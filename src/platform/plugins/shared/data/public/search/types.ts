@@ -12,7 +12,7 @@ import type { DataViewsContract } from '@kbn/data-views-plugin/common';
 import type { RequestAdapter } from '@kbn/inspector-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { WarningHandlerCallback } from '@kbn/search-response-warnings';
-import type { ISearchGeneric } from '@kbn/search-types';
+import type { ISearchGeneric, ITypedSearchService } from '@kbn/search-types';
 import type { ISearchStartSearchSource } from '../../common/search';
 import type { AggsSetup, AggsSetupDependencies, AggsStart, AggsStartDependencies } from './aggs';
 import type { SearchUsageCollector } from './collectors';
@@ -57,6 +57,11 @@ export interface ISearchStart {
    * {@link ISearchGeneric}
    */
   search: ISearchGeneric;
+  /**
+   * Typed search service with strategy-specific methods
+   * {@link ITypedSearchService}
+   */
+  typed: ITypedSearchService;
   /**
    * Show toast for caught error
    * @param e Error

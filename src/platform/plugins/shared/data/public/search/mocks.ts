@@ -28,6 +28,12 @@ function createStartContract(
   return {
     aggs: searchAggsStartMock(),
     search: jest.fn(),
+    typed: {
+      searchDSL: jest.fn(),
+      searchESQL: jest.fn(),
+      searchEQL: jest.fn(),
+      searchSQL: jest.fn(),
+    },
     showError: jest.fn(),
     showSearchSessionsFlyout: jest.fn(),
     showWarnings: jest.fn(),

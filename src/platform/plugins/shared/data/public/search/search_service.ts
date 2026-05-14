@@ -30,6 +30,7 @@ import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/publ
 import { BehaviorSubject } from 'rxjs';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { ICPSManager } from '@kbn/cps-utils';
+import type { ITypedSearchService } from '@kbn/search-types';
 import type { SearchSourceDependencies } from '../../common/search';
 import {
   cidrFunction,
@@ -71,6 +72,7 @@ import { createUsageCollector } from './collectors';
 import { getEql, getEsaggs, getEsdsl, getEssql, getEsql } from './expressions';
 import type { ISearchInterceptor } from './search_interceptor';
 import { SearchInterceptor } from './search_interceptor';
+import { TypedSearchService } from './typed_search_service';
 import type { ISearchSessionEBTManager, ISessionsClient, ISessionService } from './session';
 import {
   SessionsClient,
@@ -106,6 +108,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private readonly aggsService = new AggsService();
   private readonly searchSourceService = new SearchSourceService();
   private searchInterceptor!: ISearchInterceptor;
+  private typedSearchService!: ITypedSearchService;
   private usageCollector?: SearchUsageCollector;
   private sessionService!: ISessionService;
   private sessionsClient!: ISessionsClient;
@@ -256,6 +259,8 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       return this.searchInterceptor.search(request, options);
     }) as ISearchGeneric;
 
+    this.typedSearchService = new TypedSearchService(this.searchInterceptor);
+
     const loadingCount$ = new BehaviorSubject(0);
     http.addLoadingCountSource(loadingCount$);
 
@@ -319,6 +324,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     return {
       aggs,
       search,
+      typed: this.typedSearchService,
       showError: (e) => {
         this.searchInterceptor.showError(e);
       },
