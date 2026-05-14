@@ -270,7 +270,7 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                 endpointDisplayMap={endpointDisplayMap}
                 invalidEndpointIds={invalidEndpointIds}
                 globalDefaultRow={
-                  showGlobalDefaultRow
+                  showGlobalDefaultRow && globalDefaultId
                     ? {
                         icon: globalDefaultIcon,
                         label: globalDefaultLabel,
@@ -284,7 +284,7 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
               <EuiDragDropContext onDragEnd={handleDragEnd}>
                 <div ref={listRef}>
                   <EuiSplitPanel.Outer hasBorder>
-                    {showGlobalDefaultRow && (
+                    {showGlobalDefaultRow && globalDefaultId && (
                       <GlobalDefaultLockedRow
                         featureId={featureId}
                         icon={globalDefaultIcon}
@@ -496,7 +496,7 @@ interface GlobalDefaultLockedRowProps {
   icon: string;
   label: string;
   showBadge: boolean;
-  globalDefaultId: string | undefined;
+  globalDefaultId: string;
 }
 
 const GlobalDefaultLockedRow: React.FC<GlobalDefaultLockedRowProps> = ({
@@ -527,7 +527,7 @@ const GlobalDefaultLockedRow: React.FC<GlobalDefaultLockedRowProps> = ({
             min-width: 0;
           `}
         >
-          <EuiToolTip title={label} content={globalDefaultId ?? ''} position="top">
+          <EuiToolTip title={label} content={globalDefaultId} position="top">
             <EuiText
               size="s"
               color="subdued"
@@ -566,7 +566,7 @@ interface RecommendedEndpointsListProps {
     icon: string;
     label: string;
     showBadge: boolean;
-    globalDefaultId: string | undefined;
+    globalDefaultId: string;
   };
 }
 
