@@ -242,9 +242,12 @@ export const EventSchema = schema.maybe(
               type: ecsString(),
               type_id: ecsString(),
               space_agnostic: ecsBoolean(),
-            })
+            }),
+            { maxSize: 1000 }
           )
         ),
+        cps_scope_expression: ecsString(),
+        cps_scope_linked_projects: ecsFlattened(),
         space_ids: ecsStringMulti(),
         version: ecsVersion(),
         action: schema.maybe(
@@ -307,7 +310,8 @@ export const EventSchema = schema.maybe(
                       processed_gaps: ecsStringOrNumber(),
                       status: ecsString(),
                       error: ecsString(),
-                    })
+                    }),
+                    { maxSize: 1000 }
                   )
                 ),
               })
@@ -374,6 +378,10 @@ function ecsDateRange() {
 
 function ecsDateRangeMulti() {
   return schema.maybe(schema.arrayOf(ecsDateRangeBase()));
+}
+
+function ecsFlattened() {
+  return schema.maybe(schema.any());
 }
 
 const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
