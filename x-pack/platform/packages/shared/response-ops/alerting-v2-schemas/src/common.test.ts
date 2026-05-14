@@ -47,9 +47,7 @@ describe('optionalWithDescription', () => {
   });
 
   it('preserves the description on object schemas', () => {
-    const schema = z
-      .object({ owner: z.string(), active: z.boolean() })
-      .describe('Auth info');
+    const schema = z.object({ owner: z.string(), active: z.boolean() }).describe('Auth info');
     const result = optionalWithDescription(schema);
 
     expect(result.isOptional()).toBe(true);
