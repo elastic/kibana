@@ -37,10 +37,10 @@ export const ConfigSchema = schema.object({
      * their analytics docs. Lower values catch up faster after a hook
      * failure but cost more SO walks against the cases index.
      *
-     * Defaults to 30 minutes — fast enough to recover from a tick of
-     * dropped hooks well within an operator response window, slow
-     * enough to keep background read load negligible. Hard floor of 5
-     * minutes prevents misconfigured deployments from hammering ES.
+     * Defaults to 30 minutes — fast enough to recover from dropped hooks
+     * within an on-call response window, slow enough to keep background
+     * read load negligible. Hard floor of 5 minutes prevents misconfigured
+     * deployments from hammering ES.
      */
     reconciliationIntervalMinutes: schema.number({
       defaultValue: 30,

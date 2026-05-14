@@ -128,11 +128,12 @@ cluster-level — only the view is scoped.
 **Bootstrap timing.** First Cases request in a space triggers the ensure.
 After that, subsequent requests skip via an in-memory cache. A new template
 in a space won't appear in that space's runtime fields until either a Kibana
-process restart or an operator `/reset`.
+process restart or an administrator `/reset`.
 
-**Cross-space analytics.** No global data view is shipped. An operator who
-needs a cross-space dashboard can duplicate the per-space view (saving it
-without the `managed` flag), edit it to use `namespaces: ['*']`, and curate
+**Cross-space analytics.** No global data view is shipped. An administrator
+who needs a cross-space dashboard can duplicate the per-space view (saving
+it without the `managed` flag), edit it to use `namespaces: ['*']`, and
+curate
 the runtime fields they want to keep. Out of scope for the managed feature.
 
 **DLS interaction.** Once the implicit-privileges Kibana provider for cases
@@ -149,8 +150,9 @@ Each template-declared extended field is stored at
 `cases.extended_fields.<name>_as_<type>` inside a `flattened` mapping, with
 a typed runtime field published at `cases.<name>_as_<type>` — Lens and
 Discover get numeric / date / boolean filter operators instead of
-string-contains. The runtime field reads the raw string from
-`params._source.cases.extended_fields.<...>` at query time.
+string-contains. The runtime field reads the value via
+`doc['cases.extended_fields.<name>_as_<type>']` at query time (flattened
+sub-keys are doc-values-backed under the parent's value stream).
 
 `flattened` is used (not `dynamic_template`-per-key) so the index mapping
 stays at one field for `extended_fields` regardless of how many distinct
@@ -243,7 +245,7 @@ POST /internal/cases/_analyticsV2/reset
 Drops `.cases`, recreates it from scratch using the same bootstrap path as
 plugin start, and schedules a follow-up reconciliation to repopulate from the
 SO source of truth. Use for mapping migrations, recovery from sustained
-writer failures, or operator-initiated full backfills. Superuser only.
+writer failures, or administrator-initiated full backfills. Superuser only.
 
 ### Failure modes
 
@@ -261,7 +263,7 @@ cases_analytics_v2/
 ├── README.md          you are here
 ├── index.ts           public surface (CasesAnalyticsV2Service, writer contract)
 ├── service.ts         lifecycle orchestrator (setup → start → stop)
-├── constants.ts       index name + operator route URLs
+├── constants.ts       index name + administrator route URLs
 │
 ├── ensure_indices/
 │   └── case.ts        idempotent bootstrap for .cases (lookup-mode)

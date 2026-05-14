@@ -24,15 +24,14 @@ import { ensureCaseIndex } from '../ensure_indices/case';
 const DATA_VIEW_SO_TYPE = 'index-pattern';
 
 /**
- * Authorization shape for every operator route in this module. The
- * routes are intentionally **superuser-only** — they're not customer-facing,
- * and granting any subset of operator-route access via a Kibana feature
- * privilege would broaden the attack surface (anyone with that feature
- * could `/reset` the index). Cluster privilege check via `superuser`
- * keeps the security model trivial.
+ * Authorization shape for every administrator route in this module.
+ * **Superuser-only** — these aren't customer-facing, and routing them
+ * through a Kibana feature privilege would broaden the attack surface
+ * (anyone holding that feature could `/reset` the index). Cluster
+ * privilege keeps the model trivial.
  *
  * Not `as const` because `core.http.createRouter`'s `RouteSecurity` shape
- * requires mutable arrays — the deep-readonly inference rejects literal
+ * requires mutable arrays — deep-readonly inference rejects literal
  * assignment otherwise.
  */
 const SUPERUSER_AUTHZ = {
@@ -60,31 +59,24 @@ interface RegisterArgs {
   clearDataViewBootstrapCache: () => void;
   /**
    * Resolved config value for `xpack.cases.analyticsV2.enabled` — surfaced
-   * through `/state` so operators can confirm whether v2 is active.
+   * through `/state` so administrators can confirm whether v2 is active.
    */
   enabled: boolean;
   /**
    * Resolved config value for
    * `xpack.cases.analyticsV2.reconciliationIntervalMinutes`. Threaded into
-   * the `/reset` handler so the re-scheduled task picks the operator-tuned
+   * the `/reset` handler so the re-scheduled task picks the configured
    * cadence rather than reverting to a hard-coded default.
    */
   reconciliationIntervalMinutes: number;
 }
 
 /**
- * Operator support routes for cases-analytics v2.
- *
- * These are intentionally **superuser-only**. They're not customer-facing —
- * they exist so on-call has a path other than direct `_search` against system
- * indices when something looks wrong. Registered directly on
- * `core.http.createRouter()` rather than through the cases client because
- * they need access to the analytics subsystem, which doesn't live on the
- * cases client surface.
- *
- * Failure mode for each route is conservative: a missing dependency (e.g.
- * Task Manager not yet available) returns `503` rather than crashing so the
- * caller can retry.
+ * Administrator support routes for cases-analytics v2. **Superuser-only**
+ * (see `SUPERUSER_AUTHZ`); registered directly on `core.http.createRouter()`
+ * so they bypass the cases client surface, which doesn't expose the
+ * analytics subsystem. Missing dependencies (e.g. Task Manager not yet
+ * available) return `503` so callers can retry.
  */
 export const registerCasesAnalyticsV2Routes = ({
   core,
@@ -146,11 +138,10 @@ export const registerCasesAnalyticsV2Routes = ({
         }
       }
 
-      // Check `.cases` existence so an operator looking at /state sees the
-      // bootstrap result, not just the config flag. `ensureCaseIndex`
-      // logs-and-continues on failure, so a misconfigured cluster can end
-      // up with `enabled: true` but no index — surfacing this here saves
-      // an on-call engineer from a wild-goose chase.
+      // Check `.cases` existence so /state reports the bootstrap result,
+      // not just the config flag. `ensureCaseIndex` logs-and-continues on
+      // failure, so a misconfigured cluster can have `enabled: true` with
+      // no index — surfacing this here saves a wild-goose chase.
       let indexExists = false;
       try {
         const coreContext = await context.core;
@@ -216,14 +207,11 @@ export const registerCasesAnalyticsV2Routes = ({
   //
   // Full subsystem reset: drops `.cases`, deletes every per-space `Cases`
   // data view, clears reconciliation task state, and triggers a full
-  // reconciliation that will repopulate the index from the SO source of
-  // truth. The next request in each space will lazily re-create that
-  // space's data view (with current template runtime fields).
-  //
-  // Useful for: mapping migrations, recovering from sustained writer
-  // failures that left the index inconsistent, operator-initiated full
-  // backfills, or refreshing data view runtime fields after templates
-  // change.
+  // backfill from the SO source of truth. Per-space data views are lazily
+  // re-created on the next request (with current template runtime fields).
+  // Used for mapping migrations, recovering from sustained writer
+  // failures, administrator-initiated full backfills, and refreshing
+  // data view runtime fields after templates change.
   router.post(
     {
       path: CASES_ANALYTICS_V2_RESET_URL,

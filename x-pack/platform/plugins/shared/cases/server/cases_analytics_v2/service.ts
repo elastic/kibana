@@ -47,7 +47,7 @@ interface CasesAnalyticsV2ServiceDeps {
  * here (Task Manager setup, logger, etc.).
  */
 interface CasesAnalyticsV2SetupDeps {
-  /** Core setup contract — needed by the operator-route registration. */
+  /** Core setup contract — needed by the administrator-route registration. */
   core: CoreSetup;
   taskManager: TaskManagerSetupContract;
 }
@@ -98,33 +98,22 @@ export type CasesAnalyticsV2DataViewRefresher = (deps: EnsureDataViewForSpaceDep
 export const V2_NOOP_DATA_VIEW_REFRESHER: CasesAnalyticsV2DataViewRefresher = () => {};
 
 /**
- * Top-level orchestrator for cases-analytics v2.
+ * Top-level orchestrator for cases-analytics v2: owns index bootstrap,
+ * writer lifecycle, reconciliation task registration, per-space data-view
+ * ensure, and administrator route registration.
  *
- * Owns the lifecycle of the v2 analytics subsystem: index bootstrap, writer
- * construction, reconciliation task registration, per-space data-view
- * ensure, and operator route registration. Constructed once in plugin
- * `setup()`; lifecycle hooks (`setup`, `start`, `stop`) fire from the
- * plugin's matching lifecycle hooks.
+ * Gated by `xpack.cases.analyticsV2.enabled`. When disabled, every method
+ * is a no-op; v1 (`server/cases_analytics`) is independent of this flag.
  *
- * v2 is gated by the `xpack.cases.analyticsV2.enabled` config. When disabled
- * (the default) every method is a no-op — nothing is registered, nothing is
- * scheduled, nothing is written. v1 (`server/cases_analytics`) is unaffected
- * regardless of the v2 flag's state.
+ * Two stable proxies are exposed (`writerProxy`, `dataViewRefresherProxy`)
+ * so SO services and the cases client factory can capture references in
+ * `setup()`, before the underlying ES client / data-views service exist —
+ * the proxy delegates to whichever implementation is current and silently
+ * no-ops until `start()` swaps them in.
  *
- * **Writer access pattern.** The cases SO services consume the writer via
- * `getWriter()` rather than receiving it at construction. Two reasons:
- *   1. The plugin's `setup()` (where SO services are wired) runs before
- *      `start()` (where the writer is constructed with the ES client).
- *   2. Per-request SO service instances need a stable reference even though
- *      the writer's identity changes from `V2_NOOP_WRITER` to the real
- *      writer when start runs.
- * The getter returns a stable proxy that delegates to whichever writer is
- * current — see `writerProxy` below.
- *
- * **Data view bootstrap is lazy + per-space.** See
- * `data_view/service.ts` — the request handler context fires
- * `ensureDataViewForSpace` on every request; it short-circuits on already-
- * bootstrapped spaces via an in-memory cache.
+ * Per-space data view bootstrap is lazy: the request handler context
+ * fires `ensureDataViewForSpace` on every cases request; the data view
+ * service short-circuits via an in-memory cache after the first success.
  */
 export class CasesAnalyticsV2Service {
   private readonly logger: Logger;
@@ -175,7 +164,7 @@ export class CasesAnalyticsV2Service {
    */
   private dataViewService: CasesAnalyticsV2DataViewService | undefined;
   /**
-   * Task Manager start contract captured at start. Operator routes
+   * Task Manager start contract captured at start. Administrator routes
    * registered in `setup()` close over a `getTaskManager()` callback that
    * reads this — the routes need a TM start contract, but they're
    * registered in setup where only the setup contract is available.
@@ -202,11 +191,9 @@ export class CasesAnalyticsV2Service {
       this.logger.debug(
         'cases-analytics v2 disabled (xpack.cases.analyticsV2.enabled=false); skipping setup'
       );
-      // Note: operator routes are NOT registered when the flag is off. Health
-      // tooling that queries `/state` against a disabled instance gets a 404
-      // — equivalent to "the feature isn't present here." If we want a
-      // discoverable health endpoint regardless of the flag, we can register
-      // a thin always-on route here later. Not in this PR.
+      // Administrator routes are NOT registered when the flag is off:
+      // `/state` on a disabled instance returns 404, which health tooling
+      // reads as "feature not present here."
       return;
     }
     registerReconciliationTask({
@@ -227,11 +214,11 @@ export class CasesAnalyticsV2Service {
       },
     });
 
-    // Register operator routes. The Task Manager start contract isn't
-    // available yet — routes close over a `getTaskManager()` callback that
-    // returns `this.taskManager` once `start()` runs. The reset route also
-    // closes over `clearDataViewBootstrapCache()` so it can wipe the
-    // in-memory ensure cache after deleting per-space data views.
+    // Register administrator routes. The TM start contract isn't available
+    // yet — routes close over `getTaskManager()` which returns
+    // `this.taskManager` once `start()` runs. `/reset` also closes over
+    // `clearDataViewBootstrapCache()` to wipe the in-memory ensure cache
+    // after dropping per-space data views.
     registerCasesAnalyticsV2Routes({
       core: deps.core,
       logger: this.logger,
@@ -243,19 +230,15 @@ export class CasesAnalyticsV2Service {
   }
 
   /**
-   * Plugin start hook.
+   * Plugin start hook. When the flag is off, returns at debug level so an
+   * administrator who disabled v2 can still confirm the wiring is present.
    *
-   * When the feature flag is off, returns immediately at debug log level so an
-   * operator who turned the flag off can still confirm the wiring is in place.
-   *
-   * When on: bootstraps the `.cases` index, constructs the real writer,
-   * captures lifecycle references (SO client, ES client, Task Manager start,
-   * data views service), and schedules the singleton reconciliation task.
-   *
-   * Failures during bootstrap are logged inside `ensureCaseIndex` and never
-   * thrown — the cases plugin must keep starting even if analytics has
-   * trouble. Per-space data view bootstrap is lazy (per-request) — see
-   * `ensureDataViewForSpace`.
+   * When on: bootstraps `.cases`, swaps the no-op writer for the real one,
+   * captures lifecycle references, and schedules the singleton
+   * reconciliation task. Bootstrap failures are logged inside
+   * `ensureCaseIndex` and never thrown — the cases plugin must keep
+   * starting even if analytics has trouble. Per-space data view bootstrap
+   * is lazy via `ensureDataViewForSpace`.
    */
   public async start(deps: CasesAnalyticsV2StartDeps): Promise<void> {
     if (!this.enabled) {
@@ -277,7 +260,7 @@ export class CasesAnalyticsV2Service {
     });
 
     // Capture lifecycle deps for use after start by the reconciliation task,
-    // the operator routes, and the per-request data-view ensure hook.
+    // the administrator routes, and the per-request data-view ensure hook.
     this.internalSavedObjectsClient = deps.internalSavedObjectsClient;
     this.esClient = deps.esClient;
     this.taskManager = deps.taskManager;
@@ -292,8 +275,8 @@ export class CasesAnalyticsV2Service {
     });
 
     // Schedule the singleton reconciliation task. Idempotent; safe under
-    // concurrent node starts (Task Manager dedupes by id). The interval is
-    // operator-tunable via `xpack.cases.analyticsV2.reconciliationIntervalMinutes`.
+    // concurrent node starts (Task Manager dedupes by id). Interval is
+    // configurable via `xpack.cases.analyticsV2.reconciliationIntervalMinutes`.
     await scheduleReconciliationTask({
       taskManager: deps.taskManager,
       logger: this.logger,

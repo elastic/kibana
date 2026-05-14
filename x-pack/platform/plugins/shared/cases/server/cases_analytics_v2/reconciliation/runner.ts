@@ -13,11 +13,19 @@ import type { CasePersistedAttributes } from '../../common/types/case';
 import type { CasesAnalyticsV2WriterContract } from '../writer';
 
 /**
- * Maximum number of case SOs fetched per ES round-trip. Modest enough that
- * Task Manager's task-runtime budget isn't a concern even on cases with
- * heavy `extended_fields` payloads.
+ * Maximum number of case SOs fetched per ES round-trip. Modest enough
+ * that Task Manager's task-runtime budget isn't a concern even on cases
+ * with heavy `extended_fields` payloads.
  */
 const PAGE_SIZE = 100;
+
+/**
+ * Cap on the per-space breakdown the summary log reports. Heavy-tenant
+ * clusters (1000+ spaces) would otherwise produce log lines large enough
+ * to break ingest pipelines; capping keeps the line readable while still
+ * surfacing the top contributors to a noisy tick.
+ */
+const SUMMARY_TOP_N_SPACES = 25;
 
 export interface RunReconciliationDeps {
   /** Internal SO client (no request scope). Used to walk every case across every space. */
@@ -25,11 +33,10 @@ export interface RunReconciliationDeps {
   writer: CasesAnalyticsV2WriterContract;
   logger: Logger;
   /**
-   * ISO timestamp from the previous successful tick — only cases updated AFTER
-   * this point are walked. `undefined` on the first ever run; in that case
-   * the runner walks every case (i.e. acts as a backfill). Operators who want
-   * to trigger an explicit backfill use the `/reset` endpoint, which clears
-   * the task state and forces this code path.
+   * ISO timestamp from the previous successful tick — only cases updated
+   * AFTER this point are walked. `undefined` on the first run, in which
+   * case the runner walks every case (backfill mode). To force a backfill
+   * later, an administrator hits `/reset`, which clears task state.
    */
   lastRunAt: string | undefined;
 }
@@ -42,27 +49,23 @@ export interface RunReconciliationResult {
 }
 
 /**
- * Reconciliation tick. Walks every case saved object updated since the last
- * successful tick and re-emits its analytics doc via the writer.
+ * Reconciliation tick. Walks every case saved object updated since the
+ * last successful tick and re-emits its analytics doc via the writer.
  *
- * **Why this exists.** The primary write path (the SO-service hooks added in
- * commit 4) is fire-and-forget — errors are logged and swallowed. That's
- * correct behaviour (analytics must never block the user's request), but it
- * means a transient ES blip can silently leave a case un-mirrored. This task
- * is the durability backstop: on every tick we re-walk recent activity, and
- * `writer.upsertCase` is idempotent (last-write-wins on the same `_id`), so
- * any missed updates get repaired without the operator noticing.
+ * **Why this exists.** The primary write path (the SO-service hooks) is
+ * fire-and-forget — errors are logged and swallowed so analytics never
+ * blocks the user's request. A transient ES blip can therefore leave a
+ * case un-mirrored. This task is the durability backstop: every tick
+ * re-walks recent activity, and `writer.upsertCase` is idempotent, so
+ * misses self-heal silently.
  *
- * **Why PIT + searchAfter** (rather than page+perPage). The SO `find` API
- * with `page` has an effective ~10k-result limit (ES's
- * `index.max_result_window`). For incremental ticks the result set is small,
- * but the first run from an empty cursor (backfill scenario) can sweep
- * everything — PIT + searchAfter has no such cap.
+ * **Why PIT + searchAfter.** The SO `find` API with `page` caps at
+ * `index.max_result_window` (~10k); the first run from an empty cursor
+ * (backfill mode) can exceed that. PIT + searchAfter has no such cap.
  *
- * **Cursor advancement.** On successful drain, `last_run_at` advances to the
- * tick start time. Any case updated *during* the tick will land in the next
- * tick's window (since its `updated_at` > tickStartedAt). Caller is
- * responsible for persisting the result.
+ * **Cursor advancement.** On successful drain, `last_run_at` advances to
+ * the tick start time captured before any I/O. Any case updated *during*
+ * the tick lands in the next tick's window. Caller persists the result.
  */
 export async function runReconciliation({
   savedObjectsClient,
@@ -117,14 +120,12 @@ export async function runReconciliation({
       const page = await savedObjectsClient.find<CasePersistedAttributes>({
         type: CASE_SAVED_OBJECT,
         filter,
-        // Sorting by `created_at` (always non-null) rather than `updated_at`
-        // (null on new cases) keeps PIT + searchAfter pagination stable —
-        // search_after with a null cursor value can skip or duplicate docs
-        // depending on the field's `missing` semantics. Created order isn't
-        // user-perceived edit order, but order doesn't matter for analytics
-        // correctness (upsert is idempotent).
-        sortField: 'created_at',
-        sortOrder: 'asc',
+        // No `sortField` — the SO API uses `_shard_doc` by default with a
+        // PIT, which is unique per doc (no ties → no `searchAfter` skips
+        // or dupes when many cases share the same timestamp, e.g. bulk
+        // imports) and is the optimal sort for PIT walks per ES docs.
+        // Result order isn't analytically meaningful — upsert is
+        // idempotent, so any traversal order is correct.
         perPage: PAGE_SIZE,
         pit: { id: pit.id },
         searchAfter,
@@ -173,16 +174,11 @@ export async function runReconciliation({
     await savedObjectsClient.closePointInTime(pit.id);
   }
 
-  // Per-space breakdown for the log line — formatted as `space=N` pairs,
-  // sorted by count descending so the loudest spaces lead. Omitted when no
-  // cases were processed (the message is already trivially "processed=0").
-  const perSpaceSummary =
-    processedBySpace.size === 0
-      ? ''
-      : ` by_space={${[...processedBySpace.entries()]
-          .sort((a, b) => b[1] - a[1])
-          .map(([space, n]) => `${space}=${n}`)
-          .join(', ')}}`;
+  // Per-space breakdown for the log line — top-N by count, descending,
+  // so heavy-tenant clusters stay readable. Sort cost stays bounded at
+  // O(S log SUMMARY_TOP_N_SPACES) regardless of space cardinality, and
+  // total log line stays bounded too.
+  const perSpaceSummary = formatTopSpaces(processedBySpace);
 
   logger.info(
     `cases-analyticsV2: reconciliation processed=${processed}${perSpaceSummary} lastRunAt=${
@@ -195,9 +191,46 @@ export async function runReconciliation({
 
 /**
  * Pulls the `sort` cursor off the last result in a page. Extracted so the
- * runner's loop stays readable; `sort` on a `SavedObjectsFindResult` is the
- * ES `SortResults` array we feed back into the next `find` as `searchAfter`.
+ * runner's loop stays readable; `sort` on a `SavedObjectsFindResult` is
+ * the ES `SortResults` array we feed back as `searchAfter` next page.
  */
 function getLastSort<T>(results: Array<SavedObjectsFindResult<T>>): SortResults | undefined {
   return results[results.length - 1]?.sort;
+}
+
+/**
+ * Format the top-N per-space counts as ` by_space={a=10, b=8, ...}` for
+ * the summary log. Returns an empty string when no cases were processed.
+ *
+ * Bounded selection (partial-sort by hand) keeps cost at O(S × N) rather
+ * than O(S log S) — matters at thousands of spaces × short reconciliation
+ * intervals.
+ */
+function formatTopSpaces(processedBySpace: Map<string, number>): string {
+  if (processedBySpace.size === 0) return '';
+
+  const top: Array<[string, number]> = [];
+  for (const entry of processedBySpace) {
+    if (top.length < SUMMARY_TOP_N_SPACES) {
+      top.push(entry);
+      continue;
+    }
+    let minIdx = 0;
+    for (let i = 1; i < top.length; i++) {
+      if (top[i][1] < top[minIdx][1]) minIdx = i;
+    }
+    if (entry[1] > top[minIdx][1]) top[minIdx] = entry;
+  }
+  top.sort((a, b) => b[1] - a[1]);
+
+  let summary = ' by_space={';
+  for (let i = 0; i < top.length; i++) {
+    if (i > 0) summary += ', ';
+    summary += `${top[i][0]}=${top[i][1]}`;
+  }
+  if (processedBySpace.size > SUMMARY_TOP_N_SPACES) {
+    summary += `, ... +${processedBySpace.size - SUMMARY_TOP_N_SPACES} more`;
+  }
+  summary += '}';
+  return summary;
 }

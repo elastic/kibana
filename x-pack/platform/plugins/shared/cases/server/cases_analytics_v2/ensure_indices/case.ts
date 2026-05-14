@@ -16,19 +16,18 @@ import { CASE_INDEX_MAPPING } from '../mappings/case';
  *
  * Settings:
  *   - `index.hidden: true`  → not surfaced by default in `_cat/indices` and
- *                             excluded from queries that don't explicitly opt
- *                             in. Out-of-the-box visibility is restricted to
- *                             operators querying directly via Console.
- *   - `index.mode: lookup`  → required for `LOOKUP JOIN` from ES|QL queries on
- *                             the activity / attachments surfaces. Single
- *                             primary shard; cases data fits comfortably (a
- *                             tenant with millions of cases at ~2KB/doc is a
- *                             few GB, well under shard limits).
+ *                             excluded from queries that don't opt in.
+ *                             Out-of-the-box visibility is restricted to
+ *                             administrators querying directly via Console.
+ *   - `index.mode: lookup`  → required for `LOOKUP JOIN` from ES|QL on the
+ *                             activity / attachments surfaces. Single primary
+ *                             shard; cases data fits comfortably (millions
+ *                             of cases at ~2KB/doc is a few GB, well under
+ *                             shard limits).
  *
- * **Failure policy: log, don't throw.** A bootstrap failure must not block
- * plugin start — cases-analytics is a downstream feature, and its absence
- * shouldn't take down the cases plugin. Operators see ERROR-level logs and
- * can re-trigger via the future reset endpoint.
+ * **Failure policy: log, don't throw.** Bootstrap failure must not block
+ * plugin start — cases-analytics is a downstream feature. Administrators
+ * see ERROR-level logs and can re-trigger via `/reset`.
  */
 export async function ensureCaseIndex({
   esClient,
@@ -64,8 +63,8 @@ export async function ensureCaseIndex({
       return;
     }
 
-    // Anything else: log and continue. Bootstrap can be re-attempted via the
-    // operator reset endpoint. The plugin must keep starting regardless.
+    // Anything else: log and continue. Bootstrap can be re-attempted via
+    // the administrator `/reset` endpoint. Plugin must keep starting.
     logger.error(`failed to bootstrap ${CASE_INDEX_NAME}: ${err.message}`, { error: err });
   }
 }

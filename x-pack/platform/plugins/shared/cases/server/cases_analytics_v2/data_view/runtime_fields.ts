@@ -5,7 +5,22 @@
  * 2.0.
  */
 
+import { createHash } from 'crypto';
 import type { RuntimeFieldSpec, RuntimeType } from '@kbn/data-views-plugin/common';
+
+/**
+ * Bumped whenever `SUFFIX_TO_RUNTIME_TYPE`, `NO_RUNTIME_FIELD_SUFFIXES`,
+ * or `buildPainlessSource` changes shape. The build version is the prefix
+ * on every fingerprint produced by `computeRuntimeFieldsFingerprint`, so
+ * a bump invalidates every cached fingerprint and forces all spaces to
+ * re-run the diff branch on their next ensure — which is the only way to
+ * reliably propagate a transform-shape change.
+ *
+ * Tracker convention: increment by 1 whenever the resulting runtime field
+ * spec for any input snake-key would differ from the previous build. Pure
+ * comment / formatting changes don't require a bump.
+ */
+export const RUNTIME_FIELDS_BUILD_VERSION = 1;
 
 /**
  * Maps the cases-template type suffixes (the second half of
@@ -62,12 +77,12 @@ const SUFFIX_TO_RUNTIME_TYPE: Record<string, RuntimeType> = {
 const NO_RUNTIME_FIELD_SUFFIXES = new Set<string>();
 
 /**
- * Every suffix the cases template system can emit — derived once from the two
- * tables above so adding a new template type extends it automatically.
+ * Every suffix the cases template system can emit — derived once from the
+ * two tables above so adding a new template type extends it automatically.
  *
- * Exported for `mappings/schema_drift.test.ts` (added in a later commit),
- * which uses it to forbid any mapping field whose leaf ends in
- * `_as_<one of these>` from colliding with a runtime field of the same name.
+ * Exported for `mappings/schema_drift.test.ts`, which uses it to forbid
+ * any mapping field whose leaf ends in `_as_<one of these>` from
+ * colliding with a runtime field of the same name.
  */
 export const ALL_TEMPLATE_TYPE_SUFFIXES: readonly string[] = [
   ...Object.keys(SUFFIX_TO_RUNTIME_TYPE),
@@ -88,8 +103,22 @@ export const suffixToRuntimeType = (suffix: string): RuntimeType | null | undefi
 };
 
 /**
+ * Charset enforced by `splitSnakeKey`. Defense-in-depth: the snake-key is
+ * concatenated verbatim into a Painless string literal in
+ * `buildPainlessSource`, so any single quote, backslash, or newline would
+ * either break the script or open a script-injection path. Template names
+ * are validated upstream (`common/types/domain/template/fields.ts`) but
+ * that schema currently allows any string, and we don't want the analytics
+ * layer's safety to depend on a sibling team's validation choices. We also
+ * cap the total length to keep Painless compile budgets bounded.
+ */
+const SAFE_SNAKE_KEY = /^[A-Za-z0-9_]+$/;
+const MAX_SNAKE_KEY_LENGTH = 256;
+
+/**
  * Splits a snake-key field name into `{ name, suffix }`. Returns `null` if
- * the key has no `_as_<suffix>` segment.
+ * the key has no `_as_<suffix>` segment, exceeds the length cap, or contains
+ * any character outside `[A-Za-z0-9_]`.
  *
  * A field path may contain underscores in the user-chosen name (e.g.
  * `risk_score_as_long`) — we always split on the **last** `_as_` so the
@@ -97,6 +126,8 @@ export const suffixToRuntimeType = (suffix: string): RuntimeType | null | undefi
  * put in their field name.
  */
 export const splitSnakeKey = (snakeKey: string): { name: string; suffix: string } | null => {
+  if (snakeKey.length === 0 || snakeKey.length > MAX_SNAKE_KEY_LENGTH) return null;
+  if (!SAFE_SNAKE_KEY.test(snakeKey)) return null;
   const marker = '_as_';
   const idx = snakeKey.lastIndexOf(marker);
   if (idx < 0) return null;
@@ -111,35 +142,24 @@ export const splitSnakeKey = (snakeKey: string): { name: string; suffix: string 
  * `cases.extended_fields.<snakeKey>` and emits a parsed value of the
  * target runtime type.
  *
- * **Access pattern: `doc['cases.extended_fields.<snakeKey>']` — NOT
- * `_source`.** ES explicitly prescribes `doc[parent.subkey]` for sub-keys
- * of a `flattened` field (see ES docs, "Retrieving flattened fields").
- * `flattened` sub-keys ARE doc-values-backed under the parent's value
- * stream — `doc[...]` resolves them by filtering the parent's term
- * dictionary on path. An earlier implementation walked `params._source`,
- * which silently returns no value in synthetic-source / lookup-mode
- * indices because `_source` is reconstructed from doc values and the
- * sub-object structure is lost. `doc[...]` is also faster (no per-doc
- * `_source` parse) and is the supported path.
+ * **Access pattern: `doc['cases.extended_fields.<snakeKey>']`.** ES
+ * prescribes `doc[parent.subkey]` for `flattened` sub-keys (ES docs,
+ * "Retrieving flattened fields") — flattened sub-keys are doc-values-
+ * backed under the parent's value stream. Walking `params._source`
+ * silently returns no value on synthetic-source / `index.mode: lookup`
+ * indices (which `.cases` uses) because `_source` is reconstructed from
+ * doc values and the sub-object structure is lost.
  *
- * The script iterates the doc-values list rather than reading `.value`
- * directly. Single-valued template fields collapse to a one-element
- * iteration; multi-valued (e.g. `CHECKBOX_GROUP` arrays stored as JSON
- * strings, or future array support) are handled naturally — `emit` may
- * be called multiple times to publish a multi-valued runtime field.
+ * Iterates the doc-values list so multi-valued template fields publish
+ * every value (`emit` may be called more than once per doc).
  *
  * **Defensive by design**: any parse failure falls through silently — the
- * runtime field simply has no value for that doc, which is the intended
- * behaviour for malformed user input. The alternative (throwing) would
- * surface as errors per-doc in Lens / Discover, breaking the user
- * experience for the whole field whenever a single bad value exists.
+ * field simply has no value for that doc. Throwing would surface as
+ * per-doc errors in Lens / Discover, breaking the field for everyone
+ * whenever a single bad value exists.
  *
- * **Field-name interpolation note**: `${snakeKey}` is concatenated into
- * the painless source verbatim, matching the existing template field
- * naming contract. Template field names that contain `'` would break the
- * resulting script — same caveat applied to the previous `_source.get('...')`
- * implementation; tightening this requires a constraint at template
- * validation time and is tracked separately.
+ * `${snakeKey}` is concatenated into the Painless string literal verbatim;
+ * `splitSnakeKey` enforces `[A-Za-z0-9_]+` so the literal is always safe.
  */
 export const buildPainlessSource = (snakeKey: string, runtimeType: RuntimeType): string => {
   const fieldPath = `cases.extended_fields.${snakeKey}`;
@@ -240,9 +260,8 @@ export interface RuntimeFieldEntry {
  * filter operators.
  *
  * Collision risk for the `cases.<snakeKey>` path is bounded by a schema
- * invariant enforced at CI by `mappings/schema_drift.test.ts` (added in a
- * later commit): no direct child of `cases` may end in `_as_<type>` for
- * any supported suffix.
+ * invariant enforced in `mappings/schema_drift.test.ts`: no direct child
+ * of `cases` may end in `_as_<type>` for any supported suffix.
  */
 export const buildRuntimeFieldEntry = (snakeKey: string): RuntimeFieldEntry | null => {
   const split = splitSnakeKey(snakeKey);
@@ -258,4 +277,27 @@ export const buildRuntimeFieldEntry = (snakeKey: string): RuntimeFieldEntry | nu
       script: { source: buildPainlessSource(snakeKey, runtimeType) },
     },
   };
+};
+
+/**
+ * Stable digest of the snake-keys that drive a runtime field map. Used by
+ * `CasesAnalyticsV2DataViewService` to short-circuit the `dvService.get`
+ * + `isEqual` diff path when the intended state is byte-identical to the
+ * last successful ensure on this node — the dominant cost in template-edit
+ * bursts at scale.
+ *
+ * Inputs are unique-and-sorted before hashing so traversal order doesn't
+ * affect the digest. The digest is prefixed with `RUNTIME_FIELDS_BUILD_VERSION`
+ * so any change to the suffix → runtime-type table or the Painless transform
+ * invalidates every cached fingerprint without a manual cache flush.
+ *
+ * Truncated to 16 hex chars (~64 bits). Collision probability for any pair
+ * is ~1 in 2^32 by the birthday bound; the worst-case fault from a hit
+ * would be a real change going undetected on one node until the bootstrap
+ * cache TTL elapses (5 min).
+ */
+export const computeRuntimeFieldsFingerprint = (snakeKeys: readonly string[]): string => {
+  const unique = Array.from(new Set(snakeKeys)).sort();
+  const hash = createHash('sha1').update(unique.join('\n')).digest('hex').slice(0, 16);
+  return `v${RUNTIME_FIELDS_BUILD_VERSION}:${hash}`;
 };

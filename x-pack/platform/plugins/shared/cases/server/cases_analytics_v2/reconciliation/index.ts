@@ -25,9 +25,9 @@ export const RECONCILIATION_TASK_TYPE = 'cases.analyticsV2.reconciliation';
  * time. The id is constant so concurrent boots converge on the same scheduled
  * task rather than each scheduling its own.
  *
- * Exported because operator routes (`/reconcile/run_soon`, `/reset`) need to
- * pass it to `taskManager.runSoon(id)` — that API takes the task **instance**
- * id, not the task **type**.
+ * Exported because administrator routes (`/reconcile/run_soon`, `/reset`)
+ * need to pass it to `taskManager.runSoon(id)` — that API takes the task
+ * **instance** id, not the task **type**.
  */
 export const RECONCILIATION_TASK_ID = 'cases-analyticsV2-reconciliation';
 
@@ -65,7 +65,7 @@ export function registerReconciliationTask({
           // Pull the cursor off the previous tick's state. Task Manager
           // persists `state` between runs atomically.
           const previousState = (taskInstance.state ?? {}) as { last_run_at?: string };
-          const lastRunAt = previousState.last_run_at;
+          const lastRunAt = clampCursorToNotFuture(previousState.last_run_at, logger);
 
           try {
             const deps = await getRunnerDeps();
@@ -178,7 +178,40 @@ export async function resetReconciliationTask({
       );
     }
   }
-  // Re-schedule with the same operator-tuned interval the route handler
+  // Re-schedule with the same configured interval the route handler
   // received from the v2 service.
   await scheduleReconciliationTask({ taskManager, logger, intervalMinutes });
+}
+
+/**
+ * Guard against a corrupted persisted cursor that points to a time later
+ * than the current wall clock. This can happen from clock skew between
+ * Kibana nodes or from manual SO tampering. Without the clamp,
+ * incremental reconciliation silently freezes until wall time catches up.
+ *
+ * Returns the original cursor when valid, otherwise `undefined` (forces
+ * the next tick to walk every case as a backfill — slower than incremental
+ * but correct, vs. silently doing nothing).
+ *
+ * Exported for tests.
+ */
+export function clampCursorToNotFuture(
+  lastRunAt: string | undefined,
+  logger: Logger
+): string | undefined {
+  if (lastRunAt == null) return undefined;
+  const cursorMs = Date.parse(lastRunAt);
+  if (Number.isNaN(cursorMs)) {
+    logger.warn(
+      `cases-analyticsV2: persisted reconciliation cursor is unparseable (${lastRunAt}); treating as a fresh backfill`
+    );
+    return undefined;
+  }
+  if (cursorMs > Date.now()) {
+    logger.warn(
+      `cases-analyticsV2: persisted reconciliation cursor is in the future (${lastRunAt}); treating as a fresh backfill to avoid silently skipping recent updates`
+    );
+    return undefined;
+  }
+  return lastRunAt;
 }

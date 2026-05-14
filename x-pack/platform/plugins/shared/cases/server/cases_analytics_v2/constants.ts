@@ -6,26 +6,25 @@
  */
 
 /**
- * Names of the Elasticsearch indices owned by cases-analytics v2. These are
- * cluster-level (one index per surface, regardless of how many spaces or owners
- * the tenant has) and hidden by default.
+ * Names of the Elasticsearch indices owned by cases-analytics v2. Cluster-
+ * level (one index per surface, regardless of spaces or owners) and hidden
+ * by default.
  *
- * - `.cases`             — current state of every case. `index.mode: lookup` so
- *                          downstream surfaces can `LOOKUP JOIN` it from ES|QL.
- * - `.cases-activity`    — append-only audit of case events. Added in PR 2.
- * - `.cases-attachments` — comments + attachments, denormalized. Added in PR 3.
+ * - `.cases`             — current state of every case. `index.mode: lookup`
+ *                          so downstream surfaces can `LOOKUP JOIN` from ES|QL.
+ * - `.cases-activity`    — append-only audit of case events. Future PR.
+ * - `.cases-attachments` — denormalized comments + attachments. Future PR.
  *
- * Mirroring the saved-object type names where possible — `cases` SO ↔ `.cases`
- * index — so an operator reading `_cat/indices` can map back to the source data
- * without a translation table.
+ * Index name mirrors the saved-object type (`cases` SO ↔ `.cases` index) so
+ * an administrator reading `_cat/indices` can map back to the source data.
  */
 export const CASE_INDEX_NAME = '.cases';
 
 /**
- * Operator route URLs. All under `/internal/cases/_analyticsV2/*` — internal
- * access only, superuser-gated. These are not customer-facing; they exist for
- * on-call to introspect state and recover from inconsistencies without
- * having to query system indices by hand.
+ * Administrator route URLs. All under `/internal/cases/_analyticsV2/*` —
+ * internal access only, superuser-gated. Not customer-facing; exist so
+ * on-call can introspect state and recover from inconsistencies without
+ * querying system indices by hand.
  */
 export const CASES_ANALYTICS_V2_STATE_URL = '/internal/cases/_analyticsV2/state';
 export const CASES_ANALYTICS_V2_RECONCILE_RUN_SOON_URL =

@@ -5,54 +5,23 @@
  * 2.0.
  */
 
-import type { SavedObject } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import { CASE_SAVED_OBJECT } from '../../../common/constants';
-import {
-  CasePersistedSeverity,
-  CasePersistedStatus,
-  type CasePersistedAttributes,
-} from '../../common/types/case';
 import { CASE_INDEX_NAME } from '../constants';
+import { makeCase } from '../__test_helpers__';
 import { CasesAnalyticsV2Writer } from '.';
 
-const makeCase = (id: string): SavedObject<CasePersistedAttributes> =>
-  ({
-    type: CASE_SAVED_OBJECT,
-    id,
-    namespaces: ['default'],
-    references: [],
-    attributes: {
-      owner: 'securitySolution',
-      title: id,
-      description: '',
-      tags: [],
-      assignees: [],
-      severity: CasePersistedSeverity.LOW,
-      status: CasePersistedStatus.OPEN,
-      created_at: '2026-05-01T00:00:00.000Z',
-      updated_at: '2026-05-01T00:00:00.000Z',
-      closed_at: null,
-      created_by: { username: 'jane', full_name: 'J', email: 'j@e.com', profile_uid: 'p-1' },
-      closed_by: null,
-      updated_by: null,
-      duration: null,
-      total_alerts: 0,
-      total_comments: 0,
-      connector: { name: 'none', type: '.none', fields: null },
-      external_service: null,
-      settings: { syncAlerts: false },
-    } as unknown as CasePersistedAttributes,
-  } as SavedObject<CasePersistedAttributes>);
-
-const makeWriter = () => {
+/**
+ * Builds the writer under test wired to fresh ES + logger mocks. The
+ * retry budget is intentionally tight (1 retry, 1 ms delay) so the
+ * failure-path tests don't bake real wall-clock backoff into the suite.
+ */
+const buildWriterUnderTest = () => {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();
   const logger = loggerMock.create();
   const writer = new CasesAnalyticsV2Writer({
     esClient,
     logger,
-    // Tight retry budget — keeps the failure-path tests fast.
     maxRetries: 1,
     retryInitialDelayMs: 1,
   });
@@ -66,7 +35,7 @@ describe('CasesAnalyticsV2Writer', () => {
 
   describe('bulkUpsertCases', () => {
     it('dispatches one `_bulk` request with index ops per case', async () => {
-      const { writer, esClient } = makeWriter();
+      const { writer, esClient } = buildWriterUnderTest();
       (esClient.bulk as jest.Mock).mockResolvedValue({ errors: false, items: [] });
 
       writer.bulkUpsertCases([makeCase('case-A'), makeCase('case-B')]);
@@ -86,7 +55,7 @@ describe('CasesAnalyticsV2Writer', () => {
     });
 
     it('skips dispatch when the array is empty', async () => {
-      const { writer, esClient } = makeWriter();
+      const { writer, esClient } = buildWriterUnderTest();
 
       writer.bulkUpsertCases([]);
       await new Promise((r) => setImmediate(r));
@@ -95,7 +64,7 @@ describe('CasesAnalyticsV2Writer', () => {
     });
 
     it('logs per-item failures at WARN but does not throw to the caller', async () => {
-      const { writer, esClient, logger } = makeWriter();
+      const { writer, esClient, logger } = buildWriterUnderTest();
       (esClient.bulk as jest.Mock).mockResolvedValue({
         errors: true,
         items: [
@@ -118,7 +87,7 @@ describe('CasesAnalyticsV2Writer', () => {
 
   describe('bulkDeleteCases', () => {
     it('dispatches one `_bulk` request with delete ops per id', async () => {
-      const { writer, esClient } = makeWriter();
+      const { writer, esClient } = buildWriterUnderTest();
       (esClient.bulk as jest.Mock).mockResolvedValue({ errors: false, items: [] });
 
       writer.bulkDeleteCases(['a', 'b', 'c']);
@@ -133,7 +102,7 @@ describe('CasesAnalyticsV2Writer', () => {
     });
 
     it('treats per-item 404s as no-ops (no WARN log)', async () => {
-      const { writer, esClient, logger } = makeWriter();
+      const { writer, esClient, logger } = buildWriterUnderTest();
       (esClient.bulk as jest.Mock).mockResolvedValue({
         errors: true,
         items: [
@@ -160,7 +129,7 @@ describe('CasesAnalyticsV2Writer', () => {
 
   describe('bulkUpsertCasesAwait', () => {
     it('resolves to undefined on success and dispatches one bulk', async () => {
-      const { writer, esClient } = makeWriter();
+      const { writer, esClient } = buildWriterUnderTest();
       (esClient.bulk as jest.Mock).mockResolvedValue({ errors: false, items: [] });
 
       const result = await writer.bulkUpsertCasesAwait([makeCase('case-A')]);
@@ -168,21 +137,88 @@ describe('CasesAnalyticsV2Writer', () => {
       expect(esClient.bulk).toHaveBeenCalledTimes(1);
     });
 
-    it('resolves (does not throw) when the bulk request fails its retry budget', async () => {
-      const { writer, esClient, logger } = makeWriter();
+    /**
+     * FAILURE SCENARIO: Bulk-level transport failure during reconciliation
+     * Symptom: Reconciliation tick fails; analytics frozen for that tick
+     * Log signature: `cases.analyticsV2 bulk-awaited write failed after N retries`
+     * Trigger: ES unreachable / 5xx on the entire bulk request
+     * Recovery: Self-heals on the next reconciliation tick; cursor pinned
+     */
+    it('throws (does not resolve) when the bulk request fails its retry budget — keeps cursor pinned', async () => {
+      const { writer, esClient, logger } = buildWriterUnderTest();
       (esClient.bulk as jest.Mock).mockRejectedValue(new Error('cluster down'));
 
-      // Should not reject — caller (reconciliation) shouldn't crash.
+      await expect(writer.bulkUpsertCasesAwait([makeCase('case-A')])).rejects.toThrow(
+        'cluster down'
+      );
+
+      const childLogger = (logger.get as jest.Mock).mock.results[0]?.value ?? logger;
+      expect(childLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('bulk-awaited write failed after'),
+        expect.objectContaining({ error: expect.any(Error) })
+      );
+    });
+
+    /**
+     * FAILURE SCENARIO: Transient per-item failure (e.g. ES queue full → 429)
+     *                   during reconciliation
+     * Symptom: Tick fails so the cursor stays pinned and the failed cases
+     *          get re-walked on the next tick (whose `updated_at` filter
+     *          would otherwise miss them — `updated_at` doesn't move on
+     *          a failed write).
+     * Log signature: `bulk-upsert item failed [id=case-A, status=429, retryable=true]`
+     * Trigger: 429 / 503 / 504 on a single bulk item
+     * Recovery: Self-heals on the next tick once ES queue clears
+     */
+    it('throws when at least one item failed with a retryable status', async () => {
+      const { writer, esClient } = buildWriterUnderTest();
+      (esClient.bulk as jest.Mock).mockResolvedValue({
+        errors: true,
+        items: [{ index: { _id: 'case-A', status: 429, error: { reason: 'queue full' } } }],
+      });
+
+      await expect(writer.bulkUpsertCasesAwait([makeCase('case-A')])).rejects.toThrow(
+        /retryable item failure/
+      );
+    });
+
+    /**
+     * FAILURE SCENARIO: Permanent per-item failure (mapper exception on a
+     *                   single bad doc) during reconciliation
+     * Symptom: WARN log surfaces the bad document; the rest of the page
+     *          completes; reconciliation continues — the alternative
+     *          (throwing) would freeze every subsequent tick on the
+     *          same poison doc.
+     * Log signature: `bulk-upsert item failed [id=..., status=400, retryable=false]`
+     * Trigger: malformed `extended_fields` payload, schema drift
+     * Recovery: requires investigating + fixing the source SO; reconciliation
+     *           cannot self-heal a permanent indexing error.
+     */
+    it('does not throw when the only item failures are permanent (e.g. 400 mapper exception)', async () => {
+      const { writer, esClient, logger } = buildWriterUnderTest();
+      (esClient.bulk as jest.Mock).mockResolvedValue({
+        errors: true,
+        items: [
+          {
+            index: {
+              _id: 'case-A',
+              status: 400,
+              error: { reason: 'mapper_parsing_exception' },
+            },
+          },
+        ],
+      });
+
       await expect(writer.bulkUpsertCasesAwait([makeCase('case-A')])).resolves.toBeUndefined();
 
-      // WARN log emitted by fireAndForget after retries exhaust.
       const childLogger = (logger.get as jest.Mock).mock.results[0]?.value ?? logger;
-      const warnCalls = (childLogger.warn as jest.Mock).mock.calls.map(([msg]: [string]) => msg);
-      expect(warnCalls.some((m: string) => m.includes('write failed after'))).toBe(true);
+      expect(childLogger.warn).toHaveBeenCalledWith(
+        expect.stringMatching(/bulk-upsert item failed.*case-A.*status=400.*retryable=false/)
+      );
     });
 
     it('skips dispatch on empty input', async () => {
-      const { writer, esClient } = makeWriter();
+      const { writer, esClient } = buildWriterUnderTest();
 
       await writer.bulkUpsertCasesAwait([]);
       expect(esClient.bulk).not.toHaveBeenCalled();
@@ -190,19 +226,28 @@ describe('CasesAnalyticsV2Writer', () => {
   });
 
   describe('fireAndForget logging', () => {
+    /**
+     * FAILURE SCENARIO: Single-case write retries exhaust on a transient blip
+     * Symptom: One case temporarily missing from analytics; reconciliation
+     *          repairs it on the next tick.
+     * Log signature: `cases.analyticsV2 write failed after N retries [case[id=...]]`
+     * Trigger: Transient ES 5xx during the per-case `index` call
+     * Recovery: Self-heals via reconciliation (next tick re-walks).
+     */
     it('downgrades post-retry-budget failures to WARN (not ERROR)', async () => {
-      const { writer, esClient, logger } = makeWriter();
+      const { writer, esClient, logger } = buildWriterUnderTest();
       (esClient.index as jest.Mock).mockRejectedValue(new Error('boom'));
 
       writer.upsertCase(makeCase('case-A'));
-      // Wait long enough for retries + jittered backoff to complete.
       await new Promise((r) => setTimeout(r, 100));
 
       const childLogger = (logger.get as jest.Mock).mock.results[0]?.value ?? logger;
-      // ERROR must NOT have been called — that would re-introduce alert spam
-      // during bulk-op blips.
+      // ERROR would re-introduce alert spam during bulk-op blips.
       expect(childLogger.error).not.toHaveBeenCalled();
-      expect(childLogger.warn).toHaveBeenCalled();
+      expect(childLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('write failed after'),
+        expect.objectContaining({ error: expect.any(Error) })
+      );
     });
   });
 });

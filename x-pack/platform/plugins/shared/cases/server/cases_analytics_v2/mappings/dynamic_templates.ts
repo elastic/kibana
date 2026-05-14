@@ -25,13 +25,12 @@ import type { MappingDynamicTemplate } from '@elastic/elasticsearch/lib/api/type
  * - Exact match + term aggregations work out of the box.
  * - Keyword semantics match the SO's `value` field type.
  *
- * `extended_fields` deliberately does **not** have a dynamic template — it's
- * mapped as `flattened` directly (see `case.ts`), which gives the same
- * "arbitrary keyword sub-keys" behaviour as a dynamic_template would but
- * collapses the mapping cost to a single field regardless of how many
- * distinct snake-keys exist across templates cluster-wide. Typed querying
- * happens via runtime fields published at `cases.<snake>` reading from
- * `params._source`; see `data_view/runtime_fields.ts`.
+ * `extended_fields` deliberately does **not** have a dynamic template —
+ * it's mapped as `flattened` directly (see `case.ts`), collapsing the
+ * mapping cost to a single field regardless of cluster-wide snake-key
+ * cardinality. Typed querying via runtime fields at `cases.<snake>`
+ * reading `doc['cases.extended_fields.<snake>']`; see
+ * `data_view/runtime_fields.ts`.
  */
 export const CASE_DYNAMIC_TEMPLATES: Array<Record<string, MappingDynamicTemplate>> = [
   {

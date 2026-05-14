@@ -9,6 +9,8 @@ import {
   ALL_TEMPLATE_TYPE_SUFFIXES,
   buildPainlessSource,
   buildRuntimeFieldEntry,
+  computeRuntimeFieldsFingerprint,
+  RUNTIME_FIELDS_BUILD_VERSION,
   splitSnakeKey,
   suffixToRuntimeType,
 } from './runtime_fields';
@@ -39,17 +41,42 @@ describe('splitSnakeKey', () => {
     expect(splitSnakeKey('_as_long')).toBeNull();
     expect(splitSnakeKey('foo_as_')).toBeNull();
   });
+
+  /**
+   * FAILURE SCENARIO: Unsafe template name reaches the Painless interpolator
+   * Symptom: A template field whose name contains a single quote, backslash,
+   *          newline, or other shell-special character would otherwise be
+   *          concatenated verbatim into a Painless string literal, breaking
+   *          the script (Lens / Discover would render the field as broken)
+   *          or — worst case — opening a Painless-injection path.
+   * Log signature: none — defensive drop is silent (the field is simply
+   *          not surfaced as a runtime field).
+   * Trigger: Template upstream layer accepts arbitrary `name: z.string()`;
+   *          analytics layer cannot trust the upstream charset.
+   * Recovery: Self-healing — once the template is fixed to use a safe name,
+   *          the next refresh publishes the runtime field normally.
+   */
+  it('rejects snake-keys containing characters outside [A-Za-z0-9_]', () => {
+    expect(splitSnakeKey("evil'); script(\"x\"_as_long")).toBeNull();
+    expect(splitSnakeKey('with space_as_long')).toBeNull();
+    expect(splitSnakeKey('quote\u0027_as_long')).toBeNull();
+    expect(splitSnakeKey('backslash\\_as_long')).toBeNull();
+    expect(splitSnakeKey('newline\n_as_long')).toBeNull();
+    expect(splitSnakeKey('dot.path_as_long')).toBeNull();
+  });
+
+  it('rejects snake-keys exceeding the length cap', () => {
+    const longName = 'a'.repeat(300);
+    expect(splitSnakeKey(`${longName}_as_long`)).toBeNull();
+  });
 });
 
 describe('suffixToRuntimeType', () => {
   it('maps keyword to a keyword runtime field — flattened sub-keys are not discoverable on their own', () => {
-    // Regression guard: under the `flattened` mapping for
-    // `cases.extended_fields`, sub-keys are queryable in ES but invisible
-    // to Kibana's data-view field list. Returning `null` here (the prior
-    // behaviour) silently dropped every `keyword`-typed template field
-    // from Discover / Lens / Stack Management. Lifting them through a
-    // keyword runtime field at `cases.<name>_as_keyword` is the only
-    // path that surfaces the value.
+    // Under `flattened`, sub-keys are queryable in ES but invisible to
+    // Kibana's data-view field list. Without a keyword runtime field at
+    // `cases.<name>_as_keyword`, every `keyword`-typed template field
+    // would be dropped from Discover / Lens / Stack Management.
     expect(suffixToRuntimeType('keyword')).toBe('keyword');
   });
 
@@ -80,17 +107,13 @@ describe('suffixToRuntimeType', () => {
 
 describe('buildPainlessSource', () => {
   it('reads from doc[cases.extended_fields.<snake>] with a defensive guard', () => {
-    // ES docs explicitly prescribe `doc[parent.subkey]` (not `_source`) for
-    // sub-keys of `flattened` — flattened sub-keys ARE doc-values-backed
-    // through the parent. A prior `_source` walk silently returned no value
-    // in synthetic-source / lookup-mode indices because `_source` is
-    // reconstructed from doc values and the sub-object structure is lost.
+    // ES docs prescribe `doc[parent.subkey]` for `flattened` sub-keys
+    // (doc-values-backed under the parent). `_source` access silently
+    // returns no value on synthetic-source / `index.mode: lookup` indices.
     const src = buildPainlessSource('riskScore_as_long', 'long');
     expect(src).toContain("doc['cases.extended_fields.riskScore_as_long']");
     expect(src).toContain('vals.empty');
     expect(src).toContain('for (String v : vals)');
-    // Must NOT walk _source — that pattern silently fails on synthetic source
-    // and is much slower than doc-values access.
     expect(src).not.toContain('params._source');
     expect(src).not.toContain('ef.get(');
   });
@@ -179,6 +202,55 @@ describe('buildRuntimeFieldEntry', () => {
 
   it('returns null for unknown suffixes', () => {
     expect(buildRuntimeFieldEntry('weird_as_quux')).toBeNull();
+  });
+});
+
+describe('computeRuntimeFieldsFingerprint', () => {
+  it('returns the same digest for inputs that differ only in order', () => {
+    // Order-independence is what makes the fingerprint stable across
+    // template SO traversal orders (e.g. ES result ordering shifts).
+    const a = computeRuntimeFieldsFingerprint(['a_as_long', 'b_as_keyword', 'c_as_date']);
+    const b = computeRuntimeFieldsFingerprint(['c_as_date', 'a_as_long', 'b_as_keyword']);
+    expect(a).toBe(b);
+  });
+
+  it('returns the same digest when an input is duplicated', () => {
+    // Templates can collide on the same snake-key intentionally (different
+    // templates declaring the same field). Dedup before hash so the cache
+    // hit isn't sensitive to template churn that doesn't change semantics.
+    const a = computeRuntimeFieldsFingerprint(['a_as_long', 'b_as_keyword']);
+    const b = computeRuntimeFieldsFingerprint(['a_as_long', 'b_as_keyword', 'a_as_long']);
+    expect(a).toBe(b);
+  });
+
+  it('returns a different digest when a snake-key is added or removed', () => {
+    const base = computeRuntimeFieldsFingerprint(['a_as_long']);
+    const added = computeRuntimeFieldsFingerprint(['a_as_long', 'b_as_keyword']);
+    const removed = computeRuntimeFieldsFingerprint([]);
+    expect(added).not.toBe(base);
+    expect(removed).not.toBe(base);
+  });
+
+  it('returns a different digest when a suffix changes', () => {
+    // A template field type-promoted from `keyword` to `long` produces a
+    // structurally-different runtime field; the fingerprint must reflect.
+    const asKeyword = computeRuntimeFieldsFingerprint(['priority_as_keyword']);
+    const asLong = computeRuntimeFieldsFingerprint(['priority_as_long']);
+    expect(asKeyword).not.toBe(asLong);
+  });
+
+  it('prefixes every digest with the build version', () => {
+    // The build-version prefix is the global invalidation lever:
+    // bumping `RUNTIME_FIELDS_BUILD_VERSION` invalidates every cached
+    // fingerprint without a manual cache flush.
+    const fp = computeRuntimeFieldsFingerprint(['a_as_long']);
+    expect(fp.startsWith(`v${RUNTIME_FIELDS_BUILD_VERSION}:`)).toBe(true);
+  });
+
+  it('produces a stable digest for the empty input', () => {
+    // A space with zero templates should still fingerprint to a stable
+    // value so two consecutive ensures hit the cache.
+    expect(computeRuntimeFieldsFingerprint([])).toBe(computeRuntimeFieldsFingerprint([]));
   });
 });
 

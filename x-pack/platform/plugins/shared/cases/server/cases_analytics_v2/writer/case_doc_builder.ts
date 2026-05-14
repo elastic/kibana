@@ -132,14 +132,13 @@ const SEVERITY_TO_STRING: Record<CasePersistedSeverity, CaseSeverityString> = {
 /**
  * Pure transformation: case saved-object → analytics doc.
  *
- * Side-effect-free, deterministic, and safe to call from any context. Tests
- * (added in commit 8) round-trip a synthetic SO and assert every emitted dotted
- * path resolves in the mapping — that's the schema-drift guard.
+ * Side-effect-free, deterministic, safe to call from any context. The
+ * round-trip guard in `mappings/schema_drift.test.ts` asserts every
+ * emitted dotted path resolves in the mapping.
  *
- * `@timestamp` is set to the most recent activity on the case — `updated_at`
- * if present, otherwise `created_at`. Discover/Lens use `@timestamp` for time
- * picker filtering; aligning it to "last activity" makes the time picker
- * intuitive ("show me cases active in the last 24h").
+ * `@timestamp` is the most recent activity (`updated_at` or, if absent,
+ * `created_at`) so Discover/Lens time-picker filtering reads as "show me
+ * cases active in the last 24h".
  */
 export function buildCaseDoc(so: SavedObject<CasePersistedAttributes>): CaseAnalyticsDoc {
   const a = so.attributes;
@@ -226,18 +225,16 @@ function buildObservables(
   if (observables == null || observables.length === 0) return undefined;
 
   const byType: Record<string, string[]> = {};
+  let bucketed = 0;
   for (const obs of observables) {
     const type = obs.typeKey;
-    // Skip observables missing a typeKey — shouldn't happen in practice, but
-    // we'd have nowhere to bucket them and we don't want to fail the whole
-    // doc build over malformed data.
+    // Skip observables missing a typeKey or value — defensive against
+    // malformed input; we don't want to fail the whole doc build.
     if (type != null && obs.value != null) {
       const bucket = byType[type] ?? (byType[type] = []);
       bucket.push(String(obs.value));
+      bucketed++;
     }
   }
-
-  // If every observable lacked a typeKey or value (shouldn't happen, but
-  // defensive), return undefined rather than an empty object.
-  return Object.keys(byType).length > 0 ? byType : undefined;
+  return bucketed > 0 ? byType : undefined;
 }

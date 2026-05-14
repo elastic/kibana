@@ -12,13 +12,22 @@ import { buildCaseDoc } from './case_doc_builder';
 import { withRetry } from './retry';
 
 /**
- * Default retry budget for analytics writes. A handful of attempts is enough
- * to ride out a brief ES blip; beyond that, reconciliation is the durability
- * backstop. Kept low so a sustained outage doesn't queue up unbounded
- * background work.
+ * Default retry budget for analytics writes. A handful of attempts is
+ * enough to ride out a brief ES blip; beyond that, reconciliation is the
+ * durability backstop. Kept low so a sustained outage doesn't queue
+ * unbounded background work.
  */
 const DEFAULT_MAX_RETRIES = 3;
 const DEFAULT_INITIAL_DELAY_MS = 250;
+
+/**
+ * HTTP status codes treated as transient failures on a per-item bulk
+ * response. Anything else (400 mapper_parsing_exception, 403 forbidden,
+ * etc.) is permanent — retrying won't help. Distinguishing the two
+ * lets us pin the reconciliation cursor on transient blips without
+ * freezing the whole tick on a single malformed document.
+ */
+const RETRYABLE_BULK_ITEM_STATUSES = new Set<number>([408, 409, 429, 500, 502, 503, 504]);
 
 interface CasesAnalyticsV2WriterDeps {
   esClient: ElasticsearchClient;
@@ -32,24 +41,19 @@ interface CasesAnalyticsV2WriterDeps {
 /**
  * Public hook surface invoked from the cases SO services post-write success.
  *
- * The contract is **fire-and-forget**: callers don't await, errors are logged
- * at WARN and never propagate. The cases plugin's primary write path must
- * never fail because analytics had trouble — analytics is a downstream
- * derivation, not part of the user's transactional commit. Reconciliation
- * is the durability backstop: any write that fails its retry budget gets
- * re-emitted on the next tick.
+ * **Fire-and-forget**: callers don't await, errors log at WARN and never
+ * propagate. The user's transactional write must never fail because
+ * analytics had trouble; reconciliation re-emits anything that exhausts
+ * its retry budget.
  *
- * **Bulk variants exist for batched writes.** The single-item methods
- * (`upsertCase`, `deleteCase`) call ES once per item. The bulk variants
- * (`bulkUpsertCases`, `bulkDeleteCases`) collapse N writes into one
- * `_bulk` request — required for the SO services' bulk operations and
- * the reconciliation runner's page loop, where naïve per-item dispatch
- * would saturate the ES connection pool on large batches.
+ * **Bulk variants** (`bulkUpsertCases`, `bulkDeleteCases`) collapse N
+ * writes into one `_bulk` request. Required by the SO services' bulk
+ * operations and the reconciliation runner's page loop — naïve per-item
+ * dispatch saturates the shared ES connection pool on large batches.
  *
  * **`bulkUpsertCasesAwait`** is the only awaitable method. Reconciliation
- * uses it so each page's writes complete before the next page is fetched
- * — bounds concurrency to one in-flight bulk per runner. SO-service hooks
- * never wait on analytics; they use the fire-and-forget variants.
+ * awaits between pages to bound in-flight bulks to one per runner; SO-
+ * service hooks always use the fire-and-forget variants.
  */
 export interface CasesAnalyticsV2WriterContract {
   upsertCase: (so: SavedObject<CasePersistedAttributes>) => void;
@@ -91,13 +95,8 @@ export class CasesAnalyticsV2Writer implements CasesAnalyticsV2WriterContract {
   /**
    * Bulk-upsert N case docs in a single `_bulk` request. Called by
    * `CasesService.bulkCreateCases` and `bulkPatchCases` post-success.
-   * Fire-and-forget.
-   *
-   * **Why bulk instead of N single upserts.** A 1000-case bulk patch would
-   * otherwise fire 1000 individual `index` requests into the ES connection
-   * pool Kibana shares cluster-wide. Pool saturation and queue back-pressure
-   * become visible to other plugins. Collapsing to one bulk request keeps
-   * the amplification factor at 1×.
+   * Fire-and-forget. Single bulk keeps the per-cases-write amplification
+   * factor at 1× regardless of batch size.
    */
   public bulkUpsertCases(sos: Array<SavedObject<CasePersistedAttributes>>): void {
     if (sos.length === 0) return;
@@ -117,24 +116,37 @@ export class CasesAnalyticsV2Writer implements CasesAnalyticsV2WriterContract {
   }
 
   /**
-   * Awaitable bulk-upsert. Same dispatch as `bulkUpsertCases`, but the
-   * caller can `await` completion (or post-retry-budget failure-log).
+   * Awaitable bulk-upsert. Same dispatch as `bulkUpsertCases`; reserved
+   * for the reconciliation runner so a 50k-case backfill awaits between
+   * pages instead of firing ~500 concurrent bulks at the ES pool.
    *
-   * Reserved for the reconciliation runner — running a single bulk per page
-   * with `await` between pages serializes pages and bounds concurrency to
-   * one in-flight bulk at a time. Without this, a 50k-case backfill
-   * (`/reset` followed by reconciliation with `lastRunAt: undefined`) would
-   * fire ~500 concurrent bulks into the ES connection pool.
-   *
-   * Never throws — errors are caught + logged inside `fireAndForget`.
+   * **Throws** on bulk-level failure or after retries exhaust on bulks
+   * with retryable per-item failures (429 / 503 / etc.). Reconciliation
+   * relies on this to keep its cursor pinned: if it advanced past a tick
+   * with a transient blip, the affected cases would never be re-walked
+   * (their `updated_at` doesn't change). Permanent per-item failures
+   * (mapper errors etc.) are logged but do NOT throw — those cases
+   * cannot be repaired by reconciliation regardless and must not freeze
+   * every subsequent tick.
    */
   public async bulkUpsertCasesAwait(
     sos: Array<SavedObject<CasePersistedAttributes>>
   ): Promise<void> {
     if (sos.length === 0) return;
-    await this.fireAndForget(`bulk-awaited[count=${sos.length}]`, () =>
-      this.doBulkUpsertCases(sos)
-    );
+    try {
+      await withRetry({
+        op: () => this.doBulkUpsertCases(sos, { throwOnRetryableItemFailures: true }),
+        maxRetries: this.maxRetries,
+        initialDelayMs: this.retryInitialDelayMs,
+      });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      this.logger.warn(
+        `cases.analyticsV2 bulk-awaited write failed after ${this.maxRetries} retries [count=${sos.length}]: ${message}. Cursor pinned; reconciliation will retry the same window.`,
+        { error: err }
+      );
+      throw err;
+    }
   }
 
   // ----- Private "do" methods. Throw on failure so the retry wrapper can see. -----
@@ -171,7 +183,10 @@ export class CasesAnalyticsV2Writer implements CasesAnalyticsV2WriterContract {
    * Throws only on bulk-request-level failure (network, cluster down,
    * etc.), which lets `withRetry` re-attempt the entire batch.
    */
-  private async doBulkUpsertCases(sos: Array<SavedObject<CasePersistedAttributes>>): Promise<void> {
+  private async doBulkUpsertCases(
+    sos: Array<SavedObject<CasePersistedAttributes>>,
+    opts?: { throwOnRetryableItemFailures?: boolean }
+  ): Promise<void> {
     // The ES `_bulk` API takes a flat array alternating between operation
     // headers and document bodies. `operations` types accept arbitrary
     // header shapes; we use plain object literals to avoid pulling in
@@ -182,12 +197,15 @@ export class CasesAnalyticsV2Writer implements CasesAnalyticsV2WriterContract {
       operations.push(buildCaseDoc(so));
     }
     const response = await this.esClient.bulk({ operations });
-    if (response.errors) {
-      this.logBulkItemErrors(
-        'upsert',
-        sos.map((so) => so.id),
-        response.items,
-        'index'
+    if (!response.errors) return;
+
+    const ids: string[] = [];
+    for (const so of sos) ids.push(so.id);
+    const { retryableCount } = this.logBulkItemErrors('upsert', ids, response.items, 'index');
+
+    if (opts?.throwOnRetryableItemFailures && retryableCount > 0) {
+      throw new Error(
+        `cases.analyticsV2 bulk upsert had ${retryableCount}/${sos.length} retryable item failure(s)`
       );
     }
   }
@@ -200,9 +218,10 @@ export class CasesAnalyticsV2Writer implements CasesAnalyticsV2WriterContract {
    * failures so `withRetry` can re-attempt.
    */
   private async doBulkDeleteCases(caseIds: string[]): Promise<void> {
-    const operations: object[] = caseIds.map((id) => ({
-      delete: { _index: CASE_INDEX_NAME, _id: id },
-    }));
+    const operations: object[] = [];
+    for (const id of caseIds) {
+      operations.push({ delete: { _index: CASE_INDEX_NAME, _id: id } });
+    }
     const response = await this.esClient.bulk({ operations });
     if (response.errors) {
       this.logBulkItemErrors('delete', caseIds, response.items, 'delete');
@@ -210,45 +229,50 @@ export class CasesAnalyticsV2Writer implements CasesAnalyticsV2WriterContract {
   }
 
   /**
-   * Walk bulk-response items, log per-item errors at WARN. Skips 404s for
-   * delete operations — "already absent" is the post-state we want.
+   * Walk bulk-response items, log per-item errors at WARN, and report
+   * how many were transient (retryable). Skips 404s for delete ops —
+   * "already absent" is the post-state we want.
    */
   private logBulkItemErrors(
     label: 'upsert' | 'delete',
     ids: string[],
     items: BulkResponseItem[],
     opKey: 'index' | 'delete'
-  ): void {
-    let logged = 0;
-    items.forEach((item, idx) => {
-      const op = item[opKey];
-      if (op?.error == null) return;
-      if (opKey === 'delete' && op.status === 404) return;
+  ): { loggedCount: number; retryableCount: number } {
+    let loggedCount = 0;
+    let retryableCount = 0;
+    for (let idx = 0; idx < items.length; idx++) {
+      const op = items[idx][opKey];
+      if (op?.error == null) continue;
+      if (opKey === 'delete' && op.status === 404) continue;
+
+      const status = op.status ?? 0;
+      const isRetryable = RETRYABLE_BULK_ITEM_STATUSES.has(status);
+      if (isRetryable) retryableCount++;
+
       this.logger.warn(
-        `cases.analyticsV2 bulk-${label} item failed [id=${ids[idx]}]: ${
+        `cases.analyticsV2 bulk-${label} item failed [id=${ids[idx]}, status=${status}, retryable=${isRetryable}]: ${
           op.error.reason ?? 'unknown'
         }`
       );
-      logged++;
-    });
-    if (logged > 0) {
+      loggedCount++;
+    }
+    if (loggedCount > 0) {
       this.logger.warn(
-        `cases.analyticsV2 bulk-${label} completed with ${logged}/${ids.length} item failures; reconciliation will retry`
+        `cases.analyticsV2 bulk-${label} completed with ${loggedCount}/${ids.length} item failures (${retryableCount} retryable)`
       );
     }
+    return { loggedCount, retryableCount };
   }
 
   /**
-   * Fire-and-forget wrapper. Errors logged at WARN (downgraded from ERROR
-   * with the bulk migration — write amplification meant one transient blip
-   * could spam thousands of ERROR lines on bulk operations, drowning out
-   * real problems and tripping operator alerting). Reconciliation is the
-   * proven backstop; a post-retry-budget write failure isn't an alert
-   * condition.
+   * Fire-and-forget wrapper. Errors logged at WARN (not ERROR): bulk write
+   * amplification means a transient blip could spam thousands of lines and
+   * trip on-call alerting on what reconciliation will repair anyway.
    *
-   * The returned promise resolves on success OR after the post-retry-budget
-   * log. It never rejects. Single-item callers `void` it; reconciliation's
-   * awaited variant awaits it for serialization.
+   * Returned promise resolves on success or after the post-retry-budget
+   * log; it never rejects. Single-item callers `void` it; reconciliation's
+   * awaited variant awaits it for page serialization.
    */
   private fireAndForget(targetId: string, op: () => Promise<void>): Promise<void> {
     return withRetry({

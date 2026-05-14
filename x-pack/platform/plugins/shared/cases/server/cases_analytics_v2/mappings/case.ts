@@ -9,65 +9,47 @@ import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import { CASE_DYNAMIC_TEMPLATES } from './dynamic_templates';
 
 /**
- * Mapping for the `.cases` analytics index. One document per case, keyed on
- * the case saved-object id.
+ * Mapping for the `.cases` analytics index. One document per case, keyed
+ * on the case saved-object id.
  *
- * **Source of truth**: this mapping mirrors the cases SO mapping at
- * `server/saved_object_types/cases/cases.ts`. Field types and shapes should
- * match unless there's an explicit analytics-only divergence (noted inline).
- *
- * `dynamic: 'strict'` — any field the doc-builder emits that isn't declared
- * here will fail the write with `mapper_parsing_exception`. We prefer strict
- * over `dynamic: false` because silent drops are a foot-gun: the writer's
- * fire-and-forget contract means a strict failure surfaces in error logs, but
- * a dropped field looks identical to "the feature isn't wired up." A
- * round-trip schema-drift guard test (added with the doc-builder in a later
- * commit) protects against accidental drift.
+ * Mirrors the cases SO mapping at `server/saved_object_types/cases/cases.ts`
+ * unless an analytics-only divergence is noted inline. `dynamic: 'strict'`
+ * means a doc-builder field not declared here fails the write with
+ * `mapper_parsing_exception`, surfacing in logs instead of silently
+ * dropping. The round-trip guard in `mappings/schema_drift.test.ts`
+ * prevents accidental drift.
  *
  * Field group conventions:
- *   - `@timestamp`           — required by Discover / Lens for time-aware UX.
- *                              Set to `case.updated_at` (or `created_at` if
- *                              the case has never been updated) at write time.
- *   - `kibana.space_ids`     — every space this case belongs to. Future DLS
- *                              key.
- *   - `cases.*`              — case-specific fields, namespaced so runtime
- *                              fields published at `cases.<snake>` can lift
- *                              extended-field keywords to typed values without
- *                              colliding with top-level fields.
+ *   - `@timestamp`        — required by Discover / Lens; set to the case's
+ *                           latest activity timestamp at write time.
+ *   - `kibana.space_ids`  — every space this case belongs to. Future DLS key.
+ *   - `cases.*`           — case-specific fields, namespaced so runtime
+ *                           fields at `cases.<snake>` can lift extended-
+ *                           field keywords without colliding.
  *
  * **Deliberate divergences from the SO mapping:**
- *   - `status` and `severity`: SO stores numeric enums (`short`); the
- *     analytics doc converts them to human-readable keywords (`"low"`,
- *     `"open"`, etc.) so Lens / Discover display sensible labels without an
- *     extra transform. The conversion lives in the doc-builder.
- *   - `extended_fields`: same `flattened` mapping as the SO. An earlier
- *     v2 design used an object with a `dynamic_template` mapping every
- *     child to keyword, but tenants with many templates (× many spaces)
- *     blew through the default `index.mapping.total_fields.limit` of
- *     1000. `flattened` keeps the index mapping bounded at one field
- *     regardless of cluster-wide snake-key cardinality. Per-child
- *     querying still happens via runtime fields published at
- *     `cases.<snake>` (see `data_view/runtime_fields.ts`) — those scripts
- *     read the value from `params._source` at query time. Slightly
- *     slower per-doc than doc_values, but unbounded sub-key cardinality
- *     is the right trade-off here.
+ *   - `status` / `severity`: SO stores numeric enums (`short`); the
+ *     analytics doc converts them to human-readable keywords so Lens and
+ *     Discover show labels without an extra transform.
+ *   - `extended_fields`: `flattened`. Per-child mappings via
+ *     `dynamic_template` would balloon past `index.mapping.total_fields.limit`
+ *     (default 1000) on tenants with many templates × spaces; flattened
+ *     keeps the mapping bounded at one field regardless of cluster-wide
+ *     snake-key cardinality. Per-child typed querying happens via runtime
+ *     fields at `cases.<snake>` — see `data_view/runtime_fields.ts` —
+ *     which read the value via `doc['cases.extended_fields.<snake>']`.
  *   - `observables`: SO uses a nested array of `{ typeKey, value,
- *     description }` triples; v2 denormalizes to one keyword array per
- *     `typeKey` (`cases.observables.url: ["http://..."]`). Preserves the
- *     type↔value relationship via the field path and lets analysts run
- *     simple term queries instead of nested aggregations. `description` is
- *     dropped — it's free text per-observable and isn't a useful analytics
- *     dimension. Doc-builder does the regrouping.
+ *     description }`; v2 denormalizes to one keyword array per `typeKey`
+ *     (`cases.observables.url: ["http://..."]`) so analysts run simple
+ *     term queries instead of nested aggregations. `description` is
+ *     dropped — free text per-observable, not an analytics dimension.
  *   - `time_to_acknowledge` / `time_to_investigate` / `time_to_resolve` /
- *     `in_progress_at`: present in the cases SO's persisted attributes but
- *     not listed in the SO mapping (the SO uses `dynamic: false`, so they're
- *     stored in `_source` only). v2's `dynamic: 'strict'` requires every
- *     field to be declared, so we explicitly map them as SLA metrics — they
- *     power dashboards directly.
+ *     `in_progress_at`: present in the cases SO's persisted attributes
+ *     but absent from its mapping (SO is `dynamic: false`); v2's strict
+ *     mapping requires explicit declaration, and these power SLA dashboards.
  *
- * **`settings` stored opaque** (`enabled: false`). Per-case config (sync
- * alerts, extract observables) isn't an analytics dimension; analysts care
- * about case content, not its toggles. Still round-trips through `_source`.
+ * **`settings` stored opaque** (`enabled: false`). Per-case toggles aren't
+ * an analytics dimension; round-trip through `_source` is sufficient.
  */
 export const CASE_INDEX_MAPPING: MappingTypeMapping = {
   dynamic: 'strict',
@@ -212,12 +194,10 @@ export const CASE_INDEX_MAPPING: MappingTypeMapping = {
         // toggles.
         settings: { type: 'object', enabled: false },
         // `customFields`: matches the SO mapping exactly — nested array,
-        // multi-fielded value so users can filter typed sub-fields (number,
-        // boolean, string, date, ip). `ignore_malformed: true` keeps the
-        // index write resilient if a user enters a value that doesn't fit
-        // its declared type. Note: the templates system will eventually
-        // supersede custom fields, at which point this can be simplified
-        // alongside that migration.
+        // multi-fielded value so users can filter typed sub-fields
+        // (number, boolean, string, date, ip). `ignore_malformed: true`
+        // keeps writes resilient if a user enters a value that doesn't
+        // fit its declared type.
         customFields: {
           type: 'nested',
           properties: {
@@ -250,18 +230,12 @@ export const CASE_INDEX_MAPPING: MappingTypeMapping = {
         // parent stays `dynamic: 'strict'`). Children are forced to keyword
         // by `CASE_DYNAMIC_TEMPLATES.observables_keyword`.
         observables: { type: 'object', dynamic: true },
-        // `flattened` — keeps the index mapping bounded at one field
-        // regardless of how many distinct `<name>_as_<type>` snake-keys
-        // exist across templates cluster-wide. A `dynamic_template` per
-        // sub-key burns one mapping slot per unique snake-key and trips
-        // the default `index.mapping.total_fields.limit` (1000) on
-        // tenants with many templates. Typed querying still happens via
-        // runtime fields published at `cases.<snake>` — see
-        // `data_view/runtime_fields.ts`. Those fields read the value from
-        // `params._source` at query time (flattened sub-keys aren't
-        // independently doc-values-backed); slightly slower per-doc than
-        // doc_values but unbounded sub-key cardinality is the right
-        // trade-off here. Matches the cases SO mapping.
+        // `flattened` — keeps the index mapping at one field regardless
+        // of how many distinct `<name>_as_<type>` snake-keys exist across
+        // templates cluster-wide. Typed querying happens via runtime
+        // fields at `cases.<snake>` (see `data_view/runtime_fields.ts`),
+        // which read the value via `doc['cases.extended_fields.<snake>']`.
+        // Matches the cases SO mapping.
         extended_fields: { type: 'flattened' },
       },
     },

@@ -506,11 +506,9 @@ export class TemplatesService {
       { refresh: true }
     );
 
-    // Today the v2 collector walks every template version (including
-    // soft-deleted ones) so cases referencing historical template versions
-    // still resolve. The refresh call here is a no-op against a stable map
-    // but lets us tighten the collector later (e.g. drop deleted templates)
-    // without losing the propagation hook.
+    // Refresh the per-space runtime field map even on soft-delete: keeps
+    // the propagation hook wired so future changes to the template field
+    // collection reach the data view without a code change.
     this.dependencies.refreshAnalyticsV2DataView();
   }
 }

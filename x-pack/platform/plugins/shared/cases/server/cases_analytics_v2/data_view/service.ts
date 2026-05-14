@@ -16,9 +16,23 @@ import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import type { DataView, RuntimeField, RuntimeFieldSpec } from '@kbn/data-views-plugin/common';
 import { CASE_TEMPLATE_SAVED_OBJECT } from '../../../common/constants';
 import { buildCaseDataViewSpec, getCaseDataViewId } from './data_view_specs';
-import { buildRuntimeFieldEntry } from './runtime_fields';
+import { buildRuntimeFieldEntry, computeRuntimeFieldsFingerprint } from './runtime_fields';
 
 const TEMPLATES_PAGE_SIZE = 100;
+
+/**
+ * How long an "ensured" entry stays trusted before the next request in
+ * that space re-runs the full ensure path. Bounds the recovery time when
+ * an administrator deletes a per-space data view out-of-band (e.g. via
+ * Stack Management UI rather than the `/reset` route, which would clear
+ * the cache directly). Without an upper bound the in-memory cache could
+ * mask a missing data view for the lifetime of the Kibana process.
+ *
+ * Trade-off: every request after the TTL pays one templates page-read +
+ * one data view get; both are typically a single round-trip and the cost
+ * is bounded by space count, not request volume.
+ */
+const BOOTSTRAP_CACHE_TTL_MS = 5 * 60 * 1000;
 
 interface CasesAnalyticsV2DataViewServiceDeps {
   logger: Logger;
@@ -70,53 +84,65 @@ interface TemplateAttributesLike {
 }
 
 /**
- * Manages per-space `Cases` data views. One data view per space, each with a
- * runtime field map derived from THAT space's templates only.
+ * Tracks a successful ensure for a single space.
  *
- * **Bootstrap model — lazy, per-request.** A space's data view is created
- * the first time a Cases request fires in that space (`ensureForSpace`
- * called from the request handler context). We skip subsequent calls within
- * the same Kibana process via an in-memory `Set` of bootstrapped space ids.
- * Process restart re-checks each space on first visit (idempotent — a doc
- * `get` returns the existing view).
+ * - `ensuredAt` drives the TTL guard against out-of-band data view
+ *   deletion (entries past the TTL re-run the full ensure path).
+ * - `fingerprint` is the digest of the snake-keys collected at the last
+ *   successful ensure. When a subsequent ensure recomputes the same
+ *   fingerprint we skip the data view fetch + `isEqual` diff entirely —
+ *   this is the dominant cost in template-edit bursts at scale.
  *
- * Why lazy rather than enumerating at start? Tenants with thousands of
- * spaces would pay heavy bootstrap cost even for spaces nobody visits.
- * Lazy spreads the cost across actual usage; spaces never visited via
- * Cases pay nothing.
+ * Both fields are written together inside `ensureOrRefreshForSpace` and
+ * read together by the cache check; treating them as a unit avoids
+ * partial-state confusion if one is updated without the other.
+ */
+interface BootstrapEntry {
+  ensuredAt: number;
+  fingerprint: string;
+}
+
+/**
+ * Manages per-space `Cases` data views. One data view per space; each
+ * carries a runtime field map derived from THAT space's templates only.
  *
- * **Why runtime fields and not mapped fields?** Templates declare extended
- * fields at runtime; the cases plugin can't know at index-template-creation
- * time what users will declare. Instead, every extended-field value lands
- * as a keyword under `cases.extended_fields.<snake>`, and we publish a
- * typed runtime field at `cases.<snake>` that parses the keyword at query
- * time. See `runtime_fields.ts` for the snake-key → painless transform.
+ * **Lazy bootstrap.** A space's data view is created on the first Cases
+ * request in that space; subsequent in-process requests short-circuit via
+ * an in-memory `Set`. Tenants with thousands of unused spaces pay nothing
+ * until usage.
  *
- * **Template-change latency.** A new template's extended fields propagate
- * to the data view via three paths:
- *   1. Template SO lifecycle hook — the templates service calls
- *      `refreshForSpace` after every create / update / delete, so in-process
- *      changes land on the data view immediately. Fire-and-forget; failures
- *      log at WARN and the next access path repairs.
- *   2. Kibana process restart — the Set is empty, `ensureForSpace`
- *      computes the freshly-derived runtime field map and diffs it against
- *      the persisted data view's map. Different → update; same → skip.
- *   3. Operator-initiated `/reset` — drops all per-space data views and
- *      clears the in-memory Set; the next request rebuilds from scratch.
+ * **Runtime fields, not mapped fields.** Extended-field values land as
+ * keywords under `cases.extended_fields.<snake>`; we publish a typed
+ * runtime field at `cases.<snake>` that parses at query time. See
+ * `runtime_fields.ts` for the snake-key → painless transform.
  *
- * **Failure policy.** Never throws past the service boundary. Bootstrap or
- * sync failures log at WARN; the cases plugin's request handlers continue.
- * Users in a space whose data view failed to bootstrap will see "no data
- * view found" in Lens — operators inspect logs.
+ * **Template change → data view propagation:**
+ *   1. Template SO lifecycle hook (templates service) → `refreshForSpace`
+ *      after every create / update / delete. Fire-and-forget; the next
+ *      access path repairs on failure.
+ *   2. Kibana restart → cache is empty; `ensureForSpace` recomputes the
+ *      desired map and diffs against the persisted data view.
+ *   3. Administrator `/reset` → drops all per-space data views and clears
+ *      the cache.
+ *
+ * **Failure policy.** Never throws past the service boundary. Bootstrap
+ * failures log at WARN; users in an affected space see "no data view
+ * found" in Lens until the next refresh path resolves.
  */
 export class CasesAnalyticsV2DataViewService {
   private readonly logger: Logger;
   private readonly deps: CasesAnalyticsV2DataViewServiceDeps;
   /**
    * Process-local cache of spaces we've already bootstrapped this run.
-   * Cleared on plugin start (new process); /reset also clears it explicitly.
+   * Entries older than `BOOTSTRAP_CACHE_TTL_MS` re-run the full ensure
+   * path on the next request — the only mechanism that recovers from
+   * out-of-band data view deletion (admin UI, scripts) short of process
+   * restart or `/reset`. Each entry also carries the snake-key fingerprint
+   * from the last successful ensure so within-TTL refreshes can skip the
+   * data view fetch + diff when the desired state hasn't changed.
+   * Cleared on plugin start (new process); `/reset` also clears it.
    */
-  private readonly bootstrappedSpaces = new Set<string>();
+  private readonly bootstrappedSpaces = new Map<string, BootstrapEntry>();
 
   constructor(deps: CasesAnalyticsV2DataViewServiceDeps) {
     this.logger = deps.logger.get('dataView');
@@ -124,29 +150,32 @@ export class CasesAnalyticsV2DataViewService {
   }
 
   /**
-   * Ensures the Cases data view exists in the given space and that its
-   * runtime field map matches the union of currently-declared template
-   * fields in that space.
+   * Test-only seam — overridden in `service.test.ts` to make TTL behaviour
+   * deterministic without `jest.useFakeTimers()` (which would interfere
+   * with the data view service's own internal timers).
+   */
+  protected now(): number {
+    return Date.now();
+  }
+
+  /**
+   * Ensures the Cases data view exists in the given space and its
+   * runtime field map matches the union of that space's templates.
+   * Idempotent — in-process repeats hit the cache after the first success.
    *
-   * Idempotent. Repeated calls in the same process hit the in-memory cache
-   * and return immediately after the first successful run.
+   * The desired runtime field map is computed up-front so all branches
+   * compare like for like:
+   *   - missing → create with the freshly-computed map;
+   *   - exists, map matches → no-op;
+   *   - exists, map differs → update in place.
+   * Computing up-front is what makes restart refresh stale fields without
+   * waiting for `/reset`.
    *
-   * **Behaviour by branch.** The runtime field map is computed up-front so
-   * the existence-check branches make a like-for-like comparison:
-   *   - Data view doesn't exist → create with the freshly-computed map.
-   *   - Data view exists, runtime field map matches → no-op.
-   *   - Data view exists, runtime field map differs → update in place.
-   * Computing up-front is what makes process restart actually refresh
-   * runtime fields when templates have been added between restarts —
-   * without it, the existence check short-circuits and stale runtime fields
-   * would persist until `/reset` ran.
-   *
-   * Fire-and-forget by contract from the caller's perspective: errors are
-   * caught internally and logged at WARN. The request handler context
-   * invokes this without awaiting.
+   * Fire-and-forget: errors caught internally and logged at WARN.
    */
   public async ensureForSpace(deps: EnsureForSpaceDeps): Promise<void> {
-    if (this.bootstrappedSpaces.has(deps.spaceId)) return;
+    const cached = this.bootstrappedSpaces.get(deps.spaceId);
+    if (cached != null && this.now() - cached.ensuredAt < BOOTSTRAP_CACHE_TTL_MS) return;
     await this.ensureOrRefreshForSpace(deps);
   }
 
@@ -169,6 +198,24 @@ export class CasesAnalyticsV2DataViewService {
    */
   private async ensureOrRefreshForSpace(deps: EnsureForSpaceDeps): Promise<void> {
     try {
+      const dataViewId = getCaseDataViewId(deps.spaceId);
+
+      // Compute snake-keys + fingerprint first. The fingerprint is a stable
+      // digest of the snake-key set; if it matches the last successful
+      // ensure on this node we can skip the data view fetch + isEqual diff
+      // entirely. This is the dominant cost path during template-edit bursts
+      // (most edits — name, tags, validation — don't change snake-keys at
+      // all). Fail-open: a cache miss is just current behaviour.
+      const snakeKeys = await this.collectSnakeKeysForSpace(deps.spaceId);
+      const fingerprint = computeRuntimeFieldsFingerprint(snakeKeys);
+      const cached = this.bootstrappedSpaces.get(deps.spaceId);
+      if (cached?.fingerprint === fingerprint) {
+        // Same intended state. Refresh the timestamp so the TTL window
+        // restarts (we just verified upstream templates haven't drifted).
+        cached.ensuredAt = this.now();
+        return;
+      }
+
       const dvService = await this.deps.dataViewsService.dataViewsServiceFactory(
         deps.savedObjectsClient,
         deps.esClient,
@@ -176,15 +223,7 @@ export class CasesAnalyticsV2DataViewService {
         true /* byPassCapabilities */
       );
 
-      const dataViewId = getCaseDataViewId(deps.spaceId);
-
-      // Compute the desired runtime field map up-front so we can compare it
-      // against an existing data view on the diff branch below. Cheap (one
-      // paginated SO read of templates in this space) and gives both
-      // branches a consistent view.
-      const snakeKeys = await this.collectSnakeKeysForSpace(deps.spaceId);
       const desiredRuntimeFieldMap = this.buildRuntimeFieldMap(snakeKeys);
-
       const existing = await this.getDataViewIfExists(dvService, dataViewId);
 
       if (existing == null) {
@@ -221,7 +260,10 @@ export class CasesAnalyticsV2DataViewService {
         }
       }
 
-      this.bootstrappedSpaces.add(deps.spaceId);
+      this.bootstrappedSpaces.set(deps.spaceId, {
+        ensuredAt: this.now(),
+        fingerprint,
+      });
     } catch (err) {
       this.logger.warn(
         `cases-analyticsV2: data view ensure failed for space=${deps.spaceId}: ${
@@ -258,7 +300,7 @@ export class CasesAnalyticsV2DataViewService {
   /**
    * Clears the in-memory bootstrapped-spaces cache so the next request in
    * each space re-checks (and recreates if missing). Called from the
-   * `/reset` route after the operator has deleted the underlying data view
+   * `/reset` route after the administrator has deleted the underlying data view
    * SOs out-of-band — without this, the Set would still claim "bootstrapped"
    * for every space and the data views would stay missing until process
    * restart.
@@ -270,20 +312,23 @@ export class CasesAnalyticsV2DataViewService {
   // ----- Internals -----
 
   /**
-   * Page through every template SO in the given space and extract
+   * Page through every active template SO in the given space and extract
    * `<name>_as_<type>` snake-keys from each template's persisted
-   * `fieldNames` array.
+   * `attributes.fieldNames` array. (`attributes.definition` is YAML on
+   * disk; structured `{ name, type }` only exists as transient parser
+   * output during create / update.)
    *
-   * **Why `fieldNames`, not `definition`.** `attributes.definition` is the
-   * raw YAML string the user submitted — the structured `{ name, type }`
-   * pairs only exist as transient parser output during create / update
-   * request handling. The persisted form lives on `attributes.fieldNames`,
-   * populated by `toFieldNames(parsedDefinition.fields)` in
-   * `services/templates/index.ts`. Reading from there is the only way to
-   * recover field metadata after the request has completed.
+   * Uses the internal SO client because templates are hidden and the
+   * request-scoped client may not include them.
    *
-   * Uses the internal SO client (held since construction) — templates are
-   * hidden and the request-scoped client may not include them.
+   * Filters apply the templates service's own definition of "live":
+   *   - `isLatest: true` — old versions don't contribute fields a renamed
+   *     template no longer publishes.
+   *   - `NOT deletedAt: *` — soft-deleted templates don't contribute.
+   * `fields: ['fieldNames']` keeps the response payload to the only
+   *  attribute we read; the SO API skips migrations for partial-field
+   *  reads, which is safe here because both filter fields and `fieldNames`
+   *  have been part of the template SO since its first model version.
    */
   private async collectSnakeKeysForSpace(spaceId: string): Promise<string[]> {
     const out: string[] = [];
@@ -297,6 +342,8 @@ export class CasesAnalyticsV2DataViewService {
         // Single-space scope — runtime fields for this view are derived
         // only from templates in this space.
         namespaces: [spaceId],
+        filter: `${CASE_TEMPLATE_SAVED_OBJECT}.attributes.isLatest: true AND NOT ${CASE_TEMPLATE_SAVED_OBJECT}.attributes.deletedAt: *`,
+        fields: ['fieldNames'],
       });
 
       for (const tpl of response.saved_objects) {

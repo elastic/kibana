@@ -149,11 +149,10 @@ describe('buildCaseDoc', () => {
 
   it('passes through real-world connector shapes — id + polymorphic fields', () => {
     // Regression guard: runtime jira connectors carry an `id` and a
-    // `fields` blob that is NOT `{key,value}`. The v2 mapping must accept
-    // both (mapped `connector.id` keyword + opaque `connector.fields`).
-    // Before this was fixed, the v2 strict mapping rejected real cases
-    // with "dynamic introduction of [id] within [cases.connector] is not
-    // allowed."
+    // `fields` blob that is NOT `{key,value}`. The v2 strict mapping
+    // must accept both (mapped `connector.id` keyword + opaque
+    // `connector.fields`); a missing field declaration trips
+    // `dynamic introduction of [id] within [cases.connector] is not allowed`.
     const so = fullCaseSO();
     (so.attributes as unknown as { connector: unknown }).connector = {
       id: 'connector-1',

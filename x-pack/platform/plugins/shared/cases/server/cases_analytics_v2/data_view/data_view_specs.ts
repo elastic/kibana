@@ -11,8 +11,8 @@ import { CASE_INDEX_NAME } from '../constants';
 /**
  * Shared prefix for every managed Cases data view id. One data view exists
  * per space; the id is suffixed with the space id so they're independently
- * addressable. The prefix is exported so the operator `/reset` route can
- * enumerate every per-space view via a prefix match.
+ * addressable. The prefix is exported so the administrator `/reset` route
+ * can enumerate every per-space view via a prefix match.
  */
 export const CASE_DATA_VIEW_ID_PREFIX = 'cases-analytics-managed-';
 
@@ -34,33 +34,20 @@ const CASE_DATA_VIEW_NAME = 'Cases';
 
 /**
  * Base spec for the managed Cases data view in a single space. Runtime
- * fields are added on top via the data-view service from that same space's
- * declared templates.
+ * fields are added on top via the data-view service from that same
+ * space's templates.
  *
- * **Per-space scoping.** Data views are space-scoped saved objects. We
- * deliberately create one per space rather than a single global view with
- * `namespaces: ['*']` because:
- *   1. The runtime field map is derived from template SOs — also
- *      space-scoped. A space-A analyst shouldn't see fields declared by
- *      templates in space B.
- *   2. The global map would balloon with N × M fields on tenants with
- *      thousands of spaces.
- *   3. Cross-space naming collisions (two spaces declaring the same
- *      `riskScore_as_long` for different purposes) are impossible per-space.
+ * **Per-space scoping.** Templates are space-scoped SOs, so the derived
+ * runtime field map is too — a global view with `namespaces: ['*']` would
+ * leak space-A field definitions into space B and balloon to N × M fields
+ * on tenants with thousands of spaces. The underlying `.cases` index
+ * stays cluster-level; only the *view* is per-space.
  *
- * Indices remain cluster-level — `.cases` is a single shared index. Only
- * the *view* into it is per-space. DLS (when the implicit-privileges
- * provider lands) layers on top, scoping which documents in `.cases` each
- * user can read.
- *
- * Other settings:
- *   - `managed: true`         — UI flags this as Kibana-owned; operator
- *                               edits get a "managed by application" hint.
- *   - `allowNoIndex: true`    — view is creatable before any docs land in
- *                               `.cases`. Avoids start-order coupling.
- *   - `timeFieldName`         — `@timestamp` (set to last activity at
- *                               write time) makes Discover's time picker
- *                               meaningful.
+ * Settings:
+ *   - `managed: true`        — UI flags this as Kibana-owned; administrator
+ *                              edits get a "managed by application" hint.
+ *   - `allowNoIndex: true`   — view is creatable before docs land in `.cases`.
+ *   - `timeFieldName`        — `@timestamp` (last activity at write time).
  */
 export const buildCaseDataViewSpec = (spaceId: string): DataViewSpec => ({
   id: getCaseDataViewId(spaceId),

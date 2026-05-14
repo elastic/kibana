@@ -294,7 +294,7 @@ export class CasePlugin
     // **dataViews is optional** — it's only consumed by the v2 service for
     // managed data view bootstrap. If v2 is enabled but dataViews isn't
     // installed, log loudly and skip v2 start. The flag-vs-dependency
-    // mismatch is an operator config error, not a runtime crash.
+    // mismatch is an administrator config error, not a runtime crash.
     if (this.casesAnalyticsV2Service) {
       if (this.caseConfig.analyticsV2.enabled && plugins.dataViews == null) {
         this.logger.error(

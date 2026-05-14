@@ -17,20 +17,17 @@ describe('deleteAllPerSpaceCasesDataViews', () => {
   });
 
   it('deletes each managed Cases data view with force: true and no caller-supplied namespace', async () => {
-    // Regression guard covering two prod issues from PR1:
-    //   1. version_conflict_engine_exception on the next ensure because the
-    //      previous delete didn't fully remove the multi-namespace SO. `index-
-    //      pattern` is `namespaceType: 'multiple'` — without `force: true` a
-    //      raw `delete` can leave the underlying ES doc behind and the next
-    //      `createAndSave` 409s on the deterministic id.
-    //   2. "Namespace cannot be specified by the caller when the spaces
-    //      extension is enabled." The Spaces SO extension owns namespace
-    //      selection from the request context; passing `{ namespace }`
-    //      throws. `force: true` already removes the multi-namespace doc
-    //      fully, so the caller never needs to specify it.
-    //
-    // The data-views plugin's own SO wrapper passes only `{ force: true }`
-    // for these same two reasons — we mirror that here.
+    // Two invariants:
+    //   1. `force: true` — `index-pattern` is `namespaceType: 'multiple'`,
+    //      so a raw `delete` can leave the underlying ES doc behind and
+    //      the next `createAndSave` 409s on the deterministic id with
+    //      `version_conflict_engine_exception`.
+    //   2. No caller-supplied `namespace` — the Spaces SO extension owns
+    //      namespace selection from the request context; passing
+    //      `{ namespace }` throws "Namespace cannot be specified by the
+    //      caller when the spaces extension is enabled." `force: true`
+    //      already removes the multi-namespace doc fully.
+    // Mirrors the data-views plugin's own SO wrapper.
     const soClient = savedObjectsClientMock.create();
     soClient.find.mockResolvedValueOnce({
       saved_objects: [
