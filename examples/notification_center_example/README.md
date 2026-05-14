@@ -24,8 +24,14 @@ built as a sidebar app.
   hooks ship.
 - **Global-header-style unread badge** in the controller page header,
   subscribing to `useUnreadNotificationCount` (O(1) per render).
-- **Tabbed sidebar UI** with All / Unread / Read views, plus "Mark all as
-  read" in the sidebar header.
+- **Filter panel sidebar UI** — type chips (All / Report / Alert / Cloud),
+  state filter (All / Unread / Pinned), and an optional "Current space only"
+  toggle (visible when the spaces plugin is available). All filters compose;
+  "Mark all as read" lives in the sidebar header.
+- **Registration-time primary actions** — the report type registers a
+  `resolvePrimaryAction` resolver at `registerType` time. The sidebar calls
+  `events.getPrimaryActionForEvent` per row and wires the returned label and
+  handler without any type-specific branching.
 
 ### Run
 

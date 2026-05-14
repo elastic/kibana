@@ -27,9 +27,9 @@ application root and pass `notifications.events` as the value.
 ```tsx
 import { NotificationEventsProvider } from '@kbn/core-notifications-browser-hooks';
 
-function AppRoot({ core }: { core: CoreStart }) {
+function AppRoot({ core, spaces }: { core: CoreStart; spaces?: SpacesPluginStart }) {
   return (
-    <NotificationEventsProvider value={core.notifications.events}>
+    <NotificationEventsProvider events={core.notifications.events} spaces={spaces}>
       <App />
     </NotificationEventsProvider>
   );
@@ -42,8 +42,9 @@ function AppRoot({ core }: { core: CoreStart }) {
 
 | Prop | Type | Required | Description |
 | :--- | :--- | :--- | :--- |
-| `value` | `INotificationEvents` | Yes | Typically `core.notifications.events` from `start()`. |
+| `events` | `INotificationEvents` | Yes | Typically `core.notifications.events` from `start()`. |
 | `children` | `ReactNode` | Yes | Subtree that can consume the hooks below. |
+| `spaces` | `SpacesDependency` | No | Pass `spaces` from `StartDeps` to enable space-scoped filtering. The provider only binds to `getActiveSpace$()`. Omit when the spaces plugin is not available. |
 
 ### `useNotificationEventsService(): INotificationEvents`
 

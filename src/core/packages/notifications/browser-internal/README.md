@@ -135,7 +135,7 @@ yarn test:jest src/core/packages/notifications/browser-internal
 ```
 
 Co-located test files:
-- `events/events_service.test.ts` — upsert, hydration, unread count, scope
+- `events/events_service.test.ts` — upsert, hydration, unread count, scope, primary action resolution
 - `events/local_storage_state_store.test.ts` — preload, mutations, sanitization
 - `feedback/feedback_service.test.ts`
 - `tours/tours_service.test.ts`
