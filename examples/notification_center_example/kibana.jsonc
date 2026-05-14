@@ -6,7 +6,7 @@
   "group": "platform",
   "visibility": "private",
   "plugin": {
-    "id": "notificationCenterExample",
+    "id": "notificationEventsExample",
     "server": false,
     "browser": true,
     "requiredPlugins": [

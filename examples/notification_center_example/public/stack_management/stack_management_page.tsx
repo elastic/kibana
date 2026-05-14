@@ -27,23 +27,23 @@ import { NOTIFICATION_STACK_QUERY_KEY } from './constants';
 import { BulkActionsBar } from './bulk_actions_bar';
 
 const LABELS = {
-  entity: i18n.translate('notificationCenterExample.stack.entity', {
+  entity: i18n.translate('notificationEventsExample.stack.entity', {
     defaultMessage: 'notification',
   }),
-  entityPlural: i18n.translate('notificationCenterExample.stack.entityPlural', {
+  entityPlural: i18n.translate('notificationEventsExample.stack.entityPlural', {
     defaultMessage: 'notifications',
   }),
 };
 
-const PAGE_TITLE = i18n.translate('notificationCenterExample.stack.page.title', {
+const PAGE_TITLE = i18n.translate('notificationEventsExample.stack.page.title', {
   defaultMessage: 'Notifications',
 });
 
-const SORT_FIELD_RECEIVED = i18n.translate('notificationCenterExample.stack.sort.received', {
+const SORT_FIELD_RECEIVED = i18n.translate('notificationEventsExample.stack.sort.received', {
   defaultMessage: 'Received',
 });
 
-const SORT_FIELD_NAME = i18n.translate('notificationCenterExample.stack.sort.name', {
+const SORT_FIELD_NAME = i18n.translate('notificationEventsExample.stack.sort.name', {
   defaultMessage: 'Name',
 });
 

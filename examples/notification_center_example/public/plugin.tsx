@@ -55,8 +55,8 @@ export class NotificationCenterExamplePlugin implements Plugin<void, void, Setup
     });
 
     core.application.register({
-      id: 'notificationCenterExample',
-      title: 'Notification Center Example',
+      id: 'notificationEventsExample',
+      title: 'Notification Events Example',
       async mount({ element }: AppMountParameters) {
         const [coreStart, { spaces }] = await core.getStartServices();
         const events = coreStart.notifications.events;
@@ -89,8 +89,8 @@ export class NotificationCenterExamplePlugin implements Plugin<void, void, Setup
     });
 
     deps.developerExamples.register({
-      appId: 'notificationCenterExample',
-      title: 'Notification Center',
+      appId: 'notificationEventsExample',
+      title: 'Notification Events',
       description:
         'Fully featured notification center demo built on core.notifications.events, the browser-hooks package, and the NotificationEvent component.',
     });

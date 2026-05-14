@@ -58,7 +58,7 @@ export function BulkActionsBar() {
             onClick={() => void handleMarkAsRead()}
             data-test-subj="notificationStackBulkMarkAsRead"
           >
-            {i18n.translate('notificationCenterExample.stack.bulk.markAsRead', {
+            {i18n.translate('notificationEventsExample.stack.bulk.markAsRead', {
               defaultMessage:
                 'Mark {count, plural, one {# notification} other {# notifications}} as read',
               values: { count: selectedCount },
@@ -72,7 +72,7 @@ export function BulkActionsBar() {
             onClick={() => void handlePin()}
             data-test-subj="notificationStackBulkPin"
           >
-            {i18n.translate('notificationCenterExample.stack.bulk.pin', {
+            {i18n.translate('notificationEventsExample.stack.bulk.pin', {
               defaultMessage: 'Pin {count, plural, one {# notification} other {# notifications}}',
               values: { count: selectedCount },
             })}
