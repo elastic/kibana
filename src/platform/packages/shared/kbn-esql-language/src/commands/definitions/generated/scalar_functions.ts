@@ -4927,7 +4927,7 @@ const decayDefinition: FunctionDefinition = {
           name: 'options',
           type: 'function_named_parameters',
           mapParams:
-            "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, time_duration, keyword, text]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}, {name='type', values=[], description='Decay function to use: linear, exponential or gaussian.', type=[keyword]}",
+            "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, unsigned_long, time_duration, keyword, text]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}, {name='type', values=[], description='Decay function to use: linear, exponential or gaussian.', type=[keyword]}",
           optional: true,
           description: '(Optional) Additional options such as `decay`, `offset` and `type`.',
         },
@@ -4958,7 +4958,7 @@ const decayDefinition: FunctionDefinition = {
           name: 'options',
           type: 'function_named_parameters',
           mapParams:
-            "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, time_duration, keyword, text]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}, {name='type', values=[], description='Decay function to use: linear, exponential or gaussian.', type=[keyword]}",
+            "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, unsigned_long, time_duration, keyword, text]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}, {name='type', values=[], description='Decay function to use: linear, exponential or gaussian.', type=[keyword]}",
           optional: true,
           description: '(Optional) Additional options such as `decay`, `offset` and `type`.',
         },
@@ -4989,7 +4989,7 @@ const decayDefinition: FunctionDefinition = {
           name: 'options',
           type: 'function_named_parameters',
           mapParams:
-            "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, time_duration, keyword, text]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}, {name='type', values=[], description='Decay function to use: linear, exponential or gaussian.', type=[keyword]}",
+            "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, unsigned_long, time_duration, keyword, text]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}, {name='type', values=[], description='Decay function to use: linear, exponential or gaussian.', type=[keyword]}",
           optional: true,
           description: '(Optional) Additional options such as `decay`, `offset` and `type`.',
         },
@@ -5020,7 +5020,7 @@ const decayDefinition: FunctionDefinition = {
           name: 'options',
           type: 'function_named_parameters',
           mapParams:
-            "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, time_duration, keyword, text]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}, {name='type', values=[], description='Decay function to use: linear, exponential or gaussian.', type=[keyword]}",
+            "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, unsigned_long, time_duration, keyword, text]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}, {name='type', values=[], description='Decay function to use: linear, exponential or gaussian.', type=[keyword]}",
           optional: true,
           description: '(Optional) Additional options such as `decay`, `offset` and `type`.',
         },
@@ -5051,7 +5051,7 @@ const decayDefinition: FunctionDefinition = {
           name: 'options',
           type: 'function_named_parameters',
           mapParams:
-            "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, time_duration, keyword, text]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}, {name='type', values=[], description='Decay function to use: linear, exponential or gaussian.', type=[keyword]}",
+            "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, unsigned_long, time_duration, keyword, text]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}, {name='type', values=[], description='Decay function to use: linear, exponential or gaussian.', type=[keyword]}",
           optional: true,
           description: '(Optional) Additional options such as `decay`, `offset` and `type`.',
         },
@@ -5082,7 +5082,7 @@ const decayDefinition: FunctionDefinition = {
           name: 'options',
           type: 'function_named_parameters',
           mapParams:
-            "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, time_duration, keyword, text]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}, {name='type', values=[], description='Decay function to use: linear, exponential or gaussian.', type=[keyword]}",
+            "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, unsigned_long, time_duration, keyword, text]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}, {name='type', values=[], description='Decay function to use: linear, exponential or gaussian.', type=[keyword]}",
           optional: true,
           description: '(Optional) Additional options such as `decay`, `offset` and `type`.',
         },
@@ -5113,7 +5113,7 @@ const decayDefinition: FunctionDefinition = {
           name: 'options',
           type: 'function_named_parameters',
           mapParams:
-            "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, time_duration, keyword, text]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}, {name='type', values=[], description='Decay function to use: linear, exponential or gaussian.', type=[keyword]}",
+            "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, unsigned_long, time_duration, keyword, text]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}, {name='type', values=[], description='Decay function to use: linear, exponential or gaussian.', type=[keyword]}",
           optional: true,
           description: '(Optional) Additional options such as `decay`, `offset` and `type`.',
         },
@@ -5144,7 +5144,38 @@ const decayDefinition: FunctionDefinition = {
           name: 'options',
           type: 'function_named_parameters',
           mapParams:
-            "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, time_duration, keyword, text]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}, {name='type', values=[], description='Decay function to use: linear, exponential or gaussian.', type=[keyword]}",
+            "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, unsigned_long, time_duration, keyword, text]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}, {name='type', values=[], description='Decay function to use: linear, exponential or gaussian.', type=[keyword]}",
+          optional: true,
+          description: '(Optional) Additional options such as `decay`, `offset` and `type`.',
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'value',
+          type: 'unsigned_long',
+          optional: false,
+          description: 'The input value to apply decay scoring to.',
+        },
+        {
+          name: 'origin',
+          type: 'unsigned_long',
+          optional: false,
+          description: 'Central point from which the distances are calculated.',
+        },
+        {
+          name: 'scale',
+          type: 'unsigned_long',
+          optional: false,
+          description: 'Distance from the origin where the function returns the decay value.',
+        },
+        {
+          name: 'options',
+          type: 'function_named_parameters',
+          mapParams:
+            "{name='offset', values=[], description='Distance from the origin where no decay occurs.', type=[double, integer, long, unsigned_long, time_duration, keyword, text]}, {name='decay', values=[], description='Multiplier value returned at the scale distance from the origin.', type=[double]}, {name='type', values=[], description='Decay function to use: linear, exponential or gaussian.', type=[keyword]}",
           optional: true,
           description: '(Optional) Additional options such as `decay`, `offset` and `type`.',
         },
@@ -5233,6 +5264,7 @@ const embeddingDefinition: FunctionDefinition = {
             'Identifier of an existing inference endpoint that will generate the embeddings. The inference endpoint must have the `embedding` task type and should use the same model that was used to embed your indexed data.',
           hint: {
             entityType: 'inference_endpoint',
+            kind: 'entity',
             constraints: {
               task_type: 'embedding',
             },
@@ -5440,6 +5472,38 @@ const expDefinition: FunctionDefinition = {
     Location.JOIN,
   ],
   examples: ['ROW d = 5.0\n| EVAL s = EXP(d)'],
+};
+
+// Do not edit this manually... generated by scripts/generate_function_definitions.ts
+const fieldExtractDefinition: FunctionDefinition = {
+  type: FunctionDefinitionTypes.SCALAR,
+  name: EsqlFunctionNames.FIELD_EXTRACT,
+  description: i18n.translate('kbn-esql-language.esql.definitions.field_extract', {
+    defaultMessage:
+      'Extracts the value of a single sub-field from a `flattened` field root as `keyword`.',
+  }),
+  ignoreAsSuggestion: true,
+  preview: true,
+  alias: undefined,
+  signatures: [],
+  locationsAvailable: [
+    Location.EVAL,
+    Location.ROW,
+    Location.SORT,
+    Location.WHERE,
+    Location.STATS,
+    Location.STATS_BY,
+    Location.LIMIT_BY,
+    Location.STATS_WHERE,
+    Location.STATS_TIMESERIES,
+    Location.COMPLETION,
+    Location.MMR,
+    Location.RERANK,
+    Location.JOIN,
+  ],
+  examples: [
+    'FROM flattened_otel_logs\n| WHERE @timestamp == "2020-01-01T00:02:48.461Z"\n| EVAL hn = field_extract(resource.attributes, "host.name")\n| KEEP hn',
+  ],
 };
 
 // Do not edit this manually... generated by scripts/generate_function_definitions.ts
@@ -14496,6 +14560,88 @@ const qstrDefinition: FunctionDefinition = {
 };
 
 // Do not edit this manually... generated by scripts/generate_function_definitions.ts
+const rangeContainsDefinition: FunctionDefinition = {
+  type: FunctionDefinitionTypes.SCALAR,
+  name: EsqlFunctionNames.RANGE_CONTAINS,
+  description: i18n.translate('kbn-esql-language.esql.definitions.range_contains', {
+    defaultMessage:
+      'Returns true if the first argument\ncontains the second argument.\nThis is the inverse of RANGE_WITHIN; equivalent to `RANGE_WITHIN(b, a)`.\nSupports (date_range, date) and (date_range, date_range). The first argument must be a date_range.',
+  }),
+  ignoreAsSuggestion: true,
+  preview: true,
+  alias: undefined,
+  signatures: [],
+  locationsAvailable: [
+    Location.EVAL,
+    Location.ROW,
+    Location.SORT,
+    Location.WHERE,
+    Location.STATS,
+    Location.STATS_BY,
+    Location.LIMIT_BY,
+    Location.STATS_WHERE,
+    Location.STATS_TIMESERIES,
+    Location.COMPLETION,
+    Location.MMR,
+    Location.RERANK,
+    Location.JOIN,
+  ],
+  examples: [
+    'FROM employees\n| WHERE RANGE_CONTAINS(TO_DATE_RANGE("1985-02-01..1985-03-01"), hire_date)\n| KEEP emp_no, hire_date\n| SORT emp_no',
+  ],
+};
+
+// Do not edit this manually... generated by scripts/generate_function_definitions.ts
+const rangeIntersectsDefinition: FunctionDefinition = {
+  type: FunctionDefinitionTypes.SCALAR,
+  name: EsqlFunctionNames.RANGE_INTERSECTS,
+  description: i18n.translate('kbn-esql-language.esql.definitions.range_intersects', {
+    defaultMessage:
+      'Returns true if the two arguments overlap. The relation is symmetric — argument order does not matter. Supports any combination of `date` and `date_range`. When both arguments are `date`, this is equivalent to `a == b`.',
+  }),
+  ignoreAsSuggestion: true,
+  preview: true,
+  alias: undefined,
+  signatures: [
+    {
+      params: [
+        {
+          name: 'left',
+          type: 'date',
+          optional: false,
+          description: 'First value (point or range).',
+        },
+        {
+          name: 'right',
+          type: 'date',
+          optional: false,
+          description: 'Second value (point or range).',
+        },
+      ],
+      returnType: 'boolean',
+    },
+  ],
+  locationsAvailable: [
+    Location.EVAL,
+    Location.ROW,
+    Location.SORT,
+    Location.WHERE,
+    Location.STATS,
+    Location.STATS_BY,
+    Location.LIMIT_BY,
+    Location.STATS_WHERE,
+    Location.STATS_TIMESERIES,
+    Location.COMPLETION,
+    Location.MMR,
+    Location.RERANK,
+    Location.JOIN,
+  ],
+  examples: [
+    'FROM employees\n| WHERE RANGE_INTERSECTS(hire_date, TO_DATE_RANGE("1985-02-01..1985-03-01"))\n| KEEP emp_no, hire_date\n| SORT emp_no',
+  ],
+};
+
+// Do not edit this manually... generated by scripts/generate_function_definitions.ts
 const rangeMaxDefinition: FunctionDefinition = {
   type: FunctionDefinitionTypes.SCALAR,
   name: EsqlFunctionNames.RANGE_MAX,
@@ -16590,6 +16736,7 @@ const stBufferDefinition: FunctionDefinition = {
   ],
   examples: [
     'ROW wkt = "POLYGON ((0 0, 4 0, 4 4, 0 4, 0 0))"\n| EVAL buffered = ST_BUFFER(TO_GEOSHAPE(wkt), -1)',
+    'ROW geom = TO_CARTESIANSHAPE("LINESTRING(0 0, 10 0, 10 10)")\n| EVAL buffered = ST_BUFFER(geom, 2, {"endcap": "flat", "join": "mitre"})\n| KEEP buffered',
   ],
 };
 
@@ -19712,6 +19859,7 @@ const textEmbeddingDefinition: FunctionDefinition = {
             'Identifier of an existing inference endpoint that will generate the embeddings. The inference endpoint must have the `text_embedding` task type and should use the same model that was used to embed your indexed data.',
           hint: {
             entityType: 'inference_endpoint',
+            kind: 'entity',
             constraints: {
               task_type: 'text_embedding',
             },
@@ -22895,7 +23043,7 @@ const topSnippetsDefinition: FunctionDefinition = {
           name: 'options',
           type: 'function_named_parameters',
           mapParams:
-            "{name='num_snippets', values=[3], description='The maximum number of matching snippets to return.', type=[integer]}, {name='num_words', values=[300], description='The maximum number of words to return in each snippet.\n\t\n{applies_to}`stack: preview 9.4`When set to 0, disables chunking entirely,\n the input field values are used as-is, which is\nuseful when the text has already been chunked.\n', type=[integer]}, {name='highlight', values=[true], description='When true, wraps matched query terms in the returned snippets with markup tags.\nDefaults to false.\n', type=[boolean]}, {name='pre_tag', values=[<em>], description='Opening tag for highlighted terms. Only applies when highlight is true.\nDefaults to `<em>`.\n', type=[keyword]}, {name='post_tag', values=[</em>], description='Closing tag for highlighted terms. Only applies when highlight is true.\nDefaults to `</em>`.\n', type=[keyword]}, {name='encoder', values=[default], description='Controls HTML encoding of snippet text before tagging: `default` (no encoding) or `html`.\nOnly applies when highlight is true. Defaults to `default`.\n', type=[keyword]}, {name='order', values=[score, none], description='Order of returned snippets: `score` (default, by relevance) or `none` (original text order).\n', type=[keyword]}",
+            "{name='num_snippets', values=[3], description='The maximum number of matching snippets to return.', type=[integer]}, {name='num_words', values=[300], description='The maximum number of words to return in each snippet.\n\t\n{applies_to}`stack: preview 9.4`When set to 0, disables chunking entirely,\n the input field values are used as-is, which is\nuseful when the text has already been chunked.\n', type=[integer]}, {name='highlight', values=[true], description='When true, wraps matched query terms in the returned snippets with markup tags.\nDefaults to false.\n', type=[boolean]}, {name='pre_tag', values=[<em>], description='Opening tag for highlighted terms. Only applies when highlight is true.\nDefaults to `<em>`.\n', type=[keyword]}, {name='post_tag', values=[</em>], description='Closing tag for highlighted terms. Only applies when highlight is true.\nDefaults to `</em>`.\n', type=[keyword]}, {name='encoder', values=[default], description='Controls HTML encoding of snippet text before tagging: `default` (no encoding) or `html`.\nOnly applies when highlight is true. Defaults to `default`.\n', type=[keyword]}, {name='order', values=[score, none], description='Order of returned snippets: `score` (default, by relevance) or `none` (original text order).\n', type=[keyword]}, {name='analyzer', values=[english], description='Name of the analyzer to use for scoring and highlighting. When omitted, defaults to the standard\nanalyzer. The name must match a registered analyzer (prebuilt or plugin-contributed), such as\n`standard`, `whitespace`, `simple`, `keyword`, `english`, `french`, `german`, `spanish`, etc.\n', type=[keyword]}",
           optional: true,
           description:
             '(Optional) `TOP_SNIPPETS` additional options as [function named parameters](https://www.elastic.co/docs/reference/query-languages/esql/esql-syntax#esql-function-named-params).',
@@ -22942,7 +23090,7 @@ const topSnippetsDefinition: FunctionDefinition = {
           name: 'options',
           type: 'function_named_parameters',
           mapParams:
-            "{name='num_snippets', values=[3], description='The maximum number of matching snippets to return.', type=[integer]}, {name='num_words', values=[300], description='The maximum number of words to return in each snippet.\n\t\n{applies_to}`stack: preview 9.4`When set to 0, disables chunking entirely,\n the input field values are used as-is, which is\nuseful when the text has already been chunked.\n', type=[integer]}, {name='highlight', values=[true], description='When true, wraps matched query terms in the returned snippets with markup tags.\nDefaults to false.\n', type=[boolean]}, {name='pre_tag', values=[<em>], description='Opening tag for highlighted terms. Only applies when highlight is true.\nDefaults to `<em>`.\n', type=[keyword]}, {name='post_tag', values=[</em>], description='Closing tag for highlighted terms. Only applies when highlight is true.\nDefaults to `</em>`.\n', type=[keyword]}, {name='encoder', values=[default], description='Controls HTML encoding of snippet text before tagging: `default` (no encoding) or `html`.\nOnly applies when highlight is true. Defaults to `default`.\n', type=[keyword]}, {name='order', values=[score, none], description='Order of returned snippets: `score` (default, by relevance) or `none` (original text order).\n', type=[keyword]}",
+            "{name='num_snippets', values=[3], description='The maximum number of matching snippets to return.', type=[integer]}, {name='num_words', values=[300], description='The maximum number of words to return in each snippet.\n\t\n{applies_to}`stack: preview 9.4`When set to 0, disables chunking entirely,\n the input field values are used as-is, which is\nuseful when the text has already been chunked.\n', type=[integer]}, {name='highlight', values=[true], description='When true, wraps matched query terms in the returned snippets with markup tags.\nDefaults to false.\n', type=[boolean]}, {name='pre_tag', values=[<em>], description='Opening tag for highlighted terms. Only applies when highlight is true.\nDefaults to `<em>`.\n', type=[keyword]}, {name='post_tag', values=[</em>], description='Closing tag for highlighted terms. Only applies when highlight is true.\nDefaults to `</em>`.\n', type=[keyword]}, {name='encoder', values=[default], description='Controls HTML encoding of snippet text before tagging: `default` (no encoding) or `html`.\nOnly applies when highlight is true. Defaults to `default`.\n', type=[keyword]}, {name='order', values=[score, none], description='Order of returned snippets: `score` (default, by relevance) or `none` (original text order).\n', type=[keyword]}, {name='analyzer', values=[english], description='Name of the analyzer to use for scoring and highlighting. When omitted, defaults to the standard\nanalyzer. The name must match a registered analyzer (prebuilt or plugin-contributed), such as\n`standard`, `whitespace`, `simple`, `keyword`, `english`, `french`, `german`, `spanish`, etc.\n', type=[keyword]}",
           optional: true,
           description:
             '(Optional) `TOP_SNIPPETS` additional options as [function named parameters](https://www.elastic.co/docs/reference/query-languages/esql/esql-syntax#esql-function-named-params).',
@@ -23687,6 +23835,7 @@ export const scalarFunctionDefinitions = [
   embeddingDefinition,
   endsWithDefinition,
   expDefinition,
+  fieldExtractDefinition,
   floorDefinition,
   fromBase64Definition,
   greatestDefinition,
@@ -23734,6 +23883,8 @@ export const scalarFunctionDefinitions = [
   piDefinition,
   powDefinition,
   qstrDefinition,
+  rangeContainsDefinition,
+  rangeIntersectsDefinition,
   rangeMaxDefinition,
   rangeMinDefinition,
   rangeWithinDefinition,

@@ -37,6 +37,9 @@ const createDeferred = <T>() => {
   return { promise, resolve, reject };
 };
 
+const waitForNextEventLoopTurn = (): Promise<void> =>
+  new Promise((resolve) => setImmediate(resolve));
+
 const getSections = (panels: DashboardAttachmentData['panels']): DashboardSection[] =>
   panels.filter(isSection);
 
@@ -50,6 +53,17 @@ describe('executeDashboardOperations', () => {
     id,
     config: { type: 'metric' },
     grid: { x: 0, y: gridY, w: 24, h: 9 },
+  });
+
+  const createMarkdownPanel = (
+    id: string,
+    content: string,
+    grid: AttachmentPanel['grid'] = { x: 0, y: 0, w: 48, h: 5 }
+  ): AttachmentPanel => ({
+    id,
+    type: MARKDOWN_EMBEDDABLE_TYPE,
+    config: { content },
+    grid,
   });
 
   const createSection = (
@@ -1141,10 +1155,14 @@ describe('executeDashboardOperations', () => {
         },
         operations: [
           {
-            operation: 'edit_visualization_panels',
+            operation: 'edit_panels',
             panels: [
-              { panelId: 'panel-1', query: 'turn this into a bar chart' },
-              { panelId: 'section-panel-1', query: 'turn this into a line chart' },
+              { kind: 'visualization', panelId: 'panel-1', query: 'turn this into a bar chart' },
+              {
+                kind: 'visualization',
+                panelId: 'section-panel-1',
+                query: 'turn this into a line chart',
+              },
             ],
           },
         ],
@@ -1192,12 +1210,14 @@ describe('executeDashboardOperations', () => {
         },
         operations: [
           {
-            operation: 'edit_visualization_panels',
-            panels: [{ panelId: 'panel-1', query: 'make this a bar chart' }],
+            operation: 'edit_panels',
+            panels: [{ kind: 'visualization', panelId: 'panel-1', query: 'make this a bar chart' }],
           },
           {
-            operation: 'edit_visualization_panels',
-            panels: [{ panelId: 'panel-1', query: 'now make this a line chart' }],
+            operation: 'edit_panels',
+            panels: [
+              { kind: 'visualization', panelId: 'panel-1', query: 'now make this a line chart' },
+            ],
           },
         ],
         logger,
@@ -1254,8 +1274,8 @@ describe('executeDashboardOperations', () => {
         operations: [
           { operation: 'remove_panels', panelIds: ['panel-1'] },
           {
-            operation: 'edit_visualization_panels',
-            panels: [{ panelId: 'panel-1', query: 'make this a bar chart' }],
+            operation: 'edit_panels',
+            panels: [{ kind: 'visualization', panelId: 'panel-1', query: 'make this a bar chart' }],
           },
         ],
         logger,
@@ -1267,7 +1287,7 @@ describe('executeDashboardOperations', () => {
       expect(getPanelsOnly(result.dashboardData.panels)).toEqual([]);
       expect(result.failures).toEqual([
         {
-          type: 'edit_visualization_panels',
+          type: DASHBOARD_OPERATION_FAILURE_TYPES.editPanels,
           identifier: 'panel-1',
           error: 'Panel "panel-1" not found.',
         },
@@ -1342,8 +1362,8 @@ describe('executeDashboardOperations', () => {
         },
         operations: [
           {
-            operation: 'edit_visualization_panels',
-            panels: [{ panelId: 'panel-1', query: 'refine this analysis' }],
+            operation: 'edit_panels',
+            panels: [{ kind: 'visualization', panelId: 'panel-1', query: 'refine this analysis' }],
           },
         ],
         logger,
@@ -1352,7 +1372,7 @@ describe('executeDashboardOperations', () => {
           'panel-1': {
             type: 'failure',
             failure: {
-              type: 'edit_visualization_panels',
+              type: DASHBOARD_OPERATION_FAILURE_TYPES.editPanels,
               identifier: 'panel-1',
               error:
                 'Panel "panel-1" with type "aiOpsLogRateAnalysis" is not supported for inline visualization editing.',
@@ -1371,12 +1391,279 @@ describe('executeDashboardOperations', () => {
       ]);
       expect(result.failures).toEqual([
         {
-          type: 'edit_visualization_panels',
+          type: DASHBOARD_OPERATION_FAILURE_TYPES.editPanels,
           identifier: 'panel-1',
           error:
             'Panel "panel-1" with type "aiOpsLogRateAnalysis" is not supported for inline visualization editing.',
         },
       ]);
+    });
+
+    it('resolves multiple panel edits in one edit_panels op in parallel', async () => {
+      const deferredByPanelId = new Map<
+        string,
+        ReturnType<typeof createDeferred<VisualizationAttempt>>
+      >([
+        ['panel-1', createDeferred<VisualizationAttempt>()],
+        ['panel-2', createDeferred<VisualizationAttempt>()],
+      ]);
+
+      const resolveVisualizationConfig = jest.fn<
+        ReturnType<ResolveVisualizationConfig>,
+        Parameters<ResolveVisualizationConfig>
+      >(({ identifier }) => {
+        const deferred = deferredByPanelId.get(identifier);
+        if (!deferred) {
+          throw new Error(`Unexpected identifier "${identifier}" in test resolver`);
+        }
+        return deferred.promise;
+      });
+
+      const operationPromise = executeDashboardOperations({
+        dashboardData: {
+          title: 'Test',
+          description: 'Desc',
+          panels: [createLensPanel('panel-1', 0), createLensPanel('panel-2', 9)],
+        },
+        operations: [
+          {
+            operation: 'edit_panels',
+            panels: [
+              { kind: 'visualization', panelId: 'panel-1', query: 'make this a bar chart' },
+              { kind: 'visualization', panelId: 'panel-2', query: 'make this a line chart' },
+            ],
+          },
+        ],
+        logger,
+        resolvePanelsFromAttachments: () => ({ panels: [], failures: [] }),
+        resolveVisualizationConfig,
+      });
+
+      // Gives the operation a chance to start both parallel resolver calls.
+      await waitForNextEventLoopTurn();
+
+      expect(resolveVisualizationConfig).toHaveBeenCalledTimes(2);
+
+      deferredByPanelId
+        .get('panel-1')!
+        .resolve(
+          createResolvedVisualization({ type: LENS_EMBEDDABLE_TYPE, config: { type: 'bar' } })
+        );
+      deferredByPanelId
+        .get('panel-2')!
+        .resolve(
+          createResolvedVisualization({ type: LENS_EMBEDDABLE_TYPE, config: { type: 'line' } })
+        );
+
+      const result = await operationPromise;
+
+      const topLevelPanels = getPanelsOnly(result.dashboardData.panels);
+      expect(topLevelPanels[0]).toEqual(
+        expect.objectContaining({ id: 'panel-1', config: { type: 'bar' } })
+      );
+      expect(topLevelPanels[1]).toEqual(
+        expect.objectContaining({ id: 'panel-2', config: { type: 'line' } })
+      );
+      expect(result.failures).toEqual([]);
+    });
+
+    it('records a failure for each occurrence when a panelId is duplicated within one op', async () => {
+      const resolveVisualizationConfig = jest.fn<
+        ReturnType<ResolveVisualizationConfig>,
+        Parameters<ResolveVisualizationConfig>
+      >(async ({ identifier }) =>
+        createResolvedVisualization({
+          type: LENS_EMBEDDABLE_TYPE,
+          config: { type: 'bar', identifier },
+        })
+      );
+
+      const result = await executeDashboardOperations({
+        dashboardData: {
+          title: 'Test',
+          description: 'Desc',
+          panels: [createLensPanel('panel-1', 0), createLensPanel('panel-2', 9)],
+        },
+        operations: [
+          {
+            operation: 'edit_panels',
+            panels: [
+              { kind: 'visualization', panelId: 'panel-1', query: 'first edit' },
+              { kind: 'visualization', panelId: 'panel-2', query: 'edit a different panel' },
+              { kind: 'visualization', panelId: 'panel-1', query: 'second edit of same panel' },
+            ],
+          },
+        ],
+        logger,
+        resolvePanelsFromAttachments: () => ({ panels: [], failures: [] }),
+        resolveVisualizationConfig,
+      });
+
+      const duplicateError =
+        'Panel "panel-1" appears multiple times in this edit_panels operation. Edit each panel at most once per operation.';
+
+      expect(result.failures).toEqual([
+        {
+          type: DASHBOARD_OPERATION_FAILURE_TYPES.editPanels,
+          identifier: 'panel-1',
+          error: duplicateError,
+        },
+        {
+          type: DASHBOARD_OPERATION_FAILURE_TYPES.editPanels,
+          identifier: 'panel-1',
+          error: duplicateError,
+        },
+      ]);
+
+      // The duplicated panel must not be touched; the non-duplicated panel still resolves.
+      expect(resolveVisualizationConfig).toHaveBeenCalledTimes(1);
+      expect(resolveVisualizationConfig).toHaveBeenCalledWith(
+        expect.objectContaining({ identifier: 'panel-2' })
+      );
+
+      const topLevelPanels = getPanelsOnly(result.dashboardData.panels);
+      expect(topLevelPanels[0]).toEqual(
+        expect.objectContaining({ id: 'panel-1', config: { type: 'metric' } })
+      );
+      expect(topLevelPanels[1]).toEqual(
+        expect.objectContaining({
+          id: 'panel-2',
+          config: { type: 'bar', identifier: 'panel-2' },
+        })
+      );
+    });
+
+    it('edits a markdown panel content in place by panelId', async () => {
+      const resolveVisualizationConfig = jest.fn<
+        ReturnType<ResolveVisualizationConfig>,
+        Parameters<ResolveVisualizationConfig>
+      >();
+
+      const result = await executeDashboardOperations({
+        dashboardData: {
+          title: 'Test',
+          description: 'Desc',
+          panels: [createMarkdownPanel('md-1', 'old text')],
+        },
+        operations: [
+          {
+            operation: 'edit_panels',
+            panels: [{ kind: 'markdown', panelId: 'md-1', markdownContent: '### Updated summary' }],
+          },
+        ],
+        logger,
+        resolvePanelsFromAttachments: () => ({ panels: [], failures: [] }),
+        resolveVisualizationConfig,
+      });
+
+      expect(resolveVisualizationConfig).not.toHaveBeenCalled();
+      expect(result.failures).toEqual([]);
+
+      const topLevelPanels = getPanelsOnly(result.dashboardData.panels);
+      expect(topLevelPanels[0]).toEqual(
+        expect.objectContaining({
+          id: 'md-1',
+          type: MARKDOWN_EMBEDDABLE_TYPE,
+          config: { content: '### Updated summary' },
+          grid: { x: 0, y: 0, w: 48, h: 5 },
+        })
+      );
+    });
+
+    it('records a failure when kind: "markdown" targets a non-markdown panel', async () => {
+      const resolveVisualizationConfig = jest.fn<
+        ReturnType<ResolveVisualizationConfig>,
+        Parameters<ResolveVisualizationConfig>
+      >();
+
+      const result = await executeDashboardOperations({
+        dashboardData: {
+          title: 'Test',
+          description: 'Desc',
+          panels: [createLensPanel('panel-1', 0)],
+        },
+        operations: [
+          {
+            operation: 'edit_panels',
+            panels: [{ kind: 'markdown', panelId: 'panel-1', markdownContent: 'new text' }],
+          },
+        ],
+        logger,
+        resolvePanelsFromAttachments: () => ({ panels: [], failures: [] }),
+        resolveVisualizationConfig,
+      });
+
+      expect(resolveVisualizationConfig).not.toHaveBeenCalled();
+      expect(result.failures).toEqual([
+        {
+          type: DASHBOARD_OPERATION_FAILURE_TYPES.editPanels,
+          identifier: 'panel-1',
+          error: `Panel "panel-1" with type "${LENS_EMBEDDABLE_TYPE}" cannot be edited as markdown. Use kind: "visualization" for ES|QL-backed Lens panels.`,
+        },
+      ]);
+
+      // Lens panel must be left untouched
+      expect(getPanelsOnly(result.dashboardData.panels)[0]).toEqual(
+        expect.objectContaining({
+          id: 'panel-1',
+          type: LENS_EMBEDDABLE_TYPE,
+          config: { type: 'metric' },
+        })
+      );
+    });
+
+    it('mixes markdown and visualization edits in one op, parallelizing only the visualization resolves', async () => {
+      const deferred = createDeferred<VisualizationAttempt>();
+      const resolveVisualizationConfig = jest.fn<
+        ReturnType<ResolveVisualizationConfig>,
+        Parameters<ResolveVisualizationConfig>
+      >(() => deferred.promise);
+
+      const operationPromise = executeDashboardOperations({
+        dashboardData: {
+          title: 'Test',
+          description: 'Desc',
+          panels: [createMarkdownPanel('md-1', 'old text'), createLensPanel('panel-1', 5)],
+        },
+        operations: [
+          {
+            operation: 'edit_panels',
+            panels: [
+              { kind: 'markdown', panelId: 'md-1', markdownContent: '### New summary' },
+              { kind: 'visualization', panelId: 'panel-1', query: 'turn into a bar chart' },
+            ],
+          },
+        ],
+        logger,
+        resolvePanelsFromAttachments: () => ({ panels: [], failures: [] }),
+        resolveVisualizationConfig,
+      });
+
+      // Gives the operation a chance to subscribe to the visualization resolve.
+      await waitForNextEventLoopTurn();
+
+      expect(resolveVisualizationConfig).toHaveBeenCalledTimes(1);
+      expect(resolveVisualizationConfig).toHaveBeenCalledWith(
+        expect.objectContaining({ identifier: 'panel-1' })
+      );
+
+      deferred.resolve(
+        createResolvedVisualization({ type: LENS_EMBEDDABLE_TYPE, config: { type: 'bar' } })
+      );
+
+      const result = await operationPromise;
+      expect(result.failures).toEqual([]);
+
+      const topLevelPanels = getPanelsOnly(result.dashboardData.panels);
+      expect(topLevelPanels[0]).toEqual(
+        expect.objectContaining({
+          id: 'md-1',
+          config: { content: '### New summary' },
+        })
+      );
+      expect(topLevelPanels[1]).toEqual(
+        expect.objectContaining({ id: 'panel-1', config: { type: 'bar' } })
+      );
     });
   });
 
