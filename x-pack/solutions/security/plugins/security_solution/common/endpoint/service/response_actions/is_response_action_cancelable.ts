@@ -71,7 +71,7 @@ const CANCELABLE_RESPONSE_ACTIONS: DeepReadonly<CancelSupportMap> = {
     microsoft_defender_endpoint: true,
   },
   cancel: {
-    endpoint: true,
+    endpoint: false,
     sentinel_one: false,
     crowdstrike: false,
     microsoft_defender_endpoint: false,
