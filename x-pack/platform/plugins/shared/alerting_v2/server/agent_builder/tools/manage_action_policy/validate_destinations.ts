@@ -25,48 +25,35 @@ export interface ValidateDestinationsDeps {
   spaceId: string;
 }
 
-export interface ResolvedDestination {
-  name: string;
-  isDraft: boolean;
-}
-
 /**
- * Validates that every destination references a valid workflow and returns
- * resolved metadata (name + draft status) for each destination.
+ * Validates that every destination references a valid workflow.
+ * Throws {@link ActionPolicyOperationValidationError} for invalid destinations
+ * (bare attachment IDs, connector IDs, or unknown IDs).
  */
 export async function validateDestinations(
   destinations: ActionPolicyDestination[],
   { attachments, workflowLookup, connectorLookup, spaceId }: ValidateDestinationsDeps
-): Promise<Map<string, ResolvedDestination>> {
+): Promise<void> {
   const activeAttachments = attachments.getActive();
 
-  // Build lookup maps from workflow attachments:
-  // - workflowIds: workflowId → display name (for accepting valid destinations)
-  // - attachmentToWorkflowId: attachment ID → workflowId (for rejecting bare attachment IDs with a helpful hint)
-  const workflowIds = new Map<string, string>();
+  const workflowIds = new Set<string>();
   const attachmentToWorkflowId = new Map<string, string | undefined>();
 
   for (const att of activeAttachments) {
     if (att.type !== WORKFLOW_YAML_ATTACHMENT_TYPE) continue;
     const latestVersion = att.versions.at(-1);
-    const data = latestVersion?.data as { workflowId?: string; name?: string } | undefined;
+    const data = latestVersion?.data as { workflowId?: string } | undefined;
     if (data?.workflowId) {
-      workflowIds.set(data.workflowId, data.name ?? data.workflowId);
+      workflowIds.add(data.workflowId);
     }
     attachmentToWorkflowId.set(att.id, data?.workflowId);
   }
 
-  const resolved = new Map<string, ResolvedDestination>();
-
   for (const dest of destinations) {
-    // Accept pre-assigned workflowIds from in-conversation workflow attachments
-    const draftName = workflowIds.get(dest.id);
-    if (draftName) {
-      resolved.set(dest.id, { name: draftName, isDraft: true });
+    if (workflowIds.has(dest.id)) {
       continue;
     }
 
-    // Reject bare attachment IDs — the agent should use workflowId instead
     if (attachmentToWorkflowId.has(dest.id)) {
       const correctId = attachmentToWorkflowId.get(dest.id);
       const hint = correctId
@@ -81,9 +68,6 @@ export async function validateDestinations(
 
     const workflow = await workflowLookup.getWorkflow(dest.id, spaceId);
     if (workflow) {
-      if (workflow.name) {
-        resolved.set(dest.id, { name: workflow.name, isDraft: false });
-      }
       continue;
     }
 
@@ -105,6 +89,4 @@ export async function validateDestinations(
         `\`workflowId\` as the destination.`
     );
   }
-
-  return resolved;
 }

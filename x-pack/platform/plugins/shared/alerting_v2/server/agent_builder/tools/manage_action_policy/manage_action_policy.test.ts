@@ -160,7 +160,7 @@ describe('manageActionPolicyTool', () => {
       expect(results[0].data.message).toContain('Failed to persist action policy attachment');
     });
 
-    it('calls validateDestinations and stores resolvedDestinations', async () => {
+    it('calls validateDestinations for destinations', async () => {
       const deps = createDeps();
       const tool = manageActionPolicyTool(deps);
       const ctx = createContext();
@@ -178,13 +178,7 @@ describe('manageActionPolicyTool', () => {
         ctx
       );
 
-      const addCall = ctx.attachments.add.mock.calls[0][0] as {
-        data: { resolvedDestinations?: Record<string, { name: string; isDraft: boolean }> };
-      };
-      expect(addCall.data.resolvedDestinations).toBeDefined();
-      expect(addCall.data.resolvedDestinations!['wf-1']).toEqual(
-        expect.objectContaining({ name: expect.any(String) })
-      );
+      expect(ctx.attachments.add).toHaveBeenCalled();
     });
   });
 

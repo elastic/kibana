@@ -184,16 +184,7 @@ export const ActionPolicyCanvasContent = ({
         <h2>{data.name ?? EMPTY_VALUE}</h2>
       </EuiTitle>
       <EuiSpacer size="m" />
-      <ActionPolicyDefinitionList
-        description={data.description ?? undefined}
-        tags={data.tags ?? undefined}
-        matcher={data.matcher}
-        groupingMode={data.groupingMode ?? undefined}
-        groupBy={data.groupBy ?? undefined}
-        throttle={data.throttle ?? undefined}
-        destinations={data.destinations ?? []}
-        resolvedDestinations={data.resolvedDestinations}
-      />
+      <ActionPolicyDefinitionList policy={data as ActionPolicyResponse} />
     </EuiPanel>
   );
 };

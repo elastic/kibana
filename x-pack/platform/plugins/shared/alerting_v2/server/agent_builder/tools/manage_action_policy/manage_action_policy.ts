@@ -100,16 +100,12 @@ Use operations[] to:
           return null;
         };
 
-        const resolved = await validateDestinations(updatedData.destinations, {
+        await validateDestinations(updatedData.destinations, {
           attachments,
           workflowLookup: { getWorkflow },
           connectorLookup: { findConnectorById },
           spaceId,
         });
-
-        if (resolved.size > 0) {
-          updatedData.resolvedDestinations = Object.fromEntries(resolved);
-        }
       }
 
       const attachmentInput = {

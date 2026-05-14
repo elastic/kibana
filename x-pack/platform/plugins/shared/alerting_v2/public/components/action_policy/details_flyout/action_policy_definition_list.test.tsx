@@ -25,19 +25,8 @@ jest.mock('./badge_list', () => ({
 }));
 
 jest.mock('./destination_row', () => ({
-  DestinationRow: ({
-    destination,
-    name,
-    isDraft,
-  }: {
-    destination: { type: string; id: string };
-    name?: string;
-    isDraft?: boolean;
-  }) => (
-    <span data-test-subj="mockDestinationRow">
-      {name ?? destination.id}
-      {isDraft ? ' (draft)' : ''}
-    </span>
+  DestinationRow: ({ destination }: { destination: { type: string; id: string } }) => (
+    <span data-test-subj="mockDestinationRow">{destination.id}</span>
   ),
 }));
 
@@ -47,15 +36,17 @@ jest.mock('../labels', () => ({
 }));
 
 const defaultProps: ActionPolicyDefinitionListProps = {
-  description: 'A test description',
-  tags: ['tag-a', 'tag-b'],
-  matcher: 'rule.id: "abc"',
-  groupingMode: 'per_episode',
-  destinations: [
-    { type: 'workflow', id: 'wf-1' },
-    { type: 'workflow', id: 'wf-2' },
-  ],
-  throttle: { strategy: 'on_status_change', interval: '5m' },
+  policy: {
+    description: 'A test description',
+    tags: ['tag-a', 'tag-b'],
+    matcher: 'rule.id: "abc"',
+    groupingMode: 'per_episode',
+    destinations: [
+      { type: 'workflow', id: 'wf-1' },
+      { type: 'workflow', id: 'wf-2' },
+    ],
+    throttle: { strategy: 'on_status_change', interval: '5m' },
+  },
 };
 
 describe('ActionPolicyDefinitionList', () => {
@@ -74,7 +65,7 @@ describe('ActionPolicyDefinitionList', () => {
   });
 
   it('renders empty values when fields are missing', () => {
-    renderWithI18n({ destinations: [] });
+    renderWithI18n({ policy: {} });
 
     expect(screen.getByText('Description')).toBeDefined();
     expect(screen.getAllByText('-').length).toBeGreaterThanOrEqual(2);
@@ -83,9 +74,11 @@ describe('ActionPolicyDefinitionList', () => {
 
   it('renders Group by when groupingMode is per_field', () => {
     renderWithI18n({
-      ...defaultProps,
-      groupingMode: 'per_field',
-      groupBy: ['host.name', 'service.name'],
+      policy: {
+        ...defaultProps.policy,
+        groupingMode: 'per_field',
+        groupBy: ['host.name', 'service.name'],
+      },
     });
 
     expect(screen.getByText('Group by')).toBeDefined();
@@ -93,29 +86,15 @@ describe('ActionPolicyDefinitionList', () => {
   });
 
   it('does not render Group by when groupingMode is not per_field', () => {
-    renderWithI18n({ ...defaultProps, groupingMode: 'per_episode' });
+    renderWithI18n({ policy: { ...defaultProps.policy, groupingMode: 'per_episode' } });
 
     expect(screen.queryByText('Group by')).toBeNull();
   });
 
-  it('renders resolved destination names when provided', () => {
-    renderWithI18n({
-      ...defaultProps,
-      resolvedDestinations: {
-        'wf-1': { name: 'Resolved Workflow One', isDraft: false },
-        'wf-2': { name: 'Draft Workflow Two', isDraft: true },
-      },
-    });
-
-    expect(screen.getByText('Resolved Workflow One')).toBeDefined();
-    expect(screen.getByText('Draft Workflow Two (draft)')).toBeDefined();
-  });
-
-  it('falls back to destination id without resolvedDestinations', () => {
+  it('renders destination rows', () => {
     renderWithI18n(defaultProps);
 
-    expect(screen.getByText('wf-1')).toBeDefined();
-    expect(screen.getByText('wf-2')).toBeDefined();
+    expect(screen.getAllByTestId('mockDestinationRow')).toHaveLength(2);
   });
 
   it('renders frequency interval when present', () => {

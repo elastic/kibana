@@ -71,14 +71,14 @@ describe('validateDestinations', () => {
       },
     ]);
 
-    const result = await validateDestinations([{ type: 'workflow', id: 'wf-saved-1' }], {
-      attachments,
-      workflowLookup: createMockWorkflowLookup(),
-      connectorLookup: createMockConnectorLookup(),
-      spaceId: 'default',
-    });
-
-    expect(result).toBeInstanceOf(Map);
+    await expect(
+      validateDestinations([{ type: 'workflow', id: 'wf-saved-1' }], {
+        attachments,
+        workflowLookup: createMockWorkflowLookup(),
+        connectorLookup: createMockConnectorLookup(),
+        spaceId: 'default',
+      })
+    ).resolves.toBeUndefined();
   });
 
   it('passes when destination matches a persisted workflow', async () => {
@@ -86,14 +86,15 @@ describe('validateDestinations', () => {
       new Map([['persisted-wf-1', { id: 'persisted-wf-1' }]])
     );
 
-    const result = await validateDestinations([{ type: 'workflow', id: 'persisted-wf-1' }], {
-      attachments: createMockAttachments(),
-      workflowLookup,
-      connectorLookup: createMockConnectorLookup(),
-      spaceId: 'default',
-    });
+    await expect(
+      validateDestinations([{ type: 'workflow', id: 'persisted-wf-1' }], {
+        attachments: createMockAttachments(),
+        workflowLookup,
+        connectorLookup: createMockConnectorLookup(),
+        spaceId: 'default',
+      })
+    ).resolves.toBeUndefined();
 
-    expect(result).toBeInstanceOf(Map);
     expect(workflowLookup.getWorkflow).toHaveBeenCalledWith('persisted-wf-1', 'default');
   });
 
@@ -223,114 +224,4 @@ describe('validateDestinations', () => {
     ).rejects.toThrow(/is not a valid workflow/);
   });
 
-  describe('resolved destination metadata', () => {
-    it('marks in-memory workflowId destinations as drafts', async () => {
-      const attachments = createMockAttachments([
-        {
-          id: 'att-wf-1',
-          type: WORKFLOW_YAML_ATTACHMENT_TYPE,
-          versions: [
-            {
-              data: { yaml: 'version: 1', workflowId: 'notify-high-cpu', name: 'Notify: High CPU' },
-            },
-          ],
-        },
-      ]);
-
-      const result = await validateDestinations([{ type: 'workflow', id: 'notify-high-cpu' }], {
-        attachments,
-        workflowLookup: createMockWorkflowLookup(),
-        connectorLookup: createMockConnectorLookup(),
-        spaceId: 'default',
-      });
-
-      expect(result.get('notify-high-cpu')).toEqual({ name: 'Notify: High CPU', isDraft: true });
-    });
-
-    it('marks in-memory attachment destinations by workflowId as drafts', async () => {
-      const attachments = createMockAttachments([
-        {
-          id: 'att-wf-1',
-          type: WORKFLOW_YAML_ATTACHMENT_TYPE,
-          versions: [
-            { data: { yaml: 'version: 1', workflowId: 'wf-persisted', name: 'Alert Email' } },
-          ],
-        },
-      ]);
-
-      const result = await validateDestinations([{ type: 'workflow', id: 'wf-persisted' }], {
-        attachments,
-        workflowLookup: createMockWorkflowLookup(),
-        connectorLookup: createMockConnectorLookup(),
-        spaceId: 'default',
-      });
-
-      expect(result.get('wf-persisted')).toEqual({ name: 'Alert Email', isDraft: true });
-    });
-
-    it('marks persisted workflow destinations as not drafts', async () => {
-      const workflowLookup = createMockWorkflowLookup(
-        new Map([['persisted-wf', { id: 'persisted-wf', name: 'SRE Notifications' }]])
-      );
-
-      const result = await validateDestinations([{ type: 'workflow', id: 'persisted-wf' }], {
-        attachments: createMockAttachments(),
-        workflowLookup,
-        connectorLookup: createMockConnectorLookup(),
-        spaceId: 'default',
-      });
-
-      expect(result.get('persisted-wf')).toEqual({ name: 'SRE Notifications', isDraft: false });
-    });
-
-    it('falls back to workflowId as name when no name is available', async () => {
-      const attachments = createMockAttachments([
-        {
-          id: 'att-wf-1',
-          type: WORKFLOW_YAML_ATTACHMENT_TYPE,
-          versions: [{ data: { yaml: 'version: 1', workflowId: 'notify-unnamed' } }],
-        },
-      ]);
-
-      const result = await validateDestinations([{ type: 'workflow', id: 'notify-unnamed' }], {
-        attachments,
-        workflowLookup: createMockWorkflowLookup(),
-        connectorLookup: createMockConnectorLookup(),
-        spaceId: 'default',
-      });
-
-      expect(result.get('notify-unnamed')).toEqual({ name: 'notify-unnamed', isDraft: true });
-    });
-
-    it('resolves mixed draft and persisted destinations', async () => {
-      const attachments = createMockAttachments([
-        {
-          id: 'att-wf-1',
-          type: WORKFLOW_YAML_ATTACHMENT_TYPE,
-          versions: [
-            { data: { yaml: 'v: 1', workflowId: 'notify-draft', name: 'Draft Workflow' } },
-          ],
-        },
-      ]);
-      const workflowLookup = createMockWorkflowLookup(
-        new Map([['persisted-wf', { id: 'persisted-wf', name: 'Saved Workflow' }]])
-      );
-
-      const result = await validateDestinations(
-        [
-          { type: 'workflow', id: 'notify-draft' },
-          { type: 'workflow', id: 'persisted-wf' },
-        ],
-        {
-          attachments,
-          workflowLookup,
-          connectorLookup: createMockConnectorLookup(),
-          spaceId: 'default',
-        }
-      );
-
-      expect(result.get('notify-draft')).toEqual({ name: 'Draft Workflow', isDraft: true });
-      expect(result.get('persisted-wf')).toEqual({ name: 'Saved Workflow', isDraft: false });
-    });
-  });
 });

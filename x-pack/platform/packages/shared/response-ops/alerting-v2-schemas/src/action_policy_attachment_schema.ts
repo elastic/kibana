@@ -46,10 +46,6 @@ export const actionPolicyAttachmentDataSchema = actionPolicyResponseSchema.exten
   updatedByUsername: opt(shape.updatedByUsername),
   groupingMode: opt(shape.groupingMode),
   throttle: opt(shape.throttle),
-  /** Maps destination IDs to resolved metadata for display (not persisted to API). */
-  resolvedDestinations: z
-    .record(z.string(), z.object({ name: z.string(), isDraft: z.boolean() }))
-    .optional(),
 });
 
 export type ActionPolicyAttachmentData = z.infer<typeof actionPolicyAttachmentDataSchema>;

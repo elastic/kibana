@@ -229,17 +229,7 @@ export const ActionPolicyDetailsFlyout = ({
             </h3>
           </EuiTitle>
           <EuiSpacer size="s" />
-          <ActionPolicyDefinitionList
-            description={policy.description ?? undefined}
-            policyType={policy.type}
-            ruleId={policy.ruleId}
-            tags={policy.tags ?? undefined}
-            matcher={policy.matcher}
-            groupingMode={policy.groupingMode ?? undefined}
-            groupBy={policy.groupBy ?? undefined}
-            throttle={policy.throttle ?? undefined}
-            destinations={policy.destinations}
-          />
+          <ActionPolicyDefinitionList policy={policy} />
           <EuiHorizontalRule />
           <EuiTitle size="xs">
             <h3>
