@@ -44,12 +44,19 @@ const createUnifiedDocViewerServices = () => {
 
 let unifiedDocViewerServices = createUnifiedDocViewerServices();
 
+const TestFlyoutCustomBody: NonNullable<UnifiedDocViewerFlyoutProps['FlyoutCustomBody']> = ({
+  doc,
+}) => (
+  <div data-test-subj="docViewerFlyoutHeaderHit" data-message={doc.raw._source?.message}>
+    Header
+  </div>
+);
+
 const buildProps = (
   overrides: Partial<UnifiedDocViewerFlyoutProps> = {}
 ): UnifiedDocViewerFlyoutProps => ({
   services: {
     toastNotifications: unifiedDocViewerServices.toasts,
-    chrome: unifiedDocViewerServices.core.chrome,
   },
   isEsqlQuery: false,
   columns: [],
@@ -80,11 +87,7 @@ describe('UnifiedDocViewerFlyout', () => {
         {...buildProps({
           hit: staleHit,
           hits: [unrelatedHit, refreshedHit],
-          renderCustomHeader: ({ hit }) => (
-            <div data-test-subj="docViewerFlyoutHeaderHit" data-message={hit.raw._source?.message}>
-              Header
-            </div>
-          ),
+          FlyoutCustomBody: TestFlyoutCustomBody,
         })}
       />
     );
@@ -107,11 +110,7 @@ describe('UnifiedDocViewerFlyout', () => {
         {...buildProps({
           hit: staleHit,
           hits: [unrelatedHit, secondUnrelatedHit],
-          renderCustomHeader: ({ hit }) => (
-            <div data-test-subj="docViewerFlyoutHeaderHit" data-message={hit.raw._source?.message}>
-              Header
-            </div>
-          ),
+          FlyoutCustomBody: TestFlyoutCustomBody,
         })}
       />
     );
