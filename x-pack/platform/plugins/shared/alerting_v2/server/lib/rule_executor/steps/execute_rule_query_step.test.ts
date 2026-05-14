@@ -8,6 +8,7 @@
 import { ExecuteRuleQueryStep } from './execute_rule_query_step';
 import {
   collectStreamResults,
+  createEsqlResponse,
   createPipelineStream,
   createRuleExecutionInput,
   createRuleResponse,
