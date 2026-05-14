@@ -73,6 +73,7 @@ dependsOn:
   - '@kbn/std'
   - '@kbn/core-elasticsearch-server'
   - '@kbn/css-utils'
+  - '@kbn/shared-ux-utility'
 tags:
   - plugin
   - prod
@@ -88,6 +89,7 @@ fileGroups:
     - common/**/*.json
     - public/**/*.json
     - test/scout/**/*
+    - test/scout_http2/**/*
     - test/scout_search_sessions/**/*
     - '!target/**/*'
   jest-config:

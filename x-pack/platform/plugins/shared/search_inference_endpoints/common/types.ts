@@ -67,6 +67,10 @@ export interface InferenceFeatureResponse {
   recommendedEndpoints: string[];
   isBeta?: boolean;
   isTechPreview?: boolean;
+  visibilityCondition?: {
+    key: string;
+    value: string | number | boolean | null;
+  };
 }
 
 export type InferenceEndpointWithMetadata = InferenceAPIConfigResponse & {
