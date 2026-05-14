@@ -30,7 +30,7 @@ import { StatefulEventContext } from '../../../../../common/components/events_vi
 import { RulePanelKey } from '../../../../../flyout/rule_details/right';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
-import { RuleDetails } from '../../../../../flyout_v2/rule';
+import { RuleDetails } from '../../../../../flyout_v2/rule/main';
 import { flyoutProviders } from '../../../../../flyout_v2/shared/components/flyout_provider';
 import { useDefaultDocumentFlyoutProperties } from '../../../../../flyout_v2/shared/hooks/use_default_flyout_properties';
 

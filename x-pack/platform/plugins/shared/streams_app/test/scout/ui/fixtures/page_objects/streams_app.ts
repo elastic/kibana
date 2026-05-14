@@ -1345,6 +1345,12 @@ export class StreamsApp {
   }
 
   async clickDeleteQueryStreamModalDeleteButton() {
+    // Toast notifications rendered in the globalToastList can overlap the confirm
+    // button and intercept pointer events. Wait until the list is empty before clicking.
+    await expect(this.page.testSubj.locator('globalToastList').locator(':scope > *')).toHaveCount(
+      0,
+      { timeout: 15_000 }
+    );
     await this.page.getByTestId('streamsAppDeleteStreamModalDeleteButton').click();
   }
 
