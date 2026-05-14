@@ -599,6 +599,23 @@ describe('WorkflowExecuteModal', () => {
       expect(executeButton).toBeInTheDocument();
     });
 
+    it('disables execute button when the user cannot execute workflows', () => {
+      mockUseWorkflowsCapabilities.mockReturnValue({
+        ...defaultWorkflowsCapabilities,
+        canExecuteWorkflow: false,
+      });
+      const { getByTestId } = renderWithProviders(
+        <WorkflowExecuteModal
+          isTestRun={false}
+          definition={null}
+          onClose={mockOnClose}
+          onSubmit={mockOnSubmit}
+        />
+      );
+
+      expect(getByTestId('executeWorkflowButton')).toBeDisabled();
+    });
+
     it('disables execute button when there are errors', () => {
       const { getByTestId } = renderWithProviders(
         <WorkflowExecuteModal

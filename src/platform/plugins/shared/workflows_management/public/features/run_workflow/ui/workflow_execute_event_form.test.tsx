@@ -232,4 +232,32 @@ describe('WorkflowExecuteEventForm', () => {
       expect.objectContaining({ enabled: true })
     );
   });
+
+  it('shows a privilege message when trigger event search returns 403', async () => {
+    mockUseQueryTriggerEvents.mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      isError: true,
+      error: { response: { status: 403 } },
+      isSuccess: false,
+      status: 'error',
+    } as unknown as ReturnType<typeof useQueryTriggerEvents>);
+
+    const { findByText } = render(
+      <TestWrapper>
+        <WorkflowExecuteEventForm
+          definition={baseDefinition as any}
+          value=""
+          setValue={mockSetValue}
+          errors={null}
+        />
+      </TestWrapper>
+    );
+
+    expect(
+      await findByText(
+        'You need the Workflows "Read Workflow Execution" privilege to search trigger events.'
+      )
+    ).toBeInTheDocument();
+  });
 });

@@ -145,7 +145,25 @@ interface TriggerEventTableRow {
   source: Record<string, unknown>;
 }
 
+function isHttpForbiddenError(error: unknown): boolean {
+  if (!error || typeof error !== 'object') {
+    return false;
+  }
+  const withResponse = error as { response?: { status?: number } };
+  if (withResponse.response?.status === 403) {
+    return true;
+  }
+  const withStatus = error as { statusCode?: number };
+  return withStatus.statusCode === 403;
+}
+
 function formatQueryError(error: unknown): string {
+  if (isHttpForbiddenError(error)) {
+    return i18n.translate('workflows.workflowExecuteEventTriggerForm.forbiddenErrorBody', {
+      defaultMessage:
+        'You need the Workflows "Read Workflow Execution" privilege to search trigger events.',
+    });
+  }
   if (error instanceof Error) {
     return error.message;
   }

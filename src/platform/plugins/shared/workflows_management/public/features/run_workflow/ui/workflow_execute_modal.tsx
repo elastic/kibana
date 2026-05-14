@@ -64,7 +64,7 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
     const modalTitleId = useGeneratedHtmlId();
     const { services } = useKibana();
     const { http } = services;
-    const { canReadWorkflowExecution } = useWorkflowsCapabilities();
+    const { canReadWorkflowExecution, canExecuteWorkflow } = useWorkflowsCapabilities();
     const { eventDrivenExecutionEnabled } = useEventDrivenExecutionStatus();
 
     const [hasAlertRacAccess, setHasAlertRacAccess] = useState(true);
@@ -112,6 +112,9 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
     }, []);
 
     const handleSubmit = useCallback(() => {
+      if (!canExecuteWorkflow) {
+        return;
+      }
       const trimmed = executionInput.trim();
       if (selectedTrigger === 'event' && trimmed === '') {
         setExecutionInputErrors(
@@ -143,7 +146,14 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
       setExecutionInputErrors(null);
       onSubmit(parsed, selectedTrigger);
       onClose();
-    }, [selectedTrigger, onSubmit, onClose, executionInput, eventTriggerTableSelectionCount]);
+    }, [
+      canExecuteWorkflow,
+      selectedTrigger,
+      onSubmit,
+      onClose,
+      executionInput,
+      eventTriggerTableSelectionCount,
+    ]);
 
     const handleChangeTrigger = useCallback(
       (trigger: WorkflowTriggerTab): void => {
@@ -226,6 +236,21 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
       }
     );
 
+    const eventTabExecutionReadDisabledTooltip = i18n.translate(
+      'workflows.workflowExecuteModal.eventTabExecutionReadDisabledTooltip',
+      {
+        defaultMessage:
+          'You need the Workflows "Read Workflow Execution" privilege to browse and replay trigger events.',
+      }
+    );
+
+    const runExecuteForbiddenTooltip = i18n.translate(
+      'workflows.workflowExecuteModal.runExecuteForbiddenTooltip',
+      {
+        defaultMessage: 'You need the Workflows Execute privilege to run this workflow.',
+      }
+    );
+
     const eventTabEventDrivenDisabledTooltip = i18n.translate(
       'workflows.workflowExecuteModal.eventTabEventDrivenDisabledTooltip',
       {
@@ -245,6 +270,24 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
         };
 
     const isEventTabLayout = selectedTrigger === 'event';
+
+    const runIsDisabled =
+      !canExecuteWorkflow ||
+      Boolean(executionInputErrors) ||
+      (selectedTrigger === 'event' && executionInput.trim() === '') ||
+      (selectedTrigger === 'event' && eventTriggerTableSelectionCount > 1);
+
+    const renderRunWorkflowButton = () => (
+      <EuiButton
+        onClick={handleSubmit}
+        iconType="play"
+        disabled={runIsDisabled}
+        color="success"
+        data-test-subj="executeWorkflowButton"
+      >
+        <FormattedMessage id="keepWorkflows.buttonText" defaultMessage="Run" ignoreTag />
+      </EuiButton>
+    );
 
     return (
       <>
@@ -440,7 +483,7 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
                       triggerDisabledTooltip = historicalTabDisabledTooltip;
                     } else if (trigger === 'event') {
                       if (!canReadWorkflowExecution) {
-                        triggerDisabledTooltip = historicalTabDisabledTooltip;
+                        triggerDisabledTooltip = eventTabExecutionReadDisabledTooltip;
                       } else if (!eventDrivenExecutionEnabled) {
                         triggerDisabledTooltip = eventTabEventDrivenDisabledTooltip;
                       }
@@ -620,19 +663,20 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
             </EuiFlexGroup>
           </EuiModalBody>
           <EuiModalFooter>
-            <EuiButton
-              onClick={handleSubmit}
-              iconType="play"
-              disabled={
-                Boolean(executionInputErrors) ||
-                (selectedTrigger === 'event' && executionInput.trim() === '') ||
-                (selectedTrigger === 'event' && eventTriggerTableSelectionCount > 1)
-              }
-              color="success"
-              data-test-subj="executeWorkflowButton"
-            >
-              <FormattedMessage id="keepWorkflows.buttonText" defaultMessage="Run" ignoreTag />
-            </EuiButton>
+            {!canExecuteWorkflow ? (
+              <EuiToolTip content={runExecuteForbiddenTooltip} position="top" display="block">
+                <span
+                  tabIndex={0}
+                  css={css`
+                    display: inline-block;
+                  `}
+                >
+                  {renderRunWorkflowButton()}
+                </span>
+              </EuiToolTip>
+            ) : (
+              renderRunWorkflowButton()
+            )}
           </EuiModalFooter>
         </EuiModal>
       </>
