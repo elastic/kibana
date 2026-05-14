@@ -21,6 +21,13 @@ jest.mock('../../../context/apm_index_settings/use_apm_index_settings_context');
 jest.mock('../../../context/apm_plugin/use_apm_plugin_context');
 jest.mock('../../../hooks/use_apm_params');
 
+// The provider internally calls `useKibana` + `useFetcher` to load index
+// settings; we mock it as a pass-through and rely on the
+// `useApmIndexSettingsContext` mock above to drive the consumed values.
+jest.mock('../../../context/apm_index_settings/apm_index_settings_context', () => ({
+  ApmIndexSettingsContextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}));
+
 jest.mock('../../routing/templates/apm_main_template', () => ({
   ApmMainTemplate: ({
     pageHeader,

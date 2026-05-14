@@ -10,6 +10,7 @@ import { ApmMainTemplate } from '../../routing/templates/apm_main_template';
 import { Breadcrumb } from '../breadcrumb';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { OpenInDiscover } from '../../shared/links/discover_links/open_in_discover';
+import { ApmIndexSettingsContextProvider } from '../../../context/apm_index_settings/apm_index_settings_context';
 
 export function TraceOverview({
   children,
@@ -27,37 +28,39 @@ export function TraceOverview({
   } = useApmParams('/traces');
 
   return (
-    <Breadcrumb href="/traces" title={title} omitOnServerless>
-      <ApmMainTemplate
-        pageTitle={title}
-        searchBar={searchBar}
-        pageHeader={{
-          rightSideItems: [
-            <OpenInDiscover
-              key="apmTracesExploreInDiscoverButton"
-              dataTestSubj="apmTracesExploreInDiscoverButton"
-              variant="button"
-              indexType="traces"
-              label={i18n.translate('xpack.apm.tracesOverview.exploreTracesInDiscover', {
-                defaultMessage: 'Explore traces',
-              })}
-              rangeFrom={rangeFrom}
-              rangeTo={rangeTo}
-              queryParams={{ kuery, environment, sortDirection: 'DESC' }}
-            />,
-          ],
-        }}
-        pageSectionProps={{
-          contentProps: {
-            style: {
-              display: 'flex',
-              flexGrow: 1,
+    <ApmIndexSettingsContextProvider>
+      <Breadcrumb href="/traces" title={title} omitOnServerless>
+        <ApmMainTemplate
+          pageTitle={title}
+          searchBar={searchBar}
+          pageHeader={{
+            rightSideItems: [
+              <OpenInDiscover
+                key="apmTracesExploreInDiscoverButton"
+                dataTestSubj="apmTracesExploreInDiscoverButton"
+                variant="button"
+                indexType="traces"
+                label={i18n.translate('xpack.apm.tracesOverview.exploreTracesInDiscover', {
+                  defaultMessage: 'Explore traces',
+                })}
+                rangeFrom={rangeFrom}
+                rangeTo={rangeTo}
+                queryParams={{ kuery, environment, sortDirection: 'DESC' }}
+              />,
+            ],
+          }}
+          pageSectionProps={{
+            contentProps: {
+              style: {
+                display: 'flex',
+                flexGrow: 1,
+              },
             },
-          },
-        }}
-      >
-        {children}
-      </ApmMainTemplate>
-    </Breadcrumb>
+          }}
+        >
+          {children}
+        </ApmMainTemplate>
+      </Breadcrumb>
+    </ApmIndexSettingsContextProvider>
   );
 }
