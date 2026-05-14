@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ReactElement } from 'react';
 import { DEVTOOL_HIDDEN_ATTR } from '../constants';
 
 /**
@@ -29,6 +30,8 @@ export interface ElementSession {
   isDuplicate: boolean;
   /** The in-flow element whose layout position the clone tracks on resize. */
   referenceEl?: HTMLElement;
+  /** When set, this element is a live React render (not a static clone). */
+  liveReactElement?: { element: ReactElement; zIndex: number };
 }
 
 /**

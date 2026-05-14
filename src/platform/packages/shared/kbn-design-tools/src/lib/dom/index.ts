@@ -39,7 +39,11 @@ export {
 export { hasSignificantRounding, isInRoundedDeadZone } from './rounded_dead_zone';
 export { resolveHoverTarget } from './resolve_hover_target';
 export { snapToGrid } from './snap_to_grid';
-export { renderAndCloneEuiComponent, centerInViewport } from './insert_element';
+export {
+  renderAndCloneEuiComponent,
+  renderEuiComponentLive,
+  centerInViewport,
+} from './insert_element';
 export { getPageColorMode } from './get_page_color_mode';
 
 export type { SpacingLine } from './calculate_spacing';

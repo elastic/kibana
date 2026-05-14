@@ -35,7 +35,12 @@ import {
 } from '../../lib/constants';
 import { useOverlayZIndex, usePortalZIndex } from '../../hooks';
 import { buildAddEuiPanels } from '../edit/library';
-import { renderAndCloneEuiComponent, centerInViewport } from '../../lib/dom/insert_element';
+import {
+  renderAndCloneEuiComponent,
+  renderEuiComponentLive,
+  centerInViewport,
+} from '../../lib/dom/insert_element';
+import { preloadAllEuiIcons } from '../../lib/eui_icon_cache';
 
 /**
  * Toggles a column layout overlay and provides layout settings.
@@ -88,20 +93,38 @@ export const DesignToolsButton = () => {
   };
 
   const handleInsertEui = useCallback(
-    async (element: ReactElement) => {
-      const { clone, rect } = await renderAndCloneEuiComponent(element, zIndex.clone);
-      centerInViewport(clone, rect);
-      clone.style.pointerEvents = 'auto';
-      document.body.appendChild(clone);
-      setIsEditMode(true);
+    async (element: ReactElement, interactive?: boolean) => {
       setIsPopoverOpen(false);
+      await preloadAllEuiIcons();
+
+      let el: HTMLElement;
+      let rect: DOMRect;
+      let liveReactElement: { element: ReactElement; zIndex: number } | undefined;
+
+      if (interactive) {
+        const live = renderEuiComponentLive(element, zIndex.clone);
+        el = live.wrapper;
+        rect = live.rect;
+        liveReactElement = live.liveReactElement;
+      } else {
+        const cloned = await renderAndCloneEuiComponent(element, zIndex.clone);
+        el = cloned.clone;
+        rect = cloned.rect;
+      }
+
+      centerInViewport(el, rect);
+      el.style.pointerEvents = 'auto';
+      if (!interactive) {
+        document.body.appendChild(el);
+      }
+      setIsEditMode(true);
       setMoveCount((prev) => prev + 1);
 
       // Defer insertElement until after React renders EditOverlay.
       // The state updates above are batched, so editHandleRef.current
       // is null until the next commit.
       requestAnimationFrame(() => {
-        editHandleRef.current?.insertElement(clone);
+        editHandleRef.current?.insertElement(el, liveReactElement);
       });
     },
     [zIndex.clone]
@@ -196,6 +219,7 @@ export const DesignToolsButton = () => {
           >
             <EuiButtonIcon
               onClick={() => {
+                preloadAllEuiIcons();
                 setIsPopoverOpen((prev) => !prev);
                 setIsFlyoutOpen(false);
               }}

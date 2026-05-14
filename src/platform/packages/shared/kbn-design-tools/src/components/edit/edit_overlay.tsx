@@ -8,7 +8,7 @@
  */
 
 import React, { useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
-import type { Dispatch, Ref, SetStateAction } from 'react';
+import type { Dispatch, ReactElement, Ref, SetStateAction } from 'react';
 import { EuiPortal } from '@elastic/eui';
 import {
   useToolbarHeight,
@@ -49,7 +49,10 @@ import type { StyleChange, TextNodeChange, SourceChange } from './modal/edit_mod
 
 export interface EditOverlayHandle {
   resetAll: () => void;
-  insertElement: (element: HTMLElement) => void;
+  insertElement: (
+    element: HTMLElement,
+    liveReactElement?: { element: ReactElement; zIndex: number }
+  ) => void;
 }
 
 interface Props {
@@ -163,7 +166,7 @@ export const EditOverlay = ({
   }, [onChangeCount, restoreAll]);
 
   const insertElement = useCallback(
-    (element: HTMLElement) => {
+    (element: HTMLElement, liveReactElement?: { element: ReactElement; zIndex: number }) => {
       const rect = element.getBoundingClientRect();
       const originalRect = new DOMRect(rect.left, rect.top, rect.width, rect.height);
 
@@ -175,6 +178,7 @@ export const EditOverlay = ({
         dh: 0,
         originalRect,
         isDuplicate: true,
+        liveReactElement,
       };
       registry.current.set(session);
       stickyHover.current = element;

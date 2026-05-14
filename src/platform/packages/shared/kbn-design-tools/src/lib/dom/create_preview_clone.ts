@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DEVTOOL_HIDDEN_ATTR, DEVTOOL_MANAGED_ATTR } from '../constants';
+import { DEVTOOL_HIDDEN_ATTR, DEVTOOL_LIVE_ATTR, DEVTOOL_MANAGED_ATTR } from '../constants';
 import { copyCanvasContent, copyStylesDeep, setImportant, roundRect } from './clone_element';
 
 export interface PreviewCloneResult {
@@ -33,13 +33,18 @@ const stripTranslate = (transform: string): string => {
  */
 export const createPreviewClone = (target: HTMLElement): PreviewCloneResult => {
   const isManaged = target.hasAttribute(DEVTOOL_MANAGED_ATTR);
+  const isLive = target.hasAttribute(DEVTOOL_LIVE_ATTR);
   // Visual dimensions (post-transform) — what the user actually sees
   const visualRect = roundRect(target.getBoundingClientRect());
 
   const clone = target.cloneNode(true) as HTMLElement;
   copyCanvasContent(target, clone);
 
-  if (!isManaged) {
+  if (!isManaged || isLive) {
+    // Non-managed elements need styles inlined. Live elements are managed
+    // but use Emotion CSS classes instead of inlined styles, so they also
+    // need copyStylesDeep to avoid inheriting wrong theme values in the
+    // dark-mode edit modal.
     copyStylesDeep(target, clone);
     // Original elements may have relative sizing (width:100% etc.) — pin to actual size
     setImportant(clone, 'width', `${visualRect.width}px`);

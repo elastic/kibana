@@ -26,7 +26,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
-import { DEVTOOL_IGNORE_ATTR, EDIT_MODAL_ID } from '../../../lib/constants';
+import { DEVTOOL_IGNORE_ATTR, DEVTOOL_LIVE_ATTR, EDIT_MODAL_ID } from '../../../lib/constants';
 import { collectAllTextNodes } from '../../../lib/dom/collect_text_nodes';
 import { collectSourceElements } from '../../../lib/dom/collect_source_elements';
 import { setImportant } from '../../../lib/dom/clone_element';
@@ -149,7 +149,12 @@ export const EditModal = ({ target, onClose, onSave }: Props) => {
       // Select the outermost element by default now that the preview is ready.
       // Called here instead of in a separate useEffect to avoid an extra render
       // cycle and to guarantee elementMapRef is populated.
-      handleSelectRef.current(target);
+      // For live elements the tree root is the first child (skipping the wrapper).
+      const initialSelection =
+        target.hasAttribute(DEVTOOL_LIVE_ATTR) && target.firstElementChild
+          ? (target.firstElementChild as HTMLElement)
+          : target;
+      handleSelectRef.current(initialSelection);
     },
     [target]
   );
@@ -335,7 +340,11 @@ export const EditModal = ({ target, onClose, onSave }: Props) => {
             {cloneRoot && (
               <div className={treeCss}>
                 <ElementTree
-                  root={target}
+                  root={
+                    target.hasAttribute(DEVTOOL_LIVE_ATTR) && target.firstElementChild
+                      ? (target.firstElementChild as HTMLElement)
+                      : target
+                  }
                   selectedElement={selectedElement}
                   onSelect={handleSelect}
                 />
