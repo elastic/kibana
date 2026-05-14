@@ -9,6 +9,7 @@ import { EuiCallOut, EuiFlexGroup, EuiLink, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useState } from 'react';
 import { css } from '@emotion/react';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import { useKibana } from '../application/hooks/use_kibana';
 import { useAgentBuilderServices } from '../application/hooks/use_agent_builder_service';
 import { useConversationList } from '../application/hooks/use_conversation_list';
@@ -49,7 +50,13 @@ export const EmbeddableWelcomeMessage = () => {
   if (!showCallOut || !hasNoConversations) return null;
 
   const documentationLink = (
-    <EuiLink href={docLinksService.agentBuilder} target="_blank" external>
+    <EuiLink
+      href={docLinksService.agentBuilder}
+      target="_blank"
+      external
+      data-ebt-element={AGENT_BUILDER_UI_EBT.element.INAPP_CHAT}
+      data-ebt-action={AGENT_BUILDER_UI_EBT.action.inapp.WELCOME_DOCS_LINK}
+    >
       <FormattedMessage
         id="xpack.agentBuilder.welcomeMessage.documentationLink"
         defaultMessage="documentation"
@@ -62,6 +69,8 @@ export const EmbeddableWelcomeMessage = () => {
       href={application.getUrlForApp('management', { path: '/ai/genAiSettings' })}
       target="_blank"
       external
+      data-ebt-element={AGENT_BUILDER_UI_EBT.element.INAPP_CHAT}
+      data-ebt-action={AGENT_BUILDER_UI_EBT.action.inapp.WELCOME_GENAI_SETTINGS_LINK}
     >
       <FormattedMessage
         id="xpack.agentBuilder.welcomeMessage.genAiSettingsLink"

@@ -111,6 +111,8 @@ export const ToolsCustomizeEmptyState: React.FC<ToolsCustomizeEmptyStateProps> =
       learnMoreHref={docLinksService.agentBuilderTools}
       learnMoreLabel={labels.customizeLandingEmptyState.learnMore}
       learnMoreSuffix={labels.agentTools.emptyStateLearnMoreSuffix}
+      learnMoreDataEbtElement={AGENT_BUILDER_UI_EBT.element.CUSTOMIZE_TOOLS}
+      learnMoreDataEbtAction={AGENT_BUILDER_UI_EBT.action.access.OPEN_AGENT_BUILDER_DOCS}
       footer={footer}
       primaryAction={
         canEditAgent ? (

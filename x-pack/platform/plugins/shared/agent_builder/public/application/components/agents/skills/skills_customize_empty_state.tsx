@@ -111,6 +111,8 @@ export const SkillsCustomizeEmptyState: React.FC<SkillsCustomizeEmptyStateProps>
       learnMoreHref={docLinksService.agentBuilderSkills}
       learnMoreLabel={labels.customizeLandingEmptyState.learnMore}
       learnMoreSuffix={labels.agentSkills.emptyStateLearnMoreSuffix}
+      learnMoreDataEbtElement={AGENT_BUILDER_UI_EBT.element.CUSTOMIZE_SKILLS}
+      learnMoreDataEbtAction={AGENT_BUILDER_UI_EBT.action.access.OPEN_AGENT_BUILDER_DOCS}
       footer={footer}
       primaryAction={
         canEditAgent ? (

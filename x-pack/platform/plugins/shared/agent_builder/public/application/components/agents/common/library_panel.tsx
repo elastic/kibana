@@ -54,6 +54,7 @@ export interface LibraryPanelProps<T extends LibraryItem> {
   manageLibraryPath: string;
   manageLibraryDataEbtElement?: string;
   manageLibraryDataEbtAction?: string;
+  sortFilterEbtElement: string;
   getItemName?: (item: T) => string;
   getSearchableText?: (item: T) => string[];
   disabledItemIdSet?: Set<string>;
@@ -73,6 +74,7 @@ export function LibraryPanel<T extends LibraryItem>({
   manageLibraryPath,
   manageLibraryDataEbtElement,
   manageLibraryDataEbtAction,
+  sortFilterEbtElement,
   getItemName = defaultGetItemName,
   getSearchableText,
   disabledItemIdSet,
@@ -152,6 +154,7 @@ export function LibraryPanel<T extends LibraryItem>({
               filterMode={filterMode}
               onFilterChange={setFilterMode}
               filterCounts={filterCounts}
+              sortFilterEbtElement={sortFilterEbtElement}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

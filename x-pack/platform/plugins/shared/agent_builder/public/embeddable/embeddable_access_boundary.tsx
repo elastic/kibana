@@ -15,6 +15,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import { PROMPT_LAYOUT_VARIANTS } from '../application/components/common/prompt/layout';
 import { useAgentBuilderServices } from '../application/hooks/use_agent_builder_service';
 import { useUiPrivileges } from '../application/hooks/use_ui_privileges';
@@ -80,6 +81,8 @@ const AccessDeniedWrapper: React.FC<AccessDeniedWrapperProps> = ({ children, onC
             aria-label={closeButtonLabel}
             onClick={onClose}
             data-test-subj="embeddableAccessBoundaryCloseButton"
+            data-ebt-element={AGENT_BUILDER_UI_EBT.element.CONVERSATION_EMBEDDABLE_HEADER}
+            data-ebt-action={AGENT_BUILDER_UI_EBT.action.conversation.EMBEDDABLE_CLOSE}
           />
         )}
       </EuiFlyoutHeader>

@@ -22,6 +22,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import type { FilterCounts, FilterMode, SortOrder } from './use_library_sort_filter';
 
 const POPOVER_WIDTH = 250;
@@ -66,6 +67,7 @@ interface LibrarySortFilterButtonProps {
   filterMode: FilterMode;
   onFilterChange: (mode: FilterMode) => void;
   filterCounts: FilterCounts;
+  sortFilterEbtElement: string;
 }
 
 export const LibrarySortFilterButton: React.FC<LibrarySortFilterButtonProps> = ({
@@ -74,6 +76,7 @@ export const LibrarySortFilterButton: React.FC<LibrarySortFilterButtonProps> = (
   filterMode,
   onFilterChange,
   filterCounts,
+  sortFilterEbtElement,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const sortTitleId = useGeneratedHtmlId();
@@ -106,6 +109,8 @@ export const LibrarySortFilterButton: React.FC<LibrarySortFilterButtonProps> = (
           color="text"
           size="m"
           onClick={() => setIsOpen((o) => !o)}
+          data-ebt-element={sortFilterEbtElement}
+          data-ebt-action={AGENT_BUILDER_UI_EBT.action.layer2Crud.LIBRARY_SORT_FILTER_MENU_OPEN}
         />
       }
       isOpen={isOpen}
@@ -121,6 +126,9 @@ export const LibrarySortFilterButton: React.FC<LibrarySortFilterButtonProps> = (
             key="sort-asc"
             icon={sortOrder === 'asc' ? 'check' : 'empty'}
             onClick={() => onSortChange('asc')}
+            data-ebt-element={sortFilterEbtElement}
+            data-ebt-action={AGENT_BUILDER_UI_EBT.action.layer2Crud.LIBRARY_SORT_FILTER_APPLY}
+            data-ebt-detail={AGENT_BUILDER_UI_EBT.detail.librarySortFilter.SORT_ASC}
           >
             {labels.sortAscLabel}
           </EuiContextMenuItem>,
@@ -128,6 +136,9 @@ export const LibrarySortFilterButton: React.FC<LibrarySortFilterButtonProps> = (
             key="sort-desc"
             icon={sortOrder === 'desc' ? 'check' : 'empty'}
             onClick={() => onSortChange('desc')}
+            data-ebt-element={sortFilterEbtElement}
+            data-ebt-action={AGENT_BUILDER_UI_EBT.action.layer2Crud.LIBRARY_SORT_FILTER_APPLY}
+            data-ebt-detail={AGENT_BUILDER_UI_EBT.detail.librarySortFilter.SORT_DESC}
           >
             {labels.sortDescLabel}
           </EuiContextMenuItem>,
@@ -143,6 +154,9 @@ export const LibrarySortFilterButton: React.FC<LibrarySortFilterButtonProps> = (
             key="filter-all"
             icon={filterMode === 'all' ? 'check' : 'empty'}
             onClick={() => onFilterChange('all')}
+            data-ebt-element={sortFilterEbtElement}
+            data-ebt-action={AGENT_BUILDER_UI_EBT.action.layer2Crud.LIBRARY_SORT_FILTER_APPLY}
+            data-ebt-detail={AGENT_BUILDER_UI_EBT.detail.librarySortFilter.FILTER_ALL}
           >
             <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s" responsive={false}>
               <EuiFlexItem grow={false}>{labels.filterAllLabel}</EuiFlexItem>
@@ -155,6 +169,9 @@ export const LibrarySortFilterButton: React.FC<LibrarySortFilterButtonProps> = (
             key="filter-active"
             icon={filterMode === 'active' ? 'check' : 'empty'}
             onClick={() => onFilterChange('active')}
+            data-ebt-element={sortFilterEbtElement}
+            data-ebt-action={AGENT_BUILDER_UI_EBT.action.layer2Crud.LIBRARY_SORT_FILTER_APPLY}
+            data-ebt-detail={AGENT_BUILDER_UI_EBT.detail.librarySortFilter.FILTER_ACTIVE}
           >
             <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s" responsive={false}>
               <EuiFlexItem grow={false}>{labels.filterActiveLabel}</EuiFlexItem>
@@ -167,6 +184,9 @@ export const LibrarySortFilterButton: React.FC<LibrarySortFilterButtonProps> = (
             key="filter-elastic"
             icon={filterMode === 'elastic' ? 'check' : 'empty'}
             onClick={() => onFilterChange('elastic')}
+            data-ebt-element={sortFilterEbtElement}
+            data-ebt-action={AGENT_BUILDER_UI_EBT.action.layer2Crud.LIBRARY_SORT_FILTER_APPLY}
+            data-ebt-detail={AGENT_BUILDER_UI_EBT.detail.librarySortFilter.FILTER_ELASTIC}
           >
             <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s" responsive={false}>
               <EuiFlexItem grow={false}>{labels.filterElasticLabel}</EuiFlexItem>
@@ -179,6 +199,9 @@ export const LibrarySortFilterButton: React.FC<LibrarySortFilterButtonProps> = (
             key="filter-custom"
             icon={filterMode === 'custom' ? 'check' : 'empty'}
             onClick={() => onFilterChange('custom')}
+            data-ebt-element={sortFilterEbtElement}
+            data-ebt-action={AGENT_BUILDER_UI_EBT.action.layer2Crud.LIBRARY_SORT_FILTER_APPLY}
+            data-ebt-detail={AGENT_BUILDER_UI_EBT.detail.librarySortFilter.FILTER_CUSTOM}
           >
             <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s" responsive={false}>
               <EuiFlexItem grow={false}>{labels.filterCustomLabel}</EuiFlexItem>

@@ -74,6 +74,7 @@ export const ToolLibraryPanel: React.FC<ToolLibraryPanelProps> = ({
       manageLibraryPath={appPaths.tools.list}
       manageLibraryDataEbtElement={AGENT_BUILDER_UI_EBT.element.LIBRARY_TOOLS}
       manageLibraryDataEbtAction={AGENT_BUILDER_UI_EBT.action.uiChrome.MANAGE_LIBRARY_LINK}
+      sortFilterEbtElement={AGENT_BUILDER_UI_EBT.element.LIBRARY_TOOLS}
       disabledItemIdSet={disabledItemIdSet}
       readOnlyItemIdSet={readOnlyItemIdSet}
     />

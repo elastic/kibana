@@ -17,6 +17,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import { type ActionButton, ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 
 interface AttachmentActionsProps {
@@ -62,6 +63,11 @@ export const AttachmentActions: React.FC<AttachmentActionsProps> = ({ buttons })
               iconType={button.icon}
               onClick={button.handler}
               isDisabled={button.disabled}
+              data-ebt-element={AGENT_BUILDER_UI_EBT.element.CONVERSATION_ROUND_RESPONSE}
+              data-ebt-action={
+                AGENT_BUILDER_UI_EBT.action.conversation.ATTACHMENT_HEADER_SECONDARY_CLICK
+              }
+              data-ebt-detail={button.label}
             >
               {button.label}
             </EuiButtonEmpty>
@@ -78,6 +84,11 @@ export const AttachmentActions: React.FC<AttachmentActionsProps> = ({ buttons })
               iconType={button.icon}
               onClick={button.handler}
               isDisabled={button.disabled}
+              data-ebt-element={AGENT_BUILDER_UI_EBT.element.CONVERSATION_ROUND_RESPONSE}
+              data-ebt-action={
+                AGENT_BUILDER_UI_EBT.action.conversation.ATTACHMENT_HEADER_PRIMARY_CLICK
+              }
+              data-ebt-detail={button.label}
             >
               {button.label}
             </EuiButton>
@@ -99,6 +110,10 @@ export const AttachmentActions: React.FC<AttachmentActionsProps> = ({ buttons })
                 })}
                 onClick={togglePopover}
                 size="s"
+                data-ebt-element={AGENT_BUILDER_UI_EBT.element.CONVERSATION_ROUND_RESPONSE}
+                data-ebt-action={
+                  AGENT_BUILDER_UI_EBT.action.conversation.ATTACHMENT_HEADER_OVERFLOW_OPEN
+                }
               />
             }
             isOpen={isPopoverOpen}
@@ -116,6 +131,10 @@ export const AttachmentActions: React.FC<AttachmentActionsProps> = ({ buttons })
                     icon: button.icon,
                     disabled: button.disabled,
                     toolTipContent: button.disabled ? button.disabledReason : undefined,
+                    'data-ebt-element': AGENT_BUILDER_UI_EBT.element.CONVERSATION_ROUND_RESPONSE,
+                    'data-ebt-action':
+                      AGENT_BUILDER_UI_EBT.action.conversation.ATTACHMENT_HEADER_OVERFLOW_ITEM,
+                    'data-ebt-detail': button.label,
                     onClick: () => {
                       closePopover();
                       button.handler();

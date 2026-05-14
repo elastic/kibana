@@ -34,6 +34,8 @@ export interface CustomizeLandingEmptyStateProps {
   learnMoreHref: string;
   learnMoreLabel?: string;
   learnMoreSuffix?: React.ReactNode;
+  learnMoreDataEbtElement?: string;
+  learnMoreDataEbtAction?: string;
   primaryAction?: React.ReactNode;
   secondaryAction?: React.ReactNode;
   footer?: React.ReactNode;
@@ -47,6 +49,8 @@ export const CustomizeLandingEmptyState: React.FC<CustomizeLandingEmptyStateProp
   learnMoreHref,
   learnMoreLabel = labels.customizeLandingEmptyState.learnMore,
   learnMoreSuffix,
+  learnMoreDataEbtElement,
+  learnMoreDataEbtAction,
   primaryAction,
   secondaryAction,
   footer,
@@ -146,6 +150,12 @@ export const CustomizeLandingEmptyState: React.FC<CustomizeLandingEmptyStateProp
                     href={learnMoreHref}
                     target="_blank"
                     rel="noopener noreferrer"
+                    {...(learnMoreDataEbtElement != null
+                      ? { 'data-ebt-element': learnMoreDataEbtElement }
+                      : {})}
+                    {...(learnMoreDataEbtAction != null
+                      ? { 'data-ebt-action': learnMoreDataEbtAction }
+                      : {})}
                   >
                     {learnMoreLabel}
                   </EuiLink>

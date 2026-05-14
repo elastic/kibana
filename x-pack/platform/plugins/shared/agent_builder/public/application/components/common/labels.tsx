@@ -44,7 +44,9 @@ const LabelGroup: React.FC<{ labels: string[] }> = ({ labels }) => {
 const ViewMorePopover: React.FC<{
   labels: string[];
   totalLabels: number;
-}> = ({ labels, totalLabels }) => {
+  viewMoreEbtElement?: string;
+  viewMoreEbtAction?: string;
+}> = ({ labels, totalLabels, viewMoreEbtElement, viewMoreEbtAction }) => {
   const { euiTheme } = useEuiTheme();
   const popoverPanelStyles = css`
     max-inline-size: calc(${euiTheme.size.xxxxl} * 5);
@@ -78,6 +80,8 @@ const ViewMorePopover: React.FC<{
           aria-label={viewMoreAriaLabel}
           aria-expanded={isOpen}
           data-test-subj="agentBuilderLabelsViewMoreButton"
+          {...(viewMoreEbtElement != null ? { 'data-ebt-element': viewMoreEbtElement } : {})}
+          {...(viewMoreEbtAction != null ? { 'data-ebt-action': viewMoreEbtAction } : {})}
         >
           <FormattedMessage
             id="xpack.agentBuilder.labels.viewMore.buttonLabel"
@@ -96,7 +100,9 @@ const NUM_VISIBLE_LABELS = 4;
 export const Labels: React.FC<{
   labels: string[];
   numVisible?: number;
-}> = ({ labels, numVisible = NUM_VISIBLE_LABELS }) => {
+  viewMoreEbtElement?: string;
+  viewMoreEbtAction?: string;
+}> = ({ labels, numVisible = NUM_VISIBLE_LABELS, viewMoreEbtElement, viewMoreEbtAction }) => {
   if (labels.length === 0) {
     return null;
   }
@@ -114,7 +120,12 @@ export const Labels: React.FC<{
         <LabelGroup labels={visibleLabels} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <ViewMorePopover labels={hiddenLabels} totalLabels={labels.length} />
+        <ViewMorePopover
+          labels={hiddenLabels}
+          totalLabels={labels.length}
+          viewMoreEbtElement={viewMoreEbtElement}
+          viewMoreEbtAction={viewMoreEbtAction}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

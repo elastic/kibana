@@ -118,6 +118,8 @@ export const PluginsCustomizeEmptyState: React.FC<PluginsCustomizeEmptyStateProp
       learnMoreHref={docLinksService.agentBuilderPlugins}
       learnMoreLabel={labels.customizeLandingEmptyState.learnMore}
       learnMoreSuffix={labels.agentPlugins.emptyStateLearnMoreSuffix}
+      learnMoreDataEbtElement={AGENT_BUILDER_UI_EBT.element.CUSTOMIZE_PLUGINS}
+      learnMoreDataEbtAction={AGENT_BUILDER_UI_EBT.action.access.OPEN_AGENT_BUILDER_DOCS}
       footer={footer}
       primaryAction={
         canEditAgent ? (

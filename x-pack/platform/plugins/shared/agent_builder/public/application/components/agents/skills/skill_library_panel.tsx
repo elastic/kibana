@@ -75,6 +75,7 @@ export const SkillLibraryPanel: React.FC<SkillLibraryPanelProps> = ({
       manageLibraryPath={appPaths.manage.skills}
       manageLibraryDataEbtElement={AGENT_BUILDER_UI_EBT.element.LIBRARY_SKILLS}
       manageLibraryDataEbtAction={AGENT_BUILDER_UI_EBT.action.uiChrome.MANAGE_LIBRARY_LINK}
+      sortFilterEbtElement={AGENT_BUILDER_UI_EBT.element.LIBRARY_SKILLS}
       getItemName={getSkillName}
       disabledItemIdSet={disabledItemIdSet}
       readOnlyItemIdSet={readOnlyItemIdSet}

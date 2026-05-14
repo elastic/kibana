@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 import { useController, useFieldArray, useWatch, type Control } from 'react-hook-form';
 import { maxReferencedContentItems } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import { labels } from '../../utils/i18n';
 import type { ReferencedContentItem, SkillFormData } from './skill_form_validation';
 import { ReferencedContentFileCard } from './referenced_content_file_card';
@@ -71,6 +72,10 @@ const ReferencedContentFileRow: React.FC<ReferencedContentFileRowProps> = ({
           aria-label={labels.skills.referencedFileSection.removeFileAriaLabel}
           title={labels.skills.referencedFileSection.removeFileAriaLabel}
           data-test-subj={`agentBuilderSkillReferencedContentRemove-${index}`}
+          data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_SKILLS_FORM}
+          data-ebt-action={
+            AGENT_BUILDER_UI_EBT.action.manageSkills.FORM_REFERENCED_CONTENT_REMOVE_FILE
+          }
         />
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -124,6 +129,10 @@ const SkillReferencedContentFieldArrayEdit: React.FC<{ control: Control<SkillFor
                 : undefined
             }
             data-test-subj="agentBuilderSkillReferencedContentAddFile"
+            data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_SKILLS_FORM}
+            data-ebt-action={
+              AGENT_BUILDER_UI_EBT.action.manageSkills.FORM_REFERENCED_CONTENT_ADD_FILE
+            }
           >
             {labels.skills.referencedFileSection.addFileButton}
           </EuiButton>

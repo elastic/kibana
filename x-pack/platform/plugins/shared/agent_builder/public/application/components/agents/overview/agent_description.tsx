@@ -8,6 +8,7 @@
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useLayoutEffect, useRef, useState } from 'react';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import { labels } from '../../../utils/i18n';
 
 const { agentOverview: overviewLabels } = labels;
@@ -64,6 +65,10 @@ export const AgentDescription = ({ description }: { description: string }) => {
               setIsExpanded((prev) => !prev);
             }}
             data-test-subj="agentOverviewDescriptionToggle"
+            data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_AGENT_OVERVIEW}
+            data-ebt-action={
+              AGENT_BUILDER_UI_EBT.action.manageAgent.OVERVIEW_DESCRIPTION_READ_TOGGLE
+            }
           >
             {isExpanded ? overviewLabels.readLess : overviewLabels.readMore}
           </EuiButtonEmpty>

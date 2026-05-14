@@ -145,7 +145,13 @@ export const AgentsList: React.FC = () => {
           return null;
         }
 
-        return <Labels labels={labels} />;
+        return (
+          <Labels
+            labels={labels}
+            viewMoreEbtElement={AGENT_BUILDER_UI_EBT.element.MANAGE_AGENTS_TABLE}
+            viewMoreEbtAction={AGENT_BUILDER_UI_EBT.action.manageAgents.TABLE_LABELS_VIEW_MORE}
+          />
+        );
       },
       'data-test-subj': 'agentBuilderAgentsListLabels',
     };
@@ -170,7 +176,10 @@ export const AgentsList: React.FC = () => {
           showOnHover: true,
           href: (agent) =>
             createAgentBuilderUrl(appPaths.agent.conversations.new({ agentId: agent.id })),
-        },
+          'data-ebt-element': AGENT_BUILDER_UI_EBT.element.MANAGE_AGENTS_TABLE,
+          'data-ebt-action': AGENT_BUILDER_UI_EBT.action.manageAgents.TABLE_ROW_CHAT_OPEN,
+          'data-ebt-detail': AGENT_BUILDER_UI_EBT.entity.AGENT,
+        } as EuiTableActionsColumnType<AgentDefinition>['actions'][number],
         {
           type: 'icon',
           icon: 'pencil',
@@ -181,7 +190,10 @@ export const AgentsList: React.FC = () => {
           showOnHover: true,
           href: (agent) => createAgentBuilderUrl(appPaths.agents.edit({ agentId: agent.id })),
           available: canEditAgent,
-        },
+          'data-ebt-element': AGENT_BUILDER_UI_EBT.element.MANAGE_AGENTS_TABLE,
+          'data-ebt-action': AGENT_BUILDER_UI_EBT.action.manageAgents.TABLE_ROW_EDIT_OPEN,
+          'data-ebt-detail': AGENT_BUILDER_UI_EBT.entity.AGENT,
+        } as EuiTableActionsColumnType<AgentDefinition>['actions'][number],
         {
           type: 'icon',
           icon: 'copy',
@@ -192,7 +204,10 @@ export const AgentsList: React.FC = () => {
           href: (agent) =>
             createAgentBuilderUrl(appPaths.agents.new, { [searchParamNames.sourceId]: agent.id }),
           available: () => manageAgents,
-        },
+          'data-ebt-element': AGENT_BUILDER_UI_EBT.element.MANAGE_AGENTS_TABLE,
+          'data-ebt-action': AGENT_BUILDER_UI_EBT.action.manageAgents.TABLE_ROW_CLONE_OPEN,
+          'data-ebt-detail': AGENT_BUILDER_UI_EBT.entity.AGENT,
+        } as EuiTableActionsColumnType<AgentDefinition>['actions'][number],
         {
           // Have to use a custom action to display the danger color
           // Can use default action if this proposal is implemented: https://github.com/elastic/eui/discussions/8735

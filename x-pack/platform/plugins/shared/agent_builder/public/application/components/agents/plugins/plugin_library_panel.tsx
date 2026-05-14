@@ -69,6 +69,7 @@ export const PluginLibraryPanel: React.FC<PluginLibraryPanelProps> = ({
       manageLibraryPath={appPaths.plugins.list}
       manageLibraryDataEbtElement={AGENT_BUILDER_UI_EBT.element.LIBRARY_PLUGINS}
       manageLibraryDataEbtAction={AGENT_BUILDER_UI_EBT.action.uiChrome.MANAGE_LIBRARY_LINK}
+      sortFilterEbtElement={AGENT_BUILDER_UI_EBT.element.LIBRARY_PLUGINS}
       getItemName={getPluginName}
       disabledItemIdSet={autoPluginIdSet}
       readOnlyItemIdSet={readOnlyItemIdSet}
