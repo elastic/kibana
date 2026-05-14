@@ -30,6 +30,7 @@ export const BUILD_AGENT_NODE_NAMES = {
   CREATE_RULE_NAME_AND_DESCRIPTION: 'createRuleNameAndDescription',
   ADD_MITRE_MAPPINGS: 'addMitreMappings',
   ADD_SCHEDULE: 'addSchedule',
+  REJECTION: 'rejection',
 } as const;
 
 const {
@@ -38,6 +39,7 @@ const {
   CREATE_RULE_NAME_AND_DESCRIPTION,
   ADD_MITRE_MAPPINGS,
   ADD_SCHEDULE,
+  REJECTION,
 } = BUILD_AGENT_NODE_NAMES;
 
 export interface GetBuildAgentParams {
@@ -80,18 +82,22 @@ export const getBuildAgent = async ({
     .addNode(CREATE_RULE_NAME_AND_DESCRIPTION, createRuleNameAndDescriptionNode({ model, events }))
     .addNode(ADD_MITRE_MAPPINGS, addMitreMappingsNode({ model, events }))
     .addNode(ADD_SCHEDULE, addScheduleNode({ model, logger, events }))
+    .addNode(REJECTION, rejectionNode)
     .addEdge(START, ESQL_QUERY_CREATION)
-    .addConditionalEdges(ESQL_QUERY_CREATION, shouldContinue, {
+    .addConditionalEdges(ESQL_QUERY_CREATION, resolveRejectionRoute, {
       continue: CREATE_RULE_NAME_AND_DESCRIPTION,
       end: END,
+      rejection: REJECTION,
     })
-    .addConditionalEdges(CREATE_RULE_NAME_AND_DESCRIPTION, shouldContinue, {
+    .addConditionalEdges(CREATE_RULE_NAME_AND_DESCRIPTION, resolveRejectionRoute, {
       continue: GET_TAGS,
       end: END,
+      rejection: REJECTION,
     })
     .addEdge(GET_TAGS, ADD_MITRE_MAPPINGS)
     .addEdge(ADD_MITRE_MAPPINGS, ADD_SCHEDULE)
-    .addEdge(ADD_SCHEDULE, END);
+    .addEdge(ADD_SCHEDULE, END)
+    .addEdge(REJECTION, END);
 
   const graph = buildAgentGraph.compile({ checkpointer: undefined });
   graph.name = 'Detection Engine AI Rule Creation Graph';
@@ -99,12 +105,38 @@ export const getBuildAgent = async ({
 };
 
 /**
- * Stop further execution if there are critical errors in the state for mandatory rule fields: query, name, description.
- * Rest fields are optional or can be fillled with default values.
+ * Route to rejection when the agent deliberately cannot build a rule, to end on
+ * system errors, or continue to the next node otherwise.
  */
-const shouldContinue = (state: RuleCreationState): 'continue' | 'end' => {
-  if (state.errors.length > 0) {
-    return 'end';
-  }
+const resolveRejectionRoute = (state: RuleCreationState): 'rejection' | 'end' | 'continue' => {
+  if (state.rejectionReason) return 'rejection';
+  if (state.errors.length > 0) return 'end';
   return 'continue';
+};
+
+const rejectionNode = async (state: RuleCreationState) => {
+  if (!state.rejectionReason) return {};
+  const { code, details } = state.rejectionReason;
+  const { userQuery } = state;
+
+  switch (code) {
+    case 'NO_DATA':
+      return {
+        rejectionMessage: `No relevant data found in your indices for "${userQuery}". Can you point me to a specific index or data source?`,
+      };
+    case 'INVALID_OUTPUT':
+      return {
+        rejectionMessage: `I built a rule but it failed validation${
+          details ? `: ${details}` : ''
+        }. Please retry or rephrase.`,
+      };
+    case 'INCOHERENT':
+      return {
+        rejectionMessage: `I couldn't identify a detectable behavior in your request. Can you rephrase what activity to detect — for example, "detect failed login attempts from a single IP"?`,
+      };
+    case 'NOT_SECURITY_RELEVANT':
+      return {
+        rejectionMessage: `This doesn't look like a security detection scenario. Try describing suspicious behavior, attack patterns, or anomalies.`,
+      };
+  }
 };
