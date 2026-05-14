@@ -130,23 +130,15 @@ export const SIGNAL_FETCHERS: SignalFetcher[] = [
     async fetch({ core, plugins, request, logger, serviceName, serviceEnvironment }, start, end) {
       if (!serviceName || !serviceEnvironment) return null;
 
-      const buckets = await getExitSpanChangePoints({
+      const changePoints = await getExitSpanChangePoints({
         core,
         plugins,
         request,
+        serviceName,
+        serviceEnvironment,
         logger,
         start,
         end,
-        kqlFilter: `service.name: "${serviceName}" AND service.environment: "${serviceEnvironment}"`,
-      });
-      const changePoints = buckets.map((bucket) => {
-        return {
-          key: bucket.key,
-          doc_count: bucket.doc_count,
-          changes_latency: bucket.changes_latency,
-          changes_throughput: bucket.changes_throughput,
-          changes_failure_rate: bucket.changes_failure_rate,
-        };
       });
       return isEmpty(changePoints) ? null : changePoints;
     },
