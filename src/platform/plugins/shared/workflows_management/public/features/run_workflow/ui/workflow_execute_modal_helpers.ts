@@ -8,6 +8,7 @@
  */
 
 import { parseDocument } from 'yaml';
+import { getKqlFieldNamesFromExpression } from '@kbn/es-query';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { isTriggerType } from '@kbn/workflows';
 import { normalizeFieldsToJsonSchema } from '@kbn/workflows/spec/lib/field_conversion';
@@ -93,17 +94,36 @@ export function getWorkflowCustomTriggerTypeIds(definition: WorkflowYaml | null)
     return [];
   }
 
-  const ids: string[] = [];
+  const ids = new Set<string>();
+  const orderedUnique: string[] = [];
   for (const trigger of definition.triggers) {
     if (trigger && typeof trigger === 'object' && 'type' in trigger) {
       const type = (trigger as { type: unknown }).type;
-      if (typeof type === 'string' && !isTriggerType(type)) {
-        ids.push(type);
+      if (typeof type === 'string' && !isTriggerType(type) && !ids.has(type)) {
+        ids.add(type);
+        orderedUnique.push(type);
       }
     }
   }
 
-  return ids;
+  return orderedUnique;
+}
+
+const ROOT_TRIGGER_ID_FIELD = 'triggerId';
+
+export function doesSubmittedKqlReferenceTriggerIdField(kql: string): boolean {
+  const trimmed = kql.trim();
+  if (!trimmed) {
+    return false;
+  }
+  try {
+    const fields = getKqlFieldNamesFromExpression(trimmed);
+    return fields.some(
+      (field) => field === ROOT_TRIGGER_ID_FIELD || field.startsWith(`${ROOT_TRIGGER_ID_FIELD}.`)
+    );
+  } catch {
+    return false;
+  }
 }
 
 export function getDefaultTrigger(definition: WorkflowYaml | null): WorkflowTriggerTab {

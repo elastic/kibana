@@ -8,7 +8,7 @@
  */
 
 import { EuiProvider } from '@elastic/eui';
-import { render } from '@testing-library/react';
+import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { themeServiceMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
@@ -54,6 +54,16 @@ jest.mock('@kbn/workflows-ui', () => {
   };
 });
 
+jest.mock('./workflow_execute_event_form_infinite_list', () => {
+  const actual = jest.requireActual('./workflow_execute_event_form_infinite_list');
+  return {
+    ...actual,
+    useTriggerEventGridScrollLoadMore: (options: { onNearBottom: () => void }) => {
+      (globalThis as Record<string, unknown>).__WORKFLOW_TRIGGER_EVENT_TEST_LOAD_MORE__ =
+        options.onNearBottom;
+    },
+  };
+});
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 const mockUseQueryTriggerEvents = useQueryTriggerEvents as jest.MockedFunction<
   typeof useQueryTriggerEvents
@@ -136,6 +146,8 @@ describe('WorkflowExecuteEventForm', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     queryClient.clear();
+    delete (globalThis as Record<string, unknown>).__WORKFLOW_TRIGGER_EVENT_TEST_LOAD_MORE__;
+    mockUseQueryTriggerEvents.mockReset();
     (mockData.query.timefilter.timefilter.getTimeDefaults as jest.Mock).mockReturnValue({
       from: 'now-15m',
       to: 'now',
@@ -231,6 +243,149 @@ describe('WorkflowExecuteEventForm', () => {
       }),
       expect.objectContaining({ enabled: true })
     );
+    expect(mockUseQueryTriggerEvents.mock.calls[0][0]).not.toHaveProperty('kql');
+  });
+
+  it('sends workflow triggerIds when submitted KQL does not reference triggerId', async () => {
+    const { findByTestId, getByTestId } = render(
+      <TestWrapper>
+        <WorkflowExecuteEventForm
+          definition={baseDefinition as any}
+          value=""
+          setValue={mockSetValue}
+          errors={null}
+        />
+      </TestWrapper>
+    );
+
+    await findByTestId('workflowTriggerEventsTable');
+    const input = getByTestId('query-input');
+    fireEvent.change(input, { target: { value: 'eventId: e1' } });
+    fireEvent.keyDown(input, { key: 'Enter', code: 'Enter', charCode: 13 });
+
+    await waitFor(() => {
+      const calls = mockUseQueryTriggerEvents.mock.calls;
+      const lastParams = calls[calls.length - 1][0] as Record<string, unknown>;
+      expect(lastParams).toMatchObject({
+        kql: 'eventId: e1',
+        triggerIds: ['custom.trigger'],
+      });
+    });
+  });
+
+  it('passes every custom trigger id from the workflow as API triggerIds to useQueryTriggerEvents', async () => {
+    const definitionWithTwoCustomTriggers = {
+      ...baseDefinition,
+      triggers: [
+        { type: 'workflow.execution.failed' },
+        { type: 'cases.created' },
+        { type: 'manual' },
+      ],
+    };
+
+    const { findByTestId } = render(
+      <TestWrapper>
+        <WorkflowExecuteEventForm
+          definition={definitionWithTwoCustomTriggers as any}
+          value=""
+          setValue={mockSetValue}
+          errors={null}
+        />
+      </TestWrapper>
+    );
+
+    await findByTestId('workflowTriggerEventsTable');
+    expect(mockUseQueryTriggerEvents).toHaveBeenCalledWith(
+      expect.objectContaining({
+        triggerIds: ['workflow.execution.failed', 'cases.created'],
+      }),
+      expect.objectContaining({ enabled: true })
+    );
+  });
+
+  it('resets trigger event search pagination when the search bar is submitted again', async () => {
+    const dataByPage: Record<
+      number,
+      {
+        hits: Array<{
+          id: string;
+          source: Record<string, unknown>;
+        }>;
+        total: number;
+        page: number;
+        size: number;
+      }
+    > = {};
+
+    mockUseQueryTriggerEvents.mockImplementation((params: { page?: number }) => {
+      const page = params.page ?? 1;
+      if (!dataByPage[page]) {
+        dataByPage[page] = {
+          hits: Array.from({ length: page === 2 ? 25 : 50 }, (_, i) => ({
+            id: `evt-${page}-${i}`,
+            source: {
+              '@timestamp': '2025-01-01T12:00:00.000Z',
+              eventId: `e-${i}`,
+              triggerId: 'custom.trigger',
+              spaceId: 'default',
+              subscriptions: [],
+              payload: { foo: 'bar' },
+            },
+          })),
+          total: 100,
+          page,
+          size: 50,
+        };
+      }
+      return {
+        data: dataByPage[page],
+        isLoading: false,
+        isFetching: false,
+        isPreviousData: false,
+        isError: false,
+        error: undefined,
+        isSuccess: true,
+        status: 'success',
+      } as unknown as ReturnType<typeof useQueryTriggerEvents>;
+    });
+
+    const { findByTestId, getByTestId } = render(
+      <TestWrapper>
+        <WorkflowExecuteEventForm
+          definition={baseDefinition as any}
+          value=""
+          setValue={mockSetValue}
+          errors={null}
+        />
+      </TestWrapper>
+    );
+
+    await findByTestId('workflowTriggerEventsTable');
+    await waitFor(() => {
+      expect(
+        (globalThis as Record<string, unknown>).__WORKFLOW_TRIGGER_EVENT_TEST_LOAD_MORE__
+      ).toEqual(expect.any(Function));
+    });
+    act(() => {
+      (
+        (globalThis as Record<string, unknown>)
+          .__WORKFLOW_TRIGGER_EVENT_TEST_LOAD_MORE__ as () => void
+      )();
+    });
+
+    await waitFor(() => {
+      const lastCall =
+        mockUseQueryTriggerEvents.mock.calls[mockUseQueryTriggerEvents.mock.calls.length - 1];
+      expect((lastCall[0] as { page: number }).page).toBe(2);
+    });
+
+    fireEvent.click(getByTestId('mock-search-bar-submit'));
+
+    await waitFor(() => {
+      const lastCall =
+        mockUseQueryTriggerEvents.mock.calls[mockUseQueryTriggerEvents.mock.calls.length - 1];
+      expect((lastCall[0] as { page: number }).page).toBe(1);
+    });
   });
 
   it('shows a privilege message when trigger event search returns 403', async () => {

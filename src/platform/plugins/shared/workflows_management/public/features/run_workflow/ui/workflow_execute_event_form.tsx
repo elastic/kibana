@@ -14,14 +14,23 @@ import {
   EuiFlexItem,
   euiFontSize,
   EuiIconTip,
-  EuiPagination,
+  EuiLoadingSpinner,
   EuiProgress,
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
 import type { EuiDataGridCellPopoverElementProps } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  memo,
+  useCallback,
+  useContext,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import type { DataView, FieldSpec } from '@kbn/data-views-plugin/public';
 import { DataGridDensity } from '@kbn/discover-utils';
@@ -57,11 +66,35 @@ import {
   formatTriggerEventPayloadAsText,
   withoutTrailingDefaultCopyCellAction,
 } from './trigger_event_summary_copy_payload_cell_action';
-import { getWorkflowCustomTriggerTypeIds } from './workflow_execute_modal_helpers';
+import {
+  useAccumulatedTriggerEventSearchPages,
+  useTriggerEventGridScrollLoadMore,
+} from './workflow_execute_event_form_infinite_list';
+import {
+  doesSubmittedKqlReferenceTriggerIdField,
+  getWorkflowCustomTriggerTypeIds,
+} from './workflow_execute_modal_helpers';
 import { WorkflowTriggerEventDataGridCellPopover } from './workflow_trigger_event_data_grid_cell_popover';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useSpaceId } from '../../../hooks/use_space_id';
 import { useEventDrivenExecutionStatus } from '../../workflow_list/ui/use_event_driven_execution_status';
+
+function resolveTriggerEventTableLoadingState(
+  isSearchLoading: boolean,
+  accumulatedHitsLength: number,
+  isEventConfigLoading: boolean,
+  isFetching: boolean
+): DataLoadingState {
+  const isInitialSearchLoading =
+    (isSearchLoading && accumulatedHitsLength === 0) || isEventConfigLoading;
+  if (isInitialSearchLoading) {
+    return DataLoadingState.loading;
+  }
+  if (isFetching && accumulatedHitsLength > 0) {
+    return DataLoadingState.loadingMore;
+  }
+  return DataLoadingState.loaded;
+}
 
 const PAGE_SIZE = 50;
 
@@ -248,6 +281,253 @@ const TriggerEventTableSelectionCountSync = ({
 
 TriggerEventTableSelectionCountSync.displayName = 'TriggerEventTableSelectionCountSync';
 
+interface WorkflowExecuteEventFormSearchResultsProps {
+  isError: boolean;
+  searchError: unknown;
+  errors: string | null;
+  triggerEventsSurfaceRef: React.Ref<HTMLDivElement>;
+  euiTheme: ReturnType<typeof useEuiTheme>['euiTheme'];
+  tableSurfaceColor: string;
+  timestampCellTypography: ReturnType<typeof euiFontSize>;
+  tableLoadingState: DataLoadingState;
+  dataView: DataView | null;
+  getNoCellActions: UiActionsStart['getTriggerCompatibleActions'];
+  visibleTableColumns: string[];
+  columnsMeta: DataTableColumnsMeta;
+  dataTableRows: DataTableRecord[];
+  rowsLength: number;
+  unifiedDataTableServices: React.ComponentProps<typeof UnifiedDataTable>['services'];
+  handleUnifiedDataTableSetColumns: (columns: string[], hideTimeColumn: boolean) => void;
+  showTimeColumn: boolean;
+  sort: SortOrder[];
+  handleSortChange: (nextSort: string[][]) => void;
+  customGridColumnsConfiguration: CustomGridColumnsConfiguration;
+  renderCustomToolbar: UnifiedDataTableRenderCustomToolbar;
+  renderCellPopover: (popoverProps: EuiDataGridCellPopoverElementProps) => React.JSX.Element;
+  externalCustomRenderers: CustomCellRenderer;
+  hasMoreHits: boolean;
+  isFetching: boolean;
+  accumulatedHitsLength: number;
+}
+
+const WorkflowExecuteEventFormSearchResults = memo(function WorkflowExecuteEventFormSearchResults({
+  isError,
+  searchError,
+  errors,
+  triggerEventsSurfaceRef,
+  euiTheme,
+  tableSurfaceColor,
+  timestampCellTypography,
+  tableLoadingState,
+  dataView,
+  getNoCellActions,
+  visibleTableColumns,
+  columnsMeta,
+  dataTableRows,
+  rowsLength,
+  unifiedDataTableServices,
+  handleUnifiedDataTableSetColumns,
+  showTimeColumn,
+  sort,
+  handleSortChange,
+  customGridColumnsConfiguration,
+  renderCustomToolbar,
+  renderCellPopover,
+  externalCustomRenderers,
+  hasMoreHits,
+  isFetching,
+  accumulatedHitsLength,
+}: WorkflowExecuteEventFormSearchResultsProps): React.JSX.Element {
+  return (
+    <>
+      {isError && (
+        <EuiFlexItem grow={false}>
+          <EuiCallOut
+            announceOnMount
+            title={i18n.translate('workflows.workflowExecuteEventTriggerForm.errorTitle', {
+              defaultMessage: 'Could not load trigger events',
+            })}
+            color="danger"
+            iconType="error"
+            size="s"
+          >
+            <p>{formatQueryError(searchError)}</p>
+          </EuiCallOut>
+        </EuiFlexItem>
+      )}
+      {errors !== null && (
+        <EuiFlexItem grow={false}>
+          <EuiCallOut
+            announceOnMount
+            title={i18n.translate(
+              'workflows.workflowExecuteEventTriggerForm.executionPayloadErrorTitle',
+              {
+                defaultMessage: 'Fix the run payload before continuing',
+              }
+            )}
+            color="danger"
+            iconType="error"
+            size="s"
+          >
+            <p>{errors}</p>
+          </EuiCallOut>
+        </EuiFlexItem>
+      )}
+
+      <EuiFlexItem
+        grow={true}
+        css={css({
+          minHeight: 0,
+          display: 'flex',
+          flexDirection: 'column',
+        })}
+      >
+        <div
+          ref={triggerEventsSurfaceRef}
+          css={[
+            css({
+              position: 'relative',
+              display: 'flex',
+              flexDirection: 'column',
+              flex: 1,
+              minHeight: 0,
+              width: '100%',
+              minWidth: 0,
+              border: euiTheme.border.thin,
+              borderRadius: euiTheme.border.radius.medium,
+              boxSizing: 'border-box',
+              backgroundColor: tableSurfaceColor,
+            }),
+            css`
+              padding-block-start: ${euiTheme.size.m};
+              padding-inline: ${euiTheme.size.s};
+              padding-block-end: ${euiTheme.size.xs};
+              .unifiedDataTable__headerCell .euiDataGridHeaderCell__button {
+                margin-top: 0 !important;
+              }
+              .euiDataGridHeaderCell .euiDataGridHeaderCell__button,
+              .euiDataGridHeaderCell .euiDataGridHeaderCell__content {
+                font-size: ${timestampCellTypography.fontSize} !important;
+                line-height: ${timestampCellTypography.lineHeight};
+              }
+              .euiDataGridHeader,
+              .euiDataGridHeaderCell {
+                background-color: ${tableSurfaceColor} !important;
+              }
+              .euiDataGridRowCell[data-gridcell-column-id='@timestamp']
+                .euiDataGridRowCell__content,
+              .euiDataGridRowCell[data-gridcell-column-id='@timestamp']
+                .unifiedDataTable__cellValue {
+                white-space: nowrap;
+                font-size: ${timestampCellTypography.fontSize} !important;
+                line-height: ${timestampCellTypography.lineHeight};
+              }
+              .unifiedDataTable__inner {
+                flex: 1;
+                minheight: 0;
+                height: 100%;
+              }
+              .unifiedDataTableToolbar {
+                padding-top: ${euiTheme.size.xs};
+                padding-bottom: ${euiTheme.size.xs};
+              }
+              .unifiedDataTableToolbarControlButton:has(
+                  [data-test-subj='unifiedDataTableSelectionBtn']
+                ),
+              .unifiedDataTableToolbarControlButton:has([data-test-subj='dscGridSelectAllDocs']) {
+                display: none !important;
+              }
+              .euiDataGrid__pagination {
+                padding-bottom: 0 !important;
+                margin-bottom: 0 !important;
+              }
+            `,
+          ]}
+          data-test-subj="workflowTriggerEventsTable"
+        >
+          {tableLoadingState === DataLoadingState.loading && (
+            <div
+              css={css({
+                position: 'absolute',
+                insetInlineStart: 0,
+                insetInlineEnd: 0,
+                top: 0,
+                zIndex: euiTheme.levels.toast,
+              })}
+            >
+              <EuiProgress size="xs" color="accent" />
+            </div>
+          )}
+          {dataView ? (
+            <>
+              <div
+                css={css({
+                  flex: 1,
+                  minHeight: 0,
+                  display: 'flex',
+                  flexDirection: 'column',
+                })}
+              >
+                <CellActionsProvider getTriggerCompatibleActions={getNoCellActions}>
+                  <UnifiedDataTable
+                    ariaLabelledBy="workflowTriggerEventsTable"
+                    columns={visibleTableColumns}
+                    columnsMeta={columnsMeta}
+                    rows={dataTableRows}
+                    dataView={dataView}
+                    loadingState={tableLoadingState}
+                    sampleSizeState={rowsLength}
+                    services={unifiedDataTableServices}
+                    onSetColumns={handleUnifiedDataTableSetColumns}
+                    showTimeCol={showTimeColumn}
+                    sort={sort}
+                    onSort={handleSortChange}
+                    isSortEnabled={true}
+                    isPaginationEnabled={false}
+                    dataGridDensityState={DataGridDensity.NORMAL}
+                    isPlainRecord={true}
+                    showFullScreenButton={true}
+                    showKeyboardShortcuts={false}
+                    enableInTableSearch={true}
+                    controlColumnIds={[SELECT_ROW]}
+                    customGridColumnsConfiguration={customGridColumnsConfiguration}
+                    renderCustomToolbar={renderCustomToolbar}
+                    renderCellPopover={renderCellPopover}
+                    externalCustomRenderers={externalCustomRenderers}
+                  />
+                </CellActionsProvider>
+              </div>
+              {hasMoreHits && isFetching && accumulatedHitsLength > 0 ? (
+                <div
+                  role="status"
+                  aria-label={i18n.translate(
+                    'workflows.workflowExecuteEventTriggerForm.loadingMoreTriggerEventsAria',
+                    {
+                      defaultMessage: 'Loading more trigger events',
+                    }
+                  )}
+                  data-test-subj="workflowTriggerEventsLoadingMore"
+                  css={css({
+                    flexShrink: 0,
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    paddingBlock: euiTheme.size.s,
+                  })}
+                >
+                  <EuiLoadingSpinner size="m" />
+                </div>
+              ) : null}
+            </>
+          ) : null}
+        </div>
+      </EuiFlexItem>
+    </>
+  );
+});
+
+WorkflowExecuteEventFormSearchResults.displayName = 'WorkflowExecuteEventFormSearchResults';
+
 export const WorkflowExecuteEventForm = ({
   definition,
   value: _value,
@@ -268,6 +548,16 @@ export const WorkflowExecuteEventForm = ({
 
   const activeSpaceId = useSpaceId();
   const replaySpaceId = activeSpaceId ?? 'default';
+
+  const customTriggerTypeIds = useMemo(
+    () => getWorkflowCustomTriggerTypeIds(definition),
+    [definition]
+  );
+  const customTriggerIdsKey = useMemo(
+    () => customTriggerTypeIds.join('\0'),
+    [customTriggerTypeIds]
+  );
+
   const [query, setQuery] = useState<Query>({ query: '', language: 'kuery' });
   const [submittedQuery, setSubmittedQuery] = useState<Query>({ query: '', language: 'kuery' });
   const [timeRange, setTimeRange] = useState<TimeRange>(
@@ -276,6 +566,7 @@ export const WorkflowExecuteEventForm = ({
   const [dataView, setDataView] = useState<DataView | null>(null);
   const dataViewCreatingRef = useRef(false);
   const [pageIndex, setPageIndex] = useState(0);
+  const triggerEventsSurfaceRef = useRef<HTMLDivElement | null>(null);
   const [visibleTableColumns, setVisibleTableColumns] = useState<string[]>(() => [
     ...DEFAULT_TRIGGER_EVENT_TABLE_COLUMNS,
   ]);
@@ -283,8 +574,9 @@ export const WorkflowExecuteEventForm = ({
   const [sort, setSort] = useState<SortOrder[]>([['@timestamp', 'desc']]);
 
   useEffect(() => {
-    setPageIndex(0);
-  }, [definition, submittedQuery.query, timeRange.from, timeRange.to]);
+    setQuery({ query: '', language: 'kuery' });
+    setSubmittedQuery({ query: '', language: 'kuery' });
+  }, [customTriggerIdsKey]);
 
   useEffect(() => {
     const dataViews = services.dataViews;
@@ -349,35 +641,58 @@ export const WorkflowExecuteEventForm = ({
   const queryEnabled =
     eventDrivenExecutionEnabled && !isEventConfigLoading && Boolean(services.http);
 
-  const customTriggerTypeIds = useMemo(
-    () => getWorkflowCustomTriggerTypeIds(definition),
-    [definition]
-  );
-
-  const searchParams = useMemo(
-    () => ({
-      ...(customTriggerTypeIds.length > 0 ? { triggerIds: customTriggerTypeIds } : {}),
-      kql: submittedQuery.query.trim() || undefined,
+  const searchParams = useMemo(() => {
+    const kqlTrimmed = submittedQuery.query.trim();
+    const kqlForRequest = kqlTrimmed || undefined;
+    const kqlAlreadyScopesTriggerId =
+      kqlTrimmed.length > 0 && doesSubmittedKqlReferenceTriggerIdField(kqlTrimmed);
+    return {
+      ...(kqlAlreadyScopesTriggerId || customTriggerTypeIds.length === 0
+        ? {}
+        : { triggerIds: customTriggerTypeIds }),
+      ...(kqlForRequest !== undefined ? { kql: kqlForRequest } : {}),
       from: timeRange.from,
       to: timeRange.to,
       page: pageIndex + 1,
       size: PAGE_SIZE,
-    }),
-    [customTriggerTypeIds, submittedQuery.query, timeRange.from, timeRange.to, pageIndex]
-  );
+    };
+  }, [customTriggerTypeIds, submittedQuery.query, timeRange.from, timeRange.to, pageIndex]);
 
   const {
     data: searchResult,
     isLoading: isSearchLoading,
+    isFetching,
+    isPreviousData,
     isError,
     error: searchError,
   } = useQueryTriggerEvents(searchParams, { enabled: queryEnabled });
 
+  const [accumulatedHits, setAccumulatedHits] = useAccumulatedTriggerEventSearchPages(
+    searchResult,
+    pageIndex,
+    isPreviousData
+  );
+
+  useLayoutEffect(() => {
+    setPageIndex(0);
+    setAccumulatedHits([]);
+    /**
+     * Must run in useLayoutEffect (not useEffect) so it executes before the passive effect in
+     * useAccumulatedTriggerEventSearchPages. Otherwise, when the next query is served from cache
+     * (isPreviousData false on the first paint), the accumulator applies hits and this reset
+     * would clear them afterward with no dependency change, leaving the grid empty.
+     */
+  }, [definition, submittedQuery.query, timeRange.from, timeRange.to, setAccumulatedHits]);
+
+  const handleLoadMoreTriggerEventPage = useCallback(() => {
+    setPageIndex((p) => p + 1);
+  }, []);
+
   const rows: TriggerEventTableRow[] = useMemo(() => {
-    if (!searchResult?.hits?.length) {
+    if (!accumulatedHits.length) {
       return [];
     }
-    return searchResult.hits.map((hit) => {
+    return accumulatedHits.map((hit) => {
       const source = hit.source as Record<string, unknown>;
       return {
         id: hit.id,
@@ -385,7 +700,26 @@ export const WorkflowExecuteEventForm = ({
         grid: triggerSourceToGridRow(hit.id, source),
       };
     });
-  }, [searchResult?.hits]);
+  }, [accumulatedHits]);
+
+  const hasMoreHits = Boolean(searchResult && accumulatedHits.length < searchResult.total);
+
+  useTriggerEventGridScrollLoadMore({
+    dataViewReady: Boolean(dataView),
+    queryEnabled,
+    surfaceRef: triggerEventsSurfaceRef,
+    isFetching,
+    hasMoreHits,
+    reboundKey: `${accumulatedHits.length}-${searchResult?.total ?? 0}`,
+    onNearBottom: handleLoadMoreTriggerEventPage,
+  });
+
+  const tableLoadingState = resolveTriggerEventTableLoadingState(
+    isSearchLoading,
+    accumulatedHits.length,
+    isEventConfigLoading,
+    isFetching
+  );
 
   const handleQueryChange = useCallback(
     ({ query: newQuery, dateRange }: { query?: Query; dateRange: TimeRange }) => {
@@ -404,8 +738,10 @@ export const WorkflowExecuteEventForm = ({
         setSubmittedQuery(newQuery);
       }
       setTimeRange(dateRange);
+      setPageIndex(0);
+      setAccumulatedHits([]);
     },
-    []
+    [setAccumulatedHits]
   );
 
   const dataTableRows = useMemo<DataTableRecord[]>(
@@ -561,6 +897,19 @@ export const WorkflowExecuteEventForm = ({
     );
   }, []);
 
+  const handleUnifiedDataTableSetColumns = useCallback(
+    (columns: string[], hideTimeColumn: boolean) => {
+      let nextColumns = columns.length > 0 ? [...columns] : [...VISIBLE_COLUMNS_FALLBACK];
+      const timeFieldName = dataView?.timeFieldName;
+      if (timeFieldName && nextColumns.length === 1 && nextColumns[0] === timeFieldName) {
+        nextColumns = [...nextColumns, 'summary'];
+      }
+      setVisibleTableColumns(nextColumns);
+      setShowTimeColumn(!hideTimeColumn);
+    },
+    [dataView]
+  );
+
   const timestampCellTypography = useMemo(
     () => euiFontSize(euiThemeContext, 'xs'),
     [euiThemeContext]
@@ -622,11 +971,6 @@ export const WorkflowExecuteEventForm = ({
     return <WorkflowTriggerEventDataGridCellPopover {...popoverProps} />;
   }, []);
 
-  const totalPages =
-    searchResult && searchResult.total > 0
-      ? Math.ceil(searchResult.total / (searchResult.size || PAGE_SIZE))
-      : 0;
-
   if (!eventDrivenExecutionEnabled && !isEventConfigLoading) {
     return (
       <EuiCallOut
@@ -686,185 +1030,34 @@ export const WorkflowExecuteEventForm = ({
         />
       </EuiFlexItem>
 
-      {isError && (
-        <EuiFlexItem grow={false}>
-          <EuiCallOut
-            announceOnMount
-            title={i18n.translate('workflows.workflowExecuteEventTriggerForm.errorTitle', {
-              defaultMessage: 'Could not load trigger events',
-            })}
-            color="danger"
-            iconType="error"
-            size="s"
-          >
-            <p>{formatQueryError(searchError)}</p>
-          </EuiCallOut>
-        </EuiFlexItem>
-      )}
-      {errors !== null && (
-        <EuiFlexItem grow={false}>
-          <EuiCallOut
-            announceOnMount
-            title={i18n.translate(
-              'workflows.workflowExecuteEventTriggerForm.executionPayloadErrorTitle',
-              {
-                defaultMessage: 'Fix the run payload before continuing',
-              }
-            )}
-            color="danger"
-            iconType="error"
-            size="s"
-          >
-            <p>{errors}</p>
-          </EuiCallOut>
-        </EuiFlexItem>
-      )}
-
-      <EuiFlexItem
-        grow={true}
-        css={css({
-          minHeight: 0,
-          display: 'flex',
-          flexDirection: 'column',
-        })}
-      >
-        <div
-          css={[
-            css({
-              position: 'relative',
-              display: 'flex',
-              flexDirection: 'column',
-              flex: 1,
-              minHeight: 0,
-              width: '100%',
-              minWidth: 0,
-              border: euiTheme.border.thin,
-              borderRadius: euiTheme.border.radius.medium,
-              boxSizing: 'border-box',
-              backgroundColor: tableSurfaceColor,
-            }),
-            css`
-              padding-block-start: ${euiTheme.size.m};
-              padding-inline: ${euiTheme.size.s};
-              padding-block-end: ${euiTheme.size.xs};
-              .unifiedDataTable__headerCell .euiDataGridHeaderCell__button {
-                margin-top: 0 !important;
-              }
-              .euiDataGridHeaderCell .euiDataGridHeaderCell__button,
-              .euiDataGridHeaderCell .euiDataGridHeaderCell__content {
-                font-size: ${timestampCellTypography.fontSize} !important;
-                line-height: ${timestampCellTypography.lineHeight};
-              }
-              .euiDataGridHeader,
-              .euiDataGridHeaderCell {
-                background-color: ${tableSurfaceColor} !important;
-              }
-              .euiDataGridRowCell[data-gridcell-column-id='@timestamp']
-                .euiDataGridRowCell__content,
-              .euiDataGridRowCell[data-gridcell-column-id='@timestamp']
-                .unifiedDataTable__cellValue {
-                white-space: nowrap;
-                font-size: ${timestampCellTypography.fontSize} !important;
-                line-height: ${timestampCellTypography.lineHeight};
-              }
-              .unifiedDataTable__inner {
-                flex: 1;
-                min-height: 0;
-                height: 100%;
-              }
-              .unifiedDataTableToolbar {
-                padding-top: ${euiTheme.size.xs};
-                padding-bottom: ${euiTheme.size.xs};
-              }
-              .unifiedDataTableToolbarControlButton:has(
-                  [data-test-subj='unifiedDataTableSelectionBtn']
-                ),
-              .unifiedDataTableToolbarControlButton:has([data-test-subj='dscGridSelectAllDocs']) {
-                display: none !important;
-              }
-              .euiDataGrid__pagination {
-                padding-bottom: 0 !important;
-                margin-bottom: 0 !important;
-              }
-            `,
-          ]}
-          data-test-subj="workflowTriggerEventsTable"
-        >
-          {(isSearchLoading || isEventConfigLoading) && (
-            <div
-              css={css({
-                position: 'absolute',
-                insetInlineStart: 0,
-                insetInlineEnd: 0,
-                top: 0,
-                zIndex: euiTheme.levels.toast,
-              })}
-            >
-              <EuiProgress size="xs" color="accent" />
-            </div>
-          )}
-          {dataView ? (
-            <CellActionsProvider getTriggerCompatibleActions={getNoCellActions}>
-              <UnifiedDataTable
-                ariaLabelledBy="workflowTriggerEventsTable"
-                columns={visibleTableColumns}
-                columnsMeta={columnsMeta}
-                rows={dataTableRows}
-                dataView={dataView}
-                loadingState={
-                  isSearchLoading || isEventConfigLoading
-                    ? DataLoadingState.loading
-                    : DataLoadingState.loaded
-                }
-                sampleSizeState={rows.length}
-                services={unifiedDataTableServices}
-                onSetColumns={(columns, hideTimeColumn) => {
-                  let nextColumns =
-                    columns.length > 0 ? [...columns] : [...VISIBLE_COLUMNS_FALLBACK];
-                  const timeFieldName = dataView.timeFieldName;
-                  if (
-                    timeFieldName &&
-                    nextColumns.length === 1 &&
-                    nextColumns[0] === timeFieldName
-                  ) {
-                    nextColumns = [...nextColumns, 'summary'];
-                  }
-                  setVisibleTableColumns(nextColumns);
-                  setShowTimeColumn(!hideTimeColumn);
-                }}
-                showTimeCol={showTimeColumn}
-                sort={sort}
-                onSort={handleSortChange}
-                isSortEnabled={true}
-                isPaginationEnabled={false}
-                dataGridDensityState={DataGridDensity.NORMAL}
-                isPlainRecord={true}
-                showFullScreenButton={true}
-                showKeyboardShortcuts={false}
-                enableInTableSearch={true}
-                controlColumnIds={[SELECT_ROW]}
-                customGridColumnsConfiguration={customGridColumnsConfiguration}
-                renderCustomToolbar={renderCustomToolbar}
-                renderCellPopover={renderCellPopover}
-                externalCustomRenderers={externalCustomRenderers}
-              />
-            </CellActionsProvider>
-          ) : null}
-        </div>
-      </EuiFlexItem>
-
-      {totalPages > 1 ? (
-        <EuiFlexItem grow={false}>
-          <EuiPagination
-            aria-label={i18n.translate('workflows.workflowExecuteEventTriggerForm.paginationAria', {
-              defaultMessage: 'Trigger events pages',
-            })}
-            pageCount={totalPages}
-            activePage={pageIndex}
-            onPageClick={(activePage) => setPageIndex(activePage)}
-          />
-        </EuiFlexItem>
-      ) : null}
+      <WorkflowExecuteEventFormSearchResults
+        isError={isError}
+        searchError={searchError}
+        errors={errors}
+        triggerEventsSurfaceRef={triggerEventsSurfaceRef}
+        euiTheme={euiTheme}
+        tableSurfaceColor={tableSurfaceColor}
+        timestampCellTypography={timestampCellTypography}
+        tableLoadingState={tableLoadingState}
+        dataView={dataView}
+        getNoCellActions={getNoCellActions}
+        visibleTableColumns={visibleTableColumns}
+        columnsMeta={columnsMeta}
+        dataTableRows={dataTableRows}
+        rowsLength={rows.length}
+        unifiedDataTableServices={unifiedDataTableServices}
+        handleUnifiedDataTableSetColumns={handleUnifiedDataTableSetColumns}
+        showTimeColumn={showTimeColumn}
+        sort={sort}
+        handleSortChange={handleSortChange}
+        customGridColumnsConfiguration={customGridColumnsConfiguration}
+        renderCustomToolbar={renderCustomToolbar}
+        renderCellPopover={renderCellPopover}
+        externalCustomRenderers={externalCustomRenderers}
+        hasMoreHits={hasMoreHits}
+        isFetching={isFetching}
+        accumulatedHitsLength={accumulatedHits.length}
+      />
     </EuiFlexGroup>
   );
 };
