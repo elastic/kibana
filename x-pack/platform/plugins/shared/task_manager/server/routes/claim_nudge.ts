@@ -29,7 +29,12 @@ const claimNudgeBodySchema = schema.object({
   ),
 });
 
-export function claimNudgeRoute({ router, logger, shouldRunTasks, onClaimNudge }: ClaimNudgeRouteParams) {
+export function claimNudgeRoute({
+  router,
+  logger,
+  shouldRunTasks,
+  onClaimNudge,
+}: ClaimNudgeRouteParams) {
   router.post(
     {
       path: '/internal/task_manager/_claim_nudge',
@@ -53,7 +58,9 @@ export function claimNudgeRoute({ router, logger, shouldRunTasks, onClaimNudge }
     },
     async (_, request, response) => {
       if (!shouldRunTasks) {
-        logger.info('[claim_nudge] received_nudge but node is not running background tasks, ignoring');
+        logger.info(
+          '[claim_nudge] received_nudge but node is not running background tasks, ignoring'
+        );
         return response.ok({ body: { acknowledged: true } });
       }
 

@@ -29,12 +29,16 @@ export interface TaskManagerClaimNudgeService {
   emitLocalNudge(source: string, taskTargets?: ClaimNudgeTarget[]): void;
 }
 
-class BaseClaimNudgeService implements TaskManagerClaimNudgeService {
+type NotifyHandler = (taskTargets?: ClaimNudgeTarget[]) => Promise<void>;
+
+class ClaimNudgeService implements TaskManagerClaimNudgeService {
   protected readonly logger: Logger;
   protected readonly claimNudgeSubject = new Subject<ClaimNudgeEvent>();
+  private readonly notifyHandler: NotifyHandler;
 
-  constructor(logger: Logger) {
+  constructor(logger: Logger, notifyHandler: NotifyHandler = async () => {}) {
     this.logger = logger;
+    this.notifyHandler = notifyHandler;
   }
 
   public get claimNudge$() {
@@ -44,7 +48,9 @@ class BaseClaimNudgeService implements TaskManagerClaimNudgeService {
   public start() {}
   public stop() {}
 
-  public async notify(_taskTargets?: ClaimNudgeTarget[]) {}
+  public async notify(taskTargets?: ClaimNudgeTarget[]) {
+    await this.notifyHandler(taskTargets);
+  }
 
   public emitLocalNudge(source: string, taskTargets: ClaimNudgeTarget[] = []) {
     this.logger.info(
@@ -54,29 +60,27 @@ class BaseClaimNudgeService implements TaskManagerClaimNudgeService {
   }
 }
 
-export class NoopClaimNudgeService extends BaseClaimNudgeService {
-  public override async notify(_taskTargets?: ClaimNudgeTarget[]) {
-    this.logger.info('[claim_nudge] strategy=noop, skipping notify');
-  }
+export function createNoopClaimNudgeService(logger: Logger): TaskManagerClaimNudgeService {
+  return new ClaimNudgeService(logger, async () => {
+    logger.info('[claim_nudge] strategy=noop, skipping notify');
+  });
 }
 
-export class GlobalCheckpointsClaimNudgeService extends BaseClaimNudgeService {
-  public override async notify(_taskTargets?: ClaimNudgeTarget[]) {
-    this.logger.info(
+export function createGlobalCheckpointsClaimNudgeService(
+  logger: Logger
+): TaskManagerClaimNudgeService {
+  return new ClaimNudgeService(logger, async () => {
+    logger.info(
       '[claim_nudge] strategy=global_checkpoints unavailable in this deployment, falling back to regular poll interval'
     );
-  }
+  });
 }
 
-export class HttpClaimNudgeService extends BaseClaimNudgeService {
-  private readonly client: HttpClaimNudgeClient;
-
-  constructor(logger: Logger, client: HttpClaimNudgeClient) {
-    super(logger);
-    this.client = client;
-  }
-
-  public override async notify(taskTargets: ClaimNudgeTarget[] = []) {
-    await this.client.notify(taskTargets);
-  }
+export function createHttpClaimNudgeService(
+  logger: Logger,
+  client: HttpClaimNudgeClient
+): TaskManagerClaimNudgeService {
+  return new ClaimNudgeService(logger, async (taskTargets = []) => {
+    await client.notify(taskTargets);
+  });
 }

@@ -83,10 +83,10 @@ import {
 } from './invalidate_api_keys/invalidate_api_keys_task';
 import { createApiKeyStrategy } from './api_key_strategy';
 import {
-  GlobalCheckpointsClaimNudgeService,
+  createGlobalCheckpointsClaimNudgeService,
   HttpClaimNudgeClient,
-  HttpClaimNudgeService,
-  NoopClaimNudgeService,
+  createHttpClaimNudgeService,
+  createNoopClaimNudgeService,
 } from './claim_nudge';
 import {
   CLAIM_NUDGE_STRATEGY_DISABLED,
@@ -516,11 +516,11 @@ export class TaskManagerPlugin
         timeoutMs: this.config.claim_nudge.http_timeout_ms,
         serverBasePath: http.basePath.serverBasePath,
       });
-      this.claimNudgeService = new HttpClaimNudgeService(this.logger, claimNudgeClient);
+      this.claimNudgeService = createHttpClaimNudgeService(this.logger, claimNudgeClient);
     } else if (claimNudgeStrategy === CLAIM_NUDGE_STRATEGY_GLOBAL_CHECKPOINTS) {
-      this.claimNudgeService = new GlobalCheckpointsClaimNudgeService(this.logger);
+      this.claimNudgeService = createGlobalCheckpointsClaimNudgeService(this.logger);
     } else {
-      this.claimNudgeService = new NoopClaimNudgeService(this.logger);
+      this.claimNudgeService = createNoopClaimNudgeService(this.logger);
     }
     if (this.shouldRunBackgroundTasks) {
       this.claimNudgeService.start();

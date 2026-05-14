@@ -62,7 +62,9 @@ export class HttpClaimNudgeClient {
 
     if (!this.hasLoggedConnectivityCheck) {
       this.logger.info(
-        `[claim_nudge] connectivity_check node_targets=${JSON.stringify(addresses)} path=${this.nudgePath} timeout_ms=${this.timeoutMs}`
+        `[claim_nudge] connectivity_check node_targets=${JSON.stringify(addresses)} path=${
+          this.nudgePath
+        } timeout_ms=${this.timeoutMs}`
       );
       this.hasLoggedConnectivityCheck = true;
     }
@@ -122,9 +124,7 @@ export class HttpClaimNudgeClient {
       discoveredNodes: activeNodes.length,
     };
 
-    this.logger.info(
-      `[claim_nudge] refreshed_node_cache nodes=${addresses.length} cache_age_ms=0`
-    );
+    this.logger.info(`[claim_nudge] refreshed_node_cache nodes=${addresses.length} cache_age_ms=0`);
 
     return {
       discoveredNodes: activeNodes.length,

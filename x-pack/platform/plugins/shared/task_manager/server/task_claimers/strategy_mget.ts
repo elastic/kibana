@@ -46,7 +46,7 @@ import {
 } from '../queries/mark_available_tasks_as_claimed';
 
 import type { TaskStore, SearchOpts } from '../task_store';
-import { isOk, asOk } from '../lib/result_type';
+import { asOk } from '../lib/result_type';
 import { buildClaimUpdate } from './lib/build_claim_update';
 import { executeClaimUpdates } from './lib/execute_claim_updates';
 import { selectTasksByCapacity } from './lib/task_selector_by_capacity';

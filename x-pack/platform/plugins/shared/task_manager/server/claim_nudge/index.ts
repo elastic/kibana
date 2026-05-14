@@ -8,8 +8,8 @@
 export type { TaskManagerClaimNudgeService } from './claim_nudge_service';
 export type { ClaimNudgeEvent, ClaimNudgeTarget } from './claim_nudge_service';
 export {
-  GlobalCheckpointsClaimNudgeService,
-  HttpClaimNudgeService,
-  NoopClaimNudgeService,
+  createGlobalCheckpointsClaimNudgeService,
+  createHttpClaimNudgeService,
+  createNoopClaimNudgeService,
 } from './claim_nudge_service';
 export { HttpClaimNudgeClient } from './http_claim_nudge_client';

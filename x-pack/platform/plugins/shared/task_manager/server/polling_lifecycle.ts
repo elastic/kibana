@@ -364,7 +364,9 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
         reservationReleased = true;
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
-        this.logger.info(`[claim_nudge] claim_by_id failed task_id=${target.taskId} reason=${message}`);
+        this.logger.info(
+          `[claim_nudge] claim_by_id failed task_id=${target.taskId} reason=${message}`
+        );
       } finally {
         if (!reservationReleased) {
           this.pool.releaseCapacity(reservationCost);

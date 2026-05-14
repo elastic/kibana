@@ -57,7 +57,10 @@ export async function executeClaimUpdates({
 
   const docs = (await taskStore.bulkGet(Object.keys(updatedTasks))).reduce<ConcreteTaskInstance[]>(
     (acc, taskResult) => {
-      if (isOk(taskResult) && taskResult.value.version === updatedTasks[taskResult.value.id].version) {
+      if (
+        isOk(taskResult) &&
+        taskResult.value.version === updatedTasks[taskResult.value.id].version
+      ) {
         acc.push(taskResult.value);
       } else if (isOk(taskResult)) {
         conflicts += 1;
