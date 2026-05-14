@@ -141,144 +141,147 @@ export const getRuleExecutor = (basePath: IBasePath) =>
           ).activeRules
         : [];
 
-    await withSpan({ name: BURN_RATE_EXECUTOR_SPAN_NAMES.ACTION_DISPATCH, type: 'rule' }, async () => {
-      if (results.length > 0) {
-        const alertLimit = alertsClient.getAlertLimitValue();
-        let hasReachedLimit = false;
-        let scheduledActionsCount = 0;
-        for (const result of results) {
-          const {
-            instanceId,
-            groupings,
-            shouldAlert,
-            longWindowDuration,
-            longWindowBurnRate,
-            shortWindowDuration,
-            shortWindowBurnRate,
-            window: windowDef,
-          } = result;
+    await withSpan(
+      { name: BURN_RATE_EXECUTOR_SPAN_NAMES.ACTION_DISPATCH, type: 'rule' },
+      async () => {
+        if (results.length > 0) {
+          const alertLimit = alertsClient.getAlertLimitValue();
+          let hasReachedLimit = false;
+          let scheduledActionsCount = 0;
+          for (const result of results) {
+            const {
+              instanceId,
+              groupings,
+              shouldAlert,
+              longWindowDuration,
+              longWindowBurnRate,
+              shortWindowDuration,
+              shortWindowBurnRate,
+              window: windowDef,
+            } = result;
 
-          const groupingsFlattened = flattenObject(groupings ?? {});
-          const groups = getFormattedGroups(groupingsFlattened);
+            const groupingsFlattened = flattenObject(groupings ?? {});
+            const groups = getFormattedGroups(groupingsFlattened);
 
-          const urlQuery = instanceId === ALL_VALUE ? '' : `?instanceId=${instanceId}`;
+            const urlQuery = instanceId === ALL_VALUE ? '' : `?instanceId=${instanceId}`;
+            const viewInAppUrl = addSpaceIdToPath(
+              basePath.publicBaseUrl,
+              spaceId,
+              `${SLOS_BASE_PATH}/${slo.id}${urlQuery}`
+            );
+            if (shouldAlert) {
+              const shouldSuppress = shouldSuppressInstanceId(suppressResults, instanceId);
+              if (scheduledActionsCount >= alertLimit) {
+                // need to set this so that warning is displayed in the UI and in the logs
+                hasReachedLimit = true;
+                break; // once limit is reached, we break out of the loop and don't schedule any more alerts
+              }
+
+              const sloSummary = await getSloSummary(esClient.asCurrentUser, slo, instanceId);
+
+              const reason = buildReason(
+                instanceId,
+                windowDef.actionGroup,
+                longWindowDuration,
+                longWindowBurnRate,
+                shortWindowDuration,
+                shortWindowBurnRate,
+                windowDef,
+                shouldSuppress
+              );
+
+              const alertId = instanceId;
+              const actionGroup = shouldSuppress
+                ? SUPPRESSED_PRIORITY_ACTION.id
+                : windowDef.actionGroup;
+
+              const apmFields = extractApmFieldsFromSLOSummary(sloSummary);
+
+              const { uuid } = alertsClient.report({
+                id: alertId,
+                actionGroup,
+                state: {
+                  alertState: AlertStates.ALERT,
+                },
+                payload: {
+                  [ALERT_REASON]: reason,
+                  [ALERT_EVALUATION_THRESHOLD]: windowDef.burnRateThreshold,
+                  [ALERT_EVALUATION_VALUE]: Math.min(longWindowBurnRate, shortWindowBurnRate),
+                  [ALERT_GROUP]: groups,
+                  [ALERT_GROUPING]: groupings, // Object, example: { host: { name: 'host-0' } }
+                  [SLO_ID_FIELD]: slo.id,
+                  [SLO_REVISION_FIELD]: slo.revision,
+                  [SLO_INSTANCE_ID_FIELD]: instanceId,
+                  [SLO_DATA_VIEW_ID_FIELD]: slo.indicator.params.dataViewId,
+                  ...getEcsGroupsFromFlattenGrouping(groupingsFlattened),
+                  ...apmFields,
+                },
+              });
+
+              const alertDetailsUrl = await getAlertDetailsUrl(basePath, spaceId, uuid);
+
+              const context = {
+                alertDetailsUrl,
+                reason,
+                longWindow: { burnRate: longWindowBurnRate, duration: longWindowDuration.format() },
+                shortWindow: {
+                  burnRate: shortWindowBurnRate,
+                  duration: shortWindowDuration.format(),
+                },
+                burnRateThreshold: windowDef.burnRateThreshold,
+                timestamp: startedAt.toISOString(),
+                viewInAppUrl,
+                sloId: slo.id,
+                sloName: slo.name,
+                sloInstanceId: instanceId,
+                slo,
+                sliValue: sloSummary?.sliValue ?? -1,
+                sloStatus: sloSummary?.status ?? 'NO_DATA',
+                sloErrorBudgetRemaining: sloSummary?.errorBudgetRemaining ?? 1,
+                sloErrorBudgetConsumed: sloSummary?.errorBudgetConsumed ?? 0,
+                suppressedAction: shouldSuppress ? windowDef.actionGroup : null,
+                grouping: groupings,
+              };
+
+              alertsClient.setAlertData({ id: alertId, context });
+              scheduledActionsCount++;
+            }
+          }
+
+          alertsClient.setAlertLimitReached(hasReachedLimit);
+        }
+
+        const recoveredAlerts = alertsClient.getRecoveredAlerts() ?? [];
+
+        for (const recoveredAlert of recoveredAlerts) {
+          const alertId = recoveredAlert.alert.getId();
+          const alertUuid = recoveredAlert.alert.getUuid();
+          const alertDetailsUrl = await getAlertDetailsUrl(basePath, spaceId, alertUuid);
+
+          const urlQuery = alertId === ALL_VALUE ? '' : `?instanceId=${alertId}`;
           const viewInAppUrl = addSpaceIdToPath(
             basePath.publicBaseUrl,
             spaceId,
             `${SLOS_BASE_PATH}/${slo.id}${urlQuery}`
           );
-          if (shouldAlert) {
-            const shouldSuppress = shouldSuppressInstanceId(suppressResults, instanceId);
-            if (scheduledActionsCount >= alertLimit) {
-              // need to set this so that warning is displayed in the UI and in the logs
-              hasReachedLimit = true;
-              break; // once limit is reached, we break out of the loop and don't schedule any more alerts
-            }
 
-            const sloSummary = await getSloSummary(esClient.asCurrentUser, slo, instanceId);
+          const context = {
+            timestamp: startedAt.toISOString(),
+            viewInAppUrl,
+            alertDetailsUrl,
+            sloId: slo.id,
+            sloName: slo.name,
+            sloInstanceId: alertId,
+            grouping: recoveredAlert.hit?.[ALERT_GROUPING],
+          };
 
-            const reason = buildReason(
-              instanceId,
-              windowDef.actionGroup,
-              longWindowDuration,
-              longWindowBurnRate,
-              shortWindowDuration,
-              shortWindowBurnRate,
-              windowDef,
-              shouldSuppress
-            );
-
-            const alertId = instanceId;
-            const actionGroup = shouldSuppress
-              ? SUPPRESSED_PRIORITY_ACTION.id
-              : windowDef.actionGroup;
-
-            const apmFields = extractApmFieldsFromSLOSummary(sloSummary);
-
-            const { uuid } = alertsClient.report({
-              id: alertId,
-              actionGroup,
-              state: {
-                alertState: AlertStates.ALERT,
-              },
-              payload: {
-                [ALERT_REASON]: reason,
-                [ALERT_EVALUATION_THRESHOLD]: windowDef.burnRateThreshold,
-                [ALERT_EVALUATION_VALUE]: Math.min(longWindowBurnRate, shortWindowBurnRate),
-                [ALERT_GROUP]: groups,
-                [ALERT_GROUPING]: groupings, // Object, example: { host: { name: 'host-0' } }
-                [SLO_ID_FIELD]: slo.id,
-                [SLO_REVISION_FIELD]: slo.revision,
-                [SLO_INSTANCE_ID_FIELD]: instanceId,
-                [SLO_DATA_VIEW_ID_FIELD]: slo.indicator.params.dataViewId,
-                ...getEcsGroupsFromFlattenGrouping(groupingsFlattened),
-                ...apmFields,
-              },
-            });
-
-            const alertDetailsUrl = await getAlertDetailsUrl(basePath, spaceId, uuid);
-
-            const context = {
-              alertDetailsUrl,
-              reason,
-              longWindow: { burnRate: longWindowBurnRate, duration: longWindowDuration.format() },
-              shortWindow: {
-                burnRate: shortWindowBurnRate,
-                duration: shortWindowDuration.format(),
-              },
-              burnRateThreshold: windowDef.burnRateThreshold,
-              timestamp: startedAt.toISOString(),
-              viewInAppUrl,
-              sloId: slo.id,
-              sloName: slo.name,
-              sloInstanceId: instanceId,
-              slo,
-              sliValue: sloSummary?.sliValue ?? -1,
-              sloStatus: sloSummary?.status ?? 'NO_DATA',
-              sloErrorBudgetRemaining: sloSummary?.errorBudgetRemaining ?? 1,
-              sloErrorBudgetConsumed: sloSummary?.errorBudgetConsumed ?? 0,
-              suppressedAction: shouldSuppress ? windowDef.actionGroup : null,
-              grouping: groupings,
-            };
-
-            alertsClient.setAlertData({ id: alertId, context });
-            scheduledActionsCount++;
-          }
+          alertsClient.setAlertData({
+            id: alertId,
+            context,
+          });
         }
-
-        alertsClient.setAlertLimitReached(hasReachedLimit);
       }
-
-      const recoveredAlerts = alertsClient.getRecoveredAlerts() ?? [];
-
-      for (const recoveredAlert of recoveredAlerts) {
-        const alertId = recoveredAlert.alert.getId();
-        const alertUuid = recoveredAlert.alert.getUuid();
-        const alertDetailsUrl = await getAlertDetailsUrl(basePath, spaceId, alertUuid);
-
-        const urlQuery = alertId === ALL_VALUE ? '' : `?instanceId=${alertId}`;
-        const viewInAppUrl = addSpaceIdToPath(
-          basePath.publicBaseUrl,
-          spaceId,
-          `${SLOS_BASE_PATH}/${slo.id}${urlQuery}`
-        );
-
-        const context = {
-          timestamp: startedAt.toISOString(),
-          viewInAppUrl,
-          alertDetailsUrl,
-          sloId: slo.id,
-          sloName: slo.name,
-          sloInstanceId: alertId,
-          grouping: recoveredAlert.hit?.[ALERT_GROUPING],
-        };
-
-        alertsClient.setAlertData({
-          id: alertId,
-          context,
-        });
-      }
-    });
+    );
 
     addTransactionLabels({ executor_outcome: 'success' });
     return { state: {} };
