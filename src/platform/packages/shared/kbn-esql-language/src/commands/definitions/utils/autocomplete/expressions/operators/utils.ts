@@ -17,8 +17,8 @@ export const LIKE_OPERATOR_REGEX = /\b(not\s+)?(r?like)\s*$/i;
 export const IS_NOT_REGEX = /\bis\s+not\b/i;
 export const IS_NULL_OPERATOR_REGEX =
   /\bis\s+(?:n(?:o(?:t(?:\s+n(?:u(?:l)?)?|\s*)?)?|u(?:l)?)?)?$/i;
-export const IN_OPERATOR_REGEX = /\b(?:not\s+)?in\s*\(?\s*$/i;
-export const NOT_IN_REGEX = /\bnot\s+in\s*$/i;
+export const IN_OPERATOR_REGEX = /\b(?:not\s+)?in\s*\(?\s*\/?\s*$/i;
+export const NOT_IN_REGEX = /\bnot\s+in\s*\(?\s*\/?\s*$/i;
 
 export function endsWithInOrNotInToken(innerText: string): boolean {
   return IN_OPERATOR_REGEX.test(innerText);

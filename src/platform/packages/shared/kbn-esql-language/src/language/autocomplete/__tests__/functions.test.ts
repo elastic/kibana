@@ -447,6 +447,15 @@ describe('functions arg suggestions', () => {
       expect(texts).toContain('($0)');
     });
 
+    it('IN operator in EVAL expression: does not add a new-column suggestion', async () => {
+      const { suggest } = await setup();
+      const suggestions = await suggest('FROM index | EVAL integerField IN /');
+      const texts = suggestions.map(({ text }) => text);
+
+      expect(texts).toContain('($0)');
+      expect(texts).not.toContain('col0 = ');
+    });
+
     it('NOT IN operator: suggests opening parenthesis for list', async () => {
       const { suggest } = await setup();
       const suggestions = await suggest('FROM index | EVAL result = CASE(integerField NOT IN /)');

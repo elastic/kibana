@@ -109,9 +109,9 @@ async function handleInfixOperator(
   const leftOperand = expressionRoot?.type === 'column' ? expressionRoot : undefined;
   const syntheticNode = createSyntheticNode(operatorName, text, leftOperand);
 
-  return dispatchOperators({
-    ...context,
-    expressionRoot: syntheticNode,
-    innerText: text,
-  });
+  // Keep the recovered context visible to the caller so it can recompute derived state.
+  context.expressionRoot = syntheticNode;
+  context.innerText = text;
+
+  return dispatchOperators(context);
 }
