@@ -92,11 +92,7 @@ export function computeCompositeSummary(
 }
 
 function buildMemberSummary(
-  ms: {
-    member: { sloId: string; weight: number; instanceId?: string };
-    sloName: string;
-    summary: { sliValue: number; status: SLOStatus };
-  },
+  ms: MemberSummaryData,
   normalisedWeight: number
 ): CompositeSLOMemberSummary {
   const { sliValue } = ms.summary;
@@ -110,6 +106,9 @@ function buildMemberSummary(
     sliValue,
     status: ms.summary.status,
     contribution,
+    fiveMinuteBurnRate: ms.summary.fiveMinuteBurnRate,
+    oneHourBurnRate: ms.summary.oneHourBurnRate,
+    oneDayBurnRate: ms.summary.oneDayBurnRate,
     ...(ms.member.instanceId !== undefined ? { instanceId: ms.member.instanceId } : {}),
   };
 }

@@ -156,12 +156,18 @@ describe('GetCompositeSLO', () => {
       name: 'Service A',
       weight: 6,
       normalisedWeight: 0.6,
+      fiveMinuteBurnRate: 1.0,
+      oneHourBurnRate: 0.8,
+      oneDayBurnRate: 0.5,
     });
     expect(result.members[1]).toMatchObject({
       id: sloB.id,
       name: 'Service B',
       weight: 4,
       normalisedWeight: 0.4,
+      fiveMinuteBurnRate: 2.0,
+      oneHourBurnRate: 1.5,
+      oneDayBurnRate: 1.0,
     });
   });
 

@@ -79,7 +79,10 @@ const compositeSloMemberSummarySchema = z.object({
   normalisedWeight: z.number(),
   sliValue: z.number(),
   contribution: z.number(),
-  status: compositeStatusSchema,
+  status: compositeStatusSchema,  
+  fiveMinuteBurnRate: z.number().optional(),
+  oneHourBurnRate: z.number().optional(),
+  oneDayBurnRate: z.number().optional(),
   instanceId: z.string().optional(),
 });
 

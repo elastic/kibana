@@ -61,11 +61,42 @@ describe('composite_slo_summary_index', () => {
             sliValue: 0.995,
             contribution: 0.597,
             status: 'HEALTHY',
+            fiveMinuteBurnRate: 1.1,
+            oneHourBurnRate: 0.9,
+            oneDayBurnRate: 0.8,
           },
         ],
       });
       expect(persisted?.members).toHaveLength(1);
       expect(persisted?.members?.[0].id).toBe('slo-a');
+      expect(persisted?.members?.[0].fiveMinuteBurnRate).toBe(1.1);
+    });
+
+    it('parses members that omit per-member burn rates (legacy index documents)', () => {
+      const persisted = mapCompositeSummaryIndexSource({
+        sliValue: 0.99,
+        status: 'HEALTHY',
+        errorBudgetInitial: 0.01,
+        errorBudgetConsumed: 0.2,
+        errorBudgetRemaining: 0.8,
+        errorBudgetIsEstimated: false,
+        fiveMinuteBurnRate: 0.1,
+        oneHourBurnRate: 0.2,
+        oneDayBurnRate: 0.3,
+        members: [
+          {
+            id: 'slo-a',
+            name: 'Service A',
+            weight: 1,
+            normalisedWeight: 1,
+            sliValue: 0.995,
+            contribution: 0.995,
+            status: 'HEALTHY',
+          },
+        ],
+      });
+      expect(persisted?.members).toHaveLength(1);
+      expect(persisted?.members?.[0].fiveMinuteBurnRate).toBeUndefined();
     });
 
     it('ignores extra keys on the index document', () => {

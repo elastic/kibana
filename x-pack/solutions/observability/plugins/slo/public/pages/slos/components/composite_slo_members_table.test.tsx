@@ -23,6 +23,10 @@ const baseMember = {
   normalisedWeight: 0.5,
   sliValue: 0.99,
   contribution: 0.495,
+  status: 'HEALTHY' as const,
+  fiveMinuteBurnRate: 1.25,
+  oneHourBurnRate: 0.9,
+  oneDayBurnRate: 0.7,
 };
 
 describe('CompositeSloMembersTable', () => {
@@ -61,5 +65,36 @@ describe('CompositeSloMembersTable', () => {
         /It may take some time before the data is aggregated and available for this member SLO/i
       )
     ).toBeInTheDocument();
+  });
+
+  it('renders member burn rate for the selected window and updates when the window changes', async () => {
+    const user = userEvent.setup();
+    render(<CompositeSloMembersTable members={[{ ...baseMember }]} percentFormat="0.0%" />);
+
+    expect(screen.getByText('1.25x')).toBeInTheDocument();
+
+    await user.click(screen.getByTestId('compositeSloMembersBurnRateWindowSelector'));
+    await user.click(screen.getByText('1h'));
+    expect(screen.queryByText('1.25x')).not.toBeInTheDocument();
+    expect(screen.getByText('0.9x')).toBeInTheDocument();
+  });
+
+  it('shows N/A for burn rate when legacy member docs omit burn rate fields', () => {
+    render(
+      <CompositeSloMembersTable
+        members={[
+          {
+            ...baseMember,
+            instanceId: 'prod',
+            fiveMinuteBurnRate: undefined,
+            oneHourBurnRate: undefined,
+            oneDayBurnRate: undefined,
+          },
+        ]}
+        percentFormat="0.0%"
+      />
+    );
+
+    expect(screen.getAllByText('N/A')).toHaveLength(1);
   });
 });
