@@ -6,7 +6,6 @@
  */
 
 import { CASE_USER_ACTION_SAVED_OBJECT } from '../../../../common/constants';
-import { PersistableStateAttachmentTypeRegistry } from '../../../attachment_framework/persistable_state_registry';
 import { createSavedObjectsSerializerMock } from '../../../client/mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -57,7 +56,6 @@ describe('UserActionPersister', () => {
   const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
   const mockLogger = loggerMock.create();
   const auditMockLocker = auditLoggerMock.create();
-  const persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
   const savedObjectsSerializer = createSavedObjectsSerializerMock();
 
   let persister: UserActionPersister;
@@ -72,7 +70,6 @@ describe('UserActionPersister', () => {
     persister = new UserActionPersister({
       log: mockLogger,
       unsecuredSavedObjectsClient,
-      persistableStateAttachmentTypeRegistry,
       savedObjectsSerializer,
       auditLogger: auditMockLocker,
     });

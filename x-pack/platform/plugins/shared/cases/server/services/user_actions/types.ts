@@ -27,7 +27,6 @@ import type {
   CaseAssignees,
   CaseCustomFields,
 } from '../../../common/types/domain';
-import type { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
 import type {
   UserActionPersistedAttributes,
   UserActionSavedObjectTransformed,
@@ -169,13 +168,8 @@ export type CommonBuilderArguments = CommonArguments & {
   valueKey: string;
 };
 
-export interface BuilderDeps {
-  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
-}
-
 export interface ServiceContext {
   log: Logger;
-  persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
   savedObjectsSerializer: ISavedObjectsSerializer;
   auditLogger: AuditLogger;
