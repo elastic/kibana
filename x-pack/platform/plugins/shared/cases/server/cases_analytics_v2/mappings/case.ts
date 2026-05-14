@@ -161,19 +161,26 @@ export const CASE_INDEX_MAPPING: MappingTypeMapping = {
             version: { type: 'integer' },
           },
         },
-        // Connector and external_service are indexed per their SO shape —
-        // analytics needs them to answer "which integrations are getting
-        // pushed to" and "which connectors are in use."
+        // Connector and external_service answer "which integrations are
+        // getting pushed to" and "which connector instances are in use."
+        //
+        // `connector.id`: the connector instance id (e.g. which jira config),
+        //   keyword for aggregations. Missing from the cases SO mapping
+        //   (SO uses `dynamic: false`, so it's stored in `_source` only) —
+        //   surfaced explicitly here because it's a high-signal analytics
+        //   dimension.
+        // `connector.fields`: polymorphic per connector type (jira has
+        //   `{issueType, priority, parent}`; ServiceNow has different
+        //   keys; etc.). `enabled: false` so ES stores the raw blob in
+        //   `_source` without trying to index it — keeps the index tolerant
+        //   of new connector types without mapping changes. Matches the
+        //   `settings` treatment for the same reason.
         connector: {
           properties: {
+            id: { type: 'keyword' },
             name: { type: 'text' },
             type: { type: 'keyword' },
-            fields: {
-              properties: {
-                key: { type: 'text' },
-                value: { type: 'text' },
-              },
-            },
+            fields: { type: 'object', enabled: false },
           },
         },
         external_service: {

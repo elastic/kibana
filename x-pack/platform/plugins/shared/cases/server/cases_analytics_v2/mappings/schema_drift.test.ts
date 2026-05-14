@@ -95,7 +95,16 @@ const buildFullAttributes = (): {
   time_to_resolve: 300000,
   incremental_id: 42,
   template: { id: 't-1', version: 1 },
-  connector: { name: 'jira', type: '.jira', fields: { key: 'k', value: 'v' } },
+  // Realistic shape: runtime connectors always carry an `id` (which connector
+  // instance) and a polymorphic `fields` blob (jira's are not key/value).
+  // The fixture matches reality so a regression where v2 mapping forgets
+  // `connector.id` or assumes `fields.{key,value}` fails Layer 1.
+  connector: {
+    id: 'connector-1',
+    name: 'jira',
+    type: '.jira',
+    fields: { issueType: '10006', priority: 'High', parent: null },
+  },
   external_service: {
     pushed_at: '2026-05-02T00:00:00.000Z',
     pushed_by: { username: 'jane', full_name: 'J', email: 'j@e.com', profile_uid: 'p-1' },

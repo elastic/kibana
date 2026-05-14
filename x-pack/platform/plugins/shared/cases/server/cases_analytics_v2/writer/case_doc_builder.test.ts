@@ -147,6 +147,29 @@ describe('buildCaseDoc', () => {
     expect(doc.cases.external_service).toBeNull();
   });
 
+  it('passes through real-world connector shapes — id + polymorphic fields', () => {
+    // Regression guard: runtime jira connectors carry an `id` and a
+    // `fields` blob that is NOT `{key,value}`. The v2 mapping must accept
+    // both (mapped `connector.id` keyword + opaque `connector.fields`).
+    // Before this was fixed, the v2 strict mapping rejected real cases
+    // with "dynamic introduction of [id] within [cases.connector] is not
+    // allowed."
+    const so = fullCaseSO();
+    (so.attributes as unknown as { connector: unknown }).connector = {
+      id: 'connector-1',
+      name: 'jira',
+      type: '.jira',
+      fields: { issueType: '10006', priority: 'High', parent: null },
+    };
+    const doc = buildCaseDoc(so);
+    expect(doc.cases.connector).toEqual({
+      id: 'connector-1',
+      name: 'jira',
+      type: '.jira',
+      fields: { issueType: '10006', priority: 'High', parent: null },
+    });
+  });
+
   it('preserves the case id under cases.id', () => {
     const doc = buildCaseDoc(fullCaseSO());
     expect(doc.cases.id).toBe('case-1');
