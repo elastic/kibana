@@ -1,7 +1,0 @@
-prs:
-- https://github.com/elastic/kibana/pull/266711
-type: bug-fix
-products:
-- product: cloud-serverless
-  target: 2026-05-12
-title: Add test for circuit breaker scenario from ES

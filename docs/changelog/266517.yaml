@@ -6,5 +6,4 @@ products:
   target: 2026-05-12
 areas:
 - Search and data
-title: Registered feature reads the SO object from current active kibana space
-description: Fixes space-aware inference model lists so feature connector pickers match per-space model settings
+title: Fix space-aware inference model lists so feature connector pickers match per-space model settings

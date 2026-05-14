@@ -8,4 +8,4 @@ products:
   target: 2026-05-12
 areas:
 - Dashboards and visualizations
-title: Fix close behaviour of ES|QL control flyout
+title: Fix close behavior of ES|QL control flyout
