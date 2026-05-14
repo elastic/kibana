@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-import { PREFIX } from '../../shared/test_ids';
-
-export const ALERT_REASON_BODY_TEST_ID = `${PREFIX}AlertReasonBody` as const;
+export { TrialUsageBadge } from './trial_usage_badge';

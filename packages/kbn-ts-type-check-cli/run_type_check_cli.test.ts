@@ -376,6 +376,36 @@ describe('run_type_check_cli', () => {
     expect(mockArchiveTSBuildArtifacts).toHaveBeenCalledTimes(1);
   });
 
+  it('only uploads (not restores) when --upload-archive is used on the contract path', async () => {
+    tsProjectsState.projects = [createProject()];
+    mockGetMoonChangedFiles.mockResolvedValue(['packages/foo/src/index.ts']);
+    mockGetAffectedMoonProjectsFromChangedFiles.mockResolvedValue([
+      { id: 'foo', sourceRoot: 'packages/foo' },
+    ]);
+
+    const ctx = createContext({ profile: 'quick', 'upload-archive': true });
+    await contractHandler(ctx);
+
+    expect(mockRestoreTSBuildArtifacts).not.toHaveBeenCalled();
+    expect(ctx.procRunner.run).toHaveBeenCalledTimes(1);
+    expect(mockArchiveTSBuildArtifacts).toHaveBeenCalledTimes(1);
+  });
+
+  it('only restores (not uploads) when --restore-archive is used on the contract path', async () => {
+    tsProjectsState.projects = [createProject()];
+    mockGetMoonChangedFiles.mockResolvedValue(['packages/foo/src/index.ts']);
+    mockGetAffectedMoonProjectsFromChangedFiles.mockResolvedValue([
+      { id: 'foo', sourceRoot: 'packages/foo' },
+    ]);
+
+    const ctx = createContext({ profile: 'quick', 'restore-archive': true });
+    await contractHandler(ctx);
+
+    expect(mockRestoreTSBuildArtifacts).toHaveBeenCalledTimes(1);
+    expect(ctx.procRunner.run).toHaveBeenCalledTimes(1);
+    expect(mockArchiveTSBuildArtifacts).not.toHaveBeenCalled();
+  });
+
   it('skips staged scope immediately when nothing is staged', async () => {
     tsProjectsState.projects = [createProject()];
     mockHasStagedChanges.mockResolvedValue(false);
