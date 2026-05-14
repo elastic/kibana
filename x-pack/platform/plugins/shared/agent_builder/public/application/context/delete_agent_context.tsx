@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createContext, useCallback, useContext, useState } from 'react';
+import React, { createContext, useCallback, useContext, useState } from 'react';
 import type { AgentDefinition } from '@kbn/agent-builder-common';
 import {
   EuiButton,
@@ -21,7 +21,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
-import React from 'react';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import { useKibana } from '../hooks/use_kibana';
 import { queryKeys } from '../query_keys';
@@ -109,7 +109,13 @@ const AgentDeleteModal: React.FC<AgentDeleteModalProps> = ({
         </EuiText>
       </EuiModalBody>
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={onClose} isDisabled={isDeleting}>
+        <EuiButtonEmpty
+          onClick={onClose}
+          isDisabled={isDeleting}
+          data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_AGENTS}
+          data-ebt-action={AGENT_BUILDER_UI_EBT.action.manageAgents.DELETE_MODAL_CANCEL}
+          data-ebt-detail={AGENT_BUILDER_UI_EBT.entity.AGENT}
+        >
           <FormattedMessage
             id="xpack.agentBuilder.agents.deleteModal.cancelButton"
             defaultMessage="Cancel"
@@ -123,6 +129,9 @@ const AgentDeleteModal: React.FC<AgentDeleteModalProps> = ({
           fill
           isLoading={isDeleting}
           data-test-subj="agentBuilderAgentDeleteConfirmButton"
+          data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_AGENTS}
+          data-ebt-action={AGENT_BUILDER_UI_EBT.action.manageAgents.DELETE_MODAL_CONFIRM}
+          data-ebt-detail={AGENT_BUILDER_UI_EBT.entity.AGENT}
         >
           <FormattedMessage
             id="xpack.agentBuilder.agents.deleteModal.confirmButton"

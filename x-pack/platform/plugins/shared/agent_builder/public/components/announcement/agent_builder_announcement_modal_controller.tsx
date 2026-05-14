@@ -25,7 +25,10 @@ import { AIChatExperience, canUserChangeSpaceChatExperience } from '@kbn/ai-assi
 import { useGlobalUiSetting, useKibana } from '@kbn/kibana-react-plugin/public';
 import { AI_CHAT_EXPERIENCE_TYPE, HIDE_ANNOUNCEMENTS_ID } from '@kbn/management-settings-ids';
 import { AgentBuilderAnnouncementModal } from '@kbn/agent-builder-browser';
-import { AGENT_BUILDER_EVENT_TYPES } from '@kbn/agent-builder-common/telemetry';
+import {
+  AGENT_BUILDER_EVENT_TYPES,
+  AGENT_BUILDER_UI_EBT,
+} from '@kbn/agent-builder-common/telemetry';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { useAgentBuilderAnnouncementModalSeenState } from './use_agent_builder_announcement_modal_seen';
@@ -70,7 +73,13 @@ function showRevertToast({
             defaultMessage="Manage further changes in {link}"
             values={{
               link: (
-                <EuiLink href={genAiSettingsUrl}>
+                <EuiLink
+                  href={genAiSettingsUrl}
+                  data-ebt-element={AGENT_BUILDER_UI_EBT.element.ANNOUNCEMENT_TOAST}
+                  data-ebt-action={
+                    AGENT_BUILDER_UI_EBT.action.announcement.TOAST_GENAI_SETTINGS_LINK
+                  }
+                >
                   {'GenAI '}
                   <span style={{ whiteSpace: 'nowrap' }}>
                     {'Settings '}
@@ -113,7 +122,13 @@ function showCtaToast({
               defaultMessage="Manage further changes in {link}"
               values={{
                 link: (
-                  <EuiLink href={genAiSettingsUrl}>
+                  <EuiLink
+                    href={genAiSettingsUrl}
+                    data-ebt-element={AGENT_BUILDER_UI_EBT.element.ANNOUNCEMENT_TOAST}
+                    data-ebt-action={
+                      AGENT_BUILDER_UI_EBT.action.announcement.TOAST_GENAI_SETTINGS_LINK
+                    }
+                  >
                     {'GenAI '}
                     <span style={{ whiteSpace: 'nowrap' }}>
                       {'Settings '}

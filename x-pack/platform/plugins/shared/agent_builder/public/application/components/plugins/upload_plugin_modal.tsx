@@ -20,6 +20,7 @@ import {
   EuiModalHeaderTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import { labels } from '../../utils/i18n';
 import { useUploadPlugin } from '../../hooks/plugins/use_install_plugin';
 
@@ -73,7 +74,13 @@ export const UploadPluginModal: React.FC<UploadPluginModalProps> = ({ onClose })
         </EuiForm>
       </EuiModalBody>
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={onClose} disabled={isLoading}>
+        <EuiButtonEmpty
+          onClick={onClose}
+          disabled={isLoading}
+          data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_PLUGINS}
+          data-ebt-action={AGENT_BUILDER_UI_EBT.action.managePlugins.INSTALL_UPLOAD_MODAL_CANCEL}
+          data-ebt-detail={AGENT_BUILDER_UI_EBT.entity.PLUGIN}
+        >
           {labels.plugins.cancelButton}
         </EuiButtonEmpty>
         <EuiButton
@@ -83,6 +90,9 @@ export const UploadPluginModal: React.FC<UploadPluginModalProps> = ({ onClose })
           isLoading={isLoading}
           disabled={!file}
           data-test-subj="agentBuilderUploadPluginSubmitButton"
+          data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_PLUGINS}
+          data-ebt-action={AGENT_BUILDER_UI_EBT.action.managePlugins.INSTALL_UPLOAD_MODAL_CONFIRM}
+          data-ebt-detail={AGENT_BUILDER_UI_EBT.entity.PLUGIN}
         >
           {labels.plugins.installButton}
         </EuiButton>

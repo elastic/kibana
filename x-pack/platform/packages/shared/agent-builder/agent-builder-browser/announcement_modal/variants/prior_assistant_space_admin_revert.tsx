@@ -18,6 +18,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import {
   AnnouncementFeatureBulletList,
   AnnouncementReleaseNotesButton,
@@ -76,6 +77,8 @@ export function PriorAssistantSpaceAdminRevert({
                   target="_blank"
                   rel="noopener noreferrer"
                   data-test-subj="agentBuilderAnnouncementLearnMoreLink"
+                  data-ebt-element={AGENT_BUILDER_UI_EBT.element.ANNOUNCEMENT_MODAL}
+                  data-ebt-action={AGENT_BUILDER_UI_EBT.action.announcement.MODAL_LEARN_MORE_LINK}
                 >
                   {i18n.NOTE_REPLACES_LEGACY_AGENTS_LEARN_MORE}
                 </EuiLink>
@@ -93,6 +96,8 @@ export function PriorAssistantSpaceAdminRevert({
               flush="left"
               onClick={onRevert}
               data-test-subj="agentBuilderAnnouncementRevertButton"
+              data-ebt-element={AGENT_BUILDER_UI_EBT.element.ANNOUNCEMENT_MODAL}
+              data-ebt-action={AGENT_BUILDER_UI_EBT.action.announcement.MODAL_REVERT}
             >
               {i18n.REVERT_BUTTON}
             </EuiButtonEmpty>
@@ -104,6 +109,8 @@ export function PriorAssistantSpaceAdminRevert({
                 fill
                 onClick={onContinue}
                 data-test-subj="agentBuilderAnnouncementContinueButton"
+                data-ebt-element={AGENT_BUILDER_UI_EBT.element.ANNOUNCEMENT_MODAL}
+                data-ebt-action={AGENT_BUILDER_UI_EBT.action.announcement.MODAL_CONTINUE}
               >
                 {i18n.USE_AI_AGENT_BUTTON}
               </EuiButton>

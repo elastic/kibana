@@ -8,6 +8,7 @@
 import React from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import { AGENT_BUILDER_RELEASE_NOTES_URL } from './announcement_urls';
 import * as i18n from './translations';
 
@@ -26,6 +27,8 @@ export function AnnouncementReleaseNotesButton() {
       color="primary"
       fill={false}
       data-test-subj="agentBuilderAnnouncementReleaseNotesButton"
+      data-ebt-element={AGENT_BUILDER_UI_EBT.element.ANNOUNCEMENT_MODAL}
+      data-ebt-action={AGENT_BUILDER_UI_EBT.action.announcement.MODAL_RELEASE_NOTES}
     >
       {i18n.RELEASE_NOTES_BUTTON}
     </EuiButton>

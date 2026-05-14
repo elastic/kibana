@@ -68,6 +68,8 @@ export const AGENT_BUILDER_UI_EBT = {
     MANAGE_CONNECTORS_TABLE: 'agentBuilder.manage.connectors.table',
     INAPP_CHAT: 'agentBuilder.inappChat',
     ACCESS_PROMPT: 'agentBuilder.access.prompt',
+    ANNOUNCEMENT_MODAL: 'agentBuilder.announcement.modal',
+    ANNOUNCEMENT_TOAST: 'agentBuilder.announcement.toast',
   },
 
   // `data-ebt-action`
@@ -113,6 +115,7 @@ export const AGENT_BUILDER_UI_EBT = {
       RESPONSE_FEEDBACK_NEGATIVE: 'conversation_response_feedback_negative',
       ATTACHMENT_OPEN: 'conversation_attachment_open',
       ATTACHMENT_DOWNLOAD: 'conversation_attachment_download',
+      ATTACHMENT_REMOVE: 'conversation_attachment_remove',
       EXTERNAL_LINK_OPEN: 'conversation_external_link_open',
       EXTERNAL_LINK_CANCEL: 'conversation_external_link_cancel',
       ROUND_ERROR_RETRY: 'conversation_round_error_retry',
@@ -132,6 +135,10 @@ export const AGENT_BUILDER_UI_EBT = {
       EMBEDDABLE_CONVERSATIONS_OPEN: 'conversation_embeddable_conversations_open',
       STALE_ATTACHMENT_DISMISS: 'conversation_stale_attachment_dismiss',
       STALE_ATTACHMENT_RETRY: 'conversation_stale_attachment_retry',
+      ATTACHMENT_HEADER_PRIMARY_CLICK: 'conversation_attachment_header_primary_click',
+      ATTACHMENT_HEADER_SECONDARY_CLICK: 'conversation_attachment_header_secondary_click',
+      ATTACHMENT_HEADER_OVERFLOW_OPEN: 'conversation_attachment_header_overflow_open',
+      ATTACHMENT_HEADER_OVERFLOW_ITEM: 'conversation_attachment_header_overflow_item',
     },
     layer2Crud: {
       ENTITY_ADD_FROM_LIBRARY: 'entity_add_from_library',
@@ -142,6 +149,8 @@ export const AGENT_BUILDER_UI_EBT = {
       ENTITY_COPY_ID: 'entity_copy_id',
       PANEL_REMOVE_MODAL_CONFIRM: 'layer2_panel_remove_modal_confirm',
       PANEL_REMOVE_MODAL_CANCEL: 'layer2_panel_remove_modal_cancel',
+      LIBRARY_SORT_FILTER_MENU_OPEN: 'layer2_library_sort_filter_menu_open',
+      LIBRARY_SORT_FILTER_APPLY: 'layer2_library_sort_filter_apply',
     },
     manageGlobal: {
       MANAGE_ENTITY_LIST_VIEW: 'manage_entity_list_view',
@@ -156,6 +165,16 @@ export const AGENT_BUILDER_UI_EBT = {
       INAPP_AGENT_SWITCH: 'inapp_agent_switch',
       INAPP_OPEN_FULLSCREEN: 'inapp_open_fullscreen',
       FULLSCREEN_ENTRY_POINT: 'fullscreen_entry_point',
+      WELCOME_DOCS_LINK: 'inapp_welcome_docs_link',
+      WELCOME_GENAI_SETTINGS_LINK: 'inapp_welcome_genai_settings_link',
+    },
+    /** First-run AI Agent announcement modal and follow-up toasts */
+    announcement: {
+      MODAL_CONTINUE: 'announcement_modal_continue',
+      MODAL_REVERT: 'announcement_modal_revert',
+      MODAL_RELEASE_NOTES: 'announcement_modal_release_notes',
+      MODAL_LEARN_MORE_LINK: 'announcement_modal_learn_more_link',
+      TOAST_GENAI_SETTINGS_LINK: 'announcement_toast_genai_settings_link',
     },
     access: {
       CONNECT_LLM: 'access_connect_llm',
@@ -182,6 +201,7 @@ export const AGENT_BUILDER_UI_EBT = {
       MCP_NAV_BULK_IMPORT: 'manage_tools_mcp_nav_bulk_import',
       MCP_NAV_CLIENTS: 'manage_tools_mcp_nav_clients',
       MCP_DOCS_EXTERNAL: 'manage_tools_mcp_docs_external',
+      MCP_CLIENTS_TABLE_ACTIONS_OPEN: 'manage_tools_mcp_clients_table_actions_open',
       TABLE_CONTEXT_OPEN: 'manage_tools_table_context_open',
       TABLE_ROW_EDIT: 'manage_tools_table_row_edit',
       TABLE_ROW_DELETE: 'manage_tools_table_row_delete',
@@ -213,12 +233,15 @@ export const AGENT_BUILDER_UI_EBT = {
       DELETE_MODAL_CANCEL: 'manage_tools_delete_modal_cancel',
       BULK_DELETE_MODAL_CONFIRM: 'manage_tools_bulk_delete_modal_confirm',
       BULK_DELETE_MODAL_CANCEL: 'manage_tools_bulk_delete_modal_cancel',
+      TABLE_LABELS_VIEW_MORE: 'manage_tools_table_labels_view_more',
     },
     /** Agent overview, create/edit form, edit-details flyout */
     manageAgent: {
       OVERVIEW_COPY_ID: 'manage_agent_overview_copy_id',
       OVERVIEW_DOCS_LINK: 'manage_agent_overview_docs_link',
       OVERVIEW_EDIT_DETAILS: 'manage_agent_overview_edit_details',
+      OVERVIEW_DESCRIPTION_READ_TOGGLE: 'manage_agent_overview_description_read_toggle',
+      FORM_SKILLS_HUB_LINK: 'manage_agent_form_skills_hub_link',
       FORM_SAVE: 'manage_agent_form_save',
       FORM_SAVE_AND_CHAT: 'manage_agent_form_save_and_chat',
       FORM_CHAT_NAV: 'manage_agent_form_chat_nav',
@@ -238,6 +261,11 @@ export const AGENT_BUILDER_UI_EBT = {
       DOCS_LEARN_MORE: 'manage_agents_docs_learn_more',
       TABLE_ROW_EDIT_OPEN: 'manage_agents_table_row_edit_open',
       TABLE_ACTION_DELETE: 'manage_agents_table_action_delete',
+      DELETE_MODAL_CONFIRM: 'manage_agents_delete_modal_confirm',
+      DELETE_MODAL_CANCEL: 'manage_agents_delete_modal_cancel',
+      TABLE_LABELS_VIEW_MORE: 'manage_agents_table_labels_view_more',
+      TABLE_ROW_CHAT_OPEN: 'manage_agents_table_row_chat_open',
+      TABLE_ROW_CLONE_OPEN: 'manage_agents_table_row_clone_open',
     },
     /** Global skills library and per-agent skill flyouts */
     manageSkills: {
@@ -253,12 +281,18 @@ export const AGENT_BUILDER_UI_EBT = {
       FORM_SAVE: 'manage_skills_form_save',
       DELETE_MODAL_CONFIRM: 'manage_skills_delete_modal_confirm',
       DELETE_MODAL_CANCEL: 'manage_skills_delete_modal_cancel',
+      FORM_REFERENCED_CONTENT_ADD_FILE: 'manage_skills_form_referenced_content_add_file',
+      FORM_REFERENCED_CONTENT_REMOVE_FILE: 'manage_skills_form_referenced_content_remove_file',
     },
     /** Global plugins library */
     managePlugins: {
       INSTALL_MENU_OPEN: 'manage_plugins_install_menu_open',
       INSTALL_FROM_URL: 'manage_plugins_install_from_url',
       INSTALL_UPLOAD: 'manage_plugins_install_upload',
+      INSTALL_FROM_URL_MODAL_CONFIRM: 'manage_plugins_install_from_url_modal_confirm',
+      INSTALL_FROM_URL_MODAL_CANCEL: 'manage_plugins_install_from_url_modal_cancel',
+      INSTALL_UPLOAD_MODAL_CONFIRM: 'manage_plugins_install_upload_modal_confirm',
+      INSTALL_UPLOAD_MODAL_CANCEL: 'manage_plugins_install_upload_modal_cancel',
       TABLE_ROW_OPEN: 'manage_plugins_table_row_open',
       TABLE_CONTEXT_OPEN: 'manage_plugins_table_context_open',
       TABLE_CONTEXT_VIEW: 'manage_plugins_table_context_view',
@@ -326,6 +360,14 @@ export const AGENT_BUILDER_UI_EBT = {
       EMBED_AGENTS_MENU: 'embed_agents_menu',
       EMBED_CONVERSATIONS_MENU: 'embed_conversations_menu',
       EMBED_MAIN_MENU: 'embed_main_menu',
+    },
+    librarySortFilter: {
+      SORT_ASC: 'library_sort_filter_sort_asc',
+      SORT_DESC: 'library_sort_filter_sort_desc',
+      FILTER_ALL: 'library_sort_filter_filter_all',
+      FILTER_ACTIVE: 'library_sort_filter_filter_active',
+      FILTER_ELASTIC: 'library_sort_filter_filter_elastic',
+      FILTER_CUSTOM: 'library_sort_filter_filter_custom',
     },
   },
 

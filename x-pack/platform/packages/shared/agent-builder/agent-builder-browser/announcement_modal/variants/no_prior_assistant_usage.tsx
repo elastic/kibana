@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiModalBody, EuiModalFooter } from '@elastic/eui';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import {
   AnnouncementFeatureBulletList,
   AnnouncementReleaseNotesButton,
@@ -34,6 +35,8 @@ export function NoPriorAssistantUsage({ onContinue }: AnnouncementModalVariantPr
                 fill
                 onClick={onContinue}
                 data-test-subj="agentBuilderAnnouncementContinueButton"
+                data-ebt-element={AGENT_BUILDER_UI_EBT.element.ANNOUNCEMENT_MODAL}
+                data-ebt-action={AGENT_BUILDER_UI_EBT.action.announcement.MODAL_CONTINUE}
               >
                 {i18n.USE_AI_AGENT_BUTTON}
               </EuiButton>
