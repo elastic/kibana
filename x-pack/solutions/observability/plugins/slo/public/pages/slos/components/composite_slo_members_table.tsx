@@ -6,14 +6,38 @@
  */
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiBasicTable, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiBadge, EuiBasicTable, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import type { CompositeSLOMemberSummary } from '@kbn/slo-schema';
 import React, { lazy, Suspense, useMemo, useState } from 'react';
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
+import { displayStatus } from '../../../components/slo/slo_badges/slo_status_badge';
 
 const SLODetailsFlyout = lazy(() => import('../../slo_details/shared_flyout/slo_details_flyout'));
+
+function MemberStatusBadge({ status }: { status: CompositeSLOMemberSummary['status'] }) {
+  const statusInfo = displayStatus[status];
+  if (!statusInfo) {
+    return <>{NOT_AVAILABLE_LABEL}</>;
+  }
+  if (status === 'NO_DATA') {
+    return (
+      <EuiToolTip
+        position="top"
+        content={i18n.translate('xpack.slo.compositeSloList.members.statusNoDataTooltip', {
+          defaultMessage:
+            'It may take some time before the data is aggregated and available for this member SLO.',
+        })}
+      >
+        <EuiBadge tabIndex={0} color={statusInfo.badgeColor}>
+          {statusInfo.displayText}
+        </EuiBadge>
+      </EuiToolTip>
+    );
+  }
+  return <EuiBadge color={statusInfo.badgeColor}>{statusInfo.displayText}</EuiBadge>;
+}
 
 const getMemberColumns = (
   percentFormat: string
@@ -25,6 +49,16 @@ const getMemberColumns = (
     }),
     truncateText: true,
     width: '220px',
+  },
+  {
+    field: 'status',
+    name: i18n.translate('xpack.slo.compositeSloList.members.status', {
+      defaultMessage: 'Status',
+    }),
+    width: '110px',
+    render: (status: CompositeSLOMemberSummary['status']) => (
+      <MemberStatusBadge status={status} />
+    ),
   },
   {
     field: 'instanceId',
