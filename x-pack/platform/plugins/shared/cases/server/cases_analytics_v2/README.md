@@ -137,11 +137,21 @@ space-A cases.
 
 ## Runtime field lift
 
-Each template-declared extended field is keyword-indexed under
-`cases.extended_fields.<name>_as_<type>`, with a typed runtime field
-published at `cases.<name>_as_<type>` — Lens and Discover get numeric / date
-/ boolean filter operators instead of string-contains. The runtime field
-reads from `doc[...]` (doc_values) at query time.
+Each template-declared extended field is stored at
+`cases.extended_fields.<name>_as_<type>` inside a `flattened` mapping, with
+a typed runtime field published at `cases.<name>_as_<type>` — Lens and
+Discover get numeric / date / boolean filter operators instead of
+string-contains. The runtime field reads the raw string from
+`params._source.cases.extended_fields.<...>` at query time.
+
+`flattened` is used (not `dynamic_template`-per-key) so the index mapping
+stays at one field for `extended_fields` regardless of how many distinct
+snake-keys exist across templates cluster-wide. With per-key dynamic
+mappings, a tenant with many templates trips ES's default
+`index.mapping.total_fields.limit` (1000). The trade-off is per-doc
+`_source` decode cost at query time vs `doc_values` — small for the
+volumes this surface is sized for, and the runtime path was already on
+the hot path for typed lookup.
 
 ## Schema
 
@@ -155,9 +165,9 @@ The `.cases` index mapping mirrors the cases SO mapping at
   denormalizes to per-type keyword arrays — `cases.observables.url: ["..."]`,
   `cases.observables.ipv4: [...]`. Type↔value relationship preserved via the
   field path; `description` dropped (free text, not an analytics dimension).
-- **`extended_fields`**: SO uses `flattened`; v2 uses `object` with a
-  dynamic_template mapping every child to keyword (required so the runtime
-  field lift can address each child individually).
+- **`extended_fields`**: SO uses `flattened`; v2 matches. Runtime fields
+  at `cases.<snake>` parse the raw string from `_source` at query time
+  (see "Runtime field lift" above for the field-limit rationale).
 - **`time_to_acknowledge` / `time_to_investigate` / `time_to_resolve` /
   `in_progress_at`**: present in the SO's persisted attributes but not the SO
   mapping (the SO uses `dynamic: false`); v2 maps them explicitly because
@@ -250,7 +260,7 @@ cases_analytics_v2/
 │
 ├── mappings/
 │   ├── case.ts                CASE_INDEX_MAPPING (dynamic: strict)
-│   ├── dynamic_templates.ts   keyword templates for extended_fields + observables
+│   ├── dynamic_templates.ts   keyword template for observables denormalization
 │   └── schema_drift.test.ts   round-trip + snake-key collision guards
 │
 ├── writer/

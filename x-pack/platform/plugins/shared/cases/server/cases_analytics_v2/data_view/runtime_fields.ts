@@ -88,9 +88,16 @@ export const splitSnakeKey = (snakeKey: string): { name: string; suffix: string 
 };
 
 /**
- * Generate the painless source that reads the indexed keyword at
- * `cases.extended_fields.<snakeKey>` and emits a parsed value of the target
- * runtime type.
+ * Generate the painless source that reads the user-supplied value at
+ * `cases.extended_fields.<snakeKey>` (via `_source`) and emits a parsed
+ * value of the target runtime type.
+ *
+ * **Why `_source` rather than `doc[...]`.** `cases.extended_fields` is
+ * mapped as `flattened` (see `mappings/case.ts` for the field-limit
+ * rationale). `flattened` sub-keys aren't independently doc-values-backed,
+ * so per-key access has to go through `_source`. The trade-off is small
+ * per-doc overhead at query time vs. unbounded sub-key cardinality at index
+ * time — for the volumes this surface is sized for, the right call.
  *
  * **Defensive by design**: any parse failure falls through silently — the
  * runtime field simply has no value for that doc, which is the intended
@@ -99,9 +106,18 @@ export const splitSnakeKey = (snakeKey: string): { name: string; suffix: string 
  * experience for the whole field whenever a single bad value exists.
  */
 export const buildPainlessSource = (snakeKey: string, runtimeType: RuntimeType): string => {
-  const indexedPath = `cases.extended_fields.${snakeKey}`;
-  const docAccess = `doc['${indexedPath}']`;
-  const guard = `if (${docAccess}.size() == 0) { return; } String v = ${docAccess}.value; if (v == null || v.length() == 0) { return; }`;
+  // Defensive `_source` walk: `params._source` may be null on docs without
+  // source; the nested objects may be absent on partial writes. Each step
+  // returns early instead of throwing — see "defensive by design" above.
+  // Use `Map.get(key)` for the leaf so snake-keys with any character set
+  // resolve correctly (template field names are user-supplied).
+  const guard =
+    `def src = params._source; if (src == null) { return; } ` +
+    `def c = src.cases; if (c == null) { return; } ` +
+    `def ef = c.extended_fields; if (ef == null) { return; } ` +
+    `def raw = ef.get('${snakeKey}'); if (raw == null) { return; } ` +
+    `String v = raw instanceof String ? (String) raw : raw.toString(); ` +
+    `if (v.length() == 0) { return; }`;
 
   switch (runtimeType) {
     case 'long':
@@ -141,7 +157,9 @@ export interface RuntimeFieldEntry {
  *
  * Publication path: `cases.<snakeKey>` (e.g. `cases.riskScore_as_long`),
  * sitting alongside `cases.title`, `cases.severity`, etc. The painless reads
- * from the indexed keyword `cases.extended_fields.<snakeKey>` under the hood.
+ * the raw string from `params._source.cases.extended_fields.<snakeKey>`
+ * under the hood (the indexed value lives inside a `flattened` field —
+ * see `mappings/case.ts`).
  *
  * **Why not shadow the indexed path?**
  * Kibana data views resolve a field name by merging

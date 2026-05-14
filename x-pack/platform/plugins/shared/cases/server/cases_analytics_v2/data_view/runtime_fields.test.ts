@@ -72,11 +72,17 @@ describe('suffixToRuntimeType', () => {
 });
 
 describe('buildPainlessSource', () => {
-  it('reads from doc[cases.extended_fields.<snake>] with a defensive guard', () => {
+  it('reads from params._source.cases.extended_fields.<snake> with a defensive guard', () => {
+    // `cases.extended_fields` is mapped `flattened` — sub-keys aren't
+    // independently doc-values-backed, so the runtime field has to walk
+    // `_source`. Each null-step short-circuits via `return` so a missing
+    // value yields an empty runtime field (matches doc_values semantics).
     const src = buildPainlessSource('riskScore_as_long', 'long');
-    expect(src).toContain("doc['cases.extended_fields.riskScore_as_long']");
-    expect(src).toContain('size() == 0');
+    expect(src).toContain('params._source');
+    expect(src).toContain('c.extended_fields');
+    expect(src).toContain("ef.get('riskScore_as_long')");
     expect(src).toContain('v.length() == 0');
+    expect(src).not.toContain("doc['cases.extended_fields"); // doc_values path no longer used
   });
 
   it('uses Long.parseLong for long', () => {
@@ -108,15 +114,16 @@ describe('buildPainlessSource', () => {
 
 describe('buildRuntimeFieldEntry', () => {
   it('publishes the runtime field at top-level cases.<snake>', () => {
-    // The published field name lives one level above the indexed keyword
+    // The published field name lives one level above the source location
     // (cases.extended_fields.<snake>) so Lens / Discover surface the typed
-    // runtime field. The painless still reads from the indexed path.
+    // runtime field. The painless reads from `_source` because the source
+    // location is inside a `flattened` mapping.
     const entry = buildRuntimeFieldEntry('riskScore_as_long');
     expect(entry).not.toBeNull();
     expect(entry!.fieldName).toBe('cases.riskScore_as_long');
     expect(entry!.spec.type).toBe('long');
     expect(entry!.spec.script?.source).toContain('Long.parseLong');
-    expect(entry!.spec.script?.source).toContain("doc['cases.extended_fields.riskScore_as_long']");
+    expect(entry!.spec.script?.source).toContain("ef.get('riskScore_as_long')");
   });
 
   it('returns null for keyword (already keyword at index level — no runtime needed)', () => {

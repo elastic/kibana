@@ -244,14 +244,19 @@ export const CASE_INDEX_MAPPING: MappingTypeMapping = {
         // parent stays `dynamic: 'strict'`). Children are forced to keyword
         // by `CASE_DYNAMIC_TEMPLATES.observables_keyword`.
         observables: { type: 'object', dynamic: true },
-        // Children dynamically mapped to keyword via
-        // `CASE_DYNAMIC_TEMPLATES.extended_fields_keyword`. `dynamic: true`
-        // here scopes the dynamic behaviour to this subtree and does not
-        // relax the parent's `dynamic: 'strict'`. Typed querying happens via
+        // `flattened` — keeps the index mapping bounded at one field
+        // regardless of how many distinct `<name>_as_<type>` snake-keys
+        // exist across templates cluster-wide. A `dynamic_template` per
+        // sub-key burns one mapping slot per unique snake-key and trips
+        // the default `index.mapping.total_fields.limit` (1000) on
+        // tenants with many templates. Typed querying still happens via
         // runtime fields published at `cases.<snake>` — see
-        // `data_view/runtime_fields.ts` (added in a later commit) for the
-        // lift.
-        extended_fields: { type: 'object', dynamic: true },
+        // `data_view/runtime_fields.ts`. Those fields read the value from
+        // `params._source` at query time (flattened sub-keys aren't
+        // independently doc-values-backed); slightly slower per-doc than
+        // doc_values but unbounded sub-key cardinality is the right
+        // trade-off here. Matches the cases SO mapping.
+        extended_fields: { type: 'flattened' },
       },
     },
   },
