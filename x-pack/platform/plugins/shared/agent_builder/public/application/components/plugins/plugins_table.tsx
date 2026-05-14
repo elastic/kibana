@@ -34,12 +34,8 @@ import { PluginContextMenu } from './plugins_table_context_menu';
 export const AgentBuilderPluginsTable = memo(() => {
   const { euiTheme } = useEuiTheme();
   const {
-    services: {
-      analytics,
-      appParams: { history },
-    },
+    services: { analytics },
   } = useKibana();
-  const pathname = history.location.pathname;
   const deleteModalTitleId = useGeneratedHtmlId();
   const deletePluginUsedByAgentsTitleId = useGeneratedHtmlId();
   const { plugins, isLoading: isLoadingPlugins, error: pluginsError } = usePluginsService();
@@ -136,7 +132,6 @@ export const AgentBuilderPluginsTable = memo(() => {
               ebt_action: AGENT_BUILDER_UI_EBT.action.managePlugins.DELETE_MODAL_CANCEL,
               ebt_detail: AGENT_BUILDER_UI_EBT.entity.PLUGIN,
               element_kind: 'button',
-              location_pathname: pathname,
             });
             cancelDelete();
           }}
@@ -146,7 +141,6 @@ export const AgentBuilderPluginsTable = memo(() => {
               ebt_action: AGENT_BUILDER_UI_EBT.action.managePlugins.DELETE_MODAL_CONFIRM,
               ebt_detail: AGENT_BUILDER_UI_EBT.entity.PLUGIN,
               element_kind: 'button',
-              location_pathname: pathname,
             });
             void confirmDelete();
           }}
@@ -270,12 +264,8 @@ const PluginUsedByAgentsModal = ({
   onConfirm: () => void;
 }) => {
   const {
-    services: {
-      analytics,
-      appParams: { history },
-    },
+    services: { analytics },
   } = useKibana();
-  const pathname = history.location.pathname;
 
   return (
     <EuiConfirmModal
@@ -288,7 +278,6 @@ const PluginUsedByAgentsModal = ({
           ebt_action: AGENT_BUILDER_UI_EBT.action.manageGlobal.USED_BY_WARNING_DISMISS,
           ebt_detail: AGENT_BUILDER_UI_EBT.entity.PLUGIN,
           element_kind: 'button',
-          location_pathname: pathname,
         });
         onCancel();
       }}
@@ -298,7 +287,6 @@ const PluginUsedByAgentsModal = ({
           ebt_action: AGENT_BUILDER_UI_EBT.action.manageGlobal.USED_BY_WARNING_PROCEEDED,
           ebt_detail: AGENT_BUILDER_UI_EBT.entity.PLUGIN,
           element_kind: 'button',
-          location_pathname: pathname,
         });
         void onConfirm();
       }}

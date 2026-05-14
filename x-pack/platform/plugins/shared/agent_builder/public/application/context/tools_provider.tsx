@@ -45,12 +45,8 @@ export const ToolsActionsContext = createContext<ToolsActionsContextType | undef
 export const ToolsProvider = ({ children }: { children: React.ReactNode }) => {
   const { navigateToAgentBuilderUrl, createAgentBuilderUrl } = useNavigation();
   const {
-    services: {
-      analytics,
-      appParams: { history },
-    },
+    services: { analytics },
   } = useKibana();
-  const pathname = history.location.pathname;
 
   const createTool = useCallback(
     (toolType: ToolType) => {
@@ -193,7 +189,6 @@ export const ToolsProvider = ({ children }: { children: React.ReactNode }) => {
               ebt_action: AGENT_BUILDER_UI_EBT.action.manageTools.DELETE_MODAL_CANCEL,
               ebt_detail: AGENT_BUILDER_UI_EBT.entity.TOOL,
               element_kind: 'button',
-              location_pathname: pathname,
             });
             cancelDelete();
           }}
@@ -203,7 +198,6 @@ export const ToolsProvider = ({ children }: { children: React.ReactNode }) => {
               ebt_action: AGENT_BUILDER_UI_EBT.action.manageTools.DELETE_MODAL_CONFIRM,
               ebt_detail: AGENT_BUILDER_UI_EBT.entity.TOOL,
               element_kind: 'button',
-              location_pathname: pathname,
             });
             void confirmDelete();
           }}
@@ -226,7 +220,6 @@ export const ToolsProvider = ({ children }: { children: React.ReactNode }) => {
               ebt_action: AGENT_BUILDER_UI_EBT.action.manageGlobal.USED_BY_WARNING_DISMISS,
               ebt_detail: AGENT_BUILDER_UI_EBT.entity.TOOL,
               element_kind: 'button',
-              location_pathname: pathname,
             });
             cancelForceDelete();
           }}
@@ -236,7 +229,6 @@ export const ToolsProvider = ({ children }: { children: React.ReactNode }) => {
               ebt_action: AGENT_BUILDER_UI_EBT.action.manageGlobal.USED_BY_WARNING_PROCEEDED,
               ebt_detail: AGENT_BUILDER_UI_EBT.entity.TOOL,
               element_kind: 'button',
-              location_pathname: pathname,
             });
             void confirmForceDelete();
           }}
@@ -269,7 +261,6 @@ export const ToolsProvider = ({ children }: { children: React.ReactNode }) => {
               ebt_action: AGENT_BUILDER_UI_EBT.action.manageTools.BULK_DELETE_MODAL_CANCEL,
               ebt_detail: AGENT_BUILDER_UI_EBT.entity.TOOL,
               element_kind: 'button',
-              location_pathname: pathname,
             });
             cancelBulkDeleteTools();
           }}
@@ -279,7 +270,6 @@ export const ToolsProvider = ({ children }: { children: React.ReactNode }) => {
               ebt_action: AGENT_BUILDER_UI_EBT.action.manageTools.BULK_DELETE_MODAL_CONFIRM,
               ebt_detail: AGENT_BUILDER_UI_EBT.entity.TOOL,
               element_kind: 'button',
-              location_pathname: pathname,
             });
             void confirmBulkDeleteTools();
           }}

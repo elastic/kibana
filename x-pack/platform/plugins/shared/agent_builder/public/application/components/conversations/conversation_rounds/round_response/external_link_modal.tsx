@@ -37,10 +37,8 @@ interface ExternalLinkModalContentProps {
 const ExternalLinkModalContent: React.FC<ExternalLinkModalContentProps> = ({ url, onClose }) => {
   const titleId = useGeneratedHtmlId({ prefix: 'externalLinkModal' });
   const {
-    services: { analytics, appParams },
+    services: { analytics },
   } = useKibana();
-
-  const pathname = appParams?.history?.location.pathname ?? window.location.pathname;
 
   return (
     <EuiConfirmModal
@@ -58,7 +56,6 @@ const ExternalLinkModalContent: React.FC<ExternalLinkModalContentProps> = ({ url
           ebt_element: AGENT_BUILDER_UI_EBT.element.CONVERSATION_ROUND_RESPONSE,
           ebt_action: AGENT_BUILDER_UI_EBT.action.conversation.EXTERNAL_LINK_CANCEL,
           element_kind: 'button',
-          location_pathname: pathname,
         });
         onClose();
       }}
@@ -67,7 +64,6 @@ const ExternalLinkModalContent: React.FC<ExternalLinkModalContentProps> = ({ url
           ebt_element: AGENT_BUILDER_UI_EBT.element.CONVERSATION_ROUND_RESPONSE,
           ebt_action: AGENT_BUILDER_UI_EBT.action.conversation.EXTERNAL_LINK_OPEN,
           element_kind: 'button',
-          location_pathname: pathname,
         });
         window.open(url, '_blank', 'noreferrer');
         onClose();

@@ -36,12 +36,8 @@ import { SkillContextMenu } from './skills_table_context_menu';
 export const AgentBuilderSkillsTable = memo(() => {
   const { euiTheme } = useEuiTheme();
   const {
-    services: {
-      analytics,
-      appParams: { history },
-    },
+    services: { analytics },
   } = useKibana();
-  const pathname = history.location.pathname;
   const { skills, isLoading: isLoadingSkills, error: skillsError } = useSkillsService();
   const [tablePageIndex, setTablePageIndex] = useState(0);
   const [tablePageSize, setTablePageSize] = useState(10);
@@ -153,7 +149,6 @@ export const AgentBuilderSkillsTable = memo(() => {
               ebt_action: AGENT_BUILDER_UI_EBT.action.manageSkills.DELETE_MODAL_CANCEL,
               ebt_detail: AGENT_BUILDER_UI_EBT.entity.SKILL,
               element_kind: 'button',
-              location_pathname: pathname,
             });
             cancelDelete();
           }}
@@ -163,7 +158,6 @@ export const AgentBuilderSkillsTable = memo(() => {
               ebt_action: AGENT_BUILDER_UI_EBT.action.manageSkills.DELETE_MODAL_CONFIRM,
               ebt_detail: AGENT_BUILDER_UI_EBT.entity.SKILL,
               element_kind: 'button',
-              location_pathname: pathname,
             });
             void confirmDelete();
           }}
@@ -186,7 +180,6 @@ export const AgentBuilderSkillsTable = memo(() => {
               ebt_action: AGENT_BUILDER_UI_EBT.action.manageGlobal.USED_BY_WARNING_DISMISS,
               ebt_detail: AGENT_BUILDER_UI_EBT.entity.SKILL,
               element_kind: 'button',
-              location_pathname: pathname,
             });
             cancelForceDelete();
           }}
@@ -196,7 +189,6 @@ export const AgentBuilderSkillsTable = memo(() => {
               ebt_action: AGENT_BUILDER_UI_EBT.action.manageGlobal.USED_BY_WARNING_PROCEEDED,
               ebt_detail: AGENT_BUILDER_UI_EBT.entity.SKILL,
               element_kind: 'button',
-              location_pathname: pathname,
             });
             void confirmForceDelete();
           }}

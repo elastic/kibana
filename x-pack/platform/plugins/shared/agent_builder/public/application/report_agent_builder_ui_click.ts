@@ -13,7 +13,10 @@ import {
 
 export function reportAgentBuilderUiClick(
   analytics: AnalyticsServiceStart,
-  params: ReportUiClickParams
+  params: Omit<ReportUiClickParams, 'location_pathname'>
 ): void {
-  analytics.reportEvent<ReportUiClickParams>(AGENT_BUILDER_EVENT_TYPES.UiClick, params);
+  analytics.reportEvent<ReportUiClickParams>(AGENT_BUILDER_EVENT_TYPES.UiClick, {
+    ...params,
+    location_pathname: window.location.pathname,
+  });
 }

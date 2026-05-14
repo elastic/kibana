@@ -31,10 +31,7 @@ export const BaseDeleteConversationModal: React.FC<BaseDeleteConversationModalPr
   const [isLoading, setIsLoading] = useState(false);
   const confirmModalTitleId = useGeneratedHtmlId({ prefix: 'deleteConversationModal' });
   const {
-    services: {
-      analytics,
-      appParams: { history },
-    },
+    services: { analytics },
   } = useKibana();
 
   const handleDelete = useCallback(async () => {
@@ -45,7 +42,6 @@ export const BaseDeleteConversationModal: React.FC<BaseDeleteConversationModalPr
       ebt_element: AGENT_BUILDER_UI_EBT.element.CONVERSATION_TITLE,
       ebt_action: AGENT_BUILDER_UI_EBT.action.conversation.DELETE_CONFIRM,
       element_kind: 'button',
-      location_pathname: history.location.pathname,
     });
     setIsLoading(true);
     try {
@@ -54,17 +50,16 @@ export const BaseDeleteConversationModal: React.FC<BaseDeleteConversationModalPr
     } catch {
       setIsLoading(false);
     }
-  }, [analytics, conversationId, history.location.pathname, onDelete, onClose]);
+  }, [analytics, conversationId, onDelete, onClose]);
 
   const handleCancel = useCallback(() => {
     reportAgentBuilderUiClick(analytics, {
       ebt_element: AGENT_BUILDER_UI_EBT.element.CONVERSATION_TITLE,
       ebt_action: AGENT_BUILDER_UI_EBT.action.conversation.DELETE_CANCEL,
       element_kind: 'button',
-      location_pathname: history.location.pathname,
     });
     onClose();
-  }, [analytics, history.location.pathname, onClose]);
+  }, [analytics, onClose]);
 
   if (!conversationId) {
     return null;

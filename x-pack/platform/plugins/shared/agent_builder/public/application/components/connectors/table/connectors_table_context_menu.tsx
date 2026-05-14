@@ -39,10 +39,8 @@ const DisconnectConfirmModal: React.FC<{
     services: {
       notifications: { toasts },
       analytics,
-      appParams: { history },
     },
   } = useKibana();
-  const pathname = history.location.pathname;
   const { invalidateConnectors } = useConnectorsActions();
   const disconnectModalTitleId = useGeneratedHtmlId({ prefix: 'disconnectConnectorTitle' });
 
@@ -76,7 +74,6 @@ const DisconnectConfirmModal: React.FC<{
           ebt_action: AGENT_BUILDER_UI_EBT.action.manageConnectors.OAUTH_DISCONNECT_MODAL_CANCEL,
           ebt_detail: AGENT_BUILDER_UI_EBT.entity.CONNECTOR,
           element_kind: 'button',
-          location_pathname: pathname,
         });
         onCancel();
       }}
@@ -86,7 +83,6 @@ const DisconnectConfirmModal: React.FC<{
           ebt_action: AGENT_BUILDER_UI_EBT.action.manageConnectors.OAUTH_DISCONNECT_MODAL_CONFIRM,
           ebt_detail: AGENT_BUILDER_UI_EBT.entity.CONNECTOR,
           element_kind: 'button',
-          location_pathname: pathname,
         });
         disconnect();
       }}

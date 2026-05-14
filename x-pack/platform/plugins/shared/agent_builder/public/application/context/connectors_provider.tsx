@@ -52,10 +52,8 @@ export const ConnectorsProvider = ({ children }: { children: React.ReactNode }) 
     services: {
       plugins: { triggersActionsUi },
       analytics,
-      appParams: { history },
     },
   } = useKibana();
-  const pathname = history.location.pathname;
   const queryClient = useQueryClient();
 
   // Flyout state
@@ -152,7 +150,6 @@ export const ConnectorsProvider = ({ children }: { children: React.ReactNode }) 
               ebt_action: AGENT_BUILDER_UI_EBT.action.manageConnectors.DELETE_MODAL_CANCEL,
               ebt_detail: AGENT_BUILDER_UI_EBT.entity.CONNECTOR,
               element_kind: 'button',
-              location_pathname: pathname,
             });
             cancelDelete();
           }}
@@ -162,7 +159,6 @@ export const ConnectorsProvider = ({ children }: { children: React.ReactNode }) 
               ebt_action: AGENT_BUILDER_UI_EBT.action.manageConnectors.DELETE_MODAL_CONFIRM,
               ebt_detail: AGENT_BUILDER_UI_EBT.entity.CONNECTOR,
               element_kind: 'button',
-              location_pathname: pathname,
             });
             confirmDelete();
           }}
@@ -186,7 +182,6 @@ export const ConnectorsProvider = ({ children }: { children: React.ReactNode }) 
               ebt_action: AGENT_BUILDER_UI_EBT.action.manageConnectors.BULK_DELETE_MODAL_CANCEL,
               ebt_detail: AGENT_BUILDER_UI_EBT.entity.CONNECTOR,
               element_kind: 'button',
-              location_pathname: pathname,
             });
             cancelBulkDeleteConnectors();
           }}
@@ -196,7 +191,6 @@ export const ConnectorsProvider = ({ children }: { children: React.ReactNode }) 
               ebt_action: AGENT_BUILDER_UI_EBT.action.manageConnectors.BULK_DELETE_MODAL_CONFIRM,
               ebt_detail: AGENT_BUILDER_UI_EBT.entity.CONNECTOR,
               element_kind: 'button',
-              location_pathname: pathname,
             });
             confirmBulkDeleteConnectors();
           }}

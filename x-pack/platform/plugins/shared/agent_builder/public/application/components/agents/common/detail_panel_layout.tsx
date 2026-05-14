@@ -60,12 +60,8 @@ export const DetailPanelLayout: React.FC<DetailPanelLayoutProps> = ({
   const { euiTheme } = useEuiTheme();
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const {
-    services: {
-      analytics,
-      appParams: { history },
-    },
+    services: { analytics },
   } = useKibana();
-  const pathname = history.location.pathname;
 
   const openConfirmRemove = () => setIsConfirmOpen(true);
 
@@ -170,7 +166,6 @@ export const DetailPanelLayout: React.FC<DetailPanelLayoutProps> = ({
                 ebt_action: ebt.ebtActionCancel,
                 ...(ebt.ebtDetail ? { ebt_detail: ebt.ebtDetail } : {}),
                 element_kind: 'button',
-                location_pathname: pathname,
               });
             }
             setIsConfirmOpen(false);
@@ -183,7 +178,6 @@ export const DetailPanelLayout: React.FC<DetailPanelLayoutProps> = ({
                 ebt_action: ebt.ebtActionConfirm,
                 ...(ebt.ebtDetail ? { ebt_detail: ebt.ebtDetail } : {}),
                 element_kind: 'button',
-                location_pathname: pathname,
               });
             }
             setIsConfirmOpen(false);
