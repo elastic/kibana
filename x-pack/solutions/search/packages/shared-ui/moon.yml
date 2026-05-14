@@ -18,6 +18,7 @@ project:
   sourceRoot: x-pack/solutions/search/packages/shared-ui
 dependsOn:
   - '@kbn/i18n'
+  - '@kbn/cloud-plugin'
 tags:
   - shared-browser
   - package
