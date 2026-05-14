@@ -9,7 +9,9 @@ description: >-
 
 # Flaky Test Investigator
 
-Investigate a flaky Scout, FTR, or Jest test failure and identify a fix if one is available.
+Investigate a flaky Scout, FTR, or Jest test failure and reach a sound conclusion about what is actually happening and what should be done about it.
+
+**The goal is the right diagnosis, not a PR.** A confident "this is a real product bug, escalate to team X", "this is environmental and will likely self-resolve", or "this is a recurring offender that needs structural work" is a successful outcome. A patch that hides the symptom is not.
 
 You should accept any of these inputs:
 
@@ -26,23 +28,23 @@ More access means more context on the failure:
 - **Buildkite API** (for logs).
 - **AppEx QA cluster.**
 
-# What "fixing" a flaky test actually means (read this first)
+# What "fixing" a flaky test actually means
 
-A large fraction of merged "flaky test fixes" in Kibana do not hold — the same test, or a close variant, fails again within weeks or months. Treat the investigation as an exercise in **avoiding a fix that only changes the symptom**.
+A large fraction of merged "flaky test fixes" in Kibana do not hold — the same test, or a close variant, fails again within weeks or months. The investigation's job is to **understand the failure well enough to avoid a conclusion that only changes the symptom**.
 
 ## The "looks like a fix vs. is a fix" gap
 
 A few patterns recur often enough that they should reshape your defaults:
 
 - **A green `flaky-test-runner` run is necessary but not sufficient.** Many PRs that passed flaky-test-runner all-green nonetheless recurred later. The runner cannot detect environmental coupling, slow downstream services, lane pollution, or load-pattern-dependent races. Treat the green check as one signal, not proof.
-- **Fixes that change only test code recur more often than fixes that change product code.** "Fix the test, not the product" is the easy default, but a meaningful share of flaky tests are exposing real product bugs (missing awaits in handlers, racy state, unstable ordering, environment-only behavior). Always ask whether the failure could be a real defect before fixing the test.
-- **A reopened `failed-test` issue is the strongest single signal that the previous fix did not work.** If the issue you are looking at, or a related one for the same path, has ever been reopened, expect the obvious fix to fail again.
+- **Conclusions that blame only test code recur more often than conclusions that identify a product issue.** "Fix the test, not the product" is the easy default, but a meaningful share of flaky tests are exposing real product bugs (missing awaits in handlers, racy state, unstable ordering, environment-only behavior). Always ask whether the failure could be a real defect before concluding the test is the problem.
+- **A reopened `failed-test` issue is the strongest single signal that the previous diagnosis was wrong.** If the issue you are looking at, or a related one for the same path, has ever been reopened, expect the obvious explanation to be incomplete.
 
 ## Pre-investigation: check the history
 
 Before reading the latest failure, run these checks. They cheaply rule out "we've been here before" patterns.
 
-1. **Has this issue been reopened?** Look at the GitHub timeline. If yes, the previous fix did not hold — re-using the same fix approach is unlikely to work.
+1. **Has this issue been reopened?** Look at the GitHub timeline. If yes, the previous diagnosis did not hold — re-using the same line of reasoning is unlikely to land somewhere new.
 2. **Has the test path or suite already produced multiple `failed-test` issues?** Query:
 
    ```bash
@@ -52,8 +54,8 @@ Before reading the latest failure, run these checks. They cheaply rule out "we'v
 
    If several issues match — especially recent ones — treat the test as a recurring offender (see "Recurring offenders" below).
 
-3. **Has a prior fix PR been merged for this path?** Search merged PRs touching it. If a recent prior attempt exists, read the prior PR before proposing a new fix. The flake may have already cycled through `timeout-bump → unskip → page-object refactor → re-skip`; if so, you need a different kind of fix, not another lap around the same loop.
-4. **What did the previous fix change?** If it touched only test code, the next attempt should consider whether the product needs to change. If it touched product code and still recurred, the bug may be deeper than the previous diff fixed.
+3. **Has a prior fix PR been merged for this path?** Search merged PRs touching it. If a recent prior attempt exists, read the prior PR before drawing conclusions. The flake may have already cycled through `timeout-bump → unskip → page-object refactor → re-skip`; if so, the same kind of conclusion will produce the same kind of outcome.
+4. **What did the previous fix change, and what did it claim?** If it touched only test code and the test recurred, the next investigation should weigh the product side more heavily. If it touched product code and still recurred, the bug may be deeper than the previous diff captured.
 
 # Background
 
@@ -103,66 +105,69 @@ How tests share or isolate test servers affects whether one test can be polluted
 - **Scout:** tests are split into lanes. All Playwright configs in the same lane run against the same test servers, so state can leak between configs.
 - **FTR:** tests are divided into groups. A fresh set of test servers is started for each config, so cross-config pollution is unlikely.
 
-# Investigation: understand the bigger picture
+# Investigation
+
+## Understand the bigger picture
 
 Don't just inspect the latest failure. Build a picture of the failure over time — recent failures are the most relevant, but the full history is what reveals the pattern.
 
-## Guiding questions
+### Guiding questions
 
 - **Where is the test currently running?** Both local and Cloud pipelines, or just one? Query the AppEx QA cluster to see all recent runs.
 - **Is it failing consistently?** Place the test on the spectrum from "very occasional" to "fails every run".
 - **Is it failing on both local and Cloud pipelines, or just one?**
 - **Did it fail in builds with many other test failures?** That points to a broader test environment issue rather than a problem with this test.
 - **When did it first fail, and when did it last pass?** This narrows down the Kibana commit or PR that may have introduced the flakiness.
-- **Has this issue or a related one been closed and reopened before?** A reopen is the single strongest signal that the previous fix did not hold.
+- **Has this issue or a related one been closed and reopened before?** A reopen is the single strongest signal that the previous diagnosis did not hold.
 
-## When did it start failing?
+### When did it start failing?
 
 Compare the timestamps of the last successful run and the first failure. For Cloud runs, look up the Kibana commit each one used (see "Finding the Kibana commit a Cloud run used" in Background) so you can pinpoint which commit introduced the regression.
 
-## On which pipelines did it fail?
+### On which pipelines did it fail?
 
 For each Buildkite URL the test failed in:
 
-- Understand the pipeline type (Cloud or local)
-- Understand the test server configuration (for Scout and Jest tests, are the tests using **default** or **custom test servers** configuration?)
+- Understand the pipeline type (Cloud or local).
+- Understand the test server configuration (for Scout and Jest tests, are the tests using **default** or **custom test servers** configuration?).
   - Tip: reference `docs/extend/scout/feature-flags.md#custom-server-configs-reach-out-to-appex-qa-first-scout-feature-flags-custom-servers` for more information on custom servers configs in Scout.
 
 Ideally, query the AppEx QA cluster — see `references/appex-qa-cluster-queries.md`. Otherwise, read the comments on the `failed-test` issue to gauge frequency.
 
-## Did the environment cause the failure?
+### Did the environment cause the failure?
 
 Signs the environment is at fault rather than the test itself:
 
-- **The build had many unrelated failures**: a broad pattern of failures across unrelated tests in the same build points to an infrastructure issue (agent problems, network, downstream service outage).
-- **The test was polluted by another test**: most likely for Scout tests sharing a lane (see "How tests are distributed across servers"). Look at which other tests ran against the same servers in the failing build. Check if the failing builds often share the same config run order pattern.
-- **The failure screenshot** could sometimes help. Example: it shows a loading Kibana logo, typically indicating that Kibana isn't completely operational.
+- **The build had many unrelated failures.** A broad pattern of failures across unrelated tests in the same build points to an infrastructure issue (agent problems, network, downstream service outage).
+- **The test was polluted by another test.** Most likely for Scout tests sharing a lane (see "How tests are distributed across servers"). Look at which other tests ran against the same servers in the failing build. Check whether the failing builds often share the same config run order pattern.
+- **The failure screenshot** can sometimes help. Example: it shows a loading Kibana logo, typically indicating that Kibana isn't completely operational.
 
-# Investigation: assess the test itself
+## Assess the test itself
 
-Once you understand the failure pattern, evaluate whether the test is worth fixing as-is.
+Once you understand the failure pattern, evaluate what the test is really telling you.
 
-## First, ask: is this test exposing a real product bug?
+### First, ask: is this test exposing a real product bug?
 
-This is the single most consequential question in the investigation. Before assuming "the test is wrong", check whether the failure could be a real defect:
+This is the single most consequential question in the investigation. Before concluding "the test is wrong", check whether the failure could be a real defect:
 
-- **What does the assertion actually claim?** Translate it into product behavior. ("`expect(response.data).toEqual([a, b, c])`" is claiming the product returns these three values in this order.)
+- **What does the assertion actually claim?** Translate it into product behavior. (`expect(response.data).toEqual([a, b, c])` is claiming the product returns these three values in this order.)
 - **Is the failure consistent with a real bug?** Misordered array results, missing fields, intermittent 500s, slow first-response, stale state across requests, or wrong values are all symptoms of product bugs that get attributed to "flakiness".
 - **Is there an awaited or non-awaited handler on the product side?** A missing `await` in product code is a common root cause; the test only flakes because the product is racy.
-- **Does the failure correlate with a particular environment** (e.g., only serverless, only stateful, only MKI, only on slower agents)? Environment-only failures often surface real product behavior that the test was implicitly relying on.
+- **Does the failure correlate with a particular environment** (e.g. only serverless, only stateful, only MKI, only on slower agents)? Environment-only failures often surface real product behavior that the test was implicitly relying on.
 
-If you can build a plausible story that the failure is real, write a one-paragraph "what the product is doing wrong" summary in the PR body.
+If you can build a plausible story that the failure is real, write that story down explicitly as part of your conclusion. Hand-waving "the test is just flaky" is the failure mode this skill is designed to prevent.
 
-## Consider alternatives before fixing
+### Consider alternatives before recommending a code fix
 
-Before attempting a fix, consider:
+Once you have a diagnosis, the right next step is not always a code change. Consider:
 
 - **Delete the test.** Do other tests already cover what this one is testing?
 - **Refactor or downgrade the test.** See "Pick the right test type" in `docs/extend/scout/best-practices.md`. A functional test can often become an API, component, or Jest unit/integration test.
-  - **Caveat:** "migrate this Jest test to RTL" or "convert this to a unit test" PRs commonly land on a flaky-test issue without addressing the underlying flake. Downgrading test type is good hygiene, but the test rewrite alone is rarely the fix — the underlying problem (often a missing await or shared state) must also be addressed, or the new test will inherit the flake.
+  - **Caveat:** "migrate this Jest test to RTL" or "convert this to a unit test" is commonly proposed on a flaky-test issue without addressing the underlying flake. Downgrading test type is good hygiene, but the rewrite alone is rarely the fix — the underlying problem (often a missing await or shared state) must also be addressed, or the new test will inherit the flake.
 - **Update the tags.** Are the test's tags still appropriate? Should it run on Cloud? Should it be excluded from certain serverless solution types (e.g. Security)?
+- **Escalate to the owning team.** If this is a recurring offender or you suspect a product bug, the most useful conclusion may be a writeup handed to the owners, not a fix attempt.
 
-## Does the test follow best practices?
+### Does the test follow best practices?
 
 Common best-practice violations that cause flakiness:
 
@@ -173,26 +178,26 @@ Common best-practice violations that cause flakiness:
 
 Scout and FTR tests should also follow the general best practices in `docs/extend/scout/best-practices.md`, the UI best practices in `docs/extend/scout/ui-best-practices.md`, and the API best practices in `docs/extend/scout/api-best-practices.md`.
 
-## Scout-specific checks
+### Scout-specific checks
 
 When investigating a Scout failure, weight these checks higher:
 
 - **Lane pollution.** Scout tests in the same Playwright lane share servers (see "How tests are distributed across servers"). Look at which other configs ran in the same lane in the failing build. If the same neighbor configs appear repeatedly in failing builds, suspect cross-test state leakage.
-- **Page-object brittleness.** Page-object rewrites are a common "fix" that often does not hold. If you're touching a page object, confirm the change addresses a root cause (e.g., the previous locator was racing with rendering) rather than being a cleaner-looking rewrite of the same race.
-- **Poll/timeout values.** Bumping a Scout poll timeout is a frequent and frequently-recurring fix. Before adding to that pile, confirm the slow operation is intrinsic to the product (e.g., index creation, SLO calculation) rather than a missing `waitForResponse` or `waitForSelector` somewhere upstream.
-- **Whole-suite recurrence.** Some Scout suites (e.g., parts of the Streams plugin, Observability dashboards) generate clusters of `failed-test` issues that share infrastructure problems. If multiple sibling specs in the same suite are flaky, expect a structural fix rather than a single-test patch.
+- **Page-object brittleness.** Page-object rewrites are a common "fix" that often does not hold. If a page-object change is on the table, confirm it addresses a root cause (e.g. the previous locator was racing with rendering) rather than being a cleaner-looking rewrite of the same race.
+- **Poll/timeout values.** Bumping a Scout poll timeout is a frequent and frequently-recurring fix. Before recommending one, confirm the slow operation is intrinsic to the product (e.g. index creation, SLO calculation) rather than a missing `waitForResponse` or `waitForSelector` somewhere upstream.
+- **Whole-suite recurrence.** Some Scout suites (e.g. parts of the Streams plugin, Observability dashboards) generate clusters of `failed-test` issues that share infrastructure problems. If multiple sibling specs in the same suite are flaky, expect a structural conclusion rather than a single-test patch.
 
 # Fix patterns and how durable they tend to be
 
-When you've decided what kind of fix you want to apply, check it against this list before proceeding further.
+When weighing what conclusion to reach, check it against this list. The categories below describe how durable each kind of fix tends to be — useful both for evaluating a proposed approach and for honestly characterizing your recommendation.
 
 ## Patterns that often look like a fix but frequently do not hold
 
 Treat these as "may not be enough" rather than "this is the fix":
 
 - **Add `await` / `waitFor` / replace `sleep`.** Often correct, but only if you can identify _which_ missing wait was the root cause. Adding waits speculatively tends to move the race rather than remove it.
-- **Rewrite a page object.** Document specifically which interaction was racy or fragile and why the new code fixes it. A cleaner-looking page object is not by itself a fix.
-- **Bump a timeout, poll duration, or retry count.** If the test is slow because the product is slow, fix the product or the test setup, not the timeout. Use this as a last resort, and only with a follow-up planned for the underlying issue.
+- **Rewrite a page object.** A cleaner-looking page object is not by itself a fix. Be able to state specifically which interaction was racy or fragile and why the new approach addresses it.
+- **Bump a timeout, poll duration, or retry count.** If the test is slow because the product is slow, the product or the test setup is the right target, not the timeout. Last resort, with a follow-up planned for the underlying issue.
 - **Update a snapshot.** Confirms the new value is "current" without addressing why the value drifted. Rarely a real fix on its own.
 - **Migrate a test to RTL or to a smaller test type.** Good hygiene, but the rewrite itself usually inherits the underlying flake (missing await, shared state, ordering assumption) if you don't also address it.
 
@@ -213,44 +218,46 @@ Some test paths and suites generate flaky-test issues at a rate that cannot be a
 - The history shows a sequence of partial fixes: `timeout-bump → unskip → page-object rewrite → re-skip`.
 - The `failed-test` issue has been closed and reopened.
 
-When the test is a recurring offender, escalate to the owning team rather than landing a one-line fix; the suite likely needs structural work (shared fixture, environment isolation, fundamental test redesign, or a product-side fix).
+For a recurring offender, the right conclusion is usually "escalate to the owning team with a writeup" rather than "land a one-line fix". The suite likely needs structural work (shared fixture, environment isolation, fundamental test redesign, or a product-side fix).
 
-# Pre-PR self-check
+# Conclusion self-check
 
-Before opening or recommending a fix PR, walk through this checklist. Items that fail mean the fix is unlikely to hold.
+Before reporting your conclusion, walk through this checklist. Items that fail mean the conclusion is not yet solid — keep investigating or be explicit that you couldn't get further.
 
 ```
 - [ ] I can name the root cause in one sentence (not "the test is flaky").
-- [ ] My one-sentence root cause describes either a product behavior, a test-isolation problem, or an environment coupling — not "the previous code timed out".
-- [ ] If I'm only changing test code, I can articulate why the product side is correct and does not need to change.
-- [ ] If I'm bumping a timeout, adding a retry, or skipping: I have a separate follow-up planned to address the root cause, and the PR body says so.
-- [ ] I checked whether the same path or suite has been a recurring offender. If yes, my fix addresses the structural problem, or I have looped in the owning team.
-- [ ] I checked whether the original issue was previously reopened. If yes, my fix is meaningfully different from the previous one.
-- [ ] If I ran flaky-test-runner and it passed, I treat that as one signal, not proof.
-- [ ] My PR title does NOT use "stabilize", "deflake", "[Flaky Test]", or "another attempt at" unless I have a strong story for why this attempt is different — those titles often appear on third- and fourth-attempt PRs that go on to recur.
+- [ ] That sentence describes either a product behavior, a test-isolation problem, or an environment coupling — not "the previous code timed out".
+- [ ] If my conclusion blames only the test, I can articulate why the product side is correct and does not need to change.
+- [ ] If my recommended next step is a timeout bump, retry, or skip, I have explicitly flagged it as a symptom-level mitigation and named a separate follow-up for the root cause.
+- [ ] I checked whether the same path or suite has been a recurring offender. If yes, my conclusion accounts for the structural problem, not just this one failure.
+- [ ] I checked whether the original issue was previously reopened. If yes, my conclusion is meaningfully different from the previous one — or I have stated explicitly why the previous reasoning still applies.
+- [ ] I am not relying on a hypothetical flaky-test-runner pass as proof. The runner can confirm a fix is plausible; it cannot confirm a fix is durable.
+- [ ] I have stated my confidence level honestly. "Likely environmental, low confidence" is a valid conclusion. "The test is flaky, fixed by retry" is not.
 ```
 
 # Investigation pitfalls
 
-Common bad instincts when fixing a flaky test. Each of these can make the symptom go away while leaving the underlying problem — or worse, hiding a real bug.
+Common bad instincts when concluding a flaky test investigation. Each of these can make the symptom go away while leaving the underlying problem — or worse, hiding a real bug.
 
-- **Ignoring the bigger picture.** Don't fix in isolation. The flakiness may have been transient, may point to a broader environment issue, or may be a signal that the test should be rewritten or removed (see "Investigation: assess the test itself").
-- **Raising timeouts or retry counts.** Rarely the right fix. Treat it as a last resort and exhaust other options first; timeout-bump fixes commonly come back.
-- **Weakening assertions.** Don't make assertions more lenient or narrow their scope just to make the test pass; that hides regressions instead of catching them.
-- **Reducing coverage surface.** Don't strip tags to skip the test in certain environments (e.g. Cloud) or project types (e.g. serverless Security) unless you have a real reason it shouldn't run there. "It's flaky here" is not a real reason.
-- **Trusting flaky-test-runner alone.** A green 30/30 or 60/60 run does not prove the fix held. The runner cannot detect environmental coupling, slow ES indices, downstream test pollution, or load-pattern-dependent races.
+- **Ignoring the bigger picture.** Don't draw conclusions from a single failure. The flakiness may have been transient, may point to a broader environment issue, or may be a signal that the test should be rewritten or removed (see "Assess the test itself").
+- **Reaching for timeouts or retries.** Rarely the right conclusion. Treat it as a last resort; timeout-bump fixes commonly come back.
+- **Weakening assertions.** Don't recommend making assertions more lenient or narrowing their scope just to make the test pass; that hides regressions instead of catching them.
+- **Reducing coverage surface.** Don't recommend stripping tags to skip the test in certain environments (e.g. Cloud) or project types (e.g. serverless Security) unless you have a real reason it shouldn't run there. "It's flaky here" is not a real reason.
+- **Trusting flaky-test-runner alone.** A green 30/30 or 60/60 run does not prove a fix held. The runner cannot detect environmental coupling, slow ES indices, downstream test pollution, or load-pattern-dependent races.
 - **Assuming "fix the test, not the product".** This is the team's default but it is the more recurrence-prone choice. Always ask first whether the product could be at fault.
+- **Reporting false certainty.** "I don't know, here are the two plausible explanations and what would distinguish them" is more useful to the owning team than a confident wrong answer.
 
 # Reporting
 
-When you summarize your investigation, structure the output as:
+When you report your conclusion, structure the output as:
 
 1. **What the test does** (one paragraph).
 2. **What failed and when** (most recent failure + count of failures over time + last-known-good).
-3. **Where it ran** (pipelines, configs, cloud vs local).
-4. **Root cause hypothesis** (one sentence: product, test isolation, race, environment, or unknown).
-5. **Recommended fix or next step**, with the pattern from "Fix patterns and how durable they tend to be" and an honest note on expected durability.
-6. **Whether this is a recurring offender**, and if yes, who should own the structural work.
-7. **Open questions** the investigation could not resolve.
+3. **Where it ran** (pipelines, configs, Cloud vs local).
+4. **Root cause hypothesis, with confidence level** (one sentence: product, test isolation, race, environment, or unknown — and how sure you are).
+5. **Evidence supporting that hypothesis**, and evidence against it. If you considered alternative hypotheses, name them and say what would distinguish them.
+6. **Recommended next step.** This is not always a code change — it may be "escalate to team X", "wait and see, likely transient", or "owning team should look at the whole suite". If you are recommending a code fix, cite the relevant pattern from "Fix patterns and how durable they tend to be" and give an honest note on expected durability.
+7. **Whether this is a recurring offender**, and if yes, who should own the structural work.
+8. **Open questions** the investigation could not resolve.
 
-This ordering mirrors the diagnostic flow and surfaces the highest-leverage facts first.
+This ordering surfaces the highest-leverage facts first and makes it easy for the next reader to see _why_ the conclusion holds, not just _what_ it is.
