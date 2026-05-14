@@ -83,6 +83,8 @@
     "@kbn/scout",
     "@kbn/encrypted-saved-objects-shared",
     "@kbn/core-analytics-server-mocks",
+    "@kbn/cps-server-utils",
+    "@kbn/cps-utils",
   ],
   "exclude": ["target/**/*"]
 }

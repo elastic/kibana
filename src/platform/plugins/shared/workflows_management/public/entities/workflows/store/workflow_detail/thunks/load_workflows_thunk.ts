@@ -8,7 +8,7 @@
  */
 
 import { createAsyncThunk } from '@reduxjs/toolkit';
-import { normalizeFieldsToJsonSchema } from '@kbn/workflows/spec/lib/field_conversion';
+import { getInputsFromDefinition } from '@kbn/workflows/spec/lib/field_conversion';
 import { WorkflowApi } from '@kbn/workflows-ui';
 import type { WorkflowsServices } from '../../../../../types';
 import type { WorkflowsResponse } from '../../../model/types';
@@ -36,10 +36,12 @@ export const loadWorkflowsThunk = createAsyncThunk<
 
     const workflowsMap: WorkflowsResponse['workflows'] = {};
     response.results.forEach((workflow) => {
+      const inputsSchema = getInputsFromDefinition(workflow.definition);
+
       workflowsMap[workflow.id] = {
         id: workflow.id,
         name: workflow.name,
-        inputsSchema: normalizeFieldsToJsonSchema(workflow.definition?.inputs),
+        inputsSchema,
       };
     });
 

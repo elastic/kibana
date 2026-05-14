@@ -36,6 +36,7 @@ import { AddToTimelineButton } from '../../timelines/add_to_timeline_button';
 import { TagsColumn } from '../../actions/components/tags_column';
 import { RowKebabMenu } from './row_kebab_menu';
 import { useIsExperimentalFeatureEnabled } from '../../common/experimental_features_context';
+import { ExportFiltersProvider } from '../../results/export_filters_context';
 import type { AddToTimelineHandler } from '../../types';
 
 const truncateTooltipTextCss = {
@@ -675,6 +676,8 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
           agentIds={agentIds}
           addToTimeline={addToTimeline}
           isScheduled={!!scheduleId}
+          scheduleId={scheduleId}
+          executionCount={executionCount}
           onSaveQuery={onSaveQuery}
         />
       )}
@@ -696,4 +699,10 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   );
 };
 
-export const PackQueriesStatusTable = React.memo(PackQueriesStatusTableComponent);
+const PackQueriesStatusTableMemo = React.memo(PackQueriesStatusTableComponent);
+
+export const PackQueriesStatusTable: React.FC<PackQueriesStatusTableProps> = (props) => (
+  <ExportFiltersProvider>
+    <PackQueriesStatusTableMemo {...props} />
+  </ExportFiltersProvider>
+);
