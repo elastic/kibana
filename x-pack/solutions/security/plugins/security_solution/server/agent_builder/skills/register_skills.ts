@@ -16,6 +16,7 @@ import { pciComplianceSkill } from './pci_compliance';
 import { threatHuntingSkill } from './threat_hunting';
 import { alertAnalysisSkill } from './alert_analysis';
 import { alertAnalysisApiDrivenSkill } from './alert_analysis/alert_analysis_skill_api_driven';
+import { alertAnalysisInlineApiToolSkill } from './alert_analysis/alert_analysis_skill_inline_api_tool';
 import type { EntityAnalyticsRoutesDeps } from '../../lib/entity_analytics/types';
 import { findSecurityMlJobsSkill } from './find_security_ml_jobs';
 
@@ -61,7 +62,9 @@ export const registerSkills = async ({
 
   await agentBuilder.skills.register(threatHuntingSkill);
   await agentBuilder.skills.register(
-    experimentalFeatures.alertAnalysisApiDrivenSkill
+    experimentalFeatures.alertAnalysisInlineApiToolSkill
+      ? alertAnalysisInlineApiToolSkill
+      : experimentalFeatures.alertAnalysisApiDrivenSkill
       ? alertAnalysisApiDrivenSkill
       : alertAnalysisSkill
   );
