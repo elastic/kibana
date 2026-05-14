@@ -14,6 +14,7 @@ import type { Logger } from '@kbn/logging';
 import { retryEs } from '../retry_es';
 import type { AnyDataStreamDefinition } from '../types';
 import { applyDefaults } from './defaults';
+import { buildIndexTemplateBody } from './template_body';
 
 /**
  * https://www.elastic.co/docs/manage-data/data-store/data-streams/set-up-data-stream
@@ -73,23 +74,7 @@ export async function initializeIndexTemplate({
     () =>
       elasticsearchClient.indices.putIndexTemplate({
         name: dataStream.name,
-        priority: dataStream.template.priority,
-        index_patterns: [`${dataStream.name}*`],
-        composed_of: dataStream.template.composedOf,
-        data_stream: {
-          hidden: dataStream.hidden,
-        },
-        template: {
-          aliases: dataStream.template.aliases,
-          mappings: dataStream.template.mappings,
-          lifecycle: dataStream.template.lifecycle,
-          settings: dataStream.template.settings,
-        },
-        _meta: {
-          ...dataStream.template._meta,
-          version,
-          previousVersions,
-        },
+        ...buildIndexTemplateBody(dataStream, previousVersions),
       }),
     { logger, dataStreamName: dataStream.name }
   );
