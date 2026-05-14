@@ -13,7 +13,7 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
-  const { common, discover } = getPageObjects(['common', 'discover']);
+  const { discover } = getPageObjects(['discover']);
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
 

@@ -18,7 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const queryBar = getService('queryBar');
   const security = getService('security');
-  const { common, discover } = getPageObjects(['common', 'discover']);
+  const { discover } = getPageObjects(['discover']);
 
   describe('test large strings', function () {
     before(async function () {

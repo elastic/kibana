@@ -15,11 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
   const retry = getService('retry');
-  const { common, discover, unifiedFieldList } = getPageObjects([
-    'common',
-    'discover',
-    'unifiedFieldList',
-  ]);
+  const { discover, unifiedFieldList } = getPageObjects(['discover', 'unifiedFieldList']);
 
   describe('index pattern with unmapped fields', () => {
     before(async () => {

@@ -14,8 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const filterBar = getService('filterBar');
-  const { common, discover, header, timePicker, unifiedFieldList } = getPageObjects([
-    'common',
+  const { discover, header, timePicker, unifiedFieldList } = getPageObjects([
     'discover',
     'header',
     'timePicker',

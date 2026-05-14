@@ -17,12 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const filterBar = getService('filterBar');
   const testSubjects = getService('testSubjects');
-  const { common, discover, timePicker, header } = getPageObjects([
-    'common',
-    'discover',
-    'timePicker',
-    'header',
-  ]);
+  const { discover, timePicker, header } = getPageObjects(['discover', 'timePicker', 'header']);
 
   describe('Discover request cancellation', () => {
     before(async () => {

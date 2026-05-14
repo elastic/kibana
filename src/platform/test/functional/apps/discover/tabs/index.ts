@@ -14,7 +14,7 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
   const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
-  const { common, timePicker, discover } = getPageObjects(['common', 'timePicker', 'discover']);
+  const { timePicker, discover } = getPageObjects(['timePicker', 'discover']);
 
   describe('discover/tabs', function () {
     before(async function () {

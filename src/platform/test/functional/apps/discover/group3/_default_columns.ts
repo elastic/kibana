@@ -13,8 +13,7 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataGrid = getService('dataGrid');
   const dataViews = getService('dataViews');
-  const { common, discover, timePicker, unifiedFieldList } = getPageObjects([
-    'common',
+  const { discover, timePicker, unifiedFieldList } = getPageObjects([
     'discover',
     'timePicker',
     'unifiedFieldList',

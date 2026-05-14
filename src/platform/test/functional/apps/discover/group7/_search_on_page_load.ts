@@ -19,7 +19,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const { appMenu, common, discover, header, timePicker, unifiedFieldList } = getPageObjects([
     'appMenu',
-    'common',
     'discover',
     'header',
     'timePicker',

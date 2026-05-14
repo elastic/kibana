@@ -13,7 +13,7 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const { common, timePicker, discover } = getPageObjects(['common', 'timePicker', 'discover']);
+  const { timePicker, discover } = getPageObjects(['timePicker', 'discover']);
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
   const retry = getService('retry');

@@ -18,8 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const monacoEditor = getService('monacoEditor');
   const security = getService('security');
 
-  const { common, discover, timePicker, unifiedFieldList } = getPageObjects([
-    'common',
+  const { discover, timePicker, unifiedFieldList } = getPageObjects([
     'discover',
     'timePicker',
     'unifiedFieldList',

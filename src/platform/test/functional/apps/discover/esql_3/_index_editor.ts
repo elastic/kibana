@@ -30,7 +30,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const { indexEditor, common, discover } = getPageObjects([
     'indexEditor',
-    'common',
     'discover',
     'dashboard',
     'header',

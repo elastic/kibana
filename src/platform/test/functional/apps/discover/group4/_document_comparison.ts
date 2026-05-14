@@ -12,8 +12,7 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const { common, discover, timePicker, unifiedFieldList } = getPageObjects([
-    'common',
+  const { discover, timePicker, unifiedFieldList } = getPageObjects([
     'discover',
     'timePicker',
     'unifiedFieldList',

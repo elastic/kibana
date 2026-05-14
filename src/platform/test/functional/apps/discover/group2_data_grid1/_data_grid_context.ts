@@ -22,16 +22,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const dataGrid = getService('dataGrid');
   const testSubjects = getService('testSubjects');
-  const { common, discover, timePicker, dashboard, header, unifiedFieldList, context } =
-    getPageObjects([
-      'common',
-      'discover',
-      'timePicker',
-      'dashboard',
-      'header',
-      'unifiedFieldList',
-      'context',
-    ]);
+  const { discover, timePicker, dashboard, header, unifiedFieldList, context } = getPageObjects([
+    'discover',
+    'timePicker',
+    'dashboard',
+    'header',
+    'unifiedFieldList',
+    'context',
+  ]);
   const defaultSettings = {
     defaultIndex: 'logstash-*',
     'discover:rowHeightOption': 0, // single line

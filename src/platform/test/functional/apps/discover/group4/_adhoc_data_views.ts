@@ -22,16 +22,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const queryBar = getService('queryBar');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
-  const { common, discover, timePicker, header, context, dashboard, unifiedFieldList } =
-    getPageObjects([
-      'common',
-      'discover',
-      'timePicker',
-      'header',
-      'context',
-      'dashboard',
-      'unifiedFieldList',
-    ]);
+  const { discover, timePicker, header, context, dashboard, unifiedFieldList } = getPageObjects([
+    'discover',
+    'timePicker',
+    'header',
+    'context',
+    'dashboard',
+    'unifiedFieldList',
+  ]);
   const find = getService('find');
   const security = getService('security');
   const dataViews = getService('dataViews');

@@ -17,12 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
   const testSubjects = getService('testSubjects');
-  const { common, timePicker, discover, header } = getPageObjects([
-    'common',
-    'timePicker',
-    'discover',
-    'header',
-  ]);
+  const { timePicker, discover, header } = getPageObjects(['timePicker', 'discover', 'header']);
 
   describe('indexpattern without timefield', () => {
     before(async () => {

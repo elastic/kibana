@@ -18,7 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const toasts = getService('toasts');
   const security = getService('security');
-  const { common, discover, timePicker } = getPageObjects(['common', 'discover', 'timePicker']);
+  const { discover, timePicker } = getPageObjects(['discover', 'timePicker']);
   const defaultSettings = {
     defaultIndex: 'logstash-*',
   };

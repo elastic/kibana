@@ -16,12 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const { common, discover, share, timePicker } = getPageObjects([
-    'common',
-    'discover',
-    'share',
-    'timePicker',
-  ]);
+  const { discover, share, timePicker } = getPageObjects(['discover', 'share', 'timePicker']);
   const browser = getService('browser');
   const toasts = getService('toasts');
   const deployment = getService('deployment');

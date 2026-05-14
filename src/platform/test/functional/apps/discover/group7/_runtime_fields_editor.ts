@@ -19,8 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const security = getService('security');
   const dataGrid = getService('dataGrid');
   const dataViews = getService('dataViews');
-  const { common, discover, header, timePicker, unifiedFieldList } = getPageObjects([
-    'common',
+  const { discover, header, timePicker, unifiedFieldList } = getPageObjects([
     'discover',
     'header',
     'timePicker',

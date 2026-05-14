@@ -18,8 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const queryBar = getService('queryBar');
   const dataViews = getService('dataViews');
-  const { common, discover, timePicker, unifiedFieldList } = getPageObjects([
-    'common',
+  const { discover, timePicker, unifiedFieldList } = getPageObjects([
     'discover',
     'timePicker',
     'unifiedFieldList',
