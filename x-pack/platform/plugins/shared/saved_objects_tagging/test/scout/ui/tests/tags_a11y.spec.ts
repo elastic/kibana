@@ -20,7 +20,7 @@ test.describe.skip('Tags management — accessibility', { tag: tags.stateful.cla
   });
 
   test('tags management page a11y', async ({ page, browserAuth, pageObjects, kbnUrl }) => {
-    await browserAuth.loginAsAdmin();
+    await browserAuth.loginAsPrivilegedUser();
     await page.goto(kbnUrl.app('management/kibana/tags'));
     await pageObjects.tagManagement.waitForTableLoaded();
 

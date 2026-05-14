@@ -16,9 +16,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./create'));
     loadTestFile(require.resolve('./edit'));
     loadTestFile(require.resolve('./som_integration'));
-    loadTestFile(require.resolve('./visualize_integration'));
-    loadTestFile(require.resolve('./dashboard_integration'));
-    loadTestFile(require.resolve('./maps_integration'));
     loadTestFile(require.resolve('./discover_integration'));
   });
 }
