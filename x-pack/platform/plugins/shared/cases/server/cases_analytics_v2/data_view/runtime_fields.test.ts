@@ -79,17 +79,20 @@ describe('suffixToRuntimeType', () => {
 });
 
 describe('buildPainlessSource', () => {
-  it('reads from params._source.cases.extended_fields.<snake> with a defensive guard', () => {
-    // `cases.extended_fields` is mapped `flattened` — sub-keys aren't
-    // independently doc-values-backed, so the runtime field has to walk
-    // `_source`. Each null-step short-circuits via `return` so a missing
-    // value yields an empty runtime field (matches doc_values semantics).
+  it('reads from doc[cases.extended_fields.<snake>] with a defensive guard', () => {
+    // ES docs explicitly prescribe `doc[parent.subkey]` (not `_source`) for
+    // sub-keys of `flattened` — flattened sub-keys ARE doc-values-backed
+    // through the parent. A prior `_source` walk silently returned no value
+    // in synthetic-source / lookup-mode indices because `_source` is
+    // reconstructed from doc values and the sub-object structure is lost.
     const src = buildPainlessSource('riskScore_as_long', 'long');
-    expect(src).toContain('params._source');
-    expect(src).toContain('c.extended_fields');
-    expect(src).toContain("ef.get('riskScore_as_long')");
-    expect(src).toContain('v.length() == 0');
-    expect(src).not.toContain("doc['cases.extended_fields"); // doc_values path no longer used
+    expect(src).toContain("doc['cases.extended_fields.riskScore_as_long']");
+    expect(src).toContain('vals.empty');
+    expect(src).toContain('for (String v : vals)');
+    // Must NOT walk _source — that pattern silently fails on synthetic source
+    // and is much slower than doc-values access.
+    expect(src).not.toContain('params._source');
+    expect(src).not.toContain('ef.get(');
   });
 
   it('uses Long.parseLong for long', () => {
@@ -112,17 +115,26 @@ describe('buildPainlessSource', () => {
   });
 
   it('emits the raw string for keyword without parsing', () => {
-    // The flattened `_source` value is already string-shaped (or coerced
-    // via the guard's `toString()`); a keyword runtime field just lifts
-    // it to a discoverable path. No try/catch needed because there is no
+    // Flattened sub-keys are stored as keyword in ES; doc-values iteration
+    // yields the raw strings directly. A keyword runtime field just lifts
+    // them to a discoverable path. No try/catch needed because there is no
     // parse step.
     const src = buildPainlessSource('summary_as_keyword', 'keyword');
-    expect(src).toContain("ef.get('summary_as_keyword')");
-    expect(src).toMatch(/emit\(v\)\s*;?\s*$/);
+    expect(src).toContain("doc['cases.extended_fields.summary_as_keyword']");
+    expect(src).toContain('emit(v)');
     expect(src).not.toContain('parseLong');
     expect(src).not.toContain('parseDouble');
     expect(src).not.toContain('Instant.parse');
     expect(src).not.toContain('parseBoolean');
+  });
+
+  it('iterates the doc-values list so multi-valued template fields publish every value', () => {
+    // Single-valued template fields collapse to a one-element iteration;
+    // multi-valued (e.g. CHECKBOX_GROUP arrays, future array support) call
+    // emit once per element, which is how runtime fields publish multi-value.
+    for (const type of ['long', 'double', 'date', 'boolean', 'keyword'] as const) {
+      expect(buildPainlessSource('m', type)).toContain('for (String v : vals)');
+    }
   });
 
   it('wraps every parse in try/catch so malformed values silently drop', () => {
@@ -137,14 +149,14 @@ describe('buildRuntimeFieldEntry', () => {
   it('publishes the runtime field at top-level cases.<snake>', () => {
     // The published field name lives one level above the source location
     // (cases.extended_fields.<snake>) so Lens / Discover surface the typed
-    // runtime field. The painless reads from `_source` because the source
-    // location is inside a `flattened` mapping.
+    // runtime field. The painless reads via `doc[...]` because flattened
+    // sub-keys are doc-values-backed under the parent's value stream.
     const entry = buildRuntimeFieldEntry('riskScore_as_long');
     expect(entry).not.toBeNull();
     expect(entry!.fieldName).toBe('cases.riskScore_as_long');
     expect(entry!.spec.type).toBe('long');
     expect(entry!.spec.script?.source).toContain('Long.parseLong');
-    expect(entry!.spec.script?.source).toContain("ef.get('riskScore_as_long')");
+    expect(entry!.spec.script?.source).toContain("doc['cases.extended_fields.riskScore_as_long']");
   });
 
   it('publishes a keyword runtime field for keyword extended fields (flattened sub-keys are not discoverable)', () => {
@@ -155,7 +167,9 @@ describe('buildRuntimeFieldEntry', () => {
     expect(entry).not.toBeNull();
     expect(entry!.fieldName).toBe('cases.playbook_as_keyword');
     expect(entry!.spec.type).toBe('keyword');
-    expect(entry!.spec.script?.source).toContain("ef.get('playbook_as_keyword')");
+    expect(entry!.spec.script?.source).toContain(
+      "doc['cases.extended_fields.playbook_as_keyword']"
+    );
     expect(entry!.spec.script?.source).toMatch(/emit\(v\)/);
   });
 

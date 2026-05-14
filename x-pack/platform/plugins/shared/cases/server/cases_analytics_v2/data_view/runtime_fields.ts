@@ -22,9 +22,10 @@ import type { RuntimeFieldSpec, RuntimeType } from '@kbn/data-views-plugin/commo
  * discoverable fields in Kibana data views** — only the parent
  * `cases.extended_fields` shows up in Discover / Lens / Stack Management.
  * To make per-field keyword values navigable in those UIs we publish a
- * keyword runtime field at `cases.<name>_as_keyword` that emits the raw
- * string from `_source`. Without this, every `keyword`-typed template
- * field would be invisible to the analytics surface.
+ * keyword runtime field at `cases.<name>_as_keyword` that emits the value
+ * from `doc['cases.extended_fields.<name>_as_keyword']`. Without this,
+ * every `keyword`-typed template field would be invisible to the analytics
+ * surface.
  *
  * `unsigned_long` is mapped to `long` for runtime purposes; values exceeding
  * `Long.MAX_VALUE` lose precision when surfaced through the data view but
@@ -107,61 +108,106 @@ export const splitSnakeKey = (snakeKey: string): { name: string; suffix: string 
 
 /**
  * Generate the painless source that reads the user-supplied value at
- * `cases.extended_fields.<snakeKey>` (via `_source`) and emits a parsed
- * value of the target runtime type.
+ * `cases.extended_fields.<snakeKey>` and emits a parsed value of the
+ * target runtime type.
  *
- * **Why `_source` rather than `doc[...]`.** `cases.extended_fields` is
- * mapped as `flattened` (see `mappings/case.ts` for the field-limit
- * rationale). `flattened` sub-keys aren't independently doc-values-backed,
- * so per-key access has to go through `_source`. The trade-off is small
- * per-doc overhead at query time vs. unbounded sub-key cardinality at index
- * time — for the volumes this surface is sized for, the right call.
+ * **Access pattern: `doc['cases.extended_fields.<snakeKey>']` — NOT
+ * `_source`.** ES explicitly prescribes `doc[parent.subkey]` for sub-keys
+ * of a `flattened` field (see ES docs, "Retrieving flattened fields").
+ * `flattened` sub-keys ARE doc-values-backed under the parent's value
+ * stream — `doc[...]` resolves them by filtering the parent's term
+ * dictionary on path. An earlier implementation walked `params._source`,
+ * which silently returns no value in synthetic-source / lookup-mode
+ * indices because `_source` is reconstructed from doc values and the
+ * sub-object structure is lost. `doc[...]` is also faster (no per-doc
+ * `_source` parse) and is the supported path.
+ *
+ * The script iterates the doc-values list rather than reading `.value`
+ * directly. Single-valued template fields collapse to a one-element
+ * iteration; multi-valued (e.g. `CHECKBOX_GROUP` arrays stored as JSON
+ * strings, or future array support) are handled naturally — `emit` may
+ * be called multiple times to publish a multi-valued runtime field.
  *
  * **Defensive by design**: any parse failure falls through silently — the
  * runtime field simply has no value for that doc, which is the intended
  * behaviour for malformed user input. The alternative (throwing) would
  * surface as errors per-doc in Lens / Discover, breaking the user
  * experience for the whole field whenever a single bad value exists.
+ *
+ * **Field-name interpolation note**: `${snakeKey}` is concatenated into
+ * the painless source verbatim, matching the existing template field
+ * naming contract. Template field names that contain `'` would break the
+ * resulting script — same caveat applied to the previous `_source.get('...')`
+ * implementation; tightening this requires a constraint at template
+ * validation time and is tracked separately.
  */
 export const buildPainlessSource = (snakeKey: string, runtimeType: RuntimeType): string => {
-  // Defensive `_source` walk: `params._source` may be null on docs without
-  // source; the nested objects may be absent on partial writes. Each step
-  // returns early instead of throwing — see "defensive by design" above.
-  // Use `Map.get(key)` for the leaf so snake-keys with any character set
-  // resolve correctly (template field names are user-supplied).
-  const guard =
-    `def src = params._source; if (src == null) { return; } ` +
-    `def c = src.cases; if (c == null) { return; } ` +
-    `def ef = c.extended_fields; if (ef == null) { return; } ` +
-    `def raw = ef.get('${snakeKey}'); if (raw == null) { return; } ` +
-    `String v = raw instanceof String ? (String) raw : raw.toString(); ` +
-    `if (v.length() == 0) { return; }`;
+  const fieldPath = `cases.extended_fields.${snakeKey}`;
+  // `doc[path]` returns a `ScriptDocValues` instance. `.empty` is the
+  // documented short-circuit for "no value present on this doc"; iteration
+  // over the instance yields the typed leaf values (Strings for keyword-
+  // backed fields, which is how ES indexes flattened sub-keys).
+  const guard = `def vals = doc['${fieldPath}']; if (vals == null || vals.empty) { return; }`;
 
   switch (runtimeType) {
     case 'long':
-      return `${guard} try { emit(Long.parseLong(v)); } catch (Exception e) {}`;
+      return (
+        `${guard} ` +
+        `for (String v : vals) { ` +
+        `if (v == null || v.length() == 0) { continue; } ` +
+        `try { emit(Long.parseLong(v)); } catch (Exception e) {} ` +
+        `}`
+      );
     case 'double':
-      return `${guard} try { emit(Double.parseDouble(v)); } catch (Exception e) {}`;
+      return (
+        `${guard} ` +
+        `for (String v : vals) { ` +
+        `if (v == null || v.length() == 0) { continue; } ` +
+        `try { emit(Double.parseDouble(v)); } catch (Exception e) {} ` +
+        `}`
+      );
     case 'date':
       // ISO-8601 with or without offset. `Instant.parse` requires a `Z` or
       // explicit offset; fall back to `LocalDateTime` interpreted in UTC if
       // the user wrote a naive timestamp.
-      return `${guard} try { emit(Instant.parse(v).toEpochMilli()); return; } catch (Exception e1) {} try { emit(LocalDateTime.parse(v).toInstant(ZoneOffset.UTC).toEpochMilli()); } catch (Exception e2) {}`;
+      return (
+        `${guard} ` +
+        `for (String v : vals) { ` +
+        `if (v == null || v.length() == 0) { continue; } ` +
+        `try { emit(Instant.parse(v).toEpochMilli()); continue; } catch (Exception e1) {} ` +
+        `try { emit(LocalDateTime.parse(v).toInstant(ZoneOffset.UTC).toEpochMilli()); } catch (Exception e2) {} ` +
+        `}`
+      );
     case 'boolean':
-      return `${guard} try { emit(Boolean.parseBoolean(v)); } catch (Exception e) {}`;
+      return (
+        `${guard} ` +
+        `for (String v : vals) { ` +
+        `if (v == null || v.length() == 0) { continue; } ` +
+        `try { emit(Boolean.parseBoolean(v)); } catch (Exception e) {} ` +
+        `}`
+      );
     case 'keyword':
-      // No parsing — `flattened` sub-keys come back from `_source` already
-      // string-shaped (the guard above coerces non-strings via
-      // `toString()`). Emitting `v` lifts the value out of the opaque
-      // `flattened` parent and into a discoverable typed field at
-      // `cases.<name>_as_keyword`.
-      return `${guard} emit(v);`;
+      // No parsing — flattened sub-keys are stored as keyword in ES, so
+      // doc-values iteration yields the raw strings directly. Lifts the
+      // value out of the opaque `flattened` parent and into a discoverable
+      // typed field at `cases.<name>_as_keyword`.
+      return (
+        `${guard} ` +
+        `for (String v : vals) { ` +
+        `if (v != null && v.length() > 0) { emit(v); } ` +
+        `}`
+      );
     default:
       // ip / geo_point / composite — not currently produced by the template
       // system. If a future template type maps here, extend this switch
       // alongside the suffix → runtime type table. The fallthrough emits the
       // raw string so the field at least has a value, even if untyped.
-      return `${guard} emit(v);`;
+      return (
+        `${guard} ` +
+        `for (String v : vals) { ` +
+        `if (v != null && v.length() > 0) { emit(v); } ` +
+        `}`
+      );
   }
 };
 
@@ -180,10 +226,11 @@ export interface RuntimeFieldEntry {
  * the suffix is in `NO_RUNTIME_FIELD_SUFFIXES`, or the suffix is unknown.
  *
  * Publication path: `cases.<snakeKey>` (e.g. `cases.riskScore_as_long`),
- * sitting alongside `cases.title`, `cases.severity`, etc. The painless reads
- * the raw string from `params._source.cases.extended_fields.<snakeKey>`
- * under the hood (the indexed value lives inside a `flattened` field —
- * see `mappings/case.ts`).
+ * sitting alongside `cases.title`, `cases.severity`, etc. The painless
+ * reads the value via `doc['cases.extended_fields.<snakeKey>']` — the
+ * indexed value lives inside a `flattened` field (see `mappings/case.ts`),
+ * and ES exposes flattened sub-keys as doc-values-backed paths under the
+ * parent's value stream.
  *
  * **Why not shadow the indexed path?**
  * Kibana data views resolve a field name by merging
