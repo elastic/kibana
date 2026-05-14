@@ -73,8 +73,6 @@ xpack.cases.analyticsV2:
     # start; runtime changes require a Kibana
     # restart (the next /reset re-applies the
     # current value to the rescheduled task).
-
-xpack.cases.analytics:
   enable_debug_mode:
     false # default — set to true to register the
     # mutating administrator routes (/reset and
@@ -86,7 +84,7 @@ xpack.cases.analytics:
 
 When `analyticsV2.enabled: false`, the v2 service is a no-op. Nothing
 registers, nothing schedules, nothing writes. v1 is unaffected regardless of
-v2's state. When `analytics.enable_debug_mode: false` (the default) but
+v2's state. When `analyticsV2.enable_debug_mode: false` (the default) but
 `analyticsV2.enabled: true`, v2 runs normally and `/state` is reachable; only
 the two mutating routes return HTTP 404.
 
@@ -247,15 +245,15 @@ The two routes below mutate subsystem state cluster-wide and operate
 space's URL. They're gated behind a second flag:
 
 ```yaml
-xpack.cases.analytics.enable_debug_mode: true # default false
+xpack.cases.analyticsV2.enable_debug_mode: true # default false
 ```
 
 When the flag is off, neither route is registered — requests return
 HTTP 404. The read-only `GET /state` route above is registered
 regardless (a future Case Settings page polls it for health info).
 
-Lives under `analytics`, not `analyticsV2`, so future v1 admin
-surfaces can share the same opt-in.
+Lives under `analyticsV2` (not the legacy `analytics` namespace, which
+is the v1-only surface and will be removed once v2 supersedes it).
 
 ### Re-run reconciliation immediately
 
@@ -265,7 +263,7 @@ POST /internal/cases/_analyticsV2/reconcile/run_soon
 
 Triggers Task Manager's `runSoon` for the reconciliation task. Useful if you
 suspect the primary write path dropped a case. **Requires
-`xpack.cases.analytics.enable_debug_mode: true`.** Superuser only.
+`xpack.cases.analyticsV2.enable_debug_mode: true`.** Superuser only.
 
 ### Reset the index
 
@@ -278,7 +276,7 @@ plugin start, deletes every per-space managed Case Analytics data view, and
 synchronously walks every case SO via the reconciliation runner to repopulate
 from the SO source of truth. Returns once the walk completes; the response
 includes the processed count and the cursor the next periodic tick will
-resume from. **Requires `xpack.cases.analytics.enable_debug_mode: true`.**
+resume from. **Requires `xpack.cases.analyticsV2.enable_debug_mode: true`.**
 
 The walk runs **in-handler** (not via Task Manager's `runSoon`) — going through
 Task Manager would expose two race windows that produce a silent "reset

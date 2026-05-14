@@ -21,28 +21,6 @@ export const ConfigSchema = schema.object({
         traditional: schema.boolean({ defaultValue: false }),
       }),
     }),
-    /**
-     * Gates the cases-analyticsV2 administrator routes that mutate
-     * subsystem state — `POST /internal/cases/_analyticsV2/reset` and
-     * `POST /internal/cases/_analyticsV2/reconcile/run_soon`. The
-     * read-only `GET /internal/cases/_analyticsV2/state` is always
-     * registered (it's the surface a future Case Settings page will
-     * poll for health info; gating it would break that integration).
-     *
-     * Default `false` because both gated routes operate **globally**
-     * across every space but are invocable from a single space — an
-     * operator hitting `/reset` from `default` wipes case data views
-     * in every space the cluster knows about. That's exactly what the
-     * route is designed for, but a misclick from an unaware tenant can
-     * be disruptive. Keeping it off by default forces operators to
-     * opt in via `xpack.cases.analytics.enable_debug_mode: true` in
-     * `kibana.yml`, which is also the right knob for repeated dev /
-     * test invocations during local development.
-     *
-     * Lives under `analytics` (not `analyticsV2`) so future v1 admin
-     * routes can share the same opt-in if they ever need one.
-     */
-    enable_debug_mode: schema.boolean({ defaultValue: false }),
   }),
   /**
    * Cases-as-data v2 — cluster-level analytics indices populated by real-time
@@ -68,6 +46,30 @@ export const ConfigSchema = schema.object({
       defaultValue: 30,
       min: 5,
     }),
+    /**
+     * Gates the cases-analyticsV2 administrator routes that mutate
+     * subsystem state — `POST /internal/cases/_analyticsV2/reset` and
+     * `POST /internal/cases/_analyticsV2/reconcile/run_soon`. The
+     * read-only `GET /internal/cases/_analyticsV2/state` is always
+     * registered (it's the surface a future Case Settings page will
+     * poll for health info; gating it would break that integration).
+     *
+     * Default `false` because both gated routes operate **globally**
+     * across every space but are invocable from a single space — an
+     * operator hitting `/reset` from `default` wipes case data views
+     * in every space the cluster knows about. That's exactly what the
+     * route is designed for, but a misclick from an unaware tenant can
+     * be disruptive. Keeping it off by default forces operators to
+     * opt in via `xpack.cases.analyticsV2.enable_debug_mode: true` in
+     * `kibana.yml`, which is also the right knob for repeated dev /
+     * test invocations during local development.
+     *
+     * Lives under `analyticsV2` (not the legacy `analytics` namespace,
+     * which is the v1-only surface and will eventually be removed) so
+     * the gating contract retires alongside the v2 service if both are
+     * ever sunset together.
+     */
+    enable_debug_mode: schema.boolean({ defaultValue: false }),
   }),
   attachments: schema.object({
     enabled: schema.boolean({ defaultValue: false }),

@@ -84,7 +84,7 @@ interface RegisterArgs {
    */
   enabled: boolean;
   /**
-   * Resolved config value for `xpack.cases.analytics.enable_debug_mode`.
+   * Resolved config value for `xpack.cases.analyticsV2.enable_debug_mode`.
    * Gates the **mutating** administrator routes (`/reset` and
    * `/reconcile/run_soon`) at registration time — when false, neither
    * route is registered, and an HTTP request to either path returns 404.
@@ -212,13 +212,13 @@ export const registerCasesAnalyticsV2Routes = ({
   );
 
   // The two routes below mutate subsystem state cluster-wide and are
-  // therefore gated behind `xpack.cases.analytics.enable_debug_mode`. When
-  // the flag is off, neither route is registered — requests to these paths
-  // return 404. See the `enableDebugMode` JSDoc on `RegisterArgs` for the
-  // (route-registration vs runtime-403) rationale.
+  // therefore gated behind `xpack.cases.analyticsV2.enable_debug_mode`.
+  // When the flag is off, neither route is registered — requests to
+  // these paths return 404. See the `enableDebugMode` JSDoc on
+  // `RegisterArgs` for the (route-registration vs runtime-403) rationale.
   if (!enableDebugMode) {
     log.debug(
-      'cases-analyticsV2 debug-mode routes (/reset, /reconcile/run_soon) are NOT registered; set xpack.cases.analytics.enable_debug_mode: true to enable.'
+      'cases-analyticsV2 debug-mode routes (/reset, /reconcile/run_soon) are NOT registered; set xpack.cases.analyticsV2.enable_debug_mode: true to enable.'
     );
     return;
   }

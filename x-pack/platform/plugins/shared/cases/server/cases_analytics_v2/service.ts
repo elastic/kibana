@@ -40,7 +40,7 @@ interface CasesAnalyticsV2ServiceDeps {
    */
   reconciliationIntervalMinutes: number;
   /**
-   * Resolved value of `xpack.cases.analytics.enable_debug_mode`. Gates
+   * Resolved value of `xpack.cases.analyticsV2.enable_debug_mode`. Gates
    * the mutating administrator routes (`/reset` and `/reconcile/run_soon`)
    * at registration time — when false, those routes are NOT registered at
    * all (HTTP 404 instead of 403, so health probes can't fingerprint the
