@@ -25,6 +25,7 @@ const createInitialState = (
   queryCommitted: mode === 'edit',
   sandboxDateStart: 'now-15m',
   sandboxDateEnd: 'now',
+  yamlMode: false,
 });
 
 /**
@@ -72,8 +73,14 @@ function reducer(state: ComposeDiscoverState, action: ComposeDiscoverAction): Co
       return {
         ...state,
         sandbox: { ...state.sandbox, query: action.query },
-        childOpen: false,
+        childOpen: state.yamlMode ? state.childOpen : false,
         queryCommitted: true,
+      };
+    case 'SET_YAML_MODE':
+      return {
+        ...state,
+        yamlMode: action.enabled,
+        childOpen: true,
       };
     default:
       return state;
