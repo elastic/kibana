@@ -78,6 +78,34 @@ const updateReport = core.notifications.events.registerType<ReportMetadata>(
 `id` already exists in the events stream merges new fields into the
 existing entry (useful for "report is generating → 30% → 60% → ready").
 
+### Primary actions (optional, registration-time)
+
+A notification type can expose a primary-action button in the notification
+center UI by supplying a `resolvePrimaryAction` resolver as the **fourth**
+argument to `registerType`. The resolver is called per event row at render
+time — it is **never** called automatically by `notify()` or the merge path.
+
+```ts
+events.registerType<ReportMetadata>(
+  'reporting',
+  { severity: 'info', iconType: 'reportingApp', badgeColor: 'primary', eventName: 'reporting' },
+  undefined,                        // no merge callback
+  (event) => ({                     // resolvePrimaryAction — event is TypedNotificationEvent<ReportMetadata>
+    label: i18n.translate('myPlugin.downloadReport', { defaultMessage: 'Download report' }),
+    onClick: () => openDownloadPanel(event.id, event.metadata?.format),
+  })
+);
+```
+
+The returned `PrimaryActionDescriptor` (`{ label: string; onClick: () => void }`) is
+**in-memory only** — it is never persisted. If the resolver returns `undefined`
+(or is not provided), the notification renders without a primary-action button.
+Types that have no primary action simply omit the fourth argument.
+
+The notification center calls `events.getPrimaryActionForEvent(event)` per row
+to obtain the descriptor. This keeps the sidebar completely agnostic to
+specific notification types.
+
 ### The typeId allowlist
 
 `typeId` is type-constrained by `NotificationTypeId`:

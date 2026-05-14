@@ -31,6 +31,7 @@ export type {
   NotificationEvent,
   NotificationEventTypeData,
   NotificationTypeId,
+  PrimaryActionDescriptor,
   RegisteredNotificationEventType,
   TypedNotificationEvent,
 } from './src/events_types';

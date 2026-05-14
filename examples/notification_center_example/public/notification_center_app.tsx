@@ -268,24 +268,29 @@ export function NotificationCenterApp({
             }
           />
         ) : (
-          items.map((event: NotificationEventType) => (
-            <NotificationEvent
-              key={event.id}
-              id={event.id}
-              type={event.eventName}
-              severity={event.severity}
-              badgeColor={event.badgeColor}
-              iconType={event.iconType}
-              iconAriaLabel={event.eventName}
-              time={<NotificationTime timestamp={event.timestamp} uiSettings={uiSettings} />}
-              title={event.title}
-              messages={Array.isArray(event.message) ? event.message : [event.message]}
-              isRead={event.isRead}
-              isPinned={event.isPinned ?? false}
-              onPin={(id, isPinned) => (isPinned ? events.unpin(id) : events.pin(id))}
-              onOpenContextMenu={buildContextMenu(event)}
-            />
-          ))
+          items.map((event: NotificationEventType) => {
+            const primary = events.getPrimaryActionForEvent(event);
+            return (
+              <NotificationEvent
+                key={event.id}
+                id={event.id}
+                type={event.eventName}
+                severity={event.severity}
+                badgeColor={event.badgeColor}
+                iconType={event.iconType}
+                iconAriaLabel={event.eventName}
+                time={<NotificationTime timestamp={event.timestamp} uiSettings={uiSettings} />}
+                title={event.title}
+                messages={Array.isArray(event.message) ? event.message : [event.message]}
+                isRead={event.isRead}
+                isPinned={event.isPinned ?? false}
+                onPin={(id, isPinned) => (isPinned ? events.unpin(id) : events.pin(id))}
+                onOpenContextMenu={buildContextMenu(event)}
+                primaryAction={primary?.label}
+                onClickPrimaryAction={primary ? () => primary.onClick() : undefined}
+              />
+            );
+          })
         )}
       </SidebarBody>
       {onOpenStackManagement && (
