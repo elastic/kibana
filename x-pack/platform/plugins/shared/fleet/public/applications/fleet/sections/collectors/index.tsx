@@ -5,52 +5,40 @@
  * 2.0.
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { EuiCallOut, EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
-import type { CriteriaWithPagination } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { AGENT_TYPE_OPAMP } from '../../../../../common/constants';
-import type { Agent } from '../../../../../common/types';
-import { useGetAgentsQuery } from '../../../../hooks/use_request/agents';
 import { FLEET_ROUTING_PATHS } from '../../constants';
 import { DefaultLayout } from '../../layouts';
 import { useBreadcrumbs } from '../../hooks';
 
 import { CollectorsTable } from './components/collectors_table';
 import { CollectorsStatusBar } from './components/collectors_status_bar';
+import { useCollectorsList } from './hooks';
 
-const DEFAULT_PAGE_SIZE = 20;
 const REFRESH_INTERVAL_MS = 30000;
 
 const CollectorsListPage: React.FC = () => {
   useBreadcrumbs('collectors');
 
-  const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
   const [isAutoRefreshOn, setIsAutoRefreshOn] = useState(true);
 
-  const { data, isLoading, isInitialLoading, isError, error, dataUpdatedAt } = useGetAgentsQuery(
-    {
-      kuery: `type:${AGENT_TYPE_OPAMP}`,
-      page: pageIndex + 1,
-      perPage: pageSize,
-      showInactive: false,
-    },
-    {
-      refetchInterval: isAutoRefreshOn ? REFRESH_INTERVAL_MS : false,
-      keepPreviousData: true,
-    }
-  );
-
-  const collectors = data?.data?.items ?? [];
-  const totalCount = data?.data?.total ?? 0;
-
-  const onTableChange = useCallback((criteria: CriteriaWithPagination<Agent>) => {
-    setPageIndex(criteria.page.index);
-    setPageSize(criteria.page.size);
-  }, []);
+  const {
+    collectors,
+    totalCount,
+    isLoading,
+    isInitialLoading,
+    isError,
+    error,
+    dataUpdatedAt,
+    pageIndex,
+    pageSize,
+    onTableChange,
+  } = useCollectorsList({
+    refetchInterval: isAutoRefreshOn ? REFRESH_INTERVAL_MS : false,
+  });
 
   return (
     <DefaultLayout section="collectors">

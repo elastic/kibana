@@ -26,6 +26,7 @@ import { FormattedDate, FormattedMessage, FormattedRelative } from '@kbn/i18n-re
 import type { Agent } from '../../../../../../common/types';
 import { useLink } from '../../../hooks';
 import { Tags } from '../../agents/components/tags';
+import { VALID_PAGE_SIZES } from '../hooks';
 
 type VisColorKey = keyof EuiThemeComputed['colors']['vis'];
 
@@ -112,7 +113,7 @@ export const CollectorsTable: React.FC<CollectorsTableProps> = ({
         }),
         width: '190px',
         render: (signals: string[] | undefined) => {
-          if (!signals?.length) return '—';
+          if (!signals?.length) return '-';
           return (
             <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
               {signals.map((signal) => {
@@ -202,7 +203,7 @@ export const CollectorsTable: React.FC<CollectorsTableProps> = ({
                 <EuiText size="xs" color="subdued">
                   <FormattedMessage
                     id="xpack.fleet.collectors.table.lastSeenNever"
-                    defaultMessage="Last: —"
+                    defaultMessage="Last: -"
                   />
                 </EuiText>
               )}
@@ -246,7 +247,7 @@ export const CollectorsTable: React.FC<CollectorsTableProps> = ({
         pageIndex,
         pageSize,
         totalItemCount: totalCount,
-        pageSizeOptions: [10, 20, 50],
+        pageSizeOptions: [...VALID_PAGE_SIZES],
       }}
       onChange={onTableChange}
     />
