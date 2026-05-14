@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { css } from '@emotion/react';
 import {
   ResizableLayout,
@@ -58,14 +58,20 @@ export const TemplateEditorLayout: React.FC<TemplateEditorLayoutProps> = ({
     <ResizableLayout
       className="eui-fullHeight"
       flexPanel={
-        <div css={styles.editorPanel}>
-          <TemplateYamlEditor
-            value={yamlValue}
-            onChange={onYamlChange}
-            isSaving={isYamlSaving}
-            isSaved={isYamlSaved}
-          />
-        </div>
+        <EuiFlexGroup
+          direction="column"
+          gutterSize="none"
+          css={css({ height: '100%', overflow: 'hidden' })}
+        >
+          <EuiFlexItem css={styles.editorPanel}>
+            <TemplateYamlEditor
+              value={yamlValue}
+              onChange={onYamlChange}
+              isSaving={isYamlSaving}
+              isSaved={isYamlSaved}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       }
       minFlexPanelSize={MIN_EDITOR_WIDTH}
       fixedPanel={

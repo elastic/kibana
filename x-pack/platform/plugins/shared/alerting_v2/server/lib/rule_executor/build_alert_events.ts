@@ -10,8 +10,40 @@ import { stableStringify } from '@kbn/std';
 
 import type { EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
-import type { AlertEvent } from '../../resources/datastreams/alert_events';
+import type { AlertEvent, AlertEventSeverity } from '../../resources/datastreams/alert_events';
+import { alertEventSeverity } from '../../resources/datastreams/alert_events';
 import type { ActiveAlertGroupHash } from './queries';
+
+const SEVERITY_COLUMN = 'severity';
+const SUPPORTED_SEVERITIES = new Set<AlertEventSeverity>(
+  Object.values(alertEventSeverity) as AlertEventSeverity[]
+);
+
+/**
+ * Best-effort severity extraction for breached alert events.
+ *
+ * The framework supports a fixed set of severity values. Users map their
+ * source data severities into these values via the rule's ES|QL query,
+ * which may emit a `severity` column. This helper:
+ *
+ * - returns `undefined` when the column is missing or not a string
+ * - lowercases the value before comparing against the supported set
+ * - returns the matching {@link AlertEventSeverity} or `undefined`
+ *
+ * Recovered and no-data events do not carry severity, so this is only
+ * applied to breached events.
+ */
+function extractSeverity(rowDoc: Record<string, unknown>): AlertEventSeverity | undefined {
+  const raw = rowDoc[SEVERITY_COLUMN];
+
+  if (typeof raw !== 'string') {
+    return undefined;
+  }
+
+  const normalized = raw.toLowerCase() as AlertEventSeverity;
+
+  return SUPPORTED_SEVERITIES.has(normalized) ? normalized : undefined;
+}
 
 function sha256(value: string) {
   return createHash('sha256').update(value).digest('hex');
@@ -91,6 +123,11 @@ export function createAlertEventsBatchBuilder({
         type: 'signal',
         space_id: spaceId,
       };
+
+      const severity = extractSeverity(rowDoc);
+      if (severity !== undefined) {
+        doc.severity = severity;
+      }
 
       index++;
       alertEventsBatch.push(doc);

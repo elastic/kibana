@@ -15,7 +15,7 @@ import type { RollingFileAppenderConfig } from './rolling_file';
 
 export type { ConsoleAppenderConfig } from './console';
 export type { FileAppenderConfig } from './file';
-export type { OtelAppenderConfig } from './otel';
+export type { OtelAppenderConfig, OtelAppenderTlsConfig } from './otel';
 export type {
   RewriteAppenderConfig,
   MetaRewritePolicyConfig,

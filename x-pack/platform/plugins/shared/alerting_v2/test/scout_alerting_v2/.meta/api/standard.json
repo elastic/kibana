@@ -1,59 +1,269 @@
 {
-  "sha1": "dd3b8b0d02420039c46ee446cc71dde5234d3a13",
+  "sha1": "d906948a79e3f349cdecf68df64de56c96e8a3c3",
   "tests": [
     {
-      "id": "7d659b2da63538a-85f1c7853cd9e1b",
-      "title": "Episode lifecycle for alert rules should transition through pending -> active when source data keeps breaching",
+      "id": "9932666685095b3-d8099f4a61f66f4",
+      "title": "Director skips director processing for signal rules",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/episode_lifecycle.spec.ts",
-        "line": 154,
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
+        "line": 50,
         "column": 10
       }
     },
     {
-      "id": "7d659b2da63538a-e615b55e187194d",
-      "title": "Episode lifecycle for alert rules should transition active -> recovering -> inactive when source data stops breaching",
+      "id": "9932666685095b3-1d5c4dc707dc069",
+      "title": "Director rewrites event type to \"alert\" and populates episode id/status on every processed event",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/episode_lifecycle.spec.ts",
-        "line": 220,
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
+        "line": 90,
         "column": 10
       }
     },
     {
-      "id": "7d659b2da63538a-650627f974905d2",
-      "title": "Episode lifecycle for alert rules should track multiple groups independently",
+      "id": "9932666685095b3-f352403dec812f5",
+      "title": "Director preserves the same episode id across pending -> active -> recovering -> inactive",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/episode_lifecycle.spec.ts",
-        "line": 282,
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
+        "line": 132,
         "column": 10
       }
     },
     {
-      "id": "7d659b2da63538a-a04d736fac0b492",
-      "title": "Episode lifecycle for alert rules should use pending_count threshold before transitioning to active",
+      "id": "9932666685095b3-ebbfa9920a93e05",
+      "title": "Director generates a new episode id when a previously inactive group breaches again",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/episode_lifecycle.spec.ts",
-        "line": 348,
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
+        "line": 194,
+        "column": 10
+      }
+    },
+    {
+      "id": "9932666685095b3-ed7e911db6c2aaa",
+      "title": "Director uses the basic strategy when state_transition is omitted (no status_count is ever set)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
+        "line": 274,
+        "column": 10
+      }
+    },
+    {
+      "id": "9932666685095b3-bea8cefa97f2b1d",
+      "title": "Director increments status_count across consecutive pending executions and resets it on transition to active",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
+        "line": 331,
+        "column": 10
+      }
+    },
+    {
+      "id": "9932666685095b3-31b01d236180dbf",
+      "title": "Director starts a new pending lifecycle at status_count 1 after the previous lifecycle reached inactive",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
+        "line": 386,
+        "column": 10
+      }
+    },
+    {
+      "id": "9932666685095b3-da864b8974dd136",
+      "title": "Director does not write status_count on inactive episode events",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
+        "line": 473,
+        "column": 10
+      }
+    },
+    {
+      "id": "9932666685095b3-9a9ef6a5fa308a9",
+      "title": "Director keeps episode in recovering until recovering_count threshold is met",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
+        "line": 523,
+        "column": 10
+      }
+    },
+    {
+      "id": "9932666685095b3-03be7bd31066395",
+      "title": "Director recovering_count: 0 skips the recovering status and goes straight to inactive",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
+        "line": 583,
+        "column": 10
+      }
+    },
+    {
+      "id": "9932666685095b3-8411a599b7698cc",
+      "title": "Director pending_count: 0 skips the pending status and goes straight to active",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
+        "line": 637,
+        "column": 10
+      }
+    },
+    {
+      "id": "9932666685095b3-daec988cd8d7088",
+      "title": "Director transitions recovering -> active when the group breaches again",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
+        "line": 684,
+        "column": 10
+      }
+    },
+    {
+      "id": "9932666685095b3-51c8bb98d9b6b96",
+      "title": "Director transitions pending -> inactive when a group recovers before the pending threshold is met",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
+        "line": 789,
+        "column": 10
+      }
+    },
+    {
+      "id": "9932666685095b3-69b44437dd98841",
+      "title": "Director tracks episode id and status_count independently per group",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
+        "line": 845,
+        "column": 10
+      }
+    },
+    {
+      "id": "9932666685095b3-d675ba276f0a73c",
+      "title": "Director transitions pending -> active via pending_timeframe even when pending_count is unreachable",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
+        "line": 946,
+        "column": 10
+      }
+    },
+    {
+      "id": "9932666685095b3-2460e798459b606",
+      "title": "Director transitions recovering -> inactive via recovering_timeframe when recovering_operator is OR",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
+        "line": 1004,
+        "column": 10
+      }
+    },
+    {
+      "id": "9932666685095b3-7182c84cbe7c68a",
+      "title": "Director keeps the latest episode in recovering when only recovering_timeframe is met under recovering_operator AND",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
+        "line": 1070,
+        "column": 10
+      }
+    },
+    {
+      "id": "9932666685095b3-5c5ce4414752b37",
+      "title": "Director keeps the latest episode in pending when only pending_timeframe is met under pending_operator AND",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
+        "line": 1149,
+        "column": 10
+      }
+    },
+    {
+      "id": "9932666685095b3-7faf6350097a4dc",
+      "title": "Director transitions pending -> active under pending_operator AND when both count and timeframe are met",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/director.spec.ts",
+        "line": 1218,
         "column": 10
       }
     },
@@ -370,6 +580,110 @@
       }
     },
     {
+      "id": "511e44aec89a669-d6ea6bec654d255",
+      "title": "Matcher data fields suggestions API returns the union of data.* field names across all matching alerts when no matcher is given",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/matcher_data_fields_suggestions.spec.ts",
+        "line": 82,
+        "column": 10
+      }
+    },
+    {
+      "id": "511e44aec89a669-882d56d967076af",
+      "title": "Matcher data fields suggestions API narrows fields when matcher selects a single rule via rule.id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/matcher_data_fields_suggestions.spec.ts",
+        "line": 103,
+        "column": 10
+      }
+    },
+    {
+      "id": "511e44aec89a669-44a0edc5bdf7249",
+      "title": "Matcher data fields suggestions API falls back to the unfiltered result when matcher cannot be parsed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/matcher_data_fields_suggestions.spec.ts",
+        "line": 118,
+        "column": 10
+      }
+    },
+    {
+      "id": "511e44aec89a669-222b539d5e76e73",
+      "title": "Matcher data fields suggestions API falls back to the unfiltered result when matcher only references dropped fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/matcher_data_fields_suggestions.spec.ts",
+        "line": 132,
+        "column": 10
+      }
+    },
+    {
+      "id": "511e44aec89a669-ef0d3f951a5cba0",
+      "title": "Matcher data fields suggestions API validation: rejects empty matcher with a 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/matcher_data_fields_suggestions.spec.ts",
+        "line": 147,
+        "column": 10
+      }
+    },
+    {
+      "id": "511e44aec89a669-cda8477863a44a8",
+      "title": "Matcher data fields suggestions API validation: rejects matcher longer than the schema limit with a 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/matcher_data_fields_suggestions.spec.ts",
+        "line": 157,
+        "column": 10
+      }
+    },
+    {
+      "id": "511e44aec89a669-c2fe2ca7fecde3f",
+      "title": "Matcher data fields suggestions API authorization: returns 200 for a user with read-only privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/matcher_data_fields_suggestions.spec.ts",
+        "line": 170,
+        "column": 10
+      }
+    },
+    {
+      "id": "511e44aec89a669-898e04400f23442",
+      "title": "Matcher data fields suggestions API authorization: returns 403 for a user without alerting_v2 privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/matcher_data_fields_suggestions.spec.ts",
+        "line": 184,
+        "column": 10
+      }
+    },
+    {
       "id": "0279d59e2a21a9f-ddebf96dc384bd8",
       "title": "Rule Doctor insights API should list insights with pagination",
       "expectedStatus": "passed",
@@ -450,6 +764,370 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_doctor_insights.spec.ts",
         "line": 108,
+        "column": 10
+      }
+    },
+    {
+      "id": "2438f1e77f2c56f-0e977e98fb99ba7",
+      "title": "Rule executor writes one breach event per matching ES|QL row",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
+        "line": 72,
+        "column": 10
+      }
+    },
+    {
+      "id": "2438f1e77f2c56f-77d63b284d4de05",
+      "title": "Rule executor writes the columns returned by the query to the data field correctly",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
+        "line": 111,
+        "column": 10
+      }
+    },
+    {
+      "id": "2438f1e77f2c56f-ea445300011525e",
+      "title": "Rule executor populates rule, source, and scheduling fields on every breach event",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
+        "line": 163,
+        "column": 10
+      }
+    },
+    {
+      "id": "2438f1e77f2c56f-b3f74e144f14a8b",
+      "title": "Rule executor writes one event per group when grouping.fields is set",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
+        "line": 216,
+        "column": 10
+      }
+    },
+    {
+      "id": "2438f1e77f2c56f-58b42763926cd1b",
+      "title": "Rule executor groups multiple documents into the same group correctly",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
+        "line": 261,
+        "column": 10
+      }
+    },
+    {
+      "id": "2438f1e77f2c56f-9ee8192456d838b",
+      "title": "Rule executor produces stable group_hash for the same group across executions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
+        "line": 324,
+        "column": 10
+      }
+    },
+    {
+      "id": "2438f1e77f2c56f-06a499fd5d06511",
+      "title": "Rule executor produces the correct breach events for match based queries without grouping",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
+        "line": 378,
+        "column": 10
+      }
+    },
+    {
+      "id": "2438f1e77f2c56f-e98ca3fdb0768e7",
+      "title": "Rule executor extracts severity from the ES|QL row onto breached events as a top-level field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
+        "line": 434,
+        "column": 10
+      }
+    },
+    {
+      "id": "2438f1e77f2c56f-cd70e404df6d0ab",
+      "title": "Rule executor includes data within the lookback window even when older than schedule.every",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
+        "line": 518,
+        "column": 10
+      }
+    },
+    {
+      "id": "2438f1e77f2c56f-0764f6813bc9f63",
+      "title": "Rule executor excludes data outside the lookback window",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
+        "line": 559,
+        "column": 10
+      }
+    },
+    {
+      "id": "2438f1e77f2c56f-338ac7759c20be6",
+      "title": "Rule executor defaults the lookback window to schedule.every when no lookback is set",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
+        "line": 595,
+        "column": 10
+      }
+    },
+    {
+      "id": "2438f1e77f2c56f-0363349d4f603b0",
+      "title": "Rule executor uses the configured time_field for the lookback range filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
+        "line": 637,
+        "column": 10
+      }
+    },
+    {
+      "id": "2438f1e77f2c56f-885f62d064ffa5a",
+      "title": "Rule executor binds the ?_tstart and ?_tend reserved ES|QL params to the lookback window",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
+        "line": 696,
+        "column": 10
+      }
+    },
+    {
+      "id": "2438f1e77f2c56f-c6053795bdb7194",
+      "title": "Rule executor emits a recovered event under no_breach policy when a previously breaching group stops breaching",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
+        "line": 739,
+        "column": 10
+      }
+    },
+    {
+      "id": "2438f1e77f2c56f-fa0800ab5bed882",
+      "title": "Rule executor does not emit recovery events for kind: \"signal\" rules when previously matching groups stop matching",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
+        "line": 789,
+        "column": 10
+      }
+    },
+    {
+      "id": "2438f1e77f2c56f-5ba0845ba35b7c5",
+      "title": "Rule executor uses the configured query under recovery_policy.type=query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
+        "line": 840,
+        "column": 10
+      }
+    },
+    {
+      "id": "2438f1e77f2c56f-ea5da1ccca55f29",
+      "title": "Rule executor emits one recovery event per active group when recovery_policy.type=query matches multiple",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
+        "line": 918,
+        "column": 10
+      }
+    },
+    {
+      "id": "2438f1e77f2c56f-033f45ff22a1659",
+      "title": "Rule executor does not recover a group when recovery_policy.type=query returns no matching active group",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
+        "line": 1015,
+        "column": 10
+      }
+    },
+    {
+      "id": "2438f1e77f2c56f-be6d6473b1eaeab",
+      "title": "Rule executor does not recover a group when recovery_policy.type=query returns zero rows",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
+        "line": 1086,
+        "column": 10
+      }
+    },
+    {
+      "id": "2438f1e77f2c56f-2c933d29b3535e0",
+      "title": "Rule executor emits recovery events only for groups that stop breaching when others keep breaching",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
+        "line": 1151,
+        "column": 10
+      }
+    },
+    {
+      "id": "2438f1e77f2c56f-c995dce28cb9615",
+      "title": "Rule executor emits both breach and recovery events in the same execution when one group recovers and another keeps breaching",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
+        "line": 1256,
+        "column": 10
+      }
+    },
+    {
+      "id": "2438f1e77f2c56f-1462dc9dada6f00",
+      "title": "Rule executor writes zero events when the ES|QL query returns no rows",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
+        "line": 1343,
+        "column": 10
+      }
+    },
+    {
+      "id": "2438f1e77f2c56f-13e2313a20c3188",
+      "title": "Rule executor a disabled rule writes no new events",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
+        "line": 1364,
+        "column": 10
+      }
+    },
+    {
+      "id": "2438f1e77f2c56f-d716fd4b00f7e6f",
+      "title": "Rule executor resumes producing events after a disabled rule is re-enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
+        "line": 1421,
+        "column": 10
+      }
+    },
+    {
+      "id": "2438f1e77f2c56f-ad19ddc9e83754c",
+      "title": "Rule executor a deleted rule writes no new events",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
+        "line": 1497,
+        "column": 10
+      }
+    },
+    {
+      "id": "2438f1e77f2c56f-2c0ff1a827876c6",
+      "title": "Rule executor an invalid ES|QL query writes no events",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/api/tests/rule_executor.spec.ts",
+        "line": 1553,
         "column": 10
       }
     }
