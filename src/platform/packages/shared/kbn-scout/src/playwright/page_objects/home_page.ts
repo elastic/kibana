@@ -16,14 +16,6 @@ export class HomePage {
     return this.page.testSubj.locator('homeApp');
   }
 
-  public get welcomeInterstitial() {
-    return this.page.testSubj.locator('homeWelcomeInterstitial');
-  }
-
-  public get skipWelcomeButton() {
-    return this.page.testSubj.locator('skipWelcomeScreen');
-  }
-
   public async goto() {
     await this.page.gotoApp('home');
     await this.homeApp.waitFor({ state: 'visible' });

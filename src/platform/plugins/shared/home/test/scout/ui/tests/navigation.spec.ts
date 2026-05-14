@@ -11,7 +11,7 @@ import { test, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { ES_ARCHIVE, KBN_ARCHIVE } from '../constants';
 
-test.describe('Kibana browser back navigation should work', { tag: tags.stateful.classic }, () => {
+test.describe('Kibana navigation', { tag: tags.stateful.classic }, () => {
   test.beforeAll(async ({ esArchiver, kbnClient }) => {
     await esArchiver.loadIfNeeded(ES_ARCHIVE);
     await kbnClient.importExport.load(KBN_ARCHIVE);
@@ -23,7 +23,21 @@ test.describe('Kibana browser back navigation should work', { tag: tags.stateful
     await kbnClient.uiSettings.unset('defaultIndex');
   });
 
-  test('detect navigate back issues', async ({ browserAuth, page, pageObjects }) => {
+  test('clicking on kibana logo should take you to home page', async ({ browserAuth, page }) => {
+    await page.addInitScript(() => {
+      window.localStorage.setItem('home:welcome:show', 'false');
+    });
+    await browserAuth.loginAsViewer();
+    await page.gotoApp('management');
+    await page.testSubj.locator('logo').click();
+    await expect(page).toHaveURL(/\/app\/home/);
+  });
+
+  test('browser back navigation preserves URL state', async ({
+    browserAuth,
+    page,
+    pageObjects,
+  }) => {
     await page.addInitScript(() => {
       window.localStorage.setItem('home:welcome:show', 'false');
     });
