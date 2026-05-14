@@ -16,7 +16,7 @@ test.describe('Maps integration', { tag: tags.stateful.classic }, () => {
     await kbnClient.savedObjects.cleanStandardList();
     await kbnClient.importExport.load(KBN_ARCHIVES.MAPS);
 
-    await browserAuth.loginAsAdmin();
+    await browserAuth.loginAsPrivilegedUser();
     await page.goto(kbnUrl.app('maps'));
     await new SavedObjectsListingPage(page).waitForLoaded();
   });

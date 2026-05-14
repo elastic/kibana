@@ -22,11 +22,7 @@ export class SavedObjectsListingPage {
   constructor(private readonly page: ScoutPage) {}
 
   async waitForLoaded() {
-    await expect
-      .poll(() =>
-        this.page.locator('[data-test-subj="itemsInMemTable"]:not(.euiBasicTable-loading)').count()
-      )
-      .toBeGreaterThan(0);
+    await this.page.testSubj.locator('listingTable-isLoaded').waitFor({ state: 'visible' });
   }
 
   async searchForItemWithName(name: string, { escape = true }: { escape?: boolean } = {}) {
