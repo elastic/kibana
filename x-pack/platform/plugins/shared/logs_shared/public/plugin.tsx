@@ -38,7 +38,7 @@ export class LogsSharedPlugin implements LogsSharedClientPluginClass {
         },
         getIsEsqlDefault: async () => {
           const [coreStart] = await coreSetup.getStartServices();
-          return coreStart.featureFlags.getBooleanValue(IS_ESQL_DEFAULT_FEATURE_FLAG_KEY, false);
+          return coreStart.featureFlags.getBooleanValue(IS_ESQL_DEFAULT_FEATURE_FLAG_KEY, true);
         },
       })
     );
