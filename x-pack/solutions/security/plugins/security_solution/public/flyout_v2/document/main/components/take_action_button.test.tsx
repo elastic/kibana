@@ -41,10 +41,8 @@ jest.mock('../hooks/use_explore_actions', () => ({
   useExploreActions: (...args: unknown[]) => mockUseExploreActions(...args),
 }));
 
-const mockOpenAddRuleException = jest.fn();
-const mockUseOpenAddRuleException = jest.fn().mockReturnValue(mockOpenAddRuleException);
-jest.mock('../../tools/add_rule_exception/hooks/use_open_add_rule_exception', () => ({
-  useOpenAddRuleException: (...args: unknown[]) => mockUseOpenAddRuleException(...args),
+jest.mock('../../tools/add_rule_exception', () => ({
+  AddRuleException: () => <div data-test-subj="addRuleException" />,
 }));
 
 const mockUseRunAlertWorkflowPanel = jest.fn().mockReturnValue({

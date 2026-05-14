@@ -37,12 +37,6 @@ jest.mock('../../../../common/components/endpoint/host_isolation');
 jest.mock('../../../../common/components/endpoint/responder');
 jest.mock('../../../../common/components/user_privileges');
 jest.mock('../../../../exceptions/hooks/use_endpoint_exceptions_capability');
-jest.mock(
-  '../../../../flyout_v2/document/tools/add_rule_exception/hooks/use_open_add_rule_exception',
-  () => ({
-    useOpenAddRuleException: jest.fn().mockReturnValue(jest.fn()),
-  })
-);
 
 const mockUseRunAlertWorkflowPanel = jest.fn().mockReturnValue({
   runWorkflowMenuItem: [],

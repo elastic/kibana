@@ -27,7 +27,7 @@ import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app'
 import { useRunAlertWorkflowPanel } from '../../../../detections/components/alerts_table/timeline_actions/use_run_alert_workflow_panel';
 import { useRunDocumentWorkflowPanel } from '../../../../detections/components/alerts_table/timeline_actions/use_run_document_workflow_panel';
 import { useExploreActions } from '../hooks/use_explore_actions';
-import { useOpenAddRuleException } from '../../tools/add_rule_exception/hooks/use_open_add_rule_exception';
+import { AddRuleException } from '../../tools/add_rule_exception';
 import { FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID } from './test_ids';
 
 const TAKE_ACTION = i18n.translate('xpack.securitySolution.flyoutV2.footer.takeActionButtonLabel', {
@@ -187,24 +187,28 @@ export const TakeActionButton = memo(
       closePopover: closePopoverHandler,
     });
 
-    const onAddRuleExceptionConfirm = useCallback(
+    const [exceptionFlyoutType, setExceptionFlyoutType] = useState<
+      ExceptionListTypeEnum | null | undefined
+    >(undefined);
+    const handleOpenAddRuleException = useCallback(
+      (type?: ExceptionListTypeEnum) => {
+        closePopoverHandler();
+        setExceptionFlyoutType(type ?? null);
+      },
+      [closePopoverHandler]
+    );
+    const handleExceptionCancel = useCallback(
+      (_didRuleChange: boolean) => setExceptionFlyoutType(undefined),
+      []
+    );
+    const handleExceptionConfirm = useCallback(
       (_didRuleChange: boolean, didCloseAlert: boolean, didBulkCloseAlert: boolean) => {
         if (didCloseAlert || didBulkCloseAlert) {
           onAlertUpdated();
         }
+        setExceptionFlyoutType(undefined);
       },
       [onAlertUpdated]
-    );
-    const openAddRuleException = useOpenAddRuleException({
-      hit,
-      onConfirm: onAddRuleExceptionConfirm,
-    });
-    const handleOpenAddRuleException = useCallback(
-      (type?: ExceptionListTypeEnum) => {
-        closePopoverHandler();
-        openAddRuleException(type ?? null);
-      },
-      [closePopoverHandler, openAddRuleException]
     );
     const { exceptionActionItems } = useAlertExceptionActions({
       isEndpointAlert,
@@ -274,23 +278,33 @@ export const TakeActionButton = memo(
     );
 
     return (
-      <EuiPopover
-        id="AlertTakeActionPanel"
-        aria-label={TAKE_ACTION}
-        button={takeActionButton}
-        isOpen={isPopoverOpen}
-        closePopover={closePopoverHandler}
-        panelPaddingSize="none"
-        anchorPosition="downLeft"
-        repositionOnScroll
-      >
-        <EuiContextMenu
-          size="s"
-          initialPanelId={0}
-          panels={panels}
-          data-test-subj="takeActionPanelMenu"
-        />
-      </EuiPopover>
+      <>
+        <EuiPopover
+          id="AlertTakeActionPanel"
+          aria-label={TAKE_ACTION}
+          button={takeActionButton}
+          isOpen={isPopoverOpen}
+          closePopover={closePopoverHandler}
+          panelPaddingSize="none"
+          anchorPosition="downLeft"
+          repositionOnScroll
+        >
+          <EuiContextMenu
+            size="s"
+            initialPanelId={0}
+            panels={panels}
+            data-test-subj="takeActionPanelMenu"
+          />
+        </EuiPopover>
+        {exceptionFlyoutType !== undefined && (
+          <AddRuleException
+            hit={hit}
+            exceptionListType={exceptionFlyoutType}
+            onCancel={handleExceptionCancel}
+            onConfirm={handleExceptionConfirm}
+          />
+        )}
+      </>
     );
   }
 );

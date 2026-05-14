@@ -5,14 +5,17 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
-import { css } from '@emotion/react';
-import { EuiFlyoutBody, EuiFlyoutHeader, EuiSkeletonText, useEuiTheme } from '@elastic/eui';
+import React, { memo, useCallback, useMemo } from 'react';
+import {
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
+  EuiSkeletonText,
+} from '@elastic/eui';
 import { ALERT_RULE_UUID, ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
-import { expandDottedObject } from '../../../../../common/utils/expand_dotted';
 import type { Status } from '../../../../../common/api/detection_engine';
 import { AddExceptionFlyout } from '../../../../detection_engine/rule_exceptions/components/add_exception_flyout';
 import {
@@ -52,7 +55,7 @@ export interface AddRuleExceptionProps {
  */
 export const AddRuleException: React.FC<AddRuleExceptionProps> = memo(
   ({ hit, exceptionListType, onCancel, onConfirm }) => {
-    const { euiTheme } = useEuiTheme();
+    const handleClose = useCallback(() => onCancel(false), [onCancel]);
 
     const ruleId = useMemo(() => {
       const value = getFieldValue(hit, ALERT_RULE_UUID);
@@ -74,7 +77,7 @@ export const AddRuleException: React.FC<AddRuleExceptionProps> = memo(
     const alertData = useMemo<AlertData>(
       () =>
         ({
-          ...expandDottedObject(hit.flattened, true),
+          ...(hit.raw._source as object),
           _id: hit.raw._id,
           _index: hit.raw._index,
         } as AlertData),
@@ -88,13 +91,8 @@ export const AddRuleException: React.FC<AddRuleExceptionProps> = memo(
     }, [hit]);
 
     return (
-      <>
-        <EuiFlyoutHeader
-          hasBorder
-          css={css`
-            padding-block: ${euiTheme.size.s} !important;
-          `}
-        >
+      <EuiFlyout session="never" size="l" onClose={handleClose} aria-label={title}>
+        <EuiFlyoutHeader hasBorder>
           <ToolsFlyoutHeader
             hit={hit}
             title={title}
@@ -128,7 +126,7 @@ export const AddRuleException: React.FC<AddRuleExceptionProps> = memo(
             onConfirm={onConfirm}
           />
         )}
-      </>
+      </EuiFlyout>
     );
   }
 );
