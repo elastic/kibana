@@ -12,16 +12,16 @@ import type { Logger } from '@kbn/core/server';
 import { isEqual } from 'lodash';
 import type { Middleware } from './lib/middleware';
 import { parseIntervalAsMillisecond } from './lib/intervals';
-import type {
-  ApiKeyOptions,
-  ConcreteTaskInstance,
-  IntervalSchedule,
-  RruleSchedule,
-  ScheduleOptions,
-  TaskInstanceWithDeprecatedFields,
-  TaskInstanceWithId,
+import {
+  TaskStatus,
+  type ApiKeyOptions,
+  type ConcreteTaskInstance,
+  type IntervalSchedule,
+  type RruleSchedule,
+  type ScheduleOptions,
+  type TaskInstanceWithDeprecatedFields,
+  type TaskInstanceWithId,
 } from './task';
-import { TaskStatus } from './task';
 import type { TaskStore } from './task_store';
 import { ensureDeprecatedFieldsAreCorrected } from './lib/correct_deprecated_fields';
 import { retryableBulkUpdate } from './lib/retryable_bulk_update';
@@ -30,6 +30,25 @@ import { calculateNextRunAtFromSchedule } from './lib/get_next_run_at';
 import { TaskAlreadyRunningError } from './lib/errors';
 import type { TaskPollingLifecycle } from './polling_lifecycle';
 import { getExecutionId } from './lib/get_execution_id';
+
+const scheduleOptionsToStoreApiKeyOptions = (
+  options?: ScheduleOptions
+): ApiKeyOptions | undefined => {
+  if (!options) {
+    return undefined;
+  }
+  const storeOpts: ApiKeyOptions = {};
+  if (options.request) {
+    storeOpts.request = options.request;
+  }
+  if (options.onEsKey === true) {
+    storeOpts.onEsKey = true;
+  }
+  if (options.regenerateApiKey !== undefined) {
+    storeOpts.regenerateApiKey = options.regenerateApiKey;
+  }
+  return Object.keys(storeOpts).length ? storeOpts : undefined;
+};
 
 const VERSION_CONFLICT_STATUS = 409;
 const NOT_FOUND_STATUS = 404;
@@ -110,11 +129,7 @@ export class TaskScheduling {
         traceparent: traceparent || '',
         enabled: modifiedTask.enabled ?? true,
       },
-      options?.request
-        ? {
-            request: options?.request,
-          }
-        : undefined
+      scheduleOptionsToStoreApiKeyOptions(options)
     );
   }
 
@@ -148,11 +163,7 @@ export class TaskScheduling {
 
     return await this.store.bulkSchedule(
       modifiedTasks,
-      options?.request
-        ? {
-            request: options?.request,
-          }
-        : undefined
+      scheduleOptionsToStoreApiKeyOptions(options)
     );
   }
 

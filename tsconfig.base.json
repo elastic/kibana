@@ -2576,6 +2576,8 @@
       "@kbn/ui-side-navigation/*": ["src/platform/kbn-ui/side-navigation/*"],
       "@kbn/ui-theme": ["src/platform/packages/shared/kbn-ui-theme"],
       "@kbn/ui-theme/*": ["src/platform/packages/shared/kbn-ui-theme/*"],
+      "@kbn/uiam-api-keys-provisioning-status": ["x-pack/platform/packages/shared/kbn-uiam-api-keys-provisioning-status"],
+      "@kbn/uiam-api-keys-provisioning-status/*": ["x-pack/platform/packages/shared/kbn-uiam-api-keys-provisioning-status/*"],
       "@kbn/unified-chart-section-viewer": ["src/platform/packages/shared/kbn-unified-chart-section-viewer"],
       "@kbn/unified-chart-section-viewer/*": ["src/platform/packages/shared/kbn-unified-chart-section-viewer/*"],
       "@kbn/unified-data-table": ["src/platform/packages/shared/kbn-unified-data-table"],
