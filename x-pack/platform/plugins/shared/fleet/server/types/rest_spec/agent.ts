@@ -377,6 +377,7 @@ export const AgentResponseSchema = schema.object({
   capabilities: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
   health: schema.maybe(schema.recordOf(schema.string(), schema.any())),
   effective_config: schema.maybe(schema.any()),
+  signals: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 10 })),
 });
 
 export const GetAgentsResponseSchema = ListResponseSchema(AgentResponseSchema).extends({

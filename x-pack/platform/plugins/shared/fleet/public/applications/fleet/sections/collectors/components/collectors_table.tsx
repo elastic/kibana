@@ -23,25 +23,25 @@ import type { EuiThemeComputed } from '@elastic/eui-theme-common';
 import { i18n } from '@kbn/i18n';
 import { FormattedDate, FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 
-import type { OtelCollector } from '../../../../../../common/types/rest_spec/otel_collector';
+import type { Agent } from '../../../../../../common/types';
 import { useLink } from '../../../hooks';
 import { Tags } from '../../agents/components/tags';
 
 type VisColorKey = keyof EuiThemeComputed['colors']['vis'];
 
 interface CollectorsTableProps {
-  collectors: OtelCollector[];
+  collectors: Agent[];
   isLoading: boolean;
   totalCount: number;
   pageIndex: number;
   pageSize: number;
-  onTableChange: (criteria: CriteriaWithPagination<OtelCollector>) => void;
+  onTableChange: (criteria: CriteriaWithPagination<Agent>) => void;
 }
 
-const getHostName = (collector: OtelCollector): string =>
+const getHostName = (collector: Agent): string =>
   (collector.non_identifying_attributes?.['elastic.display.name'] as string) ?? collector.id;
 
-const getConfigName = (collector: OtelCollector): string | undefined =>
+const getConfigName = (collector: Agent): string | undefined =>
   collector.non_identifying_attributes?.['config.name'] as string | undefined;
 
 const SIGNAL_VIS_COLOR_KEYS: Record<string, [VisColorKey, VisColorKey]> = {
@@ -61,7 +61,7 @@ export const CollectorsTable: React.FC<CollectorsTableProps> = ({
   const { getHref } = useLink();
   const { euiTheme } = useEuiTheme();
 
-  const columns: Array<EuiBasicTableColumn<OtelCollector>> = useMemo(() => {
+  const columns: Array<EuiBasicTableColumn<Agent>> = useMemo(() => {
     const getSignalBadgeColor = (signal: string): [string, string] => {
       const entry = SIGNAL_VIS_COLOR_KEYS[signal];
       if (!entry) return ['hollow', 'default'];
@@ -75,7 +75,7 @@ export const CollectorsTable: React.FC<CollectorsTableProps> = ({
           defaultMessage: 'Host Name',
         }),
         width: '185px',
-        render: (_: string, collector: OtelCollector) => {
+        render: (_: string, collector: Agent) => {
           return (
             <EuiFlexGroup gutterSize="none" direction="column">
               <EuiFlexItem grow={false}>
@@ -95,7 +95,7 @@ export const CollectorsTable: React.FC<CollectorsTableProps> = ({
         name: i18n.translate('xpack.fleet.collectors.table.configurationColumn', {
           defaultMessage: 'Configuration',
         }),
-        render: (_: unknown, collector: OtelCollector) => getConfigName(collector) ?? '-',
+        render: (_: unknown, collector: Agent) => getConfigName(collector) ?? '-',
       },
       {
         field: 'identifying_attributes',
@@ -103,7 +103,7 @@ export const CollectorsTable: React.FC<CollectorsTableProps> = ({
           defaultMessage: 'Version',
         }),
         // TODO not implemmented yet, waiting for backend to populate the field
-        render: (_: unknown, collector: OtelCollector) => <EuiBadge>TODO</EuiBadge>,
+        render: (_: unknown, collector: Agent) => <EuiBadge>TODO</EuiBadge>,
       },
       {
         field: 'signals',
@@ -142,7 +142,7 @@ export const CollectorsTable: React.FC<CollectorsTableProps> = ({
         }),
         width: '100px',
         // TODO not implemmented yet, waiting for backend to populate the field
-        render: (_: unknown, collector: OtelCollector) => '-',
+        render: (_: unknown, collector: Agent) => '-',
       },
       {
         field: 'enrolled_at',
@@ -150,7 +150,7 @@ export const CollectorsTable: React.FC<CollectorsTableProps> = ({
           defaultMessage: 'Seen',
         }),
         width: '180px',
-        render: (_: string, collector: OtelCollector) => (
+        render: (_: string, collector: Agent) => (
           <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiToolTip
@@ -225,7 +225,7 @@ export const CollectorsTable: React.FC<CollectorsTableProps> = ({
             }),
             type: 'icon',
             icon: 'inspect',
-            href: ({ id }: OtelCollector) => getHref('agent_details', { agentId: id }),
+            href: ({ id }: Agent) => getHref('agent_details', { agentId: id }),
           },
         ],
       },
@@ -233,7 +233,7 @@ export const CollectorsTable: React.FC<CollectorsTableProps> = ({
   }, [getHref, euiTheme.colors.vis]);
 
   return (
-    <EuiBasicTable<OtelCollector>
+    <EuiBasicTable<Agent>
       data-test-subj="fleetCollectorsTable"
       tableCaption={i18n.translate('xpack.fleet.collectors.table.caption', {
         defaultMessage: 'OTel collectors',

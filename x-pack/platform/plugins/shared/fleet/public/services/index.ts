@@ -20,7 +20,6 @@ export {
   dataStreamRouteService,
   fleetSetupRouteService,
   agentRouteService,
-  otelCollectorRouteService,
   enrollmentAPIKeyRouteService,
   epmRouteService,
   setupRouteService,

@@ -37,6 +37,7 @@ import { retryTransientEsErrors } from '../epm/elasticsearch/retry';
 
 import { searchHitToAgent, agentSOAttributesToFleetServerAgentDoc } from './helpers';
 import { buildAgentStatusRuntimeField } from './build_status_runtime_field';
+import { SIGNALS_RUNTIME_FIELD } from './build_signals_runtime_field';
 import { getLatestAvailableAgentVersion } from './versions';
 
 const INACTIVE_AGENT_CONDITION = `status:inactive`;
@@ -218,7 +219,6 @@ export async function getAgentsByKuery(
     pitId?: string;
     pitKeepAlive?: string;
     aggregations?: Record<string, AggregationsAggregationContainer>;
-    runtimeFields?: estypes.SearchRequest['runtime_mappings'];
   }
 ): Promise<{
   agents: Agent[];
@@ -280,7 +280,7 @@ export async function getAgentsByKuery(
 
   const runtimeFields = {
     ...(await buildAgentStatusRuntimeField(soClient)),
-    ...options.runtimeFields,
+    ...SIGNALS_RUNTIME_FIELD,
   };
 
   const sort = getSortConfig(sortField, sortOrder);

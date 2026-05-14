@@ -97,7 +97,6 @@ export interface AgentClient {
       pitId?: string;
       pitKeepAlive?: string;
       getStatusSummary?: boolean;
-      runtimeFields?: estypes.SearchRequest['runtime_mappings'];
     }
   ): Promise<{
     agents: Agent[];
@@ -144,7 +143,6 @@ class AgentClientImpl implements AgentClient {
       pitId?: string;
       pitKeepAlive?: string;
       getStatusSummary?: boolean;
-      runtimeFields?: estypes.SearchRequest['runtime_mappings'];
     }
   ) {
     await this.#runPreflight();

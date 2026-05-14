@@ -11,8 +11,9 @@ import { EuiCallOut, EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
 import type { CriteriaWithPagination } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { OtelCollector } from '../../../../../common/types/rest_spec/otel_collector';
-import { useGetOtelCollectorsQuery } from '../../../../hooks/use_request/otel_collectors';
+import { AGENT_TYPE_OPAMP } from '../../../../../common/constants';
+import type { Agent } from '../../../../../common/types';
+import { useGetAgentsQuery } from '../../../../hooks/use_request/agents';
 import { FLEET_ROUTING_PATHS } from '../../constants';
 import { DefaultLayout } from '../../layouts';
 import { useBreadcrumbs } from '../../hooks';
@@ -30,22 +31,23 @@ const CollectorsListPage: React.FC = () => {
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
   const [isAutoRefreshOn, setIsAutoRefreshOn] = useState(true);
 
-  const { data, isLoading, isInitialLoading, isError, error, dataUpdatedAt } =
-    useGetOtelCollectorsQuery(
-      {
-        page: pageIndex + 1,
-        perPage: pageSize,
-        showInactive: false,
-      },
-      {
-        refetchInterval: isAutoRefreshOn ? REFRESH_INTERVAL_MS : false,
-      }
-    );
+  const { data, isLoading, isInitialLoading, isError, error, dataUpdatedAt } = useGetAgentsQuery(
+    {
+      kuery: `type:${AGENT_TYPE_OPAMP}`,
+      page: pageIndex + 1,
+      perPage: pageSize,
+      showInactive: false,
+    },
+    {
+      refetchInterval: isAutoRefreshOn ? REFRESH_INTERVAL_MS : false,
+      keepPreviousData: true,
+    }
+  );
 
-  const collectors = data?.items ?? [];
-  const totalCount = data?.total ?? 0;
+  const collectors = data?.data?.items ?? [];
+  const totalCount = data?.data?.total ?? 0;
 
-  const onTableChange = useCallback((criteria: CriteriaWithPagination<OtelCollector>) => {
+  const onTableChange = useCallback((criteria: CriteriaWithPagination<Agent>) => {
     setPageIndex(criteria.page.index);
     setPageSize(criteria.page.size);
   }, []);
@@ -57,6 +59,7 @@ const CollectorsListPage: React.FC = () => {
         <EuiCallOut
           color="danger"
           iconType="error"
+          announceOnMount
           title={
             <FormattedMessage
               id="xpack.fleet.collectors.errorTitle"
