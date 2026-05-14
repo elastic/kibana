@@ -109,15 +109,17 @@ The tool stores the result as an attachment (creating new or updating existing).
 
         if (result.rejectionReason) {
           return {
-            results: [{
-              type: ToolResultType.other,
-              data: {
-                success: false,
-                rejected: true,
-                rejectionCode: result.rejectionReason.code,
-                message: result.rejectionMessage,
+            results: [
+              {
+                type: ToolResultType.other,
+                data: {
+                  success: false,
+                  rejected: true,
+                  rejectionCode: result.rejectionReason.code,
+                  message: result.rejectionMessage ?? result.rejectionReason.message,
+                },
               },
-            }],
+            ],
           };
         }
 
