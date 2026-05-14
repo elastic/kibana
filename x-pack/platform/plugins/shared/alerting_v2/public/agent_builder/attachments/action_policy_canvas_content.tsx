@@ -216,6 +216,7 @@ const extractRuleIdFromMatcher = (matcher: string | null | undefined): string | 
 const buildActionPolicyPayload = (data: ActionPolicyAttachment['data']) => ({
   name: data.name,
   description: data.description ?? '',
+  type: data.type ?? 'global',
   destinations: data.destinations ?? [],
   ...(data.matcher !== undefined ? { matcher: data.matcher ?? undefined } : {}),
   ...(data.groupBy !== undefined ? { groupBy: data.groupBy ?? undefined } : {}),
