@@ -6,22 +6,24 @@
  */
 
 /**
- * Stable `data-ebt-*` wire strings for `agent_builder_ui_click` (`ReportUiClickParams`).
- * Resolved from the DOM by `agent_builder_ui_click_resolve.ts`.
+ * Stable wire strings for Agent Builder UI click telemetry (`agent_builder_ui_click`).
  *
- * Import **`AGENT_BUILDER_UI_EBT`** only. String values are analytics keywords — **do not rename**.
+ * Controls set `data-ebt-element`, `data-ebt-action`, and optionally `data-ebt-detail` on
+ * the DOM; the click handler reads them (see `agent_builder_ui_click_resolve.ts` in the
+ * Agent Builder plugin).
  *
- * | DOM / usage | Tree |
- * | --- | --- |
- * | `data-ebt-element` | `element.*` (`agentBuilder.…`) |
- * | `data-ebt-action` | `action.*` (by UI domain) |
- * | `data-ebt-detail` (entity typing) | `entity.*` |
- * | `data-ebt-detail` / route `ebtNavItem` | `detail.*` |
- * | _reserved_ | `format` |
+ * Import `AGENT_BUILDER_UI_EBT` only. String values are analytics keywords: do not rename
+ * or change casually (downstream dashboards depend on stable names).
+ *
+ * Conventions:
+ * - `element.*` → `data-ebt-element` (where in the product the click happened)
+ * - `action.*` → `data-ebt-action` (what the user did)
+ * - `entity.*` → `data-ebt-detail` when the detail is an entity type (agent, tool, …)
+ * - `detail.*` → `data-ebt-detail` for non-entity discriminants (nav targets, filter mode, embed menu ids, …)
  */
 
 export const AGENT_BUILDER_UI_EBT = {
-  // `data-ebt-element`
+  // data-ebt-element: where in the product (region / surface)
   element: {
     APP_ROOT: 'agentBuilder.app',
     PAGE_CONTENT: 'agentBuilder.pageContent',
@@ -32,7 +34,6 @@ export const AGENT_BUILDER_UI_EBT = {
     LIBRARY_TOOLS: 'agentBuilder.library.tools',
     LIBRARY_PLUGINS: 'agentBuilder.library.plugins',
     SIDEBAR: 'agentBuilder.sidebar',
-    CONVERSATION: 'agentBuilder.conversation',
     CONVERSATION_HEADER: 'agentBuilder.conversation.header',
     CONVERSATION_TITLE: 'agentBuilder.conversation.title',
     CONVERSATION_EMBEDDABLE_HEADER: 'agentBuilder.conversation.embeddableHeader',
@@ -45,7 +46,6 @@ export const AGENT_BUILDER_UI_EBT = {
     CONVERSATION_SEARCH_MODAL: 'agentBuilder.conversation.searchModal',
     CONVERSATION_SCROLL: 'agentBuilder.conversation.scroll',
     CONVERSATION_STALE_ATTACHMENTS: 'agentBuilder.conversation.staleAttachments',
-    MANAGE_GLOBAL: 'agentBuilder.layer3.manage',
     MANAGE_TOOLS: 'agentBuilder.manage.tools',
     MANAGE_TOOLS_TABLE: 'agentBuilder.manage.tools.table',
     MANAGE_TOOLS_FORM: 'agentBuilder.manage.tools.form',
@@ -73,7 +73,7 @@ export const AGENT_BUILDER_UI_EBT = {
     ANNOUNCEMENT_TOAST: 'agentBuilder.announcement.toast',
   },
 
-  // `data-ebt-action`
+  // data-ebt-action: what the user did (grouped by product area)
   action: {
     navSidebar: {
       SIDEBAR_LAYER_TRANSITION: 'sidebar_layer_transition',
@@ -169,7 +169,6 @@ export const AGENT_BUILDER_UI_EBT = {
       WELCOME_DOCS_LINK: 'inapp_welcome_docs_link',
       WELCOME_GENAI_SETTINGS_LINK: 'inapp_welcome_genai_settings_link',
     },
-    /** First-run AI Agent announcement modal and follow-up toasts */
     announcement: {
       MODAL_CONTINUE: 'announcement_modal_continue',
       MODAL_REVERT: 'announcement_modal_revert',
@@ -184,14 +183,12 @@ export const AGENT_BUILDER_UI_EBT = {
       UPGRADE_SUBSCRIPTION: 'access_upgrade_subscription',
       MANAGE_LICENSE: 'access_manage_license',
     },
-    /** Library / cross-nav / install entry points when no finer-grained action applies */
     uiChrome: {
       MANAGE_LIBRARY_LINK: 'manage_library_link',
       OPEN_ADD_MENU: 'open_add_menu',
       CROSS_NAVIGATE: 'cross_navigate',
       INSTALL_FROM_URL_OR_ZIP: 'install_from_url_or_zip',
     },
-    /** Global tools library, MCP connection entry points, tool form, bulk import */
     manageTools: {
       NEW_TOOL_ESQL: 'manage_tools_new_tool_esql',
       NAV_AGENTS: 'manage_tools_nav_agents',
@@ -236,7 +233,6 @@ export const AGENT_BUILDER_UI_EBT = {
       BULK_DELETE_MODAL_CANCEL: 'manage_tools_bulk_delete_modal_cancel',
       TABLE_LABELS_VIEW_MORE: 'manage_tools_table_labels_view_more',
     },
-    /** Agent overview, create/edit form, edit-details flyout */
     manageAgent: {
       OVERVIEW_COPY_ID: 'manage_agent_overview_copy_id',
       OVERVIEW_DOCS_LINK: 'manage_agent_overview_docs_link',
@@ -256,7 +252,6 @@ export const AGENT_BUILDER_UI_EBT = {
       EDIT_DETAILS_SAVE: 'manage_agent_edit_details_save',
       EDIT_DETAILS_CANCEL: 'manage_agent_edit_details_cancel',
     },
-    /** Global agents library (`/manage/agents`) */
     manageAgents: {
       NEW_AGENT: 'manage_agents_new_agent',
       DOCS_LEARN_MORE: 'manage_agents_docs_learn_more',
@@ -268,7 +263,6 @@ export const AGENT_BUILDER_UI_EBT = {
       TABLE_ROW_CHAT_OPEN: 'manage_agents_table_row_chat_open',
       TABLE_ROW_CLONE_OPEN: 'manage_agents_table_row_clone_open',
     },
-    /** Global skills library and per-agent skill flyouts */
     manageSkills: {
       NEW_SKILL: 'manage_skills_new_skill',
       TABLE_CONTEXT_OPEN: 'manage_skills_table_context_open',
@@ -285,7 +279,6 @@ export const AGENT_BUILDER_UI_EBT = {
       FORM_REFERENCED_CONTENT_ADD_FILE: 'manage_skills_form_referenced_content_add_file',
       FORM_REFERENCED_CONTENT_REMOVE_FILE: 'manage_skills_form_referenced_content_remove_file',
     },
-    /** Global plugins library */
     managePlugins: {
       INSTALL_MENU_OPEN: 'manage_plugins_install_menu_open',
       INSTALL_FROM_URL: 'manage_plugins_install_from_url',
@@ -304,7 +297,6 @@ export const AGENT_BUILDER_UI_EBT = {
       DELETE_MODAL_CONFIRM: 'manage_plugins_delete_modal_confirm',
       DELETE_MODAL_CANCEL: 'manage_plugins_delete_modal_cancel',
     },
-    /** Global connectors library (`/manage/connectors`) */
     manageConnectors: {
       CREATE_CONNECTOR: 'manage_connectors_create',
       TABLE_ROW_EDIT: 'manage_connectors_table_row_edit',
@@ -326,7 +318,7 @@ export const AGENT_BUILDER_UI_EBT = {
     },
   },
 
-  // `data-ebt-detail` — entity typing
+  // data-ebt-detail: entity typing (agent, tool, …)
   entity: {
     AGENT: 'agent',
     SKILL: 'skill',
@@ -335,7 +327,7 @@ export const AGENT_BUILDER_UI_EBT = {
     CONNECTOR: 'connector',
   },
 
-  // `data-ebt-detail` / route metadata (`ebtNavItem`, …)
+  // data-ebt-detail: non-entity discriminants (grouped by UI area; not the same as action.* groups)
   detail: {
     sidebarChrome: {
       TOGGLE_WIDTH: 'sidebar_toggle_width',
@@ -357,6 +349,7 @@ export const AGENT_BUILDER_UI_EBT = {
       AGENTS: 'agents',
       TOOLS: 'tools',
     },
+    // Embeddable header menu ids (detail only; conversation *actions* live under action.conversation)
     conversation: {
       EMBED_AGENTS_MENU: 'embed_agents_menu',
       EMBED_CONVERSATIONS_MENU: 'embed_conversations_menu',
@@ -371,8 +364,6 @@ export const AGENT_BUILDER_UI_EBT = {
       FILTER_CUSTOM: 'library_sort_filter_filter_custom',
     },
   },
-
-  format: {} as const,
 } as const;
 
 export type AgentBuilderUiEbt = typeof AGENT_BUILDER_UI_EBT;
