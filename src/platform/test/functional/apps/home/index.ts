@@ -17,12 +17,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       return browser.setWindowSize(1200, 800);
     });
 
-    loadTestFile(require.resolve('./_navigation'));
-    loadTestFile(require.resolve('./_home'));
-    loadTestFile(require.resolve('./_newsfeed'));
-    loadTestFile(require.resolve('./_add_data'));
     loadTestFile(require.resolve('./_sample_data'));
-    loadTestFile(require.resolve('./_welcome'));
-    loadTestFile(require.resolve('./_breadcrumbs'));
   });
 }

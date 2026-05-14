@@ -1212,6 +1212,7 @@
     "@kbn/ui-shared-deps-src": "link:src/platform/packages/private/kbn-ui-shared-deps-src",
     "@kbn/ui-side-navigation": "link:src/platform/kbn-ui/side-navigation",
     "@kbn/ui-theme": "link:src/platform/packages/shared/kbn-ui-theme",
+    "@kbn/uiam-api-keys-provisioning-status": "link:x-pack/platform/packages/shared/kbn-uiam-api-keys-provisioning-status",
     "@kbn/unified-chart-section-viewer": "link:src/platform/packages/shared/kbn-unified-chart-section-viewer",
     "@kbn/unified-data-table": "link:src/platform/packages/shared/kbn-unified-data-table",
     "@kbn/unified-doc-viewer": "link:src/platform/packages/shared/kbn-unified-doc-viewer",
