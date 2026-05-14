@@ -308,6 +308,7 @@ interface WorkflowExecuteEventFormSearchResultsProps {
   hasMoreHits: boolean;
   isFetching: boolean;
   accumulatedHitsLength: number;
+  onDataGridFullScreenChange: (isFullScreen: boolean) => void;
 }
 
 const WorkflowExecuteEventFormSearchResults = memo(function WorkflowExecuteEventFormSearchResults({
@@ -337,6 +338,7 @@ const WorkflowExecuteEventFormSearchResults = memo(function WorkflowExecuteEvent
   hasMoreHits,
   isFetching,
   accumulatedHitsLength,
+  onDataGridFullScreenChange,
 }: WorkflowExecuteEventFormSearchResultsProps): React.JSX.Element {
   return (
     <>
@@ -494,6 +496,7 @@ const WorkflowExecuteEventFormSearchResults = memo(function WorkflowExecuteEvent
                     renderCustomToolbar={renderCustomToolbar}
                     renderCellPopover={renderCellPopover}
                     externalCustomRenderers={externalCustomRenderers}
+                    onFullScreenChange={onDataGridFullScreenChange}
                   />
                 </CellActionsProvider>
               </div>
@@ -572,6 +575,11 @@ export const WorkflowExecuteEventForm = ({
   ]);
   const [showTimeColumn, setShowTimeColumn] = useState(true);
   const [sort, setSort] = useState<SortOrder[]>([['@timestamp', 'desc']]);
+  const [isDataGridFullScreen, setIsDataGridFullScreen] = useState(false);
+
+  const handleDataGridFullScreenChange = useCallback((nextIsFullScreen: boolean) => {
+    setIsDataGridFullScreen(nextIsFullScreen);
+  }, []);
 
   useEffect(() => {
     setQuery({ query: '', language: 'kuery' });
@@ -701,6 +709,12 @@ export const WorkflowExecuteEventForm = ({
       };
     });
   }, [accumulatedHits]);
+
+  useEffect(() => {
+    if (rows.length === 0 && isDataGridFullScreen) {
+      setIsDataGridFullScreen(false);
+    }
+  }, [rows.length, isDataGridFullScreen]);
 
   const hasMoreHits = Boolean(searchResult && accumulatedHits.length < searchResult.total);
 
@@ -1006,29 +1020,32 @@ export const WorkflowExecuteEventForm = ({
         height: '100%',
       })}
     >
-      <EuiFlexItem grow={false}>
-        <SearchBar
-          appName="workflow_management"
-          useDefaultBehaviors={true}
-          onQueryChange={handleQueryChange}
-          onQuerySubmit={handleQuerySubmit}
-          query={query}
-          indexPatterns={dataView ? [dataView] : []}
-          showDatePicker={true}
-          dateRangeFrom={timeRange.from}
-          dateRangeTo={timeRange.to}
-          showFilterBar={false}
-          showSubmitButton={true}
-          placeholder={i18n.translate(
-            'workflows.workflowExecuteEventTriggerForm.searchPlaceholder',
-            {
-              defaultMessage: 'Filter using KQL (e.g. triggerId: my.trigger or eventId: abc)',
-            }
-          )}
-          data-test-subj="workflow-trigger-events-query-input"
-          displayStyle="inPage"
-        />
-      </EuiFlexItem>
+      {!isDataGridFullScreen ? (
+        <EuiFlexItem grow={false}>
+          <SearchBar
+            appName="workflow_management"
+            useDefaultBehaviors={true}
+            disableSubscribingToGlobalDataServices={true}
+            onQueryChange={handleQueryChange}
+            onQuerySubmit={handleQuerySubmit}
+            query={query}
+            indexPatterns={dataView ? [dataView] : []}
+            showDatePicker={true}
+            dateRangeFrom={timeRange.from}
+            dateRangeTo={timeRange.to}
+            showFilterBar={false}
+            showSubmitButton={true}
+            placeholder={i18n.translate(
+              'workflows.workflowExecuteEventTriggerForm.searchPlaceholder',
+              {
+                defaultMessage: 'Filter using KQL (e.g. triggerId: my.trigger or eventId: abc)',
+              }
+            )}
+            data-test-subj="workflow-trigger-events-query-input"
+            displayStyle="inPage"
+          />
+        </EuiFlexItem>
+      ) : null}
 
       <WorkflowExecuteEventFormSearchResults
         isError={isError}
@@ -1057,6 +1074,7 @@ export const WorkflowExecuteEventForm = ({
         hasMoreHits={hasMoreHits}
         isFetching={isFetching}
         accumulatedHitsLength={accumulatedHits.length}
+        onDataGridFullScreenChange={handleDataGridFullScreenChange}
       />
     </EuiFlexGroup>
   );
