@@ -88,3 +88,14 @@ export type {
   EnrichmentResult,
   ConnectorParamsSchemaResolver,
 } from './common/zod/enrich_error_message';
+
+// Yaml editing utilities
+export {
+  insertStep,
+  modifyStep,
+  modifyStepProperty,
+  modifyWorkflowProperty,
+  deleteStep,
+  getStepNode,
+} from './lib/yaml_edit';
+export type { StepDefinition, EditResult } from './lib/yaml_edit';

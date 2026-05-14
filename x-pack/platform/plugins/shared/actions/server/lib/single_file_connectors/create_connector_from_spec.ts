@@ -27,17 +27,16 @@ export const createConnectorTypeFromSpec = (
 ): ActionType<ActionTypeConfig, ActionTypeSecrets, ActionTypeParams, unknown> => {
   const configUtils = actions.getActionsConfigurationUtilities();
 
-  const shouldGenerateExecutor = Boolean(spec.actions);
-  const shouldGenerateParams = Boolean(spec.actions);
+  const hasActions = Boolean(spec.actions);
 
-  const executor = shouldGenerateExecutor
+  const executor = hasActions
     ? generateExecutorFunction({
         actions: spec.actions,
         getAxiosInstanceWithAuth: actions.getAxiosInstanceWithAuth,
       })
     : undefined;
 
-  const paramsValidator = shouldGenerateParams ? generateParamsSchema(spec.actions) : undefined;
+  const paramsValidator = hasActions ? generateParamsSchema(spec.actions) : undefined;
 
   return {
     id: spec.metadata.id,
@@ -52,5 +51,7 @@ export const createConnectorTypeFromSpec = (
     ...(executor ? { executor } : {}),
     globalAuthHeaders: spec.auth?.headers,
     source: ACTION_TYPE_SOURCES.spec,
+    description: spec.metadata.description,
+    isExperimental: spec.metadata.isTechnicalPreview,
   };
 };
