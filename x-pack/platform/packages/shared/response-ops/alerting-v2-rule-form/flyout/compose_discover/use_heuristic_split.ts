@@ -5,87 +5,97 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
+import { Parser } from '@elastic/esql';
+
+export type SplitConfidence = 'high' | 'low' | 'none';
 
 export interface SplitResult {
   base: string;
   alertBlock: string;
-  confidence: 'high' | 'low' | 'none';
+  confidence: SplitConfidence;
+  /**
+   * Machine-readable reason for the confidence level, useful for downstream
+   * branching without string-matching the human-readable messages.
+   *
+   * - 'no_stats'        — no STATS segment found; cannot identify a base query
+   * - 'no_where'        — STATS found but no WHERE after it; alert block is absent
+   * - 'split_succeeded' — both STATS and a post-STATS WHERE were found
+   */
+  reason: 'no_stats' | 'no_where' | 'split_succeeded';
 }
 
 /**
- * Splits an ES|QL query into base and alert block using pipe-segment analysis.
+ * Splits an ES|QL query into a base portion and an alert-condition block
+ * using the ANTLR-based AST parser from `@elastic/esql`.
  *
- * Strategy: find the last STATS segment and the first WHERE after it.
+ * Strategy: find the last STATS command and the first WHERE after it.
  * Everything up to and including STATS is the base query. Everything from
- * the first WHERE onward is the alert block.
+ * that WHERE onward is the alert block (including its leading pipe).
  *
- * Handles both multi-line and single-line queries by operating on pipe
- * segments rather than lines.
+ * Because splitting is performed against the real AST, pipes inside string
+ * literals, comments, or other lexical contexts are handled correctly.
  */
 export function splitQuery(query: string): SplitResult {
   if (!query.trim()) {
-    return { base: '', alertBlock: '', confidence: 'none' };
+    return { base: '', alertBlock: '', confidence: 'none', reason: 'no_stats' };
   }
 
-  const segments: Array<{ text: string; start: number; end: number; keyword: string }> = [];
-  let current = '';
-  let segStart = 0;
+  const { root } = Parser.parse(query);
+  const { commands } = root;
 
-  for (let i = 0; i <= query.length; i++) {
-    if (i === query.length || query[i] === '|') {
-      if (current.trim()) {
-        const trimmed = current.trim();
-        const keyword = trimmed.split(/\s+/)[0].toUpperCase();
-        segments.push({ text: current, start: segStart, end: i, keyword });
-      }
-      current = '';
-      segStart = i + 1;
-    } else {
-      current += query[i];
-    }
-  }
-
-  if (segments.length === 0) {
-    return { base: query, alertBlock: '', confidence: 'none' };
+  if (commands.length === 0) {
+    return { base: '', alertBlock: query.trim(), confidence: 'none', reason: 'no_stats' };
   }
 
   let lastStatsIdx = -1;
-  for (let i = segments.length - 1; i >= 0; i--) {
-    if (segments[i].keyword === 'STATS') {
-      lastStatsIdx = i;
+  for (let j = commands.length - 1; j >= 0; j--) {
+    if (commands[j].name === 'stats') {
+      lastStatsIdx = j;
       break;
     }
   }
 
   if (lastStatsIdx === -1) {
-    return { base: '', alertBlock: query.trim(), confidence: 'none' };
+    return { base: '', alertBlock: query.trim(), confidence: 'none', reason: 'no_stats' };
   }
 
   let firstWhereAfterStats = -1;
-  for (let i = lastStatsIdx + 1; i < segments.length; i++) {
-    if (segments[i].keyword === 'WHERE') {
-      firstWhereAfterStats = i;
+  for (let j = lastStatsIdx + 1; j < commands.length; j++) {
+    if (commands[j].name === 'where') {
+      firstWhereAfterStats = j;
       break;
     }
   }
 
   if (firstWhereAfterStats === -1) {
-    return { base: query.trim(), alertBlock: '', confidence: 'low' };
+    return { base: query.trim(), alertBlock: '', confidence: 'low', reason: 'no_where' };
   }
 
-  // segments[].start is the position AFTER the preceding |, so back up to
-  // include the pipe itself in the alert block.
-  const afterPipe = segments[firstWhereAfterStats].start;
-  const pipePos = query.lastIndexOf('|', afterPipe);
-  const splitPos = pipePos >= 0 ? pipePos : afterPipe;
+  const whereCmd = commands[firstWhereAfterStats];
+  const splitPos = query.lastIndexOf('|', whereCmd.location.min);
+  const cutAt = splitPos >= 0 ? splitPos : whereCmd.location.min;
 
-  const base = query.slice(0, splitPos).trim();
-  const alertBlock = query.slice(splitPos).trim();
+  const base = query.slice(0, cutAt).trim();
+  const alertBlock = query.slice(cutAt).trim();
 
-  return { base, alertBlock, confidence: 'high' };
+  return { base, alertBlock, confidence: 'high', reason: 'split_succeeded' };
 }
 
-export const useHeuristicSplit = (fullQuery: string): SplitResult => {
-  return useMemo(() => splitQuery(fullQuery), [fullQuery]);
-};
+/**
+ * Produces a candidate recovery block from an alert block by performing a
+ * naive per-operator flip of comparison operators (`>` ↔ `<`, `>=` ↔ `<=`).
+ * Uses a single-pass regex substitution to avoid the double-replacement bug
+ * that arises from sequential `.replace()` calls on overlapping patterns
+ * (e.g. `>=` being matched by both `>=` and `>`).
+ *
+ * **Important:** This is NOT a logical negation (De Morgan's law). For
+ * compound expressions like `a > 1 AND b < 2`, the true negation would be
+ * `a <= 1 OR b >= 2` — but this function produces `a < 1 AND b > 2`
+ * (flips each operator independently, preserves AND/OR connectives). For
+ * single-condition alert blocks this is usually what users want operationally,
+ * and it works well as a starting seed for the Recovery query editor.
+ */
+export function guessRecoveryBlock(alertBlock: string): string {
+  const FLIP: Record<string, string> = { '>=': '<=', '<=': '>=', '>': '<', '<': '>' };
+  return alertBlock.replace(/>=|<=|>|</g, (op) => FLIP[op] ?? op);
+}

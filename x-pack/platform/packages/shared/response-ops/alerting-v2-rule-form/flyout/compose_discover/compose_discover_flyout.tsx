@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import {
   EuiBadge,
@@ -31,11 +31,12 @@ import {
   mapFormValuesToCreateRequest,
   mapFormValuesToUpdateRequest,
 } from '../../form/utils/rule_request_mappers';
-import type { ComposeDiscoverMode } from './types';
-import { useComposeDiscoverState, getStepTitles } from './use_compose_discover_state';
-import { ComposeDiscoverForm } from './compose_discover_form';
+import type { ComposeDiscoverMode, SandboxApplyData } from './types';
+import { useComposeDiscoverState, getSandboxTabConfig } from './use_compose_discover_state';
+import { ComposeDiscoverForm, getSteps } from './compose_discover_form';
 import { ComposeDiscoverChild } from './compose_discover_child';
 import { useEsqlAutocomplete } from './use_esql_providers';
+import { useSplitQueryCompletion } from './use_split_query_completion';
 
 const LazyYamlRuleForm = React.lazy(() =>
   import('../../form/yaml_rule_form').then((m) => ({ default: m.YamlRuleForm }))
@@ -105,19 +106,39 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
   onUpdateRule,
   isSaving = false,
 }) => {
-  // ── UI state (step navigation, sandbox open/close, tab selection, etc.) ──
-  // In edit mode, seed the sandbox draft with the rule's existing query so the
-  // Alert Condition step shows the current query summary instead of "No query defined".
-  const initialSandboxQuery =
-    mode === 'edit'
-      ? rule
-        ? mapRuleResponseToFormValues(rule).evaluation?.query?.base ?? ''
-        : ''
-      : '';
-  const [uiState, dispatch] = useComposeDiscoverState(mode, initialSandboxQuery);
+  /*
+   * ── UI state (step navigation, sandbox open/close, tab selection, etc.) ──
+   * In edit mode, seed the sandbox draft with the rule's existing query so the
+   * Alert Condition step shows the current query summary instead of "No query defined".
+   * When the persisted rule has a custom recovery query, the initial state
+   * infers that tracking was active and reconstructs the split.
+   */
+  const initialMapped = mode === 'edit' && rule ? mapRuleResponseToFormValues(rule) : undefined;
+  const [uiState, dispatch] = useComposeDiscoverState({
+    mode,
+    initialQuery: initialMapped?.evaluation?.query?.base ?? '',
+    initialRecoveryQuery:
+      initialMapped?.recoveryPolicy?.type === 'query'
+        ? initialMapped.recoveryPolicy.query?.base ?? undefined
+        : undefined,
+  });
 
   // Registered once here so providers persist across Sandbox open/close cycles.
   useEsqlAutocomplete(services);
+
+  /*
+   * Split-query completion for alert and recovery block editors. Registered at
+   * the flyout level so providers survive Sandbox (child) open/close cycles and
+   * are immune to React Strict Mode double-mount disposal.
+   */
+  const { onEditorMount: onAlertEditorMount } = useSplitQueryCompletion({
+    baseQuery: uiState.baseQuery,
+    search: services.data.search.search,
+  });
+  const { onEditorMount: onRecoveryEditorMount } = useSplitQueryCompletion({
+    baseQuery: uiState.baseQuery,
+    search: services.data.search.search,
+  });
 
   // ── Form values (submitted to the API) ──
   const defaultValues = useMemo<FormValues>(() => {
@@ -154,8 +175,39 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
   const isCreate = mode === 'create';
   const title = isCreate ? 'Create alert rule' : 'Edit alert rule';
 
-  const stepTitles = getStepTitles();
-  const isLastStep = uiState.step === stepTitles.length - 1;
+  const steps = getSteps(uiState.tracking);
+  const currentStep = steps[uiState.step];
+  const isLastStep = uiState.step === steps.length - 1;
+
+  /*
+   * Sync recovery policy into RHF.
+   * When tracking + custom recovery: assemble base + recoveryBlock into a full
+   * query and store it under recoveryPolicy.query.base (type 'query').
+   * Otherwise: reset to the default no_breach policy.
+   *
+   * This effect covers recovery type changes (e.g. user switches from
+   * "Default" to "Custom" in the step form) which happen outside the
+   * Sandbox Apply flow.
+   */
+  useEffect(() => {
+    if (!uiState.queryCommitted) return;
+    if (uiState.tracking && uiState.recoveryType === 'custom') {
+      const recoveryQuery = [uiState.baseQuery, uiState.recoveryBlock].filter(Boolean).join('\n');
+      methods.setValue('recoveryPolicy', {
+        type: 'query',
+        query: { base: recoveryQuery },
+      });
+    } else {
+      methods.setValue('recoveryPolicy', { type: 'no_breach' });
+    }
+  }, [
+    uiState.tracking,
+    uiState.recoveryType,
+    uiState.baseQuery,
+    uiState.recoveryBlock,
+    uiState.queryCommitted,
+    methods,
+  ]);
 
   // ── YAML mode state ──────────────────────────────────────────────────────
   const [yamlText, setYamlText] = useState('');
@@ -190,7 +242,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
         if (result.values) {
           methods.reset(result.values);
           const parsedQuery = result.values.evaluation?.query?.base ?? '';
-          dispatch({ type: 'COMMIT_SANDBOX_QUERY', query: parsedQuery });
+          dispatch({ type: 'COMMIT_CHILD_QUERY', fullQuery: parsedQuery });
         }
         preYamlFormSnapshotRef.current = null;
       }
@@ -209,12 +261,27 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
   }, [methods, dispatch]);
 
   // Imperative handler for Sandbox "Apply changes". Writes the committed
-  // query into both the reducer and RHF, then regenerates YAML if in YAML
-  // mode. No effects involved — every Apply call executes this directly.
+  // query into both RHF (the source of truth) and the reducer cache, then
+  // regenerates YAML if in YAML mode. No effects involved for the eval
+  // query — every Apply call executes this directly.
   const handleSandboxApply = useCallback(
-    (query: string) => {
-      dispatch({ type: 'COMMIT_SANDBOX_QUERY', query });
-      methods.setValue('evaluation.query.base', query);
+    (data: SandboxApplyData) => {
+      const evalBase = data.isSplit
+        ? [data.baseQuery, data.alertBlock].filter(Boolean).join('\n')
+        : data.fullQuery;
+      methods.setValue('evaluation.query.base', evalBase);
+
+      if (data.isSplit) {
+        dispatch({
+          type: 'COMMIT_CHILD_SPLIT',
+          baseQuery: data.baseQuery,
+          alertBlock: data.alertBlock,
+          recoveryBlock: data.recoveryBlock,
+        });
+      } else {
+        dispatch({ type: 'COMMIT_CHILD_QUERY', fullQuery: data.fullQuery });
+      }
+
       if (uiState.yamlMode) {
         setYamlText(serializeFormToYaml(methods.getValues()));
       }
@@ -242,15 +309,12 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
   }, [yamlText, methods, handleSubmit]);
 
   const handleNext = useCallback(async () => {
-    // Step 0: require a committed query before advancing
-    if (uiState.step === 0 && !uiState.queryCommitted) return;
-    // Step 1: validate that the rule name has been filled in
-    if (uiState.step === 1) {
-      const valid = await methods.trigger(['metadata.name']);
+    if (currentStep?.validate) {
+      const valid = await currentStep.validate(methods, uiState);
       if (!valid) return;
     }
     dispatch({ type: 'GO_NEXT' });
-  }, [uiState.step, uiState.queryCommitted, methods, dispatch]);
+  }, [currentStep, methods, uiState, dispatch]);
 
   return (
     <RuleFormProvider services={services} meta={{ layout: 'flyout' }}>
@@ -351,6 +415,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
                       <EuiFlexItem grow={false}>
                         <EuiButtonEmpty
                           iconType="arrowLeft"
+                          isDisabled={uiState.childOpen}
                           onClick={() => dispatch({ type: 'GO_BACK' })}
                           data-test-subj="composeDiscoverBack"
                         >
@@ -371,7 +436,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
                       ) : (
                         <EuiToolTip
                           content={
-                            uiState.step === 0 && !uiState.queryCommitted
+                            currentStep?.id === 'alertCondition' && !uiState.queryCommitted
                               ? 'Define a query in the editor before continuing'
                               : undefined
                           }
@@ -381,7 +446,8 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
                             iconType="arrowRight"
                             iconSide="right"
                             isDisabled={
-                              uiState.childOpen || (uiState.step === 0 && !uiState.queryCommitted)
+                              uiState.childOpen ||
+                              (currentStep?.id === 'alertCondition' && !uiState.queryCommitted)
                             }
                             onClick={handleNext}
                             data-test-subj="composeDiscoverNext"
@@ -401,6 +467,9 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
             <ComposeDiscoverChild
               state={uiState}
               dispatch={dispatch}
+              tabConfig={getSandboxTabConfig(uiState)}
+              onAlertEditorMount={onAlertEditorMount}
+              onRecoveryEditorMount={onRecoveryEditorMount}
               onClose={() => dispatch({ type: 'CLOSE_CHILD' })}
               onApply={handleSandboxApply}
             />
