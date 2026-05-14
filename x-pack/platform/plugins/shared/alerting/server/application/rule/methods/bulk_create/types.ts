@@ -11,7 +11,7 @@ import type { RuleParams } from '../../types';
 import type { CreateRuleData } from '../create/types';
 import type { CreateRuleOptions } from '../create/create_rule';
 import type { BulkOperationError, RulesClientContext } from '../../../../rules_client/types';
-import type { RawRule, SanitizedRule } from '../../../../types';
+import type { RawRule } from '../../../../types';
 
 export interface PreparedRule {
   id: string;
@@ -49,8 +49,10 @@ export interface BulkCreateRulesItem<Params extends RuleParams = never> {
 
 export interface BulkCreateRulesParams<Params extends RuleParams = never> {
   rules: Array<BulkCreateRulesItem<Params>>;
-  // If true, skip Phase 5 (taskManager.bulkEnable);
-  skipTaskEnabling?: boolean;
+  /** Per-batch size; clamped to [1, MAX_BULK_CREATE_BATCH_SIZE], defaults to DEFAULT_BULK_CREATE_BATCH_SIZE. Total is bounded by MAX_RULES_NUMBER_FOR_BULK_OPERATION (callers should enforce request-level limits). */
+  batchSize?: number;
+  /** If true, stop further batches on SO-level failure (whole-call throw or any per-row SO error). Phase 1/2/3 demotions never halt the loop. Defaults to false. */
+  exitEarlyOnError?: boolean;
 }
 
 export type BulkCreateDisabledReason =
@@ -63,9 +65,16 @@ export interface BulkCreateOperationError extends BulkOperationError {
   disabledReason?: BulkCreateDisabledReason;
 }
 
-export interface BulkCreateRulesResult<Params extends RuleParams = never> {
-  rules: Array<SanitizedRule<Params>>;
+export interface BulkCreateRulesResult {
+  /** IDs of rules whose SO was successfully persisted. */
+  successfulIds: string[];
   errors: BulkCreateOperationError[];
   total: number;
-  taskIdsFailedToBeEnabled: string[];
+}
+
+export interface BatchResult {
+  successfulIds: string[];
+  errors: BulkCreateOperationError[];
+  /** True if SO bulkCreate threw or any per-row SO error was returned; drives the exitEarlyOnError short-circuit. */
+  soFailureOccurred: boolean;
 }

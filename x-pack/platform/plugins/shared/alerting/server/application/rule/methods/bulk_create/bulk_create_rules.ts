@@ -5,26 +5,34 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import pMap from 'p-map';
 import { withSpan } from '@kbn/apm-utils';
-import type { SavedObject, SavedObjectsBulkCreateObject } from '@kbn/core/server';
+import type { SavedObjectsBulkCreateObject } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { getRuleCircuitBreakerErrorMessage } from '../../../../../common';
 import { updateMeta } from '../../../../rules_client/lib';
-import { API_KEY_GENERATE_CONCURRENCY } from '../../../../rules_client/common/constants';
+import {
+  API_KEY_GENERATE_CONCURRENCY,
+  DEFAULT_BULK_CREATE_BATCH_SIZE,
+  MAX_BULK_CREATE_BATCH_SIZE,
+  MAX_RULES_NUMBER_FOR_BULK_OPERATION,
+} from '../../../../rules_client/common/constants';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
-import { bulkEnableTasks } from '../bulk_enable_tasks';
 import { bulkCreateRulesSo } from '../../../../data/rule';
-import type { RawRule, SanitizedRule } from '../../../../types';
-import type { BulkOperationError, RulesClientContext } from '../../../../rules_client/types';
+import type { RawRule } from '../../../../types';
+import type { RulesClientContext } from '../../../../rules_client/types';
 import type { RuleParams } from '../../types';
 import { validateScheduleLimit } from '../get_schedule_frequency';
 import type {
   ApiKeyEntry,
-  PreparedRule,
+  BatchResult,
+  BulkCreateOperationError,
+  BulkCreateRulesItem,
   BulkCreateRulesParams,
   BulkCreateRulesResult,
+  PreparedRule,
 } from './types';
 import {
   buildTaskInstance,
@@ -32,30 +40,94 @@ import {
   demotePreparedRules,
   flushKeysToInvalidate,
   prepareRule,
-  toSanitizedRule,
 } from './utils';
 
 export async function bulkCreateRules<Params extends RuleParams = never>(
   context: RulesClientContext,
   params: BulkCreateRulesParams<Params>
-): Promise<BulkCreateRulesResult<Params>> {
-  const { rules } = params;
+): Promise<BulkCreateRulesResult> {
+  const { rules, exitEarlyOnError = false } = params;
   const { logger } = context;
   const total = rules.length;
 
   if (total === 0) {
-    return { rules: [], errors: [], total: 0, taskIdsFailedToBeEnabled: [] };
+    return { successfulIds: [], errors: [], total: 0 };
+  }
+
+  if (total > MAX_RULES_NUMBER_FOR_BULK_OPERATION) {
+    throw Boom.badRequest(
+      `bulkCreateRules: ${total} rules exceeds the hard limit of ${MAX_RULES_NUMBER_FOR_BULK_OPERATION}. ` +
+        `Callers should enforce request-level limits before invoking this method.`
+    );
+  }
+
+  const requestedBatchSize = params.batchSize ?? DEFAULT_BULK_CREATE_BATCH_SIZE;
+  const batchSize = Math.max(1, Math.min(MAX_BULK_CREATE_BATCH_SIZE, requestedBatchSize));
+
+  if (requestedBatchSize !== batchSize) {
+    logger.warn(
+      `bulkCreateRules: batchSize ${requestedBatchSize} clamped to ${batchSize} (hard cap ${MAX_BULK_CREATE_BATCH_SIZE}).`
+    );
   }
 
   const username = await context.getUserName();
   const actionsClient = await context.getActionsClient();
 
-  const inputsWithIds = rules.map((rule) => ({
+  const successfulIds: string[] = [];
+  const errors: BulkCreateOperationError[] = [];
+
+  const totalBatches = Math.ceil(total / batchSize);
+  logger.debug(`bulkCreateRules: ${total} rules, ${totalBatches}x batches of ${batchSize} rules.`);
+
+  for (let batchIndex = 0; batchIndex < totalBatches; batchIndex++) {
+    const start = batchIndex * batchSize;
+    const batch = rules.slice(start, start + batchSize);
+
+    const result = await runBatch<Params>({
+      context,
+      username,
+      actionsClient,
+      batch,
+    });
+
+    successfulIds.push(...result.successfulIds);
+    errors.push(...result.errors);
+
+    if (exitEarlyOnError && result.soFailureOccurred) {
+      logger.warn(
+        `bulkCreateRules: exiting early on SO failure at batch ${
+          batchIndex + 1
+        }/${totalBatches}. ` +
+          `${successfulIds.length} rule(s) created, ${
+            total - start - batch.length
+          } rule(s) skipped.`
+      );
+      break;
+    }
+  }
+
+  return { successfulIds, errors, total };
+}
+
+interface RunBatchArgs<Params extends RuleParams> {
+  context: RulesClientContext;
+  username: string | null;
+  actionsClient: Awaited<ReturnType<RulesClientContext['getActionsClient']>>;
+  batch: Array<BulkCreateRulesItem<Params>>;
+}
+
+async function runBatch<Params extends RuleParams>({
+  context,
+  username,
+  actionsClient,
+  batch,
+}: RunBatchArgs<Params>): Promise<BatchResult> {
+  const { logger } = context;
+
+  const inputsWithIds = batch.map((rule) => ({
     id: rule.options?.id ?? SavedObjectsUtils.generateId(),
     rule,
   }));
-
-  logger.debug(`Bulk creating batch of ${total} rules`);
 
   // Phase 1: per-rule prepare (validation + api key generation).
   // NOTE: in order to minimise external calls, the values below get mutated
@@ -64,7 +136,7 @@ export async function bulkCreateRules<Params extends RuleParams = never>(
   const preparedRules = new Map<string, PreparedRule>();
   const keysToInvalidate = new Set<string>();
   const apiKeysMap = new Map<string, ApiKeyEntry>();
-  const errors: BulkOperationError[] = [];
+  const errors: BulkCreateOperationError[] = [];
   const authzCache = new Map<string, Promise<void>>();
 
   await pMap(
@@ -86,10 +158,10 @@ export async function bulkCreateRules<Params extends RuleParams = never>(
     { concurrency: API_KEY_GENERATE_CONCURRENCY }
   );
 
-  // No survivors? Flush out any keys created and return
+  // No survivors? Flush any keys created and return.
   if (preparedRules.size === 0) {
     await flushKeysToInvalidate(keysToInvalidate, context);
-    return { rules: [], errors, total, taskIdsFailedToBeEnabled: [] };
+    return { successfulIds: [], errors, soFailureOccurred: false };
   }
 
   // Phase 2: validate schedule-limits, enabled subset only.
@@ -211,10 +283,9 @@ export async function bulkCreateRules<Params extends RuleParams = never>(
         })
     );
   } catch (error) {
-    // Whole-call SO failure (auth, timeout, etc): invalidate every newly-minted
-    // key, best-effort orphan-task cleanup, then rethrow.
+    // Whole-call SO failure: invalidate keys, best-effort task cleanup.
+    // Surface as batch-wide SO failure so exitEarlyOnError can honour it.
     for (const k of collectNewKeysToInvalidate(apiKeysMap.values())) keysToInvalidate.add(k);
-    await flushKeysToInvalidate(keysToInvalidate, context);
     if (newlyScheduledTaskIds.size > 0) {
       try {
         await context.taskManager.bulkRemove([...newlyScheduledTaskIds]);
@@ -226,16 +297,23 @@ export async function bulkCreateRules<Params extends RuleParams = never>(
         );
       }
     }
-    throw error;
+    await flushKeysToInvalidate(keysToInvalidate, context);
+    errors.push({
+      message: `Failed to bulk create rule saved objects: ${error.message}`,
+      status: error.output?.statusCode,
+      rule: { id: 'n/a', name: 'n/a' },
+    });
+    return { successfulIds: [], errors, soFailureOccurred: true };
   }
 
   // Phase 4 per-row outcomes.
-  const successfulSos: Array<SavedObject<RawRule>> = [];
-  const taskIdsToEnable: string[] = [];
+  const batchSuccessfulIds: string[] = [];
   const taskIdsToCleanUp: string[] = [];
+  let perRowFailureOccurred = false;
 
   for (const so of bulkResponse.saved_objects) {
     if (so.error) {
+      perRowFailureOccurred = true;
       errors.push({
         message: so.error.message ?? 'n/a',
         status: so.error.statusCode,
@@ -253,9 +331,8 @@ export async function bulkCreateRules<Params extends RuleParams = never>(
         taskIdsToCleanUp.push(so.id);
       }
     } else {
-      successfulSos.push(so as SavedObject<RawRule>);
+      batchSuccessfulIds.push(so.id);
       if (newlyScheduledTaskIds.has(so.id)) {
-        taskIdsToEnable.push(so.id);
         // Audit per-rule ENABLE for the enabled subset (mirrors single-rule semantics).
         context.auditLogger?.log(
           ruleAuditEvent({
@@ -286,23 +363,12 @@ export async function bulkCreateRules<Params extends RuleParams = never>(
     }
   }
 
-  // Phase 5: enable scheduled tasks. If skipTaskEnabling, caller enables them later.
-  const taskIdsFailedToBeEnabled = params.skipTaskEnabling
-    ? [...taskIdsToEnable]
-    : (await bulkEnableTasks(context, { taskIds: taskIdsToEnable })).taskIdsFailedToBeEnabled;
-
-  // Single end-of-function flush for all collected key invalidations.
+  // Single per-batch flush for all collected key invalidations.
   await flushKeysToInvalidate(keysToInvalidate, context);
 
-  // Phase 6: domain transform + return.
-  const sanitizedRules: Array<SanitizedRule<Params>> = successfulSos.map((so) =>
-    toSanitizedRule<Params>(context, so, context.ruleTypeRegistry)
-  );
-
   return {
-    rules: sanitizedRules,
+    successfulIds: batchSuccessfulIds,
     errors,
-    total,
-    taskIdsFailedToBeEnabled,
+    soFailureOccurred: perRowFailureOccurred,
   };
 }

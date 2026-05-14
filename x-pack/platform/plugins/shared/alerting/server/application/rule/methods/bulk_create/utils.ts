@@ -8,7 +8,6 @@
 import Boom from '@hapi/boom';
 import Semver from 'semver';
 import { i18n } from '@kbn/i18n';
-import type { SavedObject } from '@kbn/core/server';
 import type { TaskInstanceWithDeprecatedFields } from '@kbn/task-manager-plugin/server/task';
 
 import { validateAndAuthorizeSystemActions } from '../../../../lib/validate_authorize_system_actions';
@@ -32,17 +31,12 @@ import {
   apiKeyAsAlertAttributes,
   apiKeyAsRuleDomainProperties,
 } from '../../../../rules_client/common';
+// import { BULK_TM_SCHEDULE_DELAY } from '../../../../rules_client/common/constants';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
-import type { RawRule, RuleTypeRegistry, SanitizedRule } from '../../../../types';
 import type { BulkOperationError, RulesClientContext } from '../../../../rules_client/types';
 import type { RuleDomain, RuleParams } from '../../types';
-import {
-  transformRuleAttributesToRuleDomain,
-  transformRuleDomainToRule,
-  transformRuleDomainToRuleAttributes,
-} from '../../transforms';
-import { ruleDomainSchema } from '../../schemas';
+import { transformRuleDomainToRuleAttributes } from '../../transforms';
 import { createRuleDataSchema } from '../create/schemas';
 import type {
   PreparedRule,
@@ -67,55 +61,30 @@ export const collectNewKeysToInvalidate = (entries: Iterable<ApiKeyEntry>): stri
   return keys;
 };
 
+// Task is scheduled `enabled: true` in the future.
 export const buildTaskInstance = (
   context: RulesClientContext,
   prepared: PreparedRule
-): TaskInstanceWithDeprecatedFields => ({
-  id: prepared.id,
-  taskType: `alerting:${prepared.ruleTypeId}`,
-  schedule: prepared.schedule,
-  params: {
-    alertId: prepared.id,
-    spaceId: context.spaceId,
-    consumer: prepared.consumer,
-  },
-  state: {
-    previousStartedAt: null,
-    alertTypeState: {},
-    alertInstances: {},
-  },
-  scope: ['alerting'],
-  // Tasks are scheduled disabled. Phase 5 enables them via taskManager.bulkEnable
-  // so per-task validation drops never produce a running task without a rule SO,
-  // and the activation can randomise schedule datetimes across the batch.
-  enabled: false,
-});
-
-export const toSanitizedRule = <Params extends RuleParams = never>(
-  context: RulesClientContext,
-  so: SavedObject<RawRule>,
-  ruleTypeRegistry: RuleTypeRegistry
-): SanitizedRule<Params> => {
-  const ruleType = ruleTypeRegistry.get(so.attributes.alertTypeId);
-  const ruleDomain: RuleDomain<Params> = transformRuleAttributesToRuleDomain<Params>(
-    so.attributes,
-    {
-      id: so.id,
-      logger: context.logger,
-      ruleType,
-      references: so.references,
-      omitGeneratedValues: false,
+): TaskInstanceWithDeprecatedFields => {
+  return {
+    id: prepared.id,
+    taskType: `alerting:${prepared.ruleTypeId}`,
+    schedule: prepared.schedule,
+    params: {
+      alertId: prepared.id,
+      spaceId: context.spaceId,
+      consumer: prepared.consumer,
     },
-    context.isSystemAction
-  );
-
-  try {
-    ruleDomainSchema.validate(ruleDomain);
-  } catch (e) {
-    context.logger.warn(`Error validating bulk-created rule domain object for id: ${so.id}, ${e}`);
-  }
-
-  return transformRuleDomainToRule<Params>(ruleDomain, { isPublic: true }) as SanitizedRule<Params>;
+    state: {
+      previousStartedAt: null,
+      alertTypeState: {},
+      alertInstances: {},
+    },
+    scope: ['alerting'],
+    enabled: true,
+    runAt: new Date(),
+    scheduledAt: new Date(),
+  };
 };
 
 export const prepareRule = async <Params extends RuleParams>({
