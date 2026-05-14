@@ -8,11 +8,16 @@
  */
 
 import { parse } from 'yaml';
+import { z } from '@kbn/zod/v4';
 import { managedWorkflowDefinitions } from '.';
 import type { ManagedWorkflowTemplateValuesById } from '.';
 import { EXAMPLE_MANAGED_WORKFLOW_ID } from './definitions/workflows_extensions_example';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from './types';
-import { WorkflowSchema } from '../spec/schema';
+import { WorkflowSchemaBase } from '../spec/schema';
+
+const ManagedWorkflowSchema = WorkflowSchemaBase.extend({
+  triggers: z.array(z.object({ type: z.string().min(1) }).passthrough()).min(1),
+});
 
 type RegistryManagedWorkflowDefinition = (typeof managedWorkflowDefinitions)[number];
 type TemplateManagedWorkflowDefinition = RegistryManagedWorkflowDefinition & {
@@ -81,7 +86,7 @@ function assertWorkflowYamlIsValid(workflowId: string, yamlContent: string): voi
     );
   }
 
-  const validationResult = WorkflowSchema.safeParse(parsedYaml);
+  const validationResult = ManagedWorkflowSchema.safeParse(parsedYaml);
   if (!validationResult.success) {
     throw new Error(
       `Managed workflow '${workflowId}' failed workflow schema validation: ${validationResult.error.message}`
