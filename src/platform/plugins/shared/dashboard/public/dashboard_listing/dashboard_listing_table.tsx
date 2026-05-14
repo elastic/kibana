@@ -9,29 +9,37 @@
 
 import React from 'react';
 
-import {
-  TableListViewKibanaProvider,
-  TableListViewTable,
-} from '@kbn/content-management-table-list-view-table';
-import { FormattedRelative, I18nProvider } from '@kbn/i18n-react';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 
-import {
-  coreServices,
-  savedObjectsTaggingService,
-  serverlessService,
-} from '../services/kibana_services';
-import { DashboardUnsavedListing } from './dashboard_unsaved_listing';
+import { coreServices } from '../services/kibana_services';
+import { DashboardListingContent, DashboardListingProviders } from './content';
 import { useDashboardListingTable } from './hooks/use_dashboard_listing_table';
-import type { DashboardListingProps, DashboardSavedObjectUserContent } from './types';
+import type { DashboardListingProps } from './types';
 
-export const DashboardListingTable = ({
+/**
+ * Embeddable Dashboard listing — used outside the Dashboard application
+ * (e.g., the Security Solution landing page).
+ *
+ * Thin shell around {@link DashboardListingTableContent} that mounts the
+ * shared provider stack (`I18nProvider`, `ContentEditorKibanaProvider`).
+ */
+export const DashboardListingTable = (props: DashboardListingProps) => (
+  <DashboardListingProviders>
+    <DashboardListingTableContent {...props} />
+  </DashboardListingProviders>
+);
+
+const DashboardListingTableContent = ({
   disableCreateDashboardButton,
-  initialFilter,
   goToDashboard,
   getDashboardUrl,
   useSessionStorageIntegration,
-  urlStateEnabled,
+  initialFilter,
+  // Mirrors the legacy `TableListView` default (`urlStateEnabled = true`) so
+  // callers who didn't opt in or out keep their previous behavior. Hosts
+  // that already manage the URL (e.g. the Security landing page) pass
+  // `urlStateEnabled={false}` to avoid stomping on their query string.
+  urlStateEnabled = true,
   showCreateDashboardButton = true,
 }: DashboardListingProps) => {
   useExecutionContext(coreServices.executionContext, {
@@ -39,42 +47,16 @@ export const DashboardListingTable = ({
     page: 'list',
   });
 
-  const {
-    unsavedDashboardIds,
-    refreshUnsavedDashboards,
-    tableListViewTableProps: { title: tableCaption, ...tableListViewTable },
-    contentInsightsClient,
-  } = useDashboardListingTable({
+  const bundle = useDashboardListingTable({
+    id: 'dashboard-listing-table',
     disableCreateDashboardButton,
     goToDashboard,
     getDashboardUrl,
-    urlStateEnabled,
     useSessionStorageIntegration,
-    initialFilter,
     showCreateDashboardButton,
+    initialFilter,
+    urlStateEnabled,
   });
 
-  return (
-    <I18nProvider>
-      <TableListViewKibanaProvider
-        core={coreServices}
-        savedObjectsTagging={savedObjectsTaggingService?.getTaggingApi()}
-        FormattedRelative={FormattedRelative}
-        contentInsightsClient={contentInsightsClient}
-        isKibanaVersioningEnabled={!serverlessService}
-      >
-        <>
-          <DashboardUnsavedListing
-            goToDashboard={goToDashboard}
-            unsavedDashboardIds={unsavedDashboardIds}
-            refreshUnsavedDashboards={refreshUnsavedDashboards}
-          />
-          <TableListViewTable<DashboardSavedObjectUserContent>
-            tableCaption={tableCaption}
-            {...tableListViewTable}
-          />
-        </>
-      </TableListViewKibanaProvider>
-    </I18nProvider>
-  );
+  return <DashboardListingContent {...{ bundle, goToDashboard }} />;
 };

@@ -40,11 +40,12 @@ export const action = table.definePart<ActionPresets, ActionOutput, ActionBuilde
  * Registered as the fallback resolver via `createComponent({ resolve })`.
  * Custom actions are identified by `props.id` rather than a preset name.
  */
-const resolveCustomAction = (
+export const resolveCustomAction = (
   {
     id,
     name,
     description,
+    disabledReason,
     icon,
     type: actionType,
     color,
@@ -61,13 +62,19 @@ const resolveCustomAction = (
   // both `icon` and `type`). Without this, the conditional spread loses the
   // discriminant and requires a cast.
   const resolvedType = actionType ?? (icon ? 'icon' : undefined);
+  const resolvedDescription =
+    disabledReason && description
+      ? (item: Parameters<NonNullable<ActionProps['disabledReason']>>[0]) =>
+          disabledReason(item) ??
+          (typeof description === 'function' ? description(item) : description)
+      : disabledReason ?? description;
 
   // Cast required: EUI's `DefaultItemAction` is a discriminated union keyed on
   // `icon`. The spread-conditional pattern loses the discriminant, but the
   // `resolvedType` guard above ensures the runtime object is always valid.
   return {
     name,
-    ...(description && { description }),
+    ...(resolvedDescription && { description: resolvedDescription }),
     ...(icon && { icon }),
     ...(resolvedType && { type: resolvedType }),
     ...(color && { color }),

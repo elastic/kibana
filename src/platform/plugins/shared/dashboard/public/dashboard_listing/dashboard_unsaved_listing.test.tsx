@@ -16,19 +16,12 @@ import userEvent from '@testing-library/user-event';
 import { DASHBOARD_PANELS_UNSAVED_ID } from '../services/dashboard_backup_service';
 import { getDashboardBackupService } from '../services/dashboard_api_services';
 import { coreServices } from '../services/kibana_services';
-import type { DashboardUnsavedListingProps } from './dashboard_unsaved_listing';
 import { DashboardUnsavedListing } from './dashboard_unsaved_listing';
 
-const renderDashboardUnsavedListing = (props: Partial<DashboardUnsavedListingProps> = {}) =>
-  render(
-    <DashboardUnsavedListing
-      goToDashboard={jest.fn()}
-      unsavedDashboardIds={['dashboardUnsavedOne', 'dashboardUnsavedTwo', 'dashboardUnsavedThree']}
-      refreshUnsavedDashboards={jest.fn()}
-      {...props}
-    />,
-    { wrapper: I18nProvider }
-  );
+const renderDashboardUnsavedListing = (props: { goToDashboard?: jest.Mock } = {}) =>
+  render(<DashboardUnsavedListing goToDashboard={props.goToDashboard ?? jest.fn()} />, {
+    wrapper: I18nProvider,
+  });
 
 const mockFindByIds = jest.fn();
 jest.mock('../dashboard_client', () => ({
@@ -40,31 +33,31 @@ jest.mock('../dashboard_client', () => ({
 describe('Unsaved listing', () => {
   const dashboardBackupService = getDashboardBackupService();
 
+  // Helper that drives the underlying source the self-subscribed hook reads.
+  const setUnsavedIds = (ids: string[]) => {
+    (dashboardBackupService.getDashboardIdsWithUnsavedChanges as jest.Mock).mockReturnValue(ids);
+  };
+
   beforeEach(() => {
     mockFindByIds.mockReset();
     mockFindByIds.mockResolvedValue([
       {
         id: `dashboardUnsavedOne`,
         status: 'success',
-        attributes: {
-          title: `Dashboard Unsaved One`,
-        },
+        attributes: { title: `Dashboard Unsaved One` },
       },
       {
         id: `dashboardUnsavedTwo`,
         status: 'success',
-        attributes: {
-          title: `Dashboard Unsaved Two`,
-        },
+        attributes: { title: `Dashboard Unsaved Two` },
       },
       {
         id: `dashboardUnsavedThree`,
         status: 'success',
-        attributes: {
-          title: `Dashboard Unsaved Three`,
-        },
+        attributes: { title: `Dashboard Unsaved Three` },
       },
     ]);
+    setUnsavedIds(['dashboardUnsavedOne', 'dashboardUnsavedTwo', 'dashboardUnsavedThree']);
   });
 
   it('Gets information for each unsaved dashboard', async () => {
@@ -73,9 +66,8 @@ describe('Unsaved listing', () => {
   });
 
   it('Does not attempt to get newly created dashboard', async () => {
-    renderDashboardUnsavedListing({
-      unsavedDashboardIds: ['dashboardUnsavedOne', DASHBOARD_PANELS_UNSAVED_ID],
-    });
+    setUnsavedIds(['dashboardUnsavedOne', DASHBOARD_PANELS_UNSAVED_ID]);
+    renderDashboardUnsavedListing();
     await waitFor(() => expect(mockFindByIds).toHaveBeenCalledWith(['dashboardUnsavedOne']));
   });
 
@@ -88,11 +80,9 @@ describe('Unsaved listing', () => {
   });
 
   it('Redirects to new dashboard when continue editing clicked', async () => {
+    setUnsavedIds([DASHBOARD_PANELS_UNSAVED_ID]);
     const goToDashboard = jest.fn();
-    renderDashboardUnsavedListing({
-      unsavedDashboardIds: [DASHBOARD_PANELS_UNSAVED_ID],
-      goToDashboard,
-    });
+    renderDashboardUnsavedListing({ goToDashboard });
     const editButton = await screen.findByTestId('edit-unsaved-New-Dashboard');
 
     await userEvent.click(editButton);
@@ -121,21 +111,21 @@ describe('Unsaved listing', () => {
       },
     ]);
 
-    renderDashboardUnsavedListing({
-      unsavedDashboardIds: [
-        'dashboardUnsavedOne',
-        'dashboardUnsavedTwo',
-        'dashboardUnsavedThree',
-        'failCase1',
-        'failCase2',
-      ],
-    });
+    setUnsavedIds([
+      'dashboardUnsavedOne',
+      'dashboardUnsavedTwo',
+      'dashboardUnsavedThree',
+      'failCase1',
+      'failCase2',
+    ]);
+    renderDashboardUnsavedListing();
 
     waitFor(() => {
       expect(dashboardBackupService.clearState).toHaveBeenCalledWith('failCase1');
       expect(dashboardBackupService.clearState).toHaveBeenCalledWith('failCase2');
 
-      // clearing panels from dashboard with errors should cause getDashboardIdsWithUnsavedChanges to be called again.
+      // Clearing panels from dashboards with errors triggers an unsaved-ids
+      // refresh, which re-reads `getDashboardIdsWithUnsavedChanges`.
       expect(dashboardBackupService.getDashboardIdsWithUnsavedChanges).toHaveBeenCalledTimes(2);
     });
   });

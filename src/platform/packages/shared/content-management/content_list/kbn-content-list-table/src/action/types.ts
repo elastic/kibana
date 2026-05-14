@@ -38,7 +38,9 @@ export interface ActionProps {
   /** Display name for the action (shown in menu and tooltip). */
   name: string | ((item: ContentListItem) => ReactNode);
   /** Accessible description for the action. */
-  description?: string;
+  description?: string | ((item: ContentListItem) => string);
+  /** Per-item disabled reason, shown when the action is disabled. */
+  disabledReason?: (item: ContentListItem) => string | undefined;
   /** Icon type (EUI icon name). */
   icon?: string;
   /** Render type: `'icon'` (compact) or `'button'` (full). */
@@ -78,6 +80,8 @@ export interface EditActionProps {
   label?: string;
   /** Per-item guard. When provided, disables the action for items where this returns `false`. */
   enabled?: (item: ContentListItem) => boolean;
+  /** Per-item disabled reason, shown when the action is disabled. */
+  disabledReason?: (item: ContentListItem) => string | undefined;
 }
 
 /**
@@ -88,6 +92,8 @@ export interface DeleteActionProps {
   label?: string;
   /** Per-item guard. When provided, disables the action for items where this returns `false`. */
   enabled?: (item: ContentListItem) => boolean;
+  /** Per-item disabled reason, shown when the action is disabled. */
+  disabledReason?: (item: ContentListItem) => string | undefined;
 }
 
 /**

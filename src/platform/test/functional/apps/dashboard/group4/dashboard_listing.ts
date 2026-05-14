@@ -14,7 +14,6 @@ import type { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { dashboard, header, common } = getPageObjects(['dashboard', 'header', 'common']);
   const browser = getService('browser');
-  const listingTable = getService('listingTable');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
@@ -40,7 +39,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboard.saveDashboard(dashboardName);
 
         await dashboard.gotoDashboardLandingPage();
-        await listingTable.searchAndExpectItemsCount('dashboard', dashboardName, 1);
+        await dashboard.searchAndExpectListingItemsCount(dashboardName, 1);
       });
 
       it('is not shown when there is a dashboard', async function () {
@@ -49,19 +48,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('is not shown when there are no dashboards shown during a search', async function () {
-        await listingTable.searchAndExpectItemsCount('dashboard', 'gobeldeguck', 0);
+        await dashboard.searchAndExpectListingItemsCount('gobeldeguck', 0);
 
         const promptExists = await dashboard.getCreateDashboardPromptExists();
         expect(promptExists).to.be(false);
-        await listingTable.clearSearchFilter();
+        await dashboard.clearListingSearchFilter();
       });
     });
 
     describe('delete', function () {
       it('default confirm action is cancel', async function () {
-        await listingTable.searchForItemWithName(dashboardName);
-        await listingTable.checkListingSelectAllCheckbox();
-        await listingTable.clickDeleteSelected();
+        await dashboard.searchForDashboardWithName(dashboardName);
+        await dashboard.selectAllListingItems();
+        await dashboard.clickDeleteSelectedListingItems();
 
         await common.expectConfirmModalOpenState(true);
 
@@ -69,55 +68,55 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await common.expectConfirmModalOpenState(false);
 
-        await listingTable.searchAndExpectItemsCount('dashboard', dashboardName, 1);
+        await dashboard.searchAndExpectListingItemsCount(dashboardName, 1);
       });
 
       it('succeeds on confirmation press', async function () {
-        await listingTable.checkListingSelectAllCheckbox();
-        await listingTable.clickDeleteSelected();
+        await dashboard.selectAllListingItems();
+        await dashboard.clickDeleteSelectedListingItems();
 
         await common.clickConfirmOnModal();
 
-        await listingTable.searchAndExpectItemsCount('dashboard', dashboardName, 0);
+        await dashboard.searchAndExpectListingItemsCount(dashboardName, 0);
       });
     });
 
     describe('search', function () {
       before(async () => {
-        await listingTable.clearSearchFilter();
+        await dashboard.clearListingSearchFilter();
         await dashboard.clickNewDashboard();
         await dashboard.saveDashboard('Two Words');
         await dashboard.gotoDashboardLandingPage();
       });
 
       it('matches on the first word', async function () {
-        await listingTable.searchForItemWithName('Two');
-        await listingTable.expectItemsCount('dashboard', 1);
+        await dashboard.searchForDashboardWithName('Two');
+        await dashboard.expectListingItemsCount(1);
       });
 
       it('matches the second word', async function () {
-        await listingTable.searchForItemWithName('Words');
-        await listingTable.expectItemsCount('dashboard', 1);
+        await dashboard.searchForDashboardWithName('Words');
+        await dashboard.expectListingItemsCount(1);
       });
 
       it('matches the second word prefix', async function () {
-        await listingTable.searchForItemWithName('Wor');
-        await listingTable.expectItemsCount('dashboard', 1);
+        await dashboard.searchForDashboardWithName('Wor');
+        await dashboard.expectListingItemsCount(1);
       });
 
       it('does not match mid word', async function () {
-        await listingTable.searchForItemWithName('ords');
-        await listingTable.expectItemsCount('dashboard', 0);
+        await dashboard.searchForDashboardWithName('ords');
+        await dashboard.expectListingItemsCount(0);
       });
 
       it('is case insensitive', async function () {
-        await listingTable.searchForItemWithName('two words');
-        await listingTable.expectItemsCount('dashboard', 1);
+        await dashboard.searchForDashboardWithName('two words');
+        await dashboard.expectListingItemsCount(1);
       });
 
       it('is using AND operator', async function () {
-        await listingTable.searchForItemWithName('three words');
-        await listingTable.expectItemsCount('dashboard', 0);
+        await dashboard.searchForDashboardWithName('three words');
+        await dashboard.expectListingItemsCount(0);
       });
     });
 
@@ -164,7 +163,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('preloads search filter bar when there is no match', async function () {
-        const searchFilter = await listingTable.getSearchFilterValue();
+        const searchFilter = await dashboard.getListingSearchFilterValue();
         expect(searchFilter).to.equal('nodashboardsnamedme');
       });
 
@@ -188,7 +187,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('preloads search filter bar when there is more than one match', async function () {
-        const searchFilter = await listingTable.getSearchFilterValue();
+        const searchFilter = await dashboard.getListingSearchFilterValue();
         expect(searchFilter).to.equal('two words');
       });
 
@@ -226,17 +225,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const originalPanelCount = await dashboard.getPanelCount();
 
         await dashboard.gotoDashboardLandingPage();
-        await listingTable.searchForItemWithName(`${dashboardName}-editMetaData`);
-        await listingTable.inspectVisualization();
-        await listingTable.editVisualizationDetails({
+        await dashboard.searchForDashboardWithName(`${dashboardName}-editMetaData`);
+        await dashboard.openListingInspectFlyout();
+        await dashboard.editListingItemDetails({
           title: 'new title',
           description: 'new description',
         });
 
-        await listingTable.searchAndExpectItemsCount('dashboard', 'new title', 1);
-        await listingTable.setSearchFilterValue('new description');
-        await listingTable.expectItemsCount('dashboard', 1);
-        await listingTable.clickItemLink('dashboard', 'new title');
+        await dashboard.searchAndExpectListingItemsCount('new title', 1);
+        await dashboard.searchForDashboardWithName('new description');
+        await dashboard.expectListingItemsCount(1);
+        await dashboard.clickListingItemLink('new title');
         await dashboard.waitForRenderComplete();
 
         const newPanelCount = await dashboard.getPanelCount();
@@ -260,15 +259,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('shows the insights panel and counts the views', async () => {
-        await listingTable.searchForItemWithName(DASHBOARD_NAME);
+        await dashboard.searchForDashboardWithName(DASHBOARD_NAME);
 
         async function getViewsCount() {
-          await listingTable.inspectVisualization();
+          await dashboard.openListingInspectFlyout();
           const totalViewsStats = await testSubjects.find('views-stats-total-views');
           const viewsStr = await (
             await totalViewsStats.findByCssSelector('.euiStat__title')
           ).getVisibleText();
-          await listingTable.closeInspector();
+          await dashboard.closeListingInspectFlyout();
           return Number(viewsStr);
         }
 
@@ -278,7 +277,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(views1).to.be(1);
         });
 
-        await listingTable.clickItemLink('dashboard', DASHBOARD_NAME);
+        await dashboard.clickListingItemLink(DASHBOARD_NAME);
         await dashboard.waitForRenderComplete();
         await dashboard.gotoDashboardLandingPage();
 

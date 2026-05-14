@@ -43,7 +43,7 @@ describe('delete action builder', () => {
       const result = buildDeleteAction({}, defaultContext);
 
       expect(result).toMatchObject({
-        description: expect.any(String),
+        description: expect.any(Function),
         icon: 'trash',
         type: 'icon',
         color: 'danger',
@@ -53,6 +53,27 @@ describe('delete action builder', () => {
 
       const { getByText } = render(<>{result!.name as ReactNode}</>);
       expect(getByText('Delete')).toBeInTheDocument();
+    });
+
+    it('uses the default description when no disabled reason is provided', () => {
+      const result = buildDeleteAction({}, defaultContext);
+      const description = result?.description as (item: { id: string }) => string;
+
+      expect(description({ id: '1' })).toBe('Delete this item');
+    });
+
+    it('uses the per-item disabled reason when provided', () => {
+      const result = buildDeleteAction(
+        {
+          disabledReason: (item) =>
+            item.id === 'managed' ? 'Managed dashboards cannot delete' : undefined,
+        },
+        defaultContext
+      );
+      const description = result?.description as (item: { id: string }) => string;
+
+      expect(description({ id: 'managed' })).toBe('Managed dashboards cannot delete');
+      expect(description({ id: 'open' })).toBe('Delete this item');
     });
 
     it('returns `undefined` when in read-only mode', () => {
