@@ -173,11 +173,13 @@ export function CompositeSloTable({
               onClick={() => toggleExpandRow(item)}
               aria-label={
                 isExpanded
-                  ? i18n.translate('xpack.slo.compositeSloList.collapseRow', {
-                      defaultMessage: 'Collapse',
+                  ? i18n.translate('xpack.slo.compositeSloList.collapseRowFor', {
+                      defaultMessage: 'Collapse row: {name}',
+                      values: { name: item.name },
                     })
-                  : i18n.translate('xpack.slo.compositeSloList.expandRow', {
-                      defaultMessage: 'Expand',
+                  : i18n.translate('xpack.slo.compositeSloList.expandRowFor', {
+                      defaultMessage: 'Expand row: {name}',
+                      values: { name: item.name },
                     })
               }
               iconType={isExpanded ? 'arrowDown' : 'arrowRight'}

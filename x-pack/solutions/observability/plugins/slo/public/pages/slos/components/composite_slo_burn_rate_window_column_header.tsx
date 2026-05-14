@@ -11,9 +11,27 @@ import {
   EuiContextMenuPanel,
   EuiPopover,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 
 export type CompositeSloBurnRateWindow = '5m' | '1h' | '1d';
+
+export function getCompositeSloBurnRateWindowAriaLabel(window: CompositeSloBurnRateWindow): string {
+  switch (window) {
+    case '5m':
+      return i18n.translate('xpack.slo.compositeSloList.burnRate.timeWindowAria5m', {
+        defaultMessage: '5 minutes',
+      });
+    case '1h':
+      return i18n.translate('xpack.slo.compositeSloList.burnRate.timeWindowAria1h', {
+        defaultMessage: '1 hour',
+      });
+    case '1d':
+      return i18n.translate('xpack.slo.compositeSloList.burnRate.timeWindowAria1d', {
+        defaultMessage: '1 day',
+      });
+  }
+}
 
 export interface CompositeSloBurnRateWindowColumnHeaderProps {
   burnRateWindow: CompositeSloBurnRateWindow;
@@ -45,6 +63,13 @@ export function CompositeSloBurnRateWindowColumnHeader({
           iconSide="right"
           onClick={() => setIsPopoverOpen((open) => !open)}
           css={{ fontWeight: 700 }}
+          aria-label={i18n.translate('xpack.slo.compositeSloList.burnRate.windowButtonAriaLabel', {
+            defaultMessage: '{burnRateLabel} ({windowDescription})',
+            values: {
+              burnRateLabel,
+              windowDescription: getCompositeSloBurnRateWindowAriaLabel(burnRateWindow),
+            },
+          })}
         >
           {burnRateLabel} ({burnRateWindow})
         </EuiButtonEmpty>
@@ -59,6 +84,7 @@ export function CompositeSloBurnRateWindowColumnHeader({
           <EuiContextMenuItem
             key={itemWindow}
             icon={burnRateWindow === itemWindow ? 'check' : 'empty'}
+            aria-label={getCompositeSloBurnRateWindowAriaLabel(itemWindow)}
             onClick={() => {
               onBurnRateWindowChange(itemWindow);
               setIsPopoverOpen(false);

@@ -79,7 +79,7 @@ const getMemberColumns = (
   {
     field: 'normalisedWeight',
     name: i18n.translate('xpack.slo.compositeSloList.members.normalisedWeight', {
-      defaultMessage: 'Normalised weight',
+      defaultMessage: 'Normalized weight',
     }),
     width: '140px',
     render: (value: number) =>
