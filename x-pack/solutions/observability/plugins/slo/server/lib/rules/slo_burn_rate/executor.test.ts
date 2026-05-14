@@ -887,10 +887,18 @@ describe('BurnRateRuleExecutor', () => {
   });
 
   describe('APM instrumentation', () => {
+    const addTransactionLabelsMock = addTransactionLabels as jest.MockedFunction<
+      typeof addTransactionLabels
+    >;
+    const withSpanMock = withSpan as jest.MockedFunction<typeof withSpan>;
+    const setCustomContextMock = apm.setCustomContext as jest.MockedFunction<
+      typeof apm.setCustomContext
+    >;
+
     beforeEach(() => {
-      (addTransactionLabels as jest.Mock).mockClear();
-      (withSpan as jest.Mock).mockClear();
-      (apm.setCustomContext as jest.Mock).mockClear();
+      addTransactionLabelsMock.mockClear();
+      withSpanMock.mockClear();
+      setCustomContextMock.mockClear();
     });
 
     it('sets SLO-shape labels and custom context after loading the SLO definition', async () => {
@@ -919,13 +927,13 @@ describe('BurnRateRuleExecutor', () => {
         isServerless: false,
       });
 
-      expect(addTransactionLabels).toHaveBeenCalledWith(
+      expect(addTransactionLabelsMock).toHaveBeenCalledWith(
         expect.objectContaining({
           slo_indicator_type: slo.indicator.type,
           slo_budgeting_method: slo.budgetingMethod,
         })
       );
-      expect(apm.setCustomContext).toHaveBeenCalledWith({ slo_id: slo.id, rule_id: ruleId });
+      expect(setCustomContextMock).toHaveBeenCalledWith({ slo_id: slo.id, rule_id: ruleId });
     });
 
     it('sets executor_outcome: skipped when the SLO is disabled', async () => {
@@ -949,8 +957,8 @@ describe('BurnRateRuleExecutor', () => {
         isServerless: false,
       });
 
-      expect(addTransactionLabels).toHaveBeenCalledWith({ executor_outcome: 'skipped' });
-      expect(addTransactionLabels).not.toHaveBeenCalledWith({ executor_outcome: 'success' });
+      expect(addTransactionLabelsMock).toHaveBeenCalledWith({ executor_outcome: 'skipped' });
+      expect(addTransactionLabelsMock).not.toHaveBeenCalledWith({ executor_outcome: 'success' });
     });
 
     it('sets executor_outcome: success and creates named spans for all pipeline stages', async () => {
@@ -978,20 +986,20 @@ describe('BurnRateRuleExecutor', () => {
         isServerless: false,
       });
 
-      expect(addTransactionLabels).toHaveBeenCalledWith({ executor_outcome: 'success' });
-      expect(withSpan).toHaveBeenCalledWith(
+      expect(addTransactionLabelsMock).toHaveBeenCalledWith({ executor_outcome: 'success' });
+      expect(withSpanMock).toHaveBeenCalledWith(
         { name: 'slo_burn_rate_executor.load_definition', type: 'rule' },
         expect.any(Function)
       );
-      expect(withSpan).toHaveBeenCalledWith(
+      expect(withSpanMock).toHaveBeenCalledWith(
         { name: 'slo_burn_rate_executor.eval', type: 'rule' },
         expect.any(Function)
       );
-      expect(withSpan).toHaveBeenCalledWith(
+      expect(withSpanMock).toHaveBeenCalledWith(
         { name: 'slo_burn_rate_executor.es_query', type: 'rule' },
         expect.any(Function)
       );
-      expect(withSpan).toHaveBeenCalledWith(
+      expect(withSpanMock).toHaveBeenCalledWith(
         { name: 'slo_burn_rate_executor.action_dispatch', type: 'rule' },
         expect.any(Function)
       );

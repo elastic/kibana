@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import apm from 'elastic-apm-node';
 import numeral from '@elastic/numeral';
 import { addTransactionLabels, withSpan } from '@kbn/apm-utils';
+import apm from 'elastic-apm-node';
 import type { ExecutorType, RuleExecutorOptions } from '@kbn/alerting-plugin/server';
 import { AlertsClientError } from '@kbn/alerting-plugin/server';
 import { getEcsGroupsFromFlattenGrouping, getFormattedGroups } from '@kbn/alerting-rule-utils';
