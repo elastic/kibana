@@ -120,9 +120,13 @@ export const YamlRuleForm = ({
   );
 
   const handleBlur = useCallback(() => {
-    // Use lenient parsing so partial edits (e.g. query changed but name
-    // still empty) flush to form state. Strict validation only runs on submit.
+    // Lenient parse: skips required-field and ES|QL validation so partial
+    // edits flush to form state. Syntax errors are still surfaced.
     const result = parseYamlToFormValues(yamlText, { strict: false });
+    if (result.error) {
+      setError(result.error);
+      return;
+    }
     if (result.values) {
       setError(null);
       applyYamlValuesToForm(result.values);
