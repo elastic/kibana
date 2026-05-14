@@ -55,6 +55,8 @@ export interface ComposeDiscoverState {
    *  Intentionally NOT connected to FormValues.schedule.lookback. */
   sandboxDateStart: string;
   sandboxDateEnd: string;
+  /** When true the stepped form is replaced by a full YAML editor. */
+  yamlMode: boolean;
 }
 
 export type ComposeDiscoverAction =
@@ -67,4 +69,5 @@ export type ComposeDiscoverAction =
   | { type: 'OPEN_CHILD' }
   | { type: 'OPEN_CHILD_FOR_STEP'; step: number }
   | { type: 'CLOSE_CHILD' }
-  | { type: 'COMMIT_SANDBOX_QUERY'; query: string };
+  | { type: 'COMMIT_SANDBOX_QUERY'; query: string }
+  | { type: 'SET_YAML_MODE'; enabled: boolean };
