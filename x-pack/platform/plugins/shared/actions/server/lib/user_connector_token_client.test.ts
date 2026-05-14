@@ -68,7 +68,7 @@ describe('UserConnectorTokenClient', () => {
 
       unsecuredSavedObjectsClient.create.mockResolvedValueOnce(savedObjectCreateResult);
       const result = await userClient.create({
-        profileUid: 'user-profile-123',
+        userIdentifiers: { profileUid: 'user-profile-123' },
         connectorId: '123',
         credentials: {
           accessToken: 'testtokenvalue',
@@ -104,11 +104,52 @@ describe('UserConnectorTokenClient', () => {
     test('throws error if credentials are empty', async () => {
       await expect(
         userClient.create({
-          profileUid: 'user-profile-123',
+          userIdentifiers: { profileUid: 'user-profile-123' },
           connectorId: '123',
           credentials: {},
         })
       ).rejects.toThrow('Per-user credentials are required to create a user connector token');
+    });
+
+    test('persists userCloudId when provided to create', async () => {
+      const expiresAt = new Date().toISOString();
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+        id: 'mock-saved-object-id',
+        type: 'user_connector_token',
+        attributes: {
+          profileUid: 'user-profile-123',
+          userCloudId: 'cloud-user-123',
+          connectorId: '123',
+          credentialType: 'oauth',
+          credentials: {
+            accessToken: 'testtokenvalue',
+          },
+          expiresAt,
+          createdAt: '2021-01-01T12:00:00.000Z',
+          updatedAt: '2021-01-01T12:00:00.000Z',
+        },
+        references: [],
+      });
+
+      await userClient.create({
+        userIdentifiers: { profileUid: 'user-profile-123', userCloudId: 'cloud-user-123' },
+        connectorId: '123',
+        credentials: {
+          accessToken: 'testtokenvalue',
+        },
+        expiresAtMillis: expiresAt,
+        credentialType: 'oauth',
+      });
+
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+        'user_connector_token',
+        expect.objectContaining({
+          profileUid: 'user-profile-123',
+          userCloudId: 'cloud-user-123',
+          connectorId: '123',
+        }),
+        { id: 'mock-saved-object-id' }
+      );
     });
   });
 
@@ -159,7 +200,7 @@ describe('UserConnectorTokenClient', () => {
       });
 
       const result = await userClient.get({
-        profileUid: 'user-profile-123',
+        userIdentifiers: { profileUid: 'user-profile-123' },
         connectorId: '123',
         credentialType: 'oauth',
       });
@@ -191,7 +232,7 @@ describe('UserConnectorTokenClient', () => {
       });
 
       const result = await userClient.get({
-        profileUid: 'user-profile-123',
+        userIdentifiers: { profileUid: 'user-profile-123' },
         connectorId: '123',
         credentialType: 'oauth',
       });
@@ -247,7 +288,7 @@ describe('UserConnectorTokenClient', () => {
       });
 
       const result = await userClient.getOAuthPersonalToken({
-        profileUid: 'user-profile-123',
+        userIdentifiers: { profileUid: 'user-profile-123' },
         connectorId: '123',
       });
 
@@ -311,7 +352,7 @@ describe('UserConnectorTokenClient', () => {
       });
 
       const result = await userClient.getOAuthPersonalToken({
-        profileUid: 'user-profile-123',
+        userIdentifiers: { profileUid: 'user-profile-123' },
         connectorId: '123',
       });
 
@@ -348,7 +389,7 @@ describe('UserConnectorTokenClient', () => {
       });
 
       const result = await userClient.createWithRefreshToken({
-        profileUid: 'user-profile-123',
+        userIdentifiers: { profileUid: 'user-profile-123' },
         connectorId: '123',
         accessToken: 'Bearer testtokenvalue',
         refreshToken: 'testrefreshtoken',
@@ -375,6 +416,47 @@ describe('UserConnectorTokenClient', () => {
             accessToken: 'Bearer testtokenvalue',
             refreshToken: 'testrefreshtoken',
           },
+        }),
+        { id: 'mock-saved-object-id' }
+      );
+    });
+
+    test('persists userCloudId on attributes when provided with profileUid', async () => {
+      const expiresAt = new Date(Date.now() + 3600 * 1000).toISOString();
+
+      unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+        id: 'mock-saved-object-id',
+        type: 'user_connector_token',
+        attributes: {
+          profileUid: 'user-profile-123',
+          userCloudId: 'cloud-abc',
+          connectorId: '123',
+          credentialType: 'oauth',
+          credentials: {
+            accessToken: 'Bearer testtokenvalue',
+            refreshToken: 'testrefreshtoken',
+          },
+          expiresAt,
+          createdAt: '2021-01-01T12:00:00.000Z',
+          updatedAt: '2021-01-01T12:00:00.000Z',
+        },
+        references: [],
+      });
+
+      await userClient.createWithRefreshToken({
+        userIdentifiers: { profileUid: 'user-profile-123', userCloudId: 'cloud-abc' },
+        connectorId: '123',
+        accessToken: 'Bearer testtokenvalue',
+        refreshToken: 'testrefreshtoken',
+        expiresIn: 3600,
+      });
+
+      expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+        'user_connector_token',
+        expect.objectContaining({
+          profileUid: 'user-profile-123',
+          userCloudId: 'cloud-abc',
+          connectorId: '123',
         }),
         { id: 'mock-saved-object-id' }
       );
@@ -547,7 +629,7 @@ describe('UserConnectorTokenClient', () => {
 
       unsecuredSavedObjectsClient.find.mockResolvedValueOnce(findResult);
       await userClient.deleteConnectorTokens({
-        profileUid: 'user-profile-123',
+        userIdentifiers: { profileUid: 'user-profile-123' },
         connectorId: '123',
         credentialType: 'oauth',
       });
@@ -564,7 +646,7 @@ describe('UserConnectorTokenClient', () => {
       );
     });
 
-    test('deletes all user tokens for connectorId when profileUid is not provided', async () => {
+    test('deletes all per-user tokens for connectorId when no profileUid is provided', async () => {
       unsecuredSavedObjectsClient.delete.mockResolvedValue({});
 
       const findResult = {
@@ -605,9 +687,8 @@ describe('UserConnectorTokenClient', () => {
 
       unsecuredSavedObjectsClient.find.mockResolvedValueOnce(findResult);
 
-      // Simulate connector deletion: no profileUid, delete all tokens for the connector
       await userClient.deleteConnectorTokens({
-        profileUid: undefined as unknown as string,
+        userIdentifiers: {},
         connectorId: '123',
       });
 
@@ -627,6 +708,64 @@ describe('UserConnectorTokenClient', () => {
         'token-user-b'
       );
     });
+
+    test('does not delete when only userCloudId is provided without profileUid', async () => {
+      await userClient.deleteConnectorTokens({
+        userIdentifiers: { userCloudId: 'cloud-user-1' },
+        connectorId: '123',
+      });
+
+      expect(unsecuredSavedObjectsClient.find).not.toHaveBeenCalled();
+      expect(unsecuredSavedObjectsClient.delete).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'Skipping deleteConnectorTokens for user_connector_token: userCloudId without profileUid is not supported for scoped delete'
+        )
+      );
+    });
+
+    test('deletes all per-user tokens for connectorId when userIdentifiers is undefined', async () => {
+      unsecuredSavedObjectsClient.delete.mockResolvedValue({});
+
+      const findResult = {
+        total: 1,
+        per_page: 10,
+        page: 1,
+        saved_objects: [
+          {
+            id: 'token-user-a',
+            type: 'user_connector_token',
+            attributes: {
+              profileUid: 'user-a',
+              connectorId: '123',
+              credentialType: 'oauth',
+              credentials: {},
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+            },
+            score: 1,
+            references: [],
+          },
+        ],
+      };
+
+      unsecuredSavedObjectsClient.find.mockResolvedValueOnce(findResult);
+
+      await userClient.deleteConnectorTokens({
+        connectorId: '123',
+      });
+
+      expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'user_connector_token',
+          filter: expect.not.stringContaining('profileUid'),
+        })
+      );
+      expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledWith(
+        'user_connector_token',
+        'token-user-a'
+      );
+    });
   });
 
   describe('updateOrReplace()', () => {
@@ -642,7 +781,7 @@ describe('UserConnectorTokenClient', () => {
 
       await expect(
         userClient.updateOrReplace({
-          profileUid: 'user-profile-123',
+          userIdentifiers: { profileUid: 'user-profile-123' },
           connectorId: '123',
           token: tokenWithoutId as UserConnectorToken,
           newToken: 'newtoken',
@@ -665,7 +804,7 @@ describe('UserConnectorTokenClient', () => {
 
       await expect(
         userClient.updateOrReplace({
-          profileUid: 'user-profile-123',
+          userIdentifiers: { profileUid: 'user-profile-123' },
           connectorId: '123',
           token: tokenWithEmptyId as UserConnectorToken,
           newToken: 'newtoken',
