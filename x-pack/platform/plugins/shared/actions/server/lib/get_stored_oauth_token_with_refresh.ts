@@ -10,7 +10,12 @@ import pLimit from 'p-limit';
 import type { Logger } from '@kbn/core/server';
 import { ConnectorAuthorizationError } from '@kbn/connector-specs';
 import type { OAuthTokenResponse } from './request_oauth_token';
-import type { ConnectorToken, ConnectorTokenClientContract, UserConnectorToken } from '../types';
+import type {
+  ConnectorToken,
+  ConnectorTokenClientContract,
+  UserIdentifiers,
+  UserConnectorToken,
+} from '../types';
 
 // Per-connector (or per-connector-per-user) locks to prevent concurrent token refreshes
 const tokenRefreshLocks = new Map<string, ReturnType<typeof pLimit>>();
@@ -40,7 +45,7 @@ export interface GetStoredTokenWithRefreshOpts {
   forceRefresh?: boolean;
   isPerUser?: boolean;
   /** Required when `isPerUser` is true to look up the per-user stored token. */
-  profileUid?: string;
+  userIdentifiers?: UserIdentifiers;
   /** Used in log messages to identify the auth mode (e.g. 'per-user'). */
   authMode?: string;
   /**
@@ -109,14 +114,22 @@ export const getStoredTokenWithRefresh = async ({
   authMethod,
   forceRefresh = false,
   isPerUser = false,
-  profileUid,
+  userIdentifiers,
   authMode,
   refreshFn,
   treatRefreshFailureAsAuthError = false,
 }: GetStoredTokenWithRefreshOpts): Promise<string | null> => {
+  const perUserProfileUid = userIdentifiers?.profileUid;
+  if (isPerUser && !perUserProfileUid) {
+    logger.warn(
+      `Per-user token retrieval requires profileUid for connectorId: ${connectorId}. Cannot retrieve token.`
+    );
+    return null;
+  }
+
   // Acquire lock scoped to the connector (shared mode) or to the connector + user (per-user mode),
   // so concurrent requests for different users don't block each other unnecessarily.
-  const lockKey = isPerUser ? `${connectorId}:${profileUid}` : connectorId;
+  const lockKey = isPerUser ? `${connectorId}:${perUserProfileUid}` : connectorId;
   const lock = getOrCreateLock(lockKey);
 
   try {
@@ -124,7 +137,7 @@ export const getStoredTokenWithRefresh = async ({
       // Re-fetch token inside lock - another request may have already refreshed it
       const { connectorToken, hasErrors } = isPerUser
         ? await connectorTokenClient.get({
-            profileUid: profileUid!,
+            userIdentifiers: { ...userIdentifiers, profileUid: perUserProfileUid },
             connectorId,
             tokenType: 'access_token',
           })
