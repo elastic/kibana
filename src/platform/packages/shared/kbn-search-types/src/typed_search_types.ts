@@ -12,6 +12,7 @@ import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { AbstractDataView } from '@kbn/data-views-plugin/common';
 import type { ProjectRouting } from '@kbn/es-query';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
+import type { SanitizedConnectionRequestParams } from './types';
 
 /**
  * Base options shared across all typed search methods
@@ -159,6 +160,10 @@ export interface IDSLSearchResult<TDoc = unknown> {
    */
   rawResponse: estypes.SearchResponse<TDoc>;
   /**
+   * Request parameters for inspector
+   */
+  requestParams?: SanitizedConnectionRequestParams;
+  /**
    * Pagination helpers (only present when paginate: true option is used)
    */
   pagination?: IDSLPagination;
@@ -211,6 +216,10 @@ export interface IAggsSearchResult {
    * Raw Elasticsearch search response (size: 0, contains aggregations)
    */
   rawResponse: estypes.SearchResponse;
+  /**
+   * Request parameters for inspector
+   */
+  requestParams?: SanitizedConnectionRequestParams;
 }
 
 // ============================================================================
@@ -275,6 +284,10 @@ export interface IESQLSearchResult {
    * Raw Elasticsearch ES|QL async query response
    */
   rawResponse: estypes.EsqlAsyncQueryResponse;
+  /**
+   * Request parameters for inspector
+   */
+  requestParams?: SanitizedConnectionRequestParams;
 }
 
 // ============================================================================
@@ -344,6 +357,10 @@ export interface IEQLSearchResult {
    * Raw Elasticsearch EQL search response
    */
   rawResponse: estypes.EqlSearchResponse;
+  /**
+   * Request parameters for inspector
+   */
+  requestParams?: SanitizedConnectionRequestParams;
 }
 
 // ============================================================================
@@ -403,6 +420,11 @@ export interface ISQLSearchResult {
    * Time in milliseconds the search took to execute
    */
   took: number;
+
+  /**
+   * Request parameters for inspector
+   */
+  requestParams?: SanitizedConnectionRequestParams;
 }
 
 // ============================================================================

@@ -141,7 +141,7 @@ export const getEqlFn = ({
       });
 
       try {
-        const { rawResponse } = await typed.searchEQL(
+        const { rawResponse, requestParams } = await typed.searchEQL(
           {
             index: args.index,
             query: args.query,
@@ -154,7 +154,7 @@ export const getEqlFn = ({
 
         const stats: RequestStatistics = {};
 
-        request.stats(stats).ok({ json: { rawResponse } });
+        request.stats(stats).ok({ json: { rawResponse }, requestParams });
         request.json(dsl);
 
         return {

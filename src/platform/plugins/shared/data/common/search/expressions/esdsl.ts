@@ -130,7 +130,7 @@ export const getEsdslFn = ({
       });
 
       try {
-        const { rawResponse } = await typed.searchDSL(
+        const { rawResponse, requestParams } = await typed.searchDSL(
           {
             index: args.index,
             size: args.size,
@@ -180,7 +180,7 @@ export const getEsdslFn = ({
           };
         }
 
-        request.stats(stats).ok({ json: rawResponse });
+        request.stats(stats).ok({ json: rawResponse, requestParams });
         request.json(dsl);
 
         return {

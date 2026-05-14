@@ -193,7 +193,7 @@ export const getEssqlFn = ({ getStartDependencies }: EssqlFnArguments) => {
       };
 
       try {
-        const { rawResponse, took } = await typed.searchSQL(
+        const { rawResponse, took, requestParams } = await typed.searchSQL(
           {
             query,
             params: parameter,
@@ -233,7 +233,7 @@ export const getEssqlFn = ({ getStartDependencies }: EssqlFnArguments) => {
             },
           })
           .json(params)
-          .ok({ json: rawResponse });
+          .ok({ json: rawResponse, requestParams });
 
         return mapResponseToDatatable(rawResponse);
       } catch (error) {

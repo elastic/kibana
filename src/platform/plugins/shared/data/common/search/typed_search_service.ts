@@ -60,7 +60,7 @@ export class TypedSearchService implements ITypedSearchService {
       request,
       this.mapESQLOptions(options, 'esql_async' as typeof ESQL_ASYNC_SEARCH_STRATEGY)
     );
-    return { rawResponse: response.rawResponse };
+    return { rawResponse: response.rawResponse, requestParams: response.requestParams };
   }
 
   /**
@@ -86,7 +86,10 @@ export class TypedSearchService implements ITypedSearchService {
     const request = this.buildDSLRequest(params);
     const response = await this.executeSearch(request, this.mapDSLOptions(options));
 
-    const result: IDSLSearchResult = { rawResponse: response.rawResponse };
+    const result: IDSLSearchResult = {
+      rawResponse: response.rawResponse,
+      requestParams: response.requestParams,
+    };
 
     // Add pagination helpers if requested
     if (options?.paginate) {
@@ -108,7 +111,7 @@ export class TypedSearchService implements ITypedSearchService {
       request,
       this.mapEQLOptions(options, 'eql' as typeof EQL_SEARCH_STRATEGY)
     );
-    return { rawResponse: response.rawResponse };
+    return { rawResponse: response.rawResponse, requestParams: response.requestParams };
   }
 
   /**
@@ -123,7 +126,11 @@ export class TypedSearchService implements ITypedSearchService {
       request,
       this.mapSQLOptions(options, 'sql' as typeof SQL_SEARCH_STRATEGY)
     );
-    return { rawResponse: response.rawResponse, took: response.took };
+    return {
+      rawResponse: response.rawResponse,
+      took: response.took,
+      requestParams: response.requestParams,
+    };
   }
 
   // ============================================================================
@@ -215,12 +222,14 @@ export class TypedSearchService implements ITypedSearchService {
 
         return {
           rawResponse: nextResponse.rawResponse,
+          requestParams: nextResponse.requestParams,
           pagination: self.buildDSLPagination(nextResponse.rawResponse, nextParams, options),
         };
       },
       async *getAllPages(maxPages = 100) {
         let currentResult: IDSLSearchResult = {
           rawResponse,
+          requestParams: undefined,
           pagination: self.buildDSLPagination(rawResponse, originalParams, options),
         };
         let pageCount = 1;
