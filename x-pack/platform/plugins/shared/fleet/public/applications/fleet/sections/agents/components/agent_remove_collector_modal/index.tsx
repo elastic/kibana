@@ -36,14 +36,13 @@ export const AgentRemoveCollectorModal: React.FunctionComponent<Props> = ({
   async function onSubmit() {
     try {
       setIsSubmitting(true);
-      const { error } = isSingleAgent
-        ? await sendPostRemoveCollector((agents[0] as Agent).id)
-        : await sendPostBulkRemoveCollectors({
-            agents: Array.isArray(agents) ? agents.map((agent) => agent.id) : agents,
-            includeInactive: true,
-          });
-      if (error) {
-        throw error;
+      if (isSingleAgent) {
+        await sendPostRemoveCollector((agents[0] as Agent).id);
+      } else {
+        await sendPostBulkRemoveCollectors({
+          agents: Array.isArray(agents) ? agents.map((agent) => agent.id) : agents,
+          includeInactive: true,
+        });
       }
       setIsSubmitting(false);
       const successMessage = isSingleAgent

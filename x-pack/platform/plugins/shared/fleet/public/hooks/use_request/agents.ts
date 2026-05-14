@@ -233,25 +233,20 @@ export function sendPostBulkAgentUnenroll(
   });
 }
 
-export function sendPostRemoveCollector(agentId: string, options?: RequestOptions) {
-  return sendRequest<PostRemoveCollectorResponse>({
+export function sendPostRemoveCollector(agentId: string) {
+  return sendRequestForRq<PostRemoveCollectorResponse>({
     path: agentRouteService.getRemoveCollectorPath(agentId),
     method: 'post',
     version: API_VERSIONS.public.v1,
-    ...options,
   });
 }
 
-export function sendPostBulkRemoveCollectors(
-  body: PostBulkRemoveCollectorsRequest['body'],
-  options?: RequestOptions
-) {
-  return sendRequest<PostBulkRemoveCollectorsResponse>({
+export function sendPostBulkRemoveCollectors(body: PostBulkRemoveCollectorsRequest['body']) {
+  return sendRequestForRq<PostBulkRemoveCollectorsResponse>({
     path: agentRouteService.getBulkRemoveCollectorsPath(),
     method: 'post',
     body,
     version: API_VERSIONS.public.v1,
-    ...options,
   });
 }
 
