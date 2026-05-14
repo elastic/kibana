@@ -42,11 +42,10 @@ export const ModelDeprecatedBadge = ({ id, metadata, iconOnly }: ModelDeprecated
         color="warning"
         data-test-subj={`modelDeprecatedBadge-${id}`}
       >
-        {iconOnly
-          ? null
-          : i18n.translate('xpack.searchInferenceEndpoints.eisModelCard.deprecatedBadge.content', {
-              defaultMessage: 'Deprecated',
-            })}
+        {!iconOnly &&
+          i18n.translate('xpack.searchInferenceEndpoints.eisModelCard.deprecatedBadge.content', {
+            defaultMessage: 'Deprecated',
+          })}
       </EuiBadge>
     </EuiToolTip>
   );

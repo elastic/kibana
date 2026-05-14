@@ -42,14 +42,10 @@ export const ModelEOLBadge = ({ id, metadata, iconOnly }: ModelEOLBadgeProps) =>
         color="danger"
         data-test-subj={`modelEolBadge-${id}`}
       >
-        {iconOnly
-          ? null
-          : i18n.translate(
-              'xpack.searchInferenceEndpoints.eisModelCard.deprecatedEOLBadge.content',
-              {
-                defaultMessage: 'End of life',
-              }
-            )}
+        {!iconOnly &&
+          i18n.translate('xpack.searchInferenceEndpoints.eisModelCard.deprecatedEOLBadge.content', {
+            defaultMessage: 'End of life',
+          })}
       </EuiBadge>
     </EuiToolTip>
   );
