@@ -1,0 +1,9 @@
+prs:
+- https://github.com/elastic/kibana/pull/268440
+issues:
+- https://github.com/elastic/search-team/issues/14381
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-05-14
+title: Add new property to public events contract to filter events by conversation id
