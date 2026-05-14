@@ -33,11 +33,56 @@ import { useFleetStatus, useStartServices } from '../../../../../../../../hooks'
 
 import { DATASET_VAR_NAME } from '../../../../../../../../../common/constants';
 
-import type { DataStream, RegistryVarsEntry } from '../../../../../../types';
+import type { DataStream, RegistryVarsEntry, RegistryVarsMigrateFrom } from '../../../../../../types';
 
 import { MultiTextInput } from './multi_text_input';
 import { DatasetComponent } from './dataset_component';
-import { VarMigrationTooltip } from './package_policy_input_panel';
+
+const VarMigrationTooltip = ({
+  migrateFrom: migrateFromProp,
+}: {
+  migrateFrom: RegistryVarsMigrateFrom | string;
+}) => {
+  const migrateFrom: RegistryVarsMigrateFrom =
+    typeof migrateFromProp === 'string' ? { name: migrateFromProp } : migrateFromProp;
+  const { name, scope } = migrateFrom;
+  let content: string;
+  if (name && scope) {
+    content = i18n.translate(
+      'xpack.fleet.createPackagePolicy.stepConfigure.varMigratedNameAndScopeTooltip',
+      {
+        defaultMessage:
+          'This variable was previously named {name} at {scope} level. Its value was carried over from the previous package version.',
+        values: { name, scope },
+      }
+    );
+  } else if (scope) {
+    content = i18n.translate(
+      'xpack.fleet.createPackagePolicy.stepConfigure.varMigratedScopeTooltip',
+      {
+        defaultMessage:
+          'This variable was previously at {scope} level. Its value was carried over from the previous package version.',
+        values: { scope },
+      }
+    );
+  } else if (name) {
+    content = i18n.translate(
+      'xpack.fleet.createPackagePolicy.stepConfigure.varMigratedNameTooltip',
+      {
+        defaultMessage:
+          'This variable was previously named {name}. Its value was carried over from the previous package version.',
+        values: { name },
+      }
+    );
+  } else {
+    return null;
+  }
+  return (
+    <EuiFlexItem grow={false}>
+      <EuiIconTip type="info" color="subdued" content={content} />
+    </EuiFlexItem>
+  );
+};
 
 const FixedHeightDiv = styled.div`
   height: 300px;
@@ -186,13 +231,7 @@ export const PackagePolicyInputVarField: React.FunctionComponent<InputFieldProps
     ) : undefined;
     const migrationTooltip =
       isUpgrade && varDef.migrate_from ? (
-        <VarMigrationTooltip
-          migrateFrom={
-            typeof varDef.migrate_from === 'string'
-              ? { name: varDef.migrate_from }
-              : varDef.migrate_from
-          }
-        />
+        <VarMigrationTooltip migrateFrom={varDef.migrate_from} />
       ) : undefined;
     const labelAppend = isOptional ? (
       <EuiText size="xs" color="subdued">

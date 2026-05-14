@@ -286,26 +286,17 @@ export function applyStreamLevelMigration(
 }
 
 /**
- * Applies variable-level scope migration for a same-input-type upgrade. When a variable in the
- * new package schema declares `migrate_from.scope`, this function carries the old value across
- * scopes (input ↔ stream) by seeding the original input's vars in place. The subsequent
- * `deepMergeVars` + `removeStaleVars` cycle in `updatePackageInputs` then propagates the value
- * to the new scope and drops it from the old scope automatically (because the old scope is no
- * longer in the new package schema).
+ * Carries var values across scopes (input ↔ stream) for same-input-type upgrades when the new
+ * schema declares `migrate_from.scope`. Seeds the value into `originalInput` in place so the
+ * subsequent `deepMergeVars` + `removeStaleVars` cycle propagates and cleans up automatically.
  *
- * Only fires on the same-input-type path; cross-input-type migrations are handled by
- * `applyInputLevelMigration` / `applyStreamLevelMigration`.
+ * Cross-input-type migrations are handled by `applyInputLevelMigration` / `applyStreamLevelMigration`.
  *
- * Behavior:
- *  - `scope === 'stream'` on an input-level var: pulls the value from one of the old streams.
- *    When `migrate_from.stream` is set, that exact dataset is used. Otherwise the source must be
- *    a single-stream input — multi-stream inputs without an explicit `stream` field are skipped
- *    so we never silently pick an arbitrary stream's value.
- *  - `scope === 'input'` on a stream-level var: pulls the value from the old input-level vars.
- *  - `migrate_from.name` (alone or combined with `scope`): the old value is looked up under that
- *    name. Without `name`, the same identifier is used at both old and new positions.
- *  - Only writes when the new-scope var has no explicit value yet (`null`/`undefined`).
- *  - Missing source vars or streams are skipped silently — never throws.
+ * - `scope: 'stream'` on an input var: pulls from the matching old stream. `migrate_from.stream`
+ *   picks the dataset (bare name or fully-qualified); omit only when the input has exactly one stream.
+ * - `scope: 'input'` on a stream var: pulls from old input-level vars.
+ * - `migrate_from.name`: look up the old value under that key instead of the var's current name.
+ * - No-ops when the destination already has a value, or the source var/stream is missing.
  */
 export function applyVarScopeMigration(
   originalInput: NewPackagePolicyInput,
@@ -341,7 +332,7 @@ export function applyVarScopeMigration(
       const existing = originalInput.vars[varDef.name];
       if (existing?.value != null) continue;
 
-      originalInput.vars[varDef.name] = oldEntry;
+      originalInput.vars[varDef.name] = { ...oldEntry };
     }
   }
 
@@ -366,7 +357,7 @@ export function applyVarScopeMigration(
         const existing = originalStream.vars[varDef.name];
         if (existing?.value != null) continue;
 
-        originalStream.vars[varDef.name] = oldEntry;
+        originalStream.vars[varDef.name] = { ...oldEntry };
       }
     }
   }

@@ -106,6 +106,7 @@ export type {
   PackageMetadata,
   RegistrySection,
   RegistryVarsEntry,
+  RegistryVarsMigrateFrom,
   RegistryInput,
   RegistryStream,
   RegistryStreamWithDataStream,
