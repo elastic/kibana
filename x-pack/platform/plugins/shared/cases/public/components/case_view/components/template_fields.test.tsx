@@ -20,6 +20,13 @@ jest.mock('../../templates_v2/hooks/use_get_template', () => ({
   useGetTemplate: (...args: unknown[]) => mockUseGetTemplate(...args),
 }));
 
+jest.mock('../../field_library/hooks/use_resolved_fields', () => ({
+  useResolvedFields: (fields: unknown[]) => ({
+    resolvedFields: fields,
+    isLoading: false,
+  }),
+}));
+
 const mockTemplate: ParsedTemplate = {
   templateId: 'template-1',
   name: 'Test Template',

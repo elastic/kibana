@@ -6,6 +6,7 @@
  */
 
 import { useEffect, useRef } from 'react';
+import { load as parseYaml } from 'js-yaml';
 import { useFormContext, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { ParsedTemplate } from '../../../common/types/domain/template/v1';
 import { CASE_EXTENDED_FIELDS } from '../../../common/constants';
@@ -14,6 +15,13 @@ import { useParentTemplateDefinition } from '../templates_v2/hooks/use_parent_te
 import { mergeTemplateDefinitions } from '../templates_v2/utils/merge_template_definitions';
 import { getFieldSnakeKey } from '../../../common/utils';
 import { getYamlDefaultAsString } from '../templates_v2/utils';
+import {
+  FieldSchema,
+  isInlineField,
+  isRefField,
+} from '../../../common/types/domain/template/fields';
+import type { InlineField } from '../../../common/types/domain/template/fields';
+import { useGetFieldDefinitions } from '../field_library/hooks/use_get_field_definitions';
 
 interface UseTemplateFormSyncReturn {
   template: ParsedTemplate | undefined;
@@ -24,6 +32,9 @@ export const useTemplateFormSync = (): UseTemplateFormSyncReturn => {
   const { setFieldValue } = useFormContext();
   const [{ templateId }] = useFormData<{ templateId?: string }>({ watch: ['templateId'] });
   const { data: template, isLoading } = useGetTemplate(templateId || undefined);
+  const { data: fieldDefsData, isLoading: isLoadingFieldDefs } = useGetFieldDefinitions({
+    owner: template?.owner,
+  });
   const { definition: parentDefinition, isFetched: parentFetched } = useParentTemplateDefinition(
     template?.definition?.extends
   );
@@ -66,7 +77,7 @@ export const useTemplateFormSync = (): UseTemplateFormSyncReturn => {
     if (appliedRef.current === key) {
       return;
     }
-    appliedRef.current = key;
+
     const fieldMappings: Array<[string, unknown]> = [
       ['title', definition.name],
       ['description', definition.description],
@@ -81,23 +92,54 @@ export const useTemplateFormSync = (): UseTemplateFormSyncReturn => {
       }
     }
 
+    // Wait for field definitions to load before applying extended field defaults.
+    // Do NOT set appliedRef.current yet — the effect must re-run once defs are available.
+    if (isLoadingFieldDefs) return;
+
     // Merge parent fields (if `extends` is set) with the template's own fields
     const effectiveDefinition = parentDefinition
       ? mergeTemplateDefinitions(parentDefinition, definition)
       : definition;
 
-    // Apply default values for extended fields
-    const newAppliedFields: string[] = [];
-    if (effectiveDefinition.fields) {
-      for (const field of effectiveDefinition.fields) {
-        const fieldPath = `${CASE_EXTENDED_FIELDS}.${getFieldSnakeKey(field.name, field.type)}`;
-        const defaultValue = getYamlDefaultAsString(field.metadata?.default);
-        setFieldValue(fieldPath, defaultValue);
-        newAppliedFields.push(fieldPath);
+    // Resolve all fields — inline fields pass through, ref fields are looked up in the library
+    const libraryDefs = fieldDefsData?.fieldDefinitions ?? [];
+    const resolvedFields = (effectiveDefinition.fields ?? []).flatMap((field): InlineField[] => {
+      if (isInlineField(field)) return [field];
+      const fd = libraryDefs.find((d) => d.name === field.$ref);
+      if (!fd) return [];
+      try {
+        const parsed = parseYaml(fd.definition);
+        const result = FieldSchema.safeParse(parsed);
+        if (!result.success || isRefField(result.data)) return [];
+        const inlineField = result.data as InlineField;
+        return [
+          field.name && field.name !== inlineField.name
+            ? { ...inlineField, name: field.name }
+            : inlineField,
+        ];
+      } catch {
+        return [];
       }
+    });
+
+    const newAppliedFields: string[] = [];
+    for (const field of resolvedFields) {
+      const fieldPath = `${CASE_EXTENDED_FIELDS}.${getFieldSnakeKey(field.name, field.type)}`;
+      const defaultValue = getYamlDefaultAsString(field.metadata?.default);
+      setFieldValue(fieldPath, defaultValue);
+      newAppliedFields.push(fieldPath);
     }
     appliedFieldsRef.current = newAppliedFields;
-  }, [templateId, template, parentDefinition, parentFetched, setFieldValue]);
+    appliedRef.current = key;
+  }, [
+    templateId,
+    template,
+    parentDefinition,
+    parentFetched,
+    setFieldValue,
+    fieldDefsData,
+    isLoadingFieldDefs,
+  ]);
 
   return { template, isLoading };
 };

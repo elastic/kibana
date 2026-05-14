@@ -13,6 +13,7 @@ import {
   CASE_CONFIGURE_SAVED_OBJECT,
   CASE_TEMPLATE_SAVED_OBJECT,
   CASE_ATTACHMENT_SAVED_OBJECT,
+  CASE_FIELD_DEFINITION_SAVED_OBJECT,
 } from '../constants';
 
 interface CasesConfigType {
@@ -40,6 +41,7 @@ export const getSavedObjectsTypes = (config?: Partial<CasesConfigType>): string[
 
   if (config?.templates?.enabled) {
     experimentalSOs.push(CASE_TEMPLATE_SAVED_OBJECT);
+    experimentalSOs.push(CASE_FIELD_DEFINITION_SAVED_OBJECT);
   }
 
   if (config?.attachments?.enabled) {

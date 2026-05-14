@@ -6,11 +6,12 @@
  */
 
 import type { ParsedTemplate } from '../../../common/types/domain/template/v1';
+import { isInlineField } from '../../../common/types/domain/template/fields';
 
 type ParsedField = ParsedTemplate['definition']['fields'][number];
 
 export const toFieldNames = (fields: ParsedField[]) =>
-  fields.map((f) => ({
+  fields.filter(isInlineField).map((f) => ({
     name: f.name,
     label: f.label ?? f.name,
     type: f.type,

@@ -35,6 +35,13 @@ jest.mock('../templates_v2/field_types/field_types_registry', () => ({
   },
 }));
 
+jest.mock('../field_library/hooks/use_resolved_fields', () => ({
+  useResolvedFields: (fields: unknown[]) => ({
+    resolvedFields: fields,
+    isLoading: false,
+  }),
+}));
+
 describe('CreateCaseTemplateFields', () => {
   beforeEach(() => {
     jest.clearAllMocks();

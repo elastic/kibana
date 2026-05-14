@@ -382,7 +382,7 @@ export class TemplatesService {
         usageCount: currentTemplate.attributes.usageCount,
         lastUsedAt: currentTemplate.attributes.lastUsedAt,
         isEnabled: input.isEnabled ?? currentTemplate.attributes.isEnabled ?? true,
-      },
+      } as Template,
       {
         refresh: true,
       }
