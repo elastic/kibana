@@ -19,6 +19,7 @@ import type { EntityAnalyticsRoutesDeps } from '../../lib/entity_analytics/types
 import { findSecurityMlJobsSkill } from './find_security_ml_jobs';
 import { createFindRulesSkill } from './find_rules';
 import { siemReadinessSkill } from './siem_readiness';
+import { getRecommendRulesToInstallSkill } from './recommend_rules_to_install';
 
 interface RegisterSkillsOpts {
   agentBuilder: AgentBuilderPluginSetup;
@@ -56,6 +57,7 @@ export const registerSkills = async ({
   );
 
   agentBuilder.skills.register(getDetectionRuleEditSkill());
+  agentBuilder.skills.register(getRecommendRulesToInstallSkill());
   await agentBuilder.skills.register(
     findSecurityMlJobsSkill({ getStartServices, isEntityStoreV2Enabled, logger, ml })
   );
