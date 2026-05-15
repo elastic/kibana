@@ -85,7 +85,5 @@ spaceTest.describe(
         await expect(metricsExperience.chartActions.addToCase).toBeVisible();
       });
     });
-
-
   }
 );
