@@ -71,7 +71,7 @@ describe('function parameters autocomplete from hints', () => {
     expect(suggestions).toEqual(suggestionsForHint);
   });
 
-  it('hint.kind === "aggregation" suggests only aggregation and time-series-aggregation functions', async () => {
+  it('hint.kind === "aggregation" suggests only aggregation functions', async () => {
     const functionName = 'test_hint_kind_aggregation';
 
     setTestFunctions([
