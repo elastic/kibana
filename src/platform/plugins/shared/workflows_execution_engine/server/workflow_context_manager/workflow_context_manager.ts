@@ -27,8 +27,9 @@ import {
   isTemplateExpression,
 } from '@kbn/workflows-execution-engine-utils';
 import { buildWorkflowContext } from './build_workflow_context';
+import type { StepIoService } from './step_io_service';
 import type { ContextDependencies } from './types';
-import type { WorkflowExecutionState } from './workflow_execution_state';
+import type { StepExecutionMetadata, WorkflowExecutionState } from './workflow_execution_state';
 import { WorkflowScopeStack } from '@kbn/workflows-execution-engine-core';
 import type { WorkflowTemplatingEngine } from '../templating_engine';
 
@@ -37,6 +38,7 @@ export interface ContextManagerInit {
   templateEngine: WorkflowTemplatingEngine;
   workflowExecutionGraph: WorkflowGraph;
   workflowExecutionState: WorkflowExecutionState;
+  stepIoService: StepIoService;
   node: GraphNodeUnion;
   stackFrames: StackFrame[];
   // New properties for internal actions
@@ -48,7 +50,7 @@ export interface ContextManagerInit {
 
 interface ScopeEntry {
   topFrame: NonNullable<ReturnType<WorkflowScopeStack['getCurrentScope']>>;
-  stepExecution: EsWorkflowStepExecution | undefined;
+  stepExecution: StepExecutionMetadata | undefined;
 }
 
 type ContextPathSegment = string | number;
@@ -57,6 +59,7 @@ type ContextPath = ContextPathSegment[];
 export class WorkflowContextManager implements IWorkflowContextManager {
   private workflowExecutionGraph: WorkflowGraph;
   private workflowExecutionState: WorkflowExecutionState;
+  private stepIoService: StepIoService;
   private esClient: ElasticsearchClient;
   private templateEngine: WorkflowTemplatingEngine;
   private fakeRequest: KibanaRequest;
@@ -66,6 +69,21 @@ export class WorkflowContextManager implements IWorkflowContextManager {
   private stackFrames: StackFrame[];
   public readonly node: GraphNodeUnion;
 
+  /**
+   * Cached predecessors for this node. Since `node` is readonly and the graph is immutable
+   * during execution, the result of `getAllPredecessors` is constant for the lifetime of
+   * the instance. Computed once on first access to avoid redundant O(V+E) DAG traversals
+   * on every `getContext()` call (invoked 5-10x per step via renderValueAccordingToContext, etc.).
+   */
+  private predecessorsCache: GraphNodeUnion[] | undefined;
+
+  private get predecessors(): ReadonlyArray<GraphNodeUnion> {
+    if (!this.predecessorsCache) {
+      this.predecessorsCache = this.workflowExecutionGraph.getAllPredecessors(this.node.id);
+    }
+    return this.predecessorsCache;
+  }
+
   public get scopeStack(): WorkflowScopeStack {
     return WorkflowScopeStack.fromStackFrames(this.stackFrames);
   }
@@ -73,6 +91,7 @@ export class WorkflowContextManager implements IWorkflowContextManager {
   constructor(init: ContextManagerInit) {
     this.workflowExecutionGraph = init.workflowExecutionGraph;
     this.workflowExecutionState = init.workflowExecutionState;
+    this.stepIoService = init.stepIoService;
     this.esClient = init.esClient;
     this.fakeRequest = init.fakeRequest;
     this.coreStart = init.coreStart;
@@ -80,6 +99,22 @@ export class WorkflowContextManager implements IWorkflowContextManager {
     this.stackFrames = init.stackFrames;
     this.templateEngine = init.templateEngine;
     this.dependencies = init.dependencies;
+  }
+
+  /**
+   * Pre-warms the execution state by rehydrating any evicted step outputs
+   * that will be needed by `getContext()`. Must be called before `getContext()`.
+   *
+   * This exists so that `getContext()` and all its synchronous callers
+   * (`renderValueAccordingToContext`, `evaluateBooleanExpressionInContext`, etc.)
+   * remain synchronous. When nothing has been evicted, this is a no-op with
+   * zero overhead.
+   */
+  public async ensureContextReady(): Promise<void> {
+    await this.stepIoService.prepareForRead({
+      node: this.node,
+      predecessorsResolver: () => this.predecessors,
+    });
   }
 
   // Any change here should be reflected in the 'getContextSchemaForPath' function for frontend validation to work
@@ -91,11 +126,7 @@ export class WorkflowContextManager implements IWorkflowContextManager {
       variables: this.getVariables(),
     };
 
-    const currentNode = this.node;
-    const currentNodeId = currentNode.id;
-
-    const allPredecessors = this.workflowExecutionGraph.getAllPredecessors(currentNodeId);
-    allPredecessors.forEach((node) => {
+    this.predecessors.forEach((node) => {
       const stepId = node.stepId;
       const stepData = this.getStepData(stepId);
 
@@ -258,20 +289,7 @@ export class WorkflowContextManager implements IWorkflowContextManager {
    * Steps are processed in execution order to ensure consistent variable assignment.
    */
   public getVariables(): Record<string, unknown> {
-    return this.workflowExecutionState
-      .getAllStepExecutions()
-      .filter(
-        (stepExecution) =>
-          stepExecution.stepType === 'data.set' &&
-          typeof stepExecution.output === 'object' &&
-          !Array.isArray(stepExecution.output)
-      )
-      .filter((stepExecution) => stepExecution.output)
-      .sort((a, b) => a.globalExecutionIndex - b.globalExecutionIndex)
-      .reduce((acc, stepExecution) => {
-        Object.assign(acc, stepExecution.output);
-        return acc;
-      }, {});
+    return this.stepIoService.getDataSetVariables();
   }
 
   /**
@@ -563,16 +581,21 @@ export class WorkflowContextManager implements IWorkflowContextManager {
    * This avoids storing the entire items array in the step execution state on every iteration.
    */
   private buildForeachContext(
-    stepExecution: EsWorkflowStepExecution,
+    stepExecution: StepExecutionMetadata,
     stepContext: StepContext
   ): StepContext['foreach'] {
     const foreachState = stepExecution.state ?? {};
     const index = typeof foreachState.index === 'number' ? foreachState.index : 0;
     const total = typeof foreachState.total === 'number' ? foreachState.total : 0;
 
-    // Re-evaluate the foreach expression (stored in the step input at entry time)
-    // to derive the full items array and current item without persisting them in state.
-    const foreachExpression = this.extractForeachExpression(stepExecution.input);
+    // Re-evaluate the foreach expression (stored in the step input at entry
+    // time) to derive the full items array and current item without
+    // persisting them in state. Input lives in `StepIoService` (lifecycle
+    // metadata vs IO data are owned separately); a foreach is non-terminal
+    // while iterating, so its input is never evicted by post-flush input
+    // eviction — the service read is safe here.
+    const foreachInput = this.stepIoService.getStepInput(stepExecution.id);
+    const foreachExpression = this.extractForeachExpression(foreachInput);
     const items = foreachExpression
       ? this.resolveForeachItems(foreachExpression, stepContext)
       : undefined;
@@ -587,7 +610,7 @@ export class WorkflowContextManager implements IWorkflowContextManager {
     };
   }
 
-  private buildWhileContext(stepExecution: EsWorkflowStepExecution): StepContext['while'] {
+  private buildWhileContext(stepExecution: StepExecutionMetadata): StepContext['while'] {
     const whileState = stepExecution.state ?? {};
     const iteration = typeof whileState.iteration === 'number' ? whileState.iteration : 0;
     return { iteration };
@@ -646,18 +669,18 @@ export class WorkflowContextManager implements IWorkflowContextManager {
         stepState: Record<string, unknown> | undefined;
       }
     | undefined {
-    const latestStepExecution = this.workflowExecutionState.getLatestStepExecution(stepId);
-    if (!latestStepExecution) {
+    const io = this.stepIoService.getLatestStepIO(stepId);
+    if (!io) {
       return;
     }
-
+    const latestStepExecution = this.workflowExecutionState.getLatestStepExecution(stepId);
     return {
       runStepResult: {
-        input: latestStepExecution?.input,
-        output: latestStepExecution?.output,
-        error: latestStepExecution?.error,
+        input: io.input,
+        output: io.output,
+        error: io.error,
       },
-      stepState: latestStepExecution.state,
+      stepState: latestStepExecution?.state,
     };
   }
 }

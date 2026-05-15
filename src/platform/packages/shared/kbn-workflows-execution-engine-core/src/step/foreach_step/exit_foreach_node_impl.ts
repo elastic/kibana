@@ -11,9 +11,9 @@ import type { ExitForeachNode, WorkflowGraph } from '@kbn/workflows/graph';
 import type { ForeachStepState } from './types';
 import type { INodeImplementation } from '../../collaborators/node_implementation';
 import type { IStepExecutionRuntime } from '../../collaborators/step_execution_runtime';
+import type { IStepIoService } from '../../collaborators/step_io_service';
 import type { IWorkflowEventLogger } from '../../collaborators/workflow_event_logger';
 import type { IWorkflowExecutionRuntimeManager } from '../../collaborators/workflow_execution_runtime_manager';
-import type { IWorkflowExecutionState } from '../../collaborators/workflow_execution_state';
 
 export class ExitForeachNodeImpl implements INodeImplementation {
   constructor(
@@ -21,7 +21,7 @@ export class ExitForeachNodeImpl implements INodeImplementation {
     private stepExecutionRuntime: IStepExecutionRuntime,
     private wfExecutionRuntimeManager: IWorkflowExecutionRuntimeManager,
     private workflowLogger: IWorkflowEventLogger,
-    private workflowExecutionState: IWorkflowExecutionState,
+    private stepIoService: IStepIoService,
     private workflowGraph: WorkflowGraph
   ) {}
 
@@ -48,7 +48,7 @@ export class ExitForeachNodeImpl implements INodeImplementation {
       // Evict before throwing — high-iteration loops that fail at the limit
       // are precisely the scenario most likely to cause memory pressure.
       const innerStepIds = this.workflowGraph.getInnerStepIds(this.node.stepId);
-      this.workflowExecutionState.evictStaleLoopOutputs(innerStepIds);
+      this.stepIoService.evictStaleLoopOutputs(innerStepIds);
       throw new Error(
         `Foreach step "${this.node.stepId}" exceeded max-iterations limit of ${this.node.maxIterations}. ` +
           `Processed ${nextIndex} of ${foreachState.total} items.`
@@ -57,7 +57,7 @@ export class ExitForeachNodeImpl implements INodeImplementation {
 
     this.stepExecutionRuntime.finishStep();
     const innerStepIds = this.workflowGraph.getInnerStepIds(this.node.stepId);
-    this.workflowExecutionState.evictStaleLoopOutputs(innerStepIds);
+    this.stepIoService.evictStaleLoopOutputs(innerStepIds);
     this.workflowLogger.logDebug(
       `Evicted stale in-memory outputs for ${innerStepIds.size} inner step(s) of foreach "${this.node.stepId}"`,
       { workflow: { step_id: this.node.stepId } }
