@@ -63,8 +63,7 @@ export const useDeploymentStats = () => {
         storeSizeBytes: esStats?.storeSizeBytes ?? null,
         agentsCount,
         workflowsCount: workflowsResponse?.workflows
-          ? (workflowsResponse.workflows.enabled ?? 0) +
-            (workflowsResponse.workflows.disabled ?? 0)
+          ? (workflowsResponse.workflows.enabled ?? 0) + (workflowsResponse.workflows.disabled ?? 0)
           : null,
         elasticsearchUrl: esConfig?.elasticsearchUrl ?? null,
       };

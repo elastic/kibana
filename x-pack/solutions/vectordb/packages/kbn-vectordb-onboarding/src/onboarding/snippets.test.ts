@@ -40,16 +40,12 @@ describe('fillPlaceholders', () => {
 
   it('replaces both placeholders', () => {
     const snippet = `url=${URL_PLACEHOLDER} key=${API_KEY_PLACEHOLDER}`;
-    expect(fillPlaceholders(snippet, 'https://host', 'secret')).toBe(
-      'url=https://host key=secret'
-    );
+    expect(fillPlaceholders(snippet, 'https://host', 'secret')).toBe('url=https://host key=secret');
   });
 
   it('replaces all occurrences when placeholder appears more than once', () => {
     const snippet = `${URL_PLACEHOLDER} and again ${URL_PLACEHOLDER}`;
-    expect(fillPlaceholders(snippet, 'https://host')).toBe(
-      'https://host and again https://host'
-    );
+    expect(fillPlaceholders(snippet, 'https://host')).toBe('https://host and again https://host');
   });
 
   it('leaves the snippet unchanged when url is an empty string', () => {
