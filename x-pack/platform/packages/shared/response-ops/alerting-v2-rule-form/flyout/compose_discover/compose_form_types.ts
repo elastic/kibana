@@ -41,6 +41,7 @@ export function getBreachQuery(query: RuleQuery | undefined): string {
 export function getRecoverQuery(query: RuleQuery | undefined): string {
   if (!query) return '';
   if (query.format === 'standalone') return query.recover ?? '';
+  if (!query.blocks.recover) return '';
   return [query.base, query.blocks.recover].filter(Boolean).join('\n');
 }
 
