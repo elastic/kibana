@@ -6666,6 +6666,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/elastic-agent-condition-language@link:x-pack/platform/packages/shared/kbn-elastic-agent-condition-language":
+  version "0.0.0"
+  uid ""
+
 "@kbn/elastic-agent-utils@link:src/platform/packages/shared/kbn-elastic-agent-utils":
   version "0.0.0"
   uid ""
