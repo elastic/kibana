@@ -56,6 +56,20 @@ export interface RuleArtifact {
   value: string;
 }
 
+export type WorkflowFormValue = object;
+
+export interface WorkflowFormComponentProps {
+  value: WorkflowFormValue;
+  onChange: (next: WorkflowFormValue) => void;
+  isInvalid?: boolean;
+  errorMessage?: string;
+}
+
+export interface RuleNotificationsValue {
+  enabled: boolean;
+  workflow: WorkflowFormValue;
+}
+
 /**
  * State transition configuration for alert-type rules.
  */
@@ -83,4 +97,5 @@ export interface FormValues {
   stateTransitionAlertDelayMode: StateTransitionDelayMode;
   stateTransitionRecoveryDelayMode: StateTransitionDelayMode;
   artifacts?: RuleArtifact[];
+  notifications?: RuleNotificationsValue;
 }

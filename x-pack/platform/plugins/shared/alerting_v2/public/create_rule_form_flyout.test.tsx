@@ -22,6 +22,10 @@ const createMockServices = (): RuleFormServices => ({
   notifications: notificationServiceMock.createStartContract(),
   application: applicationServiceMock.createStartContract(),
   lens: lensPluginMock.createStartContract(),
+  workflowForm: {
+    Component: () => null,
+    defaultValue: () => ({}),
+  },
 });
 
 // Capture props passed to the underlying DynamicRuleFormFlyout from the package

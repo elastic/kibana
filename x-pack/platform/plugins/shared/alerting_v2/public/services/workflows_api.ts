@@ -9,6 +9,8 @@ import { CoreStart } from '@kbn/core-di-browser';
 import type { HttpFetchQuery, HttpStart } from '@kbn/core/public';
 import type { WorkflowDetailDto, WorkflowListDto, WorkflowsSearchParams } from '@kbn/workflows';
 import { inject, injectable } from 'inversify';
+import type { CreateWorkflowFormValue } from '../components/single_step_workflow_form';
+import { buildSingleStepWorkflowYaml } from '../components/single_step_workflow_form';
 
 const API_VERSION = '2023-10-31';
 
@@ -25,6 +27,13 @@ export class WorkflowsApi {
   public async searchWorkflows(params: WorkflowsSearchParams): Promise<WorkflowListDto> {
     return this.http.get<WorkflowListDto>('/api/workflows', {
       query: params as unknown as HttpFetchQuery,
+      version: API_VERSION,
+    });
+  }
+
+  public async createWorkflow(value: CreateWorkflowFormValue): Promise<{ id: string }> {
+    return this.http.post<{ id: string }>('/api/workflows/workflow', {
+      body: JSON.stringify({ yaml: buildSingleStepWorkflowYaml(value) }),
       version: API_VERSION,
     });
   }

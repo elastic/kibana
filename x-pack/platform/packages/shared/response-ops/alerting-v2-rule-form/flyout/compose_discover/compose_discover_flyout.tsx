@@ -24,7 +24,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { RuleFormServices } from '../../form/contexts/rule_form_context';
 import { RuleFormProvider } from '../../form/contexts/rule_form_context';
-import type { FormValues } from '../../form/types';
+import type { FormValues, RuleNotificationsValue } from '../../form/types';
 import { serializeFormToYaml, parseYamlToFormValues } from '../../form/utils/yaml_form_utils';
 import {
   mapRuleResponseToFormValues,
@@ -72,7 +72,10 @@ export interface ComposeDiscoverFlyoutProps {
   onClose: () => void;
   services: RuleFormServices;
   /** Called with the create payload when the user submits in create mode. */
-  onCreateRule: (payload: ReturnType<typeof mapFormValuesToCreateRequest>) => void;
+  onCreateRule: (
+    payload: ReturnType<typeof mapFormValuesToCreateRequest>,
+    notifications?: RuleNotificationsValue
+  ) => void;
   /** Called with id + update payload when the user submits in edit mode. */
   onUpdateRule?: (id: string, payload: ReturnType<typeof mapFormValuesToUpdateRequest>) => void;
   /** True while a create/update mutation is in flight. */
@@ -291,7 +294,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
 
   const handleSubmit = methods.handleSubmit((values) => {
     if (isCreate) {
-      onCreateRule(mapFormValuesToCreateRequest(values));
+      onCreateRule(mapFormValuesToCreateRequest(values), values.notifications);
     } else if (ruleId && onUpdateRule) {
       onUpdateRule(ruleId, mapFormValuesToUpdateRequest(values));
     }

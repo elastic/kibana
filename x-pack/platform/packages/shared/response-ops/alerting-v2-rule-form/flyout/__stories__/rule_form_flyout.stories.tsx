@@ -61,6 +61,10 @@ const mockServices = {
     EmbeddableComponent: () => null,
     stateHelperApi: () => ({}),
   } as any,
+  workflowForm: {
+    Component: () => null,
+    defaultValue: () => ({}),
+  },
 };
 
 const mockFormServices: RuleFormServices = {
@@ -70,6 +74,10 @@ const mockFormServices: RuleFormServices = {
   application: mockServices.application,
   notifications: mockServices.notifications,
   lens: mockServices.lens,
+  workflowForm: {
+    Component: () => null,
+    defaultValue: () => ({}),
+  },
 };
 
 // =============================================================================

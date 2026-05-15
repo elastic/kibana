@@ -48,7 +48,13 @@ export const RuleResultsPreview = () => (
   </Suspense>
 );
 
-export type { FormValues, StateTransitionDelayMode } from './types';
+export type {
+  FormValues,
+  StateTransitionDelayMode,
+  WorkflowFormValue,
+  WorkflowFormComponentProps,
+  RuleNotificationsValue,
+} from './types';
 export type { DynamicRuleFormProps } from './dynamic_rule_form';
 export type { StandaloneRuleFormProps } from './standalone_rule_form';
 export type { RuleFormServices, RuleFormMeta, RuleFormLayout } from './contexts';

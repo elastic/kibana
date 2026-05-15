@@ -55,7 +55,7 @@ export const ExistingWorkflowSelector = ({
     {
       label: i18n.translate(
         'xpack.alertingV2.singleStepWorkflow.existing.createNewWorkflowOption',
-        { defaultMessage: '+ Create new workflow' }
+        { defaultMessage: '+ Create new single-step workflow' }
       ),
       value: CREATE_NEW_OPTION_VALUE,
     },
@@ -119,7 +119,7 @@ export const ExistingWorkflowSelector = ({
         isInvalid={!!isInvalid}
         data-test-subj="singleStepWorkflowSelector"
         placeholder={i18n.translate('xpack.alertingV2.singleStepWorkflow.existing.placeholder', {
-          defaultMessage: 'Search or create a workflow',
+          defaultMessage: 'Search or create a single-step workflow',
         })}
         selectedOptions={selectedOptions}
         onSearchChange={setSearchQuery}

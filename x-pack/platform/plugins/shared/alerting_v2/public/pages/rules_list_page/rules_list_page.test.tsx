@@ -41,6 +41,10 @@ jest.mock('@kbn/core-di-browser', () => ({
     if (token === 'data' || token === 'dataViews' || token === 'lens') {
       return {};
     }
+    // Handle class-based service tokens (WorkflowsApi, ActionPoliciesApi, etc.)
+    if (typeof token === 'function') {
+      return {};
+    }
     throw new Error(`Unexpected token in useService mock: ${String(token)}`);
   },
   CoreStart: (key: string) => key,

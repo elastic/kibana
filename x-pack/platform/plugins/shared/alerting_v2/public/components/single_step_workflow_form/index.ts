@@ -17,7 +17,7 @@ export {
   getSingleStepWorkflowType,
 } from './registry';
 export type { PayloadVariable, SingleStepWorkflowType } from './registry';
-export { SingleStepWorkflowForm } from './single_step_workflow_form';
+export { SingleStepWorkflowForm, createInitialCreateValue } from './single_step_workflow_form';
 export type {
   CreateWorkflowFormValue,
   ExistingWorkflowFormValue,

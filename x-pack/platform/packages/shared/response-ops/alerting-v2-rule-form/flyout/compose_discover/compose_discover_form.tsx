@@ -29,6 +29,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
+import { NotificationsStep } from './steps/notifications_step';
 import type {
   ComposeDiscoverState,
   ComposeDiscoverAction,
@@ -472,24 +473,6 @@ function DetailsAndArtifactsStep() {
   );
 }
 
-// TODO (#268770): Notifications step — wire workflow selector and notification policy fields
-// to FormValues once the action policy API integration is in place.
-function NotificationsStep() {
-  return (
-    <EuiCallOut
-      title="Notifications configuration coming soon"
-      iconType="clock"
-      color="primary"
-      size="s"
-    >
-      <p>
-        Notification policies will be configurable here. Rules are created without notifications
-        until this step is wired.
-      </p>
-    </EuiCallOut>
-  );
-}
-
 // ── Step definitions ──────────────────────────────────────────────────────────
 
 const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
@@ -513,7 +496,7 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
   notifications: {
     id: 'notifications',
     title: 'Notifications',
-    render: () => <NotificationsStep />,
+    render: (props) => <NotificationsStep services={props.services} />,
   },
 };
 

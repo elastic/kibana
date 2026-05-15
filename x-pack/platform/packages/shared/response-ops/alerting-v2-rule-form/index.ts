@@ -60,6 +60,9 @@ export type {
   RuleFormMeta,
   RuleFormLayout,
   RuleRequestCommon,
+  WorkflowFormValue,
+  WorkflowFormComponentProps,
+  RuleNotificationsValue,
 } from './form';
 
 export type {

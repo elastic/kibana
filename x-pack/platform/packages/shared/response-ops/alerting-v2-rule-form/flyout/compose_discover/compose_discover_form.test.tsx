@@ -167,3 +167,82 @@ describe('RecoveryConditionStep', () => {
     expect(dispatch).toHaveBeenCalledWith({ type: 'OPEN_CHILD_FOR_STEP', step: state.step });
   });
 });
+
+// ── NotificationsStep rendering ───────────────────────────────────────────────
+
+const DEFAULT_WORKFLOW_VALUE = { mode: 'create' };
+
+const renderNotificationsStep = (formDefaults: Partial<FormValues> = {}) => {
+  const mockWorkflowComponent = jest.fn(
+    ({ value, onChange }: { value: object; onChange: (v: object) => void }) => (
+      <button
+        data-test-subj="mockWorkflowComponent"
+        onClick={() => onChange({ mode: 'existing', workflowId: 'wf-1' })}
+      >
+        workflow-{JSON.stringify(value)}
+      </button>
+    )
+  );
+  const services = createMockServices();
+  services.workflowForm = {
+    Component: mockWorkflowComponent as React.ComponentType<{
+      value: object;
+      onChange: (v: object) => void;
+    }>,
+    defaultValue: () => DEFAULT_WORKFLOW_VALUE,
+  };
+
+  const state = createState();
+  const dispatch = jest.fn();
+  const steps = getSteps(false);
+  const notificationsStep = steps.find((s) => s.id === 'notifications')!;
+
+  render(notificationsStep.render({ state, dispatch, services }) as React.ReactElement, {
+    wrapper: createFormWrapper(formDefaults, services, { layout: 'flyout' }),
+  });
+
+  return { mockWorkflowComponent };
+};
+
+describe('NotificationsStep', () => {
+  it('renders with toggle off by default and no workflow component', () => {
+    renderNotificationsStep();
+
+    expect(screen.getByTestId('notificationsEnableToggle')).not.toBeChecked();
+    expect(screen.queryByTestId('mockWorkflowComponent')).not.toBeInTheDocument();
+  });
+
+  it('always shows the disclaimer callout', () => {
+    renderNotificationsStep();
+
+    expect(screen.getByTestId('notificationsMoreControlCallout')).toBeInTheDocument();
+  });
+
+  it('shows workflow component when toggle is turned on', () => {
+    renderNotificationsStep();
+
+    fireEvent.click(screen.getByTestId('notificationsEnableToggle'));
+
+    expect(screen.getByTestId('mockWorkflowComponent')).toBeInTheDocument();
+  });
+
+  it('initialises workflow component with defaultValue when toggled on', () => {
+    renderNotificationsStep();
+
+    fireEvent.click(screen.getByTestId('notificationsEnableToggle'));
+
+    expect(screen.getByTestId('mockWorkflowComponent').textContent).toContain(
+      JSON.stringify(DEFAULT_WORKFLOW_VALUE)
+    );
+  });
+
+  it('hides workflow component when toggle is turned off after being on', () => {
+    renderNotificationsStep({ notifications: { enabled: true, workflow: DEFAULT_WORKFLOW_VALUE } });
+
+    expect(screen.getByTestId('mockWorkflowComponent')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('notificationsEnableToggle'));
+
+    expect(screen.queryByTestId('mockWorkflowComponent')).not.toBeInTheDocument();
+  });
+});

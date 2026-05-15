@@ -61,7 +61,18 @@ export const QuickEditRuleFlyout = ({ rule, onClose }: QuickEditRuleFlyoutProps)
   const lens = useService(PluginStart('lens')) as LensPublicStart;
 
   const ruleFormServices = useMemo(
-    () => ({ http, data, dataViews, notifications, application, lens }),
+    () => ({
+      http,
+      data,
+      dataViews,
+      notifications,
+      application,
+      lens,
+      workflowForm: {
+        Component: () => null,
+        defaultValue: () => ({}),
+      },
+    }),
     [http, data, dataViews, notifications, application, lens]
   );
 

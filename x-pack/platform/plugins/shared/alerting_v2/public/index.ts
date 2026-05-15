@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type React from 'react';
 import { ContainerModule } from 'inversify';
 import { OnSetup, PluginSetup, PluginStart, Start } from '@kbn/core-di';
 import { CoreSetup } from '@kbn/core-di-browser';
@@ -17,6 +18,7 @@ import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
+import type { WorkflowFormComponentProps } from '@kbn/alerting-v2-rule-form';
 import {
   ALERTING_V2_SECTION_ID,
   ALERTING_V2_RULES_APP_ID,
@@ -32,6 +34,10 @@ import { RulesApi } from './services/rules_api';
 import { WorkflowsApi } from './services/workflows_api';
 import { registerTriggerDefinitions } from './lib/workflow_extensions/register_trigger_definitions';
 import { setKibanaServices } from './kibana_services';
+import {
+  SingleStepWorkflowForm,
+  type ExistingWorkflowFormValue,
+} from './components/single_step_workflow_form';
 import { DynamicRuleFormFlyout } from './create_rule_form_flyout';
 import type { AlertingV2PublicStart } from './types';
 
@@ -65,6 +71,10 @@ export const module = new ContainerModule(({ bind }) => {
         lens: diContainer.get(PluginStart('lens')) as LensPublicStart,
         expressions: diContainer.get(PluginStart('expressions')) as ExpressionsStart,
         uiActions: diContainer.get(PluginStart('uiActions')) as UiActionsStart,
+        workflowForm: {
+          Component: SingleStepWorkflowForm as React.ComponentType<WorkflowFormComponentProps>,
+          defaultValue: (): ExistingWorkflowFormValue => ({ mode: 'existing', workflowId: null }),
+        },
       });
 
       const experimentalEnabled = coreStart.settings.globalClient.get<boolean>(

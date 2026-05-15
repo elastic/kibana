@@ -12,9 +12,17 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import { ComposeDiscoverFlyout } from '@kbn/alerting-v2-rule-form';
+import type { RuleFormServices, WorkflowFormComponentProps } from '@kbn/alerting-v2-rule-form';
 import type { RuleApiResponse } from '../services/rules_api';
 import { useCreateRule } from './use_create_rule';
 import { useUpdateRule } from './use_update_rule';
+import {
+  SingleStepWorkflowForm,
+  type ExistingWorkflowFormValue,
+  type SingleStepWorkflowFormValue,
+} from '../components/single_step_workflow_form';
+import { WorkflowsApi } from '../services/workflows_api';
+import { ActionPoliciesApi } from '../services/action_policies_api';
 
 interface UseComposeDiscoverFlyoutOptions {
   createSuccessRedirectPath?: string;
@@ -29,14 +37,27 @@ export const useComposeDiscoverFlyout = ({
   const data = useService(PluginStart('data')) as DataPublicPluginStart;
   const dataViews = useService(PluginStart('dataViews')) as DataViewsPublicPluginStart;
   const lens = useService(PluginStart('lens')) as LensPublicStart;
+  const workflowsApi = useService(WorkflowsApi);
+  const actionPoliciesApi = useService(ActionPoliciesApi);
 
   const [flyoutOpen, setFlyoutOpen] = useState(false);
   const [editRule, setEditRule] = useState<RuleApiResponse | null>(null);
   const historyKey = useMemo(() => Symbol('ruleAuthoring'), []);
   const createRuleMutation = useCreateRule();
   const updateRuleMutation = useUpdateRule();
-  const ruleFormServices = useMemo(
-    () => ({ http, data, dataViews, notifications, application, lens }),
+  const ruleFormServices = useMemo<RuleFormServices>(
+    () => ({
+      http,
+      data,
+      dataViews,
+      notifications,
+      application,
+      lens,
+      workflowForm: {
+        Component: SingleStepWorkflowForm as React.ComponentType<WorkflowFormComponentProps>,
+        defaultValue: (): ExistingWorkflowFormValue => ({ mode: 'existing', workflowId: null }),
+      },
+    }),
     [http, data, dataViews, notifications, application, lens]
   );
 
@@ -63,9 +84,28 @@ export const useComposeDiscoverFlyout = ({
       ruleId={editRule?.id}
       onClose={closeFlyout}
       services={ruleFormServices}
-      onCreateRule={(payload) =>
+      onCreateRule={(payload, ruleNotifications) =>
         createRuleMutation.mutate(payload, {
-          onSuccess: () => {
+          onSuccess: async (rule) => {
+            if (ruleNotifications?.enabled) {
+              const workflowValue = ruleNotifications.workflow as SingleStepWorkflowFormValue;
+              let workflowId: string;
+              if (workflowValue.mode === 'create') {
+                const created = await workflowsApi.createWorkflow(workflowValue);
+                workflowId = created.id;
+              } else {
+                workflowId = workflowValue.workflowId!;
+              }
+              await actionPoliciesApi.createActionPolicy({
+                name: `${rule.metadata.name} notifications`,
+                description: `Notifications for rule "${rule.metadata.name}"`,
+                type: 'single_rule',
+                ruleId: rule.id,
+                destinations: [{ type: 'workflow', id: workflowId }],
+                groupingMode: 'per_episode',
+                throttle: { strategy: 'on_status_change', interval: null },
+              });
+            }
             setFlyoutOpen(false);
             if (createSuccessRedirectPath) {
               application.navigateToUrl(http.basePath.prepend(createSuccessRedirectPath));

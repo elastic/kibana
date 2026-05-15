@@ -148,6 +148,10 @@ const RuleFormPageContent = ({ ruleId, initialQuery, initialValues }: RuleFormPa
       notifications,
       application,
       lens,
+      workflowForm: {
+        Component: () => null,
+        defaultValue: () => ({}),
+      },
     }),
     [http, data, dataViews, notifications, application, lens]
   );
