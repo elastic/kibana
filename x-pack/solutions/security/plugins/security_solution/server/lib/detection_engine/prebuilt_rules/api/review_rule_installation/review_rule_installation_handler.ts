@@ -229,7 +229,7 @@ async function fetchStats({
   };
 }
 
-async function getInstallableRuleVersions(
+export async function getInstallableRuleVersions(
   ruleAssetsClient: IPrebuiltRuleAssetsClient,
   logger: Logger,
   mlAuthz: MlAuthz,
