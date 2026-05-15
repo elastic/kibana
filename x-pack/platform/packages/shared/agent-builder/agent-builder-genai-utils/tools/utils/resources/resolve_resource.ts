@@ -5,12 +5,15 @@
  * 2.0.
  */
 
-import type { IndicesResolveIndexResponse } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  IndicesGetDataStreamResponse,
+  IndicesResolveIndexResponse,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { isNotFoundError } from '@kbn/es-errors';
 import { EsResourceType } from '@kbn/agent-builder-common';
 import type { MappingField } from '../mappings';
-import { flattenMapping, getIndexMappings, getDataStreamMappings } from '../mappings';
+import { flattenMapping, getIndexMappings } from '../mappings';
 import { processFieldCapsResponse } from '../field_caps';
 import { isCcsTarget, getFieldsFromFieldCaps } from '../ccs';
 
@@ -69,6 +72,14 @@ const getDataStream = async ({
   esClient: ElasticsearchClient;
 }) => {
   return esClient.indices.getDataStream({ name: datastreamName });
+};
+
+/**
+ * Returns true when the data stream is a time-series data stream
+ * (i.e. its backing indices run in `index.mode: time_series`).
+ */
+const isTimeseriesDataStream = (definition: IndicesGetDataStreamResponse): boolean => {
+  return definition.data_streams[0]?.indices?.[0]?.index_mode === 'time_series';
 };
 /**
  * Retrieve the field list and other relevant info from the given resource name (index, alias or datastream)
@@ -206,8 +217,9 @@ const resolveSingleResource = async ({
   if (resolveRes.data_streams.length > 0) {
     const datastream = resolveRes.data_streams[0].name;
 
-    // CCS fallback: the _data_stream/_mappings API does not support remote data streams,
-    // so we use the CCS-compatible _field_caps API instead.
+    // CCS fallback: _data_stream APIs (both /_mappings and the data stream definition)
+    // do not support remote data streams, so we use the CCS-compatible _field_caps API
+    // and fall back to the heuristic isTsdb check.
     // Trade-off: _meta.description is not available via _field_caps.
     if (isCcsTarget(resourceName)) {
       const fields = await getFieldsFromFieldCaps({ resource: datastream, esClient });
@@ -219,27 +231,15 @@ const resolveSingleResource = async ({
       };
     }
 
-    const [mappingRes, dataStreamRes] = await Promise.all([
-      getDataStreamMappings({
-        datastreams: [datastream],
-        esClient,
-        cleanup: true,
-      }),
+    const [fields, dataStreamRes] = await Promise.all([
+      getFieldsFromFieldCaps({ resource: datastream, esClient }),
       getDataStream({ datastreamName: datastream, esClient }),
     ]);
-    const mappings = mappingRes[datastream].mappings;
-    const fields = flattenMapping(mappings);
-    // `index_mode` may not yet be in the published TS types; cast as a safety net.
-    const firstBackingIndex = dataStreamRes.data_streams[0]?.indices?.[0] as
-      | { index_mode?: string }
-      | undefined;
-    const isTsdb = firstBackingIndex?.index_mode === 'time_series';
     return {
       name: resourceName,
       type: EsResourceType.dataStream,
       fields,
-      description: mappings._meta?.description,
-      isTsdb,
+      isTsdb: isTimeseriesDataStream(dataStreamRes),
     };
   }
   // target is an alias

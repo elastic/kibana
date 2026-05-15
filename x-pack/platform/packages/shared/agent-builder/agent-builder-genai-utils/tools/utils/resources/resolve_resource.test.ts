@@ -497,15 +497,12 @@ describe('resolveResource', () => {
           },
         ],
       });
-      // Mapping fetch for data streams goes through transport.request today.
-      esClient.transport.request.mockResolvedValue({
-        data_streams: [
-          {
-            name: 'metrics-host',
-            effective_mappings: { properties: { '@timestamp': { type: 'date' } } },
-          },
-        ],
-      } as any);
+      // Fields come from _field_caps now (avoids template-level effective_mappings
+      // which would miss dynamically added fields).
+      esClient.fieldCaps.mockResolvedValue({
+        indices: ['.ds-metrics-host-001'],
+        fields: { '@timestamp': { date: { type: 'date', searchable: true, aggregatable: true } } },
+      });
       esClient.indices.getDataStream.mockResolvedValue({
         data_streams: [
           {
@@ -518,6 +515,7 @@ describe('resolveResource', () => {
       const result = await resolveResource({ resourceName: 'metrics-host', esClient });
 
       expect(esClient.indices.getDataStream).toHaveBeenCalledWith({ name: 'metrics-host' });
+      expect(esClient.fieldCaps).toHaveBeenCalledWith({ index: 'metrics-host', fields: ['*'] });
       expect(result.isTsdb).toBe(true);
     });
 
@@ -533,18 +531,19 @@ describe('resolveResource', () => {
           },
         ],
       });
-      esClient.transport.request.mockResolvedValue({
-        data_streams: [
-          {
-            name: 'logs-app',
-            effective_mappings: {
-              properties: {
-                'agent.name': { type: 'keyword', time_series_dimension: true },
-              },
+      esClient.fieldCaps.mockResolvedValue({
+        indices: ['.ds-logs-app-001'],
+        fields: {
+          'agent.name': {
+            keyword: {
+              type: 'keyword',
+              searchable: true,
+              aggregatable: true,
+              time_series_dimension: true,
             },
           },
-        ],
-      } as any);
+        },
+      });
       esClient.indices.getDataStream.mockResolvedValue({
         data_streams: [
           {
@@ -566,9 +565,10 @@ describe('resolveResource', () => {
           { name: 'plain-ds', backing_indices: ['.ds-plain-001'], timestamp_field: '@timestamp' },
         ],
       });
-      esClient.transport.request.mockResolvedValue({
-        data_streams: [{ name: 'plain-ds', effective_mappings: { properties: {} } }],
-      } as any);
+      esClient.fieldCaps.mockResolvedValue({
+        indices: ['.ds-plain-001'],
+        fields: {},
+      });
       esClient.indices.getDataStream.mockResolvedValue({
         data_streams: [{ name: 'plain-ds', indices: [{ index_name: '.ds-plain-001' }] }],
       } as any);
