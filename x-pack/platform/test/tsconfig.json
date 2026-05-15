@@ -21,7 +21,8 @@
     "../../../src/platform/packages/shared/kbn-test/types/ftr_globals/**/*",
     "../../*.json",
     "./api_integration/apis/telemetry/fixtures/*.json",
-    "./monitoring_api_integration/fixtures/**/*.json"
+    "./monitoring_api_integration/fixtures/**/*.json",
+    "./plugin_api_integration/test_suites/event_log/fixtures/*.json"
   ],
   "exclude": ["target/**/*", "*/plugins/**/*", "*/packages/**/*", "*/*/packages/**/*"],
   "kbn_references": [
