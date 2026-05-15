@@ -422,9 +422,7 @@ describe('validate_email_address', () => {
     });
 
     test('rejects group address with invalid local part in a member', () => {
-      const result = validateEmailAddresses(null, [
-        'Team: -alice@example.com, bob@example.com;',
-      ]);
+      const result = validateEmailAddresses(null, ['Team: -alice@example.com, bob@example.com;']);
       expect(result).toEqual([
         {
           address: 'Team: -alice@example.com, bob@example.com;',
@@ -435,9 +433,7 @@ describe('validate_email_address', () => {
     });
 
     test('rejects group address with invalid domain in a member', () => {
-      const result = validateEmailAddresses(null, [
-        'Team: alice@-example.com, bob@example.com;',
-      ]);
+      const result = validateEmailAddresses(null, ['Team: alice@-example.com, bob@example.com;']);
       expect(result).toEqual([
         {
           address: 'Team: alice@-example.com, bob@example.com;',
@@ -448,9 +444,7 @@ describe('validate_email_address', () => {
     });
 
     test('accepts group address when all members are valid', () => {
-      const result = validateEmailAddresses(null, [
-        'Team: alice@example.com, bob@example.com;',
-      ]);
+      const result = validateEmailAddresses(null, ['Team: alice@example.com, bob@example.com;']);
       expect(result).toEqual([
         { address: 'Team: alice@example.com, bob@example.com;', valid: true },
       ]);
