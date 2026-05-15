@@ -83,6 +83,7 @@ export class AgentBuilderWorkflowsPlugin
     const platformTools: Array<BuiltinToolDefinition<any>> = [
       getWorkflowExecutionStatusTool({ workflowsManagement }),
       resumeWorkflowExecutionTool({ workflowsManagement }),
+      listWorkflowExecutionsTool({ workflowsManagement }),
       generateWorkflowTool({ workflowsManagement }),
     ];
     platformTools.forEach((tool) => agentBuilder.tools.register(tool));
