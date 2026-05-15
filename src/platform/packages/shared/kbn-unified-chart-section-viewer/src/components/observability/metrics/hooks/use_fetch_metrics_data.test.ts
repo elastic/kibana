@@ -670,8 +670,6 @@ describe('useFetchMetricsData', () => {
       });
 
       expect(mockApmCaptureError).toHaveBeenCalledTimes(1);
-      // The error is reported with centralised labels so it can be filtered
-      // in APM independently of generic Discover errors (PR #268782 review).
       expect(mockApmCaptureError).toHaveBeenCalledWith(fetchError, {
         labels: {
           kibana_section: 'metrics',

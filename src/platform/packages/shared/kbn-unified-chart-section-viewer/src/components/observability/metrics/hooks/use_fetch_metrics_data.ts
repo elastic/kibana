@@ -133,10 +133,6 @@ export function useFetchMetricsData({
         // the platform's data plugin. Real failures go to APM via
         // `apm.captureError` (matching the pattern adopted in #265380), and
         // we re-throw so MetricsInfoError still renders via useAsyncFn's error.
-        //
-        // Labels are produced by `getMetricsApmLabels` — the same vocabulary
-        // (`action` / `name`) used for the request's execution context page
-        // label, so APM filters line up across requests and errors.
         if (!signal.aborted && !isSuppressedFetchError(err) && err instanceof Error) {
           apm.captureError(err, {
             labels: getMetricsApmLabels(
