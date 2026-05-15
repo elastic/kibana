@@ -492,7 +492,6 @@ src/platform/packages/shared/home/sample_data_types @elastic/appex-sharedux
 src/platform/packages/shared/kbn-actions-types @elastic/response-ops
 src/platform/packages/shared/kbn-actions-utils @elastic/response-ops
 src/platform/packages/shared/kbn-aiops-utils @elastic/ml-ui
-src/platform/packages/shared/kbn-change-point-chart-viewer @elastic/ml-ui
 src/platform/packages/shared/kbn-alerting-types @elastic/response-ops
 src/platform/packages/shared/kbn-alerts-as-data-utils @elastic/response-ops
 src/platform/packages/shared/kbn-alerts-ui-shared @elastic/response-ops
@@ -514,6 +513,7 @@ src/platform/packages/shared/kbn-calculate-width-from-char-count @elastic/kibana
 src/platform/packages/shared/kbn-cases-components @elastic/kibana-cases
 src/platform/packages/shared/kbn-cbor @elastic/kibana-operations
 src/platform/packages/shared/kbn-cell-actions @elastic/security-threat-hunting
+src/platform/packages/shared/kbn-change-point-chart-viewer @elastic/ml-ui
 src/platform/packages/shared/kbn-chart-icons @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-charts-theme @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-cleanup-before-exit @elastic/observability-ui
