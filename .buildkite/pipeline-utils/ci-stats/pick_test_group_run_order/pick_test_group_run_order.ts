@@ -20,7 +20,7 @@ import { AGENT_DISK_GIB, DURATION_PERCENTILE, STEP_KEYS } from './const';
 import { loadRunOrderConfig } from './env_config';
 import { getEnabledFtrConfigs } from './ftr_manifests';
 import { discoverJestIntegrationConfigs, discoverJestUnitConfigs } from './jest_configs';
-import { getRunGroup, getRunGroups } from './run_groups';
+import { getRunGroup, getRunGroups, labelJestSubgroups } from './run_groups';
 import { isScoutTestsOnlyDiff } from './selective_scout';
 import {
   filterJestIntegrationConfigsByAffected,
@@ -111,6 +111,8 @@ export async function pickTestGroupRunOrder() {
 
   const unit = getRunGroup(bk, types, config.unitType);
   const integration = getRunGroup(bk, types, config.integrationType);
+  labelJestSubgroups(unit, config.unitType);
+  labelJestSubgroups(integration, config.integrationType);
 
   const { functionalGroups, ftrRunOrder } = ftrConfigsByQueue.size
     ? collectFunctionalGroups(getRunGroups(bk, types, config.functionalType), defaultQueue)

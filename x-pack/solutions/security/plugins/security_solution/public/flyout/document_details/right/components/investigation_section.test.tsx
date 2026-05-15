@@ -11,17 +11,17 @@ import {
   INVESTIGATION_SECTION_CONTENT_TEST_ID,
   INVESTIGATION_SECTION_HEADER_TEST_ID,
 } from './test_ids';
-import { INVESTIGATION_GUIDE_TEST_ID } from '../../../../flyout_v2/document/components/test_ids';
+import { INVESTIGATION_GUIDE_TEST_ID } from '../../../../flyout_v2/document/main/components/test_ids';
 import { DocumentDetailsContext } from '../../shared/context';
 import { InvestigationSection } from './investigation_section';
 import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
 import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
 import { mockContextValue } from '../../shared/mocks/mock_context';
 import { useExpandSection } from '../../../../flyout_v2/shared/hooks/use_expand_section';
-import { useHighlightedFields } from '../../../../flyout_v2/document/hooks/use_highlighted_fields';
-import { useRuleDetails } from '../../../../flyout_v2/rule/hooks/use_rule_details';
+import { useHighlightedFields } from '../../../../flyout_v2/document/main/hooks/use_highlighted_fields';
+import { useRuleDetails } from '../../../../flyout_v2/rule/main/hooks/use_rule_details';
 import type { RuleResponse } from '../../../../../common/api/detection_engine';
-import { useHighlightedFieldsPrivilege } from '../../../../flyout_v2/document/hooks/use_highlighted_fields_privilege';
+import { useHighlightedFieldsPrivilege } from '../../../../flyout_v2/document/main/hooks/use_highlighted_fields_privilege';
 import type { UseBasicDataFromDetailsDataResult } from '../../shared/hooks/use_basic_data_from_details_data';
 import { useBasicDataFromDetailsData } from '../../shared/hooks/use_basic_data_from_details_data';
 import { useRuleWithFallback } from '../../../../detection_engine/rule_management/logic/use_rule_with_fallback';
@@ -50,10 +50,10 @@ jest.mock('../../../entity_details/shared/hooks/use_entity_from_store');
 jest.mock('../../../../flyout_v2/shared/hooks/use_expand_section', () => ({
   useExpandSection: jest.fn(),
 }));
-jest.mock('../../../../flyout_v2/document/hooks/use_highlighted_fields');
+jest.mock('../../../../flyout_v2/document/main/hooks/use_highlighted_fields');
 jest.mock('../../../../common/hooks/use_experimental_features');
-jest.mock('../../../../flyout_v2/rule/hooks/use_rule_details');
-jest.mock('../../../../flyout_v2/document/hooks/use_highlighted_fields_privilege');
+jest.mock('../../../../flyout_v2/rule/main/hooks/use_rule_details');
+jest.mock('../../../../flyout_v2/document/main/hooks/use_highlighted_fields_privilege');
 jest.mock('../../shared/hooks/use_basic_data_from_details_data');
 jest.mock('../../../../detection_engine/rule_management/logic/use_rule_with_fallback');
 jest.mock('../../shared/hooks/use_navigate_to_left_panel', () => ({

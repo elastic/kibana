@@ -513,7 +513,14 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
 
     import('./components/alerting/rule_types/register_apm_rule_types').then(
       ({ registerApmRuleTypes }) => {
-        registerApmRuleTypes(observabilityRuleTypeRegistry, core as ApmCoreSetup);
+        registerApmRuleTypes(observabilityRuleTypeRegistry, core as ApmCoreSetup, {
+          coreSetup: core,
+          pluginsSetup: plugins,
+          config,
+          kibanaEnvironment,
+          observabilityRuleTypeRegistry,
+          telemetry,
+        });
       }
     );
     registerEmbeddables({

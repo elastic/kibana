@@ -1,0 +1,15 @@
+﻿prs:
+- https://github.com/elastic/kibana/pull/266185
+type: bug-fix
+products:
+- product: cloud-serverless
+  target: 2026-05-06
+title: Fix the time filter component in Discover and Dashboards
+description: >-
+  - The input now shows a blinking cursor on focus, instead of selected text.
+
+  - The input placeholder is prefixed with "Type" to make its purpose clearer.
+
+  - The popover panel height now adapts correctly in small viewports.
+
+  - A calendar icon has been added to the control.
