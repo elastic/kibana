@@ -37,12 +37,12 @@ const transferSourceEdits = (
 
   const sourceFingerprints = new Map<Element, string>();
   for (const el of allSource) {
-    sourceFingerprints.set(el, buildFingerprint(el));
+    sourceFingerprints.set(el, buildTreeFingerprint(el));
   }
 
   const targetByFingerprint = new Map<string, Element[]>();
   for (const el of allTarget) {
-    const key = buildFingerprint(el);
+    const key = buildTreeFingerprint(el);
     const list = targetByFingerprint.get(key);
     if (list) {
       list.push(el);
@@ -101,7 +101,7 @@ const transferSourceEdits = (
  * siblings — more resilient than flat index when React re-renders change
  * child counts (e.g. toggling a switch).
  */
-const buildFingerprint = (el: Element): string => {
+const buildTreeFingerprint = (el: Element): string => {
   const parent = el.parentElement;
   let positionIndex = 0;
   if (parent) {
@@ -126,7 +126,7 @@ const transferDomEdits = (source: HTMLElement, target: HTMLElement): void => {
   const targetEls = target.querySelectorAll<HTMLElement>('*');
   const targetMap = new Map<string, HTMLElement[]>();
   for (const tgt of targetEls) {
-    const key = buildFingerprint(tgt);
+    const key = buildTreeFingerprint(tgt);
     const list = targetMap.get(key);
     if (list) {
       list.push(tgt);
@@ -142,7 +142,7 @@ const transferDomEdits = (source: HTMLElement, target: HTMLElement): void => {
   for (const src of sourceEls) {
     if (src.style.length === 0 && !hasModifiedTextNodes(src)) continue;
 
-    const key = buildFingerprint(src);
+    const key = buildTreeFingerprint(src);
     const targets = targetMap.get(key);
     if (!targets) continue;
 
@@ -191,6 +191,24 @@ const hasModifiedTextNodes = (el: HTMLElement): boolean => {
  * React attaches `__reactContainer$<hash>` to the container. Due to
  * double-buffering the stored fiber may be the pre-commit tree; the
  * committed tree with actual components lives on `alternate` in that case.
+ *
+ * **WARNING — React Fiber Internals**
+ *
+ * The functions below (`getRootFiber`, `collectComponentFibers`,
+ * `readHookValues`, `snapshotComponentState`, `restoreComponentState`)
+ * depend on undocumented React fiber internals (`__reactContainer$`,
+ * `memoizedState`, `tag`, `alternate`, `queue.dispatch`). These are
+ * implementation details of React's reconciler and:
+ *
+ * 1. **Will break on React major upgrades** (and possibly minors).
+ * 2. `flushSync` + dispatching into foreign fibers' hook dispatchers
+ *    can corrupt React's reconciler state if a concurrent render is
+ *    in progress.
+ *
+ * All call sites are wrapped in `try/catch` and gracefully degrade —
+ * duplicates still work without state transfer, they just start with
+ * default state. If React's fiber structure changes, these functions
+ * will silently return `undefined` / bail out.
  */
 const getRootFiber = (el: Element): Record<string, unknown> | null => {
   const props = Object.keys(el);
@@ -252,6 +270,8 @@ const readHookValues = (fiber: Record<string, unknown>): unknown[] => {
  *
  * Store the result on `ElementSession.componentState` so it survives
  * across duplicates without needing to re-read fibers.
+ *
+ * See the warning on `getRootFiber` about React fiber internals risk.
  */
 export const snapshotComponentState = (el: HTMLElement): unknown[][] | undefined => {
   try {
@@ -272,6 +292,8 @@ export const snapshotComponentState = (el: HTMLElement): unknown[][] | undefined
  * live element. Dispatches differ values into the target's hook setters
  * inside `flushSync`, with CSS transitions suppressed so there's no
  * visible animation (the duplicate should appear already in the right state).
+ *
+ * See the warning on `getRootFiber` about React fiber internals risk.
  */
 export const restoreComponentState = async (
   el: HTMLElement,
@@ -392,7 +414,11 @@ export const createDuplicate = async (
 
     // Replay source edits (icon changes, etc.) from the source session.
     if (existingSession?.sourceEdits.length) {
-      transferredSourceEdits = transferSourceEdits(existingSession.sourceEdits, sourceEl, duplicate);
+      transferredSourceEdits = transferSourceEdits(
+        existingSession.sourceEdits,
+        sourceEl,
+        duplicate
+      );
     }
 
     // Restore the snapshotted state (with transitions suppressed).

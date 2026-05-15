@@ -60,6 +60,7 @@ export const useInteractionMachine = (options: InteractionMachineOptions) => {
   const interaction = useRef<InteractionState>(IDLE);
 
   const { registry, hoverTargetRef, stickyHover, roundedTargets, rafId, effects } = options;
+  const { cloneZIndex, isInsideHoverLock } = options;
 
   /** Read the current interaction state (ref value). */
   const getState = useCallback((): InteractionState => interaction.current, []);
@@ -136,7 +137,7 @@ export const useInteractionMachine = (options: InteractionMachineOptions) => {
               interaction.current = startDragFromElement(
                 state.target,
                 registry.current,
-                options.cloneZIndex,
+                cloneZIndex,
                 state.startX,
                 state.startY
               );
@@ -176,7 +177,7 @@ export const useInteractionMachine = (options: InteractionMachineOptions) => {
               event.clientX,
               event.clientY,
               currentHover,
-              options.isInsideHoverLock,
+              isInsideHoverLock,
               currentHover ? roundedTargets.current.has(currentHover) : false
             );
 
@@ -197,7 +198,7 @@ export const useInteractionMachine = (options: InteractionMachineOptions) => {
             // When locked in hover-lock zone with no handle, show grab cursor
             if (
               resolution.target === currentHover &&
-              options.isInsideHoverLock(event.clientX, event.clientY)
+              isInsideHoverLock(event.clientX, event.clientY)
             ) {
               effects.setCursor('grab');
               return;
@@ -215,7 +216,7 @@ export const useInteractionMachine = (options: InteractionMachineOptions) => {
         }
       });
     },
-    [registry, hoverTargetRef, stickyHover, roundedTargets, rafId, effects, options]
+    [registry, hoverTargetRef, stickyHover, roundedTargets, rafId, effects, cloneZIndex, isInsideHoverLock]
   );
 
   /**
@@ -244,7 +245,7 @@ export const useInteractionMachine = (options: InteractionMachineOptions) => {
           const dragState = startDragFromElement(
             state.target,
             registry.current,
-            options.cloneZIndex,
+            cloneZIndex,
             event.clientX,
             event.clientY
           );
@@ -279,7 +280,7 @@ export const useInteractionMachine = (options: InteractionMachineOptions) => {
       effects.setCursor('grab');
       effects.notifyCount();
     },
-    [registry, effects, parkInteraction, options.cloneZIndex]
+    [registry, effects, parkInteraction, cloneZIndex]
   );
 
   /**

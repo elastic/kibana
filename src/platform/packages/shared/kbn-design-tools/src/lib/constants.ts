@@ -106,6 +106,15 @@ export const DUPLICATE_OFFSET = 20;
 /** Minimum border-radius (px) to consider an element "rounded". */
 export const ROUNDING_THRESHOLD = 4;
 
+/** Maximum number of transactions kept in the undo/redo history stack. */
+export const MAX_UNDO_ENTRIES = 500;
+
+/**
+ * Fallback z-index used when importing/restoring elements outside of a
+ * React context (where `useOverlayZIndex` is unavailable).
+ */
+export const IMPORT_CLONE_Z_INDEX = 9001;
+
 /** Width (px) of the edge zone where dead-zone compensation applies. */
 export const EDGE_ZONE = 16;
 

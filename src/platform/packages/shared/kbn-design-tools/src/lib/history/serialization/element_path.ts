@@ -93,7 +93,7 @@ export const buildRelativeSelector = (root: Element, descendant: Element): strin
  * characters to keep paths compact while remaining unique enough for
  * structural comparison.
  */
-const buildFingerprint = (el: Element): string => {
+const buildContentFingerprint = (el: Element): string => {
   const tag = el.tagName;
   const rawClass = typeof el.className === 'string' ? el.className : String(el.className ?? '');
   const classSnippet = rawClass.slice(0, 80);
@@ -109,7 +109,7 @@ const buildFingerprint = (el: Element): string => {
  */
 export const toPath = (el: Element): ElementPath => ({
   selector: buildSelector(el),
-  fingerprint: buildFingerprint(el),
+  fingerprint: buildContentFingerprint(el),
 });
 
 /**
@@ -143,7 +143,7 @@ export const fromPath = (path: ElementPath): ResolveResult => {
   if (!element) {
     return { element: null, fingerprintMatch: false };
   }
-  const currentFingerprint = buildFingerprint(element);
+  const currentFingerprint = buildContentFingerprint(element);
   return {
     element,
     fingerprintMatch: currentFingerprint === path.fingerprint,

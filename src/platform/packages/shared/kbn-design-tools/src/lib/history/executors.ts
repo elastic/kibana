@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ElementRegistry, StyleEdit, TextEdit, SourceEdit } from '../dom/element_registry';
+import type { ElementRegistry } from '../dom/element_registry';
 import { revertEdits } from '../dom/element_registry';
 import { setImportant } from '../dom/clone_element';
 import { buildTransform } from '../dom/resize_helpers';
@@ -21,6 +21,7 @@ import type {
   DuplicateTransaction,
   DeleteTransaction,
   CloneTransaction,
+  ElementSessionSnapshot,
 } from './transaction';
 
 /**
@@ -34,6 +35,21 @@ export interface TransactionExecutor<T extends Transaction> {
   /** Reverse the transaction's effect (undo). */
   reverse(tx: T, registry: ElementRegistry): void;
 }
+
+/**
+ * Re-insert an element at its snapshotted DOM position.
+ *
+ * If `nextSibling` has been reparented (e.g. by a React re-render)
+ * since the snapshot was taken, falls back to `appendChild`.
+ */
+const insertAtSnapshot = (element: HTMLElement, snapshot: ElementSessionSnapshot): void => {
+  const { parentNode, nextSibling } = snapshot;
+  if (nextSibling && nextSibling.parentNode === parentNode) {
+    parentNode.insertBefore(element, nextSibling);
+  } else {
+    parentNode.appendChild(element);
+  }
+};
 
 /**
  * Rebuild the CSS transform on a managed element from its session's
@@ -179,9 +195,9 @@ export const editExecutor: TransactionExecutor<EditTransaction> = {
 
   reverse(tx) {
     revertEdits(
-      tx.undoRecords.styleEdits as StyleEdit[],
-      tx.undoRecords.textEdits as TextEdit[],
-      tx.undoRecords.sourceEdits as SourceEdit[]
+      tx.undoRecords.styleEdits,
+      tx.undoRecords.textEdits,
+      tx.undoRecords.sourceEdits
     );
   },
 };
@@ -197,12 +213,7 @@ export const editExecutor: TransactionExecutor<EditTransaction> = {
 export const duplicateExecutor: TransactionExecutor<DuplicateTransaction> = {
   apply(tx, registry) {
     const { sessionSnapshot } = tx;
-    const { parentNode, nextSibling } = sessionSnapshot;
-    if (nextSibling && nextSibling.parentNode === parentNode) {
-      parentNode.insertBefore(tx.element, nextSibling);
-    } else {
-      parentNode.appendChild(tx.element);
-    }
+    insertAtSnapshot(tx.element, sessionSnapshot);
     registry.set(restoreSession(sessionSnapshot));
   },
 
@@ -243,12 +254,7 @@ export const deleteExecutor: TransactionExecutor<DeleteTransaction> = {
 
   reverse(tx, registry) {
     if (tx.sessionSnapshot) {
-      const { parentNode, nextSibling } = tx.sessionSnapshot;
-      if (nextSibling && nextSibling.parentNode === parentNode) {
-        parentNode.insertBefore(tx.element, nextSibling);
-      } else {
-        parentNode.appendChild(tx.element);
-      }
+      insertAtSnapshot(tx.element, tx.sessionSnapshot);
       registry.set(restoreSession(tx.sessionSnapshot));
     } else if (tx.originalStyles) {
       tx.element.style.transform = tx.originalStyles.transform;
@@ -273,12 +279,7 @@ export const deleteExecutor: TransactionExecutor<DeleteTransaction> = {
 export const cloneExecutor: TransactionExecutor<CloneTransaction> = {
   apply(tx, registry) {
     const { sessionSnapshot, referenceEl } = tx;
-    const { parentNode, nextSibling } = sessionSnapshot;
-    if (nextSibling && nextSibling.parentNode === parentNode) {
-      parentNode.insertBefore(tx.element, nextSibling);
-    } else {
-      parentNode.appendChild(tx.element);
-    }
+    insertAtSnapshot(tx.element, sessionSnapshot);
     registry.set(restoreSession(sessionSnapshot));
 
     const originalTransform = referenceEl.style.transform || '';

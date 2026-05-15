@@ -92,11 +92,13 @@ export interface EditTransaction extends TransactionBase {
   /**
    * Original-value records created during forward application.
    * Used by the edit executor to reverse the changes on undo.
+   * Mutable: the executor pushes entries during `apply` and clears
+   * them during `reverse`.
    */
   readonly undoRecords: {
-    readonly styleEdits: StyleEdit[];
-    readonly textEdits: TextEdit[];
-    readonly sourceEdits: SourceEdit[];
+    styleEdits: StyleEdit[];
+    textEdits: TextEdit[];
+    sourceEdits: SourceEdit[];
   };
 }
 

@@ -8,6 +8,7 @@
  */
 
 import type { Transaction, TransactionInput } from './transaction';
+import { MAX_UNDO_ENTRIES } from '../constants';
 
 /**
  * Snapshot of the stack's observable state. Consumed by the React bridge
@@ -83,6 +84,10 @@ export class UndoRedoStack {
       timestamp: Date.now(),
     } as Transaction;
     this.undoEntries.push(tx);
+    // Drop the oldest entries when the stack exceeds the limit.
+    while (this.undoEntries.length > MAX_UNDO_ENTRIES) {
+      this.undoEntries.shift();
+    }
     this.redoEntries.length = 0;
     this.notify();
     return tx;

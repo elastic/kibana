@@ -14,7 +14,11 @@ import type { ElementPath } from './element_path';
 import { buildTransform } from '../../dom/resize_helpers';
 import { setImportant } from '../../dom/clone_element';
 import { cloneElement } from '../../dom/clone_element';
-import { DEVTOOL_HIDDEN_ATTR, DEVTOOL_LIBRARY_ID_ATTR } from '../../constants';
+import {
+  DEVTOOL_HIDDEN_ATTR,
+  DEVTOOL_LIBRARY_ID_ATTR,
+  IMPORT_CLONE_Z_INDEX,
+} from '../../constants';
 import { EUI_LIBRARY } from '../../../components/edit/library';
 import { renderEuiComponentLive } from '../../dom/insert_element';
 import { readStateAttributes } from '../../../components/edit/library/serializable_state';
@@ -289,6 +293,20 @@ const sanitizeHTML = (html: string): string =>
     FORBID_TAGS: ['script', 'iframe', 'object', 'embed'],
   });
 
+/**
+ * Sanitize inline CSS text to prevent script execution.
+ *
+ * Applies the styles to a detached element and reads them back via
+ * `style.cssText` — the browser's CSS parser rejects any non-standard
+ * constructs (e.g. `expression()`, `behavior:`, `javascript:`,
+ * `-moz-binding:`) without needing fragile regex patterns.
+ */
+const sanitizeInlineStyles = (raw: string): string => {
+  const scratch = document.createElement('div');
+  scratch.style.cssText = raw;
+  return scratch.style.cssText;
+};
+
 const recreateFromOuterHTML = (
   exported: ExportedSession,
   warnings: string[]
@@ -306,14 +324,7 @@ const recreateFromOuterHTML = (
   }
   const adopted = document.adoptNode(recreated);
   if (exported.inlineStyles) {
-    // Sanitize inline styles: strip CSS expressions and behavior URLs
-    // that could execute scripts in legacy or non-standard engines.
-    const safeStyles = exported.inlineStyles
-      .replace(/expression\s*\(/gi, '')
-      .replace(/behavior\s*:/gi, '')
-      .replace(/javascript\s*:/gi, '')
-      .replace(/-moz-binding\s*:/gi, '');
-    adopted.style.cssText = safeStyles;
+    adopted.style.cssText = sanitizeInlineStyles(exported.inlineStyles);
   }
   adopted.style.pointerEvents = 'auto';
   document.body.appendChild(adopted);
@@ -379,7 +390,7 @@ export const importState = async (
         try {
           const live = await renderEuiComponentLive(
             libraryMatch.element,
-            9001,
+            IMPORT_CLONE_Z_INDEX,
             exported.stateAttributes
           );
           el = live.wrapper;
@@ -444,7 +455,7 @@ export const importState = async (
           failedCount++;
           continue;
         }
-        const { clone } = cloneElement(original, 9001);
+        const { clone } = cloneElement(original, IMPORT_CLONE_Z_INDEX);
         clone.style.pointerEvents = 'auto';
 
         setImportant(clone, 'left', `${exported.originalRect.x}px`);
@@ -626,6 +637,7 @@ export const pickJsonFile = (): Promise<ExportedState | null> =>
     const settle = (value: ExportedState | null) => {
       if (settled) return;
       settled = true;
+      input.remove();
       resolve(value);
     };
 
