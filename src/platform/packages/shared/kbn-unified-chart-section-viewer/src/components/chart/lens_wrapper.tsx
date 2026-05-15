@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { EmbeddableRendererContext } from '@kbn/embeddable-plugin/public';
@@ -115,11 +115,7 @@ export function LensWrapper({
 
   const disabledActions = [...DEFAULT_DISABLED_ACTIONS, ...extraDisabledActions];
 
-  // Inspect demotion + dividers are blocked on a Lens API change; see PR #236787.
-  const quickActionView = useMemo(
-    () => (quickActionIds ?? DEFAULT_QUICK_ACTION_VIEW) as string[],
-    [quickActionIds]
-  );
+  const quickActionView = (quickActionIds ?? DEFAULT_QUICK_ACTION_VIEW) as string[];
 
   return (
     <div css={chartCss}>
