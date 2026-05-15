@@ -594,7 +594,41 @@ describe('params validation', () => {
     }).toThrowError(/not valid emails/);
   });
 
-  test('params validation succeeds for single-label domain (on-prem/self-hosted)', () => {
+  test('params validation fails when email has double @ sign', () => {
+    const configUtils = getActionsConfigUtils({});
+    expect(() => {
+      validateParams(
+        connectorType,
+        {
+          to: ['user@@example.com'],
+          cc: [],
+          bcc: [],
+          subject: 'this is a test',
+          message: 'this is the message',
+        },
+        { configurationUtilities: configUtils }
+      );
+    }).toThrowError(/not valid emails/);
+  });
+
+  test('params validation fails when email has space in domain', () => {
+    const configUtils = getActionsConfigUtils({});
+    expect(() => {
+      validateParams(
+        connectorType,
+        {
+          to: ['user@exam ple.com'],
+          cc: [],
+          bcc: [],
+          subject: 'this is a test',
+          message: 'this is the message',
+        },
+        { configurationUtilities: configUtils }
+      );
+    }).toThrowError(/not valid emails/);
+  });
+
+  test('params validation accepts email with single-label domain (on-prem MTA)', () => {
     const configUtils = getActionsConfigUtils({});
     expect(() => {
       validateParams(
@@ -608,7 +642,24 @@ describe('params validation', () => {
         },
         { configurationUtilities: configUtils }
       );
-    }).not.toThrow();
+    }).not.toThrowError();
+  });
+
+  test('params validation fails when email has path traversal characters', () => {
+    const configUtils = getActionsConfigUtils({});
+    expect(() => {
+      validateParams(
+        connectorType,
+        {
+          to: ['../etc/passwd@example.com'],
+          cc: [],
+          bcc: [],
+          subject: 'this is a test',
+          message: 'this is the message',
+        },
+        { configurationUtilities: configUtils }
+      );
+    }).toThrowError(/not valid emails/);
   });
 
   test('params validation succeeds for valid email with hyphens and subdomains', () => {

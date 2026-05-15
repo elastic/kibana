@@ -315,7 +315,7 @@ describe('validate_email_address', () => {
       ]);
     });
 
-    test('allows single-label domains for on-prem/self-hosted workloads', () => {
+    test('accepts addresses with single-label domain (on-prem MTA)', () => {
       const result = validateEmailAddresses(null, ['user@localhost']);
       expect(result).toEqual([{ address: 'user@localhost', valid: true }]);
     });
@@ -346,6 +346,34 @@ describe('validate_email_address', () => {
       result.forEach((r) => expect(r.valid).toBe(true));
     });
 
+    test('rejects address with leading dot in local part', () => {
+      const result = validateEmailAddresses(null, ['.user@example.com']);
+      expect(result).toEqual([
+        { address: '.user@example.com', valid: false, reason: InvalidEmailReason.invalid },
+      ]);
+    });
+
+    test('rejects address with trailing dot in local part', () => {
+      const result = validateEmailAddresses(null, ['user.@example.com']);
+      expect(result).toEqual([
+        { address: 'user.@example.com', valid: false, reason: InvalidEmailReason.invalid },
+      ]);
+    });
+
+    test('rejects address with leading dot in domain', () => {
+      const result = validateEmailAddresses(null, ['user@.example.com']);
+      expect(result).toEqual([
+        { address: 'user@.example.com', valid: false, reason: InvalidEmailReason.invalid },
+      ]);
+    });
+
+    test('rejects address with trailing dot in domain', () => {
+      const result = validateEmailAddresses(null, ['user@example.com.']);
+      expect(result).toEqual([
+        { address: 'user@example.com.', valid: false, reason: InvalidEmailReason.invalid },
+      ]);
+    });
+
     test('rejects address starting with @ sign', () => {
       const result = validateEmailAddresses(null, ['@something@example.com']);
       expect(result).toEqual([
@@ -371,6 +399,13 @@ describe('validate_email_address', () => {
       const result = validateEmailAddresses(null, ['user@exam ple.com']);
       expect(result).toEqual([
         { address: 'user@exam ple.com', valid: false, reason: InvalidEmailReason.invalid },
+      ]);
+    });
+
+    test('rejects address with angle brackets and script content', () => {
+      const result = validateEmailAddresses(null, ['<script>@example.com']);
+      expect(result).toEqual([
+        { address: '<script>@example.com', valid: false, reason: InvalidEmailReason.invalid },
       ]);
     });
 
