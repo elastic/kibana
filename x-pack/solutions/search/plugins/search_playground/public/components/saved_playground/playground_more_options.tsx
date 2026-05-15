@@ -85,6 +85,10 @@ export const PlaygroundMoreOptionsMenu = ({
 
   return (
     <EuiPopover
+      aria-label={i18n.translate(
+        'xpack.searchPlayground.savedPlayground.moreOptions.popover.ariaLabel',
+        { defaultMessage: 'More options' }
+      )}
       isOpen={showMoreOptions}
       closePopover={closePopover}
       panelPaddingSize="none"

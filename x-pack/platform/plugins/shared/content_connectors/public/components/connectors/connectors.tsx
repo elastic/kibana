@@ -168,6 +168,10 @@ const Connectors: React.FC<ConnectorsProps> = ({ isCrawler, isCrawlerSelfManaged
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiPopover
+                    aria-label={i18n.translate(
+                      'xpack.contentConnectors.connectors.moreOptionsPopover.ariaLabel',
+                      { defaultMessage: 'More connector options' }
+                    )}
                     isOpen={showMoreOptionsPopover}
                     closePopover={() => setShowMoreOptionsPopover(false)}
                     button={

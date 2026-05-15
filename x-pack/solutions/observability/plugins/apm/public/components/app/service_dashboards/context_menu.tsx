@@ -25,6 +25,9 @@ export function ContextMenu({ items }: Props) {
 
   return (
     <EuiPopover
+      aria-label={i18n.translate('xpack.apm.serviceDashboards.contextMenu.ariaLabel', {
+        defaultMessage: 'More actions',
+      })}
       button={
         <EuiButtonIcon
           data-test-subj="apmContextMenuButton"
