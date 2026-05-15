@@ -55,19 +55,6 @@ export function listChangedFiles({
   mergeBase: string;
   commit: string;
 }): string[] {
-  // TEMP — Scout tests-only fast path CI verification.
-  // Set SCOUT_CI_TESTS_ONLY_OVERRIDE=1 in a Buildkite build to simulate a diff
-  // containing exactly one Scout spec. Both downstream consumers of this
-  // function — the Scout test-run builder and the Jest/FTR pick step — will
-  // then see the same synthetic file list, so the build should run only the
-  // discover Playwright config and emit zero Jest/FTR steps.
-  // Remove this block (and the env var) once verified.
-  if (process.env.SCOUT_CI_TESTS_ONLY_OVERRIDE) {
-    return [
-      'src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/core/data_grid_doc_table.spec.ts',
-    ];
-  }
-
   const execOptions = {
     cwd: getKibanaDir(),
     encoding: 'utf8' as const,
