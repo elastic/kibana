@@ -405,18 +405,37 @@ export function useEsqlDataCascadeRowHeaderComponents(
 
   const enrichmentQueryStr = useMemo(() => {
     if (!groupByField) return undefined;
-    return getGroupRowEnrichmentQueryAccessor(() => undefined)({ query: esqlQuery, groupByField });
+    const result = getGroupRowEnrichmentQueryAccessor(() => undefined)({
+      query: esqlQuery,
+      groupByField,
+    });
+    // eslint-disable-next-line no-console
+    console.log('[enrichment] query string:', result);
+    return result;
   }, [getGroupRowEnrichmentQueryAccessor, esqlQuery, groupByField]);
 
   const [enrichmentData, setEnrichmentData] = useState<
     Map<string, Record<string, unknown>> | undefined
   >(undefined);
 
+  // Use resolved time strings as deps so the effect doesn't re-fire on every render
+  // when the timeRange object reference changes but the actual values haven't.
+  const timeFrom = timeRange?.from;
+  const timeTo = timeRange?.to;
+
   useEffect(() => {
     if (!enrichmentQueryStr || !groupByField) {
+      // eslint-disable-next-line no-console
+      console.log('[enrichment] skipping — no query or groupByField', {
+        enrichmentQueryStr,
+        groupByField,
+      });
       setEnrichmentData(undefined);
       return;
     }
+
+    // eslint-disable-next-line no-console
+    console.log('[enrichment] firing request', { enrichmentQueryStr, timeFrom, timeTo });
 
     const abortController = new AbortController();
 
@@ -427,26 +446,34 @@ export function useEsqlDataCascadeRowHeaderComponents(
       signal: abortController.signal,
     })
       .then(({ response }) => {
+        // eslint-disable-next-line no-console
+        console.log('[enrichment] response', response);
         const columnNames = response.columns.map((c) => c.name);
         const map = new Map<string, Record<string, unknown>>();
-        response.values.forEach((row) => {
+        (response.values ?? []).forEach((row) => {
           const record: Record<string, unknown> = {};
           columnNames.forEach((col, i) => {
             record[col] = row[i];
           });
-          const key = String(record[groupByField] ?? '');
+          const key =
+            record[groupByField] != null ? String(record[groupByField]) : GROUP_NOT_SET_VALUE;
           map.set(key, record);
         });
+        // eslint-disable-next-line no-console
+        console.log('[enrichment] map keys:', [...map.keys()]);
         setEnrichmentData(map);
       })
-      .catch(() => {
+      .catch((err) => {
+        // eslint-disable-next-line no-console
+        console.error('[enrichment] request failed', err);
         setEnrichmentData(undefined);
       });
 
     return () => {
       abortController.abort();
     };
-  }, [enrichmentQueryStr, timeRange, groupByField, services]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [enrichmentQueryStr, timeFrom, timeTo, groupByField, services]);
 
   const aggregateColumnIdentifiers = useMemo(() => {
     return new Set(editorQueryMeta.appliedFunctions.map(({ identifier }) => identifier));

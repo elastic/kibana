@@ -9,7 +9,8 @@
 
 import React from 'react';
 import type { FC } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
+import type { TimeRange } from '@kbn/es-query';
+import { euiPaletteColorBlind, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { PartialTheme } from '@elastic/charts';
 import { Chart, LineSeries, ScaleType, Settings, Tooltip, TooltipType } from '@elastic/charts';
@@ -20,12 +21,49 @@ import type { DataSourceProfileProvider } from '../../../..';
 interface MetricConfig {
   label: string;
   color: string;
+  getSummary?: (rowData: Record<string, unknown>, timeRange?: TimeRange) => string | undefined;
 }
 
+const apmPalette = euiPaletteColorBlind({ rotations: 2 });
+
 const METRICS: Record<string, MetricConfig> = {
-  latency: { label: 'Latency', color: '#006bb4' },
-  errors: { label: 'Errors', color: '#bd271e' },
-  throughput: { label: 'Throughput', color: '#017d73' },
+  latency: {
+    label: 'Latency',
+    color: apmPalette[2],
+    getSummary: (rowData) => {
+      const avg = rowData.latency_avg;
+      if (typeof avg !== 'number') return undefined;
+      return avg < 1000 ? `${Math.round(avg)} ms` : `${(avg / 1000).toFixed(1)} s`;
+    },
+  },
+  errors: {
+    label: 'Errors',
+    color: apmPalette[6],
+    getSummary: (rowData, timeRange) => {
+      const count = rowData.error_count;
+      if (typeof count !== 'number') return undefined;
+      if (!timeRange) return String(Math.round(count));
+      const fromMs = new Date(timeRange.from).getTime();
+      const toMs = new Date(timeRange.to).getTime();
+      if (isNaN(fromMs) || isNaN(toMs) || toMs <= fromMs) return String(Math.round(count));
+      const epm = count / ((toMs - fromMs) / 60000);
+      return `${epm < 1 ? epm.toFixed(2) : epm < 10 ? epm.toFixed(1) : Math.round(epm)} epm`;
+    },
+  },
+  throughput: {
+    label: 'Throughput',
+    color: apmPalette[0],
+    getSummary: (rowData, timeRange) => {
+      const total = rowData.total;
+      if (typeof total !== 'number') return undefined;
+      if (!timeRange) return `${total}`;
+      const fromMs = new Date(timeRange.from).getTime();
+      const toMs = new Date(timeRange.to).getTime();
+      if (isNaN(fromMs) || isNaN(toMs) || toMs <= fromMs) return `${total}`;
+      const tpm = total / ((toMs - fromMs) / 60000);
+      return `${tpm < 1 ? tpm.toFixed(2) : tpm < 10 ? tpm.toFixed(1) : Math.round(tpm)} tpm`;
+    },
+  },
 };
 
 const miniTheme: PartialTheme = {
@@ -60,31 +98,23 @@ const LineSparkline: FC<{ values: number[]; color: string; charts: ChartsPluginS
           yAccessors={['v']}
           data={data}
           color={color}
-          lineSeriesStyle={{ point: { visible: false }, line: { strokeWidth: 1.5 } }}
+          lineSeriesStyle={{ point: { visible: 'never' }, line: { strokeWidth: 1.5 } }}
         />
       </Chart>
     </div>
   );
 };
 
-const naSlots = [
-  <EuiFlexGroup key="na" alignItems="center" gutterSize="xs" responsive={false}>
-    <EuiFlexItem grow={false}>
-      <EuiIcon type="visLine" size="s" color="subdued" aria-hidden={true} />
-    </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      <EuiText size="xs" color="subdued">
-        N/A
-      </EuiText>
-    </EuiFlexItem>
-  </EuiFlexGroup>,
-];
+const naSlots = Object.entries(METRICS).map(([key, config]) =>
+  renderMetricSlot(key, config, undefined, null as unknown as ChartsPluginStart)
+);
 
 function renderMetricSlot(
   key: string,
   { label, color }: MetricConfig,
   value: unknown,
-  charts: ChartsPluginStart
+  charts: ChartsPluginStart,
+  summary?: string
 ) {
   const isArray = Array.isArray(value) && (value as number[]).length > 0;
 
@@ -96,28 +126,37 @@ function renderMetricSlot(
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        {isArray ? (
-          <LineSparkline values={value as number[]} color={color} charts={charts} />
-        ) : (
-          <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiIcon type="visLine" size="s" color="subdued" aria-hidden={true} />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText size="xs" color="subdued">
-                N/A
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        )}
+        <div css={css({ width: '80px' })}>
+          {isArray ? (
+            <LineSparkline values={value as number[]} color={color} charts={charts} />
+          ) : (
+            <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiIcon type="visLine" size="s" color="subdued" aria-hidden={true} />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs" color="subdued">
+                  N/A
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          )}
+        </div>
       </EuiFlexItem>
+      {summary !== undefined && (
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" css={css({ whiteSpace: 'nowrap' })}>
+            {summary}
+          </EuiText>
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 }
 
 export const getGroupRowMetaSlots: DataSourceProfileProvider['profile']['getGroupRowMetaSlots'] =
   (prev) => (params) => {
-    const { groupValue, enrichmentData, charts } = params;
+    const { groupValue, enrichmentData, charts, timeRange } = params;
 
     if (!enrichmentData) {
       return prev?.(params);
@@ -129,6 +168,6 @@ export const getGroupRowMetaSlots: DataSourceProfileProvider['profile']['getGrou
     }
 
     return Object.entries(METRICS).map(([key, config]) =>
-      renderMetricSlot(key, config, rowData[key], charts)
+      renderMetricSlot(key, config, rowData[key], charts, config.getSummary?.(rowData, timeRange))
     );
   };
