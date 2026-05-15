@@ -8,7 +8,7 @@ export declare const typeRt: t.TypeC<{
         profiling: null;
     }>;
 }>;
-export declare const typesRt: t.Type<("logs" | "metrics" | "traces" | "synthetics" | "profiling")[], ("logs" | "metrics" | "traces" | "synthetics" | "profiling")[], unknown>;
+export declare const typesRt: t.Type<("logs" | "metrics" | "synthetics" | "profiling" | "traces")[], ("logs" | "metrics" | "synthetics" | "profiling" | "traces")[], unknown>;
 export declare const rangeRt: t.TypeC<{
     start: t.Type<number, string, unknown>;
     end: t.Type<number, string, unknown>;

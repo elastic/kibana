@@ -30,7 +30,6 @@ import {
   EuiSplitButton,
   EuiSplitPanel,
   EuiText,
-  EuiTitle,
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
@@ -43,7 +42,13 @@ import { AssetImage } from '../asset_image';
 const ELASTIC_LOGOS = 'https://raw.githubusercontent.com/elastic/integrations/main/packages';
 
 type DataSourceStatus = 'active' | 'delayed' | 'stale';
-type DataSourceCategory = 'integration' | 'input_package' | 'asset' | 'connector' | 'api' | 'custom';
+type DataSourceCategory =
+  | 'integration'
+  | 'input_package'
+  | 'asset'
+  | 'connector'
+  | 'api'
+  | 'custom';
 
 interface DataSource {
   id: string;
@@ -239,18 +244,14 @@ export function DataSourcesView() {
     });
   }, []);
 
-  const showCustomFilter =
-    activeCategories.size === 0 || activeCategories.has('integration');
+  const showCustomFilter = activeCategories.size === 0 || activeCategories.has('integration');
 
   const filteredSources = useMemo(() => {
     const q = searchQuery.toLowerCase();
     return DATA_SOURCES.filter((source) => {
       const matchesSearch =
-        !q ||
-        source.name.toLowerCase().includes(q) ||
-        source.streamName.toLowerCase().includes(q);
-      const matchesCategory =
-        activeCategories.size === 0 || activeCategories.has(source.category);
+        !q || source.name.toLowerCase().includes(q) || source.streamName.toLowerCase().includes(q);
+      const matchesCategory = activeCategories.size === 0 || activeCategories.has(source.category);
       const matchesCustom = !customOnly || source.category === 'custom';
       return matchesSearch && matchesCategory && matchesCustom;
     }).sort((a, b) => (b.hasUpdate ? 1 : 0) - (a.hasUpdate ? 1 : 0));
@@ -280,13 +281,18 @@ export function DataSourcesView() {
           </EuiFlexGroup>
         }
         description={i18n.translate('xpack.streams.dataSourcesView.pageDescription', {
-          defaultMessage:
-            'Browse and manage all data sources sending data to your streams.',
+          defaultMessage: 'Browse and manage all data sources sending data to your streams.',
         })}
         rightSideItems={
           hasIngestedMockAwsData
             ? [
-                <EuiButton key="add-data" iconType="plusInCircle" fill size="s" onClick={openCatalog}>
+                <EuiButton
+                  key="add-data"
+                  iconType="plusInCircle"
+                  fill
+                  size="s"
+                  onClick={openCatalog}
+                >
                   {i18n.translate('xpack.streams.dataSourcesView.addDataButton', {
                     defaultMessage: 'Add data',
                   })}
@@ -318,7 +324,7 @@ export function DataSourcesView() {
               <p>
                 {i18n.translate('xpack.streams.dataSourcesView.emptyBody', {
                   defaultMessage:
-                    'Connect integrations, packages, connectors, or APIs and get an instant view of what\'s flowing — volume, schema, and health for every source in one place. Once connected, manage retention, routing, and policies without leaving Streams.',
+                    "Connect integrations, packages, connectors, or APIs and get an instant view of what's flowing — volume, schema, and health for every source in one place. Once connected, manage retention, routing, and policies without leaving Streams.",
                 })}
               </p>
             }
@@ -375,10 +381,9 @@ export function DataSourcesView() {
                         `,
                       }}
                       color={allSelected ? 'primary' : 'text'}
-                      aria-label={i18n.translate(
-                        'xpack.streams.dataSourcesView.allCard.label',
-                        { defaultMessage: 'All' }
-                      )}
+                      aria-label={i18n.translate('xpack.streams.dataSourcesView.allCard.label', {
+                        defaultMessage: 'All',
+                      })}
                     >
                       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
                         <EuiFlexItem grow={false}>
@@ -402,14 +407,11 @@ export function DataSourcesView() {
                         {totalUpdates > 0 && (
                           <EuiFlexItem grow={false}>
                             <EuiBadge color="warning">
-                              {i18n.translate(
-                                'xpack.streams.dataSourcesView.allCard.updates',
-                                {
-                                  defaultMessage:
-                                    '{totalUpdates} {totalUpdates, plural, one {update} other {updates}}',
-                                  values: { totalUpdates },
-                                }
-                              )}
+                              {i18n.translate('xpack.streams.dataSourcesView.allCard.updates', {
+                                defaultMessage:
+                                  '{totalUpdates} {totalUpdates, plural, one {update} other {updates}}',
+                                values: { totalUpdates },
+                              })}
                             </EuiBadge>
                           </EuiFlexItem>
                         )}
@@ -514,10 +516,9 @@ export function DataSourcesView() {
             <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
               <EuiFlexItem>
                 <EuiFieldSearch
-                  placeholder={i18n.translate(
-                    'xpack.streams.dataSourcesView.searchPlaceholder',
-                    { defaultMessage: 'Search data sources…' }
-                  )}
+                  placeholder={i18n.translate('xpack.streams.dataSourcesView.searchPlaceholder', {
+                    defaultMessage: 'Search data sources…',
+                  })}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   isClearable
@@ -684,10 +685,9 @@ export function DataSourcesView() {
                               icon="returnKey"
                               onClick={closePopover}
                             >
-                              {i18n.translate(
-                                'xpack.streams.dataSourcesView.action.rollback',
-                                { defaultMessage: 'Rollback' }
-                              )}
+                              {i18n.translate('xpack.streams.dataSourcesView.action.rollback', {
+                                defaultMessage: 'Rollback',
+                              })}
                             </EuiContextMenuItem>,
                           ]
                         : []),
@@ -701,16 +701,14 @@ export function DataSourcesView() {
 
                     const defaultItems = [
                       <EuiContextMenuItem key="edit" icon="pencil" onClick={closePopover}>
-                        {i18n.translate(
-                          'xpack.streams.dataSourcesView.action.editConfiguration',
-                          { defaultMessage: 'Edit configuration' }
-                        )}
+                        {i18n.translate('xpack.streams.dataSourcesView.action.editConfiguration', {
+                          defaultMessage: 'Edit configuration',
+                        })}
                       </EuiContextMenuItem>,
                       <EuiContextMenuItem key="policies" icon="symlink" onClick={closePopover}>
-                        {i18n.translate(
-                          'xpack.streams.dataSourcesView.action.viewPolicies',
-                          { defaultMessage: 'View attached policies' }
-                        )}
+                        {i18n.translate('xpack.streams.dataSourcesView.action.viewPolicies', {
+                          defaultMessage: 'View attached policies',
+                        })}
                       </EuiContextMenuItem>,
                       uninstallItem,
                     ];
@@ -732,10 +730,9 @@ export function DataSourcesView() {
                               icon="symlink"
                               onClick={closePopover}
                             >
-                              {i18n.translate(
-                                'xpack.streams.dataSourcesView.action.viewPolicies',
-                                { defaultMessage: 'View attached policies' }
-                              )}
+                              {i18n.translate('xpack.streams.dataSourcesView.action.viewPolicies', {
+                                defaultMessage: 'View attached policies',
+                              })}
                             </EuiContextMenuItem>,
                             uninstallItem,
                           ];

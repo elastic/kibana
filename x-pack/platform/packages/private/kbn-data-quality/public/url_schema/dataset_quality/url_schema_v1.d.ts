@@ -10,7 +10,7 @@ export declare const stateFromUntrustedUrlRT: rt.Type<Partial<import("@kbn/datas
         rowsPerPage?: number | undefined;
         sort?: {
             field: string;
-            direction: "asc" | "desc";
+            direction: "desc" | "asc";
         } | undefined;
     } | undefined;
     filters?: {
@@ -27,7 +27,7 @@ export declare const stateFromUntrustedUrlRT: rt.Type<Partial<import("@kbn/datas
         types?: string[] | undefined;
         integrations?: string[] | undefined;
         namespaces?: string[] | undefined;
-        qualities?: ("good" | "poor" | "degraded")[] | undefined;
+        qualities?: ("good" | "degraded" | "poor")[] | undefined;
         query?: string | undefined;
     } | undefined;
 }, unknown>;

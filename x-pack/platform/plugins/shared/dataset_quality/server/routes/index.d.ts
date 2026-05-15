@@ -79,7 +79,7 @@ declare function getTypedDatasetQualityServerRouteRepository(): {
             start: import("io-ts").Type<number, string, unknown>;
             end: import("io-ts").Type<number, string, unknown>;
         }>, import("io-ts").TypeC<{
-            types: import("io-ts").Type<("logs" | "metrics" | "traces" | "synthetics" | "profiling")[], ("logs" | "metrics" | "traces" | "synthetics" | "profiling")[], unknown>;
+            types: import("io-ts").Type<("logs" | "metrics" | "synthetics" | "profiling" | "traces")[], ("logs" | "metrics" | "synthetics" | "profiling" | "traces")[], unknown>;
         }>, import("io-ts").PartialC<{
             datasetQuery: import("io-ts").StringC;
         }>]>;
@@ -255,7 +255,7 @@ declare function getTypedDatasetQualityServerRouteRepository(): {
             start: import("io-ts").Type<number, string, unknown>;
             end: import("io-ts").Type<number, string, unknown>;
         }>, import("io-ts").TypeC<{
-            types: import("io-ts").Type<("logs" | "metrics" | "traces" | "synthetics" | "profiling")[], ("logs" | "metrics" | "traces" | "synthetics" | "profiling")[], unknown>;
+            types: import("io-ts").Type<("logs" | "metrics" | "synthetics" | "profiling" | "traces")[], ("logs" | "metrics" | "synthetics" | "profiling" | "traces")[], unknown>;
         }>, import("io-ts").PartialC<{
             dataStream: import("io-ts").StringC;
         }>]>;
@@ -284,7 +284,7 @@ declare function getTypedDatasetQualityServerRouteRepository(): {
             start: import("io-ts").Type<number, string, unknown>;
             end: import("io-ts").Type<number, string, unknown>;
         }>, import("io-ts").TypeC<{
-            types: import("io-ts").Type<("logs" | "metrics" | "traces" | "synthetics" | "profiling")[], ("logs" | "metrics" | "traces" | "synthetics" | "profiling")[], unknown>;
+            types: import("io-ts").Type<("logs" | "metrics" | "synthetics" | "profiling" | "traces")[], ("logs" | "metrics" | "synthetics" | "profiling" | "traces")[], unknown>;
         }>, import("io-ts").PartialC<{
             datasetQuery: import("io-ts").StringC;
         }>]>;
@@ -293,7 +293,7 @@ declare function getTypedDatasetQualityServerRouteRepository(): {
     }, import("./types").DatasetQualityRouteCreateOptions>;
     "GET /internal/dataset_quality/data_streams/stats": import("@kbn/server-route-repository").ServerRoute<"GET /internal/dataset_quality/data_streams/stats", import("io-ts").TypeC<{
         query: import("io-ts").IntersectionC<[import("io-ts").UnionC<[import("io-ts").TypeC<{
-            types: import("io-ts").Type<("logs" | "metrics" | "traces" | "synthetics" | "profiling")[], ("logs" | "metrics" | "traces" | "synthetics" | "profiling")[], unknown>;
+            types: import("io-ts").Type<("logs" | "metrics" | "synthetics" | "profiling" | "traces")[], ("logs" | "metrics" | "synthetics" | "profiling" | "traces")[], unknown>;
         }>, import("io-ts").TypeC<{
             datasetQuery: import("io-ts").StringC;
         }>]>, import("io-ts").PartialC<{
@@ -305,7 +305,7 @@ declare function getTypedDatasetQualityServerRouteRepository(): {
     }, import("./types").DatasetQualityRouteCreateOptions>;
     "GET /internal/dataset_quality/data_streams/types_privileges": import("@kbn/server-route-repository").ServerRoute<"GET /internal/dataset_quality/data_streams/types_privileges", import("io-ts").TypeC<{
         query: import("io-ts").TypeC<{
-            types: import("io-ts").Type<("logs" | "metrics" | "traces" | "synthetics" | "profiling")[], ("logs" | "metrics" | "traces" | "synthetics" | "profiling")[], unknown>;
+            types: import("io-ts").Type<("logs" | "metrics" | "synthetics" | "profiling" | "traces")[], ("logs" | "metrics" | "synthetics" | "profiling" | "traces")[], unknown>;
         }>;
     }>, import("./types").DatasetQualityRouteHandlerResources, {
         datasetTypesPrivileges: import("../../common/api_types").DatasetTypesPrivileges;

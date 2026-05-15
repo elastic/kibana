@@ -32,6 +32,10 @@ import { esqlResultToTimeseries } from '../../util/esql_result_to_timeseries';
 import type { useTimefilter } from '../../hooks/use_timefilter';
 import { TooltipOrPopoverIcon } from '../tooltip_popover_icon/tooltip_popover_icon';
 import { getFormattedError } from '../../util/errors';
+import {
+  DOCUMENTS_CELL_CHART_WIDTH_PX,
+  DOCUMENTS_CELL_COUNT_SLOT_REM,
+} from './documents_cell_layout';
 
 export function DocumentsColumn({
   indexPattern,
@@ -99,10 +103,14 @@ export function DocumentsColumn({
   return (
     <EuiFlexGroup
       alignItems="center"
-      gutterSize="m"
+      gutterSize="s"
+      responsive={false}
+      justifyContent="flexEnd"
+      wrap={false}
       className={css`
         height: ${euiTheme.size.xl};
         white-space: nowrap;
+        width: 100%;
       `}
       role="group"
       aria-label={cellAriaLabel}
@@ -112,28 +120,36 @@ export function DocumentsColumn({
       ) : (
         <>
           <EuiFlexItem
-            grow={2}
+            grow={false}
             aria-hidden="true"
             className={css`
+              flex: 0 0 ${DOCUMENTS_CELL_COUNT_SLOT_REM}rem;
+              max-width: ${DOCUMENTS_CELL_COUNT_SLOT_REM}rem;
+              display: flex;
+              align-items: center;
+              justify-content: flex-end;
               text-align: right;
-              font-family: 'Roboto mono', sans-serif;
+              font-variant-numeric: tabular-nums;
+              font-family: ${euiTheme.font.familyCode};
             `}
             data-test-subj={`streamsDocCount-${indexPattern}`}
           >
             {hasData ? <EuiI18nNumber value={docCount} /> : noDocCountData}
           </EuiFlexItem>
           <EuiFlexItem
-            grow={3}
+            grow={false}
             aria-hidden="true"
             className={css`
+              flex: 0 0 ${DOCUMENTS_CELL_CHART_WIDTH_PX}px;
+              width: ${DOCUMENTS_CELL_CHART_WIDTH_PX}px;
               border-bottom: ${hasData ? '1px solid' : 'none'} ${euiTheme.colors.lightShade};
               display: flex;
-              justify-content: center;
+              justify-content: flex-end;
               align-items: center;
             `}
           >
             {hasData ? (
-              <Chart size={{ width: '100%', height: euiTheme.size.l }}>
+              <Chart size={{ width: DOCUMENTS_CELL_CHART_WIDTH_PX, height: euiTheme.size.l }}>
                 <Settings
                   locale={i18n.getLocale()}
                   baseTheme={chartBaseTheme}
@@ -173,32 +189,42 @@ const LoadingPlaceholder = () => {
     <EuiFlexGroup
       alignItems="center"
       justifyContent="flexEnd"
-      gutterSize="m"
+      gutterSize="s"
+      responsive={false}
+      wrap={false}
       className={css`
         height: ${euiTheme.size.xl};
         white-space: nowrap;
-        padding-right: ${euiTheme.size.xl};
+        width: 100%;
       `}
     >
-      <EuiFlexGroup>
-        <EuiFlexItem
-          className={css`
-            text-align: center;
-          `}
-        >
-          -
-        </EuiFlexItem>
-        <EuiFlexItem
-          grow={false}
-          className={css`
-            display: flex;
-            padding-right: ${euiTheme.size.xl};
-            justify-content: center;
-          `}
-        >
-          <EuiLoadingChart size="m" />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiFlexItem
+        grow={false}
+        className={css`
+          flex: 0 0 ${DOCUMENTS_CELL_COUNT_SLOT_REM}rem;
+          max-width: ${DOCUMENTS_CELL_COUNT_SLOT_REM}rem;
+          display: flex;
+          align-items: center;
+          justify-content: flex-end;
+          text-align: right;
+          font-variant-numeric: tabular-nums;
+          font-family: ${euiTheme.font.familyCode};
+        `}
+      >
+        -
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+        className={css`
+          flex: 0 0 ${DOCUMENTS_CELL_CHART_WIDTH_PX}px;
+          width: ${DOCUMENTS_CELL_CHART_WIDTH_PX}px;
+          display: flex;
+          justify-content: flex-end;
+          align-items: center;
+        `}
+      >
+        <EuiLoadingChart size="m" />
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

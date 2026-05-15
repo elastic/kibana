@@ -18,7 +18,7 @@ export declare const buildRoutingSaveRequestPayload: (definition: Streams.WiredS
 };
 export declare const buildRoutingForkRequestPayload: (rule: RoutingDefinition) => {
     where: Condition;
-    status: "enabled" | "disabled" | undefined;
+    status: "disabled" | "enabled" | undefined;
     stream: {
         name: string;
     };

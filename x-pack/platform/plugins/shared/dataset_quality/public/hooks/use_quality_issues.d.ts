@@ -37,7 +37,7 @@ export declare function useQualityIssues(): {
     })[];
     sort: {
         sort: {
-            field: "type" | "lastOccurrence" | "name" | "count" | "timeSeries" | "indexFieldWasLastPresentIn";
+            field: "type" | "name" | "count" | "lastOccurrence" | "timeSeries" | "indexFieldWasLastPresentIn";
             direction: SortDirection;
         };
     };

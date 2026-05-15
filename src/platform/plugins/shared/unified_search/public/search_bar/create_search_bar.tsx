@@ -307,6 +307,7 @@ export function createSearchBar({
             useBackgroundSearchButton={props.useBackgroundSearchButton}
             esqlQueryStats={props.esqlQueryStats}
             enableResourceBrowser={props.enableResourceBrowser}
+            showTimeWindowButtons={props.showTimeWindowButtons}
           />
         </core.i18n.Context>
       </KibanaContextProvider>

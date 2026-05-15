@@ -16,8 +16,10 @@ export function StreamsAppPageTemplate({ children }: { children: React.ReactNode
       offset={0}
       minHeight={0}
       restrictWidth={false}
+      grow
       className={css`
-        height: 0;
+        flex: 1;
+        min-height: 0;
       `}
     >
       {children}
@@ -44,6 +46,7 @@ StreamsAppPageTemplate.Sidebar = ({
 StreamsAppPageTemplate.Body = ({
   noPadding,
   grow = true,
+  paddingSize,
   ...props
 }: EuiPageSectionProps & { noPadding?: boolean; grow?: boolean }) => (
   <EuiPageTemplate.Section
@@ -69,5 +72,6 @@ StreamsAppPageTemplate.Body = ({
       },
     }}
     {...props}
+    paddingSize={noPadding ? 'none' : paddingSize}
   />
 );

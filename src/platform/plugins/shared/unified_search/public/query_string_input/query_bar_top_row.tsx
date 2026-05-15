@@ -241,6 +241,11 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
    */
   enableResourceBrowser?: ESQLEditorProps['enableResourceBrowser'];
   useBackgroundSearchButton?: boolean;
+  /**
+   * When false, hides pan/zoom controls rendered beside the super date picker.
+   * @default true
+   */
+  showTimeWindowButtons?: boolean;
 }
 
 export const SharingMetaFields = React.memo(function SharingMetaFields({
@@ -664,7 +669,7 @@ export const QueryBarTopRow = React.memo(
           isQuickSelectOnly={isMobile ? false : isQueryInputFocused}
           width={isMobile ? 'full' : 'auto'}
           compressed
-          showTimeWindowButtons
+          showTimeWindowButtons={props.showTimeWindowButtons !== false}
           timeZoneDisplayProps={{
             timeZone: timeZoneName,
             customRender: timeZoneCustomRender,

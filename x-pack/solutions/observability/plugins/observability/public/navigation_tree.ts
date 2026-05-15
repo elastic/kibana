@@ -9,7 +9,7 @@ import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { AddSolutionNavigationArg } from '@kbn/navigation-plugin/public';
 import { STACK_MANAGEMENT_NAV_ID, DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
-import { combineLatest, map, of, merge, fromEvent } from 'rxjs';
+import { combineLatest, fromEvent, map, merge, of } from 'rxjs';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
 import type { Location } from 'history';
@@ -131,31 +131,31 @@ function createNavTree({
               icon: 'productStreamsWired',
               renderAs: 'panelOpener' as const,
               children: [
-              {
-                id: 'streams_main',
-                title: '',
-                children: [
-                  {
-                    link: 'streams:streams-list' as const,
-                  },
-                  {
-                    // Hidden catch-all that keeps the Streams panel open when
-                    // navigating to stream detail/management pages whose URLs
-                    // don't match any explicit nav item (e.g. /{key}/management/{tab}).
-                    link: 'streams:streams-list' as const,
-                    sideNavStatus: 'hidden' as const,
-                    getIsActive: ({ pathNameSerialized, prepend }) => {
-                      const base = prepend('/app/streams');
-                      if (!pathNameSerialized.startsWith(base)) return false;
-                      const streamsPath = pathNameSerialized.slice(base.length);
-                      return /^\/[^/]+\/management/.test(streamsPath);
+                {
+                  id: 'streams_main',
+                  title: '',
+                  children: [
+                    {
+                      link: 'streams:streams-list' as const,
                     },
-                  },
-                  {
-                    link: 'streams:data-sources' as const,
-                  },
-                ],
-              },
+                    {
+                      // Hidden catch-all that keeps the Streams panel open when
+                      // navigating to stream detail/management pages whose URLs
+                      // don't match any explicit nav item (e.g. /{key}/management/{tab}).
+                      link: 'streams:streams-list' as const,
+                      sideNavStatus: 'hidden' as const,
+                      getIsActive: ({ pathNameSerialized, prepend }) => {
+                        const base = prepend('/app/streams');
+                        if (!pathNameSerialized.startsWith(base)) return false;
+                        const streamsPath = pathNameSerialized.slice(base.length);
+                        return /^\/[^/]+\/management/.test(streamsPath);
+                      },
+                    },
+                    {
+                      link: 'streams:data-sources' as const,
+                    },
+                  ],
+                },
               ],
             },
           ]

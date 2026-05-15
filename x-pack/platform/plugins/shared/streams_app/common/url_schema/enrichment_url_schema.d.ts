@@ -48,14 +48,14 @@ export declare const customSamplesDataSourceSchema: z.ZodObject<{
     storageKey: z.ZodOptional<z.ZodString>;
 }, "strip", z.ZodTypeAny, {
     type: "custom-samples";
-    enabled: boolean;
     documents: import("@kbn/streams-schema/src/shared/record_types").RecursiveRecord[];
+    enabled: boolean;
     name?: string | undefined;
     storageKey?: string | undefined;
 }, {
     type: "custom-samples";
-    enabled: boolean;
     documents: import("@kbn/streams-schema/src/shared/record_types").RecursiveRecord[];
+    enabled: boolean;
     name?: string | undefined;
     storageKey?: string | undefined;
 }>;
@@ -115,11 +115,11 @@ export declare const enrichmentUrlSchema: z.ZodObject<{
             to: string;
         }>>;
     }, "strip", z.ZodTypeAny, {
+        type: "kql-samples";
         query: {
             query: string;
             language: string;
         };
-        type: "kql-samples";
         enabled: boolean;
         name?: string | undefined;
         filters?: any[] | undefined;
@@ -128,11 +128,11 @@ export declare const enrichmentUrlSchema: z.ZodObject<{
             to: string;
         } | undefined;
     }, {
+        type: "kql-samples";
         query: {
             query: string;
             language: string;
         };
-        type: "kql-samples";
         enabled: boolean;
         name?: string | undefined;
         filters?: any[] | undefined;
@@ -149,14 +149,14 @@ export declare const enrichmentUrlSchema: z.ZodObject<{
         storageKey: z.ZodOptional<z.ZodString>;
     }, "strip", z.ZodTypeAny, {
         type: "custom-samples";
-        enabled: boolean;
         documents: import("@kbn/streams-schema/src/shared/record_types").RecursiveRecord[];
+        enabled: boolean;
         name?: string | undefined;
         storageKey?: string | undefined;
     }, {
         type: "custom-samples";
-        enabled: boolean;
         documents: import("@kbn/streams-schema/src/shared/record_types").RecursiveRecord[];
+        enabled: boolean;
         name?: string | undefined;
         storageKey?: string | undefined;
     }>, z.ZodObject<{
@@ -206,11 +206,11 @@ export declare const enrichmentUrlSchema: z.ZodObject<{
             to: string;
         } | undefined;
     } | {
+        type: "kql-samples";
         query: {
             query: string;
             language: string;
         };
-        type: "kql-samples";
         enabled: boolean;
         name?: string | undefined;
         filters?: any[] | undefined;
@@ -220,8 +220,8 @@ export declare const enrichmentUrlSchema: z.ZodObject<{
         } | undefined;
     } | {
         type: "custom-samples";
-        enabled: boolean;
         documents: import("@kbn/streams-schema/src/shared/record_types").RecursiveRecord[];
+        enabled: boolean;
         name?: string | undefined;
         storageKey?: string | undefined;
     })[];
@@ -240,11 +240,11 @@ export declare const enrichmentUrlSchema: z.ZodObject<{
             to: string;
         } | undefined;
     } | {
+        type: "kql-samples";
         query: {
             query: string;
             language: string;
         };
-        type: "kql-samples";
         enabled: boolean;
         name?: string | undefined;
         filters?: any[] | undefined;
@@ -254,8 +254,8 @@ export declare const enrichmentUrlSchema: z.ZodObject<{
         } | undefined;
     } | {
         type: "custom-samples";
-        enabled: boolean;
         documents: import("@kbn/streams-schema/src/shared/record_types").RecursiveRecord[];
+        enabled: boolean;
         name?: string | undefined;
         storageKey?: string | undefined;
     })[];

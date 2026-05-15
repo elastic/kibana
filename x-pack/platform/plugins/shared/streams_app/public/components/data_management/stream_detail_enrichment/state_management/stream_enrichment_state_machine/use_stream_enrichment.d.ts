@@ -800,7 +800,7 @@ export declare const useStreamEnrichmentSelector: <T>(selector: (snapshot: impor
         enrichment: {
             displayingSimulation: "viewDataPreview" | "viewDetectedFields";
             managingDataSources: "open" | "closed";
-            managingProcessors: "interactive" | "yaml" | "evaluatingMode";
+            managingProcessors: "yaml" | "interactive" | "evaluatingMode";
         };
     };
 }, string, import("xstate").NonReducibleUnknown, import("xstate").MetaObject, {
@@ -1638,7 +1638,7 @@ export declare const useGetStreamEnrichmentState: () => () => import("xstate").M
         enrichment: {
             displayingSimulation: "viewDataPreview" | "viewDetectedFields";
             managingDataSources: "open" | "closed";
-            managingProcessors: "interactive" | "yaml" | "evaluatingMode";
+            managingProcessors: "yaml" | "interactive" | "evaluatingMode";
         };
     };
 }, string, import("xstate").NonReducibleUnknown, import("xstate").MetaObject, {
@@ -3259,7 +3259,7 @@ export declare const useStreamEnrichmentEvents: () => {
             enrichment: {
                 displayingSimulation: "viewDataPreview" | "viewDetectedFields";
                 managingDataSources: "open" | "closed";
-                managingProcessors: "interactive" | "yaml" | "evaluatingMode";
+                managingProcessors: "yaml" | "interactive" | "evaluatingMode";
             };
         };
     }, string, StreamEnrichmentInput, import("xstate").NonReducibleUnknown, import("xstate").EventObject, import("xstate").MetaObject, {

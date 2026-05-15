@@ -3,8 +3,8 @@ import type { Action } from '@kbn/ui-actions-plugin/public';
 import type { QualityIssueType } from '../state_machines/dataset_quality_details_controller';
 export declare const useQualityIssuesDocsChart: () => {
     attributes: {
-        version?: import("@kbn/lens-common/content_management/constants").LENS_ITEM_LATEST_VERSION | undefined;
         title: string;
+        version?: import("@kbn/lens-common/content_management/constants").LENS_ITEM_LATEST_VERSION | undefined;
         description?: string | undefined;
         references: import("@kbn/content-management-utils").Reference[];
         visualizationType: "lnsXY";
@@ -25,8 +25,8 @@ export declare const useQualityIssuesDocsChart: () => {
             visualization: import("@kbn/lens-common").XYState;
         };
     } | {
-        version?: import("@kbn/lens-common/content_management/constants").LENS_ITEM_LATEST_VERSION | undefined;
         title: string;
+        version?: import("@kbn/lens-common/content_management/constants").LENS_ITEM_LATEST_VERSION | undefined;
         description?: string | undefined;
         references: import("@kbn/content-management-utils").Reference[];
         visualizationType: "lnsPie";
@@ -47,8 +47,8 @@ export declare const useQualityIssuesDocsChart: () => {
             visualization: import("@kbn/lens-common").LensPartitionVisualizationState;
         };
     } | {
-        version?: import("@kbn/lens-common/content_management/constants").LENS_ITEM_LATEST_VERSION | undefined;
         title: string;
+        version?: import("@kbn/lens-common/content_management/constants").LENS_ITEM_LATEST_VERSION | undefined;
         description?: string | undefined;
         references: import("@kbn/content-management-utils").Reference[];
         visualizationType: "lnsHeatmap";
@@ -69,8 +69,8 @@ export declare const useQualityIssuesDocsChart: () => {
             visualization: import("@kbn/lens-common").HeatmapVisualizationState;
         };
     } | {
-        version?: import("@kbn/lens-common/content_management/constants").LENS_ITEM_LATEST_VERSION | undefined;
         title: string;
+        version?: import("@kbn/lens-common/content_management/constants").LENS_ITEM_LATEST_VERSION | undefined;
         description?: string | undefined;
         references: import("@kbn/content-management-utils").Reference[];
         visualizationType: "lnsGauge";
@@ -91,8 +91,8 @@ export declare const useQualityIssuesDocsChart: () => {
             visualization: import("@kbn/lens-common").GaugeVisualizationState;
         };
     } | {
-        version?: import("@kbn/lens-common/content_management/constants").LENS_ITEM_LATEST_VERSION | undefined;
         title: string;
+        version?: import("@kbn/lens-common/content_management/constants").LENS_ITEM_LATEST_VERSION | undefined;
         description?: string | undefined;
         references: import("@kbn/content-management-utils").Reference[];
         visualizationType: "lnsDatatable";
@@ -113,8 +113,8 @@ export declare const useQualityIssuesDocsChart: () => {
             visualization: import("@kbn/lens-common").DatatableVisualizationState;
         };
     } | {
-        version?: import("@kbn/lens-common/content_management/constants").LENS_ITEM_LATEST_VERSION | undefined;
         title: string;
+        version?: import("@kbn/lens-common/content_management/constants").LENS_ITEM_LATEST_VERSION | undefined;
         description?: string | undefined;
         references: import("@kbn/content-management-utils").Reference[];
         visualizationType: "lnsMetric";
@@ -135,8 +135,8 @@ export declare const useQualityIssuesDocsChart: () => {
             visualization: import("@kbn/lens-common").MetricVisualizationState;
         };
     } | {
-        version?: import("@kbn/lens-common/content_management/constants").LENS_ITEM_LATEST_VERSION | undefined;
         title: string;
+        version?: import("@kbn/lens-common/content_management/constants").LENS_ITEM_LATEST_VERSION | undefined;
         description?: string | undefined;
         references: import("@kbn/content-management-utils").Reference[];
         visualizationType: "lnsChoropleth";
@@ -157,8 +157,8 @@ export declare const useQualityIssuesDocsChart: () => {
             visualization: import("@kbn/lens-common").ChoroplethChartState;
         };
     } | {
-        version?: import("@kbn/lens-common/content_management/constants").LENS_ITEM_LATEST_VERSION | undefined;
         title: string;
+        version?: import("@kbn/lens-common/content_management/constants").LENS_ITEM_LATEST_VERSION | undefined;
         description?: string | undefined;
         references: import("@kbn/content-management-utils").Reference[];
         visualizationType: "lnsTagcloud";
@@ -179,8 +179,8 @@ export declare const useQualityIssuesDocsChart: () => {
             visualization: import("@kbn/lens-common").LensTagCloudState;
         };
     } | {
-        version?: import("@kbn/lens-common/content_management/constants").LENS_ITEM_LATEST_VERSION | undefined;
         title: string;
+        version?: import("@kbn/lens-common/content_management/constants").LENS_ITEM_LATEST_VERSION | undefined;
         description?: string | undefined;
         references: import("@kbn/content-management-utils").Reference[];
         visualizationType: string;
@@ -201,8 +201,8 @@ export declare const useQualityIssuesDocsChart: () => {
             visualization: unknown;
         };
     } | {
-        version?: import("@kbn/lens-common/content_management/constants").LENS_ITEM_LATEST_VERSION | undefined;
         title: string;
+        version?: import("@kbn/lens-common/content_management/constants").LENS_ITEM_LATEST_VERSION | undefined;
         description?: string | undefined;
         references: import("@kbn/content-management-utils").Reference[];
         visualizationType: "lnsLegacyMetric";
@@ -248,8 +248,8 @@ export declare const useQualityIssuesDocsChart: () => {
     handleDocsTrendChartChange: (qualityIssuesChart: QualityIssueType) => void;
     onChartLoading: (isLoading: boolean) => void;
     setAttributes: import("react").Dispatch<import("react").SetStateAction<{
-        version?: import("@kbn/lens-common/content_management/constants").LENS_ITEM_LATEST_VERSION | undefined;
         title: string;
+        version?: import("@kbn/lens-common/content_management/constants").LENS_ITEM_LATEST_VERSION | undefined;
         description?: string | undefined;
         references: import("@kbn/content-management-utils").Reference[];
         visualizationType: "lnsXY";
@@ -270,8 +270,8 @@ export declare const useQualityIssuesDocsChart: () => {
             visualization: import("@kbn/lens-common").XYState;
         };
     } | {
-        version?: import("@kbn/lens-common/content_management/constants").LENS_ITEM_LATEST_VERSION | undefined;
         title: string;
+        version?: import("@kbn/lens-common/content_management/constants").LENS_ITEM_LATEST_VERSION | undefined;
         description?: string | undefined;
         references: import("@kbn/content-management-utils").Reference[];
         visualizationType: "lnsPie";
@@ -292,8 +292,8 @@ export declare const useQualityIssuesDocsChart: () => {
             visualization: import("@kbn/lens-common").LensPartitionVisualizationState;
         };
     } | {
-        version?: import("@kbn/lens-common/content_management/constants").LENS_ITEM_LATEST_VERSION | undefined;
         title: string;
+        version?: import("@kbn/lens-common/content_management/constants").LENS_ITEM_LATEST_VERSION | undefined;
         description?: string | undefined;
         references: import("@kbn/content-management-utils").Reference[];
         visualizationType: "lnsHeatmap";
@@ -314,8 +314,8 @@ export declare const useQualityIssuesDocsChart: () => {
             visualization: import("@kbn/lens-common").HeatmapVisualizationState;
         };
     } | {
-        version?: import("@kbn/lens-common/content_management/constants").LENS_ITEM_LATEST_VERSION | undefined;
         title: string;
+        version?: import("@kbn/lens-common/content_management/constants").LENS_ITEM_LATEST_VERSION | undefined;
         description?: string | undefined;
         references: import("@kbn/content-management-utils").Reference[];
         visualizationType: "lnsGauge";
@@ -336,8 +336,8 @@ export declare const useQualityIssuesDocsChart: () => {
             visualization: import("@kbn/lens-common").GaugeVisualizationState;
         };
     } | {
-        version?: import("@kbn/lens-common/content_management/constants").LENS_ITEM_LATEST_VERSION | undefined;
         title: string;
+        version?: import("@kbn/lens-common/content_management/constants").LENS_ITEM_LATEST_VERSION | undefined;
         description?: string | undefined;
         references: import("@kbn/content-management-utils").Reference[];
         visualizationType: "lnsDatatable";
@@ -358,8 +358,8 @@ export declare const useQualityIssuesDocsChart: () => {
             visualization: import("@kbn/lens-common").DatatableVisualizationState;
         };
     } | {
-        version?: import("@kbn/lens-common/content_management/constants").LENS_ITEM_LATEST_VERSION | undefined;
         title: string;
+        version?: import("@kbn/lens-common/content_management/constants").LENS_ITEM_LATEST_VERSION | undefined;
         description?: string | undefined;
         references: import("@kbn/content-management-utils").Reference[];
         visualizationType: "lnsMetric";
@@ -380,8 +380,8 @@ export declare const useQualityIssuesDocsChart: () => {
             visualization: import("@kbn/lens-common").MetricVisualizationState;
         };
     } | {
-        version?: import("@kbn/lens-common/content_management/constants").LENS_ITEM_LATEST_VERSION | undefined;
         title: string;
+        version?: import("@kbn/lens-common/content_management/constants").LENS_ITEM_LATEST_VERSION | undefined;
         description?: string | undefined;
         references: import("@kbn/content-management-utils").Reference[];
         visualizationType: "lnsChoropleth";
@@ -402,8 +402,8 @@ export declare const useQualityIssuesDocsChart: () => {
             visualization: import("@kbn/lens-common").ChoroplethChartState;
         };
     } | {
-        version?: import("@kbn/lens-common/content_management/constants").LENS_ITEM_LATEST_VERSION | undefined;
         title: string;
+        version?: import("@kbn/lens-common/content_management/constants").LENS_ITEM_LATEST_VERSION | undefined;
         description?: string | undefined;
         references: import("@kbn/content-management-utils").Reference[];
         visualizationType: "lnsTagcloud";
@@ -424,8 +424,8 @@ export declare const useQualityIssuesDocsChart: () => {
             visualization: import("@kbn/lens-common").LensTagCloudState;
         };
     } | {
-        version?: import("@kbn/lens-common/content_management/constants").LENS_ITEM_LATEST_VERSION | undefined;
         title: string;
+        version?: import("@kbn/lens-common/content_management/constants").LENS_ITEM_LATEST_VERSION | undefined;
         description?: string | undefined;
         references: import("@kbn/content-management-utils").Reference[];
         visualizationType: string;
@@ -446,8 +446,8 @@ export declare const useQualityIssuesDocsChart: () => {
             visualization: unknown;
         };
     } | {
-        version?: import("@kbn/lens-common/content_management/constants").LENS_ITEM_LATEST_VERSION | undefined;
         title: string;
+        version?: import("@kbn/lens-common/content_management/constants").LENS_ITEM_LATEST_VERSION | undefined;
         description?: string | undefined;
         references: import("@kbn/content-management-utils").Reference[];
         visualizationType: "lnsLegacyMetric";

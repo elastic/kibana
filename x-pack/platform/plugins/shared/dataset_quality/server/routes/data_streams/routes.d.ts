@@ -49,7 +49,7 @@ export declare const dataStreamsRouteRepository: {
             start: t.Type<number, string, unknown>;
             end: t.Type<number, string, unknown>;
         }>, t.TypeC<{
-            types: t.Type<("logs" | "metrics" | "traces" | "synthetics" | "profiling")[], ("logs" | "metrics" | "traces" | "synthetics" | "profiling")[], unknown>;
+            types: t.Type<("logs" | "metrics" | "synthetics" | "profiling" | "traces")[], ("logs" | "metrics" | "synthetics" | "profiling" | "traces")[], unknown>;
         }>, t.PartialC<{
             datasetQuery: t.StringC;
         }>]>;
@@ -225,7 +225,7 @@ export declare const dataStreamsRouteRepository: {
             start: t.Type<number, string, unknown>;
             end: t.Type<number, string, unknown>;
         }>, t.TypeC<{
-            types: t.Type<("logs" | "metrics" | "traces" | "synthetics" | "profiling")[], ("logs" | "metrics" | "traces" | "synthetics" | "profiling")[], unknown>;
+            types: t.Type<("logs" | "metrics" | "synthetics" | "profiling" | "traces")[], ("logs" | "metrics" | "synthetics" | "profiling" | "traces")[], unknown>;
         }>, t.PartialC<{
             dataStream: t.StringC;
         }>]>;
@@ -254,7 +254,7 @@ export declare const dataStreamsRouteRepository: {
             start: t.Type<number, string, unknown>;
             end: t.Type<number, string, unknown>;
         }>, t.TypeC<{
-            types: t.Type<("logs" | "metrics" | "traces" | "synthetics" | "profiling")[], ("logs" | "metrics" | "traces" | "synthetics" | "profiling")[], unknown>;
+            types: t.Type<("logs" | "metrics" | "synthetics" | "profiling" | "traces")[], ("logs" | "metrics" | "synthetics" | "profiling" | "traces")[], unknown>;
         }>, t.PartialC<{
             datasetQuery: t.StringC;
         }>]>;
@@ -263,7 +263,7 @@ export declare const dataStreamsRouteRepository: {
     }, import("../types").DatasetQualityRouteCreateOptions>;
     "GET /internal/dataset_quality/data_streams/stats": import("@kbn/server-route-repository-utils").ServerRoute<"GET /internal/dataset_quality/data_streams/stats", t.TypeC<{
         query: t.IntersectionC<[t.UnionC<[t.TypeC<{
-            types: t.Type<("logs" | "metrics" | "traces" | "synthetics" | "profiling")[], ("logs" | "metrics" | "traces" | "synthetics" | "profiling")[], unknown>;
+            types: t.Type<("logs" | "metrics" | "synthetics" | "profiling" | "traces")[], ("logs" | "metrics" | "synthetics" | "profiling" | "traces")[], unknown>;
         }>, t.TypeC<{
             datasetQuery: t.StringC;
         }>]>, t.PartialC<{
@@ -275,7 +275,7 @@ export declare const dataStreamsRouteRepository: {
     }, import("../types").DatasetQualityRouteCreateOptions>;
     "GET /internal/dataset_quality/data_streams/types_privileges": import("@kbn/server-route-repository-utils").ServerRoute<"GET /internal/dataset_quality/data_streams/types_privileges", t.TypeC<{
         query: t.TypeC<{
-            types: t.Type<("logs" | "metrics" | "traces" | "synthetics" | "profiling")[], ("logs" | "metrics" | "traces" | "synthetics" | "profiling")[], unknown>;
+            types: t.Type<("logs" | "metrics" | "synthetics" | "profiling" | "traces")[], ("logs" | "metrics" | "synthetics" | "profiling" | "traces")[], unknown>;
         }>;
     }>, import("../types").DatasetQualityRouteHandlerResources, {
         datasetTypesPrivileges: DatasetTypesPrivileges;

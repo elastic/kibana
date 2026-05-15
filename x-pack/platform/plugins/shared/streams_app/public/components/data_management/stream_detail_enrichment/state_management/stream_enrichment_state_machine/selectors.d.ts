@@ -31,7 +31,7 @@ export declare const hasErrorsInParentSnapshot: (parentSnapshot: {
  * Selects schema errors from Zod parsing.
  */
 export declare const selectSchemaErrors: (context: StreamEnrichmentContextType) => string[];
-export declare const selectWhetherThereAreOutdatedDocumentsInSimulation: ((state: StreamEnrichmentContextType, dataSourceContext: DataSourceContext | undefined) => boolean) & import("reselect").OutputSelectorFields<(args_0: string, args_1: "latest-samples" | "failure-store" | "kql-samples" | "custom-samples" | undefined, args_2: import("@kbn/streams-schema/src/shared/record_types").RecursiveRecord[] | undefined) => boolean, {
+export declare const selectWhetherThereAreOutdatedDocumentsInSimulation: ((state: StreamEnrichmentContextType, dataSourceContext: DataSourceContext | undefined) => boolean) & import("reselect").OutputSelectorFields<(args_0: string, args_1: "kql-samples" | "custom-samples" | "latest-samples" | "failure-store" | undefined, args_2: import("@kbn/streams-schema/src/shared/record_types").RecursiveRecord[] | undefined) => boolean, {
     clearCache: () => void;
 }> & {
     clearCache: () => void;

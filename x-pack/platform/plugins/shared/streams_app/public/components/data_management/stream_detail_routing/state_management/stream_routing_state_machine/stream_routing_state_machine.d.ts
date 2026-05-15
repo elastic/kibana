@@ -155,8 +155,8 @@ export declare const streamRoutingMachine: import("xstate").StateMachine<StreamR
         };
     }, "conditionUpdateDebounceTime", "debouncingCondition" | {
         fetching: {
-            documents: "done" | "loading";
-            documentCounts: "done" | "loading";
+            documents: "loading" | "done";
+            documentCounts: "loading" | "done";
         };
     }, string, import("./routing_samples_state_machine").RoutingSamplesInput, import("xstate").NonReducibleUnknown, import("xstate").EventObject, import("xstate").MetaObject, {
         id: "routingSamples";
@@ -278,8 +278,8 @@ export declare const streamRoutingMachine: import("xstate").StateMachine<StreamR
         };
     }, "conditionUpdateDebounceTime", "debouncingCondition" | {
         fetching: {
-            documents: "done" | "loading";
-            documentCounts: "done" | "loading";
+            documents: "loading" | "done";
+            documentCounts: "loading" | "done";
         };
     }, string, import("./routing_samples_state_machine").RoutingSamplesInput, import("xstate").NonReducibleUnknown, import("xstate").EventObject, import("xstate").MetaObject, {
         id: "routingSamples";

@@ -1581,7 +1581,7 @@ export declare const streamEnrichmentMachine: import("xstate").StateMachine<Stre
         enrichment: {
             displayingSimulation: "viewDataPreview" | "viewDetectedFields";
             managingDataSources: "open" | "closed";
-            managingProcessors: "interactive" | "yaml" | "evaluatingMode";
+            managingProcessors: "yaml" | "interactive" | "evaluatingMode";
         };
     };
 }, string, StreamEnrichmentInput, import("xstate").NonReducibleUnknown, import("xstate").EventObject, import("xstate").MetaObject, {

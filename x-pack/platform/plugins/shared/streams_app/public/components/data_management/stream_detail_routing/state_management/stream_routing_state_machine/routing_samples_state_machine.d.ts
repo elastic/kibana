@@ -142,8 +142,8 @@ export declare const routingSamplesMachine: import("xstate").StateMachine<Routin
     };
 }, "conditionUpdateDebounceTime", "debouncingCondition" | {
     fetching: {
-        documents: "done" | "loading";
-        documentCounts: "done" | "loading";
+        documents: "loading" | "done";
+        documentCounts: "loading" | "done";
     };
 }, string, RoutingSamplesInput, import("xstate").NonReducibleUnknown, import("xstate").EventObject, import("xstate").MetaObject, {
     id: "routingSamples";

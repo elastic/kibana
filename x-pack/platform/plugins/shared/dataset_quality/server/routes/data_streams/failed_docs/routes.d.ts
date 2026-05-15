@@ -36,7 +36,7 @@ export declare const failedDocsRouteRepository: {
             start: t.Type<number, string, unknown>;
             end: t.Type<number, string, unknown>;
         }>, t.TypeC<{
-            types: t.Type<("logs" | "metrics" | "traces" | "synthetics" | "profiling")[], ("logs" | "metrics" | "traces" | "synthetics" | "profiling")[], unknown>;
+            types: t.Type<("logs" | "metrics" | "synthetics" | "profiling" | "traces")[], ("logs" | "metrics" | "synthetics" | "profiling" | "traces")[], unknown>;
         }>, t.PartialC<{
             datasetQuery: t.StringC;
         }>]>;

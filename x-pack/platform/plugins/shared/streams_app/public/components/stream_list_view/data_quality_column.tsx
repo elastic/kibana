@@ -6,10 +6,18 @@
  */
 
 import React from 'react';
+import { css } from '@emotion/react';
 import { DatasetQualityIndicator } from '@kbn/dataset-quality-plugin/public';
 import type { QualityIndicators } from '@kbn/dataset-quality-plugin/common';
 import { EuiLink } from '@elastic/eui';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
+
+const cellAlignEndCss = css({
+  display: 'flex',
+  justifyContent: 'flex-end',
+  width: '100%',
+  minWidth: 0,
+});
 
 export function DataQualityColumn({
   streamName,
@@ -23,18 +31,20 @@ export function DataQualityColumn({
   const router = useStreamsAppRouter();
 
   return (
-    <EuiLink
-      href={router.link('/{key}/management/{tab}', {
-        path: { key: streamName, tab: 'dataQuality' },
-      })}
-      data-test-subj={`streamsDataQualityLink-${streamName}`}
-    >
-      <DatasetQualityIndicator
-        dataTestSubj={`dataQualityIndicator-${streamName}`}
-        quality={quality}
-        isLoading={isLoading}
-        showTooltip={true}
-      />
-    </EuiLink>
+    <div css={cellAlignEndCss}>
+      <EuiLink
+        href={router.link('/{key}/management/{tab}', {
+          path: { key: streamName, tab: 'dataQuality' },
+        })}
+        data-test-subj={`streamsDataQualityLink-${streamName}`}
+      >
+        <DatasetQualityIndicator
+          dataTestSubj={`dataQualityIndicator-${streamName}`}
+          quality={quality}
+          isLoading={isLoading}
+          showTooltip={true}
+        />
+      </EuiLink>
+    </div>
   );
 }

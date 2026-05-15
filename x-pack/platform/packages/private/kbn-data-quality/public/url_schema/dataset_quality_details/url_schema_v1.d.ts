@@ -22,7 +22,7 @@ export declare const stateFromUntrustedUrlRT: rt.Type<DatasetQualityDetailsPubli
             rowsPerPage?: number | undefined;
             sort?: {
                 field: string;
-                direction: "asc" | "desc";
+                direction: "desc" | "asc";
             } | undefined;
         } | undefined;
     } | undefined;

@@ -223,14 +223,14 @@ export declare const createDatasetQualityControllerStateMachine: ({ initialConte
     params: unknown;
 }, never, "initializing" | "emptyState" | "initializationFailed" | {
     main: {
-        integrations: "fetching" | "loaded";
         stats: {
+            datasets: "fetching" | "loaded";
             degradedDocs: "fetching" | "loaded" | "unauthorized";
             failedDocs: "fetching" | "loaded" | "unauthorized" | "notImplemented";
-            datasets: "fetching" | "loaded";
             nonAggregatableDatasets: "fetching" | "loaded" | "unauthorized";
             docsStats: "fetching" | "loaded" | "unauthorized";
         };
+        integrations: "fetching" | "loaded";
         failureStoreUpdate: "idle" | "updating";
     };
 }, string, import("xstate").NonReducibleUnknown, import("xstate").NonReducibleUnknown, import("xstate").EventObject, import("xstate").MetaObject, {

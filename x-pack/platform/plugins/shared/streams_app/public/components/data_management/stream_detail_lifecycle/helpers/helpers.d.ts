@@ -21,7 +21,7 @@ export declare const getILMRatios: (value: {
     min_age: string;
     delete_searchable_snapshot?: boolean;
 } | {
-    grow: 3 | 5 | 2 | 4 | 6 | 7 | 8 | 9 | 10;
+    grow: 6 | 2 | 3 | 4 | 5 | 7 | 8 | 9 | 10;
     name: import("@kbn/streams-schema").PhaseName;
     size_in_bytes: number;
     min_age?: string;
@@ -29,7 +29,7 @@ export declare const getILMRatios: (value: {
     readonly?: boolean;
     searchable_snapshot?: string;
 } | {
-    grow: 3 | 5 | 2 | 4 | 6 | 7 | 8 | 9 | 10;
+    grow: 6 | 2 | 3 | 4 | 5 | 7 | 8 | 9 | 10;
     name: "delete";
     min_age: string;
     delete_searchable_snapshot?: boolean;

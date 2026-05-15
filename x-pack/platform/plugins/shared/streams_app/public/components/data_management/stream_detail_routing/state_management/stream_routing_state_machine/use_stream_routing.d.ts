@@ -155,8 +155,8 @@ export declare const useStreamsRoutingSelector: <T>(selector: (snapshot: import(
         };
     }, "conditionUpdateDebounceTime", "debouncingCondition" | {
         fetching: {
-            documents: "done" | "loading";
-            documentCounts: "done" | "loading";
+            documents: "loading" | "done";
+            documentCounts: "loading" | "done";
         };
     }, string, import("./routing_samples_state_machine").RoutingSamplesInput, import("xstate").NonReducibleUnknown, import("xstate").EventObject, import("xstate").MetaObject, {
         id: "routingSamples";
@@ -414,8 +414,8 @@ export declare const useStreamsRoutingActorRef: () => import("xstate").Actor<imp
         };
     }, "conditionUpdateDebounceTime", "debouncingCondition" | {
         fetching: {
-            documents: "done" | "loading";
-            documentCounts: "done" | "loading";
+            documents: "loading" | "done";
+            documentCounts: "loading" | "done";
         };
     }, string, import("./routing_samples_state_machine").RoutingSamplesInput, import("xstate").NonReducibleUnknown, import("xstate").EventObject, import("xstate").MetaObject, {
         id: "routingSamples";
@@ -537,8 +537,8 @@ export declare const useStreamsRoutingActorRef: () => import("xstate").Actor<imp
         };
     }, "conditionUpdateDebounceTime", "debouncingCondition" | {
         fetching: {
-            documents: "done" | "loading";
-            documentCounts: "done" | "loading";
+            documents: "loading" | "done";
+            documentCounts: "loading" | "done";
         };
     }, string, import("./routing_samples_state_machine").RoutingSamplesInput, import("xstate").NonReducibleUnknown, import("xstate").EventObject, import("xstate").MetaObject, {
         id: "routingSamples";
@@ -834,8 +834,8 @@ export declare const useStreamSamplesRef: () => import("xstate").ActorRef<import
     }, import("xstate").NonReducibleUnknown, import("xstate").EventObject>> | undefined;
 }, "debouncingCondition" | {
     fetching: {
-        documents: "done" | "loading";
-        documentCounts: "done" | "loading";
+        documents: "loading" | "done";
+        documentCounts: "loading" | "done";
     };
 }, string, import("xstate").NonReducibleUnknown, import("xstate").MetaObject, {
     id: "routingSamples";

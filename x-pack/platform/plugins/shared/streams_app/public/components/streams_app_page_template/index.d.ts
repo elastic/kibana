@@ -9,7 +9,7 @@ export declare namespace StreamsAppPageTemplate {
     var Sidebar: ({ children, ...props }: EuiPageSidebarProps & {
         children: React.ReactNode;
     }) => React.JSX.Element;
-    var Body: ({ noPadding, grow, ...props }: EuiPageSectionProps & {
+    var Body: ({ noPadding, grow, paddingSize, ...props }: EuiPageSectionProps & {
         noPadding?: boolean;
         grow?: boolean;
     }) => React.JSX.Element;

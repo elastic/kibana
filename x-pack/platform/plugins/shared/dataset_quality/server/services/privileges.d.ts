@@ -12,8 +12,8 @@ declare class DatasetQualityPrivileges {
         }>;
         canViewIntegrations: boolean;
     }>;
-    canReadDataset(esClient: ElasticsearchClient, type?: "logs" | "metrics" | "traces" | "synthetics" | "profiling", datasetQuery?: string, space?: string): Promise<boolean>;
-    throwIfCannotReadDataset(esClient: ElasticsearchClient, type?: "logs" | "metrics" | "traces" | "synthetics" | "profiling", datasetQuery?: string, space?: string): Promise<void>;
+    canReadDataset(esClient: ElasticsearchClient, type?: "logs" | "metrics" | "synthetics" | "profiling" | "traces", datasetQuery?: string, space?: string): Promise<boolean>;
+    throwIfCannotReadDataset(esClient: ElasticsearchClient, type?: "logs" | "metrics" | "synthetics" | "profiling" | "traces", datasetQuery?: string, space?: string): Promise<void>;
 }
 export declare const datasetQualityPrivileges: DatasetQualityPrivileges;
 export {};
