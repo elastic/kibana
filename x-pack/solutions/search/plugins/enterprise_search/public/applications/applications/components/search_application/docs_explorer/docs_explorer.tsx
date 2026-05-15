@@ -153,7 +153,7 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
             {hasSchemaConflicts && (
               <>
                 <EuiFlexItem>
-                  <EuiIcon type="alert" color="danger" aria-hidden={true} />
+                  <EuiIcon type="alert" color="danger" aria-hidden />
                 </EuiFlexItem>
                 {!isTourClosed && <EuiSpacer size="xs" />}
               </>
@@ -251,7 +251,7 @@ const ConfigurationPopover: React.FC<ConfigurationPopOverProps> = ({
             key="Schema"
             icon={
               hasSchemaConflicts ? (
-                <EuiIcon type="warning" color="danger" aria-hidden={true} />
+                <EuiIcon type="warning" color="danger" aria-hidden />
               ) : (
                 'kqlField'
               )

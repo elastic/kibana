@@ -61,7 +61,7 @@ export const SelfManagedWebCrawlerEmptyPrompt: React.FC = () => {
                         <EuiIcon size="m" type="sortRight" aria-hidden />
                       </EuiFlexItem>
                       <EuiFlexItem>
-                        <EuiIcon color="primary" size="l" type="launch" aria-hidden={true} />
+                        <EuiIcon color="primary" size="l" type="launch" aria-hidden />
                       </EuiFlexItem>
                     </EuiFlexGroup>
                     <EuiFlexItem>

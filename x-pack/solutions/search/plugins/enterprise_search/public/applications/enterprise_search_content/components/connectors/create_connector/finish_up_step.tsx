@@ -118,7 +118,7 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
               <EuiFlexGroup gutterSize="m">
                 <EuiFlexItem>
                   <EuiCard
-                    icon={<EuiIcon size="xxl" type="machineLearningApp" aria-hidden={true} />}
+                    icon={<EuiIcon size="xxl" type="machineLearningApp" aria-hidden />}
                     titleSize="s"
                     title={i18n.translate(
                       'xpack.enterpriseSearch.createConnector.finishUpStep.euiCard.chatWithYourDataLabel',
@@ -170,7 +170,7 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiCard
-                    icon={<EuiIcon size="xxl" type="discoverApp" aria-hidden={true} />}
+                    icon={<EuiIcon size="xxl" type="discoverApp" aria-hidden />}
                     titleSize="s"
                     title={i18n.translate(
                       'xpack.enterpriseSearch.createConnector.finishUpStep.euiCard.exploreYourDataLabel',
@@ -296,7 +296,7 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
                       `}
                       size="m"
                       type="visVega"
-                      aria-hidden={true}
+                      aria-hidden
                     />
                   }
                   title={i18n.translate(

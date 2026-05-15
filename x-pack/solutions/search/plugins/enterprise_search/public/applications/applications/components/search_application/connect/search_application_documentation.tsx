@@ -162,7 +162,7 @@ export const SearchApplicationDocumentation = () => {
             <EuiPanel grow paddingSize="l">
               <EuiFlexGroup direction="row">
                 <EuiFlexItem grow={false}>
-                  <EuiIcon type="securitySignal" size="l" aria-hidden={true} />
+                  <EuiIcon type="securitySignal" size="l" aria-hidden />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiTitle size="s">

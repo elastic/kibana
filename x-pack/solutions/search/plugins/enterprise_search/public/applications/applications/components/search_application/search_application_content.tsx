@@ -99,7 +99,7 @@ export const SearchApplicationContent = () => {
               ),
             text: (
               <>
-                <EuiIcon size="s" type="arrowLeft" aria-hidden={true} /> {searchApplicationName}
+                <EuiIcon size="s" type="arrowLeft" aria-hidden /> {searchApplicationName}
               </>
             ),
           },
