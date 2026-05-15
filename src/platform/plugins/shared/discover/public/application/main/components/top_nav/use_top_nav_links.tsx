@@ -242,9 +242,13 @@ export const useTopNavLinks = ({
       items.push({
         id: SWITCH_LANGUAGE_MODE_APP_MENU_ID,
         order: 10,
-        label: i18n.translate('discover.localMenu.switchLanguageModeTitle', {
-          defaultMessage: isDataViewMode ? 'Switch tab to ES|QL' : 'Switch tab to Classic',
-        }),
+        label: isDataViewMode
+          ? i18n.translate('discover.localMenu.switchToESQLTitle', {
+              defaultMessage: 'Switch tab to ES|QL',
+            })
+          : i18n.translate('discover.localMenu.switchToClassicTitle', {
+              defaultMessage: 'Switch tab to Classic',
+            }),
         iconType: isDataViewMode ? 'code' : 'discoverApp',
         testId: 'discoverSwitchLanguageModeButton',
         run: switchLanguageMode,

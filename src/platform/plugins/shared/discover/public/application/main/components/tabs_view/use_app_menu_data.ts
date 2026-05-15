@@ -56,7 +56,7 @@ export const useAppMenuData = ({ currentDataView }: UseAppMenuDataParams): UseAp
         {
           'data-test-subj': 'unifiedTabs_tabMenuItem_inspect',
           name: 'inspect',
-          label: i18n.translate('discover.localMenu.inspectTitle', {
+          label: i18n.translate('discover.tabsView.tabMenu.inspectTitle', {
             defaultMessage: 'Inspect',
           }),
           onClick: () => openInspector(),
@@ -83,7 +83,7 @@ export const useAppMenuData = ({ currentDataView }: UseAppMenuDataParams): UseAp
           {
             'data-test-subj': 'unifiedTabs_tabMenuItem_switchToESQL',
             name: 'switchToESQL',
-            label: i18n.translate('discover.localMenu.switchToESQLTitle', {
+            label: i18n.translate('discover.tabsView.tabMenu.switchToESQLTitle', {
               defaultMessage: 'Switch to ES|QL',
             }),
             onClick: switchLanguageMode,
@@ -95,7 +95,7 @@ export const useAppMenuData = ({ currentDataView }: UseAppMenuDataParams): UseAp
         {
           'data-test-subj': 'unifiedTabs_tabMenuItem_switchToClassic',
           name: 'switchToClassic',
-          label: i18n.translate('discover.localMenu.switchToClassicTitle', {
+          label: i18n.translate('discover.tabsView.tabMenu.switchToClassicTitle', {
             defaultMessage: 'Switch to classic',
           }),
           onClick: switchLanguageMode,
