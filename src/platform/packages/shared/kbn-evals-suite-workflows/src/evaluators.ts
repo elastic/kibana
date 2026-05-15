@@ -17,12 +17,17 @@ import type {
   WorkflowEditExample,
   WorkflowCreateExample,
   NegativeWorkflowExample,
+  MultiTurnWorkflowEditExample,
   WorkflowTaskOutput,
   StructuralExpectations,
   EfficiencyExpectations,
 } from './types';
 
-type WorkflowExample = WorkflowEditExample | WorkflowCreateExample | NegativeWorkflowExample;
+type WorkflowExample =
+  | WorkflowEditExample
+  | WorkflowCreateExample
+  | NegativeWorkflowExample
+  | MultiTurnWorkflowEditExample;
 
 const INFRA_ERROR_NA = {
   score: null as null,
@@ -428,9 +433,9 @@ export function createEditPreservationEvaluator() {
       output,
       expected,
     }: {
-      input: WorkflowEditExample['input'];
+      input: WorkflowEditExample['input'] | MultiTurnWorkflowEditExample['input'];
       output: WorkflowTaskOutput;
-      expected: WorkflowEditExample['output'];
+      expected: WorkflowEditExample['output'] | MultiTurnWorkflowEditExample['output'];
     }) => {
       const preservedStepNames = expected.preservedStepNames;
       if (!preservedStepNames || preservedStepNames.length === 0) {
@@ -686,7 +691,10 @@ export function createCriteriaEvaluator({ evaluators }: { evaluators: DefaultEva
       }
 
       const cleanInput: Record<string, string> = {
-        instruction: input.instruction,
+        instruction:
+          'instruction' in input
+            ? input.instruction
+            : input.turns.map((t, i) => `Turn ${i + 1}: ${t.instruction}`).join('\n'),
       };
       if ('initialYaml' in input && input.initialYaml != null) {
         cleanInput.initialYaml = input.initialYaml;
