@@ -26,7 +26,7 @@ import type { FormValues } from '../../form/types';
 import type { RuleFormServices } from '../../form/contexts/rule_form_context';
 import { RuleFormProvider } from '../../form/contexts/rule_form_context';
 import { serializeFormToYaml, parseYamlToFormValues } from '../../form/utils/yaml_form_utils';
-import type { ComposeFormValues } from './compose_form_types';
+import type { ComposeFormValues, RuleQuery } from './compose_form_types';
 import { getBreachQuery, getRecoverQuery } from './compose_form_types';
 import {
   mapRuleToComposeFormValues,
@@ -315,21 +315,18 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
   // query — every Apply call executes this directly.
   const handleSandboxApply = useCallback(
     (data: SandboxApplyData) => {
-      if (data.isSplit) {
-        methods.setValue('query', {
-          format: 'composed',
-          base: data.baseQuery,
-          blocks: {
-            breach: data.alertBlock,
-            ...(data.recoveryBlock.trim() ? { recover: data.recoveryBlock } : {}),
-          },
-        });
-      } else {
-        methods.setValue('query', {
-          format: 'standalone',
-          breach: data.fullQuery,
-        });
-      }
+      const updatedQuery: RuleQuery = data.isSplit
+        ? {
+            format: 'composed',
+            base: data.baseQuery,
+            blocks: {
+              breach: data.alertBlock,
+              ...(data.recoveryBlock.trim() ? { recover: data.recoveryBlock } : {}),
+            },
+          }
+        : { format: 'standalone', breach: data.fullQuery };
+
+      methods.setValue('query', updatedQuery);
 
       if (data.isSplit) {
         dispatch({
@@ -343,7 +340,8 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
       }
 
       if (uiState.yamlMode) {
-        setYamlText(serializeFormToYaml(composeFormValuesForYamlSerialize(methods.getValues())));
+        const current = { ...methods.getValues(), query: updatedQuery };
+        setYamlText(serializeFormToYaml(composeFormValuesForYamlSerialize(current)));
       }
     },
     [dispatch, methods, uiState.yamlMode]
