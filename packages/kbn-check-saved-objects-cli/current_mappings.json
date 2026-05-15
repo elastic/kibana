@@ -4474,6 +4474,9 @@
           },
           "sloId": {
             "type": "keyword"
+          },
+          "weight": {
+            "type": "float"
           }
         }
       },
