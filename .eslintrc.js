@@ -11,6 +11,7 @@ require('@kbn/babel-register').install();
 
 const { getPackages } = require('@kbn/repo-packages');
 const { REPO_ROOT } = require('@kbn/repo-info');
+const path = require('path');
 
 const APACHE_2_0_LICENSE_HEADER = `
 /*
@@ -900,7 +901,7 @@ module.exports = {
           'error',
           {
             /* Files that ARE allowed to use devDependencies */
-            devDependencies: [...DEV_PATTERNS],
+            devDependencies: DEV_PATTERNS.map((p) => path.resolve(__dirname, p)),
             peerDependencies: true,
             packageDir: __dirname,
           },
