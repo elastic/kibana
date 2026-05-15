@@ -30,6 +30,7 @@ import { MetricsGridLoadingProgress } from '../../empty_state/empty_state';
 import { useMetricsExperienceState } from './context/metrics_experience_state_provider';
 import { firstNonNullable } from '../../../common/utils';
 import { extractWhereCommand } from '../../../utils/extract_where_command';
+import { getDuplicateMetricNames } from './utils/get_duplicate_metric_names';
 
 export interface MetricsExperienceGridContentProps
   extends Pick<
@@ -90,6 +91,20 @@ export const MetricsExperienceGridContent = ({
     []
   );
 
+  const duplicateMetricNames = useMemo(() => getDuplicateMetricNames(metricItems), [metricItems]);
+
+  const getDescription = useCallback(
+    (metricItem: ParsedMetricItem) =>
+      duplicateMetricNames.has(metricItem.metricName)
+        ? i18n.translate('metricsExperience.grid.duplicateMetricDescription', {
+            defaultMessage:
+              'This metric exists in multiple data streams. This chart shows data from {dataStream} only.',
+            values: { dataStream: metricItem.dataStream },
+          })
+        : undefined,
+    [duplicateMetricNames]
+  );
+
   return (
     <EuiFlexGroup
       direction="column"
@@ -130,6 +145,7 @@ export const MetricsExperienceGridContent = ({
           searchTerm={searchTerm}
           whereStatements={whereStatements}
           getUserMessages={getUserMessages}
+          getDescription={getDescription}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
