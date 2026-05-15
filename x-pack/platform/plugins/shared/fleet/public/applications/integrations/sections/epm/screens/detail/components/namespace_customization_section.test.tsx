@@ -51,7 +51,7 @@ describe('NamespaceCustomizationSection', () => {
   });
 
   it('shows Save and Discard buttons after adding a namespace', async () => {
-    const { getByTestId, queryByTestId } = renderSection({ savedNamespaces: [] });
+    const { getByTestId } = renderSection({ savedNamespaces: [] });
 
     const input = getByTestId('epmSettings.namespaceCustomizationInput').querySelector('input')!;
     await userEvent.type(input, 'prod');
