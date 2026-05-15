@@ -110,17 +110,15 @@ spaceTest.describe(
 
       const cardIndex = 0;
 
-      await spaceTest.step('context menu shows View details and Copy to dashboard', async () => {
-        await metricsExperience.openCardContextMenu(cardIndex);
-        await expect(metricsExperience.chartActions.viewDetails).toBeVisible();
-        await expect(metricsExperience.chartActions.copyToDashboard).toBeVisible();
-      });
-
-      await spaceTest.step('hover bar shows Explore action', async () => {
-        await page.keyboard.press('Escape');
-        await metricsExperience.getCardByIndex(cardIndex).hover();
-        await expect(metricsExperience.getQuickActionsForCard(cardIndex).explore).toBeVisible();
-      });
+      await spaceTest.step(
+        'visible quick-action row shows Explore, View details, and Copy to dashboard',
+        async () => {
+          await metricsExperience.getCardByIndex(cardIndex).hover();
+          await expect(metricsExperience.chartActions.explore).toBeVisible();
+          await expect(metricsExperience.chartActions.viewDetails).toBeVisible();
+          await expect(metricsExperience.chartActions.copyToDashboard).toBeVisible();
+        }
+      );
     });
   }
 );
