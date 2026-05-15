@@ -18,23 +18,12 @@ import {
 
 export const userConnectorTokenModelVersions = (
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
-): SavedObjectsModelVersionMap => ({
-  '1': {
-    changes: [],
-    schemas: {
-      forwardCompatibility: rawUserConnectorTokenSchemaV1.extends({}, { unknowns: 'ignore' }),
-      create: rawUserConnectorTokenSchemaV1,
-    },
-  },
-  '2': encryptedSavedObjects.createModelVersion({
+): SavedObjectsModelVersionMap => {
+  // createModelVersion replaces `changes` with a single `unsafe_transform`, stripping
+  // `mappings_addition`. We spread it back so the SO validator can see the new field.
+  const version2 = encryptedSavedObjects.createModelVersion({
     modelVersion: {
       changes: [
-        {
-          type: 'mappings_addition',
-          addedMappings: {
-            userCloudId: { type: 'keyword' },
-          },
-        },
         {
           // no-op backfill to trigger re-encryption with updated AAD
           type: 'data_backfill',
@@ -49,5 +38,27 @@ export const userConnectorTokenModelVersions = (
     inputType: userConnectorTokenEncryptedRegistrationV1,
     outputType: userConnectorTokenEncryptedRegistrationV2,
     shouldTransformIfDecryptionFails: true,
-  }),
-});
+  });
+
+  return {
+    '1': {
+      changes: [],
+      schemas: {
+        forwardCompatibility: rawUserConnectorTokenSchemaV1.extends({}, { unknowns: 'ignore' }),
+        create: rawUserConnectorTokenSchemaV1,
+      },
+    },
+    '2': {
+      ...version2,
+      changes: [
+        ...version2.changes,
+        {
+          type: 'mappings_addition',
+          addedMappings: {
+            userCloudId: { type: 'keyword' },
+          },
+        },
+      ],
+    },
+  };
+};
