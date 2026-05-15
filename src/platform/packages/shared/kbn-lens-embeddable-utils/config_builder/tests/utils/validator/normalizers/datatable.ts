@@ -39,6 +39,28 @@ const isReferenceBased = (c: GenericIndexPatternColumn): c is ReferenceBasedInde
   Array.isArray((c as ReferenceBasedIndexPatternColumn).references);
 
 /**
+ * Semantic type assigned to a datatable column during classification.
+ * `metric_ref` columns are internal datasource references (e.g. the `max`
+ * column referenced by a `counter_rate`). They never appear in
+ * `visualization.columns`.
+ */
+type DatatableColumnType = 'metric' | 'row' | 'split_metric_by' | 'metric_ref';
+
+interface DatatableRemappingEntry {
+  oldId: string;
+  newId: string;
+  type: DatatableColumnType;
+}
+
+type DatatableRemapping = DatatableRemappingEntry[];
+
+/**
+ * Adapt the typed datatable remapping to the IdRemapping shape
+ */
+const toIdRemapping = (remapping: DatatableRemapping): IdRemapping =>
+  remapping.map(({ oldId, newId }) => [oldId, newId]);
+
+/**
  * Sort visualization columns by semantic type: rows first, then split_metrics_by, then metrics.
  * Within each group, sort by columnId for stable ordering.
  * This is the sorting logic used by the transform.
@@ -72,51 +94,68 @@ function dedupColumnsByColumnId(columns: DatatableColumn[]): DatatableColumn[] {
   });
 }
 
+function classifyVisualizationColumn(
+  isMetric: boolean,
+  isTransposed: boolean | undefined
+): Exclude<DatatableColumnType, 'metric_ref'> {
+  if (isMetric) {
+    return 'metric';
+  }
+  if (isTransposed) {
+    return 'split_metric_by';
+  }
+  return 'row';
+}
+
+function pushRemappingEntry(
+  remapping: DatatableRemapping,
+  oldId: string,
+  type: DatatableColumnType,
+  indices: Record<DatatableColumnType, number>
+): void {
+  remapping.push({ oldId, type, newId: getAccessorName(type, indices[type]++) });
+}
+
+const createTypeIndices = (): Record<DatatableColumnType, number> => ({
+  metric: 0,
+  row: 0,
+  split_metric_by: 0,
+  metric_ref: 0,
+});
+
 function getColumnRemappingFormBased(
   visualization: DatatableVisualizationState,
   layer: Omit<FormBasedLayer, 'indexPatternId'>
-): IdRemapping {
+): DatatableRemapping {
   const columnStateMap = new Map(visualization.columns.map((col) => [col.columnId, col]));
-
-  let metricIndex = 0;
-  let rowIndex = 0;
-  let splitMetricByIndex = 0;
-
-  const remapping: IdRemapping = [];
+  const indices = createTypeIndices();
+  const remapping: DatatableRemapping = [];
 
   for (const columnId of layer.columnOrder) {
     const column = columnStateMap.get(columnId);
     if (!column) {
       continue;
     }
-
-    if (isMetricColumnNoESQL(column, layer.columns[columnId])) {
-      remapping.push([columnId, getAccessorName('metric', metricIndex++)]);
-    } else if (column.isTransposed) {
-      remapping.push([columnId, getAccessorName('split_metric_by', splitMetricByIndex++)]);
-    } else {
-      remapping.push([columnId, getAccessorName('row', rowIndex++)]);
-    }
+    const type = classifyVisualizationColumn(
+      isMetricColumnNoESQL(column, layer.columns[columnId]),
+      column.isTransposed
+    );
+    pushRemappingEntry(remapping, columnId, type, indices);
   }
 
   // Remap internal reference columns (e.g., max referenced by counter_rate)
   // These are not in visualization.columns but exist in the datasource layer.
-  // Exclude formula columns — their internal math references are cleared separately.
-  let refIndex = 0;
-  for (const [oldId] of [...remapping]) {
-    if (!oldId) {
-      continue;
-    }
+  for (const { oldId } of [...remapping]) {
     const dsCol = layer.columns[oldId];
-    if (dsCol?.operationType === 'formula') {
+    // Exclude formula columns — their internal math references are cleared separately.
+    // Only ReferenceBasedIndexPatternColumn have references array.
+    if (!dsCol || dsCol.operationType === 'formula' || !isReferenceBased(dsCol)) {
       continue;
     }
-    // references array is only present on ReferenceBasedIndexPatternColumn
-    if (isReferenceBased(dsCol)) {
-      for (const refId of dsCol.references) {
-        if (layer.columns[refId]) {
-          remapping.push([refId, getAccessorName('metric_ref', refIndex++)]);
-        }
+
+    for (const refId of dsCol.references) {
+      if (layer.columns[refId]) {
+        pushRemappingEntry(remapping, refId, 'metric_ref', indices);
       }
     }
   }
@@ -127,26 +166,20 @@ function getColumnRemappingFormBased(
 function getColumnRemappingTextBased(
   visualization: DatatableVisualizationState,
   layer: TextBasedLayer
-): IdRemapping {
+): DatatableRemapping {
   const columnStateMap = new Map(visualization.columns.map((col) => [col.columnId, col]));
-
-  let metricIndex = 0;
-  let rowIndex = 0;
-  let splitMetricByIndex = 0;
-
-  const remapping: IdRemapping = [];
+  const indices = createTypeIndices();
+  const remapping: DatatableRemapping = [];
 
   for (const { columnId } of layer.columns) {
     const column = columnStateMap.get(columnId);
     if (!column) continue;
 
-    if (isMetricColumnESQL(column, layer.columns)) {
-      remapping.push([columnId, getAccessorName('metric', metricIndex++)]);
-    } else if (column.isTransposed) {
-      remapping.push([columnId, getAccessorName('split_metric_by', splitMetricByIndex++)]);
-    } else {
-      remapping.push([columnId, getAccessorName('row', rowIndex++)]);
-    }
+    const type = classifyVisualizationColumn(
+      isMetricColumnESQL(column, layer.columns),
+      column.isTransposed
+    );
+    pushRemappingEntry(remapping, columnId, type, indices);
   }
 
   return remapping;
@@ -155,7 +188,7 @@ function getColumnRemappingTextBased(
 function getColumnRemapping(
   visualization: DatatableVisualizationState,
   datasourceStates: LensAttributes['state']['datasourceStates']
-): IdRemapping {
+): DatatableRemapping {
   const formBasedState =
     datasourceStates.formBased ??
     ((datasourceStates as any).indexpattern as typeof datasourceStates.formBased);
@@ -211,10 +244,7 @@ export const normalizeDatatable: AttributesNormalizer<DatatableAttributes> = (at
   const columnRemapping = getColumnRemapping(visualization, datasourceStates);
   const layerRemapping: IdRemapping = [[visualization.layerId, DEFAULT_LAYER_ID]];
 
-  const validRemappings = columnRemapping.filter(
-    (pair): pair is [string, string] => pair[0] != null
-  );
-  const idMap = new Map(validRemappings);
+  const idMap = new Map(toIdRemapping(columnRemapping));
 
   const filterOrphanColumns = getFilterOrphanColumns(datasourceStates);
 
@@ -242,17 +272,16 @@ export const normalizeDatatable: AttributesNormalizer<DatatableAttributes> = (at
     },
   };
 
-  // Build a type map from old column ID → { isMetric, isTransposed }
-  // derived from the accessor name assigned during classification.
-  // Original SOs may omit these. The transform always sets them explicitly.
+  // Map original column ID → { isMetric, isTransposed } using the type assigned
+  // during classification.
+  // Original SOs may omit these flags. The transform always sets them explicitly.
   const columnTypeMap = new Map(
-    validRemappings.map(([oldId, newId]) => [
-      oldId,
-      {
-        isMetric: newId.includes('_metric_') && !newId.includes('_split_metric_by_'),
-        isTransposed: newId.includes('_split_metric_by_'),
-      },
-    ])
+    columnRemapping
+      .filter(({ type }) => type !== 'metric_ref')
+      .map(({ oldId, type }) => [
+        oldId,
+        { isMetric: type === 'metric', isTransposed: type === 'split_metric_by' },
+      ])
   );
 
   const alignColumnTypes: NormalizerConfig<DatatableAttributes> = {
@@ -376,7 +405,7 @@ export const normalizeDatatable: AttributesNormalizer<DatatableAttributes> = (at
   return mergeNormalizers<DatatableAttributes>([
     getCommonNormalizer<DatatableAttributes>(() => ({
       layerRemapping,
-      columnRemapping,
+      columnRemapping: toIdRemapping(columnRemapping),
     })),
     filterOrphanColumns,
     alignColumnTypes,
