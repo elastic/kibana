@@ -40,7 +40,7 @@ export const UnnecessaryEscapingCallout = () => {
                 href={docLinks.links.securitySolution.endpointArtifactsNoEscaping}
               >
                 <FormattedMessage
-                  id="xpack.securitySolution.artifacts.confirmWarningModal.unnecessaryEscapingLink"
+                  id="exceptionList-components.unnecessaryEscapingCallout.link"
                   defaultMessage="Learn more about endpoint artifact value syntax."
                 />
               </EuiLink>
