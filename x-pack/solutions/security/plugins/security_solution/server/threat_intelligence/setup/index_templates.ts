@@ -64,8 +64,24 @@ import {
  * could have been written to in any environment that didn't elevate
  * `kibana_system`) are abandoned. See
  * `dev_docs/key_concepts/kibana_system_user.mdx`.
+ *
+ * v8: adds the tradecraft-style ranking signals to the threat-reports
+ * data stream:
+ *   - `extracted.relevance` (float 0..1) — LLM-emitted "how actionable
+ *     is this report for detection?" score, populated by the stage-2
+ *     enrichment in `nl_extraction_behavioral`.
+ *   - `extracted.detection_actionability` (keyword) — closed-set
+ *     classifier (`informational` / `iocs_only` / `ttps_present` /
+ *     `rule_candidate`). See `DETECTION_ACTIONABILITY_LEVELS` in
+ *     `common/threat_intelligence/hub/constants.ts`.
+ *   - `rank_score` (float) — multiplicative composite of
+ *     `severity.score * extracted.relevance` computed at extraction
+ *     time. Consumed by `search_reports` when `sort_by: 'rank'` and
+ *     by the dashboard's "Top reports" panel. Reports missing this
+ *     field (e.g. legacy or pending docs) tie-break to 0 via the
+ *     `missing` sort parameter on the read side.
  */
-const TEMPLATE_VERSION = 7;
+const TEMPLATE_VERSION = 8;
 
 /** Keyword sentinel meaning "visible from every space". */
 export const SPACE_ID_GLOBAL = '*' as const;
@@ -140,6 +156,15 @@ const threatReportsTemplate = {
             score: { type: 'float' as const },
           },
         },
+        // Multiplicative composite of `severity.score * extracted.relevance`
+        // computed at extraction time. Populated by the
+        // `nl_extraction_behavioral` workflow's `capture_ranking_signals`
+        // step so downstream consumers (`search_reports` sort_by='rank',
+        // dashboard "Top reports" panel, digest top-N gating) can rank
+        // reports by detection actionability rather than recency or
+        // severity alone. See the v8 doc comment above and tradecraft's
+        // severity × relevance scoring model.
+        rank_score: { type: 'float' as const },
         extracted: {
           properties: {
             iocs: {
@@ -152,6 +177,19 @@ const threatReportsTemplate = {
               },
             },
             ioc_set_hash: { type: 'keyword' as const },
+            // LLM-emitted "how actionable is this report for writing a
+            // detection rule?" score in `[0, 1]`. Populated by the
+            // stage-2 enrichment in `nl_extraction_behavioral`.
+            // Multiplied with `severity.score` to derive `rank_score`.
+            // A neutral 0.5 baseline is written if the enrichment step
+            // fails (best-effort) so reports still get a usable rank.
+            relevance: { type: 'float' as const },
+            // Closed-set classifier — see `DETECTION_ACTIONABILITY_LEVELS`
+            // in `common/threat_intelligence/hub/constants.ts`. Allows
+            // operators to filter the digest / dashboard to only
+            // `rule_candidate` reports without thresholding the float
+            // `relevance` field.
+            detection_actionability: { type: 'keyword' as const },
             ttps: {
               properties: {
                 tactics: { type: 'keyword' as const },

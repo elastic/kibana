@@ -246,6 +246,42 @@ export const IOC_TYPES = ['hash', 'ip', 'domain', 'url'] as const;
 export type IocType = (typeof IOC_TYPES)[number];
 
 /**
+ * Closed-set detection actionability classifier emitted by the stage-2
+ * enrichment in `nl_extraction_behavioral`. Co-pilots downstream
+ * prioritization decisions ("should I bother running a hunt against this
+ * report?"). Ordered from least to most actionable so a future numeric
+ * mapping is monotonic.
+ *
+ *   - `informational`  : narrative / opinion / context only; nothing to detect on.
+ *   - `iocs_only`      : atomic indicators present (IPs, domains, hashes) but
+ *                        no behavior described. Useful for Indicator Match,
+ *                        not for behavioral rules.
+ *   - `ttps_present`   : behavioral TTPs / ATT&CK techniques described but
+ *                        no concrete detection guidance.
+ *   - `rule_candidate` : behavioral details concrete enough to derive a
+ *                        durable Detection Engine rule from.
+ */
+export const DETECTION_ACTIONABILITY_LEVELS = [
+  'informational',
+  'iocs_only',
+  'ttps_present',
+  'rule_candidate',
+] as const;
+export type DetectionActionability = (typeof DETECTION_ACTIONABILITY_LEVELS)[number];
+
+/**
+ * Sort modes for `threat_intel.search_reports`. The default (`'rank'`) is the
+ * tradecraft-style multiplicative `severity.score * extracted.relevance`
+ * composite — see the `rank_score` field on the threat-reports data stream.
+ * `'severity'` falls back to the legacy single-dimension `severity.score`
+ * sort. `'recency'` sorts by `@timestamp desc`. `'relevance'` is the implicit
+ * default when `sort_by` is omitted entirely — it preserves the RRF
+ * (semantic + BM25) retriever ordering for free-text discovery.
+ */
+export const REPORT_SORT_OPTIONS = ['rank', 'severity', 'recency', 'relevance'] as const;
+export type ReportSortBy = (typeof REPORT_SORT_OPTIONS)[number];
+
+/**
  * Customer environment indices searched by `threat_intel.hunt_for_threat`
  * when performing a forward-hunt for a report's IOCs. Mirrors the PRD's
  * named index set so the forward-hunt covers the same surfaces a SOC

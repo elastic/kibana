@@ -10,6 +10,7 @@ import {
   GLOBAL_SPACE_ID,
   SEVERITY_LEVELS,
   THREAT_REPORTS_INDEX_PATTERN,
+  type ReportSortBy,
   type SeverityLevel,
   type SourceType,
   type ThreatCategory,
@@ -34,10 +35,36 @@ export interface SearchReportsParams {
   time_range?: { from: string; to: string };
   categories?: ThreatCategory[];
   regions?: ThreatRegion[];
+  /**
+   * Sort mode.
+   *
+   *   - `undefined` (the default) and `'relevance'` use the hybrid RRF
+   *     retriever (semantic + BM25) — best for free-text discovery
+   *     ("ransomware in EMEA financial services?").
+   *   - `'rank'`     sorts by the tradecraft-style `rank_score` field
+   *     (`severity.score * extracted.relevance`) — best for "give me
+   *     the most actionable reports right now" digest / top-N flows.
+   *   - `'severity'` sorts by the single-dimension `severity.score` —
+   *     legacy compatibility.
+   *   - `'recency'`  sorts by `@timestamp` descending — useful when the
+   *     caller already filtered to a tight window and wants chronology.
+   *
+   * In every mode except `'relevance'` (RRF), the free-text `query`
+   * is still applied as a `multi_match` filter so the result set is
+   * scoped to documents that mention the query terms — only the
+   * ordering changes.
+   */
+  sort_by?: ReportSortBy;
 }
 
 export interface SearchReportsResult {
   total: number;
+  /**
+   * Echo of the effective sort mode so callers can render an
+   * unambiguous "Sorted by: rank score" label without reasoning about
+   * `undefined` vs `'relevance'`.
+   */
+  sort_by: ReportSortBy;
   reports: Array<Record<string, unknown> & { report_id?: string; score?: number | null }>;
 }
 
@@ -56,6 +83,44 @@ const buildSeverityFilter = (minSeverity?: SeverityLevel): Array<Record<string, 
   return [{ terms: { 'severity.level': allowed } }];
 };
 
+// Plain `string[]` (not `readonly`) so the ES client's mutable
+// `SearchSourceConfig` overload accepts it without a cast at every call site.
+const SOURCE_FIELDS: string[] = [
+  '@timestamp',
+  'source',
+  'content.title',
+  'severity',
+  'rank_score',
+  'extracted.ttps.techniques',
+  'extracted.threat_actors',
+  'extracted.categories',
+  'extracted.relevance',
+  'extracted.detection_actionability',
+  'geography.regions',
+  'content_fingerprint',
+];
+
+/**
+ * Translate a `sort_by` mode into an Elasticsearch `sort` clause. `'rank'`
+ * tie-breaks reports without a `rank_score` (legacy or pending-extraction
+ * docs) to `0` via `missing` so they sort below ranked reports rather than
+ * sorting unpredictably or being dropped. `'severity'` uses the same
+ * `missing` strategy for `severity.score`. `'recency'` needs no missing
+ * handler because `@timestamp` is required on every report.
+ */
+const buildSortClause = (
+  sortBy: Exclude<ReportSortBy, 'relevance'>
+): Array<Record<string, unknown>> => {
+  switch (sortBy) {
+    case 'rank':
+      return [{ rank_score: { order: 'desc', missing: 0 } }];
+    case 'severity':
+      return [{ 'severity.score': { order: 'desc', missing: 0 } }];
+    case 'recency':
+      return [{ '@timestamp': { order: 'desc' } }];
+  }
+};
+
 export const searchReports = async (
   esClient: ElasticsearchClient,
   logger: Logger,
@@ -70,6 +135,7 @@ export const searchReports = async (
     time_range: timeRange,
     categories,
     regions,
+    sort_by: sortBy,
   } = params;
 
   const filters: Array<Record<string, unknown>> = [
@@ -84,61 +150,110 @@ export const searchReports = async (
   filters.push(...buildSeverityFilter(minSeverity));
 
   const sharedFilter = filters.length ? { bool: { filter: filters } } : undefined;
+  // `undefined` and the explicit `'relevance'` both mean "use the RRF
+  // retriever ranking". Any other value switches to a field-sorted
+  // bool query. The result echoes the effective mode so the caller can
+  // render an unambiguous label.
+  const effectiveSort: ReportSortBy = sortBy ?? 'relevance';
 
-  // RRF retriever combines a BM25 multi_match against the mirror fields with a
-  // semantic retriever against the semantic_text fields. RRF degrades gracefully
-  // if inference is unavailable — BM25 hits still surface.
+  if (effectiveSort === 'relevance') {
+    // RRF retriever combines a BM25 multi_match against the mirror fields with a
+    // semantic retriever against the semantic_text fields. RRF degrades gracefully
+    // if inference is unavailable — BM25 hits still surface.
+    const response = await esClient.search({
+      index: THREAT_REPORTS_INDEX_PATTERN,
+      size,
+      _source: SOURCE_FIELDS,
+      retriever: {
+        rrf: {
+          rank_window_size: Math.max(size * 4, 50),
+          rank_constant: 60,
+          retrievers: [
+            {
+              standard: {
+                query: {
+                  bool: {
+                    must: [
+                      {
+                        multi_match: {
+                          query,
+                          fields: ['content.title_bm25^2', 'content.body_text_bm25'],
+                        },
+                      },
+                    ],
+                    ...(sharedFilter ? { filter: sharedFilter.bool.filter } : {}),
+                  },
+                },
+              },
+            },
+            {
+              standard: {
+                query: {
+                  bool: {
+                    should: [
+                      { semantic: { field: 'content.title', query } },
+                      { semantic: { field: 'content.body_text', query } },
+                    ],
+                    minimum_should_match: 1,
+                    ...(sharedFilter ? { filter: sharedFilter.bool.filter } : {}),
+                  },
+                },
+              },
+            },
+          ],
+        },
+      },
+    } as Parameters<typeof esClient.search>[0]);
+
+    const hits = (response.hits.hits ?? []).map((hit) => ({
+      report_id: hit._id,
+      score: hit._score,
+      ...(hit._source as Record<string, unknown>),
+    }));
+
+    logger.debug(
+      `search_reports returned ${hits.length} hits for query="${query}" ` +
+        `in space="${spaceId}" sort_by="relevance"`
+    );
+
+    return {
+      total:
+        typeof response.hits.total === 'number'
+          ? response.hits.total
+          : response.hits.total?.value ?? hits.length,
+      sort_by: effectiveSort,
+      reports: hits,
+    };
+  }
+
+  // Field-sorted mode. The free-text `query` becomes a BM25 must-match so
+  // we still scope to documents that mention the query terms — only the
+  // ordering switches from RRF to the chosen field. Skipping the semantic
+  // retriever here is deliberate: when the caller asked for "top N by rank
+  // score" they don't want semantic re-ordering of the result set.
+  //
+  // Cast mirrors the RRF branch's `as Parameters<typeof esClient.search>[0]`
+  // and exists because `buildSortClause` returns
+  // `Array<Record<string, unknown>>` which is a structural superset of the
+  // ES client's narrower `SortCombinations` union; a precise type would
+  // require re-deriving the union here for no read-side benefit.
   const response = await esClient.search({
     index: THREAT_REPORTS_INDEX_PATTERN,
     size,
-    _source: [
-      '@timestamp',
-      'source',
-      'content.title',
-      'severity',
-      'extracted.ttps.techniques',
-      'extracted.threat_actors',
-      'extracted.categories',
-      'geography.regions',
-      'content_fingerprint',
-    ],
-    retriever: {
-      rrf: {
-        rank_window_size: Math.max(size * 4, 50),
-        rank_constant: 60,
-        retrievers: [
+    track_total_hits: true,
+    _source: SOURCE_FIELDS,
+    sort: buildSortClause(effectiveSort),
+    query: {
+      bool: {
+        must: [
           {
-            standard: {
-              query: {
-                bool: {
-                  must: [
-                    {
-                      multi_match: {
-                        query,
-                        fields: ['content.title_bm25^2', 'content.body_text_bm25'],
-                      },
-                    },
-                  ],
-                  ...(sharedFilter ? { filter: sharedFilter.bool.filter } : {}),
-                },
-              },
-            },
-          },
-          {
-            standard: {
-              query: {
-                bool: {
-                  should: [
-                    { semantic: { field: 'content.title', query } },
-                    { semantic: { field: 'content.body_text', query } },
-                  ],
-                  minimum_should_match: 1,
-                  ...(sharedFilter ? { filter: sharedFilter.bool.filter } : {}),
-                },
-              },
+            multi_match: {
+              query,
+              fields: ['content.title_bm25^2', 'content.body_text_bm25'],
             },
           },
         ],
+        ...(sharedFilter ? { filter: sharedFilter.bool.filter } : {}),
       },
     },
   } as Parameters<typeof esClient.search>[0]);
@@ -150,7 +265,8 @@ export const searchReports = async (
   }));
 
   logger.debug(
-    `search_reports returned ${hits.length} hits for query="${query}" in space="${spaceId}"`
+    `search_reports returned ${hits.length} hits for query="${query}" ` +
+      `in space="${spaceId}" sort_by="${effectiveSort}"`
   );
 
   return {
@@ -158,6 +274,7 @@ export const searchReports = async (
       typeof response.hits.total === 'number'
         ? response.hits.total
         : response.hits.total?.value ?? hits.length,
+    sort_by: effectiveSort,
     reports: hits,
   };
 };

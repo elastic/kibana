@@ -14,30 +14,30 @@
 # adapter implementations belong to follow-up PRs. The key shape this workflow
 # pins down is the `switch` dispatch + fingerprint-and-write pattern.
 #
-# `content_fingerprint` is intended to be the SHA-256 of the normalized
-# response body so RSS-syndicated copies dedup via `op_type: create` on a
-# matching `_id`. A `| sha256` filter is not registered in the workflow
-# Liquid engine yet — see
-# `src/platform/packages/shared/kbn-workflows/common/utils/create_workflow_liquid_engine`
-# and `filter_contribution.md`. Until that lands, the fingerprint is a
-# short composite of `adapter_type:item_id:now` hoisted into
-# `variables.fingerprint` by `capture_source_fields` and stored on the
-# doc as `content_fingerprint`. Once a `| sha256` filter lands, this
-# value flips to `{{ steps.<fetch>.output.data | sha256 }}` so subsequent
-# fetches of the same RSS body produce the same fingerprint. The HTTP
-# step's response body lives on `.output.data` (see `HttpResponseSchema`
-# in `src/platform/plugins/shared/workflows_management/common/stack_connectors_schema/http.ts`),
-# *not* `.output.body`.
+# `content_fingerprint` is the SHA-256 hex digest of the normalized
+# `<source.url>:<response.body>` pair so RSS-syndicated copies and
+# re-fetches of the same content collapse to the same fingerprint. The
+# `| sha256` Liquid filter is registered in the workflow engine — see
+# `src/platform/packages/shared/kbn-workflows/common/utils/create_workflow_liquid_engine`.
+# The HTTP step's response body lives on `.output.data` (see
+# `HttpResponseSchema` in
+# `src/platform/plugins/shared/workflows_management/common/stack_connectors_schema/http.ts`),
+# *not* `.output.body`. Pre-pending the source URL means two different
+# feeds that legitimately mirror the same upstream advisory both keep a
+# row each, while a re-fetch from the same URL collapses to a single
+# fingerprint.
 #
 # `_id` is intentionally NOT set on the `elasticsearch.index` step. The
 # target is a data stream and Elasticsearch rejects writes that combine
 # `op_type: create` with a caller-supplied `_id` against a data stream
-# with `op_type create with a provided id is not allowed in data
-# streams`. The fingerprint therefore only lives on the doc body for now
-# — true `op_type: create`-based dedup will require either (a) a sha256
-# Liquid filter plus a regular index instead of a data stream, or (b) an
-# upstream "have I seen this fingerprint?" search step before the index
-# call. Both are out of scope for this YAML.
+# (`op_type create with a provided id is not allowed in data streams`).
+# Dedup is therefore enforced upstream of the write via a
+# `check_already_ingested` `elasticsearch.search` step that aborts the
+# per-source branch when the same `content_fingerprint` is already
+# present in the data stream within the configured TTL window
+# (`DEDUP_TTL` below — defaults to the tradecraft 90-day horizon so
+# stale duplicates can re-enter the pipeline only after the upstream
+# advisory has had time to rotate).
 #
 # The previous revision wrote the entire response body verbatim into
 # `content_fingerprint`. That field is mapped as `keyword`, and Lucene
@@ -96,25 +96,17 @@ steps:
         with:
           adapter_type: "{{ foreach.item._source.adapter_type }}"
           item_id: "{{ foreach.item._id }}"
-          # Placeholder `content_fingerprint` until a `| sha256` Liquid
-          # filter is registered (see top-of-file comment). Hoisted into
-          # `variables` to match the existing `variables.adapter_type`
-          # / `variables.item_id` pattern and to keep the value short
-          # enough not to bust the keyword field's 32766-byte term
-          # limit. The `now` suffix means each run produces a fresh
-          # fingerprint per source — true dedup waits on the sha256
-          # filter.
-          # `now` is a JS `Date` in the rendering context. Interpolating
-          # it directly via `{{ now }}` calls `Date.prototype.toString()`
-          # and produces `"Thu May 14 2026 13:01:02 GMT-0700 (Pacific
-          # Daylight Time)"`, which Elasticsearch's
-          # `strict_date_optional_time||epoch_millis` parser rejects on
-          # the `@timestamp` field below. The built-in LiquidJS
-          # `date_to_xmlschema` filter formats it as ISO 8601 with a
-          # colon-separated offset (e.g. `2026-05-14T13:01:02-07:00`),
-          # which is exactly what `strict_date_optional_time` parses.
-          # Reused here so the fingerprint stays human-readable too.
-          fingerprint: "{{ foreach.item._source.adapter_type }}:{{ foreach.item._id }}:{{ now | date_to_xmlschema }}"
+          source_url: "{{ foreach.item._source.config.url }}"
+          # `content_fingerprint` is computed inside each adapter case
+          # AFTER the fetch step lands, via `| sha256` on the
+          # `<source.url>:<response.body>` pair. See the per-case
+          # `*_compute_fingerprint` and `*_check_dedup` steps below for
+          # the dedup pipeline; the legacy `adapter_type:item_id:now`
+          # placeholder previously held this slot has been removed
+          # because (a) it made every run a fresh fingerprint and so
+          # never deduped anything, and (b) the real fingerprint depends
+          # on the response body which is not yet available at this
+          # point in the workflow.
 
       - name: dispatch_by_adapter
         type: switch
@@ -129,6 +121,56 @@ steps:
                   url: "{{ foreach.item._source.config.url }}"
                 on-failure:
                   continue: true
+
+              # Cheap pre-filter — skip the rest of this adapter branch
+              # when the fetch failed (HTTP step swallowed via
+              # `on-failure: continue: true` above) or the feed returned
+              # an empty body. KQL's `field : *` matches docs where the
+              # field exists with a non-empty value, so `NOT … : *`
+              # short-circuits both "missing" and "empty string" without
+              # paying the cost of the sha256 hash or the dedup search.
+              - name: rss_skip_empty
+                type: loop.continue
+                if: "NOT steps.rss_fetch.output.data : *"
+
+              # Deterministic SHA-256 of `<source.url>:<response.body>`.
+              # Two feeds that legitimately mirror the same upstream
+              # advisory each keep a row (different URLs → different
+              # digests); a re-fetch from the same URL collapses to a
+              # single digest. The `| append:` chain is the only Liquid
+              # idiom that lets us hash a multi-token expression — `{{ a
+              # }}:{{ b }} | sha256` is parsed as two interpolations
+              # followed by literal text " | sha256".
+              - name: rss_compute_fingerprint
+                type: data.set
+                with:
+                  content_fingerprint: "{{ variables.source_url | append: ':' | append: steps.rss_fetch.output.data | sha256 }}"
+
+              # Pre-write dedup gate. The data stream target rejects
+              # `op_type: create` with a caller-supplied `_id`, so we
+              # can't push dedup into the write itself. The 90-day TTL
+              # mirrors tradecraft's URL-normalized seen-store horizon —
+              # an advisory that disappears for 90+ days can legitimately
+              # re-enter the pipeline as fresh content.
+              - name: rss_check_dedup
+                type: elasticsearch.search
+                with:
+                  index: .kibana-threat-reports
+                  size: 0
+                  track_total_hits: true
+                  query:
+                    bool:
+                      filter:
+                        - term:
+                            content_fingerprint: "{{ steps.rss_compute_fingerprint.output.content_fingerprint }}"
+                        - range:
+                            "@timestamp":
+                              gte: "now-90d"
+
+              - name: rss_skip_if_seen
+                type: loop.continue
+                if: "steps.rss_check_dedup.output.hits.total.value > 0"
+
               - name: fingerprint_and_write_rss
                 type: elasticsearch.index
                 with:
@@ -139,7 +181,7 @@ steps:
                   op_type: create
                   document:
                     "@timestamp": "{{ now | date_to_xmlschema }}"
-                    content_fingerprint: "{{ variables.fingerprint }}"
+                    content_fingerprint: "{{ steps.rss_compute_fingerprint.output.content_fingerprint }}"
                     space_id: "{{ foreach.item._source.space_id | default: '*' }}"
                     source:
                       type: rss
@@ -157,7 +199,10 @@ steps:
                       ingested_at: "{{ now | date_to_xmlschema }}"
                       extraction_method: pending
                 on-failure:
-                  # 409 conflict on op_type:create == duplicate fingerprint -> skip silently
+                  # Defensive — `rss_check_dedup` should have caught any
+                  # duplicate already. A 409 here means another worker
+                  # raced us on the same fingerprint in the dedup TTL
+                  # window; treat it the same as the dedup skip.
                   continue: true
           - match: stix
             steps:
@@ -170,6 +215,39 @@ steps:
                     Accept: application/stix+json
                 on-failure:
                   continue: true
+
+              # See the RSS case for the rationale behind each of these
+              # four gates — the pattern is identical and intentionally
+              # so, the only thing that varies per adapter is the fetch
+              # step name we hash and the `source.type` we write.
+              - name: stix_skip_empty
+                type: loop.continue
+                if: "NOT steps.stix_pull.output.data : *"
+
+              - name: stix_compute_fingerprint
+                type: data.set
+                with:
+                  content_fingerprint: "{{ variables.source_url | append: ':' | append: steps.stix_pull.output.data | sha256 }}"
+
+              - name: stix_check_dedup
+                type: elasticsearch.search
+                with:
+                  index: .kibana-threat-reports
+                  size: 0
+                  track_total_hits: true
+                  query:
+                    bool:
+                      filter:
+                        - term:
+                            content_fingerprint: "{{ steps.stix_compute_fingerprint.output.content_fingerprint }}"
+                        - range:
+                            "@timestamp":
+                              gte: "now-90d"
+
+              - name: stix_skip_if_seen
+                type: loop.continue
+                if: "steps.stix_check_dedup.output.hits.total.value > 0"
+
               - name: fingerprint_and_write_stix
                 type: elasticsearch.index
                 with:
@@ -177,7 +255,7 @@ steps:
                   op_type: create
                   document:
                     "@timestamp": "{{ now | date_to_xmlschema }}"
-                    content_fingerprint: "{{ variables.fingerprint }}"
+                    content_fingerprint: "{{ steps.stix_compute_fingerprint.output.content_fingerprint }}"
                     space_id: "{{ foreach.item._source.space_id | default: '*' }}"
                     source:
                       type: stix
@@ -207,6 +285,35 @@ steps:
                     Accept: application/taxii+json;version=2.1
                 on-failure:
                   continue: true
+
+              - name: taxii_skip_empty
+                type: loop.continue
+                if: "NOT steps.taxii_poll.output.data : *"
+
+              - name: taxii_compute_fingerprint
+                type: data.set
+                with:
+                  content_fingerprint: "{{ variables.source_url | append: ':' | append: steps.taxii_poll.output.data | sha256 }}"
+
+              - name: taxii_check_dedup
+                type: elasticsearch.search
+                with:
+                  index: .kibana-threat-reports
+                  size: 0
+                  track_total_hits: true
+                  query:
+                    bool:
+                      filter:
+                        - term:
+                            content_fingerprint: "{{ steps.taxii_compute_fingerprint.output.content_fingerprint }}"
+                        - range:
+                            "@timestamp":
+                              gte: "now-90d"
+
+              - name: taxii_skip_if_seen
+                type: loop.continue
+                if: "steps.taxii_check_dedup.output.hits.total.value > 0"
+
               - name: fingerprint_and_write_taxii
                 type: elasticsearch.index
                 with:
@@ -214,7 +321,7 @@ steps:
                   op_type: create
                   document:
                     "@timestamp": "{{ now | date_to_xmlschema }}"
-                    content_fingerprint: "{{ variables.fingerprint }}"
+                    content_fingerprint: "{{ steps.taxii_compute_fingerprint.output.content_fingerprint }}"
                     space_id: "{{ foreach.item._source.space_id | default: '*' }}"
                     source:
                       type: taxii
@@ -242,6 +349,35 @@ steps:
                   url: "{{ foreach.item._source.config.url }}"
                 on-failure:
                   continue: true
+
+              - name: vendor_skip_empty
+                type: loop.continue
+                if: "NOT steps.vendor_call.output.data : *"
+
+              - name: vendor_compute_fingerprint
+                type: data.set
+                with:
+                  content_fingerprint: "{{ variables.source_url | append: ':' | append: steps.vendor_call.output.data | sha256 }}"
+
+              - name: vendor_check_dedup
+                type: elasticsearch.search
+                with:
+                  index: .kibana-threat-reports
+                  size: 0
+                  track_total_hits: true
+                  query:
+                    bool:
+                      filter:
+                        - term:
+                            content_fingerprint: "{{ steps.vendor_compute_fingerprint.output.content_fingerprint }}"
+                        - range:
+                            "@timestamp":
+                              gte: "now-90d"
+
+              - name: vendor_skip_if_seen
+                type: loop.continue
+                if: "steps.vendor_check_dedup.output.hits.total.value > 0"
+
               - name: fingerprint_and_write_vendor
                 type: elasticsearch.index
                 with:
@@ -249,7 +385,7 @@ steps:
                   op_type: create
                   document:
                     "@timestamp": "{{ now | date_to_xmlschema }}"
-                    content_fingerprint: "{{ variables.fingerprint }}"
+                    content_fingerprint: "{{ steps.vendor_compute_fingerprint.output.content_fingerprint }}"
                     space_id: "{{ foreach.item._source.space_id | default: '*' }}"
                     source:
                       type: vendor_api

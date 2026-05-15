@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { sha256 } from 'js-sha256';
 import type { FS, LiquidOptions } from 'liquidjs';
 import { Liquid } from 'liquidjs';
 
@@ -68,6 +69,51 @@ const removeDisallowedLiquidTags = (engine: Liquid): void => {
 };
 
 /**
+ * Coerces a value into the canonical UTF-8 string the `sha256` filter
+ * hashes. Strings hash verbatim; numbers and booleans round-trip through
+ * `String()`; `null` / `undefined` hash the empty string (deterministic,
+ * distinct from any non-empty input); everything else (arrays / objects)
+ * round-trips through `JSON.stringify` so structurally-equal inputs
+ * produce equal digests.
+ *
+ * `JSON.stringify` is intentionally NOT key-sorted — workflow templates
+ * typically hash response bodies (which arrive as strings) and never
+ * synthesize object literals on the fly. If a future caller needs a
+ * key-stable hash for object inputs they can `| json` first, but the
+ * default keeps the filter cheap and predictable for the dominant
+ * "hash this fetched body" use case.
+ */
+const coerceToHashable = (value: unknown): string => {
+  if (typeof value === 'string') return value;
+  if (value === null || value === undefined) return '';
+  if (typeof value === 'number' || typeof value === 'boolean') return String(value);
+  try {
+    return JSON.stringify(value);
+  } catch {
+    // Circular references — fall back to the loose string coercion rather
+    // than throwing. A `[object Object]` digest is collision-prone but it
+    // is at least deterministic for the same shape, which is what callers
+    // using sha256 for dedup care about.
+    return String(value);
+  }
+};
+
+/**
+ * Registers the filters the workflow Liquid dialect adds on top of the
+ * built-in LiquidJS set. Currently:
+ *
+ *   - `sha256`: returns the lowercase hex SHA-256 digest of the input.
+ *     Used by workflows that need a deterministic dedup fingerprint for
+ *     externally-fetched content (e.g. the threat-intelligence
+ *     `source_ingestion` workflow's `content_fingerprint`). Pure-JS
+ *     implementation via `js-sha256` so the engine stays isomorphic
+ *     (`shared-common` package).
+ */
+const registerWorkflowFilters = (engine: Liquid): void => {
+  engine.registerFilter('sha256', (value: unknown) => sha256(coerceToHashable(value)));
+};
+
+/**
  * Creates a LiquidJS engine configured for workflow templates.
  * Uses an in-memory filesystem, restricts tags to the supported set,
  * and enables ownPropertyOnly.
@@ -94,5 +140,6 @@ export const createWorkflowLiquidEngine = (options?: LiquidOptions): Liquid => {
     memoryLimit: 15_000_000,
   });
   removeDisallowedLiquidTags(engine);
+  registerWorkflowFilters(engine);
   return engine;
 };

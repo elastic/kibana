@@ -14,7 +14,15 @@
  * `x-pack/solutions/security/plugins/security_solution/common/experimental_features.ts`
  * — consume them from there.
  */
-export type { SourceType, SeverityLevel, IocType, ThreatCategory, ThreatRegion } from './constants';
+export type {
+  SourceType,
+  SeverityLevel,
+  IocType,
+  ThreatCategory,
+  ThreatRegion,
+  DetectionActionability,
+  ReportSortBy,
+} from './constants';
 export {
   PLUGIN_ID,
   PLUGIN_NAME,
@@ -35,6 +43,8 @@ export {
   IOC_TYPES,
   THREAT_CATEGORIES,
   THREAT_REGIONS,
+  DETECTION_ACTIONABILITY_LEVELS,
+  REPORT_SORT_OPTIONS,
   HUNT_FOR_THREAT_INDEX_PATTERNS,
   THREAT_INTELLIGENCE_API_BASE,
   SEARCH_REPORTS_API_PATH,

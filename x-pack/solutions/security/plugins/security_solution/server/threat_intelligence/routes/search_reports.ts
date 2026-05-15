@@ -7,12 +7,14 @@
 
 import { schema } from '@kbn/config-schema';
 import {
+  REPORT_SORT_OPTIONS,
   SEARCH_REPORTS_API_PATH,
   SEVERITY_LEVELS,
   SOURCE_TYPES,
   THREAT_CATEGORIES,
   THREAT_INTELLIGENCE_API_PRIVILEGES,
   THREAT_REGIONS,
+  type ReportSortBy,
   type SeverityLevel,
   type SourceType,
   type ThreatCategory,
@@ -71,6 +73,14 @@ const searchReportsBodySchema = schema.object({
       })
     )
   ),
+  sort_by: schema.maybe(
+    schema.string({
+      validate: (value) =>
+        (REPORT_SORT_OPTIONS as readonly string[]).includes(value)
+          ? undefined
+          : `must be one of: ${enumLiterals(REPORT_SORT_OPTIONS)}`,
+    })
+  ),
 });
 
 /**
@@ -113,6 +123,7 @@ export const registerSearchReportsRoute = ({
             time_range: request.body.time_range,
             categories: request.body.categories as ThreatCategory[] | undefined,
             regions: request.body.regions as ThreatRegion[] | undefined,
+            sort_by: request.body.sort_by as ReportSortBy | undefined,
           });
           return response.ok({ body: result });
         } catch (err) {

@@ -10,6 +10,7 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import {
+  REPORT_SORT_OPTIONS,
   SEARCH_REPORTS_API_PATH,
   SEVERITY_LEVELS,
   SOURCE_TYPES,
@@ -75,6 +76,19 @@ const searchReportsSchema = z.object({
     .describe(
       'Restrict to reports tagged with any of the given macro geographic regions ' +
         '(e.g. ["north-america", "europe"]). Backed by `geography.regions` on the report.'
+    ),
+  sort_by: z
+    .enum(REPORT_SORT_OPTIONS)
+    .optional()
+    .describe(
+      'Sort mode. Omit (or pass `"relevance"`) for hybrid semantic + BM25 RRF ranking — ' +
+        'best for free-text discovery. Pass `"rank"` for the tradecraft-style ' +
+        'multiplicative `severity.score * extracted.relevance` composite — best for ' +
+        '"give me the most actionable reports right now" digest / top-N flows. ' +
+        '`"severity"` and `"recency"` are single-dimension sorts on `severity.score` ' +
+        'and `@timestamp` respectively. In every non-RRF mode the free-text `query` ' +
+        'is still applied as a BM25 must-match so the result set is scoped to ' +
+        'documents that mention the query terms — only the ordering changes.'
     ),
 });
 

@@ -120,13 +120,15 @@ steps:
             required:
               - behaviors
 
-      # Stage 2 — closed-set taxonomy enrichment. Drives the visual
-      # dashboard's category-breakdown panel and the "Affects You" geo
-      # filter without dragging hunt_behavior off-task. The LLM is
-      # constrained to the THREAT_CATEGORIES / THREAT_REGIONS enums
-      # (see common/constants.ts) so downstream consumers don't have
-      # to handle long-tail free-text labels. Hallucinations outside
-      # the enums are dropped by the persist step's `default: []`.
+      # Stage 2 — closed-set taxonomy enrichment + detection-actionability
+      # scoring. Drives the visual dashboard's category-breakdown panel,
+      # the "Affects You" geo filter, AND the tradecraft-style multiplicative
+      # rank_score (severity × relevance) used by `search_reports` when
+      # `sort_by='rank'`. The LLM is constrained to the THREAT_CATEGORIES /
+      # THREAT_REGIONS / DETECTION_ACTIONABILITY_LEVELS enums (see
+      # common/constants.ts) so downstream consumers don't have to handle
+      # long-tail free-text labels. Hallucinations outside the enums are
+      # dropped by `capture_ranking_signals` below via `| default:`.
       - name: enrich_taxonomy
         type: ai.agent
         # Same default-agent fallback as `extract_behaviors` above —
@@ -134,9 +136,10 @@ steps:
         # rather than failing the literal-string lookup for `default`.
         with:
           message: >-
-            You are a threat intel taxonomist. Categorize the following report.
+            You are a threat intel taxonomist. Categorize the following report
+            AND score how actionable it is for detection-rule authors.
 
-            Return a strict JSON object with exactly two keys:
+            Return a strict JSON object with exactly four keys:
 
               categories: array of zero or more values from this closed set:
                 ["apt", "malware", "ransomware", "vulnerability", "data-breach",
@@ -148,6 +151,21 @@ steps:
                 ["north-america", "south-america", "europe", "middle-east",
                  "africa", "south-asia", "east-asia", "southeast-asia",
                  "oceania", "global"]
+
+              relevance: float in [0, 1] expressing how useful this report
+                is for *writing a detection rule*. Anchor points:
+                  0.0  - opinion piece, policy commentary, vendor PR.
+                  0.25 - news of a breach with no technical detail.
+                  0.5  - IOCs listed but no behavior described.
+                  0.75 - TTPs / ATT&CK techniques described.
+                  1.0  - concrete behavior (commands, registry keys,
+                         process patterns) suitable for a durable rule.
+
+              detection_actionability: exactly one value from this closed set:
+                ["informational", "iocs_only", "ttps_present", "rule_candidate"]
+                Use the same anchors as `relevance` — "rule_candidate" only
+                when the report names concrete behaviors a rule author
+                could lift directly.
 
             Pick only categories actively described in the text (not background
             mentions). Pick "global" for regions only when the activity
@@ -169,13 +187,46 @@ steps:
                 type: array
                 items:
                   type: string
+              relevance:
+                type: number
+                description: 0..1 detection actionability score
+              detection_actionability:
+                type: string
+                description: Closed-set DETECTION_ACTIONABILITY_LEVELS classifier
             required:
               - categories
               - regions
+              - relevance
+              - detection_actionability
         on-failure:
           # Enrichment is best-effort — a stale connector or an over-quota
           # LLM should not block the rest of the extraction pipeline.
+          # When enrichment fails, `capture_ranking_signals` below falls
+          # back to a neutral relevance of 0.5 so the report still gets
+          # a usable rank_score (severity.score * 0.5) instead of being
+          # silently dropped from sort_by='rank' results.
           continue: true
+
+      # Compute and hoist the ranking signals so `persist_extractions`
+      # can write a single composite `rank_score` to the doc without
+      # reaching back into the LLM step's output (and so the rest of the
+      # workflow doesn't pay the cost of repeatedly evaluating the
+      # multiplicative expression). The neutral defaults match the
+      # "best-effort" stance of `enrich_taxonomy`'s `on-failure:
+      # continue: true` — a missing relevance yields a baseline rank of
+      # `severity.score * 0.5`, never a NaN or 0 that would hide the
+      # report from sort_by='rank' results.
+      #
+      # `"${{ ... }}"` (dollar-prefixed) takes the evaluateExpression()
+      # branch of WorkflowTemplatingEngine so the multiplication
+      # returns a number rather than a coerced string — same pattern
+      # used in `persist_extractions` below for the arrays.
+      - name: capture_ranking_signals
+        type: data.set
+        with:
+          relevance: "${{ steps.enrich_taxonomy.output.structured_output.relevance | default: 0.5 }}"
+          detection_actionability: "{{ steps.enrich_taxonomy.output.structured_output.detection_actionability | default: 'informational' }}"
+          severity_score: "${{ foreach.item._source.severity.score | default: 0 }}"
 
       # Cross-report correlation: find OTHER reports that already share this
       # report's IOC set hash. The exact-set match is cheap (one terms query
@@ -240,8 +291,22 @@ steps:
               ioc_set_hash: "{{ steps.extract_iocs.output.ioc_set_hash }}"
               behaviors: "${{ steps.extract_behaviors.output.structured_output.behaviors }}"
               categories: "${{ steps.enrich_taxonomy.output.structured_output.categories }}"
+              # Hoisted from `capture_ranking_signals` so the neutral
+              # defaults (0.5 / 'informational') apply uniformly whether
+              # `enrich_taxonomy` succeeded or hit `on-failure: continue: true`.
+              # Mapped as `float` / `keyword` by the v8 index template.
+              relevance: "${{ variables.relevance }}"
+              detection_actionability: "{{ variables.detection_actionability }}"
             geography:
               regions: "${{ steps.enrich_taxonomy.output.structured_output.regions }}"
+            # Top-level multiplicative composite (`severity.score *
+            # extracted.relevance`) — the tradecraft-style ranking signal.
+            # Consumed by `search_reports` when `sort_by: 'rank'` and by
+            # the dashboard's "Top reports" panel. Computed at extraction
+            # time rather than at query time so the read path stays a
+            # single `_search` with a regular `sort` clause (no painless,
+            # no script_score).
+            rank_score: "${{ variables.severity_score | times: variables.relevance }}"
             provenance:
               extracted_at: "${{ now }}"
               extraction_method: workflow_v2
