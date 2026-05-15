@@ -188,6 +188,7 @@ function getPartialRuleFromRaw<Params extends RuleTypeParams>(
             muteAll: partialRawRule.muteAll ?? false,
           })?.map((s) => s.id),
           isSnoozedUntil: isSnoozedUntil as PartialRule['isSnoozedUntil'],
+          ...(snoozedInstances?.length ? { snoozedInstances } : {}),
         }
       : {}),
     ...(updatedAt ? { updatedAt: new Date(updatedAt) } : {}),

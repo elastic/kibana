@@ -12,38 +12,50 @@ import type { QueryOptionsOverrides } from '@kbn/alerts-ui-shared/src/common/typ
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import { queryKeys } from '../query_keys';
-import type { MutedAlerts, ServerError } from '../types';
-import type { GetMutedAlertsInstancesByRuleParams } from '../apis/get_muted_alerts_instances_by_rule';
-import { getMutedAlertsInstancesByRule } from '../apis/get_muted_alerts_instances_by_rule';
+import type { MutedAlerts, SnoozedAlerts, ServerError } from '../types';
+import type { GetAlertSnoozeStateByRuleParams } from '../apis/get_muted_alerts_instances_by_rule';
+import { getAlertSnoozeStateByRule } from '../apis/get_muted_alerts_instances_by_rule';
 
-const ERROR_TITLE = i18n.translate('xpack.responseOpsAlertsApis.mutedAlerts.api.get', {
-  defaultMessage: 'Error fetching muted alerts data',
+const ERROR_TITLE = i18n.translate('xpack.responseOpsAlertsApis.alertSnoozeState.api.get', {
+  defaultMessage: 'Error fetching alert snooze state',
 });
 
-const getMutedAlerts = ({ http, signal, ruleIds }: GetMutedAlertsInstancesByRuleParams) =>
-  getMutedAlertsInstancesByRule({ http, ruleIds, signal }).then(({ data: rules }) =>
-    rules?.reduce((mutedAlerts, rule) => {
-      mutedAlerts[rule.id] = rule.muted_alert_ids;
-      return mutedAlerts;
-    }, {} as MutedAlerts)
-  );
+export interface AlertSnoozeState {
+  mutedAlerts: MutedAlerts;
+  snoozedAlerts: SnoozedAlerts;
+}
 
-export interface UseGetMutedAlertsQueryParams {
+const getAlertSnoozeState = ({
+  http,
+  signal,
+  ruleIds,
+}: GetAlertSnoozeStateByRuleParams): Promise<AlertSnoozeState> =>
+  getAlertSnoozeStateByRule({ http, ruleIds, signal }).then(({ data: rules }) => {
+    const mutedAlerts: MutedAlerts = {};
+    const snoozedAlerts: SnoozedAlerts = {};
+    for (const rule of rules ?? []) {
+      mutedAlerts[rule.id] = rule.mutedAlertIds;
+      snoozedAlerts[rule.id] = rule.snoozedInstances;
+    }
+    return { mutedAlerts, snoozedAlerts };
+  });
+
+export interface UseGetAlertSnoozeStateQueryParams {
   ruleIds: string[];
   http: HttpStart;
   notifications: NotificationsStart;
 }
 
-export const getKey = queryKeys.getMutedAlerts;
+export const getKey = queryKeys.getAlertSnoozeState;
 
-export const useGetMutedAlertsQuery = (
-  { ruleIds, http, notifications: { toasts } }: UseGetMutedAlertsQueryParams,
-  { enabled }: QueryOptionsOverrides<typeof getMutedAlerts> = {}
+export const useGetAlertSnoozeStateQuery = (
+  { ruleIds, http, notifications: { toasts } }: UseGetAlertSnoozeStateQueryParams,
+  { enabled }: QueryOptionsOverrides<typeof getAlertSnoozeState> = {}
 ) => {
   return useQuery({
     context: AlertsQueryContext,
     queryKey: getKey(ruleIds),
-    queryFn: ({ signal }) => getMutedAlerts({ http, signal, ruleIds }),
+    queryFn: ({ signal }) => getAlertSnoozeState({ http, signal, ruleIds }),
     onError: (error: ServerError) => {
       if (error.name !== 'AbortError') {
         toasts.addError(error.body?.message ? new Error(error.body.message) : error, {

@@ -288,6 +288,21 @@ export const UNMUTE = i18n.translate('xpack.responseOpsAlertsTable.actions.unmut
   defaultMessage: 'Unmute',
 });
 
+export const SNOOZE = i18n.translate('xpack.responseOpsAlertsTable.actions.snooze', {
+  defaultMessage: 'Snooze',
+});
+
+export const UNSNOOZE = i18n.translate('xpack.responseOpsAlertsTable.actions.unsnooze', {
+  defaultMessage: 'Unsnooze',
+});
+
+export const LOADING_SNOOZE_STATE = i18n.translate(
+  'xpack.responseOpsAlertsTable.actions.loadingSnoozeState',
+  {
+    defaultMessage: 'Loading snooze state',
+  }
+);
+
 export const MUTE_SELECTED = i18n.translate('xpack.responseOpsAlertsTable.actions.muteSelected', {
   defaultMessage: 'Mute selected',
 });

@@ -27,6 +27,7 @@ export {
   monitoringSchema as monitoringSchemaV1,
   ruleResponseSchema as ruleResponseSchemaV1,
   ruleSnoozeScheduleSchema as ruleSnoozeScheduleSchemaV1,
+  snoozedAlertInstanceSchema as snoozedAlertInstanceSchemaV1,
   notifyWhenSchema as notifyWhenSchemaV1,
   scheduleIdsSchema as scheduleIdsSchemaV1,
   alertDelaySchema as alertDelaySchemaV1,

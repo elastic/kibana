@@ -46,6 +46,7 @@ export interface RuleResponse<Params extends RuleParamsV1 = never> {
   monitoring?: RuleResponseSchemaType['monitoring'];
   snooze_schedule?: RuleResponseSchemaType['snooze_schedule'];
   active_snoozes?: RuleResponseSchemaType['active_snoozes'];
+  snoozed_alert_instances?: RuleResponseSchemaType['snoozed_alert_instances'];
   is_snoozed_until?: RuleResponseSchemaType['is_snoozed_until'];
   last_run?: RuleResponseSchemaType['last_run'];
   next_run?: RuleResponseSchemaType['next_run'];

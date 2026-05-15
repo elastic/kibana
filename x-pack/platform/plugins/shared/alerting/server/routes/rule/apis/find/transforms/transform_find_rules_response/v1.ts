@@ -67,6 +67,20 @@ export const transformPartialRule = <Params extends RuleParams = never>(
     ...(rule.monitoring ? { monitoring: transformMonitoringV1(rule.monitoring) } : {}),
     ...(rule.snoozeSchedule ? { snooze_schedule: rule.snoozeSchedule } : {}),
     ...(rule.activeSnoozes ? { active_snoozes: rule.activeSnoozes } : {}),
+    ...(rule.snoozedInstances
+      ? {
+          snoozed_alert_instances: rule.snoozedInstances.map((si) => ({
+            instance_id: si.instanceId,
+            ...(si.expiresAt !== undefined && { expires_at: si.expiresAt }),
+            ...(si.conditions !== undefined && { conditions: si.conditions }),
+            ...(si.conditionOperator !== undefined && {
+              condition_operator: si.conditionOperator,
+            }),
+            snoozed_at: si.snoozedAt,
+            snoozed_by: si.snoozedBy,
+          })),
+        }
+      : {}),
     ...(rule.isSnoozedUntil !== undefined
       ? { is_snoozed_until: rule.isSnoozedUntil?.toISOString() || null }
       : {}),
