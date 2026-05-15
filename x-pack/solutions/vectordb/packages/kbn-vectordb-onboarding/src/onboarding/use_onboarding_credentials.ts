@@ -21,7 +21,7 @@ let inFlightApiKeyRequest: Promise<string | null> | null = null;
 
 const readCachedKey = (): CachedKey | null => {
   try {
-    const raw = localStorage.getItem(ONBOARDING_API_KEY_STORAGE_KEY);
+    const raw = sessionStorage.getItem(ONBOARDING_API_KEY_STORAGE_KEY);
     return raw ? (JSON.parse(raw) as CachedKey) : null;
   } catch {
     return null;
@@ -30,9 +30,9 @@ const readCachedKey = (): CachedKey | null => {
 
 const writeCachedKey = (key: CachedKey) => {
   try {
-    localStorage.setItem(ONBOARDING_API_KEY_STORAGE_KEY, JSON.stringify(key));
+    sessionStorage.setItem(ONBOARDING_API_KEY_STORAGE_KEY, JSON.stringify(key));
   } catch {
-    // localStorage unavailable (e.g. private browsing) — proceed without caching
+    // sessionStorage unavailable (e.g. private browsing) — proceed without caching
   }
 };
 

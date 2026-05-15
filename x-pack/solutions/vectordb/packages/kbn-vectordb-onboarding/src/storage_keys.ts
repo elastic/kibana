@@ -7,7 +7,7 @@
 
 export const ONBOARDING_SEEN_STORAGE_KEY = 'serverless.onboarding.completed';
 
-// Persists across sessions so that a new API key is only created once per browser.
+// sessionStorage: cleared when the tab closes, so the key is never written to disk.
 export const ONBOARDING_API_KEY_STORAGE_KEY = 'vectordb.onboarding.apiKey';
 
 export const TUTORIAL_PROGRESS_STORAGE_KEY = 'serverless.onboarding.tutorials.completed';
