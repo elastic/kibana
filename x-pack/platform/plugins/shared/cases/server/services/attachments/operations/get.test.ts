@@ -149,6 +149,49 @@ describe('AttachmentService getter', () => {
         ]);
       });
 
+      it('returns migrated legacy file externalReference in unified shape when mode=unified', async () => {
+        const legacyFile = createFileAttachment({
+          externalReferenceMetadata: {
+            files: [
+              {
+                name: 'foo',
+                extension: 'txt',
+                mimeType: 'text/plain',
+                created: '2025-01-01T00:00:00.000Z',
+              },
+            ],
+          },
+        });
+
+        unsecuredSavedObjectsClient.bulkGet.mockResolvedValue({
+          saved_objects: [legacyFile],
+        });
+
+        const res = await attachmentGetter.bulkGet(['1'], 'unified');
+
+        expect(res.saved_objects).toEqual([
+          expect.objectContaining({
+            id: '1',
+            attributes: expect.objectContaining({
+              type: 'file',
+              attachmentId: 'my-id',
+              metadata: expect.objectContaining({
+                soType: 'file',
+                files: [
+                  {
+                    name: 'foo',
+                    extension: 'txt',
+                    mimeType: 'text/plain',
+                    created: '2025-01-01T00:00:00.000Z',
+                  },
+                ],
+              }),
+              owner: 'securitySolution',
+            }),
+          }),
+        ]);
+      });
+
       it('throws when the response is missing the attributes.comment field', async () => {
         const invalidAttachment = createUserAttachment();
         unset(invalidAttachment, 'attributes.comment');

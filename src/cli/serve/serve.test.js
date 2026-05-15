@@ -139,10 +139,6 @@ describe('applyConfigOverrides', () => {
       plugins: { paths: [] },
       server: { basePath: '/kbn', publicBaseUrl: 'http://localhost:5601/kbn' },
       xpack: {
-        cloud: {
-          id: 'ftr_fake_cloud_id',
-          organization_id: 'org1234567890',
-        },
         security: {
           authc: {
             providers: {
