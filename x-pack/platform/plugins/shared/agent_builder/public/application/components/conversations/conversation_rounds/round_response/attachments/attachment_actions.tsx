@@ -24,7 +24,10 @@ interface AttachmentActionsProps {
   iconOnly?: boolean;
 }
 
-export const AttachmentActions: React.FC<AttachmentActionsProps> = ({ buttons, iconOnly = false }) => {
+export const AttachmentActions: React.FC<AttachmentActionsProps> = ({
+  buttons,
+  iconOnly = false,
+}) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const secondaryButtons = buttons.filter((b) => b.type === ActionButtonType.SECONDARY);
