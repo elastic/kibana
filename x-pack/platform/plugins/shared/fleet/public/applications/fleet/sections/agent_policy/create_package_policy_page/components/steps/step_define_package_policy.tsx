@@ -30,8 +30,6 @@ import {
 
 import styled from 'styled-components';
 
-import { isNamespaceAllowedByPrefixes } from '../../../../../../../../common/services';
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../../../../constants';
 import { NamespaceComboBox } from '../../../../../../../components/namespace_combo_box';
 import { CloudConnectorSetup } from '../../../../../../../components/cloud_connector';
 
@@ -46,7 +44,6 @@ import type {
 import { Loading } from '../../../../../components';
 import {
   useGetEpmDatastreams,
-  useGetPackagePoliciesQuery,
   useStartServices,
   useVarGroupCloudConnector,
 } from '../../../../../hooks';
@@ -58,6 +55,7 @@ import { ExperimentalFeaturesService } from '../../../../../services';
 
 import { PackagePolicyInputVarField, VarGroupSelector, useVarGroupSelections } from './components';
 import { useOutputs } from './components/hooks';
+import { useNamespaceCustomization } from './use_namespace_customization';
 
 // on smaller screens, fields should be displayed in one column
 const FormGroupResponsiveFields = styled(EuiDescribedFormGroup)`
@@ -79,11 +77,8 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
   noAdvancedToggle?: boolean;
   isAgentlessSelected?: boolean;
   agentPolicies?: AgentPolicy[];
-  // Namespace-level customization toggle (only rendered when all of the following are provided).
-  namespaceCustomizationEnabled?: boolean;
+  // Namespace-level customization toggle (rendered when this callback is provided).
   onNamespaceCustomizationEnabledChange?: (enabled: boolean) => void;
-  installedNamespaceCustomizationEnabledFor?: string[];
-  allowedNamespacePrefixes?: string[];
   packagePolicyId?: string;
 }> = memo(
   ({
@@ -97,10 +92,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
     isEditPage = false,
     isAgentlessSelected = false,
     agentPolicies,
-    namespaceCustomizationEnabled,
     onNamespaceCustomizationEnabledChange,
-    installedNamespaceCustomizationEnabledFor,
-    allowedNamespacePrefixes,
     packagePolicyId,
   }) => {
     const { docLinks, cloud } = useStartServices();
@@ -221,57 +213,23 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
     // Output is also disabled when any parent agent policy is managed (e.g. Elastic Cloud Agent Policy).
     const isOutputDisabled = isManaged || agentPolicies?.some((p) => p.is_managed) === true;
 
-    // Namespace-level customization toggle visibility/state.
-    const showNamespaceCustomizationToggle =
-      onNamespaceCustomizationEnabledChange !== undefined &&
-      installedNamespaceCustomizationEnabledFor !== undefined &&
-      allowedNamespacePrefixes !== undefined;
-
-    const currentNamespace = packagePolicy.namespace?.trim() ?? '';
-    const namespacePrefixesForCheck =
-      allowedNamespacePrefixes && allowedNamespacePrefixes.length > 0
-        ? allowedNamespacePrefixes
-        : null;
-    const isNamespacePrefixAllowed = currentNamespace
-      ? isNamespaceAllowedByPrefixes(currentNamespace, namespacePrefixesForCheck)
-      : true;
-    const isNamespaceCustomizationInputDisabled =
-      !currentNamespace || isManaged || !isNamespacePrefixAllowed;
-
-    // When the namespace changes to one that can't use customization, auto-reset the toggle so
-    // stale "enabled" state doesn't persist across namespace edits or form reuse.
-    useEffect(() => {
-      if (isNamespaceCustomizationInputDisabled && namespaceCustomizationEnabled) {
-        onNamespaceCustomizationEnabledChange?.(false);
-      }
-    }, [
-      isNamespaceCustomizationInputDisabled,
+    const {
+      showToggle: showNamespaceCustomizationToggle,
+      currentNamespace,
+      isPrefixAllowed: isNamespacePrefixAllowed,
+      isToggleDisabled: isNamespaceCustomizationInputDisabled,
       namespaceCustomizationEnabled,
-      onNamespaceCustomizationEnabledChange,
-    ]);
-
-    // Whether the current namespace is already opted in to namespace-level customization.
-    const isOptedIn = !!installedNamespaceCustomizationEnabledFor?.includes(currentNamespace);
-
-    // Query other policies for the same package + namespace to determine impact warnings.
-    // Only fires when a warning is possible:
-    //   Case 3: toggle on  + namespace not yet opted in → opting in may affect others
-    //   Case 8: toggle off + namespace already opted in → opting out may affect others
-    const otherPoliciesQuery = useGetPackagePoliciesQuery(
-      {
-        perPage: SO_SEARCH_LIMIT,
-        page: 1,
-        kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:"${packageInfo.name}" and ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.namespace:"${currentNamespace}"`,
-      },
-      {
-        enabled:
-          showNamespaceCustomizationToggle &&
-          !isNamespaceCustomizationInputDisabled &&
-          !!namespaceCustomizationEnabled !== isOptedIn,
-      }
-    );
-    const otherPoliciesCount =
-      otherPoliciesQuery.data?.items?.filter((item) => item.id !== packagePolicyId).length ?? 0;
+      showOptInImpactWarning,
+      showOptOutImpactWarning,
+      otherPoliciesCount,
+      handleToggleChange: handleNamespaceCustomizationToggleChange,
+    } = useNamespaceCustomization({
+      packageInfo,
+      namespace: packagePolicy.namespace,
+      onEnabledChange: onNamespaceCustomizationEnabledChange,
+      isManaged: !!isManaged,
+      packagePolicyId,
+    });
 
     return validationResults ? (
       <>
@@ -540,10 +498,10 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                             'xpack.fleet.createPackagePolicy.namespaceCustomization.label',
                             { defaultMessage: 'Enable namespace-level customization' }
                           )}
-                          checked={!!namespaceCustomizationEnabled}
+                          checked={namespaceCustomizationEnabled}
                           disabled={isNamespaceCustomizationInputDisabled}
                           onChange={(e) =>
-                            onNamespaceCustomizationEnabledChange?.(e.target.checked)
+                            handleNamespaceCustomizationToggleChange(e.target.checked)
                           }
                         />
                       </EuiToolTip>
@@ -551,11 +509,10 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                       <EuiText size="xs" color="subdued">
                         <FormattedMessage
                           id="xpack.fleet.createPackagePolicy.namespaceCustomization.helpText"
-                          defaultMessage="Allows applying customized settings to all data streams in that namespace."
+                          defaultMessage="Creates a dedicated index template for this namespace, enabling independent settings and mappings from other namespaces."
                         />
                       </EuiText>
-                      {/* Case 3: toggle on, not yet opted in, others share namespace */}
-                      {namespaceCustomizationEnabled && !isOptedIn && otherPoliciesCount > 0 && (
+                      {showOptInImpactWarning && (
                         <>
                           <EuiSpacer size="s" />
                           <EuiCallOut
@@ -568,14 +525,14 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                               'xpack.fleet.createPackagePolicy.namespaceCustomization.optInImpactTitle',
                               {
                                 defaultMessage:
-                                  'Enabling customization will affect {count, plural, one {# other policy} other {# other policies}}',
+                                  'Enabling namespace customization will affect {count, plural, one {# other policy} other {# other policies}}',
                                 values: { count: otherPoliciesCount },
                               }
                             )}
                           >
                             <FormattedMessage
                               id="xpack.fleet.createPackagePolicy.namespaceCustomization.optInImpactDescription"
-                              defaultMessage="Namespace-level customization is shared across all {packageTitle} integration policies targeting namespace {namespace}. Enabling it here will apply to all of them."
+                              defaultMessage="The namespace index template is shared across all {packageTitle} integration policies targeting namespace {namespace}. Enabling customization here will apply it to all of them."
                               values={{
                                 packageTitle: packageInfo.title,
                                 namespace: <strong>{currentNamespace}</strong>,
@@ -584,8 +541,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                           </EuiCallOut>
                         </>
                       )}
-                      {/* Case 8: toggle off, currently opted in, others share namespace */}
-                      {!namespaceCustomizationEnabled && isOptedIn && otherPoliciesCount > 0 && (
+                      {showOptOutImpactWarning && (
                         <>
                           <EuiSpacer size="s" />
                           <EuiCallOut
@@ -605,7 +561,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                           >
                             <FormattedMessage
                               id="xpack.fleet.createPackagePolicy.namespaceCustomization.optOutImpactDescription"
-                              defaultMessage="Namespace-level customization is shared across all {packageTitle} integration policies targeting namespace {namespace}. Disabling it here will remove it from all of them."
+                              defaultMessage="The namespace index template is shared across all {packageTitle} integration policies targeting namespace {namespace}. Disabling customization here will remove it from all of them."
                               values={{
                                 packageTitle: packageInfo.title,
                                 namespace: <strong>{currentNamespace}</strong>,

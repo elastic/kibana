@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef, memo } from 'react';
 import { useRouteMatch, useLocation } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -29,7 +29,6 @@ import {
   useAuthz,
   sendBulkGetAgentPoliciesForRq,
 } from '../../../hooks';
-import { useSpaceSettingsContext } from '../../../../../hooks/use_space_settings_context';
 import {
   useBreadcrumbs as useIntegrationsBreadcrumbs,
   useGetOnePackagePolicy,
@@ -180,34 +179,14 @@ export const EditPackagePolicyForm = memo<{
   const [isFirstLoad, setIsFirstLoad] = useState<boolean>(true);
   const [newAgentPolicyName, setNewAgentPolicyName] = useState<string | undefined>();
 
-  // Namespace-level customization toggle state. Initialized once package info loads.
-  const { allowedNamespacePrefixes } = useSpaceSettingsContext();
   const installedNamespaceCustomizationEnabledFor = useMemo(() => {
     if (packageInfo && 'installationInfo' in packageInfo) {
       return packageInfo.installationInfo?.namespace_customization_enabled_for ?? [];
     }
     return [];
   }, [packageInfo]);
-  const [namespaceCustomizationEnabled, setNamespaceCustomizationEnabled] =
-    useState<boolean>(false);
-  const [namespaceCustomizationInitialized, setNamespaceCustomizationInitialized] =
-    useState<boolean>(false);
-  useEffect(() => {
-    if (namespaceCustomizationInitialized || !packagePolicy.namespace || !packageInfo) {
-      return;
-    }
-    setNamespaceCustomizationEnabled(
-      installedNamespaceCustomizationEnabledFor.includes(packagePolicy.namespace.trim())
-    );
-    setNamespaceCustomizationInitialized(true);
-  }, [
-    installedNamespaceCustomizationEnabledFor,
-    packagePolicy.namespace,
-    namespaceCustomizationInitialized,
-    packageInfo,
-  ]);
+  const namespaceCustomizationEnabledRef = useRef<boolean>(false);
 
-  // make form dirty if new agent policy is selected
   useEffect(() => {
     if (newAgentPolicyName) {
       setIsEdited(true);
@@ -387,7 +366,7 @@ export const EditPackagePolicyForm = memo<{
           packageInfo.name,
           packageInfo.version,
           packagePolicy.namespace,
-          namespaceCustomizationEnabled,
+          namespaceCustomizationEnabledRef.current,
           installedNamespaceCustomizationEnabledFor,
           notifications,
           packageInfo.title ?? packageInfo.name
@@ -504,13 +483,10 @@ export const EditPackagePolicyForm = memo<{
               isEditPage={true}
               isAgentlessSelected={hasAgentlessAgentPolicy}
               agentPolicies={agentPolicies}
-              namespaceCustomizationEnabled={namespaceCustomizationEnabled}
               onNamespaceCustomizationEnabledChange={(enabled) => {
-                setNamespaceCustomizationEnabled(enabled);
+                namespaceCustomizationEnabledRef.current = enabled;
                 setIsEdited(true);
               }}
-              installedNamespaceCustomizationEnabledFor={installedNamespaceCustomizationEnabledFor}
-              allowedNamespacePrefixes={allowedNamespacePrefixes}
               packagePolicyId={packagePolicyId}
             />
           )}
@@ -567,9 +543,6 @@ export const EditPackagePolicyForm = memo<{
       isUpgrade,
       validationResults,
       varGroupSelections,
-      namespaceCustomizationEnabled,
-      installedNamespaceCustomizationEnabledFor,
-      allowedNamespacePrefixes,
       packagePolicyId,
       setIsEdited,
     ]

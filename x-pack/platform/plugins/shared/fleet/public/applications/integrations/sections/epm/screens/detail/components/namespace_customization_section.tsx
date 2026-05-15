@@ -155,11 +155,10 @@ export const NamespaceCustomizationSection: React.FC<Props> = ({
           />
         </h4>
       </EuiTitle>
-      <EuiSpacer size="s" />
-      <EuiText size="s" color="subdued">
+      <EuiText>
         <FormattedMessage
           id="xpack.fleet.integrations.settings.namespaceCustomization.description"
-          defaultMessage="Opt in namespaces to apply namespace-level customization for this integration. Fleet will create dedicated index templates for each opted-in namespace."
+          defaultMessage="Select which namespaces use a dedicated index template for this integration. This enables independent customization of settings and mappings per namespace."
         />
       </EuiText>
       <EuiSpacer size="m" />
@@ -210,7 +209,7 @@ export const NamespaceCustomizationSection: React.FC<Props> = ({
                 <EuiFlexItem grow={false}>
                   <FormattedMessage
                     id="xpack.fleet.integrations.settings.namespaceCustomization.applying"
-                    defaultMessage="Applying namespace customization changes…"
+                    defaultMessage="Applying namespace index template changes…"
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>

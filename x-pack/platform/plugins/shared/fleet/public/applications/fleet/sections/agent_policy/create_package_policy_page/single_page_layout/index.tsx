@@ -291,16 +291,15 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     [setSelectedPolicyTab, setPolicyValidation, newAgentPolicy]
   );
 
-  // Namespace-level customization toggle state. Defaults to disabled for new policies; the actual
-  // package update is deferred until policy save (see effect below).
+  // Namespace-level customization. Toggle state lives inside StepDefinePackagePolicy's hook;
+  // the parent only tracks the latest value via ref for the deferred post-save update.
   const installedNamespaceCustomizationEnabledFor = useMemo(() => {
     if (packageInfo && 'installationInfo' in packageInfo) {
       return packageInfo.installationInfo?.namespace_customization_enabled_for ?? [];
     }
     return [];
   }, [packageInfo]);
-  const [namespaceCustomizationEnabled, setNamespaceCustomizationEnabled] =
-    useState<boolean>(false);
+  const namespaceCustomizationEnabledRef = useRef<boolean>(false);
   const namespaceCustomizationAppliedRef = useRef<string | undefined>(undefined);
 
   // After policy save: sync the package's namespace_customization_enabled_for list (deferred update).
@@ -312,24 +311,19 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       return;
     }
     namespaceCustomizationAppliedRef.current = savedPackagePolicy.id;
-    // Reset the toggle so stale "enabled" state doesn't carry over if the form is reused.
-    setNamespaceCustomizationEnabled(false);
+    // Capture and reset the toggle value so stale state doesn't carry over if the form is reused.
+    const wasEnabled = namespaceCustomizationEnabledRef.current;
+    namespaceCustomizationEnabledRef.current = false;
     void applyNamespaceCustomizationChange(
       packageInfo.name,
       packageInfo.version,
       savedPackagePolicy.namespace,
-      namespaceCustomizationEnabled,
+      wasEnabled,
       installedNamespaceCustomizationEnabledFor,
       notifications,
       packageInfo.title ?? packageInfo.name
     );
-  }, [
-    savedPackagePolicy,
-    packageInfo,
-    namespaceCustomizationEnabled,
-    installedNamespaceCustomizationEnabledFor,
-    notifications,
-  ]);
+  }, [savedPackagePolicy, packageInfo, installedNamespaceCustomizationEnabledFor, notifications]);
 
   // Retrieve agent count
   const agentPolicyIds = agentPolicies.map((policy) => policy.id);
@@ -597,10 +591,9 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             submitAttempted={formState === 'INVALID'}
             isAgentlessSelected={isAgentlessSelected}
             agentPolicies={agentPolicies}
-            namespaceCustomizationEnabled={namespaceCustomizationEnabled}
-            onNamespaceCustomizationEnabledChange={setNamespaceCustomizationEnabled}
-            installedNamespaceCustomizationEnabledFor={installedNamespaceCustomizationEnabledFor}
-            allowedNamespacePrefixes={spaceSettings?.allowedNamespacePrefixes ?? []}
+            onNamespaceCustomizationEnabledChange={(enabled) => {
+              namespaceCustomizationEnabledRef.current = enabled;
+            }}
           />
 
           {/* Show SetupTechnologySelector for all agentless integrations, including extension views, if agentless is default display as a separate step  */}
@@ -650,8 +643,6 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       varGroupSelections,
       setupTechnologySelector,
       useCheckableCardsForSetupTechnologySelector,
-      namespaceCustomizationEnabled,
-      installedNamespaceCustomizationEnabledFor,
     ]
   );
 

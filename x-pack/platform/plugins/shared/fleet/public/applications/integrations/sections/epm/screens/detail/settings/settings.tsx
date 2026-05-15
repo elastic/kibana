@@ -194,7 +194,7 @@ export const SettingsPage: React.FC<Props> = memo(
                 text: i18n.translate(
                   'xpack.fleet.integrations.namespaceCustomizationSavedSuccess',
                   {
-                    defaultMessage: 'Applying namespace customization changes for {title}.',
+                    defaultMessage: 'Applying namespace index template changes for {title}.',
                     values: { title },
                   }
                 ),

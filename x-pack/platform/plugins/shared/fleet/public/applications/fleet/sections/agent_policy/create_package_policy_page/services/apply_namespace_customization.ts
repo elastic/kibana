@@ -63,7 +63,7 @@ export async function applyNamespaceCustomizationChange(
       defaultMessage: 'Namespace customization updated',
     }),
     text: i18n.translate('xpack.fleet.packagePolicy.namespaceCustomizationApplySuccessText', {
-      defaultMessage: 'Applying namespace customization changes for {title}.',
+      defaultMessage: 'Applying namespace index template changes for {title}.',
       values: { title: packageTitle },
     }),
   });
