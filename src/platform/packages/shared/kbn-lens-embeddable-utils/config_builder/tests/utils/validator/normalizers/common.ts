@@ -149,11 +149,13 @@ function normalizeESQLAdHocDataViews(
       };
     }
 
-    refs.push({
-      id: layer.index!,
-      name: `indexpattern-datasource-layer-${DEFAULT_LAYER_ID}`,
-      type: 'index-pattern',
-    });
+    if (layer.index) {
+      refs.push({
+        id: layer.index,
+        name: `indexpattern-datasource-layer-${DEFAULT_LAYER_ID}`,
+        type: 'index-pattern',
+      });
+    }
   }
 
   return refs;
