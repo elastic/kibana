@@ -36,7 +36,7 @@ export interface ResolveResourceResponse {
  * CCS / cross-project targets.
  */
 export const deriveIsTsdb = (fields: MappingField[]): boolean => {
-  return fields.some((f) => f.tsDimension === true || typeof f.tsMetric === 'string');
+  return fields.some((f) => f.tsDimension === true || f.tsMetric != null);
 };
 
 /**
