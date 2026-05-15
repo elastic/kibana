@@ -64,7 +64,7 @@ export const ruleQueryInspectorRoute = (
               'Indicates the rule type is not supported or the request parameters are invalid.',
           },
           404: {
-            description: 'Indicates a rule with the given ID does not exist.',
+            description: 'Indicates a rule with the specified rule ID does not exist.',
           },
         },
       },
