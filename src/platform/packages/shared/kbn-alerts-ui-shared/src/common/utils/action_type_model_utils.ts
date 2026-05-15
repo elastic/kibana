@@ -92,10 +92,10 @@ export function transformSpecToActionTypeModel(
     isExperimental: spec.metadata.isTechnicalPreview ?? false,
     getHideInUi: (_actionTypes: ActionType[]) =>
       shouldHideWorkflowsOnlyConnector(spec.metadata.supportedFeatureIds, uiSettings),
-    actionConnectorFields: lazy(() => {
+    actionConnectorFields: lazy(async () => {
       const parsedZodSchema = fromConnectorSpecSchema(spec.schema);
       if (!parsedZodSchema) {
-        return Promise.reject(new Error(`Invalid connector spec schema for "${spec.metadata.id}"`));
+        throw new Error(`Invalid connector spec schema for "${spec.metadata.id}"`);
       }
       const connectorZodSchema: ConnectorZodSchema = parsedZodSchema;
       function SpecConnectorFormFields({ readOnly, isEdit, authMode }: ActionConnectorFieldsProps) {
@@ -111,12 +111,10 @@ export function transformSpecToActionTypeModel(
           metaFunctions: { getMeta, setMeta },
         });
       }
-      return Promise.resolve({
-        default: SpecConnectorFormFields,
-      });
+      return { default: SpecConnectorFormFields };
     }),
     // Spec-based connectors don't have custom action params UI
-    actionParamsFields: lazy(() => Promise.resolve({ default: () => null })),
+    actionParamsFields: lazy(async () => ({ default: () => null })),
     // Validation is handled server-side via the Zod schema
     validateParams: async () => ({ errors: {} }),
     connectorForm: {

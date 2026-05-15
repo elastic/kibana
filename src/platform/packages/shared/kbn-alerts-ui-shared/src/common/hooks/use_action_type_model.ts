@@ -17,6 +17,7 @@ import type { ActionTypeModel, ActionTypeRegistryContract } from '../types';
 import {
   fetchConnectorSpec,
   transformSpecToActionTypeModel,
+  type ConnectorSpecResponse,
 } from '../utils/action_type_model_utils';
 
 const CONNECTOR_SPEC_QUERY_KEY = 'connectorSpec';
@@ -64,11 +65,11 @@ export function useActionTypeModel({
   const shouldFetchSpec = actionType != null && actionType.source === ACTION_TYPE_SOURCES.spec;
 
   const {
-    data: specData,
+    data: specBasedModel = null,
     isLoading,
     error,
     refetch,
-  } = useQuery<Awaited<ReturnType<typeof fetchConnectorSpec>>, Error>({
+  } = useQuery<ConnectorSpecResponse, Error, ActionTypeModel | null>({
     queryKey: [CONNECTOR_SPEC_QUERY_KEY, actionType?.id],
     queryFn: async ({ signal }) => {
       const spec = await fetchConnectorSpec(http, actionType!.id, signal);
@@ -79,17 +80,11 @@ export function useActionTypeModel({
       }
       return spec;
     },
+    select: (spec) => transformSpecToActionTypeModel(spec, uiSettings),
     enabled: shouldFetchSpec,
     staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false,
   });
-
-  const specBasedModel = useMemo(() => {
-    if (!specData) {
-      return null;
-    }
-    return transformSpecToActionTypeModel(specData, uiSettings);
-  }, [specData, uiSettings]);
 
   return {
     actionTypeModel: shouldFetchSpec ? specBasedModel : registeredModel,
