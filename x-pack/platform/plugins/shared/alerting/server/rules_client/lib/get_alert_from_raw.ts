@@ -126,6 +126,7 @@ function getPartialRuleFromRaw<Params extends RuleTypeParams>(
     lastRun,
     isSnoozedUntil: DoNotUseIsSnoozedUntil,
     artifacts,
+    snoozedInstances,
     ...partialRawRule
   } = rawRule;
 

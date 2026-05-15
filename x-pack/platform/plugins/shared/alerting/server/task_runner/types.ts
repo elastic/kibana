@@ -58,6 +58,7 @@ import type { ElasticsearchError } from '../lib';
 import type { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
 import type { RulesSettingsService } from '../rules_settings';
 import type { MaintenanceWindowsService } from './maintenance_windows';
+import type { RawRuleSnoozedInstance } from '../saved_objects/schemas/raw_rule';
 
 export interface RuleTaskRunResult {
   state: RuleTaskState;
@@ -77,13 +78,14 @@ export const getDeleteRuleTaskRunResult = (): RuleTaskRunResult => ({
 export interface RunRuleResult {
   metrics: RuleRunMetrics;
   state: RuleTaskState;
+  prunedSnoozedInstances?: RawRuleSnoozedInstance[];
 }
 
 export interface RunRuleParams<Params extends RuleTypeParams> {
   apiKey: RawRule['apiKey'];
   uiamApiKey?: RawRule['uiamApiKey'];
   fakeRequest: KibanaRequest;
-  rule: SanitizedRule<Params>;
+  rule: SanitizedRule<Params> & { snoozedInstances: RawRuleSnoozedInstance[] };
   validatedParams: Params;
   version: string | undefined;
 }

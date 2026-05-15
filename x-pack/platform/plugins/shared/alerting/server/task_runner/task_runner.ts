@@ -33,6 +33,7 @@ import type {
   RuleExecutionStatus,
   RuleTypeRegistry,
 } from '../types';
+import type { RawRuleSnoozedInstance } from '../saved_objects/schemas/raw_rule';
 import { RuleExecutionStatusErrorReasons } from '../types';
 import type { Result } from '../lib/result_type';
 import { asErr, asOk, isOk } from '../lib/result_type';
@@ -70,6 +71,7 @@ import {
   getSchedule,
   getState,
   getTaskRunError,
+  evaluatePerAlertSnooze,
 } from './lib';
 import {
   ErrorWithType,
@@ -216,6 +218,7 @@ export class TaskRunner<
       monitoring?: RawRuleMonitoring;
       nextRun?: string | null;
       lastRun?: RawRuleLastRun | null;
+      snoozedInstances?: RawRuleSnoozedInstance[];
     }
   ) {
     const client = this.context.elasticsearch.client.asInternalUser;
@@ -277,6 +280,8 @@ export class TaskRunner<
     uiamApiKey,
     validatedParams: params,
   }: RunRuleParams<Params>): Promise<RunRuleResult> {
+    const { activeInstances } = evaluatePerAlertSnooze(rule.snoozedInstances, this.runDate);
+
     if (apm.currentTransaction) {
       apm.currentTransaction.name = `Execute Alerting Rule: "${rule.name}"`;
     }
@@ -347,6 +352,7 @@ export class TaskRunner<
           params: rule.params,
           muteAll: rule.muteAll,
           mutedInstanceIds: rule.mutedInstanceIds,
+          snoozedInstances: activeInstances,
         },
         ruleType: this.ruleType as UntypedNormalizedRuleType,
         startedAt: this.taskInstance.startedAt,
@@ -416,6 +422,7 @@ export class TaskRunner<
       alertingEventLogger: this.alertingEventLogger,
       actionsClient,
       alertsClient,
+      activeSnoozedIds: new Set(activeInstances.map((i) => i.instanceId)),
     });
 
     let actionSchedulerResult: RunResult = { throttledSummaryActions: {} };
@@ -475,6 +482,8 @@ export class TaskRunner<
         alertRecoveredInstances: recoveredAlertsToReturn,
         summaryActions: actionSchedulerResult.throttledSummaryActions,
       },
+      prunedSnoozedInstances:
+        activeInstances.length < rule.snoozedInstances.length ? activeInstances : undefined,
     };
   }
 
@@ -685,6 +694,10 @@ export class TaskRunner<
         });
       }
 
+      const prunedSnoozedInstances = isOk(runRuleResult)
+        ? runRuleResult.value.prunedSnoozedInstances
+        : undefined;
+
       if (!this.cancelled) {
         this.inMemoryMetrics.increment(IN_MEMORY_METRICS.RULE_EXECUTIONS);
         if (outcome === 'failure') {
@@ -703,6 +716,9 @@ export class TaskRunner<
           nextRun,
           lastRun: lastRunToRaw(lastRun),
           monitoring: this.ruleMonitoring.getMonitoring() as RawRuleMonitoring,
+          ...(prunedSnoozedInstances !== undefined
+            ? { snoozedInstances: prunedSnoozedInstances }
+            : {}),
         });
       }
 

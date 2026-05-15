@@ -3620,6 +3620,52 @@ describe('Task Runner', () => {
     );
   });
 
+  test('should write back pruned snoozedInstances when expired entries are removed', async () => {
+    const expiredSnooze = {
+      instanceId: 'alert-1',
+      expiresAt: '1969-12-31T23:59:59.000Z',
+      snoozedAt: '1969-12-01T00:00:00.000Z',
+      snoozedBy: 'user',
+    };
+    const activeSnooze = {
+      instanceId: 'alert-2',
+      snoozedAt: '1969-12-01T00:00:00.000Z',
+      snoozedBy: 'user',
+    };
+    const rawRuleSOWithSnooze: SavedObject<RawRule> = {
+      ...mockedRawRuleSO,
+      attributes: {
+        ...mockedRawRuleSO.attributes,
+        enabled: true,
+        snoozedInstances: [expiredSnooze, activeSnooze],
+      },
+    };
+
+    const taskRunner = new TaskRunner({
+      ruleType,
+      taskInstance: mockedTaskInstance,
+      context: taskRunnerFactoryInitializerParams,
+      inMemoryMetrics,
+      internalSavedObjectsRepository,
+    });
+
+    mockGetRuleFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(rawRuleSOWithSnooze);
+
+    await taskRunner.run();
+
+    expect(elasticsearchService.client.asInternalUser.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        doc: expect.objectContaining({
+          alert: expect.objectContaining({
+            snoozedInstances: [activeSnooze],
+          }),
+        }),
+      }),
+      expect.anything()
+    );
+  });
+
   function testAlertingEventLogCalls({
     ruleContext = alertingEventLoggerInitializer,
     ruleTypeDef = ruleType,
