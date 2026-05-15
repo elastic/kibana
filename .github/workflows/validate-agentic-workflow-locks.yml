@@ -10,10 +10,9 @@ on:
 permissions:
   contents: read
 
-# GitHub Actions does not allow expressions in `uses:` refs, so the
-# github/gh-aw/actions/setup-cli ref below must be updated alongside this value.
-# It must also match the github/gh-aw-actions/setup entry in
-# .github/aw/actions-lock.json; the verify step below enforces that.
+# gh-aw CLI version installed by setup-cli below. Must match the
+# github/gh-aw-actions/setup entry in .github/aw/actions-lock.json;
+# the verify step below enforces that.
 env:
   GH_AW_VERSION: v0.71.5
 
@@ -45,12 +44,12 @@ jobs:
           ' .github/aw/actions-lock.json)
           echo "Pinned gh-aw version: ${version}"
           if [[ "${version}" != "${GH_AW_VERSION}" ]]; then
-            echo "::error::actions-lock.json pins gh-aw ${version} but this workflow installs github/gh-aw/actions/setup-cli@${GH_AW_VERSION}. Update both refs to match."
+            echo "::error::actions-lock.json pins gh-aw ${version} but this workflow installs gh-aw ${GH_AW_VERSION} (set via GH_AW_VERSION). Update one of them so they match."
             exit 1
           fi
 
       - name: Install gh-aw CLI
-        uses: github/gh-aw/actions/setup-cli@v0.71.5
+        uses: github/gh-aw/actions/setup-cli@489dbab88cc78e35506b5ccbf08a4037166824ac # v0.72.1
         with:
           version: ${{ env.GH_AW_VERSION }}
 
