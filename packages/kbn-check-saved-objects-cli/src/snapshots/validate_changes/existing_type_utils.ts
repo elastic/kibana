@@ -12,6 +12,7 @@ import { cloneDeep, difference } from 'lodash';
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import type { MigrationInfoRecord, ModelVersionSummary } from '../../types';
 import {
+  getFieldsMissingIgnoreAbove,
   getMappingFieldPaths,
   validateAllMappingsInModelVersion,
   getLatestModelVersion,
@@ -152,6 +153,44 @@ export function validateNewMappingsInModelVersion(
         newModelVersion.version
       }': ${undeclaredFields.join(', ')}. ` +
         `All new mapping fields must be declared via 'mappings_addition' changes in the corresponding model version.`
+    );
+  }
+}
+
+/**
+ * Validates that all `keyword` and `flattened` mapping fields on an **existing** SO type define
+ * `ignore_above`. Fields that were already missing the constraint in the baseline (`from`) emit a
+ * warning instead of throwing, because the fix (adding a model version with `ignore_above`) is
+ * low-risk but still requires deliberate action. Newly introduced fields always throw.
+ */
+export function validateIgnoreAboveExistingType(
+  name: string,
+  to: MigrationInfoRecord,
+  from: MigrationInfoRecord,
+  log: (message: string) => void
+): void {
+  const missingInTo = getFieldsMissingIgnoreAbove(to.mappings);
+  if (missingInTo.length === 0) return;
+
+  const missingInFromSet = new Set(getFieldsMissingIgnoreAbove(from.mappings));
+  const preExisting = missingInTo.filter((field) => missingInFromSet.has(field));
+  const newlyIntroduced = missingInTo.filter((field) => !missingInFromSet.has(field));
+
+  if (preExisting.length > 0) {
+    log(
+      `⚠️  The SO type '${name}' has pre-existing 'keyword' or 'flattened' mapping fields without 'ignore_above': ${preExisting.join(
+        ', '
+      )}. ` +
+        `Consider adding 'ignore_above' to prevent Elasticsearch from silently dropping strings that exceed the limit.`
+    );
+  }
+
+  if (newlyIntroduced.length > 0) {
+    throw new Error(
+      `❌ The SO type '${name}' has newly introduced 'keyword' or 'flattened' mapping fields without 'ignore_above': ${newlyIntroduced.join(
+        ', '
+      )}. ` +
+        `Add 'ignore_above' to prevent Elasticsearch from silently dropping strings that exceed the limit.`
     );
   }
 }

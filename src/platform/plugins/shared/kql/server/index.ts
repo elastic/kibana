@@ -11,6 +11,7 @@ import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core
 import type { ConfigSchema } from './config';
 import { configSchema } from './config';
 import type { KQLServerPlugin, KQLServerPluginSetup, KQLServerPluginStart } from './plugin';
+import { autocompleteConfigDeprecationProvider } from './config_deprecations';
 
 /**
  * Static code to be shared externally
@@ -30,4 +31,5 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
     autocomplete: true,
   },
   schema: configSchema,
+  deprecations: autocompleteConfigDeprecationProvider,
 };
