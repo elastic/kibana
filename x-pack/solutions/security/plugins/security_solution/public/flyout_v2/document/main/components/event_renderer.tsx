@@ -7,7 +7,7 @@
 
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
-import { EuiFlexItem, EuiSkeletonText, EuiTitle, useEuiTheme } from '@elastic/eui';
+import { EuiFlexItem, EuiSkeletonText, EuiSpacer, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
@@ -83,6 +83,7 @@ export const EventRenderer: FC<EventRendererProps> = ({
 
   return (
     <EuiFlexItem data-test-subj={EVENT_RENDERER_TEST_ID}>
+      <EuiSpacer size="s" />
       <EuiTitle size="xxs">
         <h5>{'Event renderer'}</h5>
       </EuiTitle>

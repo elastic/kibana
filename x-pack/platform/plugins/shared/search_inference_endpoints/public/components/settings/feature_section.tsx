@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { InferenceFeatureResponse as InferenceFeatureConfig } from '../../../common/types';
+import type { EndpointDeprecationInfo } from '../../types';
 import { SubFeatureCard } from './sub_feature_card';
 
 interface FeatureSettingItem {
@@ -34,6 +35,7 @@ interface FeatureSectionProps {
   features: FeatureSettingItem[];
   onEndpointsChange: (featureId: string, newEndpointIds: string[]) => void;
   invalidEndpointIds: Set<string>;
+  deprecatedEndpointsMap: Map<string, EndpointDeprecationInfo>;
   isTechPreview?: boolean;
   isBeta?: boolean;
   globalDefaultId: string | undefined;
@@ -45,6 +47,7 @@ export const FeatureSection: React.FC<FeatureSectionProps> = ({
   features,
   onEndpointsChange,
   invalidEndpointIds,
+  deprecatedEndpointsMap,
   isTechPreview = false,
   isBeta = false,
   globalDefaultId,
@@ -112,6 +115,7 @@ export const FeatureSection: React.FC<FeatureSectionProps> = ({
                     effectiveRecommendedEndpoints={effectiveRecommendedEndpoints}
                     onEndpointsChange={onEndpointsChange}
                     invalidEndpointIds={invalidEndpointIds}
+                    deprecatedEndpointsMap={deprecatedEndpointsMap}
                     hasSavedObject={hasSavedObject}
                     isFeatureDirty={isFeatureDirty}
                     globalDefaultId={feature.ignoreGlobalDefault ? undefined : globalDefaultId}

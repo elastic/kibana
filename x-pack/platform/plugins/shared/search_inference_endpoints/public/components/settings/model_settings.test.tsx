@@ -373,6 +373,152 @@ describe('ModelSettings', () => {
     });
   });
 
+  describe('deprecated/EOL assigned models callouts', () => {
+    const gaConnector = {
+      connectorId: 'ep-ga',
+      name: 'GA Model',
+      isPreconfigured: true,
+      metadata: { heuristics: { status: 'ga', end_of_life_date: '2099-01-01' } },
+    };
+    const deprecatedConnector = {
+      connectorId: 'ep-dep',
+      name: 'Deprecated Model',
+      isPreconfigured: true,
+      metadata: { heuristics: { status: 'deprecated', end_of_life_date: '2099-01-01' } },
+    };
+    const eolConnector = {
+      connectorId: 'ep-eol',
+      name: 'EOL Model',
+      isPreconfigured: true,
+      metadata: { heuristics: { status: 'deprecated', end_of_life_date: '2020-01-01' } },
+    };
+
+    it('does not render either callout when only GA connectors are assigned', () => {
+      mockUseConnectors.mockReturnValue({ data: [gaConnector], isLoading: false });
+
+      render(
+        <Wrapper>
+          <ModelSettings />
+        </Wrapper>
+      );
+
+      expect(screen.queryByTestId('deprecatedModelsCallout')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('eolModelsCallout')).not.toBeInTheDocument();
+    });
+
+    it('renders the warning callout when a deprecated connector is assigned to a feature', () => {
+      mockUseConnectors.mockReturnValue({
+        data: [deprecatedConnector],
+        isLoading: false,
+      });
+      mockUseModelSettingsForm.mockReturnValue({
+        ...defaultFormState,
+        assignments: { child_1: ['ep-dep'] },
+      });
+
+      render(
+        <Wrapper>
+          <ModelSettings />
+        </Wrapper>
+      );
+
+      const callout = screen.getByTestId('deprecatedModelsCallout');
+      expect(callout).toBeInTheDocument();
+      expect(callout).toHaveTextContent('Deprecated Model');
+      expect(screen.queryByTestId('eolModelsCallout')).not.toBeInTheDocument();
+    });
+
+    it('renders the danger callout when an EOL connector is assigned to a feature', () => {
+      mockUseConnectors.mockReturnValue({ data: [eolConnector], isLoading: false });
+      mockUseModelSettingsForm.mockReturnValue({
+        ...defaultFormState,
+        assignments: { child_1: ['ep-eol'] },
+      });
+
+      render(
+        <Wrapper>
+          <ModelSettings />
+        </Wrapper>
+      );
+
+      const callout = screen.getByTestId('eolModelsCallout');
+      expect(callout).toBeInTheDocument();
+      expect(callout).toHaveTextContent('EOL Model');
+      expect(screen.queryByTestId('deprecatedModelsCallout')).not.toBeInTheDocument();
+    });
+
+    it('includes the deprecated default model in the warning callout', () => {
+      mockUseConnectors.mockReturnValue({
+        data: [deprecatedConnector],
+        isLoading: false,
+      });
+      mockUseDefaultModelSettings.mockReturnValue({
+        ...defaultModelSettingsState,
+        state: {
+          enableAi: true,
+          defaultModelId: 'ep-dep',
+          featureSpecificModels: true,
+        },
+      });
+      mockUseModelSettingsForm.mockReturnValue({
+        ...defaultFormState,
+        assignments: { child_1: ['ep-1'] },
+      });
+
+      render(
+        <Wrapper>
+          <ModelSettings />
+        </Wrapper>
+      );
+
+      expect(screen.getByTestId('deprecatedModelsCallout')).toHaveTextContent('Deprecated Model');
+    });
+
+    it('renders both callouts when both deprecated and EOL connectors are assigned', () => {
+      mockUseConnectors.mockReturnValue({
+        data: [deprecatedConnector, eolConnector],
+        isLoading: false,
+      });
+      mockUseModelSettingsForm.mockReturnValue({
+        ...defaultFormState,
+        assignments: { child_1: ['ep-dep', 'ep-eol'] },
+      });
+
+      render(
+        <Wrapper>
+          <ModelSettings />
+        </Wrapper>
+      );
+
+      expect(screen.getByTestId('deprecatedModelsCallout')).toHaveTextContent('Deprecated Model');
+      expect(screen.getByTestId('eolModelsCallout')).toHaveTextContent('EOL Model');
+    });
+
+    it('hides callouts when featureSpecificModels is off, even with deprecated connectors assigned', () => {
+      mockUseConnectors.mockReturnValue({
+        data: [deprecatedConnector, eolConnector],
+        isLoading: false,
+      });
+      mockUseDefaultModelSettings.mockReturnValue({
+        ...defaultModelSettingsState,
+        state: { enableAi: true, defaultModelId: 'pre-1', featureSpecificModels: false },
+      });
+      mockUseModelSettingsForm.mockReturnValue({
+        ...defaultFormState,
+        assignments: { child_1: ['ep-dep', 'ep-eol'] },
+      });
+
+      render(
+        <Wrapper>
+          <ModelSettings />
+        </Wrapper>
+      );
+
+      expect(screen.queryByTestId('deprecatedModelsCallout')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('eolModelsCallout')).not.toBeInTheDocument();
+    });
+  });
+
   it('closes unsaved changes modal without navigating when cancel is clicked', async () => {
     const history = createMemoryHistory();
     mockUseModelSettingsForm.mockReturnValue({ ...defaultFormState, isDirty: true });
