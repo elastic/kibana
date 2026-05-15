@@ -36,7 +36,6 @@ function soToDeployment(
     attemptCount: attributes.attemptCount,
     vars: attributes.vars,
     serviceVars: attributes.serviceVars,
-    secrets: attributes.secrets,
     packagePolicyIds: attributes.packagePolicyIds,
     createdAt: attributes.createdAt,
     updatedAt: attributes.updatedAt,

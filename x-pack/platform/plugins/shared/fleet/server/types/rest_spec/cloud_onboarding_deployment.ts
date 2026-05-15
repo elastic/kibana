@@ -7,6 +7,13 @@
 
 import { schema } from '@kbn/config-schema';
 
+// --- Shared primitives ---
+
+const CloudOnboardingDeploymentProviderSchema = schema.oneOf(
+  [schema.literal('aws'), schema.literal('azure'), schema.literal('gcp')],
+  { meta: { description: 'Cloud provider.' } }
+);
+
 const CloudOnboardingDeploymentMechanismSchema = schema.oneOf(
   [
     schema.literal('identity_federation'),
@@ -28,12 +35,36 @@ const CloudOnboardingDeploymentStatusSchema = schema.oneOf(
   { meta: { description: 'Deployment status.' } }
 );
 
-// secrets is intentionally excluded from all response schemas — never returned to clients.
+// Request-body variants enforce minLength: 1 on record keys.
+const RequestVarsSchema = schema.recordOf(schema.string({ minLength: 1 }), schema.string(), {
+  meta: { description: 'Deployment-level plaintext config.' },
+});
+
+const ServiceVarsEntrySchema = schema.arrayOf(schema.recordOf(schema.string(), schema.any()), {
+  maxSize: 100,
+});
+
+const RequestServiceVarsSchema = schema.recordOf(
+  schema.string({ minLength: 1 }),
+  ServiceVarsEntrySchema,
+  { meta: { description: 'Per-service source configs.' } }
+);
+
+const RequestSecretsSchema = schema.recordOf(schema.string({ minLength: 1 }), schema.string(), {
+  meta: { description: 'Deployment-level encrypted secrets (e.g. external_id).' },
+});
+
+const DeploymentIdParamSchema = schema.object({
+  deploymentId: schema.string({
+    meta: { description: 'The unique identifier of the cloud onboarding deployment.' },
+  }),
+});
+
+// --- Item schema (response only — secrets intentionally excluded) ---
+
 const CloudOnboardingDeploymentItemSchema = schema.object({
   id: schema.string(),
-  provider: schema.oneOf([schema.literal('aws'), schema.literal('azure'), schema.literal('gcp')], {
-    meta: { description: 'Cloud provider.' },
-  }),
+  provider: CloudOnboardingDeploymentProviderSchema,
   connectionId: schema.string({
     meta: { description: 'ID of the fleet-cloud-connector this deployment belongs to.' },
   }),
@@ -44,9 +75,7 @@ const CloudOnboardingDeploymentItemSchema = schema.object({
     })
   ),
   deploymentName: schema.maybe(
-    schema.string({
-      meta: { description: 'Opaque deployment name; for AWS, the CFN stack name.' },
-    })
+    schema.string({ meta: { description: 'Opaque deployment name; for AWS, the CFN stack name.' } })
   ),
   services: schema.arrayOf(schema.string(), {
     maxSize: 1000,
@@ -54,26 +83,26 @@ const CloudOnboardingDeploymentItemSchema = schema.object({
   }),
   status: CloudOnboardingDeploymentStatusSchema,
   statusMessage: schema.maybe(
-    schema.string({
-      meta: { description: 'Error context when status is failed.' },
+    schema.string({ meta: { description: 'Error context when status is failed.' } })
+  ),
+  attemptCount: schema.maybe(
+    schema.number({
+      min: 1,
+      meta: { description: 'Number of deployment attempts, including the current one.' },
     })
   ),
-  attemptCount: schema.number({
-    min: 1,
-    meta: { description: 'Number of deployment attempts, including the current one.' },
-  }),
-  vars: schema.recordOf(schema.string(), schema.string(), {
-    meta: { description: 'Deployment-level plaintext config (e.g. role_arn, api_key_id).' },
-  }),
-  serviceVars: schema.recordOf(
-    schema.string(),
-    schema.arrayOf(schema.recordOf(schema.string(), schema.any()), { maxSize: 100 }),
-    {
+  vars: schema.maybe(
+    schema.recordOf(schema.string(), schema.string(), {
+      meta: { description: 'Deployment-level plaintext config (e.g. role_arn, api_key_id).' },
+    })
+  ),
+  serviceVars: schema.maybe(
+    schema.recordOf(schema.string(), ServiceVarsEntrySchema, {
       meta: {
         description:
           'Per-service config keyed by service ID. Each entry is an array of source configs (regions, S3 bucket ARN, etc.).',
       },
-    }
+    })
   ),
   packagePolicyIds: schema.maybe(
     schema.arrayOf(schema.string(), {
@@ -88,12 +117,13 @@ const CloudOnboardingDeploymentItemSchema = schema.object({
   updatedAt: schema.string(),
 });
 
+const SingleItemResponseSchema = schema.object({ item: CloudOnboardingDeploymentItemSchema });
+
+// --- Public schemas ---
+
 export const CreateCloudOnboardingDeploymentRequestSchema = {
   body: schema.object({
-    provider: schema.oneOf(
-      [schema.literal('aws'), schema.literal('azure'), schema.literal('gcp')],
-      { meta: { description: 'Cloud provider.' } }
-    ),
+    provider: CloudOnboardingDeploymentProviderSchema,
     connectionId: schema.string({
       minLength: 1,
       meta: { description: 'ID of the fleet-cloud-connector to associate with this deployment.' },
@@ -106,36 +136,17 @@ export const CreateCloudOnboardingDeploymentRequestSchema = {
       maxSize: 1000,
       meta: { description: 'Service IDs to be covered by this deployment.' },
     }),
-    vars: schema.maybe(
-      schema.recordOf(schema.string({ minLength: 1 }), schema.string(), {
-        meta: { description: 'Deployment-level plaintext config.' },
-      })
-    ),
-    serviceVars: schema.maybe(
-      schema.recordOf(
-        schema.string({ minLength: 1 }),
-        schema.arrayOf(schema.recordOf(schema.string(), schema.any()), { maxSize: 100 }),
-        { meta: { description: 'Per-service source configs.' } }
-      )
-    ),
+    vars: schema.maybe(RequestVarsSchema),
+    serviceVars: schema.maybe(RequestServiceVarsSchema),
+    secrets: schema.maybe(RequestSecretsSchema),
   }),
 };
 
-export const CreateCloudOnboardingDeploymentResponseSchema = schema.object({
-  item: CloudOnboardingDeploymentItemSchema,
-});
+export const CreateCloudOnboardingDeploymentResponseSchema = SingleItemResponseSchema;
 
-export const GetCloudOnboardingDeploymentRequestSchema = {
-  params: schema.object({
-    deploymentId: schema.string({
-      meta: { description: 'The unique identifier of the cloud onboarding deployment.' },
-    }),
-  }),
-};
+export const GetCloudOnboardingDeploymentRequestSchema = { params: DeploymentIdParamSchema };
 
-export const GetCloudOnboardingDeploymentResponseSchema = schema.object({
-  item: CloudOnboardingDeploymentItemSchema,
-});
+export const GetCloudOnboardingDeploymentResponseSchema = SingleItemResponseSchema;
 
 export const GetCloudOnboardingDeploymentsByConnectionIdRequestSchema = {
   params: schema.object({
@@ -150,17 +161,11 @@ export const GetCloudOnboardingDeploymentsByConnectionIdResponseSchema = schema.
 });
 
 export const UpdateCloudOnboardingDeploymentRequestSchema = {
-  params: schema.object({
-    deploymentId: schema.string({
-      meta: { description: 'The unique identifier of the deployment to update.' },
-    }),
-  }),
+  params: DeploymentIdParamSchema,
   body: schema.object({
     status: schema.maybe(CloudOnboardingDeploymentStatusSchema),
     statusMessage: schema.maybe(
-      schema.string({
-        meta: { description: 'Error context; set when transitioning to failed.' },
-      })
+      schema.string({ meta: { description: 'Error context; set when transitioning to failed.' } })
     ),
     deploymentId: schema.maybe(
       schema.string({
@@ -171,34 +176,19 @@ export const UpdateCloudOnboardingDeploymentRequestSchema = {
       })
     ),
     deploymentName: schema.maybe(schema.string()),
-    vars: schema.maybe(schema.recordOf(schema.string({ minLength: 1 }), schema.string())),
-    serviceVars: schema.maybe(
-      schema.recordOf(
-        schema.string({ minLength: 1 }),
-        schema.arrayOf(schema.recordOf(schema.string(), schema.any()), { maxSize: 100 })
-      )
-    ),
+    vars: schema.maybe(RequestVarsSchema),
+    serviceVars: schema.maybe(RequestServiceVarsSchema),
+    secrets: schema.maybe(RequestSecretsSchema),
     attemptCount: schema.maybe(
-      schema.number({
-        min: 1,
-        meta: { description: 'Incremented by callers performing a retry.' },
-      })
+      schema.number({ min: 1, meta: { description: 'Incremented by callers performing a retry.' } })
     ),
     packagePolicyIds: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
   }),
 };
 
-export const UpdateCloudOnboardingDeploymentResponseSchema = schema.object({
-  item: CloudOnboardingDeploymentItemSchema,
-});
+export const UpdateCloudOnboardingDeploymentResponseSchema = SingleItemResponseSchema;
 
-export const DeleteCloudOnboardingDeploymentRequestSchema = {
-  params: schema.object({
-    deploymentId: schema.string({
-      meta: { description: 'The unique identifier of the deployment to delete.' },
-    }),
-  }),
-};
+export const DeleteCloudOnboardingDeploymentRequestSchema = { params: DeploymentIdParamSchema };
 
 export const DeleteCloudOnboardingDeploymentResponseSchema = schema.object({
   id: schema.string(),

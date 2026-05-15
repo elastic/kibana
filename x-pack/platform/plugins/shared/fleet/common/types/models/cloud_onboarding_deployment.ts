@@ -28,10 +28,10 @@ export interface CloudOnboardingDeployment {
   services: string[];
   status: CloudOnboardingDeploymentStatus;
   statusMessage?: string;
-  attemptCount: number;
-  vars: Record<string, string>;
-  serviceVars: Record<string, CloudOnboardingDeploymentServiceVars>;
-  secrets: Record<string, string>;
+  attemptCount?: number;
+  vars?: Record<string, string>;
+  serviceVars?: Record<string, CloudOnboardingDeploymentServiceVars>;
+  secrets?: Record<string, string>;
   packagePolicyIds?: string[];
   createdAt: string;
   updatedAt: string;
