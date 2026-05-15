@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { coreMock } from '@kbn/core/public/mocks';
 import type { CoreStart } from '@kbn/core/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
@@ -18,6 +19,7 @@ import type { ReactNode } from 'react';
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { Observable, of } from 'rxjs';
+import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { apmRouter } from '../../components/routing/apm_route_config';
 import type { ITelemetryClient } from '../../services/telemetry/types';
 import { createCallApmApi } from '../../services/rest/create_call_apm_api';
@@ -27,6 +29,9 @@ import { MockTimeRangeContextProvider } from '../time_range_metadata/mock_time_r
 import { ApmTimeRangeMetadataContextProvider } from '../time_range_metadata/time_range_metadata_context';
 import type { ApmPluginContextValue } from './apm_plugin_context';
 import { ApmPluginContext } from './apm_plugin_context';
+import type { ConfigSchema } from '../..';
+
+const coreStart = coreMock.createStart({ basePath: '/basepath' });
 
 const uiSettings: Record<string, unknown> = {
   [UI_SETTINGS.TIMEPICKER_QUICK_RANGES]: [
@@ -82,7 +87,7 @@ const mockPlugin = {
   },
 };
 
-const mockCore = {
+const mockCore = merge({}, coreStart, {
   application: {
     capabilities: {
       apm: {},
@@ -139,6 +144,11 @@ const mockCore = {
           }, 300);
         }),
     },
+    observabilityShared: {
+      navigation: {
+        PageTemplate: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+      },
+    },
   },
   data: {
     query: {
@@ -154,6 +164,28 @@ const mockCore = {
   dataViews: {
     create: jest.fn(),
   },
+});
+
+const mockConfig: ConfigSchema = {
+  serviceMapEnabled: true,
+  ui: {
+    enabled: true,
+  },
+  latestAgentVersionsUrl: '',
+  serverlessOnboarding: false,
+  managedServiceUrl: '',
+  featureFlags: {
+    agentConfigurationAvailable: true,
+    configurableIndicesAvailable: true,
+    infrastructureTabAvailable: true,
+    infraUiAvailable: true,
+    migrationToFleetAvailable: true,
+    sourcemapApiAvailable: true,
+    storageExplorerAvailable: true,
+    profilingIntegrationAvailable: false,
+    ruleFormV2Enabled: false,
+  },
+  serverless: { enabled: false },
 };
 
 /** Satisfies `useKibana` consumers (e.g. service map) that read `services.telemetry`. */
@@ -173,18 +205,17 @@ const mockUnifiedSearchBar = {
 };
 
 const mockApmPluginContext = {
+  appMountParameters: coreMock.createAppMountParameters('/basepath'),
+  config: mockConfig,
   core: mockCore,
   plugins: mockPlugin,
   unifiedSearch: mockUnifiedSearchBar,
   observabilityAIAssistant: {
     service: { setScreenContext: () => noop },
   },
-  share: {
-    url: {
-      locators: {
-        get: jest.fn(),
-      },
-    },
+  share: sharePluginMock.createSetupContract(),
+  uiActions: {
+    getTriggerCompatibleActions: () => Promise.resolve([]),
   },
 } as unknown as ApmPluginContextValue;
 
@@ -200,7 +231,9 @@ export function MockApmPluginStorybook({
   serviceContextValue?: APMServiceContextValue;
 }) {
   const contextMock = merge({}, mockApmPluginContext, apmContext);
-  createCallApmApi(contextMock.core);
+  if (contextMock.core) {
+    createCallApmApi(contextMock.core);
+  }
   const KibanaReactContext = createKibanaReactContext(
     merge({}, contextMock.core, {
       telemetry: storybookTelemetry,
@@ -210,6 +243,9 @@ export function MockApmPluginStorybook({
       },
     }) as unknown as Partial<CoreStart>
   );
+
+  performance.mark = jest.fn();
+  performance.clearMeasures = jest.fn();
 
   const history = createMemoryHistory({
     initialEntries: [routePath || '/services/?rangeFrom=now-15m&rangeTo=now'],
