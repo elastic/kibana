@@ -20,10 +20,7 @@ import { createNewRound } from '../utils/new_conversation';
 import { useConversationId } from '../context/conversation/use_conversation_id';
 import { useAgentBuilderServices } from './use_agent_builder_service';
 import { storageKeys } from '../storage_keys';
-import {
-  useSendMessageContext,
-  useStreamRecord,
-} from '../context/send_message/send_message_context';
+import { useStreamingContext, useStreamRecord } from '../context/streaming/streaming_context';
 import { useActiveSpaceId } from '../context/active_space_context';
 import { useValidateAgentId } from './agents/use_validate_agent_id';
 import { useConversationContext } from '../context/conversation/conversation_context';
@@ -33,7 +30,7 @@ export const useConversation = () => {
   const { conversationsService } = useAgentBuilderServices();
   const queryClient = useQueryClient();
   const queryKey = queryKeys.conversations.byId(conversationId ?? '');
-  const { activeStreams, byConversationId } = useSendMessageContext();
+  const { activeStreams, byConversationId } = useStreamingContext();
 
   // Disable the query when this conversation is being written to by a stream, OR when
   // its cached state shows a HITL pause, OR when there's an unpersisted error in the

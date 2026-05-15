@@ -119,8 +119,6 @@ enabled:
   - src/platform/test/functional/apps/discover/tabs8/config.ts
   - src/platform/test/functional/apps/discover/cascade_layout/config.ts
   - src/platform/test/functional/apps/getting_started/config.ts
-  - src/platform/test/functional/apps/home/config.ts
-  - src/platform/test/functional/apps/kibana_overview/config.ts
   - src/platform/test/functional/apps/management/group1/config.ts
   - src/platform/test/functional/apps/management/group2/config.ts
   - src/platform/test/functional/apps/management/group3/config.ts
@@ -145,7 +143,6 @@ enabled:
   - src/platform/test/functional/firefox/console.config.ts
   - src/platform/test/functional/firefox/dashboard.config.ts
   - src/platform/test/functional/firefox/discover.config.ts
-  - src/platform/test/functional/firefox/home.config.ts
   - src/platform/test/functional/firefox/visualize.config.ts
   - src/platform/test/health_gateway/config.ts
   - src/platform/test/interactive_setup_api_integration/enrollment_flow.config.ts
@@ -260,16 +257,13 @@ enabled:
   - x-pack/platform/test/functional/apps/dashboard/group1/config.ts
   - x-pack/platform/test/functional/apps/dashboard/group3/config.ts
   - x-pack/platform/test/functional/apps/data_views/config.ts
-  - x-pack/platform/test/functional/apps/dev_tools/config.ts
   - x-pack/platform/test/functional/apps/discover/group1/config.ts
   - x-pack/platform/test/functional/apps/discover/group2/config.ts
   - x-pack/platform/test/functional/apps/discover/group3/config.ts
   - x-pack/platform/test/functional/apps/graph/config.ts
-  - x-pack/platform/test/functional/apps/grok_debugger/config.ts
   - x-pack/platform/test/functional/apps/home/config.ts
   - x-pack/platform/test/functional/apps/index_lifecycle_management/config.ts
   - x-pack/platform/test/functional/apps/index_management/config.ts
-  - x-pack/platform/test/functional/apps/ingest_pipelines/config.ts
   - x-pack/platform/test/functional/apps/lens/group1/config.ts
   - x-pack/platform/test/functional/apps/lens/group2/config.ts
   - x-pack/platform/test/functional/apps/lens/group3/config.ts
@@ -323,7 +317,6 @@ enabled:
   - x-pack/platform/test/functional/apps/ml/memory_usage/config.ts
   - x-pack/platform/test/functional/apps/monitoring/config.group1.ts
   - x-pack/platform/test/functional/apps/monitoring/config.group2.ts
-  - x-pack/platform/test/functional/apps/painless_lab/config.ts
   - x-pack/platform/test/functional/apps/remote_clusters/config.ts
   - x-pack/platform/test/functional/apps/reporting_management/config.ts
   - x-pack/platform/test/functional/apps/rollup_job/config.ts
@@ -368,7 +361,6 @@ enabled:
   - x-pack/platform/test/rule_registry/spaces_only/config_basic.ts
   - x-pack/platform/test/rule_registry/spaces_only/config_trial.ts
   - x-pack/platform/test/saved_object_tagging/api_integration/security_and_spaces/config.ts
-  - x-pack/platform/test/saved_object_tagging/api_integration/tagging_api/config.ts
   - x-pack/platform/test/saved_object_tagging/api_integration/tagging_usage_collection/config.ts
   - x-pack/platform/test/saved_object_tagging/functional/config.ts
   - x-pack/platform/test/saved_objects_field_count/config.ts
@@ -462,7 +454,6 @@ enabled:
   - x-pack/platform/test/api_integration/apis/features/config.ts
   - x-pack/platform/test/api_integration/apis/entity_manager/config.ts
   - x-pack/platform/test/api_integration/apis/es/config.ts
-  - x-pack/platform/test/api_integration/apis/grok_debugger/config.ts
   - x-pack/platform/test/api_integration/apis/file_upload/config.ts
   - x-pack/platform/test/api_integration/apis/kibana/config.ts
   - x-pack/platform/test/api_integration/apis/management/config.ts
@@ -471,7 +462,6 @@ enabled:
   - x-pack/platform/test/api_integration/apis/monitoring/config.ts
   - x-pack/platform/test/api_integration/apis/monitoring_collection/config.ts
   - x-pack/platform/test/api_integration/apis/osquery/config.ts
-  - x-pack/platform/test/api_integration/apis/searchprofiler/config.ts
   - x-pack/platform/test/api_integration/apis/security/config_security_trial.ts
   - x-pack/platform/test/api_integration/apis/spaces/config.ts
   - x-pack/platform/test/api_integration/apis/stats/config.ts
