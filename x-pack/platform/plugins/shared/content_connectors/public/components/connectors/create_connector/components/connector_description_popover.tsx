@@ -29,7 +29,7 @@ const nativePopoverPanels = [
       'xpack.contentConnectors.connectorDescriptionPopover.connectorDescriptionBadge.native.chooseADataSourceLabel',
       { defaultMessage: 'Choose a data source you would like to sync' }
     ),
-    icons: [<EuiIcon size="l" type="documents" />],
+    icons: [<EuiIcon size="l" type="documents" aria-hidden={true} />],
     id: 'native-choose-source',
   },
   {
@@ -37,7 +37,10 @@ const nativePopoverPanels = [
       'xpack.contentConnectors.connectorDescriptionPopover.connectorDescriptionBadge.native.configureConnectorLabel',
       { defaultMessage: 'Configure your connector using our Kibana UI' }
     ),
-    icons: [<EuiIcon size="l" type="plugs" />, <EuiIcon size="l" type="logoElastic" />],
+    icons: [
+      <EuiIcon size="l" type="plugs" aria-hidden={true} />,
+      <EuiIcon size="l" type="logoElastic" aria-hidden={true} />,
+    ],
     id: 'native-configure-connector',
   },
 ];
@@ -48,7 +51,7 @@ const connectorClientPopoverPanels = [
       'xpack.contentConnectors.connectorDescriptionPopover.connectorDescriptionBadge.client.chooseADataSourceLabel',
       { defaultMessage: 'Choose a data source you would like to sync' }
     ),
-    icons: [<EuiIcon size="l" type="documents" />],
+    icons: [<EuiIcon size="l" type="documents" aria-hidden={true} />],
     id: 'client-choose-source',
   },
   {
@@ -60,9 +63,9 @@ const connectorClientPopoverPanels = [
       }
     ),
     icons: [
-      <EuiIcon size="l" type="plugs" />,
-      <EuiIcon size="l" type="sortRight" />,
-      <EuiIcon size="l" type="launch" />,
+      <EuiIcon size="l" type="plugs" aria-hidden={true} />,
+      <EuiIcon size="l" type="sortRight" aria-hidden={true} />,
+      <EuiIcon size="l" type="launch" aria-hidden={true} />,
     ],
     id: 'client-deploy',
   },
@@ -74,11 +77,11 @@ const connectorClientPopoverPanels = [
       }
     ),
     icons: [
-      <EuiIcon size="l" type="documents" />,
-      <EuiIcon size="l" type="sortRight" />,
-      <EuiIcon size="l" type="plugs" />,
-      <EuiIcon size="l" type="sortRight" />,
-      <EuiIcon size="l" type="logoElastic" />,
+      <EuiIcon size="l" type="documents" aria-hidden={true} />,
+      <EuiIcon size="l" type="sortRight" aria-hidden={true} />,
+      <EuiIcon size="l" type="plugs" aria-hidden={true} />,
+      <EuiIcon size="l" type="sortRight" aria-hidden={true} />,
+      <EuiIcon size="l" type="logoElastic" aria-hidden={true} />,
     ],
     id: 'client-configure-connector',
   },
