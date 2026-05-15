@@ -128,11 +128,8 @@ export function useFetchMetricsData({
           activeDimensions: appliedDimensions ?? [],
         };
       } catch (err) {
-        // Skip reporting for aborted fetches (normal control flow on re-render /
-        // unmount / dependency change) and for AbortErrors that surface through
-        // the platform's data plugin. Real failures go to APM via
-        // `apm.captureError` (matching the pattern adopted in #265380), and
-        // we re-throw so MetricsInfoError still renders via useAsyncFn's error.
+        // Don't report cancellations: signal.aborted covers the local AbortController
+        // path; isSuppressedFetchError covers AbortErrors thrown from the data plugin.
         if (!signal.aborted && !isSuppressedFetchError(err) && err instanceof Error) {
           apm.captureError(err, {
             labels: getMetricsApmLabels(

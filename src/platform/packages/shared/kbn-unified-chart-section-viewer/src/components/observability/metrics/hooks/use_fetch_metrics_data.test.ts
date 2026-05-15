@@ -706,6 +706,41 @@ describe('useFetchMetricsData', () => {
       });
     });
 
+    it('reports an EsqlResponseError without status to APM', async () => {
+      const responseError = new EsqlResponseError({ type: 'verification_exception' });
+      mockExecuteEsqlQuery.mockRejectedValue(responseError);
+
+      const params = createDefaultParams();
+      const { result } = renderHook(() => useFetchMetricsData(params));
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+        expect(result.current.error).toBeTruthy();
+      });
+
+      expect(mockApmCaptureError).toHaveBeenCalledTimes(1);
+      expect(mockApmCaptureError).toHaveBeenCalledWith(responseError, expect.any(Object));
+    });
+
+    it('reports an EsqlResponseError without type to APM', async () => {
+      const responseError = new EsqlResponseError(
+        { reason: 'index_not_found_exception' },
+        { status: 404 }
+      );
+      mockExecuteEsqlQuery.mockRejectedValue(responseError);
+
+      const params = createDefaultParams();
+      const { result } = renderHook(() => useFetchMetricsData(params));
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+        expect(result.current.error).toBeTruthy();
+      });
+
+      expect(mockApmCaptureError).toHaveBeenCalledTimes(1);
+      expect(mockApmCaptureError).toHaveBeenCalledWith(responseError, expect.any(Object));
+    });
+
     it('does NOT report to APM when the error is an AbortError', async () => {
       const abortError = new Error('aborted');
       abortError.name = 'AbortError';
