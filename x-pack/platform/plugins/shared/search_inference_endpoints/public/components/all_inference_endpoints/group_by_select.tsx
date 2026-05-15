@@ -82,6 +82,9 @@ export const GroupBySelect = ({ value, onChange }: GroupBySelectProps) => {
   return (
     <EuiFilterGroup data-test-subj="group-by-select">
       <EuiPopover
+        aria-label={i18n.translate('xpack.searchInferenceEndpoints.groupBy.popover.ariaLabel', {
+          defaultMessage: 'Group by options',
+        })}
         ownFocus
         button={
           <EuiFilterButton
@@ -117,6 +120,7 @@ export const GroupBySelect = ({ value, onChange }: GroupBySelectProps) => {
           )}
           listProps={{
             onFocusBadge: false,
+            paddingSize: 's',
           }}
         >
           {(list, _search) => <div css={GroupBySelectableContainer}>{list}</div>}
