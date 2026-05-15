@@ -118,6 +118,7 @@ New {{ech}} deployments now default to 2 GB of RAM for each {{kib}} instance.
 % sections
 * Extends the selectable area for dragging, collapsing and expanding sections to their entire header [#258502]({{kib-pull}}258502).
 * Allows dragging of opened collapsible sections [#257191]({{kib-pull}}257191).
+* Enforces panel limits on dashboards: up to 100 top-level items (panels, unpinned controls, and sections combined), up to 100 panels per section, and up to 100 pinned controls [#256102]({{kib-pull}}256102).
 
 % dashboard usability
 * Makes the filter pills section collapsible [#255887]({{kib-pull}}255887).
