@@ -307,18 +307,12 @@ describe('<TakeActionButton />', () => {
     );
   });
 
-  it('should call useResponderActionItem with field-browser data, closePopover, and action log flyout props', () => {
+  it('should call useResponderActionItem with field-browser data and closePopover', () => {
     renderTakeActionButton();
 
     expect(mockUseResponderActionItem).toHaveBeenCalledWith(
       expectedDataFormattedForFieldBrowser,
-      expect.any(Function),
-      {
-        actionLogFlyoutProps: {
-          size: 'l',
-          session: 'never',
-        },
-      }
+      expect.any(Function)
     );
   });
 

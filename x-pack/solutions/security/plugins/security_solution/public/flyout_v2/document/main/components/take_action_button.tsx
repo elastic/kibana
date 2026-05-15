@@ -178,13 +178,7 @@ export const TakeActionButton = memo(
 
     const endpointResponseActionsConsoleItems = useResponderActionItem(
       dataFormattedForFieldBrowser,
-      closePopoverHandler,
-      {
-        actionLogFlyoutProps: {
-          size: 'l',
-          session: 'never',
-        },
-      }
+      closePopoverHandler
     );
 
     const items = useMemo(

@@ -22,7 +22,6 @@ import { UX_MESSAGES } from '../../endpoint_response_actions_list/translations';
 export const ActionLogButton = memo<EndpointResponderExtensionComponentProps>((props) => {
   const buttonRef = useRef<HTMLButtonElement | null>(null);
   const [showActionLogFlyout, setShowActionLogFlyout] = useState<boolean>(false);
-  const { actionLogFlyoutProps } = props.meta;
   const toggleActionLog = useCallback(() => {
     setShowActionLogFlyout((prevState) => {
       // When closing, restore focus to the trigger button so EUI's focus trap
@@ -55,11 +54,11 @@ export const ActionLogButton = memo<EndpointResponderExtensionComponentProps>((p
       {showActionLogFlyout && (
         <EuiFlyout
           onClose={toggleActionLog}
-          size={actionLogFlyoutProps?.size ?? 'm'}
+          size="m"
           paddingSize="l"
           aria-labelledby={responderActionLogFlyoutTitleId}
           data-test-subj="responderActionLogFlyout"
-          session={actionLogFlyoutProps?.session}
+          session="never"
         >
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="m">

@@ -6,7 +6,6 @@
  */
 
 import React, { useCallback } from 'react';
-import type { EuiFlyoutProps } from '@elastic/eui';
 import { type SupportedHostOsType } from '../../../common/endpoint/constants';
 import { useLicense } from '../../common/hooks/use_license';
 import type { MaybeImmutable } from '../../../common/endpoint/types';
@@ -28,15 +27,12 @@ import { RESPONDER_PAGE_TITLE } from './translations';
 
 type ShowResponseActionsConsole = (props: ResponderInfoProps) => void;
 
-export type ResponderActionLogFlyoutProps = Pick<EuiFlyoutProps, 'size' | 'session'>;
-
 export interface BasicConsoleProps {
   agentId: string;
   hostName: string;
   /** Required for Endpoint agents. */
   capabilities: MaybeImmutable<EndpointCapabilities[]>;
   platform: string;
-  actionLogFlyoutProps?: ResponderActionLogFlyoutProps;
 }
 
 type ResponderInfoProps =
@@ -54,7 +50,7 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
 
   return useCallback(
     (props: ResponderInfoProps) => {
-      const { agentId, agentType, capabilities, hostName, platform, actionLogFlyoutProps } = props;
+      const { agentId, agentType, capabilities, hostName, platform } = props;
 
       // If no authz, just exit and log something to the console
       if (agentType === 'endpoint' && !endpointPrivileges.canAccessResponseConsole) {
@@ -102,7 +98,6 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
               hostName,
               capabilities,
               platform,
-              actionLogFlyoutProps,
             },
             consoleProps,
             PageTitleComponent: () => {
