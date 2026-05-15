@@ -26,7 +26,7 @@ const meta: Meta<DateRangePickerProps> = {
     onChange: action('onChange'),
     onInputChange: action('onInputChange'),
     onSettingsChange: action('onSettingsChange'),
-    settings: { roundRelativeTime: true, timePrecision: 's' },
+    settings: { roundRelativeTime: false, timePrecision: 's' },
   },
 };
 

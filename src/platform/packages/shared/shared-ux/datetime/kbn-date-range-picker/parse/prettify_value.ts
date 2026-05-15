@@ -55,17 +55,16 @@ const prettifyAbsoluteDate = (bound: string): string | null => {
 };
 
 /**
- * Strips the `now` prefix from a dateMath offset bound.
- * When `keepRounding` is false (default), also strips the rounding suffix.
+ * Strips the `now` prefix from a dateMath offset bound, preserving any rounding suffix.
  * Returns `null` if the bound is not a relative offset expression
  * (bare `now`, `now/w`, absolute dates, natural language all return null).
  */
-const prettifyStartBound = (bound: string, keepRounding = false): string | null => {
+const prettifyStartBound = (bound: string): string | null => {
   const match = bound.match(DATEMATH_OFFSET_RE);
   if (!match) return null;
 
   const [, , sign, count, unit, rounding] = match;
-  return `${sign}${count}${unit}${keepRounding ? rounding ?? '' : ''}`;
+  return `${sign}${count}${unit}${rounding ?? ''}`;
 };
 
 /**
@@ -86,12 +85,6 @@ export interface PrettifyValueOptions {
   extraDelimiter?: string;
   /** Presets to match against — if the value's bounds match a preset, its label is used. */
   presets?: TimeRangeBoundsOption[];
-  /**
-   * When `false`, rounding suffixes on the start bound are preserved so user-typed
-   * suffixes survive the round-trip. When `true` or `undefined`, they are stripped
-   * (the parser auto-manages rounding on the next parse).
-   */
-  roundRelativeTime?: boolean;
 }
 
 /**
@@ -118,8 +111,7 @@ export const prettifyValue = (value: string, options?: PrettifyValueOptions): st
   const trimmed = value.trim();
   if (!trimmed) return value;
 
-  const { extraDelimiter, presets = [], roundRelativeTime } = options ?? {};
-  const keepRounding = roundRelativeTime === false;
+  const { extraDelimiter, presets = [] } = options ?? {};
   const patterns = getDelimiterPatterns(extraDelimiter);
 
   // Try splitting on delimiters
@@ -136,7 +128,7 @@ export const prettifyValue = (value: string, options?: PrettifyValueOptions): st
         if (presetLabel) return presetLabel;
       }
 
-      const prettyStart = prettifyStartBound(start, keepRounding);
+      const prettyStart = prettifyStartBound(start);
       const prettyEnd = prettifyEndBound(end);
 
       // Both bounds are "now" (with or without rounding) — format any absolute dates
@@ -166,7 +158,7 @@ export const prettifyValue = (value: string, options?: PrettifyValueOptions): st
 
   // No delimiter found — try prettifying as a single dateMath expression (start-bound rules)
   if (trimmed === 'now') return trimmed;
-  const prettySingle = prettifyStartBound(trimmed, keepRounding);
+  const prettySingle = prettifyStartBound(trimmed);
   if (prettySingle) return prettySingle;
 
   // Try formatting as an absolute ISO date

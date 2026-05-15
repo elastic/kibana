@@ -191,10 +191,7 @@ export function DateRangePickerProvider({
   const isEditingRef = useRef(isEditing);
   isEditingRef.current = isEditing;
   const [text, setText] = useState<string>(() =>
-    prettifyValue(value ?? defaultValue ?? '', {
-      presets,
-      roundRelativeTime: settings.roundRelativeTime,
-    })
+    prettifyValue(value ?? defaultValue ?? '', { presets })
   );
   const timeRange: TimeRange = useMemo(
     () =>
@@ -220,9 +217,9 @@ export function DateRangePickerProvider({
 
   useEffect(() => {
     if (typeof value === 'string' && !isEditingRef.current) {
-      setText(prettifyValue(value, { presets, roundRelativeTime: settings.roundRelativeTime }));
+      setText(prettifyValue(value, { presets }));
     }
-  }, [value, presets, settings.roundRelativeTime]);
+  }, [value, presets]);
 
   const timeWindowButtonsConfig: TimeWindowButtonsConfig | false = useMemo(
     () =>
@@ -241,7 +238,7 @@ export function DateRangePickerProvider({
       }
       if (!editing) {
         if (typeof value === 'string') {
-          setText(prettifyValue(value, { presets, roundRelativeTime: settings.roundRelativeTime }));
+          setText(prettifyValue(value, { presets }));
         } else if (lastValidText.current) {
           setText(lastValidText.current);
         }
@@ -249,7 +246,7 @@ export function DateRangePickerProvider({
       }
       setIsEditing(editing);
     },
-    [text, value, presets, settings.roundRelativeTime]
+    [text, value, presets]
   );
 
   const hasAutoRefresh = !!onRefresh;
