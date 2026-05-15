@@ -67,7 +67,7 @@ describe('cloudOnboardingDeploymentService', () => {
   });
 
   describe('create', () => {
-    it('creates a deployment SO and returns the mapped deployment', async () => {
+    it('creates a deployment SO with server-set status/attemptCount/timestamps and returns the mapped deployment', async () => {
       const attrs = makeAttributes();
       soClient.create.mockResolvedValue(makeSOResponse('deploy-1', attrs));
 
@@ -76,22 +76,28 @@ describe('cloudOnboardingDeploymentService', () => {
         connectionId: 'conn-1',
         mechanisms: ['identity_federation'],
         services: ['cloudtrail'],
-        status: 'pending',
-        attemptCount: 1,
         vars: { role_arn: 'arn:aws:iam::123:role/Role' },
         serviceVars: {},
         secrets: { external_id: 'ext-123' },
-        createdAt: attrs.createdAt,
-        updatedAt: attrs.updatedAt,
       });
 
       expect(soClient.create).toHaveBeenCalledWith(
         CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
-        expect.objectContaining({ connectionId: 'conn-1', status: 'pending' })
+        expect.objectContaining({
+          connectionId: 'conn-1',
+          status: 'pending',
+          attemptCount: 1,
+          createdAt: expect.any(String),
+          updatedAt: expect.any(String),
+        })
       );
       expect(result.id).toBe('deploy-1');
       expect(result.connectionId).toBe('conn-1');
       expect(result.mechanisms).toEqual(['identity_federation']);
+      expect(result.status).toBe('pending');
+      expect(result.attemptCount).toBe(1);
+      expect(result.createdAt).toEqual(expect.any(String));
+      expect(result.updatedAt).toEqual(expect.any(String));
       expect(result.secrets).toEqual({ external_id: 'ext-123' });
     });
 
@@ -110,13 +116,9 @@ describe('cloudOnboardingDeploymentService', () => {
           connectionId: 'conn-1',
           mechanisms: ['identity_federation'],
           services: [],
-          status: 'pending',
-          attemptCount: 1,
           vars: {},
           serviceVars: {},
           secrets: {},
-          createdAt: '2026-05-13T10:00:00.000Z',
-          updatedAt: '2026-05-13T10:00:00.000Z',
         })
       ).rejects.toThrow('write failed');
     });
@@ -182,7 +184,8 @@ describe('cloudOnboardingDeploymentService', () => {
       expect(esoClientMock.createPointInTimeFinderDecryptedAsInternalUser).toHaveBeenCalledWith(
         expect.objectContaining({
           type: CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
-          filter: expect.stringContaining('conn-1'),
+          // filter is a KueryNode object built by nodeBuilder.is, not a plain string
+          filter: expect.any(Object),
         })
       );
     });
@@ -269,8 +272,8 @@ describe('cloudOnboardingDeploymentService', () => {
         expect.objectContaining({ serviceVars })
       );
       expect(result.serviceVars).toEqual(serviceVars);
-      expect(result.serviceVars.cloudtrail).toHaveLength(2);
-      expect(result.serviceVars.elb_logs).toHaveLength(1);
+      expect(result.serviceVars?.cloudtrail).toHaveLength(2);
+      expect(result.serviceVars?.elb_logs).toHaveLength(1);
     });
   });
 
@@ -412,7 +415,7 @@ describe('cloudOnboardingDeploymentService', () => {
   // UC5: Identity Federation + CloudFront Logs + EDOT Cloud Forwarder
   describe('use case scenarios', () => {
     describe('UC1: identity_federation + cloudwatch_metrics + agentless', () => {
-      it('stores external_id in secrets, no api_key_id, and sets packagePolicyIds after agentless stack succeeds', async () => {
+      it('stores external_id in secrets, no api_key_id, and sets packagePolicyIds', async () => {
         const attrs = makeAttributes({
           mechanisms: ['identity_federation'],
           services: ['cloudwatch_metrics'],
@@ -420,7 +423,6 @@ describe('cloudOnboardingDeploymentService', () => {
           vars: { role_arn: 'arn:aws:iam::123456789012:role/ElasticIFRole' },
           secrets: { external_id: 'ext-uc1' },
           packagePolicyIds: ['pkg-aws-001'],
-          status: 'succeeded',
         });
         soClient.create.mockResolvedValue(makeSOResponse('deploy-uc1', attrs));
 
@@ -433,12 +435,16 @@ describe('cloudOnboardingDeploymentService', () => {
           vars: { role_arn: 'arn:aws:iam::123456789012:role/ElasticIFRole' },
           secrets: { external_id: 'ext-uc1' },
           packagePolicyIds: ['pkg-aws-001'],
-          status: 'succeeded',
-          attemptCount: 1,
-          createdAt: attrs.createdAt,
-          updatedAt: attrs.updatedAt,
         });
 
+        expect(soClient.create).toHaveBeenCalledWith(
+          CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
+          expect.objectContaining({ status: 'pending', attemptCount: 1 })
+        );
+        expect(result.status).toBe('pending');
+        expect(result.attemptCount).toBe(1);
+        expect(result.createdAt).toEqual(expect.any(String));
+        expect(result.updatedAt).toEqual(expect.any(String));
         expect(result.mechanisms).toEqual(['identity_federation']);
         expect(result.secrets).toEqual({ external_id: 'ext-uc1' });
         expect(result.vars).not.toHaveProperty('api_key_id');
@@ -455,7 +461,6 @@ describe('cloudOnboardingDeploymentService', () => {
           vars: {},
           secrets: {},
           packagePolicyIds: ['pkg-aws-002'],
-          status: 'succeeded',
         });
         soClient.create.mockResolvedValue(makeSOResponse('deploy-uc2', attrs));
 
@@ -468,12 +473,16 @@ describe('cloudOnboardingDeploymentService', () => {
           vars: {},
           secrets: {},
           packagePolicyIds: ['pkg-aws-002'],
-          status: 'succeeded',
-          attemptCount: 1,
-          createdAt: attrs.createdAt,
-          updatedAt: attrs.updatedAt,
         });
 
+        expect(soClient.create).toHaveBeenCalledWith(
+          CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
+          expect.objectContaining({ status: 'pending', attemptCount: 1 })
+        );
+        expect(result.status).toBe('pending');
+        expect(result.attemptCount).toBe(1);
+        expect(result.createdAt).toEqual(expect.any(String));
+        expect(result.updatedAt).toEqual(expect.any(String));
         expect(result.mechanisms).toEqual([]);
         expect(result.secrets).toEqual({});
         expect(result.vars).not.toHaveProperty('api_key_id');
@@ -495,7 +504,6 @@ describe('cloudOnboardingDeploymentService', () => {
           vars: { api_key_id: 'abc123keyid' },
           secrets: {},
           packagePolicyIds: undefined,
-          status: 'succeeded',
         });
         soClient.create.mockResolvedValue(makeSOResponse('deploy-uc3', attrs));
 
@@ -511,12 +519,16 @@ describe('cloudOnboardingDeploymentService', () => {
           },
           vars: { api_key_id: 'abc123keyid' },
           secrets: {},
-          status: 'succeeded',
-          attemptCount: 1,
-          createdAt: attrs.createdAt,
-          updatedAt: attrs.updatedAt,
         });
 
+        expect(soClient.create).toHaveBeenCalledWith(
+          CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
+          expect.objectContaining({ status: 'pending', attemptCount: 1 })
+        );
+        expect(result.status).toBe('pending');
+        expect(result.attemptCount).toBe(1);
+        expect(result.createdAt).toEqual(expect.any(String));
+        expect(result.updatedAt).toEqual(expect.any(String));
         expect(result.mechanisms).toEqual(['cloud_forwarder']);
         expect(result.vars).toEqual({ api_key_id: 'abc123keyid' });
         expect(result.secrets).toEqual({});
@@ -553,7 +565,6 @@ describe('cloudOnboardingDeploymentService', () => {
             },
             secrets: { external_id: extId },
             packagePolicyIds: undefined,
-            status: 'succeeded',
           });
           soClient.create.mockResolvedValue(makeSOResponse(`deploy-${_pushMechanism}`, attrs));
 
@@ -572,12 +583,16 @@ describe('cloudOnboardingDeploymentService', () => {
               api_key_id: 'abc123keyid',
             },
             secrets: { external_id: extId },
-            status: 'succeeded',
-            attemptCount: 1,
-            createdAt: attrs.createdAt,
-            updatedAt: attrs.updatedAt,
           });
 
+          expect(soClient.create).toHaveBeenCalledWith(
+            CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
+            expect.objectContaining({ status: 'pending', attemptCount: 1 })
+          );
+          expect(result.status).toBe('pending');
+          expect(result.attemptCount).toBe(1);
+          expect(result.createdAt).toEqual(expect.any(String));
+          expect(result.updatedAt).toEqual(expect.any(String));
           expect(result.mechanisms).toEqual(mechanisms);
           expect(result.vars).toEqual({
             role_arn: 'arn:aws:iam::123456789012:role/ElasticIFRole',

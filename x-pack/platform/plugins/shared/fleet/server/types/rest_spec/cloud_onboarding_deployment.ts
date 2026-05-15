@@ -178,7 +178,6 @@ export const UpdateCloudOnboardingDeploymentRequestSchema = {
     deploymentName: schema.maybe(schema.string()),
     vars: schema.maybe(RequestVarsSchema),
     serviceVars: schema.maybe(RequestServiceVarsSchema),
-    secrets: schema.maybe(RequestSecretsSchema),
     attemptCount: schema.maybe(
       schema.number({ min: 1, meta: { description: 'Incremented by callers performing a retry.' } })
     ),

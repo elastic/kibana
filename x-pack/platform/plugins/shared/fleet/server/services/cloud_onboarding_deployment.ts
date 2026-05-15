@@ -39,6 +39,7 @@ function soToDeployment(
     vars: attributes.vars,
     serviceVars: attributes.serviceVars,
     packagePolicyIds: attributes.packagePolicyIds,
+    secrets: attributes.secrets,
     createdAt: attributes.createdAt,
     updatedAt: attributes.updatedAt,
   };
