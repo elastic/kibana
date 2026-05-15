@@ -14,7 +14,6 @@ import type {
   AgentContextLayerStartDependencies,
 } from './types';
 import { registerFeatures } from './features';
-import { registerUISettings } from './ui_settings';
 import { registerSearchRoute } from './routes/search';
 import { createSmlService, type SmlServiceInstance } from './services/sml/sml_service';
 import {
@@ -47,7 +46,6 @@ export class AgentContextLayerPlugin
     setupDeps: AgentContextLayerSetupDependencies
   ): AgentContextLayerPluginSetup {
     registerFeatures({ features: setupDeps.features });
-    registerUISettings({ uiSettings: coreSetup.uiSettings });
 
     const smlSetup = this.smlServiceInstance.setup({ logger: this.logger.get('sml') });
 

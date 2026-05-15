@@ -92,23 +92,6 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-ids",
-        "id": "def-common.AGENT_CONTEXT_LAYER_EXPERIMENTAL_FEATURES_SETTING_ID",
-        "type": "string",
-        "tags": [],
-        "label": "AGENT_CONTEXT_LAYER_EXPERIMENTAL_FEATURES_SETTING_ID",
-        "description": [],
-        "signature": [
-          "\"agentContextLayer:experimentalFeatures\""
-        ],
-        "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "lineNumber": 69,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/management-settings-ids",
         "id": "def-common.AI_ANONYMIZATION_SETTINGS",
         "type": "string",
         "tags": [],
