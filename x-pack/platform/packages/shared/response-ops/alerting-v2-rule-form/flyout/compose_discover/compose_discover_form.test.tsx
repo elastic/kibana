@@ -12,7 +12,7 @@ import { createFormWrapper, createMockServices } from '../../test_utils';
 import { createInitialState } from './use_compose_discover_state';
 import { getSteps } from './compose_discover_form';
 import type { ComposeDiscoverState } from './types';
-import type { FormValues } from '../../form/types';
+import type { ComposeFormValues } from './compose_form_types';
 
 jest.mock('@kbn/code-editor', () => ({
   ...jest.requireActual('@kbn/code-editor'),
@@ -58,14 +58,14 @@ describe('step validation', () => {
 
     it('returns true when queryCommitted is true', async () => {
       const state = createState({ queryCommitted: true });
-      const methods = {} as UseFormReturn<FormValues>;
+      const methods = {} as UseFormReturn<ComposeFormValues>;
 
       expect(await alertStep.validate!(methods, state)).toBe(true);
     });
 
     it('returns false when queryCommitted is false', async () => {
       const state = createState({ queryCommitted: false });
-      const methods = {} as UseFormReturn<FormValues>;
+      const methods = {} as UseFormReturn<ComposeFormValues>;
 
       expect(await alertStep.validate!(methods, state)).toBe(false);
     });
@@ -78,7 +78,7 @@ describe('step validation', () => {
       const state = createState();
       const methods = {
         trigger: jest.fn().mockResolvedValue(true),
-      } as unknown as UseFormReturn<FormValues>;
+      } as unknown as UseFormReturn<ComposeFormValues>;
 
       const result = await detailsStep.validate!(methods, state);
 
@@ -90,7 +90,7 @@ describe('step validation', () => {
       const state = createState();
       const methods = {
         trigger: jest.fn().mockResolvedValue(false),
-      } as unknown as UseFormReturn<FormValues>;
+      } as unknown as UseFormReturn<ComposeFormValues>;
 
       const result = await detailsStep.validate!(methods, state);
 
