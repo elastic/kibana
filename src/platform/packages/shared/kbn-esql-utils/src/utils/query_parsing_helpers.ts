@@ -552,6 +552,7 @@ export const getSparklineColumns = (esql: string): string[] => {
     if (arg.name === 'where') {
       // Aggregate inline WHERE filter: "sparkline = SPARKLINE(...) WHERE condition"
       // is a 'where' function expression where args[0] is the aggregate expression
+      if (arg.args.length === 0) return;
       collectFromArg(arg.args[0]);
       return;
     }
