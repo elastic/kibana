@@ -1957,11 +1957,8 @@
       "groupName": "minify",
       "matchDepNames": [
         "gulp-brotli",
-        "gulp-postcss",
-        "gulp-terser",
         "terser",
-        "terser-webpack-plugin",
-        "@types/gulp"
+        "terser-webpack-plugin"
       ],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
