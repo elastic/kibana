@@ -47,8 +47,8 @@ describe('DashboardEmptyScreen', () => {
     expect(screen.queryByTestId('dashboardEmptyReadWrite')).not.toBeInTheDocument();
     expect(screen.queryByTestId('dashboardEmptyReadOnly')).not.toBeInTheDocument();
     expect(screen.getByTestId('emptyDashboardWidget')).toBeInTheDocument();
-    expect(screen.getByTestId('emptyDashboard-addLensPanelAction')).toBeInTheDocument();
-    expect(screen.getByTestId('emptyDashboard-ACTION_CREATE_ESQL_CHART')).toBeInTheDocument();
+    expect(screen.getByTestId('emptyDashboardCreateVisualization')).toBeInTheDocument();
+    expect(screen.getByTestId('emptyDashboardCreateEsqlVisualization')).toBeInTheDocument();
   });
 
   test('renders correctly with readonly mode', () => {

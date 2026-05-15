@@ -10,7 +10,7 @@
 import React, { useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
-import type { UseEuiTheme } from '@elastic/eui';
+import type { IconType, UseEuiTheme } from '@elastic/eui';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -29,7 +29,39 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
 import { coreServices, uiActionsService } from '../../../services/kibana_services';
 import { getDashboardCapabilities } from '../../../utils/get_dashboard_capabilities';
-import { FeaturedItems } from '../../../dashboard_app/top_nav/add_panel_button/components/featured_menu_items';
+
+interface EmptyStateAction {
+  actionId: string;
+  title: string;
+  description: string;
+  icon: IconType;
+  dataTestSubj: string;
+}
+
+const EMPTY_STATE_ACTIONS: readonly EmptyStateAction[] = [
+  {
+    actionId: 'addLensPanelAction',
+    title: i18n.translate('dashboard.emptyScreen.createVisualizationTitle', {
+      defaultMessage: 'Create visualization',
+    }),
+    description: i18n.translate('dashboard.emptyScreen.createVisualizationDescription', {
+      defaultMessage: 'Build charts, metrics, and tables with a point-and-click editor.',
+    }),
+    icon: 'visBarVertical',
+    dataTestSubj: 'emptyDashboardCreateVisualization',
+  },
+  {
+    actionId: 'ACTION_CREATE_ESQL_CHART',
+    title: i18n.translate('dashboard.emptyScreen.createEsqlVisualizationTitle', {
+      defaultMessage: 'Create visualization (query)',
+    }),
+    description: i18n.translate('dashboard.emptyScreen.createEsqlVisualizationDescription', {
+      defaultMessage: 'Build charts, metrics, and tables with ES|QL.',
+    }),
+    icon: 'editorCodeBlock',
+    dataTestSubj: 'emptyDashboardCreateEsqlVisualization',
+  },
+] as const;
 
 export function DashboardEmptyScreen() {
   const { showWriteControls } = useMemo(() => {
@@ -111,31 +143,26 @@ export function DashboardEmptyScreen() {
   const actions = (() => {
     if (showEditPrompt) {
       return (
-        <EuiFlexGroup direction="column" gutterSize="s" css={styles.featuredPanelsWrapper}>
-          {Object.entries(FeaturedItems).map(([actionId, item]) => (
-            <EuiFlexItem key={actionId} grow={false}>
+        <EuiFlexGroup direction="column" gutterSize="s" css={styles.actionsWrapper}>
+          {EMPTY_STATE_ACTIONS.map((action) => (
+            <EuiFlexItem key={action.actionId} grow={false}>
               <EuiPanel
                 hasBorder
                 paddingSize="none"
-                onClick={() => executeAction(actionId)}
-                css={styles.featuredPanel}
-                data-test-subj={`emptyDashboard-${actionId}`}
+                onClick={() => executeAction(action.actionId)}
+                css={styles.actionPanel}
+                data-test-subj={action.dataTestSubj}
               >
                 <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
                   <EuiFlexItem grow={false}>
-                    <EuiIcon type={item.icon} size="m" aria-hidden={true} />
+                    <EuiIcon type={action.icon} size="m" aria-hidden={true} />
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <EuiText size="s">
-                      <strong>
-                        {i18n.translate('dashboard.emptyScreen.createPanelTitle', {
-                          defaultMessage: 'Create {title}',
-                          values: { title: item.title.toLowerCase() },
-                        })}
-                      </strong>
+                      <strong>{action.title}</strong>
                     </EuiText>
                     <EuiText size="xs" color="subdued">
-                      {item.description}
+                      {action.description}
                     </EuiText>
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -193,10 +220,10 @@ const emptyScreenStyles = {
         paddingRight: euiTheme.size.s,
       },
     }),
-  featuredPanelsWrapper: css({
+  actionsWrapper: css({
     width: '100%',
   }),
-  featuredPanel: ({ euiTheme }: UseEuiTheme) =>
+  actionPanel: ({ euiTheme }: UseEuiTheme) =>
     css({
       padding: `${euiTheme.size.s} ${euiTheme.size.base}`,
       cursor: 'pointer',
