@@ -21,7 +21,6 @@ dependsOn:
   - '@kbn/core'
   - '@kbn/i18n'
   - '@kbn/server-route-repository'
-  - '@kbn/apm-types'
 tags:
   - plugin
   - prod
