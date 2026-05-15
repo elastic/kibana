@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { AlertStatus } from '@kbn/rule-data-utils';
+import type { Edge, Node, EdgeMarker as ReactFlowEdgeMarker } from '@xyflow/react';
 import type {
   AGENT_NAME,
   SERVICE_ENVIRONMENT,
@@ -17,8 +19,6 @@ import type { SloStatus } from './service_inventory';
 import type { ServiceAnomaliesResponse } from './service_anomalies';
 import type { ServiceAnomalyStats } from './service_anomaly_stats';
 import type { AgentName } from './es_schemas/ui/fields/agent';
-import type { AlertStatus } from '@kbn/rule-data-utils';
-import type { Edge, Node, EdgeMarker as ReactFlowEdgeMarker } from '@xyflow/react';
 
 export interface ServiceMapTelemetry {
   tracesCount: number;
