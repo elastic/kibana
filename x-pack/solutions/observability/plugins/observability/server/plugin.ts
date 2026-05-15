@@ -31,6 +31,7 @@ import type { SharePluginSetup } from '@kbn/share-plugin/server';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
+import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import type { PluginSetup as ESQLSetup } from '@kbn/esql/server';
 import { getLogsFeature } from './features/logs_feature';
 import type { ObservabilityConfig } from '.';
@@ -69,6 +70,7 @@ interface PluginSetup {
 
 interface PluginStart {
   alerting: AlertingServerStart;
+  data: DataPluginStart;
   spaces?: SpacesPluginStart;
   dataViews: DataViewsServerPluginStart;
   ruleRegistry: RuleRegistryPluginStartContract;
@@ -115,7 +117,7 @@ export class ObservabilityPlugin
 
     core.savedObjects.registerType(threshold);
 
-    registerRuleTypes(plugins.alerting, core.http.basePath, config, this.logger, {
+    registerRuleTypes(plugins.alerting, core, core.http.basePath, config, this.logger, {
       alertsLocator,
       logsLocator,
     });

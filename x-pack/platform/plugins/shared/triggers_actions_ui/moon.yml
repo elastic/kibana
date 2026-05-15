@@ -106,6 +106,7 @@ dependsOn:
   - '@kbn/std'
   - '@kbn/lens-common'
   - '@kbn/connector-specs'
+  - '@kbn/inspector-plugin'
 tags:
   - plugin
   - prod
