@@ -100,6 +100,7 @@ const RuleActivityFilterComponent = ({
           options={options}
           onChange={handleSelectableOnChange}
           renderOption={renderOptionLabel}
+          listProps={{ paddingSize: 's' }}
         >
           {(list) => (
             <div
