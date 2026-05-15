@@ -93,7 +93,7 @@ function createStartDependencies() {
         SearchBar: () => null,
       },
     },
-  } as AgentBuilderStartDependencies;
+  } as unknown as AgentBuilderStartDependencies;
 }
 
 function getAST(markdown: string) {
