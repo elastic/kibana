@@ -328,7 +328,8 @@ function displayMultiTrackSummary(
   log: ToolingLog
 ) {
   if (tracks.length === 0) {
-    throw createFlagError('Multi-track summary requested, but the provided track list is empty');
+    log.warning('Multi-track summary requested, but the provided track list is empty');
+    return;
   }
 
   const panel = new CliTable3();

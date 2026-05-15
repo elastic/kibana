@@ -1,0 +1,91 @@
+{
+  "id": "serverlessVectordb",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "serverlessVectordb",
+      "id": "def-public.ServerlessVectordbPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "ServerlessVectordbPluginSetup",
+      "description": [],
+      "path": "x-pack/solutions/vectordb/plugins/serverless_vectordb/public/types.ts",
+      "lineNumber": 9,
+      "columnNumber": 1,
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "serverlessVectordb",
+      "id": "def-public.ServerlessVectordbPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "ServerlessVectordbPluginStart",
+      "description": [],
+      "path": "x-pack/solutions/vectordb/plugins/serverless_vectordb/public/types.ts",
+      "lineNumber": 12,
+      "columnNumber": 1,
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "serverlessVectordb",
+      "id": "def-server.ServerlessVectordbPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "ServerlessVectordbPluginSetup",
+      "description": [],
+      "path": "x-pack/solutions/vectordb/plugins/serverless_vectordb/server/types.ts",
+      "lineNumber": 11,
+      "columnNumber": 1,
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "serverlessVectordb",
+      "id": "def-server.ServerlessVectordbPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "ServerlessVectordbPluginStart",
+      "description": [],
+      "path": "x-pack/solutions/vectordb/plugins/serverless_vectordb/server/types.ts",
+      "lineNumber": 13,
+      "columnNumber": 1,
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

@@ -4,8 +4,9 @@
     "outDir": "target/types",
     "isolatedModules": true
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*", ".storybook/**/*"],
+  "include": ["common/**/*", "public/**/*", "server/**/*", ".storybook/**/*", "test/scout/**/*"],
   "kbn_references": [
+    "@kbn/scout",
     "@kbn/core",
     "@kbn/data-views-plugin",
     "@kbn/custom-integrations-plugin",
@@ -32,6 +33,7 @@
     "@kbn/core-http-browser",
     "@kbn/react-kibana-context-theme",
     "@kbn/css-utils",
+    "@kbn/shared-ux-utility",
   ],
   "exclude": [
     "target/**/*",

@@ -18,6 +18,8 @@ import { useDiscoverLinkAndEsqlQuery } from '../../../../../hooks/use_discover_l
 import { useOpenInDiscoverSectionAction } from '../../../../../hooks/use_open_in_discover_section_action';
 import { TRACES_DOC_VIEWER_EBT_ELEMENTS, TRACES_DOC_VIEWER_EBT_DETAILS } from '../../ebt_constants';
 
+const FETCH_TRACE_CONTEXT_LOGS_OPERATION_ID = 'fetch-trace-context-logs';
+
 const logsTitle = i18n.translate('unifiedDocViewer.observability.traces.section.logs.title', {
   defaultMessage: 'Logs',
 });
@@ -97,6 +99,7 @@ export function TraceContextLogEvents({
           nonHighlightingQuery={query}
           timeRange={savedSearchTimeRange}
           index={indexes.logs}
+          executionContext={{ meta: { operation_id: FETCH_TRACE_CONTEXT_LOGS_OPERATION_ID } }}
         />
       </div>
     </ContentFrameworkSection>

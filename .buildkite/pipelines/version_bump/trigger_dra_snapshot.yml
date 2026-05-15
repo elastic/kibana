@@ -2,10 +2,15 @@ steps:
   - name: mock kibana snapshot build
     if: build.env("DRY_RUN") == "true"
     command: sleep 10
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-4
 
   - name: Trigger DRA Snapshot Build
     key: trigger-dra-snapshot
-    if: build.env("DRY_RUN") == "false"
+    if: build.env("DRY_RUN") != "true"
     trigger: kibana-artifacts-snapshot
     async: false
     build:

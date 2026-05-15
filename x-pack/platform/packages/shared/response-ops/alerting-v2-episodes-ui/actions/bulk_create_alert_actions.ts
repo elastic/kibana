@@ -18,6 +18,6 @@ export const bulkCreateAlertActions = (
   http: HttpStart,
   items: BulkCreateAlertActionBody
 ): Promise<BulkCreateAlertActionsResponse> =>
-  http.post<BulkCreateAlertActionsResponse>(`${ALERTING_V2_ALERT_API_PATH}/action/_bulk`, {
+  http.post<BulkCreateAlertActionsResponse>(`${ALERTING_V2_ALERT_API_PATH}/_bulk_action`, {
     body: JSON.stringify(items),
   });

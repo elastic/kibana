@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/ebt-click'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/obs-exploration'
+  defaultOwner: '@elastic/obs-exploration-team'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/ebt-click'
   description: Moon project for @kbn/ebt-click
   channel: ''
-  owner: '@elastic/obs-exploration'
+  owner: '@elastic/obs-exploration-team'
   sourceRoot: src/platform/packages/shared/kbn-ebt-click
 dependsOn: []
 tags:

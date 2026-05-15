@@ -15,7 +15,6 @@ import { EuiSplitPanel } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { AttachmentsService } from '../../../../../../services/attachments/attachements_service';
 import { useConversationContext } from '../../../../../context/conversation/conversation_context';
-import { usePersistedConversationId } from '../../../../../hooks/use_persisted_conversation_id';
 import { useAgentBuilderServices } from '../../../../../hooks/use_agent_builder_service';
 import { AttachmentHeader } from './attachment_header';
 import { getAttachmentPreviewKey, useCanvasContext } from './canvas_context';
@@ -53,7 +52,6 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
   } = useCanvasContext();
   const { conversationActions } = useConversationContext();
   const { openSidebarConversation: openSidebarConversationInternal } = useAgentBuilderServices();
-  const { updatePersistedConversationId } = usePersistedConversationId({});
 
   const openCanvas = useCallback(() => {
     openCanvasContext(attachment, isSidebar, version);
@@ -69,11 +67,8 @@ export const InlineAttachmentWithActions: React.FC<InlineAttachmentWithActionsPr
   );
 
   const openSidebarConversation = useCallback(() => {
-    if (conversationId) {
-      updatePersistedConversationId(conversationId);
-    }
-    openSidebarConversationInternal();
-  }, [conversationId, updatePersistedConversationId, openSidebarConversationInternal]);
+    openSidebarConversationInternal({ conversationId });
+  }, [conversationId, openSidebarConversationInternal]);
 
   const uiDefinition = attachmentsService.getAttachmentUiDefinition(attachment.type);
   const attachmentPreviewKey = getAttachmentPreviewKey(attachment.id, version);

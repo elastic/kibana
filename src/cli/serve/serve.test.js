@@ -130,6 +130,81 @@ describe('applyConfigOverrides', () => {
     });
   });
 
+  it('alters config to enable SAML Mock IdP in stateful dev mode', () => {
+    expect(applyConfigOverrides({}, { dev: true }, {}, {})).toEqual({
+      elasticsearch: {
+        username: 'kibana_system',
+        password: 'changeme',
+      },
+      plugins: { paths: [] },
+      server: { basePath: '/kbn', publicBaseUrl: 'http://localhost:5601/kbn' },
+      xpack: {
+        security: {
+          authc: {
+            providers: {
+              basic: { basic: { order: Number.MAX_SAFE_INTEGER } },
+              saml: {
+                'cloud-saml-kibana': {
+                  description: 'Continue as Test User',
+                  hint: 'Allows testing stateful user roles',
+                  icon: 'user',
+                  order: 0,
+                  realm: 'cloud-saml-kibana',
+                },
+              },
+            },
+            selector: { enabled: false },
+          },
+        },
+      },
+    });
+  });
+
+  it('omits the fixed base path in stateful dev mode when `--no-base-path` is passed', () => {
+    const config = applyConfigOverrides({}, { dev: true, basePath: false }, {}, {});
+    expect(config.server).toEqual({ publicBaseUrl: 'http://localhost:5601' });
+  });
+
+  it('omits the fixed base path in stateful dev mode when `--run-examples` is passed', () => {
+    const config = applyConfigOverrides({}, { dev: true, runExamples: true }, {}, {});
+    expect(config.server).toEqual({ publicBaseUrl: 'http://localhost:5601' });
+  });
+
+  it('keeps a user-provided server.basePath in stateful dev mode and derives publicBaseUrl from it', () => {
+    const config = applyConfigOverrides({ server: { basePath: '/custom' } }, { dev: true }, {}, {});
+    expect(config.server).toEqual({
+      basePath: '/custom',
+      publicBaseUrl: 'http://localhost:5601/custom',
+    });
+  });
+
+  it('derives publicBaseUrl from a user-customized server.port in stateful dev mode', () => {
+    const config = applyConfigOverrides(
+      { server: { basePath: '/custom', port: 5701 } },
+      { dev: true },
+      {},
+      {}
+    );
+    expect(config.server).toEqual({
+      basePath: '/custom',
+      port: 5701,
+      publicBaseUrl: 'http://localhost:5701/custom',
+    });
+  });
+
+  it('respects a user-provided server.publicBaseUrl in stateful dev mode', () => {
+    const config = applyConfigOverrides(
+      { server: { publicBaseUrl: 'https://kibana.example.com/kbn' } },
+      { dev: true },
+      {},
+      {}
+    );
+    expect(config.server).toEqual({
+      basePath: '/kbn',
+      publicBaseUrl: 'https://kibana.example.com/kbn',
+    });
+  });
+
   it('omits UIAM config if `--no-uiam` flag is passed in serverless dev mode', () => {
     expect(applyConfigOverrides({}, { dev: true, serverless: true, uiam: false }, {}, {})).toEqual({
       elasticsearch: {

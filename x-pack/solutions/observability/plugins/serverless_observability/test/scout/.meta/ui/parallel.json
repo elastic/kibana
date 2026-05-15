@@ -1,5 +1,5 @@
 {
-  "sha1": "102deb71133b638aeacc6f6e616252063ebc92fb",
+  "sha1": "c88b3c20538b2cd2965c7b6a6d0a8ebe1616fba0",
   "tests": [
     {
       "id": "08c621ad2871856-3596071962e357d",
@@ -39,7 +39,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_complete.spec.ts",
-        "line": 121,
+        "line": 145,
         "column": 9
       }
     },
@@ -53,7 +53,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_complete.spec.ts",
-        "line": 169,
+        "line": 209,
         "column": 9
       }
     },
@@ -67,7 +67,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/serverless_observability/test/scout/ui/parallel_tests/navigation_complete.spec.ts",
-        "line": 176,
+        "line": 218,
         "column": 9
       }
     },

@@ -39,7 +39,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-data-lifecycle-phases/src/phases.ts",
-        "lineNumber": 117,
+        "lineNumber": 118,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -64,7 +64,7 @@
           "\"delete\" | \"warm\" | \"hot\" | \"frozen\" | \"cold\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-data-lifecycle-phases/src/phases.ts",
-        "lineNumber": 11,
+        "lineNumber": 12,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -90,7 +90,7 @@
           "[]"
         ],
         "path": "x-pack/platform/packages/shared/kbn-data-lifecycle-phases/src/phases.ts",
-        "lineNumber": 19,
+        "lineNumber": 20,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -107,7 +107,7 @@
           "{ delete: string; warm: string; hot: string; frozen: string; cold: string; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-data-lifecycle-phases/src/phases.ts",
-        "lineNumber": 112,
+        "lineNumber": 113,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -125,7 +125,7 @@
           "\nShort descriptions (one sentence). Used in the Streams app phase selector."
         ],
         "path": "x-pack/platform/packages/shared/kbn-data-lifecycle-phases/src/phases.ts",
-        "lineNumber": 66,
+        "lineNumber": 67,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -140,7 +140,7 @@
               "\nShort descriptions (one sentence). Used in the Streams app phase selector."
             ],
             "path": "x-pack/platform/packages/shared/kbn-data-lifecycle-phases/src/phases.ts",
-            "lineNumber": 67,
+            "lineNumber": 68,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -155,7 +155,7 @@
               "\nShort descriptions (one sentence). Used in the Streams app phase selector."
             ],
             "path": "x-pack/platform/packages/shared/kbn-data-lifecycle-phases/src/phases.ts",
-            "lineNumber": 71,
+            "lineNumber": 72,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -170,7 +170,7 @@
               "\nShort descriptions (one sentence). Used in the Streams app phase selector."
             ],
             "path": "x-pack/platform/packages/shared/kbn-data-lifecycle-phases/src/phases.ts",
-            "lineNumber": 75,
+            "lineNumber": 76,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -185,7 +185,7 @@
               "\nShort descriptions (one sentence). Used in the Streams app phase selector."
             ],
             "path": "x-pack/platform/packages/shared/kbn-data-lifecycle-phases/src/phases.ts",
-            "lineNumber": 79,
+            "lineNumber": 80,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -200,7 +200,7 @@
               "\nShort descriptions (one sentence). Used in the Streams app phase selector."
             ],
             "path": "x-pack/platform/packages/shared/kbn-data-lifecycle-phases/src/phases.ts",
-            "lineNumber": 82,
+            "lineNumber": 83,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -218,7 +218,7 @@
           "\nLong descriptions. Used in the ILM policy editor."
         ],
         "path": "x-pack/platform/packages/shared/kbn-data-lifecycle-phases/src/phases.ts",
-        "lineNumber": 90,
+        "lineNumber": 91,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -233,7 +233,7 @@
               "\nLong descriptions. Used in the ILM policy editor."
             ],
             "path": "x-pack/platform/packages/shared/kbn-data-lifecycle-phases/src/phases.ts",
-            "lineNumber": 91,
+            "lineNumber": 92,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -248,7 +248,7 @@
               "\nLong descriptions. Used in the ILM policy editor."
             ],
             "path": "x-pack/platform/packages/shared/kbn-data-lifecycle-phases/src/phases.ts",
-            "lineNumber": 95,
+            "lineNumber": 96,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -263,7 +263,7 @@
               "\nLong descriptions. Used in the ILM policy editor."
             ],
             "path": "x-pack/platform/packages/shared/kbn-data-lifecycle-phases/src/phases.ts",
-            "lineNumber": 99,
+            "lineNumber": 100,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -278,7 +278,7 @@
               "\nLong descriptions. Used in the ILM policy editor."
             ],
             "path": "x-pack/platform/packages/shared/kbn-data-lifecycle-phases/src/phases.ts",
-            "lineNumber": 103,
+            "lineNumber": 104,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -293,7 +293,7 @@
               "\nLong descriptions. Used in the ILM policy editor."
             ],
             "path": "x-pack/platform/packages/shared/kbn-data-lifecycle-phases/src/phases.ts",
-            "lineNumber": 107,
+            "lineNumber": 108,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -311,7 +311,7 @@
           "\nShort phase labels (\"Hot\", \"Warm\", …). Used in badges and summaries."
         ],
         "path": "x-pack/platform/packages/shared/kbn-data-lifecycle-phases/src/phases.ts",
-        "lineNumber": 24,
+        "lineNumber": 25,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -326,7 +326,7 @@
               "\nShort phase labels (\"Hot\", \"Warm\", …). Used in badges and summaries."
             ],
             "path": "x-pack/platform/packages/shared/kbn-data-lifecycle-phases/src/phases.ts",
-            "lineNumber": 25,
+            "lineNumber": 26,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -341,7 +341,7 @@
               "\nShort phase labels (\"Hot\", \"Warm\", …). Used in badges and summaries."
             ],
             "path": "x-pack/platform/packages/shared/kbn-data-lifecycle-phases/src/phases.ts",
-            "lineNumber": 28,
+            "lineNumber": 29,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -356,7 +356,7 @@
               "\nShort phase labels (\"Hot\", \"Warm\", …). Used in badges and summaries."
             ],
             "path": "x-pack/platform/packages/shared/kbn-data-lifecycle-phases/src/phases.ts",
-            "lineNumber": 31,
+            "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -371,7 +371,7 @@
               "\nShort phase labels (\"Hot\", \"Warm\", …). Used in badges and summaries."
             ],
             "path": "x-pack/platform/packages/shared/kbn-data-lifecycle-phases/src/phases.ts",
-            "lineNumber": 34,
+            "lineNumber": 35,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -386,7 +386,7 @@
               "\nShort phase labels (\"Hot\", \"Warm\", …). Used in badges and summaries."
             ],
             "path": "x-pack/platform/packages/shared/kbn-data-lifecycle-phases/src/phases.ts",
-            "lineNumber": 37,
+            "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -404,7 +404,7 @@
           "\nFull phase labels (\"Hot phase\", \"Warm phase\", …). Used in selects and the policy editor."
         ],
         "path": "x-pack/platform/packages/shared/kbn-data-lifecycle-phases/src/phases.ts",
-        "lineNumber": 45,
+        "lineNumber": 46,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -419,7 +419,7 @@
               "\nFull phase labels (\"Hot phase\", \"Warm phase\", …). Used in selects and the policy editor."
             ],
             "path": "x-pack/platform/packages/shared/kbn-data-lifecycle-phases/src/phases.ts",
-            "lineNumber": 46,
+            "lineNumber": 47,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -434,7 +434,7 @@
               "\nFull phase labels (\"Hot phase\", \"Warm phase\", …). Used in selects and the policy editor."
             ],
             "path": "x-pack/platform/packages/shared/kbn-data-lifecycle-phases/src/phases.ts",
-            "lineNumber": 49,
+            "lineNumber": 50,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -449,7 +449,7 @@
               "\nFull phase labels (\"Hot phase\", \"Warm phase\", …). Used in selects and the policy editor."
             ],
             "path": "x-pack/platform/packages/shared/kbn-data-lifecycle-phases/src/phases.ts",
-            "lineNumber": 52,
+            "lineNumber": 53,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -464,7 +464,7 @@
               "\nFull phase labels (\"Hot phase\", \"Warm phase\", …). Used in selects and the policy editor."
             ],
             "path": "x-pack/platform/packages/shared/kbn-data-lifecycle-phases/src/phases.ts",
-            "lineNumber": 55,
+            "lineNumber": 56,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -479,7 +479,7 @@
               "\nFull phase labels (\"Hot phase\", \"Warm phase\", …). Used in selects and the policy editor."
             ],
             "path": "x-pack/platform/packages/shared/kbn-data-lifecycle-phases/src/phases.ts",
-            "lineNumber": 58,
+            "lineNumber": 59,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

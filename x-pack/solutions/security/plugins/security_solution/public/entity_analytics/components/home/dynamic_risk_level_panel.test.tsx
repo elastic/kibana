@@ -77,7 +77,7 @@ describe('DynamicRiskLevelPanel', () => {
     });
   });
 
-  it('renders the entity risk levels title when no watchlist is selected', () => {
+  it('renders the entity risk levels title', () => {
     mockUseKibana.mockReturnValue(buildKibanaServices(jest.fn(), false));
 
     render(
@@ -89,16 +89,16 @@ describe('DynamicRiskLevelPanel', () => {
     expect(screen.getByText('Entity risk levels')).toBeInTheDocument();
   });
 
-  it('renders the watchlist-scoped title when a watchlist is selected', () => {
+  it('renders the entity risk levels title when a watchlist is selected', () => {
     mockUseKibana.mockReturnValue(buildKibanaServices(jest.fn(), true));
 
     render(
       <TestProviders>
-        <DynamicRiskLevelPanel watchlistId="wl-1" watchlistName="VIP users" />
+        <DynamicRiskLevelPanel watchlistId="wl-1" />
       </TestProviders>
     );
 
-    expect(screen.getByText('VIP users risk levels')).toBeInTheDocument();
+    expect(screen.getByText('Entity risk levels')).toBeInTheDocument();
   });
 
   it('renders the inspect button', () => {

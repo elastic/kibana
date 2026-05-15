@@ -13,13 +13,34 @@ import type { ContentListItem } from '@kbn/content-list-provider';
 import { i18n } from '@kbn/i18n';
 import type { ColumnBuilderContext } from '../types';
 import { column } from '../part';
-import { getColumnLayoutProps, type ColumnLayoutProps } from '../layout';
+import { getColumnLayoutProps, pickAttribute, type ColumnLayoutProps } from '../layout';
 import { CreatedByCell } from './created_by_cell';
 
+/**
+ * Default column header.
+ *
+ * ContentList intentionally standardises on `'Created by'` for both the
+ * column header *and* the filter button, correcting the legacy
+ * `TableListView` mismatch where the column said `'Creator'` but the filter
+ * said `'Created by'`. Translators in `de-DE.json` / `fr-FR.json` /
+ * `ja-JP.json` / `zh-CN.json` get fresh entries for this key — see the
+ * package README's "Naming and translation backfill" notes before changing
+ * the wording.
+ */
 const DEFAULT_COLUMN_TITLE = i18n.translate(
   'contentManagement.contentList.table.column.createdBy',
   { defaultMessage: 'Created by' }
 );
+
+/**
+ * Locked English baseline width for the created-by column.
+ *
+ * `88px` ≈ the `'Created by'` header text (~75px) plus a small breathing
+ * gutter for the centered 24px avatar. Long-text locales (e.g. de "Erstellt
+ * von" ~85px) still fit because `minWidth: 'max-content'` lets the column
+ * expand past `width` when the header demands it.
+ */
+const DEFAULT_CREATED_BY_WIDTH = '88px';
 
 /**
  * Props for the `Column.CreatedBy` preset component.
@@ -43,10 +64,16 @@ export const buildCreatedByColumn = (
     return undefined;
   }
 
-  const { columnTitle, ...layoutProps } = attributes;
+  const { columnTitle } = attributes;
+  const resolvedWidth = pickAttribute(attributes, 'width', DEFAULT_CREATED_BY_WIDTH);
 
   return {
-    ...getColumnLayoutProps(layoutProps),
+    ...getColumnLayoutProps({
+      width: resolvedWidth,
+      minWidth: pickAttribute(attributes, 'minWidth', 'max-content'),
+      maxWidth: pickAttribute(attributes, 'maxWidth', resolvedWidth),
+      truncateText: pickAttribute(attributes, 'truncateText', undefined),
+    }),
     field: 'createdBy',
     name: columnTitle ?? DEFAULT_COLUMN_TITLE,
     sortable: false,

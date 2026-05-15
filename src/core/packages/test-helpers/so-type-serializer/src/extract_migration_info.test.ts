@@ -336,14 +336,71 @@ describe('extractMigrationInfo', () => {
         },
       });
       const output = extractMigrationInfo(type);
-      expect(output.modelVersions[0].schemas).toEqual({
-        forwardCompatibility: 'c7c71ae951f0ac343cea0403bc34144ede93afec1bfe0ae6bd3279dd28ddf696',
-        create: '7457866b52ceea9e20767b3337518de452b7790243891d81737d48eb8b3afd18',
-      });
+
+      const { forwardCompatibility, create } = output.modelVersions[0].schemas;
+      expect(typeof forwardCompatibility).toBe('string');
+      expect(typeof create).toBe('string');
       expect(output.modelVersions[1].schemas).toEqual({
         forwardCompatibility: false,
         create: false,
       });
+    });
+
+    it('returns the same hash for two structurally identical config-schema objects', () => {
+      const makeType = () =>
+        createType({
+          modelVersions: {
+            1: {
+              changes: [],
+              schemas: {
+                create: schema.object({ title: schema.string() }),
+              },
+            },
+          },
+        });
+
+      const hashA = extractMigrationInfo(makeType()).modelVersions[0].schemas.create;
+      const hashB = extractMigrationInfo(makeType()).modelVersions[0].schemas.create;
+      expect(hashA).toEqual(hashB);
+    });
+
+    it('returns different hashes for structurally different config-schema objects', () => {
+      const typeWithTitle = createType({
+        modelVersions: {
+          1: { changes: [], schemas: { create: schema.object({ title: schema.string() }) } },
+        },
+      });
+      const typeWithBody = createType({
+        modelVersions: {
+          1: { changes: [], schemas: { create: schema.object({ body: schema.string() }) } },
+        },
+      });
+
+      const hashWithTitle = extractMigrationInfo(typeWithTitle).modelVersions[0].schemas.create;
+      const hashWithBody = extractMigrationInfo(typeWithBody).modelVersions[0].schemas.create;
+      expect(hashWithTitle).not.toEqual(hashWithBody);
+    });
+
+    it('returns different hashes when a custom validator is added to a config-schema object', () => {
+      const withoutValidator = createType({
+        modelVersions: {
+          1: { changes: [], schemas: { create: schema.object({ interval: schema.string() }) } },
+        },
+      });
+      const withValidator = createType({
+        modelVersions: {
+          1: {
+            changes: [],
+            schemas: {
+              create: schema.object({ interval: schema.string({ validate: () => undefined }) }),
+            },
+          },
+        },
+      });
+
+      const hashWithout = extractMigrationInfo(withoutValidator).modelVersions[0].schemas.create;
+      const hashWith = extractMigrationInfo(withValidator).modelVersions[0].schemas.create;
+      expect(hashWithout).not.toEqual(hashWith);
     });
   });
 

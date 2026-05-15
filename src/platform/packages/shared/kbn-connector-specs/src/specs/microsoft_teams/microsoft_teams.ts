@@ -94,7 +94,7 @@ export const MicrosoftTeams: ConnectorSpec = {
                 'core.kibanaConnectorSpecs.microsoftTeams.auth.oauthAuthCode.authorizationUrl.helpText',
                 {
                   defaultMessage:
-                    "Replace ''{tenantId}'' with your Azure AD tenant ID. For example: https://login.microsoftonline.com/your-tenant-id/oauth2/v2.0/authorize",
+                    "Replace '{tenantId}' with your Azure AD tenant ID. For example: https://login.microsoftonline.com/your-tenant-id/oauth2/v2.0/authorize",
                   values: { tenantId: '{tenant-id}' },
                 }
               ),
@@ -109,7 +109,7 @@ export const MicrosoftTeams: ConnectorSpec = {
                 'core.kibanaConnectorSpecs.microsoftTeams.auth.oauthAuthCode.tokenUrl.helpText',
                 {
                   defaultMessage:
-                    "Replace ''{tenantId}'' with your Azure AD tenant ID. For example: https://login.microsoftonline.com/your-tenant-id/oauth2/v2.0/token",
+                    "Replace '{tenantId}' with your Azure AD tenant ID. For example: https://login.microsoftonline.com/your-tenant-id/oauth2/v2.0/token",
                   values: { tenantId: '{tenant-id}' },
                 }
               ),
@@ -135,7 +135,7 @@ export const MicrosoftTeams: ConnectorSpec = {
                 'core.kibanaConnectorSpecs.microsoftTeams.auth.oauth.tokenUrl.helpText',
                 {
                   defaultMessage:
-                    "Replace ''{tenantId}'' with your Azure AD tenant ID. For example: https://login.microsoftonline.com/your-tenant-id/oauth2/v2.0/token",
+                    "Replace '{tenantId}' with your Azure AD tenant ID. For example: https://login.microsoftonline.com/your-tenant-id/oauth2/v2.0/token",
                   values: { tenantId: '{tenant-id}' },
                 }
               ),
