@@ -160,6 +160,40 @@ describe('prettifyValue', () => {
     });
   });
 
+  describe('roundRelativeTime option', () => {
+    describe('false — preserves start rounding', () => {
+      it('keeps rounding on start bound when set to false', () => {
+        expect(prettifyValue('now-1h/h to now', { roundRelativeTime: false })).toBe('-1h/h');
+      });
+
+      it('keeps rounding on both bounds when both have it', () => {
+        expect(prettifyValue('now-30d/d to now-7d/d', { roundRelativeTime: false })).toBe(
+          '-30d/d to -7d/d'
+        );
+      });
+
+      it('keeps start rounding on a single dateMath expression', () => {
+        expect(prettifyValue('now-7d/d', { roundRelativeTime: false })).toBe('-7d/d');
+      });
+
+      it('is a no-op when start has no rounding', () => {
+        expect(prettifyValue('now-15m to now', { roundRelativeTime: false })).toBe('-15m');
+      });
+    });
+
+    describe('true — strips start rounding (default behaviour)', () => {
+      it('strips rounding from start bound', () => {
+        expect(prettifyValue('now-1h/h to now', { roundRelativeTime: true })).toBe('-1h');
+      });
+
+      it('strips rounding from start but keeps it on end', () => {
+        expect(prettifyValue('now-30d/d to now-7d/d', { roundRelativeTime: true })).toBe(
+          '-30d to -7d/d'
+        );
+      });
+    });
+  });
+
   describe('preset matching', () => {
     const presets = [
       { start: 'now/w', end: 'now/w', label: 'This week' },
