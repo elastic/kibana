@@ -51,8 +51,36 @@ function ensureCommandRegistered() {
   );
 }
 
+// Returns the number of identical lines at the start and end of both arrays.
+// Lines are compared after trimming so that indentation differences introduced
+// by the LLM (e.g. dropping leading spaces from pipe-separated lines) don't
+// cause unchanged lines to appear in the diff.
+function findChangedRegion(
+  originalLines: string[],
+  fixedLines: string[]
+): { prefixLen: number; suffixLen: number } {
+  const maxPrefix = Math.min(originalLines.length, fixedLines.length);
+  let prefixLen = 0;
+  while (prefixLen < maxPrefix && originalLines[prefixLen].trim() === fixedLines[prefixLen].trim()) {
+    prefixLen++;
+  }
+
+  const maxSuffix = Math.min(originalLines.length - prefixLen, fixedLines.length - prefixLen);
+  let suffixLen = 0;
+  while (
+    suffixLen < maxSuffix &&
+    originalLines[originalLines.length - 1 - suffixLen].trim() ===
+      fixedLines[fixedLines.length - 1 - suffixLen].trim()
+  ) {
+    suffixLen++;
+  }
+
+  return { prefixLen, suffixLen };
+}
+
 interface ReviewState {
-  originalLineCount: number;
+  firstChangedOriginalLine: number;
+  lastChangedOriginalLine: number;
   generatedLineStart: number;
   generatedLineEnd: number;
 }
@@ -125,10 +153,15 @@ export const useSuggestFix = ({
 
     cleanup();
 
-    // Remove the original lines — fixed lines shift up to fill their place
+    // Remove only the original changed lines — the fix lines shift up to replace them
     editor.executeEdits('esql-suggest-fix-accept', [
       {
-        range: new monaco.Range(1, 1, state.originalLineCount + 1, 1),
+        range: new monaco.Range(
+          state.firstChangedOriginalLine,
+          1,
+          state.lastChangedOriginalLine + 1,
+          1
+        ),
         text: null,
       },
     ]);
@@ -145,13 +178,13 @@ export const useSuggestFix = ({
 
     cleanup();
 
-    // Remove the "\n" connector + fixed lines by selecting from the end of the
-    // last original line through the end of the last fixed line.
+    // Remove the "\n" connector + fix lines by selecting from the end of the last
+    // original changed line through the end of the last fix line.
     editor.executeEdits('esql-suggest-fix-reject', [
       {
         range: new monaco.Range(
-          state.originalLineCount,
-          model.getLineMaxColumn(state.originalLineCount),
+          state.lastChangedOriginalLine,
+          model.getLineMaxColumn(state.lastChangedOriginalLine),
           state.generatedLineEnd,
           model.getLineMaxColumn(state.generatedLineEnd)
         ),
@@ -169,7 +202,7 @@ export const useSuggestFix = ({
 
       const decorations: monaco.editor.IModelDeltaDecoration[] = [];
 
-      for (let line = 1; line <= state.originalLineCount; line++) {
+      for (let line = state.firstChangedOriginalLine; line <= state.lastChangedOriginalLine; line++) {
         decorations.push({
           range: new monaco.Range(line, 1, line, 1),
           options: { isWholeLine: true, className: LINE_REPLACED_CLASS },
@@ -240,10 +273,7 @@ export const useSuggestFix = ({
       abortInFlight();
       cleanup();
 
-      const originalLineCount = model.getLineCount();
-      const lastLineMaxCol = model.getLineMaxColumn(originalLineCount);
-
-      const decorationLine = errorLineNumber ?? originalLineCount;
+      const decorationLine = errorLineNumber ?? model.getLineCount();
       const decorationCol = model.getLineMaxColumn(decorationLine);
       generatingDecorationsRef.current = editor.createDecorationsCollection([
         {
@@ -269,22 +299,45 @@ export const useSuggestFix = ({
         }
         abortControllerRef.current = undefined;
 
-        // Strip trailing newlines so the insert is clean
         const fixedQuery = result.content.replace(/\n+$/, '');
+        const originalLines = model.getValue().split('\n');
+        const fixedLines = fixedQuery.split('\n');
 
-        // Insert the fix after the original — both are visible for review
+        const { prefixLen, suffixLen } = findChangedRegion(originalLines, fixedLines);
+
+        const firstChangedOriginalLine = prefixLen + 1;
+        const lastChangedOriginalLine = originalLines.length - suffixLen;
+        const changedFixedLines = fixedLines.slice(prefixLen, fixedLines.length - suffixLen);
+
+        // Nothing actually changed
+        if (changedFixedLines.length === 0 && firstChangedOriginalLine > lastChangedOriginalLine) {
+          return;
+        }
+
+        // Insert only the changed fix lines after the last changed original line
+        const insertMaxCol = model.getLineMaxColumn(lastChangedOriginalLine);
         editor.executeEdits('esql-suggest-fix', [
           {
-            range: new monaco.Range(originalLineCount, lastLineMaxCol, originalLineCount, lastLineMaxCol),
-            text: '\n' + fixedQuery,
+            range: new monaco.Range(
+              lastChangedOriginalLine,
+              insertMaxCol,
+              lastChangedOriginalLine,
+              insertMaxCol
+            ),
+            text: '\n' + changedFixedLines.join('\n'),
             forceMoveMarkers: true,
           },
         ]);
 
-        const generatedLineStart = originalLineCount + 1;
-        const generatedLineEnd = originalLineCount + fixedQuery.split('\n').length;
+        const generatedLineStart = lastChangedOriginalLine + 1;
+        const generatedLineEnd = lastChangedOriginalLine + changedFixedLines.length;
 
-        showReview({ originalLineCount, generatedLineStart, generatedLineEnd });
+        showReview({
+          firstChangedOriginalLine,
+          lastChangedOriginalLine,
+          generatedLineStart,
+          generatedLineEnd,
+        });
       } catch (error) {
         if (controller.signal.aborted) return;
         const message =
