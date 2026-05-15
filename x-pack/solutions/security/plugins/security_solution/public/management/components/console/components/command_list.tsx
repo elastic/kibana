@@ -338,6 +338,7 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
 
     const callout = (
       <EuiCallOut
+        announceOnMount
         css={styledEuiCallOutStyles}
         title={
           <FormattedMessage
