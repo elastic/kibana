@@ -30,14 +30,14 @@ jest.mock('../../../context/apm_index_settings/apm_index_settings_context', () =
 
 jest.mock('../../routing/templates/apm_main_template', () => ({
   ApmMainTemplate: ({
-    pageTitle,
+    pageHeader,
     children,
   }: {
-    pageTitle?: React.ReactNode;
+    pageHeader?: { rightSideItems?: React.ReactNode[] };
     children: React.ReactNode;
   }) => (
     <div data-test-subj="apmMainTemplateMock">
-      <div data-test-subj="apmMainTemplatePageTitle">{pageTitle}</div>
+      <div data-test-subj="apmMainTemplatePageHeader">{pageHeader?.rightSideItems}</div>
       {children}
     </div>
   ),
