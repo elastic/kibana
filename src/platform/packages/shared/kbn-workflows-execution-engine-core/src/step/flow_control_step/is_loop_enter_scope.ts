@@ -8,9 +8,18 @@
  */
 
 import { LoopStepTypes } from '@kbn/workflows';
-import type { ScopeData } from '@kbn/workflows-execution-engine-core';
+import type { ScopeData } from '../../collaborators/scope_data';
 
-const loopEnterNodeTypes = new Set<string>(LoopStepTypes.map((t) => `enter-${t}`));
+// Lazily built so the Set is not constructed at module-load time, avoiding
+// circular-initialization issues when jest resolves the @kbn/workflows barrel.
+let loopEnterNodeTypes: Set<string> | undefined;
+
+const getLoopEnterNodeTypes = (): Set<string> => {
+  if (!loopEnterNodeTypes) {
+    loopEnterNodeTypes = new Set<string>(LoopStepTypes.map((t) => `enter-${t}`));
+  }
+  return loopEnterNodeTypes;
+};
 
 export const isLoopEnterScope = (scope: ScopeData): boolean =>
-  loopEnterNodeTypes.has(scope.nodeType);
+  getLoopEnterNodeTypes().has(scope.nodeType);

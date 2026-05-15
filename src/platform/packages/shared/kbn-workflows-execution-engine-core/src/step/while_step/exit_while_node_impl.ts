@@ -13,7 +13,7 @@ import type { IStepExecutionRuntime } from '@kbn/workflows-execution-engine-core
 import type { IWorkflowExecutionRuntimeManager } from '@kbn/workflows-execution-engine-core';
 import type { IWorkflowExecutionState } from '@kbn/workflows-execution-engine-core';
 import type { IWorkflowEventLogger } from '@kbn/workflows-execution-engine-core';
-import { evaluateCondition } from '@kbn/workflows-execution-engine-core';
+import { evaluateCondition } from '../../evaluate_condition';
 import type { INodeImplementation } from '@kbn/workflows-execution-engine-core';
 
 export class ExitWhileNodeImpl implements INodeImplementation {

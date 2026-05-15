@@ -25,6 +25,15 @@ import type { WorkflowExecutionState } from '../workflow_execution_state';
 
 const dependencies = mockContextDependencies();
 
+jest.mock('@kbn/workflows-execution-engine-utils', () => ({
+  ...jest.requireActual<typeof import('@kbn/workflows-execution-engine-utils')>(
+    '@kbn/workflows-execution-engine-utils'
+  ),
+  buildStepExecutionId: jest.fn().mockImplementation((executionId: string, stepId: string) => {
+    return `${stepId}_generated`;
+  }),
+}));
+
 jest.mock('../../utils', () => ({
   ...jest.requireActual<typeof import('../../utils')>('../../utils'),
   buildStepExecutionId: jest.fn().mockImplementation((executionId: string, stepId: string) => {
