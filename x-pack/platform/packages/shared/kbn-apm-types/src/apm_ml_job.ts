@@ -5,8 +5,32 @@
  * 2.0.
  */
 
-import type { DATAFEED_STATE, JOB_STATE } from '@kbn/ml-plugin/common';
 import type { Environment } from './environment_rt';
+
+/*
+Duplicating it here to avoid importing from x-pack/platform/plugins/shared/ml/common/constants/states.ts which causes circular dependencies.
+We must extract the ml types to a separate package to avoid this in the future.
+*/
+enum JOB_STATE {
+  CLOSED = 'closed',
+  CLOSING = 'closing',
+  FAILED = 'failed',
+  OPENED = 'opened',
+  OPENING = 'opening',
+  DELETED = 'deleted',
+}
+
+/*
+Duplicating it here to avoid importing from x-pack/platform/plugins/shared/ml/common/constants/states.ts which causes circular dependencies.
+We must extract the ml types to a separate package to avoid this in the future.
+*/
+enum DATAFEED_STATE {
+  STARTED = 'started',
+  STARTING = 'starting',
+  STOPPED = 'stopped',
+  STOPPING = 'stopping',
+  DELETED = 'deleted',
+}
 
 export interface ApmMlJob {
   environment: Environment;
