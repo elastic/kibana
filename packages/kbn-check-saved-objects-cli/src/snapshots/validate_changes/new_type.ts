@@ -18,7 +18,7 @@ import {
   validateInitialModelVersion,
   getFirstModelVersion,
 } from './common_utils';
-import { validateNameTitleFieldTypesNewType } from './new_type_utils';
+import { validateIgnoreAboveNewType, validateNameTitleFieldTypesNewType } from './new_type_utils';
 
 interface ValidateChangesNewTypeParams {
   to: MigrationInfoRecord;
@@ -53,4 +53,7 @@ export function validateChangesNewType({ to, registeredType }: ValidateChangesNe
 
   // validate that name and title fields are of type "text"
   validateNameTitleFieldTypesNewType(name, to, registeredType);
+
+  // validate that keyword and flattened fields have ignore_above
+  validateIgnoreAboveNewType(name, to);
 }

@@ -6,6 +6,7 @@
  */
 
 import type { ScoutPage } from '@kbn/scout';
+import { TagsTable } from './tags_table';
 
 interface FillTagFormFields {
   name?: string;
@@ -14,7 +15,11 @@ interface FillTagFormFields {
 }
 
 export class TagManagementPage {
-  constructor(private readonly page: ScoutPage) {}
+  readonly tagsTable: TagsTable;
+
+  constructor(private readonly page: ScoutPage) {
+    this.tagsTable = new TagsTable(page);
+  }
 
   async waitForTableLoaded() {
     await this.page.testSubj.waitForSelector('tagsManagementTable table-is-ready');
@@ -83,5 +88,31 @@ export class TagManagementPage {
 
   getAssignFlyoutCloseButton() {
     return this.page.testSubj.locator('euiFlyoutCloseButton');
+  }
+  async selectSavedObjectTags(...tagNames: string[]) {
+    await this.page.testSubj.click('savedObjectTagSelector');
+    for (const tagName of tagNames) {
+      await this.page.testSubj.click(`tagSelectorOption-${tagName.replace(' ', '_')}`);
+    }
+    const savedObjectTitleInput = this.page.testSubj.locator('savedObjectTitle');
+    if (await savedObjectTitleInput.isVisible()) {
+      await savedObjectTitleInput.click();
+      return;
+    }
+
+    const dashboardTitleInput = this.page.testSubj.locator('dashboardTitleInput');
+    if (await dashboardTitleInput.isVisible()) {
+      await dashboardTitleInput.click();
+      return;
+    }
+
+    // Fallback blur in case selector host varies by form.
+    await this.page.keyboard.press('Escape');
+  }
+
+  async openCreateTagFromSelector() {
+    await this.page.testSubj.click('savedObjectTagSelector');
+    await this.page.testSubj.click('tagSelectorOption-action__create');
+    await this.page.testSubj.waitForSelector('tagModalForm');
   }
 }
