@@ -469,7 +469,6 @@ export const RulesListTable: React.FC<RulesListTableProps> = ({
                 })}
               >
                 <EuiContextMenuPanel
-                  size="s"
                   items={[
                     <EuiContextMenuItem
                       key="enable"
