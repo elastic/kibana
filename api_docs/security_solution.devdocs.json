@@ -2617,7 +2617,7 @@
           ">"
         ],
         "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts",
-        "lineNumber": 176,
+        "lineNumber": 178,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2633,7 +2633,7 @@
               "any"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts",
-            "lineNumber": 208,
+            "lineNumber": 210,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2650,7 +2650,7 @@
                   "<unknown>"
                 ],
                 "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts",
-                "lineNumber": 208,
+                "lineNumber": 210,
                 "columnNumber": 15,
                 "deprecated": false,
                 "docsReferencedTypeName": "PluginInitializerContext",
@@ -2682,7 +2682,7 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts",
-            "lineNumber": 288,
+            "lineNumber": 290,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2698,7 +2698,7 @@
                   "SecuritySolutionPluginCoreSetupDependencies"
                 ],
                 "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts",
-                "lineNumber": 289,
+                "lineNumber": 291,
                 "columnNumber": 5,
                 "deprecated": false,
                 "docsReferencedTypeName": "SecuritySolutionPluginCoreSetupDependencies",
@@ -2716,7 +2716,7 @@
                   "SecuritySolutionPluginSetupDependencies"
                 ],
                 "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts",
-                "lineNumber": 290,
+                "lineNumber": 292,
                 "columnNumber": 5,
                 "deprecated": false,
                 "docsReferencedTypeName": "SecuritySolutionPluginSetupDependencies",
@@ -2748,7 +2748,7 @@
               }
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts",
-            "lineNumber": 835,
+            "lineNumber": 829,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -2764,7 +2764,7 @@
                   "CoreStart"
                 ],
                 "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts",
-                "lineNumber": 836,
+                "lineNumber": 830,
                 "columnNumber": 5,
                 "deprecated": false,
                 "docsReferencedTypeName": "SecuritySolutionPluginCoreStartDependencies",
@@ -2782,7 +2782,7 @@
                   "SecuritySolutionPluginStartDependencies"
                 ],
                 "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts",
-                "lineNumber": 837,
+                "lineNumber": 831,
                 "columnNumber": 5,
                 "deprecated": false,
                 "docsReferencedTypeName": "SecuritySolutionPluginStartDependencies",
@@ -2803,7 +2803,7 @@
               "() => void"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts",
-            "lineNumber": 1135,
+            "lineNumber": 1129,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,

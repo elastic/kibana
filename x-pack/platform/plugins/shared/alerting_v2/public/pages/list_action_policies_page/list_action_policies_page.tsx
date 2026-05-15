@@ -127,6 +127,7 @@ export const ListActionPoliciesPage = () => {
     const data: CreateActionPolicyData = {
       name: `${name} [clone]`,
       description,
+      type: 'global',
       destinations,
       groupingMode: groupingMode ?? 'per_episode',
       ...(tags != null && { tags }),
@@ -534,14 +535,26 @@ export const ListActionPoliciesPage = () => {
         <ActionPolicyDetailsFlyout
           policy={policyToView}
           onClose={() => setPolicyToViewId(null)}
-          onEdit={navigateToEdit}
-          onClone={clonePolicy}
-          onDelete={setPolicyToDelete}
+          onEdit={(id) => {
+            setPolicyToViewId(null);
+            navigateToEdit(id);
+          }}
+          onClone={(p) => {
+            setPolicyToViewId(null);
+            clonePolicy(p);
+          }}
+          onDelete={(p) => {
+            setPolicyToViewId(null);
+            setPolicyToDelete(p);
+          }}
           onEnable={(id) => enablePolicy(id)}
           onDisable={(id) => disablePolicy(id)}
           onSnooze={(id, until) => snoozePolicy({ id, snoozedUntil: until })}
           onCancelSnooze={(id) => unsnoozePolicy(id)}
-          onUpdateApiKey={(id) => setPolicyToUpdateApiKey(id)}
+          onUpdateApiKey={(id) => {
+            setPolicyToViewId(null);
+            setPolicyToUpdateApiKey(id);
+          }}
           isStateLoading={
             (isEnabling && enableVariables === policyToView.id) ||
             (isDisabling && disableVariables === policyToView.id)
