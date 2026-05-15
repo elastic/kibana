@@ -59,6 +59,9 @@ apiTest.describe(
         await apiServices.ml.anomalyDetection.filters.create(filterId, requestBody);
       }
       for (const jobConfig of testJobConfigs) {
+        await apiServices.ml.anomalyDetection.delete({ jobIds: [jobConfig.job_id] }).catch(() => {
+          /* no-op if job doesn't exist */
+        });
         await apiServices.ml.anomalyDetection.create(
           jobConfig as Record<string, unknown> & { job_id: string }
         );
