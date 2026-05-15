@@ -48,7 +48,7 @@ export default function (providerContext: FtrProviderContext) {
   };
 
   // Failing: See https://github.com/elastic/kibana/issues/246204
-  describe.skip('Package Policy - upgrade', function () {
+  describe('Package Policy - upgrade', function () {
     skipIfNoDockerRegistry(providerContext);
     let agentPolicyId: string;
     let packagePolicyId: string;
@@ -1181,7 +1181,7 @@ export default function (providerContext: FtrProviderContext) {
     // The following two describe blocks require a package-spec release that includes
     // migrate_from as a valid var field. The registry image must be updated before
     // these tests will pass locally or in CI.
-    describe('when upgrading to a version where a stream-level variable moves to input scope', function () {
+    describe.skip('when upgrading to a version where a stream-level variable moves to input scope', function () {
       withTestPackage('package_policy_upgrade', '0.9.0-stream-var-to-input');
 
       beforeEach(async function () {
@@ -1276,7 +1276,7 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    describe('when upgrading to a version where an input-level variable moves to stream scope', function () {
+    describe.skip('when upgrading to a version where an input-level variable moves to stream scope', function () {
       withTestPackage('package_policy_upgrade', '0.10.0-input-var-to-stream');
 
       beforeEach(async function () {
