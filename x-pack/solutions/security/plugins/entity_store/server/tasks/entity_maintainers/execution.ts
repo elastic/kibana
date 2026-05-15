@@ -18,6 +18,7 @@ import {
   type EntityMaintainerTaskMethod,
 } from './types';
 import { CRUDClient, type EntityUpdateClient } from '../../domain/crud';
+import { createCpsAllClient } from './create_cps_all_client';
 import type { TelemetryReporter } from '../../telemetry/events';
 import { ENTITY_MAINTAINER_EVENT } from '../../telemetry/events';
 import { wrapTaskRun } from '../../telemetry/traces';
@@ -40,6 +41,7 @@ export interface ExecuteMaintainerRunParams {
   licensing: LicensingPluginStart;
   analytics: TelemetryReporter;
   logger: Logger;
+  isServerless?: boolean;
 }
 
 export async function canRunMaintainerWithLicense({
@@ -109,6 +111,7 @@ export async function executeMaintainerRun({
   licensing,
   analytics,
   logger,
+  isServerless,
 }: ExecuteMaintainerRunParams): Promise<{ state: EntityMaintainerStatus } | null> {
   if (status.taskStatus === EntityMaintainerTaskStatus.STOPPED) {
     logger.debug(`Entity maintainer task is stopped, skipping run`);
@@ -127,6 +130,7 @@ export async function executeMaintainerRun({
 
   const maintainerStatus = createMaintainerStatus({ status, namespace, initialState });
   const esClient = coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
+  const cpsEsClient = isServerless ? createCpsAllClient(esClient) : undefined;
   const crudClient = new CRUDClient({
     logger,
     esClient,
@@ -152,6 +156,7 @@ export async function executeMaintainerRun({
         run,
         abortController,
         esClient,
+        cpsEsClient,
         crudClient,
         id,
         analytics,
@@ -181,6 +186,7 @@ export async function runEntityMaintainerTask({
   run,
   abortController,
   esClient,
+  cpsEsClient,
   crudClient,
   id,
   analytics,
@@ -192,6 +198,7 @@ export async function runEntityMaintainerTask({
   run: EntityMaintainerTaskMethod;
   abortController: AbortController;
   esClient: ElasticsearchClient;
+  cpsEsClient?: ElasticsearchClient;
   crudClient: EntityUpdateClient;
   id: string;
   analytics: TelemetryReporter;
@@ -216,6 +223,7 @@ export async function runEntityMaintainerTask({
         logger,
         fakeRequest,
         esClient,
+        cpsEsClient,
         crudClient,
       });
       analytics.reportEvent(ENTITY_MAINTAINER_EVENT, {
@@ -231,6 +239,7 @@ export async function runEntityMaintainerTask({
       logger,
       fakeRequest,
       esClient,
+      cpsEsClient,
       crudClient,
     });
     analytics.reportEvent(ENTITY_MAINTAINER_EVENT, {

@@ -240,6 +240,7 @@ async function runIntegration(
  */
 export const runRelationshipMaintainer = async ({
   esClient,
+  cpsEsClient,
   logger,
   namespace,
   crudClient,
@@ -247,6 +248,8 @@ export const runRelationshipMaintainer = async ({
   abortController,
 }: {
   esClient: ElasticsearchClient;
+  /** CPS-enabled client covering origin + linked projects. Falls back to `esClient` when absent. */
+  cpsEsClient?: ElasticsearchClient;
   logger: Logger;
   namespace: string;
   crudClient: EntityUpdateClient;
@@ -273,6 +276,11 @@ export const runRelationshipMaintainer = async ({
   // is cheaper and stronger than trusting all callers.
   assertValidNamespace(namespace);
 
+  // CPS: use the cross-project client for log reads when available so a single
+  // pass covers both origin and linked-project logs. Writes go through crudClient
+  // which always uses the local origin client (no change needed there).
+  const readClient = cpsEsClient ?? esClient;
+
   let totalBuckets = 0;
   let totalRecords = 0;
   let totalWritten = 0;
@@ -287,7 +295,7 @@ export const runRelationshipMaintainer = async ({
     logger.info(`[${config.id}] Processing integration: ${config.name}`);
     const { buckets, recordsCount, write } = await runIntegration(
       config,
-      esClient,
+      readClient,
       logger,
       namespace,
       crudClient,

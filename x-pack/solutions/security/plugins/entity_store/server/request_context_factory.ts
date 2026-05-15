@@ -124,6 +124,7 @@ export async function createRequestHandlerContext({
       analytics,
       coreStart,
       licensing: startPlugins.licensing,
+      isServerless,
     }),
     crudClient,
     resolutionClient: new ResolutionClient({

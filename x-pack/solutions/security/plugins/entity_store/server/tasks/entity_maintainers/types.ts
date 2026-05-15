@@ -83,6 +83,13 @@ export interface EntityMaintainerTaskMethodContext {
   logger: Logger;
   fakeRequest: KibanaRequest;
   esClient: ElasticsearchClient;
+  /**
+   * CPS-enabled ES client for querying across origin + linked projects (`_alias:*`).
+   * Absent on non-serverless or when CPS is not yet enabled for this deployment.
+   * Maintainers that query source logs (e.g. accesses, communicates_with) should
+   * prefer this client for reads; writes always go through `crudClient` (origin only).
+   */
+  cpsEsClient?: ElasticsearchClient;
   crudClient: EntityUpdateClient;
 }
 
