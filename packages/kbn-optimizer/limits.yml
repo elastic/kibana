@@ -9,7 +9,7 @@ pageLoadAssetSize:
   aiops: 15227
   alerting: 22371
   alertingVTwo: 76778
-  apm: 28027
+  apm: 36634
   apmSourcesAccess: 2278
   automaticImport: 18629
   banners: 4006
@@ -78,7 +78,7 @@ pageLoadAssetSize:
   files: 6037
   filesManagement: 5208
   fileUpload: 22957
-  fleet: 230612
+  fleet: 229970
   genAiSettings: 6342
   globalSearch: 6890
   globalSearchBar: 26122

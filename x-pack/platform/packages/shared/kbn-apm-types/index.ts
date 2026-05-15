@@ -47,7 +47,6 @@ export type * from './src/time_range_metadata';
 export * from './src/custom_link';
 export type * from './src/apm_ml_job';
 export * from './src/mobile_types';
-export * from './src/config_schema';
 export type * from './src/apm_event';
 export type * from './src/service_map_diagnostic_types';
 export type * from './src/diagnostics';
