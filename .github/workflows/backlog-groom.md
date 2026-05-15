@@ -14,8 +14,6 @@ steps:
     with:
       node-version-file: '.node-version'
       cache: yarn
-  - name: Ensure local main branch exists
-    run: git branch main origin/main 2>/dev/null || true
   - name: Bootstrap Kibana
     run: yarn kbn bootstrap
 permissions:
