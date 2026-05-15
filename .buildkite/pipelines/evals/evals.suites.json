@@ -163,6 +163,20 @@
       ]
     },
     {
+      "id": "lead-generation",
+      "name": "Lead Generation",
+      "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-lead-generation/playwright.config.ts",
+      "tags": [
+        "security",
+        "lead-generation",
+        "entity-analytics"
+      ],
+      "ciLabels": [
+        "evals:lead-generation"
+      ],
+      "serverConfigSet": "evals_lead_generation"
+    },
+    {
       "id": "workflows",
       "name": "Workflows Authoring",
       "configPath": "src/platform/packages/shared/kbn-evals-suite-workflows/playwright.config.ts",
