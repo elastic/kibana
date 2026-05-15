@@ -371,6 +371,8 @@ export const Host: FC<HostProps> = memo(function Host({
             skipRiskAndCriticality={noEntityInStore}
             entityStoreEntityId={entityStoreEntityId}
             hideHeaderIcons
+            mockMisconfigurationFindings
+            mockVulnerabilitiesFindings
           />
         )}
       </EuiFlyoutBody>

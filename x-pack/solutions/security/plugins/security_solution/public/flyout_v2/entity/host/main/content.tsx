@@ -55,6 +55,10 @@ export interface ContentProps {
   prefetchedResolutionRisk?: EntityRiskScore<EntityType.host>;
   /** When true, hides the chevron icons in the risk summary and alerts section headers. Used by the v2 flyout. */
   hideHeaderIcons?: boolean;
+  /** Dev override: force the misconfiguration findings section to render regardless of real data. */
+  mockMisconfigurationFindings?: boolean;
+  /** Dev override: force the vulnerabilities findings section to render regardless of real data. */
+  mockVulnerabilitiesFindings?: boolean;
 }
 
 /**
@@ -75,6 +79,8 @@ export const Content = ({
   entityStoreEntityId,
   prefetchedResolutionRisk,
   hideHeaderIcons = false,
+  mockMisconfigurationFindings = false,
+  mockVulnerabilitiesFindings = false,
 }: ContentProps) => {
   const hasEntityResolutionLicense = useHasEntityResolutionLicense();
 
@@ -146,6 +152,8 @@ export const Content = ({
         hideAlertsHeaderIcon={hideHeaderIcons}
         hideMisconfigurationsHeaderIcon={hideHeaderIcons}
         hideVulnerabilitiesHeaderIcon={hideHeaderIcons}
+        mockMisconfigurationFindings={mockMisconfigurationFindings}
+        mockVulnerabilitiesFindings={mockVulnerabilitiesFindings}
       />
       <ObservedDataSection
         observedHost={observedHost}

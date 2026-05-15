@@ -8,10 +8,40 @@
 import React, { memo } from 'react';
 import { EuiFlyoutBody, EuiFlyoutHeader } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { MisconfigurationFindingDetailFields } from '@kbn/cloud-security-posture';
 import { EntityIdentifierFields, EntityType } from '../../../../../../common/entity_analytics/types';
 import { ToolsFlyoutHeader } from '../../../../shared/components/tools_flyout_header';
 import { MISCONFIGURATION_INSIGHTS_TOOL_TEST_ID } from './test_ids';
 import { MisconfigurationFindingsDetailsTable } from '../../../../../cloud_security_posture/components/csp_details/misconfiguration_findings_details_table';
+
+const MOCK_DATA: {
+  rows: MisconfigurationFindingDetailFields[];
+  passedFindings: number;
+  failedFindings: number;
+} = {
+  rows: [
+    {
+      rule: { id: 'rule-1', name: 'Ensure SSH PermitEmptyPasswords is disabled' },
+      resource: { id: 'resource-1', name: 'sshd_config', sub_type: 'config', type: 'file' },
+      'result.evaluation': 'failed',
+      'rule.name': 'Ensure SSH PermitEmptyPasswords is disabled',
+    },
+    {
+      rule: { id: 'rule-2', name: 'Ensure /tmp is configured as a separate partition' },
+      resource: { id: 'resource-2', name: '/etc/fstab', sub_type: 'file', type: 'filesystem' },
+      'result.evaluation': 'passed',
+      'rule.name': 'Ensure /tmp is configured as a separate partition',
+    },
+    {
+      rule: { id: 'rule-3', name: 'Ensure firewall is active and enabled on boot' },
+      resource: { id: 'resource-3', name: 'ufw', sub_type: 'service', type: 'process' },
+      'result.evaluation': 'failed',
+      'rule.name': 'Ensure firewall is active and enabled on boot',
+    },
+  ] as unknown as MisconfigurationFindingDetailFields[],
+  passedFindings: 1,
+  failedFindings: 2,
+};
 
 const TITLE = i18n.translate(
   'xpack.securitySolution.flyout.entityDetails.host.misconfigurationInsights.title',
@@ -48,6 +78,7 @@ export const MisconfigurationInsights = memo(
             scopeId={scopeId}
             entityId={entityId}
             entityType={EntityType.host}
+            mockData={MOCK_DATA}
           />
         </EuiFlyoutBody>
       </>
