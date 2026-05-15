@@ -285,4 +285,137 @@ describe('validate_email_address', () => {
       );
     });
   });
+
+  describe('email format validation', () => {
+    test('rejects addresses with leading hyphen in local part', () => {
+      const result = validateEmailAddresses(null, ['-user@example.com']);
+      expect(result).toEqual([
+        { address: '-user@example.com', valid: false, reason: InvalidEmailReason.invalid },
+      ]);
+    });
+
+    test('rejects addresses with trailing hyphen in local part', () => {
+      const result = validateEmailAddresses(null, ['user-@example.com']);
+      expect(result).toEqual([
+        { address: 'user-@example.com', valid: false, reason: InvalidEmailReason.invalid },
+      ]);
+    });
+
+    test('rejects addresses with leading hyphen in domain label', () => {
+      const result = validateEmailAddresses(null, ['user@-example.com']);
+      expect(result).toEqual([
+        { address: 'user@-example.com', valid: false, reason: InvalidEmailReason.invalid },
+      ]);
+    });
+
+    test('rejects addresses with trailing hyphen in domain label', () => {
+      const result = validateEmailAddresses(null, ['user@example-.com']);
+      expect(result).toEqual([
+        { address: 'user@example-.com', valid: false, reason: InvalidEmailReason.invalid },
+      ]);
+    });
+
+    test('rejects addresses with single-label domain (no dot)', () => {
+      const result = validateEmailAddresses(null, ['user@localhost']);
+      expect(result).toEqual([
+        { address: 'user@localhost', valid: false, reason: InvalidEmailReason.invalid },
+      ]);
+    });
+
+    test('allows addresses with hyphens in the middle of local part', () => {
+      const result = validateEmailAddresses(null, ['first-last@example.com']);
+      expect(result).toEqual([{ address: 'first-last@example.com', valid: true }]);
+    });
+
+    test('allows addresses with hyphens in the middle of domain labels', () => {
+      const result = validateEmailAddresses(null, ['user@my-domain.example.com']);
+      expect(result).toEqual([{ address: 'user@my-domain.example.com', valid: true }]);
+    });
+
+    test('allows standard valid email addresses', () => {
+      const validEmails = [
+        'user@example.com',
+        'first.last@example.com',
+        'user+tag@example.com',
+        'user@sub.domain.example.com',
+      ];
+      const result = validateEmailAddresses(null, validEmails);
+      result.forEach((r) => expect(r.valid).toBe(true));
+    });
+
+    test('rejects address starting with @ sign', () => {
+      const result = validateEmailAddresses(null, ['@something@example.com']);
+      expect(result).toEqual([
+        { address: '@something@example.com', valid: false, reason: InvalidEmailReason.invalid },
+      ]);
+    });
+
+    test('rejects address with double @ sign', () => {
+      const result = validateEmailAddresses(null, ['user@@example.com']);
+      expect(result).toEqual([
+        { address: 'user@@example.com', valid: false, reason: InvalidEmailReason.invalid },
+      ]);
+    });
+
+    test('rejects address with double dots in domain', () => {
+      const result = validateEmailAddresses(null, ['user@example..com']);
+      expect(result).toEqual([
+        { address: 'user@example..com', valid: false, reason: InvalidEmailReason.invalid },
+      ]);
+    });
+
+    test('rejects address with space in domain', () => {
+      const result = validateEmailAddresses(null, ['user@exam ple.com']);
+      expect(result).toEqual([
+        { address: 'user@exam ple.com', valid: false, reason: InvalidEmailReason.invalid },
+      ]);
+    });
+
+    test('rejects address with path traversal characters', () => {
+      const result = validateEmailAddresses(null, ['../etc/passwd@example.com']);
+      expect(result).toEqual([
+        { address: '../etc/passwd@example.com', valid: false, reason: InvalidEmailReason.invalid },
+      ]);
+    });
+
+    test('accepts RFC 5322 quoted local part', () => {
+      const result = validateEmailAddresses(null, ['"quoted"@example.com']);
+      expect(result).toEqual([{ address: '"quoted"@example.com', valid: true }]);
+    });
+
+    test('rejects group address with invalid local part in a member', () => {
+      const result = validateEmailAddresses(null, [
+        'Team: -alice@example.com, bob@example.com;',
+      ]);
+      expect(result).toEqual([
+        {
+          address: 'Team: -alice@example.com, bob@example.com;',
+          valid: false,
+          reason: InvalidEmailReason.invalid,
+        },
+      ]);
+    });
+
+    test('rejects group address with invalid domain in a member', () => {
+      const result = validateEmailAddresses(null, [
+        'Team: alice@-example.com, bob@example.com;',
+      ]);
+      expect(result).toEqual([
+        {
+          address: 'Team: alice@-example.com, bob@example.com;',
+          valid: false,
+          reason: InvalidEmailReason.invalid,
+        },
+      ]);
+    });
+
+    test('accepts group address when all members are valid', () => {
+      const result = validateEmailAddresses(null, [
+        'Team: alice@example.com, bob@example.com;',
+      ]);
+      expect(result).toEqual([
+        { address: 'Team: alice@example.com, bob@example.com;', valid: true },
+      ]);
+    });
+  });
 });
