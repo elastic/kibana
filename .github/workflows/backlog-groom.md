@@ -116,8 +116,6 @@ Every `noop` MUST include:
 
 ## Guardrails
 
-Do NOT re-check trigger eligibility or actor trust (pre-activation handled this).
-
 Do NOT open more than one PR for the same issue.
 
 Do NOT change the branch naming convention.
