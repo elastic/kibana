@@ -40,8 +40,8 @@ export const useSetAlertAssignees = (): ReturnSetAlertAssignees => {
   );
 
   const onUpdateFailure = useCallback(
-    (error: Error) => {
-      addError(error.message, { title: i18n.UPDATE_ALERT_ASSIGNEES_FAILURE });
+    (error: unknown) => {
+      addError(error, { title: i18n.UPDATE_ALERT_ASSIGNEES_FAILURE });
     },
     [addError]
   );
