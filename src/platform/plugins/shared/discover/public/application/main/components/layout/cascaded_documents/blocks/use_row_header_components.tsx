@@ -43,7 +43,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldTerminals } from '@kbn/esql-utils/src/utils/esql_fields_utils';
-import { getSparklineCellRenderer } from '../../../../../../context_awareness/profile_providers/common/sparkline_data_source_profile/sparkline_cell_renderer';
+import { SparklineRenderer } from '../../../../../../context_awareness/profile_providers/common/sparkline_data_source_profile/sparkline_cell_renderer';
 import { type UpdateESQLQueryFn } from '../../../../../../context_awareness';
 import { getPatternCellRenderer } from '../../../../../../context_awareness/profile_providers/common/patterns_data_source_profile/pattern_cell_renderer';
 import type { ESQLDataGroupNode } from './types';
@@ -454,11 +454,9 @@ export function useEsqlDataCascadeRowHeaderComponents(
 
           if (aggregation && /sparkline/i.test(aggregation) && isArrayType) {
             return (
-              <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <div css={css({ width: '100px' })}>
-                    {getSparklineCellRenderer(services.charts, aggregatedValue, false, undefined)}
-                  </div>
+              <EuiFlexGroup alignItems="stretch" gutterSize="s" responsive={false}>
+                <EuiFlexItem grow={false} css={{ width: '100px' }}>
+                  <SparklineRenderer charts={services.charts} values={aggregatedValue} />
                 </EuiFlexItem>
               </EuiFlexGroup>
             );
