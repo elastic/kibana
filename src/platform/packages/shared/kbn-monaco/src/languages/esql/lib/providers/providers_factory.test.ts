@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { monaco } from '../../../../monaco_imports';
+import { monaco } from '../../../../monaco_imports';
 import {
   createMonacoProvider,
   createDisposedSafeModel,
   DisposedModelAccessError,
+  createCancellableCallbacks,
 } from './providers_factory';
 
 describe('Providers Factory', () => {
@@ -75,6 +76,32 @@ describe('Providers Factory', () => {
       const model = disposedModel();
       const safe = createDisposedSafeModel(model);
       expect(() => safe.getValue()).toThrow(DisposedModelAccessError);
+    });
+  });
+
+  describe('createCancellableCallbacks', () => {
+    it('returns emptyResult when the Monaco token is cancelled on the middle of the provider execution, and cuts the execution', async () => {
+      const tokenSource = new monaco.CancellationTokenSource();
+
+      const callbacks = {
+        getSources: jest.fn(async () => []),
+        getVariables: jest.fn().mockReturnValue({}),
+      };
+      const providerPromise = createMonacoProvider({
+        model: nonDisposedModel(),
+        run: async () => {
+          const cancellableCallbacks = createCancellableCallbacks(callbacks, tokenSource.token);
+          await cancellableCallbacks.getSources();
+          tokenSource.cancel();
+          await cancellableCallbacks.getVariables();
+          return 'full-result';
+        },
+        emptyResult: '__empty__',
+      });
+
+      await expect(providerPromise).resolves.toBe('__empty__');
+      expect(callbacks.getSources).toHaveBeenCalled();
+      expect(callbacks.getVariables).not.toHaveBeenCalled();
     });
   });
 });
