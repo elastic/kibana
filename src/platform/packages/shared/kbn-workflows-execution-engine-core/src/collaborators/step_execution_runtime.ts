@@ -8,7 +8,7 @@
  */
 
 import type { EsWorkflowStepExecution, StackFrame } from '@kbn/workflows';
-import { ExecutionStatus } from '@kbn/workflows';
+import type { ExecutionStatus } from '@kbn/workflows';
 import type { ScopeData } from './scope_data';
 import type { IWorkflowContextManager } from './workflow_context_manager';
 import type { IWorkflowEventLogger } from './workflow_event_logger';

@@ -8,7 +8,7 @@
  */
 
 import type { EsWorkflowExecution } from '@kbn/workflows';
-import { ExecutionStatus } from '@kbn/workflows';
+import type { ExecutionStatus } from '@kbn/workflows';
 
 import type { IStepExecutionRuntimeFactory } from './step_execution_runtime_factory';
 import type { ScopeData } from './scope_data';
