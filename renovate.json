@@ -1865,7 +1865,6 @@
     {
       "groupName": "platform security modules",
       "matchDepNames": [
-        "css.escape",
         "dependency-check",
         "dependency-cruiser",
         "dompurify",
