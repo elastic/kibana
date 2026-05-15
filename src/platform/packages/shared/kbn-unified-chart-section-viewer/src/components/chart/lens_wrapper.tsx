@@ -115,6 +115,13 @@ export function LensWrapper({
 
   const disabledActions = [...DEFAULT_DISABLED_ACTIONS, ...extraDisabledActions];
 
+  // NOTE (issue #236787): Inspect demotion and action-bar dividers are blocked on a
+  // Lens API change. Until @elastic/kibana-visualizations exposes a way for consumers
+  // to suppress or reorder a default action by id (see the blocker at
+  // x-pack/platform/plugins/shared/lens/public/react_embeddable/renderer/lens_custom_renderer_component.tsx:142-157),
+  // Inspect stays on the visible quick-action row and dividers cannot be inserted.
+  // When that lands, update DEFAULT_QUICK_ACTION_VIEW, remove the test.fixme in
+  // quick_actions.spec.ts, and remove this comment.
   const quickActionView = (quickActionIds ?? DEFAULT_QUICK_ACTION_VIEW) as string[];
 
   return (
