@@ -15,7 +15,7 @@ export const registerCreateApiKeyRoute = (router: IRouter, logger: Logger) => {
       path: '/internal/serverless_vectordb/api_key',
       validate: {
         body: schema.object({
-          name: schema.maybe(schema.string()),
+          name: schema.maybe(schema.string({ maxLength: 256 })),
         }),
       },
       security: {

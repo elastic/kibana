@@ -17,6 +17,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import type { EuiThemeComputed } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../hooks/use_kibana';
 
@@ -36,6 +37,29 @@ const readRect = (el: HTMLElement): LauncherRect => {
   const r = el.getBoundingClientRect();
   return { top: r.top, left: r.left, width: r.width, height: r.height };
 };
+
+const titleStyles = css`
+  font-weight: 400;
+`;
+
+const sendButtonRowStyles = css`
+  display: flex;
+  justify-content: flex-end;
+`;
+
+const overlayBaseStyles = ({ euiTheme }: { euiTheme: EuiThemeComputed }) => css`
+  position: fixed;
+  z-index: ${euiTheme.levels.flyout};
+  background: ${euiTheme.colors.emptyShade};
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: ${euiTheme.border.thin};
+  border-color: ${euiTheme.colors.borderBaseSubdued};
+  transition: top ${ANIM_MS}ms ease, left ${ANIM_MS}ms ease, width ${ANIM_MS}ms ease,
+    height ${ANIM_MS}ms ease, border-radius ${ANIM_MS}ms ease, border-color ${ANIM_MS}ms ease;
+  will-change: top, left, width, height;
+`;
 
 export const NewConversationPrompt: React.FC = () => {
   const {
@@ -86,11 +110,7 @@ export const NewConversationPrompt: React.FC = () => {
     }, ANIM_MS);
   };
 
-  const EmbeddableConversation = agentBuilder?.EmbeddableConversation;
-
-  const titleStyles = css`
-    font-weight: 400;
-  `;
+  const { EmbeddableConversation } = agentBuilder;
 
   const inlineContainerStyles = css`
     width: 100%;
@@ -98,20 +118,6 @@ export const NewConversationPrompt: React.FC = () => {
     margin: 0 auto;
     /* Keep the launcher visually present so its rect can be measured */
     visibility: ${isOverlayVisible ? 'hidden' : 'visible'};
-  `;
-
-  const overlayBaseStyles = css`
-    position: fixed;
-    z-index: ${euiTheme.levels.flyout};
-    background: ${euiTheme.colors.emptyShade};
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    border: ${euiTheme.border.thin};
-    border-color: ${euiTheme.colors.borderBaseSubdued};
-    transition: top ${ANIM_MS}ms ease, left ${ANIM_MS}ms ease, width ${ANIM_MS}ms ease,
-      height ${ANIM_MS}ms ease, border-radius ${ANIM_MS}ms ease, border-color ${ANIM_MS}ms ease;
-    will-change: top, left, width, height;
   `;
 
   const overlayPositionStyles = isAnimatingToFull
@@ -131,7 +137,7 @@ export const NewConversationPrompt: React.FC = () => {
         height: ${launcherRect.height}px;
         border-radius: 16px;
       `
-    : css``;
+    : undefined;
 
   // Match agent_builder's ConversationInput visual styling: 16px radius,
   // EUI shadow (s -> xl on focus), backgroundBasePlain, asymmetric padding.
@@ -173,11 +179,6 @@ export const NewConversationPrompt: React.FC = () => {
         color: ${euiTheme.colors.textDisabled};
       }
     }
-  `;
-
-  const sendButtonRow = css`
-    display: flex;
-    justify-content: flex-end;
   `;
 
   const conversationStyles = css`
@@ -231,7 +232,7 @@ export const NewConversationPrompt: React.FC = () => {
                 expand();
               }}
             />
-            <div css={sendButtonRow}>
+            <div css={sendButtonRowStyles}>
               <EuiButtonIcon
                 iconType="kqlFunction"
                 display="fill"
@@ -250,7 +251,7 @@ export const NewConversationPrompt: React.FC = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      {isOverlayVisible && EmbeddableConversation ? (
+      {isOverlayVisible ? (
         <div
           css={[overlayBaseStyles, overlayPositionStyles]}
           data-test-subj="vectordbHomeNewConversationOverlay"

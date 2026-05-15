@@ -23,7 +23,9 @@ import {
   EuiStepNumber,
   EuiText,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../services';
 import { useOnboardingCredentials } from './use_onboarding_credentials';
@@ -183,6 +185,85 @@ const StepRail: React.FC<{
   );
 };
 
+interface StepPanelProps {
+  title?: string;
+  description?: string;
+  onBack?: () => void;
+  onNext?: () => void;
+  nextLabel?: string;
+  nextDisabled?: boolean;
+  children: React.ReactNode;
+}
+
+const StepPanel: React.FC<StepPanelProps> = ({
+  title,
+  description,
+  onBack,
+  onNext,
+  nextLabel,
+  nextDisabled,
+  children,
+}) => (
+  <EuiPanel hasShadow={false} paddingSize="l">
+    {title ? (
+      <EuiTitle size="l">
+        <h1>{title}</h1>
+      </EuiTitle>
+    ) : null}
+    {description ? (
+      <>
+        <EuiSpacer size="s" />
+        <EuiText size="s" color="subdued">
+          <p>{description}</p>
+        </EuiText>
+      </>
+    ) : null}
+    {title || description ? <EuiSpacer size="m" /> : null}
+    {children}
+    {onBack || onNext ? (
+      <>
+        <EuiSpacer size="l" />
+        <EuiHorizontalRule margin="none" />
+        <EuiSpacer size="m" />
+        <EuiFlexGroup justifyContent="spaceBetween" gutterSize="m">
+          <EuiFlexItem grow={false}>
+            {onBack ? (
+              <EuiButtonEmpty
+                iconType="arrowLeft"
+                onClick={onBack}
+                data-test-subj="vectordbWizardBack"
+              >
+                {i18n.translate('vectordbOnboarding.wizard.back', {
+                  defaultMessage: 'Back',
+                })}
+              </EuiButtonEmpty>
+            ) : (
+              <span />
+            )}
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            {onNext ? (
+              <EuiButton
+                fill
+                iconType="arrowRight"
+                iconSide="right"
+                onClick={onNext}
+                isDisabled={nextDisabled}
+                data-test-subj="vectordbWizardNext"
+              >
+                {nextLabel ??
+                  i18n.translate('vectordbOnboarding.wizard.next', {
+                    defaultMessage: 'Next',
+                  })}
+              </EuiButton>
+            ) : null}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </>
+    ) : null}
+  </EuiPanel>
+);
+
 export const StepLayout: React.FC<StepLayoutProps> = ({
   currentStep,
   title,
@@ -200,6 +281,7 @@ export const StepLayout: React.FC<StepLayoutProps> = ({
   const {
     services: { chrome },
   } = useKibana();
+  const { euiTheme } = useEuiTheme();
 
   useEffect(() => {
     chrome.setIsVisible(false);
@@ -208,86 +290,43 @@ export const StepLayout: React.FC<StepLayoutProps> = ({
 
   const isHero = variant === 'hero';
 
-  const panelContent = (
-    <EuiPanel hasShadow={false} paddingSize="l">
-      {title ? (
-        <EuiTitle size="l">
-          <h1>{title}</h1>
-        </EuiTitle>
-      ) : null}
-      {description ? (
-        <>
-          <EuiSpacer size="s" />
-          <EuiText size="s" color="subdued">
-            <p>{description}</p>
-          </EuiText>
-        </>
-      ) : null}
-      {title || description ? <EuiSpacer size="m" /> : null}
-      {children}
-      {onBack || onNext ? (
-        <>
-          <EuiSpacer size="l" />
-          <EuiHorizontalRule margin="none" />
-          <EuiSpacer size="m" />
-          <EuiFlexGroup justifyContent="spaceBetween" gutterSize="m">
-            <EuiFlexItem grow={false}>
-              {onBack ? (
-                <EuiButtonEmpty
-                  iconType="arrowLeft"
-                  onClick={onBack}
-                  data-test-subj="vectordbWizardBack"
-                >
-                  {i18n.translate('vectordbOnboarding.wizard.back', {
-                    defaultMessage: 'Back',
-                  })}
-                </EuiButtonEmpty>
-              ) : (
-                <span />
-              )}
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              {onNext ? (
-                <EuiButton
-                  fill
-                  iconType="arrowRight"
-                  iconSide="right"
-                  onClick={onNext}
-                  isDisabled={nextDisabled}
-                  data-test-subj="vectordbWizardNext"
-                >
-                  {nextLabel ??
-                    i18n.translate('vectordbOnboarding.wizard.next', {
-                      defaultMessage: 'Next',
-                    })}
-                </EuiButton>
-              ) : null}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </>
-      ) : null}
-    </EuiPanel>
-  );
+  const mainContentStyles = css`
+    min-height: calc(100vh - 96px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  `;
 
-  const mainContent = (
-    <div
-      style={{
-        minHeight: 'calc(100vh - 96px)',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-      }}
-    >
-      <div>{isHero ? children : panelContent}</div>
-    </div>
-  );
+  const sidebarStyles = css`
+    min-width: ${euiTheme.base * 13.75}px;
+    max-width: ${euiTheme.base * 17.5}px;
+  `;
 
   return (
     <EuiPageTemplate restrictWidth panelled={false} grow={false}>
       <EuiPageTemplate.Section paddingSize="xl" grow={false}>
         <EuiFlexGroup gutterSize="l" alignItems="center" responsive={false}>
-          <EuiFlexItem grow={3}>{mainContent}</EuiFlexItem>
-          <EuiFlexItem grow={1} style={{ minWidth: 220, maxWidth: 280 }}>
+          <EuiFlexItem grow={3}>
+            <div css={mainContentStyles}>
+              <div>
+                {isHero ? (
+                  children
+                ) : (
+                  <StepPanel
+                    title={title}
+                    description={description}
+                    onBack={onBack}
+                    onNext={onNext}
+                    nextLabel={nextLabel}
+                    nextDisabled={nextDisabled}
+                  >
+                    {children}
+                  </StepPanel>
+                )}
+              </div>
+            </div>
+          </EuiFlexItem>
+          <EuiFlexItem grow={1} css={sidebarStyles}>
             <StepRail
               currentStep={currentStep}
               onSkip={onSkip}

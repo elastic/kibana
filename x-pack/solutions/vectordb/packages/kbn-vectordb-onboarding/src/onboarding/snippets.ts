@@ -10,10 +10,12 @@ export type VectorPath = 'have-vectors' | 'generate-vectors';
 export const URL_PLACEHOLDER = 'https://your-elasticsearch-url';
 export const API_KEY_PLACEHOLDER = 'YOUR_API_KEY';
 
-export const fillPlaceholders = (snippet: string, url?: string, apiKey?: string): string =>
-  snippet
-    .replaceAll(URL_PLACEHOLDER, url || URL_PLACEHOLDER)
-    .replaceAll(API_KEY_PLACEHOLDER, apiKey || API_KEY_PLACEHOLDER);
+export const fillPlaceholders = (snippet: string, url?: string, apiKey?: string): string => {
+  let result = snippet;
+  if (url) result = result.replaceAll(URL_PLACEHOLDER, url);
+  if (apiKey) result = result.replaceAll(API_KEY_PLACEHOLDER, apiKey);
+  return result;
+};
 
 export const HAVE_VECTORS_INGEST = `# Create an index with a dense_vector field
 PUT my-vectors

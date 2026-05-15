@@ -45,7 +45,7 @@ const StatTile: React.FC<{ label: string; value: string; isLoading: boolean }> =
 
 export const HomePage: React.FC = () => {
   const {
-    services: { application, agentBuilder },
+    services: { application },
   } = useKibana();
   const { stats, isLoading } = useDeploymentStats();
   const elasticsearchUrl = stats.elasticsearchUrl ?? '';
@@ -177,12 +177,8 @@ export const HomePage: React.FC = () => {
           </EuiFlexGroup>
         </EuiPanel>
 
-        {agentBuilder ? (
-          <>
-            <EuiSpacer size="xxl" />
-            <NewConversationPrompt />
-          </>
-        ) : null}
+        <EuiSpacer size="xxl" />
+        <NewConversationPrompt />
       </EuiPageTemplate.Section>
     </EuiPageTemplate>
   );

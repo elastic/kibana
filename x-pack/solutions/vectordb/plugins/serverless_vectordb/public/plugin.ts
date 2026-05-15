@@ -9,6 +9,7 @@ import { of } from 'rxjs';
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import { VECTORDB_APP_ID, TUTORIALS_DEEP_LINK_ID } from '../common/constants';
 import { createNavigationTree } from './navigation_tree';
 import type {
   ServerlessVectordbPluginSetup,
@@ -30,14 +31,16 @@ export class ServerlessVectordbPlugin
     core: CoreSetup<ServerlessVectordbStartDependencies, ServerlessVectordbPluginStart>
   ): ServerlessVectordbPluginSetup {
     core.application.register({
-      id: 'vectordb',
-      title: 'Vector DB',
+      id: VECTORDB_APP_ID,
+      title: i18n.translate('xpack.serverlessVectordb.app.title', {
+        defaultMessage: 'Vector DB',
+      }),
       appRoute: '/app/vectordb',
       euiIconType: 'logoElasticsearch',
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       deepLinks: [
         {
-          id: 'tutorials',
+          id: TUTORIALS_DEEP_LINK_ID,
           path: '/tutorials',
           title: i18n.translate('xpack.serverlessVectordb.tutorials.title', {
             defaultMessage: 'Tutorials',

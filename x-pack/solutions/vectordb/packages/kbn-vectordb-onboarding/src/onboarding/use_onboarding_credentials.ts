@@ -6,10 +6,9 @@
  */
 
 import { useEffect, useState } from 'react';
+import { ONBOARDING_API_KEY_STORAGE_KEY } from '../storage_keys';
 import { useOnboardingApiPaths } from '../api_paths';
 import { useKibana } from '../services';
-
-const SESSION_KEY = 'vectordb.onboarding.apiKey';
 
 interface CachedKey {
   id: string;
@@ -17,11 +16,12 @@ interface CachedKey {
   encoded: string;
 }
 
+// Module-level in-flight promise so concurrent hook instances share one request.
 let inFlightApiKeyRequest: Promise<string | null> | null = null;
 
 const readCachedKey = (): CachedKey | null => {
   try {
-    const raw = sessionStorage.getItem(SESSION_KEY);
+    const raw = localStorage.getItem(ONBOARDING_API_KEY_STORAGE_KEY);
     return raw ? (JSON.parse(raw) as CachedKey) : null;
   } catch {
     return null;
@@ -30,9 +30,9 @@ const readCachedKey = (): CachedKey | null => {
 
 const writeCachedKey = (key: CachedKey) => {
   try {
-    sessionStorage.setItem(SESSION_KEY, JSON.stringify(key));
+    localStorage.setItem(ONBOARDING_API_KEY_STORAGE_KEY, JSON.stringify(key));
   } catch {
-    // sessionStorage unavailable (e.g. private browsing) — proceed without caching
+    // localStorage unavailable (e.g. private browsing) — proceed without caching
   }
 };
 

@@ -21,7 +21,7 @@ export type OnboardingServices = CoreStart & {
   share: SharePluginStart;
   console?: ConsolePluginStart;
   cloud?: CloudStart;
-  agentBuilder?: AgentBuilderPluginStart;
+  agentBuilder: AgentBuilderPluginStart;
 };
 
 export const useKibana = () => _useKibana<OnboardingServices>();

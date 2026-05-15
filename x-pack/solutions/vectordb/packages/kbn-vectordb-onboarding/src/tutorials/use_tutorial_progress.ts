@@ -6,13 +6,11 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-
-const STORAGE_KEY = 'serverless.onboarding.tutorials.completed';
-const STORAGE_EVENT = 'serverless-onboarding-tutorials-changed';
+import { TUTORIAL_PROGRESS_STORAGE_KEY, TUTORIAL_PROGRESS_EVENT } from '../storage_keys';
 
 const readCompleted = (): Set<string> => {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(TUTORIAL_PROGRESS_STORAGE_KEY);
     if (!raw) return new Set();
     const parsed = JSON.parse(raw);
     return Array.isArray(parsed)
@@ -25,10 +23,10 @@ const readCompleted = (): Set<string> => {
 
 const writeCompleted = (ids: Set<string>) => {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(Array.from(ids)));
+    localStorage.setItem(TUTORIAL_PROGRESS_STORAGE_KEY, JSON.stringify(Array.from(ids)));
     // Notify other components in the same tab; `storage` event only fires
     // cross-tab so we dispatch our own.
-    window.dispatchEvent(new Event(STORAGE_EVENT));
+    window.dispatchEvent(new Event(TUTORIAL_PROGRESS_EVENT));
   } catch {
     // localStorage unavailable (e.g. private browsing) — silently ignore.
   }
@@ -48,10 +46,10 @@ export const useTutorialProgress = () => {
 
   useEffect(() => {
     const refresh = () => setCompleted(readCompleted());
-    window.addEventListener(STORAGE_EVENT, refresh);
+    window.addEventListener(TUTORIAL_PROGRESS_EVENT, refresh);
     window.addEventListener('storage', refresh);
     return () => {
-      window.removeEventListener(STORAGE_EVENT, refresh);
+      window.removeEventListener(TUTORIAL_PROGRESS_EVENT, refresh);
       window.removeEventListener('storage', refresh);
     };
   }, []);

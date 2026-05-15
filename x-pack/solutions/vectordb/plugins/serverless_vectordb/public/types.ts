@@ -22,7 +22,7 @@ export interface ServerlessVectordbAppStartDependencies {
   share: SharePluginStart;
   console?: ConsolePluginStart;
   cloud?: CloudStart;
-  agentBuilder?: AgentBuilderPluginStart;
+  agentBuilder: AgentBuilderPluginStart;
 }
 
 export interface ServerlessVectordbStartDependencies
