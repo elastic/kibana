@@ -17,6 +17,7 @@ import {
   createEditPreservationEvaluator,
   createStructuralCorrectnessEvaluator,
   createLiquidCorrectnessEvaluator,
+  createSelfCorrectionEvaluator,
   skipInfraErrors,
   skipNegativeCases,
 } from './evaluators';
@@ -626,5 +627,50 @@ steps:
     expect(result.score).toBe(0.5);
     expect(result.metadata?.total).toBe(2);
     expect(result.metadata?.correct).toBe(1);
+  });
+});
+
+describe('SelfCorrection evaluator', () => {
+  const evaluator = createSelfCorrectionEvaluator();
+
+  const run = (turnsToRecovery: number | null, maxTurns: number) =>
+    evaluator.evaluate({
+      output: { messages: [], errors: [], turnsToRecovery },
+      expected: { maxTurns, criteria: [] },
+    });
+
+  it('scores 0 with FAIL when the agent never recovers', async () => {
+    const result = await run(null, 3);
+    expect(result.score).toBe(0);
+    expect(result.label).toBe('FAIL');
+  });
+
+  it('scores 1 with PASS when the agent recovers on turn 1', async () => {
+    const result = await run(1, 3);
+    expect(result.score).toBe(1);
+    expect(result.label).toBe('PASS');
+  });
+
+  it('scores 0.5 when the agent recovers on the last allowed turn', async () => {
+    const result = await run(3, 3);
+    expect(result.score).toBe(0.5);
+    expect(result.label).toBe('FAIL');
+  });
+
+  it('decays linearly between first and last turn', async () => {
+    const result = await run(2, 3);
+    expect(result.score).toBe(0.75);
+    expect(result.label).toBe('PASS');
+  });
+
+  it('clamps turnsToRecovery to maxTurns', async () => {
+    const result = await run(99, 3);
+    expect(result.score).toBe(0.5);
+  });
+
+  it('scores 1 with PASS when maxTurns is 1 and the agent recovers', async () => {
+    const result = await run(1, 1);
+    expect(result.score).toBe(1);
+    expect(result.label).toBe('PASS');
   });
 });

@@ -18,6 +18,7 @@ import type {
   WorkflowCreateExample,
   NegativeWorkflowExample,
   MultiTurnWorkflowEditExample,
+  SelfCorrectionExample,
   WorkflowTaskOutput,
   StructuralExpectations,
   EfficiencyExpectations,
@@ -27,7 +28,8 @@ type WorkflowExample =
   | WorkflowEditExample
   | WorkflowCreateExample
   | NegativeWorkflowExample
-  | MultiTurnWorkflowEditExample;
+  | MultiTurnWorkflowEditExample
+  | SelfCorrectionExample;
 
 const INFRA_ERROR_NA = {
   score: null as null,
@@ -968,6 +970,53 @@ export function createCriteriaEvaluator({ evaluators }: { evaluators: DefaultEva
         output: { resultYaml: output.resultYaml },
         metadata: undefined,
       });
+    },
+  };
+}
+
+/**
+ * Scores the agent's ability to recover from broken-input YAML across multiple
+ * conversational turns. The spec's task loop sets `output.turnsToRecovery` to
+ * the 1-based turn index at which valid YAML was produced, or `null` if the
+ * loop exhausted maxTurns without recovery.
+ *
+ * Score: 1.0 if recovered on turn 1, linearly decaying to 0.5 if recovered on
+ * the last allowed turn, 0.0 if never recovered.
+ */
+export function createSelfCorrectionEvaluator() {
+  return {
+    name: 'SelfCorrection',
+    kind: 'CODE' as const,
+    evaluate: async ({
+      output,
+      expected,
+    }: {
+      output: WorkflowTaskOutput;
+      expected: SelfCorrectionExample['output'];
+    }) => {
+      const { turnsToRecovery } = output;
+      const maxTurns = Math.max(1, expected.maxTurns);
+
+      if (turnsToRecovery == null) {
+        return {
+          score: 0,
+          label: 'FAIL' as const,
+          explanation: `Agent did not produce valid YAML within ${maxTurns} turns`,
+          metadata: { turnsToRecovery: null, maxTurns },
+        };
+      }
+
+      const clamped = Math.min(turnsToRecovery, maxTurns);
+      // Linearly decay from 1.0 (turn 1) to 0.5 (turn maxTurns).
+      const score = maxTurns === 1 ? 1 : 1 - 0.5 * ((clamped - 1) / (maxTurns - 1));
+      const rounded = Math.round(score * 1000) / 1000;
+
+      return {
+        score: rounded,
+        label: rounded >= 0.75 ? ('PASS' as const) : ('FAIL' as const),
+        explanation: `Recovered on turn ${clamped} of ${maxTurns}`,
+        metadata: { turnsToRecovery: clamped, maxTurns },
+      };
     },
   };
 }

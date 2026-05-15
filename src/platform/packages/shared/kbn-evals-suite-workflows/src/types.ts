@@ -71,6 +71,8 @@ export type WorkflowTaskOutput = TaskOutput & {
   errors: unknown[];
   resultYaml?: string;
   latencyMs?: number;
+  /** Set by self-correction spec: turn index (1-based) at which valid YAML was produced; null if never. */
+  turnsToRecovery?: number | null;
 };
 
 export interface MultiTurnWorkflowEditExample extends Example {
