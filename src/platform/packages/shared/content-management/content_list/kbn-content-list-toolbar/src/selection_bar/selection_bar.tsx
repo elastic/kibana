@@ -32,9 +32,8 @@ export interface SelectionBarProps {
  * the deletable subset. Clicking opens a {@link DeleteConfirmationModal}
  * which surfaces any skipped items.
  *
- * Returns `null` when nothing is selected, when
- * `actions.delete.onBulkAction` is not configured, or when every
- * selected item is restricted (deletable count would be zero).
+ * Returns `null` when nothing is selected or when
+ * `actions.delete.onBulkAction` is not configured.
  *
  * @internal Rendered automatically by {@link ContentListToolbar}.
  */
@@ -57,23 +56,28 @@ export const SelectionBar = ({
     [selectedItems, deleteRestriction]
   );
 
-  const buttonLabel = useMemo(
-    () =>
-      i18n.translate('contentManagement.contentList.toolbar.selectionBar.deleteButton', {
-        defaultMessage: 'Delete {itemCount} {entityName}',
-        values: {
-          itemCount: deletableCount,
-          entityName: deletableCount === 1 ? labels.entity : labels.entityPlural,
-        },
-      }),
-    [deletableCount, labels.entity, labels.entityPlural]
-  );
+  const buttonLabel = useMemo(() => {
+    const hasDeletableItems = deletableCount > 0;
+    const itemCount = hasDeletableItems ? deletableCount : selectedCount;
 
-  if (
-    selectedCount === 0 ||
-    deletableCount === 0 ||
-    typeof itemConfig?.actions?.delete?.onBulkAction !== 'function'
-  ) {
+    return hasDeletableItems
+      ? i18n.translate('contentManagement.contentList.toolbar.selectionBar.deleteButton', {
+          defaultMessage: 'Delete {itemCount} {entityName}',
+          values: {
+            itemCount,
+            entityName: itemCount === 1 ? labels.entity : labels.entityPlural,
+          },
+        })
+      : i18n.translate('contentManagement.contentList.toolbar.selectionBar.reviewButton', {
+          defaultMessage: 'Review {itemCount} {entityName}',
+          values: {
+            itemCount,
+            entityName: itemCount === 1 ? labels.entity : labels.entityPlural,
+          },
+        });
+  }, [deletableCount, selectedCount, labels.entity, labels.entityPlural]);
+
+  if (selectedCount === 0 || typeof itemConfig?.actions?.delete?.onBulkAction !== 'function') {
     return null;
   }
 
