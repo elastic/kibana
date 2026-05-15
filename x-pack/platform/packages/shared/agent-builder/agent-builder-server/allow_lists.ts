@@ -55,6 +55,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.security}.siem_readiness.get_quality`,
   `${internalNamespaces.security}.siem_readiness.get_continuity`,
   `${internalNamespaces.security}.siem_readiness.get_retention`,
+  `${internalNamespaces.security}.recommend_rules_to_install`,
 
   // Streams
   `${internalNamespaces.streams}.inspect_streams`,
@@ -141,6 +142,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'entity-analytics',
   'alert-analysis',
   'detection-rule-edit',
+  'recommend-rules-to-install',
   'threat-hunting',
   'find-security-rules',
   'pci-compliance',
