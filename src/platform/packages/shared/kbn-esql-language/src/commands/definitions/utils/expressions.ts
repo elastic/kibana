@@ -137,9 +137,6 @@ export function getExpressionType(
     }
 
     const rightArg = root.args[1];
-    // IN/NOT IN with a subquery still behaves as a boolean predicate. Returning
-    // boolean here lets WHERE treat the expression as complete and suggest
-    // continuations such as AND, OR, and pipe.
     if (
       inOperators.some(({ name }) => name === fnDefinition.name) &&
       !Array.isArray(rightArg) &&

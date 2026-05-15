@@ -42,19 +42,22 @@ export async function handleListOperator(ctx: ExpressionContext): Promise<ISugge
   // containing the values, not a JS array of values.
   const rightOperand = getBinaryExpressionOperand(fn, 'right') as ESQLSingleAstItem | undefined;
   const leftOperand = getBinaryExpressionOperand(fn, 'left') as ESQLSingleAstItem | undefined;
-  const canSuggestSubquery = ctx.options.allowSubquery === true;
+  const allowSubqueryOperand = ctx.options.allowSubquery === true;
 
   // No list yet: suggest opening parenthesis
   if (shouldSuggestRightOperandStart(rightOperand)) {
-    if (canSuggestSubquery) {
+    if (allowSubqueryOperand) {
       return [listCompleteItem, buildSubqueryCompleteItem()];
     }
 
     return [listCompleteItem];
   }
 
+  // A subquery operand is already present; only suggest continuations after it.
   if (isSubQuery(rightOperand)) {
-    if (canSuggestSubquery && innerText.length > rightOperand.location.max) {
+    const cursorAfterSubquery = innerText.length > rightOperand.location.max;
+
+    if (allowSubqueryOperand && cursorAfterSubquery) {
       return getLogicalContinuationSuggestions();
     }
 
