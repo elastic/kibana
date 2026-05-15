@@ -360,6 +360,37 @@ describe('UpdateSLO', () => {
       expectInstallationOfUpdatedSLOResources();
       expectDeletionOfOriginalSLOResources(slo);
     });
+
+    // SDH #6202: previously the catch block in deleteOriginalSLO swallowed
+    // failures silently, leaving stale transforms running and feeding orphan
+    // summary documents into the summary index.
+    it('logs an error but does not throw when cleanup of the previous revision fails', async () => {
+      const slo = createSLO();
+      mockRepository.findById.mockResolvedValueOnce(slo);
+      const originalRollupTransformId = getSLOTransformId(slo.id, slo.revision);
+      mockTransformManager.uninstall.mockImplementation(async (id) => {
+        if (id === originalRollupTransformId) {
+          throw new Error('boom: ES transient failure while uninstalling old transform');
+        }
+      });
+
+      await expect(
+        updateSLO.execute(slo.id, {
+          indicator: createAPMTransactionErrorRateIndicator(),
+        })
+      ).resolves.not.toThrow();
+
+      expectInstallationOfUpdatedSLOResources();
+
+      const warnMessages = mockLogger.warn.mock.calls.map(([msg]) => String(msg));
+      expect(warnMessages).toEqual(
+        expect.arrayContaining([
+          expect.stringContaining(
+            `previous revision of SLO [id=${slo.id}, revision=${slo.revision}]`
+          ),
+        ])
+      );
+    });
   });
 
   describe('when error happens during the update', () => {
