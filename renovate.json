@@ -974,15 +974,6 @@
       "enabled": true
     },
     {
-      "groupName": "cssstyle",
-      "matchDepNames": ["cssstyle", "@types/cssstyle"],
-      "reviewers": ["team:kibana-operations"],
-      "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Operations"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
       "groupName": "execa",
       "matchDepNames": ["execa"],
       "reviewers": ["team:kibana-operations"],
