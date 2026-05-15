@@ -73,6 +73,7 @@ export const ChooseConnector: React.FC<ChooseConnectorSelectableProps> = ({
         <EuiFlexItem
           css={css`
             overflow: auto;
+            align-self: center;
           `}
           grow
         >

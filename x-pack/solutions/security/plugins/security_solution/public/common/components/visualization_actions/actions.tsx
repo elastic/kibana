@@ -162,7 +162,7 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
           panelClassName="withHoverActions__popover"
           data-test-subj="viz-actions-popover"
         >
-          <EuiContextMenu data-test-subj="viz-actions-panel" size="s" panels={panels.value} />
+          <EuiContextMenu data-test-subj="viz-actions-panel" panels={panels.value} />
         </EuiPopover>
       )}
       {isInspectModalOpen && request !== null && response !== null && (
