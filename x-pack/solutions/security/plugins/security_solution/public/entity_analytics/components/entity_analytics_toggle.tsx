@@ -90,14 +90,18 @@ export const EntityAnalyticsToggle: React.FC<EntityAnalyticsToggleProps> = ({
   onSaveSettings,
   isSavingSettings,
 }) => {
-  const { status, isLoading, toggle, errors } = useToggleEntityAnalytics({
+  const { status, isLoading, isStatusLoading, toggle, errors } = useToggleEntityAnalytics({
     selectedSettingsMatchSavedSettings,
     onSaveSettings,
     isSavingSettings,
   });
 
   const isDisabled =
-    isPrivilegesLoading || !hasAllRequiredPrivileges || status === 'enabling' || status === 'error';
+    isPrivilegesLoading ||
+    !hasAllRequiredPrivileges ||
+    isStatusLoading ||
+    status === 'enabling' ||
+    status === 'error';
 
   const isChecked = status === 'enabled' || status === 'partially_enabled';
 

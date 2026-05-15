@@ -1,0 +1,75 @@
+responses:
+  '200':
+    description: Overall status is OK and Kibana should be functioning normally.
+    content:
+      application/json:
+        examples:
+          statusAvailableResponse:
+            summary: Kibana is available
+            description: A successful response when Kibana and its core services are operating normally.
+            value:
+              name: kibana
+              uuid: 5b2de169-2785-441b-ae8c-186a1936b17d
+              version:
+                number: 9.3.0
+                build_hash: ad8f0fa4d5022f56bbe2c4d51e9d0fcfa1ee67fc
+                build_number: 100200
+                build_snapshot: false
+                build_flavor: traditional
+                build_date: '2026-04-30T12:00:00.000Z'
+              status:
+                overall:
+                  level: available
+                  summary: All services are available
+                core:
+                  elasticsearch:
+                    level: available
+                    summary: Elasticsearch is available
+                  savedObjects:
+                    level: available
+                    summary: SavedObjects service has completed migrations and is available
+                plugins: {}
+              metrics:
+                last_updated: '2026-04-30T12:00:05.000Z'
+                collection_interval_in_millis: 5000
+                elasticsearch_client:
+                  totalActiveSockets: 4
+                  totalIdleSockets: 2
+                  totalQueuedRequests: 0
+  '503':
+    description: Kibana or some of its essential services are unavailable. Kibana may be degraded or unavailable.
+    content:
+      application/json:
+        examples:
+          statusUnavailableResponse:
+            summary: Kibana is unavailable
+            description: A response when one or more core services are unavailable.
+            value:
+              name: kibana
+              uuid: 5b2de169-2785-441b-ae8c-186a1936b17d
+              version:
+                number: 9.3.0
+                build_hash: ad8f0fa4d5022f56bbe2c4d51e9d0fcfa1ee67fc
+                build_number: 100200
+                build_snapshot: false
+                build_flavor: traditional
+                build_date: '2026-04-30T12:00:00.000Z'
+              status:
+                overall:
+                  level: unavailable
+                  summary: Some services are unavailable
+                core:
+                  elasticsearch:
+                    level: unavailable
+                    summary: Unable to connect to Elasticsearch
+                  savedObjects:
+                    level: unavailable
+                    summary: SavedObjects service depends on Elasticsearch
+                plugins: {}
+              metrics:
+                last_updated: '2026-04-30T12:00:05.000Z'
+                collection_interval_in_millis: 5000
+                elasticsearch_client:
+                  totalActiveSockets: 0
+                  totalIdleSockets: 0
+                  totalQueuedRequests: 0

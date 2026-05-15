@@ -10,8 +10,11 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import {
   EVENT_CHAIN_DEPTH_HEADER,
+  EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER,
   EVENT_CHAIN_SOURCE_EXECUTION_HEADER,
+  EVENT_CHAIN_VISITED_WORKFLOW_IDS_HEADER,
   getEventChainContext,
+  getEventChainDepthFromHeaders,
   getOutboundEventChainHeaders,
   setWorkflowEventChainContext,
 } from './event_chain_context';
@@ -98,9 +101,15 @@ describe('event_chain_context', () => {
       ).toBeUndefined();
     });
 
-    it('returns undefined when depth header value is negative', () => {
+    it('returns depth -1 sentinel when header is -1 (unknown persisted depth)', () => {
+      expect(getEventChainContext(internalRequest({ [EVENT_CHAIN_DEPTH_HEADER]: '-1' }))).toEqual({
+        depth: -1,
+      });
+    });
+
+    it('returns undefined when depth header value is negative other than -1', () => {
       expect(
-        getEventChainContext(internalRequest({ [EVENT_CHAIN_DEPTH_HEADER]: '-1' }))
+        getEventChainContext(internalRequest({ [EVENT_CHAIN_DEPTH_HEADER]: '-2' }))
       ).toBeUndefined();
     });
 
@@ -126,6 +135,29 @@ describe('event_chain_context', () => {
       expect(
         getEventChainContext(internalRequest({ [EVENT_CHAIN_DEPTH_HEADER]: ['3', '5'] }))
       ).toEqual({ depth: 3 });
+    });
+
+    it('ignores visited-workflows header when base64url value exceeds byte cap (no decode)', () => {
+      const oversized = 'A'.repeat(65537);
+      expect(
+        getEventChainContext(
+          internalRequest({
+            [EVENT_CHAIN_DEPTH_HEADER]: '1',
+            [EVENT_CHAIN_VISITED_WORKFLOW_IDS_HEADER]: oversized,
+          })
+        )
+      ).toEqual({ depth: 1 });
+    });
+
+    it('getEventChainDepthFromHeaders mirrors depth header parsing', () => {
+      expect(
+        getEventChainDepthFromHeaders(internalRequest({ [EVENT_CHAIN_DEPTH_HEADER]: '4' }).headers)
+      ).toBe(4);
+      expect(
+        getEventChainDepthFromHeaders(
+          internalRequest({ [EVENT_CHAIN_DEPTH_HEADER]: 'invalid' }).headers
+        )
+      ).toBeUndefined();
     });
   });
 
@@ -178,6 +210,45 @@ describe('event_chain_context', () => {
         [EVENT_CHAIN_DEPTH_HEADER]: '1',
         [EVENT_CHAIN_SOURCE_EXECUTION_HEADER]: 'exec-emit-loop',
       });
+    });
+
+    it('includes visited header, source execution id, and emitter execution id when provided', () => {
+      const request = {} as KibanaRequest;
+      setWorkflowEventChainContext(request, {
+        depth: 2,
+        sourceExecutionId: 'exec-src',
+        visitedWorkflowIds: ['wf-a'],
+      });
+      expect(getOutboundEventChainHeaders(request, 'exec-uuid')).toEqual({
+        [EVENT_CHAIN_DEPTH_HEADER]: '2',
+        [EVENT_CHAIN_SOURCE_EXECUTION_HEADER]: 'exec-src',
+        [EVENT_CHAIN_VISITED_WORKFLOW_IDS_HEADER]: Buffer.from(
+          JSON.stringify(['wf-a']),
+          'utf8'
+        ).toString('base64url'),
+        [EVENT_CHAIN_EMITTER_EXECUTION_ID_HEADER]: 'exec-uuid',
+      });
+    });
+
+    it('encodes visited ids so the header stays within the byte cap', () => {
+      const longId = 'w'.repeat(600);
+      const request = {} as KibanaRequest;
+      setWorkflowEventChainContext(request, {
+        depth: 0,
+        visitedWorkflowIds: Array.from({ length: 128 }, () => longId),
+      });
+      const outbound = getOutboundEventChainHeaders(request);
+      const visitedHeader = outbound[EVENT_CHAIN_VISITED_WORKFLOW_IDS_HEADER];
+      expect(typeof visitedHeader).toBe('string');
+      expect(visitedHeader!.length).toBeLessThanOrEqual(65536);
+      const parsed = getEventChainContext(
+        internalRequest({
+          [EVENT_CHAIN_DEPTH_HEADER]: '0',
+          [EVENT_CHAIN_VISITED_WORKFLOW_IDS_HEADER]: visitedHeader!,
+        })
+      );
+      expect(parsed?.visitedWorkflowIds?.length).toBeGreaterThan(0);
+      expect(parsed?.visitedWorkflowIds?.length).toBeLessThanOrEqual(128);
     });
   });
 

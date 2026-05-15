@@ -26,7 +26,15 @@ describe('When using `EnteredInput` class', () => {
       ? {
           commandDefinition: commandDef,
           argState: argValueSelectorState,
-          argsWithValueSelectors: undefined,
+          argsWithValueSelectors: Object.entries(commandDef.args ?? {}).reduce(
+            (acc, [argName, argDef]) => {
+              if (argDef.SelectorComponent) {
+                acc[argName] = argDef;
+              }
+              return acc;
+            },
+            {} as NonNullable<EnteredCommand['argsWithValueSelectors']>
+          ),
         }
       : undefined;
 
@@ -319,4 +327,23 @@ describe('When using `EnteredInput` class', () => {
       );
     }
   );
+
+  describe('and command with argument selector', () => {
+    beforeEach(() => {
+      commandDefinition = getCommandListMock().find((def) => def.name === 'cmd7')!;
+    });
+
+    it('should auto insert a space after the argument selector', () => {
+      createEnteredInput('cmd7 --foo', '');
+
+      expect(enteredInput.getFullText()).toEqual('cmd7 --foo ');
+    });
+
+    it('should handle backspace correctly when cursor is immediately to the right of the argument selector', () => {
+      createEnteredInput('cmd7 --foo', '');
+      enteredInput.backspaceChar();
+
+      expect(enteredInput.getFullText()).toEqual('cmd7 ');
+    });
+  });
 });

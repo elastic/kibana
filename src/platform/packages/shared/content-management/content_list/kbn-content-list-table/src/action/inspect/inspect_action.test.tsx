@@ -63,12 +63,13 @@ describe('inspect action builder', () => {
       expect(result).toBeUndefined();
     });
 
-    it('generates a dynamic name including the item title', () => {
+    it('defaults to a terse "View details" label that ignores the item title', () => {
       const result = buildInspectAction({}, defaultContext);
       const item = { id: '1', title: 'My Dashboard' };
 
       const name = typeof result?.name === 'function' ? result.name(item) : result?.name;
-      expect(name).toContain('My Dashboard');
+      expect(name).toBe('View details');
+      expect(result?.description).toBe('View details');
     });
 
     it('calls onInspect when onClick is triggered', () => {

@@ -86,9 +86,11 @@ describe('ToolRegistryImpl', () => {
   const setup = ({
     builtinTools = [],
     persistedTools = [],
+    experimentalFeaturesEnabled = false,
   }: {
     builtinTools?: InternalToolDefinition[];
     persistedTools?: InternalToolDefinition[];
+    experimentalFeaturesEnabled?: boolean;
   } = {}) => {
     const builtinProvider = createMockBuiltinProvider(builtinTools);
     const persistedProvider = createMockPersistedProvider(persistedTools);
@@ -105,6 +107,7 @@ describe('ToolRegistryImpl', () => {
       savedObjects,
       healthClient,
       healthTrackedToolTypes: new Set(),
+      experimentalFeaturesEnabled,
     });
 
     return { registry, builtinProvider, persistedProvider };
@@ -404,6 +407,105 @@ describe('ToolRegistryImpl', () => {
 
       expect(tools).toHaveLength(1);
       expect(tools[0].id).toBe('mcp.tavily.search');
+    });
+  });
+
+  describe('experimental filtering', () => {
+    const normalTool = availableTool({
+      id: 'normal-tool',
+      type: ToolType.builtin,
+      experimental: false,
+    });
+    const experimentalTool = availableTool({
+      id: 'experimental-tool',
+      type: ToolType.builtin,
+      experimental: true,
+    });
+
+    describe('when experimentalFeaturesEnabled is false', () => {
+      it('has() returns false for experimental tools', async () => {
+        const { registry } = setup({
+          builtinTools: [experimentalTool],
+          experimentalFeaturesEnabled: false,
+        });
+        expect(await registry.has('experimental-tool')).toBe(false);
+      });
+
+      it('has() returns true for non-experimental tools', async () => {
+        const { registry } = setup({
+          builtinTools: [normalTool],
+          experimentalFeaturesEnabled: false,
+        });
+        expect(await registry.has('normal-tool')).toBe(true);
+      });
+
+      it('get() throws not-found for experimental tools', async () => {
+        const { registry } = setup({
+          builtinTools: [experimentalTool],
+          experimentalFeaturesEnabled: false,
+        });
+        await expect(registry.get('experimental-tool')).rejects.toThrow();
+      });
+
+      it('get() returns the tool for non-experimental tools', async () => {
+        const { registry } = setup({
+          builtinTools: [normalTool],
+          experimentalFeaturesEnabled: false,
+        });
+        const result = await registry.get('normal-tool');
+        expect(result.id).toBe('normal-tool');
+      });
+
+      it('list() excludes experimental tools', async () => {
+        const { registry } = setup({
+          builtinTools: [normalTool, experimentalTool],
+          experimentalFeaturesEnabled: false,
+        });
+        const result = await registry.list();
+        expect(result).toHaveLength(1);
+        expect(result[0].id).toBe('normal-tool');
+      });
+    });
+
+    describe('when experimentalFeaturesEnabled is true', () => {
+      it('has() returns true for experimental tools', async () => {
+        const { registry } = setup({
+          builtinTools: [experimentalTool],
+          experimentalFeaturesEnabled: true,
+        });
+        expect(await registry.has('experimental-tool')).toBe(true);
+      });
+
+      it('get() returns experimental tools', async () => {
+        const { registry } = setup({
+          builtinTools: [experimentalTool],
+          experimentalFeaturesEnabled: true,
+        });
+        const result = await registry.get('experimental-tool');
+        expect(result.id).toBe('experimental-tool');
+      });
+
+      it('list() includes experimental tools', async () => {
+        const { registry } = setup({
+          builtinTools: [normalTool, experimentalTool],
+          experimentalFeaturesEnabled: true,
+        });
+        const result = await registry.list();
+        expect(result).toHaveLength(2);
+      });
+    });
+
+    it('non-experimental tools are returned regardless of the flag', async () => {
+      const off = setup({
+        builtinTools: [normalTool],
+        experimentalFeaturesEnabled: false,
+      });
+      const on = setup({
+        builtinTools: [normalTool],
+        experimentalFeaturesEnabled: true,
+      });
+      expect(await off.registry.has('normal-tool')).toBe(true);
+      expect(await on.registry.has('normal-tool')).toBe(true);
     });
   });
 });

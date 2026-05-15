@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { Coerced, validateRecordKeysAllowed, validateRecordMaxKeys } from '../../common/utils';
 
 export const ExternalIncidentServiceConfiguration = {
@@ -14,18 +14,18 @@ export const ExternalIncidentServiceConfiguration = {
   orgId: z.string(),
 };
 
-export const ExternalIncidentServiceConfigurationSchema = z
-  .object(ExternalIncidentServiceConfiguration)
-  .strict();
+export const ExternalIncidentServiceConfigurationSchema = lazySchema(() =>
+  z.object(ExternalIncidentServiceConfiguration).strict()
+);
 
 export const ExternalIncidentServiceSecretConfiguration = {
   apiKeyId: z.string(),
   apiKeySecret: z.string(),
 };
 
-export const ExternalIncidentServiceSecretConfigurationSchema = z
-  .object(ExternalIncidentServiceSecretConfiguration)
-  .strict();
+export const ExternalIncidentServiceSecretConfigurationSchema = lazySchema(() =>
+  z.object(ExternalIncidentServiceSecretConfiguration).strict()
+);
 
 const MAX_ADDITIONAL_FIELDS_LENGTH = 50;
 
@@ -65,24 +65,26 @@ const CommonIncidentAttributes = {
 
 export const commonIncidentSchemaObjectProperties = Object.keys(CommonIncidentAttributes);
 
-export const ExecutorSubActionPushParamsSchema = z.object({
-  incident: z
-    .object({
-      ...CommonIncidentAttributes,
-    })
-    .strict(),
-  comments: z
-    .array(
-      z
-        .object({
-          comment: z.string(),
-          commentId: z.string(),
-        })
-        .strict()
-    )
-    .nullable()
-    .default(null),
-});
+export const ExecutorSubActionPushParamsSchema = lazySchema(() =>
+  z.object({
+    incident: z
+      .object({
+        ...CommonIncidentAttributes,
+      })
+      .strict(),
+    comments: z
+      .array(
+        z
+          .object({
+            comment: z.string(),
+            commentId: z.string(),
+          })
+          .strict()
+      )
+      .nullable()
+      .default(null),
+  })
+);
 
 export const PushToServiceIncidentSchema = {
   name: z.string(),
@@ -93,67 +95,83 @@ export const PushToServiceIncidentSchema = {
 };
 
 // Reserved for future implementation
-export const ExecutorSubActionCommonFieldsParamsSchema = z.object({}).strict();
-export const ExecutorSubActionGetIncidentTypesParamsSchema = z.object({}).strict();
-export const ExecutorSubActionGetSeverityParamsSchema = z.object({}).strict();
+export const ExecutorSubActionCommonFieldsParamsSchema = lazySchema(() => z.object({}).strict());
+export const ExecutorSubActionGetIncidentTypesParamsSchema = lazySchema(() =>
+  z.object({}).strict()
+);
+export const ExecutorSubActionGetSeverityParamsSchema = lazySchema(() => z.object({}).strict());
 
-const ArrayOfValuesSchema = z.array(
+const ArrayOfValuesSchema = lazySchema(() =>
+  z.array(
+    z
+      .object({
+        value: z.coerce.number(),
+        label: z.string(),
+      })
+      .passthrough()
+  )
+);
+
+export const GetIncidentTypesResponseSchema = lazySchema(() =>
   z
     .object({
-      value: z.coerce.number(),
-      label: z.string(),
+      values: ArrayOfValuesSchema,
     })
     .passthrough()
 );
 
-export const GetIncidentTypesResponseSchema = z
-  .object({
-    values: ArrayOfValuesSchema,
-  })
-  .passthrough();
+export const GetSeverityResponseSchema = lazySchema(() =>
+  z
+    .object({
+      values: ArrayOfValuesSchema,
+    })
+    .passthrough()
+);
 
-export const GetSeverityResponseSchema = z
-  .object({
-    values: ArrayOfValuesSchema,
-  })
-  .passthrough();
+const ValuesItemSchema = lazySchema(() =>
+  z
+    .object({
+      value: z.union([z.coerce.number(), z.string()]),
+      label: z.string(),
+      enabled: z.boolean(),
+      hidden: z.boolean(),
+      default: z.boolean(),
+    })
+    .passthrough()
+);
 
-const ValuesItemSchema = z
-  .object({
-    value: z.union([z.coerce.number(), z.string()]),
-    label: z.string(),
-    enabled: z.boolean(),
-    hidden: z.boolean(),
-    default: z.boolean(),
-  })
-  .passthrough();
+export const ExternalServiceFieldsSchema = lazySchema(() =>
+  z
+    .object({
+      input_type: z.string(),
+      name: z.string(),
+      read_only: z.boolean(),
+      required: z.string().nullable().default(null),
+      text: z.string(),
+      prefix: z.string().nullable().default(null),
+      values: z.array(ValuesItemSchema).nullable().default(null),
+    })
+    .passthrough()
+);
 
-export const ExternalServiceFieldsSchema = z
-  .object({
-    input_type: z.string(),
-    name: z.string(),
-    read_only: z.boolean(),
-    required: z.string().nullable().default(null),
-    text: z.string(),
-    prefix: z.string().nullable().default(null),
-    values: z.array(ValuesItemSchema).nullable().default(null),
-  })
-  .passthrough();
+export const GetCommonFieldsResponseSchema = lazySchema(() => z.array(ExternalServiceFieldsSchema));
 
-export const GetCommonFieldsResponseSchema = z.array(ExternalServiceFieldsSchema);
+export const ExternalServiceIncidentResponseSchema = lazySchema(() =>
+  z
+    .object({
+      id: z.string(),
+      title: z.string(),
+      url: z.string(),
+      pushedDate: z.string(),
+    })
+    .strict()
+);
 
-export const ExternalServiceIncidentResponseSchema = z
-  .object({
-    id: z.string(),
-    title: z.string(),
-    url: z.string(),
-    pushedDate: z.string(),
-  })
-  .strict();
-
-export const GetIncidentResponseSchema = z
-  .object({
-    id: z.coerce.number(),
-    inc_last_modified_date: z.coerce.number(),
-  })
-  .passthrough();
+export const GetIncidentResponseSchema = lazySchema(() =>
+  z
+    .object({
+      id: z.coerce.number(),
+      inc_last_modified_date: z.coerce.number(),
+    })
+    .passthrough()
+);

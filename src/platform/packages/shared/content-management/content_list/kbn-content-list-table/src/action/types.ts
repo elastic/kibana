@@ -94,6 +94,12 @@ export interface DeleteActionProps {
  * Props for the `Action.Inspect` preset component.
  */
 export interface InspectActionProps {
-  /** Custom label for the inspect action. Defaults to `'View {itemTitle} details'`. */
+  /**
+   * Custom label for the inspect action. Defaults to `'View details'`.
+   *
+   * Pass a function to derive the label from the item (e.g.
+   * `'View {itemTitle} details'`); the default deliberately omits the
+   * item title to keep the icon-button affordance terse.
+   */
   label?: string | ((item: ContentListItem) => ReactNode);
 }

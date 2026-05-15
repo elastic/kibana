@@ -32,7 +32,10 @@ export interface AgentRef {
   name: string;
 }
 
-export type CreateToolPayload = Omit<ToolDefinition, 'description' | 'tags' | 'readonly'> &
+export type CreateToolPayload = Omit<
+  ToolDefinition,
+  'description' | 'tags' | 'readonly' | 'experimental'
+> &
   Partial<Pick<ToolDefinition, 'description' | 'tags'>>;
 
 export type UpdateToolPayload = Partial<Pick<ToolDefinition, 'description' | 'tags'>> & {

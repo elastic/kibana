@@ -19,10 +19,12 @@ import { changeHistoryMappings } from './mappings';
 import {
   FLAGS,
   DATA_STREAM_NAME,
+  ILM_POLICY_NAME,
   SEPARATOR_CHAR,
   ECS_VERSION,
   DEFAULT_RESULT_SIZE,
 } from './constants';
+import { ensureIlmPolicy } from './ilm_policy';
 import type {
   ChangeHistoryDocument,
   GetHistoryResult,
@@ -30,7 +32,7 @@ import type {
   GetChangeHistoryOptions,
   ObjectChange,
 } from './types';
-import { sha256, defaultDiffCalculation, hashFields } from './utils';
+import { sha256, hashFields } from './utils';
 
 export { DATA_STREAM_NAME } from './constants';
 
@@ -106,8 +108,22 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
       this.logger.error(error);
       throw error;
     }
-    // Step 1: Create data stream definition
-    // TODO: What about ILM policy (defaults to none = keep forever)
+    // Step 1: Ensure the ILM policy exists. Installed only when missing so
+    // cluster admins can customize the policy in place without Kibana
+    // overwriting their changes on the next startup.
+    try {
+      await ensureIlmPolicy(elasticsearchClient, this.logger);
+    } catch (error) {
+      const err = new Error(
+        `Unable to install change history ILM policy [${ILM_POLICY_NAME}]: ${error}`,
+        { cause: error }
+      );
+      this.logger.error(err);
+      throw err;
+    }
+
+    // Step 2: Create data stream definition. The `index.lifecycle.name` setting
+    // points backing indices at the policy installed above.
     const definition: DataStreamDefinition<typeof changeHistoryMappings.v1, ChangeHistoryDocument> =
       {
         name: DATA_STREAM_NAME,
@@ -116,10 +132,13 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
         template: {
           priority: 100,
           mappings: changeHistoryMappings.v1,
+          settings: {
+            'index.lifecycle.name': ILM_POLICY_NAME,
+          },
         },
       };
 
-    // Step 2: Initialize data stream
+    // Step 3: Initialize data stream
     try {
       this.client = await DataStreamClient.initialize({
         dataStream: definition,
@@ -139,7 +158,7 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
 
   /**
    * Log a change for a single object.
-   * @param change - The changes to object that was affected.
+   * @param change - The affected object; `change.snapshot` must be the **after** (post-change) state persisted as `object.snapshot`.
    * @param opts - The options for the change.
    * @returns A promise that resolves when the change is logged.
    * @throws An error if the data stream is not initialized, or if an error occurs while logging the change.
@@ -150,7 +169,7 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
 
   /**
    * Log a bulk change for one or more objects.
-   * @param changes - The changes to objects that were affected.
+   * @param changes - The affected objects; each `snapshot` is the **after** (post-change) state for that object.
    * @param opts - The options for the bulk change.
    * @param opts.action - The action performed (`rule_create`, `rule_update`, `rule_delete`, etc.)
    * @param opts.username - Current login name for the user who performed the change.
@@ -158,7 +177,6 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
    * @param opts.spaceId - The ID of the space that the change belongs to.
    * @param opts.correlationId - Optional correlation ID for the bulk change.
    * @param opts.data - Optional data to merge into the change history document.
-   * @param opts.fieldsToIgnore - Optional fields to exclude from the diff calculation.
    * @param opts.fieldsToHash - Optional fields whose string values are replaced with full SHA-256 digests in the stored snapshot.
    * @param opts.refresh - Optional indicator to force an ES refresh after changes (affects performance)
    * @returns A promise that resolves when the bulk change is logged.
@@ -183,9 +201,9 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
 
     for (const change of changes) {
       // Create document and populate
-      const { objectType, objectId, index, timestamp, sequence } = change;
-      const hash = sha256(JSON.stringify(change.after));
-      const hashed = hashFields(change.after, opts.fieldsToHash);
+      const { objectType, objectId, timestamp, sequence } = change;
+      const hash = sha256(JSON.stringify(change.snapshot));
+      const hashed = hashFields(change.snapshot, opts.fieldsToHash);
       const { event, metadata, tags } = opts.data ?? {};
       const created = new Date().toISOString();
       const document: ChangeHistoryDocument = {
@@ -204,7 +222,6 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
         object: {
           id: objectId,
           type: objectType,
-          index,
           hash,
           sequence,
           fields: { hashed: hashed.fields },
@@ -213,33 +230,8 @@ export class ChangeHistoryClient implements IChangeHistoryClient {
         tags,
         metadata,
         service: { type: 'kibana', version: kibanaVersion },
-        transaction: correlationId ? { id: correlationId } : undefined,
+        span: correlationId ? { id: correlationId } : undefined,
       };
-      // Do we have "before" state?
-      // Perform diff using registered calculation, defaulting to defaultDiffCalculation().
-      if (change.before) {
-        const diffCalc = defaultDiffCalculation;
-        try {
-          const hashedBefore = hashFields(change.before, opts.fieldsToHash);
-          const { type, fields, before } = diffCalc({
-            a: hashedBefore.snapshot,
-            b: hashed.snapshot,
-            fieldsToIgnore: opts.fieldsToIgnore,
-          });
-          document.object.diff = { type, fields, before };
-          document.object.fields.hashed = Array.from(
-            new Set([...hashedBefore.fields, ...hashed.fields])
-          );
-        } catch (err) {
-          // Uncalculated diff should not be fatal, just log and continue
-          this.logger.error(
-            new Error(
-              `Unable to calculate change history diff for module ${module} and dataset ${dataset}`,
-              { cause: err }
-            )
-          );
-        }
-      }
       // Queue operations
       request.documents.push({ _id: document.event.id, ...document });
     }

@@ -78,7 +78,7 @@ export const HeaderFields: React.FC<Props> = ({ readOnly, maxHeaders, required =
                 </EuiText>
               )}
               <EuiSpacer size="s" />
-              {items.map((item) => (
+              {items.map((item, index) => (
                 <UseField
                   key={item.id}
                   path={`${item.path}.type`}
@@ -88,7 +88,11 @@ export const HeaderFields: React.FC<Props> = ({ readOnly, maxHeaders, required =
                     const headerTypeValue = typeField.value;
 
                     return (
-                      <EuiFlexGroup direction="column" gutterSize="s">
+                      <EuiFlexGroup
+                        direction="column"
+                        gutterSize="s"
+                        data-test-subj={`webhookHeaderRow-${index}`}
+                      >
                         {headerTypeValue === 'secret' && (
                           <EuiFlexGroup>
                             <EuiFlexItem grow={false}>

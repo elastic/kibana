@@ -36,6 +36,7 @@ import type { UserProfileServiceSetup } from '@kbn/core-user-profile-server';
 import type { CoreDiServiceSetup } from '@kbn/core-di';
 import type { DataStreamsSetup } from '@kbn/core-data-streams-server';
 import type { UserActivityServiceSetup } from '@kbn/core-user-activity-server';
+import type { UserStorageServiceSetup } from '@kbn/core-user-storage-server';
 import type { CoreStart } from './core_start';
 
 /**
@@ -103,6 +104,8 @@ export interface CoreSetup<TPluginsStart extends Record<string, any> = {}, TStar
   injection: CoreDiServiceSetup;
   /** {@link DataStreamSetup} */
   dataStreams: DataStreamsSetup;
+  /** {@link UserStorageServiceSetup} */
+  userStorage: UserStorageServiceSetup;
 }
 
 /**

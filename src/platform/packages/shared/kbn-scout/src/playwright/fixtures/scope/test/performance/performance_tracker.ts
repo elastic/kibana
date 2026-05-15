@@ -8,6 +8,7 @@
  */
 
 import type { CDPSession, TestInfo } from '@playwright/test';
+import { getLogicalBundlePluginLabel } from './bundle_plugin_label';
 import type { BundleInfo, PageInfo, PerformanceMetrics, PluginInfo } from './types';
 
 export class PerformanceTracker {
@@ -34,7 +35,7 @@ export class PerformanceTracker {
         const requestData = this.getRequestData(event.requestId);
         requestData.url = event.response.url;
         requestData.name = event.response.url.split('/').pop()!;
-        requestData.plugin = requestData.name.split('.')[0];
+        requestData.plugin = getLogicalBundlePluginLabel(requestData.name);
         requestData.headersSize = event.response.headersText?.length ?? 0;
       }
     });

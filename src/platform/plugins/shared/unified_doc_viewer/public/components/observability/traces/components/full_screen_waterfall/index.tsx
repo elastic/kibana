@@ -25,8 +25,10 @@ import { css } from '@emotion/react';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
 import { useFlyoutHistoryKey } from '../../../../doc_viewer_flyout/flyout_history_key_context';
 import type { TraceOverviewSections } from '../../doc_viewer_overview/overview';
-import { DocumentDetailFlyout, type DocumentType } from './waterfall_flyout/document_detail_flyout';
+import { DocumentDetailFlyout } from './waterfall_flyout/document_detail_flyout';
 import { FlyoutContentId } from '../../common/constants';
+import type { TraceDocFlyoutType } from '../../common/types';
+import { TRACES_DOC_VIEWER_EBT_ELEMENTS } from '../../ebt_constants';
 
 export interface FullScreenWaterfallProps {
   traceId: string;
@@ -38,7 +40,7 @@ export interface FullScreenWaterfallProps {
   scrollToContextOnMount?: boolean;
   docId: string | null;
   docIndex?: string;
-  activeFlyoutType: DocumentType | null;
+  activeFlyoutType: TraceDocFlyoutType | null;
   activeSection?: TraceOverviewSections;
   skipOpenAnimation?: boolean;
   onNodeClick: (nodeSpanId: string) => void;
@@ -179,6 +181,11 @@ export const FullScreenWaterfall = ({
             scrollStrategy="parent"
             onNodeClick={onNodeClick}
             onErrorClick={onErrorClick}
+            ebt={{
+              row: { element: TRACES_DOC_VIEWER_EBT_ELEMENTS.WATERFALL_ROW },
+              errorBadge: { element: TRACES_DOC_VIEWER_EBT_ELEMENTS.WATERFALL_ERROR_BADGE },
+              serviceBadge: { element: TRACES_DOC_VIEWER_EBT_ELEMENTS.WATERFALL_SERVICE_BADGE },
+            }}
           />
         </div>
       </EuiFlyoutBody>

@@ -10,20 +10,32 @@ import { css } from '@emotion/react';
 import { EuiButtonEmpty, EuiIcon, EuiPopover, EuiSelectable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { EuiSelectableOption } from '@elastic/eui';
-import { SERVICE_PROVIDERS } from '@kbn/inference-endpoint-ui-common';
-import type { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
-import { useQueryInferenceEndpoints } from '../../hooks/use_inference_endpoints';
-import { getModelId } from '../../utils/get_model_id';
-import {
-  isEisEndpoint,
-  getModelName,
-  getModelCreator,
-  getProviderKeyForCreator,
-} from '../../utils/eis_utils';
+import { InferenceConnectorType } from '@kbn/inference-common';
+import type { InferenceConnector } from '@kbn/inference-common';
+import { useConnectors } from '../../hooks/use_connectors';
+import { getConnectorIcon } from '../../utils/connector_display';
+
+const getConnectorTaskType = (connector: InferenceConnector): string => {
+  if (connector.isInferenceEndpoint) {
+    const fromConfig = connector.config?.taskType;
+    if (typeof fromConfig === 'string' && fromConfig.length > 0) {
+      return fromConfig;
+    }
+  }
+  if (
+    connector.type === InferenceConnectorType.OpenAI ||
+    connector.type === InferenceConnectorType.Bedrock ||
+    connector.type === InferenceConnectorType.Gemini
+  ) {
+    return 'chat_completion';
+  }
+  return '';
+};
 
 interface AddModelPopoverProps {
   existingEndpointIds: string[];
   onAdd: (endpointId: string) => void;
+  /** When set, only connectors compatible with this inference task type are listed. */
   taskType?: string;
   panelWidth?: number;
 }
@@ -34,45 +46,36 @@ export const AddModelPopover: React.FC<AddModelPopoverProps> = ({
   taskType,
   panelWidth,
 }) => {
-  const { data: inferenceEndpoints = [] } = useQueryInferenceEndpoints();
+  const { data: connectors = [] } = useConnectors();
   const [isOpen, setIsOpen] = useState(false);
 
   const options: EuiSelectableOption[] = useMemo(() => {
     const existingSet = new Set(existingEndpointIds);
-    const available = inferenceEndpoints.filter(
-      (endpoint) =>
-        !existingSet.has(endpoint.inference_id) && (!taskType || endpoint.task_type === taskType)
-    );
+    const available = connectors.filter((connector) => {
+      if (existingSet.has(connector.connectorId)) {
+        return false;
+      }
+      if (!taskType) {
+        return true;
+      }
+      return getConnectorTaskType(connector) === taskType;
+    });
 
-    const modelToCount = inferenceEndpoints.reduce<Map<string, number>>((acc, ep) => {
-      const modelId = getModelId(ep) ?? ep.inference_id;
-      acc.set(modelId, (acc.get(modelId) ?? 0) + 1);
+    const nameToCount = connectors.reduce<Map<string, number>>((acc, connector) => {
+      acc.set(connector.name, (acc.get(connector.name) ?? 0) + 1);
       return acc;
     }, new Map());
 
-    return available.map((endpoint) => {
-      const modelId = getModelId(endpoint) ?? endpoint.inference_id;
-      const count = modelToCount.get(modelId) ?? 1;
-      let icon: string;
-      let baseName: string;
-      if (isEisEndpoint(endpoint)) {
-        const creator = getModelCreator(endpoint);
-        const providerKey = getProviderKeyForCreator(creator);
-        icon = (providerKey && SERVICE_PROVIDERS[providerKey]?.icon) ?? 'compute';
-        baseName = getModelName(endpoint);
-      } else {
-        const provider = SERVICE_PROVIDERS[endpoint.service as ServiceProviderKeys];
-        icon = provider?.icon ?? 'compute';
-        baseName = modelId;
-      }
-      const label = count > 1 ? `${baseName} (${endpoint.inference_id})` : baseName;
+    return available.map((connector) => {
+      const count = nameToCount.get(connector.name) ?? 1;
+      const label = count > 1 ? `${connector.name} (${connector.connectorId})` : connector.name;
       return {
         label,
-        key: endpoint.inference_id,
-        prepend: <EuiIcon type={icon} size="s" aria-hidden />,
+        key: connector.connectorId,
+        prepend: <EuiIcon type={getConnectorIcon(connector)} size="s" aria-hidden />,
       };
     });
-  }, [inferenceEndpoints, existingEndpointIds, taskType]);
+  }, [connectors, existingEndpointIds, taskType]);
 
   const handleChange = useCallback(
     (newOptions: EuiSelectableOption[]) => {
@@ -87,6 +90,9 @@ export const AddModelPopover: React.FC<AddModelPopoverProps> = ({
 
   return (
     <EuiPopover
+      aria-label={i18n.translate('xpack.searchInferenceEndpoints.settings.addModel.ariaLabel', {
+        defaultMessage: 'Model selection',
+      })}
       button={
         <EuiButtonEmpty
           iconType="plusInCircle"

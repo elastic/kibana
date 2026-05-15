@@ -14,112 +14,130 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
-export type Model = z.infer<typeof Model>;
-export const Model = z.object({
-  id: z.string(),
-  family: z.string().optional(),
-  provider: z.string().optional(),
-});
-
-export type BuildkiteMetadata = z.infer<typeof BuildkiteMetadata>;
-export const BuildkiteMetadata = z.object({
-  build_id: z.string().optional(),
-  job_id: z.string().optional(),
-  build_url: z.string().optional(),
-  pipeline_slug: z.string().optional(),
-  pull_request: z.string().optional(),
-  branch: z.string().optional(),
-  commit: z.string().optional(),
-});
-
-export type ExampleInfo = z.infer<typeof ExampleInfo>;
-export const ExampleInfo = z.object({
-  id: z.string(),
-  index: z.number().int(),
-  input: z.object({}).catchall(z.unknown()).nullable().optional(),
-  dataset: z.object({
+export const Model = lazySchema(() =>
+  z.object({
     id: z.string(),
-    name: z.string(),
-  }),
-});
+    family: z.string().optional(),
+    provider: z.string().optional(),
+  })
+);
+export type Model = z.infer<typeof Model>;
 
+export const BuildkiteMetadata = lazySchema(() =>
+  z.object({
+    build_id: z.string().optional(),
+    job_id: z.string().optional(),
+    build_url: z.string().optional(),
+    pipeline_slug: z.string().optional(),
+    pull_request: z.string().optional(),
+    branch: z.string().optional(),
+    commit: z.string().optional(),
+  })
+);
+export type BuildkiteMetadata = z.infer<typeof BuildkiteMetadata>;
+
+export const ExampleInfo = lazySchema(() =>
+  z.object({
+    id: z.string(),
+    index: z.number().int(),
+    input: z.object({}).catchall(z.unknown()).nullable().optional(),
+    dataset: z.object({
+      id: z.string(),
+      name: z.string(),
+    }),
+  })
+);
+export type ExampleInfo = z.infer<typeof ExampleInfo>;
+
+export const TaskInfo = lazySchema(() =>
+  z.object({
+    trace_id: z.string().nullable().optional(),
+    repetition_index: z.number().int(),
+    output: z.object({}).catchall(z.unknown()).nullable().optional(),
+    model: Model,
+  })
+);
 export type TaskInfo = z.infer<typeof TaskInfo>;
-export const TaskInfo = z.object({
-  trace_id: z.string().nullable().optional(),
-  repetition_index: z.number().int(),
-  output: z.object({}).catchall(z.unknown()).nullable().optional(),
-  model: Model,
-});
 
+export const EvaluatorInfo = lazySchema(() =>
+  z.object({
+    name: z.string(),
+    score: z.number().nullable().optional(),
+    label: z.string().nullable().optional(),
+    explanation: z.string().nullable().optional(),
+    metadata: z.object({}).catchall(z.unknown()).nullable().optional(),
+    trace_id: z.string().nullable().optional(),
+    model: Model,
+  })
+);
 export type EvaluatorInfo = z.infer<typeof EvaluatorInfo>;
-export const EvaluatorInfo = z.object({
-  name: z.string(),
-  score: z.number().nullable().optional(),
-  label: z.string().nullable().optional(),
-  explanation: z.string().nullable().optional(),
-  metadata: z.object({}).catchall(z.unknown()).nullable().optional(),
-  trace_id: z.string().nullable().optional(),
-  model: Model,
-});
 
+export const RunMetadata = lazySchema(() =>
+  z.object({
+    git_branch: z.string().nullable().optional(),
+    git_commit_sha: z.string().nullable().optional(),
+    total_repetitions: z.number().int(),
+  })
+);
 export type RunMetadata = z.infer<typeof RunMetadata>;
-export const RunMetadata = z.object({
-  git_branch: z.string().nullable().optional(),
-  git_commit_sha: z.string().nullable().optional(),
-  total_repetitions: z.number().int(),
-});
 
+export const EvaluationScoreDocument = lazySchema(() =>
+  z.object({
+    '@timestamp': z.string(),
+    run_id: z.string(),
+    experiment_id: z.string(),
+    suite: z
+      .object({
+        id: z.string().optional(),
+      })
+      .optional(),
+    ci: z
+      .object({
+        buildkite: BuildkiteMetadata.optional(),
+      })
+      .optional(),
+    example: ExampleInfo,
+    task: TaskInfo,
+    evaluator: EvaluatorInfo,
+    run_metadata: RunMetadata,
+    environment: z.object({
+      hostname: z.string().optional(),
+    }),
+  })
+);
 export type EvaluationScoreDocument = z.infer<typeof EvaluationScoreDocument>;
-export const EvaluationScoreDocument = z.object({
-  '@timestamp': z.string(),
-  run_id: z.string(),
-  experiment_id: z.string(),
-  suite: z
-    .object({
-      id: z.string().optional(),
-    })
-    .optional(),
-  ci: z
-    .object({
-      buildkite: BuildkiteMetadata.optional(),
-    })
-    .optional(),
-  example: ExampleInfo,
-  task: TaskInfo,
-  evaluator: EvaluatorInfo,
-  run_metadata: RunMetadata,
-  environment: z.object({
-    hostname: z.string().optional(),
-  }),
-});
 
+export const EvaluatorStats = lazySchema(() =>
+  z.object({
+    dataset_id: z.string(),
+    dataset_name: z.string(),
+    evaluator_name: z.string(),
+    stats: z.object({
+      mean: z.number(),
+      median: z.number(),
+      std_dev: z.number(),
+      min: z.number(),
+      max: z.number(),
+      count: z.number().int(),
+    }),
+  })
+);
 export type EvaluatorStats = z.infer<typeof EvaluatorStats>;
-export const EvaluatorStats = z.object({
-  dataset_id: z.string(),
-  dataset_name: z.string(),
-  evaluator_name: z.string(),
-  stats: z.object({
-    mean: z.number(),
-    median: z.number(),
-    std_dev: z.number(),
-    min: z.number(),
-    max: z.number(),
-    count: z.number().int(),
-  }),
-});
 
+export const TraceSpan = lazySchema(() =>
+  z.object({
+    span_id: z.string(),
+    trace_id: z.string(),
+    parent_span_id: z.string().optional(),
+    name: z.string(),
+    kind: z.string().optional(),
+    status: z.string().optional(),
+    start_time: z.string(),
+    end_time: z.string().optional(),
+    duration_ms: z.number(),
+    attributes: z.object({}).catchall(z.unknown()).optional(),
+  })
+);
 export type TraceSpan = z.infer<typeof TraceSpan>;
-export const TraceSpan = z.object({
-  span_id: z.string(),
-  trace_id: z.string(),
-  parent_span_id: z.string().optional(),
-  name: z.string(),
-  kind: z.string().optional(),
-  status: z.string().optional(),
-  start_time: z.string(),
-  end_time: z.string().optional(),
-  duration_ms: z.number(),
-  attributes: z.object({}).catchall(z.unknown()).optional(),
-});

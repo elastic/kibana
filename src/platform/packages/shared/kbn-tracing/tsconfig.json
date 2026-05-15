@@ -18,5 +18,6 @@
     "@kbn/std",
     "@kbn/tracing-config",
     "@kbn/cleanup-before-exit",
+    "@kbn/core-elasticsearch-server",
   ]
 }

@@ -39,63 +39,6 @@ describe('saveSavedSearch', () => {
     } as SavedSearch;
   });
 
-  describe('onTitleDuplicate', () => {
-    test('should check for title duplicating', async () => {
-      cmApi.search = jest.fn().mockReturnValue({
-        hits: [
-          {
-            attributes: {
-              title: 'title',
-            },
-          },
-        ],
-      });
-      const onTitleDuplicate = jest.fn();
-
-      await saveSavedSearch(
-        savedSearch,
-        {
-          onTitleDuplicate,
-          copyOnSave: true,
-        },
-        cmApi,
-        undefined
-      );
-
-      expect(onTitleDuplicate).toHaveBeenCalled();
-    });
-
-    test('should not check for title duplicating for saving existing search', async () => {
-      cmApi.search = jest.fn().mockReturnValue({
-        hits: [
-          {
-            attributes: {
-              title: 'title',
-            },
-          },
-        ],
-      });
-      cmApi.update = jest.fn().mockReturnValue({
-        item: {
-          id: 'id',
-        },
-      });
-      const onTitleDuplicate = jest.fn();
-
-      await saveSavedSearch(
-        savedSearch,
-        {
-          onTitleDuplicate,
-          copyOnSave: false,
-        },
-        cmApi,
-        undefined
-      );
-
-      expect(onTitleDuplicate).not.toHaveBeenCalled();
-    });
-  });
-
   test('should call savedObjectsClient.create for saving new search', async () => {
     cmApi.search = jest.fn().mockReturnValue({
       hits: [

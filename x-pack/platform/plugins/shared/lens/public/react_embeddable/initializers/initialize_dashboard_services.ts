@@ -26,7 +26,7 @@ import type {
   IntegrationCallbacks,
   LensInternalApi,
 } from '@kbn/lens-common';
-import type { LensApi, LensSerializedAPIConfig } from '@kbn/lens-common-2';
+import type { LensApi, LensWireAPIConfig } from '@kbn/lens-common-2';
 
 import { stripInheritedContext } from '../../../common/transforms/helpers';
 import { isTextBasedLanguage, transformToApiConfig } from '../helper';
@@ -59,12 +59,12 @@ export const dashboardServicesComparators: StateComparators<SerializedProps> = {
 export interface DashboardServicesConfig {
   api: PublishesWritableTitle &
     PublishesWritableDescription &
-    HasLibraryTransforms<LensSerializedAPIConfig, LensSerializedAPIConfig> &
+    HasLibraryTransforms<LensWireAPIConfig, LensWireAPIConfig> &
     Pick<LensApi, 'parentApi'> &
     Pick<IntegrationCallbacks, 'updateOverrides' | 'getTriggerCompatibleActions'>;
   anyStateChange$: Observable<void>;
   getLatestState: () => SerializedProps;
-  reinitializeState: (lastSaved?: LensSerializedAPIConfig) => void;
+  reinitializeState: (lastSaved?: LensWireAPIConfig) => void;
 }
 
 /**
@@ -111,22 +111,7 @@ export function initializeDashboardServices(
         stateConfig.api.updateRefId(savedObjectId);
         return savedObjectId;
       },
-      checkForDuplicateTitle: async (
-        newTitle: string,
-        isTitleDuplicateConfirmed: boolean,
-        onTitleDuplicate: () => void
-      ) => {
-        await attributeService.checkForDuplicateTitle({
-          newTitle,
-          isTitleDuplicateConfirmed,
-          onTitleDuplicate,
-          newCopyOnSave: false,
-          newDescription: '',
-          displayName: '',
-          lastSavedTitle: '',
-          copyOnSave: false,
-        });
-      },
+      hasLibraryItemWithTitle: attributeService.hasLibraryItemWithTitle,
       canLinkToLibrary: async () =>
         !getLatestState().ref_id && !isTextBasedLanguage(getLatestState()),
       canUnlinkFromLibrary: async () => Boolean(getLatestState().ref_id),
@@ -168,7 +153,7 @@ export function initializeDashboardServices(
         disableTriggers: internalApi.disableTriggers$.getValue(),
       };
     },
-    reinitializeState: (lastSaved?: LensSerializedAPIConfig) => {
+    reinitializeState: (lastSaved?: LensWireAPIConfig) => {
       titleManager.reinitializeState(lastSaved);
     },
   };

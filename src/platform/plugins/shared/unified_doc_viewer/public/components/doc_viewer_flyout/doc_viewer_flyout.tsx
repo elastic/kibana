@@ -127,8 +127,9 @@ export function UnifiedDocViewerFlyout({
   const minWidth = euiTheme.base * 24;
   const maxWidth = euiTheme.breakpoint.xl;
   // Get actual hit with updated highlighted searches
-  const actualHit = useMemo(() => hits?.find(({ id }) => id === hit?.id) || hit, [hit, hits]);
-  const pageCount = useMemo<number>(() => (hits ? hits.length : 0), [hits]);
+  const foundHit = useMemo(() => hits?.find(({ id }) => id === hit.id), [hit, hits]);
+  const actualHit = useMemo(() => foundHit ?? hit, [foundHit, hit]);
+  const pageCount = useMemo<number>(() => (hits && foundHit ? hits.length : 0), [foundHit, hits]);
   const activePage = useMemo<number>(() => {
     const id = hit.id;
     if (!hits || pageCount <= 1) {

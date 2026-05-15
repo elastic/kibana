@@ -176,7 +176,7 @@ export function FrameInformationWindow({
                 <div>
                   <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
                     <EuiFlexItem grow={false}>
-                      <EuiIcon type="apmApp" />
+                      <EuiIcon type="apmApp" aria-hidden={true} />
                     </EuiFlexItem>
                     <EuiFlexItem>
                       <EuiTitle size="xs">

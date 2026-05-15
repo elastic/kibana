@@ -29,11 +29,11 @@ import { DurationInput } from './duration_input/duration_input';
 
 export const DispatchSection = () => {
   const { control, setValue, getValues } = useFormContext<ActionPolicyFormState>();
-  const groupingMode = useWatch({ control, name: 'groupingMode' });
-  const groupBy = useWatch({ control, name: 'groupBy' });
-  const throttleStrategy = useWatch({ control, name: 'throttleStrategy' });
-  const throttleInterval = useWatch({ control, name: 'throttleInterval' });
-  const { data: dataFieldNames } = useFetchDataFields();
+  const [groupingMode, groupBy, throttleStrategy, throttleInterval, matcher] = useWatch({
+    control,
+    name: ['groupingMode', 'groupBy', 'throttleStrategy', 'throttleInterval', 'matcher'],
+  });
+  const { data: dataFieldNames } = useFetchDataFields(matcher);
 
   useEffect(() => {
     if (needsInterval(getValues('throttleStrategy')) && !getValues('throttleInterval')) {
@@ -61,14 +61,14 @@ export const DispatchSection = () => {
         render={({ field }) => (
           <EuiFormRow
             label={i18n.translate('xpack.alertingV2.actionPolicy.form.dispatch.dispatchPer', {
-              defaultMessage: 'Dispatch per',
+              defaultMessage: 'Notify per',
             })}
             fullWidth
             helpText={GROUPING_MODE_HELP_TEXT[field.value]}
           >
             <EuiButtonGroup
               legend={i18n.translate('xpack.alertingV2.actionPolicy.form.dispatch.modeLegend', {
-                defaultMessage: 'Dispatch per',
+                defaultMessage: 'Notify per',
               })}
               options={GROUPING_MODE_OPTIONS}
               idSelected={field.value}
@@ -113,7 +113,7 @@ export const DispatchSection = () => {
               error={error?.message}
               helpText={i18n.translate('xpack.alertingV2.actionPolicy.form.groupBy.helpText', {
                 defaultMessage:
-                  'Episodes that share these field values are grouped together for dispatch.',
+                  'Episodes that share these field values are grouped into a single notification.',
               })}
             >
               <EuiComboBox

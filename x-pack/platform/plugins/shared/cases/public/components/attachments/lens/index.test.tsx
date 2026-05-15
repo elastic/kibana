@@ -8,8 +8,10 @@
 import React, { Suspense } from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import { LENS_ATTACHMENT_TYPE } from '../../../../common';
-import type { UnifiedValueAttachmentViewProps } from '../../../client/attachment_framework/types';
-import { AttachmentActionType } from '../../../client/attachment_framework/types';
+import {
+  AttachmentActionType,
+  type UnifiedValueAttachmentViewProps,
+} from '../../../client/attachment_framework/types';
 
 import { basicCase } from '../../../containers/mock';
 import { getVisualizationAttachmentType } from '.';
@@ -22,15 +24,13 @@ describe('getVisualizationAttachmentType', () => {
     .mockReturnValue(<div data-test-subj="embeddableComponent" />);
 
   const attachmentViewProps: UnifiedValueAttachmentViewProps = {
-    type: LENS_ATTACHMENT_TYPE,
     data: {
       state: {
         attributes: { state: { query: {} } },
         timeRange: {},
       },
     },
-    owner: 'securitySolution',
-    createdBy: { username: 'elastic', full_name: null, email: null, profile_uid: null },
+    createdBy: { username: 'elastic', fullName: null, email: null, profileUid: undefined },
     version: '1',
     savedObjectId: 'test',
     caseData: { title: basicCase.title, id: basicCase.id },
@@ -41,7 +41,7 @@ describe('getVisualizationAttachmentType', () => {
       loadingCommentIds: [],
       euiTheme: {} as never,
     },
-  } as unknown as UnifiedValueAttachmentViewProps;
+  };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -56,7 +56,7 @@ describe('getVisualizationAttachmentType', () => {
       displayName: 'Visualizations',
       getAttachmentViewObject: expect.any(Function),
       getAttachmentRemovalObject: expect.any(Function),
-      schemaValidator: expect.any(Function),
+      schema: expect.any(Object),
     });
   });
 

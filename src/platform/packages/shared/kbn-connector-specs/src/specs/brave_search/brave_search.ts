@@ -16,7 +16,7 @@
  * - Support for localization and safe search
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { i18n } from '@kbn/i18n';
 import type { ConnectorSpec } from '../../connector_spec';
 
@@ -42,29 +42,33 @@ export const BraveSearchConnector: ConnectorSpec = {
   actions: {
     webSearch: {
       isTool: true,
-      input: z.object({
-        q: z.string().describe('Search query'),
-        count: z
-          .number()
-          .int()
-          .min(1)
-          .max(20)
-          .optional()
-          .default(DEFAULT_COUNT)
-          .describe('Number of results to return (max 20)'),
-        offset: z
-          .number()
-          .int()
-          .min(0)
-          .optional()
-          .default(DEFAULT_OFFSET)
-          .describe('Result offset for pagination'),
-      }),
-      output: z.object({
-        query: z.any().describe('Original query information'),
-        results: z.array(z.any()).describe('Array of search results'),
-        type: z.string().describe('Search type'),
-      }),
+      input: lazySchema(() =>
+        z.object({
+          q: z.string().describe('Search query'),
+          count: z
+            .number()
+            .int()
+            .min(1)
+            .max(20)
+            .optional()
+            .default(DEFAULT_COUNT)
+            .describe('Number of results to return (max 20)'),
+          offset: z
+            .number()
+            .int()
+            .min(0)
+            .optional()
+            .default(DEFAULT_OFFSET)
+            .describe('Result offset for pagination'),
+        })
+      ),
+      output: lazySchema(() =>
+        z.object({
+          query: z.any().describe('Original query information'),
+          results: z.array(z.any()).describe('Array of search results'),
+          type: z.string().describe('Search type'),
+        })
+      ),
       handler: async (ctx, input) => {
         const typedInput = input as {
           q: string;

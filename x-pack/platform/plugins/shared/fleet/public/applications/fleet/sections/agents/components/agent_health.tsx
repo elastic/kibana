@@ -219,7 +219,7 @@ export const AgentHealth: React.FunctionComponent<Props> = ({
               ...restOfProps,
             })}
             &nbsp;
-            <EuiIcon type="warning" color="warning" />
+            <EuiIcon type="warning" color="warning" aria-hidden={true} />
           </div>
         ) : (
           <>

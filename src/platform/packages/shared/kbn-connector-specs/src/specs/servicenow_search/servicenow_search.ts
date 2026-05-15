@@ -21,7 +21,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
 import {
   SearchInputSchema,
@@ -87,17 +87,19 @@ export const ServicenowSearch: ConnectorSpec = {
     ],
   },
 
-  schema: z.object({
-    instanceUrl: z
-      .string()
-      .url()
-      .describe('ServiceNow instance URL (e.g., https://your-instance.service-now.com)')
-      .meta({
-        label: 'Instance URL',
-        widget: 'text',
-        placeholder: 'https://your-instance.service-now.com',
-      }),
-  }),
+  schema: lazySchema(() =>
+    z.object({
+      instanceUrl: z
+        .string()
+        .url()
+        .describe('ServiceNow instance URL (e.g., https://your-instance.service-now.com)')
+        .meta({
+          label: 'Instance URL',
+          widget: 'text',
+          placeholder: 'https://your-instance.service-now.com',
+        }),
+    })
+  ),
 
   actions: {
     search: {
@@ -255,11 +257,13 @@ export const ServicenowSearch: ConnectorSpec = {
         'Attachment sys_ids can be found by querying the sys_attachment table: ' +
         'use listRecords with table=sys_attachment and encodedQuery=table_name=<table>^table_sys_id=<record_sys_id>.',
       input: GetAttachmentInputSchema,
-      output: z.object({
-        fileName: z.string().describe('Name of the attachment file'),
-        contentType: z.string().describe('MIME type of the attachment'),
-        base64: z.string().describe('Base64-encoded attachment content'),
-      }),
+      output: lazySchema(() =>
+        z.object({
+          fileName: z.string().describe('Name of the attachment file'),
+          contentType: z.string().describe('MIME type of the attachment'),
+          base64: z.string().describe('Base64-encoded attachment content'),
+        })
+      ),
       handler: async (ctx, input: GetAttachmentInput) => {
         const { instanceUrl } = ctx.config as { instanceUrl: string };
 
