@@ -21,7 +21,6 @@ dependsOn:
   - '@kbn/i18n'
   - '@kbn/es-query'
   - '@kbn/io-ts-utils'
-  - '@kbn/config-schema'
   - '@kbn/es-types'
   - '@kbn/apm-types-shared'
   - '@kbn/slo-schema'
