@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { ProviderCollection } from './provider_collection';
-export * from './read_provider_spec';
-export { createAsyncInstance } from './async_instance';
-export type { Provider } from './read_provider_spec';
-export { ftrTimingRegistry, ftrTimingEnabled, activateTiming } from './ftr_timing_registry';
+import { createContext, useContext } from 'react';
+
+export const OriginDocTypeContext = createContext<string | undefined>(undefined);
+
+export const useOriginDocType = () => useContext(OriginDocTypeContext);
