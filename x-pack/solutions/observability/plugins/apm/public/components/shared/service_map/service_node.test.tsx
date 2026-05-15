@@ -10,10 +10,10 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { ReactFlowProvider } from '@xyflow/react';
 import { ServiceNode } from './service_node';
 import { ServiceMapSloFlyoutProvider } from './service_map_slo_flyout_context';
-import { useServiceMapSearchHighlight } from '../../shared/service_map/service_map_search_context';
-import { useServiceMapAlertsTabNavigate } from './use_service_map_alerts_tab_href';
+import { useServiceMapSearchHighlight } from './service_map_search_context';
+import { useServiceMapAlertsNavigate } from './service_map_alerts_navigate_context';
 import type { ServiceNodeData } from '../../../../common/service_map';
-import { MOCK_EUI_THEME_FOR_USE_THEME } from './constants';
+import { MOCK_EUI_THEME_FOR_USE_THEME } from './test_helpers';
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
@@ -43,13 +43,13 @@ jest.mock('../../../context/apm_plugin/use_apm_plugin_context', () => ({
   }),
 }));
 
-jest.mock('./use_service_map_alerts_tab_href', () => ({
-  useServiceMapAlertsTabHref: jest.fn(() => '/app/apm/services/Test%20Service/alerts'),
-  useServiceMapAlertsTabNavigate: jest.fn(() => jest.fn()),
+jest.mock('./service_map_alerts_navigate_context', () => ({
+  ...jest.requireActual('./service_map_alerts_navigate_context'),
+  useServiceMapAlertsNavigate: jest.fn(() => jest.fn()),
 }));
 
-jest.mock('../../shared/service_map/service_map_search_context', () => ({
-  ...jest.requireActual('../../shared/service_map/service_map_search_context'),
+jest.mock('./service_map_search_context', () => ({
+  ...jest.requireActual('./service_map_search_context'),
   useServiceMapSearchHighlight: jest.fn(() => ({
     isSearchMatch: false,
     isActiveSearchMatch: false,
@@ -211,13 +211,30 @@ describe('ServiceNode', () => {
   });
 
   describe('Alerts badge', () => {
+    afterEach(() => {
+      jest.mocked(useServiceMapAlertsNavigate).mockReturnValue(jest.fn());
+    });
+
     it('calls the alerts navigation handler when the alerts badge is clicked', () => {
       const navigateCb = jest.fn();
-      jest.mocked(useServiceMapAlertsTabNavigate).mockReturnValue(navigateCb);
+      jest.mocked(useServiceMapAlertsNavigate).mockReturnValue(navigateCb);
 
       renderServiceNode(createServiceNodeData({ alertsCount: 2 }));
       fireEvent.click(screen.getByTestId('serviceMapNodeAlertsBadge'));
       expect(navigateCb).toHaveBeenCalled();
+    });
+
+    it('renders a non-interactive badge when no navigate handler is injected via context', () => {
+      jest.mocked(useServiceMapAlertsNavigate).mockReturnValue(undefined);
+
+      renderServiceNode(createServiceNodeData({ alertsCount: 3 }));
+      const badge = screen.getByTestId('serviceMapNodeAlertsBadge');
+      expect(badge).toBeInTheDocument();
+      // EuiBadge renders as a span (not a button) when `onClick` is omitted,
+      // so the badge does not advertise a click affordance to assistive tech.
+      expect(badge.tagName).toBe('SPAN');
+      expect(badge).not.toHaveAttribute('role', 'button');
+      expect(badge).toHaveTextContent('3');
     });
   });
 

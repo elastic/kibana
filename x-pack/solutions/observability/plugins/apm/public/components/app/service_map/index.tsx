@@ -36,7 +36,7 @@ import { useServiceMap } from './use_service_map';
 import { useServiceMapBadges } from './use_service_map_badges';
 import { getServiceMapBadgesEnd } from './get_service_map_badges_end';
 import { ServiceMapGraph } from './graph';
-import { ServiceMapSloFlyoutProvider } from './service_map_slo_flyout_context';
+import { ServiceMapSloFlyoutProvider } from '../../shared/service_map/service_map_slo_flyout_context';
 
 function PromptContainer({ children }: { children: ReactNode }) {
   return (
