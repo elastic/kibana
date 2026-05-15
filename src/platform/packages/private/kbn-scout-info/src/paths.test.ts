@@ -19,7 +19,7 @@ import {
   SCOUT_EXAMPLES_PLAYWRIGHT_CONFIG_REGEX,
   SCOUT_UNIFIED_CONFIG_PATH_REGEX,
   TESTABLE_COMPONENT_SCOUT_ROOT_PATH_REGEX,
-  SCOUT_TESTS_ONLY_NOISE_PATTERNS,
+  SCOUT_TESTS_ONLY_IGNORE_PATTERNS,
   SCOUT_TESTS_ONLY_SCOPE_GLOBS,
 } from './paths';
 
@@ -412,40 +412,35 @@ describe('Scout path regexes', () => {
 });
 
 /**
- * Lockstep test: `.buildkite/pipeline-utils/ci-stats/pick_test_group_run_order/selective_scout.ts`
- * inlines `SCOUT_TESTS_ONLY_NOISE_PATTERNS` and `SCOUT_TESTS_ONLY_SCOPE_GLOBS` because
- * pipeline-utils is hermetic and cannot import @kbn/* packages. This test asserts the
- * inlined arrays stay in sync with this file (the source of truth).
+ * `pipeline-utils/` is hermetic and may not import `@kbn/*`, so
+ * `.buildkite/pipeline-utils/ci-stats/pick_test_group_run_order/selective_scout.ts`
+ * keeps a duplicate of the Scout tests-only patterns defined here. This test
+ * reads that file as text and asserts every pattern appears verbatim, so the
+ * two copies cannot drift unnoticed.
  */
-describe('Scout tests-only patterns mirror in pipeline-utils/selective_scout', () => {
-  const mirrorPath = path.resolve(
+describe('Scout tests-only patterns duplicated in pipeline-utils/selective_scout', () => {
+  const duplicatePath = path.resolve(
     REPO_ROOT,
     '.buildkite/pipeline-utils/ci-stats/pick_test_group_run_order/selective_scout.ts'
   );
-  const mirrorSource = fs.readFileSync(mirrorPath, 'utf-8');
+  const duplicateSource = fs.readFileSync(duplicatePath, 'utf-8');
 
-  // The mirror file uses single-quoted string literals (TS/Kibana style); check
-  // for either single- or double-quoted form so the test stays resilient to a
-  // future formatter change.
+  // selective_scout.ts uses single-quoted string literals (TS/Kibana style),
+  // but accept double quotes too in case the formatter ever changes.
   const containsPatternLiteral = (source: string, pattern: string): boolean =>
     source.includes(`'${pattern}'`) || source.includes(`"${pattern}"`);
 
-  it.each(SCOUT_TESTS_ONLY_NOISE_PATTERNS)(
-    'mirror file contains noise pattern verbatim: %s',
+  it.each(SCOUT_TESTS_ONLY_IGNORE_PATTERNS)(
+    'selective_scout.ts contains ignore pattern verbatim: %s',
     (pattern) => {
-      expect(containsPatternLiteral(mirrorSource, pattern)).toBe(true);
+      expect(containsPatternLiteral(duplicateSource, pattern)).toBe(true);
     }
   );
 
   it.each(SCOUT_TESTS_ONLY_SCOPE_GLOBS)(
-    'mirror file contains scope glob verbatim: %s',
+    'selective_scout.ts contains scope glob verbatim: %s',
     (pattern) => {
-      expect(containsPatternLiteral(mirrorSource, pattern)).toBe(true);
+      expect(containsPatternLiteral(duplicateSource, pattern)).toBe(true);
     }
   );
-
-  it('mirror file marks the lockstep block clearly', () => {
-    expect(mirrorSource).toContain('LOCKSTEP:scout-info BEGIN');
-    expect(mirrorSource).toContain('LOCKSTEP:scout-info END');
-  });
 });

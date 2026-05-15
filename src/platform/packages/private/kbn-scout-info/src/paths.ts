@@ -110,7 +110,7 @@ export const SCOUT_CI_CONFIG_PATH = path.resolve(REPO_ROOT, '.buildkite', 'scout
  * next to a Playwright config is noise — it must not block the fast path nor
  * schedule any Playwright config to run.
  */
-export const SCOUT_TESTS_ONLY_NOISE_PATTERNS: readonly string[] = [
+export const SCOUT_TESTS_ONLY_IGNORE_PATTERNS: readonly string[] = [
   '**/README*',
   '**/*.md',
   '**/CHANGELOG*',
@@ -152,8 +152,7 @@ export const SCOUT_TEST_SCOPE_PATTERN = new RegExp(
 /**
  * Files whose modification invalidates Scout selective testing entirely:
  * any change here forces a full Scout suite run regardless of the diff's
- * other contents. Keep narrow: shared test harness, build/runtime config,
- * core Scout machinery.
+ * other contents.
  */
 export const CRITICAL_FILES_SCOUT: readonly string[] = [
   'package.json',

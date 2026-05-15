@@ -15,7 +15,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import type { ToolingLog } from '@kbn/tooling-log';
 import {
   CRITICAL_FILES_SCOUT,
-  SCOUT_TESTS_ONLY_NOISE_PATTERNS,
+  SCOUT_TESTS_ONLY_IGNORE_PATTERNS,
   SCOUT_TESTS_ONLY_SCOPE_GLOBS,
   SCOUT_TEST_SCOPE_PATTERN,
 } from '@kbn/scout-info';
@@ -31,7 +31,7 @@ const compileMatchers = (patterns: readonly string[]): readonly Minimatch[] =>
   patterns.map((p) => new Minimatch(p, { dot: true }));
 
 const CRITICAL_FILES_MATCHERS = compileMatchers(CRITICAL_FILES_SCOUT);
-const NOISE_MATCHERS = compileMatchers(SCOUT_TESTS_ONLY_NOISE_PATTERNS);
+const IGNORE_MATCHERS = compileMatchers(SCOUT_TESTS_ONLY_IGNORE_PATTERNS);
 const SCOPE_MATCHERS = compileMatchers(SCOUT_TESTS_ONLY_SCOPE_GLOBS);
 
 const matchesAny = (file: string, matchers: readonly Minimatch[]): boolean =>
@@ -65,7 +65,7 @@ export const criticalScoutFilesTouched = (changedFiles: readonly string[]): bool
 export const isScoutTestsOnlyDiff = (changedFiles: readonly string[]): boolean => {
   let sawMeaningful = false;
   for (const file of changedFiles) {
-    if (matchesAny(file, NOISE_MATCHERS)) continue;
+    if (matchesAny(file, IGNORE_MATCHERS)) continue;
     sawMeaningful = true;
     if (!matchesAny(file, SCOPE_MATCHERS)) return false;
   }
