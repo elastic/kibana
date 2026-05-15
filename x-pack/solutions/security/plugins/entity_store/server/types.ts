@@ -78,6 +78,17 @@ export interface EntityStoreApiRequestHandlerContext {
    */
   globalStateClient: EntityStoreGlobalStateClient;
   security: SecurityPluginStart;
+  /**
+   * Optional streams plugin start, mirroring `EntityStoreStartPlugins.streams`.
+   * Exposed on the request context so route handlers that need a
+   * `StreamsKnowledgeIndicatorsReader` (e.g. to load schema-feature alias
+   * contexts for an alias-aware extraction) can build one directly from a
+   * real `KibanaRequest` without round-tripping through `coreSetup.getStartServices()`.
+   * `undefined` when streams is not enabled in the deployment — consumers must
+   * guard at the call site (the no-op reader pattern in
+   * `createKnowledgeIndicatorsReader` is the canonical fallback).
+   */
+  streams?: StreamsPluginStart;
   namespace: string;
 }
 

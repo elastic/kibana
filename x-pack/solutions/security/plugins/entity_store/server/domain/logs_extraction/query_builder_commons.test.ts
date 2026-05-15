@@ -76,6 +76,46 @@ describe('buildExtractionSourceClause', () => {
       `${TIMESTAMP_FIELD} >= TO_DATETIME("2024-01-01T00:00:00.000Z")`
     );
   });
+
+  // Alias-scoped passes (Option ① in the Option E POC) hand off identity validation
+  // to the schema feature's `aliasFilter`. The engine's pre-aggregation
+  // `documentsFilter` would otherwise drop every raw row on non-ECS streams, so the
+  // flag must remove it from the source-clause WHERE while preserving the time-window
+  // and cursor predicates.
+  describe('aliasScopedPass flag', () => {
+    it('omits the engine documentsFilter from the WHERE when aliasScopedPass is true', () => {
+      const aliasScoped = buildExtractionSourceClause({
+        ...baseParams,
+        aliasScopedPass: true,
+      });
+      expect(aliasScoped).toContain(`${TIMESTAMP_FIELD} >= TO_DATETIME`);
+      expect(aliasScoped).toContain(`${TIMESTAMP_FIELD} <= TO_DATETIME`);
+      expect(aliasScoped).not.toContain(getEuidEsqlDocumentsContainsIdFilter('host'));
+    });
+
+    it('keeps the documentsFilter when aliasScopedPass is false / unset (default-pass parity)', () => {
+      const defaultPass = buildExtractionSourceClause(baseParams);
+      const explicitFalse = buildExtractionSourceClause({
+        ...baseParams,
+        aliasScopedPass: false,
+      });
+      expect(defaultPass).toContain(getEuidEsqlDocumentsContainsIdFilter('host'));
+      expect(explicitFalse).toBe(defaultPass);
+    });
+
+    it('preserves the cursor compound filter on alias-scoped passes', () => {
+      const aliasScopedWithCursor = buildExtractionSourceClause({
+        ...baseParams,
+        aliasScopedPass: true,
+        logsPageCursorStart: { timestampCursor: '2024-01-01T12:00:00.000Z', idCursor: 'abc' },
+      });
+      expect(aliasScopedWithCursor).toContain(
+        `${TIMESTAMP_FIELD} > TO_DATETIME("2024-01-01T12:00:00.000Z")`
+      );
+      expect(aliasScopedWithCursor).toContain('"abc"');
+      expect(aliasScopedWithCursor).not.toContain(getEuidEsqlDocumentsContainsIdFilter('host'));
+    });
+  });
 });
 
 describe('aggregationStats', () => {

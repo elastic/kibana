@@ -177,10 +177,10 @@ describe('buildAliasPrelude', () => {
       getEuidSourceFields('user').identitySourceFields,
       'user'
     );
-    expect(prelude).toContain('MV_FIRST(azure.signinlogs.properties.user_principal_name)');
-    expect(prelude).toContain('MV_FIRST(azure.signinlogs.properties.user_id)');
+    expect(prelude).toContain('MV_FIRST(`azure.signinlogs.properties.user_principal_name`)');
+    expect(prelude).toContain('MV_FIRST(`azure.signinlogs.properties.user_id`)');
     expect(prelude).toContain(
-      'user.email = COALESCE(user.email, MV_FIRST(azure.signinlogs.properties.user_principal_name))'
+      'user.email = COALESCE(user.email, MV_FIRST(`azure.signinlogs.properties.user_principal_name`))'
     );
   });
 
@@ -273,10 +273,10 @@ describe('buildAliasPrelude', () => {
       'user'
     );
     expect(prelude).toContain(
-      'user.email IS NULL AND MV_FIRST(azure.signinlogs.properties.user_principal_name) IS NOT NULL'
+      'user.email IS NULL AND MV_FIRST(`azure.signinlogs.properties.user_principal_name`) IS NOT NULL'
     );
     expect(prelude).toContain(
-      'user.email IS NULL AND MV_FIRST(azure.signinlogs.properties.alternative_upn) IS NOT NULL'
+      'user.email IS NULL AND MV_FIRST(`azure.signinlogs.properties.alternative_upn`) IS NOT NULL'
     );
   });
 
@@ -289,8 +289,53 @@ describe('buildAliasPrelude', () => {
       'user'
     );
     expect(prelude).toContain(
-      'user.email = COALESCE(user.email, MV_FIRST(azure.preferred_upn), MV_FIRST(azure.alt_upn))'
+      'user.email = COALESCE(user.email, MV_FIRST(`azure.preferred_upn`), MV_FIRST(`azure.alt_upn`))'
     );
+  });
+
+  // Azure Activity / AAD sign-in logs surface user identity through XML-ish claim
+  // paths whose flat-dotted form contains `:` and `/`. Without backtick escaping
+  // ESQL terminates the identifier at the first invalid character and aborts the
+  // prelude with `parsing_exception`, which is the exact failure mode observed
+  // in the empirical POC. This regression covers the escape contract end-to-end:
+  // the prelude must wrap the source path in backticks AND the resulting query
+  // must round-trip cleanly through the ESQL validator.
+  it('backtick-escapes flat-dotted source paths that contain `:` and `/` (Azure claim regression)', async () => {
+    const azureClaimUpn =
+      'azure.activitylogs.identity.claims.http://schemas_xmlsoap_org/ws/2005/05/identity/claims/upn';
+    const prelude = buildAliasPrelude(
+      userAliasContext({
+        aliases: new Map([['user.email', [azureClaimUpn]]]),
+      }),
+      getEuidSourceFields('user').identitySourceFields,
+      'user'
+    );
+
+    expect(prelude).toContain(`MV_FIRST(\`${azureClaimUpn}\`)`);
+    expect(prelude).toContain(`user.email = COALESCE(user.email, MV_FIRST(\`${azureClaimUpn}\`))`);
+    expect(prelude).toContain(`user.email IS NULL AND MV_FIRST(\`${azureClaimUpn}\`) IS NOT NULL`);
+    // The unescaped form would let `:` / `/` terminate the bare identifier; an
+    // assertion against the unbackticked variant guards against accidental
+    // regressions to direct interpolation.
+    expect(prelude).not.toContain(`MV_FIRST(${azureClaimUpn})`);
+
+    // The provenance CASE's string-literal arm keeps the original (unbacked)
+    // path so downstream tooling can match on raw field names.
+    expect(prelude).toContain(`"${azureClaimUpn}"`);
+
+    // End-to-end: the full extraction query that splices this prelude must
+    // pass ESQL validation. Without the escape this query would fail to parse.
+    const query = buildLogsExtractionEsqlQuery({
+      indexPatterns: ['logs-azure.activitylogs-*'],
+      latestIndex: 'latest-index',
+      entityDefinition: getEntityDefinition('user', 'default'),
+      docsLimit: 10000,
+      fromDateISO: '2026-01-01T00:00:00.000Z',
+      toDateISO: '2026-01-01T23:59:59.999Z',
+      aliasPrelude: prelude,
+      aliasScopedPass: true,
+    });
+    await expect(validateQuery(query)).resolves.toHaveProperty('errors', []);
   });
 });
 
@@ -395,6 +440,141 @@ describe('buildLogsExtractionEsqlQuery with alias prelude (Option E)', () => {
     // regular ECS docs); the prelude-set CASE is only present when an aliasPrelude is wired in.
     expect(baseline).not.toContain('user.entity.knowledge_indicator.identity_source = CASE(');
     expect(baseline).not.toContain('| WHERE event.action');
+  });
+});
+
+// Option ① ("Trust-the-LLM-fully") POC contract: on alias-scoped passes the engine's
+// pre-aggregation `documentsFilter` and post-LOOKUP `postAggFilter` are both elided.
+// The schema feature's `aliasFilter` (+ the loader's confidence gate) become the
+// sole document validators for that pass. Required for fully non-ECS streams (e.g.
+// Azure activity logs) where every raw row has NULL ECS user slots and would
+// otherwise be dropped before the alias prelude has a chance to COALESCE them.
+describe('buildLogsExtractionEsqlQuery alias-scoped pass (Option ① — trust-the-LLM-fully)', () => {
+  const buildContext = (): StreamAliasContext => ({
+    streamName: 'logs.azure.activitylogs',
+    indexPatterns: ['logs-azure.activitylogs-*'],
+    aliases: new Map([
+      [
+        'user.email',
+        [
+          'azure.activitylogs.identity.claims.http://schemas_xmlsoap_org/ws/2005/05/identity/claims/upn',
+        ],
+      ],
+      ['user.id', ['azure.activitylogs.identity.claims.principal_id']],
+    ]),
+    featureUuid: 'feat-azure-activity-1',
+    confidence: 95,
+  });
+
+  it('drops the engine documentsFilter from the source WHERE when aliasScopedPass is true', async () => {
+    const aliasContext = buildContext();
+    const aliasPrelude = buildAliasPrelude(
+      aliasContext,
+      getEuidSourceFields('user').identitySourceFields,
+      'user'
+    );
+    const aliasScopedQuery = buildLogsExtractionEsqlQuery({
+      indexPatterns: ['logs-azure.activitylogs-*'],
+      latestIndex: 'latest-index',
+      entityDefinition: getEntityDefinition('user', 'default'),
+      docsLimit: 10000,
+      fromDateISO: '2026-01-01T00:00:00.000Z',
+      toDateISO: '2026-01-01T23:59:59.999Z',
+      aliasPrelude,
+      aliasFilter: 'data_stream.dataset == "azure.activitylogs"',
+      aliasScopedPass: true,
+    });
+    const defaultQuery = buildLogsExtractionEsqlQuery({
+      indexPatterns: ['logs-azure.activitylogs-*'],
+      latestIndex: 'latest-index',
+      entityDefinition: getEntityDefinition('user', 'default'),
+      docsLimit: 10000,
+      fromDateISO: '2026-01-01T00:00:00.000Z',
+      toDateISO: '2026-01-01T23:59:59.999Z',
+      aliasPrelude,
+      aliasFilter: 'data_stream.dataset == "azure.activitylogs"',
+    });
+
+    // The user engine's documentsFilter requires raw user.email / user.id /
+    // user.name to be non-null on the source doc AND filters out failure outcomes —
+    // both gates are fatal for Azure activity logs whose identity lives in
+    // `azure.activitylogs.identity.claims.*`. The alias pass must elide them.
+    //
+    // The `(NOT(\`user.email\` IS NULL) ... OR ...)` predicate and the
+    // `\`event.outcome\` != "failure"` clause are documentsFilter-only signatures;
+    // narrowing the assertions to them avoids false positives from the namespace
+    // EVAL block, which also references `user.name`.
+    expect(aliasScopedQuery).not.toMatch(/COALESCE\(`event\.outcome` != "failure"/);
+    expect(aliasScopedQuery).not.toMatch(/AND \(NOT\(`user\.email` IS NULL\)/);
+    expect(aliasScopedQuery).not.toMatch(/OR NOT\(`user\.id` IS NULL\)/);
+    expect(defaultQuery).toMatch(/COALESCE\(`event\.outcome` != "failure"/);
+    expect(defaultQuery).toMatch(/AND \(NOT\(`user\.email` IS NULL\)/);
+
+    // The aliasFilter and prelude still anchor the document set.
+    expect(aliasScopedQuery).toContain('| WHERE data_stream.dataset == "azure.activitylogs"');
+    expect(aliasScopedQuery).toContain('user.email = COALESCE(');
+
+    await expect(validateQuery(aliasScopedQuery)).resolves.toHaveProperty('errors', []);
+  });
+
+  it('suppresses the user engine postAggFilter (idpGate) on alias-scoped passes', async () => {
+    const aliasContext = buildContext();
+    const aliasPrelude = buildAliasPrelude(
+      aliasContext,
+      getEuidSourceFields('user').identitySourceFields,
+      'user'
+    );
+    const aliasScopedQuery = buildLogsExtractionEsqlQuery({
+      indexPatterns: ['logs-azure.activitylogs-*'],
+      latestIndex: 'latest-index',
+      entityDefinition: getEntityDefinition('user', 'default'),
+      docsLimit: 10000,
+      fromDateISO: '2026-01-01T00:00:00.000Z',
+      toDateISO: '2026-01-01T23:59:59.999Z',
+      aliasPrelude,
+      aliasScopedPass: true,
+    });
+    const defaultQuery = buildLogsExtractionEsqlQuery({
+      indexPatterns: ['logs-azure.activitylogs-*'],
+      latestIndex: 'latest-index',
+      entityDefinition: getEntityDefinition('user', 'default'),
+      docsLimit: 10000,
+      fromDateISO: '2026-01-01T00:00:00.000Z',
+      toDateISO: '2026-01-01T23:59:59.999Z',
+      aliasPrelude,
+    });
+
+    // The post-LOOKUP idpGate (`event.kind`/`event.category`/`event.type` checks)
+    // is part of the user definition's postAggFilter. Default pass emits it; the
+    // alias pass takes the no-postAggFilter fast path (single pagination, no
+    // post-join WHERE besides the namespace gate baked into the LOOKUP JOIN).
+    expect(aliasScopedQuery).not.toContain('| WHERE NOT(`entity.id` IS NULL)');
+    expect(aliasScopedQuery).not.toContain('MV_CONTAINS(`recent.event.kind`, "asset")');
+    expect(defaultQuery).toMatch(/MV_CONTAINS\(`recent\.event\.kind`, "asset"\)/);
+
+    await expect(validateQuery(aliasScopedQuery)).resolves.toHaveProperty('errors', []);
+  });
+
+  it('snapshots the full alias-scoped query shape for the user engine + Azure activity feature', async () => {
+    const aliasContext = buildContext();
+    const aliasPrelude = buildAliasPrelude(
+      aliasContext,
+      getEuidSourceFields('user').identitySourceFields,
+      'user'
+    );
+    const query = buildLogsExtractionEsqlQuery({
+      indexPatterns: ['logs-azure.activitylogs-*'],
+      latestIndex: 'latest-index',
+      entityDefinition: getEntityDefinition('user', 'default'),
+      docsLimit: 10000,
+      fromDateISO: '2026-01-01T00:00:00.000Z',
+      toDateISO: '2026-01-01T23:59:59.999Z',
+      aliasPrelude,
+      aliasFilter: 'data_stream.dataset == "azure.activitylogs"',
+      aliasScopedPass: true,
+    });
+    expect(query).toMatchSnapshot();
+    await expect(validateQuery(query)).resolves.toHaveProperty('errors', []);
   });
 });
 

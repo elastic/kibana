@@ -10,7 +10,11 @@ import type { Condition } from '@kbn/streamlang';
 import { conditionToESQL } from '@kbn/streamlang';
 import { HASH_ALG } from '../../../common/domain/euid';
 import { recentData } from '../../../common/domain/definitions/esql';
-import { escapeEsqlStringLiteral, esqlIsNotNullOrEmpty } from '../../../common/esql/strings';
+import {
+  escapeEsqlIdentifier,
+  escapeEsqlStringLiteral,
+  esqlIsNotNullOrEmpty,
+} from '../../../common/esql/strings';
 import {
   type EntityDefinition,
   type EntityField,
@@ -90,6 +94,19 @@ interface LogsExtractionQueryParams {
    * `| WHERE` after the FROM/WHERE source clause.
    */
   aliasFilter?: string;
+  /**
+   * When `true`, the static engine's pre-aggregation `documentsFilter` is
+   * dropped from the source-clause WHERE AND the post-LOOKUP `postAggFilter`
+   * is not emitted. The schema feature's `aliasFilter` becomes the sole
+   * document validator. Set ONLY by alias-scoped passes (see
+   * `runAliasScopedPasses` in `LogsExtractionClient`). See
+   * {@link LogPageProbeSourceClauseParams.aliasScopedPass} for the rationale.
+   *
+   * Independent of `aliasPrelude` so callers may inspect / extend the flag
+   * (e.g. `buildRemainingLogsCountQuery` reuses the source clause but never
+   * runs LOOKUP), but in practice it is always set together with `aliasPrelude`.
+   */
+  aliasScopedPass?: boolean;
 }
 
 export function buildRemainingLogsCountQuery(params: {
@@ -119,6 +136,7 @@ export function buildLogsExtractionEsqlQuery({
   logsPageCursorEnd,
   aliasPrelude,
   aliasFilter,
+  aliasScopedPass = false,
 }: LogsExtractionQueryParams): string {
   const { fields, type, entityTypeFallback, identityField } = entityDefinition;
 
@@ -137,6 +155,8 @@ export function buildLogsExtractionEsqlQuery({
   // `identityField` must come from the passed-in definition (not the registry) so that
   // stream-derived (KI) definitions — which ride `type: 'generic'` but use a custom
   // grouping field — produce a `documentsFilter` that matches their source indices.
+  // On alias-scoped passes the engine's `documentsFilter` is dropped — the schema
+  // feature's `aliasFilter` (appended below) is the sole document validator.
   parts.push(
     buildExtractionSourceClause({
       indexPatterns,
@@ -146,6 +166,7 @@ export function buildLogsExtractionEsqlQuery({
       toDateISO,
       logsPageCursorStart,
       logsPageCursorEnd,
+      aliasScopedPass,
     })
   );
 
@@ -196,8 +217,12 @@ export function buildLogsExtractionEsqlQuery({
     BY ${recentData(ENGINE_METADATA_UNTYPED_ID_FIELD)}`);
 
   // If there is no post aggregation filter we can paginate before the lookup join
-  // and save some performance
-  if (!entityDefinition.postAggFilter) {
+  // and save some performance. Alias-scoped passes deliberately suppress the
+  // engine's `postAggFilter` (the schema feature's filter has already gated docs),
+  // so they take this fast path even when the engine definition declares one.
+  const effectivePostAggFilter =
+    aliasScopedPass || !entityDefinition.postAggFilter ? undefined : entityDefinition.postAggFilter;
+  if (!effectivePostAggFilter) {
     parts.push(
       ...buildPaginationSection(
         fromDateISO,
@@ -231,11 +256,11 @@ export function buildLogsExtractionEsqlQuery({
   parts.push(`| LOOKUP JOIN ${latestIndex}
       ON ${recentData(ENGINE_METADATA_UNTYPED_ID_FIELD)} == ${ENGINE_METADATA_UNTYPED_ID_FIELD}`);
 
-  if (entityDefinition.postAggFilter) {
+  if (effectivePostAggFilter) {
     // If it has post aggregation filter, we filter it right after lookup join
     parts.push(
       buildPostAggFilter(
-        mapPostAggFilterFieldsToRecentForEsql(entityDefinition.postAggFilter, entityDefinition)
+        mapPostAggFilterFieldsToRecentForEsql(effectivePostAggFilter, entityDefinition)
       )
     );
     // then we can paginate after the post aggregation filter
@@ -436,11 +461,20 @@ export function buildAliasPrelude(
   // Provenance CASE: pairs of (predicate, source-path-literal) followed by a
   // trailing `null` default. CASE returns `null` when no branch fires, which
   // is the "no alias contributed identity for this row" signal.
+  //
+  // Source paths are wrapped in backticks (via `escapeEsqlIdentifier`) so the
+  // ESQL parser treats them as single identifiers regardless of the characters
+  // they contain. Real-world non-ECS identity fields can include flat-dotted
+  // paths with `:`, `/`, `-`, or other non-bare-identifier characters
+  // (e.g. Azure claim URLs like `azure.activitylogs.identity.claims.http://schemas_xmlsoap_org/.../upn`).
+  // Without escaping, the unbacked identifier terminates at the first invalid
+  // character and ESQL rejects the prelude with `parsing_exception`.
   const provenanceCaseArgs: string[] = [];
   for (const [destination, sources] of applicable) {
     for (const sourcePath of sources) {
+      const quotedSource = escapeEsqlIdentifier(sourcePath);
       provenanceCaseArgs.push(
-        `${destination} IS NULL AND MV_FIRST(${sourcePath}) IS NOT NULL`,
+        `${destination} IS NULL AND MV_FIRST(${quotedSource}) IS NOT NULL`,
         `"${escapeEsqlStringLiteral(sourcePath)}"`
       );
     }
@@ -457,11 +491,13 @@ export function buildAliasPrelude(
 
   // ECS-slot COALESCE: prefer the existing ECS value; fall back to the alias
   // sources in declaration order. Multiple sources for one destination produce
-  // a flat COALESCE(ecs, src1, src2, …) — preference is array order.
+  // a flat COALESCE(ecs, src1, src2, …) — preference is array order. Source
+  // paths share the same identifier-escaping treatment as the provenance CASE.
   const coalesceAssignments = applicable.map(([destination, sources]) => {
-    const args = [destination, ...sources.map((sourcePath) => `MV_FIRST(${sourcePath})`)].join(
-      ', '
-    );
+    const args = [
+      destination,
+      ...sources.map((sourcePath) => `MV_FIRST(${escapeEsqlIdentifier(sourcePath)})`),
+    ].join(', ');
     return `${destination} = COALESCE(${args})`;
   });
 

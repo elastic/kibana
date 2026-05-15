@@ -79,6 +79,26 @@ export interface LogPageProbeSourceClauseParams {
   toDateISO: string;
   /** Exclusive lower bound on (@timestamp, _id) for log-slice pagination within the time window. */
   logsPageCursorStart?: PaginationParams;
+  /**
+   * When `true`, the engine's pre-aggregation `documentsFilter` is omitted from the
+   * source-clause WHERE. The caller (an alias-scoped pass — see
+   * `runAliasScopedPasses` in `LogsExtractionClient`) is responsible for scoping the
+   * query to identity-bearing rows via the schema feature's `aliasFilter` instead.
+   *
+   * Rationale: the static engines' `documentsFilter` requires ECS identity slots
+   * (`user.email | user.id | user.name`, etc.) to be non-null on the RAW doc. For
+   * fully non-ECS streams (e.g. Azure activity logs whose identity lives in
+   * `azure.activitylogs.identity.claims.*`), those slots are unmapped/null at the
+   * source-clause stage, so every row is dropped before the alias prelude has a
+   * chance to COALESCE them. Skipping the engine filter on alias passes hands
+   * document validation over to the LLM-vetted schema-feature filter, which is
+   * the contract the loader's `schemaAliasMinConfidence` gate already commits to.
+   *
+   * Default extraction passes pass `false` (or omit the field) and keep today's
+   * behaviour. Stream-derived KI definitions also leave this `false` — their own
+   * `documentsFilter` (a grouping-field-exists check) is necessary and cheap.
+   */
+  aliasScopedPass?: boolean;
 }
 
 /** Bounded extraction: same as probe plus optional inclusive upper bound on (@timestamp, _id). */
@@ -87,14 +107,29 @@ export type ExtractionSourceClauseParams = LogPageProbeSourceClauseParams & {
 };
 
 export function buildLogPageProbeSourceClause(params: LogPageProbeSourceClauseParams): string {
-  const { indexPatterns, type, identityField, fromDateISO, toDateISO, logsPageCursorStart } =
-    params;
+  const {
+    indexPatterns,
+    type,
+    identityField,
+    fromDateISO,
+    toDateISO,
+    logsPageCursorStart,
+    aliasScopedPass = false,
+  } = params;
 
   // Always use >= for the time-window start. When logsPageCursorStart is set its compound filter
   // (@timestamp > T OR (@timestamp = T AND _id > id)) owns the exclusive lower bound. Using >
   // here would drop documents with @timestamp = fromDateISO when the cursor timestamp equals
   // fromDateISO (e.g. second recovery slice where all remaining logs share the same timestamp).
-  const baseWhere = `FROM ${indexPatterns.join(', ')}
+  // On alias-scoped passes the engine's pre-COALESCE `documentsFilter` is dropped — see
+  // {@link LogPageProbeSourceClauseParams.aliasScopedPass} for the design rationale.
+  const baseWhere = aliasScopedPass
+    ? `FROM ${indexPatterns.join(', ')}
+    METADATA ${METADATA_FIELDS.join(', ')}
+  | WHERE
+      ${TIMESTAMP_FIELD} >= TO_DATETIME("${fromDateISO}")
+      AND ${TIMESTAMP_FIELD} <= TO_DATETIME("${toDateISO}")`
+    : `FROM ${indexPatterns.join(', ')}
     METADATA ${METADATA_FIELDS.join(', ')}
   | WHERE
       ${TIMESTAMP_FIELD} >= TO_DATETIME("${fromDateISO}")

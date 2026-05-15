@@ -297,6 +297,12 @@ export class LogsExtractionClient {
           // engine descriptor's pagination cursor.
           aliasPrelude,
           aliasFilter,
+          // Hands off the engine's `documentsFilter` + `postAggFilter` to the
+          // schema feature's `aliasFilter`. Required for fully non-ECS streams
+          // (e.g. Azure activity logs whose identity is in claim paths) where
+          // every raw row has NULL ECS user slots and would otherwise be dropped
+          // before the alias prelude has a chance to COALESCE them.
+          aliasScopedPass: true,
         });
         totalCount += aliasResult.count;
         totalPages += aliasResult.pages;
@@ -391,6 +397,7 @@ export class LogsExtractionClient {
     persistState,
     aliasPrelude,
     aliasFilter,
+    aliasScopedPass = false,
   }: {
     entityDefinition: ManagedEntityDefinition;
     paginationState: EngineLogExtractionState;
@@ -415,6 +422,12 @@ export class LogsExtractionClient {
      * entity-page query in this extraction run.
      */
     aliasFilter?: string;
+    /**
+     * When `true`, the static engine's `documentsFilter` and `postAggFilter` are
+     * dropped for this run; the schema feature's `aliasFilter` becomes the sole
+     * document validator. Set by {@link runAliasScopedPasses} only.
+     */
+    aliasScopedPass?: boolean;
   }): Promise<{
     count: number;
     pages: number;
@@ -442,6 +455,7 @@ export class LogsExtractionClient {
       persistState: effectivePersistState,
       aliasPrelude,
       aliasFilter,
+      aliasScopedPass,
     });
 
     let mainResult: Awaited<typeof mainPromise>;
@@ -508,6 +522,7 @@ export class LogsExtractionClient {
     persistState,
     aliasPrelude,
     aliasFilter,
+    aliasScopedPass = false,
   }: {
     type: EntityType;
     config: LogExtractionConfig;
@@ -519,6 +534,7 @@ export class LogsExtractionClient {
     persistState?: (state: EngineLogExtractionState) => Promise<void>;
     aliasPrelude?: string;
     aliasFilter?: string;
+    aliasScopedPass?: boolean;
   }): Promise<{
     count: number;
     pages: number;
@@ -544,6 +560,7 @@ export class LogsExtractionClient {
         persistState,
         aliasPrelude,
         aliasFilter,
+        aliasScopedPass,
       });
       return { ...result, indexPatterns };
     }
@@ -594,6 +611,7 @@ export class LogsExtractionClient {
         persistState,
         aliasPrelude,
         aliasFilter,
+        aliasScopedPass,
       });
 
       totalCount += subResult.count;
@@ -631,6 +649,7 @@ export class LogsExtractionClient {
     persistState,
     aliasPrelude,
     aliasFilter,
+    aliasScopedPass = false,
   }: {
     type: EntityType;
     engineState: EngineLogExtractionState;
@@ -645,6 +664,7 @@ export class LogsExtractionClient {
     persistState?: (state: EngineLogExtractionState) => Promise<void>;
     aliasPrelude?: string;
     aliasFilter?: string;
+    aliasScopedPass?: boolean;
   }) {
     let totalCount = 0;
     let pages = 0;
@@ -689,6 +709,7 @@ export class LogsExtractionClient {
           logsPageCursorStart,
           maxLogsPerPage,
           opts,
+          aliasScopedPass,
         });
         const probeOutcome = await probePromise;
 
@@ -721,6 +742,7 @@ export class LogsExtractionClient {
           persistState,
           aliasPrelude,
           aliasFilter,
+          aliasScopedPass,
         });
 
         totalCount += sliceIngestOutcome.addedToTotalCount;
@@ -757,6 +779,7 @@ export class LogsExtractionClient {
     logsPageCursorStart,
     maxLogsPerPage,
     opts,
+    aliasScopedPass = false,
   }: {
     indexPatterns: string[];
     type: EntityType;
@@ -773,6 +796,14 @@ export class LogsExtractionClient {
     logsPageCursorStart: PaginationParams | undefined;
     maxLogsPerPage: number;
     opts?: LogsExtractionOptions;
+    /**
+     * When `true`, the probe drops the engine's `documentsFilter` to mirror the
+     * alias-scoped extraction query. Without this the probe would report
+     * `hasLogsToProcess: false` for streams whose ECS identity slots are null
+     * on every raw row (e.g. Azure activity logs), and the alias pass would
+     * terminate before issuing any extraction.
+     */
+    aliasScopedPass?: boolean;
   }): Promise<LogPaginationCursor> {
     const logPaginationCursorProbeQuery =
       // Mirrors the main extraction query (and the CCS probe) in tolerating
@@ -790,6 +821,7 @@ export class LogsExtractionClient {
         toDateISO,
         logsPageCursorStart,
         maxLogsPerPage,
+        aliasScopedPass,
       });
 
     const logPaginationCursorProbeResponse = await executeEsqlQuery({
@@ -842,6 +874,7 @@ export class LogsExtractionClient {
     persistState,
     aliasPrelude,
     aliasFilter,
+    aliasScopedPass = false,
   }: {
     type: EntityType;
     opts?: LogsExtractionOptions;
@@ -859,6 +892,7 @@ export class LogsExtractionClient {
     persistState?: (state: EngineLogExtractionState) => Promise<void>;
     aliasPrelude?: string;
     aliasFilter?: string;
+    aliasScopedPass?: boolean;
   }): Promise<{
     addedToTotalCount: number;
     addedToPageCount: number;
@@ -885,6 +919,7 @@ export class LogsExtractionClient {
         logsPageCursorEnd,
         aliasPrelude,
         aliasFilter,
+        aliasScopedPass,
       });
       recoveryIdForBounded = undefined;
 

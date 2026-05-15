@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-export { createKnowledgeIndicatorsReader } from './knowledge_indicators_reader_factory';
+export {
+  createKnowledgeIndicatorsReader,
+  createKnowledgeIndicatorsReaderFromStreamsStart,
+} from './knowledge_indicators_reader_factory';
 export {
   ECS_IDENTITY_FIELD_SET,
   loadStreamSchemaAliases,

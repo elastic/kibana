@@ -7,7 +7,10 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import type { StreamsKnowledgeIndicatorsReader } from '@kbn/streams-plugin/server';
+import type {
+  StreamsKnowledgeIndicatorsReader,
+  StreamsPluginStart,
+} from '@kbn/streams-plugin/server';
 import type { EntityStoreCoreSetup } from '../../types';
 
 /**
@@ -58,6 +61,36 @@ export const createKnowledgeIndicatorsReader = async ({
     return NO_OP_KI_READER;
   }
   return pluginsStart.streams.getKnowledgeIndicatorsReader({ request: fakeRequest });
+};
+
+/**
+ * Request-scoped variant of {@link createKnowledgeIndicatorsReader} for callers
+ * that already hold a started `StreamsPluginStart` (typical in route handlers,
+ * which receive the start contract via the request context). Skips the
+ * `coreSetup.getStartServices()` round-trip that the background-task variant
+ * needs.
+ *
+ * Behavior matches the background-task factory: returns the no-op reader when
+ * `streams` is `undefined` (streams plugin not enabled in the deployment) so
+ * callers can drive a uniform "no Knowledge Indicators" branch without
+ * scattered `if (reader)` guards.
+ */
+export const createKnowledgeIndicatorsReaderFromStreamsStart = async ({
+  streams,
+  request,
+  logger,
+}: {
+  streams: StreamsPluginStart | undefined;
+  request: KibanaRequest;
+  logger: Logger;
+}): Promise<StreamsKnowledgeIndicatorsReader> => {
+  if (!streams) {
+    logger.debug(
+      'Streams plugin not available; Knowledge Indicators reader will return empty results'
+    );
+    return NO_OP_KI_READER;
+  }
+  return streams.getKnowledgeIndicatorsReader({ request });
 };
 
 /** Exported for tests so they can assert reference-equality against the fallback. */

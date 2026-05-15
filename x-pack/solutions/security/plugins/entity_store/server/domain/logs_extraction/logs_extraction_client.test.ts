@@ -1808,7 +1808,7 @@ describe('LogsExtractionClient', () => {
       );
       const queriesWithCoalesce = queries.filter((q) =>
         q.includes(
-          'user.email = COALESCE(user.email, MV_FIRST(azure.signinlogs.properties.user_principal_name))'
+          'user.email = COALESCE(user.email, MV_FIRST(`azure.signinlogs.properties.user_principal_name`))'
         )
       );
       expect(queriesWithPrelude.length).toBeGreaterThan(0);
@@ -1901,6 +1901,89 @@ describe('LogsExtractionClient', () => {
 
       expect(result.success).toBe(true);
       expect(mockExecuteEsqlQuery).toHaveBeenCalledTimes(3);
+    });
+
+    // Option ① ("Trust-the-LLM-fully") POC contract — alias-scoped passes must
+    // hand off identity validation to the schema feature's `aliasFilter` and
+    // bypass both the engine's pre-aggregation `documentsFilter` and the
+    // post-LOOKUP `postAggFilter`. Required for fully non-ECS streams (e.g.
+    // Azure activity logs whose identity is in `azure.activitylogs.identity.claims.*`).
+    // Without the bypass every raw row is dropped by the documentsFilter before
+    // the prelude has a chance to COALESCE the identity into ECS slots, which is
+    // the empirically-observed failure mode this contract fixes.
+    it('alias-pass queries drop the engine documentsFilter AND postAggFilter (Option ① bypass)', async () => {
+      mockExtractSuccessSequence(buildExtractionResponse('hash-default'));
+      mockExtractSuccessSequence(buildExtractionResponse('hash-alias'));
+
+      await client.extractLogs('user', {
+        aliasContexts: [buildAliasContext() as any],
+      });
+
+      const queries = mockExecuteEsqlQuery.mock.calls.map(([{ query }]) => query);
+      const aliasQueries = queries.filter((q) =>
+        q.includes('user.entity.knowledge_indicator.identity_source = CASE(')
+      );
+      const defaultQueries = queries.filter(
+        (q) => !q.includes('user.entity.knowledge_indicator.identity_source = CASE(')
+      );
+
+      expect(aliasQueries.length).toBeGreaterThan(0);
+      expect(defaultQueries.length).toBeGreaterThan(0);
+
+      // Alias-pass extraction query: no documentsFilter and no postAggFilter.
+      // documentsFilter signatures (user definition):
+      //   - `\`event.outcome\` != "failure"` (failure-outcome exclusion)
+      //   - `AND (NOT(\`user.email\` IS NULL) ... OR NOT(\`user.id\` IS NULL) ...)` (identity presence)
+      // postAggFilter signature: `MV_CONTAINS(\`recent.event.kind\`, "asset")` (idpGate post-LOOKUP)
+      // These predicates appear only in the gates we're trying to elide; using them
+      // as assertion signatures avoids false positives from the namespace EVAL block
+      // (which also references `user.name`).
+      const aliasExtractionQuery = aliasQueries.find((q) => q.includes('| LOOKUP JOIN'));
+      expect(aliasExtractionQuery).toBeDefined();
+      expect(aliasExtractionQuery).not.toMatch(/COALESCE\(`event\.outcome` != "failure"/);
+      expect(aliasExtractionQuery).not.toMatch(/AND \(NOT\(`user\.email` IS NULL\)/);
+      expect(aliasExtractionQuery).not.toContain('MV_CONTAINS(`recent.event.kind`, "asset")');
+
+      // Default-pass extraction query keeps both gates — regression guard.
+      const defaultExtractionQuery = defaultQueries.find((q) => q.includes('| LOOKUP JOIN'));
+      expect(defaultExtractionQuery).toBeDefined();
+      expect(defaultExtractionQuery).toMatch(/COALESCE\(`event\.outcome` != "failure"/);
+      expect(defaultExtractionQuery).toMatch(/AND \(NOT\(`user\.email` IS NULL\)/);
+      expect(defaultExtractionQuery).toMatch(/MV_CONTAINS\(`recent\.event\.kind`, "asset"\)/);
+    });
+
+    // The probe query reuses the same source-clause builder as the extraction
+    // query, so it must mirror the alias-scoped bypass — otherwise the probe
+    // would report `hasLogsToProcess: false` for non-ECS streams and the alias
+    // pass would terminate before issuing any extraction.
+    it('alias-pass probe query drops the engine documentsFilter (so the slice probe sees the rows the prelude will COALESCE)', async () => {
+      mockExtractSuccessSequence(buildExtractionResponse('hash-default'));
+      mockExtractSuccessSequence(buildExtractionResponse('hash-alias'));
+
+      await client.extractLogs('user', {
+        aliasContexts: [buildAliasContext() as any],
+      });
+
+      const queries = mockExecuteEsqlQuery.mock.calls.map(([{ query }]) => query);
+      // Probe queries are characterised by the INLINE STATS / SORT-LIMIT-1 shape
+      // and the absence of LOOKUP JOIN. The alias-pass probe targets the alias
+      // context's index patterns.
+      const aliasProbeQueries = queries.filter(
+        (q) =>
+          q.includes('logs-azure.signinlogs-*') &&
+          q.includes('INLINE STATS') &&
+          !q.includes('| LOOKUP JOIN')
+      );
+
+      expect(aliasProbeQueries.length).toBeGreaterThan(0);
+      // Same documentsFilter signatures as the extraction-query check; the probe
+      // reuses `buildLogPageProbeSourceClause`, so the same elision must hold.
+      expect(
+        aliasProbeQueries.every((q) => !q.match(/COALESCE\(`event\.outcome` != "failure"/))
+      ).toBe(true);
+      expect(aliasProbeQueries.every((q) => !q.match(/AND \(NOT\(`user\.email` IS NULL\)/))).toBe(
+        true
+      );
     });
   });
 });
