@@ -94,7 +94,6 @@ safe-outputs:
     draft: false
     auto-close-issue: false
     allowed-base-branches:
-      - main
       - "[0-9]*.[0-9]*"
     fallback-as-issue: false
     protected-files: allowed
