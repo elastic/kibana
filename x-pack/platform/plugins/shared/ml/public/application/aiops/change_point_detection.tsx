@@ -84,6 +84,7 @@ export const ChangePointDetectionPage: FC = () => {
           dataView={dataView}
           savedSearch={savedSearch}
           showFrozenDataTierChoice={showNodeInfo}
+          pageTitle={pageTitle}
           headerContent={headerContent}
           appContextValue={{
             embeddingOrigin: AIOPS_EMBEDDABLE_ORIGIN.ML_AIOPS_LABS,

@@ -97,6 +97,7 @@ export const MlDataSourcePicker: FC<MlDataSourcePickerProps> = ({ currentDataVie
             savedDataViews={savedDataViews}
             trigger={{
               label: triggerLabel,
+              title: triggerLabel,
               'data-test-subj': 'mlDataSourceSelectorButton',
             }}
             onChangeDataView={onChangeDataView}

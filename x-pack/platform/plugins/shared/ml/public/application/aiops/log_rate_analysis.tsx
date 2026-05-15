@@ -72,6 +72,7 @@ export const LogRateAnalysisPage: FC = () => {
           savedSearch={savedSearch}
           showContextualInsights={showContextualInsights}
           showFrozenDataTierChoice={showNodeInfo}
+          pageTitle={pageTitle}
           headerContent={headerContent}
           appContextValue={{
             embeddingOrigin: AIOPS_EMBEDDABLE_ORIGIN.ML_AIOPS_LABS,
