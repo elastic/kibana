@@ -10,9 +10,9 @@ import type { LoadResult } from '@kbn/es-snapshot-loader';
 import {
   replayObservabilityDataStreams,
   cleanObservabilityDataStreams,
-} from '../../src/data_generators/replay';
-import { GCS_BUCKET } from '../../src/scenarios/constants';
-import { evaluate } from './evaluate';
+} from '../../../src/data_generators/replay';
+import { GCS_BUCKET } from '../../../src/scenarios/constants';
+import { evaluate } from '../evaluate';
 
 const AD_SERVICE_HIGH_CPU_GCS = {
   bucket: GCS_BUCKET,
@@ -22,7 +22,7 @@ const AD_SERVICE_HIGH_CPU_GCS = {
 const SNAPSHOT_NAME = 'ad-high-cpu';
 
 evaluate.describe(
-  'Ad High CPU Investigation',
+  'Investigation Skill: Ad High CPU',
   { tag: tags.serverless.observability.complete },
   () => {
     let replayResult: LoadResult;
