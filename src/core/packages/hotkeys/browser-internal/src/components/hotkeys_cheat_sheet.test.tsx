@@ -173,4 +173,85 @@ describe('HotkeysCheatSheetModal', () => {
 
     expect(screen.getByText('No shortcuts match')).toBeInTheDocument();
   });
+
+  it('clusters shortcuts by featureId and uses shared group as subsection title', () => {
+    const first: HotkeyDefinition = {
+      id: 'cluster:a',
+      keys: 'Mod+1',
+      label: 'First',
+      scope: 'global',
+      featureId: 'discover:table',
+      group: 'Document table',
+    };
+    const second: HotkeyDefinition = {
+      id: 'cluster:b',
+      keys: 'Mod+2',
+      label: 'Second',
+      scope: 'global',
+      featureId: 'discover:table',
+      group: 'Document table',
+    };
+    renderModal({ registrations: [first, second] });
+
+    expect(screen.getByText('Document table')).toBeInTheDocument();
+    expect(screen.getByText('First')).toBeInTheDocument();
+    expect(screen.getByText('Second')).toBeInTheDocument();
+  });
+
+  it('uses formatted featureId as subsection title when group values differ within a bucket', () => {
+    const one: HotkeyDefinition = {
+      id: 'mixed:a',
+      keys: 'Mod+1',
+      label: 'One',
+      scope: 'global',
+      featureId: 'foo:bar',
+      group: 'Alpha',
+    };
+    const two: HotkeyDefinition = {
+      id: 'mixed:b',
+      keys: 'Mod+2',
+      label: 'Two',
+      scope: 'global',
+      featureId: 'foo:bar',
+      group: 'Beta',
+    };
+    renderModal({ registrations: [one, two] });
+
+    expect(screen.getByText('foo › bar')).toBeInTheDocument();
+  });
+
+  it('renders shortcuts without featureId after a horizontal rule when mixed with feature buckets', () => {
+    const withFeature: HotkeyDefinition = {
+      id: 'feat:row',
+      keys: 'Mod+f',
+      label: 'Featured',
+      scope: 'global',
+      featureId: 'ns:feat',
+      group: 'Grouped',
+    };
+    const noFeatureRow: HotkeyDefinition = {
+      id: 'plain:row',
+      keys: 'Mod+p',
+      label: 'Plain shortcut',
+      scope: 'global',
+    };
+    renderModal({ registrations: [withFeature, noFeatureRow] });
+
+    expect(screen.getByText('Featured')).toBeInTheDocument();
+    expect(screen.getByText('Plain shortcut')).toBeInTheDocument();
+    expect(screen.getAllByRole('separator').length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('wraps app and context sections in volatile scopes container when applicable', () => {
+    renderModal({
+      registrations: [globalRegistration, appRegistration],
+      currentAppId: 'discover',
+    });
+    expect(screen.getByTestId('hotkeysCheatSheetVolatileScopes')).toBeInTheDocument();
+  });
+
+  it('does not render volatile scopes container when only global shortcuts exist', () => {
+    renderModal({ registrations: [globalRegistration] });
+    expect(screen.queryByTestId('hotkeysCheatSheetVolatileScopes')).not.toBeInTheDocument();
+  });
 });

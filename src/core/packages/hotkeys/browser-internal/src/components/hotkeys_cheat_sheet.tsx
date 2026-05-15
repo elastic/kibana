@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { css } from '@emotion/react';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiEmptyPrompt,
@@ -23,6 +24,7 @@ import {
   EuiButtonIcon,
   EuiHorizontalRule,
   EuiNotificationBadge,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { SidebarComponentProps } from '@kbn/core-chrome-sidebar';
@@ -44,7 +46,14 @@ interface GroupedRegistrations {
   context: HotkeyDefinition[];
 }
 
+interface FeatureBucket {
+  readonly featureId: string;
+  readonly defs: readonly HotkeyDefinition[];
+}
+
 const EMPTY_REGISTRATIONS: ReadonlyArray<HotkeyDefinition> = [];
+
+const GROUP_UNIT_SEPARATOR = '\u241E';
 
 const SECTION_TITLES: Record<Section, string> = {
   global: i18n.translate('core.ui.chrome.hotkeysCheatSheet.sectionGlobal', {
@@ -56,6 +65,44 @@ const SECTION_TITLES: Record<Section, string> = {
   context: i18n.translate('core.ui.chrome.hotkeysCheatSheet.sectionContext', {
     defaultMessage: 'On this page',
   }),
+};
+
+/** Cosmetic display only — featureIds are registrant-supplied namespaces. */
+const formatFeatureTitle = (featureId: string): string => featureId.replace(/:/g, ' › ');
+
+/** Subsection heading for a bucket keyed by {@link HotkeyDefinition.featureId}. */
+const getBucketTitle = (featureId: string, defs: readonly HotkeyDefinition[]): string => {
+  if (defs.length === 0) {
+    return formatFeatureTitle(featureId);
+  }
+  const firstGroup = defs[0].group;
+  if (firstGroup !== undefined && firstGroup !== '' && defs.every((d) => d.group === firstGroup)) {
+    return firstGroup;
+  }
+  return formatFeatureTitle(featureId);
+};
+
+const partitionIntoFeatureBuckets = (
+  entries: readonly HotkeyDefinition[]
+): { readonly buckets: readonly FeatureBucket[]; readonly noFeature: HotkeyDefinition[] } => {
+  const byFeature = new Map<string, HotkeyDefinition[]>();
+  const noFeature: HotkeyDefinition[] = [];
+  for (const def of entries) {
+    if (def.featureId) {
+      const list = byFeature.get(def.featureId);
+      if (list) {
+        list.push(def);
+      } else {
+        byFeature.set(def.featureId, [def]);
+      }
+    } else {
+      noFeature.push(def);
+    }
+  }
+  const buckets: FeatureBucket[] = [...byFeature.entries()]
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([featureId, defs]) => ({ featureId, defs }));
+  return { buckets, noFeature };
 };
 
 const matches = (def: HotkeyDefinition, query: string): boolean => {
@@ -111,31 +158,80 @@ const HotkeyRow = ({ def }: { def: HotkeyDefinition }) => {
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="xs">
-          {formattedChord.split(separatorToken).map((key) => (
-            <EuiFlexItem key={key} grow={false}>
-              <EuiNotificationBadge color="subdued">{key}</EuiNotificationBadge>
-            </EuiFlexItem>
-          ))}
+          <EuiFlexItem
+            grow={false}
+            css={css({ display: 'none', ':hover': { display: 'initial' } })}
+          >
+            <EuiButtonIcon aria-label="Edit" color="text" iconType="pencil" />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiToolTip content={formattedChord}>
+              <EuiFlexGroup gutterSize="xs">
+                {formattedChord.split(separatorToken).map((key) => (
+                  <EuiFlexItem key={key} grow={false}>
+                    <EuiNotificationBadge color="subdued">{key}</EuiNotificationBadge>
+                  </EuiFlexItem>
+                ))}
+              </EuiFlexGroup>
+            </EuiToolTip>
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
 };
 
-const Section = ({ title, entries }: { title: string; entries: HotkeyDefinition[] }) => {
-  if (entries.length === 0) return null;
+const HotkeyRows = ({ defs }: { defs: readonly HotkeyDefinition[] }) => (
+  <>
+    {defs.map((def) => (
+      <React.Fragment key={def.id}>
+        <HotkeyRow def={def} />
+        <EuiSpacer size="s" />
+      </React.Fragment>
+    ))}
+  </>
+);
+
+const ScopeSection = ({
+  title,
+  entries,
+}: {
+  title: string;
+  entries: readonly HotkeyDefinition[];
+}) => {
+  if (entries.length === 0) {
+    return null;
+  }
+  const { buckets, noFeature } = partitionIntoFeatureBuckets(entries);
+  const hasFeatureBuckets = buckets.length > 0;
+  const hasNoFeatureTail = noFeature.length > 0;
+
   return (
     <>
       <EuiTitle size="xs">
         <p>{title}</p>
       </EuiTitle>
       <EuiHorizontalRule margin="xs" />
-      {entries.map((def) => (
-        <React.Fragment key={def.id}>
-          <HotkeyRow def={def} />
-          <EuiSpacer size="s" />
-        </React.Fragment>
-      ))}
+      {hasFeatureBuckets
+        ? buckets.map(({ featureId, defs }) => (
+            <React.Fragment key={featureId}>
+              <EuiTitle size="xxs">
+                <p>{getBucketTitle(featureId, defs)}</p>
+              </EuiTitle>
+              <EuiSpacer size="s" />
+              <HotkeyRows defs={defs} />
+              <EuiSpacer size="s" />
+            </React.Fragment>
+          ))
+        : null}
+      {hasFeatureBuckets && hasNoFeatureTail ? (
+        <>
+          <EuiHorizontalRule margin="m" />
+          <HotkeyRows defs={noFeature} />
+        </>
+      ) : (
+        <HotkeyRows defs={noFeature} />
+      )}
       <EuiSpacer size="m" />
     </>
   );
@@ -232,9 +328,18 @@ export const HotkeysCheatSheet = ({
           />
         ) : (
           <>
-            <Section title={SECTION_TITLES.global} entries={grouped.global} />
-            <Section title={SECTION_TITLES.app} entries={grouped.app} />
-            <Section title={SECTION_TITLES.context} entries={grouped.context} />
+            <ScopeSection title={SECTION_TITLES.global} entries={grouped.global} />
+            {grouped.app.length > 0 || grouped.context.length > 0 ? (
+              <EuiFlexGroup
+                direction="column"
+                gutterSize="none"
+                responsive={false}
+                data-test-subj="hotkeysCheatSheetVolatileScopes"
+              >
+                <ScopeSection title={SECTION_TITLES.app} entries={grouped.app} />
+                <ScopeSection title={SECTION_TITLES.context} entries={grouped.context} />
+              </EuiFlexGroup>
+            ) : null}
           </>
         )}
       </EuiPageBody>
