@@ -128,13 +128,6 @@ export class MetricsExperiencePage {
   /**
    * Hovers a card to reveal the visible quick-action row, then clicks the
    * given action.
-   *
-   * Used for actions that have been promoted onto the visible row (Explore,
-   * View details, Copy to dashboard) per the metrics-grid quick-action
-   * reorganization in issue #236787. Inspect remains in the visible row in
-   * the spike but is intentionally still routed via `openCardContextMenu`
-   * for the popover-flow test (`openInspectorFlyout`) so we can verify the
-   * popover path until the visualizations follow-up demotes it.
    */
   private async clickVisibleQuickAction(cardIndex: number, action: Locator): Promise<void> {
     const card = this.getCardByIndex(cardIndex);
@@ -145,9 +138,7 @@ export class MetricsExperiencePage {
 
   /**
    * Opens the insights flyout by clicking "View details" on the visible
-   * quick-action row of the given card. After the metrics-grid action
-   * reorganization (issue #236787), View details is no longer in the
-   * 3-dot popover; it sits on the visible row alongside Explore.
+   * quick-action row of the given card.
    */
   public async openInsightsFlyout(cardIndex: number): Promise<void> {
     await this.clickVisibleQuickAction(cardIndex, this.chartActions.viewDetails);
@@ -156,15 +147,6 @@ export class MetricsExperiencePage {
   /**
    * Opens the inspector flyout by triggering "Inspect" from the chart
    * actions menu of the given card.
-   *
-   * NOTE (issue #236787): Inspect is currently still on the visible
-   * quick-action row, but the popover entry (read from the same default
-   * action set Lens auto-injects) is also clickable here. The desired
-   * end-state, Inspect demoted to the popover only, is blocked on a
-   * follow-up from @elastic/kibana-visualizations. See
-   * x-pack/platform/plugins/shared/lens/public/react_embeddable/renderer/lens_custom_renderer_component.tsx:142-157
-   * for the consumer-side blocker. When that lands, this helper will keep
-   * working unchanged.
    */
   public async openInspectorFlyout(cardIndex: number): Promise<void> {
     await this.openCardContextMenu(cardIndex);
