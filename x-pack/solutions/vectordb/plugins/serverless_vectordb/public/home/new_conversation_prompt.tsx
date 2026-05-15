@@ -12,16 +12,14 @@ import {
   EuiFlexItem,
   EuiTitle,
   useEuiFontSize,
-  useEuiShadow,
-  useEuiShadowHover,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { ConversationInputShell } from '@kbn/agent-builder-plugin/public';
 import { useKibana } from '../hooks/use_kibana';
 
-const INPUT_MIN_HEIGHT = '150px';
 const ANIM_MS = 480;
 
 type Phase = 'closed' | 'opening' | 'open' | 'closing';
@@ -66,10 +64,6 @@ export const NewConversationPrompt: React.FC = () => {
     services: { chrome, agentBuilder },
   } = useKibana();
   const { euiTheme } = useEuiTheme();
-  const shadowSmall = useEuiShadow('s');
-  const shadowSmallHover = useEuiShadowHover('s');
-  const shadowFocus = useEuiShadow('xl');
-  const shadowFocusHover = useEuiShadowHover('xl');
   const fontSizeMedium = useEuiFontSize('m');
 
   const launcherRef = useRef<HTMLDivElement>(null);
@@ -139,31 +133,8 @@ export const NewConversationPrompt: React.FC = () => {
       `
     : undefined;
 
-  // Match agent_builder's ConversationInput visual styling: 16px radius,
-  // EUI shadow (s -> xl on focus), backgroundBasePlain, asymmetric padding.
-  const inlineInputStyles = css`
-    border: ${euiTheme.border.thin};
-    border-radius: 16px;
-    border-color: ${euiTheme.colors.borderBaseSubdued};
-    background-color: ${euiTheme.colors.backgroundBasePlain};
-    min-height: ${INPUT_MIN_HEIGHT};
-    padding: ${euiTheme.size.base} ${euiTheme.size.base} ${euiTheme.size.s} ${euiTheme.size.base};
+  const textareaStyles = css`
     cursor: text;
-    transition: box-shadow 250ms, border-color 250ms;
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    ${shadowSmall}
-    &:hover {
-      ${shadowSmallHover}
-    }
-    &:focus-within {
-      border-color: ${euiTheme.colors.primary};
-      ${shadowFocus}
-      &:hover {
-        ${shadowFocusHover}
-      }
-    }
     textarea {
       flex: 1;
       cursor: text;
@@ -211,7 +182,7 @@ export const NewConversationPrompt: React.FC = () => {
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false} css={inlineContainerStyles}>
-          <div ref={launcherRef} css={inlineInputStyles}>
+          <ConversationInputShell ref={launcherRef} css={textareaStyles}>
             <textarea
               data-test-subj="vectordbHomeNewConversationInput"
               placeholder={i18n.translate(
@@ -247,7 +218,7 @@ export const NewConversationPrompt: React.FC = () => {
                 data-test-subj="vectordbHomeNewConversationSend"
               />
             </div>
-          </div>
+          </ConversationInputShell>
         </EuiFlexItem>
       </EuiFlexGroup>
 
