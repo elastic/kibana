@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   EuiCallOut,
   EuiContextMenu,
@@ -54,16 +54,6 @@ const TABLE_FIELD_TO_API_SORT_FIELD = Object.fromEntries(
 ) as Partial<Record<string, FindRulesSortField>>;
 
 export const RulesListPage = () => {
-  const { basePath } = useService(CoreStart('http'));
-  const { navigateToUrl } = useService(CoreStart('application'));
-  const [isCreateMenuOpen, setIsCreateMenuOpen] = useState(false);
-  const toggleCreateMenu = useCallback(() => setIsCreateMenuOpen((prev) => !prev), []);
-  const closeCreateMenu = useCallback(() => setIsCreateMenuOpen(false), []);
-  const navigateToCreateRule = useCallback(
-    () => navigateToUrl(basePath.prepend(paths.ruleCreate)),
-    [navigateToUrl, basePath]
-  );
-
   const http = useService(CoreStart('http'));
   useBreadcrumbs('rules_list');
 

@@ -35,6 +35,7 @@ export {
   KindField,
   AlertConditionsFieldGroup,
   AttachmentRunbookFieldGroup,
+  ConditionFieldGroup,
   RuleDetailsFieldGroup,
   RuleExecutionFieldGroup,
 } from './form';
@@ -56,14 +57,6 @@ export {
 } from './form';
 
 export { useDataFields, getTimeFieldOptions } from './form';
-// Field groups — for composing custom form layouts
-export {
-  RuleDetailsFieldGroup,
-  ConditionFieldGroup,
-  RuleExecutionFieldGroup,
-  AlertConditionsFieldGroup,
-  KindField,
-} from './form';
 
 // Types
 export type {
