@@ -16,6 +16,7 @@ import {
   createCriteriaEvaluator,
   createEditPreservationEvaluator,
   createStructuralCorrectnessEvaluator,
+  createLiquidCorrectnessEvaluator,
   skipInfraErrors,
   skipNegativeCases,
 } from './evaluators';
@@ -402,5 +403,228 @@ describe('Criteria evaluator', () => {
         output: { resultYaml: 'name: test' },
       })
     );
+  });
+});
+
+describe('LiquidCorrectness evaluator', () => {
+  const evaluator = createLiquidCorrectnessEvaluator();
+
+  const evaluateYaml = (yaml: string) =>
+    evaluator.evaluate({ output: { messages: [], errors: [], resultYaml: yaml } });
+
+  it('returns N/A when no result YAML is produced', async () => {
+    const result = await evaluator.evaluate({
+      output: { messages: [], errors: [] },
+    });
+    expect(result.label).toBe('N/A');
+    expect(result.score).toBeNull();
+  });
+
+  it('returns N/A when YAML has no Liquid expressions', async () => {
+    const yaml = `name: Simple
+triggers:
+  - type: manual
+steps:
+  - name: log
+    type: console
+    with:
+      message: "Plain text"`;
+    const result = await evaluateYaml(yaml);
+    expect(result.label).toBe('N/A');
+  });
+
+  it('passes when a step reference targets an existing step', async () => {
+    const yaml = `name: Test
+triggers:
+  - type: manual
+steps:
+  - name: fetch
+    type: http
+    with:
+      url: "https://api.example.com"
+  - name: log
+    type: console
+    with:
+      message: "Fetched {{ steps.fetch.output.status }} items"`;
+    const result = await evaluateYaml(yaml);
+    expect(result.score).toBe(1);
+    expect(result.metadata?.total).toBe(1);
+    expect(result.metadata?.correct).toBe(1);
+  });
+
+  it('fails when a step reference targets a nonexistent step', async () => {
+    const yaml = `name: Test
+triggers:
+  - type: manual
+steps:
+  - name: log
+    type: console
+    with:
+      message: "{{ steps.does_not_exist.output.foo }}"`;
+    const result = await evaluateYaml(yaml);
+    expect(result.score).toBe(0);
+    expect(result.metadata?.failures[0].reason).toMatch(/does_not_exist/);
+  });
+
+  it('passes foreach.item references inside a foreach', async () => {
+    const yaml = `name: Test
+triggers:
+  - type: alert
+steps:
+  - name: loop
+    type: foreach
+    foreach: "{{ event.alerts }}"
+    steps:
+      - name: log_each
+        type: console
+        with:
+          message: "{{ foreach.item.id }}"`;
+    const result = await evaluateYaml(yaml);
+    expect(result.score).toBe(1);
+    expect(result.metadata?.total).toBe(2);
+  });
+
+  it('fails foreach.item references outside any foreach', async () => {
+    const yaml = `name: Test
+triggers:
+  - type: alert
+steps:
+  - name: log
+    type: console
+    with:
+      message: "{{ foreach.item.id }}"`;
+    const result = await evaluateYaml(yaml);
+    expect(result.score).toBe(0);
+    expect(result.metadata?.failures[0].reason).toMatch(/outside any foreach/);
+  });
+
+  it('passes event.* references under an alert trigger', async () => {
+    const yaml = `name: Test
+triggers:
+  - type: alert
+steps:
+  - name: log
+    type: console
+    with:
+      message: "{{ event.alerts }}"`;
+    const result = await evaluateYaml(yaml);
+    expect(result.score).toBe(1);
+  });
+
+  it('fails event.* references under a manual trigger', async () => {
+    const yaml = `name: Test
+triggers:
+  - type: manual
+steps:
+  - name: log
+    type: console
+    with:
+      message: "{{ event.alerts }}"`;
+    const result = await evaluateYaml(yaml);
+    expect(result.score).toBe(0);
+    expect(result.metadata?.failures[0].reason).toMatch(/alert.*detection-rule.*webhook/);
+  });
+
+  it('passes consts references when the key is declared', async () => {
+    const yaml = `name: Test
+triggers:
+  - type: manual
+consts:
+  api_key: "redacted"
+steps:
+  - name: req
+    type: http
+    with:
+      headers:
+        Authorization: "{{ consts.api_key }}"`;
+    const result = await evaluateYaml(yaml);
+    expect(result.score).toBe(1);
+  });
+
+  it('fails consts references when the key is missing', async () => {
+    const yaml = `name: Test
+triggers:
+  - type: manual
+consts:
+  api_key: "redacted"
+steps:
+  - name: req
+    type: http
+    with:
+      headers:
+        Authorization: "{{ consts.missing_secret }}"`;
+    const result = await evaluateYaml(yaml);
+    expect(result.score).toBe(0);
+    expect(result.metadata?.failures[0].reason).toMatch(/missing_secret/);
+  });
+
+  it('strips filters and validates the underlying reference', async () => {
+    const yaml = `name: Test
+triggers:
+  - type: alert
+steps:
+  - name: log
+    type: console
+    with:
+      message: "{{ event.alerts | json }}"`;
+    const result = await evaluateYaml(yaml);
+    expect(result.score).toBe(1);
+  });
+
+  it('handles control-flow form ${{ ... }} the same as {{ ... }}', async () => {
+    const yaml = `name: Test
+triggers:
+  - type: manual
+steps:
+  - name: a
+    type: console
+    with:
+      message: "first"
+  - name: b
+    type: if
+    condition: "\${{ steps.a.output != empty }}"
+    steps:
+      - name: log
+        type: console
+        with:
+          message: "ok"`;
+    const result = await evaluateYaml(yaml);
+    expect(result.score).toBe(1);
+  });
+
+  it('tracks foreach context across nested foreach loops', async () => {
+    const yaml = `name: Test
+triggers:
+  - type: alert
+steps:
+  - name: outer
+    type: foreach
+    foreach: "{{ event.alerts }}"
+    steps:
+      - name: inner
+        type: foreach
+        foreach: "{{ foreach.item.alert_ids }}"
+        steps:
+          - name: log
+            type: console
+            with:
+              message: "{{ foreach.item }}"`;
+    const result = await evaluateYaml(yaml);
+    expect(result.score).toBe(1);
+  });
+
+  it('counts mixed valid + invalid references and returns a partial score', async () => {
+    const yaml = `name: Test
+triggers:
+  - type: manual
+steps:
+  - name: a
+    type: console
+    with:
+      message: "{{ steps.a.output.x }} and {{ steps.missing.output.y }}"`;
+    const result = await evaluateYaml(yaml);
+    expect(result.score).toBe(0.5);
+    expect(result.metadata?.total).toBe(2);
+    expect(result.metadata?.correct).toBe(1);
   });
 });

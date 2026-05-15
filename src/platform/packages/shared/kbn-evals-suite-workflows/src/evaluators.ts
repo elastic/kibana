@@ -492,6 +492,248 @@ export function createEditPreservationEvaluator() {
   };
 }
 
+// ---------------------------------------------------------------------------
+// Liquid templating correctness
+// ---------------------------------------------------------------------------
+
+/**
+ * Matches both standard Liquid `{{ ... }}` and the workflow-specific control-flow
+ * `${{ ... }}` form. The inner capture is the raw expression body.
+ */
+const LIQUID_EXPRESSION_RE = /\$?\{\{\s*([\s\S]+?)\s*\}\}/g;
+
+/** Drops Liquid filters (` | json`, ` | date: "..."`) and operator tails. */
+const extractReferenceHead = (rawExpr: string): string | undefined => {
+  const beforeFilter = rawExpr.split('|')[0].trim();
+  // Take the first whitespace- or operator-delimited token: `steps.x.output != empty` → `steps.x.output`.
+  const head = beforeFilter.split(/[\s=!<>+]/)[0];
+  if (!head) return undefined;
+  // Skip pure literals (strings / numbers) — they are not references to validate.
+  if (/^["'`]/.test(head) || /^\d/.test(head)) return undefined;
+  return head;
+};
+
+interface LiquidValidationContext {
+  stepNames: Set<string>;
+  triggerTypes: Set<string>;
+  consts: Set<string>;
+  /** Stack of enclosing foreach step names. Non-empty ⇒ `foreach.*` references are legal. */
+  foreachStack: string[];
+}
+
+interface LiquidValidationFailure {
+  ref: string;
+  reason: string;
+  /** Step name where the bad reference appears, if known. */
+  inStep?: string;
+}
+
+const TRIGGER_EVENT_TYPES = new Set(['alert', 'detection-rule', 'webhook']);
+
+const validateLiquidReference = (
+  ref: string,
+  ctx: LiquidValidationContext
+): { valid: true } | { valid: false; reason: string } => {
+  const [root, second] = ref.split('.');
+  switch (root) {
+    case 'steps': {
+      if (!second) return { valid: false, reason: 'steps reference missing step name' };
+      // Step name may be followed by `[0]` etc — strip subscript before matching.
+      const stepName = second.replace(/\[.*$/, '');
+      if (!ctx.stepNames.has(stepName)) {
+        return { valid: false, reason: `references unknown step "${stepName}"` };
+      }
+      return { valid: true };
+    }
+    case 'foreach': {
+      if (ctx.foreachStack.length === 0) {
+        return { valid: false, reason: 'foreach.* used outside any foreach' };
+      }
+      return { valid: true };
+    }
+    case 'event': {
+      const hasEventTrigger = [...ctx.triggerTypes].some((t) => TRIGGER_EVENT_TYPES.has(t));
+      if (!hasEventTrigger) {
+        return {
+          valid: false,
+          reason: `event.* requires alert / detection-rule / webhook trigger; declared triggers: ${
+            [...ctx.triggerTypes].join(', ') || '(none)'
+          }`,
+        };
+      }
+      return { valid: true };
+    }
+    case 'consts': {
+      if (!second) return { valid: false, reason: 'consts reference missing key' };
+      if (!ctx.consts.has(second)) {
+        return { valid: false, reason: `references undeclared consts key "${second}"` };
+      }
+      return { valid: true };
+    }
+    default:
+      // Anything else (helpers, literals, filter-only forms like `"now" | date`) is not validated here.
+      return { valid: true };
+  }
+};
+
+const collectStringsFromValue = (value: unknown, acc: string[]): void => {
+  if (typeof value === 'string') {
+    acc.push(value);
+  } else if (Array.isArray(value)) {
+    for (const item of value) collectStringsFromValue(item, acc);
+  } else if (value && typeof value === 'object') {
+    for (const v of Object.values(value as Record<string, unknown>)) {
+      collectStringsFromValue(v, acc);
+    }
+  }
+};
+
+interface RawStep {
+  name?: string;
+  type?: string;
+  foreach?: unknown;
+  condition?: unknown;
+  steps?: RawStep[];
+  with?: unknown;
+  [key: string]: unknown;
+}
+
+const walkStepsForLiquid = (
+  steps: RawStep[],
+  ctx: LiquidValidationContext,
+  visit: (refs: Array<{ ref: string; inStep?: string }>, ctx: LiquidValidationContext) => void
+): void => {
+  for (const step of steps) {
+    const strings: string[] = [];
+    // Pull strings from everything except the nested `steps` array.
+    for (const [key, value] of Object.entries(step)) {
+      if (key === 'steps') continue;
+      collectStringsFromValue(value, strings);
+    }
+
+    const refs: Array<{ ref: string; inStep?: string }> = [];
+    for (const str of strings) {
+      LIQUID_EXPRESSION_RE.lastIndex = 0;
+      let match: RegExpExecArray | null;
+
+      while ((match = LIQUID_EXPRESSION_RE.exec(str)) !== null) {
+        const head = extractReferenceHead(match[1]);
+        if (head) refs.push({ ref: head, inStep: step.name });
+      }
+    }
+    if (refs.length > 0) visit(refs, ctx);
+
+    if (Array.isArray(step.steps) && step.steps.length > 0) {
+      const isForeach = step.type === 'foreach';
+      const nextCtx: LiquidValidationContext = isForeach
+        ? { ...ctx, foreachStack: [...ctx.foreachStack, step.name ?? 'foreach'] }
+        : ctx;
+      walkStepsForLiquid(step.steps, nextCtx, visit);
+    }
+  }
+};
+
+interface LiquidCorrectnessResult {
+  score: number | null;
+  label?: 'PASS' | 'FAIL' | 'N/A';
+  explanation?: string;
+  metadata?: {
+    total: number;
+    correct: number;
+    failures: LiquidValidationFailure[];
+  };
+}
+
+/**
+ * Score Liquid expressions in the produced YAML for *correctness* (the reference
+ * resolves to a real step / foreach context / trigger field / consts key), not
+ * merely *presence*.
+ *
+ * Returns score = correct / total. Returns N/A when no expressions are found
+ * (skip — nothing to evaluate) or when the YAML fails to parse.
+ */
+export function createLiquidCorrectnessEvaluator() {
+  return {
+    name: 'LiquidCorrectness',
+    kind: 'CODE' as const,
+    evaluate: async ({
+      output,
+    }: {
+      output: WorkflowTaskOutput;
+    }): Promise<LiquidCorrectnessResult> => {
+      if (!output.resultYaml) {
+        return {
+          score: null,
+          label: 'N/A',
+          explanation: 'No result YAML to evaluate Liquid expressions on',
+        };
+      }
+
+      let parsed: unknown;
+      try {
+        parsed = parseYaml(output.resultYaml);
+      } catch {
+        return { score: null, label: 'N/A', explanation: 'YAML parse failed' };
+      }
+      if (!parsed || typeof parsed !== 'object') {
+        return { score: null, label: 'N/A', explanation: 'YAML root is not an object' };
+      }
+
+      const workflow = parsed as {
+        steps?: RawStep[];
+        triggers?: Array<{ type?: string }>;
+        consts?: Record<string, unknown>;
+      };
+      const rawSteps = Array.isArray(workflow.steps) ? workflow.steps : [];
+      const flatSteps = collectAllSteps(rawSteps as unknown as WorkflowYaml['steps']);
+
+      const ctx: LiquidValidationContext = {
+        stepNames: new Set(flatSteps.map((s) => s.name).filter((n): n is string => !!n)),
+        triggerTypes: new Set(
+          (workflow.triggers ?? []).map((t) => t?.type).filter((t): t is string => !!t)
+        ),
+        consts: new Set(workflow.consts ? Object.keys(workflow.consts) : []),
+        foreachStack: [],
+      };
+
+      const failures: LiquidValidationFailure[] = [];
+      let total = 0;
+      let correct = 0;
+
+      walkStepsForLiquid(rawSteps, ctx, (refs, currentCtx) => {
+        for (const { ref, inStep } of refs) {
+          total += 1;
+          const result = validateLiquidReference(ref, currentCtx);
+          if (result.valid) {
+            correct += 1;
+          } else {
+            failures.push({ ref, reason: result.reason, inStep });
+          }
+        }
+      });
+
+      if (total === 0) {
+        return {
+          score: null,
+          label: 'N/A',
+          explanation: 'No Liquid expressions found in the workflow',
+        };
+      }
+
+      const score = correct / total;
+      return {
+        score,
+        label: score === 1 ? 'PASS' : 'FAIL',
+        explanation:
+          failures.length === 0
+            ? `All ${total} Liquid references resolved correctly.`
+            : `${correct}/${total} references valid. First failure: ${failures[0].ref} — ${failures[0].reason}`,
+        metadata: { total, correct, failures },
+      };
+    },
+  };
+}
+
 const LOOKUP_TOOL_PATTERNS = [
   'get_step_definitions',
   'get_connectors',

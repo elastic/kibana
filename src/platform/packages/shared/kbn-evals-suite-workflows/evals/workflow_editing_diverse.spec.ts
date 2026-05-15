@@ -34,6 +34,7 @@ import {
   createCriteriaEvaluator,
   createStructuralCorrectnessEvaluator,
   createEditPreservationEvaluator,
+  createLiquidCorrectnessEvaluator,
   createEfficiencyEvaluator,
   createLatencyEvaluator,
   skipInfraErrors,
@@ -52,6 +53,8 @@ const WORKFLOW_YAML_ATTACHMENT_TYPE = 'workflow.yaml';
 
 const skip = <E extends WorkflowEditExample>(e: Parameters<typeof skipInfraErrors<E>>[0]) =>
   skipInfraErrors(skipNegativeCases(e));
+
+const liquid = skipInfraErrors(skipNegativeCases(createLiquidCorrectnessEvaluator()));
 
 const evaluate = base.extend<
   {
@@ -108,6 +111,7 @@ const evaluate = base.extend<
             skip(createToolUsageEvaluator()),
             skip(createStructuralCorrectnessEvaluator()),
             skip(createEditPreservationEvaluator()),
+            liquid,
             skip(createEfficiencyEvaluator()),
             skip(createLatencyEvaluator()),
             skipInfraErrors(createCriteriaEvaluator({ evaluators })),

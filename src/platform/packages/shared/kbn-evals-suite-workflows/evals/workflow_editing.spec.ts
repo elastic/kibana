@@ -20,6 +20,7 @@ import {
   createCriteriaEvaluator,
   createStructuralCorrectnessEvaluator,
   createEditPreservationEvaluator,
+  createLiquidCorrectnessEvaluator,
   createEfficiencyEvaluator,
   createToolTrajectoryEvaluator,
   createLatencyEvaluator,
@@ -28,6 +29,8 @@ import {
   extractResultYaml,
   extractYamlFromAttachments,
 } from '../src/evaluators';
+
+const liquid = skipInfraErrors(skipNegativeCases(createLiquidCorrectnessEvaluator()));
 
 const WORKFLOW_YAML_ATTACHMENT_TYPE = 'workflow.yaml';
 
@@ -115,6 +118,7 @@ const evaluate = base.extend<
             skip(createToolUsageEvaluator()),
             skip(createStructuralCorrectnessEvaluator()),
             skip(createEditPreservationEvaluator()),
+            liquid,
             skip(createEfficiencyEvaluator()),
             skip(createToolTrajectoryEvaluator()),
             skip(createLatencyEvaluator()),

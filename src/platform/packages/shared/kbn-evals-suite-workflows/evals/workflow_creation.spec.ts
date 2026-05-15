@@ -19,6 +19,7 @@ import {
   createRejectionEvaluator,
   createCriteriaEvaluator,
   createStructuralCorrectnessEvaluator,
+  createLiquidCorrectnessEvaluator,
   createEfficiencyEvaluator,
   createToolTrajectoryEvaluator,
   createLatencyEvaluator,
@@ -30,6 +31,8 @@ import {
 
 const skip = <E extends WorkflowCreateExample>(e: Parameters<typeof skipInfraErrors<E>>[0]) =>
   skipInfraErrors(skipNegativeCases(e));
+
+const liquid = skipInfraErrors(skipNegativeCases(createLiquidCorrectnessEvaluator()));
 
 const evaluate = base.extend<
   {
@@ -78,6 +81,7 @@ const evaluate = base.extend<
             skip(createEditSuccessEvaluator()),
             skip(createValidationPassEvaluator()),
             skip(createStructuralCorrectnessEvaluator()),
+            liquid,
             skip(createEfficiencyEvaluator()),
             skip(createToolTrajectoryEvaluator()),
             skip(createLatencyEvaluator()),
