@@ -48,9 +48,6 @@ const createMockTransaction = (span: MockSpan | undefined): MockTransaction => (
 describe('reportChartSectionError', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    // Default: no active transaction. Tests that exercise the span path
-    // override this explicitly so the default keeps existing assertions
-    // (which only check `apm.captureError`) honest.
     getCurrentTransactionMock.mockReturnValue(undefined);
   });
 
@@ -166,8 +163,6 @@ describe('reportChartSectionError', () => {
       error_type: CHART_SECTION_ERROR_TYPE_LABEL,
       chart_section_source: 'useLensProps',
     });
-    // captureError must run inside the span lifecycle so the RUM agent
-    // associates the captured error with the failed span.
     expect(captureErrorMock).toHaveBeenCalledWith(plainError, {
       labels: {
         error_type: CHART_SECTION_ERROR_TYPE_LABEL,
@@ -201,10 +196,6 @@ describe('reportChartSectionError', () => {
     });
   });
 
-  // Tests below cover the caller-supplied `labels` correlation tags
-  // (e.g. `profile_id`, `chart_id`) that PR #265380 review feedback asked
-  // for so APM dashboards can filter chart-section errors by upstream
-  // context.
   describe('caller-supplied labels', () => {
     it('merges caller labels into the APM payload', () => {
       const plainError = new Error('boom');

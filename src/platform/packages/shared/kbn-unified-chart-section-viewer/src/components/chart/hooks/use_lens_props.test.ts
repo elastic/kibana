@@ -93,11 +93,7 @@ describe('useLensProps', () => {
       IntersectionObserver: MockIntersectionObserver,
     });
 
-    // Minimal stand-in for the real LensAttributes shape: the test only
-    // asserts that these nested keys round-trip through the hook, and
-    // LensConfigBuilder.build is mocked so its true signature is irrelevant.
-    // Each call returns a fresh object so reference-identity assertions
-    // (e.g. "did a rebuild produce new attributes?") work.
+    // Fresh object per call so reference-identity assertions work.
     const createMockLensAttributes = (): LensAttributes =>
       ({
         attributes: {},
@@ -340,12 +336,6 @@ describe('useLensProps', () => {
       const chartRef = createMockChartRef();
       const builderError = new Error('builder failed');
 
-      // First build rejects (the silent-failure path). Subsequent builds
-      // fall back to the beforeEach `mockImplementation` that resolves —
-      // after setBuildError triggers a re-render, buildAttributesFn runs
-      // again and goes down the `effectiveError` branch (build with no
-      // datasource) so the chart surfaces an error instead of spinning
-      // forever.
       LensConfigBuilderMock.prototype.build.mockImplementationOnce(() =>
         Promise.reject(builderError)
       );
@@ -371,23 +361,16 @@ describe('useLensProps', () => {
       expect(mockReportChartSectionError).toHaveBeenCalledWith({
         error: builderError,
         source: 'useLensProps',
-        // Correlation labels (PR #265380 review feedback). Kept in sync
-        // with the executionContext meta the hook also attaches to Lens
-        // so APM can filter chart-section errors by upstream profile.
         labels: {
           profile_id: 'testProfileId',
           chart_id: 'testChartId',
         },
       });
 
-      // After the setBuildError rerender, the hook should eventually yield
-      // defined lens props — the chart is no longer stuck loading.
       await waitFor(() => {
         expect(result.current).toBeDefined();
       });
 
-      // build() is called more than once — once for the failing call and
-      // at least once for the recovery re-build triggered by setBuildError.
       expect((LensConfigBuilder.prototype.build as jest.Mock).mock.calls.length).toBeGreaterThan(1);
     });
 
@@ -416,25 +399,16 @@ describe('useLensProps', () => {
         { initialProps: { query: 'FROM metrics-*' } }
       );
 
-      // First pass: build rejects, error is reported, effectiveError latches.
       await waitFor(() => {
         expect(mockReportChartSectionError).toHaveBeenCalled();
       });
 
-      // Resolve the error-branch rebuild that setBuildError triggers so the
-      // hook lands in a stable state before we assert recovery.
       await waitFor(() => {
         expect(result.current).toBeDefined();
       });
 
-      // Record the attributes produced while buildError was latched so we can
-      // assert that the successful rebuild below produces a fresh set.
       const latchedAttributes = result.current?.attributes;
 
-      // Trigger a successful rebuild by changing an input the effect depends
-      // on. buildAttributesFn returns a non-null value this time, the new
-      // tap() should fire setBuildError(undefined), and the hook should
-      // settle on fresh attributes from the non-error branch.
       rerender({ query: 'FROM other-metrics-*' });
 
       await act(async () => {
@@ -451,11 +425,7 @@ describe('useLensProps', () => {
     it('reports a persistent build failure only once across repeat fetches', async () => {
       const chartRef = createMockChartRef();
 
-      // Every build rejects with a freshly constructed Error sharing the
-      // same name+message — that's exactly the shape that would create the
-      // tight loop the dedup guards against (each retry produces a new
-      // reference, so React state and the useEffect dep on `effectiveError`
-      // keep changing).
+      // Same name+message but fresh Error reference each call — the dedup target.
       LensConfigBuilderMock.prototype.build.mockImplementation(() =>
         Promise.reject(new Error('persistent failure'))
       );
@@ -474,21 +444,16 @@ describe('useLensProps', () => {
         })
       );
 
-      // First failure surfaces.
       await waitFor(() => {
         expect(mockReportChartSectionError).toHaveBeenCalledTimes(1);
       });
 
-      // Drive several additional triggers; without dedup these would each
-      // produce a new Error instance, change `effectiveError`, re-fire the
-      // useEffect, and emit another report.
       for (let i = 0; i < 5; i++) {
         await act(async () => {
           discoverFetch$.next({ fetchParams, lensVisServiceState: undefined });
         });
       }
 
-      // Still only one report — the same logical failure was suppressed.
       expect(mockReportChartSectionError).toHaveBeenCalledTimes(1);
     });
 
@@ -496,12 +461,7 @@ describe('useLensProps', () => {
       const chartRef = createMockChartRef();
       const failureMessage = 'flaky failure';
 
-      // Mock sequence: first build rejects (failure streak A), second
-      // build resolves (recovery — clears the dedup key), third build
-      // rejects with the same name+message (a new streak that should be
-      // reported again because the previous streak ended in success).
-      // Anything after the third call falls through to the default
-      // resolve from beforeEach so the hook can settle.
+      // reject → resolve (clears dedup) → reject (new streak should re-fire).
       LensConfigBuilderMock.prototype.build
         .mockImplementationOnce(() => Promise.reject(new Error(failureMessage)))
         .mockImplementationOnce(() =>
@@ -527,9 +487,6 @@ describe('useLensProps', () => {
         })
       );
 
-      // Two distinct failure streaks separated by a successful build, so
-      // both should be reported. Without the on-success ref clear, only
-      // the first would land and the second would be wrongly suppressed.
       await waitFor(() => {
         expect(mockReportChartSectionError).toHaveBeenCalledTimes(2);
       });
@@ -561,8 +518,6 @@ describe('useLensProps', () => {
         expect(mockReportChartSectionError).toHaveBeenCalled();
       });
 
-      // Next external trigger should produce defined lensProps — the
-      // subscription did not terminate on the earlier throw.
       await act(async () => {
         discoverFetch$.next({ fetchParams, lensVisServiceState: undefined });
       });

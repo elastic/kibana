@@ -137,9 +137,6 @@ const createDefaultParams = (overrides?: Record<string, unknown>) => ({
   services: createMockServices() as unknown as ChartSectionProps['services'],
   isComponentVisible: true,
   selectedDimensionNames: undefined as Dimension[] | undefined,
-  // Forwarded as an APM correlation label on captured errors so dashboards
-  // can filter `useFetchMetricsData` failures by profile (PR #265380
-  // review feedback).
   profileId: 'test-profile-id',
 });
 
@@ -525,8 +522,7 @@ describe('useFetchMetricsData', () => {
         expect(result.current.error).toBeTruthy();
       });
 
-      // The wiring always forwards to the reporter; AbortError suppression
-      // lives inside reportChartSectionError (covered by its own unit test).
+      // AbortError suppression lives in the reporter (see its own tests).
       expect(mockReportChartSectionError).toHaveBeenCalledTimes(1);
       expect(mockReportChartSectionError).toHaveBeenCalledWith({
         error: abortError,
