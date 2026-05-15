@@ -70,7 +70,12 @@ SECURITY RULE DATA:
 Complete in order:
 
 1. When asked to modify, update, or create a detection rule, ALWAYS read the ${DETECTION_RULE_SKILL_NAME_ID} skill from the skills/security/rules directory.
-2. Use the available tools to research, create, or edit the rule and provide a response.`;
+2. Use the available tools to research, create, or edit the rule and provide a response.
+
+CRITICAL TOOL RULES:
+- To CREATE a new rule: ALWAYS use \`${SECURITY_CREATE_DETECTION_RULE_TOOL_ID}\`. NEVER use \`attachment_add\` for rule creation.
+- To EDIT an existing rule: use \`attachment_update\`.
+- Do NOT call \`attachment_add\` for security detection rules under any circumstances.`;
       return description;
     },
   };

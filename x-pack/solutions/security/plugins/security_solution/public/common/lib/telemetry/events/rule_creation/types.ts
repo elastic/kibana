@@ -7,11 +7,12 @@
 
 import type { RootSchema } from '@kbn/core/public';
 
-export type RuleCreationSource = 'ai' | 'manual';
+export type RuleCreationSource = 'ai' | 'ai_edit' | 'manual';
 
 export enum RuleCreationEventTypes {
   CreationInitialized = 'Rule Creation Initialized',
   AiAppliedToForm = 'AI Rule Applied to Form',
+  AiSaved = 'AI Rule Saved',
   RuleCreated = 'Rule Created',
   RuleEdited = 'Rule Edited',
   RuleCreationError = 'Rule Creation Error',
@@ -26,6 +27,14 @@ export interface ReportCreationInitializedParams {
 export interface ReportAiAppliedToFormParams {
   ruleType: string;
   sessionId: string;
+  durationSinceSessionStartMs: number;
+}
+
+export interface ReportAiSavedParams {
+  ruleId: string;
+  isUpdate: boolean;
+  sessionId: string;
+  applyCount: number;
   durationSinceSessionStartMs: number;
 }
 
@@ -68,6 +77,7 @@ export interface ReportCreationAbandonedParams {
 export interface RuleCreationTelemetryEventsMap {
   [RuleCreationEventTypes.CreationInitialized]: ReportCreationInitializedParams;
   [RuleCreationEventTypes.AiAppliedToForm]: ReportAiAppliedToFormParams;
+  [RuleCreationEventTypes.AiSaved]: ReportAiSavedParams;
   [RuleCreationEventTypes.RuleCreated]: ReportRuleCreatedParams;
   [RuleCreationEventTypes.RuleEdited]: ReportRuleEditedParams;
   [RuleCreationEventTypes.RuleCreationError]: ReportRuleCreationErrorParams;

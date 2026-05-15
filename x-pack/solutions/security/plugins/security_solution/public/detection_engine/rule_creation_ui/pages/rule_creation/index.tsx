@@ -88,8 +88,8 @@ import { useRuleForms, useRuleIndexPattern } from '../form';
 import { CustomHeaderPageMemo } from '..';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { AddRuleAttachmentToChatButton } from '../../components/add_rule_attachment_to_chat_button';
-import { useAgentBuilderRuleCreation } from './hooks/use_agent_builder_rule_creation';
 import { useAgentBuilderAvailability } from '../../../../agent_builder/hooks/use_agent_builder_availability';
+import { useAgentBuilderRuleCreation } from './hooks/use_agent_builder_rule_creation';
 import { useRuleCreationTelemetry } from './hooks/use_rule_creation_telemetry';
 
 const MyEuiPanel = styled(EuiPanel)<{
@@ -223,45 +223,27 @@ const CreateRulePageComponent: React.FC<{}> = () => {
 
   const defineFieldsTransform = useExperimentalFeatureFieldsTransform<DefineStepRule>();
 
-  const onAiCreatedRuleAppliedRef = useRef<(() => void | Promise<void>) | undefined>(undefined);
-  const { isAiRuleAppliedRef, getAiMeta, reportRuleCreated, reportRuleCreationError } =
-    useRuleCreationTelemetry(ruleType);
-
-  const { isAiRuleUpdateRef } = useAgentBuilderRuleCreation({
+  useAgentBuilderRuleCreation({
     defineStepForm,
     aboutStepForm,
     scheduleStepForm,
     actionsStepForm,
-    defineStepData,
-    aboutStepData,
-    scheduleStepData,
-    actionsStepData,
-    actionTypeRegistry: triggersActionsUi.actionTypeRegistry,
-    onAiCreatedRuleAppliedRef,
   });
+
+  const { isAiRuleAppliedRef, getAiMeta, reportRuleCreated, reportRuleCreationError } =
+    useRuleCreationTelemetry(ruleType);
 
   useEffect(() => {
     if (prevRuleType && prevRuleType !== ruleType) {
       aboutStepForm.updateFieldValues({
         threatIndicatorPath: isThreatMatchRuleValue ? DEFAULT_INDICATOR_SOURCE_PATH : undefined,
       });
-      if (isAiRuleUpdateRef.current) {
-        isAiRuleUpdateRef.current = false;
-      } else {
-        scheduleStepForm.updateFieldValues(
-          isThreatMatchRuleValue ? defaultThreatMatchSchedule : defaultSchedule
-        );
-      }
+      scheduleStepForm.updateFieldValues(
+        isThreatMatchRuleValue ? defaultThreatMatchSchedule : defaultSchedule
+      );
     }
     setPrevRuleType(ruleType);
-  }, [
-    aboutStepForm,
-    scheduleStepForm,
-    isThreatMatchRuleValue,
-    prevRuleType,
-    ruleType,
-    isAiRuleUpdateRef,
-  ]);
+  }, [aboutStepForm, scheduleStepForm, isThreatMatchRuleValue, prevRuleType, ruleType]);
 
   const { starting: isStartingJobs, startMlJobs } = useStartMlJobs();
 
@@ -337,29 +319,6 @@ const CreateRulePageComponent: React.FC<{}> = () => {
   goToStepRef.current = goToStep;
   const toggleStepAccordionRef = useRef(toggleStepAccordion);
   toggleStepAccordionRef.current = toggleStepAccordion;
-
-  onAiCreatedRuleAppliedRef.current = async () => {
-    isAiRuleAppliedRef.current = true;
-    const o = openStepsRef.current;
-    if (o[RuleStep.defineRule]) {
-      toggleStepAccordionRef.current(RuleStep.defineRule);
-    }
-    if (o[RuleStep.aboutRule]) {
-      toggleStepAccordionRef.current(RuleStep.aboutRule);
-    }
-    if (o[RuleStep.scheduleRule]) {
-      toggleStepAccordionRef.current(RuleStep.scheduleRule);
-    }
-
-    await Promise.all([
-      defineStepForm.validate(),
-      aboutStepForm.validate(),
-      scheduleStepForm.validate(),
-      actionsStepForm.validate(),
-    ]);
-
-    goToStepRef.current(RuleStep.ruleActions);
-  };
 
   const validateStep = useCallback(
     async (step: RuleStep) => {

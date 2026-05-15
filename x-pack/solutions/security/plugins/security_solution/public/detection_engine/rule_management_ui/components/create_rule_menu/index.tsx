@@ -36,18 +36,6 @@ interface CreateRuleContextMenuProps {
   isDisabled?: boolean;
 }
 
-/**
- * Alternative implementation using SecuritySolutionLinkButton components
- * for better integration with existing routing
- */
-const AI_RULE_CREATION_INITIAL_MESSAGE = `Create ES|QL SIEM detection rule (name, description, data sources, detection logic, severity, risk score, schedule, tags, and MITRE ATT&CK mappings) using dedicated detection rule creation tool. Always render inline the latest version of the rule attachment.
-
-You can review and edit everything before enabling the rule. 
-Desired behavior or activity to detect:
-
-==== YOUR DESCRIPTION HERE====
-`;
-
 const AI_RULE_CREATION_MENU_TOUR_SUBTITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.aiRuleCreationTour.subtitle',
   {
@@ -150,8 +138,6 @@ export const CreateRuleMenu: React.FC<CreateRuleContextMenuProps> = ({ loading, 
     if (agentBuilder?.openChat) {
       agentBuilder.openChat({
         newConversation: true,
-        initialMessage: AI_RULE_CREATION_INITIAL_MESSAGE,
-        autoSendInitialMessage: false,
         sessionTag: 'security',
         attachments: [emptyRuleAttachment],
       });

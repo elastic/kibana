@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import type { Subscription } from 'rxjs';
 import { BehaviorSubject, combineLatestWith, Subject } from 'rxjs';
 import type * as H from 'history';
 import type {
@@ -85,6 +86,7 @@ import {
 } from './agent_builder/attachment_types';
 import type { SecurityCanvasEmbeddedBundle } from './agent_builder/components/security_redux_embedded_provider';
 import { registerWorkflowSteps } from './workflows/step_types';
+import { createSaveRuleHandler } from './detection_engine/common/save_rule_handler';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private config: SecuritySolutionUiConfigType;
@@ -96,6 +98,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
   private appUpdater$ = new Subject<AppUpdater>();
   private storage = new Storage(localStorage);
+  private saveRuleSub?: Subscription;
 
   // Lazily instantiated dependencies
   private _subPlugins?: SubPlugins;
@@ -303,6 +306,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.registerFleetExtensions(core, plugins);
     this.registerPluginUpdates(core, plugins); // Not awaiting to prevent blocking start execution
 
+    this.saveRuleSub = createSaveRuleHandler({
+      aiRuleCreation: this.services.aiRuleCreation,
+      notifications: core.notifications,
+      agentBuilder: plugins.agentBuilder,
+    });
+
     if (plugins.agentBuilder?.attachments) {
       registerAttachmentUiDefinitions(plugins.agentBuilder.attachments);
       registerRuleAttachment({
@@ -341,6 +350,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   }
 
   public stop() {
+    this.saveRuleSub?.unsubscribe();
     this.services.stop();
   }
 

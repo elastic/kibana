@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiBadge,
@@ -13,6 +13,7 @@ import {
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -21,6 +22,7 @@ import type {
   AttachmentUIDefinition,
   AttachmentRenderProps,
   AttachmentServiceStartContract,
+  InlineRenderCallbacks,
 } from '@kbn/agent-builder-browser/attachments';
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
@@ -29,13 +31,14 @@ import { RULES_UI_EDIT_PRIVILEGE } from '@kbn/security-solution-features/constan
 import { toSimpleRuleSchedule } from '../../../common/api/detection_engine/model/rule_schema/to_simple_rule_schedule';
 import type { RuleResponse } from '../../../common/api/detection_engine/model/rule_schema';
 import type { AiRuleCreationService } from '../../detection_engine/common/ai_rule_creation_store';
-import { RULES_PATH, SecurityAgentBuilderAttachments } from '../../../common/constants';
+import {
+  RULES_PATH,
+  RULES_CREATE_PATH,
+  SecurityAgentBuilderAttachments,
+} from '../../../common/constants';
 import { hasCapabilities } from '../../common/lib/capabilities';
 
 type RuleAttachment = Attachment<string, { text: string; attachmentLabel?: string }>;
-
-export const isOnRuleFormPage = (pathname: string): boolean =>
-  pathname.includes(RULES_PATH) && (pathname.includes('/create') || pathname.includes('/edit'));
 
 const parseRuleFromAttachment = (attachment: RuleAttachment): RuleResponse | null => {
   try {
@@ -163,8 +166,108 @@ const IndexPatterns: React.FC<{ patterns: string[] }> = ({ patterns }) => (
   </>
 );
 
-const RuleInlineContent: React.FC<AttachmentRenderProps<RuleAttachment>> = ({ attachment }) => {
+interface RuleInlineContentProps extends AttachmentRenderProps<RuleAttachment> {
+  callbacks?: InlineRenderCallbacks;
+  application: ApplicationStart;
+  aiRuleCreation: AiRuleCreationService;
+}
+
+const isOnRuleDetailsPage = (ruleId: string): boolean =>
+  window.location.pathname.includes(`${RULES_PATH}/id/${ruleId}`);
+
+const RuleInlineContent: React.FC<RuleInlineContentProps> = ({
+  attachment,
+  callbacks,
+  application,
+  aiRuleCreation,
+}) => {
   const rule = parseRuleFromAttachment(attachment);
+  const ruleRef = useRef<RuleResponse | null>(rule);
+  ruleRef.current = rule;
+
+  // Hold callbacks in a ref so the button-registration effect doesn't re-run
+  // every render (the framework creates a new callbacks object each render,
+  // and including it in deps would cause an infinite setState loop).
+  const callbacksRef = useRef(callbacks);
+  callbacksRef.current = callbacks;
+
+  const canEditRules = hasCapabilities(application.capabilities, RULES_UI_EDIT_PRIVILEGE);
+
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    setReady(true);
+  }, []);
+
+  const [isDirty, setIsDirty] = useState(false);
+  useEffect(() => {
+    const sub = aiRuleCreation.dirty$.subscribe(setIsDirty);
+    return () => sub.unsubscribe();
+  }, [aiRuleCreation]);
+
+  const handleSave = useCallback(() => {
+    if (ruleRef.current) {
+      aiRuleCreation.requestSaveRule(ruleRef.current);
+    }
+  }, [aiRuleCreation]);
+
+  const handleOpenInForm = useCallback(() => {
+    const current = ruleRef.current;
+    if (!current) return;
+    aiRuleCreation.setAiCreatedRule(current);
+    application.navigateToApp('securitySolutionUI', {
+      path: current.id ? `${RULES_PATH}/id/${current.id}/edit` : RULES_CREATE_PATH,
+    });
+  }, [aiRuleCreation, application]);
+
+  useEffect(() => {
+    if (!ready || !callbacksRef.current) {
+      return;
+    }
+    const registerActionButtons = callbacksRef.current.registerActionButtons;
+    const buttons = [];
+
+    if (canEditRules) {
+      buttons.push({
+        label: rule?.id
+          ? i18n.translate('xpack.securitySolution.agentBuilder.ruleAttachment.saveChanges', {
+              defaultMessage: 'Save changes',
+            })
+          : i18n.translate('xpack.securitySolution.agentBuilder.ruleAttachment.saveRule', {
+              defaultMessage: 'Save rule',
+            }),
+        icon: 'save' as const,
+        type: ActionButtonType.PRIMARY,
+        color: 'primary',
+        handler: handleSave,
+      });
+
+      buttons.push({
+        label: i18n.translate('xpack.securitySolution.agentBuilder.ruleAttachment.openInForm', {
+          defaultMessage: 'Open in form',
+        }),
+        icon: 'pencil' as const,
+        type: ActionButtonType.SECONDARY,
+        handler: handleOpenInForm,
+      });
+    }
+
+    if (rule?.id && !isOnRuleDetailsPage(rule.id)) {
+      buttons.push({
+        label: i18n.translate('xpack.securitySolution.agentBuilder.ruleAttachment.viewRule', {
+          defaultMessage: 'View rule',
+        }),
+        icon: 'popout' as const,
+        type: ActionButtonType.SECONDARY,
+        handler: () => {
+          application.navigateToApp('securitySolutionUI', {
+            path: `${RULES_PATH}/id/${rule.id}`,
+          });
+        },
+      });
+    }
+
+    registerActionButtons(buttons);
+  }, [ready, rule?.id, canEditRules, application, handleSave, handleOpenInForm]);
 
   if (!rule) {
     return <EmptyRuleContent />;
@@ -177,6 +280,38 @@ const RuleInlineContent: React.FC<AttachmentRenderProps<RuleAttachment>> = ({ at
 
   return (
     <EuiPanel paddingSize="m" hasShadow={false} hasBorder={false}>
+      {rule.id && (
+        <>
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiIcon type="check" color="success" size="s" aria-hidden={true} />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs" color="success">
+                    {i18n.translate('xpack.securitySolution.agentBuilder.ruleAttachment.saved', {
+                      defaultMessage: 'Saved',
+                    })}
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            {isDirty && (
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="warning">
+                  {i18n.translate(
+                    'xpack.securitySolution.agentBuilder.ruleAttachment.unsavedChanges',
+                    { defaultMessage: 'Unsaved changes' }
+                  )}
+                </EuiBadge>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+          <EuiSpacer size="s" />
+        </>
+      )}
+
       {rule.type && (
         <>
           <EuiText size="xs">
@@ -293,37 +428,12 @@ export const createRuleAttachmentDefinition = ({
       defaultMessage: 'Security Rule',
     }),
   getIcon: () => 'securityApp',
-  renderInlineContent: (props) => <RuleInlineContent {...props} />,
-  getActionButtons: ({ attachment, openSidebarConversation }) => {
-    const rule = parseRuleFromAttachment(attachment);
-    const canEditRules = hasCapabilities(application.capabilities, RULES_UI_EDIT_PRIVILEGE);
-    if (!rule || !canEditRules) {
-      return [];
-    }
-
-    const onRuleForm = isOnRuleFormPage(window.location.pathname);
-
-    return [
-      {
-        label: onRuleForm
-          ? i18n.translate('xpack.securitySolution.agentBuilder.ruleAttachment.buildRule', {
-              defaultMessage: 'Update rule',
-            })
-          : i18n.translate('xpack.securitySolution.agentBuilder.ruleAttachment.applyToCreation', {
-              defaultMessage: 'Apply to creation',
-            }),
-        icon: 'plus',
-        type: ActionButtonType.PRIMARY,
-        handler: () => {
-          aiRuleCreation.setAiCreatedRule(rule);
-          if (!onRuleForm) {
-            application.navigateToApp('securitySolutionUI', {
-              path: '/rules/create',
-            });
-            openSidebarConversation?.();
-          }
-        },
-      },
-    ];
-  },
+  renderInlineContent: (props, callbacks) => (
+    <RuleInlineContent
+      {...props}
+      callbacks={callbacks}
+      application={application}
+      aiRuleCreation={aiRuleCreation}
+    />
+  ),
 });

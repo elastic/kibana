@@ -9,7 +9,7 @@ import { firstValueFrom } from 'rxjs';
 import type { RuleResponse } from '../../../common/api/detection_engine/model/rule_schema';
 import { AiRuleCreationService } from './ai_rule_creation_store';
 
-const mockRule = { name: 'Test Rule', type: 'query' } as RuleResponse;
+const mockRule = { name: 'Test Rule', type: 'query', id: 'rule-1' } as RuleResponse;
 
 describe('AiRuleCreationService', () => {
   let service: AiRuleCreationService;
@@ -18,74 +18,104 @@ describe('AiRuleCreationService', () => {
     service = new AiRuleCreationService();
   });
 
-  describe('aiCreatedRule$', () => {
-    it('initially emits null', async () => {
-      const value = await firstValueFrom(service.aiCreatedRule$);
-      expect(value).toBeNull();
-    });
-
-    it('emits the rule after setAiCreatedRule', async () => {
-      service.setAiCreatedRule(mockRule);
-      const value = await firstValueFrom(service.aiCreatedRule$);
+  describe('saveRuleRequest$', () => {
+    it('emits the rule after requestSaveRule', async () => {
+      const promise = firstValueFrom(service.saveRuleRequest$);
+      service.requestSaveRule(mockRule);
+      const value = await promise;
       expect(value).toEqual(mockRule);
-    });
-
-    it('emits null after clearAiCreatedRule', async () => {
-      service.setAiCreatedRule(mockRule);
-      service.clearAiCreatedRule();
-      const value = await firstValueFrom(service.aiCreatedRule$);
-      expect(value).toBeNull();
     });
   });
 
-  describe('formSyncActive$', () => {
+  describe('lastSavedRuleId$', () => {
+    it('initially emits null', async () => {
+      const value = await firstValueFrom(service.lastSavedRuleId$);
+      expect(value).toBeNull();
+    });
+
+    it('emits the id after setLastSavedRuleId', async () => {
+      service.setLastSavedRuleId('rule-1');
+      const value = await firstValueFrom(service.lastSavedRuleId$);
+      expect(value).toBe('rule-1');
+    });
+
+    it('getLastSavedRuleId returns current value synchronously', () => {
+      expect(service.getLastSavedRuleId()).toBeNull();
+      service.setLastSavedRuleId('rule-1');
+      expect(service.getLastSavedRuleId()).toBe('rule-1');
+    });
+  });
+
+  describe('dirty$', () => {
     it('initially emits false', async () => {
-      const value = await firstValueFrom(service.formSyncActive$);
+      const value = await firstValueFrom(service.dirty$);
       expect(value).toBe(false);
     });
 
-    it('emits true after activateFormSync', async () => {
-      service.activateFormSync();
-      const value = await firstValueFrom(service.formSyncActive$);
+    it('emits true after markDirty', async () => {
+      service.markDirty();
+      const value = await firstValueFrom(service.dirty$);
       expect(value).toBe(true);
     });
 
-    it('deduplicates consecutive identical values via distinctUntilChanged', () => {
-      const emissions: boolean[] = [];
-      const subscription = service.formSyncActive$.subscribe((v) => emissions.push(v));
+    it('emits false after clearDirty', async () => {
+      service.markDirty();
+      service.clearDirty();
+      const value = await firstValueFrom(service.dirty$);
+      expect(value).toBe(false);
+    });
+  });
 
-      service.activateFormSync();
-      service.activateFormSync();
-      service.activateFormSync();
+  describe('session management', () => {
+    it('startSession creates a new session', () => {
+      const session = service.startSession();
+      expect(session.sessionId).toBeDefined();
+      expect(session.applyCount).toBe(0);
+    });
 
-      subscription.unsubscribe();
-      expect(emissions).toEqual([false, true]);
+    it('incrementApplyCount increments the apply count', () => {
+      service.startSession();
+      service.incrementApplyCount();
+      service.incrementApplyCount();
+      expect(service.getSession()?.applyCount).toBe(2);
+    });
+
+    it('clearSession sets session to null', () => {
+      service.startSession();
+      service.clearSession();
+      expect(service.getSession()).toBeNull();
     });
   });
 
   describe('reset', () => {
-    it('resets aiCreatedRule$ to null', async () => {
-      service.setAiCreatedRule(mockRule);
+    it('resets lastSavedRuleId$ to null', async () => {
+      service.setLastSavedRuleId('rule-1');
       service.reset();
-      const value = await firstValueFrom(service.aiCreatedRule$);
+      const value = await firstValueFrom(service.lastSavedRuleId$);
       expect(value).toBeNull();
     });
 
-    it('resets formSyncActive$ to false', async () => {
-      service.activateFormSync();
+    it('resets dirty$ to false', async () => {
+      service.markDirty();
       service.reset();
-      const value = await firstValueFrom(service.formSyncActive$);
+      const value = await firstValueFrom(service.dirty$);
       expect(value).toBe(false);
+    });
+
+    it('resets session to null', () => {
+      service.startSession();
+      service.reset();
+      expect(service.getSession()).toBeNull();
     });
   });
 
   it('each instance maintains independent state', async () => {
     const other = new AiRuleCreationService();
 
-    service.setAiCreatedRule(mockRule);
-    service.activateFormSync();
+    service.setLastSavedRuleId('rule-1');
+    service.markDirty();
 
-    expect(await firstValueFrom(other.aiCreatedRule$)).toBeNull();
-    expect(await firstValueFrom(other.formSyncActive$)).toBe(false);
+    expect(await firstValueFrom(other.lastSavedRuleId$)).toBeNull();
+    expect(await firstValueFrom(other.dirty$)).toBe(false);
   });
 });

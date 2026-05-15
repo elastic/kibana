@@ -11,7 +11,7 @@ import { RuleCreationEventTypes } from './types';
 const creationSourceSchema = {
   type: 'keyword' as const,
   _meta: {
-    description: 'How the rule was created: "ai" or "manual"',
+    description: 'How the rule was created: "ai", "ai_edit", or "manual"',
     optional: false as const,
   },
 };
@@ -53,6 +53,35 @@ const durationSchema = {
   _meta: {
     description: 'Milliseconds elapsed since the rule creation session started (0 for manual)',
     optional: false as const,
+  },
+};
+
+const aiSavedEvent: RuleCreationTelemetryEvent = {
+  eventType: RuleCreationEventTypes.AiSaved,
+  schema: {
+    ruleId: {
+      type: 'keyword' as const,
+      _meta: {
+        description: 'The ID of the saved detection rule',
+        optional: false as const,
+      },
+    },
+    isUpdate: {
+      type: 'boolean' as const,
+      _meta: {
+        description: 'Whether the save was an update (true) or a create (false)',
+        optional: false as const,
+      },
+    },
+    sessionId: sessionIdSchema,
+    applyCount: {
+      type: 'long' as const,
+      _meta: {
+        description: 'How many attachment_update calls were made before save',
+        optional: false as const,
+      },
+    },
+    durationSinceSessionStartMs: durationSchema,
   },
 };
 
@@ -143,6 +172,7 @@ const creationAbandonedEvent: RuleCreationTelemetryEvent = {
 export const ruleCreationTelemetryEvents = [
   creationInitializedEvent,
   aiAppliedToFormEvent,
+  aiSavedEvent,
   ruleCreatedEvent,
   ruleEditedEvent,
   ruleCreationErrorEvent,
