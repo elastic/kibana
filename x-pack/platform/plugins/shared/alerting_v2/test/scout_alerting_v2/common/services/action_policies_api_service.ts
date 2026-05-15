@@ -64,7 +64,7 @@ export const getActionPoliciesApiService = ({
   const update: ActionPoliciesApiService['update'] = ({ id, version, data }) =>
     measurePerformanceAsync(log, 'actionPolicies.update', async () => {
       const response = await kbnClient.request<ActionPolicyResponse>({
-        method: 'PUT',
+        method: 'PATCH',
         path: `${ALERTING_V2_ACTION_POLICY_API_PATH}/${encodeURIComponent(id)}`,
         headers: COMMON_HEADERS,
         body: { ...data, version },

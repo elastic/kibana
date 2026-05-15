@@ -167,12 +167,14 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
         buildCreateRuleData({
           metadata: { name: `Dispatcher test ${ruleId}` },
           schedule: { every: '1d' },
-          // A `WHERE _id == "__never_matches__"` query against an existing
-          // index is the cheapest no-op: it parses, runs successfully, and
-          // returns zero rows even if the executor task fires before the
-          // bulkDisable below lands.
+          // A `WHERE rule_id == "__never_matches__"` query against an
+          // existing index is the cheapest no-op: it parses, runs
+          // successfully, and returns zero rows even if the executor task
+          // fires before the bulkDisable below lands. (`_id` is not exposed
+          // as a column in ES|QL, so referencing it triggers a
+          // verification_exception.)
           evaluation: {
-            query: { base: 'FROM .alert-actions | WHERE _id == "__never_matches__"' },
+            query: { base: 'FROM .alert-actions | WHERE rule_id == "__never_matches__"' },
           },
           recovery_policy: { type: 'no_breach' },
           state_transition: { pending_count: 0, recovering_count: 0 },
@@ -245,11 +247,21 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
   apiTest(
     'dispatches all unique episodes when alert events have no prior fire actions',
     async ({ apiServices }) => {
-      // 3 episodes for rule-1, mirroring ALERT_EVENTS_TEST_DATA from the Jest test:
+      // 3 episodes for rule-1, mirroring ALERT_EVENTS_TEST_DATA from the Jest
+      // test. Timestamps are captured once and reused in the assertions so we
+      // compare against the exact strings written to `.alert-actions` (calling
+      // `relativeTime` again at expect time would drift by the seed→assert
+      // wall-clock delta and break strict equality).
+      //
       //  - episode-3 active                           (latest @ -10s)
       //  - episode-2 active -> inactive (collapsed)   (latest @ -45s)
-      //  - episode-1 active -> inactive (collapsed)   (latest @ -90s)
-      const ts = (sec: number) => relativeTime(sec);
+      //  - episode-1 active -> inactive (collapsed)   (latest @ -85s)
+      const tsEp3Active = relativeTime(10);
+      const tsEp2Inactive = relativeTime(45);
+      const tsEp2Active = relativeTime(50);
+      const tsEp1Inactive = relativeTime(85);
+      const tsEp1Active = relativeTime(90);
+
       const events: AlertEvent[] = [
         buildAlertEvent({
           ruleId: 'rule-1',
@@ -257,7 +269,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
           episodeId: 'rule-1-series-1-episode-3',
           episodeStatus: 'active',
           status: 'breached',
-          timestamp: ts(10),
+          timestamp: tsEp3Active,
         }),
         buildAlertEvent({
           ruleId: 'rule-1',
@@ -265,7 +277,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
           episodeId: 'rule-1-series-1-episode-2',
           episodeStatus: 'inactive',
           status: 'recovered',
-          timestamp: ts(45),
+          timestamp: tsEp2Inactive,
         }),
         buildAlertEvent({
           ruleId: 'rule-1',
@@ -273,7 +285,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
           episodeId: 'rule-1-series-1-episode-2',
           episodeStatus: 'active',
           status: 'breached',
-          timestamp: ts(50),
+          timestamp: tsEp2Active,
         }),
         buildAlertEvent({
           ruleId: 'rule-1',
@@ -281,7 +293,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
           episodeId: 'rule-1-series-1-episode-1',
           episodeStatus: 'inactive',
           status: 'recovered',
-          timestamp: ts(85),
+          timestamp: tsEp1Inactive,
         }),
         buildAlertEvent({
           ruleId: 'rule-1',
@@ -289,7 +301,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
           episodeId: 'rule-1-series-1-episode-1',
           episodeStatus: 'active',
           status: 'breached',
-          timestamp: ts(90),
+          timestamp: tsEp1Active,
         }),
       ];
 
@@ -310,12 +322,16 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
         });
       }
 
-      // Each fire's `last_series_event_timestamp` must equal the latest
-      // alert event timestamp seen for the corresponding episode.
+      // Each fire's `last_series_event_timestamp` is the COLLAPSED latest
+      // event for the corresponding episode (per the dispatcher contract,
+      // an episode that ended in `inactive` reports the inactive timestamp,
+      // not the earlier breach timestamp).
       const fireEpisodeTimestamps = fireActions
         .map((action) => action.last_series_event_timestamp)
         .sort();
-      expect(fireEpisodeTimestamps).toStrictEqual([ts(10), ts(45), ts(90)].sort());
+      expect(fireEpisodeTimestamps).toStrictEqual(
+        [tsEp1Inactive, tsEp2Inactive, tsEp3Active].sort()
+      );
 
       const notifiedActions = await apiServices.alertingV2.alertActions.find({
         ruleId: 'rule-1',
