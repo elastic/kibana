@@ -98,7 +98,6 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
             properties: {
               params: {
                 type: 'flattened',
-                ignore_above: 4096,
               },
             },
           },
