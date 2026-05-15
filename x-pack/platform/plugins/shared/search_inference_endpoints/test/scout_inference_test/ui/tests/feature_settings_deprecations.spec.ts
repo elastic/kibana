@@ -7,11 +7,12 @@
 
 import { expect } from '@kbn/scout/ui';
 
+import { INFERENCE_LOCAL_TAGS } from '../../scout_test_tags';
 import { test } from '../fixtures';
 import { mockInferenceEndpoints as mockEndpointsData } from '../fixtures/mock_data/inference_endpoints';
 import { mockInferenceEndpoints } from '../fixtures/mocks';
 
-test.describe('deprecation surface', () => {
+test.describe('deprecation surface', { tag: [...INFERENCE_LOCAL_TAGS] }, () => {
   // Connector IDs the mocked connectors API surfaces for the deprecated/EOL models.
   // Set by endpointsAsConnectors() in fixtures/mocks.ts.
   const deprecatedConnectorId = '.mock-openai-gpt-3.5-chat_completion-g4c7';

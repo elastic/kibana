@@ -311,7 +311,8 @@ export const ModelSettings: React.FC = () => {
             message={i18n.translate(
               'xpack.searchInferenceEndpoints.settings.deprecatedModelsCallout.description',
               {
-                defaultMessage: `Features using these models should be updated before the end-of-life date. The following models are deprecated:`,
+                defaultMessage:
+                  'Features using these models should be updated before the end-of-life date. The following models are deprecated:',
               }
             )}
             modelList={deprecatedAssignedModels}

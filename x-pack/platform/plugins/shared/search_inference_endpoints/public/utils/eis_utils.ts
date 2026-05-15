@@ -237,7 +237,7 @@ export function isModelDeprecated(metadata: EisInferenceEndpointMetadata | undef
   if (!metadata) return false;
   const eolDate = getModelEOLDate(metadata);
   if (eolDate && dateMath.parse(MODEL_DEPRECATED_EOL_TIME_DURATION)?.isSameOrAfter(eolDate)) {
-    // if the EOL date is withing the next 30 days, treat is as deprecated.
+    // if the EOL date is within the next 30 days, treat is as deprecated.
     return true;
   }
   if (metadata.heuristics?.status?.toLowerCase() === EisModelStatus.Deprecated) return true;
@@ -288,14 +288,14 @@ export function getModelEOLMessage(eolFormattedDate: string | null) {
       );
 }
 
-export function getModelDeprecatedMessage(eolFormattedDate: string | null) {
-  return eolFormattedDate
+export function getModelDeprecatedMessage(deprecatedFormattedDate: string | null) {
+  return deprecatedFormattedDate
     ? i18n.translate(
         'xpack.searchInferenceEndpoints.eisModelCard.deprecatedBadge.tooltip.content',
         {
           defaultMessage:
-            'This model will be deprecated on {eolFormattedDate}. We recommend a newer model for optimal results.',
-          values: { eolFormattedDate },
+            'This model will be deprecated on {deprecatedFormattedDate}. We recommend a newer model for optimal results.',
+          values: { deprecatedFormattedDate },
         }
       )
     : i18n.translate(
