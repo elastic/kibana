@@ -90,7 +90,7 @@ export const AddFromLibraryContent = ({ container }: AddFromLibraryContentProps)
             return core.http.post(SEARCH_ROUTE_PATH, {
               body: JSON.stringify({
                 type: input.contentTypes.map(({ contentTypeId }) => contentTypeId),
-                search: input.query.text,
+                ...(input.query.text && { search: `${input.query.text}*` }),
                 limit: input.query.limit,
                 tags: input.query.tags,
               }),
