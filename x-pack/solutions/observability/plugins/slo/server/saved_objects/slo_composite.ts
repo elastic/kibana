@@ -8,6 +8,7 @@
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import type { SavedObject } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
+import { COMPOSITE_SLO_MAX_MEMBERS, COMPOSITE_SLO_MIN_MEMBERS } from '@kbn/slo-schema';
 import type { StoredCompositeSLODefinition } from '../domain/models';
 
 export const SO_SLO_COMPOSITE_TYPE = 'slo-composite';
@@ -31,7 +32,7 @@ const compositeSloAttributesSchema = {
       weight: schema.number(),
       instanceId: schema.maybe(schema.string()),
     }),
-    { maxSize: 25 }
+    { minSize: COMPOSITE_SLO_MIN_MEMBERS, maxSize: COMPOSITE_SLO_MAX_MEMBERS }
   ),
   tags: schema.arrayOf(schema.string(), { maxSize: 30 }),
   enabled: schema.boolean(),
@@ -64,6 +65,7 @@ export const sloComposite: SavedObjectsType = {
       members: {
         properties: {
           sloId: { type: 'keyword' },
+          weight: { type: 'float' },
           instanceId: { type: 'keyword' },
         },
       },
