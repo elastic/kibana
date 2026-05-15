@@ -101,26 +101,29 @@ export const AlertHeaderTitle = memo(() => {
 
   return (
     <>
-      {showPagination && (
-        <>
-          <EuiFlexGroup gutterSize="none" justifyContent="flexEnd" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiPagination
-                aria-label={PAGINATION_ARIA_LABEL}
-                pageCount={totalAlertCount}
-                activePage={flyoutAlertIndex}
-                onPageClick={openAlertFlyout}
-                compressed
-                data-test-subj={FLYOUT_ALERT_PAGINATION_TEST_ID}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size="s" />
-        </>
-      )}
-      <DocumentSeverity hit={hit}>
-        <EuiSpacer size="m" />
-      </DocumentSeverity>
+      <EuiFlexGroup
+        gutterSize="s"
+        justifyContent="spaceBetween"
+        alignItems="center"
+        responsive={false}
+      >
+        <EuiFlexItem grow={false}>
+          <DocumentSeverity hit={hit} />
+        </EuiFlexItem>
+        {showPagination && (
+          <EuiFlexItem grow={false}>
+            <EuiPagination
+              aria-label={PAGINATION_ARIA_LABEL}
+              pageCount={totalAlertCount}
+              activePage={flyoutAlertIndex}
+              onPageClick={openAlertFlyout}
+              compressed
+              data-test-subj={FLYOUT_ALERT_PAGINATION_TEST_ID}
+            />
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
       <EuiText size="s">
         <Timestamp hit={hit} />
       </EuiText>
