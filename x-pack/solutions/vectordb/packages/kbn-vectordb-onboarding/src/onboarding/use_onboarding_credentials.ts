@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useState } from 'react';
+import { useQuery } from '@kbn/react-query';
 import { ONBOARDING_API_KEY_STORAGE_KEY } from '../storage_keys';
 import { useOnboardingApiPaths } from '../api_paths';
 import { useKibana } from '../services';
@@ -21,9 +21,6 @@ interface ApiKeyResponse {
   name: string | null;
   encoded: string | null;
 }
-
-// Module-level in-flight promise so concurrent hook instances share one request.
-let inFlightApiKeyRequest: Promise<string | null> | null = null;
 
 const readCachedKey = (): CachedKey | null => {
   try {
@@ -42,37 +39,6 @@ const writeCachedKey = (key: CachedKey) => {
   }
 };
 
-const fetchApiKey = (
-  http: ReturnType<typeof useKibana>['services']['http'],
-  apiKeyPath: string
-) => {
-  const cached = readCachedKey();
-  if (cached) {
-    return Promise.resolve(cached.encoded);
-  }
-
-  if (inFlightApiKeyRequest) {
-    return inFlightApiKeyRequest;
-  }
-
-  inFlightApiKeyRequest = http
-    .post<ApiKeyResponse>(apiKeyPath, {
-      body: JSON.stringify({}),
-    })
-    .then((result) => {
-      if (result.encoded && result.id && result.name) {
-        writeCachedKey({ id: result.id, name: result.name, encoded: result.encoded });
-      }
-      return result.encoded;
-    })
-    .catch(() => null)
-    .finally(() => {
-      inFlightApiKeyRequest = null;
-    });
-
-  return inFlightApiKeyRequest;
-};
-
 export interface OnboardingCredentials {
   elasticsearchUrl: string | null;
   apiKey: string | null;
@@ -84,34 +50,41 @@ export const useOnboardingCredentials = (): OnboardingCredentials => {
     services: { http, cloud },
   } = useKibana();
   const { apiKey: apiKeyPath } = useOnboardingApiPaths();
-  const [elasticsearchUrl, setElasticsearchUrl] = useState<string | null>(null);
-  const [apiKey, setApiKey] = useState<string | null>(() => readCachedKey()?.encoded ?? null);
-  const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    let cancelled = false;
-    setIsLoading(true);
+  const { data, isLoading } = useQuery({
+    queryKey: ['onboardingCredentials', apiKeyPath],
+    queryFn: async () => {
+      const urlPromise = cloud
+        ? cloud
+            .fetchElasticsearchConfig()
+            .then((c) => c.elasticsearchUrl ?? null)
+            .catch(() => null)
+        : Promise.resolve(null);
 
-    const urlPromise = cloud
-      ? cloud
-          .fetchElasticsearchConfig()
-          .then((c) => c.elasticsearchUrl ?? null)
-          .catch(() => null)
-      : Promise.resolve(null);
+      const keyPromise = (() => {
+        const cached = readCachedKey();
+        if (cached) return Promise.resolve(cached.encoded);
+        return http
+          .post<ApiKeyResponse>(apiKeyPath, { body: JSON.stringify({}) })
+          .then((result) => {
+            if (result.encoded && result.id && result.name) {
+              writeCachedKey({ id: result.id, name: result.name, encoded: result.encoded });
+            }
+            return result.encoded;
+          })
+          .catch(() => null);
+      })();
 
-    const keyPromise = fetchApiKey(http, apiKeyPath);
+      const [elasticsearchUrl, apiKey] = await Promise.all([urlPromise, keyPromise]);
+      return { elasticsearchUrl, apiKey };
+    },
+    refetchOnWindowFocus: false,
+    staleTime: Infinity,
+  });
 
-    Promise.all([urlPromise, keyPromise]).then(([url, key]) => {
-      if (cancelled) return;
-      setElasticsearchUrl(url);
-      setApiKey(key);
-      setIsLoading(false);
-    });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [http, cloud, apiKeyPath]);
-
-  return { elasticsearchUrl, apiKey, isLoading };
+  return {
+    elasticsearchUrl: data?.elasticsearchUrl ?? null,
+    apiKey: data?.apiKey ?? null,
+    isLoading,
+  };
 };

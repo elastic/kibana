@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useState } from 'react';
+import { useQuery } from '@kbn/react-query';
 import { useKibana } from '../hooks/use_kibana';
 
 const DEPLOYMENT_STATS_PATH = '/internal/serverless_vectordb/deployment_stats';
@@ -32,60 +32,47 @@ export const useDeploymentStats = () => {
   const {
     services: { http, cloud },
   } = useKibana();
-  const [stats, setStats] = useState<DeploymentStats>(initialStats);
-  const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    let cancelled = false;
-    setIsLoading(true);
+  const { data, isLoading } = useQuery({
+    queryKey: ['deploymentStats'],
+    queryFn: async () => {
+      const [esStats, agentsResponse, workflowsResponse, esConfig] = await Promise.all([
+        http
+          .get<{ indicesCount: number; vectorDocsCount: number; storeSizeBytes: number }>(
+            DEPLOYMENT_STATS_PATH
+          )
+          .catch(() => null),
+        http
+          .get<{ results?: unknown[] } | unknown[]>('/api/agent_builder/agents')
+          .catch(() => null),
+        http
+          .get<{ workflows?: { enabled?: number; disabled?: number } }>('/api/workflows/stats')
+          .catch(() => null),
+        cloud ? cloud.fetchElasticsearchConfig().catch(() => null) : Promise.resolve(null),
+      ]);
 
-    const fetchEs = http
-      .get<{ indicesCount: number; vectorDocsCount: number; storeSizeBytes: number }>(
-        DEPLOYMENT_STATS_PATH
-      )
-      .catch(() => null);
+      const agentsCount = Array.isArray(agentsResponse)
+        ? agentsResponse.length
+        : Array.isArray(agentsResponse?.results)
+        ? agentsResponse!.results!.length
+        : null;
 
-    const fetchAgents = http
-      .get<{ results?: unknown[] } | unknown[]>('/api/agent_builder/agents')
-      .catch(() => null);
+      return {
+        indicesCount: esStats?.indicesCount ?? null,
+        vectorDocsCount: esStats?.vectorDocsCount ?? null,
+        storeSizeBytes: esStats?.storeSizeBytes ?? null,
+        agentsCount,
+        workflowsCount: workflowsResponse?.workflows
+          ? (workflowsResponse.workflows.enabled ?? 0) +
+            (workflowsResponse.workflows.disabled ?? 0)
+          : null,
+        elasticsearchUrl: esConfig?.elasticsearchUrl ?? null,
+      };
+    },
+    refetchOnWindowFocus: false,
+  });
 
-    const fetchWorkflows = http
-      .get<{ workflows?: { enabled?: number; disabled?: number } }>('/api/workflows/stats')
-      .catch(() => null);
-
-    const fetchEsUrl = cloud
-      ? cloud.fetchElasticsearchConfig().catch(() => null)
-      : Promise.resolve(null);
-
-    Promise.all([fetchEs, fetchAgents, fetchWorkflows, fetchEsUrl]).then(
-      ([esStats, agentsResponse, workflowsResponse, esConfig]) => {
-        if (cancelled) return;
-        const agentsCount = Array.isArray(agentsResponse)
-          ? agentsResponse.length
-          : Array.isArray(agentsResponse?.results)
-          ? agentsResponse!.results!.length
-          : null;
-        setStats({
-          indicesCount: esStats?.indicesCount ?? null,
-          vectorDocsCount: esStats?.vectorDocsCount ?? null,
-          storeSizeBytes: esStats?.storeSizeBytes ?? null,
-          agentsCount,
-          workflowsCount: workflowsResponse?.workflows
-            ? (workflowsResponse.workflows.enabled ?? 0) +
-              (workflowsResponse.workflows.disabled ?? 0)
-            : null,
-          elasticsearchUrl: esConfig?.elasticsearchUrl ?? null,
-        });
-        setIsLoading(false);
-      }
-    );
-
-    return () => {
-      cancelled = true;
-    };
-  }, [http, cloud]);
-
-  return { stats, isLoading };
+  return { stats: data ?? initialStats, isLoading };
 };
 
 export const formatBytes = (bytes: number | null): string => {

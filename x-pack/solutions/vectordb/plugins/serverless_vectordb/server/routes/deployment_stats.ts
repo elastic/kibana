@@ -24,7 +24,7 @@ interface MeteringStatsResponse {
   indices: MeteringIndexStat[];
 }
 
-const containsVectorField = (properties?: Record<string, MappingProperty>): boolean => {
+export const containsVectorField = (properties?: Record<string, MappingProperty>): boolean => {
   if (!properties) return false;
   for (const value of Object.values(properties)) {
     if (value.type === 'dense_vector' || value.type === 'semantic_text') return true;

@@ -11,6 +11,7 @@ import { Redirect } from 'react-router-dom';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import {
   hasSeenOnboarding,
@@ -22,6 +23,8 @@ import {
 } from '@kbn/vectordb-onboarding';
 import { HomePage } from './home/home_page';
 import type { ServerlessVectordbServices } from './types';
+
+const queryClient = new QueryClient();
 
 const ONBOARDING_API_PATHS = {
   apiKey: '/internal/serverless_vectordb/api_key',
@@ -51,13 +54,15 @@ export const renderApp = (
   ReactDOM.render(
     core.rendering.addContext(
       <KibanaContextProvider services={services}>
-        <I18nProvider>
-          <OnboardingApiPathsProvider paths={ONBOARDING_API_PATHS}>
-            <Router history={history}>
-              <App />
-            </Router>
-          </OnboardingApiPathsProvider>
-        </I18nProvider>
+        <QueryClientProvider client={queryClient}>
+          <I18nProvider>
+            <OnboardingApiPathsProvider paths={ONBOARDING_API_PATHS}>
+              <Router history={history}>
+                <App />
+              </Router>
+            </OnboardingApiPathsProvider>
+          </I18nProvider>
+        </QueryClientProvider>
       </KibanaContextProvider>
     ),
     element
