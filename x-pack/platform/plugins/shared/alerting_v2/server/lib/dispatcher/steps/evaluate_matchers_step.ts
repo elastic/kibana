@@ -58,6 +58,7 @@ export class EvaluateMatchersStep implements DispatcherStep {
       for (const policy of spacePolicies) {
         if (!policy.enabled) continue;
         if (policy.snoozedUntil && new Date(policy.snoozedUntil) > new Date()) continue;
+        if (policy.type === 'single_rule' && policy.ruleId !== rule.id) continue;
 
         if (!policy.matcher) {
           matched.push({ episode, policy });

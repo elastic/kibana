@@ -6,6 +6,7 @@
  */
 
 export { generateStreamDescription } from './src/description/generate_description';
+export { descriptionPrompt, overviewDescriptionPrompt } from './src/description/prompt';
 export { partitionStream } from './workflows/partition_stream';
 export {
   suggestProcessingPipeline,

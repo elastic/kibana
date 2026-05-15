@@ -57,6 +57,7 @@ export interface BrowserPopoverWrapperProps<TItem> {
   items: EuiSelectableOption[];
   isOpen: boolean;
   onClose: () => void;
+  onCloseComplete?: () => void;
   onSelect: (changedOption: EuiSelectableOption | undefined) => void;
   isFilterOpen: boolean;
   setIsFilterOpen: (isOpen: boolean) => void;
@@ -78,12 +79,14 @@ export interface BrowserPopoverWrapperProps<TItem> {
   searchValue: string;
   setSearchValue: (value: string) => void;
   isMultiSelect?: boolean;
+  dataTestSubj?: string;
 }
 
 export function BrowserPopoverWrapper<TItem extends { name: string }>({
   items,
   isOpen,
   onClose,
+  onCloseComplete,
   onSelect,
   isFilterOpen,
   setIsFilterOpen,
@@ -96,6 +99,7 @@ export function BrowserPopoverWrapper<TItem extends { name: string }>({
   searchValue,
   setSearchValue,
   isMultiSelect = true,
+  dataTestSubj,
 }: BrowserPopoverWrapperProps<TItem>) {
   const { euiTheme } = useEuiTheme();
   const searchInputRef = useRef<HTMLInputElement | null>(null);
@@ -133,6 +137,7 @@ export function BrowserPopoverWrapper<TItem extends { name: string }>({
       button={<div style={{ display: 'none' }} />}
       isOpen={isOpen}
       closePopover={onClose}
+      focusTrapProps={{ returnFocus: false, onDeactivation: onCloseComplete }}
       panelPaddingSize="none"
       anchorPosition="downLeft"
       panelStyle={{
@@ -185,7 +190,10 @@ export function BrowserPopoverWrapper<TItem extends { name: string }>({
         singleSelection={!isMultiSelect}
       >
         {(list, search) => (
-          <div style={{ width: BROWSER_POPOVER_WIDTH, maxHeight: BROWSER_POPOVER_HEIGHT }}>
+          <div
+            data-test-subj={dataTestSubj}
+            style={{ width: BROWSER_POPOVER_WIDTH, maxHeight: BROWSER_POPOVER_HEIGHT }}
+          >
             <EuiPopoverTitle paddingSize="s">{i18nKeys.title}</EuiPopoverTitle>
             <div style={{ padding: euiTheme.size.s }}>{search}</div>
             <div style={{ maxHeight: MAX_LIST_HEIGHT, overflowY: 'auto' }}>{list}</div>
