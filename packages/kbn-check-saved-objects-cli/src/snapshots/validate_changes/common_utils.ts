@@ -257,6 +257,33 @@ export function validateNoIndexOrEnabledFalseInAllMappings(
   throwIfIndexOrEnabledFalse(name, fieldsWithIndexFalse, fieldsWithEnabledFalse);
 }
 
+const TYPES_REQUIRING_IGNORE_ABOVE = new Set(['keyword', 'flattened']);
+
+/**
+ * Returns the paths of all `keyword` and `flattened` mapping fields that are missing an
+ * `ignore_above` constraint. Paths are expressed in schema format (dot-separated, with
+ * `.properties.` collapsed), e.g. `parent.child` or `name.fields.keyword`.
+ */
+export function getFieldsMissingIgnoreAbove(mappings: Record<string, unknown>): string[] {
+  return Object.entries(mappings)
+    .filter(([key, value]) => {
+      if (!key.endsWith('.type')) return false;
+      if (!TYPES_REQUIRING_IGNORE_ABOVE.has(value as string)) return false;
+      const fieldPrefix = key.slice(0, -'.type'.length);
+      // Non-indexed fields are never indexed, so ignore_above has no effect on them.
+      if (mappings[`${fieldPrefix}.index`] === false) return false;
+      return !(`${fieldPrefix}.ignore_above` in mappings);
+    })
+    .map(([key]) => {
+      const fieldPrefix = key.slice(0, -'.type'.length);
+      const withoutTopLevelPrefix = fieldPrefix.startsWith('properties.')
+        ? fieldPrefix.slice('properties.'.length)
+        : fieldPrefix;
+      return toSchemaPathFormat(withoutTopLevelPrefix);
+    })
+    .sort();
+}
+
 /**
  * Returns the invalid name/title fields for a given mapping snapshot, expressed as
  * `{ fieldName, description }` pairs. The caller decides whether to warn or throw.
