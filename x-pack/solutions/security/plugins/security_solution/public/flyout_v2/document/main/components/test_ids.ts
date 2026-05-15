@@ -42,6 +42,8 @@ const REASON_TEST_ID = `${PREFIX}Reason` as const;
 export const REASON_TITLE_TEST_ID = `${REASON_TEST_ID}Title` as const;
 export const REASON_DETAILS_TEST_ID = `${REASON_TEST_ID}Details` as const;
 export const REASON_DETAILS_PREVIEW_BUTTON_TEST_ID = `${REASON_TEST_ID}PreviewButton` as const;
+export const REASON_DETAILS_POPOVER_TEST_ID = `${REASON_TEST_ID}Popover` as const;
+export const REASON_DETAILS_LEGACY_BODY_TEST_ID = `${PREFIX}AlertReasonBody` as const;
 
 const WORKFLOW_STATUS_TEST_ID = `${PREFIX}WorkflowStatus` as const;
 export const WORKFLOW_STATUS_TITLE_TEST_ID = `${WORKFLOW_STATUS_TEST_ID}Title` as const;
@@ -128,6 +130,14 @@ export const SUMMARY_ROW_LOADING_TEST_ID = (dataTestSubj: string) => `${dataTest
 export const SUMMARY_ROW_TEXT_TEST_ID = (dataTestSubj: string) => `${dataTestSubj}Text`;
 export const SUMMARY_ROW_VALUE_TEST_ID = (dataTestSubj: string) => `${dataTestSubj}Value`;
 export const SUMMARY_ROW_BUTTON_TEST_ID = (dataTestSubj: string) => `${dataTestSubj}Button`;
+
+/* Response */
+
+const RESPONSE_TEST_ID = `${PREFIX}Response` as const;
+export const RESPONSE_SECTION_TEST_ID = `${RESPONSE_TEST_ID}Section` as const;
+export const RESPONSE_SECTION_HEADER_TEST_ID = `${RESPONSE_SECTION_TEST_ID}Header` as const;
+export const RESPONSE_SECTION_CONTENT_TEST_ID = `${RESPONSE_SECTION_TEST_ID}Content` as const;
+export const RESPONSE_BUTTON_TEST_ID = `${RESPONSE_TEST_ID}Button` as const;
 
 /* Footer */
 

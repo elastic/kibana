@@ -1,0 +1,73 @@
+name: Validate agentic workflow locks
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/*.md'
+      - '.github/workflows/*.lock.yml'
+      - '.github/aw/actions-lock.json'
+      - '.github/workflows/validate-agentic-workflow-locks.yml'
+
+permissions:
+  contents: read
+
+# gh-aw CLI version installed by setup-cli below. Must match the
+# github/gh-aw-actions/setup entry in .github/aw/actions-lock.json;
+# the verify step below enforces that.
+env:
+  GH_AW_VERSION: v0.71.5
+
+concurrency:
+  group: validate-agentic-workflow-locks-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-locks:
+    name: Validate agentic workflow locks
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Verify pinned gh-aw version matches actions-lock.json
+        run: |
+          set -euo pipefail
+          version=$(jq -er '
+            [.entries[] | select(.repo == "github/gh-aw-actions/setup") | .version]
+            | unique
+            | if length == 1 then .[0]
+              else error("expected exactly one github/gh-aw-actions/setup version in .github/aw/actions-lock.json")
+              end
+          ' .github/aw/actions-lock.json)
+          echo "Pinned gh-aw version: ${version}"
+          if [[ "${version}" != "${GH_AW_VERSION}" ]]; then
+            echo "::error::actions-lock.json pins gh-aw ${version} but this workflow installs gh-aw ${GH_AW_VERSION} (set via GH_AW_VERSION). Update one of them so they match."
+            exit 1
+          fi
+
+      - name: Install gh-aw CLI
+        uses: github/gh-aw/actions/setup-cli@489dbab88cc78e35506b5ccbf08a4037166824ac # v0.72.1
+        with:
+          version: ${{ env.GH_AW_VERSION }}
+
+      - name: Compile and validate all agentic workflows
+        run: gh aw compile --purge --validate --no-check-update
+
+      - name: Verify generated outputs are up to date
+        run: |
+          set -euo pipefail
+          status=$(git status --porcelain -- '.github/workflows/*.lock.yml' '.github/aw/actions-lock.json')
+          if [[ -n "${status}" ]]; then
+            echo "::error::Compiled output is out of date. Run 'gh aw compile --purge --validate' with gh-aw ${GH_AW_VERSION} and commit the resulting lock changes."
+            echo "Files that differ:"
+            echo "${status}"
+            echo
+            echo "Tracked diff:"
+            git --no-pager diff -- '.github/workflows/*.lock.yml' '.github/aw/actions-lock.json'
+            exit 1
+          fi
+          echo "All compiled lock files are in sync with the source markdown."
