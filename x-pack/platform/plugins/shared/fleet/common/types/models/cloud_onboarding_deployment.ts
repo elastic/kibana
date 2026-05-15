@@ -38,3 +38,17 @@ export interface CloudOnboardingDeployment {
 }
 
 export type NewCloudOnboardingDeployment = Omit<CloudOnboardingDeployment, 'id'>;
+
+export type CreateCloudOnboardingDeploymentInput = Omit<
+  CloudOnboardingDeployment,
+  'id' | 'status' | 'attemptCount' | 'createdAt' | 'updatedAt'
+>;
+
+// Secrets are intentionally excluded: partial updates could silently clobber
+// existing keys. Use a dedicated secrets-update path when needed.
+export type UpdateCloudOnboardingDeploymentInput = Partial<
+  Omit<
+    CloudOnboardingDeployment,
+    'id' | 'provider' | 'connectionId' | 'secrets' | 'createdAt' | 'updatedAt'
+  >
+>;

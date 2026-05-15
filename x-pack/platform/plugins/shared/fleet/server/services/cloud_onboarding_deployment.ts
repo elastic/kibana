@@ -6,11 +6,13 @@
  */
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
+import { nodeBuilder } from '@kbn/es-query';
 
 import { CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE } from '../../common/constants';
 import type {
   CloudOnboardingDeployment,
-  NewCloudOnboardingDeployment,
+  CreateCloudOnboardingDeploymentInput,
+  UpdateCloudOnboardingDeploymentInput,
   CloudOnboardingDeploymentStatus,
 } from '../../common/types/models/cloud_onboarding_deployment';
 import type { CloudOnboardingDeploymentSOAttributes } from '../types/so_attributes';
@@ -49,12 +51,14 @@ class CloudOnboardingDeploymentService {
 
   public async create(
     soClient: SavedObjectsClientContract,
-    deployment: NewCloudOnboardingDeployment
+    input: CreateCloudOnboardingDeploymentInput
   ): Promise<CloudOnboardingDeployment> {
     const now = new Date().toISOString();
     const attributes: CloudOnboardingDeploymentSOAttributes = {
-      ...deployment,
-      mechanisms: deployment.mechanisms as string[],
+      ...input,
+      mechanisms: input.mechanisms as string[],
+      status: 'pending',
+      attemptCount: 1,
       createdAt: now,
       updatedAt: now,
     };
@@ -90,26 +94,31 @@ class CloudOnboardingDeploymentService {
       await this.encryptedSoClient.createPointInTimeFinderDecryptedAsInternalUser<CloudOnboardingDeploymentSOAttributes>(
         {
           type: CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
-          filter: `${CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE}.attributes.connectionId: "${connectionId}"`,
+          filter: nodeBuilder.is(
+            `${CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE}.attributes.connectionId`,
+            connectionId
+          ),
           perPage: SO_SEARCH_LIMIT,
         }
       );
 
     const deployments: CloudOnboardingDeployment[] = [];
-    for await (const result of finder.find()) {
-      for (const so of result.saved_objects) {
-        deployments.push(soToDeployment(so.id, so.attributes));
+    try {
+      for await (const result of finder.find()) {
+        for (const so of result.saved_objects) {
+          deployments.push(soToDeployment(so.id, so.attributes));
+        }
       }
+    } finally {
+      await finder.close();
     }
-
-    await finder.close();
     return deployments;
   }
 
   public async update(
     soClient: SavedObjectsClientContract,
     id: string,
-    update: Partial<Omit<NewCloudOnboardingDeployment, 'createdAt'>>
+    update: UpdateCloudOnboardingDeploymentInput
   ): Promise<CloudOnboardingDeployment> {
     const now = new Date().toISOString();
     await soClient.update<CloudOnboardingDeploymentSOAttributes>(
