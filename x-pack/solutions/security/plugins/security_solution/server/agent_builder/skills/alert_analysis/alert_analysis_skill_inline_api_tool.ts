@@ -106,12 +106,6 @@ Use this skill when:
           .max(168)
           .default(24)
           .describe('Time window in hours to search for related alerts (1-168, default 24)'),
-        maxResults: z
-          .number()
-          .min(1)
-          .max(100)
-          .default(25)
-          .describe('Maximum number of related alerts to return (1-100, default 25)'),
         hostNames: z
           .array(z.string())
           .optional()
@@ -138,7 +132,7 @@ Use this skill when:
           ),
       }),
       handler: async (
-        { alertId, timeWindowHours, maxResults, hostNames, userNames, sourceIps, destIps },
+        { alertId, timeWindowHours, hostNames, userNames, sourceIps, destIps },
         context
       ) => {
         const alertsIndex = `${DEFAULT_ALERTS_INDEX}-${context.spaceId}`;
@@ -147,7 +141,7 @@ Use this skill when:
           alertId,
           alertsIndex,
           timeWindowHours,
-          maxResults,
+          maxResults: 50,
           hostNames,
           userNames,
           sourceIps,
@@ -173,9 +167,6 @@ Use this skill when:
                 message: result.message,
                 sourceEntities: result.sourceEntities,
                 relatedAlerts: result.relatedAlerts,
-                totalMatched: result.totalMatched,
-                returnedCount: result.returnedCount,
-                isTruncated: result.isTruncated,
               },
             },
           ],
