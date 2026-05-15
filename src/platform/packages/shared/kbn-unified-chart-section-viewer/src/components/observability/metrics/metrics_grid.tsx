@@ -39,6 +39,7 @@ export type MetricsGridProps = Pick<
   metricItems: ParsedMetricItem[];
   whereStatements?: string[];
   getUserMessages?: (metricItem: ParsedMetricItem) => EmbeddableComponentProps['userMessages'];
+  getDescription?: (metricItem: ParsedMetricItem) => EmbeddableComponentProps['description'];
 };
 
 const getItemKey = (metricItem: ParsedMetricItem, index: number) => {
@@ -57,6 +58,7 @@ export const MetricsGrid = ({
   discoverFetch$,
   searchTerm,
   getUserMessages,
+  getDescription,
 }: MetricsGridProps) => {
   const gridRef = useRef<HTMLDivElement>(null);
   const { euiTheme } = useEuiTheme();
@@ -164,6 +166,7 @@ export const MetricsGrid = ({
                   searchTerm={searchTerm}
                   whereStatements={whereStatements}
                   userSource={userSource}
+                  description={getDescription?.(metricItem)}
                   userMessages={getUserMessages ? getUserMessages(metricItem) : undefined}
                 />
               </EuiFlexItem>
@@ -199,6 +202,7 @@ interface ChartItemProps
   searchTerm?: string;
   onFocusCell: (rowIndex: number, colIndex: number) => void;
   onViewDetails: (index: number, esqlQuery: string, metricItem: ParsedMetricItem) => void;
+  description?: string;
   whereStatements?: string[];
   userSource?: string;
   userMessages?: EmbeddableComponentProps['userMessages'];
@@ -223,6 +227,7 @@ const ChartItem = React.memo(
     searchTerm,
     whereStatements,
     userSource,
+    description,
     onFocusCell,
     onViewDetails,
     userMessages,
@@ -281,7 +286,10 @@ const ChartItem = React.memo(
           onExploreInDiscoverTab={actions.openInNewTab}
           onViewDetails={handleViewDetailsCallback}
           title={metricItem.metricName}
+          description={description}
           chartLayers={chartLayers}
+          syncCursor
+          syncTooltips={false}
           titleHighlight={searchTerm}
           extraDisabledActions={[ACTION_OPEN_IN_DISCOVER]}
           userMessages={userMessages}

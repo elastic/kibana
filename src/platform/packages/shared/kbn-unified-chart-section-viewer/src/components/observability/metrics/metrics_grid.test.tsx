@@ -118,6 +118,18 @@ describe('MetricsGrid', () => {
     expect(charts).toHaveLength(metricItems.length);
   });
 
+  it('passes syncCursor and syncTooltips={false} to each chart for cross-panel cursor sync', () => {
+    renderMetricsGrid();
+
+    metricItems.forEach((_, index) => {
+      expect(Chart).toHaveBeenNthCalledWith(
+        index + 1,
+        expect.objectContaining({ syncCursor: true, syncTooltips: false }),
+        expect.anything()
+      );
+    });
+  });
+
   it('passes the correct size prop', () => {
     const { rerender } = render(
       <MetricsExperienceStateProvider profileId="test-profile">
@@ -176,6 +188,31 @@ describe('MetricsGrid', () => {
     expect(Chart).toHaveBeenNthCalledWith(
       2,
       expect.objectContaining({ userMessages: undefined }),
+      expect.anything()
+    );
+  });
+
+  it('passes getDescription(metric) result to each chart when getDescription is provided', () => {
+    const descriptionForFirst = 'Data stream: metrics-system.cpu-default';
+
+    const getDescription = jest.fn((metric: (typeof metricItems)[0]) =>
+      metric.metricName === 'system.cpu.utilization' ? descriptionForFirst : undefined
+    );
+
+    renderMetricsGrid({ getDescription });
+
+    expect(getDescription).toHaveBeenCalledTimes(metricItems.length);
+    expect(getDescription).toHaveBeenNthCalledWith(1, metricItems[0]);
+    expect(getDescription).toHaveBeenNthCalledWith(2, metricItems[1]);
+
+    expect(Chart).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({ description: descriptionForFirst }),
+      expect.anything()
+    );
+    expect(Chart).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({ description: undefined }),
       expect.anything()
     );
   });
