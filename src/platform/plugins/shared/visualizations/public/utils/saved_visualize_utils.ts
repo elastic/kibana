@@ -164,12 +164,14 @@ export async function findListItems(
 
   const { hits: savedObjects, total } = await embeddableService.getSavedObjects({
     type: searchOption('docTypes', 'visualization'),
-    search,
     limit: size,
-    tags: {
-      included: references?.map((r) => r.id),
-      excluded: referencesToExclude?.map((r) => r.id),
-    },
+    ...(search.length && { search }),
+    ...(references?.length && {
+      tags: {
+        included: references?.map((r) => r.id),
+        excluded: referencesToExclude?.map((r) => r.id),
+      },
+    }),
   });
 
   return {
