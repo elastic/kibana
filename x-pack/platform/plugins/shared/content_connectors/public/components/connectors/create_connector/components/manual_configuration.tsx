@@ -66,7 +66,7 @@ export const ManualConfiguration: React.FC<ManualConfigurationProps> = ({
     setPopover(false);
   };
   const { selectedConnector, rawName } = useValues(
-    NewConnectorLogic({ http, navigateToUrl: application?.navigateToUrl })
+    NewConnectorLogic({ http, navigateToApp: application?.navigateToApp })
   );
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const [flyoutContent, setFlyoutContent] = useState<'manual_config' | 'client'>();
