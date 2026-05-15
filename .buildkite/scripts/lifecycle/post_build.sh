@@ -2,6 +2,8 @@
 
 set -euo pipefail
 
+source .buildkite/scripts/common/util.sh
+
 BUILD_SUCCESSFUL=$(ts-node "$(dirname "${0}")/build_status.ts")
 export BUILD_SUCCESSFUL
 
@@ -14,9 +16,7 @@ if [[ "${BUILDKITE_RETRY_COUNT:-0}" == "0" ]]; then
   ts-node "$(dirname "${0}")/ci_stats_complete.ts"
 fi
 
-PR_LABELS="${GITHUB_PR_LABELS:-$(buildkite-agent meta-data get "ingest:pr_labels" 2>/dev/null || true)}"
-
-if [[ "$PR_LABELS" == *"ci:collect-ftr-timing"* ]]; then
+if is_pr_with_label "ci:collect-ftr-timing"; then
   ts-node "$(dirname "${0}")/aggregate_ftr_timing.ts"
 fi
 
