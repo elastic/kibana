@@ -15,10 +15,12 @@ import {
   GENERALIZE_FROM_TELEMETRY_API_PATH,
   HUNT_BEHAVIOR_API_PATH,
   HUNT_FOR_THREAT_API_PATH,
+  HUNT_ORCHESTRATED_API_PATH,
   INGEST_REPORT_API_PATH,
   LIST_SUBSCRIPTIONS_API_PATH,
   SEARCH_REPORTS_API_PATH,
   SUBMIT_SUBSCRIPTION_API_PATH,
+  SYNTHESIZE_ADVISORY_API_PATH,
   THREAT_INTELLIGENCE_SKILL_ID,
   THREAT_INTEL_TOOL_IDS,
 } from '../../../../common/threat_intelligence/hub';
@@ -152,6 +154,38 @@ report's IOCs and ATT&CK technique IDs. Returns the top matching
 documents AND an \`affected_assets\` aggregation (unique hosts + users).
 Body: \`{ report_id?, iocs?, techniques?, time_range?, size?, max_assets? }\`.
 Either \`report_id\` or explicit \`iocs[]\` / \`techniques[]\` is required.
+
+### \`POST ${HUNT_ORCHESTRATED_API_PATH}\` (read)
+One-call orchestrated hunt: Tier 1 (\`hunt_for_threat\`) → Tier 2
+(\`hunt_behavior\`) with the Tier 1 affected-asset + sample-event context
+threaded into the Tier 2 LLM prompt for tradecraft-style corroboration.
+Tier 2 gating is controlled by \`tier2_when\`: \`"on_hits"\` (default —
+only when Tier 1 matched), \`"always"\` (propose rules from the report
+text even without current activity, used by digest / advisory flows),
+or \`"never"\` (Tier 1 only). When no GenAI connector is configured the
+route degrades gracefully — Tier 1 still runs and the response carries
+\`tier2_skipped_reason: "no_inference"\` so the digest workflow can
+produce an IOC-only digest rather than failing. Body: \`{ report_id?,
+text?, iocs?, techniques?, time_range?, size?, max_assets?,
+llm_confidence_threshold?, tier2_when?, max_tier2_sample_events? }\`.
+Prefer this route over manually chaining \`hunt_for_threat\` +
+\`hunt_behavior\` when you want both tiers in the same call.
+
+### \`POST ${SYNTHESIZE_ADVISORY_API_PATH}\` (read/write)
+Cross-report advisory synthesis — pulls the top-N reports for a window
+(sorted by hunt-feedback-corroborated rank, see point 4 above), groups
+by threat actor / category / region, and asks the LLM to produce a
+2-3 paragraph narrative + recommended-actions list. Optionally
+persists into the \`.kibana-threat-intel-advisories\` companion index
+under a deterministic \`theme_id\` so re-runs over the same input set
+can be detected by the UI. Returns a structured \`no_inference\` status
+(not a 503) when no GenAI connector is configured, so the dashboard
+can still render the aggregate counts. Body: \`{ time_range,
+categories?, regions?, min_severity?, max_reports?, description?,
+persist? }\`. Prefer this over manually chaining \`search_reports\` +
+ad-hoc summarisation when an analyst asks for a "weekly threat
+advisory" or a "what's been happening" digest beyond the per-source
+bullet list a subscription produces.
 
 ### \`POST ${COVERAGE_GAP_API_PATH}\` (read)
 Join in-the-wild ATT&CK techniques in \`.kibana-threat-reports-*\` against
@@ -312,6 +346,8 @@ services these routes call:
 - \`${THREAT_INTEL_TOOL_IDS.coverageGap}\`
 - \`${THREAT_INTEL_TOOL_IDS.generalizeFromTelemetry}\`
 - \`${THREAT_INTEL_TOOL_IDS.manageSubscriptions}\`
+- \`${THREAT_INTEL_TOOL_IDS.huntOrchestrated}\` (registry — one-call Tier 1 + Tier 2 hunt)
+- \`${THREAT_INTEL_TOOL_IDS.synthesizeAdvisory}\` (registry — cross-report advisory synthesis)
 - \`${THREAT_INTEL_TOOL_IDS.extractIocs}\` (registry)
 - \`${THREAT_INTEL_TOOL_IDS.analyseEnvironment}\` (registry)
 
@@ -349,6 +385,18 @@ The user may surface this skill with any of:
     'security.security_labs_search',
     THREAT_INTEL_TOOL_IDS.extractIocs, // demoted to registry — Workflow 2 calls the service directly
     THREAT_INTEL_TOOL_IDS.analyseEnvironment,
+    // Registry-only because the skill is at its 7-inline-tool hard cap
+    // and the granular `huntForThreat` / `huntBehavior` are kept inline
+    // for fine-grained control. Workflows that need both tiers in one
+    // call use the HTTP route directly; the registry slot exists for
+    // 3rd-party agents and LLM-driven flows that prefer the combined
+    // shape.
+    THREAT_INTEL_TOOL_IDS.huntOrchestrated,
+    // Registry-only, same reasoning as huntOrchestrated above —
+    // advisory synthesis is a less-frequent, dashboard-/digest-driven
+    // operation and would otherwise push the skill over the 7
+    // inline-tool cap.
+    THREAT_INTEL_TOOL_IDS.synthesizeAdvisory,
     platformCoreTools.cases,
   ],
 });

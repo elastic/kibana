@@ -10,6 +10,7 @@ import {
   GLOBAL_SPACE_ID,
   SEVERITY_LEVELS,
   THREAT_REPORTS_INDEX_PATTERN,
+  type DetectionActionability,
   type ReportSortBy,
   type SeverityLevel,
   type SourceType,
@@ -35,6 +36,16 @@ export interface SearchReportsParams {
   time_range?: { from: string; to: string };
   categories?: ThreatCategory[];
   regions?: ThreatRegion[];
+  /**
+   * Closed-set classifier filter — see `DETECTION_ACTIONABILITY_LEVELS`
+   * in `common/threat_intelligence/hub/constants.ts`. Allows operators
+   * to scope to `rule_candidate` reports (or any subset of the
+   * `informational | iocs_only | ttps_present | rule_candidate`
+   * enum) without thresholding the float `extracted.relevance` field.
+   * Backs the dashboard's "Actionable" chip and the "rule_candidate
+   * only" digest preset.
+   */
+  detection_actionability?: DetectionActionability[];
   /**
    * Sort mode.
    *
@@ -91,6 +102,7 @@ const SOURCE_FIELDS: string[] = [
   'content.title',
   'severity',
   'rank_score',
+  'corroborated_rank_score',
   'extracted.ttps.techniques',
   'extracted.threat_actors',
   'extracted.categories',
@@ -98,22 +110,40 @@ const SOURCE_FIELDS: string[] = [
   'extracted.detection_actionability',
   'geography.regions',
   'content_fingerprint',
+  'feedback',
 ];
 
 /**
- * Translate a `sort_by` mode into an Elasticsearch `sort` clause. `'rank'`
- * tie-breaks reports without a `rank_score` (legacy or pending-extraction
- * docs) to `0` via `missing` so they sort below ranked reports rather than
- * sorting unpredictably or being dropped. `'severity'` uses the same
- * `missing` strategy for `severity.score`. `'recency'` needs no missing
- * handler because `@timestamp` is required on every report.
+ * Translate a `sort_by` mode into an Elasticsearch `sort` clause.
+ *
+ * `'rank'` is a tiered sort that prefers the hunt-feedback-corroborated
+ * derivative, falling back through the static rank and severity score:
+ *
+ *   1. `corroborated_rank_score` — `rank_score * (1 + boost)` where
+ *      `boost ∈ [0, 0.5]` reflects how many environment matches the
+ *      latest orchestrated hunt produced (see
+ *      `services/write_hunt_feedback.ts`).
+ *   2. `rank_score`               — static `severity.score * relevance`
+ *      composite written at extraction time. Reports never hunted yet
+ *      (typical for fresh ingestions) fall through to this tier.
+ *   3. `severity.score`           — single-dimension fallback for
+ *      pre-v8 reports that pre-date the rank composite.
+ *
+ * Every tier carries `missing: 0` so reports lacking a given field sort
+ * below ranked reports rather than sorting unpredictably or being
+ * dropped from the result set. `'severity'` and `'recency'` are
+ * single-tier sorts for backward compat.
  */
 const buildSortClause = (
   sortBy: Exclude<ReportSortBy, 'relevance'>
 ): Array<Record<string, unknown>> => {
   switch (sortBy) {
     case 'rank':
-      return [{ rank_score: { order: 'desc', missing: 0 } }];
+      return [
+        { corroborated_rank_score: { order: 'desc', missing: 0 } },
+        { rank_score: { order: 'desc', missing: 0 } },
+        { 'severity.score': { order: 'desc', missing: 0 } },
+      ];
     case 'severity':
       return [{ 'severity.score': { order: 'desc', missing: 0 } }];
     case 'recency':
@@ -135,6 +165,7 @@ export const searchReports = async (
     time_range: timeRange,
     categories,
     regions,
+    detection_actionability: detectionActionability,
     sort_by: sortBy,
   } = params;
 
@@ -147,6 +178,9 @@ export const searchReports = async (
   }
   if (categories?.length) filters.push({ terms: { 'extracted.categories': categories } });
   if (regions?.length) filters.push({ terms: { 'geography.regions': regions } });
+  if (detectionActionability?.length) {
+    filters.push({ terms: { 'extracted.detection_actionability': detectionActionability } });
+  }
   filters.push(...buildSeverityFilter(minSeverity));
 
   const sharedFilter = filters.length ? { bool: { filter: filters } } : undefined;

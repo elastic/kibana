@@ -67,6 +67,15 @@ export const THREAT_INTEL_SUBSCRIPTIONS_INDEX = '.kibana-threat-intel-subscripti
 // persistence layer.
 export const THREAT_INTEL_DIGESTS_INDEX = '.kibana-threat-intel-digests' as const;
 /**
+ * Destination index for LLM-synthesised cross-report advisories produced
+ * by `services/synthesize_advisory.ts`. One row per advisory; each row
+ * carries the rendered narrative, the recommended actions list, and the
+ * set of report ids that fed the synthesis so the analyst can drill back
+ * into the underlying reports. Persistence is opt-in on the service so
+ * ad-hoc invocations from the LLM don't litter the index.
+ */
+export const THREAT_INTEL_ADVISORIES_INDEX = '.kibana-threat-intel-advisories' as const;
+/**
  * Destination index for IOC indicators synced from the threat-reports data
  * stream by the Task Manager job (`server/tasks/ioc_indicator_sync.ts`).
  * Detection Engine's Indicator Match rule can be configured to query this
@@ -124,6 +133,28 @@ export const THREAT_INTEL_TOOL_IDS = {
    * so the analyst can promote them to a durable Detection Engine rule.
    */
   generalizeFromTelemetry: 'threat_intel.generalize_from_telemetry',
+  /**
+   * One-call orchestrated hunt that chains the tradecraft-style two-tier
+   * model: Tier 1 (`hunt_for_threat`, atomic IOC lookups) → Tier 2
+   * (`hunt_behavior`, LLM-refined behavioral rules with the affected-asset
+   * context from Tier 1 fed into the prompt). Workflows (digest delivery,
+   * hit provenance backfill) call this directly via the internal HTTP
+   * route so they get Tier 2 without having to encode the chaining
+   * themselves; the granular tools remain available on the registry for
+   * power-user / LLM-driven control flows.
+   */
+  huntOrchestrated: 'threat_intel.hunt_orchestrated',
+  /**
+   * Cross-report advisory synthesis. Pulls the top-N
+   * corroborated-rank reports for a time window (and optional category /
+   * region / tag filter), groups by `extracted.threat_actors` /
+   * `extracted.categories`, and asks the LLM to produce a narrative
+   * theme + a short "recommended actions" list. Optionally persists the
+   * resulting advisory into `.kibana-threat-intel-advisories` for
+   * dashboard / digest consumption. Registry-only — the skill is at
+   * the 7-inline-tool cap.
+   */
+  synthesizeAdvisory: 'threat_intel.synthesize_advisory',
 } as const;
 
 /**
@@ -150,6 +181,24 @@ export const SEARCH_REPORTS_API_PATH = `${THREAT_INTELLIGENCE_API_BASE}/search_r
 export const INGEST_REPORT_API_PATH = `${THREAT_INTELLIGENCE_API_BASE}/ingest_report` as const;
 export const HUNT_BEHAVIOR_API_PATH = `${THREAT_INTELLIGENCE_API_BASE}/hunt_behavior` as const;
 export const HUNT_FOR_THREAT_API_PATH = `${THREAT_INTELLIGENCE_API_BASE}/hunt_for_threat` as const;
+/**
+ * Orchestrated Tier 1 → Tier 2 hunt — see {@link THREAT_INTEL_TOOL_IDS.huntOrchestrated}.
+ * Workflows that need both tiers in a single call (digest delivery, hit
+ * provenance backfill, future advisory synthesis) target this path
+ * instead of chaining the two granular routes themselves. Same
+ * `requiredPrivileges` as the two underlying actions (read).
+ */
+export const HUNT_ORCHESTRATED_API_PATH =
+  `${THREAT_INTELLIGENCE_API_BASE}/hunt_orchestrated` as const;
+/**
+ * Cross-report advisory synthesis — see
+ * {@link THREAT_INTEL_TOOL_IDS.synthesizeAdvisory}. Same
+ * `requiredPrivileges` as `search_reports` (read) when `persist: false`;
+ * the persist branch additionally requires write on the advisories
+ * companion index, handled inside the route.
+ */
+export const SYNTHESIZE_ADVISORY_API_PATH =
+  `${THREAT_INTELLIGENCE_API_BASE}/synthesize_advisory` as const;
 export const COVERAGE_GAP_API_PATH = `${THREAT_INTELLIGENCE_API_BASE}/coverage_gap` as const;
 export const GENERALIZE_FROM_TELEMETRY_API_PATH =
   `${THREAT_INTELLIGENCE_API_BASE}/generalize_from_telemetry` as const;
@@ -280,6 +329,46 @@ export type DetectionActionability = (typeof DETECTION_ACTIONABILITY_LEVELS)[num
  */
 export const REPORT_SORT_OPTIONS = ['rank', 'severity', 'recency', 'relevance'] as const;
 export type ReportSortBy = (typeof REPORT_SORT_OPTIONS)[number];
+
+/**
+ * Tradecraft-style two-tier telemetry-probe discriminator.
+ *
+ *   - `1` (atomic)        : point lookups on ECS fields like `source.ip`,
+ *                           `dns.question.name`, `file.hash.sha256`.
+ *                           Cheap, high-specificity. Backed today by
+ *                           `huntForThreat`.
+ *   - `2` (corroboration) : behavioral / multi-event queries — typically
+ *                           `process.name` + `process.command_line`
+ *                           patterns refined per article context. Backed
+ *                           today by `huntBehavior`. Only meaningful to
+ *                           run when Tier 1 has matched at least once
+ *                           (the corroboration semantic), but the
+ *                           orchestrator's `tier2_when: 'always'` mode
+ *                           also lets callers run Tier 2 standalone to
+ *                           propose durable rules from report text alone.
+ *
+ * Carried on every `huntOrchestrated` result so consumers (digest
+ * delivery, hit provenance backfill, dashboard "Tier-2 corroborated"
+ * pill) can distinguish the two tiers without inspecting the underlying
+ * sub-results. Reserved for the future Streams KI probe registry: a
+ * `TelemetryProbe` interface with `tier: TelemetryProbeTier` becomes the
+ * cross-team contract once the RFC lands; the current hunt services are
+ * the in-tree default implementation.
+ */
+export const TELEMETRY_PROBE_TIERS = [1, 2] as const;
+export type TelemetryProbeTier = (typeof TELEMETRY_PROBE_TIERS)[number];
+
+/**
+ * Caller-facing knob on `huntOrchestrated` controlling whether Tier 2
+ * runs. Tradecraft's pipeline only runs Tier 2 when Tier 1 has at least
+ * one environment hit (the corroboration semantic) — that is the default
+ * (`'on_hits'`). `'always'` is useful for "propose rules from this
+ * report regardless of current activity" flows (digest, advisory
+ * synthesis). `'never'` is a defensive option for callers that only
+ * want the atomic IOC lookup result.
+ */
+export const HUNT_TIER2_WHEN_OPTIONS = ['on_hits', 'always', 'never'] as const;
+export type HuntTier2When = (typeof HUNT_TIER2_WHEN_OPTIONS)[number];
 
 /**
  * Customer environment indices searched by `threat_intel.hunt_for_threat`

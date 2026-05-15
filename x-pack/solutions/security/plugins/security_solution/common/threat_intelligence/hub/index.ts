@@ -22,6 +22,8 @@ export type {
   ThreatRegion,
   DetectionActionability,
   ReportSortBy,
+  TelemetryProbeTier,
+  HuntTier2When,
 } from './constants';
 export {
   PLUGIN_ID,
@@ -35,6 +37,7 @@ export {
   THREAT_INTEL_SUBSCRIPTIONS_INDEX,
   THREAT_INTEL_DIGESTS_INDEX,
   THREAT_INTEL_INDICATORS_INDEX,
+  THREAT_INTEL_ADVISORIES_INDEX,
   INDICATOR_REFERENCE_PREFIX,
   THREAT_INTEL_TOOL_IDS,
   THREAT_INTELLIGENCE_SKILL_ID,
@@ -45,12 +48,16 @@ export {
   THREAT_REGIONS,
   DETECTION_ACTIONABILITY_LEVELS,
   REPORT_SORT_OPTIONS,
+  TELEMETRY_PROBE_TIERS,
+  HUNT_TIER2_WHEN_OPTIONS,
   HUNT_FOR_THREAT_INDEX_PATTERNS,
   THREAT_INTELLIGENCE_API_BASE,
   SEARCH_REPORTS_API_PATH,
   INGEST_REPORT_API_PATH,
   HUNT_BEHAVIOR_API_PATH,
   HUNT_FOR_THREAT_API_PATH,
+  HUNT_ORCHESTRATED_API_PATH,
+  SYNTHESIZE_ADVISORY_API_PATH,
   COVERAGE_GAP_API_PATH,
   GENERALIZE_FROM_TELEMETRY_API_PATH,
   EXTRACT_IOCS_API_PATH,
@@ -69,9 +76,21 @@ export {
   SUBSCRIPTION_TEMPLATE_IDS,
   getSubscriptionTemplate,
 } from './subscription_templates';
-export type { BehaviorExport } from './rule_export';
+export type { BehaviorExport, AtomicIocExport, AtomicEsqlProposal } from './rule_export';
+export type {
+  TelemetryProbe,
+  TelemetryProbeContext,
+  TelemetryProbeInput,
+  TelemetryProbeMatch,
+  TelemetryProbeProposedRule,
+  TelemetryProbeRegistry,
+  TelemetryProbeResult,
+  TelemetryProbeStatus,
+} from './telemetry_probe';
 export {
   proposedEsqlRule,
+  proposedAtomicEsqlRule,
+  proposeAtomicEsqlFromIocs,
   sanitizeRuleName,
   severityToRiskScore,
   severityFromConfidence,

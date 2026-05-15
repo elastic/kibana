@@ -15,10 +15,12 @@ import { registerExtractIocsRoute } from './extract_iocs';
 import { registerGeneralizeFromTelemetryRoute } from './generalize_from_telemetry';
 import { registerHuntBehaviorRoute } from './hunt_behavior';
 import { registerHuntForThreatRoute } from './hunt_for_threat';
+import { registerHuntOrchestratedRoute } from './hunt_orchestrator';
 import { registerIngestReportRoute } from './ingest_report';
 import { registerSavedViewsRoutes } from './saved_views';
 import { registerSearchReportsRoute } from './search_reports';
 import { registerSubscriptionRoutes } from './subscriptions';
+import { registerSynthesizeAdvisoryRoute } from './synthesize_advisory';
 
 export interface RouteRegistrationDeps {
   router: IRouter;
@@ -52,10 +54,12 @@ export const registerRoutes = (deps: RouteRegistrationDeps): void => {
   registerIngestReportRoute(deps);
   registerHuntBehaviorRoute(deps);
   registerHuntForThreatRoute(deps);
+  registerHuntOrchestratedRoute(deps);
   registerCoverageGapRoute(deps);
   registerGeneralizeFromTelemetryRoute(deps);
   registerExtractIocsRoute(deps);
   registerAnalyseEnvironmentRoute(deps);
+  registerSynthesizeAdvisoryRoute(deps);
   registerSubscriptionRoutes(deps);
 
   // UI-facing routes (dashboard + saved views).

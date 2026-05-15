@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import {
+  DETECTION_ACTIONABILITY_LEVELS,
   REPORT_SORT_OPTIONS,
   SEARCH_REPORTS_API_PATH,
   SEVERITY_LEVELS,
@@ -14,6 +15,7 @@ import {
   THREAT_CATEGORIES,
   THREAT_INTELLIGENCE_API_PRIVILEGES,
   THREAT_REGIONS,
+  type DetectionActionability,
   type ReportSortBy,
   type SeverityLevel,
   type SourceType,
@@ -73,6 +75,16 @@ const searchReportsBodySchema = schema.object({
       })
     )
   ),
+  detection_actionability: schema.maybe(
+    schema.arrayOf(
+      schema.string({
+        validate: (value) =>
+          (DETECTION_ACTIONABILITY_LEVELS as readonly string[]).includes(value)
+            ? undefined
+            : `must be one of: ${enumLiterals(DETECTION_ACTIONABILITY_LEVELS)}`,
+      })
+    )
+  ),
   sort_by: schema.maybe(
     schema.string({
       validate: (value) =>
@@ -123,6 +135,9 @@ export const registerSearchReportsRoute = ({
             time_range: request.body.time_range,
             categories: request.body.categories as ThreatCategory[] | undefined,
             regions: request.body.regions as ThreatRegion[] | undefined,
+            detection_actionability: request.body.detection_actionability as
+              | DetectionActionability[]
+              | undefined,
             sort_by: request.body.sort_by as ReportSortBy | undefined,
           });
           return response.ok({ body: result });

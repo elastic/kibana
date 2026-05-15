@@ -31,6 +31,14 @@ import {
  * tool wrapper — the route resolves a `ScopedModel` from the inference
  * plugin (mirroring `nl_to_esql_route.ts`); the tool delegates here using
  * the model already provided by the runtime.
+ *
+ * @implements
+ * Conforms to the cross-team `TelemetryProbe` contract defined in
+ * `common/threat_intelligence/hub/telemetry_probe.ts` (the Tier 2 /
+ * corroboration variant). The validated `behaviors[]` array maps onto
+ * `TelemetryProbeResult.matches` + `TelemetryProbeResult.proposed_rules`
+ * — see RFC §3.1 mapping table in
+ * `docs/rfcs/0001_streams_layer3_grounded_hypothesis_flow.md`.
  */
 
 const candidateBehaviorSchema = z.object({
@@ -52,10 +60,39 @@ export const huntBehaviorLlmExtractionSchema = z.object({
 
 type CandidateBehavior = z.infer<typeof candidateBehaviorSchema>;
 
+/**
+ * Optional environment-hit context passed by `huntOrchestrated` after a
+ * Tier 1 atomic-IOC lookup matches. Lets the Tier 2 LLM extractor refine
+ * its behavioral candidates against the actual entities seen in the
+ * customer environment (tradecraft-style article + corroboration
+ * coupling) rather than reasoning from the report text alone.
+ *
+ * All fields are best-effort hints — when missing or empty, the
+ * extraction falls back to text-only behavior, preserving the
+ * standalone `hunt_behavior` semantics that `nl_extraction_behavioral`
+ * already depends on.
+ */
+export interface HuntBehaviorArticleContext {
+  /** Top N affected hostnames from the Tier 1 hit aggregation. */
+  affected_hosts?: string[];
+  /** Top N affected usernames from the Tier 1 hit aggregation. */
+  affected_users?: string[];
+  /** Compact field summaries from a handful of Tier 1 hit documents. */
+  sample_events?: string[];
+  /** Time window the Tier 1 hunt searched, ISO-8601. */
+  time_range?: { from: string; to: string };
+}
+
 export interface HuntBehaviorParams {
   text: string;
   report_id?: string;
   llm_confidence_threshold?: number;
+  /**
+   * When provided, the LLM extraction prompt is prepended with a
+   * structured "Environment context" block describing the Tier 1 hit
+   * surface. See {@link HuntBehaviorArticleContext}.
+   */
+  article_context?: HuntBehaviorArticleContext;
 }
 
 export interface ValidatedBehavior {
@@ -118,21 +155,69 @@ For each candidate technique, return:
 - evidence_quote: a verbatim 1-3 sentence quote from the text justifying the mapping
 - llm_confidence: 0.0-1.0 estimate of confidence`;
 
+const CONTEXT_PREAMBLE = `When environment context is provided, prefer techniques that BOTH the
+report text describes AND the observed entities (hosts, users, sample events) plausibly exhibit.
+Use the context to refine technique IDs (e.g. choose a specific sub-technique that matches an
+observed process/command pattern) — do NOT invent IDs that aren't in the report text just because
+the environment is noisy.`;
+
 const buildFindingId = (techniqueId: string, reportId?: string): string =>
   `${reportId ?? 'anon'}:${techniqueId}`;
+
+/**
+ * Render the optional Tier 1 environment-hit context as a structured
+ * preamble for the LLM prompt. Empty / missing context returns `''` so
+ * the standalone `hunt_behavior` shape (no article_context) is
+ * byte-identical to the pre-orchestrator prompt and existing callers
+ * (`nl_extraction_behavioral` workflow, direct route invocations)
+ * behave unchanged.
+ */
+const renderArticleContext = (context: HuntBehaviorArticleContext | undefined): string => {
+  if (!context) return '';
+  const lines: string[] = [];
+  const {
+    affected_hosts: hosts,
+    affected_users: users,
+    sample_events: events,
+    time_range,
+  } = context;
+  if (time_range) {
+    lines.push(`- Time window searched: ${time_range.from} → ${time_range.to}`);
+  }
+  if (hosts?.length) {
+    lines.push(`- Top affected hosts: ${hosts.slice(0, 10).join(', ')}`);
+  }
+  if (users?.length) {
+    lines.push(`- Top affected users: ${users.slice(0, 10).join(', ')}`);
+  }
+  if (events?.length) {
+    lines.push('- Sample environment events:');
+    for (const evt of events.slice(0, 5)) {
+      lines.push(`    • ${evt}`);
+    }
+  }
+  if (lines.length === 0) return '';
+  return `\n\n--- ENVIRONMENT CONTEXT (Tier 1 hits) ---\n${CONTEXT_PREAMBLE}\n${lines.join('\n')}`;
+};
 
 export const huntBehavior = async (
   model: ScopedModel,
   logger: Logger,
   params: HuntBehaviorParams
 ): Promise<HuntBehaviorResult> => {
-  const { text, report_id: reportId, llm_confidence_threshold: llmThreshold = 0.5 } = params;
+  const {
+    text,
+    report_id: reportId,
+    llm_confidence_threshold: llmThreshold = 0.5,
+    article_context: articleContext,
+  } = params;
 
   // Step 1 — LLM extraction with structured output (zod-typed; no JSON parsing).
   let candidates: CandidateBehavior[] = [];
   const structured = model.chatModel.withStructuredOutput(huntBehaviorLlmExtractionSchema);
+  const contextBlock = renderArticleContext(articleContext);
   const result = (await structured.invoke(
-    `${EXTRACTION_PROMPT}\n\n--- REPORT TEXT ---\n${text}`
+    `${EXTRACTION_PROMPT}${contextBlock}\n\n--- REPORT TEXT ---\n${text}`
   )) as z.infer<typeof huntBehaviorLlmExtractionSchema>;
   candidates = (result.candidates ?? [])
     .map((c) => ({

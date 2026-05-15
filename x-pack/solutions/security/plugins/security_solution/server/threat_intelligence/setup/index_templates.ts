@@ -13,6 +13,7 @@ import {
   THREAT_INTEL_SUBSCRIPTIONS_INDEX,
   THREAT_INTEL_DIGESTS_INDEX,
   THREAT_INTEL_INDICATORS_INDEX,
+  THREAT_INTEL_ADVISORIES_INDEX,
 } from '../../../common/threat_intelligence/hub';
 
 /**
@@ -80,8 +81,39 @@ import {
  *     by the dashboard's "Top reports" panel. Reports missing this
  *     field (e.g. legacy or pending docs) tie-break to 0 via the
  *     `missing` sort parameter on the read side.
+ *
+ * v9: closes the hunt → ranking feedback loop. Adds:
+ *   - `feedback` (object) — per-report aggregate of the latest
+ *     orchestrated-hunt outcome:
+ *       * `ioc_hit_count` / `ttp_hit_count` (long) — Tier 1 hit counts.
+ *       * `affected_host_count` / `affected_user_count` (long) —
+ *         Tier 1 affected-asset cardinality.
+ *       * `last_hunted_at` (date) — wall-clock of the latest hunt.
+ *       * `last_hunt_status` (keyword) — `HuntForThreatStatus` echo so
+ *         downstream consumers can distinguish "no hits in this window"
+ *         from "no searchable input" without rerunning the hunt.
+ *     Written by `services/write_hunt_feedback.ts` from the orchestrator
+ *     after every Tier 1 invocation against a known `report_id`.
+ *   - `corroborated_rank_score` (float) — `rank_score * (1 + boost)`
+ *     where `boost` is a log-based, monotone, clamped function of the
+ *     IOC and TTP hit counts. See the formula in
+ *     `services/write_hunt_feedback.ts`. `search_reports` sort_by='rank'
+ *     prefers this field over the static `rank_score` so reports
+ *     corroborated by environment activity float to the top of digests,
+ *     dashboard "Top reports" panel, and any future top-N gating. Bound
+ *     to `[rank_score, 1.5 * rank_score]` so a noisy report can never
+ *     dominate a clean high-relevance one outright; the boost is
+ *     idempotent across reruns of the same hunt window.
+ *
+ * v10: introduces the advisories companion index template
+ * (`.kibana-threat-intel-advisories`) for cross-report LLM-synthesised
+ * advisories produced by `services/synthesize_advisory.ts`. One row
+ * per advisory carrying the rendered narrative, the recommended actions
+ * list, and the report ids that fed the synthesis. No changes to the
+ * threat-reports data stream mapping in this bump — companion index
+ * additions are always backwards-compatible.
  */
-const TEMPLATE_VERSION = 8;
+const TEMPLATE_VERSION = 10;
 
 /** Keyword sentinel meaning "visible from every space". */
 export const SPACE_ID_GLOBAL = '*' as const;
@@ -165,6 +197,16 @@ const threatReportsTemplate = {
         // severity alone. See the v8 doc comment above and tradecraft's
         // severity × relevance scoring model.
         rank_score: { type: 'float' as const },
+        // Hunt-feedback-corroborated derivative of `rank_score`. Equal to
+        // `rank_score * (1 + boost)` where `boost ∈ [0, 0.5]` is a
+        // log-based function of `feedback.ioc_hit_count` and
+        // `feedback.ttp_hit_count`. Written by
+        // `services/write_hunt_feedback.ts` after every orchestrated
+        // hunt; `search_reports` sort_by='rank' uses this as the
+        // primary sort key with `rank_score` and `severity.score` as
+        // tie-breakers (so legacy or never-hunted reports still rank
+        // sensibly). See the v9 doc comment above.
+        corroborated_rank_score: { type: 'float' as const },
         extracted: {
           properties: {
             iocs: {
@@ -247,6 +289,39 @@ const threatReportsTemplate = {
               },
             },
             environment_hits_total: { type: 'integer' as const },
+          },
+        },
+        // Hunt-feedback aggregate, refreshed by `write_hunt_feedback`
+        // after every orchestrated hunt against a known `report_id`.
+        // Distinct from `provenance.environment_hits` (which is the
+        // hourly cross-rule backfill from `hit_provenance_backfill`):
+        // `feedback` reflects the latest *targeted* hunt's outcome and
+        // feeds `corroborated_rank_score`; the provenance block reflects
+        // ambient Detection Engine alert volume. The two coexist
+        // deliberately so the digest can show both "what this report's
+        // IOCs hit in the targeted hunt" and "what alerts have fired
+        // referencing this report in the last 7d".
+        feedback: {
+          properties: {
+            ioc_hit_count: { type: 'long' as const },
+            ttp_hit_count: { type: 'long' as const },
+            affected_host_count: { type: 'long' as const },
+            affected_user_count: { type: 'long' as const },
+            last_hunted_at: { type: 'date' as const },
+            // `HuntForThreatStatus` echo — see
+            // `services/hunt_for_threat.ts`. Closed enum but typed as
+            // keyword so a future enum extension does not require a
+            // mapping migration.
+            last_hunt_status: { type: 'keyword' as const },
+            // Wall-clock window of the hunt that produced these counts,
+            // ISO-8601 stringified. Lets readers tell "no hits because
+            // not hunted recently" from "no hits in the searched window".
+            last_hunt_window: {
+              properties: {
+                from: { type: 'date' as const },
+                to: { type: 'date' as const },
+              },
+            },
           },
         },
       },
@@ -411,6 +486,74 @@ const COMPANION_INDEX_TEMPLATES: Array<{
       },
     },
   },
+  {
+    // Advisories companion — LLM-synthesised cross-report narratives. See
+    // `services/synthesize_advisory.ts`. One row per advisory; rows are
+    // append-only (no in-place edits) so re-runs over the same window
+    // produce a new row, letting the UI render an audit trail of
+    // synthesis attempts. Indexed by `theme_id` (a stable digest of the
+    // input report-id set) so the de-dup logic can filter at query time.
+    name: `${THREAT_INTEL_ADVISORIES_INDEX}-template`,
+    body: {
+      name: `${THREAT_INTEL_ADVISORIES_INDEX}-template`,
+      index_patterns: [THREAT_INTEL_ADVISORIES_INDEX],
+      priority: 200,
+      _meta: TEMPLATE_META,
+      template: {
+        mappings: {
+          dynamic: 'strict',
+          properties: {
+            '@timestamp': { type: 'date' },
+            // Stable digest of the input set — used to detect duplicate
+            // synthesis runs over the same window + report selection.
+            theme_id: { type: 'keyword' },
+            time_range: {
+              properties: {
+                from: { type: 'date' },
+                to: { type: 'date' },
+              },
+            },
+            // Filter inputs that produced the advisory, persisted so the
+            // dashboard can render "synthesised from X reports in CATEGORY
+            // over the past 7 days" without recomputing.
+            filters: {
+              properties: {
+                tags: { type: 'keyword' },
+                categories: { type: 'keyword' },
+                regions: { type: 'keyword' },
+                min_severity: { type: 'keyword' },
+              },
+            },
+            // LLM-produced narrative. `theme_title` is the short headline,
+            // `narrative_markdown` is the 2-3 paragraph body. Both are
+            // text-only (no inference / semantic_text) — advisories are
+            // read by humans, not searched.
+            theme_title: { type: 'text' },
+            narrative_markdown: { type: 'text' },
+            // Recommended actions — short imperative bullets, parsed by
+            // the UI into a checkbox list and a "Open a Case" button.
+            recommended_actions: { type: 'keyword' },
+            // Provenance — the report ids the advisory was synthesised
+            // from. Lets the UI render "View source reports" drill-downs
+            // and powers the "advisory coverage" panel on the dashboard.
+            report_ids: { type: 'keyword' },
+            // Threat actor / category aggregations the LLM was given as
+            // a prompt anchor. Persisted so a later re-render of the
+            // advisory does not have to re-compute them.
+            grouping: {
+              properties: {
+                threat_actors: { type: 'keyword' },
+                categories: { type: 'keyword' },
+                regions: { type: 'keyword' },
+              },
+            },
+            generated_by: { type: 'keyword' },
+            space_id: { type: 'keyword' },
+          },
+        },
+      },
+    },
+  },
 ];
 
 const ensureCompanionIndex = async (
@@ -483,6 +626,7 @@ export const installIndexTemplates = async ({
   await ensureCompanionIndex(esClient, THREAT_INTEL_SUBSCRIPTIONS_INDEX, log);
   await ensureCompanionIndex(esClient, THREAT_INTEL_DIGESTS_INDEX, log);
   await ensureCompanionIndex(esClient, THREAT_INTEL_INDICATORS_INDEX, log);
+  await ensureCompanionIndex(esClient, THREAT_INTEL_ADVISORIES_INDEX, log);
 
   log.info('Threat intelligence index templates installed');
 };

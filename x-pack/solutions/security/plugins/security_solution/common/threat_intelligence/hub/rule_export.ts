@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SeverityLevel } from './constants';
+import type { IocType, SeverityLevel } from './constants';
 
 /**
  * ES|QL rule export for behaviors extracted by `hunt_behavior`. The Elastic
@@ -93,4 +93,144 @@ export const proposedEsqlRule = (b: BehaviorExport): string => {
     `| KEEP @timestamp, host.name, user.name, process.name, event.action, message`,
     `| LIMIT 100`,
   ].join('\n');
+};
+
+/**
+ * Atomic IOC → ES|QL rule export. Tier 1 of the tradecraft model: when
+ * an IOC actually matched in the environment, this helper proposes a
+ * one-line durable rule that catches the exact ECS-field pattern that
+ * produced the match. Distinct from `proposedEsqlRule` above (which is
+ * the Tier 2 behavioral path).
+ *
+ * Pure and isomorphic — lives in `common/` so the UI can re-render the
+ * proposed body in the analyst's review surface without re-fetching
+ * from the server. The server's `services/hunt_orchestrator.ts`
+ * attaches the result of {@link proposeAtomicEsqlFromIocs} as
+ * `proposed_atomic_rules` on every Tier 1 hit, giving the LLM both
+ * atomic and behavioral candidates to choose between when handing off
+ * to `security.create_detection_rule`.
+ */
+
+export interface AtomicIocExport {
+  ioc_type: IocType;
+  ioc_value: string;
+  report_id?: string;
+}
+
+export interface AtomicEsqlProposal {
+  finding_id: string;
+  rule_name: string;
+  ioc_type: IocType;
+  ioc_value: string;
+  esql: string;
+  severity: SeverityLevel;
+  risk_score: number;
+}
+
+/**
+ * Per-IOC-type ECS field set. Mirrors `buildIocShould` in
+ * `services/hunt_for_threat.ts` so the proposed ES|QL `WHERE` clause
+ * inspects exactly the fields the Tier 1 hunt searched on — meaning
+ * the rule, once enabled, will catch the same documents Tier 1 just
+ * matched (no recall drift between the hunt and the durable rule).
+ */
+const IOC_FIELD_MAP: Record<IocType, readonly string[]> = {
+  ip: ['source.ip', 'destination.ip', 'host.ip', 'client.ip', 'server.ip'],
+  domain: ['dns.question.name', 'destination.domain', 'url.domain'],
+  url: ['url.full', 'url.original'],
+  hash: ['file.hash.md5', 'file.hash.sha1', 'file.hash.sha256'],
+} as const;
+
+/**
+ * Sanitised one-line rule name. Truncates the IOC value at 16 chars so
+ * a 64-char SHA-256 doesn't blow up the rule name when surfaced in
+ * dashboards.
+ */
+const buildAtomicRuleName = (iocType: IocType, iocValue: string, reportId?: string): string => {
+  const trimmed = iocValue.length > 16 ? `${iocValue.slice(0, 13)}…` : iocValue;
+  const base = `Atomic IOC match — ${iocType}: ${trimmed}`;
+  return reportId ? `${base} (${reportId.slice(0, 12)})` : base;
+};
+
+const buildAtomicFindingId = (iocType: IocType, iocValue: string, reportId?: string): string =>
+  `${reportId ?? 'anon'}:atomic:${iocType}:${iocValue}`;
+
+/**
+ * Render the ES|QL body. Atomic IOC matches are high-confidence by
+ * definition (the IOC came from a vetted source AND fired in the
+ * environment), so we default to severity=high and risk_score=73; the
+ * analyst can lower on the review surface. The KEEP list mirrors the
+ * `_source` projection that `hunt_for_threat` uses on its search so the
+ * rule's preview surface looks identical to what the analyst already
+ * inspected.
+ */
+export const proposedAtomicEsqlRule = (ioc: AtomicIocExport): AtomicEsqlProposal => {
+  const fields = IOC_FIELD_MAP[ioc.ioc_type];
+  const ruleName = buildAtomicRuleName(ioc.ioc_type, ioc.ioc_value, ioc.report_id);
+  const severity: SeverityLevel = 'high';
+  // `==` per ES|QL syntax. String literals are double-quoted. The
+  // generated body is meant to be a starting point; the analyst will
+  // typically narrow the FROM clause to the integration the IOC came
+  // from before enabling.
+  const wherePredicate = fields.map((field) => `${field} == "${ioc.ioc_value}"`).join(' OR ');
+  const esql = [
+    `// Generated from threat_intel.hunt_orchestrated (Tier 1 atomic IOC match).`,
+    `// Refine the FROM clause to the specific integration(s) producing the matches`,
+    `// before enabling — the WHERE list mirrors hunt_for_threat's per-IOC ECS fields.`,
+    `// rule_name: ${ruleName}`,
+    `// severity: ${severity}  risk_score: ${severityToRiskScore(severity)}`,
+    `// ioc_type: ${ioc.ioc_type}  ioc_value: ${ioc.ioc_value}`,
+    `FROM logs-*,traces-*,.alerts-security.*`,
+    `| WHERE ${wherePredicate}`,
+    `| KEEP @timestamp, host.name, user.name, source.ip, destination.ip, url.full, ` +
+      `file.hash.sha256, event.dataset`,
+    `| LIMIT 100`,
+  ].join('\n');
+  return {
+    finding_id: buildAtomicFindingId(ioc.ioc_type, ioc.ioc_value, ioc.report_id),
+    rule_name: ruleName,
+    ioc_type: ioc.ioc_type,
+    ioc_value: ioc.ioc_value,
+    esql,
+    severity,
+    risk_score: severityToRiskScore(severity),
+  };
+};
+
+const ATOMIC_PROPOSAL_HARD_CAP = 20;
+
+/**
+ * Build atomic ES|QL proposals from a Tier 1 resolved IOC set.
+ *
+ * De-duplicates on `(ioc_type, ioc_value)` so the same IOC appearing
+ * twice in a report (e.g. once as a raw value and once defanged) maps
+ * to a single proposal. Capped at 20 proposals — the orchestrator's
+ * caller usually only acts on the top few; more is noise in the LLM
+ * context window.
+ */
+export const proposeAtomicEsqlFromIocs = (
+  iocs: ReadonlyArray<{ type: IocType; value: string }>,
+  reportId?: string
+): AtomicEsqlProposal[] => {
+  const seen = new Set<string>();
+  const proposals: AtomicEsqlProposal[] = [];
+  for (const ioc of iocs) {
+    const hasValidValue = ioc && typeof ioc.value === 'string' && ioc.value.length > 0;
+    const hasKnownType = hasValidValue && IOC_FIELD_MAP[ioc.type] !== undefined;
+    if (hasKnownType) {
+      const key = `${ioc.type}:${ioc.value}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        proposals.push(
+          proposedAtomicEsqlRule({
+            ioc_type: ioc.type,
+            ioc_value: ioc.value,
+            report_id: reportId,
+          })
+        );
+        if (proposals.length >= ATOMIC_PROPOSAL_HARD_CAP) break;
+      }
+    }
+  }
+  return proposals;
 };

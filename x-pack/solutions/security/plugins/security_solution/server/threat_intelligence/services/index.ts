@@ -24,6 +24,7 @@ export type { IngestReportParams, IngestReportResult } from './ingest_report';
 
 export { huntBehavior, huntBehaviorLlmExtractionSchema } from './hunt_behavior';
 export type {
+  HuntBehaviorArticleContext,
   HuntBehaviorParams,
   HuntBehaviorResult,
   HuntBehaviorStatus,
@@ -40,6 +41,36 @@ export type {
   HuntIoc,
   AffectedAsset,
 } from './hunt_for_threat';
+
+export { huntOrchestrated } from './hunt_orchestrator';
+export type {
+  HuntOrchestratedParams,
+  HuntOrchestratedResult,
+  HuntOrchestratedStatus,
+  HuntOrchestratedTier1,
+  HuntOrchestratedTier2,
+  HuntOrchestratedTier2SkipReason,
+} from './hunt_orchestrator';
+
+export {
+  buildHuntFeedbackDoc,
+  computeBoost,
+  resolveHuntFeedbackTarget,
+  writeHuntFeedback,
+  writeHuntFeedbackSafe,
+} from './write_hunt_feedback';
+export type {
+  HuntFeedbackInputs,
+  HuntFeedbackTarget,
+  HuntFeedbackWrite,
+} from './write_hunt_feedback';
+
+export { synthesizeAdvisory, advisoryLlmOutputSchema } from './synthesize_advisory';
+export type {
+  SynthesizeAdvisoryParams,
+  SynthesizeAdvisoryResult,
+  SynthesizeAdvisoryStatus,
+} from './synthesize_advisory';
 
 export { coverageGap } from './coverage_gap';
 export type { CoverageGapParams, CoverageGapResult, CoverageGapTechniqueRow } from './coverage_gap';

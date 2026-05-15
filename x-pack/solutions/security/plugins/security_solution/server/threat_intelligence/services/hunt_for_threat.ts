@@ -22,6 +22,15 @@ import {
  *
  * Same shape is used by the internal HTTP route and the Agent Builder
  * tool wrapper.
+ *
+ * @implements
+ * Conforms to the cross-team `TelemetryProbe` contract defined in
+ * `common/threat_intelligence/hub/telemetry_probe.ts` (the Tier 1 /
+ * atomic-lookup variant). See
+ * `docs/rfcs/0001_streams_layer3_grounded_hypothesis_flow.md` for the
+ * full mapping — `HuntForThreatResult` is a structural superset of
+ * `TelemetryProbeResult` so we don't construct an adapter at the
+ * boundary, only at the future Streams-registry registration site.
  */
 
 export interface HuntIoc {
@@ -61,6 +70,19 @@ export interface HuntForThreatResult {
   report_id?: string;
   searched_iocs: number;
   searched_techniques: number;
+  /**
+   * The resolved IOC set the hunt actually executed against. Populated
+   * from `params.iocs` when supplied or fetched from `extracted.iocs`
+   * when only `report_id` is given. Surfaced on the result so the
+   * orchestrator's atomic-rule proposal step (see
+   * `common/threat_intelligence/hub/rule_export.ts`) can emit one ES|QL
+   * proposal per IOC without re-resolving from the report. Optional —
+   * legacy callers that only inspect `searched_iocs` (the count) keep
+   * working unchanged.
+   */
+  resolved_iocs?: HuntIoc[];
+  /** Same shape as `resolved_iocs`, for the ATT&CK technique list. */
+  resolved_techniques?: string[];
   time_range?: { from: string; to: string };
   counts: {
     total_hits: number;
@@ -200,6 +222,8 @@ export const huntForThreat = async (
     report_id: reportId,
     searched_iocs: resolvedIocs.length,
     searched_techniques: resolvedTechniques.length,
+    resolved_iocs: resolvedIocs,
+    resolved_techniques: resolvedTechniques,
     counts: { total_hits: 0, returned_hits: 0, affected_hosts: 0, affected_users: 0 },
     hits: [],
     affected_assets: { hosts: [], users: [] },
@@ -312,6 +336,8 @@ export const huntForThreat = async (
     report_id: reportId,
     searched_iocs: resolvedIocs.length,
     searched_techniques: resolvedTechniques.length,
+    resolved_iocs: resolvedIocs,
+    resolved_techniques: resolvedTechniques,
     time_range: { from, to },
     counts: {
       total_hits: total,

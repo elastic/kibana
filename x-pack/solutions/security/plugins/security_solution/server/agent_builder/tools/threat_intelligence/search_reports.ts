@@ -10,6 +10,7 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import {
+  DETECTION_ACTIONABILITY_LEVELS,
   REPORT_SORT_OPTIONS,
   SEARCH_REPORTS_API_PATH,
   SEVERITY_LEVELS,
@@ -76,6 +77,16 @@ const searchReportsSchema = z.object({
     .describe(
       'Restrict to reports tagged with any of the given macro geographic regions ' +
         '(e.g. ["north-america", "europe"]). Backed by `geography.regions` on the report.'
+    ),
+  detection_actionability: z
+    .array(z.enum(DETECTION_ACTIONABILITY_LEVELS))
+    .optional()
+    .describe(
+      'Closed-set classifier filter — `informational | iocs_only | ttps_present | ' +
+        'rule_candidate`. Use `["rule_candidate"]` (or include `"ttps_present"`) when the ' +
+        'analyst asks for "actionable", "high-quality", or "rule-ready" reports. Backed by ' +
+        '`extracted.detection_actionability` populated by the stage-2 enrichment in the ' +
+        '`nl_extraction_behavioral` workflow.'
     ),
   sort_by: z
     .enum(REPORT_SORT_OPTIONS)

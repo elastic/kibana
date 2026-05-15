@@ -233,8 +233,17 @@ steps:
       # against the keyword field) and high-signal — it catches RSS-syndicated
       # variants and same-campaign reports that hit different feeds. Future
       # iterations can layer a partial-overlap correlation on top.
+      #
+      # Skipped when no IOCs were extracted from this report: an empty
+      # `ioc_set_hash` would degenerate the `term` clause into a match on
+      # the empty string, returning every prior empty-IOC report as
+      # "related" — false positives that would poison the
+      # `related_reports` provenance field. The `if` guard short-circuits
+      # cleanly; the persist step's `default` keeps the downstream doc
+      # numerically clean.
       - name: find_related_reports
         type: elasticsearch.search
+        if: "steps.extract_iocs.output.ioc_set_hash : *"
         with:
           index: .kibana-threat-reports
           size: 25

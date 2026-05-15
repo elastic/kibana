@@ -13,5 +13,7 @@ export type { PersistSubscriptionInput } from './manage_subscriptions';
 export { coverageGapTool } from './coverage_gap';
 export { extractIocsTool } from './extract_iocs';
 export { huntForThreatTool } from './hunt_for_threat';
+export { huntOrchestratedTool } from './hunt_orchestrator';
+export { synthesizeAdvisoryTool } from './synthesize_advisory';
 export { analyseEnvironmentTool } from './analyse_environment';
 export { generalizeFromTelemetryTool } from './generalize_from_telemetry';
