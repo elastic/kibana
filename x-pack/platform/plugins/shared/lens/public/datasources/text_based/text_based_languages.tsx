@@ -613,6 +613,9 @@ export function getTextBasedDatasource({
     initializeDimension(state, layerId, indexPatterns, { columnId, groupId, autoTimeField }) {
       const layer = state.layers[layerId];
       if (!layer) return state;
+
+      // For trendline layers, auto-initialize the time field column
+      // and modify the query to add time bucketing
       if (autoTimeField && layer.timeField) {
         const tf = layer.timeField;
         let trendlineTimeField = buildTrendlineBucketExpression(tf);
