@@ -303,6 +303,7 @@ export const ConditionalSnoozePanel = ({
       {descriptorWarning && (
         <>
           <EuiCallOut
+            announceOnMount
             size="s"
             color="warning"
             iconType="warning"

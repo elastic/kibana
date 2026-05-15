@@ -75,7 +75,7 @@ export const DataConditionPanel = ({
           data-test-subj={`dataConditionChip-${entry.id}`}
         >
           <EuiFlexItem grow={false}>
-            <EuiIcon type="database" />
+            <EuiIcon type="database" aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
@@ -111,7 +111,7 @@ export const DataConditionPanel = ({
         <>
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiIcon type="database" />
+              <EuiIcon type="database" aria-hidden={true} />
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiText size="s">

@@ -57,7 +57,7 @@ export const TimeConditionPanel = ({
       <EuiPanel hasBorder={true} color="subdued" paddingSize="s" data-test-subj="timeConditionChip">
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiIcon type="clock" color="subdued" />
+            <EuiIcon type="clock" color="subdued" aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="s" color="subdued">
@@ -94,7 +94,7 @@ export const TimeConditionPanel = ({
       <EuiPanel hasBorder paddingSize="s">
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiIcon type="clock" />
+            <EuiIcon type="clock" aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText size="s">
