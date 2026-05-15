@@ -419,6 +419,7 @@ export function XYChart({
   const isHistogramViz = dataLayers.every((l) => l.isHistogram);
   const isEsqlMode = dataLayers.some((l) => l.table?.meta?.type === ESQL_TABLE_TYPE);
   const hasBars = dataLayers.some((l) => l.seriesType === SeriesTypes.BAR);
+  const isHorizontalBarChart = isHorizontalChart(dataLayers) && hasBars;
 
   const { baseDomain: rawXDomain, extendedDomain: xDomain } = getXDomain(
     data.datatableUtilities,
@@ -686,7 +687,6 @@ export function XYChart({
                 inner: linesPaddings[position],
               }
             : undefined,
-        maxLength: axis.truncate,
       },
       axisTitle: {
         visible: axis.showTitle,
@@ -703,15 +703,11 @@ export function XYChart({
   };
 
   const getXAxisStyle = (): RecursivePartial<AxisStyle> => {
-    const isHorizontalBarChart = isHorizontalChart(dataLayers) && hasBars;
-    const MAX_LENGTH_FOR_HORIZONTAL_BAR_CHART = '40%';
-
     if (isHorizontalTimeAxis) {
       return {
         tickLabel: {
           visible: Boolean(xAxisConfig?.showLabels),
           fill: xAxisConfig?.labelColor,
-          maxLength: xAxisConfig?.truncate,
         },
         tickLine: {
           visible: Boolean(xAxisConfig?.showLabels),
@@ -728,10 +724,6 @@ export function XYChart({
         rotation: xAxisConfig?.labelsOrientation,
         padding: linesPaddings.bottom != null ? { inner: linesPaddings.bottom } : undefined,
         fill: xAxisConfig?.labelColor,
-        maxLength:
-          xAxisConfig?.truncate ??
-          (isHorizontalBarChart ? MAX_LENGTH_FOR_HORIZONTAL_BAR_CHART : undefined),
-        truncate: isHorizontalBarChart ? ('middle' as const) : undefined,
       },
       axisTitle: {
         visible: xAxisConfig?.showTitle,
@@ -965,6 +957,10 @@ export function XYChart({
               style={getXAxisStyle()}
               showOverlappingLabels={xAxisConfig?.showOverlappingLabels}
               showDuplicatedTicks={xAxisConfig?.showDuplicates}
+              tickLabelMaxLength={
+                xAxisConfig?.truncate ?? (isHorizontalBarChart ? '40%' : undefined)
+              }
+              tickLabelTruncate={isHorizontalBarChart ? ('middle' as const) : undefined}
               {...getOverridesFor(overrides, 'axisX')}
             />
             {isSplitChart && splitTable && (
@@ -996,6 +992,7 @@ export function XYChart({
                   domain={getYAxisDomain(axis)}
                   showOverlappingLabels={axis.showOverlappingLabels}
                   showDuplicatedTicks={axis.showDuplicates}
+                  tickLabelMaxLength={axis.truncate}
                   {...getOverridesFor(
                     overrides,
                     /left/i.test(axis.groupId) ? 'axisLeft' : 'axisRight'
