@@ -13,7 +13,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 
-import React, { memo, useMemo } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
@@ -24,6 +24,8 @@ import type { ObservedEntityData } from '../../../../../flyout/entity_details/sh
 import { ONE_WEEK_IN_HOURS } from '../../../../../flyout/entity_details/shared/constants';
 import { ObservedEntity } from '../../../../../flyout/entity_details/shared/components/observed_entity';
 import { useObservedHostFields } from '../hooks/use_observed_host_fields';
+import type { OpenFlyoutLinkProps } from '../../../../shared/components/open_flyout_link';
+import { OpenFlyoutLink } from '../../../../shared/components/open_flyout_link';
 import { FormattedRelativePreferenceDate } from '../../../../../common/components/formatted_date';
 import { InspectButton, InspectButtonContainer } from '../../../../../common/components/inspect';
 import type { HostItem } from '../../../../../../common/search_strategy';
@@ -200,12 +202,18 @@ const ObservedDataSectionContent = memo(
     );
     const observedFields = useObservedHostFields(observedHostWithAnomalies);
 
+    const renderFlyoutLink = useCallback(
+      (props: OpenFlyoutLinkProps) => <OpenFlyoutLink {...props} asParent={false} />,
+      []
+    );
+
     return (
       <ObservedEntity
         observedData={observedHostWithAnomalies}
         contextID={contextID}
         scopeId={scopeId}
         observedFields={observedFields}
+        linkRenderer={renderFlyoutLink}
       />
     );
   }

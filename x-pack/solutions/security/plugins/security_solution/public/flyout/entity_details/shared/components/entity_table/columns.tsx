@@ -7,6 +7,7 @@
 
 import { css } from '@emotion/react';
 import React from 'react';
+import type { ComponentType, ReactNode } from 'react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -21,7 +22,8 @@ import { PreviewLink } from '../../../../shared/components/preview_link';
 export const getEntityTableColumns = <T extends BasicEntityData>(
   contextID: string,
   scopeId: string,
-  data: T
+  data: T,
+  linkRenderer?: ComponentType<{ field: string; value: string; children?: ReactNode }>
 ): EntityTableColumns<T> => [
   {
     name: (
@@ -55,17 +57,28 @@ export const getEntityTableColumns = <T extends BasicEntityData>(
       const values = getValues && getValues(data);
 
       if (field) {
-        const showPreviewLink = values && isFlyoutLink({ field, scopeId });
-        const renderPreviewLink = (value: string) => (
-          <PreviewLink field={field} value={value} entityId={data.entityId} scopeId={scopeId} />
-        );
+        let renderLink: ((value: string) => JSX.Element) | undefined;
+        if (linkRenderer) {
+          const LinkRenderer = linkRenderer;
+          renderLink = (value: string) => (
+            <LinkRenderer field={field} value={value}>
+              {value}
+            </LinkRenderer>
+          );
+        } else if (values && isFlyoutLink({ field, scopeId })) {
+          renderLink = (value: string) => (
+            <PreviewLink field={field} value={value} entityId={data.entityId} scopeId={scopeId} />
+          );
+        } else {
+          renderLink = renderField;
+        }
         return (
           <DefaultFieldRenderer
             rowItems={toFieldRendererItems(values)}
             attrName={field}
             idPrefix={contextID ? `entityTable-${contextID}` : 'entityTable'}
             scopeId={scopeId}
-            render={showPreviewLink ? renderPreviewLink : renderField}
+            render={renderLink}
             data-test-subj="entity-table-value"
           />
         );
