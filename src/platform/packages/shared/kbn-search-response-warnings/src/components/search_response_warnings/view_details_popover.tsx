@@ -82,7 +82,7 @@ export const ViewDetailsPopover = (props: Props) => {
             data-test-subj="searchResponseWarningsViewDetails"
           >
             <>
-              {viewDetailsLabel} <EuiIcon type="arrowRight" size="s" />
+              {viewDetailsLabel} <EuiIcon type="arrowRight" size="s" aria-hidden={true} />
             </>
           </EuiLink>
         ) : (
