@@ -6,7 +6,10 @@
  */
 
 import {
+  EuiButton,
+  EuiButtonEmpty,
   EuiButtonIcon,
+  EuiCallOut,
   EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,6 +20,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  useEuiTheme,
   EuiToolTip,
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
@@ -29,6 +33,8 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import type { EntityHighlightsResponse } from '../types';
 
+export type StalenessDisplayMode = 'banner' | 'inline';
+
 interface EntityHighlightsResultProps {
   assistantResult: {
     response: EntityHighlightsResponse | null;
@@ -37,6 +43,8 @@ interface EntityHighlightsResultProps {
   showAnonymizedValues: boolean;
   generatedAt: number | null;
   generatedBy?: string;
+  stalenessReasons?: string[];
+  stalenessDisplayMode?: StalenessDisplayMode;
   onRefresh: () => void;
 }
 
@@ -45,8 +53,11 @@ export const EntityHighlightsResult: React.FC<EntityHighlightsResultProps> = ({
   showAnonymizedValues,
   generatedAt,
   generatedBy,
+  stalenessReasons,
+  stalenessDisplayMode = 'banner',
   onRefresh,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const anonymizedResult = useAnonymizedResponse(assistantResult, showAnonymizedValues);
   const textToCopy = useMemo(() => formatTextToCopy(anonymizedResult), [anonymizedResult]);
 
@@ -54,51 +65,137 @@ export const EntityHighlightsResult: React.FC<EntityHighlightsResultProps> = ({
     return null;
   }
 
+  const isStale = stalenessReasons && stalenessReasons.length > 0;
+
+  const showInlineStaleness = isStale && stalenessDisplayMode === 'inline';
+
   return (
     <EuiPanel hasBorder={true}>
-      {anonymizedResult.highlights.length > 0 ? (
-        anonymizedResult.highlights.map((highlight, index) => (
-          <React.Fragment key={index}>
-            <EuiText size="xs" color="default">
-              <strong>{highlight.title}</strong>
+      {isStale && stalenessDisplayMode === 'banner' && (
+        <>
+          <EuiCallOut
+            size="s"
+            color="warning"
+            iconType="warning"
+            data-test-subj="entity-highlights-staleness-callout"
+            title={
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.entityDetails.highlights.stalenessTitle"
+                defaultMessage="Entity data has changed since this summary was generated"
+              />
+            }
+          >
+            <EuiText size="xs">
+              <ul style={{ margin: 0, paddingLeft: '1em' }}>
+                {stalenessReasons.map((reason, i) => (
+                  <li key={i}>{reason}</li>
+                ))}
+              </ul>
             </EuiText>
             <EuiSpacer size="xs" />
-            <EuiMarkdownFormat textSize="xs" color="default">
-              {highlight.text}
-            </EuiMarkdownFormat>
-            {index < anonymizedResult.highlights.length - 1 && <EuiSpacer size="m" />}
-          </React.Fragment>
-        ))
-      ) : (
-        <EuiText size="xs" color="subdued" textAlign="center">
-          <FormattedMessage
-            id="xpack.securitySolution.flyout.entityDetails.highlights.emptyState"
-            defaultMessage="There's not enough data to create an AI summary."
-          />
-        </EuiText>
+            <EuiButtonEmpty
+              size="s"
+              iconType="refresh"
+              onClick={onRefresh}
+              data-test-subj="entity-highlights-staleness-regenerate"
+            >
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.entityDetails.highlights.stalenessRegenerate"
+                defaultMessage="Regenerate summary"
+              />
+            </EuiButtonEmpty>
+          </EuiCallOut>
+          <EuiSpacer size="m" />
+        </>
       )}
-      {anonymizedResult.recommendedActions && anonymizedResult.recommendedActions.length > 0 && (
+
+      {/* Stale content is dimmed so the user immediately senses something is off */}
+      <div style={{ opacity: isStale ? 0.45 : 1 }}>
+        {anonymizedResult.highlights.length > 0 ? (
+          anonymizedResult.highlights.map((highlight, index) => (
+            <React.Fragment key={index}>
+              <EuiText size="xs" color="default">
+                <strong>{highlight.title}</strong>
+              </EuiText>
+              <EuiSpacer size="xs" />
+              <EuiMarkdownFormat textSize="xs" color="default">
+                {highlight.text}
+              </EuiMarkdownFormat>
+              {index < anonymizedResult.highlights.length - 1 && <EuiSpacer size="m" />}
+            </React.Fragment>
+          ))
+        ) : (
+          <EuiText size="xs" color="subdued" textAlign="center">
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.entityDetails.highlights.emptyState"
+              defaultMessage="There's not enough data to create an AI summary."
+            />
+          </EuiText>
+        )}
+        {anonymizedResult.recommendedActions && anonymizedResult.recommendedActions.length > 0 && (
+          <>
+            <EuiHorizontalRule margin="m" />
+            <EuiFlexGroup alignItems="center" gutterSize="xs">
+              <EuiFlexItem grow={false}>
+                <EuiIcon type="documentation" size="m" aria-hidden={true} />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="xxs">
+                  <h4>
+                    <FormattedMessage
+                      id="xpack.securitySolution.flyout.entityDetails.highlights.recommendedActions"
+                      defaultMessage="Recommended actions"
+                    />
+                  </h4>
+                </EuiTitle>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="s" />
+            <EuiMarkdownFormat textSize="xs" color="default">
+              {anonymizedResult.recommendedActions.map((action) => `- ${action}`).join('\n')}
+            </EuiMarkdownFormat>
+          </>
+        )}
+      </div>
+
+      {/* Inline staleness: prominent full-width CTA after the dimmed content */}
+      {showInlineStaleness && (
         <>
-          <EuiHorizontalRule margin="m" />
-          <EuiFlexGroup alignItems="center" gutterSize="xs">
+          <EuiSpacer size="m" />
+          <EuiFlexGroup
+            alignItems="center"
+            gutterSize="s"
+            responsive={false}
+            data-test-subj="entity-highlights-staleness-inline"
+          >
             <EuiFlexItem grow={false}>
-              <EuiIcon type="documentation" size="m" aria-hidden={true} />
+              <EuiIcon type="warning" color="warning" size="s" aria-hidden={true} />
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiTitle size="xxs">
-                <h4>
-                  <FormattedMessage
-                    id="xpack.securitySolution.flyout.entityDetails.highlights.recommendedActions"
-                    defaultMessage="Recommended actions"
-                  />
-                </h4>
-              </EuiTitle>
+            <EuiFlexItem grow>
+              <EuiText size="xs" color="warning">
+                <FormattedMessage
+                  id="xpack.securitySolution.flyout.entityDetails.highlights.stalenessInlineLabel"
+                  defaultMessage="Summary may be outdated — {reasons}"
+                  values={{ reasons: stalenessReasons.join(', ') }}
+                />
+              </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer size="s" />
-          <EuiMarkdownFormat textSize="xs" color="default">
-            {anonymizedResult.recommendedActions.map((action) => `- ${action}`).join('\n')}
-          </EuiMarkdownFormat>
+          <EuiButton
+            fullWidth
+            fill
+            color="warning"
+            iconType="refresh"
+            size="s"
+            onClick={onRefresh}
+            data-test-subj="entity-highlights-staleness-inline-regenerate"
+          >
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.entityDetails.highlights.stalenessInlineRegenerate"
+              defaultMessage="Regenerate summary"
+            />
+          </EuiButton>
         </>
       )}
       <>

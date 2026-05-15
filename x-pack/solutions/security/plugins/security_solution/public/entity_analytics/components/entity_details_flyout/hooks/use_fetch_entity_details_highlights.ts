@@ -66,8 +66,11 @@ type AssistantResult = {
  */
 const buildResultFromStoredSummary = (storedSummary: EntitySummaryAttribute): AssistantResult => ({
   response: {
-    highlights: storedSummary.highlights ?? [],
-    recommendedActions: storedSummary.recommendedActions ?? null,
+    // Guard against corrupted stored data — highlights must be an array
+    highlights: Array.isArray(storedSummary.highlights) ? storedSummary.highlights : [],
+    recommendedActions: Array.isArray(storedSummary.recommendedActions)
+      ? storedSummary.recommendedActions
+      : null,
   },
   replacements: {},
   summaryAsText: '',
@@ -81,12 +84,19 @@ export const useFetchEntityDetailsHighlights = ({
   entityType,
   entityIdentifier,
   storedSummary,
+  entitySnapshot,
 }: {
   connectorId: string;
   anonymizationFields: AnonymizationFieldResponse[];
   entityType: string;
   entityIdentifier: string;
   storedSummary?: EntitySummaryAttribute | null;
+  /** Current entity signal values — snapshotted into the summary at generation time for staleness detection. */
+  entitySnapshot?: {
+    riskLevel?: string | null;
+    anomalyJobIds?: string[];
+    ruleNames?: string[];
+  } | null;
 }) => {
   const { inference } = useKibana().services;
   const { fetchEntityDetailsHighlights, saveEntityAiSummary } = useEntityAnalyticsRoutes();
@@ -185,6 +195,9 @@ export const useFetchEntityDetailsHighlights = ({
           highlights: typedOutput.highlights,
           recommendedActions: typedOutput.recommendedActions,
           generated_at: generatedAt,
+          risk_level_at_generation: entitySnapshot?.riskLevel ?? null,
+          anomaly_job_ids_at_generation: entitySnapshot?.anomalyJobIds ?? null,
+          rule_names_at_generation: entitySnapshot?.ruleNames ?? null,
         },
       }).catch((persistError: Error) => {
         // Persist is best-effort — the in-memory result is still usable this session.
@@ -219,6 +232,7 @@ export const useFetchEntityDetailsHighlights = ({
     inference,
     addError,
     currentUser,
+    entitySnapshot,
   ]);
 
   const abortStream = useCallback(() => {
@@ -235,5 +249,10 @@ export const useFetchEntityDetailsHighlights = ({
     abortStream,
     result: assistantResult,
     error,
+    // True once the user has generated a fresh summary this mount cycle.
+    // Used to suppress the staleness banner after regeneration (entity record
+    // is not re-fetched after persist, so the old snapshot would otherwise
+    // keep triggering the banner).
+    isFreshGeneration: userTriggeredGeneration.current,
   };
 };

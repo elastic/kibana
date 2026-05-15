@@ -10,6 +10,7 @@ import React from 'react';
 import type { EntityRiskScore, ServiceItem } from '../../../../common/search_strategy';
 import type { Entity } from '../../../../common/api/entity_analytics';
 import { AssetCriticalityAccordion } from '../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
+import { EntityHighlightsAccordion } from '../../../entity_analytics/components/entity_details_flyout/components/entity_highlights';
 import { FlyoutRiskSummary } from '../../../entity_analytics/components/risk_summary_flyout/risk_summary';
 import type { RiskScoreState } from '../../../entity_analytics/api/hooks/use_risk_score';
 import type { EntityRiskScoresState } from '../../../entity_analytics/api/hooks/use_entity_risk_scores';
@@ -62,6 +63,11 @@ export const ServicePanelContent = ({
 
   return (
     <>
+      <EntityHighlightsAccordion
+        entityIdentifier={entityRecord ? entityRecord.entity.id : serviceName}
+        entityType={EntityType.service}
+        entityRecord={entityRecord}
+      />
       {riskScoreState.hasEngineBeenInstalled && riskScoreState.data?.length !== 0 && (
         <>
           <FlyoutRiskSummary

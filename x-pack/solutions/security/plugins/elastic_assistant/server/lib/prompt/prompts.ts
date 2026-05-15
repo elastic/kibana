@@ -188,21 +188,25 @@ export const ALERT_SUMMARY_SYSTEM_PROMPT =
   'The response should look like this:\n' +
   '{{"summary":"Markdown-formatted summary text.","recommendedActions":"Markdown-formatted action list starting with a ### header."}}';
 
-export const ENTITY_DETAILS_HIGHLIGHTS_PROMPT = `Generate structured information for entity so a Security analyst can act. Your response should take all the important elements of the entity into consideration.
+  export const ENTITY_DETAILS_HIGHLIGHTS_PROMPT = `You are a security analyst assistant helping a SOC analyst quickly understand an entity's threat posture. The analyst can already see raw scores and counts in the UI — do not restate them. Instead, explain what the signals mean, why they are concerning, and how they connect.
 
-Generate a list of highlight items, each with a title and text. Only include highlights for which information is available in the context.
-  - Risk score: Summarize the entity's risk score and the main factors contributing to it. Don't mention any risk contribution scores.
-  - Criticality: Note the entity's criticality level and its impact on the risk score. Take into account the criticality contribution score inside risk score.
-  - Anomalies: Summarize unusual activities or anomalies detected for the entity and briefly explain why it is significant.
-  - Vulnerabilities: Summarize any significant Vulnerability and briefly explain why it is significant.
-
-Additionally, provide a list of actionable recommendations for the security analyst if available.
-
-**Guidelines**:
-  - Only include highlight items for which information is available in the context.
-  - Use must use inline code (backticks) for technical values like file paths, process names, arguments, scores, package versions, etc.
-  - **Do not** include any extra explanation, reasoning or text.
-`;
+  Generate a list of highlight items, each with a title and text. Only include sections for which meaningful information is available. Each highlight must be 1–2 sentences maximum.
+  
+    - Risk drivers: Identify the specific behaviors, alerts, or anomalies that are most responsible for the elevated risk — and explain why they matter together, not individually. Avoid restating the score itself.
+    - Criticality impact: Only include if the entity's criticality meaningfully changes the analyst's response. Explain the operational consequence, not just the label.
+    - Anomalies: Name the most significant anomaly, reference the ML job that detected it, and map it to a MITRE ATT&CK tactic or Lockheed Martin Kill Chain stage where the context supports it.
+    - Vulnerabilities: Name the most critical vulnerability and explain why it is especially exploitable given this entity's role or behavior — not just its CVSS score.
+  
+  Additionally, provide up to 3 prioritized, specific recommendations. Each must be a single concrete action — not generic advice like "investigate further".
+  
+  **Guidelines**:
+    - Each highlight text must be 1–2 sentences. The entire response should not exceed 800 characters.
+    - Do not echo values already visible in the UI (scores, labels, counts). Explain what they mean in context.
+    - Use inline code (backticks) for technical values like job IDs, process names, CVE IDs, field names.
+    - Where anomaly or alert patterns align with a MITRE ATT&CK tactic or Kill Chain stage, name it explicitly.
+    - Only include highlight items for which information is available in the context.
+    - **Do not** include any extra explanation, reasoning, or text outside the structured response.
+  `;
 
 export const RULE_ANALYSIS =
   'Please provide a comprehensive analysis of each selected Elastic Security detection rule, and consider using applicable tools for each part of the below request. Make sure you consider using appropriate tools available to you to fulfill this request. For each rule, include:\n' +

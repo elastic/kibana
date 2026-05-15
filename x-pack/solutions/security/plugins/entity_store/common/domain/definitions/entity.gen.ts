@@ -174,6 +174,18 @@ export const EntityField = lazySchema(() =>
                * Username of the user who triggered the summary generation.
                */
               generated_by: z.string().optional(),
+              /**
+               * The entity risk level at the time the summary was generated. Used for staleness detection.
+               */
+              risk_level_at_generation: z.string().nullable().optional(),
+              /**
+               * Snapshot of anomaly job IDs active at generation time. Used for staleness detection.
+               */
+              anomaly_job_ids_at_generation: z.array(z.string()).nullable().optional(),
+              /**
+               * Snapshot of detection rule names at generation time. Used for staleness detection.
+               */
+              rule_names_at_generation: z.array(z.string()).nullable().optional(),
             })
             .strict()
             .nullable()
