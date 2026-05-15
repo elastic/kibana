@@ -223,5 +223,4 @@ describe('validateDestinations', () => {
       })
     ).rejects.toThrow(/is not a valid workflow/);
   });
-
 });
