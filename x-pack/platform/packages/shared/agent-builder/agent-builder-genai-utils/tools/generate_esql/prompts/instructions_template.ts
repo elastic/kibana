@@ -99,7 +99,7 @@ export const getEsqlInstructions = (params: InstructionsTemplateParams = {}): st
         ? ''
         : `## Using named parameters for start and end time periods
 
-    You should ALWAYS use named parameters (?_tstart and ?_tend) for start and end time in WHERE conditions, BUCKET ranges or TRANGE ,
+    Unless specified otherwise, you should always use named parameters (?_tstart and ?_tend) for start and end time in WHERE conditions, BUCKET ranges or TRANGE ,
     examples:
     - "FROM myindex | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend"
     - "FROM myindex | ... BUCKET(@timestamp, 50, ?_tstart, ?_tend)"

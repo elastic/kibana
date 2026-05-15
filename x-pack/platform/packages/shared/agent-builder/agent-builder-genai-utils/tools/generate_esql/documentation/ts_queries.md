@@ -39,11 +39,9 @@ window (`time_duration`). The window must be a multiple of the `TBUCKET` interva
 
 For fields with `time_series_metric: counter`.
 
-| Function   | Description                                                            |
-| ---------- | ---------------------------------------------------------------------- |
-| `RATE`     | Per-second average rate of increase; handles counter resets            |
-| `IRATE`    | Per-second rate between the last two data points; responsive to spikes |
-| `INCREASE` | Absolute increase of the counter in the time window; handles resets    |
+- RATE: Per-second average rate of increase; handles counter resets
+- IRATE: Per-second rate between the last two data points; responsive to spikes
+- INCREASE: Absolute increase of the counter in the time window; handles resets
 
 ```esql
 // Average rate per host per hour
@@ -63,28 +61,25 @@ TS k8s
 
 ### Gauge / Numeric Functions
 
-For gauge metrics and general numeric fields (`double`, `integer`, `long`, `aggregate_metric_double`).
+For gauge metrics and general numeric fields.
 
-| Function                   | Description                                        |
-| -------------------------- | -------------------------------------------------- |
-| `AVG_OVER_TIME`            | Average value over the time window                 |
-| `SUM_OVER_TIME`            | Sum of values over the time window                 |
-| `MIN_OVER_TIME`            | Minimum value over the time window                 |
-| `MAX_OVER_TIME`            | Maximum value over the time window                 |
-| `FIRST_OVER_TIME`          | Earliest value by `@timestamp`                     |
-| `LAST_OVER_TIME`           | Latest value by `@timestamp` (implicit default)    |
-| `COUNT_OVER_TIME`          | Count of values over the time window               |
-| `COUNT_DISTINCT_OVER_TIME` | Count of distinct values over the time window      |
-| `PERCENTILE_OVER_TIME`     | Percentile of values; takes `(field, percentile)`  |
-| `STDDEV_OVER_TIME`         | Population standard deviation over the time window |
-| `VARIANCE_OVER_TIME`       | Population variance over the time window           |
-| `DELTA`                    | Absolute change of a gauge in the time window      |
-| `IDELTA`                   | Change between the last two data points only       |
-| `DERIV`                    | Derivative over time using linear regression       |
+- AVG_OVER_TIME: Average value over the time window
+- SUM_OVER_TIME: Sum of values over the time window
+- MIN_OVER_TIME: Minimum value over the time window
+- MAX_OVER_TIME: Maximum value over the time window
+- FIRST_OVER_TIME: Earliest value by `@timestamp`
+- LAST_OVER_TIME: Latest value by `@timestamp`
+- COUNT_OVER_TIME: Count of values over the time window
+- COUNT_DISTINCT_OVER_TIME: Count of distinct values over the time window
+- PERCENTILE_OVER_TIME: Percentile of values; takes `(field, percentile)`
+- STDDEV_OVER_TIME: Population standard deviation over the time window
+- VARIANCE_OVER_TIME: Population variance over the time window
+- DELTA: Absolute change of a gauge in the time window
+- IDELTA: Change between the last two data points only
+- DERIV: Derivative over time using linear regression
 
 ```esql
-// Average memory per cluster per 5 minutes
-// cluster is a dimension of the TSDS index metrics
+// Average memory per cluster per 5 minutes - cluster is a dimension of the TSDS index metrics
 TS metrics
 | WHERE TRANGE(?_tstart, ?_tend)
 | STATS AVG(AVG_OVER_TIME(memory_usage)) BY cluster, TBUCKET(5 minute)
@@ -107,10 +102,8 @@ TS k8s
 
 Detect whether a field has data in a given time window. Return `boolean`.
 
-| Function            | Description                                     |
-| ------------------- | ----------------------------------------------- |
-| `PRESENT_OVER_TIME` | `true` if field has values in the window        |
-| `ABSENT_OVER_TIME`  | `true` if field has **no** values in the window |
+- PRESENT_OVER_TIME: returns `true` if field has values in the window
+- ABSENT_OVER_TIME: returns `true` if field has **no** values in the window
 
 ```esql
 // Detect pods with missing data
@@ -124,8 +117,7 @@ Pass a `time_duration` as the second argument to any time series function to use
 interval. The window must be a multiple of the `TBUCKET` interval.
 
 ```esql
-// Average rate per host over a 10-minute sliding window, bucketed by 1 minute
-// host is a dimension of the TSDS index metrics
+// Average rate per host over a 10-minute sliding window, bucketed by 1 minute - host is a dimension of the TSDS index metrics
 TS metrics
 | WHERE TRANGE(?_tstart, ?_tend)
 | STATS AVG(RATE(requests, 10m)) BY TBUCKET(1m), host
@@ -140,11 +132,9 @@ STATS ... BY bucket = TBUCKET(interval)
 STATS ... BY TBUCKET(interval)
 ```
 
-The interval is a time duration (`1 hour`, `5 minute`, `30s`) or date period (`1 month`). A string representation
-(`"1 hour"`) also works.
+The interval is a time duration (`1 hour`, `5 minute`, `30s`) or date period (`1 month`).
 
-`TBUCKET` is the preferred bucketing function for `TS` queries. It has a simpler signature than
-`DATE_TRUNC(interval, @timestamp)` and is aware of time series semantics.
+`TBUCKET` is the preferred bucketing function for `TS` queries. It has a simpler signature than `DATE_TRUNC(interval, @timestamp)` and is aware of time series semantics.
 
 ```esql
 // 1-hour buckets
@@ -209,16 +199,14 @@ TS logs
 
 ## Guidelines
 
-- **Use `TS` for all aggregations on TSDB indices.** `FROM` is still available for listing raw documents, but use `TS` for metrics aggregations.
-- **Use `SUM` as the outer function for counters.** Rates and increases are additive across time series that share a
-  dimension (e.g. host). Use `AVG` or `MAX` for gauges.
-- **Always add a time range filter** with `TRANGE` (or `WHERE @timestamp`) to limit scan volume, except in Kibana where
-  the date picker handles this automatically. Don't add a range filter if the user explicitly asks not to add it.
-- **Do not nest time series functions.** `AVG_OVER_TIME(RATE(field))` is invalid. Use a standard aggregation as the
-  outer function.
-- **Avoid mixing metrics with different dimensions** in one query. If `foo` and `bar` have different dimension values,
-  `SUM(RATE(foo)) + SUM(RATE(bar))` may produce nulls for mismatched dimensions.
-- **Use CLAMP functions to bound gauge values.** `CLAMP`, `CLAMP_MIN`, and `CLAMP_MAX` are useful for filtering outliers before aggregation (e.g. `CLAMP_MAX(cpu_pct, 100)` to cap values before computing averages).
+- **Use `TS` for all aggregations on TSDB indices.**
+- **Use `SUM` as the outer function for counters.** 
+  - Rates and increases are additive across time series that share a dimension (e.g. host). Use `AVG` or `MAX` for gauges.
+- **Do not nest time series functions.** `AVG_OVER_TIME(RATE(field))` is invalid. Use a standard aggregation as the  outer function.
+- **Avoid mixing metrics with different dimensions** in one query. 
+  - If `foo` and `bar` have different dimension values, `SUM(RATE(foo)) + SUM(RATE(bar))` may produce nulls for mismatched dimensions.
+- **Use CLAMP functions to bound gauge values.** 
+  - `CLAMP`, `CLAMP_MIN`, and `CLAMP_MAX` are useful for filtering outliers before aggregation (e.g. `CLAMP_MAX(cpu_pct, 100)` to cap values before computing averages).
 - `COUNT()` and `COUNT(*)` is not supported with TS
 - Cannot combine with `FORK` before `STATS` is applied
 - For `TS`, prefer `TRANGE` over manual `WHERE @timestamp > NOW() - ...` filters.
