@@ -108,7 +108,7 @@ function ImportCard() {
             <>
               {!importStatus.isValid && (
                 <>
-                  <EuiCallOut color="danger" iconType="warning">
+                  <EuiCallOut announceOnMount color="danger" iconType="warning">
                     The uploaded file could not be parsed: {importStatus.errorMessage}
                   </EuiCallOut>
                   <EuiSpacer />
