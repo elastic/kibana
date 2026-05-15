@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # Backport a Kibana PR
 
-Drive a manual backport from end to end. The `backport` tool handles the cherry-pick and PR creation — your job is to pick the right inputs, propose conflict resolutions for the user to approve, and push a clean result.
+Drive a manual backport from end to end. The `backport` tool handles the cherry-pick and PR creation — your job is to pick the right inputs, propose conflict resolutions for the user to approve, and release the tool's interactive prompt once conflicts are fixed.
 
 ## When to use this skill
 
@@ -46,7 +46,16 @@ Look for a table like:
 
 Extract exactly the branches marked ❌ — those are your targets. Skip ✅ (already succeeded).
 
-**3. If no bot comment exists** (first attempt, CI hasn't run yet), read the active release branches:
+**3. Check the PR body for `ONMERGE` metadata** — this is the canonical list the author chose at merge time, and is authoritative when there is no bot comment yet (first manual attempt):
+
+```bash
+gh pr view <PR> --repo elastic/kibana --json body --jq '.body' \
+  | grep -oE 'ONMERGE \{[^}]+\}' | head -1
+```
+
+If the output contains `"backportTargets":["8.19","9.3","9.4"]`, those are your targets. Confirm them with the user in one short message and proceed.
+
+**4. If neither a bot comment nor ONMERGE metadata exists**, read the active release branches:
 
 ```bash
 cat versions.json | jq -r '.versions[] | select(.branchType == "release") | .branch'
@@ -58,13 +67,38 @@ Confirm the final target list in one short message before running anything.
 
 ## Step 2 — Run the backport tool (one branch at a time)
 
-**Always backport one branch at a time** — pass a single `--branch` flag per invocation. This makes it easier to handle conflicts per-branch and learn from the first branch before tackling the rest.
+**Always backport one branch at a time** — pass a single `--branch` flag per invocation.
+
+The backport tool is interactive: when it hits a conflict it prints `Press ENTER when the conflicts are resolved and files are staged (Y/n)` and waits. **Keep this process alive** — if you let it exit and re-run it, it restarts the cherry-pick from scratch and your conflict resolutions are lost.
+
+### How to keep the process running while you edit
+
+Start the tool in the background with its stdin connected to a named pipe (fifo). While the tool waits at the prompt you edit the conflicted files, then write a newline to the pipe to release the prompt:
 
 ```bash
-node scripts/backport --pr <PR> --branch <X.Y>
+# One-time setup per branch
+INPUT=$(mktemp -u /tmp/bp-input-XXXXXX)
+mkfifo "$INPUT"
+exec 9>"$INPUT"   # keep the write end open so the fifo doesn't EOF
 ```
 
-After the first branch completes (or is resolved), repeat for the next branch.
+Run the backport tool with `run_in_background: true`, reading from the fifo:
+
+```bash
+node scripts/backport --pr <PR> --branch <X.Y> <"$INPUT" &
+```
+
+Use the `Monitor` tool to watch its output stream. When you see the `Press ENTER` prompt:
+
+1. Resolve conflicts per Step 3 below.
+2. Stage the resolved files inside `~/.backport/repositories/elastic/kibana`.
+3. Release the prompt: `echo "" >&9`
+4. The tool runs `git cherry-pick --continue` itself, pushes to your fork, and opens the PR. `Monitor` will surface the PR URL.
+5. Clean up: `exec 9>&-; rm -f "$INPUT"`
+
+If there are multiple commits being cherry-picked, the tool may pause again on a second conflict — repeat the resolve → stage → `echo "" >&9` loop.
+
+Do **not** run `git cherry-pick --continue` yourself — the tool does that once the prompt is released. Running it manually will confuse the tool's state.
 
 Useful flags (only add when needed):
 
@@ -76,11 +110,11 @@ Useful flags (only add when needed):
 
 Do **not** use `--autoResolveConflictsWithTheirs` or `--commitConflicts` — conflicts need human approval here.
 
-**Where the tool works:** The backport tool clones the repo into `.backport/repositories/elastic/kibana` (relative to your home directory). All conflict resolution happens there, not in the main working tree.
+**Where the tool works:** The backport tool clones the repo into `~/.backport/repositories/elastic/kibana`. All conflict resolution happens there, not in the main working tree.
 
 ## Step 3 — Resolve conflicts
 
-When the tool hits a conflict it pauses. Navigate into `.backport/repositories/elastic/kibana` and check what's conflicted:
+When the tool pauses, navigate into `~/.backport/repositories/elastic/kibana` and check what's conflicted:
 
 ```bash
 git diff --name-only --diff-filter=U
@@ -94,7 +128,17 @@ For every conflict — even mechanical ones — **show the user what you found a
 
 Only fix after the user says yes. This prevents surprises and lets them override your categorization.
 
-**If the same pattern of conflicts appears on a subsequent branch**, apply the same approved resolution automatically without asking again — the user already greenlit it.
+**If the same pattern of conflicts appears on a subsequent branch**, you may apply the same approved resolution automatically — but first verify that the prerequisites still hold on the new branch (see "Cross-branch verification" below). If anything is missing, fall back to proposing options and waiting.
+
+### Cross-branch verification before reapplying a resolution
+
+The same conflict hunk can require different resolutions on different branches. Before silently reapplying:
+
+- For each **file** referenced in the source-side hunk: `ls ~/.backport/repositories/elastic/kibana/<path>` — does it exist on this branch?
+- For each **step key** referenced (e.g. `verify_rspack_build` in a pipeline YAML): `grep -r "key: <step>" ~/.backport/repositories/elastic/kibana/.buildkite/` — is this step defined?
+- For each **exported symbol**: `grep -r "export.*<symbol>" ~/.backport/repositories/elastic/kibana/` — is the source file present?
+
+If any prerequisite is absent, do not silently apply — propose the adjusted resolution and wait for approval.
 
 ### Mechanical conflicts (safe to auto-propose)
 
@@ -111,9 +155,9 @@ These are generated files where the right fix is always regeneration, not hand-m
 
 If the conflict is in real source code (TS/JS, tests, types), show the user:
 
-1. The file path and the conflict hunk (`git diff` of the conflicted region).
-2. One sentence on what the source PR was changing.
-3. Two or three concrete options: "take source", "take target", "merge as: …".
+1. **File path** and the raw conflict hunk only — the `<<<<<<< / ======= / >>>>>>>` region, not the full file diff.
+2. **One sentence** on what the source PR was changing in that region.
+3. **Two or three concrete options**: "take source", "take target", "merge as: `<exact text>`".
 
 **Do not edit the file until the user picks an option.**
 
@@ -133,29 +177,47 @@ Then explain to the user:
 
 Stopping cleanly with a clear explanation is more helpful than a broken backport.
 
-### Continue the cherry-pick
+### If the backport process already exited (manual fallback)
 
-Once all conflicts for this branch are resolved and staged:
+If the backport tool exited before pushing (e.g. the agent already ran `git cherry-pick --continue` manually and the process is gone), recover by pushing and opening the PR yourself. Inside `~/.backport/repositories/elastic/kibana`:
 
 ```bash
-git cherry-pick --continue
+# The fork remote is named after the GitHub username, NOT "origin"
+git remote -v   # find the right remote name
+
+git push <fork-remote> backport/<X.Y>/pr-<PR>
+
+gh pr create \
+  --repo elastic/kibana \
+  --title "Backport #<PR> to <X.Y>: <original title>" \
+  --base <X.Y> \
+  --head <fork-user>:backport/<X.Y>/pr-<PR> \
+  --label backport \
+  --body "$(cat <<'EOF'
+# Backport
+
+This will backport the following commits from `main` to `<X.Y>`:
+- [<original title> (#<PR>)](https://github.com/elastic/kibana/pull/<PR>)
+EOF
+)"
 ```
-
-(Use `git -c core.editor=true cherry-pick --continue` to skip the editor prompt.)
-
-If there are multiple commits being cherry-picked, you may hit further conflicts — repeat the propose→approve→fix loop for each.
-
-When the tool resumes it pushes the branch and opens the backport PR. Then move to the next target branch.
 
 ## Step 4 — Validate before pushing
 
-Inside `.backport/repositories/elastic/kibana`, run a quick sanity check after conflict resolution and before letting the tool push:
+Inside `~/.backport/repositories/elastic/kibana`, run a quick sanity check after staging the resolved files and before releasing the backport tool's prompt:
 
 ```bash
-node scripts/check_changes.ts --ref HEAD~1
+if [ -f scripts/check_changes.ts ]; then
+  node scripts/check_changes.ts --ref HEAD~1
+else
+  # Older branches (e.g. 8.19) don't have this script — lint changed files instead
+  node scripts/eslint --fix $(git diff --name-only HEAD~1 HEAD -- '*.ts' '*.tsx' '*.js')
+fi
 ```
 
-If it fails on something mechanical, fix it in the backport repo and amend (`git commit --amend --no-edit`). If it fails on something non-trivial, abort and explain to the user.
+If validation fails due to a **Node version mismatch** (`Kibana does not support the current Node.js version`), say so explicitly rather than silently skipping — this is an environmental issue, not a code problem.
+
+If it fails on something mechanical, fix and re-stage the files. If it fails on something non-trivial, abort and explain to the user.
 
 ## Step 5 — Report
 
