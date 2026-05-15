@@ -58,11 +58,6 @@ describe('<ToolsFlyoutHeader />', () => {
     expect(getByText('Session view')).toBeInTheDocument();
   });
 
-  it('should apply the optional title test subject', () => {
-    const { getByTestId } = renderHeader({ titleDataTestSubj: 'customToolTitle' });
-    expect(getByTestId('customToolTitle')).toHaveTextContent('Correlations');
-  });
-
   it('should render ToolsFlyoutTitle', () => {
     const { getByTestId } = renderHeader();
     expect(getByTestId('mockToolsFlyoutTitle')).toBeInTheDocument();

@@ -26,8 +26,10 @@ import { DiscoverInTimelineContextProvider } from '../../../common/components/di
 import { AssistantProvider } from '../../../assistant/provider';
 import { CaseProvider } from '../../../cases/components/provider/provider';
 
-// The exception builder still has styled-components descendants that read `theme.eui.*`.
-// Keep this bridge until those forms are fully migrated to Emotion/EUI theme hooks.
+// The exception builder and its flyout_components still use styled-components and read
+// `theme.eui.*`.  This bridge provides them with a compatible theme context.
+// TODO: remove once the rule_exceptions/components and lists/exceptions/components/builder
+// directories are fully migrated to Emotion — approximately 24 production files remain.
 const StyledComponentsThemeProvider = ({ children }: { children: ReactNode }) => {
   const darkMode = useDarkMode();
   return <EuiThemeProvider darkMode={darkMode}>{children}</EuiThemeProvider>;

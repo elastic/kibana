@@ -280,18 +280,47 @@ describe('<TakeActionButton />', () => {
     );
   });
 
-  it('should detect endpoint alerts from scalar or array original event values', () => {
-    const alertHit = createMockHit({
-      'event.kind': 'signal',
-      'kibana.alert.original_event.module': 'endpoint',
-      'kibana.alert.original_event.kind': ['alert'],
+  describe('isEndpointAlert detection', () => {
+    it('should be true when module=endpoint and kind=alert', () => {
+      const alertHit = createMockHit({
+        'event.kind': 'signal',
+        'kibana.alert.original_event.module': 'endpoint',
+        'kibana.alert.original_event.kind': ['alert'],
+      });
+
+      renderTakeActionButton({ ...defaultProps, hit: alertHit });
+
+      expect(mockUseAlertExceptionActions).toHaveBeenCalledWith(
+        expect.objectContaining({ isEndpointAlert: true })
+      );
     });
 
-    renderTakeActionButton({ ...defaultProps, hit: alertHit });
+    it('should be false when module=endpoint but kind is not alert', () => {
+      const alertHit = createMockHit({
+        'event.kind': 'signal',
+        'kibana.alert.original_event.module': 'endpoint',
+        'kibana.alert.original_event.kind': ['metric'],
+      });
 
-    expect(mockUseAlertExceptionActions).toHaveBeenCalledWith(
-      expect.objectContaining({ isEndpointAlert: true })
-    );
+      renderTakeActionButton({ ...defaultProps, hit: alertHit });
+
+      expect(mockUseAlertExceptionActions).toHaveBeenCalledWith(
+        expect.objectContaining({ isEndpointAlert: false })
+      );
+    });
+
+    it('should be false when module is missing', () => {
+      const alertHit = createMockHit({
+        'event.kind': 'signal',
+        'kibana.alert.original_event.kind': ['alert'],
+      });
+
+      renderTakeActionButton({ ...defaultProps, hit: alertHit });
+
+      expect(mockUseAlertExceptionActions).toHaveBeenCalledWith(
+        expect.objectContaining({ isEndpointAlert: false })
+      );
+    });
   });
 
   it('should call useRunAlertWorkflowPanel with ecsData and closePopover', () => {

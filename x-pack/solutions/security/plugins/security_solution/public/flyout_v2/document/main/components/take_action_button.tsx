@@ -93,25 +93,13 @@ export const TakeActionButton = memo(
       () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
       [hit]
     );
-    const alertStatus = useMemo(() => {
-      const rawStatus = getFieldValue(hit, ALERT_WORKFLOW_STATUS);
-      return (Array.isArray(rawStatus) ? rawStatus[0] : rawStatus) as Status;
-    }, [hit]);
-    const isEndpointAlert = useMemo(() => {
-      const originalEventModules = getFieldValue(hit, 'kibana.alert.original_event.module');
-      const originalEventKinds = getFieldValue(hit, 'kibana.alert.original_event.kind');
-      const modules = Array.isArray(originalEventModules)
-        ? originalEventModules
-        : originalEventModules
-        ? [originalEventModules]
-        : [];
-      const kinds = Array.isArray(originalEventKinds)
-        ? originalEventKinds
-        : originalEventKinds
-        ? [originalEventKinds]
-        : [];
-      return modules.includes('endpoint') && kinds.includes('alert');
-    }, [hit]);
+    const alertStatus = useMemo(() => getFieldValue(hit, ALERT_WORKFLOW_STATUS) as Status, [hit]);
+    const isEndpointAlert = useMemo(
+      () =>
+        getFieldValue(hit, 'kibana.alert.original_event.module') === 'endpoint' &&
+        getFieldValue(hit, 'kibana.alert.original_event.kind') === 'alert',
+      [hit]
+    );
 
     const { addToCaseActionItems } = useAddToCaseActions({
       ecsData,
@@ -187,55 +175,61 @@ export const TakeActionButton = memo(
       closePopover: closePopoverHandler,
     });
 
-    const ruleId = useMemo<string | undefined>(() => {
-      const v = getFieldValue(hit, ALERT_RULE_UUID) ?? getFieldValue(hit, 'signal.rule.id');
-      return (Array.isArray(v) ? v[0] : v) as string | undefined;
-    }, [hit]);
-    const ruleRuleId = useMemo<string | undefined>(() => {
-      const v =
-        getFieldValue(hit, 'kibana.alert.rule.rule_id') ??
-        getFieldValue(hit, 'signal.rule.rule_id');
-      return (Array.isArray(v) ? v[0] : v) as string | undefined;
-    }, [hit]);
-    const ruleName = useMemo<string>(() => {
-      const v =
-        getFieldValue(hit, 'kibana.alert.rule.name') ?? getFieldValue(hit, 'signal.rule.name');
-      return ((Array.isArray(v) ? v[0] : v) as string) ?? '';
-    }, [hit]);
+    const ruleId = useMemo(
+      () =>
+        (getFieldValue(hit, ALERT_RULE_UUID) ?? getFieldValue(hit, 'signal.rule.id')) as
+          | string
+          | undefined,
+      [hit]
+    );
+    const ruleRuleId = useMemo(
+      () =>
+        (getFieldValue(hit, 'kibana.alert.rule.rule_id') ??
+          getFieldValue(hit, 'signal.rule.rule_id')) as string | undefined,
+      [hit]
+    );
+    const ruleName = useMemo(
+      () =>
+        ((getFieldValue(hit, 'kibana.alert.rule.name') ??
+          getFieldValue(hit, 'signal.rule.name')) as string) ?? '',
+      [hit]
+    );
+    // getFieldValue collapses arrays to their first element, so read flattened directly
+    // to preserve all indices for multi-index rules.
     const ruleIndices = useMemo<string[] | undefined>(() => {
       const v =
-        getFieldValue(hit, 'kibana.alert.rule.parameters.index') ??
-        getFieldValue(hit, 'signal.rule.index');
+        hit.flattened['kibana.alert.rule.parameters.index'] ?? hit.flattened['signal.rule.index'];
       if (!v) return undefined;
       return Array.isArray(v) ? (v as string[]) : [v as string];
     }, [hit]);
-    const ruleDataViewId = useMemo<string | undefined>(() => {
-      const v =
-        getFieldValue(hit, 'kibana.alert.rule.parameters.data_view_id') ??
-        getFieldValue(hit, 'signal.rule.data_view_id');
-      return (Array.isArray(v) ? v[0] : v) as string | undefined;
-    }, [hit]);
+    const ruleDataViewId = useMemo(
+      () =>
+        (getFieldValue(hit, 'kibana.alert.rule.parameters.data_view_id') ??
+          getFieldValue(hit, 'signal.rule.data_view_id')) as string | undefined,
+      [hit]
+    );
 
-    const [exceptionFlyoutType, setExceptionFlyoutType] = useState<
-      ExceptionListTypeEnum | null | undefined
-    >(undefined);
+    const [isExceptionFlyoutOpen, setIsExceptionFlyoutOpen] = useState(false);
+    const [exceptionFlyoutType, setExceptionFlyoutType] = useState<ExceptionListTypeEnum | null>(
+      null
+    );
     const handleOpenAddRuleException = useCallback(
       (type?: ExceptionListTypeEnum) => {
         closePopoverHandler();
         setExceptionFlyoutType(type ?? null);
+        setIsExceptionFlyoutOpen(true);
       },
       [closePopoverHandler]
     );
-    const handleExceptionCancel = useCallback(
-      (_didRuleChange: boolean) => setExceptionFlyoutType(undefined),
-      []
-    );
+    const handleExceptionCancel = useCallback((_didRuleChange: boolean) => {
+      setIsExceptionFlyoutOpen(false);
+    }, []);
     const handleExceptionConfirm = useCallback(
       (_didRuleChange: boolean, didCloseAlert: boolean, didBulkCloseAlert: boolean) => {
         if (didCloseAlert || didBulkCloseAlert) {
           onAlertUpdated();
         }
-        setExceptionFlyoutType(undefined);
+        setIsExceptionFlyoutOpen(false);
       },
       [onAlertUpdated]
     );
@@ -325,7 +319,7 @@ export const TakeActionButton = memo(
             data-test-subj="takeActionPanelMenu"
           />
         </EuiPopover>
-        {exceptionFlyoutType !== undefined && ruleId != null && ruleRuleId != null && (
+        {isExceptionFlyoutOpen && ruleId != null && ruleRuleId != null && (
           <AddExceptionFlyoutWrapper
             ruleId={ruleId}
             ruleRuleId={ruleRuleId}
