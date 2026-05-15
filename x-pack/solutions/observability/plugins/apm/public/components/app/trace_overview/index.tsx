@@ -38,7 +38,7 @@ export function TraceOverview({
               <OpenInDiscover
                 key="apmTracesExploreInDiscoverButton"
                 dataTestSubj="apmTracesExploreInDiscoverButton"
-                variant="button"
+                variant="emptyButton"
                 indexType="traces"
                 label={i18n.translate('xpack.apm.tracesOverview.exploreTracesInDiscover', {
                   defaultMessage: 'Explore traces',
