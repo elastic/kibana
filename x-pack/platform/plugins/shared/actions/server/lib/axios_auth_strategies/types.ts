@@ -9,7 +9,7 @@ import type { AxiosInstance } from 'axios';
 import type { AuthMode, GetTokenOpts } from '@kbn/connector-specs';
 import type { Logger } from '@kbn/core/server';
 import type { ActionsConfigurationUtilities } from '../../actions_config';
-import type { ConnectorTokenClientContract } from '../../types';
+import type { ConnectorTokenClientContract, UserIdentifiers } from '../../types';
 
 export interface AuthStrategyDeps {
   connectorId: string;
@@ -18,7 +18,7 @@ export interface AuthStrategyDeps {
   logger: Logger;
   configurationUtilities: ActionsConfigurationUtilities;
   authMode?: AuthMode;
-  profileUid?: string;
+  userIdentifiers?: UserIdentifiers;
 }
 
 export interface AxiosAuthStrategy {

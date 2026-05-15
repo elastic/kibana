@@ -32,7 +32,7 @@ export class OAuthAuthCodeStrategy implements AxiosAuthStrategy {
       logger,
       configurationUtilities,
       authMode,
-      profileUid,
+      userIdentifiers,
     } = deps;
 
     if (!connectorTokenClient) {
@@ -81,7 +81,7 @@ export class OAuthAuthCodeStrategy implements AxiosAuthStrategy {
           connectorTokenClient,
           scope,
           authMode,
-          profileUid,
+          userIdentifiers,
           forceRefresh: true,
           tokenResponseOptions: buildTokenResponseOptions({
             accessTokenPath,
@@ -118,7 +118,7 @@ export class OAuthAuthCodeStrategy implements AxiosAuthStrategy {
       logger,
       configurationUtilities,
       authMode,
-      profileUid,
+      userIdentifiers,
     } = deps;
     if (!connectorTokenClient) {
       throw new Error('ConnectorTokenClient is required for OAuth authorization code flow');
@@ -142,7 +142,7 @@ export class OAuthAuthCodeStrategy implements AxiosAuthStrategy {
       connectorTokenClient,
       scope: opts.scope,
       authMode,
-      profileUid,
+      userIdentifiers,
       tokenResponseOptions: buildTokenResponseOptions({
         accessTokenPath: opts.accessTokenPath,
         tokenTypePath: opts.tokenTypePath,

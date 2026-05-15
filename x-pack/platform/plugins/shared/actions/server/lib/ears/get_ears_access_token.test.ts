@@ -293,7 +293,7 @@ describe('getEarsAccessToken', () => {
   });
 
   describe('per-user auth mode', () => {
-    it('returns null and warns when authMode is per-user but profileUid is missing', async () => {
+    it('returns null and warns when authMode is per-user but user identifiers are missing', async () => {
       const result = await getEarsAccessToken({
         ...baseOpts,
         authMode: 'per-user',
@@ -301,12 +301,26 @@ describe('getEarsAccessToken', () => {
 
       expect(result).toBeNull();
       expect(logger.warn).toHaveBeenCalledWith(
-        'Per-user authMode requires a profileUid for connectorId: connector-1. Cannot retrieve token.'
+        'Per-user authMode requires profileUid for connectorId: connector-1. Cannot retrieve token until userCloudId-based lookup is supported.'
       );
       expect(connectorTokenClient.get).not.toHaveBeenCalled();
     });
 
-    it('fetches the token using profileUid when authMode is per-user', async () => {
+    it('returns null and warns when authMode is per-user but only userCloudId is present', async () => {
+      const result = await getEarsAccessToken({
+        ...baseOpts,
+        authMode: 'per-user',
+        userIdentifiers: { userCloudId: 'cloud-user-1' },
+      });
+
+      expect(result).toBeNull();
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Per-user authMode requires profileUid for connectorId: connector-1. Cannot retrieve token until userCloudId-based lookup is supported.'
+      );
+      expect(connectorTokenClient.get).not.toHaveBeenCalled();
+    });
+
+    it('fetches the token using userIdentifiers when authMode is per-user', async () => {
       connectorTokenClient.get.mockResolvedValueOnce({
         hasErrors: false,
         connectorToken: validPerUserToken,
@@ -315,11 +329,11 @@ describe('getEarsAccessToken', () => {
       await getEarsAccessToken({
         ...baseOpts,
         authMode: 'per-user',
-        profileUid: 'profile-1',
+        userIdentifiers: { profileUid: 'profile-1' },
       });
 
       expect(connectorTokenClient.get).toHaveBeenCalledWith({
-        profileUid: 'profile-1',
+        userIdentifiers: { profileUid: 'profile-1' },
         connectorId: 'connector-1',
         tokenType: 'access_token',
       });
@@ -334,7 +348,7 @@ describe('getEarsAccessToken', () => {
       const result = await getEarsAccessToken({
         ...baseOpts,
         authMode: 'per-user',
-        profileUid: 'profile-1',
+        userIdentifiers: { profileUid: 'profile-1' },
       });
 
       expect(result).toBe('stored-per-user-access-token');
@@ -351,7 +365,7 @@ describe('getEarsAccessToken', () => {
       const result = await getEarsAccessToken({
         ...baseOpts,
         authMode: 'per-user',
-        profileUid: 'profile-1',
+        userIdentifiers: { profileUid: 'profile-1' },
       });
 
       expect(requestEarsRefreshToken).toHaveBeenCalledWith(
@@ -372,7 +386,7 @@ describe('getEarsAccessToken', () => {
       const result = await getEarsAccessToken({
         ...baseOpts,
         authMode: 'per-user',
-        profileUid: 'profile-1',
+        userIdentifiers: { profileUid: 'profile-1' },
       });
 
       expect(result).toBeNull();
