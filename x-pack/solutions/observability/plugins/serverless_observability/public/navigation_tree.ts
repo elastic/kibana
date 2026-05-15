@@ -288,10 +288,6 @@ export const createNavigationTree = ({
                   link: 'ml:indexDataVisualizer',
                   sideNavStatus: 'hidden',
                 },
-                {
-                  link: 'ml:indexDataVisualizerPage',
-                  sideNavStatus: 'hidden',
-                },
               ],
             },
             {

@@ -19,6 +19,7 @@ import {
   EuiSpacer,
   EuiHorizontalRule,
   EuiBadge,
+  EuiTitle,
 } from '@elastic/eui';
 
 import type { WindowParameters } from '@kbn/aiops-log-rate-analysis';
@@ -109,7 +110,13 @@ export const PageHeader: FC<PageHeaderProps> = ({ onRefresh, needsUpdate, header
       wrap={true}
       data-test-subj="dataComparisonTimeRangeSelectorSection"
     >
-      <EuiFlexItem grow={false}>{headerContent ?? null}</EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        {headerContent ?? (
+          <EuiTitle size="s">
+            <h2 data-test-subj="mlDataDriftPageDataViewTitle">{dataView.getName()}</h2>
+          </EuiTitle>
+        )}
+      </EuiFlexItem>
       <EuiFlexItem grow={false} css={maxInlineSizeStyles}>
         <EuiFlexGroup css={maxInlineSizeStyles} gutterSize="s" alignItems="center">
           {hasValidTimeField && (

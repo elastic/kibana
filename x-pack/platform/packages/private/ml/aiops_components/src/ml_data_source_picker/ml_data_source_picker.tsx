@@ -61,6 +61,7 @@ export const MlDataSourcePicker: FC<MlDataSourcePickerProps> = ({
       closeFieldEditorRef.current?.();
     };
   }, []);
+
   useEffect(() => {
     dataViews.getIdsWithTitle().then(setSavedDataViews);
   }, [dataViews]);

@@ -222,17 +222,7 @@ function createDeepLinks(
         title: i18n.translate('xpack.ml.deepLink.indexDataVisualizer', {
           defaultMessage: 'Index data visualizer',
         }),
-        path: `/${ML_PAGES.DATA_VISUALIZER_INDEX_SELECT}`,
-      };
-    },
-    getIndexDataVisualizerPageDeepLink: (): AppDeepLink<LinkId> => {
-      return {
-        id: 'indexDataVisualizerPage',
-        title: i18n.translate('xpack.ml.deepLink.indexDataVisualizer', {
-          defaultMessage: 'Index data visualizer',
-        }),
         path: `/${ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER}`,
-        visibleIn: [],
       };
     },
 

@@ -56,8 +56,7 @@ export const IndexDataVisualizerPage: FC<{ esql: boolean }> = ({ esql = false })
 
   useEffect(() => {
     getMlNodeCount(mlApi);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [mlApi]);
 
   const [IndexDataVisualizer, setIndexDataVisualizer] = useState<IndexDataVisualizerSpec | null>(
     null

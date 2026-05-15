@@ -181,18 +181,6 @@ describe('ML locator', () => {
         });
       });
 
-      it('should generate valid URL for the Index Data Visualizer select data view or saved search page', async () => {
-        const location = await definition.getLocation({
-          page: ML_PAGES.DATA_VISUALIZER_INDEX_SELECT,
-        });
-
-        expect(location).toMatchObject({
-          app: 'ml',
-          path: '/datavisualizer_index_select',
-          state: {},
-        });
-      });
-
       it('should generate valid URL for the Index Data Visualizer Viewer page', async () => {
         const location = await definition.getLocation({
           page: ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER,

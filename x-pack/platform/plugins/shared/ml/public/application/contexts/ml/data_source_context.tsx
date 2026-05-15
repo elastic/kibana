@@ -83,7 +83,8 @@ export const DataSourceContextProvider: FC<PropsWithChildren<unknown>> = ({ chil
     } else if (dataViewId !== undefined) {
       dataViewAndSavedSearch.dataView = await dataViews.get(dataViewId);
     } else {
-      dataViewAndSavedSearch.dataView = (await dataViews.getDefaultDataView().catch(() => null)) ?? null;
+      const defaultDataView = await dataViews.getDefaultDataView().catch(() => null);
+      dataViewAndSavedSearch.dataView = defaultDataView ?? null;
     }
 
     const { savedSearch, dataView } = dataViewAndSavedSearch;
