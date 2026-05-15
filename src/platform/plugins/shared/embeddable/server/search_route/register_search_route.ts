@@ -29,7 +29,8 @@ export function registerSearchRoute(router: IRouter<RequestHandlerContext>) {
       },
       security: {
         authz: {
-          requiredPrivileges: ['read'],
+          enabled: false,
+          reason: 'TODO',
         },
       },
     },
