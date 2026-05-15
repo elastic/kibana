@@ -15,6 +15,7 @@ import type { Process, ProcessEvent } from '@kbn/session-view-plugin/common';
 import { useHistory } from 'react-router-dom';
 import { useStore } from 'react-redux';
 import { ToolsFlyoutHeader } from '../../../shared/components/tools_flyout_header';
+import { useDocumentFlyoutTitle } from '../../../shared/hooks/use_document_flyout_title';
 import type { CellActionRenderer } from '../../../shared/components/cell_actions';
 import type { SessionViewConfig } from '../../../../../common/types/session_view';
 import { DocumentFlyoutWrapper } from '../../main/document_flyout_wrapper';
@@ -68,6 +69,11 @@ export interface SessionViewProps {
 export const SessionView: FC<SessionViewProps> = memo(
   ({ hit, jumpToEntityId, jumpToCursor, renderCellActions, onAlertUpdated }) => {
     const { euiTheme } = useEuiTheme();
+    const { label, iconType, onTitleClick, badge, timestamp } = useDocumentFlyoutTitle({
+      hit,
+      renderCellActions,
+      onAlertUpdated,
+    });
     const { services } = useKibana();
     const { overlays, sessionView } = services;
     const store = useStore();
@@ -212,10 +218,12 @@ export const SessionView: FC<SessionViewProps> = memo(
           `}
         >
           <ToolsFlyoutHeader
-            hit={hit}
             title={TITLE}
-            renderCellActions={renderCellActions}
-            onAlertUpdated={onAlertUpdated}
+            onTitleClick={onTitleClick}
+            label={label}
+            iconType={iconType}
+            badge={badge}
+            timestamp={timestamp}
           />
         </EuiFlyoutHeader>
         <EuiFlyoutBody>

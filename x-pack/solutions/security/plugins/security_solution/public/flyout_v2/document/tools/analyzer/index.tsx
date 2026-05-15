@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { CellActionRenderer } from '../../../shared/components/cell_actions';
 import { ToolsFlyoutHeader } from '../../../shared/components/tools_flyout_header';
+import { useDocumentFlyoutTitle } from '../../../shared/hooks/use_document_flyout_title';
 import { PREFIX } from '../../../../flyout/shared/test_ids';
 import { PageScope } from '../../../../data_view_manager/constants';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
@@ -49,6 +50,11 @@ const TITLE = i18n.translate('xpack.securitySolution.flyout.analyzer.title', {
 export const AnalyzerGraph = memo(
   ({ hit, renderCellActions, onAlertUpdated }: AnalyzerGraphProps) => {
     const { euiTheme } = useEuiTheme();
+    const { label, iconType, onTitleClick, badge, timestamp } = useDocumentFlyoutTitle({
+      hit,
+      renderCellActions,
+      onAlertUpdated,
+    });
     const eventId = hit.raw._id ?? '';
 
     const { from, to, shouldUpdate } = useTimelineDataFilters(false);
@@ -74,10 +80,12 @@ export const AnalyzerGraph = memo(
           `}
         >
           <ToolsFlyoutHeader
-            hit={hit}
             title={TITLE}
-            renderCellActions={renderCellActions}
-            onAlertUpdated={onAlertUpdated}
+            onTitleClick={onTitleClick}
+            label={label}
+            iconType={iconType}
+            badge={badge}
+            timestamp={timestamp}
           />
         </EuiFlyoutHeader>
         <EuiFlyoutBody>

@@ -12,8 +12,6 @@ import { useHistory } from 'react-router-dom';
 import { useStore } from 'react-redux';
 import { EuiFlyoutHeader, EuiFlyoutBody, EuiSpacer } from '@elastic/eui';
 import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
-import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
-import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
 import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { useUpdateAssetCriticality } from '../../../../entity_analytics/api/hooks/use_update_asset_criticality';
 import { useRefetchQueryById } from '../../../../entity_analytics/api/hooks/use_refetch_query_by_id';
@@ -25,15 +23,17 @@ import { useQueryInspector } from '../../../../common/components/page/manage_que
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { buildHostNamesFilter, type RiskSeverity } from '../../../../../common/search_strategy';
 import { useUiSetting, useKibana } from '../../../../common/lib/kibana';
-import { buildEuidCspPreviewOptions } from '../../../../cloud_security_posture/utils/build_euid_csp_preview_options';
-import { useNonClosedAlerts } from '../../../../cloud_security_posture/hooks/use_non_closed_alerts';
-import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../../../overview/components/detection_response/alerts_by_status/types';
 import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
 import type { EntityDetailsPath } from '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+import { EntityDetailsLeftPanelTab } from '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import { flyoutProviders } from '../../../shared/components/flyout_provider';
-import { defaultToolsFlyoutProperties } from '../../../shared/hooks/use_default_flyout_properties';
+import {
+  defaultToolsFlyoutProperties,
+  useDefaultDocumentFlyoutProperties,
+} from '../../../shared/hooks/use_default_flyout_properties';
 import { documentFlyoutHistoryKey } from '../../../shared/constants/flyout_history';
-import { HostDetails } from '../tools/details';
+import { RiskInputs } from '../tools/risk_inputs';
+import { CspInsights } from '../tools/csp_insights';
 import { Header } from './header';
 import { Content } from './content';
 import { Footer } from './footer';
@@ -108,9 +108,10 @@ export const Host: FC<HostProps> = memo(function Host({
   const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
   const isInSecurityApp = useIsInSecurityApp();
   const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
+  const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
 
   const safeContextID = contextID ?? scopeId ?? 'host-panel';
-  const { setQuery, deleteQuery, isInitializing, to, from } = useGlobalTime();
+  const { setQuery, deleteQuery, isInitializing } = useGlobalTime();
 
   const hostStoreIdentityFields = useMemo(
     () => (!entityId && hostName ? { 'host.name': hostName } : undefined),
@@ -233,61 +234,60 @@ export const Host: FC<HostProps> = memo(function Host({
     />
   ) : undefined;
 
-  const { hasMisconfigurationFindings } = useHasMisconfigurations(
-    buildEuidCspPreviewOptions('host', entityFromStoreResult.entityRecord, euidApi, {
-      entityStoreV2Enabled,
-      legacyIdentityFields:
-        hostName != null && hostName !== '' ? { 'host.name': hostName } : undefined,
-    })
-  );
-
-  const { hasVulnerabilitiesFindings } = useHasVulnerabilities(
-    buildEuidCspPreviewOptions('host', entityFromStoreResult.entityRecord, euidApi, {
-      entityStoreV2Enabled,
-      legacyIdentityFields:
-        hostName != null && hostName !== '' ? { 'host.name': hostName } : undefined,
-    })
-  );
-
-  const { hasNonClosedAlerts } = useNonClosedAlerts({
-    identityFields: documentEntityIdentifiers,
-    entityType: EntityType.host,
-    entityRecord: entityStoreV2Enabled ? entityFromStoreResult.entityRecord : undefined,
-    to,
-    from,
-    queryId: `${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}HOST_NAME_V2`,
-  });
-
-  const isRiskScoreExist = (effectiveRiskScoreState.data?.length ?? 0) > 0;
+  const onOpenHost = useCallback(() => {
+    overlays.openSystemFlyout(
+      flyoutProviders({
+        services,
+        store,
+        history,
+        children: <Host hostName={hostName} entityId={entityId} scopeId={scopeId} />,
+      }),
+      { ...defaultDocumentFlyoutProperties, title: hostName, historyKey, session: 'inherit' }
+    );
+  }, [
+    overlays,
+    services,
+    store,
+    history,
+    historyKey,
+    hostName,
+    entityId,
+    scopeId,
+    defaultDocumentFlyoutProperties,
+  ]);
 
   const openDetailsPanel = useCallback(
     (path: EntityDetailsPath) => {
-      overlays.openSystemFlyout(
-        flyoutProviders({
-          services,
-          store,
-          history,
-          children: (
-            <HostDetails
-              isRiskScoreExist={isRiskScoreExist}
-              hostName={hostName}
+      const common = {
+        ...defaultToolsFlyoutProperties,
+        title: hostName,
+        historyKey,
+        session: 'start' as const,
+      };
+      const wrap = (children: React.ReactNode) =>
+        overlays.openSystemFlyout(flyoutProviders({ services, store, history, children }), common);
+
+      switch (path.tab) {
+        case EntityDetailsLeftPanelTab.RISK_INPUTS:
+          return wrap(
+            <RiskInputs
+              entityName={hostName}
+              entityId={entityStoreEntityId}
+              scopeId={scopeId}
+              onOpenHost={onOpenHost}
+            />
+          );
+        case EntityDetailsLeftPanelTab.CSP_INSIGHTS:
+          return wrap(
+            <CspInsights
+              value={hostName}
               entityId={panelDisplayEntityId ?? ''}
               scopeId={scopeId}
-              hasMisconfigurationFindings={hasMisconfigurationFindings}
-              hasVulnerabilitiesFindings={hasVulnerabilitiesFindings}
-              hasNonClosedAlerts={hasNonClosedAlerts}
-              entityStoreEntityId={entityStoreEntityId}
-              initialPath={path}
+              entityType={EntityType.host}
+              onOpenHost={onOpenHost}
             />
-          ),
-        }),
-        {
-          ...defaultToolsFlyoutProperties,
-          title: hostName,
-          historyKey,
-          session: 'start',
-        }
-      );
+          );
+      }
     },
     [
       overlays,
@@ -295,14 +295,11 @@ export const Host: FC<HostProps> = memo(function Host({
       store,
       history,
       historyKey,
-      isRiskScoreExist,
       hostName,
       panelDisplayEntityId,
       scopeId,
-      hasMisconfigurationFindings,
-      hasVulnerabilitiesFindings,
-      hasNonClosedAlerts,
       entityStoreEntityId,
+      onOpenHost,
     ]
   );
 

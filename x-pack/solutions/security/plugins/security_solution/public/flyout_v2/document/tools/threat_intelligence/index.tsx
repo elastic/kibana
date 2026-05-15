@@ -11,6 +11,7 @@ import { EuiFlyoutBody, EuiFlyoutHeader, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { ToolsFlyoutHeader } from '../../../shared/components/tools_flyout_header';
+import { useDocumentFlyoutTitle } from '../../../shared/hooks/use_document_flyout_title';
 import { ThreatIntelligenceDetailsView } from './components/threat_intelligence_details_view';
 
 export const THREAT_INTELLIGENCE_TAB_ID = 'threatIntelligence';
@@ -31,6 +32,7 @@ export interface ThreatIntelligenceDetailsProps {
  */
 export const ThreatIntelligenceDetails = memo(({ hit }: ThreatIntelligenceDetailsProps) => {
   const { euiTheme } = useEuiTheme();
+  const { label, iconType, onTitleClick, badge, timestamp } = useDocumentFlyoutTitle({ hit });
 
   return (
     <>
@@ -40,7 +42,14 @@ export const ThreatIntelligenceDetails = memo(({ hit }: ThreatIntelligenceDetail
           padding-block: ${euiTheme.size.s} !important;
         `}
       >
-        <ToolsFlyoutHeader hit={hit} title={TITLE} />
+        <ToolsFlyoutHeader
+          title={TITLE}
+          onTitleClick={onTitleClick}
+          label={label}
+          iconType={iconType}
+          badge={badge}
+          timestamp={timestamp}
+        />
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <ThreatIntelligenceDetailsView hit={hit} />
