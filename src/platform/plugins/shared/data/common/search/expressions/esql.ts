@@ -329,7 +329,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
       };
 
       try {
-        const { rawResponse } = await typed.searchESQL(
+        const { rawResponse, requestParams } = await typed.searchESQL(
           {
             query: fixedQuery,
             params: params.params as Array<{ name: string; value: unknown }> | undefined,
@@ -392,7 +392,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
               }),
           })
           .json(params)
-          .ok({ json: { rawResponse } });
+          .ok({ json: { rawResponse }, requestParams });
 
         // Map to Datatable
         return mapResponseToDatatable(rawResponse as any, query, input);
