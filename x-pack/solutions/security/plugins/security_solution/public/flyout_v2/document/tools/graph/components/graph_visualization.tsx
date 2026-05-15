@@ -23,24 +23,27 @@ import {
 import { type NodeDocumentDataModel } from '@kbn/cloud-security-posture-common/types/graph/v1';
 import { DOCUMENT_TYPE_ENTITY } from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import { isEntityNodeEnriched } from '@kbn/cloud-security-posture-graph/src/components/utils';
-import { useFlyoutBodyAvailableHeight } from './use_flyout_body_available_height';
-import { PageScope } from '../../../data_view_manager/constants';
-import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
-import { useGetScopedSourcererDataView } from '../../../sourcerer/components/use_get_sourcerer_data_view';
+import { useFlyoutBodyAvailableHeight } from '../hooks/use_flyout_body_available_height';
+import { PageScope } from '../../../../../data_view_manager/constants';
+import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
+import { useGetScopedSourcererDataView } from '../../../../../sourcerer/components/use_get_sourcerer_data_view';
 import { GRAPH_VISUALIZATION_TEST_ID } from './test_ids';
-import { useInvestigateInTimeline } from '../../../common/hooks/timeline/use_investigate_in_timeline';
-import { normalizeTimeRange } from '../../../common/utils/normalize_time_range';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import { DocumentDetailsPreviewPanelKey } from '../../document_details/shared/constants/panel_keys';
+import { useInvestigateInTimeline } from '../../../../../common/hooks/timeline/use_investigate_in_timeline';
+import { normalizeTimeRange } from '../../../../../common/utils/normalize_time_range';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import { DocumentDetailsPreviewPanelKey } from '../../../../../flyout/document_details/shared/constants/panel_keys';
 import {
   ALERT_PREVIEW_BANNER,
   EVENT_PREVIEW_BANNER,
   GENERIC_ENTITY_PREVIEW_BANNER,
-} from '../../document_details/preview/constants';
-import { useKibana, useToasts } from '../../../common/lib/kibana';
-import { extractTimelineCapabilities } from '../../../common/utils/timeline_capabilities';
-import { GenericEntityPanelKey, EntityPanelKeyByType } from '../../entity_details/shared/constants';
-import { FlowTargetSourceDest } from '../../../../common/search_strategy';
+} from '../../../../../flyout/document_details/preview/constants';
+import { useKibana, useToasts } from '../../../../../common/lib/kibana';
+import { extractTimelineCapabilities } from '../../../../../common/utils/timeline_capabilities';
+import {
+  GenericEntityPanelKey,
+  EntityPanelKeyByType,
+} from '../../../../../flyout/entity_details/shared/constants';
+import { FlowTargetSourceDest } from '../../../../../../common/search_strategy';
 
 const GraphInvestigationLazy = React.lazy(() =>
   import('@kbn/cloud-security-posture-graph').then((module) => ({
@@ -63,6 +66,13 @@ interface EventGraphVisualizationProps {
   timestamp: string;
   /** Whether the source document is an alert */
   isAlert: boolean;
+  /**
+   * Override for opening a single document (event or alert) from a graph node.
+   * When provided, replaces the default `openPreviewPanel` call so callers that
+   * don't have a registered expandable-flyout panel (e.g. flyout v2) can open
+   * the document their own way.
+   */
+  onOpenDocumentPreview?: (id: string, indexName?: string) => void;
 }
 
 /** Props for entity mode — drives the graph from an Entity Store entity ID */
@@ -72,6 +82,13 @@ interface EntityGraphVisualizationProps {
   scopeId: string;
   /** Entity Store v2 entity ID (`entity.id`) to center the graph on */
   entityId: string;
+  /**
+   * Override for opening a single document (event or alert) from a graph node.
+   * When provided, replaces the default `openPreviewPanel` call so callers that
+   * don't have a registered expandable-flyout panel (e.g. flyout v2) can open
+   * the document their own way.
+   */
+  onOpenDocumentPreview?: (id: string, indexName?: string) => void;
 }
 
 export type GraphVisualizationProps = EventGraphVisualizationProps | EntityGraphVisualizationProps;
@@ -83,7 +100,7 @@ export type GraphVisualizationProps = EventGraphVisualizationProps | EntityGraph
  * - 'entity': driven by an Entity Store entity ID (used in entity detail panels).
  */
 export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props) => {
-  const { scopeId } = props;
+  const { scopeId, onOpenDocumentPreview } = props;
 
   const wrapperRef = useRef<HTMLDivElement>(null);
   const height = useFlyoutBodyAvailableHeight(wrapperRef);
@@ -141,12 +158,9 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props
 
         if (!panelId) {
           toasts.addDanger({
-            title: i18n.translate(
-              'xpack.securitySolution.flyout.shared.components.graphVisualization.errorInvalidEntityPanel',
-              {
-                defaultMessage: 'Unable to open entity preview',
-              }
-            ),
+            title: i18n.translate('xpack.securitySolution.flyout.graph.errorInvalidEntityPanel', {
+              defaultMessage: 'Unable to open entity preview',
+            }),
           });
           return;
         }
@@ -182,6 +196,10 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props
         },
         index?: string
       ) => {
+        if (onOpenDocumentPreview) {
+          onOpenDocumentPreview(item.id, index);
+          return;
+        }
         openPreviewPanel({
           id: DocumentDetailsPreviewPanelKey,
           params: {
@@ -238,16 +256,13 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props
         });
       } else {
         toasts.addDanger({
-          title: i18n.translate(
-            'xpack.securitySolution.flyout.shared.components.graphVisualization.errorOpenNodePreview',
-            {
-              defaultMessage: 'Failed showing preview',
-            }
-          ),
+          title: i18n.translate('xpack.securitySolution.flyout.graph.errorOpenNodePreview', {
+            defaultMessage: 'Failed showing preview',
+          }),
         });
       }
     },
-    [toasts, openPreviewPanel, scopeId, dataViewIndexPattern]
+    [toasts, openPreviewPanel, scopeId, dataViewIndexPattern, onOpenDocumentPreview]
   );
 
   const { investigateInTimeline } = useInvestigateInTimeline();
@@ -258,14 +273,11 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props
 
       if (!from || !to) {
         toasts.addDanger({
-          title: i18n.translate(
-            'xpack.securitySolution.flyout.shared.components.graphVisualization.errorInvalidTimeRange',
-            {
-              defaultMessage: 'Invalid time range',
-            }
-          ),
+          title: i18n.translate('xpack.securitySolution.flyout.graph.errorInvalidTimeRange', {
+            defaultMessage: 'Invalid time range',
+          }),
           text: i18n.translate(
-            'xpack.securitySolution.flyout.shared.components.graphVisualization.errorInvalidTimeRangeDescription',
+            'xpack.securitySolution.flyout.graph.errorInvalidTimeRangeDescription',
             {
               defaultMessage: 'Please select a valid time range.',
             }

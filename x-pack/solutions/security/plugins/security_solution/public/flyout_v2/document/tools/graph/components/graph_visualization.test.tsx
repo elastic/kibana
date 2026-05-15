@@ -11,7 +11,7 @@ import { render, waitFor } from '@testing-library/react';
 import { GraphInvestigation } from '@kbn/cloud-security-posture-graph';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { GraphVisualization } from './graph_visualization';
-import { mockFlyoutApi } from '../../document_details/shared/mocks/mock_flyout_context';
+import { mockFlyoutApi } from '../../../../../flyout/document_details/shared/mocks/mock_flyout_context';
 import { GRAPH_VISUALIZATION_TEST_ID } from './test_ids';
 
 const mockToasts = {
@@ -62,7 +62,7 @@ const mockCapabilities = {
   },
 };
 
-jest.mock('../../../common/lib/kibana', () => ({
+jest.mock('../../../../../common/lib/kibana', () => ({
   useToasts: () => mockToasts,
   useKibana: () => ({
     services: {
@@ -80,11 +80,11 @@ jest.mock('../../../common/lib/kibana', () => ({
   },
 }));
 
-jest.mock('../../../common/hooks/timeline/use_investigate_in_timeline', () => ({
+jest.mock('../../../../../common/hooks/timeline/use_investigate_in_timeline', () => ({
   useInvestigateInTimeline: () => mockInvestigateInTimeline,
 }));
 
-jest.mock('../../../sourcerer/components/use_get_sourcerer_data_view', () => ({
+jest.mock('../../../../../sourcerer/components/use_get_sourcerer_data_view', () => ({
   useGetScopedSourcererDataView: () => ({
     dataView: {
       id: 'old-data-view',
@@ -93,7 +93,7 @@ jest.mock('../../../sourcerer/components/use_get_sourcerer_data_view', () => ({
   }),
 }));
 
-jest.mock('../../../data_view_manager/hooks/use_data_view', () => ({
+jest.mock('../../../../../data_view_manager/hooks/use_data_view', () => ({
   useDataView: () => ({
     dataView: {
       id: 'experimental-data-view',
@@ -102,7 +102,7 @@ jest.mock('../../../data_view_manager/hooks/use_data_view', () => ({
   }),
 }));
 
-jest.mock('../../../common/hooks/use_experimental_features', () => ({
+jest.mock('../../../../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: () => true,
 }));
 

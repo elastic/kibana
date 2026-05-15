@@ -1,0 +1,131 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { memo, useCallback, useMemo } from 'react';
+import { css } from '@emotion/react';
+import { EuiFlyoutBody, EuiFlyoutHeader, useEuiTheme } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { getFieldValue, type DataTableRecord } from '@kbn/discover-utils';
+import { GRAPH_SCOPE_ID } from '@kbn/cloud-security-posture-graph';
+import { EVENT_KIND } from '@kbn/rule-data-utils';
+import { useHistory } from 'react-router-dom';
+import { useStore } from 'react-redux';
+import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
+import { ToolsFlyoutHeader } from '../../../shared/components/tools_flyout_header';
+import type { CellActionRenderer } from '../../../shared/components/cell_actions';
+import { PREFIX } from '../../../../flyout/shared/test_ids';
+import { EventKind } from '../../main/constants/event_kinds';
+import { GraphVisualization } from './components/graph_visualization';
+import { useGraphPreview } from '../../main/hooks/use_graph_preview';
+import { useKibana } from '../../../../common/lib/kibana';
+import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
+import { documentFlyoutHistoryKey } from '../../../shared/constants/flyout_history';
+import { flyoutProviders } from '../../../shared/components/flyout_provider';
+import { DocumentFlyoutWrapper } from '../../main/document_flyout_wrapper';
+import { useDefaultDocumentFlyoutProperties } from '../../../shared/hooks/use_default_flyout_properties';
+
+export const GRAPH_TOOLS_TEST_ID = `${PREFIX}GraphTools` as const;
+
+const TITLE = i18n.translate('xpack.securitySolution.flyout.graph.title', {
+  defaultMessage: 'Graph',
+});
+
+export interface GraphDetailsProps {
+  hit: DataTableRecord;
+  renderCellActions: CellActionRenderer;
+  onAlertUpdated: () => void;
+}
+
+export const GraphDetails = memo(
+  ({ hit, renderCellActions, onAlertUpdated }: GraphDetailsProps) => {
+    const { euiTheme } = useEuiTheme();
+    const eventId = hit.raw._id ?? '';
+    const { timestamp, eventIds } = useGraphPreview({ hit });
+    const isAlert = useMemo(
+      () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
+      [hit]
+    );
+
+    const { services } = useKibana();
+    const { overlays } = services;
+    const store = useStore();
+    const history = useHistory();
+    const isInSecurityApp = useIsInSecurityApp();
+    const historyKey = isInSecurityApp ? documentFlyoutHistoryKey : DOC_VIEWER_FLYOUT_HISTORY_KEY;
+    const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
+
+    const onOpenDocumentPreview = useCallback(
+      (documentId: string, indexName?: string) =>
+        overlays.openSystemFlyout(
+          flyoutProviders({
+            services,
+            store,
+            history,
+            children: (
+              <DocumentFlyoutWrapper
+                documentId={documentId}
+                indexName={indexName}
+                renderCellActions={renderCellActions}
+                onAlertUpdated={onAlertUpdated}
+              />
+            ),
+          }),
+          {
+            ...defaultFlyoutProperties,
+            historyKey,
+            session: 'inherit',
+          }
+        ),
+      [
+        defaultFlyoutProperties,
+        history,
+        historyKey,
+        onAlertUpdated,
+        overlays,
+        renderCellActions,
+        services,
+        store,
+      ]
+    );
+
+    if (!eventId || !timestamp) {
+      return null;
+    }
+
+    return (
+      <>
+        <EuiFlyoutHeader
+          hasBorder
+          css={css`
+            padding-block: ${euiTheme.size.s} !important;
+          `}
+        >
+          <ToolsFlyoutHeader
+            hit={hit}
+            title={TITLE}
+            renderCellActions={renderCellActions}
+            onAlertUpdated={onAlertUpdated}
+          />
+        </EuiFlyoutHeader>
+        <EuiFlyoutBody>
+          <div data-test-subj={GRAPH_TOOLS_TEST_ID}>
+            <GraphVisualization
+              mode="event"
+              scopeId={GRAPH_SCOPE_ID}
+              eventIds={eventIds}
+              timestamp={timestamp}
+              isAlert={isAlert}
+              onOpenDocumentPreview={onOpenDocumentPreview}
+            />
+          </div>
+        </EuiFlyoutBody>
+      </>
+    );
+  }
+);
+
+GraphDetails.displayName = 'GraphDetails';
