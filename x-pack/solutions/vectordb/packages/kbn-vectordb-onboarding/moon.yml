@@ -21,6 +21,7 @@ dependsOn:
   - '@kbn/i18n'
   - '@kbn/i18n-react'
   - '@kbn/kibana-react-plugin'
+  - '@kbn/react-query'
   - '@kbn/share-plugin'
   - '@kbn/console-plugin'
   - '@kbn/cloud-plugin'
@@ -32,9 +33,12 @@ tags:
   - prod
   - group-vectordb
   - private
+  - jest-unit-tests
 fileGroups:
   src:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
+  jest-config:
+    - jest.config.js
 tasks: {}
