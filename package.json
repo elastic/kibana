@@ -112,8 +112,7 @@
     "@types/react-dom": "18.2.25",
     "@xstate5/react/**/xstate": "5.19.2",
     "apache-arrow": "20.x - 21.x",
-    "globby/fast-glob": "3.3.2",
-    "lodash": "4.17.23"
+    "globby/fast-glob": "3.3.2"
   },
   "dependencies": {
     "@ai-sdk/langchain": "1.0.102",
@@ -1233,7 +1232,7 @@
     "langsmith": "0.5.25",
     "launchdarkly-js-client-sdk": "3.9.0",
     "load-json-file": "6.2.0",
-    "lodash": "4.17.23",
+    "lodash": "4.18.1",
     "lru-cache": "11.3.5",
     "lz-string": "1.5.0",
     "magic-bytes.js": "1.12.1",
