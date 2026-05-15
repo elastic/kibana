@@ -3578,15 +3578,7 @@ class PackagePolicyClientWithAuthz extends PackagePolicyClientImpl {
 }
 
 function validateConditionPlacement(packagePolicy: NewPackagePolicy) {
-  const { enableIntegrationConditions } = appContextService.getExperimentalFeatures();
   const isAgentless = packagePolicy.supports_agentless === true;
-  const throwDisabled = () => {
-    throw new PackagePolicyValidationError(
-      i18n.translate('xpack.fleet.packagePolicyConditionFeatureDisabled', {
-        defaultMessage: '`condition` is not supported because the conditions feature is disabled.',
-      })
-    );
-  };
   const throwAgentless = () => {
     throw new PackagePolicyValidationError(
       i18n.translate('xpack.fleet.packagePolicyConditionNotAllowedAgentless', {
@@ -3604,20 +3596,17 @@ function validateConditionPlacement(packagePolicy: NewPackagePolicy) {
   };
 
   if (packagePolicy.condition) {
-    if (!enableIntegrationConditions) throwDisabled();
     if (isAgentless) throwAgentless();
   }
 
   for (const input of packagePolicy.inputs) {
     const isOtel = input.type === OTEL_COLLECTOR_INPUT_TYPE;
     if (input.condition) {
-      if (!enableIntegrationConditions) throwDisabled();
       if (isAgentless) throwAgentless();
       if (isOtel) throwOtel();
     }
     for (const stream of input.streams) {
       if (!stream.condition) continue;
-      if (!enableIntegrationConditions) throwDisabled();
       if (isAgentless) throwAgentless();
       if (isOtel) throwOtel();
     }
