@@ -29,7 +29,7 @@ export const ruleQueryInspectorQuerySchema = schema.object({
     schema.string({
       meta: {
         description:
-          'The alert document ID. When provided, the inspector uses the evaluation time range from the alert instead of the current time.',
+          'The alert document ID. When provided, the query inspector uses the evaluation time range from the alert instead of the current time.',
       },
     })
   ),
