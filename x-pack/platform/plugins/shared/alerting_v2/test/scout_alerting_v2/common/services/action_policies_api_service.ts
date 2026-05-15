@@ -10,7 +10,7 @@ import { measurePerformanceAsync } from '@kbn/scout';
 import type {
   ActionPolicyResponse,
   BulkActionActionPoliciesResponse,
-  CreateActionPolicyData,
+  CreateActionPolicyDataInput,
   FindActionPoliciesResponse,
   UpdateActionPolicyData,
 } from '@kbn/alerting-v2-schemas';
@@ -19,7 +19,7 @@ import { COMMON_HEADERS } from '../constants';
 
 export interface ActionPoliciesApiService {
   create: (
-    data: CreateActionPolicyData,
+    data: CreateActionPolicyDataInput,
     options?: { id?: string }
   ) => Promise<ActionPolicyResponse>;
   get: (id: string) => Promise<ActionPolicyResponse>;

@@ -27,7 +27,16 @@ import type { AlertAction } from '../../../../server/resources/datastreams/alert
 import type { AlertingApiServicesFixture } from '../fixtures';
 import { apiTest, buildCreateRuleData, testData } from '../fixtures';
 
-const { POLL_INTERVAL_MS, POLL_TIMEOUT_MS, WAIT_TIME_MS } = testData;
+const { POLL_INTERVAL_MS, POLL_TIMEOUT_MS } = testData;
+
+/**
+ * Time-based wait used by tests that assert an exact count of side-effect
+ * actions, where the next dispatcher tick must not produce extras. Sized to
+ * comfortably cover ~1 dispatcher tick (SCHEDULE_INTERVAL is 5s) so a
+ * regression that incorrectly produced extra actions has time to surface
+ * before we lock in the count.
+ */
+const WAIT_TIME_MS = 12_000;
 
 const ACTION_POLICY_ID = 'np-1';
 const ACTION_POLICY_MATCHER_ID = 'np-matcher';
@@ -1018,6 +1027,12 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
         ruleId: 'rule-1',
         actionType: 'fire',
       });
+
+      const finalFires = await apiServices.alertingV2.alertActions.find({
+        ruleId: 'rule-1',
+        actionType: 'fire',
+      });
+      expect(finalFires.length).toBeGreaterThanOrEqual(4);
     }
   );
 
