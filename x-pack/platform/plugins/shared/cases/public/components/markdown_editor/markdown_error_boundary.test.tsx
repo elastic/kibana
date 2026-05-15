@@ -5,13 +5,20 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { render, screen } from '@testing-library/react';
 
 import { MarkdownErrorBoundary } from './markdown_error_boundary';
 
 const ThrowingChild = () => {
   throw new Error('ReferenceError: parts is not defined');
+};
+
+const ThrowingInUseMemoChild = ({ content }: { content: string }) => {
+  const result = useMemo(() => {
+    throw new ReferenceError('parts is not defined');
+  }, []);
+  return <div>{result}</div>;
 };
 
 describe('MarkdownErrorBoundary', () => {
@@ -40,6 +47,19 @@ describe('MarkdownErrorBoundary', () => {
     render(
       <MarkdownErrorBoundary content={rawContent}>
         <ThrowingChild />
+      </MarkdownErrorBoundary>
+    );
+
+    expect(screen.getByTestId('markdown-render-error')).toBeInTheDocument();
+    expect(screen.getByText(rawContent)).toBeInTheDocument();
+  });
+
+  it('catches errors thrown from useMemo inside a child component', () => {
+    const rawContent = 'url: https://example.com?index=.alerts&timestamp=2026-05-08';
+
+    render(
+      <MarkdownErrorBoundary content={rawContent}>
+        <ThrowingInUseMemoChild content={rawContent} />
       </MarkdownErrorBoundary>
     );
 

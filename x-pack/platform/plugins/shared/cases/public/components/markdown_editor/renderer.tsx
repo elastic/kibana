@@ -29,6 +29,13 @@ const withDisabledLinks = (disableLinks?: boolean): React.FC<EuiLinkAnchorProps>
 };
 
 const MarkdownRendererComponent: React.FC<Props> = ({ children, disableLinks, textSize }) => {
+  // eslint-disable-next-line no-console
+  console.log(
+    '[Cases:MarkdownRenderer] rendering, content length:',
+    children?.length,
+    'content preview:',
+    children?.slice(0, 80)
+  );
   const { processingPlugins, parsingPlugins } = usePlugins();
   // Deep clone of the processing plugins to prevent affecting the markdown editor.
   const processingPluginList = cloneDeep(processingPlugins);

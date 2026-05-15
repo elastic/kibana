@@ -39,3 +39,10 @@ export const DELETE_REGISTERED_ATTACHMENT = i18n.translate(
     defaultMessage: 'Deleted attachment',
   }
 );
+
+export const ATTACHMENT_RENDER_ERROR = i18n.translate(
+  'xpack.cases.userActions.attachments.renderError',
+  {
+    defaultMessage: 'Unable to render this attachment. An error occurred during rendering.',
+  }
+);

@@ -30,6 +30,16 @@ const UserActionMarkdownComponent = forwardRef<
   const editorRef = useRef();
   const fieldName = 'content';
 
+  // eslint-disable-next-line no-console
+  console.log(
+    '[Cases:UserActionMarkdown] rendering id:',
+    id,
+    'isEditable:',
+    isEditable,
+    'content length:',
+    content?.length
+  );
+
   return isEditable ? (
     <EditableMarkdown
       id={id}

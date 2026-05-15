@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { EuiCallOut, EuiCodeBlock } from '@elastic/eui';
 
 import * as i18n from './translations';
 
@@ -27,26 +26,48 @@ export class MarkdownErrorBoundary extends React.Component<
   constructor(props: React.PropsWithChildren<MarkdownErrorBoundaryProps>) {
     super(props);
     this.state = { hasError: false };
+    // eslint-disable-next-line no-console
+    console.log(
+      '[Cases:MarkdownErrorBoundary] constructor called, content length:',
+      props.content?.length
+    );
   }
 
-  static getDerivedStateFromError(): MarkdownErrorBoundaryState {
+  static getDerivedStateFromError(error: Error): MarkdownErrorBoundaryState {
+    // eslint-disable-next-line no-console
+    console.error(
+      '[Cases:MarkdownErrorBoundary] getDerivedStateFromError caught error:',
+      error?.message,
+      error
+    );
     return { hasError: true };
   }
 
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    // eslint-disable-next-line no-console
+    console.error('[Cases:MarkdownErrorBoundary] componentDidCatch:', {
+      errorMessage: error?.message,
+      errorName: error?.name,
+      errorStack: error?.stack,
+      componentStack: errorInfo?.componentStack,
+    });
+  }
+
   render() {
+    // eslint-disable-next-line no-console
+    console.log('[Cases:MarkdownErrorBoundary] render called, hasError:', this.state.hasError);
+
     if (this.state.hasError) {
+      // eslint-disable-next-line no-console
+      console.log(
+        '[Cases:MarkdownErrorBoundary] rendering fallback for content length:',
+        this.props.content?.length
+      );
       return (
-        <EuiCallOut
-          title={i18n.MARKDOWN_RENDER_ERROR}
-          color="warning"
-          iconType="warning"
-          size="s"
-          data-test-subj="markdown-render-error"
-        >
-          <EuiCodeBlock isCopyable paddingSize="s" fontSize="s">
-            {this.props.content}
-          </EuiCodeBlock>
-        </EuiCallOut>
+        <div data-test-subj="markdown-render-error">
+          <p>{i18n.MARKDOWN_RENDER_ERROR}</p>
+          <pre>{this.props.content}</pre>
+        </div>
       );
     }
 

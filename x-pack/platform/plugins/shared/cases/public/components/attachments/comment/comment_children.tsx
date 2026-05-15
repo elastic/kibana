@@ -31,6 +31,15 @@ export const CommentChildren: React.FC<CommentChildrenProps> = ({
   caseId,
   version,
 }) => {
+  // eslint-disable-next-line no-console
+  console.log(
+    '[Cases:CommentChildren] rendering commentId:',
+    commentId,
+    'content length:',
+    content?.length,
+    'content preview:',
+    content?.slice(0, 80)
+  );
   const {
     appId = '',
     manageMarkdownEditIds = [],

@@ -22,6 +22,13 @@ export const getContentWrapperCss = (euiTheme: EuiThemeComputed<{}>) => css`
 
 const ScrollableMarkdownRenderer = ({ content }: { content: string }) => {
   const { euiTheme } = useEuiTheme();
+  // eslint-disable-next-line no-console
+  console.log(
+    '[Cases:ScrollableMarkdown] rendering, content length:',
+    content?.length,
+    'content preview:',
+    content?.slice(0, 80)
+  );
   return (
     <div
       className={'eui-xScroll'}

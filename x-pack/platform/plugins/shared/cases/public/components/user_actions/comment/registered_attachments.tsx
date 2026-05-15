@@ -15,6 +15,7 @@ import React, { Suspense } from 'react';
 import { memoize, partition } from 'lodash';
 
 import { EuiCallOut, EuiCode, EuiLoadingSpinner, EuiButtonIcon, EuiFlexItem } from '@elastic/eui';
+import { AttachmentErrorBoundary } from './attachment_error_boundary';
 
 import type {
   AttachmentType,
@@ -69,7 +70,13 @@ const getAttachmentRenderer = memoize((cachingKey: string) => {
       AttachmentElement = React.cloneElement(AttachmentElement, props);
     }
 
-    return <Suspense fallback={<EuiLoadingSpinner />}>{AttachmentElement}</Suspense>;
+    // eslint-disable-next-line no-console
+    console.log('[Cases:AttachmentRenderer] rendering attachment, cachingKey:', cachingKey);
+    return (
+      <AttachmentErrorBoundary attachmentId={cachingKey}>
+        <Suspense fallback={<EuiLoadingSpinner />}>{AttachmentElement}</Suspense>
+      </AttachmentErrorBoundary>
+    );
   };
 
   return renderCallback;
