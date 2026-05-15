@@ -235,5 +235,27 @@ describe('<AlertHeaderTitle />', () => {
       // Previous from absolute index 49 → 48.
       expect(openAlertFlyoutMock).toHaveBeenCalledWith(48);
     });
+
+    it('renders the severity badge and the pagination control in the same EuiFlexGroup row', () => {
+      jest.mocked(useAlertsContext).mockReturnValue({
+        ...defaultAlertsContextValue,
+        flyoutAlertIndex: 2,
+        pageSize: 50,
+        totalAlertCount: 1432,
+      });
+      const { getByTestId } = renderHeader(mockContextValue);
+
+      const severity = getByTestId(SEVERITY_VALUE_TEST_ID);
+      const pagination = getByTestId(FLYOUT_ALERT_PAGINATION_TEST_ID);
+
+      // The closest ancestor flex group should be the same node for both —
+      // proves severity (left) and pagination (right) share one row, rather
+      // than the pre-iteration-2 layout where pagination sat on its own row
+      // above severity.
+      const severityFlexGroup = severity.closest('.euiFlexGroup');
+      const paginationFlexGroup = pagination.closest('.euiFlexGroup');
+      expect(severityFlexGroup).not.toBeNull();
+      expect(severityFlexGroup).toBe(paginationFlexGroup);
+    });
   });
 });
