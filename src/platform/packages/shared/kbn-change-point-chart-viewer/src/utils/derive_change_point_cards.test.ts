@@ -57,10 +57,10 @@ describe('derive_change_point_cards', () => {
       const table = {
         type: 'datatable' as const,
         columns: [
-          { id: 'bucket', name: 'bucket', meta: { type: 'date' } },
-          { id: 'avg_bytes', name: 'avg_bytes', meta: { type: 'number' } },
-          { id: 'type', name: 'type', meta: { type: 'string' } },
-          { id: 'pvalue', name: 'pvalue', meta: { type: 'number' } },
+          { id: 'bucket', name: 'bucket', meta: { type: 'date' as const } },
+          { id: 'avg_bytes', name: 'avg_bytes', meta: { type: 'number' as const } },
+          { id: 'type', name: 'type', meta: { type: 'string' as const } },
+          { id: 'pvalue', name: 'pvalue', meta: { type: 'number' as const } },
         ],
         rows: [
           {
@@ -97,11 +97,11 @@ describe('derive_change_point_cards', () => {
       const table = {
         type: 'datatable' as const,
         columns: [
-          { id: 'host', name: 'host', meta: { type: 'string' } },
-          { id: 'bucket', name: 'bucket', meta: { type: 'date' } },
-          { id: 'avg_bytes', name: 'avg_bytes', meta: { type: 'number' } },
-          { id: 'type', name: 'type', meta: { type: 'string' } },
-          { id: 'pvalue', name: 'pvalue', meta: { type: 'number' } },
+          { id: 'host', name: 'host', meta: { type: 'string' as const } },
+          { id: 'bucket', name: 'bucket', meta: { type: 'date' as const } },
+          { id: 'avg_bytes', name: 'avg_bytes', meta: { type: 'number' as const } },
+          { id: 'type', name: 'type', meta: { type: 'string' as const } },
+          { id: 'pvalue', name: 'pvalue', meta: { type: 'number' as const } },
         ],
         rows: [
           {
@@ -197,10 +197,10 @@ describe('derive_change_point_cards', () => {
       const table = {
         type: 'datatable' as const,
         columns: [
-          { id: 'bucket', name: 'bucket', meta: { type: 'date' } },
-          { id: 'avg_bytes', name: 'avg_bytes', meta: { type: 'number' } },
-          { id: 'type', name: 'type', meta: { type: 'string' } },
-          { id: 'pvalue', name: 'pvalue', meta: { type: 'number' } },
+          { id: 'bucket', name: 'bucket', meta: { type: 'date' as const } },
+          { id: 'avg_bytes', name: 'avg_bytes', meta: { type: 'number' as const } },
+          { id: 'type', name: 'type', meta: { type: 'string' as const } },
+          { id: 'pvalue', name: 'pvalue', meta: { type: 'number' as const } },
         ],
         rows: [
           {

@@ -176,8 +176,8 @@ describe('useChangePointLensProps', () => {
     const props = makeDefaultProps({ timeRange: timeRangeOverride });
     const { result } = renderHook(() => useChangePointLensProps(props));
 
-    await waitFor(() => expect(result.current).toBeDefined());
-    expect(result.current?.timeRange).toEqual(timeRangeOverride);
+    await waitFor(() => expect(result.current.lensProps).toBeDefined());
+    expect(result.current.lensProps?.timeRange).toEqual(timeRangeOverride);
   });
 
   it('falls back to fetchParams.timeRange when no timeRange override is provided', async () => {
@@ -187,16 +187,16 @@ describe('useChangePointLensProps', () => {
     const props = makeDefaultProps();
     const { result } = renderHook(() => useChangePointLensProps(props));
 
-    await waitFor(() => expect(result.current).toBeDefined());
-    expect(result.current?.timeRange).toEqual(absoluteTimeRangeStub);
+    await waitFor(() => expect(result.current.lensProps).toBeDefined());
+    expect(result.current.lensProps?.timeRange).toEqual(absoluteTimeRangeStub);
   });
 
   it('sets attributes.description when a description is provided', async () => {
     const props = makeDefaultProps({ description: 'host: web-01' });
     const { result } = renderHook(() => useChangePointLensProps(props));
 
-    await waitFor(() => expect(result.current).toBeDefined());
-    expect(result.current?.attributes.description).toBe('host: web-01');
+    await waitFor(() => expect(result.current.lensProps).toBeDefined());
+    expect(result.current.lensProps?.attributes.description).toBe('host: web-01');
   });
 
   it('does not set attributes.description when no description is provided', async () => {
@@ -206,8 +206,8 @@ describe('useChangePointLensProps', () => {
     const props = makeDefaultProps();
     const { result } = renderHook(() => useChangePointLensProps(props));
 
-    await waitFor(() => expect(result.current).toBeDefined());
-    expect(result.current?.attributes.description).toBeUndefined();
+    await waitFor(() => expect(result.current.lensProps).toBeDefined());
+    expect(result.current.lensProps?.attributes.description).toBeUndefined();
   });
 
   it('remains undefined when chartLayers is empty and no error is set', async () => {
@@ -216,7 +216,7 @@ describe('useChangePointLensProps', () => {
     const { result } = renderHook(() => useChangePointLensProps(props));
 
     await act(async () => {});
-    expect(result.current).toBeUndefined();
+    expect(result.current.lensProps).toBeUndefined();
   });
 
   it('holds the build result until the chart enters the viewport', async () => {
@@ -233,7 +233,7 @@ describe('useChangePointLensProps', () => {
     await act(async () => {
       await Promise.resolve();
     });
-    expect(result.current).toBeUndefined();
+    expect(result.current.lensProps).toBeUndefined();
 
     // Chart scrolls into view: the queued build result flushes through combineLatest.
     act(() => {
@@ -243,7 +243,7 @@ describe('useChangePointLensProps', () => {
       );
     });
 
-    await waitFor(() => expect(result.current).toBeDefined());
+    await waitFor(() => expect(result.current.lensProps).toBeDefined());
   });
 
   it('rebuilds when discoverFetch$ emits a new value', async () => {
@@ -251,7 +251,7 @@ describe('useChangePointLensProps', () => {
     const props = makeDefaultProps({ discoverFetch$ });
     const { result } = renderHook(() => useChangePointLensProps(props));
 
-    await waitFor(() => expect(result.current).toBeDefined());
+    await waitFor(() => expect(result.current.lensProps).toBeDefined());
     const buildCallsAfterMount = mockBuild.mock.calls.length;
 
     act(() => {
@@ -270,7 +270,7 @@ describe('useChangePointLensProps', () => {
 
     const { result, rerender } = renderHook(() => useChangePointLensProps({ ...props, query }));
 
-    await waitFor(() => expect(result.current).toBeDefined());
+    await waitFor(() => expect(result.current.lensProps).toBeDefined());
     const buildCallsAfterMount = mockBuild.mock.calls.length;
 
     // Change the query prop and re-render — chartConfigUpdates$ should emit, triggering a rebuild.
@@ -292,17 +292,17 @@ describe('useChangePointLensProps', () => {
     const props = makeDefaultProps({ discoverFetch$ });
     const { result } = renderHook(() => useChangePointLensProps(props));
 
-    // Let the failing build settle; result must remain undefined.
+    // Let the failing build settle; lensProps must remain undefined (buildError will be set).
     await act(async () => {
       await Promise.resolve();
     });
-    expect(result.current).toBeUndefined();
+    expect(result.current.lensProps).toBeUndefined();
 
     // Trigger again — the subscription must still be alive after the earlier error.
     act(() => {
       discoverFetch$.next({} as Parameters<typeof discoverFetch$.next>[0]);
     });
-    await waitFor(() => expect(result.current).toBeDefined());
+    await waitFor(() => expect(result.current.lensProps).toBeDefined());
 
     expect(consoleErrorSpy).toHaveBeenCalledWith(
       '[useChangePointLensProps] Failed to build Lens attributes',

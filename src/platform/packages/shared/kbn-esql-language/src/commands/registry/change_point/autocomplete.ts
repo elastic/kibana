@@ -58,7 +58,7 @@ export const getPosition = (query: string, command: ESQLAstAllCommands): Positio
     if (query.match(/by\s+\S.*,\s*\S*$/i)) {
       return Position.BY_COLUMN;
     }
-    if (query.match(/by\s+\S+(\s*,\s*\S+)*\s+$/i)) {
+    if (query.match(/by\s+[^\s,]+(\s*,\s*[^\s,]+)*\s+$/i)) {
       return Position.AFTER_BY_CLAUSE;
     }
   }
