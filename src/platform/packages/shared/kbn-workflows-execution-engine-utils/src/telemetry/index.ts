@@ -19,6 +19,8 @@ export { WorkflowExecutionTelemetryEventTypes } from './events/workflows_executi
 export type {
   BaseWorkflowExecutionTelemetryParams,
   EventDrivenExecutionSuppressedParams,
+  OutputSizeStats,
+  OutputSizeTelemetryFields,
   TriggerEventDispatchedParams,
   WorkflowExecutionCancelledParams,
   WorkflowExecutionCompletedParams,
