@@ -32,12 +32,21 @@ const UserActionMarkdownComponent = forwardRef<
 
   // eslint-disable-next-line no-console
   console.log(
-    '[Cases:UserActionMarkdown] rendering id:',
+    '[Cases:UserActionMarkdown] rendering.',
+    'id:',
     id,
     'isEditable:',
     isEditable,
     'content length:',
-    content?.length
+    content?.length,
+    'content type:',
+    typeof content,
+    'content preview:',
+    content?.slice(0, 120),
+    'has ampersand:',
+    content?.includes('&'),
+    'will render:',
+    isEditable ? 'EditableMarkdown' : 'ScrollableMarkdown'
   );
 
   return isEditable ? (

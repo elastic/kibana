@@ -12,6 +12,9 @@ import { EuiMarkdownFormat } from '@elastic/eui';
 import { MarkdownLink } from './markdown_link';
 import { usePlugins } from './use_plugins';
 
+// eslint-disable-next-line no-console
+console.log('[Cases:renderer.tsx] Module loaded — chunk evaluated successfully.');
+
 interface Props {
   children: string;
   disableLinks?: boolean;
@@ -28,28 +31,104 @@ const withDisabledLinks = (disableLinks?: boolean): React.FC<EuiLinkAnchorProps>
   return MarkdownLinkProcessingComponent;
 };
 
-/**
- * Escapes bare `&` characters that are not valid HTML entity references.
- * Prevents a crash in the markdown parser caused by a minifier bug (SWC
- * compress.passes:2) that corrupts vfile-message's VMessage constructor
- * in the DLL bundle. When parse-entities encounters an unterminated legacy
- * HTML entity (e.g. `&timestamp=`), it emits a warning via VMessage which
- * throws `ReferenceError: parts is not defined`.
- */
-const escapeUnterminatedEntities = (text: string): string =>
-  text.replace(/&(?!(?:amp|lt|gt|quot|apos|nbsp|#\d+|#x[\da-fA-F]+);)/g, '&amp;');
-
 const MarkdownRendererComponent: React.FC<Props> = ({ children, disableLinks, textSize }) => {
-  const { processingPlugins, parsingPlugins } = usePlugins();
-  // Deep clone of the processing plugins to prevent affecting the markdown editor.
-  const processingPluginList = cloneDeep(processingPlugins);
-  // This line of code is TS-compatible and it will break if [1][1] change in the future.
-  processingPluginList[1][1].components.a = useMemo(
-    () => withDisabledLinks(disableLinks),
-    [disableLinks]
+  // eslint-disable-next-line no-console
+  console.log(
+    '[Cases:MarkdownRenderer] component ENTERED.',
+    'children length:',
+    (children as string)?.length,
+    'children type:',
+    typeof children,
+    'children preview:',
+    (children as string)?.slice(0, 100),
+    'disableLinks:',
+    disableLinks,
+    'textSize:',
+    textSize,
+    'has ampersand:',
+    (children as string)?.includes('&'),
+    'has &amp;:',
+    (children as string)?.includes('&amp;')
   );
 
-  const sanitizedContent = useMemo(() => escapeUnterminatedEntities(children), [children]);
+  const { processingPlugins, parsingPlugins } = usePlugins();
+
+  // eslint-disable-next-line no-console
+  console.log(
+    '[Cases:MarkdownRenderer] usePlugins returned.',
+    'processingPlugins type:',
+    typeof processingPlugins,
+    'processingPlugins isArray:',
+    Array.isArray(processingPlugins),
+    'processingPlugins length:',
+    processingPlugins?.length,
+    'processingPlugins[1] type:',
+    typeof processingPlugins?.[1],
+    'processingPlugins[1] isArray:',
+    Array.isArray(processingPlugins?.[1]),
+    'processingPlugins[1] length:',
+    (processingPlugins?.[1] as unknown[])?.length,
+    'processingPlugins[1][1] type:',
+    typeof processingPlugins?.[1]?.[1],
+    'processingPlugins[1][1]:',
+    processingPlugins?.[1]?.[1] != null ? 'exists' : 'NULL/UNDEFINED',
+    'processingPlugins[1][1].components:',
+    (processingPlugins?.[1]?.[1] as Record<string, unknown>)?.components != null
+      ? 'exists'
+      : 'NULL/UNDEFINED'
+  );
+
+  const linkComponent = useMemo(() => withDisabledLinks(disableLinks), [disableLinks]);
+  // Deep clone of the processing plugins to prevent affecting the markdown editor.
+  const processingPluginList = cloneDeep(processingPlugins);
+
+  // eslint-disable-next-line no-console
+  console.log(
+    '[Cases:MarkdownRenderer] after cloneDeep.',
+    'processingPluginList type:',
+    typeof processingPluginList,
+    'processingPluginList isArray:',
+    Array.isArray(processingPluginList),
+    'processingPluginList length:',
+    processingPluginList?.length,
+    'processingPluginList[1] type:',
+    typeof processingPluginList?.[1],
+    'processingPluginList[1] isArray:',
+    Array.isArray(processingPluginList?.[1]),
+    'processingPluginList[1][1] type:',
+    typeof processingPluginList?.[1]?.[1],
+    'processingPluginList[1][1]:',
+    processingPluginList?.[1]?.[1] != null ? 'exists' : 'NULL/UNDEFINED',
+    'processingPluginList[1][1]?.components:',
+    (processingPluginList?.[1]?.[1] as Record<string, unknown>)?.components != null
+      ? 'exists'
+      : 'NULL/UNDEFINED'
+  );
+
+  const rehypeConfig = processingPluginList?.[1]?.[1];
+  if (rehypeConfig?.components) {
+    rehypeConfig.components.a = linkComponent;
+    // eslint-disable-next-line no-console
+    console.log(
+      '[Cases:MarkdownRenderer] successfully set linkComponent on rehypeConfig.components.a'
+    );
+  } else {
+    // eslint-disable-next-line no-console
+    console.warn(
+      '[Cases:MarkdownRenderer] WARNING: could not set linkComponent.',
+      'rehypeConfig:',
+      rehypeConfig,
+      'rehypeConfig?.components:',
+      rehypeConfig?.components
+    );
+  }
+
+  // eslint-disable-next-line no-console
+  console.log(
+    '[Cases:MarkdownRenderer] about to render EuiMarkdownFormat.',
+    'children length:',
+    (children as string)?.length
+  );
 
   return (
     <EuiMarkdownFormat
@@ -58,7 +137,7 @@ const MarkdownRendererComponent: React.FC<Props> = ({ children, disableLinks, te
       grow={true}
       textSize={textSize}
     >
-      {sanitizedContent}
+      {children}
     </EuiMarkdownFormat>
   );
 };

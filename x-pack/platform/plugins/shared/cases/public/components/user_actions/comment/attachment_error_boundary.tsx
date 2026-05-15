@@ -28,14 +28,28 @@ export class AttachmentErrorBoundary extends React.Component<
     super(props);
     this.state = { hasError: false, errorMessage: null };
     // eslint-disable-next-line no-console
-    console.log('[Cases:AttachmentErrorBoundary] constructor, attachmentId:', props.attachmentId);
+    console.log(
+      '[Cases:AttachmentErrorBoundary] constructor.',
+      'attachmentId:',
+      props.attachmentId,
+      'children type:',
+      typeof props.children,
+      'children:',
+      props.children != null ? 'present' : 'NULL/UNDEFINED'
+    );
   }
 
   static getDerivedStateFromError(error: Error): AttachmentErrorBoundaryState {
     // eslint-disable-next-line no-console
     console.error(
-      '[Cases:AttachmentErrorBoundary] getDerivedStateFromError caught error:',
+      '[Cases:AttachmentErrorBoundary] getDerivedStateFromError CAUGHT ERROR.',
+      'error.message:',
       error?.message,
+      'error.name:',
+      error?.name,
+      'error.stack:',
+      error?.stack,
+      'error:',
       error
     );
     return { hasError: true, errorMessage: error?.message ?? null };
@@ -43,7 +57,7 @@ export class AttachmentErrorBoundary extends React.Component<
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     // eslint-disable-next-line no-console
-    console.error('[Cases:AttachmentErrorBoundary] componentDidCatch:', {
+    console.error('[Cases:AttachmentErrorBoundary] componentDidCatch DETAILS:', {
       attachmentId: this.props.attachmentId,
       errorMessage: error?.message,
       errorName: error?.name,
@@ -52,13 +66,27 @@ export class AttachmentErrorBoundary extends React.Component<
     });
   }
 
-  render() {
+  componentDidUpdate() {
     // eslint-disable-next-line no-console
     console.log(
-      '[Cases:AttachmentErrorBoundary] render, attachmentId:',
+      '[Cases:AttachmentErrorBoundary] componentDidUpdate.',
+      'attachmentId:',
       this.props.attachmentId,
       'hasError:',
       this.state.hasError
+    );
+  }
+
+  render() {
+    // eslint-disable-next-line no-console
+    console.log(
+      '[Cases:AttachmentErrorBoundary] render.',
+      'attachmentId:',
+      this.props.attachmentId,
+      'hasError:',
+      this.state.hasError,
+      'errorMessage:',
+      this.state.errorMessage
     );
 
     if (this.state.hasError) {

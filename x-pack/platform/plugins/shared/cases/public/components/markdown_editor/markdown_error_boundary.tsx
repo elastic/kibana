@@ -28,16 +28,31 @@ export class MarkdownErrorBoundary extends React.Component<
     this.state = { hasError: false };
     // eslint-disable-next-line no-console
     console.log(
-      '[Cases:MarkdownErrorBoundary] constructor called, content length:',
-      props.content?.length
+      '[Cases:MarkdownErrorBoundary] constructor called.',
+      'content length:',
+      props.content?.length,
+      'content preview:',
+      props.content?.slice(0, 100),
+      'has ampersand:',
+      props.content?.includes('&'),
+      'children type:',
+      typeof props.children,
+      'children:',
+      props.children != null ? 'present' : 'NULL/UNDEFINED'
     );
   }
 
   static getDerivedStateFromError(error: Error): MarkdownErrorBoundaryState {
     // eslint-disable-next-line no-console
     console.error(
-      '[Cases:MarkdownErrorBoundary] getDerivedStateFromError caught error:',
+      '[Cases:MarkdownErrorBoundary] getDerivedStateFromError CAUGHT ERROR.',
+      'error.message:',
       error?.message,
+      'error.name:',
+      error?.name,
+      'error.stack:',
+      error?.stack,
+      'error:',
       error
     );
     return { hasError: true };
@@ -45,7 +60,7 @@ export class MarkdownErrorBoundary extends React.Component<
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     // eslint-disable-next-line no-console
-    console.error('[Cases:MarkdownErrorBoundary] componentDidCatch:', {
+    console.error('[Cases:MarkdownErrorBoundary] componentDidCatch DETAILS:', {
       errorMessage: error?.message,
       errorName: error?.name,
       errorStack: error?.stack,
@@ -53,15 +68,41 @@ export class MarkdownErrorBoundary extends React.Component<
     });
   }
 
+  componentDidUpdate(_prevProps: React.PropsWithChildren<MarkdownErrorBoundaryProps>) {
+    // eslint-disable-next-line no-console
+    console.log(
+      '[Cases:MarkdownErrorBoundary] componentDidUpdate.',
+      'hasError:',
+      this.state.hasError,
+      'content length:',
+      this.props.content?.length
+    );
+  }
+
   render() {
     // eslint-disable-next-line no-console
-    console.log('[Cases:MarkdownErrorBoundary] render called, hasError:', this.state.hasError);
+    console.log(
+      '[Cases:MarkdownErrorBoundary] render called.',
+      'hasError:',
+      this.state.hasError,
+      'content length:',
+      this.props.content?.length,
+      'content preview:',
+      this.props.content?.slice(0, 80),
+      'children type:',
+      typeof this.props.children,
+      'children:',
+      this.props.children != null ? 'present' : 'NULL/UNDEFINED'
+    );
 
     if (this.state.hasError) {
       // eslint-disable-next-line no-console
       console.log(
-        '[Cases:MarkdownErrorBoundary] rendering fallback for content length:',
-        this.props.content?.length
+        '[Cases:MarkdownErrorBoundary] RENDERING FALLBACK (error was caught).',
+        'content length:',
+        this.props.content?.length,
+        'content preview:',
+        this.props.content?.slice(0, 200)
       );
       return (
         <div data-test-subj="markdown-render-error">
@@ -71,6 +112,8 @@ export class MarkdownErrorBoundary extends React.Component<
       );
     }
 
+    // eslint-disable-next-line no-console
+    console.log('[Cases:MarkdownErrorBoundary] RENDERING CHILDREN (no error).');
     return this.props.children;
   }
 }

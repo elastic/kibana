@@ -20,6 +20,7 @@ import { NoCases } from './no_cases';
 import type { FilterOptions } from '../../containers/types';
 import { TruncatedText } from '../truncated_text';
 import { MarkdownRenderer } from '../markdown_editor';
+import { escapeUnterminatedEntities } from '../markdown_editor/sanitize_markdown';
 import { initialData as initialGetCasesData, useGetCases } from '../../containers/use_get_cases';
 import type { FilterMode as RecentCasesFilterMode } from './types';
 import { useAvailableCasesOwners } from '../app/use_available_owners';
@@ -79,7 +80,7 @@ export const RecentCasesComp = React.memo<RecentCasesProps>(
                 <div css={getMarkdownContainerCss(euiTheme)}>
                   <div css={getTruncateCompCss}>
                     <MarkdownRenderer disableLinks={true} textSize="relative">
-                      {c.description}
+                      {escapeUnterminatedEntities(c.description)}
                     </MarkdownRenderer>
                   </div>
                 </div>

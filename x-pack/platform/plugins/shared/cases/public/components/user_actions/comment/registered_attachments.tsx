@@ -71,7 +71,17 @@ const getAttachmentRenderer = memoize((cachingKey: string) => {
     }
 
     // eslint-disable-next-line no-console
-    console.log('[Cases:AttachmentRenderer] rendering attachment, cachingKey:', cachingKey);
+    console.log(
+      '[Cases:AttachmentRenderer] rendering attachment.',
+      'cachingKey:',
+      cachingKey,
+      'AttachmentElement type:',
+      typeof AttachmentElement,
+      'AttachmentElement:',
+      AttachmentElement != null ? 'present' : 'NULL/UNDEFINED',
+      'attachmentViewObject.children:',
+      attachmentViewObject?.children != null ? 'present' : 'NULL/UNDEFINED'
+    );
     return (
       <AttachmentErrorBoundary attachmentId={cachingKey}>
         <Suspense fallback={<EuiLoadingSpinner />}>{AttachmentElement}</Suspense>
