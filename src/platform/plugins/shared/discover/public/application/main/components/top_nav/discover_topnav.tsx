@@ -44,11 +44,7 @@ import {
 import { DiscoverTopNavMenu } from './discover_topnav_menu';
 import { ESQLToDataViewTransitionModal } from './esql_dataview_transition';
 import { DiscoverSessionSaveModalContainer } from './save_discover_session';
-import {
-  isDiscoverInspectorInTabMenu,
-  useDiscoverTopNavWithInspector,
-  useDiscoverTopNavWithoutInspector,
-} from './use_discover_topnav';
+import { useDiscoverTopNav } from './use_discover_topnav';
 import { useESQLVariables } from './use_esql_variables';
 import type { UpdateESQLQueryFn } from '../../../../context_awareness/types';
 
@@ -61,57 +57,12 @@ function DiscoverTopNavMenuSection({
   onOpenSaveAsModal: () => void;
   persistedDiscoverSession: DiscoverSession | undefined;
 }) {
-  const services = useDiscoverServices();
-  const customizationContext = useDiscoverCustomizationContext();
-  if (isDiscoverInspectorInTabMenu(services, customizationContext)) {
-    return (
-      <DiscoverTopNavMenuNoInspector
-        onOpenSaveModal={onOpenSaveModal}
-        onOpenSaveAsModal={onOpenSaveAsModal}
-        persistedDiscoverSession={persistedDiscoverSession}
-      />
-    );
-  }
-  return (
-    <DiscoverTopNavMenuWithInspector
-      onOpenSaveModal={onOpenSaveModal}
-      onOpenSaveAsModal={onOpenSaveAsModal}
-      persistedDiscoverSession={persistedDiscoverSession}
-    />
-  );
-}
-
-function DiscoverTopNavMenuWithInspector({
-  onOpenSaveModal,
-  onOpenSaveAsModal,
-  persistedDiscoverSession,
-}: {
-  onOpenSaveModal: () => void;
-  onOpenSaveAsModal: () => void;
-  persistedDiscoverSession: DiscoverSession | undefined;
-}) {
-  const { topNavBadges, topNavMenu } = useDiscoverTopNavWithInspector({
+  const { topNavBadges, topNavMenu } = useDiscoverTopNav({
     onOpenSaveModal,
     onOpenSaveAsModal,
     persistedDiscoverSession,
   });
-  return <DiscoverTopNavMenu topNavBadges={topNavBadges} topNavMenu={topNavMenu} />;
-}
 
-function DiscoverTopNavMenuNoInspector({
-  onOpenSaveModal,
-  onOpenSaveAsModal,
-  persistedDiscoverSession,
-}: {
-  onOpenSaveModal: () => void;
-  onOpenSaveAsModal: () => void;
-  persistedDiscoverSession: DiscoverSession | undefined;
-}) {
-  const { topNavBadges, topNavMenu } = useDiscoverTopNavWithoutInspector({
-    onOpenSaveModal,
-    onOpenSaveAsModal,
-    persistedDiscoverSession,
-  });
   return <DiscoverTopNavMenu topNavBadges={topNavBadges} topNavMenu={topNavMenu} />;
 }
 
