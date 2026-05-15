@@ -8,7 +8,8 @@
 import type { AgentName } from './es_schemas/ui/fields/agent';
 import type { EventOutcome } from './es_schemas/raw/fields/event_outcome';
 import type { StatusCode } from './es_schemas/raw/fields/otel/status_code';
-import { EVENT_OUTCOME, STATUS_CODE } from './es_fields/apm';
+import { EVENT_OUTCOME } from './es_fields/apm';
+import { STATUS_CODE } from './es_fields/otel';
 import type { Span } from './es_schemas/ui/span';
 import type { Transaction } from './es_schemas/ui/transaction';
 
