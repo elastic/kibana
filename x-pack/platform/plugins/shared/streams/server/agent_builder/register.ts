@@ -77,6 +77,9 @@ export const registerStreamsAgentBuilder = async ({
   const memoryToolsOptions = {
     getMemoryService,
     getSecurity: () => server.core.security,
+    getScopedClients,
+    server,
+    logger,
   };
 
   await registerAgentBuilderTools({

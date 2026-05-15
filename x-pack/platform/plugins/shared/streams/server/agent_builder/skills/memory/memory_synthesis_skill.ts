@@ -6,8 +6,10 @@
  */
 
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
+import type { SkillBoundedTool } from '@kbn/agent-builder-server/skills/tools';
 import { createMemoryTools } from '../../tools/memory';
 import type { MemoryToolsOptions } from '../../tools/memory';
+import { createSearchKnowledgeIndicatorsTool } from '../../tools/search_knowledge_indicators/tool';
 
 export const createMemorySynthesisSkill = (options: MemoryToolsOptions) =>
   defineSkillType({
@@ -22,7 +24,7 @@ Significant events knowledge is **cross-stream by default**: organize around **s
 
 ## Your task
 
-You will receive a set of **knowledge indicators** (KIs) — observed facts about streams and services extracted from logs and telemetry. Your job is to synthesize these into focused, actionable wiki pages.
+Use the \`platform_streams_sig_events_search_knowledge_indicators\` tool to fetch **knowledge indicators** (KIs) — observed facts about streams and services extracted from logs and telemetry. Your job is to synthesize these into focused, actionable wiki pages.
 
 ## Organizing knowledge
 
@@ -32,18 +34,36 @@ Pages have **names** (unique identifiers, e.g. "nginx-error-patterns"), **titles
 
 - **Synthesize, don't transcribe**: Combine multiple related KIs into a single coherent page rather than creating one page per KI.
 - **One topic, one page**: Pages should cover a focused topic. Don't create catch-all pages.
-- **Read before writing**: Before updating an existing page, read it with \`platform.streams.memory.read\` to understand what's already there. Preserve accurate content, correct outdated information, and add genuinely new insights.
+- **Read before writing**: Before updating an existing page, read it with \`platform_streams_memory_read\` to understand what's already there. Preserve accurate content, correct outdated information, and add genuinely new insights.
 - **Precise naming**: Page names should be descriptive and unique (e.g. "nginx-prod-latency-patterns", not "nginx-observations").
 - **Cross-reference**: When mentioning a concept that has its own page, add the \`page_name\` to the references array.
 
 ## Workflow
 
-1. Use \`platform.streams.memory.list\` to see existing pages
-2. Use \`platform.streams.memory.read\` or \`platform.streams.memory.search\` to read relevant existing pages
-3. Use \`platform.streams.memory.write\` to create or update memory pages`,
-    getInlineTools: () =>
-      createMemoryTools(options).map(({ tags, id, ...rest }) => ({
+1. Call \`platform_streams_sig_events_search_knowledge_indicators\` (no filters) to fetch all available KIs
+2. Use \`platform_streams_memory_list\` to see existing pages
+3. Use \`platform_streams_memory_read\` or \`platform_streams_memory_search\` to read relevant existing pages
+4. Use \`platform_streams_memory_write\` to create or update memory pages`,
+    getInlineTools: () => {
+      const memoryTools = createMemoryTools(options).map(({ tags, id, ...rest }) => ({
         ...rest,
         id: id.replaceAll('.', '_'),
-      })),
+      }));
+
+      const extraTools = [];
+      if (options.getScopedClients && options.server && options.logger) {
+        const { availability: _availability, ...kiTool } = createSearchKnowledgeIndicatorsTool({
+          getScopedClients: options.getScopedClients,
+          server: options.server,
+          logger: options.logger,
+        });
+        extraTools.push({
+          ...kiTool,
+          id: kiTool.id.replaceAll('.', '_'),
+          experimental: false,
+        } as SkillBoundedTool);
+      }
+
+      return [...memoryTools, ...extraTools];
+    },
   });
