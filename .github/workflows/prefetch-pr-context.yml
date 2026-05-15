@@ -57,7 +57,7 @@ jobs:
           mkdir -p /tmp/pr-context
 
           gh pr view "$PR_NUMBER" --repo "$REPO" \
-            --json number,title,body,url,isDraft,author,baseRefName,headRefName,labels \
+            --json number,title,body,url,isDraft,author,baseRefName,headRefName,labels,mergeCommit,mergedAt,state \
             > /tmp/pr-context/pr-metadata.json
 
           fetch_paginated_array \
