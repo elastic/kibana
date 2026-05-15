@@ -1,59 +1,59 @@
 {
-  "sha1": "4bfab72882a030ec273492780808890b2b4e47bc",
+  "sha1": "2f75b25175019498cbca6acd5503522a17dc4fdb",
   "tests": [
     {
       "id": "405beff6794306f-a54347ac1e57e7e",
       "title": "Profiling is not setup and no data is loaded Admin users",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/has_no_setup.spec.ts",
-        "line": 28,
+        "line": 29,
         "column": 12
       }
     },
     {
       "id": "405beff6794306f-429a339166c2e77",
       "title": "Profiling is not setup and no data is loaded Viewer users",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/has_no_setup.spec.ts",
-        "line": 42,
+        "line": 43,
         "column": 12
       }
     },
     {
       "id": "f24ba03baeb5e26-0723e6c11fe5d87",
       "title": "APM integration not installed but setup completed Admin user",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/has_setup_apm_not_installed.spec.ts",
-        "line": 33,
+        "line": 34,
         "column": 12
       }
     },
     {
       "id": "f24ba03baeb5e26-76b2ff68d4e7a1b",
       "title": "APM integration not installed but setup completed Viewer user",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/has_setup_apm_not_installed.spec.ts",
-        "line": 48,
+        "line": 49,
         "column": 12
       }
     },

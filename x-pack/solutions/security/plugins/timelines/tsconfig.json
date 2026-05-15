@@ -1,0 +1,46 @@
+
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "common/**/*",
+    "public/**/*",
+    "server/**/*",
+    // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
+    "server/**/*.json",
+    "public/**/*.json",
+    "../../../../../typings/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/data-plugin",
+    "@kbn/cases-plugin",
+    "@kbn/alerting-plugin",
+    "@kbn/utility-types",
+    "@kbn/es-query",
+    "@kbn/securitysolution-ecs",
+    "@kbn/securitysolution-t-grid",
+    "@kbn/rule-data-utils",
+    "@kbn/rule-registry-plugin",
+    "@kbn/data-views-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/ui-theme",
+    "@kbn/i18n-react",
+    "@kbn/i18n",
+    "@kbn/safer-lodash-set",
+    "@kbn/alerts-as-data-utils",
+    "@kbn/logging",
+    "@kbn/search-errors",
+    "@kbn/search-types",
+    "@kbn/react-kibana-mount",
+    "@kbn/field-formats-plugin",
+    "@kbn/config-schema",
+    "@kbn/zod"
+  ],
+  "exclude": [
+    "target/**/*"
+  ]
+}

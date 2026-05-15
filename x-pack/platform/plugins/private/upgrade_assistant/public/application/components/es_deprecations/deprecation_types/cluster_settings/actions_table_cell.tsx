@@ -40,7 +40,7 @@ export const ClusterSettingsActionsCell: React.FunctionComponent<Props> = ({ ope
           data-test-subj="clusterSettingsResolutionStatusCell"
         >
           <EuiFlexItem grow={false}>
-            <EuiIcon type="indexSettings" />
+            <EuiIcon type="indexSettings" aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="s">{i18nTexts.resolutionText}</EuiText>
