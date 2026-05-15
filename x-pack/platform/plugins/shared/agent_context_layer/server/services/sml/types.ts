@@ -13,6 +13,7 @@ import type {
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
+import type { SmlSearchFilters } from '../../../common/http_api/sml';
 
 /**
  * A single SML chunk to be indexed.
@@ -20,10 +21,16 @@ import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 export interface SmlChunk {
   /** Type of the chunk (e.g., 'dashboard', 'lens', 'esql') */
   type: string;
-  /** Searchable content text */
+  /** Searchable content (indexed as `semantic_text`) */
   content: string;
   /** Display title */
   title: string;
+  /** Longer summary for semantic search (indexed as `semantic_text`); omit or empty if none */
+  description?: string;
+  /** Owner or last-modifier user id when known */
+  user_id?: string;
+  /** Other SML chunk ids this item references */
+  references?: string[];
   /** Permissions required to access the underlying element (e.g., 'saved_object:lens/get') */
   permissions?: string[];
 }
@@ -116,8 +123,14 @@ export interface SmlDocument {
   title: string;
   /** Origin ID (e.g., saved object ID) */
   origin_id: string;
-  /** Searchable content */
+  /** Searchable content (`semantic_text` in the index) */
   content: string;
+  /** Semantic summary (`semantic_text` in the index) */
+  description?: string;
+  /** Owner or last-modifier user id */
+  user_id?: string;
+  /** Referenced SML chunk ids */
+  references?: string[];
   /** Timestamp when first created */
   created_at: string;
   /** Timestamp when last updated */
@@ -130,7 +143,7 @@ export interface SmlDocument {
 
 /**
  * An SML search result — same fields as {@link SmlDocument} plus relevance score.
- * `content` is optional when the query excluded it from `_source` (e.g. `skipContent`).
+ * `content` and `description` are optional when excluded from `_source` (e.g. `skipContent`).
  */
 export type SmlSearchResult = Omit<SmlDocument, 'content'> & {
   content?: string;
@@ -175,6 +188,12 @@ export interface SmlCrawler {
 }
 
 /**
+ * Per-type filter parameters for SML search.
+ * Re-exported from the shared HTTP API types so server and client use a single definition.
+ */
+export type { SmlSearchFilters } from '../../../common/http_api/sml';
+
+/**
  * SML service interface — exposed on the plugin start contract.
  */
 export interface SmlService {
@@ -189,11 +208,19 @@ export interface SmlService {
     request: KibanaRequest;
     /** When true, Elasticsearch omits `content` from `_source` (smaller payloads for autocomplete). */
     skipContent?: boolean;
+    /** Per-type filters. See {@link SmlSearchFilters}. */
+    filters?: SmlSearchFilters;
   }) => Promise<{ results: SmlSearchResult[]; total: number }>;
 
   /**
    * Check whether the current user has access to specific SML items.
    * Returns a map of document id → authorized (true/false).
+   *
+   * **Internal use only.** Callers outside the plugin should use the public
+   * `getDocuments` method, which performs this check internally and returns
+   * only authorized documents. This primitive is exposed on the internal
+   * `SmlService` so `resolveSmlAttachItems` can distinguish "access denied"
+   * from "not found" in its per-item error messages.
    */
   checkItemsAccess: (params: {
     ids: string[];
@@ -213,7 +240,16 @@ export interface SmlService {
     logger: Logger;
   }) => Promise<void>;
 
-  /** Fetch SML documents by their chunk IDs, scoped to a space */
+  /**
+   * Fetch SML documents by their chunk IDs, scoped to a space.
+   *
+   * **Internal use only — does NOT perform permission checks.** The public
+   * `AgentContextLayerPluginStart.getDocuments` wraps this with an access
+   * check and filters out unauthorized IDs before fetching. Direct callers
+   * MUST authorize IDs (via `checkItemsAccess`) before invoking this method,
+   * or use it only from system contexts where the user's privileges are
+   * irrelevant (e.g. crawler/indexer tasks).
+   */
   getDocuments: (params: {
     ids: string[];
     spaceId: string;

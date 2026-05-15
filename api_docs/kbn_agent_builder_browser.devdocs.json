@@ -792,7 +792,7 @@
           "\nPublic-facing contract for the attachment service."
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-        "lineNumber": 159,
+        "lineNumber": 173,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -822,7 +822,7 @@
               "<TAttachment>) => void"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-            "lineNumber": 163,
+            "lineNumber": 177,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -840,7 +840,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-                "lineNumber": 170,
+                "lineNumber": 184,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -866,7 +866,7 @@
                   "<TAttachment>"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-                "lineNumber": 171,
+                "lineNumber": 185,
                 "columnNumber": 5,
                 "deprecated": false,
                 "docsReferencedTypeName": "AttachmentUIDefinition",
@@ -901,7 +901,7 @@
               "<TAttachment> | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-            "lineNumber": 174,
+            "lineNumber": 188,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -919,7 +919,7 @@
                   "string"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-                "lineNumber": 181,
+                "lineNumber": 195,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -953,7 +953,7 @@
           "<TAttachment>"
         ],
         "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-        "lineNumber": 108,
+        "lineNumber": 116,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -971,7 +971,7 @@
               "(attachment: TAttachment) => string"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-            "lineNumber": 112,
+            "lineNumber": 120,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -987,7 +987,7 @@
                   "TAttachment"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-                "lineNumber": 115,
+                "lineNumber": 123,
                 "columnNumber": 14,
                 "deprecated": false,
                 "docsReferencedTypeName": "TAttachment",
@@ -1012,7 +1012,7 @@
               ") | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-            "lineNumber": 116,
+            "lineNumber": 124,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1034,7 +1034,7 @@
               "<unknown> | undefined; }) => void) | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-            "lineNumber": 120,
+            "lineNumber": 128,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1047,7 +1047,7 @@
                 "label": "args",
                 "description": [],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-                "lineNumber": 124,
+                "lineNumber": 132,
                 "columnNumber": 20,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -1063,7 +1063,7 @@
                       "TAttachment"
                     ],
                     "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-                    "lineNumber": 124,
+                    "lineNumber": 132,
                     "columnNumber": 22,
                     "deprecated": false,
                     "trackAdoption": false
@@ -1080,7 +1080,7 @@
                       "<unknown> | undefined"
                     ],
                     "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-                    "lineNumber": 124,
+                    "lineNumber": 132,
                     "columnNumber": 47,
                     "deprecated": false,
                     "trackAdoption": false
@@ -1097,15 +1097,17 @@
             "tags": [],
             "label": "renderInlineContent",
             "description": [
-              "\nOptional custom content renderer for inline attachment display.\nWhen provided, attachments can be rendered inline in the conversation\nusing the <render_attachment> tag."
+              "\nOptional custom content renderer for inline attachment display.\nWhen provided, attachments can be rendered inline in the conversation\nusing the <render_attachment> tag.\n\nThe `callbacks` object provides:\n- `registerActionButtons`: dynamically register action buttons in the inline header"
             ],
             "signature": [
               "((props: ",
               "AttachmentRenderProps",
-              "<TAttachment>) => React.ReactNode) | undefined"
+              "<TAttachment>, callbacks?: ",
+              "InlineRenderCallbacks",
+              " | undefined) => React.ReactNode) | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-            "lineNumber": 125,
+            "lineNumber": 133,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1122,12 +1124,31 @@
                   "<TAttachment>"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-                "lineNumber": 130,
-                "columnNumber": 26,
+                "lineNumber": 142,
+                "columnNumber": 5,
                 "deprecated": false,
                 "docsReferencedTypeName": "AttachmentRenderProps",
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/agent-builder-browser",
+                "id": "def-common.AttachmentUIDefinition.renderInlineContent.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "callbacks",
+                "description": [],
+                "signature": [
+                  "InlineRenderCallbacks",
+                  " | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
+                "lineNumber": 143,
+                "columnNumber": 5,
+                "deprecated": false,
+                "docsReferencedTypeName": "InlineRenderCallbacks",
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -1145,7 +1166,7 @@
               "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-            "lineNumber": 131,
+            "lineNumber": 145,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1167,7 +1188,7 @@
               ") => React.ReactNode) | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-            "lineNumber": 138,
+            "lineNumber": 152,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1184,7 +1205,7 @@
                   "<TAttachment>"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-                "lineNumber": 149,
+                "lineNumber": 163,
                 "columnNumber": 5,
                 "deprecated": false,
                 "docsReferencedTypeName": "AttachmentRenderProps",
@@ -1202,7 +1223,7 @@
                   "CanvasRenderCallbacks"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-                "lineNumber": 150,
+                "lineNumber": 164,
                 "columnNumber": 5,
                 "deprecated": false,
                 "docsReferencedTypeName": "CanvasRenderCallbacks",
@@ -1229,7 +1250,7 @@
               "[]) | undefined"
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-            "lineNumber": 152,
+            "lineNumber": 166,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1246,7 +1267,7 @@
                   "<TAttachment>"
                 ],
                 "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/attachments/contract.ts",
-                "lineNumber": 156,
+                "lineNumber": 170,
                 "columnNumber": 23,
                 "deprecated": false,
                 "docsReferencedTypeName": "GetActionButtonsParams",
@@ -1509,10 +1530,12 @@
             "parentPluginId": "@kbn/agent-builder-browser",
             "id": "def-common.EventsServiceStartContract.chat$",
             "type": "Object",
-            "tags": [],
+            "tags": [
+              "deprecated"
+            ],
             "label": "chat$",
             "description": [
-              "\n(hot) observable of all chat events."
+              "\nHot observable of chat events from every conversation, interleaved.\n"
             ],
             "signature": [
               "Observable",
@@ -1529,8 +1552,82 @@
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/events/contract.ts",
             "lineNumber": 39,
             "columnNumber": 3,
+            "deprecated": true,
+            "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/public/services/events/create_public_contract.ts"
+              },
+              {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/public/mocks.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/public/widgets/workflow_yaml_editor/ui/hooks/use_agent_builder_integration.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/public/widgets/workflow_yaml_editor/ui/hooks/use_agent_builder_integration.ts"
+              },
+              {
+                "plugin": "dashboardAgent",
+                "path": "x-pack/platform/plugins/shared/dashboard_agent/public/attachment_types/dashboard_integration/agent_live_updates_subscription.ts"
+              },
+              {
+                "plugin": "dashboardAgent",
+                "path": "x-pack/platform/plugins/shared/dashboard_agent/public/attachment_types/dashboard_integration/new_attachment_id_regeneration_subscription.ts"
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/agent-builder-browser",
+            "id": "def-common.EventsServiceStartContract.getChatEvents$",
+            "type": "Function",
+            "tags": [],
+            "label": "getChatEvents$",
+            "description": [
+              "\nReturns a hot observable of chat events scoped to a single conversation. Subscribe\nat any point during the events service's lifetime; events emit live as the agent\nruns that conversation. Subscribers only see events tagged with the matching id.\n\nUse this in preference to `chat$` whenever your consumer cares about a specific\nconversation. Concurrent streams mean `chat$` is no longer single-conversation,\nand most chat event payloads do not carry a `conversation_id` field that you can\nfilter on directly.\n\nMigration patterns (these are recommendations):\n\n  // Before — assumes only one conversation streams at a time:\n  events.chat$.subscribe((event) => { ... });\n\n  // After — scope to a known conversation:\n  events.getChatEvents$(conversationId).subscribe((event) => { ... });\n\n  // After — scope to whichever conversation the UI is currently focused on:\n  events.ui.activeConversation$.pipe(\n    filter((c): c is ActiveConversation => c?.id != null),\n    switchMap((c) => events.getChatEvents$(c.id!))\n  ).subscribe((event) => { ... });"
+            ],
+            "signature": [
+              "(conversationId: string) => ",
+              "Observable",
+              "<",
+              {
+                "pluginId": "@kbn/agent-builder-common",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderCommonPluginApi",
+                "section": "def-common.ChatEvent",
+                "text": "ChatEvent"
+              },
+              ">"
+            ],
+            "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/events/contract.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/agent-builder-browser",
+                "id": "def-common.EventsServiceStartContract.getChatEvents$.$1",
+                "type": "string",
+                "tags": [],
+                "label": "conversationId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/events/contract.ts",
+                "lineNumber": 74,
+                "columnNumber": 20,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "@kbn/agent-builder-browser",
@@ -1551,7 +1648,7 @@
               }
             ],
             "path": "x-pack/platform/packages/shared/agent-builder/agent-builder-browser/events/contract.ts",
-            "lineNumber": 43,
+            "lineNumber": 76,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

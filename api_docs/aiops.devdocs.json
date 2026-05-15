@@ -1623,7 +1623,7 @@
       "label": "AiopsPluginStart",
       "description": [],
       "path": "x-pack/platform/plugins/shared/aiops/public/types/index.ts",
-      "lineNumber": 53,
+      "lineNumber": 54,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -1647,7 +1647,7 @@
             ") => boolean>"
           ],
           "path": "x-pack/platform/plugins/shared/aiops/public/types/index.ts",
-          "lineNumber": 54,
+          "lineNumber": 55,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -1669,7 +1669,7 @@
             ">"
           ],
           "path": "x-pack/platform/plugins/shared/aiops/public/types/index.ts",
-          "lineNumber": 55,
+          "lineNumber": 56,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false
@@ -1687,7 +1687,7 @@
             ">"
           ],
           "path": "x-pack/platform/plugins/shared/aiops/public/types/index.ts",
-          "lineNumber": 56,
+          "lineNumber": 57,
           "columnNumber": 3,
           "deprecated": false,
           "trackAdoption": false,
@@ -1743,7 +1743,7 @@
         "void"
       ],
       "path": "x-pack/platform/plugins/shared/aiops/public/types/index.ts",
-      "lineNumber": 52,
+      "lineNumber": 53,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,

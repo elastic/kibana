@@ -15,6 +15,7 @@ import type {
   ESQLFieldWithMetadata,
   ESQLCallbacks,
   EsqlView,
+  EsqlDataset,
 } from '@kbn/esql-types';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
@@ -157,7 +158,7 @@ export interface ESQLCommandSummary {
    */
   metadataColumns?: Set<string>;
   /**
-   * A set of renamed columns pairs [oldName, newName]
+   * A set of renamed columns pairs [newName, oldName]
    */
   renamedColumnsPairs?: Set<[string, string]>;
 
@@ -215,6 +216,7 @@ export interface ICommandContext {
   inferenceEndpoints?: InferenceEndpointAutocompleteItem[];
   policies?: Map<string, ESQLPolicy>;
   views?: EsqlView[];
+  datasets?: EsqlDataset[];
   editorExtensions?: EditorExtensions;
   variables?: ESQLControlVariable[];
   supportsControls?: boolean;

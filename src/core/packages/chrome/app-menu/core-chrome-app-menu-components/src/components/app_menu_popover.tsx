@@ -73,7 +73,7 @@ export const AppMenuPopover = ({
   const showTooltip = Boolean(content || title);
 
   const button = showTooltip ? (
-    <EuiToolTip delay="long" content={content} title={title}>
+    <EuiToolTip content={content} title={title}>
       {anchorElement}
     </EuiToolTip>
   ) : (

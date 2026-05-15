@@ -19,7 +19,7 @@
  * MVP implementation focusing on core IP reputation actions.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { i18n } from '@kbn/i18n';
 import type { ConnectorSpec } from '../../connector_spec';
 
@@ -41,17 +41,19 @@ export const AbuseIPDBConnector: ConnectorSpec = {
   actions: {
     checkIp: {
       isTool: true,
-      input: z.object({
-        ipAddress: z.ipv4().describe('IP address to check'),
-        maxAgeInDays: z
-          .number()
-          .int()
-          .min(1)
-          .max(365)
-          .optional()
-          .default(90)
-          .describe('Maximum age of reports in days'),
-      }),
+      input: lazySchema(() =>
+        z.object({
+          ipAddress: z.ipv4().describe('IP address to check'),
+          maxAgeInDays: z
+            .number()
+            .int()
+            .min(1)
+            .max(365)
+            .optional()
+            .default(90)
+            .describe('Maximum age of reports in days'),
+        })
+      ),
       handler: async (ctx, input) => {
         const typedInput = input as { ipAddress: string; maxAgeInDays?: number };
         const response = await ctx.client.get('https://api.abuseipdb.com/api/v2/check', {
@@ -73,11 +75,13 @@ export const AbuseIPDBConnector: ConnectorSpec = {
 
     reportIp: {
       isTool: true,
-      input: z.object({
-        ip: z.ipv4().describe('IP address to report'),
-        categories: z.array(z.number().int()).min(1).describe('Abuse category IDs'),
-        comment: z.string().optional().describe('Additional details'),
-      }),
+      input: lazySchema(() =>
+        z.object({
+          ip: z.ipv4().describe('IP address to report'),
+          categories: z.array(z.number().int()).min(1).describe('Abuse category IDs'),
+          comment: z.string().optional().describe('Additional details'),
+        })
+      ),
       handler: async (ctx, input) => {
         const typedInput = input as { ip: string; categories: number[]; comment?: string };
         const response = await ctx.client.post(
@@ -102,9 +106,11 @@ export const AbuseIPDBConnector: ConnectorSpec = {
 
     getIpInfo: {
       isTool: true,
-      input: z.object({
-        ipAddress: z.ipv4().describe('IP address to lookup'),
-      }),
+      input: lazySchema(() =>
+        z.object({
+          ipAddress: z.ipv4().describe('IP address to lookup'),
+        })
+      ),
       handler: async (ctx, input) => {
         const typedInput = input as { ipAddress: string };
         const response = await ctx.client.get('https://api.abuseipdb.com/api/v2/check', {
@@ -129,17 +135,19 @@ export const AbuseIPDBConnector: ConnectorSpec = {
 
     bulkCheck: {
       isTool: true,
-      input: z.object({
-        network: z.string().describe('Network in CIDR notation'),
-        maxAgeInDays: z
-          .number()
-          .int()
-          .min(1)
-          .max(365)
-          .optional()
-          .default(30)
-          .describe('Maximum age of reports in days'),
-      }),
+      input: lazySchema(() =>
+        z.object({
+          network: z.string().describe('Network in CIDR notation'),
+          maxAgeInDays: z
+            .number()
+            .int()
+            .min(1)
+            .max(365)
+            .optional()
+            .default(30)
+            .describe('Maximum age of reports in days'),
+        })
+      ),
       handler: async (ctx, input) => {
         const typedInput = input as { network: string; maxAgeInDays?: number };
         const response = await ctx.client.get('https://api.abuseipdb.com/api/v2/check-block', {

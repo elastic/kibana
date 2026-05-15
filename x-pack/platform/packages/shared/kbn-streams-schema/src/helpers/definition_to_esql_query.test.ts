@@ -44,13 +44,16 @@ const alwaysCondition: Condition = { always: {} };
 
 describe('definitionToESQLQuery', () => {
   describe('basic query structure', () => {
-    it('generates FROM parent view and WHERE clause', async () => {
+    it('generates FROM parent view with METADATA _source and WHERE clause', async () => {
       const result = await definitionToESQLQuery({
         definition: createDraftDefinition(),
         routingCondition: eqCondition,
       });
       expect(result).toBe(
-        ['FROM $.logs.otel', '| WHERE COALESCE(`service.name` == "nginx", FALSE)'].join('\n')
+        [
+          'FROM $.logs.otel METADATA _source',
+          '| WHERE COALESCE(`service.name` == "nginx", FALSE)',
+        ].join('\n')
       );
     });
 
@@ -59,7 +62,7 @@ describe('definitionToESQLQuery', () => {
         definition: createDraftDefinition(),
         routingCondition: alwaysCondition,
       });
-      expect(result).toBe('FROM $.logs.otel');
+      expect(result).toBe('FROM $.logs.otel METADATA _source');
     });
 
     it('supports compound AND routing conditions', async () => {
@@ -69,7 +72,7 @@ describe('definitionToESQLQuery', () => {
       });
       expect(result).toBe(
         [
-          'FROM $.logs.otel',
+          'FROM $.logs.otel METADATA _source',
           '| WHERE COALESCE(`service.name` == "nginx", FALSE) AND COALESCE(`log.level` == "error", FALSE)',
         ].join('\n')
       );
@@ -91,7 +94,10 @@ describe('definitionToESQLQuery', () => {
         routingCondition: eqCondition,
       });
       expect(result).toBe(
-        ['FROM $.logs.otel.nginx', '| WHERE COALESCE(`service.name` == "nginx", FALSE)'].join('\n')
+        [
+          'FROM $.logs.otel.nginx METADATA _source',
+          '| WHERE COALESCE(`service.name` == "nginx", FALSE)',
+        ].join('\n')
       );
     });
 
@@ -115,7 +121,7 @@ describe('definitionToESQLQuery', () => {
       });
       expect(result).toBe(
         [
-          'FROM $.logs.otel',
+          'FROM $.logs.otel METADATA _source',
           '| WHERE COALESCE(`service.name` == "nginx", FALSE)',
           '| WHERE NOT(old_field IS NULL)',
           '  | WHERE new_field IS NULL',
@@ -125,14 +131,101 @@ describe('definitionToESQLQuery', () => {
       );
     });
 
+    it('pre-casts own fields before processing to prevent type mismatches', async () => {
+      const result = await definitionToESQLQuery({
+        definition: createDraftDefinition({
+          steps: [{ action: 'set', to: 'attributes.flag', value: 'true' }],
+          fields: { 'attributes.flag': { type: 'boolean' } },
+        }),
+        routingCondition: eqCondition,
+      });
+      const lines = result.split('\n');
+      const preCastIdx = lines.findIndex((l) => l.includes('TO_BOOLEAN(`attributes.flag`)'));
+      expect(preCastIdx).not.toBe(-1);
+      expect(preCastIdx).toBeLessThan(
+        lines.findIndex((l, i) => i > preCastIdx && l.includes('attributes.flag'))
+      );
+    });
+
     it('produces only FROM + WHERE when steps are empty', async () => {
       const result = await definitionToESQLQuery({
         definition: createDraftDefinition({ steps: [] }),
         routingCondition: eqCondition,
       });
       expect(result).toBe(
-        ['FROM $.logs.otel', '| WHERE COALESCE(`service.name` == "nginx", FALSE)'].join('\n')
+        [
+          'FROM $.logs.otel METADATA _source',
+          '| WHERE COALESCE(`service.name` == "nginx", FALSE)',
+        ].join('\n')
       );
+    });
+
+    it('does not duplicate own-field casts when steps are empty', async () => {
+      const result = await definitionToESQLQuery({
+        definition: createDraftDefinition({
+          steps: [],
+          fields: { 'attributes.flag': { type: 'boolean' } },
+        }),
+        routingCondition: eqCondition,
+      });
+      const castCount = (result.match(/TO_BOOLEAN/g) || []).length;
+      expect(castCount).toBe(1);
+    });
+  });
+
+  describe('includeProcessing: false', () => {
+    it('omits processing steps and own-field casts to avoid polluting simulation samples', async () => {
+      const result = await definitionToESQLQuery({
+        definition: createDraftDefinition({
+          steps: [{ action: 'rename', from: 'old_field', to: 'new_field' }],
+          fields: { status_code: { type: 'long' } },
+        }),
+        routingCondition: eqCondition,
+        includeProcessing: false,
+      });
+      expect(result).toBe(
+        [
+          'FROM $.logs.otel METADATA _source',
+          '| WHERE COALESCE(`service.name` == "nginx", FALSE)',
+        ].join('\n')
+      );
+      expect(result).not.toContain('RENAME');
+      expect(result).not.toContain('old_field');
+      expect(result).not.toContain('TO_LONG');
+    });
+
+    it('casts all inherited non-keyword fields before routing and processing', async () => {
+      const result = await definitionToESQLQuery({
+        definition: createDraftDefinition({
+          steps: [{ action: 'rename', from: 'old_field', to: 'new_field' }],
+        }),
+        routingCondition: { field: 'attributes.secure', eq: 'true' },
+        inheritedFields: {
+          'attributes.secure': { type: 'boolean' },
+          http_status: { type: 'long' },
+          message: { type: 'keyword' },
+        },
+        includeProcessing: false,
+      });
+      expect(result).toContain('EVAL `attributes.secure` = TO_BOOLEAN(`attributes.secure`)');
+      expect(result).toContain('TO_LONG(http_status)');
+      expect(result).not.toContain('TO_STRING');
+      expect(result).toContain('WHERE');
+      expect(result).not.toContain('RENAME');
+    });
+
+    it('omits own-field casts even when routing is always', async () => {
+      const result = await definitionToESQLQuery({
+        definition: createDraftDefinition({
+          steps: [{ action: 'rename', from: 'old_field', to: 'new_field' }],
+          fields: { status_code: { type: 'long' } },
+        }),
+        routingCondition: alwaysCondition,
+        includeProcessing: false,
+      });
+      expect(result).toBe('FROM $.logs.otel METADATA _source');
+      expect(result).not.toContain('RENAME');
+      expect(result).not.toContain('TO_LONG');
     });
   });
 });

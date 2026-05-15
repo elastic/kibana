@@ -222,6 +222,15 @@ Expected one of:
           },
         }),
       };
+    case 'expectedAggregationArgument':
+      return {
+        message: i18n.translate('kbn-esql-language.esql.validation.expectedAggregationArgument', {
+          defaultMessage: 'This argument of {parentName} must be an aggregation function.',
+          values: {
+            parentName: out.parentName.toUpperCase(),
+          },
+        }),
+      };
     case 'unknownAggregateFunction':
       return {
         message: i18n.translate('kbn-esql-language.esql.validation.unknowAggregateFunction', {
@@ -433,29 +442,11 @@ Expected one of:
         }),
         type: 'error',
       };
-    case 'forkTooFewBranches':
-      return {
-        message: i18n.translate('kbn-esql-language.esql.validation.forkTooFewBranches', {
-          defaultMessage: '[FORK] Must include at least two branches.',
-        }),
-        type: 'error',
-      };
     case 'forkNotAllowedWithSubqueries':
       return {
         message: i18n.translate('kbn-esql-language.esql.validation.forkNotAllowedWithSubqueries', {
           defaultMessage: '[FORK] Command is not allowed inside a subquery.',
         }),
-        type: 'error',
-      };
-    case 'inlineStatsNotAllowedAfterLimit':
-      return {
-        message: i18n.translate(
-          'kbn-esql-language.esql.validation.inlineStatsNotAllowedAfterLimit',
-          {
-            defaultMessage:
-              '[INLINE STATS] Command is not allowed at the root level when the query contains subqueries.',
-          }
-        ),
         type: 'error',
       };
     case 'invalidSettingValue':
@@ -639,6 +630,14 @@ export const errors = {
       parentName,
     }),
 
+  expectedAggregationArgument: (
+    parentFn: ESQLFunction,
+    location: ESQLLocation = parentFn.location
+  ): ESQLMessage =>
+    errors.byId('expectedAggregationArgument', location, {
+      parentName: parentFn.name,
+    }),
+
   unknownAggFunction: (
     node: ESQLColumn | ESQLIdentifier,
     type: string = 'FieldAttribute'
@@ -754,14 +753,8 @@ export const errors = {
   forkTooManyBranches: (command: ESQLAstAllCommands): ESQLMessage =>
     errors.byId('forkTooManyBranches', command.location, {}),
 
-  forkTooFewBranches: (command: ESQLAstAllCommands): ESQLMessage =>
-    errors.byId('forkTooFewBranches', command.location, {}),
-
   forkNotAllowedWithSubqueries: (command: ESQLAstAllCommands): ESQLMessage =>
     errors.byId('forkNotAllowedWithSubqueries', command.location, {}),
-
-  inlineStatsNotAllowedAfterLimit: (command: ESQLAstAllCommands): ESQLMessage =>
-    errors.byId('inlineStatsNotAllowedAfterLimit', command.location, {}),
 };
 
 export const buildSignatureTypes = (sig: Signature) =>

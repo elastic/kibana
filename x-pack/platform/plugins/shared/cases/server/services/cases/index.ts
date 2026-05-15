@@ -103,6 +103,25 @@ import {
 
 const PartialCaseTransformedAttributesRt = getPartialCaseTransformedAttributesRt();
 
+/**
+ * `cases-comments.comment` is a text-analyzed field: we use `match_phrase` so the user's
+ * input has to appear as a contiguous sequence
+ *
+ * `cases-comments.alertId` and `cases-comments.eventId` are keyword fields used
+ * to look up an exact ID, so a regular `match` is the correct semantic
+ */
+const buildAttachmentSearchClause = (
+  field: string,
+  search: string
+): estypes.QueryDslQueryContainer => {
+  // TODO: add support for CASE_ATTACHMENT_SAVED_OBJECT
+  // https://github.com/elastic/security-team/issues/15066
+  if (field === `${CASE_COMMENT_SAVED_OBJECT}.comment`) {
+    return { match_phrase: { [field]: search } };
+  }
+  return { match: { [field]: search } };
+};
+
 export class CasesService {
   private readonly log: Logger;
   private readonly unsecuredSavedObjectsClient: SavedObjectsClientContract;
@@ -206,14 +225,7 @@ export class CasesService {
       namespaces,
       query: {
         bool: {
-          should: [
-            ...attachmentSearchFields.map((field) => ({
-              // use match instead of term to support non-keyword search for fields like comments
-              match: {
-                [field]: search,
-              },
-            })),
-          ],
+          should: attachmentSearchFields.map((field) => buildAttachmentSearchClause(field, search)),
         },
       },
     });

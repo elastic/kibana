@@ -15,10 +15,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
 import type { SaveModalDashboardProps } from '@kbn/presentation-util-plugin/public';
-import {
-  LazySavedObjectSaveModalDashboard,
-  withSuspense,
-} from '@kbn/presentation-util-plugin/public';
+import { SavedObjectSaveModalDashboard } from '@kbn/presentation-util-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useSelector } from 'react-redux';
 import type { ClientPluginsStart } from '../../../../../plugin';
@@ -27,8 +24,6 @@ import { selectOverviewView } from '../../../state';
 import type { OverviewMonitorsEmbeddableCustomState } from '../../../../embeddables/monitors_overview/monitors_embeddable_factory';
 import { SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE } from '../../../../../../common/embeddables/stats_overview/constants';
 import type { OverviewStatsEmbeddableCustomState } from '../../../../../../common/types';
-
-const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
 
 export const useAddToDashboard = ({
   type,

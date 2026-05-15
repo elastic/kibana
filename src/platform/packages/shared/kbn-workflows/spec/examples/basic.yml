@@ -10,7 +10,6 @@ workflow:
         every: 1
         unit: day
     - type: manual
-  inputs:
   consts:
     - name: jamf-server-url
   steps:

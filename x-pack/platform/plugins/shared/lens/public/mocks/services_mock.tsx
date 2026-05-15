@@ -63,7 +63,7 @@ export function makeAttributeService(doc: LensDocument): jest.Mocked<LensAttribu
   const attributeServiceMock: jest.Mocked<LensAttributesService> = {
     loadFromLibrary: jest.fn().mockResolvedValue(exactMatchDoc),
     saveToLibrary: jest.fn().mockResolvedValue(doc.savedObjectId),
-    checkForDuplicateTitle: jest.fn().mockResolvedValue(false),
+    hasLibraryItemWithTitle: jest.fn().mockResolvedValue(false),
   };
 
   return attributeServiceMock;

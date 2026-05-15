@@ -17,10 +17,10 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-import { HEALTH_STATUS_COLORS } from '../utils';
+import { getComponentAccentColor, getHealthStatusColor } from '../utils';
 
 import type { OTelGraphNodeData } from './constants';
-import { COMPONENT_TYPE_VIS_COLORS, COMPONENT_TYPE_LABELS } from './constants';
+import { COMPONENT_TYPE_LABELS } from './constants';
 
 type ComponentNodeType = Node<OTelGraphNodeData, 'component'>;
 
@@ -28,9 +28,7 @@ export const ComponentNode = memo(
   ({ data, selected, sourcePosition, targetPosition }: NodeProps<ComponentNodeType>) => {
     const { euiTheme } = useEuiTheme();
 
-    const accentColor =
-      euiTheme.colors.vis[COMPONENT_TYPE_VIS_COLORS[data.componentType]] ??
-      euiTheme.colors.mediumShade;
+    const accentColor = getComponentAccentColor(data.componentType, euiTheme);
 
     const containerStyles = css`
       background: ${euiTheme.colors.backgroundBasePlain};
@@ -75,7 +73,7 @@ export const ComponentNode = memo(
           <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
             {data.healthStatus && (
               <EuiFlexItem grow={false}>
-                <EuiHealth color={HEALTH_STATUS_COLORS[data.healthStatus]} />
+                <EuiHealth color={getHealthStatusColor(data.healthStatus, euiTheme)} />
               </EuiFlexItem>
             )}
             <EuiFlexItem>

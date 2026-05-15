@@ -254,7 +254,7 @@ function buildVisualizationState(config: MetricConfig): MetricVisualizationState
       ? { palette: fromColorByValueAPIToLensState(primaryMetric.color) }
       : {}),
     ...(primaryMetric.apply_color_to ? { applyColorTo: primaryMetric.apply_color_to } : {}),
-    subtitle: primaryMetric.subtitle ?? '',
+    ...(primaryMetric.subtitle ? { subtitle: primaryMetric.subtitle } : {}),
     showBar: false,
     ...convertStylingToStateFormat(layer.styling, !!secondaryMetric),
     ...(secondaryMetric
