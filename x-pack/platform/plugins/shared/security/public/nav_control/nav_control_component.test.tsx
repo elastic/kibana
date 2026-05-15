@@ -246,6 +246,7 @@ describe('SecurityNavControl', () => {
                       class="euiListItemLayout__prepend emotion-euiListItemLayout__prepend"
                     >
                       <span
+                        aria-hidden="true"
                         class="emotion-euiContextMenu__icon"
                         data-euiicon-type="user"
                       />
@@ -270,6 +271,7 @@ describe('SecurityNavControl', () => {
                       class="euiListItemLayout__prepend emotion-euiListItemLayout__prepend"
                     >
                       <span
+                        aria-hidden="true"
                         class="emotion-euiContextMenu__icon"
                         data-euiicon-type="empty"
                       />
@@ -294,6 +296,7 @@ describe('SecurityNavControl', () => {
                       class="euiListItemLayout__prepend emotion-euiListItemLayout__prepend"
                     >
                       <span
+                        aria-hidden="true"
                         class="emotion-euiContextMenu__icon"
                         data-euiicon-type="empty"
                       />
@@ -318,6 +321,7 @@ describe('SecurityNavControl', () => {
                       class="euiListItemLayout__prepend emotion-euiListItemLayout__prepend"
                     >
                       <span
+                        aria-hidden="true"
                         class="emotion-euiContextMenu__icon"
                         data-euiicon-type="empty"
                       />
@@ -343,6 +347,7 @@ describe('SecurityNavControl', () => {
                       class="euiListItemLayout__prepend emotion-euiListItemLayout__prepend"
                     >
                       <span
+                        aria-hidden="true"
                         class="emotion-euiContextMenu__icon"
                         data-euiicon-type="logOut"
                       />
@@ -430,6 +435,7 @@ describe('SecurityNavControl', () => {
                       class="euiListItemLayout__prepend emotion-euiListItemLayout__prepend"
                     >
                       <span
+                        aria-hidden="true"
                         class="emotion-euiContextMenu__icon"
                         data-euiicon-type="empty"
                       />
@@ -454,6 +460,7 @@ describe('SecurityNavControl', () => {
                       class="euiListItemLayout__prepend emotion-euiListItemLayout__prepend"
                     >
                       <span
+                        aria-hidden="true"
                         class="emotion-euiContextMenu__icon"
                         data-euiicon-type="empty"
                       />
@@ -478,6 +485,7 @@ describe('SecurityNavControl', () => {
                       class="euiListItemLayout__prepend emotion-euiListItemLayout__prepend"
                     >
                       <span
+                        aria-hidden="true"
                         class="emotion-euiContextMenu__icon"
                         data-euiicon-type="empty"
                       />
@@ -500,6 +508,7 @@ describe('SecurityNavControl', () => {
                       class="euiListItemLayout__prepend emotion-euiListItemLayout__prepend"
                     >
                       <span
+                        aria-hidden="true"
                         class="emotion-euiContextMenu__icon"
                         data-euiicon-type="logOut"
                       />
@@ -582,6 +591,7 @@ describe('SecurityNavControl', () => {
                       class="euiListItemLayout__prepend emotion-euiListItemLayout__prepend"
                     >
                       <span
+                        aria-hidden="true"
                         class="emotion-euiContextMenu__icon"
                         data-euiicon-type="logOut"
                       />
