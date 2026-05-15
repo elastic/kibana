@@ -32,7 +32,7 @@ export interface DeleteJobsOptions {
 
 export interface MlADJobsApi {
   /** Create an anomaly detection job via the Kibana internal API (registers in current space) */
-  create: (jobConfig: Record<string, unknown> & { job_id: string }) => Promise<void>;
+  create: <T extends { job_id: string }>(jobConfig: T) => Promise<void>;
   /** Delete anomaly detection jobs via the Kibana API */
   delete: (options: DeleteJobsOptions) => Promise<void>;
   /** Get all anomaly detection jobs via the Elasticsearch API */
@@ -89,6 +89,11 @@ export interface MlCalendarsApi {
 }
 
 export interface MlFiltersApi {
+  /** Create an ML filter via the Elasticsearch API */
+  create: (
+    filterId: string,
+    body: { description?: string; items: string[] }
+  ) => Promise<void>;
   /** Get all ML filters via the Elasticsearch API */
   getAll: () => Promise<estypes.MlFilter[]>;
   /** Get an ML filter by ID via the Elasticsearch API */
@@ -97,11 +102,6 @@ export interface MlFiltersApi {
   waitForFilterToExist: (filterId: string) => Promise<void>;
   /** Wait for a filter to be deleted by polling the Elasticsearch API */
   waitForFilterToNotExist: (filterId: string) => Promise<void>;
-  /** Create an ML filter via the Elasticsearch API */
-  create: (
-    filterId: string,
-    body: { description?: string; items: string[] }
-  ) => Promise<void>;
   /** Delete a filter via the Elasticsearch API */
   delete: (filterId: string) => Promise<void>;
   /** Delete all filters via the Elasticsearch API */
@@ -497,7 +497,7 @@ export const getMlApiHelper = (
   };
 
   const anomalyDetection: MlADJobsApi = {
-    async create(jobConfig: Record<string, unknown> & { job_id: string }): Promise<void> {
+    async create<T extends { job_id: string }>(jobConfig: T): Promise<void> {
       const { job_id: jobId, ...body } = jobConfig;
       await measurePerformanceAsync(log, `mlApi.anomalyDetection.create [${jobId}]`, async () => {
         // Use Kibana internal API so the job is registered in the current space.

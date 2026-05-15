@@ -62,9 +62,7 @@ apiTest.describe(
         await apiServices.ml.anomalyDetection.delete({ jobIds: [jobConfig.job_id] }).catch(() => {
           /* no-op if job doesn't exist */
         });
-        await apiServices.ml.anomalyDetection.create(
-          jobConfig as Record<string, unknown> & { job_id: string }
-        );
+        await apiServices.ml.anomalyDetection.create(jobConfig);
       }
     });
 
@@ -72,7 +70,7 @@ apiTest.describe(
       // Scoped cleanup: only delete resources created by this test
       for (const jobConfig of testJobConfigs) {
         await esClient.ml
-          .deleteJob({ job_id: jobConfig.job_id, force: true })
+          .deleteJob({ job_id: jobConfig.job_id, force: true, wait_for_completion: true })
           .catch((e: Error) =>
             log.debug(
               `[get_filters_stats] Failed to delete AD job ${jobConfig.job_id}: ${e.message}`
@@ -93,7 +91,7 @@ apiTest.describe(
       });
 
       expect(res).toHaveStatusCode(200);
-      expect((res.body as FilterStats[]).length).toBeGreaterThan(testFilters.length - 1);
+      expect((res.body as FilterStats[]).length).toBeGreaterThanOrEqual(testFilters.length);
 
       const statsMap = new Map((res.body as FilterStats[]).map((s) => [s.filter_id, s]));
 
