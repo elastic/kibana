@@ -140,6 +140,7 @@ describe('checking changes on all registered encrypted SO types', () => {
         "cloud-connect-api-key|1",
         "connector_token|2",
         "connector_token|1",
+        "fleet-cloud-onboarding-deployment|1",
         "fleet-fleet-server-host|2",
         "fleet-fleet-server-host|1",
         "fleet-uninstall-tokens|1",

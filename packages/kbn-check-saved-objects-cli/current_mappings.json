@@ -1162,53 +1162,6 @@
       }
     }
   },
-  "cloud-onboarding-deployment": {
-    "dynamic": false,
-    "properties": {
-      "attemptCount": {
-        "type": "integer"
-      },
-      "connectionId": {
-        "type": "keyword"
-      },
-      "createdAt": {
-        "type": "date"
-      },
-      "deploymentId": {
-        "type": "keyword"
-      },
-      "deploymentName": {
-        "type": "keyword"
-      },
-      "mechanisms": {
-        "type": "keyword"
-      },
-      "packagePolicyIds": {
-        "type": "keyword"
-      },
-      "provider": {
-        "type": "keyword"
-      },
-      "serviceVars": {
-        "type": "flattened"
-      },
-      "services": {
-        "type": "keyword"
-      },
-      "status": {
-        "type": "keyword"
-      },
-      "statusMessage": {
-        "type": "text"
-      },
-      "updatedAt": {
-        "type": "date"
-      },
-      "vars": {
-        "type": "flattened"
-      }
-    }
-  },
   "cloud-security-posture-settings": {
     "dynamic": false,
     "properties": {}

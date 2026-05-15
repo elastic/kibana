@@ -342,22 +342,6 @@
     "createdAt",
     "updatedAt"
   ],
-  "cloud-onboarding-deployment": [
-    "attemptCount",
-    "connectionId",
-    "createdAt",
-    "deploymentId",
-    "deploymentName",
-    "mechanisms",
-    "packagePolicyIds",
-    "provider",
-    "serviceVars",
-    "services",
-    "status",
-    "statusMessage",
-    "updatedAt",
-    "vars"
-  ],
   "cloud-security-posture-settings": [],
   "config": [
     "buildNum"
