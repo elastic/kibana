@@ -2,7 +2,7 @@ format_version: 3.7.0
 name: package_policy_upgrade
 title: Tests package policy upgrades
 description: This is a test package for upgrading package policies
-version: 0.9.0_stream_var_to_input
+version: 0.10.0-input-var-to-stream
 categories: []
 release: beta
 type: integration
@@ -24,10 +24,3 @@ policy_templates:
         title: Test Input
         description: Test Input
         enabled: true
-        vars:
-          - name: test_var
-            type: text
-            title: Test Var
-            show_user: true
-            migrate_from:
-              scope: stream
