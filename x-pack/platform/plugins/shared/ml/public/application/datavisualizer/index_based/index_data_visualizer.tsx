@@ -51,7 +51,11 @@ export const IndexDataVisualizerPage: FC<{ esql: boolean }> = ({ esql = false })
   const mlLocator = useMlLocator()!;
   const mlManagementLocator = useMlManagementLocator();
   const mlFeaturesDisabled = !isFullLicense();
-  getMlNodeCount(mlApi);
+
+  useEffect(() => {
+    getMlNodeCount(mlApi);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const [IndexDataVisualizer, setIndexDataVisualizer] = useState<IndexDataVisualizerSpec | null>(
     null
