@@ -746,12 +746,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
       description: 'Enable ES|QL views for wired streams',
     },
   },
-  'observability:streamsEnableOverviewPage': {
-    type: 'boolean',
-    _meta: {
-      description: 'Enable the Streams management Overview tab',
-    },
-  },
   'observability:streamsEnableDraftStreams': {
     type: 'boolean',
     _meta: {

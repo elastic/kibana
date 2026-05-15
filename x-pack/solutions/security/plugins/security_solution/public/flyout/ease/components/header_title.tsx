@@ -6,18 +6,18 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { buildDataTableRecord, type EsHitRecord } from '@kbn/discover-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RELATED_INTEGRATION } from '../../../detections/constants';
 import { IntegrationIcon } from './integration_icon';
 import { useBasicDataFromDetailsData } from '../../document_details/shared/hooks/use_basic_data_from_details_data';
 import { FlyoutTitle } from '../../../flyout_v2/shared/components/flyout_title';
-import { DocumentSeverity } from '../../../flyout_v2/document/components/severity';
-import { RiskScore } from '../../../flyout_v2/document/components/risk_score';
+import { DocumentSeverity } from '../../../flyout_v2/document/main/components/severity';
+import { RiskScore } from '../../../flyout_v2/document/main/components/risk_score';
 import { FlyoutHeaderBlock } from '../../../flyout_v2/shared/components/flyout_header_block';
 import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
-import { getAlertTitle } from '../../../flyout_v2/document/utils/get_header_title';
+import { getAlertTitle } from '../../../flyout_v2/document/main/utils/get_header_title';
 import { getField } from '../../document_details/shared/utils';
 import { useEaseDetailsContext } from '../context';
 
@@ -50,54 +50,44 @@ export const HeaderTitle = memo(() => {
       <EuiSpacer size="xs" />
       <FlyoutTitle data-test-subj={HEADER_TITLE_TEST_ID} title={title} iconType={'warning'} />
       <EuiSpacer size="m" />
-      <EuiPanel
+      <EuiFlexGroup
         data-test-subj={HEADER_SUMMARY_TEST_ID}
-        hasBorder={true}
-        hasShadow={false}
-        paddingSize="s"
+        direction="row"
+        gutterSize="s"
+        responsive={false}
       >
-        <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
-          <EuiFlexItem>
-            <FlyoutHeaderBlock
-              data-test-subj={HEADER_SEVERITY_TITLE_TEST_ID}
-              title={
-                <FormattedMessage
-                  id="xpack.securitySolution.flyout.ease.header.severityTitle"
-                  defaultMessage="Severity"
-                />
-              }
-            >
-              <DocumentSeverity hit={hit} />
-            </FlyoutHeaderBlock>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <FlyoutHeaderBlock
-              data-test-subj={HEADER_RISK_SCORE_TITLE_TEST_ID}
-              title={
-                <FormattedMessage
-                  id="xpack.securitySolution.flyout.ease.header.riskScoreTitle"
-                  defaultMessage="Risk score"
-                />
-              }
-            >
-              <RiskScore hit={hit} />
-            </FlyoutHeaderBlock>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <FlyoutHeaderBlock
-              data-test-subj={HEADER_INTEGRATION_TITLE_TEST_ID}
-              title={
-                <FormattedMessage
-                  id="xpack.securitySolution.flyout.right.header.integrationTitle"
-                  defaultMessage="Integration"
-                />
-              }
-            >
-              <IntegrationIcon integrationName={integrationName} />
-            </FlyoutHeaderBlock>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel>
+        <EuiFlexItem>
+          <FlyoutHeaderBlock
+            data-test-subj={HEADER_SEVERITY_TITLE_TEST_ID}
+            hasBorder
+            title={
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.ease.header.severityTitle"
+                defaultMessage="Severity"
+              />
+            }
+          >
+            <DocumentSeverity hit={hit} />
+          </FlyoutHeaderBlock>
+        </EuiFlexItem>
+        <EuiFlexItem data-test-subj={HEADER_RISK_SCORE_TITLE_TEST_ID}>
+          <RiskScore hit={hit} />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <FlyoutHeaderBlock
+            data-test-subj={HEADER_INTEGRATION_TITLE_TEST_ID}
+            hasBorder
+            title={
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.right.header.integrationTitle"
+                defaultMessage="Integration"
+              />
+            }
+          >
+            <IntegrationIcon integrationName={integrationName} />
+          </FlyoutHeaderBlock>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </>
   );
 });

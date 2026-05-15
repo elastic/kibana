@@ -376,6 +376,8 @@ actions:
                           id: a1b2c3d4-0001-4000-8000-000000000003
                           type: vis
                       pinned_panels: []
+                      access_control:
+                        access_mode: write_restricted
                       title: Web logs overview
                     meta:
                       created_at: "2026-04-13T10:00:00.000Z"
@@ -392,6 +394,7 @@ actions:
               -H "Content-Type: application/json" \
               -d '{
               "title": "Web logs overview",
+              "access_control": { "access_mode": "write_restricted" },
               "panels": [
                 {
                   "grid": {
@@ -1165,6 +1168,10 @@ actions:
         > This is a full replacement. Any panels not included in the request body are permanently
         > removed. To make targeted changes, retrieve the current state first with
         > GET /api/dashboards/{id}, apply your changes, and submit the full updated object.
+
+        You can optionally include `access_control.access_mode` to change the dashboard access mode.
+        If the authenticated user is not authorized to change access mode for the target dashboard,
+        the request returns a `403` response with a descriptive `message`.
       responses:
         '200':
           content:
