@@ -10,46 +10,17 @@ import { render, screen } from '@testing-library/react';
 import { DestinationRow } from './destination_row';
 
 jest.mock('../workflow_destination_link', () => ({
-  WorkflowDestinationLink: ({
-    id,
-    name,
-    isDraft,
-  }: {
-    id: string;
-    name?: string;
-    isDraft?: boolean;
-  }) => (
-    <span data-test-subj="mockWorkflowLink">
-      {name ?? id}
-      {isDraft ? ' (draft)' : ''}
-    </span>
+  WorkflowDestinationLink: ({ id }: { id: string }) => (
+    <span data-test-subj="mockWorkflowLink">{id}</span>
   ),
 }));
 
 describe('DestinationRow', () => {
   it('renders a workflow destination with WorkflowDestinationLink', () => {
-    render(<DestinationRow destination={{ type: 'workflow', id: 'wf-1' }} name="My Workflow" />);
-
-    expect(screen.getByText('My Workflow')).toBeDefined();
-    expect(screen.getByTestId('mockWorkflowLink')).toBeDefined();
-  });
-
-  it('passes isDraft to WorkflowDestinationLink', () => {
-    render(
-      <DestinationRow
-        destination={{ type: 'workflow', id: 'wf-1' }}
-        name="Draft Workflow"
-        isDraft={true}
-      />
-    );
-
-    expect(screen.getByText('Draft Workflow (draft)')).toBeDefined();
-  });
-
-  it('renders without name (falls back to id)', () => {
     render(<DestinationRow destination={{ type: 'workflow', id: 'wf-1' }} />);
 
     expect(screen.getByText('wf-1')).toBeDefined();
+    expect(screen.getByTestId('mockWorkflowLink')).toBeDefined();
   });
 
   it('returns null for unknown destination types', () => {
