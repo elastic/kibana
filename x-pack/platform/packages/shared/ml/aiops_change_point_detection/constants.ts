@@ -11,19 +11,19 @@
  */
 export const CHANGE_POINT_DETECTION_ENABLED = true;
 
-//
-// Do not change constant value - part of public REST APIs
-//
+// Do not change constant values - part of public REST APIs
 export const EMBEDDABLE_CHANGE_POINT_CHART_TYPE = 'aiops_change_point_chart' as const;
-
 export const CHANGE_POINT_CHART_DATA_VIEW_REF_NAME = 'aiopsChangePointChartDataViewId';
-
-export type EmbeddableChangePointType = typeof EMBEDDABLE_CHANGE_POINT_CHART_TYPE;
-
 export const CHANGE_POINT_DETECTION_VIEW_TYPE = {
   CHARTS: 'charts',
   TABLE: 'table',
 } as const;
 
+export type EmbeddableChangePointType = typeof EMBEDDABLE_CHANGE_POINT_CHART_TYPE;
+
 export type ChangePointDetectionViewType =
   (typeof CHANGE_POINT_DETECTION_VIEW_TYPE)[keyof typeof CHANGE_POINT_DETECTION_VIEW_TYPE];
+
+export const CHANGE_POINT_CHART_MAX_SERIES = 50;
+
+export const CHANGE_POINT_CHART_DEFAULT_SERIES = 6;

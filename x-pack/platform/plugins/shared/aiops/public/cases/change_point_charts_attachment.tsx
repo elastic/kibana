@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { memoize } from 'lodash';
+import { memoize, omit } from 'lodash';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import React from 'react';
 import type { UnifiedValueAttachmentViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
@@ -32,8 +32,26 @@ export const initComponent = memoize(
 
         const rawState = props.data.state as Record<string, unknown>;
         const timeRange = (rawState.time_range ?? rawState.timeRange) as TimeRange;
-        const inputProps = {
-          ...(rawState as unknown as ChangePointDetectionProps),
+        const rawUiState = omit(rawState, [
+          'aggregation_function',
+          'data_view_id',
+          'max_series_to_plot',
+          'metric_field',
+          'split_field',
+          'time_range',
+          'view_type',
+        ]);
+        const inputProps: ChangePointDetectionProps = {
+          ...(rawUiState as unknown as ChangePointDetectionProps),
+          viewType: (rawState.view_type ??
+            rawState.viewType) as ChangePointDetectionProps['viewType'],
+          dataViewId: (rawState.data_view_id ?? rawState.dataViewId) as string,
+          fn: (rawState.aggregation_function ?? rawState.fn) as ChangePointDetectionProps['fn'],
+          metricField: (rawState.metric_field ?? rawState.metricField) as string,
+          splitField: (rawState.split_field ?? rawState.splitField) as string | undefined,
+          maxSeriesToPlot: (rawState.max_series_to_plot ?? rawState.maxSeriesToPlot) as
+            | number
+            | undefined,
           timeRange,
         };
 
