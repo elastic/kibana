@@ -39,7 +39,7 @@ export const asCodePaginationResponseMetaSchema = schema.object(
     }),
     per_page: schema.number({
       meta: {
-        description: 'The number of results to return per page.',
+        description: 'The number of results returned per page.',
       },
       defaultValue: PAGINATION_DEFAULT_PER_PAGE,
       min: 1,
