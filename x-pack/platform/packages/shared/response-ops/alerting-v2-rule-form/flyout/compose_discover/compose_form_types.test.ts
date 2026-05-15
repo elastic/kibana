@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RuleQuery, ComposedQuery, StandaloneQuery } from './compose_form_types';
+import type { ComposedQuery, StandaloneQuery } from './compose_form_types';
 import { getBreachQuery, getRecoverQuery } from './compose_form_types';
 
 const BASE = 'FROM logs-*\n| STATS count = COUNT(*) BY host.name';

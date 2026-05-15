@@ -147,19 +147,13 @@ describe('transformQueryIn', () => {
 
 describe('transformQueryOut', () => {
   it('returns evaluation only for standalone signal with no recovery', () => {
-    const result = transformQueryOut(
-      { format: 'standalone', breach: 'FROM logs-*' },
-      'signal'
-    );
+    const result = transformQueryOut({ format: 'standalone', breach: 'FROM logs-*' }, 'signal');
     expect(result).toEqual({ evaluation: { query: { base: 'FROM logs-*' } } });
     expect(result.recovery_policy).toBeUndefined();
   });
 
   it('returns no_breach recovery for standalone alert with no recovery', () => {
-    const result = transformQueryOut(
-      { format: 'standalone', breach: 'FROM logs-*' },
-      'alert'
-    );
+    const result = transformQueryOut({ format: 'standalone', breach: 'FROM logs-*' }, 'alert');
     expect(result.evaluation).toEqual({ query: { base: 'FROM logs-*' } });
     expect(result.recovery_policy).toEqual({ type: 'no_breach' });
   });
@@ -325,9 +319,7 @@ describe('composeFormToCreateRequest', () => {
       stateTransition: { pendingCount: 5 },
     };
     const result = composeFormToCreateRequest(values);
-    expect(result.state_transition).toEqual(
-      expect.objectContaining({ pending_count: 5 })
-    );
+    expect(result.state_transition).toEqual(expect.objectContaining({ pending_count: 5 }));
   });
 
   it('maps state_transition for duration delay mode', () => {
