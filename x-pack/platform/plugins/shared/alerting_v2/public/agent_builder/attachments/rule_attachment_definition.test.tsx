@@ -133,7 +133,7 @@ describe('createRuleAttachmentDefinition', () => {
         <>{definition.renderInlineContent!({ attachment, isSidebar: false })}</>
       );
 
-      expect(getByText('proposed')).toBeDefined();
+      expect(getByText('draft')).toBeDefined();
     });
 
     it('shows enabled status when origin set and enabled is undefined (server default)', () => {

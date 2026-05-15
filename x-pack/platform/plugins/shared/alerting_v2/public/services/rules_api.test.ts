@@ -64,7 +64,9 @@ describe('RulesApi', () => {
 
       await api.getRule('rule-1');
 
-      expect(http.get).toHaveBeenCalledWith(`${ALERTING_V2_RULE_API_PATH}/rule-1`);
+      expect(http.get).toHaveBeenCalledWith(`${ALERTING_V2_RULE_API_PATH}/rule-1`, {
+        signal: undefined,
+      });
     });
   });
 

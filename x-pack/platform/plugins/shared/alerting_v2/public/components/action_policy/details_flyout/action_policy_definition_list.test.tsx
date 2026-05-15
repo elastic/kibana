@@ -18,6 +18,16 @@ const renderWithI18n = (props: ActionPolicyDefinitionListProps) =>
     </I18nProvider>
   );
 
+jest.mock('@kbn/core-di-browser', () => ({
+  CoreStart: (key: string) => key,
+  useService: (token: unknown) => {
+    if (token === 'http') {
+      return { basePath: { prepend: (path: string) => `/base${path}` } };
+    }
+    return {};
+  },
+}));
+
 jest.mock('./badge_list', () => ({
   BadgeList: ({ items }: { items: string[] }) => (
     <span data-test-subj="mockBadgeList">{items.join(', ')}</span>

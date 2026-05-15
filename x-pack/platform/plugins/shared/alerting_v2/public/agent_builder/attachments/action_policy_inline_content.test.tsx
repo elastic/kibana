@@ -28,9 +28,9 @@ const createAttachment = (overrides: { origin?: string; enabled?: boolean } = {}
 });
 
 describe('ActionPolicyInlineContent', () => {
-  it('shows proposed status when no origin', () => {
+  it('shows draft status when no origin', () => {
     render(<ActionPolicyInlineContent attachment={createAttachment()} isSidebar={false} />);
-    expect(screen.getByText('proposed')).toBeDefined();
+    expect(screen.getByText('draft')).toBeDefined();
   });
 
   it('shows enabled status when origin is set and enabled is undefined', () => {
