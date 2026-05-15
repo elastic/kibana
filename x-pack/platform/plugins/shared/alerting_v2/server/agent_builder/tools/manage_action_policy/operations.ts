@@ -18,6 +18,7 @@ import {
   AGGREGATE_STRATEGIES,
   STRATEGIES_REQUIRING_INTERVAL,
 } from '@kbn/alerting-v2-schemas';
+import { buildActionPolicyPayload } from '../../../../common/agent_builder/action_policy_mappers';
 
 // ─── Operation schemas ────────────────────────────────────────────────────────
 // Derived from shared alerting-v2-schemas so tool-level validation stays
@@ -172,7 +173,7 @@ export const executeActionPolicyOperations = (
         break;
 
       case 'validate': {
-        const payload = buildActionPolicyValidationPayload(next);
+        const payload = buildActionPolicyPayload(next);
         const result = createActionPolicyDataSchema.safeParse(payload);
         if (!result.success) {
           const issues = result.error.issues
@@ -202,16 +203,3 @@ export const executeActionPolicyOperations = (
   return next;
 };
 
-// ─── Validation payload ────────────────────────────────────────────────────────
-
-const buildActionPolicyValidationPayload = (data: Partial<ActionPolicyAttachmentData>) => ({
-  name: data.name ?? '',
-  type: data.type ?? 'global',
-  description: data.description ?? '',
-  destinations: data.destinations ?? [],
-  ...(data.matcher !== undefined ? { matcher: data.matcher ?? undefined } : {}),
-  ...(data.groupBy !== undefined ? { groupBy: data.groupBy ?? undefined } : {}),
-  ...(data.tags !== undefined ? { tags: data.tags ?? undefined } : {}),
-  ...(data.groupingMode !== undefined ? { groupingMode: data.groupingMode ?? undefined } : {}),
-  ...(data.throttle !== undefined ? { throttle: data.throttle ?? undefined } : {}),
-});

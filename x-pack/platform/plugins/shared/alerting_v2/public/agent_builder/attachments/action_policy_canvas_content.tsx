@@ -19,6 +19,7 @@ import { paths } from '../../constants';
 import { ActionPoliciesApi } from '../../services/action_policies_api';
 import { RulesApi } from '../../services/rules_api';
 import { WorkflowsApi } from '../../services/workflows_api';
+import { buildActionPolicyPayload } from '../../../common/agent_builder/action_policy_mappers';
 import type { ActionPolicyAttachment } from './action_policy_attachment_definition';
 
 const EMPTY_VALUE = '-';
@@ -219,14 +220,3 @@ const extractRuleIdFromMatcher = (matcher: string | null | undefined): string | 
   return match?.[1];
 };
 
-const buildActionPolicyPayload = (data: ActionPolicyCanvasData) => ({
-  name: data.name,
-  description: data.description ?? '',
-  type: data.type ?? 'global',
-  destinations: data.destinations ?? [],
-  ...(data.matcher !== undefined ? { matcher: data.matcher ?? undefined } : {}),
-  ...(data.groupBy !== undefined ? { groupBy: data.groupBy ?? undefined } : {}),
-  ...(data.tags !== undefined ? { tags: data.tags ?? undefined } : {}),
-  ...(data.groupingMode !== undefined ? { groupingMode: data.groupingMode ?? undefined } : {}),
-  ...(data.throttle !== undefined ? { throttle: data.throttle ?? undefined } : {}),
-});
