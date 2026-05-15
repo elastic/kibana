@@ -43,9 +43,10 @@ const ACTION_POLICY_MATCHER_ID = 'np-matcher';
 const ACTION_POLICY_GROUPBY_ID = 'np-groupby';
 
 /**
- * Test rule identifiers. Each rule is created via the public API in `beforeAll`
- * and immediately bulk-disabled so the rule executor task does not write extra
- * events into `.rule-events` while these tests are seeding synthetic events.
+ * Test rule identifiers. Each rule is upserted with these fixed ids in
+ * `beforeAll` and immediately bulk-disabled so the rule executor task does
+ * not write extra events into `.rule-events` while these tests seed
+ * synthetic events.
  *
  * Disabled rules are still returned by the dispatcher's `findByIds` call, so
  * they remain available for the dispatcher pipeline.
@@ -155,13 +156,14 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
     await apiServices.alertingV2.ruleEvents.cleanUp();
     await apiServices.alertingV2.alertActions.cleanUp();
 
-    // Test rules: created via the public API so their auth/api-key wiring
+    // Test rules: upserted via the public API so their auth/api-key wiring
     // matches production, then immediately disabled so the executor task
     // does not pollute `.rule-events` with breach events the dispatcher
     // would race against. The dispatcher's `findByIds` returns disabled
     // rules, so suppression behavior is unaffected.
     for (const ruleId of TEST_RULE_IDS) {
-      await apiServices.alertingV2.rules.create(
+      await apiServices.alertingV2.rules.upsert(
+        ruleId,
         buildCreateRuleData({
           metadata: { name: `Dispatcher test ${ruleId}` },
           schedule: { every: '1d' },
@@ -174,8 +176,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
           },
           recovery_policy: { type: 'no_breach' },
           state_transition: { pending_count: 0, recovering_count: 0 },
-        }),
-        { id: ruleId }
+        })
       );
     }
 
@@ -183,36 +184,27 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
 
     // Action policies: seed with the same logical IDs the dispatcher Jest
     // tests used so reasoning ("notified by policy np-1", etc.) carries over.
-    await apiServices.alertingV2.actionPolicies.create(
-      {
-        name: 'Test Policy',
-        description: 'Default test action policy',
-        destinations: [{ type: 'workflow', id: 'test-workflow' }],
-      },
-      { id: ACTION_POLICY_ID }
-    );
+    await apiServices.alertingV2.actionPolicies.upsert(ACTION_POLICY_ID, {
+      name: 'Test Policy',
+      description: 'Default test action policy',
+      destinations: [{ type: 'workflow', id: 'test-workflow' }],
+    });
 
-    await apiServices.alertingV2.actionPolicies.create(
-      {
-        name: 'Matcher Policy',
-        description: 'Only matches critical severity',
-        destinations: [{ type: 'workflow', id: 'test-workflow' }],
-        matcher: 'data.severity: "critical"',
-      },
-      { id: ACTION_POLICY_MATCHER_ID }
-    );
+    await apiServices.alertingV2.actionPolicies.upsert(ACTION_POLICY_MATCHER_ID, {
+      name: 'Matcher Policy',
+      description: 'Only matches critical severity',
+      destinations: [{ type: 'workflow', id: 'test-workflow' }],
+      matcher: 'data.severity: "critical"',
+    });
     await apiServices.alertingV2.actionPolicies.disable(ACTION_POLICY_MATCHER_ID);
 
-    await apiServices.alertingV2.actionPolicies.create(
-      {
-        name: 'GroupBy Policy',
-        description: 'Groups by host.name',
-        destinations: [{ type: 'workflow', id: 'test-workflow' }],
-        groupBy: ['data.host.name'],
-        groupingMode: 'per_field',
-      },
-      { id: ACTION_POLICY_GROUPBY_ID }
-    );
+    await apiServices.alertingV2.actionPolicies.upsert(ACTION_POLICY_GROUPBY_ID, {
+      name: 'GroupBy Policy',
+      description: 'Groups by host.name',
+      destinations: [{ type: 'workflow', id: 'test-workflow' }],
+      groupBy: ['data.host.name'],
+      groupingMode: 'per_field',
+    });
     await apiServices.alertingV2.actionPolicies.disable(ACTION_POLICY_GROUPBY_ID);
   });
 

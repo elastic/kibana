@@ -18,10 +18,8 @@ import { ALERTING_V2_ACTION_POLICY_API_PATH } from '@kbn/alerting-v2-constants';
 import { COMMON_HEADERS } from '../constants';
 
 export interface ActionPoliciesApiService {
-  create: (
-    data: CreateActionPolicyDataInput,
-    options?: { id?: string }
-  ) => Promise<ActionPolicyResponse>;
+  create: (data: CreateActionPolicyDataInput) => Promise<ActionPolicyResponse>;
+  upsert: (id: string, data: CreateActionPolicyDataInput) => Promise<ActionPolicyResponse>;
   get: (id: string) => Promise<ActionPolicyResponse>;
   list: (query?: Record<string, string | number | boolean>) => Promise<FindActionPoliciesResponse>;
   update: (params: {
@@ -84,14 +82,22 @@ export const getActionPoliciesApiService = ({
     });
 
   return {
-    create: (data, options) =>
+    create: (data) =>
       measurePerformanceAsync(log, 'actionPolicies.create', async () => {
-        const path = options?.id
-          ? `${ALERTING_V2_ACTION_POLICY_API_PATH}/${encodeURIComponent(options.id)}`
-          : ALERTING_V2_ACTION_POLICY_API_PATH;
         const response = await kbnClient.request<ActionPolicyResponse>({
           method: 'POST',
-          path,
+          path: ALERTING_V2_ACTION_POLICY_API_PATH,
+          headers: COMMON_HEADERS,
+          body: data,
+        });
+        return response.data;
+      }),
+
+    upsert: (id, data) =>
+      measurePerformanceAsync(log, 'actionPolicies.upsert', async () => {
+        const response = await kbnClient.request<ActionPolicyResponse>({
+          method: 'PUT',
+          path: `${ALERTING_V2_ACTION_POLICY_API_PATH}/${encodeURIComponent(id)}`,
           headers: COMMON_HEADERS,
           body: data,
         });
