@@ -255,12 +255,10 @@ export const enrichExceptionItemsWithOS = (
 export const retrieveAlertOsTypes = (alertData?: AlertData): OsTypeArray => {
   const osDefaults: OsTypeArray = ['windows', 'macos'];
   if (alertData != null) {
-    const osValue =
-      alertData?.agent?.type === 'endpoint' ? alertData.host?.os?.name : alertData.host?.os?.family;
-    const osString = Array.isArray(osValue)
-      ? osValue.find((value): value is string => typeof value === 'string')
-      : osValue;
-    const os = typeof osString === 'string' ? osString.toLowerCase() : undefined;
+    const os =
+      alertData?.agent?.type === 'endpoint'
+        ? alertData.host?.os?.name?.toLowerCase()
+        : alertData.host?.os?.family;
     if (os != null) {
       return osType.is(os) ? [os] : osDefaults;
     }
