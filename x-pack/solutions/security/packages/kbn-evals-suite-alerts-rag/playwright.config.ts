@@ -23,6 +23,4 @@ const config = createPlaywrightEvalsConfig({
   timeout: 30 * 60_000,
 });
 
-config.retries = 2;
-
 export default config;
