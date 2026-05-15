@@ -4,6 +4,9 @@ on:
   issue_comment:
     types: [created]
 
+permissions:
+  contents: read
+
 jobs:
   issue_alert:
     name: Alert on failed test

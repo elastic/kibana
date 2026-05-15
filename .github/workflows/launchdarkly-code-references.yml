@@ -5,6 +5,9 @@ on:
     branches:
       - 'main'
 
+permissions:
+  contents: read
+
 jobs:
   launchDarklyCodeReferences:
     name: LaunchDarkly Code References

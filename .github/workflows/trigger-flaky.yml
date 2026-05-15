@@ -5,6 +5,9 @@ on:
     types:
       - created
 
+permissions:
+  contents: read
+
 jobs:
   trigger_flaky:
     name: Trigger flaky test runner on /flaky comment

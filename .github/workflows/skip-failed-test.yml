@@ -5,6 +5,9 @@ on:
     types:
       - created
 
+permissions:
+  contents: read
+
 jobs:
   issue_commented:
     name: Skip failed test on comment
