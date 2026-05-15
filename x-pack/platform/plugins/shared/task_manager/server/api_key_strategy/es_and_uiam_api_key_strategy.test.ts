@@ -253,6 +253,36 @@ describe('EsAndUiamApiKeyStrategy', () => {
       expect(fields?.userScope.uiamApiKeyId).toBe('uiamId');
     });
 
+    test('skips UIAM grant when opts.onEsKey is true', async () => {
+      const { strategy, coreStart, mockUiam } = createStrategy();
+      const request = httpServerMock.createKibanaRequest({
+        headers: { authorization: 'ApiKey essu_uiam-credential' },
+      });
+      const basePath = coreStart.http.basePath;
+
+      const esKeyMap = new Map();
+      esKeyMap.set('task-1', {
+        apiKey: Buffer.from('esId:esSecret').toString('base64'),
+        apiKeyId: 'esId',
+      });
+      createApiKeyMock.mockResolvedValueOnce(esKeyMap);
+      requestHasApiKeyMock.mockReturnValue(false);
+      (coreStart.security.authc.getCurrentUser as jest.Mock).mockReturnValue({
+        username: 'testuser',
+      });
+
+      const tasks = [{ id: 'task-1', taskType: 'report', params: {}, state: {} }];
+      const result = await strategy.grantApiKeys(tasks, request, coreStart.security, basePath, {
+        onEsKey: true,
+      });
+
+      const fields = result.get('task-1');
+      expect(fields?.apiKey).toBe(Buffer.from('esId:esSecret').toString('base64'));
+      expect(fields?.uiamApiKey).toBeUndefined();
+      expect(fields?.userScope.uiamApiKeyId).toBeUndefined();
+      expect(mockUiam.grant).not.toHaveBeenCalled();
+    });
+
     test('grants only ES keys when request credential is not UIAM-compatible', async () => {
       const { strategy, coreStart, mockUiam, logger } = createStrategy();
       const request = httpServerMock.createKibanaRequest({

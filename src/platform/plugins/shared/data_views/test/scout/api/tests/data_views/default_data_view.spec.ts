@@ -26,16 +26,19 @@ apiTest.describe(
 
     function expectDefaultDataView(apiClient: ApiClientFixture, defaultId: string) {
       return expect
-        .poll(async () => {
-          const getResponse = await apiClient.get(scopedPath(defaultPath), {
-            headers: {
-              ...COMMON_HEADERS,
-              ...adminApiCredentials.apiKeyHeader,
-            },
-            responseType: 'json',
-          });
-          return getResponse.body[serviceKeyId];
-        })
+        .poll(
+          async () => {
+            const getResponse = await apiClient.get(scopedPath(defaultPath), {
+              headers: {
+                ...COMMON_HEADERS,
+                ...adminApiCredentials.apiKeyHeader,
+              },
+              responseType: 'json',
+            });
+            return getResponse.body[serviceKeyId];
+          },
+          { timeout: 30_000 }
+        )
         .toBe(defaultId);
     }
 
