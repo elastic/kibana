@@ -50,6 +50,7 @@ import {
   setTestStepModalOpenStepId,
 } from '../../../entities/workflows/store/workflow_detail/slice';
 import { ExecutionGraph } from '../../../features/debug_graph/execution_graph';
+import { useExportGraphPng } from '../../../features/workflow_visual_editor/use_export_graph_png';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 import { getTestRunTooltipContent } from '../../../shared/ui';
@@ -69,6 +70,27 @@ const WorkflowVisualEditor = React.lazy(() =>
     default: module.WorkflowVisualEditor,
   }))
 );
+
+function ExportPngButton({ isGraphView }: { isGraphView: boolean }) {
+  const { exportPng, isExporting } = useExportGraphPng();
+  const label = i18n.translate('workflows.workflowDetailEditor.tools.exportGraph', {
+    defaultMessage: 'Export graph as PNG',
+  });
+  return (
+    <EuiToolTip content={label} disableScreenReaderOutput>
+      <EuiButtonIcon
+        iconType="exportAction"
+        color="text"
+        size="s"
+        onClick={exportPng}
+        isLoading={isExporting}
+        isDisabled={!isGraphView || isExporting}
+        aria-label={label}
+        data-test-subj="workflowBottomBarExportPng"
+      />
+    </EuiToolTip>
+  );
+}
 
 interface WorkflowDetailEditorProps {
   highlightDiff?: boolean;
@@ -269,6 +291,13 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
 
   const toolsSlot = (
     <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false} wrap={false}>
+      {showGraph ? (
+        <EuiFlexItem grow={false}>
+          <ExportPngButton isGraphView={showGraph} />
+        </EuiFlexItem>
+      ) : (
+        <></>
+      )}
       <EuiFlexItem grow={false}>
         <EuiToolTip content={documentationLabel} disableScreenReaderOutput>
           <EuiButtonIcon

@@ -38,11 +38,6 @@ const EDGE_TYPES: EdgeTypes = {
   workflowEdge: WorkflowGraphEdge,
 };
 
-// `zIndex: -1` forces React Flow to render the edge layer strictly below
-// every node — without this, edges connected to parent (`foreachGroup`)
-// nodes can paint above the parent's body, so the trunk-stub overshoot
-// at the target arrow becomes visible through the foreach header.
-const DEFAULT_EDGE_OPTIONS = { type: 'workflowEdge', zIndex: -1 } as const;
 const PRO_OPTIONS = { hideAttribution: true } as const;
 // Predefined zoom for the initial graph view; user can zoom in/out from
 // the bar afterwards. Picked to match the readability shown in the design.
@@ -86,6 +81,36 @@ export interface WorkflowGraphCanvasProps {
    * interaction. Used by the workflow-list hover preview.
    */
   previewMode?: boolean;
+  /**
+   * When true the viewport is fitted to show all nodes on init, overriding the
+   * default centre-on-top behaviour. Does not imply previewMode.
+   */
+  fitView?: boolean;
+  /** Options forwarded to ReactFlow's fitView when `fitView` is true. */
+  fitViewOptions?: { padding?: number; minZoom?: number; maxZoom?: number };
+  /**
+   * Whether to render the minimap. Defaults to true when not in previewMode.
+   * Pass false to suppress it (e.g. for off-screen export canvases).
+   */
+  showMinimap?: boolean;
+  /**
+   * Whether to render the dot-pattern background and the coloured wrapper div
+   * background. Pass false for export canvases that need a transparent output.
+   */
+  showBackground?: boolean;
+  /**
+   * Override the z-index applied to every edge. The default (-1) keeps edges
+   * below nodes in the live editor, but breaks DOM-to-image capture because
+   * negative-z children are clipped by the stacking context. Pass 0 for
+   * off-screen export canvases.
+   */
+  edgeZIndex?: number;
+  /**
+   * Called once after ReactFlow has initialised and positioned the viewport
+   * (including any fitView). Useful for off-screen export canvases that need
+   * to know when the graph is ready to capture.
+   */
+  onReady?: () => void;
 }
 
 function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
@@ -107,7 +132,18 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
     renderStepIcon,
     direction = 'TB',
     previewMode = false,
+    fitView: fitViewProp = false,
+    fitViewOptions: fitViewOptionsProp,
+    showMinimap = true,
+    showBackground = true,
+    edgeZIndex = -1,
+    onReady,
   } = props;
+
+  const defaultEdgeOptions = useMemo(
+    () => ({ type: 'workflowEdge', zIndex: edgeZIndex }),
+    [edgeZIndex]
+  );
   const actions = useMemo(
     () => ({ onStepRun, canRunSteps, onOpenStepMenu, renderStepMenuItems, renderStepIcon }),
     [onStepRun, canRunSteps, onOpenStepMenu, renderStepMenuItems, renderStepIcon]
@@ -182,6 +218,13 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
   // that node; otherwise centre on the graph's top row.
   const handleInit = useCallback(
     (instance: ReactFlowInstance) => {
+      // When fitView is declarative (fitViewProp=true), ReactFlow handles the
+      // viewport positioning internally before firing onInit. Just signal ready.
+      if (fitViewProp) {
+        onReady?.();
+        return;
+      }
+
       if (decoratedNodes.length === 0) return;
       const widthOf = (n: (typeof decoratedNodes)[number]) =>
         typeof n.width === 'number' ? n.width : 200;
@@ -199,6 +242,7 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
             focusNode.position.y + heightOf(focusNode) / 2,
             { zoom: INITIAL_ZOOM, duration: 0 }
           );
+          onReady?.();
           return;
         }
       }
@@ -212,9 +256,27 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
         zoom: INITIAL_ZOOM,
         duration: 0,
       });
+      onReady?.();
     },
-    [decoratedNodes, focusStepId]
+    [decoratedNodes, fitViewProp, focusStepId, onReady]
   );
+
+  // In previewMode ReactFlow calls fitView internally (no handleInit); fire
+  // onReady after the first layout so callers know the canvas is capturable.
+  const onReadyRef = useRef(onReady);
+  onReadyRef.current = onReady;
+  const readyFiredRef = useRef(false);
+  useEffect(() => {
+    if (!previewMode || readyFiredRef.current || decoratedNodes.length === 0) return;
+    readyFiredRef.current = true;
+    // Two rAFs: first lets React commit the node positions, second lets
+    // ReactFlow's fitView animation settle before we signal ready.
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        onReadyRef.current?.();
+      });
+    });
+  }, [previewMode, decoratedNodes.length]);
 
   const wrapperRef = useRef<HTMLDivElement | null>(null);
 
@@ -228,7 +290,7 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
           position: 'relative',
           width: '100%',
           height: '100%',
-          background: euiTheme.colors.backgroundBaseSubdued,
+          background: showBackground ? euiTheme.colors.backgroundBaseSubdued : 'transparent',
         }}
         data-test-subj="workflowGraphCanvas"
       >
@@ -267,12 +329,18 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
             onNodesChange={onNodesChange}
             nodeTypes={NODE_TYPES}
             edgeTypes={EDGE_TYPES}
-            defaultEdgeOptions={DEFAULT_EDGE_OPTIONS}
+            defaultEdgeOptions={defaultEdgeOptions}
             proOptions={PRO_OPTIONS}
             colorMode={colorMode}
             onInit={previewMode ? undefined : handleInit}
-            fitView={previewMode}
-            fitViewOptions={previewMode ? { padding: 0.08, minZoom: 0.2, maxZoom: 2 } : undefined}
+            fitView={previewMode || fitViewProp}
+            fitViewOptions={
+              previewMode
+                ? { padding: 0.08, minZoom: 0.2, maxZoom: 2 }
+                : fitViewProp
+                ? fitViewOptionsProp
+                : undefined
+            }
             onNodeClick={previewMode ? undefined : handleNodeClick}
             onPaneClick={previewMode ? undefined : handlePaneClick}
             nodesDraggable={false}
@@ -292,11 +360,13 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
             zoomOnDoubleClick={false}
             translateExtent={previewMode ? undefined : translateExtent}
           >
-            <Background
-              bgColor={euiTheme.colors.backgroundBaseSubdued}
-              color={euiTheme.colors.textSubdued}
-            />
-            {!previewMode && (
+            {showBackground && (
+              <Background
+                bgColor={euiTheme.colors.backgroundBaseSubdued}
+                color={euiTheme.colors.textSubdued}
+              />
+            )}
+            {!previewMode && showMinimap && (
               <MiniMap
                 pannable
                 zoomable
