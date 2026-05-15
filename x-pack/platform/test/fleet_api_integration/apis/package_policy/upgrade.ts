@@ -1279,22 +1279,6 @@ export default function (providerContext: FtrProviderContext) {
     describe('when upgrading to a version where an input-level variable moves to stream scope', function () {
       withTestPackage('package_policy_upgrade', '0.10.0-input-var-to-stream');
 
-      before(async function () {
-        await supertest
-          .post('/api/fleet/epm/packages/package_policy_upgrade/0.9.0-stream-var-to-input')
-          .set('kbn-xsrf', 'xxxx')
-          .send({ force: true })
-          .expect(200);
-      });
-
-      after(async function () {
-        await supertest
-          .delete('/api/fleet/epm/packages/package_policy_upgrade/0.9.0-stream-var-to-input')
-          .set('kbn-xsrf', 'xxxx')
-          .send({ force: true })
-          .expect(200);
-      });
-
       beforeEach(async function () {
         const { body: agentPolicyResponse } = await supertest
           .post(`/api/fleet/agent_policies`)
