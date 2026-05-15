@@ -118,6 +118,18 @@ describe('MetricsGrid', () => {
     expect(charts).toHaveLength(metricItems.length);
   });
 
+  it('passes syncCursor and syncTooltips={false} to each chart for cross-panel cursor sync', () => {
+    renderMetricsGrid();
+
+    metricItems.forEach((_, index) => {
+      expect(Chart).toHaveBeenNthCalledWith(
+        index + 1,
+        expect.objectContaining({ syncCursor: true, syncTooltips: false }),
+        expect.anything()
+      );
+    });
+  });
+
   it('passes the correct size prop', () => {
     const { rerender } = render(
       <MetricsExperienceStateProvider profileId="test-profile">
