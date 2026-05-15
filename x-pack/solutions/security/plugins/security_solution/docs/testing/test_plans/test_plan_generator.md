@@ -170,7 +170,7 @@ The skill and its reference files were added to the repository by the Engineerin
 
 The files live at:
 ```
-x-pack/solutions/security/.agents/skills/test-plan-generator/
+x-pack/solutions/security/plugins/security_solution/.agents/skills/test-plan-generator/
 ├── SKILL.md                              # Agent instructions
 ├── references/
 │   ├── common-mistakes.md                # Quality checklist reviewed before every save
@@ -345,7 +345,7 @@ The agent will detect the existing test plan and ask whether you want to check i
 No — `gh` CLI is the primary and recommended method. The GitHub MCP is optional and in practice causes hanging issues when enabled during complex agent sessions. Install and authenticate `gh` CLI (Step 4) and you will have everything you need. The GitHub MCP can be left disabled.
 
 **Who maintains the skill?**
-The skill files live in the repository under `x-pack/solutions/security/.agents/skills/test-plan-generator/`. Any team member can propose changes via PR, just like any other code file.
+The skill files live in the repository under `x-pack/solutions/security/plugins/security_solution/.agents/skills/test-plan-generator/`. Any team member can propose changes via PR, just like any other code file.
 
 **Can I run this without being inside the repository folder in Cursor?**
 No — the skill only loads when you have the repository open in Cursor. The MCP servers work globally, but the skill is repo-specific.
