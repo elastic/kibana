@@ -369,7 +369,7 @@ describe('saved_visualize_utils', () => {
         [
           {
             limit: 10,
-            search: 'ahoythere',
+            search: 'ahoythere*',
             type: ['bazdoc', 'bar', 'visualization', 'foo'],
           },
         ],
