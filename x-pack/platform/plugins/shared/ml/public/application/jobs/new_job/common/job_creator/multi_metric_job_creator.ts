@@ -294,7 +294,7 @@ export class MultiMetricJobCreator extends JobCreator {
     }
     const sources = Array.from(sourcesSet);
 
-    if (sources.length > 1) {
+    if (sources.length) {
       const dateHistogram = cloneDeep(datafeedAggregations.buckets.date_histogram)!;
       delete datafeedAggregations.buckets.date_histogram;
       datafeedAggregations.buckets.composite = {
@@ -309,23 +309,6 @@ export class MultiMetricJobCreator extends JobCreator {
             [s]: { terms: { field: s } },
           })),
         ],
-      };
-    } else if (this.splitField) {
-      const aggregations = cloneDeep(datafeedAggregations.buckets.aggregations);
-      const timeField = this._job_config.data_description.time_field!;
-      const timeFieldAgg = aggregations[timeField];
-      delete aggregations[timeField];
-
-      const fieldName = this.splitField.name;
-      datafeedAggregations.buckets.aggregations = {
-        [timeField]: timeFieldAgg,
-        [fieldName]: {
-          terms: {
-            field: fieldName,
-            size: 1000,
-          },
-          aggregations,
-        },
       };
     }
   }
