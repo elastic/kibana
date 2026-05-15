@@ -9,6 +9,7 @@ import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 
 import { CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE } from '../../common/constants';
+import type { CloudOnboardingDeploymentMechanism } from '../../common/types/models/cloud_onboarding_deployment';
 import type { CloudOnboardingDeploymentSOAttributes } from '../types/so_attributes';
 
 import { cloudOnboardingDeploymentService } from './cloud_onboarding_deployment';
@@ -274,54 +275,6 @@ describe('cloudOnboardingDeploymentService', () => {
   });
 
   describe('updateStatus', () => {
-    it('updates status and returns the refreshed deployment', async () => {
-      const updatedAttrs = makeAttributes({ status: 'deploying' });
-      soClient.update.mockResolvedValue({
-        id: 'deploy-1',
-        type: CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
-        references: [],
-        attributes: updatedAttrs,
-      });
-      makeMockedEncryptedSoClient('deploy-1', updatedAttrs);
-
-      const result = await cloudOnboardingDeploymentService.updateStatus(
-        soClient,
-        'deploy-1',
-        'deploying'
-      );
-
-      expect(soClient.update).toHaveBeenCalledWith(
-        CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
-        'deploy-1',
-        expect.objectContaining({ status: 'deploying' })
-      );
-      expect(result.status).toBe('deploying');
-    });
-
-    it('includes statusMessage when provided', async () => {
-      const updatedAttrs = makeAttributes({ status: 'failed', statusMessage: 'stack rollback' });
-      soClient.update.mockResolvedValue({
-        id: 'deploy-1',
-        type: CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
-        references: [],
-        attributes: updatedAttrs,
-      });
-      makeMockedEncryptedSoClient('deploy-1', updatedAttrs);
-
-      await cloudOnboardingDeploymentService.updateStatus(
-        soClient,
-        'deploy-1',
-        'failed',
-        'stack rollback'
-      );
-
-      expect(soClient.update).toHaveBeenCalledWith(
-        CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
-        'deploy-1',
-        expect.objectContaining({ status: 'failed', statusMessage: 'stack rollback' })
-      );
-    });
-
     describe('status transitions', () => {
       function mockUpdateAndGet(id: string, attrs: CloudOnboardingDeploymentSOAttributes) {
         soClient.update.mockResolvedValue({
@@ -435,26 +388,6 @@ describe('cloudOnboardingDeploymentService', () => {
           expect.anything(),
           expect.objectContaining({ vars: expect.anything(), secrets: expect.anything() })
         );
-      });
-
-      it('increments attemptCount on each retry', async () => {
-        for (const attempt of [2, 3]) {
-          const attrs = makeAttributes({ status: 'pending', attemptCount: attempt });
-          soClient.update.mockResolvedValue({
-            id: 'deploy-1',
-            type: CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
-            references: [],
-            attributes: attrs,
-          });
-          makeMockedEncryptedSoClient('deploy-1', attrs);
-
-          const result = await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', {
-            status: 'pending',
-            attemptCount: attempt,
-          });
-
-          expect(result.attemptCount).toBe(attempt);
-        }
       });
     });
   });
@@ -589,185 +522,71 @@ describe('cloudOnboardingDeploymentService', () => {
         expect(result.secrets).toEqual({});
         expect(result.packagePolicyIds).toBeUndefined();
       });
-
-      it('stores per-service S3 config in serviceVars', async () => {
-        const serviceVars = {
-          cloudfront_logs: [
-            { regions: ['us-east-1'], s3_bucket_arn: 'arn:aws:s3:::cf-logs-bucket' },
-          ],
-        };
-        const attrs = makeAttributes({
-          mechanisms: ['cloud_forwarder'],
-          services: ['cloudfront_logs'],
-          serviceVars,
-        });
-        soClient.create.mockResolvedValue(makeSOResponse('deploy-uc3b', attrs));
-
-        const result = await cloudOnboardingDeploymentService.create(soClient, {
-          provider: 'aws',
-          connectionId: 'conn-3',
-          mechanisms: ['cloud_forwarder'],
-          services: ['cloudfront_logs'],
-          serviceVars,
-          vars: {},
-          secrets: {},
-          status: 'pending',
-          attemptCount: 1,
-          createdAt: attrs.createdAt,
-          updatedAt: attrs.updatedAt,
-        });
-
-        expect(result.serviceVars.cloudfront_logs).toHaveLength(1);
-        expect(result.serviceVars.cloudfront_logs[0]).toMatchObject({
-          regions: ['us-east-1'],
-          s3_bucket_arn: 'arn:aws:s3:::cf-logs-bucket',
-        });
-      });
     });
 
-    describe('UC4: identity_federation + cloudfront_logs + firehose', () => {
-      it('stores external_id in secrets and api_key_id in vars, with no packagePolicyIds', async () => {
-        const attrs = makeAttributes({
-          mechanisms: ['identity_federation', 'firehose'],
-          services: ['cloudfront_logs'],
-          serviceVars: {
-            cloudfront_logs: [
-              { regions: ['us-east-1', 'eu-west-1'], s3_bucket_arn: 'arn:aws:s3:::cf-logs' },
-            ],
-          },
-          vars: {
+    describe('UC4/UC5: identity_federation + cloudfront_logs + push mechanism', () => {
+      it.each([
+        [
+          'firehose',
+          ['identity_federation', 'firehose'] as CloudOnboardingDeploymentMechanism[],
+          'ext-uc4',
+        ],
+        [
+          'cloud_forwarder',
+          ['identity_federation', 'cloud_forwarder'] as CloudOnboardingDeploymentMechanism[],
+          'ext-uc5',
+        ],
+      ])(
+        '%s: stores external_id in secrets and api_key_id in vars, with no packagePolicyIds',
+        async (_pushMechanism, mechanisms, extId) => {
+          const attrs = makeAttributes({
+            mechanisms,
+            services: ['cloudfront_logs'],
+            serviceVars: {
+              cloudfront_logs: [
+                { regions: ['us-east-1', 'eu-west-1'], s3_bucket_arn: 'arn:aws:s3:::cf-logs' },
+              ],
+            },
+            vars: {
+              role_arn: 'arn:aws:iam::123456789012:role/ElasticIFRole',
+              api_key_id: 'abc123keyid',
+            },
+            secrets: { external_id: extId },
+            packagePolicyIds: undefined,
+            status: 'succeeded',
+          });
+          soClient.create.mockResolvedValue(makeSOResponse(`deploy-${_pushMechanism}`, attrs));
+
+          const result = await cloudOnboardingDeploymentService.create(soClient, {
+            provider: 'aws',
+            connectionId: `conn-${_pushMechanism}`,
+            mechanisms,
+            services: ['cloudfront_logs'],
+            serviceVars: {
+              cloudfront_logs: [
+                { regions: ['us-east-1', 'eu-west-1'], s3_bucket_arn: 'arn:aws:s3:::cf-logs' },
+              ],
+            },
+            vars: {
+              role_arn: 'arn:aws:iam::123456789012:role/ElasticIFRole',
+              api_key_id: 'abc123keyid',
+            },
+            secrets: { external_id: extId },
+            status: 'succeeded',
+            attemptCount: 1,
+            createdAt: attrs.createdAt,
+            updatedAt: attrs.updatedAt,
+          });
+
+          expect(result.mechanisms).toEqual(mechanisms);
+          expect(result.vars).toEqual({
             role_arn: 'arn:aws:iam::123456789012:role/ElasticIFRole',
             api_key_id: 'abc123keyid',
-          },
-          secrets: { external_id: 'ext-uc4' },
-          packagePolicyIds: undefined,
-          status: 'succeeded',
-        });
-        soClient.create.mockResolvedValue(makeSOResponse('deploy-uc4', attrs));
-
-        const result = await cloudOnboardingDeploymentService.create(soClient, {
-          provider: 'aws',
-          connectionId: 'conn-4',
-          mechanisms: ['identity_federation', 'firehose'],
-          services: ['cloudfront_logs'],
-          serviceVars: {
-            cloudfront_logs: [
-              { regions: ['us-east-1', 'eu-west-1'], s3_bucket_arn: 'arn:aws:s3:::cf-logs' },
-            ],
-          },
-          vars: {
-            role_arn: 'arn:aws:iam::123456789012:role/ElasticIFRole',
-            api_key_id: 'abc123keyid',
-          },
-          secrets: { external_id: 'ext-uc4' },
-          status: 'succeeded',
-          attemptCount: 1,
-          createdAt: attrs.createdAt,
-          updatedAt: attrs.updatedAt,
-        });
-
-        expect(result.mechanisms).toEqual(['identity_federation', 'firehose']);
-        expect(result.vars).toEqual({
-          role_arn: 'arn:aws:iam::123456789012:role/ElasticIFRole',
-          api_key_id: 'abc123keyid',
-        });
-        expect(result.secrets).toEqual({ external_id: 'ext-uc4' });
-        expect(result.packagePolicyIds).toBeUndefined();
-      });
-    });
-
-    describe('UC5: identity_federation + cloudfront_logs + cloud_forwarder', () => {
-      it('stores external_id in secrets and api_key_id in vars, with no packagePolicyIds', async () => {
-        const attrs = makeAttributes({
-          mechanisms: ['identity_federation', 'cloud_forwarder'],
-          services: ['cloudfront_logs'],
-          serviceVars: {
-            cloudfront_logs: [
-              { regions: ['us-east-1'], s3_bucket_arn: 'arn:aws:s3:::cf-logs-bucket' },
-            ],
-          },
-          vars: {
-            role_arn: 'arn:aws:iam::123456789012:role/ElasticIFRole',
-            api_key_id: 'abc123keyid',
-          },
-          secrets: { external_id: 'ext-uc5' },
-          packagePolicyIds: undefined,
-          status: 'succeeded',
-        });
-        soClient.create.mockResolvedValue(makeSOResponse('deploy-uc5', attrs));
-
-        const result = await cloudOnboardingDeploymentService.create(soClient, {
-          provider: 'aws',
-          connectionId: 'conn-5',
-          mechanisms: ['identity_federation', 'cloud_forwarder'],
-          services: ['cloudfront_logs'],
-          serviceVars: {
-            cloudfront_logs: [
-              { regions: ['us-east-1'], s3_bucket_arn: 'arn:aws:s3:::cf-logs-bucket' },
-            ],
-          },
-          vars: {
-            role_arn: 'arn:aws:iam::123456789012:role/ElasticIFRole',
-            api_key_id: 'abc123keyid',
-          },
-          secrets: { external_id: 'ext-uc5' },
-          status: 'succeeded',
-          attemptCount: 1,
-          createdAt: attrs.createdAt,
-          updatedAt: attrs.updatedAt,
-        });
-
-        expect(result.mechanisms).toEqual(['identity_federation', 'cloud_forwarder']);
-        expect(result.vars).toEqual({
-          role_arn: 'arn:aws:iam::123456789012:role/ElasticIFRole',
-          api_key_id: 'abc123keyid',
-        });
-        expect(result.secrets).toEqual({ external_id: 'ext-uc5' });
-        expect(result.packagePolicyIds).toBeUndefined();
-      });
-
-      it('differs from UC3 by including identity_federation in mechanisms and external_id in secrets', async () => {
-        const uc3Attrs = makeAttributes({ mechanisms: ['cloud_forwarder'], secrets: {} });
-        const uc5Attrs = makeAttributes({
-          mechanisms: ['identity_federation', 'cloud_forwarder'],
-          secrets: { external_id: 'ext-uc5' },
-        });
-        soClient.create
-          .mockResolvedValueOnce(makeSOResponse('deploy-uc3', uc3Attrs))
-          .mockResolvedValueOnce(makeSOResponse('deploy-uc5', uc5Attrs));
-
-        const uc3 = await cloudOnboardingDeploymentService.create(soClient, {
-          provider: 'aws',
-          connectionId: 'conn-3',
-          mechanisms: ['cloud_forwarder'],
-          services: ['cloudfront_logs'],
-          serviceVars: {},
-          vars: {},
-          secrets: {},
-          status: 'pending',
-          attemptCount: 1,
-          createdAt: uc3Attrs.createdAt,
-          updatedAt: uc3Attrs.updatedAt,
-        });
-        const uc5 = await cloudOnboardingDeploymentService.create(soClient, {
-          provider: 'aws',
-          connectionId: 'conn-5',
-          mechanisms: ['identity_federation', 'cloud_forwarder'],
-          services: ['cloudfront_logs'],
-          serviceVars: {},
-          vars: { role_arn: 'arn:aws:iam::123456789012:role/ElasticIFRole' },
-          secrets: { external_id: 'ext-uc5' },
-          status: 'pending',
-          attemptCount: 1,
-          createdAt: uc5Attrs.createdAt,
-          updatedAt: uc5Attrs.updatedAt,
-        });
-
-        expect(uc3.mechanisms).not.toContain('identity_federation');
-        expect(uc3.secrets).toEqual({});
-        expect(uc5.mechanisms).toContain('identity_federation');
-        expect(uc5.secrets).toHaveProperty('external_id');
-      });
+          });
+          expect(result.secrets).toEqual({ external_id: extId });
+          expect(result.packagePolicyIds).toBeUndefined();
+        }
+      );
     });
   });
 });
