@@ -22,12 +22,9 @@ export type Api = DefaultEmbeddableApi<{}>;
 
 export const factory: EmbeddablePublicDefinition<{}, Api> = {
   type: FILTER_DEBUGGER_EMBEDDABLE_ID,
-  getDisplaySettings: () => ({
-    placementSettings: {
-      width: 48,
-      height: 12,
-    },
-  }),
+  getPlacementHints: () => {
+    return { width: 48, height: 12 };
+  },
   buildEmbeddable: async ({ finalizeApi, parentApi }) => {
     const api = finalizeApi({
       serializeState: () => ({}),

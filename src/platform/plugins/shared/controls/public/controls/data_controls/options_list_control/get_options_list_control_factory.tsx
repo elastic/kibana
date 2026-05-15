@@ -59,7 +59,7 @@ import {
   makeSelection,
   selectAll,
 } from './utils/selection_utils';
-import { CONTROL_DISPLAY_SETTINGS } from '../../constants';
+import { getPlacementHints, LAYOUT_CONSTRAINTS } from '../../constants';
 
 export const getOptionsListControlFactory = (): EmbeddablePublicDefinition<
   OptionsListDSLControlState,
@@ -67,7 +67,8 @@ export const getOptionsListControlFactory = (): EmbeddablePublicDefinition<
 > => {
   return {
     type: OPTIONS_LIST_CONTROL,
-    getDisplaySettings: () => CONTROL_DISPLAY_SETTINGS,
+    getPlacementHints,
+    layoutConstraints: LAYOUT_CONSTRAINTS,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const state = initialState;
 

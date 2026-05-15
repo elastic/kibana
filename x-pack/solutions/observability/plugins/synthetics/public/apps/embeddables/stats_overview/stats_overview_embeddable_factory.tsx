@@ -62,6 +62,7 @@ export const getStatsOverviewEmbeddableFactory = (
 ) => {
   const factory: EmbeddablePublicDefinition<OverviewStatsEmbeddableState, StatsOverviewApi> = {
     type: SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE,
+    getPlacementHints: () => ({ width: 10, height: 8 }),
     buildEmbeddable: async ({
       initializeDrilldownsManager,
       initialState,

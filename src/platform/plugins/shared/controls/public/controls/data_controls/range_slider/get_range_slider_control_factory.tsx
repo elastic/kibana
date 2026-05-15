@@ -35,7 +35,7 @@ import { RangeSliderStrings } from './range_slider_strings';
 import type { RangeSliderControlApi } from './types';
 import { editorComparators, initializeEditorStateManager } from './editor_state_manager';
 import { buildFilter } from './utils/filter_utils';
-import { CONTROL_DISPLAY_SETTINGS } from '../../constants';
+import { getPlacementHints, LAYOUT_CONSTRAINTS } from '../../constants';
 
 export const getRangesliderControlFactory = (): EmbeddablePublicDefinition<
   RangeSliderControlState,
@@ -43,7 +43,8 @@ export const getRangesliderControlFactory = (): EmbeddablePublicDefinition<
 > => {
   return {
     type: RANGE_SLIDER_CONTROL,
-    getDisplaySettings: () => CONTROL_DISPLAY_SETTINGS,
+    getPlacementHints,
+    layoutConstraints: LAYOUT_CONSTRAINTS,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const state = initialState;
       const loadingMinMax$ = new BehaviorSubject<boolean>(false);

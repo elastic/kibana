@@ -37,7 +37,7 @@ import type {
   ESQLOptionsListComponentApi,
   ESQLOptionsListRuntimeState,
 } from './types';
-import { CONTROL_DISPLAY_SETTINGS } from '../constants';
+import { getPlacementHints, LAYOUT_CONSTRAINTS } from '../constants';
 
 export const getESQLControlFactory = <
   State extends OptionsListESQLControlState = OptionsListESQLControlState
@@ -47,7 +47,8 @@ export const getESQLControlFactory = <
 > => {
   return {
     type: ESQL_CONTROL,
-    getDisplaySettings: () => CONTROL_DISPLAY_SETTINGS,
+    getPlacementHints,
+    layoutConstraints: LAYOUT_CONSTRAINTS,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const state = initialState;
 

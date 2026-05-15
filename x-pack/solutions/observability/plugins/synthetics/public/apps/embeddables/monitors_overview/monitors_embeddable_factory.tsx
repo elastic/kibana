@@ -64,6 +64,7 @@ export const getMonitorsEmbeddableFactory = (
 ) => {
   const factory: EmbeddablePublicDefinition<OverviewMonitorsEmbeddableState, StatusOverviewApi> = {
     type: SYNTHETICS_MONITORS_EMBEDDABLE,
+    getPlacementHints: () => ({ width: 30, height: 12 }),
     buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
       const [coreStart, pluginStart] = await getStartServices();
 
