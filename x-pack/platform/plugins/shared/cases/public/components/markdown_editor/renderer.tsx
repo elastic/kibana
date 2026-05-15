@@ -6,9 +6,10 @@
  */
 
 import React, { memo, useMemo } from 'react';
+import unified from 'unified';
 import { cloneDeep } from 'lodash/fp';
 import type { EuiMarkdownFormatProps, EuiLinkAnchorProps } from '@elastic/eui';
-import { EuiMarkdownFormat } from '@elastic/eui';
+import { EuiMarkdownFormat, EuiText } from '@elastic/eui';
 import { MarkdownLink } from './markdown_link';
 import { usePlugins } from './use_plugins';
 
@@ -44,6 +45,30 @@ const MarkdownRendererComponent: React.FC<Props> = ({ children, disableLinks, te
     () => withDisabledLinks(disableLinks),
     [disableLinks]
   );
+
+  // Pre-validate markdown parsing in our own try/catch. The try/catch inside
+  // EuiMarkdownFormat (in the DLL bundle) can be corrupted by the SWC minifier
+  // (compress.passes:2 bug), so errors escape and crash the page. By running
+  // processSync here (in cases.plugin.js, which uses webpack's minifier), we
+  // get a reliable try/catch that falls back to plain text on failure.
+  const parseError = useMemo(() => {
+    try {
+      unified().use(parsingPlugins).use(processingPluginList).processSync(children);
+      return null;
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error('[Cases:MarkdownRenderer] pre-validation caught error, falling back:', e);
+      return true;
+    }
+  }, [children, parsingPlugins, processingPluginList]);
+
+  if (parseError) {
+    return (
+      <EuiText size={textSize} data-test-subj="markdown-renderer-fallback">
+        <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{children}</pre>
+      </EuiText>
+    );
+  }
 
   return (
     <EuiMarkdownFormat
