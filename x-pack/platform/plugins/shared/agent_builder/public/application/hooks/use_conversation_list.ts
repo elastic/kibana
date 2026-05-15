@@ -9,7 +9,10 @@ import { useQuery } from '@kbn/react-query';
 import { queryKeys } from '../query_keys';
 import { useAgentBuilderServices } from './use_agent_builder_service';
 
-export const useConversationList = ({ agentId }: { agentId?: string } = {}) => {
+export const useConversationList = ({
+  agentId,
+  staleTime,
+}: { agentId?: string; staleTime?: number } = {}) => {
   const { conversationsService } = useAgentBuilderServices();
 
   const {
@@ -21,6 +24,7 @@ export const useConversationList = ({ agentId }: { agentId?: string } = {}) => {
     queryFn: () => {
       return conversationsService.list({ agentId });
     },
+    staleTime,
   });
 
   return {
