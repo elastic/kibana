@@ -308,6 +308,7 @@ fileGroups:
     - server/**/*
     - scripts/**/*
     - test/scout/**/*
+    - test/scout_cps_local/**/*
     - test/scout_security_attacks_alignment/**/*
     - common/**/*.json
     - server/**/*.json

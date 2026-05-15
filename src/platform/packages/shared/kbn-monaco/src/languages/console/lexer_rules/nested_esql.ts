@@ -15,9 +15,17 @@ import {
 import { languageTolerantRules } from './constants';
 import { remapStringsToNestedState } from './utils/remap_strings_to_nested_state';
 import type { monaco } from '../../../monaco_imports';
+import { ESQL_LANG_ID } from '../../esql/lib/constants';
 
 /*
- * This rule is used inside json root to start an esql highlighting sequence
+ * This rule is used inside json root to start an esql highlighting sequence.
+ * Triple-quoted strings use nextEmbedded to delegate to the @elastic/monaco-esql grammar.
+ * Single-quoted strings cannot use nextEmbedded because JSON escape sequences (e.g. `\"`)
+ * cause the embedded grammar to be popped and re-entered from its root state. The
+ * @elastic/monaco-esql root starts in firstCommandName, which only matches /[a-zA-Z]+/ —
+ * no underscores — so any identifier after an escaped quote would be miscoloured. Instead,
+ * single-quoted strings use a direct state transition and inline the ES|QL rules so that
+ * escape sequences are handled by the outer Console grammar before ES|QL rules ever see them.
  */
 export const buildEsqlStartRule = (tripleQuotes: boolean, esqlRoot: string = 'esql_root') => {
   return [
@@ -27,18 +35,18 @@ export const buildEsqlStartRule = (tripleQuotes: boolean, esqlRoot: string = 'es
       'whitespace',
       'punctuation.colon',
       'whitespace',
-      {
-        token: 'punctuation',
-        next: tripleQuotes ? `@${esqlRoot}_triple_quotes` : `@${esqlRoot}_single_quotes`,
-      },
+      tripleQuotes
+        ? { token: 'punctuation', next: `${esqlRoot}_triple_quotes`, nextEmbedded: ESQL_LANG_ID }
+        : { token: 'punctuation', next: `@${esqlRoot}_single_quotes` },
     ],
   ];
 };
 
 /*
- * This function creates a group of rules needed for sql highlighting in console.
- * It reuses the lexer rules from the "esql" language, but since not all rules are referenced in the root
- * tokenizer and to avoid conflicts with existing console rules, only selected rules are used.
+ * This function creates a group of rules needed for esql highlighting in console.
+ * It reuses the tokenizer rules from esql_lexer_rules (a flat, self-contained set
+ * compatible with the Console tokenizer context), but keywords and functions are
+ * sourced from @kbn/esql-language so they stay in sync automatically.
  */
 export const buildEsqlRules = (
   esqlRoot: string = 'esql_root'
@@ -51,21 +59,13 @@ export const buildEsqlRules = (
 
   return {
     [`${esqlRoot}_triple_quotes`]: [
-      // the rule to end esql highlighting and get back to the previous tokenizer state
-      [
-        /"""/,
-        {
-          token: 'punctuation',
-          next: '@pop',
-        },
-      ],
-      ...languageTolerantRules,
-      ...root,
-      ...numbers,
-      ...remappedStrings,
-      [/./, 'text'],
+      // End esql highlighting and return to the previous tokenizer state.
+      [/"""/, { token: 'punctuation', next: '@pop', nextEmbedded: '@pop' }],
     ],
     [`${esqlRoot}_single_quotes`]: [
+      // A JSON-escaped quoted string: \"...\". Tokenised as a string so it renders
+      // the same colour as double-quoted strings in triple-quote mode.
+      [/\\"[^"]*\\"/, 'string'],
       [/@escapes/, 'string.escape'],
       // the rule to end esql highlighting and get back to the previous tokenizer state
       [

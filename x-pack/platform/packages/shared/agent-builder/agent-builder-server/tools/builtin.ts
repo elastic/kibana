@@ -108,6 +108,11 @@ export interface BuiltInToolSpecificConfig<
    */
   availability?: ToolAvailabilityConfig;
   /**
+   * When true, this tool is only available when experimental features are enabled.
+   * Defaults to false.
+   */
+  experimental?: boolean;
+  /**
    * Optional tool call policy to control tool call confirmation behavior
    */
   confirmation?: ToolConfirmationPolicy<TParams>;
@@ -141,7 +146,7 @@ export type ToolReturnSummarizerFn = (
 export interface BuiltinToolDefinition<
   RunInput extends ZodObject<any> = ZodObject<any>,
   TResult extends ToolResult = ToolResult
-> extends Omit<ToolDefinition, 'type' | 'readonly' | 'configuration'>,
+> extends Omit<ToolDefinition, 'type' | 'readonly' | 'configuration' | 'experimental'>,
     BuiltInToolSpecificConfig<z.infer<RunInput>> {
   /**
    * built-in tool types
@@ -162,7 +167,7 @@ export interface BuiltinToolDefinition<
   availability?: ToolAvailabilityConfig;
 }
 
-type StaticToolRegistrationMixin<T extends ToolDefinition> = Omit<T, 'readonly'> &
+type StaticToolRegistrationMixin<T extends ToolDefinition> = Omit<T, 'readonly' | 'experimental'> &
   BuiltInToolSpecificConfig;
 
 export type StaticEsqlTool = StaticToolRegistrationMixin<EsqlToolDefinition>;

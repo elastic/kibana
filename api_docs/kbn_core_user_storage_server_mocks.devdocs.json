@@ -1,0 +1,84 @@
+{
+  "id": "@kbn/core-user-storage-server-mocks",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-user-storage-server-mocks",
+        "id": "def-server.userStorageServiceMock",
+        "type": "Object",
+        "tags": [],
+        "label": "userStorageServiceMock",
+        "description": [],
+        "path": "src/core/packages/user-storage/server-mocks/index.ts",
+        "lineNumber": 16,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-user-storage-server-mocks",
+            "id": "def-server.userStorageServiceMock.createSetupContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createSetupContract",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "UserStorageServiceSetup",
+              ">"
+            ],
+            "path": "src/core/packages/user-storage/server-mocks/index.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-user-storage-server-mocks",
+            "id": "def-server.userStorageServiceMock.createStartContract",
+            "type": "Function",
+            "tags": [],
+            "label": "createStartContract",
+            "description": [],
+            "signature": [
+              "() => jest.Mocked<",
+              "UserStorageServiceStart",
+              ">"
+            ],
+            "path": "src/core/packages/user-storage/server-mocks/index.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

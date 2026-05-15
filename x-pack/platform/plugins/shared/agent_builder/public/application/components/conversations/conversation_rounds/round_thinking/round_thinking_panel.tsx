@@ -69,7 +69,6 @@ export const RoundThinkingPanel = ({
     return Array.isArray(id) ? id[0] : id;
   }, [rawRound.trace_id]);
 
-  const TraceWaterfallComponent = services.plugins.evals?.TraceWaterfall;
   const addToDatasetAction = services.plugins.evals?.getAddToDatasetAction
     ? services.plugins.evals.getAddToDatasetAction({
         initialExample: {
@@ -88,7 +87,7 @@ export const RoundThinkingPanel = ({
     : null;
   const isExperimentalEnabled = useExperimentalFeatures();
 
-  const showTraceButton = isExperimentalEnabled && !!TraceWaterfallComponent && !!traceId;
+  const showTraceButton = isExperimentalEnabled && !!traceId;
   const showAddToDatasetButton = isExperimentalEnabled && addToDatasetAction != null;
 
   const shadowStyles = useEuiShadow('l');
@@ -180,12 +179,8 @@ export const RoundThinkingPanel = ({
         )}
       </EuiFlexGroup>
       <RoundFlyout isOpen={showFlyout} onClose={toggleFlyout} rawRound={rawRound} />
-      {showTraceFlyout && TraceWaterfallComponent && traceId && (
-        <TraceFlyout
-          traceId={traceId}
-          onClose={() => setShowTraceFlyout(false)}
-          TraceWaterfall={TraceWaterfallComponent}
-        />
+      {showTraceFlyout && traceId && (
+        <TraceFlyout traceId={traceId} onClose={() => setShowTraceFlyout(false)} />
       )}
     </>
   );

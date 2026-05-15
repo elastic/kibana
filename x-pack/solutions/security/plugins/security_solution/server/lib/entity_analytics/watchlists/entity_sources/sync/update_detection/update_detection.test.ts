@@ -105,7 +105,7 @@ describe('Watchlist update detection service', () => {
       const esClient = elasticsearchServiceMock.createElasticsearchClient();
 
       const correlationMap: CorrelationMap = new Map([
-        ['jdoe', { euid: 'user:jdoe', entityType: 'user' as const }],
+        ['jdoe', { euids: ['user:jdoe'], entityType: 'user' as const }],
       ]);
 
       esClient.search.mockImplementation((params?: SearchRequest) => {

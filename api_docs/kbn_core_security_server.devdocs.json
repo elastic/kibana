@@ -572,7 +572,7 @@
           "(params: any) => boolean"
         ],
         "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-        "lineNumber": 267,
+        "lineNumber": 294,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -588,7 +588,7 @@
               "any"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 267,
+            "lineNumber": 294,
             "columnNumber": 42,
             "deprecated": false,
             "trackAdoption": false,
@@ -781,7 +781,7 @@
           "NativeAPIKeysType"
         ],
         "path": "src/core/packages/security/server/src/authentication/api_keys/index.ts",
-        "lineNumber": 46,
+        "lineNumber": 48,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -798,7 +798,7 @@
               " | null"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/index.ts",
-            "lineNumber": 47,
+            "lineNumber": 49,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -819,7 +819,7 @@
           "NativeAPIKeysWithContextType"
         ],
         "path": "src/core/packages/security/server/src/authentication/api_keys/index.ts",
-        "lineNumber": 50,
+        "lineNumber": 52,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -836,7 +836,7 @@
               " | null"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/index.ts",
-            "lineNumber": 51,
+            "lineNumber": 53,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1396,6 +1396,119 @@
             ],
             "path": "src/core/packages/security/server/src/request_handler_context.ts",
             "lineNumber": 22,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-security-server",
+        "id": "def-server.CloneAPIKeyParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "CloneAPIKeyParams",
+        "description": [],
+        "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
+        "lineNumber": 174,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.CloneAPIKeyParams.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
+            "lineNumber": 175,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.CloneAPIKeyParams.metadata",
+            "type": "Object",
+            "tags": [],
+            "label": "metadata",
+            "description": [],
+            "signature": [
+              "Record<string, unknown> | undefined"
+            ],
+            "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
+            "lineNumber": 176,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-security-server",
+        "id": "def-server.CloneAPIKeyResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "CloneAPIKeyResult",
+        "description": [],
+        "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
+        "lineNumber": 179,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.CloneAPIKeyResult.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
+            "lineNumber": 180,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.CloneAPIKeyResult.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
+            "lineNumber": 181,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.CloneAPIKeyResult.api_key",
+            "type": "string",
+            "tags": [],
+            "label": "api_key",
+            "description": [],
+            "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
+            "lineNumber": 182,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.CloneAPIKeyResult.encoded",
+            "type": "string",
+            "tags": [],
+            "label": "encoded",
+            "description": [],
+            "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
+            "lineNumber": 183,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1984,7 +2097,7 @@
         "label": "CreateCrossClusterAPIKeyParams",
         "description": [],
         "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-        "lineNumber": 126,
+        "lineNumber": 141,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2000,7 +2113,7 @@
               "\"cross_cluster\""
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 127,
+            "lineNumber": 142,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2016,7 +2129,7 @@
               "string | undefined"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 128,
+            "lineNumber": 143,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2029,7 +2142,7 @@
             "label": "name",
             "description": [],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 129,
+            "lineNumber": 144,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2045,7 +2158,7 @@
               "{ [key: string]: any; } | undefined"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 130,
+            "lineNumber": 145,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2061,7 +2174,7 @@
               "{ search?: { names: string[]; query?: unknown; field_security?: unknown; allow_restricted_indices?: boolean | undefined; }[] | undefined; replication?: { names: string[]; }[] | undefined; }"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 131,
+            "lineNumber": 146,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2077,7 +2190,7 @@
         "label": "CreateRestAPIKeyParams",
         "description": [],
         "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-        "lineNumber": 104,
+        "lineNumber": 119,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2093,7 +2206,7 @@
               "\"rest\" | undefined"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 105,
+            "lineNumber": 120,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2109,7 +2222,7 @@
               "string | undefined"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 106,
+            "lineNumber": 121,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2122,7 +2235,7 @@
             "label": "name",
             "description": [],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 107,
+            "lineNumber": 122,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2138,7 +2251,7 @@
               "{ [x: string]: { [key: string]: any; }; }"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 108,
+            "lineNumber": 123,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2154,7 +2267,7 @@
               "{ [key: string]: any; } | undefined"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 109,
+            "lineNumber": 124,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2170,7 +2283,7 @@
         "label": "CreateRestAPIKeyWithKibanaPrivilegesParams",
         "description": [],
         "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-        "lineNumber": 112,
+        "lineNumber": 127,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2186,7 +2299,7 @@
               "\"rest\" | undefined"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 113,
+            "lineNumber": 128,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2202,7 +2315,7 @@
               "string | undefined"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 114,
+            "lineNumber": 129,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2215,7 +2328,7 @@
             "label": "name",
             "description": [],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 115,
+            "lineNumber": 130,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2231,7 +2344,7 @@
               "{ [key: string]: any; } | undefined"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 116,
+            "lineNumber": 131,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2251,7 +2364,7 @@
               "; }; }"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 117,
+            "lineNumber": 132,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2476,7 +2589,7 @@
         "label": "GrantAPIKeyResult",
         "description": [],
         "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-        "lineNumber": 144,
+        "lineNumber": 159,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2491,7 +2604,7 @@
               "\nUnique id for this API key"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 145,
+            "lineNumber": 160,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2506,7 +2619,7 @@
               "\nName for this API key"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 149,
+            "lineNumber": 164,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2521,7 +2634,7 @@
               "\nGenerated API key"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 153,
+            "lineNumber": 168,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2590,7 +2703,7 @@
           "\nThe return value when invalidating an API key in Elasticsearch."
         ],
         "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-        "lineNumber": 184,
+        "lineNumber": 211,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2608,7 +2721,7 @@
               "string[]"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 188,
+            "lineNumber": 215,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2626,7 +2739,7 @@
               "string[]"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 192,
+            "lineNumber": 219,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2641,7 +2754,7 @@
               "\nThe number of errors that were encountered when invalidating the API keys."
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 196,
+            "lineNumber": 223,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2659,7 +2772,7 @@
               "{ type?: string | undefined; code?: string | undefined; reason?: string | null | undefined; caused_by?: { type?: string | undefined; reason?: string | null | undefined; } | undefined; }[] | undefined"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 200,
+            "lineNumber": 227,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -2677,7 +2790,7 @@
           "\nRepresents the params for invalidating multiple API keys"
         ],
         "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-        "lineNumber": 174,
+        "lineNumber": 201,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -2695,7 +2808,7 @@
               "string[]"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 178,
+            "lineNumber": 205,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3148,6 +3261,74 @@
                 "columnNumber": 28,
                 "deprecated": false,
                 "docsReferencedTypeName": "InvalidateAPIKeysParams",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.NativeAPIKeysType.cloneAsInternalUser",
+            "type": "Function",
+            "tags": [],
+            "label": "cloneAsInternalUser",
+            "description": [
+              "\nClones an existing API key using the internal user, creating a new independent key\nwith the same role descriptors as the source. The source key credential is extracted\nfrom the request's Authorization header.\n\nRequires the `clone_api_key` cluster privilege (available to `kibana_system`).\n"
+            ],
+            "signature": [
+              "(request: ",
+              "KibanaRequest",
+              "<unknown, unknown, unknown, any>, cloneParams: ",
+              "CloneAPIKeyParams",
+              ") => Promise<",
+              "CloneAPIKeyResult",
+              " | null>"
+            ],
+            "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
+            "lineNumber": 93,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-security-server",
+                "id": "def-server.NativeAPIKeysType.cloneAsInternalUser.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "request",
+                "description": [
+                  "Request instance containing the source API key in the Authorization header."
+                ],
+                "signature": [
+                  "KibanaRequest",
+                  "<unknown, unknown, unknown, any>"
+                ],
+                "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
+                "lineNumber": 104,
+                "columnNumber": 5,
+                "deprecated": false,
+                "docsReferencedTypeName": "KibanaRequest",
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-security-server",
+                "id": "def-server.NativeAPIKeysType.cloneAsInternalUser.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "cloneParams",
+                "description": [
+                  "Clone operation parameters."
+                ],
+                "signature": [
+                  "CloneAPIKeyParams"
+                ],
+                "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
+                "lineNumber": 105,
+                "columnNumber": 5,
+                "deprecated": false,
+                "docsReferencedTypeName": "CloneAPIKeyParams",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -5024,7 +5205,7 @@
         "label": "UpdateCrossClusterAPIKeyParams",
         "description": [],
         "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-        "lineNumber": 235,
+        "lineNumber": 262,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -5037,7 +5218,7 @@
             "label": "id",
             "description": [],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 236,
+            "lineNumber": 263,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5053,7 +5234,7 @@
               "\"cross_cluster\""
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 237,
+            "lineNumber": 264,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5069,7 +5250,7 @@
               "string | undefined"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 238,
+            "lineNumber": 265,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5085,7 +5266,7 @@
               "{ [key: string]: any; } | undefined"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 239,
+            "lineNumber": 266,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5101,7 +5282,7 @@
               "{ search?: { names: string[]; query?: unknown; field_security?: unknown; allow_restricted_indices?: boolean | undefined; }[] | undefined; replication?: { names: string[]; }[] | undefined; }"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 240,
+            "lineNumber": 267,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5117,7 +5298,7 @@
         "label": "UpdateRestAPIKeyParams",
         "description": [],
         "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-        "lineNumber": 227,
+        "lineNumber": 254,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -5130,7 +5311,7 @@
             "label": "id",
             "description": [],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 228,
+            "lineNumber": 255,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5146,7 +5327,7 @@
               "\"rest\" | undefined"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 229,
+            "lineNumber": 256,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5162,7 +5343,7 @@
               "string | undefined"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 230,
+            "lineNumber": 257,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5178,7 +5359,7 @@
               "{ [x: string]: { [key: string]: unknown; }; }"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 231,
+            "lineNumber": 258,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5194,7 +5375,7 @@
               "{ [key: string]: any; } | undefined"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 232,
+            "lineNumber": 259,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5210,7 +5391,7 @@
         "label": "UpdateRestAPIKeyWithKibanaPrivilegesParams",
         "description": [],
         "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-        "lineNumber": 253,
+        "lineNumber": 280,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -5223,7 +5404,7 @@
             "label": "id",
             "description": [],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 254,
+            "lineNumber": 281,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5239,7 +5420,7 @@
               "\"rest\" | undefined"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 255,
+            "lineNumber": 282,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5255,7 +5436,7 @@
               "string | undefined"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 256,
+            "lineNumber": 283,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5271,7 +5452,7 @@
               "{ [key: string]: any; } | undefined"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 257,
+            "lineNumber": 284,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5291,7 +5472,7 @@
               "; }; }"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 258,
+            "lineNumber": 285,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5419,7 +5600,7 @@
           "\nRepresents the parameters for validating API Key credentials."
         ],
         "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-        "lineNumber": 159,
+        "lineNumber": 186,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -5434,7 +5615,7 @@
               "\nUnique id for this API key"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 163,
+            "lineNumber": 190,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5449,7 +5630,7 @@
               "\nGenerated API Key (secret)"
             ],
             "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-            "lineNumber": 168,
+            "lineNumber": 195,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -5559,7 +5740,7 @@
           "CreateCrossClusterAPIKeyParams"
         ],
         "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-        "lineNumber": 94,
+        "lineNumber": 109,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -5578,7 +5759,7 @@
           "SecurityCreateApiKeyResponse"
         ],
         "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-        "lineNumber": 99,
+        "lineNumber": 114,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -5637,7 +5818,7 @@
           "UpdateRestAPIKeyWithKibanaPrivilegesParams"
         ],
         "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-        "lineNumber": 219,
+        "lineNumber": 246,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -5656,7 +5837,7 @@
           "SecurityUpdateApiKeyResponse"
         ],
         "path": "src/core/packages/security/server/src/authentication/api_keys/api_keys.ts",
-        "lineNumber": 214,
+        "lineNumber": 241,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

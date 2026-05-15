@@ -35,7 +35,7 @@
           "SavedObjectTypeMigrationInfo"
         ],
         "path": "src/core/packages/test-helpers/so-type-serializer/src/extract_migration_info.ts",
-        "lineNumber": 54,
+        "lineNumber": 55,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -52,7 +52,7 @@
               "<any>"
             ],
             "path": "src/core/packages/test-helpers/so-type-serializer/src/extract_migration_info.ts",
-            "lineNumber": 54,
+            "lineNumber": 55,
             "columnNumber": 38,
             "deprecated": false,
             "docsReferencedTypeName": "SavedObjectsType",
@@ -76,7 +76,7 @@
           "<any>) => string"
         ],
         "path": "src/core/packages/test-helpers/so-type-serializer/src/get_migration_hash.ts",
-        "lineNumber": 129,
+        "lineNumber": 130,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -93,7 +93,7 @@
               "<any>"
             ],
             "path": "src/core/packages/test-helpers/so-type-serializer/src/get_migration_hash.ts",
-            "lineNumber": 129,
+            "lineNumber": 130,
             "columnNumber": 34,
             "deprecated": false,
             "docsReferencedTypeName": "SavedObjectsType",
@@ -117,7 +117,7 @@
           "<any>) => SavedObjectTypeMigrationHashes"
         ],
         "path": "src/core/packages/test-helpers/so-type-serializer/src/get_migration_hash.ts",
-        "lineNumber": 26,
+        "lineNumber": 27,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -134,7 +134,7 @@
               "<any>"
             ],
             "path": "src/core/packages/test-helpers/so-type-serializer/src/get_migration_hash.ts",
-            "lineNumber": 26,
+            "lineNumber": 27,
             "columnNumber": 31,
             "deprecated": false,
             "docsReferencedTypeName": "SavedObjectsType",
@@ -155,7 +155,7 @@
         "label": "ModelVersionSummary",
         "description": [],
         "path": "src/core/packages/test-helpers/so-type-serializer/src/extract_migration_info.ts",
-        "lineNumber": 37,
+        "lineNumber": 38,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -168,7 +168,7 @@
             "label": "version",
             "description": [],
             "path": "src/core/packages/test-helpers/so-type-serializer/src/extract_migration_info.ts",
-            "lineNumber": 38,
+            "lineNumber": 39,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -181,7 +181,7 @@
             "label": "modelVersionHash",
             "description": [],
             "path": "src/core/packages/test-helpers/so-type-serializer/src/extract_migration_info.ts",
-            "lineNumber": 39,
+            "lineNumber": 40,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -197,7 +197,7 @@
               "string[]"
             ],
             "path": "src/core/packages/test-helpers/so-type-serializer/src/extract_migration_info.ts",
-            "lineNumber": 40,
+            "lineNumber": 41,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -210,7 +210,7 @@
             "label": "hasTransformation",
             "description": [],
             "path": "src/core/packages/test-helpers/so-type-serializer/src/extract_migration_info.ts",
-            "lineNumber": 41,
+            "lineNumber": 42,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -226,7 +226,7 @@
               "string[]"
             ],
             "path": "src/core/packages/test-helpers/so-type-serializer/src/extract_migration_info.ts",
-            "lineNumber": 42,
+            "lineNumber": 43,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -242,7 +242,7 @@
               "{ create: string | false; forwardCompatibility: string | false; }"
             ],
             "path": "src/core/packages/test-helpers/so-type-serializer/src/extract_migration_info.ts",
-            "lineNumber": 43,
+            "lineNumber": 44,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -258,7 +258,7 @@
         "label": "SavedObjectTypeMigrationInfo",
         "description": [],
         "path": "src/core/packages/test-helpers/so-type-serializer/src/extract_migration_info.ts",
-        "lineNumber": 24,
+        "lineNumber": 25,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -271,7 +271,7 @@
             "label": "name",
             "description": [],
             "path": "src/core/packages/test-helpers/so-type-serializer/src/extract_migration_info.ts",
-            "lineNumber": 25,
+            "lineNumber": 26,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -287,7 +287,7 @@
               "\"single\" | \"multiple\" | \"agnostic\" | \"multiple-isolated\""
             ],
             "path": "src/core/packages/test-helpers/so-type-serializer/src/extract_migration_info.ts",
-            "lineNumber": 26,
+            "lineNumber": 27,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -303,7 +303,7 @@
               "string | undefined"
             ],
             "path": "src/core/packages/test-helpers/so-type-serializer/src/extract_migration_info.ts",
-            "lineNumber": 27,
+            "lineNumber": 28,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -319,7 +319,7 @@
               "string | undefined"
             ],
             "path": "src/core/packages/test-helpers/so-type-serializer/src/extract_migration_info.ts",
-            "lineNumber": 28,
+            "lineNumber": 29,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -335,7 +335,7 @@
               "string[]"
             ],
             "path": "src/core/packages/test-helpers/so-type-serializer/src/extract_migration_info.ts",
-            "lineNumber": 29,
+            "lineNumber": 30,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -351,7 +351,7 @@
               "string[]"
             ],
             "path": "src/core/packages/test-helpers/so-type-serializer/src/extract_migration_info.ts",
-            "lineNumber": 30,
+            "lineNumber": 31,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -367,7 +367,7 @@
               "{ [x: string]: unknown; }"
             ],
             "path": "src/core/packages/test-helpers/so-type-serializer/src/extract_migration_info.ts",
-            "lineNumber": 31,
+            "lineNumber": 32,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -380,7 +380,7 @@
             "label": "hasExcludeOnUpgrade",
             "description": [],
             "path": "src/core/packages/test-helpers/so-type-serializer/src/extract_migration_info.ts",
-            "lineNumber": 32,
+            "lineNumber": 33,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -397,7 +397,7 @@
               "[]"
             ],
             "path": "src/core/packages/test-helpers/so-type-serializer/src/extract_migration_info.ts",
-            "lineNumber": 33,
+            "lineNumber": 34,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -413,7 +413,7 @@
               "string | undefined"
             ],
             "path": "src/core/packages/test-helpers/so-type-serializer/src/extract_migration_info.ts",
-            "lineNumber": 34,
+            "lineNumber": 35,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

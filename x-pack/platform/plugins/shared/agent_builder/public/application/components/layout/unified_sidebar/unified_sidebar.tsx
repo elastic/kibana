@@ -20,6 +20,7 @@ import {
 } from '../../../route_config';
 import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
 import { getLastAgentId } from '../../../hooks/use_last_agent_id';
+import { useActiveSpaceId } from '../../../context/active_space_context';
 import { useValidateAgentId } from '../../../hooks/agents/use_validate_agent_id';
 import { ConversationSidebarView } from './views/conversation_view';
 import { ManageSidebarView } from './views/manage_view';
@@ -40,7 +41,8 @@ export const UnifiedSidebar: React.FC<UnifiedSidebarProps> = ({
   const location = useLocation();
   const sidebarView = getSidebarViewForRoute(location.pathname);
   const agentIdFromUrl = getAgentIdFromPath(location.pathname);
-  const [, setStoredAgentId] = useLocalStorage<string>(storageKeys.agentId);
+  const spaceId = useActiveSpaceId();
+  const [, setStoredAgentId] = useLocalStorage<string>(storageKeys.getAgentIdKey(spaceId));
   const { isFetched: isAgentsFetched } = useAgentBuilderAgents();
   const validateAgentId = useValidateAgentId();
   const { euiTheme } = useEuiTheme();

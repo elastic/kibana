@@ -44,8 +44,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const maintainerRoutes = entityMaintainerRouteHelpersFactory(supertest);
   const entityStoreIndex = getEntitiesAlias(ENTITY_LATEST, 'default');
 
-  // Failing: See https://github.com/elastic/kibana/issues/265177
-  describe.skip('@ess @serverless @serverlessQA Risk Score Maintainer Resolution Scoring', function () {
+  describe('@ess @serverless @serverlessQA Risk Score Maintainer Resolution Scoring', function () {
     this.tags(['esGate']);
 
     context('with test log data', () => {

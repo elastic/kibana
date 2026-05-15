@@ -10,7 +10,7 @@ import { EuiImage, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eu
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EntityStoreMissingPrivilegesCallout } from '../../../entity_analytics/components/entity_store/components/entity_store_missing_privileges_callout';
-import type { AssetInventoryStatusResponse } from '../../../../common/api/asset_inventory/types';
+import type { AssetInventoryStatusResponse } from '../../hooks/use_asset_inventory_status';
 import illustration from '../../../common/images/lock_light.png';
 import { CenteredWrapper } from './centered_wrapper';
 import { EmptyStateIllustrationContainer } from '../empty_state_illustration_container';

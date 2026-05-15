@@ -10,10 +10,27 @@
 import type { FC, PropsWithChildren, ReactNode } from 'react';
 import React, { useCallback, useContext, useMemo } from 'react';
 import {
+  UserProfilesKibanaProvider,
   UserProfilesProvider,
   useUserProfilesServices,
 } from '@kbn/content-management-user-profiles';
-import { QueryClientProvider, useQueryClient } from '@kbn/react-query';
+import { QueryClient, QueryClientProvider, useQueryClient } from '@kbn/react-query';
+
+/**
+ * Create a React Query client for a single content-editor provider instance.
+ *
+ * Called inside a `useMemo` so each mounted {@link ContentEditorKibanaProvider}
+ * gets its own client that can be garbage-collected on unmount, avoiding
+ * unbounded cache growth when multiple instances are mounted across the app.
+ */
+const createContentEditorQueryClient = () =>
+  new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
+    },
+  });
 
 import type { EuiComboBoxProps } from '@elastic/eui';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
@@ -124,10 +141,50 @@ export interface ContentEditorKibanaDependencies {
 
 /**
  * Kibana-specific Provider that maps to known dependency types.
+ *
+ * Self-provides every external context the editor needs so consumers can drop
+ * it into any provider tree without thinking about ancestry:
+ *
+ * - {@link QueryClientProvider} — the inner body uses `useQueryClient()` to
+ *   forward the client into the system flyout it opens, so user-profile
+ *   queries inside the flyout work without an outer `QueryClientProvider`.
+ * - {@link UserProfilesKibanaProvider} — the inner body reads profile services
+ *   via `useUserProfilesServices()` for the same forwarding reason.
+ *
+ * When this provider is itself rendered under another `QueryClientProvider`
+ * or `UserProfilesProvider` (e.g. legacy `TableListViewKibanaProvider`), the
+ * inner providers shadow the outer with semantically equivalent values derived
+ * from the same `core` services, so nesting is harmless.
  */
 export const ContentEditorKibanaProvider: FC<
   PropsWithChildren<ContentEditorKibanaDependencies>
 > = ({ children, ...services }) => {
+  // Create a per-instance QueryClient so the cache is released when this
+  // provider unmounts, preventing unbounded memory growth across multiple
+  // mounted ContentEditorKibanaProvider trees.
+  const queryClient = useMemo(() => createContentEditorQueryClient(), []);
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <UserProfilesKibanaProvider core={services.core}>
+        <ContentEditorKibanaProviderInner {...services}>
+          {children}
+        </ContentEditorKibanaProviderInner>
+      </UserProfilesKibanaProvider>
+    </QueryClientProvider>
+  );
+};
+
+/**
+ * Inner body of {@link ContentEditorKibanaProvider}.
+ *
+ * Split from the public provider so `useUserProfilesServices()` reads from
+ * the {@link UserProfilesKibanaProvider} rendered by the outer wrapper.
+ */
+const ContentEditorKibanaProviderInner: FC<PropsWithChildren<ContentEditorKibanaDependencies>> = ({
+  children,
+  ...services
+}) => {
   const { core, savedObjectsTagging } = services;
   const { overlays, notifications, rendering } = core;
   const { openSystemFlyout: coreOpenFlyout } = overlays;

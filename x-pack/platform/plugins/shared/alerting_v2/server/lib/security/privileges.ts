@@ -8,6 +8,7 @@
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { AppCategory } from '@kbn/core/types';
 import { APP_ID } from '../constants';
+import { ACTION_POLICY_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 const ALERTS_FEATURE_ID = 'alerting_v2_alerts';
 const RULES_FEATURE_ID = 'alerting_v2_rules';
@@ -26,13 +27,22 @@ export const ALERTING_V2_API_PRIVILEGES = {
     read: 'read-alerting-v2-action-policies',
     write: 'write-alerting-v2-action-policies',
   },
+  ruleDoctor: {
+    read: 'read-alerting-v2-rule-doctor',
+    write: 'write-alerting-v2-rule-doctor',
+  },
 } as const;
+
+const ALERTING_V2_SAVED_OBJECT_TYPES = [
+  RULE_SAVED_OBJECT_TYPE,
+  ACTION_POLICY_SAVED_OBJECT_TYPE,
+] as const;
 
 const getPrivileges = () => ({
   all: {
     app: [APP_ID],
     savedObject: {
-      all: [],
+      all: [...ALERTING_V2_SAVED_OBJECT_TYPES],
       read: [],
     },
     ui: [],
@@ -43,19 +53,22 @@ const getPrivileges = () => ({
       ALERTING_V2_API_PRIVILEGES.alerts.write,
       ALERTING_V2_API_PRIVILEGES.actionPolicies.read,
       ALERTING_V2_API_PRIVILEGES.actionPolicies.write,
+      ALERTING_V2_API_PRIVILEGES.ruleDoctor.read,
+      ALERTING_V2_API_PRIVILEGES.ruleDoctor.write,
     ],
   },
   read: {
     app: [APP_ID],
     savedObject: {
       all: [],
-      read: [],
+      read: [...ALERTING_V2_SAVED_OBJECT_TYPES],
     },
     ui: [],
     api: [
       ALERTING_V2_API_PRIVILEGES.rules.read,
       ALERTING_V2_API_PRIVILEGES.alerts.read,
       ALERTING_V2_API_PRIVILEGES.actionPolicies.read,
+      ALERTING_V2_API_PRIVILEGES.ruleDoctor.read,
     ],
   },
 });

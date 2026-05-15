@@ -153,11 +153,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await testSubjects.click('confirmSaveSavedObjectButton');
 
-        const toastContents = await toastsService.getContentByIndex(1);
-
-        expect(toastContents).to.be(
-          `Saved "${ANNOTATION_GROUP_TITLE}"\nView or manage in the annotation library.`
-        );
+        await retry.try(async () => {
+          const toastContents = await toastsService.getContentByIndex(1);
+          expect(toastContents).to.be(
+            `Saved "${ANNOTATION_GROUP_TITLE}"\nView or manage in the annotation library.`
+          );
+        });
 
         await lens.save(FIRST_VIS_TITLE);
 

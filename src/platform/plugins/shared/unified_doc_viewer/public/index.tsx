@@ -41,4 +41,8 @@ export { UnifiedDocViewerLogsOverview } from './components/lazy_doc_viewer_logs_
 export { UnifiedDocViewerObservabilityTracesOverview } from './components/observability/traces/doc_viewer_overview/lazy_doc_viewer_obs_traces_overview';
 export { UnifiedDocViewerObservabilityGenericOverview } from './components/observability/generic/doc_viewer_overview/lazy_doc_viewer_obs_generic_overview';
 export { UnifiedDocViewerObservabilityAttributesOverview } from './components/observability/attributes/doc_viewer_attributes_overview/lazy_doc_viewer_obs_attributes_overview';
+export { UnifiedDocViewerObservabilityTraceDocFlyout } from './components/observability/traces/components/full_screen_waterfall/waterfall_flyout/lazy_trace_doc_flyout';
+export type { TraceDocFlyoutProps as UnifiedDocViewerObservabilityTraceDocFlyoutProps } from './components/observability/traces/components/full_screen_waterfall/waterfall_flyout/trace_doc_flyout';
+export type { TraceDocFlyoutType as UnifiedDocViewerObservabilityTracesDocumentType } from './components/observability/traces/components/full_screen_waterfall/waterfall_flyout/trace_doc_flyout';
+
 export const plugin = () => new UnifiedDocViewerPublicPlugin();

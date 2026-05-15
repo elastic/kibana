@@ -2,7 +2,8 @@
   "type": "shared-browser",
   "id": "@kbn/apm-ui-shared",
   "owner": [
-    "@elastic/obs-presentation-team"
+    "@elastic/obs-presentation-team",
+    "@elastic/obs-exploration-team"
   ],
   "group": "platform",
   "visibility": "shared"

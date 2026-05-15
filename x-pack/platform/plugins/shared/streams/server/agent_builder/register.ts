@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
+import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
 import type { StreamsServer } from '../types';
 import type { GetScopedClients } from '../routes/types';
@@ -41,7 +41,7 @@ export const registerStreamsAgentBuilder = async ({
 
   // The memory skill is registered lazily — only once the Streams memory advanced setting is on.
   // This avoids exposing the skill to the agent when memory is not configured.
-  // Call ensureMemorySkillRegistered() after enabling observability:streamsEnableMemory.
+  // Call onMemorySettingChanged when observability:streamsEnableMemory may have changed (e.g. from a uiSettings subscription).
   let memorySkillRegistered = false;
 
   const ensureMemorySkillRegistered = () => {
@@ -62,5 +62,16 @@ export const registerStreamsAgentBuilder = async ({
     ensureMemorySkillRegistered();
   }
 
-  return { ensureMemorySkillRegistered };
+  return {
+    ensureMemorySkillRegistered,
+    /**
+     * Call this from a uiSettings change subscription (e.g. in plugin start)
+     * to auto-register the memory skill when the setting is toggled on.
+     */
+    onMemorySettingChanged: async () => {
+      if (await isMemoryEnabled()) {
+        ensureMemorySkillRegistered();
+      }
+    },
+  };
 };

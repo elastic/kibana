@@ -56,6 +56,8 @@ export { ToolManagerToolType } from './tool_manager';
 export type { SkillsStore, WritableSkillsStore } from './skills_store';
 export type { PromptManager, ToolPromptManager, ConfirmationInfo } from './prompt_manager';
 export type { ConversationStateManager, ToolStateManager } from './state_manager';
+export type { TodoStateManager } from './todo_state_manager';
+export { createTodoStateManager } from './todo_state_manager';
 export { FileEntryType } from './filestore';
 export type {
   IToolFileStore,

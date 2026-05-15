@@ -26,8 +26,9 @@ describe('action policy form utils', () => {
       expect(toCreatePayload(state)).toEqual({
         name: 'Policy',
         description: 'Description',
+        type: 'global',
         groupingMode: 'per_episode',
-        throttle: { strategy: 'on_status_change' },
+        throttle: { strategy: 'on_status_change', interval: null },
         destinations: [{ type: 'workflow', id: 'workflow-1' }],
       });
     });
@@ -44,6 +45,7 @@ describe('action policy form utils', () => {
       expect(payload).toEqual({
         name: 'Policy',
         description: 'Description',
+        type: 'global',
         groupingMode: 'per_field',
         groupBy: ['host.name'],
         throttle: { strategy: 'time_interval', interval: '5m' },
@@ -51,13 +53,23 @@ describe('action policy form utils', () => {
       });
     });
 
-    it('omits throttle interval for strategies that do not require it', () => {
+    it('emits interval: null for strategies that do not require it', () => {
       const payload = toCreatePayload({
         ...state,
         throttleStrategy: 'every_time',
       });
 
-      expect(payload.throttle).toEqual({ strategy: 'every_time' });
+      expect(payload.throttle).toEqual({ strategy: 'every_time', interval: null });
+    });
+
+    it('emits interval: null when strategy does not need interval, even if state holds a stale value', () => {
+      const payload = toCreatePayload({
+        ...state,
+        throttleStrategy: 'on_status_change',
+        throttleInterval: '5m',
+      });
+
+      expect(payload.throttle).toEqual({ strategy: 'on_status_change', interval: null });
     });
   });
 
@@ -71,7 +83,7 @@ describe('action policy form utils', () => {
         tags: null,
         matcher: null,
         groupBy: null,
-        throttle: { strategy: 'on_status_change' },
+        throttle: { strategy: 'on_status_change', interval: null },
         destinations: [{ type: 'workflow', id: 'workflow-1' }],
       });
     });
@@ -110,6 +122,8 @@ describe('action policy form utils', () => {
       version: 'WzEsMV0=',
       name: 'Test Policy',
       description: 'A test policy',
+      type: 'global',
+      ruleId: null,
       enabled: true,
       matcher: 'data.severity : "critical"',
       groupBy: ['host.name'],

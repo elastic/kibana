@@ -33,7 +33,8 @@
     "@kbn/react-query",
     "@kbn/doc-links",
     "@kbn/cloud",
-    "@kbn/agent-builder-plugin",
+    "@kbn/agent-builder-browser",
+    "@kbn/agent-builder-server",
     "@kbn/scout-search",
     "@kbn/search-agent",
     "@kbn/shared-ux-ai-components"

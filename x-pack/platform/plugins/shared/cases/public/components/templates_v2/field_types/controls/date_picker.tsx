@@ -22,6 +22,7 @@ import {
   type ConditionRenderProps,
 } from '../../../../../common/types/domain/template/fields';
 import { FIELD_REQUIRED } from '../../translations';
+import { OptionalFieldLabel } from '../../../optional_field_label';
 
 type DatePickerProps = z.infer<typeof DatePickerFieldSchema> & ConditionRenderProps;
 
@@ -62,8 +63,15 @@ export const DatePicker: React.FC<DatePickerProps> = ({
     >
       {(field) => {
         const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
+
         return (
-          <EuiFormRow label={label} error={errorMessage} isInvalid={isInvalid} fullWidth>
+          <EuiFormRow
+            label={label}
+            labelAppend={!isRequired ? OptionalFieldLabel : undefined}
+            error={errorMessage}
+            isInvalid={isInvalid}
+            fullWidth
+          >
             <EuiDatePicker
               selected={toMoment(field.value, isLocal)}
               onChange={(date) => field.setValue(date)}

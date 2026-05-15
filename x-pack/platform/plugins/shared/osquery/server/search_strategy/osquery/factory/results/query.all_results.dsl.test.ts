@@ -347,6 +347,66 @@ describe('buildResultsQuery', () => {
     });
   });
 
+  describe('esFilters handling', () => {
+    it('includes positive esFilters in the bool.filter clause', () => {
+      const positiveFilter = JSON.stringify([
+        {
+          meta: { type: 'phrase', key: 'osquery.uid', params: { query: '0' } },
+          query: { match_phrase: { 'osquery.uid': '0' } },
+        },
+      ]);
+
+      const options: ResultsRequestOptions = {
+        actionId: 'action-123',
+        esFilters: positiveFilter,
+        pagination: { activePage: 0, querySize: 10, cursorStart: 0 },
+        sort: [{ field: '@timestamp', direction: Direction.desc }],
+      };
+
+      const result = buildResultsQuery(options);
+      const query = result.query as { bool: { filter: unknown[]; must_not?: unknown[] } };
+
+      expect(query.bool.filter).toHaveLength(2);
+      expect(query.bool.filter[1]).toEqual({ match_phrase: { 'osquery.uid': '0' } });
+      expect(query.bool.must_not).toBeUndefined();
+    });
+
+    it('includes negated esFilters in the bool.must_not clause', () => {
+      const negatedFilter = JSON.stringify([
+        {
+          meta: { negate: true, type: 'phrase', key: 'osquery.uid', params: { query: '0' } },
+          query: { match_phrase: { 'osquery.uid': '0' } },
+        },
+      ]);
+
+      const options: ResultsRequestOptions = {
+        actionId: 'action-123',
+        esFilters: negatedFilter,
+        pagination: { activePage: 0, querySize: 10, cursorStart: 0 },
+        sort: [{ field: '@timestamp', direction: Direction.desc }],
+      };
+
+      const result = buildResultsQuery(options);
+      const query = result.query as { bool: { filter: unknown[]; must_not?: unknown[] } };
+
+      expect(query.bool.filter).toHaveLength(1);
+      expect(query.bool.must_not).toEqual([{ match_phrase: { 'osquery.uid': '0' } }]);
+    });
+
+    it('omits must_not key when no esFilters are negated', () => {
+      const options: ResultsRequestOptions = {
+        actionId: 'action-123',
+        pagination: { activePage: 0, querySize: 10, cursorStart: 0 },
+        sort: [{ field: '@timestamp', direction: Direction.desc }],
+      };
+
+      const result = buildResultsQuery(options);
+      const query = result.query as { bool: { filter: unknown[]; must_not?: unknown[] } };
+
+      expect(query.bool.must_not).toBeUndefined();
+    });
+  });
+
   describe('schedule-based filtering', () => {
     it('should filter by schedule_id and execution count when scheduleId and executionCount are provided', () => {
       const options: ResultsRequestOptions = {

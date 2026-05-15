@@ -21,7 +21,8 @@
     "../../../src/platform/packages/shared/kbn-test/types/ftr_globals/**/*",
     "../../*.json",
     "./api_integration/apis/telemetry/fixtures/*.json",
-    "./monitoring_api_integration/fixtures/**/*.json"
+    "./monitoring_api_integration/fixtures/**/*.json",
+    "./plugin_api_integration/test_suites/event_log/fixtures/*.json"
   ],
   "exclude": ["target/**/*", "*/plugins/**/*", "*/packages/**/*", "*/*/packages/**/*"],
   "kbn_references": [
@@ -158,17 +159,13 @@
     "@kbn/core-chrome-browser",
     "@kbn/licensing-types",
     "@kbn/product-intercept-plugin",
-    "@kbn/agent-builder-common",
     "@kbn/reindex-service-plugin",
-    "@kbn/agent-builder-plugin",
     "@kbn/field-formats-common",
     "@kbn/reporting-test-routes",
     "@kbn/ml-common-types",
     "@kbn/access-control-test-plugin",
     "@kbn/alerting-types",
     "@kbn/visualizations-common",
-    "@kbn/test-subj-selector",
-    "@kbn/agent-builder-server",
     "@kbn/setup-node-env",
     "@kbn/connector-schemas",
     "@kbn/es-types",
@@ -177,11 +174,9 @@
     "@kbn/automatic-import-plugin",
     "@kbn/connector-specs",
     "@kbn/alerting-v2-plugin",
-    "@kbn/ftr-llm-proxy",
-    "@kbn/dev-cli-runner",
     "@kbn/ui-actions-plugin",
     "@kbn/product-doc-common",
-    "@kbn/lens-common",
-    "@kbn/alerting-v2-episodes-ui"
+    "@kbn/alerting-v2-episodes-ui",
+    "@kbn/inbox-common",
   ]
 }

@@ -116,7 +116,7 @@
         "label": "LegacyIgnoreParentSettings",
         "description": [],
         "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
-        "lineNumber": 85,
+        "lineNumber": 86,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -132,7 +132,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
-            "lineNumber": 86,
+            "lineNumber": 87,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -148,7 +148,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
-            "lineNumber": 87,
+            "lineNumber": 88,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -164,7 +164,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
-            "lineNumber": 88,
+            "lineNumber": 89,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -180,7 +180,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
-            "lineNumber": 89,
+            "lineNumber": 90,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -359,13 +359,29 @@
           },
           {
             "parentPluginId": "@kbn/controls-schemas",
+            "id": "def-server.LegacyStoredESQLControlExplicitInput.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
+            "lineNumber": 72,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/controls-schemas",
             "id": "def-server.LegacyStoredESQLControlExplicitInput.esqlQuery",
             "type": "string",
             "tags": [],
             "label": "esqlQuery",
             "description": [],
             "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
-            "lineNumber": 72,
+            "lineNumber": 73,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -381,7 +397,7 @@
               "string[]"
             ],
             "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
-            "lineNumber": 73,
+            "lineNumber": 74,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -397,7 +413,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
-            "lineNumber": 74,
+            "lineNumber": 75,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -410,7 +426,7 @@
             "label": "variableName",
             "description": [],
             "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
-            "lineNumber": 75,
+            "lineNumber": 76,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -423,7 +439,7 @@
             "label": "variableType",
             "description": [],
             "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
-            "lineNumber": 76,
+            "lineNumber": 77,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -497,7 +513,7 @@
         "label": "LegacyStoredTimeSliderExplicitInput",
         "description": [],
         "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
-        "lineNumber": 79,
+        "lineNumber": 80,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -513,7 +529,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
-            "lineNumber": 80,
+            "lineNumber": 81,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -529,7 +545,7 @@
               "number | undefined"
             ],
             "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
-            "lineNumber": 81,
+            "lineNumber": 82,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -545,7 +561,7 @@
               "number | undefined"
             ],
             "path": "src/platform/packages/shared/controls/controls-schemas/src/legacy_types.ts",
-            "lineNumber": 82,
+            "lineNumber": 83,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

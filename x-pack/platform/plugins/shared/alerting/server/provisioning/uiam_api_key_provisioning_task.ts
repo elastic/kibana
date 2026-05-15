@@ -59,6 +59,7 @@ export class UiamApiKeyProvisioningTask {
   private readonly isServerless: boolean;
   private readonly analytics: AnalyticsServiceSetup;
   private featureFlagSubscription: Subscription | undefined;
+  private appliedFlagValue: boolean | undefined;
 
   constructor({
     logger,
@@ -192,7 +193,14 @@ export class UiamApiKeyProvisioningTask {
     enabled: boolean,
     taskManager: TaskManagerStartContract
   ): Promise<void> => {
-    if (enabled) {
+    // Only react to real flag transitions. The initial subscription emission
+    // (previousValue === undefined) with `false` is treated as a no-op: there
+    // is nothing to unschedule, and attempting to remove a non-existent task
+    // can surface transient errors during startup.
+    const previousValue = this.appliedFlagValue;
+    this.appliedFlagValue = enabled;
+
+    if (enabled && previousValue !== true) {
       try {
         await this.scheduleProvisioningTask(taskManager);
       } catch (e) {
@@ -201,7 +209,10 @@ export class UiamApiKeyProvisioningTask {
           { tags: TAGS }
         );
       }
-    } else {
+      return;
+    }
+
+    if (!enabled && previousValue === true) {
       try {
         await this.unscheduleProvisioningTask(taskManager);
       } catch (e) {

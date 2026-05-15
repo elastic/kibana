@@ -19,7 +19,13 @@ import { useApmPluginContext } from '../../context/apm_plugin/use_apm_plugin_con
 import { EmptyPrompt } from '../../components/app/service_map/empty_prompt';
 import { TimeoutPrompt } from '../../components/app/service_map/timeout_prompt';
 import { useServiceMap } from '../../components/app/service_map/use_service_map';
+import { useServiceMapBadges } from '../../components/app/service_map/use_service_map_badges';
 import { ServiceMapGraph } from '../../components/app/service_map/graph';
+import { ServiceMapSloFlyoutProvider } from '../../components/app/service_map/service_map_slo_flyout_context';
+import {
+  SloOverviewFlyout,
+  useSloOverviewFlyout,
+} from '../../components/shared/slo_overview_flyout';
 import { getServiceMapUrl } from './get_service_map_url';
 import type { Environment } from '../../../common/environment_rt';
 
@@ -35,6 +41,21 @@ export interface ServiceMapEmbeddableProps {
   serviceGroupId?: string;
   core: CoreStart;
   onBlockingError?: (error: Error | undefined) => void;
+  /** Separate range for the badges query. Defaults to `[rangeFrom, rangeTo]`. */
+  badgesRangeFrom?: string;
+  badgesRangeTo?: string;
+  /** KQL for the badges query only. Defaults to `kuery`. Pass `""` to aggregate across all nodes. */
+  badgesKuery?: string;
+  /** Show the popover's "Focus map" button in embedded contexts. Defaults to `!isEmbedded`. */
+  showFocusMapInPopover?: boolean;
+  /** Strip `kuery` from popover-built URLs ("Service Details" / "Focus map"); env still flows through. */
+  clearKueryOnPopoverNavigation?: boolean;
+  /** Focus button always navigates to standalone APM, even for the currently focused service. */
+  alwaysNavigateOnPopoverFocus?: boolean;
+  /** Drop cross-env spans before rendering when env is set. */
+  strictEnvironmentScope?: boolean;
+  /** Fires when the topology is definitively empty (`SUCCESS && nodes.length === 0`). */
+  onEmptyStateChange?: (isEmpty: boolean) => void;
 }
 
 function LoadingSpinner() {
@@ -55,6 +76,14 @@ export function ServiceMapEmbeddable({
   serviceGroupId,
   core,
   onBlockingError,
+  badgesRangeFrom,
+  badgesRangeTo,
+  badgesKuery,
+  showFocusMapInPopover,
+  clearKueryOnPopoverNavigation,
+  alwaysNavigateOnPopoverFocus,
+  strictEnvironmentScope,
+  onEmptyStateChange,
 }: ServiceMapEmbeddableProps) {
   const license = useLicenseContext();
   const { config } = useApmPluginContext();
@@ -78,12 +107,24 @@ export function ServiceMapEmbeddable({
     }
   }, [license, hasValidLicense, isServiceMapEnabled, onBlockingError]);
 
-  const { start: resolvedStart, end: resolvedEnd } = useMemo(
-    () => getDateRange({ rangeFrom, rangeTo }),
-    [rangeFrom, rangeTo]
-  );
-  const start = resolvedStart ?? rangeFrom;
-  const end = resolvedEnd ?? rangeTo;
+  const { start, end } = useMemo(() => {
+    const { start: parsedStart, end: parsedEnd } = getDateRange({ rangeFrom, rangeTo });
+    return { start: parsedStart ?? rangeFrom, end: parsedEnd ?? rangeTo };
+  }, [rangeFrom, rangeTo]);
+
+  const { start: badgesStart, end: badgesEnd } = useMemo(() => {
+    if (badgesRangeFrom == null || badgesRangeTo == null) {
+      return { start, end };
+    }
+    const { start: parsedStart, end: parsedEnd } = getDateRange({
+      rangeFrom: badgesRangeFrom,
+      rangeTo: badgesRangeTo,
+    });
+    return { start: parsedStart ?? badgesRangeFrom, end: parsedEnd ?? badgesRangeTo };
+  }, [badgesRangeFrom, badgesRangeTo, start, end]);
+
+  const { sloOverviewFlyout, openSloOverviewFlyout, closeSloOverviewFlyout } =
+    useSloOverviewFlyout();
 
   const { data, status, error } = useServiceMap({
     environment,
@@ -92,6 +133,23 @@ export function ServiceMapEmbeddable({
     end,
     serviceGroupId,
     serviceName,
+    strictEnvironmentScope,
+  });
+
+  // Only fire on SUCCESS — loading/error states carry no emptiness signal.
+  useEffect(() => {
+    if (!onEmptyStateChange) return;
+    if (status !== FETCH_STATUS.SUCCESS) return;
+    onEmptyStateChange(data.nodes.length === 0);
+  }, [onEmptyStateChange, status, data.nodes.length]);
+
+  const { nodes: nodesForGraph, status: badgesStatus } = useServiceMapBadges({
+    environment,
+    start: badgesStart,
+    end: badgesEnd,
+    kuery: badgesKuery ?? kuery,
+    nodes: data.nodes,
+    nodesStatus: status,
   });
 
   if (!license || !isActivePlatinumLicense(license) || !config.serviceMapEnabled) {
@@ -114,6 +172,10 @@ export function ServiceMapEmbeddable({
 
   const isEmpty = data.nodes.length === 0;
   if (status === FETCH_STATUS.SUCCESS && isEmpty) {
+    // Host owns the empty UI; skip the prompt to avoid a one-frame flash before unmount.
+    if (onEmptyStateChange) {
+      return null;
+    }
     return (
       <div data-test-subj="apmServiceMapEmbeddable">
         <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l">
@@ -173,32 +235,47 @@ export function ServiceMapEmbeddable({
     serviceGroupId,
   });
 
+  const isLoading = status === FETCH_STATUS.LOADING || badgesStatus === FETCH_STATUS.LOADING;
+
   return (
-    <div
-      data-test-subj="apmServiceMapEmbeddable"
-      style={{
-        width: '100%',
-        height: '100%',
-        minWidth: EMBEDDABLE_MIN_WIDTH,
-        minHeight: EMBEDDABLE_MIN_HEIGHT,
-        position: 'relative' as const,
-        boxSizing: 'border-box',
-      }}
-    >
-      {status === FETCH_STATUS.LOADING && <LoadingSpinner />}
-      <ServiceMapGraph
-        height="100%"
-        nodes={data.nodes}
-        edges={data.edges}
-        serviceName={serviceName}
-        environment={environment}
-        kuery={kuery}
-        start={start}
-        end={end}
-        isFullscreen={false}
-        fullMapHref={fullMapHref}
-        isEmbedded
-      />
-    </div>
+    <ServiceMapSloFlyoutProvider onSloBadgeClick={openSloOverviewFlyout}>
+      <div
+        data-test-subj="apmServiceMapEmbeddable"
+        style={{
+          width: '100%',
+          height: '100%',
+          minWidth: EMBEDDABLE_MIN_WIDTH,
+          minHeight: EMBEDDABLE_MIN_HEIGHT,
+          position: 'relative' as const,
+          boxSizing: 'border-box',
+        }}
+      >
+        {isLoading && <LoadingSpinner />}
+        <ServiceMapGraph
+          height="100%"
+          nodes={isLoading ? [] : nodesForGraph}
+          edges={isLoading ? [] : data.edges}
+          serviceName={serviceName}
+          highlightedServiceName={serviceName}
+          environment={environment}
+          kuery={kuery}
+          start={start}
+          end={end}
+          isFullscreen={false}
+          fullMapHref={fullMapHref}
+          isEmbedded
+          showFocusMap={showFocusMapInPopover}
+          alwaysNavigateOnPopoverFocus={alwaysNavigateOnPopoverFocus}
+          clearKueryOnPopoverNavigation={clearKueryOnPopoverNavigation}
+        />
+      </div>
+      {sloOverviewFlyout && (
+        <SloOverviewFlyout
+          serviceName={sloOverviewFlyout.serviceName}
+          agentName={sloOverviewFlyout.agentName}
+          onClose={closeSloOverviewFlyout}
+        />
+      )}
+    </ServiceMapSloFlyoutProvider>
   );
 }
