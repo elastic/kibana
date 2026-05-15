@@ -8,6 +8,7 @@
 import { kqlQuery, rangeQuery, termsQuery } from '@kbn/observability-plugin/server';
 import { ApmDocumentType, RollupInterval } from '@kbn/apm-data-access-plugin/common';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ServicesResponse } from '../../../common/service_map/types';
 import { AGENT_NAME, SERVICE_ENVIRONMENT, SERVICE_NAME } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
@@ -25,9 +26,31 @@ export async function getServiceStats({
   serviceGroupKuery,
   serviceName,
   kuery,
+  esQuery,
 }: IEnvOptions & { maxNumberOfServices: number }): Promise<ServicesResponse[]> {
   const processorEvent = getProcessorEventForTransactions(searchAggregatedTransactions);
   const shouldQueryMetrics = processorEvent === ProcessorEvent.metric;
+
+  const esQueryFilters: QueryDslQueryContainer[] = esQuery
+    ? [
+        ...(esQuery.bool.filter
+          ? Array.isArray(esQuery.bool.filter)
+            ? esQuery.bool.filter
+            : [esQuery.bool.filter]
+          : []),
+        ...(esQuery.bool.must
+          ? Array.isArray(esQuery.bool.must)
+            ? esQuery.bool.must
+            : [esQuery.bool.must]
+          : []),
+      ]
+    : [];
+
+  const esQueryMustNot: QueryDslQueryContainer[] = esQuery?.bool.must_not
+    ? Array.isArray(esQuery.bool.must_not)
+      ? esQuery.bool.must_not
+      : [esQuery.bool.must_not]
+    : [];
 
   const sharedRequestBody = {
     track_total_hits: false,
@@ -40,7 +63,9 @@ export async function getServiceStats({
           ...termsQuery(SERVICE_NAME, serviceName),
           ...kqlQuery(serviceGroupKuery),
           ...kqlQuery(kuery),
+          ...esQueryFilters,
         ],
+        ...(esQueryMustNot.length > 0 ? { must_not: esQueryMustNot } : {}),
       },
     },
     aggs: {

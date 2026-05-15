@@ -29,6 +29,7 @@ import { useServiceName } from '../../../hooks/use_service_name';
 import { useApmParams, useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import type { Environment } from '../../../../common/environment_rt';
+import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { DisabledPrompt } from './disabled_prompt';
 import { SloOverviewFlyout, useSloOverviewFlyout } from '../../shared/slo_overview_flyout';
@@ -37,6 +38,7 @@ import { useServiceMapBadges } from './use_service_map_badges';
 import { getServiceMapBadgesEnd } from './get_service_map_badges_end';
 import { ServiceMapGraph } from './graph';
 import { ServiceMapSloFlyoutProvider } from '../../shared/service_map/service_map_slo_flyout_context';
+import { useServiceMapSearchContext } from './service_map_search_context';
 
 function PromptContainer({ children }: { children: ReactNode }) {
   return (
@@ -57,6 +59,8 @@ export function ServiceMapHome() {
     query: { environment, kuery, rangeFrom, rangeTo, serviceGroup },
   } = useApmParams('/service-map');
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+  const { esQuery } = useServiceMapSearchContext();
+
   return (
     <ServiceMap
       environment={environment}
@@ -64,6 +68,7 @@ export function ServiceMapHome() {
       start={start}
       end={end}
       serviceGroupId={serviceGroup}
+      esQuery={esQuery}
     />
   );
 }
@@ -76,8 +81,9 @@ export function ServiceMapServiceDetail() {
     '/mobile-services/{serviceName}/service-map'
   );
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+  const { esQuery } = useServiceMapSearchContext();
 
-  return <ServiceMap environment={environment} kuery={kuery} start={start} end={end} />;
+  return <ServiceMap environment={environment} kuery={kuery} start={start} end={end} esQuery={esQuery} />;
 }
 
 export function ServiceMap({
@@ -86,12 +92,14 @@ export function ServiceMap({
   start,
   end,
   serviceGroupId,
+  esQuery,
 }: {
   environment: Environment;
   kuery: string;
   start: string;
   end: string;
   serviceGroupId?: string;
+  esQuery?: Parameters<typeof useServiceMap>[0]['esQuery'];
 }) {
   const license = useLicenseContext();
   const serviceName = useServiceName();
@@ -121,12 +129,16 @@ export function ServiceMap({
   const { onPageReady } = usePerformanceContext();
 
   const { data, status, error } = useServiceMap({
-    environment,
+    // When esQuery is set, environment filtering is already encoded inside it
+    // (from the Controls API environment dropdown). Pass ENVIRONMENT_ALL so the
+    // server doesn't also apply the URL `environment` param and double-filter.
+    environment: esQuery !== undefined ? ENVIRONMENT_ALL.value : environment,
     kuery,
     start,
     end,
     serviceGroupId,
     serviceName,
+    esQuery,
   });
 
   const { ref, height } = useRefDimensions();

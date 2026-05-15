@@ -9,6 +9,7 @@ import Boom from '@hapi/boom';
 import { sortBy, take, uniq } from 'lodash';
 import { existsQuery, kqlQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import type { BoolQuery } from '@kbn/es-query';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import {
@@ -36,6 +37,7 @@ export async function getTraceSampleIds({
   end,
   serviceGroupKuery,
   kuery,
+  esQuery,
 }: {
   serviceName?: string;
   environment: string;
@@ -45,7 +47,33 @@ export async function getTraceSampleIds({
   end: number;
   serviceGroupKuery?: string;
   kuery?: string;
+  /** Pre-built ES query from the client (includes KQL query + filter bar + Controls API). */
+  esQuery?: { bool: BoolQuery };
 }) {
+  // Collect extra filter clauses from the pre-built esQuery.
+  // We only consume the bool.filter / bool.must / bool.should / bool.must_not
+  // clauses so we don't accidentally duplicate range/environment filters.
+  const esQueryFilters: QueryDslQueryContainer[] = esQuery
+    ? [
+        ...(esQuery.bool.filter
+          ? Array.isArray(esQuery.bool.filter)
+            ? esQuery.bool.filter
+            : [esQuery.bool.filter]
+          : []),
+        ...(esQuery.bool.must
+          ? Array.isArray(esQuery.bool.must)
+            ? esQuery.bool.must
+            : [esQuery.bool.must]
+          : []),
+      ]
+    : [];
+
+  const esQueryMustNot: QueryDslQueryContainer[] = esQuery?.bool.must_not
+    ? Array.isArray(esQuery.bool.must_not)
+      ? esQuery.bool.must_not
+      : [esQuery.bool.must_not]
+    : [];
+
   const query = {
     bool: {
       filter: [
@@ -54,7 +82,9 @@ export async function getTraceSampleIds({
         ...kqlQuery(serviceGroupKuery),
         ...kqlQuery(kuery),
         ...termQuery(SERVICE_NAME, serviceName),
+        ...esQueryFilters,
       ],
+      ...(esQueryMustNot.length > 0 ? { must_not: esQueryMustNot } : {}),
     },
   };
 
