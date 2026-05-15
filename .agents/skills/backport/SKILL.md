@@ -82,18 +82,18 @@ mkfifo "$INPUT"
 exec 9>"$INPUT"   # keep the write end open so the fifo doesn't EOF
 ```
 
-Run the backport tool with `run_in_background: true`, reading from the fifo:
+Run the backport tool in the background, reading from the fifo:
 
 ```bash
 node scripts/backport --pr <PR> --branch <X.Y> <"$INPUT" &
 ```
 
-Use the `Monitor` tool to watch its output stream. When you see the `Press ENTER` prompt:
+When you see the `Press ENTER` prompt in the background output:
 
 1. Resolve conflicts per Step 3 below.
 2. Stage the resolved files inside `~/.backport/repositories/elastic/kibana`.
 3. Release the prompt: `echo "" >&9`
-4. The tool runs `git cherry-pick --continue` itself, pushes to your fork, and opens the PR. `Monitor` will surface the PR URL.
+4. The tool runs `git cherry-pick --continue` itself, pushes to your fork, and opens the PR. The PR URL will appear in the background output.
 5. Clean up: `exec 9>&-; rm -f "$INPUT"`
 
 If there are multiple commits being cherry-picked, the tool may pause again on a second conflict — repeat the resolve → stage → `echo "" >&9` loop.
