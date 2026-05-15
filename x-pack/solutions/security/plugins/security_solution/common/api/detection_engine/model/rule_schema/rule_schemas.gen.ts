@@ -779,49 +779,86 @@ export const TypeSpecificResponseInternal = lazySchema(() =>
 export type TypeSpecificResponse = z.infer<typeof TypeSpecificResponseInternal>;
 export const TypeSpecificResponse = TypeSpecificResponseInternal as z.ZodType<TypeSpecificResponse>;
 
+// MANUAL EDIT (preserve on regeneration): cross-field validation requiring `alert_suppression`
+// to include either `group_by` or `group_by_v2` with at least one field. The generated
+// `AlertSuppression` schema cannot express this on its own (both fields are individually
+// optional). Threshold rules are excluded because that variant strips both group_by fields
+// before `alert_suppression` reaches this refine.
+const requireSuppressionGroupBy = (
+  data: unknown,
+  ctx: { addIssue: (issue: z.core.$ZodRawIssue) => void }
+) => {
+  const value = data as
+    | { type?: string; alert_suppression?: { group_by?: string[]; group_by_v2?: unknown[] } }
+    | undefined;
+  if (value == null || value.type === 'threshold') {
+    return;
+  }
+  const suppression = value.alert_suppression;
+  if (suppression == null) {
+    return;
+  }
+  const hasGroupBy = Array.isArray(suppression.group_by) && suppression.group_by.length > 0;
+  const hasGroupByV2 = Array.isArray(suppression.group_by_v2) && suppression.group_by_v2.length > 0;
+  if (!hasGroupBy && !hasGroupByV2) {
+    ctx.addIssue({
+      code: 'custom',
+      path: ['alert_suppression'],
+      message: 'Either group_by or group_by_v2 must be provided with at least one field',
+      input: data,
+    } as z.core.$ZodRawIssue);
+  }
+};
+
 export const RuleCreatePropsInternal = lazySchema(() =>
-  z.discriminatedUnion('type', [
-    EqlRuleCreateProps,
-    QueryRuleCreateProps,
-    SavedQueryRuleCreateProps,
-    ThresholdRuleCreateProps,
-    ThreatMatchRuleCreateProps,
-    MachineLearningRuleCreateProps,
-    NewTermsRuleCreateProps,
-    EsqlRuleCreateProps,
-  ])
+  z
+    .discriminatedUnion('type', [
+      EqlRuleCreateProps,
+      QueryRuleCreateProps,
+      SavedQueryRuleCreateProps,
+      ThresholdRuleCreateProps,
+      ThreatMatchRuleCreateProps,
+      MachineLearningRuleCreateProps,
+      NewTermsRuleCreateProps,
+      EsqlRuleCreateProps,
+    ])
+    .superRefine(requireSuppressionGroupBy)
 );
 
 export type RuleCreateProps = z.infer<typeof RuleCreatePropsInternal>;
 export const RuleCreateProps = RuleCreatePropsInternal as z.ZodType<RuleCreateProps>;
 
 export const RuleUpdatePropsInternal = lazySchema(() =>
-  z.discriminatedUnion('type', [
-    EqlRuleUpdateProps,
-    QueryRuleUpdateProps,
-    SavedQueryRuleUpdateProps,
-    ThresholdRuleUpdateProps,
-    ThreatMatchRuleUpdateProps,
-    MachineLearningRuleUpdateProps,
-    NewTermsRuleUpdateProps,
-    EsqlRuleUpdateProps,
-  ])
+  z
+    .discriminatedUnion('type', [
+      EqlRuleUpdateProps,
+      QueryRuleUpdateProps,
+      SavedQueryRuleUpdateProps,
+      ThresholdRuleUpdateProps,
+      ThreatMatchRuleUpdateProps,
+      MachineLearningRuleUpdateProps,
+      NewTermsRuleUpdateProps,
+      EsqlRuleUpdateProps,
+    ])
+    .superRefine(requireSuppressionGroupBy)
 );
 
 export type RuleUpdateProps = z.infer<typeof RuleUpdatePropsInternal>;
 export const RuleUpdateProps = RuleUpdatePropsInternal as z.ZodType<RuleUpdateProps>;
 
 export const RulePatchPropsInternal = lazySchema(() =>
-  z.union([
-    EqlRulePatchProps,
-    QueryRulePatchProps,
-    SavedQueryRulePatchProps,
-    ThresholdRulePatchProps,
-    ThreatMatchRulePatchProps,
-    MachineLearningRulePatchProps,
-    NewTermsRulePatchProps,
-    EsqlRulePatchProps,
-  ])
+  z
+    .union([
+      EqlRulePatchProps,
+      QueryRulePatchProps,
+      SavedQueryRulePatchProps,
+      ThresholdRulePatchProps,
+      ThreatMatchRulePatchProps,
+      MachineLearningRulePatchProps,
+      NewTermsRulePatchProps,
+      EsqlRulePatchProps,
+    ])
+    .superRefine(requireSuppressionGroupBy)
 );
 
 export type RulePatchProps = z.infer<typeof RulePatchPropsInternal>;
