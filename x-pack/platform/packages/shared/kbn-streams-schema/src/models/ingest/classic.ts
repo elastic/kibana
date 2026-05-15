@@ -173,4 +173,10 @@ ClassicStream.Definition.is = (
 // Optimized implementation for GetResponse check - avoids full DeepStrict Zod parse
 ClassicStream.GetResponse.is = (
   response: BaseStream.Model['GetResponse']
-): response is ClassicStream.GetResponse => ClassicStream.Definition.is(response.stream);
+): response is ClassicStream.GetResponse =>
+  ClassicStream.Definition.is(response.stream) &&
+  'privileges' in response &&
+  typeof response.privileges === 'object' &&
+  response.privileges !== null &&
+  'read_failure_store' in response.privileges &&
+  'manage_failure_store' in response.privileges;

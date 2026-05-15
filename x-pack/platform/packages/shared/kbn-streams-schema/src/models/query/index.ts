@@ -130,4 +130,5 @@ QueryStream.Definition.is = (
 // Optimized implementation for GetResponse check - avoids full DeepStrict Zod parse
 QueryStream.GetResponse.is = (
   response: BaseStream.Model['GetResponse']
-): response is QueryStream.GetResponse => QueryStream.Definition.is(response.stream);
+): response is QueryStream.GetResponse =>
+  'type' in response.stream && response.stream.type === 'query';
