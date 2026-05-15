@@ -35,11 +35,14 @@ export function getSuggestionProvider(
     triggerCharacters: ESQL_AUTOCOMPLETE_TRIGGER_CHARS,
     async provideCompletionItems(
       model: monaco.editor.ITextModel,
-      position: monaco.Position
+      position: monaco.Position,
+      _context: monaco.languages.CompletionContext,
+      token: monaco.CancellationToken
     ): Promise<monaco.languages.CompletionList> {
       return createMonacoProvider({
         model,
-        run: async (safeModel) => {
+        token,
+        run: async (safeModel, abortIfCancelled) => {
           // Avoid returning suggestions for unfocused editors sharing the same model.
           const editors = monaco.editor
             .getEditors()
@@ -59,7 +62,7 @@ export function getSuggestionProvider(
           const offset = monacoPositionToOffset(fullText, position);
 
           const computeStart = performance.now();
-          const suggestions = await suggest(fullText, offset, resolvedDeps);
+          const suggestions = await suggest(fullText, offset, resolvedDeps, abortIfCancelled);
 
           const suggestionsWithCustomCommands = filterSuggestionsWithCustomCommands(suggestions);
           if (suggestionsWithCustomCommands.length) {

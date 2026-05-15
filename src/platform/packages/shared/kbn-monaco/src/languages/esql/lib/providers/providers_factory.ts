@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+// eslint-disable-next-line max-classes-per-file
 import type { monaco } from '../../../../monaco_imports';
 
 export interface CreateProviderParams<T> {
   model: monaco.editor.ITextModel;
-  run: (safeModel: monaco.editor.ITextModel) => T | Promise<T>;
+  token?: monaco.CancellationToken;
+  run: (safeModel: monaco.editor.ITextModel, abortIfCancelled: () => void) => T | Promise<T>;
   emptyResult: T;
 }
 
@@ -19,6 +21,13 @@ export class DisposedModelAccessError extends Error {
   constructor() {
     super('DisposedModelAccessError');
     this.name = 'DisposedModelAccessError';
+  }
+}
+
+export class AbortedDueToCancellationError extends Error {
+  constructor() {
+    super('Execution aborted due to Moncao cancellation');
+    this.name = 'AbortedDueToCancellationError';
   }
 }
 
@@ -33,18 +42,27 @@ export class DisposedModelAccessError extends Error {
  */
 export async function createMonacoProvider<T>({
   model,
+  token,
   run,
   emptyResult,
 }: CreateProviderParams<T>): Promise<T> {
   const safeModel = createDisposedSafeModel(model);
+  const [abortIfCancelled, dispose] = createAbortIfCancelledFn(token);
+
   try {
-    const result = await Promise.resolve(run(safeModel));
+    const result = await Promise.resolve(run(safeModel, abortIfCancelled));
     return model.isDisposed() ? emptyResult : result;
   } catch (error) {
-    if (error instanceof DisposedModelAccessError) {
+    if (
+      error instanceof DisposedModelAccessError ||
+      error instanceof AbortedDueToCancellationError
+    ) {
+      console.error(error);
       return emptyResult;
     }
     throw error;
+  } finally {
+    dispose();
   }
 }
 
@@ -78,4 +96,31 @@ function assertModelIsUsable(target: monaco.editor.ITextModel) {
   if (target.isDisposed()) {
     throw new DisposedModelAccessError();
   }
+}
+
+/**
+ * Creates a function that throws an error if the cancellation token is triggered by Monaco.
+ * The exception is caught by the providers factory to return an empty result.
+ * @param token
+ * @returns
+ */
+function createAbortIfCancelledFn(token?: monaco.CancellationToken) {
+  const abortController = new AbortController();
+  const cancellationListener = token?.onCancellationRequested(() => {
+    abortController.abort();
+  });
+  if (token?.isCancellationRequested) {
+    abortController.abort();
+  }
+
+  const abortIfCancelled = () => {
+    if (abortController.signal.aborted) {
+      throw new AbortedDueToCancellationError();
+    }
+  };
+
+  const dispose = () => {
+    cancellationListener?.dispose();
+  };
+  return [abortIfCancelled, dispose];
 }
