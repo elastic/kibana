@@ -120,7 +120,6 @@ class DashboardUserActivitySession {
           ...(meta && { meta }),
         }),
         method: 'POST',
-        asSystemRequest: true,
         ...(type === 'view' && { keepalive: true }), // allows views to be tracked on refresh + tab close
       }
     );

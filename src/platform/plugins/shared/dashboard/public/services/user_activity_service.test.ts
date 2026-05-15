@@ -30,7 +30,6 @@ describe(`user activity service`, () => {
       expect(coreServices.http.post).toBeCalledWith(
         expect.stringContaining('/internal/dashboard/user_activity/view/'),
         {
-          asSystemRequest: true,
           keepalive: true,
           method: 'POST',
           body: JSON.stringify({
@@ -56,7 +55,6 @@ describe(`user activity service`, () => {
       expect(coreServices.http.post).toBeCalledWith(
         expect.stringContaining('/internal/dashboard/user_activity/refresh/'),
         {
-          asSystemRequest: true,
           method: 'POST',
           body: JSON.stringify({
             title: 'My Dashboard',
