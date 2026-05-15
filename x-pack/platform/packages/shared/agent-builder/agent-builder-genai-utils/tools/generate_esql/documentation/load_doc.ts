@@ -9,7 +9,7 @@ import Path from 'path';
 import { readFile } from 'fs/promises';
 
 export enum EsqlDocEntry {
-  syntax = 'syntax.txt',
+  syntax = 'syntax.md',
   examples = 'examples.md',
   tsQueries = 'ts_queries.md',
 }

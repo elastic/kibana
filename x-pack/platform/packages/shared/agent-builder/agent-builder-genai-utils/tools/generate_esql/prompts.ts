@@ -142,7 +142,7 @@ const getDocumentationSection = ({
 }): string => {
   const isTsdb = resource.isTsdb || tsDocRequested;
 
-  return `## ES|QL Documentation
+  return `# ES|QL Documentation
 
 <syntax-overview>
 ${documentation.getDocContent(EsqlDocEntry.syntax)}
