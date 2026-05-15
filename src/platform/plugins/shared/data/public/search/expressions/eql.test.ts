@@ -46,6 +46,12 @@ describe('eql', () => {
       {
         search: {
           search: jest.fn((params: any) => of({ rawResponse: params })),
+          typed: {
+            searchEQL: jest.fn(async (params: any) => ({
+              rawResponse: params,
+              requestParams: params,
+            })),
+          },
         },
       },
     ];
