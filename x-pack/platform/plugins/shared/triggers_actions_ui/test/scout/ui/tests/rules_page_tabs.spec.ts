@@ -13,8 +13,8 @@ const RULES_LIST_SUBJ = 'rulesList';
 const RULES_TAB_SUBJ = 'rulesTab';
 const LOGS_TAB_SUBJ = 'logsTab';
 
-const RULES_URL_RE = /\/app\/rules(\/|$|\?|#)/;
-const LOGS_URL_RE = /\/app\/rules\/logs(\/|$|\?|#)/;
+const RULES_URL_RE = /\/app\/management\/insightsAndAlerting\/triggersActions(\/|$|\?|#)/;
+const LOGS_URL_RE = /\/app\/management\/insightsAndAlerting\/triggersActions\/logs(\/|$|\?|#)/;
 
 test.describe('Rules page tab functionality', { tag: tags.stateful.classic }, () => {
   let createdRuleId: string | undefined;
@@ -39,7 +39,7 @@ test.describe('Rules page tab functionality', { tag: tags.stateful.classic }, ()
 
   test('selects the Rules tab by default on load', async ({ page }) => {
     expect(page.url()).toMatch(RULES_URL_RE);
-    expect(page.url()).not.toContain('/app/rules/logs');
+    expect(page.url()).not.toMatch(LOGS_URL_RE);
     await expect(page.testSubj.locator(RULES_LIST_SUBJ)).toBeVisible();
   });
 
@@ -47,19 +47,19 @@ test.describe('Rules page tab functionality', { tag: tags.stateful.classic }, ()
     await expect(page.testSubj.locator(LOGS_TAB_SUBJ)).toBeVisible();
   });
 
-  test('navigates to /app/rules/logs when clicking the Logs tab', async ({ page }) => {
+  test('navigates to rules logs tab when clicking the Logs tab', async ({ page }) => {
     await page.testSubj.click(LOGS_TAB_SUBJ);
     await page.waitForURL(LOGS_URL_RE);
-    expect(page.url()).toContain('/app/rules/logs');
+    expect(page.url()).toMatch(LOGS_URL_RE);
   });
 
-  test('navigates back to /app/rules when clicking the Rules tab', async ({ page }) => {
+  test('navigates back to rules list when clicking the Rules tab', async ({ page }) => {
     await page.testSubj.click(LOGS_TAB_SUBJ);
     await page.waitForURL(LOGS_URL_RE);
 
     await page.testSubj.click(RULES_TAB_SUBJ);
     await page.waitForURL(RULES_URL_RE);
-    expect(page.url()).not.toContain('/app/rules/logs');
+    expect(page.url()).not.toMatch(LOGS_URL_RE);
     await expect(page.testSubj.locator(RULES_LIST_SUBJ)).toBeVisible();
   });
 
@@ -71,6 +71,6 @@ test.describe('Rules page tab functionality', { tag: tags.stateful.classic }, ()
 
     await page.testSubj.click(RULES_TAB_SUBJ);
     await page.waitForURL(RULES_URL_RE);
-    expect(page.url()).not.toContain('/app/rules/logs');
+    expect(page.url()).not.toMatch(LOGS_URL_RE);
   });
 });
