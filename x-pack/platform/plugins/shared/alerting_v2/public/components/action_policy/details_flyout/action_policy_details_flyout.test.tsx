@@ -195,7 +195,7 @@ describe('ActionPolicyDetailsFlyout', () => {
         policy: createPolicy({
           groupingMode: 'per_episode',
           groupBy: null,
-          throttle: { strategy: 'on_status_change' },
+          throttle: { strategy: 'on_status_change', interval: null },
         }),
       });
 
