@@ -1893,27 +1893,7 @@ export const getSavedObjectTypes = (
       },
       modelVersions: {
         1: {
-          changes: [
-            {
-              type: 'mappings_addition',
-              addedMappings: {
-                provider: { type: 'keyword' },
-                connectionId: { type: 'keyword' },
-                mechanisms: { type: 'keyword' },
-                deploymentId: { type: 'keyword' },
-                deploymentName: { type: 'keyword' },
-                services: { type: 'keyword' },
-                status: { type: 'keyword' },
-                statusMessage: { type: 'text' },
-                attemptCount: { type: 'integer' },
-                vars: { type: 'flattened' },
-                serviceVars: { type: 'flattened' },
-                packagePolicyIds: { type: 'keyword' },
-                createdAt: { type: 'date' },
-                updatedAt: { type: 'date' },
-              },
-            },
-          ],
+          changes: [],
           schemas: {
             forwardCompatibility: CloudOnboardingDeploymentSchemaV1.extends(
               {},
