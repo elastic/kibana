@@ -41,9 +41,10 @@ export const ActionPolicyCanvasContent = ({
   const basePath = useService(CoreStart('http')).basePath;
   const notifications = useService(CoreStart('notifications'));
 
-  const { data: rawData, origin: savedObjectId } = attachment;
+  const { data: rawData, origin } = attachment;
   const data = rawData as ActionPolicyCanvasData;
-  const isPersisted = isPersistedSavedObject(savedObjectId);
+  // Origin is only set if the action policy has been persisted
+  const isPersisted = Boolean(origin);
 
   const [mounted, setMounted] = useState(false);
   const [dependenciesReady, setDependenciesReady] = useState<boolean | null>(null);
@@ -140,8 +141,6 @@ export const ActionPolicyCanvasContent = ({
       return;
     }
 
-    const policyId = savedObjectId;
-
     registerActionButtons([
       {
         label: i18n.translate('xpack.alertingV2.actionPolicyAttachment.updatePolicy', {
@@ -157,7 +156,7 @@ export const ActionPolicyCanvasContent = ({
           : undefined,
         handler: async () => {
           try {
-            await actionPoliciesApi.upsertActionPolicy(policyId, buildActionPolicyPayload(data));
+            await actionPoliciesApi.upsertActionPolicy(data.id, buildActionPolicyPayload(data));
             notifications.toasts.addSuccess(
               i18n.translate('xpack.alertingV2.actionPolicyAttachment.updatedSuccess', {
                 defaultMessage: 'Policy "{name}" updated',
@@ -181,14 +180,13 @@ export const ActionPolicyCanvasContent = ({
         icon: 'popout',
         type: ActionButtonType.OVERFLOW,
         handler: () => {
-          application.navigateToUrl(basePath.prepend(paths.actionPolicyEdit(policyId)));
+          application.navigateToUrl(basePath.prepend(paths.actionPolicyEdit(data.id)));
         },
       },
     ]);
   }, [
     mounted,
     isPersisted,
-    savedObjectId,
     registerActionButtons,
     updateOrigin,
     actionPoliciesApi,
@@ -208,10 +206,6 @@ export const ActionPolicyCanvasContent = ({
       <ActionPolicyDefinitionList policy={data} />
     </EuiPanel>
   );
-};
-
-const isPersistedSavedObject = (savedObjectId: string | undefined): savedObjectId is string => {
-  return Boolean(savedObjectId);
 };
 
 /**

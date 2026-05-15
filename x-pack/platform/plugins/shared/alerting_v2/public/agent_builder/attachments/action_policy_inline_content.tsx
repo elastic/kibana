@@ -14,8 +14,8 @@ import type { ActionPolicyAttachment } from './action_policy_attachment_definiti
 export const ActionPolicyInlineContent: React.FC<AttachmentRenderProps<ActionPolicyAttachment>> = ({
   attachment,
 }) => {
-  const { data, origin: savedObjectId } = attachment;
-  const isDraft = !savedObjectId;
+  const { data, origin } = attachment;
+  const isDraft = !origin;
   const isEnabled = data.enabled ?? true;
   const { label: status, color: statusColor } = getStatusInfo(isDraft, isEnabled);
 

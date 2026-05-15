@@ -70,34 +70,27 @@ jest.mock('../../components/action_policy/details_flyout/action_policy_definitio
   ),
 }));
 
-const createAttachment = (
-  overrides: {
-    origin?: string;
-    enabled?: boolean;
-    dataId?: string;
-    version?: string;
-    destinations?: Array<{ type: 'workflow'; id: string }>;
-    matcher?: string | null;
-  } = {}
-) => ({
+const defaultData = {
+  name: 'My Policy',
+  type: 'global' as const,
+  description: 'A test policy',
+  destinations: [{ type: 'workflow' as const, id: 'wf-1' }],
+  matcher: 'rule.id: "abc"',
+  groupingMode: 'per_episode' as const,
+  throttle: { strategy: 'on_status_change' as const },
+  tags: ['tag1'],
+};
+
+const createAttachment = ({
+  origin,
+  data,
+}: { origin?: string; data?: Record<string, unknown> } = {}) => ({
   id: 'att-1',
   type: 'action_policy' as const,
   versions: [],
   current_version: 1,
-  origin: overrides.origin,
-  data: {
-    name: 'My Policy',
-    type: 'global' as const,
-    description: 'A test policy',
-    destinations: overrides.destinations ?? [{ type: 'workflow' as const, id: 'wf-1' }],
-    matcher: overrides.matcher !== undefined ? overrides.matcher : 'rule.id: "abc"',
-    groupingMode: 'per_episode' as const,
-    throttle: { strategy: 'on_status_change' as const },
-    tags: ['tag1'],
-    enabled: overrides.enabled,
-    ...(overrides.dataId ? { id: overrides.dataId } : {}),
-    ...(overrides.version ? { version: overrides.version } : {}),
-  } as any,
+  origin,
+  data: { ...defaultData, ...data } as any,
 });
 
 const renderCanvas = async (
@@ -176,7 +169,7 @@ describe('ActionPolicyCanvasContent', () => {
     it('Create policy handler calls upsertActionPolicy and updateOrigin', async () => {
       const updateOrigin = jest.fn().mockResolvedValue(undefined);
       const { registerActionButtons } = await renderCanvas(
-        { dataId: 'pre-assigned-id' },
+        { data: { id: 'pre-assigned-id' } },
         { updateOrigin }
       );
 
@@ -195,7 +188,7 @@ describe('ActionPolicyCanvasContent', () => {
     it('shows a danger toast when create fails', async () => {
       mockUpsertActionPolicy.mockRejectedValueOnce({ message: 'Server error' });
 
-      const { registerActionButtons } = await renderCanvas({ dataId: 'pre-assigned-id' });
+      const { registerActionButtons } = await renderCanvas({ data: { id: 'pre-assigned-id' } });
       const buttons = getLastRegisteredButtons(registerActionButtons);
       const createButton = buttons.find((b) => b.label === 'Create policy')!;
       await createButton.handler();
@@ -209,7 +202,7 @@ describe('ActionPolicyCanvasContent', () => {
     it('registers Update Policy button', async () => {
       const { registerActionButtons } = await renderCanvas({
         origin: 'policy-123',
-        version: 'v1',
+        data: { id: 'policy-123', version: 'v1' },
       });
       const buttons = getLastRegisteredButtons(registerActionButtons);
       expect(buttons.find((b) => b.label === 'Update Policy')).toBeDefined();
@@ -218,7 +211,7 @@ describe('ActionPolicyCanvasContent', () => {
     it('registers View in Policies button', async () => {
       const { registerActionButtons } = await renderCanvas({
         origin: 'policy-123',
-        version: 'v1',
+        data: { id: 'policy-123', version: 'v1' },
       });
       const buttons = getLastRegisteredButtons(registerActionButtons);
       expect(buttons.find((b) => b.label === 'View in Policies')).toBeDefined();
@@ -227,16 +220,16 @@ describe('ActionPolicyCanvasContent', () => {
     it('does not register Create policy button', async () => {
       const { registerActionButtons } = await renderCanvas({
         origin: 'policy-123',
-        version: 'v1',
+        data: { id: 'policy-123', version: 'v1' },
       });
       const buttons = getLastRegisteredButtons(registerActionButtons);
       expect(buttons.find((b) => b.label === 'Create policy')).toBeUndefined();
     });
 
-    it('Update Policy handler calls upsertActionPolicy with the origin id', async () => {
+    it('Update Policy handler calls upsertActionPolicy with data.id', async () => {
       const { registerActionButtons } = await renderCanvas({
         origin: 'policy-123',
-        version: 'v1',
+        data: { id: 'policy-123', version: 'v1' },
       });
 
       const buttons = getLastRegisteredButtons(registerActionButtons);
@@ -255,7 +248,7 @@ describe('ActionPolicyCanvasContent', () => {
 
       const { registerActionButtons } = await renderCanvas({
         origin: 'policy-123',
-        version: 'v1',
+        data: { id: 'policy-123', version: 'v1' },
       });
 
       const buttons = getLastRegisteredButtons(registerActionButtons);
@@ -266,10 +259,10 @@ describe('ActionPolicyCanvasContent', () => {
       expect(mockAddSuccess).not.toHaveBeenCalled();
     });
 
-    it('View in Policies handler navigates to the policy edit page', async () => {
+    it('View in Policies handler navigates using data.id', async () => {
       const { registerActionButtons } = await renderCanvas({
         origin: 'policy-123',
-        version: 'v1',
+        data: { id: 'policy-123', version: 'v1' },
       });
 
       const buttons = getLastRegisteredButtons(registerActionButtons);
@@ -313,7 +306,9 @@ describe('ActionPolicyCanvasContent', () => {
     });
 
     it('enables the save button when there are no workflow destinations and no matcher rule', async () => {
-      const { registerActionButtons } = await renderCanvas({ destinations: [], matcher: null });
+      const { registerActionButtons } = await renderCanvas({
+        data: { destinations: [], matcher: null },
+      });
       const buttons = getLastRegisteredButtons(registerActionButtons);
       const createButton = buttons.find((b) => b.label === 'Create policy')!;
       expect(createButton.disabled).toBeFalsy();
@@ -323,10 +318,12 @@ describe('ActionPolicyCanvasContent', () => {
       mockGetWorkflow.mockResolvedValue({ id: 'wf-1', name: 'Workflow' });
 
       await renderCanvas({
-        destinations: [
-          { type: 'workflow', id: 'wf-1' },
-          { type: 'workflow', id: 'wf-2' },
-        ],
+        data: {
+          destinations: [
+            { type: 'workflow', id: 'wf-1' },
+            { type: 'workflow', id: 'wf-2' },
+          ],
+        },
       });
 
       expect(mockGetWorkflow).toHaveBeenCalledWith('wf-1', expect.any(AbortSignal));
@@ -335,14 +332,14 @@ describe('ActionPolicyCanvasContent', () => {
     });
 
     it('checks the rule referenced in the matcher via RulesApi.getRule', async () => {
-      await renderCanvas({ matcher: 'rule.id: "my-rule-id"' });
+      await renderCanvas({ data: { matcher: 'rule.id: "my-rule-id"' } });
 
       expect(mockGetRule).toHaveBeenCalledWith('my-rule-id', expect.any(AbortSignal));
       expect(mockGetRule).toHaveBeenCalledTimes(1);
     });
 
     it('does not check a rule when the matcher has no rule.id clause', async () => {
-      await renderCanvas({ matcher: 'rule.tags: "production"' });
+      await renderCanvas({ data: { matcher: 'rule.tags: "production"' } });
 
       expect(mockGetRule).not.toHaveBeenCalled();
     });
