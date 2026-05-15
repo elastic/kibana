@@ -39,6 +39,7 @@ import {
   hasExistsQuery,
   hasMatchQuery,
   hasMatchPhraseQuery,
+  isValidRangeBoundValue,
   isPhrasesFilter,
   isCombinedFilter,
 } from './type_guards';
@@ -146,10 +147,10 @@ function convertToSimpleCondition(storedFilter: StoredFilter): AsCodeConditionFi
       field,
       operator: ASCODE_FILTER_OPERATOR.RANGE,
       value: {
-        ...(range.gte != null && { gte: range.gte as number | string }),
-        ...(range.lte != null && { lte: range.lte as number | string }),
-        ...(range.gt != null && { gt: range.gt as number | string }),
-        ...(range.lt != null && { lt: range.lt as number | string }),
+        ...(isValidRangeBoundValue(range.gte) && { gte: range.gte }),
+        ...(isValidRangeBoundValue(range.lte) && { lte: range.lte }),
+        ...(isValidRangeBoundValue(range.gt) && { gt: range.gt }),
+        ...(isValidRangeBoundValue(range.lt) && { lt: range.lt }),
         ...(range.format !== undefined && { format: range.format as string }),
       },
       ...(meta.negate && { negate: true }),
