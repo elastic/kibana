@@ -81,6 +81,25 @@ export interface HuntBehaviorArticleContext {
   sample_events?: string[];
   /** Time window the Tier 1 hunt searched, ISO-8601. */
   time_range?: { from: string; to: string };
+  /**
+   * Atomic ES|QL rule proposals already generated for this Tier 1 hit
+   * set (see `common/threat_intelligence/hub/rule_export.ts`'s
+   * `proposeAtomicEsqlFromIocs`). When provided, the LLM is steered
+   * away from re-proposing the same atomic detection as a behavioral
+   * rule — Tier 2 should add value over Tier 1 (broader patterns,
+   * cross-event correlations) rather than duplicating the IOC-direct
+   * coverage the orchestrator will already surface to the analyst.
+   *
+   * Only the rule name + IOC type/value are threaded into the prompt;
+   * the full ES|QL body is intentionally omitted to keep the LLM's
+   * context window focused on the analytical signal rather than the
+   * rule scaffolding.
+   */
+  proposed_atomic_rules?: Array<{
+    rule_name: string;
+    ioc_type: string;
+    ioc_value: string;
+  }>;
 }
 
 export interface HuntBehaviorParams {
@@ -159,7 +178,14 @@ const CONTEXT_PREAMBLE = `When environment context is provided, prefer technique
 report text describes AND the observed entities (hosts, users, sample events) plausibly exhibit.
 Use the context to refine technique IDs (e.g. choose a specific sub-technique that matches an
 observed process/command pattern) — do NOT invent IDs that aren't in the report text just because
-the environment is noisy.`;
+the environment is noisy.
+
+When a "Proposed atomic rules" block is present, the listed IOCs are ALREADY covered by atomic
+ES|QL detections the orchestrator will surface to the analyst. Your job is to add value beyond
+that coverage: propose behaviors that catch the same activity through *patterns* (process trees,
+command-line signatures, parent/child relationships, event sequences) rather than echoing the
+atomic IOC match. If a candidate technique would only fire on the exact IOC values already
+listed, drop it — it's not a corroboration signal, it's a duplicate.`;
 
 const buildFindingId = (techniqueId: string, reportId?: string): string =>
   `${reportId ?? 'anon'}:${techniqueId}`;
@@ -180,6 +206,7 @@ const renderArticleContext = (context: HuntBehaviorArticleContext | undefined): 
     affected_users: users,
     sample_events: events,
     time_range,
+    proposed_atomic_rules: atomicRules,
   } = context;
   if (time_range) {
     lines.push(`- Time window searched: ${time_range.from} → ${time_range.to}`);
@@ -194,6 +221,18 @@ const renderArticleContext = (context: HuntBehaviorArticleContext | undefined): 
     lines.push('- Sample environment events:');
     for (const evt of events.slice(0, 5)) {
       lines.push(`    • ${evt}`);
+    }
+  }
+  if (atomicRules?.length) {
+    // Cap at 10 atomic rules in the prompt — the prompt grows linearly
+    // with the IOC count and the LLM only needs a representative sample
+    // to recognise the "already covered atomically" pattern.
+    lines.push('- Proposed atomic rules (already drafted from Tier 1 IOC hits):');
+    for (const rule of atomicRules.slice(0, 10)) {
+      lines.push(`    • ${rule.rule_name}  [${rule.ioc_type}=${rule.ioc_value}]`);
+    }
+    if (atomicRules.length > 10) {
+      lines.push(`    • … and ${atomicRules.length - 10} more atomic rule(s).`);
     }
   }
   if (lines.length === 0) return '';

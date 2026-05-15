@@ -42,6 +42,18 @@ steps:
         # treated as a real agent id by `agentRegistry.has(...)` and
         # surfaces as `Agent "default" not found or not available` —
         # there is no agent registered under that id.
+        #
+        # Two-pass prompt: the agent (1) calls
+        # `threat_intel.synthesize_advisory` with `persist: true` to mint
+        # an executive-summary advisory over the same time window and
+        # severity floor as the digest, then (2) calls
+        # `threat_intel.search_reports` for the per-report table. The
+        # advisory step is graceful — `no_reports` / `no_inference`
+        # statuses (see `services/synthesize_advisory.ts`) leave the
+        # `advisory_id` absent and the agent renders the digest without
+        # the lede section. The `advisory_id` returned by step 1 is
+        # threaded into the structured output so `archive_digest` can
+        # persist it for dashboard cross-linking.
         with:
           message: >-
             Use the threat-intelligence skill and tools as needed.
@@ -49,16 +61,41 @@ steps:
             Build the recurring digest for subscription {{ foreach.item._id }}.
             Tags: {{ foreach.item._source.tags | join: ", " }}.
             Min severity: {{ foreach.item._source.severity_threshold }}.
-            Time range: last 7 days.
+            Time range: last 7 days
+            ({{ now | date: '%s' | minus: 604800 | date: '%Y-%m-%dT%H:%M:%SZ' }}
+            to {{ now | date: '%Y-%m-%dT%H:%M:%SZ' }}).
 
-            Use threat_intel.search_reports to gather the matching reports.
-            Render the result as a threat-intel-mitre-heatmap attachment, then a
+            STEP 1 — Executive summary. Call
+            `threat_intel.synthesize_advisory` with that same time_range,
+            `min_severity` set to this subscription's severity_threshold, and
+            `persist: true` so the advisory is written to
+            `.kibana-threat-intel-advisories` for dashboard cross-linking.
+            If any of this subscription's tags happen to map to the closed
+            `THREAT_CATEGORIES` enum (ransomware, supply_chain,
+            credential_access, etc.), pass them as `categories[]` to focus the
+            synthesis — otherwise omit `categories`. If the response status is
+            `advisory_persisted` or `advisory_generated`, use `theme_title` as
+            the H2 header, then `narrative_markdown` as the lede paragraph(s),
+            then `recommended_actions` as a bulleted "What you should do this
+            week" list at the TOP of the digest, and forward the returned
+            `advisory_id` (when present) on the structured output. If the
+            status is `no_reports` or `no_inference`, skip the lede section
+            entirely and leave `advisory_id` empty — DO NOT invent narrative
+            text in the no_inference fallback.
+
+            STEP 2 — Report detail. Call `threat_intel.search_reports` to
+            gather the matching reports. Render the result as a
+            threat-intel-mitre-heatmap attachment, then a
             threat-intel-report-table attachment, then a short prose summary
             and (if time range > 7 days) a threat-intel-severity-timeline.
 
-            Respond with JSON matching the provided schema: digest_markdown must
-            contain the full digest as markdown for archival and delivery, and
-            report_ids must list the threat report ids included in the digest.
+            Respond with JSON matching the provided schema: digest_markdown
+            must contain the full digest as markdown for archival and
+            delivery (including the executive-summary section from STEP 1
+            when present), report_ids must list the threat report ids
+            included in the digest, and advisory_id (optional) must echo
+            the `_id` returned by `threat_intel.synthesize_advisory` when
+            persisted — omit it on the graceful-degradation paths.
           schema:
             type: object
             properties:
@@ -70,6 +107,13 @@ steps:
                 items:
                   type: string
                 description: Kibana threat report ids included in the digest
+              advisory_id:
+                type: string
+                description: >-
+                  Optional. _id of the row in
+                  .kibana-threat-intel-advisories the digest cites as its
+                  executive summary. Absent when synthesize_advisory
+                  returned no_reports / no_inference.
             required:
               - digest_markdown
               - report_ids
@@ -102,6 +146,20 @@ steps:
               to: "{{ now | date: '%Y-%m-%dT%H:%M:%SZ' }}"
             content_markdown: "{{ steps.render_digest.output.structured_output.digest_markdown }}"
             report_ids: "${{ steps.render_digest.output.structured_output.report_ids }}"
+            # `advisory_id` is optional. The `"${{ … }}"` form goes
+            # through `WorkflowTemplatingEngine.evaluateExpression` →
+            # `liquid.evalValueSync`, which returns `undefined` for a
+            # missing property on the structured output (the
+            # graceful-degradation paths in
+            # `services/synthesize_advisory.ts` — `no_reports` and
+            # `no_inference` — leave `advisory_id` off the LLM's
+            # response). The ES client's JSON serialiser strips
+            # `undefined` values, so the document indexed in those cases
+            # simply omits the field — which is exactly what the strict
+            # mapping expects for an unset optional keyword. When the
+            # advisory IS persisted, the `_id` round-trips as a plain
+            # string and is stored verbatim.
+            advisory_id: "${{ steps.render_digest.output.structured_output.advisory_id }}"
             delivered: false
         on-failure:
           continue: true

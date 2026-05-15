@@ -234,29 +234,89 @@ steps:
       # variants and same-campaign reports that hit different feeds. Future
       # iterations can layer a partial-overlap correlation on top.
       #
-      # Skipped when no IOCs were extracted from this report: an empty
-      # `ioc_set_hash` would degenerate the `term` clause into a match on
-      # the empty string, returning every prior empty-IOC report as
-      # "related" — false positives that would poison the
-      # `related_reports` provenance field. The `if` guard short-circuits
-      # cleanly; the persist step's `default` keeps the downstream doc
-      # numerically clean.
+      # Three-tier relatedness scoring. Higher boost = stronger
+      # confidence the two reports describe the same incident:
+      #
+      #  1. **Exact IOC set hash** (boost 5) — verbatim match on the
+      #     stage-1 deterministic digest. Zero-FP but very low recall
+      #     in practice (two reports rarely list identical IOC sets).
+      #  2. **Partial IOC value overlap** (boost 2, score_mode=sum) —
+      #     `nested terms` over `extracted.iocs.value`. Each shared IOC
+      #     contributes 1.0 × boost to `_score`, so a report sharing 5
+      #     of this report's IOCs ranks above one that shares 1. The
+      #     `extract_iocs` service already filters private IPs and the
+      #     common-noise domains (`example.com`, `github.com`, …), so a
+      #     single accidental overlap on `8.8.8.8` won't poison the
+      #     ranking.
+      #  3. **Partial technique overlap** (boost 1, score_mode=sum) —
+      #     `nested terms` over `extracted.behaviors.technique_id` (the
+      #     field this workflow actually writes; `extracted.ttps.techniques`
+      #     is populated by `hit_provenance_backfill` and is intentionally
+      #     out of scope here). Catches "same tradecraft, different IOCs"
+      #     relations.
+      #
+      # `minimum_should_match: 1` means at least one signal must match;
+      # the resulting `_score` ranking gives the persisted
+      # `related_reports[]` a meaningful order without an explicit sort
+      # clause. `size: 50` widens the candidate pool slightly versus
+      # the v1 exact-match query — downstream consumers cap their own
+      # render count, so it's safe to overshoot.
+      #
+      # Skipped when no IOCs were extracted from this report: with no
+      # IOC values to seed signals (1) and (2), the partial-overlap
+      # query would still return technique-only matches via signal (3)
+      # — but a report with zero IOCs is by construction also a poor
+      # *target* for relatedness scoring (no anchor for downstream
+      # corroboration). The `if` guard preserves the v1 semantics; an
+      # IOC-light + behavior-rich report still triggers cross-report
+      # correlation via the `hunt_for_threat` orchestrator path, which
+      # has its own (more expensive, LLM-grounded) recall mechanism.
       - name: find_related_reports
         type: elasticsearch.search
         if: "steps.extract_iocs.output.ioc_set_hash : *"
         with:
           index: .kibana-threat-reports
-          size: 25
+          size: 50
           _source: false
           query:
             bool:
-              must:
-                - term:
-                    extracted.ioc_set_hash: "{{ steps.extract_iocs.output.ioc_set_hash }}"
+              minimum_should_match: 1
               must_not:
                 - ids:
                     values:
                       - "{{ foreach.item._id }}"
+              should:
+                # Signal 1 — exact IOC set hash. Highest-confidence;
+                # term query stays cheap (single keyword equality).
+                - term:
+                    extracted.ioc_set_hash:
+                      value: "{{ steps.extract_iocs.output.ioc_set_hash }}"
+                      boost: 5
+                # Signal 2 — partial IOC value overlap. `"${{ ... | map: 'value' }}"`
+                # routes through `evaluateExpression` so the JS array is
+                # passed through verbatim; the `terms` clause then handles
+                # the array natively. `score_mode: sum` makes _score grow
+                # linearly with the overlap count (each matched IOC adds
+                # 1.0 × boost to the parent score) so reports sharing many
+                # IOCs outrank reports sharing one.
+                - nested:
+                    path: extracted.iocs
+                    score_mode: sum
+                    boost: 2
+                    query:
+                      terms:
+                        extracted.iocs.value: "${{ steps.extract_iocs.output.iocs | map: 'value' }}"
+                # Signal 3 — partial technique overlap. Same `score_mode: sum`
+                # rationale as signal 2 — more shared techniques means
+                # higher score. Safe against `behaviors=[]` (empty
+                # `terms` clause is a no-op in `should`).
+                - nested:
+                    path: extracted.behaviors
+                    score_mode: sum
+                    boost: 1
+                    query:
+                      terms:
+                        extracted.behaviors.technique_id: "${{ steps.extract_behaviors.output.structured_output.behaviors | map: 'technique_id' }}"
         on-failure:
           # If the field doesn't exist yet (first run after the v2 mapping bump)
           # treat the related-reports list as empty rather than failing the doc.

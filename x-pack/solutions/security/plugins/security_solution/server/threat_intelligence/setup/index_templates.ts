@@ -112,8 +112,20 @@ import {
  * list, and the report ids that fed the synthesis. No changes to the
  * threat-reports data stream mapping in this bump — companion index
  * additions are always backwards-compatible.
+ *
+ * v11: adds `advisory_id` (keyword) to the digests companion index
+ * (`.kibana-threat-intel-digests`). Populated by `digest_delivery` when
+ * the agent calls `threat_intel.synthesize_advisory` (with
+ * `persist: true`) at the top of the per-subscription render step and
+ * weaves the resulting executive summary into the digest markdown.
+ * Lets the dashboard cross-link each archived digest back to the
+ * advisory row it cites — and lets the per-subscription history pane
+ * render "this digest is built around the <theme_title> advisory"
+ * without re-running the synthesis. Companion-index addition; the
+ * mapping is `dynamic: 'strict'` so the field MUST be declared up-front
+ * before any write attempts it.
  */
-const TEMPLATE_VERSION = 10;
+const TEMPLATE_VERSION = 11;
 
 /** Keyword sentinel meaning "visible from every space". */
 export const SPACE_ID_GLOBAL = '*' as const;
@@ -478,6 +490,14 @@ const COMPANION_INDEX_TEMPLATES: Array<{
             },
             content_markdown: { type: 'text' },
             report_ids: { type: 'keyword' },
+            // `_id` of the row in `.kibana-threat-intel-advisories` the
+            // agent cited as the executive summary for this digest.
+            // Optional — absent when `synthesize_advisory` returned
+            // `no_reports` / `no_inference` (graceful-degradation paths
+            // documented in `services/synthesize_advisory.ts`). See
+            // `workflows/digest_delivery.yaml`'s `archive_digest` step
+            // for how it's populated.
+            advisory_id: { type: 'keyword' },
             delivered: { type: 'boolean' },
             delivery_error: { type: 'text', index: false },
             space_id: { type: 'keyword' },

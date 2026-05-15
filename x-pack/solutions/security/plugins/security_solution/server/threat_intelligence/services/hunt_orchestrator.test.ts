@@ -431,6 +431,46 @@ describe('huntOrchestrated', () => {
       expect(result.next_step).toContain('proposed_atomic_rules');
     });
 
+    it('forwards proposed_atomic_rules into huntBehavior.article_context so Tier 2 LLM avoids duplicating Tier 1 coverage', async () => {
+      huntForThreatMock.mockResolvedValueOnce(tier1WithHits());
+      huntBehaviorMock.mockResolvedValueOnce(tier2Result());
+      await huntOrchestrated(
+        buildEsClient({ body_text: 'body', rank_score: 0.5 }),
+        buildScopedModel(),
+        logger,
+        { report_id: 'report-1' }
+      );
+      expect(huntBehaviorMock).toHaveBeenCalledTimes(1);
+      const [, , params] = huntBehaviorMock.mock.calls[0];
+      expect(params.article_context).toBeDefined();
+      expect(params.article_context?.proposed_atomic_rules).toBeDefined();
+      expect(params.article_context?.proposed_atomic_rules).toHaveLength(2);
+      const atomicRules = params.article_context?.proposed_atomic_rules ?? [];
+      expect(atomicRules[0]).toEqual(
+        expect.objectContaining({ ioc_type: 'ip', ioc_value: '198.51.100.5' })
+      );
+      // Verify the orchestrator strips the full ES|QL body and severity
+      // before forwarding — the LLM only sees the minimal shape declared
+      // on `HuntBehaviorArticleContext.proposed_atomic_rules`.
+      expect(atomicRules[0]).not.toHaveProperty('esql');
+      expect(atomicRules[0]).not.toHaveProperty('severity');
+    });
+
+    it('omits proposed_atomic_rules from article_context when Tier 1 had no atomic rules (techniques-only hunt)', async () => {
+      huntForThreatMock.mockResolvedValueOnce(
+        tier1WithHits({ resolved_iocs: [], resolved_techniques: ['T1059.003'] })
+      );
+      huntBehaviorMock.mockResolvedValueOnce(tier2Result());
+      await huntOrchestrated(
+        buildEsClient({ body_text: 'body', rank_score: 0.5 }),
+        buildScopedModel(),
+        logger,
+        { report_id: 'report-1' }
+      );
+      const [, , params] = huntBehaviorMock.mock.calls[0];
+      expect(params.article_context?.proposed_atomic_rules).toBeUndefined();
+    });
+
     it('omits proposed_atomic_rules when Tier 1 returned no environment hits', async () => {
       huntForThreatMock.mockResolvedValueOnce(tier1NoHits());
       const result = await huntOrchestrated(buildEsClient(), buildScopedModel(), logger, {

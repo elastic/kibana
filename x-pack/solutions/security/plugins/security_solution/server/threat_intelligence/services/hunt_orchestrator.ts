@@ -255,10 +255,17 @@ const resolveReportContext = async (
  * result. Returns `undefined` when Tier 1 produced no hits so the Tier 2
  * extractor's prompt is byte-identical to the pre-orchestrator,
  * text-only invocation in that case.
+ *
+ * `proposedAtomicRules` is threaded through (when non-empty) so the
+ * Tier 2 LLM knows which IOCs already have atomic ES|QL coverage. The
+ * preamble in `hunt_behavior.ts` steers the LLM away from
+ * re-proposing those as behavioral rules — see
+ * `services/hunt_behavior.ts` CONTEXT_PREAMBLE.
  */
 const buildArticleContext = (
   tier1: HuntForThreatResult,
-  maxSamples: number
+  maxSamples: number,
+  proposedAtomicRules?: AtomicEsqlProposal[]
 ): HuntBehaviorArticleContext | undefined => {
   if (tier1.status !== 'environment_hits_found') return undefined;
   const context: HuntBehaviorArticleContext = {};
@@ -270,6 +277,17 @@ const buildArticleContext = (
     context.sample_events = tier1.hits.slice(0, maxSamples).map(summarizeHit);
   }
   if (tier1.time_range) context.time_range = tier1.time_range;
+  if (proposedAtomicRules && proposedAtomicRules.length > 0) {
+    // Map down to the minimal shape `HuntBehaviorArticleContext` accepts
+    // so the orchestrator's internal `AtomicEsqlProposal` (which carries
+    // the full ES|QL body, severity, risk score) doesn't leak into the
+    // prompt — see the field docstring on `proposed_atomic_rules`.
+    context.proposed_atomic_rules = proposedAtomicRules.map((rule) => ({
+      rule_name: rule.rule_name,
+      ioc_type: rule.ioc_type,
+      ioc_value: rule.ioc_value,
+    }));
+  }
   // If nothing meaningful was attached, return undefined so the prompt
   // stays unchanged from the standalone hunt_behavior path.
   return Object.keys(context).length === 0 ? undefined : context;
@@ -476,7 +494,7 @@ export const huntOrchestrated = async (
     };
   }
 
-  const articleContext = buildArticleContext(tier1Raw, maxSamples);
+  const articleContext = buildArticleContext(tier1Raw, maxSamples, proposedAtomicRules);
   const tier2Params: HuntBehaviorParams = {
     text: reportText,
     report_id: reportId,
