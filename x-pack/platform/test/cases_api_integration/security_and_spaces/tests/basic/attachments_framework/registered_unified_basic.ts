@@ -48,6 +48,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const types = await getRegisteredUnifiedTypes();
 
         expect(types).to.eql({
+          file: '971c419dd609331343dee105fffd0f4608dc0bf2',
           lens: '45d27f9672c86ca48baf24ef1b04d4802555aee2',
           comment: '118a9989815489c24b81b160782015890ed2085e',
           'security.endpoint': '16a05a198eed9dda49ac2997921142b7b6b602d9',
