@@ -83,6 +83,9 @@ interface ExtractedLogsSummarySuccess {
   count: number;
   pages: number;
   scannedIndices: string[];
+  lastSearchTimestamp: string;
+  logsCapApplied: boolean;
+  logsProcessed: number;
 }
 
 interface ExtractedLogsSummaryError {
@@ -149,38 +152,57 @@ export class LogsExtractionClient {
     try {
       const { config, engineState } = await this.getLogExtractionConfigAndState(type);
       const entityDefinition = getEntityDefinition(type, this.namespace);
-      const { count, pages, indexPatterns, lastSearchTimestamp, ccsError } =
-        await this.runQueryAndIngestDocs({
-          type,
-          config,
-          engineState,
-          opts,
-          entityDefinition,
-        });
+      const {
+        count,
+        pages,
+        indexPatterns,
+        lastSearchTimestamp,
+        ccsError,
+        logsCapDeferred,
+        logsCapApplied,
+        logsProcessed,
+      } = await this.runQueryAndIngestDocs({
+        type,
+        config,
+        engineState,
+        opts,
+        entityDefinition,
+      });
 
       const operationResult = {
         success: true as const,
         count,
         pages,
         scannedIndices: indexPatterns,
+        lastSearchTimestamp,
+        logsCapApplied,
+        logsProcessed,
       };
 
       if (opts?.specificWindow) {
         return operationResult;
       }
 
-      await this.engineDescriptorClient.update(type, {
-        logExtractionState: {
-          paginationTimestamp: null,
-          paginationId: null,
-          logsPageCursorStartTimestamp: null,
-          logsPageCursorStartId: null,
-          logsPageCursorEndTimestamp: null,
-          logsPageCursorEndId: null,
-          lastExecutionTimestamp: lastSearchTimestamp || moment().utc().toISOString(),
-        },
-        error: ccsError ? { message: ccsError.message, action: 'extractLogs' } : null,
-      });
+      if (logsCapDeferred) {
+        // Cursor is already persisted at the last completed slice end inside runMainExtractionLoop;
+        // do not overwrite it — only clear any stale error.
+        await this.engineDescriptorClient.update(type, {
+          error: ccsError ? { message: ccsError.message, action: 'extractLogs' } : null,
+        });
+      } else {
+        await this.engineDescriptorClient.update(type, {
+          logExtractionState: {
+            paginationTimestamp: null,
+            paginationId: null,
+            logsPageCursorStartTimestamp: null,
+            logsPageCursorStartId: null,
+            logsPageCursorEndTimestamp: null,
+            logsPageCursorEndId: null,
+            lastExecutionTimestamp: lastSearchTimestamp || moment().utc().toISOString(),
+          },
+          error: ccsError ? { message: ccsError.message, action: 'extractLogs' } : null,
+        });
+      }
 
       return operationResult;
     } catch (error) {
@@ -254,6 +276,9 @@ export class LogsExtractionClient {
     indexPatterns: string[];
     lastSearchTimestamp: string;
     ccsError?: Error;
+    logsCapDeferred: boolean;
+    logsCapApplied: boolean;
+    logsProcessed: number;
   }> {
     const { localIndexPatterns, remoteIndexPatterns } = await this.getLocalAndRemoteIndexPatterns(
       config.additionalIndexPatterns,
@@ -283,6 +308,8 @@ export class LogsExtractionClient {
         abortController: opts?.abortController,
         windowOverride: opts?.specificWindow,
         maxTimeWindowSize: config.maxTimeWindowSize,
+        maxLogsPerWindow: config.maxLogsPerWindow,
+        maxLogsPerWindowCapBehavior: config.maxLogsPerWindowCapBehavior,
       });
 
       const [mainResult, ccsResult] = await Promise.all([mainPromise, ccsPromise]);
@@ -327,8 +354,11 @@ export class LogsExtractionClient {
     pages: number;
     indexPatterns: string[];
     lastSearchTimestamp: string;
+    logsCapDeferred: boolean;
+    logsCapApplied: boolean;
+    logsProcessed: number;
   }> {
-    const { docsLimit, maxLogsPerPage } = config;
+    const { docsLimit, maxLogsPerPage, maxLogsPerWindow, maxLogsPerWindowCapBehavior } = config;
 
     if (opts?.specificWindow) {
       const { fromDateISO, toDateISO } = opts.specificWindow;
@@ -343,9 +373,25 @@ export class LogsExtractionClient {
         toDateISO,
         docsLimit,
         maxLogsPerPage,
+        maxLogsPerWindow,
         entityDefinition,
       });
-      return { ...result, indexPatterns };
+      let { lastSearchTimestamp } = result;
+      if (result.logsCapApplied) {
+        this.logger.warn(
+          `Entity extraction volume cap reached for entity type "${type}": processed ${result.logsProcessed} logs (limit: ${maxLogsPerWindow}). Cap behavior: "${maxLogsPerWindowCapBehavior}". This is a manual (force) run — cursor is not persisted.`
+        );
+        if (maxLogsPerWindowCapBehavior === 'drop') {
+          lastSearchTimestamp = toDateISO;
+        }
+      }
+      return {
+        ...result,
+        lastSearchTimestamp,
+        indexPatterns,
+        logsCapDeferred: false,
+        logsCapApplied: result.logsCapApplied,
+      };
     }
 
     const { fromDateISO: initialFromDateISO, effectiveWindowEnd } = resolveMainExtractionWindow({
@@ -362,6 +408,7 @@ export class LogsExtractionClient {
     let currentEngineState = engineState;
     let totalCount = 0;
     let totalPages = 0;
+    let totalLogs = 0;
     let lastSubWindowEnd = currentFromDateISO;
 
     let hasNextPage = true;
@@ -380,6 +427,9 @@ export class LogsExtractionClient {
         logger: this.logger,
       });
 
+      // Pass remaining budget into the inner loop so that cross-sub-window accumulation is
+      // tracked correctly: remaining=0 means no cap (maxLogsPerWindow=0 disabled).
+      const remainingCap = maxLogsPerWindow > 0 ? maxLogsPerWindow - totalLogs : 0;
       const subResult = await this.runMainExtractionLoop({
         type,
         engineState: currentEngineState,
@@ -390,12 +440,39 @@ export class LogsExtractionClient {
         toDateISO,
         docsLimit,
         maxLogsPerPage,
+        maxLogsPerWindow: remainingCap,
         entityDefinition,
       });
 
       totalCount += subResult.count;
       totalPages += subResult.pages;
-      lastSubWindowEnd = toDateISO;
+      totalLogs += subResult.logsProcessed;
+      lastSubWindowEnd = subResult.lastSearchTimestamp;
+
+      if (subResult.logsCapApplied) {
+        this.logger.warn(
+          `Entity extraction volume cap reached for entity type "${type}": processed ${totalLogs} logs (limit: ${maxLogsPerWindow}). Cap behavior: "${maxLogsPerWindowCapBehavior}".`
+        );
+        if (maxLogsPerWindowCapBehavior === 'drop') {
+          this.logger.warn(
+            `Dropping remaining logs in window. Advancing cursor to end of window: ${effectiveWindowEnd}.`
+          );
+          lastSubWindowEnd = effectiveWindowEnd;
+        } else {
+          this.logger.warn(
+            `Deferring remaining logs in window. Task will resume from last processed position on next run.`
+          );
+        }
+        return {
+          count: totalCount,
+          pages: totalPages,
+          indexPatterns,
+          lastSearchTimestamp: lastSubWindowEnd,
+          logsCapDeferred: maxLogsPerWindowCapBehavior === 'defer',
+          logsCapApplied: true,
+          logsProcessed: totalLogs,
+        };
+      }
 
       // if the window was capped we consider we have a next page
       hasNextPage = isCapped;
@@ -408,6 +485,9 @@ export class LogsExtractionClient {
       pages: totalPages,
       indexPatterns,
       lastSearchTimestamp: lastSubWindowEnd,
+      logsCapDeferred: false,
+      logsCapApplied: false,
+      logsProcessed: totalLogs,
     };
   }
 
@@ -424,6 +504,7 @@ export class LogsExtractionClient {
     toDateISO,
     docsLimit,
     maxLogsPerPage,
+    maxLogsPerWindow,
     entityDefinition,
   }: {
     type: EntityType;
@@ -435,10 +516,14 @@ export class LogsExtractionClient {
     toDateISO: string;
     docsLimit: number;
     maxLogsPerPage: number;
+    maxLogsPerWindow: number;
     entityDefinition: ManagedEntityDefinition;
   }) {
     let totalCount = 0;
+    let totalLogs = 0;
     let pages = 0;
+    let logsCapApplied = false;
+    let logsCapTimestamp: string | undefined;
     let state: EngineLogExtractionState = { ...initialEngineState };
 
     const onAbort = () => this.logger.debug('Aborting execution mid logs extraction');
@@ -471,7 +556,7 @@ export class LogsExtractionClient {
               state.logsPageCursorStartId
             );
 
-        const probePromise = this.runLogPaginationCursorProbeForNextPage({
+        const probe = await this.runLogPaginationCursorProbeForNextPage({
           indexPatterns,
           type,
           fromDateISO,
@@ -480,14 +565,14 @@ export class LogsExtractionClient {
           maxLogsPerPage,
           opts,
         });
-        const probeOutcome = await probePromise;
 
-        if (!probeOutcome.hasLogsToProcess) {
+        if (!probe.hasLogsToProcess) {
           break;
         }
 
-        const logsPageCursorEnd = probeOutcome.logsPaginationCursor;
-        lastLogsPages = probeOutcome.isLastLogsPage;
+        const logsPageCursorEnd = probe.logsPaginationCursor;
+        lastLogsPages = probe.isLastLogsPage;
+        totalLogs += probe.sliceLogCount;
         state = {
           ...state,
           logsPageCursorEndTimestamp: logsPageCursorEnd.timestampCursor,
@@ -519,6 +604,12 @@ export class LogsExtractionClient {
         state = this.advanceEngineStateAfterLogPageCompletes(state, logsPageCursorEnd);
         await this.persistMainLogExtractionStateIfNotManualWindow(type, opts, state);
         isFirstRunInThisCycle = false;
+
+        if (maxLogsPerWindow > 0 && totalLogs >= maxLogsPerWindow) {
+          logsCapApplied = true;
+          logsCapTimestamp = logsPageCursorEnd.timestampCursor;
+          break;
+        }
       } while (!lastLogsPages);
     } finally {
       opts?.abortController?.signal.removeEventListener('abort', onAbort);
@@ -528,7 +619,11 @@ export class LogsExtractionClient {
       count: totalCount,
       pages,
       indexPatterns,
-      lastSearchTimestamp: toDateISO,
+      logsProcessed: totalLogs,
+      // When cap fires the caller (runMainPath) applies maxLogsPerWindowCapBehavior to determine the final
+      // lastSearchTimestamp; here we report where the loop actually stopped.
+      lastSearchTimestamp: logsCapTimestamp ?? toDateISO,
+      logsCapApplied,
     };
   }
 
@@ -588,6 +683,7 @@ export class LogsExtractionClient {
       hasLogsToProcess: true,
       logsPaginationCursor: interpretedLogPaginationCursor.logsPaginationCursor,
       isLastLogsPage: interpretedLogPaginationCursor.isLastLogsPage,
+      sliceLogCount: interpretedLogPaginationCursor.sliceLogCount,
     };
   }
 

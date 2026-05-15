@@ -153,6 +153,11 @@ describe('LogsExtractionClient', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // clearAllMocks does NOT drain mockResolvedValueOnce queues — only mockReset does.
+    // Cap tests consume fewer queued calls than were set up (cap fires early), leaving stale
+    // Once values that would otherwise pollute the next test.
+    mockExecuteEsqlQuery.mockReset();
+    mockIngestEntities.mockReset();
 
     mockLogger = loggerMock.create();
     mockEsClient = {} as jest.Mocked<ElasticsearchClient>;
@@ -959,6 +964,222 @@ describe('LogsExtractionClient', () => {
       expect(mockExecuteEsqlQuery).not.toHaveBeenCalled();
       expect(mockIngestEntities).not.toHaveBeenCalled();
       expect(mockEngineDescriptorClient.update).not.toHaveBeenCalled();
+    });
+
+    describe('volume cap', () => {
+      const fixedNow = new Date('2025-01-15T12:00:00.000Z');
+      const effectiveWindowEnd = '2025-01-15T11:59:00.000Z'; // now - 1m delay
+
+      const setupVolCapTest = (overrides: {
+        maxLogsPerWindow: number;
+        maxLogsPerWindowCapBehavior?: 'defer' | 'drop';
+      }) => {
+        jest.useFakeTimers({ now: fixedNow.getTime() });
+        const globalState = {
+          logsExtraction: LogExtractionConfig.parse({
+            lookbackPeriod: '3h',
+            delay: '1m',
+            maxTimeWindowSize: '999d',
+            maxLogsPerWindow: overrides.maxLogsPerWindow,
+            maxLogsPerWindowCapBehavior: overrides.maxLogsPerWindowCapBehavior ?? 'defer',
+          }),
+        } as EntityStoreGlobalState;
+        mockGlobalStateClient.find.mockResolvedValue(globalState);
+        mockGlobalStateClient.findOrThrow.mockResolvedValue(globalState);
+        mockEngineDescriptorClient.findOrThrow.mockResolvedValue(
+          createMockEngineDescriptor('user') as Awaited<
+            ReturnType<EngineDescriptorClient['findOrThrow']>
+          >
+        );
+        mockDataViewsService.get.mockResolvedValue({
+          getIndexPattern: jest.fn().mockReturnValue('logs-*'),
+        } as any);
+      };
+
+      afterEach(() => {
+        jest.useRealTimers();
+      });
+
+      it('defer — stops early, preserves cursor, skips final logExtractionState clear', async () => {
+        const mainExtractionResponse: ESQLSearchResponse = {
+          columns: [
+            { name: '@timestamp', type: 'date' },
+            { name: HASHED_ID_FIELD, type: 'keyword' },
+          ],
+          values: [
+            ['2025-01-15T11:00:00.000Z', 'hash1'],
+            ['2025-01-15T11:00:01.000Z', 'hash2'],
+          ],
+        };
+        // Probe default total_logs = maxLogsPerPage+1 → sliceLogCount = maxLogsPerPage.
+        // With maxLogsPerWindow=1, totalLogs >= 1 after the first slice → cap fires.
+        setupVolCapTest({ maxLogsPerWindow: 1, maxLogsPerWindowCapBehavior: 'defer' });
+        mockExtractSuccessSequence(mainExtractionResponse);
+        mockIngestEntities.mockResolvedValue(undefined);
+
+        const result = await client.extractLogs('user');
+
+        expect(result.success).toBe(true);
+        if (!result.success) return;
+        expect(result.count).toBe(2);
+        expect(result.logsCapApplied).toBe(true);
+        expect(result.logsProcessed).toBe(LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT);
+
+        // Final engineDescriptorClient.update must NOT include logExtractionState —
+        // the cursor is already persisted by the inner loop.
+        expect(mockEngineDescriptorClient.update).toHaveBeenCalled();
+        const finalUpdate = mockEngineDescriptorClient.update.mock.calls.at(-1)!;
+        expect(finalUpdate[1]).not.toHaveProperty('logExtractionState');
+
+        expect(mockLogger.warn).toHaveBeenCalledWith(
+          expect.stringContaining('Deferring remaining logs')
+        );
+      });
+
+      it('drop — advances cursor to effectiveWindowEnd and clears all cursor fields', async () => {
+        const mainExtractionResponse: ESQLSearchResponse = {
+          columns: [
+            { name: '@timestamp', type: 'date' },
+            { name: HASHED_ID_FIELD, type: 'keyword' },
+          ],
+          values: [
+            ['2025-01-15T11:00:00.000Z', 'hash1'],
+            ['2025-01-15T11:00:01.000Z', 'hash2'],
+          ],
+        };
+        // Probe default total_logs = maxLogsPerPage+1 → sliceLogCount = maxLogsPerPage.
+        // With maxLogsPerWindow=1, totalLogs >= 1 after the first slice → cap fires.
+        setupVolCapTest({ maxLogsPerWindow: 1, maxLogsPerWindowCapBehavior: 'drop' });
+        mockExtractSuccessSequence(mainExtractionResponse);
+        mockIngestEntities.mockResolvedValue(undefined);
+
+        const result = await client.extractLogs('user');
+
+        expect(result.success).toBe(true);
+        if (!result.success) return;
+        expect(result.count).toBe(2);
+        expect(result.logsCapApplied).toBe(true);
+        expect(result.logsProcessed).toBe(LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT);
+        expect(result.lastSearchTimestamp).toBe(effectiveWindowEnd);
+
+        const finalUpdate = mockEngineDescriptorClient.update.mock.calls.at(-1)!;
+        expect(finalUpdate[1]).toHaveProperty('logExtractionState');
+        expect(finalUpdate[1].logExtractionState).toMatchObject({
+          paginationTimestamp: null,
+          paginationId: null,
+          logsPageCursorStartTimestamp: null,
+          logsPageCursorStartId: null,
+          logsPageCursorEndTimestamp: null,
+          logsPageCursorEndId: null,
+          lastExecutionTimestamp: effectiveWindowEnd,
+        });
+
+        expect(mockLogger.warn).toHaveBeenCalledWith(
+          expect.stringContaining('Dropping remaining logs')
+        );
+      });
+
+      it('maxLogsPerWindow=0 disables the cap and processes all logs', async () => {
+        const mainExtractionResponse: ESQLSearchResponse = {
+          columns: [
+            { name: '@timestamp', type: 'date' },
+            { name: HASHED_ID_FIELD, type: 'keyword' },
+          ],
+          values: [
+            ['2025-01-15T11:00:00.000Z', 'hash1'],
+            ['2025-01-15T11:00:01.000Z', 'hash2'],
+          ],
+        };
+        setupVolCapTest({ maxLogsPerWindow: 0 });
+        mockExtractSuccessSequence(mainExtractionResponse);
+        mockIngestEntities.mockResolvedValue(undefined);
+
+        const result = await client.extractLogs('user');
+
+        expect(result.success).toBe(true);
+        if (!result.success) return;
+        expect(result.count).toBe(2);
+        expect(result.logsCapApplied).toBe(false);
+
+        // Normal final update — no cap triggered, logExtractionState is cleared
+        const finalUpdate = mockEngineDescriptorClient.update.mock.calls.at(-1)!;
+        expect(finalUpdate[1]).toHaveProperty('logExtractionState');
+        expect(finalUpdate[1].logExtractionState).toMatchObject({
+          paginationTimestamp: null,
+          lastExecutionTimestamp: expect.any(String),
+        });
+
+        // No cap-related warnings
+        const warnCalls = (mockLogger.warn as jest.Mock).mock.calls.map(([msg]) => msg);
+        expect(warnCalls.some((m: string) => m.includes('volume cap'))).toBe(false);
+      });
+
+      it('specificWindow + defer — cap fires, lastSearchTimestamp is last page end, no engine update', async () => {
+        const toDateISO = '2024-01-02T23:59:00.000Z';
+        const lastPageTimestamp = '2024-01-02T11:00:00.000Z';
+        const mainExtractionResponse: ESQLSearchResponse = {
+          columns: [
+            { name: '@timestamp', type: 'date' },
+            { name: HASHED_ID_FIELD, type: 'keyword' },
+          ],
+          values: [
+            ['2024-01-02T10:00:00.000Z', 'hash1'],
+            [lastPageTimestamp, 'hash2'],
+          ],
+        };
+        setupVolCapTest({ maxLogsPerWindow: 1, maxLogsPerWindowCapBehavior: 'defer' });
+        // Probe response uses the last page timestamp as the cursor end
+        mockExecuteEsqlQuery
+          .mockResolvedValueOnce(
+            mockLogPaginationCursorProbeRow(lastPageTimestamp, 'cursor-end-id')
+          )
+          .mockResolvedValueOnce(mainExtractionResponse)
+          .mockResolvedValueOnce(mockLogPaginationCursorProbeEmpty());
+        mockIngestEntities.mockResolvedValue(undefined);
+
+        const result = await client.extractLogs('user', {
+          specificWindow: { fromDateISO: '2024-01-02T00:00:00.000Z', toDateISO },
+        });
+
+        expect(result.success).toBe(true);
+        if (!result.success) return;
+        expect(result.logsCapApplied).toBe(true);
+        expect(result.logsProcessed).toBe(LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT);
+        // defer: lastSearchTimestamp is where the loop stopped, NOT the window end
+        expect(result.lastSearchTimestamp).toBe(lastPageTimestamp);
+        expect(result.lastSearchTimestamp).not.toBe(toDateISO);
+        // specificWindow never touches engineDescriptorClient
+        expect(mockEngineDescriptorClient.update).not.toHaveBeenCalled();
+      });
+
+      it('specificWindow + drop — cap fires, lastSearchTimestamp equals toDateISO, no engine update', async () => {
+        const toDateISO = '2024-01-02T23:59:00.000Z';
+        const mainExtractionResponse: ESQLSearchResponse = {
+          columns: [
+            { name: '@timestamp', type: 'date' },
+            { name: HASHED_ID_FIELD, type: 'keyword' },
+          ],
+          values: [
+            ['2024-01-02T10:00:00.000Z', 'hash1'],
+            ['2024-01-02T11:00:00.000Z', 'hash2'],
+          ],
+        };
+        setupVolCapTest({ maxLogsPerWindow: 1, maxLogsPerWindowCapBehavior: 'drop' });
+        mockExtractSuccessSequence(mainExtractionResponse);
+        mockIngestEntities.mockResolvedValue(undefined);
+
+        const result = await client.extractLogs('user', {
+          specificWindow: { fromDateISO: '2024-01-02T00:00:00.000Z', toDateISO },
+        });
+
+        expect(result.success).toBe(true);
+        if (!result.success) return;
+        expect(result.logsCapApplied).toBe(true);
+        expect(result.logsProcessed).toBe(LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT);
+        // drop: lastSearchTimestamp is advanced to the window end
+        expect(result.lastSearchTimestamp).toBe(toDateISO);
+        expect(mockEngineDescriptorClient.update).not.toHaveBeenCalled();
+      });
     });
 
     describe('sub-window cap', () => {

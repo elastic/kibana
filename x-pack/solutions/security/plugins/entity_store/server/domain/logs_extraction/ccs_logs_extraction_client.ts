@@ -49,12 +49,18 @@ interface CcsExtractToUpdatesParams {
   windowOverride?: { fromDateISO: string; toDateISO: string };
   /** Cap each scheduled sub-window to this duration to bound probe cost in lagging environments. */
   maxTimeWindowSize: string;
+  /** Total CCS entity rows allowed per run. 0 = disabled. */
+  maxLogsPerWindow: number;
+  /** What to do when the cap fires: preserve cursor (defer) or advance to window end (drop). */
+  maxLogsPerWindowCapBehavior: 'defer' | 'drop';
 }
 
 export interface CcsExtractToUpdatesResult {
   count: number;
   pages: number;
+  logsProcessed?: number;
   error?: Error;
+  logsCapApplied?: boolean;
 }
 
 export class CcsLogsExtractionClient {
@@ -90,6 +96,8 @@ export class CcsLogsExtractionClient {
     abortController,
     windowOverride,
     maxTimeWindowSize,
+    maxLogsPerWindow,
+    maxLogsPerWindowCapBehavior,
   }: CcsExtractToUpdatesParams): Promise<CcsExtractToUpdatesResult> {
     const ccsState =
       windowOverride != null
@@ -112,24 +120,32 @@ export class CcsLogsExtractionClient {
     }
 
     if (isWindowOverride) {
-      // Manual `windowOverride` runs bypass the cap and run as a single pass.
+      // Manual windowOverride runs as a single pass without persisting checkpoint.
       const result = await this.runLogsPaginationOuterLoop({
         type,
         remoteIndexPatterns,
         toDateISO: effectiveWindowEnd,
         docsLimit,
         maxLogsPerPage,
+        maxLogsPerWindow,
+        maxLogsPerWindowCapBehavior,
         entityDefinition,
         abortController,
         effectiveFromDateISO,
         recoveryId,
         skipStateUpdates: true,
       });
+      if (result.logsCapApplied) {
+        this.logger.warn(
+          `CCS extraction volume cap reached for entity type "${type}" (manual run): processed ${result.logsProcessed} logs (limit: ${maxLogsPerWindow}). Cap behavior: "${maxLogsPerWindowCapBehavior}". Cursor is not persisted.`
+        );
+      }
       return result;
     }
 
     let totalCount = 0;
     let totalPages = 0;
+    let totalLogs = 0;
     let currentFromDateISO = effectiveFromDateISO;
     // Recovery applies only to the first sub-window. The inner outer-loop persists
     // `checkpointTimestamp` after every slice, so a crash mid-run resumes from the last
@@ -152,12 +168,16 @@ export class CcsLogsExtractionClient {
         logger: this.logger,
       });
 
+      // Pass remaining budget so the cap is tracked correctly across sub-windows.
+      const remainingCap = maxLogsPerWindow > 0 ? maxLogsPerWindow - totalLogs : 0;
       const subResult = await this.runLogsPaginationOuterLoop({
         type,
         remoteIndexPatterns,
         toDateISO: subWindowEnd,
         docsLimit,
         maxLogsPerPage,
+        maxLogsPerWindow: remainingCap,
+        maxLogsPerWindowCapBehavior,
         entityDefinition,
         abortController,
         effectiveFromDateISO: currentFromDateISO,
@@ -168,6 +188,28 @@ export class CcsLogsExtractionClient {
 
       totalCount += subResult.count;
       totalPages += subResult.pages;
+      totalLogs += subResult.logsProcessed ?? 0;
+
+      if (subResult.logsCapApplied) {
+        this.logger.warn(
+          `CCS extraction volume cap reached for entity type "${type}": processed ${totalLogs} logs (limit: ${maxLogsPerWindow}). Cap behavior: "${maxLogsPerWindowCapBehavior}".`
+        );
+        if (maxLogsPerWindowCapBehavior === 'drop') {
+          this.logger.warn(
+            `Dropping remaining CCS logs. Advancing checkpoint to end of window: ${effectiveWindowEnd}.`
+          );
+          await this.ccsStateClient.update(type, {
+            checkpointTimestamp: effectiveWindowEnd,
+            paginationRecoveryId: null,
+          });
+        }
+        return {
+          count: totalCount,
+          pages: totalPages,
+          logsProcessed: totalLogs,
+          logsCapApplied: true,
+        };
+      }
 
       // if the window was capped we consider we have a next page
       hasNextPage = isCapped;
@@ -193,6 +235,8 @@ export class CcsLogsExtractionClient {
     toDateISO,
     docsLimit,
     maxLogsPerPage,
+    maxLogsPerWindow,
+    maxLogsPerWindowCapBehavior,
     entityDefinition,
     abortController,
     effectiveFromDateISO: initialFromDateISO,
@@ -204,6 +248,8 @@ export class CcsLogsExtractionClient {
     toDateISO: string;
     docsLimit: number;
     maxLogsPerPage: number;
+    maxLogsPerWindow: number;
+    maxLogsPerWindowCapBehavior: 'defer' | 'drop';
     entityDefinition: ManagedEntityDefinition;
     abortController?: AbortController;
     effectiveFromDateISO: string;
@@ -212,6 +258,7 @@ export class CcsLogsExtractionClient {
   }): Promise<CcsExtractToUpdatesResult> {
     let totalCount = 0;
     let totalPages = 0;
+    let totalLogs = 0;
 
     const onAbort = () => {
       this.logger.info(
@@ -243,6 +290,7 @@ export class CcsLogsExtractionClient {
 
       const { logsPaginationCursor: sliceEnd } = logPaginationCursor;
       isLastLogsPage = logPaginationCursor.isLastLogsPage;
+      totalLogs += logPaginationCursor.sliceLogCount;
 
       // Recovery cursor is only used in the first slice; clear it after consumption
       const recoveryIdForThisSlice = recoveryId;
@@ -274,11 +322,30 @@ export class CcsLogsExtractionClient {
           paginationRecoveryId: null,
         });
       }
+
+      if (maxLogsPerWindow > 0 && totalLogs >= maxLogsPerWindow) {
+        this.logger.info(
+          `CCS entities extracted: ${totalCount}, logs processed: ${totalLogs}, in ${totalPages} pages`
+        );
+        return {
+          count: totalCount,
+          pages: totalPages,
+          logsProcessed: totalLogs,
+          logsCapApplied: true,
+        };
+      }
     } while (!isLastLogsPage);
 
-    this.logger.info(`CCS entities extracted: ${totalCount}, in ${totalPages} pages`);
+    this.logger.info(
+      `CCS entities extracted: ${totalCount}, logs processed: ${totalLogs}, in ${totalPages} pages`
+    );
 
-    return { count: totalCount, pages: totalPages };
+    return {
+      count: totalCount,
+      pages: totalPages,
+      logsProcessed: totalLogs,
+      logsCapApplied: false,
+    };
   }
 
   /**
