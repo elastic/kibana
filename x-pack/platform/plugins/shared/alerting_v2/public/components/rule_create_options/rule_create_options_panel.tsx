@@ -20,6 +20,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { CoreStart, useService } from '@kbn/core-di-browser';
+import { paths } from '../../constants';
 
 interface RuleCreateOptionsPanelProps {
   onCreateEsqlRule: () => void;
@@ -28,6 +30,7 @@ interface RuleCreateOptionsPanelProps {
 export const RuleCreateOptionsPanel: React.FC<RuleCreateOptionsPanelProps> = ({
   onCreateEsqlRule,
 }) => {
+  const { basePath } = useService(CoreStart('http'));
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -134,21 +137,15 @@ export const RuleCreateOptionsPanel: React.FC<RuleCreateOptionsPanelProps> = ({
             />
           </h3>
         </EuiTitle>
-        <EuiSpacer size="l" />
+        <EuiSpacer size="s" />
         <EuiFlexGroup justifyContent="center">
-          {/* TODO: Add the other rule builders here */}
           <EuiFlexItem css={{ width: '100%' }}>
             <EuiCard
-              betaBadgeProps={{
-                label: i18n.translate('xpack.alertingV2.ruleCreateOptionsPanel.comingSoonLabel', {
-                  defaultMessage: 'Coming soon',
-                }),
-                color: 'hollow',
-                size: 'm',
-              }}
               layout="horizontal"
+              display="plain"
               titleElement="h3"
               titleSize="xs"
+              hasBorder={true}
               title={i18n.translate('xpack.alertingV2.ruleCreateOptionsPanel.thresholdAlertTitle', {
                 defaultMessage: 'Threshold Alert',
               })}
@@ -159,12 +156,9 @@ export const RuleCreateOptionsPanel: React.FC<RuleCreateOptionsPanelProps> = ({
                     'Monitor one or more metrics and alert when they cross a threshold. Multi-condition support with custom aggregations.',
                 }
               )}
+              href={basePath.prepend(paths.thresholdRuleCreate)}
               icon={<EuiIcon type="chartThreshold" color="text" size="l" aria-hidden={true} />}
-              aria-disabled={true}
-              display="subdued"
               css={{
-                cursor: 'default',
-                pointerEvents: 'none',
                 width: '50%',
                 margin: '0 auto',
               }}
