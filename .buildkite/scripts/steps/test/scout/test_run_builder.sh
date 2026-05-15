@@ -2,6 +2,13 @@
 
 set -euo pipefail
 
+# TEMP — CI verification of the Scout tests-only fast path. Combined with the
+# SCOUT_CI_TESTS_ONLY_OVERRIDE branch in pipeline-utils/affected-packages/
+# strategy_git.ts, this forces listChangedFiles() to return a single Scout
+# spec, exercising the "only one Playwright config runs" outcome. Remove
+# alongside the override block.
+export SCOUT_CI_TESTS_ONLY_OVERRIDE=1
+
 source .buildkite/scripts/bootstrap.sh
 .buildkite/scripts/setup_es_snapshot_cache.sh
 

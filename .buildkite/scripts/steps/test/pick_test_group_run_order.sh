@@ -6,6 +6,12 @@ set -euo pipefail
 # it never needs the dev-mode shared webpack bundles (monaco, ui-shared-deps).
 export KBN_BOOTSTRAP_NO_PREBUILT=true
 
+# TEMP — CI verification of the Scout tests-only fast path. Combined with the
+# SCOUT_CI_TESTS_ONLY_OVERRIDE branch in pipeline-utils/affected-packages/
+# strategy_git.ts, this forces the picker to see a single-Scout-spec diff
+# and skip emitting any Jest/FTR step. Remove alongside the override block.
+export SCOUT_CI_TESTS_ONLY_OVERRIDE=1
+
 source .buildkite/scripts/bootstrap.sh
 
 echo '--- Pick Test Group Run Order'
