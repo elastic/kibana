@@ -42,8 +42,7 @@ const renderFindingsPage = (dependencies = getMockServerDependencies()) => {
   );
 };
 
-// Failing: See https://github.com/elastic/kibana/issues/244001
-describe.skip('<Findings />', () => {
+describe('<Findings />', () => {
   startMockServer(server);
 
   (useExpandableFlyoutCsp as jest.Mock).mockReturnValue({
@@ -204,6 +203,15 @@ describe.skip('<Findings />', () => {
       await waitFor(() => expect(screen.getByText(/2 findings/i)).toBeInTheDocument());
     });
     it('add filter', async () => {
+      // Use setup({ delay: null }) to drop @testing-library/user-event v14's
+      // default ~6ms-per-keystroke delay. The default 30s Jest timeout was
+      // exhausted under CI load by the cumulative cost of ~10 sequential
+      // user interactions in this test (paste, click, paste, click, ...).
+      // pointerEventsCheck: 0 moves to setup() because the v14 instance
+      // .click() method doesn't accept per-call options (only the legacy
+      // static userEvent.click did).
+      // See https://github.com/elastic/kibana/issues/244001.
+      const user = userEvent.setup({ delay: null, pointerEventsCheck: 0 });
       const finding1 = generateCspFinding('0001', 'failed');
       const finding2 = generateCspFinding('0002', 'passed');
 
@@ -217,7 +225,7 @@ describe.skip('<Findings />', () => {
 
       await waitFor(() => expect(screen.getByText(/2 findings/i)).toBeInTheDocument());
 
-      await userEvent.click(screen.getByTestId('addFilter'), { pointerEventsCheck: 0 });
+      await user.click(screen.getByTestId('addFilter'));
 
       await waitFor(() =>
         expect(screen.getByTestId('filterFieldSuggestionList')).toBeInTheDocument()
@@ -227,14 +235,14 @@ describe.skip('<Findings />', () => {
         screen.getByTestId('filterFieldSuggestionList')
       ).getByTestId('comboBoxSearchInput');
 
-      await userEvent.click(filterFieldSuggestionListInput);
-      await userEvent.paste('rule.section');
-      await userEvent.keyboard('{enter}');
+      await user.click(filterFieldSuggestionListInput);
+      await user.paste('rule.section');
+      await user.keyboard('{enter}');
 
       const filterOperatorListInput = within(screen.getByTestId('filterOperatorList')).getByTestId(
         'comboBoxSearchInput'
       );
-      await userEvent.click(filterOperatorListInput, { pointerEventsCheck: 0 });
+      await user.click(filterOperatorListInput);
 
       const filterOption = within(
         screen.getByTestId('comboBoxOptionsList filterOperatorList-optionsList')
@@ -242,10 +250,10 @@ describe.skip('<Findings />', () => {
       fireEvent.click(filterOption);
 
       const filterParamsInput = within(screen.getByTestId('filterParams')).getByRole('textbox');
-      await userEvent.click(filterParamsInput);
-      await userEvent.paste(finding1.rule.section);
+      await user.click(filterParamsInput);
+      await user.paste(finding1.rule.section);
 
-      await userEvent.click(screen.getByTestId('saveFilter'), { pointerEventsCheck: 0 });
+      await user.click(screen.getByTestId('saveFilter'));
 
       await waitFor(() => expect(screen.getByText(/1 findings/i)).toBeInTheDocument());
       expect(screen.getByText(finding1.resource.name)).toBeInTheDocument();

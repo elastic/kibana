@@ -32,10 +32,7 @@ import { css } from '@emotion/react';
 import { useQueryClient } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useFetchAlertingEpisodesQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_alerting_episodes_query';
-import type {
-  EpisodesFilterState,
-  EpisodesSortState,
-} from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
+import type { EpisodesSortState } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
 import { useAlertingRulesCache } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rules_cache';
 import { createEpisodeActions, type EpisodeAction } from '@kbn/alerting-v2-episodes-ui/actions';
 import {
@@ -51,7 +48,7 @@ import { alertEpisodeToDataTableRecord } from './utils';
 import { dataTableRecordToEpisode } from './utils/data_table_record_to_episode';
 import { getDiscoverHrefForRuleAndEpisodeTimestamp } from '../../utils/discover_href_for_episode';
 import { paths } from '../../constants';
-import { useEpisodesTimeRange } from './hooks/use_episodes_time_range';
+import { useEpisodesListUrlState } from './hooks/use_episodes_list_url_state';
 import { useEpisodesBulkActions } from './hooks/use_episodes_bulk_actions';
 import { EpisodeAssigneeCell } from './components/episode_assignee_cell';
 
@@ -114,9 +111,8 @@ export const AlertEpisodesListPage = () => {
 
   useBreadcrumbs('episodes_list');
 
-  const { timeRange, handleTimeChange } = useEpisodesTimeRange(timefilter);
-
-  const [filterState, setFilterState] = useState<EpisodesFilterState>({});
+  const { filterState, setFilterState, timeRange, handleTimeChange } =
+    useEpisodesListUrlState(timefilter);
   const [sortState, setSortState] = useState<EpisodesSortState>(DEFAULT_SORT);
   const [columns, setColumns] = useState<string[]>([
     'episode.status',
