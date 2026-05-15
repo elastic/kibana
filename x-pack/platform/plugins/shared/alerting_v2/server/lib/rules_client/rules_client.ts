@@ -16,36 +16,36 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type { KibanaRequest as CoreKibanaRequest } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import type { z } from '@kbn/zod/v4';
 import { stringifyZodError } from '@kbn/zod-helpers/v4';
-
+import type { z } from '@kbn/zod/v4';
 import { type RuleSavedObjectAttributes } from '../../saved_objects';
+import { type ActionPolicyClient } from '../action_policy_client';
+import { withApm as withApmDecorator } from '../apm/with_apm_decorator';
 import { ALERTING_RULE_EXECUTOR_TASK_TYPE } from '../rule_executor';
 import { ensureRuleExecutorTaskScheduled, getRuleExecutorTaskId } from '../rule_executor/schedule';
 import type { RuleExecutorTaskParams } from '../rule_executor/types';
 import type { RulesSavedObjectServiceContract } from '../services/rules_saved_object_service/rules_saved_object_service';
 import type { UserServiceContract } from '../services/user_service/user_service';
+import { buildRuleSoFilter } from './build_rule_filter';
+import { buildSoSearch, RULE_SEARCH_FIELDS } from './build_so_search';
 import type {
   BulkOperationError,
   BulkOperationResponse,
   BulkRulesParams,
   CreateRuleData,
   CreateRuleParams,
-  FindRulesSortField,
   FindRulesParams,
   FindRulesResponse,
+  FindRulesSortField,
   RuleResponse,
   UpdateRuleData,
 } from './types';
 import {
+  assertImmutableUnchanged,
+  buildUpdateRuleAttributes,
   transformCreateRuleBodyToRuleSoAttributes,
   transformRuleSoAttributesToRuleApiResponse,
-  buildUpdateRuleAttributes,
-  assertImmutableUnchanged,
 } from './utils';
-import { buildRuleSoFilter } from './build_rule_filter';
-import { buildSoSearch, RULE_SEARCH_FIELDS } from './build_so_search';
-import { withApm as withApmDecorator } from '../apm/with_apm_decorator';
 
 const withApm = withApmDecorator('RulesClient');
 
@@ -80,6 +80,7 @@ interface RulesClientParams {
     rulesSavedObjectService: RulesSavedObjectServiceContract;
     taskManager: TaskManagerStartContract;
     userService: UserServiceContract;
+    actionPolicyClient: ActionPolicyClient;
   };
   options: {
     spaceId: string;
@@ -91,6 +92,7 @@ export class RulesClient {
   private readonly rulesSavedObjectService: RulesSavedObjectServiceContract;
   private readonly taskManager: TaskManagerStartContract;
   private readonly userService: UserServiceContract;
+  private readonly actionPolicyClient: ActionPolicyClient;
   private readonly spaceId: string;
 
   constructor({ services, options }: RulesClientParams) {
@@ -98,6 +100,7 @@ export class RulesClient {
     this.rulesSavedObjectService = services.rulesSavedObjectService;
     this.taskManager = services.taskManager;
     this.userService = services.userService;
+    this.actionPolicyClient = services.actionPolicyClient;
     this.spaceId = options.spaceId;
   }
 
@@ -301,6 +304,11 @@ export class RulesClient {
     await this.taskManager.removeIfExists(taskId);
 
     await this.rulesSavedObjectService.delete({ id });
+
+    await this.actionPolicyClient.deleteActionPoliciesByFilter({
+      type: 'single_rule',
+      ruleId: id,
+    });
   }
 
   @withApm
