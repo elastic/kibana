@@ -257,12 +257,10 @@ enabled:
   - x-pack/platform/test/functional/apps/dashboard/group1/config.ts
   - x-pack/platform/test/functional/apps/dashboard/group3/config.ts
   - x-pack/platform/test/functional/apps/data_views/config.ts
-  - x-pack/platform/test/functional/apps/dev_tools/config.ts
   - x-pack/platform/test/functional/apps/discover/group1/config.ts
   - x-pack/platform/test/functional/apps/discover/group2/config.ts
   - x-pack/platform/test/functional/apps/discover/group3/config.ts
   - x-pack/platform/test/functional/apps/graph/config.ts
-  - x-pack/platform/test/functional/apps/grok_debugger/config.ts
   - x-pack/platform/test/functional/apps/home/config.ts
   - x-pack/platform/test/functional/apps/index_lifecycle_management/config.ts
   - x-pack/platform/test/functional/apps/index_management/config.ts
@@ -319,7 +317,6 @@ enabled:
   - x-pack/platform/test/functional/apps/ml/memory_usage/config.ts
   - x-pack/platform/test/functional/apps/monitoring/config.group1.ts
   - x-pack/platform/test/functional/apps/monitoring/config.group2.ts
-  - x-pack/platform/test/functional/apps/painless_lab/config.ts
   - x-pack/platform/test/functional/apps/remote_clusters/config.ts
   - x-pack/platform/test/functional/apps/reporting_management/config.ts
   - x-pack/platform/test/functional/apps/rollup_job/config.ts
@@ -457,7 +454,6 @@ enabled:
   - x-pack/platform/test/api_integration/apis/features/config.ts
   - x-pack/platform/test/api_integration/apis/entity_manager/config.ts
   - x-pack/platform/test/api_integration/apis/es/config.ts
-  - x-pack/platform/test/api_integration/apis/grok_debugger/config.ts
   - x-pack/platform/test/api_integration/apis/file_upload/config.ts
   - x-pack/platform/test/api_integration/apis/kibana/config.ts
   - x-pack/platform/test/api_integration/apis/management/config.ts
@@ -466,7 +462,6 @@ enabled:
   - x-pack/platform/test/api_integration/apis/monitoring/config.ts
   - x-pack/platform/test/api_integration/apis/monitoring_collection/config.ts
   - x-pack/platform/test/api_integration/apis/osquery/config.ts
-  - x-pack/platform/test/api_integration/apis/searchprofiler/config.ts
   - x-pack/platform/test/api_integration/apis/security/config_security_trial.ts
   - x-pack/platform/test/api_integration/apis/spaces/config.ts
   - x-pack/platform/test/api_integration/apis/stats/config.ts
