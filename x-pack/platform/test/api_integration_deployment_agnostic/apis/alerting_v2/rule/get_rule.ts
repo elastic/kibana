@@ -48,7 +48,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           grouping: { fields: ['host.name'] },
         });
 
-      expect(createResponse.status).to.be(200);
+      expect(createResponse.status).to.be(201);
       const createdRuleId = createResponse.body.id;
 
       const response = await supertestWithoutAuth

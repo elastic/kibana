@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { LlmProxy } from '@kbn/test-suites-xpack-platform/agent_builder_api_integration/utils/llm_proxy';
-import { createLlmProxy } from '@kbn/test-suites-xpack-platform/agent_builder_api_integration/utils/llm_proxy';
+import type { LlmProxy } from '@kbn/ftr-llm-proxy';
+import { createLlmProxy } from '@kbn/ftr-llm-proxy';
 import { OBSERVABILITY_AI_INSIGHTS_SUBFEATURE_ID } from '@kbn/observability-agent-builder-plugin/common/constants';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import {

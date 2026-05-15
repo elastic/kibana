@@ -30,6 +30,7 @@ dependsOn:
   - '@kbn/saved-objects-finder-plugin'
   - '@kbn/content-management-table-list-view-common'
   - '@kbn/core-saved-objects-api-server'
+  - '@kbn/scout'
 tags:
   - plugin
   - prod
@@ -43,6 +44,7 @@ fileGroups:
     - public/**/*.ts
     - public/**/*.tsx
     - server/**/*.ts
+    - test/scout_examples/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js

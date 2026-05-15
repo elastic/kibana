@@ -13,7 +13,20 @@ import userEvent from '@testing-library/user-event';
 import { useForm, FormProvider } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { ParsedTemplateDefinitionSchema } from '../../../../common/types/domain/template/latest';
 import { CASE_EXTENDED_FIELDS } from '../../../../common/constants';
+import { isInlineField } from '../../../../common/types/domain/template/fields';
 import { FieldsRenderer, TemplateFieldRenderer } from './field_renderer';
+
+jest.mock('../../field_library/hooks/use_resolved_fields', () => ({
+  useResolvedFields: (fields: Array<Record<string, unknown>>) => ({
+    // Inline fields have `control`; ref fields have `$ref` without `control`
+    resolvedFields: fields.filter((f) => 'control' in f),
+    isLoading: false,
+  }),
+}));
+
+jest.mock('../../cases_context/use_cases_context', () => ({
+  useCasesContext: () => ({ owner: ['cases'] }),
+}));
 
 /**
  * Template with a required field whose show_when condition is false by default
@@ -54,6 +67,8 @@ const FormWrapper: React.FC<{
     return <>{`Invalid template: ${parseResult.error}`}</>;
   }
 
+  const resolvedFields = parseResult.data.fields.filter(isInlineField);
+
   const handleSubmit = async () => {
     const { isValid } = await form.submit();
     onSubmitResult(isValid);
@@ -61,7 +76,7 @@ const FormWrapper: React.FC<{
 
   return (
     <FormProvider form={form}>
-      <FieldsRenderer parsedTemplate={parseResult.data} form={form} />
+      <FieldsRenderer resolvedFields={resolvedFields} form={form} />
       <button type="button" onClick={handleSubmit}>
         {'Submit'}
       </button>
@@ -191,6 +206,7 @@ describe('TemplateFieldRenderer — stable fields reference', () => {
     const { rerender } = render(
       <TemplateFieldRenderer
         parsedTemplate={parsedTemplate}
+        owner="securitySolution"
         onFieldDefaultChange={onFieldDefaultChange}
       />
     );
@@ -209,6 +225,7 @@ describe('TemplateFieldRenderer — stable fields reference', () => {
     rerender(
       <TemplateFieldRenderer
         parsedTemplate={identicalParsedTemplate}
+        owner="securitySolution"
         onFieldDefaultChange={onFieldDefaultChange}
       />
     );
