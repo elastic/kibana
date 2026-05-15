@@ -154,14 +154,6 @@ export class MetricsExperiencePage {
   }
 
   /**
-   * Clicks "Copy to dashboard" on the visible quick-action row of the
-   * given card. Promoted to the visible row in issue #236787.
-   */
-  public async clickCopyToDashboard(cardIndex: number): Promise<void> {
-    await this.clickVisibleQuickAction(cardIndex, this.chartActions.copyToDashboard);
-  }
-
-  /**
    * Opens the inspector flyout by triggering "Inspect" from the chart
    * actions menu of the given card.
    *
