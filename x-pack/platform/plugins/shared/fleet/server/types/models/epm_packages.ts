@@ -87,6 +87,9 @@ export const EpmPackagesSchemaV8 = EpmPackagesSchemaV7.extends({
 });
 
 export const EpmPackagesSchemaV9 = EpmPackagesSchemaV8.extends({
+  namespace_customization_enabled_for: schema.maybe(
+    schema.arrayOf(schema.string(), { maxSize: 100 })
+  ),
   previous_dependency_versions: schema.maybe(
     schema.nullable(
       schema.arrayOf(

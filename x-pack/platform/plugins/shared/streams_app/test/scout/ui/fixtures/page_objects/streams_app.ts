@@ -361,7 +361,8 @@ export class StreamsApp {
   }
 
   async switchToColumnsView() {
-    await this.page.getByTestId('streamsAppPreviewTableViewModeToggle').click();
+    // Draft streams fetch samples via ES|QL from the parent, which can be slow
+    await this.page.getByTestId('streamsAppPreviewTableViewModeToggle').click({ timeout: 30_000 });
   }
 
   async saveRoutingRule() {
@@ -1344,6 +1345,12 @@ export class StreamsApp {
   }
 
   async clickDeleteQueryStreamModalDeleteButton() {
+    // Toast notifications rendered in the globalToastList can overlap the confirm
+    // button and intercept pointer events. Wait until the list is empty before clicking.
+    await expect(this.page.testSubj.locator('globalToastList').locator(':scope > *')).toHaveCount(
+      0,
+      { timeout: 15_000 }
+    );
     await this.page.getByTestId('streamsAppDeleteStreamModalDeleteButton').click();
   }
 
@@ -1355,6 +1362,21 @@ export class StreamsApp {
     await this.page.getByTestId('streamsAppQueryStreamFormSaveButton').click();
   }
 
+  async saveInlineQueryStreamEdit() {
+    await this.clickQueryStreamFormSaveButton();
+    await this.queryStreamUpdatedSuccessToast.waitFor({ state: 'visible' });
+  }
+
+  async saveFlyoutQueryStreamCreate() {
+    await this.clickQueryStreamFlyoutSaveButton();
+    await this.queryStreamCreatedSuccessToast.waitFor({ state: 'visible' });
+  }
+
+  async saveFlyoutQueryStreamEdit() {
+    await this.clickQueryStreamFlyoutSaveButton();
+    await this.queryStreamUpdatedSuccessToast.waitFor({ state: 'visible' });
+  }
+
   async clickQueryStreamFormDeleteButton() {
     await this.page.getByTestId('streamsAppQueryStreamFormDeleteButton').click();
   }
@@ -1364,7 +1386,7 @@ export class StreamsApp {
     await this.fillRoutingRuleName(name);
     await this.kibanaMonacoEditor.waitCodeEditorReady('streamsEsqlEditor');
     await this.kibanaMonacoEditor.setCodeEditorValue(esqlQuery);
-    await this.clickQueryStreamFlyoutSaveButton();
+    await this.saveFlyoutQueryStreamCreate();
   }
 
   async openCreateChildQueryStreamForm() {
@@ -1372,15 +1394,20 @@ export class StreamsApp {
     await this.kibanaMonacoEditor.waitCodeEditorReady('streamsEsqlEditor');
   }
 
-  async fillAndSaveChildQueryStream(childName: string, esqlQuery: string) {
+  async fillChildQueryStreamForm(childName: string, esqlQuery: string) {
     await this.fillRoutingRuleName(childName);
     await this.kibanaMonacoEditor.setCodeEditorValue(esqlQuery);
+  }
+
+  async saveChildQueryStream() {
     await this.clickQueryStreamFormCreateButton();
+    await this.childQueryStreamCreatedSuccessToast.waitFor({ state: 'visible' });
   }
 
   async createChildQueryStreamFromPartitioningTab(childName: string, esqlQuery: string) {
     await this.openCreateChildQueryStreamForm();
-    await this.fillAndSaveChildQueryStream(childName, esqlQuery);
+    await this.fillChildQueryStreamForm(childName, esqlQuery);
+    await this.saveChildQueryStream();
   }
 
   async deleteQueryStreamFromAdvancedTab(streamName: string) {

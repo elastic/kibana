@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { findActionPoliciesResponseSchema } from '@kbn/alerting-v2-schemas';
+import {
+  actionPolicyDestinationTypeSchema,
+  findActionPoliciesResponseSchema,
+} from '@kbn/alerting-v2-schemas';
 import { Request } from '@kbn/core-di-server';
 import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
@@ -21,6 +24,8 @@ const sortFieldSchema = z
   .enum(['name', 'createdAt', 'updatedAt', 'createdByUsername', 'updatedByUsername'])
   .describe('The available fields to sort action policies by.');
 
+const tagFilterItemSchema = z.string().min(1).max(128);
+
 const listActionPoliciesQuerySchema = z.object({
   page: z.coerce.number().min(1).optional().describe('The page number to return.'),
   perPage: z.coerce
@@ -29,15 +34,27 @@ const listActionPoliciesQuerySchema = z.object({
     .max(100)
     .optional()
     .describe('The number of action policies to return per page.'),
-  search: z.string().optional().describe('A text string to search across action policy fields.'),
+  search: z
+    .string()
+    .min(1)
+    .max(256)
+    .optional()
+    .describe('A text string to search across action policy fields.'),
   tags: z
-    .union([z.string(), z.array(z.string())])
+    .union([tagFilterItemSchema, z.array(tagFilterItemSchema)])
     .transform((v) => (Array.isArray(v) ? v : [v]).map((t) => t.trim()).filter(Boolean))
-    .pipe(z.array(z.string()).max(10))
+    .pipe(z.array(tagFilterItemSchema).max(10))
     .optional()
     .describe('Filter by tags. Accepts a single string or an array.'),
-  destinationType: z.string().optional().describe('Filter by destination connector type.'),
-  createdBy: z.string().optional().describe('Filter by the user ID who created the action policy.'),
+  destinationType: actionPolicyDestinationTypeSchema
+    .optional()
+    .describe('Filter by destination connector type.'),
+  createdBy: z
+    .string()
+    .min(1)
+    .max(256)
+    .optional()
+    .describe('Filter by the user ID who created the action policy.'),
   enabled: z
     .enum(['true', 'false'])
     .transform((v) => v === 'true')

@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import {
   CommentsSchema,
   CommonAttributes,
@@ -17,55 +17,59 @@ import {
   ExecutorSubActionHandshakeParamsSchema,
 } from '../../servicenow';
 
-export const ExecutorSubActionPushParamsSchemaITSM = z
-  .object({
-    incident: z
+export const ExecutorSubActionPushParamsSchemaITSM = lazySchema(() =>
+  z
+    .object({
+      incident: z
+        .object({
+          ...CommonAttributes,
+          severity: z.string().nullable().default(null),
+          urgency: z.string().nullable().default(null),
+          impact: z.string().nullable().default(null),
+        })
+        .strict(),
+      comments: CommentsSchema,
+    })
+    .strict()
+);
+
+export const ExecutorParamsSchemaITSM = lazySchema(() =>
+  z.discriminatedUnion('subAction', [
+    z
       .object({
-        ...CommonAttributes,
-        severity: z.string().nullable().default(null),
-        urgency: z.string().nullable().default(null),
-        impact: z.string().nullable().default(null),
+        subAction: z.literal('getFields'),
+        subActionParams: ExecutorSubActionCommonFieldsParamsSchema,
       })
       .strict(),
-    comments: CommentsSchema,
-  })
-  .strict();
-
-export const ExecutorParamsSchemaITSM = z.discriminatedUnion('subAction', [
-  z
-    .object({
-      subAction: z.literal('getFields'),
-      subActionParams: ExecutorSubActionCommonFieldsParamsSchema,
-    })
-    .strict(),
-  z
-    .object({
-      subAction: z.literal('getIncident'),
-      subActionParams: ExecutorSubActionGetIncidentParamsSchema,
-    })
-    .strict(),
-  z
-    .object({
-      subAction: z.literal('handshake'),
-      subActionParams: ExecutorSubActionHandshakeParamsSchema,
-    })
-    .strict(),
-  z
-    .object({
-      subAction: z.literal('pushToService'),
-      subActionParams: ExecutorSubActionPushParamsSchemaITSM,
-    })
-    .strict(),
-  z
-    .object({
-      subAction: z.literal('getChoices'),
-      subActionParams: ExecutorSubActionGetChoicesParamsSchema,
-    })
-    .strict(),
-  z
-    .object({
-      subAction: z.literal('closeIncident'),
-      subActionParams: ExecutorSubActionCloseIncidentParamsSchema,
-    })
-    .strict(),
-]);
+    z
+      .object({
+        subAction: z.literal('getIncident'),
+        subActionParams: ExecutorSubActionGetIncidentParamsSchema,
+      })
+      .strict(),
+    z
+      .object({
+        subAction: z.literal('handshake'),
+        subActionParams: ExecutorSubActionHandshakeParamsSchema,
+      })
+      .strict(),
+    z
+      .object({
+        subAction: z.literal('pushToService'),
+        subActionParams: ExecutorSubActionPushParamsSchemaITSM,
+      })
+      .strict(),
+    z
+      .object({
+        subAction: z.literal('getChoices'),
+        subActionParams: ExecutorSubActionGetChoicesParamsSchema,
+      })
+      .strict(),
+    z
+      .object({
+        subAction: z.literal('closeIncident'),
+        subActionParams: ExecutorSubActionCloseIncidentParamsSchema,
+      })
+      .strict(),
+  ])
+);

@@ -8,10 +8,10 @@
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup, IRouter, Logger } from '@kbn/core/server';
 import type { RouteSecurity } from '@kbn/core-http-server';
-import { AGENT_CONTEXT_LAYER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { apiPrivileges } from '../../common/features';
 import type { SmlSearchHttpResponse } from '../../common/http_api/sml';
-import { SML_HTTP_SEARCH_QUERY_MAX_LENGTH } from '../../common/http_api/sml';
+import { SML_HTTP_SEARCH_QUERY_MAX_LENGTH, SmlSearchFilterType } from '../../common/http_api/sml';
 import { smlSearchPath } from '../../common/constants';
 import type { SmlService } from '../services/sml/types';
 import type { AgentContextLayerStartDependencies, AgentContextLayerPluginStart } from '../types';
@@ -41,6 +41,14 @@ export const registerSearchRoute = ({
           query: schema.string({ minLength: 1, maxLength: SML_HTTP_SEARCH_QUERY_MAX_LENGTH }),
           size: schema.maybe(schema.number({ min: 1, max: SML_SEARCH_SIZE_MAX })),
           skip_content: schema.maybe(schema.boolean()),
+          filters: schema.maybe(
+            schema.recordOf(
+              schema.literal(SmlSearchFilterType.connector),
+              schema.object({
+                ids: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 100 })),
+              })
+            )
+          ),
         }),
       },
       options: { access: 'internal' },
@@ -52,14 +60,14 @@ export const registerSearchRoute = ({
         const uiSettingsClient = coreContext.uiSettings.client;
 
         const isEnabled = await uiSettingsClient.get<boolean>(
-          AGENT_CONTEXT_LAYER_EXPERIMENTAL_FEATURES_SETTING_ID
+          AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
         );
         if (!isEnabled) {
           return response.notFound();
         }
 
         const sml = getSmlService();
-        const { query, size, skip_content: skipContent } = request.body;
+        const { query, size, skip_content: skipContent, filters } = request.body;
         const esClient = coreContext.elasticsearch.client;
 
         const [, startDeps] = await coreSetup.getStartServices();
@@ -72,6 +80,7 @@ export const registerSearchRoute = ({
           esClient,
           request,
           skipContent,
+          filters,
         });
 
         const body: SmlSearchHttpResponse = {

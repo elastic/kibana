@@ -112,11 +112,9 @@ describe('chat_message_text', () => {
       isEmbeddedContext: false,
       browserApiTools: undefined,
       conversationActions: {
-        removeNewConversationQuery: jest.fn(),
         invalidateConversation: jest.fn(),
         addOptimisticRound: jest.fn(),
         removeOptimisticRound: jest.fn(),
-        setAgentId: jest.fn(),
         addReasoningStep: jest.fn(),
         addToolCall: jest.fn(),
         setToolCallProgress: jest.fn(),
@@ -133,6 +131,7 @@ describe('chat_message_text', () => {
         addBackgroundExecutionCompleteStep: jest.fn(),
         addCompactionStep: jest.fn(),
         setCompactionStepComplete: jest.fn(),
+        addOrUpdateTodosStep: jest.fn(),
       },
     });
   });

@@ -11,6 +11,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
+import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { InternalHttpSetup } from '@kbn/core-http-browser-internal';
 import type { NotificationsSetup } from '@kbn/core-notifications-browser';
 import type { AppMountParameters } from '@kbn/core-application-browser';
@@ -19,16 +20,17 @@ import { StatusApp } from './status_app';
 interface Deps {
   http: InternalHttpSetup;
   notifications: NotificationsSetup;
+  getDocLinks: () => DocLinksStart | undefined;
 }
 
 export const renderApp = (
   { element, theme$ }: AppMountParameters,
-  { http, notifications }: Deps
+  { http, notifications, getDocLinks }: Deps
 ) => {
   ReactDOM.render(
     <I18nProvider>
       <KibanaThemeProvider theme={{ theme$ }}>
-        <StatusApp http={http} notifications={notifications} />
+        <StatusApp http={http} notifications={notifications} getDocLinks={getDocLinks} />
       </KibanaThemeProvider>
     </I18nProvider>,
     element

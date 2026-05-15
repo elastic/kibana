@@ -9,9 +9,7 @@ paths:
       operationId: EndpointScriptLibraryPatchUpdateScript
       description: Update (full or partial) a script entry
       x-codegen-enabled: false
-      x-labels: []
-      #      TODO: When feature flag is enable, remove empty `x-labels` and un-comment the line below.
-      #      x-labels: [ ess, serverless ]
+      x-labels: [ ess, serverless ]
       parameters:
         - name: script_id
           in: path
@@ -53,6 +51,18 @@ paths:
             application/json:
               schema:
                 $ref: './common.yaml#/components/schemas/ScriptsApiResponse'
+              examples:
+                UpdateScriptEntrySuccess:
+                  summary: Update script entry success
+                  value:
+                    data:
+                      id: 1234567890
+                      name: Collect host data
+                      platform: [ linux, macos ]
+                      file: ./collect_host_data.sh
+                      fileType: script
+                      description: Collects host data for investigation
+                      instructions: No arguments required
 
 components:
   x-codegen-enabled: false

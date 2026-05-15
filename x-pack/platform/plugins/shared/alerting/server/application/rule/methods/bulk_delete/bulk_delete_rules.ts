@@ -10,6 +10,7 @@ import type { KueryNode } from '@kbn/es-query';
 import { nodeBuilder } from '@kbn/es-query';
 import type { SavedObject } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
+import { RuleChangeTrackingAction } from '@kbn/alerting-types';
 import {
   combineFiltersWithInternalRuleTypeFilter,
   constructIgnoreInternalRuleTypesFilter,
@@ -42,6 +43,7 @@ import type { RuleParams, RuleDomain } from '../../types';
 import type { RawRule, SanitizedRule } from '../../../../types';
 import { untrackRuleAlerts } from '../../../../rules_client/lib';
 import { softDeleteGaps } from '../../../../lib/rule_gaps/soft_delete/soft_delete_gaps';
+import { logBulkRuleChanges } from '../common_utils/log_bulk_rule_changes';
 
 export const bulkDeleteRules = async <Params extends RuleParams>(
   context: RulesClientContext,
@@ -87,7 +89,7 @@ export const bulkDeleteRules = async <Params extends RuleParams>(
         action: 'DELETE',
         logger: context.logger,
         bulkOperation: (filterKueryNode: KueryNode | null) =>
-          bulkDeleteWithOCC(context, { filter: filterKueryNode }),
+          bulkDeleteWithOCC(context, { filter: filterKueryNode, totalNumOfRules: total }),
         filter: finalFilter,
       })
   );
@@ -153,7 +155,7 @@ export const bulkDeleteRules = async <Params extends RuleParams>(
 
 const bulkDeleteWithOCC = async (
   context: RulesClientContext,
-  { filter }: { filter: KueryNode | null }
+  { filter, totalNumOfRules }: { filter: KueryNode | null; totalNumOfRules: number }
 ) => {
   const rulesFinder = await withSpan(
     {
@@ -239,6 +241,7 @@ const bulkDeleteWithOCC = async (
     );
   }
 
+  const deletionTimestamp = Date.now();
   const result = await withSpan(
     { name: 'unsecuredSavedObjectsClient.bulkDelete', type: 'rules' },
     () =>
@@ -277,6 +280,16 @@ const bulkDeleteWithOCC = async (
     }
   });
   const rules = rulesToDelete.filter((rule) => deletedRuleIds.includes(rule.id));
+
+  await logBulkRuleChanges({
+    ruleSOs: rules,
+    rulesClientContext: context,
+    changesContext: {
+      action: RuleChangeTrackingAction.ruleDelete,
+      timestamp: deletionTimestamp,
+      metadata: { bulkCount: totalNumOfRules },
+    },
+  });
 
   return {
     errors,

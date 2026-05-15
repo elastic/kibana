@@ -49,10 +49,16 @@ export const INDICATORS_TABLE_MORE_ACTION_BUTTON_ICON = getDataTestSubjectSelect
 
 export const TOGGLE_FLYOUT_BUTTON = getDataTestSubjectSelector('tiToggleIndicatorFlyoutButton');
 export const FLYOUT_CLOSE_BUTTON = getDataTestSubjectSelector('euiFlyoutCloseButton');
-export const FLYOUT_TITLE = getDataTestSubjectSelector('tiIndicatorFlyoutTitle');
-export const FLYOUT_OVERVIEW_TAB = getDataTestSubjectSelector('securitySolutionFlyoutOverviewTab');
-export const FLYOUT_TABLE_TAB = getDataTestSubjectSelector('securitySolutionFlyoutTableTab');
-export const FLYOUT_JSON_TAB = getDataTestSubjectSelector('securitySolutionFlyoutJsonTab');
+export const FLYOUT_TITLE = getDataTestSubjectSelector('securitySolutionFlyoutIOCDetailsTitle');
+export const FLYOUT_OVERVIEW_TAB = getDataTestSubjectSelector(
+  'securitySolutionFlyoutIOCDetailsOverviewTab'
+);
+export const FLYOUT_TABLE_TAB = getDataTestSubjectSelector(
+  'securitySolutionFlyoutIOCDetailsTableTab'
+);
+export const FLYOUT_JSON_TAB = getDataTestSubjectSelector(
+  'securitySolutionFlyoutIOCDetailsJsonTab'
+);
 export const FLYOUT_TABLE = getDataTestSubjectSelector('tiFlyoutTable');
 export const FLYOUT_JSON = getDataTestSubjectSelector('indicators-flyoutjsonView');
 export const FLYOUT_OVERVIEW_TAB_TABLE_ROW_FILTER_IN_BUTTON = getDataTestSubjectSelector(
@@ -61,9 +67,8 @@ export const FLYOUT_OVERVIEW_TAB_TABLE_ROW_FILTER_IN_BUTTON = getDataTestSubject
 export const FLYOUT_OVERVIEW_TAB_TABLE_ROW_FILTER_OUT_BUTTON = getDataTestSubjectSelector(
   'actionItem-security-default-cellActions-filterOut'
 );
-export const FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCK_ITEM = getDataTestSubjectSelector(
-  'tiFlyoutOverviewHighLevelBlocksItem'
-);
+export const FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCK_ITEM =
+  getDataTestSubjectSelector('iocHeaderBlockItem');
 export const FLYOUT_OVERVIEW_TAB_BLOCKS_FILTER_IN_BUTTON = getDataTestSubjectSelector(
   'actionItem-security-default-cellActions-filterIn'
 );

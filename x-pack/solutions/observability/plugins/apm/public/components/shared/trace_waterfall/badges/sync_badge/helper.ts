@@ -9,6 +9,7 @@ import type { AgentName, ElasticAgentName } from '@kbn/elastic-agent-utils/src/a
 import {
   OPEN_TELEMETRY_AGENT_NAMES,
   EDOT_AGENT_NAMES,
+  OTEL_AGENT_NAMES,
 } from '@kbn/elastic-agent-utils/src/agent_names';
 
 type OtelLanguage = 'webjs' | 'swift' | 'android' | 'cpp' | 'erlang' | 'rust';
@@ -17,7 +18,11 @@ type SyncBadgeAgentName = ElasticAgentName | OtelLanguage;
 /**
  * Set of known OTEL and EDOT agents for O(1) lookup validation.
  */
-const knownOtelAgents: Set<string> = new Set([...OPEN_TELEMETRY_AGENT_NAMES, ...EDOT_AGENT_NAMES]);
+const knownOtelAgents: Set<string> = new Set([
+  ...OPEN_TELEMETRY_AGENT_NAMES,
+  ...EDOT_AGENT_NAMES,
+  ...OTEL_AGENT_NAMES,
+]);
 
 /**
  * Maps agent names and language names to their expected sync behavior.
