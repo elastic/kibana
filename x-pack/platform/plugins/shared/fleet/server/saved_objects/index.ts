@@ -14,6 +14,7 @@ import {
   LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+  CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
 } from '../../common/constants';
 
 import {
@@ -48,6 +49,7 @@ import {
   SettingsSchemaV8,
   PackagePolicySchemaV22,
   CloudConnectorSchemaV4,
+  CloudOnboardingDeploymentSchemaV1,
 } from '../types';
 
 import { migrateSyntheticsPackagePolicyToV8120 } from './migrations/synthetics/to_v8_12_0';
@@ -1837,6 +1839,66 @@ export const getSavedObjectTypes = (
         },
       },
     },
+    [CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE]: {
+      name: CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
+      indexPattern: INGEST_SAVED_OBJECT_INDEX,
+      hidden: false,
+      namespaceType: 'multiple',
+      management: {
+        importableAndExportable: false,
+      },
+      mappings: {
+        dynamic: false,
+        properties: {
+          provider: { type: 'keyword' },
+          connectionId: { type: 'keyword' },
+          mechanisms: { type: 'keyword' },
+          deploymentId: { type: 'keyword' },
+          deploymentName: { type: 'keyword' },
+          services: { type: 'keyword' },
+          status: { type: 'keyword' },
+          statusMessage: { type: 'text' },
+          attemptCount: { type: 'integer' },
+          vars: { type: 'flattened' },
+          serviceVars: { type: 'flattened' },
+          packagePolicyIds: { type: 'keyword' },
+          createdAt: { type: 'date' },
+          updatedAt: { type: 'date' },
+        },
+      },
+      modelVersions: {
+        1: {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                provider: { type: 'keyword' },
+                connectionId: { type: 'keyword' },
+                mechanisms: { type: 'keyword' },
+                deploymentId: { type: 'keyword' },
+                deploymentName: { type: 'keyword' },
+                services: { type: 'keyword' },
+                status: { type: 'keyword' },
+                statusMessage: { type: 'text' },
+                attemptCount: { type: 'integer' },
+                vars: { type: 'flattened' },
+                serviceVars: { type: 'flattened' },
+                packagePolicyIds: { type: 'keyword' },
+                createdAt: { type: 'date' },
+                updatedAt: { type: 'date' },
+              },
+            },
+          ],
+          schemas: {
+            forwardCompatibility: CloudOnboardingDeploymentSchemaV1.extends(
+              {},
+              { unknowns: 'ignore' }
+            ),
+            create: CloudOnboardingDeploymentSchemaV1,
+          },
+        },
+      },
+    },
   };
 };
 
@@ -1899,6 +1961,12 @@ export function registerEncryptedSavedObjects(
     type: DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
     attributesToEncrypt: DOWNLOAD_SOURCE_ENCRYPTED_FIELDS,
     // enforceRandomId allows to create an SO with an arbitrary id
+    enforceRandomId: false,
+  });
+  encryptedSavedObjects.registerType({
+    type: CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
+    attributesToEncrypt: new Set(['secrets']),
+    attributesToIncludeInAAD: new Set(['provider', 'connectionId', 'mechanisms']),
     enforceRandomId: false,
   });
 }
