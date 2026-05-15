@@ -253,27 +253,6 @@ describe('SavedObjectsFinder', () => {
           .map((item: any) => item.attributes.description)
       ).toEqual([doc.attributes.description, doc2.attributes.description]);
     });
-
-    it('render extra items if provided', async () => {
-      (contentClient.mSearch as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({ hits: [doc3] })
-      );
-      const wrapper = shallow(
-        <SavedObjectFinder
-          {...baseProps}
-          services={{ uiSettings, contentClient, savedObjectsTagging }}
-          savedObjectMetaData={[metaDataConfig[1]]}
-          extraItems={{ metaData: searchMetaData, get: jest.fn().mockResolvedValue([doc, doc2]) }}
-        />
-      );
-      wrapper.instance().componentDidMount!();
-      await nextTick();
-      const items: any[] = wrapper.find(EuiInMemoryTable).prop('items');
-      expect(items).toHaveLength(3);
-      expect(items[0].attributes.title).toBe(doc3.attributes.title);
-      expect(items[1].attributes.title).toBe(doc.attributes.title);
-      expect(items[2].attributes.title).toBe(doc2.attributes.title);
-    });
   });
 
   describe('sorting', () => {

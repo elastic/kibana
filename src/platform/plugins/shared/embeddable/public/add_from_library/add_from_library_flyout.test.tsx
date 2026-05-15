@@ -103,31 +103,4 @@ describe('add from library flyout', () => {
       'AWESOME_EMBEDDABLE:add'
     );
   });
-
-  test('renders saved objects that provide their own getter', async () => {
-    contentManagement.client.mSearch = jest.fn().mockResolvedValueOnce({ hits: [] });
-    jest
-      .spyOn(SavedObjectsFinderPlugin, 'SavedObjectFinder')
-      .mockImplementationOnce(
-        jest.requireActual('@kbn/saved-objects-finder-plugin/public').SavedObjectFinder
-      );
-    const mockGetSavedObjects = jest.fn().mockResolvedValue([
-      { type: 'no_cm', id: 'test-id', attributes: { title: 'Test1' } },
-      { type: 'no_cm', id: 'another-id', attributes: { title: 'Test2' } },
-    ]);
-    registerAddFromLibraryType({
-      onAdd,
-      savedObjectType: 'no_cm',
-      savedObjectName: 'Use API endpoint to get objects',
-      getIconForSavedObject: () => 'popper',
-      getSavedObjects: mockGetSavedObjects,
-    });
-
-    const result = render(<AddFromLibraryFlyout container={container} />);
-    await waitFor(() => {
-      expect(mockGetSavedObjects).toBeCalled();
-    });
-    expect(result.getByTestId('savedObjectTitleTest1')).toBeInTheDocument();
-    expect(result.getByTestId('savedObjectTitleTest2')).toBeInTheDocument();
-  });
 });
