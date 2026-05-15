@@ -6,7 +6,6 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useFormContext } from 'react-hook-form';
 import {
   EuiFlyout,
   EuiFlyoutBody,
@@ -32,31 +31,33 @@ import {
   type EuiDataGridCellValueElementProps,
 } from '@elastic/eui';
 import { CodeEditor, ESQL_LANG_ID, type monaco } from '@kbn/code-editor';
-import type { ComposeFormValues } from './compose_form_types';
-import { getBreachQuery } from './compose_form_types';
 import { useRuleFormServices } from '../../form/contexts/rule_form_context';
 import { useDataFields } from '../../form/hooks/use_data_fields';
-import type {
-  ComposeDiscoverState,
-  ComposeDiscoverAction,
-  SandboxTabConfig,
-  SandboxApplyData,
-} from './types';
+import type { SandboxDraft, SandboxTabConfig, QueryTab } from './types';
 import { useQueryExecution } from './use_query_execution';
 import { ComposeDiscoverChart } from './compose_discover_chart';
 import { ComposeDiscoverTabs, TAB_DEFINITIONS, visibleTabIds } from './compose_discover_tabs';
 
 interface ComposeDiscoverChildProps {
-  state: ComposeDiscoverState;
-  dispatch: React.Dispatch<ComposeDiscoverAction>;
-  /** Controls whether the Sandbox renders a single editor or a Base/Alert/Recovery tab layout. */
+  draft: SandboxDraft;
+  /** When absent, all query editors are read-only (same as an uncontrolled input). */
+  onDraftChange?: (update: Partial<SandboxDraft>) => void;
+  /** Time field for query execution — managed by the parent via RHF. */
+  timeField: string;
+  onTimeFieldChange: (field: string) => void;
+  /** Controls which tab layout the Sandbox renders. */
   tabConfig: SandboxTabConfig;
+  /** Active tab within the Sandbox, owned by the parent reducer. */
+  activeTab: QueryTab;
+  onTabChange: (tab: QueryTab) => void;
+  /** When true, all query editors are locked (Rule Builder read-only preview). */
+  readOnlyQueries?: boolean;
+  /** When provided, renders an "Apply changes" button that calls this on click.
+   *  When absent, no Apply button is shown (Rule Builder close-only mode). */
+  onApply?: () => void;
+  onClose: () => void;
   onAlertEditorMount?: (editor: monaco.editor.IStandaloneCodeEditor) => void;
   onRecoveryEditorMount?: (editor: monaco.editor.IStandaloneCodeEditor) => void;
-  onClose: () => void;
-  /** Called when the user clicks "Apply changes". The parent writes the query
-   *  into RHF (the source of truth) and updates the reducer cache. */
-  onApply: (data: SandboxApplyData) => void;
 }
 
 const CHILD_FLYOUT_TITLE_ID = 'composeDiscoverChildTitle';
@@ -69,49 +70,32 @@ const isMac = typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(na
 const RUN_SHORTCUT_LABEL = isMac ? '⌘⏎' : 'Ctrl+Enter';
 
 export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
-  state,
-  dispatch,
+  draft,
+  onDraftChange,
+  timeField,
+  onTimeFieldChange,
   tabConfig,
+  activeTab,
+  onTabChange,
+  readOnlyQueries = false,
+  onApply,
+  onClose,
   onAlertEditorMount,
   onRecoveryEditorMount,
-  onClose,
-  onApply,
 }) => {
   const services = useRuleFormServices();
   const isSplit = tabConfig.type !== 'single';
-  const [localQuery, setLocalQuery] = useState(state.fullQuery);
-  const [localBaseQuery, setLocalBaseQuery] = useState(state.baseQuery);
-  const [localAlertBlock, setLocalAlertBlock] = useState(state.alertBlock);
-  const [localRecoveryBlock, setLocalRecoveryBlock] = useState(state.recoveryBlock);
+  const isReadOnly = readOnlyQueries || !onDraftChange;
 
-  // Read timeField and the base query from RHF
-  const { setValue: setFormValue, watch: watchForm } = useFormContext<ComposeFormValues>();
-  const timeField = watchForm('timeField') ?? '@timestamp';
-  const formQuery = getBreachQuery(watchForm('query'));
+  const timeRange = useMemo(
+    () => ({ from: draft.dateStart, to: draft.dateEnd }),
+    [draft.dateStart, draft.dateEnd]
+  );
 
-  // In single mode, sync localQuery when RHF's query changes externally
-  // (e.g. from YAML edits that debounce into RHF). When the change comes
-  // from this Sandbox's own "Apply changes", formQuery equals localQuery
-  // so the setState is a no-op.
-  useEffect(() => {
-    if (!isSplit) {
-      setLocalQuery(formQuery);
-    }
-  }, [formQuery, isSplit]);
-
-  // Date range persists in the reducer so it's remembered across Sandbox open/close.
-  // It is intentionally not connected to schedule.lookback in FormValues — it's a
-  // preview window for testing the query, not a rule configuration field.
-  const dateStart = state.sandboxDateStart;
-  const dateEnd = state.sandboxDateEnd;
-
-  const timeRange = useMemo(() => ({ from: dateStart, to: dateEnd }), [dateStart, dateEnd]);
-
-  // In split mode the "active" query for execution and field-detection is the full assembled
-  // query (base + alert block). In single mode it is the local editor content.
+  // In split mode the "active" query is the assembled base + breach block.
   const activeQuery = isSplit
-    ? [localBaseQuery, localAlertBlock].filter(Boolean).join('\n')
-    : localQuery;
+    ? [draft.base, draft.breach].filter(Boolean).join('\n')
+    : draft.breach;
 
   // Only fetch fields when the query has a real index pattern after FROM.
   const queryForFields = /^\s*FROM\s+[a-zA-Z0-9_.*-]/i.test(activeQuery) ? activeQuery : '';
@@ -144,13 +128,11 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
       .map((f) => f.name);
 
     if (dateFieldNames.length === 0) {
-      // Editor cleared or no date fields — reset to @timestamp convention.
-      if (timeField !== '@timestamp') setFormValue('timeField', '@timestamp');
+      if (timeField !== '@timestamp') onTimeFieldChange('@timestamp');
     } else if (!dateFieldNames.includes(timeField)) {
-      // Index changed and selected field isn't present — pick the first real one.
-      setFormValue('timeField', dateFieldNames[0]);
+      onTimeFieldChange(dateFieldNames[0]);
     }
-  }, [fieldMap, timeField, setFormValue]);
+  }, [fieldMap, timeField, onTimeFieldChange]);
 
   const {
     columns,
@@ -182,14 +164,8 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
   }, [run]);
 
   const handleDone = useCallback(() => {
-    onApply({
-      isSplit,
-      fullQuery: localQuery,
-      baseQuery: localBaseQuery,
-      alertBlock: localAlertBlock,
-      recoveryBlock: localRecoveryBlock,
-    });
-  }, [isSplit, localQuery, localBaseQuery, localAlertBlock, localRecoveryBlock, onApply]);
+    onApply?.();
+  }, [onApply]);
 
   const gridColumns: EuiDataGridColumn[] = useMemo(
     () =>
@@ -251,9 +227,9 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
     <EuiFlyout type="overlay" size="fill" onClose={onClose} aria-labelledby={CHILD_FLYOUT_TITLE_ID}>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s" id={CHILD_FLYOUT_TITLE_ID}>
-          <h3>{state.queryCommitted ? 'Edit alert query' : 'Define alert query'}</h3>
+          <h3>{draft.breach ? 'Edit alert query' : 'Define alert query'}</h3>
         </EuiTitle>
-        {!state.queryCommitted && (
+        {!draft.breach && (
           <EuiText size="s" color="subdued">
             Write the ES|QL query that defines when this rule should alert. You&apos;ll configure
             the rest of the rule settings next.
@@ -269,8 +245,8 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
               {splitTabs.map((tab) => (
                 <EuiTab
                   key={tab.id}
-                  isSelected={state.activeTab === tab.id}
-                  onClick={() => dispatch({ type: 'SET_TAB', tab: tab.id })}
+                  isSelected={activeTab === tab.id}
+                  onClick={() => onTabChange(tab.id)}
                   data-test-subj={`composeDiscoverTab-${tab.id}`}
                 >
                   {tab.label}
@@ -288,7 +264,7 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
               options={timeFieldOptions}
               value={timeField}
               aria-label="Time field for rule execution"
-              onChange={(e) => setFormValue('timeField', e.target.value)}
+              onChange={(e) => onTimeFieldChange(e.target.value)}
               compressed
               prepend="Time field"
               data-test-subj="composeDiscoverTimeField"
@@ -296,10 +272,10 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
           </EuiFlexItem>
           <EuiFlexItem grow>
             <EuiSuperDatePicker
-              start={dateStart}
-              end={dateEnd}
+              start={draft.dateStart}
+              end={draft.dateEnd}
               onTimeChange={({ start, end }) => {
-                dispatch({ type: 'SET_SANDBOX_DATE_RANGE', start, end });
+                onDraftChange?.({ dateStart: start, dateEnd: end });
               }}
               showUpdateButton={false}
               compressed
@@ -325,30 +301,33 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
         <EuiPanel hasBorder paddingSize="s" style={{ ...editorPanelStyles }}>
           {isSplit ? (
             <ComposeDiscoverTabs
-              baseQuery={localBaseQuery}
-              alertBlock={localAlertBlock}
-              recoveryBlock={localRecoveryBlock}
-              onBaseQueryChange={setLocalBaseQuery}
-              onAlertBlockChange={setLocalAlertBlock}
-              onRecoveryBlockChange={setLocalRecoveryBlock}
-              activeTab={state.activeTab}
-              onTabChange={(tab) => dispatch({ type: 'SET_TAB', tab })}
+              baseQuery={draft.base}
+              alertBlock={draft.breach}
+              recoveryBlock={draft.recover}
+              onBaseQueryChange={(v) => onDraftChange?.({ base: v })}
+              onAlertBlockChange={(v) => onDraftChange?.({ breach: v })}
+              onRecoveryBlockChange={(v) => onDraftChange?.({ recover: v })}
+              activeTab={activeTab}
+              onTabChange={onTabChange}
               tabConfig={tabConfig}
               onAlertEditorMount={onAlertEditorMount}
               onRecoveryEditorMount={onRecoveryEditorMount}
+              readOnly={isReadOnly}
               hideTabBar
             />
           ) : (
             <CodeEditor
               languageId={ESQL_LANG_ID}
-              value={localQuery}
-              onChange={setLocalQuery}
+              value={draft.breach}
+              onChange={(v) => onDraftChange?.({ breach: v })}
               height="100%"
               options={{
                 minimap: { enabled: false },
                 automaticLayout: true,
                 scrollBeyondLastLine: false,
                 fontSize: 13,
+                readOnly: isReadOnly,
+                domReadOnly: isReadOnly,
               }}
             />
           )}
@@ -436,15 +415,17 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
         )}
       </EuiFlyoutBody>
 
-      <EuiFlyoutFooter>
-        <EuiFlexGroup justifyContent="flexEnd">
-          <EuiFlexItem grow={false}>
-            <EuiButton fill onClick={handleDone} data-test-subj="composeDiscoverChildDone">
-              Apply changes
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutFooter>
+      {onApply && (
+        <EuiFlyoutFooter>
+          <EuiFlexGroup justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              <EuiButton fill onClick={handleDone} data-test-subj="composeDiscoverChildDone">
+                Apply changes
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlyoutFooter>
+      )}
     </EuiFlyout>
   );
 };

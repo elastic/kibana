@@ -18,10 +18,30 @@ export type QueryTab = 'base' | 'alert' | 'recovery';
 
 export type StepId = 'alertCondition' | 'recoveryCondition' | 'details' | 'notifications';
 
+/**
+ * Editing buffer for the Sandbox flyout. Lives in the parent hook (`useSandboxDraft`),
+ * above the Sandbox child, so edits persist across open/close cycles.
+ * Date range is intentionally not connected to schedule.lookback — it is a
+ * preview window for testing the query, not a rule configuration field.
+ */
+export interface SandboxDraft {
+  base: string;
+  breach: string;
+  recover: string;
+  dateStart: string;
+  dateEnd: string;
+}
+
 export interface StepRenderProps {
   state: ComposeDiscoverState;
   dispatch: React.Dispatch<ComposeDiscoverAction>;
   services: RuleFormServices;
+  /** Called when the user toggles tracking ON from the Alert Condition step. */
+  onEnableTracking: () => void;
+  /** Called when the user toggles tracking OFF from the Alert Condition step. */
+  onDisableTracking: () => void;
+  /** Called when the user changes the recovery type selector. */
+  onRecoveryTypeChange: (type: RecoveryType) => void;
 }
 
 export interface StepDefinition {
@@ -38,7 +58,7 @@ export interface StepDefinition {
  * Describes which tabs the Discover Sandbox should show.
  * Computed from state by getSandboxTabConfig().
  *
- * - 'single'        — no tracking; single editor with fullQuery
+ * - 'single'        — no tracking; single editor
  * - 'base-alert'    — tracking on, Alert Condition step: locked base above editable alert block
  * - 'base-recovery' — tracking on, Recovery Condition step: locked base above editable recovery block
  */
@@ -48,71 +68,39 @@ export type SandboxTabConfig =
   | { type: 'base-recovery' };
 
 /**
- * Data passed from the Sandbox child to the flyout parent on "Apply changes".
- * The flyout writes these values into RHF (the source of truth) and updates
- * the reducer cache.
- */
-export interface SandboxApplyData {
-  isSplit: boolean;
-  fullQuery: string;
-  baseQuery: string;
-  alertBlock: string;
-  recoveryBlock: string;
-}
-
-/**
  * UI-only state for the ComposeDiscover flyout.
  *
- * This reducer manages navigation, Sandbox state, and split-query cache.
- * All form values (name, schedule, delays, etc.) live in useForm<ComposeFormValues>()
- * via RHF and are never stored here. The query/split fields are a write-through
- * cache: written imperatively alongside RHF at Apply time. RHF is the source
- * of truth — these fields exist so the form view can display query summaries
- * without subscribing to RHF watchers.
+ * Query content lives in RHF (committed state) and the SandboxDraft hook (editing buffer).
+ * This reducer owns navigation, Sandbox open/close, tab selection, and mode flags only —
+ * no query strings are stored here.
  */
 export interface ComposeDiscoverState {
   mode: ComposeDiscoverMode;
   step: number;
   /**
-   * When false: a single fullQuery editor is shown.
-   * When true: the query is split into baseQuery + alertBlock, with an optional
-   * recoveryBlock for custom recovery. The Sandbox shows a tab bar.
+   * When false: a single editor is shown.
+   * When true: the query is split into base + breach block, with an optional recovery block.
    */
   tracking: boolean;
-  /** Full (unsplit) query — used when tracking is disabled. */
-  fullQuery: string;
-  /** Base portion of the split query (FROM … | STATS …) — used when tracking is enabled. */
-  baseQuery: string;
-  /** Alert condition block (| WHERE …) — used when tracking is enabled. */
-  alertBlock: string;
-  /** Recovery condition block — used when tracking + custom recovery are enabled. */
-  recoveryBlock: string;
-  /** How recovery is detected. 'default' = invert the alert block; 'custom' = recoveryBlock. */
+  /** How recovery is detected. 'default' = invert alert block; 'custom' = separate recovery block. */
   recoveryType: RecoveryType;
   activeTab: QueryTab;
   childOpen: boolean;
   queryCommitted: boolean;
-  /** Date range for the Discover Sandbox preview window — persists across open/close.
-   *  Intentionally NOT connected to ComposeFormValues.schedule.lookback. */
-  sandboxDateStart: string;
-  sandboxDateEnd: string;
   /** When true the stepped form is replaced by a full YAML editor. */
   yamlMode: boolean;
 }
 
 export type ComposeDiscoverAction =
-  | { type: 'SET_FULL_QUERY'; query: string }
   | { type: 'SET_RECOVERY_TYPE'; recoveryType: RecoveryType }
-  | { type: 'ENABLE_TRACKING'; base: string; alertBlock: string }
+  | { type: 'ENABLE_TRACKING' }
   | { type: 'DISABLE_TRACKING' }
   | { type: 'SET_TAB'; tab: QueryTab }
   | { type: 'SET_STEP'; step: number }
   | { type: 'GO_NEXT' }
   | { type: 'GO_BACK' }
-  | { type: 'SET_SANDBOX_DATE_RANGE'; start: string; end: string }
   | { type: 'OPEN_CHILD' }
   | { type: 'OPEN_CHILD_FOR_STEP'; step: number }
   | { type: 'CLOSE_CHILD' }
-  | { type: 'COMMIT_CHILD_QUERY'; fullQuery: string }
-  | { type: 'COMMIT_CHILD_SPLIT'; baseQuery: string; alertBlock: string; recoveryBlock: string }
+  | { type: 'COMMIT_QUERY' }
   | { type: 'SET_YAML_MODE'; enabled: boolean };
