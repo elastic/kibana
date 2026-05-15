@@ -120,12 +120,9 @@ function generateActions(bugs) {
       `    description: "Remove x-oas-optional fields from required: ${buggyFields.join(', ')}"`
     );
     lines.push('    remove: true');
-    lines.push(`  - target: "${target}"`);
-    lines.push('    description: "Restore required array without x-oas-optional fields"');
-    if (correctRequired.length === 0) {
-      lines.push('    update:');
-      lines.push('      required: []');
-    } else {
+    if (correctRequired.length > 0) {
+      lines.push(`  - target: "${target}"`);
+      lines.push('    description: "Restore required array without x-oas-optional fields"');
       lines.push('    update:');
       lines.push('      required:');
       correctRequired.forEach((f) => lines.push(`        - ${JSON.stringify(f)}`));
