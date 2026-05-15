@@ -16,8 +16,6 @@ import { createStore } from 'redux';
 import { AlertFlyoutOverviewTab } from '.';
 import type { StartServices } from '../../types';
 import { noopCellActionRenderer } from '../../flyout_v2/shared/components/cell_actions';
-import { of } from 'rxjs';
-
 jest.mock('../../common/components/user_privileges/user_privileges_context', () => ({
   UserPrivilegesProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
@@ -74,10 +72,6 @@ describe('AlertFlyoutOverviewTab', () => {
       },
     },
     upselling: {},
-    theme: {
-      getTheme: jest.fn().mockReturnValue({ darkMode: false }),
-      theme$: of({ darkMode: false }),
-    },
   } as unknown as StartServices;
 
   beforeEach(() => {
