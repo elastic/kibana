@@ -6,6 +6,7 @@
  */
 
 import { AttachmentType, ExternalReferenceStorageType } from '../../../common/types/domain';
+import { LEGACY_FILE_ATTACHMENT_TYPE } from '../../../common/constants';
 import { externalReferenceAttachmentTransformer } from './external_reference';
 
 const baseLegacyAttributes = {
@@ -213,6 +214,130 @@ describe('externalReferenceAttachmentTransformer', () => {
     it('isUnifiedPayload detects unified payloads', () => {
       expect(externalReferenceAttachmentTransformer.isUnifiedPayload(unifiedPayload)).toBe(true);
       expect(externalReferenceAttachmentTransformer.isUnifiedPayload(legacyPayload)).toBe(false);
+    });
+  });
+
+  describe('soType lift/lower', () => {
+    const fileSoType = 'file';
+    const legacyFileAttributes = {
+      ...baseLegacyAttributes,
+      type: AttachmentType.externalReference as const,
+      externalReferenceId: 'file-id-1',
+      externalReferenceStorage: {
+        type: ExternalReferenceStorageType.savedObject as const,
+        soType: fileSoType,
+      },
+      externalReferenceAttachmentTypeId: LEGACY_FILE_ATTACHMENT_TYPE,
+      externalReferenceMetadata: {
+        files: [
+          {
+            name: 'foo',
+            extension: 'png',
+            mimeType: 'image/png',
+            created: '2024-01-01T00:00:00.000Z',
+          },
+        ],
+      },
+      owner: 'securitySolution',
+    };
+
+    it('lifts soType into metadata.soType on toUnifiedSchema', () => {
+      const result = externalReferenceAttachmentTransformer.toUnifiedSchema(legacyFileAttributes);
+      expect(result).toEqual(
+        expect.objectContaining({
+          attachmentId: 'file-id-1',
+          metadata: expect.objectContaining({
+            soType: fileSoType,
+            files: legacyFileAttributes.externalReferenceMetadata.files,
+          }),
+        })
+      );
+    });
+
+    it('lowers metadata.soType back into externalReferenceStorage on toLegacySchema', () => {
+      const unified = externalReferenceAttachmentTransformer.toUnifiedSchema(legacyFileAttributes);
+      const round = externalReferenceAttachmentTransformer.toLegacySchema(unified);
+
+      expect(round).toEqual(
+        expect.objectContaining({
+          type: AttachmentType.externalReference,
+          externalReferenceId: 'file-id-1',
+          externalReferenceStorage: {
+            type: ExternalReferenceStorageType.savedObject,
+            soType: fileSoType,
+          },
+          externalReferenceMetadata: {
+            files: legacyFileAttributes.externalReferenceMetadata.files,
+          },
+          owner: 'securitySolution',
+        })
+      );
+      expect(
+        (round as { externalReferenceMetadata?: Record<string, unknown> }).externalReferenceMetadata
+      ).not.toHaveProperty('soType');
+    });
+
+    it('round-trips toUnifiedSchema -> toLegacySchema for savedObject-backed externalReferences', () => {
+      const unified = externalReferenceAttachmentTransformer.toUnifiedSchema(legacyFileAttributes);
+      const round = externalReferenceAttachmentTransformer.toLegacySchema(unified);
+      expect(round).toEqual(legacyFileAttributes);
+    });
+
+    it('round-trips toUnifiedPayload -> toLegacyPayload for savedObject-backed externalReferences', () => {
+      const legacyPayload = {
+        type: AttachmentType.externalReference as const,
+        externalReferenceId: 'file-id-2',
+        externalReferenceStorage: {
+          type: ExternalReferenceStorageType.savedObject as const,
+          soType: fileSoType,
+        },
+        externalReferenceAttachmentTypeId: LEGACY_FILE_ATTACHMENT_TYPE,
+        externalReferenceMetadata: {
+          files: [
+            {
+              name: 'bar',
+              extension: 'pdf',
+              mimeType: 'application/pdf',
+              created: '2024-01-02T00:00:00.000Z',
+            },
+          ],
+        },
+        owner: 'securitySolution',
+      };
+      const unified = externalReferenceAttachmentTransformer.toUnifiedPayload(legacyPayload);
+      expect(unified.metadata).toEqual(
+        expect.objectContaining({
+          soType: fileSoType,
+          files: legacyPayload.externalReferenceMetadata.files,
+        })
+      );
+      const round = externalReferenceAttachmentTransformer.toLegacyPayload(unified);
+      expect(round).toEqual(legacyPayload);
+    });
+
+    it('does not alter metadata for elasticSearchDoc-backed externalReferences', () => {
+      const result =
+        externalReferenceAttachmentTransformer.toUnifiedSchema(legacyEndpointAttributes);
+      expect(result).toEqual(
+        expect.objectContaining({
+          metadata: legacyEndpointAttributes.externalReferenceMetadata,
+        })
+      );
+      expect((result as { metadata?: Record<string, unknown> }).metadata).not.toHaveProperty(
+        'soType'
+      );
+    });
+
+    it('falls back to static type-id storage map when metadata.soType is absent on the unified row', () => {
+      const round =
+        externalReferenceAttachmentTransformer.toLegacySchema(unifiedEndpointAttributes);
+      expect(round).toEqual(
+        expect.objectContaining({
+          externalReferenceStorage: {
+            type: ExternalReferenceStorageType.elasticSearchDoc,
+          },
+        })
+      );
     });
   });
 });
