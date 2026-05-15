@@ -9,7 +9,6 @@ import { i18n } from '@kbn/i18n';
 import { type Streams, isRoot, isDraftStream, LOGS_ROOT_STREAM_NAME } from '@kbn/streams-schema';
 import { EuiBadgeGroup, EuiCallOut, EuiFlexGroup, EuiToolTip } from '@elastic/eui';
 import { useStreamsAppParams } from '../../../../hooks/use_streams_app_params';
-import { useStreamsPrivileges } from '../../../../hooks/use_streams_privileges';
 import { RedirectTo } from '../../../redirect_to';
 import { StreamDetailRouting } from '../stream_detail_routing';
 import { StreamDetailSchemaEditor } from '../stream_detail_schema_editor';
@@ -45,13 +44,7 @@ const tabRedirects: Record<string, { newTab: WiredStreamManagementSubTab }> = {
   route: { newTab: 'partitioning' },
   enrich: { newTab: 'processing' },
 };
-function isValidManagementSubTab(
-  value: string,
-  overviewPageEnabled: boolean
-): value is WiredStreamManagementSubTab {
-  if (value === 'overview' && !overviewPageEnabled) {
-    return false;
-  }
+function isValidManagementSubTab(value: string): value is WiredStreamManagementSubTab {
   return wiredStreamManagementSubTabs.includes(value as WiredStreamManagementSubTab);
 }
 
@@ -65,10 +58,6 @@ export function WiredStreamDetailManagement({
   const {
     path: { key, tab },
   } = useStreamsAppParams('/{key}/management/{tab}');
-
-  const {
-    features: { overviewPage },
-  } = useStreamsPrivileges();
 
   const { processing, isLoading, ...otherTabs } = useStreamsDetailManagementTabs({
     definition,
@@ -169,16 +158,12 @@ export function WiredStreamDetailManagement({
   }
 
   const tabs = {
-    ...(overviewPage.enabled
-      ? {
-          overview: {
-            content: <StreamOverview />,
-            label: i18n.translate('xpack.streams.streamDetailView.overviewTab', {
-              defaultMessage: 'Overview',
-            }),
-          },
-        }
-      : {}),
+    overview: {
+      content: <StreamOverview />,
+      label: i18n.translate('xpack.streams.streamDetailView.overviewTab', {
+        defaultMessage: 'Overview',
+      }),
+    },
     ...(!isDraft
       ? {
           retention: {
@@ -283,11 +268,8 @@ export function WiredStreamDetailManagement({
     );
   }
 
-  if (tab === 'overview' && !overviewPage.enabled) {
-    const fallbackTab = isDraft ? 'partitioning' : 'retention';
-    return (
-      <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: fallbackTab } }} />
-    );
+  if (isValidManagementSubTab(tab)) {
+    return <Wrapper tabs={tabs} streamId={key} tab={tab} />;
   }
 
   if (isDraft && (tab === 'retention' || tab === 'dataQuality')) {
@@ -296,14 +278,9 @@ export function WiredStreamDetailManagement({
     );
   }
 
-  if (isValidManagementSubTab(tab, overviewPage.enabled)) {
-    return <Wrapper tabs={tabs} streamId={key} tab={tab} />;
-  }
-
   if (isLoading) {
     return null;
   }
 
-  const defaultTab = overviewPage.enabled ? 'overview' : isDraft ? 'partitioning' : 'retention';
-  return <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: defaultTab } }} />;
+  return <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'overview' } }} />;
 }

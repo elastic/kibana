@@ -42,7 +42,7 @@ jest.mock('../form/components/matcher_input', () => ({
 }));
 
 jest.mock('../../../hooks/use_fetch_data_fields', () => ({
-  useFetchDataFields: () => ({ data: undefined, isLoading: false }),
+  useFetchDataFields: (_matcher?: string) => ({ data: undefined, isLoading: false }),
 }));
 
 jest.mock('../../../hooks/use_fetch_rules', () => ({
@@ -151,7 +151,7 @@ describe('ActionPolicyFormFlyout', () => {
       description: 'Description from test',
       type: 'global',
       groupingMode: 'per_episode',
-      throttle: { strategy: 'on_status_change' },
+      throttle: { strategy: 'on_status_change', interval: null },
       destinations: [{ type: 'workflow', id: 'wf-1' }],
     });
   });
