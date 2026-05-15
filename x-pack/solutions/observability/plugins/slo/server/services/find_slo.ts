@@ -44,13 +44,19 @@ export class FindSLO {
         .map((summaryResult) => summaryResult.sloId)
     );
 
+    const results = mergeSloWithSummary(localSloDefinitions, summaryResults.results);
+    // Summary documents whose slo.id no longer maps to a saved object (orphans)
+    // are silently dropped by mergeSloWithSummary. Decrement total accordingly so
+    // the response is internally consistent for this page. SDH #6202.
+    const droppedOnThisPage = summaryResults.results.length - results.length;
+
     return findSLOResponseSchema.encode({
       page: 'page' in summaryResults ? summaryResults.page : DEFAULT_PAGE,
       perPage: 'perPage' in summaryResults ? summaryResults.perPage : DEFAULT_PER_PAGE,
       size: 'size' in summaryResults ? summaryResults.size : undefined,
       searchAfter: 'searchAfter' in summaryResults ? summaryResults.searchAfter : undefined,
-      total: summaryResults.total,
-      results: mergeSloWithSummary(localSloDefinitions, summaryResults.results),
+      total: Math.max(0, summaryResults.total - droppedOnThisPage),
+      results,
     });
   }
 }

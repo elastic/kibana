@@ -95,6 +95,7 @@ export const EmptyThumbnail = ({
             data-test-subj="stepScreenshotNotAvailable"
             type="eyeClosed"
             color={euiTheme.colors.textDisabled}
+            aria-hidden={true}
           />
 
           {unavailableMessage ? (
