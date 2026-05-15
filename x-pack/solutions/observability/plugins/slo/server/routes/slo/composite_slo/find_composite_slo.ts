@@ -60,7 +60,7 @@ async function findCompositeSlos(
     { term: { spaceId } },
     {
       bool: {
-        must: [{ exists: { field: 'compositeSlo.id' } }],        
+        must: [{ exists: { field: 'compositeSlo.id' } }],
       },
     },
   ];
