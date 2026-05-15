@@ -35,7 +35,7 @@ export const generateExecutorFunction = ({
       logger,
       signal,
       authMode,
-      profileUid,
+      userIdentifiers,
     } = execOptions;
     const { subAction, subActionParams } = params as ExecutorParams;
 
@@ -46,7 +46,7 @@ export const generateExecutorFunction = ({
       secrets,
       signal,
       authMode,
-      profileUid,
+      userIdentifiers,
     });
 
     if (!actions[subAction]) {

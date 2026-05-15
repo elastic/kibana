@@ -132,7 +132,7 @@ describe('generateExecutorFunction', () => {
       const globalAuthHeaders = { 'X-Custom': 'value' };
       const signal = new AbortController().signal;
       const authMode = 'basic' as never;
-      const profileUid = 'profile-123';
+      const userIdentifiers = { profileUid: 'profile-123' };
 
       const executor = generateExecutorFunction({
         actions: makeActions(),
@@ -145,7 +145,7 @@ describe('generateExecutorFunction', () => {
         globalAuthHeaders,
         signal,
         authMode,
-        profileUid,
+        userIdentifiers,
       });
 
       expect(mockGetAxiosInstanceWithAuth).toHaveBeenCalledWith({
@@ -155,7 +155,7 @@ describe('generateExecutorFunction', () => {
         secrets: { token: 'secret' },
         signal,
         authMode,
-        profileUid,
+        userIdentifiers,
       });
     });
   });
