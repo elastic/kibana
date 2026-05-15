@@ -4,4 +4,5 @@ type: feature
 products:
 - product: cloud-serverless
   target: 2026-05-14
-title: Sample records in dashboard migration for more accurate output
+title: "Improve dashboard migration accuracy with data sampling"
+description: "Enhances the dashboard migration process by sampling actual data records to produce more accurate visualizations and configurations in the migrated dashboards."

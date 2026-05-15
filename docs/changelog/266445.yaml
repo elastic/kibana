@@ -4,4 +4,4 @@ type: bug-fix
 products:
 - product: cloud-serverless
   target: 2026-05-14
-title: 'Fix: [Security Solution] [Bug] License management link does not navigate to the mentioned path'
+title: "Fix license management navigation link in Security"

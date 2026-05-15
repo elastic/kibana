@@ -9,4 +9,4 @@ products:
 areas:
 - Dashboards and visualizations
 title: Fix gauge min/max/goal available operations
-description: 'Fix: Updated gauge chart `min`, `max`, and `goal` schemas to reject reference-based metric operations (`moving_average`, `differences`, `cumulative_sum`, `counter_rate`). These pipeline aggregations require a date histogram, which the gauge chart does not support. The accepted operations are now limited to field-based aggregations, static values, and formulas.'
+description: "Updated gauge chart `min`, `max`, and `goal` schemas to reject reference-based metric operations (`moving_average`, `differences`, `cumulative_sum`, `counter_rate`). These pipeline aggregations require a date histogram, which the gauge chart does not support. The accepted operations are now limited to field-based aggregations, static values, and formulas."

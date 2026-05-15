@@ -6,4 +6,5 @@ products:
   target: 2026-05-14
 areas:
 - AI and machine Learning
-title: Enhance PackageInstaller to support version fallback during installation
+title: "Improve integration package installation reliability"
+description: "Enables automatic fallback to compatible package versions when the preferred version is unavailable, reducing installation failures."
