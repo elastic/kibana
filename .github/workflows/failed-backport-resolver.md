@@ -97,6 +97,9 @@ safe-outputs:
       - "[0-9]*.[0-9]*"
     fallback-as-issue: false
     protected-files: allowed
+  assign-to-user:
+    max: 8
+    target: "*"
 
 strict: false
 jobs:
@@ -138,13 +141,13 @@ Resolve failed automatic backports for the pull request identified by the inject
 
 ## Parent Workflow
 
-1. Read `/tmp/gh-aw/agent/pr-metadata.json` and `/tmp/gh-aw/agent/pr-issue-comments.json`. Use those prefetched files as the source of truth for PR metadata and comments.
+1. Read `/tmp/gh-aw/agent/pr-metadata.json` and `/tmp/gh-aw/agent/pr-issue-comments.json`. Use those prefetched files as the source of truth for PR metadata and comments, and capture `author.login` from `pr-metadata.json` as the source PR author login.
 2. From `pr-issue-comments.json`, use the latest `kibanamachine` comment whose body contains `Some backports could not be created` or `All backports failed`.
 3. Parse that comment for target branches that failed. A failed branch is any branch row whose result says `Backport failed because of merge conflicts`, or an equivalent failure row under the matching failure heading.
 4. Read `versions.json` and build the active branch allowlist from `versions[].branch`. Drop any parsed failed branch that is not in that allowlist, and mention the skipped branch in the final comment.
 5. Read `.backportrc.json` for non-branch PR conventions only. Ignore branch lists in `.backportrc.json`; active branches come from `versions.json`.
 6. Before starting a target branch, inspect only source PR-local data for an existing backport: `pr-metadata.json`, `pr-issue-comments.json`, and any PRs directly linked from those comments or the source PR body. Treat a linked open PR as existing only when it has the `backport` label and targets the same branch. Do not perform broad repository PR searches.
-7. For each remaining target branch, launch one parallel task with the `backport-branch-worker` sub-agent defined at the end of this workflow. Pass only the source PR number, source PR title, source PR URL, source branch, source merge commit SHA, target branch, repository from `GH_AW_GITHUB_REPOSITORY`, and the workflow run URL built from `GH_AW_GITHUB_REPOSITORY` and `GH_AW_GITHUB_RUN_ID`.
+7. For each remaining target branch, launch one parallel task with the `backport-branch-worker` sub-agent defined at the end of this workflow. Pass only the source PR number, source PR title, source PR URL, source PR author login, source branch, source merge commit SHA, target branch, repository from `GH_AW_GITHUB_REPOSITORY`, and the workflow run URL built from `GH_AW_GITHUB_REPOSITORY` and `GH_AW_GITHUB_RUN_ID`.
 8. Wait for every branch task to finish. Do not stop after the first failure.
 9. For each successful branch task, ensure it called `create_pull_request`. Do not call `create_pull_request` again for the same branch.
 10. Post exactly one final `add_comment` after all branch tasks finish. Include a compact table with `Branch`, `Status`, and `Result`. Use statuses: `created`, `existing`, `skipped`, `needs manual backport`, or `failed`. Do not fabricate PR URLs; gh-aw safe outputs will attach related created PRs to the comment after processing.
@@ -176,6 +179,7 @@ The parent task will provide:
 - source PR number
 - source PR title
 - source PR URL
+- source PR author login
 - source branch
 - source merge commit SHA
 - target branch
@@ -198,7 +202,8 @@ If the cherry-pick applies without conflicts:
    - `branch`: exactly the output of `git branch --show-current`; do not invent a branch name
    - `title`: `[<target branch>] <source PR title> (#<source PR number>)`
    - `body`: matching the backport body rules below.
-5. Return `created`.
+5. Call `assign_to_user` for the PR created by that `create_pull_request` call with `issue_number` set to the temporary PR reference returned by `create_pull_request` and `assignees`: `["<source PR author login>"]`.
+6. Return `created`.
 
 If the cherry-pick has conflicts:
 
@@ -223,7 +228,8 @@ If the cherry-pick has conflicts:
     - `branch`: exactly the output of `git branch --show-current`; do not invent a branch name
     - `title`: `[<target branch>] <source PR title> (#<source PR number>)`
     - `body`: matching the backport body rules below.
-11. Return `created`.
+11. Call `assign_to_user` for the PR created by that `create_pull_request` call with `issue_number` set to the temporary PR reference returned by `create_pull_request` and `assignees`: `["<source PR author login>"]`.
+12. Return `created`.
 
 Backport body rules. JSON-escape string values in the `BACKPORT` marker when substituting real PR metadata:
 
