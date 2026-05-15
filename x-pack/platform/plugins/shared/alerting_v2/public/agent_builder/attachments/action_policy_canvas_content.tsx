@@ -23,7 +23,7 @@ import type { ActionPolicyAttachment } from './action_policy_attachment_definiti
 
 const EMPTY_VALUE = '-';
 
-type ActionPolicyCanvasData = ActionPolicyAttachment['data'] & { id: string };
+type ActionPolicyCanvasData = ActionPolicyAttachment['data'] & { id: string; name: string };
 
 export interface ActionPolicyCanvasContentProps
   extends AttachmentRenderProps<ActionPolicyAttachment>,
@@ -219,7 +219,7 @@ const extractRuleIdFromMatcher = (matcher: string | null | undefined): string | 
   return match?.[1];
 };
 
-const buildActionPolicyPayload = (data: ActionPolicyAttachment['data']) => ({
+const buildActionPolicyPayload = (data: ActionPolicyCanvasData) => ({
   name: data.name,
   description: data.description ?? '',
   type: data.type ?? 'global',
