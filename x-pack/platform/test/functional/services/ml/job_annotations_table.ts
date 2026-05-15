@@ -365,7 +365,7 @@ export function MachineLearningJobAnnotationsProvider({ getService }: FtrProvide
           `mlAnnotationsTableRow row-${annotationId} > euiCollapsedItemActionsButton`,
           30 * 1000
         );
-        await find.byCssSelector('euiContextMenuPanel');
+        await find.byCssSelector('.euiContextMenuPanel');
       });
     }
 

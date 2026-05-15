@@ -424,7 +424,7 @@ export function MachineLearningCommonUIProvider({
           await this.ensureAllMenuPopoversClosed();
 
           await testSubjects.click(`${rowSelector} > euiCollapsedItemActionsButton`);
-          await find.byCssSelector('euiContextMenuPanel');
+          await find.byCssSelector('.euiContextMenuPanel');
 
           const isEnabled = await testSubjects.isEnabled(actionTestSubject);
 
