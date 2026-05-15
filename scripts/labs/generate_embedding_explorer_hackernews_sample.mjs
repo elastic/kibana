@@ -2,6 +2,7 @@
 
 import { mkdir, writeFile } from 'fs/promises';
 import { dirname, resolve } from 'path';
+import { gzipSync } from 'zlib';
 import { asyncBufferFromUrl, parquetMetadataAsync, parquetReadObjects } from 'hyparquet';
 import { compressors } from 'hyparquet-compressors';
 import { UMAP } from 'umap-js';
@@ -10,7 +11,7 @@ const SOURCE_URL =
   'https://clickhouse-datasets.s3.amazonaws.com/hackernews-miniLM/hackernews_part_1_of_1.parquet';
 const SOURCE_BYTE_LENGTH = 59267912355;
 const INDEX_DOCUMENTS_OUTPUT_PATH = resolve(
-  'src/platform/plugins/private/labs/server/lab_apps/embedding_explorer/routes/hackernews_sample_index_documents.json'
+  'src/platform/plugins/private/labs/server/lab_apps/embedding_explorer/routes/hackernews_sample_index_documents.json.gz'
 );
 
 const WINDOW_COUNT = 12;
@@ -276,18 +277,19 @@ const main = async () => {
     })),
   };
 
+  const indexDocumentsPayload = JSON.stringify(indexDocuments);
+  const compressedIndexDocumentsPayload = gzipSync(indexDocumentsPayload);
+
   await mkdir(dirname(INDEX_DOCUMENTS_OUTPUT_PATH), { recursive: true });
-  await writeFile(
-    `${INDEX_DOCUMENTS_OUTPUT_PATH}`,
-    `${JSON.stringify(indexDocuments, null, 2)}\n`,
-    'utf8'
-  );
+  await writeFile(`${INDEX_DOCUMENTS_OUTPUT_PATH}`, compressedIndexDocumentsPayload);
 
   console.log(
     JSON.stringify(
       {
+        compressedBytes: compressedIndexDocumentsPayload.byteLength,
         indexDocumentsOutputPath: INDEX_DOCUMENTS_OUTPUT_PATH,
         pointCount: indexDocuments.docs.length,
+        uncompressedBytes: Buffer.byteLength(indexDocumentsPayload),
         categories: indexDocuments.docs.reduce((acc, point) => {
           acc[point.type] = (acc[point.type] ?? 0) + 1;
           return acc;

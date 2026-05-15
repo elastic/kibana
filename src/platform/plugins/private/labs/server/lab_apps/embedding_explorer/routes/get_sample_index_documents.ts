@@ -9,6 +9,7 @@
 
 import { readFileSync } from 'fs';
 import { join } from 'path';
+import { gunzipSync } from 'zlib';
 
 export interface SampleIndexDocument {
   author: string;
@@ -47,7 +48,9 @@ let cachedSampleIndexDocuments: SampleIndexDocumentsAsset | undefined;
 export const getSampleIndexDocuments = (): SampleIndexDocumentsAsset => {
   if (!cachedSampleIndexDocuments) {
     cachedSampleIndexDocuments = JSON.parse(
-      readFileSync(join(__dirname, 'hackernews_sample_index_documents.json'), 'utf8')
+      gunzipSync(
+        readFileSync(join(__dirname, 'hackernews_sample_index_documents.json.gz'))
+      ).toString('utf8')
     ) as SampleIndexDocumentsAsset;
   }
 

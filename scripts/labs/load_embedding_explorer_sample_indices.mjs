@@ -2,9 +2,10 @@
 
 import { readFile } from 'fs/promises';
 import { resolve } from 'path';
+import { gunzipSync } from 'zlib';
 
 const INDEX_DOCUMENTS_PATH = resolve(
-  'src/platform/plugins/private/labs/server/lab_apps/embedding_explorer/routes/hackernews_sample_index_documents.json'
+  'src/platform/plugins/private/labs/server/lab_apps/embedding_explorer/routes/hackernews_sample_index_documents.json.gz'
 );
 const DEFAULT_ES_URL = process.env.ELASTICSEARCH_URL ?? process.env.ES_URL ?? 'http://localhost:9200';
 const DEFAULT_USERNAME = process.env.ELASTICSEARCH_USERNAME ?? process.env.ES_USERNAME ?? 'elastic';
@@ -145,7 +146,7 @@ const bulkLoad = async (indexName, docs, transformDoc) => {
 };
 
 const main = async () => {
-  const artifact = JSON.parse(await readFile(INDEX_DOCUMENTS_PATH, 'utf8'));
+  const artifact = JSON.parse(gunzipSync(await readFile(INDEX_DOCUMENTS_PATH)).toString('utf8'));
   const projectedIndex =
     args['projected-index'] ?? `${artifact.indexNamePrefix ?? 'labs_embedding_hackernews_sample'}_projected`;
   const vectorsOnlyIndex =
