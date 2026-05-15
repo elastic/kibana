@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import moment from 'moment';
 import { useHistory, useLocation } from 'react-router-dom';
 import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { IngestionTimeRange } from '../../../context/apm_service/apm_service_context';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { fromQuery, toQuery, isInactiveHistoryError } from '../../shared/links/url_helpers';
@@ -42,13 +43,40 @@ export function NoDashboardFoundCallout() {
   );
 }
 
-// TODO: remove flip once a dedicated mixed-agent-types doc page is available
-const SHOW_MIXED_AGENT_DOC_LINK = false;
-
 const DATE_FORMAT = 'MMM D, YYYY HH:mm';
 
+const formatTimestamp = (ts: number) => moment(ts).format(DATE_FORMAT);
+
 const formatRange = (range: IngestionTimeRange) =>
-  `${moment(range.from).format(DATE_FORMAT)} - ${moment(range.to).format(DATE_FORMAT)}`;
+  `${formatTimestamp(range.from)} - ${formatTimestamp(range.to)}`;
+
+const INSTRUMENTATION_NAMES: Record<'classicApm' | 'otelNative', string> = {
+  classicApm: 'Classic APM',
+  otelNative: 'OpenTelemetry',
+};
+
+const getInstrumentationDetails = (ingestionTimeRanges: {
+  classicApm: IngestionTimeRange;
+  otelNative: IngestionTimeRange;
+}) => {
+  const otelIsMoreRecent = ingestionTimeRanges.otelNative.to >= ingestionTimeRanges.classicApm.to;
+
+  const currentKey = otelIsMoreRecent ? 'otelNative' : 'classicApm';
+  const previousKey = otelIsMoreRecent ? 'classicApm' : 'otelNative';
+
+  const currentRange = ingestionTimeRanges[currentKey];
+  const previousRange = ingestionTimeRanges[previousKey];
+
+  const changeTimestamp = previousRange.to;
+
+  return {
+    currentName: INSTRUMENTATION_NAMES[currentKey],
+    previousName: INSTRUMENTATION_NAMES[previousKey],
+    currentRange,
+    previousRange,
+    changeTimestamp,
+  };
+};
 
 interface MixedAgentCalloutProps {
   hasMultipleAgentTypes?: boolean;
@@ -86,7 +114,12 @@ export function MixedAgentCallout({
     [history, location]
   );
 
-  if (!hasMultipleAgentTypes || !ingestionTimeRanges) {
+  const details = useMemo(
+    () => (ingestionTimeRanges ? getInstrumentationDetails(ingestionTimeRanges) : null),
+    [ingestionTimeRanges]
+  );
+
+  if (!hasMultipleAgentTypes || !ingestionTimeRanges || !details) {
     return null;
   }
 
@@ -94,99 +127,89 @@ export function MixedAgentCallout({
     ingestionTimeRanges.classicApm.from < ingestionTimeRanges.otelNative.to &&
     ingestionTimeRanges.otelNative.from < ingestionTimeRanges.classicApm.to;
 
-  const renderRangeLink = (range: IngestionTimeRange) => (
-    <EuiLink data-test-subj="apmMetricsTimeRangeLink" onClick={() => navigateToTimeRange(range)}>
-      {formatRange(range)}
-    </EuiLink>
-  );
-
-  const rangeDetails = (
-    <p>
-      {i18n.translate('xpack.apm.metrics.mixedAgentTypes.classicRangeLabel', {
-        defaultMessage: 'Classic APM metrics:',
-      })}{' '}
-      {renderRangeLink(ingestionTimeRanges.classicApm)}
-      <br />
-      {i18n.translate('xpack.apm.metrics.mixedAgentTypes.otelRangeLabel', {
-        defaultMessage: 'OpenTelemetry metrics:',
-      })}{' '}
-      {renderRangeLink(ingestionTimeRanges.otelNative)}
-    </p>
-  );
-
-  if (hasOverlap) {
-    return (
-      <>
-        <EuiCallOut
-          announceOnMount
-          title={i18n.translate('xpack.apm.metrics.mixedAgentTypes.overlapping.title', {
-            defaultMessage:
-              'This service has overlapping data from multiple instrumentation types. Only metrics from the most recent instrumentation are shown.',
-          })}
-          iconType="warning"
-          color="warning"
-          data-test-subj="apmMetricsMixedAgentTypesOverlap"
-        >
-          {rangeDetails}
-          <p>
-            {i18n.translate('xpack.apm.metrics.mixedAgentTypes.overlapping.description', {
-              defaultMessage:
-                'Both instrumentation types are sending data simultaneously. Metrics from the other type are not displayed in this view.',
-            })}
-          </p>
-          {SHOW_MIXED_AGENT_DOC_LINK && (
-            <p>
-              <EuiLink
-                data-test-subj="apmMetricsMixedAgentTypesDocLink"
-                href={docLinks.links.apm.overview}
-                target="_blank"
-                external
-              >
-                {i18n.translate('xpack.apm.metrics.mixedAgentTypes.docsLink', {
-                  defaultMessage: 'See documentation for more information',
-                })}
-              </EuiLink>
-            </p>
-          )}
-        </EuiCallOut>
-        <EuiSpacer size="m" />
-      </>
-    );
-  }
+  const title = hasOverlap
+    ? i18n.translate('xpack.apm.metrics.mixedAgentTypes.overlapping.title', {
+        defaultMessage: 'This service has overlapping data from multiple instrumentation types.',
+      })
+    : i18n.translate('xpack.apm.metrics.mixedAgentTypes.sequential.title', {
+        defaultMessage:
+          'The selected time range contains data from multiple instrumentation types.',
+      });
 
   return (
     <>
       <EuiCallOut
         announceOnMount
-        title={i18n.translate('xpack.apm.metrics.mixedAgentTypes.sequential.title', {
-          defaultMessage:
-            'The selected time range contains data from multiple instrumentation types. Only metrics from the most recent instrumentation are shown.',
-        })}
-        iconType="info"
-        color="primary"
-        data-test-subj="apmMetricsMixedAgentTypes"
+        title={title}
+        iconType={hasOverlap ? 'warning' : 'info'}
+        color={hasOverlap ? 'warning' : 'primary'}
+        data-test-subj={
+          hasOverlap ? 'apmMetricsMixedAgentTypesOverlap' : 'apmMetricsMixedAgentTypes'
+        }
       >
-        {rangeDetails}
         <p>
-          {i18n.translate('xpack.apm.metrics.mixedAgentTypes.sequential.description', {
-            defaultMessage:
-              'Adjust the time range to view metrics from a specific instrumentation type.',
-          })}
+          <FormattedMessage
+            id="xpack.apm.metrics.mixedAgentTypes.changeDetectedDescription"
+            defaultMessage="We have detected a change on {timestamp} in the instrumentation of your service."
+            values={{
+              timestamp: <strong>{formatTimestamp(details.changeTimestamp)}</strong>,
+            }}
+          />
         </p>
-        {SHOW_MIXED_AGENT_DOC_LINK && (
-          <p>
-            <EuiLink
-              data-test-subj="apmMetricsMixedAgentTypesDocLink"
-              href={docLinks.links.apm.overview}
-              target="_blank"
-              external
-            >
-              {i18n.translate('xpack.apm.metrics.mixedAgentTypes.docsLink', {
-                defaultMessage: 'See documentation for more information',
-              })}
-            </EuiLink>
-          </p>
-        )}
+        <p>
+          <FormattedMessage
+            id="xpack.apm.metrics.mixedAgentTypes.currentInstrumentationDescription"
+            defaultMessage="We are showing the {instrumentationName} covering {timePeriod}."
+            values={{
+              instrumentationName: <strong>{details.currentName}</strong>,
+              timePeriod: (
+                <EuiLink
+                  data-test-subj="apmMetricsCurrentTimeRangeLink"
+                  onClick={() => navigateToTimeRange(details.currentRange)}
+                >
+                  {formatRange(details.currentRange)}
+                </EuiLink>
+              ),
+            }}
+          />
+        </p>
+        <p>
+          <FormattedMessage
+            id="xpack.apm.metrics.mixedAgentTypes.previousRangeDescription"
+            defaultMessage="You can see data for the previous {previousInstrumentationName} instrumentation period by changing the date range to {previousDateRange}."
+            values={{
+              previousInstrumentationName: <strong>{details.previousName}</strong>,
+              previousDateRange: (
+                <EuiLink
+                  data-test-subj="apmMetricsPreviousTimeRangeLink"
+                  onClick={() => navigateToTimeRange(details.previousRange)}
+                >
+                  {formatRange(details.previousRange)}
+                </EuiLink>
+              ),
+            }}
+          />
+        </p>
+        <p>
+          <FormattedMessage
+            id="xpack.apm.metrics.mixedAgentTypes.docsDescription"
+            defaultMessage="See {docsLink} for more information."
+            values={{
+              docsLink: (
+                <EuiLink
+                  data-test-subj="apmMetricsMixedAgentTypesDocLink"
+                  href={docLinks.links.apm.metricsUi}
+                  target="_blank"
+                  external
+                >
+                  {i18n.translate('xpack.apm.metrics.mixedAgentTypes.docsLinkText', {
+                    defaultMessage: 'documentation',
+                  })}
+                </EuiLink>
+              ),
+            }}
+          />
+        </p>
       </EuiCallOut>
       <EuiSpacer size="m" />
     </>
