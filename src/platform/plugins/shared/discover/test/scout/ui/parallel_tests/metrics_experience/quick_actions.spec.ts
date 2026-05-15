@@ -9,16 +9,6 @@
 
 /**
  * Quick-action placement contract for the metrics-grid card.
- *
- * Asserts the placement contract introduced by issue #236787: Explore,
- * View details, and Copy to dashboard are on the visible row; Add to case
- * stays in the 3-dot popover. A `test.fixme` case captures the desired but
- * currently-blocked Inspect demotion so the visualizations follow-up has a
- * green target the moment it lands.
- *
- * Privileged login is used so Add to case is visible in the popover (it
- * requires cases create/update capabilities, which the viewer role lacks).
- * Mirrored from `add_to_case_privileged.spec.ts`.
  */
 
 import { expect } from '@kbn/scout/ui';
