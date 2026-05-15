@@ -20,6 +20,7 @@ const mockGetWorkflow = jest.fn().mockResolvedValue({ id: 'wf-1', name: 'Test Wo
 const mockGetRule = jest.fn().mockResolvedValue({ id: 'abc', name: 'Test Rule' });
 const mockNavigateToUrl = jest.fn();
 const mockAddSuccess = jest.fn();
+const mockAddDanger = jest.fn();
 const mockPrepend = (path: string) => `/base${path}`;
 
 jest.mock('../../services/action_policies_api', () => ({
@@ -37,7 +38,10 @@ jest.mock('../../services/workflows_api', () => ({
 const mockApplicationService = { navigateToUrl: (...a: unknown[]) => mockNavigateToUrl(...a) };
 const mockHttpService = { basePath: { prepend: mockPrepend } };
 const mockNotificationsService = {
-  toasts: { addSuccess: (...a: unknown[]) => mockAddSuccess(...a) },
+  toasts: {
+    addSuccess: (...a: unknown[]) => mockAddSuccess(...a),
+    addDanger: (...a: unknown[]) => mockAddDanger(...a),
+  },
 };
 const mockWorkflowsApiService = { getWorkflow: (...a: unknown[]) => mockGetWorkflow(...a) };
 const mockRulesApiService = { getRule: (...a: unknown[]) => mockGetRule(...a) };
@@ -187,6 +191,18 @@ describe('ActionPolicyCanvasContent', () => {
       expect(updateOrigin).toHaveBeenCalledWith('pre-assigned-id');
       expect(mockAddSuccess).toHaveBeenCalled();
     });
+
+    it('shows a danger toast when create fails', async () => {
+      mockUpsertActionPolicy.mockRejectedValueOnce({ message: 'Server error' });
+
+      const { registerActionButtons } = await renderCanvas({ dataId: 'pre-assigned-id' });
+      const buttons = getLastRegisteredButtons(registerActionButtons);
+      const createButton = buttons.find((b) => b.label === 'Create policy')!;
+      await createButton.handler();
+
+      expect(mockAddDanger).toHaveBeenCalledWith(expect.stringContaining('Failed to create'));
+      expect(mockAddSuccess).not.toHaveBeenCalled();
+    });
   });
 
   describe('action buttons for persisted (saved) policies', () => {
@@ -232,6 +248,22 @@ describe('ActionPolicyCanvasContent', () => {
         expect.objectContaining({ name: 'My Policy' })
       );
       expect(mockAddSuccess).toHaveBeenCalled();
+    });
+
+    it('shows a danger toast when update fails', async () => {
+      mockUpsertActionPolicy.mockRejectedValueOnce({ message: 'Conflict' });
+
+      const { registerActionButtons } = await renderCanvas({
+        origin: 'policy-123',
+        version: 'v1',
+      });
+
+      const buttons = getLastRegisteredButtons(registerActionButtons);
+      const updateButton = buttons.find((b) => b.label === 'Update Policy')!;
+      await updateButton.handler();
+
+      expect(mockAddDanger).toHaveBeenCalledWith(expect.stringContaining('Failed to update'));
+      expect(mockAddSuccess).not.toHaveBeenCalled();
     });
 
     it('View in Policies handler navigates to the policy edit page', async () => {

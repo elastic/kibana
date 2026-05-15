@@ -117,14 +117,23 @@ export const ActionPolicyCanvasContent = ({
               })
             : undefined,
           handler: async () => {
-            await actionPoliciesApi.upsertActionPolicy(data.id, buildActionPolicyPayload(data));
-            await updateOrigin(data.id);
-            notifications.toasts.addSuccess(
-              i18n.translate('xpack.alertingV2.actionPolicyAttachment.createdSuccess', {
-                defaultMessage: 'Policy "{name}" created',
-                values: { name: data.name },
-              })
-            );
+            try {
+              await actionPoliciesApi.upsertActionPolicy(data.id, buildActionPolicyPayload(data));
+              await updateOrigin(data.id);
+              notifications.toasts.addSuccess(
+                i18n.translate('xpack.alertingV2.actionPolicyAttachment.createdSuccess', {
+                  defaultMessage: 'Policy "{name}" created',
+                  values: { name: data.name },
+                })
+              );
+            } catch (e) {
+              notifications.toasts.addDanger(
+                i18n.translate('xpack.alertingV2.actionPolicyAttachment.createError', {
+                  defaultMessage: 'Failed to create policy: {error}',
+                  values: { error: e.body?.message ?? e.message },
+                })
+              );
+            }
           },
         },
       ]);
@@ -147,13 +156,22 @@ export const ActionPolicyCanvasContent = ({
             })
           : undefined,
         handler: async () => {
-          await actionPoliciesApi.upsertActionPolicy(policyId, buildActionPolicyPayload(data));
-          notifications.toasts.addSuccess(
-            i18n.translate('xpack.alertingV2.actionPolicyAttachment.updatedSuccess', {
-              defaultMessage: 'Policy "{name}" updated',
-              values: { name: data.name },
-            })
-          );
+          try {
+            await actionPoliciesApi.upsertActionPolicy(policyId, buildActionPolicyPayload(data));
+            notifications.toasts.addSuccess(
+              i18n.translate('xpack.alertingV2.actionPolicyAttachment.updatedSuccess', {
+                defaultMessage: 'Policy "{name}" updated',
+                values: { name: data.name },
+              })
+            );
+          } catch (e) {
+            notifications.toasts.addDanger(
+              i18n.translate('xpack.alertingV2.actionPolicyAttachment.updateError', {
+                defaultMessage: 'Failed to update policy: {error}',
+                values: { error: e.body?.message ?? e.message },
+              })
+            );
+          }
         },
       },
       {
