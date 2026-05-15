@@ -6,8 +6,8 @@
  */
 
 import type { FC } from 'react';
-import React, { memo, useCallback, useMemo } from 'react';
-import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle, useEuiTheme } from '@elastic/eui';
+import React, { memo, useCallback } from 'react';
+import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue, HOST_NAME_FIELD } from '@kbn/discover-utils';
@@ -52,7 +52,6 @@ export interface HostIsolationFlyoutProps {
  */
 export const HostIsolationFlyout: FC<HostIsolationFlyoutProps> = memo(
   ({ hit, detailsData, isolateAction, onClose }) => {
-    const { euiTheme } = useEuiTheme();
     const { addSuccess } = useAppToasts();
     const caseDetailsRefresh = useWithCaseDetailsRefresh();
 
@@ -69,18 +68,14 @@ export const HostIsolationFlyout: FC<HostIsolationFlyoutProps> = memo(
       onClose();
     }, [addSuccess, caseDetailsRefresh, hostName, isolateAction, onClose]);
 
-    const maskProps = useMemo(
-      () => ({ style: `z-index: ${(euiTheme.levels.flyout as number) + 4}` }),
-      [euiTheme.levels.flyout]
-    );
-
     return (
       <EuiFlyout
         onClose={onClose}
+        // Explicit viewport mode keeps this nested flyout above the Timeline modal.
+        container={null}
         session="never"
         size="m"
         paddingSize="m"
-        maskProps={maskProps}
         aria-labelledby={HOST_ISOLATION_TITLE_TEST_ID}
         data-test-subj={HOST_ISOLATION_FLYOUT_TEST_ID}
       >

@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { find } from 'lodash/fp';
 import { buildDataTableRecord } from '@kbn/discover-utils';
@@ -138,7 +138,9 @@ export const TakeActionButton: FC = () => {
   const [isOsqueryFlyoutOpenWithAgentId, setOsqueryFlyoutOpenWithAgentId] = useState<null | string>(
     null
   );
-  const closeOsqueryFlyout = () => setOsqueryFlyoutOpenWithAgentId(null);
+  const closeOsqueryFlyout = useCallback(() => {
+    setOsqueryFlyoutOpenWithAgentId(null);
+  }, []);
   const alertId = useMemo(
     () => (dataAsNestedObject?.kibana?.alert ? dataAsNestedObject?._id : null),
     [dataAsNestedObject?._id, dataAsNestedObject?.kibana?.alert]
