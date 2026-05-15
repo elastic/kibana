@@ -17,7 +17,7 @@ export type {
   IWorkflowContextManager,
   IStepExecutionRuntime,
   IWorkflowExecutionRuntimeManager,
-  IWorkflowExecutionState,
+  IStepIoService,
   IStepExecutionRuntimeFactory,
   ScopeData,
   INodeImplementation,

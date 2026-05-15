@@ -12,7 +12,7 @@ import type {
   IStepExecutionRuntime,
   IWorkflowExecutionRuntimeManager,
   IWorkflowEventLogger,
-  IWorkflowExecutionState,
+  IStepIoService,
 } from '../../..';
 import { EnterForeachNodeImpl } from './enter_foreach_node_impl';
 import { ExitForeachNodeImpl } from './exit_foreach_node_impl';
@@ -83,7 +83,7 @@ const makeRuntimeManager = (): IWorkflowExecutionRuntimeManager => ({
   unwindScopes: jest.fn(),
 });
 
-const makeWorkflowExecutionState = (): IWorkflowExecutionState => ({
+const makeStepIoService = (): IStepIoService => ({
   evictStaleLoopOutputs: jest.fn(),
 });
 
@@ -211,19 +211,19 @@ describe('ExitForeachNodeImpl', () => {
     step: IStepExecutionRuntime,
     runtime: IWorkflowExecutionRuntimeManager,
     logger: IWorkflowEventLogger,
-    execState: IWorkflowExecutionState,
+    stepIoService: IStepIoService,
     graph: ReturnType<typeof makeWorkflowGraph>
-  ) => new ExitForeachNodeImpl(node, step, runtime, logger, execState, graph as any);
+  ) => new ExitForeachNodeImpl(node, step, runtime, logger, stepIoService, graph as any);
 
   it('navigates back to start node when more items remain', () => {
     const step = makeStepRuntime();
     (step.getCurrentStepState as jest.Mock).mockReturnValue({ index: 0, total: 3 });
     const runtime = makeRuntimeManager();
     const node = makeExitForeachNode({ startNodeId: 'enter-foreach-1' });
-    const execState = makeWorkflowExecutionState();
+    const stepIoService = makeStepIoService();
     const graph = makeWorkflowGraph();
 
-    const impl = makeImpl(node, step, runtime, makeLogger(), execState, graph);
+    const impl = makeImpl(node, step, runtime, makeLogger(), stepIoService, graph);
     impl.run();
 
     expect(runtime.navigateToNode).toHaveBeenCalledWith('enter-foreach-1');
@@ -235,14 +235,14 @@ describe('ExitForeachNodeImpl', () => {
     (step.getCurrentStepState as jest.Mock).mockReturnValue({ index: 2, total: 3 });
     const runtime = makeRuntimeManager();
     const node = makeExitForeachNode();
-    const execState = makeWorkflowExecutionState();
+    const stepIoService = makeStepIoService();
     const graph = makeWorkflowGraph(['inner-step-1']);
 
-    const impl = makeImpl(node, step, runtime, makeLogger(), execState, graph);
+    const impl = makeImpl(node, step, runtime, makeLogger(), stepIoService, graph);
     impl.run();
 
     expect(step.finishStep).toHaveBeenCalledTimes(1);
-    expect(execState.evictStaleLoopOutputs).toHaveBeenCalledTimes(1);
+    expect(stepIoService.evictStaleLoopOutputs).toHaveBeenCalledTimes(1);
     expect(runtime.navigateToNextNode).toHaveBeenCalledTimes(1);
   });
 
@@ -252,12 +252,12 @@ describe('ExitForeachNodeImpl', () => {
     (step.getCurrentStepState as jest.Mock).mockReturnValue({ index: 1, total: 5 });
     const runtime = makeRuntimeManager();
     const node = makeExitForeachNode({ maxIterations: 2, onLimit: 'fail' });
-    const execState = makeWorkflowExecutionState();
+    const stepIoService = makeStepIoService();
     const graph = makeWorkflowGraph();
 
-    const impl = makeImpl(node, step, runtime, makeLogger(), execState, graph);
+    const impl = makeImpl(node, step, runtime, makeLogger(), stepIoService, graph);
     expect(() => impl.run()).toThrow(/exceeded max-iterations limit/);
-    expect(execState.evictStaleLoopOutputs).toHaveBeenCalledTimes(1);
+    expect(stepIoService.evictStaleLoopOutputs).toHaveBeenCalledTimes(1);
   });
 
   it('stops gracefully when maxIterations is hit and onLimit is not "fail"', () => {
@@ -265,10 +265,10 @@ describe('ExitForeachNodeImpl', () => {
     (step.getCurrentStepState as jest.Mock).mockReturnValue({ index: 1, total: 5 });
     const runtime = makeRuntimeManager();
     const node = makeExitForeachNode({ maxIterations: 2, onLimit: 'continue' });
-    const execState = makeWorkflowExecutionState();
+    const stepIoService = makeStepIoService();
     const graph = makeWorkflowGraph();
 
-    const impl = makeImpl(node, step, runtime, makeLogger(), execState, graph);
+    const impl = makeImpl(node, step, runtime, makeLogger(), stepIoService, graph);
     expect(() => impl.run()).not.toThrow();
     expect(step.finishStep).toHaveBeenCalledTimes(1);
     expect(runtime.navigateToNextNode).toHaveBeenCalledTimes(1);
@@ -283,7 +283,7 @@ describe('ExitForeachNodeImpl', () => {
       step,
       makeRuntimeManager(),
       makeLogger(),
-      makeWorkflowExecutionState(),
+      makeStepIoService(),
       makeWorkflowGraph()
     );
     expect(() => impl.run()).toThrow(/Foreach state for step .* not found/);

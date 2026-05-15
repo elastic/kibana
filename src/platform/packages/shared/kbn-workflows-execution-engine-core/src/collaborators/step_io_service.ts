@@ -8,14 +8,13 @@
  */
 
 /**
- * Minimal workflow-execution-state collaborator needed by flow-control nodes.
+ * Minimal IO-service collaborator needed by flow-control nodes that evict
+ * stale loop outputs (foreach exit, while exit, loop-break, loop-continue).
  *
- * The plugin's concrete `WorkflowExecutionState` class has additional I/O
- * methods (ES persistence, task-recovery helpers) that do not belong in the
- * package layer. Only the loop-output eviction surface is needed by nodes in
- * this package.
+ * The plugin's concrete `StepIoService` owns the IO maps, ES persistence, and
+ * eviction logic. Nodes only need the eviction surface.
  */
-export interface IWorkflowExecutionState {
+export interface IStepIoService {
   /**
    * Removes output entries for stale loop iterations so they no longer
    * pollute the workflow context after a loop exits or breaks.
