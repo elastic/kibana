@@ -18,8 +18,9 @@ test.describe('deprecation surface', { tag: [...INFERENCE_LOCAL_TAGS] }, () => {
   const deprecatedConnectorId = '.mock-openai-gpt-3.5-chat_completion-g4c7';
   const eolConnectorId = '.mock-openai-davinci-chat_completion-h2d5';
 
-  test.beforeEach(async ({ page, pageObjects }) => {
+  test.beforeEach(async ({ browserAuth, page, pageObjects }) => {
     await mockInferenceEndpoints(page, mockEndpointsData);
+    await browserAuth.loginAsPrivilegedUser();
     await pageObjects.featureSettings.goto();
   });
 
