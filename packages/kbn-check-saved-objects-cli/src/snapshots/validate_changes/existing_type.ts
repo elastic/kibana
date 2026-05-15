@@ -22,6 +22,7 @@ import {
   validateNoModelVersionChanges,
   validateModelVersionsChanges,
   validateNewMappingsInModelVersion,
+  validateIgnoreAboveExistingType,
   validateNameTitleFieldTypesExistingType,
 } from './existing_type_utils';
 
@@ -63,6 +64,9 @@ export function validateChangesExistingType({
 
   // validate that name and title fields are of type "text"
   validateNameTitleFieldTypesExistingType(name, to, from, registeredType, log);
+
+  // validate that keyword and flattened fields have ignore_above
+  validateIgnoreAboveExistingType(name, to, from, log);
 
   const newModelVersionCount = to.modelVersions.length - from.modelVersions.length;
 
