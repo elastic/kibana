@@ -90,8 +90,7 @@ export const reportChartSectionError = ({
     }
   }
   if (callerLabels) {
-    // Drop undefined / empty values so we don't pollute APM with blanks
-    // (e.g. when a caller forwards an optional `profileId` that wasn't set).
+    // Drop undefined / empty values.
     for (const [key, value] of Object.entries(callerLabels)) {
       if (value !== undefined && value !== '') {
         labels[key] = value;
@@ -99,29 +98,17 @@ export const reportChartSectionError = ({
     }
   }
 
-  // `apm.captureError` on its own does not flip the surrounding RUM
-  // transaction to `outcome: 'failure'`. Mirror the pattern in
-  // `x-pack/platform/plugins/shared/lens/public/react_embeddable/data_loader.ts`
-  // (PR #265354) by attaching a child span, capturing the error inside it,
-  // and explicitly marking the span as failed so APM dashboards correlate
-  // the error with a failed unit of work. If there is no active transaction
-  // (e.g. unit-test environments or callers outside a managed transaction)
-  // fall back to a plain capture so the error is never dropped.
-  const transaction = apm.getCurrentTransaction();
-  if (transaction) {
-    const span = transaction.startSpan('chart-section-non-render-error', 'chart-section');
-    if (span) {
-      span.addLabels(labels);
-      apm.captureError(error, { labels });
-      // @ts-expect-error RUM types do not expose `outcome` on Span, but the
-      // RUM agent reads it when present (see lens data_loader for the same
-      // workaround).
-      span.outcome = 'failure';
-      span.end();
-    } else {
-      apm.captureError(error, { labels });
-    }
-  } else {
-    apm.captureError(error, { labels });
+  // `apm.captureError` alone doesn't mark the surrounding transaction failed.
+  // Mirror lens/data_loader.ts: attach a failed child span around the capture.
+  const span = apm.getCurrentTransaction()?.startSpan(
+    'chart-section-non-render-error',
+    'chart-section'
+  );
+  span?.addLabels(labels);
+  apm.captureError(error, { labels });
+  if (span) {
+    // @ts-expect-error RUM types do not expose `outcome` on Span.
+    span.outcome = 'failure';
+    span.end();
   }
 };
