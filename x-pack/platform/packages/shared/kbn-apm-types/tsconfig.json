@@ -18,7 +18,6 @@
     "@kbn/es-query",
     "@kbn/io-ts-utils",
     "@kbn/config-schema",
-    "@kbn/ml-plugin",
     "@kbn/es-types",
     "@kbn/apm-types-shared",
     "@kbn/slo-schema",
