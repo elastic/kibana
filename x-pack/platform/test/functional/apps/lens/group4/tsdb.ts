@@ -34,7 +34,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const createDocs = getDocsGenerator(log, es, 'tsdb');
 
   // Failing: See https://github.com/elastic/kibana/issues/245335
-  describe.skip('lens tsdb', function () {
+  describe('lens tsdb', function () {
     const tsdbIndex = 'kibana_sample_data_logstsdb';
     const tsdbDataView = tsdbIndex;
     const tsdbEsArchive =

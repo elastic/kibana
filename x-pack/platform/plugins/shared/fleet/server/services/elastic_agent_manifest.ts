@@ -13,15 +13,15 @@ metadata:
   name: elastic-agent
   namespace: kube-system
   labels:
-    app: elastic-agent
+    app.kubernetes.io/name: elastic-agent
 spec:
   selector:
     matchLabels:
-      app: elastic-agent
+      app.kubernetes.io/name: elastic-agent
   template:
     metadata:
       labels:
-        app: elastic-agent
+        app.kubernetes.io/name: elastic-agent
     spec:
       # Tolerations are needed to run Elastic Agent on Kubernetes control-plane nodes.
       # Agents running on control-plane nodes collect metrics from the control plane components (scheduler, controller manager) of Kubernetes
@@ -31,26 +31,28 @@ spec:
         - key: node-role.kubernetes.io/master
           effect: NoSchedule
       serviceAccountName: elastic-agent
+      # The following setting is needed for Universal Profiling to observe all processes on the host
+      # and produce userspace frames.
+      # If you are using the Universal Profiling integration, please uncomment the following line before applying.
+      # hostPID: true
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
       # Uncomment if using hints feature
       #initContainers:
       #  - name: k8s-templates-downloader
-      #    image: docker.elastic.co/beats/elastic-agent:VERSION
+      #    image: docker.elastic.co/elastic-agent/elastic-agent:VERSION
       #    command: ['bash']
       #    args:
       #      - -c
       #      - >-
-      #        mkdir -p /usr/share/elastic-agent/state/inputs.d &&
-      #        curl -sL https://github.com/elastic/elastic-agent/archive/8.16.tar.gz | tar xz -C /usr/share/elastic-agent/state/inputs.d --strip=5 "elastic-agent-8.16/deploy/kubernetes/elastic-agent-standalone/templates.d"
-      #    securityContext:
-      #      runAsUser: 0
+      #        mkdir -p /etc/elastic-agent/inputs.d &&
+      #        curl -sL https://github.com/elastic/elastic-agent/archive/refs/tags/vVERSION.tar.gz | tar xz -C /etc/elastic-agent/inputs.d --strip=5 "elastic-agent-VERSION/deploy/kubernetes/elastic-agent-standalone/templates.d"
       #    volumeMounts:
-      #      - name: elastic-agent-state
-      #        mountPath: /usr/share/elastic-agent/state
+      #      - name: external-inputs
+      #        mountPath: /etc/elastic-agent/inputs.d
       containers:
         - name: elastic-agent
-          image: docker.elastic.co/beats/elastic-agent:VERSION
+          image: docker.elastic.co/elastic-agent/elastic-agent:VERSION
           args: ["-c", "/etc/elastic-agent/agent.yml", "-e"]
           env:
             # The API Key with access privilleges to connect to Elasticsearch. https://www.elastic.co/guide/en/fleet/current/grant-access-to-elasticsearch.html#create-api-key-standalone-agent
@@ -62,6 +64,9 @@ spec:
             # The basic authentication password used to connect to Elasticsearch
             - name: ES_PASSWORD
               value: "changeme"
+            # The fingerprint of a root CA certificate used to sign
+            # Elasticsearch's TLS certificate
+            - name: CA_TRUSTED
             - name: NODE_NAME
               valueFrom:
                 fieldRef:
@@ -74,6 +79,9 @@ spec:
             # For more info: https://www.elastic.co/guide/en/beats/metricbeat/current/add-host-metadata.html
             - name: ELASTIC_NETINFO
               value: "false"
+            # 'Defend for containers' integration (cloud-defend) uses the HOSTFS_PROC_PATH variable for accessing process information from the node.
+            - name: HOSTFS_PROC_PATH
+              value: "/hostfs/proc"
           securityContext:
             runAsUser: 0
             # The following capabilities are needed for 'Defend for containers' integration (cloud-defend)
@@ -87,17 +95,16 @@ spec:
             # The following capabilities are needed for Universal Profiling.
             # More fine graded capabilities are only available for newer Linux kernels.
             # If you are using the Universal Profiling integration, please uncomment these lines before applying.
-            #procMount: "Unmasked"
             #privileged: true
             #capabilities:
             #  add:
             #    - SYS_ADMIN
           resources:
             limits:
-              memory: 700Mi
+              memory: 1200Mi
             requests:
               cpu: 100m
-              memory: 400Mi
+              memory: 500Mi
           volumeMounts:
             - name: datastreams
               mountPath: /etc/elastic-agent/agent.yml
@@ -123,8 +130,19 @@ spec:
               readOnly: true
             - name: sys-kernel-debug
               mountPath: /sys/kernel/debug
+            - name: boot
+              mountPath: /boot
+              readOnly: true
+            - name: sys-fs-bpf
+              mountPath: /sys/fs/bpf
+            - name: sys-kernel-security
+              mountPath: /sys/kernel/security
+              readOnly: true
             - name: elastic-agent-state
               mountPath: /usr/share/elastic-agent/state
+            # Uncomment if using hints feature
+            # - name: external-inputs
+            #   mountPath: /usr/share/elastic-agent/state/inputs.d
       volumes:
         - name: datastreams
           configMap:
@@ -157,12 +175,26 @@ spec:
         - name: sys-kernel-debug
           hostPath:
             path: /sys/kernel/debug
+        # The following three mounts are needed for 'Defend for containers' integration (cloud-defend)
+        # If you are not using cloud-defend, then these volumes and the corresponding mounts can be removed.
+        - name: boot
+          hostPath:
+            path: /boot
+        - name: sys-fs-bpf
+          hostPath:
+            path: /sys/fs/bpf
+        - name: sys-kernel-security
+          hostPath:
+            path: /sys/kernel/security
         # Mount /var/lib/elastic-agent-managed/kube-system/state to store elastic-agent state
         # Update 'kube-system' with the namespace of your agent installation
         - name: elastic-agent-state
           hostPath:
             path: /var/lib/elastic-agent/kube-system/state
             type: DirectoryOrCreate
+        # Uncomment if using hints feature
+        # - name: external-inputs
+        #   emptyDir: {}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -210,7 +242,7 @@ kind: ClusterRole
 metadata:
   name: elastic-agent
   labels:
-    k8s-app: elastic-agent
+    app.kubernetes.io/name: elastic-agent
 rules:
   - apiGroups: [""]
     resources:
@@ -282,7 +314,7 @@ metadata:
   # Should be the namespace where elastic-agent is running
   namespace: kube-system
   labels:
-    k8s-app: elastic-agent
+    app.kubernetes.io/name: elastic-agent
 rules:
   - apiGroups:
       - coordination.k8s.io
@@ -296,7 +328,7 @@ metadata:
   name: elastic-agent-kubeadm-config
   namespace: kube-system
   labels:
-    k8s-app: elastic-agent
+    app.kubernetes.io/name: elastic-agent
 rules:
   - apiGroups: [""]
     resources:
@@ -311,7 +343,7 @@ metadata:
   name: elastic-agent
   namespace: kube-system
   labels:
-    k8s-app: elastic-agent
+    app.kubernetes.io/name: elastic-agent
 ---
 `;
 
@@ -323,15 +355,15 @@ metadata:
   name: elastic-agent
   namespace: kube-system
   labels:
-    app: elastic-agent
+    app.kubernetes.io/name: elastic-agent
 spec:
   selector:
     matchLabels:
-      app: elastic-agent
+      app.kubernetes.io/name: elastic-agent
   template:
     metadata:
       labels:
-        app: elastic-agent
+        app.kubernetes.io/name: elastic-agent
     spec:
       # Tolerations are needed to run Elastic Agent on Kubernetes control-plane nodes.
       # Agents running on control-plane nodes collect metrics from the control plane components (scheduler, controller manager) of Kubernetes
@@ -341,11 +373,15 @@ spec:
         - key: node-role.kubernetes.io/master
           effect: NoSchedule
       serviceAccountName: elastic-agent
+      # The following setting is needed for Universal Profiling to observe all processes on the host
+      # and produce userspace frames.
+      # If you are using the Universal Profiling integration, please uncomment the following line before applying.
+      # hostPID: true
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
       containers:
         - name: elastic-agent
-          image: docker.elastic.co/beats/elastic-agent:VERSION
+          image: docker.elastic.co/elastic-agent/elastic-agent:VERSION
           env:
             # Set to 1 for enrollment into Fleet server. If not set, Elastic Agent is run in standalone mode
             - name: FLEET_ENROLL
@@ -381,6 +417,9 @@ spec:
             # For more info: https://www.elastic.co/guide/en/beats/metricbeat/current/add-host-metadata.html
             - name: ELASTIC_NETINFO
               value: "false"
+            # 'Defend for containers' integration (cloud-defend) uses the HOSTFS_PROC_PATH variable for accessing process information from the node.
+            - name: HOSTFS_PROC_PATH
+              value: "/hostfs/proc"
           securityContext:
             runAsUser: 0
             # The following capabilities are needed for 'Defend for containers' integration (cloud-defend)
@@ -394,17 +433,16 @@ spec:
             # The following capabilities are needed for Universal Profiling.
             # More fine graded capabilities are only available for newer Linux kernels.
             # If you are using the Universal Profiling integration, please uncomment these lines before applying.
-            #procMount: "Unmasked"
             #privileged: true
             #capabilities:
             #  add:
             #    - SYS_ADMIN
           resources:
             limits:
-              memory: 700Mi
+              memory: 1200Mi
             requests:
               cpu: 100m
-              memory: 400Mi
+              memory: 500Mi
           volumeMounts:
             - name: proc
               mountPath: /hostfs/proc
@@ -429,6 +467,14 @@ spec:
               readOnly: true
             - name: sys-kernel-debug
               mountPath: /sys/kernel/debug
+            - name: boot
+              mountPath: /boot
+              readOnly: true
+            - name: sys-fs-bpf
+              mountPath: /sys/fs/bpf
+            - name: sys-kernel-security
+              mountPath: /sys/kernel/security
+              readOnly: true
             - name: elastic-agent-state
               mountPath: /usr/share/elastic-agent/state
       volumes:
@@ -465,6 +511,17 @@ spec:
         - name: sys-kernel-debug
           hostPath:
             path: /sys/kernel/debug
+        # The following three mounts are needed for 'Defend for containers' integration (cloud-defend)
+        # If you are not using cloud-defend, then these volumes and the corresponding mounts can be removed.
+        - name: boot
+          hostPath:
+            path: /boot
+        - name: sys-fs-bpf
+          hostPath:
+            path: /sys/fs/bpf
+        - name: sys-kernel-security
+          hostPath:
+            path: /sys/kernel/security
         # Mount /var/lib/elastic-agent-managed/kube-system/state to store elastic-agent state
         # Update 'kube-system' with the namespace of your agent installation
         - name: elastic-agent-state
@@ -518,7 +575,7 @@ kind: ClusterRole
 metadata:
   name: elastic-agent
   labels:
-    k8s-app: elastic-agent
+    app.kubernetes.io/name: elastic-agent
 rules:
   - apiGroups: [""]
     resources:
@@ -590,7 +647,7 @@ metadata:
   # Should be the namespace where elastic-agent is running
   namespace: kube-system
   labels:
-    k8s-app: elastic-agent
+    app.kubernetes.io/name: elastic-agent
 rules:
   - apiGroups:
       - coordination.k8s.io
@@ -604,7 +661,7 @@ metadata:
   name: elastic-agent-kubeadm-config
   namespace: kube-system
   labels:
-    k8s-app: elastic-agent
+    app.kubernetes.io/name: elastic-agent
 rules:
   - apiGroups: [""]
     resources:
@@ -619,6 +676,6 @@ metadata:
   name: elastic-agent
   namespace: kube-system
   labels:
-    k8s-app: elastic-agent
+    app.kubernetes.io/name: elastic-agent
 ---
 `;
