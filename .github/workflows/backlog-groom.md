@@ -48,7 +48,6 @@ safe-outputs:
     draft: true
     base-branch: main
     preserve-branch-name: true
-    recreate-ref: true
   noop:
     max: 1
     report-as-issue: false
