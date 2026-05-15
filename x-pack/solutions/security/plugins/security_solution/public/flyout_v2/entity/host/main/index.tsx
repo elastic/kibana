@@ -25,7 +25,10 @@ import { buildHostNamesFilter, type RiskSeverity } from '../../../../../common/s
 import { useUiSetting, useKibana } from '../../../../common/lib/kibana';
 import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
 import type { EntityDetailsPath } from '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
-import { EntityDetailsLeftPanelTab } from '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
+import {
+  CspInsightLeftPanelSubTab,
+  EntityDetailsLeftPanelTab,
+} from '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import { flyoutProviders } from '../../../shared/components/flyout_provider';
 import {
   defaultToolsFlyoutProperties,
@@ -33,7 +36,9 @@ import {
 } from '../../../shared/hooks/use_default_flyout_properties';
 import { documentFlyoutHistoryKey } from '../../../shared/constants/flyout_history';
 import { RiskInputs } from '../tools/risk_inputs';
-import { CspInsights } from '../tools/csp_insights';
+import { MisconfigurationInsights } from '../tools/misconfiguration_insights';
+import { VulnerabilityInsights } from '../tools/vulnerability_insights';
+import { AlertsInsights } from '../tools/alerts_insights';
 import { Header } from './header';
 import { Content } from './content';
 import { Footer } from './footer';
@@ -278,15 +283,34 @@ export const Host: FC<HostProps> = memo(function Host({
             />
           );
         case EntityDetailsLeftPanelTab.CSP_INSIGHTS:
-          return wrap(
-            <CspInsights
-              value={hostName}
-              entityId={panelDisplayEntityId ?? ''}
-              scopeId={scopeId}
-              entityType={EntityType.host}
-              onOpenHost={onOpenHost}
-            />
-          );
+          switch (path.subTab) {
+            case CspInsightLeftPanelSubTab.VULNERABILITIES:
+              return wrap(
+                <VulnerabilityInsights
+                  value={hostName}
+                  entityId={panelDisplayEntityId}
+                  scopeId={scopeId}
+                  onOpenHost={onOpenHost}
+                />
+              );
+            case CspInsightLeftPanelSubTab.ALERTS:
+              return wrap(
+                <AlertsInsights
+                  value={hostName}
+                  entityId={panelDisplayEntityId}
+                  onOpenHost={onOpenHost}
+                />
+              );
+            default:
+              return wrap(
+                <MisconfigurationInsights
+                  value={hostName}
+                  entityId={panelDisplayEntityId}
+                  scopeId={scopeId}
+                  onOpenHost={onOpenHost}
+                />
+              );
+          }
       }
     },
     [
