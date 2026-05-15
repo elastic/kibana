@@ -110,7 +110,8 @@ safe-outputs:
     draft: false
     auto-close-issue: false
     allowed-base-branches:
-      - "[0-9]*.[0-9]*"
+      - "8.19"
+      - "9.*"
     fallback-as-issue: false
     protected-files: allowed
   assign-to-user:
@@ -248,7 +249,7 @@ Backport PR creation steps:
 3. Call `assign_to_user` for the PR created by that `create_pull_request` call with `issue_number` set to the temporary PR reference returned by `create_pull_request` and `assignees`: `["<source PR author login>"]`.
 4. Return `created`.
 
-Backport body rules. JSON-escape string values in the `BACKPORT` marker when substituting real PR metadata:
+Backport body must match this template EXACTLY. JSON-escape string values in the `BACKPORT` marker when substituting real PR metadata:
 
 ```markdown
 # Backport
