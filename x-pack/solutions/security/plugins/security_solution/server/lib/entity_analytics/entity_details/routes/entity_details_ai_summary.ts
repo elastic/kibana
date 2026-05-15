@@ -31,6 +31,9 @@ const SaveAiSummaryRequestBody = z.object({
     generated_at: z.number(),
     // generated_by is intentionally excluded from the request body —
     // it is derived server-side from the authenticated user to prevent spoofing.
+    risk_level_at_generation: z.string().nullable().optional(),
+    anomaly_job_ids_at_generation: z.array(z.string()).nullable().optional(),
+    rule_names_at_generation: z.array(z.string()).nullable().optional(),
   }),
 });
 

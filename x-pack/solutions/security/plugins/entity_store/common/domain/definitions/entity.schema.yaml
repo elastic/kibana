@@ -169,6 +169,22 @@ components:
                 generated_by:
                   type: string
                   description: Username of the user who triggered the summary generation.
+                risk_level_at_generation:
+                  type: string
+                  nullable: true
+                  description: The entity risk level at the time the summary was generated. Used for staleness detection.
+                anomaly_job_ids_at_generation:
+                  type: array
+                  nullable: true
+                  description: Snapshot of anomaly job IDs active at generation time. Used for staleness detection.
+                  items:
+                    type: string
+                rule_names_at_generation:
+                  type: array
+                  nullable: true
+                  description: Snapshot of detection rule names at generation time. Used for staleness detection.
+                  items:
+                    type: string
         behaviors:
           type: object
           description: Behavioral signals observed for the entity.

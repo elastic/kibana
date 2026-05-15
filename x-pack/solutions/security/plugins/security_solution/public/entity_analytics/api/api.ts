@@ -726,6 +726,9 @@ export const useEntityAnalyticsRoutes = () => {
         highlights: Array<{ title: string; text: string }>;
         recommendedActions: string[] | null | undefined;
         generated_at: number;
+        risk_level_at_generation?: string | null;
+        anomaly_job_ids_at_generation?: string[] | null;
+        rule_names_at_generation?: string[] | null;
       };
     }): Promise<{ updated: boolean }> =>
       http.fetch(ENTITY_DETAILS_AI_SUMMARY_INTERNAL_URL, {
