@@ -1885,7 +1885,7 @@ export const getSavedObjectTypes = (
           statusMessage: { type: 'text' },
           attemptCount: { type: 'integer' },
           vars: { type: 'flattened' },
-          serviceVars: { type: 'flattened' },
+          serviceVars: { type: 'object', enabled: false },
           packagePolicyIds: { type: 'keyword' },
           createdAt: { type: 'date' },
           updatedAt: { type: 'date' },
