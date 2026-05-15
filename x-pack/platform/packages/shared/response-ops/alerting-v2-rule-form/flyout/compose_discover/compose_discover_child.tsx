@@ -25,22 +25,37 @@ import {
   EuiSuperDatePicker,
   EuiSelect,
   EuiPanel,
+  EuiTabs,
+  EuiTab,
   EuiDataGrid,
   type EuiDataGridColumn,
   type EuiDataGridCellValueElementProps,
 } from '@elastic/eui';
-import { CodeEditor, ESQL_LANG_ID } from '@kbn/code-editor';
+import { CodeEditor, ESQL_LANG_ID, type monaco } from '@kbn/code-editor';
 import type { FormValues } from '../../form/types';
 import { useRuleFormServices } from '../../form/contexts/rule_form_context';
 import { useDataFields } from '../../form/hooks/use_data_fields';
-import type { ComposeDiscoverState, ComposeDiscoverAction } from './types';
+import type {
+  ComposeDiscoverState,
+  ComposeDiscoverAction,
+  SandboxTabConfig,
+  SandboxApplyData,
+} from './types';
 import { useQueryExecution } from './use_query_execution';
 import { ComposeDiscoverChart } from './compose_discover_chart';
+import { ComposeDiscoverTabs, TAB_DEFINITIONS, visibleTabIds } from './compose_discover_tabs';
 
 interface ComposeDiscoverChildProps {
   state: ComposeDiscoverState;
   dispatch: React.Dispatch<ComposeDiscoverAction>;
+  /** Controls whether the Sandbox renders a single editor or a Base/Alert/Recovery tab layout. */
+  tabConfig: SandboxTabConfig;
+  onAlertEditorMount?: (editor: monaco.editor.IStandaloneCodeEditor) => void;
+  onRecoveryEditorMount?: (editor: monaco.editor.IStandaloneCodeEditor) => void;
   onClose: () => void;
+  /** Called when the user clicks "Apply changes". The parent writes the query
+   *  into RHF (the source of truth) and updates the reducer cache. */
+  onApply: (data: SandboxApplyData) => void;
 }
 
 const CHILD_FLYOUT_TITLE_ID = 'composeDiscoverChildTitle';
@@ -55,10 +70,34 @@ const RUN_SHORTCUT_LABEL = isMac ? '⌘⏎' : 'Ctrl+Enter';
 export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
   state,
   dispatch,
+  tabConfig,
+  onAlertEditorMount,
+  onRecoveryEditorMount,
   onClose,
+  onApply,
 }) => {
   const services = useRuleFormServices();
-  const [localQuery, setLocalQuery] = useState(state.sandbox.query);
+  const isSplit = tabConfig.type !== 'single';
+  const [localQuery, setLocalQuery] = useState(state.fullQuery);
+  const [localBaseQuery, setLocalBaseQuery] = useState(state.baseQuery);
+  const [localAlertBlock, setLocalAlertBlock] = useState(state.alertBlock);
+  const [localRecoveryBlock, setLocalRecoveryBlock] = useState(state.recoveryBlock);
+
+  // Read timeField and the base query from RHF
+  const { setValue: setFormValue, watch: watchForm } = useFormContext<FormValues>();
+  const timeField = watchForm('timeField') ?? '@timestamp';
+  const formQuery = watchForm('evaluation.query.base') ?? '';
+
+  // In single mode, sync localQuery when RHF's query changes externally
+  // (e.g. from YAML edits that debounce into RHF). When the change comes
+  // from this Sandbox's own "Apply changes", formQuery equals localQuery
+  // so the setState is a no-op.
+  useEffect(() => {
+    if (!isSplit) {
+      setLocalQuery(formQuery);
+    }
+  }, [formQuery, isSplit]);
+
   // Date range persists in the reducer so it's remembered across Sandbox open/close.
   // It is intentionally not connected to schedule.lookback in FormValues — it's a
   // preview window for testing the query, not a rule configuration field.
@@ -67,12 +106,11 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
 
   const timeRange = useMemo(() => ({ from: dateStart, to: dateEnd }), [dateStart, dateEnd]);
 
-  // Single-editor mode: always use localQuery
-  const activeQuery = localQuery;
-
-  // Read timeField from RHF — it lives there, not in the UI reducer
-  const { setValue: setFormValue, watch: watchForm } = useFormContext<FormValues>();
-  const timeField = watchForm('timeField') ?? '@timestamp';
+  // In split mode the "active" query for execution and field-detection is the full assembled
+  // query (base + alert block). In single mode it is the local editor content.
+  const activeQuery = isSplit
+    ? [localBaseQuery, localAlertBlock].filter(Boolean).join('\n')
+    : localQuery;
 
   // Only fetch fields when the query has a real index pattern after FROM.
   const queryForFields = /^\s*FROM\s+[a-zA-Z0-9_.*-]/i.test(activeQuery) ? activeQuery : '';
@@ -143,9 +181,14 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
   }, [run]);
 
   const handleDone = useCallback(() => {
-    dispatch({ type: 'COMMIT_SANDBOX_QUERY', query: localQuery });
-    onClose();
-  }, [localQuery, dispatch, onClose]);
+    onApply({
+      isSplit,
+      fullQuery: localQuery,
+      baseQuery: localBaseQuery,
+      alertBlock: localAlertBlock,
+      recoveryBlock: localRecoveryBlock,
+    });
+  }, [isSplit, localQuery, localBaseQuery, localAlertBlock, localRecoveryBlock, onApply]);
 
   const gridColumns: EuiDataGridColumn[] = useMemo(
     () =>
@@ -186,6 +229,12 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
     [rows]
   );
 
+  const splitTabs = useMemo(() => {
+    if (!isSplit) return [];
+    const tabIds = visibleTabIds(tabConfig);
+    return TAB_DEFINITIONS.filter((t) => tabIds.includes(t.id));
+  }, [isSplit, tabConfig]);
+
   const editorPanelStyles: React.CSSProperties = useMemo(
     () => ({
       resize: 'vertical',
@@ -212,143 +261,178 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
-        {/* ── 1. Time field / date picker / Search row — one line ──────── */}
-        <div style={{ padding: '8px 16px' }}>
-          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={false}>
-            <EuiFlexItem grow={false} style={{ width: 200, minWidth: 0 }}>
-              <EuiSelect
-                options={timeFieldOptions}
-                value={timeField}
-                onChange={(e) => setFormValue('timeField', e.target.value)}
-                compressed
-                prepend="Time field"
-                data-test-subj="composeDiscoverTimeField"
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow>
-              <EuiSuperDatePicker
-                start={dateStart}
-                end={dateEnd}
-                onTimeChange={({ start, end }) => {
-                  dispatch({ type: 'SET_SANDBOX_DATE_RANGE', start, end });
-                }}
-                showUpdateButton={false}
-                compressed
-                width="full"
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiToolTip content={`Search (${RUN_SHORTCUT_LABEL})`}>
-                <EuiButton
-                  size="s"
-                  onClick={run}
-                  isLoading={isLoading}
-                  data-test-subj="composeDiscoverRunQuery"
+        {/* ── 0. Tab bar (split mode only) ─────────────────────────────── */}
+        {splitTabs.length > 0 && (
+          <>
+            <EuiTabs>
+              {splitTabs.map((tab) => (
+                <EuiTab
+                  key={tab.id}
+                  isSelected={state.activeTab === tab.id}
+                  onClick={() => dispatch({ type: 'SET_TAB', tab: tab.id })}
+                  data-test-subj={`composeDiscoverTab-${tab.id}`}
                 >
-                  Search
-                </EuiButton>
-              </EuiToolTip>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </div>
+                  {tab.label}
+                </EuiTab>
+              ))}
+            </EuiTabs>
+            <EuiSpacer size="s" />
+          </>
+        )}
+
+        {/* ── 1. Time field / date picker / Search row — one line ──────── */}
+        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={false}>
+          <EuiFlexItem grow={false} style={{ width: 200, minWidth: 0 }}>
+            <EuiSelect
+              options={timeFieldOptions}
+              value={timeField}
+              aria-label="Time field for rule execution"
+              onChange={(e) => setFormValue('timeField', e.target.value)}
+              compressed
+              prepend="Time field"
+              data-test-subj="composeDiscoverTimeField"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow>
+            <EuiSuperDatePicker
+              start={dateStart}
+              end={dateEnd}
+              onTimeChange={({ start, end }) => {
+                dispatch({ type: 'SET_SANDBOX_DATE_RANGE', start, end });
+              }}
+              showUpdateButton={false}
+              compressed
+              width="full"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiToolTip content={`Search (${RUN_SHORTCUT_LABEL})`}>
+              <EuiButton
+                size="s"
+                onClick={run}
+                isLoading={isLoading}
+                data-test-subj="composeDiscoverRunQuery"
+              >
+                Search
+              </EuiButton>
+            </EuiToolTip>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="s" />
 
         {/* ── 2. Editor — bordered panel ──────────────────────────────── */}
-        <EuiPanel hasBorder paddingSize="none" style={{ margin: '0 16px', ...editorPanelStyles }}>
-          <CodeEditor
-            languageId={ESQL_LANG_ID}
-            value={localQuery}
-            onChange={setLocalQuery}
-            height="100%"
-            options={{
-              minimap: { enabled: false },
-              automaticLayout: true,
-              scrollBeyondLastLine: false,
-              fontSize: 13,
-            }}
-          />
+        <EuiPanel hasBorder paddingSize="s" style={{ ...editorPanelStyles }}>
+          {isSplit ? (
+            <ComposeDiscoverTabs
+              baseQuery={localBaseQuery}
+              alertBlock={localAlertBlock}
+              recoveryBlock={localRecoveryBlock}
+              onBaseQueryChange={setLocalBaseQuery}
+              onAlertBlockChange={setLocalAlertBlock}
+              onRecoveryBlockChange={setLocalRecoveryBlock}
+              activeTab={state.activeTab}
+              onTabChange={(tab) => dispatch({ type: 'SET_TAB', tab })}
+              tabConfig={tabConfig}
+              onAlertEditorMount={onAlertEditorMount}
+              onRecoveryEditorMount={onRecoveryEditorMount}
+              hideTabBar
+            />
+          ) : (
+            <CodeEditor
+              languageId={ESQL_LANG_ID}
+              value={localQuery}
+              onChange={setLocalQuery}
+              height="100%"
+              options={{
+                minimap: { enabled: false },
+                automaticLayout: true,
+                scrollBeyondLastLine: false,
+                fontSize: 13,
+              }}
+            />
+          )}
         </EuiPanel>
+        <EuiSpacer size="s" />
 
         {/* ── 3. Footer stats ─────────────────────────────────────────── */}
         {hasRun && !isLoading && !isError && (
-          <div style={{ padding: '4px 16px' }}>
-            <EuiText size="xs" color="subdued">
-              {totalRowCount.toLocaleString()} {totalRowCount === 1 ? 'result' : 'results'}
-            </EuiText>
-          </div>
+          <EuiText size="xs" color="subdued">
+            {totalRowCount.toLocaleString()} {totalRowCount === 1 ? 'result' : 'results'}
+          </EuiText>
         )}
 
+        <EuiSpacer size="s" />
+
         {/* ── 4. Results ──────────────────────────────────────────────── */}
-        <div style={{ padding: '0 16px' }}>
-          <EuiSpacer size="m" />
+        <EuiSpacer size="m" />
 
-          {!hasRun && (
-            <EuiEmptyPrompt
-              iconType="playFilled"
-              title={<h4>Run your query to see results</h4>}
-              body={
-                <p>
-                  Click <strong>Search</strong> or press <strong>{RUN_SHORTCUT_LABEL}</strong> to
-                  execute the query.
-                </p>
-              }
+        {!hasRun && (
+          <EuiEmptyPrompt
+            iconType="playFilled"
+            title={<h4>Run your query to see results</h4>}
+            body={
+              <p>
+                Click <strong>Search</strong> or press <strong>{RUN_SHORTCUT_LABEL}</strong> to
+                execute the query.
+              </p>
+            }
+          />
+        )}
+
+        {hasRun && isLoading && (
+          <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: 200 }}>
+            <EuiFlexItem grow={false}>
+              <EuiLoadingSpinner size="l" />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
+
+        {hasRun && isError && (
+          <EuiCallOut announceOnMount color="danger" iconType="error" title="Query error">
+            <p>{error}</p>
+          </EuiCallOut>
+        )}
+
+        {hasRun && !isLoading && !isError && rows.length === 0 && activeQuery.trim() && (
+          <EuiEmptyPrompt
+            iconType="search"
+            title={<h4>No results</h4>}
+            body={<p>The query returned no results for the current time range.</p>}
+          />
+        )}
+
+        {hasRun && !isLoading && !isError && rows.length > 0 && (
+          <>
+            <ComposeDiscoverChart
+              query={lastExecutedQuery ?? activeQuery}
+              timeField={timeField}
+              timeRange={timeRange}
+              columns={columns}
             />
-          )}
 
-          {hasRun && isLoading && (
-            <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: 200 }}>
-              <EuiFlexItem grow={false}>
-                <EuiLoadingSpinner size="l" />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          )}
+            <EuiSpacer size="m" />
 
-          {hasRun && isError && (
-            <EuiCallOut color="danger" iconType="error" title="Query error">
-              <p>{error}</p>
-            </EuiCallOut>
-          )}
-
-          {hasRun && !isLoading && !isError && rows.length === 0 && activeQuery.trim() && (
-            <EuiEmptyPrompt
-              iconType="search"
-              title={<h4>No results</h4>}
-              body={<p>The query returned no results for the current time range.</p>}
+            <EuiDataGrid
+              aria-label="Query results"
+              columns={gridColumns}
+              columnVisibility={{ visibleColumns, setVisibleColumns }}
+              rowCount={rows.length}
+              renderCellValue={renderCellValue}
+              pagination={{
+                ...pagination,
+                pageSizeOptions: [10, 25, 50],
+                onChangePage,
+                onChangeItemsPerPage,
+              }}
+              gridStyle={{ border: 'all', header: 'shade', fontSize: 's', cellPadding: 's' }}
+              toolbarVisibility={{
+                showColumnSelector: true,
+                showSortSelector: true,
+                showFullScreenSelector: false,
+              }}
             />
-          )}
-
-          {hasRun && !isLoading && !isError && rows.length > 0 && (
-            <>
-              <ComposeDiscoverChart
-                query={lastExecutedQuery ?? activeQuery}
-                timeField={timeField}
-                timeRange={timeRange}
-                columns={columns}
-              />
-
-              <EuiSpacer size="m" />
-
-              <EuiDataGrid
-                aria-label="Query results"
-                columns={gridColumns}
-                columnVisibility={{ visibleColumns, setVisibleColumns }}
-                rowCount={rows.length}
-                renderCellValue={renderCellValue}
-                pagination={{
-                  ...pagination,
-                  pageSizeOptions: [10, 25, 50],
-                  onChangePage,
-                  onChangeItemsPerPage,
-                }}
-                gridStyle={{ border: 'all', header: 'shade', fontSize: 's', cellPadding: 's' }}
-                toolbarVisibility={{
-                  showColumnSelector: true,
-                  showSortSelector: true,
-                  showFullScreenSelector: false,
-                }}
-              />
-            </>
-          )}
-        </div>
+          </>
+        )}
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>
