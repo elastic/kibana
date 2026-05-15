@@ -248,7 +248,7 @@ describe('LensWrapper', () => {
       expect(view).toEqual(ids);
     });
 
-    it('ignores onCopyToDashboard / onViewDetails handler presence when no quickActionIds is provided', () => {
+    it('does not auto-promote actions to the visible row just because a handler is wired', () => {
       const view = renderAndCaptureViewList({
         onCopyToDashboard: jest.fn(),
         onViewDetails: jest.fn(),
