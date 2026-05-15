@@ -34,7 +34,7 @@
         "frequency": "1h",
         "excludedIndexPatterns": [],
         "maxTimeWindowSize": "15m",
-        "maxLogsPerWindow": 0,
+        "maxLogsPerWindow": 500000,
         "maxLogsPerWindowCapBehavior": "defer"
       }
     }
