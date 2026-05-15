@@ -136,6 +136,106 @@ function unmount() {
 
 Provides access to Elasticsearch using the high-level `SearchSource` API or low-level `Search Strategies`.
 
+### Typed Search Service
+
+The Typed Search Service provides a type-safe, Promise-based interface for executing Elasticsearch searches across various search strategies. It abstracts away the complexity of Observable-based search execution and provides built-in pagination support.
+
+**Available search methods:**
+
+- `searchESQL` - ES|QL queries for columnar data analysis
+- `searchDSL` - Query DSL searches with built-in pagination
+- `searchEQL` - Event Query Language for sequence queries
+- `searchSQL` - SQL syntax queries
+
+#### ES|QL Search
+
+```.ts
+const result = await data.search.typed.searchESQL(
+  {
+    query: 'FROM logs-* | WHERE status >= 400 | STATS count = COUNT(*) BY status',
+    timeZone: 'America/New_York'
+  },
+  { abortSignal }
+);
+
+console.log(result.rawResponse.values);
+```
+
+#### Basic DSL Search
+
+```.ts
+const result = await data.search.typed.searchDSL(
+  {
+    index: 'logs-*',
+    query: { match: { message: 'error' } },
+    size: 100,
+    sort: [{ '@timestamp': 'desc' }]
+  },
+  { abortSignal }
+);
+
+console.log(result.rawResponse.hits.total);
+```
+
+#### DSL Search with Pagination
+
+```.ts
+const result = await data.search.typed.searchDSL(
+  {
+    index: 'logs-*',
+    query: { range: { '@timestamp': { gte: 'now-1d' } } },
+    size: 1000,
+    sort: [{ '@timestamp': 'desc' }]
+  },
+  { paginate: true, abortSignal }
+);
+
+// Fetch next page
+if (result.pagination.hasNextPage) {
+  const nextPage = await result.pagination.nextPage();
+}
+
+// Or iterate all pages
+for await (const page of result.pagination.getAllPages(10)) {
+  console.log(`Page has ${page.rawResponse.hits.hits.length} hits`);
+}
+```
+
+#### EQL Search
+
+```.ts
+const result = await data.search.typed.searchEQL(
+  {
+    index: 'logs-*',
+    query: 'process where process.name == "cmd.exe"',
+    size: 50,
+    fields: ['process.name', 'process.pid', '@timestamp']
+  },
+  {
+    abortSignal,
+    timestampField: '@timestamp',
+    eventCategoryField: 'event.category'
+  }
+);
+
+console.log(result.rawResponse.hits.events);
+```
+
+#### SQL Search
+
+```.ts
+const result = await data.search.typed.searchSQL(
+  {
+    query: 'SELECT status, COUNT(*) FROM "logs-*" GROUP BY status',
+    fetchSize: 1000
+  },
+  { abortSignal, timeZone: 'UTC' }
+);
+
+console.log(result.rawResponse.rows);
+console.log(result.took); // Elasticsearch query execution time in ms
+```
+
 ### SearchSource
 
 The `SearchSource` API is a convenient way to construct and run an Elasticsearch search query.

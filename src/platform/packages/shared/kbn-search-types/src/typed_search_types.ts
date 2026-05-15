@@ -11,7 +11,6 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { AbstractDataView } from '@kbn/data-views-plugin/common';
 import type { ProjectRouting } from '@kbn/es-query';
-import type { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { SanitizedConnectionRequestParams } from './types';
 
 /**
@@ -32,14 +31,6 @@ export interface IBaseSearchOptions {
    * Represents meta-information about a Kibana entity initiating a search request.
    */
   executionContext?: KibanaExecutionContext;
-
-  /**
-   * Inspector configuration for debugging search requests.
-   */
-  inspector?: {
-    adapter?: RequestAdapter;
-    title: string;
-  };
 
   /**
    * Project routing configuration for cross-project search (CPS).
