@@ -15,6 +15,7 @@ export const RULE_IDS = {
   EXISTING_TYPE_MAPPINGS_WITHOUT_NEW_MODEL_VERSION:
     'existing-type/mappings-changed-without-new-model-version',
   EXISTING_TYPE_MUTATED_MODEL_VERSION: 'existing-type/mutated-existing-model-version',
+  EXISTING_TYPE_VIRTUAL_VERSION_DOWNGRADE: 'existing-type/virtual-version-downgrade',
   // new types
   NEW_TYPE_LEGACY_MIGRATIONS: 'new-type/legacy-migrations',
   NEW_TYPE_MISSING_INITIAL_MODEL_VERSION: 'new-type/missing-initial-model-version',

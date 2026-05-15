@@ -9,6 +9,7 @@
 
 import { lt } from 'semver';
 import type { MigrationInfoRecord, MigrationSnapshot } from '../../types';
+import { RULE_IDS, SavedObjectsCheckError } from '../../findings';
 
 const DEFAULT_VIRTUAL_VERSION = '10.0.0';
 
@@ -44,9 +45,15 @@ export function validateNoVirtualVersionDowngrade({
   }
 
   if (downgrades.length > 0) {
-    const details = downgrades.map((d) => `  - '${d.name}': ${d.from} => ${d.to}`).join('\n');
-    throw new Error(
-      `❌ Virtual version downgrade detected for the following SO type(s). Existing entries' semvers must never be downgraded:\n${details}`
+    throw new SavedObjectsCheckError(
+      downgrades.map(({ name, from: fromVersion, to: toVersion }) => ({
+        ruleId: RULE_IDS.EXISTING_TYPE_VIRTUAL_VERSION_DOWNGRADE,
+        severity: 'error' as const,
+        typeName: name,
+        message: `SO type '${name}' virtual version was downgraded from '${fromVersion}' to '${toVersion}'.`,
+        fixHint: `Existing model versions must never be removed. Restore the missing model version(s) so the virtual version is at least '${fromVersion}'.`,
+        docsAnchor: '#defining-model-versions',
+      }))
     );
   }
 }

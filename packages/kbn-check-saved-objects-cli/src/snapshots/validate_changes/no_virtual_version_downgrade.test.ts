@@ -8,6 +8,7 @@
  */
 
 import type { MigrationInfoRecord, MigrationSnapshot, ModelVersionSummary } from '../../types';
+import { RULE_IDS, isSavedObjectsCheckError } from '../../findings';
 import {
   getVirtualVersionFromRecord,
   validateNoVirtualVersionDowngrade,
@@ -87,15 +88,30 @@ describe('validateNoVirtualVersionDowngrade', () => {
     expect(() => validateNoVirtualVersionDowngrade({ from, to })).not.toThrow();
   });
 
-  it('throws when a type virtual version is downgraded', () => {
+  it('throws a SavedObjectsCheckError with a finding when a type virtual version is downgraded', () => {
     const from = buildSnapshot([
       buildRecord('foo', [buildModelVersion('1'), buildModelVersion('2')]),
     ]);
     const to = buildSnapshot([buildRecord('foo', [buildModelVersion('1')])]);
 
-    expect(() => validateNoVirtualVersionDowngrade({ from, to })).toThrow(
-      /foo.*10\.2\.0.*=>.*10\.1\.0/s
+    let error: unknown;
+    try {
+      validateNoVirtualVersionDowngrade({ from, to });
+    } catch (e) {
+      error = e;
+    }
+
+    expect(isSavedObjectsCheckError(error)).toBe(true);
+    if (!isSavedObjectsCheckError(error)) throw new Error('unreachable');
+    expect(error.findings).toHaveLength(1);
+    expect(error.findings[0]).toEqual(
+      expect.objectContaining({
+        ruleId: RULE_IDS.EXISTING_TYPE_VIRTUAL_VERSION_DOWNGRADE,
+        severity: 'error',
+        typeName: 'foo',
+      })
     );
+    expect(error.findings[0].message).toMatch(/'foo'.*'10\.2\.0'.*'10\.1\.0'/);
   });
 
   it('passes for a brand-new type with no model versions (10.0.0 == 10.0.0)', () => {
@@ -116,7 +132,7 @@ describe('validateNoVirtualVersionDowngrade', () => {
     expect(() => validateNoVirtualVersionDowngrade({ from, to })).not.toThrow();
   });
 
-  it('aggregates multiple downgrades into a single error', () => {
+  it('aggregates multiple downgrades into a single error with one finding per type', () => {
     const from = buildSnapshot([
       buildRecord('foo', [buildModelVersion('2')]),
       buildRecord('bar', [buildModelVersion('3')]),
@@ -126,15 +142,19 @@ describe('validateNoVirtualVersionDowngrade', () => {
       buildRecord('bar', [buildModelVersion('1')]),
     ]);
 
-    let error: Error | undefined;
+    let error: unknown;
     try {
       validateNoVirtualVersionDowngrade({ from, to });
     } catch (e) {
-      error = e as Error;
+      error = e;
     }
 
-    expect(error).toBeDefined();
-    expect(error!.message).toMatch(/'foo': 10\.2\.0 => 10\.1\.0/);
-    expect(error!.message).toMatch(/'bar': 10\.3\.0 => 10\.1\.0/);
+    expect(isSavedObjectsCheckError(error)).toBe(true);
+    if (!isSavedObjectsCheckError(error)) throw new Error('unreachable');
+    expect(error.findings).toHaveLength(2);
+    expect(error.findings.map((f) => f.typeName)).toEqual(['foo', 'bar']);
+    expect(
+      error.findings.every((f) => f.ruleId === RULE_IDS.EXISTING_TYPE_VIRTUAL_VERSION_DOWNGRADE)
+    ).toBe(true);
   });
 });
