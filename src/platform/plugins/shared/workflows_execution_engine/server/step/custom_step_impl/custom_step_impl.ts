@@ -10,7 +10,8 @@
 import type { AtomicGraphNode } from '@kbn/workflows/graph';
 import { ExecutionError } from '@kbn/workflows/server';
 import type { ServerStepDefinition, StepHandlerContext } from '@kbn/workflows-extensions/server';
-import { handlePollingStep } from './handle_polling_step';
+import type { StepHandler } from './handle_polling_step';
+import { PollPolicyStepHandler } from './handle_polling_step';
 import { createHandlerContext } from './step_context_handler';
 import type { ConnectorExecutor } from '../../connector_executor';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
@@ -30,7 +31,12 @@ import type { BaseStep, CancellableNode, RunStepResult } from '../node_implement
  * the `CancellableNode.onCancel` method so the execution engine can invoke
  * cleanup on cancellation.
  */
-export class CustomStepImpl extends BaseAtomicNodeImplementation<BaseStep> {
+export class CustomStepImpl
+  extends BaseAtomicNodeImplementation<BaseStep>
+  implements CancellableNode
+{
+  private stepHandler: StepHandler | undefined;
+
   constructor(
     private node: AtomicGraphNode,
     private stepDefinition: ServerStepDefinition,
@@ -47,11 +53,31 @@ export class CustomStepImpl extends BaseAtomicNodeImplementation<BaseStep> {
     };
     super(baseStep, stepExecutionRuntime, connectorExecutor, workflowExecutionRuntime);
 
+    if ((this.stepDefinition.run && this.stepDefinition.poll) || this.stepDefinition.poll) {
+      this.stepHandler = new PollPolicyStepHandler(
+        this.stepDefinition,
+        this.node,
+        this.stepExecutionRuntime,
+        this.workflowLogger
+      );
+    }
+
     if (stepDefinition.onCancel) {
       const onCancelFn = stepDefinition.onCancel;
       (this as unknown as CancellableNode).onCancel = async () => {
         await onCancelFn(this.createHandlerContext(this.getInput()));
       };
+    }
+  }
+
+  public async onCancel(): Promise<void> {
+    if (this.stepHandler) {
+      await this.stepHandler.onCancel();
+      return;
+    }
+
+    if (this.stepDefinition.onCancel) {
+      await this.stepDefinition.onCancel(this.createHandlerContext(this.getInput()));
     }
   }
 
@@ -80,16 +106,8 @@ export class CustomStepImpl extends BaseAtomicNodeImplementation<BaseStep> {
 
         return stepResult;
       }
-      if ((this.stepDefinition.run && this.stepDefinition.poll) || this.stepDefinition.poll) {
-        return handlePollingStep(
-          input,
-          this.getInput(),
-          this.node.configuration || {},
-          this.stepDefinition,
-          this.node,
-          this.stepExecutionRuntime,
-          this.workflowLogger
-        );
+      if (this.stepHandler) {
+        return this.stepHandler.run(input, this.getInput(), this.node.configuration || {});
       }
 
       throw new Error(`Step "${this.node.stepType}" has no executable phase.`);
