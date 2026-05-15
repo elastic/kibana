@@ -1,0 +1,174 @@
+ES|QL: pipe-based query language. A source command followed by | separated processing commands.
+
+```esql
+[source-command]
+| [processing-command1]
+| [processing-command2]
+```
+
+<source-commands>
+- FROM: one or more indices, data streams, or aliases
+- ROW: inline row with specified values
+- SHOW: deployment information
+- TS: data streams with time series semantics
+</source-commands>
+
+<processing-commands>
+- DISSECT: extract structured data from a string via a dissect pattern
+- DROP: remove columns
+- ENRICH: add columns from existing indices
+- EVAL: add columns with calculated values
+- GROK: extract structured data from a string via a grok pattern
+- KEEP: retain specified columns, drop the rest
+- LIMIT: return first N rows (max 10000)
+- MV_EXPAND: expand multi-value columns into one row per value
+- RENAME: rename a column
+- SORT: sort rows by a column (expressions not supported)
+- STATS ... BY: group rows and compute aggregations
+- WHERE: filter rows by a boolean condition
+- [preview] RERANK: rerank documents using an inference model
+- [preview] SAMPLE: sample a fraction of rows
+- [preview] COMPLETION: send prompts to an LLM
+- [preview] CHANGE_POINT: detect spikes, dips, change points in a metric
+- [preview] FORK: create multiple execution branches on the same input; adds `_fork` discriminator column
+- [preview] FUSE: merge rows from multiple result sets with relevance scores (used with FORK for hybrid search)
+</processing-commands>
+
+<grouping-functions>
+BUCKET: groups datetime or numeric values into fixed-size buckets
+TBUCKET: groups by @timestamp
+CATEGORIZE: groups text messages into similarly formatted categories
+</grouping-functions>
+
+<aggregation-functions>
+AVG, COUNT, COUNT_DISTINCT (approximate distinct count), MAX, MIN, SUM, STD_DEV, VARIANCE, WEIGHTED_AVG
+MEDIAN: 50th percentile
+MEDIAN_ABSOLUTE_DEVIATION: median absolute deviation
+PERCENTILE: value at a given percentile
+ABSENT: true if no non-null values in aggregation context
+PRESENT: true if any non-null values in aggregation context
+SAMPLE: collect sample values
+TOP: collect top N values
+VALUES: return unique values as a multi-value field
+ST_CENTROID_AGG, ST_EXTENT_AGG
+</aggregation-functions>
+
+<conditional-functions>
+CASE, COALESCE, GREATEST, LEAST, CLAMP, CLAMP_MIN, CLAMP_MAX
+</conditional-functions>
+
+<search-functions>
+MATCH: match query on a field — preferred for full-text search
+MATCH_PHRASE: match_phrase query on a field
+QSTR: Lucene query string query
+KQL: KQL query
+DECAY: relevance score decaying by distance from an origin
+SCORE: score an expression
+TOP_SNIPPETS: extract best snippets for a query string from a text field
+</search-functions>
+
+<date-time-functions>
+DATE_DIFF: subtract timestamps and return difference in a given unit
+DATE_EXTRACT: extract date parts (year, month, day, hour, ...)
+DATE_FORMAT: format a date as a string
+DATE_PARSE: parse a string into a date
+DATE_TRUNC: round down a date to the nearest interval
+DAY_NAME, MONTH_NAME, NOW, TRANGE
+</date-time-functions>
+
+<string-functions>
+CONCAT, CONTAINS, ENDS_WITH, LEFT, LENGTH, LOCATE, LTRIM, REPEAT, REPLACE, REVERSE, RIGHT, RTRIM, SPACE, SPLIT, STARTS_WITH, SUBSTRING, TRIM
+BIT_LENGTH, BYTE_LENGTH
+CHUNK: split text into smaller chunks
+FROM_BASE64, TO_BASE64
+HASH: compute hash (MD5, SHA, SHA-224, SHA-256, SHA-384, SHA-512)
+MD5, SHA1, SHA256
+TO_LOWER, TO_UPPER
+URL_ENCODE, URL_ENCODE_COMPONENT, URL_DECODE
+</string-functions>
+
+<ip-functions>
+CIDR_MATCH, IP_PREFIX
+</ip-functions>
+
+<type-conversion-functions>
+TO_AGGREGATE_METRIC_DOUBLE, TO_BOOLEAN, TO_CARTESIANPOINT, TO_CARTESIANSHAPE, TO_DATEPERIOD, TO_DATETIME, TO_DATE_NANOS, TO_DEGREES, TO_DENSE_VECTOR, TO_DOUBLE, TO_GEOHASH, TO_GEOHEX, TO_GEOPOINT, TO_GEOSHAPE, TO_GEOTILE, TO_INTEGER, TO_IP, TO_LONG, TO_RADIANS, TO_STRING, TO_TIMEDURATION, TO_UNSIGNED_LONG, TO_VERSION
+</type-conversion-functions>
+
+<mathematical-functions>
+ABS, ACOS, ASIN, ATAN, ATAN2, CBRT, CEIL, COS, COSH, E, EXP, FLOOR, HYPOT, LOG, LOG10, PI, POW, ROUND, SIGNUM, SIN, SINH, SQRT, TAN, TANH, TAU
+</mathematical-functions>
+
+<multivalue-functions>
+MV_APPEND, MV_AVG, MV_CONCAT, MV_COUNT, MV_DEDUPE, MV_FIRST, MV_LAST, MV_MAX, MV_MEDIAN, MV_MEDIAN_ABSOLUTE_DEVIATION, MV_MIN, MV_PERCENTILE, MV_SLIDE, MV_SORT, MV_SUM, MV_ZIP
+</multivalue-functions>
+
+<spatial-functions>
+ST_CONTAINS, ST_DISJOINT, ST_DISTANCE, ST_ENVELOPE, ST_INTERSECTS, ST_WITHIN
+ST_X, ST_Y, ST_XMAX, ST_YMAX, ST_XMIN, ST_YMIN
+ST_EXTENT_AGG, ST_CENTROID_AGG
+</spatial-functions>
+
+<operators>
+Binary: ==, !=, <, <=, >, >=, +, -, *, /, %
+Logical: AND, OR, NOT
+Predicates: IS NULL, IS NOT NULL
+Unary: -
+IN: membership test in a list of literals
+LIKE: wildcard string matching
+RLIKE: regex string matching
+Cast (::): shorthand for TO_<type> conversion
+</operators>
+
+<syntax>
+### Identifiers
+Quote with backticks if they don't start with letter/`_`/`@`, or contain chars other than letters/numbers/`_`.
+```esql
+FROM index | KEEP `1.field`
+```
+
+### String Literals
+Enclosed in double quotes. Escape with `\\` or use triple-quotes:
+```esql
+ROW name = """Indiana "Indy" Jones"""
+```
+
+### Comments
+`//` single-line, `/* */` block.
+
+### Timespan literals
+Number + temporal unit, whitespace-insensitive (e.g. `1 day`, `24h`, `7 weeks`).
+
+| Unit | Abbreviations |
+|---|---|
+| year | y, yr, years |
+| quarter | q, quarters |
+| month | mo, months |
+| week | w, weeks |
+| day | d, days |
+| hour | h, hours |
+| minute | min, minutes |
+| second | s, sec, seconds |
+| millisecond | ms, milliseconds |
+
+Example:
+```esql
+FROM events
+| WHERE @timestamp >= NOW() - 1 day
+| STATS event_count = COUNT(*) BY hour = BUCKET(@timestamp, 1 hour)
+| SORT hour
+```
+
+### Named Parameters in Functions
+```esql
+FROM library
+| WHERE MATCH(author, "Frank Herbert", {"minimum_should_match": 2, "operator": "AND"})
+| LIMIT 5
+```
+</syntax>
+
+<limitations>
+- No pagination
+- Max 10000 rows per query
+- Unsupported field types: binary, nested, histogram
+</limitations>

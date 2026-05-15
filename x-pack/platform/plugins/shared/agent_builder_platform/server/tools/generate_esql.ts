@@ -74,7 +74,6 @@ export const generateEsqlTool = (): BuiltinToolDefinition<typeof nlToEsqlToolSch
       { esClient, modelProvider, logger, events, attachments }
     ) => {
       const model = await modelProvider.getDefaultModel();
-
       const timeRange = resolveTimeRange(attachments, explicitTimeRange);
 
       const esqlResponse = await generateEsql({

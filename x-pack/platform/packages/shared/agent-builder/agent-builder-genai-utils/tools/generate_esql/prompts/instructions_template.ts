@@ -17,6 +17,42 @@ export interface InstructionsTemplateParams {
   disableNamedParams?: boolean;
 }
 
+export const getTightEsqlInstructions = (params: InstructionsTemplateParams = {}): string => {
+  const { defaultLimit = DEFAULT_LIMIT, disableNamedParams = false } = params;
+
+  return `## Rules
+
+- Only use commands and functions from the provided syntax. Do not guess from other query languages.
+- Only use the provided field mappings. Do not assume other fields exist.
+- Avoid tech preview features unless requested.
+- Use MATCH for full-text search.
+- Do not invent capabilities. If a request isn't achievable in ES|QL, say so.
+
+## LIMIT
+
+- Default: \`LIMIT ${defaultLimit}\` for raw events and GROUP BY results.
+- Time-series aggregations (\`STATS ... BY BUCKET(@timestamp, ...)\`): omit LIMIT — it truncates the time series.
+- Single-row aggregations (\`STATS\` without \`GROUP BY\`): no LIMIT needed.
+- User specifies a number ("top 10", "get 50"): use that number.
+- User asks for all rows ("return all", "no limit"): omit LIMIT.
+
+## Query format
+
+Wrap all queries in \`\`\`esql ... \`\`\`. Use a newline after each pipe command.
+
+${
+  disableNamedParams
+    ? ''
+    : `## Time parameters
+
+Always use \`?_tstart\` / \`?_tend\` for time range — never hardcode dates or use \`now()\`.
+- WHERE: \`WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend\`
+- BUCKET (preferred): \`BUCKET(@timestamp, 50, ?_tstart, ?_tend)\`
+
+`
+}`;
+};
+
 const DEFAULT_LIMIT = 100;
 
 /**

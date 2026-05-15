@@ -190,6 +190,58 @@ function configureExperiment({
         spanName: 'Converse',
       }),
     }),
+    {
+      name: 'ESQL Input Tokens',
+      kind: 'CODE' as const,
+      evaluate: async ({ output }) => {
+        const traceId = (output as Record<string, unknown>)?.traceId as string | undefined;
+        if (!traceId) {
+          return { score: null, label: 'unavailable', explanation: 'No traceId available' };
+        }
+
+        try {
+          // Step 1: find the GenerateEsqlGraph span's time window
+          const graphSpanResponse = (await traceEsClient.esql.query({
+            query: `FROM traces-*
+| WHERE trace.id == "${traceId}" AND name == "GenerateEsqlGraph"
+| EVAL start_ms = TO_LONG(@timestamp)
+| EVAL end_ms = start_ms + duration / 1000000
+| KEEP start_ms, end_ms
+| LIMIT 1`,
+          })) as unknown as { values: Array<[number, number]> };
+
+          if (!graphSpanResponse.values?.length) {
+            return {
+              score: null,
+              label: 'unavailable',
+              explanation: 'GenerateEsqlGraph span not found in trace',
+            };
+          }
+
+          const [startMs, endMs] = graphSpanResponse.values[0];
+
+          // Step 2: sum input tokens of all LLM spans within the GenerateEsqlGraph time window
+          const tokensResponse = (await traceEsClient.esql.query({
+            query: `FROM traces-*
+| WHERE trace.id == "${traceId}"
+  AND TO_LONG(@timestamp) >= ${startMs}
+  AND TO_LONG(@timestamp) <= ${endMs}
+  AND attributes.gen_ai.usage.input_tokens IS NOT NULL
+| STATS esql_input_tokens = SUM(attributes.gen_ai.usage.input_tokens)`,
+          })) as unknown as { values: Array<[number | null]> };
+
+          const score = tokensResponse.values?.[0]?.[0] ?? null;
+          return { score };
+        } catch (error) {
+          log.warning(
+            `ESQL Input Tokens failed for trace ${traceId}: ${
+              error instanceof Error ? error.message : String(error)
+            }`
+          );
+          return { score: null, label: 'error' };
+        }
+      },
+    },
     createSkillInvocationEvaluator({
       traceEsClient,
       log,

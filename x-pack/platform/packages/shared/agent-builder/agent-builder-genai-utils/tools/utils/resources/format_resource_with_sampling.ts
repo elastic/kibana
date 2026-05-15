@@ -33,10 +33,18 @@ const SAMPLE_VALUE_TYPES = new Set([
  */
 export const formatResourceWithSampledValues = ({
   resource,
+  includeSamples = true,
 }: {
   resource: ResolvedResourceWithSampling;
+  includeSamples?: boolean;
 }) => {
-  const samplingCount = resource.fields.length > 1000 ? 0 : resource.fields.length > 200 ? 1 : 2;
+  const samplingCount = !includeSamples
+    ? 0
+    : resource.fields.length > 1000
+    ? 0
+    : resource.fields.length > 200
+    ? 1
+    : 2;
   const lines = resource.fields.map((field) => renderFieldLine(field, samplingCount));
   const tsdbAttr = resource.isTsdb ? ` is-tsds="true"` : '';
   return [

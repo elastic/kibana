@@ -17,6 +17,7 @@ import type { EsqlResponse } from '../utils/esql';
 import { createNlToEsqlGraph } from './graph';
 import { indexExplorer } from '../index_explorer';
 import { loadDocumentation } from './documentation';
+import { loadTightPrompts } from './prompts_static_loader';
 
 export interface GenerateEsqlResponse {
   /**
@@ -111,12 +112,21 @@ export const generateEsql = async ({
   const documentation = await loadDocumentation();
   const esqlCallbacks = buildServerESQLCallbacks({ client: esClient });
 
+  const tightPrompts = await loadTightPrompts();
+  logger?.info(
+    `[generateEsql] tight prompts active — syntax: ${tightPrompts.syntax.length} chars, examples: ${tightPrompts.examples.length} chars (vs baseline ~16856 / ~9186)`
+  );
+  logger?.debug(
+    `[generateEsql] tight syntax preview:\n${tightPrompts.syntax.slice(0, 300)}\n...\n[generateEsql] tight examples preview:\n${tightPrompts.examples.slice(0, 300)}`
+  );
+
   const graph = createNlToEsqlGraph({
     model,
     esClient,
     docBase,
     documentation,
     esqlCallbacks,
+    tightPrompts,
   });
 
   return withActiveInferenceSpan(
