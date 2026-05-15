@@ -8,6 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { RuleAttachmentData } from '@kbn/alerting-v2-schemas';
+import { buildRulePayload } from '../../../../common/agent_builder/rule_mappers';
 import {
   createRuleDataSchema,
   metadataSchema,
@@ -228,7 +229,7 @@ export const executeRuleOperations = async (
         break;
 
       case 'validate': {
-        const payload = buildRuleValidationPayload(next);
+        const payload = buildRulePayload(next);
         const result = createRuleDataSchema.safeParse(payload);
         if (!result.success) {
           const issues = result.error.issues
@@ -265,17 +266,3 @@ export const executeRuleOperations = async (
   };
 };
 
-// ─── Validation payload ────────────────────────────────────────────────────────
-
-const buildRuleValidationPayload = (data: Partial<RuleAttachmentData>) => ({
-  kind: data.kind,
-  metadata: data.metadata,
-  schedule: data.schedule,
-  evaluation: data.evaluation,
-  time_field: data.time_field ?? '@timestamp',
-  state_transition: data.state_transition ?? null,
-  ...(data.recovery_policy !== undefined ? { recovery_policy: data.recovery_policy } : {}),
-  ...(data.grouping !== undefined ? { grouping: data.grouping } : {}),
-  ...(data.no_data !== undefined ? { no_data: data.no_data } : {}),
-  ...(data.artifacts !== undefined ? { artifacts: data.artifacts } : {}),
-});

@@ -19,6 +19,7 @@ import { RuleHeaderDescription } from '../../components/rule_details/rule_header
 import { RuleSidebar } from '../../components/rule_details/sidebar/rule_sidebar';
 import { paths } from '../../constants';
 import { RulesApi, type RuleApiResponse } from '../../services/rules_api';
+import { buildRulePayload } from '../../../common/agent_builder/rule_mappers';
 import type { RuleAttachment } from './rule_attachment_definition';
 
 export interface RuleCanvasContentProps
@@ -59,10 +60,7 @@ export const RuleCanvasContent = ({
           icon: 'save',
           type: ActionButtonType.PRIMARY,
           handler: async () => {
-            await rulesApi.upsertRule(data.id!, {
-              kind: data.kind,
-              ...buildRuleCommonPayload(data),
-            });
+            await rulesApi.upsertRule(data.id!, buildRulePayload(data));
             await updateOrigin(data.id!);
             notifications.toasts.addSuccess(
               i18n.translate('xpack.alertingV2.ruleAttachment.createdSuccess', {
@@ -86,10 +84,7 @@ export const RuleCanvasContent = ({
         icon: 'save',
         type: ActionButtonType.PRIMARY,
         handler: async () => {
-          await rulesApi.upsertRule(ruleId, {
-            kind: data.kind,
-            ...buildRuleCommonPayload(data),
-          });
+          await rulesApi.upsertRule(ruleId, buildRulePayload(data));
           notifications.toasts.addSuccess(
             i18n.translate('xpack.alertingV2.ruleAttachment.updatedSuccess', {
               defaultMessage: 'Rule "{name}" updated',
@@ -137,14 +132,3 @@ const isPersistedSavedObject = (savedObjectId: string | undefined): savedObjectI
   return Boolean(savedObjectId);
 };
 
-const buildRuleCommonPayload = (data: RuleAttachment['data']) => ({
-  metadata: data.metadata,
-  schedule: data.schedule,
-  evaluation: data.evaluation,
-  state_transition: data.state_transition ?? null,
-  time_field: data.time_field ?? '@timestamp',
-  ...(data.recovery_policy !== undefined ? { recovery_policy: data.recovery_policy } : {}),
-  ...(data.grouping !== undefined ? { grouping: data.grouping } : {}),
-  ...(data.no_data !== undefined ? { no_data: data.no_data } : {}),
-  ...(data.artifacts !== undefined ? { artifacts: data.artifacts } : {}),
-});
