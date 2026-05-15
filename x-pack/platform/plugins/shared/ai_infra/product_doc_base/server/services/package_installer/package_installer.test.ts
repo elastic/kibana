@@ -69,6 +69,8 @@ describe('PackageInstaller', () => {
       productName: 'kibana',
       productVersion: '8.17',
     });
+
+    validateArtifactArchiveMock.mockReturnValue({ valid: true });
   });
 
   afterEach(() => {
@@ -241,6 +243,30 @@ describe('PackageInstaller', () => {
         productVersion: '8.15',
       });
     });
+
+    it('falls back to previous version when selected artifact is missing', async () => {
+      jest.spyOn(packageInstaller, 'installPackage').mockResolvedValue(undefined as never);
+
+      fetchArtifactVersionsMock.mockResolvedValue({
+        kibana: ['8.15', '8.16'],
+      });
+
+      openZipArchiveMock.mockImplementationOnce(async () => {
+        throw new Error('End of central directory record signature not found.');
+      });
+      openZipArchiveMock.mockResolvedValue({
+        close: jest.fn(),
+      });
+
+      await packageInstaller.installAll();
+
+      expect(packageInstaller.installPackage).toHaveBeenCalledTimes(1);
+      expect(packageInstaller.installPackage).toHaveBeenCalledWith({
+        productName: 'kibana',
+        productVersion: '8.15',
+        customInference: undefined,
+      });
+    });
   });
 
   describe('ensureUpToDate', () => {
@@ -410,6 +436,92 @@ describe('PackageInstaller', () => {
       });
 
       expect(zipArchive.close).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('installOpenAPISpec', () => {
+    const getOpenApiArchive = () => ({
+      close: jest.fn(),
+      hasEntry: jest.fn().mockReturnValue(true),
+      getEntryPaths: jest
+        .fn()
+        .mockReturnValue([
+          'kibana/content/content-0.ndjson',
+          'elasticsearch/content/content-0.ndjson',
+        ]),
+      getEntryContent: jest.fn().mockImplementation(async (entryPath: string) => {
+        if (entryPath.endsWith('manifest.json')) {
+          return Buffer.from(JSON.stringify({ formatVersion: TEST_FORMAT_VERSION }), 'utf-8');
+        }
+        if (entryPath.endsWith('mappings.json')) {
+          return Buffer.from(JSON.stringify({ properties: {} }), 'utf-8');
+        }
+        return Buffer.from(
+          JSON.stringify({
+            _inference_fields: {
+              semantic: {
+                inference: {
+                  inference_id: defaultInferenceEndpoints.ELSER,
+                },
+              },
+            },
+          }),
+          'utf-8'
+        );
+      }),
+    });
+
+    beforeEach(() => {
+      esClient.bulk.mockResolvedValue({ errors: false } as never);
+    });
+
+    it('does not fetch artifact versions when explicit version is directly installable', async () => {
+      openZipArchiveMock
+        .mockResolvedValueOnce({ close: jest.fn() }) // precheck
+        .mockResolvedValueOnce(getOpenApiArchive()); // install
+      downloadToDiskMock.mockResolvedValue('/tmp/openapi-explicit.zip');
+
+      await packageInstaller.installOpenAPISpec({
+        version: '8.16',
+        inferenceId: defaultInferenceEndpoints.ELSER,
+      });
+
+      expect(fetchArtifactVersionsMock).not.toHaveBeenCalled();
+      expect(productDocClient.setOpenapiSpecInstallationStarted).toHaveBeenCalledWith(
+        expect.objectContaining({
+          productVersion: '8.16',
+          inferenceId: defaultInferenceEndpoints.ELSER,
+        })
+      );
+    });
+
+    it('retries listing and falls back to previous explicit version when selected is missing', async () => {
+      openZipArchiveMock
+        .mockImplementationOnce(async () => {
+          throw new Error('End of central directory record signature not found.');
+        }) // explicit precheck miss
+        .mockResolvedValueOnce({ close: jest.fn() }) // fallback precheck success
+        .mockResolvedValueOnce(getOpenApiArchive()); // install fallback
+      downloadToDiskMock.mockResolvedValue('/tmp/openapi-fallback.zip');
+
+      fetchArtifactVersionsMock
+        .mockRejectedValueOnce(new Error('temporary listing failure'))
+        .mockResolvedValueOnce({
+          openapi: ['8.16', '8.15'],
+        });
+
+      await packageInstaller.installOpenAPISpec({
+        version: '8.16',
+        inferenceId: defaultInferenceEndpoints.ELSER,
+      });
+
+      expect(fetchArtifactVersionsMock).toHaveBeenCalledTimes(2);
+      expect(productDocClient.setOpenapiSpecInstallationStarted).toHaveBeenCalledWith(
+        expect.objectContaining({
+          productVersion: '8.15',
+          inferenceId: defaultInferenceEndpoints.ELSER,
+        })
+      );
     });
   });
 });

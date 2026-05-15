@@ -15,7 +15,7 @@ import { getLookupIndicesFromQuery } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
 import type { EditLookupIndexContentContext } from '@kbn/index-editor';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { monaco } from '@kbn/monaco';
+import { monaco } from '@kbn/code-editor';
 import { useDebounceFn } from '@kbn/react-hooks';
 import { isEqual } from 'lodash';
 import type React from 'react';

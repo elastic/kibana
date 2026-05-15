@@ -15,4 +15,5 @@ export const PLUGIN_PATH = '/app/elasticsearch/getting_started';
 
 export enum AnalyticsEvents {
   gettingStartedLoaded = 'getting_started_loaded',
+  gettingStartedChatLoaded = 'getting_started_chat_loaded',
 }
