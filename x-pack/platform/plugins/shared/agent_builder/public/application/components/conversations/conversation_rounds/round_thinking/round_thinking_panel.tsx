@@ -113,17 +113,16 @@ export const RoundThinkingPanel = ({
         data-test-subj="agentBuilderThinkingPanel"
       >
         {/* Thinking Panel Title */}
-        <EuiFlexGroup
-          direction="row"
-          justifyContent="spaceBetween"
-          responsive={false}
+        <button
           onClick={onClose}
           aria-label={closePanelLabel}
           data-test-subj="agentBuilderThinkingToggle"
           data-ebt-element={AGENT_BUILDER_UI_EBT.element.CONVERSATION_ROUND_THINKING}
           data-ebt-action={AGENT_BUILDER_UI_EBT.action.conversation.THINKING_PANEL_COLLAPSE}
           css={css`
+            all: unset;
             cursor: pointer;
+            width: 100%;
           `}
         >
           <EuiFlexGroup responsive={false} gutterSize="m" direction="row" alignItems="center">
@@ -133,7 +132,7 @@ export const RoundThinkingPanel = ({
             </EuiTitle>
             <EuiIcon type="chevronSingleDown" color="subdued" size="m" aria-hidden={true} />
           </EuiFlexGroup>
-        </EuiFlexGroup>
+        </button>
 
         {/* Thinking Steps */}
         <RoundSteps steps={steps} isLoading={isLoading} />

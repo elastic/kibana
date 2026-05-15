@@ -55,20 +55,15 @@ export const RoundThinkingTitle = ({ isLoading, hasSteps, onShow }: RoundThinkin
   }
 
   return (
-    <EuiFlexGroup
-      direction="row"
-      justifyContent="spaceBetween"
-      responsive={false}
+    <button
       data-test-subj="agentBuilderThinkingToggle"
       onClick={hasSteps ? onShow : undefined}
-      alignItems="center"
-      {...(hasSteps
-        ? {
-            'data-ebt-element': AGENT_BUILDER_UI_EBT.element.CONVERSATION_ROUND_THINKING,
-            'data-ebt-action': AGENT_BUILDER_UI_EBT.action.conversation.THINKING_PANEL_EXPAND,
-          }
-        : {})}
+      data-ebt-element={AGENT_BUILDER_UI_EBT.element.CONVERSATION_ROUND_THINKING}
+      data-ebt-action={AGENT_BUILDER_UI_EBT.action.conversation.THINKING_PANEL_EXPAND}
       css={css`
+        all: unset;
+        display: flex;
+        align-items: center;
         min-height: ${MIN_HEIGHT};
         cursor: ${hasSteps ? 'pointer' : 'default'};
         &:hover {
@@ -85,6 +80,6 @@ export const RoundThinkingTitle = ({ isLoading, hasSteps, onShow }: RoundThinkin
         </EuiText>
         {hasSteps && <EuiIcon type="chevronSingleRight" color="subdued" size="m" />}
       </EuiFlexGroup>
-    </EuiFlexGroup>
+    </button>
   );
 };
