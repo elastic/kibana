@@ -443,7 +443,7 @@ describe('StepDefinePackagePolicy', () => {
     const renderWithToggle = (overrides: {
       packagePolicyOverride?: Partial<NewPackagePolicy>;
       packageInfoOverride?: Partial<PackageInfo>;
-      onNamespaceCustomizationEnabledChange?: (enabled: boolean) => void;
+      onNamespaceCustomizationEnabledChange?: (enabled: boolean, isInit?: boolean) => void;
       packagePolicyId?: string;
     }) => {
       const policy = { ...packagePolicy, ...(overrides.packagePolicyOverride ?? {}) };
@@ -539,7 +539,24 @@ describe('StepDefinePackagePolicy', () => {
       await userEvent.click(renderResult.getByText('Advanced options').closest('button')!);
       const toggle = await renderResult.findByTestId('packagePolicyNamespaceCustomizationToggle');
       await userEvent.click(toggle);
-      expect(onChange).toHaveBeenCalledWith(true);
+      // The last call should be the user's toggle (no isInit flag), not the init call.
+      expect(onChange).toHaveBeenLastCalledWith(true);
+    });
+
+    it('calls onNamespaceCustomizationEnabledChange with isInit=true when namespace is already opted in', async () => {
+      const onChange = jest.fn();
+      renderResult = renderWithToggle({
+        packagePolicyOverride: { namespace: 'staging' },
+        packageInfoOverride: {
+          installationInfo: {
+            namespace_customization_enabled_for: ['staging'],
+          } as any,
+        },
+        onNamespaceCustomizationEnabledChange: onChange,
+      });
+      await waitFor(() => {
+        expect(onChange).toHaveBeenCalledWith(true, true);
+      });
     });
 
     describe('impact warnings', () => {

@@ -78,7 +78,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
   isAgentlessSelected?: boolean;
   agentPolicies?: AgentPolicy[];
   // Namespace-level customization toggle (rendered when this callback is provided).
-  onNamespaceCustomizationEnabledChange?: (enabled: boolean) => void;
+  onNamespaceCustomizationEnabledChange?: (enabled: boolean, isInit?: boolean) => void;
   packagePolicyId?: string;
 }> = memo(
   ({
@@ -489,7 +489,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                                     'Namespace-level customization cannot be changed on a managed integration policy.',
                                 }
                               )
-                            : ''
+                            : undefined
                         }
                       >
                         <EuiSwitch

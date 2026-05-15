@@ -16,7 +16,8 @@ import type { PackageInfo } from '../../../../../types';
 interface Params {
   packageInfo: PackageInfo | undefined;
   namespace: string | undefined;
-  onEnabledChange: ((enabled: boolean) => void) | undefined;
+  // isInit is true when the call comes from programmatic initialization, not user interaction.
+  onEnabledChange: ((enabled: boolean, isInit?: boolean) => void) | undefined;
   isManaged: boolean;
   packagePolicyId: string | undefined;
 }
@@ -73,13 +74,20 @@ export function useNamespaceCustomization({
   // Initialize toggle from installed state once packageInfo is available.
   // The !packageInfo guard prevents the effect from marking as initialized
   // before the async packageInfo load completes.
+  // onEnabledChange is called with isInit=true so the parent can sync its ref without
+  // treating this as a user-driven edit (e.g. to avoid marking the form dirty).
+  // The initialized flag is intentional: once set it prevents the toggle from
+  // re-syncing when the user types a different namespace, which would override their
+  // explicit toggle choice. The auto-reset effect handles the disabled-namespace case.
   useEffect(() => {
     if (initialized || !namespace || !packageInfo) {
       return;
     }
-    setNamespaceCustomizationEnabledInternal(installedEnabledFor.includes(namespace.trim()));
+    const enabled = installedEnabledFor.includes(namespace.trim());
+    setNamespaceCustomizationEnabledInternal(enabled);
+    onEnabledChange?.(enabled, true);
     setInitialized(true);
-  }, [installedEnabledFor, namespace, initialized, packageInfo]);
+  }, [installedEnabledFor, namespace, initialized, packageInfo, onEnabledChange]);
 
   const handleToggleChange = useCallback(
     (enabled: boolean) => {
@@ -101,6 +109,8 @@ export function useNamespaceCustomization({
   const isOptedIn = !!installedEnabledFor?.includes(currentNamespace);
 
   // Query other policies for the same package + namespace to determine impact warnings.
+  // Limited to SO_SEARCH_LIMIT results; deployments with more policies than that threshold
+  // may under-count. This only affects the display of the warning, not correctness of the save.
   const otherPoliciesQuery = useGetPackagePoliciesQuery(
     {
       perPage: SO_SEARCH_LIMIT,

@@ -10,14 +10,7 @@ import type { NotificationsStart } from '@kbn/core/public';
 
 import { sendUpdatePackage } from '../../../../hooks';
 
-/**
- * After saving a package policy, sync the package's `namespace_customization_enabled_for` list
- * so that the policy's namespace is added (when the toggle is on) or removed (when it is off
- * and no other opted-in reason exists).
- *
- * Best effort: on error a toast is shown but no exception is rethrown — the policy save itself
- * has already succeeded.
- */
+// Best effort: errors show a toast but are not rethrown — the policy save has already succeeded.
 export async function applyNamespaceCustomizationChange(
   pkgName: string,
   pkgVersion: string,

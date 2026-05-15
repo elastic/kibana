@@ -483,9 +483,11 @@ export const EditPackagePolicyForm = memo<{
               isEditPage={true}
               isAgentlessSelected={hasAgentlessAgentPolicy}
               agentPolicies={agentPolicies}
-              onNamespaceCustomizationEnabledChange={(enabled) => {
+              onNamespaceCustomizationEnabledChange={(enabled, isInit) => {
                 namespaceCustomizationEnabledRef.current = enabled;
-                setIsEdited(true);
+                if (!isInit) {
+                  setIsEdited(true);
+                }
               }}
               packagePolicyId={packagePolicyId}
             />
