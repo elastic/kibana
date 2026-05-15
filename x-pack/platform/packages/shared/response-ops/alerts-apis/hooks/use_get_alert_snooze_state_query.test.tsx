@@ -10,7 +10,7 @@ import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { Wrapper } from '@kbn/alerts-ui-shared/src/common/test_utils/wrapper';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import * as api from '../apis/get_muted_alerts_instances_by_rule';
-import { useGetAlertSnoozeStateQuery } from './use_get_muted_alerts_query';
+import { useGetAlertSnoozeStateQuery } from './use_get_alert_snooze_state_query';
 
 jest.mock('../apis/get_muted_alerts_instances_by_rule');
 

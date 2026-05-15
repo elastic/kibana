@@ -33,7 +33,7 @@ import { useSearchAlertsQuery } from '@kbn/alerts-ui-shared/src/common/hooks/use
 import { DEFAULT_ALERTS_PAGE_SIZE } from '@kbn/alerts-ui-shared/src/common/constants';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 import type { Alert, BrowserFields } from '@kbn/alerting-types';
-import { useGetAlertSnoozeStateQuery } from '@kbn/response-ops-alerts-apis/hooks/use_get_muted_alerts_query';
+import { useGetAlertSnoozeStateQuery } from '@kbn/response-ops-alerts-apis/hooks/use_get_alert_snooze_state_query';
 import deepEqual from 'fast-deep-equal';
 import { useFetchAlertsFieldsQuery } from '@kbn/alerts-ui-shared/src/common/hooks/use_fetch_alerts_fields_query';
 import { queryKeys as alertsQueryKeys } from '@kbn/response-ops-alerts-apis/query_keys';
