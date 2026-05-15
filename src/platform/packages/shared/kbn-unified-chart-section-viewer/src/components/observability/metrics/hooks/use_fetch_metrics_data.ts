@@ -20,6 +20,11 @@ import { executeEsqlQuery } from '../utils/execute_esql_query';
 import { parseMetricsWithTelemetry } from '../utils/parse_metrics_response_with_telemetry';
 import { getEsqlQuery } from '../utils/get_esql_query';
 import { isSuppressedFetchError } from '../utils/is_suppressed_fetch_error';
+import { getMetricsApmLabels } from '../utils/execution_context';
+import {
+  MetricsExecutionContextAction,
+  MetricsExecutionContextName,
+} from '../utils/execution_context_enums';
 
 /**
  * Fetches METRICS_INFO when in Metrics Experience (non-transformational ES|QL, chart visible).
@@ -128,8 +133,17 @@ export function useFetchMetricsData({
         // the platform's data plugin. Real failures go to APM via
         // `apm.captureError` (matching the pattern adopted in #265380), and
         // we re-throw so MetricsInfoError still renders via useAsyncFn's error.
+        //
+        // Labels are produced by `getMetricsApmLabels` — the same vocabulary
+        // (`action` / `name`) used for the request's execution context page
+        // label, so APM filters line up across requests and errors.
         if (!signal.aborted && !isSuppressedFetchError(err) && err instanceof Error) {
-          apm.captureError(err);
+          apm.captureError(err, {
+            labels: getMetricsApmLabels(
+              MetricsExecutionContextAction.FETCH,
+              MetricsExecutionContextName.METRICS_INFO
+            ),
+          });
         }
         throw err;
       }

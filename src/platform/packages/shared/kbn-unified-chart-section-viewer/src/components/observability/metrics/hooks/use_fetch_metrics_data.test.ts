@@ -670,7 +670,15 @@ describe('useFetchMetricsData', () => {
       });
 
       expect(mockApmCaptureError).toHaveBeenCalledTimes(1);
-      expect(mockApmCaptureError).toHaveBeenCalledWith(fetchError);
+      // The error is reported with centralised labels so it can be filtered
+      // in APM independently of generic Discover errors (PR #268782 review).
+      expect(mockApmCaptureError).toHaveBeenCalledWith(fetchError, {
+        labels: {
+          kibana_section: 'metrics',
+          kibana_action: 'fetch',
+          kibana_name: 'metrics_info',
+        },
+      });
       // Success-path emission must NOT fire when the fetch failed.
       expect(mockTrackMetricsInfo).not.toHaveBeenCalled();
     });
@@ -691,7 +699,13 @@ describe('useFetchMetricsData', () => {
       });
 
       expect(mockApmCaptureError).toHaveBeenCalledTimes(1);
-      expect(mockApmCaptureError).toHaveBeenCalledWith(responseError);
+      expect(mockApmCaptureError).toHaveBeenCalledWith(responseError, {
+        labels: {
+          kibana_section: 'metrics',
+          kibana_action: 'fetch',
+          kibana_name: 'metrics_info',
+        },
+      });
     });
 
     it('does NOT report to APM when the error is an AbortError', async () => {

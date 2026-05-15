@@ -23,3 +23,31 @@ export const getMetricsExecutionContext = (
 ) => ({
   executionContext: { page: `metrics_${action}_${name}` } as KibanaExecutionContext,
 });
+
+/**
+ * Centralised APM labels for `apm.captureError` calls originating from the
+ * metrics chart section. Keeping these in the same module as
+ * `getMetricsExecutionContext` ensures the `action` / `name` vocabulary
+ * stays in sync between the request execution context (`page` label) and
+ * the error label families used for filtering in the APM UI.
+ *
+ * Example:
+ *   apm.captureError(err, {
+ *     labels: getMetricsApmLabels(
+ *       MetricsExecutionContextAction.FETCH,
+ *       MetricsExecutionContextName.METRICS_INFO
+ *     ),
+ *   });
+ *
+ * Produces a stable label set (`kibana_section`, `kibana_action`,
+ * `kibana_name`) that the obs-exploration team can filter on without
+ * pattern-matching the generic Discover error stream.
+ */
+export const getMetricsApmLabels = (
+  action: MetricsExecutionContextAction,
+  name: MetricsExecutionContextName
+) => ({
+  kibana_section: 'metrics',
+  kibana_action: action,
+  kibana_name: name,
+});
