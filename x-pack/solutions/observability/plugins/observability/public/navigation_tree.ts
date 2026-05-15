@@ -576,7 +576,7 @@ function createNavTree({
             renderAs: 'panelOpener',
             children: [
               {
-                link: 'rules',
+                link: 'management:triggersActions',
               },
               {
                 link: 'management:triggersActionsConnectors',

@@ -532,7 +532,7 @@ export const createNavigationTree = ({
             breadcrumbStatus: 'hidden',
             children: [
               { link: 'management:triggersActionsAlerts' },
-              { link: 'rules' },
+              { link: 'management:triggersActions' },
               { link: 'management:triggersActionsConnectors', breadcrumbStatus: 'hidden' },
               { link: 'management:maintenanceWindows', breadcrumbStatus: 'hidden' },
             ],
