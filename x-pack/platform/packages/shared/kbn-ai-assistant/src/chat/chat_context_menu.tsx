@@ -127,7 +127,7 @@ export function ChatContextMenu({
           color: ${euiTheme.colors.danger};
           padding: ${euiTheme.size.s};
         `}
-        icon={<EuiIcon type="trash" size="m" color="danger" />}
+        icon={<EuiIcon type="trash" size="m" color="danger" aria-hidden={true} />}
         onClick={() => {
           confirmDeleteCallback().then((confirmed) => {
             if (!confirmed) {

@@ -127,7 +127,12 @@ export const AnalyticsCollectionToolbar: React.FC = () => {
         <EuiFlexItem grow={false}>
           <EuiPopover
             button={
-              <EuiButton iconType="chevronSingleDown" iconSide="right" onClick={togglePopover}>
+              <EuiButton
+                data-test-subj="enterpriseSearchAnalyticsCollectionToolbarManageButton"
+                iconType="chevronSingleDown"
+                iconSide="right"
+                onClick={togglePopover}
+              >
                 <FormattedMessage
                   id="xpack.enterpriseSearch.analytics.collectionsView.manageButton"
                   defaultMessage="Manage"
@@ -183,6 +188,7 @@ export const AnalyticsCollectionToolbar: React.FC = () => {
 
               <EuiPopoverFooter paddingSize="m">
                 <EuiButton
+                  data-test-subj="enterpriseSearchAnalyticsCollectionToolbarDeleteCollectionButton"
                   type="submit"
                   color="danger"
                   fullWidth
