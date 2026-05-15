@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { Parser, isColumn } from '@elastic/esql';
 import { useQuery } from '@kbn/react-query';
+import { i18n } from '@kbn/i18n';
 import { getEsqlColumns } from '@kbn/esql-utils';
 import {
+  EuiBadge,
   EuiButton,
   EuiCallOut,
   EuiComboBox,
@@ -20,17 +22,29 @@ import {
   EuiPanel,
   EuiSelect,
   EuiSpacer,
+  EuiSuperSelect,
+  EuiSwitch,
   EuiText,
   EuiTitle,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
-import type { ComposeDiscoverState, ComposeDiscoverAction } from './types';
+import type {
+  ComposeDiscoverState,
+  ComposeDiscoverAction,
+  RecoveryType,
+  StepDefinition,
+} from './types';
+import { getStepIds } from './use_compose_discover_state';
 import type { FormValues } from '../../form/types';
 import { QuerySummary } from './query_summary';
 import type { RuleFormServices } from '../../form/contexts/rule_form_context';
 import { useDataFields } from '../../form/hooks/use_data_fields';
+import { splitQuery } from './use_heuristic_split';
 import { RuleDetailsFieldGroup } from '../../form';
 import { ScheduleField } from '../../form/fields/schedule_field';
 import { LookbackWindowField } from '../../form/fields/lookback_window_field';
+import { RecoveryDelayField } from '../../form/fields/recovery_delay_field';
 
 interface ComposeDiscoverFormProps {
   state: ComposeDiscoverState;
@@ -38,7 +52,128 @@ interface ComposeDiscoverFormProps {
   services: RuleFormServices;
 }
 
-// ── Step content renderers ────────────────────────────────────────────────────
+// ── Recovery type selector ────────────────────────────────────────────────────
+
+const defaultRecoveryLabel = i18n.translate(
+  'xpack.responseOps.alertingV2RuleForm.composeDiscover.recoveryType.defaultRecovery.dropDownOptionLabel',
+  {
+    defaultMessage: 'Default recovery',
+  }
+);
+
+const defaultRecoveryDescription = i18n.translate(
+  'xpack.responseOps.alertingV2RuleForm.composeDiscover.recoveryType.defaultRecovery.description',
+  {
+    defaultMessage: 'Recover automatically when the alert condition is no longer met.',
+  }
+);
+
+const customRecoveryLabel = i18n.translate(
+  'xpack.responseOps.alertingV2RuleForm.composeDiscover.recoveryType.customRecovery.dropDownOptionLabel',
+  {
+    defaultMessage: 'Custom recovery',
+  }
+);
+
+const customRecoveryDescription = i18n.translate(
+  'xpack.responseOps.alertingV2RuleForm.composeDiscover.recoveryType.customRecovery.description',
+  {
+    defaultMessage: 'Define a custom recovery condition.',
+  }
+);
+
+const noRecoveryLabel = i18n.translate(
+  'xpack.responseOps.alertingV2RuleForm.composeDiscover.recoveryType.noRecovery.dropDownOptionLabel',
+  {
+    defaultMessage: 'No recovery',
+  }
+);
+
+const noRecoveryDescription = i18n.translate(
+  'xpack.responseOps.alertingV2RuleForm.composeDiscover.recoveryType.noRecovery.description',
+  {
+    defaultMessage: 'Do not recover alerts automatically.',
+  }
+);
+
+const noRecoveryComingSoonBadgeLabel = i18n.translate(
+  'xpack.responseOps.alertingV2RuleForm.composeDiscover.recoveryType.noRecovery.comingSoonBadgeLabel',
+  {
+    defaultMessage: 'Coming soon',
+  }
+);
+
+const RECOVERY_TYPE_OPTIONS: Array<{
+  value: RecoveryType;
+  inputDisplay: string;
+  dropdownDisplay: React.ReactNode;
+  disabled?: boolean;
+}> = [
+  {
+    value: 'default',
+    inputDisplay: defaultRecoveryLabel,
+    dropdownDisplay: (
+      <>
+        <strong>{defaultRecoveryLabel}</strong>
+        <EuiText size="s" color="subdued">
+          <p>{defaultRecoveryDescription}</p>
+        </EuiText>
+      </>
+    ),
+  },
+  {
+    value: 'custom',
+    inputDisplay: customRecoveryLabel,
+    dropdownDisplay: (
+      <>
+        <strong>{customRecoveryLabel}</strong>
+        <EuiText size="s" color="subdued">
+          <p>{customRecoveryDescription}</p>
+        </EuiText>
+      </>
+    ),
+  },
+  {
+    value: 'none',
+    disabled: true,
+    inputDisplay: noRecoveryLabel,
+    dropdownDisplay: (
+      <>
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap={false}>
+          <EuiFlexItem grow={false}>
+            <strong>{noRecoveryLabel}</strong>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="hollow">{noRecoveryComingSoonBadgeLabel}</EuiBadge>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiText size="s" color="subdued">
+          <p>{noRecoveryDescription}</p>
+        </EuiText>
+      </>
+    ),
+  },
+];
+
+interface RecoveryTypeSelectorProps {
+  state: ComposeDiscoverState;
+  dispatch: React.Dispatch<ComposeDiscoverAction>;
+}
+
+const RecoveryTypeSelector: React.FC<RecoveryTypeSelectorProps> = ({ state, dispatch }) => (
+  <EuiFormRow label="Recovery" fullWidth>
+    <EuiSuperSelect
+      options={RECOVERY_TYPE_OPTIONS}
+      valueOfSelected={state.recoveryType}
+      onChange={(val) => dispatch({ type: 'SET_RECOVERY_TYPE', recoveryType: val as RecoveryType })}
+      fullWidth
+      hasDividers
+      data-test-subj="composeDiscoverRecoveryType"
+    />
+  </EuiFormRow>
+);
+
+// ── Step renderers ────────────────────────────────────────────────────────────
 
 function AlertConditionStep({
   state,
@@ -54,11 +189,12 @@ function AlertConditionStep({
   const grouping = watch('grouping');
   const groupFields = grouping?.fields ?? [];
 
-  const hasValidQuery =
-    /^\s*FROM\s+[a-zA-Z0-9_.*-]/i.test(state.sandbox.query) && state.queryCommitted;
-  const committedQuery = hasValidQuery ? state.sandbox.query : '';
+  // Use the base query for field lookup when tracking is on; fall back to fullQuery.
+  const committedQuery = useMemo(() => {
+    const q = state.tracking ? state.baseQuery : state.fullQuery;
+    return /^\s*FROM\s+[a-zA-Z0-9_.*-]/i.test(q) && state.queryCommitted ? q : '';
+  }, [state.tracking, state.baseQuery, state.fullQuery, state.queryCommitted]);
 
-  // Source index fields → date-type options for the time field selector
   const { data: fieldMap } = useDataFields({
     query: committedQuery,
     http: services.http,
@@ -94,11 +230,11 @@ function AlertConditionStep({
   // and the user hasn't already set any group fields.
   const autoPopulatedForRef = useRef<string | null>(null);
   useEffect(() => {
-    if (!state.queryCommitted || groupFields.length > 0 || !state.sandbox.query) return;
-    if (autoPopulatedForRef.current === state.sandbox.query) return;
-    autoPopulatedForRef.current = state.sandbox.query;
+    if (!state.queryCommitted || groupFields.length > 0 || !committedQuery) return;
+    if (autoPopulatedForRef.current === committedQuery) return;
+    autoPopulatedForRef.current = committedQuery;
     try {
-      const { root } = Parser.parse(state.sandbox.query);
+      const { root } = Parser.parse(committedQuery);
       const statsCmd = [...root.commands].reverse().find((c) => c.name === 'stats');
       // ESQLAstItem is a wide union — use a local type alias to access the 'by' option
       // safely rather than an inline interface (which triggers lint in function scope).
@@ -115,7 +251,20 @@ function AlertConditionStep({
     } catch {
       // Non-parseable query — skip auto-populate
     }
-  }, [state.queryCommitted, state.sandbox.query, groupFields.length, setValue]);
+  }, [state.queryCommitted, committedQuery, groupFields.length, setValue]);
+
+  const handleTrackingToggle = useCallback(() => {
+    if (state.tracking) {
+      dispatch({ type: 'DISABLE_TRACKING' });
+    } else {
+      const currentQuery = state.fullQuery;
+      const { base, alertBlock } = splitQuery(currentQuery);
+      dispatch({ type: 'ENABLE_TRACKING', base, alertBlock });
+    }
+  }, [state.tracking, state.fullQuery, dispatch]);
+
+  // Callout when the heuristic split couldn't find a clear split point
+  const splitFailed = state.tracking && !state.baseQuery && state.queryCommitted;
 
   return (
     <>
@@ -141,9 +290,9 @@ function AlertConditionStep({
             Open query editor
           </EuiButton>
         </>
-      ) : (
+      ) : !state.tracking ? (
         <>
-          <QuerySummary query={state.sandbox.query} label="query" />
+          <QuerySummary query={state.fullQuery} label="query" />
           <EuiSpacer size="s" />
           <EuiButton
             size="s"
@@ -153,6 +302,42 @@ function AlertConditionStep({
             data-test-subj="composeDiscoverEditQuery"
           >
             Edit query
+          </EuiButton>
+        </>
+      ) : (
+        <>
+          {splitFailed && (
+            <>
+              <EuiCallOut
+                announceOnMount={false}
+                size="s"
+                color="primary"
+                iconType="iInCircle"
+                title="Couldn't automatically separate base query from alert condition. Adjust the split in the query editor."
+              />
+              <EuiSpacer size="s" />
+            </>
+          )}
+          <EuiText size="xs" color="subdued">
+            <strong>Base query</strong>
+          </EuiText>
+          <EuiSpacer size="xs" />
+          <QuerySummary query={state.baseQuery} label="base query" />
+          <EuiSpacer size="m" />
+          <EuiText size="xs" color="subdued">
+            <strong>Alert condition</strong>
+          </EuiText>
+          <EuiSpacer size="xs" />
+          <QuerySummary query={state.alertBlock} label="alert condition" />
+          <EuiSpacer size="s" />
+          <EuiButton
+            size="s"
+            iconType="editorCodeBlock"
+            isDisabled={state.childOpen}
+            onClick={() => dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: state.step })}
+            data-test-subj="composeDiscoverEditQueries"
+          >
+            Edit queries
           </EuiButton>
         </>
       )}
@@ -184,9 +369,74 @@ function AlertConditionStep({
       </EuiFormRow>
 
       <EuiSpacer size="m" />
+      <EuiSwitch
+        label="Track active and recovered state over time"
+        checked={state.tracking}
+        onChange={handleTrackingToggle}
+        disabled={!state.queryCommitted}
+        data-test-subj="composeDiscoverTrackingToggle"
+      />
+
+      {/* Schedule and lookback — connected to RHF via useFormContext() internally */}
+      <EuiSpacer size="m" />
       <ScheduleField />
       <EuiSpacer size="m" />
       <LookbackWindowField />
+    </>
+  );
+}
+
+function RecoveryConditionStep({
+  state,
+  dispatch,
+}: {
+  state: ComposeDiscoverState;
+  dispatch: React.Dispatch<ComposeDiscoverAction>;
+}) {
+  return (
+    <>
+      <RecoveryTypeSelector state={state} dispatch={dispatch} />
+
+      {state.recoveryType === 'custom' && (
+        <>
+          <EuiSpacer size="l" />
+          <EuiHorizontalRule margin="none" />
+          <EuiSpacer size="m" />
+          <EuiText size="xs" color="subdued">
+            <strong>Base query</strong>
+          </EuiText>
+          <EuiSpacer size="xs" />
+          <QuerySummary query={state.baseQuery} label="base query" />
+          <EuiSpacer size="m" />
+          <EuiText size="xs" color="subdued">
+            <strong>Recovery condition</strong>
+          </EuiText>
+          <EuiSpacer size="xs" />
+          <QuerySummary query={state.recoveryBlock} label="recovery condition" />
+          <EuiSpacer size="s" />
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                size="s"
+                iconType="editorCodeBlock"
+                isDisabled={state.childOpen}
+                onClick={() => dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: state.step })}
+                data-test-subj="composeDiscoverEditRecovery"
+              >
+                Edit recovery query
+              </EuiButton>
+            </EuiFlexItem>
+            {state.recoveryBlock && (
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="success">Custom condition set</EuiBadge>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        </>
+      )}
+
+      <EuiSpacer size="m" />
+      <RecoveryDelayField />
     </>
   );
 }
@@ -240,6 +490,36 @@ function NotificationsStep() {
   );
 }
 
+// ── Step definitions ──────────────────────────────────────────────────────────
+
+const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
+  alertCondition: {
+    id: 'alertCondition',
+    title: 'Alert Condition',
+    render: (props) => <AlertConditionStep {...props} />,
+    validate: (_methods, s) => s.queryCommitted,
+  },
+  recoveryCondition: {
+    id: 'recoveryCondition',
+    title: 'Recovery Condition',
+    render: (props) => <RecoveryConditionStep state={props.state} dispatch={props.dispatch} />,
+  },
+  details: {
+    id: 'details',
+    title: 'Details & Artifacts',
+    render: () => <DetailsAndArtifactsStep />,
+    validate: async (methods) => methods.trigger(['metadata.name']),
+  },
+  notifications: {
+    id: 'notifications',
+    title: 'Notifications',
+    render: () => <NotificationsStep />,
+  },
+};
+
+export const getSteps = (tracking: boolean): StepDefinition[] =>
+  getStepIds(tracking).map((id) => STEP_REGISTRY[id]);
+
 // ── Main form component ───────────────────────────────────────────────────────
 
 export const ComposeDiscoverForm: React.FC<ComposeDiscoverFormProps> = ({
@@ -247,15 +527,6 @@ export const ComposeDiscoverForm: React.FC<ComposeDiscoverFormProps> = ({
   dispatch,
   services,
 }) => {
-  // Route by step index — avoids silent breakage if step titles change
-  switch (state.step) {
-    case 0:
-      return <AlertConditionStep state={state} dispatch={dispatch} services={services} />;
-    case 1:
-      return <DetailsAndArtifactsStep />;
-    case 2:
-      return <NotificationsStep />;
-    default:
-      return null;
-  }
+  const steps = getSteps(state.tracking);
+  return steps[state.step].render({ state, dispatch, services });
 };
