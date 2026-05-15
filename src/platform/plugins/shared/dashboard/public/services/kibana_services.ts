@@ -32,6 +32,8 @@ import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { DashboardStartDependencies } from '../plugin';
 
 export let coreServices: CoreStart;
+/** Kibana build version from plugin package info (technical footer, etc.). */
+export let dashboardKibanaVersion = '';
 export let cpsService: CPSPluginStart | undefined;
 export let contentManagementService: ContentManagementPublicStart;
 export let dataService: DataPublicPluginStart;
@@ -58,8 +60,13 @@ const servicesReady$ = new BehaviorSubject(false);
 /**
  * Allows module-level access to all of the Dashboard plugin's dependencies.
  */
-export const setKibanaServices = (kibanaCore: CoreStart, deps: DashboardStartDependencies) => {
+export const setKibanaServices = (
+  kibanaCore: CoreStart,
+  deps: DashboardStartDependencies,
+  kibanaVersionFromPlugin?: string
+) => {
   coreServices = kibanaCore;
+  dashboardKibanaVersion = kibanaVersionFromPlugin ?? '';
   cpsService = deps.cps;
   contentManagementService = deps.contentManagement;
   dataService = deps.data;

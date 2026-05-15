@@ -149,7 +149,10 @@ export class DashboardPlugin
   implements
     Plugin<DashboardSetup, DashboardStart, DashboardSetupDependencies, DashboardStartDependencies>
 {
+  private readonly initializerContext: PluginInitializerContext;
+
   constructor(initializerContext: PluginInitializerContext) {
+    this.initializerContext = initializerContext;
     setLogger(initializerContext.logger.get('dashboard'));
   }
 
@@ -338,7 +341,7 @@ export class DashboardPlugin
   }
 
   public start(core: CoreStart, plugins: DashboardStartDependencies): DashboardStart {
-    setKibanaServices(core, plugins);
+    setKibanaServices(core, plugins, this.initializerContext.env.packageInfo.version);
 
     registerActions(plugins);
 

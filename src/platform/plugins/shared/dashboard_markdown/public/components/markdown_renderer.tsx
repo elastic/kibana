@@ -23,6 +23,10 @@ const markdownRendererStyles = {
       padding: euiTheme.size.base,
       width: '100%',
       overflowWrap: 'break-word',
+      color: euiTheme.colors.textSubdued,
+      'h1, h2, h3': {
+        color: euiTheme.colors.textHeading,
+      },
       img: {
         maxInlineSize: '100%',
       },

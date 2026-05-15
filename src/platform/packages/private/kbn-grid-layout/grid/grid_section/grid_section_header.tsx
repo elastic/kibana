@@ -305,11 +305,43 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
         />
         {
           /**
-           * Add actions at the end of the header section when the layout is editable + the section title
-           * is not in edit mode
+           * When the layout is editable and the title is not being edited: delete + move handles sit
+           * to the left of the trailing column (placeholder text, status badge, panel count) which is
+           * pushed to the far right via flexGrow on that column.
            */
           !editTitleOpen && (
             <>
+              {!readOnly && (
+                <>
+                  {!isActive && (
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonIcon
+                        data-no-drag
+                        iconType="trash"
+                        color="danger"
+                        className="kbnGridLayout--deleteSectionIcon"
+                        onClick={confirmDeleteSection}
+                        aria-label={i18n.translate('kbnGridLayout.section.deleteSection', {
+                          defaultMessage: 'Delete section',
+                        })}
+                      />
+                    </EuiFlexItem>
+                  )}
+                  <EuiFlexItem
+                    grow={false}
+                    className="kbnGridSection--dragHandle"
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={handleSectionDragStart}
+                    aria-label={i18n.translate('kbnGridLayout.section.moveRow', {
+                      defaultMessage: 'Move section',
+                    })}
+                    data-test-subj={`kbnGridSectionHeader-${sectionId}--dragHandle`}
+                  >
+                    <EuiIcon type="move" color="text" aria-hidden={true} />
+                  </EuiFlexItem>
+                </>
+              )}
               <EuiFlexItem
                 grow={true}
                 css={styles.sectionDescriptionColumn}
@@ -344,58 +376,26 @@ export const GridSectionHeader = React.memo(({ sectionId }: GridSectionHeaderPro
                   >
                     {getSectionBadgeLabel(sectionStatusBadgeColor)}
                   </EuiBadge>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-              <EuiFlexItem
-                grow={false}
-                css={readOnly ? styles.visibleOnlyWhenCollapsed : undefined}
-              >
-                <EuiBadge
-                  color="hollow"
-                  data-test-subj={`kbnGridSectionHeader-${sectionId}--panelCount`}
-                  className={'kbnGridLayout--panelCount'}
-                >
-                  {i18n.translate('kbnGridLayout.section.panelCount', {
-                    defaultMessage:
-                      '{panelCount} {panelCount, plural, one {panel} other {panels}}',
-                    values: {
-                      panelCount,
-                    },
-                  })}
-                </EuiBadge>
-              </EuiFlexItem>
-              {!readOnly && (
-                <>
-                  {!isActive && (
-                    <EuiFlexItem grow={false} css={[styles.floatToRight]}>
-                      <EuiButtonIcon
-                        data-no-drag
-                        iconType="trash"
-                        color="danger"
-                        className="kbnGridLayout--deleteSectionIcon"
-                        onClick={confirmDeleteSection}
-                        aria-label={i18n.translate('kbnGridLayout.section.deleteSection', {
-                          defaultMessage: 'Delete section',
-                        })}
-                      />
-                    </EuiFlexItem>
-                  )}
                   <EuiFlexItem
                     grow={false}
-                    css={isActive && [styles.floatToRight]}
-                    className="kbnGridSection--dragHandle"
-                    role="button"
-                    tabIndex={0}
-                    onKeyDown={handleSectionDragStart}
-                    aria-label={i18n.translate('kbnGridLayout.section.moveRow', {
-                      defaultMessage: 'Move section',
-                    })}
-                    data-test-subj={`kbnGridSectionHeader-${sectionId}--dragHandle`}
+                    css={readOnly ? styles.visibleOnlyWhenCollapsed : undefined}
                   >
-                    <EuiIcon type="move" color="text" aria-hidden={true} />
+                    <EuiBadge
+                      color="hollow"
+                      data-test-subj={`kbnGridSectionHeader-${sectionId}--panelCount`}
+                      className={'kbnGridLayout--panelCount'}
+                    >
+                      {i18n.translate('kbnGridLayout.section.panelCount', {
+                        defaultMessage:
+                          '{panelCount} {panelCount, plural, one {panel} other {panels}}',
+                        values: {
+                          panelCount,
+                        },
+                      })}
+                    </EuiBadge>
                   </EuiFlexItem>
-                </>
-              )}
+                </EuiFlexGroup>
+              </EuiFlexItem>
             </>
           )
         }
@@ -423,11 +423,8 @@ const styles = {
   visibleOnlyWhenCollapsed: css({
     display: 'none',
     '.kbnGridSectionHeader--collapsed &': {
-      display: 'block',
+      display: 'flex',
     },
-  }),
-  floatToRight: css({
-    marginLeft: 'auto',
   }),
   headerStyles: ({ euiTheme }: UseEuiTheme, sectionId: string, readOnly: boolean) =>
     css({
@@ -449,9 +446,6 @@ const styles = {
               backgroundColor: `${transparentize(euiTheme.colors.vis.euiColorVis0, 0.1)}`,
             },
           }),
-      '.kbnGridLayout--deleteSectionIcon': {
-        marginLeft: euiTheme.size.xs,
-      },
       '.kbnGridLayout--panelCount': {
         textWrapMode: 'nowrap', // prevent panel count from wrapping
       },

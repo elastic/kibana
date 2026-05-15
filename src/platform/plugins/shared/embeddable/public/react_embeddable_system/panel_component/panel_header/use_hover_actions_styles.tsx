@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEuiTheme, highContrastModeStyles, euiShadow } from '@elastic/eui';
+import { transparentize, useEuiTheme, highContrastModeStyles, euiShadow } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import { useMemo } from 'react';
 
 export const useHoverActionStyles = (isEditMode: boolean, showBorder?: boolean) => {
   const euiThemeContext = useEuiTheme();
-  const { euiTheme } = euiThemeContext;
+  const { euiTheme, colorMode } = euiThemeContext;
 
   const hoverActionStyles = useMemo(() => {
     const singleWrapperStyles = css`
@@ -86,8 +86,12 @@ export const useHoverActionStyles = (isEditMode: boolean, showBorder?: boolean) 
   }, [euiTheme, euiThemeContext]);
 
   const containerStyles = useMemo(() => {
-    const editModeOutline = `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued}`;
-    const viewModeOutline = `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued}`;
+    const panelBorderColor =
+      colorMode === 'DARK'
+        ? transparentize(euiTheme.colors.borderBaseSubdued, 0.5)
+        : euiTheme.colors.borderBaseSubdued;
+    const editModeOutline = `${euiTheme.border.width.thin} solid ${panelBorderColor}`;
+    const viewModeOutline = `${euiTheme.border.width.thin} solid ${panelBorderColor}`;
 
     return css`
       // the border style can be overwritten by parents who define --hoverActionsBorderStyle; otherwise, default to either
@@ -176,7 +180,7 @@ export const useHoverActionStyles = (isEditMode: boolean, showBorder?: boolean) 
         }
       }
     `;
-  }, [euiTheme, showBorder, isEditMode, euiThemeContext, hoverActionStyles]);
+  }, [colorMode, euiTheme, showBorder, isEditMode, euiThemeContext, hoverActionStyles]);
 
   return containerStyles;
 };

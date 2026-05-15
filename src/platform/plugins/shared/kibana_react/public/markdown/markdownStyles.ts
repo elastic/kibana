@@ -55,6 +55,9 @@ export const markdownStyles = (euiTheme: UseEuiTheme['euiTheme'], isReversed: bo
   const kbnMarkdownAlphaLightShadeReversed = transparentize(`${euiTheme.colors.emptyShade}`, 0.15);
 
   return css({
+    ...(!isReversed && {
+      color: `${euiTheme.colors.textSubdued}`,
+    }),
     ...(isReversed && {
       color: `${euiTheme.colors.lightestShade}`,
     }),
@@ -99,16 +102,19 @@ export const markdownStyles = (euiTheme: UseEuiTheme['euiTheme'], isReversed: bo
       marginBottom: kbnMarkdownSizeXS,
     },
     h1: {
+      color: `${euiTheme.colors.textHeading}`,
       fontSize: kbnMarkdownFontSizeXXL,
       lineHeight: '1.333333em',
       fontWeight: 300,
     },
     h2: {
+      color: `${euiTheme.colors.textHeading}`,
       fontSize: kbnMarkdownFontSizeXL,
       lineHeight: '1.428571em',
       fontWeight: 300,
     },
     h3: {
+      color: `${euiTheme.colors.textHeading}`,
       fontSize: kbnMarkdownFontSizeL,
       lineHeight: '1.6em',
       fontWeight: 600,

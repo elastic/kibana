@@ -22,6 +22,7 @@ import { DashboardGrid } from '../grid';
 import { INITIAL_DASHBOARD_LAYOUT_TWEAK } from '../grid/constants';
 import { resolveDashboardBackgroundBaseColor } from '../grid/dashboard_background_tokens';
 import { DashboardEmptyScreen } from './empty_screen/dashboard_empty_screen';
+import { DashboardTechnicalFooter } from './dashboard_technical_footer';
 
 export const DashboardViewport = () => {
   const dashboardApi = useDashboardApi();
@@ -165,7 +166,10 @@ export const DashboardViewport = () => {
         {panelCount === 0 && sectionCount === 0 ? (
           <DashboardEmptyScreen />
         ) : (
-          <DashboardGrid marginGutterPx={marginGutterPx} />
+          <>
+            <DashboardGrid marginGutterPx={marginGutterPx} />
+            <DashboardTechnicalFooter />
+          </>
         )}
       </div>
     </div>

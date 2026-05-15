@@ -63,7 +63,7 @@ export function getDashboardLayoutTweakpanePresets(
         panelPaddingVerticalPx: 10,
         panelPaddingHorizontalPx: 12,
         markdownCornerPaddingBottomPx: 0,
-        markdownCornerPaddingRightPx: 200,
+        markdownCornerPaddingRightPx: 80,
         dashboardBackgroundToken: 'backgroundBaseSubdued',
       },
     },
