@@ -25,6 +25,7 @@ const createStartContract = (): Start => {
   const startContract: Start = {
     locator: sharePluginMock.createLocator(),
     DiscoverContainer: jest.fn().mockImplementation(() => <></>),
+    OpenSessionPanel: jest.fn().mockImplementation(() => null),
   };
   return startContract;
 };

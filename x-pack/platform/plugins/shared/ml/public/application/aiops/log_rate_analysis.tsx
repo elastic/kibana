@@ -32,12 +32,7 @@ export const LogRateAnalysisPage: FC = () => {
     <FormattedMessage id="xpack.ml.logRateAnalysis.pageHeader" defaultMessage="Log rate analysis" />
   );
 
-  const headerContent = (
-    <MlDataSourcePicker
-      currentDataView={dataView ?? null}
-      currentSavedSearch={savedSearch ?? null}
-    />
-  );
+  const headerContent = <MlDataSourcePicker currentDataView={dataView ?? null} />;
 
   return (
     <>

@@ -67,7 +67,6 @@ import { forwardLegacyUrls } from './plugin_imports/forward_legacy_urls';
 import { registerEsqlResultsAttachmentUi } from './agent_builder/register_esql_results_ui';
 import { getProfilesInspectorView } from './context_awareness/inspector/get_profiles_inspector_view';
 import { OpenSearchPanel } from './application/main/components/top_nav/open_search_panel';
-import type { DiscoverServices } from './build_services';
 
 /**
  * Contains Discover, one of the oldest parts of Kibana
@@ -319,7 +318,7 @@ export class DiscoverPlugin
           uiSettings: core.uiSettings,
         };
         return (
-          <KibanaContextProvider services={openSessionServices as unknown as DiscoverServices}>
+          <KibanaContextProvider services={openSessionServices}>
             <OpenSearchPanel {...props} />
           </KibanaContextProvider>
         );

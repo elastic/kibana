@@ -35,12 +35,7 @@ export const LogCategorizationPage: FC = () => {
     />
   );
 
-  const headerContent = (
-    <MlDataSourcePicker
-      currentDataView={dataView ?? null}
-      currentSavedSearch={savedSearch ?? null}
-    />
-  );
+  const headerContent = <MlDataSourcePicker currentDataView={dataView ?? null} />;
 
   return (
     <>

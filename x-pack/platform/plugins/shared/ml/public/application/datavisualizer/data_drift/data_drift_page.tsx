@@ -33,12 +33,7 @@ export const DataDriftPage: FC = () => {
 
   const { selectedDataView: dataView, selectedSavedSearch: savedSearch } = useDataSource();
 
-  const dataSourcePicker = (
-    <MlDataSourcePicker
-      currentDataView={dataView ?? null}
-      currentSavedSearch={savedSearch ?? null}
-    />
-  );
+  const dataSourcePicker = <MlDataSourcePicker currentDataView={dataView ?? null} />;
 
   return (
     <>
@@ -56,7 +51,7 @@ export const DataDriftPage: FC = () => {
           savedSearch={savedSearch}
           headerContent={dataSourcePicker}
         />
-      ) : (
+      ) : dataView ? null : (
         <>
           {dataSourcePicker}
           <EuiEmptyPrompt

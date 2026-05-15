@@ -47,7 +47,7 @@ export const IndexDataVisualizerPage: FC<{ esql: boolean }> = ({ esql = false })
   } = useMlKibana();
   const mlApi = useMlApi();
   const { showNodeInfo } = useEnabledFeatures();
-  const { selectedDataView: dataView, selectedSavedSearch: savedSearch } = useDataSource();
+  const { selectedDataView: dataView } = useDataSource();
   const mlLocator = useMlLocator()!;
   const mlManagementLocator = useMlManagementLocator();
   const mlFeaturesDisabled = !isFullLicense();
@@ -199,10 +199,7 @@ export const IndexDataVisualizerPage: FC<{ esql: boolean }> = ({ esql = false })
   );
 
   const dataSourcePicker = !esql ? (
-    <MlDataSourcePicker
-      currentDataView={dataView ?? null}
-      currentSavedSearch={savedSearch ?? null}
-    />
+    <MlDataSourcePicker currentDataView={dataView ?? null} />
   ) : undefined;
 
   return IndexDataVisualizer ? (

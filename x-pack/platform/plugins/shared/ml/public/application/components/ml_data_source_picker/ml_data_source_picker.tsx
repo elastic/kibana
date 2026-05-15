@@ -11,14 +11,12 @@ import { useLocation } from 'react-router-dom';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/public';
-import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { DataViewPicker } from '@kbn/unified-search-plugin/public';
 
 import { useMlKibana, useNavigateToPath } from '../../contexts/kibana';
 
 export interface MlDataSourcePickerProps {
   currentDataView: DataView | null;
-  currentSavedSearch: SavedSearch | null;
 }
 
 export const MlDataSourcePicker: FC<MlDataSourcePickerProps> = ({ currentDataView }) => {
