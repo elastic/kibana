@@ -13,16 +13,19 @@ import type { Agent } from '../../../../../../common/types';
 import { useGetAgentsQuery } from '../../../../../hooks/use_request/agents';
 
 import { useCollectorsUrlFilters, useSetCollectorsUrlFilters } from './use_url_filters';
+import { useCollectorsSessionState } from './use_session_state';
 
 interface UseCollectorsListOptions {
   refetchInterval: number | false;
 }
 
 export const useCollectorsList = ({ refetchInterval }: UseCollectorsListOptions) => {
-  const { q, pageIndex, pageSize } = useCollectorsUrlFilters();
-  const setFilters = useSetCollectorsUrlFilters();
+  const { kuery: userKuery, pageIndex } = useCollectorsUrlFilters();
+  const setUrlFilters = useSetCollectorsUrlFilters();
+  const { pageSize, setPageSize } = useCollectorsSessionState();
 
-  const kuery = q ? `type:${AGENT_TYPE_OPAMP} AND (${q})` : `type:${AGENT_TYPE_OPAMP}`;
+  const baseKuery = `type:${AGENT_TYPE_OPAMP}`;
+  const kuery = userKuery ? `${baseKuery} AND (${userKuery})` : baseKuery;
 
   const { data, isLoading, isInitialLoading, isError, error, dataUpdatedAt } = useGetAgentsQuery(
     { kuery, page: pageIndex + 1, perPage: pageSize, showInactive: false },
@@ -31,17 +34,15 @@ export const useCollectorsList = ({ refetchInterval }: UseCollectorsListOptions)
 
   const onTableChange = useCallback(
     (criteria: CriteriaWithPagination<Agent>) => {
-      setFilters(
-        { pageIndex: criteria.page.index, pageSize: criteria.page.size },
-        { replace: true }
-      );
+      setUrlFilters({ pageIndex: criteria.page.index }, { replace: true });
+      setPageSize(criteria.page.size);
     },
-    [setFilters]
+    [setUrlFilters, setPageSize]
   );
 
   const setSearchQuery = useCallback(
-    (value: string | undefined) => setFilters({ q: value, pageIndex: 0 }),
-    [setFilters]
+    (value: string | undefined) => setUrlFilters({ kuery: value, pageIndex: 0 }),
+    [setUrlFilters]
   );
 
   return {
@@ -54,7 +55,7 @@ export const useCollectorsList = ({ refetchInterval }: UseCollectorsListOptions)
     dataUpdatedAt,
     pageIndex,
     pageSize,
-    searchQuery: q,
+    searchQuery: userKuery,
     setSearchQuery,
     onTableChange,
   };

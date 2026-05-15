@@ -137,6 +137,7 @@ export {
 export * from './cloud_connectors';
 
 export { validateSslCertPath } from './ssl_validators';
+export { getOtelCollectorDisplayName, getOtelCollectorConfigName } from './otel_collector';
 
 export type { YamlModule } from './yaml_utils';
 export { createYamlKeysSorter, toYaml } from './yaml_utils';

@@ -24,9 +24,13 @@ import { i18n } from '@kbn/i18n';
 import { FormattedDate, FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 
 import type { Agent } from '../../../../../../common/types';
+import {
+  getOtelCollectorDisplayName,
+  getOtelCollectorConfigName,
+} from '../../../../../../common/services';
+import { FLEET_PAGE_SIZE_OPTIONS } from '../../../../../constants';
 import { useLink } from '../../../hooks';
 import { Tags } from '../../agents/components/tags';
-import { VALID_PAGE_SIZES } from '../hooks';
 
 type VisColorKey = keyof EuiThemeComputed['colors']['vis'];
 
@@ -39,11 +43,7 @@ interface CollectorsTableProps {
   onTableChange: (criteria: CriteriaWithPagination<Agent>) => void;
 }
 
-const getHostName = (collector: Agent): string =>
-  (collector.non_identifying_attributes?.['elastic.display.name'] as string) ?? collector.id;
-
-const getConfigName = (collector: Agent): string | undefined =>
-  collector.non_identifying_attributes?.['config.name'] as string | undefined;
+const PAGE_SIZE_OPTIONS = [...FLEET_PAGE_SIZE_OPTIONS];
 
 const SIGNAL_VIS_COLOR_KEYS: Record<string, [VisColorKey, VisColorKey]> = {
   logs: ['euiColorVisBehindText9', 'euiColorVisText9'],
@@ -72,8 +72,8 @@ export const CollectorsTable: React.FC<CollectorsTableProps> = ({
     return [
       {
         field: 'id',
-        name: i18n.translate('xpack.fleet.collectors.table.hostNameColumn', {
-          defaultMessage: 'Host Name',
+        name: i18n.translate('xpack.fleet.collectors.table.displayNameColumn', {
+          defaultMessage: 'Display name',
         }),
         width: '185px',
         render: (_: string, collector: Agent) => {
@@ -81,7 +81,7 @@ export const CollectorsTable: React.FC<CollectorsTableProps> = ({
             <EuiFlexGroup gutterSize="none" direction="column">
               <EuiFlexItem grow={false}>
                 <EuiLink href={getHref('agent_details', { agentId: collector.id })}>
-                  {getHostName(collector)}
+                  {getOtelCollectorDisplayName(collector)}
                 </EuiLink>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
@@ -96,14 +96,14 @@ export const CollectorsTable: React.FC<CollectorsTableProps> = ({
         name: i18n.translate('xpack.fleet.collectors.table.configurationColumn', {
           defaultMessage: 'Configuration',
         }),
-        render: (_: unknown, collector: Agent) => getConfigName(collector) ?? '-',
+        render: (_: unknown, collector: Agent) => getOtelCollectorConfigName(collector) ?? '-',
       },
       {
         field: 'identifying_attributes',
         name: i18n.translate('xpack.fleet.collectors.table.versionColumn', {
           defaultMessage: 'Version',
         }),
-        // TODO not implemmented yet, waiting for backend to populate the field
+        // TODO not implemented yet, waiting for backend to populate the field
         render: (_: unknown, collector: Agent) => <EuiBadge>TODO</EuiBadge>,
       },
       {
@@ -142,7 +142,7 @@ export const CollectorsTable: React.FC<CollectorsTableProps> = ({
           defaultMessage: 'Alerts',
         }),
         width: '100px',
-        // TODO not implemmented yet, waiting for backend to populate the field
+        // TODO not implemented yet, waiting for backend to populate the field
         render: (_: unknown, collector: Agent) => '-',
       },
       {
@@ -161,8 +161,8 @@ export const CollectorsTable: React.FC<CollectorsTableProps> = ({
                     year="numeric"
                     month="short"
                     day="2-digit"
-                    hour="numeric"
-                    minute="numeric"
+                    hour="2-digit"
+                    minute="2-digit"
                   />
                 }
               >
@@ -177,9 +177,9 @@ export const CollectorsTable: React.FC<CollectorsTableProps> = ({
               </EuiToolTip>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              {collector.last_checkin ? (
-                <EuiToolTip
-                  content={
+              <EuiToolTip
+                content={
+                  collector.last_checkin ? (
                     <FormattedDate
                       value={collector.last_checkin}
                       year="numeric"
@@ -188,25 +188,24 @@ export const CollectorsTable: React.FC<CollectorsTableProps> = ({
                       hour="2-digit"
                       minute="2-digit"
                     />
-                  }
-                >
-                  <EuiText size="xs" color="subdued" tabIndex={0}>
-                    <EuiIcon type="refresh" size="s" aria-hidden={true} />{' '}
-                    <FormattedMessage
-                      id="xpack.fleet.collectors.table.lastSeen"
-                      defaultMessage="Last: {date}"
-                      values={{ date: <FormattedRelative value={collector.last_checkin} /> }}
-                    />
-                  </EuiText>
-                </EuiToolTip>
-              ) : (
-                <EuiText size="xs" color="subdued">
+                  ) : undefined
+                }
+              >
+                <EuiText size="xs" color="subdued" tabIndex={0}>
+                  <EuiIcon type="refresh" size="s" aria-hidden={true} />{' '}
                   <FormattedMessage
-                    id="xpack.fleet.collectors.table.lastSeenNever"
-                    defaultMessage="Last: -"
+                    id="xpack.fleet.collectors.table.lastSeen"
+                    defaultMessage="Last: {date}"
+                    values={{
+                      date: collector.last_checkin ? (
+                        <FormattedRelative value={collector.last_checkin} />
+                      ) : (
+                        '-'
+                      ),
+                    }}
                   />
                 </EuiText>
-              )}
+              </EuiToolTip>
             </EuiFlexItem>
           </EuiFlexGroup>
         ),
@@ -247,7 +246,7 @@ export const CollectorsTable: React.FC<CollectorsTableProps> = ({
         pageIndex,
         pageSize,
         totalItemCount: totalCount,
-        pageSizeOptions: [...VALID_PAGE_SIZES],
+        pageSizeOptions: PAGE_SIZE_OPTIONS,
       }}
       onChange={onTableChange}
     />

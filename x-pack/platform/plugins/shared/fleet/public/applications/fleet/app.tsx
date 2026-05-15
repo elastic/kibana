@@ -446,10 +446,25 @@ export const AppRoutes = memo(
           </Route>
 
           {ExperimentalFeaturesService.get().enableOtelUI && (
-            <Route path={FLEET_ROUTING_PATHS.collectors}>
-              <AppLayout setHeaderActionMenu={setHeaderActionMenu}>
-                <CollectorsApp />
-              </AppLayout>
+            <Route path={FLEET_ROUTING_PATHS.collectors} key={FLEET_ROUTING_PATHS.collectors}>
+              {authz.fleet.readAgents ? (
+                <AppLayout
+                  setHeaderActionMenu={setHeaderActionMenu}
+                  isReadOnly={!authz.fleet.allAgents}
+                >
+                  <CollectorsApp />
+                </AppLayout>
+              ) : (
+                <AppLayout setHeaderActionMenu={setHeaderActionMenu}>
+                  <ErrorLayout isAddIntegrationsPath={false}>
+                    <PermissionsError
+                      callingApplication="Fleet"
+                      error="MISSING_PRIVILEGES"
+                      requiredFleetRole="Agents Read"
+                    />
+                  </ErrorLayout>
+                </AppLayout>
+              )}
             </Route>
           )}
 

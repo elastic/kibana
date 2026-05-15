@@ -12,32 +12,24 @@ import { omit } from 'lodash';
 import { useUrlParams } from '../../../../../hooks';
 
 export interface CollectorsFilter {
-  q?: string;
+  kuery?: string;
   pageIndex: number;
-  pageSize: number;
 }
 
-const QUERYPARAM_Q = 'q';
+const QUERYPARAM_KUERY = 'kuery';
 const QUERYPARAM_PAGE = 'page';
-const QUERYPARAM_PAGE_SIZE = 'pageSize';
-export const VALID_PAGE_SIZES = [10, 20, 50] as const;
-const DEFAULT_PAGE_SIZE = 20;
 
 export const useCollectorsUrlFilters = (): CollectorsFilter => {
   const { urlParams } = useUrlParams();
 
   return useMemo(() => {
-    const q = typeof urlParams[QUERYPARAM_Q] === 'string' ? urlParams[QUERYPARAM_Q] : undefined;
+    const kuery =
+      typeof urlParams[QUERYPARAM_KUERY] === 'string' ? urlParams[QUERYPARAM_KUERY] : undefined;
 
     const rawPage = Number(urlParams[QUERYPARAM_PAGE]);
     const pageIndex = Number.isInteger(rawPage) && rawPage >= 1 ? rawPage - 1 : 0;
 
-    const rawSize = Number(urlParams[QUERYPARAM_PAGE_SIZE]);
-    const pageSize = (VALID_PAGE_SIZES as readonly number[]).includes(rawSize)
-      ? rawSize
-      : DEFAULT_PAGE_SIZE;
-
-    return { q, pageIndex, pageSize };
+    return { kuery, pageIndex };
   }, [urlParams]);
 };
 
@@ -54,12 +46,9 @@ export const useSetCollectorsUrlFilters = () => {
       method.call(history, {
         search: toUrlParams(
           {
-            ...omit(urlParams, QUERYPARAM_Q, QUERYPARAM_PAGE, QUERYPARAM_PAGE_SIZE),
-            ...(next.q ? { [QUERYPARAM_Q]: next.q } : {}),
+            ...omit(urlParams, QUERYPARAM_KUERY, QUERYPARAM_PAGE),
+            ...(next.kuery ? { [QUERYPARAM_KUERY]: next.kuery } : {}),
             ...(next.pageIndex > 0 ? { [QUERYPARAM_PAGE]: String(next.pageIndex + 1) } : {}),
-            ...(next.pageSize !== DEFAULT_PAGE_SIZE
-              ? { [QUERYPARAM_PAGE_SIZE]: String(next.pageSize) }
-              : {}),
           },
           { skipEmptyString: true }
         ),
