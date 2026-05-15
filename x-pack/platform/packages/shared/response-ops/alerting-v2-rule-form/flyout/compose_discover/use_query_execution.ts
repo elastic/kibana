@@ -47,6 +47,13 @@ function formatCellValue(value: unknown): string | null {
   return String(value);
 }
 
+/**
+ * Injects a time-range WHERE clause directly after the FROM segment by
+ * operating on pipe segments rather than newlines. This correctly handles
+ * single-line queries like `FROM logs-* | STATS count() BY host.name`,
+ * where splitting by newline would append the WHERE after STATS instead of
+ * after FROM, causing "Unknown column [@timestamp]" errors.
+ */
 function injectTimeFilter(query: string, timeField: string): string {
   const trimmed = query.trim();
   if (!trimmed) return trimmed;

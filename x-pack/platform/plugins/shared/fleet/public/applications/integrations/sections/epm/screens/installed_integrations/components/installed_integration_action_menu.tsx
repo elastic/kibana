@@ -212,7 +212,7 @@ export const InstalledIntegrationsActionMenu: React.FunctionComponent<{
         panelPaddingSize="none"
         anchorPosition="downLeft"
       >
-        <EuiContextMenuPanel size="s" items={items} />
+        <EuiContextMenuPanel items={items} />
       </EuiPopover>
       {showIntegrationKnowledgeFlyout && (
         <IntegrationKnowledgeFlyout onClose={() => setShowIntegrationKnowledgeFlyout(false)} />
