@@ -973,15 +973,6 @@
       "enabled": true
     },
     {
-      "groupName": "cssstyle",
-      "matchDepNames": ["cssstyle", "@types/cssstyle"],
-      "reviewers": ["team:kibana-operations"],
-      "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Operations"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
       "groupName": "execa",
       "matchDepNames": ["execa"],
       "reviewers": ["team:kibana-operations"],
@@ -1873,7 +1864,6 @@
     {
       "groupName": "platform security modules",
       "matchDepNames": [
-        "css.escape",
         "dependency-check",
         "dependency-cruiser",
         "dompurify",
@@ -1965,11 +1955,8 @@
       "groupName": "minify",
       "matchDepNames": [
         "gulp-brotli",
-        "gulp-postcss",
-        "gulp-terser",
         "terser",
-        "terser-webpack-plugin",
-        "@types/gulp"
+        "terser-webpack-plugin"
       ],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
@@ -2155,12 +2142,10 @@
     {
       "groupName": "langchain",
       "matchDepNames": [
-        "langchain",
         "@langchain/aws",
         "@langchain/classic",
         "@langchain/core",
         "@langchain/google-common",
-        "@langchain/google-genai",
         "@langchain/google-vertexai",
         "@langchain/langgraph",
         "@langchain/langgraph-checkpoint",
