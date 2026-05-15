@@ -71,10 +71,7 @@ export interface TransformQueryOutResult {
 /**
  * Converts a `RuleQuery` back into the old API fields.
  */
-export function transformQueryOut(
-  query: RuleQuery,
-  kind?: RuleKind
-): TransformQueryOutResult {
+export function transformQueryOut(query: RuleQuery, kind?: RuleKind): TransformQueryOutResult {
   if (query.format === 'standalone') {
     const evaluation = { query: { base: query.breach } };
     const recoverStr = query.recover?.trim();
