@@ -10,7 +10,8 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { EuiFlyout } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { find } from 'lodash/fp';
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import type { EsHitRecord } from '@kbn/discover-utils';
 import { useBasicDataFromDetailsData } from '../hooks/use_basic_data_from_details_data';
 import type { Status } from '../../../../../common/api/detection_engine';
 import { getAlertDetailsFieldValue } from '../../../../common/lib/endpoint/utils/get_event_details_field_values';
@@ -47,14 +48,6 @@ interface AlertSummaryData {
    * Id of the rule
    */
   ruleId: string;
-  /**
-   * Property ruleId on the rule
-   */
-  ruleRuleId: string;
-  /**
-   * Name of the rule
-   */
-  ruleName: string;
 }
 
 /**
@@ -84,42 +77,14 @@ export const TakeActionButton: FC = () => {
 
   const { refetch: refetchAll } = useRefetchByScope({ scopeId });
 
+  const hit = useMemo(() => buildDataTableRecord(searchHit as EsHitRecord), [searchHit]);
+
   // exception interaction
-  const ruleIndexRaw = useMemo(
-    () =>
-      find({ category: 'signal', field: 'signal.rule.index' }, dataFormattedForFieldBrowser)
-        ?.values ??
-      find(
-        { category: 'kibana', field: 'kibana.alert.rule.parameters.index' },
-        dataFormattedForFieldBrowser
-      )?.values,
-    [dataFormattedForFieldBrowser]
-  );
-  const ruleIndex = useMemo(
-    (): string[] | undefined => (Array.isArray(ruleIndexRaw) ? ruleIndexRaw : undefined),
-    [ruleIndexRaw]
-  );
-  const ruleDataViewIdRaw = useMemo(
-    () =>
-      find({ category: 'signal', field: 'signal.rule.data_view_id' }, dataFormattedForFieldBrowser)
-        ?.values ??
-      find(
-        { category: 'kibana', field: 'kibana.alert.rule.parameters.data_view_id' },
-        dataFormattedForFieldBrowser
-      )?.values,
-    [dataFormattedForFieldBrowser]
-  );
-  const ruleDataViewId = useMemo(
-    (): string | undefined => (Array.isArray(ruleDataViewIdRaw) ? ruleDataViewIdRaw[0] : undefined),
-    [ruleDataViewIdRaw]
-  );
   const alertSummaryData = useMemo(
     () =>
       [
         { category: 'signal', field: 'signal.rule.id', name: 'ruleId' },
-        { category: 'signal', field: 'signal.rule.rule_id', name: 'ruleRuleId' },
-        { category: 'signal', field: 'signal.rule.name', name: 'ruleName' },
-        { category: 'signal', field: 'kibana.alert.workflow_status', name: 'alertStatus' },
+        { category: 'kibana', field: 'kibana.alert.workflow_status', name: 'alertStatus' },
         { category: '_id', field: '_id', name: 'eventId' },
       ].reduce<AlertSummaryData>(
         (acc, curr) => ({
@@ -181,12 +146,11 @@ export const TakeActionButton: FC = () => {
 
       {openAddExceptionFlyout &&
         alertSummaryData.ruleId != null &&
-        alertSummaryData.ruleRuleId != null &&
         alertSummaryData.eventId != null && (
           <AddExceptionFlyoutWrapper
-            {...alertSummaryData}
-            ruleIndices={ruleIndex}
-            ruleDataViewId={ruleDataViewId}
+            hit={hit}
+            alertStatus={alertSummaryData.alertStatus}
+            eventId={alertSummaryData.eventId}
             exceptionListType={exceptionFlyoutType}
             onCancel={onAddExceptionCancel}
             onConfirm={onAddExceptionConfirm}

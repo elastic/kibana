@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
 import { isNonLocalIndexName } from '@kbn/es-query';
-import { ALERT_RULE_UUID, ALERT_WORKFLOW_STATUS, EVENT_KIND } from '@kbn/rule-data-utils';
+import { ALERT_WORKFLOW_STATUS, EVENT_KIND } from '@kbn/rule-data-utils';
 import type { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { EventKind } from '../constants/event_kinds';
@@ -175,40 +175,6 @@ export const TakeActionButton = memo(
       closePopover: closePopoverHandler,
     });
 
-    const ruleId = useMemo(
-      () =>
-        (getFieldValue(hit, ALERT_RULE_UUID) ?? getFieldValue(hit, 'signal.rule.id')) as
-          | string
-          | undefined,
-      [hit]
-    );
-    const ruleRuleId = useMemo(
-      () =>
-        (getFieldValue(hit, 'kibana.alert.rule.rule_id') ??
-          getFieldValue(hit, 'signal.rule.rule_id')) as string | undefined,
-      [hit]
-    );
-    const ruleName = useMemo(
-      () =>
-        ((getFieldValue(hit, 'kibana.alert.rule.name') ??
-          getFieldValue(hit, 'signal.rule.name')) as string) ?? '',
-      [hit]
-    );
-    // getFieldValue collapses arrays to their first element, so read flattened directly
-    // to preserve all indices for multi-index rules.
-    const ruleIndices = useMemo<string[] | undefined>(() => {
-      const v =
-        hit.flattened['kibana.alert.rule.parameters.index'] ?? hit.flattened['signal.rule.index'];
-      if (!v) return undefined;
-      return Array.isArray(v) ? (v as string[]) : [v as string];
-    }, [hit]);
-    const ruleDataViewId = useMemo(
-      () =>
-        (getFieldValue(hit, 'kibana.alert.rule.parameters.data_view_id') ??
-          getFieldValue(hit, 'signal.rule.data_view_id')) as string | undefined,
-      [hit]
-    );
-
     const [isExceptionFlyoutOpen, setIsExceptionFlyoutOpen] = useState(false);
     const [exceptionFlyoutType, setExceptionFlyoutType] = useState<ExceptionListTypeEnum | null>(
       null
@@ -319,13 +285,9 @@ export const TakeActionButton = memo(
             data-test-subj="takeActionPanelMenu"
           />
         </EuiPopover>
-        {isExceptionFlyoutOpen && ruleId != null && ruleRuleId != null && (
+        {isExceptionFlyoutOpen && (
           <AddExceptionFlyoutWrapper
-            ruleId={ruleId}
-            ruleRuleId={ruleRuleId}
-            ruleName={ruleName}
-            ruleIndices={ruleIndices}
-            ruleDataViewId={ruleDataViewId}
+            hit={hit}
             eventId={documentId}
             exceptionListType={exceptionFlyoutType}
             alertStatus={alertStatus}
