@@ -36,6 +36,12 @@ export interface CreateModelProviderOpts {
   savedObjects: SavedObjectsServiceStart;
   logger: Logger;
   searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
+  /**
+   * Conversation id for this execution. Passed to the inference chat model as
+   * `anonymizationSessionId` so workflow-driven anonymization can derive a
+   * stable salt per conversation (deterministic PII tokens across turns).
+   */
+  conversationId?: string;
 }
 
 export type CreateModelProviderFactoryFn = (
@@ -43,7 +49,7 @@ export type CreateModelProviderFactoryFn = (
 ) => ModelProviderFactoryFn;
 
 export type ModelProviderFactoryFn = (
-  opts: Pick<CreateModelProviderOpts, 'request' | 'defaultConnectorId'>
+  opts: Pick<CreateModelProviderOpts, 'request' | 'defaultConnectorId' | 'conversationId'>
 ) => ModelProvider;
 
 const memoizeAsync = <T>(fn: () => Promise<T>): (() => Promise<T>) => {
@@ -73,6 +79,7 @@ export const createModelProvider = ({
   savedObjects,
   searchInferenceEndpoints,
   logger,
+  conversationId,
 }: CreateModelProviderOpts): ModelProvider => {
   const getDefaultConnectorId = memoizeAsync(async () => {
     const resolvedConnectorId = await resolveSelectedConnectorId({
@@ -176,6 +183,7 @@ export const createModelProvider = ({
       },
       chatModelOptions: {
         telemetryMetadata: MODEL_TELEMETRY_METADATA,
+        ...(conversationId ? { anonymizationSessionId: conversationId } : {}),
       },
     });
 

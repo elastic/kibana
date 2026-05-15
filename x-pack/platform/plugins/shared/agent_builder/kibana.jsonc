@@ -43,6 +43,7 @@
     "optionalPlugins": [
       "cloud",
       "evals",
+      "inferenceWorkflows",
       "licenseManagement",
       "security",
       "workflowsManagement",

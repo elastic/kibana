@@ -8,3 +8,4 @@
  */
 
 export { TriggerRegistry } from './trigger_registry';
+export { HookHandlerRegistry } from './hook_handler_registry';

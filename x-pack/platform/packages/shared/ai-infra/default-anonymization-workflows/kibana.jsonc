@@ -1,0 +1,10 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/default-anonymization-workflows",
+  "owner": [
+    "@elastic/appex-ai-infra"
+  ],
+  "group": "platform",
+  "visibility": "shared"
+
+}

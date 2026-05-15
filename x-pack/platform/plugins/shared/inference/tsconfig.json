@@ -48,5 +48,7 @@
     "@kbn/anonymization-common",
     "@kbn/utility-types",
     "@kbn/management-settings-ids",
+    "@kbn/workflows",
+    "@kbn/workflows-extensions",
   ]
 }

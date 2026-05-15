@@ -20,6 +20,7 @@ import type { CustomRequestHandlerContext, IRouter } from '@kbn/core/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 
 import type { InboxPluginSetup } from '@kbn/inbox-plugin/server';
+import type { InferenceWorkflowsServerStart } from '@kbn/inference-workflows-plugin/server';
 import type {
   LicensingApiRequestHandlerContext,
   LicensingPluginStart,
@@ -70,6 +71,7 @@ export interface WorkflowsServerPluginStartDeps {
   spaces: SpacesPluginStart;
   workflowsExtensions: WorkflowsExtensionsServerPluginStart;
   licensing: LicensingPluginStart;
+  inferenceWorkflows?: InferenceWorkflowsServerStart;
 }
 
 export type WorkflowsRequestHandlerContext = CustomRequestHandlerContext<{

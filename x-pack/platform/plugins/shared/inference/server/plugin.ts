@@ -30,6 +30,7 @@ import type { InferenceConfig } from './config';
 import type {
   InferenceBoundClientCreateOptions,
   InferenceClientCreateOptions,
+  InvokeHookFn,
   InferenceServerSetup,
   InferenceServerStart,
   InferenceSetupDependencies,
@@ -101,6 +102,7 @@ export class InferencePlugin
   private regexWorker?: RegexWorkerService;
   private endpointIdCache: InferenceEndpointIdCache;
   private tokenUsageLogger: TokenUsageLogger;
+  private workflowsExt: InferenceStartDependencies['workflowsExtensions'] | null = null;
 
   constructor(context: PluginInitializerContext<InferenceConfig>) {
     this.logger = context.logger.get();
@@ -126,6 +128,9 @@ export class InferencePlugin
 
   start(core: CoreStart, pluginsStart: InferenceStartDependencies): InferenceServerStart {
     const anonymizationEnabled = pluginsStart.anonymization?.isEnabled() ?? false;
+    // Wire up the lifecycle hook invoker from the optional workflowsExtensions dep.
+    // inferenceWorkflows registers the trigger definitions and hook handlers during its setup().
+    this.workflowsExt = pluginsStart.workflowsExtensions ?? null;
     this.endpointIdCache.setEsClient(core.elasticsearch.client.asInternalUser);
     this.tokenUsageLogger.setEsClient(core.elasticsearch.client.asInternalUser);
 
@@ -260,6 +265,8 @@ export class InferencePlugin
           endpointIdCache: this.endpointIdCache,
           tokenUsageLogger: this.tokenUsageLogger,
           isTokenUsageTrackingEnabled: createTokenUsageTrackingEnabledCheck(options.request),
+          anonymizationHookInvoker: this.makeHookInvoker(options.request),
+          config: this.config,
         }) as T extends InferenceBoundClientCreateOptions ? BoundInferenceClient : InferenceClient;
       },
 
@@ -278,6 +285,8 @@ export class InferencePlugin
           logger: this.logger,
           tokenUsageLogger: this.tokenUsageLogger,
           isTokenUsageTrackingEnabled: createTokenUsageTrackingEnabledCheck(options.request),
+          anonymizationHookInvoker: this.makeHookInvoker(options.request),
+          config: this.config,
         });
       },
 
@@ -343,6 +352,15 @@ export class InferencePlugin
         const savedObjectsImporter = core.savedObjects.createImporter(internalClient);
         await installTokenUsageDashboard(savedObjectsImporter, this.logger);
       },
+    };
+  }
+
+  private makeHookInvoker(request: KibanaRequest): InvokeHookFn | null {
+    const ext = this.workflowsExt;
+    if (!ext) return null;
+    return async (triggerId, payload, capabilities) => {
+      const client = await ext.getClient(request);
+      return client.invokeHook(triggerId, payload, capabilities);
     };
   }
 

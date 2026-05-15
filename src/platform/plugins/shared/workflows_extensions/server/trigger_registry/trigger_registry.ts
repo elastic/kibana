@@ -18,7 +18,7 @@ function isZodObject(schema: z.ZodType): schema is z.ZodObject<z.ZodRawShape> {
 }
 
 function validateDefinition(definition: ServerTriggerDefinition): void {
-  const { id, eventSchema } = definition;
+  const { id, eventSchema, sync } = definition;
 
   if (typeof id !== 'string' || id.length === 0) {
     throw new Error('Trigger definition "id" must be a non-empty string.');
@@ -35,6 +35,30 @@ function validateDefinition(definition: ServerTriggerDefinition): void {
     throw new Error(
       `Trigger "${id}": "eventSchema" must be a Zod object schema (e.g. z.object({...})).`
     );
+  }
+
+  if (sync !== undefined) {
+    if (!sync.outputSchema || typeof sync.outputSchema.safeParse !== 'function') {
+      throw new Error(`Trigger "${id}": sync.outputSchema must be a Zod schema.`);
+    }
+    if (!isZodObject(sync.outputSchema)) {
+      throw new Error(
+        `Trigger "${id}": sync.outputSchema must be a Zod object schema (e.g. z.object({...})).`
+      );
+    }
+    if (typeof sync.maxTimeout !== 'string' || !/^(\d+)(ms|s|m)$/.test(sync.maxTimeout)) {
+      throw new Error(
+        `Trigger "${id}": sync.maxTimeout must be a duration string (e.g. '15s', '500ms', '2m'), got '${sync.maxTimeout}'.`
+      );
+    }
+    if (sync.failurePolicy !== 'open' && sync.failurePolicy !== 'closed') {
+      throw new Error(
+        `Trigger "${id}": sync.failurePolicy must be 'open' or 'closed', got '${sync.failurePolicy}'.`
+      );
+    }
+    if (typeof sync.chained !== 'boolean') {
+      throw new Error(`Trigger "${id}": sync.chained must be a boolean.`);
+    }
   }
 }
 

@@ -30,6 +30,7 @@ export const workflowsExecutionEngineMock = {
       isLogEventsEnabled: true,
       maxEventChainDepth: 10,
     },
+    executeWorkflowSync: jest.fn(),
     config: {
       maxWorkflowDepth: 10,
     },
