@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ApmMainTemplate } from '../../routing/templates/apm_main_template';
@@ -11,6 +12,9 @@ import { Breadcrumb } from '../breadcrumb';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { OpenInDiscover } from '../../shared/links/discover_links/open_in_discover';
 import { ApmIndexSettingsContextProvider } from '../../../context/apm_index_settings/apm_index_settings_context';
+
+// Visually align `EuiButtonEmpty` with the larger page title baseline.
+const exploreTracesButtonCss = css({ marginTop: 4 });
 
 export function TraceOverview({
   children,
@@ -35,18 +39,19 @@ export function TraceOverview({
           searchBar={searchBar}
           pageHeader={{
             rightSideItems: [
-              <OpenInDiscover
-                key="apmTracesExploreInDiscoverButton"
-                dataTestSubj="apmTracesExploreInDiscoverButton"
-                variant="emptyButton"
-                indexType="traces"
-                label={i18n.translate('xpack.apm.tracesOverview.exploreTracesInDiscover', {
-                  defaultMessage: 'Explore traces',
-                })}
-                rangeFrom={rangeFrom}
-                rangeTo={rangeTo}
-                queryParams={{ kuery, environment, sortDirection: 'DESC' }}
-              />,
+              <span key="apmTracesExploreInDiscoverButton" css={exploreTracesButtonCss}>
+                <OpenInDiscover
+                  dataTestSubj="apmTracesExploreInDiscoverButton"
+                  variant="emptyButton"
+                  indexType="traces"
+                  label={i18n.translate('xpack.apm.tracesOverview.exploreTracesInDiscover', {
+                    defaultMessage: 'Explore traces',
+                  })}
+                  rangeFrom={rangeFrom}
+                  rangeTo={rangeTo}
+                  queryParams={{ kuery, environment, sortDirection: 'DESC' }}
+                />
+              </span>,
             ],
           }}
           pageSectionProps={{
