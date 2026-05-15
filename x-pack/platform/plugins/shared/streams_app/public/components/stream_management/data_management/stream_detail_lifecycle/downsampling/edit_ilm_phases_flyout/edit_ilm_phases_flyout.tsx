@@ -23,6 +23,7 @@ import {
 } from '@elastic/eui';
 import { isEqual } from 'lodash';
 import { FormProvider, useForm, useFormState, useWatch, type FieldPath } from 'react-hook-form';
+import { PHASE_ORDER } from '@kbn/data-lifecycle-phases';
 import type { EditIlmPhasesFlyoutChangeMeta, EditIlmPhasesFlyoutProps } from './types';
 import {
   createMapFormValuesToIlmPolicyPhases,
@@ -33,7 +34,7 @@ import {
   useIlmPhasesFlyoutTabErrors,
   zodResolver,
 } from './form';
-import { DEFAULT_NEW_PHASE_MIN_AGE, ILM_PHASE_ORDER } from './constants';
+import { DEFAULT_NEW_PHASE_MIN_AGE } from './constants';
 import { GlobalFieldsMount, PhasePanel, PhaseTabsRow } from './sections';
 import { useStyles } from './use_styles';
 import { getDoubledDurationFromPrevious, type PreservedTimeUnit } from '../shared';
@@ -88,7 +89,7 @@ export const EditIlmPhasesFlyout = ({
   const enabledPhases = useMemo(
     () =>
       isMetaReady
-        ? ILM_PHASE_ORDER.filter((p) => {
+        ? PHASE_ORDER.filter((p) => {
             const enabled = meta?.[p]?.enabled;
             return Boolean(enabled);
           })
@@ -103,7 +104,7 @@ export const EditIlmPhasesFlyout = ({
     onChangeRef.current = onChange;
   }, [onChange]);
   const buildInvalidPhases = useCallback(
-    () => ILM_PHASE_ORDER.filter((p) => tabHasErrors(p)),
+    () => PHASE_ORDER.filter((p) => tabHasErrors(p)),
     [tabHasErrors]
   );
 
@@ -399,7 +400,7 @@ export const EditIlmPhasesFlyout = ({
           >
             <GlobalFieldsMount />
 
-            {ILM_PHASE_ORDER.map((phase) => (
+            {PHASE_ORDER.map((phase) => (
               <PhasePanel
                 key={phase}
                 phase={phase}

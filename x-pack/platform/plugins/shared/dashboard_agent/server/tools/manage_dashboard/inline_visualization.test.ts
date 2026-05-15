@@ -57,7 +57,7 @@ describe('createVisualizationResolver', () => {
     });
 
     const result = await resolveVisualizationConfig({
-      operationType: 'create_visualization_panels',
+      operationType: 'add_panels',
       identifier: 'show total requests',
       nlQuery: 'show total requests',
       index: 'logs-*',
@@ -90,7 +90,7 @@ describe('createVisualizationResolver', () => {
     });
 
     await resolveVisualizationConfig({
-      operationType: 'edit_visualization_panels',
+      operationType: 'edit_panels',
       identifier: 'panel-1',
       nlQuery: 'turn this into a line chart',
       existingPanel: {
@@ -118,7 +118,7 @@ describe('createVisualizationResolver', () => {
     });
 
     const result = await resolveVisualizationConfig({
-      operationType: 'edit_visualization_panels',
+      operationType: 'edit_panels',
       identifier: 'panel-1',
       nlQuery: 'refine this analysis',
       existingPanel: {
@@ -132,7 +132,7 @@ describe('createVisualizationResolver', () => {
     expect(result).toEqual({
       type: 'failure',
       failure: {
-        type: 'edit_visualization_panels',
+        type: 'edit_panels',
         identifier: 'panel-1',
         error:
           'Panel "panel-1" with type "aiOpsLogRateAnalysis" is not supported for inline visualization editing.',

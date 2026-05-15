@@ -22,7 +22,7 @@
           "() => void"
         ],
         "path": "packages/kbn-plugin-helpers/src/cli.ts",
-        "lineNumber": 22,
+        "lineNumber": 30,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

@@ -203,7 +203,7 @@ export class TriggerEventHandler {
       eventChainDepth: nextScheduledEventChainDepth(eventChainContext),
     };
 
-    this.validateTrigger(triggerId, spaceId, eventContextForResolution);
+    this.validateTrigger(triggerId, spaceId, payload);
 
     const resolutionStartMs = Date.now();
     const { workflows, stats: resolutionStats } = await this.resolveMatchingWorkflowSubscriptions(

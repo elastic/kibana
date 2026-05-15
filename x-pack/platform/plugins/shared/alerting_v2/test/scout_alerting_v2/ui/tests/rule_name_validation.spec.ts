@@ -5,27 +5,30 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 
-test.describe('Rule name validation — dedicated page', { tag: tags.stateful.classic }, () => {
+/*
+ * Custom-role auth (`browserAuth.loginWithCustomRole`) is not yet supported on
+ * Elastic Cloud Hosted, so this suite only runs on local stateful (classic)
+ * until ECH support lands.
+ */
+test.describe('Rule name validation — dedicated page', { tag: '@local-stateful-classic' }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
-    await browserAuth.loginAsAdmin();
+    await browserAuth.loginAsAlertingV2Editor();
     await pageObjects.ruleForm.gotoCreate();
   });
 
   test('displays "Untitled rule" as the default placeholder', async ({ pageObjects }) => {
-    await expect(pageObjects.ruleForm.nameInput()).toHaveAttribute('placeholder', 'Untitled rule');
+    await expect(pageObjects.ruleForm.nameInput).toHaveAttribute('placeholder', 'Untitled rule');
   });
 
   test('shows "Name is required" error when saving with empty default value', async ({
     pageObjects,
   }) => {
     await pageObjects.ruleForm.clickSave();
-    const errorCallout = pageObjects.ruleForm.errorCallout();
-    await expect(errorCallout).toBeVisible();
-    await expect(errorCallout).toContainText('Name is required');
+    await expect(pageObjects.ruleForm.errorCallout).toBeVisible();
+    await expect(pageObjects.ruleForm.errorCallout).toContainText('Name is required');
   });
 
   test('shows validation error when rule name is cleared after editing', async ({
@@ -39,7 +42,7 @@ test.describe('Rule name validation — dedicated page', { tag: tags.stateful.cl
 
     await test.step('attempt to save and verify error is shown', async () => {
       await pageObjects.ruleForm.clickSave();
-      await expect(pageObjects.ruleForm.nameInput()).toHaveAttribute('aria-invalid', 'true');
+      await expect(pageObjects.ruleForm.nameInput).toHaveAttribute('aria-invalid', 'true');
       await expect(page.getByText('Name is required.')).toBeVisible();
     });
   });
@@ -54,29 +57,21 @@ test.describe('Rule name validation — dedicated page', { tag: tags.stateful.cl
 
     await test.step('attempt to save and verify error is shown', async () => {
       await pageObjects.ruleForm.clickSave();
-      await expect(pageObjects.ruleForm.nameInput()).toHaveAttribute('aria-invalid', 'true');
+      await expect(pageObjects.ruleForm.nameInput).toHaveAttribute('aria-invalid', 'true');
       await expect(page.getByText('Name is required.')).toBeVisible();
     });
   });
 
-  test('error callout scrolls into view on failed submission', async ({ page, pageObjects }) => {
-    await test.step('scroll to bottom of the form', async () => {
-      await page.locator('#ruleV2Form').evaluate((el) => {
-        el.scrollTop = el.scrollHeight;
-      });
-    });
-
-    await test.step('click save and verify error callout is visible in viewport', async () => {
-      await pageObjects.ruleForm.clickSave();
-      const errorCallout = pageObjects.ruleForm.errorCallout();
-      await expect(errorCallout).toBeVisible();
-      await expect(errorCallout).toBeInViewport();
-    });
+  test('error callout scrolls into view on failed submission', async ({ pageObjects }) => {
+    await pageObjects.ruleForm.scrollFormToBottom();
+    await pageObjects.ruleForm.clickSave();
+    await expect(pageObjects.ruleForm.errorCallout).toBeVisible();
+    await expect(pageObjects.ruleForm.errorCallout).toBeInViewport();
   });
 
   test('no name validation error with a custom rule name', async ({ page, pageObjects }) => {
     await pageObjects.ruleForm.setRuleName('My custom alert rule');
-    await expect(pageObjects.ruleForm.nameInput()).toHaveValue('My custom alert rule');
+    await expect(pageObjects.ruleForm.nameInput).toHaveValue('My custom alert rule');
 
     await pageObjects.ruleForm.clickSave();
 

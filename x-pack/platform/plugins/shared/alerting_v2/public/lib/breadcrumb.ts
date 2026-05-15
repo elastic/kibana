@@ -16,9 +16,11 @@ export type AlertingV2BreadcrumbPage =
   | 'action_policies_list'
   | 'action_policy_create'
   | 'action_policy_edit'
+  | 'rule_create_options'
   | 'episodes_list'
   | 'episode_details'
-  | 'rule_doctor';
+  | 'rule_doctor'
+  | 'execution_history_list';
 
 export const getAlertingV2Breadcrumb = (
   page: AlertingV2BreadcrumbPage,
@@ -53,6 +55,12 @@ export const getAlertingV2Breadcrumb = (
       return {
         text: options?.ruleName ?? '',
       };
+    case 'rule_create_options':
+      return {
+        text: i18n.translate('xpack.alertingV2.breadcrumbs.ruleCreateOptionsTitle', {
+          defaultMessage: 'Create rule',
+        }),
+      };
     case 'action_policies_list':
       return {
         text: i18n.translate('xpack.alertingV2.breadcrumbs.actionPoliciesListTitle', {
@@ -85,6 +93,12 @@ export const getAlertingV2Breadcrumb = (
       return {
         text: i18n.translate('xpack.alertingV2.breadcrumbs.ruleDoctorTitle', {
           defaultMessage: 'Rule Doctor',
+        }),
+      };
+    case 'execution_history_list':
+      return {
+        text: i18n.translate('xpack.alertingV2.breadcrumbs.executionHistoryListTitle', {
+          defaultMessage: 'Execution history',
         }),
       };
   }

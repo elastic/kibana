@@ -914,7 +914,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         }`, async () => {
           await PageObjects.settings.filterField(fieldName);
           await PageObjects.settings.openControlsByName(fieldName);
-          await PageObjects.settings.toggleRow('formatRow');
+          await retry.try(async () => {
+            await browser.execute(() => {
+              const row = document.querySelector('[data-test-subj="formatRow"]');
+              if (!row) throw new Error('formatRow not found');
+              const toggle = row.querySelector('[data-test-subj="toggle"]') as HTMLElement;
+              if (!toggle) throw new Error('Toggle not found in formatRow');
+              toggle.click();
+            });
+          });
 
           if (spec.expectFormatterTypes) {
             expect(

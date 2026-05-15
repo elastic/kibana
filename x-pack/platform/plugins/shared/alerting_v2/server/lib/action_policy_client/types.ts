@@ -7,8 +7,9 @@
 
 import type {
   ActionPolicyBulkAction,
+  ActionPolicyDestinationType,
   ActionPolicyResponse,
-  CreateActionPolicyData,
+  CreateActionPolicyDataInput,
   UpdateActionPolicyData,
 } from '@kbn/alerting-v2-schemas';
 
@@ -18,7 +19,7 @@ export interface UpdateActionPolicyParams {
 }
 
 export interface CreateActionPolicyParams {
-  data: CreateActionPolicyData;
+  data: CreateActionPolicyDataInput;
   options?: { id?: string };
 }
 
@@ -51,10 +52,12 @@ export interface FindActionPoliciesParams {
   page?: number;
   perPage?: number;
   search?: string;
-  destinationType?: string;
+  destinationType?: ActionPolicyDestinationType;
   createdBy?: string;
   enabled?: boolean;
   tags?: string[];
+  ruleId?: string;
+  type?: 'global' | 'single_rule';
   sortField?: FindActionPoliciesSortField;
   sortOrder?: 'asc' | 'desc';
 }

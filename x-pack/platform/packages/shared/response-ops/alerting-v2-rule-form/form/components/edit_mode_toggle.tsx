@@ -23,7 +23,6 @@ const toggleButtons = [
     label: i18n.translate('xpack.alertingV2.ruleForm.editMode.form', {
       defaultMessage: 'Form',
     }),
-    iconType: 'productDashboard',
     'data-test-subj': 'ruleV2FormEditModeFormButton',
   },
   {
@@ -31,7 +30,6 @@ const toggleButtons = [
     label: i18n.translate('xpack.alertingV2.ruleForm.editMode.yaml', {
       defaultMessage: 'YAML',
     }),
-    iconType: 'code',
     'data-test-subj': 'ruleV2FormEditModeYamlButton',
   },
 ];
@@ -50,7 +48,6 @@ export const EditModeToggle = ({ editMode, onChange, disabled }: EditModeToggleP
       idSelected={editMode}
       onChange={handleChange}
       buttonSize="compressed"
-      isIconOnly
       isFullWidth={false}
       isDisabled={disabled}
       data-test-subj="ruleV2FormEditModeToggle"

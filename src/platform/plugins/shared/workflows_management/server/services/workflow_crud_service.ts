@@ -47,6 +47,19 @@ import type { WorkflowProperties } from '../storage/workflow_storage';
 import { scheduleWorkflowTriggers } from '../task_defs/schedule_workflow_triggers';
 import { syncSchedulerAfterSave } from '../task_defs/sync_scheduler_after_save';
 
+const VERSION_CONFLICT_STATUS = 409;
+// How many times to re-resolve a server-generated ID after losing a TOCTOU race
+// against `op_type: 'create'`. The id resolver itself walks up to MAX_COLLISION_RETRIES
+// candidates per call, so the practical ceiling is far higher than this number;
+// this only bounds repeated round-trips when many concurrent writers share a base ID.
+const TOCTOU_MAX_RETRIES = 5;
+
+const isVersionConflictError = (error: unknown): boolean => {
+  if (!error || typeof error !== 'object') return false;
+  const e = error as { statusCode?: number; meta?: { statusCode?: number } };
+  return e.statusCode === VERSION_CONFLICT_STATUS || e.meta?.statusCode === VERSION_CONFLICT_STATUS;
+};
+
 export class WorkflowCrudService {
   constructor(private readonly deps: WorkflowCrudDeps) {}
 
@@ -165,10 +178,14 @@ export class WorkflowCrudService {
 
     let id = baseId;
     if (workflow.id) {
-      const existingWorkflow = await this.getWorkflow(workflow.id, spaceId, {
-        includeDeleted: true,
-      });
-      if (existingWorkflow) {
+      // Globally unique check: a workflow ID taken in any space — including
+      // soft-deleted tombstones — blocks reuse. See checkExistingIds for the
+      // full rationale; the short version is that the ES `_id` is unique per
+      // index regardless of `spaceId` or `deleted_at`, so anything narrower
+      // here would lie about availability and the write below could silently
+      // overwrite or resurrect another document.
+      const existingIds = await this.checkExistingIds([workflow.id]);
+      if (existingIds.has(workflow.id)) {
         throw new WorkflowConflictError(
           `Workflow with id '${workflow.id}' already exists`,
           workflow.id
@@ -176,14 +193,15 @@ export class WorkflowCrudService {
       }
     } else {
       [id] = await resolveUniqueWorkflowIds([baseId], new Set(), (candidateIds) =>
-        this.checkExistingIds(candidateIds, spaceId)
+        this.checkExistingIds(candidateIds)
       );
     }
 
-    await this.deps.workflowStorage.getClient().index({
-      id,
+    id = await this.createWorkflowDocument({
+      initialId: id,
+      baseId,
+      isUserSupplied: Boolean(workflow.id),
       document: workflowData,
-      refresh: true,
     });
 
     await scheduleWorkflowTriggers({
@@ -235,6 +253,7 @@ export class WorkflowCrudService {
         validWorkflows.push({
           idx: i,
           id: prepared.id,
+          baseId: prepared.id,
           idSource: workflows[i].id ? 'user-supplied' : 'server-generated',
           workflowData: prepared.workflowData,
           definition: prepared.definition,
@@ -251,47 +270,70 @@ export class WorkflowCrudService {
     const overwrite = options?.overwrite ?? false;
     const { resolvedWorkflows, failures } = await this.resolveAndDeduplicateBulkIds(
       validWorkflows,
-      overwrite,
-      spaceId
+      overwrite
     );
     failed.push(...failures);
 
-    const bulkOperations = resolvedWorkflows.map((vw) =>
-      overwrite
-        ? { index: { _id: vw.id, document: vw.workflowData } }
-        : { create: { _id: vw.id, document: vw.workflowData } }
-    );
+    // Walk the bulk response across up to TOCTOU_MAX_RETRIES + 1 attempts.
+    // Server-generated IDs that lose a concurrent `op_type: 'create'` race are
+    // re-resolved against the live index and retried so callers don't see spurious
+    // failures from races; user-supplied IDs are surfaced as conflicts because the
+    // caller picked the ID and rewriting it would violate their expectation.
+    let pending: BulkWorkflowEntry[] = resolvedWorkflows;
+    const seenIds = new Set<string>(resolvedWorkflows.map((vw) => vw.id));
+    const successfullyWritten: BulkWorkflowEntry[] = [];
 
-    if (bulkOperations.length > 0) {
+    for (let attempt = 0; attempt <= TOCTOU_MAX_RETRIES && pending.length > 0; attempt++) {
+      const bulkOperations = pending.map((vw) =>
+        overwrite
+          ? { index: { _id: vw.id, document: vw.workflowData } }
+          : { create: { _id: vw.id, document: vw.workflowData } }
+      );
+
       const bulkResponse = await this.deps.workflowStorage.getClient().bulk({
         operations: bulkOperations,
         refresh: 'wait_for',
       });
 
+      const toRetryBaseIds: string[] = [];
+      const toRetryEntries: BulkWorkflowEntry[] = [];
+
       for (let itemIndex = 0; itemIndex < bulkResponse.items.length; itemIndex++) {
         const item = bulkResponse.items[itemIndex];
         const operation = item.index ?? item.create;
-        const resolvedWorkflow = resolvedWorkflows[itemIndex];
+        const entry = pending[itemIndex];
 
-        if (operation?.error) {
-          failed.push({
-            index: resolvedWorkflow.idx,
-            id: resolvedWorkflow.id,
-            error: extractBulkItemError(operation.error),
-          });
+        if (!operation?.error) {
+          created.push(transformStorageDocumentToWorkflowDto(entry.id, entry.workflowData));
+          successfullyWritten.push(entry);
         } else {
-          created.push(
-            transformStorageDocumentToWorkflowDto(
-              resolvedWorkflow.id,
-              resolvedWorkflow.workflowData
-            )
-          );
+          const isVersionConflict = operation.status === VERSION_CONFLICT_STATUS;
+          const canRetry = isVersionConflict && entry.idSource === 'server-generated';
+
+          if (canRetry && attempt < TOCTOU_MAX_RETRIES) {
+            toRetryBaseIds.push(entry.baseId);
+            toRetryEntries.push(entry);
+          } else {
+            failed.push({
+              index: entry.idx,
+              id: entry.id,
+              error: extractBulkItemError(operation.error),
+            });
+          }
         }
       }
+
+      if (toRetryEntries.length === 0) {
+        pending = [];
+        break;
+      }
+
+      const reResolved = await resolveUniqueWorkflowIds(toRetryBaseIds, seenIds, (candidateIds) =>
+        this.checkExistingIds(candidateIds)
+      );
+      pending = toRetryEntries.map((entry, i) => ({ ...entry, id: reResolved[i] }));
     }
 
-    const createdIds = new Set(created.map((w) => w.id));
-    const successfullyWritten = resolvedWorkflows.filter((vw) => createdIds.has(vw.id));
     const taskScheduler = this.deps.getTaskScheduler();
 
     if (overwrite && taskScheduler) {
@@ -509,8 +551,7 @@ export class WorkflowCrudService {
 
   private async resolveAndDeduplicateBulkIds(
     validWorkflows: readonly BulkWorkflowEntry[],
-    overwrite: boolean,
-    spaceId: string
+    overwrite: boolean
   ): Promise<{ resolvedWorkflows: BulkWorkflowEntry[]; failures: BulkFailureEntry[] }> {
     const failures: BulkFailureEntry[] = [];
 
@@ -522,7 +563,7 @@ export class WorkflowCrudService {
       const resolvedIds = await resolveUniqueWorkflowIds(
         serverGenerated.map((wf) => wf.id),
         seenIds,
-        (candidateIds) => this.checkExistingIds(candidateIds, spaceId)
+        (candidateIds) => this.checkExistingIds(candidateIds)
       );
       resolvedServerGen = serverGenerated.map((wf, i) => ({ ...wf, id: resolvedIds[i] }));
     }
@@ -531,10 +572,7 @@ export class WorkflowCrudService {
     let workflows: BulkWorkflowEntry[] = validWorkflows.map((wf) => resolvedById.get(wf) ?? wf);
 
     if (!overwrite && userSupplied.length > 0) {
-      const existingUserIds = await this.checkExistingIds(
-        userSupplied.map((wf) => wf.id),
-        spaceId
-      );
+      const existingUserIds = await this.checkExistingIds(userSupplied.map((wf) => wf.id));
       const conflictResult = removeConflictingIds(workflows, existingUserIds);
       workflows = conflictResult.kept;
       failures.push(...conflictResult.removed);
@@ -547,16 +585,90 @@ export class WorkflowCrudService {
     return { resolvedWorkflows: workflows, failures };
   }
 
-  private async checkExistingIds(ids: string[], spaceId: string): Promise<Set<string>> {
+  /**
+   * Indexes a new workflow with `op_type: 'create'` so that ES rejects the write
+   * with a 409 if another concurrent caller has already taken `_id` since our
+   * collision check ran. This closes the TOCTOU window between
+   * `resolveUniqueWorkflowIds`/`checkExistingIds` and `index()`.
+   *
+   * Behavior on conflict:
+   * - User-supplied ID: surface a `WorkflowConflictError` (the user picked the ID,
+   *   so silently rewriting it would violate caller expectations).
+   * - Server-generated ID: re-resolve from the original `baseId` and retry.
+   *   The resolver picks the next available `baseId-N` candidate, so the human
+   *   readability of the ID is preserved.
+   */
+  private async createWorkflowDocument(params: {
+    initialId: string;
+    baseId: string;
+    isUserSupplied: boolean;
+    document: WorkflowProperties;
+  }): Promise<string> {
+    const { baseId, isUserSupplied, document } = params;
+    let id = params.initialId;
+    const seenIds = new Set<string>();
+
+    for (let attempt = 0; attempt <= TOCTOU_MAX_RETRIES; attempt++) {
+      try {
+        await this.deps.workflowStorage.getClient().index({
+          id,
+          document,
+          op_type: 'create',
+          refresh: true,
+        });
+        return id;
+      } catch (error) {
+        if (!isVersionConflictError(error)) {
+          throw error;
+        }
+        if (isUserSupplied) {
+          throw new WorkflowConflictError(`Workflow with id '${id}' already exists`, id);
+        }
+        seenIds.add(id);
+        const [resolved] = await resolveUniqueWorkflowIds([baseId], seenIds, (candidateIds) =>
+          this.checkExistingIds(candidateIds)
+        );
+        if (resolved === id) {
+          // Resolver returned the same ID we just lost on — guard against an infinite loop
+          // (shouldn't happen because we passed it via seenIds, but be defensive).
+          throw new WorkflowConflictError(
+            `Failed to allocate a unique workflow id after ${attempt + 1} attempts`,
+            id
+          );
+        }
+        id = resolved;
+      }
+    }
+
+    throw new WorkflowConflictError(
+      `Failed to allocate a unique workflow id after ${TOCTOU_MAX_RETRIES + 1} attempts`,
+      id
+    );
+  }
+
+  /**
+   * Checks which of the given candidate IDs already exist in the workflow index.
+   * The lookup is intentionally:
+   *
+   * - **Index-wide (no `spaceId` filter)**: workflow IDs are surfaced to users as
+   *   "human-readable IDs", so they must stay globally unique. The ES `_id` is
+   *   unique per index regardless of the document's `spaceId` field, so this
+   *   query matches the index's real uniqueness boundary. A document with the
+   *   same `_id` in any space — even one the caller cannot read — would still
+   *   collide on write.
+   * - **Inclusive of soft-deleted documents (tombstones)**: the `ids` query
+   *   matches purely by `_id`, which is preserved on soft-delete. We rely on
+   *   that here: re-using the ID of a soft-deleted workflow would (a) silently
+   *   resurrect the tombstone or (b) be rejected by `op_type: 'create'`, both
+   *   of which are wrong for a "globally unique human-readable ID" contract.
+   */
+  private async checkExistingIds(ids: string[]): Promise<Set<string>> {
     if (ids.length === 0) {
       return new Set();
     }
 
-    const { must } = workflowSpaceFilter(spaceId, { includeDeleted: true });
-    must.push({ ids: { values: ids } });
-
     const response = await this.deps.workflowStorage.getClient().search({
-      query: { bool: { must } },
+      query: { ids: { values: ids } },
       size: ids.length,
       track_total_hits: false,
     });

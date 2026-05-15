@@ -293,6 +293,9 @@ export function AddCisIntegrationFormPageProvider({
       return await testSubjects.exists(TEST_IDS.ADD_AGENT_BUTTON);
     });
     await testSubjects.click(TEST_IDS.ADD_AGENT_BUTTON);
+    await retry.waitFor('Agent enrollment flyout to render', async () => {
+      return await testSubjects.exists(TEST_IDS.AGENT_ENROLLMENT_FLYOUT);
+    });
   };
 
   const clickLaunchAndGetCurrentUrl = async (buttonId: string) => {
@@ -453,17 +456,27 @@ export function AddCisIntegrationFormPageProvider({
   };
 
   const doesStringExistInCodeBlock = async (str: string) => {
-    const flyout = await testSubjects.find(TEST_IDS.AGENT_ENROLLMENT_FLYOUT);
-    const codeBlock = await flyout.findByXpath('//code');
-    const commandsToBeCopied = await codeBlock.getVisibleText();
-    return commandsToBeCopied.includes(str);
+    return await retry.tryForTime(20_000, async () => {
+      const flyout = await testSubjects.find(TEST_IDS.AGENT_ENROLLMENT_FLYOUT);
+      const codeBlock = await flyout.findByXpath('//code');
+      const commandsToBeCopied = await codeBlock.getVisibleText();
+      if (!commandsToBeCopied.includes(str)) {
+        throw new Error(`Expected code block to include "${str}". Got: ${commandsToBeCopied}`);
+      }
+      return true;
+    });
   };
 
   const getFieldValueInAddAgentFlyout = async (field: string, value: string) => {
-    await testSubjects.find(TEST_IDS.AGENT_ENROLLMENT_FLYOUT);
-    await PageObjects.header.waitUntilLoadingHasFinished();
-    const fieldValue = await (await testSubjects.find(field)).getAttribute(value);
-    return fieldValue;
+    return await retry.tryForTime(20_000, async () => {
+      await testSubjects.find(TEST_IDS.AGENT_ENROLLMENT_FLYOUT);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      const fieldValue = await (await testSubjects.find(field)).getAttribute(value);
+      if (fieldValue == null) {
+        throw new Error(`Field "${field}" attribute "${value}" not yet available`);
+      }
+      return fieldValue;
+    });
   };
 
   const selectValue = async (selector: string, value: string) => {

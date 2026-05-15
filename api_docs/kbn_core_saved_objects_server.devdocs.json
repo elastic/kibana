@@ -9330,26 +9330,6 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/risk_engine/saved_object/risk_engine_configuration_type.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/risk_engine/saved_object/risk_engine_configuration_type.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/risk_engine/saved_object/risk_engine_configuration_type.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/risk_engine/saved_object/risk_engine_configuration_type.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/risk_engine/saved_object/risk_engine_configuration_type.ts"
-          },
-          {
-            "plugin": "securitySolution",
             "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/saved_object/engine_descriptor_type.ts"
           },
           {
@@ -9359,6 +9339,38 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/saved_object/engine_descriptor_type.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/risk_engine/saved_object/risk_engine_configuration_type.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/risk_engine/saved_object/risk_engine_configuration_type.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/risk_engine/saved_object/risk_engine_configuration_type.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/risk_engine/saved_object/risk_engine_configuration_type.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/risk_engine/saved_object/risk_engine_configuration_type.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/privilege_monitoring/saved_objects/monitoring_entity_source_type.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/privilege_monitoring/saved_objects/monitoring_entity_source_type.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/privilege_monitoring/saved_objects/monitoring_entity_source_type.ts"
           },
           {
             "plugin": "securitySolution",
@@ -9367,18 +9379,6 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/privilege_monitoring/saved_objects/privilege_monitoring_type.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/privilege_monitoring/saved_objects/monitoring_entity_source_type.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/privilege_monitoring/saved_objects/monitoring_entity_source_type.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/privilege_monitoring/saved_objects/monitoring_entity_source_type.ts"
           },
           {
             "plugin": "securitySolution",
@@ -11912,12 +11912,12 @@
                 "path": "x-pack/platform/plugins/shared/apm_sources_access/server/saved_objects/apm_indices.ts"
               },
               {
-                "plugin": "savedSearch",
-                "path": "src/platform/plugins/shared/saved_search/server/saved_objects/search.ts"
-              },
-              {
                 "plugin": "lens",
                 "path": "x-pack/platform/plugins/shared/lens/server/saved_objects.ts"
+              },
+              {
+                "plugin": "savedSearch",
+                "path": "src/platform/plugins/shared/saved_search/server/saved_objects/search.ts"
               },
               {
                 "plugin": "cases",
@@ -12815,12 +12815,12 @@
                 "path": "x-pack/platform/plugins/shared/alerting/server/saved_objects/index.ts"
               },
               {
-                "plugin": "savedSearch",
-                "path": "src/platform/plugins/shared/saved_search/server/saved_objects/search.ts"
-              },
-              {
                 "plugin": "lens",
                 "path": "x-pack/platform/plugins/shared/lens/server/saved_objects.ts"
+              },
+              {
+                "plugin": "savedSearch",
+                "path": "src/platform/plugins/shared/saved_search/server/saved_objects/search.ts"
               },
               {
                 "plugin": "cases",

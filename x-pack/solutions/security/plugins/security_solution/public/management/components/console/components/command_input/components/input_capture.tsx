@@ -332,6 +332,7 @@ export const InputCapture = memo<InputCaptureProps>(
           </div>
           <div className="textSelectionBoundaryHelper"> </div>
           <input
+            name="inputCapture"
             ref={hiddenInputEleRef}
             type="text"
             value=""

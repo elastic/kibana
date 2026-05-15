@@ -32,6 +32,12 @@ export {
 export { AgentExecutionErrorCode } from './execution_errors';
 export { AgentExecutionMode, SubagentExecutionMode } from './execution_mode';
 export { ExecutionStatus, type SerializedExecutionError } from './execution_status';
+export type {
+  AgentListOptions,
+  AgentCreateRequest,
+  AgentUpdateRequest,
+  AgentDeleteRequest,
+} from './crud';
 export {
   type ConfirmPromptColor,
   type ConfirmPromptDefinition,
