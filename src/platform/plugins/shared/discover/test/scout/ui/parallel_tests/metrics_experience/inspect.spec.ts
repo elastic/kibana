@@ -7,18 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/**
- * NOTE (issue #236787): Inspect is currently still on the visible
- * quick-action row in the metrics-grid, even though the desired end-state is
- * for it to live only inside the 3-dot popover. The popover entry remains
- * clickable (Lens auto-injects the same default action set into both rows),
- * so this spec passes unchanged in the spike. Once
- * @elastic/kibana-visualizations exposes a way for consumers to suppress or
- * replace a default action by id (the blocker is in
- * x-pack/platform/plugins/shared/lens/public/react_embeddable/renderer/lens_custom_renderer_component.tsx:142-157),
- * the matching `test.fixme` in `quick_actions.spec.ts` should be flipped to
- * `spaceTest(...)` and this comment can be removed.
- */
 import { expect } from '@kbn/scout/ui';
 import { spaceTest, testData, DEFAULT_TIME_RANGE } from '../../fixtures/metrics_experience';
 
