@@ -6,10 +6,9 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import unified from 'unified';
 import { cloneDeep } from 'lodash/fp';
 import type { EuiMarkdownFormatProps, EuiLinkAnchorProps } from '@elastic/eui';
-import { EuiMarkdownFormat, EuiText } from '@elastic/eui';
+import { EuiMarkdownFormat } from '@elastic/eui';
 import { MarkdownLink } from './markdown_link';
 import { usePlugins } from './use_plugins';
 
@@ -29,14 +28,18 @@ const withDisabledLinks = (disableLinks?: boolean): React.FC<EuiLinkAnchorProps>
   return MarkdownLinkProcessingComponent;
 };
 
+/**
+ * Escapes bare `&` characters that are not valid HTML entity references.
+ * Prevents a crash in the markdown parser caused by a minifier bug (SWC
+ * compress.passes:2) that corrupts vfile-message's VMessage constructor
+ * in the DLL bundle. When parse-entities encounters an unterminated legacy
+ * HTML entity (e.g. `&timestamp=`), it emits a warning via VMessage which
+ * throws `ReferenceError: parts is not defined`.
+ */
+const escapeUnterminatedEntities = (text: string): string =>
+  text.replace(/&(?!(?:amp|lt|gt|quot|apos|nbsp|#\d+|#x[\da-fA-F]+);)/g, '&amp;');
+
 const MarkdownRendererComponent: React.FC<Props> = ({ children, disableLinks, textSize }) => {
-  // eslint-disable-next-line no-console
-  console.log(
-    '[Cases:MarkdownRenderer] rendering, content length:',
-    children?.length,
-    'content preview:',
-    children?.slice(0, 80)
-  );
   const { processingPlugins, parsingPlugins } = usePlugins();
   // Deep clone of the processing plugins to prevent affecting the markdown editor.
   const processingPluginList = cloneDeep(processingPlugins);
@@ -46,29 +49,7 @@ const MarkdownRendererComponent: React.FC<Props> = ({ children, disableLinks, te
     [disableLinks]
   );
 
-  // Pre-validate markdown parsing in our own try/catch. The try/catch inside
-  // EuiMarkdownFormat (in the DLL bundle) can be corrupted by the SWC minifier
-  // (compress.passes:2 bug), so errors escape and crash the page. By running
-  // processSync here (in cases.plugin.js, which uses webpack's minifier), we
-  // get a reliable try/catch that falls back to plain text on failure.
-  const parseError = useMemo(() => {
-    try {
-      unified().use(parsingPlugins).use(processingPluginList).processSync(children);
-      return null;
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.error('[Cases:MarkdownRenderer] pre-validation caught error, falling back:', e);
-      return true;
-    }
-  }, [children, parsingPlugins, processingPluginList]);
-
-  if (parseError) {
-    return (
-      <EuiText size={textSize} data-test-subj="markdown-renderer-fallback">
-        <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{children}</pre>
-      </EuiText>
-    );
-  }
+  const sanitizedContent = useMemo(() => escapeUnterminatedEntities(children), [children]);
 
   return (
     <EuiMarkdownFormat
@@ -77,7 +58,7 @@ const MarkdownRendererComponent: React.FC<Props> = ({ children, disableLinks, te
       grow={true}
       textSize={textSize}
     >
-      {children}
+      {sanitizedContent}
     </EuiMarkdownFormat>
   );
 };
