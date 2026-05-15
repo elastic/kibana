@@ -24,10 +24,15 @@ import {
   STATUS_REQUIRED,
 } from './translations';
 
-export function getConnectorType(
-  service: ObservabilityAIAssistantService,
-  getHideInUi: (actionTypes: ActionType[]) => boolean
-): ConnectorTypeModel<unknown, {}, ObsAIAssistantActionParams> {
+export function getConnectorType({
+  service,
+  getHideInUi,
+  isDisabled,
+}: {
+  service: ObservabilityAIAssistantService;
+  getHideInUi: (actionTypes: ActionType[]) => boolean;
+  isDisabled?: boolean;
+}): ConnectorTypeModel<unknown, {}, ObsAIAssistantActionParams> {
   return {
     id: OBSERVABILITY_AI_ASSISTANT_CONNECTOR_ID,
     modalWidth: 675,
@@ -62,7 +67,9 @@ export function getConnectorType(
     },
     actionParamsFields: lazy(() =>
       import('./ai_assistant_params').then(({ default: ActionParamsFields }) => ({
-        default: (props) => <ActionParamsFields {...props} service={service} />,
+        default: (props) => (
+          <ActionParamsFields {...props} service={service} isDisabled={isDisabled} />
+        ),
       }))
     ),
     actionConnectorFields: null,
