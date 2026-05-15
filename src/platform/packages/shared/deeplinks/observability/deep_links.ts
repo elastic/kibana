@@ -71,7 +71,7 @@ export type ObservabilityOverviewLinkId =
   | 'cases_configure'
   | 'cases_create'
   | 'rules'
-  | 'sigevents_overview';
+  | 'nightshift';
 
 export type MetricsLinkId =
   | 'inventory'

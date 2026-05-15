@@ -8,7 +8,7 @@
 import React from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { AnnotationsPage } from '../pages/annotations/annotations';
-import { SigeventsOverviewPage } from '../pages/sigevents_overview/sigevents_overview';
+import { NightshiftPage } from '../pages/nightshift/nightshift';
 import { DatePickerContextProvider } from '../context/date_picker_context/date_picker_context';
 import { useKibana } from '../utils/kibana_react';
 import { AlertsPage } from '../pages/alerts/alerts';
@@ -29,6 +29,7 @@ import {
   EDIT_RULE_PATH,
   EXPLORATORY_VIEW_PATH,
   LANDING_PATH,
+  NIGHTSHIFT_PATH,
   OLD_SLO_DETAIL_PATH,
   OLD_SLO_EDIT_PATH,
   OLD_SLOS_OUTDATED_DEFINITIONS_PATH,
@@ -39,7 +40,6 @@ import {
   RULE_DETAIL_PATH,
   RULES_LOGS_PATH,
   RULES_PATH,
-  SIGEVENTS_OVERVIEW_PATH,
 } from '../../common/locators/paths';
 import { HasDataContextProvider } from '../context/has_data_context/has_data_context';
 
@@ -118,9 +118,9 @@ const completeRoutes: Record<RoutePath, RouteDefinition> = {
 };
 
 const routes: Record<RoutePath, RouteDefinition> = {
-  [SIGEVENTS_OVERVIEW_PATH]: {
+  [NIGHTSHIFT_PATH]: {
     handler: () => {
-      return <SigeventsOverviewPage />;
+      return <NightshiftPage />;
     },
     params: {},
     exact: true,

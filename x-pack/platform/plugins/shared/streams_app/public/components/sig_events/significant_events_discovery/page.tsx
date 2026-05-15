@@ -186,7 +186,7 @@ export function SignificantEventsDiscoveryPage() {
             {significantEventsDiscovery?.enabled && (
               <EuiFlexItem grow={false}>
                 <EuiButton
-                  href={getUrlForApp('observability', { path: '/sigevents_overview' })}
+                  href={getUrlForApp('observability', { path: '/nightshift' })}
                   iconType="moon"
                   size="s"
                 >

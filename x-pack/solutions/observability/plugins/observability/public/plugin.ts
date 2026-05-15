@@ -88,10 +88,10 @@ import { getObservabilityAlertType } from './cases/attachments/alert';
 import {
   ALERTS_PATH,
   CASES_PATH,
+  NIGHTSHIFT_PATH,
   OBSERVABILITY_BASE_PATH,
   OVERVIEW_PATH,
   RULES_PATH,
-  SIGEVENTS_OVERVIEW_PATH,
 } from '../common/locators/paths';
 import { registerDataHandler } from './context/has_data_context/data_handler';
 import { createUseRulesLink } from './hooks/create_use_rules_link';
@@ -222,12 +222,12 @@ export class Plugin
       keywords: ['alerts', 'rules'],
     },
     {
-      id: 'sigevents_overview',
-      title: i18n.translate('xpack.observability.sigeventsOverviewLinkTitle', {
+      id: 'nightshift',
+      title: i18n.translate('xpack.observability.nightshiftLinkTitle', {
         defaultMessage: 'Nightshift',
       }),
       order: 8002,
-      path: SIGEVENTS_OVERVIEW_PATH,
+      path: NIGHTSHIFT_PATH,
       visibleIn: [],
       keywords: ['nightshift', 'significant events'],
     },

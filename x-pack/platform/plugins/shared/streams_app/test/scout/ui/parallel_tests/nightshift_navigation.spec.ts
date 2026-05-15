@@ -43,10 +43,10 @@ test.describe(
       await expect(nightshiftButton).toBeVisible({ timeout: 60_000 });
       await nightshiftButton.click();
 
-      await expect(page).toHaveURL(/\/app\/observability\/sigevents_overview/, {
+      await expect(page).toHaveURL(/\/app\/observability\/nightshift/, {
         timeout: 60_000,
       });
-      await expect(page.testSubj.locator('sigeventsOverviewPage')).toBeVisible({
+      await expect(page.testSubj.locator('nightshiftPage')).toBeVisible({
         timeout: 60_000,
       });
     });

@@ -14,7 +14,7 @@ import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { OVERVIEW_PATH } from '../../../common/locators/paths';
 
-export function SigeventsOverviewPage() {
+export function NightshiftPage() {
   const {
     http: { basePath },
     uiSettings,
@@ -31,11 +31,11 @@ export function SigeventsOverviewPage() {
   useBreadcrumbs(
     [
       {
-        href: basePath.prepend('/app/observability/sigevents_overview'),
+        href: basePath.prepend('/app/observability/nightshift'),
         text: i18n.translate('xpack.observability.breadcrumbs.nightshiftLinkText', {
           defaultMessage: 'Nightshift',
         }),
-        deepLinkId: 'observability-overview:sigevents_overview',
+        deepLinkId: 'observability-overview:nightshift',
       },
     ],
     { serverless }
@@ -47,8 +47,8 @@ export function SigeventsOverviewPage() {
   }
 
   return (
-    <ObservabilityPageTemplate data-test-subj="sigeventsOverviewPage">
-      {i18n.translate('xpack.observability.sigeventsOverview.body', {
+    <ObservabilityPageTemplate data-test-subj="nightshiftPage">
+      {i18n.translate('xpack.observability.nightshift.body', {
         defaultMessage: '🚧 Coming soon ✨🌙.',
       })}
     </ObservabilityPageTemplate>
