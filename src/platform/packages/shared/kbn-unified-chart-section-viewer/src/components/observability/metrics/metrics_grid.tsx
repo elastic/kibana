@@ -28,6 +28,8 @@ import {
   ACTION_OPEN_IN_DISCOVER,
   ACTION_VIEW_DETAILS,
 } from '../../../common/constants';
+import { useChartLayers } from '../../chart/hooks/use_chart_layers';
+import { useMetricsExperienceState } from './context/metrics_experience_state_provider';
 
 const METRICS_QUICK_ACTION_IDS: ReadonlyArray<string> = [
   ACTION_EXPLORE_IN_DISCOVER_TAB,
@@ -35,8 +37,6 @@ const METRICS_QUICK_ACTION_IDS: ReadonlyArray<string> = [
   ACTION_COPY_TO_DASHBOARD,
   'openInspector',
 ];
-import { useChartLayers } from '../../chart/hooks/use_chart_layers';
-import { useMetricsExperienceState } from './context/metrics_experience_state_provider';
 
 export type MetricsGridProps = Pick<
   UnifiedMetricsGridProps,
