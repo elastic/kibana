@@ -332,9 +332,9 @@ describe('validateChangesNewType', () => {
         },
       });
 
-      expect(() =>
-        callValidate(to, createMockType('my-type', ['parent.child']))
-      ).toThrowError(/parent\.child/);
+      expect(() => callValidate(to, createMockType('my-type', ['parent.child']))).toThrowError(
+        /parent\.child/
+      );
     });
 
     it('should not throw when a text field with a keyword subfield has ignore_above on the subfield', () => {
