@@ -9,4 +9,4 @@ products:
 areas:
 - Discover and ES|QL
 title: Remove html converter/bridge from field formatters plugin and clean up
-description: Field formatters now return React elements instead of HTML strings, eliminating the use of dangerouslySetInnerHTML and removing a class of potential XSS vulnerabilities.
+impact: Field formatters now return React elements instead of HTML strings, eliminating the use of dangerouslySetInnerHTML and removing a class of potential XSS vulnerabilities.

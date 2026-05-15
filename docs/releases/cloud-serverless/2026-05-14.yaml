@@ -7,9 +7,9 @@ products:
 entries:
 - file:
     name: 267342.yaml
-    checksum: 67a8befef144df72c41462d71de55072ce2061b6
+    checksum: 4430d41990dae7abf12957737fb005e8e8ba5ca1
   type: bug-fix
-  title: Fixes entity details not rendered properly on Preview mode from Agent Builder
+  title: Fixes entity details not rendered properly on preview mode from Agent Builder
   products:
   - product: cloud-serverless
     target: 2026-05-14
@@ -19,13 +19,13 @@ entries:
   - https://github.com/elastic/kibana/issues/265943
 - file:
     name: 268326.yaml
-    checksum: 6671d6d6969cfdbaa232a7b200f4211801aae980
+    checksum: 4ccd4350aeb1ae826e0d76bb8ae3b67deb3bf5ad
   type: enhancement
   title: Show "Go to dashboard" button in save success toast
   products:
   - product: cloud-serverless
     target: 2026-05-14
-  description: Adds a **Go to dashboard** navigation button to the dashboard save toast when saving from outside the Dashboard app.
+  description: Add a "Go to dashboard" navigation button to the dashboard save toast when saving from outside the Dashboard app.
   areas:
   - Dashboards and visualizations
   prs:
@@ -34,9 +34,9 @@ entries:
   - https://github.com/elastic/kibana/issues/259129
 - file:
     name: 268150.yaml
-    checksum: 1f65f20e2e1ccf922b28b7a3bce57d4b3110845a
+    checksum: d568718db178aaa85f13112db5e3178da02d1089
   type: bug-fix
-  title: Fix & document exception handling for parsing KQL
+  title: Fix and document exception handling for parsing KQL
   products:
   - product: cloud-serverless
     target: 2026-05-14
@@ -61,9 +61,9 @@ entries:
   - https://github.com/elastic/kibana/issues/266313
 - file:
     name: 268167.yaml
-    checksum: 4a5ce3045536ecb79e181fbd1034937b87ab7100
+    checksum: 667424a04d5b8d1b2baaffe74513604ca7ac8b8c
   type: bug-fix
-  title: 'File upload: Fixes disabling data view creation based on user capabilities'
+  title: Prevent data view creation in the file upload tool without sufficient privileges
   products:
   - product: cloud-serverless
     target: 2026-05-14
@@ -73,13 +73,12 @@ entries:
   - https://github.com/elastic/kibana/pull/268167
 - file:
     name: 268425.yaml
-    checksum: 4591aa27f31897c62b3bb9096b17d35bde076cdb
+    checksum: 566577c9311a17c9fd0f2714d4f7f970bda418e4
   type: bug-fix
-  title: Fix badge color at runtime
+  title: Fix the Visualization API to correctly show default datatable colored badges
   products:
   - product: cloud-serverless
     target: 2026-05-14
-  description: Fix the Visualization API to correctly show default datatable colored badges.
   areas:
   - Dashboards and visualizations
   prs:
@@ -101,9 +100,9 @@ entries:
   - https://github.com/elastic/kibana/pull/268615
 - file:
     name: 268224.yaml
-    checksum: d88004fe23d3fc9492318f08e3c381234e199d89
+    checksum: 128cdf916c0da6b8eccd7e6cd5bdc80f91c7a131
   type: bug-fix
-  title: Use event.ingested instead of @timestamp for incoming data checks
+  title: Use `event.ingested` instead of `@timestamp` for incoming Fleet data checks
   products:
   - product: cloud-serverless
     target: 2026-05-14
@@ -129,9 +128,9 @@ entries:
   - '# PRIVATE: https://github.com/elastic/search-team/issues/13172'
 - file:
     name: 268069.yaml
-    checksum: 4a5a9612b0228a65360682c19c3f9001a1f640c2
+    checksum: e6fff97bb97c2e1c4b2929fa8bf18ca05041c3d0
   type: enhancement
-  title: Add elastic cloud identifiers to connector user agent
+  title: Add Elastic Cloud identifiers to connector user agent
   products:
   - product: cloud-serverless
     target: 2026-05-14
@@ -168,13 +167,13 @@ entries:
   - https://github.com/elastic/kibana/issues/222215
 - file:
     name: 267517.yaml
-    checksum: 4c5807a465a17e28c01d46218b5082d331f22b71
+    checksum: a0c69ba4e3200534e274e8a1aaa0d8ce52168a02
   type: deprecation
   title: Remove html converter/bridge from field formatters plugin and clean up
   products:
   - product: cloud-serverless
     target: 2026-05-14
-  description: Field formatters now return React elements instead of HTML strings, eliminating the use of dangerouslySetInnerHTML and removing a class of potential XSS vulnerabilities.
+  impact: Field formatters now return React elements instead of HTML strings, eliminating the use of dangerouslySetInnerHTML and removing a class of potential XSS vulnerabilities.
   areas:
   - Discover and ES|QL
   prs:
@@ -183,9 +182,9 @@ entries:
   - https://github.com/elastic/kibana/issues/259295
 - file:
     name: 266111.yaml
-    checksum: 6a9fc4e84c8b1a26cf66f189b5bf9fd722d23727
+    checksum: ac38de34b5b86b2942c5a6c46f20eb8327268b36
   type: bug-fix
-  title: Fix **View in AI Assistant** button availability when AI Assistant is disabled
+  title: Fix "View in AI Assistant" button availability when AI Assistant is disabled
   products:
   - product: cloud-serverless
     target: 2026-05-14
@@ -281,13 +280,13 @@ entries:
   - https://github.com/elastic/kibana/pull/268719
 - file:
     name: 266697.yaml
-    checksum: a9248295c30f9022386c0005efc958072bbb4e68
+    checksum: 8c7ff8668f5d252107b6cda3cc5e196956f7789f
   type: bug-fix
   title: Change grouping in the Feature Registry
   products:
   - product: cloud-serverless
     target: 2026-05-14
-  description: Consolidates the Security AI Assistant inference endpoint configuration under the Security group on the **Inference Endpoints** page, removing a duplicate **AI Assistant** section, and hides the AI-Assistant-for-Security entry when the classic chat experience is not selected.
+  description: Consolidate the Security AI Assistant inference endpoint configuration under the Security group on the "Inference Endpoints" page. Remove a duplicate AI Assistant section and hide the AI-Assistant-for-Security entry when the classic chat experience is not selected.
   prs:
   - https://github.com/elastic/kibana/pull/266697
   issues:
@@ -332,9 +331,9 @@ entries:
   - '# PRIVATE: https://github.com/elastic/search-team/issues/13171'
 - file:
     name: 266418.yaml
-    checksum: 1f25d8929f93a198fefa2e2ebd94123144acca90
+    checksum: c5714992433219ff36d0b218ccf193b8a73ea8a0
   type: bug-fix
-  title: Fix and clean up variable substitution
+  title: Fix variable substitution in the Console
   products:
   - product: cloud-serverless
     target: 2026-05-14
@@ -357,13 +356,13 @@ entries:
   - https://github.com/elastic/kibana/pull/268515
 - file:
     name: 267906.yaml
-    checksum: 76db02c3b9f9112822751e25accce5f360e5237a
+    checksum: 51bc6af30386d5d00b518d0da846a3c4b62b7c5f
   type: enhancement
   title: Update Agent Builder announcement modal revert flow
   products:
   - product: cloud-serverless
     target: 2026-05-14
-  description: Updates the Agent Builder announcement modal so that the **Revert** button immediately switches all space users back to AI Assistant and shows a confirmation toast with a link to GenAI Settings.
+  description: Update the Agent Builder announcement modal so that the revert button immediately switches all space users back to AI Assistant and shows a confirmation toast with a link to "GenAI Settings".
   prs:
   - https://github.com/elastic/kibana/pull/267906
   issues:
