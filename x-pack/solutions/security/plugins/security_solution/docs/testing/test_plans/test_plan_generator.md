@@ -173,11 +173,14 @@ The files live at:
 x-pack/solutions/security/plugins/security_solution/.agents/skills/test-plan-generator/
 ├── SKILL.md                              # Agent instructions
 ├── references/
-│   ├── common-mistakes.md                # Quality checklist reviewed before every save
-│   ├── document-structure.md             # Test plan template and structure
-│   ├── mode-update.md                    # Incremental update workflow
-│   ├── optional-scenarios.md             # Gherkin templates and formatting rules
-│   ├── output-formats.md                 # Sources Summary template and chat output formats
+│   ├── common-mistakes.md                # 8 common quality mistakes with ❌ Bad / ✅ Good examples; reviewed before every save
+│   ├── document-structure.md             # Test plan template, required sections, and the Pending work pattern for epics
+│   ├── example-test-plan.md              # Fully-worked end-to-end example — structure, scenario density, Known Limitations
+│   ├── gathering-context.md              # Step 1 in detail: gh CLI commands, URL handling, images, Figma, sub-issues, PRs, test catalog
+│   ├── mode-generate.md                  # Generate / regenerate flow (run end-to-end or fill gaps when a draft exists)
+│   ├── mode-update.md                    # Incremental update flow with PR re-read for activity since last publish
+│   ├── optional-scenarios.md             # Optional sections (RBAC, upgrade, CCS, multi-space, multi-tenant), Gherkin rules, priorities
+│   ├── output-formats.md                 # Scenario format, footer, Sources Summary, Gherkin self-review with sum-checks
 │   └── security-test-directories.md      # Map of existing test locations in the repo
 └── scripts/
     └── publish_test_plan.sh              # Deterministic publish step (invoked in Step 4)
@@ -300,6 +303,7 @@ When publishing, the agent runs `scripts/publish_test_plan.sh`. If the script fa
 | 65 | The draft does not start with `<!-- test-plan-generated -->` | The agent should have prepended the marker. If you see this, the draft was edited externally — open `.agents/tmp/test-plan-#<issue>.md` and make sure the first two lines are the marker and `generated-by:` lines. |
 | 66 | Draft file does not exist | Run `generate test plan for issue #<n>` first to create the draft. |
 | 69 | `gh` CLI is not installed | Run `brew install gh` (Step 4). |
+| 70 | Unexpected response from GitHub API (could not resolve comment id, or API returned no URL) | Usually a transient API issue. Re-run the publish command. If it persists, check `gh api /repos/<owner>/<repo>/issues/<n>/comments` manually to confirm the comment is reachable. |
 | 77 | `gh` CLI is not authenticated | Run `gh auth login` (Step 4). |
 | 64 | Argument or usage error | Re-run the publish command. If it persists, open an issue. |
 
@@ -324,7 +328,7 @@ Use [jsonlint.com](https://jsonlint.com) to validate the file. A missing closing
 ## FAQ
 
 **Can I use this for any repository in the elastic org?**
-Yes, as long as your GitHub token has access to that repository and has been SSO-authorized for the `elastic` org.
+Yes, as long as your GitHub token has access to that repository and has been SSO-authorized for the `elastic` org. The target issue (the one named in your command, where the test plan comment will be posted) can live in a different repo than the one you currently have open in Cursor — for example, you can run the skill from your local `elastic/kibana` checkout but publish to an issue in `elastic/security-team`. The skill passes the right `--repo <owner>/<repo>` flag to the publish script automatically based on the issue URL or context.
 
 **What if the issue has no Figma or Google Docs links?**
 The agent skips those steps and works only with the issue text and sub-issues. The quality of the test plan depends on the quality of the issue description.
@@ -338,6 +342,9 @@ The agent automatically reads the parent issue one level up — including its bo
 **What if a sub-issue already has a published test plan?**
 The agent reads it and uses it to understand what is already covered. It will not duplicate those scenarios in the current issue's test plan. If everything is already covered by sub-issue test plans, the agent will stop and ask how you want to proceed — offering a summary plan with links, a full self-contained plan, or cancellation.
 
+**What if the issue is an epic and some sub-issues are not yet implemented?**
+The agent applies the *Pending work pattern* defined in `references/document-structure.md`: unimplemented sub-issue acceptance criteria are written as forward-looking scenarios under a collapsible "Pending work — forward-looking gaps from open sub-issues" section, each marked with `(Pending #N)` against its source sub-issue. The Test Coverage Summary then includes a dedicated "Pending work" row that counts those scenarios as `Manual only` (they cannot be exercised today). Implemented-but-unreleased sub-issues are treated as in scope and get regular scenarios instead. The pattern is applied only to true epics with open sub-issues — for standalone issues it is skipped.
+
 **What if the issue itself already has a published test plan and I run `generate`?**
 The agent will detect the existing test plan and ask whether you want to check if it is still up to date, generate from scratch, or cancel. If you choose to check, it will re-read all sources and add only what is missing — it will not rewrite what is already correct.
 
@@ -346,6 +353,13 @@ No — `gh` CLI is the primary and recommended method. The GitHub MCP is optiona
 
 **Who maintains the skill?**
 The skill files live in the repository under `x-pack/solutions/security/plugins/security_solution/.agents/skills/test-plan-generator/`. Any team member can propose changes via PR, just like any other code file.
+
+**How does the agent self-review the draft before saving?**
+Two layers, both run during Step 3 just before the draft is written:
+1. The *Red flags — STOP and ask* table at the top of `SKILL.md` (right below the Core rule). It is a 7-row table mapping the most common "I'll just rationalise this" thoughts (e.g. *"the image fetch failed, I'll describe it from alt text"*, *"the total scenarios count looks close enough — I'll round"*) to the correct alternative behaviour. If the agent catches itself in any of those, it stops and asks instead of inventing.
+2. The expanded `references/common-mistakes.md` file. 8 frequent quality issues (hallucinated scenarios, duplicated sub-issue coverage, speculative optional sections, UI-step Gherkin, overlooked sub-issue ACs, overlooked PR artifacts, inconsistent Known Limitations, ignoring the Core rule) — each entry has a one-paragraph description, a concrete ❌ Bad example (most sourced from observed agent runs), and a ✅ Good alternative. On top of that, the Gherkin self-review in `references/output-formats.md` includes three mechanical sum-checks on the Test Coverage Summary table to catch undercounts.
+
+If something still looks off in the published comment, edit the source file in `references/` and open a PR — the skill improves the same way any other code does.
 
 **Can I run this without being inside the repository folder in Cursor?**
 No — the skill only loads when you have the repository open in Cursor. The MCP servers work globally, but the skill is repo-specific.
