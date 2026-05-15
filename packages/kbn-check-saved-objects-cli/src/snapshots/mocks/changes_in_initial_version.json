@@ -18,7 +18,8 @@
         "properties.counterType.type": "keyword",
         "properties.source.type": "keyword",
         "properties.count.type": "integer",
-        "properties.name.type": "keyword"
+        "properties.name.type": "keyword",
+        "properties.name.ignore_above": 256
       },
       "migrationVersions": [],
       "modelVersions": [

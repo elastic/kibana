@@ -8,6 +8,7 @@
  */
 
 import { validateAdditiveOnlyMappings } from './additive_only_mappings';
+import { RULE_IDS, isSavedObjectsCheckError } from '../../findings';
 
 describe('validateAdditiveOnlyMappings', () => {
   it('passes when mappings are identical', () => {
@@ -49,7 +50,7 @@ describe('validateAdditiveOnlyMappings', () => {
       'properties.foo.type': 'keyword',
     };
     expect(() => validateAdditiveOnlyMappings('my-type', from, to)).toThrow(
-      /removes mapped properties.*properties\.bar/
+      /Mapped properties have been removed.*properties\.bar/
     );
   });
 
@@ -106,5 +107,32 @@ describe('validateAdditiveOnlyMappings', () => {
     const from = { 'properties.foo.type': 'keyword' };
     const to = {};
     expect(() => validateAdditiveOnlyMappings('my-type', from, to)).toThrow(/'my-type'/);
+  });
+
+  it('throws a SavedObjectsCheckError with a structured finding', () => {
+    const from = {
+      'properties.foo.type': 'keyword',
+      'properties.bar.type': 'text',
+    };
+    const to = {
+      'properties.foo.type': 'keyword',
+    };
+
+    let error: unknown;
+    try {
+      validateAdditiveOnlyMappings('my-type', from, to);
+    } catch (e) {
+      error = e;
+    }
+
+    expect(isSavedObjectsCheckError(error)).toBe(true);
+    if (!isSavedObjectsCheckError(error)) return;
+    expect(error.findings).toHaveLength(1);
+    expect(error.findings[0]).toMatchObject({
+      ruleId: RULE_IDS.EXISTING_TYPE_REMOVED_MAPPED_PROPERTIES,
+      severity: 'error',
+      typeName: 'my-type',
+    });
+    expect(error.findings[0].message).toContain('properties.bar');
   });
 });

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { RULE_IDS, SavedObjectsCheckError } from '../../findings';
+
 type FlattenedMappings = Record<string, unknown>;
 
 const collectMappedPropertyPaths = (mappings: FlattenedMappings): Set<string> => {
@@ -47,9 +49,15 @@ export const validateAdditiveOnlyMappings = (
 
   if (missing.length > 0) {
     missing.sort();
-    throw new Error(
-      `❌ The '${name}' SO type removes mapped properties, which is not allowed. ` +
-        `Missing properties: ${JSON.stringify(missing)}.`
-    );
+    throw new SavedObjectsCheckError({
+      ruleId: RULE_IDS.EXISTING_TYPE_REMOVED_MAPPED_PROPERTIES,
+      severity: 'error',
+      typeName: name,
+      message:
+        `Mapped properties have been removed from SO type '${name}', which is not allowed. ` +
+        `Missing properties: ${JSON.stringify(missing)}.`,
+      fixHint: `Restore the removed mapped properties; existing mapped fields cannot be deleted.`,
+      docsAnchor: '#defining-model-versions',
+    });
   }
 };
