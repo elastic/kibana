@@ -49,6 +49,7 @@ export class MemoryServiceImpl implements MemoryService {
       index: MEMORIES_DATA_STREAM,
       document: {
         '@timestamp': entry.updated_at,
+        is_deleted: false,
         ...entry,
       },
     });
@@ -66,7 +67,7 @@ export class MemoryServiceImpl implements MemoryService {
       size,
       query,
       collapse: { field: 'name' },
-      sort: [{ '@timestamp': { order: 'desc' } }],
+      sort: [{ version: { order: 'desc' } }, { '@timestamp': { order: 'desc' } }],
     });
     return response.hits.hits as Array<{ _source: MemoryEntry }>;
   }
@@ -74,8 +75,7 @@ export class MemoryServiceImpl implements MemoryService {
   private async _getByName(name: string): Promise<MemoryEntry | undefined> {
     const hits = await this._searchLatest({ bool: { filter: [{ term: { name } }] } });
     const entry = hits[0]?._source;
-    // Treat soft-deleted as not found
-    return entry && !(entry as MemoryEntry & { is_deleted?: boolean }).is_deleted
+    return entry && (entry as MemoryEntry & { is_deleted?: boolean }).is_deleted !== true
       ? entry
       : undefined;
   }
@@ -83,7 +83,7 @@ export class MemoryServiceImpl implements MemoryService {
   private async _getById(id: string): Promise<MemoryEntry | undefined> {
     const hits = await this._searchLatest({ bool: { filter: [{ term: { id } }] } });
     const entry = hits[0]?._source;
-    return entry && !(entry as MemoryEntry & { is_deleted?: boolean }).is_deleted
+    return entry && (entry as MemoryEntry & { is_deleted?: boolean }).is_deleted !== true
       ? entry
       : undefined;
   }
@@ -318,7 +318,7 @@ export class MemoryServiceImpl implements MemoryService {
       index: MEMORIES_DATA_STREAM,
       track_total_hits: false,
       collapse: { field: 'name' },
-      sort: [{ '@timestamp': { order: 'desc' } }],
+      sort: [{ version: { order: 'desc' } }, { '@timestamp': { order: 'desc' } }],
       query: {
         bool: {
           filter: filters,
@@ -371,7 +371,7 @@ export class MemoryServiceImpl implements MemoryService {
       track_total_hits: true,
       query: { bool: { filter: [{ term: { is_deleted: false } }] } },
       collapse: { field: 'name' },
-      sort: [{ '@timestamp': { order: 'desc' } }],
+      sort: [{ version: { order: 'desc' } }, { '@timestamp': { order: 'desc' } }],
       size: 10000,
     });
 

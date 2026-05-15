@@ -160,7 +160,7 @@ export const createMemoryPatchTool = ({
   tags: ['memory'],
   confirmation: { askUser: 'never' },
   handler: async ({ id, name, operations, change_summary: changeSummary }, context) => {
-    const memoryService = getMemoryService();
+    const memoryService = getMemoryService(context.esClient.asCurrentUser);
     const { request, esClient } = context;
     const { username: user } = await getUserFromRequest({
       request,

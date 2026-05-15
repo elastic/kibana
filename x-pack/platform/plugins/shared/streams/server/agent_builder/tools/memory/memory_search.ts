@@ -54,7 +54,7 @@ export const createMemorySearchTool = ({
   schema: memorySearchSchema,
   tags: ['memory'],
   handler: async ({ query, tags, categories, references, size }, context) => {
-    const memoryService = getMemoryService();
+    const memoryService = getMemoryService(context.esClient.asCurrentUser);
 
     try {
       const results = await memoryService.search({

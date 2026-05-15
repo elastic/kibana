@@ -68,10 +68,12 @@ export const registerStreamsAgentBuilder = async ({
   workflowsManagement?: WorkflowsServerPluginSetup;
   isMemoryEnabled: () => Promise<boolean>;
 }) => {
-  const getMemoryService = () =>
+  const getMemoryService = (
+    esClient: import('@kbn/core-elasticsearch-server').ElasticsearchClient
+  ) =>
     new MemoryServiceImpl({
       logger: logger.get('memory'),
-      esClient: server.core.elasticsearch.client.asInternalUser,
+      esClient,
     });
 
   const memoryToolsOptions = {
