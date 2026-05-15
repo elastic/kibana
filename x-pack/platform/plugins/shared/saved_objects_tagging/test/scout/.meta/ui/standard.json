@@ -1,5 +1,5 @@
 {
-  "sha1": "2db682e604032f1564472eec6758642208a5aba3",
+  "sha1": "48f9495d3b98224373f26217265a1591d5fe5bd7",
   "tests": [
     {
       "id": "693cb822f00b147-c7297dddd0937a8",
@@ -12,6 +12,597 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_a11y.spec.ts",
         "line": 22,
+        "column": 7
+      }
+    },
+    {
+      "id": "e41cc965e299ae5-e92aa74feb13c20",
+      "title": "Dashboard integration allows to manually type tag filter query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_dashboard_integration.spec.ts",
+        "line": 32,
+        "column": 7
+      }
+    },
+    {
+      "id": "e41cc965e299ae5-fbe7465d4af0b7d",
+      "title": "Dashboard integration allows to filter by selecting a tag in the filter menu",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_dashboard_integration.spec.ts",
+        "line": 46,
+        "column": 7
+      }
+    },
+    {
+      "id": "e41cc965e299ae5-8bc21f89703b2d7",
+      "title": "Dashboard integration allows to filter by multiple tags",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_dashboard_integration.spec.ts",
+        "line": 57,
+        "column": 7
+      }
+    },
+    {
+      "id": "e41cc965e299ae5-59a297b3e018713",
+      "title": "Dashboard integration allows to select tags for a new dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_dashboard_integration.spec.ts",
+        "line": 72,
+        "column": 7
+      }
+    },
+    {
+      "id": "e41cc965e299ae5-57878d3dd8d9eae",
+      "title": "Dashboard integration allows to create a tag from the tag selector",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_dashboard_integration.spec.ts",
+        "line": 89,
+        "column": 7
+      }
+    },
+    {
+      "id": "e41cc965e299ae5-ec9d883de17934a",
+      "title": "Dashboard integration allows to select tags for an existing dashboard",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_dashboard_integration.spec.ts",
+        "line": 115,
+        "column": 7
+      }
+    },
+    {
+      "id": "e41cc965e299ae5-66974e4f9185825",
+      "title": "Dashboard integration retains dashboard saved object tags after quicksave",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_dashboard_integration.spec.ts",
+        "line": 132,
+        "column": 7
+      }
+    },
+    {
+      "id": "9c36f201f029f86-dbd87934004d981",
+      "title": "Tags management feature controls no saved objects tagging privileges cannot access tags page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_feature_control.spec.ts",
+        "line": 156,
+        "column": 7
+      }
+    },
+    {
+      "id": "9c36f201f029f86-4dc1504394f7e25",
+      "title": "Tags management feature controls read role can see all tags",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_feature_control.spec.ts",
+        "line": 167,
+        "column": 9
+      }
+    },
+    {
+      "id": "9c36f201f029f86-f3e763236c86644",
+      "title": "Tags management feature controls read role cannot delete a tag",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_feature_control.spec.ts",
+        "line": 180,
+        "column": 9
+      }
+    },
+    {
+      "id": "9c36f201f029f86-405ca874367c06e",
+      "title": "Tags management feature controls read role cannot bulk delete tags",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_feature_control.spec.ts",
+        "line": 196,
+        "column": 9
+      }
+    },
+    {
+      "id": "9c36f201f029f86-22ff64e9c2394d0",
+      "title": "Tags management feature controls read role cannot create a tag",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_feature_control.spec.ts",
+        "line": 212,
+        "column": 9
+      }
+    },
+    {
+      "id": "9c36f201f029f86-8063916e30f8cae",
+      "title": "Tags management feature controls read role cannot edit a tag",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_feature_control.spec.ts",
+        "line": 226,
+        "column": 9
+      }
+    },
+    {
+      "id": "9c36f201f029f86-5038b09671e0c2d",
+      "title": "Tags management feature controls read role cannot see tag relations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_feature_control.spec.ts",
+        "line": 242,
+        "column": 9
+      }
+    },
+    {
+      "id": "9c36f201f029f86-99fedadad4ef445",
+      "title": "Tags management feature controls write role can see all tags",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_feature_control.spec.ts",
+        "line": 167,
+        "column": 9
+      }
+    },
+    {
+      "id": "9c36f201f029f86-010bfdcd887b6c2",
+      "title": "Tags management feature controls write role can delete a tag",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_feature_control.spec.ts",
+        "line": 180,
+        "column": 9
+      }
+    },
+    {
+      "id": "9c36f201f029f86-f60534825e89692",
+      "title": "Tags management feature controls write role can bulk delete tags",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_feature_control.spec.ts",
+        "line": 196,
+        "column": 9
+      }
+    },
+    {
+      "id": "9c36f201f029f86-f5151f4dcff66a5",
+      "title": "Tags management feature controls write role can create a tag",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_feature_control.spec.ts",
+        "line": 212,
+        "column": 9
+      }
+    },
+    {
+      "id": "9c36f201f029f86-b66177ba8d58264",
+      "title": "Tags management feature controls write role can edit a tag",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_feature_control.spec.ts",
+        "line": 226,
+        "column": 9
+      }
+    },
+    {
+      "id": "9c36f201f029f86-9dda03cbb1c4279",
+      "title": "Tags management feature controls write role cannot see tag relations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_feature_control.spec.ts",
+        "line": 242,
+        "column": 9
+      }
+    },
+    {
+      "id": "9c36f201f029f86-7d1087d8899e0d4",
+      "title": "Tags management feature controls read + so management read role can see all tags",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_feature_control.spec.ts",
+        "line": 167,
+        "column": 9
+      }
+    },
+    {
+      "id": "9c36f201f029f86-9faf33f8ac0b83c",
+      "title": "Tags management feature controls read + so management read role cannot delete a tag",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_feature_control.spec.ts",
+        "line": 180,
+        "column": 9
+      }
+    },
+    {
+      "id": "9c36f201f029f86-e4152be06b06948",
+      "title": "Tags management feature controls read + so management read role cannot bulk delete tags",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_feature_control.spec.ts",
+        "line": 196,
+        "column": 9
+      }
+    },
+    {
+      "id": "9c36f201f029f86-4cfeb35c84074ae",
+      "title": "Tags management feature controls read + so management read role cannot create a tag",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_feature_control.spec.ts",
+        "line": 212,
+        "column": 9
+      }
+    },
+    {
+      "id": "9c36f201f029f86-41eb70fa06fcda1",
+      "title": "Tags management feature controls read + so management read role cannot edit a tag",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_feature_control.spec.ts",
+        "line": 226,
+        "column": 9
+      }
+    },
+    {
+      "id": "9c36f201f029f86-7ab6bdbde3c4719",
+      "title": "Tags management feature controls read + so management read role can see tag relations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_feature_control.spec.ts",
+        "line": 242,
+        "column": 9
+      }
+    },
+    {
+      "id": "9c36f201f029f86-7322eee7867e00b",
+      "title": "Tags management feature controls base write role can see all tags",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_feature_control.spec.ts",
+        "line": 167,
+        "column": 9
+      }
+    },
+    {
+      "id": "9c36f201f029f86-1beea400d048163",
+      "title": "Tags management feature controls base write role can delete a tag",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_feature_control.spec.ts",
+        "line": 180,
+        "column": 9
+      }
+    },
+    {
+      "id": "9c36f201f029f86-81a6e59b08cfbbd",
+      "title": "Tags management feature controls base write role can bulk delete tags",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_feature_control.spec.ts",
+        "line": 196,
+        "column": 9
+      }
+    },
+    {
+      "id": "9c36f201f029f86-6ed6db6a81dd34d",
+      "title": "Tags management feature controls base write role can create a tag",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_feature_control.spec.ts",
+        "line": 212,
+        "column": 9
+      }
+    },
+    {
+      "id": "9c36f201f029f86-c2e166be15b33ec",
+      "title": "Tags management feature controls base write role can edit a tag",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_feature_control.spec.ts",
+        "line": 226,
+        "column": 9
+      }
+    },
+    {
+      "id": "9c36f201f029f86-7bf06097ddd6601",
+      "title": "Tags management feature controls base write role can see tag relations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_feature_control.spec.ts",
+        "line": 242,
+        "column": 9
+      }
+    },
+    {
+      "id": "56de84615d65af8-5e3fc25a77b4a3d",
+      "title": "Maps integration allows to manually type tag filter query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_maps_integration.spec.ts",
+        "line": 28,
+        "column": 7
+      }
+    },
+    {
+      "id": "56de84615d65af8-5f7408b7ced341c",
+      "title": "Maps integration allows to filter by selecting a tag in the filter menu",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_maps_integration.spec.ts",
+        "line": 39,
+        "column": 7
+      }
+    },
+    {
+      "id": "56de84615d65af8-597c36503993d65",
+      "title": "Maps integration allows to filter by multiple tags",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_maps_integration.spec.ts",
+        "line": 50,
+        "column": 7
+      }
+    },
+    {
+      "id": "56de84615d65af8-b0391283671bcb9",
+      "title": "Maps integration allows to select tags for a new map",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_maps_integration.spec.ts",
+        "line": 61,
+        "column": 7
+      }
+    },
+    {
+      "id": "56de84615d65af8-7ae6343b4656073",
+      "title": "Maps integration allows to create a tag from the tag selector",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_maps_integration.spec.ts",
+        "line": 79,
+        "column": 7
+      }
+    },
+    {
+      "id": "56de84615d65af8-ffb057df0c5c21a",
+      "title": "Maps integration allows to select tags for an existing map",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_maps_integration.spec.ts",
+        "line": 105,
+        "column": 7
+      }
+    },
+    {
+      "id": "3f09ca873c83767-a0a004396e1099f",
+      "title": "Visualize integration allows to manually type tag filter query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_visualize_integration.spec.ts",
+        "line": 29,
+        "column": 7
+      }
+    },
+    {
+      "id": "3f09ca873c83767-5ad513a9138db6f",
+      "title": "Visualize integration allows to filter by selecting a tag in the filter menu",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_visualize_integration.spec.ts",
+        "line": 43,
+        "column": 7
+      }
+    },
+    {
+      "id": "3f09ca873c83767-3f7ec1454a55783",
+      "title": "Visualize integration allows to filter by multiple tags",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_visualize_integration.spec.ts",
+        "line": 57,
+        "column": 7
+      }
+    },
+    {
+      "id": "3f09ca873c83767-27c6351030ef58d",
+      "title": "Visualize integration allows to select tags for a new visualization",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_visualize_integration.spec.ts",
+        "line": 71,
+        "column": 7
+      }
+    },
+    {
+      "id": "3f09ca873c83767-6a5aa243a2af7da",
+      "title": "Visualize integration allows to create a tag from the tag selector",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_visualize_integration.spec.ts",
+        "line": 87,
+        "column": 7
+      }
+    },
+    {
+      "id": "3f09ca873c83767-fbf9a5694c75781",
+      "title": "Visualize integration allows to select tags for an existing visualization",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_visualize_integration.spec.ts",
+        "line": 111,
         "column": 7
       }
     }
