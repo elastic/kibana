@@ -14,10 +14,10 @@ const getPageName = (path: string, params: Record<string, Record<string, string>
   if (path === '/') {
     return 'stream_list';
   }
-  if (path === '/_discovery/{tab}') {
+  if (path === '/_discovery/:tab') {
     return `discovery_${params?.path?.tab ?? 'unknown'}`;
   }
-  if (path === '/{key}/management/{tab}') {
+  if (path === '/:key/management/:tab') {
     return `management_${params?.path?.tab ?? 'unknown'}`;
   }
   return path;
