@@ -125,7 +125,7 @@ const composeFormValuesForYamlSerialize = (compose: ComposeFormValues): FormValu
     schedule: compose.schedule,
     evaluation,
     grouping: compose.grouping,
-    ...(recovery_policy ? { recoveryPolicy: recovery_policy as FormValues['recoveryPolicy'] } : {}),
+    ...(recovery_policy ? { recoveryPolicy: recovery_policy } : {}),
     stateTransition: compose.stateTransition,
     stateTransitionAlertDelayMode: compose.stateTransitionAlertDelayMode,
     stateTransitionRecoveryDelayMode: compose.stateTransitionRecoveryDelayMode,

@@ -25,7 +25,7 @@ import { splitQuery } from './use_heuristic_split';
 /**
  * Converts old API response fields into a `RuleQuery`.
  *
- * Uses `splitQuery()` to re-derive the base/alertBlock split from the stored
+ * Uses `splitQuery()` to re-derive the base/block split from the stored
  * single query string. Lossy if the user hand-edited the split, but acceptable
  * during active dev — the new schema stores the split natively.
  */
@@ -40,22 +40,32 @@ export function transformQueryIn(rule: {
     return { format: 'standalone', breach: fullQuery };
   }
 
-  const split = splitQuery(fullQuery);
+  const { base, alertBlock: block } = splitQuery(fullQuery);
 
   let recover: string | undefined;
   if (rule.recovery_policy?.type === 'query' && rule.recovery_policy.query?.base) {
-    const recoverySplit = splitQuery(rule.recovery_policy.query.base);
-    recover = recoverySplit.alertBlock || undefined;
+    const { alertBlock: recoveryBlock } = splitQuery(rule.recovery_policy.query.base);
+    recover = recoveryBlock || undefined;
   }
 
   return {
     format: 'composed',
-    base: split.base,
+    base,
     blocks: {
-      breach: split.alertBlock,
+      breach: block,
       ...(recover ? { recover } : {}),
     },
   };
+}
+
+interface RecoveryPolicyOut {
+  type: RecoveryPolicyType;
+  query?: { base: string };
+}
+
+export interface TransformQueryOutResult {
+  evaluation: { query: { base: string } };
+  recovery_policy?: RecoveryPolicyOut;
 }
 
 /**
@@ -64,10 +74,7 @@ export function transformQueryIn(rule: {
 export function transformQueryOut(
   query: RuleQuery,
   kind?: RuleKind
-): {
-  evaluation: { query: { base: string } };
-  recovery_policy?: { type: RecoveryPolicyType; query?: { base: string } };
-} {
+): TransformQueryOutResult {
   if (query.format === 'standalone') {
     const evaluation = { query: { base: query.breach } };
     const recoverStr = query.recover?.trim();
@@ -85,10 +92,7 @@ export function transformQueryOut(
 
   const evalQuery = [query.base, query.blocks.breach].filter(Boolean).join('\n');
 
-  const result: {
-    evaluation: { query: { base: string } };
-    recovery_policy?: { type: RecoveryPolicyType; query?: { base: string } };
-  } = { evaluation: { query: { base: evalQuery } } };
+  const result: TransformQueryOutResult = { evaluation: { query: { base: evalQuery } } };
 
   if (query.blocks.recover?.trim()) {
     const recoveryQuery = [query.base, query.blocks.recover].filter(Boolean).join('\n');
@@ -142,8 +146,8 @@ const mapStateTransition = (formValues: ComposeFormValues) => {
   const { kind, stateTransition } = formValues;
   if (kind !== 'alert') return undefined;
 
-  const alertMode = formValues.stateTransitionAlertDelayMode ?? DELAY_IMMEDIATE;
-  const recoveryMode = formValues.stateTransitionRecoveryDelayMode ?? DELAY_IMMEDIATE;
+  const alertMode = formValues.stateTransitionAlertDelayMode;
+  const recoveryMode = formValues.stateTransitionRecoveryDelayMode;
 
   const out: Record<string, number | string> = {};
 
