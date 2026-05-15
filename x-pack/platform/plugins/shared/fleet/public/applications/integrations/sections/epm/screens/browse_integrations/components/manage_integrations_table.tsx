@@ -74,7 +74,7 @@ const isIntegrationPackageReady = (item: CreatedIntegrationRow): boolean =>
   item.successfulDataStreamCount === item.totalDataStreamCount &&
   (item.status === 'completed' || item.status === 'approved');
 
-function getStatusDisplay(status: TaskStatus): {
+export function getStatusDisplay(status: TaskStatus): {
   color: 'success' | 'danger' | 'default' | 'hollow';
   iconType?: string;
   label: string;
@@ -85,8 +85,9 @@ function getStatusDisplay(status: TaskStatus): {
     case 'completed':
       return { color: 'success', iconType: 'check', label: 'Success' };
     case 'failed':
+      return { color: 'danger', iconType: 'cross', label: 'Failed' };
     case 'cancelled':
-      return { color: 'danger', iconType: 'cross', label: 'Fail' };
+      return { color: 'danger', iconType: 'cross', label: 'Cancelled' };
     case 'processing':
     case 'pending':
     default:
