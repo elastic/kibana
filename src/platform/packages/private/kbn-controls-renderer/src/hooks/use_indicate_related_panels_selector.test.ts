@@ -39,7 +39,12 @@ const createMockApi = ({
 } = {}) => ({
   uuid,
   parentApi,
-  ...(publishesRelatedPanels ? { relatedPanels$: new BehaviorSubject<string[]>(['panel-a']) } : {}),
+  ...(publishesRelatedPanels
+    ? {
+        canIndicateRelatedSiblings: true,
+        relatedPanels$: new BehaviorSubject<string[]>(['panel-a']),
+      }
+    : {}),
 });
 
 describe('useIndicateRelatedPanelsSelector', () => {
@@ -75,7 +80,7 @@ describe('useIndicateRelatedPanelsSelector', () => {
     });
   });
 
-  describe('when parent can indicate and API publishes related panels', () => {
+  describe('when parent can indicate and API can inicate related panels', () => {
     it('should track indicateRelatedPanelsId from parent', async () => {
       const parentApi = createMockParentApi({ indicateRelatedPanelsId: undefined });
       const api = createMockApi({ parentApi });

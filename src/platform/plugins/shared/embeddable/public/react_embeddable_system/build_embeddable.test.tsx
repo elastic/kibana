@@ -112,7 +112,7 @@ it('auto-injects relatedPanels$ and recomputes it when siblings change', async (
     type: 'test',
   });
 
-  expect(componentApi.relatedPanels$.value).toEqual([]);
+  expect(componentApi.relatedPanels$!.value).toEqual([]);
 
   const filterControl = {
     uuid: 'filter',
@@ -124,7 +124,7 @@ it('auto-injects relatedPanels$ and recomputes it when siblings change', async (
     filter: filterControl,
   });
 
-  expect(componentApi.relatedPanels$.value).toEqual(['filter']);
+  expect(componentApi.relatedPanels$!.value).toEqual(['filter']);
 });
 
 it('should handle factory error', async () => {
