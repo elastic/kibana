@@ -57,7 +57,7 @@ interface SubFeatureCardProps {
   deprecatedEndpointsMap: Map<string, EndpointDeprecationInfo>;
   hasSavedObject: boolean;
   isFeatureDirty: boolean;
-  globalDefaultId: string | undefined;
+  globalDefaultId: string;
 }
 
 export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
@@ -122,12 +122,11 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
   const canAddMore =
     !feature.maxNumberOfEndpoints || endpointIds.length < feature.maxNumberOfEndpoints;
 
-  const showGlobalDefaultRow =
-    !hasSavedObject && !!globalDefaultId && globalDefaultId !== NO_DEFAULT_MODEL;
-  const { icon: globalDefaultIcon = 'compute', label: globalDefaultLabel = globalDefaultId ?? '' } =
-    (globalDefaultId ? endpointDisplayMap.get(globalDefaultId) : undefined) ?? {};
+  const showGlobalDefaultRow = !hasSavedObject && globalDefaultId !== NO_DEFAULT_MODEL;
+  const { icon: globalDefaultIcon = 'compute', label: globalDefaultLabel = globalDefaultId } =
+    endpointDisplayMap.get(globalDefaultId) ?? {};
   const globalDefaultDeprecationInfo =
-    !hasSavedObject && !!globalDefaultId && globalDefaultId !== NO_DEFAULT_MODEL
+    !hasSavedObject && globalDefaultId !== NO_DEFAULT_MODEL
       ? deprecatedEndpointsMap.get(globalDefaultId)
       : undefined;
 

@@ -141,7 +141,7 @@ describe('SubFeatureCard', () => {
     globalRowOverrides?: Partial<{
       hasSavedObject: boolean;
       isFeatureDirty: boolean;
-      globalDefaultId: string | undefined;
+      globalDefaultId: string;
     }>,
     deprecatedEndpointsMap: Map<string, EndpointDeprecationInfo> = new Map()
   ) =>
@@ -548,11 +548,11 @@ describe('SubFeatureCard', () => {
     });
   });
 
-  describe('ignoreGlobalDefault — globalDefaultId undefined', () => {
-    it('does not render the global default locked row when globalDefaultId is undefined', () => {
+  describe('ignoreGlobalDefault — globalDefaultId set to NO_DEFAULT_MODEL', () => {
+    it('does not render the global default locked row when globalDefaultId is NO_DEFAULT_MODEL', () => {
       renderCard(['ep-1'], undefined, new Set(), ['__different__'], {
         hasSavedObject: false,
-        globalDefaultId: undefined,
+        globalDefaultId: NO_DEFAULT_MODEL,
       });
 
       expect(screen.queryByTestId('global-default-row-test_feature')).not.toBeInTheDocument();
