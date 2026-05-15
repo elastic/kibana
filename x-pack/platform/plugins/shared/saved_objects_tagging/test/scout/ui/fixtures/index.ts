@@ -11,6 +11,21 @@ import type { ScoutPage, ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/sco
 import type { TaggingPageObjects } from './page_objects';
 import { extendPageObjects } from './page_objects';
 
+export const KBN_ARCHIVES = {
+  FUNCTIONAL_BASE:
+    'x-pack/platform/test/saved_object_tagging/common/fixtures/es_archiver/functional_base/data.json',
+  DASHBOARD:
+    'x-pack/platform/test/saved_object_tagging/common/fixtures/es_archiver/dashboard/data.json',
+  VISUALIZE:
+    'x-pack/platform/test/saved_object_tagging/common/fixtures/es_archiver/visualize/data.json',
+  MAPS: 'x-pack/platform/test/saved_object_tagging/common/fixtures/es_archiver/maps/data.json',
+} as const;
+
+export const ES_ARCHIVES = {
+  LOGSTASH_FUNCTIONAL:
+    'x-pack/platform/test/saved_object_tagging/common/fixtures/es_archiver/logstash_functional',
+} as const;
+
 export interface TaggingTestFixtures extends ScoutTestFixtures {
   pageObjects: TaggingPageObjects;
 }

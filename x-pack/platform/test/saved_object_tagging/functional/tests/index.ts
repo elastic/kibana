@@ -6,25 +6,16 @@
  */
 
 import type { FtrProviderContext } from '../ftr_provider_context';
-import { createUsersAndRoles } from '../../common/lib';
 
 // eslint-disable-next-line import/no-default-export
-export default function ({ loadTestFile, getService }: FtrProviderContext) {
+export default function ({ loadTestFile }: FtrProviderContext) {
   describe('saved objects tagging - functional tests', function () {
-    before(async () => {
-      await createUsersAndRoles(getService);
-    });
-
     loadTestFile(require.resolve('./listing'));
     loadTestFile(require.resolve('./bulk_actions'));
     loadTestFile(require.resolve('./bulk_assign'));
     loadTestFile(require.resolve('./create'));
     loadTestFile(require.resolve('./edit'));
     loadTestFile(require.resolve('./som_integration'));
-    loadTestFile(require.resolve('./visualize_integration'));
-    loadTestFile(require.resolve('./dashboard_integration'));
-    loadTestFile(require.resolve('./feature_control'));
-    loadTestFile(require.resolve('./maps_integration'));
     loadTestFile(require.resolve('./discover_integration'));
   });
 }
