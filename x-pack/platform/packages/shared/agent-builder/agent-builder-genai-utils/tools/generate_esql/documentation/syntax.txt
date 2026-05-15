@@ -33,16 +33,14 @@
         - RENAME: renames a column
         - STATS ... BY: groups rows according to a common value and calculates one or more aggregated values over the grouped rows, using aggregation and grouping functions.
         - SORT: sorts the row in a table by a column. Expressions are not supported.
-        - WHERE: Filters rows based on a boolean condition. WHERE supports the same functions as EVAL.
-        - [preview] RERANK: uses an inference model to compute a new relevance score for an initial set of documents
+        - LOOKUP JOIN: adds fields from the lookup index as new columns to your results table based on matching values in the join field
+        - WHERE: Filters rows based on a boolean condition. WHERE supports the same functions as EVAL
+        - RERANK: uses an inference model to compute a new relevance score for an initial set of documents
+        - COMPLETION: send prompts and context to an LLM
+        - CHANGE_POINT: detects spikes, dips, and change points in a metric.
+        - FORK creates multiple execution branches to operate on the same input data and combines the results in a single output table
+        - [preview] FUSE merges rows from multiple result sets and assigns new relevance scores. Used together with `FORK`
         - [preview] SAMPLE: samples a fraction of the table rows
-        - [preview] COMPLETION: send prompts and context to an LLM
-        - [preview] CHANGE_POINT: detects spikes, dips, and change points in a metric.
-        - [preview] FORK creates multiple execution branches to operate
-on the same input data and combines the results in a single output table. A discriminator column (`_fork`) is added to identify which branch each row came from.
-- [preview] FUSE merges rows from multiple result sets and assigns
-new relevance scores. `FUSE` enables hybrid search to combine and score results from multiple queries, together with the `FORK` command.
-
     </processing-commands>
 
     <grouping-functions>
@@ -144,29 +142,29 @@ new relevance scores. `FUSE` enables hybrid search to combine and score results 
     </ip-functions>
 
     <type-conversion-functions>
-        TO_AGGREGATE_METRIC_DOUBLE: Encode a numeric to an aggregate_metric_double.
-        TO_BOOLEAN: Converts an input value to a boolean value
-        TO_CARTESIANPOINT: Converts an input value to a cartesian_point value
-        TO_CARTESIANSHAPE: Converts an input value to a cartesian_shape value
-        TO_DATEPERIOD: Converts an input value into a date_period value.
-        TO_DATETIME: Converts an input value to a date value
-        TO_DATE_NANOS: Converts an input to a nanosecond-resolution date value (aka date_nanos)
-        TO_DEGREES: Converts a number in radians to degrees).
-        TO_DENSE_VECTOR: Converts a multi-valued input of numbers, or a hexadecimal string, to a dense_vector.
-        TO_DOUBLE: Converts an input value to a double value
-        TO_GEOHASH: Converts an input value to a geohash value
-        TO_GEOHEX: Converts an input value to a geohex value
-        TO_GEOPOINT: Converts an input value to a geo_point value
-        TO_GEOSHAPE: Converts an input value to a geo_shape value
-        TO_GEOTILE: Converts an input value to a geotile value
-        TO_INTEGER: Converts an input value to an integer value
-        TO_IP: Converts an input string to an IP value.
-        TO_LONG: Converts the input value to a long
-        TO_RADIANS: Converts a number in degrees) to radians.
-        TO_STRING: Converts an input value into a string.
-        TO_TIMEDURATION: Converts an input value into a time_duration value.
-        TO_UNSIGNED_LONG: Converts an input value to an unsigned long value
-        TO_VERSION: Converts an input string to a version value.
+        TO_AGGREGATE_METRIC_DOUBLE
+        TO_BOOLEAN
+        TO_CARTESIANPOINT
+        TO_CARTESIANSHAPE
+        TO_DATEPERIOD
+        TO_DATETIME
+        TO_DATE_NANOS
+        TO_DEGREES
+        TO_DENSE_VECTOR
+        TO_DOUBLE
+        TO_GEOHASH
+        TO_GEOHEX
+        TO_GEOPOINT
+        TO_GEOSHAPE
+        TO_GEOTILE
+        TO_INTEGER
+        TO_IP
+        TO_LONG
+        TO_RADIANS
+        TO_STRING
+        TO_TIMEDURATION
+        TO_UNSIGNED_LONG
+        TO_VERSION
     </type-conversion-functions>
 
     <mathematical-functions>
@@ -177,6 +175,7 @@ new relevance scores. `FUSE` enables hybrid search to combine and score results 
         ATAN2
         CBRT
         CEIL
+        COPY_SIGN
         COS
         COSH
         E
@@ -188,6 +187,8 @@ new relevance scores. `FUSE` enables hybrid search to combine and score results 
         PI
         POW
         ROUND
+        ROUND_TO
+        SCALB
         SIGNUM
         SIN
         SINH
@@ -197,13 +198,29 @@ new relevance scores. `FUSE` enables hybrid search to combine and score results 
         TAU
     </mathematical-functions>
 
-    <counter-functions>
-       Use with `TS` for fields with `ts_metric: counter`.
+    <time-series-aggregation-functions>
+      Use with `TS`
 
-       RATE: Calculates the per-second average rate of increase
-       IRATE: Calculates the per-second rate between the last two data points
-       INCREASE: Calculates the absolute increase in a time window
-    </counter-functions>
+      ABSENT_OVER_TIME: Calculates the absence of a field in the output result over time range
+      AVG_OVER_TIME: Average value over the time window
+      COUNT_DISTINCT_OVER_TIME: Count of distinct values over the time window
+      COUNT_OVER_TIME: Count of values over the time window
+      DELTA: Absolute change of a gauge in the time window
+      DERIV: Derivative over time using linear regression
+      FIRST_OVER_TIME: Earliest value by `@timestamp`
+      IDELTA: Change between the last two data points only
+      INCREASE: Calculates the absolute increase in a time window
+      IRATE: Calculates the per-second rate between the last two data points
+      LAST_OVER_TIME: Latest value by `@timestamp` (implicit default)
+      MAX_OVER_TIME: Maximum value over the time window
+      MIN_OVER_TIME: Minimum value over the time window
+      PERCENTILE_OVER_TIME: Percentile of values; takes `(field, percentile)`
+      PRESENT_OVER_TIME: Calculates the presence of a field in the output result over time range
+      RATE: Calculates the per-second average rate of increase
+      STDDEV_OVER_TIME: Population standard deviation over the time window
+      SUM_OVER_TIME: Sum of values over the time window
+      VARIANCE_OVER_TIME: Population variance over the time window
+    </time-series-aggregation-functions>
 
     <multivalue-functions>
         Multivalue function are used to manipulate and transform multi-value fields.
@@ -220,7 +237,7 @@ new relevance scores. `FUSE` enables hybrid search to combine and score results 
         MV_MEDIAN_ABSOLUTE_DEVIATION: returns the median absolute deviation of a multivalued field
         MV_MIN: returns the min value of a multivalued field
         MV_PERCENTILE: returns the specified percentile of a multivalued field
-        MV_SLIDE: extract a subset of a multivalued field using specified start and end index values
+        MV_SLICE: extract a subset of a multivalued field using specified start and end index values
         MV_SORT: sorts a multivalued field in lexicographical order.
         MV_SUM: returns the sum of all values of a multivalued field
         MV_ZIP: combines the values from two multivalued fields with a specified delimiter
@@ -239,6 +256,16 @@ new relevance scores. `FUSE` enables hybrid search to combine and score results 
         ST_EXTENT_AGG: calculate the spatial extent over a field that has a geometry type
         ST_CENTROID_AGG: calculate the spatial centroid over a spatial point geometry field
     </spatial-functions>
+
+    <dense-vector-functions>
+        KNN
+        TEXT_EMBEDDING
+        V_COSINE
+        V_DOT_PRODUCT
+        V_HAMMING
+        V_L1_NORM
+        V_L2_NORM
+    </dense-vector-functions>
 
     <operators>
         Binary operators: ==, !=, <, <=, >, >=, +, -, *, /, %

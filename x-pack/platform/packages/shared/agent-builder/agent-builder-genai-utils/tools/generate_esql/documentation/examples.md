@@ -153,6 +153,35 @@ FROM sales
 ```
 
 ```esql
+// Enrich firewall logs with threat intelligence by joining on source IP
+FROM firewall_logs
+| LOOKUP JOIN threat_list ON source.ip
+| WHERE threat_level IS NOT NULL
+| SORT timestamp
+| KEEP source.ip, action, threat_type, threat_level
+| LIMIT 10
+```
+
+```esql
+// Returns the total number of rows that match the query along with the top five rows sorted by score
+FROM books METADATA _score
+| WHERE author:"Faulkner"
+| EVAL score = round(_score, 2)
+| FORK (SORT score DESC, author | LIMIT 5 | KEEP author, score)
+       (STATS total = COUNT(*))
+| SORT _fork, score DESC, author
+```
+
+```esql
+// Run a lexical and a semantic query in parallel with FORK, then merge with FUSE
+FROM books METADATA _id, _index, _score
+| FORK (WHERE title:"Shakespeare" | SORT _score DESC | LIMIT 100)
+       (WHERE semantic_title:"Shakespeare" | SORT _score DESC | LIMIT 100)
+| FUSE
+| SORT _score DESC
+```
+
+```esql
 // What is the HTTP request rate per host over the selected time range? (time series index)
 TS metrics
 | WHERE TRANGE(?_tstart, ?_tend)
@@ -173,4 +202,3 @@ TS k8s
 | STATS missing = MAX(ABSENT_OVER_TIME(events_received)) BY pod, TBUCKET(2 minute)
 | WHERE missing == true
 ```
-
