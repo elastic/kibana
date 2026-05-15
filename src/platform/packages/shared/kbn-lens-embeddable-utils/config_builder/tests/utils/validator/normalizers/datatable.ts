@@ -55,7 +55,9 @@ function sortByColumnType(a: DatatableColumn, b: DatatableColumn): number {
 function dedupColumnsByColumnId(columns: DatatableColumn[]): DatatableColumn[] {
   const seen = new Set<string>();
   return columns.filter((col) => {
-    if (seen.has(col.columnId)) return false;
+    if (seen.has(col.columnId)) {
+      return false;
+    }
     seen.add(col.columnId);
     return true;
   });
@@ -75,7 +77,9 @@ function getColumnRemappingFormBased(
 
   for (const columnId of layer.columnOrder) {
     const column = columnStateMap.get(columnId);
-    if (!column) continue;
+    if (!column) {
+      continue;
+    }
 
     if (isMetricColumnNoESQL(column, layer.columns[columnId] as any)) {
       remapping.push([columnId, getAccessorName('metric', metricIndex++)]);
@@ -160,6 +164,34 @@ function getColumnRemapping(
 }
 
 /**
+ * Filter out visualization columns that exist in the visualization state
+ * but have no corresponding column in the datasource layer.
+ * Must run before alignId since it matches on original column UUIDs.
+ */
+function getFilterOrphanColumns(
+  datasourceStates: LensAttributes['state']['datasourceStates']
+): NormalizerConfig<DatatableAttributes> {
+  const formBasedState =
+    datasourceStates.formBased ??
+    ((datasourceStates as any).indexpattern as typeof datasourceStates.formBased);
+  const formBasedColumns = Object.values(formBasedState?.layers ?? {})[0]?.columnOrder;
+  const textBasedColumns = Object.values(datasourceStates.textBased?.layers ?? {})[0]?.columns;
+
+  const datasourceColumnIds = new Set(
+    formBasedColumns ?? textBasedColumns?.map(({ columnId }) => columnId) ?? []
+  );
+
+  return {
+    original: (attrs) => {
+      attrs.state.visualization.columns = attrs.state.visualization.columns.filter((col) =>
+        datasourceColumnIds.has(col.columnId)
+      );
+      return attrs;
+    },
+  };
+}
+
+/**
  * Precompute the remapping from the original (unmutated) state,
  * then pass it to both the common normalizer and the visualization ID normalizer.
  * This avoids the ordering issue where getCommonNormalizer (order: -1) mutates
@@ -170,12 +202,16 @@ export const normalizeDatatable: AttributesNormalizer<DatatableAttributes> = (at
   const columnRemapping = getColumnRemapping(visualization, datasourceStates);
   const layerRemapping: IdRemapping = [[visualization.layerId, DEFAULT_LAYER_ID]];
 
+  const validRemappings = columnRemapping.filter(
+    (pair): pair is [string, string] => pair[0] != null
+  );
+  const idMap = new Map(validRemappings);
+
+  const filterOrphanColumns = getFilterOrphanColumns(datasourceStates);
+
   const alignId: NormalizerConfig<DatatableAttributes> = {
     original: (attrs) => {
       const viz = attrs.state.visualization;
-      const idMap = new Map(
-        columnRemapping.filter((pair): pair is [string, string] => pair[0] != null)
-      );
       viz.layerId = DEFAULT_LAYER_ID;
 
       for (const col of viz.columns) {
@@ -201,15 +237,13 @@ export const normalizeDatatable: AttributesNormalizer<DatatableAttributes> = (at
   // derived from the accessor name assigned during classification.
   // Original SOs may omit these. The transform always sets them explicitly.
   const columnTypeMap = new Map(
-    columnRemapping
-      .filter((pair): pair is [string, string] => pair[0] != null)
-      .map(([oldId, newId]) => [
-        oldId,
-        {
-          isMetric: newId.includes('_metric_') && !newId.includes('_split_metric_by_'),
-          isTransposed: newId.includes('_split_metric_by_'),
-        },
-      ])
+    validRemappings.map(([oldId, newId]) => [
+      oldId,
+      {
+        isMetric: newId.includes('_metric_') && !newId.includes('_split_metric_by_'),
+        isTransposed: newId.includes('_split_metric_by_'),
+      },
+    ])
   );
 
   const alignColumnTypes: NormalizerConfig<DatatableAttributes> = {
@@ -335,6 +369,7 @@ export const normalizeDatatable: AttributesNormalizer<DatatableAttributes> = (at
       layerRemapping,
       columnRemapping,
     })),
+    filterOrphanColumns,
     alignColumnTypes,
     alignId,
     deduplicateColumns,
