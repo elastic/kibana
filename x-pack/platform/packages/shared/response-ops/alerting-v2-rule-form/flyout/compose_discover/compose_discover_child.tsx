@@ -241,9 +241,9 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
     return TAB_DEFINITIONS.filter((t) => tabIds.includes(t.id));
   }, [isSplit, tabConfig]);
 
-  const editorPanelStyles: React.CSSProperties = useMemo(
+  const editorPanelStyles = useMemo(
     () => ({
-      resize: 'vertical',
+      resize: 'vertical' as const,
       overflow: 'auto',
       height: INITIAL_EDITOR_HEIGHT,
       minHeight: MIN_EDITOR_HEIGHT,

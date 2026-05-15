@@ -189,7 +189,8 @@ function AlertConditionStep({
   // RHF is the source of truth for the evaluation query. Both field
   // detection and output-column fetching derive from it, gated on
   // queryCommitted so we don't fire requests before the user applies.
-  const evalQuery = watch('evaluation.query.base') ?? '';
+  const queryValue = watch('query');
+  const evalQuery = queryValue?.format === 'composed' ? queryValue.base ?? '' : '';
   const committedQuery = useMemo(() => {
     return /^\s*FROM\s+[a-zA-Z0-9_.*-]/i.test(evalQuery) && state.queryCommitted ? evalQuery : '';
   }, [evalQuery, state.queryCommitted]);

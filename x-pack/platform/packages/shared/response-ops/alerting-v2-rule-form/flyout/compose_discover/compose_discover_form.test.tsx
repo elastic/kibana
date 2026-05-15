@@ -58,7 +58,9 @@ describe('step validation', () => {
 
     it('returns true when queryCommitted is true', async () => {
       const state = createState({ queryCommitted: true });
-      const methods = {} as UseFormReturn<ComposeFormValues>;
+      const methods = {
+        trigger: jest.fn().mockResolvedValue(true),
+      } as unknown as UseFormReturn<ComposeFormValues>;
 
       expect(await alertStep.validate!(methods, state)).toBe(true);
       expect(methods.trigger).toHaveBeenCalledWith('timeField');
@@ -66,7 +68,9 @@ describe('step validation', () => {
 
     it('returns false when queryCommitted is false', async () => {
       const state = createState({ queryCommitted: false });
-      const methods = {} as UseFormReturn<ComposeFormValues>;
+      const methods = {
+        trigger: jest.fn(),
+      } as unknown as UseFormReturn<ComposeFormValues>;
 
       expect(await alertStep.validate!(methods, state)).toBe(false);
       expect(methods.trigger).not.toHaveBeenCalled();

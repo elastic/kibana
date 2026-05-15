@@ -329,7 +329,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
 
       methods.setValue('query', updatedQuery);
 
-      const byFields = getGroupByColumnsFromQuery(evalBase);
+      const byFields = getGroupByColumnsFromQuery(getBreachQuery(updatedQuery));
       if (byFields.length > 0) {
         methods.setValue('grouping', { fields: byFields });
       }
