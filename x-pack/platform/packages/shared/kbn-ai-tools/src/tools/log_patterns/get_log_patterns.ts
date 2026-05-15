@@ -14,7 +14,6 @@ import type {
   AggregationsTopHitsAggregation,
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
-import { esql } from '@elastic/esql';
 import { categorizationAnalyzer } from '@kbn/aiops-log-pattern-analysis/categorization_analyzer';
 import type { ChangePointType } from '@kbn/es-types/src';
 import type { ESQLSearchResponse } from '@kbn/es-types';
@@ -24,6 +23,7 @@ import moment from 'moment';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { kqlQuery, dateRangeQuery } from '@kbn/es-query';
 import type { Logger } from '@kbn/logging';
+import { buildCountQuery } from '../../utils/build_count_query';
 import { getEsqlColumnSchema } from '../../utils/get_esql_column_schema';
 import { pValueToLabel } from '../../utils/p_value_to_label';
 import {
@@ -439,6 +439,8 @@ export async function getSigEventsLogPatternsEsql({
     start,
     end,
   });
+  // ES|QL normalizes the `text` family in `column.type`: both `text` and
+  // `match_only_text` mappings report as `text`.
   const textColumnNames = new Set(
     columns.filter((column) => column.type === 'text').map((column) => column.name)
   );
@@ -580,14 +582,4 @@ async function runSigEventsPass1({
   })) as unknown as ESQLSearchResponse;
 
   return parsePass1Rows(response);
-}
-
-function buildCountQuery({ index, kql }: { index: string | string[]; kql?: string }): string {
-  let query = esql.from(Array.isArray(index) ? index : [index]);
-
-  if (kql) {
-    query = query.where`KQL(${esql.str(kql)})`;
-  }
-
-  return query.pipe`STATS total = COUNT(*)`.print('basic');
 }

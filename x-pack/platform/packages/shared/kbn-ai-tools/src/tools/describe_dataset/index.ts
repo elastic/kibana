@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { esql } from '@elastic/esql';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { dateRangeQuery } from '@kbn/es-query';
+import { buildCountQuery } from '../../utils/build_count_query';
 import { getEsqlColumnSchema } from '../../utils/get_esql_column_schema';
 import { getSampleDocumentsEsql } from './get_sample_documents';
 import { mergeSampleDocumentsWithSchema } from './merge_sample_documents_with_schema';
@@ -67,15 +67,8 @@ async function runEsqlPopulationCount({
   end: number;
   kql?: string;
 }): Promise<number> {
-  const indices = Array.isArray(index) ? index : [index];
-  let query = esql.from(indices);
-
-  if (kql) {
-    query = query.where`KQL(${esql.str(kql)})`;
-  }
-
   const response = (await esClient.esql.query({
-    query: query.pipe`STATS total = COUNT(*)`.print('basic'),
+    query: buildCountQuery({ index, kql }),
     filter: { bool: { filter: dateRangeQuery(start, end) } },
     drop_null_columns: true,
   })) as unknown as ESQLSearchResponse;
