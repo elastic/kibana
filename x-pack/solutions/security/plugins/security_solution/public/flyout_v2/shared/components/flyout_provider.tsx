@@ -16,6 +16,7 @@ import { ExpandableFlyoutProvider } from '@kbn/expandable-flyout';
 import { NavigationProvider } from '@kbn/security-solution-navigation';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { useDarkMode } from '@kbn/kibana-react-plugin/public';
+import { EntityStoreEuidApiProvider } from '@kbn/entity-store/public';
 import type { StartServices } from '../../../types';
 import { ReactQueryClientProvider } from '../../../common/containers/query_client/query_client_provider';
 import { KibanaContextProvider } from '../../../common/lib/kibana';
@@ -66,7 +67,9 @@ export const flyoutProviders = ({
                   <UpsellingProvider upsellingService={services.upselling}>
                     <DiscoverInTimelineContextProvider>
                       <CaseProvider>
-                        <AssistantProvider>{flyoutContent}</AssistantProvider>
+                        <EntityStoreEuidApiProvider>
+                          <AssistantProvider>{flyoutContent}</AssistantProvider>
+                        </EntityStoreEuidApiProvider>
                       </CaseProvider>
                     </DiscoverInTimelineContextProvider>
                   </UpsellingProvider>
