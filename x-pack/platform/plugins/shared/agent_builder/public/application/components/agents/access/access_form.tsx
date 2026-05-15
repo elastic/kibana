@@ -7,7 +7,18 @@
 
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
-import { EuiText, EuiTitle, useEuiTheme, type EuiThemeComputed } from '@elastic/eui';
+import {
+  EuiAvatar,
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+  useEuiTheme,
+  type EuiThemeComputed,
+} from '@elastic/eui';
 import { type AgentAclEntry, AgentAclRole, type AgentDefinition } from '@kbn/agent-builder-common';
 import { selectableRolesForVisibility } from './role_to_capabilities';
 import { PrincipalRow } from './principal_row';
@@ -21,6 +32,7 @@ import {
 interface AccessFormProps {
   agent: AgentDefinition;
   entries: AgentAclEntry[];
+  ownerName?: string;
   isDisabled?: boolean;
   onChange: (entries: AgentAclEntry[]) => void;
 }
@@ -33,14 +45,16 @@ const sectionHeaderStyles = (euiTheme: EuiThemeComputed) => css`
   margin-bottom: ${euiTheme.size.s};
 `;
 
-const entriesContainerStyles = (euiTheme: EuiThemeComputed) => css`
-  margin-top: ${euiTheme.size.m};
-  /* Group of rows; each row has its own top divider so the group reads as a list. */
-`;
-
 const emptyStateStyles = (euiTheme: EuiThemeComputed) => css`
   margin-top: ${euiTheme.size.m};
   padding: ${euiTheme.size.m} 0;
+`;
+
+const ownerRowStyles = css`
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
 `;
 
 interface SectionProps {
@@ -66,7 +80,13 @@ const Section: React.FC<SectionProps> = ({ title, helpText, children }) => {
   );
 };
 
-export const AccessForm: React.FC<AccessFormProps> = ({ agent, entries, isDisabled, onChange }) => {
+export const AccessForm: React.FC<AccessFormProps> = ({
+  agent,
+  entries,
+  ownerName,
+  isDisabled,
+  onChange,
+}) => {
   const { euiTheme } = useEuiTheme();
   const visibility = agent.visibility;
 
@@ -101,18 +121,40 @@ export const AccessForm: React.FC<AccessFormProps> = ({ agent, entries, isDisabl
           {accessFlyoutNoPeople}
         </EuiText>
       ) : (
-        <div css={entriesContainerStyles(euiTheme)}>
-          {entries.map((entry) => (
-            <PrincipalRow
-              key={`user:${entry.name}`}
-              entry={entry}
-              visibility={visibility}
-              isDisabled={isDisabled}
-              onChangeRole={(role) => handleChangeRole(entry, role)}
-              onRemove={() => handleRemove(entry)}
-            />
-          ))}
-        </div>
+        <>
+          <EuiSpacer size="s" />
+          <EuiPanel paddingSize="s" hasBorder={false} hasShadow={false} color="subdued">
+            <EuiPanel paddingSize="none" hasBorder={true} hasShadow={false}>
+              {ownerName && (
+                <div css={ownerRowStyles}>
+                  <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
+                    <EuiFlexItem grow={false}>
+                      <EuiAvatar size="s" name={ownerName} />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow>
+                      <EuiText size="s">
+                        <strong>{ownerName}</strong>
+                      </EuiText>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiBadge>Owner</EuiBadge>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </div>
+              )}
+              {entries.map((entry) => (
+                <PrincipalRow
+                  key={`user:${entry.name}`}
+                  entry={entry}
+                  visibility={visibility}
+                  isDisabled={isDisabled}
+                  onChangeRole={(role) => handleChangeRole(entry, role)}
+                  onRemove={() => handleRemove(entry)}
+                />
+              ))}
+            </EuiPanel>
+          </EuiPanel>
+        </>
       )}
     </Section>
   );

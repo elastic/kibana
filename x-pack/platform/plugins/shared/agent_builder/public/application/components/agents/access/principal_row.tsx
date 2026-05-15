@@ -73,7 +73,7 @@ export const PrincipalRow: React.FC<PrincipalRowProps> = ({
   `;
 
   const rowStyles = css`
-    padding: ${euiTheme.size.s} 0;
+    padding: ${euiTheme.size.s};
     border-top: ${euiTheme.border.thin};
     &:first-of-type {
       border-top: none;
@@ -84,7 +84,7 @@ export const PrincipalRow: React.FC<PrincipalRowProps> = ({
     <div css={rowStyles} data-test-subj={`agentBuilderAclRow-${entry.type}-${entry.name}`}>
       <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiAvatar css={avatarStyles} name={entry.name} size="m" />
+          <EuiAvatar css={avatarStyles} size="s" name={entry.name} />
         </EuiFlexItem>
 
         <EuiFlexItem grow>
@@ -93,33 +93,41 @@ export const PrincipalRow: React.FC<PrincipalRowProps> = ({
           </EuiText>
         </EuiFlexItem>
 
-        <EuiFlexItem
-          grow={false}
-          css={css`
-            min-width: 180px;
-          `}
-        >
-          <EuiSuperSelect<AgentAclRole>
-            compressed
-            aria-label={accessFlyoutRoleAriaLabel}
-            valueOfSelected={entry.role}
-            options={roleOptions}
-            disabled={isDisabled}
-            onChange={(next) => onChangeRole(next)}
-            popoverProps={{ panelPaddingSize: 's' }}
-            data-test-subj={`agentBuilderAclRoleSelect-${entry.type}-${entry.name}`}
-          />
-        </EuiFlexItem>
-
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            iconType="cross"
-            color="danger"
-            aria-label={accessFlyoutRemoveAriaLabel}
-            onClick={onRemove}
-            isDisabled={isDisabled}
-            data-test-subj={`agentBuilderAclRemove-${entry.type}-${entry.name}`}
-          />
+          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+            <EuiFlexItem
+              grow={false}
+              css={css`
+                min-width: 180px;
+              `}
+            >
+              <EuiSuperSelect<AgentAclRole>
+                compressed
+                aria-label={accessFlyoutRoleAriaLabel}
+                valueOfSelected={entry.role}
+                options={roleOptions}
+                disabled={isDisabled}
+                onChange={(next) => onChangeRole(next)}
+                popoverProps={{
+                  panelPaddingSize: 's',
+                  panelStyle: { minWidth: 280 },
+                  anchorPosition: 'downRight',
+                }}
+                data-test-subj={`agentBuilderAclRoleSelect-${entry.type}-${entry.name}`}
+              />
+            </EuiFlexItem>
+
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon
+                iconType="trash"
+                color="danger"
+                aria-label={accessFlyoutRemoveAriaLabel}
+                onClick={onRemove}
+                isDisabled={isDisabled}
+                data-test-subj={`agentBuilderAclRemove-${entry.type}-${entry.name}`}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     </div>
