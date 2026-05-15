@@ -156,6 +156,21 @@ describe('createWorkflowYamlAttachmentUiDefinition', () => {
       expect(openInEditorButton).toBeDefined();
     });
 
+    it('returns no inline buttons when isCanvas is true (canvas registers its own)', () => {
+      const services = createMockServices();
+      const definition = createWorkflowYamlAttachmentUiDefinition(services);
+      const attachment = createAttachment({ workflowId: 'wf-123', origin: 'wf-123' });
+
+      const buttons = definition.getActionButtons!({
+        attachment,
+        isSidebar: false,
+        isCanvas: true,
+        updateOrigin: jest.fn(),
+      });
+
+      expect(buttons).toHaveLength(0);
+    });
+
     it('does NOT include Open in editor button when workflowId is present but not persisted', () => {
       const services = createMockServices();
       const definition = createWorkflowYamlAttachmentUiDefinition(services);
@@ -266,6 +281,27 @@ describe('createWorkflowYamlAttachmentUiDefinition', () => {
       const buttons = registerActionButtons.mock.calls[0][0];
       expect(buttons.find((b: { label: string }) => b.label === 'Save')).toBeDefined();
       expect(buttons.find((b: { label: string }) => b.label === 'Override')).toBeUndefined();
+    });
+
+    it('registers Save button when workflowId is pre-assigned but not yet persisted', () => {
+      const services = createMockServices();
+      const definition = createWorkflowYamlAttachmentUiDefinition(services);
+      const attachment = createAttachment({ workflowId: 'wf-pre-assigned' });
+      const registerActionButtons = jest.fn();
+
+      render(
+        <>
+          {definition.renderCanvasContent!(
+            { attachment, isSidebar: false },
+            { registerActionButtons, updateOrigin: jest.fn(), closeCanvas: jest.fn() }
+          )}
+        </>
+      );
+
+      const buttons = registerActionButtons.mock.calls[0][0];
+      expect(buttons.find((b: { label: string }) => b.label === 'Save')).toBeDefined();
+      expect(buttons.find((b: { label: string }) => b.label === 'Override')).toBeUndefined();
+      expect(buttons.find((b: { label: string }) => b.label === 'Save as new')).toBeUndefined();
     });
 
     it('registers Override and Save as new buttons for existing workflow', () => {
