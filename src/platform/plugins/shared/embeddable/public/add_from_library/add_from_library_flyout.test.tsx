@@ -8,11 +8,11 @@
  */
 
 import * as React from 'react';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import type { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 
 import { AddFromLibraryFlyout } from './add_from_library_flyout';
-import { contentManagement, usageCollection } from '../kibana_services';
+import { usageCollection } from '../kibana_services';
 import { getMockPresentationContainer } from '@kbn/presentation-publishing/interfaces/containers/mocks';
 import { registerAddFromLibraryType } from './registry';
 import type { PresentationContainer, HasType } from '@kbn/presentation-publishing';
