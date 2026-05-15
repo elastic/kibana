@@ -20,7 +20,15 @@ import {
   OtelApmPage,
   CloudForwarderPage,
 } from './pages';
+import {
+  HostLinuxAutoDetectPage,
+  HostLinuxOtelPage,
+  HostMacosAutoDetectPage,
+  HostMacosOtelPage,
+  HostWindowsOtelPage,
+} from './pages/host';
 import type { ObservabilityOnboardingAppServices } from '..';
+import { IS_ADD_DATA_PAGE_V2_ENABLED } from '../../common/feature_flags';
 import { useFlowBreadcrumb } from './shared/use_flow_breadcrumbs';
 import { useManagedOtlpServiceAvailability } from './shared/use_managed_otlp_service_availability';
 
@@ -30,9 +38,11 @@ export function ObservabilityOnboardingFlow() {
   const { pathname } = useLocation();
   const {
     services: {
+      featureFlags,
       context: { isDev, isCloud, isServerless },
     },
   } = useKibana<ObservabilityOnboardingAppServices>();
+  const isAddDataPageV2Enabled = featureFlags.getBooleanValue(IS_ADD_DATA_PAGE_V2_ENABLED, false);
 
   useFlowBreadcrumb(null);
 
@@ -41,6 +51,31 @@ export function ObservabilityOnboardingFlow() {
   }, [pathname]);
 
   const isManagedOtlpServiceAvailable = useManagedOtlpServiceAvailability();
+
+  // V2 host onboarding sub-pages. Returned as an array (not a fragment) so the
+  // legacy Switch underlying Routes still iterates each Route as a direct child.
+  // When the FF is off, no /host/* routes are registered and the catch-all
+  // LandingPage at the bottom of the Routes renders on the original path
+  // (e.g. /host/linux stays as /host/linux), per the V2 spec.
+  const v2HostRoutes = isAddDataPageV2Enabled
+    ? [
+        <Route key="host-linux" exact path="/host/linux">
+          <HostLinuxOtelPage />
+        </Route>,
+        <Route key="host-linux-auto-detect" exact path="/host/linux/auto-detect">
+          <HostLinuxAutoDetectPage />
+        </Route>,
+        <Route key="host-macos" exact path="/host/macos">
+          <HostMacosOtelPage />
+        </Route>,
+        <Route key="host-macos-auto-detect" exact path="/host/macos/auto-detect">
+          <HostMacosAutoDetectPage />
+        </Route>,
+        <Route key="host-windows" exact path="/host/windows">
+          <HostWindowsOtelPage />
+        </Route>,
+      ]
+    : [];
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -72,6 +107,7 @@ export function ObservabilityOnboardingFlow() {
             <CloudForwarderPage />
           </Route>
         )}
+        {v2HostRoutes}
         <Route>
           <LandingPage />
         </Route>

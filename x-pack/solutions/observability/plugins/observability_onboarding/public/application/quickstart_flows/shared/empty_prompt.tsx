@@ -19,12 +19,20 @@ interface EmptyPromptProps {
   error: IHttpFetchError<ResponseErrorBody>;
   telemetryEventContext?: OnboardingFlowEventContext;
   onRetryClick(): void;
+  /**
+   * When the prompt is rendered inline inside a wizard step (rather than as
+   * the full-page entry-failure state), this shrinks the prompt's padding so
+   * it nests visually inside the step body. Cosmetic only — does not change
+   * the prompt's title, body, or retry semantics.
+   */
+  inline?: boolean;
 }
 export const EmptyPrompt: FunctionComponent<EmptyPromptProps> = ({
   onboardingFlowType,
   error,
   telemetryEventContext,
   onRetryClick,
+  inline = false,
 }) => {
   const {
     services: { analytics },
@@ -43,6 +51,8 @@ export const EmptyPrompt: FunctionComponent<EmptyPromptProps> = ({
       <EuiEmptyPrompt
         color="plain"
         iconType="lock"
+        paddingSize={inline ? 's' : 'm'}
+        data-test-subj="observabilityOnboardingEmptyPrompt"
         title={
           <h2>
             {i18n.translate(
@@ -70,6 +80,8 @@ export const EmptyPrompt: FunctionComponent<EmptyPromptProps> = ({
     <EuiEmptyPrompt
       color="danger"
       iconType="error"
+      paddingSize={inline ? 's' : 'm'}
+      data-test-subj="observabilityOnboardingEmptyPrompt"
       title={
         <h2>
           {i18n.translate(
@@ -94,7 +106,7 @@ export const EmptyPrompt: FunctionComponent<EmptyPromptProps> = ({
           color="danger"
           iconType="refresh"
           fill
-          data-test-subj="observabilityOnboardingAutoDetectPanelGoBackButton"
+          data-test-subj="observabilityOnboardingEmptyPromptRetryButton"
           onClick={onRetryClick}
         >
           {i18n.translate(

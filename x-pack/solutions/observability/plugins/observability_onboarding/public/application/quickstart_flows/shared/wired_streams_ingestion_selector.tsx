@@ -23,6 +23,19 @@ import { EnableWiredStreamsConfirmModal } from './enable_wired_streams_confirm_m
 
 export type IngestionMode = 'classic' | 'wired';
 
+const INGESTION_MODES: readonly IngestionMode[] = ['classic', 'wired'] as const;
+
+const isIngestionMode = (value: string | null | undefined): value is IngestionMode =>
+  typeof value === 'string' && (INGESTION_MODES as readonly string[]).includes(value);
+
+// URL-contract helper for the onboarding-app `?ingestion=` search param.
+// Unknown, missing, or malformed values silently fall back to 'classic' so
+// hand-edited or stale URLs never break the UI. The canonical values are the
+// IngestionMode union above; future flows that adopt this contract should
+// reuse this helper rather than re-parsing the param.
+export const parseIngestionMode = (raw: string | null | undefined): IngestionMode =>
+  isIngestionMode(raw) ? raw : 'classic';
+
 interface WiredStreamsIngestionSelectorProps {
   ingestionMode: IngestionMode;
   onChange: (mode: IngestionMode) => void;

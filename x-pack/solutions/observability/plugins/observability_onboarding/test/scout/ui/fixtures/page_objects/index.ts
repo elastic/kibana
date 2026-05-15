@@ -8,9 +8,11 @@
 import type { ScoutPage, ObltPageObjects } from '@kbn/scout-oblt';
 import { createLazyPageObject } from '@kbn/scout-oblt';
 import { OnboardingApp } from './onboarding_app';
+import { HostV2Page } from './host_v2_page';
 
 export interface OnboardingPageObjects extends ObltPageObjects {
   onboarding: OnboardingApp;
+  hostV2: HostV2Page;
 }
 
 export function extendPageObjects(
@@ -20,5 +22,6 @@ export function extendPageObjects(
   return {
     ...pageObjects,
     onboarding: createLazyPageObject(OnboardingApp, page),
+    hostV2: createLazyPageObject(HostV2Page, page),
   };
 }
