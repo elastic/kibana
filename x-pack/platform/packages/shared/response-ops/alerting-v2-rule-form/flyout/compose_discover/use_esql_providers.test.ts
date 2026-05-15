@@ -40,7 +40,17 @@ describe('useEsqlAutocomplete', () => {
   const getSources = jest.fn();
   const getColumnsFor = jest.fn();
   const suggestionProvider = { provideCompletionItems: jest.fn() };
-  const signatureProvider = { signatureHelpTriggerCharacters: ['('] };
+  const signatureProvider: monaco.languages.SignatureHelpProvider = {
+    signatureHelpTriggerCharacters: ['('],
+    provideSignatureHelp: jest.fn(() => ({
+      value: {
+        signatures: [],
+        activeSignature: 0,
+        activeParameter: 0,
+      },
+      dispose: jest.fn(),
+    })),
+  };
   const hoverProvider = { provideHover: jest.fn() };
 
   beforeEach(() => {
@@ -51,10 +61,12 @@ describe('useEsqlAutocomplete', () => {
     jest
       .mocked(monaco.languages.registerSignatureHelpProvider)
       .mockReturnValue({ dispose: mockDisposeSignature });
-    jest.mocked(monaco.languages.registerHoverProvider).mockReturnValue({ dispose: mockDisposeHover });
+    jest
+      .mocked(monaco.languages.registerHoverProvider)
+      .mockReturnValue({ dispose: mockDisposeHover });
     jest.mocked(ESQLLang.getSuggestionProvider).mockReturnValue(suggestionProvider);
-    jest.mocked(ESQLLang.getSignatureProvider).mockReturnValue(signatureProvider);
-    jest.mocked(ESQLLang.getHoverProvider).mockReturnValue(hoverProvider);
+    jest.mocked(ESQLLang.getSignatureProvider!).mockReturnValue(signatureProvider);
+    jest.mocked(ESQLLang.getHoverProvider!).mockReturnValue(hoverProvider);
     jest.mocked(useEsqlCallbacks).mockReturnValue({ getSources, getColumnsFor });
   });
 
@@ -75,7 +87,10 @@ describe('useEsqlAutocomplete', () => {
       ESQL_LANG_ID,
       signatureProvider
     );
-    expect(monaco.languages.registerHoverProvider).toHaveBeenCalledWith(ESQL_LANG_ID, hoverProvider);
+    expect(monaco.languages.registerHoverProvider).toHaveBeenCalledWith(
+      ESQL_LANG_ID,
+      hoverProvider
+    );
   });
 
   it('disposes registered providers on unmount', () => {
