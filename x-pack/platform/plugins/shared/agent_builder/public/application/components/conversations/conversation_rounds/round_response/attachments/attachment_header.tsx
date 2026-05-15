@@ -8,6 +8,7 @@
 import React, { useRef } from 'react';
 import {
   EuiBadge,
+  EuiBadgeGroup,
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiFlexGroup,
@@ -92,7 +93,7 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
     position: relative;
     border-bottom: ${euiTheme.border.thin};
     border-color: ${euiTheme.colors.borderBaseSubdued};
-    min-height: ${isCompact ? 'auto' : `${HEADER_HEIGHT}px`};
+    min-height: ${HEADER_HEIGHT}px;
   `;
 
   const badgeStyles = css`
@@ -115,10 +116,10 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
         )}
         <EuiFlexGroup
           responsive={false}
-          direction={isCompact ? 'column' : 'row'}
+          direction="row"
           justifyContent="spaceBetween"
-          alignItems={isCompact ? 'flexStart' : 'center'}
-          gutterSize={isCompact ? 's' : 'm'}
+          alignItems="center"
+          gutterSize="m"
           style={{ width: '100%' }}
         >
           {/* Start: icon + title/badges/subtitle */}
@@ -151,24 +152,32 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
                 >
                   <EuiFlexItem grow={false}>
                     <EuiFlexGroup
-                      gutterSize="s"
+                      gutterSize="none"
                       alignItems="center"
                       responsive={false}
                       wrap
-                      style={{ minWidth: 0 }}
+                      style={{
+                        minWidth: 0,
+                        columnGap: euiTheme.size.s,
+                        rowGap: isCompact ? 0 : euiTheme.size.xs,
+                      }}
                     >
                       <EuiFlexItem grow={false} style={{ minWidth: 0 }}>
                         <EuiText css={textStyles} size="s">
                           {title}
                         </EuiText>
                       </EuiFlexItem>
-                      {badges?.map((badge, index) => (
-                        <EuiFlexItem grow={false} key={index}>
-                          <EuiBadge color={badge.color} iconType={badge.iconType}>
-                            {badge.label}
-                          </EuiBadge>
+                      {badges && badges.length > 0 && (
+                        <EuiFlexItem grow={false}>
+                          <EuiBadgeGroup gutterSize="xs">
+                            {badges.map((badge, index) => (
+                              <EuiBadge key={index} color={badge.color} iconType={badge.iconType}>
+                                {badge.label}
+                              </EuiBadge>
+                            ))}
+                          </EuiBadgeGroup>
                         </EuiFlexItem>
-                      ))}
+                      )}
                     </EuiFlexGroup>
                   </EuiFlexItem>
                   {subtitle && (
@@ -183,14 +192,11 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
             </EuiFlexGroup>
           </EuiFlexItem>
           {/* End: action buttons + close button */}
-          <EuiFlexItem
-            grow={false}
-            style={isCompact ? { alignSelf: 'flex-end', flexShrink: 0 } : { flexShrink: 0 }}
-          >
+          <EuiFlexItem grow={false} style={{ flexShrink: 0 }}>
             <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
               {previewBadgeState !== 'previewing' && hasActionButtons && (
                 <EuiFlexItem grow={false}>
-                  <AttachmentActions buttons={actionButtons} />
+                  <AttachmentActions buttons={actionButtons} iconOnly={isCompact} />
                 </EuiFlexItem>
               )}
               {previewBadgeState === 'previewing' && (

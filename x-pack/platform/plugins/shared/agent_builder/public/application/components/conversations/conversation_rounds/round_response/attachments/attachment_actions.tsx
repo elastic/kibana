@@ -21,9 +21,10 @@ import { type ActionButton, ActionButtonType } from '@kbn/agent-builder-browser/
 
 interface AttachmentActionsProps {
   buttons: ActionButton[];
+  iconOnly?: boolean;
 }
 
-export const AttachmentActions: React.FC<AttachmentActionsProps> = ({ buttons }) => {
+export const AttachmentActions: React.FC<AttachmentActionsProps> = ({ buttons, iconOnly = false }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const secondaryButtons = buttons.filter((b) => b.type === ActionButtonType.SECONDARY);
@@ -65,33 +66,63 @@ export const AttachmentActions: React.FC<AttachmentActionsProps> = ({ buttons })
     <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="flexEnd" responsive={false}>
       {secondaryButtons.map((button) => (
         <EuiFlexItem grow={false} key={button.label}>
-          {maybeWrapWithTooltip(
-            button,
-            <EuiButtonEmpty
-              color="text"
-              size="s"
-              iconType={button.icon}
-              isDisabled={button.disabled}
-              {...getNavProps(button)}
-            >
-              {button.label}
-            </EuiButtonEmpty>
+          {iconOnly ? (
+            <EuiToolTip content={button.disabled ? button.disabledReason : button.label}>
+              <span tabIndex={button.disabled ? 0 : undefined}>
+                <EuiButtonIcon
+                  aria-label={button.label}
+                  color="text"
+                  size="s"
+                  iconType={button.icon}
+                  isDisabled={button.disabled}
+                  {...getNavProps(button)}
+                />
+              </span>
+            </EuiToolTip>
+          ) : (
+            maybeWrapWithTooltip(
+              button,
+              <EuiButtonEmpty
+                color="text"
+                size="s"
+                iconType={button.icon}
+                isDisabled={button.disabled}
+                {...getNavProps(button)}
+              >
+                {button.label}
+              </EuiButtonEmpty>
+            )
           )}
         </EuiFlexItem>
       ))}
       {primaryButtons.map((button) => (
         <EuiFlexItem grow={false} key={button.label}>
-          {maybeWrapWithTooltip(
-            button,
-            <EuiButton
-              color="text"
-              size="s"
-              iconType={button.icon}
-              isDisabled={button.disabled}
-              {...getNavProps(button)}
-            >
-              {button.label}
-            </EuiButton>
+          {iconOnly ? (
+            <EuiToolTip content={button.disabled ? button.disabledReason : button.label}>
+              <span tabIndex={button.disabled ? 0 : undefined}>
+                <EuiButtonIcon
+                  aria-label={button.label}
+                  color="text"
+                  size="s"
+                  iconType={button.icon}
+                  isDisabled={button.disabled}
+                  {...getNavProps(button)}
+                />
+              </span>
+            </EuiToolTip>
+          ) : (
+            maybeWrapWithTooltip(
+              button,
+              <EuiButton
+                color="text"
+                size="s"
+                iconType={button.icon}
+                isDisabled={button.disabled}
+                {...getNavProps(button)}
+              >
+                {button.label}
+              </EuiButton>
+            )
           )}
         </EuiFlexItem>
       ))}
