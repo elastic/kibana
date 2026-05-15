@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { parseDocument } from 'yaml';
 import type { WorkflowYaml } from '@kbn/workflows';
-import { normalizeFieldsToJsonSchema } from '@kbn/workflows/spec/lib/field_conversion';
+import type { normalizeFieldsToJsonSchema } from '@kbn/workflows/spec/lib/field_conversion';
+import { getInputsFromDefinition } from '@kbn/workflows/spec/lib/field_conversion';
 import type { WorkflowTriggerTab } from './types';
 
 export type NormalizedWorkflowInputs = ReturnType<typeof normalizeFieldsToJsonSchema>;
@@ -50,35 +50,14 @@ export function isRacAlertsApiForbiddenError(error: unknown): boolean {
   );
 }
 
-export function normalizeInputsFromDefinitionOrYaml(
-  definition: WorkflowYaml | null,
-  yamlString: string | undefined
-): NormalizedWorkflowInputs {
-  if (definition?.inputs) {
-    return normalizeFieldsToJsonSchema(definition.inputs);
-  }
-  if (yamlString) {
-    try {
-      const yamlJson = parseDocument(yamlString).toJSON();
-      if (yamlJson && typeof yamlJson === 'object' && 'inputs' in yamlJson) {
-        return normalizeFieldsToJsonSchema(yamlJson.inputs);
-      }
-    } catch {
-      // ignore errors when extracting from YAML
-    }
-  }
-  return undefined;
-}
-
 export function getDefaultTrigger(definition: WorkflowYaml | null): WorkflowTriggerTab {
   if (!definition) {
     return 'alert';
   }
 
-  const hasManualTrigger = definition.triggers?.some((trigger) => trigger.type === 'manual');
-  const normalizedInputs = normalizeFieldsToJsonSchema(definition.inputs);
+  const normalizedInputs = getInputsFromDefinition(definition);
 
-  if (hasManualTrigger && hasWorkflowInputFields(normalizedInputs)) {
+  if (normalizedInputs && hasWorkflowInputFields(normalizedInputs)) {
     return 'manual';
   }
   return 'alert';
