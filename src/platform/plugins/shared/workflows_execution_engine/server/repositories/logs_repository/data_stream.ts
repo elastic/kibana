@@ -94,6 +94,14 @@ export type LogsRepositoryDataStreamClient = IDataStreamClient<
   WorkflowLogEvent
 >;
 
+/**
+ * Bump the matching `WORKFLOWS_LOGS_MANAGED_INDEX_MAPPINGS_VERSION`
+ * when changing index mappings for a data stream in elasticsearch KibanaPlugin.
+ * This version is used to determine if the data stream needs to be rolled over
+ * on kibana startup.
+ */
+export const WORKFLOWS_LOGS_MANAGED_INDEX_MAPPINGS_VERSION = 2;
+
 export const initializeDataStreamClient = (
   coreDataStreams: DataStreamsStart
 ): Promise<LogsRepositoryDataStreamClient> => {

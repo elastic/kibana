@@ -55,6 +55,14 @@ export type TriggerEventsDataStreamClient = IDataStreamClient<
   TriggerEventDocument
 >;
 
+/**
+ * Bump the matching `WORKFLOWS_EVENTS_MANAGED_INDEX_MAPPINGS_VERSION`
+ * when changing index mappings for a data stream in elasticsearch KibanaPlugin.
+ * This version is used to determine if the data stream needs to be rolled over
+ * on kibana startup.
+ */
+export const WORKFLOWS_EVENTS_MANAGED_INDEX_MAPPINGS_VERSION = 3;
+
 export const initializeTriggerEventsClient = (
   coreDataStreams: DataStreamsStart
 ): Promise<TriggerEventsDataStreamClient> => {
