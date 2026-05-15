@@ -132,6 +132,7 @@ const IlmLifecycleSummary = ({
       {ilmSummary.policyMissing && (
         <>
           <EuiCallOut
+            announceOnMount
             title={i18n.translate('xpack.streams.lifecycleSummary.policyMissingTitle', {
               defaultMessage: 'ILM policy not found',
             })}
