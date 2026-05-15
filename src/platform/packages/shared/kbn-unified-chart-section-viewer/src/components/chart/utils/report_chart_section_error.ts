@@ -11,59 +11,22 @@ import { apm } from '@elastic/apm-rum';
 import { EsqlResponseError } from './esql_response_error';
 import { isSuppressedFetchError } from './is_suppressed_fetch_error';
 
-/**
- * Identifies which chart-section code path produced a non-render error.
- * Used as an APM label so failures can be split by origin in dashboards.
- *
- * The shared chart hook (`useLensProps`) is consumed by both the metrics
- * grid and the traces grid, so the source enum mixes a chart-shared
- * value with grid-specific values. Add new entries here when a new
- * grid-specific call site needs to report through this util.
- */
+/** APM label identifying which chart-section call site produced an error. */
 export type ChartSectionErrorSource = 'useFetchMetricsData' | 'useLensProps';
 
-/**
- * APM label value used to distinguish chart-section non-render error
- * captures from the existing React `SectionFatalReactError` /
- * `PageFatalReactError` taxonomy emitted by
- * `@kbn/shared-ux-error-boundary`.
- *
- * Named `ChartSection` (not `MetricsGrid`) because `useLensProps` —
- * one of the call sites — is shared across the metrics grid and the
- * traces grid; a metrics-grid-only label would mislabel trace failures.
- */
+/** APM `error_type` label for non-render captures (vs. SectionFatalReactError). */
 export const CHART_SECTION_ERROR_TYPE_LABEL = 'ChartSectionNonRenderError';
 
 interface ReportChartSectionErrorArgs {
   error: unknown;
   source: ChartSectionErrorSource;
-  /**
-   * Caller-supplied correlation labels (e.g. `profile_id`, `chart_id`) that
-   * help split error captures by upstream context in APM dashboards. Merged
-   * in last so call sites can override the built-in `error_type` /
-   * `chart_section_source` keys if absolutely necessary, but call sites
-   * should not normally need to do that. Values must be strings — APM RUM
-   * labels do not accept arbitrary types.
-   *
-   * Added in response to PR #265380 review feedback: without these, the
-   * Errors view in APM has no labels to filter by, making per-profile
-   * triage difficult.
-   */
+  /** Optional correlation labels (e.g. `profile_id`, `chart_id`) merged into the APM payload. */
   labels?: Record<string, string>;
 }
 
 /**
- * Reports a non-render chart-section error to APM. Per guidance from the
- * Observability/EBT stakeholders (see PR #265380 review feedback), EBT is
- * intended for product-usage analytics rather than observability /
- * monitoring, so monitoring-style error reporting goes through APM (or
- * logs) only.
- *
- * Preserves the existing `AbortError` suppression semantics from
- * `isSuppressedFetchError` — user-driven cancellations are dropped
- * silently. Non-`Error` values are also ignored.
- *
- * This util is intentionally side-effect-only and does not re-throw.
+ * Reports a non-render chart-section error to APM.
+ * No-ops on `AbortError` (per `isSuppressedFetchError`) and non-Error values.
  */
 export const reportChartSectionError = ({
   error,

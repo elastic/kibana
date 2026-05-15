@@ -58,8 +58,6 @@ export const MetricsExperienceGrid = ({
     services,
     isComponentVisible,
     selectedDimensionNames: selectedDimensions,
-    // Forwarded so error captures inside the hook carry a `profile_id`
-    // label, matching the executionContext we attach on the Lens side.
     profileId,
   });
 

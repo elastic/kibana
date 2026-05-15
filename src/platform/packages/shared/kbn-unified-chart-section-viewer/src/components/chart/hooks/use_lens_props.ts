@@ -86,27 +86,14 @@ export const useLensProps = ({
   const { euiTheme } = useEuiTheme();
   const chartConfigUpdates$ = useRef<BehaviorSubject<void>>(new BehaviorSubject<void>(undefined));
 
-  // Captures errors thrown during LensConfigBuilder.build() so the chart
-  // doesn't stay in forever-loading state. Folded into `effectiveError`
-  // below so the same "build with no datasource" fallback that fetch
-  // errors use applies to builder errors too.
+  // Builder errors are folded into `effectiveError` so the same "no datasource" fallback applies.
   const [buildError, setBuildError] = useState<Error | undefined>();
   const effectiveError = error ?? buildError;
-  // Capture the latest profile / chart identifiers so the rxjs subscription
-  // below can attach them as APM correlation labels without dragging them
-  // into its dependency array. Following the same `useLatest` pattern this
-  // hook already uses for `buildAttributesFn` so subscription identity stays
-  // stable across re-renders that only change identifiers.
+  // Read inside the rxjs subscription without rebuilding it on identifier changes.
   const profileIdRef = useLatest(profileId);
   const chartIdRef = useLatest(chartId);
-  // Identity key (name + message) of the most recent build failure that
-  // was reported / latched. A persistent failure (e.g. malformed query)
-  // throws a new Error instance every retry, so without dedup the
-  // `setBuildError` below would change `effectiveError`'s reference each
-  // time, re-fire the useEffect on line 100, kick off another build via
-  // `chartConfigUpdates$`, and loop forever — spamming APM and
-  // re-rendering. Keying on name+message keeps repeat emissions of the
-  // same logical failure quiet while still surfacing distinct ones.
+  // Dedup persistent failures by name+message so a fresh Error reference per retry
+  // doesn't loop through setBuildError -> effectiveError -> rebuild.
   const lastBuildErrorKeyRef = useRef<string | null>(null);
 
   useEffect(() => {
@@ -197,18 +184,9 @@ export const useLensProps = ({
       discoverFetch$
     ).pipe(
       // any new emission cancels previous load to avoid race conditions.
-      // catchError is INSIDE the switchMap's inner observable so a thrown
-      // build error doesn't terminate the outer subscription — it emits
-      // null for this round, reports the error, and the next trigger
-      // restarts cleanly.
       switchMap(() =>
         from(buildAttributesFn.current()).pipe(
-          // A successful build clears any previously latched builder error so
-          // the chart can recover from transient failures. Without this,
-          // `effectiveError = error ?? buildError` stays truthy for the rest
-          // of the component's lifetime once any build throws. Also clear
-          // the dedup key so that if the same logical failure resurfaces
-          // later it is reported again (one report per failure streak).
+          // Clear latched buildError and dedup key on successful rebuild.
           tap((attributes) => {
             if (attributes !== null) {
               lastBuildErrorKeyRef.current = null;
@@ -216,10 +194,6 @@ export const useLensProps = ({
             }
           }),
           catchError((buildErr: unknown) => {
-            // Dedup persistent failures so the catchError → setBuildError →
-            // effectiveError-change → useEffect → rebuild loop above can't
-            // run away. Plain string values fall through to the report
-            // branch (the util no-ops on non-Error values internally).
             const errorKey =
               buildErr instanceof Error ? `${buildErr.name}:${buildErr.message}` : null;
             if (errorKey !== null && errorKey === lastBuildErrorKeyRef.current) {
@@ -229,11 +203,6 @@ export const useLensProps = ({
             reportChartSectionError({
               error: buildErr,
               source: 'useLensProps',
-              // Correlation labels so APM dashboards can filter chart-section
-              // errors by upstream profile / chart. Kept in sync with the
-              // executionContext meta we already pass to Lens above. Read
-              // from `useLatest` refs so the subscription identity stays
-              // stable across renders that only change identifiers.
               labels: {
                 profile_id: profileIdRef.current,
                 chart_id: chartIdRef.current,
@@ -263,9 +232,6 @@ export const useLensProps = ({
     return () => {
       subscription.unsubscribe();
     };
-    // Note: profileIdRef / chartIdRef are stable identities from useLatest,
-    // so including them in the dep array does not cause the subscription to
-    // rebuild — they just satisfy the exhaustive-deps lint.
   }, [
     discoverFetch$,
     buildAttributesFn,

@@ -37,12 +37,7 @@ export function useFetchMetricsData({
   services: ChartSectionProps['services'];
   isComponentVisible: boolean;
   selectedDimensionNames?: Dimension[];
-  /**
-   * Profile ID of the surrounding data source profile. Forwarded as an APM
-   * correlation label on captured errors so dashboards can filter
-   * `useFetchMetricsData` failures by profile, matching the
-   * `executionContext.meta.profile_id` we attach on the Lens side.
-   */
+  /** Forwarded as `profile_id` APM label on captured errors. */
   profileId?: string;
 }): MetricsInfo {
   const { trackMetricsInfo } = useTelemetry();
@@ -162,9 +157,7 @@ export function useFetchMetricsData({
     executeFetch,
   ]);
 
-  // Report any landed fetch error to APM. De-duped via a ref so repeat
-  // renders with the same error instance don't spam the sink.
-  // The util internally no-ops on AbortError so cancellations stay silent.
+  // De-duped report of landed fetch errors.
   const lastReportedErrorRef = useRef<unknown>(null);
   useEffect(() => {
     if (!error || error === lastReportedErrorRef.current) {
@@ -174,9 +167,6 @@ export function useFetchMetricsData({
     reportChartSectionError({
       error,
       source: 'useFetchMetricsData',
-      // Correlation labels so the Errors view in APM can filter
-      // metrics-grid fetch failures by upstream profile. The reporter
-      // drops empty / undefined values so an unset profileId is safe.
       labels: {
         profile_id: profileId ?? '',
       },
