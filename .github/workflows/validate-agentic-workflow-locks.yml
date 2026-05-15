@@ -6,6 +6,7 @@ on:
       - '.github/workflows/*.md'
       - '.github/workflows/*.lock.yml'
       - '.github/aw/actions-lock.json'
+      - '.github/workflows/validate-agentic-workflow-locks.yml'
 
 permissions:
   contents: read
