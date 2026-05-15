@@ -14,19 +14,29 @@ export const memoriesMappings = {
   dynamic: false,
   properties: {
     '@timestamp': mappings.date({ format: 'strict_date_optional_time' }),
-    page_name: mappings.keyword(),
-    title: mappings.text(),
+    // Core identity
+    id: mappings.keyword(),
+    name: mappings.keyword(),
+    title: mappings.text({ fields: { keyword: { type: 'keyword', ignore_above: 512 } } }),
     content: mappings.text(),
+    // Classification
     categories: mappings.keyword(),
     tags: mappings.keyword(),
     references: mappings.keyword(),
-    written_by: mappings.keyword(),
-    workflow_execution_id: mappings.keyword(),
+    // Versioning & authorship
+    version: mappings.long(),
+    created_at: mappings.date({ format: 'strict_date_optional_time' }),
+    updated_at: mappings.date({ format: 'strict_date_optional_time' }),
+    created_by: mappings.keyword(),
+    updated_by: mappings.keyword(),
+    // Soft-delete flag (used by workflow write_memory_page tool)
     is_deleted: mappings.boolean(),
   },
 } satisfies MappingsDefinition;
 
 export type StoredMemoryPage = GetFieldsOf<typeof memoriesMappings>;
+// MemoryEntry mapped to the data stream document shape
+export type MemoryPageDocument = Omit<StoredMemoryPage, '@timestamp'> & { '@timestamp': string };
 
 export const memoriesDataStream: DataStreamDefinition<typeof memoriesMappings, StoredMemoryPage> = {
   name: MEMORIES_DATA_STREAM,
