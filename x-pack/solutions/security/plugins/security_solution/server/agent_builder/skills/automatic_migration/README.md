@@ -1,7 +1,16 @@
 # Automatic Migration Skills
 
-Two Agent Builder skills that improve SIEM rule migration quality from both
-in-product chat and MCP / IDE clients.
+Two Agent Builder skills that improve SIEM rule migration quality on the
+in-product Agent Builder chat surface (`POST /api/agent_builder/converse`).
+The six registered tools that back the skills are also exposed over the
+Agent Builder MCP server (`/api/agent_builder/mcp`), so external MCP
+clients (IDEs, custom apps) can drive the same operations directly — but
+**the skills themselves are not exposed over MCP**. MCP clients see the
+tool list only; skill orchestration (SKILL.md "when to use", per-skill
+tool subsetting, structural-confirmation prompts) is an in-product
+concept driven by `defineSkillType` registrations and the
+`/api/agent_builder/converse` agent loop. See "Surface model" below for
+the full integration contract.
 
 ## Skills
 
@@ -106,6 +115,40 @@ saved objects that Phase 2/3 tool handlers will touch. **No new capability
 constants are introduced in Phase 1.** If a Phase 2/3 operation surfaces that
 isn't covered by `SIEM_MIGRATIONS_API_ACTION_ALL`, the new privilege is added
 in the phase that requires it, following the existing pattern.
+
+## Surface model
+
+The two skills and the six tools are visible to different surfaces. This
+matters when integrating from an external app such as
+`example-mcp-app-security` — the integration contract is not "invoke a
+skill" but "consume a tool set the skills happen to also drive".
+
+| Surface | Skills auto-activate? | Tools available? | Notes |
+| --- | --- | --- | --- |
+| `POST /api/agent_builder/converse` (in-product chat) | yes — registered skills are loaded into the agent loop; the model picks one via SKILL.md "When to use" | yes — every registered tool is callable | The orchestration path the SKILL.md content was written for. |
+| `POST /api/agent_builder/mcp` (Agent Builder MCP server) | **no** — the MCP server iterates the tool registry and calls `server.tool(...)` for each tool; there is no `server.skill(...)` | yes — same tool list as the chat surface, optionally filtered by the `?namespace=` query param | MCP clients (Claude Desktop, Cursor, VS Code, the `example-mcp-app-security` reference app) drive their own LLM loop with their own system prompt; the SKILL.md content can be replicated client-side as prompt material, but it is not auto-loaded. |
+| `GET /api/agent_builder/skills` | n/a — read-only enumeration | n/a | Returns the SKILL.md metadata so callers can render a picker, but invoking a skill from this surface is not supported. |
+| `GET /api/agent_builder/tools` | n/a — read-only enumeration | yes — same tool list as MCP | Useful for clients that want to validate tool ids before invoking via MCP. |
+
+Practical consequences for external MCP consumers (including the
+`example-mcp-app-security` reference app):
+
+- The six migration tools (`security.migration_translated_rules_search`,
+  `…_get`, `…_update`, `security.migration_resources_list`, `…_upsert`,
+  `…_remove`) ARE the integration surface — invoke them directly over
+  MCP.
+- The "guided" UX the SKILL.md content describes (per-rule diff preview,
+  uniform-diagnosis check, single-batch confirmation, "applies on the
+  next translation run" semantics) is **not free over MCP**. An external
+  app that wants that UX has to either (a) re-run the chat surface
+  (`POST /api/agent_builder/converse`) which keeps the skill orchestration
+  inside Kibana, or (b) copy the SKILL.md content into its own host
+  prompt and drive the MCP tools with its own LLM. The skill files in
+  this directory are the source of truth for (b).
+- The destructive `confirm: z.literal(true)` gate is enforced at the
+  **tool schema** layer, so it works identically on both surfaces:
+  MCP clients calling the update / upsert / remove tools must surface a
+  confirmation step in their host UI before passing `confirm: true`.
 
 ## Architectural Seams
 
