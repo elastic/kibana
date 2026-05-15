@@ -37,34 +37,21 @@ describe('rollDataStreamIfRequired', () => {
     targetManagedIndexMappingsVersion: TARGET_VERSION,
   });
 
-  it('does nothing if there is no data stream', async () => {
-    mockEsClient.indices.exists.mockResponse(false);
-
-    await rollDataStreamIfRequired(rollParams());
-
-    expect(mockEsClient.indices.exists).toHaveBeenCalledWith({
-      index: DATA_STREAM_NAME,
-      expand_wildcards: 'all',
-    });
-    expect(mockLogger.debug).toHaveBeenCalledWith(`${msgPrefix} does not exist so ${skipMessage}`);
-    expect(mockEsClient.indices.getMapping).not.toHaveBeenCalled();
-    expect(mockEsClient.indices.rollover).not.toHaveBeenCalled();
-  });
-
-  it('does nothing if there are no mappings on the backing indices', async () => {
-    mockEsClient.indices.exists.mockResponse(true);
+  it('does nothing when getMapping returns no backing indices (missing data stream)', async () => {
     mockEsClient.indices.getMapping.mockResponse({});
 
     await rollDataStreamIfRequired(rollParams());
 
-    expect(mockLogger.debug).toHaveBeenCalledWith(
-      `${msgPrefix} has no backing indices so ${skipMessage}`
-    );
+    expect(mockEsClient.indices.getMapping).toHaveBeenCalledWith({
+      index: DATA_STREAM_NAME,
+      allow_no_indices: true,
+      expand_wildcards: 'all',
+    });
+    expect(mockLogger.debug).toHaveBeenCalledWith(`${msgPrefix} does not exist so ${skipMessage}`);
     expect(mockEsClient.indices.rollover).not.toHaveBeenCalled();
   });
 
   it('rolls over if backing indices have no managed_index_mappings_version', async () => {
-    mockEsClient.indices.exists.mockResponse(true);
     const mappings: IndicesGetMappingResponse = {
       indexName: {
         mappings: { _meta: {} },
@@ -84,7 +71,6 @@ describe('rollDataStreamIfRequired', () => {
   });
 
   it('rolls over if deployed version is older than the Kibana target', async () => {
-    mockEsClient.indices.exists.mockResponse(true);
     const olderVersion = TARGET_VERSION - 1;
     const mappings: IndicesGetMappingResponse = {
       indexName: {
@@ -103,8 +89,7 @@ describe('rollDataStreamIfRequired', () => {
     expect(mockEsClient.indices.rollover).toHaveBeenCalled();
   });
 
-  it('throws if deployed version is newer than the Kibana target', async () => {
-    mockEsClient.indices.exists.mockResponse(true);
+  it('warns and skips rollover if deployed version is newer than the Kibana target', async () => {
     const newerVersion = TARGET_VERSION + 1;
     const mappings: IndicesGetMappingResponse = {
       indexName: {
@@ -115,15 +100,15 @@ describe('rollDataStreamIfRequired', () => {
     };
     mockEsClient.indices.getMapping.mockResponse(mappings);
 
-    await expect(rollDataStreamIfRequired(rollParams())).rejects.toThrow(
-      `${msgPrefix} has ${MANAGED_INDEX_MAPPINGS_VERSION_META_FIELD} ${newerVersion} which is newer than Kibana target ${TARGET_VERSION}`
-    );
+    await rollDataStreamIfRequired(rollParams());
 
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      `${msgPrefix} has ${MANAGED_INDEX_MAPPINGS_VERSION_META_FIELD} ${newerVersion} which is newer than this node's Kibana target ${TARGET_VERSION}. Skipping rollover; this can happen during rolling Kibana upgrades when other nodes have already advanced the data stream.`
+    );
     expect(mockEsClient.indices.rollover).not.toHaveBeenCalled();
   });
 
   it('does nothing if deployed version matches the Kibana target', async () => {
-    mockEsClient.indices.exists.mockResponse(true);
     const mappings: IndicesGetMappingResponse = {
       indexName: {
         mappings: {

@@ -20,6 +20,10 @@ export interface RollDataStreamIfRequiredParams {
 /**
  * Schedules a lazy rollover when backing indices lack the target
  * `mappings._meta.managed_index_mappings_version`.
+ *
+ * The `managed_index_mappings_version` value is read from Elasticsearch backing-index
+ * mappings (`_meta`); Kibana does not stamp it here—it compares the deployed value to
+ * a local target constant to decide whether to call rollover.
  */
 export async function rollDataStreamIfRequired({
   logger,
@@ -31,20 +35,6 @@ export async function rollDataStreamIfRequired({
   const skipMessage = 'does not need to be rolled over';
   const scheduleMessage = 'scheduling lazy rollover';
 
-  const exists = await esClient.indices.exists({
-    index: dataStreamName,
-    expand_wildcards: 'all',
-  });
-
-  if (!exists) {
-    logger.debug(`${msgPrefix} does not exist so ${skipMessage}`);
-    return false;
-  }
-
-  logger.debug(
-    `${msgPrefix} target ${MANAGED_INDEX_MAPPINGS_VERSION_META_FIELD}: ${targetManagedIndexMappingsVersion}`
-  );
-
   const indexMappings = await esClient.indices.getMapping({
     index: dataStreamName,
     allow_no_indices: true,
@@ -53,9 +43,13 @@ export async function rollDataStreamIfRequired({
 
   const mappingsArray = Object.values(indexMappings);
   if (mappingsArray.length === 0) {
-    logger.debug(`${msgPrefix} has no backing indices so ${skipMessage}`);
+    logger.debug(`${msgPrefix} does not exist so ${skipMessage}`);
     return false;
   }
+
+  logger.debug(
+    `${msgPrefix} target ${MANAGED_INDEX_MAPPINGS_VERSION_META_FIELD}: ${targetManagedIndexMappingsVersion}`
+  );
 
   const deployedVersions = mappingsArray
     .map((m) => m.mappings._meta?.[MANAGED_INDEX_MAPPINGS_VERSION_META_FIELD])
@@ -75,9 +69,10 @@ export async function rollDataStreamIfRequired({
   }
 
   if (deployedVersion !== undefined && deployedVersion > targetManagedIndexMappingsVersion) {
-    throw new Error(
-      `${msgPrefix} has ${MANAGED_INDEX_MAPPINGS_VERSION_META_FIELD} ${deployedVersion} which is newer than Kibana target ${targetManagedIndexMappingsVersion}`
+    logger.warn(
+      `${msgPrefix} has ${MANAGED_INDEX_MAPPINGS_VERSION_META_FIELD} ${deployedVersion} which is newer than this node's Kibana target ${targetManagedIndexMappingsVersion}. Skipping rollover; this can happen during rolling Kibana upgrades when other nodes have already advanced the data stream.`
     );
+    return false;
   }
 
   if (deployedVersion === undefined) {
