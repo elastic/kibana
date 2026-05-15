@@ -266,7 +266,9 @@ const scenario: Scenario<ApmOtelFields> = async ({ from, to, logger, ...runOptio
       logger.info(`Indexed ${otelDocs.length} OTel JVM metric docs`);
 
       logger.info(
-        `Overlap period: ${new Date(otelStart).toISOString()} to ${new Date(classicEnd).toISOString()}`
+        `Overlap period: ${new Date(otelStart).toISOString()} to ${new Date(
+          classicEnd
+        ).toISOString()}`
       );
 
       await esClient.indices.refresh({
