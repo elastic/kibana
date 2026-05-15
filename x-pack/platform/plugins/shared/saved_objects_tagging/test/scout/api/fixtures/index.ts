@@ -10,7 +10,6 @@ import { apiTest as baseApiTest } from '@kbn/scout';
 
 export const apiTest = baseApiTest.extend<ScoutTestFixtures, ScoutWorkerFixtures>({});
 
-export { COMMON_HEADERS, TELEMETRY_HEADERS, KBN_ARCHIVES } from './constants';
 export {
   COMMON_HEADERS,
   KBN_ARCHIVES,
@@ -20,4 +19,5 @@ export {
   SO_TAGGING_WRITE_ROLE,
   DASHBOARD_WRITE_ROLE,
   VISUALIZE_WRITE_ROLE,
+  TELEMETRY_HEADERS,
 } from './constants';
