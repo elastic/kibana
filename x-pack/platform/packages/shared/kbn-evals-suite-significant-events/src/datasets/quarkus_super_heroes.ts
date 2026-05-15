@@ -1034,7 +1034,7 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
                 bool: {
                   filter: [{ term: { 'resource.attributes.app.keyword': 'rest-heroes' } }],
                   should: [
-                    { match_phrase: { 'body.text': 'NoStackTraceThrowable' } },
+                    { match_phrase: { 'body.text': 'io.vertx.core.impl.NoStackTraceThrowable' } },
                     { match_phrase: { 'body.text': 'HR000021' } },
                     { match_phrase: { 'body.text': 'HTTP Request to /api/heroes/random failed' } },
                   ],
