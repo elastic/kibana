@@ -62,6 +62,7 @@ import {
   LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   DATA_STREAM_TYPE_VAR_NAME,
+  OTEL_COLLECTOR_INPUT_TYPE,
 } from '../../common/constants';
 import type {
   PostDeletePackagePoliciesResponse,
@@ -2689,6 +2690,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           cloud_connector_id: newPolicy.cloud_connector_id,
           cloud_connector_name: newPolicy.cloud_connector_name,
           additional_datastreams_permissions: newPolicy.additional_datastreams_permissions,
+          condition: newPolicy.condition,
         };
       }
     }
@@ -3544,7 +3546,55 @@ class PackagePolicyClientWithAuthz extends PackagePolicyClientImpl {
   }
 }
 
+function validateConditionPlacement(packagePolicy: NewPackagePolicy) {
+  const { enableIntegrationConditions } = appContextService.getExperimentalFeatures();
+  const isAgentless = packagePolicy.supports_agentless === true;
+  const throwDisabled = () => {
+    throw new PackagePolicyValidationError(
+      i18n.translate('xpack.fleet.packagePolicyConditionFeatureDisabled', {
+        defaultMessage: '`condition` is not supported because the conditions feature is disabled.',
+      })
+    );
+  };
+  const throwAgentless = () => {
+    throw new PackagePolicyValidationError(
+      i18n.translate('xpack.fleet.packagePolicyConditionNotAllowedAgentless', {
+        defaultMessage: '`condition` is not supported on agentless package policies.',
+      })
+    );
+  };
+  const throwOtel = () => {
+    throw new PackagePolicyValidationError(
+      i18n.translate('xpack.fleet.packagePolicyConditionNotAllowedOtel', {
+        defaultMessage: '`condition` is not supported on `{otelcol}` inputs or their streams.',
+        values: { otelcol: OTEL_COLLECTOR_INPUT_TYPE },
+      })
+    );
+  };
+
+  if (packagePolicy.condition) {
+    if (!enableIntegrationConditions) throwDisabled();
+    if (isAgentless) throwAgentless();
+  }
+
+  for (const input of packagePolicy.inputs) {
+    const isOtel = input.type === OTEL_COLLECTOR_INPUT_TYPE;
+    if (input.condition) {
+      if (!enableIntegrationConditions) throwDisabled();
+      if (isAgentless) throwAgentless();
+      if (isOtel) throwOtel();
+    }
+    for (const stream of input.streams) {
+      if (!stream.condition) continue;
+      if (!enableIntegrationConditions) throwDisabled();
+      if (isAgentless) throwAgentless();
+      if (isOtel) throwOtel();
+    }
+  }
+}
+
 function validatePackagePolicyOrThrow(packagePolicy: NewPackagePolicy, pkgInfo: PackageInfo) {
+  validateConditionPlacement(packagePolicy);
   const validationResults = validatePackagePolicy(packagePolicy, pkgInfo, parse);
   if (validationHasErrors(validationResults)) {
     const responseFormattedValidationErrors = Object.entries(getFlattenedObject(validationResults))
