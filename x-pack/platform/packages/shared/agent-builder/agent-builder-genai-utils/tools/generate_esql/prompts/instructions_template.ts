@@ -79,7 +79,7 @@ export const getEsqlInstructions = (params: InstructionsTemplateParams = {}): st
     This ensures that time series aggregations are performed correctly and efficiently, and allows using time-serie specific functions such as TBUCKET or RATE.
 
     The only reasons to **not** use \`TS\` for time series are:
-    - request is about returning raw documents (no aggregations)
+    - request is about returning raw documents (no aggregations / STATS commands)
     - user explicitly asked to use FROM
 
     ## ES|QL query formatting

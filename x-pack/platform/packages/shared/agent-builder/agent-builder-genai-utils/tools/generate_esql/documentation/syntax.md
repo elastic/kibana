@@ -203,7 +203,7 @@ ES|QL processing commands change an input table by adding, removing, or changing
 
 ## Time series aggregation functions
   
-*To be used with `TS`*
+**Important: time series aggregation functions can only be used with `TS`**
 
 - ABSENT_OVER_TIME: Calculates the absence of a field in the output result over time range
 - AVG_OVER_TIME: Average value over the time window
@@ -356,7 +356,6 @@ Some functions, like `MATCH`, support named parameters for additional options:
  | WHERE MATCH(author, "Frank Herbert", {"minimum_should_match": 2, "operator": "AND"})
  | LIMIT 5
  ```
-
 
 ## Limitations 
 
