@@ -16,6 +16,12 @@ interface CachedKey {
   encoded: string;
 }
 
+interface ApiKeyResponse {
+  id: string | null;
+  name: string | null;
+  encoded: string | null;
+}
+
 // Module-level in-flight promise so concurrent hook instances share one request.
 let inFlightApiKeyRequest: Promise<string | null> | null = null;
 
@@ -50,11 +56,13 @@ const fetchApiKey = (
   }
 
   inFlightApiKeyRequest = http
-    .post<CachedKey>(apiKeyPath, {
+    .post<ApiKeyResponse>(apiKeyPath, {
       body: JSON.stringify({}),
     })
     .then((result) => {
-      writeCachedKey(result);
+      if (result.encoded && result.id && result.name) {
+        writeCachedKey({ id: result.id, name: result.name, encoded: result.encoded });
+      }
       return result.encoded;
     })
     .catch(() => null)

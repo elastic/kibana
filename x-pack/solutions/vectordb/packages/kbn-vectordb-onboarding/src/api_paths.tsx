@@ -13,7 +13,9 @@ import React, { createContext, useContext } from 'react';
  * provides the matching paths via the context.
  */
 export interface OnboardingApiPaths {
-  /** POST endpoint that creates an API key. Returns `{ id, name, encoded }`. */
+  /** POST endpoint that gets-or-creates an onboarding API key.
+   *  Returns `{ id, name, encoded }` when a new key is created.
+   *  Returns `{ id: null, name: null, encoded: null }` when an active onboarding key already exists. */
   apiKey: string;
   /** GET endpoint returning `{ indicesCount, vectorDocsCount, storeSizeBytes }`. */
   deploymentStats: string;
