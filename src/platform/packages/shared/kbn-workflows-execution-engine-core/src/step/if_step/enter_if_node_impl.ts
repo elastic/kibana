@@ -8,11 +8,11 @@
  */
 
 import type { EnterConditionBranchNode, EnterIfNode, WorkflowGraph } from '@kbn/workflows/graph';
-import type { IStepExecutionRuntime } from '@kbn/workflows-execution-engine-core';
-import type { IWorkflowExecutionRuntimeManager } from '@kbn/workflows-execution-engine-core';
-import type { IWorkflowEventLogger } from '@kbn/workflows-execution-engine-core';
+import type { INodeImplementation } from '../../..';
+import type { IStepExecutionRuntime } from '../../..';
+import type { IWorkflowExecutionRuntimeManager } from '../../..';
+import type { IWorkflowEventLogger } from '../../..';
 import { evaluateCondition } from '../../evaluate_condition';
-import type { INodeImplementation } from '@kbn/workflows-execution-engine-core';
 
 export class EnterIfNodeImpl implements INodeImplementation {
   constructor(
