@@ -2156,12 +2156,10 @@
     {
       "groupName": "langchain",
       "matchDepNames": [
-        "langchain",
         "@langchain/aws",
         "@langchain/classic",
         "@langchain/core",
         "@langchain/google-common",
-        "@langchain/google-genai",
         "@langchain/google-vertexai",
         "@langchain/langgraph",
         "@langchain/langgraph-checkpoint",
@@ -2187,24 +2185,6 @@
       "reviewers": ["team:security-threat-hunting"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Threat Hunting"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
-      "groupName": "nunjucks",
-      "matchDepNames": ["@types/nunjucks", "nunjucks"],
-      "reviewers": ["team:integration-experience"],
-      "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Integration-Experience"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
-      "groupName": "oas",
-      "matchDepNames": ["oas"],
-      "reviewers": ["team:integration-experience"],
-      "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Integration-Experience"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
