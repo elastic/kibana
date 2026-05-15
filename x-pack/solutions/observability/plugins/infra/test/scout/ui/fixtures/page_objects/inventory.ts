@@ -28,6 +28,8 @@ export class InventoryPage {
   public readonly metricSwitcherButton: Locator;
   public readonly metricsContextMenu: Locator;
 
+  public readonly schemaSelect: Locator;
+
   public readonly k8sTourText: Locator;
   public readonly k8sTourDismissButton: Locator;
 
@@ -79,6 +81,8 @@ export class InventoryPage {
 
     this.metricSwitcherButton = this.page.getByTestId('infraInventoryMetricDropdown');
     this.metricsContextMenu = this.page.getByTestId('infraInventoryMetricsContextMenu');
+
+    this.schemaSelect = this.page.getByTestId('infraSchemaSelect');
 
     this.k8sTourText = this.page.getByTestId('infra-kubernetesTour-text');
     this.k8sTourDismissButton = this.page.getByTestId('infra-kubernetesTour-dismiss');
