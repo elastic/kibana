@@ -62,13 +62,21 @@ const esQueryConfig = {
 
 const logger = {} as Logger;
 
-const callGetData = (search: ElasticsearchClient['search']) =>
+const expectedNoDataResponse = {
+  [UNGROUPED_FACTORY_KEY]: {
+    value: null,
+    trigger: false,
+    bucketKey: { groupBy0: UNGROUPED_FACTORY_KEY },
+  },
+};
+
+const callGetData = (search: ElasticsearchClient['search'], groupBy?: string | string[]) =>
   getData(
     { search } as ElasticsearchClient,
     params,
     'metrics-*',
     '@timestamp',
-    undefined,
+    groupBy,
     searchConfiguration,
     undefined,
     esQueryConfig,
@@ -110,13 +118,36 @@ describe('getData', () => {
       })
     );
 
-    expect(response).toEqual({
-      [UNGROUPED_FACTORY_KEY]: {
-        value: null,
-        trigger: false,
-        bucketKey: { groupBy0: UNGROUPED_FACTORY_KEY },
-      },
-    });
+    expect(response).toEqual(expectedNoDataResponse);
+  });
+
+  it('returns no data when a last value no-data error is surfaced as a message', async () => {
+    const response = await callGetData(
+      jest.fn().mockRejectedValue({
+        message:
+          'buckets_path must reference either a number value or a single value numeric metric aggregation',
+      })
+    );
+
+    expect(response).toEqual(expectedNoDataResponse);
+  });
+
+  it('returns no data when a grouped search has no buckets', async () => {
+    const response = await callGetData(
+      jest.fn().mockResolvedValue({
+        aggregations: {
+          groupings: {
+            buckets: [],
+          },
+        },
+        _shards: {
+          successful: 1,
+        },
+      }),
+      'host.name'
+    );
+
+    expect(response).toEqual(expectedNoDataResponse);
   });
 
   it('throws other Elasticsearch errors', async () => {
