@@ -37,8 +37,14 @@ tools:
   github:
     toolsets: [default]
     min-integrity: none
+runs-on: kibana
 network:
-  allowed: [defaults, node, elastic.litellm-prod.ai]
+  allowed:
+    - defaults
+    - github
+    - registry.npmjs.org
+    - kibana-bazel-remote-h5qd3jkxkq-uc.a.run.app
+    - elastic.litellm-prod.ai
 checkout:
   fetch-depth: 0
 safe-outputs:
