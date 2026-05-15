@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -12,9 +13,6 @@ import { Breadcrumb } from '../breadcrumb';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { OpenInDiscover } from '../../shared/links/discover_links/open_in_discover';
 import { ApmIndexSettingsContextProvider } from '../../../context/apm_index_settings/apm_index_settings_context';
-
-// Visually align `EuiButtonEmpty` with the larger page title baseline.
-const exploreTracesButtonCss = css({ marginTop: 4 });
 
 export function TraceOverview({
   children,
@@ -30,6 +28,15 @@ export function TraceOverview({
   const {
     query: { environment, kuery, rangeFrom, rangeTo },
   } = useApmParams('/traces');
+
+  const { euiTheme } = useEuiTheme();
+  // Visually align `EuiButtonEmpty` with the larger page title baseline.
+  // `display: inline-flex` prevents the inline wrapper from adding extra
+  // line-height-driven height around the button.
+  const exploreTracesButtonCss = css({
+    display: 'inline-flex',
+    marginTop: euiTheme.size.xs,
+  });
 
   return (
     <ApmIndexSettingsContextProvider>
