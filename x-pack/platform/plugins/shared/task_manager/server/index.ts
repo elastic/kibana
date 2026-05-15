@@ -61,6 +61,8 @@ export type {
   TaskManagerStartContract,
 } from './plugin';
 
+export { TaskAlreadyRunningError } from './lib/errors';
+
 export { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER } from './constants';
 
 export const config: PluginConfigDescriptor<TaskManagerConfig> = {

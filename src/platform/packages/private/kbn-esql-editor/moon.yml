@@ -18,7 +18,6 @@ project:
   sourceRoot: src/platform/packages/private/kbn-esql-editor
 dependsOn:
   - '@kbn/i18n'
-  - '@kbn/monaco'
   - '@kbn/es-query'
   - '@kbn/core'
   - '@kbn/kibana-react-plugin'
