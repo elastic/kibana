@@ -46,6 +46,7 @@ import { css } from '@emotion/css';
 import { CodeEditor } from '@kbn/code-editor';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import { useHistory, useParams } from 'react-router-dom';
+import { TraceWaterfall, useTraceSpans } from '@kbn/llm-trace-waterfall';
 import type {
   DatasetExample,
   EvaluationRunSummary,
@@ -55,12 +56,13 @@ import {
   useAddExamples,
   useDataset,
   useDeleteExample,
+  useEvalsTraceFetcher,
   useExampleScores,
   useEvaluationRuns,
   useUpdateDataset,
   useUpdateExample,
 } from '../../hooks/use_evals_api';
-import { TraceWaterfall } from '../../components/trace_waterfall';
+import { useEvalsPermissions } from '../../hooks/use_evals_permissions';
 import * as i18n from './translations';
 
 type JsonObject = Record<string, unknown>;
@@ -102,6 +104,7 @@ export const DatasetDetailPage: React.FC = () => {
   const { datasetId } = useParams<{ datasetId: string }>();
   const history = useHistory();
   const { euiTheme } = useEuiTheme();
+  const { canManage } = useEvalsPermissions();
 
   const { data: dataset, isLoading: isDatasetLoading, error: datasetError } = useDataset(datasetId);
   const {
@@ -134,6 +137,13 @@ export const DatasetDetailPage: React.FC = () => {
   const [formError, setFormError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTraceId, setSelectedTraceId] = useState<string | null>(null);
+  const fetchTrace = useEvalsTraceFetcher();
+  const {
+    spans,
+    durationMs,
+    isLoading: traceLoading,
+    error: traceError,
+  } = useTraceSpans(selectedTraceId, { fetchTrace });
 
   const {
     data: exampleScoresData,
@@ -591,7 +601,7 @@ export const DatasetDetailPage: React.FC = () => {
               <h2>{i18n.getPageTitle(dataset?.name ?? datasetId)}</h2>
             </EuiTitle>
           </EuiFlexItem>
-          {dataset ? (
+          {dataset && canManage ? (
             <EuiFlexItem grow={false}>
               <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
                 <EuiFlexItem grow={false}>
@@ -714,27 +724,29 @@ export const DatasetDetailPage: React.FC = () => {
                   </h2>
                 </EuiTitle>
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup gutterSize="s" responsive={false}>
-                  {!isEditingExample ? (
-                    <>
-                      <EuiFlexItem grow={false}>
-                        <EuiButton size="s" iconType="pencil" onClick={enterEditMode}>
-                          {i18n.EDIT_EXAMPLE_BUTTON}
-                        </EuiButton>
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiButtonIcon
-                          aria-label={i18n.DELETE_EXAMPLE_BUTTON}
-                          iconType="trash"
-                          color="danger"
-                          onClick={() => setDeletingExample(selectedExample)}
-                        />
-                      </EuiFlexItem>
-                    </>
-                  ) : null}
-                </EuiFlexGroup>
-              </EuiFlexItem>
+              {canManage ? (
+                <EuiFlexItem grow={false}>
+                  <EuiFlexGroup gutterSize="s" responsive={false}>
+                    {!isEditingExample ? (
+                      <>
+                        <EuiFlexItem grow={false}>
+                          <EuiButton size="s" iconType="pencil" onClick={enterEditMode}>
+                            {i18n.EDIT_EXAMPLE_BUTTON}
+                          </EuiButton>
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <EuiButtonIcon
+                            aria-label={i18n.DELETE_EXAMPLE_BUTTON}
+                            iconType="trash"
+                            color="danger"
+                            onClick={() => setDeletingExample(selectedExample)}
+                          />
+                        </EuiFlexItem>
+                      </>
+                    ) : null}
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+              ) : null}
             </EuiFlexGroup>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
@@ -1041,7 +1053,13 @@ export const DatasetDetailPage: React.FC = () => {
             `}
           >
             <div style={{ height: '100%', padding: 16 }}>
-              <TraceWaterfall traceId={selectedTraceId} />
+              <TraceWaterfall
+                spans={spans}
+                traceId={selectedTraceId}
+                durationMs={durationMs}
+                isLoading={traceLoading}
+                error={traceError}
+              />
             </div>
           </EuiFlyoutBody>
         </EuiFlyoutResizable>
