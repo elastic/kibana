@@ -15,7 +15,7 @@
 @base2/pretty-print-object@1.0.1
 @elastic/apm-rum-core@5.25.2
 @elastic/charts@71.6.0
-@elastic/esql@3.0.0
+@elastic/esql@4.0.0
 @elastic/eui-theme-borealis@7.0.0
 @elastic/eui-theme-common@9.0.0
 @elastic/eui@115.0.0
