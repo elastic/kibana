@@ -120,9 +120,9 @@ describe('runResolveTestingScope', () => {
   });
 
   it('writes a tests-only scope for a Scout-tests-only diff', () => {
-    // We can't override REPO_ROOT trivially here; the test asserts the
-    // kind=tests-only outcome plus the affectedModules pass-through.
-    // affectedConfigs may be empty if the on-disk resolver lookup misses tmpRoot.
+    // `affectedConfigs` is discovered on disk relative to REPO_ROOT, which
+    // we can't redirect at this tmp path, so we only assert on `kind` and
+    // `affectedModules` here.
     writeCodeChanges(['pkg/test/scout/ui/tests/foo.spec.ts'], ['@kbn/pkg']);
     setFlags({
       codeChanges: codeChangesPath,

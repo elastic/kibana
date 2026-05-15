@@ -412,11 +412,10 @@ describe('Scout path regexes', () => {
 });
 
 /**
- * `pipeline-utils/` is hermetic and may not import `@kbn/*`, so
- * `.buildkite/pipeline-utils/ci-stats/pick_test_group_run_order/selective_scout.ts`
- * keeps a duplicate of the Scout tests-only patterns defined here. This test
- * reads that file as text and asserts every pattern appears verbatim, so the
- * two copies cannot drift unnoticed.
+ * `selective_scout.ts` (under `.buildkite/pipeline-utils/`) can't import from
+ * `@kbn/*` packages, so it keeps its own copy of these patterns. This test
+ * reads that file and checks each pattern is still present, so the two
+ * copies stay in sync.
  */
 describe('Scout tests-only patterns duplicated in pipeline-utils/selective_scout', () => {
   const duplicatePath = path.resolve(
@@ -425,8 +424,8 @@ describe('Scout tests-only patterns duplicated in pipeline-utils/selective_scout
   );
   const duplicateSource = fs.readFileSync(duplicatePath, 'utf-8');
 
-  // selective_scout.ts uses single-quoted string literals (TS/Kibana style),
-  // but accept double quotes too in case the formatter ever changes.
+  // Match the pattern whether it's written with single or double quotes,
+  // so reformatting selective_scout.ts can't accidentally break this test.
   const containsPatternLiteral = (source: string, pattern: string): boolean =>
     source.includes(`'${pattern}'`) || source.includes(`"${pattern}"`);
 

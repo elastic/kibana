@@ -13,13 +13,10 @@ import { readCodeChanges } from '../tests_discovery/code_changes';
 import { resolveScoutTestingScope, writeScoutTestingScope } from '../tests_discovery/testing_scope';
 
 /**
- * Resolve the Scout selective-testing scope for a PR diff and publish it as a
- * small JSON artifact. This command is the single producer of
- * `testing_scope.json`; every downstream Scout step (discover-playwright-configs,
- * create-test-tracks) and cross-pipeline consumer (FTR/Jest skip) reads from it.
- *
- * Strategy-agnostic: runs once in the shared prelude of the Scout Test Run
- * Builder step, before either the configs or lanes branch executes.
+ * Decides which Scout tests to run for a PR diff and writes the result to
+ * `testing_scope.json`. The same file is then read by
+ * `discover-playwright-configs` (configs strategy) and `create-test-tracks`
+ * (lanes strategy), so the decision is made once per build.
  */
 export const runResolveTestingScope = (flagsReader: FlagsReader, log: ToolingLog): void => {
   const codeChangesPath = flagsReader.string('code-changes');
