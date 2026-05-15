@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import invariant from 'node:assert';
 import type api from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { prettyPrintAndSortKeys } from '@kbn/utils';
@@ -121,16 +120,6 @@ export async function initializeDataStream({
 }): Promise<{ migrated: boolean }> {
   const version = dataStream.version;
   logger.debug(`Migrating data stream write index: ${dataStream.name} v${version}`);
-
-  if (existingIndexTemplate) {
-    const deployedVersion = existingIndexTemplate.index_template?._meta?.version;
-    // Guards against a corrupted `_meta` (no version, wrong type). Not a version short-circuit:
-    // the migration round-trip runs regardless of `deployedVersion`.
-    invariant(
-      typeof deployedVersion === 'number' && deployedVersion > 0,
-      `Datastream ${dataStream.name} metadata is in an unexpected state, expected version to be a number but got ${deployedVersion}`
-    );
-  }
 
   // https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-get-data-stream#operation-indices-get-data-stream-200-body-application-json-data_streams-indices
   // The last item in this array contains information about the stream’s current write index.

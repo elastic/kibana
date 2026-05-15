@@ -13,6 +13,7 @@ import type { AnyDataStreamDefinition } from '../types';
 import { initializeDataStream, createDataStream } from './data_stream';
 import { initializeIndexTemplate } from './index_template';
 import { getExistingDataStream, getExistingIndexTemplate } from './exists_checks';
+import { assertDeployedVersion } from './assert_deployed_version';
 
 /**
  * https://www.elastic.co/docs/manage-data/data-store/data-streams/set-up-data-stream
@@ -52,6 +53,11 @@ export async function initialize({
     logger
   );
 
+  // Validate `_meta.version` once at the boundary; downstream steps trust the typed value.
+  const deployedVersion = existingIndexTemplate
+    ? assertDeployedVersion(existingIndexTemplate, dataStream.name)
+    : undefined;
+
   // The index template is created and updated in all cases except if the data stream does not exist and we will not create it now.
   const createIndexTemplateIfDoesntExist = existingDataStream ? true : !lazyCreation;
 
@@ -81,6 +87,7 @@ export async function initialize({
     dataStream,
     elasticsearchClient,
     existingIndexTemplate,
+    deployedVersion,
     skipCreation: !createIndexTemplateIfDoesntExist,
   });
 

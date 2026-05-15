@@ -25,6 +25,7 @@ import { initialize } from './initialize';
 import { initializeIndexTemplate } from './initialize/index_template';
 import { initializeDataStream } from './initialize/data_stream';
 import { getExistingDataStream, getExistingIndexTemplate } from './initialize/exists_checks';
+import { assertDeployedVersion } from './initialize/assert_deployed_version';
 import { validateClientArgs } from './validate_client_args';
 import {
   generateSpacePrefixedId,
@@ -113,6 +114,11 @@ export class DataStreamClient<
       getExistingIndexTemplate(elasticsearchClient, dataStream.name, logger),
     ]);
 
+    // Validate `_meta.version` once at the boundary; downstream steps trust the typed value.
+    const deployedVersion = existingIndexTemplate
+      ? assertDeployedVersion(existingIndexTemplate, dataStream.name)
+      : undefined;
+
     // Migrate the existing write index BEFORE installing the new template, so a migration
     // failure leaves the on-disk `_meta.version` untouched and the next call can retry
     // (see elastic/kibana#268853). When no data stream exists yet, this is a no-op.
@@ -133,6 +139,7 @@ export class DataStreamClient<
       dataStream,
       elasticsearchClient,
       existingIndexTemplate,
+      deployedVersion,
       skipCreation: false,
     });
   }
