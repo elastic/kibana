@@ -18,25 +18,15 @@ import { getLatencyChart } from './trace_charts_definition';
 type LatencyChartContentProps = NonNullable<ReturnType<typeof getLatencyChart>>;
 
 const LatencyChartContent = ({ esqlQuery, seriesType, color, title }: LatencyChartContentProps) => {
-  const {
-    services,
-    fetchParams,
-    discoverFetch$,
-    indexes,
-    onBrushEnd,
-    onFilter,
-    actions,
-    profileId,
-  } = useTraceMetricsContext();
+  const { services, fetchParams, discoverFetch$, onBrushEnd, onFilter, actions, profileId } =
+    useTraceMetricsContext();
 
   const chartLayers = useChartLayers({
     metricItem: {
       metricName: 'duration_ms',
       metricTypes: ['histogram'],
       units: ['ms'],
-      dataStream: indexes,
       fieldTypes: [ES_FIELD_TYPES.DOUBLE],
-      dimensionFields: [],
     },
     color,
     seriesType,

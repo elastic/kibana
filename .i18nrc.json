@@ -11,6 +11,7 @@
     "cases": [
       "src/platform/packages/shared/kbn-cases-components"
     ],
+    "llmTraceWaterfall": "x-pack/platform/packages/shared/llm-trace-waterfall",
     "cellActions": "src/platform/packages/shared/kbn-cell-actions",
     "charts": "src/platform/plugins/shared/charts",
     "console": "src/platform/plugins/shared/console",

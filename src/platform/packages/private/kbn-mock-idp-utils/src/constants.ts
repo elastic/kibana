@@ -15,6 +15,9 @@ export const MOCK_IDP_LOGOUT_PATH = '/mock_idp/logout';
 // the Elasticsearch SAML realm aligned with Kibana's URL across restarts.
 export const MOCK_IDP_KIBANA_BASE_PATH = '/kbn';
 
+// Externally-visible Kibana URL — must match the SAML realm's `kibana_url` exactly.
+export const MOCK_IDP_KIBANA_URL = `http://localhost:5601${MOCK_IDP_KIBANA_BASE_PATH}`;
+
 // These are the values that dev UIAM service is configured with (openssl rand 32 | base64).
 export const MOCK_IDP_UIAM_SIGNING_SECRET = 'MnpT2a582F/LiRbocLHLnSF2SYElqTUdmQvBpVn+51Q=';
 export const MOCK_IDP_UIAM_SHARED_SECRET = 'Dw7eRt5yU2iO9pL3aS4dF6gH8jK0lZ1xC2vB3nM4qW5=';

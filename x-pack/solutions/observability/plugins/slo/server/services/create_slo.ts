@@ -14,6 +14,7 @@ import type {
   Logger,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
+import { addTransactionLabels } from '@kbn/apm-utils';
 import type { CreateSLOParams, CreateSLOResponse } from '@kbn/slo-schema';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
@@ -41,6 +42,7 @@ import { createTempSummaryDocument } from './summary_transform_generator/helpers
 import type { TransformManager } from './transform_manager';
 import { assertExpectedIndicatorSourceIndexPrivileges } from './utils/assert_expected_indicator_source_index_privileges';
 import { getTransformQueryComposite } from './utils/get_transform_compite_query';
+import { getSloApmLabels } from './utils';
 
 export class CreateSLO {
   constructor(
@@ -57,6 +59,7 @@ export class CreateSLO {
 
   public async execute(params: CreateSLOParams): Promise<CreateSLOResponse> {
     const slo = this.toSLO(params);
+    addTransactionLabels(getSloApmLabels(slo));
     validateSLO(slo);
 
     await Promise.all([

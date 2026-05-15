@@ -10,11 +10,13 @@ plugins:
     - banners
     - cloud_security_posture
     - console
+    - contentManagementExamples
     - custom_branding
     - dashboard
     - dashboard_markdown
     - data
     - data_views
+    - dev_tools
     - discover
     - discover_enhanced
     - entity_store
@@ -24,9 +26,13 @@ plugins:
     - flyoutSystemExamples
     - gen_ai_settings
     - global_search
+    - grokdebugger
     - index_management
     - infra
+    - ingest_pipelines
     - intercepts
+    - home
+    - kibana_overview
     - lens
     - logstash
     - maps
@@ -42,6 +48,7 @@ plugins:
     - search_getting_started
     - search_homepage
     - search_inference_endpoints
+    - searchprofiler
     - security
     - security_solution
     - serverless_observability
