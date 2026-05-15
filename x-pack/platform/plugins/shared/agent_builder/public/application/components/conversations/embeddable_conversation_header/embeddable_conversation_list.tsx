@@ -35,7 +35,7 @@ export const EmbeddableConversationList: React.FC<EmbeddableConversationListProp
   const { euiTheme } = useEuiTheme();
   const { agentId, conversationId, setConversationId } = useConversationContext();
   const { removeAllErrors } = useStreamingContext();
-  const { conversations = [], isLoading } = useConversationList({ agentId, staleTime: Infinity });
+  const { conversations = [], isLoading } = useConversationList({ agentId });
 
   const sortedConversations = useMemo(
     () =>
