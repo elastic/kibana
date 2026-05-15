@@ -13,7 +13,7 @@ import type {
 } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
 import type { SmlTypeRegistry } from './sml_type_registry';
-import type { SmlIndexAction, SmlContext } from './types';
+import type { SmlIndexAction, SmlContext, SmlDocument } from './types';
 import { createSmlStorage, smlIndexName } from './sml_storage';
 import { isNotFoundError } from './sml_service';
 
@@ -124,20 +124,30 @@ class SmlIndexerImpl implements SmlIndexer {
     const now = new Date().toISOString();
     const bulkOps = smlData.chunks.map((chunk) => {
       const chunkId = `${attachmentType}:${originId}:${uuidv4()}`;
+      const document: SmlDocument = {
+        id: chunkId,
+        type: chunk.type,
+        title: chunk.title,
+        origin_id: originId,
+        content: chunk.content,
+        created_at: now,
+        updated_at: now,
+        spaces,
+        permissions: chunk.permissions ?? [],
+      };
+      if (chunk.description !== undefined) {
+        document.description = chunk.description;
+      }
+      if (chunk.user_id !== undefined) {
+        document.user_id = chunk.user_id;
+      }
+      if (chunk.references !== undefined) {
+        document.references = chunk.references;
+      }
       return {
         index: {
           _id: chunkId,
-          document: {
-            id: chunkId,
-            type: chunk.type,
-            title: chunk.title,
-            origin_id: originId,
-            content: chunk.content,
-            created_at: now,
-            updated_at: now,
-            spaces,
-            permissions: chunk.permissions ?? [],
-          },
+          document,
         },
       };
     });

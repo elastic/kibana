@@ -1,0 +1,472 @@
+{
+  "id": "@kbn/human-readable-id",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/human-readable-id",
+        "id": "def-common.buildCandidateIds",
+        "type": "Function",
+        "tags": [],
+        "label": "buildCandidateIds",
+        "description": [
+          "\nBuilds the list of candidate IDs for a given base ID:\n[baseId, baseId-1, baseId-2, ..., baseId-{MAX_COLLISION_RETRIES}].\n\nWhen a base ID is near HUMAN_READABLE_ID_MAX_LENGTH and already ends with a\nhyphen-digit pattern (e.g. `<252 chars>-1`), truncation + re-suffixing\ncan reconstruct the original base, producing a duplicate entry. Duplicates\nare skipped so every element in the returned array is unique."
+        ],
+        "signature": [
+          "(baseId: string) => string[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-human-readable-id/src/collision.ts",
+        "lineNumber": 33,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/human-readable-id",
+            "id": "def-common.buildCandidateIds.$1",
+            "type": "string",
+            "tags": [],
+            "label": "baseId",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-human-readable-id/src/collision.ts",
+            "lineNumber": 33,
+            "columnNumber": 35,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/human-readable-id",
+        "id": "def-common.buildSuffixedCandidate",
+        "type": "Function",
+        "tags": [],
+        "label": "buildSuffixedCandidate",
+        "description": [
+          "\nBuilds a single suffixed candidate ID from a base ID and a numeric index.\nTruncates the base when appending the suffix would exceed HUMAN_READABLE_ID_MAX_LENGTH\nand strips trailing hyphens to prevent invalid double-hyphen sequences."
+        ],
+        "signature": [
+          "(baseId: string, index: number) => string"
+        ],
+        "path": "src/platform/packages/shared/kbn-human-readable-id/src/collision.ts",
+        "lineNumber": 17,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/human-readable-id",
+            "id": "def-common.buildSuffixedCandidate.$1",
+            "type": "string",
+            "tags": [],
+            "label": "baseId",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-human-readable-id/src/collision.ts",
+            "lineNumber": 17,
+            "columnNumber": 40,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/human-readable-id",
+            "id": "def-common.buildSuffixedCandidate.$2",
+            "type": "number",
+            "tags": [],
+            "label": "index",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "src/platform/packages/shared/kbn-human-readable-id/src/collision.ts",
+            "lineNumber": 17,
+            "columnNumber": 56,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/human-readable-id",
+        "id": "def-common.generateHumanReadableId",
+        "type": "Function",
+        "tags": [],
+        "label": "generateHumanReadableId",
+        "description": [
+          "\nGenerates a slug-based human-readable ID from a name, or falls back to a\n`{fallbackPrefix}-{uuid}` ID when the name cannot produce a valid slug.\n\nShared between client-side preview and server-side creation so both sides\nproduce identical IDs for the same input."
+        ],
+        "signature": [
+          "(name?: string | null | undefined, options?: { fallbackPrefix?: string | undefined; } | undefined) => string"
+        ],
+        "path": "src/platform/packages/shared/kbn-human-readable-id/src/generate_human_readable_id.ts",
+        "lineNumber": 22,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/human-readable-id",
+            "id": "def-common.generateHumanReadableId.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "string | null | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-human-readable-id/src/generate_human_readable_id.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/human-readable-id",
+            "id": "def-common.generateHumanReadableId.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-human-readable-id/src/generate_human_readable_id.ts",
+            "lineNumber": 24,
+            "columnNumber": 13,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/human-readable-id",
+                "id": "def-common.generateHumanReadableId.$2.fallbackPrefix",
+                "type": "string",
+                "tags": [],
+                "label": "fallbackPrefix",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-human-readable-id/src/generate_human_readable_id.ts",
+                "lineNumber": 24,
+                "columnNumber": 15,
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/human-readable-id",
+        "id": "def-common.isUnsafeId",
+        "type": "Function",
+        "tags": [],
+        "label": "isUnsafeId",
+        "description": [
+          "\nReturns true if the ID is a known prototype-pollution key, empty, too long,\nor contains path traversal sequences.\n"
+        ],
+        "signature": [
+          "(id: string, maxLength?: number) => boolean"
+        ],
+        "path": "src/platform/packages/shared/kbn-human-readable-id/src/is_unsafe_id.ts",
+        "lineNumber": 18,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/human-readable-id",
+            "id": "def-common.isUnsafeId.$1",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-human-readable-id/src/is_unsafe_id.ts",
+            "lineNumber": 18,
+            "columnNumber": 28,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/human-readable-id",
+            "id": "def-common.isUnsafeId.$2",
+            "type": "number",
+            "tags": [],
+            "label": "maxLength",
+            "description": [
+              "— Upper bound for the ID length. Defaults to {@link HUMAN_READABLE_ID_MAX_LENGTH} (255)."
+            ],
+            "signature": [
+              "number"
+            ],
+            "path": "src/platform/packages/shared/kbn-human-readable-id/src/is_unsafe_id.ts",
+            "lineNumber": 18,
+            "columnNumber": 40,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/human-readable-id",
+        "id": "def-common.isValidId",
+        "type": "Function",
+        "tags": [],
+        "label": "isValidId",
+        "description": [
+          "\nValidates that an ID is safe and matches the human-readable slug format.\nRejects prototype-pollution keys, path traversal, and non-slug characters.\n\nDoes NOT check domain-specific reserved prefixes — consumers should compose\nthis with their own reserved-prefix check when needed.\n"
+        ],
+        "signature": [
+          "(id: string, maxLength?: number, minLength?: number) => boolean"
+        ],
+        "path": "src/platform/packages/shared/kbn-human-readable-id/src/is_valid_id.ts",
+        "lineNumber": 27,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/human-readable-id",
+            "id": "def-common.isValidId.$1",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-human-readable-id/src/is_valid_id.ts",
+            "lineNumber": 28,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/human-readable-id",
+            "id": "def-common.isValidId.$2",
+            "type": "number",
+            "tags": [],
+            "label": "maxLength",
+            "description": [
+              "— Upper bound for the ID length. Defaults to {@link HUMAN_READABLE_ID_MAX_LENGTH} (255)."
+            ],
+            "signature": [
+              "number"
+            ],
+            "path": "src/platform/packages/shared/kbn-human-readable-id/src/is_valid_id.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/human-readable-id",
+            "id": "def-common.isValidId.$3",
+            "type": "number",
+            "tags": [],
+            "label": "minLength",
+            "description": [
+              "— Lower bound for the ID length. Defaults to {@link HUMAN_READABLE_ID_MIN_LENGTH} (3)."
+            ],
+            "signature": [
+              "number"
+            ],
+            "path": "src/platform/packages/shared/kbn-human-readable-id/src/is_valid_id.ts",
+            "lineNumber": 30,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/human-readable-id",
+        "id": "def-common.resolveCollisionId",
+        "type": "Function",
+        "tags": [],
+        "label": "resolveCollisionId",
+        "description": [
+          "\nResolves a non-colliding ID by appending a numeric suffix (-1, -2, ...).\nReturns the first ID that is not in `conflictIds`, or falls back to `fallbackId`."
+        ],
+        "signature": [
+          "(baseId: string, conflictIds: ReadonlySet<string>, fallbackId: string) => string"
+        ],
+        "path": "src/platform/packages/shared/kbn-human-readable-id/src/collision.ts",
+        "lineNumber": 50,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/human-readable-id",
+            "id": "def-common.resolveCollisionId.$1",
+            "type": "string",
+            "tags": [],
+            "label": "baseId",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-human-readable-id/src/collision.ts",
+            "lineNumber": 51,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/human-readable-id",
+            "id": "def-common.resolveCollisionId.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "conflictIds",
+            "description": [],
+            "signature": [
+              "ReadonlySet<string>"
+            ],
+            "path": "src/platform/packages/shared/kbn-human-readable-id/src/collision.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
+            "deprecated": false,
+            "docsReferencedTypeName": "ReadonlySet",
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/human-readable-id",
+            "id": "def-common.resolveCollisionId.$3",
+            "type": "string",
+            "tags": [],
+            "label": "fallbackId",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-human-readable-id/src/collision.ts",
+            "lineNumber": 53,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/human-readable-id",
+        "id": "def-common.HUMAN_READABLE_ID_MAX_LENGTH",
+        "type": "number",
+        "tags": [],
+        "label": "HUMAN_READABLE_ID_MAX_LENGTH",
+        "description": [],
+        "signature": [
+          "255"
+        ],
+        "path": "src/platform/packages/shared/kbn-human-readable-id/src/constants.ts",
+        "lineNumber": 21,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/human-readable-id",
+        "id": "def-common.HUMAN_READABLE_ID_MIN_LENGTH",
+        "type": "number",
+        "tags": [],
+        "label": "HUMAN_READABLE_ID_MIN_LENGTH",
+        "description": [],
+        "signature": [
+          "3"
+        ],
+        "path": "src/platform/packages/shared/kbn-human-readable-id/src/constants.ts",
+        "lineNumber": 22,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/human-readable-id",
+        "id": "def-common.MAX_COLLISION_RETRIES",
+        "type": "number",
+        "tags": [],
+        "label": "MAX_COLLISION_RETRIES",
+        "description": [],
+        "signature": [
+          "100"
+        ],
+        "path": "src/platform/packages/shared/kbn-human-readable-id/src/constants.ts",
+        "lineNumber": 24,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/human-readable-id",
+        "id": "def-common.HUMAN_READABLE_ID_PATTERN",
+        "type": "Object",
+        "tags": [],
+        "label": "HUMAN_READABLE_ID_PATTERN",
+        "description": [],
+        "signature": [
+          "RegExp"
+        ],
+        "path": "src/platform/packages/shared/kbn-human-readable-id/src/constants.ts",
+        "lineNumber": 20,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

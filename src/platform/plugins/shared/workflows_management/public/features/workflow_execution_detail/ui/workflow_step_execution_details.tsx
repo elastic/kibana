@@ -24,6 +24,7 @@ import {
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { hasActiveModifierKey } from '@kbn/shared-ux-utility';
 import type { ChildWorkflowExecutionItem, WorkflowStepExecutionDto } from '@kbn/workflows';
 import { ExecutionStatus, isExecuteSyncStepType, isTerminalStatus } from '@kbn/workflows';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
@@ -43,6 +44,7 @@ interface WorkflowStepExecutionDetailsProps {
   resumeMessage?: string;
   resumeSchema?: JsonModelSchemaType;
   shouldAutoResume?: boolean;
+  waitingStepExecutionId?: string;
   /** When the step is workflow.execute, the child workflow execution (to link to) */
   childWorkflowExecution?: ChildWorkflowExecutionItem;
   /** When viewing a step that belongs to a nested execution, the parent workflow execution (to link to) */
@@ -59,6 +61,7 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
     resumeMessage,
     resumeSchema,
     shouldAutoResume = false,
+    waitingStepExecutionId,
     childWorkflowExecution,
     parentWorkflowExecution,
   }) => {
@@ -96,6 +99,7 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
 
     const handleWorkflowLinkClick = useCallback(
       (e: React.MouseEvent) => {
+        if (hasActiveModifierKey(e)) return;
         if (childWorkflowExecution) {
           e.preventDefault();
           workflowNav.navigate();
@@ -106,6 +110,7 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
 
     const handleParentWorkflowLinkClick = useCallback(
       (e: React.MouseEvent) => {
+        if (hasActiveModifierKey(e)) return;
         if (parentWorkflowExecution) {
           e.preventDefault();
           parentWorkflowNav.navigate();
@@ -187,6 +192,7 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
           resumeMessage={resumeMessage}
           resumeSchema={resumeSchema}
           shouldAutoResume={shouldAutoResume}
+          waitingStepExecutionId={waitingStepExecutionId}
         />
       );
     }
@@ -278,9 +284,12 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
                         <>
                           <ResumeExecutionButton
                             executionId={workflowExecutionId}
+                            workflowId={stepExecution?.workflowId}
+                            stepStartedAt={stepExecution?.startedAt}
                             resumeMessage={resumeMessage}
                             resumeSchema={resumeSchema}
                             autoOpen={shouldAutoResume}
+                            waitingStepExecutionId={stepExecution?.id}
                           />
                           <EuiSpacer size="m" />
                         </>

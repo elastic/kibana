@@ -6,7 +6,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingLogo, EuiSpacer, EuiTitle } from '@elastic/eui';
-import React, { useEffect, useCallback, useState } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import type { AgentName } from '@kbn/elastic-agent-utils';
 import { i18n } from '@kbn/i18n';
@@ -25,7 +25,7 @@ import { useTimeRange } from '../../../../hooks/use_time_range';
 import { replace } from '../../../shared/links/url_helpers';
 import { SearchBar } from '../../../shared/search_bar/search_bar';
 import { ServiceIcons } from '../../../shared/service_icons';
-import { SloOverviewFlyout } from '../../../shared/slo_overview_flyout';
+import { SloOverviewFlyout, useSloOverviewFlyout } from '../../../shared/slo_overview_flyout';
 import { ApmMainTemplate } from '../apm_main_template';
 import { AnalyzeDataButton } from './analyze_data_button';
 import { ServiceHeaderBadges } from './service_header_badges';
@@ -79,18 +79,12 @@ function TemplateWithContext({
 
   const isPendingServiceAgent = !agentName && isPending(serviceAgentStatus);
 
-  const [sloOverviewFlyout, setSloOverviewFlyout] = useState<{
-    serviceName: string;
-    agentName?: string;
-  } | null>(null);
+  const { sloOverviewFlyout, openSloOverviewFlyout, closeSloOverviewFlyout } =
+    useSloOverviewFlyout();
 
-  const openSloOverviewFlyout = useCallback(() => {
-    setSloOverviewFlyout({ serviceName, agentName });
-  }, [serviceName, agentName]);
-
-  const closeSloOverviewFlyout = useCallback(() => {
-    setSloOverviewFlyout(null);
-  }, []);
+  const onSloClick = useCallback(() => {
+    openSloOverviewFlyout(serviceName, agentName as AgentName);
+  }, [serviceName, agentName, openSloOverviewFlyout]);
 
   const alertsTabHref = router.link('/services/{serviceName}/alerts' as const, {
     path: { serviceName },
@@ -180,7 +174,7 @@ function TemplateWithContext({
                 environment={environment}
                 start={start}
                 end={end}
-                onSloClick={openSloOverviewFlyout}
+                onSloClick={onSloClick}
                 alertsTabHref={alertsTabHref}
               />
             ),

@@ -4,11 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+// NOTE: Do not import from '../types/domain' here to avoid circular dependencies
+// (types/domain -> constants/index -> constants/attachments -> types/domain).
+// Use string literals for legacy type names instead.
+
 import { SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER, GENERAL_CASES_OWNER } from './owners';
 
 // ----------------Unified attachment types-------------------------
 export const COMMENT_ATTACHMENT_TYPE = 'comment';
 export const SECURITY_EVENT_ATTACHMENT_TYPE = 'security.event';
+export const SECURITY_ENDPOINT_ATTACHMENT_TYPE = 'security.endpoint';
+export const FILE_ATTACHMENT_TYPE = 'file';
 export const LENS_ATTACHMENT_TYPE = 'lens';
 
 export const ML_ANOMALY_SWIMLANE_ATTACHMENT_TYPE = 'ml.anomaly_swimlane';
@@ -26,6 +32,8 @@ export const LEGACY_EXTERNAL_REFERENCE_TYPE = 'externalReference';
 export const LEGACY_PERSISTABLE_STATE_TYPE = 'persistableState';
 export const LEGACY_USER_TYPE = 'user';
 
+export const LEGACY_FILE_ATTACHMENT_TYPE = '.files';
+
 export const LEGACY_LENS_ATTACHMENT_TYPE = '.lens';
 export const LEGACY_ML_ANOMALY_SWIMLANE_ATTACHMENT_TYPE = 'ml_anomaly_swimlane';
 export const LEGACY_ML_ANOMALY_CHARTS_ATTACHMENT_TYPE = 'ml_anomaly_charts';
@@ -33,6 +41,15 @@ export const LEGACY_ML_SINGLE_METRIC_VIEWER_ATTACHMENT_TYPE = 'ml_single_metric_
 export const LEGACY_AIOPS_CHANGE_POINT_CHART_ATTACHMENT_TYPE = 'aiopsChangePointChart';
 export const LEGACY_AIOPS_PATTERN_ANALYSIS_ATTACHMENT_TYPE = 'aiopsPatternAnalysisEmbeddable';
 export const LEGACY_AIOPS_LOG_RATE_ANALYSIS_ATTACHMENT_TYPE = 'aiopsLogRateAnalysisEmbeddable';
+
+/**
+ * Mapping from legacy externalReferenceAttachmentTypeId to unified type name.
+ * Used by the generic externalReference transformer to resolve the unified type.
+ */
+export const EXTERNAL_REFERENCE_TYPE_MAP: Record<string, string> = {
+  endpoint: SECURITY_ENDPOINT_ATTACHMENT_TYPE,
+  [LEGACY_FILE_ATTACHMENT_TYPE]: FILE_ATTACHMENT_TYPE,
+} as const;
 
 export const LEGACY_ATTACHMENT_TYPES = new Set([
   LEGACY_ACTIONS_TYPE,
@@ -46,6 +63,8 @@ export const LEGACY_ATTACHMENT_TYPES = new Set([
 export const UNIFIED_ATTACHMENT_TYPES = new Set([
   COMMENT_ATTACHMENT_TYPE,
   SECURITY_EVENT_ATTACHMENT_TYPE,
+  SECURITY_ENDPOINT_ATTACHMENT_TYPE,
+  FILE_ATTACHMENT_TYPE,
 ]);
 
 export const PERSISTABLE_STATE_LEGACY_TO_UNIFIED_MAP: Record<string, string> = {
@@ -84,6 +103,16 @@ export const LEGACY_TO_UNIFIED_MAP: Record<string, string> = {
 export const UNIFIED_TO_LEGACY_MAP: Record<string, string> = {
   [COMMENT_ATTACHMENT_TYPE]: LEGACY_USER_TYPE,
   [SECURITY_EVENT_ATTACHMENT_TYPE]: LEGACY_EVENT_TYPE,
+  [SECURITY_ENDPOINT_ATTACHMENT_TYPE]: LEGACY_EXTERNAL_REFERENCE_TYPE,
+  [FILE_ATTACHMENT_TYPE]: LEGACY_EXTERNAL_REFERENCE_TYPE,
+} as const;
+
+/**
+ * Reverse mapping from unified type name back to externalReferenceAttachmentTypeId.
+ */
+export const UNIFIED_TO_EXTERNAL_REFERENCE_TYPE_MAP: Record<string, string> = {
+  [SECURITY_ENDPOINT_ATTACHMENT_TYPE]: 'endpoint',
+  [FILE_ATTACHMENT_TYPE]: LEGACY_FILE_ATTACHMENT_TYPE,
 } as const;
 
 /**
@@ -92,6 +121,8 @@ export const UNIFIED_TO_LEGACY_MAP: Record<string, string> = {
 export const MIGRATED_ATTACHMENT_TYPES = new Set<string>([
   COMMENT_ATTACHMENT_TYPE,
   SECURITY_EVENT_ATTACHMENT_TYPE,
+  SECURITY_ENDPOINT_ATTACHMENT_TYPE,
+  FILE_ATTACHMENT_TYPE,
   ...PERSISTABLE_ATTACHMENT_TYPES,
 ]);
 

@@ -106,8 +106,9 @@ export const EnrollmentTokenListPage: React.FunctionComponent<{}> = () => {
     kuery,
   });
 
-  const total = enrollmentAPIKeysRequest?.data?.total ?? 0;
-  const rowItems = enrollmentAPIKeysRequest?.data?.items ?? [];
+  const agentPoliciesLoaded = !agentPoliciesRequest.isLoading;
+  const total = agentPoliciesLoaded ? enrollmentAPIKeysRequest?.data?.total ?? 0 : 0;
+  const rowItems = agentPoliciesLoaded ? enrollmentAPIKeysRequest?.data?.items ?? [] : [];
 
   const refresh = () => {
     clearSelection();

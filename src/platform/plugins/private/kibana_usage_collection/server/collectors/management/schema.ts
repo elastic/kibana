@@ -627,10 +627,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'observability:apmUseUnifiedTraceWaterfall': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'observability:profilingShowErrorFrames': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -752,12 +748,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: {
       description: 'Enable ES|QL views for wired streams',
-    },
-  },
-  'observability:streamsEnableOverviewPage': {
-    type: 'boolean',
-    _meta: {
-      description: 'Enable the Streams management Overview tab',
     },
   },
   'observability:streamsEnableDraftStreams': {

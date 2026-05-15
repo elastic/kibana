@@ -30,11 +30,15 @@ import semverLt from 'semver/functions/lt';
 import { getDeferredInstallationsCnt } from '../../../../../../services/has_deferred_installations';
 
 import {
-  getPackageReleaseLabel,
   isPackagePrerelease,
   splitPkgKey,
   packageToPackagePolicyInputs,
 } from '../../../../../../../common/services';
+import { getPackageReleaseLabel } from '../../../../../../../common/services/package_prerelease';
+import {
+  getAgentlessRelease,
+  isOnlyAgentlessIntegration,
+} from '../../../../../../../common/services/agentless_policy_helper';
 import { HIDDEN_API_REFERENCE_PACKAGES } from '../../../../../../../common/constants';
 
 import {
@@ -49,7 +53,6 @@ import {
   useGetSettingsQuery,
 } from '../../../../hooks';
 import { useAgentless } from '../../../../../fleet/sections/agent_policy/create_package_policy_page/single_page_layout/hooks/setup_technology';
-import { isOnlyAgentlessIntegration } from '../../../../../../../common/services/agentless_policy_helper';
 import { INTEGRATIONS_ROUTING_PATHS } from '../../../../constants';
 import { useGetPackageInfoByKeyQuery, useLink, useAgentPolicyContext } from '../../../../hooks';
 import { ExperimentalFeaturesService, pkgKeyFromPackageInfo } from '../../../../services';
@@ -372,6 +375,16 @@ export function Detail() {
     [packageInfo]
   );
 
+  const integrationName = integration ?? undefined;
+
+  const releaseLabel = useMemo(() => {
+    if (packageInfo && isOnlyAgentlessIntegration(packageInfo, integrationName)) {
+      const release = getAgentlessRelease(packageInfo, integrationName);
+      if (release !== undefined) return release;
+    }
+    return getPackageReleaseLabel(packageInfo?.version ?? '');
+  }, [packageInfo, integrationName]);
+
   const headerLeftContent = useMemo(
     () => (
       <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="headerLeft">
@@ -425,11 +438,9 @@ export function Detail() {
                           </EuiBadge>
                         </EuiFlexItem>
                       )}
-                      {packageInfo?.release && packageInfo.release !== 'ga' ? (
+                      {releaseLabel !== 'ga' ? (
                         <EuiFlexItem grow={false}>
-                          <HeaderReleaseBadge
-                            release={getPackageReleaseLabel(packageInfo.version)}
-                          />
+                          <HeaderReleaseBadge release={releaseLabel} />
                         </EuiFlexItem>
                       ) : null}
                     </EuiFlexGroup>
@@ -441,7 +452,15 @@ export function Detail() {
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
-    [integrationInfo, isLoading, packageInfo, fromIntegrationsPath, queryParams, packageInfoError]
+    [
+      integrationInfo,
+      isLoading,
+      packageInfo,
+      fromIntegrationsPath,
+      queryParams,
+      packageInfoError,
+      releaseLabel,
+    ]
   );
 
   const handleEditIntegrationClick = useCallback<ReactEventHandler>((ev) => {

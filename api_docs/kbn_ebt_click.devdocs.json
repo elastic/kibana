@@ -1,0 +1,163 @@
+{
+  "id": "@kbn/ebt-click",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/ebt-click",
+        "id": "def-common.getEbtProps",
+        "type": "Function",
+        "tags": [],
+        "label": "getEbtProps",
+        "description": [
+          "Maps an EbtClickAttrs object to the corresponding `data-ebt-*` HTML attributes."
+        ],
+        "signature": [
+          "(ebt: ",
+          {
+            "pluginId": "@kbn/ebt-click",
+            "scope": "common",
+            "docId": "kibKbnEbtClickPluginApi",
+            "section": "def-common.EbtClickAttrs",
+            "text": "EbtClickAttrs"
+          },
+          ") => { 'data-ebt-action': string; 'data-ebt-element': string; 'data-ebt-detail'?: string | undefined; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-ebt-click/helpers.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ebt-click",
+            "id": "def-common.getEbtProps.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "ebt",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/ebt-click",
+                "scope": "common",
+                "docId": "kibKbnEbtClickPluginApi",
+                "section": "def-common.EbtClickAttrs",
+                "text": "EbtClickAttrs"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-ebt-click/helpers.ts",
+            "lineNumber": 13,
+            "columnNumber": 29,
+            "deprecated": false,
+            "docsReferencedTypeName": "EbtClickAttrs",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/ebt-click",
+        "id": "def-common.EbtClickAttrs",
+        "type": "Interface",
+        "tags": [],
+        "label": "EbtClickAttrs",
+        "description": [
+          "Shape of the `data-ebt-*` attributes for click tracking."
+        ],
+        "path": "src/platform/packages/shared/kbn-ebt-click/types.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ebt-click",
+            "id": "def-common.EbtClickAttrs.action",
+            "type": "string",
+            "tags": [],
+            "label": "action",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-ebt-click/types.ts",
+            "lineNumber": 12,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ebt-click",
+            "id": "def-common.EbtClickAttrs.element",
+            "type": "string",
+            "tags": [],
+            "label": "element",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-ebt-click/types.ts",
+            "lineNumber": 13,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ebt-click",
+            "id": "def-common.EbtClickAttrs.detail",
+            "type": "string",
+            "tags": [],
+            "label": "detail",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-ebt-click/types.ts",
+            "lineNumber": 14,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/ebt-click",
+        "id": "def-common.EBT_CLICK_ACTIONS",
+        "type": "Object",
+        "tags": [],
+        "label": "EBT_CLICK_ACTIONS",
+        "description": [
+          "\nEBT click action name constants.\n\nThese values populate the `data-ebt-action` HTML attribute and map to the\n`click.action` field in EBT click events.\n\n## Naming convention: intent over implementation\n\nAction names must express what the user *intends* to do, not what the UI does\nunderneath. For example, a link that currently opens an error in Discover should\nbe named `viewError`, not `openInDiscover` — because if the destination changes\ntomorrow (e.g. to APM or a flyout), the user intent is still \"view the error\"\nand we should not need to update every call site.\n\nUse `openInDiscover` only when the user explicitly chooses to open something in\nDiscover (e.g. a button that says \"Open in Discover\").\n\nShared EBT click action constants.\n\nUse these when the user intent is generic enough to be shared across plugins.\nFor plugin-specific actions, define them locally in the plugin's own ebt_constants file."
+        ],
+        "signature": [
+          "{ readonly OPEN_IN_DISCOVER: \"openInDiscover\"; readonly VIEW_SPAN: \"viewSpan\"; readonly VIEW_SERVICE: \"viewService\"; readonly VIEW_ERROR: \"viewError\"; readonly OPEN_IN_APM: \"openInApm\"; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-ebt-click/constants.ts",
+        "lineNumber": 34,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

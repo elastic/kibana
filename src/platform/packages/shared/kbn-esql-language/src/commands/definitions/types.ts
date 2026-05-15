@@ -102,9 +102,14 @@ export const isReturnType = (str: string | FunctionParameterType): str is Functi
 
 export const parameterHintEntityTypes = ['inference_endpoint'] as const;
 export type ParameterHintEntityType = (typeof parameterHintEntityTypes)[number];
+
+export const parameterHintKinds = ['entity', 'aggregation'] as const;
+export type ParameterHintKind = (typeof parameterHintKinds)[number];
+
 export interface ParameterHint {
-  entityType: ParameterHintEntityType;
+  entityType?: ParameterHintEntityType;
   constraints?: Record<string, string>;
+  kind?: ParameterHintKind;
 }
 
 export interface FunctionParameter {
@@ -353,6 +358,10 @@ export interface ValidationErrors {
     message: string;
     type: { parentName: string; name: string };
   };
+  expectedAggregationArgument: {
+    message: string;
+    type: { parentName: string };
+  };
   unknownAggregateFunction: {
     message: string;
     type: { type: string; value: string };
@@ -453,15 +462,7 @@ export interface ValidationErrors {
     message: string;
     type: {};
   };
-  forkTooFewBranches: {
-    message: string;
-    type: {};
-  };
   forkNotAllowedWithSubqueries: {
-    message: string;
-    type: {};
-  };
-  inlineStatsNotAllowedAfterLimit: {
     message: string;
     type: {};
   };

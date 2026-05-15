@@ -6,6 +6,7 @@
  */
 
 import type { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
+import { addTransactionLabels } from '@kbn/apm-utils';
 import type { IBasePath, IScopedClusterClient, Logger } from '@kbn/core/server';
 import { asyncForEach } from '@kbn/std';
 import type { ResetSLOResponse } from '@kbn/slo-schema';
@@ -30,6 +31,7 @@ import type { SLODefinitionRepository } from './slo_definition_repository';
 import { createTempSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
 import type { TransformManager } from './transform_manager';
 import { assertExpectedIndicatorSourceIndexPrivileges } from './utils/assert_expected_indicator_source_index_privileges';
+import { getSloApmLabels } from './utils';
 
 export class ResetSLO {
   constructor(
@@ -44,6 +46,7 @@ export class ResetSLO {
 
   public async execute(sloId: string): Promise<ResetSLOResponse> {
     const originalSlo = await this.repository.findById(sloId);
+    addTransactionLabels(getSloApmLabels(originalSlo));
     await assertExpectedIndicatorSourceIndexPrivileges(
       originalSlo,
       this.scopedClusterClient.asCurrentUser

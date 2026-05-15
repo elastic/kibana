@@ -9,6 +9,14 @@ import { SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING } from '@kbn/managemen
 import { rootRequest } from '../api_calls/common';
 import { setKibanaSetting } from '../api_calls/kibana_advanced_settings';
 
+// Inlined constants from `@kbn/entity-store/common` to avoid pulling the package
+// into the cypress tsconfig. Public API contract values, safe to duplicate here.
+const ENTITY_STORE_INSTALL_ROUTE = '/api/security/entity_store/install';
+const ENTITY_STORE_PUBLIC_API_VERSION = '2023-10-31';
+// Stable write-alias for v2 latest entities. Invariant under entity-store
+// MAPPING_VERSION bumps (which only change the concrete index suffix).
+const getEntitiesLatestAlias = (namespace: string) => `entities-latest-${namespace}`;
+
 const timestamp = Date.now();
 const date = new Date(timestamp);
 const iso8601String = date.toISOString();
@@ -345,11 +353,20 @@ export const createMockAsset = (indexName: string) => {
   });
 };
 
-export const enableAssetInventoryApiCall = () => {
+// Asset Inventory now relies on the Entity Store V2 lifecycle (no dedicated /api/asset_inventory/enable
+// route). Installing the entity store creates the unified `entities-latest-{namespace}` alias and
+// underlying indices the page reads from.
+export const installEntityStoreV2ApiCall = () => {
   return rootRequest({
     method: 'POST',
-    url: `/api/asset_inventory/enable`,
+    url: ENTITY_STORE_INSTALL_ROUTE,
+    headers: {
+      'kbn-xsrf': 'xxxx',
+      'elastic-api-version': ENTITY_STORE_PUBLIC_API_VERSION,
+      'x-elastic-internal-origin': 'kibana',
+    },
     body: {},
+    failOnStatusCode: false,
   });
 };
 
@@ -361,19 +378,25 @@ export const enableAssetInventory = () => {
   setKibanaSetting(SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING, true);
 };
 
-export const waitForStatusReady = (retries = 5) => {
-  if (retries === 0) throw new Error('Status never became ready');
+// In the v2 flow the "ready" state is determined entirely client-side by composing the entity store
+// status, the privileges check, and a search for any document on `entities-latest-*`. Tests should
+// seed entity docs into `entities-latest-{namespace}` and the All Assets title becomes visible once
+// the page renders.
+export const ALL_ASSETS_TITLE_TEST_ID = '[data-test-subj="asset-inventory-test-subj-page-title"]';
+export const waitForAssetInventoryReady = (timeoutMs = 30000) => {
+  cy.get(ALL_ASSETS_TITLE_TEST_ID, { timeout: timeoutMs }).should('be.visible');
+};
 
-  cy.intercept('GET', '/api/asset_inventory/status').as('getStatus');
-
-  cy.reload();
-  cy.wait('@getStatus', { timeout: 20000 }).then(({ response }) => {
-    if (response?.body?.status !== 'ready') {
-      // eslint-disable-next-line cypress/no-unnecessary-waiting
-      cy.wait(3000);
-      waitForStatusReady(retries - 1);
-    } else {
-      expect(response.body.status).to.eq('ready');
-    }
+// Indexes a v2 entity document directly through the `entities-latest-{namespace}` write-alias.
+// We bypass the live extraction tasks so UI tests don't depend on the entity store extraction
+// cadence. Writing through the alias keeps this resilient to mapping-version bumps in the
+// underlying concrete index name.
+export const createMockEntityV2 = (entityDoc: Record<string, unknown>, namespace = 'default') => {
+  return rootRequest({
+    method: 'POST',
+    url: `${Cypress.env('ELASTICSEARCH_URL')}/${getEntitiesLatestAlias(
+      namespace
+    )}/_doc?refresh=wait_for`,
+    body: entityDoc,
   });
 };

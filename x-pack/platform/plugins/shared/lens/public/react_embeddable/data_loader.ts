@@ -337,11 +337,12 @@ export function loadEmbeddableData(
         const transaction = apm.getCurrentTransaction();
         if (transaction) {
           const span = transaction.startSpan('lens-chart-error', 'lens-embeddable');
+
           if (span) {
             span.addLabels({
-              kibana_meta_lens_metric_type: currentState.attributes?.visualizationType ?? 'unknown',
-              kibana_meta_lens_profile_id: meta?.profile_id ?? 'unknown',
-              kibana_meta_lens_metric_id: meta?.metric_id ?? 'unknown',
+              kibana_meta_metric_type: currentState.attributes?.visualizationType ?? 'unknown',
+              kibana_meta_profile_id: meta?.profile_id ?? 'unknown',
+              kibana_meta_metric_id: meta?.metric_id ?? 'unknown',
             });
             apm.captureError(error);
             // @ts-expect-error RUM types don't include outcome

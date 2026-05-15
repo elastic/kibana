@@ -96,10 +96,18 @@ export const CreateCdnAssets: Task = {
       resolve(buildSource, 'node_modules/@kbn/ui-shared-deps-src/shared_built_assets'),
       resolve(bundles, 'kbn-ui-shared-deps-src')
     );
-    await copyAll(
-      resolve(buildSource, 'node_modules/@kbn/core/target/public'),
-      resolve(bundles, 'core')
-    );
+    // [rspack-transition] When the legacy optimizer is removed, delete the else branch.
+    if (process.env.KBN_USE_RSPACK === 'true' || process.env.KBN_USE_RSPACK === '1') {
+      // Rspack: all bundles (core + plugins) are in the unified output directory.
+      // Copy into the CDN bundles root so URLs like /bundles/kibana.bundle.js
+      // and /bundles/chunks/<hash>.js resolve correctly.
+      await copyAll(resolve(buildSource, 'target/public/bundles'), resolve(bundles));
+    } else {
+      await copyAll(
+        resolve(buildSource, 'node_modules/@kbn/core/target/public'),
+        resolve(bundles, 'core')
+      );
+    }
     await copyAll(
       resolve(buildSource, 'node_modules/@kbn/monaco/target_workers'),
       resolve(bundles, 'kbn-monaco')

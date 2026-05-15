@@ -22,7 +22,7 @@ import {
 import { STREAMS_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import { registerRoutes } from '@kbn/server-route-repository';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type { RulesClient, RulesClientCreateOptions } from '@kbn/alerting-plugin/server';
 import { LOGS_ECS_STREAM_NAME, ROOT_STREAM_NAMES, Streams } from '@kbn/streams-schema';
 import { isNotFoundError } from '@kbn/es-errors';
 import type { StreamsConfig } from '../common/config';
@@ -61,6 +61,11 @@ import { TaskService } from './lib/tasks/task_service';
 import { CONVERSATION_SCRAPER_TASK_TYPE } from './lib/tasks/task_definitions/conversation_scraper';
 import { MEMORY_CONSOLIDATION_TASK_TYPE } from './lib/tasks/task_definitions/memory_consolidation';
 import { InsightService } from './lib/sig_events/insights/client/insight_service';
+import {
+  createSignificantEventsClients,
+  createSignificantEventsServices,
+  initializeSignificantEventsTemplates,
+} from './lib/sig_events/significant_events_clients';
 import { baseFields } from './lib/streams/component_templates/logs_layer';
 import { ecsBaseFields } from './lib/streams/component_templates/logs_ecs_layer';
 import { registerStreamsAgentBuilder } from './agent_builder/register';
@@ -141,6 +146,7 @@ export class StreamsPlugin
       this.logger.get('inference-features')
     );
 
+    const significantEventsServices = createSignificantEventsServices();
     const attachmentService = new AttachmentService(core, this.logger);
     const streamsService = new StreamsService(core, this.logger, this.isDev);
     const featureService = new FeatureService(core, this.logger);
@@ -150,8 +156,10 @@ export class StreamsPlugin
     const taskService = new TaskService(plugins.taskManager);
     const getScopedClients = async ({
       request,
+      rulesClientOptions,
     }: {
       request: KibanaRequest;
+      rulesClientOptions?: RulesClientCreateOptions;
     }): Promise<RouteHandlerScopedClients> => {
       const [coreStart, pluginsStart] = await core.getStartServices();
 
@@ -186,12 +194,21 @@ export class StreamsPlugin
         return featureClientPromise;
       };
 
+      const space = pluginsStart.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+
+      const significantEventsClients = createSignificantEventsClients({
+        services: significantEventsServices,
+        esClient: scopedClusterClient.asCurrentUser,
+        space,
+      });
+
       let queryClientPromise: Promise<QueryClient> | undefined;
       const getQueryClient = (): Promise<QueryClient> => {
         queryClientPromise ??= (async () => {
           const rulesClient = await pluginsStart.alerting.getRulesClientWithRequestInSpace(
             request,
-            DEFAULT_SPACE_ID
+            DEFAULT_SPACE_ID,
+            rulesClientOptions
           );
           return queryService.getClient({
             esClient: coreStart.elasticsearch.client.asInternalUser,
@@ -227,6 +244,7 @@ export class StreamsPlugin
         attachmentClient,
         streamsClient,
         getFeatureClient,
+        ...significantEventsClients,
         insightClient,
         inferenceClient,
         contentClient,
@@ -492,6 +510,17 @@ export class StreamsPlugin
   }
 
   public start(core: CoreStart, plugins: StreamsPluginStartDependencies): StreamsPluginStart {
+    initializeSignificantEventsTemplates({
+      esClient: core.elasticsearch.client.asInternalUser,
+      logger: this.logger,
+    }).catch((error) => {
+      this.logger.error(
+        `Failed to initialize significant events templates: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    });
+
     if (this.server) {
       this.server.core = core;
       this.server.isServerless = core.elasticsearch.getCapabilities().serverless;

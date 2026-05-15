@@ -790,6 +790,113 @@ describe('API Keys', () => {
     });
   });
 
+  describe('cloneAsInternalUser()', () => {
+    it('returns null when security feature is disabled', async () => {
+      mockLicense.isEnabled.mockReturnValue(false);
+      const result = await apiKeys.cloneAsInternalUser(httpServerMock.createKibanaRequest(), {
+        name: 'cloned-key',
+      });
+      expect(result).toBeNull();
+    });
+
+    it('throws when request has no authorization header', async () => {
+      await expect(
+        apiKeys.cloneAsInternalUser(httpServerMock.createKibanaRequest(), {
+          name: 'cloned-key',
+        })
+      ).rejects.toThrow('request does not contain an authorization header');
+    });
+
+    it('throws when authorization scheme is not ApiKey', async () => {
+      await expect(
+        apiKeys.cloneAsInternalUser(
+          httpServerMock.createKibanaRequest({
+            headers: { authorization: `Bearer some-token` },
+          }),
+          { name: 'cloned-key' }
+        )
+      ).rejects.toThrow('expected ApiKey authorization scheme');
+    });
+
+    it('calls ES clone endpoint with correct parameters', async () => {
+      const apiKeyCredentials = encodeToBase64('key-id:key-secret');
+      mockClusterClient.asInternalUser.transport.request.mockResolvedValueOnce({
+        id: 'cloned-id',
+        name: 'cloned-key',
+        api_key: 'cloned-secret',
+        encoded: encodeToBase64('cloned-id:cloned-secret'),
+      });
+
+      const result = await apiKeys.cloneAsInternalUser(
+        httpServerMock.createKibanaRequest({
+          headers: { authorization: `ApiKey ${apiKeyCredentials}` },
+        }),
+        { name: 'cloned-key', metadata: { managed: true } }
+      );
+
+      expect(mockClusterClient.asInternalUser.transport.request).toHaveBeenCalledWith({
+        method: 'POST',
+        path: '/_security/api_key/clone',
+        body: {
+          api_key: apiKeyCredentials,
+          name: 'cloned-key',
+          expiration: null,
+          metadata: { managed: true },
+        },
+      });
+
+      expect(result).toEqual({
+        id: 'cloned-id',
+        name: 'cloned-key',
+        api_key: 'cloned-secret',
+        encoded: encodeToBase64('cloned-id:cloned-secret'),
+      });
+    });
+
+    it('calls ES clone endpoint without metadata when not provided', async () => {
+      const apiKeyCredentials = encodeToBase64('key-id:key-secret');
+      mockClusterClient.asInternalUser.transport.request.mockResolvedValueOnce({
+        id: 'cloned-id',
+        name: 'cloned-key',
+        api_key: 'cloned-secret',
+        encoded: encodeToBase64('cloned-id:cloned-secret'),
+      });
+
+      await apiKeys.cloneAsInternalUser(
+        httpServerMock.createKibanaRequest({
+          headers: { authorization: `ApiKey ${apiKeyCredentials}` },
+        }),
+        { name: 'cloned-key' }
+      );
+
+      expect(mockClusterClient.asInternalUser.transport.request).toHaveBeenCalledWith({
+        method: 'POST',
+        path: '/_security/api_key/clone',
+        body: {
+          api_key: apiKeyCredentials,
+          name: 'cloned-key',
+          expiration: null,
+        },
+      });
+    });
+
+    it('throws when ES clone endpoint fails', async () => {
+      const apiKeyCredentials = encodeToBase64('key-id:key-secret');
+      mockClusterClient.asInternalUser.transport.request.mockRejectedValueOnce(
+        new Error('Clone not supported')
+      );
+
+      await expect(
+        apiKeys.cloneAsInternalUser(
+          httpServerMock.createKibanaRequest({
+            headers: { authorization: `ApiKey ${apiKeyCredentials}` },
+          }),
+          { name: 'cloned-key' }
+        )
+      ).rejects.toThrow('Clone not supported');
+    });
+  });
+
   describe('invalidate()', () => {
     it('returns null when security feature is disabled', async () => {
       mockLicense.isEnabled.mockReturnValue(false);

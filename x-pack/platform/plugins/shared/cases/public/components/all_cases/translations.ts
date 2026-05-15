@@ -102,7 +102,7 @@ export const INCIDENT_MANAGEMENT_SYSTEM = i18n.translate('xpack.cases.caseTable.
 
 export const SEARCH_PLACEHOLDER = i18n.translate('xpack.cases.caseTable.searchPlaceholder', {
   defaultMessage:
-    'Search cases or filter by field, e.g. "Effort estimate":3, "Start Date":01/01/2024',
+    'Free text, field label, or field:value. Use "" for multi-word, e.g. network Priority:high "Start date":01/01/2025',
 });
 
 export const CLOSED = i18n.translate('xpack.cases.caseTable.closed', {

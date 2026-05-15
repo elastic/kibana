@@ -33,6 +33,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useKibanaSpace } from '../../../../../../hooks/use_kibana_space';
+import { createRemoteMonitorDetailUrl } from '../../../../utils/remote/remote_monitor_urls';
 import type { ClientPluginsStart } from '../../../../../../plugin';
 import { useMonitorDetail } from '../../../../hooks/use_monitor_detail';
 import { useMonitorDetailLocator } from '../../../../hooks/use_monitor_detail_locator';
@@ -52,6 +53,7 @@ import { MonitorDetailsPanel } from '../../../common/components/monitor_details_
 import { ErrorCallout } from '../../../common/components/error_callout';
 import { useOverviewStatusState } from '../../hooks/use_overview_status';
 import { useMonitorAttachmentConfigWithMonitor } from '../../../monitor_details/hooks/use_monitor_attachment_config';
+import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../../common/constants';
 import type { OverviewStatusMetaData } from '../types';
 import { ConfigKey } from '../types';
 import { ActionsPopover } from './actions_popover';
@@ -59,6 +61,7 @@ import type { FlyoutParamProps } from './types';
 import { quietFetchOverviewStatusAction } from '../../../../state/overview_status';
 import { MonitorStatusPanel } from '../../../monitor_details/monitor_status/monitor_status_panel';
 import { FlyoutLastTestRun, FlyoutSummaryKPIs } from './flyout_panels';
+import { RemoteMonitorDetailsPanel } from './remote_monitor_details_panel';
 
 interface Props {
   configId: string;
@@ -93,10 +96,12 @@ function DetailFlyoutDurationChart({
   id,
   location,
   allLocations,
+  remoteName,
 }: {
   id: string;
   location: string;
   allLocations: Array<{ id: string; label: string }>;
+  remoteName?: string;
 }) {
   const { euiTheme } = useEuiTheme();
   const [showAllLocations, setShowAllLocations] = useState(false);
@@ -163,6 +168,11 @@ function DetailFlyoutDurationChart({
     ];
   }, [showAllLocations, allLocations, id, location, euiTheme.colors.vis]);
 
+  const dataTypesIndexPatterns = useMemo(
+    () => (remoteName ? { synthetics: `${remoteName}:${SYNTHETICS_INDEX_PATTERN}` } : undefined),
+    [remoteName]
+  );
+
   return (
     <EuiPageSection bottomBorder="extended">
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
@@ -190,6 +200,7 @@ function DetailFlyoutDurationChart({
         legendIsVisible={true}
         legendPosition="bottom"
         attributes={attributes}
+        dataTypesIndexPatterns={dataTypesIndexPatterns}
       />
     </EuiPageSection>
   );
@@ -205,7 +216,15 @@ export function LoadingState() {
   );
 }
 
-function DetailFlyoutStatusHistory({ configId, location }: { configId: string; location: string }) {
+function DetailFlyoutStatusHistory({
+  configId,
+  location,
+  remoteName,
+}: {
+  configId: string;
+  location: string;
+  remoteName?: string;
+}) {
   return (
     <EuiPageSection bottomBorder="extended">
       <EuiTitle size="xs">
@@ -219,6 +238,7 @@ function DetailFlyoutStatusHistory({ configId, location }: { configId: string; l
         periodCaption={LAST_24H_TEXT}
         monitorId={configId}
         locationLabel={location}
+        remoteName={remoteName}
       />
     </EuiPageSection>
   );
@@ -240,6 +260,8 @@ export function MonitorDetailFlyout(props: Props) {
     return allConfigs.find((ov) => ov.configId === configId);
   }, [overviewStatus, configId]);
 
+  const isRemote = Boolean(monitor?.remote);
+
   const setLocation = useCallback(
     (locId: string, locLabel: string) =>
       onLocationChange({ id, configId, location: locLabel, locationId: locId, spaces }),
@@ -253,6 +275,20 @@ export function MonitorDetailFlyout(props: Props) {
   });
 
   const editLink = useEditMonitorLocator({ configId, spaces });
+
+  const { space } = useKibanaSpace();
+
+  const remoteMonitorUrl = useMemo(
+    () =>
+      monitor
+        ? createRemoteMonitorDetailUrl({
+            monitor,
+            locationId,
+            spaceId: space?.id,
+          })
+        : undefined,
+    [monitor, locationId, space?.id]
+  );
 
   const dispatch = useDispatch();
 
@@ -269,25 +305,26 @@ export function MonitorDetailFlyout(props: Props) {
 
   const upsertSuccess = upsertStatus?.status === 'success';
 
-  const { space } = useKibanaSpace();
-
+  // Skip fetching the local saved object for remote monitors — they have no
+  // local SO and the request would 404.
   useEffect(() => {
+    if (isRemote) return;
     dispatch(
       getMonitorAction.get({
         monitorId: configId,
         ...(space && spaces?.length && !spaces?.includes(space?.id) ? { spaceId: spaces[0] } : {}),
       })
     );
-  }, [configId, dispatch, space, space?.id, spaces, upsertSuccess]);
+  }, [configId, dispatch, isRemote, space, space?.id, spaces, upsertSuccess]);
 
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
 
-  const monitorDetail = useMonitorDetail(configId, props.location);
+  const monitorDetail = useMonitorDetail(configId, props.location, monitor?.remote?.remoteName);
 
   const getColor = useMonitorHealthColor();
 
   useMonitorAttachmentConfigWithMonitor(
-    monitorObject
+    !isRemote && monitorObject
       ? {
           ...monitorObject,
           [ConfigKey.CONFIG_ID]: monitorObject[ConfigKey.CONFIG_ID] ?? configId,
@@ -319,7 +356,7 @@ export function MonitorDetailFlyout(props: Props) {
       paddingSize="none"
       resizable
     >
-      {error && !isLoading && <ErrorCallout {...error} />}
+      {error && !isLoading && !isRemote && <ErrorCallout {...error} />}
       <EuiFlyoutHeader hasBorder>
         <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l">
           <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
@@ -419,6 +456,7 @@ export function MonitorDetailFlyout(props: Props) {
               loading={Boolean(monitorDetail.loading)}
               configId={configId}
               locationId={locationId}
+              remoteName={monitor?.remote?.remoteName}
             />
             <FlyoutSummaryKPIs
               monitorId={id}
@@ -426,8 +464,13 @@ export function MonitorDetailFlyout(props: Props) {
               from="now-30d"
               to="now"
               dateLabel={LAST_30_DAYS_LABEL}
+              remoteName={monitor?.remote?.remoteName}
             />
-            <DetailFlyoutStatusHistory configId={configId} location={props.location} />
+            <DetailFlyoutStatusHistory
+              configId={configId}
+              location={props.location}
+              remoteName={monitor?.remote?.remoteName}
+            />
           </>
         )}
         {selectedTab === 'performance' && (
@@ -435,10 +478,13 @@ export function MonitorDetailFlyout(props: Props) {
             id={id}
             location={props.location}
             allLocations={monitor?.locations ?? []}
+            remoteName={monitor?.remote?.remoteName}
           />
         )}
         {selectedTab === 'details' &&
-          (monitorObject ? (
+          (isRemote && monitor ? (
+            <RemoteMonitorDetailsPanel monitor={monitor} latestPing={monitorDetail.data} />
+          ) : monitorObject ? (
             <MonitorDetailsPanel
               hasBorder={false}
               latestPing={monitorDetail.data}
@@ -469,30 +515,46 @@ export function MonitorDetailFlyout(props: Props) {
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize="s">
-                <EuiFlexItem grow={false}>
+              {isRemote ? (
+                <EuiToolTip content={!remoteMonitorUrl ? REMOTE_URL_UNAVAILABLE_TEXT : undefined}>
                   <EuiButton
-                    data-test-subj="syntheticsMonitorDetailFlyoutEditButton"
-                    isDisabled={!editLink}
-                    href={editLink}
-                    iconType="pencil"
-                  >
-                    {EDIT_MONITOR_LINK_TEXT}
-                  </EuiButton>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    data-test-subj="syntheticsMonitorDetailFlyoutButton"
-                    isDisabled={!detailLink}
-                    href={detailLink}
-                    iconType="sortRight"
+                    data-test-subj="syntheticsMonitorDetailFlyoutViewRemoteButton"
+                    isDisabled={!remoteMonitorUrl}
+                    href={remoteMonitorUrl}
+                    target="_blank"
+                    iconType="popout"
                     iconSide="right"
                     fill
                   >
-                    {GO_TO_MONITOR_LINK_TEXT}
+                    {VIEW_ON_REMOTE_CLUSTER_TEXT}
                   </EuiButton>
-                </EuiFlexItem>
-              </EuiFlexGroup>
+                </EuiToolTip>
+              ) : (
+                <EuiFlexGroup gutterSize="s">
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      data-test-subj="syntheticsMonitorDetailFlyoutEditButton"
+                      isDisabled={!editLink}
+                      href={editLink}
+                      iconType="pencil"
+                    >
+                      {EDIT_MONITOR_LINK_TEXT}
+                    </EuiButton>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      data-test-subj="syntheticsMonitorDetailFlyoutButton"
+                      isDisabled={!detailLink}
+                      href={detailLink}
+                      iconType="sortRight"
+                      iconSide="right"
+                      fill
+                    >
+                      {GO_TO_MONITOR_LINK_TEXT}
+                    </EuiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              )}
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPanel>
@@ -616,3 +678,18 @@ const FLYOUT_TABS: Array<{ id: FlyoutTabId; label: string }> = [
     }),
   },
 ];
+
+const VIEW_ON_REMOTE_CLUSTER_TEXT = i18n.translate(
+  'xpack.synthetics.monitorList.viewOnRemoteClusterText',
+  {
+    defaultMessage: 'View on remote cluster',
+  }
+);
+
+const REMOTE_URL_UNAVAILABLE_TEXT = i18n.translate(
+  'xpack.synthetics.monitorList.remoteUrlUnavailableText',
+  {
+    defaultMessage:
+      'The remote Kibana URL is not available. Ensure the remote cluster has server.publicBaseUrl configured.',
+  }
+);

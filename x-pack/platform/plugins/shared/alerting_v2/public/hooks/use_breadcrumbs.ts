@@ -48,6 +48,13 @@ export function useBreadcrumbs(
       case 'rules_list':
         breadcrumbs = [rootBreadcrumb, { ...getAlertingV2Breadcrumb('rules_list') }];
         break;
+      case 'rule_create_options':
+        breadcrumbs = [
+          rootBreadcrumb,
+          rulesListBreadcrumb,
+          getAlertingV2Breadcrumb('rule_create_options'),
+        ];
+        break;
       case 'create':
         breadcrumbs = [rootBreadcrumb, rulesListBreadcrumb, getAlertingV2Breadcrumb('create')];
         break;
@@ -94,6 +101,9 @@ export function useBreadcrumbs(
         break;
       case 'rule_doctor':
         breadcrumbs = [rootBreadcrumb, { ...getAlertingV2Breadcrumb('rule_doctor') }];
+        break;
+      case 'execution_history_list':
+        breadcrumbs = [rootBreadcrumb, { ...getAlertingV2Breadcrumb('execution_history_list') }];
         break;
       default:
         breadcrumbs = [rootBreadcrumb, { ...getAlertingV2Breadcrumb('rules_list') }];
