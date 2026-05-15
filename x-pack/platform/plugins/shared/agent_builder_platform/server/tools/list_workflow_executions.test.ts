@@ -18,7 +18,6 @@ const mockExecution = {
   duration: 60000,
   triggeredBy: 'manual',
   executedBy: 'user@example.com',
-  // fields that should NOT appear in the slim output
   spaceId: 'default',
   stepId: undefined,
   isTestRun: false,
