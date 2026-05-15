@@ -151,18 +151,25 @@ steps:
         with:
           index: "{{ foreach.item._index }}"
           id: "{{ foreach.item._id }}"
+          # See the matching note in `nl_extraction_behavioral.yaml`'s
+          # `persist_extractions` step: `"{{ expr }}"` always coerces to a
+          # string (so `now` becomes the JS `Date.toString()` form ES
+          # rejects, and numeric counters land as quoted strings). Use
+          # `"${{ expr }}"` for non-string fields so the templating engine
+          # preserves the JS type — Dates land as ISO 8601 via
+          # `JSON.stringify`, numbers stay numeric.
           doc:
             provenance:
               environment_hits:
                 window: "7d"
-                computed_at: "{{ now }}"
-                layer_1_ioc_match: "{{ steps.count_layer1_hits.output.hits.total.value | default: 0 }}"
-                layer_2_behavioral: "{{ steps.layer2_search.output.hits.total.value | default: 0 }}"
+                computed_at: "${{ now }}"
+                layer_1_ioc_match: "${{ steps.count_layer1_hits.output.hits.total.value | default: 0 }}"
+                layer_2_behavioral: "${{ steps.layer2_search.output.hits.total.value | default: 0 }}"
               # Liquid has no arithmetic operators — `(a) + (b)` is parsed as
               # a range literal and rejected. Use the `plus` filter, which
               # coerces missing values to 0 internally so the `if`-skipped
               # `layer2_search` case still produces a clean sum.
-              environment_hits_total: "{{ steps.count_layer1_hits.output.hits.total.value | default: 0 | plus: steps.layer2_search.output.hits.total.value }}"
+              environment_hits_total: "${{ steps.count_layer1_hits.output.hits.total.value | default: 0 | plus: steps.layer2_search.output.hits.total.value }}"
         on-failure:
           # Doc deleted mid-run, mapping mismatch on first run after template
           # bump, or version conflict from a concurrent ingest. Backfill is
