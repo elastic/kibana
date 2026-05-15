@@ -32,6 +32,7 @@ function getConfig(overrides: Partial<ConfigType> = {}): ConfigType {
     stack: { enabled: true },
     incrementalId: { enabled: true, taskIntervalMinutes: 10, taskStartDelayMinutes: 10 },
     analytics: { index: { enabled: true } },
+    analyticsV2: { enabled: false, reconciliationIntervalMinutes: 30, enable_admin_routes: false },
     templates: { enabled: true },
     attachments: { enabled: true },
     ...overrides,
@@ -81,6 +82,13 @@ describe('Cases Plugin', () => {
       notifications: notificationsMock.createStart(),
       ruleRegistry: { getRacClientWithRequest: jest.fn(), alerting: alertsMock.createStart() },
       taskManager: taskManagerMock.createStart(),
+      // Cases-analyticsV2 needs the dataViews plugin at start to manage the
+      // Cases data view + runtime fields. The flag is off in the test
+      // fixture so this mock is never actually called.
+      dataViews: {
+        dataViewsServiceFactory: jest.fn(),
+        getScriptedFieldsEnabled: jest.fn().mockReturnValue(false),
+      } as unknown as CasesServerStartDependencies['dataViews'],
     };
   });
 
@@ -171,6 +179,9 @@ describe('Cases Plugin', () => {
               "index": Object {
                 "enabled": true,
               },
+            },
+            "analyticsV2": Object {
+              "enabled": false,
             },
             "attachments": Object {
               "enabled": true,
