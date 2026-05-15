@@ -183,20 +183,17 @@ export function SignificantEventsDiscoveryPage() {
                 })}
               </EuiFlexGroup>
             </EuiFlexItem>
-            {significantEventsDiscovery?.enabled && (
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  href={getUrlForApp('observability', { path: '/nightshift' })}
-                  iconType="moon"
-                  size="s"
-                >
-                  {i18n.translate(
-                    'xpack.streams.significantEventsDiscovery.nightshiftButtonLabel',
-                    { defaultMessage: 'Nightshift' }
-                  )}
-                </EuiButton>
-              </EuiFlexItem>
-            )}
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                href={getUrlForApp('observability', { path: '/nightshift' })}
+                iconType="moon"
+                size="s"
+              >
+                {i18n.translate('xpack.streams.significantEventsDiscovery.nightshiftButtonLabel', {
+                  defaultMessage: 'Nightshift',
+                })}
+              </EuiButton>
+            </EuiFlexItem>
           </EuiFlexGroup>
         }
         tabs={tabs}
