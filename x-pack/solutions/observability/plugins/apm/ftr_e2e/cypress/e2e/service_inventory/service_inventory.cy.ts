@@ -98,7 +98,7 @@ describe('Service inventory', () => {
       cy.getByTestSubj('environmentFilter').find('input').click();
       cy.getByTestSubj('comboBoxOptionsList environmentFilter-optionsList').should('be.visible');
       cy.getByTestSubj('comboBoxOptionsList environmentFilter-optionsList')
-        .contains('button', 'production')
+        .contains('.euiComboBoxOption', 'production')
         .click({ force: true });
 
       cy.expectAPIsToHaveBeenCalledWith({
