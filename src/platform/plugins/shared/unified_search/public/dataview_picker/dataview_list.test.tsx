@@ -194,8 +194,8 @@ describe('DataView list component', () => {
       expect(screen.getByRole('option', { name: 'dataview-2' })).toBeInTheDocument();
     });
 
-    // When the list has items, the input has role "combobox" (not "searchbox")
-    const searchInput = screen.getByRole('combobox');
+    // The search input uses role "searchbox" (not "combobox") for better screen reader accessibility
+    const searchInput = screen.getByRole('searchbox');
 
     // Clear and type to filter options
     await user.clear(searchInput);
@@ -205,6 +205,25 @@ describe('DataView list component', () => {
       // Only matching dataview should be visible
       expect(screen.getByRole('option', { name: 'dataview-1' })).toBeInTheDocument();
       expect(screen.queryByRole('option', { name: 'dataview-2' })).not.toBeInTheDocument();
+    });
+  });
+
+  it('should call onSearchChange with value and match count', async () => {
+    const user = userEvent.setup();
+    const onSearchChangeSpy = jest.fn();
+
+    renderWithContainer(<DataViewsList {...props} onSearchChange={onSearchChangeSpy} />);
+
+    await waitFor(() => {
+      expect(screen.getAllByRole('option')).toHaveLength(2);
+    });
+
+    const searchInput = screen.getByRole('searchbox');
+    await user.clear(searchInput);
+    await user.type(searchInput, 'dataview-1');
+
+    await waitFor(() => {
+      expect(onSearchChangeSpy).toHaveBeenCalledWith('dataview-1', 1);
     });
   });
 });

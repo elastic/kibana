@@ -69,19 +69,12 @@ export const DataViewSelector = ({
         dataViewsList={dataViewsList}
         onChangeDataView={onChangeDataView}
         currentDataViewId={currentDataViewId}
-        selectableProps={{
-          ...(selectableProps || {}),
-          // @ts-expect-error Some EUI weirdness
-          searchProps: {
-            ...(selectableProps?.searchProps || {}),
-            onChange: (value, matches) => {
-              selectableProps?.searchProps?.onChange?.(value, matches);
-              setNoDataViewMatches(matches.length === 0 && dataViewsList.length > 0);
-              setDataViewSearchString(value);
-            },
-          },
-        }}
+        selectableProps={selectableProps}
         searchListInputId={searchListInputId}
+        onSearchChange={(value, matchCount) => {
+          setNoDataViewMatches(matchCount === 0 && dataViewsList.length > 0);
+          setDataViewSearchString(value);
+        }}
       />
       <ExploreMatchingButton
         noDataViewMatches={noDataViewMatches}
