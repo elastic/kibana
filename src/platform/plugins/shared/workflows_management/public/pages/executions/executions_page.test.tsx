@@ -9,7 +9,6 @@
 
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import { WORKFLOW_GLOBAL_EXECUTIONS_VIEW_FEATURE_FLAG_ID } from '@kbn/workflows/common/constants';
 import { WorkflowExecutionsPage } from './executions_page';
 import { createStartServicesMock } from '../../mocks';
 import { getTestProvider } from '../../shared/mocks/test_providers';
@@ -17,9 +16,7 @@ import { getTestProvider } from '../../shared/mocks/test_providers';
 describe('WorkflowExecutionsPage', () => {
   it('renders the executions shell and stub grid', async () => {
     const services = createStartServicesMock();
-    services.uiSettings.get.mockImplementation((key: string, fallback?: unknown) =>
-      key === WORKFLOW_GLOBAL_EXECUTIONS_VIEW_FEATURE_FLAG_ID ? true : fallback
-    );
+    services.workflowsManagement.globalExecutionsView.enabled = true;
 
     render(<WorkflowExecutionsPage />, { wrapper: getTestProvider({ services }) });
 

@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import '@testing-library/jest-dom';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { I18nProviderMock } from '@kbn/core-i18n-browser-mocks/src/i18n_context_mock';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { MemoryRouter, Route, Routes } from '@kbn/shared-ux-router';
-import { WORKFLOW_GLOBAL_EXECUTIONS_VIEW_FEATURE_FLAG_ID } from '@kbn/workflows/common/constants';
 import { WorkflowExecutionsRouteGate } from './workflow_executions_route_gate';
 import { createStartServicesMock } from '../mocks';
 
@@ -39,9 +39,7 @@ describe('WorkflowExecutionsRouteGate', () => {
 
   it('redirects to workflows home when the executions view feature flag is off', () => {
     const services = createStartServicesMock();
-    services.uiSettings.get.mockImplementation((key: string, fallback?: unknown) =>
-      key === WORKFLOW_GLOBAL_EXECUTIONS_VIEW_FEATURE_FLAG_ID ? false : fallback
-    );
+    services.workflowsManagement.globalExecutionsView.enabled = false;
 
     renderGate(services);
 
@@ -51,9 +49,7 @@ describe('WorkflowExecutionsRouteGate', () => {
 
   it('renders the executions page when the executions view feature flag is on', () => {
     const services = createStartServicesMock();
-    services.uiSettings.get.mockImplementation((key: string, fallback?: unknown) =>
-      key === WORKFLOW_GLOBAL_EXECUTIONS_VIEW_FEATURE_FLAG_ID ? true : fallback
-    );
+    services.workflowsManagement.globalExecutionsView.enabled = true;
 
     renderGate(services);
 

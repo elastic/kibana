@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { filter, merge, of, Subject, type Subscription } from 'rxjs';
+import { filter, Subject, type Subscription } from 'rxjs';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type {
   AppDeepLinkLocations,
@@ -21,10 +21,7 @@ import type {
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { Logger } from '@kbn/logging';
-import {
-  WORKFLOW_GLOBAL_EXECUTIONS_VIEW_FEATURE_FLAG_ID,
-  WORKFLOWS_UI_SETTING_ID,
-} from '@kbn/workflows/common/constants';
+import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows/common/constants';
 import { getWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { AvailabilityService } from './common/lib/availability';
 import { TelemetryService } from './common/lib/telemetry/telemetry_service';
@@ -41,6 +38,7 @@ import type {
 import { getWorkflowsAppDeepLinks } from './workflows_app_deep_links';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 import { stepSchemas } from '../common/step_schemas';
+import type { WorkflowsManagementConfig } from '../server/config';
 
 export class WorkflowsPlugin
   implements
@@ -59,13 +57,14 @@ export class WorkflowsPlugin
   private agentBuilderPromise: Promise<AgentBuilderPluginStart | undefined> | undefined;
   private settingsSubscription?: Subscription;
   private appVisibilitySubscription?: Subscription;
-  private executionsViewFeatureFlagSubscription?: Subscription;
+  private readonly pluginConfig: WorkflowsManagementConfig;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get('WorkflowsManagement');
     this.appUpdater$ = new Subject<AppUpdater>();
     this.telemetryService = new TelemetryService();
     this.availabilityService = new AvailabilityService();
+    this.pluginConfig = initializerContext.config.get<WorkflowsManagementConfig>();
   }
 
   public setup(
@@ -95,10 +94,7 @@ export class WorkflowsPlugin
 
     this.setupAgentBuilderStart(core);
 
-    const initialExecutionsViewEnabled = core.uiSettings.get<boolean>(
-      WORKFLOW_GLOBAL_EXECUTIONS_VIEW_FEATURE_FLAG_ID,
-      false
-    );
+    const initialExecutionsViewEnabled = this.pluginConfig.globalExecutionsView.enabled;
 
     core.application.register({
       id: PLUGIN_ID,
@@ -136,7 +132,6 @@ export class WorkflowsPlugin
     this.availabilityService.setLicense$(plugins.licensing.license$);
 
     this.subscribeAppVisibilityChanges(core);
-    this.subscribeGlobalExecutionsViewUiSetting(core);
 
     return {
       setUnavailableInServerlessTier: (options) => {
@@ -159,29 +154,7 @@ export class WorkflowsPlugin
   public stop() {
     this.settingsSubscription?.unsubscribe();
     this.appVisibilitySubscription?.unsubscribe();
-    this.executionsViewFeatureFlagSubscription?.unsubscribe();
     this.availabilityService.stop();
-  }
-
-  private subscribeGlobalExecutionsViewUiSetting(core: CoreStart): void {
-    const pushExecutionsDeepLinks = () => {
-      const enabled = core.uiSettings.get<boolean>(
-        WORKFLOW_GLOBAL_EXECUTIONS_VIEW_FEATURE_FLAG_ID,
-        false
-      );
-      this.appUpdater$.next(() => ({
-        deepLinks: getWorkflowsAppDeepLinks(enabled),
-      }));
-    };
-
-    this.executionsViewFeatureFlagSubscription = merge(
-      of(undefined),
-      core.uiSettings
-        .getUpdate$()
-        .pipe(filter(({ key }) => key === WORKFLOW_GLOBAL_EXECUTIONS_VIEW_FEATURE_FLAG_ID))
-    ).subscribe(() => {
-      pushExecutionsDeepLinks();
-    });
   }
 
   /**
@@ -281,6 +254,7 @@ export class WorkflowsPlugin
         availability: this.availabilityService,
         telemetry: this.telemetryService.getClient(),
         agentBuilder,
+        globalExecutionsView: this.pluginConfig.globalExecutionsView,
       },
     };
 

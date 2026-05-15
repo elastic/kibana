@@ -12,7 +12,6 @@ import type { App, AppUpdatableFields, AppUpdater } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import {
-  WORKFLOW_GLOBAL_EXECUTIONS_VIEW_FEATURE_FLAG_ID,
   WORKFLOWS_MANAGEMENT_FEATURE_ID,
   WORKFLOWS_UI_SETTING_ID,
 } from '@kbn/workflows/common/constants';
@@ -43,6 +42,16 @@ jest.mock('./connectors/workflows', () => ({
   getWorkflowsConnectorType: jest.fn(() => ({ id: 'workflows', actionTypeId: 'workflows' })),
 }));
 
+const createPlugin = (globalExecutionsViewEnabled = false) =>
+  new WorkflowsPlugin(
+    coreMock.createPluginInitializerContext({
+      enabled: true,
+      logging: { console: false },
+      available: true,
+      globalExecutionsView: { enabled: globalExecutionsViewEnabled },
+    })
+  );
+
 describe('WorkflowsPlugin', () => {
   let plugin: WorkflowsPlugin;
   let coreSetup: ReturnType<typeof coreMock.createSetup>;
@@ -57,7 +66,7 @@ describe('WorkflowsPlugin', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    plugin = new WorkflowsPlugin(coreMock.createPluginInitializerContext());
+    plugin = createPlugin();
     coreSetup = coreMock.createSetup();
     coreStart = coreMock.createStart();
     coreSetup.plugins.onStart.mockReturnValue(Promise.resolve({ found: false }));
@@ -81,9 +90,9 @@ describe('WorkflowsPlugin', () => {
     });
 
     it('should register only the workflows list deep link when executions view flag is off in bootstrap', () => {
+      plugin = createPlugin(false);
       coreSetup.uiSettings.get.mockImplementation((key: string, fallback?: unknown) => {
         if (key === WORKFLOWS_UI_SETTING_ID) return true;
-        if (key === WORKFLOW_GLOBAL_EXECUTIONS_VIEW_FEATURE_FLAG_ID) return false;
         return fallback;
       });
 
@@ -102,9 +111,9 @@ describe('WorkflowsPlugin', () => {
     });
 
     it('should register the executions deep link when executions view flag is on in bootstrap', () => {
+      plugin = createPlugin(true);
       coreSetup.uiSettings.get.mockImplementation((key: string, fallback?: unknown) => {
         if (key === WORKFLOWS_UI_SETTING_ID) return true;
-        if (key === WORKFLOW_GLOBAL_EXECUTIONS_VIEW_FEATURE_FLAG_ID) return true;
         return fallback;
       });
 
@@ -157,7 +166,6 @@ describe('WorkflowsPlugin', () => {
       const captureAppUpdates = (): Array<Partial<AppUpdatableFields>> => {
         const uiSettingsGetImpl = (key: string, fallback?: unknown) => {
           if (key === WORKFLOWS_UI_SETTING_ID) return true;
-          if (key === WORKFLOW_GLOBAL_EXECUTIONS_VIEW_FEATURE_FLAG_ID) return false;
           return fallback;
         };
         coreSetup.uiSettings.get.mockImplementation(uiSettingsGetImpl);

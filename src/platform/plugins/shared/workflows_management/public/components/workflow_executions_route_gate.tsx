@@ -9,16 +9,14 @@
 
 import React from 'react';
 import { Redirect } from 'react-router-dom';
-import { WORKFLOW_GLOBAL_EXECUTIONS_VIEW_FEATURE_FLAG_ID } from '@kbn/workflows/common/constants';
 import { useKibana } from '../hooks/use_kibana';
 import { WorkflowExecutionsPage } from '../pages/executions';
 
 export const WorkflowExecutionsRouteGate = React.memo(() => {
-  const { uiSettings } = useKibana().services;
-  const isExecutionsViewEnabled = uiSettings.get<boolean>(
-    WORKFLOW_GLOBAL_EXECUTIONS_VIEW_FEATURE_FLAG_ID,
-    false
-  );
+  const {
+    workflowsManagement: { globalExecutionsView },
+  } = useKibana().services;
+  const isExecutionsViewEnabled = globalExecutionsView.enabled;
 
   if (!isExecutionsViewEnabled) {
     return <Redirect to="/" />;

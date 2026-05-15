@@ -8,10 +8,7 @@
  */
 
 import { createCoreSetupMock } from '@kbn/core-lifecycle-server-mocks/src/core_setup.mock';
-import {
-  WORKFLOW_GLOBAL_EXECUTIONS_VIEW_FEATURE_FLAG_ID,
-  WORKFLOWS_UI_SETTING_ID,
-} from '@kbn/workflows';
+import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows';
 import type { WorkflowsServerPluginSetupDeps } from './types';
 import { registerUISettings } from './ui_settings';
 
@@ -35,15 +32,6 @@ describe('Workflows Management UI Settings', () => {
           readonly: false,
           requiresPageReload: true,
           category: expect.any(Array),
-        },
-        [WORKFLOW_GLOBAL_EXECUTIONS_VIEW_FEATURE_FLAG_ID]: {
-          name: expect.any(String),
-          description: expect.any(String),
-          schema: expect.any(Object),
-          value: false,
-          readonly: false,
-          requiresPageReload: false,
-          category: ['general'],
         },
       })
     );
