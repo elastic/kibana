@@ -9,7 +9,7 @@
 
 import { getHoverItem } from '@kbn/esql-language';
 import type { monaco } from '../../../../monaco_imports';
-import { createMonacoProvider } from './providers_factory';
+import { createCancellableCallbacks, createMonacoProvider } from './providers_factory';
 import { getDecorationHoveredMessages, monacoPositionToOffset } from '../shared/utils';
 import type { ESQLDependencies } from './types';
 
@@ -17,7 +17,11 @@ export function getHoverProvider(deps?: ESQLDependencies): monaco.languages.Hove
   let lastHoveredWord: string;
 
   return {
-    async provideHover(model: monaco.editor.ITextModel, position: monaco.Position) {
+    async provideHover(
+      model: monaco.editor.ITextModel,
+      position: monaco.Position,
+      token: monaco.CancellationToken
+    ) {
       return createMonacoProvider({
         model,
         run: async (safeModel) => {
@@ -39,8 +43,8 @@ export function getHoverProvider(deps?: ESQLDependencies): monaco.languages.Hove
               deps?.telemetry?.onDecorationHoverShown(hoverMessages.join(', '));
             }
           }
-
-          return getHoverItem(fullText, offset, deps);
+          const cancellableCallbacks = createCancellableCallbacks(deps, token);
+          return getHoverItem(fullText, offset, cancellableCallbacks);
         },
         emptyResult: null,
       });

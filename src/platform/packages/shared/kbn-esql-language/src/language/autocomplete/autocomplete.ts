@@ -54,11 +54,8 @@ const orderingEngine = new SuggestionOrderingEngine();
 export async function suggest(
   fullText: string,
   offset: number,
-  resourceRetriever?: ESQLCallbacks,
-  abortIfCancelled?: () => void
+  resourceRetriever?: ESQLCallbacks
 ): Promise<ISuggestionItem[]> {
-  abortIfCancelled?.();
-
   const { innerText, correctedQuery, root, astContext } = getAutocompleteCursorContext(
     fullText,
     offset

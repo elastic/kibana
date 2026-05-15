@@ -9,7 +9,7 @@
 
 import { getIndexSourcesFromQuery, suggest } from '@kbn/esql-language';
 import { monaco } from '../../../../monaco_imports';
-import { createMonacoProvider } from './providers_factory';
+import { createCancellableCallbacks, createMonacoProvider } from './providers_factory';
 import { wrapAsMonacoSuggestions } from '../converters/suggestions';
 import { filterSuggestionsWithCustomCommands, monacoPositionToOffset } from '../shared/utils';
 import type { ESQLDependencies } from './types';
@@ -41,8 +41,7 @@ export function getSuggestionProvider(
     ): Promise<monaco.languages.CompletionList> {
       return createMonacoProvider({
         model,
-        token,
-        run: async (safeModel, abortIfCancelled) => {
+        run: async (safeModel) => {
           // Avoid returning suggestions for unfocused editors sharing the same model.
           const editors = monaco.editor
             .getEditors()
@@ -62,7 +61,8 @@ export function getSuggestionProvider(
           const offset = monacoPositionToOffset(fullText, position);
 
           const computeStart = performance.now();
-          const suggestions = await suggest(fullText, offset, resolvedDeps, abortIfCancelled);
+          const cancellableCallbacks = createCancellableCallbacks(resolvedDeps, token);
+          const suggestions = await suggest(fullText, offset, cancellableCallbacks);
 
           const suggestionsWithCustomCommands = filterSuggestionsWithCustomCommands(suggestions);
           if (suggestionsWithCustomCommands.length) {
