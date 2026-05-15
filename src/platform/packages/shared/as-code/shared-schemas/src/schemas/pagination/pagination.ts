@@ -32,7 +32,7 @@ export const asCodePaginationResponseMetaSchema = schema.object(
   {
     page: schema.number({
       meta: {
-        description: 'The page of results to return.',
+        description: 'The returned page of results.',
       },
       min: 1,
       defaultValue: 1,
