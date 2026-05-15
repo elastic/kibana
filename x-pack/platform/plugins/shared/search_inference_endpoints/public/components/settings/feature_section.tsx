@@ -120,7 +120,9 @@ export const FeatureSection: React.FC<FeatureSectionProps> = ({
                     hasSavedObject={hasSavedObject}
                     isFeatureDirty={isFeatureDirty}
                     globalDefaultId={
-                      feature.ignoreGlobalDefault ? NO_DEFAULT_MODEL : (globalDefaultId ?? NO_DEFAULT_MODEL)
+                      feature.ignoreGlobalDefault
+                        ? NO_DEFAULT_MODEL
+                        : globalDefaultId ?? NO_DEFAULT_MODEL
                     }
                   />
                 </EuiFlexItem>
