@@ -9,8 +9,9 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useCaseViewNavigation, useCaseViewParams } from '../../../common/navigation';
-import { ShowAlertTableLink } from './show_alert_table_link';
+import { ShowTableButton } from './show_table_button';
 import { renderWithTestingProviders } from '../../../common/mock';
+import { CASE_VIEW_PAGE_TABS } from '../../../../common';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../../common/navigation/hooks');
@@ -25,10 +26,10 @@ describe('case view alert table link', () => {
     useCaseViewParamsMock.mockReturnValue({ detailName: 'case-id' });
     useCaseViewNavigationMock.mockReturnValue({ navigateToCaseView });
 
-    renderWithTestingProviders(<ShowAlertTableLink />);
-    expect(screen.getByTestId('comment-action-show-alerts-case-id')).toBeInTheDocument();
+    renderWithTestingProviders(<ShowTableButton tabId={CASE_VIEW_PAGE_TABS.ALERTS} />);
+    expect(screen.getByTestId('comment-action-show-table-case-id')).toBeInTheDocument();
 
-    await userEvent.click(screen.getByTestId('comment-action-show-alerts-case-id'));
+    await userEvent.click(screen.getByTestId('comment-action-show-table-case-id'));
 
     expect(navigateToCaseView).toHaveBeenCalledWith({
       detailName: 'case-id',
