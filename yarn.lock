@@ -3286,7 +3286,7 @@
     pngjs "7.0.0"
     sharp "0.32.1"
 
-"@google/generative-ai@0.24.1", "@google/generative-ai@^0.24.0":
+"@google/generative-ai@0.24.1":
   version "0.24.1"
   resolved "https://registry.yarnpkg.com/@google/generative-ai/-/generative-ai-0.24.1.tgz#634a3c06f8ea7a6125c1b0d6c1e66bb11afb52c9"
   integrity sha512-MqO+MLfM6kjxcKoy0p1wRzG3b4ZZXtPI+z2IE26UogS2Cm/XHO+7gGRBh6gcJsOiIVoH93UwKvW4HdgiOZCy9Q==
@@ -10040,14 +10040,6 @@
     "@langchain/google-common" "2.1.24"
     google-auth-library "^10.1.0"
 
-"@langchain/google-genai@2.1.24":
-  version "2.1.24"
-  resolved "https://registry.yarnpkg.com/@langchain/google-genai/-/google-genai-2.1.24.tgz#cc7cc26946faf392f04a8974497840b1ce061280"
-  integrity sha512-gBuYWIrTiT4S8U3AxaAMl6SKeGKtB10fXc+m0p2BPSvTfCaTbIlycH7IZjZUTD1L92dQMi/SULwCWffq5OIBgQ==
-  dependencies:
-    "@google/generative-ai" "^0.24.0"
-    uuid "^11.1.0"
-
 "@langchain/google-vertexai@2.1.24":
   version "2.1.24"
   resolved "https://registry.yarnpkg.com/@langchain/google-vertexai/-/google-vertexai-2.1.24.tgz#d4522c609642be9b094bcf1eea6f8cf4850bf6f2"
@@ -10072,7 +10064,7 @@
     p-retry "^7.1.1"
     uuid "^13.0.0"
 
-"@langchain/langgraph@1.2.0", "@langchain/langgraph@^1.1.2":
+"@langchain/langgraph@1.2.0":
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/@langchain/langgraph/-/langgraph-1.2.0.tgz#cb09262719eaefff71b4ab83c593d27a200f73cd"
   integrity sha512-wyqKIzXTAfXX3L1d8R7icM+HmRQBTbuNLWtUlpRJ/JP/ux1ei/sOSt6p8f90ARoOP2iJVlM70wOBYWaGErdBlA==
@@ -26451,17 +26443,6 @@ kuler@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/kuler/-/kuler-2.0.0.tgz#e2c570a3800388fb44407e851531c1d670b061b3"
   integrity sha512-Xq9nH7KlWZmXAtodXDDRE7vs6DU1gTU8zYDHDiWLSip45Egwq3plLHzPn27NgvzL2r1LMPC1vdqh98sQxtqj4A==
-
-langchain@1.2.30:
-  version "1.2.30"
-  resolved "https://registry.yarnpkg.com/langchain/-/langchain-1.2.30.tgz#262f57c6101b42f10e7f2fa6b872897f14abd26f"
-  integrity sha512-Ofsk7LTGvIkyy3uesv7hpyerpTghdjNpYFJfIxJRGGLjd+4JgTVkT/Ax6Cjg0F6doEuO7VRID0NK2QwmT3A/bg==
-  dependencies:
-    "@langchain/langgraph" "^1.1.2"
-    "@langchain/langgraph-checkpoint" "^1.0.0"
-    langsmith ">=0.5.0 <1.0.0"
-    uuid "^11.1.0"
-    zod "^3.25.76 || ^4"
 
 langsmith@0.7.1, "langsmith@>=0.4.0 <1.0.0", "langsmith@>=0.5.0 <1.0.0":
   version "0.7.1"
