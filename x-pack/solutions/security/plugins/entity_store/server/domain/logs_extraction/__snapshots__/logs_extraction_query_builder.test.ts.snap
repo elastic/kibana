@@ -29,6 +29,7 @@ true, CASE((user.email IS NOT NULL AND user.email != \\"\\" AND entity.namespace
 (user.id IS NOT NULL AND user.id != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(user.id, \\"@\\", entity.namespace),
 (user.name IS NOT NULL AND user.name != \\"\\" AND user.domain IS NOT NULL AND user.domain != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(user.name, \\"@\\", user.domain, \\"@\\", entity.namespace),
 (user.name IS NOT NULL AND user.name != \\"\\" AND entity.namespace IS NOT NULL AND entity.namespace != \\"\\"), CONCAT(user.name, \\"@\\", entity.namespace), NULL), NULL)
+| WHERE recent.entity.EngineMetadata.UntypedId IS NOT NULL
 | STATS
     entity.EngineMetadata.FirstSeenLogInPage = MIN(@timestamp),
     recent.timestamp = MAX(@timestamp),

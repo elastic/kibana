@@ -121,9 +121,31 @@ export async function ingestEntities({
     isIdField: useUpsertById && col.name === esIdField,
   }));
 
+  // Defense-in-depth counter for null-_id rows we drop in upsert mode (see the
+  // generator below). Aggregated to a single warn line after streaming so a
+  // misbehaving query doesn't drown the log with one entry per row.
+  let droppedNullIdCount = 0;
+
   // Generator function that yields documents one at a time from columnar format
   async function* documentGenerator() {
     for (const row of values) {
+      // Defense-in-depth: in upsert mode, skip rows whose identity column is
+      // null/empty rather than letting them reach the bulk API as
+      // `_id: null`, which Elasticsearch rejects with the opaque
+      // `action_request_validation_exception: Validation Failed: 1: id is
+      // missing` error and aborts the entire batch. The query builder is
+      // expected to filter these upstream (see the alias-scoped null-identity
+      // guard in `buildLogsExtractionEsqlQuery`); this is a backstop so a
+      // future regression at the query layer surfaces as a counted warn
+      // instead of a hard ingest failure.
+      if (useUpsertById) {
+        const idValue = row[identityFieldIndex];
+        if (idValue === null || idValue === undefined || idValue === '') {
+          droppedNullIdCount += 1;
+          continue;
+        }
+      }
+
       const doc: Record<string, unknown> = {};
       for (let i = 0; i < row.length; i++) {
         const { name, skip } = columnMeta[i];
@@ -170,4 +192,10 @@ export async function ingestEntities({
     },
     options
   );
+
+  if (droppedNullIdCount > 0) {
+    logger.warn(
+      `[entity_store] Skipped ${droppedNullIdCount} entity row(s) with null/empty "${esIdField}" before bulk upsert to ${targetIndex}; this indicates the upstream ESQL query produced rows the engine cannot identify (likely an alias-scoped pass without a NULL-identity guard).`
+    );
+  }
 }

@@ -576,6 +576,77 @@ describe('buildLogsExtractionEsqlQuery alias-scoped pass (Option ① — trust-t
     expect(query).toMatchSnapshot();
     await expect(validateQuery(query)).resolves.toHaveProperty('errors', []);
   });
+
+  // Regression: Lumos activity logs (logs-lumos.activity_logs-default) — a
+  // schema feature aliased `user.email` / `user.name` to
+  // `lumos.activity_logs.actor.email`, but a subset of docs had no `actor.email`
+  // populated AND no ECS `user.*` fallback. Without this guard those rows
+  // collapsed in STATS as a single `recent.entity.EngineMetadata.UntypedId IS
+  // NULL` row and crashed the bulk upsert with
+  // `action_request_validation_exception: 1: id is missing`. The guard must
+  // sit between the EUID EVAL and STATS so the NULL row never enters the
+  // aggregation.
+  it('emits a NULL-identity guard between the EUID EVAL and STATS on alias-scoped passes', async () => {
+    const aliasContext = buildContext();
+    const aliasPrelude = buildAliasPrelude(
+      aliasContext,
+      getEuidSourceFields('user').identitySourceFields,
+      'user'
+    );
+    const aliasScopedQuery = buildLogsExtractionEsqlQuery({
+      indexPatterns: ['logs-lumos.activity_logs-*'],
+      latestIndex: 'latest-index',
+      entityDefinition: getEntityDefinition('user', 'default'),
+      docsLimit: 10000,
+      fromDateISO: '2026-01-01T00:00:00.000Z',
+      toDateISO: '2026-01-01T23:59:59.999Z',
+      aliasPrelude,
+      aliasFilter: 'data_stream.dataset == "lumos.activity_logs"',
+      aliasScopedPass: true,
+    });
+
+    expect(aliasScopedQuery).toContain(
+      '| WHERE recent.entity.EngineMetadata.UntypedId IS NOT NULL'
+    );
+
+    const guardIdx = aliasScopedQuery.indexOf(
+      '| WHERE recent.entity.EngineMetadata.UntypedId IS NOT NULL'
+    );
+    const statsIdx = aliasScopedQuery.indexOf('| STATS');
+    const euidEvalIdx = aliasScopedQuery.indexOf('| EVAL recent.entity.EngineMetadata.UntypedId =');
+    expect(euidEvalIdx).toBeGreaterThan(-1);
+    expect(guardIdx).toBeGreaterThan(euidEvalIdx);
+    expect(statsIdx).toBeGreaterThan(guardIdx);
+
+    await expect(validateQuery(aliasScopedQuery)).resolves.toHaveProperty('errors', []);
+  });
+
+  it('does NOT emit the NULL-identity guard on default (non-alias) passes', () => {
+    const aliasContext = buildContext();
+    const aliasPrelude = buildAliasPrelude(
+      aliasContext,
+      getEuidSourceFields('user').identitySourceFields,
+      'user'
+    );
+    // Default pass: aliasScopedPass omitted (falsy). The engine documentsFilter
+    // already prevents NULL identities from reaching STATS, so the extra guard
+    // is unnecessary work and we must not emit it (avoids drift between the
+    // default-pass snapshot and the alias-pass extension).
+    const defaultQuery = buildLogsExtractionEsqlQuery({
+      indexPatterns: ['logs-azure.activitylogs-*'],
+      latestIndex: 'latest-index',
+      entityDefinition: getEntityDefinition('user', 'default'),
+      docsLimit: 10000,
+      fromDateISO: '2026-01-01T00:00:00.000Z',
+      toDateISO: '2026-01-01T23:59:59.999Z',
+      aliasPrelude,
+      aliasFilter: 'data_stream.dataset == "azure.activitylogs"',
+    });
+
+    expect(defaultQuery).not.toContain(
+      '| WHERE recent.entity.EngineMetadata.UntypedId IS NOT NULL'
+    );
+  });
 });
 
 describe('buildRemainingLogsCountQuery', () => {

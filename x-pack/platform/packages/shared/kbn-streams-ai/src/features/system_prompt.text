@@ -54,7 +54,7 @@ Schema features describe the **log schema family** evident from field names and 
 - **Evidence**: Field names and log structure (e.g. ECS: `@timestamp`, `ecs.version`, `event.*`, `log.*`, `service.name`; OTel: `resource.attributes.*`, `severity_text`, `body.text`). Use only evidence from sample_documents.
 - **Short properties**: For `type: "schema"`, `properties` must be minimal: include `schema_family` (`"ecs"` | `"otel"` | `"custom"`) and optionally `ecs_version` when ECS is detected and version is evident. Do not list all fields or paste long analysis.
 - **Multiple schemas**: If evidence supports more than one schema family (e.g. ECS and OTel both present), emit one schema feature per detected family; list all of them. Each feature keeps short `properties`.
-- **ECS identity aliases (entity extraction support)**: When the stream's documents carry identity-bearing fields under non-ECS paths (e.g. `azure.signinlogs.properties.user_principal_name`, `okta.actor.alternateId`, `aws.cloudtrail.user_identity.user_name`), include an `ecs_identity_aliases` table in `properties`. The table maps ECS identity destinations to the non-ECS source paths in this stream that carry the same identity. Downstream entity extraction uses these to project canonical entities from arbitrary log sources without per-integration ECS normalization.
+- **ECS identity aliases (entity extraction support)**: When the stream's documents carry identity-bearing fields under non-ECS paths (e.g. `azure.signinlogs.properties.user_principal_name`, `okta.actor.alternateId`, or `aws.cloudtrail.user_identity.user_name` for users; `infoblox_nios.log.dhcp.client_hostname`, `cisco_asa.dhcp.host_name`, or `forescout.asset.hostname` for hosts), include an `ecs_identity_aliases` table in `properties`. The table maps ECS identity destinations to the non-ECS source paths in this stream that carry the same identity. Downstream entity extraction uses these to project canonical entities from arbitrary log sources without per-integration ECS normalization.
   - **Allowed destination keys (closed vocabulary)**: `user.email`, `user.id`, `user.name`, `user.domain`, `host.id`, `host.name`, `host.hostname`, `service.name`, `entity.namespace`. Any other key is ignored downstream.
   - **Values**: arrays of non-ECS field paths in this stream that carry the same identity, ordered by preference (highest-quality source first).
   - **Evidence-bound emission**: only emit an alias when sample documents directly support the mapping (e.g. the same value appears under both an existing ECS field and the aliased path, or a sample doc shows the non-ECS path carrying a clearly identity-shaped value).
@@ -399,6 +399,43 @@ Version formatting rules (important for vulnerability analysis):
   "filter": {
     "field": "event.dataset",
     "eq": "azure.signinlogs"
+  }
+}
+```
+
+**Example 9 — Schema: ECS family with host identity aliases (no co-occurring ECS host.\*)**
+
+Asset-tracking streams (DHCP leases, CMDB/inventory exports, AD computer accounts, network-device discovery) routinely carry the asset's hostname under a vendor-specific non-ECS path while the corresponding ECS `host.*` fields are never populated. The stream's purpose makes the non-ECS path a canonical host identity, so an alias is warranted even without co-occurrence — provided the path identifies the asset the event is *about* (the leasing client, the inventoried device) and not an observer/relay/lookup target.
+```
+{
+  "type": "schema",
+  "subtype": "ecs",
+  "id": "infoblox-nios-log-schema",
+  "title": "Infoblox NIOS log schema",
+  "description": "Infoblox NIOS DHCP/DNS log stream. The leasing client's hostname is carried under the non-ECS path infoblox_nios.log.dhcp.client_hostname; the corresponding ECS host.* fields are not populated on this stream, but the stream's purpose (DHCP lease tracking) makes it a canonical source for host identity. The DHCP relay/server hostname carried elsewhere on the same stream (observer.* / host.domain) is intentionally NOT aliased — it identifies the observer, not the leased asset.",
+  "properties": {
+    "schema_family": "ecs",
+    "ecs_version": "8.11.0",
+    "ecs_identity_aliases": {
+      "host.name": ["infoblox_nios.log.dhcp.client_hostname"],
+      "host.hostname": ["infoblox_nios.log.dhcp.client_hostname"]
+    }
+  },
+  "confidence": 90,
+  "evidence": [
+    "data_stream.dataset=infoblox_nios.log",
+    "infoblox_nios.log.service_name=dhcpd",
+    "infoblox_nios.log.dhcp.client_hostname=MacBook-Pro-16-inch",
+    "event.action=dhcpack",
+    "ecs.version=8.11.0"
+  ],
+  "evidence_doc_ids": ["a1b2c3d"],
+  "tags": ["schema", "ecs", "identity-alias", "host"],
+  "filter": {
+    "and": [
+      { "field": "data_stream.dataset", "eq": "infoblox_nios.log" },
+      { "field": "infoblox_nios.log.type", "eq": "DHCP" }
+    ]
   }
 }
 ```

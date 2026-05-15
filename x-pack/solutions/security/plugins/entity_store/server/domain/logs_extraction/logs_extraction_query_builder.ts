@@ -209,6 +209,25 @@ export function buildLogsExtractionEsqlQuery({
     })}`
   );
 
+  // Alias-scoped null-identity guard. Required because alias-scoped passes drop
+  // the engine's `documentsFilter` (so non-ECS streams whose ECS slots are NULL
+  // on the raw doc still reach the alias prelude — see `aliasScopedPass` in
+  // `query_builder_commons.ts`). Without this guard, any doc the schema
+  // feature's filter admitted but whose aliased source paths were ALSO null
+  // (e.g. a Lumos activity log with `lumos.activity_logs.actor.email` missing
+  // alongside no ECS `user.*`) would survive STATS as a single
+  // `untypedId IS NULL` row, propagate through the LOOKUP JOIN as
+  // `entity.id = CONCAT("user:", NULL) = NULL` and `entity.hashedId = HASH(...,
+  // NULL) = NULL`, and crash the bulk upsert with
+  // `action_request_validation_exception: id is missing`. The default pass
+  // gets the same invariant for free via the `documentsFilter` it keeps on the
+  // source clause, so this guard is intentionally limited to alias-scoped
+  // passes — the more selective the filter, the cheaper the STATS that
+  // follows.
+  if (aliasScopedPass) {
+    parts.push(`| WHERE ${recentData(ENGINE_METADATA_UNTYPED_ID_FIELD)} IS NOT NULL`);
+  }
+
   // Main stats aggregation from incoming data
   parts.push(`| STATS
     ${ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD} = MIN(${TIMESTAMP_FIELD}),
