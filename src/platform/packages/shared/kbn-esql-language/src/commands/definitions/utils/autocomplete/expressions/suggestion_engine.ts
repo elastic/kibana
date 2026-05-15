@@ -58,7 +58,6 @@ export async function suggestForExpression(
     };
   }
 
-  // Recovery mutate the context used to compute derived state without chaning the original request
   const clonedCtx = { ...baseCtx };
   const partialSuggestions = await trySuggestForPartialOperators(clonedCtx);
 

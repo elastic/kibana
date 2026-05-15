@@ -447,9 +447,12 @@ describe('functions arg suggestions', () => {
       expect(texts).toContain('($0)');
     });
 
-    it('IN operator in EVAL expression: does not add a new-column suggestion', async () => {
+    it.each([
+      ['IN', 'FROM index | EVAL integerField IN /'],
+      ['NOT IN', 'FROM index | EVAL integerField NOT IN /'],
+    ])('%s operator in EVAL expression: does not add a new-column suggestion', async (_, query) => {
       const { suggest } = await setup();
-      const suggestions = await suggest('FROM index | EVAL integerField IN /');
+      const suggestions = await suggest(query);
       const texts = suggestions.map(({ text }) => text);
 
       expect(texts).toContain('($0)');
