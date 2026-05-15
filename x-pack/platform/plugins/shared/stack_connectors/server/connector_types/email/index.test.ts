@@ -594,7 +594,7 @@ describe('params validation', () => {
     }).toThrowError(/not valid emails/);
   });
 
-  test('params validation fails when email has single-label domain', () => {
+  test('params validation succeeds for single-label domain (on-prem/self-hosted)', () => {
     const configUtils = getActionsConfigUtils({});
     expect(() => {
       validateParams(
@@ -608,7 +608,7 @@ describe('params validation', () => {
         },
         { configurationUtilities: configUtils }
       );
-    }).toThrowError(/not valid emails/);
+    }).not.toThrow();
   });
 
   test('params validation succeeds for valid email with hyphens and subdomains', () => {
