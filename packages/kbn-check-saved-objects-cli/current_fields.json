@@ -693,6 +693,22 @@
     "verification_started_at",
     "verification_status"
   ],
+  "fleet-cloud-onboarding-deployment": [
+    "attemptCount",
+    "connectionId",
+    "createdAt",
+    "deploymentId",
+    "deploymentName",
+    "mechanisms",
+    "packagePolicyIds",
+    "provider",
+    "serviceVars",
+    "services",
+    "status",
+    "statusMessage",
+    "updatedAt",
+    "vars"
+  ],
   "fleet-fleet-server-host": [
     "host_urls",
     "is_default",

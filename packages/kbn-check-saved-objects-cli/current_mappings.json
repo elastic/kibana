@@ -2330,6 +2330,54 @@
       }
     }
   },
+  "fleet-cloud-onboarding-deployment": {
+    "dynamic": false,
+    "properties": {
+      "attemptCount": {
+        "type": "integer"
+      },
+      "connectionId": {
+        "type": "keyword"
+      },
+      "createdAt": {
+        "type": "date"
+      },
+      "deploymentId": {
+        "type": "keyword"
+      },
+      "deploymentName": {
+        "type": "keyword"
+      },
+      "mechanisms": {
+        "type": "keyword"
+      },
+      "packagePolicyIds": {
+        "type": "keyword"
+      },
+      "provider": {
+        "type": "keyword"
+      },
+      "serviceVars": {
+        "enabled": false,
+        "type": "object"
+      },
+      "services": {
+        "type": "keyword"
+      },
+      "status": {
+        "type": "keyword"
+      },
+      "statusMessage": {
+        "type": "text"
+      },
+      "updatedAt": {
+        "type": "date"
+      },
+      "vars": {
+        "type": "flattened"
+      }
+    }
+  },
   "fleet-fleet-server-host": {
     "dynamic": false,
     "properties": {
