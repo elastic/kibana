@@ -195,3 +195,9 @@ src/platform/plugins/shared/console/packaging/react/translations
 
 # Batched commits marker, e.g.: from quick checks
 .collect_commits_marker
+
+custom_rule_creation_skills_audit.md
+custom_rule_creation_audit/kibana_security_architecture.md
+custom_rule_creation_audit/slides.html
+x-pack/solutions/security/packages/kbn-evals-suite-security-ai-rules/LOCAL_SETUP.md
+x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_monitoring/TESTING_APM_OUTCOME.md
