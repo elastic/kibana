@@ -17,6 +17,8 @@ const createPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPoli
     id: 'policy-1',
     name: 'Test policy',
     description: '',
+    type: 'global',
+    ruleId: null,
     enabled: true,
     matcher: null,
     groupBy: null,
