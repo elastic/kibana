@@ -96,31 +96,6 @@ spaceTest.describe(
       });
     });
 
-    /**
-     * Pinned blocker (#236787): asserts the desired end-state where Inspect lives
-     * only in the 3-dot popover, not on the visible quick-action row. Today
-     * Lens auto-injects Inspect into the default `view`-mode actions and the
-     * public LensRenderer contract (see
-     * x-pack/platform/plugins/shared/lens/public/react_embeddable/renderer/lens_custom_renderer_component.tsx:142-157)
-     * does not let consumers suppress or replace a default by id, so the
-     * consumer-side spike cannot satisfy this assertion.
-     *
-     * When @elastic/kibana-visualizations ships the LensRenderer change that
-     * exposes a way to filter/replace defaults (e.g. a `defaultActionFilter`
-     * or `omitDefaultActionIds` prop), flip this back to `spaceTest(...)` and
-     * remove the fixme. The body should pass green at that point with no
-     * other test changes.
-     */
-    spaceTest.fixme(
-      'Inspect is demoted from the visible quick-action row',
-      async ({ pageObjects }) => {
-        await pageObjects.discover.writeAndSubmitEsqlQuery(testData.ESQL_QUERIES.TS);
-        const { metricsExperience } = pageObjects;
-        await expect(metricsExperience.grid).toBeVisible();
 
-        await metricsExperience.getCardByIndex(0).hover();
-        await expect(metricsExperience.chartActions.inspect).toBeHidden();
-      }
-    );
   }
 );
