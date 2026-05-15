@@ -5565,11 +5565,11 @@
           },
           {
             "plugin": "dashboardAgent",
-            "path": "x-pack/platform/plugins/shared/dashboard_agent/server/tools/manage_dashboard/operations.ts"
+            "path": "x-pack/platform/plugins/shared/dashboard_agent/server/tools/manage_dashboard/operations/add_section.ts"
           },
           {
             "plugin": "dashboardAgent",
-            "path": "x-pack/platform/plugins/shared/dashboard_agent/server/tools/manage_dashboard/operations.ts"
+            "path": "x-pack/platform/plugins/shared/dashboard_agent/server/tools/manage_dashboard/operations/edit_visualization_panels.ts"
           },
           {
             "plugin": "@kbn/agent-builder-tools-base",
@@ -16493,6 +16493,18 @@
                 "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/entity.ts"
               },
               {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/public/features/workflow_context/lib/get_steps_collection_schema.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/public/features/workflow_context/lib/get_context_for_path.ts"
+              },
+              {
+                "plugin": "workflowsManagement",
+                "path": "src/platform/plugins/shared/workflows_management/public/features/validate_workflow_yaml/lib/validate_variables.ts"
+              },
+              {
                 "plugin": "osquery",
                 "path": "x-pack/platform/plugins/shared/osquery/common/api/unified_history/get_unified_history.gen.ts"
               },
@@ -17155,18 +17167,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/common/api/endpoint/actions/response_actions/upload/upload.gen.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/public/features/workflow_context/lib/get_steps_collection_schema.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/public/features/workflow_context/lib/get_context_for_path.ts"
-              },
-              {
-                "plugin": "workflowsManagement",
-                "path": "src/platform/plugins/shared/workflows_management/public/features/validate_workflow_yaml/lib/validate_variables.ts"
               },
               {
                 "plugin": "entityStore",

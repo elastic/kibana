@@ -109,7 +109,7 @@ export const RuleActionsMenu = ({
         defaultMessage: 'Rule actions',
       })}
     >
-      <EuiContextMenuPanel size="s" items={menuItems} />
+      <EuiContextMenuPanel items={menuItems} />
     </EuiPopover>
   );
 };

@@ -8,7 +8,7 @@ notify:
       channels:
         - '#mission-control'
       message: |
-        Kibana has been bumped to `${NEW_VERSION}` on branch `${BRANCH}` and a DRA build has begun.
+        Kibana has been bumped to `${NEW_VERSION}` on branch `${BRANCH}`.
         Build: ${BUILDKITE_BUILD_URL}
     if: build.state == "passed"
 
