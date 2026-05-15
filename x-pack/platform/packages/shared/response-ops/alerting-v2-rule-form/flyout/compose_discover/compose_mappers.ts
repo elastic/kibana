@@ -1,0 +1,253 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type {
+  RuleResponse,
+  CreateRuleData,
+  UpdateRuleData,
+} from '@kbn/alerting-v2-schemas';
+import { RUNBOOK_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
+import type { ComposeFormValues, RuleQuery, RuleKind, RecoveryPolicyType } from './compose_form_types';
+import { splitQuery } from './use_heuristic_split';
+
+// ---------------------------------------------------------------------------
+// Schema bridge: RuleQuery <-> old API fields
+//
+// TEMPORARY — remove when #268984 merges and the API natively uses the
+// composed/standalone query schema.
+// ---------------------------------------------------------------------------
+
+/**
+ * Converts old API response fields into a `RuleQuery`.
+ *
+ * Uses `splitQuery()` to re-derive the base/alertBlock split from the stored
+ * single query string. Lossy if the user hand-edited the split, but acceptable
+ * during active dev — the new schema stores the split natively.
+ */
+export function transformQueryIn(rule: {
+  kind: RuleKind;
+  evaluation: { query: { base: string } };
+  recovery_policy?: { type: string; query?: { base?: string } } | null;
+}): RuleQuery {
+  const fullQuery = rule.evaluation.query.base;
+
+  if (rule.kind === 'signal') {
+    return { format: 'standalone', breach: fullQuery };
+  }
+
+  const split = splitQuery(fullQuery);
+
+  let recover: string | undefined;
+  if (rule.recovery_policy?.type === 'query' && rule.recovery_policy.query?.base) {
+    const recoverySplit = splitQuery(rule.recovery_policy.query.base);
+    recover = recoverySplit.alertBlock || undefined;
+  }
+
+  return {
+    format: 'composed',
+    base: split.base,
+    blocks: {
+      breach: split.alertBlock,
+      ...(recover ? { recover } : {}),
+    },
+  };
+}
+
+/**
+ * Converts a `RuleQuery` back into the old API fields.
+ */
+export function transformQueryOut(
+  query: RuleQuery,
+  kind?: RuleKind
+): {
+  evaluation: { query: { base: string } };
+  recovery_policy?: { type: RecoveryPolicyType; query?: { base: string } };
+} {
+  if (query.format === 'standalone') {
+    const evaluation = { query: { base: query.breach } };
+    const recoverStr = query.recover?.trim();
+    if (recoverStr) {
+      return {
+        evaluation,
+        recovery_policy: { type: 'query', query: { base: recoverStr } },
+      };
+    }
+    if (kind === 'alert') {
+      return { evaluation, recovery_policy: { type: 'no_breach' } };
+    }
+    return { evaluation };
+  }
+
+  const evalQuery = [query.base, query.blocks.breach].filter(Boolean).join('\n');
+
+  const result: {
+    evaluation: { query: { base: string } };
+    recovery_policy?: { type: RecoveryPolicyType; query?: { base: string } };
+  } = { evaluation: { query: { base: evalQuery } } };
+
+  if (query.blocks.recover?.trim()) {
+    const recoveryQuery = [query.base, query.blocks.recover].filter(Boolean).join('\n');
+    result.recovery_policy = { type: 'query', query: { base: recoveryQuery } };
+  } else {
+    result.recovery_policy = { type: 'no_breach' };
+  }
+
+  return result;
+}
+
+// ---------------------------------------------------------------------------
+// ComposeFormValues → API request
+// ---------------------------------------------------------------------------
+
+type RuleArtifactPayload = Array<{ id: string; type: string; value: string }>;
+
+const createRunbookArtifactId = () =>
+  `runbook-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+
+const mapArtifacts = (artifacts: ComposeFormValues['artifacts']): RuleArtifactPayload | undefined => {
+  const currentArtifacts = artifacts ?? [];
+  const runbookArtifact = currentArtifacts.find(
+    (artifact) => artifact.type === RUNBOOK_ARTIFACT_TYPE
+  );
+  const runbookValue = runbookArtifact?.value.trim();
+
+  if (runbookArtifact && !runbookValue) {
+    const filtered = currentArtifacts.filter((a) => a.type !== RUNBOOK_ARTIFACT_TYPE);
+    return filtered.length ? filtered : undefined;
+  }
+  if (runbookArtifact && runbookValue) {
+    const runbookId = runbookArtifact.id.trim() ? runbookArtifact.id : createRunbookArtifactId();
+    if (runbookArtifact.value === runbookValue && runbookArtifact.id === runbookId) {
+      return currentArtifacts.length ? currentArtifacts : undefined;
+    }
+    return currentArtifacts.map((a) =>
+      a.type === RUNBOOK_ARTIFACT_TYPE ? { ...a, id: runbookId, value: runbookValue } : a
+    );
+  }
+  return currentArtifacts.length ? currentArtifacts : undefined;
+};
+
+const DELAY_IMMEDIATE = 'immediate';
+const DELAY_BREACHES = 'breaches';
+const DELAY_DURATION = 'duration';
+
+const mapStateTransition = (formValues: ComposeFormValues) => {
+  const { kind, stateTransition } = formValues;
+  if (kind !== 'alert') return undefined;
+
+  const alertMode = formValues.stateTransitionAlertDelayMode ?? DELAY_IMMEDIATE;
+  const recoveryMode = formValues.stateTransitionRecoveryDelayMode ?? DELAY_IMMEDIATE;
+
+  const out: Record<string, number | string> = {};
+
+  if (alertMode === DELAY_IMMEDIATE) {
+    out.pending_count = 0;
+  } else if (alertMode === DELAY_BREACHES && stateTransition?.pendingCount != null) {
+    out.pending_count = stateTransition.pendingCount;
+  } else if (alertMode === DELAY_DURATION) {
+    if (stateTransition?.pendingTimeframe != null) out.pending_timeframe = stateTransition.pendingTimeframe;
+    if (stateTransition?.pendingCount != null) out.pending_count = stateTransition.pendingCount;
+  }
+
+  if (recoveryMode === DELAY_IMMEDIATE) {
+    out.recovering_count = 0;
+  } else if (recoveryMode !== DELAY_DURATION && stateTransition?.recoveringCount != null) {
+    out.recovering_count = stateTransition.recoveringCount;
+  } else if (recoveryMode === DELAY_DURATION) {
+    if (stateTransition?.recoveringTimeframe != null) out.recovering_timeframe = stateTransition.recoveringTimeframe;
+    if (stateTransition?.recoveringCount != null) out.recovering_count = stateTransition.recoveringCount;
+  }
+
+  return Object.keys(out).length ? out : undefined;
+};
+
+export const composeFormToCreateRequest = (formValues: ComposeFormValues): CreateRuleData => {
+  const { evaluation, recovery_policy } = transformQueryOut(formValues.query, formValues.kind);
+  const artifacts = mapArtifacts(formValues.artifacts);
+
+  return {
+    kind: formValues.kind,
+    metadata: {
+      name: formValues.metadata.name,
+      description: formValues.metadata.description,
+      owner: formValues.metadata.owner,
+      ...(formValues.metadata.tags?.length ? { tags: formValues.metadata.tags } : {}),
+    },
+    time_field: formValues.timeField,
+    schedule: { every: formValues.schedule.every, lookback: formValues.schedule.lookback },
+    evaluation,
+    grouping: formValues.grouping?.fields?.length ? { fields: formValues.grouping.fields } : undefined,
+    recovery_policy,
+    state_transition: mapStateTransition(formValues),
+    ...(artifacts ? { artifacts } : {}),
+  };
+};
+
+export const composeFormToUpdateRequest = (formValues: ComposeFormValues): UpdateRuleData => {
+  const { kind, ...request } = composeFormToCreateRequest(formValues);
+  const { grouping, recovery_policy, state_transition, artifacts, ...rest } = request;
+  return {
+    ...rest,
+    grouping: grouping ?? null,
+    recovery_policy: recovery_policy ?? null,
+    state_transition: state_transition ?? null,
+    artifacts: artifacts ?? null,
+  };
+};
+
+// ---------------------------------------------------------------------------
+// API response → ComposeFormValues
+// ---------------------------------------------------------------------------
+
+const deriveAlertDelayMode = (
+  st?: ComposeFormValues['stateTransition']
+): ComposeFormValues['stateTransitionAlertDelayMode'] => {
+  if (st?.pendingTimeframe != null) return DELAY_DURATION;
+  if (st?.pendingCount != null && st.pendingCount > 0) return DELAY_BREACHES;
+  return DELAY_IMMEDIATE;
+};
+
+const deriveRecoveryDelayMode = (
+  st?: ComposeFormValues['stateTransition']
+): ComposeFormValues['stateTransitionRecoveryDelayMode'] => {
+  if (st?.recoveringTimeframe != null) return DELAY_DURATION;
+  if (st?.recoveringCount != null && st.recoveringCount > 0) return 'recoveries';
+  return DELAY_IMMEDIATE;
+};
+
+export const mapRuleToComposeFormValues = (rule: RuleResponse): ComposeFormValues => {
+  const stateTransition: ComposeFormValues['stateTransition'] = rule.state_transition
+    ? {
+        pendingCount: rule.state_transition.pending_count ?? null,
+        pendingTimeframe: rule.state_transition.pending_timeframe ?? null,
+        recoveringCount: rule.state_transition.recovering_count ?? null,
+        recoveringTimeframe: rule.state_transition.recovering_timeframe ?? null,
+      }
+    : undefined;
+
+  return {
+    kind: rule.kind,
+    metadata: {
+      name: rule.metadata.name,
+      description: rule.metadata.description,
+      enabled: rule.enabled,
+      owner: rule.metadata.owner,
+      tags: rule.metadata.tags,
+    },
+    timeField: rule.time_field,
+    schedule: {
+      every: rule.schedule.every,
+      lookback: rule.schedule.lookback ?? '1m',
+    },
+    query: transformQueryIn(rule),
+    ...(rule.grouping ? { grouping: { fields: rule.grouping.fields } } : {}),
+    stateTransition,
+    stateTransitionAlertDelayMode: deriveAlertDelayMode(stateTransition),
+    stateTransitionRecoveryDelayMode: deriveRecoveryDelayMode(stateTransition),
+    ...(rule.artifacts ? { artifacts: rule.artifacts } : {}),
+  };
+};
