@@ -121,7 +121,7 @@ Scan the returned comments for one whose body starts with `<!-- test-plan-genera
 | `generate / create / write` | No | Run Steps 1–3, save draft |
 | `generate / create / write` | Yes | Read `references/mode-generate.md` |
 | `update / regenerate` | Yes | Incremental diff (see below) |
-| `update / regenerate` | No | Full draft fallback — run Steps 1–3 |
+| `update / regenerate` | No | Tell the user *"No existing test plan found for issue #&lt;number&gt; — treating as a fresh generate."*, then run Steps 1–3 |
 | `publish / post` | n/a | Read local file, post to GitHub (Step 4) |
 | Anything else (ambiguous phrasing) | n/a | Apply Core rule — stop and ask the user which mode they intend (generate, update, or publish) |
 

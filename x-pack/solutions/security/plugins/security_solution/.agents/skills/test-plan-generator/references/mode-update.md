@@ -35,6 +35,8 @@ If no published comment exists, skip all steps here and run Steps 1–3 from SKI
    - New PR artifacts (API routes, service methods, saved object types, schemas, UI components, feature flags) introduced by re-read PRs that are not covered by any existing scenario.
    - **Sub-issues previously listed in the *Pending work* collapsible block that have now been implemented** — see the special handling in Step 6.
 
+   **If this comparison produces an empty change list** (no new ACs, no incorrect scenarios, no outdated sections, no new/resolved limitations, no new test files or PR artifacts, no implemented Pending sub-issues): skip Steps 6 and 7, do not save a draft, and tell the user *"The existing test plan for issue #&lt;number&gt; appears to be up to date — no draft saved."* Then jump directly to Step 8 and output the Sources Summary so the user can see what was checked.
+
 6. **Apply only the identified changes.** Do not rewrite accurate sections.
 
    **Special handling: implemented Pending sub-issues** (per the *Pending work pattern* in [`document-structure.md`](document-structure.md)):
@@ -43,9 +45,11 @@ If no published comment exists, skip all steps here and run Steps 1–3 from SKI
    - Decrease the *Pending work* row in the Test Coverage Summary by the number of migrated scenarios, and increase the affected feature area rows accordingly. Reclassify the migrated scenarios in the `Automated` / `Manual only` columns based on whether matching tests exist in the catalog.
    - If the *Pending work* row would reach `0`, remove the row, the collapsible block, and the related `⚠️` entry in Known Limitations.
 
-   If new scenarios must be written, follow the [Writing scenarios](../SKILL.md#writing-scenarios) and [Saving the draft](../SKILL.md#saving-the-draft) procedures from Step 3 of SKILL.md — skip the Sources Summary sub-step there (the update-mode version with PR re-read info is emitted in step 8 below).
+   If new scenarios must be written, follow the [Writing scenarios](../SKILL.md#writing-scenarios) procedures from Step 3 of SKILL.md.
 
-   **Self-review applies to the full updated document, not just the changes.** Before saving, run the Gherkin self-review and the three mechanical sum-checks from [`output-formats.md`](output-formats.md) against the entire updated draft, and re-review [`common-mistakes.md`](common-mistakes.md). Updates that recompute Test Coverage Summary totals incorrectly are the most common quality regression — verify column-wise and row-wise sums explicitly.
+   **Self-review applies to the full updated document, not just the changes.** Run the Gherkin self-review and the three mechanical sum-checks from [`output-formats.md`](output-formats.md) against the entire updated draft, and re-review [`common-mistakes.md`](common-mistakes.md). Updates that recompute Test Coverage Summary totals incorrectly are the most common quality regression — verify column-wise and row-wise sums explicitly.
+
+   **Save the updated draft** to `x-pack/solutions/security/plugins/security_solution/.agents/tmp/test-plan-#<issue_number>.md`, overwriting any existing draft at that path. This save is unconditional — it applies whether the changes involved new scenarios, edits to existing scenarios, Pending-work migrations, or only metadata updates (Known Limitations, AC list, feature-flag names, etc.). The publish step will PATCH the existing GitHub comment with this file's contents. Skip the Sources Summary sub-step inside [Saving the draft](../SKILL.md#saving-the-draft) — the update-mode version with PR re-read info is emitted in step 8 below.
 
 7. Replace Step 3's generic *"Draft saved…"* message: tell the user exactly what changed and what was left unchanged.
 
