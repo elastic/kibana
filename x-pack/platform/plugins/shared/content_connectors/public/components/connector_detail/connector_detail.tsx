@@ -201,26 +201,6 @@ export const ConnectorDetail: React.FC = () => {
     },
   ];
 
-  /* const PIPELINES_TAB = {
-    content: <SearchIndexPipelines />,
-    disabled: !index,
-    id: ConnectorDetailTabId.PIPELINES,
-    isSelected: tabId === ConnectorDetailTabId.PIPELINES,
-    label: i18n.translate(
-      'xpack.contentConnectors.connectors.connectorDetail.pipelinesTabLabel',
-      {
-        defaultMessage: 'Pipelines',
-      }
-    ),
-    onClick: () =>
-      application?.navigateToUrl(
-        generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
-          connectorId,
-          tabId: ConnectorDetailTabId.PIPELINES,
-        })
-      ),
-  }; */
-
   interface TabMenuItem {
     content: JSX.Element;
     disabled?: boolean;
@@ -232,12 +212,7 @@ export const ConnectorDetail: React.FC = () => {
     testSubj?: string;
   }
 
-  const tabs: TabMenuItem[] = [
-    ...ALL_INDICES_TABS,
-    ...CONNECTOR_TABS,
-    // ...[PIPELINES_TAB],
-    ...CONFIG_TAB,
-  ];
+  const tabs: TabMenuItem[] = [...ALL_INDICES_TABS, ...CONNECTOR_TABS, ...CONFIG_TAB];
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const selectedTab = useMemo(() => tabs.find((tab) => tab.id === tabId), [tabId]);
