@@ -22,9 +22,9 @@ import type { StepExecutionRuntime } from '../workflow_context_manager/step_exec
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 
 export interface RunStepResult {
-  input: unknown;
-  output: unknown;
-  error: SerializedError | undefined;
+  input?: unknown;
+  output?: unknown;
+  error?: SerializedError | undefined;
   /**
    * When true, the step has handed control back to the scheduler (e.g. a
    * durable poll step that put itself in WAITING state). The base run loop

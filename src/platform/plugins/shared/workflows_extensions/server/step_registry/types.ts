@@ -184,7 +184,7 @@ export type PollPolicy<State = unknown> =
     }
   | {
       strategy: 'dynamic';
-      next: (ctx: PollPolicyContext<State>) => number;
+      next: (ctx: PollPolicyContext<State>) => Promise<number>;
     };
 
 /**
@@ -195,9 +195,9 @@ export interface PollPolicyContext<State = unknown> {
   /** 1-based count of poll invocations so far (does not include `run`). */
   attempt: number;
   /** Epoch ms when the step entered its poll loop (after `run`). */
-  startedAt: number;
+  startedAt: string;
   /** Epoch ms of the most recent poll handler invocation. */
-  lastInvocationAt: number;
+  lastPollAt: string;
   /** Persisted author state, as returned by the previous handler call. */
   state: State | undefined;
 }

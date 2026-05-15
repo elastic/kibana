@@ -36,6 +36,7 @@ export async function handleExecutionDelay(
     return;
   }
   const resumeAtFromState = stepExecutionRuntime.stepExecution.state?.resumeAt;
+  const forceTaskScheduleFromState = stepExecutionRuntime.stepExecution.state?.forceTaskSchedule;
 
   if (typeof resumeAtFromState !== 'string') {
     return;
@@ -47,7 +48,7 @@ export async function handleExecutionDelay(
   params.workflowExecutionState.updateWorkflowExecution({
     status: ExecutionStatus.WAITING,
   });
-  if (diff < SHORT_DURATION_THRESHOLD) {
+  if (!forceTaskScheduleFromState && diff < SHORT_DURATION_THRESHOLD) {
     const timeout = diff > 0 ? diff : 0;
 
     try {

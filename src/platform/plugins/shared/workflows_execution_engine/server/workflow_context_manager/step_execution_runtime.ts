@@ -333,12 +333,17 @@ export class StepExecutionRuntime {
    * @param additionalState Fields to merge into the persisted step state. The
    *   engine writes `resumeAt` itself; callers do not need to pass it.
    */
-  public enterWaitUntil(resumeDate: Date, additionalState?: Record<string, unknown>): void {
+  public enterWaitUntil(
+    resumeDate: Date,
+    additionalState?: Record<string, unknown>,
+    forceTaskSchedule?: boolean
+  ): void {
     const existing = this.stepExecution?.state ?? {};
     const nextState: Record<string, unknown> = {
       ...existing,
       ...(additionalState ?? {}),
       resumeAt: resumeDate.toISOString(),
+      forceTaskSchedule,
     };
     // `undefined` cannot round-trip through JSON persistence — a spread of
     // `{ __authorState: undefined }` would otherwise leave a stale key from

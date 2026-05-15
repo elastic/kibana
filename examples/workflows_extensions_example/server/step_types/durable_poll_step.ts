@@ -15,6 +15,15 @@ import { durablePollStepCommonDefinition } from '../../common/step_types/durable
 
 export const durablePollStepDefinition = createServerStepDefinition({
   ...durablePollStepCommonDefinition,
+  run: async (context) => {
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    return {
+      state: {
+        lastAttempt: 0,
+        jobId: '123',
+      },
+    };
+  },
   poll: {
     handler: async (context) => {
       const { pollsBeforeDone } = context.input;
@@ -24,14 +33,17 @@ export const durablePollStepDefinition = createServerStepDefinition({
           output: {
             message: `Finished after ${context.attempt} poll invocation(s).`,
             completedAfterPolls: context.attempt,
+            state: context.state,
           },
         };
       }
 
       context.logger.debug(`Durable poll demo: attempt ${context.attempt}/${pollsBeforeDone}`);
-      return { state: { lastAttempt: context.attempt } };
+      return {
+        state: context.state ? { ...context.state, lastAttempt: context.attempt } : undefined,
+      };
     },
     policy: { strategy: 'fixed', intervalMs: 7_000 },
-    ceilings: { maxAttempts: 30, maxWaitMs: 15 * 60_000 },
+    ceilings: { maxAttempts: 5, maxWaitMs: 36 * 1000 },
   },
 }) as ServerStepDefinition;

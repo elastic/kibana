@@ -28,6 +28,7 @@ export const InputSchema = z.object({
 export const OutputSchema = z.object({
   message: z.string(),
   completedAfterPolls: z.number().int(),
+  state: z.unknown(),
 });
 
 export type DurablePollStepInputSchema = typeof InputSchema;
