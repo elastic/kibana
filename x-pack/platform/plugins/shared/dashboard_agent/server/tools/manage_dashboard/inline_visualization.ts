@@ -29,10 +29,7 @@ export type VisualizationAttempt =
       failure: VisualizationFailure;
     };
 
-export type InlineVisualizationOperationType =
-  | 'add_section'
-  | 'create_visualization_panels'
-  | 'edit_visualization_panels';
+export type InlineVisualizationOperationType = 'add_section' | 'add_panels' | 'edit_panels';
 
 interface ResolveVisualizationConfigParams {
   operationType: InlineVisualizationOperationType;
@@ -52,7 +49,7 @@ export const createVisualizationFailureResult = (
   type: VisualizationFailure['type'],
   identifier: string,
   error: string
-): VisualizationAttempt => ({
+): Extract<VisualizationAttempt, { type: 'failure' }> => ({
   type: 'failure',
   failure: {
     type,
