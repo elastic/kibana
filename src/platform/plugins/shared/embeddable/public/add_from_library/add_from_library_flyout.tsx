@@ -94,7 +94,6 @@ export const AddFromLibraryContent = ({ container }: AddFromLibraryContentProps)
                 limit: input.query.limit,
                 tags: input.query.tags,
               }),
-              asSystemRequest: true,
             });
           },
         } as ContentClient,
