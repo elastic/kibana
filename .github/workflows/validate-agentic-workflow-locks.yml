@@ -4,6 +4,8 @@ on:
   pull_request:
     paths:
       - '.github/workflows/*.md'
+      - '.github/workflows/*.lock.yml'
+      - '.github/aw/actions-lock.json'
 
 permissions:
   contents: read
