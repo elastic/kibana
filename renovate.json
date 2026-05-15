@@ -2384,7 +2384,7 @@
     },
     {
       "groupName": "Kibana ES|QL Team",
-      "matchDepNames": ["recast", "tree-dump"],
+      "matchDepNames": ["recast"],
       "reviewers": ["team:kibana-esql"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:ESQL"],
