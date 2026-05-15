@@ -15,7 +15,7 @@ import { test } from '../fixtures';
 
 test.describe(
   'Nightshift navigation from Significant Events Discovery',
-  { tag: tags.serverless.observability.all },
+  { tag: tags.serverless.observability.complete },
   () => {
     test.beforeAll(async ({ kbnClient }) => {
       await kbnClient.uiSettings.update({
