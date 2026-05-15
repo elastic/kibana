@@ -35,6 +35,7 @@ import {
   createLiquidCorrectnessEvaluator,
   createEfficiencyEvaluator,
   createLatencyEvaluator,
+  skipCompositeMode,
   skipInfraErrors,
   skipNegativeCases,
   extractResultYaml,
@@ -90,11 +91,11 @@ const evaluate = base.extend<
           },
           selectEvaluators<WorkflowCreateExample, WorkflowTaskOutput>([
             skip(createNoErrorsEvaluator()),
-            skip(createEditSuccessEvaluator()),
+            skip(skipCompositeMode(createEditSuccessEvaluator())),
             skip(createValidationPassEvaluator()),
             skip(createStructuralCorrectnessEvaluator()),
             liquid,
-            skip(createEfficiencyEvaluator()),
+            skip(skipCompositeMode(createEfficiencyEvaluator())),
             skip(createLatencyEvaluator()),
             skipInfraErrors(createCriteriaEvaluator({ evaluators })),
           ])

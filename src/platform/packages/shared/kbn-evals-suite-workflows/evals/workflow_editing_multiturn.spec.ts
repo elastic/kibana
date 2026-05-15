@@ -37,6 +37,7 @@ import {
   createLiquidCorrectnessEvaluator,
   createEfficiencyEvaluator,
   createLatencyEvaluator,
+  skipCompositeMode,
   skipInfraErrors,
   skipNegativeCases,
   extractResultYaml,
@@ -153,12 +154,12 @@ const evaluate = base.extend<
           },
           selectEvaluators<MultiTurnWorkflowEditExample, WorkflowTaskOutput>([
             skip(createNoErrorsEvaluator()),
-            skip(createEditSuccessEvaluator()),
+            skip(skipCompositeMode(createEditSuccessEvaluator())),
             skip(createValidationPassEvaluator()),
             skip(createStructuralCorrectnessEvaluator()),
             skip(createEditPreservationEvaluator()),
             liquid,
-            skip(createEfficiencyEvaluator()),
+            skip(skipCompositeMode(createEfficiencyEvaluator())),
             skip(createLatencyEvaluator()),
             skipInfraErrors(createCriteriaEvaluator({ evaluators })),
           ])

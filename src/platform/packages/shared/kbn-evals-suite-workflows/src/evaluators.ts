@@ -206,7 +206,7 @@ export const extractYamlFromAttachments = (
 };
 
 export function createToolUsageEvaluator() {
-  return skipCompositeMode({
+  return {
     name: 'UsedExpectedTools',
     kind: 'CODE' as const,
     evaluate: async ({
@@ -230,13 +230,13 @@ export function createToolUsageEvaluator() {
         metadata: { expectedToolIds, usedToolIds },
       };
     },
-  });
+  };
 }
 
 const SCORE_ON_FINAL_RESULT = true;
 
 export function createEditSuccessEvaluator() {
-  return skipCompositeMode({
+  return {
     name: 'EditToolSuccess',
     kind: 'CODE' as const,
     evaluate: async ({ output }: { output: WorkflowTaskOutput }) => {
@@ -279,7 +279,7 @@ export function createEditSuccessEvaluator() {
         },
       };
     },
-  });
+  };
 }
 
 export function createValidationPassEvaluator() {
@@ -838,7 +838,7 @@ const REDUNDANT_LOOKUP_WEIGHT = 0.25;
 const DEFAULT_TOOL_CALL_BUDGET = 6;
 
 export function createEfficiencyEvaluator() {
-  return skipCompositeMode({
+  return {
     name: 'Efficiency',
     kind: 'CODE' as const,
     evaluate: async ({
@@ -893,7 +893,7 @@ export function createEfficiencyEvaluator() {
         },
       };
     },
-  });
+  };
 }
 
 export function createToolTrajectoryEvaluator() {
@@ -910,7 +910,7 @@ export function createToolTrajectoryEvaluator() {
     coverageWeight: 0.4,
   });
 
-  return skipCompositeMode({
+  return {
     ...inner,
     evaluate: async (args: Parameters<typeof inner.evaluate>[0]) => {
       const exp = args.expected as EfficiencyExpectations;
@@ -923,7 +923,7 @@ export function createToolTrajectoryEvaluator() {
       }
       return inner.evaluate(args);
     },
-  });
+  };
 }
 
 /**

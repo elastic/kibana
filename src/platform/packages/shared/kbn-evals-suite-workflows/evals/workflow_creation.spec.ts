@@ -23,6 +23,7 @@ import {
   createEfficiencyEvaluator,
   createToolTrajectoryEvaluator,
   createLatencyEvaluator,
+  skipCompositeMode,
   skipInfraErrors,
   skipNegativeCases,
   extractResultYaml,
@@ -31,6 +32,10 @@ import {
 
 const skip = <E extends WorkflowCreateExample>(e: Parameters<typeof skipInfraErrors<E>>[0]) =>
   skipInfraErrors(skipNegativeCases(e));
+
+const skipTrajectory = <E extends WorkflowCreateExample>(
+  e: Parameters<typeof skipInfraErrors<E>>[0]
+) => skipInfraErrors(skipNegativeCases(skipCompositeMode(e)));
 
 const liquid = skipInfraErrors(skipNegativeCases(createLiquidCorrectnessEvaluator()));
 
@@ -78,12 +83,12 @@ const evaluate = base.extend<
           },
           selectEvaluators<WorkflowCreateExample, WorkflowTaskOutput>([
             skip(createNoErrorsEvaluator()),
-            skip(createEditSuccessEvaluator()),
+            skipTrajectory(createEditSuccessEvaluator()),
             skip(createValidationPassEvaluator()),
             skip(createStructuralCorrectnessEvaluator()),
             liquid,
-            skip(createEfficiencyEvaluator()),
-            skip(createToolTrajectoryEvaluator()),
+            skipTrajectory(createEfficiencyEvaluator()),
+            skipTrajectory(createToolTrajectoryEvaluator()),
             skip(createLatencyEvaluator()),
             skipInfraErrors(createCriteriaEvaluator({ evaluators })),
             skipInfraErrors(createRejectionEvaluator()),
