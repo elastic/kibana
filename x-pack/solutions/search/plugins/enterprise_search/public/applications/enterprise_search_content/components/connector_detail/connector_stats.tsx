@@ -199,7 +199,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
             >
               {connectorDefinition && connectorDefinition.iconPath && (
                 <EuiFlexItem grow={false}>
-                  <EuiIcon type={connectorDefinition.iconPath} size="xl" />
+                  <EuiIcon type={connectorDefinition.iconPath} size="xl" aria-hidden />
                 </EuiFlexItem>
               )}
               <EuiFlexItem>
@@ -326,7 +326,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
               <EuiFlexItem>
                 <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
                   <EuiFlexItem grow={false}>
-                    <EuiIcon type="documents" />
+                    <EuiIcon type="documents" aria-hidden />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiText size="s">
