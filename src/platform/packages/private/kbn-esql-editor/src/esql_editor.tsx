@@ -40,6 +40,7 @@ import { QuerySource } from '@kbn/esql-types';
 import { isMac } from '@kbn/shared-ux-utility';
 import { useLookupIndexCommand } from './lookup_join';
 import { useCommentToEsql, useGhostLineHint } from './comment_to_esql';
+import { useSuggestFix } from './suggest_fix/use_suggest_fix';
 import { useFieldsBrowser } from './resource_browser/use_fields_browser';
 import { EditorFooter } from './editor_footer';
 import { QuickSearchVisor } from './editor_visor';
@@ -618,6 +619,14 @@ const ESQLEditorInternal = function ESQLEditor({
       },
     });
 
+  useSuggestFix({
+    editorRef,
+    editorModel,
+    http: core.http,
+    notifications: core.notifications,
+    isEnabled: isNlToEsqlEnabled,
+  });
+
   const { lookupIndexBadgeStyle, addLookupIndicesDecorator } = useLookupIndexCommand(
     editorRef,
     editorModel,
@@ -646,6 +655,7 @@ const ESQLEditorInternal = function ESQLEditor({
     editorCommandDisposables,
     esqlCallbacks,
     telemetryCallbacks,
+    isSuggestFixEnabled: isNlToEsqlEnabled,
     isDisabled,
     measuredEditorWidth,
     setMeasuredEditorWidth,
@@ -752,6 +762,7 @@ const ESQLEditorInternal = function ESQLEditor({
                     esqlDepsByModelUri.set(editorModelUriRef.current, {
                       ...esqlCallbacks,
                       telemetry: telemetryCallbacks,
+                      isSuggestFixEnabled: isNlToEsqlEnabled,
                       getEditorMessages: () => editorMessagesRef.current,
                     });
                     await addLookupIndicesDecorator();

@@ -13,6 +13,7 @@ export const TIMEFIELD_ROUTE = '/internal/esql/get_timefield';
 export const VIEWS_ROUTE = '/internal/esql/views';
 export const DATASETS_ROUTE = '/internal/esql/datasets';
 export const NL_TO_ESQL_ROUTE = '/internal/esql/nl_to_esql';
+export const SUGGEST_FIX_ROUTE = '/internal/esql/suggest_fix';
 
 const LOOKUP_INDEX_ROUTE = '/internal/esql/lookup_index';
 export const LOOKUP_INDEX_CREATE_ROUTE = `${LOOKUP_INDEX_ROUTE}/create`;

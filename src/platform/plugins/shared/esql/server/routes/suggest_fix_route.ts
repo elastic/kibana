@@ -6,43 +6,42 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup, IRouter, PluginInitializerContext } from '@kbn/core/server';
-import { NL_TO_ESQL_ROUTE } from '@kbn/esql-types';
-import { generateEsql, generateEsqlCompletion } from '@kbn/agent-builder-genai-utils';
-import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
+import { SUGGEST_FIX_ROUTE } from '@kbn/esql-types';
+import { generateEsql } from '@kbn/agent-builder-genai-utils';
+import type { EsqlServerPluginStart } from '../types';
 import { createScopedModel, resolveConnectorId } from './helpers';
 
-const MAX_NL_INSTRUCTION_LENGTH = 2000;
-
-const buildNlToEsqlAdditionalContext = (currentQuery: string): string => {
-  if (!currentQuery) return '';
-  return [
-    'The user is in the ES|QL editor. Below is their current query.',
-    'If the request is about changing, extending, or fixing that query, treat it as the starting point.',
-    'If the request is for a new or unrelated query, you may produce a full replacement.',
+const buildSuggestFixContext = (queryString: string, errorMessage: string): string =>
+  [
+    'The user is in the ES|QL editor and their query has an error.',
     '',
     '<current_query>',
-    currentQuery,
+    queryString,
     '</current_query>',
+    '',
+    '<error_message>',
+    errorMessage,
+    '</error_message>',
+    '',
+    "Return a corrected ES|QL query that resolves the error while preserving the user's intent.",
   ].join('\n');
-};
 
-import type { EsqlServerPluginStart } from '../types';
-
-export const registerNLtoESQLRoute = (
+export const registerSuggestFixRoute = (
   router: IRouter,
   getStartServices: CoreSetup<EsqlServerPluginStart>['getStartServices'],
   context: PluginInitializerContext
 ) => {
   router.post(
     {
-      path: NL_TO_ESQL_ROUTE,
+      path: SUGGEST_FIX_ROUTE,
       validate: {
         body: schema.object({
-          nlInstruction: schema.string({ maxLength: MAX_NL_INSTRUCTION_LENGTH }),
-          currentQuery: schema.maybe(schema.string({ maxLength: 50000 })),
-          isCompletion: schema.maybe(schema.boolean()),
+          queryString: schema.string({ maxLength: 50000 }),
+          errorMessage: schema.string({ maxLength: 4000 }),
+          errorCode: schema.maybe(schema.nullable(schema.string({ maxLength: 200 }))),
         }),
       },
       security: {
@@ -55,7 +54,7 @@ export const registerNLtoESQLRoute = (
     async (requestHandlerContext, request, response) => {
       const logger = context.logger.get();
       try {
-        const { nlInstruction, currentQuery, isCompletion } = request.body;
+        const { queryString, errorMessage } = request.body;
         const core = await requestHandlerContext.core;
         const client = core.elasticsearch.client.asCurrentUser;
         const [, { inference }] = await getStartServices();
@@ -75,32 +74,13 @@ export const registerNLtoESQLRoute = (
         }
 
         const model = await createScopedModel({ inference, request, connectorId });
-        const trimmedCurrent = currentQuery?.trim();
-        const isCompletionRequest = Boolean(isCompletion && trimmedCurrent);
-        const signal = getRequestAbortedSignal(request.events.aborted$);
-
-        if (isCompletionRequest) {
-          const { content, replacesNext } = await generateEsqlCompletion({
-            model,
-            esClient: client,
-            logger,
-            nlInstruction,
-            currentQuery: trimmedCurrent ?? '',
-            signal,
-          });
-          return response.ok({
-            body: { content, replacesNext },
-          });
-        }
-
-        const additionalContext = buildNlToEsqlAdditionalContext(trimmedCurrent ?? '');
 
         const result = await generateEsql({
           model,
           esClient: client,
           logger,
-          nlQuery: nlInstruction,
-          additionalContext,
+          nlQuery: 'Fix the following ES|QL query. Return only the corrected query.',
+          additionalContext: buildSuggestFixContext(queryString, errorMessage),
           executeQuery: false,
         });
 
@@ -109,7 +89,7 @@ export const registerNLtoESQLRoute = (
         });
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
-        logger.error(`NL to ES|QL failed: ${errorMessage}`);
+        logger.error(`ES|QL suggest fix failed: ${errorMessage}`);
         if (
           error instanceof Error &&
           'reason' in error &&
