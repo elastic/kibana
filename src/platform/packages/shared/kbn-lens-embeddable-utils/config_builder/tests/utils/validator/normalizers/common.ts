@@ -68,6 +68,15 @@ export const DEFAULT_LAYER_ID = 'layer_0';
 export type IdRemapping = Array<[old: string | undefined, new: string]>;
 
 /**
+ * Resolve the form-based datasource state, falling back to the legacy
+ * `indexpattern` key.
+ */
+export const getFormBasedDatasourceState = (
+  datasourceStates: LensAttributes['state']['datasourceStates']
+): FormBasedPersistedState | undefined =>
+  datasourceStates.formBased ?? ((datasourceStates as any).indexpattern as FormBasedPersistedState);
+
+/**
  * ES|QL ad-hoc data views: remap existing ones to deterministic IDs or create
  * new ones from the ES|QL query. Returns rebuilt internalReferences with standard naming.
  */
@@ -434,8 +443,7 @@ export const getCommonNormalizer = <T extends LensAttributes>(
         return ds;
       }),
       formBased: normalizeDatasourceState(
-        attributes.state.datasourceStates.formBased ??
-          ((attributes.state.datasourceStates as any).indexpattern as FormBasedPersistedState), // fallback to legacy
+        getFormBasedDatasourceState(attributes.state.datasourceStates),
         (ds) => {
           for (const layer of Object.values(ds.layers)) {
             layer.columns = columnRemapping.reduce((columns, [oldColumn, newColumn]) => {

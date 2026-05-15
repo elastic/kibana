@@ -24,7 +24,12 @@ import type { LensAttributes } from '../../../../types';
 import { mergeNormalizers } from './normalize';
 import type { AttributesNormalizer, NormalizerConfig } from './normalize';
 import type { IdRemapping } from './common';
-import { DEFAULT_LAYER_ID, getCommonNormalizer, getPaletteNormalizer } from './common';
+import {
+  DEFAULT_LAYER_ID,
+  getCommonNormalizer,
+  getFormBasedDatasourceState,
+  getPaletteNormalizer,
+} from './common';
 import {
   getAccessorName,
   isMetricColumnNoESQL,
@@ -189,10 +194,9 @@ function getColumnRemapping(
   visualization: DatatableVisualizationState,
   datasourceStates: LensAttributes['state']['datasourceStates']
 ): DatatableRemapping {
-  const formBasedState =
-    datasourceStates.formBased ??
-    ((datasourceStates as any).indexpattern as typeof datasourceStates.formBased);
-  const formBasedLayer = Object.values(formBasedState?.layers ?? {})[0];
+  const formBasedLayer = Object.values(
+    getFormBasedDatasourceState(datasourceStates)?.layers ?? {}
+  )[0];
   if (formBasedLayer) {
     return getColumnRemappingFormBased(visualization, formBasedLayer);
   }
@@ -213,10 +217,9 @@ function getColumnRemapping(
 function getFilterOrphanColumns(
   datasourceStates: LensAttributes['state']['datasourceStates']
 ): NormalizerConfig<DatatableAttributes> {
-  const formBasedState =
-    datasourceStates.formBased ??
-    ((datasourceStates as any).indexpattern as typeof datasourceStates.formBased);
-  const formBasedColumns = Object.values(formBasedState?.layers ?? {})[0]?.columnOrder;
+  const formBasedColumns = Object.values(
+    getFormBasedDatasourceState(datasourceStates)?.layers ?? {}
+  )[0]?.columnOrder;
   const textBasedColumns = Object.values(datasourceStates.textBased?.layers ?? {})[0]?.columns;
 
   const datasourceColumnIds = new Set(
