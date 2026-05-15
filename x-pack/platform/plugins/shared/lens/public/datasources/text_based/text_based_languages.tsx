@@ -377,9 +377,40 @@ export function getTextBasedDatasource({
       };
     },
 
-    syncColumns({ state }) {
-      // TODO implement this for real
-      return state;
+    syncColumns({ state, links }) {
+      if (!links?.length) return state;
+
+      let newState = state;
+      for (const link of links) {
+        const fromLayer = newState.layers[link.from.layerId];
+        const toLayer = newState.layers[link.to.layerId];
+        if (!fromLayer || !toLayer) continue;
+
+        const sourceCol = fromLayer.columns.find((c) => c.columnId === link.from.columnId);
+        if (!sourceCol) continue;
+
+        // Check if the target column already exists
+        const existingCol = toLayer.columns.find((c) => c.columnId === link.to.columnId);
+        if (existingCol) continue;
+
+        // Copy the source column with the target's columnId
+        const newCol: TextBasedLayerColumn = {
+          ...sourceCol,
+          columnId: link.to.columnId!,
+        };
+
+        newState = {
+          ...newState,
+          layers: {
+            ...newState.layers,
+            [link.to.layerId]: {
+              ...toLayer,
+              columns: [...toLayer.columns, newCol],
+            },
+          },
+        };
+      }
+      return newState;
     },
 
     onRefreshIndexPattern() {},
@@ -410,13 +441,64 @@ export function getTextBasedDatasource({
         layer?.index ??
         (JSON.parse(localStorage.getItem('lens-settings') || '{}').indexPatternId ||
           state.indexPatternRefs[0].id);
+      // Resolve timeField from the source layer, or fall back to the index pattern ref
+      const timeField =
+        layer?.timeField ??
+        state.indexPatternRefs?.find((ref) => ref.id === (layer?.index ?? index))?.timeField;
       return {
         ...state,
         layers: {
           ...state.layers,
-          [newLayerId]: blankLayer(index, query),
+          [newLayerId]: { ...blankLayer(index, query), timeField },
         },
       };
+    },
+
+    initializeDimension(state, layerId, indexPatterns, { columnId, groupId, autoTimeField }) {
+      const layer = state.layers[layerId];
+      if (!layer) return state;
+
+      // For trendline layers, auto-initialize the time field column
+      // and modify the query to add time bucketing
+      if (autoTimeField && layer.timeField) {
+        const tf = layer.timeField;
+        const bucketExpr = `${tf} = BUCKET(${tf}, 50, ?_tstart, ?_tend)`;
+        const timeColumn: TextBasedLayerColumn = {
+          columnId,
+          fieldName: tf,
+          meta: { type: 'date' },
+        };
+
+        // Auto-modify query to add time bucketing for trendline
+        let trendlineQuery = layer.query;
+        if (trendlineQuery && 'esql' in trendlineQuery) {
+          const esql = trendlineQuery.esql;
+          // If STATS exists, append BY BUCKET(...); otherwise add STATS COUNT(*) BY BUCKET(...)
+          if (/\bSTATS\b/i.test(esql)) {
+            // Check if there's already a BY clause
+            if (/\bBY\b/i.test(esql)) {
+              trendlineQuery = { esql: `${esql}, ${bucketExpr}` };
+            } else {
+              trendlineQuery = { esql: `${esql} BY ${bucketExpr}` };
+            }
+          } else {
+            trendlineQuery = { esql: `${esql} | STATS COUNT(*) BY ${bucketExpr}` };
+          }
+        }
+
+        return {
+          ...state,
+          layers: {
+            ...state.layers,
+            [layerId]: {
+              ...layer,
+              query: trendlineQuery,
+              columns: [...layer.columns, timeColumn],
+            },
+          },
+        };
+      }
+      return state;
     },
     createEmptyLayer() {
       return {
