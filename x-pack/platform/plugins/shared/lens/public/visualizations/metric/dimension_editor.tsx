@@ -1006,10 +1006,7 @@ export function DimensionEditorAdditionalSection({
     supportingVisualization(state) === 'panel' && state.applyColorTo === 'value';
 
   const colorMode = state.palette ? 'dynamic' : 'static';
-  const applyColorTo =
-    state.applyColorTo === undefined && (Boolean(state.color) || Boolean(state.palette))
-      ? LENS_METRIC_STATE_DEFAULTS.applyColorTo
-      : state.applyColorTo;
+  const { applyColorTo } = state;
   const colorControlsSectionVisible =
     selectedSupportingVisualization !== 'panel' || Boolean(applyColorTo);
 

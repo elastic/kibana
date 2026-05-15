@@ -236,10 +236,7 @@ export const toExpression = (
     inspectorTableId: state.layerId,
     secondaryLabelPosition:
       state.secondaryLabelPosition ?? LENS_METRIC_STATE_DEFAULTS.secondaryLabelPosition,
-    applyColorTo:
-      state.applyColorTo === undefined && (Boolean(state.color) || Boolean(state.palette))
-        ? LENS_METRIC_STATE_DEFAULTS.applyColorTo
-        : state.applyColorTo,
+    applyColorTo: state.applyColorTo,
   });
 
   return {
