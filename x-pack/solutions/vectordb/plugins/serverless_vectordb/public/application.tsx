@@ -15,7 +15,7 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import {
   hasSeenOnboarding,
-  IngestStep,
+  IngestStepRoute,
   OnboardingApiPathsProvider,
   PathStep,
   SearchStep,
@@ -39,7 +39,7 @@ const App: React.FC = () => (
       render={() => (hasSeenOnboarding() ? <HomePage /> : <Redirect to="/onboarding" />)}
     />
     <Route exact path="/onboarding" component={PathStep} />
-    <Route exact path="/onboarding/ingest" component={IngestStep} />
+    <Route exact path="/onboarding/ingest" component={IngestStepRoute} />
     <Route exact path="/onboarding/search" component={SearchStep} />
     <Route exact path="/tutorials" component={TutorialsPage} />
     <Route render={() => <Redirect to="/" />} />
