@@ -89,6 +89,47 @@ export function skipNegativeCases<TExample extends Example>(
   };
 }
 
+const COMPOSITE_MODE_NA = {
+  score: null as null,
+  label: 'N/A' as const,
+  explanation:
+    'Not applicable: trajectory-style evaluator skipped in composite authoring mode (KBN_EVAL_AUTHORING_MODE=composite)',
+};
+
+/**
+ * True when the suite is being run against the new composite `generate_workflow`
+ * agent (vs. the current root-level toolset). Read at evaluate-time so a single
+ * factory call can serve both modes across a process lifetime.
+ */
+export const isCompositeAuthoringMode = (): boolean =>
+  process.env.KBN_EVAL_AUTHORING_MODE === 'composite';
+
+/**
+ * Wraps a trajectory-style evaluator (one that measures the multi-tool path
+ * the agent took) so it returns N/A when the run targets the composite agent.
+ *
+ * The composite `generate_workflow` tool produces the workflow in a single
+ * call, so per-step trajectory / tool-budget metrics are meaningless and
+ * should not skew averages in the comparison report. Artifact-scoring
+ * evaluators (`Criteria`, `ValidationPass`, `StructuralCorrectness`,
+ * `LiquidCorrectness`, `Rejection`, `SelfCorrection`, ...) keep running.
+ *
+ * See security-team#17399 for the broader comparison + gating plan.
+ */
+export function skipCompositeMode<TExample extends Example>(
+  evaluator: Evaluator<TExample, WorkflowTaskOutput>
+): Evaluator<TExample, WorkflowTaskOutput> {
+  return {
+    ...evaluator,
+    evaluate: async (args) => {
+      if (isCompositeAuthoringMode()) {
+        return COMPOSITE_MODE_NA;
+      }
+      return evaluator.evaluate(args);
+    },
+  };
+}
+
 /**
  * Tool results from the converse API are ToolResult objects:
  * `{ tool_result_id, type: "other", data: { success, validation, ... } }`
@@ -165,7 +206,7 @@ export const extractYamlFromAttachments = (
 };
 
 export function createToolUsageEvaluator() {
-  return {
+  return skipCompositeMode({
     name: 'UsedExpectedTools',
     kind: 'CODE' as const,
     evaluate: async ({
@@ -189,13 +230,13 @@ export function createToolUsageEvaluator() {
         metadata: { expectedToolIds, usedToolIds },
       };
     },
-  };
+  });
 }
 
 const SCORE_ON_FINAL_RESULT = true;
 
 export function createEditSuccessEvaluator() {
-  return {
+  return skipCompositeMode({
     name: 'EditToolSuccess',
     kind: 'CODE' as const,
     evaluate: async ({ output }: { output: WorkflowTaskOutput }) => {
@@ -238,7 +279,7 @@ export function createEditSuccessEvaluator() {
         },
       };
     },
-  };
+  });
 }
 
 export function createValidationPassEvaluator() {
@@ -797,7 +838,7 @@ const REDUNDANT_LOOKUP_WEIGHT = 0.25;
 const DEFAULT_TOOL_CALL_BUDGET = 6;
 
 export function createEfficiencyEvaluator() {
-  return {
+  return skipCompositeMode({
     name: 'Efficiency',
     kind: 'CODE' as const,
     evaluate: async ({
@@ -852,7 +893,7 @@ export function createEfficiencyEvaluator() {
         },
       };
     },
-  };
+  });
 }
 
 export function createToolTrajectoryEvaluator() {
@@ -869,7 +910,7 @@ export function createToolTrajectoryEvaluator() {
     coverageWeight: 0.4,
   });
 
-  return {
+  return skipCompositeMode({
     ...inner,
     evaluate: async (args: Parameters<typeof inner.evaluate>[0]) => {
       const exp = args.expected as EfficiencyExpectations;
@@ -882,7 +923,7 @@ export function createToolTrajectoryEvaluator() {
       }
       return inner.evaluate(args);
     },
-  };
+  });
 }
 
 /**

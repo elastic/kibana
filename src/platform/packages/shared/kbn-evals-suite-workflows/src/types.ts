@@ -9,6 +9,22 @@
 
 import type { Example, TaskOutput } from '@kbn/evals';
 
+/**
+ * Which authoring approach an example targets.
+ * - `shared` (default): scored on the final artifact, so applicable to both the
+ *   current root-level tools (`create_workflow` / `edit_workflow` / ...) and the
+ *   incoming composite `generate_workflow` tool.
+ * - `tools-only`: relies on a specific multi-tool trajectory; the composite
+ *   agent won't have those tools so the comparison run should skip it.
+ * - `composite-only`: relies on the composite agent's contract; the legacy
+ *   root-level tools can't satisfy it.
+ *
+ * The runtime authoring mode is selected via `KBN_EVAL_AUTHORING_MODE` (see
+ * `skipCompositeMode` in `./evaluators`); the per-example tag is used by the
+ * comparison/gate tooling tracked in security-team#17399.
+ */
+export type AuthoringMode = 'shared' | 'tools-only' | 'composite-only';
+
 export interface LiquidExpectation {
   /** The Liquid reference, e.g. "steps.create_case.output.id" or "event.alerts" */
   ref: string;
@@ -44,6 +60,7 @@ export interface WorkflowEditExample extends Example {
     EfficiencyExpectations;
   metadata?: {
     category?: string;
+    authoringMode?: AuthoringMode;
   };
 }
 
@@ -57,6 +74,7 @@ export interface WorkflowCreateExample extends Example {
     EfficiencyExpectations;
   metadata?: {
     category?: string;
+    authoringMode?: AuthoringMode;
   };
 }
 
@@ -88,6 +106,7 @@ export interface MultiTurnWorkflowEditExample extends Example {
     EfficiencyExpectations;
   metadata?: {
     category?: string;
+    authoringMode?: AuthoringMode;
   };
 }
 
@@ -106,6 +125,7 @@ export interface SelfCorrectionExample extends Example {
   };
   metadata?: {
     category?: string;
+    authoringMode?: AuthoringMode;
   };
 }
 
@@ -132,6 +152,7 @@ export interface NegativeWorkflowExample extends Example {
   };
   metadata?: {
     category: 'negative';
+    authoringMode?: AuthoringMode;
     [key: string]: unknown;
   };
 }

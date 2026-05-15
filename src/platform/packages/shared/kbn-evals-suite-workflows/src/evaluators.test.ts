@@ -18,6 +18,7 @@ import {
   createStructuralCorrectnessEvaluator,
   createLiquidCorrectnessEvaluator,
   createSelfCorrectionEvaluator,
+  skipCompositeMode,
   skipInfraErrors,
   skipNegativeCases,
 } from './evaluators';
@@ -249,6 +250,71 @@ describe('skipNegativeCases', () => {
   it('delegates to the inner evaluator for non-negative cases', async () => {
     const { evaluator, evaluate } = createMockWorkflowEvaluator();
     const wrapped = skipNegativeCases(evaluator);
+
+    const result = await wrapped.evaluate({
+      input: { instruction: 'Update the workflow', initialYaml: '' },
+      output: { messages: [], steps: [], errors: [] },
+      expected: { criteria: [] },
+      metadata: { category: 'modify-step' },
+    });
+
+    expect(result).toEqual({ score: 0.42 });
+    expect(evaluate).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('skipCompositeMode', () => {
+  const originalMode = process.env.KBN_EVAL_AUTHORING_MODE;
+
+  afterEach(() => {
+    if (originalMode === undefined) {
+      delete process.env.KBN_EVAL_AUTHORING_MODE;
+    } else {
+      process.env.KBN_EVAL_AUTHORING_MODE = originalMode;
+    }
+  });
+
+  it('returns N/A and skips the inner evaluator when KBN_EVAL_AUTHORING_MODE=composite', async () => {
+    process.env.KBN_EVAL_AUTHORING_MODE = 'composite';
+    const { evaluator, evaluate } = createMockWorkflowEvaluator();
+    const wrapped = skipCompositeMode(evaluator);
+
+    const result = await wrapped.evaluate({
+      input: { instruction: 'Update the workflow', initialYaml: '' },
+      output: { messages: [], steps: [], errors: [] },
+      expected: { criteria: [] },
+      metadata: { category: 'modify-step' },
+    });
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        score: null,
+        label: 'N/A',
+      })
+    );
+    expect(evaluate).not.toHaveBeenCalled();
+  });
+
+  it('delegates to the inner evaluator when KBN_EVAL_AUTHORING_MODE is unset (tools mode is the default)', async () => {
+    delete process.env.KBN_EVAL_AUTHORING_MODE;
+    const { evaluator, evaluate } = createMockWorkflowEvaluator();
+    const wrapped = skipCompositeMode(evaluator);
+
+    const result = await wrapped.evaluate({
+      input: { instruction: 'Update the workflow', initialYaml: '' },
+      output: { messages: [], steps: [], errors: [] },
+      expected: { criteria: [] },
+      metadata: { category: 'modify-step' },
+    });
+
+    expect(result).toEqual({ score: 0.42 });
+    expect(evaluate).toHaveBeenCalledTimes(1);
+  });
+
+  it('delegates to the inner evaluator when KBN_EVAL_AUTHORING_MODE=tools', async () => {
+    process.env.KBN_EVAL_AUTHORING_MODE = 'tools';
+    const { evaluator, evaluate } = createMockWorkflowEvaluator();
+    const wrapped = skipCompositeMode(evaluator);
 
     const result = await wrapped.evaluate({
       input: { instruction: 'Update the workflow', initialYaml: '' },
