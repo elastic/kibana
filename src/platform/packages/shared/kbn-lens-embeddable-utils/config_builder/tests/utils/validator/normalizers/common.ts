@@ -228,10 +228,6 @@ function removeOrphanedAdHocDataViews(attributes: LensAttributes, internalRefere
 }
 
 function normalizeAdHocDataViews(attributes: LensAttributes) {
-  // if (Object.keys(attributes.state.adHocDataViews ?? {}).length === 0) {
-  //   delete attributes.state.adHocDataViews;
-  // }
-
   let internalReferences = attributes.state.internalReferences ?? [];
   internalReferences = normalizeESQLAdHocDataViews(attributes, internalReferences);
   internalReferences = normalizeFormBasedAdHocDataViews(attributes, internalReferences);
