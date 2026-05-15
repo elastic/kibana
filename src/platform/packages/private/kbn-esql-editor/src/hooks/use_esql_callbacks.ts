@@ -33,7 +33,7 @@ import type { ESQLEditorDeps } from '../types';
 import type { StarredQueryMetadata } from '../editor_footer/esql_starred_queries_service';
 import { useCanCreateLookupIndex } from '../lookup_join';
 import { useCanSuggestResourceBrowser } from '../resource_browser/use_can_suggest_resource_browser';
-import { ESQL_SOURCES_CACHE_KEY, HISTORY_STARRED_ITEMS_CACHE_KEY } from './use_memoized_caches';
+import { DATA_SOURCES_CACHE_KEY, HISTORY_STARRED_ITEMS_CACHE_KEY } from '../helpers';
 
 type MemoizedFn<TArgs extends unknown[], TResult> = (...args: TArgs) => {
   timestamp: number;
@@ -111,7 +111,7 @@ export const useEsqlCallbacks = ({
   const previousColumnsQueryRef = useRef<string | undefined>(undefined);
 
   const getSources = useCallback(async () => {
-    clearCacheWhenOld(dataSourcesCache, ESQL_SOURCES_CACHE_KEY);
+    clearCacheWhenOld(dataSourcesCache, DATA_SOURCES_CACHE_KEY);
     const getLicense = esqlService?.getLicense;
     const enrichSources = esqlService?.enrichSources;
     const sources = await memoizedSources(core, getLicense, enrichSources).result;

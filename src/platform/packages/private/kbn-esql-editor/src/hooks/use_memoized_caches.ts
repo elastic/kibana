@@ -24,9 +24,7 @@ import {
 } from '@kbn/esql-utils';
 import type { getHistoryItems } from '../history_local_storage';
 import type { StarredQueryMetadata } from '../editor_footer/esql_starred_queries_service';
-
-export const ESQL_SOURCES_CACHE_KEY = 'esqlSources';
-export const HISTORY_STARRED_ITEMS_CACHE_KEY = 'historyStarredItems';
+import { DATA_SOURCES_CACHE_KEY, HISTORY_STARRED_ITEMS_CACHE_KEY } from '../helpers';
 
 interface UseMemoizedCachesParams {
   code: string;
@@ -82,7 +80,7 @@ export const useMemoizedCaches = ({
         timestamp: Date.now(),
         result: getESQLSources(...args, undefined, effectiveProjectRouting),
       }),
-      () => ESQL_SOURCES_CACHE_KEY
+      () => DATA_SOURCES_CACHE_KEY
     );
 
     return { cache: fn.cache, memoizedSources: fn };
