@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export { EventOutcome } from '@kbn/apm-types';
+export enum EventOutcome {
+  success = 'success',
+  failure = 'failure',
+  unknown = 'unknown',
+}

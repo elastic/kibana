@@ -5,8 +5,4 @@
  * 2.0.
  */
 
-export enum EventOutcome {
-  success = 'success',
-  failure = 'failure',
-  unknown = 'unknown',
-}
+export type EventOutcome = 'success' | 'failure' | 'unknown';
