@@ -8,6 +8,7 @@
 import { getFlattenedObject } from '@kbn/std';
 import { i18n } from '@kbn/i18n';
 import { keyBy } from 'lodash';
+import { validateAgentConditionExpression } from '@kbn/elastic-agent-condition-language';
 
 import type {
   NewPackagePolicy,
@@ -133,6 +134,7 @@ type ValidationRequiredVars = Record<string, ValidationRequiredVarsEntry[]>;
 export interface PackagePolicyConfigValidationResults {
   required_vars?: ValidationRequiredVars | null;
   vars?: ValidationEntry;
+  condition?: Errors;
 }
 
 export type PackagePolicyInputValidationResults = PackagePolicyConfigValidationResults & {
@@ -144,8 +146,20 @@ export type PackagePolicyValidationResults = {
   description: Errors;
   namespace: Errors;
   additional_datastreams_permissions: Errors;
+  condition: Errors;
   inputs: Record<PackagePolicyInput['type'], PackagePolicyInputValidationResults> | null;
 } & PackagePolicyConfigValidationResults;
+
+const validateCondition = (expr?: string): Errors => {
+  const errors = validateAgentConditionExpression(expr);
+  if (!errors.length) return null;
+  return errors.map(({ line, column, message }) =>
+    i18n.translate('xpack.fleet.packagePolicyValidation.conditionSyntaxErrorMessage', {
+      defaultMessage: 'Line {line}, column {col}: {message}',
+      values: { line, col: column + 1, message },
+    })
+  );
+};
 
 const validatePackageRequiredVars = (
   streamOrInput: Pick<NewPackagePolicyInputStream | PackagePolicyInput, 'vars' | 'enabled'>,
@@ -287,6 +301,7 @@ export const validatePackagePolicy = (
     description: null,
     namespace: null,
     additional_datastreams_permissions: null,
+    condition: null,
     inputs: {},
     vars: {},
   };
@@ -326,6 +341,8 @@ export const validatePackagePolicy = (
         null
       );
   }
+
+  validationResults.condition = validateCondition(packagePolicy.condition);
 
   // Validate package-level vars
   const packageVarsByName = keyBy(packageInfo.vars || [], 'name');
@@ -477,6 +494,11 @@ export const validatePackagePolicy = (
       delete inputValidationResults.required_vars;
     }
 
+    const inputConditionErrors = validateCondition(input.condition);
+    if (inputConditionErrors !== null) {
+      inputValidationResults.condition = inputConditionErrors;
+    }
+
     // Validate each input stream with var definitions
     if (input.streams.length) {
       input.streams.forEach((stream) => {
@@ -530,13 +552,22 @@ export const validatePackagePolicy = (
           }
         }
 
+        const streamConditionErrors = validateCondition(stream.condition);
+        if (streamConditionErrors !== null) {
+          streamValidationResults.condition = streamConditionErrors;
+        }
+
         inputValidationResults.streams![stream.data_stream.dataset] = streamValidationResults;
       });
     } else {
       delete inputValidationResults.streams;
     }
 
-    if (inputValidationResults.vars || inputValidationResults.streams) {
+    if (
+      inputValidationResults.vars ||
+      inputValidationResults.streams ||
+      inputValidationResults.condition
+    ) {
       validationResults.inputs![inputKey] = inputValidationResults;
     }
   });

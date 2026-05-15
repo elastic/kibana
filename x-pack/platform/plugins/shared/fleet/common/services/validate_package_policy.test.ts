@@ -350,6 +350,7 @@ describe('Fleet - validatePackagePolicy()', () => {
     const noErrorsValidationResults = {
       name: null,
       additional_datastreams_permissions: null,
+      condition: null,
       description: null,
       namespace: null,
       inputs: {
@@ -399,6 +400,7 @@ describe('Fleet - validatePackagePolicy()', () => {
         description: null,
         namespace: null,
         additional_datastreams_permissions: null,
+        condition: null,
         inputs: {
           foo: {
             vars: {
@@ -466,6 +468,7 @@ describe('Fleet - validatePackagePolicy()', () => {
         description: null,
         namespace: null,
         additional_datastreams_permissions: null,
+        condition: null,
         inputs: {
           foo: {
             vars: {
@@ -520,6 +523,7 @@ describe('Fleet - validatePackagePolicy()', () => {
         description: null,
         namespace: null,
         additional_datastreams_permissions: null,
+        condition: null,
         inputs: {},
         vars: {},
       });
@@ -537,6 +541,7 @@ describe('Fleet - validatePackagePolicy()', () => {
         description: null,
         namespace: null,
         additional_datastreams_permissions: null,
+        condition: null,
         inputs: {},
         vars: {},
       });
@@ -557,6 +562,7 @@ describe('Fleet - validatePackagePolicy()', () => {
         description: null,
         namespace: null,
         additional_datastreams_permissions: null,
+        condition: null,
         inputs: {},
         vars: {},
       });
@@ -573,6 +579,7 @@ describe('Fleet - validatePackagePolicy()', () => {
         name: null,
         description: null,
         additional_datastreams_permissions: null,
+        condition: null,
         namespace: null,
         inputs: {},
         vars: {},
@@ -612,6 +619,7 @@ describe('Fleet - validatePackagePolicy()', () => {
         description: null,
         namespace: null,
         additional_datastreams_permissions: null,
+        condition: null,
         inputs: {
           foo: {
             streams: {
@@ -629,6 +637,111 @@ describe('Fleet - validatePackagePolicy()', () => {
           },
         },
         vars: {},
+      });
+    });
+
+    describe('condition field', () => {
+      const VALID_EXPR = "${host.platform} == 'linux'";
+      const INVALID_EXPR = "(${host.platform} == 'linux'"; // unclosed paren
+
+      it('condition is null when no condition is set at any level', () => {
+        const result = validatePackagePolicy(validPackagePolicy, mockPackage, parse);
+        expect(result.condition).toBeNull();
+        expect(validationHasErrors(result)).toBe(false);
+      });
+
+      it('condition is null for a valid integration-level expression', () => {
+        const result = validatePackagePolicy(
+          { ...validPackagePolicy, condition: VALID_EXPR },
+          mockPackage,
+          parse
+        );
+        expect(result.condition).toBeNull();
+        expect(validationHasErrors(result)).toBe(false);
+      });
+
+      it('returns errors for an invalid integration-level condition', () => {
+        const result = validatePackagePolicy(
+          { ...validPackagePolicy, condition: INVALID_EXPR },
+          mockPackage,
+          parse
+        );
+        expect(result.condition).not.toBeNull();
+        expect(result.condition!.length).toBeGreaterThan(0);
+        expect(result.condition![0]).toMatch(/column \d+:/);
+        expect(validationHasErrors(result)).toBe(true);
+      });
+
+      it('has no condition errors for a valid input-level expression', () => {
+        const result = validatePackagePolicy(
+          {
+            ...validPackagePolicy,
+            inputs: [
+              { ...validPackagePolicy.inputs[0], condition: VALID_EXPR },
+              ...validPackagePolicy.inputs.slice(1),
+            ],
+          },
+          mockPackage,
+          parse
+        );
+        expect(result.inputs?.foo?.condition).toBeFalsy();
+        expect(validationHasErrors(result)).toBe(false);
+      });
+
+      it('returns errors for an invalid input-level condition', () => {
+        const result = validatePackagePolicy(
+          {
+            ...validPackagePolicy,
+            inputs: [
+              { ...validPackagePolicy.inputs[0], condition: INVALID_EXPR },
+              ...validPackagePolicy.inputs.slice(1),
+            ],
+          },
+          mockPackage,
+          parse
+        );
+        expect(result.inputs?.foo?.condition).toBeTruthy();
+        expect(result.inputs?.foo?.condition!.length).toBeGreaterThan(0);
+        expect(validationHasErrors(result)).toBe(true);
+      });
+
+      it('has no condition errors for a valid stream-level expression', () => {
+        const result = validatePackagePolicy(
+          {
+            ...validPackagePolicy,
+            inputs: [
+              {
+                ...validPackagePolicy.inputs[0],
+                streams: [{ ...validPackagePolicy.inputs[0].streams[0], condition: VALID_EXPR }],
+              },
+              ...validPackagePolicy.inputs.slice(1),
+            ],
+          },
+          mockPackage,
+          parse
+        );
+        expect(result.inputs?.foo?.streams?.foo?.condition).toBeFalsy();
+        expect(validationHasErrors(result)).toBe(false);
+      });
+
+      it('returns errors for an invalid stream-level condition', () => {
+        const result = validatePackagePolicy(
+          {
+            ...validPackagePolicy,
+            inputs: [
+              {
+                ...validPackagePolicy.inputs[0],
+                streams: [{ ...validPackagePolicy.inputs[0].streams[0], condition: INVALID_EXPR }],
+              },
+              ...validPackagePolicy.inputs.slice(1),
+            ],
+          },
+          mockPackage,
+          parse
+        );
+        expect(result.inputs?.foo?.streams?.foo?.condition).toBeTruthy();
+        expect(result.inputs?.foo?.streams?.foo?.condition!.length).toBeGreaterThan(0);
+        expect(validationHasErrors(result)).toBe(true);
       });
     });
   });
@@ -947,6 +1060,7 @@ describe('Fleet - validateConditionalRequiredVars()', () => {
       description: null,
       namespace: null,
       additional_datastreams_permissions: null,
+      condition: null,
       inputs: {
         'foo-input': {
           streams: {
@@ -1047,6 +1161,7 @@ describe('Fleet - validateConditionalRequiredVars()', () => {
       description: null,
       namespace: null,
       additional_datastreams_permissions: null,
+      condition: null,
       inputs: {
         'foo-input': {
           streams: {
@@ -1151,6 +1266,7 @@ describe('Fleet - validateConditionalRequiredVars()', () => {
       description: null,
       namespace: null,
       additional_datastreams_permissions: null,
+      condition: null,
       inputs: {
         'foo-input': {
           streams: {
@@ -1245,6 +1361,7 @@ describe('Fleet - validateConditionalRequiredVars()', () => {
       description: null,
       namespace: null,
       additional_datastreams_permissions: null,
+      condition: null,
       inputs: {
         'foo-input': {
           streams: {
@@ -1317,6 +1434,7 @@ describe('Fleet - validationHasErrors()', () => {
         name: ['name error'],
         description: null,
         additional_datastreams_permissions: null,
+        condition: null,
         namespace: null,
         inputs: {
           input1: {
@@ -1332,6 +1450,7 @@ describe('Fleet - validationHasErrors()', () => {
         name: null,
         description: null,
         additional_datastreams_permissions: null,
+        condition: null,
         namespace: null,
         inputs: {
           input1: {
@@ -1346,6 +1465,7 @@ describe('Fleet - validationHasErrors()', () => {
         name: null,
         description: null,
         additional_datastreams_permissions: null,
+        condition: null,
         namespace: null,
         inputs: {
           input1: {
@@ -1364,6 +1484,7 @@ describe('Fleet - validationHasErrors()', () => {
         description: null,
         namespace: null,
         additional_datastreams_permissions: null,
+        condition: null,
         inputs: {
           input1: {
             vars: { foo: null, bar: null },
