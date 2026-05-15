@@ -15,6 +15,7 @@ import {
   createRtlHelpers,
   flushPreviewAndSearchTimers,
   setupFieldEditorFlyout,
+  type RtlSetup,
 } from './helpers/rtl_helpers';
 
 const defaultProps: Props = {
@@ -49,6 +50,11 @@ const getActions = (renderResult: RenderResult, user: UserEvent) => {
   };
 };
 
-export const setup = async (props?: Partial<Props>, deps?: Partial<Context>) => {
+type FieldEditorFlyoutContentActions = ReturnType<typeof getActions>;
+
+export const setup = async (
+  props?: Partial<Props>,
+  deps?: Partial<Context>
+): Promise<RtlSetup<FieldEditorFlyoutContentActions>> => {
   return setupFieldEditorFlyout(props, deps, defaultProps, getActions);
 };

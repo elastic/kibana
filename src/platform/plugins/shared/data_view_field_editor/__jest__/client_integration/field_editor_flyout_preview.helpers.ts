@@ -17,6 +17,7 @@ import {
   flushDocumentsAndPreviewTimers,
   flushPreviewAndSearchTimers,
   setupFieldEditorFlyout,
+  type RtlSetup,
 } from './helpers/rtl_helpers';
 import { FIELD_PREVIEW_PATH } from '../../common/constants';
 import { spyIndexPatternGetByName, spySearchQuery, spySearchQueryResponse } from './helpers';
@@ -213,8 +214,13 @@ const getActions = (renderResult: RenderResult, user: UserEvent) => {
   };
 };
 
-export const setup = async (props?: Partial<Props>, deps?: Partial<Context>) => {
+type FieldEditorFlyoutPreviewActions = ReturnType<typeof getActions>;
+
+export const setup = async (
+  props?: Partial<Props>,
+  deps?: Partial<Context>
+): Promise<RtlSetup<FieldEditorFlyoutPreviewActions>> => {
   return setupFieldEditorFlyout(props, deps, defaultProps, getActions);
 };
 
-export type FieldEditorFlyoutPreviewHarness = Awaited<ReturnType<typeof setup>>;
+export type FieldEditorFlyoutPreviewHarness = RtlSetup<FieldEditorFlyoutPreviewActions>;

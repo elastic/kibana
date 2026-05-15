@@ -23,6 +23,11 @@ interface FieldEditorFieldsOptions {
   getTypeValue?: (value: string) => string;
 }
 
+export type RtlSetup<Actions> = RenderResult & {
+  actions: Actions;
+  user: UserEvent;
+};
+
 const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 export const flushDocumentsAndPreviewTimers = async () => {
@@ -63,7 +68,7 @@ export const setupFieldEditorFlyout = async <Actions>(
   deps: Partial<Context> | undefined,
   defaultProps: Props,
   getActions: (renderResult: RenderResult, user: UserEvent) => Actions
-) => {
+): Promise<RtlSetup<Actions>> => {
   const user = userEvent.setup({
     advanceTimers: jest.advanceTimersByTime,
   });

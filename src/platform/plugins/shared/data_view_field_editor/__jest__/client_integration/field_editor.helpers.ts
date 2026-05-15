@@ -11,7 +11,7 @@ import React from 'react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
 import { act, fireEvent, type RenderResult } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
-import { createRtlHelpers } from './helpers/rtl_helpers';
+import { createRtlHelpers, type RtlSetup } from './helpers/rtl_helpers';
 import { FieldEditor } from '../../public/components/field_editor/field_editor';
 import { WithFieldEditorDependencies } from './helpers';
 import type { Context } from '../../public/components/field_editor_context';
@@ -46,11 +46,13 @@ const getActions = (renderResult: RenderResult, user: UserEvent) => {
   };
 };
 
+type FieldEditorActions = ReturnType<typeof getActions>;
+
 export const setup = async (
   props?: Partial<Props>,
   deps?: Partial<Context>,
   getByNameOverride?: () => any
-) => {
+): Promise<RtlSetup<FieldEditorActions>> => {
   const user = userEvent.setup({
     advanceTimers: jest.advanceTimersByTime,
   });
