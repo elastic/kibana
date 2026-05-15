@@ -251,7 +251,7 @@ describe('validateChangesNewType', () => {
 
   it('should not throw for types not searchable via the management page, even if name field has non-text type', () => {
     const to = buildNewType('my-internal-type', {
-      mappings: { 'properties.name.type': 'keyword' },
+      mappings: { 'properties.name.type': 'keyword', 'properties.name.ignore_above': 1024 },
     });
     // importableAndExportable: false is the exemption criterion — the management find route
     // only searches types with importableAndExportable: true
@@ -278,6 +278,76 @@ describe('validateChangesNewType', () => {
     expect(() => callValidate(to, hiddenExportableType)).toThrow(
       /The SO type 'my-hidden-exportable-type' has 'name' or 'title' fields with incorrect types/
     );
+  });
+
+  describe('ignore_above validation', () => {
+    it('should throw when a keyword field is missing ignore_above', () => {
+      const to = buildNewType('my-type', {
+        mappings: { 'properties.myField.type': 'keyword' },
+      });
+
+      expect(() => callValidate(to, createMockType('my-type', ['myField']))).toThrowError(
+        /The SO type 'my-type' has 'keyword' or 'flattened' mapping fields without 'ignore_above': myField/
+      );
+    });
+
+    it('should throw when a flattened field is missing ignore_above', () => {
+      const to = buildNewType('my-type', {
+        mappings: { 'properties.dataField.type': 'flattened' },
+      });
+
+      expect(() => callValidate(to, createMockType('my-type', ['dataField']))).toThrowError(
+        /The SO type 'my-type' has 'keyword' or 'flattened' mapping fields without 'ignore_above': dataField/
+      );
+    });
+
+    it('should not throw when all keyword fields have ignore_above', () => {
+      const to = buildNewType('my-type', {
+        mappings: {
+          'properties.myField.type': 'keyword',
+          'properties.myField.ignore_above': 1024,
+        },
+      });
+
+      expect(() => callValidate(to, createMockType('my-type', ['myField']))).not.toThrow();
+    });
+
+    it('should throw when a keyword subfield (multi-field) is missing ignore_above', () => {
+      const to = buildNewType('my-type', {
+        mappings: {
+          'properties.name.type': 'text',
+          'properties.name.fields.keyword.type': 'keyword',
+        },
+      });
+
+      expect(() => callValidate(to, createMockType('my-type', ['name']))).toThrowError(
+        /name\.fields\.keyword/
+      );
+    });
+
+    it('should throw when a nested keyword field is missing ignore_above', () => {
+      const to = buildNewType('my-type', {
+        mappings: {
+          'properties.parent.properties.child.type': 'keyword',
+        },
+      });
+
+      expect(() =>
+        callValidate(to, createMockType('my-type', ['parent.child']))
+      ).toThrowError(/parent\.child/);
+    });
+
+    it('should not throw when a text field with a keyword subfield has ignore_above on the subfield', () => {
+      const to = buildNewType('my-type', {
+        mappings: {
+          'properties.name.type': 'text',
+          'properties.name.fields.keyword.type': 'keyword',
+          'properties.name.fields.keyword.ignore_above': 2048,
+        },
+      });
+
+      expect(() => callValidate(to, createMockType('my-type', ['name']))).not.toThrow();
+    });
   });
 
   it('should not throw when mapping has nested fields that match schema (path format normalization)', () => {
@@ -370,7 +440,9 @@ describe('validateChangesNewType', () => {
     const to = buildNewType('my-array-type', {
       mappings: {
         'properties.destinations.properties.id.type': 'keyword',
+        'properties.destinations.properties.id.ignore_above': 1024,
         'properties.destinations.properties.type.type': 'keyword',
+        'properties.destinations.properties.type.ignore_above': 1024,
       },
     });
 
