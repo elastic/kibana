@@ -360,8 +360,6 @@ enabled:
   - x-pack/platform/test/rule_registry/security_and_spaces/config_trial.ts
   - x-pack/platform/test/rule_registry/spaces_only/config_basic.ts
   - x-pack/platform/test/rule_registry/spaces_only/config_trial.ts
-  - x-pack/platform/test/saved_object_tagging/api_integration/security_and_spaces/config.ts
-  - x-pack/platform/test/saved_object_tagging/api_integration/tagging_usage_collection/config.ts
   - x-pack/platform/test/saved_objects_field_count/config.ts
   - x-pack/platform/test/search_sessions_integration/config.ts
   - x-pack/platform/test/search_sessions_integration/config.discover.ts
@@ -431,7 +429,6 @@ enabled:
   - x-pack/performance/journeys_e2e/web_logs_dashboard.ts
   - x-pack/performance/journeys_e2e/web_logs_dashboard_esql.ts
   - x-pack/performance/journeys_e2e/web_logs_dashboard_esql_long_running.ts
-  - x-pack/performance/journeys_e2e/web_logs_dashboard_long_running.ts
   - x-pack/performance/journeys_e2e/data_stress_test_lens.ts
   - x-pack/performance/journeys_e2e/data_stress_test_lens_esql.ts
   - x-pack/performance/journeys_e2e/ecommerce_dashboard_saved_search_only.ts
