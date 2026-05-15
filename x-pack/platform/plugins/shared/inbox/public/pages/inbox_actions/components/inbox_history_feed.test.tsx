@@ -73,9 +73,88 @@ describe('InboxHistoryFeed', () => {
     expect(screen.getByText('Prompt')).toBeInTheDocument();
     expect(screen.getByText('Response')).toBeInTheDocument();
     expect(screen.getByText(/"approved": true/)).toBeInTheDocument();
-    // Default channel falls back to 'inbox' when the server hasn't yet
-    // populated the channel field (kibana#256603 will fill it in).
-    expect(screen.getByText('inbox')).toBeInTheDocument();
+    // No channel badge for the default-inbox / null-channel case — the
+    // audit feed only surfaces a per-channel tag when a non-default
+    // surface (Slack/MCP/agent builder/…) submitted the response.
+    expect(screen.queryByTestId('inboxHistoryChannelBadge')).not.toBeInTheDocument();
+  });
+
+  it('renders an explicit channel badge for non-default responders (well-known app slug)', async () => {
+    // External clients (MCP apps, Slack, custom automations) self-tag
+    // with a stable client slug — the audit feed renders a friendly
+    // pill for first-party slugs we have a label for (here:
+    // `example-mcp-app-security`). Default-inbox responses stay
+    // un-tagged (covered by the previous test) to keep the feed
+    // visually quiet for the dominant surface.
+    httpGet.mockResolvedValueOnce({
+      actions: [
+        createStubInboxAction({
+          id: 'wf-1:run-1:step-1',
+          status: 'approved',
+          title: 'Approve isolation of host-42',
+          response_mode: 'responded',
+          response_input: { approved: true },
+          channel: 'example-mcp-app-security',
+          source_app: 'workflows',
+        }),
+      ],
+      total: 1,
+    });
+
+    render(<InboxHistoryFeed />, { wrapper: createWrapper() });
+
+    expect(await screen.findByTestId('inboxHistoryChannelBadge')).toBeInTheDocument();
+    expect(screen.getByText('Security MCP example')).toBeInTheDocument();
+  });
+
+  it('falls back to the raw slug for unknown channel identifiers', async () => {
+    // Third-party clients can send any slug-shaped channel; the audit
+    // feed should still surface the value verbatim rather than hide
+    // it, so the source remains visible.
+    httpGet.mockResolvedValueOnce({
+      actions: [
+        createStubInboxAction({
+          id: 'wf-1:run-1:step-1',
+          status: 'approved',
+          title: 'Approve isolation of host-42',
+          response_mode: 'responded',
+          response_input: { approved: true },
+          channel: 'acme-bot',
+          source_app: 'workflows',
+        }),
+      ],
+      total: 1,
+    });
+
+    render(<InboxHistoryFeed />, { wrapper: createWrapper() });
+
+    expect(await screen.findByTestId('inboxHistoryChannelBadge')).toBeInTheDocument();
+    expect(screen.getByText('acme-bot')).toBeInTheDocument();
+  });
+
+  it('renders a red rejected badge when status === "rejected"', async () => {
+    // `to_inbox_action.deriveHistoryStatus` flips the status when the
+    // responder payload encodes a rejection (e.g. `{ approved: false }`).
+    // The audit feed surfaces this as a red badge so reviewers can scan
+    // approve-vs-reject outcomes at a glance.
+    httpGet.mockResolvedValueOnce({
+      actions: [
+        createStubInboxAction({
+          id: 'wf-1:run-1:step-1',
+          status: 'rejected',
+          title: 'Approve isolation of host-42',
+          response_mode: 'responded',
+          response_input: { approved: false, reason: 'too risky' },
+          source_app: 'workflows',
+        }),
+      ],
+      total: 1,
+    });
+
+    render(<InboxHistoryFeed />, { wrapper: createWrapper() });
+
+    expect(await screen.findByTestId('inboxHistoryRejectedBadge')).toBeInTheDocument();
+    expect(screen.getByText('Rejected')).toBeInTheDocument();
   });
 
   it('shows a "Processing…" badge for the responded-but-not-yet-resumed window from the server', async () => {

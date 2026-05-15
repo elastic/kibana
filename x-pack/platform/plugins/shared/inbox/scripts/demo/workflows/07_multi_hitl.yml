@@ -1,0 +1,58 @@
+# Inbox demo workflow — multi-step HITL chain.
+#
+# Surfaces *two* sequential `waitForInput` steps so the inbox can show
+# how a single workflow run produces a queue of approvals (one row at a
+# time — only the currently paused step is `WAITING_FOR_INPUT`). After
+# responding to step 1, refreshing the inbox reveals step 2 paused on
+# the same workflow run id. Useful for validating:
+#   - history continuity across two responses on one run
+#   - badge attribution when the responder differs across steps (e.g.
+#     approve via UI then reject via MCP)
+#   - the "Processing…" badge transition between the two HITL gates
+name: inbox-demo-multi-hitl
+enabled: true
+triggers:
+  - type: manual
+steps:
+  - name: triage_severity
+    type: waitForInput
+    with:
+      message: "Step 1 of 2 — Set the triage severity for this alert."
+      schema:
+        type: object
+        properties:
+          severity:
+            type: string
+            title: Severity
+            description: Initial severity classification.
+            enum:
+              - low
+              - medium
+              - high
+              - critical
+        required:
+          - severity
+  - name: log_severity
+    type: console
+    with:
+      message: "Severity set to {{ steps.triage_severity.output.severity }}"
+  - name: approve_isolation
+    type: waitForInput
+    with:
+      message: "Step 2 of 2 — Approve isolating the affected host?"
+      schema:
+        type: object
+        properties:
+          approved:
+            type: boolean
+            title: Approve isolation
+          reason:
+            type: string
+            title: Reason
+            description: Optional justification (especially helpful on rejection).
+        required:
+          - approved
+  - name: log_decision
+    type: console
+    with:
+      message: "Isolation approved? {{ steps.approve_isolation.output.approved }}"

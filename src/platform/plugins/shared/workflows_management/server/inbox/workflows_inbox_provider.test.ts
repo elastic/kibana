@@ -48,9 +48,10 @@ const buildStep = (overrides: Partial<EsWorkflowStepExecution> = {}): EsWorkflow
   ...overrides,
 });
 
-const ctx = () => ({
+const ctx = (overrides: { channel?: string } = {}) => ({
   request: httpServerMock.createKibanaRequest(),
   spaceId: 'default',
+  ...overrides,
 });
 
 const fakeApi = () => {
@@ -188,6 +189,54 @@ describe('createWorkflowsInboxProvider', () => {
         'default',
         { approved: true, reason: 'contained' },
         c.request
+      );
+    });
+
+    it('forwards the responder-supplied channel from ctx into the audit-stamp call', async () => {
+      // Non-UI clients (MCP, Slack bot, agent builder) tag their channel
+      // explicitly via the respond route's request body. The provider
+      // must pass that through to `markStepAsResponded` verbatim — no
+      // hardcoded `'inbox'` literal — so the audit feed renders the
+      // correct "via …" attribution.
+      const api = fakeApi();
+      const provider = createWorkflowsInboxProvider({
+        api,
+        logger: loggerMock.create(),
+        audit: createTestAudit(),
+      });
+      const c = ctx({ channel: 'example-mcp-app-security' });
+
+      await provider.respond('wf-1:run-1:step-exec-1', { approved: true }, c);
+
+      expect(api.markStepAsResponded).toHaveBeenCalledWith(
+        'step-exec-1',
+        c.request,
+        'example-mcp-app-security',
+        'default'
+      );
+    });
+
+    it('falls back to channel="inbox" when ctx.channel is undefined (defence-in-depth)', async () => {
+      // The respond HTTP route already defaults to `'inbox'` for
+      // omitted-channel bodies, but the provider keeps a belt-and-suspenders
+      // fallback so a future caller that builds an `InboxRequestContext`
+      // without a channel doesn't end up persisting `undefined` into the
+      // audit feed.
+      const api = fakeApi();
+      const provider = createWorkflowsInboxProvider({
+        api,
+        logger: loggerMock.create(),
+        audit: createTestAudit(),
+      });
+      const c = ctx();
+
+      await provider.respond('wf-1:run-1:step-exec-1', { approved: true }, c);
+
+      expect(api.markStepAsResponded).toHaveBeenCalledWith(
+        'step-exec-1',
+        c.request,
+        'inbox',
+        'default'
       );
     });
 

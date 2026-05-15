@@ -199,12 +199,46 @@ export const HISTORY_SYSTEM_RESPONDER = i18n.translate(
   }
 );
 
-export const HISTORY_DEFAULT_CHANNEL = i18n.translate(
-  'xpack.inbox.actionsPage.historySection.defaultChannel',
+export const HISTORY_CHANNEL_INBOX = i18n.translate(
+  'xpack.inbox.actionsPage.historySection.channel.inbox',
   {
-    defaultMessage: 'inbox',
+    defaultMessage: 'Inbox',
   }
 );
+
+export const HISTORY_CHANNEL_KIBANA_EXECUTION_VIEW = i18n.translate(
+  'xpack.inbox.actionsPage.historySection.channel.kibanaExecutionView',
+  {
+    defaultMessage: 'Workflow execution',
+  }
+);
+
+export const HISTORY_CHANNEL_AGENT_BUILDER = i18n.translate(
+  'xpack.inbox.actionsPage.historySection.channel.agentBuilder',
+  {
+    defaultMessage: 'Agent Builder',
+  }
+);
+
+export const HISTORY_CHANNEL_SLACK = i18n.translate(
+  'xpack.inbox.actionsPage.historySection.channel.slack',
+  {
+    defaultMessage: 'Slack',
+  }
+);
+
+export const HISTORY_CHANNEL_EXAMPLE_MCP_APP_SECURITY = i18n.translate(
+  'xpack.inbox.actionsPage.historySection.channel.exampleMcpAppSecurity',
+  {
+    defaultMessage: 'Security MCP example',
+  }
+);
+
+export const getHistoryChannelTooltip = (channel: string) =>
+  i18n.translate('xpack.inbox.actionsPage.historySection.channelTooltip', {
+    defaultMessage: 'Response submitted via {channel}',
+    values: { channel },
+  });
 
 export const HISTORY_PROCESSING_BADGE = i18n.translate(
   'xpack.inbox.actionsPage.historySection.processingBadge',

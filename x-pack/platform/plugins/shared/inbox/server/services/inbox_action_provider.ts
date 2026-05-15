@@ -6,7 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import type { InboxAction, ListInboxActionsRequestQuery } from '@kbn/inbox-common';
+import type { InboxAction, InboxChannel, ListInboxActionsRequestQuery } from '@kbn/inbox-common';
 
 /**
  * Request-scoped context passed to every provider call. Providers receive the
@@ -16,6 +16,16 @@ import type { InboxAction, ListInboxActionsRequestQuery } from '@kbn/inbox-commo
 export interface InboxRequestContext {
   request: KibanaRequest;
   spaceId: string;
+  /**
+   * Surface the response was submitted through. Only populated for the
+   * `respond()` path — list/history fan-outs leave this `undefined`. The
+   * respond HTTP route reads it from the (closed-enum) request body, so
+   * providers can treat it as a trusted-shape but client-supplied tag.
+   * Defaults to `inbox` if a respond client doesn't explicitly identify
+   * itself. Paired with the server-derived `respondedBy` in audit
+   * metadata — the latter is what identity decisions key off of.
+   */
+  channel?: InboxChannel;
 }
 
 /**

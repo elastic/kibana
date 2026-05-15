@@ -20,11 +20,13 @@ import {
   EuiTablePagination,
   EuiText,
   EuiTitle,
+  EuiToolTip,
   type EuiCommentProps,
+  type IconType,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { InboxAction } from '@kbn/inbox-common';
-import { DEFAULT_INBOX_ACTIONS_PER_PAGE } from '@kbn/inbox-common';
+import { DEFAULT_INBOX_ACTIONS_PER_PAGE, INBOX_CHANNELS } from '@kbn/inbox-common';
 import { useInboxActionsHistory } from '../../../hooks/use_inbox_api';
 import * as i18n from '../translations';
 
@@ -45,6 +47,71 @@ const formatTimestamp = (iso?: string | null): string => {
   if (!iso) return '';
   const date = new Date(iso);
   return Number.isNaN(date.getTime()) ? '' : date.toLocaleString();
+};
+
+/**
+ * Per-channel display config. The keys are the well-known core
+ * surfaces from `INBOX_CHANNELS` plus opt-in entries for first-party
+ * client integrations we want to render with a friendly label/icon
+ * (e.g. the public `example-mcp-app-security` reference). Anything
+ * not in this map falls through to a neutral pill in
+ * `renderChannelBadge`, so the audit feed stays readable for
+ * arbitrary client-supplied slugs (third-party MCP apps, custom
+ * automations) without a Kibana code change.
+ */
+const CHANNEL_DISPLAY: Record<string, { label: string; icon: IconType }> = {
+  [INBOX_CHANNELS.inbox]: { label: i18n.HISTORY_CHANNEL_INBOX, icon: 'email' },
+  [INBOX_CHANNELS.kibanaExecutionView]: {
+    label: i18n.HISTORY_CHANNEL_KIBANA_EXECUTION_VIEW,
+    icon: 'logoKibana',
+  },
+  [INBOX_CHANNELS.agentBuilder]: {
+    label: i18n.HISTORY_CHANNEL_AGENT_BUILDER,
+    icon: 'sparkles',
+  },
+  [INBOX_CHANNELS.slack]: { label: i18n.HISTORY_CHANNEL_SLACK, icon: 'logoSlack' },
+  // First-party reference MCP app
+  // (https://github.com/elastic/example-mcp-app-security). Kept as a
+  // discrete entry so its history rows render with a recognizable
+  // tag instead of a generic fallback pill.
+  'example-mcp-app-security': {
+    label: i18n.HISTORY_CHANNEL_EXAMPLE_MCP_APP_SECURITY,
+    icon: 'logoSecurity',
+  },
+};
+
+/**
+ * The default channel (`inbox`) is the overwhelmingly common case for
+ * Kibana-UI responses, so we suppress its badge to keep the audit feed
+ * uncluttered. Non-default channels (Slack, MCP/API, agent builder)
+ * show an explicit tag so the audit trail makes the source obvious.
+ *
+ * Returns `null` when no badge should render — also covers the
+ * pre-channel-feature history rows that ship with `channel: null`.
+ */
+const renderChannelBadge = (channel: InboxAction['channel']) => {
+  if (!channel || channel === INBOX_CHANNELS.inbox) {
+    return null;
+  }
+  const display = CHANNEL_DISPLAY[channel] ?? { label: channel, icon: 'globe' as IconType };
+  return (
+    <EuiToolTip position="top" content={i18n.getHistoryChannelTooltip(display.label)}>
+      {/*
+        EuiBadge is non-interactive on its own, so we make it keyboard
+        focusable to satisfy the @elastic/eui/tooltip-focusable-anchor
+        rule. The tooltip text is the user-facing affordance — there's
+        no equivalent click target to switch to.
+      */}
+      <EuiBadge
+        color="hollow"
+        iconType={display.icon}
+        tabIndex={0}
+        data-test-subj="inboxHistoryChannelBadge"
+      >
+        {display.label}
+      </EuiBadge>
+    </EuiToolTip>
+  );
 };
 
 const buildBody = (action: InboxAction) => {
@@ -82,9 +149,10 @@ const buildBody = (action: InboxAction) => {
 const buildComment = (action: InboxAction): EuiCommentProps => {
   const responder = action.responded_by ?? i18n.HISTORY_SYSTEM_RESPONDER;
   const timestampLabel = formatTimestamp(action.responded_at ?? action.created_at);
-  const channelLabel = action.channel ?? i18n.HISTORY_DEFAULT_CHANNEL;
   const isTimedOut = action.response_mode === 'timed_out';
+  const isRejected = action.status === 'rejected';
   const processing = isProcessing(action);
+  const channelBadge = renderChannelBadge(action.channel);
 
   return {
     // EuiCommentList renders the `username` in the avatar/header, so
@@ -107,9 +175,24 @@ const buildComment = (action: InboxAction): EuiCommentProps => {
         <EuiFlexItem grow={false}>
           <EuiBadge color="hollow">{action.source_app}</EuiBadge>
         </EuiFlexItem>
+        {/*
+          Status badge: green for the v1 "approved" placeholder, red
+          when `to_inbox_action.deriveHistoryStatus` mapped a rejection
+          payload. Bumps the audit feed from "everything looks the
+          same" to a quick visual scan of approve-vs-reject outcomes.
+        */}
         <EuiFlexItem grow={false}>
-          <EuiBadge color="hollow">{channelLabel}</EuiBadge>
+          {isRejected ? (
+            <EuiBadge color="danger" iconType="cross" data-test-subj="inboxHistoryRejectedBadge">
+              {i18n.STATUS_REJECTED}
+            </EuiBadge>
+          ) : (
+            <EuiBadge color="success" iconType="check">
+              {i18n.STATUS_APPROVED}
+            </EuiBadge>
+          )}
         </EuiFlexItem>
+        {channelBadge ? <EuiFlexItem grow={false}>{channelBadge}</EuiFlexItem> : null}
         {isTimedOut ? (
           <EuiFlexItem grow={false}>
             <EuiBadge color="warning">{i18n.HISTORY_TIMED_OUT_BADGE}</EuiBadge>

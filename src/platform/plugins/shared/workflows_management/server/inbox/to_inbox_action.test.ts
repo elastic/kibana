@@ -11,6 +11,7 @@ import type { EsWorkflowStepExecution } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import {
   buildWorkflowSourceId,
+  deriveHistoryStatus,
   parseWorkflowSourceId,
   toInboxAction,
   toInboxHistoryAction,
@@ -63,6 +64,44 @@ describe('buildWorkflowSourceId / parseWorkflowSourceId', () => {
       executionId: 'run',
       stepExecutionId: 'step:with:colons',
     });
+  });
+});
+
+describe('deriveHistoryStatus', () => {
+  // Conservative heuristic: reject signals must be *explicit* in one of
+  // the documented shapes, otherwise we default to `'approved'` so we
+  // don't paint the audit feed red on ambiguous payloads.
+  it('returns approved for null payloads (responded-but-not-resumed window)', () => {
+    expect(deriveHistoryStatus(null)).toBe('approved');
+  });
+
+  it('returns approved for an empty object', () => {
+    expect(deriveHistoryStatus({})).toBe('approved');
+  });
+
+  it('returns approved for { approved: true }', () => {
+    expect(deriveHistoryStatus({ approved: true })).toBe('approved');
+  });
+
+  it('returns rejected for { approved: false }', () => {
+    expect(deriveHistoryStatus({ approved: false })).toBe('rejected');
+  });
+
+  it.each(['reject', 'rejected', 'deny', 'denied', 'decline', 'declined', 'REJECT', '  Reject  '])(
+    'returns rejected for { action: %p }',
+    (verb) => {
+      expect(deriveHistoryStatus({ action: verb })).toBe('rejected');
+    }
+  );
+
+  it('returns rejected for { decision: "rejected" } (alternative free-form signal)', () => {
+    expect(deriveHistoryStatus({ decision: 'rejected' })).toBe('rejected');
+  });
+
+  it('returns approved for unrelated free-text payloads (no false positives)', () => {
+    expect(deriveHistoryStatus({ message: 'rejected the suggestion in chat' })).toBe('approved');
+    expect(deriveHistoryStatus({ action: 'approve' })).toBe('approved');
+    expect(deriveHistoryStatus({ approved: 'maybe' })).toBe('approved');
   });
 });
 
@@ -128,9 +167,23 @@ describe('toInboxHistoryAction', () => {
       ...overrides,
     });
 
-  it('coerces every responded item to status: approved (v1 placeholder until kibana#256603 lands)', () => {
+  it('maps a clean approval payload to status: approved', () => {
     const action = toInboxHistoryAction(buildCompletedStep());
     expect(action.status).toBe('approved');
+  });
+
+  it('flips status to rejected for { approved: false } responses (canonical demo shape)', () => {
+    const action = toInboxHistoryAction(
+      buildCompletedStep({ output: { approved: false, reason: 'too risky' } })
+    );
+    expect(action.status).toBe('rejected');
+  });
+
+  it('flips status to rejected for free-form { action: "reject" } responses', () => {
+    const action = toInboxHistoryAction(
+      buildCompletedStep({ output: { action: 'reject', notes: 'wrong host' } })
+    );
+    expect(action.status).toBe('rejected');
   });
 
   it('marks completed steps with response_mode: responded', () => {

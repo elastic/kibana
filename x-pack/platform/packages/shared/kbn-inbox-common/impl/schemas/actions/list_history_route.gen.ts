@@ -15,6 +15,7 @@
  */
 
 import { z, lazySchema } from '@kbn/zod/v4';
+
 import { InboxAction } from './list_actions_route.gen';
 
 export const ListInboxActionsHistoryRequestQuery = lazySchema(() =>

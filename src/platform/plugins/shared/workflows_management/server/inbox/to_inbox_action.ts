@@ -7,9 +7,66 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { InboxAction } from '@kbn/inbox-common';
+import type { InboxAction, InboxActionStatus } from '@kbn/inbox-common';
 import type { EsWorkflowStepExecution } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
+
+/**
+ * Best-effort heuristic that distinguishes approve-vs-reject outcomes
+ * from the responder's submitted payload. The inbox-common contract's
+ * `status` is a closed enum (`pending | approved | rejected`) and the
+ * workflow team has not yet landed first-class "rejection" conventions
+ * on the workflow YAML side, so we infer from a small set of common
+ * shapes that workflow authors tend to use:
+ *
+ *   - `{ approved: false }`     (the canonical inbox-demo shape)
+ *   - `{ action: 'reject' }`    (free-form reject signals)
+ *   - `{ decision: 'reject' }`  (alternative free-form signal)
+ *   - any of the above with `'rejected' / 'denied' / 'declined'`
+ *     case-insensitive
+ *
+ * Anything we can't confidently classify as a rejection falls through
+ * to `'approved'` — matching the existing v1 placeholder behavior so
+ * we never regress existing rows. The heuristic is intentionally
+ * conservative: false positives on rejection are worse than false
+ * negatives, because the audit feed surfaces a red badge that's
+ * jarring if shown for a normal approval.
+ *
+ * Promoting this from heuristic to a first-class workflow convention
+ * (e.g. an `approve_path` / `reject_path` block on the `waitForInput`
+ * step) is tracked alongside the per-action status work — out of
+ * scope for the inbox history MVP.
+ */
+export const deriveHistoryStatus = (
+  responseInput: Record<string, unknown> | null
+): InboxActionStatus => {
+  if (!responseInput) {
+    return 'approved';
+  }
+
+  if (responseInput.approved === false) {
+    return 'rejected';
+  }
+
+  const isRejectVerb = (value: unknown): boolean => {
+    if (typeof value !== 'string') return false;
+    const normalized = value.trim().toLowerCase();
+    return (
+      normalized === 'reject' ||
+      normalized === 'rejected' ||
+      normalized === 'deny' ||
+      normalized === 'denied' ||
+      normalized === 'decline' ||
+      normalized === 'declined'
+    );
+  };
+
+  if (isRejectVerb(responseInput.action) || isRejectVerb(responseInput.decision)) {
+    return 'rejected';
+  }
+
+  return 'approved';
+};
 
 /**
  * Composite identifier that makes a Workflows step execution uniquely
@@ -103,9 +160,11 @@ export const toInboxAction = (step: EsWorkflowStepExecution): InboxAction => {
  *   - `'timed_out'` when the step settled with an error (covers the
  *     workflow-level timeout monitor and other failure paths).
  *
- * v1 behaviour also coerces every history row to `status: 'approved'`.
- * Splitting approve vs reject is a follow-up after the workflow team
- * lands per-action conventions on top of `respondedBy/At/channel`.
+ * v1 maps `status` via {@link deriveHistoryStatus} — a conservative
+ * payload-shape heuristic that flips to `'rejected'` for the common
+ * `{ approved: false }` and `action: 'reject'` shapes, and otherwise
+ * defaults to `'approved'`. First-class approve/reject conventions on
+ * the workflow YAML side will replace the heuristic in a follow-up.
  */
 export const toInboxHistoryAction = (step: EsWorkflowStepExecution): InboxAction => {
   const input = (step.input ?? {}) as { message?: unknown; schema?: unknown };
@@ -139,7 +198,7 @@ export const toInboxHistoryAction = (step: EsWorkflowStepExecution): InboxAction
     id: buildWorkflowSourceId(step),
     source_app: 'workflows',
     source_id: buildWorkflowSourceId(step),
-    status: 'approved',
+    status: deriveHistoryStatus(responseInput),
     title: promptMessage ?? `Step "${step.stepId}" was processed`,
     description: `Workflow ${step.workflowId} — step "${step.stepId}"`,
     input_message: promptMessage,

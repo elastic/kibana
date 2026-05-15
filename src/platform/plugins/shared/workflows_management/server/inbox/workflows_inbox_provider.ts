@@ -169,8 +169,15 @@ export const createWorkflowsInboxProvider = ({
       // engine timeout monitor / a manual retry can then drive it
       // forward. The reverse ordering would let a responder see "no
       // change" on a successful resume that beat its own audit write.
+      // `ctx.channel` is set by the inbox respond route from the request
+      // body's closed-enum field; it falls back to `'inbox'` when the
+      // caller (e.g. the in-product Kibana inbox UI) doesn't explicitly
+      // identify itself, preserving pre-existing audit semantics. Non-UI
+      // clients (MCP, Slack bot, agent builder) tag their channel
+      // explicitly so the audit feed can render "via …" attribution.
+      const channel = ctx.channel ?? 'inbox';
       try {
-        await api.markStepAsResponded(parsed.stepExecutionId, ctx.request, 'inbox', ctx.spaceId);
+        await api.markStepAsResponded(parsed.stepExecutionId, ctx.request, channel, ctx.spaceId);
       } catch (error) {
         // Don't block the response on audit failure — the workflow
         // resume is the user-visible primitive. Log loudly so we notice

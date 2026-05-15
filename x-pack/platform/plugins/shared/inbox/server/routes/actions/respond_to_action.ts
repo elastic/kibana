@@ -7,6 +7,7 @@
 
 import {
   API_VERSIONS,
+  INBOX_CHANNELS,
   INTERNAL_API_ACCESS,
   INBOX_ACTION_RESPOND_URL_TEMPLATE,
   RespondToInboxActionRequestBody,
@@ -50,9 +51,17 @@ export const registerRespondToActionRoute = ({
         const { source_app: sourceApp, source_id: sourceId } = request.params;
 
         try {
+          // Default to `inbox` so callers that don't explicitly identify
+          // their surface (e.g. the existing Kibana inbox UI) end up with
+          // the same audit tag as before — preserving the audit-feed
+          // semantics that landed with the inbox-history rollout. Closed
+          // enum is enforced by the request-body Zod validator above, so
+          // by the time we read `request.body.channel` it's either a known
+          // `InboxChannel` value or `undefined`.
           await registry.respondTo(sourceApp, sourceId, request.body.input, {
             request,
             spaceId: getSpaceId(request),
+            channel: request.body.channel ?? INBOX_CHANNELS.inbox,
           });
 
           const body: RespondToInboxActionResponse = { ok: true };
