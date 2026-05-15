@@ -8,10 +8,8 @@
  */
 
 import { fetchDocuments } from './fetch_documents';
-import { throwError as throwErrorRx, of } from 'rxjs';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { savedSearchMock } from '../../../__mocks__/saved_search';
-import type { IKibanaSearchResponse } from '@kbn/search-types';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { CommonFetchParams } from './fetch_all';
 import type { EsHitRecord } from '@kbn/discover-utils/types';
@@ -60,9 +58,19 @@ describe('test fetchDocuments', () => {
       { _id: '2', foo: 'baz' },
     ] as unknown as EsHitRecord[];
     const documents = hits.map((hit) => buildDataTableRecord(hit, dataViewMock));
-    savedSearchMock.searchSource.fetch$ = <T>() =>
-      of({ rawResponse: { hits: { hits } } } as IKibanaSearchResponse<SearchResponse<T>>);
     const deps = await getDeps();
+
+    // Mock searchSource.build()
+    savedSearchMock.searchSource.build = jest.fn(() => ({
+      index: dataViewMock,
+      body: { query: {} },
+    }));
+
+    // Mock services.data.search.typed.searchDSL()
+    deps.services.data.search.typed.searchDSL = jest.fn().mockResolvedValue({
+      rawResponse: { hits: { hits } } as SearchResponse,
+    });
+
     const resolveDocumentProfileSpy = jest.spyOn(
       deps.scopedProfilesManager,
       'resolveDocumentProfile'
@@ -77,10 +85,19 @@ describe('test fetchDocuments', () => {
   });
 
   test('rejects on query failure', async () => {
-    savedSearchMock.searchSource.fetch$ = () => throwErrorRx(() => new Error('Oh noes!'));
+    const deps = await getDeps();
+
+    // Mock searchSource.build()
+    savedSearchMock.searchSource.build = jest.fn(() => ({
+      index: dataViewMock,
+      body: { query: {} },
+    }));
+
+    // Mock services.data.search.typed.searchDSL() to throw error
+    deps.services.data.search.typed.searchDSL = jest.fn().mockRejectedValue(new Error('Oh noes!'));
 
     try {
-      await fetchDocuments(savedSearchMock.searchSource, await getDeps());
+      await fetchDocuments(savedSearchMock.searchSource, deps);
     } catch (e) {
       expect(e).toEqual(new Error('Oh noes!'));
     }
@@ -97,17 +114,22 @@ describe('test fetchDocuments', () => {
     // regular search source
 
     const searchSourceRegular = createSearchSourceMock({ index: dataViewMock });
-    searchSourceRegular.fetch$ = <T>() =>
-      of({ rawResponse: { hits: { hits } } } as IKibanaSearchResponse<SearchResponse<T>>);
+    searchSourceRegular.build = jest.fn(() => ({
+      index: dataViewMock,
+      body: { query: {} },
+    }));
 
-    jest.spyOn(searchSourceRegular, 'fetch$');
+    deps.services.data.search.typed.searchDSL = jest.fn().mockResolvedValue({
+      rawResponse: { hits: { hits } } as SearchResponse,
+    });
 
     expect(await fetchDocuments(searchSourceRegular, deps)).toEqual({
       interceptedWarnings: [],
       records: documents,
     });
 
-    expect(searchSourceRegular.fetch$ as jest.Mock).toHaveBeenCalledWith(
+    expect(deps.services.data.search.typed.searchDSL).toHaveBeenCalledWith(
+      expect.objectContaining({ index: dataViewMock.getIndexPattern() }),
       expect.objectContaining({ sessionId: deps.searchSessionId })
     );
 
@@ -115,18 +137,22 @@ describe('test fetchDocuments', () => {
 
     const searchSourceForLoadMore = createSearchSourceMock({ index: dataViewMock });
     searchSourceForLoadMore.setField('searchAfter', ['100']);
+    searchSourceForLoadMore.build = jest.fn(() => ({
+      index: dataViewMock,
+      body: { query: {}, search_after: ['100'] },
+    }));
 
-    searchSourceForLoadMore.fetch$ = <T>() =>
-      of({ rawResponse: { hits: { hits } } } as IKibanaSearchResponse<SearchResponse<T>>);
-
-    jest.spyOn(searchSourceForLoadMore, 'fetch$');
+    deps.services.data.search.typed.searchDSL = jest.fn().mockResolvedValue({
+      rawResponse: { hits: { hits } } as SearchResponse,
+    });
 
     expect(await fetchDocuments(searchSourceForLoadMore, deps)).toEqual({
       interceptedWarnings: [],
       records: documents,
     });
 
-    expect(searchSourceForLoadMore.fetch$ as jest.Mock).toHaveBeenCalledWith(
+    expect(deps.services.data.search.typed.searchDSL).toHaveBeenCalledWith(
+      expect.objectContaining({ search_after: ['100'] }),
       expect.objectContaining({ sessionId: undefined })
     );
   });

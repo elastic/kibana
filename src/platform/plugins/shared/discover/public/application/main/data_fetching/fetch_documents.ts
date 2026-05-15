@@ -7,11 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { i18n } from '@kbn/i18n';
-import { filter, map } from 'rxjs';
-import { lastValueFrom } from 'rxjs';
 import type { ISearchSource } from '@kbn/data-plugin/public';
-import { isRunningResponse } from '@kbn/data-plugin/public';
 import { buildDataTableRecordList } from '@kbn/discover-utils';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import { DataViewType } from '@kbn/data-views-plugin/public';
@@ -23,7 +19,7 @@ import type { CommonFetchParams } from './fetch_all';
  * Requests the documents for Discover. This will return a promise that will resolve
  * with the documents.
  */
-export const fetchDocuments = (
+export const fetchDocuments = async (
   searchSource: ISearchSource,
   {
     abortController,
@@ -53,50 +49,46 @@ export const fetchDocuments = (
     description: isFetchingMore ? 'fetch more documents' : 'fetch documents',
   };
 
-  const fetch$ = searchSource
-    .fetch$({
+  // Build the search request (this is the ES DSL)
+  const searchRequest = searchSource.build();
+
+  // Extract index for searchDSL
+  const index =
+    typeof searchRequest.index === 'string'
+      ? searchRequest.index
+      : searchRequest.index?.getIndexPattern();
+
+  // Call typed search service directly
+  const result = await services.data.search.typed.searchDSL(
+    {
+      index,
+      ...searchRequest.body,
+    },
+    {
       abortSignal: abortController.signal,
       sessionId: isFetchingMore ? undefined : searchSessionId,
-      inspector: {
-        adapter: inspectorAdapters.requests,
-        title: isFetchingMore // TODO: show it as a separate request in Inspect flyout
-          ? i18n.translate('discover.inspectorRequestDataTitleMoreDocuments', {
-              defaultMessage: 'More documents',
-            })
-          : i18n.translate('discover.inspectorRequestDataTitleDocuments', {
-              defaultMessage: 'Documents',
-            }),
-        description: i18n.translate('discover.inspectorRequestDescriptionDocument', {
-          defaultMessage: 'This request queries Elasticsearch to fetch the documents.',
-        }),
-      },
       executionContext,
-      disableWarningToasts: true,
-    })
-    .pipe(
-      filter((res) => !isRunningResponse(res)),
-      map((res) => {
-        return buildDataTableRecordList({
-          records: res.rawResponse.hits.hits,
-          dataView,
-          processRecord: (record) => scopedProfilesManager.resolveDocumentProfile({ record }),
-        });
-      })
-    );
-
-  return lastValueFrom(fetch$).then((records) => {
-    const adapter = inspectorAdapters.requests;
-    const interceptedWarnings: SearchResponseWarning[] = [];
-    if (adapter) {
-      services.data.search.showWarnings(adapter, (warning) => {
-        interceptedWarnings.push(warning);
-        return true; // suppress the default behaviour
-      });
     }
+  );
 
-    return {
-      records,
-      interceptedWarnings,
-    };
+  // Build records from response
+  const records = buildDataTableRecordList({
+    records: result.rawResponse.hits.hits,
+    dataView,
+    processRecord: (record) => scopedProfilesManager.resolveDocumentProfile({ record }),
   });
+
+  const adapter = inspectorAdapters.requests;
+  const interceptedWarnings: SearchResponseWarning[] = [];
+  if (adapter) {
+    services.data.search.showWarnings(adapter, (warning) => {
+      interceptedWarnings.push(warning);
+      return true; // suppress the default behaviour
+    });
+  }
+
+  return {
+    records,
+    interceptedWarnings,
+  };
 };
