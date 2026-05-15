@@ -6,20 +6,17 @@
  */
 
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
-import {
-  STREAMS_MEMORY_GET_PAGE_TOOL_ID,
-  STREAMS_MEMORY_SEARCH_PAGES_TOOL_ID,
-  STREAMS_MEMORY_LIST_PAGES_TOOL_ID,
-  STREAMS_MEMORY_WRITE_PAGE_TOOL_ID,
-} from '../../tools/memory_esql';
+import { createMemoryTools } from '../../tools/memory';
+import type { MemoryToolsOptions } from '../../tools/memory';
 
-export const conversationScraperSkill = defineSkillType({
-  id: 'streams-conversation-scraper',
-  name: 'streams-conversation-scraper',
-  basePath: 'skills/platform/streams',
-  description:
-    'Extract durable, reusable knowledge from AI chat conversations and persist it as wiki pages in the memory knowledge base.',
-  content: `You are a knowledge curator extracting reusable learnings from chat conversations about an observability system.
+export const createConversationScraperSkill = (options: MemoryToolsOptions) =>
+  defineSkillType({
+    id: 'streams-conversation-scraper',
+    name: 'streams-conversation-scraper',
+    basePath: 'skills/platform/streams',
+    description:
+      'Extract durable, reusable knowledge from AI chat conversations and persist it as wiki pages in the memory knowledge base.',
+    content: `You are a knowledge curator extracting reusable learnings from chat conversations about an observability system.
 
 ## Your goal
 
@@ -29,7 +26,7 @@ Review conversations between users and an AI assistant. Extract durable knowledg
 
 - **Extract knowledge, not conversation**: Don't summarize what was said. Distill what was *learned* — architectural facts, operational patterns, troubleshooting steps, configuration details.
 - **Skip ephemeral content**: Ignore greetings, debugging sessions that led nowhere, questions about UI navigation, and other content that won't be useful in the future.
-- **Merge with existing knowledge**: Read existing pages before writing. Update them with new information rather than creating duplicates. Use \`platform.streams.memory.list_pages\` and \`platform.streams.memory.get_page\` before writing.
+- **Merge with existing knowledge**: Read existing pages before writing. Update them with new information rather than creating duplicates. Use \`platform.streams.memory.list\` and \`platform.streams.memory.read\` before writing.
 - **Be selective**: Not every conversation contains durable knowledge. It's fine to process conversations and write nothing if they don't contain reusable information.
 - **Attribute patterns, not conversations**: Write "the nginx service uses port 8080" not "in a conversation, the user mentioned nginx uses port 8080".
 - **Cross-reference**: When mentioning a concept that has its own page, add the \`page_name\` to the references array. Prefer linking over duplicating content.
@@ -44,10 +41,9 @@ Pages are organized by categories (like Wikipedia), not a fixed hierarchy:
 ## Writing style
 
 Write as if documenting for a team wiki. Be factual, direct, and concise. A few paragraphs per page maximum.`,
-  getRegistryTools: () => [
-    STREAMS_MEMORY_GET_PAGE_TOOL_ID,
-    STREAMS_MEMORY_SEARCH_PAGES_TOOL_ID,
-    STREAMS_MEMORY_LIST_PAGES_TOOL_ID,
-    STREAMS_MEMORY_WRITE_PAGE_TOOL_ID,
-  ],
-});
+    getInlineTools: () =>
+      createMemoryTools(options).map(({ tags, id, ...rest }) => ({
+        ...rest,
+        id: id.replaceAll('.', '_'),
+      })),
+  });

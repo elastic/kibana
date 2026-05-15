@@ -6,93 +6,24 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { IUiSettingsClient } from '@kbn/core/server';
+import type { IUiSettingsClient, Logger } from '@kbn/core/server';
 import { OBSERVABILITY_STREAMS_ENABLE_MEMORY } from '@kbn/management-settings-ids';
 import { notFound } from '@hapi/boom';
-import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import {
+  STREAMS_API_PRIVILEGES,
+  CONVERSATION_SCRAPER_WORKFLOW_NAME,
+  MEMORY_CONSOLIDATION_WORKFLOW_NAME,
+  MEMORY_SYNTHESIS_WORKFLOW_NAME,
+} from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
-import type { StoredMemoryPage } from '../../../lib/memory';
-
-/**
- * UI-facing shape for a memory page (maps from append-only StoredMemoryPage).
- * Route signatures stay the same so the UI (MemoryTab / use_memory.ts) requires no changes.
- */
-export interface MemoryEntry {
-  id: string;
-  name: string;
-  title: string;
-  content: string;
-  categories: string[];
-  references: string[];
-  tags: string[];
-  updated_at: string;
-  written_by: string;
-}
-
-export interface MemoryCategoryNode {
-  name: string;
-  category: string;
-  pages: Array<{ id: string; name: string; title: string }>;
-  children: MemoryCategoryNode[];
-}
-
-export interface MemorySearchResult {
-  id: string;
-  name: string;
-  title: string;
-  snippet: string;
-  categories: string[];
-  tags: string[];
-}
-
-const toStringArray = (v: unknown): string[] => {
-  if (Array.isArray(v)) return v as string[];
-  if (v) return [v as string];
-  return [];
-};
-
-const pageToEntry = (page: StoredMemoryPage): MemoryEntry => ({
-  id: page.page_name as string,
-  name: page.page_name as string,
-  title: (page.title as string) ?? '',
-  content: (page.content as string) ?? '',
-  categories: toStringArray(page.categories),
-  references: toStringArray(page.references),
-  tags: toStringArray(page.tags),
-  updated_at: (page['@timestamp'] as string) ?? new Date().toISOString(),
-  written_by: (page.written_by as string) ?? 'unknown',
-});
-
-const buildCategoryTree = (entries: MemoryEntry[]): MemoryCategoryNode[] => {
-  const nodeMap = new Map<string, MemoryCategoryNode>();
-
-  const getOrCreate = (category: string): MemoryCategoryNode => {
-    const existing = nodeMap.get(category);
-    if (existing) return existing;
-    const parts = category.split('/');
-    const node: MemoryCategoryNode = {
-      name: parts[parts.length - 1],
-      category,
-      pages: [],
-      children: [],
-    };
-    nodeMap.set(category, node);
-    if (parts.length > 1) {
-      const parentCat = parts.slice(0, -1).join('/');
-      getOrCreate(parentCat).children.push(node);
-    }
-    return node;
-  };
-
-  for (const entry of entries) {
-    const cats = entry.categories.length > 0 ? entry.categories : ['uncategorized'];
-    for (const cat of cats) {
-      getOrCreate(cat).pages.push({ id: entry.id, name: entry.name, title: entry.title });
-    }
-  }
-
-  return [...nodeMap.values()].filter((n) => !n.category.includes('/'));
-};
+import type {
+  MemoryEntry,
+  MemoryCategoryNode,
+  MemorySearchResult,
+  MemoryVersionRecord,
+} from '../../../lib/memory';
+import { MemoryServiceImpl } from '../../../lib/memory';
 
 const assertMemoryEnabled = async (uiSettingsClient: IUiSettingsClient) => {
   const useMemory = await uiSettingsClient.get<boolean>(OBSERVABILITY_STREAMS_ENABLE_MEMORY);
@@ -102,6 +33,11 @@ const assertMemoryEnabled = async (uiSettingsClient: IUiSettingsClient) => {
     );
   }
 };
+
+const getMemoryService = (
+  esClient: import('@kbn/core-elasticsearch-server').ElasticsearchClient,
+  logger: Logger
+) => new MemoryServiceImpl({ logger, esClient });
 
 const createEntryRoute = createServerRoute({
   endpoint: 'POST /internal/streams/memory/entries',
@@ -124,27 +60,21 @@ const createEntryRoute = createServerRoute({
       tags: z.array(z.string()).optional(),
     }),
   }),
-  handler: async ({ params, request, server, getScopedClients }): Promise<MemoryEntry> => {
-    const { uiSettingsClient, getMemoryClient } = await getScopedClients({ request });
+  handler: async ({ params, request, server, logger, getScopedClients }): Promise<MemoryEntry> => {
+    const { uiSettingsClient, scopedClusterClient } = await getScopedClients({ request });
     await assertMemoryEnabled(uiSettingsClient);
+    const memory = getMemoryService(scopedClusterClient.asCurrentUser, logger);
 
     const authUser = server.core.security.authc.getCurrentUser(request);
     const user = authUser?.username ?? 'unknown';
 
-    const page: StoredMemoryPage = {
-      '@timestamp': new Date().toISOString(),
-      page_name: params.body.name,
-      title: params.body.title,
-      content: params.body.content,
+    return memory.create({
+      ...params.body,
       categories: params.body.categories ?? [],
       references: params.body.references ?? [],
       tags: params.body.tags ?? [],
-      written_by: `user:${user}`,
-      is_deleted: false,
-    };
-
-    await getMemoryClient().bulkCreate([page]);
-    return pageToEntry(page);
+      user,
+    });
   },
 });
 
@@ -152,7 +82,7 @@ const getEntryRoute = createServerRoute({
   endpoint: 'GET /internal/streams/memory/entries/{id}',
   options: {
     access: 'internal',
-    summary: 'Get a memory page by ID (page_name)',
+    summary: 'Get a memory page by ID',
   },
   security: {
     authz: {
@@ -162,15 +92,12 @@ const getEntryRoute = createServerRoute({
   params: z.object({
     path: z.object({ id: z.string() }),
   }),
-  handler: async ({ params, request, getScopedClients }): Promise<MemoryEntry> => {
-    const { uiSettingsClient, getMemoryClient } = await getScopedClients({ request });
+  handler: async ({ params, request, server, logger, getScopedClients }): Promise<MemoryEntry> => {
+    const { uiSettingsClient, scopedClusterClient } = await getScopedClients({ request });
     await assertMemoryEnabled(uiSettingsClient);
+    const memory = getMemoryService(scopedClusterClient.asCurrentUser, logger);
 
-    const page = await getMemoryClient().findLatestByName(params.path.id);
-    if (!page) {
-      throw notFound(`Memory page not found: ${params.path.id}`);
-    }
-    return pageToEntry(page);
+    return memory.get({ id: params.path.id });
   },
 });
 
@@ -188,15 +115,16 @@ const getEntryByNameRoute = createServerRoute({
   params: z.object({
     query: z.object({ name: z.string() }),
   }),
-  handler: async ({ params, request, getScopedClients }): Promise<MemoryEntry> => {
-    const { uiSettingsClient, getMemoryClient } = await getScopedClients({ request });
+  handler: async ({ params, request, server, logger, getScopedClients }): Promise<MemoryEntry> => {
+    const { uiSettingsClient, scopedClusterClient } = await getScopedClients({ request });
     await assertMemoryEnabled(uiSettingsClient);
+    const memory = getMemoryService(scopedClusterClient.asCurrentUser, logger);
 
-    const page = await getMemoryClient().findLatestByName(params.query.name);
-    if (!page) {
+    const entry = await memory.getByName({ name: params.query.name });
+    if (!entry) {
       throw notFound(`Page not found with name: ${params.query.name}`);
     }
-    return pageToEntry(page);
+    return entry;
   },
 });
 
@@ -204,7 +132,7 @@ const updateEntryRoute = createServerRoute({
   endpoint: 'PUT /internal/streams/memory/entries/{id}',
   options: {
     access: 'internal',
-    summary: 'Update a memory page (appends new document with same page_name)',
+    summary: 'Update a memory page',
   },
   security: {
     authz: {
@@ -216,38 +144,27 @@ const updateEntryRoute = createServerRoute({
     body: z.object({
       title: z.string().optional(),
       content: z.string().optional(),
+      name: z.string().optional(),
       categories: z.array(z.string()).optional(),
       references: z.array(z.string()).optional(),
       tags: z.array(z.string()).optional(),
+      change_summary: z.string().optional(),
     }),
   }),
-  handler: async ({ params, request, server, getScopedClients }): Promise<MemoryEntry> => {
-    const { uiSettingsClient, getMemoryClient } = await getScopedClients({ request });
+  handler: async ({ params, request, server, logger, getScopedClients }): Promise<MemoryEntry> => {
+    const { uiSettingsClient, scopedClusterClient } = await getScopedClients({ request });
     await assertMemoryEnabled(uiSettingsClient);
+    const memory = getMemoryService(scopedClusterClient.asCurrentUser, logger);
 
     const authUser = server.core.security.authc.getCurrentUser(request);
     const user = authUser?.username ?? 'unknown';
-    const client = getMemoryClient();
 
-    const existing = await client.findLatestByName(params.path.id);
-    if (!existing) {
-      throw notFound(`Memory page not found: ${params.path.id}`);
-    }
-
-    const updated: StoredMemoryPage = {
-      '@timestamp': new Date().toISOString(),
-      page_name: params.path.id,
-      title: params.body.title ?? (existing.title as string),
-      content: params.body.content ?? (existing.content as string),
-      categories: params.body.categories ?? toStringArray(existing.categories),
-      references: params.body.references ?? toStringArray(existing.references),
-      tags: params.body.tags ?? toStringArray(existing.tags),
-      written_by: `user:${user}`,
-      is_deleted: false,
-    };
-
-    await client.bulkCreate([updated]);
-    return pageToEntry(updated);
+    return memory.update({
+      id: params.path.id,
+      ...params.body,
+      changeSummary: params.body.change_summary,
+      user,
+    });
   },
 });
 
@@ -255,7 +172,7 @@ const deleteEntryRoute = createServerRoute({
   endpoint: 'DELETE /internal/streams/memory/entries/{id}',
   options: {
     access: 'internal',
-    summary: 'Soft-delete a memory page (appends tombstone document)',
+    summary: 'Delete a memory page',
   },
   security: {
     authz: {
@@ -265,33 +182,53 @@ const deleteEntryRoute = createServerRoute({
   params: z.object({
     path: z.object({ id: z.string() }),
   }),
-  handler: async ({ params, request, server, getScopedClients }): Promise<{ deleted: boolean }> => {
-    const { uiSettingsClient, getMemoryClient } = await getScopedClients({ request });
+  handler: async ({
+    params,
+    request,
+    server,
+    logger,
+    getScopedClients,
+  }): Promise<{ deleted: boolean }> => {
+    const { uiSettingsClient, scopedClusterClient } = await getScopedClients({ request });
     await assertMemoryEnabled(uiSettingsClient);
+    const memory = getMemoryService(scopedClusterClient.asCurrentUser, logger);
 
     const authUser = server.core.security.authc.getCurrentUser(request);
     const user = authUser?.username ?? 'unknown';
-    const client = getMemoryClient();
 
-    const existing = await client.findLatestByName(params.path.id);
-    if (!existing) {
-      throw notFound(`Memory page not found: ${params.path.id}`);
-    }
-
-    const tombstone: StoredMemoryPage = {
-      '@timestamp': new Date().toISOString(),
-      page_name: params.path.id,
-      title: (existing.title as string) ?? '',
-      content: (existing.content as string) ?? '',
-      categories: toStringArray(existing.categories),
-      references: toStringArray(existing.references),
-      tags: toStringArray(existing.tags),
-      written_by: `user:${user}`,
-      is_deleted: true,
-    };
-
-    await client.bulkCreate([tombstone]);
+    await memory.delete({ id: params.path.id, user });
     return { deleted: true };
+  },
+});
+
+const renameEntryRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/memory/entries/{id}/rename',
+  options: {
+    access: 'internal',
+    summary: 'Rename a memory page',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+    },
+  },
+  params: z.object({
+    path: z.object({ id: z.string() }),
+    body: z.object({ new_name: z.string() }),
+  }),
+  handler: async ({ params, request, server, logger, getScopedClients }): Promise<MemoryEntry> => {
+    const { uiSettingsClient, scopedClusterClient } = await getScopedClients({ request });
+    await assertMemoryEnabled(uiSettingsClient);
+    const memory = getMemoryService(scopedClusterClient.asCurrentUser, logger);
+
+    const authUser = server.core.security.authc.getCurrentUser(request);
+    const user = authUser?.username ?? 'unknown';
+
+    return memory.rename({
+      id: params.path.id,
+      newName: params.body.new_name,
+      user,
+    });
   },
 });
 
@@ -309,50 +246,31 @@ const searchRoute = createServerRoute({
   params: z.object({
     body: z.object({
       query: z.string(),
+      tags: z.array(z.string()).optional(),
+      categories: z.array(z.string()).optional(),
+      references: z.array(z.string()).optional(),
       size: z.number().min(1).max(50).optional(),
     }),
   }),
   handler: async ({
     params,
     request,
+    server,
+    logger,
     getScopedClients,
   }): Promise<{ results: MemorySearchResult[] }> => {
-    const { uiSettingsClient, getMemoryClient } = await getScopedClients({ request });
+    const { uiSettingsClient, scopedClusterClient } = await getScopedClients({ request });
     await assertMemoryEnabled(uiSettingsClient);
+    const memory = getMemoryService(scopedClusterClient.asCurrentUser, logger);
 
-    const { hits } = await getMemoryClient().findLatest();
-    const lowerQuery = params.body.query.toLowerCase();
-    const limit = params.body.size ?? 10;
-
-    const matched = hits
-      .filter(
-        (p) =>
-          String(p.title ?? '')
-            .toLowerCase()
-            .includes(lowerQuery) ||
-          String(p.content ?? '')
-            .toLowerCase()
-            .includes(lowerQuery)
-      )
-      .slice(0, limit)
-      .map((p): MemorySearchResult => {
-        const content = String(p.content ?? '');
-        const idx = content.toLowerCase().indexOf(lowerQuery);
-        const snippet =
-          idx >= 0
-            ? content.substring(Math.max(0, idx - 60), idx + 140)
-            : content.substring(0, 200);
-        return {
-          id: p.page_name as string,
-          name: p.page_name as string,
-          title: (p.title as string) ?? '',
-          snippet,
-          categories: toStringArray(p.categories),
-          tags: toStringArray(p.tags),
-        };
-      });
-
-    return { results: matched };
+    const results = await memory.search({
+      query: params.body.query,
+      tags: params.body.tags,
+      categories: params.body.categories,
+      references: params.body.references,
+      size: params.body.size,
+    });
+    return { results };
   },
 });
 
@@ -368,14 +286,202 @@ const getCategoryTreeRoute = createServerRoute({
     },
   },
   params: z.object({}),
-  handler: async ({ request, getScopedClients }): Promise<{ tree: MemoryCategoryNode[] }> => {
-    const { uiSettingsClient, getMemoryClient } = await getScopedClients({ request });
+  handler: async ({
+    request,
+    server,
+    logger,
+    getScopedClients,
+  }): Promise<{ tree: MemoryCategoryNode[] }> => {
+    const { uiSettingsClient, scopedClusterClient } = await getScopedClients({ request });
     await assertMemoryEnabled(uiSettingsClient);
+    const memory = getMemoryService(scopedClusterClient.asCurrentUser, logger);
 
-    const { hits } = await getMemoryClient().findLatest();
-    return { tree: buildCategoryTree(hits.map(pageToEntry)) };
+    const tree = await memory.getCategoryTree();
+    return { tree };
   },
 });
+
+const getHistoryRoute = createServerRoute({
+  endpoint: 'GET /internal/streams/memory/entries/{id}/history',
+  options: {
+    access: 'internal',
+    summary: 'Get version history for a memory page',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  params: z.object({
+    path: z.object({ id: z.string() }),
+    query: z
+      .object({
+        size: z.coerce.number().min(1).max(100).optional(),
+      })
+      .optional()
+      .default({}),
+  }),
+  handler: async ({
+    params,
+    request,
+    server,
+    logger,
+    getScopedClients,
+  }): Promise<{ history: MemoryVersionRecord[] }> => {
+    const { uiSettingsClient, scopedClusterClient } = await getScopedClients({ request });
+    await assertMemoryEnabled(uiSettingsClient);
+    const memory = getMemoryService(scopedClusterClient.asCurrentUser, logger);
+
+    const history = await memory.getHistory({
+      entryId: params.path.id,
+      size: params.query?.size,
+    });
+    return { history };
+  },
+});
+
+const getVersionRoute = createServerRoute({
+  endpoint: 'GET /internal/streams/memory/entries/{id}/history/{version}',
+  options: {
+    access: 'internal',
+    summary: 'Get a specific version of a memory page',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  params: z.object({
+    path: z.object({
+      id: z.string(),
+      version: z.coerce.number(),
+    }),
+  }),
+  handler: async ({
+    params,
+    request,
+    server,
+    logger,
+    getScopedClients,
+  }): Promise<MemoryVersionRecord> => {
+    const { uiSettingsClient, scopedClusterClient } = await getScopedClients({ request });
+    await assertMemoryEnabled(uiSettingsClient);
+    const memory = getMemoryService(scopedClusterClient.asCurrentUser, logger);
+
+    return memory.getVersion({
+      entryId: params.path.id,
+      version: params.path.version,
+    });
+  },
+});
+
+const recentChangesRoute = createServerRoute({
+  endpoint: 'GET /internal/streams/memory/recent-changes',
+  options: {
+    access: 'internal',
+    summary: 'Get recent changes across all memory pages',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  params: z.object({
+    query: z
+      .object({
+        size: z.coerce.number().min(1).max(100).optional(),
+      })
+      .optional()
+      .default({}),
+  }),
+  handler: async ({
+    params,
+    request,
+    server,
+    logger,
+    getScopedClients,
+  }): Promise<{ changes: MemoryVersionRecord[] }> => {
+    const { uiSettingsClient, scopedClusterClient } = await getScopedClients({ request });
+    await assertMemoryEnabled(uiSettingsClient);
+    const memory = getMemoryService(scopedClusterClient.asCurrentUser, logger);
+
+    const changes = await memory.getRecentChanges({
+      size: params.query?.size,
+    });
+    return { changes };
+  },
+});
+
+const createWorkflowTriggerRoute = (
+  endpoint: `POST ${string}`,
+  workflowName: string,
+  summary: string
+) =>
+  createServerRoute({
+    endpoint,
+    options: { access: 'internal', summary },
+    security: { authz: { requiredPrivileges: [STREAMS_API_PRIVILEGES.manage] } },
+    params: z.object({ body: z.object({}).passthrough().optional() }),
+    handler: async ({
+      request,
+      server,
+      logger,
+      getScopedClients,
+    }): Promise<{ executionId: string }> => {
+      const { uiSettingsClient } = await getScopedClients({ request });
+      await assertMemoryEnabled(uiSettingsClient);
+
+      const wfMgmt = server.workflowsManagement;
+      if (!wfMgmt) {
+        throw new Error(
+          'Workflows management plugin is not available. Cannot trigger memory workflow.'
+        );
+      }
+
+      const { results } = await wfMgmt.management.getWorkflows(
+        { query: workflowName, size: 50, page: 1 },
+        DEFAULT_SPACE_ID
+      );
+      const listItem = results.find((w) => w.name === workflowName);
+      if (!listItem) {
+        throw notFound(`Workflow "${workflowName}" not found. Deploy it via streams-program.`);
+      }
+
+      const workflow = await wfMgmt.management.getWorkflow(listItem.id, DEFAULT_SPACE_ID);
+      if (!workflow) {
+        throw notFound(`Workflow "${workflowName}" (id=${listItem.id}) could not be loaded.`);
+      }
+
+      const executionId = await wfMgmt.management.runWorkflow(
+        workflow as Parameters<typeof wfMgmt.management.runWorkflow>[0],
+        DEFAULT_SPACE_ID,
+        {},
+        request,
+        'sigevents-memory-ui'
+      );
+
+      logger.info(`Triggered workflow "${workflowName}", executionId=${executionId}`);
+      return { executionId };
+    },
+  });
+
+const scrapeConversationsRoute = createWorkflowTriggerRoute(
+  'POST /internal/streams/memory/_scrape_conversations',
+  CONVERSATION_SCRAPER_WORKFLOW_NAME,
+  'Trigger conversation scraping for memory'
+);
+
+const consolidateMemoryRoute = createWorkflowTriggerRoute(
+  'POST /internal/streams/memory/_consolidate',
+  MEMORY_CONSOLIDATION_WORKFLOW_NAME,
+  'Trigger memory consolidation'
+);
+
+const synthesizeMemoryRoute = createWorkflowTriggerRoute(
+  'POST /internal/streams/memory/_synthesize',
+  MEMORY_SYNTHESIS_WORKFLOW_NAME,
+  'Trigger memory synthesis from significant events'
+);
 
 export const internalMemoryRoutes = {
   ...createEntryRoute,
@@ -383,6 +489,13 @@ export const internalMemoryRoutes = {
   ...getEntryByNameRoute,
   ...updateEntryRoute,
   ...deleteEntryRoute,
+  ...renameEntryRoute,
   ...searchRoute,
   ...getCategoryTreeRoute,
+  ...getHistoryRoute,
+  ...getVersionRoute,
+  ...recentChangesRoute,
+  ...scrapeConversationsRoute,
+  ...consolidateMemoryRoute,
+  ...synthesizeMemoryRoute,
 };

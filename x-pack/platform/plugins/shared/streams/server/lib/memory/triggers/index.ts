@@ -5,6 +5,10 @@
  * 2.0.
  */
 
-export { createMemorySynthesisSkill } from './memory_synthesis_skill';
-export { createMemoryConsolidationSkill } from './memory_consolidation_skill';
-export { createConversationScraperSkill } from './conversation_scraper_skill';
+export { MemoryTriggerRegistry } from './registry';
+export type { MemoryUpdateTrigger, MemoryUpdateContext, OutputFunction } from './types';
+
+export {
+  discoveryCompletedTrigger,
+  DISCOVERY_COMPLETED_TRIGGER_ID,
+} from './discovery_completed_trigger';

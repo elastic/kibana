@@ -181,3 +181,12 @@ export const useConsolidateMemory = () => {
     })
   );
 };
+
+export const useSynthesizeMemory = () => {
+  return useMemoryTaskAction(
+    `${MEMORY_BASE}/_synthesize`,
+    i18n.translate('xpack.streams.memory.synthesizeActionName', {
+      defaultMessage: 'Synthesize memory',
+    })
+  );
+};

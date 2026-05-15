@@ -60,10 +60,6 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.streams}.update_stream`,
   `${internalNamespaces.streams}.create_partition`,
   `${internalNamespaces.streams}.delete_stream`,
-  `${internalNamespaces.streams}.memory.get_page`,
-  `${internalNamespaces.streams}.memory.search_pages`,
-  `${internalNamespaces.streams}.memory.list_pages`,
-  `${internalNamespaces.streams}.memory.get_insights`,
   `${internalNamespaces.streams}.memory.write_page`,
 
   // Workflows

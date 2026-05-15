@@ -8,19 +8,26 @@
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { EbtTelemetryClient } from '../../lib/telemetry/ebt';
 import type { GetScopedClients } from '../../routes/types';
+import type { MemoryToolsOptions } from '../tools/memory';
 import { streamsManagementSkill } from './streams_management_skill';
 import { knowledgeIndicatorsManagementSkill } from './knowledge_indicators_management';
 import { createKiIdentificationManagementSkill } from './ki_identification_management';
-import { memorySynthesisSkill, memoryConsolidationSkill, conversationScraperSkill } from './memory';
+import {
+  createMemorySynthesisSkill,
+  createMemoryConsolidationSkill,
+  createConversationScraperSkill,
+} from './memory';
 
 export const registerAgentBuilderSkills = ({
   agentBuilder,
   getScopedClients,
   telemetry,
+  memoryToolsOptions,
 }: {
   agentBuilder: AgentBuilderPluginSetup;
   getScopedClients: GetScopedClients;
   telemetry: EbtTelemetryClient;
+  memoryToolsOptions: MemoryToolsOptions;
 }): void => {
   if (!agentBuilder) {
     return;
@@ -30,9 +37,9 @@ export const registerAgentBuilderSkills = ({
     streamsManagementSkill,
     knowledgeIndicatorsManagementSkill,
     createKiIdentificationManagementSkill({ getScopedClients, telemetry }),
-    memorySynthesisSkill,
-    memoryConsolidationSkill,
-    conversationScraperSkill,
+    createMemorySynthesisSkill(memoryToolsOptions),
+    createMemoryConsolidationSkill(memoryToolsOptions),
+    createConversationScraperSkill(memoryToolsOptions),
   ];
 
   for (const skill of streamsSkills) {

@@ -5,6 +5,10 @@
  * 2.0.
  */
 
-export { createMemorySynthesisSkill } from './memory_synthesis_skill';
-export { createMemoryConsolidationSkill } from './memory_consolidation_skill';
-export { createConversationScraperSkill } from './conversation_scraper_skill';
+import type { SecurityServiceStart } from '@kbn/core-security-server';
+import type { MemoryService } from '../../../lib/memory';
+
+export interface MemoryToolsOptions {
+  getMemoryService: () => MemoryService;
+  getSecurity: () => SecurityServiceStart;
+}

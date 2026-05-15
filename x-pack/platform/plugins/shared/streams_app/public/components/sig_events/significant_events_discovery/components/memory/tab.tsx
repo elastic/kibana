@@ -45,6 +45,7 @@ import {
   useRecentChanges,
   useScrapeConversations,
   useConsolidateMemory,
+  useSynthesizeMemory,
 } from './use_memory';
 import type { MemoryCategoryNode, MemoryVersionRecord } from './types';
 
@@ -60,6 +61,7 @@ export function MemoryTab() {
 
   const scrapeConversations = useScrapeConversations();
   const consolidateMemory = useConsolidateMemory();
+  const synthesizeMemory = useSynthesizeMemory();
 
   const isSearchActive = searchQuery.length >= 2;
 
@@ -119,6 +121,19 @@ export function MemoryTab() {
               >
                 {i18n.translate('xpack.streams.memory.consolidateButton', {
                   defaultMessage: 'Consolidate Memory',
+                })}
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                size="s"
+                iconType="sparkles"
+                isLoading={synthesizeMemory.isLoading}
+                onClick={() => synthesizeMemory.mutate()}
+                data-test-subj="streamsMemorySynthesizeButton"
+              >
+                {i18n.translate('xpack.streams.memory.synthesizeButton', {
+                  defaultMessage: 'Synthesize Memory',
                 })}
               </EuiButton>
             </EuiFlexItem>
