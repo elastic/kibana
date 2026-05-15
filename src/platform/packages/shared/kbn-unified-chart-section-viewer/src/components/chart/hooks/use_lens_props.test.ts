@@ -371,6 +371,13 @@ describe('useLensProps', () => {
       expect(mockReportChartSectionError).toHaveBeenCalledWith({
         error: builderError,
         source: 'useLensProps',
+        // Correlation labels (PR #265380 review feedback). Kept in sync
+        // with the executionContext meta the hook also attaches to Lens
+        // so APM can filter chart-section errors by upstream profile.
+        labels: {
+          profile_id: 'testProfileId',
+          chart_id: 'testChartId',
+        },
       });
 
       // After the setBuildError rerender, the hook should eventually yield

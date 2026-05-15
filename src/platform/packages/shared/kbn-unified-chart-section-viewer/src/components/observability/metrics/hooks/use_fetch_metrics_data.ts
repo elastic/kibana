@@ -31,11 +31,19 @@ export function useFetchMetricsData({
   services,
   isComponentVisible,
   selectedDimensionNames,
+  profileId,
 }: {
   fetchParams: ChartSectionProps['fetchParams'];
   services: ChartSectionProps['services'];
   isComponentVisible: boolean;
   selectedDimensionNames?: Dimension[];
+  /**
+   * Profile ID of the surrounding data source profile. Forwarded as an APM
+   * correlation label on captured errors so dashboards can filter
+   * `useFetchMetricsData` failures by profile, matching the
+   * `executionContext.meta.profile_id` we attach on the Lens side.
+   */
+  profileId?: string;
 }): MetricsInfo {
   const { trackMetricsInfo } = useTelemetry();
   const { trackRequest } = useChartSectionInspector();
@@ -166,8 +174,14 @@ export function useFetchMetricsData({
     reportChartSectionError({
       error,
       source: 'useFetchMetricsData',
+      // Correlation labels so the Errors view in APM can filter
+      // metrics-grid fetch failures by upstream profile. The reporter
+      // drops empty / undefined values so an unset profileId is safe.
+      labels: {
+        profile_id: profileId ?? '',
+      },
     });
-  }, [error]);
+  }, [error, profileId]);
 
   return {
     loading,

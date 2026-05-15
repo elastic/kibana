@@ -37,6 +37,19 @@ export const CHART_SECTION_ERROR_TYPE_LABEL = 'ChartSectionNonRenderError';
 interface ReportChartSectionErrorArgs {
   error: unknown;
   source: ChartSectionErrorSource;
+  /**
+   * Caller-supplied correlation labels (e.g. `profile_id`, `chart_id`) that
+   * help split error captures by upstream context in APM dashboards. Merged
+   * in last so call sites can override the built-in `error_type` /
+   * `chart_section_source` keys if absolutely necessary, but call sites
+   * should not normally need to do that. Values must be strings — APM RUM
+   * labels do not accept arbitrary types.
+   *
+   * Added in response to PR #265380 review feedback: without these, the
+   * Errors view in APM has no labels to filter by, making per-profile
+   * triage difficult.
+   */
+  labels?: Record<string, string>;
 }
 
 /**
@@ -52,7 +65,11 @@ interface ReportChartSectionErrorArgs {
  *
  * This util is intentionally side-effect-only and does not re-throw.
  */
-export const reportChartSectionError = ({ error, source }: ReportChartSectionErrorArgs): void => {
+export const reportChartSectionError = ({
+  error,
+  source,
+  labels: callerLabels,
+}: ReportChartSectionErrorArgs): void => {
   if (isSuppressedFetchError(error)) {
     return;
   }
@@ -70,6 +87,15 @@ export const reportChartSectionError = ({ error, source }: ReportChartSectionErr
     }
     if (error.status != null) {
       labels.esql_status = String(error.status);
+    }
+  }
+  if (callerLabels) {
+    // Drop undefined / empty values so we don't pollute APM with blanks
+    // (e.g. when a caller forwards an optional `profileId` that wasn't set).
+    for (const [key, value] of Object.entries(callerLabels)) {
+      if (value !== undefined && value !== '') {
+        labels[key] = value;
+      }
     }
   }
 

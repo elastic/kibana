@@ -137,6 +137,10 @@ const createDefaultParams = (overrides?: Record<string, unknown>) => ({
   services: createMockServices() as unknown as ChartSectionProps['services'],
   isComponentVisible: true,
   selectedDimensionNames: undefined as Dimension[] | undefined,
+  // Forwarded as an APM correlation label on captured errors so dashboards
+  // can filter `useFetchMetricsData` failures by profile (PR #265380
+  // review feedback).
+  profileId: 'test-profile-id',
 });
 
 describe('useFetchMetricsData', () => {
@@ -502,6 +506,9 @@ describe('useFetchMetricsData', () => {
       expect(mockReportChartSectionError).toHaveBeenCalledWith({
         error: fetchError,
         source: 'useFetchMetricsData',
+        labels: {
+          profile_id: 'test-profile-id',
+        },
       });
     });
 
@@ -524,6 +531,9 @@ describe('useFetchMetricsData', () => {
       expect(mockReportChartSectionError).toHaveBeenCalledWith({
         error: abortError,
         source: 'useFetchMetricsData',
+        labels: {
+          profile_id: 'test-profile-id',
+        },
       });
     });
 

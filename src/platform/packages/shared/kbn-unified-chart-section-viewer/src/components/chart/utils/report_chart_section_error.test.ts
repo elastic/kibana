@@ -200,4 +200,103 @@ describe('reportChartSectionError', () => {
       },
     });
   });
+
+  // Tests below cover the caller-supplied `labels` correlation tags
+  // (e.g. `profile_id`, `chart_id`) that PR #265380 review feedback asked
+  // for so APM dashboards can filter chart-section errors by upstream
+  // context.
+  describe('caller-supplied labels', () => {
+    it('merges caller labels into the APM payload', () => {
+      const plainError = new Error('boom');
+
+      reportChartSectionError({
+        error: plainError,
+        source: 'useLensProps',
+        labels: {
+          profile_id: 'metrics-experience',
+          chart_id: 'system.cpu.total.norm.pct',
+        },
+      });
+
+      expect(captureErrorMock).toHaveBeenCalledWith(plainError, {
+        labels: {
+          error_type: CHART_SECTION_ERROR_TYPE_LABEL,
+          chart_section_source: 'useLensProps',
+          profile_id: 'metrics-experience',
+          chart_id: 'system.cpu.total.norm.pct',
+        },
+      });
+    });
+
+    it('attaches caller labels to the failure span when one is active', () => {
+      const span = createMockSpan();
+      const transaction = createMockTransaction(span);
+      getCurrentTransactionMock.mockReturnValue(
+        transaction as unknown as ReturnType<typeof apm.getCurrentTransaction>
+      );
+
+      reportChartSectionError({
+        error: new Error('boom'),
+        source: 'useFetchMetricsData',
+        labels: {
+          profile_id: 'metrics-experience',
+        },
+      });
+
+      expect(span.addLabels).toHaveBeenCalledWith({
+        error_type: CHART_SECTION_ERROR_TYPE_LABEL,
+        chart_section_source: 'useFetchMetricsData',
+        profile_id: 'metrics-experience',
+      });
+    });
+
+    it('drops undefined and empty-string label values so APM is not polluted', () => {
+      const plainError = new Error('boom');
+
+      reportChartSectionError({
+        error: plainError,
+        source: 'useFetchMetricsData',
+        labels: {
+          profile_id: '',
+          chart_id: undefined as unknown as string,
+          valid_label: 'kept',
+        },
+      });
+
+      expect(captureErrorMock).toHaveBeenCalledWith(plainError, {
+        labels: {
+          error_type: CHART_SECTION_ERROR_TYPE_LABEL,
+          chart_section_source: 'useFetchMetricsData',
+          valid_label: 'kept',
+        },
+      });
+    });
+
+    it('preserves EsqlResponseError fields alongside caller labels', () => {
+      const esqlError = new EsqlResponseError(
+        {
+          type: 'verification_exception',
+          reason: 'unknown column x',
+          root_cause: [{ type: 'verification_exception', reason: 'unknown column x' }],
+        },
+        { status: 400 }
+      );
+
+      reportChartSectionError({
+        error: esqlError,
+        source: 'useLensProps',
+        labels: { profile_id: 'metrics-experience' },
+      });
+
+      expect(captureErrorMock).toHaveBeenCalledWith(esqlError, {
+        labels: {
+          error_type: CHART_SECTION_ERROR_TYPE_LABEL,
+          chart_section_source: 'useLensProps',
+          esql_error_type: 'verification_exception',
+          esql_status: '400',
+          profile_id: 'metrics-experience',
+        },
+      });
+    });
+  });
 });

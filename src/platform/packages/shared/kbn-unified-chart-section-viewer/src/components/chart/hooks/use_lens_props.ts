@@ -88,6 +88,13 @@ export const useLensProps = ({
   // errors use applies to builder errors too.
   const [buildError, setBuildError] = useState<Error | undefined>();
   const effectiveError = error ?? buildError;
+  // Capture the latest profile / chart identifiers so the rxjs subscription
+  // below can attach them as APM correlation labels without dragging them
+  // into its dependency array. Following the same `useLatest` pattern this
+  // hook already uses for `buildAttributesFn` so subscription identity stays
+  // stable across re-renders that only change identifiers.
+  const profileIdRef = useLatest(profileId);
+  const chartIdRef = useLatest(chartId);
   // Identity key (name + message) of the most recent build failure that
   // was reported / latched. A persistent failure (e.g. malformed query)
   // throws a new Error instance every retry, so without dedup the
@@ -210,6 +217,15 @@ export const useLensProps = ({
             reportChartSectionError({
               error: buildErr,
               source: 'useLensProps',
+              // Correlation labels so APM dashboards can filter chart-section
+              // errors by upstream profile / chart. Kept in sync with the
+              // executionContext meta we already pass to Lens above. Read
+              // from `useLatest` refs so the subscription identity stays
+              // stable across renders that only change identifiers.
+              labels: {
+                profile_id: profileIdRef.current,
+                chart_id: chartIdRef.current,
+              },
             });
             if (buildErr instanceof Error) {
               setBuildError(buildErr);
@@ -235,7 +251,18 @@ export const useLensProps = ({
     return () => {
       subscription.unsubscribe();
     };
-  }, [discoverFetch$, buildAttributesFn, updateLensPropsContext, chartRef, euiTheme.size.base]);
+    // Note: profileIdRef / chartIdRef are stable identities from useLatest,
+    // so including them in the dep array does not cause the subscription to
+    // rebuild — they just satisfy the exhaustive-deps lint.
+  }, [
+    discoverFetch$,
+    buildAttributesFn,
+    updateLensPropsContext,
+    chartRef,
+    euiTheme.size.base,
+    profileIdRef,
+    chartIdRef,
+  ]);
 
   return lensPropsContext;
 };
