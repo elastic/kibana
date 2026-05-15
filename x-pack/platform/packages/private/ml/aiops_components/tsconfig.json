@@ -28,6 +28,12 @@
     "@kbn/visualization-utils",
     "@kbn/aiops-log-rate-analysis",
     "@kbn/ml-agg-utils",
+    "@kbn/content-management-plugin",
+    "@kbn/data-views-plugin",
+    "@kbn/saved-objects-finder-plugin",
+    "@kbn/saved-search-plugin",
+    "@kbn/shared-ux-utility",
+    "@kbn/unified-search-plugin",
   ],
   "exclude": [
     "target/**/*",

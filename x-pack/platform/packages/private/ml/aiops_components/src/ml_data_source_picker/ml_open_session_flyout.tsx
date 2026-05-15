@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
+import type { ComponentType, FC } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -22,22 +22,38 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { SavedSearchType, SavedSearchTypeDisplayName } from '@kbn/saved-search-plugin/common';
-import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
-import { useMlKibana } from '../../contexts/kibana';
+import type { ApplicationStart, IUiSettingsClient } from '@kbn/core/public';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import type { SavedObjectFinderProps } from '@kbn/saved-objects-finder-plugin/public';
 
-interface MlOpenSessionFlyoutProps {
+export type { SavedObjectFinderProps };
+
+export interface MlOpenSessionFlyoutServices {
+  http: {
+    basePath: {
+      prepend(path: string): string;
+    };
+  };
+  application: Pick<ApplicationStart, 'capabilities'>;
+  contentManagement: ContentManagementPublicStart;
+  uiSettings: IUiSettingsClient;
+}
+
+export interface MlOpenSessionFlyoutProps {
+  services: MlOpenSessionFlyoutServices;
   onClose: () => void;
   onOpenSavedSearch: (id: string) => void;
+  SavedObjectFinderComponent: ComponentType<SavedObjectFinderProps>;
 }
 
 export const MlOpenSessionFlyout: FC<MlOpenSessionFlyoutProps> = ({
+  services,
   onClose,
   onOpenSavedSearch,
+  SavedObjectFinderComponent,
 }) => {
   const modalTitleId = useGeneratedHtmlId();
-  const {
-    services: { http, application, contentManagement, uiSettings },
-  } = useMlKibana();
+  const { http, application, contentManagement, uiSettings } = services;
 
   const hasSavedObjectPermission =
     application.capabilities.savedObjectsManagement?.edit ||
@@ -61,7 +77,7 @@ export const MlOpenSessionFlyout: FC<MlOpenSessionFlyoutProps> = ({
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <SavedObjectFinder
+        <SavedObjectFinderComponent
           id="mlOpenSession"
           services={{
             savedObjectsTagging: undefined,

@@ -11,16 +11,18 @@ import { EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataDriftSpec } from '@kbn/data-visualizer-plugin/public';
 
-import { useMlKibana } from '../../contexts/kibana';
+import { MlDataSourcePicker } from '@kbn/aiops-components';
+import { DataViewPicker } from '@kbn/unified-search-plugin/public';
+import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
+import { useMlKibana, useNavigateToPath } from '../../contexts/kibana';
 import { useDataSource } from '../../contexts/ml';
 import { MlPageHeader } from '../../components/page_header';
 import { PageTitle } from '../../components/page_title';
-import { MlDataSourcePicker } from '../../components/ml_data_source_picker/ml_data_source_picker';
 
 export const DataDriftPage: FC = () => {
-  const {
-    services: { dataVisualizer },
-  } = useMlKibana();
+  const { services } = useMlKibana();
+  const { dataVisualizer } = services;
+  const navigateToPath = useNavigateToPath();
 
   const [DataDriftView, setDataDriftView] = useState<DataDriftSpec | null>(null);
 
@@ -33,7 +35,15 @@ export const DataDriftPage: FC = () => {
 
   const { selectedDataView: dataView, selectedSavedSearch: savedSearch } = useDataSource();
 
-  const dataSourcePicker = <MlDataSourcePicker currentDataView={dataView ?? null} />;
+  const dataSourcePicker = (
+    <MlDataSourcePicker
+      currentDataView={dataView ?? null}
+      services={services}
+      navigateToPath={navigateToPath}
+      DataViewPickerComponent={DataViewPicker}
+      SavedObjectFinderComponent={SavedObjectFinder}
+    />
+  );
 
   return (
     <>

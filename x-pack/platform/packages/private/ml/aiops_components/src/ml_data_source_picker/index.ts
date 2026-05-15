@@ -5,21 +5,15 @@
  * 2.0.
  */
 
-export { DualBrush, DualBrushAnnotation } from './src/dual_brush';
-export { ProgressControls } from './src/progress_controls';
-export {
-  DocumentCountChart,
-  DocumentCountChartRedux,
-  type BrushSettings,
-} from './src/document_count_chart';
-export type { DocumentCountChartProps } from './src/document_count_chart';
 export {
   MlDataSourcePicker,
-  MlOpenSessionFlyout,
   type MlDataSourcePickerProps,
   type MlDataSourcePickerServices,
+  type DataViewPickerProps,
+} from './ml_data_source_picker';
+export {
+  MlOpenSessionFlyout,
   type MlOpenSessionFlyoutProps,
   type MlOpenSessionFlyoutServices,
-  type DataViewPickerProps,
   type SavedObjectFinderProps,
-} from './src/ml_data_source_picker';
+} from './ml_open_session_flyout';

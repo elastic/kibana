@@ -5,27 +5,55 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
+import type { ComponentType, FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/public';
-import { DataViewPicker } from '@kbn/unified-search-plugin/public';
+import type { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
 
-import { useMlKibana, useNavigateToPath } from '../../contexts/kibana';
+import type {
+  MlOpenSessionFlyoutProps,
+  MlOpenSessionFlyoutServices,
+} from './ml_open_session_flyout';
 import { MlOpenSessionFlyout } from './ml_open_session_flyout';
+
+export type { DataViewPickerProps };
+
+export interface MlDataSourcePickerServices extends MlOpenSessionFlyoutServices {
+  dataViews: {
+    getIdsWithTitle(): Promise<DataViewListItem[]>;
+  };
+  dataViewEditor?: {
+    userPermissions: {
+      editDataView(): boolean;
+    };
+  };
+  dataViewFieldEditor: {
+    openEditor(options: { ctx: { dataView: DataView }; onSave?: () => void }): Promise<() => void>;
+  };
+}
 
 export interface MlDataSourcePickerProps {
   currentDataView: DataView | null;
+  services: MlDataSourcePickerServices;
+  navigateToPath: (path: string) => void | Promise<void>;
+  DataViewPickerComponent: ComponentType<DataViewPickerProps>;
+  SavedObjectFinderComponent: MlOpenSessionFlyoutProps['SavedObjectFinderComponent'];
 }
 
-export const MlDataSourcePicker: FC<MlDataSourcePickerProps> = ({ currentDataView }) => {
+export const MlDataSourcePicker: FC<MlDataSourcePickerProps> = ({
+  currentDataView,
+  services,
+  navigateToPath,
+  DataViewPickerComponent,
+  SavedObjectFinderComponent,
+}) => {
   const [savedDataViews, setSavedDataViews] = useState<DataViewListItem[]>([]);
   const [isOpenSessionPanelVisible, setOpenSessionPanelVisible] = useState(false);
-  const navigateToPath = useNavigateToPath();
   const location = useLocation();
-  const { dataViews, dataViewEditor, dataViewFieldEditor } = useMlKibana().services;
+  const { dataViews, dataViewEditor, dataViewFieldEditor } = services;
   const closeFieldEditorRef = useRef<() => void | undefined>();
 
   useEffect(() => {
@@ -89,7 +117,7 @@ export const MlDataSourcePicker: FC<MlDataSourcePickerProps> = ({ currentDataVie
     <>
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
-          <DataViewPicker
+          <DataViewPickerComponent
             currentDataViewId={currentDataView?.id}
             savedDataViews={savedDataViews}
             trigger={{
@@ -125,8 +153,10 @@ export const MlDataSourcePicker: FC<MlDataSourcePickerProps> = ({ currentDataVie
       </EuiFlexGroup>
       {isOpenSessionPanelVisible ? (
         <MlOpenSessionFlyout
+          services={services}
           onClose={() => setOpenSessionPanelVisible(false)}
           onOpenSavedSearch={onOpenSavedSearch}
+          SavedObjectFinderComponent={SavedObjectFinderComponent}
         />
       ) : null}
     </>

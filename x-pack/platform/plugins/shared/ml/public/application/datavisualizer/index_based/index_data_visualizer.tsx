@@ -19,7 +19,10 @@ import type {
   GetAdditionalLinks,
 } from '@kbn/file-upload-common';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
-import { useMlApi, useMlKibana, useMlLocator } from '../../contexts/kibana';
+import { MlDataSourcePicker } from '@kbn/aiops-components';
+import { DataViewPicker } from '@kbn/unified-search-plugin/public';
+import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
+import { useMlApi, useMlKibana, useMlLocator, useNavigateToPath } from '../../contexts/kibana';
 import { HelpMenu } from '../../components/help_menu';
 import { isFullLicense } from '../../license';
 import { mlNodesAvailable, getMlNodeCount } from '../../ml_nodes_check/check_ml_nodes';
@@ -29,22 +32,21 @@ import { useEnabledFeatures } from '../../contexts/ml';
 import { useDataSource } from '../../contexts/ml/data_source_context';
 import { useMlManagementLocator } from '../../contexts/kibana/use_create_url';
 import { PageTitle } from '../../components/page_title';
-import { MlDataSourcePicker } from '../../components/ml_data_source_picker/ml_data_source_picker';
 
 export const IndexDataVisualizerPage: FC<{ esql: boolean }> = ({ esql = false }) => {
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
+  const { services } = useMlKibana();
   const {
-    services: {
-      docLinks,
-      dataVisualizer,
-      data: {
-        dataViews: { get: getDataView },
-      },
-      mlServices: {
-        mlApi: { recognizeIndex },
-      },
+    docLinks,
+    dataVisualizer,
+    data: {
+      dataViews: { get: getDataView },
     },
-  } = useMlKibana();
+    mlServices: {
+      mlApi: { recognizeIndex },
+    },
+  } = services;
+  const navigateToPath = useNavigateToPath();
   const mlApi = useMlApi();
   const { showNodeInfo } = useEnabledFeatures();
   const { selectedDataView: dataView } = useDataSource();
@@ -199,7 +201,13 @@ export const IndexDataVisualizerPage: FC<{ esql: boolean }> = ({ esql = false })
   );
 
   const dataSourcePicker = !esql ? (
-    <MlDataSourcePicker currentDataView={dataView ?? null} />
+    <MlDataSourcePicker
+      currentDataView={dataView ?? null}
+      services={services}
+      navigateToPath={navigateToPath}
+      DataViewPickerComponent={DataViewPicker}
+      SavedObjectFinderComponent={SavedObjectFinder}
+    />
   ) : undefined;
 
   return IndexDataVisualizer ? (

@@ -23,6 +23,7 @@
     "@kbn/actions-plugin",
     "@kbn/aiops-change-point-detection",
     "@kbn/aiops-common",
+    "@kbn/aiops-components",
     "@kbn/aiops-plugin",
     "@kbn/alerting-plugin",
     "@kbn/alerts-as-data-utils",
