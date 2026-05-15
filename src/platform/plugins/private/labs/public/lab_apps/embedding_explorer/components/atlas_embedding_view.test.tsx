@@ -12,10 +12,6 @@ import { fireEvent, render } from '@testing-library/react';
 import { AtlasEmbeddingView } from './atlas_embedding_view';
 
 jest.mock('../embedding_atlas_runtime', () => {
-  const ReactModule = jest.requireActual<typeof import('react')>('react');
-  const { act } = jest.requireActual<typeof import('react-dom/test-utils')>('react-dom/test-utils');
-  const { createRoot } = jest.requireActual<typeof import('react-dom/client')>('react-dom/client');
-
   interface MockEmbeddingViewProps {
     data: { x: Float32Array; y: Float32Array };
     onSelection: (points: Array<{ identifier?: string; x: number; y: number }>) => void;
@@ -25,11 +21,11 @@ jest.mock('../embedding_atlas_runtime', () => {
 
   class MockEmbeddingView {
     private props: MockEmbeddingViewProps;
-    private readonly root;
+    private readonly target: HTMLElement;
 
     constructor(target: HTMLElement, props: MockEmbeddingViewProps) {
+      this.target = target;
       this.props = props;
-      this.root = createRoot(target);
       this.render();
     }
 
@@ -39,55 +35,44 @@ jest.mock('../embedding_atlas_runtime', () => {
     }
 
     destroy() {
-      act(() => {
-        this.root.unmount();
-      });
+      this.target.replaceChildren();
     }
 
     render() {
       const { data, onSelection, onTooltip, selection } = this.props;
+      const container = globalThis.document.createElement('div');
+      container.dataset.testid = 'mockEmbeddingAtlasView';
 
-      act(() => {
-        this.root.render(
-          ReactModule.createElement(
-            'div',
-            { 'data-testid': 'mockEmbeddingAtlasView' },
-            ReactModule.createElement(
-              'div',
-              { 'data-testid': 'mockSelectionCount' },
-              selection?.length ?? 0
-            ),
-            ReactModule.createElement(
-              'button',
-              {
-                onClick: () =>
-                  onSelection([
-                    {
-                      identifier: 'sample-a',
-                      x: data.x[0],
-                      y: data.y[0],
-                    },
-                  ]),
-                type: 'button',
-              },
-              'select first point'
-            ),
-            ReactModule.createElement(
-              'button',
-              {
-                onClick: () =>
-                  onTooltip({
-                    identifier: 'sample-b',
-                    x: data.x[1],
-                    y: data.y[1],
-                  }),
-                type: 'button',
-              },
-              'hover second point'
-            )
-          )
-        );
-      });
+      const selectionCount = globalThis.document.createElement('div');
+      selectionCount.dataset.testid = 'mockSelectionCount';
+      selectionCount.textContent = String(selection?.length ?? 0);
+
+      const selectButton = globalThis.document.createElement('button');
+      selectButton.type = 'button';
+      selectButton.textContent = 'select first point';
+      selectButton.addEventListener('click', () =>
+        onSelection([
+          {
+            identifier: 'sample-a',
+            x: data.x[0],
+            y: data.y[0],
+          },
+        ])
+      );
+
+      const hoverButton = globalThis.document.createElement('button');
+      hoverButton.type = 'button';
+      hoverButton.textContent = 'hover second point';
+      hoverButton.addEventListener('click', () =>
+        onTooltip({
+          identifier: 'sample-b',
+          x: data.x[1],
+          y: data.y[1],
+        })
+      );
+
+      container.append(selectionCount, selectButton, hoverButton);
+      this.target.replaceChildren(container);
     }
   }
 

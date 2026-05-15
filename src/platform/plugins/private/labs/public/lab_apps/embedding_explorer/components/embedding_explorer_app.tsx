@@ -12,6 +12,7 @@ import {
   EuiButton,
   EuiCallOut,
   EuiEmptyPrompt,
+  EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -42,6 +43,7 @@ import {
   type EmbeddingExplorerSampleIndicesResponse,
 } from '../../../../common';
 import { getSuggestedField, getSuggestedProjectionField } from '../field_suggestions';
+import { findPointSearchMatches } from '../point_search';
 
 interface EmbeddingExplorerAppProps {
   application: ApplicationStart;
@@ -222,6 +224,7 @@ export const EmbeddingExplorerApp = ({ application, http }: EmbeddingExplorerApp
   });
   const [selectedPointId, setSelectedPointId] = useState<string | null>(null);
   const [hoveredPointId, setHoveredPointId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
   const [isSampleIndicesStatusLoading, setIsSampleIndicesStatusLoading] = useState(true);
   const [isSampleIndicesLoading, setIsSampleIndicesLoading] = useState(false);
   const [isIndicesLoading, setIsIndicesLoading] = useState(false);
@@ -326,6 +329,7 @@ export const EmbeddingExplorerApp = ({ application, http }: EmbeddingExplorerApp
     setLoadedDataset(null);
     setSelectedPointId(null);
     setHoveredPointId(null);
+    setSearchQuery('');
 
     void http
       .post<EmbeddingExplorerIndexFieldsResponse>(EMBEDDING_EXPLORER_INDEX_FIELDS_API_PATH, {
@@ -449,6 +453,20 @@ export const EmbeddingExplorerApp = ({ application, http }: EmbeddingExplorerApp
   const activeDataset = loadedDataset;
   const points = useMemo(() => activeDataset?.points ?? [], [activeDataset]);
   const pointLookup = useMemo(() => new Map(points.map((point) => [point.id, point])), [points]);
+  const trimmedSearchQuery = searchQuery.trim();
+  const isSearchActive = Boolean(trimmedSearchQuery);
+  const searchMatches = useMemo(
+    () => findPointSearchMatches(points, trimmedSearchQuery),
+    [points, trimmedSearchQuery]
+  );
+  const searchMatchedPointIds = useMemo(
+    () => searchMatches.map(({ pointId }) => pointId),
+    [searchMatches]
+  );
+  const searchMatchedPointIdSet = useMemo(
+    () => new Set(searchMatchedPointIds),
+    [searchMatchedPointIds]
+  );
 
   useEffect(() => {
     if (!selectedPointId || pointLookup.has(selectedPointId)) {
@@ -457,6 +475,20 @@ export const EmbeddingExplorerApp = ({ application, http }: EmbeddingExplorerApp
 
     setSelectedPointId(null);
   }, [pointLookup, selectedPointId]);
+
+  useEffect(() => {
+    const firstMatchedPointId = searchMatchedPointIds[0];
+
+    if (!isSearchActive || !firstMatchedPointId) {
+      return;
+    }
+
+    if (selectedPointId && searchMatchedPointIdSet.has(selectedPointId)) {
+      return;
+    }
+
+    setSelectedPointId(firstMatchedPointId);
+  }, [isSearchActive, searchMatchedPointIdSet, searchMatchedPointIds, selectedPointId]);
 
   const selectedPoint = selectedPointId ? pointLookup.get(selectedPointId) ?? null : null;
   const hoveredPoint = hoveredPointId ? pointLookup.get(hoveredPointId) ?? null : null;
@@ -468,8 +500,17 @@ export const EmbeddingExplorerApp = ({ application, http }: EmbeddingExplorerApp
   );
 
   const highlightedPointIds = useMemo(
-    () => (selectedPointId ? [selectedPointId, ...nearestNeighbors.map((point) => point.id)] : []),
-    [nearestNeighbors, selectedPointId]
+    () =>
+      Array.from(
+        new Set(
+          isSearchActive
+            ? [...searchMatchedPointIds, ...(selectedPointId ? [selectedPointId] : [])]
+            : selectedPointId
+            ? [selectedPointId, ...nearestNeighbors.map((point) => point.id)]
+            : []
+        )
+      ),
+    [isSearchActive, nearestNeighbors, searchMatchedPointIds, selectedPointId]
   );
 
   const hasProjectionPair = Boolean(fieldState.xField && fieldState.yField);
@@ -767,6 +808,47 @@ export const EmbeddingExplorerApp = ({ application, http }: EmbeddingExplorerApp
                 </EuiFlexItem>
               </EuiFlexGroup>
               <EuiSpacer size="s" />
+              {points.length > 0 ? (
+                <>
+                  <EuiFormRow
+                    helpText={
+                      isSearchActive
+                        ? searchMatches.length > 0
+                          ? i18n.translate('labs.embeddingExplorer.pointSearchMatchesDescription', {
+                              defaultMessage:
+                                '{count, plural, one {# matching point highlighted} other {# matching points highlighted}}',
+                              values: { count: searchMatches.length },
+                            })
+                          : i18n.translate(
+                              'labs.embeddingExplorer.pointSearchNoMatchesDescription',
+                              {
+                                defaultMessage: 'No matching points found.',
+                              }
+                            )
+                        : i18n.translate('labs.embeddingExplorer.pointSearchHelpText', {
+                            defaultMessage:
+                              'Fuzzy search labels, summaries, and metadata to highlight matching points.',
+                          })
+                    }
+                    label={i18n.translate('labs.embeddingExplorer.pointSearchLabel', {
+                      defaultMessage: 'Search points',
+                    })}
+                  >
+                    <EuiFieldSearch
+                      compressed
+                      data-test-subj="labsEmbeddingExplorerPointSearchInput"
+                      fullWidth
+                      isClearable
+                      onChange={(event) => setSearchQuery(event.target.value)}
+                      placeholder={i18n.translate('labs.embeddingExplorer.pointSearchPlaceholder', {
+                        defaultMessage: 'Search labels, summaries, or metadata',
+                      })}
+                      value={searchQuery}
+                    />
+                  </EuiFormRow>
+                  <EuiSpacer size="s" />
+                </>
+              ) : null}
               {isCustomDatasetLoading || isProjectionComputing ? (
                 <div
                   style={{
