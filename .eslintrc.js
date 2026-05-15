@@ -403,7 +403,7 @@ const RESTRICTED_IMPORTS = [
   {
     name: 'js-yaml',
     message:
-      'Do not introduce new js-yaml usage. Use the `yaml` package instead (e.g. `import yaml from \'yaml\'`). Existing consumers are being migrated incrementally; the allowlist in JS_YAML_LEGACY_CONSUMERS will shrink over time.',
+      "Do not introduce new js-yaml usage. Use the `yaml` package instead (e.g. `import yaml from 'yaml'`). Existing consumers are being migrated incrementally; the allowlist in JS_YAML_LEGACY_CONSUMERS will shrink over time.",
   },
 ];
 
