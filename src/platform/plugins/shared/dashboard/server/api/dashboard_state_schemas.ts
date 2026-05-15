@@ -86,8 +86,8 @@ export function getPanelSchema(isDashboardAppRequest: boolean) {
   const embeddableSchemas = embeddableService ? embeddableService.getAllEmbeddableSchemas() : {};
   const panelSchemas = Object.entries(embeddableSchemas)
     // sort to ensure consistent order in OAS documenation
-    .sort(([aType], [bType]) => aType.localeCompare(bType))
-    .map(([type, configSchema]) =>
+    .sort(([aType, { title: aTitle }], [bType, { title: bTitle }]) => aTitle.localeCompare(bTitle))
+    .map(([type, { schema: configSchema, title }]) =>
       schema.object(
         {
           ...basePanelProps,
@@ -97,7 +97,7 @@ export function getPanelSchema(isDashboardAppRequest: boolean) {
         {
           meta: {
             id: `kbn-dashboard-panel-type-${type}`,
-            title: type,
+            title,
           },
         }
       )
@@ -277,7 +277,10 @@ export function getDashboardStateSchema(isDashboardAppRequest: boolean) {
         })
       ),
       time_range: schema.maybe(timeRangeSchema),
-      title: schema.string({ meta: { description: 'A human-readable title for the dashboard.' } }),
+      title: schema.string({
+        minLength: 1,
+        meta: { description: 'A human-readable title for the dashboard.' },
+      }),
       access_control: accessControlSchema,
     },
     {

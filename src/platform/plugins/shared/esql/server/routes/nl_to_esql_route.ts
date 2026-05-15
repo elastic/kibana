@@ -6,8 +6,6 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { lastValueFrom } from 'rxjs';
-import { naturalLanguageToEsql } from '@kbn/inference-plugin/server';
 import { schema } from '@kbn/config-schema';
 import type {
   CoreSetup,
@@ -15,47 +13,51 @@ import type {
   IUiSettingsClient,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { NL_TO_ESQL_ROUTE } from '@kbn/esql-types';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import { generateEsql, generateEsqlCompletion } from '@kbn/agent-builder-genai-utils';
+import type { ScopedModel } from '@kbn/agent-builder-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
-import { EsqlService } from '../services/esql_service';
+
+const MAX_NL_INSTRUCTION_LENGTH = 2000;
+
+/**
+ * Wraps the editor's current buffer as additional context for {@link generateEsql} when
+ * the request is not a completion: the user has typed something but is asking for a fresh query.
+ */
+const buildNlToEsqlAdditionalContext = (currentQuery: string): string => {
+  if (!currentQuery) return '';
+  return [
+    'The user is in the ES|QL editor. Below is their current query.',
+    'If the request is about changing, extending, or fixing that query, treat it as the starting point.',
+    'If the request is for a new or unrelated query, you may produce a full replacement.',
+    '',
+    '<current_query>',
+    currentQuery,
+    '</current_query>',
+  ].join('\n');
+};
 
 import type { EsqlServerPluginStart } from '../types';
 
 const NO_DEFAULT_CONNECTOR = 'NO_DEFAULT_CONNECTOR';
 
-const MAX_FIELDS = 1000;
+const createScopedModel = async ({
+  inference,
+  request,
+  connectorId,
+}: {
+  inference: InferenceServerStart;
+  request: KibanaRequest;
+  connectorId: string;
+}): Promise<ScopedModel> => {
+  const chatModel = await inference.getChatModel({ request, connectorId, chatModelOptions: {} });
+  const inferenceClient = inference.getClient({ request, bindTo: { connectorId } });
+  const connector = await inference.getConnectorById(connectorId, request);
 
-const getSourceNames = async (client: ElasticsearchClient): Promise<string[]> => {
-  const service = new EsqlService({ client });
-  const sources = await service.getAllIndices('local');
-  return sources.filter((s) => !s.hidden).map((s) => s.name);
-};
-
-const getFieldsForSource = async (client: ElasticsearchClient, source: string): Promise<string> => {
-  const response = await client.fieldCaps({
-    index: source,
-    fields: '*',
-    include_unmapped: false,
-  });
-
-  const fields = Object.entries(response.fields)
-    .filter(([fieldName]) => !fieldName.startsWith('_'))
-    .slice(0, MAX_FIELDS)
-    .map(([fieldName, types]) => {
-      const type = Object.keys(types)[0];
-      return `${fieldName}: ${type}`;
-    });
-
-  const totalCount = Object.keys(response.fields).length;
-  let result = fields.join('\n');
-  if (totalCount > MAX_FIELDS) {
-    result += `\n(truncated, showing ${MAX_FIELDS} of ${totalCount} fields)`;
-  }
-
-  return result;
+  return { connector, chatModel, inferenceClient };
 };
 
 const resolveConnectorId = async ({
@@ -86,33 +88,6 @@ const resolveConnectorId = async ({
   return undefined;
 };
 
-const buildSystemPrompt = (sourceNames: string[], fieldsContext?: string): string => {
-  let prompt = `Produce the ES|QL query fenced by the esql tag. Don't explain it.
-
-<AvailableSources>
-The user's cluster has the following data sources:
-${sourceNames.join(', ')}
-Use these exact source names in the FROM clause. Do not invent source names.
-</AvailableSources>`;
-
-  if (fieldsContext) {
-    prompt += `
-
-<FieldsContext>
-The relevant source has the following fields (name: type):
-${fieldsContext}
-Use these exact field names in the query.
-</FieldsContext>`;
-  }
-
-  return prompt;
-};
-
-const extractEsqlQuery = (content: string): string => {
-  const match = content.match(/```esql\s*([\s\S]*?)```/);
-  return match ? match[1].trim() : content.trim();
-};
-
 export const registerNLtoESQLRoute = (
   router: IRouter,
   getStartServices: CoreSetup<EsqlServerPluginStart>['getStartServices'],
@@ -123,8 +98,9 @@ export const registerNLtoESQLRoute = (
       path: NL_TO_ESQL_ROUTE,
       validate: {
         body: schema.object({
-          query: schema.string(),
-          sources: schema.maybe(schema.arrayOf(schema.string(), { maxSize: 50 })),
+          nlInstruction: schema.string({ maxLength: MAX_NL_INSTRUCTION_LENGTH }),
+          currentQuery: schema.maybe(schema.string({ maxLength: 50000 })),
+          isCompletion: schema.maybe(schema.boolean()),
         }),
       },
       security: {
@@ -137,7 +113,7 @@ export const registerNLtoESQLRoute = (
     async (requestHandlerContext, request, response) => {
       const logger = context.logger.get();
       try {
-        const { query, sources } = request.body;
+        const { nlInstruction, currentQuery, isCompletion } = request.body;
         const core = await requestHandlerContext.core;
         const client = core.elasticsearch.client.asCurrentUser;
         const [, { inference }] = await getStartServices();
@@ -156,30 +132,38 @@ export const registerNLtoESQLRoute = (
           });
         }
 
-        const sourceNames = sources?.length ? sources : await getSourceNames(client);
+        const model = await createScopedModel({ inference, request, connectorId });
+        const trimmedCurrent = currentQuery?.trim();
+        const isCompletionRequest = Boolean(isCompletion && trimmedCurrent);
+        const signal = getRequestAbortedSignal(request.events.aborted$);
 
-        let fieldsContext: string | undefined;
-        if (sources?.length) {
-          try {
-            fieldsContext = await getFieldsForSource(client, sources.join(','));
-          } catch {
-            // proceed without field context, less precision but still useful
-          }
+        if (isCompletionRequest) {
+          const { content, replacesNext } = await generateEsqlCompletion({
+            model,
+            esClient: client,
+            logger,
+            nlInstruction,
+            currentQuery: trimmedCurrent ?? '',
+            signal,
+          });
+          return response.ok({
+            body: { content, replacesNext },
+          });
         }
 
-        const result = await lastValueFrom(
-          naturalLanguageToEsql({
-            client: inference.getClient({ request }),
-            connectorId,
-            input: query,
-            functionCalling: 'auto',
-            logger,
-            system: buildSystemPrompt(sourceNames, fieldsContext),
-          })
-        );
+        const additionalContext = buildNlToEsqlAdditionalContext(trimmedCurrent ?? '');
+
+        const result = await generateEsql({
+          model,
+          esClient: client,
+          logger,
+          nlQuery: nlInstruction,
+          additionalContext,
+          executeQuery: false,
+        });
 
         return response.ok({
-          body: { content: extractEsqlQuery(result.content ?? '') },
+          body: { content: result.query },
         });
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);

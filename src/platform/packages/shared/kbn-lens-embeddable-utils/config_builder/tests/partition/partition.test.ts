@@ -8,17 +8,13 @@
  */
 
 import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
-import type { LensApiState } from '../../schema';
-import type { PieState } from '../../schema/charts/pie';
-import type { TreemapState } from '../../schema/charts/treemap';
-import type { WaffleState } from '../../schema/charts/waffle';
-import { mosaicStateSchema } from '../../schema/charts/mosaic';
-import { partitionStateSchema } from '../../schema/charts/partition';
-import { pieStateSchema } from '../../schema/charts/pie';
-import { treemapStateSchema } from '../../schema/charts/treemap';
-import { waffleStateSchema } from '../../schema/charts/waffle';
+import type { LensPartitionVisualizationState } from '@kbn/lens-common';
+
+import type { LensApiConfigChartType } from '../../schema';
+import type { PieConfig } from '../../schema/charts/pie';
+import type { TreemapConfig } from '../../schema/charts/treemap';
+import type { WaffleConfig } from '../../schema/charts/waffle';
 import { AUTO_COLOR, DEFAULT_CATEGORICAL_COLOR_MAPPING } from '../../schema/color';
-import { validateAPIConverter, validateConverter } from '../validate';
 import { esqlCharts } from './lens_api_config.mock';
 import { LensConfigBuilder } from '../../config_builder';
 import {
@@ -35,71 +31,76 @@ import {
   mosaicLegacyESQLState,
   waffleLegacyESQLState,
 } from './lens_state_config.mock';
-import type { LensPartitionVisualizationState } from '@kbn/lens-common';
+import { validator } from '../utils/validator';
+import type { LensAttributes } from '../../types';
 
 describe('Partition', () => {
-  describe('validateConverter', () => {
+  describe('state transform validation', () => {
     const datasets = [
-      { name: 'pie basic', config: pieLegacyBasicState, schema: pieStateSchema },
-      { name: 'treemap basic', config: treemapLegacyBasicState, schema: treemapStateSchema },
-      { name: 'mosaic basic', config: mosaicLegacyBasicState, schema: mosaicStateSchema },
-      { name: 'waffle basic', config: waffleLegacyBasicState, schema: waffleStateSchema },
+      { name: 'pie basic', type: 'pie', config: pieLegacyBasicState },
+      { name: 'treemap basic', type: 'treemap', config: treemapLegacyBasicState },
+      { name: 'mosaic basic', type: 'mosaic', config: mosaicLegacyBasicState },
+      { name: 'waffle basic', type: 'waffle', config: waffleLegacyBasicState },
       {
         name: 'pie advanced with collapsed groups',
+        type: 'pie',
         config: pieLegacyAdvancedStateWithMultipleMetricsAndCollapsedGroups,
-        schema: pieStateSchema,
       },
       {
         name: 'treemap advanced with collapsed groups',
+        type: 'treemap',
         config: treemapLegacyAdvancedStateWithMultipleMetricsAndCollapsedGroups,
-        schema: treemapStateSchema,
       },
       {
         name: 'mosaic advanced with collapsed groups',
+        type: 'mosaic',
         config: mosaicLegacyAdvancedStateWithMultipleMetricsAndCollapsedGroups,
-        schema: mosaicStateSchema,
       },
       {
         name: 'waffle advanced with collapsed groups',
+        type: 'waffle',
         config: waffleLegacyAdvancedStateWithCollapsedGroups,
-        schema: waffleStateSchema,
       },
       {
         name: 'pie esql basic',
+        type: 'pie',
         config: pieLegacyESQLState,
-        schema: pieStateSchema,
       },
       {
         name: 'treemap esql basic',
+        type: 'treemap',
         config: treemapLegacyESQLState,
-        schema: treemapStateSchema,
       },
       {
         name: 'mosaic esql basic',
+        type: 'mosaic',
         config: mosaicLegacyESQLState,
-        schema: mosaicStateSchema,
       },
       {
         name: 'waffle esql basic',
+        type: 'waffle',
         config: waffleLegacyESQLState,
-        schema: waffleStateSchema,
       },
-    ];
-    for (const { name, config, schema } of datasets) {
-      it(`should convert a legacy ${name} chart`, () => {
-        validateConverter(config, schema);
-        validateConverter(config, partitionStateSchema);
+    ] satisfies {
+      name: string;
+      type: Extract<LensApiConfigChartType, 'pie' | 'treemap' | 'mosaic' | 'waffle'>;
+      config: LensAttributes;
+    }[];
+
+    for (const { name, type, config } of datasets) {
+      it(`should convert from state ${name} chart`, () => {
+        validator[type].fromState(config);
       });
     }
   });
 
-  describe('validateAPIConverter', () => {
+  describe('api transform validation', () => {
     for (const config of esqlCharts) {
       it(`should convert an API ${config.title} chart`, () => {
-        validateAPIConverter(config as LensApiState, partitionStateSchema, [
-          'sampling',
-          'ignore_global_filters',
-        ]);
+        validator[config.type].fromApi(
+          config as any, // TODO fix test types here'
+          ['ignore_global_filters', 'sampling']
+        );
       });
     }
   });
@@ -110,7 +111,7 @@ describe('Partition', () => {
       (pieLegacyESQLState.state
         .visualization as LensPartitionVisualizationState)!.layers[0].collapseFns!.partition_value_accessor_group_by_0 =
         '' as unknown as 'min';
-      const apiConfig = builder.toAPIFormat(pieLegacyESQLState) as PieState;
+      const apiConfig = builder.toAPIFormat(pieLegacyESQLState) as PieConfig;
 
       // The group should have color mapping (since empty string collapseFns means no collapse)
       expect(apiConfig.group_by?.[0].color).toHaveProperty('mode', 'categorical');
@@ -135,11 +136,11 @@ describe('Partition', () => {
         metrics: [{ operation: 'count', empty_as_null: false }],
         sampling: 1,
         ignore_global_filters: false,
-      } satisfies PieState;
+      } satisfies PieConfig;
 
       const builder = new LensConfigBuilder();
       const lensState = builder.fromAPIFormat(config);
-      const apiOutput = builder.toAPIFormat(lensState) as PieState;
+      const apiOutput = builder.toAPIFormat(lensState) as PieConfig;
 
       expect(apiOutput.metrics[0].color).toEqual(AUTO_COLOR);
     });
@@ -159,11 +160,11 @@ describe('Partition', () => {
         ],
         sampling: 1,
         ignore_global_filters: false,
-      } satisfies PieState;
+      } satisfies PieConfig;
 
       const builder = new LensConfigBuilder();
       const lensState = builder.fromAPIFormat(config);
-      const apiOutput = builder.toAPIFormat(lensState) as PieState;
+      const apiOutput = builder.toAPIFormat(lensState) as PieConfig;
 
       expect(apiOutput.group_by?.[0].color).toEqual(DEFAULT_CATEGORICAL_COLOR_MAPPING);
     });
@@ -176,11 +177,11 @@ describe('Partition', () => {
         metrics: [{ operation: 'count', empty_as_null: false }],
         sampling: 1,
         ignore_global_filters: false,
-      } satisfies TreemapState;
+      } satisfies TreemapConfig;
 
       const builder = new LensConfigBuilder();
       const lensState = builder.fromAPIFormat(config);
-      const apiOutput = builder.toAPIFormat(lensState) as TreemapState;
+      const apiOutput = builder.toAPIFormat(lensState) as TreemapConfig;
 
       expect(apiOutput.metrics[0].color).toEqual(AUTO_COLOR);
     });
@@ -193,11 +194,11 @@ describe('Partition', () => {
         metrics: [{ operation: 'count', empty_as_null: false }],
         sampling: 1,
         ignore_global_filters: false,
-      } satisfies WaffleState;
+      } satisfies WaffleConfig;
 
       const builder = new LensConfigBuilder();
       const lensState = builder.fromAPIFormat(config);
-      const apiOutput = builder.toAPIFormat(lensState) as WaffleState;
+      const apiOutput = builder.toAPIFormat(lensState) as WaffleConfig;
 
       expect(apiOutput.metrics[0].color).toEqual(AUTO_COLOR);
     });

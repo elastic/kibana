@@ -14,8 +14,27 @@ import { esArchiversPath, esResourcesEndpoint } from '../../common/fixtures/cons
 apiTest.describe('Profiling is setup and data is loaded', { tag: tags.stateful.classic }, () => {
   let viewerApiCreditials: RoleApiCredentials;
   let adminApiCreditials: RoleApiCredentials;
-  apiTest.beforeAll(async ({ requestAuth, profilingSetup }) => {
+
+  apiTest.beforeAll(async ({ requestAuth, profilingHelper, profilingSetup }) => {
+    await profilingHelper.installPolicies();
+    await profilingSetup.setupResources();
     await profilingSetup.loadData(esArchiversPath);
+
+    await expect
+      .poll(
+        async () => {
+          const status = await profilingSetup.checkStatus();
+          return status.has_setup === true && status.has_data === true;
+        },
+        {
+          timeout: 30_000,
+          intervals: [500, 1000, 2000, 4000],
+          message:
+            'Profiling status did not converge to has_setup: true, has_data: true after setupResources + loadData',
+        }
+      )
+      .toBe(true);
+
     viewerApiCreditials = await requestAuth.getApiKey('viewer');
     adminApiCreditials = await requestAuth.getApiKey('admin');
   });

@@ -17,6 +17,7 @@ import type {
   HasType,
   HasUniqueId,
   PublishesDataLoading,
+  PublishesUnsavedChanges,
   PublishingSubject,
 } from '@kbn/presentation-publishing';
 import type { SettersOf, SubjectsOf } from '@kbn/presentation-publishing/state_manager/types';
@@ -28,6 +29,7 @@ export type ESQLControlApi<State> = DefaultEmbeddableApi<
   State extends { control_type: 'STATIC_VALUES' } ? StaticESQLControl : QueryESQLControl
 > &
   PublishesESQLVariable &
+  PublishesUnsavedChanges &
   HasEditCapabilities &
   PublishesDataLoading &
   ReturnType<typeof initializeLabelManager>['api'];

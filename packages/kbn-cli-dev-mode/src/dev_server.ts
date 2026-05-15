@@ -9,6 +9,7 @@
 
 import * as Rx from 'rxjs';
 import { map, tap, take, share, mergeMap, switchMap, scan, takeUntil, ignoreElements } from 'rxjs';
+import Chalk from 'chalk';
 import { observeLines } from '@kbn/stdio-dev-helpers';
 
 import { usingServerProcess } from './using_server_process';
@@ -26,6 +27,7 @@ export interface Options {
   sigterm$?: Rx.Observable<void>;
   mapLogLine?: DevServer['mapLogLine'];
   forceColor?: boolean;
+  proxyUrl?: string;
 }
 
 export class DevServer {
@@ -43,6 +45,7 @@ export class DevServer {
   private readonly gracefulTimeout: number;
   private readonly mapLogLine?: (line: string) => string | null;
   private readonly forceColor: boolean;
+  private readonly proxyUrl?: string;
 
   constructor(options: Options) {
     this.log = options.log;
@@ -56,6 +59,7 @@ export class DevServer {
     this.sigterm$ = options.sigterm$ ?? Rx.fromEvent<void>(process, 'SIGTERM');
     this.mapLogLine = options.mapLogLine;
     this.forceColor = options.forceColor ?? !!process.stdout.isTTY;
+    this.proxyUrl = options.proxyUrl;
   }
 
   isReady$() {
@@ -151,7 +155,16 @@ export class DevServer {
           tap((observedLine) => {
             const line = this.mapLogLine ? this.mapLogLine(observedLine) : observedLine;
             if (line !== null) {
-              this.log.write(line);
+              if (line.includes('Kibana is now available')) {
+                this.log.write(Chalk.green.bold(line));
+                if (this.proxyUrl) {
+                  this.log.write(
+                    '  ' + Chalk.green.bold('→') + ' ' + Chalk.cyan.bold.underline(this.proxyUrl)
+                  );
+                }
+              } else {
+                this.log.write(line);
+              }
             }
           })
         );

@@ -1,0 +1,96 @@
+{
+  "id": "@kbn/apm-embeddable-common",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/apm-embeddable-common",
+        "id": "def-common.APM_ALERTING_FAILED_TRANSACTIONS_CHART_EMBEDDABLE",
+        "type": "string",
+        "tags": [],
+        "label": "APM_ALERTING_FAILED_TRANSACTIONS_CHART_EMBEDDABLE",
+        "description": [],
+        "signature": [
+          "\"apm_alerting_failed_transactions_chart\""
+        ],
+        "path": "x-pack/solutions/observability/packages/kbn-apm-embeddable-common/index.ts",
+        "lineNumber": 11,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-embeddable-common",
+        "id": "def-common.APM_ALERTING_LATENCY_CHART_EMBEDDABLE",
+        "type": "string",
+        "tags": [],
+        "label": "APM_ALERTING_LATENCY_CHART_EMBEDDABLE",
+        "description": [],
+        "signature": [
+          "\"apm_alerting_latency_chart\""
+        ],
+        "path": "x-pack/solutions/observability/packages/kbn-apm-embeddable-common/index.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-embeddable-common",
+        "id": "def-common.APM_ALERTING_THROUGHPUT_CHART_EMBEDDABLE",
+        "type": "string",
+        "tags": [],
+        "label": "APM_ALERTING_THROUGHPUT_CHART_EMBEDDABLE",
+        "description": [],
+        "signature": [
+          "\"apm_alerting_throughput_chart\""
+        ],
+        "path": "x-pack/solutions/observability/packages/kbn-apm-embeddable-common/index.ts",
+        "lineNumber": 14,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-embeddable-common",
+        "id": "def-common.APM_SERVICE_MAP_EMBEDDABLE",
+        "type": "string",
+        "tags": [],
+        "label": "APM_SERVICE_MAP_EMBEDDABLE",
+        "description": [],
+        "signature": [
+          "\"apm_service_map\""
+        ],
+        "path": "x-pack/solutions/observability/packages/kbn-apm-embeddable-common/index.ts",
+        "lineNumber": 15,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

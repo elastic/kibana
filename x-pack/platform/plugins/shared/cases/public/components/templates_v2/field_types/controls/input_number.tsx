@@ -11,11 +11,13 @@ import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { NumericField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { CASE_EXTENDED_FIELDS } from '../../../../../common/constants';
+import { getFieldSnakeKey } from '../../../../../common/utils';
 import type {
   InputNumberFieldSchema,
   ConditionRenderProps,
 } from '../../../../../common/types/domain/template/fields';
 import { FIELD_REQUIRED, FIELD_MIN_VALUE, FIELD_MAX_VALUE } from '../../translations';
+import { OptionalFieldLabel } from '../../../optional_field_label';
 
 const { emptyField } = fieldValidators;
 
@@ -53,11 +55,12 @@ export const InputNumber = ({ label, name, type, isRequired, min, max }: InputNu
   return (
     <UseField
       key={name}
-      path={`${CASE_EXTENDED_FIELDS}.${name}_as_${type}`}
+      path={`${CASE_EXTENDED_FIELDS}.${getFieldSnakeKey(name, type)}`}
       component={NumericField}
       config={{ validations }}
       componentProps={{
         label,
+        labelAppend: !isRequired ? OptionalFieldLabel : undefined,
       }}
     />
   );

@@ -29,6 +29,7 @@ import {
 import useToggle from 'react-use/lib/useToggle';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { convertToBuiltInComparators } from '@kbn/observability-plugin/common';
+import { builtInComparatorsWithInclusive } from '@kbn/observability-plugin/public';
 import { Aggregators } from '../../../../common/alerting/metrics';
 import { useMetricsDataViewContext } from '../../../containers/metrics_source';
 import { decimalToPct, pctToDecimal } from '../../../../common/utils/corrected_percent_convert';
@@ -376,6 +377,7 @@ const ThresholdElement: React.FC<{
     <>
       <StyledExpression>
         <ThresholdExpression
+          customComparators={builtInComparatorsWithInclusive}
           thresholdComparator={thresholdComparator()}
           threshold={displayedThreshold}
           onChangeSelectedThresholdComparator={updateComparator}

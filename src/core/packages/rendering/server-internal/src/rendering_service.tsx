@@ -37,7 +37,7 @@ import type {
   RenderingMetadata,
   RenderingStartDeps,
 } from './types';
-import { registerBootstrapRoute, bootstrapRendererFactory } from './bootstrap';
+import { registerBootstrapRoute, bootstrapRendererFactory, isRspackModeEnabled } from './bootstrap';
 import {
   getSettingValue,
   getCommonStylesheetPaths,
@@ -71,7 +71,6 @@ export class RenderingService {
   private readonly themeName$ = new BehaviorSubject<ThemeName>(DEFAULT_THEME_NAME);
   private airgapped: boolean = false;
   private isCoreRenderingInReactConcurrentMode: boolean = true;
-
   constructor(private readonly coreContext: CoreContext) {}
 
   public async preboot({
@@ -195,20 +194,24 @@ export class RenderingService {
       settingsUserValues = {},
       globalSettingsUserValues = {},
       userSettingDarkMode,
+      userSettingLocale,
     ] = await Promise.all([
       // All sites
       withAsyncDefaultValues(request, uiSettings.client?.getRegistered()),
       // Only non-anonymous pages
       ...(!isAnonymousPage
         ? ([
-            uiSettings.client?.getUserProvided(),
-            uiSettings.globalClient?.getUserProvided(),
+            uiSettings.client?.getUserProvided(true),
+            uiSettings.globalClient?.getUserProvided(true),
             // dark mode
             userSettings?.getUserSettingDarkMode(request),
+            // locale
+            userSettings?.getUserSettingLocale(request),
           ] as [
             Promise<Record<string, UserProvidedValues>>,
             Promise<Record<string, UserProvidedValues>>,
-            Promise<DarkModeValue> | undefined
+            Promise<DarkModeValue> | undefined,
+            Promise<string> | undefined
           ])
         : []),
     ]);
@@ -270,29 +273,59 @@ export class RenderingService {
 
     const loggingConfig = await getBrowserLoggingConfig(this.coreContext.configService);
 
-    const locale = i18nLib.getLocale();
+    const configLocale = i18nLib.getLocale();
+    const translationHashes = i18n.getTranslationHashes();
+    const availableLocales = i18n.getAvailableLocales();
+    // Resolve the effective locale server-side using the priority chain:
+    // 1. User profile setting
+    // 2. kibana.yml i18n.defaultLocale (configLocale)
+    const effectiveLocale =
+      userSettingLocale && translationHashes[userSettingLocale] ? userSettingLocale : configLocale;
     let translationsUrl: string;
     if (usingCdn) {
-      translationsUrl = `${staticAssetsHrefBase}/translations/${locale}.json`;
+      translationsUrl = `${staticAssetsHrefBase}/translations/${effectiveLocale}.json`;
     } else {
-      const translationHash = i18n.getTranslationHash();
-      translationsUrl = `${serverBasePath}/translations/${translationHash}/${locale}.json`;
+      const translationHash = translationHashes[effectiveLocale] ?? i18n.getTranslationHash();
+      translationsUrl = `${serverBasePath}/translations/${translationHash}/${effectiveLocale}.json`;
     }
 
     const apmConfig = getApmConfig(request.url.pathname);
 
     const filteredPlugins = filterUiPlugins({ uiPlugins, isAnonymousPage });
     const bootstrapScript = isAnonymousPage ? 'bootstrap-anonymous.js' : 'bootstrap.js';
+
+    const useRspack = isRspackModeEnabled();
+    const uiPublicUrl = `${staticAssetsHrefBase}/ui`;
+
+    // Script preloads are intentionally removed for Rspack mode. Under HTTP/1.1
+    // (dev mode), <link rel="preload" as="script"> tags saturate the 6-connection
+    // limit and delay critical CSS, regressing FCP by ~4x. The bootstrap load()
+    // array already ensures all scripts are fetched with "High" priority via
+    // dynamic <script async=false> tags, so preloads provide no benefit and
+    // actively harm performance.
+    //
+    // Font preloads are kept: they are small, high-priority, and give the browser
+    // a head start on WOFF2 downloads during HTML parsing.
+    const preloadFonts = useRspack
+      ? [
+          `${uiPublicUrl}/fonts/inter/Inter-Regular.woff2`,
+          `${uiPublicUrl}/fonts/inter/Inter-Medium.woff2`,
+          `${uiPublicUrl}/fonts/inter/Inter-SemiBold.woff2`,
+        ]
+      : undefined;
+
     const metadata: RenderingMetadata = {
       strictCsp: http.csp.strict,
       hardenPrototypes: http.prototypeHardening,
-      uiPublicUrl: `${staticAssetsHrefBase}/ui`,
+      uiPublicUrl,
       bootstrapScriptUrl: `${basePath}/${bootstrapScript}`,
-      locale,
+      locale: effectiveLocale,
       themeVersion,
       darkMode,
       stylesheetPaths: commonStylesheetPaths,
       scriptPaths,
+      preloadFonts,
+      optimizeFontLoading: useRspack || undefined,
       customBranding: {
         faviconSVG: branding?.faviconSVG,
         faviconPNG: branding?.faviconPNG,
@@ -318,6 +351,7 @@ export class RenderingService {
         anonymousStatusPage: status?.isStatusPageAnonymous() ?? false,
         i18n: {
           translationsUrl,
+          availableLocales: availableLocales.map(({ id, label }) => ({ id, label })),
         },
         theme: {
           darkMode,

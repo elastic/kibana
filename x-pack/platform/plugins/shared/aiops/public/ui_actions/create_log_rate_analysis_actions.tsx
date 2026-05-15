@@ -12,16 +12,16 @@ import type { PresentationContainer } from '@kbn/presentation-publishing';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-log-rate-analysis/constants';
 import { AIOPS_EMBEDDABLE_GROUPING } from '@kbn/aiops-common/constants';
 
 import { v4 } from 'uuid';
 import type { LogRateAnalysisEmbeddableApi } from '../embeddables/log_rate_analysis/types';
-import type { AiopsPluginStartDeps } from '../types';
 
 import type { LogRateAnalysisActionContext } from './log_rate_analysis_action_context';
 import { EmbeddableLogRateAnalysisUserInput } from '../embeddables/log_rate_analysis/log_rate_analysis_config_input';
+import type { AiopsCoreSetup } from '../types';
+import { canUseAiops } from '../capabilities';
 
 const parentApiIsCompatible = async (
   parentApi: unknown
@@ -32,8 +32,7 @@ const parentApiIsCompatible = async (
 };
 
 export function createAddLogRateAnalysisEmbeddableAction(
-  coreStart: CoreStart,
-  pluginStart: AiopsPluginStartDeps
+  getStartServices: AiopsCoreSetup['getStartServices']
 ): UiActionsActionDefinition<LogRateAnalysisActionContext> {
   return {
     id: 'create-log-rate-analysis-embeddable',
@@ -44,10 +43,14 @@ export function createAddLogRateAnalysisEmbeddableAction(
         defaultMessage: 'Log rate analysis',
       }),
     async isCompatible(context: EmbeddableApiContext) {
-      return Boolean(await parentApiIsCompatible(context.embeddable));
+      const [coreStart] = await getStartServices();
+      return Boolean(await parentApiIsCompatible(context.embeddable)) && canUseAiops(coreStart);
     },
     async execute(context) {
-      const presentationContainerParent = await parentApiIsCompatible(context.embeddable);
+      const [[coreStart, pluginStart], presentationContainerParent] = await Promise.all([
+        getStartServices(),
+        parentApiIsCompatible(context.embeddable),
+      ]);
       if (!presentationContainerParent) throw new IncompatibleActionError();
 
       const uuid = v4();

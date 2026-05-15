@@ -21,6 +21,7 @@ import type { UnifiedHistogramFetch$ } from '@kbn/unified-histogram/types';
 import type { UnifiedMetricsGridProps } from '../../../types';
 import { createESQLQuery } from '../../../common/utils';
 import { dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
+import { MetricsExperienceStateProvider } from './context/metrics_experience_state_provider';
 
 jest.mock('@kbn/discover-utils', () => ({
   DiscoverFlyouts: { metricInsights: 'metricInsights' },
@@ -94,7 +95,11 @@ describe('MetricsGrid', () => {
   };
 
   const renderMetricsGrid = (props: Partial<MetricsGridProps> = {}) => {
-    return render(<MetricsGrid {...defaultProps} discoverFetch$={discoverFetch$} {...props} />);
+    return render(
+      <MetricsExperienceStateProvider profileId="test-profile">
+        <MetricsGrid {...defaultProps} discoverFetch$={discoverFetch$} {...props} />
+      </MetricsExperienceStateProvider>
+    );
   };
 
   beforeEach(() => {
@@ -113,25 +118,41 @@ describe('MetricsGrid', () => {
     expect(charts).toHaveLength(metricItems.length);
   });
 
+  it('passes syncCursor and syncTooltips={false} to each chart for cross-panel cursor sync', () => {
+    renderMetricsGrid();
+
+    metricItems.forEach((_, index) => {
+      expect(Chart).toHaveBeenNthCalledWith(
+        index + 1,
+        expect.objectContaining({ syncCursor: true, syncTooltips: false }),
+        expect.anything()
+      );
+    });
+  });
+
   it('passes the correct size prop', () => {
     const { rerender } = render(
-      <MetricsGrid
-        {...defaultProps}
-        columns={3}
-        dimensions={[{ name: 'host.name' }]}
-        discoverFetch$={discoverFetch$}
-      />
+      <MetricsExperienceStateProvider profileId="test-profile">
+        <MetricsGrid
+          {...defaultProps}
+          columns={3}
+          dimensions={[{ name: 'host.name' }]}
+          discoverFetch$={discoverFetch$}
+        />
+      </MetricsExperienceStateProvider>
     );
 
     expect(Chart).toHaveBeenCalledWith(expect.objectContaining({ size: 's' }), expect.anything());
 
     rerender(
-      <MetricsGrid
-        {...defaultProps}
-        columns={4}
-        dimensions={[{ name: 'host.name' }]}
-        discoverFetch$={discoverFetch$}
-      />
+      <MetricsExperienceStateProvider profileId="test-profile">
+        <MetricsGrid
+          {...defaultProps}
+          columns={4}
+          dimensions={[{ name: 'host.name' }]}
+          discoverFetch$={discoverFetch$}
+        />
+      </MetricsExperienceStateProvider>
     );
 
     expect(Chart).toHaveBeenCalledWith(expect.objectContaining({ size: 's' }), expect.anything());
@@ -167,6 +188,31 @@ describe('MetricsGrid', () => {
     expect(Chart).toHaveBeenNthCalledWith(
       2,
       expect.objectContaining({ userMessages: undefined }),
+      expect.anything()
+    );
+  });
+
+  it('passes getDescription(metric) result to each chart when getDescription is provided', () => {
+    const descriptionForFirst = 'Data stream: metrics-system.cpu-default';
+
+    const getDescription = jest.fn((metric: (typeof metricItems)[0]) =>
+      metric.metricName === 'system.cpu.utilization' ? descriptionForFirst : undefined
+    );
+
+    renderMetricsGrid({ getDescription });
+
+    expect(getDescription).toHaveBeenCalledTimes(metricItems.length);
+    expect(getDescription).toHaveBeenNthCalledWith(1, metricItems[0]);
+    expect(getDescription).toHaveBeenNthCalledWith(2, metricItems[1]);
+
+    expect(Chart).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({ description: descriptionForFirst }),
+      expect.anything()
+    );
+    expect(Chart).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({ description: undefined }),
       expect.anything()
     );
   });

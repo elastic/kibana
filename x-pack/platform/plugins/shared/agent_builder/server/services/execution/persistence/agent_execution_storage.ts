@@ -9,8 +9,12 @@ import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { IndexStorageSettings } from '@kbn/storage-adapter';
 import { StorageIndexAdapter, types } from '@kbn/storage-adapter';
 import { chatSystemIndex } from '@kbn/agent-builder-server';
-import type { ChatEvent } from '@kbn/agent-builder-common';
-import type { AgentExecutionParams, ExecutionStatus, SerializedExecutionError } from '../types';
+import type {
+  ChatEvent,
+  ExecutionStatus,
+  SerializedExecutionError,
+} from '@kbn/agent-builder-common';
+import type { AgentExecutionParams } from '@kbn/agent-builder-server/execution';
 
 export const agentExecutionIndexName = chatSystemIndex('agent-executions');
 
@@ -22,6 +26,8 @@ const storageSettings = {
       '@timestamp': types.date({}),
       status: types.keyword({}),
       agent_id: types.keyword({}),
+      execution_mode: types.keyword({}),
+      parent_execution_id: types.keyword({}),
       space_id: types.keyword({}),
       agent_params: types.object({ dynamic: false, properties: {} }),
       error: types.object({
@@ -43,6 +49,8 @@ export interface AgentExecutionProperties {
   '@timestamp': string;
   status: ExecutionStatus;
   agent_id: string;
+  execution_mode?: string;
+  parent_execution_id?: string;
   space_id: string;
   agent_params: AgentExecutionParams;
   error?: SerializedExecutionError;

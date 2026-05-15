@@ -72,10 +72,14 @@ describe('saveUploadedFile', () => {
 
   it('deletes the temp file when the pipeline fails', async () => {
     const writeStream = new PassThrough();
-    writeStream.destroy(new Error('write error'));
     mockCreateWriteStream.mockReturnValue(writeStream);
 
     const input = Readable.from(Buffer.from('zip content'));
+
+    // Destroy the write stream on next tick so pipeline has time to attach error handlers
+    process.nextTick(() => {
+      writeStream.destroy(new Error('write error'));
+    });
 
     await expect(saveUploadedFile(input)).rejects.toThrow();
 
