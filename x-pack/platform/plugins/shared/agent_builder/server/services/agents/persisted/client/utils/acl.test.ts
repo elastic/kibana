@@ -42,15 +42,13 @@ describe('validateAclUpdate', () => {
   });
 
   test('rejects role-type entries (V1 supports user-only; V2 will add roles)', () => {
-    expect(
-      validateAclUpdate([{ ...entry(), type: 'role' as 'user', name: 'analyst' }])
-    ).toMatch(/type of "user"/);
+    expect(validateAclUpdate([{ ...entry(), type: 'role' as 'user', name: 'analyst' }])).toMatch(
+      /type of "user"/
+    );
   });
 
   test('rejects unknown principal type', () => {
-    expect(validateAclUpdate([{ ...entry(), type: 'group' as 'user' }])).toMatch(
-      /type of "user"/
-    );
+    expect(validateAclUpdate([{ ...entry(), type: 'group' as 'user' }])).toMatch(/type of "user"/);
   });
 
   test('rejects empty principal name', () => {

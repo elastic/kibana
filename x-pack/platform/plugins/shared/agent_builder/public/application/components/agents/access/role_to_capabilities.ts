@@ -71,11 +71,7 @@ export const ROLE_DESCRIPTION: Record<AgentAclRole, string> = {
   }),
 };
 
-const ROLE_ORDER: AgentAclRole[] = [
-  AgentAclRole.User,
-  AgentAclRole.Editor,
-  AgentAclRole.Manager,
-];
+const ROLE_ORDER: AgentAclRole[] = [AgentAclRole.User, AgentAclRole.Editor, AgentAclRole.Manager];
 
 /**
  * Roles that meaningfully grant something on top of a given visibility.

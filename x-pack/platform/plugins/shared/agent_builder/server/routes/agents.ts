@@ -507,7 +507,7 @@ export function registerAgentRoutes({
       access: 'public',
       summary: "Get an agent's access control list",
       description:
-        "Get the ACL for a specific agent. Callers without permission to manage the ACL receive `canManage: false` and an empty `entries` list — the principal list itself is sensitive.",
+        'Get the ACL for a specific agent. Callers without permission to manage the ACL receive `canManage: false` and an empty `entries` list — the principal list itself is sensitive.',
       options: {
         tags: ['agent', 'oas-tag:agent builder'],
         availability: { since: '9.5.0' },

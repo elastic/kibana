@@ -106,12 +106,7 @@ export const AccessSummaryCard: React.FC<AccessSummaryCardProps> = ({ agent, onM
                   key={`${entry.type}:${entry.name}`}
                   content={`${entry.name} — ${ROLE_LABEL[entry.role]}`}
                 >
-                  <EuiToken
-                    iconType="tokenUser"
-                    shape="circle"
-                    color="euiColorVis1"
-                    size="s"
-                  />
+                  <EuiToken iconType="tokenUser" shape="circle" color="euiColorVis1" size="s" />
                 </EuiToolTip>
               ))}
               {overflow > 0 ? (

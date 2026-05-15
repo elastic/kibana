@@ -136,8 +136,7 @@ export const accessSummaryHiddenDescription = i18n.translate(
 
 export const accessSummaryCount = (users: number) =>
   i18n.translate('xpack.agentBuilder.acl.summary.count', {
-    defaultMessage:
-      '{users, plural, one {# user has} other {# users have}} additional access.',
+    defaultMessage: '{users, plural, one {# user has} other {# users have}} additional access.',
     values: { users },
   });
 

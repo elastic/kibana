@@ -27,11 +27,7 @@ import type {
   AgentDeleteRequest,
   AgentUpdateRequest,
 } from '../../../common/agents';
-import type {
-  AgentAclResult,
-  WritableAgentProvider,
-  ReadonlyAgentProvider,
-} from './agent_source';
+import type { AgentAclResult, WritableAgentProvider, ReadonlyAgentProvider } from './agent_source';
 import { isReadonlyProvider } from './agent_source';
 
 // internal definition for our agents
