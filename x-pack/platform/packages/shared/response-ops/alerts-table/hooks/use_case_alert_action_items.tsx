@@ -52,7 +52,6 @@ export const useCaseAlertActionItems = ({
           handleAddToExistingCaseClick();
           onActionExecuted?.();
         }}
-        size="s"
       >
         {ADD_TO_EXISTING_CASE}
       </EuiContextMenuItem>,
@@ -63,7 +62,6 @@ export const useCaseAlertActionItems = ({
           handleAddToNewCaseClick();
           onActionExecuted?.();
         }}
-        size="s"
       >
         {ADD_TO_NEW_CASE}
       </EuiContextMenuItem>,

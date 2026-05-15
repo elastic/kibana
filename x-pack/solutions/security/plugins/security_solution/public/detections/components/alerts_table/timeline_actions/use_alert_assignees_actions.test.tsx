@@ -58,7 +58,7 @@ const renderContextMenu = (
       closePopover={() => {}}
       button={<></>}
     >
-      <EuiContextMenu size="s" initialPanelId={2} panels={panelsToRender} />
+      <EuiContextMenu initialPanelId={2} panels={panelsToRender} />
     </EuiPopover>
   );
 };
