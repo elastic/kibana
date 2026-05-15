@@ -48,7 +48,7 @@ export default function (providerContext: FtrProviderContext) {
   };
 
   // Failing: See https://github.com/elastic/kibana/issues/246204
-  describe.skip('Package Policy - upgrade', function () {
+  describe('Package Policy - upgrade', function () {
     skipIfNoDockerRegistry(providerContext);
     let agentPolicyId: string;
     let packagePolicyId: string;
