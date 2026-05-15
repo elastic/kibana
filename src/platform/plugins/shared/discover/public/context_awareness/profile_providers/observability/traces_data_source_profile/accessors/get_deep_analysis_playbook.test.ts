@@ -25,9 +25,10 @@ describe('getDeepAnalysisPlaybook (traces)', () => {
 
     expect(result?.shapeId).toBe('traces');
     expect(result?.shapeLabel).toMatch(/ECS/);
-    expect(result?.promptAddendum).toContain('*.duration.us');
-    expect(result?.promptAddendum).toContain('event.outcome');
-    expect(result?.promptAddendum.length).toBeLessThanOrEqual(600);
+    expect(result?.guidance).toContain('transaction.duration.us');
+    expect(result?.guidance).toContain('span.duration.us');
+    expect(result?.guidance).toContain('event.outcome');
+    expect(result?.guidance.length).toBeLessThanOrEqual(600);
   });
 
   it('returns the OTel contribution when columns include `kind`', () => {
@@ -40,10 +41,10 @@ describe('getDeepAnalysisPlaybook (traces)', () => {
 
     expect(result?.shapeId).toBe('traces-otel');
     expect(result?.shapeLabel).toMatch(/OTel/);
-    expect(result?.promptAddendum).toContain('status.code');
-    expect(result?.promptAddendum).toContain('event_name');
-    expect(result?.promptAddendum).not.toContain('event.outcome');
-    expect(result?.promptAddendum.length).toBeLessThanOrEqual(600);
+    expect(result?.guidance).toContain('status.code');
+    expect(result?.guidance).toContain('event_name');
+    expect(result?.guidance).not.toContain('event.outcome');
+    expect(result?.guidance.length).toBeLessThanOrEqual(600);
   });
 
   it('returns the OTel contribution when columns include `attributes.*`', () => {

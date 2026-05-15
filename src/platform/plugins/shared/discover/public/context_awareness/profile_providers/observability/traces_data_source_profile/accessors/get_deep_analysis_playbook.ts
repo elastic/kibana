@@ -8,13 +8,17 @@
  */
 
 import {
+  DURATION_FIELDS,
+  EVENT_OUTCOME_FIELD,
   OTEL_DURATION,
   OTEL_EVENT_NAME_FIELD,
   OTEL_SPAN_KIND,
   OTEL_STATUS_CODE,
   SERVICE_NAME_FIELD,
+  SPAN_NAME_FIELD,
   TIMESTAMP_FIELD,
   TRACE_FIELDS,
+  TRANSACTION_NAME_FIELD,
 } from '@kbn/discover-utils';
 import type { DataSourceProfileProvider } from '../../../../profiles';
 
@@ -48,15 +52,16 @@ export const getDeepAnalysisPlaybook: DataSourceProfileProvider['profile']['getD
         shapeId: 'traces-otel',
         shapeLabel: 'OTel traces & spans',
         characteristicFields: ALL_TRACE_FIELDS,
-        promptAddendum:
-          'This dataset is OTel traces. Deep analysis means latency (p50/p95/p99 ' +
-          'of `duration`), throughput grouped by `service.name` and `kind` or ' +
-          "`event_name`, and error rate via `status.code='ERROR'`. Group by " +
-          'service.name then by event_name or kind; never group by trace/span ids.',
+        guidance:
+          `This dataset is OTel traces. Deep analysis means latency (p50/p95/p99 of ${OTEL_DURATION}), ` +
+          `throughput grouped by ${SERVICE_NAME_FIELD} and ${OTEL_SPAN_KIND} or ${OTEL_EVENT_NAME_FIELD}, ` +
+          `and error rate via ${OTEL_STATUS_CODE}='ERROR'. ` +
+          `Group by ${SERVICE_NAME_FIELD} then by ${OTEL_EVENT_NAME_FIELD} or ${OTEL_SPAN_KIND}; ` +
+          'never group by trace/span ids.',
         interestingSignals: [
           'latency outliers per service (p99 vs p50 spread)',
-          'spans where status.code=ERROR',
-          'top server-kind spans by duration',
+          `spans where ${OTEL_STATUS_CODE}=ERROR`,
+          `top ${OTEL_SPAN_KIND}=server spans by ${OTEL_DURATION}`,
         ],
       };
     }
@@ -65,11 +70,13 @@ export const getDeepAnalysisPlaybook: DataSourceProfileProvider['profile']['getD
       shapeId: 'traces',
       shapeLabel: 'APM traces & spans (ECS)',
       characteristicFields: ALL_TRACE_FIELDS,
-      promptAddendum:
-        'This dataset is APM traces. Deep analysis means latency (p50/p95/p99 of ' +
-        '*.duration.us), throughput by transaction.name or span.name, and error rate ' +
-        "via event.outcome='failure'. Group by service.name then transaction.name; " +
-        'never group by trace/span ids.',
+      guidance:
+        `This dataset is APM traces. Deep analysis means latency (p50/p95/p99 of ${DURATION_FIELDS.join(
+          ' / '
+        )}), ` +
+        `throughput by ${TRANSACTION_NAME_FIELD} or ${SPAN_NAME_FIELD}, ` +
+        `and error rate via ${EVENT_OUTCOME_FIELD}='failure'. ` +
+        `Group by ${SERVICE_NAME_FIELD} then ${TRANSACTION_NAME_FIELD}; never group by trace/span ids.`,
       interestingSignals: [
         'latency outliers per service (p99 vs p50 spread)',
         'services with rising failure rate',

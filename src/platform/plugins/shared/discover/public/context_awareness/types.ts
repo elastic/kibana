@@ -503,10 +503,10 @@ export interface DeepAnalysisPlaybookExtension {
    */
   characteristicFields: string[];
   /**
-   * A short prompt fragment (≤600 chars) describing what "deep analysis"
-   * means for this shape — what to group by, what to avoid, what's interesting.
+   * Short guidance (≤600 chars) describing what "deep analysis" means for
+   * this shape — what to group by, what to avoid, what's interesting.
    */
-  promptAddendum: string;
+  guidance: string;
   /**
    * Optional short bullets (≤5 entries) to seed the Drill-Down Queries section.
    */

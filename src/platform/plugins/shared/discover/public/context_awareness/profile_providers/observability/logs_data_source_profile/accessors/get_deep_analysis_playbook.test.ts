@@ -21,8 +21,8 @@ describe('getDeepAnalysisPlaybook (logs)', () => {
     expect(result?.characteristicFields).toEqual(
       expect.arrayContaining(['log.level', 'message', 'service.name', 'host.name'])
     );
-    expect(result?.promptAddendum).toContain('STATS BY');
-    expect(result?.promptAddendum.length).toBeLessThanOrEqual(600);
+    expect(result?.guidance).toContain('STATS BY');
+    expect(result?.guidance.length).toBeLessThanOrEqual(600);
     expect(result?.interestingSignals).toEqual(
       expect.arrayContaining([expect.stringContaining('error')])
     );

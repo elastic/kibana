@@ -28,7 +28,7 @@ const playbookContributionSchema = z.object({
   shapeId: z.string(),
   shapeLabel: z.string(),
   characteristicFields: z.array(z.string()),
-  promptAddendum: z.string().max(600),
+  guidance: z.string().max(600),
   interestingSignals: z.array(z.string()).max(5).optional(),
 });
 
@@ -121,7 +121,7 @@ const formatQueryResultsData = (data: EsqlQueryResultsData): string => {
     if (fields.length > 0) {
       lines.push(`  Characteristic fields present: ${fields.join(', ')}`);
     }
-    lines.push(`  Guidance: ${data.playbookContribution.promptAddendum}`);
+    lines.push(`  Guidance: ${data.playbookContribution.guidance}`);
     if (data.playbookContribution.interestingSignals?.length) {
       lines.push('  Interesting signals:');
       for (const signal of data.playbookContribution.interestingSignals) {

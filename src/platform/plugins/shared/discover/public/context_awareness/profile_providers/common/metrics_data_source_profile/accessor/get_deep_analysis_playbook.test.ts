@@ -20,12 +20,12 @@ describe('getDeepAnalysisPlaybook (metrics)', () => {
 
     expect(result?.shapeId).toBe('metrics');
     expect(result?.characteristicFields).toEqual(['@timestamp']);
-    expect(result?.promptAddendum).toContain('TS_INFO');
-    expect(result?.promptAddendum).toContain('metric_name');
-    expect(result?.promptAddendum).toContain('dimension_fields');
-    expect(result?.promptAddendum).toMatch(/TS </);
-    expect(result?.promptAddendum).toMatch(/never `?FROM/);
-    expect(result?.promptAddendum.length).toBeLessThanOrEqual(600);
+    expect(result?.guidance).toContain('TS_INFO');
+    expect(result?.guidance).toContain('metric_name');
+    expect(result?.guidance).toContain('dimension_fields');
+    expect(result?.guidance).toMatch(/TS </);
+    expect(result?.guidance).toMatch(/never `?FROM/);
+    expect(result?.guidance.length).toBeLessThanOrEqual(600);
     expect((result?.interestingSignals ?? []).length).toBeLessThanOrEqual(5);
   });
 });

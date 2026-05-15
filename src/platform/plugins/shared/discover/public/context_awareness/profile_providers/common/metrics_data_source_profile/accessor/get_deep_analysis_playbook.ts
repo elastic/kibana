@@ -15,7 +15,7 @@ export const getDeepAnalysisPlaybook: MetricsExperienceDataSourceProfileProvider
     shapeId: 'metrics',
     shapeLabel: 'TSDB metrics (TS commands)',
     characteristicFields: [TIMESTAMP_FIELD],
-    promptAddendum:
+    guidance:
       'This dataset is TSDB metrics queried via the ES|QL TS command. ALL ' +
       'follow-up queries against this index MUST start with `TS <index>` ' +
       '(never `FROM <index>`). FIRST run `TS <index> | TS_INFO` to discover ' +

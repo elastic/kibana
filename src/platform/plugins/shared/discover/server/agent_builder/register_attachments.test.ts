@@ -198,7 +198,7 @@ describe('registerAttachments', () => {
           shapeId: 'logs',
           shapeLabel: 'Application & infrastructure logs',
           characteristicFields: ['log.level', 'service.name', 'host.name'],
-          promptAddendum: 'Prefer STATS BY log.level and service.name.',
+          guidance: 'Prefer STATS BY log.level and service.name.',
           interestingSignals: ['spikes in log.level=error'],
         },
       });
