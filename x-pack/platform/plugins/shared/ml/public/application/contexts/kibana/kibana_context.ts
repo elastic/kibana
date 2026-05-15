@@ -38,12 +38,10 @@ import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/publ
 import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
 import type { KqlPluginStart } from '@kbn/kql/public';
 import type { CPSPluginStart } from '@kbn/cps/public/types';
-import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { MlServicesContext } from '../../app';
 
 interface StartPlugins {
   cases?: CasesPublicStart;
-  discover: DiscoverStart;
   charts: ChartsPluginStart;
   contentManagement: ContentManagementPublicStart;
   dashboard: DashboardStart;

@@ -59,7 +59,6 @@ import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
 import type { KqlPluginStart } from '@kbn/kql/public';
 import type { CPSPluginStart } from '@kbn/cps/public/types';
 import { ProjectRoutingAccess } from '@kbn/cps-utils/types';
-import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { MlSharedServices } from './application/services/get_shared_ml_services';
 import { getMlSharedServices } from './application/services/get_shared_ml_services';
 import { registerManagementSections } from './application/management';
@@ -90,7 +89,6 @@ import { registerMlUiActions } from './ui_actions';
 
 export interface MlStartDependencies {
   cases?: CasesPublicStart;
-  discover: DiscoverStart;
   charts: ChartsPluginStart;
   contentManagement: ContentManagementPublicStart;
   dashboard: DashboardStart;
@@ -206,7 +204,6 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
           {
             cases: pluginsStart.cases,
             charts: pluginsStart.charts,
-            discover: pluginsStart.discover,
             contentManagement: pluginsStart.contentManagement,
             dashboard: pluginsStart.dashboard,
             data: pluginsStart.data,

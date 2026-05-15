@@ -82,7 +82,6 @@ export const App: FC<AppProps> = ({
       ...coreStart,
       cases: deps.cases,
       charts: deps.charts,
-      discover: deps.discover,
       contentManagement: deps.contentManagement,
       dashboard: deps.dashboard,
       data: deps.data,

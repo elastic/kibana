@@ -14,6 +14,7 @@ import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/public';
 import { DataViewPicker } from '@kbn/unified-search-plugin/public';
 
 import { useMlKibana, useNavigateToPath } from '../../contexts/kibana';
+import { MlOpenSessionFlyout } from './ml_open_session_flyout';
 
 export interface MlDataSourcePickerProps {
   currentDataView: DataView | null;
@@ -24,7 +25,7 @@ export const MlDataSourcePicker: FC<MlDataSourcePickerProps> = ({ currentDataVie
   const [isOpenSessionPanelVisible, setOpenSessionPanelVisible] = useState(false);
   const navigateToPath = useNavigateToPath();
   const location = useLocation();
-  const { dataViews, dataViewEditor, dataViewFieldEditor, discover } = useMlKibana().services;
+  const { dataViews, dataViewEditor, dataViewFieldEditor } = useMlKibana().services;
   const closeFieldEditorRef = useRef<() => void | undefined>();
 
   useEffect(() => {
@@ -84,8 +85,6 @@ export const MlDataSourcePicker: FC<MlDataSourcePickerProps> = ({ currentDataVie
       defaultMessage: 'Select data view',
     });
 
-  const { OpenSessionPanel } = discover;
-
   return (
     <>
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
@@ -125,7 +124,7 @@ export const MlDataSourcePicker: FC<MlDataSourcePickerProps> = ({ currentDataVie
         </EuiFlexItem>
       </EuiFlexGroup>
       {isOpenSessionPanelVisible ? (
-        <OpenSessionPanel
+        <MlOpenSessionFlyout
           onClose={() => setOpenSessionPanelVisible(false)}
           onOpenSavedSearch={onOpenSavedSearch}
         />
