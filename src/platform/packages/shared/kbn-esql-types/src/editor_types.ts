@@ -11,6 +11,7 @@ import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
 import type { RecommendedField, RecommendedQuery } from './extensions_autocomplete_types';
 import type {
   ESQLSourceResult,
+  EsqlDatasetsResult,
   EsqlViewsResult,
   IndexAutocompleteItem,
 } from './sources_autocomplete_types';
@@ -150,6 +151,7 @@ export interface ESQLCallbacks {
   }) => Promise<{ indices: IndexAutocompleteItem[] }>;
   getTimeseriesIndices?: () => Promise<{ indices: IndexAutocompleteItem[] }>;
   getViews?: () => Promise<EsqlViewsResult>;
+  getDatasets?: () => Promise<EsqlDatasetsResult>;
   getEditorExtensions?: (queryString: string) => Promise<{
     recommendedQueries: RecommendedQuery[];
     recommendedFields: RecommendedField[];

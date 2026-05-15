@@ -59,17 +59,29 @@ export const IMPORTANT_NOTES_TITLE = i18n.translate(
   { defaultMessage: 'Important notes:' }
 );
 
+export const NOTE_REPLACES_LEGACY_AGENTS = i18n.translate(
+  'xpack.agentBuilder.announcementModal.noteReplacesLegacyAgents',
+  {
+    defaultMessage: 'Elastic Al Agent replaces Threat Hunting Agent and Observability Agent',
+  }
+);
+
+export const NOTE_REPLACES_LEGACY_AGENTS_LEARN_MORE = i18n.translate(
+  'xpack.agentBuilder.announcementModal.noteReplacesLegacyAgentsLearnMore',
+  { defaultMessage: 'Learn more' }
+);
+
 export const NOTE_HISTORY_UNTOUCHED = i18n.translate(
   'xpack.agentBuilder.announcementModal.noteHistoryUntouched',
   {
-    defaultMessage: 'Your chat history, prompts, and data are untouched',
+    defaultMessage: 'AI Assistant chat history, prompts, and data are untouched',
   }
 );
 
 export const NOTE_REVERT_IN_SETTINGS = i18n.translate(
   'xpack.agentBuilder.announcementModal.noteRevertInSettings',
   {
-    defaultMessage: 'Revert back to AI Assistant anytime in GenAI Settings',
+    defaultMessage: 'Revert all users in this space to AI Assistant anytime in GenAI Settings',
   }
 );
 

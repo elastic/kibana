@@ -232,6 +232,64 @@
     "functions": [
       {
         "parentPluginId": "@kbn/inference-tracing",
+        "id": "def-server.isInferenceSpan",
+        "type": "Function",
+        "tags": [],
+        "label": "isInferenceSpan",
+        "description": [],
+        "signature": [
+          "(span: ",
+          "Span",
+          ", parentContext: ",
+          "Context",
+          ") => boolean"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/is_inference_span.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/inference-tracing",
+            "id": "def-server.isInferenceSpan.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "span",
+            "description": [],
+            "signature": [
+              "Span"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/is_inference_span.ts",
+            "lineNumber": 12,
+            "columnNumber": 33,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/inference-tracing",
+            "id": "def-server.isInferenceSpan.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "parentContext",
+            "description": [],
+            "signature": [
+              "Context"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/is_inference_span.ts",
+            "lineNumber": 12,
+            "columnNumber": 53,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-tracing",
         "id": "def-server.withActiveInferenceSpan",
         "type": "Function",
         "tags": [],
@@ -626,6 +684,40 @@
       }
     ],
     "misc": [
+      {
+        "parentPluginId": "@kbn/inference-tracing",
+        "id": "def-server.BAGGAGE_TRACKING_BEACON_KEY",
+        "type": "string",
+        "tags": [],
+        "label": "BAGGAGE_TRACKING_BEACON_KEY",
+        "description": [],
+        "signature": [
+          "\"kibana.inference.tracing\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/baggage.ts",
+        "lineNumber": 8,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-tracing",
+        "id": "def-server.BAGGAGE_TRACKING_BEACON_VALUE",
+        "type": "string",
+        "tags": [],
+        "label": "BAGGAGE_TRACKING_BEACON_VALUE",
+        "description": [],
+        "signature": [
+          "\"1\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-inference-tracing/src/baggage.ts",
+        "lineNumber": 9,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/inference-tracing",
         "id": "def-server.EVAL_RUN_ID_BAGGAGE_KEY",

@@ -29,7 +29,7 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { DETAIL_PANEL_CONTENT_MAX_HEIGHT } from '../graph_view/constants';
-import type { OTelComponentType } from '../graph_view/constants';
+import type { OTelComponentType } from '../constants';
 
 import type { MetricGroup } from './use_component_metrics';
 import { useComponentMetrics } from './use_component_metrics';

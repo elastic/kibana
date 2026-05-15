@@ -10,6 +10,7 @@ import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider
 export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
   describe('rule_v2', () => {
     loadTestFile(require.resolve('./create_rule'));
+    loadTestFile(require.resolve('./upsert_rule'));
     loadTestFile(require.resolve('./get_rule'));
     loadTestFile(require.resolve('./get_rule_tags'));
     loadTestFile(require.resolve('./list_rules'));

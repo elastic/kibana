@@ -36,11 +36,6 @@ export type HostsComponentsQueryProps = QueryTabBodyProps & {
   pageFilters?: Filter[];
   skip: boolean;
   setQuery: GlobalTimeArgs['setQuery'];
-  /**
-   * Host details: serialized ES query built with entity identity filters (Entity Store v2).
-   * Used by {@link AuthenticationsQueryTabBody} and {@link RiskDetailsTabBody} when set.
-   */
-  identityScopedFilterQuery?: string;
 };
 
 export type AlertsComponentQueryProps = HostsComponentsQueryProps & {

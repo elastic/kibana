@@ -126,6 +126,10 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
       return;
     }
 
+    // Pre-warm: rehydrate any evicted step outputs that the upcoming step will need.
+    // This must happen before getContext() is called (which is synchronous).
+    await stepExecutionRuntime.contextManager.ensureContextReady();
+
     monitorAbortController = new AbortController();
 
     // Run stack monitoring once before the race so timeouts/cancel win over step.run().
@@ -146,9 +150,18 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
       !monitorAbortController.signal.aborted &&
       !stepExecutionRuntime.abortController.signal.aborted
     ) {
-      runStepPromise = Promise.resolve(nodeImplementation.run()).then(
-        () => stepExecutionRuntime && handleExecutionDelay(params, stepExecutionRuntime)
-      );
+      runStepPromise = (async () => {
+        try {
+          await Promise.resolve(nodeImplementation.run());
+          if (stepExecutionRuntime) {
+            await handleExecutionDelay(params, stepExecutionRuntime);
+          }
+        } finally {
+          if (stepExecutionRuntime) {
+            await stepExecutionRuntime.flushEventLogs();
+          }
+        }
+      })();
     }
 
     await Promise.race([runMonitorPromise, runStepPromise]);
@@ -158,7 +171,9 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
     params.workflowRuntime.enterScope();
     nodeSpan?.setOutcome('success');
   } catch (error) {
-    params.workflowRuntime.setWorkflowError(error);
+    params.workflowRuntime.setWorkflowError(
+      error instanceof Error ? error : new Error(String(error))
+    );
     nodeSpan?.setOutcome('failure');
   } finally {
     monitorAbortController?.abort();
@@ -172,6 +187,13 @@ export async function runNode(params: WorkflowExecutionLoopParams): Promise<void
     const saveStateSpan = apm.startSpan('save state', 'workflow', 'persistence');
     await params.workflowRuntime.saveState(); // Ensure state is updated after each step
     saveStateSpan?.end();
+
+    // Note: predecessor outputs that `prepareForRead` rehydrated for this
+    // step are released by the *next* step's `prepareForRead` (deferred
+    // release) so that consecutive consumers of the same predecessor reuse
+    // the in-memory copy instead of re-fetching from ES. The execution
+    // loop's final-flush path is responsible for the workflow-end cleanup
+    // — see `releaseTransientlyRehydratedOutputs` in `workflow_execution_loop`.
 
     nodeSpan?.end();
   }
