@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
 import { isNonLocalIndexName } from '@kbn/es-query';
-import { ALERT_WORKFLOW_STATUS, EVENT_KIND } from '@kbn/rule-data-utils';
+import { ALERT_RULE_UUID, ALERT_WORKFLOW_STATUS, EVENT_KIND } from '@kbn/rule-data-utils';
 import type { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { EventKind } from '../constants/event_kinds';
@@ -27,7 +27,7 @@ import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app'
 import { useRunAlertWorkflowPanel } from '../../../../detections/components/alerts_table/timeline_actions/use_run_alert_workflow_panel';
 import { useRunDocumentWorkflowPanel } from '../../../../detections/components/alerts_table/timeline_actions/use_run_document_workflow_panel';
 import { useExploreActions } from '../hooks/use_explore_actions';
-import { AddRuleException } from '../../tools/add_rule_exception';
+import { AddExceptionFlyoutWrapper } from '../../../../detections/components/alerts_table/timeline_actions/alert_context_menu';
 import { FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID } from './test_ids';
 
 const TAKE_ACTION = i18n.translate('xpack.securitySolution.flyoutV2.footer.takeActionButtonLabel', {
@@ -187,6 +187,35 @@ export const TakeActionButton = memo(
       closePopover: closePopoverHandler,
     });
 
+    const ruleId = useMemo<string | undefined>(() => {
+      const v = getFieldValue(hit, ALERT_RULE_UUID) ?? getFieldValue(hit, 'signal.rule.id');
+      return (Array.isArray(v) ? v[0] : v) as string | undefined;
+    }, [hit]);
+    const ruleRuleId = useMemo<string | undefined>(() => {
+      const v =
+        getFieldValue(hit, 'kibana.alert.rule.rule_id') ??
+        getFieldValue(hit, 'signal.rule.rule_id');
+      return (Array.isArray(v) ? v[0] : v) as string | undefined;
+    }, [hit]);
+    const ruleName = useMemo<string>(() => {
+      const v =
+        getFieldValue(hit, 'kibana.alert.rule.name') ?? getFieldValue(hit, 'signal.rule.name');
+      return ((Array.isArray(v) ? v[0] : v) as string) ?? '';
+    }, [hit]);
+    const ruleIndices = useMemo<string[] | undefined>(() => {
+      const v =
+        getFieldValue(hit, 'kibana.alert.rule.parameters.index') ??
+        getFieldValue(hit, 'signal.rule.index');
+      if (!v) return undefined;
+      return Array.isArray(v) ? (v as string[]) : [v as string];
+    }, [hit]);
+    const ruleDataViewId = useMemo<string | undefined>(() => {
+      const v =
+        getFieldValue(hit, 'kibana.alert.rule.parameters.data_view_id') ??
+        getFieldValue(hit, 'signal.rule.data_view_id');
+      return (Array.isArray(v) ? v[0] : v) as string | undefined;
+    }, [hit]);
+
     const [exceptionFlyoutType, setExceptionFlyoutType] = useState<
       ExceptionListTypeEnum | null | undefined
     >(undefined);
@@ -296,10 +325,16 @@ export const TakeActionButton = memo(
             data-test-subj="takeActionPanelMenu"
           />
         </EuiPopover>
-        {exceptionFlyoutType !== undefined && (
-          <AddRuleException
-            hit={hit}
+        {exceptionFlyoutType !== undefined && ruleId != null && ruleRuleId != null && (
+          <AddExceptionFlyoutWrapper
+            ruleId={ruleId}
+            ruleRuleId={ruleRuleId}
+            ruleName={ruleName}
+            ruleIndices={ruleIndices}
+            ruleDataViewId={ruleDataViewId}
+            eventId={documentId}
             exceptionListType={exceptionFlyoutType}
+            alertStatus={alertStatus}
             onCancel={handleExceptionCancel}
             onConfirm={handleExceptionConfirm}
           />

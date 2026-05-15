@@ -75,7 +75,6 @@ export interface AddExceptionFlyoutProps {
   isBulkAction: boolean;
   showAlertCloseOptions: boolean;
   isEndpointItem: boolean;
-  renderFlyoutShell?: boolean;
   alertData?: AlertData;
   /**
    * The components that use this may or may not define `alertData`
@@ -96,7 +95,6 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   isEndpointItem,
   alertData,
   showAlertCloseOptions,
-  renderFlyoutShell = true,
   isAlertDataLoading,
   alertStatus,
   sharedListToAddTo,
@@ -645,12 +643,9 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
     </>
   );
 
-  if (!renderFlyoutShell) {
-    return flyoutContent;
-  }
-
   return (
     <EuiFlyout
+      session="never"
       size="l"
       onClose={handleCloseFlyout}
       data-test-subj="addExceptionFlyout"

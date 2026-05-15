@@ -41,9 +41,12 @@ jest.mock('../hooks/use_explore_actions', () => ({
   useExploreActions: (...args: unknown[]) => mockUseExploreActions(...args),
 }));
 
-jest.mock('../../tools/add_rule_exception', () => ({
-  AddRuleException: () => <div data-test-subj="addRuleException" />,
-}));
+jest.mock(
+  '../../../../detections/components/alerts_table/timeline_actions/alert_context_menu',
+  () => ({
+    AddExceptionFlyoutWrapper: () => <div data-test-subj="addExceptionFlyoutWrapper" />,
+  })
+);
 
 const mockUseRunAlertWorkflowPanel = jest.fn().mockReturnValue({
   runWorkflowMenuItem: [],
