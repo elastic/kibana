@@ -2191,24 +2191,6 @@
       "enabled": true
     },
     {
-      "groupName": "nunjucks",
-      "matchDepNames": ["@types/nunjucks", "nunjucks"],
-      "reviewers": ["team:integration-experience"],
-      "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Integration-Experience"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
-      "groupName": "oas",
-      "matchDepNames": ["oas"],
-      "reviewers": ["team:integration-experience"],
-      "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Integration-Experience"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
       "groupName": "seedrandom",
       "matchDepNames": ["seedrandom", "@types/seedrandom"],
       "reviewers": ["team:integration-experience"],
