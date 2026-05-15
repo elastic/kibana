@@ -66,22 +66,53 @@ For **feature requests**, also probe for these common gaps (even if the field is
 - **Target user**: Who would use this — what role or persona? If not stated, ask.
 - **Dependencies**: Are there issues, features, or infrastructure changes that must land first? If so, capture them in the "Blocked By" field.
 
-## Step 7 — Show the draft and confirm
+## Step 7 — Collect and validate labels
 
-Display the complete proposed issue (title + body) and ask the user to confirm or request changes. **End your response and wait for explicit confirmation before filing.**
+Ask the user for a **team label** (e.g. `Team:Visualizations`) and any **additional labels** (e.g. `accessibility`, `performance`). Accept "none" for either. The type label (`bug` or `enhancement`) is added automatically.
 
-## Step 8 — Create the issue
+**End your response and wait for the user to reply before proceeding.**
 
-After the user confirms, create the issue:
+Once the user provides labels, validate **all of them in parallel** against the repository:
 
 ```bash
-ISSUE_BODY=$(cat <<'EOF'
-<formatted body here>
-EOF
-)
-gh issue create --repo elastic/kibana --title "<TITLE>" --body "$ISSUE_BODY" --label "<bug|enhancement>"
+gh label list --repo elastic/kibana --search "<label>" --limit 10 --json name,description --jq '.[] | "- `\(.name)` — \(.description // "no description")"'
 ```
 
-Use label `bug` for bug reports and `enhancement` for feature requests.
+For each label:
 
-Report the new issue URL to the user when done.
+- **Exact match** → keep it.
+- **Close matches only** → show them as `` `<name>` — <description> `` and ask the user to pick one or skip.
+- **No matches** → inform the user and ask to skip or provide an alternative.
+
+If any labels need user input, **wait for the reply**, then re-validate any new labels. Repeat until all labels are resolved.
+
+## Step 8 — Show the draft and confirm
+
+Display the complete issue preview using this format:
+
+> **Title:** `<title>`
+> **Labels:** `<label1>`, `<label2>`, ...
+>
+> ---
+> \<issue body\>
+> ---
+
+Ask the user to confirm or request changes.
+
+**End your response and wait for explicit confirmation before filing.**
+
+## Step 9 — Create the issue
+
+```bash
+gh issue create --repo elastic/kibana \
+  --title "<TITLE>" \
+  --label "<label1>" --label "<label2>" --label "<labelN>" \
+  --body "$(cat <<'EOF'
+<formatted body here>
+EOF
+)"
+```
+
+Add one `--label` flag per label.
+
+Always include the type label (`bug` or `enhancement`) plus all validated labels. Report the new issue URL to the user when done.

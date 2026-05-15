@@ -2,25 +2,7 @@
 
 exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
 <DocumentFragment>
-  .c3 {
-  margin-right: 5px;
-}
-
-.c2 {
-  margin-right: 5px;
-}
-
-.c1 {
-  margin-right: 3px;
-  position: relative;
-  top: -1px;
-}
-
-.c0 {
-  margin-right: 10px;
-}
-
-<div
+  <div
     class="siemEventsTable__trSupplement siemEventsTable__trSupplement--summary css-1etiyqu-EventsTrSupplement"
   >
     <div
@@ -38,7 +20,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
             data-test-subj="netflow-columns"
           >
             <div
-              class="euiFlexItem c0 emotion-euiFlexItem-growZero"
+              class="euiFlexItem sc-bkEOxz eIJkgC emotion-euiFlexItem-growZero"
             >
               <div
                 class="euiFlexGroup emotion-euiFlexGroup-none-center-flexStart-column"
@@ -133,7 +115,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
               </div>
             </div>
             <div
-              class="euiFlexItem c0 emotion-euiFlexItem-growZero"
+              class="euiFlexItem sc-bkEOxz eIJkgC emotion-euiFlexItem-growZero"
             >
               <div
                 class="euiFlexGroup emotion-euiFlexGroup-none-center-flexStart-column"
@@ -153,7 +135,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                         class="euiText emotion-euiText-xs"
                       >
                         <span
-                          class="c1"
+                          class="sc-kFWlue gwgGAl"
                           data-euiicon-type="clock"
                         />
                         <span
@@ -184,7 +166,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                         class="euiText emotion-euiText-xs"
                       >
                         <span
-                          class="c1"
+                          class="sc-kFWlue gwgGAl"
                           data-euiicon-type="clock"
                         />
                         <span
@@ -219,7 +201,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                                 class="euiText emotion-euiText-xs"
                               >
                                 <span
-                                  class="c1"
+                                  class="sc-kFWlue gwgGAl"
                                   data-euiicon-type="clock"
                                 />
                                 <span
@@ -1230,7 +1212,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                           class="euiBadge__text emotion-euiBadge__text"
                         >
                           <span
-                            class="c2"
+                            class="sc-jOnpCo knrHMo"
                           >
                             ja3
                           </span>
@@ -1290,7 +1272,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                           class="euiBadge__text emotion-euiBadge__text"
                         >
                           <span
-                            class="c3"
+                            class="sc-iXzfSG IltkG"
                           >
                             client cert
                           </span>
@@ -1350,7 +1332,7 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
                           class="euiBadge__text emotion-euiBadge__text"
                         >
                           <span
-                            class="c3"
+                            class="sc-iXzfSG IltkG"
                           >
                             server cert
                           </span>

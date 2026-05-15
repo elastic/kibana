@@ -223,6 +223,12 @@ export const JobMapLegend: FC<{ hasMissingJobNode: boolean }> = ({ hasMissingJob
               <EuiFlexItem grow={false}>
                 <EuiPopover
                   ownFocus
+                  aria-label={i18n.translate(
+                    'xpack.ml.dataframe.analyticsMap.legend.jobTypesPopoverAriaLabel',
+                    {
+                      defaultMessage: 'Job types legend',
+                    }
+                  )}
                   button={
                     <EuiButtonIcon
                       iconSize="s"
