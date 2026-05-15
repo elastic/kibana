@@ -672,9 +672,7 @@ describe('useFetchMetricsData', () => {
       expect(mockApmCaptureError).toHaveBeenCalledTimes(1);
       expect(mockApmCaptureError).toHaveBeenCalledWith(fetchError, {
         labels: {
-          kibana_section: 'metrics',
-          kibana_action: 'fetch',
-          kibana_name: 'metrics_info',
+          error_type: 'metrics_fetch_metrics_info',
         },
       });
       // Success-path emission must NOT fire when the fetch failed.
@@ -699,9 +697,7 @@ describe('useFetchMetricsData', () => {
       expect(mockApmCaptureError).toHaveBeenCalledTimes(1);
       expect(mockApmCaptureError).toHaveBeenCalledWith(responseError, {
         labels: {
-          kibana_section: 'metrics',
-          kibana_action: 'fetch',
-          kibana_name: 'metrics_info',
+          error_type: 'metrics_fetch_metrics_info',
         },
       });
     });

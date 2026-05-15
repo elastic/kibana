@@ -28,7 +28,5 @@ export const getMetricsApmLabels = (
   action: MetricsExecutionContextAction,
   name: MetricsExecutionContextName
 ) => ({
-  kibana_section: 'metrics',
-  kibana_action: action,
-  kibana_name: name,
+  error_type: `metrics_${action}_${name}`,
 });
