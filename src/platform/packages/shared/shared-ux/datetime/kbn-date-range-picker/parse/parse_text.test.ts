@@ -560,7 +560,7 @@ describe('textToTimeRange', () => {
       it.each([
         ['now-30m to now', 'now-30m/m', 'now'],
         ['-7d to now', 'now-7d/d', 'now'],
-        ['now-3h to now-1h', 'now-3h/h', 'now-1h'],
+        ['now-3h to now-1h', 'now-3h/h', 'now-1h/h'],
       ])('delimiter-split "%s" → start=%s end=%s', (text, start, end) => {
         const range = textToTimeRange(text, opts(true));
 
@@ -579,11 +579,11 @@ describe('textToTimeRange', () => {
         expect(range.start).toBe(start);
       });
 
-      it('rounds future start in delimiter-split path', () => {
+      it('rounds future start and end in delimiter-split path', () => {
         const range = textToTimeRange('now+3d to now+7d', opts(true));
 
         expect(range.start).toBe('now+3d/d');
-        expect(range.end).toBe('now+7d');
+        expect(range.end).toBe('now+7d/d');
       });
     });
 
@@ -595,11 +595,11 @@ describe('textToTimeRange', () => {
         expect(range.end).toBe('now+7d');
       });
 
-      it('does not round future natural duration start', () => {
+      it('does not round future natural duration start; rounds future end', () => {
         const range = textToTimeRange('next 7 days', opts(true));
 
         expect(range.start).toBe('now');
-        expect(range.end).toBe('now+7d');
+        expect(range.end).toBe('now+7d/d');
       });
 
       it('does not affect named ranges', () => {
@@ -609,7 +609,7 @@ describe('textToTimeRange', () => {
         expect(range.end).toBe('now/d');
       });
 
-      it('applies rounding to preset matches', () => {
+      it('applies rounding to preset matches (bare `now` end stays as-is)', () => {
         const presets = [{ label: 'Last 15 Minutes', start: 'now-15m', end: 'now' }];
         const range = textToTimeRange('Last 15 Minutes', { presets, roundRelativeTime: true });
 
@@ -617,24 +617,55 @@ describe('textToTimeRange', () => {
         expect(range.end).toBe('now');
       });
 
-      it('never modifies end', () => {
+      it('rounds both bounds based on their own offset units', () => {
         const range = textToTimeRange('now-7d to now-1d', opts(true));
 
-        expect(range.end).toBe('now-1d');
+        expect(range.start).toBe('now-7d/d');
+        expect(range.end).toBe('now-1d/d');
+      });
+
+      it('rounds bounds independently when their units differ', () => {
+        const range = textToTimeRange('now-1h to now-30m', opts(true));
+
+        expect(range.start).toBe('now-1h/h');
+        expect(range.end).toBe('now-30m/m');
+      });
+
+      it('rounds preset start; preset end of bare `now` stays as `now`', () => {
+        const presets = [{ label: 'Last 24 hours', start: 'now-24h/h', end: 'now' }];
+        const range = textToTimeRange('Last 24 hours', { presets, roundRelativeTime: true });
+
+        expect(range.start).toBe('now-24h/h');
+        expect(range.end).toBe('now');
       });
     });
 
-    describe('false — strips rounding', () => {
-      it('removes existing rounding suffix', () => {
+    describe('false — preserves input (does not add or strip rounding)', () => {
+      it('preserves an existing rounding suffix on shorthand input', () => {
         const range = textToTimeRange('-7d/d', opts(false));
 
-        expect(range.start).toBe('now-7d');
+        expect(range.start).toBe('now-7d/d');
       });
 
       it('is a no-op when no rounding is present', () => {
         const range = textToTimeRange('-7d', opts(false));
 
         expect(range.start).toBe('now-7d');
+      });
+
+      it('preserves rounding baked into a preset on both bounds', () => {
+        const presets = [{ label: 'Last 24 hours', start: 'now-24h/h', end: 'now' }];
+        const range = textToTimeRange('Last 24 hours', { ...opts(false), presets });
+
+        expect(range.start).toBe('now-24h/h');
+        expect(range.end).toBe('now');
+      });
+
+      it('preserves user-typed rounding on both sides of a range', () => {
+        const range = textToTimeRange('-1h/h to now/h', opts(false));
+
+        expect(range.start).toBe('now-1h/h');
+        expect(range.end).toBe('now/h');
       });
     });
 
