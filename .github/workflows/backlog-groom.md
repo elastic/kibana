@@ -42,7 +42,7 @@ network:
   allowed:
     - defaults
     - github
-    - registry.npmjs.org
+    - node
     - kibana-bazel-remote-h5qd3jkxkq-uc.a.run.app
     - elastic.litellm-prod.ai
 checkout:
