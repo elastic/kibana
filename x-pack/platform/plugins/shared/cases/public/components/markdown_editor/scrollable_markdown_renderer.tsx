@@ -36,8 +36,8 @@ const ScrollableMarkdownRenderer = ({ content }: { content: string }) => {
   const { euiTheme } = useEuiTheme();
 
   // eslint-disable-next-line no-console
-  console.log(
-    '[Cases:ScrollableMarkdown] rendering.',
+  console.error(
+    '[Cases:ScrollableMarkdown] RENDER ENTRY.',
     'content length:',
     content?.length,
     'content type:',
@@ -45,37 +45,47 @@ const ScrollableMarkdownRenderer = ({ content }: { content: string }) => {
     'content preview:',
     content?.slice(0, 100),
     'has ampersand:',
-    content?.includes('&')
+    content?.includes('&'),
+    'ampersand count:',
+    (content?.match(/&/g) || []).length
   );
 
   const sanitizedContent = useMemo(() => {
     // eslint-disable-next-line no-console
-    console.log(
-      '[Cases:ScrollableMarkdown] useMemo: calling escapeUnterminatedEntities.',
+    console.error(
+      '[Cases:ScrollableMarkdown] SANITIZING content.',
       'content length:',
-      content?.length
+      content?.length,
+      'has ampersand:',
+      content?.includes('&')
     );
     const result = escapeUnterminatedEntities(content);
     // eslint-disable-next-line no-console
-    console.log(
-      '[Cases:ScrollableMarkdown] useMemo: sanitization complete.',
+    console.error(
+      '[Cases:ScrollableMarkdown] SANITIZATION DONE.',
       'input length:',
       content?.length,
       'output length:',
       result?.length,
       'changed:',
-      content !== result
+      content !== result,
+      'output has bare ampersand:',
+      /&(?!(?:amp|lt|gt|quot|apos|nbsp|#\d+|#x[\da-fA-F]+);)/.test(result),
+      'output preview:',
+      result?.slice(0, 200)
     );
     return result;
   }, [content]);
 
   // eslint-disable-next-line no-console
-  console.log(
-    '[Cases:ScrollableMarkdown] about to render MarkdownRenderer.',
+  console.error(
+    '[Cases:ScrollableMarkdown] RENDERING MarkdownRenderer.',
     'sanitizedContent length:',
     sanitizedContent?.length,
+    'sanitizedContent === content:',
+    sanitizedContent === content,
     'sanitizedContent preview:',
-    sanitizedContent?.slice(0, 100)
+    sanitizedContent?.slice(0, 200)
   );
 
   return (

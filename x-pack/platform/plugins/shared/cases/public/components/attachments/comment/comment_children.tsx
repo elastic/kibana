@@ -32,24 +32,18 @@ export const CommentChildren: React.FC<CommentChildrenProps> = ({
   version,
 }) => {
   // eslint-disable-next-line no-console
-  console.log(
-    '[Cases:CommentChildren] rendering.',
+  console.error(
+    '[Cases:CommentChildren] RENDER ENTRY.',
     'commentId:',
     commentId,
     'content length:',
     content?.length,
-    'content type:',
-    typeof content,
     'content preview:',
     content?.slice(0, 120),
     'has ampersand:',
     content?.includes('&'),
     'ampersand count:',
-    (content?.match(/&/g) || []).length,
-    'version:',
-    version,
-    'caseId:',
-    caseId
+    (content?.match(/&/g) || []).length
   );
   const {
     appId = '',

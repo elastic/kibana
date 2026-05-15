@@ -31,16 +31,14 @@ const UserActionMarkdownComponent = forwardRef<
   const fieldName = 'content';
 
   // eslint-disable-next-line no-console
-  console.log(
-    '[Cases:UserActionMarkdown] rendering.',
+  console.error(
+    '[Cases:UserActionMarkdown] RENDER ENTRY.',
     'id:',
     id,
     'isEditable:',
     isEditable,
     'content length:',
     content?.length,
-    'content type:',
-    typeof content,
     'content preview:',
     content?.slice(0, 120),
     'has ampersand:',

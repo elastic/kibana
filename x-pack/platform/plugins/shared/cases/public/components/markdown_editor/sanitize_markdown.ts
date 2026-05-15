@@ -16,30 +16,20 @@
 export const escapeUnterminatedEntities = (text: string): string => {
   const result = text.replace(/&(?!(?:amp|lt|gt|quot|apos|nbsp|#\d+|#x[\da-fA-F]+);)/g, '&amp;');
 
-  if (result !== text) {
-    // eslint-disable-next-line no-console
-    console.log(
-      '[Cases:sanitizeMarkdown] escapeUnterminatedEntities transformed content.',
-      'Original length:',
-      text.length,
-      'New length:',
-      result.length,
-      'Diff:',
-      result.length - text.length,
-      'chars added.',
-      'Original ampersand count:',
-      (text.match(/&/g) || []).length,
-      'Escaped ampersand count:',
-      (result.match(/&amp;/g) || []).length
-    );
-  } else {
-    // eslint-disable-next-line no-console
-    console.log(
-      '[Cases:sanitizeMarkdown] escapeUnterminatedEntities: no transformation needed.',
-      'Content length:',
-      text.length
-    );
-  }
+  // eslint-disable-next-line no-console
+  console.error(
+    '[Cases:sanitizeMarkdown] escapeUnterminatedEntities.',
+    'changed:',
+    result !== text,
+    'inputLen:',
+    text.length,
+    'outputLen:',
+    result.length,
+    'ampersandsBefore:',
+    (text.match(/&/g) || []).length,
+    'hasBareAmpAfter:',
+    /&(?!(?:amp|lt|gt|quot|apos|nbsp|#\d+|#x[\da-fA-F]+);)/.test(result)
+  );
 
   return result;
 };
