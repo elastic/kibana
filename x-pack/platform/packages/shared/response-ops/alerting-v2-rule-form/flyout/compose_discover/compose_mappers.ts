@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import type {
-  RuleResponse,
-  CreateRuleData,
-  UpdateRuleData,
-} from '@kbn/alerting-v2-schemas';
+import type { RuleResponse, CreateRuleData, UpdateRuleData } from '@kbn/alerting-v2-schemas';
 import { RUNBOOK_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
-import type { ComposeFormValues, RuleQuery, RuleKind, RecoveryPolicyType } from './compose_form_types';
+import type {
+  ComposeFormValues,
+  RuleQuery,
+  RuleKind,
+  RecoveryPolicyType,
+} from './compose_form_types';
 import { splitQuery } from './use_heuristic_split';
 
 // ---------------------------------------------------------------------------
@@ -108,7 +109,9 @@ type RuleArtifactPayload = Array<{ id: string; type: string; value: string }>;
 const createRunbookArtifactId = () =>
   `runbook-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 
-const mapArtifacts = (artifacts: ComposeFormValues['artifacts']): RuleArtifactPayload | undefined => {
+const mapArtifacts = (
+  artifacts: ComposeFormValues['artifacts']
+): RuleArtifactPayload | undefined => {
   const currentArtifacts = artifacts ?? [];
   const runbookArtifact = currentArtifacts.find(
     (artifact) => artifact.type === RUNBOOK_ARTIFACT_TYPE
@@ -149,7 +152,8 @@ const mapStateTransition = (formValues: ComposeFormValues) => {
   } else if (alertMode === DELAY_BREACHES && stateTransition?.pendingCount != null) {
     out.pending_count = stateTransition.pendingCount;
   } else if (alertMode === DELAY_DURATION) {
-    if (stateTransition?.pendingTimeframe != null) out.pending_timeframe = stateTransition.pendingTimeframe;
+    if (stateTransition?.pendingTimeframe != null)
+      out.pending_timeframe = stateTransition.pendingTimeframe;
     if (stateTransition?.pendingCount != null) out.pending_count = stateTransition.pendingCount;
   }
 
@@ -158,8 +162,10 @@ const mapStateTransition = (formValues: ComposeFormValues) => {
   } else if (recoveryMode !== DELAY_DURATION && stateTransition?.recoveringCount != null) {
     out.recovering_count = stateTransition.recoveringCount;
   } else if (recoveryMode === DELAY_DURATION) {
-    if (stateTransition?.recoveringTimeframe != null) out.recovering_timeframe = stateTransition.recoveringTimeframe;
-    if (stateTransition?.recoveringCount != null) out.recovering_count = stateTransition.recoveringCount;
+    if (stateTransition?.recoveringTimeframe != null)
+      out.recovering_timeframe = stateTransition.recoveringTimeframe;
+    if (stateTransition?.recoveringCount != null)
+      out.recovering_count = stateTransition.recoveringCount;
   }
 
   return Object.keys(out).length ? out : undefined;
@@ -180,7 +186,9 @@ export const composeFormToCreateRequest = (formValues: ComposeFormValues): Creat
     time_field: formValues.timeField,
     schedule: { every: formValues.schedule.every, lookback: formValues.schedule.lookback },
     evaluation,
-    grouping: formValues.grouping?.fields?.length ? { fields: formValues.grouping.fields } : undefined,
+    grouping: formValues.grouping?.fields?.length
+      ? { fields: formValues.grouping.fields }
+      : undefined,
     recovery_policy,
     state_transition: mapStateTransition(formValues),
     ...(artifacts ? { artifacts } : {}),
