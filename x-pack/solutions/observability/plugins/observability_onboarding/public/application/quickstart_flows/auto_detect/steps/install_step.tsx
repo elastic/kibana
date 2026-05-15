@@ -82,7 +82,7 @@ export const AutoDetectInstallStep: React.FC<AutoDetectInstallStepProps> = ({
       )}
       <EuiCodeBlock
         paddingSize="m"
-        language="text"
+        language="bash"
         data-test-subj="observabilityOnboardingAutoDetectPanelCodeSnippet"
       >
         {command}

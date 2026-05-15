@@ -81,7 +81,10 @@ export const OtelLogsInstallStep: React.FC<OtelLogsInstallStepProps> = ({
       })
     : '';
 
-  const codeLanguage = os === 'windows' ? 'powershell' : 'sh';
+  // Use 'bash' (not 'sh') so EuiCodeBlock's Prism picks up the registered
+  // grammar and the Linux/macOS commands get the same syntax coloring the
+  // PowerShell block already has on Windows.
+  const codeLanguage = os === 'windows' ? 'powershell' : 'bash';
 
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
