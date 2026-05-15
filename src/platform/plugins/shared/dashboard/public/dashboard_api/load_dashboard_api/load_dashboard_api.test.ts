@@ -13,7 +13,7 @@ import { DEFAULT_DASHBOARD_STATE } from '../default_dashboard_state';
 import { loadDashboardApi } from './load_dashboard_api';
 jest.mock('../telemetry/dashboard_load_telemetry', () => {
   return {
-    startQueryPerformanceTracking: jest.fn(),
+    startTrackingDashboardLoadTelemetry: jest.fn(),
   };
 });
 import { startTrackingDashboardLoadTelemetry } from '../telemetry/dashboard_load_telemetry';

@@ -116,7 +116,7 @@ export async function loadDashboardApi({
   });
   const userActivityService = getDashboardUserActivityService(api);
 
-  const performanceSubscription = startTrackingDashboardLoadTelemetry(api, {
+  const telemetrySubscription = startTrackingDashboardLoadTelemetry(api, {
     firstLoad: true,
     creationStartTime: performance.getEntriesByName(DASHBOARD_DURATION_START_MARK, 'mark')[0]
       ?.startTime,
@@ -146,7 +146,7 @@ export async function loadDashboardApi({
       if (onApiCleanup) {
         onApiCleanup();
       }
-      performanceSubscription.unsubscribe();
+      telemetrySubscription.unsubscribe();
     },
     internalApi,
     useControlsIntegration: creationOptions?.useControlsIntegration,
