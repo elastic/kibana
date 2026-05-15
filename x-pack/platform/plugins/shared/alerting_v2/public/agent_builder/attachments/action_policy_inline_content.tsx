@@ -15,9 +15,9 @@ export const ActionPolicyInlineContent: React.FC<AttachmentRenderProps<ActionPol
   attachment,
 }) => {
   const { data, origin: savedObjectId } = attachment;
-  const isProposed = !savedObjectId;
+  const isDraft = !savedObjectId;
   const isEnabled = data.enabled ?? true;
-  const { label: status, color: statusColor } = getStatusInfo(isProposed, isEnabled);
+  const { label: status, color: statusColor } = getStatusInfo(isDraft, isEnabled);
 
   const matcherSummary = data.matcher
     ? data.matcher
@@ -77,11 +77,11 @@ export const ActionPolicyInlineContent: React.FC<AttachmentRenderProps<ActionPol
   );
 };
 
-const getStatusInfo = (isProposed: boolean, isEnabled: boolean) => {
-  if (isProposed)
+const getStatusInfo = (isDraft: boolean, isEnabled: boolean) => {
+  if (isDraft)
     return {
-      label: i18n.translate('xpack.alertingV2.actionPolicyAttachment.statusProposed', {
-        defaultMessage: 'proposed',
+      label: i18n.translate('xpack.alertingV2.actionPolicyAttachment.statusDraft', {
+        defaultMessage: 'draft',
       }),
       color: 'default',
     };
