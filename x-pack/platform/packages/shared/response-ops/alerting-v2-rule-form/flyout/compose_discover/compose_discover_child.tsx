@@ -126,28 +126,33 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
       .map((f) => f.name)
       .sort();
 
-    // No index queried yet (or index has no date fields) — show @timestamp as the
-    // conventional default. Never inject it alongside real fields so the selector
-    // only shows fields that actually exist in the index.
     if (dateFields.length === 0) {
       return [{ value: '@timestamp', text: '@timestamp' }];
     }
 
-    return dateFields.map((name) => ({ value: name, text: name }));
+    const opts = dateFields.map((name) => ({ value: name, text: name }));
+
+    if (dateFields.length > 1) {
+      opts.unshift({ value: '', text: 'Select a time field…' });
+    }
+
+    return opts;
   }, [fieldMap]);
 
   // Keep the selected time field in sync with what the index actually has.
+  // Only auto-select when there's exactly one date field so the choice is
+  // unambiguous. When multiple exist, leave it for the user to pick.
   useEffect(() => {
     const dateFieldNames = Object.values(fieldMap)
       .filter((f) => f.type === 'date')
       .map((f) => f.name);
 
     if (dateFieldNames.length === 0) {
-      // Editor cleared or no date fields — reset to @timestamp convention.
       if (timeField !== '@timestamp') setFormValue('timeField', '@timestamp');
+    } else if (dateFieldNames.length === 1) {
+      if (timeField !== dateFieldNames[0]) setFormValue('timeField', dateFieldNames[0]);
     } else if (!dateFieldNames.includes(timeField)) {
-      // Index changed and selected field isn't present — pick the first real one.
-      setFormValue('timeField', dateFieldNames[0]);
+      setFormValue('timeField', '');
     }
   }, [fieldMap, timeField, setFormValue]);
 

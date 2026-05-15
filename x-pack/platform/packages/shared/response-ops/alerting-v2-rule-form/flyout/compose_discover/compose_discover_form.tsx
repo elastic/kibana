@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import { useFormContext } from 'react-hook-form';
-import { Parser, isColumn } from '@elastic/esql';
+import React, { useCallback, useMemo } from 'react';
+import { Controller, useFormContext } from 'react-hook-form';
 import { useQuery } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import { getEsqlColumns } from '@kbn/esql-utils';
@@ -184,17 +183,21 @@ function AlertConditionStep({
   dispatch: React.Dispatch<ComposeDiscoverAction>;
   services: RuleFormServices;
 }) {
-  const { setValue, watch } = useFormContext<FormValues>();
-  const timeField = watch('timeField') ?? '@timestamp';
+  const { clearErrors, control, setValue, watch } = useFormContext<FormValues>();
   const grouping = watch('grouping');
   const groupFields = grouping?.fields ?? [];
 
-  // Use the base query for field lookup when tracking is on; fall back to fullQuery.
+  // RHF is the source of truth for the evaluation query. Both field
+  // detection and output-column fetching derive from it, gated on
+  // queryCommitted so we don't fire requests before the user applies.
+  const evalQuery = watch('evaluation.query.base') ?? '';
   const committedQuery = useMemo(() => {
-    const q = state.tracking ? state.baseQuery : state.fullQuery;
-    return /^\s*FROM\s+[a-zA-Z0-9_.*-]/i.test(q) && state.queryCommitted ? q : '';
-  }, [state.tracking, state.baseQuery, state.fullQuery, state.queryCommitted]);
+    return /^\s*FROM\s+[a-zA-Z0-9_.*-]/i.test(evalQuery) && state.queryCommitted ? evalQuery : '';
+  }, [evalQuery, state.queryCommitted]);
 
+  // useDataFields resolves raw index fields via getESQLAdHocDataview,
+  // so the full pipeline (including STATS) is safe — only the FROM
+  // clause matters for field discovery.
   const { data: fieldMap } = useDataFields({
     query: committedQuery,
     http: services.http,
@@ -205,8 +208,14 @@ function AlertConditionStep({
       .filter((f) => f.type === 'date')
       .map((f) => f.name)
       .sort();
-    if (!dateFields.includes('@timestamp')) dateFields.unshift('@timestamp');
-    return dateFields.map((name) => ({ value: name, text: name }));
+    if (dateFields.length === 0) {
+      return [{ value: '@timestamp', text: '@timestamp' }];
+    }
+    const opts = dateFields.map((name) => ({ value: name, text: name }));
+    if (dateFields.length > 1) {
+      opts.unshift({ value: '', text: 'Select a time field…' });
+    }
+    return opts;
   }, [fieldMap]);
 
   // Output columns of the full pipeline → options for the group fields selector.
@@ -225,33 +234,6 @@ function AlertConditionStep({
     refetchOnWindowFocus: false,
     keepPreviousData: true,
   });
-
-  // Auto-populate group fields from the STATS BY clause when a query is first committed
-  // and the user hasn't already set any group fields.
-  const autoPopulatedForRef = useRef<string | null>(null);
-  useEffect(() => {
-    if (!state.queryCommitted || groupFields.length > 0 || !committedQuery) return;
-    if (autoPopulatedForRef.current === committedQuery) return;
-    autoPopulatedForRef.current = committedQuery;
-    try {
-      const { root } = Parser.parse(committedQuery);
-      const statsCmd = [...root.commands].reverse().find((c) => c.name === 'stats');
-      // ESQLAstItem is a wide union — use a local type alias to access the 'by' option
-      // safely rather than an inline interface (which triggers lint in function scope).
-      interface CmdOption {
-        type: string;
-        name: string;
-        args?: unknown[];
-      }
-      const byOption = (statsCmd?.args as CmdOption[] | undefined)?.find(
-        (a) => a.type === 'option' && a.name === 'by'
-      );
-      const byFields = (byOption?.args ?? []).filter(isColumn).map((a) => a.name);
-      if (byFields.length > 0) setValue('grouping', { fields: byFields });
-    } catch {
-      // Non-parseable query — skip auto-populate
-    }
-  }, [state.queryCommitted, committedQuery, groupFields.length, setValue]);
 
   const handleTrackingToggle = useCallback(() => {
     if (state.tracking) {
@@ -343,16 +325,38 @@ function AlertConditionStep({
       )}
 
       <EuiSpacer size="m" />
-      <EuiFormRow label="Time field" fullWidth>
-        <EuiSelect
-          fullWidth
-          options={timeFieldOptions}
-          value={timeField}
-          onChange={(e) => setValue('timeField', e.target.value)}
-          disabled={state.childOpen}
-          data-test-subj="composeDiscoverTimeField"
-        />
-      </EuiFormRow>
+      <Controller
+        name="timeField"
+        control={control}
+        rules={{
+          validate: (value) => {
+            if (!value) {
+              return i18n.translate(
+                'xpack.responseOps.alertingV2RuleForm.composeDiscover.timeFieldRequiredError',
+                { defaultMessage: 'Time field is required.' }
+              );
+            }
+            return true;
+          },
+        }}
+        render={({ field: { ref, value, onChange }, fieldState: { error } }) => (
+          <EuiFormRow label="Time field" fullWidth isInvalid={!!error} error={error?.message}>
+            <EuiSelect
+              inputRef={ref}
+              fullWidth
+              options={timeFieldOptions}
+              value={value ?? ''}
+              onChange={(e) => {
+                onChange(e.target.value);
+                if (e.target.value) clearErrors('timeField');
+              }}
+              disabled={state.childOpen}
+              isInvalid={!!error}
+              data-test-subj="composeDiscoverTimeField"
+            />
+          </EuiFormRow>
+        )}
+      />
       <EuiSpacer size="m" />
       <EuiFormRow label="Group fields" fullWidth>
         <EuiComboBox
@@ -497,7 +501,7 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
     id: 'alertCondition',
     title: 'Alert Condition',
     render: (props) => <AlertConditionStep {...props} />,
-    validate: (_methods, s) => s.queryCommitted,
+    validate: async (_methods, s) => s.queryCommitted && (await _methods.trigger('timeField')),
   },
   recoveryCondition: {
     id: 'recoveryCondition',

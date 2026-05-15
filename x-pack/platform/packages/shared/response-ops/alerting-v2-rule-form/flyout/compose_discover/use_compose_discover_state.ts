@@ -125,6 +125,7 @@ export function reducer(
       return {
         ...state,
         tracking: true,
+        fullQuery: [action.base, action.alertBlock].filter(Boolean).join('\n'),
         baseQuery: action.base,
         alertBlock: action.alertBlock,
         step: 0,
@@ -186,6 +187,7 @@ export function reducer(
     case 'COMMIT_CHILD_SPLIT':
       return {
         ...state,
+        fullQuery: [action.baseQuery, action.alertBlock].filter(Boolean).join('\n'),
         baseQuery: action.baseQuery,
         alertBlock: action.alertBlock,
         recoveryBlock: action.recoveryBlock,

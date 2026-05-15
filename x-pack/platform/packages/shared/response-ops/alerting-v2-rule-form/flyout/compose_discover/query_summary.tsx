@@ -18,7 +18,7 @@ interface QuerySummaryProps {
 export const QuerySummary: React.FC<QuerySummaryProps> = ({ query, label, maxLines = 5 }) => {
   const actualLines = query.split('\n').length;
   const lineCount = Math.min(actualLines, maxLines);
-  const height = lineCount * 44 + 16;
+  const height = lineCount * 36 + 16;
   const isScrollable = actualLines > maxLines;
 
   if (!query.trim()) {

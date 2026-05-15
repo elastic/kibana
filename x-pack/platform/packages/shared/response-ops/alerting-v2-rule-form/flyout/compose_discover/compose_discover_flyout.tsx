@@ -33,6 +33,7 @@ import {
 } from '../../form/utils/rule_request_mappers';
 import type { ComposeDiscoverMode, SandboxApplyData } from './types';
 import { useComposeDiscoverState, getSandboxTabConfig } from './use_compose_discover_state';
+import { getGroupByColumnsFromQuery } from '../../form/hooks/use_default_group_by';
 import { ComposeDiscoverForm, getSteps } from './compose_discover_form';
 import { ComposeDiscoverChild } from './compose_discover_child';
 import { useEsqlAutocomplete } from './use_esql_providers';
@@ -270,6 +271,11 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
         ? [data.baseQuery, data.alertBlock].filter(Boolean).join('\n')
         : data.fullQuery;
       methods.setValue('evaluation.query.base', evalBase);
+
+      const byFields = getGroupByColumnsFromQuery(evalBase);
+      if (byFields.length > 0) {
+        methods.setValue('grouping', { fields: byFields });
+      }
 
       if (data.isSplit) {
         dispatch({
