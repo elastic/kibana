@@ -38,25 +38,72 @@ import { useQueryExecution } from './use_query_execution';
 import { ComposeDiscoverChart } from './compose_discover_chart';
 import { ComposeDiscoverTabs, TAB_DEFINITIONS, visibleTabIds } from './compose_discover_tabs';
 
-interface ComposeDiscoverChildProps {
+/**
+ * Props for the Discover Sandbox flyout — a full-screen ES|QL editor with live
+ * query execution, time-range selection, and a results grid.
+ *
+ * ## Usage modes
+ *
+ * **Compose Discover flyout (default)** — the parent owns the draft and commits it
+ * to RHF on Apply. Pass `draft`, `onDraftChange`, and `onApply`.
+ *
+ * **Rule Builder preview** — show the committed query read-only so the user can
+ * inspect it before closing. Omit `onDraftChange` (makes editors read-only) and
+ * omit `onApply` (hides the Apply button; only the close button is shown).
+ *
+ * **Rule Builder edit** — let the user edit the query but commit on their own
+ * terms. Pass `onDraftChange` but omit `onApply` (close-only, no Apply button).
+ *
+ * ## State ownership
+ *
+ * `ComposeDiscoverChild` is a **props-only component** — it owns no query state.
+ * The parent is responsible for:
+ * - Holding `SandboxDraft` (editing buffer) via `useSandboxDraft`
+ * - Holding `timeField` in RHF (`ComposeFormValues.timeField`)
+ * - Owning `activeTab` in the UI-state reducer
+ * - Calling `draftToRuleQuery(draft, tracking)` and writing to RHF on Apply
+ *
+ * @see useSandboxDraft — editing buffer hook; keeps draft across open/close cycles
+ * @see draftToRuleQuery — converts draft + tracking flag to the `RuleQuery` API shape
+ */
+export interface ComposeDiscoverChildProps {
+  /** Editing buffer for all query strings and the preview date range. */
   draft: SandboxDraft;
-  /** When absent, all query editors are read-only (same as an uncontrolled input). */
+  /**
+   * Called with a partial update on every editor keystroke and date-picker change.
+   * When absent, all query editors are read-only (mirrors the uncontrolled-input pattern).
+   * The time field selector remains interactive regardless of this prop.
+   */
   onDraftChange?: (update: Partial<SandboxDraft>) => void;
-  /** Time field for query execution — managed by the parent via RHF. */
+  /**
+   * The ES|QL field used as the time axis (e.g. `@timestamp`). This is a rule
+   * configuration value stored in RHF — kept separate from `draft` so the selector
+   * remains interactive even when query editors are read-only.
+   */
   timeField: string;
   onTimeFieldChange: (field: string) => void;
-  /** Controls which tab layout the Sandbox renders. */
+  /** Controls whether the Sandbox renders a single editor or a split Base/Alert/Recovery layout. */
   tabConfig: SandboxTabConfig;
-  /** Active tab within the Sandbox, owned by the parent reducer. */
+  /** Active tab, owned by the parent reducer and passed down as a controlled value. */
   activeTab: QueryTab;
   onTabChange: (tab: QueryTab) => void;
-  /** When true, all query editors are locked (Rule Builder read-only preview). */
+  /**
+   * When true, all query editors are locked regardless of `onDraftChange`.
+   * Use this for Rule Builder read-only preview mode.
+   */
   readOnlyQueries?: boolean;
-  /** When provided, renders an "Apply changes" button that calls this on click.
-   *  When absent, no Apply button is shown (Rule Builder close-only mode). */
+  /**
+   * When provided, an "Apply changes" button is rendered in the flyout footer.
+   * Clicking it should commit `draft` to RHF (e.g. via `draftToRuleQuery`) and
+   * close the child flyout.
+   * When absent, no Apply button is shown — the flyout is close-only.
+   */
   onApply?: () => void;
   onClose: () => void;
+  /** Called with the Monaco editor instance when the alert-block editor mounts.
+   *  Use this to register split-query autocomplete providers at the flyout level. */
   onAlertEditorMount?: (editor: monaco.editor.IStandaloneCodeEditor) => void;
+  /** Called with the Monaco editor instance when the recovery-block editor mounts. */
   onRecoveryEditorMount?: (editor: monaco.editor.IStandaloneCodeEditor) => void;
 }
 

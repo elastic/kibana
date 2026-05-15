@@ -7,3 +7,9 @@
 
 export { ComposeDiscoverFlyout } from './compose_discover_flyout';
 export type { ComposeDiscoverFlyoutProps } from './compose_discover_flyout';
+
+export { ComposeDiscoverChild } from './compose_discover_child';
+export type { ComposeDiscoverChildProps } from './compose_discover_child';
+
+export { useSandboxDraft, draftToRuleQuery } from './use_sandbox_draft';
+export type { SandboxDraft, SandboxTabConfig, QueryTab } from './types';

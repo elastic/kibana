@@ -13,6 +13,15 @@ export { ComposeDiscoverFlyout } from './flyout/compose_discover';
 export type { ComposeDiscoverFlyoutProps } from './flyout/compose_discover';
 export type { ComposeDiscoverMode } from './flyout/compose_discover/types';
 
+// Compose Discover sandbox — embeddable ES|QL editor + results panel (props-only)
+export { ComposeDiscoverChild, useSandboxDraft, draftToRuleQuery } from './flyout/compose_discover';
+export type {
+  ComposeDiscoverChildProps,
+  SandboxDraft,
+  SandboxTabConfig,
+  QueryTab,
+} from './flyout/compose_discover';
+
 // Lazy components (without Suspense wrapper) - for consumers who need full control
 export { LazyDynamicRuleFormFlyout, LazyRuleFormFlyout } from './flyout';
 
