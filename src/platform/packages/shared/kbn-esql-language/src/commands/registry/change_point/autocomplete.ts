@@ -6,20 +6,24 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { i18n } from '@kbn/i18n';
 import type {
   ESQLAstAllCommands,
+  ESQLAstField,
   ESQLColumn,
   ESQLCommandOption,
-  ESQLSingleAstItem,
 } from '@elastic/esql/types';
-import { SuggestionCategory } from '../../../language/autocomplete/utils';
 import { withAutoSuggest } from '../../definitions/utils/autocomplete/helpers';
 import { ESQL_NUMBER_TYPES } from '../../definitions/types';
-import { byCompleteItem, commaCompleteItem, pipeCompleteItem } from '../complete_items';
+import {
+  byCompleteItem,
+  pipeCompleteItem,
+  onCompleteItem,
+  asCompletionItem,
+} from '../complete_items';
 import type { ISuggestionItem, ICommandCallbacks, ICommandContext } from '../types';
+import { Location } from '../types';
 import { buildUserDefinedColumnsDefinitions } from '../../definitions/utils/autocomplete/helpers';
-import { isOnlyWhitespace } from '../../definitions/utils/regex';
+import { suggestFieldsList } from '../../definitions/utils/autocomplete/fields_list';
 
 export enum Position {
   VALUE = 'value',
@@ -49,7 +53,7 @@ export const getPosition = (query: string, command: ESQLAstAllCommands): Positio
     return Position.ON_COLUMN;
   }
 
-  if (!Array.isArray(lastArg) && lastArg.name === 'on') {
+  if (!Array.isArray(lastArg) && lastArg.name === onCompleteItem.label.toLowerCase()) {
     if (query.match(/on\s+\S+\s+$/i)) {
       return Position.AFTER_ON_CLAUSE;
     }
@@ -59,7 +63,7 @@ export const getPosition = (query: string, command: ESQLAstAllCommands): Positio
     return Position.AS_TYPE_COLUMN;
   }
 
-  if (!Array.isArray(lastArg) && lastArg.name === 'as') {
+  if (!Array.isArray(lastArg) && lastArg.name === asCompletionItem.label.toLowerCase()) {
     if (query.match(/as\s+\S+,\s*\S*$/i)) {
       return Position.AS_P_VALUE_COLUMN;
     }
@@ -69,30 +73,10 @@ export const getPosition = (query: string, command: ESQLAstAllCommands): Positio
     }
   }
 
-  if (!Array.isArray(lastArg) && lastArg.name === 'by') {
+  if (!Array.isArray(lastArg) && lastArg.name === byCompleteItem.label.toLowerCase()) {
     return Position.BY_CLAUSE;
   }
 };
-
-export const onSuggestion: ISuggestionItem = withAutoSuggest({
-  label: 'ON',
-  text: 'ON ',
-  kind: 'Reference',
-  detail: i18n.translate('kbn-esql-language.esql.definitions.onDoc', {
-    defaultMessage: 'On',
-  }),
-  category: SuggestionCategory.LANGUAGE_KEYWORD,
-});
-
-export const asSuggestion: ISuggestionItem = withAutoSuggest({
-  label: 'AS',
-  text: 'AS ',
-  kind: 'Reference',
-  detail: i18n.translate('kbn-esql-language.esql.definitions.asDoc', {
-    defaultMessage: 'As',
-  }),
-  category: SuggestionCategory.LANGUAGE_KEYWORD,
-});
 
 export async function autocomplete(
   query: string,
@@ -113,7 +97,7 @@ export async function autocomplete(
         })) ?? [];
       return numericFields;
     case Position.AFTER_VALUE: {
-      return [onSuggestion, asSuggestion, byCompleteItem, pipeCompleteItem];
+      return [onCompleteItem, asCompletionItem, byCompleteItem, pipeCompleteItem];
     }
     case Position.ON_COLUMN: {
       const onFields =
@@ -124,7 +108,7 @@ export async function autocomplete(
       return onFields;
     }
     case Position.AFTER_ON_CLAUSE:
-      return [asSuggestion, byCompleteItem, pipeCompleteItem];
+      return [asCompletionItem, byCompleteItem, pipeCompleteItem];
     case Position.AS_TYPE_COLUMN: {
       // add comma and space
       return buildUserDefinedColumnsDefinitions(['changePointType']).map((v) =>
@@ -142,22 +126,24 @@ export async function autocomplete(
     }
     case Position.BY_CLAUSE: {
       const byNode = command.args[command.args.length - 1] as ESQLCommandOption;
-      const lastExpr = byNode.args[byNode.args.length - 1] as ESQLSingleAstItem | undefined;
-      const afterLastExpr = innerText.slice((lastExpr?.location?.max ?? 0) + 1);
-
-      if (!byNode.incomplete && isOnlyWhitespace(afterLastExpr)) {
-        return [commaCompleteItem, pipeCompleteItem];
-      }
 
       const usedColumns = byNode.args
-        .filter((a): a is ESQLColumn => !Array.isArray(a) && a.type === 'column')
-        .map((a) => a.parts.join('.'));
+        .filter((arg): arg is ESQLColumn => !Array.isArray(arg) && arg.type === 'column')
+        .map((arg) => arg.parts.join('.'));
 
-      return (
-        (await callbacks?.getByType?.('any', usedColumns, {
-          advanceCursor: true,
-          openSuggestions: true,
-        })) ?? []
+      return suggestFieldsList(
+        query,
+        command,
+        byNode.args as ESQLAstField[],
+        Location.CHANGE_POINT_BY,
+        callbacks,
+        context,
+        cursorPosition ?? innerText.length,
+        {
+          allowSingleColumnFields: true,
+          disableNewColumnSuggestion: true,
+          ignoredColumnsForEmptyExpression: usedColumns,
+        }
       );
     }
     default:

@@ -8,9 +8,36 @@
  */
 import { mockContext, getMockCallbacks } from '../../../__tests__/commands/context_fixtures';
 import { autocomplete } from './autocomplete';
-import { expectSuggestions, getFieldNamesByType } from '../../../__tests__/commands/autocomplete';
+import {
+  expectSuggestions,
+  getFieldNamesByType,
+  getFunctionSignaturesByReturnType,
+} from '../../../__tests__/commands/autocomplete';
 import type { ICommandCallbacks } from '../types';
+import { Location } from '../types';
 import { ESQL_NUMBER_TYPES } from '../../definitions/types';
+import {
+  byCompleteItem,
+  pipeCompleteItem,
+  commaCompleteItem,
+  onCompleteItem,
+  asCompletionItem,
+} from '../complete_items';
+
+const BY = byCompleteItem.text;
+const ON = onCompleteItem.text;
+const AS = asCompletionItem.text;
+const PIPE = pipeCompleteItem.text;
+const COMMA = `${commaCompleteItem.text} `;
+
+const allScalarFunctionsForBy = getFunctionSignaturesByReturnType(
+  Location.CHANGE_POINT_BY,
+  'any',
+  { scalar: true, grouping: true },
+  undefined,
+  undefined,
+  BY
+);
 
 const changePointExpectSuggestions = (
   query: string,
@@ -48,12 +75,7 @@ describe('CHANGE_POINT Autocomplete', () => {
   });
 
   it('suggests ON after value column', async () => {
-    await changePointExpectSuggestions(`from a | change_point value /`, [
-      'ON ',
-      'AS ',
-      'BY ',
-      '| ',
-    ]);
+    await changePointExpectSuggestions(`from a | change_point value /`, [ON, AS, BY, PIPE]);
   });
 
   it('suggests fields after ON', async () => {
@@ -65,11 +87,7 @@ describe('CHANGE_POINT Autocomplete', () => {
 
   describe('AS', () => {
     it('suggests AS after ON <field>', async () => {
-      await changePointExpectSuggestions(`from a | change_point value on field `, [
-        'AS ',
-        'BY ',
-        '| ',
-      ]);
+      await changePointExpectSuggestions(`from a | change_point value on field `, [AS, BY, PIPE]);
     });
 
     it('suggests default field name for AS clauses with an empty ON', async () => {
@@ -102,7 +120,7 @@ describe('CHANGE_POINT Autocomplete', () => {
     it('suggests pipe after complete command', async () => {
       await changePointExpectSuggestions(
         `from a | change_point value on field as changePointType, pValue `,
-        ['BY ', '| ']
+        [BY, PIPE]
       );
     });
   });
@@ -111,24 +129,30 @@ describe('CHANGE_POINT Autocomplete', () => {
     it('suggests the pipe after the AS clause, On clause should not be suggested', async () => {
       await changePointExpectSuggestions(
         `from a | change_point value as changePointType, pValue `,
-        ['BY ', '| ']
+        [BY, PIPE]
       );
     });
   });
 
   describe('BY', () => {
-    it('suggests fields after BY', async () => {
-      const expectedFields = getFieldNamesByType('any');
-      await changePointExpectSuggestions(`from a | change_point value by /`, expectedFields);
+    it('suggests fields and functions after BY', async () => {
+      const expected = [...getFieldNamesByType('any'), ...allScalarFunctionsForBy];
+      await changePointExpectSuggestions(`from a | change_point value by `, expected);
     });
 
-    it('suggests fields after BY <field>,', async () => {
-      const expectedFields = getFieldNamesByType('any');
-      await changePointExpectSuggestions(`from a | change_point value by host, /`, expectedFields);
+    it('suggests fields and functions after BY <field>,', async () => {
+      const expected = [
+        ...getFieldNamesByType('any').filter((name) => name !== 'keywordField'),
+        ...allScalarFunctionsForBy,
+      ];
+      await changePointExpectSuggestions(`from a | change_point value by keywordField, `, expected);
     });
 
     it('suggests comma and pipe after a complete grouping field', async () => {
-      await changePointExpectSuggestions(`from a | change_point value by host `, [',', '| ']);
+      await changePointExpectSuggestions(`from a | change_point value by keywordField `, [
+        COMMA,
+        PIPE,
+      ]);
     });
   });
 });
