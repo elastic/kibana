@@ -40,6 +40,7 @@ import type { TextNodeEntry } from './text_node_editor';
 import { SourceEditor } from './source_editor';
 import type { SourceEditorEntry } from './source_editor';
 import { HtmlAttributesEditor } from './html_attributes_editor';
+import { DimensionsEditor } from './dimensions_editor';
 import { createPreviewClone } from '../../../lib/dom/create_preview_clone';
 
 export interface StyleChange {
@@ -52,6 +53,8 @@ export interface TextNodeChange {
   node: Text;
   text?: string;
   color?: string;
+  fontSize?: string;
+  fontWeight?: string;
 }
 
 export interface SourceChange {
@@ -100,6 +103,19 @@ export const EditModal = ({ target, onClose, onSave }: Props) => {
     };
   }, []);
 
+  /**
+   * Re-select the current element to refresh the preview overlay.
+   * Used after dimension/font changes that alter the element's size.
+   */
+  const refreshOverlay = useCallback(() => {
+    if (selectedElement) {
+      // Defer to next frame so the DOM has updated from the style change.
+      requestAnimationFrame(() => {
+        handleSelectRef.current(selectedElement);
+      });
+    }
+  }, [selectedElement]);
+
   const previewCallbackRef = useCallback(
     (node: HTMLDivElement | null) => {
       if (!node) return;
@@ -125,10 +141,13 @@ export const EditModal = ({ target, onClose, onSave }: Props) => {
         const cl = cloneTextNodes[idx];
         if (!cl) continue;
         const parentEl = cl.parentElement;
+        const parentStyles = parentEl ? getComputedStyle(parentEl) : null;
         entries.push({
           node: orig,
           text: cl.textContent ?? '',
-          color: parentEl ? rgbToHex(getComputedStyle(parentEl).color) || '' : '',
+          color: parentStyles ? rgbToHex(parentStyles.color) || '' : '',
+          fontSize: parentStyles ? parentStyles.fontSize : '',
+          fontWeight: parentStyles ? parentStyles.fontWeight : '',
         });
         mapping.push({ original: orig, clone: cl });
       }
@@ -195,12 +214,45 @@ export const EditModal = ({ target, onClose, onSave }: Props) => {
     [selectedElement, setColor]
   );
 
+  const handleDimensionChange = useCallback(
+    (property: string, value: string) => {
+      if (!(selectedElement instanceof HTMLElement)) return;
+
+      const cloneEl = elementMapRef.current.get(selectedElement);
+      if (cloneEl instanceof HTMLElement) {
+        setImportant(cloneEl, property, value);
+      }
+
+      setStyleChanges((prev) => {
+        const filtered = prev.filter(
+          (c) => !(c.element === selectedElement && c.property === property)
+        );
+        return [
+          ...filtered,
+          { element: selectedElement as HTMLElement, property, value },
+        ];
+      });
+
+      refreshOverlay();
+    },
+    [selectedElement, refreshOverlay]
+  );
+
+  const handleDimensionFocus = useCallback(() => {
+    if (selectedElement) {
+      handleSelect(selectedElement);
+    }
+  }, [selectedElement, handleSelect]);
+
   const handleSave = useCallback(() => {
     onSave(styleChanges, [...textChanges.values()], [...sourceChanges.values()]);
   }, [styleChanges, textChanges, sourceChanges, onSave]);
 
   const handleTextNodeChange = useCallback(
-    (index: number, updates: { text?: string; color?: string }) => {
+    (
+      index: number,
+      updates: { text?: string; color?: string; fontSize?: string; fontWeight?: string }
+    ) => {
       const entry = textNodeMap.current[index];
       if (!entry) return;
 
@@ -208,11 +260,17 @@ export const EditModal = ({ target, onClose, onSave }: Props) => {
       if (updates.text !== undefined) {
         entry.clone.textContent = updates.text;
       }
-      if (updates.color !== undefined) {
-        const parent = entry.clone.parentElement;
-        if (parent) {
+      const parent = entry.clone.parentElement;
+      if (parent) {
+        if (updates.color !== undefined) {
           setImportant(parent, 'color', updates.color);
           setImportant(parent, '-webkit-text-fill-color', updates.color);
+        }
+        if (updates.fontSize !== undefined) {
+          setImportant(parent, 'font-size', updates.fontSize);
+        }
+        if (updates.fontWeight !== undefined) {
+          setImportant(parent, 'font-weight', updates.fontWeight);
         }
       }
 
@@ -225,9 +283,15 @@ export const EditModal = ({ target, onClose, onSave }: Props) => {
         const existing = next.get(entry.original) ?? { node: entry.original };
         if (updates.text !== undefined) existing.text = updates.text;
         if (updates.color !== undefined) existing.color = updates.color;
+        if (updates.fontSize !== undefined) existing.fontSize = updates.fontSize;
+        if (updates.fontWeight !== undefined) existing.fontWeight = updates.fontWeight;
         next.set(entry.original, existing);
         return next;
       });
+
+      // Re-select the current element to refresh the preview outline
+      // since font changes can alter the element's dimensions.
+      refreshOverlay();
     },
     []
   );
@@ -317,6 +381,54 @@ export const EditModal = ({ target, onClose, onSave }: Props) => {
   const previewItemCss = useMemo(() => css({ flex: '1 1 0', minWidth: 0, overflow: 'hidden' }), []);
   const treeItemCss = useMemo(() => css({ flex: '0 0 300px', minWidth: 200 }), []);
   const columnCss = useMemo(() => css({ flex: '1 1 0', minWidth: 250 }), []);
+
+  const DIMENSION_PROPS: Array<{ property: string; label: string }> = useMemo(
+    () => [
+      {
+        property: 'width',
+        label: i18n.translate('kbnDesignTools.edit.modal.dimensions.width', {
+          defaultMessage: 'Width',
+        }),
+      },
+      {
+        property: 'height',
+        label: i18n.translate('kbnDesignTools.edit.modal.dimensions.height', {
+          defaultMessage: 'Height',
+        }),
+      },
+      {
+        property: 'padding',
+        label: i18n.translate('kbnDesignTools.edit.modal.dimensions.padding', {
+          defaultMessage: 'Padding',
+        }),
+      },
+      {
+        property: 'margin',
+        label: i18n.translate('kbnDesignTools.edit.modal.dimensions.margin', {
+          defaultMessage: 'Margin',
+        }),
+      },
+      {
+        property: 'border-radius',
+        label: i18n.translate('kbnDesignTools.edit.modal.dimensions.borderRadius', {
+          defaultMessage: 'Border radius',
+        }),
+      },
+    ],
+    []
+  );
+
+  const dimensionEntries = useMemo(() => {
+    if (!selectedElement || !(selectedElement instanceof HTMLElement)) return [];
+    const cloneEl = elementMapRef.current.get(selectedElement);
+    const el = cloneEl instanceof HTMLElement ? cloneEl : selectedElement;
+    const computed = window.getComputedStyle(el);
+    return DIMENSION_PROPS.map(({ property, label }) => ({
+      property,
+      label,
+      value: computed.getPropertyValue(property),
+    }));
+  }, [selectedElement, DIMENSION_PROPS, styleChanges]);
 
   return (
     <EuiModal
@@ -412,6 +524,20 @@ export const EditModal = ({ target, onClose, onSave }: Props) => {
                   </EuiTitle>
                   <EuiSpacer size="s" />
                   <HtmlAttributesEditor color={color || '#FFFFFF'} onChange={handleColorChange} />
+                  <EuiSpacer size="m" />
+                  <EuiTitle size="xxs">
+                    <h4>
+                      {i18n.translate('kbnDesignTools.edit.modal.dimensionsColumnTitle', {
+                        defaultMessage: 'Dimensions',
+                      })}
+                    </h4>
+                  </EuiTitle>
+                  <EuiSpacer size="s" />
+                  <DimensionsEditor
+                    entries={dimensionEntries}
+                    onChange={handleDimensionChange}
+                    onFocus={handleDimensionFocus}
+                  />
                 </EuiFlexItem>
               )}
             </EuiFlexGroup>

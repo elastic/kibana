@@ -61,7 +61,7 @@ export const useEditChangeTracker = (registryRef: MutableRefObject<ElementRegist
         setImportant(element, cssProp, value);
       }
 
-      for (const { node, text, color: textColor } of savedTextChanges) {
+      for (const { node, text, color: textColor, fontSize, fontWeight } of savedTextChanges) {
         if (text !== undefined) {
           textEdits.push({ node, original: node.textContent ?? '' });
           node.textContent = text;
@@ -84,6 +84,26 @@ export const useEditChangeTracker = (registryRef: MutableRefObject<ElementRegist
           });
           setImportant(parent, 'color', textColor);
           setImportant(parent, '-webkit-text-fill-color', textColor);
+        }
+        if (fontSize !== undefined && node.parentElement) {
+          const parent = node.parentElement;
+          styleEdits.push({
+            element: parent,
+            property: 'font-size',
+            original: parent.style.getPropertyValue('font-size'),
+            originalPriority: parent.style.getPropertyPriority('font-size'),
+          });
+          setImportant(parent, 'font-size', fontSize);
+        }
+        if (fontWeight !== undefined && node.parentElement) {
+          const parent = node.parentElement;
+          styleEdits.push({
+            element: parent,
+            property: 'font-weight',
+            original: parent.style.getPropertyValue('font-weight'),
+            originalPriority: parent.style.getPropertyPriority('font-weight'),
+          });
+          setImportant(parent, 'font-weight', fontWeight);
         }
       }
 
