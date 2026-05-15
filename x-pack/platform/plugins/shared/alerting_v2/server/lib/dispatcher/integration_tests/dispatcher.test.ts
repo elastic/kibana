@@ -9,7 +9,7 @@ import type { TestElasticsearchUtils, TestKibanaUtils } from '@kbn/core-test-hel
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
-import { eventLoggerMock } from '@kbn/event-log-plugin/server/mocks';
+import { createEventLogService } from '../../services/event_log_service/event_log_service.mock';
 import {
   MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
   type MaintenanceWindowAttributes,
@@ -481,7 +481,8 @@ describe('DispatcherService integration tests', () => {
   let rulesSoService: RulesSavedObjectServiceContract;
   let npSoService: ActionPolicySavedObjectServiceContract;
   let mockWfm: WorkflowsServerPluginSetup['management'];
-  let eventLogger: ReturnType<typeof eventLoggerMock.create>;
+  let eventLogService: ReturnType<typeof createEventLogService>['eventLogService'];
+  let eventLogger: ReturnType<typeof createEventLogService>['mockEventLogger'];
 
   beforeAll(async () => {
     const servers = await setupTestServers();
@@ -526,7 +527,9 @@ describe('DispatcherService integration tests', () => {
     queryService = new QueryService(esClient, mockLoggerService);
     storageService = new StorageService(esClient, mockLoggerService);
     mockWfm = createMockWorkflowsManagement();
-    eventLogger = eventLoggerMock.create();
+    const services = createEventLogService();
+    eventLogService = services.eventLogService;
+    eventLogger = services.mockEventLogger;
 
     jest.spyOn(npSoService, 'findAllDecrypted').mockImplementation(async () => {
       const { saved_objects: allPolicies } = await npSoService.find({
@@ -558,7 +561,7 @@ describe('DispatcherService integration tests', () => {
       new ApplyThrottlingStep(queryService, mockLoggerService),
       new DispatchStep(mockLoggerService, mockWfm),
       new StoreActionsStep(storageService),
-      new StoreExecutionHistoryStep(eventLogger),
+      new StoreExecutionHistoryStep(eventLogService),
     ]);
     dispatcherService = new DispatcherService(pipeline);
 
@@ -1301,6 +1304,7 @@ async function seedRulesAndPolicies(
   const policyAttrs: ActionPolicySavedObjectAttributes = {
     name: 'Test Policy',
     description: 'Test action policy',
+    type: 'global',
     enabled: true,
     destinations: [{ type: 'workflow' as const, id: 'test-workflow' }],
     auth: {
@@ -1321,6 +1325,7 @@ async function seedRulesAndPolicies(
     ...policyAttrs,
     name: 'Matcher Policy',
     description: 'Only matches critical severity',
+    type: 'global',
     enabled: false,
     matcher: 'data.severity: "critical"',
   };
@@ -1330,6 +1335,7 @@ async function seedRulesAndPolicies(
     ...policyAttrs,
     name: 'GroupBy Policy',
     description: 'Groups by host.name',
+    type: 'global',
     enabled: false,
     groupBy: ['data.host.name'],
     groupingMode: 'per_field',

@@ -241,7 +241,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         it(`should be able to add a new ${testData.title} entry`, async () => {
           await createArtifact(testData, { policyId: policyInfo.packagePolicy.id });
-          // Check new artifact is in the list
+
+          // Check new artifact is in the list (wait for list to be updated)
+          await retry.waitForWithTimeout('entry is added to list', 20000, async () => {
+            const currentValue = await testSubjects.getVisibleText(
+              testData.create.checkResults[0].selector
+            );
+            return currentValue === testData.create.checkResults[0].value;
+          });
+
           for (const checkResult of testData.create.checkResults) {
             expect(await testSubjects.getVisibleText(checkResult.selector)).to.equal(
               checkResult.value
