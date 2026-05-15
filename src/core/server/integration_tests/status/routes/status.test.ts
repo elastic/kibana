@@ -543,7 +543,7 @@ describe('GET /api/status', () => {
       expect(logger.warn).not.toHaveBeenCalled();
     });
 
-    it('falls back to the redacted body and warns (no counter) when hasPrivileges throws', async () => {
+    it('falls back to the redacted no-monitor body when hasPrivileges throws', async () => {
       await setupServer({
         allowAnonymous: false,
         coreOverall: createServiceStatus(ServiceStatusLevels.available),
@@ -558,11 +558,10 @@ describe('GET /api/status', () => {
         .expect(200);
 
       expect(response.body).toEqual(REDACTED_BODY);
-      expect(incrementUsageCounter).not.toHaveBeenCalledWith({
+      expect(incrementUsageCounter).toHaveBeenCalledWith({
         counterName: 'status_redacted_no_monitor',
       });
-      expect(logger.warn).toHaveBeenCalledTimes(1);
-      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('boom'));
+      expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('boom'));
     });
 
     it('returns the same byte-identical redacted body for unauthenticated and no-monitor callers', async () => {

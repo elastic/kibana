@@ -134,7 +134,8 @@ groups:
 
       - setting: status.statusPageBypassMonitorPrivilege
         description: |
-          If authentication is enabled and `status.allowAnonymous` is `false`, setting this to `true` enables authenticated users to access the full {{kib}} server status API and status page without requiring the Elasticsearch `monitor` cluster privilege.
+          Allow all authenticated users to access the full {{kib}} server status API. When `false`, users are required to have the Elasticsearch `monitor` cluster privilege.
+          NOTE: This setting is only relevant if `status.allowAnonymous` is `false` (default).
         datatype: bool
         default: false
         applies_to:

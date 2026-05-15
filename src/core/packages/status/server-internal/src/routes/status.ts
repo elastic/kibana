@@ -100,7 +100,9 @@ const resolveStatusDecision = async ({
     logger.debug(
       `Failed to check 'monitor' cluster privilege for /api/status, returning redacted response: ${message}`
     );
-    return 'unauthenticated';
+    // The caller is authenticated; we just couldn't verify the privilege, so account for this as
+    // a no-monitor response rather than misattributing it to the unauthenticated bucket.
+    return 'no-monitor';
   }
 };
 
