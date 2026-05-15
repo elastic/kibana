@@ -39,6 +39,9 @@ interface FindCompositeSloDeps {
  *
  * Composites without a persisted summary doc (e.g. a still-bootstrapping deployment from a
  * pre-inline-persist build) will not appear here until the background task runs.
+ *
+ * Summary docs without a usable `compositeSlo.id` are excluded in the query so `total` and
+ * pagination align with rows we can resolve (see `compositeSlo.id` keyword mapping).
  */
 async function findCompositeSlos(
   {
@@ -53,7 +56,14 @@ async function findCompositeSlos(
   }: FindCompositeSloParams,
   { compositeSloRepository, esClient }: FindCompositeSloDeps
 ): Promise<Paginated<CompositeSLODefinition>> {
-  const filters: QueryDslQueryContainer[] = [{ term: { spaceId } }];
+  const filters: QueryDslQueryContainer[] = [
+    { term: { spaceId } },
+    {
+      bool: {
+        must: [{ exists: { field: 'compositeSlo.id' } }],        
+      },
+    },
+  ];
   if (search) {
     filters.push({
       simple_query_string: {
