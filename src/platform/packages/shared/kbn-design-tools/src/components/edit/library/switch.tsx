@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import type { EuiSwitchEvent } from '@elastic/eui';
 import { EuiSwitch } from '@elastic/eui';
+import { useSerializableState } from './serializable_state';
 
 interface Props {
   label?: string;
@@ -27,7 +28,7 @@ export const SwitchRegular = ({
   mini = false,
   noLabel = false,
 }: Props) => {
-  const [checked, setChecked] = useState(false);
+  const [checked, setChecked] = useSerializableState('checked', false);
 
   const handleChange = (e: EuiSwitchEvent) => {
     setChecked(e.target.checked);

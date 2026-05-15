@@ -180,6 +180,7 @@ export const applyResizeMove = (state: ResizeState, clientX: number, clientY: nu
     baseDy
   );
 
+  if (originalRect.width === 0 || originalRect.height === 0) return;
   const scaleX = width / originalRect.width;
   const scaleY = height / originalRect.height;
   const newTransform = buildTransform(dx, dy, scaleX, scaleY);

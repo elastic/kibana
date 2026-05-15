@@ -32,7 +32,7 @@ export const useDeleteElement = (onDelete?: () => void) => {
       setImportant(el, 'pointer-events', 'none');
       el.setAttribute(DEVTOOL_HIDDEN_ATTR, el.style.transform || '');
       deletedElements.current.add(el);
-      el.style.transition = 'opacity 120ms ease';
+      setImportant(el, 'transition', 'opacity 120ms ease');
       el.style.opacity = '0';
       const timerId = setTimeout(() => {
         pendingTimers.current.delete(timerId);

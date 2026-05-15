@@ -35,8 +35,11 @@ export interface SourceEdit {
 
 /**
  * Revert all edits recorded in the given arrays and clear them.
+ *
+ * Exported for use by history executors that need to reverse edit
+ * transactions independently of session lifecycle.
  */
-const revertEdits = (
+export const revertEdits = (
   styleEdits: StyleEdit[],
   textEdits: TextEdit[],
   sourceEdits: SourceEdit[]

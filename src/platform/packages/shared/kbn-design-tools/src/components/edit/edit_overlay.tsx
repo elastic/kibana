@@ -43,6 +43,8 @@ import { createDuplicate } from '../../lib/dom/duplicate_helpers';
 import { EditOutline } from './outline';
 import { EditModal } from './modal/edit_modal';
 import type { StyleChange, TextNodeChange, SourceChange } from './modal/edit_modal';
+import { exportState, importState, downloadJson } from '../../lib/history/serialization/session_io';
+import type { ImportResult, ExportedState } from '../../lib/history/serialization/session_io';
 
 export interface EditOverlayHandle {
   resetAll: () => void;
@@ -51,6 +53,8 @@ export interface EditOverlayHandle {
     liveReactElement?: { element: ReactElement; zIndex: number },
     cleanup?: () => void
   ) => void;
+  exportSessions: () => void;
+  importSessions: (file: ExportedState) => Promise<ImportResult>;
 }
 
 interface Props {
@@ -202,7 +206,28 @@ export const EditOverlay = ({
     [notifyCount, updateHoverTarget]
   );
 
-  useImperativeHandle(handleRef, () => ({ resetAll, insertElement }), [resetAll, insertElement]);
+  useImperativeHandle(
+    handleRef,
+    () => ({
+      resetAll,
+      insertElement,
+      exportSessions: () => {
+        const state = exportState(registry.current);
+        downloadJson(state, `design-tools-export-${Date.now()}.json`);
+      },
+      importSessions: async (file: ExportedState) => {
+        // Clear existing sessions before importing to prevent duplicate
+        // elements when importing the same file twice.
+        resetAll();
+        const result = await importState(file, registry.current);
+        if (result.restoredCount > 0 || result.deletedCount > 0) {
+          notifyCount();
+        }
+        return result;
+      },
+    }),
+    [resetAll, insertElement, notifyCount]
+  );
 
   // Reset all edits when SPA navigation removes the edited originals.
   // Hidden originals are marked with DEVTOOL_HIDDEN_ATTR — when React

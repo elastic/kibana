@@ -163,7 +163,10 @@ const buildIconCache = (): Promise<Map<string, string>> => {
   if (pathToTypeMap) return Promise.resolve(pathToTypeMap);
   if (buildIconCachePromise) return buildIconCachePromise;
 
-  buildIconCachePromise = buildIconCacheImpl();
+  buildIconCachePromise = buildIconCacheImpl().catch((err) => {
+    buildIconCachePromise = undefined;
+    throw err;
+  });
   return buildIconCachePromise;
 };
 

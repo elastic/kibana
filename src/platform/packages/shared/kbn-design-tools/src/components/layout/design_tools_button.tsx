@@ -9,6 +9,7 @@
 
 import React, { useCallback, useRef, useState } from 'react';
 import type { MouseEvent, ReactElement } from 'react';
+import { flushSync } from 'react-dom';
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import {
   EuiButtonIcon,
@@ -40,7 +41,9 @@ import {
   renderEuiComponentLive,
   centerInViewport,
 } from '../../lib/dom/insert_element';
+import { DEVTOOL_LIBRARY_ID_ATTR } from '../../lib/constants';
 import { preloadAllEuiIcons } from '../../lib/eui_icon_cache';
+import { pickJsonFile } from '../../lib/history/serialization/session_io';
 
 /**
  * Toggles a column layout overlay and provides layout settings.
@@ -92,8 +95,32 @@ export const DesignToolsButton = () => {
     setIsPopoverOpen(false);
   };
 
+  const handleExport = () => {
+    editHandleRef.current?.exportSessions();
+    setIsPopoverOpen(false);
+  };
+
+  const handleImport = async () => {
+    const file = await pickJsonFile();
+    if (!file) return;
+
+    // Force a synchronous render so EditOverlay mounts and populates
+    // editHandleRef before we call importSessions. Without flushSync
+    // the async context causes React to defer the commit, leaving the
+    // ref null when we read it.
+    flushSync(() => {
+      setIsPopoverOpen(false);
+      setIsEditMode(true);
+    });
+
+    const result = await editHandleRef.current?.importSessions(file);
+    if (result && (result.restoredCount > 0 || result.deletedCount > 0)) {
+      setMoveCount((prev) => prev + result.restoredCount + result.deletedCount);
+    }
+  };
+
   const handleInsertEui = useCallback(
-    async (element: ReactElement, interactive?: boolean) => {
+    async (element: ReactElement, interactive?: boolean, libraryId?: string) => {
       setIsPopoverOpen(false);
       await preloadAllEuiIcons();
 
@@ -112,6 +139,10 @@ export const DesignToolsButton = () => {
         const cloned = await renderAndCloneEuiComponent(element, zIndex.clone);
         el = cloned.clone;
         rect = cloned.rect;
+      }
+
+      if (libraryId) {
+        el.setAttribute(DEVTOOL_LIBRARY_ID_ATTR, libraryId);
       }
 
       centerInViewport(el, rect);
@@ -196,6 +227,24 @@ export const DesignToolsButton = () => {
           }),
           icon: 'plusInCircle',
           panel: ADD_EUI_PANEL_ID,
+        },
+        {
+          isSeparator: true,
+        },
+        {
+          name: i18n.translate('kbnDesignTools.layout.popover.exportLabel', {
+            defaultMessage: 'Export',
+          }),
+          icon: 'exportAction',
+          onClick: handleExport,
+          disabled: moveCount === 0,
+        },
+        {
+          name: i18n.translate('kbnDesignTools.layout.popover.importLabel', {
+            defaultMessage: 'Import',
+          }),
+          icon: 'importAction',
+          onClick: handleImport,
         },
       ],
     },

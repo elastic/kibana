@@ -43,6 +43,9 @@ export const DEVTOOL_MANAGED_ATTR = 'data-devtool-managed';
 /** Marks a managed element owned by the edit overlay. Also indicates the element is a live React component that can be re-rendered in-place. */
 export const DEVTOOL_LIVE_ATTR = 'data-devtool-live';
 
+/** Stores the EUI library ID on an inserted element (e.g. "Switch/Regular") for export/import. */
+export const DEVTOOL_LIBRARY_ID_ATTR = 'data-devtool-library-id';
+
 /** Marks an original element hidden by the edit overlay. Stores the original inline transform. */
 export const DEVTOOL_HIDDEN_ATTR = 'data-devtool-hidden';
 

@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { EuiSelect, EuiSuperSelect } from '@elastic/eui';
+import { useSerializableState } from './serializable_state';
 
 const selectOptions = [
   { value: 'option_one', text: 'Option one' },
@@ -23,7 +24,7 @@ const superSelectOptions = [
 ];
 
 export const SelectRegular = () => {
-  const [value, setValue] = useState('option_one');
+  const [value, setValue] = useSerializableState('value', 'option_one');
   return (
     <EuiSelect
       aria-label="Select an option"
@@ -35,7 +36,7 @@ export const SelectRegular = () => {
 };
 
 export const SelectCompressed = () => {
-  const [value, setValue] = useState('option_one');
+  const [value, setValue] = useSerializableState('value', 'option_one');
   return (
     <EuiSelect
       aria-label="Select an option"
@@ -56,25 +57,25 @@ export const SelectLoading = () => (
 );
 
 export const SuperSelectRegular = () => {
-  const [value, setValue] = useState('minor');
+  const [value, setValue] = useSerializableState('value', 'minor');
   return (
     <EuiSuperSelect
       aria-label="Select severity"
       options={superSelectOptions}
       valueOfSelected={value}
-      onChange={setValue}
+      onChange={(v) => setValue(v)}
     />
   );
 };
 
 export const SuperSelectCompressed = () => {
-  const [value, setValue] = useState('minor');
+  const [value, setValue] = useSerializableState('value', 'minor');
   return (
     <EuiSuperSelect
       aria-label="Select severity"
       options={superSelectOptions}
       valueOfSelected={value}
-      onChange={setValue}
+      onChange={(v) => setValue(v)}
       compressed
     />
   );

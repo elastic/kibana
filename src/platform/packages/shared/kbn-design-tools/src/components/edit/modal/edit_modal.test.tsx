@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { cleanup, fireEvent, screen } from '@testing-library/react';
+import { cleanup, fireEvent, screen, act } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { EditModal } from './edit_modal';
 
@@ -45,37 +45,42 @@ describe('EditModal', () => {
     target.remove();
   });
 
-  it('renders the modal with title and action buttons', () => {
+  it('renders the modal with title and action buttons', async () => {
     renderWithI18n(<EditModal target={target} onClose={onClose} onSave={onSave} />);
+    await act(async () => {});
 
     expect(screen.getByText('Edit element')).toBeInTheDocument();
     expect(screen.getByText('Cancel')).toBeInTheDocument();
     expect(screen.getByText('Save')).toBeInTheDocument();
   });
 
-  it('calls onClose when Cancel is clicked', () => {
+  it('calls onClose when Cancel is clicked', async () => {
     renderWithI18n(<EditModal target={target} onClose={onClose} onSave={onSave} />);
+    await act(async () => {});
 
     fireEvent.click(screen.getByText('Cancel'));
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  it('renders element tree with the target tag', () => {
+  it('renders element tree with the target tag', async () => {
     renderWithI18n(<EditModal target={target} onClose={onClose} onSave={onSave} />);
+    await act(async () => {});
 
     // The tree should show the 'div' tag
     expect(screen.getByText('div')).toBeInTheDocument();
   });
 
-  it('renders Attributes section with background color picker', () => {
+  it('renders Attributes section with background color picker', async () => {
     renderWithI18n(<EditModal target={target} onClose={onClose} onSave={onSave} />);
+    await act(async () => {});
 
     expect(screen.getByText('Attributes')).toBeInTheDocument();
     expect(screen.getByText('Background color')).toBeInTheDocument();
   });
 
-  it('calls onSave with empty changes when Save is forced', () => {
+  it('calls onSave with empty changes when Save is forced', async () => {
     renderWithI18n(<EditModal target={target} onClose={onClose} onSave={onSave} />);
+    await act(async () => {});
 
     // Save button should be disabled when no changes
     const saveButton = screen.getByText('Save').closest('button');

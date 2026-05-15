@@ -9,6 +9,7 @@
 
 import React, { useState } from 'react';
 import { EuiButtonGroup } from '@elastic/eui';
+import { useSerializableState } from './serializable_state';
 
 const singleOptions = [
   { id: 'dt-bg-opt1', label: 'Option one' },
@@ -29,7 +30,7 @@ const multiOptions = [
 ];
 
 export const ButtonGroupSingle = () => {
-  const [selected, setSelected] = useState('dt-bg-opt2');
+  const [selected, setSelected] = useSerializableState('selected', 'dt-bg-opt2');
   return (
     <EuiButtonGroup
       legend="Single select button group"
@@ -41,7 +42,7 @@ export const ButtonGroupSingle = () => {
 };
 
 export const ButtonGroupIconOnly = () => {
-  const [selected, setSelected] = useState('dt-bg-icon1');
+  const [selected, setSelected] = useSerializableState('selected', 'dt-bg-icon1');
   return (
     <EuiButtonGroup
       legend="Text alignment"
@@ -70,7 +71,7 @@ export const ButtonGroupMulti = () => {
 };
 
 export const ButtonGroupCompressed = () => {
-  const [selected, setSelected] = useState('dt-bg-opt1');
+  const [selected, setSelected] = useSerializableState('selected', 'dt-bg-opt1');
   return (
     <EuiButtonGroup
       legend="Compressed button group"

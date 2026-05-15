@@ -14,6 +14,7 @@ import { EuiThemeProvider } from '@elastic/eui';
 import { cloneClean, setImportant } from './clone_element';
 import { DEVTOOL_MANAGED_ATTR, DEVTOOL_LIVE_ATTR } from '../constants';
 import { getPageColorMode } from './get_page_color_mode';
+import { SerializedStateContext } from '../../components/edit/library/serializable_state';
 
 /**
  * Render a ReactElement into the DOM, run `cloneClean` to produce a fully
@@ -76,7 +77,8 @@ export const renderAndCloneEuiComponent = async (
  */
 export const renderEuiComponentLive = async (
   element: ReactElement,
-  zIndex: number
+  zIndex: number,
+  initialState?: Record<string, string>
 ): Promise<{
   wrapper: HTMLElement;
   rect: DOMRect;
@@ -95,12 +97,27 @@ export const renderEuiComponentLive = async (
   document.body.appendChild(wrapper);
 
   const root = createRoot(wrapper);
-  const { flushSync } = await import('react-dom');
-  flushSync(() => {
-    root.render(
-      React.createElement(EuiThemeProvider, { colorMode: getPageColorMode(), children: element })
-    );
-  });
+  try {
+    const { flushSync } = await import('react-dom');
+    flushSync(() => {
+      const stateProvider = initialState
+        ? React.createElement(SerializedStateContext.Provider, {
+            value: initialState,
+            children: element,
+          })
+        : element;
+      root.render(
+        React.createElement(EuiThemeProvider, {
+          colorMode: getPageColorMode(),
+          children: stateProvider,
+        })
+      );
+    });
+  } catch (err) {
+    root.unmount();
+    wrapper.remove();
+    throw err;
+  }
 
   const rendered = wrapper.firstElementChild as HTMLElement;
   if (!rendered) {

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DUPLICATE_OFFSET } from '../constants';
+import { DUPLICATE_OFFSET, DEVTOOL_LIBRARY_ID_ATTR } from '../constants';
 import { cloneClean, setImportant, roundRect } from './clone_element';
 import type { ElementSession, ElementRegistry, SourceEdit } from './element_registry';
 import { buildTransform } from './resize_helpers';
@@ -18,13 +18,18 @@ import { replaceIconContent } from '../eui_icon_cache';
  * Replay source edits (e.g. icon replacements) from a source element tree
  * onto a freshly created duplicate. Matches elements by structural
  * fingerprint so the correct target is updated.
+ *
+ * Returns new {@link SourceEdit} entries mapped to the target elements so
+ * the duplicate's session can carry the edits forward to further duplicates.
  */
 const transferSourceEdits = (
   sourceEdits: SourceEdit[],
   source: HTMLElement,
   target: HTMLElement
-): void => {
-  if (sourceEdits.length === 0) return;
+): SourceEdit[] => {
+  if (sourceEdits.length === 0) return [];
+
+  const transferred: SourceEdit[] = [];
 
   // Build fingerprint maps for both trees (including roots)
   const allSource = [source, ...source.querySelectorAll<Element>('*')];
@@ -79,7 +84,15 @@ const transferSourceEdits = (
     } else {
       targetEl.setAttribute(edit.attribute, currentValue);
     }
+
+    transferred.push({
+      element: targetEl as HTMLElement,
+      attribute: edit.attribute,
+      original: edit.original,
+    });
   }
+
+  return transferred;
 };
 
 /**
@@ -362,6 +375,7 @@ export const createDuplicate = async (
   let duplicate: HTMLElement;
   let rect: DOMRect;
   let cleanup: (() => void) | undefined;
+  let transferredSourceEdits: SourceEdit[] = [];
 
   if (liveInfo) {
     // Snapshot the source's React state before rendering the duplicate.
@@ -378,7 +392,7 @@ export const createDuplicate = async (
 
     // Replay source edits (icon changes, etc.) from the source session.
     if (existingSession?.sourceEdits.length) {
-      transferSourceEdits(existingSession.sourceEdits, sourceEl, duplicate);
+      transferredSourceEdits = transferSourceEdits(existingSession.sourceEdits, sourceEl, duplicate);
     }
 
     // Restore the snapshotted state (with transitions suppressed).
@@ -418,6 +432,11 @@ export const createDuplicate = async (
 
   const correctedRect = new DOMRect(sourceRect.left, sourceRect.top, rect.width, rect.height);
 
+  const sourceLibraryId = sourceEl.getAttribute(DEVTOOL_LIBRARY_ID_ATTR);
+  if (sourceLibraryId) {
+    duplicate.setAttribute(DEVTOOL_LIBRARY_ID_ATTR, sourceLibraryId);
+  }
+
   const scaleX = (rect.width + sourceDw) / rect.width;
   const scaleY = (rect.height + sourceDh) / rect.height;
   const initialTransform = buildTransform(DUPLICATE_OFFSET, DUPLICATE_OFFSET, scaleX, scaleY);
@@ -441,7 +460,7 @@ export const createDuplicate = async (
     componentState: liveInfo ? snapshotComponentState(duplicate) : undefined,
     styleEdits: [],
     textEdits: [],
-    sourceEdits: [],
+    sourceEdits: transferredSourceEdits,
     cleanup,
   };
   registry.set(session);

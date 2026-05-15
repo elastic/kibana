@@ -103,6 +103,40 @@ export const EditModal = ({ target, onClose, onSave }: Props) => {
     };
   }, []);
 
+  // Collect source elements asynchronously once the clone is mounted.
+  // Runs inside a useEffect so React's scheduler properly tracks the
+  // state update and act() can flush it during tests.
+  useEffect(() => {
+    if (!cloneRoot) return;
+    let cancelled = false;
+    const collectSources = async () => {
+      const origSources = await collectSourceElements(target);
+      const cloneSources = await collectSourceElements(cloneRoot);
+      if (cancelled || !mountedRef.current) return;
+      const srcEntries: SourceEditorEntry[] = [];
+      const srcMapping: Array<{ original: Element; clone: Element; attribute: string }> = [];
+      for (let idx = 0; idx < origSources.length; idx++) {
+        const orig = origSources[idx];
+        const cl = cloneSources[idx];
+        if (!cl) continue;
+        srcEntries.push({
+          element: orig.element,
+          attribute: orig.attribute,
+          value: orig.value,
+          originalValue: orig.value,
+          label: orig.label,
+        });
+        srcMapping.push({ original: orig.element, clone: cl.element, attribute: orig.attribute });
+      }
+      sourceMap.current = srcMapping;
+      setSourceEntries(srcEntries);
+    };
+    collectSources();
+    return () => {
+      cancelled = true;
+    };
+  }, [cloneRoot, target]);
+
   /**
    * Re-select the current element to refresh the preview overlay.
    * Used after dimension/font changes that alter the element's size.
@@ -155,29 +189,9 @@ export const EditModal = ({ target, onClose, onSave }: Props) => {
       setTextEntries(entries);
 
       // Collect source elements (img, video, svg image/use, etc.)
-      const collectSources = async () => {
-        const origSources = await collectSourceElements(target);
-        const cloneSources = await collectSourceElements(clone);
-        if (!mountedRef.current) return;
-        const srcEntries: SourceEditorEntry[] = [];
-        const srcMapping: Array<{ original: Element; clone: Element; attribute: string }> = [];
-        for (let idx2 = 0; idx2 < origSources.length; idx2++) {
-          const orig = origSources[idx2];
-          const cl = cloneSources[idx2];
-          if (!cl) continue;
-          srcEntries.push({
-            element: orig.element,
-            attribute: orig.attribute,
-            value: orig.value,
-            originalValue: orig.value,
-            label: orig.label,
-          });
-          srcMapping.push({ original: orig.element, clone: cl.element, attribute: orig.attribute });
-        }
-        sourceMap.current = srcMapping;
-        setSourceEntries(srcEntries);
-      };
-      collectSources();
+      // Deferred to a useEffect (triggered by setCloneRoot below) so the
+      // async state update is properly tracked by React's scheduler and
+      // does not fire outside act() in tests.
 
       setCloneRoot(clone);
 
