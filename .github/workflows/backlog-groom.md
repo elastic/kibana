@@ -79,7 +79,7 @@ Use `noop` when **any** of these is true (non-exhaustive; apply judgment):
 
 1. Read surrounding production code until you can state the **root cause** in one sentence tied to file/line logic—do not guess.
 2. Implement the minimal fix on branch `backlog-groom/issue-<issue_number>` (issue number from `<github-context>`).
-3. Validate using these commands (scope paths to changed packages/plugins):
+3. Validate using these exact commands (scope paths to changed packages/plugins):
 
 ```bash
 node scripts/eslint --fix $(git diff --name-only)
