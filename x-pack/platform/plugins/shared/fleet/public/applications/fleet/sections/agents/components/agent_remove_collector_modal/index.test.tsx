@@ -55,7 +55,7 @@ describe('AgentRemoveCollectorModal', () => {
     const { getAllByText, getByText } = render();
     expect(getAllByText('Remove collector').length).toBeGreaterThanOrEqual(1);
     expect(
-      getByText(/This will remove the selected collector from the Fleet list/)
+      getByText(/This action will remove the selected collector from the Fleet agents list/)
     ).toBeInTheDocument();
   });
 
@@ -66,7 +66,7 @@ describe('AgentRemoveCollectorModal', () => {
     });
     expect(getAllByText('Remove 2 collectors').length).toBeGreaterThanOrEqual(1);
     expect(
-      getByText(/This will remove the selected collectors from the Fleet list/)
+      getByText(/This action will remove the selected collectors from the Fleet agents list/)
     ).toBeInTheDocument();
   });
 

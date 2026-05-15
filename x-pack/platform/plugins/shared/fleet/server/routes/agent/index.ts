@@ -243,9 +243,13 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
           },
         },
         summary: `Remove an OpAMP collector`,
-        description: `Remove a specific OpAMP collector from the Fleet agents list. Marks the collector as unenrolled; does not invalidate API keys, so the collector can reconnect on its own.`,
+        description: `Remove a specific OpAMP collector from the Fleet agents list. Marks the collector as unenrolled. This action does not invalidate API keys, so the collector can reconnect on its own.`,
         options: {
           tags: ['oas-tag:Elastic Agent actions'],
+          availability: {
+            since: '9.5.0',
+            stability: 'experimental',
+          },
         },
       })
       .addVersion(
@@ -269,9 +273,13 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
           },
         },
         summary: `Bulk remove OpAMP collectors`,
-        description: `Remove multiple OpAMP collectors from the Fleet agents list. Marks the collectors as unenrolled; does not invalidate API keys.`,
+        description: `Remove multiple OpAMP collectors from the Fleet agents list. Marks the collectors as unenrolled. This action does not invalidate API keys, so collectors can reconnect on their own.`,
         options: {
           tags: ['oas-tag:Elastic Agent actions'],
+          availability: {
+            since: '9.5.0',
+            stability: 'experimental',
+          },
         },
       })
       .addVersion(

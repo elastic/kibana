@@ -113,12 +113,12 @@ export const AgentRemoveCollectorModal: React.FunctionComponent<Props> = ({
         {isSingleAgent ? (
           <FormattedMessage
             id="xpack.fleet.removeCollectors.singleDescription"
-            defaultMessage="This will remove the selected collector from the Fleet list. The collector's enrollment credentials remain valid, so if it is still running it may reconnect on its own."
+            defaultMessage="This action will remove the selected collector from the Fleet agents list. The collector's enrollment credentials remain valid, so if it is still running, it may reconnect on its own."
           />
         ) : (
           <FormattedMessage
             id="xpack.fleet.removeCollectors.multipleDescription"
-            defaultMessage="This will remove the selected collectors from the Fleet list. Enrollment credentials remain valid, so any collectors still running may reconnect on their own."
+            defaultMessage="This action will remove the selected collectors from the Fleet agents list. Enrollment credentials remain valid, so any collectors still running may reconnect on their own."
           />
         )}
       </p>
