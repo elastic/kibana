@@ -54,6 +54,7 @@ export function ListingRoute({
   const history = useHistory();
   const canSave = capabilities.graph.save === true;
   const canDelete = capabilities.graph.delete === true;
+  const isReadOnly = !canSave && !canDelete;
   const basePath = coreStart.http.basePath;
 
   useEffect(() => {
@@ -132,7 +133,7 @@ export function ListingRoute({
     <ContentListClientProvider
       {...{ labels, findItems, item }}
       id="graph-listing"
-      isReadOnly={!canSave}
+      isReadOnly={isReadOnly}
       core={coreStart}
       features={{
         sorting: { initialSort: { field: 'updatedAt', direction: 'desc' } },
