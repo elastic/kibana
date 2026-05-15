@@ -87,7 +87,8 @@ import {
   TRUSTED_APPLICATIONS,
   TRUSTED_APPS_PROCESS_DESCENDANT_DECORATOR_LABELS,
 } from '../translations';
-import { OS_TITLES, CONFIRM_WARNING_MODAL_LABELS } from '../../../../common/translations';
+import { OS_TITLES } from '../../../../common/translations';
+import { CONFIRM_WARNING_MODAL_LABELS } from '../../../../components/artifact_list_page/components/artifact_confirm_modal';
 import type { LogicalConditionBuilderProps } from './logical_condition';
 import { LogicalConditionBuilder } from './logical_condition';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';

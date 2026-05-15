@@ -64,8 +64,10 @@ import { useEditExceptionItems } from './use_edit_exception';
 import * as i18n from './translations';
 import { RULE_EXCEPTION, ENDPOINT_EXCEPTION } from '../../utils/translations';
 import { ExceptionsExpireTime } from '../flyout_components/expire_time';
-import { CONFIRM_WARNING_MODAL_LABELS } from '../../../../management/common/translations';
-import { ArtifactConfirmModal } from '../../../../management/components/artifact_list_page/components/artifact_confirm_modal';
+import {
+  ArtifactConfirmModal,
+  CONFIRM_WARNING_MODAL_LABELS,
+} from '../../../../management/components/artifact_list_page/components/artifact_confirm_modal';
 import { ExceptionFlyoutFooter } from '../flyout_components/footer';
 import { ExceptionFlyoutHeader } from '../flyout_components/header';
 import * as headerI18n from '../flyout_components/header/translations';

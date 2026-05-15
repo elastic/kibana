@@ -7,7 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
-import type { ArtifactConfirmModalLabelProps } from '../components/artifact_list_page/types';
 
 export const ENDPOINTS_TAB = i18n.translate('xpack.securitySolution.endpointsTab', {
   defaultMessage: 'Endpoints',
@@ -483,68 +482,6 @@ export const MS_DEFENDER_ENDPOINT_CONSOLE_COMMANDS = {
       }
     ),
   },
-};
-
-export const CONFIRM_WARNING_MODAL_LABELS = (
-  entryType: string,
-  warnings: Partial<{ hasWildcardWithWrongOperator: boolean; hasUnnecessaryEscaping: boolean }>
-): ArtifactConfirmModalLabelProps => {
-  const listOfWarnings: string[] = [
-    ...(warnings.hasWildcardWithWrongOperator
-      ? [
-          i18n.translate(
-            'xpack.securitySolution.artifacts.confirmWarningModal.wildcardWithWrongOperator',
-            {
-              defaultMessage:
-                'Using a "*" or a "?" in the value with the "is" operator can make the entry ineffective. Change the operator to "matches" to ensure wildcards run properly.',
-            }
-          ),
-        ]
-      : []),
-
-    ...(warnings.hasUnnecessaryEscaping
-      ? [
-          i18n.translate(
-            'xpack.securitySolution.artifacts.confirmWarningModal.unnecessaryEscaping',
-            {
-              defaultMessage:
-                'Endpoint artifacts do not require escaping when using "\\", "*" or "?" characters.',
-            }
-          ),
-        ]
-      : []),
-  ];
-
-  return {
-    title: i18n.translate('xpack.securitySolution.artifacts.confirmWarningModal.title', {
-      defaultMessage: `Confirm {type}`,
-      values: { type: entryType },
-    }),
-    warningsHeader: i18n.translate(
-      'xpack.securitySolution.artifacts.confirmWarningModal.reviewWarningsHeader',
-      { defaultMessage: 'Please review the following warnings:' }
-    ),
-    listOfWarnings,
-    warningsFooter: i18n.translate(
-      'xpack.securitySolution.artifacts.confirmWarningModal.reviewEntryFooter',
-      {
-        defaultMessage:
-          'Select “Cancel” to revise your entry, or "Add" to continue with the entry in its current state.',
-      }
-    ),
-    confirmButton: i18n.translate(
-      'xpack.securitySolution.artifacts.confirmWarningModal.confirmButtonText',
-      {
-        defaultMessage: 'Add',
-      }
-    ),
-    cancelButton: i18n.translate(
-      'xpack.securitySolution.trustedapps.confirmWarningModal.cancelButtonText',
-      {
-        defaultMessage: 'Cancel',
-      }
-    ),
-  };
 };
 
 export const NO_PRIVILEGE_FOR_MANAGEMENT_OF_GLOBAL_ARTIFACT_MESSAGE = i18n.translate(

@@ -74,7 +74,8 @@ import {
   OS_LABEL,
   RULE_NAME,
 } from '../event_filters_list';
-import { OS_TITLES, CONFIRM_WARNING_MODAL_LABELS } from '../../../../common/translations';
+import { OS_TITLES } from '../../../../common/translations';
+import { CONFIRM_WARNING_MODAL_LABELS } from '../../../../components/artifact_list_page/components/artifact_confirm_modal';
 import { EVENT_FILTER_LIST_TYPE } from '../../constants';
 
 const ENDPOINT_EVENT_FILTERS_LIST_ID = ENDPOINT_ARTIFACT_LISTS.eventFilters.id;

@@ -61,8 +61,10 @@ import { useCloseAlertsFromExceptions } from '../../logic/use_close_alerts';
 import { ruleTypesThatAllowLargeValueLists } from '../../utils/constants';
 import { useInvalidateFetchRuleByIdQuery } from '../../../rule_management/api/hooks/use_fetch_rule_by_id_query';
 import { ExceptionsExpireTime } from '../flyout_components/expire_time';
-import { CONFIRM_WARNING_MODAL_LABELS } from '../../../../management/common/translations';
-import { ArtifactConfirmModal } from '../../../../management/components/artifact_list_page/components/artifact_confirm_modal';
+import {
+  ArtifactConfirmModal,
+  CONFIRM_WARNING_MODAL_LABELS,
+} from '../../../../management/components/artifact_list_page/components/artifact_confirm_modal';
 import { ExceptionFlyoutFooter } from '../flyout_components/footer';
 import { ExceptionFlyoutHeader } from '../flyout_components/header';
 import * as headerI18n from '../flyout_components/header/translations';

@@ -43,6 +43,7 @@ import { OperatingSystem } from '@kbn/securitysolution-utils';
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
 import type { OnChangeProps } from '@kbn/lists-plugin/public';
 import type { ValueSuggestionsGetFn } from '@kbn/kql/public/autocomplete/providers/value_suggestion_provider';
+import { CONFIRM_WARNING_MODAL_LABELS } from '../../../../components/artifact_list_page/components/artifact_confirm_modal';
 import { useGetEndpointExceptionsPerPolicyOptIn } from '../../../../hooks/artifacts/use_endpoint_per_policy_opt_in';
 import type { EffectedPolicySelectProps } from '../../../../components/effected_policy_select';
 import { EffectedPolicySelect } from '../../../../components/effected_policy_select';
@@ -68,11 +69,7 @@ import {
   DESCRIPTION_LABEL,
   OS_LABEL,
 } from '../../translations';
-import {
-  OS_TITLES,
-  CONFIRM_WARNING_MODAL_LABELS,
-  OPERATING_SYSTEM_WINDOWS_AND_MAC,
-} from '../../../../common/translations';
+import { OS_TITLES, OPERATING_SYSTEM_WINDOWS_AND_MAC } from '../../../../common/translations';
 import { ENDPOINT_EXCEPTIONS_LIST_DEFINITION } from '../../constants';
 
 import { ExceptionItemComments } from '../../../../../detection_engine/rule_exceptions/components/item_comments';
