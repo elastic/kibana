@@ -256,7 +256,6 @@ export class AgentBuilderPlugin
       };
     });
 
-    const noop = () => {};
     const PublicEmbeddableConversation: React.FC<PublicEmbeddableConversationProps> = ({
       onClose,
       ariaLabelledBy,
@@ -265,7 +264,7 @@ export class AgentBuilderPlugin
       <React.Suspense fallback={null}>
         <LazyConfiguredEmbeddableConversation
           {...rest}
-          onClose={onClose ?? noop}
+          onClose={onClose}
           ariaLabelledBy={ariaLabelledBy ?? 'agent-builder-embeddable-conversation'}
         />
       </React.Suspense>
