@@ -28,10 +28,47 @@ export interface ResolveResourceResponse {
 }
 
 /**
- * Returns true when any of the provided fields carries a TSDB marker.
+ * Heuristic TSDB detection from field markers. Used as a fallback for resources where
+ * we can't query an authoritative source per call: aliases, multi-target patterns, and
+ * CCS / cross-project targets.
  */
 export const deriveIsTsdb = (fields: MappingField[]): boolean => {
   return fields.some((f) => f.tsDimension === true || typeof f.tsMetric === 'string');
+};
+
+/**
+ * Fetches index settings as a flat key/value object. Returns the raw typed response so
+ * callers can read whichever setting(s) they need (`index.mode`, `index.lifecycle.name`, ...).
+ */
+const getIndexSettings = async ({
+  indexName,
+  esClient,
+}: {
+  indexName: string;
+  esClient: ElasticsearchClient;
+}) => {
+  return esClient.indices.getSettings({
+    index: indexName,
+    flat_settings: true,
+  });
+};
+
+/**
+ * Fetches a data stream definition. Returns the raw typed response so callers can read
+ * whichever property they need (`indices[].index_mode`, `generation`, `lifecycle`, ...).
+ *
+ * All backing indices of a single data stream share `index.mode` (it's inherited from the
+ * index template at every rollover), so a single backing-index entry is enough to decide
+ * the mode of the stream.
+ */
+const getDataStream = async ({
+  datastreamName,
+  esClient,
+}: {
+  datastreamName: string;
+  esClient: ElasticsearchClient;
+}) => {
+  return esClient.indices.getDataStream({ name: datastreamName });
 };
 /**
  * Retrieve the field list and other relevant info from the given resource name (index, alias or datastream)
@@ -150,15 +187,19 @@ const resolveSingleResource = async ({
       };
     }
 
-    const mappingRes = await getIndexMappings({ indices: [indexName], esClient, cleanup: true });
+    const [mappingRes, settingsRes] = await Promise.all([
+      getIndexMappings({ indices: [indexName], esClient, cleanup: true }),
+      getIndexSettings({ indexName, esClient }),
+    ]);
     const mappings = mappingRes[indexName].mappings;
     const fields = flattenMapping(mappings);
+    const isTsdb = settingsRes[indexName]?.settings?.['index.mode'] === 'time_series';
     return {
       name: resourceName,
       type: EsResourceType.index,
       fields,
       description: mappings._meta?.description,
-      isTsdb: deriveIsTsdb(fields),
+      isTsdb,
     };
   }
   // target is a datastream
@@ -178,19 +219,27 @@ const resolveSingleResource = async ({
       };
     }
 
-    const mappingRes = await getDataStreamMappings({
-      datastreams: [datastream],
-      esClient,
-      cleanup: true,
-    });
+    const [mappingRes, dataStreamRes] = await Promise.all([
+      getDataStreamMappings({
+        datastreams: [datastream],
+        esClient,
+        cleanup: true,
+      }),
+      getDataStream({ datastreamName: datastream, esClient }),
+    ]);
     const mappings = mappingRes[datastream].mappings;
     const fields = flattenMapping(mappings);
+    // `index_mode` may not yet be in the published TS types; cast as a safety net.
+    const firstBackingIndex = dataStreamRes.data_streams[0]?.indices?.[0] as
+      | { index_mode?: string }
+      | undefined;
+    const isTsdb = firstBackingIndex?.index_mode === 'time_series';
     return {
       name: resourceName,
       type: EsResourceType.dataStream,
       fields,
       description: mappings._meta?.description,
-      isTsdb: deriveIsTsdb(fields),
+      isTsdb,
     };
   }
   // target is an alias

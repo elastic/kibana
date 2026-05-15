@@ -136,6 +136,9 @@ describe('resolveResource', () => {
           },
         },
       });
+      esClient.indices.getSettings.mockResolvedValue({
+        'my-local-index': { settings: {} },
+      } as any);
 
       const result = await resolveResource({
         resourceName: 'my-local-index',
@@ -174,6 +177,9 @@ describe('resolveResource', () => {
           },
         },
       });
+      esClient.indices.getSettings.mockResolvedValue({
+        'logs-1': { settings: {} },
+      } as any);
 
       const result = await resolveResourceForEsql({ resourceName: 'logs-1', esClient });
 
@@ -313,25 +319,21 @@ describe('resolveResource', () => {
   });
 
   describe('isTsdb flag', () => {
-    it('is true when at least one field has tsDimension or tsMetric (index branch)', async () => {
+    it('ignores field markers for concrete index and follows index.mode setting', async () => {
+      // Index advertises time_series in settings, even with no field-level markers -> true
       esClient.indices.resolveIndex.mockResolvedValue({
         indices: [{ name: 'metrics-host', attributes: ['open'] }],
         aliases: [],
         data_streams: [],
       });
       esClient.indices.getMapping.mockResolvedValue({
-        'metrics-host': {
-          mappings: {
-            properties: {
-              'host.name': { type: 'keyword', time_series_dimension: true } as any,
-              'system.cpu.pct': { type: 'float', time_series_metric: 'gauge' } as any,
-            },
-          },
-        },
+        'metrics-host': { mappings: { properties: { '@timestamp': { type: 'date' } } } },
+      } as any);
+      esClient.indices.getSettings.mockResolvedValue({
+        'metrics-host': { settings: { 'index.mode': 'time_series' } },
       } as any);
 
       const result = await resolveResource({ resourceName: 'metrics-host', esClient });
-
       expect(result.isTsdb).toBe(true);
     });
 
@@ -350,6 +352,9 @@ describe('resolveResource', () => {
             },
           },
         },
+      } as any);
+      esClient.indices.getSettings.mockResolvedValue({
+        logs: { settings: {} },
       } as any);
 
       const result = await resolveResource({ resourceName: 'logs', esClient });
@@ -408,6 +413,190 @@ describe('resolveResource', () => {
       const result = await resolveResourceForEsql({ resourceName: 'metrics-*', esClient });
 
       expect(result.isTsdb).toBe(true);
+    });
+  });
+
+  describe('isTsdb — authoritative detection for indices', () => {
+    it('reads index.mode from _settings and returns true for time_series', async () => {
+      esClient.indices.resolveIndex.mockResolvedValue({
+        indices: [{ name: 'metrics-host', attributes: ['open'] }],
+        aliases: [],
+        data_streams: [],
+      });
+      esClient.indices.getMapping.mockResolvedValue({
+        'metrics-host': {
+          mappings: { properties: { 'host.name': { type: 'keyword' } } },
+        },
+      } as any);
+      esClient.indices.getSettings.mockResolvedValue({
+        'metrics-host': { settings: { 'index.mode': 'time_series' } },
+      } as any);
+
+      const result = await resolveResource({ resourceName: 'metrics-host', esClient });
+
+      expect(esClient.indices.getSettings).toHaveBeenCalledWith({
+        index: 'metrics-host',
+        flat_settings: true,
+      });
+      expect(result.isTsdb).toBe(true);
+    });
+
+    it('returns isTsdb=false for a logsdb index even when fields carry time_series_dimension', async () => {
+      esClient.indices.resolveIndex.mockResolvedValue({
+        indices: [{ name: 'logs-app', attributes: ['open'] }],
+        aliases: [],
+        data_streams: [],
+      });
+      esClient.indices.getMapping.mockResolvedValue({
+        'logs-app': {
+          mappings: {
+            properties: {
+              'agent.name': { type: 'keyword', time_series_dimension: true } as any,
+            },
+          },
+        },
+      } as any);
+      esClient.indices.getSettings.mockResolvedValue({
+        'logs-app': { settings: { 'index.mode': 'logsdb' } },
+      } as any);
+
+      const result = await resolveResource({ resourceName: 'logs-app', esClient });
+
+      expect(result.isTsdb).toBe(false);
+    });
+
+    it('returns isTsdb=false when index.mode setting is absent', async () => {
+      esClient.indices.resolveIndex.mockResolvedValue({
+        indices: [{ name: 'standard-idx', attributes: ['open'] }],
+        aliases: [],
+        data_streams: [],
+      });
+      esClient.indices.getMapping.mockResolvedValue({
+        'standard-idx': { mappings: { properties: {} } },
+      } as any);
+      esClient.indices.getSettings.mockResolvedValue({
+        'standard-idx': { settings: {} },
+      } as any);
+
+      const result = await resolveResource({ resourceName: 'standard-idx', esClient });
+
+      expect(result.isTsdb).toBe(false);
+    });
+  });
+
+  describe('isTsdb — authoritative detection for data streams', () => {
+    it('reads index_mode from _data_stream and returns true for time_series', async () => {
+      esClient.indices.resolveIndex.mockResolvedValue({
+        indices: [],
+        aliases: [],
+        data_streams: [
+          {
+            name: 'metrics-host',
+            backing_indices: ['.ds-metrics-host-001'],
+            timestamp_field: '@timestamp',
+          },
+        ],
+      });
+      // Mapping fetch for data streams goes through transport.request today.
+      esClient.transport.request.mockResolvedValue({
+        data_streams: [
+          {
+            name: 'metrics-host',
+            effective_mappings: { properties: { '@timestamp': { type: 'date' } } },
+          },
+        ],
+      } as any);
+      esClient.indices.getDataStream.mockResolvedValue({
+        data_streams: [
+          {
+            name: 'metrics-host',
+            indices: [{ index_name: '.ds-metrics-host-001', index_mode: 'time_series' }],
+          },
+        ],
+      } as any);
+
+      const result = await resolveResource({ resourceName: 'metrics-host', esClient });
+
+      expect(esClient.indices.getDataStream).toHaveBeenCalledWith({ name: 'metrics-host' });
+      expect(result.isTsdb).toBe(true);
+    });
+
+    it('returns isTsdb=false for a logsdb data stream even when fields carry tsdb markers', async () => {
+      esClient.indices.resolveIndex.mockResolvedValue({
+        indices: [],
+        aliases: [],
+        data_streams: [
+          {
+            name: 'logs-app',
+            backing_indices: ['.ds-logs-app-001'],
+            timestamp_field: '@timestamp',
+          },
+        ],
+      });
+      esClient.transport.request.mockResolvedValue({
+        data_streams: [
+          {
+            name: 'logs-app',
+            effective_mappings: {
+              properties: {
+                'agent.name': { type: 'keyword', time_series_dimension: true },
+              },
+            },
+          },
+        ],
+      } as any);
+      esClient.indices.getDataStream.mockResolvedValue({
+        data_streams: [
+          {
+            name: 'logs-app',
+            indices: [{ index_name: '.ds-logs-app-001', index_mode: 'logsdb' }],
+          },
+        ],
+      } as any);
+
+      const result = await resolveResource({ resourceName: 'logs-app', esClient });
+      expect(result.isTsdb).toBe(false);
+    });
+
+    it('returns isTsdb=false when index_mode is missing from the data stream response', async () => {
+      esClient.indices.resolveIndex.mockResolvedValue({
+        indices: [],
+        aliases: [],
+        data_streams: [
+          { name: 'plain-ds', backing_indices: ['.ds-plain-001'], timestamp_field: '@timestamp' },
+        ],
+      });
+      esClient.transport.request.mockResolvedValue({
+        data_streams: [{ name: 'plain-ds', effective_mappings: { properties: {} } }],
+      } as any);
+      esClient.indices.getDataStream.mockResolvedValue({
+        data_streams: [{ name: 'plain-ds', indices: [{ index_name: '.ds-plain-001' }] }],
+      } as any);
+
+      const result = await resolveResource({ resourceName: 'plain-ds', esClient });
+      expect(result.isTsdb).toBe(false);
+    });
+
+    it('does NOT call _data_stream for a CCS data stream target (uses field caps fallback)', async () => {
+      esClient.indices.resolveIndex.mockResolvedValue({
+        indices: [],
+        aliases: [],
+        data_streams: [
+          {
+            name: 'remote_cluster:logs-ds',
+            backing_indices: [],
+            timestamp_field: '@timestamp',
+          },
+        ],
+      });
+      esClient.fieldCaps.mockResolvedValue({
+        indices: ['remote_cluster:logs-ds'],
+        fields: { '@timestamp': { date: { type: 'date', searchable: true, aggregatable: true } } },
+      });
+
+      await resolveResource({ resourceName: 'remote_cluster:logs-ds', esClient });
+
+      expect(esClient.indices.getDataStream).not.toHaveBeenCalled();
     });
   });
 });
