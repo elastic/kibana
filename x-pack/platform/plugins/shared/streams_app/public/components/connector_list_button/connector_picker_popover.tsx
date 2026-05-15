@@ -46,7 +46,6 @@ export const ConnectorPickerPopover = ({
       aria-label={ariaLabel}
     >
       <EuiContextMenuPanel
-        size="s"
         items={connectors.connectors?.map((connector) => (
           <EuiContextMenuItem
             key={connector.connectorId}
