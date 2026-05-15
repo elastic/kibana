@@ -22,7 +22,7 @@ import { useRefetchByScope } from '../../../../flyout_v2/document/main/hooks/use
 import { useExceptionFlyout } from '../../../../detections/components/alerts_table/timeline_actions/use_add_exception_flyout';
 import { isActiveTimeline } from '../../../../helpers';
 import { useEventFilterModal } from '../../../../detections/components/alerts_table/timeline_actions/use_event_filter_modal';
-import { HostIsolation } from '../../../../flyout_v2/document/tools/endpoint/host_isolation';
+import { HostIsolationFlyout } from '../../../../common/components/endpoint/host_isolation/from_alerts/host_isolation_flyout';
 import type { HostIsolationAction } from '../../../../common/components/endpoint/host_isolation/from_alerts/use_host_isolation_action';
 
 interface AlertSummaryData {
@@ -147,7 +147,7 @@ export const TakeActionButton: FC = () => {
   return (
     <>
       {isolateAction !== null && hit != null && (
-        <HostIsolation
+        <HostIsolationFlyout
           hit={hit}
           detailsData={dataFormattedForFieldBrowser}
           isolateAction={isolateAction}

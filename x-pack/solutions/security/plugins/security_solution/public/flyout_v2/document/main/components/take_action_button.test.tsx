@@ -38,13 +38,22 @@ jest.mock(
     useHostIsolationAction: jest.fn(),
   })
 );
-jest.mock('../../tools/endpoint/host_isolation', () => ({
-  HostIsolation: ({ isolateAction, onClose }: { isolateAction: string; onClose: () => void }) => (
-    <button type="button" data-test-subj={`hostIsolationMock-${isolateAction}`} onClick={onClose}>
-      {`isolation-mock-${isolateAction}`}
-    </button>
-  ),
-}));
+jest.mock(
+  '../../../../common/components/endpoint/host_isolation/from_alerts/host_isolation_flyout',
+  () => ({
+    HostIsolationFlyout: ({
+      isolateAction,
+      onClose,
+    }: {
+      isolateAction: string;
+      onClose: () => void;
+    }) => (
+      <button type="button" data-test-subj={`hostIsolationMock-${isolateAction}`} onClick={onClose}>
+        {`isolation-mock-${isolateAction}`}
+      </button>
+    ),
+  })
+);
 
 const mockUseExploreActions = jest.fn().mockReturnValue({ exploreActionItems: [] });
 jest.mock('../hooks/use_explore_actions', () => ({

@@ -27,7 +27,7 @@ import { useRunAlertWorkflowPanel } from '../../../../detections/components/aler
 import { useRunDocumentWorkflowPanel } from '../../../../detections/components/alerts_table/timeline_actions/use_run_document_workflow_panel';
 import type { HostIsolationAction } from '../../../../common/components/endpoint/host_isolation/from_alerts/use_host_isolation_action';
 import { useHostIsolationAction } from '../../../../common/components/endpoint/host_isolation/from_alerts/use_host_isolation_action';
-import { HostIsolation } from '../../tools/endpoint/host_isolation';
+import { HostIsolationFlyout } from '../../../../common/components/endpoint/host_isolation/from_alerts/host_isolation_flyout';
 import { useExploreActions } from '../hooks/use_explore_actions';
 import { FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID } from './test_ids';
 
@@ -251,7 +251,7 @@ export const TakeActionButton = memo(
     return (
       <>
         {isolateAction !== null && (
-          <HostIsolation
+          <HostIsolationFlyout
             hit={hit}
             detailsData={detailsData}
             isolateAction={isolateAction}

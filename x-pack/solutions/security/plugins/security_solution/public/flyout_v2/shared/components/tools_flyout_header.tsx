@@ -7,7 +7,7 @@
 
 import type { FC, ReactNode } from 'react';
 import React, { memo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { type DataTableRecord } from '@kbn/discover-utils';
 import { Timestamp } from './timestamp';
 import { DocumentSeverity } from '../../document/main/components/severity';
@@ -28,11 +28,6 @@ export interface ToolsFlyoutHeaderProps {
    */
   title: ReactNode;
   /**
-   * Optional content rendered directly below the title (e.g. integration badge).
-   * Block-level content is allowed here, unlike `title` which is wrapped in an `<h4>`.
-   */
-  belowTitle?: ReactNode;
-  /**
    * Optional cell action renderer passed to the child document flyout.
    */
   renderCellActions?: CellActionRenderer;
@@ -47,13 +42,7 @@ export interface ToolsFlyoutHeaderProps {
  * context (expand button, rule name, severity, timestamp) on the right.
  */
 export const ToolsFlyoutHeader: FC<ToolsFlyoutHeaderProps> = memo(
-  ({
-    hit,
-    title,
-    belowTitle,
-    renderCellActions = noopCellActionRenderer,
-    onAlertUpdated = noop,
-  }) => {
+  ({ hit, title, renderCellActions = noopCellActionRenderer, onAlertUpdated = noop }) => {
     return (
       <EuiFlexGroup
         justifyContent="spaceBetween"
@@ -66,12 +55,6 @@ export const ToolsFlyoutHeader: FC<ToolsFlyoutHeaderProps> = memo(
           <EuiTitle size="xs">
             <h4>{title}</h4>
           </EuiTitle>
-          {belowTitle ? (
-            <>
-              <EuiSpacer size="s" />
-              {belowTitle}
-            </>
-          ) : null}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems="flexEnd" direction="column" gutterSize="none">
