@@ -71,7 +71,6 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
       getSavedObjects: async (request: RequestType) => {
         const result = await core.http.post(SEARCH_ROUTE_PATH, {
           body: JSON.stringify(request),
-          asSystemRequest: true,
         });
         return result as ResponseType;
       },
