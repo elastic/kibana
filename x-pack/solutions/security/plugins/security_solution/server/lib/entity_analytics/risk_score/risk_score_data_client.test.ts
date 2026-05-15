@@ -176,6 +176,125 @@ describe('RiskScoreDataClient', () => {
       expect(errors).toEqual([error, error, error, error]);
     });
   });
+
+  describe('getDailyAverageRiskScoreNormSeries', () => {
+    const mockAggResponse = (
+      buckets: Array<{ key: string; scores: number[] }> = []
+    ): { aggregations: { by_entity: { buckets: unknown[] } } } => ({
+      aggregations: {
+        by_entity: {
+          buckets: buckets.map((b) => ({
+            key: b.key,
+            scores_over_time: {
+              buckets: b.scores.map((v) => ({ avg_score: { value: v } })),
+            },
+          })),
+        },
+      },
+    });
+
+    it('returns an empty map without issuing a query when no entity ids are provided', async () => {
+      const result = await riskScoreDataClient.getDailyAverageRiskScoreNormSeries({
+        entityType: 'host',
+        entityIds: [],
+      });
+
+      expect(result.size).toBe(0);
+      expect(esClient.search).not.toHaveBeenCalled();
+    });
+
+    it('filters on `<entityType>.risk.id_field === "entity.id"` and aggregates by `<entityType>.risk.id_value`', async () => {
+      esClient.search.mockResolvedValueOnce(mockAggResponse() as never);
+
+      await riskScoreDataClient.getDailyAverageRiskScoreNormSeries({
+        entityType: 'host',
+        entityIds: ['host:InnoDB'],
+      });
+
+      const searchCall = esClient.search.mock.calls[0][0] as Record<string, unknown>;
+      const filters = (searchCall.query as { bool: { filter: Array<Record<string, unknown>> } })
+        .bool.filter;
+
+      expect(filters).toEqual(
+        expect.arrayContaining([
+          { term: { 'host.risk.id_field': 'entity.id' } },
+          { terms: { 'host.risk.id_value': ['host:InnoDB'] } },
+        ])
+      );
+
+      const aggs = searchCall.aggs as { by_entity: { terms: { field: string } } };
+      expect(aggs.by_entity.terms.field).toBe('host.risk.id_value');
+
+      // Sanity: name-based filtering and aggregation are forbidden under the new contract.
+      const body = JSON.stringify(searchCall);
+      expect(body).not.toContain('"host.name"');
+      expect(body).not.toContain('"user.name"');
+    });
+
+    it('parameterises the field paths by entityType (user)', async () => {
+      esClient.search.mockResolvedValueOnce(mockAggResponse() as never);
+
+      await riskScoreDataClient.getDailyAverageRiskScoreNormSeries({
+        entityType: 'user',
+        entityIds: ['user:alice'],
+      });
+
+      const searchCall = esClient.search.mock.calls[0][0] as Record<string, unknown>;
+      const filters = (searchCall.query as { bool: { filter: Array<Record<string, unknown>> } })
+        .bool.filter;
+
+      expect(filters).toEqual(
+        expect.arrayContaining([
+          { term: { 'user.risk.id_field': 'entity.id' } },
+          { terms: { 'user.risk.id_value': ['user:alice'] } },
+        ])
+      );
+
+      const aggs = searchCall.aggs as { by_entity: { terms: { field: string } } };
+      expect(aggs.by_entity.terms.field).toBe('user.risk.id_value');
+    });
+
+    it('returns a map keyed by EUID directly, not by `${entityType}:${euid}`', async () => {
+      esClient.search.mockResolvedValueOnce(
+        mockAggResponse([{ key: 'host:InnoDB', scores: [50, 60, 70] }]) as never
+      );
+
+      const result = await riskScoreDataClient.getDailyAverageRiskScoreNormSeries({
+        entityType: 'host',
+        entityIds: ['host:InnoDB'],
+      });
+
+      expect(Array.from(result.keys())).toEqual(['host:InnoDB']);
+      expect(result.get('host:InnoDB')).toEqual([50, 60, 70]);
+    });
+
+    it('returns V2-written documents (`<entityType>.risk.id_field === "entity.id"`)', async () => {
+      esClient.search.mockResolvedValueOnce(
+        mockAggResponse([{ key: 'host:InnoDB', scores: [42] }]) as never
+      );
+
+      const result = await riskScoreDataClient.getDailyAverageRiskScoreNormSeries({
+        entityType: 'host',
+        entityIds: ['host:InnoDB'],
+      });
+
+      expect(result.get('host:InnoDB')).toEqual([42]);
+    });
+
+    it('excludes legacy-written documents — the `id_field === "entity.id"` filter eliminates raw-name docs', async () => {
+      // Simulate Elasticsearch's perspective: the legacy doc has
+      // host.risk.id_field === 'host.name', so the filter rejects it at the query
+      // level and the response contains no bucket for it.
+      esClient.search.mockResolvedValueOnce(mockAggResponse([]) as never);
+
+      const result = await riskScoreDataClient.getDailyAverageRiskScoreNormSeries({
+        entityType: 'host',
+        entityIds: ['host:InnoDB'],
+      });
+
+      expect(result.size).toBe(0);
+    });
+  });
 });
 
 const assertComponentTemplate = (namespace: string) => {
