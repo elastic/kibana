@@ -11,7 +11,7 @@ import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import {
   buildEpisodesQuery,
-  type AlertEpisode,
+  type AlertEpisodeEsqlRow,
   type EpisodesFilterState,
   type EpisodesSortState,
 } from '../queries/episodes_query';
@@ -38,7 +38,7 @@ export const fetchAlertingEpisodes = ({
   filterState,
   sortState = { sortField: '@timestamp', sortDirection: 'desc' },
   timeRange,
-}: FetchAlertingEpisodesOptions): Promise<AlertEpisode[]> => {
+}: FetchAlertingEpisodesOptions): Promise<AlertEpisodeEsqlRow[]> => {
   const query = buildEpisodesQuery(sortState, filterState);
 
   const input: {
@@ -56,7 +56,7 @@ export const fetchAlertingEpisodes = ({
     input.timeRange = timeRange;
   }
 
-  return executeEsqlQuery<AlertEpisode>({
+  return executeEsqlQuery<AlertEpisodeEsqlRow>({
     expressions,
     query: query.print('basic'),
     input,

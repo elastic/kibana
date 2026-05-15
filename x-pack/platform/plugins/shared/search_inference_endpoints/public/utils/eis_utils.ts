@@ -58,6 +58,9 @@ export const TASK_TYPE_DISPLAY_NAME: Record<InferenceTaskType, string> = {
   rerank: i18n.translate('xpack.searchInferenceEndpoints.eisUtils.taskType.rerank', {
     defaultMessage: 'rerank',
   }),
+  embedding: i18n.translate('xpack.searchInferenceEndpoints.eisUtils.taskType.embedding', {
+    defaultMessage: 'embedding',
+  }),
 };
 
 export interface GroupedModel {

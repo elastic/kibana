@@ -28,7 +28,7 @@ concurrency:
 engine:
   id: claude
   version: "2.1.111"
-  model: opus[1m]
+  model: opus
   max-turns: 120
   env:
     ANTHROPIC_API_KEY: ${{ secrets.LITELLM_API_KEY }}

@@ -26,6 +26,9 @@ import type {
   SecuritySolutionAlertFlyoutHeaderTitleFeature,
   SecuritySolutionAlertFlyoutOverviewTabFeature,
   SecuritySolutionCellRendererFeature,
+  SecuritySolutionIOCFlyoutFooterFeature,
+  SecuritySolutionIOCFlyoutHeaderFeature,
+  SecuritySolutionIOCFlyoutOverviewTabFeature,
 } from '@kbn/discover-shared-plugin/public/services/discover_features';
 import { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys';
 import { ProductFeatureAssistantKey } from '@kbn/security-solution-features/src/product_features_keys';
@@ -523,6 +526,86 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       },
     };
     discoverFeatureRegistry.register(headerFooterFeature);
+
+    const LazyIOCFlyoutOverviewTab = React.lazy(async () => {
+      const { IOCFlyoutOverviewTab } = await this.getLazyDiscoverSharedDeps();
+      return { default: IOCFlyoutOverviewTab };
+    });
+
+    const iocFlyoutOverviewTabFeature: SecuritySolutionIOCFlyoutOverviewTabFeature = {
+      id: 'security-solution-ioc-flyout-overview-tab',
+      render: ({ hit, columns, filter, onAddColumn, onRemoveColumn }) => {
+        const servicesPromise = this.getDiscoverFlyoutServices(core);
+        const storePromise = this.getDiscoverFlyoutStore(core);
+
+        return (
+          <React.Suspense fallback={null}>
+            <LazyIOCFlyoutOverviewTab
+              hit={hit}
+              servicesPromise={servicesPromise}
+              storePromise={storePromise}
+              columns={columns}
+              filter={filter}
+              onAddColumn={onAddColumn}
+              onRemoveColumn={onRemoveColumn}
+            />
+          </React.Suspense>
+        );
+      },
+    };
+    discoverFeatureRegistry.register(iocFlyoutOverviewTabFeature);
+
+    const LazyIOCFlyoutFooter = React.lazy(async () => {
+      const { IOCFlyoutFooter } = await this.getLazyDiscoverSharedDeps();
+      return { default: IOCFlyoutFooter };
+    });
+
+    const iocFlyoutFooterFeature: SecuritySolutionIOCFlyoutFooterFeature = {
+      id: 'security-solution-ioc-flyout-footer',
+      renderFooter: ({ hit }) => {
+        const servicesPromise = this.getDiscoverFlyoutServices(core);
+        const storePromise = this.getDiscoverFlyoutStore(core);
+
+        return (
+          <React.Suspense fallback={null}>
+            <LazyIOCFlyoutFooter
+              hit={hit}
+              servicesPromise={servicesPromise}
+              storePromise={storePromise}
+            />
+          </React.Suspense>
+        );
+      },
+    };
+    discoverFeatureRegistry.register(iocFlyoutFooterFeature);
+
+    const LazyIOCFlyoutHeader = React.lazy(async () => {
+      const { IOCFlyoutHeader } = await this.getLazyDiscoverSharedDeps();
+      return { default: IOCFlyoutHeader };
+    });
+
+    const iocFlyoutHeaderFeature: SecuritySolutionIOCFlyoutHeaderFeature = {
+      id: 'security-solution-ioc-flyout-header',
+      renderHeader: ({ hit, columns, filter, onAddColumn, onRemoveColumn }) => {
+        const servicesPromise = this.getDiscoverFlyoutServices(core);
+        const storePromise = this.getDiscoverFlyoutStore(core);
+
+        return (
+          <React.Suspense fallback={null}>
+            <LazyIOCFlyoutHeader
+              hit={hit}
+              servicesPromise={servicesPromise}
+              storePromise={storePromise}
+              columns={columns}
+              filter={filter}
+              onAddColumn={onAddColumn}
+              onRemoveColumn={onRemoveColumn}
+            />
+          </React.Suspense>
+        );
+      },
+    };
+    discoverFeatureRegistry.register(iocFlyoutHeaderFeature);
   }
 
   public async getLazyDiscoverSharedDeps() {

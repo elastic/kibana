@@ -22,6 +22,7 @@ export type {
   AppMenuPrimaryActionItem,
   AppMenuPopoverItem,
   AppMenuSplitButtonProps,
+  AppMenuStaticItem,
 } from './types';
 
 export { APP_MENU_ITEM_LIMIT, DEFAULT_POPOVER_WIDTH } from './constants';

@@ -366,6 +366,7 @@ module.exports = {
     '@kbn/eslint/no_trailing_import_slash': 'error',
     '@kbn/eslint/no_constructor_args_in_property_initializers': 'error',
     '@kbn/eslint/no_this_in_property_initializers': 'error',
+    '@kbn/eslint/no_conditional_saved_object_type_registration': 'error',
     '@kbn/eslint/no_unsafe_console': 'error',
     '@kbn/eslint/no_unsafe_hash': 'error',
     '@kbn/imports/no_unresolvable_imports': 'error',
@@ -399,6 +400,7 @@ module.exports = {
      */
     '@elastic/eui/prefer-eui-icon-tip': 'error',
     '@elastic/eui/sr-output-disabled-tooltip': 'error',
+    '@elastic/eui/badge-accessibility-rules': 'error',
   },
 
   overrides: [

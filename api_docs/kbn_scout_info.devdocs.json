@@ -26,7 +26,7 @@
         "label": "ScoutTestTarget",
         "description": [],
         "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
-        "lineNumber": 44,
+        "lineNumber": 45,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -42,7 +42,7 @@
               "RegExp"
             ],
             "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
-            "lineNumber": 45,
+            "lineNumber": 46,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -58,7 +58,7 @@
               "any"
             ],
             "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
-            "lineNumber": 46,
+            "lineNumber": 47,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -74,7 +74,7 @@
               "any"
             ],
             "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
-            "lineNumber": 47,
+            "lineNumber": 48,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -90,7 +90,7 @@
               "any"
             ],
             "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
-            "lineNumber": 48,
+            "lineNumber": 49,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -106,7 +106,7 @@
               "any"
             ],
             "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
-            "lineNumber": 50,
+            "lineNumber": 51,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -122,7 +122,7 @@
                   "any"
                 ],
                 "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
-                "lineNumber": 51,
+                "lineNumber": 52,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -139,7 +139,7 @@
                   "any"
                 ],
                 "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
-                "lineNumber": 52,
+                "lineNumber": 53,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -156,7 +156,7 @@
                   "any"
                 ],
                 "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
-                "lineNumber": 53,
+                "lineNumber": 54,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -173,7 +173,7 @@
             "label": "tagWithoutLocation",
             "description": [],
             "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
-            "lineNumber": 70,
+            "lineNumber": 71,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -186,7 +186,7 @@
             "label": "tag",
             "description": [],
             "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
-            "lineNumber": 74,
+            "lineNumber": 75,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -199,7 +199,7 @@
             "label": "playwrightTag",
             "description": [],
             "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
-            "lineNumber": 78,
+            "lineNumber": 79,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -222,7 +222,7 @@
               }
             ],
             "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
-            "lineNumber": 82,
+            "lineNumber": 83,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -238,7 +238,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
-                "lineNumber": 82,
+                "lineNumber": 83,
                 "columnNumber": 18,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -265,7 +265,7 @@
               }
             ],
             "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
-            "lineNumber": 96,
+            "lineNumber": 97,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -281,7 +281,7 @@
                   "string"
                 ],
                 "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
-                "lineNumber": 96,
+                "lineNumber": 97,
                 "columnNumber": 28,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -308,7 +308,7 @@
               }
             ],
             "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
-            "lineNumber": 107,
+            "lineNumber": 108,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -336,7 +336,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
-            "lineNumber": 111,
+            "lineNumber": 112,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -357,7 +357,7 @@
         "label": "ScoutTargetDefinition",
         "description": [],
         "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
-        "lineNumber": 39,
+        "lineNumber": 40,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -373,7 +373,7 @@
               "any[]"
             ],
             "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
-            "lineNumber": 40,
+            "lineNumber": 41,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -389,7 +389,7 @@
               "any[]"
             ],
             "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
-            "lineNumber": 41,
+            "lineNumber": 42,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -752,7 +752,7 @@
           "any"
         ],
         "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
-        "lineNumber": 36,
+        "lineNumber": 37,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -786,7 +786,7 @@
           "any"
         ],
         "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
-        "lineNumber": 37,
+        "lineNumber": 38,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -820,7 +820,7 @@
           "any"
         ],
         "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
-        "lineNumber": 35,
+        "lineNumber": 36,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -876,7 +876,7 @@
           "][]"
         ],
         "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
-        "lineNumber": 123,
+        "lineNumber": 124,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -953,7 +953,7 @@
           "$strip>"
         ],
         "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
-        "lineNumber": 29,
+        "lineNumber": 30,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -984,7 +984,7 @@
         "label": "testTargets",
         "description": [],
         "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
-        "lineNumber": 182,
+        "lineNumber": 190,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -1007,7 +1007,7 @@
               "[]"
             ],
             "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
-            "lineNumber": 183,
+            "lineNumber": 191,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1031,7 +1031,7 @@
               "[]"
             ],
             "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
-            "lineNumber": 191,
+            "lineNumber": 199,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -1047,7 +1047,7 @@
                   "any"
                 ],
                 "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
-                "lineNumber": 191,
+                "lineNumber": 199,
                 "columnNumber": 15,
                 "deprecated": false,
                 "docsReferencedTypeName": "ScoutTargetLocation",
@@ -1075,7 +1075,7 @@
               "[]"
             ],
             "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
-            "lineNumber": 195,
+            "lineNumber": 203,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1098,7 +1098,7 @@
               "[]"
             ],
             "path": "src/platform/packages/private/kbn-scout-info/src/test_target.ts",
-            "lineNumber": 199,
+            "lineNumber": 207,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

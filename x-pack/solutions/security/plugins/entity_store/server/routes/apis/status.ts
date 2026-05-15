@@ -28,6 +28,7 @@ interface LegacyEngineDescriptorV1 {
   lookbackPeriod: string;
   fieldHistoryLength: number;
   maxLogsPerPage: number;
+  maxTimeWindowSize: string;
   docsPerSecond: -1;
   indexPattern: '';
   enrichPolicyExecutionInterval: null;
@@ -59,8 +60,15 @@ function toPublicEngine(
   logsExtractionConfig: LogExtractionConfig
 ): StatusEngine {
   const { versionState, logExtractionState, ...rest } = engine;
-  const { delay, timeout, frequency, lookbackPeriod, fieldHistoryLength, maxLogsPerPage } =
-    logsExtractionConfig;
+  const {
+    delay,
+    timeout,
+    frequency,
+    lookbackPeriod,
+    fieldHistoryLength,
+    maxLogsPerPage,
+    maxTimeWindowSize,
+  } = logsExtractionConfig;
 
   return {
     ...rest,
@@ -72,6 +80,7 @@ function toPublicEngine(
     lookbackPeriod,
     fieldHistoryLength,
     maxLogsPerPage,
+    maxTimeWindowSize,
     docsPerSecond: -1,
     indexPattern: '',
     enrichPolicyExecutionInterval: null,

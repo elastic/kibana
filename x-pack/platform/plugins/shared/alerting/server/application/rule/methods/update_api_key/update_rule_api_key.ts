@@ -7,6 +7,8 @@
 
 import Boom from '@hapi/boom';
 import { omit } from 'lodash';
+import type { SavedObject } from '@kbn/core/server';
+import { RuleChangeTrackingAction } from '@kbn/alerting-types';
 import type { RawRule } from '../../../../types';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import { retryIfConflicts } from '../../../../lib/retry_if_conflicts';
@@ -16,6 +18,7 @@ import { createNewAPIKeySet, updateMeta } from '../../../../rules_client/lib';
 import { API_KEY_ATTRIBUTES_TO_STRIP } from '../../../../rules_client/common';
 import type { RulesClientContext } from '../../../../rules_client/types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
+import { logBulkRuleChanges } from '../common_utils/log_bulk_rule_changes';
 import type { UpdateApiKeyParams } from './types';
 import { updateApiKeyParamsSchema } from './schemas';
 
@@ -121,8 +124,23 @@ async function updateApiKeyWithOCC(context: RulesClientContext, { id }: UpdateAp
   context.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
 
   try {
-    await context.unsecuredSavedObjectsClient.update(RULE_SAVED_OBJECT_TYPE, id, updateAttributes, {
-      version,
+    const updateRuleApiKeyTimestamp = Date.now();
+    const updatedRuleSavedObject = await context.unsecuredSavedObjectsClient.update(
+      RULE_SAVED_OBJECT_TYPE,
+      id,
+      updateAttributes,
+      {
+        version,
+      }
+    );
+
+    await logBulkRuleChanges({
+      ruleSOs: [updatedRuleSavedObject] as Array<SavedObject<RawRule>>,
+      rulesClientContext: context,
+      changesContext: {
+        action: RuleChangeTrackingAction.ruleUpdateApiKey,
+        timestamp: updateRuleApiKeyTimestamp,
+      },
     });
   } catch (e) {
     const { apiKey, apiKeyCreatedByUser, uiamApiKey } = updateAttributes;

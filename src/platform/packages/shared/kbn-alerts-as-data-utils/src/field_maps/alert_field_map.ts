@@ -34,6 +34,7 @@ import {
   ALERT_RULE_TAGS,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
+  ALERT_SEVERITY,
   ALERT_SEVERITY_IMPROVING,
   ALERT_START,
   ALERT_STATUS,
@@ -47,6 +48,8 @@ import {
   ALERT_WORKFLOW_STATUS,
   ALERT_WORKFLOW_TAGS,
   SPACE_IDS,
+  CPS_SCOPE_EXPRESSION,
+  CPS_SCOPE_LINKED_PROJECTS,
   TIMESTAMP,
   VERSION,
   EVENT_ACTION,
@@ -213,6 +216,11 @@ export const alertFieldMap = {
     array: false,
     required: true,
   },
+  [ALERT_SEVERITY]: {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
   [ALERT_SEVERITY_IMPROVING]: {
     type: 'boolean',
     array: false,
@@ -329,6 +337,16 @@ export const alertFieldMap = {
     type: 'keyword',
     array: true,
     required: true,
+  },
+  [CPS_SCOPE_EXPRESSION]: {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  [CPS_SCOPE_LINKED_PROJECTS]: {
+    type: 'flattened',
+    array: true,
+    required: false,
   },
   // ignore_above: 1024 matches ECS definition to prevent composite mapping conflicts
   [TAGS]: {

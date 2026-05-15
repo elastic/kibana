@@ -123,12 +123,15 @@ export function registerSearchApplicationsRoutes({ log, router }: RouteDependenc
       validate: {
         body: schema.object({
           indices: schema.arrayOf(schema.string({ maxLength: 1000 }), { maxSize: 1000 }),
-          name: schema.maybe(schema.string()),
+          name: schema.maybe(schema.string({ maxLength: 1000 })),
           template: schema.maybe(
             schema.object({
               script: schema.object({
-                source: schema.oneOf([schema.string(), schema.object({}, { unknowns: 'allow' })]),
-                lang: schema.string(),
+                source: schema.oneOf([
+                  schema.string({ maxLength: 10000 }),
+                  schema.object({}, { unknowns: 'allow' }),
+                ]),
+                lang: schema.string({ maxLength: 512 }),
                 params: schema.maybe(schema.object({}, { unknowns: 'allow' })),
                 options: schema.maybe(schema.object({}, { unknowns: 'allow' })),
               }),
@@ -280,7 +283,7 @@ export function registerSearchApplicationsRoutes({ log, router }: RouteDependenc
       },
       validate: {
         body: schema.object({
-          keyName: schema.string(),
+          keyName: schema.string({ maxLength: 1000 }),
         }),
         params: schema.object({
           engine_name: schema.string(),
