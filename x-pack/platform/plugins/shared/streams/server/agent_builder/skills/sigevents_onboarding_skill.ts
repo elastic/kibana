@@ -36,17 +36,20 @@ export const createSigEventsOnboardingSkill = (options: MemoryToolsOptions) =>
     </goal>
 
     <workflow>
-    ## Step 1 — Review existing knowledge
+    ## Step 1 — Check for existing knowledge
 
-    Start by reviewing what is already known about the system:
+    Start by silently reviewing what is already known about the system:
     - Use memory_list to browse the category tree
     - Use memory_search to look for entries about "system", "architecture", "deployment", "infrastructure", "services", "repositories", "flow", "access"
-    - Use memory_recent_changes to see what was recently updated
 
-    Then present a concise summary of what the system currently knows. Be specific about services, infrastructure components, and any deployment context that was found. Clearly indicate what is present, what seems incomplete, and what is missing entirely.
+    **If memory is empty or nearly empty (no relevant pages found):**
+    Skip to Step 2 immediately — there is no prior knowledge to confirm, so go straight into gathering information.
+
+    **If memory already has content:**
+    Present a concise summary of what the system currently knows. Be specific about services, infrastructure components, and any deployment context that was found. Clearly indicate what is present, what seems incomplete, and what is missing entirely.
 
     Example summary structure:
-    > **What I already know:**
+    > **What I already know about your system:**
     > - Services: [list]
     > - Infrastructure: [list or "not documented yet"]
     > - Deployment: [summary or "not documented yet"]
@@ -56,9 +59,11 @@ export const createSigEventsOnboardingSkill = (options: MemoryToolsOptions) =>
     > - Access & resources: [list or "not documented yet"]
     > - Operational context: [summary or "not documented yet"]
 
-    Then ask: **"Is this accurate? Is anything missing or wrong?"**
+    Then ask:
+    > **"Is there something specific you'd like to add or correct, or would you like me to go through the gaps and improve things in general?"**
 
-    Incorporate any corrections or additions before moving on.
+    - If the user has a **specific thing** (e.g. "I want to add our new Kafka setup", "the deployment pipeline changed") — handle that focused update directly, confirm it's saved, and close. Do NOT launch the full interview.
+    - If the user wants a **general improvement** or says something open-ended — proceed to Step 2.
 
     ## Step 2 — Identify gaps and ask targeted questions
 

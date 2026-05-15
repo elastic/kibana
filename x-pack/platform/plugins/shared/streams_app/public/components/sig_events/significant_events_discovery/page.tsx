@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLoadingElastic, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingElastic, useEuiTheme } from '@elastic/eui';
+import { AiButton } from '@kbn/shared-ux-ai-components';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useQuery } from '@kbn/react-query';
@@ -101,7 +102,7 @@ export function SignificantEventsDiscoveryPage() {
         'xpack.streams.significantEventsDiscovery.onboardingInitialMessage',
         {
           defaultMessage:
-            'Start the significant-events-onboarding skill to interview me about my system.',
+            'Start the significant-events-onboarding skill. First check whether there is already memory about my system. If there is, summarise what you know and ask whether I have something specific to add or correct, or whether I want a general review of the gaps. If memory is empty, go straight into gathering information.',
         }
       ),
       autoSendInitialMessage: true,
@@ -266,8 +267,8 @@ export function SignificantEventsDiscoveryPage() {
             </EuiFlexItem>
             {isMemoryEnabled && agentBuilder && (
               <EuiFlexItem grow={false}>
-                <EuiButton
-                  iconType="discuss"
+                <AiButton
+                  iconType="sparkles"
                   onClick={handleOpenSystemOnboarding}
                   data-test-subj="significantEventsSystemOnboardingButton"
                 >
@@ -275,7 +276,7 @@ export function SignificantEventsDiscoveryPage() {
                     'xpack.streams.significantEventsDiscovery.systemOnboardingButton',
                     { defaultMessage: 'Tell us about your system' }
                   )}
-                </EuiButton>
+                </AiButton>
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
