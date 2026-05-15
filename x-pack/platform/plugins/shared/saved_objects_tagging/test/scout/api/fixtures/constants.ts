@@ -10,6 +10,11 @@ export const COMMON_HEADERS = {
   'x-elastic-internal-origin': 'kibana',
 };
 
+export const TELEMETRY_HEADERS = {
+  ...COMMON_HEADERS,
+  'elastic-api-version': '2',
+};
+
 export const KBN_ARCHIVES = {
   FUNCTIONAL_BASE:
     'x-pack/platform/test/saved_object_tagging/common/fixtures/es_archiver/functional_base/data.json',
@@ -17,4 +22,6 @@ export const KBN_ARCHIVES = {
     'x-pack/platform/test/saved_object_tagging/common/fixtures/es_archiver/bulk_assign/data.json',
   DELETE_WITH_REFERENCES:
     'x-pack/platform/test/saved_object_tagging/common/fixtures/es_archiver/delete_with_references/data.json',
+  USAGE_COLLECTION:
+    'x-pack/platform/test/saved_object_tagging/common/fixtures/es_archiver/usage_collection/data.json',
 } as const;

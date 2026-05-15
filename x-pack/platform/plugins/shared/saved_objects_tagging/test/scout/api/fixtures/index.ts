@@ -10,4 +10,4 @@ import { apiTest as baseApiTest } from '@kbn/scout';
 
 export const apiTest = baseApiTest.extend<ScoutTestFixtures, ScoutWorkerFixtures>({});
 
-export { COMMON_HEADERS, KBN_ARCHIVES } from './constants';
+export { COMMON_HEADERS, TELEMETRY_HEADERS, KBN_ARCHIVES } from './constants';
