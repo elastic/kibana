@@ -76,6 +76,10 @@ import {
   scheduleInvalidateApiKeyTask,
 } from './invalidate_api_keys/invalidate_api_keys_task';
 import { createApiKeyStrategy } from './api_key_strategy';
+import {
+  UiamApiKeyProvisioningTask,
+  taskManagerUiamProvisioningEvents,
+} from './uiam_api_key_provisioning';
 
 export interface TaskManagerSetupContract {
   /**
@@ -160,6 +164,7 @@ export class TaskManagerPlugin
   private invalidateUiamApiKeyFn?: UiamApiKeyInvalidationFn;
   private taskStore?: TaskStore;
   private startContract?: TaskManagerStartContract;
+  private uiamApiKeyProvisioningTask?: UiamApiKeyProvisioningTask;
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
@@ -303,6 +308,20 @@ export class TaskManagerPlugin
       this.definitions
     );
 
+    taskManagerUiamProvisioningEvents.forEach((eventConfig) =>
+      core.analytics.registerEventType(eventConfig)
+    );
+
+    this.uiamApiKeyProvisioningTask = new UiamApiKeyProvisioningTask({
+      logger: this.logger,
+      isServerless,
+      analytics: core.analytics,
+    });
+    this.uiamApiKeyProvisioningTask.register({
+      coreSetup: core,
+      taskTypeDictionary: this.definitions,
+    });
+
     if (this.config.unsafe.exclude_task_types.length) {
       this.logger.warn(
         `Excluding task types from execution: ${this.config.unsafe.exclude_task_types.join(', ')}`
@@ -336,9 +355,10 @@ export class TaskManagerPlugin
   }
 
   public start(
-    { http, savedObjects, elasticsearch, executionContext, security }: CoreStart,
+    core: CoreStart,
     { cloud, licensing }: TaskManagerPluginsStart
   ): TaskManagerStartContract {
+    const { http, savedObjects, elasticsearch, executionContext, security } = core;
     this.licenseSubscriber = new LicenseSubscriber(licensing.license$);
 
     const savedObjectsRepository = savedObjects.createInternalRepository([
@@ -509,11 +529,20 @@ export class TaskManagerPlugin
       },
     };
 
+    this.uiamApiKeyProvisioningTask
+      ?.start({
+        core,
+        taskScheduling,
+        removeIfExists: (id: string) => removeIfExists(taskStore, id),
+      })
+      .catch(() => {});
+
     return this.startContract;
   }
 
   public async stop() {
     this.licenseSubscriber?.cleanup();
+    this.uiamApiKeyProvisioningTask?.stop();
 
     // Stop polling for tasks
     if (this.taskPollingLifecycle) {
