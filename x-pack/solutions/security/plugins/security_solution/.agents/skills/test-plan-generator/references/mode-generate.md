@@ -14,12 +14,8 @@ Stop and tell the user:
 >
 > **C) Cancel** — do nothing."
 
-**If the user selects A:**
+**If the user selects A:** Run the full update flow — read [`mode-update.md`](mode-update.md) and follow every step in that file. The published comment serves as the baseline; the PR-activity optimisation, URL re-categorization, special handling for implemented Pending sub-issues, and full-document self-review rules defined there all apply.
 
-1. Read the published test plan in full — this is the baseline.
-2. Run Steps 1 and 2 normally to gather and analyze all current context.
-3. Compare the gathered context against the baseline. Identify acceptance criteria, scenarios, or sections that are missing or outdated.
-4. If gaps are found: add only the missing scenarios and update only the outdated sections. Do not rewrite accurate sections. If new scenarios must be written, follow the [Writing scenarios](../SKILL.md#writing-scenarios) and [Saving the draft](../SKILL.md#saving-the-draft) procedures from Step 3 — Sources Summary is included there. After saving, replace Step 3's generic "Draft saved…" message: tell the user exactly what was added or changed.
-5. If no gaps are found: tell the user "The existing test plan appears to be up to date. No changes are needed." Do not save a draft.
+After step 7 of `mode-update.md`, if **no gaps were found** (i.e. step 5 produced an empty change list), do not save a draft — instead tell the user *"The existing test plan appears to be up to date. No changes are needed."*
 
 **If the user selects B:** proceed normally through Steps 1, 2, and 3.
