@@ -12,6 +12,7 @@ import { buildPackagePolicyFilterExcludingHiddenPackages } from '../../../common
 import { cloudConnectorService, packagePolicyService } from '../../services';
 import type { FleetRequestHandler } from '../../types';
 import { appContextService } from '../../services/app_context';
+import { createSecrets } from '../../services/secrets';
 import type {
   GetCloudConnectorsResponse,
   GetOneCloudConnectorResponse,
@@ -39,22 +40,42 @@ export const createCloudConnectorHandler: FleetRequestHandler<
 > = async (context, request, response) => {
   const fleetContext = await context.fleet;
   const { internalSoClient } = fleetContext;
+  const coreContext = await context.core;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
   const logger = appContextService
     .getLogger()
     .get('CloudConnectorService createCloudConnectorHandler');
 
   try {
     logger.info('Creating cloud connector');
+
+    // If external_id.value is a plain string, create a Fleet secret and replace with a reference.
+    // This allows callers to pass raw values without knowing about internal secret storage.
+    const body = { ...request.body, vars: { ...request.body.vars } };
+    const externalIdVar = body.vars.external_id as
+      | { type?: string; value?: unknown; frozen?: boolean }
+      | undefined;
+    if (
+      externalIdVar &&
+      typeof externalIdVar === 'object' &&
+      typeof externalIdVar.value === 'string'
+    ) {
+      logger.debug('external_id is a plain string — creating Fleet secret');
+      const [secret] = await createSecrets({ esClient, values: [externalIdVar.value] });
+      const secretId = Array.isArray(secret) ? secret[0].id : secret.id;
+      body.vars = {
+        ...body.vars,
+        external_id: { type: 'password', value: { isSecretRef: true, id: secretId } },
+      };
+    }
+
     const cloudConnector = await cloudConnectorService.create(
       internalSoClient,
       // Type assertion is safe: schema validation ensures structure, service validates vars against CloudConnectorVars
-      request.body as unknown as CreateCloudConnectorRequest
+      body as unknown as CreateCloudConnectorRequest
     );
     logger.info(`Successfully created cloud connector ${cloudConnector.id}`);
-    const body: CreateCloudConnectorResponse = {
-      item: cloudConnector,
-    };
-    return response.ok({ body });
+    return response.ok({ body: { item: cloudConnector } as CreateCloudConnectorResponse });
   } catch (error) {
     logger.error(`Failed to create cloud connector`, error.message);
     return response.customError({

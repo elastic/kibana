@@ -28,77 +28,75 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { RequestError } from '../../hooks';
 import { useLink, useStartServices } from '../../hooks';
 
-import {
-  AgentPolicyDebugger,
-  AgentlessResourcesToggle,
-  IntegrationDebugger,
-  PreconfigurationDebugger,
-  FleetIndexDebugger,
-  SavedObjectDebugger,
-  OrphanedIntegrationPolicyDebugger,
-  HealthCheckPanel,
-} from './components';
+import { CloudOnboardingDeploymentDebugger } from './components';
 
 // TODO: Evaluate moving this react-query initialization up to the main Fleet app
 // setup if we end up pursuing wider adoption of react-query.
 export const queryClient = new QueryClient();
 
 const panels = [
+  // {
+  //   title: i18n.translate('xpack.fleet.debug.HealthCheckStatus.title', {
+  //     defaultMessage: 'Health Check Status',
+  //   }),
+  //   id: 'healthCheckStatus',
+  //   component: <HealthCheckPanel />,
+  // },
+  // {
+  //   title: i18n.translate('xpack.fleet.debug.agentPolicyDebugger.title', {
+  //     defaultMessage: 'Agent Policy Debugger',
+  //   }),
+  //   id: 'agentPolicyDebugger',
+  //   component: <AgentPolicyDebugger />,
+  // },
+  // {
+  //   title: i18n.translate('xpack.fleet.debug.integrationDebugger.title', {
+  //     defaultMessage: 'Integration Debugger',
+  //   }),
+  //   id: 'integrationDebugger',
+  //   component: <IntegrationDebugger />,
+  // },
+  // {
+  //   title: i18n.translate('xpack.fleet.debug.savedObjectDebugger.title', {
+  //     defaultMessage: 'Saved Object Debugger',
+  //   }),
+  //   id: 'savedObjectDebugger',
+  //   component: <SavedObjectDebugger />,
+  // },
+  // {
+  //   title: i18n.translate('xpack.fleet.debug.fleetIndexDebugger.title', {
+  //     defaultMessage: 'Fleet Index Debugger',
+  //   }),
+  //   id: 'fleetIndexDebugger',
+  //   component: <FleetIndexDebugger />,
+  // },
+  // {
+  //   title: i18n.translate('xpack.fleet.debug.preconfigurationDebugger.title', {
+  //     defaultMessage: 'Preconfiguration Debugger',
+  //   }),
+  //   id: 'preconfigurationDebugger',
+  //   component: <PreconfigurationDebugger />,
+  // },
+  // {
+  //   title: i18n.translate('xpack.fleet.debug.orphanedIntegrationPolicyDebugger.title', {
+  //     defaultMessage: 'Orphaned Integration Policy Debugger',
+  //   }),
+  //   id: 'orphanedIntegrationPolicyDebugger',
+  //   component: <OrphanedIntegrationPolicyDebugger />,
+  // },
+  // {
+  //   title: i18n.translate('xpack.fleet.debug.agentlessResourcesToggle.title', {
+  //     defaultMessage: 'Show Agentless Resources',
+  //   }),
+  //   id: 'agentlessResourcesToggle',
+  //   component: <AgentlessResourcesToggle />,
+  // },
   {
-    title: i18n.translate('xpack.fleet.debug.HealthCheckStatus.title', {
-      defaultMessage: 'Health Check Status',
+    title: i18n.translate('xpack.fleet.debug.cloudOnboardingDeploymentDebugger.title', {
+      defaultMessage: 'Cloud Onboarding Deployment Debugger',
     }),
-    id: 'healthCheckStatus',
-    component: <HealthCheckPanel />,
-  },
-  {
-    title: i18n.translate('xpack.fleet.debug.agentPolicyDebugger.title', {
-      defaultMessage: 'Agent Policy Debugger',
-    }),
-    id: 'agentPolicyDebugger',
-    component: <AgentPolicyDebugger />,
-  },
-  {
-    title: i18n.translate('xpack.fleet.debug.integrationDebugger.title', {
-      defaultMessage: 'Integration Debugger',
-    }),
-    id: 'integrationDebugger',
-    component: <IntegrationDebugger />,
-  },
-  {
-    title: i18n.translate('xpack.fleet.debug.savedObjectDebugger.title', {
-      defaultMessage: 'Saved Object Debugger',
-    }),
-    id: 'savedObjectDebugger',
-    component: <SavedObjectDebugger />,
-  },
-  {
-    title: i18n.translate('xpack.fleet.debug.fleetIndexDebugger.title', {
-      defaultMessage: 'Fleet Index Debugger',
-    }),
-    id: 'fleetIndexDebugger',
-    component: <FleetIndexDebugger />,
-  },
-  {
-    title: i18n.translate('xpack.fleet.debug.preconfigurationDebugger.title', {
-      defaultMessage: 'Preconfiguration Debugger',
-    }),
-    id: 'preconfigurationDebugger',
-    component: <PreconfigurationDebugger />,
-  },
-  {
-    title: i18n.translate('xpack.fleet.debug.orphanedIntegrationPolicyDebugger.title', {
-      defaultMessage: 'Orphaned Integration Policy Debugger',
-    }),
-    id: 'orphanedIntegrationPolicyDebugger',
-    component: <OrphanedIntegrationPolicyDebugger />,
-  },
-  {
-    title: i18n.translate('xpack.fleet.debug.agentlessResourcesToggle.title', {
-      defaultMessage: 'Show Agentless Resources',
-    }),
-    id: 'agentlessResourcesToggle',
-    component: <AgentlessResourcesToggle />,
+    id: 'cloudOnboardingDeploymentDebugger',
+    component: <CloudOnboardingDeploymentDebugger />,
   },
 ];
 
