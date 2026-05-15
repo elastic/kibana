@@ -1182,7 +1182,7 @@ export default function (providerContext: FtrProviderContext) {
     // migrate_from as a valid var field. The registry image must be updated before
     // these tests will pass locally or in CI.
     describe('when upgrading to a version where a stream-level variable moves to input scope', function () {
-      withTestPackage('package_policy_upgrade', '0.9.0-stream-var-to-input');
+      withTestPackage('package_policy_upgrade', '0.9.0_stream_var_to_input');
 
       beforeEach(async function () {
         const { body: agentPolicyResponse } = await supertest
@@ -1277,7 +1277,7 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     describe('when upgrading to a version where an input-level variable moves to stream scope', function () {
-      withTestPackage('package_policy_upgrade', '0.10.0-input-var-to-stream');
+      withTestPackage('package_policy_upgrade', '0.10.0_input_var_to_stream');
 
       beforeEach(async function () {
         const { body: agentPolicyResponse } = await supertest
@@ -1320,7 +1320,7 @@ export default function (providerContext: FtrProviderContext) {
             package: {
               name: 'package_policy_upgrade',
               title: 'Tests package policy upgrades',
-              version: '0.9.0-stream-var-to-input',
+              version: '0.9.0_stream_var_to_input',
             },
           });
 
