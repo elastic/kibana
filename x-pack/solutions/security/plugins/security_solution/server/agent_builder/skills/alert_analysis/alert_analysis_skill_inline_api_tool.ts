@@ -141,7 +141,7 @@ Use this skill when:
           alertId,
           alertsIndex,
           timeWindowHours,
-          maxResults: 50,
+          maxResults: 25,
           hostNames,
           userNames,
           sourceIps,

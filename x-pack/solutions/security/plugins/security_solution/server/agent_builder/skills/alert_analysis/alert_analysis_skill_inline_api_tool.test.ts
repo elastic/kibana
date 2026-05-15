@@ -102,7 +102,7 @@ describe('alertAnalysisInlineApiToolSkill', () => {
       ) as Promise<ToolHandlerStandardReturn>;
     };
 
-    it('calls findRelatedAlerts with correct params including maxResults: 50', async () => {
+    it('calls findRelatedAlerts with correct params including maxResults: 25', async () => {
       findRelatedAlerts.mockResolvedValueOnce(
         makeSuccess({
           message: 'Found 1 related alerts sharing entities with alert alert-123.',
@@ -119,7 +119,7 @@ describe('alertAnalysisInlineApiToolSkill', () => {
           alertId: 'alert-123',
           alertsIndex: '.alerts-security.alerts-default',
           timeWindowHours: 48,
-          maxResults: 50,
+          maxResults: 25,
           hostNames: ['host-1'],
         })
       );
@@ -169,14 +169,14 @@ describe('alertAnalysisInlineApiToolSkill', () => {
       expect(getData(result).message).toBe('Alert not found');
     });
 
-    it('passes maxResults: 50 to match legacy result size', async () => {
+    it('passes maxResults: 25 (compact default) to the service', async () => {
       findRelatedAlerts.mockResolvedValueOnce(makeSuccess());
 
       await callHandler({ alertId: 'alert-123' });
 
       expect(findRelatedAlerts).toHaveBeenCalledWith(
         mockEsClient.asCurrentUser,
-        expect.objectContaining({ maxResults: 50 })
+        expect.objectContaining({ maxResults: 25 })
       );
     });
   });
