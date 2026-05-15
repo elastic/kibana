@@ -129,7 +129,10 @@ export const EndpointExceptionsForm: React.FC<EndpointExceptionsFormProps> = mem
     error: submitError,
   }) => {
     const getTestId = useTestIdGenerator('endpointExceptions-form');
-    const { http } = useKibana().services;
+    const {
+      http,
+      docLinks: { links },
+    } = useKibana().services;
 
     const getSuggestionsFn = useCallback<ValueSuggestionsGetFn>(
       ({ field, query }) => {
@@ -219,7 +222,8 @@ export const EndpointExceptionsForm: React.FC<EndpointExceptionsFormProps> = mem
                   {
                     hasWildcardWithWrongOperator,
                     hasUnnecessaryEscaping,
-                  }
+                  },
+                  links
                 )
               : undefined,
         });
@@ -233,6 +237,7 @@ export const EndpointExceptionsForm: React.FC<EndpointExceptionsFormProps> = mem
         hasFormChanged,
         hasWildcardWithWrongOperator,
         hasUnnecessaryEscaping,
+        links,
       ]
     );
 

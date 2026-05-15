@@ -9,6 +9,7 @@ import React, { memo } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiLink,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
@@ -20,14 +21,17 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import type { DocLinks } from '@kbn/doc-links';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import type { ArtifactConfirmModalLabelProps } from '../types';
 
 export const CONFIRM_WARNING_MODAL_LABELS = (
   entryType: string,
-  warnings: Partial<{ hasWildcardWithWrongOperator: boolean; hasUnnecessaryEscaping: boolean }>
+  warnings: Partial<{ hasWildcardWithWrongOperator: boolean; hasUnnecessaryEscaping: boolean }>,
+  links: DocLinks
 ): ArtifactConfirmModalLabelProps => {
-  const listOfWarnings: string[] = [
+  const listOfWarnings: ArtifactConfirmModalLabelProps['listOfWarnings'] = [
     ...(warnings.hasWildcardWithWrongOperator
       ? [
           i18n.translate(
@@ -42,13 +46,22 @@ export const CONFIRM_WARNING_MODAL_LABELS = (
 
     ...(warnings.hasUnnecessaryEscaping
       ? [
-          i18n.translate(
-            'xpack.securitySolution.artifacts.confirmWarningModal.unnecessaryEscaping',
-            {
-              defaultMessage:
-                'Endpoint artifacts do not require escaping when using "\\", "*" or "?" characters.',
+          <FormattedMessage
+            id="xpack.securitySolution.artifacts.confirmWarningModal.unnecessaryEscaping"
+            defaultMessage={
+              'Endpoint artifacts do not require escaping when using "\\", "*" or "?" characters. {link}'
             }
-          ),
+            values={{
+              link: (
+                <EuiLink target="_blank" href={links.securitySolution.endpointArtifactsNoEscaping}>
+                  <FormattedMessage
+                    id="xpack.securitySolution.artifacts.confirmWarningModal.unnecessaryEscapingLink"
+                    defaultMessage="Learn more about endpoint artifact value syntax."
+                  />
+                </EuiLink>
+              ),
+            }}
+          />,
         ]
       : []),
   ];

@@ -9,9 +9,16 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-import { EuiCallOut } from '@elastic/eui';
+import { EuiCallOut, EuiLink, EuiLoadingSpinner } from '@elastic/eui';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 export const UnnecessaryEscapingCallout = () => {
+  const { docLinks } = useKibana().services;
+
+  if (!docLinks) {
+    return <EuiLoadingSpinner />;
+  }
+
   return (
     <EuiCallOut
       title={i18n.translate('exceptionList-components.unnecessaryEscapingCallout.title', {
@@ -25,7 +32,20 @@ export const UnnecessaryEscapingCallout = () => {
       <p>
         <FormattedMessage
           id="exceptionList-components.unnecessaryEscapingCallout.body"
-          defaultMessage='Endpoint artifacts do not require escaping when using "\", "*" or "?" characters.'
+          defaultMessage='Endpoint artifacts do not require escaping when using "\", "*" or "?" characters. {link}'
+          values={{
+            link: (
+              <EuiLink
+                target="_blank"
+                href={docLinks.links.securitySolution.endpointArtifactsNoEscaping}
+              >
+                <FormattedMessage
+                  id="xpack.securitySolution.artifacts.confirmWarningModal.unnecessaryEscapingLink"
+                  defaultMessage="Learn more about endpoint artifact value syntax."
+                />
+              </EuiLink>
+            ),
+          }}
         />
       </p>
     </EuiCallOut>

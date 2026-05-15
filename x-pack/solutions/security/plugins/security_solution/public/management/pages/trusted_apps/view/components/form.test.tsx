@@ -180,6 +180,13 @@ describe('Trusted apps form', () => {
     return renderResult.getByTestId(`${dataTestSub}-advancedModeUsageWarningBody`);
   };
 
+  const expectReactNodeContainingMessage = (substring: string) =>
+    expect.objectContaining({
+      props: expect.objectContaining({
+        defaultMessage: expect.stringContaining(substring),
+      }),
+    });
+
   beforeEach(() => {
     resetHTMLElementOffsetWidth = forceHTMLElementOffsetWidth();
     (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(true);
@@ -865,7 +872,7 @@ describe('Trusted apps form', () => {
             expect(formProps.onChange).toHaveBeenCalledWith(
               expect.objectContaining({
                 confirmModalLabels: expect.objectContaining({
-                  listOfWarnings: [expect.stringContaining('escaping')],
+                  listOfWarnings: [expectReactNodeContainingMessage('escaping')],
                 }),
               })
             );
@@ -900,7 +907,7 @@ describe('Trusted apps form', () => {
                 confirmModalLabels: expect.objectContaining({
                   listOfWarnings: [
                     expect.stringContaining('wildcards'),
-                    expect.stringContaining('escaping'),
+                    expectReactNodeContainingMessage('escaping'),
                   ],
                 }),
               })
@@ -962,7 +969,7 @@ describe('Trusted apps form', () => {
             expect(formProps.onChange).toHaveBeenCalledWith(
               expect.objectContaining({
                 confirmModalLabels: expect.objectContaining({
-                  listOfWarnings: [expect.stringContaining('escaping')],
+                  listOfWarnings: [expectReactNodeContainingMessage('escaping')],
                 }),
               })
             );
@@ -990,7 +997,7 @@ describe('Trusted apps form', () => {
                 confirmModalLabels: expect.objectContaining({
                   listOfWarnings: [
                     expect.stringContaining('wildcards'),
-                    expect.stringContaining('escaping'),
+                    expectReactNodeContainingMessage('escaping'),
                   ],
                 }),
               })

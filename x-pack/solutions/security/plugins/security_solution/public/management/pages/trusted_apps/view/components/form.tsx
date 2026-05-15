@@ -358,7 +358,10 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
       validateValues(item)
     );
 
-    const { http } = useKibana().services;
+    const {
+      http,
+      docLinks: { links },
+    } = useKibana().services;
     const getSuggestionsFn = useCallback<ValueSuggestionsGetFn>(
       ({ field, query }) => {
         const trustedAppsAPIClient = new TrustedAppsApiClient(http);
@@ -438,7 +441,8 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
                   {
                     hasWildcardWithWrongOperator: shouldShowWildcardConfirmModal,
                     hasUnnecessaryEscaping: shouldShowUnnecessaryEscapingConfirmModal,
-                  }
+                  },
+                  links
                 )
               : undefined,
         });
@@ -449,6 +453,7 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
         conditionsState.hasWildcardWithWrongOperator,
         hasFormChanged,
         item,
+        links,
         onChange,
       ]
     );

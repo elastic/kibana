@@ -45,6 +45,7 @@ import {
   isNewTermsRule,
   isThresholdRule,
 } from '../../../../../common/detection_engine/utils';
+import { useKibana } from '../../../../common/lib/kibana';
 
 import type { Rule } from '../../../rule_management/logic/types';
 import { ExceptionsFlyoutMeta } from '../flyout_components/item_meta_form';
@@ -106,6 +107,9 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
   onCancel,
   onConfirm,
 }): JSX.Element => {
+  const {
+    docLinks: { links },
+  } = useKibana().services;
   const selectedOs = useMemo(() => itemToEdit.os_types, [itemToEdit]);
   const rules = useMemo(() => (rule != null ? [rule] : null), [rule]);
   const listType = useMemo((): ExceptionListTypeEnum => list.type as ExceptionListTypeEnum, [list]);
@@ -393,7 +397,8 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
   const confirmModal = useMemo(() => {
     const labels = CONFIRM_WARNING_MODAL_LABELS(
       listType === ExceptionListTypeEnum.ENDPOINT ? ENDPOINT_EXCEPTION : RULE_EXCEPTION,
-      { hasWildcardWithWrongOperator: wildcardWarningExists }
+      { hasWildcardWithWrongOperator: wildcardWarningExists },
+      links
     );
 
     return (
@@ -404,7 +409,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
         data-test-subj="artifactConfirmModal"
       />
     );
-  }, [listType, handleSubmitException, wildcardWarningExists]);
+  }, [listType, wildcardWarningExists, links, handleSubmitException]);
 
   return (
     <EuiFlyout

@@ -119,7 +119,10 @@ const cleanupEntries = (item: ArtifactFormComponentProps['item']) =>
 export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSelectOs?: boolean }> =
   memo(({ allowSelectOs = true, item: exception, onChange, mode, error: submitError }) => {
     const getTestId = useTestIdGenerator('eventFilters-form');
-    const { http } = useKibana().services;
+    const {
+      http,
+      docLinks: { links },
+    } = useKibana().services;
 
     const getSuggestionsFn = useCallback<ValueSuggestionsGetFn>(
       ({ field, query }) => {
@@ -201,19 +204,21 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
                       defaultMessage: 'event filter',
                     }
                   ),
-                  { hasWildcardWithWrongOperator, hasUnnecessaryEscaping }
+                  { hasWildcardWithWrongOperator, hasUnnecessaryEscaping },
+                  links
                 )
               : undefined,
         });
       },
       [
-        areConditionsValid,
         exception,
-        hasFormChanged,
-        isFormValid,
         onChange,
+        isFormValid,
+        areConditionsValid,
+        hasFormChanged,
         hasWildcardWithWrongOperator,
         hasUnnecessaryEscaping,
+        links,
       ]
     );
 

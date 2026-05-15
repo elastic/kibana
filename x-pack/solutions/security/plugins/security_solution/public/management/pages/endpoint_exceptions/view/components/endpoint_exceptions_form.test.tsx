@@ -75,6 +75,13 @@ const TestComponentWrapper: typeof EndpointExceptionsForm = (
   return <EndpointExceptionsForm {...formProps} item={item} onChange={handleOnChange} />;
 };
 
+const expectReactNodeContainingMessage = (substring: string) =>
+  expect.objectContaining({
+    props: expect.objectContaining({
+      defaultMessage: expect.stringContaining(substring),
+    }),
+  });
+
 describe('Endpoint exceptions form', () => {
   const formPrefix = 'endpointExceptions-form';
 
@@ -508,7 +515,7 @@ describe('Endpoint exceptions form', () => {
             expect(formProps.onChange).toHaveBeenCalledWith(
               expect.objectContaining({
                 confirmModalLabels: expect.objectContaining({
-                  listOfWarnings: [expect.stringContaining('escaping')],
+                  listOfWarnings: [expectReactNodeContainingMessage('escaping')],
                 }),
               })
             );
@@ -545,7 +552,7 @@ describe('Endpoint exceptions form', () => {
                 confirmModalLabels: expect.objectContaining({
                   listOfWarnings: [
                     expect.stringContaining('wildcards'),
-                    expect.stringContaining('escaping'),
+                    expectReactNodeContainingMessage('escaping'),
                   ],
                 }),
               })

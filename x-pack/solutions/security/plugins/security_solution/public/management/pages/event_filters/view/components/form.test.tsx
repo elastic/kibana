@@ -81,6 +81,13 @@ const TestComponentWrapper: typeof EventFiltersForm = (formProps: ArtifactFormCo
   return <EventFiltersForm {...formProps} item={item} onChange={handleOnChange} />;
 };
 
+const expectReactNodeContainingMessage = (substring: string) =>
+  expect.objectContaining({
+    props: expect.objectContaining({
+      defaultMessage: expect.stringContaining(substring),
+    }),
+  });
+
 describe('Event filter form', () => {
   const formPrefix = 'eventFilters-form';
 
@@ -151,6 +158,13 @@ describe('Event filter form', () => {
         data: {},
         unifiedSearch: {},
         notifications: {},
+        docLinks: {
+          links: {
+            securitySolution: {
+              endpointArtifactsNoEscaping: 'some-link',
+            },
+          },
+        },
       },
     });
     (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(true);
@@ -709,7 +723,7 @@ describe('Event filter form', () => {
           expect(formProps.onChange).toHaveBeenCalledWith(
             expect.objectContaining({
               confirmModalLabels: expect.objectContaining({
-                listOfWarnings: [expect.stringContaining('escaping')],
+                listOfWarnings: [expectReactNodeContainingMessage('escaping')],
               }),
             })
           );
@@ -745,7 +759,7 @@ describe('Event filter form', () => {
               confirmModalLabels: expect.objectContaining({
                 listOfWarnings: [
                   expect.stringContaining('wildcards'),
-                  expect.stringContaining('escaping'),
+                  expectReactNodeContainingMessage('escaping'),
                 ],
               }),
             })

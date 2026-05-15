@@ -42,6 +42,7 @@ import type { Moment } from 'moment';
 import type { Status } from '../../../../../common/api/detection_engine';
 import * as i18n from './translations';
 import { ExceptionItemComments } from '../item_comments';
+import { useKibana } from '../../../../common/lib/kibana';
 import {
   defaultEndpointExceptionItems,
   getPrepopulatedRuleExceptionWithHighlightFields,
@@ -116,6 +117,9 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   onCancel,
   onConfirm,
 }: AddExceptionFlyoutProps) {
+  const {
+    docLinks: { links },
+  } = useKibana().services;
   const { hasAlertsUpdate } = useAlertsPrivileges();
   const [showConfirmModal, setShowConfirmModal] = useState<boolean>(false);
   const { isLoading, indexPatterns, getExtendedFields } = useFetchIndexPatterns(rules);
@@ -507,7 +511,8 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   const confirmModal = useMemo(() => {
     const labels = CONFIRM_WARNING_MODAL_LABELS(
       listType === ExceptionListTypeEnum.ENDPOINT ? ENDPOINT_EXCEPTION : RULE_EXCEPTION,
-      { hasWildcardWithWrongOperator: wildcardWarningExists }
+      { hasWildcardWithWrongOperator: wildcardWarningExists },
+      links
     );
 
     return (
@@ -518,7 +523,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
         data-test-subj="artifactConfirmModal"
       />
     );
-  }, [listType, submitException, wildcardWarningExists]);
+  }, [links, listType, submitException, wildcardWarningExists]);
 
   return (
     <EuiFlyout
