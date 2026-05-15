@@ -61,13 +61,22 @@ describe('splitQuery', () => {
       expect(result.alertBlock).toBe('| WHERE error_rate > 0.05');
     });
 
-    it('returns no base when all commands are WHERE', () => {
+    it('preserves FROM as base when the only piped command is WHERE', () => {
       const query = 'FROM logs-* | WHERE x > 1';
       const result = splitQuery(query);
       expect(result.confidence).toBe('low');
       expect(result.reason).toBe('where_without_stats');
       expect(result.base).toBe('FROM logs-*');
       expect(result.alertBlock).toBe('| WHERE x > 1');
+    });
+
+    it('sweeps a trailing non-WHERE (LIMIT) into the alert block when it follows a WHERE', () => {
+      const query = 'FROM logs-* | WHERE x > 1 | LIMIT 10';
+      const result = splitQuery(query);
+      expect(result.confidence).toBe('low');
+      expect(result.reason).toBe('where_without_stats');
+      expect(result.base).toBe('FROM logs-*');
+      expect(result.alertBlock).toBe('| WHERE x > 1 | LIMIT 10');
     });
   });
 
