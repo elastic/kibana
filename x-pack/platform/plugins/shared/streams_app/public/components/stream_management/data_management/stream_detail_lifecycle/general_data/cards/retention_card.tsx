@@ -6,97 +6,159 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  Streams,
-  isDisabledLifecycle,
-  isDslLifecycle,
-  isIlmLifecycle,
-  isInheritLifecycle,
-  isRoot,
-} from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
+import { isDisabledLifecycle, isDslLifecycle, isIlmLifecycle } from '@kbn/streams-schema';
 import React from 'react';
 import { EuiButton } from '@elastic/eui';
+import { PHASE_ORDER } from '@kbn/data-lifecycle-phases';
+import { useKibana } from '../../../../../../hooks/use_kibana';
+import { useStreamsAppFetch } from '../../../../../../hooks/use_streams_app_fetch';
 import { BaseMetricCard } from '../../common/base_metric_card';
 import { getTimeSizeAndUnitLabel } from '../../../../../../util/format_size_units';
-import { IlmLink } from '../ilm_link';
+import { useLifecyclePreview } from '../../common/hooks/lifecycle_preview';
 
 export const RetentionCard = ({
   definition,
   openEditModal,
-  isEditLifecycleFlyoutOpen = false,
 }: {
   definition: Streams.ingest.all.GetResponse;
   openEditModal: () => void;
-  isEditLifecycleFlyoutOpen?: boolean;
 }) => {
+  const {
+    isActive: isPreviewActive,
+    dataPhasesCount: previewDataPhasesCount,
+    downsampleStepsCount: previewDownsampleStepsCount,
+    retentionPeriod: previewRetentionPeriod,
+  } = useLifecyclePreview();
+
+  const {
+    dependencies: {
+      start: {
+        streams: { streamsRepositoryClient },
+      },
+    },
+  } = useKibana();
+
   const lifecycle = definition.effective_lifecycle;
 
-  const isRootStream = isRoot(definition.stream.name);
-  const isWiredStream = Streams.WiredStream.GetResponse.is(definition);
-  const isInheritingLifecycle = isInheritLifecycle(definition.stream.ingest.lifecycle);
+  const isIlm = isIlmLifecycle(lifecycle);
 
-  const getRetentionOrigin = () => {
-    if (isWiredStream) {
-      if (isInheritingLifecycle) {
-        return i18n.translate('xpack.streams.streamDetailLifecycle.inheritingFromParent', {
-          defaultMessage: 'Inherit from parent',
-        });
-      } else if (!isRootStream) {
-        return i18n.translate('xpack.streams.streamDetailLifecycle.overrideParent', {
-          defaultMessage: 'Override parent',
-        });
-      }
-      return null;
+  const { value: ilmStatsValue, loading: ilmStatsLoading } = useStreamsAppFetch(
+    ({ signal }) => {
+      if (!isIlm) return undefined;
+      return streamsRepositoryClient.fetch('GET /internal/streams/{name}/lifecycle/_stats', {
+        params: { path: { name: definition.stream.name } },
+        signal,
+      });
+    },
+    [streamsRepositoryClient, definition.stream.name, isIlm],
+    {
+      withTimeRange: false,
+      withRefresh: false,
+      clearValueOnNext: true,
+      unsetValueOnError: true,
+      disableToastOnError: true,
     }
-
-    return isInheritingLifecycle
-      ? i18n.translate('xpack.streams.streamDetailLifecycle.inheritingIndexTemplate', {
-          defaultMessage: 'Inherit from index template',
-        })
-      : i18n.translate('xpack.streams.streamDetailLifecycle.overrideIndexTemplate', {
-          defaultMessage: 'Override index template',
-        });
-  };
-
-  const retentionOrigin = getRetentionOrigin();
+  );
 
   const getMetrics = () => {
-    const baseSubtitles: string[] = [];
-    let data: React.ReactNode;
+    const subtitles: string[] = [];
+    let data: React.ReactNode = '—';
 
-    if (isIlmLifecycle(lifecycle)) {
-      baseSubtitles.push(
-        i18n.translate('xpack.streams.streamDetailLifecycle.retention.ilmPolicy', {
-          defaultMessage: 'ILM policy',
+    const isTimeSeriesStream = definition.index_mode === 'time_series';
+
+    const phasesCount = (() => {
+      if (isPreviewActive) {
+        return previewDataPhasesCount ?? undefined;
+      }
+
+      if (isIlm) {
+        const ilmPhases = ilmStatsValue?.phases;
+        if (!ilmPhases) return undefined;
+        return PHASE_ORDER.filter((phaseName) => Boolean(ilmPhases?.[phaseName])).length;
+      }
+
+      if (isDslLifecycle(lifecycle)) {
+        // DSL currently has a required hot/default phase and an optional delete phase (`data_retention`).
+        return lifecycle.dsl.data_retention ? 2 : 1;
+      }
+
+      if (isDisabledLifecycle(lifecycle)) {
+        return 1;
+      }
+
+      return undefined;
+    })();
+
+    const downsampleStepsCount = (() => {
+      if (!isTimeSeriesStream) {
+        return undefined;
+      }
+
+      if (isPreviewActive && previewDownsampleStepsCount != null) {
+        return previewDownsampleStepsCount;
+      }
+
+      if (isIlm) {
+        const phases = ilmStatsValue?.phases ?? null;
+        if (!phases) return undefined;
+
+        const hasDownsample = (phase: unknown): boolean => {
+          if (!phase || typeof phase !== 'object') return false;
+          const p = phase as { downsample?: unknown; actions?: { downsample?: unknown } };
+          return Boolean(p.downsample ?? p.actions?.downsample);
+        };
+
+        return PHASE_ORDER.filter((phaseName) => {
+          if (phaseName === 'delete') return false;
+          return hasDownsample((phases as Record<string, unknown>)[phaseName]);
+        }).length;
+      }
+
+      if (isDslLifecycle(lifecycle)) {
+        return lifecycle.dsl.downsample?.length ?? 0;
+      }
+
+      return 0;
+    })();
+    if (typeof phasesCount === 'number') {
+      subtitles.push(
+        i18n.translate('xpack.streams.streamDetailLifecycle.lifecycleSummary.dataPhasesCount', {
+          defaultMessage: '{count, plural, one {# data phase} other {# data phases}}',
+          values: { count: phasesCount },
         })
       );
-      data = <IlmLink lifecycle={lifecycle} />;
+    }
+
+    if (typeof downsampleStepsCount === 'number' && downsampleStepsCount > 0) {
+      subtitles.push(
+        i18n.translate(
+          'xpack.streams.streamDetailLifecycle.lifecycleSummary.downsampleStepsConfigured',
+          {
+            defaultMessage: '{count, plural, one {# downsample step} other {# downsample steps}}',
+            values: { count: downsampleStepsCount },
+          }
+        )
+      );
+    }
+
+    if (isPreviewActive) {
+      data =
+        (previewRetentionPeriod ? getTimeSizeAndUnitLabel(previewRetentionPeriod) : undefined) ??
+        '∞';
+    } else if (isIlm) {
+      if (!ilmStatsLoading) {
+        const deleteMinAge = ilmStatsValue?.phases?.delete?.min_age;
+        const formattedRetention = deleteMinAge ? getTimeSizeAndUnitLabel(deleteMinAge) : undefined;
+        data = formattedRetention ?? '∞';
+      }
     } else if (isDslLifecycle(lifecycle)) {
-      const formattedRetention = getTimeSizeAndUnitLabel(lifecycle.dsl.data_retention);
-      const isIndefiniteRetention = formattedRetention === undefined;
-
-      baseSubtitles.push(
-        isIndefiniteRetention
-          ? i18n.translate('xpack.streams.streamDetailLifecycle.retention.indefinite', {
-              defaultMessage: 'Indefinite',
-            })
-          : i18n.translate('xpack.streams.streamDetailLifecycle.retention.custom', {
-              defaultMessage: 'Custom period',
-            })
-      );
-      data = formattedRetention ?? '∞';
+      data = getTimeSizeAndUnitLabel(lifecycle.dsl.data_retention) ?? '∞';
     } else if (isDisabledLifecycle(lifecycle)) {
-      baseSubtitles.push(
-        i18n.translate('xpack.streams.streamDetailLifecycle.retention.disabled', {
-          defaultMessage: 'Disabled',
-        })
-      );
       data = '∞';
     } else {
       data = '—';
     }
-
-    const subtitles = retentionOrigin ? [...baseSubtitles, retentionOrigin] : baseSubtitles;
 
     return [
       {
@@ -107,8 +169,8 @@ export const RetentionCard = ({
     ];
   };
 
-  const title = i18n.translate('xpack.streams.streamDetailLifecycle.retention.title', {
-    defaultMessage: 'Retention',
+  const title = i18n.translate('xpack.streams.streamDetailLifecycle.lifecycleSummary.title', {
+    defaultMessage: 'Lifecycle summary',
   });
 
   const metrics = getMetrics();
@@ -122,16 +184,16 @@ export const RetentionCard = ({
           size="s"
           color="text"
           onClick={openEditModal}
-          disabled={!definition.privileges.lifecycle || isEditLifecycleFlyoutOpen}
+          disabled={!definition.privileges.lifecycle || isPreviewActive}
           aria-label={i18n.translate(
-            'xpack.streams.entityDetailViewWithoutParams.editDataRetentionMethodAriaLabel',
+            'xpack.streams.entityDetailViewWithoutParams.editLifecycleMethodAriaLabel',
             {
-              defaultMessage: 'Edit retention method',
+              defaultMessage: 'Edit lifecycle method',
             }
           )}
         >
-          {i18n.translate('xpack.streams.entityDetailViewWithoutParams.editDataRetentionMethod', {
-            defaultMessage: 'Edit retention method',
+          {i18n.translate('xpack.streams.entityDetailViewWithoutParams.editLifecycleMethod', {
+            defaultMessage: 'Edit lifecycle method',
           })}
         </EuiButton>
       }

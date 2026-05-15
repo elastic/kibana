@@ -283,7 +283,11 @@ export const buildDownsamplingSegments = (
 
   const hasIlmDownsampling = phases.some((phase) => phase.downsample);
   if (!hasIlmDownsampling) {
-    return null;
+    // Still return segments so the UI can show an "empty" downsampling timeline.
+    return phases.map((phase) => ({
+      grow: phase.grow,
+      isDelete: phase.isDelete,
+    }));
   }
 
   // Track the downsample step index separately from phase index

@@ -10,6 +10,7 @@ import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { LifecycleSummary } from './lifecycle_summary';
 import { Streams, type IngestStreamLifecycle } from '@kbn/streams-schema';
+import { LifecyclePreviewProvider } from '../common/hooks/lifecycle_preview';
 
 // Mock the hooks
 const mockFetch = jest.fn();
@@ -66,6 +67,10 @@ jest.mock('../hooks/use_ilm_phases_color_and_description', () => ({
 }));
 
 describe('LifecycleSummary', () => {
+  const renderWithSync = (ui: React.ReactElement) => {
+    return render(<LifecyclePreviewProvider>{ui}</LifecyclePreviewProvider>);
+  };
+
   const createDslDefinition = (
     dataRetention?: string,
     downsample?: Array<{ after: string; fixed_interval: string }>,
@@ -189,7 +194,7 @@ describe('LifecycleSummary', () => {
     it('should render DSL lifecycle with retention period', () => {
       const definition = createDslDefinition('30d');
 
-      render(<LifecycleSummary definition={definition} isMetricsStream />);
+      renderWithSync(<LifecycleSummary definition={definition} isMetricsStream />);
 
       expect(screen.getByTestId('dataLifecycleSummary-title')).toBeInTheDocument();
     });
@@ -197,7 +202,7 @@ describe('LifecycleSummary', () => {
     it('should show "Add downsample step" button and open the DSL flyout', async () => {
       const definition = createDslDefinition('60d', [{ after: '10d', fixed_interval: '1h' }]);
 
-      render(<LifecycleSummary definition={definition} isMetricsStream />);
+      renderWithSync(<LifecycleSummary definition={definition} isMetricsStream />);
 
       fireEvent.click(screen.getByTestId('dataLifecycleSummaryAddDownsampleStep'));
       await waitFor(() =>
@@ -212,7 +217,7 @@ describe('LifecycleSummary', () => {
       }));
       const definition = createDslDefinition('60d', manySteps);
 
-      render(<LifecycleSummary definition={definition} isMetricsStream />);
+      renderWithSync(<LifecycleSummary definition={definition} isMetricsStream />);
 
       expect(screen.getByTestId('dataLifecycleSummaryAddDownsampleStep')).toBeDisabled();
     });
@@ -220,7 +225,7 @@ describe('LifecycleSummary', () => {
     it('should render DSL lifecycle with infinite retention', () => {
       const definition = createDslDefinition(undefined);
 
-      render(<LifecycleSummary definition={definition} isMetricsStream />);
+      renderWithSync(<LifecycleSummary definition={definition} isMetricsStream />);
 
       expect(screen.getByTestId('dataLifecycleTimeline-infinite')).toBeInTheDocument();
     });
@@ -231,7 +236,7 @@ describe('LifecycleSummary', () => {
         { after: '30d', fixed_interval: '1d' },
       ]);
 
-      render(<LifecycleSummary definition={definition} isMetricsStream />);
+      renderWithSync(<LifecycleSummary definition={definition} isMetricsStream />);
 
       expect(screen.getByTestId('downsamplingBar-label')).toBeInTheDocument();
     });
@@ -242,7 +247,7 @@ describe('LifecycleSummary', () => {
         { after: '30d', fixed_interval: '1d' },
       ]);
 
-      render(<LifecycleSummary definition={definition} isMetricsStream={false} />);
+      renderWithSync(<LifecycleSummary definition={definition} isMetricsStream={false} />);
 
       expect(screen.queryByTestId('downsamplingBar-label')).not.toBeInTheDocument();
     });
@@ -257,7 +262,7 @@ describe('LifecycleSummary', () => {
         { inherit: {} }
       );
 
-      render(<LifecycleSummary definition={definition} isMetricsStream />);
+      renderWithSync(<LifecycleSummary definition={definition} isMetricsStream />);
 
       // Open the step popover then click edit (flyout should open, modal should not)
       fireEvent.click(screen.getByTestId('downsamplingPhase-1h-label'));
@@ -292,7 +297,7 @@ describe('LifecycleSummary', () => {
         inherit: {},
       });
 
-      render(<LifecycleSummary definition={definition} isMetricsStream />);
+      renderWithSync(<LifecycleSummary definition={definition} isMetricsStream />);
 
       fireEvent.click(screen.getByTestId('downsamplingPhase-1h-label'));
       await waitFor(() =>
@@ -318,7 +323,7 @@ describe('LifecycleSummary', () => {
         dsl: { data_retention: '60d', downsample: [{ after: '10d', fixed_interval: '1h' }] },
       });
 
-      render(<LifecycleSummary definition={definition} isMetricsStream />);
+      renderWithSync(<LifecycleSummary definition={definition} isMetricsStream />);
 
       fireEvent.click(screen.getByTestId('downsamplingPhase-1h-label'));
       await waitFor(() =>
@@ -342,7 +347,7 @@ describe('LifecycleSummary', () => {
         Streams.WiredStream.GetResponse.is(definition as unknown as Streams.WiredStream.GetResponse)
       ).toBe(true);
 
-      render(<LifecycleSummary definition={definition} isMetricsStream />);
+      renderWithSync(<LifecycleSummary definition={definition} isMetricsStream />);
 
       fireEvent.click(screen.getByTestId('downsamplingPhase-1h-label'));
       await waitFor(() =>
@@ -359,6 +364,22 @@ describe('LifecycleSummary', () => {
       expect(screen.queryByTestId('overrideSettingsModal-overrideButton')).not.toBeInTheDocument();
     });
 
+    it('shows the Inherited badge for wired non-root streams inheriting from parent', () => {
+      const definition = createWiredDslDefinition({ name: 'logs.wired-non-root', isRoot: false });
+
+      renderWithSync(<LifecycleSummary definition={definition} isMetricsStream />);
+
+      expect(screen.getByText('Inherited')).toBeInTheDocument();
+    });
+
+    it('does not show the Inherited badge for wired root streams', () => {
+      const definition = createWiredDslDefinition({ name: 'logs', isRoot: true });
+
+      renderWithSync(<LifecycleSummary definition={definition} isMetricsStream />);
+
+      expect(screen.queryByText('Inherited')).not.toBeInTheDocument();
+    });
+
     it('should require override confirmation for wired root streams when lifecycle is inherited', async () => {
       const definition = createWiredDslDefinition({ name: 'logs', isRoot: true });
 
@@ -366,7 +387,7 @@ describe('LifecycleSummary', () => {
         Streams.WiredStream.GetResponse.is(definition as unknown as Streams.WiredStream.GetResponse)
       ).toBe(true);
 
-      render(<LifecycleSummary definition={definition} isMetricsStream />);
+      renderWithSync(<LifecycleSummary definition={definition} isMetricsStream />);
 
       fireEvent.click(screen.getByTestId('downsamplingPhase-1h-label'));
       await waitFor(() =>
@@ -389,7 +410,7 @@ describe('LifecycleSummary', () => {
 
     it('should render lifecycle summary for disabled lifecycle', () => {
       const definition = createDisabledDefinition();
-      render(<LifecycleSummary definition={definition} isMetricsStream />);
+      renderWithSync(<LifecycleSummary definition={definition} isMetricsStream />);
 
       expect(screen.getByTestId('dataLifecycleSummary-title')).toBeInTheDocument();
       expect(screen.getByTestId('lifecyclePhase-Hot-name')).toBeInTheDocument();
@@ -400,7 +421,7 @@ describe('LifecycleSummary', () => {
     it('should render ILM lifecycle', () => {
       const definition = createIlmDefinition();
 
-      render(<LifecycleSummary definition={definition} isMetricsStream />);
+      renderWithSync(<LifecycleSummary definition={definition} isMetricsStream />);
 
       expect(screen.getByTestId('dataLifecycleSummary-title')).toBeInTheDocument();
     });
@@ -414,7 +435,7 @@ describe('LifecycleSummary', () => {
 
       const definition = createIlmDefinition();
 
-      render(<LifecycleSummary definition={definition} isMetricsStream />);
+      renderWithSync(<LifecycleSummary definition={definition} isMetricsStream />);
 
       expect(screen.getByTestId('dataLifecycleSummary-skeleton')).toBeInTheDocument();
     });
@@ -452,7 +473,7 @@ describe('LifecycleSummary', () => {
 
       const definition = createIlmDefinition();
 
-      render(<LifecycleSummary definition={definition} isMetricsStream />);
+      renderWithSync(<LifecycleSummary definition={definition} isMetricsStream />);
 
       await waitFor(() => {
         expect(screen.getByTestId('lifecyclePhase-warm-name')).toBeInTheDocument();
@@ -507,7 +528,7 @@ describe('LifecycleSummary', () => {
 
       const definition = createIlmDefinition();
 
-      render(<LifecycleSummary definition={definition} isMetricsStream />);
+      renderWithSync(<LifecycleSummary definition={definition} isMetricsStream />);
 
       await waitFor(() => {
         expect(screen.getByTestId('lifecyclePhase-warm-name')).toBeInTheDocument();
@@ -557,7 +578,7 @@ describe('LifecycleSummary', () => {
 
       const definition = createIlmDefinition();
 
-      render(<LifecycleSummary definition={definition} isMetricsStream />);
+      renderWithSync(<LifecycleSummary definition={definition} isMetricsStream />);
 
       expect(screen.getByTestId('downsamplingBar-label')).toBeInTheDocument();
     });
@@ -585,7 +606,7 @@ describe('LifecycleSummary', () => {
 
       const definition = createIlmDefinition();
 
-      render(<LifecycleSummary definition={definition} isMetricsStream={false} />);
+      renderWithSync(<LifecycleSummary definition={definition} isMetricsStream={false} />);
 
       expect(screen.queryByTestId('downsamplingBar-label')).not.toBeInTheDocument();
     });

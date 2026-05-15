@@ -183,7 +183,7 @@ export function WiredStreamDetailManagement({
               >
                 <span data-test-subj="retentionTab" tabIndex={0}>
                   {i18n.translate('xpack.streams.streamDetailView.lifecycleTab', {
-                    defaultMessage: 'Retention',
+                    defaultMessage: 'Data lifecycle',
                   })}
                 </span>
               </EuiToolTip>
