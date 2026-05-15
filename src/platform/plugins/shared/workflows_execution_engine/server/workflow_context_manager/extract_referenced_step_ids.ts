@@ -63,32 +63,52 @@ function computeReferencedStepIds(node: GraphNodeUnion): Set<string> | null {
       variables.push(...scanForTemplateVariables(node.configuration));
     }
 
-    const referencedStepIds = new Set<string>();
-
-    for (const variable of variables) {
-      if (variable === 'steps') {
-        // Bare `steps` reference means the path was truncated at a dynamic bracket access
-        // (e.g. `steps[variables.name].output`). We cannot determine the step ID statically.
-        return null;
-      }
-
-      if (variable.startsWith(STEPS_PREFIX)) {
-        // Extract step ID: `steps.myStep.output.field` → `myStep`
-        const dotIndex = variable.indexOf('.', STEPS_PREFIX.length);
-        const stepId =
-          dotIndex === -1
-            ? variable.slice(STEPS_PREFIX.length)
-            : variable.slice(STEPS_PREFIX.length, dotIndex);
-
-        if (stepId) {
-          referencedStepIds.add(stepId);
-        }
-      }
-    }
-
-    return referencedStepIds;
+    return collectReferencedStepIdsFromVariables(variables);
   } catch {
     // If template parsing fails for any reason, fall back to all predecessors
     return null;
   }
+}
+
+/**
+ * Variant of {@link extractReferencedStepIds} that operates on an arbitrary
+ * value (string / object / array) instead of a graph node. Used for surfaces
+ * that hold a template expression outside the static node configuration —
+ * notably the `foreach` expression captured into the foreach step's input at
+ * loop-entry time. Same semantics: returns `null` when bracket access defeats
+ * static analysis, otherwise the set of statically resolvable step IDs.
+ */
+export function extractReferencedStepIdsFromValue(value: unknown): Set<string> | null {
+  try {
+    return collectReferencedStepIdsFromVariables(scanForTemplateVariables(value));
+  } catch {
+    return null;
+  }
+}
+
+function collectReferencedStepIdsFromVariables(variables: readonly string[]): Set<string> | null {
+  const referencedStepIds = new Set<string>();
+
+  for (const variable of variables) {
+    if (variable === 'steps') {
+      // Bare `steps` reference means the path was truncated at a dynamic bracket access
+      // (e.g. `steps[variables.name].output`). We cannot determine the step ID statically.
+      return null;
+    }
+
+    if (variable.startsWith(STEPS_PREFIX)) {
+      // Extract step ID: `steps.myStep.output.field` → `myStep`
+      const dotIndex = variable.indexOf('.', STEPS_PREFIX.length);
+      const stepId =
+        dotIndex === -1
+          ? variable.slice(STEPS_PREFIX.length)
+          : variable.slice(STEPS_PREFIX.length, dotIndex);
+
+      if (stepId) {
+        referencedStepIds.add(stepId);
+      }
+    }
+  }
+
+  return referencedStepIds;
 }

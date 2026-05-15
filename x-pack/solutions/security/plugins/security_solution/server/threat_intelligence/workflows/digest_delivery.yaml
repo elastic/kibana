@@ -36,7 +36,12 @@ steps:
       # RRULE for the current hour and short-circuits non-due subscriptions.
       - name: render_digest
         type: ai.agent
-        agent-id: default
+        # `agent-id` is intentionally omitted so the step falls back to
+        # `agentBuilderDefaultAgentId` (`elastic-ai-agent`) inside
+        # `run_agent_step.ts`. Passing the literal string `default` is
+        # treated as a real agent id by `agentRegistry.has(...)` and
+        # surfaces as `Agent "default" not found or not available` —
+        # there is no agent registered under that id.
         with:
           message: >-
             Use the threat-intelligence skill and tools as needed.
@@ -73,19 +78,30 @@ steps:
         type: elasticsearch.index
         with:
           index: .kibana-threat-intel-digests
+          # `"{{ expr }}"` coerces the rendered value to a string, so a JS
+          # `Date` becomes `Date.prototype.toString()` (e.g. `Thu May 14
+          # 2026 21:01:55 GMT-0700 (Pacific Daylight Time)`) which
+          # Elasticsearch's `strict_date_optional_time||epoch_millis` parser
+          # rejects on `@timestamp`. `"${{ expr }}"` instead preserves the
+          # JS type — the Date is JSON-serialised as ISO 8601 which
+          # `strict_date_optional_time` parses cleanly. See
+          # `nl_extraction_behavioral.yaml`'s `persist_extractions` for the
+          # full templating-engine writeup.
           document:
-            "@timestamp": "{{ now }}"
+            "@timestamp": "${{ now }}"
             subscription_id: "{{ foreach.item._id }}"
             space_id: "{{ foreach.item._source.space_id | default: 'default' }}"
-            # Liquid `date` accepts a Date or a Unix-seconds number. We compute
-            # `now - 7d` via integer math (604800 s) and re-format as ISO 8601
-            # so the workflow validator does not need a custom `date_minus`
-            # filter (which is not registered on the engine).
+            # `time_range.{from,to}` are stored as keyword strings in the
+            # mapping (free-form ISO ranges), not `date` fields, so the
+            # `{{ … }}` string-coercion form is intentional here. The
+            # arithmetic via `date: '%s' | minus: 604800` keeps the
+            # template within Liquid's filter set (no custom `date_minus`
+            # filter is registered on the workflow engine).
             time_range:
               from: "{{ now | date: '%s' | minus: 604800 | date: '%Y-%m-%dT%H:%M:%SZ' }}"
               to: "{{ now | date: '%Y-%m-%dT%H:%M:%SZ' }}"
             content_markdown: "{{ steps.render_digest.output.structured_output.digest_markdown }}"
-            report_ids: "{{ steps.render_digest.output.structured_output.report_ids | json }}"
+            report_ids: "${{ steps.render_digest.output.structured_output.report_ids }}"
             delivered: false
         on-failure:
           continue: true

@@ -21,14 +21,23 @@
 # `src/platform/packages/shared/kbn-workflows/common/utils/create_workflow_liquid_engine`
 # and `filter_contribution.md`. Until that lands, the fingerprint is a
 # short composite of `adapter_type:item_id:now` hoisted into
-# `variables.fingerprint` by `capture_source_fields` and reused as both
-# the doc field and the `_id`. The composite is unique per iteration per
-# run (because `now` changes), so true content-dedup only kicks in once
-# the sha256 filter is wired up and this value flips to
-# `{{ steps.<fetch>.output.data | sha256 }}`. The HTTP step's response
-# body lives on `.output.data` (see `HttpResponseSchema` in
-# `src/platform/plugins/shared/workflows_management/common/stack_connectors_schema/http.ts`),
+# `variables.fingerprint` by `capture_source_fields` and stored on the
+# doc as `content_fingerprint`. Once a `| sha256` filter lands, this
+# value flips to `{{ steps.<fetch>.output.data | sha256 }}` so subsequent
+# fetches of the same RSS body produce the same fingerprint. The HTTP
+# step's response body lives on `.output.data` (see `HttpResponseSchema`
+# in `src/platform/plugins/shared/workflows_management/common/stack_connectors_schema/http.ts`),
 # *not* `.output.body`.
+#
+# `_id` is intentionally NOT set on the `elasticsearch.index` step. The
+# target is a data stream and Elasticsearch rejects writes that combine
+# `op_type: create` with a caller-supplied `_id` against a data stream
+# with `op_type create with a provided id is not allowed in data
+# streams`. The fingerprint therefore only lives on the doc body for now
+# — true `op_type: create`-based dedup will require either (a) a sha256
+# Liquid filter plus a regular index instead of a data stream, or (b) an
+# upstream "have I seen this fingerprint?" search step before the index
+# call. Both are out of scope for this YAML.
 #
 # The previous revision wrote the entire response body verbatim into
 # `content_fingerprint`. That field is mapped as `keyword`, and Lucene
@@ -87,16 +96,25 @@ steps:
         with:
           adapter_type: "{{ foreach.item._source.adapter_type }}"
           item_id: "{{ foreach.item._id }}"
-          # Placeholder fingerprint until a `| sha256` Liquid filter is
-          # registered (see top-of-file comment). Computed once per
-          # foreach iteration so the `elasticsearch.index` step below can
-          # use the same value for both the doc field and `_id` —
-          # `renderValueAccordingToContext` builds the rendering context
-          # once per call, so `{{ now }}` is stable across all
-          # references inside a single `with:` render anyway, but
-          # hoisting keeps the wiring explicit and matches the existing
-          # `variables.adapter_type` / `variables.item_id` pattern.
-          fingerprint: "{{ foreach.item._source.adapter_type }}:{{ foreach.item._id }}:{{ now }}"
+          # Placeholder `content_fingerprint` until a `| sha256` Liquid
+          # filter is registered (see top-of-file comment). Hoisted into
+          # `variables` to match the existing `variables.adapter_type`
+          # / `variables.item_id` pattern and to keep the value short
+          # enough not to bust the keyword field's 32766-byte term
+          # limit. The `now` suffix means each run produces a fresh
+          # fingerprint per source — true dedup waits on the sha256
+          # filter.
+          # `now` is a JS `Date` in the rendering context. Interpolating
+          # it directly via `{{ now }}` calls `Date.prototype.toString()`
+          # and produces `"Thu May 14 2026 13:01:02 GMT-0700 (Pacific
+          # Daylight Time)"`, which Elasticsearch's
+          # `strict_date_optional_time||epoch_millis` parser rejects on
+          # the `@timestamp` field below. The built-in LiquidJS
+          # `date_to_xmlschema` filter formats it as ISO 8601 with a
+          # colon-separated offset (e.g. `2026-05-14T13:01:02-07:00`),
+          # which is exactly what `strict_date_optional_time` parses.
+          # Reused here so the fingerprint stays human-readable too.
+          fingerprint: "{{ foreach.item._source.adapter_type }}:{{ foreach.item._id }}:{{ now | date_to_xmlschema }}"
 
       - name: dispatch_by_adapter
         type: switch
@@ -115,18 +133,12 @@ steps:
                 type: elasticsearch.index
                 with:
                   index: .kibana-threat-reports
-                  # Setting `_id` to the fingerprint is what makes
-                  # `op_type: create` translate a duplicate write into a
-                  # 409 instead of a fresh doc — see the top-of-file
-                  # comment on the fingerprint shape. Once a `| sha256`
-                  # filter is registered, both `id` and
-                  # `content_fingerprint` flip to the body hash and the
-                  # dedup behaviour described by `op_type: create`
-                  # actually kicks in.
-                  id: "{{ variables.fingerprint }}"
+                  # Data stream target — `op_type: create` is required,
+                  # `_id` is intentionally omitted (see top-of-file
+                  # comment on the fingerprint shape).
                   op_type: create
                   document:
-                    "@timestamp": "{{ now }}"
+                    "@timestamp": "{{ now | date_to_xmlschema }}"
                     content_fingerprint: "{{ variables.fingerprint }}"
                     space_id: "{{ foreach.item._source.space_id | default: '*' }}"
                     source:
@@ -142,7 +154,7 @@ steps:
                       level: medium
                       score: 40
                     provenance:
-                      ingested_at: "{{ now }}"
+                      ingested_at: "{{ now | date_to_xmlschema }}"
                       extraction_method: pending
                 on-failure:
                   # 409 conflict on op_type:create == duplicate fingerprint -> skip silently
@@ -162,10 +174,9 @@ steps:
                 type: elasticsearch.index
                 with:
                   index: .kibana-threat-reports
-                  id: "{{ variables.fingerprint }}"
                   op_type: create
                   document:
-                    "@timestamp": "{{ now }}"
+                    "@timestamp": "{{ now | date_to_xmlschema }}"
                     content_fingerprint: "{{ variables.fingerprint }}"
                     space_id: "{{ foreach.item._source.space_id | default: '*' }}"
                     source:
@@ -181,7 +192,7 @@ steps:
                       level: medium
                       score: 40
                     provenance:
-                      ingested_at: "{{ now }}"
+                      ingested_at: "{{ now | date_to_xmlschema }}"
                       extraction_method: pending
                 on-failure:
                   continue: true
@@ -200,10 +211,9 @@ steps:
                 type: elasticsearch.index
                 with:
                   index: .kibana-threat-reports
-                  id: "{{ variables.fingerprint }}"
                   op_type: create
                   document:
-                    "@timestamp": "{{ now }}"
+                    "@timestamp": "{{ now | date_to_xmlschema }}"
                     content_fingerprint: "{{ variables.fingerprint }}"
                     space_id: "{{ foreach.item._source.space_id | default: '*' }}"
                     source:
@@ -219,7 +229,7 @@ steps:
                       level: medium
                       score: 40
                     provenance:
-                      ingested_at: "{{ now }}"
+                      ingested_at: "{{ now | date_to_xmlschema }}"
                       extraction_method: pending
                 on-failure:
                   continue: true
@@ -236,10 +246,9 @@ steps:
                 type: elasticsearch.index
                 with:
                   index: .kibana-threat-reports
-                  id: "{{ variables.fingerprint }}"
                   op_type: create
                   document:
-                    "@timestamp": "{{ now }}"
+                    "@timestamp": "{{ now | date_to_xmlschema }}"
                     content_fingerprint: "{{ variables.fingerprint }}"
                     space_id: "{{ foreach.item._source.space_id | default: '*' }}"
                     source:
@@ -255,7 +264,7 @@ steps:
                       level: medium
                       score: 40
                     provenance:
-                      ingested_at: "{{ now }}"
+                      ingested_at: "{{ now | date_to_xmlschema }}"
                       extraction_method: pending
                 on-failure:
                   continue: true

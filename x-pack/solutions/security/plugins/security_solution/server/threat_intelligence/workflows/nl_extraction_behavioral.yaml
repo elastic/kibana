@@ -81,6 +81,13 @@ steps:
           path: /internal/threat_intelligence/extract_iocs
           use_server_info: true
           headers:
+            # Versioned Kibana route — `registerExtractIocsRoute` registers
+            # `version: '1'` on a `router.versioned.post` handler, which the
+            # core HTTP layer enforces via the `elastic-api-version` header.
+            # Without it the request fails with HTTP 400 "Please specify a
+            # version via elastic-api-version header. Available versions:
+            # [1]" before the body schema even runs.
+            elastic-api-version: "1"
             x-elastic-internal-origin: "kibana"
           body:
             text: "{{ foreach.item._source.content.body_text }}"
@@ -88,7 +95,12 @@ steps:
 
       - name: extract_behaviors
         type: ai.agent
-        agent-id: default
+        # `agent-id` is intentionally omitted so the step falls back to
+        # `agentBuilderDefaultAgentId` (`elastic-ai-agent`) inside
+        # `run_agent_step.ts`. Passing the literal string `default` is
+        # treated as a real agent id by `agentRegistry.has(...)` and
+        # surfaces as `Agent "default" not found or not available` —
+        # there is no agent registered under that id.
         with:
           # The agent loads the threat-intelligence skill and invokes
           # hunt_behavior with the report text. The agent is responsible for
@@ -117,7 +129,9 @@ steps:
       # the enums are dropped by the persist step's `default: []`.
       - name: enrich_taxonomy
         type: ai.agent
-        agent-id: default
+        # Same default-agent fallback as `extract_behaviors` above —
+        # omit `agent-id` so the step routes to `elastic-ai-agent`
+        # rather than failing the literal-string lookup for `default`.
         with:
           message: >-
             You are a threat intel taxonomist. Categorize the following report.
@@ -198,22 +212,44 @@ steps:
           # mirroring the pattern used by `hit_provenance_backfill.yaml`.
           index: "{{ foreach.item._index }}"
           id: "{{ foreach.item._id }}"
+          # `WorkflowTemplatingEngine` (in
+          # `workflows_execution_engine/server/templating_engine.ts`)
+          # routes `"{{ expr }}"` through `renderString()`, which always
+          # coerces the rendered value to a string — arrays of objects
+          # collapse to `"[object Object][object Object]…"`, arrays of
+          # strings concatenate without a separator, numbers come out
+          # quoted, and `now` (a JS `Date`) serialises via
+          # `Date.prototype.toString()` which Elasticsearch's
+          # `strict_date_optional_time||epoch_millis` parser rejects with
+          # `failed to parse date field [Thu May 14 2026 21:01:55 …]`.
+          # `"${{ expr }}"` instead routes through `evaluateExpression()`
+          # / `evalValueSync()` and preserves the underlying JS type
+          # (arrays stay arrays, numbers stay numbers, Dates land in the
+          # update doc as the JS Date which JSON.stringify writes as
+          # ISO 8601). Plain string fields stay on `"{{ … }}"` so adjacent
+          # literals continue to interpolate correctly. LiquidJS has no
+          # array literal, so a `default: []` would silently parse to
+          # `undefined` rather than `[]` — when the upstream step is
+          # skipped (`on-failure: continue: true`) we let the field
+          # resolve to `undefined` and rely on JSON serialisation to drop
+          # it from the update doc, which is exactly what a partial
+          # update wants.
           doc:
             extracted:
-              iocs: "{{ steps.extract_iocs.output.iocs }}"
+              iocs: "${{ steps.extract_iocs.output.iocs }}"
               ioc_set_hash: "{{ steps.extract_iocs.output.ioc_set_hash }}"
-              behaviors: "{{ steps.extract_behaviors.output.structured_output.behaviors }}"
-              categories: "{{ steps.enrich_taxonomy.output.structured_output.categories | default: [] }}"
+              behaviors: "${{ steps.extract_behaviors.output.structured_output.behaviors }}"
+              categories: "${{ steps.enrich_taxonomy.output.structured_output.categories }}"
             geography:
-              regions: "{{ steps.enrich_taxonomy.output.structured_output.regions | default: [] }}"
+              regions: "${{ steps.enrich_taxonomy.output.structured_output.regions }}"
             provenance:
-              extracted_at: "{{ now }}"
+              extracted_at: "${{ now }}"
               extraction_method: workflow_v2
-              related_reports: "{{ steps.find_related_reports.output.hits.hits | map: '_id' }}"
+              related_reports: "${{ steps.find_related_reports.output.hits.hits | map: '_id' }}"
               # `find_related_reports` runs with `on-failure: continue: true`
               # so its output type is unknown to the validator. Default to 0
               # so the consumer remains numeric even when the search step
               # was skipped.
-              related_reports_count: "{{ steps.find_related_reports.output.hits.total.value | default: 0 }}"
+              related_reports_count: "${{ steps.find_related_reports.output.hits.total.value | default: 0 }}"
         on-failure:
           continue: true

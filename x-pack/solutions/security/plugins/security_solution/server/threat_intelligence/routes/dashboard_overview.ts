@@ -22,18 +22,31 @@ import type { RouteRegistrationDeps } from '.';
 const DEFAULT_LOOKBACK_DAYS = 7;
 const ALERTS_INDEX_PATTERN = '.alerts-security.alerts-*';
 
+// Query strings serialize single-element arrays as a bare value (e.g.
+// `?regions=south-asia`), so accept either a string or an array and normalize
+// to an array in the handler.
+const stringOrArraySchema = schema.maybe(
+  schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
+);
+
 const overviewQuerySchema = schema.object({
   from: schema.maybe(schema.string()),
   to: schema.maybe(schema.string()),
-  regions: schema.maybe(schema.arrayOf(schema.string())),
-  categories: schema.maybe(schema.arrayOf(schema.string())),
+  regions: stringOrArraySchema,
+  categories: stringOrArraySchema,
 });
+
+const toArray = (value: string | string[] | undefined): string[] => {
+  if (value === undefined) return [];
+  return Array.isArray(value) ? value : [value];
+};
 
 interface BucketCount<TKey = string> {
   key: TKey;
   doc_count: number;
 }
-interface SeverityBucket extends BucketCount {
+interface SeverityBucket extends BucketCount<number> {
+  key_as_string: string;
   by_severity?: { buckets: BucketCount[] };
 }
 interface ReportsAggregations {
@@ -94,7 +107,11 @@ const fetchReportsOverview = async (
         terms: { field: 'severity.level', size: 4 },
       },
       by_time: {
-        date_histogram: { field: '@timestamp', fixed_interval: '1d' },
+        date_histogram: {
+          field: '@timestamp',
+          fixed_interval: '1d',
+          format: 'yyyy-MM-dd',
+        },
         aggs: {
           by_severity: { terms: { field: 'severity.level', size: 4 } },
         },
@@ -185,11 +202,13 @@ export const registerDashboardOverviewRoute = ({
 
         const currentSpaceId = resolveCurrentSpaceId(getSpacesService(), request);
         const filters: Array<Record<string, unknown>> = [buildSpaceFilterTerms(currentSpaceId)];
-        if (request.query.regions?.length) {
-          filters.push({ terms: { 'geography.regions': request.query.regions } });
+        const regions = toArray(request.query.regions);
+        const categories = toArray(request.query.categories);
+        if (regions.length) {
+          filters.push({ terms: { 'geography.regions': regions } });
         }
-        if (request.query.categories?.length) {
-          filters.push({ terms: { 'extracted.categories': request.query.categories } });
+        if (categories.length) {
+          filters.push({ terms: { 'extracted.categories': categories } });
         }
 
         const core = await context.core;
@@ -239,7 +258,7 @@ export const registerDashboardOverviewRoute = ({
               }
             }
             return {
-              bucket: bucket.key as string,
+              bucket: bucket.key_as_string,
               low: counts.low,
               medium: counts.medium,
               high: counts.high,
