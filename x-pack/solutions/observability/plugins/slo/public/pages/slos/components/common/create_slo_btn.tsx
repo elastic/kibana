@@ -106,7 +106,7 @@ export function CreateSloBtn() {
         panelPaddingSize="none"
         anchorPosition="downRight"
       >
-        <EuiContextMenuPanel items={menuItems} size="s" />
+        <EuiContextMenuPanel items={menuItems} />
       </EuiPopover>
       {isFlyoutOpen && <SloTemplatesFlyout onClose={() => setIsFlyoutOpen(false)} />}
     </>
