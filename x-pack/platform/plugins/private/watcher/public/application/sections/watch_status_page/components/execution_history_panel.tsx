@@ -156,7 +156,13 @@ export const ExecutionHistoryPanel = () => {
             {i18n.translate('xpack.watcher.sections.watchHistory.watchTable.stateHeader', {
               defaultMessage: 'State',
             })}{' '}
-            <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
+            <EuiIcon
+              size="s"
+              color="subdued"
+              type="question"
+              className="eui-alignTop"
+              aria-hidden={true}
+            />
           </span>
         </EuiToolTip>
       ),
@@ -179,7 +185,13 @@ export const ExecutionHistoryPanel = () => {
             {i18n.translate('xpack.watcher.sections.watchHistory.watchTable.metConditionHeader', {
               defaultMessage: 'Condition met',
             })}{' '}
-            <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
+            <EuiIcon
+              size="s"
+              color="subdued"
+              type="question"
+              className="eui-alignTop"
+              aria-hidden={true}
+            />
           </span>
         </EuiToolTip>
       ),
@@ -192,7 +204,16 @@ export const ExecutionHistoryPanel = () => {
         } = item;
 
         if (startTime.isSame(lastExecution)) {
-          return <EuiIcon color="green" type="check" />;
+          return (
+            <EuiIcon
+              color="green"
+              type="check"
+              aria-label={i18n.translate(
+                'xpack.watcher.sections.watchHistory.watchTable.conditionMetAriaLabel',
+                { defaultMessage: 'Condition met' }
+              )}
+            />
+          );
         }
       },
     },
@@ -212,7 +233,13 @@ export const ExecutionHistoryPanel = () => {
             {i18n.translate('xpack.watcher.sections.watchHistory.watchTable.commentHeader', {
               defaultMessage: 'Comment',
             })}{' '}
-            <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
+            <EuiIcon
+              size="s"
+              color="subdued"
+              type="question"
+              className="eui-alignTop"
+              aria-hidden={true}
+            />
           </span>
         </EuiToolTip>
       ),
@@ -291,7 +318,13 @@ export const ExecutionHistoryPanel = () => {
                     defaultMessage: 'State',
                   }
                 )}{' '}
-                <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
+                <EuiIcon
+                  size="s"
+                  color="subdued"
+                  type="question"
+                  className="eui-alignTop"
+                  aria-hidden={true}
+                />
               </span>
             </EuiToolTip>
           ),

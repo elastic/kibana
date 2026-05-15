@@ -17,6 +17,7 @@ export interface PresentationUtilPluginSetup {}
 export interface PresentationUtilPluginStart {
   labsService: PresentationLabsService;
 }
+
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PresentationUtilPluginSetupDeps {}
 

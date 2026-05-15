@@ -1,9 +1,9 @@
 {
-  "sha1": "3ee9e63a1aac7d493685bbfb91db908664070c54",
+  "sha1": "73e90a7095f7e51b5231579dbcd787622b62d497",
   "tests": [
     {
-      "id": "8f6baf4aef167da-b456d708d2cf55e",
-      "title": "Create connector from connector spec creates a spec-defined connector (.alienvault-otx)",
+      "id": "8f6baf4aef167da-ea2a6253719774d",
+      "title": "Create connector from connector spec creates a spec-defined AlienVault OTX connector",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -39,7 +39,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_jira.spec.ts",
-        "line": 96,
+        "line": 94,
         "column": 7
       }
     },
@@ -53,7 +53,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_jira.spec.ts",
-        "line": 112,
+        "line": 110,
         "column": 7
       }
     },
@@ -67,7 +67,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_webhook.spec.ts",
-        "line": 38,
+        "line": 35,
         "column": 7
       }
     },
@@ -81,7 +81,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_webhook.spec.ts",
-        "line": 93,
+        "line": 86,
         "column": 7
       }
     },
@@ -95,7 +95,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/connector_webhook.spec.ts",
-        "line": 105,
+        "line": 98,
         "column": 7
       }
     },
@@ -109,7 +109,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/maintenance_window_create.spec.ts",
-        "line": 66,
+        "line": 102,
         "column": 7
       }
     },
@@ -123,7 +123,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/maintenance_window_create.spec.ts",
-        "line": 101,
+        "line": 138,
         "column": 7
       }
     },
@@ -137,7 +137,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/maintenance_window_update.spec.ts",
-        "line": 102,
+        "line": 109,
         "column": 7
       }
     },
@@ -151,7 +151,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/maintenance_window_update.spec.ts",
-        "line": 137,
+        "line": 145,
         "column": 7
       }
     },
@@ -165,7 +165,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/maintenance_window_update.spec.ts",
-        "line": 168,
+        "line": 177,
         "column": 7
       }
     },
@@ -221,7 +221,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rule_logs_spaces_switch.spec.ts",
-        "line": 54,
+        "line": 55,
         "column": 7
       }
     },
@@ -235,7 +235,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_home_page.spec.ts",
-        "line": 83,
+        "line": 51,
         "column": 7
       }
     },
@@ -249,7 +249,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_home_page.spec.ts",
-        "line": 90,
+        "line": 58,
         "column": 7
       }
     },
@@ -263,7 +263,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_home_page.spec.ts",
-        "line": 100,
+        "line": 68,
         "column": 7
       }
     },
@@ -277,7 +277,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_home_page.spec.ts",
-        "line": 107,
+        "line": 75,
         "column": 7
       }
     },
@@ -291,7 +291,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_home_page.spec.ts",
-        "line": 128,
+        "line": 98,
         "column": 7
       }
     },
@@ -305,7 +305,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_page_navigation.spec.ts",
-        "line": 60,
+        "line": 35,
         "column": 7
       }
     },
@@ -319,7 +319,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_page_navigation.spec.ts",
-        "line": 64,
+        "line": 39,
         "column": 7
       }
     },
@@ -333,21 +333,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_page_navigation.spec.ts",
-        "line": 68,
-        "column": 7
-      }
-    },
-    {
-      "id": "e8c3862f6d55eee-1b2c9e13b31e54f",
-      "title": "Rules page navigation and loading finishes loading and shows the rules list",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_page_navigation.spec.ts",
-        "line": 72,
+        "line": 43,
         "column": 7
       }
     },
@@ -361,7 +347,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_page_tabs.spec.ts",
-        "line": 65,
+        "line": 40,
         "column": 7
       }
     },
@@ -375,7 +361,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_page_tabs.spec.ts",
-        "line": 71,
+        "line": 46,
         "column": 7
       }
     },
@@ -389,7 +375,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_page_tabs.spec.ts",
-        "line": 75,
+        "line": 50,
         "column": 7
       }
     },
@@ -403,7 +389,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_page_tabs.spec.ts",
-        "line": 81,
+        "line": 56,
         "column": 7
       }
     },
@@ -417,7 +403,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_page_tabs.spec.ts",
-        "line": 91,
+        "line": 66,
         "column": 7
       }
     },
@@ -459,7 +445,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rules_settings.spec.ts",
-        "line": 118,
+        "line": 113,
         "column": 7
       }
     }

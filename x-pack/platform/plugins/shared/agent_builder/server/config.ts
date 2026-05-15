@@ -31,6 +31,7 @@ export const configSchema = schema.object({
       }),
       { defaultValue: [] }
     ),
+    opik_distributed_tracing: schema.boolean({ defaultValue: false }),
     scheduledDelay,
   }),
 });

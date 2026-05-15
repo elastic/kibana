@@ -74,7 +74,6 @@ export const TableFieldNameCell = memo(({ dataType, field }: TableFieldNameCellP
                   ? `${ecsField?.description} ${getExampleText(ecsField?.example)}`
                   : field
               }
-              delay="long"
               anchorClassName="eui-textBreakAll"
             >
               <EuiText
