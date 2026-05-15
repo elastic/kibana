@@ -66,6 +66,11 @@ export namespace IngestStream {
   all.Definition.is = (
     stream: BaseStream.Model['Definition']
   ): stream is IngestStream.all.Definition => 'ingest' in stream;
+
+  // Optimized implementation for GetResponse check - avoids full DeepStrict Zod parse
+  all.GetResponse.is = (
+    response: BaseStream.Model['GetResponse']
+  ): response is IngestStream.all.GetResponse => 'ingest' in response.stream;
 }
 
 export type Ingest = WiredIngest | ClassicIngest;

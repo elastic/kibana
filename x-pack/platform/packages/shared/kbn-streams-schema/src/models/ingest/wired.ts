@@ -180,6 +180,11 @@ WiredStream.Definition.is = (
       'wired' in stream.ingest
   );
 
+// Optimized implementation for GetResponse check - avoids full DeepStrict Zod parse
+WiredStream.GetResponse.is = (
+  response: BaseStream.Model['GetResponse']
+): response is WiredStream.GetResponse => WiredStream.Definition.is(response.stream);
+
 /**
  * A wired stream definition where `draft` is narrowed to `true`.
  */

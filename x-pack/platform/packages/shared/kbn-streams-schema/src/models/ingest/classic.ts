@@ -169,3 +169,8 @@ ClassicStream.Definition.is = (
       stream.ingest &&
       'classic' in stream.ingest
   );
+
+// Optimized implementation for GetResponse check - avoids full DeepStrict Zod parse
+ClassicStream.GetResponse.is = (
+  response: BaseStream.Model['GetResponse']
+): response is ClassicStream.GetResponse => ClassicStream.Definition.is(response.stream);
