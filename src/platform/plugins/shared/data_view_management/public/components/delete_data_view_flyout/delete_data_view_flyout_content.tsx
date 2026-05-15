@@ -205,6 +205,7 @@ export const DeleteModalContent: React.FC<ModalProps> = ({
                     type={
                       itemIdToExpandedRowMapValues[id] ? 'chevronSingleDown' : 'chevronSingleRight'
                     }
+                    aria-hidden={true}
                   />
                 </EuiFlexGroup>
               </EuiButtonEmpty>
