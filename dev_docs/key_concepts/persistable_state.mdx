@@ -24,23 +24,6 @@ In the future, we hope to make it easier for producers of state to understand wh
 Any plugin that owns collection of items (registry) whose state/configuration can be persisted should implement `PersistableStateService`
 interface on their `setup` contract and each item in the collection should implement <DocLink id="kibKibanaUtilsPluginApi" section="def-common.PersistableStateDefinition" text="`PersistableStateDefinition`"/> interface.
 
-Example: Embeddable plugin owns the registry of embeddable factories to which other plugins can register new embeddable factories. Dashboard plugin
-stores a bunch of embeddable panels input in its saved object and URL. Embeddable plugin setup contract implements `PersistableStateService`
-interface and each `EmbeddablePublicDefinition` needs to implement `PersistableStateDefinition` interface.
-
-Embeddable plugin exposes this interfaces:
-
-```
-// EmbeddableInput implements Serializable
-
-export interface EmbeddableRegistryDefinition extends PersistableStateDefinition<EmbeddableInput> {
-  id: string;
-  ...
-}
-
-export interface EmbeddableSetup extends PersistableStateService<EmbeddableInput>;
-```
-
 Note: if your plugin doesn't expose the state (it is the only one storing state), the plugin doesn't need to implement the `PersistableStateService` interface.
 If the state your plugin is storing can be provided by other plugins (your plugin owns a registry) items in that registry still need to implement `PersistableStateDefinition` interface.
 
