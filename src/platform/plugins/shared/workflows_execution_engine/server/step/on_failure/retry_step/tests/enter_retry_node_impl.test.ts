@@ -9,10 +9,10 @@
 import type { EsWorkflowStepExecution } from '@kbn/workflows';
 import type { EnterRetryNode } from '@kbn/workflows/graph';
 import { ExecutionError } from '@kbn/workflows/server';
+import { EnterRetryNodeImpl } from '@kbn/workflows-execution-engine-core';
 import type { StepExecutionRuntime } from '../../../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../../../workflow_event_logger';
-import { EnterRetryNodeImpl } from '@kbn/workflows-execution-engine-core';
 
 describe('EnterRetryNodeImpl', () => {
   let underTest: EnterRetryNodeImpl;

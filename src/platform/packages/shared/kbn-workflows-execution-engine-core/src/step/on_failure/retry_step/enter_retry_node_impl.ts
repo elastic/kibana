@@ -10,9 +10,12 @@
 import type { SerializedError } from '@kbn/workflows';
 import type { EnterRetryNode } from '@kbn/workflows/graph';
 import { ExecutionError } from '@kbn/workflows/server';
-import type { RetryStepState } from './types';
 import { computeRetryDelayMs } from '@kbn/workflows-execution-engine-utils';
-import type { INodeImplementation, INodeWithErrorCatching } from '../../../collaborators/node_implementation';
+import type { RetryStepState } from './types';
+import type {
+  INodeImplementation,
+  INodeWithErrorCatching,
+} from '../../../collaborators/node_implementation';
 import type { IStepExecutionRuntime } from '../../../collaborators/step_execution_runtime';
 import type { IWorkflowEventLogger } from '../../../collaborators/workflow_event_logger';
 import type { IWorkflowExecutionRuntimeManager } from '../../../collaborators/workflow_execution_runtime_manager';

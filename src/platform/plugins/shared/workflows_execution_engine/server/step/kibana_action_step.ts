@@ -13,8 +13,9 @@
 import type { FetcherConfigSchema } from '@kbn/workflows';
 import { buildKibanaRequest } from '@kbn/workflows';
 import type { KibanaGraphNode } from '@kbn/workflows/graph/types';
-import type { z } from '@kbn/zod/v4';
 import { ResponseSizeLimitError } from '@kbn/workflows-execution-engine-core';
+import type { IWorkflowExecutionRuntimeManager } from '@kbn/workflows-execution-engine-core';
+import type { z } from '@kbn/zod/v4';
 import type { BaseStep, RunStepResult } from './node_implementation';
 import { BaseAtomicNodeImplementation } from './node_implementation';
 import {
@@ -23,7 +24,6 @@ import {
 } from '../trigger_events/event_context/event_chain_context';
 import { getKibanaUrl, isTextContentType, readResponseStream } from '../utils';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
-import type { IWorkflowExecutionRuntimeManager } from '@kbn/workflows-execution-engine-core';
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
 
 /**

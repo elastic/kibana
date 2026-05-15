@@ -9,8 +9,8 @@
 
 import { ExecutionStatus } from '@kbn/workflows';
 import type { WaitForInputGraphNode } from '@kbn/workflows/graph';
-import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { IWorkflowExecutionRuntimeManager } from '@kbn/workflows-execution-engine-core';
+import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger';
 import type { NodeImplementation } from '../node_implementation';
 

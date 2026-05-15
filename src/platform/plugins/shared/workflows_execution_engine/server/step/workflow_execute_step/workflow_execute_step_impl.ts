@@ -15,6 +15,7 @@ import type {
   WorkflowRepository,
 } from '@kbn/workflows';
 import type { WorkflowExecuteAsyncGraphNode, WorkflowExecuteGraphNode } from '@kbn/workflows/graph';
+import type { IWorkflowExecutionRuntimeManager } from '@kbn/workflows-execution-engine-core';
 import { WorkflowExecuteAsyncStrategy } from './strategies/workflow_execute_async_strategy';
 import { WorkflowExecuteSyncStrategy } from './strategies/workflow_execute_sync_strategy';
 import type { StrategyResult } from './types';
@@ -23,7 +24,6 @@ import type { StepExecutionRepository } from '../../repositories/step_execution_
 import type { WorkflowExecutionRepository } from '../../repositories/workflow_execution_repository';
 import type { WorkflowsExecutionEnginePluginStart } from '../../types';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
-import type { IWorkflowExecutionRuntimeManager } from '@kbn/workflows-execution-engine-core';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger';
 import type { CancellableNode, NodeImplementation } from '../node_implementation';
 

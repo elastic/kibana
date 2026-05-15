@@ -11,6 +11,7 @@ import type { EsWorkflowExecution, StackFrame } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { GraphNodeUnion } from '@kbn/workflows/graph';
 
+import { WorkflowScopeStack } from '@kbn/workflows-execution-engine-core';
 import * as catchErrorModule from './catch_error';
 import * as handleExecutionDelayModule from './handle_execution_delay';
 import { runNode } from './run_node';
@@ -19,7 +20,6 @@ import type { WorkflowExecutionLoopParams } from './types';
 import type { CancellableNode, NodeImplementation } from '../step/node_implementation';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionState } from '../workflow_context_manager/workflow_execution_state';
-import { WorkflowScopeStack } from '@kbn/workflows-execution-engine-core';
 import { createMockWorkflowEventLogger } from '../workflow_event_logger/mocks';
 
 jest.mock('./run_stack_monitor/run_stack_monitor');

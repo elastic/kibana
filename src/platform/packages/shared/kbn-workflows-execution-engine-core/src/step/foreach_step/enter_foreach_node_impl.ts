@@ -8,8 +8,8 @@
  */
 
 import type { EnterForeachNode } from '@kbn/workflows/graph';
-import type { ForeachStepState } from './types';
 import { isTemplateExpression } from '@kbn/workflows-execution-engine-utils';
+import type { ForeachStepState } from './types';
 import type { INodeImplementation } from '../../collaborators/node_implementation';
 import type { IStepExecutionRuntime } from '../../collaborators/step_execution_runtime';
 import type { IWorkflowEventLogger } from '../../collaborators/workflow_event_logger';

@@ -8,11 +8,11 @@
  */
 
 import type { ExitWhileNode, WorkflowGraph } from '@kbn/workflows/graph';
+import { ExitWhileNodeImpl } from '@kbn/workflows-execution-engine-core';
 import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
 import type { StepIoService } from '../../../workflow_context_manager/step_io_service';
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../../workflow_event_logger';
-import { ExitWhileNodeImpl } from '@kbn/workflows-execution-engine-core';
 
 describe('ExitWhileNodeImpl', () => {
   let node: ExitWhileNode;

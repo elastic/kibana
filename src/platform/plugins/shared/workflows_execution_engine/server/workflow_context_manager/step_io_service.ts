@@ -12,11 +12,15 @@ import type { JsonValue } from '@kbn/utility-types';
 import type { EsWorkflowStepExecution, SerializedError } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
+import {
+  formatBytes,
+  safeOutputSize,
+  WorkflowScopeStack,
+} from '@kbn/workflows-execution-engine-core';
+import type { OutputSizeStats } from '@kbn/workflows-execution-engine-utils';
 import { extractReferencedStepIds } from './extract_referenced_step_ids';
 import { EVICTION_EXEMPT_STEP_TYPES, LOOP_STEP_TYPES } from './step_io_pinned_types';
 import type { StepExecutionMetadata, StepIoStateAccessor } from './workflow_execution_state';
-import { WorkflowScopeStack, formatBytes, safeOutputSize } from '@kbn/workflows-execution-engine-core';
-import type { OutputSizeStats } from '@kbn/workflows-execution-engine-utils';
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import { buildStepExecutionId } from '../utils';
 

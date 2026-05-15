@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ExitStepTimeoutZoneNodeImpl } from '@kbn/workflows-execution-engine-core';
 import type { StepExecutionRuntime } from '../../../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../../../workflow_context_manager/workflow_execution_runtime_manager';
-import { ExitStepTimeoutZoneNodeImpl } from '@kbn/workflows-execution-engine-core';
 
 describe('ExitStepTimeoutZoneNodeImpl', () => {
   let stepExecutionRuntimeMock: StepExecutionRuntime;

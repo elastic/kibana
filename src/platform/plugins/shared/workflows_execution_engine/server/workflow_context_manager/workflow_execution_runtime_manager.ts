@@ -19,16 +19,16 @@ import {
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
 import { ExecutionError } from '@kbn/workflows/server';
 import type {
-  IWorkflowExecutionRuntimeManager,
   IStepExecutionRuntimeFactory,
+  IWorkflowExecutionRuntimeManager,
   ScopeData,
 } from '@kbn/workflows-execution-engine-core';
+import { WorkflowScopeStack } from '@kbn/workflows-execution-engine-core';
 import { getAlertingRuleId, getTraceId, setCurrentTransaction } from './apm_internal';
 import { buildWorkflowContext } from './build_workflow_context';
 import type { StepIoService } from './step_io_service';
 import type { ContextDependencies } from './types';
 import type { WorkflowExecutionState } from './workflow_execution_state';
-import { WorkflowScopeStack } from '@kbn/workflows-execution-engine-core';
 import type { WorkflowExecutionTelemetryClient } from '../lib/telemetry/workflow_execution_telemetry_client';
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
 

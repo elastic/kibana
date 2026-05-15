@@ -15,10 +15,10 @@ import { isMaximumResponseSizeExceededError } from '@kbn/es-errors';
 import { buildElasticsearchRequest } from '@kbn/workflows';
 import type { ElasticsearchGraphNode } from '@kbn/workflows/graph/types';
 import { formatBytes, ResponseSizeLimitError } from '@kbn/workflows-execution-engine-core';
+import type { IWorkflowExecutionRuntimeManager } from '@kbn/workflows-execution-engine-core';
 import type { BaseStep, RunStepResult } from './node_implementation';
 import { BaseAtomicNodeImplementation } from './node_implementation';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
-import type { IWorkflowExecutionRuntimeManager } from '@kbn/workflows-execution-engine-core';
 import type { IWorkflowEventLogger } from '../workflow_event_logger';
 
 export class ElasticsearchActionStepImpl extends BaseAtomicNodeImplementation<BaseStep> {

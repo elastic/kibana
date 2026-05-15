@@ -8,7 +8,10 @@
  */
 
 import type { EnterContinueNode } from '@kbn/workflows/graph';
-import type { INodeImplementation, INodeWithErrorCatching } from '../../../collaborators/node_implementation';
+import type {
+  INodeImplementation,
+  INodeWithErrorCatching,
+} from '../../../collaborators/node_implementation';
 import type { IStepExecutionRuntime } from '../../../collaborators/step_execution_runtime';
 import type { IWorkflowEventLogger } from '../../../collaborators/workflow_event_logger';
 import type { IWorkflowExecutionRuntimeManager } from '../../../collaborators/workflow_execution_runtime_manager';

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { WorkflowExecutionRuntimeManager } from '../../../../workflow_context_manager/workflow_execution_runtime_manager';
 import { ExitWorkflowTimeoutZoneNodeImpl } from '@kbn/workflows-execution-engine-core';
+import type { WorkflowExecutionRuntimeManager } from '../../../../workflow_context_manager/workflow_execution_runtime_manager';
 
 describe('ExitWorkflowTimeoutZoneNodeImpl', () => {
   let wfExecutionRuntimeManagerMock: WorkflowExecutionRuntimeManager;

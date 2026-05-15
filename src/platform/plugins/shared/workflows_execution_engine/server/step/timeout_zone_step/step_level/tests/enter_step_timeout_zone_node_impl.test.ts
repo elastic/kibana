@@ -13,10 +13,10 @@ jest.mock('@kbn/workflows-execution-engine-utils', () => ({
 }));
 
 import type { EnterTimeoutZoneNode } from '@kbn/workflows/graph';
+import { EnterStepTimeoutZoneNodeImpl } from '@kbn/workflows-execution-engine-core';
 import { parseDuration } from '@kbn/workflows-execution-engine-utils';
 import type { StepExecutionRuntime } from '../../../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../../../workflow_context_manager/workflow_execution_runtime_manager';
-import { EnterStepTimeoutZoneNodeImpl } from '@kbn/workflows-execution-engine-core';
 
 const mockParseDuration = parseDuration as jest.MockedFunction<typeof parseDuration>;
 

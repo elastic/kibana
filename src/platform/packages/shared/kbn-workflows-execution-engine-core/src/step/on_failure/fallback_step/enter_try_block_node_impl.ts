@@ -8,7 +8,10 @@
  */
 
 import type { EnterTryBlockNode } from '@kbn/workflows/graph';
-import type { INodeImplementation, INodeWithErrorCatching } from '../../../collaborators/node_implementation';
+import type {
+  INodeImplementation,
+  INodeWithErrorCatching,
+} from '../../../collaborators/node_implementation';
 import type { IStepExecutionRuntime } from '../../../collaborators/step_execution_runtime';
 import type { IWorkflowExecutionRuntimeManager } from '../../../collaborators/workflow_execution_runtime_manager';
 

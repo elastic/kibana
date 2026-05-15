@@ -21,6 +21,7 @@ import {
 import { parseJsPropertyAccess } from '@kbn/workflows/common/utils';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
 import type { IWorkflowContextManager } from '@kbn/workflows-execution-engine-core';
+import { WorkflowScopeStack } from '@kbn/workflows-execution-engine-core';
 import {
   buildStepExecutionId,
   isSerializedError,
@@ -30,7 +31,6 @@ import { buildWorkflowContext } from './build_workflow_context';
 import type { StepIoService } from './step_io_service';
 import type { ContextDependencies } from './types';
 import type { StepExecutionMetadata, WorkflowExecutionState } from './workflow_execution_state';
-import { WorkflowScopeStack } from '@kbn/workflows-execution-engine-core';
 import type { WorkflowTemplatingEngine } from '../templating_engine';
 
 export interface ContextManagerInit {

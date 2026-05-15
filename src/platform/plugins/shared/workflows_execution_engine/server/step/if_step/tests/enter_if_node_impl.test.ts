@@ -8,11 +8,11 @@
  */
 
 import type { EnterConditionBranchNode, EnterIfNode, WorkflowGraph } from '@kbn/workflows/graph';
+import { EnterIfNodeImpl } from '@kbn/workflows-execution-engine-core';
 import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowContextManager } from '../../../workflow_context_manager/workflow_context_manager';
 import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../../workflow_event_logger';
-import { EnterIfNodeImpl } from '@kbn/workflows-execution-engine-core';
 
 describe('EnterIfNodeImpl', () => {
   let node: EnterIfNode;
@@ -235,9 +235,7 @@ describe('EnterIfNodeImpl', () => {
         condition: 'invalid""condition',
       } as EnterConditionBranchNode,
     ]);
-    await expect(impl.run()).rejects.toThrow(
-      `Syntax error in condition for step ${node.stepId}:`
-    );
+    await expect(impl.run()).rejects.toThrow(`Syntax error in condition for step ${node.stepId}:`);
   });
 
   describe('boolean evaluation with ${{ }} syntax', () => {

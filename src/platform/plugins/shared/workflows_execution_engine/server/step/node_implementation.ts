@@ -17,9 +17,9 @@ import {
   ResponseSizeLimitError,
   safeOutputSize,
 } from '@kbn/workflows-execution-engine-core';
+import type { IWorkflowExecutionRuntimeManager } from '@kbn/workflows-execution-engine-core';
 import type { ConnectorExecutor } from '../connector_executor';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
-import type { IWorkflowExecutionRuntimeManager } from '@kbn/workflows-execution-engine-core';
 
 export interface RunStepResult {
   input: unknown;

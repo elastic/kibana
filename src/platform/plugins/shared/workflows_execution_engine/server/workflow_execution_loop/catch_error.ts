@@ -9,10 +9,10 @@
 
 import { ExecutionStatus } from '@kbn/workflows';
 import { ExecutionError } from '@kbn/workflows/server';
+import { WorkflowScopeStack } from '@kbn/workflows-execution-engine-core';
 import type { WorkflowExecutionLoopParams } from './types';
 import type { NodeWithErrorCatching } from '../step/node_implementation';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
-import { WorkflowScopeStack } from '@kbn/workflows-execution-engine-core';
 
 /**
  * Handles workflow execution errors by bubbling them up through the scope hierarchy

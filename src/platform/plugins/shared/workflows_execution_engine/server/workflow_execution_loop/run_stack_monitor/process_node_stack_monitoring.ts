@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { WorkflowScopeStack } from '@kbn/workflows-execution-engine-core';
 import type { MonitorableNode } from '../../step/node_implementation';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
-import { WorkflowScopeStack } from '@kbn/workflows-execution-engine-core';
 import { cancelWorkflowIfRequested } from '../cancel_workflow_if_requested';
 import type { WorkflowExecutionLoopParams } from '../types';
 
