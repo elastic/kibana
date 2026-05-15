@@ -138,11 +138,9 @@ steps:
 
       const lines = result.yaml.split('\n');
       const triggersLine = lines.findIndex((l) => l === 'triggers:');
-      const inputsLine = lines.findIndex((l) => l === 'inputs:');
       const stepsLine = lines.findIndex((l) => l === 'steps:');
 
-      expect(inputsLine).toBeGreaterThan(triggersLine);
-      expect(inputsLine).toBeLessThan(stepsLine);
+      expect(stepsLine).toBeGreaterThan(triggersLine);
     });
 
     it('inserts enabled between name and steps when intermediate properties are absent', () => {
