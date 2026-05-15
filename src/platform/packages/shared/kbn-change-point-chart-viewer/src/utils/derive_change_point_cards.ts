@@ -242,7 +242,7 @@ const getChangePointCardsBuildContext = (params: {
  *   visible regardless of whether any change points were detected.
  * - Split (entity columns present via BY clause or heuristic): true when at least one entity
  *   group contains at least one valid annotation event (row with a parseable timestamp and, for
-   *   non-BY mode, a non-empty type and defined pvalue). Mirrors the skip logic in
+ *   non-BY mode, a non-empty type and defined pvalue). Mirrors the skip logic in
  *   {@link buildChangePointCards} so the predicate never returns `true` when the builder would
  *   return `undefined`.
  */

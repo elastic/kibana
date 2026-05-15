@@ -8,7 +8,4 @@
  */
 
 export { LazyChangePointExperienceGrid } from './src/lazy_change_point_experience_grid';
-export type {
-  ChangePointChartSectionActions,
-  UnifiedChangePointGridProps,
-} from './src/types';
+export type { ChangePointChartSectionActions, UnifiedChangePointGridProps } from './src/types';
