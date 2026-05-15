@@ -1078,6 +1078,8 @@
       "@kbn/ecs-data-quality-dashboard-plugin/*": ["x-pack/solutions/security/plugins/ecs_data_quality_dashboard/*"],
       "@kbn/edot-collector": ["src/platform/packages/shared/kbn-edot-collector"],
       "@kbn/edot-collector/*": ["src/platform/packages/shared/kbn-edot-collector/*"],
+      "@kbn/elastic-agent-condition-language": ["x-pack/platform/packages/shared/kbn-elastic-agent-condition-language"],
+      "@kbn/elastic-agent-condition-language/*": ["x-pack/platform/packages/shared/kbn-elastic-agent-condition-language/*"],
       "@kbn/elastic-agent-utils": ["src/platform/packages/shared/kbn-elastic-agent-utils"],
       "@kbn/elastic-agent-utils/*": ["src/platform/packages/shared/kbn-elastic-agent-utils/*"],
       "@kbn/elastic-assistant": ["x-pack/platform/packages/shared/kbn-elastic-assistant"],
