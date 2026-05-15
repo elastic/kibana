@@ -13,7 +13,7 @@ import type { ActionInfo } from './action_executor';
 import type { AuthTypeRegistry } from '../auth_types';
 import { getCustomAgents } from './get_custom_agents';
 import type { ActionsConfigurationUtilities } from '../actions_config';
-import type { ConnectorTokenClientContract } from '../types';
+import type { ConnectorTokenClientContract, UserIdentifiers } from '../types';
 import { getBeforeRedirectFn } from './before_redirect';
 import { getAxiosAuthStrategy } from './axios_auth_strategies';
 
@@ -34,7 +34,7 @@ export interface GetAxiosInstanceWithAuthFnOpts {
   secrets: ValidatedSecrets;
   signal?: AbortSignal;
   authMode?: AuthMode;
-  profileUid?: string;
+  userIdentifiers?: UserIdentifiers;
 }
 export type GetAxiosInstanceWithAuthFn = (
   opts: GetAxiosInstanceWithAuthFnOpts
@@ -51,7 +51,7 @@ export const getAxiosInstanceWithAuth = ({
     connectorTokenClient,
     signal,
     authMode,
-    profileUid,
+    userIdentifiers,
   }: GetAxiosInstanceWithAuthFnOpts) => {
     let authTypeId: string | undefined;
     try {
@@ -103,7 +103,7 @@ export const getAxiosInstanceWithAuth = ({
         logger,
         configurationUtilities,
         authMode,
-        profileUid,
+        userIdentifiers,
       };
 
       if (connectorTokenClient) {

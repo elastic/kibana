@@ -36,6 +36,7 @@ export async function getAxiosInstance(
     spaces,
     unsecuredSavedObjectsClient,
     connectorTokenClient,
+    getUserIdentifiersFromAPIKey,
     getCurrentUserProfileId,
   } = context;
 
@@ -106,7 +107,12 @@ export async function getAxiosInstance(
   const configurationUtilities = actionTypeRegistry.getUtils();
   const validatedSecrets = validateSecrets(actionType, secrets, { configurationUtilities });
 
-  const profileUid = await getCurrentUserProfileId?.(request);
+  const userIdentifiersFromAPIKey = await getUserIdentifiersFromAPIKey?.(request);
+  const currentUserProfileUid =
+    userIdentifiersFromAPIKey === undefined ? await getCurrentUserProfileId?.(request) : undefined;
+  const userIdentifiers =
+    userIdentifiersFromAPIKey ??
+    (currentUserProfileUid ? { profileUid: currentUserProfileUid } : undefined);
 
   return await getAxiosInstanceWithAuth({
     connectorId,
@@ -114,6 +120,6 @@ export async function getAxiosInstance(
     additionalHeaders: actionType.globalAuthHeaders,
     secrets: validatedSecrets,
     authMode,
-    profileUid,
+    userIdentifiers,
   });
 }

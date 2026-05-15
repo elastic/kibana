@@ -14,7 +14,7 @@ import type { SecurityPluginStart } from '@kbn/security-plugin/server';
  * `security.userProfiles.getCurrent` requires a session-capable request.
  *
  * Do not use this for the action executor: execution uses a `FakeRequest` without a session,
- * so profile lookup must go through the API-key path (`getCurrentUserProfileIdFromAPIKey` in
+ * so profile lookup must go through the API-key path (`getUserIdentifiersFromAPIKey` in
  * `plugin.ts`) instead.
  */
 export async function getCurrentUserProfileIdFromRequest(

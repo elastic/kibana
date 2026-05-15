@@ -45,6 +45,7 @@ import { connectorTokenClientMock } from '../lib/connector_token_client.mock';
 import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
 import { getOAuthJwtAccessToken } from '../lib/get_oauth_jwt_access_token';
 import { getOAuthClientCredentialsAccessToken } from '../lib/get_oauth_client_credentials_access_token';
+import { getOAuthAuthorizationCodeAccessToken } from '../lib/get_oauth_authorization_code_access_token';
 import type { OAuthParams } from '../routes/get_oauth_access_token';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
 import type { GetGlobalExecutionKPIParams, GetGlobalExecutionLogParams } from '../../common';
@@ -71,6 +72,9 @@ jest.mock('../lib/get_oauth_jwt_access_token', () => ({
 jest.mock('../lib/get_oauth_client_credentials_access_token', () => ({
   getOAuthClientCredentialsAccessToken: jest.fn(),
 }));
+jest.mock('../lib/get_oauth_authorization_code_access_token', () => ({
+  getOAuthAuthorizationCodeAccessToken: jest.fn(),
+}));
 
 jest.mock('uuid', () => ({
   v4: () => 'uuidv4',
@@ -96,6 +100,8 @@ const postDeleteHook = jest.fn();
 const encryptedSavedObjectsClient = encryptedSavedObjectsMock.createClient();
 const getAxiosInstanceWithAuth = jest.fn();
 const isESOCanEncrypt = true;
+const getUserIdentifiersFromAPIKey = jest.fn();
+const getCurrentUserProfileId = jest.fn();
 
 let actionsClient: ActionsClient;
 let mockedLicenseState: jest.Mocked<ILicenseState>;
@@ -118,6 +124,8 @@ let logger: MockedLogger;
 beforeEach(() => {
   jest.resetAllMocks();
   logger = loggerMock.create();
+  getUserIdentifiersFromAPIKey.mockResolvedValue(undefined);
+  getCurrentUserProfileId.mockResolvedValue(undefined);
   mockedLicenseState = licenseStateMock.create();
   actionTypeRegistryParams = {
     licensing: licensingMock.createSetup(),
@@ -156,6 +164,8 @@ beforeEach(() => {
     encryptedSavedObjectsClient,
     isESOCanEncrypt,
     getAxiosInstanceWithAuth,
+    getUserIdentifiersFromAPIKey,
+    getCurrentUserProfileId,
   });
   (getOAuthJwtAccessToken as jest.Mock).mockResolvedValue(`Bearer jwttokentokentoken`);
   (getOAuthClientCredentialsAccessToken as jest.Mock).mockResolvedValue(
@@ -586,6 +596,8 @@ describe('create()', () => {
       encryptedSavedObjectsClient,
       isESOCanEncrypt,
       getAxiosInstanceWithAuth,
+      getUserIdentifiersFromAPIKey,
+      getCurrentUserProfileId,
     });
 
     const savedObjectCreateResult = {
@@ -747,6 +759,8 @@ describe('create()', () => {
       encryptedSavedObjectsClient,
       isESOCanEncrypt,
       getAxiosInstanceWithAuth,
+      getUserIdentifiersFromAPIKey,
+      getCurrentUserProfileId,
     });
 
     await expect(
@@ -1076,6 +1090,8 @@ describe('get()', () => {
       encryptedSavedObjectsClient,
       isESOCanEncrypt,
       getAxiosInstanceWithAuth,
+      getUserIdentifiersFromAPIKey,
+      getCurrentUserProfileId,
     });
 
     const result = await actionsClient.get({ id: 'testPreconfigured' });
@@ -1115,6 +1131,8 @@ describe('get()', () => {
       encryptedSavedObjectsClient,
       isESOCanEncrypt,
       getAxiosInstanceWithAuth,
+      getUserIdentifiersFromAPIKey,
+      getCurrentUserProfileId,
     });
 
     await expect(
@@ -1147,6 +1165,8 @@ describe('get()', () => {
       encryptedSavedObjectsClient,
       isESOCanEncrypt,
       getAxiosInstanceWithAuth,
+      getUserIdentifiersFromAPIKey,
+      getCurrentUserProfileId,
     });
 
     expect(
@@ -1367,6 +1387,8 @@ describe('getBulk()', () => {
       encryptedSavedObjectsClient,
       isESOCanEncrypt,
       getAxiosInstanceWithAuth,
+      getUserIdentifiersFromAPIKey,
+      getCurrentUserProfileId,
     });
 
     const result = await actionsClient.getBulk({ ids: ['1', 'testPreconfigured'] });
@@ -1452,6 +1474,8 @@ describe('getBulk()', () => {
       encryptedSavedObjectsClient,
       isESOCanEncrypt,
       getAxiosInstanceWithAuth,
+      getUserIdentifiersFromAPIKey,
+      getCurrentUserProfileId,
     });
 
     await expect(
@@ -1587,6 +1611,8 @@ describe('getOAuthAccessToken()', () => {
       encryptedSavedObjectsClient,
       isESOCanEncrypt,
       getAxiosInstanceWithAuth,
+      getUserIdentifiersFromAPIKey,
+      getCurrentUserProfileId,
     });
     return actionsClient.getOAuthAccessToken(requestBody, configurationUtilities);
   }
@@ -1793,6 +1819,96 @@ describe('getOAuthAccessToken()', () => {
         ],
       ]
     `);
+  });
+
+  test('prefers API-key user identifiers for authorization_code and skips profile fallback', async () => {
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+      id: 'connector-1',
+      type: 'action',
+      attributes: {
+        actionTypeId: '.slack',
+        authMode: 'per-user',
+        config: {},
+        secrets: {},
+        isMissingSecrets: false,
+      },
+      references: [],
+    });
+    getUserIdentifiersFromAPIKey.mockResolvedValueOnce({
+      profileUid: 'api-profile',
+      userCloudId: 'api-cloud',
+    });
+    getCurrentUserProfileId.mockResolvedValueOnce('session-profile');
+    (getOAuthAuthorizationCodeAccessToken as jest.Mock).mockResolvedValueOnce('Bearer auth-code');
+
+    const result = await getOAuthAccessToken({
+      type: 'authorization_code',
+      options: {
+        connectorId: 'connector-1',
+        tokenUrl: 'https://auth.example.com/oauth/token',
+        scope: 'openid profile',
+        config: {
+          clientId: 'abc',
+          tokenUrl: 'https://auth.example.com/oauth/token',
+        },
+        secrets: {
+          clientSecret: 'secret',
+        },
+      },
+    });
+
+    expect(result).toEqual({ accessToken: 'Bearer auth-code' });
+    expect(getUserIdentifiersFromAPIKey).toHaveBeenCalledWith(request);
+    expect(getCurrentUserProfileId).not.toHaveBeenCalled();
+    expect(getOAuthAuthorizationCodeAccessToken).toHaveBeenCalledWith(
+      expect.objectContaining({
+        connectorId: 'connector-1',
+        authMode: 'per-user',
+        userIdentifiers: { profileUid: 'api-profile', userCloudId: 'api-cloud' },
+      })
+    );
+  });
+
+  test('falls back to current profile when API-key identifiers are undefined for authorization_code', async () => {
+    unsecuredSavedObjectsClient.get.mockResolvedValueOnce({
+      id: 'connector-1',
+      type: 'action',
+      attributes: {
+        actionTypeId: '.slack',
+        authMode: 'per-user',
+        config: {},
+        secrets: {},
+        isMissingSecrets: false,
+      },
+      references: [],
+    });
+    getUserIdentifiersFromAPIKey.mockResolvedValueOnce(undefined);
+    getCurrentUserProfileId.mockResolvedValueOnce('session-profile');
+    (getOAuthAuthorizationCodeAccessToken as jest.Mock).mockResolvedValueOnce('Bearer auth-code');
+
+    await getOAuthAccessToken({
+      type: 'authorization_code',
+      options: {
+        connectorId: 'connector-1',
+        tokenUrl: 'https://auth.example.com/oauth/token',
+        scope: 'openid profile',
+        config: {
+          clientId: 'abc',
+          tokenUrl: 'https://auth.example.com/oauth/token',
+        },
+        secrets: {
+          clientSecret: 'secret',
+        },
+      },
+    });
+
+    expect(getCurrentUserProfileId).toHaveBeenCalledWith(request);
+    expect(getOAuthAuthorizationCodeAccessToken).toHaveBeenCalledWith(
+      expect.objectContaining({
+        connectorId: 'connector-1',
+        userIdentifiers: { profileUid: 'session-profile' },
+      })
+    );
   });
 
   test('throws when getOAuthJwtAccessToken throws error', async () => {
