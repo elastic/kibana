@@ -65,6 +65,7 @@ export class TagManagementPage {
     await this.assignFlyout.closeButton.waitFor({ state: 'hidden' });
     await this.tagsTable.waitForLoaded();
   }
+
   async selectSavedObjectTags(...tagNames: string[]) {
     await this.page.testSubj.click('savedObjectTagSelector');
     for (const tagName of tagNames) {
