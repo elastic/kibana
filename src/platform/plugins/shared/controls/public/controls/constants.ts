@@ -11,7 +11,7 @@ import { PlacementStrategy } from '@kbn/embeddable-plugin/public';
 
 export const MIN_POPOVER_WIDTH = 300;
 
-export const LAYOUT_CONSTRAINTS = { maxHeight: 2, minHeight: 2 }
+export const LAYOUT_CONSTRAINTS = { maxHeight: 2, minHeight: 2 };
 
 export function getPlacementHints() {
   return { width: 12, height: 2, strategy: PlacementStrategy.placeAtTop };
