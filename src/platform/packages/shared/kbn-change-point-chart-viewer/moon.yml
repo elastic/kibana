@@ -18,7 +18,6 @@ project:
   sourceRoot: src/platform/packages/shared/kbn-change-point-chart-viewer
 dependsOn:
   - '@kbn/data-plugin'
-  - '@kbn/data-views-plugin'
   - '@kbn/es-query'
   - '@kbn/esql-utils'
   - '@kbn/expressions-plugin'
@@ -26,10 +25,12 @@ dependsOn:
   - '@kbn/lens-embeddable-utils'
   - '@kbn/lens-plugin'
   - '@kbn/react-hooks'
-  - '@kbn/shared-ux-toolbar-selector'
+  - '@kbn/shared-ux-error-boundary'
   - '@kbn/shared-ux-utility'
   - '@kbn/ui-actions-plugin'
   - '@kbn/unified-histogram'
+  - '@kbn/embeddable-plugin'
+  - '@kbn/esql-types'
   - '@kbn/embeddable-plugin'
 tags:
   - shared-browser
