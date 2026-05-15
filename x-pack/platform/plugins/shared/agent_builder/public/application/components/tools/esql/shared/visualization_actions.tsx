@@ -8,77 +8,39 @@
 import React from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type {
-  InlineEditLensEmbeddableContext,
-  TypedLensByValueInput,
-} from '@kbn/lens-plugin/public';
-import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import {
-  dashboardWriteControlsDisabledReason,
-  EditVisualizationButton,
-  saveButtonLabel,
-} from './edit_visualization_button';
-import { actionsContainerStyles } from './styles';
+import { ActionButtonType, type ActionButton } from '@kbn/agent-builder-browser/attachments';
+import { actionsContainerStyles, visualizationActionsClassName } from './styles';
 
-interface Props {
-  onSave: () => void;
-  uiActions: UiActionsStart;
-  lensInput: TypedLensByValueInput | undefined;
-  lensLoadEvent: InlineEditLensEmbeddableContext['lensEvent'] | null;
-  setLensInput: (input: TypedLensByValueInput) => void;
-}
-
-export function VisualizationActions({
-  onSave,
-  uiActions,
-  lensInput,
-  lensLoadEvent,
-  setLensInput,
-}: Props) {
-  const {
-    services: { application },
-  } = useKibana();
-
-  if (!lensInput) {
-    return null;
-  }
-
-  const canWriteDashboards = application?.capabilities.dashboard_v2?.showWriteControls === true;
-
-  const saveButton = (
+export const renderActionButton = (button: ActionButton) => {
+  const buttonElement = (
     <EuiButtonIcon
       display="base"
       color="text"
       size="s"
-      iconType="save"
-      aria-label={saveButtonLabel}
-      css={css({ marginLeft: '-1px' })}
-      isDisabled={!canWriteDashboards}
-      onClick={() => {
-        if (canWriteDashboards) {
-          onSave();
-        }
-      }}
+      iconType={button.icon ? button.icon : 'pencil'}
+      aria-label={button.label}
+      css={button.type === ActionButtonType.PRIMARY ? css({ marginLeft: '-1px' }) : undefined}
+      isDisabled={button.disabled}
+      onClick={button.handler}
     />
   );
+  const tooltipContent = button.disabled ? button.disabledReason ?? button.label : button.label;
 
   return (
-    <div css={actionsContainerStyles} data-test-subj="visualizationButtonActions">
-      <EditVisualizationButton
-        uiActions={uiActions}
-        lensInput={lensInput}
-        lensLoadEvent={lensLoadEvent}
-        onAttributesChange={(attrs) => setLensInput({ ...lensInput, attributes: attrs })}
-        onApply={onSave}
-        canWriteDashboards={canWriteDashboards}
-      />
-      <EuiToolTip
-        content={canWriteDashboards ? saveButtonLabel : dashboardWriteControlsDisabledReason}
-        disableScreenReaderOutput
-      >
-        {canWriteDashboards ? saveButton : <span tabIndex={0}>{saveButton}</span>}
-      </EuiToolTip>
+    <EuiToolTip key={button.label} content={tooltipContent} disableScreenReaderOutput>
+      {button.disabled ? <span tabIndex={0}>{buttonElement}</span> : buttonElement}
+    </EuiToolTip>
+  );
+};
+
+export const FallbackVisualizationActions = ({ buttons }: { buttons: ActionButton[] }) => {
+  return (
+    <div
+      css={actionsContainerStyles}
+      className={visualizationActionsClassName}
+      data-test-subj="visualizationButtonActions"
+    >
+      {buttons.map(renderActionButton)}
     </div>
   );
-}
+};

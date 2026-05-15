@@ -143,6 +143,8 @@ node scripts/i18n_integrate --source path/to/locale.json --target x-pack/platfor
 translations that are located in a single JSON file within `x-pack/translations` plugin.
 * `--dry-run` tells the tool to exit after verification phase and not write translations to the disk.
 * `--include-config` specifies additional paths to `.i18nrc.json` files (may be useful for 3rd-party plugins)
+* `--coverage-report` optional path to write a JSON coverage report comparing the extracted English messages
+against the `--source` translations. The console summary (total / translated / missing / %) is always printed.
 
 
 ## Validation tool

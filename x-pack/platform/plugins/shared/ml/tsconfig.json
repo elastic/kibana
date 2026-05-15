@@ -9,6 +9,7 @@
     "server/**/*",
     "scripts/**/*",
     "__mocks__/**/*",
+    "test/scout/**/*",
     "../../../../../typings/**/*",
     // have to declare *.json explicitly due to https://github.com/microsoft/TypeScript/issues/25636
     "common/**/*.json",
@@ -148,5 +149,7 @@
     "@kbn/cps",
     "@kbn/cps-utils",
     "@kbn/lens-common",
+    "@kbn/scout",
+    "@kbn/core-http-common",
   ]
 }

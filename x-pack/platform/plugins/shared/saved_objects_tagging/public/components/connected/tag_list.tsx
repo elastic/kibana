@@ -44,8 +44,10 @@ interface GetConnectedTagListOptions {
 export const getConnectedTagListComponent = ({
   cache,
 }: GetConnectedTagListOptions): FC<TagListComponentProps> => {
+  const tagsState$ = cache.getState$({ waitForInitialization: true });
+
   return (props: TagListComponentProps) => {
-    const tags = useObservable(cache.getState$(), cache.getState());
+    const tags = useObservable(tagsState$, cache.getState());
     return <SavedObjectTagList {...props} tags={tags} />;
   };
 };

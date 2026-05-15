@@ -45,6 +45,10 @@ components:
       enum:
         - create-list-indices
         - security-data-views
+        - init-prebuilt-rules
+        - init-endpoint-protection
+        - init-ai-prompts
+        - init-detection-rule-monitoring
 
     InitializationFlowsResult:
       type: object
@@ -60,6 +64,22 @@ components:
         security-data-views:
           oneOf:
             - $ref: '#/components/schemas/SecurityDataViewsReadyResult'
+            - $ref: '#/components/schemas/InitializationFlowErrorResult'
+        init-prebuilt-rules:
+          oneOf:
+            - $ref: '#/components/schemas/PackageInstallReadyResult'
+            - $ref: '#/components/schemas/InitializationFlowErrorResult'
+        init-endpoint-protection:
+          oneOf:
+            - $ref: '#/components/schemas/PackageInstallReadyResult'
+            - $ref: '#/components/schemas/InitializationFlowErrorResult'
+        init-ai-prompts:
+          oneOf:
+            - $ref: '#/components/schemas/PackageInstallReadyResult'
+            - $ref: '#/components/schemas/InitializationFlowErrorResult'
+        init-detection-rule-monitoring:
+          oneOf:
+            - $ref: '#/components/schemas/InstallDetectionEngineRuleMonitoringAssetsReadyResult'
             - $ref: '#/components/schemas/InitializationFlowErrorResult'
 
     CreateListIndicesReadyResult:
@@ -118,6 +138,41 @@ components:
                 $ref: '#/components/schemas/DataViewPayload'
             signalIndexName:
               type: string
+
+    PackageInstallReadyResult:
+      type: object
+      required:
+        - status
+        - payload
+      properties:
+        status:
+          type: string
+          enum:
+            - ready
+        payload:
+          type: object
+          required:
+            - name
+            - version
+            - install_status
+          properties:
+            name:
+              type: string
+            version:
+              type: string
+            install_status:
+              type: string
+              description: Fleet package installation status (e.g., installed, already_installed).
+
+    InstallDetectionEngineRuleMonitoringAssetsReadyResult:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+          enum:
+            - ready
 
     InitializationFlowErrorResult:
       type: object

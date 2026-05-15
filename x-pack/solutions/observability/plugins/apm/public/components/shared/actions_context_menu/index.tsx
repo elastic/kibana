@@ -8,6 +8,7 @@
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiContextMenu, EuiPopover, useEuiTheme } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 
 export interface ActionSubItem {
   id: string;
@@ -137,6 +138,9 @@ export function ActionsContextMenu({
   return (
     <EuiPopover
       id={id}
+      aria-label={i18n.translate('xpack.apm.actionsContextMenu.ariaLabel', {
+        defaultMessage: 'Actions',
+      })}
       button={buttonWithToggle}
       isOpen={isPopoverOpen}
       closePopover={closePopover}

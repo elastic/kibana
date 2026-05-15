@@ -53,6 +53,7 @@ import { validateFieldMappings } from './build_integration/validate_fields';
 
 /**
  * Derives the integration status from its data streams.
+ * - 'failed' if integration previously had data streams but all were deleted
  * - 'approved' if all data streams are completed and there is at least one
  * - 'completed' if all data streams are completed
  * - 'failed' if any data stream has failed
@@ -64,7 +65,7 @@ function deriveIntegrationStatus(
   dataStreams: DataStreamAttributes[]
 ): TaskStatus {
   if (dataStreams.length === 0) {
-    return 'pending' as TaskStatus;
+    return 'failed' as TaskStatus;
   }
 
   const statuses = dataStreams.map((ds) => ds.job_info?.status);

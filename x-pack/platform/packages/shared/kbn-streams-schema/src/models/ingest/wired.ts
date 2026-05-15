@@ -195,3 +195,12 @@ export function isDraftStream(
 ): definition is DraftStreamDefinition {
   return WiredStream.Definition.is(definition) && definition.ingest.wired.draft === true;
 }
+
+/**
+ * Checks whether a GetResponse represents a draft wired stream.
+ */
+export function isDraftGetResponse(
+  response: BaseStream.Model['GetResponse']
+): response is WiredStream.GetResponse {
+  return WiredStream.GetResponse.is(response) && isDraftStream(response.stream);
+}

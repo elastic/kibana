@@ -6,9 +6,12 @@
  */
 export {
   OPEN_TELEMETRY_AGENT_NAMES,
+  EDOT_AGENT_NAMES,
+  OTEL_AGENT_NAMES,
   AGENT_NAMES,
   isOpenTelemetryAgentName,
   isEDOTAgentName,
+  isOTELAgentName,
   hasOpenTelemetryPrefix,
   JAVA_AGENT_NAMES,
   isJavaAgentName,

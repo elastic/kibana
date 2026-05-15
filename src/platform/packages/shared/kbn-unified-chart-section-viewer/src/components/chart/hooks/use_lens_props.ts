@@ -15,6 +15,7 @@ import {
   type LensSeriesLayer,
   type LensYBoundsConfig,
 } from '@kbn/lens-embeddable-utils';
+import type React from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { EmbeddableComponentProps } from '@kbn/lens-plugin/public';
 import useLatest from 'react-use/lib/useLatest';
@@ -52,11 +53,13 @@ export type LensProps = Pick<
   | 'executionContext'
   | 'lastReloadRequestTime'
   | 'userMessages'
+  | 'description'
 >;
 
 export const useLensProps = ({
   chartId,
   title,
+  description,
   query,
   services,
   fetchParams,
@@ -70,6 +73,7 @@ export const useLensProps = ({
 }: {
   chartId: string;
   title: string;
+  description?: string;
   query: string;
   discoverFetch$: UnifiedMetricsGridProps['fetch$'];
   chartRef?: React.RefObject<HTMLDivElement>;
@@ -107,7 +111,7 @@ export const useLensProps = ({
 
   useEffect(() => {
     chartConfigUpdates$.current.next(void 0);
-  }, [query, title, chartLayers, yBounds, effectiveError, userMessages, profileId]);
+  }, [query, title, description, chartLayers, yBounds, error, userMessages, profileId]);
 
   // creates a stable function that builds the Lens attributes
   const buildAttributesFn = useLatest(async () => {
@@ -115,7 +119,13 @@ export const useLensProps = ({
     // force Lens to build with no datasource on error to show the error message
     if (!chartLayers.length && !effectiveError) return null;
 
-    const lensParams = buildLensParams({ query, title, chartLayers, yBounds });
+    const lensParams = buildLensParams({
+      query,
+      title,
+      description,
+      chartLayers,
+      yBounds,
+    });
     const builder = new LensConfigBuilder(services.dataViews);
 
     const result = (await builder.build(lensParams, {
@@ -135,6 +145,7 @@ export const useLensProps = ({
         esqlVariables: fetchParams.esqlVariables,
         attributes,
         lastReloadRequestTime: fetchParams.lastReloadRequestTime,
+        description,
         userMessages,
         profileId,
         chartId,
@@ -145,6 +156,7 @@ export const useLensProps = ({
       fetchParams.relativeTimeRange,
       fetchParams.lastReloadRequestTime,
       fetchParams.esqlVariables,
+      description,
       userMessages,
       profileId,
       chartId,
@@ -270,16 +282,19 @@ export const useLensProps = ({
 const buildLensParams = ({
   query,
   title,
+  description,
   chartLayers,
   yBounds,
 }: {
   query: string;
   title: string;
+  description?: string;
   chartLayers: LensSeriesLayer[];
   yBounds?: LensYBoundsConfig;
 }): LensConfig => {
   return {
     chartType: 'xy',
+    description,
     dataset: {
       esql: query,
     },
@@ -303,6 +318,7 @@ const getLensProps = ({
   timeRange,
   attributes,
   lastReloadRequestTime,
+  description,
   esqlVariables,
   userMessages,
   profileId,
@@ -313,6 +329,7 @@ const getLensProps = ({
   esqlVariables: ESQLControlVariable[] | undefined;
   timeRange: TimeRange;
   lastReloadRequestTime?: number;
+  description?: string;
   userMessages?: EmbeddableComponentProps['userMessages'];
   profileId: string;
   chartId: string;
@@ -322,6 +339,7 @@ const getLensProps = ({
   timeRange,
   attributes,
   noPadding: true,
+  description,
   esqlVariables,
   searchSessionId,
   executionContext: {

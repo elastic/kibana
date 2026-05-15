@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
+import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import { createRuleAttachmentType } from './rule';
 import { createAlertAttachmentType } from './alert';
 import { createEntityAttachmentType } from './entity';

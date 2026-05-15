@@ -23,7 +23,7 @@
         "label": "i18nServiceMock",
         "description": [],
         "path": "src/core/packages/i18n/server-mocks/src/i18n_service.mock.ts",
-        "lineNumber": 46,
+        "lineNumber": 59,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -39,7 +39,7 @@
               "() => jest.Mocked<I18nServiceContract>"
             ],
             "path": "src/core/packages/i18n/server-mocks/src/i18n_service.mock.ts",
-            "lineNumber": 47,
+            "lineNumber": 60,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -59,7 +59,7 @@
               ">"
             ],
             "path": "src/core/packages/i18n/server-mocks/src/i18n_service.mock.ts",
-            "lineNumber": 48,
+            "lineNumber": 61,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -79,7 +79,7 @@
               ">"
             ],
             "path": "src/core/packages/i18n/server-mocks/src/i18n_service.mock.ts",
-            "lineNumber": 49,
+            "lineNumber": 62,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,

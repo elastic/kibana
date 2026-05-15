@@ -6,12 +6,15 @@
  */
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
-import { coreMock } from '@kbn/core/server/mocks';
+import { actionsMock } from '@kbn/actions-plugin/server/mocks';
+import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
+import { inferenceMock } from '@kbn/inference-plugin/server/mocks';
 import { SearchInferenceEndpointsPlugin } from './plugin';
 import {
   ELASTIC_INFERENCE_SERVICE_APP_ID,
   INFERENCE_ENDPOINTS_APP_ID,
+  INFERENCE_SETTINGS_SO_TYPE,
   MODEL_SETTINGS_APP_ID,
   PLUGIN_ID,
   PLUGIN_NAME,
@@ -87,6 +90,48 @@ describe('SearchInferenceEndpointsPlugin', () => {
       expect(feature.privileges?.read).toMatchObject({
         disabled: true,
       });
+    });
+  });
+
+  describe('start()', () => {
+    let coreStart: ReturnType<typeof coreMock.createStart>;
+    let startContract: ReturnType<SearchInferenceEndpointsPlugin['start']>;
+
+    beforeEach(() => {
+      coreStart = coreMock.createStart();
+      plugin.setup(coreSetup, { features });
+
+      const inference = inferenceMock.createStartContract();
+      inference.getConnectorList.mockResolvedValue([]);
+      inference.getConnectorById.mockRejectedValue(new Error('not found'));
+
+      startContract = plugin.start(coreStart, {
+        actions: actionsMock.createStart(),
+        inference,
+      });
+    });
+
+    it('endpoints.getForFeature reads inference settings with getScopedClient', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      await startContract.endpoints.getForFeature('any_feature', request);
+
+      expect(coreStart.savedObjects.getScopedClient).toHaveBeenCalledWith(request, {
+        includedHiddenTypes: [INFERENCE_SETTINGS_SO_TYPE],
+      });
+    });
+
+    it('creates a separate scoped SO client per request, ensuring space isolation', async () => {
+      const requestA = httpServerMock.createKibanaRequest();
+      const requestB = httpServerMock.createKibanaRequest();
+
+      await startContract.endpoints.getForFeature('any_feature', requestA);
+      await startContract.endpoints.getForFeature('any_feature', requestB);
+
+      const calls = coreStart.savedObjects.getScopedClient.mock.calls;
+      const requestsUsed = calls.map(([req]) => req);
+
+      expect(requestsUsed).toContain(requestA);
+      expect(requestsUsed).toContain(requestB);
     });
   });
 });

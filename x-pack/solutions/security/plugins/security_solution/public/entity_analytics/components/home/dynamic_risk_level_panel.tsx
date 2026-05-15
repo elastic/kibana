@@ -7,7 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { FF_ENABLE_ENTITY_STORE_V2 } from '@kbn/entity-store/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { RiskSeverity } from '../../../../common/search_strategy';
@@ -32,7 +32,6 @@ const ALL_TIME_RANGE = { from: 'now-100y', to: 'now' } as const;
 
 interface DynamicRiskLevelPanelProps {
   watchlistId?: string;
-  watchlistName?: string;
   /**
    * The ad-hoc entity store data view used to resolve the field spec for
    * `entity.risk.calculated_level` when rendering inline cell actions.
@@ -42,11 +41,9 @@ interface DynamicRiskLevelPanelProps {
 
 export const DynamicRiskLevelPanel: React.FC<DynamicRiskLevelPanelProps> = ({
   watchlistId,
-  watchlistName,
   entityDataView,
 }) => {
   const spaceId = useSpaceId();
-  const hasWatchlist = !!watchlistId;
   const { filterManager } = useKibana().services.data.query;
   const isEntityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2) === true;
   const { setQuery, deleteQuery } = useGlobalTime();
@@ -100,17 +97,9 @@ export const DynamicRiskLevelPanel: React.FC<DynamicRiskLevelPanelProps> = ({
     [filterManager]
   );
 
-  const title = hasWatchlist ? (
-    <FormattedMessage
-      id="xpack.securitySolution.entityAnalytics.dynamicRiskLevel.watchlistTitle"
-      defaultMessage="{watchlistName} risk levels"
-      values={{ watchlistName: watchlistName ?? watchlistId }}
-    />
-  ) : (
-    <FormattedMessage
-      id="xpack.securitySolution.entityAnalytics.dynamicRiskLevel.entityTitle"
-      defaultMessage="Entity risk levels"
-    />
+  const title = i18n.translate(
+    'xpack.securitySolution.entityAnalytics.dynamicRiskLevel.entityTitle',
+    { defaultMessage: 'Entity risk levels' }
   );
 
   return (

@@ -114,6 +114,10 @@ export const EditConnector: React.FC = () => {
             )}
             <span>
               <EuiPopover
+                aria-label={i18n.translate(
+                  'xpack.serverlessSearch.connectors.menuPopover.ariaLabel',
+                  { defaultMessage: 'Connector actions' }
+                )}
                 id={'connectorMenu'}
                 button={
                   <EuiButtonIcon
