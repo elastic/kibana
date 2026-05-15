@@ -131,4 +131,3 @@ export const RuleCanvasContent = ({
 const isPersistedSavedObject = (savedObjectId: string | undefined): savedObjectId is string => {
   return Boolean(savedObjectId);
 };
-
