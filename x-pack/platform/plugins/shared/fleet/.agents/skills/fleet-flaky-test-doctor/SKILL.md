@@ -243,7 +243,7 @@ Always produce the investigation report first. For `fix` and `delete-test` verdi
 
 | Verdict | Next step |
 |---|---|
-| `fix` or `delete-test` | Apply the changes, present the diff, run the affected tests locally, report the result, then **ask for approval before opening a PR**. Use a short summary of the investigation report as the PR body (root cause in 1–2 sentences, what changed and why). List all sibling issues to close in the PR description. |
+| `fix` or `delete-test` | Apply the changes, present the diff, run the affected tests locally, report the result, then **ask for approval before opening a PR**. Use a short summary of the investigation report as the PR body (root cause in 1–2 sentences, what changed and why). For every issue closed by the PR, include a `Fixes #N` line in the PR description — GitHub auto-closes the issue on merge when this keyword is present (use `Fixes` not `Closes` to match Kibana convention). Apply standard Fleet PR labels (`Team:Fleet`, `release_note:skip`, `backport:version`) **plus all version labels from the closed issues** (e.g. `v9.3.0`, `v9.4.0`) so backports are triggered automatically. If issues carry different version labels, use the union. |
 | `close-stale` | Present the drafted closing comment. Human posts it. |
 | `flaky-rerun` | Present the re-run command and draft unskip diff. Human triggers the run. |
 | `escalate` | Present the evidence package and questions. Stop. |
@@ -270,21 +270,27 @@ For each issue:
 2. Check if file/test still exists: `grep -r "<test name>" <file>` (or `NOT FOUND`).
 3. Check last commit on the file: `git log -1 --format="%ai %s" -- <file>`.
 4. Check issue's `updatedAt` — if only bumped by the auto-reporter, note it.
-5. Look for sibling issues: `gh issue list --repo elastic/kibana --label "Team:Fleet" --label "failed-test" --state open --search "$(basename <file> .ts)"`.
-6. Assign a quick verdict: close-stale | flaky-rerun | fix | delete-test | escalate.
+5. Check issue labels — note `blocker` if present, and record any version labels (e.g. `v9.3.0`, `v9.4.0`) for use in PR backport labels later.
+6. Look for sibling issues: `gh issue list --repo elastic/kibana --label "Team:Fleet" --label "failed-test" --state open --search "$(basename <file> .ts)"`.
+7. Assign a quick verdict: close-stale | flaky-rerun | fix | delete-test | escalate.
 
 ### Output format
 
 First, the tracking table:
 
 ```markdown
-| # | Title (short) | Test type | File exists? | Last file commit | Quick verdict | Cluster |
-|---|---|---|---|---|---|---|
-| 224362 | Fleet preconfig reset — all | Jest server int. | ✅ | 2025-06-18 | fix | A |
-| 246983 | EPM KB returns content | FTR API | ✅ | 2025-12-10 | fix | B+F+M |
-| 247566 | APM input_only_package | Cross-team | ✅ | 2026-01-05 | escalate | O |
+| # | Title (short) | Test type | File exists? | Last file commit | Labels | Quick verdict | Cluster |
+|---|---|---|---|---|---|---|---|
+| 224362 | Fleet preconfig reset — all | Jest server int. | ✅ | 2025-06-18 | — | fix | A |
+| 246983 | EPM KB returns content | FTR API | ✅ | 2025-12-10 | 🔴 blocker `v9.3.0` `v9.4.0` | fix | B+F+M |
+| 247566 | APM input_only_package | Cross-team | ✅ | 2026-01-05 | — | escalate | O |
 ...
 ```
+
+The **Labels** column must capture:
+- `🔴 blocker` — if the issue has the `blocker` label (higher priority, test is currently skipped and blocking a release branch)
+- `⏭ skipped` — if the issue has the `skipped-test` label
+- Version labels (`v9.3.0`, `v9.4.0`, etc.) — record all of them; the PR fixing this issue must carry the same version labels for backports
 
 Then, the cluster summary:
 
@@ -302,7 +308,7 @@ Then, the cluster summary:
 
 Lane 1 (batch close): #NNN, #NNN, ... (~N issues)
 Lane 2 (flaky-rerun): #NNN, #NNN, ... (~N issues) — note jest issues: local only
-Lane 3 (Mode 3 clusters): A → KB → J → H → C/K/L
+Lane 3 (Mode 3 clusters, ordered by highest issue number in the cluster — most recently filed first): <cluster> → <cluster> → ...
 Lane 4 (handoffs): #247566 → APM team; #246569, #265666 → Security team
 ```
 
@@ -358,12 +364,14 @@ Run all of the following and confirm green:
 - `<reproduction command for test 2>`
 ...
 
-## Issues to close after merging
+## Issues closed by this PR
 
-#N, #N, ... — reference this PR in each closing comment.
+Fixes #N
+Fixes #N
+...
 ```
 
-**After the report:** Apply the fix, present the diff, run the verification matrix locally, report the result, then **ask for approval before opening a PR**. Use a short summary of the investigation report as the PR body (root cause in 1–2 sentences, what changed and why). Include all cluster issue numbers in the PR description so they are closed on merge.
+**After the report:** Apply the fix, present the diff, run the verification matrix locally, report the result, then **ask for approval before opening a PR**. Use a short summary of the investigation report as the PR body (root cause in 1–2 sentences, what changed and why). Add a `Fixes #N` line for **every** issue in the cluster — GitHub auto-closes each linked issue on merge when this keyword is present (use `Fixes` not `Closes` to match Kibana convention). Apply standard Fleet PR labels (`Team:Fleet`, `release_note:skip`, `backport:version`) **plus the union of all version labels from the cluster's issues** — if any issue has `blocker`, those version labels are especially important as they indicate release branches that need the fix backported.
 
 ---
 
