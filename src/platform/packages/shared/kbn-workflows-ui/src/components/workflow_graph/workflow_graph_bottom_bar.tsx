@@ -134,26 +134,6 @@ function ZoomControls() {
 
   return (
     <>
-      <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          iconType="plusInCircle"
-          aria-label={zoomInLabel}
-          color="text"
-          size="s"
-          onClick={handleZoomIn}
-          data-test-subj="workflowBottomBar-zoom-in"
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          iconType="minusInCircle"
-          aria-label={zoomOutLabel}
-          color="text"
-          size="s"
-          onClick={handleZoomOut}
-          data-test-subj="workflowBottomBar-zoom-out"
-        />
-      </EuiFlexItem>
       {/* Reset-zoom button — slides in from the left with a fade when the
           current zoom drifts away from 1.0, slides back out (collapsing its
           width too) when the user returns to default zoom. */}
@@ -183,6 +163,26 @@ function ZoomControls() {
             data-test-subj="workflowBottomBar-zoom-reset"
           />
         </EuiToolTip>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButtonIcon
+          iconType="plusInCircle"
+          aria-label={zoomInLabel}
+          color="text"
+          size="s"
+          onClick={handleZoomIn}
+          data-test-subj="workflowBottomBar-zoom-in"
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButtonIcon
+          iconType="minusInCircle"
+          aria-label={zoomOutLabel}
+          color="text"
+          size="s"
+          onClick={handleZoomOut}
+          data-test-subj="workflowBottomBar-zoom-out"
+        />
       </EuiFlexItem>
     </>
   );

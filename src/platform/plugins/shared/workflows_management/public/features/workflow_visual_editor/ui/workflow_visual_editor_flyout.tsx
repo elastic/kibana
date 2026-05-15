@@ -13,19 +13,19 @@ import {
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiPopover,
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
+import { CodeEditor } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { CodeEditor } from '@kbn/code-editor';
 import { useWorkflowsMonacoTheme, WORKFLOWS_MONACO_EDITOR_THEME } from '@kbn/workflows-ui';
 import type { StepInfo } from '@kbn/workflows-yaml';
 import { setCursorPosition } from '../../../entities/workflows/store/workflow_detail/slice';
+import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
 import {
   CopyDevToolsOption,
   CopyWorkflowStepJsonOption,
@@ -49,27 +49,6 @@ interface Props {
   onClose: () => void;
   onOpenInYaml: () => void;
   onRunStep: () => void;
-}
-
-// Same icon mapping as the node component — keep them in sync visually.
-const STEP_TYPE_ICON: Record<string, string> = {
-  if: 'branch',
-  foreach: 'refresh',
-  parallel: 'visGoal',
-  merge: 'merge',
-  atomic: 'package',
-  manual: 'bolt',
-  alert: 'bell',
-  scheduled: 'clock',
-  wait: 'clock',
-  http: 'globe',
-  elasticsearch: 'logoElasticsearch',
-  kibana: 'logoKibana',
-};
-
-function getIconType(stepType: string | undefined): string {
-  if (!stepType) return 'package';
-  return STEP_TYPE_ICON[stepType.split('.')[0]] ?? 'package';
 }
 
 function extractYamlSlice(editorYaml: string, stepInfo: StepInfo | undefined): string {
@@ -102,9 +81,7 @@ export function WorkflowVisualEditorFlyout({
     // Update the global focused-step state so the menu options pick up
     // this step from Redux (they read selectEditorFocusedStepInfo).
     if (target.kind === 'step' && target.stepInfo?.lineStart != null) {
-      dispatch(
-        setCursorPosition({ lineNumber: target.stepInfo.lineStart, column: 1 })
-      );
+      dispatch(setCursorPosition({ lineNumber: target.stepInfo.lineStart, column: 1 }));
     }
     setIsMenuOpen(true);
   }, [dispatch, target]);
@@ -113,9 +90,8 @@ export function WorkflowVisualEditorFlyout({
     target.kind === 'step' ? target.stepInfo?.stepId ?? target.stepName : target.triggerLabel;
   const subtitle =
     target.kind === 'step' ? target.stepInfo?.stepType : `trigger / ${target.triggerType}`;
-  const iconType = getIconType(
-    target.kind === 'step' ? target.stepInfo?.stepType : target.triggerType
-  );
+  const iconStepType =
+    target.kind === 'step' ? target.stepInfo?.stepType ?? 'package' : target.triggerType;
 
   const yamlSlice = useMemo(() => {
     if (target.kind === 'trigger') return target.yamlSnippet;
@@ -184,7 +160,7 @@ export function WorkflowVisualEditorFlyout({
                 flexShrink: 0,
               }}
             >
-              <EuiIcon type={iconType} size="m" />
+              <StepIcon stepType={iconStepType} executionStatus={undefined} size="m" />
             </div>
           </EuiFlexItem>
           <EuiFlexItem css={{ minWidth: 0 }}>
@@ -270,9 +246,7 @@ export function WorkflowVisualEditorFlyout({
                   if (target.kind === 'step') {
                     const stepType = target.stepInfo?.stepType ?? '';
                     if (stepType.startsWith('elasticsearch.') || stepType.startsWith('kibana.')) {
-                      items.push(
-                        <CopyDevToolsOption key="copy-as-console" onClick={closeMenu} />
-                      );
+                      items.push(<CopyDevToolsOption key="copy-as-console" onClick={closeMenu} />);
                     }
                     items.push(
                       <CopyWorkflowStepOption key="copy-as-yaml" onClick={closeMenu} />,

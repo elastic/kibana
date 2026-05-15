@@ -12,6 +12,7 @@ export {
   WorkflowGraphCanvasWithoutProvider,
   type WorkflowGraphCanvasProps,
 } from './workflow_graph_canvas';
+export type { RenderStepIcon } from './workflow_graph_actions_context';
 export { ReactFlowProvider } from '@xyflow/react';
 export { WorkflowGraphPreview, type WorkflowGraphPreviewProps } from './workflow_graph_preview';
 export {

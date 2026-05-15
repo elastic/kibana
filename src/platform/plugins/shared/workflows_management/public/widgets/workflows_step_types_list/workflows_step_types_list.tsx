@@ -20,6 +20,7 @@ import React, { useCallback, useLayoutEffect, useMemo, useRef, useState } from '
 import { i18n } from '@kbn/i18n';
 import type { Step, WorkflowYaml } from '@kbn/workflows';
 import { collectAllSteps, getBuiltInStepDefinition } from '@kbn/workflows';
+import type { RenderStepIcon } from '@kbn/workflows-ui';
 import { getBaseConnectorType } from '../../shared/ui/step_icons/get_base_connector_type';
 import { StepIcon } from '../../shared/ui/step_icons/step_icon';
 import { PopoverItems } from '../worflows_triggers_list/popover_items';
@@ -101,6 +102,11 @@ export const WorkflowsStepTypesList = ({ steps, workflow }: WorkflowsStepTypesLi
   const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isNarrow = useIsWithinBreakpoints(['xs', 's']);
   const canShowPreview = !!workflow && (workflow.steps ?? []).length > 0 && !isNarrow;
+
+  const renderStepIcon = useCallback<RenderStepIcon>(
+    ({ stepType }) => <StepIcon stepType={stepType} executionStatus={undefined} />,
+    []
+  );
 
   const cancelClose = useCallback(() => {
     if (closeTimeoutRef.current) {
@@ -268,6 +274,7 @@ export const WorkflowsStepTypesList = ({ steps, workflow }: WorkflowsStepTypesLi
               workflow={workflow}
               width={PREVIEW_WIDTH}
               height={PREVIEW_HEIGHT}
+              renderStepIcon={renderStepIcon}
             />
           )}
         </React.Suspense>

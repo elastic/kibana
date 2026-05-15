@@ -12,12 +12,15 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { collectAllSteps } from '@kbn/workflows';
+import type { RenderStepIcon } from './workflow_graph_actions_context';
 import { WorkflowGraphCanvas } from './workflow_graph_canvas';
 
 export interface WorkflowGraphPreviewProps {
   workflow: WorkflowYaml;
   width?: number;
   height?: number;
+  /** Optional icon renderer forwarded to the graph canvas. */
+  renderStepIcon?: RenderStepIcon;
 }
 
 const MAX_PREVIEW_STEPS = 11;
@@ -34,6 +37,7 @@ export function WorkflowGraphPreview({
   workflow,
   width = 320,
   height = 240,
+  renderStepIcon,
 }: WorkflowGraphPreviewProps) {
   const totalSteps = collectAllSteps(workflow.steps ?? []).length;
   const tooLarge = totalSteps > MAX_PREVIEW_STEPS;
@@ -61,7 +65,13 @@ export function WorkflowGraphPreview({
           </EuiText>
         </div>
       ) : (
-        <WorkflowGraphCanvas workflow={workflow} isYamlValid onStepSelect={noop} previewMode />
+        <WorkflowGraphCanvas
+          workflow={workflow}
+          isYamlValid
+          onStepSelect={noop}
+          previewMode
+          renderStepIcon={renderStepIcon}
+        />
       )}
     </div>
   );

@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 import type { LayoutDirection, WorkflowStepExecutionDto, WorkflowYaml } from '@kbn/workflows';
 import '@xyflow/react/dist/style.css';
 import { useWorkflowLayout } from './use_workflow_layout';
-import { WorkflowGraphActionsContext } from './workflow_graph_actions_context';
+import { type RenderStepIcon, WorkflowGraphActionsContext } from './workflow_graph_actions_context';
 import { WorkflowGraphEdge } from './workflow_graph_edge';
 import { WorkflowGraphForeachGroupNode } from './workflow_graph_foreach_group_node';
 import { WorkflowGraphNode } from './workflow_graph_node';
@@ -73,6 +73,12 @@ export interface WorkflowGraphCanvasProps {
   onOpenStepMenu?: (stepName: string) => void;
   /** Renders the menu items for a node's "More" popover. */
   renderStepMenuItems?: (close: () => void) => React.ReactNode;
+  /**
+   * Optional renderer for step icons. When provided the canvas delegates icon
+   * resolution to the caller (e.g. plugin's `<StepIcon/>`) instead of the
+   * built-in fallback table. Falls back gracefully when omitted.
+   */
+  renderStepIcon?: RenderStepIcon;
   /** Dagre rank direction (default `'TB'`). */
   direction?: LayoutDirection;
   /**
@@ -98,12 +104,13 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
     canRunSteps,
     onOpenStepMenu,
     renderStepMenuItems,
+    renderStepIcon,
     direction = 'TB',
     previewMode = false,
   } = props;
   const actions = useMemo(
-    () => ({ onStepRun, canRunSteps, onOpenStepMenu, renderStepMenuItems }),
-    [onStepRun, canRunSteps, onOpenStepMenu, renderStepMenuItems]
+    () => ({ onStepRun, canRunSteps, onOpenStepMenu, renderStepMenuItems, renderStepIcon }),
+    [onStepRun, canRunSteps, onOpenStepMenu, renderStepMenuItems, renderStepIcon]
   );
   const { euiTheme } = useEuiTheme();
 

@@ -14,7 +14,11 @@ import { useDispatch, useSelector } from 'react-redux';
 import { stringify as stringifyYaml } from 'yaml';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { type LayoutDirection, transformWorkflowToGraph, type WorkflowYaml } from '@kbn/workflows';
-import { useWorkflowsCapabilities, WorkflowGraphCanvasWithoutProvider } from '@kbn/workflows-ui';
+import {
+  type RenderStepIcon,
+  useWorkflowsCapabilities,
+  WorkflowGraphCanvasWithoutProvider,
+} from '@kbn/workflows-ui';
 import { type FlyoutTarget, WorkflowVisualEditorFlyout } from './workflow_visual_editor_flyout';
 import {
   selectEditorWorkflowDefinition,
@@ -30,6 +34,7 @@ import {
   setHighlightedStepId,
 } from '../../../entities/workflows/store/workflow_detail/slice';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
+import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
 import {
   CopyDevToolsOption,
   CopyWorkflowStepJsonOption,
@@ -137,6 +142,13 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
     return null;
   }, [selectedStepId, slugToName, slugToTrigger, workflowLookup]);
 
+  const renderStepIcon = useCallback<RenderStepIcon>(
+    ({ stepType, isTrigger: _isTrigger }) => (
+      <StepIcon stepType={stepType} executionStatus={undefined} />
+    ),
+    []
+  );
+
   const handleRunStep = useCallback(() => {
     if (!flyoutTarget || flyoutTarget.kind !== 'step') return;
     onStepRun?.({ stepId: flyoutTarget.stepName, actionType: 'run' });
@@ -181,6 +193,7 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
         colorMode={colorMode.toLowerCase() as ColorMode}
         focusStepId={highlightedStepId}
         direction={direction}
+        renderStepIcon={renderStepIcon}
         onStepRun={(stepName) => onStepRun?.({ stepId: stepName, actionType: 'run' })}
         canRunSteps={Boolean(canExecuteWorkflow) && isYamlValid}
         onOpenStepMenu={(stepName) => {

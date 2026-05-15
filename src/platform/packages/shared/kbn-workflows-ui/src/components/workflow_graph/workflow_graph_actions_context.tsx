@@ -7,7 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createContext, useContext, type ReactNode } from 'react';
+import { createContext, type ReactNode, useContext } from 'react';
+
+/**
+ * Render-prop type for injecting a custom icon resolver into the graph canvas.
+ * Callers (plugin call sites) return whatever React element they want; the
+ * graph-node CSS box provides the tint via `currentColor` so plain monochrome
+ * icons inherit the step/trigger palette color automatically.
+ */
+export type RenderStepIcon = (args: {
+  stepType: string;
+  isTrigger: boolean;
+  size?: 'm' | 'l';
+}) => ReactNode;
 
 export interface WorkflowGraphActions {
   /** Called when the user clicks the Play icon on a node hover. */
@@ -25,6 +37,13 @@ export interface WorkflowGraphActions {
    * be wired to each item's `onClick` so the popover dismisses after action.
    */
   renderStepMenuItems?: (close: () => void) => ReactNode;
+  /**
+   * Optional renderer for step icons inside graph nodes. When provided, the
+   * canvas delegates icon resolution to the caller (e.g. the plugin's
+   * `<StepIcon/>` which consults the extension registry and action-type
+   * registry). Falls back to the built-in `STEP_TYPE_ICON` table when absent.
+   */
+  renderStepIcon?: RenderStepIcon;
 }
 
 export const WorkflowGraphActionsContext = createContext<WorkflowGraphActions>({});

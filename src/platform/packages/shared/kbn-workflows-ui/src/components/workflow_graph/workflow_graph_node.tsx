@@ -7,12 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  EuiButtonIcon,
-  EuiIcon,
-  EuiLoadingSpinner,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiIcon, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
 import { Handle, Position } from '@xyflow/react';
 import type { Node, NodeProps } from '@xyflow/react';
 import React, { useState } from 'react';
@@ -128,7 +123,7 @@ export function WorkflowGraphNode(node: NodeProps<Node<WorkflowGraphNodeData>>) 
 
   const isActive = node.selected;
   const [isHovered, setIsHovered] = useState(false);
-  const { onStepRun, canRunSteps } = useWorkflowGraphActions();
+  const { onStepRun, canRunSteps, renderStepIcon } = useWorkflowGraphActions();
   const execStatus = stepExecution?.status;
   const isRunning =
     execStatus === ExecutionStatus.RUNNING ||
@@ -187,11 +182,17 @@ export function WorkflowGraphNode(node: NodeProps<Node<WorkflowGraphNodeData>>) 
             justifyContent: 'center',
           }}
         >
-          <EuiIcon
-            type={iconType}
-            size="m"
-            color={LOGO_ICONS.has(iconType) ? undefined : palette.iconColor}
-          />
+          {renderStepIcon ? (
+            <div css={{ color: palette.iconColor, display: 'flex' }}>
+              {renderStepIcon({ stepType, isTrigger: isTrigger ?? false, size: 'm' })}
+            </div>
+          ) : (
+            <EuiIcon
+              type={iconType}
+              size="m"
+              color={LOGO_ICONS.has(iconType) ? undefined : palette.iconColor}
+            />
+          )}
         </div>
         <Handle type="source" position={sourceHandlePos} style={{ opacity: 0 }} />
       </>
@@ -221,8 +222,7 @@ export function WorkflowGraphNode(node: NodeProps<Node<WorkflowGraphNodeData>>) 
           // 16px gutter on the right whenever any meta is present (retry badge,
           // status icon, or hover action) so the retry badge sits at the
           // design's 16px inset from the step's right edge.
-          paddingRight:
-            showActions || hasStatusIcon || maxAttempts != null ? 16 : 6,
+          paddingRight: showActions || hasStatusIcon || maxAttempts != null ? 16 : 6,
           boxShadow: shadow,
           opacity: dimmed ? 0.4 : 1,
           transition:
@@ -259,19 +259,30 @@ export function WorkflowGraphNode(node: NodeProps<Node<WorkflowGraphNodeData>>) 
               transition: 'border-color 120ms ease',
             }}
           >
-            <EuiIcon
-              type={iconType}
-              size="m"
-              color={
-                LOGO_ICONS.has(iconType)
-                  ? undefined
-                  : isSuccess
-                  ? STATUS_SUCCESS
-                  : isFailed
-                  ? STATUS_FAIL
-                  : palette.iconColor
-              }
-            />
+            {renderStepIcon ? (
+              <div
+                css={{
+                  color: isSuccess ? STATUS_SUCCESS : isFailed ? STATUS_FAIL : palette.iconColor,
+                  display: 'flex',
+                }}
+              >
+                {renderStepIcon({ stepType, isTrigger: isTrigger ?? false, size: 'm' })}
+              </div>
+            ) : (
+              <EuiIcon
+                type={iconType}
+                size="m"
+                color={
+                  LOGO_ICONS.has(iconType)
+                    ? undefined
+                    : isSuccess
+                    ? STATUS_SUCCESS
+                    : isFailed
+                    ? STATUS_FAIL
+                    : palette.iconColor
+                }
+              />
+            )}
           </div>
         </div>
 
