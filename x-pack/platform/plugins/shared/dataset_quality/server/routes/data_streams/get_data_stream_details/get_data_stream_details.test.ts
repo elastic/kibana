@@ -433,15 +433,6 @@ describe('getDataStreamDetails', () => {
           index: 'logs-test-default',
           fields: ['*'],
           include_unmapped: false,
-          index_filter: {
-            range: {
-              '@timestamp': {
-                gte: 1234567890,
-                lte: 1234567900,
-                format: 'epoch_millis',
-              },
-            },
-          },
         });
         expect(mockESClient.fieldCaps).not.toHaveBeenCalled();
         expect(result).toEqual(detailsObject);
