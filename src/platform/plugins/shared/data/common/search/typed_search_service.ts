@@ -83,7 +83,7 @@ export class TypedSearchService implements ITypedSearchService {
     params: IDSLSearchParams,
     options?: IDSLSearchOptions
   ): Promise<IDSLSearchResult> {
-    const request = this.buildDSLRequest(params);
+    const request = this.buildDSLRequest(params, options);
     const response = await this.executeSearch(request, this.mapDSLOptions(options));
 
     const result: IDSLSearchResult = {
@@ -106,7 +106,7 @@ export class TypedSearchService implements ITypedSearchService {
     params: IEQLSearchParams,
     options?: IEQLSearchOptions
   ): Promise<IEQLSearchResult> {
-    const request = this.buildEQLRequest(params);
+    const request = this.buildEQLRequest(params, options);
     const response = await this.executeSearch(
       request,
       this.mapEQLOptions(options, 'eql' as typeof EQL_SEARCH_STRATEGY)
@@ -121,7 +121,7 @@ export class TypedSearchService implements ITypedSearchService {
     params: ISQLSearchParams,
     options?: ISQLSearchOptions
   ): Promise<ISQLSearchResult> {
-    const request = this.buildSQLRequest(params);
+    const request = this.buildSQLRequest(params, options);
     const response = await this.executeSearch(
       request,
       this.mapSQLOptions(options, 'sql' as typeof SQL_SEARCH_STRATEGY)
@@ -158,7 +158,7 @@ export class TypedSearchService implements ITypedSearchService {
   // DSL Search Helpers
   // ============================================================================
 
-  private buildDSLRequest(params: IDSLSearchParams): IEsSearchRequest {
+  private buildDSLRequest(params: IDSLSearchParams, options?: IDSLSearchOptions): IEsSearchRequest {
     const body: Record<string, any> = {
       query: params.query,
       aggs: params.aggs,
@@ -168,6 +168,7 @@ export class TypedSearchService implements ITypedSearchService {
       _source: params._source,
       runtime_mappings: params.runtimeMappings,
       highlight: params.highlight,
+      track_total_hits: options?.trackTotalHits,
     };
 
     return {
@@ -213,7 +214,7 @@ export class TypedSearchService implements ITypedSearchService {
           ...originalParams,
         };
 
-        const request = self.buildDSLRequest(nextParams);
+        const request = self.buildDSLRequest(nextParams, options);
         if (request.params && typeof request.params !== 'string') {
           (request.params as any).body.search_after = lastHit.sort;
         }
@@ -282,7 +283,7 @@ export class TypedSearchService implements ITypedSearchService {
   // EQL Search Helpers
   // ============================================================================
 
-  private buildEQLRequest(params: IEQLSearchParams): IEsSearchRequest {
+  private buildEQLRequest(params: IEQLSearchParams, options?: IEQLSearchOptions): IEsSearchRequest {
     return {
       params: {
         index: params.index,
@@ -292,6 +293,9 @@ export class TypedSearchService implements ITypedSearchService {
           size: params.size as any,
           fields: params.fields as any,
           runtime_mappings: params.runtimeMappings as any,
+          event_category_field: options?.eventCategoryField as any,
+          timestamp_field: options?.timestampField as any,
+          tiebreaker_field: options?.tiebreakerField as any,
         },
       },
     };
@@ -311,7 +315,7 @@ export class TypedSearchService implements ITypedSearchService {
   // SQL Search Helpers
   // ============================================================================
 
-  private buildSQLRequest(params: ISQLSearchParams): IEsSearchRequest {
+  private buildSQLRequest(params: ISQLSearchParams, options?: ISQLSearchOptions): IEsSearchRequest {
     return {
       params: {
         body: {
@@ -319,6 +323,8 @@ export class TypedSearchService implements ITypedSearchService {
           params: params.params,
           fetch_size: params.fetchSize,
           filter: params.filter,
+          format: options?.format,
+          time_zone: options?.timeZone,
         } as any,
       },
     };

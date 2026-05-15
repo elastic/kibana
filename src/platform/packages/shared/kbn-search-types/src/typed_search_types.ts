@@ -260,11 +260,6 @@ export interface IESQLSearchOptions extends IBaseSearchOptions {
    * When set to true, the response will include an extra _clusters object with information about the clusters that participated in the search along with info such as shards count. This is similar to include_ccs_metadata, but it also returns metadata when the query is not CCS/CPS
    */
   includeExecutionMetadata?: boolean;
-
-  /**
-   * Keep-alive duration for the cursor
-   */
-  keepAlive?: string;
 }
 
 /**
