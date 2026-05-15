@@ -16,10 +16,6 @@ actions:
   - target: "$.paths['/api/alerting/rule/{id}/snooze_schedule'].post.requestBody.content['application/json'].schema.properties.schedule.required"
     description: "Remove x-oas-optional fields from required: custom"
     remove: true
-  - target: "$.paths['/api/alerting/rule/{id}/snooze_schedule'].post.requestBody.content['application/json'].schema.properties.schedule"
-    description: "Restore required array without x-oas-optional fields"
-    update:
-      required: []
 
   - target: "$.paths['/api/alerting/rule/{id}/snooze_schedule'].post.responses.200.content['application/json'].schema.properties.body.properties.schedule.required"
     description: "Remove x-oas-optional fields from required: custom"
@@ -379,10 +375,6 @@ actions:
   - target: "$.components.schemas['Kibana_HTTP_APIs_new_rule_action_alerts_filter'].required"
     description: "Remove x-oas-optional fields from required: query"
     remove: true
-  - target: "$.components.schemas['Kibana_HTTP_APIs_new_rule_action_alerts_filter']"
-    description: "Restore required array without x-oas-optional fields"
-    update:
-      required: []
 
   - target: "$.components.schemas['Kibana_HTTP_APIs_observability-rules-custom-threshold-create-rule-body-alerting'].required"
     description: "Remove x-oas-optional fields from required: alert_delay"
@@ -411,10 +403,6 @@ actions:
   - target: "$.components.schemas['Kibana_HTTP_APIs_rule_action_alerts_filter'].required"
     description: "Remove x-oas-optional fields from required: query"
     remove: true
-  - target: "$.components.schemas['Kibana_HTTP_APIs_rule_action_alerts_filter']"
-    description: "Restore required array without x-oas-optional fields"
-    update:
-      required: []
 
   - target: "$.components.schemas['Kibana_HTTP_APIs_rule_response'].required"
     description: "Remove x-oas-optional fields from required: monitoring, alert_delay, artifacts"
@@ -445,10 +433,6 @@ actions:
   - target: "$.components.schemas['Kibana_HTTP_APIs_security_query_roles_body'].required"
     description: "Remove x-oas-optional fields from required: sort, filters"
     remove: true
-  - target: "$.components.schemas['Kibana_HTTP_APIs_security_query_roles_body']"
-    description: "Restore required array without x-oas-optional fields"
-    update:
-      required: []
 
   - target: "$.components.schemas['Kibana_HTTP_APIs_slo-rules-burnrate-create-rule-body-alerting'].required"
     description: "Remove x-oas-optional fields from required: alert_delay"
@@ -498,10 +482,6 @@ actions:
   - target: "$.components.schemas['Kibana_HTTP_APIs_update_rule_action_alerts_filter'].required"
     description: "Remove x-oas-optional fields from required: query"
     remove: true
-  - target: "$.components.schemas['Kibana_HTTP_APIs_update_rule_action_alerts_filter']"
-    description: "Restore required array without x-oas-optional fields"
-    update:
-      required: []
 
   - target: "$.components.schemas['Kibana_HTTP_APIs_xpack-ml-anomaly-detection-alert-create-rule-body-alerting'].required"
     description: "Remove x-oas-optional fields from required: alert_delay"
