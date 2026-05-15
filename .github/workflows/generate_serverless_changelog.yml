@@ -1,0 +1,48 @@
+---
+name: Generate Serverless Changelog
+
+on:
+  workflow_dispatch:
+    inputs:
+      service_version:
+        description: Kibana service version deployed to the target environment
+        required: true
+        type: string
+      target_env:
+        description: Serverless target environment
+        required: false
+        default: production-noncanary-ds-5
+        type: string
+      build_url:
+        description: Buildkite build URL that triggered this workflow
+        required: false
+        type: string
+      build_message:
+        description: Buildkite build message that triggered this workflow
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  generate:
+    if: github.event.repository.fork == false
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Generate serverless changelog
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          SERVICE_VERSION: ${{ inputs.service_version }}
+          TARGET_ENV: ${{ inputs.target_env }}
+          BUILDKITE_BUILD_URL: ${{ inputs.build_url }}
+          BUILDKITE_MESSAGE: ${{ inputs.build_message }}
+        with:
+          github-token: ${{ secrets.KIBANAMACHINE_TOKEN }}
+          script: |
+            const generateServerlessChangelog = require('./.github/scripts/generate_serverless_changelog');
+            await generateServerlessChangelog({ github, core });
