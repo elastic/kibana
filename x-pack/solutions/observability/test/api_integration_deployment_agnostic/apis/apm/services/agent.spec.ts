@@ -62,6 +62,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           agentName: 'nodejs',
           runtimeName: 'node',
           runtimeVersion: '12.18.3',
+          hasMultipleAgentTypes: false,
         });
       });
     });
