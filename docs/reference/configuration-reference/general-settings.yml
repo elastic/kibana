@@ -967,6 +967,7 @@ groups:
         id: server-maxpayload
         description: |
           The maximum payload size in bytes for incoming server requests.
+          This option controls the maximum payload size Kibana can handle, rather than the incoming request size, which also limits the inflated size when compression is used.
         datatype: int
         default: 1048576
         applies_to:
