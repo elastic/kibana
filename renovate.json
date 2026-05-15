@@ -683,8 +683,7 @@
       "reviewers": ["team:kibana-visualizations", "markov00", "nickofthyme"],
       "matchBaseBranches": ["main"],
       "labels": ["release_note:skip", "backport:skip", "Team:Visualizations"],
-      "enabled": true,
-      "minimumReleaseAge": "14 days"
+      "enabled": true
     },
     {
       "groupName": "@elastic/ecs",
