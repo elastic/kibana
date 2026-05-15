@@ -9,7 +9,7 @@
 
 import React from 'react';
 import type { QueryLanguageSwitcherProps } from './language_switcher';
-import { QueryLanguageSwitcher } from './language_switcher';
+import { QueryLanguageSwitcher, strings } from './language_switcher';
 import { coreMock } from '@kbn/core/public/mocks';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
@@ -41,6 +41,28 @@ describe('LanguageSwitcher', () => {
     expect(
       screen.getByTestId('kqlLanguageMenuItem').querySelector('[data-euiicon-type="check"]')
     ).toBeTruthy();
+  });
+
+  it('should link to KQL documentation if language is kuery', async () => {
+    await renderSwitcher({ language: 'kuery', onSelectLanguage: jest.fn() });
+
+    await userEvent.click(screen.getByRole('button'));
+
+    expect(screen.getByRole('link', { name: strings.documentationLabel() })).toHaveAttribute(
+      'href',
+      startMock.docLinks.links.query.kueryQuerySyntax
+    );
+  });
+
+  it('should link to Lucene documentation if language is lucene', async () => {
+    await renderSwitcher({ language: 'lucene', onSelectLanguage: jest.fn() });
+
+    await userEvent.click(screen.getByRole('button'));
+
+    expect(screen.getByRole('link', { name: strings.documentationLabel() })).toHaveAttribute(
+      'href',
+      startMock.docLinks.links.query.luceneQuerySyntax
+    );
   });
 
   it('should select the lucene context menu if language is text', async () => {
