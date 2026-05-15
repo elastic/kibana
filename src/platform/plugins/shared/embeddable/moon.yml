@@ -47,6 +47,8 @@ dependsOn:
   - '@kbn/data-plugin'
   - '@kbn/unified-search-plugin'
   - '@kbn/kibana-react-plugin'
+  - '@kbn/esql-types'
+  - '@kbn/esql-utils'
 tags:
   - plugin
   - prod
