@@ -3286,7 +3286,7 @@
     pngjs "7.0.0"
     sharp "0.32.1"
 
-"@google/generative-ai@0.24.1", "@google/generative-ai@^0.24.0":
+"@google/generative-ai@0.24.1":
   version "0.24.1"
   resolved "https://registry.yarnpkg.com/@google/generative-ai/-/generative-ai-0.24.1.tgz#634a3c06f8ea7a6125c1b0d6c1e66bb11afb52c9"
   integrity sha512-MqO+MLfM6kjxcKoy0p1wRzG3b4ZZXtPI+z2IE26UogS2Cm/XHO+7gGRBh6gcJsOiIVoH93UwKvW4HdgiOZCy9Q==
@@ -10039,14 +10039,6 @@
   dependencies:
     "@langchain/google-common" "2.1.24"
     google-auth-library "^10.1.0"
-
-"@langchain/google-genai@2.1.24":
-  version "2.1.24"
-  resolved "https://registry.yarnpkg.com/@langchain/google-genai/-/google-genai-2.1.24.tgz#cc7cc26946faf392f04a8974497840b1ce061280"
-  integrity sha512-gBuYWIrTiT4S8U3AxaAMl6SKeGKtB10fXc+m0p2BPSvTfCaTbIlycH7IZjZUTD1L92dQMi/SULwCWffq5OIBgQ==
-  dependencies:
-    "@google/generative-ai" "^0.24.0"
-    uuid "^11.1.0"
 
 "@langchain/google-vertexai@2.1.24":
   version "2.1.24"
