@@ -24,6 +24,7 @@ test.describe('Rules page navigation and loading', { tag: tags.stateful.classic 
   test.beforeEach(async ({ browserAuth, page }) => {
     await browserAuth.loginAsAdmin();
     await page.gotoApp('rules');
+    await page.waitForURL(/\/app\/management\/insightsAndAlerting\/triggersActions/);
   });
 
   test.afterAll(async ({ apiServices }) => {

@@ -29,6 +29,7 @@ test.describe('Rules page tab functionality', { tag: tags.stateful.classic }, ()
   test.beforeEach(async ({ browserAuth, page }) => {
     await browserAuth.loginAsAdmin();
     await page.gotoApp('rules');
+    await page.waitForURL(RULES_URL_RE);
   });
 
   test.afterAll(async ({ apiServices }) => {
