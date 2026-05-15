@@ -63,10 +63,9 @@ export const reportChartSectionError = ({
 
   // `apm.captureError` alone doesn't mark the surrounding transaction failed.
   // Mirror lens/data_loader.ts: attach a failed child span around the capture.
-  const span = apm.getCurrentTransaction()?.startSpan(
-    'chart-section-non-render-error',
-    'chart-section'
-  );
+  const span = apm
+    .getCurrentTransaction()
+    ?.startSpan('chart-section-non-render-error', 'chart-section');
   span?.addLabels(labels);
   apm.captureError(error, { labels });
   if (span) {
