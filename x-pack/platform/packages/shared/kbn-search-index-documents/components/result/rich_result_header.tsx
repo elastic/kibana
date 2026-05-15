@@ -229,7 +229,7 @@ const Score: React.FC<{ score: MetaDataProps['score'] }> = ({ score }) => {
         gutterSize="s"
       >
         <EuiFlexItem grow>
-          <EuiIcon type="chartGauge" size="m" />
+          <EuiIcon type="chartGauge" size="m" aria-hidden={true} />
         </EuiFlexItem>
         <EuiFlexItem grow>
           <EuiPanel
