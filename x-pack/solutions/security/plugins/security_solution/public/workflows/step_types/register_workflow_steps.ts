@@ -43,4 +43,11 @@ export const registerWorkflowSteps = (
       (m) => m.buildAlertEntityGraphStepDefinition
     );
   });
+
+  // v4: dual-register step — public definition only renders the icon + label in
+  // the workflows editor; the actual logic lives on the server step.
+  workflowsExtensions.registerStepDefinition(async () => {
+    if (!(await isEnabled)) return undefined;
+    return import('./get_related_alerts_step').then((m) => m.getRelatedAlertsStepDefinition);
+  });
 };

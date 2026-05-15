@@ -9,6 +9,7 @@ import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extens
 import type { CoreSetup } from '@kbn/core/server';
 import { renderAlertNarrativeStepDefinition } from './render_alert_narrative_step';
 import { buildAlertEntityGraphStepDefinition } from './build_alert_entity_graph_step';
+import { getRelatedAlertsStepDefinition } from './get_related_alerts_step';
 import {
   REGISTER_ALERT_VALIDATION_STEPS_FEATURE_FLAG,
   REGISTER_ALERT_VALIDATION_STEP_FEATURE_FLAG_DEFAULT,
@@ -40,5 +41,12 @@ export const registerWorkflowSteps = (
   workflowsExtensions.registerStepDefinition(async () => {
     if (!(await isEnabled)) return undefined;
     return buildAlertEntityGraphStepDefinition;
+  });
+
+  // v4: dual-register step backed by the same findRelatedAlerts service that the
+  // Agent Builder inline tool uses. Single handler, two consumers.
+  workflowsExtensions.registerStepDefinition(async () => {
+    if (!(await isEnabled)) return undefined;
+    return getRelatedAlertsStepDefinition;
   });
 };
