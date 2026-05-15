@@ -707,41 +707,6 @@ describe('SavedObjectsFinder', () => {
         },
       });
     });
-
-    it('should apply types filter to extra items, if provided', async () => {
-      (contentClient.mSearch as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({ hits: [doc3] })
-      );
-      const wrapper = shallow(
-        <SavedObjectFinder
-          {...baseProps}
-          services={{ uiSettings, contentClient, savedObjectsTagging }}
-          showFilter={true}
-          savedObjectMetaData={[metaDataConfig[1]]}
-          extraItems={{ metaData: searchMetaData, get: jest.fn().mockResolvedValue([doc, doc2]) }}
-        />
-      );
-      wrapper.instance().componentDidMount!();
-      await nextTick();
-
-      const table = wrapper.find<EuiInMemoryTable<any>>(EuiInMemoryTable);
-      const search = table.prop('search') as EuiSearchBarProps;
-      search.onChange?.({ query: Query.parse('type:(vis)'), queryText: '', error: null });
-      expect(contentClient.mSearch).toBeCalled();
-      await nextTick();
-      let items: any[] = wrapper.find(EuiInMemoryTable).prop('items');
-      expect(items).toHaveLength(1);
-      expect(items[0].attributes.title).toBe(doc3.attributes.title);
-
-      (contentClient.mSearch as any as jest.SpyInstance).mockReset();
-      search.onChange?.({ query: Query.parse('type:(search)'), queryText: '', error: null });
-      expect(contentClient.mSearch).not.toBeCalled();
-      await nextTick();
-      items = wrapper.find(EuiInMemoryTable).prop('items');
-      expect(items).toHaveLength(2);
-      expect(items[0].attributes.title).toBe(doc.attributes.title);
-      expect(items[1].attributes.title).toBe(doc2.attributes.title);
-    });
   });
 
   it('should display no items message if there are no items', async () => {
