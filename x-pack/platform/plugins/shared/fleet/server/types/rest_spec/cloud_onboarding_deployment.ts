@@ -55,8 +55,8 @@ const RequestSecretsSchema = schema.recordOf(schema.string({ minLength: 1 }), sc
 });
 
 const DeploymentIdParamSchema = schema.object({
-  deploymentId: schema.string({
-    meta: { description: 'The unique identifier of the cloud onboarding deployment.' },
+  id: schema.string({
+    meta: { description: 'The saved object ID of the cloud onboarding deployment.' },
   }),
 });
 
