@@ -34,7 +34,7 @@ export const useCasesFromAlerts = ({ alertId }: { alertId: string }): CasesFromA
           setCases(casesResponse);
         }
       } catch (error) {
-        addError(error.message, { title: CASES_FROM_ALERTS_FAILURE });
+        addError(error, { title: CASES_FROM_ALERTS_FAILURE });
       }
       if (isMounted) {
         setLoading(false);
