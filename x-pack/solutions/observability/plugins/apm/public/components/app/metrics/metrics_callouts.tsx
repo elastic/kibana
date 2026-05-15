@@ -43,6 +43,8 @@ export function NoDashboardFoundCallout() {
   );
 }
 
+export type IngestionType = 'classicApm' | 'otelNative';
+
 const DATE_FORMAT = 'MMM D, YYYY HH:mm';
 
 const formatTimestamp = (ts: number) => moment(ts).format(DATE_FORMAT);
@@ -61,8 +63,8 @@ const getInstrumentationDetails = (ingestionTimeRanges: {
 }) => {
   const otelIsMoreRecent = ingestionTimeRanges.otelNative.to >= ingestionTimeRanges.classicApm.to;
 
-  const currentKey = otelIsMoreRecent ? 'otelNative' : 'classicApm';
-  const previousKey = otelIsMoreRecent ? 'classicApm' : 'otelNative';
+  const currentKey: IngestionType = otelIsMoreRecent ? 'otelNative' : 'classicApm';
+  const previousKey: IngestionType = otelIsMoreRecent ? 'classicApm' : 'otelNative';
 
   const currentRange = ingestionTimeRanges[currentKey];
   const previousRange = ingestionTimeRanges[previousKey];
@@ -70,6 +72,8 @@ const getInstrumentationDetails = (ingestionTimeRanges: {
   const changeTimestamp = previousRange.to;
 
   return {
+    currentKey,
+    previousKey,
     currentName: INSTRUMENTATION_NAMES[currentKey],
     previousName: INSTRUMENTATION_NAMES[previousKey],
     currentRange,
@@ -84,19 +88,24 @@ interface MixedAgentCalloutProps {
     classicApm: IngestionTimeRange;
     otelNative: IngestionTimeRange;
   };
+  forcedIngestionType?: IngestionType | null;
+  onNavigateToIngestionType?: (type: IngestionType) => void;
 }
 
 export function MixedAgentCallout({
   hasMultipleAgentTypes,
   ingestionTimeRanges,
+  forcedIngestionType,
+  onNavigateToIngestionType,
 }: MixedAgentCalloutProps) {
   const { docLinks } = useApmPluginContext().core;
   const history = useHistory();
   const location = useLocation();
 
-  const navigateToTimeRange = useCallback(
-    (range: IngestionTimeRange) => {
+  const navigateToIngestionRange = useCallback(
+    (range: IngestionTimeRange, type: IngestionType) => {
       try {
+        onNavigateToIngestionType?.(type);
         history.push({
           ...location,
           search: fromQuery({
@@ -111,13 +120,31 @@ export function MixedAgentCallout({
         }
       }
     },
-    [history, location]
+    [history, location, onNavigateToIngestionType]
   );
 
-  const details = useMemo(
+  const baseDetails = useMemo(
     () => (ingestionTimeRanges ? getInstrumentationDetails(ingestionTimeRanges) : null),
     [ingestionTimeRanges]
   );
+
+  const details = useMemo(() => {
+    if (!baseDetails || !forcedIngestionType) {
+      return baseDetails;
+    }
+    if (forcedIngestionType === baseDetails.currentKey) {
+      return baseDetails;
+    }
+    return {
+      ...baseDetails,
+      currentKey: baseDetails.previousKey,
+      previousKey: baseDetails.currentKey,
+      currentName: baseDetails.previousName,
+      previousName: baseDetails.currentName,
+      currentRange: baseDetails.previousRange,
+      previousRange: baseDetails.currentRange,
+    };
+  }, [baseDetails, forcedIngestionType]);
 
   if (!hasMultipleAgentTypes || !ingestionTimeRanges || !details) {
     return null;
@@ -165,7 +192,7 @@ export function MixedAgentCallout({
               timePeriod: (
                 <EuiLink
                   data-test-subj="apmMetricsCurrentTimeRangeLink"
-                  onClick={() => navigateToTimeRange(details.currentRange)}
+                  onClick={() => navigateToIngestionRange(details.currentRange, details.currentKey)}
                 >
                   {formatRange(details.currentRange)}
                 </EuiLink>
@@ -182,7 +209,9 @@ export function MixedAgentCallout({
               previousDateRange: (
                 <EuiLink
                   data-test-subj="apmMetricsPreviousTimeRangeLink"
-                  onClick={() => navigateToTimeRange(details.previousRange)}
+                  onClick={() =>
+                    navigateToIngestionRange(details.previousRange, details.previousKey)
+                  }
                 >
                   {formatRange(details.previousRange)}
                 </EuiLink>

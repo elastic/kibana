@@ -732,6 +732,21 @@ Simulates a service migrating from classic Elastic APM to OTel instrumentation. 
 node scripts/synthtrace apm_service_legacy_to_otel_metrics --from now-1w --to now --clean
 ```
 
+#### `apm_service_overlapping_otel_metrics`
+
+Simulates a service migrating from classic Elastic APM to OTel instrumentation with an overlap period where both instrumentations send data simultaneously. Classic APM runs from `from` to 75% of the range, OTel runs from 25% to `to`, so the middle 50% has both types sending data at the same time. Both phases share the same `service.name`, so the APM Metrics tab must handle the overlap and let the user switch between dashboard variants.
+
+**Options:**
+
+- `serviceName` (string, default: `overlap-svc`): The shared service name across both phases
+- `rpm` (number, default: 2): Transactions per minute per phase
+
+**Usage:**
+
+```sh
+node scripts/synthtrace apm_service_overlapping_otel_metrics --from now-2d --to now --clean
+```
+
 #### `apm_jvm_metrics_type_conflict`
 
 Reproduces `verification_exception` errors on the APM Metrics tab when both classic (Elastic APM) and OTel Java agents ingest data for the same service. The OTel metrics index is configured as TSDB with gauge annotations, causing type conflicts with classic APM fields when queried via ES|QL.

@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { isElasticAgentName, isJRubyAgentName } from '@kbn/elastic-agent-utils/src/agent_guards';
 import { isAWSLambdaAgentName } from '../../../../common/agent_name';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useAdHocApmDataView } from '../../../hooks/use_adhoc_apm_data_view';
+import { useApmParams } from '../../../hooks/use_apm_params';
 import { ServerlessMetrics } from './serverless_metrics';
 import { ServiceMetrics } from './service_metrics';
 import { JsonMetricsDashboard } from './static_dashboard';
@@ -21,6 +22,7 @@ import {
   NoDataForRangeCallout,
   NoDashboardFoundCallout,
 } from './metrics_callouts';
+import type { IngestionType } from './metrics_callouts';
 
 export function Metrics() {
   const {
@@ -34,15 +36,58 @@ export function Metrics() {
     hasMultipleAgentTypes,
     ingestionTimeRanges,
   } = useApmServiceContext();
+
+  const {
+    query: { rangeFrom, rangeTo },
+  } = useApmParams('/services/{serviceName}/metrics');
+
   const isAWSLambda = isAWSLambdaAgentName(serverlessType);
   const { dataView, apmIndices } = useAdHocApmDataView();
 
-  const hasDashboardFile = hasDashboard({
-    agentName,
-    telemetrySdkName,
-    telemetrySdkLanguage,
-    runtimeVersion,
-  });
+  const [forcedIngestionType, setForcedIngestionType] = useState<IngestionType | null>(null);
+  const isInternalNavigationRef = useRef(false);
+  const snapshotTimeRangesRef = useRef(ingestionTimeRanges);
+
+  if (forcedIngestionType === null && ingestionTimeRanges) {
+    snapshotTimeRangesRef.current = ingestionTimeRanges;
+  }
+
+  const prevRangeRef = useRef({ rangeFrom, rangeTo });
+  useEffect(() => {
+    const prev = prevRangeRef.current;
+    if (prev.rangeFrom !== rangeFrom || prev.rangeTo !== rangeTo) {
+      if (isInternalNavigationRef.current) {
+        isInternalNavigationRef.current = false;
+      } else if (forcedIngestionType !== null) {
+        setForcedIngestionType(null);
+        snapshotTimeRangesRef.current = undefined;
+      }
+      prevRangeRef.current = { rangeFrom, rangeTo };
+    }
+  }, [rangeFrom, rangeTo, forcedIngestionType]);
+
+  const handleNavigateToIngestionType = useCallback((type: IngestionType) => {
+    isInternalNavigationRef.current = true;
+    setForcedIngestionType(type);
+  }, []);
+
+  const calloutTimeRanges =
+    forcedIngestionType !== null ? snapshotTimeRangesRef.current : ingestionTimeRanges;
+
+  const isForced = forcedIngestionType !== null && hasMultipleAgentTypes && ingestionTimeRanges;
+
+  const effectiveAgentFields = isForced
+    ? {
+        agentName,
+        telemetrySdkName: forcedIngestionType === 'otelNative' ? telemetrySdkName : undefined,
+        telemetrySdkLanguage:
+          forcedIngestionType === 'otelNative' ? telemetrySdkLanguage : undefined,
+        runtimeName,
+        runtimeVersion,
+      }
+    : { agentName, telemetrySdkName, telemetrySdkLanguage, runtimeName, runtimeVersion };
+
+  const hasDashboardFile = hasDashboard(effectiveAgentFields);
 
   if (isAWSLambda) {
     return <ServerlessMetrics />;
@@ -58,8 +103,10 @@ export function Metrics() {
 
   const mixedAgentCallout = (
     <MixedAgentCallout
-      hasMultipleAgentTypes={hasMultipleAgentTypes}
-      ingestionTimeRanges={ingestionTimeRanges}
+      hasMultipleAgentTypes={hasMultipleAgentTypes || forcedIngestionType !== null}
+      ingestionTimeRanges={calloutTimeRanges}
+      forcedIngestionType={forcedIngestionType}
+      onNavigateToIngestionType={handleNavigateToIngestionType}
     />
   );
 
@@ -68,11 +115,11 @@ export function Metrics() {
       <>
         {mixedAgentCallout}
         <JsonMetricsDashboard
-          agentName={agentName}
-          telemetrySdkName={telemetrySdkName}
-          telemetrySdkLanguage={telemetrySdkLanguage}
-          runtimeName={runtimeName}
-          runtimeVersion={runtimeVersion}
+          agentName={effectiveAgentFields.agentName}
+          telemetrySdkName={effectiveAgentFields.telemetrySdkName}
+          telemetrySdkLanguage={effectiveAgentFields.telemetrySdkLanguage}
+          runtimeName={effectiveAgentFields.runtimeName}
+          runtimeVersion={effectiveAgentFields.runtimeVersion}
           serverlessType={serverlessType}
           dataView={dataView}
           apmIndices={apmIndices}
