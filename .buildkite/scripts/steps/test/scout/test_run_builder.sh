@@ -111,9 +111,19 @@ else
     --save
   cp .scout/test_configs/scout_playwright_configs.json scout_playwright_configs.json
   buildkite-agent artifact upload "scout_playwright_configs.json"
+  upload_tmp_artifact scout_playwright_configs.json scout_playwright_configs.json "$BUILDKITE_BUILD_ID"
 fi
 
 source .buildkite/scripts/steps/test/scout/upload_report_events.sh
 
 echo '--- Producing Scout Test Execution Steps'
 ts-node "$(dirname "${0}")/test_run_builder.ts"
+
+echo '--- Upload scout test run order artifacts to GCS'
+if [[ -f scout_playwright_configs_scheduled.json ]]; then
+  upload_tmp_artifact scout_playwright_configs_scheduled.json scout_playwright_configs_scheduled.json "$BUILDKITE_BUILD_ID"
+fi
+
+if [[ -f .scout/test_lane_loads.json ]]; then
+  upload_tmp_artifact .scout/test_lane_loads.json .scout/test_lane_loads.json "$BUILDKITE_BUILD_ID"
+fi
