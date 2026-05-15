@@ -39,6 +39,21 @@ const getAlertSuppressionV2Entries = (
 };
 
 /**
+ * Reads `sequence_index` from a `group_by_v2` entry. The rule schema defines this field with a
+ * snake_case key, but `convertObjectKeysToCamelCase` is applied to `alert_suppression` when
+ * converting saved rule params into the alerting framework's camel-cased shape, so at runtime
+ * the entry may carry the value under `sequenceIndex` instead. Read both spellings to remain
+ * resilient regardless of which conversion path produced the entry.
+ */
+const getSequenceIndex = (entry: AlertSuppressionGroupByFieldV2): number | undefined => {
+  if (entry.sequence_index != null) {
+    return entry.sequence_index;
+  }
+  const camelEntry = entry as { sequenceIndex?: number };
+  return camelEntry.sequenceIndex;
+};
+
+/**
  * Builds suppression terms for EQL sequence shell alerts. When `groupByV2` includes
  * `sequence_index`, field values are read from that sequence event's building-block document;
  * otherwise values come from the merged shell alert document (same as non-sequence rules).
@@ -55,10 +70,8 @@ export const getEqlSequenceSuppressionTerms = ({
   const v2Entries = getAlertSuppressionV2Entries(alertSuppression);
   if (v2Entries != null) {
     return v2Entries.map((entry) => {
-      const doc =
-        entry.sequence_index != null
-          ? buildingBlockSources[entry.sequence_index]
-          : shellAlertSource;
+      const sequenceIndex = getSequenceIndex(entry);
+      const doc = sequenceIndex != null ? buildingBlockSources[sequenceIndex] : shellAlertSource;
       const value = doc != null ? robustGet({ document: doc, key: entry.field }) ?? null : null;
       const sortedValue = Array.isArray(value) ? (sortBy(value) as string[] | number[]) : value;
       return {
@@ -86,10 +99,8 @@ export const eqlSequenceHasAllSuppressionFieldValues = ({
   const v2Entries = getAlertSuppressionV2Entries(alertSuppression);
   if (v2Entries != null) {
     return v2Entries.every((entry) => {
-      const doc =
-        entry.sequence_index != null
-          ? buildingBlockSources[entry.sequence_index]
-          : shellAlertSource;
+      const sequenceIndex = getSequenceIndex(entry);
+      const doc = sequenceIndex != null ? buildingBlockSources[sequenceIndex] : shellAlertSource;
       return doc != null && robustGet({ key: entry.field, document: doc }) != null;
     });
   }

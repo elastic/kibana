@@ -200,6 +200,32 @@ describe('getEqlSequenceSuppressionTerms', () => {
       })
     ).toEqual([{ field: 'host.name', value: 'legacy' }]);
   });
+
+  it('reads sequenceIndex (camelCase) emitted by convertObjectKeysToCamelCase', () => {
+    expect(
+      getEqlSequenceSuppressionTerms({
+        // Once `alert_suppression` is converted to camelCase at the rule-execution boundary,
+        // each entry carries `sequenceIndex` instead of the original `sequence_index`.
+        alertSuppression: {
+          groupByV2: [
+            { field: 'host.name', sequenceIndex: 0 },
+            { field: 'user.name', sequenceIndex: 1 },
+          ] as unknown as Array<{
+            field: string;
+            sequence_index?: number;
+          }>,
+        },
+        shellAlertSource: {},
+        buildingBlockSources: [
+          { 'host.name': 'h0', 'user.name': 'ignored' },
+          { 'host.name': 'ignored', 'user.name': 'u1' },
+        ],
+      })
+    ).toEqual([
+      { field: 'host.name', value: 'h0' },
+      { field: 'user.name', value: 'u1' },
+    ]);
+  });
 });
 
 describe('eqlSequenceHasAllSuppressionFieldValues', () => {

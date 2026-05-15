@@ -3286,31 +3286,27 @@ export default ({ getService }: FtrProviderContext) => {
     describe('@skipInServerless EQL sequence suppression with group_by_v2 (per-sequence fields)', () => {
       it('does not suppress the second sequence when per-sequence suppression tuples differ', async () => {
         const id = uuidv4();
-        // Index four events so EQL forms two non-overlapping sequences (each event can only
-        // belong to a single sequence): (seqA0, seqA1) and (seqB0, seqB1).
-        const seqA0 = {
+        // EQL forms two overlapping sequences from three events: (doc1, doc1WithLater) and
+        // (doc1WithLater, doc2WithLater). Each sequence has distinct per-step user.name values
+        // so the suppression tuples differ and neither sequence is suppressed.
+        const doc1 = {
           id,
           '@timestamp': '2020-10-28T06:50:00.000Z',
           host: { name: 'host-a' },
           user: { name: 'sequence-a-user-0' },
         };
-        const seqA1 = {
-          ...seqA0,
+        const doc1WithLaterTimestamp = {
+          ...doc1,
           '@timestamp': '2020-10-28T06:51:00.000Z',
-          user: { name: 'sequence-a-user-1' },
+          user: { name: 'shared-middle-user' },
         };
-        const seqB0 = {
-          ...seqA0,
-          '@timestamp': '2020-10-28T06:52:00.000Z',
-          user: { name: 'sequence-b-user-0' },
-        };
-        const seqB1 = {
-          ...seqA0,
+        const doc2WithLaterTimestamp = {
+          ...doc1,
           '@timestamp': '2020-10-28T06:53:00.000Z',
           user: { name: 'sequence-b-user-1' },
         };
 
-        await indexListOfSourceDocuments([seqA0, seqA1, seqB0, seqB1]);
+        await indexListOfSourceDocuments([doc1, doc1WithLaterTimestamp, doc2WithLaterTimestamp]);
 
         const rule: EqlRuleCreateProps = {
           ...getEqlRuleForAlertTesting(['ecs_compliant']),
@@ -3352,7 +3348,7 @@ export default ({ getService }: FtrProviderContext) => {
           ...sortedSequenceAlerts[0]?._source,
           [ALERT_SUPPRESSION_TERMS]: [
             { field: 'user.name', value: 'sequence-a-user-0' },
-            { field: 'user.name', value: 'sequence-a-user-1' },
+            { field: 'user.name', value: 'shared-middle-user' },
           ],
           [TIMESTAMP]: '2020-10-28T07:00:00.000Z',
           [ALERT_LAST_DETECTED]: '2020-10-28T07:00:00.000Z',
@@ -3361,7 +3357,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(sortedSequenceAlerts[1]?._source).toEqual({
           ...sortedSequenceAlerts[1]?._source,
           [ALERT_SUPPRESSION_TERMS]: [
-            { field: 'user.name', value: 'sequence-b-user-0' },
+            { field: 'user.name', value: 'shared-middle-user' },
             { field: 'user.name', value: 'sequence-b-user-1' },
           ],
           [TIMESTAMP]: '2020-10-28T07:00:00.000Z',
@@ -3372,31 +3368,28 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('suppresses a later sequence when group_by_v2 targets only the second event and values match', async () => {
         const id = uuidv4();
-        // Index four events so EQL forms two non-overlapping sequences. Both sequences'
-        // second event share the same host.name, so the second sequence is suppressed.
-        const seqA0 = {
+        // EQL forms two overlapping sequences from three events: (doc1, doc1WithLater) and
+        // (doc1WithLater, doc2WithLater). Both sequences' second event share the same
+        // host.name, so under `sequence_index: 1` suppression the second sequence is
+        // suppressed.
+        const doc1 = {
           id,
           '@timestamp': '2020-10-28T06:50:00.000Z',
           host: { name: 'host-first' },
           user: { name: 'only-used-for-context' },
         };
-        const seqA1 = {
-          ...seqA0,
+        const doc1WithLaterTimestamp = {
+          ...doc1,
           '@timestamp': '2020-10-28T06:51:00.000Z',
           host: { name: 'shared-second-step-host' },
         };
-        const seqB0 = {
-          ...seqA0,
-          '@timestamp': '2020-10-28T06:52:00.000Z',
-          host: { name: 'host-first' },
-        };
-        const seqB1 = {
-          ...seqA0,
+        const doc2WithLaterTimestamp = {
+          ...doc1,
           '@timestamp': '2020-10-28T06:53:00.000Z',
           host: { name: 'shared-second-step-host' },
         };
 
-        await indexListOfSourceDocuments([seqA0, seqA1, seqB0, seqB1]);
+        await indexListOfSourceDocuments([doc1, doc1WithLaterTimestamp, doc2WithLaterTimestamp]);
 
         const rule: EqlRuleCreateProps = {
           ...getEqlRuleForAlertTesting(['ecs_compliant']),
@@ -3437,19 +3430,24 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('uses merged shell field values when group_by_v2 omits sequence_index', async () => {
         const id = uuidv4();
-        // Index four events so EQL forms two non-overlapping sequences. All events share the
-        // same host.name, so the merged-shell suppression value matches across both
-        // sequences and the second one is suppressed.
-        const baseDoc = {
+        // EQL forms two overlapping sequences from three events. All events share the same
+        // host.name, so the merged-shell suppression value matches across both sequences and
+        // the second one is suppressed.
+        const doc1 = {
           id,
+          '@timestamp': '2020-10-28T06:50:00.000Z',
           host: { name: 'host-a' },
         };
-        const seqA0 = { ...baseDoc, '@timestamp': '2020-10-28T06:50:00.000Z' };
-        const seqA1 = { ...baseDoc, '@timestamp': '2020-10-28T06:51:00.000Z' };
-        const seqB0 = { ...baseDoc, '@timestamp': '2020-10-28T06:52:00.000Z' };
-        const seqB1 = { ...baseDoc, '@timestamp': '2020-10-28T06:53:00.000Z' };
+        const doc1WithLaterTimestamp = {
+          ...doc1,
+          '@timestamp': '2020-10-28T06:51:00.000Z',
+        };
+        const doc2WithLaterTimestamp = {
+          ...doc1,
+          '@timestamp': '2020-10-28T06:53:00.000Z',
+        };
 
-        await indexListOfSourceDocuments([seqA0, seqA1, seqB0, seqB1]);
+        await indexListOfSourceDocuments([doc1, doc1WithLaterTimestamp, doc2WithLaterTimestamp]);
 
         const rule: EqlRuleCreateProps = {
           ...getEqlRuleForAlertTesting(['ecs_compliant']),
