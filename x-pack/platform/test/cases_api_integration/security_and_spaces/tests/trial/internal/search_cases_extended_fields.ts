@@ -288,7 +288,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const cases = await searchCases({
           supertest,
           body: {
-            extendedFieldFilters: [{ label: 'Due Date', value: '06/15/2024' }],
+            extendedFieldFilters: [{ label: 'Due Date', value: '2024-06-15' }],
             owner: 'securitySolutionFixture',
           },
         });
