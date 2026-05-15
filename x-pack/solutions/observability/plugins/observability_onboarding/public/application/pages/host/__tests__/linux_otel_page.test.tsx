@@ -173,24 +173,17 @@ describe('HostLinuxOtelPage', () => {
 
   it('renders the approach selector with OTel selected', () => {
     renderPage();
-    expect(screen.getByTestId('approachSelectorCard-otel').getAttribute('aria-current')).toBe(
-      'page'
+    expect(screen.getByTestId('approachSelectorCard-otel').getAttribute('data-selected')).toBe(
+      'true'
     );
     expect(
-      screen.getByTestId('approachSelectorCard-auto-detect').getAttribute('aria-current')
-    ).toBeNull();
+      screen.getByTestId('approachSelectorCard-auto-detect').getAttribute('data-selected')
+    ).toBe('false');
   });
 
   it('renders the OTel install step', () => {
     renderPage();
     expect(screen.getByTestId('otelInstallStep')).toBeInTheDocument();
-  });
-
-  it('preserves the ingestion search param in the approach selector hrefs', () => {
-    renderPage(['/host/linux?ingestion=wired']);
-    const eaLink = screen.getByTestId('approachSelectorCard-auto-detect') as HTMLAnchorElement;
-    expect(eaLink.getAttribute('href')).toContain('/host/linux/auto-detect');
-    expect(eaLink.getAttribute('href')).toContain('ingestion=wired');
   });
 
   it('preserves the ingestion search param in the Return link href', () => {
@@ -239,18 +232,19 @@ describe('HostLinuxOtelPage', () => {
     );
   });
 
-  it('activates monitoring on pre-existing data alone, while keeping install/start steps unfinished', () => {
-    // Asymmetry contract: pre-existing data flips the visualize step (monitoring)
-    // to active, but install/start steps must NOT mark themselves complete just
-    // because the cluster already had OTel host data before this flow started.
-    // Window-blur is what signals install completion; pre-existing-data is not.
+  it('activates monitoring on pre-existing data alone, while keeping install/start steps rendered', () => {
+    // Pre-existing data flips the visualize step (monitoring) to active so the
+    // has-data probe can light up the deeplink panel, while install/start
+    // step bodies keep rendering. The OTel flow never auto-marks any step
+    // `complete` (heuristic signals → misleading green checks), so the test
+    // only validates that the monitoring flag flips and the step bodies are
+    // still present for the user to see.
     usePreExistingDataCheckMock.mockReturnValue(true);
     useWindowBlurDataMonitoringTriggerMock.mockReturnValue(false);
     try {
       renderPage();
       const visualizeStep = screen.getByTestId('otelVisualizeStep');
       expect(visualizeStep.getAttribute('data-monitoring-active')).toBe('true');
-      // Install/start step bodies still render (the user has not finished installing).
       expect(screen.getByTestId('otelInstallStep')).toBeInTheDocument();
       expect(screen.getByTestId('otelStartStep')).toBeInTheDocument();
     } finally {

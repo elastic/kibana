@@ -43,7 +43,10 @@ test.describe.serial(
       await expect(pageObjects.hostV2.layout('linux')).toBeVisible();
       expect(page.url()).toContain('/host/linux');
       await expect(pageObjects.hostV2.approachSelector()).toBeVisible();
-      await expect(pageObjects.hostV2.approachCard('otel')).toHaveAttribute('aria-current', 'page');
+      await expect(pageObjects.hostV2.approachCard('otel')).toHaveAttribute(
+        'data-selected',
+        'true'
+      );
     });
 
     test('Linux approach selector toggles between OTel and Elastic Agent', async ({
@@ -91,7 +94,10 @@ test.describe.serial(
       await expect(pageObjects.hostV2.layout('mac')).toBeVisible();
       expect(page.url()).toContain('/host/macos');
       await expect(pageObjects.hostV2.approachSelector()).toBeVisible();
-      await expect(pageObjects.hostV2.approachCard('otel')).toHaveAttribute('aria-current', 'page');
+      await expect(pageObjects.hostV2.approachCard('otel')).toHaveAttribute(
+        'data-selected',
+        'true'
+      );
     });
 
     test('macOS tile navigates to /host/macos with the OTel approach selected', async ({
@@ -104,7 +110,10 @@ test.describe.serial(
       await expect(pageObjects.hostV2.layout('mac')).toBeVisible();
       expect(page.url()).toContain('/host/macos');
       await expect(pageObjects.hostV2.approachSelector()).toBeVisible();
-      await expect(pageObjects.hostV2.approachCard('otel')).toHaveAttribute('aria-current', 'page');
+      await expect(pageObjects.hostV2.approachCard('otel')).toHaveAttribute(
+        'data-selected',
+        'true'
+      );
     });
 
     test('Windows install step renders the PowerShell collector command', async ({

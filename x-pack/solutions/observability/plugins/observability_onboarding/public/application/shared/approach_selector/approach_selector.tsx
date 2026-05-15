@@ -5,18 +5,20 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiBadge,
+  EuiCheckableCard,
   EuiFlexGrid,
+  EuiFlexGroup,
   EuiFlexItem,
-  EuiPanel,
   EuiSpacer,
   EuiText,
-  useEuiTheme,
+  htmlIdGenerator,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import { useHistory } from 'react-router-dom';
 import { LogoIcon } from '../logo_icon';
 import type { ApproachOption } from './types';
 
@@ -31,7 +33,10 @@ export const ApproachSelector: React.FC<ApproachSelectorProps> = ({
   selectedId,
   options,
 }) => {
-  const { euiTheme } = useEuiTheme();
+  const history = useHistory();
+  // Each render gets its own radio-group id so multiple selectors on the same
+  // page (or remounts in tests) do not cross-talk via the shared `name` attr.
+  const radioGroupId = useMemo(() => htmlIdGenerator('approachSelector')(), []);
 
   return (
     <nav aria-label={legend} data-test-subj="approachSelector">
@@ -39,60 +44,69 @@ export const ApproachSelector: React.FC<ApproachSelectorProps> = ({
         {options.map((option) => {
           const isSelected = option.id === selectedId;
           return (
-            <EuiFlexItem key={option.id}>
-              <a
-                href={option.href}
-                onClick={option.onClick}
-                data-test-subj={`approachSelectorCard-${option.id}`}
-                aria-current={isSelected ? 'page' : undefined}
+            <EuiFlexItem
+              key={option.id}
+              // EuiCheckableCard does not forward `data-test-subj`, so the
+              // wrapper carries the selector + selection state for tests.
+              data-test-subj={`approachSelectorCard-${option.id}`}
+              data-selected={isSelected ? 'true' : 'false'}
+            >
+              <EuiCheckableCard
+                id={`${radioGroupId}_${option.id}`}
+                name={radioGroupId}
+                checked={isSelected}
+                // The radio's onChange fires only when the selection actually
+                // changes, which dedupes the double-fire we'd get from the
+                // panel-level onClick (label-click + radio-click bubble).
+                onChange={() => {
+                  history.push(option.navigateTo);
+                }}
+                label={
+                  <>
+                    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
+                      {(option.logo || option.euiIconType) && (
+                        <EuiFlexItem grow={false}>
+                          <LogoIcon logo={option.logo} euiIconType={option.euiIconType} size="m" />
+                        </EuiFlexItem>
+                      )}
+                      <EuiFlexItem grow={false}>
+                        <EuiText size="s">
+                          <strong>{option.label}</strong>
+                        </EuiText>
+                      </EuiFlexItem>
+                      {option.recommended && (
+                        <EuiFlexItem grow={false}>
+                          <EuiBadge
+                            color="success"
+                            data-test-subj={`approachSelectorRecommendedBadge-${option.id}`}
+                          >
+                            {i18n.translate(
+                              'xpack.observability_onboarding.approachSelector.recommendedBadge',
+                              { defaultMessage: 'Recommended' }
+                            )}
+                          </EuiBadge>
+                        </EuiFlexItem>
+                      )}
+                    </EuiFlexGroup>
+                    <EuiSpacer size="s" />
+                    <EuiText color="subdued" size="s">
+                      {option.description}
+                    </EuiText>
+                  </>
+                }
                 css={css`
-                  text-decoration: none;
-                  color: inherit;
-                  display: block;
-                  border-radius: ${euiTheme.border.radius.medium};
-                  &:focus-visible {
-                    outline: 2px solid ${euiTheme.colors.primary};
-                    outline-offset: 2px;
+                  flex-grow: 1;
+
+                  & > .euiPanel {
+                    display: flex;
+
+                    & > .euiCheckableCard__label {
+                      display: flex;
+                      flex-direction: column;
+                    }
                   }
                 `}
-              >
-                <EuiPanel
-                  hasBorder
-                  paddingSize="m"
-                  css={
-                    isSelected
-                      ? css`
-                          border-color: ${euiTheme.colors.primary};
-                          box-shadow: inset 0 0 0 1px ${euiTheme.colors.primary};
-                        `
-                      : undefined
-                  }
-                >
-                  <EuiText>
-                    <strong>{option.label}</strong>
-                  </EuiText>
-                  {option.recommended && (
-                    <>
-                      <EuiSpacer size="xs" />
-                      <EuiBadge
-                        color="hollow"
-                        data-test-subj={`approachSelectorRecommendedBadge-${option.id}`}
-                      >
-                        {i18n.translate(
-                          'xpack.observability_onboarding.approachSelector.recommendedBadge',
-                          { defaultMessage: 'Recommended' }
-                        )}
-                      </EuiBadge>
-                    </>
-                  )}
-                  <EuiSpacer size="s" />
-                  <EuiText size="s" color="subdued">
-                    {option.description}
-                  </EuiText>
-                  <EuiSpacer size="s" />
-                  <LogoIcon logo={option.logo} size="l" />
-                </EuiPanel>
-              </a>
+              />
             </EuiFlexItem>
           );
         })}

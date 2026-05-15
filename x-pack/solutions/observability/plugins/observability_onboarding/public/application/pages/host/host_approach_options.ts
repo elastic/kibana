@@ -6,13 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { SupportedLogo } from '../../shared/logo_icon';
 import type { ApproachOption } from '../../shared/approach_selector';
-
-const ELASTIC_AGENT_LOGO_BY_OS = {
-  linux: 'linux',
-  mac: 'apple_black',
-} as const satisfies Record<'linux' | 'mac', SupportedLogo>;
 
 export const HOST_APPROACH_SELECTOR_LEGEND = i18n.translate(
   'xpack.observability_onboarding.hostV2.approachSelectorLegend',
@@ -24,19 +18,12 @@ export const HOST_APPROACH_STEP_TITLE = i18n.translate(
   { defaultMessage: 'Choose how to collect host telemetry' }
 );
 
-export interface HostApproachLink {
-  href: string;
-  onClick?: ApproachOption['onClick'];
-}
-
 interface BuildHostApproachOptionsArgs {
-  os: keyof typeof ELASTIC_AGENT_LOGO_BY_OS;
-  otel: HostApproachLink;
-  elasticAgent: HostApproachLink;
+  otel: { navigateTo: string };
+  elasticAgent: { navigateTo: string };
 }
 
 export const buildHostApproachOptions = ({
-  os,
   otel,
   elasticAgent,
 }: BuildHostApproachOptionsArgs): ApproachOption[] => [
@@ -53,8 +40,7 @@ export const buildHostApproachOptions = ({
     }),
     logo: 'opentelemetry',
     recommended: true,
-    href: otel.href,
-    onClick: otel.onClick,
+    navigateTo: otel.navigateTo,
   },
   {
     id: 'auto-detect',
@@ -64,8 +50,10 @@ export const buildHostApproachOptions = ({
     description: i18n.translate('xpack.observability_onboarding.hostV2.approach.ea.description', {
       defaultMessage: 'Deploy a standalone Elastic Agent that auto-detects services on the host.',
     }),
-    logo: ELASTIC_AGENT_LOGO_BY_OS[os],
-    href: elasticAgent.href,
-    onClick: elasticAgent.onClick,
+    // Native EUI icon for Elastic Agent (hexagonal Fleet/Agent product mark)
+    // is OS-independent, matching the design where both Linux and macOS host
+    // pages show the same icon next to "Elastic Agent".
+    euiIconType: 'agentApp',
+    navigateTo: elasticAgent.navigateTo,
   },
 ];

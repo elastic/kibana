@@ -8,8 +8,8 @@
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { useGeneratedHtmlId, type EuiStepsProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { reactRouterNavigate, useKibana } from '@kbn/kibana-react-plugin/public';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useLocation } from 'react-router-dom';
 import { useSearchParams } from 'react-router-dom-v5-compat';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import {
@@ -70,7 +70,6 @@ export const HostAutoDetectPage: React.FC<HostAutoDetectPageProps> = ({
 
   const wiredStreamsStatus = useWiredStreamsStatus();
 
-  const history = useHistory();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   const ingestionMode = parseIngestionMode(searchParams.get('ingestion'));
@@ -123,8 +122,8 @@ export const HostAutoDetectPage: React.FC<HostAutoDetectPageProps> = ({
   const assetDetailsLocator =
     share.url.locators.get<AssetDetailsLocatorParams>(ASSET_DETAILS_LOCATOR_ID);
 
-  const otelNav = reactRouterNavigate(history, `${routePath}${location.search}`);
-  const eaNav = reactRouterNavigate(history, `${routePath}/auto-detect${location.search}`);
+  const otelNavigateTo = `${routePath}${location.search}`;
+  const eaNavigateTo = `${routePath}/auto-detect${location.search}`;
 
   const steps: EuiStepsProps['steps'] = useMemo(
     () => [
@@ -137,9 +136,8 @@ export const HostAutoDetectPage: React.FC<HostAutoDetectPageProps> = ({
             legend={HOST_APPROACH_SELECTOR_LEGEND}
             selectedId="auto-detect"
             options={buildHostApproachOptions({
-              os,
-              otel: { href: otelNav.href, onClick: otelNav.onClick },
-              elasticAgent: { href: eaNav.href, onClick: eaNav.onClick },
+              otel: { navigateTo: otelNavigateTo },
+              elasticAgent: { navigateTo: eaNavigateTo },
             })}
           />
         ),
@@ -210,9 +208,8 @@ export const HostAutoDetectPage: React.FC<HostAutoDetectPageProps> = ({
           ]),
     ],
     [
-      os,
-      otelNav,
-      eaNav,
+      otelNavigateTo,
+      eaNavigateTo,
       status,
       error,
       refetch,

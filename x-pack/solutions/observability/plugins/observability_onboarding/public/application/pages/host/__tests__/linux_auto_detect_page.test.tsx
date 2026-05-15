@@ -113,9 +113,11 @@ describe('HostLinuxAutoDetectPage', () => {
   it('marks Elastic Agent as the selected approach', () => {
     renderPage();
     expect(
-      screen.getByTestId('approachSelectorCard-auto-detect').getAttribute('aria-current')
-    ).toBe('page');
-    expect(screen.getByTestId('approachSelectorCard-otel').getAttribute('aria-current')).toBeNull();
+      screen.getByTestId('approachSelectorCard-auto-detect').getAttribute('data-selected')
+    ).toBe('true');
+    expect(screen.getByTestId('approachSelectorCard-otel').getAttribute('data-selected')).toBe(
+      'false'
+    );
   });
 
   it('renders the auto-detect install step', () => {

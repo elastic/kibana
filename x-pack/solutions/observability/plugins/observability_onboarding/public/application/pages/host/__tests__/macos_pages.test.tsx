@@ -201,30 +201,17 @@ describe('HostMacosOtelPage', () => {
 
   it('renders the approach selector with OTel selected', () => {
     renderMacosOtelPage();
-    expect(screen.getByTestId('approachSelectorCard-otel').getAttribute('aria-current')).toBe(
-      'page'
+    expect(screen.getByTestId('approachSelectorCard-otel').getAttribute('data-selected')).toBe(
+      'true'
     );
     expect(
-      screen.getByTestId('approachSelectorCard-auto-detect').getAttribute('aria-current')
-    ).toBeNull();
+      screen.getByTestId('approachSelectorCard-auto-detect').getAttribute('data-selected')
+    ).toBe('false');
   });
 
   it('renders the OTel install step', () => {
     renderMacosOtelPage();
     expect(screen.getByTestId('otelInstallStep')).toBeInTheDocument();
-  });
-
-  it('links Elastic Agent to the macOS auto-detect route', () => {
-    renderMacosOtelPage();
-    const eaLink = screen.getByTestId('approachSelectorCard-auto-detect') as HTMLAnchorElement;
-    expect(eaLink.getAttribute('href')).toContain('/host/macos/auto-detect');
-  });
-
-  it('preserves the ingestion search param in the approach selector hrefs', () => {
-    renderMacosOtelPage(['/host/macos?ingestion=wired']);
-    const eaLink = screen.getByTestId('approachSelectorCard-auto-detect') as HTMLAnchorElement;
-    expect(eaLink.getAttribute('href')).toContain('/host/macos/auto-detect');
-    expect(eaLink.getAttribute('href')).toContain('ingestion=wired');
   });
 
   it('uses wired ingestion mode when the URL says so', () => {
@@ -297,19 +284,15 @@ describe('HostMacosAutoDetectPage', () => {
   it('marks Elastic Agent as the selected approach', () => {
     renderMacosAutoDetectPage();
     expect(
-      screen.getByTestId('approachSelectorCard-auto-detect').getAttribute('aria-current')
-    ).toBe('page');
-    expect(screen.getByTestId('approachSelectorCard-otel').getAttribute('aria-current')).toBeNull();
+      screen.getByTestId('approachSelectorCard-auto-detect').getAttribute('data-selected')
+    ).toBe('true');
+    expect(screen.getByTestId('approachSelectorCard-otel').getAttribute('data-selected')).toBe(
+      'false'
+    );
   });
 
   it('renders the auto-detect install step', () => {
     renderMacosAutoDetectPage();
     expect(screen.getByTestId('autoDetectInstallStep')).toBeInTheDocument();
-  });
-
-  it('links OpenTelemetry to the macOS OTel route', () => {
-    renderMacosAutoDetectPage();
-    const otelLink = screen.getByTestId('approachSelectorCard-otel') as HTMLAnchorElement;
-    expect(otelLink.getAttribute('href')).toContain('/host/macos');
   });
 });

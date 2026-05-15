@@ -8,37 +8,65 @@
 import { I18nProvider } from '@kbn/i18n-react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
+import { MemoryRouter, useLocation } from 'react-router-dom';
+import { CompatRouter } from 'react-router-dom-v5-compat';
 import { ApproachSelector } from './approach_selector';
 import type { ApproachOption } from './types';
 
-const buildOptions = (overrides?: Partial<Pick<ApproachOption, 'onClick'>>): ApproachOption[] => [
+const buildOptions = (): ApproachOption[] => [
   {
     id: 'otel',
     label: 'OpenTelemetry',
     description: 'Use the Elastic Distribution of OpenTelemetry Collector.',
     logo: 'opentelemetry',
     recommended: true,
-    href: '/app/observabilityOnboarding/host/linux',
-    ...overrides,
+    navigateTo: '/host/linux',
   },
   {
     id: 'auto-detect',
     label: 'Elastic Agent',
     description: 'Deploy a standalone Elastic Agent that auto-detects services.',
-    logo: 'apple_black',
-    href: '/app/observabilityOnboarding/host/linux/auto-detect',
-    ...overrides,
+    euiIconType: 'agentApp',
+    navigateTo: '/host/linux/auto-detect',
   },
 ];
 
-const options = buildOptions();
+// Probe component that reflects the current router location into the DOM so
+// tests can assert what the selector navigated to.
+const LocationProbe = () => {
+  const location = useLocation();
+  return (
+    <div
+      data-test-subj="locationProbe"
+      data-pathname={location.pathname}
+      data-search={location.search}
+    />
+  );
+};
 
-const renderSelector = (selectedId: string, opts: ApproachOption[] = options) =>
+const renderSelector = (
+  selectedId: string,
+  initialEntries: string[] = ['/host/linux'],
+  options: ApproachOption[] = buildOptions()
+) =>
   render(
     <I18nProvider>
-      <ApproachSelector legend="Choose approach" selectedId={selectedId} options={opts} />
+      <MemoryRouter initialEntries={initialEntries}>
+        <CompatRouter>
+          <ApproachSelector legend="Choose approach" selectedId={selectedId} options={options} />
+          <LocationProbe />
+        </CompatRouter>
+      </MemoryRouter>
     </I18nProvider>
   );
+
+const getLocation = () => {
+  const probe = screen.getByTestId('locationProbe');
+  return {
+    pathname: probe.getAttribute('data-pathname'),
+    search: probe.getAttribute('data-search'),
+  };
+};
 
 describe('ApproachSelector', () => {
   it('renders one card per option with the labels visible', () => {
@@ -55,36 +83,49 @@ describe('ApproachSelector', () => {
 
   it('reflects the selected option from the prop (not internal state)', () => {
     const { rerender } = renderSelector('otel');
-    expect(screen.getByTestId('approachSelectorCard-otel').getAttribute('aria-current')).toBe(
-      'page'
+    expect(screen.getByTestId('approachSelectorCard-otel').getAttribute('data-selected')).toBe(
+      'true'
     );
     expect(
-      screen.getByTestId('approachSelectorCard-auto-detect').getAttribute('aria-current')
-    ).toBeNull();
+      screen.getByTestId('approachSelectorCard-auto-detect').getAttribute('data-selected')
+    ).toBe('false');
 
     rerender(
       <I18nProvider>
-        <ApproachSelector legend="Choose approach" selectedId="auto-detect" options={options} />
+        <MemoryRouter initialEntries={['/host/linux']}>
+          <CompatRouter>
+            <ApproachSelector
+              legend="Choose approach"
+              selectedId="auto-detect"
+              options={buildOptions()}
+            />
+            <LocationProbe />
+          </CompatRouter>
+        </MemoryRouter>
       </I18nProvider>
     );
     expect(
-      screen.getByTestId('approachSelectorCard-auto-detect').getAttribute('aria-current')
-    ).toBe('page');
-    expect(screen.getByTestId('approachSelectorCard-otel').getAttribute('aria-current')).toBeNull();
+      screen.getByTestId('approachSelectorCard-auto-detect').getAttribute('data-selected')
+    ).toBe('true');
+    expect(screen.getByTestId('approachSelectorCard-otel').getAttribute('data-selected')).toBe(
+      'false'
+    );
   });
 
-  it('renders each option as a real anchor href so middle-click works', () => {
+  it('navigates to the option path when selecting an unselected card', () => {
     renderSelector('otel');
-    const eaLink = screen.getByTestId('approachSelectorCard-auto-detect') as HTMLAnchorElement;
-    expect(eaLink.tagName).toBe('A');
-    expect(eaLink.getAttribute('href')).toBe('/app/observabilityOnboarding/host/linux/auto-detect');
+    // The radio's accessible name is composed from its label content, so match
+    // by regex to tolerate the surrounding description text.
+    fireEvent.click(screen.getByRole('radio', { name: /Elastic Agent/ }));
+    expect(getLocation().pathname).toBe('/host/linux/auto-detect');
   });
 
-  it('invokes the option onClick on primary click so navigation stays in the SPA', () => {
-    const onClick = jest.fn();
-    renderSelector('otel', buildOptions({ onClick }));
-    fireEvent.click(screen.getByTestId('approachSelectorCard-auto-detect'));
-    expect(onClick).toHaveBeenCalledTimes(1);
+  it('does not navigate when re-selecting the already selected card', () => {
+    renderSelector('otel');
+    fireEvent.click(screen.getByRole('radio', { name: /OpenTelemetry/ }));
+    // The probe still shows the starting location because the radio's
+    // onChange does not fire when state doesn't change.
+    expect(getLocation().pathname).toBe('/host/linux');
   });
 
   it('exposes the group with its accessible label', () => {

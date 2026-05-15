@@ -8,8 +8,8 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { EuiStepsProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { reactRouterNavigate, useKibana } from '@kbn/kibana-react-plugin/public';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useLocation } from 'react-router-dom';
 import { useSearchParams } from 'react-router-dom-v5-compat';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { type LogsLocatorParams, LOGS_LOCATOR_ID } from '@kbn/logs-shared-plugin/common';
@@ -73,7 +73,6 @@ export const HostOtelPage: React.FC<HostOtelPageProps> = ({
 }) => {
   useFlowBreadcrumb({ text: breadcrumbLabel });
 
-  const history = useHistory();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   const ingestionMode = parseIngestionMode(searchParams.get('ingestion'));
@@ -136,14 +135,11 @@ export const HostOtelPage: React.FC<HostOtelPageProps> = ({
     onboardingFlowType: 'otel_logs',
     onboardingId: setupData?.onboardingId,
   });
-  // Install/start step completion is intentionally asymmetric with the visualize
-  // step. Window-blur is our proxy for "user left to install" so it gates the
-  // first two steps. Pre-existing data only means the cluster already had OTel
-  // host data before this flow started, which says nothing about whether *this
-  // user* installed anything, so it must not flip install/start to complete.
-  // The visualize step is allowed to short-circuit on pre-existing data because
-  // showing the get-started panel for already-present data is the desired UX.
-  const isInstallStepLikelyComplete = windowBlurred;
+  // Window-blur is our "user left to install" proxy and pre-existing data
+  // means the cluster already had OTel host data; either one is enough to
+  // start polling the has-data endpoint so the visualize step can light up
+  // when real data arrives. Neither signal is precise enough to mark the
+  // install/start steps complete (see step-status block below).
   const isMonitoringStepActive = windowBlurred || hasPreExistingDataEarly;
 
   const [sessionStartTime, setSessionStartTime] = useState<string | null>(null);
@@ -181,9 +177,9 @@ export const HostOtelPage: React.FC<HostOtelPageProps> = ({
   // Windows ships only the OTel approach in this flow because the Elastic Agent
   // auto-detect script is bash-only and has no PowerShell counterpart.
   const showApproachSelector = os !== 'windows';
-  const otelNav = reactRouterNavigate(history, `${routePath}${location.search}`);
-  const eaNav = showApproachSelector
-    ? reactRouterNavigate(history, `${routePath}/auto-detect${location.search}`)
+  const otelNavigateTo = `${routePath}${location.search}`;
+  const eaNavigateTo = showApproachSelector
+    ? `${routePath}/auto-detect${location.search}`
     : undefined;
 
   const logsLocator = share.url.locators.get<LogsLocatorParams>(LOGS_LOCATOR_ID);
@@ -241,7 +237,7 @@ export const HostOtelPage: React.FC<HostOtelPageProps> = ({
 
   const steps: EuiStepsProps['steps'] = useMemo(() => {
     const approachStep =
-      showApproachSelector && eaNav
+      showApproachSelector && eaNavigateTo
         ? {
             title: HOST_APPROACH_STEP_TITLE,
             // The approach step is a URL-driven branch picker, not a wizard step
@@ -252,15 +248,19 @@ export const HostOtelPage: React.FC<HostOtelPageProps> = ({
                 legend={HOST_APPROACH_SELECTOR_LEGEND}
                 selectedId="otel"
                 options={buildHostApproachOptions({
-                  os,
-                  otel: { href: otelNav.href, onClick: otelNav.onClick },
-                  elasticAgent: { href: eaNav.href, onClick: eaNav.onClick },
+                  otel: { navigateTo: otelNavigateTo },
+                  elasticAgent: { navigateTo: eaNavigateTo },
                 })}
               />
             ),
           }
         : null;
 
+    // OTel flow does not auto-mark steps as `complete` because the only
+    // signals we have (window-blur + has-data) are heuristics, and a green
+    // checkmark before the user has actually finished is misleading. Steps
+    // stay on `current` / `incomplete` and the body of each step shows the
+    // real progress (e.g. visualize gets a deeplink panel once data arrives).
     const installStep = error
       ? {
           title: installStepTitle,
@@ -276,7 +276,7 @@ export const HostOtelPage: React.FC<HostOtelPageProps> = ({
         }
       : {
           title: installStepTitle,
-          status: isInstallStepLikelyComplete ? ('complete' as const) : ('current' as const),
+          status: 'current' as const,
           children: (
             <OtelLogsInstallStep
               os={os}
@@ -299,7 +299,7 @@ export const HostOtelPage: React.FC<HostOtelPageProps> = ({
       title: i18n.translate('xpack.observability_onboarding.otelLogsPanel.steps.start', {
         defaultMessage: 'Start the collector',
       }),
-      status: isInstallStepLikelyComplete ? ('complete' as const) : ('incomplete' as const),
+      status: 'incomplete' as const,
       children: <OtelLogsStartStep os={os} />,
     };
 
@@ -307,12 +307,7 @@ export const HostOtelPage: React.FC<HostOtelPageProps> = ({
       title: i18n.translate('xpack.observability_onboarding.otelLogsPanel.steps.visualize', {
         defaultMessage: 'Visualize your data',
       }),
-      status:
-        hasData || hasPreExistingDataFinal
-          ? ('complete' as const)
-          : isMonitoringStepActive
-          ? ('current' as const)
-          : ('incomplete' as const),
+      status: isMonitoringStepActive ? ('current' as const) : ('incomplete' as const),
       children: (
         <OtelLogsVisualizeStep
           isMonitoringStepActive={isMonitoringStepActive}
@@ -332,8 +327,8 @@ export const HostOtelPage: React.FC<HostOtelPageProps> = ({
     os,
     showApproachSelector,
     installStepTitle,
-    otelNav,
-    eaNav,
+    otelNavigateTo,
+    eaNavigateTo,
     error,
     refetch,
     setupData,
@@ -343,7 +338,6 @@ export const HostOtelPage: React.FC<HostOtelPageProps> = ({
     isManagedOtlpServiceAvailable,
     wiredStreamsStatus,
     docLinks?.links.observability.logsStreams,
-    isInstallStepLikelyComplete,
     isMonitoringStepActive,
     hasData,
     hasPreExistingDataFinal,
