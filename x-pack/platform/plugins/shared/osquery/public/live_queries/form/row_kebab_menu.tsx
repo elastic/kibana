@@ -169,7 +169,7 @@ const RowKebabMenuContent: React.FC<RowKebabMenuProps> = React.memo(
           anchorPosition="downLeft"
           aria-label={kebabLabel}
         >
-          <EuiContextMenuPanel size="s" items={menuItems} />
+          <EuiContextMenuPanel items={menuItems} />
         </EuiPopover>
 
         {isExportModalOpen && (
