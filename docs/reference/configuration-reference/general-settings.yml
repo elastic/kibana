@@ -132,6 +132,17 @@ groups:
           ech: unavailable
           self: ga
 
+      - setting: status.statusPageBypassMonitorPrivilege
+        description: |
+          Allow all authenticated users to access the full {{kib}} server status API. When `false`, users are required to have the Elasticsearch `monitor` cluster privilege.
+          NOTE: This setting is only relevant if `status.allowAnonymous` is `false` (default).
+        datatype: bool
+        default: false
+        applies_to:
+          stack: ga
+          ech: unavailable
+          self: ga
+
   - group: Content Security Policy (CSP) settings
     id: csp-settings
     settings:
