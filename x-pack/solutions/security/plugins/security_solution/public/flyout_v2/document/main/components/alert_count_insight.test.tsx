@@ -62,7 +62,7 @@ const mockAlertData: ParsedAlertsData = {
   },
 };
 
-const openDetailsPanel = jest.fn();
+const onShowAlertCountDetails = jest.fn();
 
 const renderAlertCountInsight = () => {
   return render(
@@ -70,7 +70,7 @@ const renderAlertCountInsight = () => {
       <AlertCountInsight
         identityFields={{ 'host.name': name }}
         data-test-subj={testId}
-        openDetailsPanel={openDetailsPanel}
+        onShowAlertCountDetails={onShowAlertCountDetails}
       />
     </TestProviders>
   );
@@ -95,14 +95,14 @@ describe('AlertCountInsight', () => {
     expect(queryByTestId(INSIGHTS_ALERTS_COUNT_TEXT_TEST_ID)).not.toBeInTheDocument();
   });
 
-  it('open entity details panel when clicking on the count', () => {
+  it('shows alert count details when clicking on the count', () => {
     (useAlertsByStatus as jest.Mock).mockReturnValue({
       isLoading: false,
       items: mockAlertData,
     });
     const { getByTestId } = renderAlertCountInsight();
     getByTestId(INSIGHTS_ALERTS_COUNT_NAVIGATION_BUTTON_TEST_ID).click();
-    expect(openDetailsPanel).toHaveBeenCalled();
+    expect(onShowAlertCountDetails).toHaveBeenCalled();
   });
 
   it('renders loading spinner if data is being fetched', () => {

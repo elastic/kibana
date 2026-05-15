@@ -31,19 +31,13 @@ import {
 } from '../../../../cloud_security_posture/utils/build_euid_csp_preview_options';
 import { InsightDistributionBar } from './insight_distribution_bar';
 import { FormattedCount } from '../../../../common/components/formatted_number';
-import type { EntityDetailsPath } from '../../../entity_details/shared/components/left_panel/left_panel_header';
-import {
-  CspInsightLeftPanelSubTab,
-  EntityDetailsLeftPanelTab,
-} from '../../../entity_details/shared/components/left_panel/left_panel_header';
-import type { IdentityFields } from '../utils';
 import { useUiSetting } from '../../../../common/lib/kibana';
 
 interface VulnerabilitiesInsightProps {
   /**
    * Entity identifiers used to filter the vulnerabilities by.
    */
-  identityFields: IdentityFields;
+  identityFields: Record<string, string>;
   /**
    * The direction of the flex group
    */
@@ -57,9 +51,9 @@ interface VulnerabilitiesInsightProps {
    */
   telemetryKey?: CloudSecurityUiCounters;
   /**
-   * The function to open the details panel.
+   * Callback to show vulnerability details. When omitted, the count is rendered as plain text.
    */
-  openDetailsPanel: (path: EntityDetailsPath) => void;
+  onShowVulnerabilitiesDetails?: () => void;
 }
 
 /*
@@ -70,7 +64,7 @@ export const VulnerabilitiesInsight: React.FC<VulnerabilitiesInsightProps> = ({
   direction,
   'data-test-subj': dataTestSubj,
   telemetryKey,
-  openDetailsPanel,
+  onShowVulnerabilitiesDetails,
 }) => {
   const renderingId = useGeneratedHtmlId();
   const { euiTheme } = useEuiTheme();
@@ -136,30 +130,31 @@ export const VulnerabilitiesInsight: React.FC<VulnerabilitiesInsightProps> = ({
           margin-bottom: ${euiTheme.size.xs};
         `}
       >
-        <EuiToolTip
-          content={
-            <FormattedMessage
-              id="xpack.securitySolution.flyout.insights.vulnerabilities.vulnerabilitiesCountTooltip"
-              defaultMessage="Opens {count, plural, one {this vulnerability} other {these vulnerabilities}} in a new flyout"
-              values={{ count: totalVulnerabilities }}
-            />
-          }
-        >
-          <EuiLink
-            data-test-subj={`${dataTestSubj}-count`}
-            onClick={() =>
-              openDetailsPanel({
-                tab: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
-                subTab: CspInsightLeftPanelSubTab.VULNERABILITIES,
-              })
+        {onShowVulnerabilitiesDetails ? (
+          <EuiToolTip
+            content={
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.insights.vulnerabilities.vulnerabilitiesCountTooltip"
+                defaultMessage="Opens {count, plural, one {this vulnerability} other {these vulnerabilities}} in a new flyout"
+                values={{ count: totalVulnerabilities }}
+              />
             }
           >
+            <EuiLink
+              data-test-subj={`${dataTestSubj}-count`}
+              onClick={onShowVulnerabilitiesDetails}
+            >
+              <FormattedCount count={totalVulnerabilities} />
+            </EuiLink>
+          </EuiToolTip>
+        ) : (
+          <span data-test-subj={`${dataTestSubj}-count`}>
             <FormattedCount count={totalVulnerabilities} />
-          </EuiLink>
-        </EuiToolTip>
+          </span>
+        )}
       </div>
     ),
-    [totalVulnerabilities, dataTestSubj, euiTheme.size, openDetailsPanel]
+    [totalVulnerabilities, dataTestSubj, euiTheme.size, onShowVulnerabilitiesDetails]
   );
 
   if (!shouldRender) return null;

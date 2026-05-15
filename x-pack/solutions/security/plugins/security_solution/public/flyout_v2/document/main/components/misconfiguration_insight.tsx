@@ -30,12 +30,7 @@ import {
 import { InsightDistributionBar } from './insight_distribution_bar';
 import { useGetFindingsStats } from '../../../../cloud_security_posture/components/misconfiguration/misconfiguration_preview';
 import { FormattedCount } from '../../../../common/components/formatted_number';
-import type { EntityDetailsPath } from '../../../entity_details/shared/components/left_panel/left_panel_header';
 import { useUiSetting } from '../../../../common/lib/kibana';
-import {
-  CspInsightLeftPanelSubTab,
-  EntityDetailsLeftPanelTab,
-} from '../../../entity_details/shared/components/left_panel/left_panel_header';
 
 interface MisconfigurationsInsightProps {
   /**
@@ -55,9 +50,9 @@ interface MisconfigurationsInsightProps {
    */
   telemetryKey?: CloudSecurityUiCounters;
   /**
-   * The function to open the details panel.
+   * Callback to show misconfiguration details. When omitted, the count is rendered as plain text.
    */
-  openDetailsPanel: (path: EntityDetailsPath) => void;
+  onShowMisconfigurationsDetails?: () => void;
 }
 
 /*
@@ -68,7 +63,7 @@ export const MisconfigurationsInsight: React.FC<MisconfigurationsInsightProps> =
   direction,
   'data-test-subj': dataTestSubj,
   telemetryKey,
-  openDetailsPanel,
+  onShowMisconfigurationsDetails,
 }) => {
   const renderingId = useGeneratedHtmlId();
   const { euiTheme } = useEuiTheme();
@@ -109,30 +104,31 @@ export const MisconfigurationsInsight: React.FC<MisconfigurationsInsightProps> =
           margin-bottom: ${euiTheme.size.xs};
         `}
       >
-        <EuiToolTip
-          content={
-            <FormattedMessage
-              id="xpack.securitySolution.flyout.insights.misconfiguration.misconfigurationCountTooltip"
-              defaultMessage="Opens {count, plural, one {this misconfiguration} other {these misconfigurations}} in a new flyout"
-              values={{ count: totalFindings }}
-            />
-          }
-        >
-          <EuiLink
-            data-test-subj={`${dataTestSubj}-count`}
-            onClick={() =>
-              openDetailsPanel({
-                tab: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
-                subTab: CspInsightLeftPanelSubTab.MISCONFIGURATIONS,
-              })
+        {onShowMisconfigurationsDetails ? (
+          <EuiToolTip
+            content={
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.insights.misconfiguration.misconfigurationCountTooltip"
+                defaultMessage="Opens {count, plural, one {this misconfiguration} other {these misconfigurations}} in a new flyout"
+                values={{ count: totalFindings }}
+              />
             }
           >
+            <EuiLink
+              data-test-subj={`${dataTestSubj}-count`}
+              onClick={onShowMisconfigurationsDetails}
+            >
+              <FormattedCount count={totalFindings} />
+            </EuiLink>
+          </EuiToolTip>
+        ) : (
+          <span data-test-subj={`${dataTestSubj}-count`}>
             <FormattedCount count={totalFindings} />
-          </EuiLink>
-        </EuiToolTip>
+          </span>
+        )}
       </div>
     ),
-    [totalFindings, dataTestSubj, euiTheme.size, openDetailsPanel]
+    [totalFindings, dataTestSubj, euiTheme.size, onShowMisconfigurationsDetails]
   );
 
   if (!shouldRender) return null;

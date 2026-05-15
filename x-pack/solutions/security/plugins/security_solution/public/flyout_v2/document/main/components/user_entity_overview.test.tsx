@@ -9,7 +9,8 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
 import { useMisconfigurationPreview } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview';
-import { USER_PREVIEW_BANNER, UserEntityOverview } from './user_entity_overview';
+import { UserEntityOverview, USER_PREVIEW_BANNER } from './user_entity_overview';
+import { UserPreviewPanelKey } from '../../../../flyout/entity_details/user_right';
 import { useFirstLastSeen } from '../../../../common/containers/use_first_last_seen';
 import {
   ENTITIES_USER_OVERVIEW_ALERT_COUNT_TEST_ID,
@@ -19,16 +20,16 @@ import {
   ENTITIES_USER_OVERVIEW_LOADING_TEST_ID,
   ENTITIES_USER_OVERVIEW_MISCONFIGURATIONS_TEST_ID,
   ENTITIES_USER_OVERVIEW_RISK_LEVEL_TEST_ID,
+  INSIGHTS_ALERTS_COUNT_NAVIGATION_BUTTON_TEST_ID,
 } from './test_ids';
 import { useObservedUserDetails } from '../../../../explore/users/containers/users/observed_details';
-import { mockContextValue } from '../../shared/mocks/mock_context';
-import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
-import { DocumentDetailsContext } from '../../shared/context';
+import { mockContextValue } from '../../../../flyout/document_details/shared/mocks/mock_context';
+import { mockDataFormattedForFieldBrowser } from '../../../../flyout/document_details/shared/mocks/mock_data_formatted_for_field_browser';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { mockFlyoutApi } from '../../shared/mocks/mock_flyout_context';
-import { UserPreviewPanelKey } from '../../../entity_details/user_right';
+import { mockFlyoutApi } from '../../../../flyout/document_details/shared/mocks/mock_flyout_context';
 import { useAlertsByStatus } from '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
+import { createTelemetryServiceMock } from '../../../../common/lib/telemetry/telemetry_service.mock';
 
 const userName = 'user';
 const identityFields = { 'user.name': userName };
@@ -49,13 +50,16 @@ const panelContextValue = {
 jest.mock('@kbn/expandable-flyout');
 jest.mock('@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview');
 
-jest.mock('../../../../common/lib/kibana');
+jest.mock('../../../../common/hooks/use_experimental_features', () => ({
+  useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
+}));
 
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const actual = jest.requireActual('@kbn/kibana-react-plugin/public');
+const mockedTelemetry = createTelemetryServiceMock();
+jest.mock('../../../../common/lib/kibana', () => {
+  const originalModule = jest.requireActual('../../../../common/lib/kibana');
   return {
-    ...actual,
-    useUiSetting: jest.fn().mockReturnValue(false),
+    ...originalModule,
+    useKibana: () => ({ services: { telemetry: mockedTelemetry } }),
   };
 });
 
@@ -103,9 +107,11 @@ jest.mock('../../../../common/containers/use_first_last_seen');
 const renderUserEntityOverview = () =>
   render(
     <TestProviders>
-      <DocumentDetailsContext.Provider value={panelContextValue}>
-        <UserEntityOverview userName={userName} identityFields={identityFields} />
-      </DocumentDetailsContext.Provider>
+      <UserEntityOverview
+        userName={userName}
+        identityFields={identityFields}
+        scopeId={panelContextValue.scopeId}
+      />
     </TestProviders>
   );
 
@@ -168,9 +174,11 @@ describe('<UserEntityOverview />', () => {
 
       const { getByTestId, queryByTestId } = render(
         <TestProviders>
-          <DocumentDetailsContext.Provider value={panelContextValue}>
-            <UserEntityOverview userName={userName} identityFields={identityFields} />
-          </DocumentDetailsContext.Provider>
+          <UserEntityOverview
+            userName={userName}
+            identityFields={identityFields}
+            scopeId={panelContextValue.scopeId}
+          />
         </TestProviders>
       );
       expect(getByTestId(ENTITIES_USER_OVERVIEW_LOADING_TEST_ID)).toBeInTheDocument();
@@ -183,24 +191,42 @@ describe('<UserEntityOverview />', () => {
 
       const { getByTestId, queryByTestId } = render(
         <TestProviders>
-          <DocumentDetailsContext.Provider value={panelContextValue}>
-            <UserEntityOverview userName={userName} identityFields={identityFields} />
-          </DocumentDetailsContext.Provider>
+          <UserEntityOverview
+            userName={userName}
+            identityFields={identityFields}
+            scopeId={panelContextValue.scopeId}
+          />
         </TestProviders>
       );
       expect(getByTestId(ENTITIES_USER_OVERVIEW_LOADING_TEST_ID)).toBeInTheDocument();
       expect(queryByTestId(ENTITIES_USER_OVERVIEW_DOMAIN_TEST_ID)).not.toBeInTheDocument();
     });
 
-    it('should open user preview', () => {
+    it('renders the user name as plain text by default (Flyout v2 / Discover)', () => {
+      mockUseUserDetails.mockReturnValue([false, { userDetails: userData }]);
+      mockUseRiskScore.mockReturnValue({ data: riskLevel, isAuthorized: true });
+
+      const { getByTestId } = renderUserEntityOverview();
+
+      const container = getByTestId(ENTITIES_USER_OVERVIEW_LINK_TEST_ID);
+      expect(container).toHaveTextContent(userName);
+      expect(container.querySelector('a, button')).toBeNull();
+      container.click();
+      expect(mockFlyoutApi.openPreviewPanel).not.toHaveBeenCalled();
+    });
+
+    it('opens user preview when clicking on title with enableEntityLinks', () => {
       mockUseUserDetails.mockReturnValue([false, { userDetails: userData }]);
       mockUseRiskScore.mockReturnValue({ data: riskLevel, isAuthorized: true });
 
       const { getByTestId } = render(
         <TestProviders>
-          <DocumentDetailsContext.Provider value={panelContextValue}>
-            <UserEntityOverview userName={userName} identityFields={identityFields} />
-          </DocumentDetailsContext.Provider>
+          <UserEntityOverview
+            userName={userName}
+            identityFields={identityFields}
+            scopeId={panelContextValue.scopeId}
+            enableEntityLinks
+          />
         </TestProviders>
       );
 
@@ -208,10 +234,10 @@ describe('<UserEntityOverview />', () => {
       expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
         id: UserPreviewPanelKey,
         params: {
+          contextID: panelContextValue.scopeId,
           userName,
-          scopeId: mockContextValue.scopeId,
+          scopeId: panelContextValue.scopeId,
           banner: USER_PREVIEW_BANNER,
-          contextID: mockContextValue.scopeId,
           entityId: undefined,
         },
       });
@@ -240,6 +266,39 @@ describe('<UserEntityOverview />', () => {
 
       const { getByTestId } = renderUserEntityOverview();
       expect(getByTestId(ENTITIES_USER_OVERVIEW_ALERT_COUNT_TEST_ID)).toBeInTheDocument();
+    });
+
+    it('opens user alert details when clicking alert count with enableEntityLinks', () => {
+      (useAlertsByStatus as jest.Mock).mockReturnValue({
+        isLoading: false,
+        items: mockAlertData,
+      });
+      mockFlyoutApi.openFlyout.mockClear();
+
+      const { getByTestId } = render(
+        <TestProviders>
+          <UserEntityOverview
+            userName={userName}
+            identityFields={identityFields}
+            scopeId={panelContextValue.scopeId}
+            enableEntityLinks
+          />
+        </TestProviders>
+      );
+
+      getByTestId(INSIGHTS_ALERTS_COUNT_NAVIGATION_BUTTON_TEST_ID).click();
+      expect(mockFlyoutApi.openFlyout).toHaveBeenCalledWith(
+        expect.objectContaining({
+          left: expect.objectContaining({
+            params: expect.objectContaining({
+              path: {
+                tab: 'csp_insights',
+                subTab: 'alertsTabId',
+              },
+            }),
+          }),
+        })
+      );
     });
 
     it('should render misconfiguration when data is available', () => {

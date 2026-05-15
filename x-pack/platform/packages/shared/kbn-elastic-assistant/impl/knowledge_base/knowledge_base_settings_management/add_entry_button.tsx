@@ -74,7 +74,7 @@ export const AddEntryButton: React.FC<Props> = React.memo(
             iconSide="right"
             onClick={onButtonClick}
           >
-            <EuiIcon type="plusCircle" />
+            <EuiIcon type="plusCircle" aria-hidden={true} />
             {i18n.NEW}
           </EuiButton>
         }
@@ -82,7 +82,7 @@ export const AddEntryButton: React.FC<Props> = React.memo(
         closePopover={closePopover}
         anchorPosition="downLeft"
       >
-        <EuiContextMenuPanel size="s" items={items} />
+        <EuiContextMenuPanel items={items} />
       </EuiPopover>
     ) : null;
   }

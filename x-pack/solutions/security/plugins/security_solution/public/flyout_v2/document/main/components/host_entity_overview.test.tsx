@@ -10,6 +10,7 @@ import { useMisconfigurationPreview } from '@kbn/cloud-security-posture/src/hook
 import { useVulnerabilitiesPreview } from '@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_preview';
 import { TestProviders } from '../../../../common/mock';
 import { HostEntityOverview, HOST_PREVIEW_BANNER } from './host_entity_overview';
+import { HostPreviewPanelKey } from '../../../../flyout/entity_details/host_right';
 import { useHostDetails } from '../../../../explore/hosts/containers/hosts/details';
 import { useFirstLastSeen } from '../../../../common/containers/use_first_last_seen';
 import {
@@ -21,14 +22,13 @@ import {
   ENTITIES_HOST_OVERVIEW_MISCONFIGURATIONS_TEST_ID,
   ENTITIES_HOST_OVERVIEW_VULNERABILITIES_TEST_ID,
   ENTITIES_HOST_OVERVIEW_ALERT_COUNT_TEST_ID,
+  INSIGHTS_ALERTS_COUNT_NAVIGATION_BUTTON_TEST_ID,
 } from './test_ids';
-import { DocumentDetailsContext } from '../../shared/context';
-import { mockContextValue } from '../../shared/mocks/mock_context';
-import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
+import { mockContextValue } from '../../../../flyout/document_details/shared/mocks/mock_context';
+import { mockDataFormattedForFieldBrowser } from '../../../../flyout/document_details/shared/mocks/mock_data_formatted_for_field_browser';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { HostPreviewPanelKey } from '../../../entity_details/host_right';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
-import { mockFlyoutApi } from '../../shared/mocks/mock_flyout_context';
+import { mockFlyoutApi } from '../../../../flyout/document_details/shared/mocks/mock_flyout_context';
 import { createTelemetryServiceMock } from '../../../../common/lib/telemetry/telemetry_service.mock';
 import { useAlertsByStatus } from '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
 
@@ -113,9 +113,11 @@ jest.mock('../../../../common/containers/use_first_last_seen');
 const renderHostEntityContent = () =>
   render(
     <TestProviders>
-      <DocumentDetailsContext.Provider value={panelContextValue}>
-        <HostEntityOverview hostName={hostName} identityFields={identityFields} />
-      </DocumentDetailsContext.Provider>
+      <HostEntityOverview
+        hostName={hostName}
+        identityFields={identityFields}
+        scopeId={panelContextValue.scopeId}
+      />
     </TestProviders>
   );
 
@@ -155,9 +157,11 @@ describe('<HostEntityContent />', () => {
 
     const { getByTestId } = render(
       <TestProviders>
-        <DocumentDetailsContext.Provider value={panelContextValue}>
-          <HostEntityOverview hostName={hostName} identityFields={identityFields} />
-        </DocumentDetailsContext.Provider>
+        <HostEntityOverview
+          hostName={hostName}
+          identityFields={identityFields}
+          scopeId={panelContextValue.scopeId}
+        />
       </TestProviders>
     );
     expect(getByTestId(ENTITIES_HOST_OVERVIEW_LOADING_TEST_ID)).toBeInTheDocument();
@@ -169,9 +173,11 @@ describe('<HostEntityContent />', () => {
 
     const { getByTestId } = render(
       <TestProviders>
-        <DocumentDetailsContext.Provider value={panelContextValue}>
-          <HostEntityOverview hostName={hostName} identityFields={identityFields} />
-        </DocumentDetailsContext.Provider>
+        <HostEntityOverview
+          hostName={hostName}
+          identityFields={identityFields}
+          scopeId={panelContextValue.scopeId}
+        />
       </TestProviders>
     );
     expect(getByTestId(ENTITIES_HOST_OVERVIEW_LOADING_TEST_ID)).toBeInTheDocument();
@@ -201,19 +207,41 @@ describe('<HostEntityContent />', () => {
       expect(getByTestId(ENTITIES_HOST_OVERVIEW_LAST_SEEN_TEST_ID)).toHaveTextContent('—');
     });
 
-    it('should open host preview when clicking on title', () => {
+    it('renders the host name as plain text by default (Flyout v2 / Discover)', () => {
       mockUseHostDetails.mockReturnValue([false, { hostDetails: hostData }]);
       mockUseRiskScore.mockReturnValue({ data: riskLevel, isAuthorized: true });
 
       const { getByTestId } = renderHostEntityContent();
 
+      const container = getByTestId(ENTITIES_HOST_OVERVIEW_LINK_TEST_ID);
+      expect(container).toHaveTextContent(hostName);
+      expect(container.querySelector('a, button')).toBeNull();
+      container.click();
+      expect(mockFlyoutApi.openPreviewPanel).not.toHaveBeenCalled();
+    });
+
+    it('opens host preview when clicking on title with enableEntityLinks', () => {
+      mockUseHostDetails.mockReturnValue([false, { hostDetails: hostData }]);
+      mockUseRiskScore.mockReturnValue({ data: riskLevel, isAuthorized: true });
+
+      const { getByTestId } = render(
+        <TestProviders>
+          <HostEntityOverview
+            hostName={hostName}
+            identityFields={identityFields}
+            scopeId={panelContextValue.scopeId}
+            enableEntityLinks
+          />
+        </TestProviders>
+      );
+
       getByTestId(ENTITIES_HOST_OVERVIEW_LINK_TEST_ID).click();
       expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
         id: HostPreviewPanelKey,
         params: {
-          contextID: mockContextValue.scopeId,
+          contextID: panelContextValue.scopeId,
           hostName,
-          scopeId: mockContextValue.scopeId,
+          scopeId: panelContextValue.scopeId,
           banner: HOST_PREVIEW_BANNER,
           entityId: undefined,
         },
@@ -244,6 +272,39 @@ describe('<HostEntityContent />', () => {
 
       const { getByTestId } = renderHostEntityContent();
       expect(getByTestId(ENTITIES_HOST_OVERVIEW_ALERT_COUNT_TEST_ID)).toBeInTheDocument();
+    });
+
+    it('opens host alert details when clicking alert count with enableEntityLinks', () => {
+      (useAlertsByStatus as jest.Mock).mockReturnValue({
+        isLoading: false,
+        items: mockAlertData,
+      });
+      mockFlyoutApi.openFlyout.mockClear();
+
+      const { getByTestId } = render(
+        <TestProviders>
+          <HostEntityOverview
+            hostName={hostName}
+            identityFields={identityFields}
+            scopeId={panelContextValue.scopeId}
+            enableEntityLinks
+          />
+        </TestProviders>
+      );
+
+      getByTestId(INSIGHTS_ALERTS_COUNT_NAVIGATION_BUTTON_TEST_ID).click();
+      expect(mockFlyoutApi.openFlyout).toHaveBeenCalledWith(
+        expect.objectContaining({
+          left: expect.objectContaining({
+            params: expect.objectContaining({
+              path: {
+                tab: 'csp_insights',
+                subTab: 'alertsTabId',
+              },
+            }),
+          }),
+        })
+      );
     });
 
     it('should render misconfiguration when data is available', () => {

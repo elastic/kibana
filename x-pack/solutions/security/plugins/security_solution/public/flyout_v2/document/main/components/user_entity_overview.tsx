@@ -23,24 +23,27 @@ import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/u
 import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { buildEuidCspPreviewOptions } from '../../../../cloud_security_posture/utils/build_euid_csp_preview_options';
+import { useNonClosedAlerts } from '../../../../cloud_security_posture/hooks/use_non_closed_alerts';
+import { useNavigateToUserDetails } from '../../../../flyout/entity_details/user_right/hooks/use_navigate_to_user_details';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
 import { buildUserNamesFilter } from '../../../../../common/search_strategy';
+import type { UserEntity } from '../../../../../common/api/entity_analytics';
 import type { ESQuery } from '../../../../../common/typed_json';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { useNonClosedAlerts } from '../../../../cloud_security_posture/hooks/use_non_closed_alerts';
-import { useDocumentDetailsContext } from '../../shared/context';
-import type { EntityStoreRecord } from '../../../entity_details/shared/hooks/use_entity_from_store';
-import { getRiskFromEntityRecord } from '../../../entity_details/shared/entity_store_risk_utils';
+import { getRiskFromEntityRecord } from '../../../../flyout/entity_details/shared/entity_store_risk_utils';
 import { PreferenceFormattedDateFromPrimitive } from '../../../../common/components/formatted_date';
 import type { DescriptionList } from '../../../../../common/utility_types';
-import type { IdentityFields } from '../../shared/utils';
+import type { IdentityFields } from '../../../../flyout/document_details/shared/utils';
 import {
   getField,
   isRiskSeverity,
   mergeLegacyIdentityWhenStoreEntityMissing,
   normalizeRiskLevel,
-} from '../../shared/utils';
-import { CellActions } from '../../shared/components/cell_actions';
+} from '../../../../flyout/document_details/shared/utils';
+import {
+  noopCellActionRenderer,
+  type CellActionRenderer,
+} from '../../../shared/components/cell_actions';
 import {
   FirstLastSeen,
   FirstLastSeenType,
@@ -70,15 +73,17 @@ import {
 } from './test_ids';
 import { useObservedUserDetails } from '../../../../explore/users/containers/users/observed_details';
 import { RiskScoreDocTooltip } from '../../../../overview/components/common';
-import { PreviewLink } from '../../../shared/components/preview_link';
-import { MisconfigurationsInsight } from '../../shared/components/misconfiguration_insight';
-import { AlertCountInsight } from '../../shared/components/alert_count_insight';
-import { useNavigateToUserDetails } from '../../../entity_details/user_right/hooks/use_navigate_to_user_details';
+import { MisconfigurationsInsight } from './misconfiguration_insight';
+import { AlertCountInsight } from './alert_count_insight';
+import { PreviewLink } from '../../../../flyout/shared/components/preview_link';
 import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../../../overview/components/detection_response/alerts_by_status/types';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 
 const USER_ICON = 'user';
 const USER_ENTITY_OVERVIEW_ID = 'user-entity-overview';
+const CSP_INSIGHTS_TAB_ID = 'csp_insights';
+const MISCONFIGURATIONS_TAB_ID = 'misconfigurationTabId';
+const ALERTS_TAB_ID = 'alertsTabId';
 
 export interface UserEntityOverviewProps {
   userName: string;
@@ -86,16 +91,30 @@ export interface UserEntityOverviewProps {
   /**
    * These identity fields for the user are wrong and need to be fixed
    */
-  identityFields: Record<string, string>;
+  identityFields?: Record<string, string>;
   /**
    * When provided (e.g. from parent EntitiesOverview), use this record for risk/display
    * so Overview section uses the same entity store data used to decide visibility.
    */
-  entityRecord?: EntityStoreRecord | null;
+  entityRecord?: UserEntity | null;
+  /**
+   * Scope id used by cell actions and preview link.
+   */
+  scopeId?: string;
+  /**
+   * Renderer for cell actions on field values. Falls back to a no-op when not provided.
+   */
+  renderCellActions?: CellActionRenderer;
+  /**
+   * When true, renders the user name as a preview link and the alert/misconfig chips
+   * as clickable counts. Set by the legacy expandable flyout host. Flyout v2 and Discover
+   * leave this off so everything renders as plain text.
+   */
+  enableEntityLinks?: boolean;
 }
 
 export const USER_PREVIEW_BANNER = {
-  title: i18n.translate('xpack.securitySolution.flyout.right.user.userPreviewTitle', {
+  title: i18n.translate('xpack.securitySolution.flyout.document.user.userPreviewTitle', {
     defaultMessage: 'Preview user details',
   }),
   backgroundColor: 'warning',
@@ -109,11 +128,13 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
   userName,
   identityFields,
   entityRecord,
+  scopeId = '',
+  renderCellActions = noopCellActionRenderer,
+  enableEntityLinks = false,
 }) => {
-  const { scopeId } = useDocumentDetailsContext();
   const { from, to } = useGlobalTime();
   const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView();
-  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
+  const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
   const euidApi = useEntityStoreEuidApi();
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
@@ -220,6 +241,7 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
     isPreviewMode: true, // setting to true to always open a new user flyout
     contextID: 'UserEntityOverview',
   });
+  type UserDetailsPath = Parameters<typeof openDetailsPanel>[0];
 
   const userDetailsForDomain = entityStoreV2Enabled ? entityRecord : userDetails;
   const userDomainValue = useMemo(
@@ -230,16 +252,17 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
     () => [
       {
         title: USER_DOMAIN,
-        description: userDomainValue ? (
-          <CellActions field={'user.domain'} value={userDomainValue}>
-            {userDomainValue}
-          </CellActions>
-        ) : (
-          getEmptyTagValue()
-        ),
+        description: userDomainValue
+          ? renderCellActions({
+              field: 'user.domain',
+              value: userDomainValue,
+              scopeId,
+              children: <>{userDomainValue}</>,
+            }) ?? getEmptyTagValue()
+          : getEmptyTagValue(),
       },
     ],
-    [userDomainValue]
+    [userDomainValue, renderCellActions, scopeId]
   );
 
   const userLastSeen: DescriptionList[] = useMemo(
@@ -311,6 +334,7 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
   }, [userRiskData]);
 
   const displayName = entityRecord?.entity?.name ?? userName;
+
   return (
     <EuiFlexGroup
       direction="column"
@@ -324,14 +348,26 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
             <EuiIcon type={USER_ICON} aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <PreviewLink
-              field="user.name"
-              value={userName}
-              entityId={entityRecord?.entity?.id}
-              scopeId={scopeId}
-              data-test-subj={ENTITIES_USER_OVERVIEW_LINK_TEST_ID}
-            >
+            {enableEntityLinks ? (
+              <PreviewLink
+                field="user.name"
+                value={displayName}
+                entityId={entityRecord?.entity?.id}
+                scopeId={scopeId}
+                data-test-subj={ENTITIES_USER_OVERVIEW_LINK_TEST_ID}
+              >
+                <EuiText
+                  css={css`
+                    font-size: ${xsFontSize};
+                    font-weight: ${euiTheme.font.weight.bold};
+                  `}
+                >
+                  {displayName}
+                </EuiText>
+              </PreviewLink>
+            ) : (
               <EuiText
+                data-test-subj={ENTITIES_USER_OVERVIEW_LINK_TEST_ID}
                 css={css`
                   font-size: ${xsFontSize};
                   font-weight: ${euiTheme.font.weight.bold};
@@ -339,7 +375,7 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
               >
                 {displayName}
               </EuiText>
-            </PreviewLink>
+            )}
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
@@ -347,7 +383,7 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
         {isLoading ? (
           <EuiSkeletonText
             contentAriaLabel={i18n.translate(
-              'xpack.securitySolution.flyout.right.insights.entities.userLoadingAriaLabel',
+              'xpack.securitySolution.flyout.document.insights.entities.userLoadingAriaLabel',
               { defaultMessage: 'user overview' }
             )}
             data-test-subj={ENTITIES_USER_OVERVIEW_LOADING_TEST_ID}
@@ -381,12 +417,28 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
         identityFields={userIdentityFields}
         entityType={EntityType.user}
         queryId={`${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}-${USER_ENTITY_OVERVIEW_ID}`}
-        openDetailsPanel={openDetailsPanel}
+        onShowAlertCountDetails={
+          enableEntityLinks
+            ? () =>
+                openDetailsPanel({
+                  tab: CSP_INSIGHTS_TAB_ID,
+                  subTab: ALERTS_TAB_ID,
+                } as UserDetailsPath)
+            : undefined
+        }
         data-test-subj={ENTITIES_USER_OVERVIEW_ALERT_COUNT_TEST_ID}
       />
       <MisconfigurationsInsight
         identityFields={userIdentityFields}
-        openDetailsPanel={openDetailsPanel}
+        onShowMisconfigurationsDetails={
+          enableEntityLinks
+            ? () =>
+                openDetailsPanel({
+                  tab: CSP_INSIGHTS_TAB_ID,
+                  subTab: MISCONFIGURATIONS_TAB_ID,
+                } as UserDetailsPath)
+            : undefined
+        }
         data-test-subj={ENTITIES_USER_OVERVIEW_MISCONFIGURATIONS_TEST_ID}
         telemetryKey={MISCONFIGURATION_INSIGHT_USER_ENTITY_OVERVIEW}
       />
