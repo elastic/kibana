@@ -26,7 +26,7 @@ import { useGetCaseConnectors } from '../../../containers/use_get_case_connector
 import { useCasesFeatures } from '../../../common/use_cases_features';
 import { useGetCurrentUserProfile } from '../../../containers/user_profiles/use_get_current_user_profile';
 import { useGetSupportedActionConnectors } from '../../../containers/configure/use_get_supported_action_connectors';
-import type { CaseUICustomField, UseFetchAlertData } from '../../../../common/ui/types';
+import type { CaseUICustomField } from '../../../../common/ui/types';
 import type { EditConnectorProps } from '../../edit_connector';
 import { EditConnector } from '../../edit_connector';
 import type { CasesNavigation } from '../../links';
@@ -61,18 +61,12 @@ import { useRefreshCaseViewPage } from '../use_on_refresh_case_view_page';
 const LOCALSTORAGE_SORT_ORDER_KEY = 'cases.userActivity.sortOrder';
 
 export const CaseViewActivity = ({
-  ruleDetailsNavigation,
   caseData,
   searchTerm,
   actionsNavigation,
-  showAlertDetails,
-  useFetchAlertData,
 }: {
-  ruleDetailsNavigation?: CasesNavigation<string | null | undefined, 'configurable'>;
   caseData: CaseUI;
   actionsNavigation?: CasesNavigation<string, 'configurable'>;
-  showAlertDetails?: (alertId: string, index: string) => void;
-  useFetchAlertData: UseFetchAlertData;
   searchTerm?: string;
 }) => {
   const [sortOrder, setSortOrder] = useCasesLocalStorage<UserActivitySortOrder>(
@@ -262,13 +256,10 @@ export const CaseViewActivity = ({
               <UserActions
                 userProfiles={userProfiles}
                 currentUserProfile={currentUserProfile}
-                getRuleDetailsHref={ruleDetailsNavigation?.href}
-                onRuleDetailsClick={ruleDetailsNavigation?.onClick}
                 caseConnectors={caseConnectors}
                 data={caseData}
                 casesConfiguration={casesConfiguration}
                 actionsNavigation={actionsNavigation}
-                onShowAlertDetails={showAlertDetails}
                 onUpdateField={onUpdateField}
                 statusActionButton={
                   permissions.update ? (
@@ -283,7 +274,6 @@ export const CaseViewActivity = ({
                     />
                   ) : null
                 }
-                useFetchAlertData={useFetchAlertData}
                 userActivityQueryParams={userActivityQueryParams}
                 userActionsStats={userActionsStats}
               />

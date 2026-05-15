@@ -17,19 +17,8 @@ import type {
 import {
   isLegacyEventAttachment,
   isUnifiedEventAttachment,
+  isUnifiedAlertAttachment,
 } from '../../../../common/utils/attachments';
-
-export const getManualAlertIds = (comments: AttachmentUIV2[]): string[] => {
-  const dedupeAlerts = comments.reduce((alertIds, comment: AttachmentUIV2) => {
-    if (comment.type === AttachmentType.alert && `alertId` in comment) {
-      const ids = Array.isArray(comment.alertId) ? comment.alertId : [comment.alertId];
-      ids.forEach((id) => alertIds.add(id));
-      return alertIds;
-    }
-    return alertIds;
-  }, new Set<string>());
-  return Array.from(dedupeAlerts);
-};
 
 const isAlertAttachment = (comment: AttachmentUIV2): comment is AlertAttachmentUI => {
   return comment.type === AttachmentType.alert && `alertId` in comment;
@@ -97,7 +86,7 @@ export const filterCaseAttachmentsBySearchTerm = (caseData: CaseUI, searchTerm: 
         if (isLegacyEventAttachment(comment)) {
           return filterLegacyEventCommentByIds(comment, searchTerm);
         }
-        if (isUnifiedEventAttachment(comment)) {
+        if (isUnifiedEventAttachment(comment) || isUnifiedAlertAttachment(comment)) {
           return filterUnifiedCommentById(comment, searchTerm);
         }
         return comment;

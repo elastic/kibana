@@ -33,7 +33,8 @@ export interface ExternalReferenceAttachmentType {
   id: string;
   /**
    * A function to validate data stored with the attachment type. This function should throw an error
-   * if the data is not in the form it expects.
+   * if the data is not in the form it expects. For **unified reference** types registered on the
+   * unified registry, the full `UnifiedReferenceAttachmentPayload` is passed (not metadata alone).
    */
   schemaValidator?: (data: unknown) => void;
 }

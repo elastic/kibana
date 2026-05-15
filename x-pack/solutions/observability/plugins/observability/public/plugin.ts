@@ -84,6 +84,7 @@ import type { ObservabilityAgentBuilderPluginPublicStart } from '@kbn/observabil
 import type { CPSPluginStart } from '@kbn/cps/public/types';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { observabilityAppId, observabilityFeatureId } from '../common';
+import { getObservabilityAlertType } from './cases/attachments/alert';
 import {
   ALERTS_PATH,
   CASES_PATH,
@@ -257,6 +258,7 @@ export class Plugin
           },
         })
       );
+      pluginsSetup.cases.attachmentFramework.registerUnified(getObservabilityAlertType());
     }
     const category = DEFAULT_APP_CATEGORIES.observability;
     const euiIconType = 'logoObservability';

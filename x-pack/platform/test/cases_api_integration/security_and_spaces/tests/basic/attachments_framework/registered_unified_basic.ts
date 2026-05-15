@@ -53,6 +53,9 @@ export default ({ getService }: FtrProviderContext): void => {
           comment: '118a9989815489c24b81b160782015890ed2085e',
           'security.endpoint': '16a05a198eed9dda49ac2997921142b7b6b602d9',
           'security.event': '0337735d3e57178e44b426e41e616aae57fd794d',
+          'security.alert': '1bd2e2db3314929fbd4b03feae1010c09b2e97cd',
+          'observability.alert': 'fd6ee185111ca9bd45e98e5414428399583a7e5e',
+          'stack.alert': '3c45f9f2b29831df4d9c7262c59d3a7e2f29b9ee',
         });
       });
     });
