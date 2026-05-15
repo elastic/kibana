@@ -87,7 +87,7 @@ export function QualitiesSelector({
       button={button}
       isOpen={isPopoverOpen}
       closePopover={closePopover}
-      panelPaddingSize="none"
+      panelPaddingSize="s"
     >
       <EuiSelectable
         data-test-subj="datasetQualityQualitiesSelectable"

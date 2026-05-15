@@ -558,7 +558,7 @@ export class DiscoverApp {
   async runRecommendedEsqlQuery(queryLabel: string) {
     await this.openRecommendedQueriesPanel();
 
-    const queryOption = this.esqlMenuPopover.getByRole('button', {
+    const queryOption = this.esqlMenuPopover.getByRole('menuitem', {
       exact: true,
       name: queryLabel,
     });

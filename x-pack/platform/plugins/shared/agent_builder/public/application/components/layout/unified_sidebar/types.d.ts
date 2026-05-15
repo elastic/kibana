@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-export const TOOLTIP = '[role="tooltip"]';
-
-export const BASIC_TABLE_LOADING = '.euiBasicTable.euiBasicTable-loading';
-
-export const COMBO_BOX_OPTION = '.euiComboBoxOptionsList .euiComboBoxOption';
-
-export const CODE_BLOCK = '.euiCodeBlock';
+declare module '@elastic/eui/es/components/icon/icon_map' {
+  export const typeToPathMap: Record<string, () => Promise<unknown>>;
+}

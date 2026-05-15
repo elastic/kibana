@@ -121,7 +121,6 @@ export const useAddToCaseActions = ({
           'data-test-subj': 'add-to-existing-case-action',
           key: 'add-to-existing-case-action',
           onClick: handleAddToExistingCaseClick,
-          size: 's',
           name: ADD_TO_EXISTING_CASE,
         },
         // add to new case menu item
@@ -130,7 +129,6 @@ export const useAddToCaseActions = ({
           'data-test-subj': 'add-to-new-case-action',
           key: 'add-to-new-case-action',
           onClick: handleAddToNewCaseClick,
-          size: 's',
           name: ADD_TO_NEW_CASE,
         },
       ];

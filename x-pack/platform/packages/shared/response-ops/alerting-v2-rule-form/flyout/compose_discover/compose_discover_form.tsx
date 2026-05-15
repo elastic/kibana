@@ -167,7 +167,6 @@ const RecoveryTypeSelector: React.FC<RecoveryTypeSelectorProps> = ({ state, disp
       valueOfSelected={state.recoveryType}
       onChange={(val) => dispatch({ type: 'SET_RECOVERY_TYPE', recoveryType: val as RecoveryType })}
       fullWidth
-      hasDividers
       data-test-subj="composeDiscoverRecoveryType"
     />
   </EuiFormRow>

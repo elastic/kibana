@@ -87,6 +87,7 @@ export function Selector({
           placeholder: searchPlaceholder,
           compressed: true,
         }}
+        listProps={{ paddingSize: 's' }}
         aria-label={label}
         options={options}
         onChange={onOptionsChange}

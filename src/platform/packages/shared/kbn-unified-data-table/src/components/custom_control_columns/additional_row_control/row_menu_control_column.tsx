@@ -95,7 +95,7 @@ export const RowMenuControlCell = ({
       panelPaddingSize="none"
       anchorPosition="downLeft"
     >
-      <EuiContextMenuPanel size="s" items={popoverMenuItems} />
+      <EuiContextMenuPanel items={popoverMenuItems} />
     </EuiPopover>
   );
 };

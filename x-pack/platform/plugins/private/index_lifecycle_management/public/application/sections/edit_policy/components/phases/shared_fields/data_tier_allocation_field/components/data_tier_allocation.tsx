@@ -209,7 +209,6 @@ export const DataTierAllocation: FunctionComponent<SharedProps> = (props) => {
               field={field}
               euiFieldProps={{
                 isLoading,
-                hasDividers: true,
                 'data-test-subj': 'dataTierSelect',
                 options: getSelectOptions(phase, disableDataTierOption),
               }}
