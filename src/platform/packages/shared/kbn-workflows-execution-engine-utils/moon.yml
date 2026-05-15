@@ -18,6 +18,9 @@ project:
   sourceRoot: src/platform/packages/shared/kbn-workflows-execution-engine-utils
 dependsOn:
   - '@kbn/workflows'
+  - '@kbn/crypto'
+  - '@kbn/eval-kql'
+  - '@kbn/core'
 tags:
   - shared-server
   - package
