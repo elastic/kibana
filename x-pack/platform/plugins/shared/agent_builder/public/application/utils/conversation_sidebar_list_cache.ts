@@ -12,15 +12,11 @@ import { queryKeys } from '../query_keys';
 
 const agentConversationListKey = (agentId: string) => queryKeys.conversations.byAgent(agentId);
 
-export type SidebarConversationListRow = ConversationWithoutRounds & {
-  _isOptimistic?: boolean;
-};
-
 const buildSidebarConversationListRow = (p: {
   id: string;
   agent_id: string;
   title: string;
-}): SidebarConversationListRow => {
+}): ConversationWithoutRounds => {
   const t = new Date().toISOString();
   return {
     id: p.id,
@@ -29,7 +25,6 @@ const buildSidebarConversationListRow = (p: {
     title: p.title,
     created_at: t,
     updated_at: t,
-    _isOptimistic: true,
   };
 };
 
@@ -53,7 +48,7 @@ export const insertSidebarConversationListRow = async ({
   await queryClient.cancelQueries({ queryKey: key });
 
   let inserted = false;
-  queryClient.setQueryData<SidebarConversationListRow[] | undefined>(key, (prev) => {
+  queryClient.setQueryData<ConversationWithoutRounds[] | undefined>(key, (prev) => {
     if (prev?.some((c) => c.id === row.id)) {
       return prev;
     }
@@ -74,7 +69,7 @@ export const removeSidebarConversationListRow = ({
   conversationId: string;
 }) => {
   const key = agentConversationListKey(agentId);
-  queryClient.setQueryData<SidebarConversationListRow[] | undefined>(key, (prev) => {
+  queryClient.setQueryData<ConversationWithoutRounds[] | undefined>(key, (prev) => {
     if (!prev?.length) {
       return prev;
     }
@@ -82,5 +77,33 @@ export const removeSidebarConversationListRow = ({
   });
 };
 
-export const isConversationPersisted = (conversation: ConversationWithoutRounds): boolean =>
-  !(conversation as SidebarConversationListRow)._isOptimistic;
+/**
+ * Patch the title of a single sidebar list row.
+ *
+ * Called by `onConversationCreated` when the chat stream emits the
+ * `conversation_created` event and we receive the server-generated title that replaces
+ * the placeholder "New conversation" set by `insertSidebarConversationListRow`.
+ */
+export const patchSidebarConversationListTitle = ({
+  queryClient,
+  agentId,
+  conversationId,
+  title,
+}: {
+  queryClient: QueryClient;
+  agentId: string;
+  conversationId: string;
+  title: string;
+}) => {
+  const key = agentConversationListKey(agentId);
+  queryClient.setQueryData<ConversationWithoutRounds[] | undefined>(key, (prev) => {
+    if (!prev?.length) return prev;
+    let changed = false;
+    const next = prev.map((c) => {
+      if (c.id !== conversationId || c.title === title) return c;
+      changed = true;
+      return { ...c, title };
+    });
+    return changed ? next : prev;
+  });
+};
