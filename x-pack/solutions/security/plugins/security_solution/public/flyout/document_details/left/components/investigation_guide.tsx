@@ -16,7 +16,7 @@ import {
 import { useRuleWithFallback } from '../../../../detection_engine/rule_management/logic/use_rule_with_fallback';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { INVESTIGATION_GUIDE_LOADING_TEST_ID, INVESTIGATION_GUIDE_TEST_ID } from './test_ids';
-import { InvestigationGuideView } from '../../../../flyout_v2/investigation_guide/components/investigation_guide_view';
+import { InvestigationGuideView } from '../../../../flyout_v2/document/tools/investigation_guide/components/investigation_guide_view';
 import { FlyoutLoading } from '../../../../flyout_v2/shared/components/flyout_loading';
 
 /**
