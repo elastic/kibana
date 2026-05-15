@@ -45,6 +45,10 @@ safe-outputs:
   staged: true
   create-pull-request:
     max: 1
+    draft: true
+    base-branch: main
+    preserve-branch-name: true
+    recreate-ref: true
   noop:
     max: 1
     report-as-issue: false
@@ -98,10 +102,8 @@ Run **each** that applies after edits. Fix failures before opening a PR. If a ch
 
 ## Pull request contract (MUST)
 
-- MUST use branch `backlog-groom/issue-<issue_number>`.
-- MUST target base branch `main`.
+- MUST use branch `backlog-groom/issue-<issue_number>` (base branch `main` and draft mode are enforced by config).
 - MUST include `Closes #<issue_number>` in the PR body.
-- MUST be opened as a **draft**.
 - MUST summarize what changed, why, and how it maps to the issue—no unrelated work.
 - MUST reference which validation commands ran and their results (pass/skip + reason).
 - MUST use `create-pull-request` safe output (do NOT open the PR by other means).
