@@ -5,6 +5,38 @@
  * 2.0.
  */
 
+import type { KibanaRole } from '@kbn/scout';
+
+export const NO_KIBANA_ACCESS_ROLE: KibanaRole = {
+  elasticsearch: { cluster: [] },
+  kibana: [],
+};
+
+export const SO_MANAGEMENT_WRITE_ROLE: KibanaRole = {
+  elasticsearch: { cluster: [] },
+  kibana: [{ base: [], spaces: ['*'], feature: { savedObjectsManagement: ['all'] } }],
+};
+
+export const DASHBOARD_WRITE_ROLE: KibanaRole = {
+  elasticsearch: { cluster: [] },
+  kibana: [{ base: [], spaces: ['default'], feature: { dashboard: ['all'] } }],
+};
+
+export const VISUALIZE_WRITE_ROLE: KibanaRole = {
+  elasticsearch: { cluster: [] },
+  kibana: [{ base: [], spaces: ['default'], feature: { visualize: ['all'] } }],
+};
+
+export const SO_TAGGING_READ_ROLE: KibanaRole = {
+  elasticsearch: { cluster: [] },
+  kibana: [{ base: [], spaces: ['default'], feature: { savedObjectsTagging: ['read'] } }],
+};
+
+export const SO_TAGGING_WRITE_ROLE: KibanaRole = {
+  elasticsearch: { cluster: [] },
+  kibana: [{ base: [], spaces: ['default'], feature: { savedObjectsTagging: ['all'] } }],
+};
+
 export const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
   'x-elastic-internal-origin': 'kibana',
@@ -24,4 +56,8 @@ export const KBN_ARCHIVES = {
     'x-pack/platform/test/saved_object_tagging/common/fixtures/es_archiver/delete_with_references/data.json',
   USAGE_COLLECTION:
     'x-pack/platform/test/saved_object_tagging/common/fixtures/es_archiver/usage_collection/data.json',
+  RBAC_TAGS_DEFAULT_SPACE:
+    'x-pack/platform/test/saved_object_tagging/common/fixtures/es_archiver/rbac_tags/default_space.json',
+  RBAC_TAGS_SPACE_1:
+    'x-pack/platform/test/saved_object_tagging/common/fixtures/es_archiver/rbac_tags/space_1.json',
 } as const;
