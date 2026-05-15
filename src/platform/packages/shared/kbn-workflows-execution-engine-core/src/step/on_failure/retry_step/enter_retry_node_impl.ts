@@ -12,10 +12,10 @@ import type { EnterRetryNode } from '@kbn/workflows/graph';
 import { ExecutionError } from '@kbn/workflows/server';
 import type { RetryStepState } from './types';
 import { computeRetryDelayMs } from '@kbn/workflows-execution-engine-utils';
-import type { IStepExecutionRuntime } from '@kbn/workflows-execution-engine-core';
-import type { IWorkflowExecutionRuntimeManager } from '@kbn/workflows-execution-engine-core';
-import type { IWorkflowEventLogger } from '@kbn/workflows-execution-engine-core';
-import type { INodeImplementation, INodeWithErrorCatching } from '@kbn/workflows-execution-engine-core';
+import type { INodeImplementation, INodeWithErrorCatching } from '../../../collaborators/node_implementation';
+import type { IStepExecutionRuntime } from '../../../collaborators/step_execution_runtime';
+import type { IWorkflowEventLogger } from '../../../collaborators/workflow_event_logger';
+import type { IWorkflowExecutionRuntimeManager } from '../../../collaborators/workflow_execution_runtime_manager';
 
 export class EnterRetryNodeImpl implements INodeImplementation, INodeWithErrorCatching {
   constructor(

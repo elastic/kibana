@@ -8,8 +8,8 @@
  */
 
 import type { ExitConditionBranchNode, WorkflowGraph } from '@kbn/workflows/graph';
-import type { IWorkflowExecutionRuntimeManager } from '@kbn/workflows-execution-engine-core';
-import type { INodeImplementation } from '@kbn/workflows-execution-engine-core';
+import type { INodeImplementation } from '../../collaborators/node_implementation';
+import type { IWorkflowExecutionRuntimeManager } from '../../collaborators/workflow_execution_runtime_manager';
 
 export class ExitConditionBranchNodeImpl implements INodeImplementation {
   constructor(

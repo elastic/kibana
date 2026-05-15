@@ -8,10 +8,10 @@
  */
 
 import type { EnterConditionBranchNode, EnterIfNode, WorkflowGraph } from '@kbn/workflows/graph';
-import type { INodeImplementation } from '../../..';
-import type { IStepExecutionRuntime } from '../../..';
-import type { IWorkflowExecutionRuntimeManager } from '../../..';
-import type { IWorkflowEventLogger } from '../../..';
+import type { INodeImplementation } from '../../collaborators/node_implementation';
+import type { IStepExecutionRuntime } from '../../collaborators/step_execution_runtime';
+import type { IWorkflowEventLogger } from '../../collaborators/workflow_event_logger';
+import type { IWorkflowExecutionRuntimeManager } from '../../collaborators/workflow_execution_runtime_manager';
 import { evaluateCondition } from '../../evaluate_condition';
 
 export class EnterIfNodeImpl implements INodeImplementation {
@@ -40,13 +40,18 @@ export class EnterIfNodeImpl implements INodeImplementation {
       );
     }
 
-    const thenNode = successors?.find((node) =>
-      Object.hasOwn(node, 'condition')
-    ) as EnterConditionBranchNode;
+    const thenNode = successors.find(
+      (node): node is EnterConditionBranchNode => node.type === 'enter-then-branch'
+    );
+    if (!thenNode) {
+      throw new Error(
+        `EnterIfNode with id ${this.node.id} has no 'enter-then-branch' successor with a condition.`
+      );
+    }
     // multiple else-if could be implemented similarly to thenNode
-    const elseNode = successors?.find(
-      (node) => !Object.hasOwn(node, 'condition')
-    ) as EnterConditionBranchNode;
+    const elseNode = successors.find(
+      (node): node is EnterConditionBranchNode => node.type === 'enter-else-branch'
+    );
     const context = this.stepExecutionRuntime.contextManager.getContext();
     const renderedCondition = this.stepExecutionRuntime.contextManager.renderValueWithContext(
       thenNode.condition,
@@ -58,7 +63,7 @@ export class EnterIfNodeImpl implements INodeImplementation {
       this.node.stepId
     );
     this.stepExecutionRuntime.setInput({
-      rawCondition: thenNode.condition as string,
+      rawCondition: thenNode.condition,
       condition: renderedCondition,
       conditionResult: evaluatedConditionResult,
     });

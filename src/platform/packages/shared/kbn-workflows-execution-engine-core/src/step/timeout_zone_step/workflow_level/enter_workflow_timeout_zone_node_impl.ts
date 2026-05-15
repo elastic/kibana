@@ -10,10 +10,10 @@
 import type { EnterTimeoutZoneNode } from '@kbn/workflows/graph';
 import { ExecutionError } from '@kbn/workflows/server';
 import { parseDuration } from '@kbn/workflows-execution-engine-utils';
-import type { IStepExecutionRuntime } from '@kbn/workflows-execution-engine-core';
-import type { IStepExecutionRuntimeFactory } from '@kbn/workflows-execution-engine-core';
-import type { IWorkflowExecutionRuntimeManager } from '@kbn/workflows-execution-engine-core';
-import type { IMonitorableNode, INodeImplementation } from '@kbn/workflows-execution-engine-core';
+import type { IMonitorableNode, INodeImplementation } from '../../../collaborators/node_implementation';
+import type { IStepExecutionRuntime } from '../../../collaborators/step_execution_runtime';
+import type { IStepExecutionRuntimeFactory } from '../../../collaborators/step_execution_runtime_factory';
+import type { IWorkflowExecutionRuntimeManager } from '../../../collaborators/workflow_execution_runtime_manager';
 
 export class EnterWorkflowTimeoutZoneNodeImpl implements INodeImplementation, IMonitorableNode {
   constructor(

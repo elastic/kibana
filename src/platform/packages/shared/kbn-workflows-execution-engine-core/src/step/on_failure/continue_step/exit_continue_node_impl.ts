@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IWorkflowExecutionRuntimeManager } from '@kbn/workflows-execution-engine-core';
-import type { INodeImplementation } from '@kbn/workflows-execution-engine-core';
+import type { INodeImplementation } from '../../../collaborators/node_implementation';
+import type { IWorkflowExecutionRuntimeManager } from '../../../collaborators/workflow_execution_runtime_manager';
 
 export class ExitContinueNodeImpl implements INodeImplementation {
   constructor(private workflowRuntime: IWorkflowExecutionRuntimeManager) {}

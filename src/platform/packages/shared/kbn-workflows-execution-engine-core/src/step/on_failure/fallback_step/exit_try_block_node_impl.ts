@@ -9,9 +9,9 @@
 
 import type { SerializedError } from '@kbn/workflows';
 import { ExecutionError } from '@kbn/workflows/server';
-import type { IStepExecutionRuntime } from '@kbn/workflows-execution-engine-core';
-import type { IWorkflowExecutionRuntimeManager } from '@kbn/workflows-execution-engine-core';
-import type { INodeImplementation } from '@kbn/workflows-execution-engine-core';
+import type { INodeImplementation } from '../../../collaborators/node_implementation';
+import type { IStepExecutionRuntime } from '../../../collaborators/step_execution_runtime';
+import type { IWorkflowExecutionRuntimeManager } from '../../../collaborators/workflow_execution_runtime_manager';
 
 export class ExitTryBlockNodeImpl implements INodeImplementation {
   constructor(

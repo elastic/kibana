@@ -9,12 +9,12 @@
 
 import type { LoopBreakNode, WorkflowGraph } from '@kbn/workflows/graph';
 import { isLoopEnterScope } from './is_loop_enter_scope';
-import type { IStepExecutionRuntime } from '@kbn/workflows-execution-engine-core';
-import type { IStepExecutionRuntimeFactory } from '@kbn/workflows-execution-engine-core';
-import type { IWorkflowExecutionRuntimeManager } from '@kbn/workflows-execution-engine-core';
-import type { IWorkflowExecutionState } from '@kbn/workflows-execution-engine-core';
-import type { IWorkflowEventLogger } from '@kbn/workflows-execution-engine-core';
-import type { INodeImplementation } from '@kbn/workflows-execution-engine-core';
+import type { INodeImplementation } from '../../collaborators/node_implementation';
+import type { IStepExecutionRuntime } from '../../collaborators/step_execution_runtime';
+import type { IStepExecutionRuntimeFactory } from '../../collaborators/step_execution_runtime_factory';
+import type { IWorkflowEventLogger } from '../../collaborators/workflow_event_logger';
+import type { IWorkflowExecutionRuntimeManager } from '../../collaborators/workflow_execution_runtime_manager';
+import type { IWorkflowExecutionState } from '../../collaborators/workflow_execution_state';
 
 export class LoopBreakNodeImpl implements INodeImplementation {
   constructor(
