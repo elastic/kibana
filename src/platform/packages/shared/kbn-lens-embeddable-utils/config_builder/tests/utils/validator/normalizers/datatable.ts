@@ -7,7 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DatatableVisualizationState, FormBasedLayer, TextBasedLayer } from '@kbn/lens-common';
+import type {
+  DatatableVisualizationState,
+  FormBasedLayer,
+  GenericIndexPatternColumn,
+  ReferenceBasedIndexPatternColumn,
+  TextBasedLayer,
+} from '@kbn/lens-common';
 import { parseTransposeId, getTransposeId, TRANSPOSE_SEPARATOR } from '@kbn/transpose-utils';
 import {
   DEFAULT_ROW_HEIGHT_LINES,
@@ -28,6 +34,9 @@ import {
 type DatatableAttributes = Extract<LensAttributes, { visualizationType: 'lnsDatatable' }>;
 
 type DatatableColumn = DatatableVisualizationState['columns'][number];
+
+const isReferenceBased = (c: GenericIndexPatternColumn): c is ReferenceBasedIndexPatternColumn =>
+  Array.isArray((c as ReferenceBasedIndexPatternColumn).references);
 
 /**
  * Sort visualization columns by semantic type: rows first, then split_metrics_by, then metrics.
@@ -81,7 +90,7 @@ function getColumnRemappingFormBased(
       continue;
     }
 
-    if (isMetricColumnNoESQL(column, layer.columns[columnId] as any)) {
+    if (isMetricColumnNoESQL(column, layer.columns[columnId])) {
       remapping.push([columnId, getAccessorName('metric', metricIndex++)]);
     } else if (column.isTransposed) {
       remapping.push([columnId, getAccessorName('split_metric_by', splitMetricByIndex++)]);
@@ -103,8 +112,8 @@ function getColumnRemappingFormBased(
       continue;
     }
     // references array is only present on ReferenceBasedIndexPatternColumn
-    if (Array.isArray((dsCol as any)?.references)) {
-      for (const refId of (dsCol as any).references) {
+    if (isReferenceBased(dsCol)) {
+      for (const refId of dsCol.references) {
         if (layer.columns[refId]) {
           remapping.push([refId, getAccessorName('metric_ref', refIndex++)]);
         }
