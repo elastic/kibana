@@ -31,8 +31,24 @@ if: >-
   )
 
 concurrency:
-  group: failed-backport-resolver-${{ github.event.issue.number || github.event.inputs.pr_number || github.run_id }}
-  cancel-in-progress: true
+  group: >-
+    ${{
+      (
+        github.event_name == 'workflow_dispatch' ||
+        (
+          github.event_name == 'issue_comment' &&
+          github.event.issue.pull_request &&
+          github.event.comment.user.login == 'kibanamachine' &&
+          (
+            contains(github.event.comment.body, 'Some backports could not be created') ||
+            contains(github.event.comment.body, 'All backports failed')
+          )
+        )
+      ) &&
+      format('failed-backport-resolver-{0}', github.event.issue.number || github.event.inputs.pr_number) ||
+      format('failed-backport-resolver-{0}', github.run_id)
+    }}
+  cancel-in-progress: false
 
 permissions:
   contents: read
@@ -141,16 +157,18 @@ Resolve failed automatic backports for the pull request identified by the inject
 
 ## Parent Workflow
 
-1. Read `/tmp/gh-aw/agent/pr-metadata.json` and `/tmp/gh-aw/agent/pr-issue-comments.json`. Use those prefetched files as the source of truth for PR metadata and comments, and capture `author.login` from `pr-metadata.json` as the source PR author login.
+1. Read `/tmp/gh-aw/agent/pr-metadata.json` and `/tmp/gh-aw/agent/pr-issue-comments.json`. Use those prefetched files as the source of truth for PR metadata and comments, and capture `author.login` from `pr-metadata.json` as the source PR author login. Also read `crossReferencedPulls` from `pr-metadata.json`; it contains compact metadata for pull requests that GitHub cross-referenced from the source PR timeline.
 2. From `pr-issue-comments.json`, use the latest `kibanamachine` comment whose body contains `Some backports could not be created` or `All backports failed`.
 3. Parse that comment for target branches that failed. A failed branch is any branch row whose result says `Backport failed because of merge conflicts`, or an equivalent failure row under the matching failure heading.
 4. Read `versions.json` and build the active branch allowlist from `versions[].branch`. Drop any parsed failed branch that is not in that allowlist, and mention the skipped branch in the final comment.
 5. Read `.backportrc.json` for non-branch PR conventions only. Ignore branch lists in `.backportrc.json`; active branches come from `versions.json`.
-6. Before starting a target branch, inspect only source PR-local data for an existing backport: `pr-metadata.json`, `pr-issue-comments.json`, and any PRs directly linked from those comments or the source PR body. Treat a linked open PR as existing only when it has the `backport` label and targets the same branch. Do not perform broad repository PR searches.
-7. For each remaining target branch, launch one parallel task with the `backport-branch-worker` sub-agent defined at the end of this workflow. Pass only the source PR number, source PR title, source PR URL, source PR author login, source branch, source merge commit SHA, target branch, repository from `GH_AW_GITHUB_REPOSITORY`, and the workflow run URL built from `GH_AW_GITHUB_REPOSITORY` and `GH_AW_GITHUB_RUN_ID`.
-8. Wait for every branch task to finish. Do not stop after the first failure.
-9. For each successful branch task, ensure it called `create_pull_request`. Do not call `create_pull_request` again for the same branch.
-10. Post exactly one final `add_comment` after all branch tasks finish. Include a compact table with `Branch`, `Status`, and `Result`. Use statuses: `created`, `existing`, `skipped`, `needs manual backport`, or `failed`. Do not fabricate PR URLs; gh-aw safe outputs will attach related created PRs to the comment after processing.
+6. Before starting a target branch, inspect only source PR-local data for an existing backport: `pr-metadata.json`, `crossReferencedPulls`, `pr-issue-comments.json`, and any PRs directly linked from those comments or the source PR body. Treat an open PR as existing only when it has the `backport` label and targets the same branch. Do not perform broad repository PR searches.
+7. If every remaining failed branch already has an existing open backport PR, call `add_comment` exactly once with the final comment table, use status `existing` for those branches, and do not launch branch workers.
+8. Create the shared parent directory for worker worktrees by running `mkdir -p /tmp/gh-aw-worktrees`.
+9. For each remaining target branch, launch one parallel task with the `backport-branch-worker` sub-agent defined at the end of this workflow. Pass only the source PR number, source PR title, source PR URL, source PR author login, source branch, source merge commit SHA, target branch, repository from `GH_AW_GITHUB_REPOSITORY`, and the workflow run URL built from `GH_AW_GITHUB_REPOSITORY` and `GH_AW_GITHUB_RUN_ID`.
+10. Wait for every branch task to finish. Do not stop after the first failure.
+11. For each successful branch task, ensure it called `create_pull_request`. Do not call `create_pull_request` again for the same branch.
+12. Post exactly one final `add_comment` after all branch tasks finish. Include a compact table with `Branch`, `Status`, and `Result`. Use statuses: `created`, `existing`, `skipped`, `needs manual backport`, or `failed`. Do not fabricate PR URLs; gh-aw safe outputs will attach related created PRs to the comment after processing.
 
 ## Final Comment Format
 
@@ -186,7 +204,9 @@ The parent task will provide:
 - workflow run URL
 - repository, always `elastic/kibana`
 
-Create exactly one isolated git worktree for the target branch from the already-fetched target branch ref. Use a branch/worktree name that starts with `backport/` and includes the source PR number and target branch.
+Create exactly one isolated git worktree for the target branch from the already-fetched target branch ref. Use a branch/worktree name that starts with `backport/` and includes the source PR number and target branch. Place the worktree under `/tmp/gh-aw-worktrees`, using a path like `/tmp/gh-aw-worktrees/wt-<source PR number>-<target branch>`.
+
+Never create a worktree, full repository copy, or package install output under `/tmp/gh-aw`. That directory is uploaded as workflow artifacts.
 
 Cherry-pick the source merge commit into the target branch worktree with `git cherry-pick -x <source merge commit SHA>`.
 
