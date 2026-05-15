@@ -269,6 +269,8 @@ const ChartItem = React.memo(
           onViewDetails={handleViewDetailsCallback}
           title={metricItem.metricName}
           chartLayers={chartLayers}
+          syncCursor
+          syncTooltips={false}
           titleHighlight={searchTerm}
           extraDisabledActions={[ACTION_OPEN_IN_DISCOVER]}
           userMessages={userMessages}
