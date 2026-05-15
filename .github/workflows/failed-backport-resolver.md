@@ -196,14 +196,7 @@ If the cherry-pick applies without conflicts:
 
 1. Confirm the diff is limited to the cherry-pick.
 2. Commit is already created by cherry-pick.
-3. Stay in the worktree directory and run `git branch --show-current`.
-4. Call `create_pull_request` from the committed worktree with:
-   - `base`: the target branch
-   - `branch`: exactly the output of `git branch --show-current`; do not invent a branch name
-   - `title`: `[<target branch>] <source PR title> (#<source PR number>)`
-   - `body`: matching the backport body rules below.
-5. Call `assign_to_user` for the PR created by that `create_pull_request` call with `issue_number` set to the temporary PR reference returned by `create_pull_request` and `assignees`: `["<source PR author login>"]`.
-6. Return `created`.
+3. Follow the Backport PR creation steps.
 
 If the cherry-pick has conflicts:
 
@@ -222,14 +215,18 @@ If the cherry-pick has conflicts:
 6. After resolving, verify no conflict markers remain with a worktree search for `<<<<<<<`, `=======`, and `>>>>>>>`.
 7. Stage only the resolved cherry-pick files.
 8. Continue the cherry-pick and preserve the `-x` attribution.
-9. Stay in the worktree directory and run `git branch --show-current`.
-10. Call `create_pull_request` from the committed worktree with:
-    - `base`: the target branch
-    - `branch`: exactly the output of `git branch --show-current`; do not invent a branch name
-    - `title`: `[<target branch>] <source PR title> (#<source PR number>)`
-    - `body`: matching the backport body rules below.
-11. Call `assign_to_user` for the PR created by that `create_pull_request` call with `issue_number` set to the temporary PR reference returned by `create_pull_request` and `assignees`: `["<source PR author login>"]`.
-12. Return `created`.
+9. Follow the Backport PR creation steps.
+
+Backport PR creation steps:
+
+3. Stay in the worktree directory and run `git branch --show-current`.
+4. Call `create_pull_request` from the committed worktree with:
+   - `base`: the target branch
+   - `branch`: exactly the output of `git branch --show-current`; do not invent a branch name
+   - `title`: `[<target branch>] <source PR title> (#<source PR number>)`
+   - `body`: matching the backport body rules below.
+5. Call `assign_to_user` for the PR created by that `create_pull_request` call with `issue_number` set to the temporary PR reference returned by `create_pull_request` and `assignees`: `["<source PR author login>"]`.
+6. Return `created`.
 
 Backport body rules. JSON-escape string values in the `BACKPORT` marker when substituting real PR metadata:
 
