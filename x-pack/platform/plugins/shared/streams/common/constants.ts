@@ -78,3 +78,10 @@ export const MIN_EXTRACTION_INTERVAL_HOURS = 0;
 export const MAX_SCHEDULED_STREAMS = 5;
 
 export const POLL_DELAY_SECONDS = 5;
+
+/**
+ * Sigevents memory data stream and workflow IDs
+ */
+export const MEMORIES_DATA_STREAM = '.significant_events-memories';
+export const WRITE_MEMORY_PAGE_WORKFLOW_NAME = 'Write Memory Page';
+export const SIGEVENTS_MEMORY_WORKFLOW_ID = '.streams-sigevents-memory';

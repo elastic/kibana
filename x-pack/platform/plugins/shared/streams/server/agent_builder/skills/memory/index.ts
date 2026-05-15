@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-import type { SecurityServiceStart } from '@kbn/core-security-server';
-import type { MemoryService } from '../../../lib/memory';
-
-export interface MemoryToolsOptions {
-  getMemoryService: () => MemoryService;
-  getSecurity: () => SecurityServiceStart;
-}
+export { memorySynthesisSkill } from './memory_synthesis_skill';
+export { memoryConsolidationSkill } from './memory_consolidation_skill';
+export { conversationScraperSkill } from './conversation_scraper_skill';

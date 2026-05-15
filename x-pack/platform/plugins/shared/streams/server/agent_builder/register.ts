@@ -7,13 +7,47 @@
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { StreamsServer } from '../types';
 import type { GetScopedClients } from '../routes/types';
 import type { EbtTelemetryClient } from '../lib/telemetry/ebt';
-import { MemoryServiceImpl } from '../lib/memory';
 import { registerAgentBuilderTools } from './tools/register_tools';
-import { createSigEventsMemorySkill } from './skills/sig_events_memory_skill';
 import { registerAgentBuilderSkills } from './skills/register_skills';
+
+type AgentDefinition = Parameters<AgentBuilderPluginSetup['agents']['register']>[0];
+
+const memorySynthesizerAgent: AgentDefinition = {
+  id: 'sigevents.memory.synthesizer',
+  name: 'Memory Synthesizer',
+  description:
+    'Synthesizes significant events knowledge indicators into memory wiki pages using ES|QL read tools and the write_memory_page workflow.',
+  configuration: {
+    skill_ids: ['streams-memory-synthesis'],
+    tools: [],
+  },
+};
+
+const memoryConsolidatorAgent: AgentDefinition = {
+  id: 'sigevents.memory.consolidator',
+  name: 'Memory Consolidator',
+  description:
+    'Curates the memory knowledge base by merging duplicates, removing stale entries, and improving categorization.',
+  configuration: {
+    skill_ids: ['streams-memory-consolidation'],
+    tools: [],
+  },
+};
+
+const conversationScraperAgent: AgentDefinition = {
+  id: 'sigevents.memory.conversation-scraper',
+  name: 'Conversation Scraper',
+  description:
+    'Extracts durable knowledge from AI chat conversations and persists it as memory wiki pages.',
+  configuration: {
+    skill_ids: ['streams-conversation-scraper'],
+    tools: [],
+  },
+};
 
 export const registerStreamsAgentBuilder = async ({
   agentBuilder,
@@ -21,57 +55,27 @@ export const registerStreamsAgentBuilder = async ({
   server,
   logger,
   telemetry,
-  isMemoryEnabled,
+  workflowsManagement,
 }: {
   agentBuilder: AgentBuilderPluginSetup;
   getScopedClients: GetScopedClients;
   server: StreamsServer;
   logger: Logger;
   telemetry: EbtTelemetryClient;
-  isMemoryEnabled: () => Promise<boolean>;
+  workflowsManagement?: WorkflowsServerPluginSetup;
 }) => {
-  registerAgentBuilderTools({ agentBuilder, getScopedClients, server, logger, telemetry });
+  await registerAgentBuilderTools({
+    agentBuilder,
+    getScopedClients,
+    server,
+    logger,
+    telemetry,
+    workflowsManagement,
+  });
   registerAgentBuilderSkills({ agentBuilder, getScopedClients, telemetry });
 
-  const getMemoryService = () =>
-    new MemoryServiceImpl({
-      logger: logger.get('memory'),
-      esClient: server.core.elasticsearch.client.asInternalUser,
-    });
-
-  // The memory skill is registered lazily — only once the Streams memory advanced setting is on.
-  // This avoids exposing the skill to the agent when memory is not configured.
-  // Call onMemorySettingChanged when observability:streamsEnableMemory may have changed (e.g. from a uiSettings subscription).
-  let memorySkillRegistered = false;
-
-  const ensureMemorySkillRegistered = () => {
-    if (memorySkillRegistered) {
-      return;
-    }
-    memorySkillRegistered = true;
-    agentBuilder.skills.register(
-      createSigEventsMemorySkill({
-        getMemoryService,
-        getSecurity: () => server.core.security,
-      })
-    );
-    logger.info('Memory skill registered (observability:streamsEnableMemory is enabled)');
-  };
-
-  if (await isMemoryEnabled()) {
-    ensureMemorySkillRegistered();
-  }
-
-  return {
-    ensureMemorySkillRegistered,
-    /**
-     * Call this from a uiSettings change subscription (e.g. in plugin start)
-     * to auto-register the memory skill when the setting is toggled on.
-     */
-    onMemorySettingChanged: async () => {
-      if (await isMemoryEnabled()) {
-        ensureMemorySkillRegistered();
-      }
-    },
-  };
+  agentBuilder.agents.register(memorySynthesizerAgent);
+  agentBuilder.agents.register(memoryConsolidatorAgent);
+  agentBuilder.agents.register(conversationScraperAgent);
+  logger.info('sigevents memory agents registered');
 };

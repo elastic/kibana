@@ -7,6 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
+import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { EbtTelemetryClient } from '../../lib/telemetry/ebt';
 import type { GetScopedClients } from '../../routes/types';
 import type { StreamsServer } from '../../types';
@@ -31,6 +32,23 @@ import { createUpdateStreamTool } from './write/update_stream';
 import { createCreatePartitionTool } from './write/create_partition';
 import { createDeleteStreamTool } from './write/delete_stream';
 import { StreamsWriteQueue } from '../utils/write_queue';
+import {
+  memoryGetPageTool,
+  memorySearchPagesTool,
+  memoryListPagesTool,
+  memoryGetInsightsTool,
+  createMemoryWritePageTool,
+  STREAMS_MEMORY_TOOL_IDS,
+} from './memory_esql';
+
+export { STREAMS_MEMORY_TOOL_IDS };
+export {
+  STREAMS_MEMORY_GET_PAGE_TOOL_ID,
+  STREAMS_MEMORY_SEARCH_PAGES_TOOL_ID,
+  STREAMS_MEMORY_LIST_PAGES_TOOL_ID,
+  STREAMS_MEMORY_GET_INSIGHTS_TOOL_ID,
+  STREAMS_MEMORY_WRITE_PAGE_TOOL_ID,
+} from './memory_esql';
 
 export {
   STREAMS_READ_TOOL_IDS,
@@ -51,19 +69,21 @@ export {
   STREAMS_SEARCH_KNOWLEDGE_INDICATORS_TOOL_ID,
 };
 
-export function registerAgentBuilderTools({
+export async function registerAgentBuilderTools({
   agentBuilder,
   getScopedClients,
   server,
   logger,
   telemetry,
+  workflowsManagement,
 }: {
   agentBuilder: AgentBuilderPluginSetup;
   getScopedClients: GetScopedClients;
   server: StreamsServer;
   logger: Logger;
   telemetry: EbtTelemetryClient;
-}): void {
+  workflowsManagement?: WorkflowsServerPluginSetup;
+}): Promise<void> {
   if (!agentBuilder) {
     return;
   }
@@ -105,9 +125,27 @@ export function registerAgentBuilderTools({
       logger: logger.get('ki_query_create_tool'),
       telemetry,
     }),
+
+    // Memory ES|QL read tools
+    memoryGetPageTool,
+    memorySearchPagesTool,
+    memoryListPagesTool,
+    memoryGetInsightsTool,
   ];
 
   for (const tool of streamsTools) {
     agentBuilder.tools.register(tool as Parameters<typeof agentBuilder.tools.register>[0]);
+  }
+
+  if (workflowsManagement) {
+    try {
+      const writePageTool = await createMemoryWritePageTool(workflowsManagement);
+      agentBuilder.tools.register(
+        writePageTool as Parameters<typeof agentBuilder.tools.register>[0]
+      );
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      logger.warn(`Memory write tool not registered: ${msg}`);
+    }
   }
 }

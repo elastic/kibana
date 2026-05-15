@@ -5,22 +5,8 @@
  * 2.0.
  */
 
-export type {
-  MemoryEntry,
-  MemoryVersionRecord,
-  MemoryChangeType,
-  MemoryCategoryNode,
-  MemorySearchResult,
-  CreateMemoryParams,
-  UpdateMemoryParams,
-  SearchMemoryParams,
-  MemoryService,
-} from './types';
-
-export { MemoryServiceImpl } from './memory_service';
-
-export {
-  formatExistingPages,
-  createReadMemoryPageCallback,
-  createWriteMemoryPageCallback,
-} from './tool_callbacks';
+export { memoriesDataStream, memoriesMappings } from './data_stream';
+export type { StoredMemoryPage } from './data_stream';
+export { MemoryClient } from './memory_client';
+export type { MemoryDataStreamClient } from './memory_client';
+export { MemoryService } from './memory_service';
