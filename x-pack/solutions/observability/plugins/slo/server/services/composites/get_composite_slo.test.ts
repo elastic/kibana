@@ -340,7 +340,6 @@ describe('GetCompositeSLO', () => {
     expect(result.members[0].normalisedWeight).toBe(1);
     expect(result.members[1].normalisedWeight).toBe(0);
     expect(result.members[1].sliValue).toBe(-1);
-    expect(result.members[1].contribution).toBe(0);
   });
 
   it('returns NO_DATA status when all members lack data', async () => {

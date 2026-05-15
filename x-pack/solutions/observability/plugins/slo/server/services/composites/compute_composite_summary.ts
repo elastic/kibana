@@ -98,7 +98,6 @@ function buildMemberSummary(
   normalisedWeight: number
 ): CompositeSLOMemberSummary {
   const { sliValue } = ms.summary;
-  const contribution = sliValue === NO_DATA ? 0 : toHighPrecision(normalisedWeight * sliValue);
 
   return {
     id: ms.member.sloId,
@@ -107,7 +106,6 @@ function buildMemberSummary(
     normalisedWeight,
     sliValue,
     status: ms.summary.status,
-    contribution,
     errorBudget: ms.summary.errorBudget,
     fiveMinuteBurnRate: ms.summary.fiveMinuteBurnRate,
     oneHourBurnRate: ms.summary.oneHourBurnRate,

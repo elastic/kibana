@@ -23,7 +23,6 @@ const baseMember = {
   weight: 2,
   normalisedWeight: 0.5,
   sliValue: 0.99,
-  contribution: 0.495,
   status: 'HEALTHY' as const,
   errorBudget: { initial: 0.01, consumed: 0.001, remaining: 0.9, isEstimated: false },
   fiveMinuteBurnRate: 1.25,
