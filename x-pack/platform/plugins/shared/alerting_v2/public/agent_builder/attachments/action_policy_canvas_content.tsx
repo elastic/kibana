@@ -219,4 +219,3 @@ const extractRuleIdFromMatcher = (matcher: string | null | undefined): string | 
   const match = matcher.match(/rule\.id\s*:\s*"?([^"\s]+)"?/);
   return match?.[1];
 };
-
