@@ -6,12 +6,11 @@
  */
 
 import type { FC } from 'react';
-import React, { useMemo } from 'react';
+import React from 'react';
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { useEventDetails } from '../../../../flyout/document_details/shared/hooks/use_event_details';
-import { getTimelineEventsDetailsFromRecord } from '../utils/get_timeline_events_details_from_record';
 import { TakeActionButton } from './take_action_button';
 import { FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID } from './test_ids';
 
@@ -56,16 +55,6 @@ export const TakeAction: FC<TakeActionProps> = ({ hit, onAlertUpdated, onShowNot
     indexName,
   });
 
-  const dataFormattedForFieldBrowser = useMemo(
-    () => getTimelineEventsDetailsFromRecord(hit),
-    [hit]
-  );
-
-  const nonEcsData = useMemo(
-    () => dataFormattedForFieldBrowser.map((d) => ({ field: d.field, value: d.values ?? null })),
-    [dataFormattedForFieldBrowser]
-  );
-
   if (loading) {
     return (
       <EuiButton data-test-subj={FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID} fill isLoading>
@@ -86,7 +75,6 @@ export const TakeAction: FC<TakeActionProps> = ({ hit, onAlertUpdated, onShowNot
     <TakeActionButton
       hit={hit}
       ecsData={dataAsNestedObject}
-      nonEcsData={nonEcsData}
       refetchFlyoutData={refetchFlyoutData}
       onAlertUpdated={onAlertUpdated}
       onShowNotes={onShowNotes}

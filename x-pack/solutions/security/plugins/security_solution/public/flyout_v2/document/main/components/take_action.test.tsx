@@ -155,23 +155,4 @@ describe('<TakeAction />', () => {
     );
   });
 
-  it('should compute nonEcsData from the hit and pass it to TakeActionButton', () => {
-    render(
-      <TakeAction
-        hit={createMockHit()}
-        onAlertUpdated={mockOnAlertUpdated}
-        onShowNotes={mockOnShowNotes}
-      />
-    );
-
-    expect(mockTakeActionButton).toHaveBeenCalledWith(
-      expect.objectContaining({
-        nonEcsData: [
-          { field: 'host.name', value: ['test-host'] },
-          { field: 'user.name', value: null },
-        ],
-      }),
-      expect.anything()
-    );
-  });
 });

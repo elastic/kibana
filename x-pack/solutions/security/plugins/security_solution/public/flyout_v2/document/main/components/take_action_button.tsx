@@ -14,7 +14,6 @@ import { isNonLocalIndexName } from '@kbn/es-query';
 import { ALERT_WORKFLOW_STATUS, EVENT_KIND } from '@kbn/rule-data-utils';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { EventKind } from '../constants/event_kinds';
-import type { TimelineNonEcsData } from '../../../../../common/search_strategy';
 import type { Status } from '../../../../../common/api/detection_engine';
 import { useAddToCaseActions } from '../../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions';
 import { useAlertsActions } from '../../../../detections/components/alerts_table/timeline_actions/use_alerts_actions';
@@ -54,10 +53,6 @@ export interface TakeActionButtonProps {
    */
   ecsData: Ecs;
   /**
-   * Non-ECS data for the document
-   */
-  nonEcsData: TimelineNonEcsData[];
-  /**
    * Callback to refetch flyout data
    */
   refetchFlyoutData: () => Promise<void>;
@@ -79,7 +74,6 @@ export const TakeActionButton = memo(
   ({
     hit,
     ecsData,
-    nonEcsData,
     refetchFlyoutData,
     onAlertUpdated,
     onShowNotes,
@@ -103,6 +97,16 @@ export const TakeActionButton = memo(
       const rawStatus = getFieldValue(hit, ALERT_WORKFLOW_STATUS);
       return (Array.isArray(rawStatus) ? rawStatus[0] : rawStatus) as Status;
     }, [hit]);
+
+    const dataFormattedForFieldBrowser = useMemo(
+      () => getTimelineEventsDetailsFromRecord(hit),
+      [hit]
+    );
+
+    const nonEcsData = useMemo(
+      () => dataFormattedForFieldBrowser.map((d) => ({ field: d.field, value: d.values ?? null })),
+      [dataFormattedForFieldBrowser]
+    );
 
     const { addToCaseActionItems } = useAddToCaseActions({
       ecsData,
@@ -177,11 +181,6 @@ export const TakeActionButton = memo(
       hit,
       closePopover: closePopoverHandler,
     });
-
-    const dataFormattedForFieldBrowser = useMemo(
-      () => getTimelineEventsDetailsFromRecord(hit),
-      [hit]
-    );
 
     const endpointResponseActionsConsoleItems = useResponderActionItem(
       dataFormattedForFieldBrowser,

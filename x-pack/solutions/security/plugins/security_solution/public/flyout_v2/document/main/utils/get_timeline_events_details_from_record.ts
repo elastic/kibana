@@ -8,6 +8,15 @@
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 
+/**
+ * Converts a `DataTableRecord` into the `TimelineEventsDetailsItem[]` format expected by legacy
+ * action hooks (e.g. responder, add-to-case). Each flattened field is mapped to its category,
+ * stringified values, and original value.
+ *
+ * @deprecated This adapter exists only to bridge the gap while legacy hooks still require
+ * `TimelineEventsDetailsItem[]`. It should be removed once all actions and downstream logic
+ * have been updated to accept `DataTableRecord` directly.
+ */
 export const getTimelineEventsDetailsFromRecord = (
   hit: DataTableRecord
 ): TimelineEventsDetailsItem[] => {

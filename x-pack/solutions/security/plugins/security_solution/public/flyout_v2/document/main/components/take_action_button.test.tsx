@@ -10,7 +10,6 @@ import { fireEvent, render } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import type { TimelineNonEcsData } from '../../../../../common/search_strategy';
 import { useAddToCaseActions } from '../../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions';
 import { useAlertsActions } from '../../../../detections/components/alerts_table/timeline_actions/use_alerts_actions';
 import { useAlertAssigneesActions } from '../../../../detections/components/alerts_table/timeline_actions/use_alert_assignees_actions';
@@ -92,7 +91,6 @@ const remoteEventHit = createMockHit(
 const mockUseInvestigateInTimeline = useInvestigateInTimeline as jest.Mock;
 const mockUseIsInSecurityApp = useIsInSecurityApp as jest.Mock;
 const mockEcsData: Ecs = { _id: 'test-id', _index: 'test-index' };
-const mockNonEcsData: TimelineNonEcsData[] = [{ field: 'host.name', value: ['test-host'] }];
 const expectedDataFormattedForFieldBrowser = [
   {
     category: 'host',
@@ -108,7 +106,6 @@ const mockOnShowNotes = jest.fn();
 const defaultProps = {
   hit: createMockHit({ 'host.name': ['test-host'] }),
   ecsData: mockEcsData,
-  nonEcsData: mockNonEcsData,
   refetchFlyoutData: mockRefetchFlyoutData,
   onAlertUpdated: mockOnAlertUpdated,
   onShowNotes: mockOnShowNotes,
@@ -175,7 +172,7 @@ describe('<TakeActionButton />', () => {
     expect(mockUseAddToCaseActions).toHaveBeenCalledWith(
       expect.objectContaining({
         ecsData: mockEcsData,
-        nonEcsData: mockNonEcsData,
+        nonEcsData: [{ field: 'host.name', value: ['test-host'] }],
         onSuccess: mockRefetchFlyoutData,
       })
     );
