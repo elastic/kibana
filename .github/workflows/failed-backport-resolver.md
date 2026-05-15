@@ -219,14 +219,14 @@ If the cherry-pick has conflicts:
 
 Backport PR creation steps:
 
-3. Stay in the worktree directory and run `git branch --show-current`.
-4. Call `create_pull_request` from the committed worktree with:
+1. Stay in the worktree directory and run `git branch --show-current`.
+2. Call `create_pull_request` from the committed worktree with:
    - `base`: the target branch
    - `branch`: exactly the output of `git branch --show-current`; do not invent a branch name
    - `title`: `[<target branch>] <source PR title> (#<source PR number>)`
    - `body`: matching the backport body rules below.
-5. Call `assign_to_user` for the PR created by that `create_pull_request` call with `issue_number` set to the temporary PR reference returned by `create_pull_request` and `assignees`: `["<source PR author login>"]`.
-6. Return `created`.
+3. Call `assign_to_user` for the PR created by that `create_pull_request` call with `issue_number` set to the temporary PR reference returned by `create_pull_request` and `assignees`: `["<source PR author login>"]`.
+4. Return `created`.
 
 Backport body rules. JSON-escape string values in the `BACKPORT` marker when substituting real PR metadata:
 
