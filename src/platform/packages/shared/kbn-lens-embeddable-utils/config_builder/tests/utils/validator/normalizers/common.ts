@@ -31,6 +31,8 @@ import { getContinuity, getRangeValue } from '../../../../transforms/coloring';
 import { stripUndefined } from '../../../../transforms/charts/utils';
 import { generateAdHocDataViewId } from '../../../../transforms/utils';
 
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+
 const COMMON_STATE_IGNORE_PATHS = [
   'savedObjectId', // panel-level SO reference, not part of LensAttributes
   'type', // misplaced type, see https://github.com/elastic/kibana/issues/245683
@@ -339,8 +341,7 @@ const normalizeReferences = <T extends LensAttributes>(
       })
       // legacy bare-UUID-named references (pre-standardized naming), probably from dashboard reference extraction
       .filter((reference) => {
-        const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
-        return !(reference.type === 'index-pattern' && uuidPattern.test(reference.name));
+        return !(reference.type === 'index-pattern' && UUID_PATTERN.test(reference.name));
       })
       .map((reference) => {
         let name = reference.name;
