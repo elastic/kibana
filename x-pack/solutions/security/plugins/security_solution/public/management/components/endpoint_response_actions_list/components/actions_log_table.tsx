@@ -21,7 +21,7 @@ import {
   type HorizontalAlignment,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP } from '../../../../../common/endpoint/service/response_actions/constants';
@@ -42,8 +42,7 @@ import { useUrlPagination } from '../../../hooks/use_url_pagination';
 
 const emptyValue = getEmptyValue();
 
-// Truncated usernames
-const StyledFacetButton = euiStyled(EuiFacetButton).attrs({ title: undefined })`
+const styledFacetButtonStyles = css`
   .euiText {
     margin-top: 0.38rem;
     overflow-y: visible !important;
@@ -127,7 +126,9 @@ const getResponseActionListTableColumns = ({
           );
         }
         return (
-          <StyledFacetButton
+          <EuiFacetButton
+            title={undefined}
+            css={styledFacetButtonStyles}
             icon={
               <EuiAvatar
                 // We've a EuiTooltip that shows for createdBy below,
@@ -150,7 +151,7 @@ const getResponseActionListTableColumns = ({
                 {createdBy}
               </EuiText>
             </EuiToolTip>
-          </StyledFacetButton>
+          </EuiFacetButton>
         );
       },
     },

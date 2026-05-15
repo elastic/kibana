@@ -5,11 +5,17 @@
  * 2.0.
  */
 
-import type { MouseEventHandler } from 'react';
+import type { KeyboardEventHandler, MouseEventHandler } from 'react';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { CommonProps } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiResizeObserver } from '@elastic/eui';
-import styled from 'styled-components';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonIcon,
+  EuiResizeObserver,
+  useEuiTheme,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
 import classNames from 'classnames';
 import type { EuiResizeObserverProps } from '@elastic/eui/src/components/observer/resize_observer/resize_observer';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
@@ -29,56 +35,6 @@ import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 import { useDataTestSubj } from '../../hooks/state_selectors/use_data_test_subj';
 import { useWithCommandList } from '../../hooks/state_selectors/use_with_command_list';
 import { detectAndPreProcessPastedCommand } from './lib/utils';
-const CommandInputContainer = styled.div`
-  background-color: ${({ theme: { eui } }) => eui.euiFormBackgroundColor};
-  border-radius: ${({ theme: { eui } }) => eui.euiBorderRadius};
-  padding: ${({ theme: { eui } }) => eui.euiSizeS};
-  outline: ${({ theme: { eui } }) => eui.euiBorderThin};
-
-  border-bottom: ${({ theme: { eui } }) => eui.euiBorderThick};
-  border-bottom-color: transparent;
-
-  &:focus-within {
-    border-bottom-color: ${({ theme: { eui } }) => eui.euiColorPrimary};
-  }
-
-  &.error {
-    border-bottom-color: ${({ theme: { eui } }) => eui.euiColorDanger};
-  }
-
-  .textEntered {
-    white-space: break-spaces;
-  }
-
-  .prompt {
-    padding-right: 1ch;
-  }
-
-  &.withPopover {
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
-  }
-
-  &.hasFocus {
-    // Cursor is defined in '<InputDisplay>' component
-    .cursor {
-      background-color: ${({ theme: { eui } }) => eui.euiTextColor};
-      animation: cursor-blink-animation 1s steps(5, start) infinite;
-      -webkit-animation: cursor-blink-animation 1s steps(5, start) infinite;
-
-      @keyframes cursor-blink-animation {
-        to {
-          visibility: hidden;
-        }
-      }
-      @-webkit-keyframes cursor-blink-animation {
-        to {
-          visibility: hidden;
-        }
-      }
-    }
-  }
-`;
 
 export interface CommandInputProps extends CommonProps {
   prompt?: string;
@@ -92,6 +48,60 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
   const getTestId = useTestIdGenerator(useDataTestSubj());
   const dispatch = useConsoleStateDispatch();
   const commands = useWithCommandList();
+  const { euiTheme } = useEuiTheme();
+  const commandInputContainerStyles = useMemo(
+    () => css`
+      background-color: ${euiTheme.colors.backgroundBasePlain};
+      border-radius: ${euiTheme.border.radius.medium};
+      padding: ${euiTheme.size.s};
+      outline: ${euiTheme.border.thin};
+
+      border-bottom: ${euiTheme.border.thick};
+      border-bottom-color: transparent;
+
+      &:focus-within {
+        border-bottom-color: ${euiTheme.colors.primary};
+      }
+
+      &.error {
+        border-bottom-color: ${euiTheme.colors.danger};
+      }
+
+      .textEntered {
+        white-space: break-spaces;
+      }
+
+      .prompt {
+        padding-right: 1ch;
+      }
+
+      &.withPopover {
+        border-top-left-radius: 0;
+        border-top-right-radius: 0;
+      }
+
+      &.hasFocus {
+        // Cursor is defined in '<InputDisplay>' component
+        .cursor {
+          background-color: ${euiTheme.colors.textParagraph};
+          animation: cursor-blink-animation 1s steps(5, start) infinite;
+          -webkit-animation: cursor-blink-animation 1s steps(5, start) infinite;
+
+          @keyframes cursor-blink-animation {
+            to {
+              visibility: hidden;
+            }
+          }
+          @-webkit-keyframes cursor-blink-animation {
+            to {
+              visibility: hidden;
+            }
+          }
+        }
+      }
+    `,
+    [euiTheme]
+  );
   const { rightOfCursorText, leftOfCursorText, fullTextEntered, enteredCommand, parsedInput } =
     useWithInputTextEntered();
   const visibleState = useWithInputVisibleState();
@@ -168,6 +178,17 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
       }
     },
     [dispatch, isKeyInputBeingCaptured, isPopoverOpen, keyCaptureFocusRef]
+  );
+
+  const handleTypingAreaKeyDown = useCallback<KeyboardEventHandler>(
+    (ev) => {
+      if (ev.key === 'Enter' || ev.key === ' ') {
+        if (keyCaptureFocusRef.current) {
+          keyCaptureFocusRef.current.focus();
+        }
+      }
+    },
+    [keyCaptureFocusRef]
   );
 
   const handleInputCapture = useCallback<InputCaptureProps['onCapture']>(
@@ -302,10 +323,12 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
       <EuiResizeObserver onResize={handleOnResize}>
         {(resizeRef) => {
           return (
-            <CommandInputContainer
+            <div
               {...commonProps}
+              css={commandInputContainerStyles}
               className={inputContainerClassname}
               onClick={handleTypingAreaClick}
+              onKeyDown={handleTypingAreaKeyDown}
               ref={resizeRef}
               data-test-subj={getTestId('cmdInput-container')}
             >
@@ -339,7 +362,7 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>
-            </CommandInputContainer>
+            </div>
           );
         }}
       </EuiResizeObserver>

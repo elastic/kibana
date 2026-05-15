@@ -154,5 +154,4 @@ describe('<TakeAction />', () => {
       expect.anything()
     );
   });
-
 });

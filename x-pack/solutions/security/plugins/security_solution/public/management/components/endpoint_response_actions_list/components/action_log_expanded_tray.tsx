@@ -6,8 +6,14 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { EuiCodeBlock, EuiDescriptionList, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { css, euiStyled } from '@kbn/kibana-react-plugin/common';
+import {
+  EuiCodeBlock,
+  EuiDescriptionList,
+  EuiFlexGroup,
+  EuiFlexItem,
+  useEuiTheme,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
 import { reduce } from 'lodash';
 import { ActionResponseOutputs } from './action_response_outputs';
 import { getAgentTypeName } from '../../../../common/translations';
@@ -19,57 +25,7 @@ import { type ActionDetails, type MaybeImmutable } from '../../../../../common/e
 
 const emptyValue = getEmptyValue();
 
-const customDescriptionListCss = css`
-  &.euiDescriptionList {
-    > .euiDescriptionList__title {
-      color: ${(props) => props.theme.eui.euiColorDarkShade};
-      font-size: ${(props) => props.theme.eui.euiFontSizeXS};
-    }
-
-    > .euiDescriptionList__title,
-    > .euiDescriptionList__description {
-      font-weight: ${(props) => props.theme.eui.euiFontWeightRegular};
-    }
-  }
-`;
-const topSpacingCss = css`
-  ${(props) => `${props.theme.eui.euiSize} 0`}
-`;
-const dashedBorderCss = css`
-  ${(props) => `1px dashed ${props.theme.eui.euiColorDisabled}`};
-`;
-const StyledDescriptionListOutput = euiStyled(EuiDescriptionList).attrs({ compressed: true })`
-  ${customDescriptionListCss}
-  dd {
-    margin: ${topSpacingCss};
-    padding: ${topSpacingCss};
-    border-top: ${dashedBorderCss};
-    border-bottom: ${dashedBorderCss};
-  }
-`;
-
-const StyledDescriptionList = euiStyled(EuiDescriptionList).attrs({
-  compressed: true,
-  type: 'column',
-})`
-  ${customDescriptionListCss}
-`;
-
-const StyledEuiCodeBlock = euiStyled(EuiCodeBlock).attrs({
-  transparentBackground: true,
-  paddingSize: 'none',
-})`
-  code {
-    color: ${(props) => props.theme.eui.euiColorDarkShade} !important;
-  }
-`;
-
-const StyledEuiFlexGroup = euiStyled(EuiFlexGroup).attrs({
-  direction: 'column',
-  className: 'eui-yScrollWithShadows',
-  gutterSize: 's',
-  tabIndex: 0,
-})`
+const flexGroupStyles = css`
   max-height: 40vh;
   min-height: 270px;
   overflow-y: auto;
@@ -80,6 +36,54 @@ export const ActionsLogExpandedTray = memo<{
   'data-test-subj'?: string;
 }>(({ action, 'data-test-subj': dataTestSubj }) => {
   const getTestId = useTestIdGenerator(dataTestSubj);
+  const { euiTheme } = useEuiTheme();
+
+  const customDescriptionListStyles = useMemo(
+    () => css`
+      &.euiDescriptionList {
+        > .euiDescriptionList__title {
+          color: ${euiTheme.colors.darkShade};
+          font-size: ${euiTheme.font.scale.xs}rem;
+        }
+        > .euiDescriptionList__title,
+        > .euiDescriptionList__description {
+          font-weight: ${euiTheme.font.weight.regular};
+        }
+      }
+    `,
+    [euiTheme]
+  );
+
+  const descriptionListOutputStyles = useMemo(
+    () => css`
+      &.euiDescriptionList {
+        > .euiDescriptionList__title {
+          color: ${euiTheme.colors.darkShade};
+          font-size: ${euiTheme.font.scale.xs}rem;
+        }
+        > .euiDescriptionList__title,
+        > .euiDescriptionList__description {
+          font-weight: ${euiTheme.font.weight.regular};
+        }
+      }
+      dd {
+        margin: ${euiTheme.size.base} 0;
+        padding: ${euiTheme.size.base} 0;
+        border-top: 1px dashed ${euiTheme.colors.disabled};
+        border-bottom: 1px dashed ${euiTheme.colors.disabled};
+      }
+    `,
+    [euiTheme]
+  );
+
+  const codeBlockStyles = useMemo(
+    () => css`
+      code {
+        color: ${euiTheme.colors.darkShade} !important;
+      }
+    `,
+    [euiTheme.colors.darkShade]
+  );
   const {
     hosts,
     startedAt,
@@ -152,43 +156,80 @@ export const ActionsLogExpandedTray = memo<{
 
     return list.map(({ title, description }) => {
       return {
-        title: <StyledEuiCodeBlock>{title}</StyledEuiCodeBlock>,
+        title: (
+          <EuiCodeBlock transparentBackground paddingSize="none" css={codeBlockStyles}>
+            {title}
+          </EuiCodeBlock>
+        ),
         description: (
-          <StyledEuiCodeBlock data-test-subj={getTestId(`action-details-info-${title}`)}>
+          <EuiCodeBlock
+            transparentBackground
+            paddingSize="none"
+            css={codeBlockStyles}
+            data-test-subj={getTestId(`action-details-info-${title}`)}
+          >
             {description}
-          </StyledEuiCodeBlock>
+          </EuiCodeBlock>
         ),
       };
     });
-  }, [agentType, command, comment, completedAt, getTestId, hosts, parametersList, startedAt]);
+  }, [
+    agentType,
+    codeBlockStyles,
+    command,
+    comment,
+    completedAt,
+    getTestId,
+    hosts,
+    parametersList,
+    startedAt,
+  ]);
 
   const outputList = useMemo(
     () => [
       {
         title: (
-          <StyledEuiCodeBlock>{`${OUTPUT_MESSAGES.expandSection.output}:`}</StyledEuiCodeBlock>
+          <EuiCodeBlock transparentBackground paddingSize="none" css={codeBlockStyles}>
+            {`${OUTPUT_MESSAGES.expandSection.output}:`}
+          </EuiCodeBlock>
         ),
         description: (
-          // codeblock for output
-          <StyledEuiCodeBlock data-test-subj={getTestId('details-tray-output')}>
+          <EuiCodeBlock
+            transparentBackground
+            paddingSize="none"
+            css={codeBlockStyles}
+            data-test-subj={getTestId('details-tray-output')}
+          >
             <ActionResponseOutputs action={action} data-test-subj={getTestId('output')} />
-          </StyledEuiCodeBlock>
+          </EuiCodeBlock>
         ),
       },
     ],
-    [action, getTestId]
+    [action, codeBlockStyles, getTestId]
   );
 
   return (
     <>
-      <StyledEuiFlexGroup data-test-subj={getTestId('details-tray')}>
+      <EuiFlexGroup
+        direction="column"
+        className="eui-yScrollWithShadows"
+        gutterSize="s"
+        tabIndex={0}
+        css={flexGroupStyles}
+        data-test-subj={getTestId('details-tray')}
+      >
         <EuiFlexItem grow={false}>
-          <StyledDescriptionList listItems={dataList} />
+          <EuiDescriptionList
+            compressed
+            type="column"
+            listItems={dataList}
+            css={customDescriptionListStyles}
+          />
         </EuiFlexItem>
         <EuiFlexItem>
-          <StyledDescriptionListOutput listItems={outputList} />
+          <EuiDescriptionList compressed listItems={outputList} css={descriptionListOutputStyles} />
         </EuiFlexItem>
-      </StyledEuiFlexGroup>
+      </EuiFlexGroup>
     </>
   );
 });

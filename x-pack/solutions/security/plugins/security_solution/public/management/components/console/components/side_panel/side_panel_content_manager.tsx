@@ -7,7 +7,6 @@
 
 import type { ReactNode } from 'react';
 import React, { memo, useMemo, useCallback } from 'react';
-import styled from 'styled-components';
 import {
   EuiText,
   EuiIcon,
@@ -16,7 +15,9 @@ import {
   EuiFlexItem,
   EuiButtonIcon,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
@@ -27,16 +28,16 @@ import { useWithSidePanel } from '../../hooks/state_selectors/use_with_side_pane
 import { useConsoleStateDispatch } from '../../hooks/state_selectors/use_console_state_dispatch';
 import { useDataTestSubj } from '../../hooks/state_selectors/use_data_test_subj';
 
-const StyledEuiFlexGroup = styled(EuiFlexGroup)`
-  padding-top: ${({ theme: { eui } }) => eui.euiPanelPaddingModifiers.paddingSmall};
-  padding-right: ${({ theme: { eui } }) => eui.euiPanelPaddingModifiers.paddingSmall};
-`;
-
 export const SidePanelContentManager = memo(() => {
   const dispatch = useConsoleStateDispatch();
   const commands = useWithCommandList();
   const getTestId = useTestIdGenerator(useDataTestSubj('sidePanel'));
   const show = useWithSidePanel().show;
+  const { euiTheme } = useEuiTheme();
+  const styledEuiFlexGroupStyles = css`
+    padding-top: ${euiTheme.size.s};
+    padding-right: ${euiTheme.size.s};
+  `;
 
   const closeHelpPanel = useCallback(() => {
     dispatch({
@@ -49,7 +50,7 @@ export const SidePanelContentManager = memo(() => {
     if (show === 'help') {
       return (
         <>
-          <StyledEuiFlexGroup>
+          <EuiFlexGroup css={styledEuiFlexGroupStyles}>
             <EuiFlexItem>
               <EuiTitle size="s" data-test-subj={getTestId('headerTitle')}>
                 <h3>
@@ -69,7 +70,7 @@ export const SidePanelContentManager = memo(() => {
                 data-test-subj={getTestId('headerCloseButton')}
               />
             </EuiFlexItem>
-          </StyledEuiFlexGroup>
+          </EuiFlexGroup>
           <EuiSpacer size="m" />
           <EuiText size="s">
             <FormattedMessage
@@ -84,7 +85,7 @@ export const SidePanelContentManager = memo(() => {
       );
     }
     return null;
-  }, [show, getTestId, closeHelpPanel]);
+  }, [show, getTestId, closeHelpPanel, styledEuiFlexGroupStyles]);
 
   const panelBody: ReactNode = useMemo(() => {
     if (show === 'help') {

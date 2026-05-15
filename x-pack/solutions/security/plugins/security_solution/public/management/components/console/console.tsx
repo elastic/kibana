@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useEffect, useRef } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import styled from 'styled-components';
+import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
+import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { ConsoleFooter } from './components/console_footer';
 import { ConsoleHeader } from './components/console_header';
 import type { CommandInputProps } from './components/command_input';
@@ -18,91 +18,6 @@ import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import { useWithManagedConsole } from './components/console_manager/console_manager';
 import { HistoryOutput } from './components/history_output';
 import { SidePanelFlexItem } from './components/side_panel/side_panel_flex_item';
-
-const ConsoleWindow = styled.div`
-  height: 100%;
-  background-color: ${({ theme: { eui } }) => eui.euiPageBackgroundColor};
-  border: ${({ theme: { eui } }) => eui.euiBorderThin};
-  border-radius: ${({ theme: { eui } }) => eui.euiBorderRadiusSmall};
-
-  .layout {
-    height: 100%;
-    width: 100%;
-    min-height: 300px;
-    min-width: 300px;
-    overflow: hidden;
-
-    &-hideOverflow {
-      overflow: hidden;
-    }
-
-    &-bottomBorder {
-      border-bottom: ${({ theme: { eui } }) => eui.euiSizeS} solid
-        ${({ theme: { eui } }) => eui.euiPageBackgroundColor};
-    }
-
-    &-container {
-      padding: ${({ theme: { eui } }) => eui.euiPanelPaddingModifiers.paddingMedium};
-    }
-
-    &-header {
-      background-color: ${({ theme: { eui } }) => eui.euiColorEmptyShade};
-      border-bottom: 1px solid ${({ theme: { eui } }) => eui.euiColorLightShade};
-      border-top-left-radius: ${({ theme: { eui } }) => eui.euiBorderRadiusSmall};
-      border-top-right-radius: ${({ theme: { eui } }) => eui.euiBorderRadiusSmall};
-      padding: ${({ theme: { eui } }) => eui.euiSize} ${({ theme: { eui } }) => eui.euiSize}
-        ${({ theme: { eui } }) => eui.euiSize} ${({ theme: { eui } }) => eui.euiSize};
-    }
-
-    &-commandInput {
-      padding-top: ${({ theme: { eui } }) => eui.euiSizeXS};
-      padding-bottom: ${({ theme: { eui } }) => eui.euiSizeXS};
-    }
-
-    &-footer {
-      padding-top: 0;
-      padding-bottom: ${({ theme: { eui } }) => eui.euiSizeXS};
-    }
-
-    &-rightPanel {
-      width: 35%;
-      background-color: ${({ theme: { eui } }) => eui.euiFormBackgroundColor};
-      border-left: ${({ theme: { eui } }) => eui.euiBorderThin};
-    }
-
-    &-historyOutput {
-      overflow: auto;
-    }
-
-    &-historyViewport {
-      height: 100%;
-      overflow-x: hidden;
-      white-space: pre-wrap;
-    }
-
-    // min-width setting is needed for flex items to ensure that overflow works as expected
-    // in the Input area and not cause the entire UI to expand beyond the overall width of
-    // the console. @see https://css-tricks.com/flexbox-truncated-text
-    // To prevent this from being applied to an individual flex item, use the classname of
-    // 'noMinWidth'. For areas of the Console that render components external to the Console,
-    // use className 'noThemeOverrides' to prevent this from impacting those components/
-    .euiFlexItem:not(.noMinWidth):not(.noThemeOverrides .euiFlexItem) {
-      min-width: 0;
-    }
-  }
-
-  //-----------------------------------------------------------
-  // 👇 Utility classnames for use anywhere inside of Console
-  //-----------------------------------------------------------
-
-  .font-family-code {
-    font-family: ${({ theme: { eui } }) => eui.euiCodeFontFamily};
-  }
-
-  .font-style-italic {
-    font-style: italic;
-  }
-`;
 
 export const Console = memo<ConsoleProps>(
   ({
@@ -118,6 +33,93 @@ export const Console = memo<ConsoleProps>(
     const inputFocusRef: CommandInputProps['focusRef'] = useRef(null);
     const getTestId = useTestIdGenerator(commonProps['data-test-subj']);
     const managedConsole = useWithManagedConsole(managedKey);
+    const { euiTheme } = useEuiTheme();
+    const consoleWindowStyles = useMemo(
+      () => css`
+        height: 100%;
+        background-color: ${euiTheme.colors.backgroundBasePlain};
+        border: ${euiTheme.border.thin};
+        border-radius: ${euiTheme.border.radius.small};
+
+        .layout {
+          height: 100%;
+          width: 100%;
+          min-height: 300px;
+          min-width: 300px;
+          overflow: hidden;
+
+          &-hideOverflow {
+            overflow: hidden;
+          }
+
+          &-bottomBorder {
+            border-bottom: ${euiTheme.size.s} solid ${euiTheme.colors.backgroundBasePlain};
+          }
+
+          &-container {
+            padding: ${euiTheme.size.base};
+          }
+
+          &-header {
+            background-color: ${euiTheme.colors.emptyShade};
+            border-bottom: 1px solid ${euiTheme.colors.lightShade};
+            border-top-left-radius: ${euiTheme.border.radius.small};
+            border-top-right-radius: ${euiTheme.border.radius.small};
+            padding: ${euiTheme.size.base} ${euiTheme.size.base} ${euiTheme.size.base}
+              ${euiTheme.size.base};
+          }
+
+          &-commandInput {
+            padding-top: ${euiTheme.size.xs};
+            padding-bottom: ${euiTheme.size.xs};
+          }
+
+          &-footer {
+            padding-top: 0;
+            padding-bottom: ${euiTheme.size.xs};
+          }
+
+          &-rightPanel {
+            width: 35%;
+            background-color: ${euiTheme.colors.backgroundBasePlain};
+            border-left: ${euiTheme.border.thin};
+          }
+
+          &-historyOutput {
+            overflow: auto;
+          }
+
+          &-historyViewport {
+            height: 100%;
+            overflow-x: hidden;
+            white-space: pre-wrap;
+          }
+
+          // min-width setting is needed for flex items to ensure that overflow works as expected
+          // in the Input area and not cause the entire UI to expand beyond the overall width of
+          // the console. @see https://css-tricks.com/flexbox-truncated-text
+          // To prevent this from being applied to an individual flex item, use the classname of
+          // 'noMinWidth'. For areas of the Console that render components external to the Console,
+          // use className 'noThemeOverrides' to prevent this from impacting those components/
+          .euiFlexItem:not(.noMinWidth):not(.noThemeOverrides .euiFlexItem) {
+            min-width: 0;
+          }
+        }
+
+        //-----------------------------------------------------------
+        // Utility classnames for use anywhere inside of Console
+        //-----------------------------------------------------------
+
+        .font-family-code {
+          font-family: ${euiTheme.font.familyCode};
+        }
+
+        .font-style-italic {
+          font-style: italic;
+        }
+      `,
+      [euiTheme]
+    );
 
     const scrollToBottom = useCallback(() => {
       // We need the `setTimeout` here because in some cases, the command output
@@ -155,7 +157,7 @@ export const Console = memo<ConsoleProps>(
         dataTestSubj={commonProps['data-test-subj']}
         storagePrefix={storagePrefix}
       >
-        <ConsoleWindow {...commonProps}>
+        <div css={consoleWindowStyles} {...commonProps}>
           <EuiFlexGroup className="layout" gutterSize="none" responsive={false}>
             <EuiFlexItem>
               <EuiFlexGroup
@@ -209,7 +211,7 @@ export const Console = memo<ConsoleProps>(
             </EuiFlexItem>
             {<SidePanelFlexItem />}
           </EuiFlexGroup>
-        </ConsoleWindow>
+        </div>
       </ConsoleStateProvider>
     );
   }

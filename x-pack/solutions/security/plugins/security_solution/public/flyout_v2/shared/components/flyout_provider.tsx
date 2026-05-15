@@ -15,8 +15,6 @@ import { Provider } from 'react-redux';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { ExpandableFlyoutProvider } from '@kbn/expandable-flyout';
 import { NavigationProvider } from '@kbn/security-solution-navigation';
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import { useDarkMode } from '@kbn/kibana-react-plugin/public';
 import type { StartServices } from '../../../types';
 import { ReactQueryClientProvider } from '../../../common/containers/query_client/query_client_provider';
 import { KibanaContextProvider } from '../../../common/lib/kibana';
@@ -26,15 +24,6 @@ import { DiscoverInTimelineContextProvider } from '../../../common/components/di
 import { AssistantProvider } from '../../../assistant/provider';
 import { CaseProvider } from '../../../cases/components/provider/provider';
 import { ConsoleManager } from '../../../management/components/console/components/console_manager';
-
-// styled-components ThemeProvider providing `theme.eui` is set at the SecurityApp root,
-// but Flyout v2 portals out of that tree (into EuiFlyoutManager). Re-apply it here so
-// styled-components consumers rendered inside the flyout (e.g. the Respond PageOverlay
-// in ConsoleManager) can read `theme.eui`.
-const FlyoutEuiThemeProvider: FC<{ children: ReactNode }> = ({ children }) => {
-  const darkMode = useDarkMode();
-  return <EuiThemeProvider darkMode={darkMode}>{children}</EuiThemeProvider>;
-};
 
 const useHasRouterContext = (): boolean => {
   try {
@@ -75,13 +64,11 @@ export const flyoutProviders = ({
   // PageOverlay they render calls `useLocation()` (for `hideOnUrlPathnameChange`).
   const flyoutContent = (
     <FlyoutRouter history={history}>
-      <FlyoutEuiThemeProvider>
-        <ConsoleManager>
-          <AssistantProvider>
-            <ExpandableFlyoutProvider>{children}</ExpandableFlyoutProvider>
-          </AssistantProvider>
-        </ConsoleManager>
-      </FlyoutEuiThemeProvider>
+      <ConsoleManager>
+        <AssistantProvider>
+          <ExpandableFlyoutProvider>{children}</ExpandableFlyoutProvider>
+        </AssistantProvider>
+      </ConsoleManager>
     </FlyoutRouter>
   );
 

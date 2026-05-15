@@ -7,69 +7,16 @@
 
 import type { ReactNode, CSSProperties } from 'react';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import styled, { createGlobalStyle } from 'styled-components';
-import { EuiFocusTrap, EuiPortal } from '@elastic/eui';
+import { Global, css } from '@emotion/react';
+import { EuiFocusTrap, EuiPortal, useEuiTheme } from '@elastic/eui';
 import classnames from 'classnames';
 import { useLocation } from 'react-router-dom';
 import type { EuiPortalProps } from '@elastic/eui/src/components/portal/portal';
-import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
 import { euiIncludeSelectorInFocusTrap, layoutVar } from '@kbn/core-chrome-layout-constants';
 
 import { useHasFullScreenContent } from '../../../common/containers/use_full_screen';
 import { FULL_SCREEN_CONTENT_OVERRIDES_CSS_STYLESHEET } from '../../../common/components/page';
-
-const OverlayRootContainer = styled.div`
-  border: none;
-
-  display: block;
-  position: fixed;
-  overflow: hidden;
-
-  top: ${layoutVar('application.top', '0px')};
-  bottom: ${layoutVar('application.bottom', '0px')};
-  right: ${layoutVar('application.right', '0px')};
-  left: ${layoutVar('application.left', '0px')};
-
-  border-left: 1px solid ${({ theme: { eui } }) => eui.euiColorLightestShade};
-
-  z-index: ${({ theme: { eui } }) => eui.euiZFlyout};
-
-  background-color: ${({ theme: { eui } }) => eui.euiColorEmptyShade};
-
-  &.scrolling {
-    overflow: auto;
-  }
-
-  &.hidden {
-    display: none;
-  }
-
-  &.padding-xs {
-    padding: ${({ theme: { eui } }) => eui.euiSizeXS};
-  }
-  &.padding-s {
-    padding: ${({ theme: { eui } }) => eui.euiSizeS};
-  }
-  &.padding-m {
-    padding: ${({ theme: { eui } }) => eui.euiSizeM};
-  }
-  &.padding-l {
-    padding: ${({ theme: { eui } }) => eui.euiSizeL};
-  }
-  &.padding-xl {
-    padding: ${({ theme: { eui } }) => eui.euiSizeXL};
-  }
-
-  &.fullScreen {
-    top: 0;
-    height: 100%;
-  }
-
-  .fullHeight {
-    height: 100%;
-  }
-`;
 
 const PAGE_OVERLAY_CSS_CLASSNAME = 'securitySolution-pageOverlay';
 export const PAGE_OVERLAY_DOCUMENT_BODY_IS_VISIBLE_CLASSNAME = `${PAGE_OVERLAY_CSS_CLASSNAME}-isVisible`;
@@ -77,7 +24,7 @@ export const PAGE_OVERLAY_DOCUMENT_BODY_LOCK_CLASSNAME = `${PAGE_OVERLAY_CSS_CLA
 export const PAGE_OVERLAY_DOCUMENT_BODY_FULLSCREEN_CLASSNAME = `${PAGE_OVERLAY_CSS_CLASSNAME}-fullScreen`;
 export const PAGE_OVERLAY_DOCUMENT_BODY_OVER_PAGE_WRAPPER_CLASSNAME = `${PAGE_OVERLAY_CSS_CLASSNAME}-overSecuritySolutionPageWrapper`;
 
-const PageOverlayGlobalStyles = createGlobalStyle<{ theme: EuiTheme }>`
+const pageOverlayGlobalStyles = css`
   body.${PAGE_OVERLAY_DOCUMENT_BODY_LOCK_CLASSNAME} {
     overflow: hidden;
   }
@@ -196,6 +143,54 @@ export const PageOverlay = memo<PageOverlayProps>(
     const { pathname } = useLocation();
     const isMounted = useIsMounted();
     const showInFullScreen = useHasFullScreenContent();
+    const { euiTheme } = useEuiTheme();
+    const overlayRootContainerStyles = useMemo(
+      () => css`
+        border: none;
+        display: block;
+        position: fixed;
+        overflow: hidden;
+
+        top: ${layoutVar('application.top', '0px')};
+        bottom: ${layoutVar('application.bottom', '0px')};
+        right: ${layoutVar('application.right', '0px')};
+        left: ${layoutVar('application.left', '0px')};
+
+        border-left: 1px solid ${euiTheme.colors.lightestShade};
+        z-index: ${euiTheme.levels.flyout};
+        background-color: ${euiTheme.colors.emptyShade};
+
+        &.scrolling {
+          overflow: auto;
+        }
+        &.hidden {
+          display: none;
+        }
+        &.padding-xs {
+          padding: ${euiTheme.size.xs};
+        }
+        &.padding-s {
+          padding: ${euiTheme.size.s};
+        }
+        &.padding-m {
+          padding: ${euiTheme.size.m};
+        }
+        &.padding-l {
+          padding: ${euiTheme.size.l};
+        }
+        &.padding-xl {
+          padding: ${euiTheme.size.xl};
+        }
+        &.fullScreen {
+          top: 0;
+          height: 100%;
+        }
+        .fullHeight {
+          height: 100%;
+        }
+      `,
+      [euiTheme]
+    );
     const [openedOnPathName, setOpenedOnPathName] = useState<null | string>(null);
     const portalEleRef = useRef<HTMLElement | null>();
 
@@ -204,13 +199,13 @@ export const PageOverlay = memo<PageOverlayProps>(
     }, []);
 
     const containerCssOverrides = useMemo<CSSProperties>(() => {
-      const css: CSSProperties = {};
+      const overrides: CSSProperties = {};
 
       if (zIndex) {
-        css.zIndex = zIndex;
+        overrides.zIndex = zIndex;
       }
 
-      return css;
+      return overrides;
     }, [zIndex]);
 
     const containerClassName = useMemo(() => {
@@ -316,7 +311,8 @@ export const PageOverlay = memo<PageOverlayProps>(
 
     return (
       <EuiPortal portalRef={setPortalEleRef}>
-        <OverlayRootContainer
+        <div
+          css={overlayRootContainerStyles}
           data-test-subj={dataTestSubj}
           className={containerClassName}
           style={containerCssOverrides}
@@ -324,8 +320,8 @@ export const PageOverlay = memo<PageOverlayProps>(
           <EuiFocusTrap data-test-subj="trap-focus" className="fullHeight" shards={focusTrapShards}>
             {children}
           </EuiFocusTrap>
-        </OverlayRootContainer>
-        <PageOverlayGlobalStyles />
+        </div>
+        <Global styles={pageOverlayGlobalStyles} />
       </EuiPortal>
     );
   }
