@@ -34,24 +34,36 @@ get:
         application/json:
           schema:
             $ref: '../components/schemas/400_response.yaml'
+          examples:
+            badRequestResponse:
+              $ref: '../components/examples/error_400_response.yaml'
     '401':
       description: Unauthorized response
       content:
         application/json:
           schema:
             $ref: '../components/schemas/401_response.yaml'
+          examples:
+            unauthorizedResponse:
+              $ref: '../components/examples/error_401_response.yaml'
     '500':
       description: Internal Server Error response
       content:
         application/json:
           schema:
             $ref: '../components/schemas/500_response.yaml'
+          examples:
+            internalServerErrorResponse:
+              $ref: '../components/examples/error_500_response.yaml'
     '501':
       description: Not Implemented response
       content:
         application/json:
           schema:
             $ref: '../components/schemas/501_response.yaml'
+          examples:
+            notImplementedResponse:
+              $ref: '../components/examples/error_501_response.yaml'
   x-codeSamples:
     - $ref: "../components/examples/source_maps_get_curl_request1.yaml"
 post:
@@ -75,6 +87,9 @@ post:
       multipart/form-data:
         schema:
           $ref: '../components/schemas/upload_source_map_object.yaml'
+        examples:
+          uploadSourceMapRequest:
+            $ref: '../components/examples/source_maps_upload_request1.yaml'
   responses:
     '200':
       description: Successful response
@@ -91,29 +106,44 @@ post:
         application/json:
           schema:
             $ref: '../components/schemas/400_response.yaml'
+          examples:
+            badRequestResponse:
+              $ref: '../components/examples/error_400_response.yaml'
     '401':
       description: Unauthorized response
       content:
         application/json:
           schema:
             $ref: '../components/schemas/401_response.yaml'
+          examples:
+            unauthorizedResponse:
+              $ref: '../components/examples/error_401_response.yaml'
     '403':
       description: Forbidden response
       content:
         application/json:
           schema:
             $ref: '../components/schemas/403_response.yaml'
+          examples:
+            forbiddenResponse:
+              $ref: '../components/examples/error_403_response.yaml'
     '500':
       description: Internal Server Error response
       content:
         application/json:
           schema:
             $ref: '../components/schemas/500_response.yaml'
+          examples:
+            internalServerErrorResponse:
+              $ref: '../components/examples/error_500_response.yaml'
     '501':
       description: Not Implemented response
       content:
         application/json:
           schema:
             $ref: '../components/schemas/501_response.yaml'
+          examples:
+            notImplementedResponse:
+              $ref: '../components/examples/error_501_response.yaml'
   x-codeSamples:
     - $ref: "../components/examples/source_maps_upload_curl_request1.yaml"

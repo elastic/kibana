@@ -1,0 +1,59 @@
+{
+  "id": "agentBuilderWorkflows",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "agentBuilderWorkflows",
+      "id": "def-public.AgentBuilderWorkflowsPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "AgentBuilderWorkflowsPluginSetup",
+      "description": [],
+      "path": "x-pack/platform/plugins/shared/agent_builder_workflows/public/types.ts",
+      "lineNumber": 21,
+      "columnNumber": 1,
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "agentBuilderWorkflows",
+      "id": "def-public.AgentBuilderWorkflowsPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "AgentBuilderWorkflowsPluginStart",
+      "description": [],
+      "path": "x-pack/platform/plugins/shared/agent_builder_workflows/public/types.ts",
+      "lineNumber": 24,
+      "columnNumber": 1,
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

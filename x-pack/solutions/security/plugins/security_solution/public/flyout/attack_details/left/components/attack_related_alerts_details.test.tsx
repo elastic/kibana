@@ -21,7 +21,7 @@ jest.mock('../../context');
 jest.mock('../../hooks/use_original_alert_ids');
 
 jest.mock(
-  '../../../../flyout_v2/correlations/components/correlations_details_alerts_table',
+  '../../../../flyout_v2/document/tools/correlations/components/correlations_details_alerts_table',
   () => ({
     CorrelationsDetailsAlertsTable: (props: { [key: string]: unknown }) =>
       mockCorrelationsDetailsAlertsTable(props),

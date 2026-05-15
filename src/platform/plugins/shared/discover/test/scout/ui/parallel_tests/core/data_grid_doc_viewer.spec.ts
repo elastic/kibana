@@ -38,6 +38,7 @@ spaceTest.describe('Discover data grid - doc viewer', { tag: testData.DISCOVER_C
   spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
     // Privileged user is needed to save the search used by the embeddable test.
     await browserAuth.loginAsPrivilegedUser();
+    await pageObjects.discover.setQueryMode('classic');
     await pageObjects.discover.goto();
     await pageObjects.discover.waitUntilSearchingHasFinished();
     await pageObjects.discover.waitForDocTableRendered();

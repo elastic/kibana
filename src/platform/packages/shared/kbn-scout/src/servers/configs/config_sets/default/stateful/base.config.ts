@@ -29,9 +29,6 @@ import {
 import type { ScoutServerConfig } from '../../../../../types';
 import { SAML_IDP_PLUGIN_PATH, STATEFUL_IDP_METADATA_PATH } from '../../../constants';
 
-// if config is executed on CI or locally
-const isRunOnCI = process.env.CI;
-
 const servers = {
   elasticsearch: {
     protocol: 'http',
@@ -192,8 +189,7 @@ export const defaultConfig: ScoutServerConfig = {
       ...(dockerRegistryPort
         ? [`--xpack.fleet.registryUrl=http://localhost:${dockerRegistryPort}`]
         : []),
-      // SAML configuration
-      ...(isRunOnCI ? [] : ['--mockIdpPlugin.enabled=true']),
+      // Agent policies are now created via Fleet API using the helper function from @kbn-scout
       // This ensures that we register the Security SAML API endpoints.
       // In the real world the SAML config is injected by control plane.
       `--plugin-path=${SAML_IDP_PLUGIN_PATH}`,

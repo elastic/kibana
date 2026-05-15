@@ -22,7 +22,7 @@ import { BaseAlertingRoute } from '../base_alerting_route';
 @injectable()
 export class BulkCreateAlertActionRoute extends BaseAlertingRoute {
   static method = 'post' as const;
-  static path = `${ALERTING_V2_ALERT_API_PATH}/action/_bulk`;
+  static path = `${ALERTING_V2_ALERT_API_PATH}/_bulk_action`;
   static security: RouteSecurity = {
     authz: {
       requiredPrivileges: [ALERTING_V2_API_PRIVILEGES.alerts.write],

@@ -60,6 +60,12 @@ interface BaseTraceWaterfallProps {
   traceDocsTotal?: number;
   maxTraceItems?: number;
   discoverHref?: string;
+  // TODO: Make required once the legacy waterfall is removed. See https://github.com/elastic/kibana/issues/248693
+  ebt?: {
+    row: { element: string };
+    errorBadge: { element: string };
+    serviceBadge: { element: string };
+  };
 }
 
 /** Default: 'window' (page scroll). Use 'parent' for flyout. */
@@ -93,6 +99,7 @@ export function TraceWaterfall(props: TraceWaterfallProps) {
     traceDocsTotal = 0,
     maxTraceItems = 0,
     discoverHref,
+    ebt,
   } = props;
   const contextSpanIds = props.contextSpanIds;
   const scrollToContextOnMount =
@@ -122,6 +129,7 @@ export function TraceWaterfall(props: TraceWaterfallProps) {
       onShowCriticalPathChange={onShowCriticalPathChange}
       entryTransactionId={entryTransactionId}
       scrollToContextOnMount={scrollToContextOnMount}
+      ebt={ebt}
     >
       {exceedMax && (
         <>

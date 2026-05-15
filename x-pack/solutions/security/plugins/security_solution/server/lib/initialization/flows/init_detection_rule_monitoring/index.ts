@@ -17,6 +17,7 @@ import type {
 
 export const initDetectionRuleMonitoringFlow: InitializationFlowDefinition<null> = {
   id: INITIALIZATION_FLOW_INIT_DETECTION_RULE_MONITORING,
+  spaceAware: true,
   runFlow: async (context: InitializationFlowContext): Promise<InitializationFlowResult<null>> => {
     const securityContext = await context.requestHandlerContext.securitySolution;
 

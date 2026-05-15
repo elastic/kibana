@@ -74,8 +74,6 @@ export interface VisSavedObject extends ISavedVis {
 
 export interface SaveVisOptions {
   confirmOverwrite?: boolean;
-  isTitleDuplicateConfirmed?: boolean;
-  onTitleDuplicate?: () => void;
   copyOnSave?: boolean;
 }
 

@@ -122,6 +122,17 @@ function tryParseEsql(esql: string) {
 // Public API
 // ---------------------------------------------------------------------------
 
+const UNMAPPED_FIELDS_DIRECTIVE = 'SET unmapped_fields="LOAD";\n';
+
+/**
+ * Prepends the `SET unmapped_fields="LOAD";` directive to an ES|QL query.
+ * This tells ES|QL to load unmapped fields from `_source` as keyword
+ * instead of raising "Unknown column" errors.
+ */
+export function withUnmappedFieldsDirective(query: string): string {
+  return `${UNMAPPED_FIELDS_DIRECTIVE}${query}`;
+}
+
 /**
  * Builds the ES|QL AST node for `METADATA _id, _source`.
  * Shared across all locations that construct or augment FROM commands.

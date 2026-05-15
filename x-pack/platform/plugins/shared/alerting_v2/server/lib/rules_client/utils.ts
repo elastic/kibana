@@ -5,9 +5,50 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
+import { isEqual } from 'lodash';
 import type { CreateRuleData, UpdateRuleData, RuleResponse } from '@kbn/alerting-v2-schemas';
+import { IMMUTABLE_RULE_FIELDS, type ImmutableRuleField } from '@kbn/alerting-v2-schemas';
 
 import { type RuleSavedObjectAttributes } from '../../saved_objects';
+
+/**
+ * Source-of-truth helpers driven by {@link IMMUTABLE_RULE_FIELDS}. They keep
+ * `upsertRule` (PUT — rejects mutation) and `buildUpdateRuleAttributes`
+ * (PATCH — silently preserves) honest as the rule schema evolves: adding a
+ * new immutable field only requires updating the registry in
+ * `@kbn/alerting-v2-schemas`.
+ */
+
+/**
+ * Throws `Boom.conflict` if the parsed request body tries to change any
+ * field declared immutable in {@link IMMUTABLE_RULE_FIELDS}. Intended for
+ * PUT-style upsert callers that send a full resource. All changed fields
+ * are reported in a single error so the client sees the full diff.
+ */
+export function assertImmutableUnchanged(
+  parsed: Pick<CreateRuleData, ImmutableRuleField>,
+  existing: Pick<RuleSavedObjectAttributes, ImmutableRuleField>
+): void {
+  const changed = IMMUTABLE_RULE_FIELDS.filter((field) => !isEqual(parsed[field], existing[field]));
+  if (changed.length > 0) {
+    throw Boom.conflict(`Some fields cannot be changed after creation: ${changed.join(', ')}.`);
+  }
+}
+
+/**
+ * Returns just the immutable fields from `attrs`, suitable for spreading at
+ * the end of an attribute builder so subsequent code cannot accidentally
+ * overwrite them.
+ */
+export function pickImmutable(
+  attrs: Pick<RuleSavedObjectAttributes, ImmutableRuleField>
+): Pick<RuleSavedObjectAttributes, ImmutableRuleField> {
+  return Object.fromEntries(IMMUTABLE_RULE_FIELDS.map((field) => [field, attrs[field]])) as Pick<
+    RuleSavedObjectAttributes,
+    ImmutableRuleField
+  >;
+}
 
 /**
  * For SO fields whose schema is `maybe(nullable(...))` — null is a valid
@@ -101,8 +142,6 @@ export function buildUpdateRuleAttributes(
 ): RuleSavedObjectAttributes {
   return {
     ...existingAttrs,
-    // `kind` is not updatable — always preserve the existing value.
-    kind: existingAttrs.kind,
     metadata: { ...existingAttrs.metadata, ...updateData.metadata },
     time_field: updateData.time_field ?? existingAttrs.time_field,
     schedule: { ...existingAttrs.schedule, ...updateData.schedule },
@@ -130,6 +169,9 @@ export function buildUpdateRuleAttributes(
     createdBy: existingAttrs.createdBy,
     createdAt: existingAttrs.createdAt,
     ...serverFields,
+    // Immutable fields are forced from storage last, so no preceding override
+    // can leak through if someone adds a new immutable field to the registry.
+    ...pickImmutable(existingAttrs),
   };
 }
 
