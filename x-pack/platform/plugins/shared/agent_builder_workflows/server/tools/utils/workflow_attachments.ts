@@ -27,13 +27,6 @@ interface EmitWorkflowDiffInput {
   toolId: string;
 }
 
-/**
- * Adds a workflow.yaml.diff attachment, adds/updates the workflow.yaml attachment,
- * and sends the WORKFLOW_YAML_CHANGED_EVENT UI event.
- *
- * Pass `existingAttachmentId` to update an existing workflow attachment (edit path).
- * Pass `undefined` to create a new workflow attachment (creation path).
- */
 export const emitWorkflowDiff = async (
   context: ToolHandlerContext,
   existingAttachmentId: string | undefined,
