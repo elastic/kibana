@@ -66,3 +66,14 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-4
+
+  - wait
+
+  - key: verify-es-snapshot
+    label: 'Verify ES Snapshot'
+    trigger: kibana-elasticsearch-snapshot-verify
+    async: true
+    soft_fail: true
+    if: build.env("DRY_RUN") != "true"
+    build:
+      branch: $BRANCH
