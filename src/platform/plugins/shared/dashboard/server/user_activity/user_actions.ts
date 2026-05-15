@@ -20,7 +20,7 @@ import type { DashboardUpdateResponseBody } from '../api/update';
 export async function trackCreateDashboardAction(
   result: DashboardCreateResponseBody,
   request: KibanaRequest
-) {
+): Promise<void> {
   coreServices.userActivity.trackUserAction({
     message: `User created dashboard "${result.data.title}" (id: ${result.id}).`,
     event: {
