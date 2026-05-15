@@ -51,7 +51,9 @@ describe('useEsqlAutocomplete', () => {
     jest
       .mocked(monaco.languages.registerSignatureHelpProvider)
       .mockReturnValue({ dispose: mockDisposeSignature });
-    jest.mocked(monaco.languages.registerHoverProvider).mockReturnValue({ dispose: mockDisposeHover });
+    jest
+      .mocked(monaco.languages.registerHoverProvider)
+      .mockReturnValue({ dispose: mockDisposeHover });
     jest.mocked(ESQLLang.getSuggestionProvider).mockReturnValue(suggestionProvider);
     jest.mocked(ESQLLang.getSignatureProvider).mockReturnValue(signatureProvider);
     jest.mocked(ESQLLang.getHoverProvider).mockReturnValue(hoverProvider);
@@ -75,7 +77,10 @@ describe('useEsqlAutocomplete', () => {
       ESQL_LANG_ID,
       signatureProvider
     );
-    expect(monaco.languages.registerHoverProvider).toHaveBeenCalledWith(ESQL_LANG_ID, hoverProvider);
+    expect(monaco.languages.registerHoverProvider).toHaveBeenCalledWith(
+      ESQL_LANG_ID,
+      hoverProvider
+    );
   });
 
   it('disposes registered providers on unmount', () => {
