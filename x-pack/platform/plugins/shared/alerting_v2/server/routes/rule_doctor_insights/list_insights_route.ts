@@ -8,8 +8,11 @@
 import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
 import { inject, injectable } from 'inversify';
 import { Request } from '@kbn/core-di-server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
-import { listInsightsQuerySchema, type ListInsightsQuery } from '@kbn/alerting-v2-schemas';
+import {
+  errorResponseSchema,
+  listInsightsQuerySchema,
+  type ListInsightsQuery,
+} from '@kbn/alerting-v2-schemas';
 import type { RuleDoctorInsightsClient } from '../../lib/rule_doctor_insights_client/rule_doctor_insights_client';
 import { InsightsClientScopedToken } from '../../lib/rule_doctor_insights_client/tokens';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
@@ -30,9 +33,15 @@ export class ListInsightsRoute extends BaseAlertingRoute {
   static routeOptions = {
     summary: 'List Rule Doctor insights',
   } as const;
-  static validate = {
+  static schemas = {
     request: {
-      query: buildRouteValidationWithZod(listInsightsQuerySchema),
+      query: listInsightsQuerySchema,
+    },
+    response: {
+      400: {
+        body: () => errorResponseSchema,
+        description: 'Indicates invalid query parameters.',
+      },
     },
   };
 

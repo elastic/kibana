@@ -65,7 +65,8 @@ export class ResetResourcesRoute extends BaseAlertingRoute {
     access: 'internal',
     summary: 'Reset alerting v2 resources (temporary, pre-GA only)',
   } as const;
-  static validate = false as const;
+  // No schemas declared — the inherited `static get validate()` falls back
+  // to `false`, matching the previous explicit `static validate = false`.
 
   protected readonly routeName = 'reset alerting v2 resources';
 
