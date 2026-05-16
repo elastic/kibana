@@ -36,6 +36,17 @@ export class TemplatesService {
       savedObjectsSerializer: ISavedObjectsSerializer;
       esClient: ElasticsearchClient;
       namespace: string;
+      /**
+       * Bound, parameterless callback that asks the cases-analytics v2
+       * subsystem to recompute and persist this space's runtime field map.
+       * Fire-and-forget — never awaited; never throws past this service.
+       *
+       * Called at the tail of every template create / update / delete. The
+       * cases client factory binds this to the current request's space + SO
+       * client. When v2 is disabled the bound function is a no-op (see
+       * `V2_NOOP_DATA_VIEW_REFRESHER`).
+       */
+      refreshAnalyticsV2DataView: () => void;
     }
   ) {}
 
@@ -349,6 +360,10 @@ export class TemplatesService {
       { refresh: true, id }
     );
 
+    // Tell cases-analytics v2 to recompute the per-space runtime field map.
+    // Fire-and-forget; failures are caught + logged inside the v2 service.
+    this.dependencies.refreshAnalyticsV2DataView();
+
     return templateSavedObject;
   }
 
@@ -400,6 +415,10 @@ export class TemplatesService {
       ],
       { refresh: true }
     );
+
+    // Update may shift `fieldNames` (different field set, renamed fields,
+    // changed types). Tell v2 to refresh.
+    this.dependencies.refreshAnalyticsV2DataView();
 
     return templateSavedObject;
   }
@@ -486,5 +505,10 @@ export class TemplatesService {
       })),
       { refresh: true }
     );
+
+    // Refresh the per-space runtime field map even on soft-delete: keeps
+    // the propagation hook wired so future changes to the template field
+    // collection reach the data view without a code change.
+    this.dependencies.refreshAnalyticsV2DataView();
   }
 }

@@ -37,6 +37,7 @@ dependsOn:
   - '@kbn/management-plugin'
   - '@kbn/core-http-browser'
   - '@kbn/data-plugin'
+  - '@kbn/data-views-plugin'
   - '@kbn/embeddable-plugin'
   - '@kbn/home-plugin'
   - '@kbn/features-plugin'

@@ -17,6 +17,7 @@ import { omit, unset } from 'lodash';
 import type { CaseAttributes, ExternalService, CaseConnector } from '../../../common/types/domain';
 import { CaseSeverity, CaseStatuses } from '../../../common/types/domain';
 import {
+  CASE_COMMENT_SAVED_OBJECT,
   CASE_EXTENDED_FIELDS,
   CASE_EXTENDED_FIELDS_LABELS,
   CASE_SAVED_OBJECT,
@@ -38,6 +39,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { CONNECTOR_ID_REFERENCE_NAME } from '../../common/constants';
 import { getNoneCaseConnector } from '../../common/utils';
 import { CasesService } from '.';
+import { V2_NOOP_WRITER } from '../../cases_analytics_v2/writer';
 import type { ESCaseConnectorWithId } from '../test_utils';
 import {
   createESJiraConnector,
@@ -185,6 +187,9 @@ describe('CasesService', () => {
       log: mockLogger,
       unsecuredSavedObjectsClient,
       attachmentService,
+      // Tests don't exercise the analytics v2 path; the no-op writer keeps
+      // every hook a tight no-op.
+      analyticsV2Writer: V2_NOOP_WRITER,
     });
   });
 
@@ -3661,6 +3666,85 @@ describe('CasesService', () => {
           { match: { 'cases-comments.alertId': search } },
           { match_phrase: { 'cases-comments.comment': search } },
         ]);
+      });
+    });
+  });
+
+  describe('cases-analytics v2 writer integration', () => {
+    // The default service fixture uses V2_NOOP_WRITER; for these assertions
+    // we need a writer we can spy on.
+    const makeServiceWithMockWriter = () => {
+      const analyticsV2Writer = {
+        upsertCase: jest.fn(),
+        deleteCase: jest.fn(),
+        bulkUpsertCases: jest.fn(),
+        bulkDeleteCases: jest.fn(),
+        bulkUpsertCasesAwait: jest.fn().mockResolvedValue(undefined),
+      };
+      const svc = new CasesService({
+        log: mockLogger,
+        unsecuredSavedObjectsClient,
+        attachmentService,
+        analyticsV2Writer,
+      });
+      return { svc, analyticsV2Writer };
+    };
+
+    describe('bulkDeleteCaseEntities', () => {
+      it('removes the analytics doc only for cases whose SO delete succeeded', async () => {
+        // case-A delete succeeds; case-B fails with 409. Without inspecting
+        // the per-entity status, the analytics doc for case-B would be
+        // removed while the SO survives — and reconciliation can't repair
+        // it (the surviving SO's updated_at didn't change).
+        unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
+          statuses: [
+            { id: 'case-A', type: CASE_SAVED_OBJECT, success: true },
+            {
+              id: 'case-B',
+              type: CASE_SAVED_OBJECT,
+              success: false,
+              error: { error: 'Conflict', message: 'version conflict', statusCode: 409 },
+            },
+          ],
+        });
+
+        const { svc, analyticsV2Writer } = makeServiceWithMockWriter();
+        await svc.bulkDeleteCaseEntities({
+          entities: [
+            { type: CASE_SAVED_OBJECT, id: 'case-A' },
+            { type: CASE_SAVED_OBJECT, id: 'case-B' },
+          ],
+        });
+
+        // Single bulk dispatch with only the successful case id — the
+        // individual `deleteCase` path is unused on bulk operations now.
+        expect(analyticsV2Writer.bulkDeleteCases).toHaveBeenCalledTimes(1);
+        expect(analyticsV2Writer.bulkDeleteCases).toHaveBeenCalledWith(['case-A']);
+        expect(analyticsV2Writer.deleteCase).not.toHaveBeenCalled();
+      });
+
+      it('skips analytics writes for non-case entity types', async () => {
+        // Comments, user-actions, etc. are tracked by their own analytics
+        // surfaces (PR 2 + PR 3). The case-surface writer only handles
+        // cases.
+        unsecuredSavedObjectsClient.bulkDelete.mockResolvedValue({
+          statuses: [
+            { id: 'comment-1', type: CASE_COMMENT_SAVED_OBJECT, success: true },
+            { id: 'case-A', type: CASE_SAVED_OBJECT, success: true },
+          ],
+        });
+
+        const { svc, analyticsV2Writer } = makeServiceWithMockWriter();
+        await svc.bulkDeleteCaseEntities({
+          entities: [
+            { type: CASE_COMMENT_SAVED_OBJECT, id: 'comment-1' },
+            { type: CASE_SAVED_OBJECT, id: 'case-A' },
+          ],
+        });
+
+        expect(analyticsV2Writer.bulkDeleteCases).toHaveBeenCalledTimes(1);
+        expect(analyticsV2Writer.bulkDeleteCases).toHaveBeenCalledWith(['case-A']);
+        expect(analyticsV2Writer.deleteCase).not.toHaveBeenCalled();
       });
     });
   });
