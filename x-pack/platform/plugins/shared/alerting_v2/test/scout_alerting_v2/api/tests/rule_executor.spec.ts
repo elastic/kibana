@@ -837,6 +837,61 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
     }
   );
 
+  apiTest(
+    'does not emit recovery events for alert rules created without a recovery_policy',
+    async ({ apiServices }) => {
+      await apiServices.alertingV2.sourceIndex.indexDocs({
+        index: SOURCE_INDEX,
+        docs: [
+          {
+            '@timestamp': new Date().toISOString(),
+            'host.name': 'host-alert-no-recovery-policy',
+            severity: 'high',
+            value: 1,
+          },
+        ],
+      });
+
+      const rule = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          kind: 'alert',
+          metadata: { name: 'executor-alert-no-recovery-policy' },
+          evaluation: {
+            query: {
+              base: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-alert-no-recovery-policy" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+            },
+          },
+          // Recovery is opt-in: an alert rule without `recovery_policy`
+          // must never produce recovery events even after a previously
+          // breaching group stops breaching.
+          recovery_policy: undefined,
+        })
+      );
+
+      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, { status: 'breached' });
+
+      // Drop the breaching doc so a recovery-enabled rule would emit a
+      // `recovered` event for this group.
+      await apiServices.alertingV2.sourceIndex.deleteDocs({
+        index: SOURCE_INDEX,
+        query: { term: { 'host.name': 'host-alert-no-recovery-policy' } },
+      });
+
+      // Wait for at least two executor ticks so a regression that incorrectly
+      // ran the recovery step would have time to write recovered documents.
+      await apiServices.alertingV2.taskExecutions.waitForExecutorRuns({
+        ruleId: rule.id,
+        runs: 2,
+      });
+
+      const recoveredEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
+        status: 'recovered',
+      });
+
+      expect(recoveredEvents).toHaveLength(0);
+    }
+  );
+
   apiTest('uses the configured query under recovery_policy.type=query', async ({ apiServices }) => {
     /**
      * severity=high docs drive the main breach query
