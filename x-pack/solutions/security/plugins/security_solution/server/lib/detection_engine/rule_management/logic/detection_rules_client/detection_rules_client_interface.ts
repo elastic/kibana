@@ -6,6 +6,7 @@
  */
 
 import type { BulkOperationError } from '@kbn/alerting-plugin/server';
+import type { BulkImportRulesResult } from './methods/bulk_import_rules';
 import type {
   RuleCreateProps,
   RuleUpdateProps,
@@ -20,11 +21,15 @@ import type { RuleImportErrorObject } from '../import/errors';
 import type { PrebuiltRuleAsset } from '../../../prebuilt_rules';
 import type { PrebuiltRulesCustomizationStatus } from '../../../../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
 import type { RuleAlertType } from '../../../rule_schema';
+import type { BulkCreatePrebuiltRulesResult } from './methods/bulk_create_prebuilt_rules';
 
 export interface IDetectionRulesClient {
   getRuleCustomizationStatus: () => PrebuiltRulesCustomizationStatus;
   createCustomRule: (args: CreateCustomRuleArgs) => Promise<RuleResponse>;
   createPrebuiltRule: (args: CreatePrebuiltRuleArgs) => Promise<RuleResponse>;
+  bulkCreatePrebuiltRules: (
+    args: BulkCreatePrebuiltRulesArgs
+  ) => Promise<BulkCreatePrebuiltRulesResult>;
   updateRule: (args: UpdateRuleArgs) => Promise<RuleResponse>;
   patchRule: (args: PatchRuleArgs) => Promise<RuleResponse>;
   deleteRule: (args: DeleteRuleArgs) => Promise<void>;
@@ -33,6 +38,7 @@ export interface IDetectionRulesClient {
   revertPrebuiltRule: (args: RevertPrebuiltRuleArgs) => Promise<RuleResponse>;
   importRule: (args: ImportRuleArgs) => Promise<RuleResponse>;
   importRules: (args: ImportRulesArgs) => Promise<Array<RuleResponse | RuleImportErrorObject>>;
+  bulkImportRules: (args: ImportRulesArgs) => Promise<BulkImportRulesResult>;
 }
 
 export interface CreateCustomRuleArgs {
@@ -41,6 +47,10 @@ export interface CreateCustomRuleArgs {
 
 export interface CreatePrebuiltRuleArgs {
   params: RuleCreateProps;
+}
+
+export interface BulkCreatePrebuiltRulesArgs {
+  rules: PrebuiltRuleAsset[];
 }
 
 export interface UpdateRuleArgs {

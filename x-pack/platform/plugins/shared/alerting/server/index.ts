@@ -47,6 +47,13 @@ export type {
 } from './rule_query_inspector/types';
 export type { RulesClientCreateOptions } from './rules_client_factory';
 export type { FindResult, BulkEditOperation, BulkOperationError } from './rules_client';
+export type {
+  BulkCreateDisabledReason,
+  BulkCreateOperationError,
+  BulkCreateRulesItem,
+  BulkCreateRulesParams,
+  BulkCreateRulesResult,
+} from './application/rule/methods/bulk_create';
 export type { Rule } from './application/rule/types';
 export type { PublicAlert as Alert } from './alert';
 export { parseDuration, isRuleSnoozed } from './lib';
