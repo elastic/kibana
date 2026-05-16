@@ -21,7 +21,12 @@ import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
-import { APP_ID, CASE_SAVED_OBJECT, CASE_TEMPLATE_SAVED_OBJECT } from '../common/constants';
+import {
+  APP_ID,
+  CASE_SAVED_OBJECT,
+  CASE_TEMPLATE_SAVED_OBJECT,
+  CASE_USER_ACTION_SAVED_OBJECT,
+} from '../common/constants';
 
 import type { CasesClient } from './client';
 import type {
@@ -58,6 +63,7 @@ import { createCasesAnalyticsIndexes, registerCasesAnalyticsIndexesTasks } from 
 import { scheduleCAISchedulerTask } from './cases_analytics/tasks/scheduler_task';
 import {
   CasesAnalyticsV2Service,
+  V2_NOOP_ACTIVITY_WRITER,
   V2_NOOP_DATA_VIEW_REFRESHER,
   V2_NOOP_WRITER,
 } from './cases_analytics_v2';
@@ -332,8 +338,11 @@ export class CasePlugin
             'Skipping v2 start.'
         );
       } else {
-        // The internal repo serves three consumers:
-        //  - The reconciliation runner walks `cases` SOs.
+        // The internal repo serves four consumers:
+        //  - The cases-surface reconciliation runner walks `cases` SOs.
+        //  - The activity-surface reconciliation runner walks
+        //    `cases-user-actions` SOs (created-only, no `updated_at`
+        //    filter — see `reconciliation/activity_runner.ts`).
         //  - The data view sub-service reads `cases-templates` SOs per-space
         //    to derive runtime fields.
         //  - The `/reset` admin route deletes per-space `index-pattern` SOs
@@ -348,6 +357,7 @@ export class CasePlugin
         // the cross-namespace delete it needs.
         const v2InternalRepository = core.savedObjects.createInternalRepository([
           CASE_SAVED_OBJECT,
+          CASE_USER_ACTION_SAVED_OBJECT,
           CASE_TEMPLATE_SAVED_OBJECT,
           'index-pattern',
         ]);
@@ -421,6 +431,11 @@ export class CasePlugin
       // here. But test harnesses that exercise `start()` in isolation get a
       // no-op writer instead of a runtime crash.
       analyticsV2Writer: this.casesAnalyticsV2Service?.getWriter() ?? V2_NOOP_WRITER,
+      // Activity surface companion. Same lifetime + same defensive fallback
+      // as `analyticsV2Writer`. Captured by the user-actions service via
+      // the cases client factory.
+      analyticsV2ActivityWriter:
+        this.casesAnalyticsV2Service?.getActivityWriter() ?? V2_NOOP_ACTIVITY_WRITER,
       // Companion data-view refresher proxy. Same lifetime + same defensive
       // fallback as `analyticsV2Writer`. Captured by the templates service
       // through the cases client factory and called fire-and-forget after

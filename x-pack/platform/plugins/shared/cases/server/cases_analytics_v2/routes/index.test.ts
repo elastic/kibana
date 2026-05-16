@@ -353,6 +353,7 @@ describe('registerCasesAnalyticsV2Routes — enableAdminRoutes gating', () => {
       getTaskManager: () => null,
       getInternalSavedObjectsClient: () => null,
       getWriter: () => null,
+      getActivityWriter: () => null,
       clearDataViewBootstrapCache: jest.fn(),
       enabled: true,
       enableAdminRoutes: false,

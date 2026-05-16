@@ -19,6 +19,7 @@ import type { CaseUserActionWithoutReferenceIds } from '../../../common/types/do
 import type { UserActionEvent } from './types';
 
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
+import { V2_NOOP_ACTIVITY_WRITER } from '../../cases_analytics_v2';
 import { createSOFindResponse } from '../test_utils';
 import {
   casePayload,
@@ -107,6 +108,7 @@ describe('CaseUserActionService', () => {
         persistableStateAttachmentTypeRegistry,
         auditLogger: mockAuditLogger,
         savedObjectsSerializer: soSerializerMock,
+        analyticsV2ActivityWriter: V2_NOOP_ACTIVITY_WRITER,
       });
     });
 
@@ -217,6 +219,7 @@ describe('CaseUserActionService', () => {
           auditLogger: mockAuditLogger,
           savedObjectsSerializer: soSerializerMock,
           isCasesAttachmentsEnabled: true,
+          analyticsV2ActivityWriter: V2_NOOP_ACTIVITY_WRITER,
         });
         unsecuredSavedObjectsClient.find.mockResolvedValue(mockStatsResponse);
 

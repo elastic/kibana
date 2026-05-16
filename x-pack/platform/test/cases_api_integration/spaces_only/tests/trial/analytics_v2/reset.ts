@@ -23,11 +23,11 @@ const INTERNAL_HEADERS = {
 } as const;
 
 /**
- * `/reset` is the administrator escape hatch. It returns 202 and runs
- * the backfill walk asynchronously in a one-shot Task Manager task. The
- * synchronous portion (drop + recreate index, delete data views, clear
- * cache) happens in-handler; only the `O(documents)` walk is moved out.
- * Tests assert both phases.
+ * `/reset` is the administrator escape hatch. It returns 202 and runs the
+ * backfill walk asynchronously in a one-shot Task Manager task. The
+ * synchronous portion (drop + recreate indices, delete data views,
+ * clear cache) happens in-handler; only the `O(documents)` walk is
+ * moved out. Tests assert both phases.
  */
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
@@ -54,7 +54,10 @@ export default ({ getService }: FtrProviderContext): void => {
 
       expect(response.body.reset).to.eql(CASE_INDEX);
       expect(response.body.reset_task).to.have.property('id', 'cases-analyticsV2-reset');
-      expect(response.body.reset_task).to.have.property('task_type', 'cases.analyticsV2.fullReset');
+      expect(response.body.reset_task).to.have.property(
+        'task_type',
+        'cases.analyticsV2.fullReset'
+      );
       expect(response.body.reset_task).to.have.property('scheduled_at');
       expect(response.body.reset_task).to.have.property(
         'poll',
@@ -136,10 +139,10 @@ export default ({ getService }: FtrProviderContext): void => {
 
       // Without `/reset`, the cursor would now be ahead of
       // `oldCase.created_at` and a periodic tick wouldn't re-emit
-      // oldCase. `/reset` schedules a full backfill (`lastRunAt:
-      // undefined → no filter → walk every case`), so the
-      // pre-existing case lands in `.cases` again after the reset
-      // task completes.
+      // oldCase. `/reset` schedules a full backfill
+      // (lastRunAt: undefined → no filter → walk every case), so
+      // the pre-existing case lands in `.cases` again after the
+      // reset task completes.
       await resetV2(supertest);
 
       await waitForAnalyticsCase(es, oldCase.id, { expect: 'present' });
@@ -153,7 +156,10 @@ export default ({ getService }: FtrProviderContext): void => {
       // gone depends on timing — what matters is that the field
       // exists and converges to `null` (success) within the
       // bootstrap timeout.
-      await supertest.post('/internal/cases/_analyticsV2/reset').set(INTERNAL_HEADERS).expect(202);
+      await supertest
+        .post('/internal/cases/_analyticsV2/reset')
+        .set(INTERNAL_HEADERS)
+        .expect(202);
 
       // After the task completes, Task Manager auto-removes the
       // SO and `/state.active_reset` returns null.
