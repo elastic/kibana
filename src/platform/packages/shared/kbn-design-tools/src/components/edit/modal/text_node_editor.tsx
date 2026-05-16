@@ -47,7 +47,12 @@ interface Props {
   entries: TextNodeEntry[];
   onChange: (
     index: number,
-    updates: { text?: string; color?: string; fontSize?: string; fontWeight?: string }
+    updates: {
+      text?: string;
+      color?: string;
+      fontSize?: string;
+      fontWeight?: string;
+    }
   ) => void;
   onFocus?: (index: number) => void;
 }

@@ -78,7 +78,9 @@ export const buildAddEuiPanels = ({
       ...filteredEntries.map((entry) => ({
         name: entry.label,
         panel: entry.variants ? `${VARIANT_PANEL_PREFIX}${entry.label}` : undefined,
-        onClick: entry.variants ? undefined : () => onInsert(entry.element, entry.interactive, entry.label),
+        onClick: entry.variants
+          ? undefined
+          : () => onInsert(entry.element, entry.interactive, entry.label),
       })),
     ],
   };
@@ -108,7 +110,12 @@ export const buildAddEuiPanels = ({
         ),
         ...filtered.map((variant) => ({
           name: variant.label,
-          onClick: () => onInsert(variant.element, variant.interactive ?? entry.interactive, `${entry.label}/${variant.label}`),
+          onClick: () =>
+            onInsert(
+              variant.element,
+              variant.interactive ?? entry.interactive,
+              `${entry.label}/${variant.label}`
+            ),
         })),
       ],
     };

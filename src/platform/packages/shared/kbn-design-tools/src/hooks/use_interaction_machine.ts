@@ -20,7 +20,7 @@ import type { InteractionState, DragState } from '../lib/dom/interaction_state';
 import { IDLE, deriveCursor } from '../lib/dom/interaction_state';
 import { resolveHoverTarget } from '../lib/dom/resolve_hover_target';
 import { getElementUnder } from '../lib/dom/get_element_under';
-import type { ElementRegistry } from '../lib/dom/element_registry';
+import type { ElementRegistry, ElementSession } from '../lib/dom/element_registry';
 import type { LayoutConfig } from '../lib/layout/layout_config';
 
 /**
@@ -216,7 +216,16 @@ export const useInteractionMachine = (options: InteractionMachineOptions) => {
         }
       });
     },
-    [registry, hoverTargetRef, stickyHover, roundedTargets, rafId, effects, cloneZIndex, isInsideHoverLock]
+    [
+      registry,
+      hoverTargetRef,
+      stickyHover,
+      roundedTargets,
+      rafId,
+      effects,
+      cloneZIndex,
+      isInsideHoverLock,
+    ]
   );
 
   /**
@@ -313,12 +322,9 @@ export const useInteractionMachine = (options: InteractionMachineOptions) => {
   /**
    * Start dragging an existing managed session (used for duplicate-and-drag).
    */
-  const startSessionDrag = useCallback(
-    (session: import('../lib/dom/element_registry').ElementSession, cx: number, cy: number) => {
-      interaction.current = startDragFromSession(session, cx, cy);
-    },
-    []
-  );
+  const startSessionDrag = useCallback((session: ElementSession, cx: number, cy: number) => {
+    interaction.current = startDragFromSession(session, cx, cy);
+  }, []);
 
   /**
    * Force-reset the interaction state to idle.

@@ -7,6 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { EuiIcon } from '@elastic/eui';
+import { createElement } from 'react';
+import { flushSync } from 'react-dom';
+import { createRoot } from 'react-dom/client';
+
 let iconTypeNames: string[] | undefined;
 
 /**
@@ -93,21 +98,12 @@ export const replaceIconContent = (container: Element, iconType: string): void =
     return;
   }
 
-  // Fallback: render a temporary EuiIcon (cache not yet built).
-  // This path uses synchronous require + flushSync which can fail in
-  // edge cases (e.g. during concurrent React renders).  Wrap in
-  // try/catch so a failure here doesn't break the entire edit session.
   try {
-    const React = require('react'); // eslint-disable-line @typescript-eslint/no-var-requires
-    const { createRoot } = require('react-dom/client'); // eslint-disable-line @typescript-eslint/no-var-requires
-    const { flushSync } = require('react-dom'); // eslint-disable-line @typescript-eslint/no-var-requires
-    const { EuiIcon } = require('@elastic/eui'); // eslint-disable-line @typescript-eslint/no-var-requires
-
     const tmp = document.createElement('div');
     const root = createRoot(tmp);
     try {
       flushSync(() => {
-        root.render(React.createElement(EuiIcon, { type: iconType }));
+        root.render(createElement(EuiIcon, { type: iconType }));
       });
       const rendered = tmp.firstElementChild;
       if (!rendered) return;
@@ -171,11 +167,6 @@ const buildIconCache = (): Promise<Map<string, string>> => {
 };
 
 const buildIconCacheImpl = async (): Promise<Map<string, string>> => {
-  const React = require('react'); // eslint-disable-line @typescript-eslint/no-var-requires
-  const { createRoot } = require('react-dom/client'); // eslint-disable-line @typescript-eslint/no-var-requires
-  const { flushSync } = require('react-dom'); // eslint-disable-line @typescript-eslint/no-var-requires
-  const { EuiIcon } = require('@elastic/eui'); // eslint-disable-line @typescript-eslint/no-var-requires
-
   const types = await getIconTypes();
   const pMap = new Map<string, string>();
   const svgMap = new Map<string, IconSvgEntry>();
@@ -185,7 +176,7 @@ const buildIconCacheImpl = async (): Promise<Map<string, string>> => {
   try {
     for (const iconType of types) {
       flushSync(() => {
-        root.render(React.createElement(EuiIcon, { type: iconType, key: iconType }));
+        root.render(createElement(EuiIcon, { type: iconType, key: iconType }));
       });
       const rendered = tmp.firstElementChild;
       if (!rendered) continue;

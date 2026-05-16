@@ -17,3 +17,18 @@ export const getPageColorMode = (): 'light' | 'dark' => {
   const tag = (window as unknown as { __kbnThemeTag__?: string }).__kbnThemeTag__;
   return tag?.endsWith('dark') ? 'dark' : 'light';
 };
+
+/**
+ * Snapshot the current page color scheme: light/dark mode and
+ * whether the OS-level forced-colors (high contrast) mode is active.
+ */
+export interface PageColorScheme {
+  readonly colorMode: 'light' | 'dark';
+  readonly forcedColors: boolean;
+}
+
+export const getPageColorScheme = (): PageColorScheme => ({
+  colorMode: getPageColorMode(),
+  forcedColors:
+    typeof window !== 'undefined' && window.matchMedia('(forced-colors: active)').matches,
+});

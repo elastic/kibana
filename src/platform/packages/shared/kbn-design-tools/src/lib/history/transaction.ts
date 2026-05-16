@@ -8,12 +8,14 @@
  */
 
 import type { ReactElement } from 'react';
-import type { StyleEdit, TextEdit, SourceEdit } from '../dom/element_registry';
 import type {
+  StyleEdit,
+  TextEdit,
+  SourceEdit,
   StyleChange,
   TextNodeChange,
   SourceChange,
-} from '../../components/edit/modal/edit_modal';
+} from '../dom/element_registry';
 
 /**
  * Fields shared by every transaction. Assigned automatically by the

@@ -54,10 +54,7 @@ export const useUndoRedo = (registryRef: MutableRefObject<ElementRegistry>) => {
    * pointer handlers — does not trigger a React re-render directly
    * (subscribers are notified, but `useSyncExternalStore` batches).
    */
-  const push = useCallback(
-    (input: TransactionInput) => stack.push(input),
-    [stack]
-  );
+  const push = useCallback((input: TransactionInput) => stack.push(input), [stack]);
 
   /**
    * Undo the most recent transaction: pops it from the undo stack,

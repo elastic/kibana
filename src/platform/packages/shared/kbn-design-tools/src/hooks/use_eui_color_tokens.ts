@@ -8,7 +8,8 @@
  */
 
 import { useMemo } from 'react';
-import { rgbToHex, useEuiTheme } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
+import { toHex } from '../lib/dom/color_token_lookup';
 
 export interface EuiColorToken {
   label: string;
@@ -36,18 +37,4 @@ export const useEuiColorTokens = (): EuiColorToken[] => {
 
     return tokens;
   }, [euiTheme.colors]);
-};
-
-const toHex = (value: string): string | null => {
-  if (/^#[0-9a-fA-F]{3,8}$/.test(value)) {
-    return value.toLowerCase();
-  }
-  if (value.startsWith('rgb')) {
-    try {
-      return rgbToHex(value).toLowerCase();
-    } catch {
-      return null;
-    }
-  }
-  return null;
 };

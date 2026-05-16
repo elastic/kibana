@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// Public API — symbols consumed outside of lib/dom.
-// Internal consumers should import directly from the specific module.
-export { getPageColorMode } from './get_page_color_mode';
+export { getPageColorMode, getPageColorScheme } from './get_page_color_mode';
+export type { PageColorScheme } from './get_page_color_mode';
+export { resolveColorTokensDeep, isTextToken, isBgToken } from './color_token_lookup';
+export { syncTokenStylesheet, removeTokenStylesheet, getTokenVar } from './color_token_stylesheet';
 export {
   renderAndCloneEuiComponent,
   renderEuiComponentLive,
@@ -18,7 +19,16 @@ export {
 export { getContentRoot, isLiveElement } from './managed_element';
 export { snapshotComponentState } from './duplicate_helpers';
 
-export type { ElementSession, StyleEdit, TextEdit, SourceEdit } from './element_registry';
+export type {
+  ElementSession,
+  StyleEdit,
+  TextEdit,
+  SourceEdit,
+  StyleChange,
+  TextNodeChange,
+  SourceChange,
+} from './element_registry';
+export { applyEditChanges } from './element_registry';
 export type { PreviewCloneResult } from './create_preview_clone';
 export type { TreeNode } from './flatten_element_tree';
 export type {

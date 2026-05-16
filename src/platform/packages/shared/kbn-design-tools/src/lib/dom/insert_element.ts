@@ -10,7 +10,9 @@
 import type { ReactElement } from 'react';
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import { EuiThemeProvider } from '@elastic/eui';
+import { EuiProvider } from '@elastic/eui';
+import { EuiThemeBorealis } from '@elastic/eui-theme-borealis';
+import { flushSync } from 'react-dom';
 import { cloneClean, setImportant } from './clone_element';
 import { DEVTOOL_MANAGED_ATTR, DEVTOOL_LIVE_ATTR } from '../constants';
 import { getPageColorMode } from './get_page_color_mode';
@@ -29,8 +31,9 @@ export const renderAndCloneEuiComponent = async (
   zIndex: number
 ): Promise<{ clone: HTMLElement; rect: DOMRect }> => {
   // Render into a visible container so computed styles and bounding rects
-  // are available for cloneClean. The page already has an EuiProvider so
-  // Emotion styles apply automatically — no need to wrap in another one.
+  // are available for cloneClean. Wrap in EuiProvider with the borealis
+  // theme and the page's color mode so Emotion-generated styles match
+  // the actual Kibana page, not the toolbar's dark-mode wrapper.
   const container = document.createElement('div');
   container.style.position = 'fixed';
   container.style.left = '0px';
@@ -44,9 +47,15 @@ export const renderAndCloneEuiComponent = async (
   try {
     // createRoot.render is async; we need a synchronous flush for
     // cloneClean to read computed styles. Use flushSync.
-    const { flushSync } = await import('react-dom');
     flushSync(() => {
-      root.render(element);
+      root.render(
+        React.createElement(EuiProvider, {
+          theme: EuiThemeBorealis,
+          colorMode: getPageColorMode(),
+          globalStyles: false,
+          children: element,
+        })
+      );
     });
 
     // The component's root element is the first (and only) child of container.
@@ -98,7 +107,6 @@ export const renderEuiComponentLive = async (
 
   const root = createRoot(wrapper);
   try {
-    const { flushSync } = await import('react-dom');
     flushSync(() => {
       const stateProvider = initialState
         ? React.createElement(SerializedStateContext.Provider, {
@@ -107,8 +115,10 @@ export const renderEuiComponentLive = async (
           })
         : element;
       root.render(
-        React.createElement(EuiThemeProvider, {
+        React.createElement(EuiProvider, {
+          theme: EuiThemeBorealis,
           colorMode: getPageColorMode(),
+          globalStyles: false,
           children: stateProvider,
         })
       );

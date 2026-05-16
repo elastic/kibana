@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { flushSync } from 'react-dom';
 import { DUPLICATE_OFFSET, DEVTOOL_LIBRARY_ID_ATTR } from '../constants';
 import { cloneClean, setImportant, roundRect } from './clone_element';
 import type { ElementSession, ElementRegistry, SourceEdit } from './element_registry';
@@ -97,10 +98,16 @@ const transferSourceEdits = (
 
 /**
  * Build a structural fingerprint for matching elements across two structurally
- * similar DOM trees. Uses tag name, className, and position among same-tag
- * siblings — more resilient than flat index when React re-renders change
- * child counts (e.g. toggling a switch).
+ * similar DOM trees. Uses tag name, stable class names, and position among
+ * same-tag siblings — more resilient than flat index when React re-renders
+ * change child counts (e.g. toggling a switch).
+ *
+ * Emotion class names (`css-{hash}-{label}`) have their volatile hash
+ * stripped so that re-renders with different Emotion hashes still produce
+ * the same fingerprint.
  */
+const EMOTION_HASH_RE = /\bcss-[a-z0-9]+-/g;
+
 const buildTreeFingerprint = (el: Element): string => {
   const parent = el.parentElement;
   let positionIndex = 0;
@@ -110,7 +117,9 @@ const buildTreeFingerprint = (el: Element): string => {
       if (child.tagName === el.tagName) positionIndex++;
     }
   }
-  return `${el.tagName}|${el.className}|${positionIndex}`;
+  const stableClass =
+    typeof el.className === 'string' ? el.className.replace(EMOTION_HASH_RE, 'css-') : '';
+  return `${el.tagName}|${stableClass}|${positionIndex}`;
 };
 
 /**
@@ -353,7 +362,6 @@ export const restoreComponentState = async (
     setImportant(d, 'animation', 'none');
   }
 
-  const { flushSync } = await import('react-dom');
   flushSync(() => {
     for (const { dispatch, value } of updates) {
       dispatch(value);

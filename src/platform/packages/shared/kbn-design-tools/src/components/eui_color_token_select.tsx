@@ -21,24 +21,8 @@ import { i18n } from '@kbn/i18n';
 import { useEuiColorTokens } from '../hooks';
 import type { EuiColorToken } from '../hooks';
 import { getPageColorMode } from '../lib/dom';
-
-const TEXT_TOKENS = new Set([
-  'textParagraph',
-  'textHeading',
-  'textSubdued',
-  'textGhost',
-  'textInk',
-  'link',
-  'textPrimary',
-  'textAccent',
-  'textAccentSecondary',
-  'textNeutral',
-  'textSuccess',
-  'textWarning',
-  'textRisk',
-  'textDanger',
-  'textAssistance',
-]);
+import { isTextToken, isBgToken } from '../lib/dom/color_token_lookup';
+import { getTokenVar } from '../lib/dom/color_token_stylesheet';
 
 interface Props {
   color: string;
@@ -145,8 +129,12 @@ const EuiColorTokenSelectInner = ({
 
     const matches = options.filter((o) => o.value === normalized);
     if (matches.length > 1 && preferText) {
-      const textMatch = matches.find((o) => TEXT_TOKENS.has(o.label));
+      const textMatch = matches.find((o) => isTextToken(o.label));
       if (textMatch) return [textMatch];
+    }
+    if (matches.length > 1 && !preferText) {
+      const bgMatch = matches.find((o) => isBgToken(o.label));
+      if (bgMatch) return [bgMatch];
     }
     if (matches.length > 0) return [matches[0]];
     // Show the raw hex value when the color doesn't match any token
@@ -158,7 +146,10 @@ const EuiColorTokenSelectInner = ({
     (selected: Array<EuiComboBoxOptionOption<string>>) => {
       if (selected.length > 0 && selected[0].value) {
         setSelectedLabel(selected[0].label);
-        onChange(selected[0].value);
+        // Emit a var(--dt-*) reference when the user picks a token,
+        // or a plain hex when the label matches the raw value.
+        const isToken = selected[0].label !== selected[0].value;
+        onChange(isToken ? getTokenVar(selected[0].label, selected[0].value) : selected[0].value);
       }
     },
     [onChange]
@@ -177,6 +168,7 @@ const EuiColorTokenSelectInner = ({
   const handleSwatchChange = useCallback(
     (newColor: string) => {
       setSelectedLabel(null);
+      // Raw color picker — no token name available.
       onChange(newColor);
     },
     [onChange]

@@ -9,14 +9,9 @@
 
 import type { MutableRefObject } from 'react';
 import { useCallback } from 'react';
-import { setImportant } from '../lib/dom/clone_element';
-import { replaceIconContent } from '../lib/eui_icon_cache';
 import type { ElementRegistry } from '../lib/dom/element_registry';
-import type {
-  StyleChange,
-  TextNodeChange,
-  SourceChange,
-} from '../components/edit/modal/edit_modal';
+import { applyEditChanges } from '../lib/dom/element_registry';
+import type { StyleChange, TextNodeChange, SourceChange } from '../lib/dom/element_registry';
 
 /**
  * Tracks style, text, and source attribute edits applied via the edit modal.
@@ -51,71 +46,14 @@ export const useEditChangeTracker = (registryRef: MutableRefObject<ElementRegist
       savedSourceChanges: SourceChange[]
     ) => {
       const session = registryRef.current.getOrCreate(target);
-      const { styleEdits, textEdits, sourceEdits } = session;
-
-      for (const { element, property, value } of savedStyleChanges) {
-        const cssProp = property.replace(/([A-Z])/g, '-$1').toLowerCase();
-        const original = element.style.getPropertyValue(cssProp);
-        const originalPriority = element.style.getPropertyPriority(cssProp);
-        styleEdits.push({ element, property: cssProp, original, originalPriority });
-        setImportant(element, cssProp, value);
-      }
-
-      for (const { node, text, color: textColor, fontSize, fontWeight } of savedTextChanges) {
-        if (text !== undefined) {
-          textEdits.push({ node, original: node.textContent ?? '' });
-          node.textContent = text;
-        }
-        if (textColor !== undefined && node.parentElement) {
-          const parent = node.parentElement;
-          const originalColor = parent.style.color;
-          const originalFill = parent.style.getPropertyValue('-webkit-text-fill-color');
-          styleEdits.push({
-            element: parent,
-            property: 'color',
-            original: originalColor,
-            originalPriority: parent.style.getPropertyPriority('color'),
-          });
-          styleEdits.push({
-            element: parent,
-            property: '-webkit-text-fill-color',
-            original: originalFill,
-            originalPriority: parent.style.getPropertyPriority('-webkit-text-fill-color'),
-          });
-          setImportant(parent, 'color', textColor);
-          setImportant(parent, '-webkit-text-fill-color', textColor);
-        }
-        if (fontSize !== undefined && node.parentElement) {
-          const parent = node.parentElement;
-          styleEdits.push({
-            element: parent,
-            property: 'font-size',
-            original: parent.style.getPropertyValue('font-size'),
-            originalPriority: parent.style.getPropertyPriority('font-size'),
-          });
-          setImportant(parent, 'font-size', fontSize);
-        }
-        if (fontWeight !== undefined && node.parentElement) {
-          const parent = node.parentElement;
-          styleEdits.push({
-            element: parent,
-            property: 'font-weight',
-            original: parent.style.getPropertyValue('font-weight'),
-            originalPriority: parent.style.getPropertyPriority('font-weight'),
-          });
-          setImportant(parent, 'font-weight', fontWeight);
-        }
-      }
-
-      for (const { element, attribute, value } of savedSourceChanges) {
-        const original = element.getAttribute(attribute) ?? '';
-        sourceEdits.push({ element, attribute, original });
-        if (attribute === 'data-icon-type') {
-          replaceIconContent(element, value);
-        } else {
-          element.setAttribute(attribute, value);
-        }
-      }
+      applyEditChanges(
+        savedStyleChanges,
+        savedTextChanges,
+        savedSourceChanges,
+        session.styleEdits,
+        session.textEdits,
+        session.sourceEdits
+      );
     },
     [registryRef]
   );

@@ -52,6 +52,12 @@ export const DEVTOOL_HIDDEN_ATTR = 'data-devtool-hidden';
 /** Marks an element that should be excluded from measurement/selection. */
 export const DEVTOOL_IGNORE_ATTR = 'data-devtool-ignore';
 
+/** Marks the injected `<style>` element containing `--dt-*` CSS custom properties. */
+export const DEVTOOL_TOKEN_VARS_ATTR = 'data-devtool-token-vars';
+
+/** Prefix for CSS custom properties managed by the design tools (e.g. `--dt-textParagraph`). */
+export const CSS_VAR_PREFIX = '--dt-';
+
 /** Marks a resize handle element within an edit outline. */
 export const DEVTOOL_RESIZE_HANDLE_ATTR = 'data-devtool-resize-handle';
 
@@ -157,8 +163,8 @@ export const SVG_INTERNALS = new Set([
   'feturbulence',
 ]);
 
-/** Pattern matching transparent rgba(0,0,0,0) color values from getComputedStyle. */
-export const TRANSPARENT_COLOR_RE = /rgba?\(\s*0\s*,\s*0\s*,\s*0\s*,\s*0\s*\)/;
+/** Pattern matching fully-transparent rgba color values from getComputedStyle. */
+export const TRANSPARENT_COLOR_RE = /^rgba\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*,\s*0\s*\)$/;
 
 /**
  * Inherited CSS properties lost when a clone is reparented to document.body,
@@ -180,27 +186,28 @@ export const INHERITED_CSS_PROPS = [
   'font-weight',
   'letter-spacing',
   'line-height',
+  'list-style-type',
+  'list-style-position',
+  'list-style-image',
+  'overflow-wrap',
+  'tab-size',
   'text-align',
   'text-indent',
   'text-transform',
+  'text-wrap',
   'visibility',
   'white-space',
   'white-space-collapse',
   'word-break',
   'word-spacing',
   'writing-mode',
+  'border-collapse',
+  'border-spacing',
   '-webkit-font-smoothing',
   '-webkit-text-fill-color',
   '-webkit-text-stroke',
   'text-rendering',
 ];
-
-/**
- * Non-inherited visual properties that can be lost when the clone leaves
- * the original style scope (e.g. contextual selectors or CSS variable
- * chains that no longer resolve).
- */
-export const NON_INHERITED_VISUAL_CSS_PROPS = ['border-radius'];
 
 /**
  * Background CSS properties copied only for non-hovered elements.

@@ -13,9 +13,10 @@ import {
   DEVTOOL_MANAGED_ATTR,
   TRUNCATION_CLASSES,
   INHERITED_CSS_PROPS,
-  NON_INHERITED_VISUAL_CSS_PROPS,
   BACKGROUND_CSS_PROPS,
+  CSS_VAR_PREFIX,
 } from '../constants';
+import { tagColorTokens } from './color_token_lookup';
 
 /**
  * Set a CSS property with `!important` priority.
@@ -102,11 +103,6 @@ const copyInheritedStyles = (target: HTMLElement, clone: HTMLElement): void => {
     clone.style.setProperty(prop, ROUND_PX_PROPS.has(prop) ? roundPx(value) : value);
   }
 
-  // Preserve non-inherited visual styles
-  for (const prop of NON_INHERITED_VISUAL_CSS_PROPS) {
-    clone.style.setProperty(prop, computed.getPropertyValue(prop));
-  }
-
   // Copy backgrounds only when the element is not in an interactive
   // pseudo-class state, so we capture the resting appearance.
   // Always copy for replaced/media elements — they don't change
@@ -119,12 +115,22 @@ const copyInheritedStyles = (target: HTMLElement, clone: HTMLElement): void => {
     }
   }
 
-  for (let i = 0; i < computed.length; i++) {
-    const prop = computed[i];
-    if (prop.startsWith('--')) {
-      clone.style.setProperty(prop, computed.getPropertyValue(prop));
+  // Copy only custom properties that are explicitly set in the
+  // element's own inline style. getComputedStyle would include every
+  // inherited global var (--kbn-layout-*, --kbn-application-*, etc.)
+  // which bloats the clone and can break layout. CSS-rule-based
+  // custom properties cascade naturally via the preserved class names.
+  // Skip --dt-* tokens — those are managed by the :root stylesheet.
+  for (let i = 0; i < target.style.length; i++) {
+    const prop = target.style[i];
+    if (prop.startsWith('--') && !prop.startsWith(CSS_VAR_PREFIX)) {
+      clone.style.setProperty(prop, target.style.getPropertyValue(prop));
     }
   }
+
+  // Record which inline color values match EUI theme tokens so they
+  // can be re-resolved when importing into a different color mode.
+  tagColorTokens(target, clone);
 };
 
 /**
@@ -180,7 +186,16 @@ export const copyStylesDeep = (
   // Lazily initialize a shared counter for the entire tree walk.
   const ctx = counter ?? { count: 0 };
   ctx.count++;
-  if (ctx.count > MAX_CLONE_ELEMENTS) return;
+  if (ctx.count > MAX_CLONE_ELEMENTS) {
+    if (ctx.count === MAX_CLONE_ELEMENTS + 1) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        `[kbn-design-tools] copyStylesDeep: element tree exceeds ${MAX_CLONE_ELEMENTS} nodes. ` +
+          'Remaining children will retain class-based styling but lose inlined computed styles.'
+      );
+    }
+    return;
+  }
 
   copyInheritedStyles(original, clone);
   applyPseudoStyle(original, clone, '::before');

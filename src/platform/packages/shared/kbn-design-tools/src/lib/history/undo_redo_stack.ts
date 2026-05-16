@@ -77,7 +77,7 @@ export class UndoRedoStack {
    * @param input - The transaction descriptor without `id`/`timestamp`.
    * @returns The fully-stamped transaction that was pushed.
    */
-  push(input: TransactionInput): Transaction {
+  public push(input: TransactionInput): Transaction {
     const tx = {
       ...input,
       id: this.nextId++,
@@ -102,7 +102,7 @@ export class UndoRedoStack {
    *
    * @returns The undone transaction, or `null` if the undo stack is empty.
    */
-  undo(): Transaction | null {
+  public undo(): Transaction | null {
     const tx = this.undoEntries.pop();
     if (!tx) return null;
     this.redoEntries.push(tx);
@@ -119,7 +119,7 @@ export class UndoRedoStack {
    *
    * @returns The redone transaction, or `null` if the redo stack is empty.
    */
-  redo(): Transaction | null {
+  public redo(): Transaction | null {
     const tx = this.redoEntries.pop();
     if (!tx) return null;
     this.undoEntries.push(tx);
@@ -133,7 +133,7 @@ export class UndoRedoStack {
    * Called when the user exits edit mode (`resetAll`) or navigates away.
    * History is not preserved across edit sessions.
    */
-  clear(): void {
+  public clear(): void {
     this.undoEntries.length = 0;
     this.redoEntries.length = 0;
     this.nextId = 1;
@@ -141,32 +141,32 @@ export class UndoRedoStack {
   }
 
   /** Whether the undo stack has at least one entry. */
-  get canUndo(): boolean {
+  public get canUndo(): boolean {
     return this.undoEntries.length > 0;
   }
 
   /** Whether the redo stack has at least one entry. */
-  get canRedo(): boolean {
+  public get canRedo(): boolean {
     return this.redoEntries.length > 0;
   }
 
   /** Label of the top-most undo entry, or `undefined` if empty. */
-  get undoLabel(): string | undefined {
+  public get undoLabel(): string | undefined {
     return this.undoEntries.at(-1)?.label;
   }
 
   /** Label of the top-most redo entry, or `undefined` if empty. */
-  get redoLabel(): string | undefined {
+  public get redoLabel(): string | undefined {
     return this.redoEntries.at(-1)?.label;
   }
 
   /** Number of entries currently on the undo stack. */
-  get undoSize(): number {
+  public get undoSize(): number {
     return this.undoEntries.length;
   }
 
   /** Number of entries currently on the redo stack. */
-  get redoSize(): number {
+  public get redoSize(): number {
     return this.redoEntries.length;
   }
 
@@ -178,7 +178,7 @@ export class UndoRedoStack {
    * the stack is mutated — this is critical for avoiding infinite
    * re-render loops in `useSyncExternalStore`.
    */
-  getSnapshot(): UndoRedoSnapshot {
+  public getSnapshot(): UndoRedoSnapshot {
     return this.cachedSnapshot;
   }
 
@@ -192,7 +192,7 @@ export class UndoRedoStack {
    * @param fn - Callback invoked on each mutation.
    * @returns An unsubscribe function.
    */
-  subscribe(fn: () => void): () => void {
+  public subscribe(fn: () => void): () => void {
     this.listeners.add(fn);
     return () => {
       this.listeners.delete(fn);

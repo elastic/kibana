@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+const isDot = (event: KeyboardEvent): boolean => event.code === 'Period' || event.key === '.';
+
 /**
  * Check if Escape key was pressed.
  */
@@ -17,8 +19,6 @@ export const isEscapeKey = (event: KeyboardEvent): boolean => event.key === 'Esc
  */
 export const isDeleteKey = (event: KeyboardEvent): boolean =>
   event.key === 'Delete' || event.key === 'Backspace';
-
-const isDot = (event: KeyboardEvent): boolean => event.code === 'Period' || event.key === '.';
 
 /**
  * Check if the keyboard event corresponds to the measure shortcut (Meta/Ctrl + .).

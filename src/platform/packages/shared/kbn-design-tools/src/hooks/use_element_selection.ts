@@ -100,10 +100,10 @@ export const useElementSelection = (
       // Show current background color
       if (element instanceof HTMLElement) {
         const cloneCounterpart = map.get(element);
-        const bg =
-          cloneCounterpart instanceof HTMLElement
-            ? cloneCounterpart.style.backgroundColor
-            : element.style.backgroundColor;
+        const target = cloneCounterpart instanceof HTMLElement ? cloneCounterpart : element;
+        // Use getComputedStyle to resolve CSS var() references
+        // (e.g. var(--dt-accent, #ee72a6)) to actual RGB values.
+        const bg = getComputedStyle(target).backgroundColor;
         setColor(isTransparentColor(bg) ? '' : rgbToHex(bg) || bg);
       }
     },

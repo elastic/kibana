@@ -42,26 +42,9 @@ import type { SourceEditorEntry } from './source_editor';
 import { HtmlAttributesEditor } from './html_attributes_editor';
 import { DimensionsEditor } from './dimensions_editor';
 import { createPreviewClone } from '../../../lib/dom/create_preview_clone';
+import type { StyleChange, TextNodeChange, SourceChange } from '../../../lib/dom/element_registry';
 
-export interface StyleChange {
-  element: HTMLElement;
-  property: string;
-  value: string;
-}
-
-export interface TextNodeChange {
-  node: Text;
-  text?: string;
-  color?: string;
-  fontSize?: string;
-  fontWeight?: string;
-}
-
-export interface SourceChange {
-  element: Element;
-  attribute: string;
-  value: string;
-}
+export type { StyleChange, TextNodeChange, SourceChange };
 
 interface Props {
   target: HTMLElement;
@@ -221,7 +204,11 @@ export const EditModal = ({ target, onClose, onSave }: Props) => {
         );
         return [
           ...filtered,
-          { element: selectedElement as HTMLElement, property: 'backgroundColor', value: newColor },
+          {
+            element: selectedElement as HTMLElement,
+            property: 'backgroundColor',
+            value: newColor,
+          },
         ];
       });
     },
@@ -241,10 +228,7 @@ export const EditModal = ({ target, onClose, onSave }: Props) => {
         const filtered = prev.filter(
           (c) => !(c.element === selectedElement && c.property === property)
         );
-        return [
-          ...filtered,
-          { element: selectedElement as HTMLElement, property, value },
-        ];
+        return [...filtered, { element: selectedElement as HTMLElement, property, value }];
       });
 
       refreshOverlay();
@@ -265,7 +249,12 @@ export const EditModal = ({ target, onClose, onSave }: Props) => {
   const handleTextNodeChange = useCallback(
     (
       index: number,
-      updates: { text?: string; color?: string; fontSize?: string; fontWeight?: string }
+      updates: {
+        text?: string;
+        color?: string;
+        fontSize?: string;
+        fontWeight?: string;
+      }
     ) => {
       const entry = textNodeMap.current[index];
       if (!entry) return;
@@ -307,7 +296,7 @@ export const EditModal = ({ target, onClose, onSave }: Props) => {
       // since font changes can alter the element's dimensions.
       refreshOverlay();
     },
-    []
+    [refreshOverlay]
   );
 
   const handleTextNodeFocus = useCallback(
@@ -432,7 +421,7 @@ export const EditModal = ({ target, onClose, onSave }: Props) => {
     []
   );
 
-  const dimensionEntries = useMemo(() => {
+  const dimensionEntries = (() => {
     if (!selectedElement || !(selectedElement instanceof HTMLElement)) return [];
     const cloneEl = elementMapRef.current.get(selectedElement);
     const el = cloneEl instanceof HTMLElement ? cloneEl : selectedElement;
@@ -442,7 +431,7 @@ export const EditModal = ({ target, onClose, onSave }: Props) => {
       label,
       value: computed.getPropertyValue(property),
     }));
-  }, [selectedElement, DIMENSION_PROPS, styleChanges]);
+  })();
 
   return (
     <EuiModal

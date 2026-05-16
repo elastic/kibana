@@ -8,6 +8,7 @@
  */
 
 import DOMPurify from 'dompurify';
+import type { ReactElement } from 'react';
 import type { ElementRegistry, ElementSession } from '../../dom/element_registry';
 import { toPath, fromPath, buildRelativeSelector } from './element_path';
 import type { ElementPath } from './element_path';
@@ -20,9 +21,13 @@ import {
   IMPORT_CLONE_Z_INDEX,
 } from '../../constants';
 import { EUI_LIBRARY } from '../../../components/edit/library';
-import { renderEuiComponentLive } from '../../dom/insert_element';
+import { renderEuiComponentLive, renderAndCloneEuiComponent } from '../../dom/insert_element';
 import { readStateAttributes } from '../../../components/edit/library/serializable_state';
 import { replaceIconContent } from '../../eui_icon_cache';
+import { getPageColorScheme } from '../../dom/get_page_color_mode';
+import type { PageColorScheme } from '../../dom/get_page_color_mode';
+import { resolveColorTokensDeep } from '../../dom/color_token_lookup';
+import { buildEmotionClassMap, remapEmotionClasses } from '../../dom/remap_emotion_classes';
 
 /**
  * Portable version of a single style edit — element replaced by path.
@@ -100,6 +105,11 @@ export interface ExportedState {
   readonly exportedAt: string;
   readonly pageUrl: string;
   readonly viewport: { width: number; height: number };
+  /**
+   * Color scheme active when the export was created. Used to detect
+   * light/dark mode and forced-colors (high contrast) mismatches on import.
+   */
+  readonly colorScheme?: PageColorScheme;
   readonly sessions: ExportedSession[];
   readonly deletions?: ExportedDeletion[];
 }
@@ -121,15 +131,18 @@ export const exportState = (registry: ElementRegistry): ExportedState => {
   for (const session of registry.values()) {
     const referenceElPath = session.referenceEl ? toPath(session.referenceEl) : undefined;
 
-    const styleEdits: SerializedStyleEditEntry[] = session.styleEdits.map((e) => ({
-      targetPath: toPath(e.element),
-      relativeSelector: buildRelativeSelector(session.el, e.element),
-      property: e.property,
-      original: e.original,
-      originalPriority: e.originalPriority,
-      current: e.element.style.getPropertyValue(e.property),
-      currentPriority: e.element.style.getPropertyPriority(e.property),
-    }));
+    const styleEdits: SerializedStyleEditEntry[] = session.styleEdits.map((e) => {
+      const current = e.element.style.getPropertyValue(e.property);
+      return {
+        targetPath: toPath(e.element),
+        relativeSelector: buildRelativeSelector(session.el, e.element),
+        property: e.property,
+        original: e.original,
+        originalPriority: e.originalPriority,
+        current,
+        currentPriority: e.element.style.getPropertyPriority(e.property),
+      };
+    });
 
     const textEdits: SerializedTextEditEntry[] = session.textEdits.map((e) => {
       const parent = e.node.parentElement;
@@ -217,6 +230,7 @@ export const exportState = (registry: ElementRegistry): ExportedState => {
     exportedAt: new Date().toISOString(),
     pageUrl: window.location.href,
     viewport: { width: window.innerWidth, height: window.innerHeight },
+    colorScheme: getPageColorScheme(),
     sessions,
     ...(deletions.length > 0 ? { deletions } : {}),
   };
@@ -234,6 +248,8 @@ export interface ImportResult {
   warnings: string[];
   /** Number of sessions that could not be resolved. */
   failedCount: number;
+  /** True when the export's color scheme differs from the current page. */
+  colorSchemeMismatch: boolean;
 }
 
 /**
@@ -368,6 +384,7 @@ export const importState = async (
   const warnings: string[] = [];
   let restoredCount = 0;
   let failedCount = 0;
+  let colorModeMismatch = false;
 
   if (state.viewport) {
     const { width, height } = state.viewport;
@@ -378,24 +395,56 @@ export const importState = async (
     }
   }
 
+  let emotionMap: ReadonlyMap<string, string> | null = null;
+
+  if (state.colorScheme) {
+    const current = getPageColorScheme();
+    if (state.colorScheme.colorMode !== current.colorMode) {
+      colorModeMismatch = true;
+      // Emotion class hashes change between color modes. Build a map
+      // from label suffix → current-mode class so we can remap stale
+      // class names from the export.
+      emotionMap = buildEmotionClassMap();
+    }
+    if (state.colorScheme.forcedColors !== current.forcedColors) {
+      warnings.push(
+        state.colorScheme.forcedColors
+          ? 'Export was created with high-contrast (forced-colors) mode active, but it is not active now. Colors may differ.'
+          : 'High-contrast (forced-colors) mode is active but was not when the export was created. Colors may differ.'
+      );
+    }
+  }
+
   for (const exported of state.sessions) {
     let el: HTMLElement;
-    let liveReactElement: { element: import('react').ReactElement; zIndex: number } | undefined;
+    let liveReactElement: { element: ReactElement; zIndex: number } | undefined;
     let cleanup: (() => void) | undefined;
 
     if (exported.isDuplicate) {
       const libraryMatch = exported.libraryId ? findLibraryElement(exported.libraryId) : null;
 
-      if (libraryMatch && libraryMatch.interactive) {
+      if (libraryMatch) {
         try {
-          const live = await renderEuiComponentLive(
-            libraryMatch.element,
-            IMPORT_CLONE_Z_INDEX,
-            exported.stateAttributes
-          );
-          el = live.wrapper;
-          liveReactElement = live.liveReactElement;
-          cleanup = live.cleanup;
+          if (libraryMatch.interactive) {
+            const live = await renderEuiComponentLive(
+              libraryMatch.element,
+              IMPORT_CLONE_Z_INDEX,
+              exported.stateAttributes
+            );
+            el = live.wrapper;
+            liveReactElement = live.liveReactElement;
+            cleanup = live.cleanup;
+          } else {
+            // Non-interactive library element — render a fresh clone so
+            // dimensions and colors match the current theme/viewport
+            // instead of using stale outerHTML with baked layout values.
+            const cloned = await renderAndCloneEuiComponent(
+              libraryMatch.element,
+              IMPORT_CLONE_Z_INDEX
+            );
+            el = cloned.clone;
+            document.body.appendChild(el);
+          }
           setImportant(el, 'left', `${exported.originalRect.x}px`);
           setImportant(el, 'top', `${exported.originalRect.y}px`);
           el.style.pointerEvents = 'auto';
@@ -405,7 +454,7 @@ export const importState = async (
           applyIconOverrides(exported.outerHTML, el);
         } catch {
           warnings.push(
-            `Live render failed for ${exported.libraryId} — falling back to outerHTML.`
+            `Fresh render failed for ${exported.libraryId} — falling back to outerHTML.`
           );
           const fallback = recreateFromOuterHTML(exported, warnings);
           if (!fallback) {
@@ -482,6 +531,16 @@ export const importState = async (
       ? resolveElement(exported.referenceElPath, 'reference element', warnings) ?? undefined
       : undefined;
 
+    // When the color mode differs, remap stale Emotion class names
+    // so CSS rules from the current mode apply correctly.
+    if (emotionMap) {
+      remapEmotionClasses(el, emotionMap);
+    }
+
+    // Refresh var(--dt-*) fallback hex values in inline styles so
+    // colors match the current color mode.
+    resolveColorTokensDeep(el);
+
     // For edits, try to resolve the original target. If that fails (e.g.
     // the old clone was removed), fall back to the newly created element.
     // This handles both cases: importing onto an existing clone, and
@@ -516,7 +575,6 @@ export const importState = async (
           e.relativeSelector
         );
         if (!element) return null;
-        // Re-apply the current (edited) value to the element.
         element.style.setProperty(e.property, e.current, e.currentPriority);
         return {
           element,
@@ -608,7 +666,13 @@ export const importState = async (
     }
   }
 
-  return { restoredCount, deletedCount, warnings, failedCount };
+  return {
+    restoredCount,
+    deletedCount,
+    warnings,
+    failedCount,
+    colorSchemeMismatch: colorModeMismatch,
+  };
 };
 
 /**
@@ -624,7 +688,8 @@ export const downloadJson = (data: unknown, filename: string): void => {
   a.href = url;
   a.download = filename;
   a.click();
-  URL.revokeObjectURL(url);
+  // Defer revocation so the browser can finish initiating the download.
+  setTimeout(() => URL.revokeObjectURL(url), 100);
 };
 
 /**

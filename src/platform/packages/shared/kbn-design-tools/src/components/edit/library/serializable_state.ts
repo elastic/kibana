@@ -31,7 +31,13 @@ export const SerializedStateContext = createContext<Record<string, string>>({});
  * On every state change, writes the value back to the data attribute
  * so it can be read during export.
  */
-type Widen<T> = T extends boolean ? boolean : T extends number ? number : T extends string ? string : T;
+type Widen<T> = T extends boolean
+  ? boolean
+  : T extends number
+  ? number
+  : T extends string
+  ? string
+  : T;
 
 export const useSerializableState = <T extends string | number | boolean>(
   key: string,

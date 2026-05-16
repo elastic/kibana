@@ -8,7 +8,7 @@
  */
 
 import type { ElementRegistry } from '../dom/element_registry';
-import { revertEdits } from '../dom/element_registry';
+import { revertEdits, applyEditChanges } from '../dom/element_registry';
 import { setImportant } from '../dom/clone_element';
 import { buildTransform } from '../dom/resize_helpers';
 import { DEVTOOL_HIDDEN_ATTR } from '../constants';
@@ -81,7 +81,14 @@ export const moveExecutor: TransactionExecutor<MoveTransaction> = {
     if (!session) return;
     session.dx = tx.after.dx;
     session.dy = tx.after.dy;
-    rebuildTransform(session.el, session.dx, session.dy, session.dw, session.dh, session.originalRect);
+    rebuildTransform(
+      session.el,
+      session.dx,
+      session.dy,
+      session.dw,
+      session.dh,
+      session.originalRect
+    );
   },
 
   reverse(tx, registry) {
@@ -89,7 +96,14 @@ export const moveExecutor: TransactionExecutor<MoveTransaction> = {
     if (!session) return;
     session.dx = tx.before.dx;
     session.dy = tx.before.dy;
-    rebuildTransform(session.el, session.dx, session.dy, session.dw, session.dh, session.originalRect);
+    rebuildTransform(
+      session.el,
+      session.dx,
+      session.dy,
+      session.dw,
+      session.dh,
+      session.originalRect
+    );
   },
 };
 
@@ -107,7 +121,14 @@ export const resizeExecutor: TransactionExecutor<ResizeTransaction> = {
     session.dy = tx.after.dy;
     session.dw = tx.after.dw;
     session.dh = tx.after.dh;
-    rebuildTransform(session.el, session.dx, session.dy, session.dw, session.dh, session.originalRect);
+    rebuildTransform(
+      session.el,
+      session.dx,
+      session.dy,
+      session.dw,
+      session.dh,
+      session.originalRect
+    );
   },
 
   reverse(tx, registry) {
@@ -117,7 +138,14 @@ export const resizeExecutor: TransactionExecutor<ResizeTransaction> = {
     session.dy = tx.before.dy;
     session.dw = tx.before.dw;
     session.dh = tx.before.dh;
-    rebuildTransform(session.el, session.dx, session.dy, session.dw, session.dh, session.originalRect);
+    rebuildTransform(
+      session.el,
+      session.dx,
+      session.dy,
+      session.dw,
+      session.dh,
+      session.originalRect
+    );
   },
 };
 
@@ -139,66 +167,20 @@ export const editExecutor: TransactionExecutor<EditTransaction> = {
     const session = registry.get(tx.target);
     if (!session) return;
 
-    for (const { element, property, value } of tx.styleChanges) {
-      const cssProp = property.replace(/([A-Z])/g, '-$1').toLowerCase();
-      const original = element.style.getPropertyValue(cssProp);
-      const originalPriority = element.style.getPropertyPriority(cssProp);
-      tx.undoRecords.styleEdits.push({ element, property: cssProp, original, originalPriority });
-      setImportant(element, cssProp, value);
-    }
-
-    for (const { node, text, color: textColor, fontSize, fontWeight } of tx.textChanges) {
-      if (text !== undefined) {
-        tx.undoRecords.textEdits.push({ node, original: node.textContent ?? '' });
-        node.textContent = text;
-      }
-      if (textColor !== undefined && node.parentElement) {
-        const parent = node.parentElement;
-        tx.undoRecords.styleEdits.push({
-          element: parent, property: 'color',
-          original: parent.style.color, originalPriority: parent.style.getPropertyPriority('color'),
-        });
-        tx.undoRecords.styleEdits.push({
-          element: parent, property: '-webkit-text-fill-color',
-          original: parent.style.getPropertyValue('-webkit-text-fill-color'),
-          originalPriority: parent.style.getPropertyPriority('-webkit-text-fill-color'),
-        });
-        setImportant(parent, 'color', textColor);
-        setImportant(parent, '-webkit-text-fill-color', textColor);
-      }
-      if (fontSize !== undefined && node.parentElement) {
-        const parent = node.parentElement;
-        tx.undoRecords.styleEdits.push({
-          element: parent, property: 'font-size',
-          original: parent.style.getPropertyValue('font-size'),
-          originalPriority: parent.style.getPropertyPriority('font-size'),
-        });
-        setImportant(parent, 'font-size', fontSize);
-      }
-      if (fontWeight !== undefined && node.parentElement) {
-        const parent = node.parentElement;
-        tx.undoRecords.styleEdits.push({
-          element: parent, property: 'font-weight',
-          original: parent.style.getPropertyValue('font-weight'),
-          originalPriority: parent.style.getPropertyPriority('font-weight'),
-        });
-        setImportant(parent, 'font-weight', fontWeight);
-      }
-    }
-
-    for (const { element, attribute, value } of tx.sourceChanges) {
-      const original = element.getAttribute(attribute) ?? '';
-      tx.undoRecords.sourceEdits.push({ element, attribute, original });
-      element.setAttribute(attribute, value);
-    }
-  },
-
-  reverse(tx) {
-    revertEdits(
+    applyEditChanges(
+      tx.styleChanges,
+      tx.textChanges,
+      tx.sourceChanges,
       tx.undoRecords.styleEdits,
       tx.undoRecords.textEdits,
       tx.undoRecords.sourceEdits
     );
+  },
+
+  reverse(tx) {
+    const { styleEdits, textEdits, sourceEdits } = tx.undoRecords;
+    if (styleEdits.length === 0 && textEdits.length === 0 && sourceEdits.length === 0) return;
+    revertEdits(styleEdits, textEdits, sourceEdits);
   },
 };
 

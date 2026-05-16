@@ -10,6 +10,36 @@
 import type { ReactElement } from 'react';
 import { DEVTOOL_HIDDEN_ATTR } from '../constants';
 import { replaceIconContent } from '../eui_icon_cache';
+import { setImportant } from './clone_element';
+
+/**
+ * A forward style change descriptor produced by the edit modal.
+ */
+export interface StyleChange {
+  element: HTMLElement;
+  property: string;
+  value: string;
+}
+
+/**
+ * A forward text node change descriptor produced by the edit modal.
+ */
+export interface TextNodeChange {
+  node: Text;
+  text?: string;
+  color?: string;
+  fontSize?: string;
+  fontWeight?: string;
+}
+
+/**
+ * A forward source/attribute change descriptor produced by the edit modal.
+ */
+export interface SourceChange {
+  element: Element;
+  attribute: string;
+  value: string;
+}
 
 /** A recorded inline style override (for undo). */
 export interface StyleEdit {
@@ -66,6 +96,82 @@ export const revertEdits = (
     }
   }
   sourceEdits.length = 0;
+};
+
+/**
+ * Apply a batch of style, text, and source changes to the DOM, recording
+ * undo entries in the provided arrays. Shared by `editExecutor.apply` and
+ * `useEditChangeTracker.applyEdits`.
+ */
+export const applyEditChanges = (
+  styleChanges: StyleChange[],
+  textChanges: TextNodeChange[],
+  sourceChanges: SourceChange[],
+  styleEdits: StyleEdit[],
+  textEdits: TextEdit[],
+  sourceEdits: SourceEdit[]
+): void => {
+  for (const { element, property, value } of styleChanges) {
+    const cssProp = property.replace(/([A-Z])/g, '-$1').toLowerCase();
+    const original = element.style.getPropertyValue(cssProp);
+    const originalPriority = element.style.getPropertyPriority(cssProp);
+    styleEdits.push({ element, property: cssProp, original, originalPriority });
+    setImportant(element, cssProp, value);
+  }
+
+  for (const { node, text, color: textColor, fontSize, fontWeight } of textChanges) {
+    if (text !== undefined) {
+      textEdits.push({ node, original: node.textContent ?? '' });
+      node.textContent = text;
+    }
+    if (textColor !== undefined && node.parentElement) {
+      const parent = node.parentElement;
+      styleEdits.push({
+        element: parent,
+        property: 'color',
+        original: parent.style.color,
+        originalPriority: parent.style.getPropertyPriority('color'),
+      });
+      styleEdits.push({
+        element: parent,
+        property: '-webkit-text-fill-color',
+        original: parent.style.getPropertyValue('-webkit-text-fill-color'),
+        originalPriority: parent.style.getPropertyPriority('-webkit-text-fill-color'),
+      });
+      setImportant(parent, 'color', textColor);
+      setImportant(parent, '-webkit-text-fill-color', textColor);
+    }
+    if (fontSize !== undefined && node.parentElement) {
+      const parent = node.parentElement;
+      styleEdits.push({
+        element: parent,
+        property: 'font-size',
+        original: parent.style.getPropertyValue('font-size'),
+        originalPriority: parent.style.getPropertyPriority('font-size'),
+      });
+      setImportant(parent, 'font-size', fontSize);
+    }
+    if (fontWeight !== undefined && node.parentElement) {
+      const parent = node.parentElement;
+      styleEdits.push({
+        element: parent,
+        property: 'font-weight',
+        original: parent.style.getPropertyValue('font-weight'),
+        originalPriority: parent.style.getPropertyPriority('font-weight'),
+      });
+      setImportant(parent, 'font-weight', fontWeight);
+    }
+  }
+
+  for (const { element, attribute, value } of sourceChanges) {
+    const original = element.getAttribute(attribute) ?? '';
+    sourceEdits.push({ element, attribute, original });
+    if (attribute === 'data-icon-type') {
+      replaceIconContent(element, value);
+    } else {
+      element.setAttribute(attribute, value);
+    }
+  }
 };
 
 /**

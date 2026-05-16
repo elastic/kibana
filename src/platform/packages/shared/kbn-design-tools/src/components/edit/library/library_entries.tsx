@@ -297,6 +297,7 @@ export const EUI_LIBRARY: EuiLibraryEntry[] = [
   {
     label: 'Button',
     element: <ButtonRegular />,
+    interactive: true,
     variants: buttonVariants,
   },
   {
