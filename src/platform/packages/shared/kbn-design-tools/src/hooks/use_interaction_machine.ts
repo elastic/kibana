@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useCallback, useRef } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
 import { HANDLE_CURSORS } from '../lib/constants';
 import {
   findManagedSession,
@@ -373,15 +373,27 @@ export const useInteractionMachine = (options: InteractionMachineOptions) => {
     interaction.current = IDLE;
   }, []);
 
-  return {
-    getState,
-    interaction,
-    parkInteraction,
-    abortDrag,
-    handlePointerMove,
-    handlePointerDown,
-    handlePointerUp,
-    startSessionDrag,
-    forceIdle,
-  };
+  return useMemo(
+    () => ({
+      getState,
+      interaction,
+      parkInteraction,
+      abortDrag,
+      handlePointerMove,
+      handlePointerDown,
+      handlePointerUp,
+      startSessionDrag,
+      forceIdle,
+    }),
+    [
+      getState,
+      parkInteraction,
+      abortDrag,
+      handlePointerMove,
+      handlePointerDown,
+      handlePointerUp,
+      startSessionDrag,
+      forceIdle,
+    ]
+  );
 };

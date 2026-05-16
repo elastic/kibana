@@ -112,6 +112,9 @@ export const DUPLICATE_OFFSET = 20;
 /** Minimum border-radius (px) to consider an element "rounded". */
 export const ROUNDING_THRESHOLD = 4;
 
+/** Maximum recursion depth when traversing DOM trees (clone, unfreeze, flatten). */
+export const MAX_TREE_DEPTH = 50;
+
 /** Maximum number of transactions kept in the undo/redo history stack. */
 export const MAX_UNDO_ENTRIES = 500;
 
@@ -205,7 +208,8 @@ export const INHERITED_CSS_PROPS = [
   'border-spacing',
   '-webkit-font-smoothing',
   '-webkit-text-fill-color',
-  '-webkit-text-stroke',
+  '-webkit-text-stroke-width',
+  '-webkit-text-stroke-color',
   'text-rendering',
 ];
 

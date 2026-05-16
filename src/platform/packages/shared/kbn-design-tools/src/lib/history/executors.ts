@@ -11,7 +11,7 @@ import type { ElementRegistry } from '../dom/element_registry';
 import { revertEdits, applyEditChanges } from '../dom/element_registry';
 import { setImportant } from '../dom/clone_element';
 import { buildTransform } from '../dom/resize_helpers';
-import { DEVTOOL_HIDDEN_ATTR, DEVTOOL_MANAGED_ATTR } from '../constants';
+import { DEVTOOL_HIDDEN_ATTR } from '../constants';
 import { restoreSession } from './snapshot';
 import type {
   Transaction,

@@ -27,7 +27,7 @@ export const isMeasureShortcut = (event: KeyboardEvent) =>
   (event.metaKey || event.ctrlKey) && isDot(event);
 
 /**
- * Check if the keyboard event corresponds to the duplicate shortcut (Meta/Ctrl + D).
+ * Check if the keyboard event corresponds to the duplicate shortcut (Meta/Ctrl + C).
  */
 export const isDuplicateShortcut = (event: KeyboardEvent): boolean =>
   (event.metaKey || event.ctrlKey) && event.key === 'c';

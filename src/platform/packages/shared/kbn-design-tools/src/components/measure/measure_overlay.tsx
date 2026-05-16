@@ -69,30 +69,45 @@ export const MeasureOverlay = ({ setIsMeasuring }: Props) => {
     el.style.top = `${clamped.top}px`;
   }, [anchorRect]);
 
+  const rafRef = useRef<number>(0);
+
   const handlePointerMove = useCallback(
     (event: PointerEvent) => {
-      const target = getElementFromPoint(event);
+      cancelAnimationFrame(rafRef.current);
+      const { clientX, clientY } = event;
+      rafRef.current = requestAnimationFrame(() => {
+        const synth = { clientX, clientY } as PointerEvent;
+        const target = getElementFromPoint(synth);
 
-      if (!target) {
-        setHoverRect(null);
-        setSpacingLines([]);
-        return;
-      }
+        if (!target) {
+          setHoverRect(null);
+          setSpacingLines([]);
+          return;
+        }
 
-      const rect = target.getBoundingClientRect();
-      setHoverRect(rect);
+        const rect = target.getBoundingClientRect();
+        setHoverRect(rect);
 
-      if (anchorElement && anchorElement !== target) {
-        const freshAnchorRect = anchorElement.getBoundingClientRect();
-        setAnchorRect(freshAnchorRect);
-        const lines = calculateSpacingLines(freshAnchorRect, rect);
-        setSpacingLines(lines);
-      } else {
-        setSpacingLines([]);
-      }
+        if (anchorElement && anchorElement.isConnected && anchorElement !== target) {
+          const freshAnchorRect = anchorElement.getBoundingClientRect();
+          setAnchorRect(freshAnchorRect);
+          const lines = calculateSpacingLines(freshAnchorRect, rect);
+          setSpacingLines(lines);
+        } else {
+          if (anchorElement && !anchorElement.isConnected) {
+            setAnchorElement(null);
+            setAnchorRect(null);
+          }
+          setSpacingLines([]);
+        }
+      });
     },
     [anchorElement]
   );
+
+  useEffect(() => {
+    return () => cancelAnimationFrame(rafRef.current);
+  }, []);
 
   const handleClick = useCallback((event: MouseEvent) => {
     const target = getElementFromPoint(event);

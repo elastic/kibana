@@ -300,12 +300,22 @@ const findLibraryElement = (libraryId: string) => {
  * Sanitize HTML to prevent script execution when importing untrusted
  * outerHTML. Returns the sanitized string.
  */
-const sanitizeHTML = (html: string): string =>
-  DOMPurify.sanitize(html, {
+const sanitizeHTML = (html: string): string => {
+  DOMPurify.addHook('afterSanitizeAttributes', (node) => {
+    const href = node.getAttribute('xlink:href') ?? node.getAttribute('href');
+    if (href && !href.startsWith('#')) {
+      node.removeAttribute('xlink:href');
+      node.removeAttribute('href');
+    }
+  });
+  const clean = DOMPurify.sanitize(html, {
     ADD_TAGS: ['use'],
     ADD_ATTR: ['xlink:href', 'data-icon-type'],
     FORBID_TAGS: ['script', 'iframe', 'object', 'embed'],
   });
+  DOMPurify.removeHook('afterSanitizeAttributes');
+  return clean;
+};
 
 /**
  * Sanitize inline CSS text to prevent script execution.
@@ -318,7 +328,8 @@ const sanitizeHTML = (html: string): string =>
 const sanitizeInlineStyles = (raw: string): string => {
   const scratch = document.createElement('div');
   scratch.style.cssText = raw;
-  return scratch.style.cssText;
+  const cleaned = scratch.style.cssText;
+  return cleaned.replace(/url\([^)]*\)/gi, 'url()');
 };
 
 const recreateFromOuterHTML = (
@@ -343,6 +354,28 @@ const recreateFromOuterHTML = (
   adopted.style.pointerEvents = 'auto';
   document.body.appendChild(adopted);
   return adopted;
+};
+
+const PSEUDO_CLASS_RE = /^__pseudo_[0-9a-f]{8}$/;
+
+const stripPseudoStyles = (root: HTMLElement): void => {
+  for (const style of Array.from(root.querySelectorAll('style'))) {
+    const text = style.textContent ?? '';
+    if (text.includes('__pseudo_') && /\.__pseudo_[0-9a-f]{8}::(?:before|after)/.test(text)) {
+      style.remove();
+    }
+  }
+  const removeCls = (el: Element): void => {
+    for (const cls of Array.from(el.classList)) {
+      if (PSEUDO_CLASS_RE.test(cls)) {
+        el.classList.remove(cls);
+      }
+    }
+  };
+  removeCls(root);
+  for (const el of root.querySelectorAll('*')) {
+    removeCls(el);
+  }
 };
 
 const applyIconOverrides = (outerHTML: string | undefined, liveEl: HTMLElement): void => {
@@ -503,9 +536,7 @@ export const importState = async (
         // properties that were actually edited so other frozen
         // dimensions remain intact.
         const editedProps = new Set(
-          exported.styleEdits
-            .filter((e) => e.relativeSelector === '')
-            .map((e) => e.property)
+          exported.styleEdits.filter((e) => e.relativeSelector === '').map((e) => e.property)
         );
         if (editedProps.has('width')) {
           unfreezeChildren(clone, 'width');
@@ -537,6 +568,12 @@ export const importState = async (
     // so CSS rules from the current mode apply correctly.
     if (emotionMap) {
       remapEmotionClasses(el, emotionMap);
+      // The remapped Emotion classes provide correct ::before/::after
+      // rules for the current color mode. Strip the captured pseudo-
+      // element <style> tags and their class names so they don't
+      // override the Emotion rules with stale structural properties
+      // (e.g. border-style: solid when the current mode uses none).
+      stripPseudoStyles(el);
     }
 
     // Refresh var(--dt-*) fallback hex values in inline styles so
@@ -605,6 +642,7 @@ export const importState = async (
 
     const sourceEdits = exported.sourceEdits
       .map((e) => {
+        if (/^on/i.test(e.attribute)) return null;
         const element = resolveEditElement(
           e.targetPath,
           `source edit (${e.attribute})`,

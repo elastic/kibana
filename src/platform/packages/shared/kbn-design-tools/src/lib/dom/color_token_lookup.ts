@@ -76,6 +76,7 @@ const BG_DENY_TOKENS: ReadonlySet<string> = new Set(['shadow']);
 const COLOR_CSS_PROPS: ReadonlySet<string> = new Set([
   'color',
   '-webkit-text-fill-color',
+  '-webkit-text-stroke-color',
   'background-color',
 ]);
 
@@ -137,7 +138,11 @@ export const colorToToken = (cssValue: string, cssProp: string): string | undefi
     const fb = fallbackReverse.get(hex);
     return fb && !BG_DENY_TOKENS.has(fb) ? fb : undefined;
   }
-  if (cssProp === 'color' || cssProp === '-webkit-text-fill-color') {
+  if (
+    cssProp === 'color' ||
+    cssProp === '-webkit-text-fill-color' ||
+    cssProp === '-webkit-text-stroke-color'
+  ) {
     return textReverse.get(hex) ?? fallbackReverse.get(hex);
   }
   if (isBorderColorProp(cssProp)) {

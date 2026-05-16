@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DEVTOOL_HIDDEN_ATTR, SVG_INTERNALS } from '../constants';
+import { DEVTOOL_HIDDEN_ATTR, SVG_INTERNALS, MAX_TREE_DEPTH } from '../constants';
 import { resolveTag } from '../fiber/resolve_component_name';
 
 interface TreeNode {
@@ -18,10 +18,8 @@ interface TreeNode {
   isClosing?: boolean;
 }
 
-const MAX_DEPTH = 50;
-
 export const flattenElementTree = (el: Element, depth: number): TreeNode[] => {
-  if (depth > MAX_DEPTH) return [];
+  if (depth > MAX_TREE_DEPTH) return [];
 
   // Skip elements hidden by the edit overlay (soft-deleted) and all their children.
   if (el.hasAttribute(DEVTOOL_HIDDEN_ATTR)) return [];

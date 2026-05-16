@@ -15,6 +15,7 @@ import {
   INHERITED_CSS_PROPS,
   BACKGROUND_CSS_PROPS,
   CSS_VAR_PREFIX,
+  MAX_TREE_DEPTH,
 } from '../constants';
 import { tagColorTokens, colorToToken, toHex } from './color_token_lookup';
 import { getTokenVar } from './color_token_stylesheet';
@@ -39,7 +40,12 @@ const MEDIA_TAGS = new Set(['IMG', 'SVG', 'VIDEO', 'PICTURE', 'CANVAS', 'OBJECT'
  * dimension change, so children reflow naturally. Media elements (img, svg,
  * video, etc.) get max-width/max-height constraints to scale proportionally.
  */
-export const unfreezeChildren = (parent: HTMLElement, property: 'width' | 'height'): void => {
+export const unfreezeChildren = (
+  parent: HTMLElement,
+  property: 'width' | 'height',
+  depth = 0
+): void => {
+  if (depth > MAX_TREE_DEPTH) return;
   for (let i = 0; i < parent.children.length; i++) {
     const child = parent.children[i];
     if (child instanceof HTMLElement) {
@@ -54,7 +60,7 @@ export const unfreezeChildren = (parent: HTMLElement, property: 'width' | 'heigh
           setImportant(child, 'width', 'auto');
         }
       }
-      unfreezeChildren(child, property);
+      unfreezeChildren(child, property, depth + 1);
     }
   }
 };
@@ -244,6 +250,10 @@ const applyPseudoStyle = (
   for (let i = 0; i < computed.length; i++) {
     const prop = computed[i];
     if (prop === 'content') continue;
+    // Custom properties inherit from the parent element; re-declaring
+    // them on the pseudo-element creates self-referencing var() cycles
+    // that resolve to empty strings in subsequent clones.
+    if (prop.startsWith(CSS_VAR_PREFIX)) continue;
     // Skip background props for hovered elements — the CSS class on the
     // clone provides the correct resting-state appearance.
     if (isInteractive && BACKGROUND_CSS_PROPS.has(prop)) continue;
@@ -294,7 +304,7 @@ export const copyStylesDeep = (
   depth = 0,
   counter?: { count: number }
 ): void => {
-  if (depth > MAX_DEPTH) return;
+  if (depth > MAX_TREE_DEPTH) return;
 
   // Lazily initialize a shared counter for the entire tree walk.
   const ctx = counter ?? { count: 0 };
@@ -387,8 +397,6 @@ export const cloneElement = (
   return { clone, rect };
 };
 
-const MAX_DEPTH = 50;
-
 /**
  * Maximum number of elements to process in copyStylesDeep before bailing out.
  * Prevents freezing the main thread when cloning large component trees
@@ -402,7 +410,7 @@ const MAX_CLONE_ELEMENTS = 2000;
  * by copyInheritedStylesDeep when the source element was hidden.
  */
 const fixCloneVisibility = (el: HTMLElement, depth = 0): void => {
-  if (depth > MAX_DEPTH) return;
+  if (depth > MAX_TREE_DEPTH) return;
   if ('cloneHidden' in el.dataset) return;
   if (el.style.visibility === 'hidden') el.style.visibility = 'visible';
   if (el.style.pointerEvents === 'none') el.style.pointerEvents = '';
