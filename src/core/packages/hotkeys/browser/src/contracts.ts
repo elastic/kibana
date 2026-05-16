@@ -6,6 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import type { SidebarApp } from '@kbn/core-chrome-sidebar';
+import type { HotkeysSidebarActions, HotkeysSidebarState } from './hotkeys_sidebar';
 import type { AppScopedHotkeys, HotkeyDefinition, HotkeyHandle } from './types';
 
 /**
@@ -59,4 +61,9 @@ export interface HotkeysStart {
    * mount.
    */
   forApp(appId?: string): AppScopedHotkeys;
+
+  /**
+   * Hotkeys cheat sheet app instance.
+   */
+  cheatSheet: SidebarApp<HotkeysSidebarState, HotkeysSidebarActions>;
 }

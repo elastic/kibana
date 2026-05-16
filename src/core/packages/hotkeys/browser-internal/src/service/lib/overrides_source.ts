@@ -40,6 +40,21 @@ export interface HotkeyOverridesSource {
   readonly overrides$: Observable<ReadonlyMap<string, HotkeyOverride>>;
 }
 
+/**
+ * Mutable persistence for user hotkey overrides: emits on
+ * {@link HotkeyOverridesSource.overrides$} and supports imperative updates.
+ *
+ * @internal
+ */
+export interface HotkeyOverridesPersistence extends HotkeyOverridesSource {
+  /** Merge `patch` into any existing override for `id`, then notify subscribers and persist. */
+  setOverride(id: string, patch: HotkeyOverride): void;
+  /** Remove any override for `id` so the declared binding is used again. */
+  clearOverride(id: string): void;
+  /** Clear every stored override. */
+  clearAll(): void;
+}
+
 const EMPTY_OVERRIDES: ReadonlyMap<string, HotkeyOverride> = new Map();
 
 /**

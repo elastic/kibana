@@ -7,36 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { css } from '@emotion/react';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiEmptyPrompt,
   EuiFieldSearch,
   EuiFlexGroup,
-  EuiFlexItem,
   EuiSpacer,
-  EuiText,
   EuiTitle,
-  EuiPageHeader,
-  EuiPageBody,
   EuiPanel,
-  EuiPageHeaderSection,
-  EuiButtonIcon,
   EuiHorizontalRule,
-  EuiNotificationBadge,
-  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { SidebarComponentProps } from '@kbn/core-chrome-sidebar';
+import { SidebarHeader, SidebarBody } from '@kbn/core-chrome-sidebar-components';
 import type {
   HotkeyDefinition,
   HotkeysSidebarActions,
   HotkeysSidebarState,
 } from '@kbn/core-hotkeys-browser';
-
 import { useObservable } from '@kbn/use-observable';
 import type { Observable } from 'rxjs';
-import { formatChord } from '../utils';
+import { HotkeyRow } from './blocks/hotkey_row';
 
 type Section = 'global' | 'app' | 'context';
 
@@ -52,8 +43,6 @@ interface FeatureBucket {
 }
 
 const EMPTY_REGISTRATIONS: ReadonlyArray<HotkeyDefinition> = [];
-
-const GROUP_UNIT_SEPARATOR = '\u241E';
 
 const SECTION_TITLES: Record<Section, string> = {
   global: i18n.translate('core.ui.chrome.hotkeysCheatSheet.sectionGlobal', {
@@ -133,59 +122,17 @@ const group = (
   return grouped;
 };
 
-const HotkeyRow = ({ def }: { def: HotkeyDefinition }) => {
-  const separatorToken = '+' as const;
-  // force a separator token so we can consistently split the chord into keys, across platforms
-  const formattedChord = formatChord(def.keys, { separatorToken });
-
-  return (
-    <EuiFlexGroup
-      alignItems="center"
-      justifyContent="spaceBetween"
-      gutterSize="m"
-      responsive={false}
-      data-test-subj={`hotkeysCheatSheet-chord-${def.id}`}
-    >
-      <EuiFlexItem>
-        <EuiText size="s">
-          <strong>{def.label}</strong>
-        </EuiText>
-        {def.description ? (
-          <EuiText size="xs" color="subdued">
-            {def.description}
-          </EuiText>
-        ) : null}
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="xs">
-          <EuiFlexItem
-            grow={false}
-            css={css({ display: 'none', ':hover': { display: 'initial' } })}
-          >
-            <EuiButtonIcon aria-label="Edit" color="text" iconType="pencil" />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiToolTip content={formattedChord}>
-              <EuiFlexGroup gutterSize="xs">
-                {formattedChord.split(separatorToken).map((key) => (
-                  <EuiFlexItem key={key} grow={false}>
-                    <EuiNotificationBadge color="subdued">{key}</EuiNotificationBadge>
-                  </EuiFlexItem>
-                ))}
-              </EuiFlexGroup>
-            </EuiToolTip>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-};
-
-const HotkeyRows = ({ defs }: { defs: readonly HotkeyDefinition[] }) => (
+const HotkeyRows = ({
+  defs,
+  actions,
+}: {
+  defs: readonly HotkeyDefinition[];
+  actions: HotkeysSidebarActions;
+}) => (
   <>
     {defs.map((def) => (
       <React.Fragment key={def.id}>
-        <HotkeyRow def={def} />
+        <HotkeyRow def={def} actions={actions} />
         <EuiSpacer size="s" />
       </React.Fragment>
     ))}
@@ -195,9 +142,11 @@ const HotkeyRows = ({ defs }: { defs: readonly HotkeyDefinition[] }) => (
 const ScopeSection = ({
   title,
   entries,
+  actions,
 }: {
   title: string;
   entries: readonly HotkeyDefinition[];
+  actions: HotkeysSidebarActions;
 }) => {
   if (entries.length === 0) {
     return null;
@@ -219,7 +168,7 @@ const ScopeSection = ({
                 <p>{getBucketTitle(featureId, defs)}</p>
               </EuiTitle>
               <EuiSpacer size="s" />
-              <HotkeyRows defs={defs} />
+              <HotkeyRows defs={defs} actions={actions} />
               <EuiSpacer size="s" />
             </React.Fragment>
           ))
@@ -227,10 +176,10 @@ const ScopeSection = ({
       {hasFeatureBuckets && hasNoFeatureTail ? (
         <>
           <EuiHorizontalRule margin="m" />
-          <HotkeyRows defs={noFeature} />
+          <HotkeyRows defs={noFeature} actions={actions} />
         </>
       ) : (
-        <HotkeyRows defs={noFeature} />
+        <HotkeyRows defs={noFeature} actions={actions} />
       )}
       <EuiSpacer size="m" />
     </>
@@ -280,29 +229,14 @@ export const HotkeysCheatSheet = ({
     grouped.global.length === 0 && grouped.app.length === 0 && grouped.context.length === 0;
 
   return (
-    <EuiPanel hasShadow={false}>
-      <EuiPageHeader responsive={false} bottomBorder>
-        <EuiPageHeaderSection>
-          <EuiTitle size="s">
-            <h3>
-              {i18n.translate('core.ui.chrome.hotkeysCheatSheet.title', {
-                defaultMessage: 'Keyboard shortcuts',
-              })}
-            </h3>
-          </EuiTitle>
-        </EuiPageHeaderSection>
-        <EuiPageHeaderSection>
-          <EuiButtonIcon
-            iconType="cross"
-            onClick={onClose}
-            aria-label={i18n.translate('core.ui.chrome.hotkeysCheatSheet.closeButtonAriaLabel', {
-              defaultMessage: 'Close',
-            })}
-          />
-        </EuiPageHeaderSection>
-      </EuiPageHeader>
-      <EuiSpacer size="m" />
-      <EuiPageBody>
+    <EuiPanel hasShadow={false} paddingSize="none">
+      <SidebarHeader
+        title={i18n.translate('core.ui.chrome.hotkeysCheatSheet.title', {
+          defaultMessage: 'Keyboard shortcuts',
+        })}
+        onClose={onClose}
+      />
+      <SidebarBody scrollable>
         <EuiFieldSearch
           fullWidth
           autoFocus
@@ -328,7 +262,11 @@ export const HotkeysCheatSheet = ({
           />
         ) : (
           <>
-            <ScopeSection title={SECTION_TITLES.global} entries={grouped.global} />
+            <ScopeSection
+              title={SECTION_TITLES.global}
+              entries={grouped.global}
+              actions={actions}
+            />
             {grouped.app.length > 0 || grouped.context.length > 0 ? (
               <EuiFlexGroup
                 direction="column"
@@ -336,13 +274,17 @@ export const HotkeysCheatSheet = ({
                 responsive={false}
                 data-test-subj="hotkeysCheatSheetVolatileScopes"
               >
-                <ScopeSection title={SECTION_TITLES.app} entries={grouped.app} />
-                <ScopeSection title={SECTION_TITLES.context} entries={grouped.context} />
+                <ScopeSection title={SECTION_TITLES.app} entries={grouped.app} actions={actions} />
+                <ScopeSection
+                  title={SECTION_TITLES.context}
+                  entries={grouped.context}
+                  actions={actions}
+                />
               </EuiFlexGroup>
             ) : null}
           </>
         )}
-      </EuiPageBody>
+      </SidebarBody>
     </EuiPanel>
   );
 };

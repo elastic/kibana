@@ -13,6 +13,24 @@ import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { HotkeysService, OPEN_CHEAT_SHEET_HOTKEY_ID } from './hotkeys_service';
 import type { HotkeyOverride, HotkeyOverridesSource } from './lib/overrides_source';
+import {
+  HOTKEY_OVERRIDES_LOCAL_STORAGE_KEY,
+  createLocalStorageHotkeyOverridesPersistence,
+} from './lib/local_storage_hotkey_overrides_persistence';
+
+const createMemoryStorage = (): Storage => {
+  const store = new Map<string, string>();
+  return {
+    get length() {
+      return store.size;
+    },
+    clear: () => store.clear(),
+    getItem: (key: string) => store.get(key) ?? null,
+    key: (index: number) => [...store.keys()][index] ?? null,
+    removeItem: (key: string) => void store.delete(key),
+    setItem: (key: string, value: string) => void store.set(key, value),
+  } as Storage;
+};
 
 const bootstrapHotkeys = (
   svc: HotkeysService,
@@ -50,6 +68,7 @@ describe('HotkeysService', () => {
 
   beforeEach(() => {
     HotkeyManager.resetInstance();
+    localStorage.removeItem(HOTKEY_OVERRIDES_LOCAL_STORAGE_KEY);
     service = new HotkeysService();
   });
 
@@ -152,6 +171,64 @@ describe('HotkeysService', () => {
         keys: 'Mod+Shift+Enter',
         defaultKeys: 'Mod+Enter',
       });
+    });
+
+    it('invokes onEffectiveBindingChange when resolved discovery keys change', () => {
+      const overrides = createOverridesSource();
+      const start = bootstrapHotkeys(service, { overrides });
+      const onEffectiveBindingChange = jest.fn();
+      start.registerForDiscovery({
+        id: 'discovery:effect',
+        keys: 'Mod+Enter',
+        label: 'Submit',
+        scope: 'context',
+        onEffectiveBindingChange,
+      });
+
+      expect(onEffectiveBindingChange).toHaveBeenCalledTimes(1);
+      expect(onEffectiveBindingChange).toHaveBeenCalledWith('Mod+Enter');
+
+      overrides.next(new Map([['discovery:effect', { keys: 'Mod+Shift+Enter' }]]));
+
+      expect(onEffectiveBindingChange).toHaveBeenCalledTimes(2);
+      expect(onEffectiveBindingChange).toHaveBeenLastCalledWith('Mod+Shift+Enter');
+    });
+
+    it('invokes onEffectiveBindingChange with an existing override at registration time', () => {
+      const overrides = createOverridesSource(
+        new Map([['discovery:persisted', { keys: 'Mod+X' }]])
+      );
+      const start = bootstrapHotkeys(service, { overrides });
+      const onEffectiveBindingChange = jest.fn();
+      start.registerForDiscovery({
+        id: 'discovery:persisted',
+        keys: 'Mod+Y',
+        label: 'Editor shortcut',
+        scope: 'context',
+        onEffectiveBindingChange,
+      });
+
+      expect(onEffectiveBindingChange).toHaveBeenCalledTimes(1);
+      expect(onEffectiveBindingChange).toHaveBeenCalledWith('Mod+X');
+    });
+
+    it('invokes onEffectiveBindingChange when discovery handle.update changes declaration keys', () => {
+      const start = bootstrapHotkeys(service);
+      const onEffectiveBindingChange = jest.fn();
+      const handle = start.registerForDiscovery({
+        id: 'discovery:updateKeys',
+        keys: 'Mod+K',
+        label: 'Cmd palette',
+        scope: 'context',
+        onEffectiveBindingChange,
+      });
+
+      expect(onEffectiveBindingChange).toHaveBeenCalledTimes(1);
+
+      handle.update({ keys: 'Mod+L' });
+
+      expect(onEffectiveBindingChange).toHaveBeenCalledTimes(2);
+      expect(onEffectiveBindingChange).toHaveBeenLastCalledWith('Mod+L');
     });
   });
 
@@ -506,6 +583,33 @@ describe('HotkeysService', () => {
       const regs = await takeRegistrations(service);
       expect(regs.find((r) => r.id === 'ov:f')).toMatchObject({ keys: 'Mod+Alt+S' });
       expect(regs.find((r) => r.id === 'ov:g')).toMatchObject({ keys: 'Mod+K' });
+    });
+
+    it('re-binds when overrides come from HotkeyOverridesPersistence.setOverride', () => {
+      const persistence = createLocalStorageHotkeyOverridesPersistence({
+        storage: createMemoryStorage(),
+        storageKey: 'hotkeys.hotkeysService.unit',
+      });
+      const start = bootstrapHotkeys(service, { overrides: persistence });
+      const handler = jest.fn();
+      start.register({ id: 'ov:persist', keys: 'Mod+S', label: 'Save', scope: 'global' }, handler);
+
+      document.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'S', ctrlKey: true, bubbles: true })
+      );
+      expect(handler).toHaveBeenCalledTimes(1);
+
+      persistence.setOverride('ov:persist', { keys: 'Mod+Alt+S' });
+
+      document.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'S', ctrlKey: true, bubbles: true })
+      );
+      expect(handler).toHaveBeenCalledTimes(1);
+
+      document.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'S', ctrlKey: true, altKey: true, bubbles: true })
+      );
+      expect(handler).toHaveBeenCalledTimes(2);
     });
   });
 

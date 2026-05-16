@@ -16,7 +16,7 @@ import type {
   HotkeysSidebarActions,
   HotkeysSidebarState,
 } from '@kbn/core-hotkeys-browser';
-import { HotkeysCheatSheet } from './hotkeys_cheat_sheet';
+import { HotkeysCheatSheet } from './cheat_sheet';
 
 const globalRegistration: HotkeyDefinition = {
   id: 'platform:chrome.openHotkeysCheatSheet',
