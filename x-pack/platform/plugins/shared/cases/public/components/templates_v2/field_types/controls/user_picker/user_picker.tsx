@@ -15,6 +15,7 @@ import {
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { CASE_EXTENDED_FIELDS } from '../../../../../../common/constants';
+import { getFieldSnakeKey } from '../../../../../../common/utils';
 import type {
   UserPickerFieldSchema,
   ConditionRenderProps,
@@ -94,6 +95,7 @@ export const UserPicker: React.FC<UserPickerProps> = ({
           errorMessage={errorMessage}
           isLoading={isLoading}
           isMultiple={isMultiple}
+          isRequired={isRequired ?? false}
           selectedUsers={selectedUsers}
           suggestedProfiles={suggestedProfiles}
           missingUids={missingUids}
@@ -102,11 +104,15 @@ export const UserPicker: React.FC<UserPickerProps> = ({
         />
       );
     },
-    [label, name, isLoading, isMultiple, suggestedProfiles, onSearchChange]
+    [label, name, isLoading, isMultiple, isRequired, suggestedProfiles, onSearchChange]
   );
 
   return (
-    <UseField key={name} path={`${CASE_EXTENDED_FIELDS}.${name}_as_${type}`} config={fieldConfig}>
+    <UseField
+      key={name}
+      path={`${CASE_EXTENDED_FIELDS}.${getFieldSnakeKey(name, type)}`}
+      config={fieldConfig}
+    >
       {renderField}
     </UseField>
   );
@@ -121,6 +127,7 @@ interface UserPickerComboboxWithProfilesProps {
   errorMessage: string | null;
   isLoading: boolean;
   isMultiple: boolean;
+  isRequired: boolean;
   selectedUsers: SelectedUser[];
   suggestedProfiles: UserProfileWithAvatar[];
   missingUids: string[];

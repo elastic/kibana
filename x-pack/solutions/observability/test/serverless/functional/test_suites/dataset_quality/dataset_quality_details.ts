@@ -291,8 +291,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await action.click();
 
-        const dashboardButtons = await PageObjects.datasetQuality.getIntegrationDashboardButtons();
-        const firstDashboardButton = await dashboardButtons[0];
+        const firstDashboardButton = await retry.try(async () => {
+          const dashboardButtons =
+            await PageObjects.datasetQuality.getIntegrationDashboardButtons();
+          if (!dashboardButtons || dashboardButtons.length === 0) {
+            throw new Error('Dashboard buttons not yet rendered');
+          }
+          return dashboardButtons[0];
+        });
         const dashboardText = await firstDashboardButton.getVisibleText();
 
         await firstDashboardButton.click();

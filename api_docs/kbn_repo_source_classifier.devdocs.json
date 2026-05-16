@@ -67,6 +67,7 @@
                 "lineNumber": 26,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "ImportResolver",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -163,7 +164,7 @@
               "Specifies the group to which this module belongs"
             ],
             "signature": [
-              "\"search\" | \"security\" | \"common\" | \"observability\" | \"workplaceai\" | \"platform\""
+              "\"search\" | \"security\" | \"common\" | \"observability\" | \"workplaceai\" | \"vectordb\" | \"platform\""
             ],
             "path": "packages/kbn-repo-source-classifier/src/module_id.ts",
             "lineNumber": 18,

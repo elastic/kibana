@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Observable } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type {
   Conversation,
@@ -14,6 +15,10 @@ import type {
   AgentCapabilities,
   AgentConfigurationOverrides,
   ConversationAction,
+  AgentExecutionMode,
+  ChatEvent,
+  ExecutionStatus,
+  SerializedExecutionError,
 } from '@kbn/agent-builder-common';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -31,6 +36,7 @@ import type {
   SkillsService,
   PluginsService,
   ToolManager,
+  TodoStateManager,
 } from '../runner';
 import type { IFileStore } from '../runner/filestore';
 import type { AttachmentStateManager } from '../attachments';
@@ -57,6 +63,35 @@ export interface AgentHandlerReturn {
 }
 
 /**
+ * Pre-scoped executor for spawning sub-agent executions.
+ * The `request` is already bound — callers don't need to provide it.
+ */
+export interface SubAgentExecutor {
+  /** Execute a sub-agent and return the execution ID and events observable. */
+  executeSubAgent(params: {
+    agentId: string;
+    connectorId?: string;
+    capabilities?: AgentCapabilities;
+    parentExecutionId: string;
+    prompt: string;
+    abortSignal?: AbortSignal;
+  }): Promise<{
+    executionId: string;
+    events$: Observable<ChatEvent>;
+  }>;
+
+  /** Retrieve a sub-agent execution by ID. Returns undefined if not found. */
+  getExecution(executionId: string): Promise<SubAgentExecution | undefined>;
+}
+
+export interface SubAgentExecution {
+  executionId: string;
+  status: ExecutionStatus;
+  error?: SerializedExecutionError;
+  events: ChatEvent[];
+}
+
+/**
  * Experimental features configuration for agent builder.
  */
 export interface ExperimentalFeatures {
@@ -64,6 +99,10 @@ export interface ExperimentalFeatures {
   filestore: boolean;
   /** Whether the skills feature is enabled */
   skills: boolean;
+  /** Whether the sub-agent execution feature is enabled */
+  subagents: boolean;
+  /** Whether the todo list tool and task-management prompt are enabled */
+  todos: boolean;
 }
 
 export interface AgentHandlerContext {
@@ -76,6 +115,10 @@ export interface AgentHandlerContext {
    * Id of the space associated with the request
    */
   spaceId: string;
+  /**
+   * The resolved connector ID for this execution, if any.
+   */
+  defaultConnectorId?: string;
   /**
    * A cluster client scoped to the current user.
    * Can be used to access ES on behalf of either the current user or the system user.
@@ -133,6 +176,10 @@ export interface AgentHandlerContext {
    */
   attachmentStateManager: AttachmentStateManager;
   /**
+   * Manages the active todo list for this conversation execution.
+   */
+  todoStateManager: TodoStateManager;
+  /**
    * Used to manage interruptions.
    */
   promptManager: PromptManager;
@@ -161,6 +208,15 @@ export interface AgentHandlerContext {
    * Determined by the UI setting at the start of execution.
    */
   experimentalFeatures: ExperimentalFeatures;
+  /**
+   * The execution mode for this agent run.
+   * NOTE: atm, when 'standalone', the execution is non-interactive (HITL disabled).
+   */
+  executionMode: AgentExecutionMode;
+  /**
+   * Sub-agent executor for spawning child agent executions.
+   */
+  subAgentExecutor: SubAgentExecutor;
 }
 
 /**
@@ -206,6 +262,10 @@ export interface AgentParams {
    * The action to perform: "regenerate" re-executes the last round with original input (requires conversation_id).
    */
   action?: ConversationAction;
+  /**
+   * The execution ID for this run. Used for sub-agent parent tracking.
+   */
+  executionId?: string;
 }
 
 export interface AgentResponse {

@@ -477,7 +477,7 @@
             "label": "serverless",
             "description": [],
             "signature": [
-              "{ project_id: string; project_name?: string | undefined; project_type?: \"search\" | \"security\" | \"observability\" | \"workplaceai\" | undefined; product_tier?: \"complete\" | \"logs_essentials\" | \"essentials\" | \"search_ai_lake\" | undefined; orchestrator_target?: string | undefined; in_trial?: boolean | undefined; } | undefined"
+              "{ project_id: string; project_name?: string | undefined; project_type?: \"search\" | \"security\" | \"observability\" | \"workplaceai\" | \"vectordb\" | undefined; product_tier?: \"complete\" | \"logs_essentials\" | \"essentials\" | \"search_ai_lake\" | undefined; orchestrator_target?: string | undefined; in_trial?: boolean | undefined; } | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/cloud/public/plugin.tsx",
             "lineNumber": 46,
@@ -916,6 +916,7 @@
               "lineNumber": 206,
               "columnNumber": 26,
               "deprecated": false,
+              "docsReferencedTypeName": "FC",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -932,7 +933,7 @@
             "\nOnboarding configuration"
           ],
           "signature": [
-            "{ defaultSolution?: \"security\" | \"es\" | \"workplaceai\" | \"oblt\" | undefined; }"
+            "{ defaultSolution?: \"security\" | \"es\" | \"workplaceai\" | \"vectordb\" | \"oblt\" | undefined; }"
           ],
           "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
           "lineNumber": 207,
@@ -965,7 +966,7 @@
             "\nServerless configuration"
           ],
           "signature": [
-            "{ projectId?: string | undefined; projectName?: string | undefined; projectType?: \"search\" | \"security\" | \"observability\" | \"workplaceai\" | undefined; productTier?: \"complete\" | \"logs_essentials\" | \"essentials\" | \"search_ai_lake\" | undefined; orchestratorTarget?: string | undefined; organizationInTrial?: boolean | undefined; }"
+            "{ projectId?: string | undefined; projectName?: string | undefined; projectType?: \"search\" | \"security\" | \"observability\" | \"workplaceai\" | \"vectordb\" | undefined; productTier?: \"complete\" | \"logs_essentials\" | \"essentials\" | \"search_ai_lake\" | undefined; orchestratorTarget?: string | undefined; organizationInTrial?: boolean | undefined; }"
           ],
           "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
           "lineNumber": 221,
@@ -1060,6 +1061,7 @@
               "lineNumber": 1109,
               "columnNumber": 10,
               "deprecated": false,
+              "docsReferencedTypeName": "P",
               "trackAdoption": false
             },
             {
@@ -1235,7 +1237,7 @@
             "\nServerless configuration"
           ],
           "signature": [
-            "{ projectId?: string | undefined; projectName?: string | undefined; projectType?: \"search\" | \"security\" | \"observability\" | \"workplaceai\" | undefined; organizationInTrial?: boolean | undefined; }"
+            "{ projectId?: string | undefined; projectName?: string | undefined; projectType?: \"search\" | \"security\" | \"observability\" | \"workplaceai\" | \"vectordb\" | undefined; organizationInTrial?: boolean | undefined; }"
           ],
           "path": "x-pack/platform/plugins/shared/cloud/public/types.ts",
           "lineNumber": 111,
@@ -1283,6 +1285,7 @@
             "lineNumber": 37,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "SavedObjectsClientContract",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1591,7 +1594,7 @@
             "\nOnboarding configuration."
           ],
           "signature": [
-            "{ defaultSolution?: \"security\" | \"es\" | \"workplaceai\" | \"oblt\" | undefined; }"
+            "{ defaultSolution?: \"security\" | \"es\" | \"workplaceai\" | \"vectordb\" | \"oblt\" | undefined; }"
           ],
           "path": "x-pack/platform/plugins/shared/cloud/server/plugin.ts",
           "lineNumber": 115,
@@ -1644,7 +1647,7 @@
             "\nServerless configuration.\n"
           ],
           "signature": [
-            "{ projectId?: string | undefined; projectName?: string | undefined; projectType?: \"search\" | \"security\" | \"observability\" | \"workplaceai\" | undefined; productTier?: \"complete\" | \"logs_essentials\" | \"essentials\" | \"search_ai_lake\" | undefined; orchestratorTarget?: string | undefined; organizationInTrial?: boolean | undefined; }"
+            "{ projectId?: string | undefined; projectName?: string | undefined; projectType?: \"search\" | \"security\" | \"observability\" | \"workplaceai\" | \"vectordb\" | undefined; productTier?: \"complete\" | \"logs_essentials\" | \"essentials\" | \"search_ai_lake\" | undefined; orchestratorTarget?: string | undefined; organizationInTrial?: boolean | undefined; }"
           ],
           "path": "x-pack/platform/plugins/shared/cloud/server/plugin.ts",
           "lineNumber": 134,

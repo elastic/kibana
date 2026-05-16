@@ -19,6 +19,8 @@ import type { KnowledgeIndicator } from '@kbn/streams-ai';
 import React from 'react';
 import { TableTitle } from '../../../stream_detail_systems/table_title';
 import { KnowledgeIndicatorsTypeFilter } from '../../../stream_detail_significant_events_view/knowledge_indicators_type_filter';
+import { KnowledgeIndicatorsSubtypeFilter } from '../../../stream_detail_significant_events_view/knowledge_indicators_subtype_filter';
+import { MATCH_QUERY_TYPE } from '../../../stream_detail_significant_events_view/utils/get_knowledge_indicator_type';
 import { KnowledgeIndicatorsStatusFilter } from '../../../stream_detail_significant_events_view/knowledge_indicators_status_filter';
 import { StreamFilter } from '../stream_filter';
 import {
@@ -31,6 +33,7 @@ import {
   RESTORE_SELECTED_LABEL,
   TABLE_LABEL,
   CANNOT_EXCLUDE_SELECTION_TOOLTIP,
+  PROMOTE_SELECTED_LABEL,
 } from './translations';
 
 const searchBarStyle = css`
@@ -45,22 +48,27 @@ interface KnowledgeIndicatorsToolbarProps {
   debouncedSearchTerm: string;
   statusFilter: 'active' | 'excluded';
   selectedTypes: string[];
+  selectedSubtypes: string[];
   selectedStreams: string[];
   hideComputedTypes: boolean;
   pagination: { pageIndex: number; pageSize: number };
   selectedKnowledgeIndicators: KnowledgeIndicator[];
   isBulkOperationInProgress: boolean;
+  isBulkPromoteInProgress: boolean;
   isDeleting: boolean;
   isSelectionActionsDisabled: boolean;
   selectionContainsNonExcludable: boolean;
+  hasPromotableSelected: boolean;
   onSearchChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onStatusFilterChange: (filter: 'active' | 'excluded') => void;
   onSelectedTypesChange: (types: string[]) => void;
+  onSelectedSubtypesChange: (subtypes: string[]) => void;
   onSelectedStreamsChange: (streams: string[]) => void;
   onComputedToggleChange: (checked: boolean) => void;
   onClearSelection: () => void;
   onBulkExclude: () => void;
   onBulkRestore: () => void;
+  onBulkPromote: () => void;
   onDeleteSelected: () => void;
 }
 
@@ -71,22 +79,27 @@ export function KnowledgeIndicatorsToolbar({
   debouncedSearchTerm,
   statusFilter,
   selectedTypes,
+  selectedSubtypes,
   selectedStreams,
   hideComputedTypes,
   pagination,
   selectedKnowledgeIndicators,
   isBulkOperationInProgress,
+  isBulkPromoteInProgress,
   isDeleting,
   isSelectionActionsDisabled,
   selectionContainsNonExcludable,
+  hasPromotableSelected,
   onSearchChange,
   onStatusFilterChange,
   onSelectedTypesChange,
+  onSelectedSubtypesChange,
   onSelectedStreamsChange,
   onComputedToggleChange,
   onClearSelection,
   onBulkExclude,
   onBulkRestore,
+  onBulkPromote,
   onDeleteSelected,
 }: KnowledgeIndicatorsToolbarProps) {
   return (
@@ -119,6 +132,18 @@ export function KnowledgeIndicatorsToolbar({
             statusFilter={statusFilter}
             selectedTypes={selectedTypes}
             onSelectedTypesChange={onSelectedTypesChange}
+            hideComputedTypes={hideComputedTypes}
+            selectedStreams={selectedStreams}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <KnowledgeIndicatorsSubtypeFilter
+            knowledgeIndicators={knowledgeIndicators}
+            searchTerm={debouncedSearchTerm}
+            statusFilter={statusFilter}
+            selectedTypes={selectedTypes}
+            selectedSubtypes={selectedSubtypes}
+            onSelectedSubtypesChange={onSelectedSubtypesChange}
             hideComputedTypes={hideComputedTypes}
             selectedStreams={selectedStreams}
           />
@@ -184,6 +209,21 @@ export function KnowledgeIndicatorsToolbar({
               onClick={onBulkRestore}
             >
               {RESTORE_SELECTED_LABEL}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        )}
+        {selectedTypes.length === 1 && selectedTypes[0] === MATCH_QUERY_TYPE && (
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              iconType="plusInCircle"
+              size="xs"
+              isDisabled={
+                isSelectionActionsDisabled || !hasPromotableSelected || isBulkPromoteInProgress
+              }
+              isLoading={isBulkPromoteInProgress}
+              onClick={onBulkPromote}
+            >
+              {PROMOTE_SELECTED_LABEL}
             </EuiButtonEmpty>
           </EuiFlexItem>
         )}

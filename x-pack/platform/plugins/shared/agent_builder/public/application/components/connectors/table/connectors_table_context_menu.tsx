@@ -18,6 +18,7 @@ import React, { useState } from 'react';
 import type { ConnectorItem } from '../../../../../common/http_api/tools';
 import { OAUTH_STATUS } from '../../../../../common/http_api/tools';
 import { useConnectorsActions } from '../../../context/connectors_provider';
+import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { useKibana } from '../../../hooks/use_kibana';
 import { labels } from '../../../utils/i18n';
 
@@ -84,6 +85,8 @@ export const ConnectorContextMenu = ({ connector }: ConnectorContextMenuProps) =
     services: { application },
   } = useKibana();
   const canDelete = application.capabilities.actions?.delete === true;
+  const { isEarsEnabled } = useAgentBuilderServices();
+  const isEarsDisabled = !isEarsEnabled && connector.config?.authType === 'ears';
   const isAuthorized = connector.oauthStatus === OAUTH_STATUS.AUTHORIZED;
   const closeMenu = () => setIsOpen(false);
 
@@ -103,11 +106,10 @@ export const ConnectorContextMenu = ({ connector }: ConnectorContextMenuProps) =
         isOpen={isOpen}
         closePopover={closeMenu}
       >
-        <EuiContextMenuPanel size="s">
+        <EuiContextMenuPanel>
           <EuiContextMenuItem
             icon="pencil"
             key="edit"
-            size="s"
             onClick={() => {
               editConnector(connector);
               closeMenu();
@@ -115,11 +117,10 @@ export const ConnectorContextMenu = ({ connector }: ConnectorContextMenuProps) =
           >
             {labels.connectors.editConnectorButtonLabel}
           </EuiContextMenuItem>
-          {isAuthorized && (
+          {isAuthorized && !isEarsDisabled && (
             <EuiContextMenuItem
               icon="linkSlash"
               key="disconnect"
-              size="s"
               onClick={() => {
                 setShowDisconnectConfirm(true);
                 closeMenu();
@@ -132,7 +133,6 @@ export const ConnectorContextMenu = ({ connector }: ConnectorContextMenuProps) =
             <EuiContextMenuItem
               icon="trash"
               key="delete"
-              size="s"
               css={({ euiTheme }) => ({
                 color: euiTheme.colors.textDanger,
               })}

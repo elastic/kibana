@@ -96,6 +96,7 @@ import {
   WATCHLISTS_URL,
   WATCHLISTS_INDICES_URL,
   WATCHLISTS_CSV_UPLOAD_URL,
+  WATCHLISTS_PRIVILEGES_URL,
 } from '../../../common/entity_analytics/watchlists/constants';
 import type { UploadWatchlistCsvResponse } from '../../../common/api/entity_analytics/watchlists/csv_upload/csv_upload.gen';
 import {
@@ -106,6 +107,7 @@ import {
   BULK_UPDATE_LEADS_URL,
   ENABLE_LEAD_GENERATION_URL,
   DISABLE_LEAD_GENERATION_URL,
+  LEAD_GENERATION_PRIVILEGES_URL,
 } from '../../../common/entity_analytics/lead_generation/constants';
 import type {
   FindLeadsResponse,
@@ -662,10 +664,8 @@ export const useEntityAnalyticsRoutes = () => {
         method: 'GET',
       });
 
-    // TODO: switch to WATCHLISTS privileges API when backend route lands; https://github.com/elastic/security-team/issues/16102
-    // Keeping this separate from privmon to allow safe removal of privmon later.
-    const fetchWatchlistPrivileges = (): Promise<PrivMonPrivilegesResponse> =>
-      http.fetch<PrivMonPrivilegesResponse>(PRIVMON_PRIVILEGE_CHECK_API, {
+    const fetchWatchlistsPrivileges = (): Promise<EntityAnalyticsPrivileges> =>
+      http.fetch<EntityAnalyticsPrivileges>(WATCHLISTS_PRIVILEGES_URL, {
         version: API_VERSIONS.public.v1,
         method: 'GET',
       });
@@ -793,6 +793,15 @@ export const useEntityAnalyticsRoutes = () => {
         }
       );
 
+    const deleteWatchlistEntitySource = async (params: {
+      watchlistId: string;
+      entitySourceId: string;
+    }) =>
+      http.fetch(`${WATCHLISTS_URL}/${params.watchlistId}/entity_source/${params.entitySourceId}`, {
+        version: API_VERSIONS.public.v1,
+        method: 'DELETE',
+      });
+
     const searchWatchlistIndices = async (params: {
       query: string | undefined;
       signal?: AbortSignal;
@@ -900,6 +909,12 @@ export const useEntityAnalyticsRoutes = () => {
         method: 'POST',
       });
 
+    const fetchLeadGenerationPrivileges = () =>
+      http.fetch<EntityAnalyticsPrivileges>(LEAD_GENERATION_PRIVILEGES_URL, {
+        version: API_VERSIONS.internal.v1,
+        method: 'GET',
+      });
+
     return {
       fetchRiskScorePreview,
       fetchRiskEngineStatus,
@@ -924,7 +939,7 @@ export const useEntityAnalyticsRoutes = () => {
       updatePrivMonMonitoredIndices,
       fetchPrivilegeMonitoringEngineStatus,
       fetchPrivilegeMonitoringPrivileges,
-      fetchWatchlistPrivileges,
+      fetchWatchlistsPrivileges,
       createWatchlist,
       getWatchlist,
       updateWatchlist,
@@ -932,6 +947,7 @@ export const useEntityAnalyticsRoutes = () => {
       listWatchlistEntitySources,
       updateWatchlistEntitySource,
       createWatchlistEntitySource,
+      deleteWatchlistEntitySource,
       searchWatchlistIndices,
       uploadWatchlistCsv,
       fetchRiskEngineSettings,
@@ -950,6 +966,7 @@ export const useEntityAnalyticsRoutes = () => {
       bulkUpdateLeads,
       enableLeadGeneration,
       disableLeadGeneration,
+      fetchLeadGenerationPrivileges,
     };
   }, [
     http,

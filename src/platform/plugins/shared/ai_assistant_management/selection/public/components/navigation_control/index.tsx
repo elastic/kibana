@@ -26,6 +26,7 @@ import {
   EuiLink,
   EuiText,
   EuiToolTip,
+  type EuiToolTipRef,
 } from '@elastic/eui';
 import { AiButton } from '@kbn/shared-ux-ai-components';
 import { i18n } from '@kbn/i18n';
@@ -33,7 +34,6 @@ import type { CoreStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { isMac } from '@kbn/shared-ux-utility';
-import { AIAgentConfirmationModal } from '@kbn/ai-agent-confirmation-modal';
 import {
   PREFERRED_AI_ASSISTANT_TYPE_SETTING_KEY,
   PREFERRED_CHAT_EXPERIENCE_SETTING_KEY,
@@ -55,7 +55,6 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
   triggerOpenChat,
 }) => {
   const [isModalOpen, setModalOpen] = useState(false);
-  const [isConfirmModalOpen, setConfirmModalOpen] = useState(false);
 
   const { getUrlForApp } = coreStart.application;
   const { toasts } = coreStart.notifications;
@@ -114,20 +113,10 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
       });
     }
   }, [coreStart.settings.client, selectedType, triggerOpenChat, toasts]);
-  const handleConfirmAgent = useCallback(async () => {
-    setConfirmModalOpen(false);
+  const onApply = useCallback(async () => {
     setModalOpen(false);
     await applySelection();
   }, [applySelection]);
-
-  const onApply = useCallback(async () => {
-    if (selectedType === AIChatExperience.Agent) {
-      setConfirmModalOpen(true);
-    } else {
-      setModalOpen(false);
-      await applySelection();
-    }
-  }, [selectedType, applySelection]);
 
   const openAIAssistantLabel = i18n.translate(
     'aiAssistantManagementSelection.navControl.openAIAssistantLabel',
@@ -142,7 +131,7 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
       defaultMessage: 'Keyboard shortcut {keyboardShortcut}',
     }
   );
-  const tooltipRef = useRef<EuiToolTip>(null);
+  const tooltipRef = useRef<EuiToolTipRef>(null);
   const [tooltipVisible, setTooltipVisible] = useState(true);
   const fullTooltipContent = (
     <div style={{ textAlign: 'center' }}>
@@ -368,14 +357,6 @@ export const AIAssistantHeaderButton: React.FC<AIAssistantHeaderButtonProps> = (
             </EuiModalFooter>
           </EuiModal>
         </EuiOverlayMask>
-      )}
-
-      {isConfirmModalOpen && (
-        <AIAgentConfirmationModal
-          onConfirm={handleConfirmAgent}
-          onCancel={() => setConfirmModalOpen(false)}
-          docLinks={docLinks}
-        />
       )}
     </>
   );

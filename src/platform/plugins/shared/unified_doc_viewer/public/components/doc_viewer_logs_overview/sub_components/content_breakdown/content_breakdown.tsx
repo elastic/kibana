@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiCodeBlock,
   EuiFlexGroup,
@@ -17,15 +17,16 @@ import {
 } from '@elastic/eui';
 
 import {
+  formatFieldStringValueWithHighlights,
   getMessageFieldWithFallbacks,
   type DataTableRecord,
   type LogDocumentOverview,
-  getHighlightedFieldValue,
 } from '@kbn/discover-utils';
 import type { ObservabilityStreamsFeature } from '@kbn/discover-shared-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { Badges } from '../badges/badges';
 import { HoverActionPopover } from '../hover_popover_action';
+import { getUnifiedDocViewerServices } from '../../../../plugin';
 
 export const ContentBreakdown = ({
   dataView,
@@ -40,21 +41,31 @@ export const ContentBreakdown = ({
   renderFlyoutStreamProcessingLink?: ObservabilityStreamsFeature['renderFlyoutStreamProcessingLink'];
   renderCpsWarning?: boolean;
 }) => {
+  const { fieldFormats } = getUnifiedDocViewerServices();
   const { field, value, formattedValue } = getMessageFieldWithFallbacks(hit.flattened, {
     includeFormattedValue: true,
   });
 
   const rawFieldValue = hit && field ? hit.flattened[field] : undefined;
-  const highlights = field ? hit.raw.highlight?.[field] : undefined;
 
-  const messageCodeBlockProps = formattedValue
-    ? { language: 'json', children: formattedValue }
-    : {
-        language: 'txt',
-        dangerouslySetInnerHTML: {
-          __html: getHighlightedFieldValue(value ?? '', highlights),
-        },
-      };
+  const messageCodeBlockProps = useMemo(
+    () =>
+      formattedValue
+        ? { language: 'json', children: formattedValue }
+        : {
+            language: 'txt',
+            // Pass field name for highlight lookup in hit.highlight.
+            // The field may not exist in the data view (e.g., OTel body.text) but highlights should still apply.
+            children: formatFieldStringValueWithHighlights({
+              value: value ?? '',
+              hit: hit.raw,
+              fieldFormats,
+              dataView,
+              fieldName: field,
+            }),
+          },
+    [dataView, field, fieldFormats, formattedValue, hit.raw, value]
+  );
   const hasMessageField = field && value;
 
   return (

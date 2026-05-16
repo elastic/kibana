@@ -75,6 +75,7 @@
                 "lineNumber": 97,
                 "columnNumber": 22,
                 "deprecated": false,
+                "docsReferencedTypeName": "ManagementAppMountParams",
                 "trackAdoption": false
               }
             ]
@@ -144,6 +145,7 @@
                 "lineNumber": 24,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "RegisterManagementAppArgs",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -230,6 +232,7 @@
                 "lineNumber": 24,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "RegisterManagementSectionArgs",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -289,6 +292,7 @@
                 "lineNumber": 28,
                 "columnNumber": 15,
                 "deprecated": false,
+                "docsReferencedTypeName": "Omit",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -866,6 +870,7 @@
                 "lineNumber": 97,
                 "columnNumber": 22,
                 "deprecated": false,
+                "docsReferencedTypeName": "ManagementAppMountParams",
                 "trackAdoption": false
               }
             ]
@@ -1050,6 +1055,7 @@
               "lineNumber": 42,
               "columnNumber": 31,
               "deprecated": false,
+              "docsReferencedTypeName": "AutoOpsStatusHook",
               "trackAdoption": false,
               "isRequired": true
             }
@@ -1105,6 +1111,7 @@
               "lineNumber": 59,
               "columnNumber": 26,
               "deprecated": false,
+              "docsReferencedTypeName": "NavigationCardsSubject",
               "trackAdoption": false,
               "isRequired": true
             }

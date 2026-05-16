@@ -1,5 +1,5 @@
 {
-  "sha1": "152027f2dac49012af5111c866305a451c9997c6",
+  "sha1": "734f411a601467f34fa28f14715349a6218fa22f",
   "tests": [
     {
       "id": "343791488d016cc-1054e603e578b92",
@@ -95,7 +95,7 @@
     {
       "id": "cf8d4b3ea94cc93-6838d4ba4b2f1e3",
       "title": "Attacks navigation updates side nav based on attacks alignment advanced setting",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -104,7 +104,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/navigation.spec.ts",
-        "line": 26,
+        "line": 27,
         "column": 14
       }
     }

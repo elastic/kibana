@@ -9,20 +9,30 @@
 
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import type { ESQLCallbacks, ESQLTelemetryCallbacks } from '@kbn/esql-types';
-import type { monaco } from '@kbn/monaco';
-import { ESQLLang, ESQL_LANG_ID } from '@kbn/monaco';
-import type { MonacoMessage } from '@kbn/monaco/src/languages/esql/language';
-import type { CodeEditorProps } from '@kbn/code-editor';
+import {
+  ESQLLang,
+  ESQL_LANG_ID,
+  type CodeEditorProps,
+  type MonacoMessage,
+  type monaco,
+} from '@kbn/code-editor';
 import type { EsqlLanguageDeps } from '../types';
 
 // Module-level singleton: maps each Monaco model URI to its ES|QL language
 // dependencies so the shared suggestion provider can resolve per-model callbacks.
 // Returned from the hook so `editorDidMount` can register new models.
 const esqlDepsByModelUri = new Map<string, EsqlLanguageDeps>();
+const getModelDependencies = (model: monaco.editor.ITextModel) =>
+  esqlDepsByModelUri.get(model.uri.toString());
 
 // Single shared provider per language; resolves callbacks per Monaco model.
 const sharedEsqlSuggestionProvider = ESQLLang.getSuggestionProvider?.({
-  getModelDependencies: (model) => esqlDepsByModelUri.get(model.uri.toString()),
+  getModelDependencies,
+});
+
+// This provider depends on getEditorMessages, so it needs to be model URI specific
+const sharedEsqlCodeActionProvider = ESQLLang.getCodeActionProvider?.({
+  getModelDependencies,
 });
 
 interface UseEditorConfigParams {
@@ -38,6 +48,10 @@ interface UseEditorConfigParams {
   measuredEditorWidth: number;
   setMeasuredEditorWidth: (width: number) => void;
   resetPendingTracking: () => void;
+  editorMessagesRef: React.MutableRefObject<{
+    errors: MonacoMessage[];
+    warnings: MonacoMessage[];
+  }>;
 }
 
 export const useEditorConfig = ({
@@ -51,15 +65,21 @@ export const useEditorConfig = ({
   measuredEditorWidth,
   setMeasuredEditorWidth,
   resetPendingTracking,
+  editorMessagesRef,
 }: UseEditorConfigParams) => {
   const suggestionProvider = sharedEsqlSuggestionProvider;
+  const codeActionsProvider = sharedEsqlCodeActionProvider;
 
   useEffect(() => {
     const modelUri = editorModelUriRef.current;
     if (modelUri) {
-      esqlDepsByModelUri.set(modelUri, { ...esqlCallbacks, telemetry: telemetryCallbacks });
+      esqlDepsByModelUri.set(modelUri, {
+        ...esqlCallbacks,
+        telemetry: telemetryCallbacks,
+        getEditorMessages: () => editorMessagesRef.current,
+      });
     }
-  }, [esqlCallbacks, telemetryCallbacks, editorModelUriRef]);
+  }, [esqlCallbacks, telemetryCallbacks, editorModelUriRef, editorMessagesRef]);
 
   const hoverProvider = useMemo(
     () =>
@@ -155,7 +175,7 @@ export const useEditorConfig = ({
   const codeEditorOptions: CodeEditorProps['options'] = useMemo(
     () => ({
       hover: {
-        above: false,
+        above: true,
       },
       parameterHints: {
         enabled: true,
@@ -210,6 +230,7 @@ export const useEditorConfig = ({
   return {
     esqlDepsByModelUri,
     suggestionProvider,
+    codeActionsProvider,
     codeEditorHoverProvider,
     signatureProvider,
     inlineCompletionsProvider,

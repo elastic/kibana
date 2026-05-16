@@ -60,7 +60,7 @@ export class ImageEmbeddablePlugin
     core: CoreSetup<ImageEmbeddableStartDependencies>,
     plugins: ImageEmbeddableSetupDependencies
   ): SetupContract {
-    plugins.embeddable.registerReactEmbeddableFactory(IMAGE_EMBEDDABLE_TYPE, async () => {
+    plugins.embeddable.registerEmbeddablePublicDefinition(IMAGE_EMBEDDABLE_TYPE, async () => {
       const [_, { getImageEmbeddableFactory }] = await Promise.all([
         untilPluginStartServicesReady(),
         import('./image_embeddable/get_image_embeddable_factory'),

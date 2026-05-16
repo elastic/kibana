@@ -67,6 +67,7 @@
                 "lineNumber": 20,
                 "columnNumber": 19,
                 "deprecated": false,
+                "docsReferencedTypeName": "PrivilegesAPIClientGetAllArgs",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -128,6 +129,26 @@
             ],
             "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/authentication/authentication_service.ts",
             "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-public",
+            "id": "def-public.AuthenticationServiceSetup.isUIAMEnabled",
+            "type": "Function",
+            "tags": [],
+            "label": "isUIAMEnabled",
+            "description": [
+              "\nDetermines if UIAM (User Identity and Access Management) is enabled for this deployment."
+            ],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/authentication/authentication_service.ts",
+            "lineNumber": 21,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -628,6 +649,7 @@
                 "lineNumber": 28,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "RolePutPayload",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -686,6 +708,7 @@
                 "lineNumber": 29,
                 "columnNumber": 21,
                 "deprecated": false,
+                "docsReferencedTypeName": "BulkUpdatePayload",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -958,6 +981,10 @@
                 "path": "x-pack/platform/plugins/shared/security/public/plugin.tsx"
               },
               {
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/public/application/hooks/use_is_uiam_enabled.ts"
+              },
+              {
                 "plugin": "cloudLinks",
                 "path": "x-pack/platform/plugins/private/cloud_integrations/cloud_links/public/maybe_add_cloud_links/maybe_add_cloud_links.ts"
               },
@@ -1199,6 +1226,7 @@
                 "lineNumber": 18,
                 "columnNumber": 14,
                 "deprecated": false,
+                "docsReferencedTypeName": "MouseEvent",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -1404,7 +1432,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/authentication/authentication_service.ts",
-        "lineNumber": 22,
+        "lineNumber": 27,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

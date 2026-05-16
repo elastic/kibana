@@ -24,7 +24,7 @@ Key differences from a standard OAuth authorization code grant flow:
 ## Endpoint structure
 
 All EARS endpoints are derived from the configured `earsBaseUrl`
-(`xpack.actions.ears.url` in `kibana.yml`) and the provider name:
+(`xpack.actions.auth.ears.url` in `kibana.yml`) and the provider name:
 
 | Purpose        | Path                                          |
 |----------------|-----------------------------------------------|
@@ -65,7 +65,7 @@ During execution, `getEarsAccessToken` will:
 
 ```yaml
 # kibana.yml
-xpack.actions.ears.url: https://...
+xpack.actions.auth.ears.url: https://...
 ```
 
 `configurationUtilities.getEarsUrl()` exposes this value at runtime.

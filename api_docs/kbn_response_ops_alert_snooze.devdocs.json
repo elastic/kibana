@@ -1,0 +1,601 @@
+{
+  "id": "@kbn/response-ops-alert-snooze",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/response-ops-alert-snooze",
+        "id": "def-public.QuickSnoozePanel",
+        "type": "Function",
+        "tags": [],
+        "label": "QuickSnoozePanel",
+        "description": [],
+        "signature": [
+          "({ onScheduleChange }: ",
+          {
+            "pluginId": "@kbn/response-ops-alert-snooze",
+            "scope": "public",
+            "docId": "kibKbnResponseOpsAlertSnoozePluginApi",
+            "section": "def-public.QuickSnoozePanelProps",
+            "text": "QuickSnoozePanelProps"
+          },
+          ") => React.JSX.Element"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alert-snooze/components/quick_snooze_panel.tsx",
+        "lineNumber": 42,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/response-ops-alert-snooze",
+            "id": "def-public.QuickSnoozePanel.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ onScheduleChange }",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/response-ops-alert-snooze",
+                "scope": "public",
+                "docId": "kibKbnResponseOpsAlertSnoozePluginApi",
+                "section": "def-public.QuickSnoozePanelProps",
+                "text": "QuickSnoozePanelProps"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alert-snooze/components/quick_snooze_panel.tsx",
+            "lineNumber": 42,
+            "columnNumber": 34,
+            "deprecated": false,
+            "docsReferencedTypeName": "QuickSnoozePanelProps",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/response-ops-alert-snooze",
+        "id": "def-public.QuickSnoozePopover",
+        "type": "Function",
+        "tags": [],
+        "label": "QuickSnoozePopover",
+        "description": [],
+        "signature": [
+          "({ onApplySnooze, \"data-test-subj\": dataTestSubj, }: ",
+          {
+            "pluginId": "@kbn/response-ops-alert-snooze",
+            "scope": "public",
+            "docId": "kibKbnResponseOpsAlertSnoozePluginApi",
+            "section": "def-public.QuickSnoozePopoverProps",
+            "text": "QuickSnoozePopoverProps"
+          },
+          ") => React.JSX.Element"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alert-snooze/components/quick_snooze_popover.tsx",
+        "lineNumber": 28,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/response-ops-alert-snooze",
+            "id": "def-public.QuickSnoozePopover.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  onApplySnooze,\n  'data-test-subj': dataTestSubj = 'quickSnoozePopover',\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/response-ops-alert-snooze",
+                "scope": "public",
+                "docId": "kibKbnResponseOpsAlertSnoozePluginApi",
+                "section": "def-public.QuickSnoozePopoverProps",
+                "text": "QuickSnoozePopoverProps"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alert-snooze/components/quick_snooze_popover.tsx",
+            "lineNumber": 28,
+            "columnNumber": 36,
+            "deprecated": false,
+            "docsReferencedTypeName": "QuickSnoozePopoverProps",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/response-ops-alert-snooze",
+        "id": "def-public.SnoozeDurationPicker",
+        "type": "Function",
+        "tags": [],
+        "label": "SnoozeDurationPicker",
+        "description": [],
+        "signature": [
+          "({ value: { mode, value: durationValue, unit: durationUnit, dateTime }, onChange, isDurationInvalid, isDateTimeInvalid, }: ",
+          {
+            "pluginId": "@kbn/response-ops-alert-snooze",
+            "scope": "public",
+            "docId": "kibKbnResponseOpsAlertSnoozePluginApi",
+            "section": "def-public.SnoozeDurationPickerProps",
+            "text": "SnoozeDurationPickerProps"
+          },
+          ") => React.JSX.Element"
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alert-snooze/components/snooze_duration_picker.tsx",
+        "lineNumber": 32,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/response-ops-alert-snooze",
+            "id": "def-public.SnoozeDurationPicker.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  value: { mode, value: durationValue, unit: durationUnit, dateTime },\n  onChange,\n  isDurationInvalid = false,\n  isDateTimeInvalid = false,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/response-ops-alert-snooze",
+                "scope": "public",
+                "docId": "kibKbnResponseOpsAlertSnoozePluginApi",
+                "section": "def-public.SnoozeDurationPickerProps",
+                "text": "SnoozeDurationPickerProps"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alert-snooze/components/snooze_duration_picker.tsx",
+            "lineNumber": 32,
+            "columnNumber": 38,
+            "deprecated": false,
+            "docsReferencedTypeName": "SnoozeDurationPickerProps",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/response-ops-alert-snooze",
+        "id": "def-public.CustomDurationState",
+        "type": "Interface",
+        "tags": [],
+        "label": "CustomDurationState",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/response-ops/alert-snooze/components/types.ts",
+        "lineNumber": 15,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/response-ops-alert-snooze",
+            "id": "def-public.CustomDurationState.mode",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "mode",
+            "description": [],
+            "signature": [
+              "\"duration\" | \"datetime\""
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alert-snooze/components/types.ts",
+            "lineNumber": 16,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-alert-snooze",
+            "id": "def-public.CustomDurationState.value",
+            "type": "number",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/response-ops/alert-snooze/components/types.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-alert-snooze",
+            "id": "def-public.CustomDurationState.unit",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "unit",
+            "description": [],
+            "signature": [
+              "\"m\" | \"M\" | \"w\" | \"d\" | \"h\""
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alert-snooze/components/types.ts",
+            "lineNumber": 18,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-alert-snooze",
+            "id": "def-public.CustomDurationState.dateTime",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "dateTime",
+            "description": [],
+            "signature": [
+              "moment.Moment | null"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alert-snooze/components/types.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/response-ops-alert-snooze",
+        "id": "def-public.QuickSnoozePanelProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "QuickSnoozePanelProps",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/response-ops/alert-snooze/components/quick_snooze_panel.tsx",
+        "lineNumber": 20,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/response-ops-alert-snooze",
+            "id": "def-public.QuickSnoozePanelProps.onScheduleChange",
+            "type": "Function",
+            "tags": [],
+            "label": "onScheduleChange",
+            "description": [
+              "\nCalled with the current snooze end date whenever the selection changes.\n`undefined` means the selection is invalid (button should be disabled).\n`null` means indefinite snooze."
+            ],
+            "signature": [
+              "(endDate: string | null | undefined) => void"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alert-snooze/components/quick_snooze_panel.tsx",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/response-ops-alert-snooze",
+                "id": "def-public.QuickSnoozePanelProps.onScheduleChange.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "endDate",
+                "description": [],
+                "signature": [
+                  "string | null | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/response-ops/alert-snooze/components/quick_snooze_panel.tsx",
+                "lineNumber": 26,
+                "columnNumber": 22,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/response-ops-alert-snooze",
+        "id": "def-public.QuickSnoozePopoverProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "QuickSnoozePopoverProps",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/response-ops/alert-snooze/components/quick_snooze_popover.tsx",
+        "lineNumber": 23,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/response-ops-alert-snooze",
+            "id": "def-public.QuickSnoozePopoverProps.onApplySnooze",
+            "type": "Function",
+            "tags": [],
+            "label": "onApplySnooze",
+            "description": [],
+            "signature": [
+              "(schedule: string | null) => void"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alert-snooze/components/quick_snooze_popover.tsx",
+            "lineNumber": 24,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/response-ops-alert-snooze",
+                "id": "def-public.QuickSnoozePopoverProps.onApplySnooze.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "schedule",
+                "description": [],
+                "signature": [
+                  "string | null"
+                ],
+                "path": "x-pack/platform/packages/shared/response-ops/alert-snooze/components/quick_snooze_popover.tsx",
+                "lineNumber": 24,
+                "columnNumber": 19,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-alert-snooze",
+            "id": "def-public.QuickSnoozePopoverProps.datatestsubj",
+            "type": "string",
+            "tags": [],
+            "label": "'data-test-subj'",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alert-snooze/components/quick_snooze_popover.tsx",
+            "lineNumber": 25,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/response-ops-alert-snooze",
+        "id": "def-public.SnoozeDurationPickerProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "SnoozeDurationPickerProps",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/response-ops/alert-snooze/components/snooze_duration_picker.tsx",
+        "lineNumber": 25,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/response-ops-alert-snooze",
+            "id": "def-public.SnoozeDurationPickerProps.value",
+            "type": "Object",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/response-ops-alert-snooze",
+                "scope": "public",
+                "docId": "kibKbnResponseOpsAlertSnoozePluginApi",
+                "section": "def-public.CustomDurationState",
+                "text": "CustomDurationState"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alert-snooze/components/snooze_duration_picker.tsx",
+            "lineNumber": 26,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-alert-snooze",
+            "id": "def-public.SnoozeDurationPickerProps.onChange",
+            "type": "Function",
+            "tags": [],
+            "label": "onChange",
+            "description": [],
+            "signature": [
+              "(update: Partial<",
+              {
+                "pluginId": "@kbn/response-ops-alert-snooze",
+                "scope": "public",
+                "docId": "kibKbnResponseOpsAlertSnoozePluginApi",
+                "section": "def-public.CustomDurationState",
+                "text": "CustomDurationState"
+              },
+              ">) => void"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alert-snooze/components/snooze_duration_picker.tsx",
+            "lineNumber": 27,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/response-ops-alert-snooze",
+                "id": "def-public.SnoozeDurationPickerProps.onChange.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "update",
+                "description": [],
+                "signature": [
+                  "Partial<",
+                  {
+                    "pluginId": "@kbn/response-ops-alert-snooze",
+                    "scope": "public",
+                    "docId": "kibKbnResponseOpsAlertSnoozePluginApi",
+                    "section": "def-public.CustomDurationState",
+                    "text": "CustomDurationState"
+                  },
+                  ">"
+                ],
+                "path": "x-pack/platform/packages/shared/response-ops/alert-snooze/components/snooze_duration_picker.tsx",
+                "lineNumber": 27,
+                "columnNumber": 14,
+                "deprecated": false,
+                "docsReferencedTypeName": "Partial",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-alert-snooze",
+            "id": "def-public.SnoozeDurationPickerProps.isDurationInvalid",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isDurationInvalid",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alert-snooze/components/snooze_duration_picker.tsx",
+            "lineNumber": 28,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-alert-snooze",
+            "id": "def-public.SnoozeDurationPickerProps.isDateTimeInvalid",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isDateTimeInvalid",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/response-ops/alert-snooze/components/snooze_duration_picker.tsx",
+            "lineNumber": 29,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/response-ops-alert-snooze",
+        "id": "def-public.CustomSnoozeMode",
+        "type": "Type",
+        "tags": [],
+        "label": "CustomSnoozeMode",
+        "description": [],
+        "signature": [
+          "\"duration\" | \"datetime\""
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alert-snooze/components/types.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/response-ops-alert-snooze",
+        "id": "def-public.PANEL_TITLE",
+        "type": "string",
+        "tags": [],
+        "label": "PANEL_TITLE",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/response-ops/alert-snooze/components/translations.ts",
+        "lineNumber": 97,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/response-ops-alert-snooze",
+        "id": "def-public.QUICK_SNOOZE_POPOVER_APPLY",
+        "type": "string",
+        "tags": [],
+        "label": "QUICK_SNOOZE_POPOVER_APPLY",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/response-ops/alert-snooze/components/translations.ts",
+        "lineNumber": 92,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/response-ops-alert-snooze",
+        "id": "def-public.QUICK_SNOOZE_POPOVER_SUBTITLE",
+        "type": "string",
+        "tags": [],
+        "label": "QUICK_SNOOZE_POPOVER_SUBTITLE",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/response-ops/alert-snooze/components/translations.ts",
+        "lineNumber": 88,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/response-ops-alert-snooze",
+        "id": "def-public.QuickDurationId",
+        "type": "Type",
+        "tags": [],
+        "label": "QuickDurationId",
+        "description": [],
+        "signature": [
+          "\"1h\" | \"custom\" | \"24h\" | \"indefinitely\" | \"8h\""
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alert-snooze/components/types.ts",
+        "lineNumber": 11,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/response-ops-alert-snooze",
+        "id": "def-public.SnoozeUnit",
+        "type": "Type",
+        "tags": [],
+        "label": "SnoozeUnit",
+        "description": [],
+        "signature": [
+          "\"m\" | \"M\" | \"w\" | \"d\" | \"h\""
+        ],
+        "path": "x-pack/platform/packages/shared/response-ops/alert-snooze/components/types.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

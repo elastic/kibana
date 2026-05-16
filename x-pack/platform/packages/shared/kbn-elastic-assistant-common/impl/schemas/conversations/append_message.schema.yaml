@@ -6,6 +6,15 @@ paths:
   /internal/elastic_assistant/current_user/conversations/{id}/messages:
     post:
       x-codegen-enabled: true
+      x-codeSamples:
+        - lang: curl
+          label: Example request
+          source: |
+            curl \
+             --request POST 'http://localhost:5601/internal/elastic_assistant/current_user/conversations/abc123/messages' \
+             --header "Authorization: $API_KEY" \
+             --header "Content-Type: application/json" \
+             --data '{"messages":[{"content":"New finding on host-01","role":"user","timestamp":"2025-05-01T12:00:00Z"}]}'
       x-labels: [ess, serverless]
       operationId: AppendConversationMessage
       description: This endpoint allows you to append a new message to an existing conversation. The message will be added to the specified conversation identified by its unique `id`.
@@ -48,7 +57,7 @@ paths:
                         sender_id: "user123"
                         timestamp: "2025-05-01T12:05:00Z"
         400:
-          description: Generic Error, indicating an issue with the request (e.g., invalid message format, missing required fields).
+          description: Bad Request response.
           content:
             application/json:
               schema:

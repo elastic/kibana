@@ -26,6 +26,8 @@ import {
   DEFAULT_TRANSFORM_FREQUENCY,
   DEFAULT_TRANSFORM_SETTINGS_DOCS_PER_SECOND,
   DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE,
+  DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE_LATEST,
+  TRANSFORM_FUNCTION,
 } from '../../../common/constants';
 import type {
   DateHistogramAgg,
@@ -162,13 +164,13 @@ export function getPreviewTransformRequestBody(
 }
 
 export const getCreateTransformSettingsRequestBody = (
-  transformDetailsState: Partial<StepDetailsExposedState>
+  transformDetailsState: Partial<StepDetailsExposedState>,
+  defaultMaxPageSearchSize: number = DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE
 ): { settings?: PutTransformsRequestSchema['settings'] } => {
   const settings: PutTransformsRequestSchema['settings'] = {
     // conditionally add optional max_page_search_size, skip if default value
     ...(transformDetailsState.transformSettingsMaxPageSearchSize &&
-    transformDetailsState.transformSettingsMaxPageSearchSize !==
-      DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE
+    transformDetailsState.transformSettingsMaxPageSearchSize !== defaultMaxPageSearchSize
       ? { max_page_search_size: transformDetailsState.transformSettingsMaxPageSearchSize }
       : {}),
     // conditionally add optional docs_per_second, skip if default value
@@ -243,5 +245,10 @@ export const getCreateTransformRequestBody = (
     : {}),
   ...(transformDetailsState._meta ? { _meta: transformDetailsState._meta } : {}),
   // conditionally add additional settings
-  ...getCreateTransformSettingsRequestBody(transformDetailsState),
+  ...getCreateTransformSettingsRequestBody(
+    transformDetailsState,
+    transformConfigState.transformFunction === TRANSFORM_FUNCTION.LATEST
+      ? DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE_LATEST
+      : DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE
+  ),
 });
