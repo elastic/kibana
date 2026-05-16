@@ -26,6 +26,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { FeatureHistoryEntry } from '@kbn/streams-schema';
 import React, { useMemo, useState } from 'react';
+import { JsonDiffView } from './json_diff_view';
 import { InfoPanel } from '../../../info_panel';
 import { useFeatureHistory } from '../../../../hooks/sig_events/use_feature_history';
 
@@ -72,6 +73,13 @@ export function FeatureHistoryPanel({ streamName, featureId }: Props) {
     inspectedIndex !== null ? revisionByIndex.get(inspectedIndex) ?? null : null;
   const inspectedNonDeletedPos =
     inspectedIndex !== null ? nonDeletedIndices.indexOf(inspectedIndex) : -1;
+
+  const hasPrevious = inspectedNonDeletedPos < nonDeletedIndices.length - 1;
+  const previousEntry = hasPrevious ? entries[nonDeletedIndices[inspectedNonDeletedPos + 1]] : null;
+  const previousRevision =
+    previousEntry !== null && inspectedNonDeletedPos + 1 < nonDeletedIndices.length
+      ? revisionByIndex.get(nonDeletedIndices[inspectedNonDeletedPos + 1]) ?? null
+      : null;
 
   return (
     <>
@@ -144,7 +152,7 @@ export function FeatureHistoryPanel({ streamName, featureId }: Props) {
       {inspectedEntry && inspectedIndex !== null && inspectedRevision !== null && (
         <EuiModal
           onClose={() => setInspectedIndex(null)}
-          style={{ width: 600 }}
+          style={{ width: hasPrevious ? 960 : 600 }}
           aria-label={i18n.translate(
             'xpack.streams.featureDetailsFlyout.history.snapshotModalLabel',
             { defaultMessage: 'Feature revision snapshot' }
@@ -152,22 +160,36 @@ export function FeatureHistoryPanel({ streamName, featureId }: Props) {
         >
           <EuiModalHeader>
             <EuiModalHeaderTitle>
-              {i18n.translate('xpack.streams.featureDetailsFlyout.history.snapshotTitle', {
-                defaultMessage: 'Revision {n} of {total}',
-                values: { n: inspectedRevision, total: nonDeletedIndices.length },
-              })}
+              {hasPrevious && previousRevision !== null
+                ? i18n.translate('xpack.streams.featureDetailsFlyout.history.diffTitle', {
+                    defaultMessage: 'Revision {n} — diff from Revision {prev}',
+                    values: { n: inspectedRevision, prev: previousRevision },
+                  })
+                : i18n.translate('xpack.streams.featureDetailsFlyout.history.snapshotTitle', {
+                    defaultMessage: 'Revision {n} of {total}',
+                    values: { n: inspectedRevision, total: nonDeletedIndices.length },
+                  })}
             </EuiModalHeaderTitle>
           </EuiModalHeader>
           <EuiModalBody>
-            <EuiCodeBlock
-              language="json"
-              paddingSize="s"
-              fontSize="s"
-              isCopyable
-              overflowHeight={400}
-            >
-              {JSON.stringify(inspectedEntry.snapshot, null, 2)}
-            </EuiCodeBlock>
+            {hasPrevious && previousEntry ? (
+              <div style={{ overflowY: 'auto', maxHeight: 500 }}>
+                <JsonDiffView
+                  oldSource={JSON.stringify(previousEntry.snapshot, null, 2)}
+                  newSource={JSON.stringify(inspectedEntry.snapshot, null, 2)}
+                />
+              </div>
+            ) : (
+              <EuiCodeBlock
+                language="json"
+                paddingSize="s"
+                fontSize="s"
+                isCopyable
+                overflowHeight={400}
+              >
+                {JSON.stringify(inspectedEntry.snapshot, null, 2)}
+              </EuiCodeBlock>
+            )}
           </EuiModalBody>
           <EuiModalFooter>
             <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
