@@ -13,6 +13,7 @@ import type {
   RouteValidatorRequestAndResponses,
 } from '@kbn/core-http-server';
 import type { RouteHandler } from '@kbn/core-di-server';
+import { errorResponseSchema } from '@kbn/alerting-v2-schemas';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { injectable } from 'inversify';
 import type { ZodType } from '@kbn/zod/v4';
@@ -112,6 +113,36 @@ export abstract class BaseAlertingRoute implements RouteHandler {
   }
 
   /**
+   * Error responses every alerting_v2 route can emit, merged into each
+   * subclass's declared `schemas.response` by the `validate` getter so the
+   * generated OAS captures them consistently. Subclass-declared status
+   * codes take precedence — a route can specialize, say, `500` with a more
+   * specific description and the merge keeps the override.
+   *
+   * Intentionally limited to truly universal codes:
+   *   401 — request was not authenticated (Kibana core enforces auth).
+   *   403 — request lacks the route's `requiredPrivileges`.
+   *   500 — any uncaught throw in `execute()` boomifies to 500.
+   *
+   * Route-specific codes (400 / 404 / 409 / …) belong on each subclass.
+   */
+  protected static readonly commonResponses: NonNullable<AlertingRouteSchemas['response']> = {
+    401: {
+      body: () => errorResponseSchema,
+      description: 'Indicates the request was not authenticated.',
+    },
+    403: {
+      body: () => errorResponseSchema,
+      description:
+        'Indicates the user does not have the required privileges to perform the request.',
+    },
+    500: {
+      body: () => errorResponseSchema,
+      description: 'Indicates an unexpected server-side error.',
+    },
+  };
+
+  /**
    * Subclasses declare raw Zod request schemas and response descriptors here.
    * The `validate` static getter below delegates to `computeRouteValidate`
    * which wraps the request schemas with `buildRouteValidationWithZod` so
@@ -122,7 +153,14 @@ export abstract class BaseAlertingRoute implements RouteHandler {
   protected static schemas: AlertingRouteSchemas = {};
 
   public static get validate() {
-    return computeRouteValidate(this.schemas);
+    const merged: AlertingRouteSchemas = {
+      ...this.schemas,
+      response: {
+        ...this.commonResponses,
+        ...(this.schemas.response ?? {}),
+      },
+    };
+    return computeRouteValidate(merged);
   }
 
   protected abstract readonly routeName: string;

@@ -102,6 +102,23 @@ backwards compatible. Renaming or removing a code is a breaking change.
 | ----------------------- | ------ | --------------------------------------------------------------------------- |
 | `INTERNAL_SERVER_ERROR` | 5xx    | Catch-all when the handler boomifies an unexpected error and no domain code applies. |
 
+## Common error responses (every route)
+
+`BaseAlertingRoute` declares a `commonResponses` block that `static get
+validate()` merges into each subclass's `schemas.response`. Every alerting_v2
+route therefore documents these three OAS responses without restating them:
+
+| HTTP status | When                                                                            |
+| ----------- | ------------------------------------------------------------------------------- |
+| `401`       | The request was not authenticated.                                              |
+| `403`       | The caller lacks the route's `requiredPrivileges`.                              |
+| `500`       | Any uncaught throw in `execute()` boomifies to 500.                             |
+
+Subclass-declared status codes take precedence — a route can override e.g.
+`500` with a more specific description by declaring it on its own
+`static schemas.response`. Route-specific codes (`400` / `404` / `409` / …)
+stay on each subclass.
+
 ## HTTP status code → code fallbacks
 
 `deriveCodeFromStatus(statusCode)` is the floor — used only when no domain code

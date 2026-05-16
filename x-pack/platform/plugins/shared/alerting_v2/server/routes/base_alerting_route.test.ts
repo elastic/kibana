@@ -8,11 +8,16 @@
 import Boom from '@hapi/boom';
 import type { KibanaResponseFactory, RouteConfigOptions, RouteMethod } from '@kbn/core-http-server';
 import type { Logger } from '@kbn/logging';
-import { BaseAlertingRoute } from './base_alerting_route';
+import { z } from '@kbn/zod/v4';
+import { BaseAlertingRoute, type AlertingRouteSchemas } from './base_alerting_route';
 import { createRouteDependencies } from './test_utils';
 
 class TestRoute extends BaseAlertingRoute {
   static routeOptions: RouteConfigOptions<RouteMethod> = {};
+  // Widened from `protected static` so tests can swap in route-specific
+  // declarations and assert how `static get validate()` merges them with
+  // the base `commonResponses`.
+  public static schemas: AlertingRouteSchemas = {};
 
   protected readonly routeName = 'test route';
   public executeFn = jest.fn();
@@ -209,6 +214,114 @@ describe('BaseAlertingRoute', () => {
         tags: ['oas-tag:alerting-v2'],
         availability: { stability: 'experimental', since: '1.0' },
       });
+    });
+  });
+
+  describe('static validate - common error responses', () => {
+    afterEach(() => {
+      TestRoute.schemas = {};
+    });
+
+    it('emits the shared 401/403/500 responses even when the subclass declares no schemas', () => {
+      const validate = TestRoute.validate;
+
+      if (validate === false) {
+        throw new Error('expected validate to be an object when commonResponses are merged');
+      }
+
+      expect(
+        Object.keys(validate.response ?? {})
+          .map(Number)
+          .sort()
+      ).toEqual([401, 403, 500]);
+      expect(validate.response?.[401]?.description).toBe(
+        'Indicates the request was not authenticated.'
+      );
+      expect(validate.response?.[403]?.description).toBe(
+        'Indicates the user does not have the required privileges to perform the request.'
+      );
+      expect(validate.response?.[500]?.description).toBe(
+        'Indicates an unexpected server-side error.'
+      );
+      // Each common response references the shared errorResponseSchema.
+      expect(typeof validate.response?.[401]?.body).toBe('function');
+      expect(typeof validate.response?.[403]?.body).toBe('function');
+      expect(typeof validate.response?.[500]?.body).toBe('function');
+    });
+
+    it('merges the subclass response schemas with the common ones', () => {
+      const okSchemaFactory = jest.fn(() => z.object({ id: z.string() }));
+
+      TestRoute.schemas = {
+        response: {
+          200: {
+            body: okSchemaFactory,
+            description: 'Indicates a successful call.',
+          },
+        },
+      };
+
+      const validate = TestRoute.validate;
+
+      if (validate === false) {
+        throw new Error('expected validate to be an object');
+      }
+
+      expect(
+        Object.keys(validate.response ?? {})
+          .map(Number)
+          .sort()
+      ).toEqual([200, 401, 403, 500]);
+      expect(validate.response?.[200]?.body).toBe(okSchemaFactory);
+    });
+
+    it('lets the subclass override a common status code (e.g. a specialized 500 description)', () => {
+      TestRoute.schemas = {
+        response: {
+          500: {
+            description: 'Specialized 500 description for this route.',
+          },
+        },
+      };
+
+      const validate = TestRoute.validate;
+
+      if (validate === false) {
+        throw new Error('expected validate to be an object');
+      }
+
+      expect(validate.response?.[500]?.description).toBe(
+        'Specialized 500 description for this route.'
+      );
+      // 401 / 403 stay on their common descriptions.
+      expect(validate.response?.[401]?.description).toBe(
+        'Indicates the request was not authenticated.'
+      );
+      expect(validate.response?.[403]?.description).toBe(
+        'Indicates the user does not have the required privileges to perform the request.'
+      );
+    });
+
+    it('still wraps subclass request schemas with buildRouteValidationWithZod', () => {
+      TestRoute.schemas = {
+        request: {
+          params: z.object({ id: z.string() }),
+        },
+      };
+
+      const validate = TestRoute.validate;
+
+      if (validate === false) {
+        throw new Error('expected validate to be an object');
+      }
+
+      expect(typeof validate.request?.params).toBe('function');
+      // Common responses are still merged in alongside the request schemas.
+      expect(
+        Object.keys(validate.response ?? {})
+          .map(Number)
+          .sort()
+      ).toEqual([401, 403, 500]);
     });
   });
 });
