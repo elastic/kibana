@@ -88,6 +88,7 @@ export const ExceptionsTableUtilityBar: React.FC<ExceptionsTableUtilityBarProps>
                               <EuiIcon
                                 css={sortIconStyles}
                                 type={sort.order === 'asc' ? 'sortUp' : 'sortDown'}
+                                aria-hidden={true}
                               />
                             )}
                           </div>

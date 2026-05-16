@@ -257,6 +257,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
                     type="warning"
                     size="s"
                     css={warningIconCss}
+                    aria-hidden={true}
                   />
                   {i18n.FIELD_CONFLICT_INDICES_WARNING_DESCRIPTION}
                 </>
