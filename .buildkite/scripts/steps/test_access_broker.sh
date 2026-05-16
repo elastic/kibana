@@ -2,8 +2,6 @@
 
 set -euo pipefail
 
-ACCESS_BROKER_URL="${ACCESS_BROKER_URL:-https://access-broker-261553193300.us-central1.run.app}"
-CAPABILITY="kibana.litellm"
 MODEL="llm-gateway/gpt-5.4-mini"
 
 # Validation phase: always cancel the rest of the build after this step runs,
@@ -55,7 +53,7 @@ HTTP_STATUS="$(
     --header "Authorization: Bearer $OIDC_TOKEN" \
     --header "Content-Type: application/json" \
     --data @- \
-    "$ACCESS_BROKER_URL/proxy/$CAPABILITY/v1/chat/completions" <<JSON
+    "https://access-broker.kibana.dev/proxy/kibana.litellm/v1/chat/completions" <<JSON
 {
   "model": "$MODEL",
   "messages": [
