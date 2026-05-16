@@ -163,6 +163,17 @@ export class CasePlugin
       // within budget without blocking the HTTP request.
       resetTaskTimeoutMinutes: this.caseConfig.analyticsV2.resetTaskTimeoutMinutes,
       resetPageDelayMs: this.caseConfig.analyticsV2.resetPageDelayMs,
+      // Mirrors `xpack.cases.attachments.enabled` — the gate that
+      // controls whether the unified `cases-attachments` SO type is
+      // registered with core's SO registry. The attachments
+      // reconciliation runner uses this to decide whether to walk one
+      // (`cases-comments` only) or both (`cases-comments` +
+      // `cases-attachments`) source SO types. Same gate also controls
+      // whether `CASE_ATTACHMENT_SAVED_OBJECT` is opted into the v2
+      // internal SO repository at start. Pre-migration tenants (the
+      // current default) have only `cases-comments` on disk, so
+      // walking only that type is the correct shape.
+      unifiedAttachmentsSoEnabled: this.caseConfig.attachments?.enabled === true,
     });
     this.casesAnalyticsV2Service.setup({ core, taskManager: plugins.taskManager });
 
@@ -364,11 +375,23 @@ export class CasePlugin
         // explicitly. `index-pattern` is a globally-registered SO type
         // (data-views plugin); opting it in here grants the internal client
         // the cross-namespace delete it needs.
+        //
+        // `cases-attachments` is conditional: it's only registered with
+        // core's SO type registry when `xpack.cases.attachments.enabled`
+        // is true (see `setup()` above). Opting an unregistered SO type
+        // into `createInternalRepository` throws at start with
+        // `Missing mappings for saved objects types: 'cases-attachments'`,
+        // so we mirror the same gate here. Pre-migration tenants
+        // (default) only ever have `cases-comments` on disk anyway, so
+        // the attachments runner walking only the legacy type is the
+        // correct shape — the dual-source walk activates once the
+        // tenant opts into the new SO type.
+        const isUnifiedAttachmentsRegistered = this.caseConfig.attachments?.enabled === true;
         const v2InternalRepository = core.savedObjects.createInternalRepository([
           CASE_SAVED_OBJECT,
           CASE_USER_ACTION_SAVED_OBJECT,
           CASE_COMMENT_SAVED_OBJECT,
-          CASE_ATTACHMENT_SAVED_OBJECT,
+          ...(isUnifiedAttachmentsRegistered ? [CASE_ATTACHMENT_SAVED_OBJECT] : []),
           CASE_TEMPLATE_SAVED_OBJECT,
           'index-pattern',
         ]);

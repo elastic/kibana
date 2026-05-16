@@ -73,16 +73,31 @@ regardless of which source SO the AttachmentService wrote to.
 
 Concretely:
 - **Pre-migration tenants** (`xpack.cases.attachments.enabled: false`,
-  the current default): the AttachmentService writes to `cases-comments`;
-  the writer hook fires, the doc-builder normalizes legacy → unified,
-  the analytics doc lands in the unified shape.
+  the current default): the cases plugin only registers the legacy
+  `cases-comments` SO type with core. The AttachmentService writes to
+  `cases-comments`; the writer hook fires, the doc-builder normalizes
+  legacy → unified, the analytics doc lands in the unified shape.
+  The reconciliation runner walks **only** `cases-comments` (the
+  unified SO type isn't registered, and walking it via
+  `openPointInTimeForType` would throw at start with
+  `Saved object type 'cases-attachments' is not registered`).
 - **Post-migration tenants** (`xpack.cases.attachments.enabled: true`):
-  the AttachmentService writes to `cases-attachments`; the writer hook
-  fires with the already-unified attributes; the doc-builder is a near
-  no-op transform.
+  both SO types are registered. The AttachmentService writes to
+  `cases-attachments`; the writer hook fires with the already-unified
+  attributes; the doc-builder is a near no-op transform.
+  Reconciliation walks both `cases-comments` and `cases-attachments`
+  into the unified analytics index.
 - **Mid-migration tenants**: both SO types coexist on disk; both
   writer hooks fire (one per source); reconciliation walks both SO
   types into the same index.
+
+The runtime list of source SO types is decided once at v2 service
+construction from `xpack.cases.attachments.enabled` and pinned for
+every reconciliation + reset tick. The `CASE_ATTACHMENT_SAVED_OBJECT`
+constant is also opted into the v2 internal SO repository
+conditionally on the same flag (`plugin.ts`) — opting in an
+unregistered SO type makes `createInternalRepository` throw at start
+with `Missing mappings for saved objects types: 'cases-attachments'`.
 
 Doc `_id` is the source SO id verbatim. SO ids are unique across both
 source types (the `AttachmentService.bulkDelete` path issues parallel
@@ -673,7 +688,7 @@ cases_analytics_v2/
 │   │                        scopes to `default`.
 │   ├── activity_runner.ts      walks user-actions by `created_at > last_run_at`
 │   │                           (immutable SOs — no `updated_at` branch needed).
-│   ├── attachments_runner.ts   walks BOTH cases-comments AND cases-attachments
+│   ├── attachments_runner.ts   walks cases-comments + (when xpack.cases.attachments.enabled) cases-attachments
 │   │                           SOs into the unified analytics index. Same
 │   │                           filter shape as the cases runner (mutable SOs).
 │   ├── reset_runner.ts         shared "walk every surface + seed cursors"

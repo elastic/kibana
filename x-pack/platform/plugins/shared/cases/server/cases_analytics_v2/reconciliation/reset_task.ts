@@ -14,6 +14,8 @@ import type {
 import type { CasesAnalyticsV2WriterContract } from '../writer';
 import type { CasesActivityV2WriterContract } from '../writer/activity';
 import type { CasesAttachmentsV2WriterContract } from '../writer/attachments';
+import { ATTACHMENT_SOURCE_TYPES } from './attachments_runner';
+import type { RunAttachmentsReconciliationDeps } from './attachments_runner';
 import { runFullReset } from './reset_runner';
 
 /**
@@ -153,6 +155,12 @@ interface RegisterResetTaskArgs {
     writer: CasesAnalyticsV2WriterContract;
     activityWriter: CasesActivityV2WriterContract;
     attachmentsWriter: CasesAttachmentsV2WriterContract;
+    /**
+     * Source SO types the attachments walk runs against. See the
+     * same field on `RegisterReconciliationTaskArgs.getRunnerDeps`
+     * for the gating logic.
+     */
+    attachmentSourceTypes: RunAttachmentsReconciliationDeps['sourceTypes'];
     taskManager: TaskManagerStartContract;
   }>;
 }
@@ -268,6 +276,8 @@ export function registerResetTask({
               writer: deps.writer,
               activityWriter: deps.activityWriter,
               attachmentsWriter: deps.attachmentsWriter,
+              attachmentSourceTypes:
+                deps.attachmentSourceTypes ?? ATTACHMENT_SOURCE_TYPES.legacyOnly,
               taskManager: deps.taskManager,
               intervalMinutes: reconciliationIntervalMinutes,
               pageDelayMs,

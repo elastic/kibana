@@ -22,6 +22,7 @@ import { ensureCaseIndex } from './ensure_indices/case';
 import { ensureActivityIndex } from './ensure_indices/activity';
 import { ensureAttachmentsIndex } from './ensure_indices/attachments';
 import { registerReconciliationTask, scheduleReconciliationTask } from './reconciliation';
+import { ATTACHMENT_SOURCE_TYPES } from './reconciliation/attachments_runner';
 import { registerResetTask } from './reconciliation/reset_task';
 import { registerCasesAnalyticsV2Routes } from './routes';
 import {
@@ -72,6 +73,19 @@ interface CasesAnalyticsV2ServiceDeps {
    * periodic ticks always use 0 (no throttle).
    */
   resetPageDelayMs: number;
+  /**
+   * Whether the unified `cases-attachments` SO type is registered with
+   * core. Mirrors `xpack.cases.attachments.enabled` — the cases plugin
+   * only registers that SO type when the flag is on. The attachments
+   * reconciliation runner uses this to decide whether to walk one
+   * (`cases-comments` only) or both (`cases-comments` +
+   * `cases-attachments`) source SO types — walking an unregistered
+   * type via `openPointInTimeForType` throws at start with
+   * `Saved object type 'cases-attachments' is not registered`. Same
+   * gate also controls whether `CASE_ATTACHMENT_SAVED_OBJECT` is opted
+   * into the v2 internal SO repository in `plugin.ts`.
+   */
+  unifiedAttachmentsSoEnabled: boolean;
 }
 
 /**
@@ -145,6 +159,7 @@ export class CasesAnalyticsV2Service {
   private readonly enableAdminRoutes: boolean;
   private readonly resetTaskTimeoutMinutes: number;
   private readonly resetPageDelayMs: number;
+  private readonly unifiedAttachmentsSoEnabled: boolean;
   /**
    * Active writer. Starts as `V2_NOOP_WRITER` so calls before `start()`
    * (or when v2 is disabled) silently no-op. Replaced with a real
@@ -233,6 +248,7 @@ export class CasesAnalyticsV2Service {
     this.enableAdminRoutes = deps.enableAdminRoutes;
     this.resetTaskTimeoutMinutes = deps.resetTaskTimeoutMinutes;
     this.resetPageDelayMs = deps.resetPageDelayMs;
+    this.unifiedAttachmentsSoEnabled = deps.unifiedAttachmentsSoEnabled;
   }
 
   /**
@@ -271,6 +287,9 @@ export class CasesAnalyticsV2Service {
           writer: this.writerProxy,
           activityWriter: this.activityWriterProxy,
           attachmentsWriter: this.attachmentsWriterProxy,
+          attachmentSourceTypes: this.unifiedAttachmentsSoEnabled
+            ? ATTACHMENT_SOURCE_TYPES.dualSource
+            : ATTACHMENT_SOURCE_TYPES.legacyOnly,
         };
       },
     });
@@ -307,6 +326,9 @@ export class CasesAnalyticsV2Service {
           writer: this.writerProxy,
           activityWriter: this.activityWriterProxy,
           attachmentsWriter: this.attachmentsWriterProxy,
+          attachmentSourceTypes: this.unifiedAttachmentsSoEnabled
+            ? ATTACHMENT_SOURCE_TYPES.dualSource
+            : ATTACHMENT_SOURCE_TYPES.legacyOnly,
           taskManager: this.taskManager,
         };
       },

@@ -47,8 +47,11 @@ const NAMESPACES_ALL: string[] = ['*'];
 const SUMMARY_TOP_N_SPACES = 25;
 
 /**
- * Both source SO types this runner walks. Order matters for the
- * single-source-per-space-summary log line: legacy first so an
+ * Source SO type descriptor for the attachments runner. The runner
+ * walks one or both of these depending on whether the unified
+ * `cases-attachments` SO type is registered with core (which is
+ * gated behind `xpack.cases.attachments.enabled`). Order matters for
+ * the single-source-per-space-summary log line: legacy first so an
  * administrator scanning logs sees the pre-migration source ahead of
  * the post-migration source.
  *
@@ -58,25 +61,55 @@ const SUMMARY_TOP_N_SPACES = 25;
  * walks — idempotent upsert means a re-emit of an attachment that
  * appears in both source types post-migration overwrites the prior
  * write with no analytics-side consequence.
- *
- * The `field` value is the SO mapping's namespaced field path
- * (`<so-type>.attributes.<field>`); the SO `find` API requires the
- * type prefix in KQL filter strings even though the `type` parameter
- * is set on the request.
  */
-const SOURCE_TYPES: ReadonlyArray<{
+interface AttachmentSourceType {
   type: string;
   label: 'legacy' | 'unified';
-}> = [
-  { type: CASE_COMMENT_SAVED_OBJECT, label: 'legacy' },
-  { type: CASE_ATTACHMENT_SAVED_OBJECT, label: 'unified' },
-];
+}
+
+/**
+ * Source SO types the runner walks when the unified
+ * `cases-attachments` SO type is registered. Exported for the
+ * service layer to pin the contract — the service decides whether
+ * to walk one or both based on the `cases.attachments.enabled`
+ * config flag.
+ */
+export const ATTACHMENT_SOURCE_TYPES: {
+  legacyOnly: ReadonlyArray<AttachmentSourceType>;
+  dualSource: ReadonlyArray<AttachmentSourceType>;
+} = {
+  legacyOnly: [{ type: CASE_COMMENT_SAVED_OBJECT, label: 'legacy' }],
+  dualSource: [
+    { type: CASE_COMMENT_SAVED_OBJECT, label: 'legacy' },
+    { type: CASE_ATTACHMENT_SAVED_OBJECT, label: 'unified' },
+  ],
+};
 
 export interface RunAttachmentsReconciliationDeps {
   /** Internal SO client (no request scope). Used to walk every attachment across every space. */
   savedObjectsClient: SavedObjectsClientContract;
   attachmentsWriter: CasesAttachmentsV2WriterContract;
   logger: Logger;
+  /**
+   * Source SO types to walk. Pre-migration tenants
+   * (`xpack.cases.attachments.enabled: false`, the current default)
+   * only have `cases-comments` registered with core's SO registry, so
+   * the runner walks only that type. Post-migration / mid-migration
+   * tenants register both and the runner walks both.
+   *
+   * Walking an unregistered SO type via `openPointInTimeForType`
+   * throws `Saved object type 'cases-attachments' is not registered`
+   * at start, which is why the source list has to be injected
+   * (the service layer reads the `cases.attachments.enabled` flag
+   * once and pins the right list per tick).
+   *
+   * Defaults to `ATTACHMENT_SOURCE_TYPES.dualSource` so a caller that
+   * forgets to set this on a post-migration tenant gets the full
+   * dual-source walk rather than silently dropping the unified
+   * source. Pre-migration callers MUST set this explicitly to
+   * `ATTACHMENT_SOURCE_TYPES.legacyOnly`.
+   */
+  sourceTypes?: ReadonlyArray<AttachmentSourceType>;
   /**
    * ISO timestamp from the previous successful tick. Only attachments
    * updated (or created, on the OR-NULL branch) after this point are
@@ -143,6 +176,7 @@ export async function runAttachmentsReconciliation({
   lastRunAt,
   pageDelayMs = 0,
   onPageComplete,
+  sourceTypes = ATTACHMENT_SOURCE_TYPES.dualSource,
 }: RunAttachmentsReconciliationDeps): Promise<RunAttachmentsReconciliationResult> {
   // Tick start, captured before any I/O. Persisted as the new cursor
   // on a successful drain so attachments updated during the tick land
@@ -155,7 +189,7 @@ export async function runAttachmentsReconciliation({
   // so the summary surfaces the migration progress at a glance.
   const processedBySpace = new Map<string, number>();
 
-  for (const { type: soType, label } of SOURCE_TYPES) {
+  for (const { type: soType, label } of sourceTypes) {
     const fieldPrefix = `${soType}.attributes`;
 
     // Same shape as the cases-surface filter — see runner.ts for the

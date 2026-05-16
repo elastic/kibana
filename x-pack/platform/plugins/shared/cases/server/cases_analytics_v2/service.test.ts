@@ -26,6 +26,7 @@ const buildService = () =>
     enableAdminRoutes: false,
     resetTaskTimeoutMinutes: 60,
     resetPageDelayMs: 0,
+    unifiedAttachmentsSoEnabled: false,
   });
 
 describe('CasesAnalyticsV2Service', () => {
