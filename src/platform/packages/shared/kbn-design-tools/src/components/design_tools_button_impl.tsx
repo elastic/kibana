@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import type { MouseEvent, ReactElement } from 'react';
 import { flushSync } from 'react-dom';
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
@@ -62,6 +62,12 @@ export const DesignToolsButtonImpl = ({ initiallyOpen }: { initiallyOpen?: boole
 
   usePortalZIndex(LAYOUT_SETTINGS_FLYOUT_ID, zIndex.flyout, isFlyoutOpen);
   usePortalZIndex(LAYOUT_POPOVER_ID, zIndex.popover, isPopoverOpen);
+
+  useEffect(() => {
+    if (initiallyOpen) {
+      preloadAllEuiIcons();
+    }
+  }, [initiallyOpen]);
 
   const handleEuiSearchChange = useCallback((panelId: string, value: string) => {
     setEuiSearchTerms((prev) => ({ ...prev, [panelId]: value }));
@@ -130,15 +136,17 @@ export const DesignToolsButtonImpl = ({ initiallyOpen }: { initiallyOpen?: boole
 
       centerInViewport(el, live.rect);
       el.style.pointerEvents = 'auto';
-      setIsEditMode(true);
-      setMoveCount((prev) => prev + 1);
 
-      // Defer insertElement until after React renders EditOverlay.
-      // The state updates above are batched, so editHandleRef.current
-      // is null until the next commit.
-      requestAnimationFrame(() => {
-        editHandleRef.current?.insertElement(el, live.liveReactElement, live.cleanup);
+      // Force a synchronous render so EditOverlay mounts and populates
+      // editHandleRef before we call insertElement. Without flushSync
+      // the async context causes React to defer the commit, leaving the
+      // ref null when we read it.
+      flushSync(() => {
+        setIsEditMode(true);
+        setMoveCount((prev) => prev + 1);
       });
+
+      editHandleRef.current?.insertElement(el, live.liveReactElement, live.cleanup);
     },
     [zIndex.clone]
   );
@@ -152,7 +160,7 @@ export const DesignToolsButtonImpl = ({ initiallyOpen }: { initiallyOpen?: boole
   const contextMenuPanels: EuiContextMenuPanelDescriptor[] = [
     {
       id: 0,
-      width: 160,
+      width: 180,
       items: [
         {
           name: isLayoutVisible
@@ -279,7 +287,7 @@ export const DesignToolsButtonImpl = ({ initiallyOpen }: { initiallyOpen?: boole
           defaultMessage: 'Toggle layout',
         })}
       >
-        <EuiContextMenu initialPanelId={0} panels={contextMenuPanels} size="s" />
+        <EuiContextMenu initialPanelId={0} panels={contextMenuPanels} />
       </EuiPopover>
       {isFlyoutOpen && (
         <EuiFlyout

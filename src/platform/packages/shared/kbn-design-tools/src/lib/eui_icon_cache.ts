@@ -8,6 +8,7 @@
  */
 
 import { EuiIcon } from '@elastic/eui';
+import type { ComponentType } from 'react';
 import { createElement } from 'react';
 import { flushSync } from 'react-dom';
 import { createRoot } from 'react-dom/client';
@@ -49,11 +50,11 @@ export const preloadAllEuiIcons = (() => {
           lazyIconTypes.names = Object.keys(typeToPathMap);
         }
 
-        const cache: Record<string, React.ComponentType> = {};
+        const cache: Record<string, ComponentType> = {};
 
         await Promise.all(
           Object.entries(typeToPathMap).map(async ([type, loader]) => {
-            const mod = await (loader as () => Promise<{ icon: React.ComponentType }>)();
+            const mod = await (loader as () => Promise<{ icon: ComponentType }>)();
             cache[type] = mod.icon;
           })
         );

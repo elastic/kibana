@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { MutableRefObject } from 'react';
 import { useCallback, useMemo, useRef } from 'react';
 import { HANDLE_CURSORS } from '../lib/constants';
 import {
@@ -37,11 +38,11 @@ interface InteractionEffects {
 }
 
 export interface InteractionMachineOptions {
-  registry: React.MutableRefObject<ElementRegistry>;
-  hoverTargetRef: React.MutableRefObject<HTMLElement | null>;
-  stickyHover: React.MutableRefObject<HTMLElement | null>;
-  roundedTargets: React.MutableRefObject<WeakSet<HTMLElement>>;
-  rafId: React.MutableRefObject<number>;
+  registry: MutableRefObject<ElementRegistry>;
+  hoverTargetRef: MutableRefObject<HTMLElement | null>;
+  stickyHover: MutableRefObject<HTMLElement | null>;
+  roundedTargets: MutableRefObject<WeakSet<HTMLElement>>;
+  rafId: MutableRefObject<number>;
   effects: InteractionEffects;
   isInsideHoverLock: (x: number, y: number) => boolean;
   cloneZIndex: number;

@@ -8,9 +8,9 @@
  */
 
 import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
-import type { Dispatch, SetStateAction } from 'react';
+import type { Dispatch, PointerEvent as ReactPointerEvent, SetStateAction } from 'react';
 import { css } from '@emotion/css';
-import { EuiBadge, EuiPortal, EuiWindowEvent, transparentize, useEuiTheme } from '@elastic/eui';
+import { EuiBadge, EuiPortal, transparentize, useEuiTheme } from '@elastic/eui';
 import { SpacingMeasurement } from './spacing_measurement';
 import { getElementFromPoint } from '../../lib/dom/get_element_from_point';
 import { clampToViewport } from '../../lib/dom/clamp_to_viewport';
@@ -49,7 +49,7 @@ export const MeasureOverlay = ({ setIsMeasuring }: Props) => {
         inset: 0,
         position: 'fixed',
         zIndex: zIndex.overlay,
-        pointerEvents: 'none',
+        pointerEvents: 'auto',
       }),
     [euiTheme.colors.backgroundFilledText, zIndex.overlay]
   );
@@ -72,7 +72,7 @@ export const MeasureOverlay = ({ setIsMeasuring }: Props) => {
   const rafRef = useRef<number>(0);
 
   const handlePointerMove = useCallback(
-    (event: PointerEvent) => {
+    (event: ReactPointerEvent) => {
       cancelAnimationFrame(rafRef.current);
       const { clientX, clientY } = event;
       rafRef.current = requestAnimationFrame(() => {
@@ -160,9 +160,12 @@ export const MeasureOverlay = ({ setIsMeasuring }: Props) => {
   return (
     <EuiPortal>
       <GlobalCursorOverride cursor="crosshair" />
-      <div className={overlayCss} id={MEASURE_OVERLAY_ID} data-test-subj="measureOverlayContainer">
-        <EuiWindowEvent event="pointermove" handler={handlePointerMove} />
-      </div>
+      <div
+        className={overlayCss}
+        id={MEASURE_OVERLAY_ID}
+        data-test-subj="measureOverlayContainer"
+        onPointerMove={handlePointerMove}
+      />
       {anchorRect && (
         <>
           <div className={anchorHighlightCss} data-test-subj="measureAnchorHighlight" />

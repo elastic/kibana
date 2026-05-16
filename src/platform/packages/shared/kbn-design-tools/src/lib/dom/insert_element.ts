@@ -8,7 +8,7 @@
  */
 
 import type { ReactElement } from 'react';
-import React from 'react';
+import { createElement } from 'react';
 import { createRoot } from 'react-dom/client';
 import { EuiProvider } from '@elastic/eui';
 import { EuiThemeBorealis } from '@elastic/eui-theme-borealis';
@@ -54,13 +54,13 @@ export const renderEuiComponentLive = async (
   try {
     flushSync(() => {
       const stateProvider = initialState
-        ? React.createElement(SerializedStateContext.Provider, {
+        ? createElement(SerializedStateContext.Provider, {
             value: initialState,
             children: element,
           })
         : element;
       root.render(
-        React.createElement(EuiProvider, {
+        createElement(EuiProvider, {
           theme: EuiThemeBorealis,
           colorMode: getPageColorMode(),
           globalStyles: false,
