@@ -2860,4 +2860,63 @@ describe('ActionPolicyClient', () => {
       expect(apiKeyService.markApiKeysForInvalidation).not.toHaveBeenCalled();
     });
   });
+
+  describe('error codes and details', () => {
+    it('attaches ACTION_POLICY_NOT_FOUND code and action_policy_id details on getActionPolicy', async () => {
+      mockSavedObjectsClient.get.mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createGenericNotFoundError(
+          ACTION_POLICY_SAVED_OBJECT_TYPE,
+          'missing-policy'
+        )
+      );
+
+      await expect(client.getActionPolicy({ id: 'missing-policy' })).rejects.toMatchObject({
+        output: { statusCode: 404 },
+        data: {
+          code: 'ACTION_POLICY_NOT_FOUND',
+          details: { action_policy_id: 'missing-policy' },
+        },
+      });
+    });
+
+    it('attaches ACTION_POLICY_ALREADY_EXISTS code on create conflict', async () => {
+      mockSavedObjectsClient.create.mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createConflictError(ACTION_POLICY_SAVED_OBJECT_TYPE, 'policy-dup')
+      );
+
+      await expect(
+        client.createActionPolicy({
+          data: {
+            name: 'my-policy',
+            description: 'my-policy description',
+            destinations: [{ type: 'workflow', id: 'my-workflow' }],
+          },
+          options: { id: 'policy-dup' },
+        })
+      ).rejects.toMatchObject({
+        output: { statusCode: 409 },
+        data: {
+          code: 'ACTION_POLICY_ALREADY_EXISTS',
+          details: { action_policy_id: 'policy-dup' },
+        },
+      });
+    });
+
+    it('attaches INVALID_ACTION_POLICY_DATA code with Zod issues when data is invalid', async () => {
+      const result = await client
+        .createActionPolicy({
+          data: {
+            name: 'my-policy',
+            description: 'my-policy description',
+            destinations: [],
+          },
+        })
+        .catch((e) => e);
+
+      expect(result.output.statusCode).toBe(400);
+      expect(result.data.code).toBe('INVALID_ACTION_POLICY_DATA');
+      expect(result.data.details.context).toBe('create');
+      expect(Array.isArray(result.data.details.issues)).toBe(true);
+    });
+  });
 });
