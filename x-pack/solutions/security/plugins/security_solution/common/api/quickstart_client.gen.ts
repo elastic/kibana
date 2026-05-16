@@ -73,6 +73,11 @@ import type {
 } from './detection_engine/rule_management/import_rules/import_rules_route.gen';
 import type { ReadTagsResponse } from './detection_engine/rule_management/read_tags/read_tags_route.gen';
 import type {
+  RuleChangesHistoryRequestQueryInput,
+  RuleChangesHistoryRequestParamsInput,
+  RuleChangesHistoryResponse,
+} from './detection_engine/rule_management/rule_history/rule_history_route.gen';
+import type {
   SearchRulesRequestBodyInput,
   SearchRulesResponse,
 } from './detection_engine/rule_management/search_rules/search_rules_route.gen';
@@ -3053,6 +3058,26 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
+    * Retrieve a paginated list of historical revisions for a single detection rule.
+Each item contains the rule snapshot at that point in time and the snapshot of
+the immediately preceding revision in `old_values`.
+
+    */
+  async ruleChangesHistory(props: RuleChangesHistoryProps) {
+    this.log.info(`${new Date().toISOString()} Calling API RuleChangesHistory`);
+    return this.kbnClient
+      .request<RuleChangesHistoryResponse>({
+        path: replaceParams('/internal/detection_engine/rules/{ruleId}/history', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'GET',
+
+        query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
    * Enhances existing migration rules with additional vendor-specific data such as MITRE mappings
    */
   async ruleMigrationEnhanceRule(props: RuleMigrationEnhanceRuleProps) {
@@ -4104,6 +4129,10 @@ export interface ReadRuleExecutionResultsProps {
 }
 export interface ResolveTimelineProps {
   query: ResolveTimelineRequestQueryInput;
+}
+export interface RuleChangesHistoryProps {
+  query: RuleChangesHistoryRequestQueryInput;
+  params: RuleChangesHistoryRequestParamsInput;
 }
 export interface RuleMigrationEnhanceRuleProps {
   params: RuleMigrationEnhanceRuleRequestParamsInput;
