@@ -75,19 +75,17 @@ describe('useTopNavLinks', () => {
 
     await toolkit.initializeTabs();
 
+    if (hookAttrs.isEsqlMode) {
+      toolkit.internalState.dispatch(
+        toolkit.injectCurrentTab(internalStateActions.setAppState)({
+          appState: { query: { esql: 'FROM test-index' } },
+        })
+      );
+    }
+
     await toolkit.initializeSingleTab({
       tabId: toolkit.getCurrentTab().id,
     });
-
-    if (hookAttrs.isEsqlMode) {
-      await toolkit.internalState.dispatch(
-        toolkit.injectCurrentTab(internalStateActions.transitionFromDataViewToESQL)({
-          dataView: testDataView,
-        })
-      );
-
-      await toolkit.waitForDataFetching({ tabId: toolkit.getCurrentTab().id });
-    }
 
     return renderHook(
       () =>
@@ -203,34 +201,6 @@ describe('useTopNavLinks', () => {
 
       const shareItem = appMenuConfig.items?.find((item) => item.id === 'share');
       expect(shareItem).toBeDefined();
-    });
-
-    it('should add the separator above the first tab-scoped app menu item', async () => {
-      const services = createTestServices();
-
-      jest
-        .spyOn(services.share!, 'availableIntegrations')
-        .mockImplementation((_objectType, groupId) => {
-          if (groupId === 'export') {
-            return [
-              {
-                id: 'csvReports',
-                shareType: 'integration' as const,
-                groupId: 'export',
-                config: () => Promise.resolve({}),
-              },
-            ];
-          }
-          return [];
-        });
-
-      const appMenuConfig = await setup({ hasShareIntegration: true, services });
-
-      const exportItem = appMenuConfig.items?.find((item) => item.id === 'export');
-      const inspectItem = appMenuConfig.items?.find((item) => item.id === 'inspect');
-
-      expect(exportItem?.separator).toBe('above');
-      expect(inspectItem?.separator).toBeUndefined();
     });
   });
 
@@ -402,6 +372,15 @@ describe('useTopNavLinks', () => {
 
       const toolkit = getDiscoverInternalStateMock({ services: v2Services });
       await toolkit.initializeTabs();
+
+      if (hookAttrs.isEsqlMode) {
+        toolkit.internalState.dispatch(
+          toolkit.injectCurrentTab(internalStateActions.setAppState)({
+            appState: { query: { esql: 'FROM test-index' } },
+          })
+        );
+      }
+
       await toolkit.initializeSingleTab({
         tabId: toolkit.getCurrentTab().id,
       });
@@ -410,16 +389,6 @@ describe('useTopNavLinks', () => {
           dataView: dataViewMock,
         })
       );
-
-      if (hookAttrs.isEsqlMode) {
-        await toolkit.internalState.dispatch(
-          toolkit.injectCurrentTab(internalStateActions.transitionFromDataViewToESQL)({
-            dataView: dataViewMock,
-          })
-        );
-
-        await toolkit.waitForDataFetching({ tabId: toolkit.getCurrentTab().id });
-      }
 
       return renderHook(
         () =>
@@ -616,6 +585,30 @@ describe('useTopNavLinks', () => {
 
       const alertsItem = appMenuConfig.items?.find((item) => item.id === AppMenuActionId.alerts);
       expect(alertsItem).toBeUndefined();
+    });
+  });
+
+  describe('when there are tab-scoped app menu items', () => {
+    it('should add the separator above the first tab-scoped app menu item', async () => {
+      const services = createTestServices();
+
+      jest.spyOn(services.share!, 'availableIntegrations').mockReturnValue([]);
+
+      let appMenuConfig = await setup({ hasShareIntegration: true, services });
+
+      let exportItem = appMenuConfig.items?.find((item) => item.id === AppMenuActionId.export);
+      let inspectItem = appMenuConfig.items?.find((item) => item.id === AppMenuActionId.inspect);
+
+      expect(exportItem?.separator).toBe('above');
+      expect(inspectItem?.separator).toBeUndefined();
+
+      appMenuConfig = await setup({ services });
+
+      exportItem = appMenuConfig.items?.find((item) => item.id === AppMenuActionId.export);
+      inspectItem = appMenuConfig.items?.find((item) => item.id === AppMenuActionId.inspect);
+
+      expect(exportItem?.separator).toBeUndefined();
+      expect(inspectItem?.separator).toBe('above');
     });
   });
 });
