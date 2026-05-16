@@ -7,7 +7,8 @@
 
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import { toKqlExpression, type KueryNode } from '@kbn/es-query';
+import type { KueryNode } from '@kbn/es-query';
+import { toKqlExpression } from '@kbn/es-query';
 import { makeCase, makeWriterMock, stubFindOnePage } from '../__test_helpers__';
 import { runReconciliation } from './runner';
 
@@ -113,14 +114,10 @@ describe('runReconciliation', () => {
     // either form.
     const TS_PATTERN = /"?2026-05-04T00\\?:00\\?:00\.000Z"?/;
     // Clause 1: cursor on updated_at.
-    expect(kuery).toMatch(
-      new RegExp(`attributes\\.updated_at\\s*>\\s*${TS_PATTERN.source}`)
-    );
+    expect(kuery).toMatch(new RegExp(`attributes\\.updated_at\\s*>\\s*${TS_PATTERN.source}`));
     // Clause 2: missing-updated_at AND-ed with cursor on created_at.
     expect(kuery).toMatch(/not\s+cases\.attributes\.updated_at\s*:\s*\*/i);
-    expect(kuery).toMatch(
-      new RegExp(`attributes\\.created_at\\s*>\\s*${TS_PATTERN.source}`)
-    );
+    expect(kuery).toMatch(new RegExp(`attributes\\.created_at\\s*>\\s*${TS_PATTERN.source}`));
   });
 
   it('walks every case when lastRunAt is undefined (first-ever run / post-reset)', async () => {

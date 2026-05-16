@@ -187,7 +187,11 @@ describe('Cases Plugin', () => {
               },
             },
             "analyticsV2": Object {
+              "enable_admin_routes": false,
               "enabled": false,
+              "reconciliationIntervalMinutes": 30,
+              "resetPageDelayMs": 0,
+              "resetTaskTimeoutMinutes": 60,
             },
             "attachments": Object {
               "enabled": true,

@@ -363,6 +363,41 @@ missed.
 Use for mapping migrations, recovery from sustained writer failures, or
 administrator-initiated full backfills. Superuser only.
 
+**Per-space data views after `/reset`.** `/reset` deletes every managed
+`Case Analytics` data view across all spaces (the SOs the cluster needs to
+walk and remove are namespace-scoped, so this is unavoidable for a
+correct reset). Data views are recreated **lazily** on the first cases
+request in each space — opening the Cases UI or hitting any cases API
+endpoint (e.g. `GET /api/cases/_find`) triggers the bootstrap and the
+data view appears within seconds.
+
+That means users in spaces that had a data view before `/reset` see "no
+data view found" in Discover/Lens until someone exercises Cases in that
+space. For an active space the gap is usually invisible (the first
+person to load the Cases page recreates it). For spaces that are
+rarely-visited but still need the analytics dashboard available
+post-reset (e.g. audit / compliance views polled by a scheduled job),
+the recommended workflow after a `/reset` is:
+
+1. Wait for `/state.active_reset` to return `null` (reset task
+   completed and `.cases` is repopulated).
+2. For each space whose data view you want to pre-warm, hit any cases
+   API endpoint in that space:
+   ```bash
+   curl -k -H 'kbn-xsrf: true' -H 'x-elastic-internal-origin: kibana' \
+     "http://<kibana>/s/<spaceId>/api/cases/_find?perPage=1"
+   ```
+   The bootstrap runs in the request handler before the response
+   returns. A successful 200 means the data view has been recreated
+   for that space.
+
+Eager recreation of pre-existing data views inside the `/reset` flow
+itself was considered and deferred — `/reset` is intentionally rare,
+and the implementation cost (bypassing the data views factory to write
+SOs cross-namespace from an unscoped internal client) wasn't justified
+for a workflow that's already an administrator-initiated, infrequent
+operation.
+
 ### Tuning `/reset` at scale
 
 Two configuration knobs control the post-reset backfill's behaviour:
@@ -419,6 +454,7 @@ lighter merge pressure.
 | `/state.active_reset.status: "failed"`                         | Reset task threw during the walk                                      | Inspect Kibana logs for the `cases-analyticsV2: full reset failed` ERROR; address the root cause; re-run POST /reset |
 | `/state.active_reset.status: "running"` for a long time        | Backfill task is mid-walk on a large tenant                           | Wait. Raise `resetTaskTimeoutMinutes` in `kibana.yml` if it exceeds your tolerance window (see "Tuning /reset at scale") |
 | `Event loop utilization exceeded threshold` from the reset task | A runner page is slower than expected on this hardware                | Raise `resetPageDelayMs` to 50–100 to throttle further                                                       |
+| `Case Analytics` data view missing in Discover / Lens after `/reset` | Lazy recreation hasn't fired in that space yet — `/reset` deletes every per-space data view, and they recreate on the next cases request per space | Open the Cases UI in the affected space, or run `curl /s/<spaceId>/api/cases/_find?perPage=1` to pre-warm. See "Per-space data views after /reset" above. |
 
 ## File layout
 

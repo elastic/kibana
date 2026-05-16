@@ -8,8 +8,9 @@
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { CasesAnalyticsV2WriterContract } from '../writer';
-import { runReconciliation, type RunReconciliationResult } from './runner';
-import { resetReconciliationTask } from './index';
+import type { RunReconciliationResult } from './runner';
+import { runReconciliation } from './runner';
+import { resetReconciliationTask } from '.';
 
 /** Inputs for `runFullReset`. */
 export interface RunFullResetDeps {

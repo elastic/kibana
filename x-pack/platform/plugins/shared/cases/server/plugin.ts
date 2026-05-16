@@ -21,12 +21,7 @@ import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
-import {
-  APP_ID,
-  CASE_SAVED_OBJECT,
-  CASE_TEMPLATE_SAVED_OBJECT,
-  CASE_USER_ACTION_SAVED_OBJECT,
-} from '../common/constants';
+import { APP_ID, CASE_SAVED_OBJECT, CASE_TEMPLATE_SAVED_OBJECT } from '../common/constants';
 
 import type { CasesClient } from './client';
 import type {

@@ -11,7 +11,7 @@ import { CASE_INDEX_NAME } from '../constants';
 /**
  * Index pattern fed to the data view's `title`. The data views API
  * accepts a comma-separated list, so additional analytics indices can
- * be appended later (the activity surface adds `.cases-activity`)
+ * be appended later (`.cases-activity`, `.cases-attachments`, etc.)
  * without breaking the existing view's id or saved-object identity.
  */
 export const CASE_ANALYTICS_DATA_VIEW_TITLE = CASE_INDEX_NAME;
