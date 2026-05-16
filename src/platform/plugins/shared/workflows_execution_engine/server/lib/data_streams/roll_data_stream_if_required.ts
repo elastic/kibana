@@ -38,7 +38,6 @@ export async function rollDataStreamIfRequired({
   const indexMappings = await esClient.indices.getMapping({
     index: dataStreamName,
     allow_no_indices: true,
-    expand_wildcards: 'all',
   });
 
   const mappingsArray = Object.values(indexMappings);

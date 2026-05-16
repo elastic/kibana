@@ -45,7 +45,6 @@ describe('rollDataStreamIfRequired', () => {
     expect(mockEsClient.indices.getMapping).toHaveBeenCalledWith({
       index: DATA_STREAM_NAME,
       allow_no_indices: true,
-      expand_wildcards: 'all',
     });
     expect(mockLogger.debug).toHaveBeenCalledWith(`${msgPrefix} does not exist so ${skipMessage}`);
     expect(mockEsClient.indices.rollover).not.toHaveBeenCalled();
