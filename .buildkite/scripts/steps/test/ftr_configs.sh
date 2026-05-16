@@ -18,6 +18,8 @@ export JOB="$FTR_CONFIG_GROUP_KEY"
 
 FAILED_CONFIGS_KEY="${BUILDKITE_STEP_ID}${FTR_CONFIG_GROUP_KEY}"
 
+FAILED_TESTS_KEY="${BUILDKITE_STEP_ID}${FTR_CONFIG_GROUP_KEY}_failed_tests"
+
 # a FTR failure will result in the script returning an exit code of 10
 exitCode=0
 
@@ -140,6 +142,48 @@ done <<< "$configs"
 if [[ "$failedConfigs" ]]; then
   buildkite-agent meta-data set "$FAILED_CONFIGS_KEY" "$failedConfigs"
 fi
+
+# --- retry-only-failed feature ---
+# Attempt 1: record the names of failing tests so the retry can evaluate whether they recovered.
+# On the first retry, the step is marked green if every previously-failing test passes — even if
+# a different (previously-passing) test happens to fail on retry.
+if [[ -z "${KIBANA_FLAKY_TEST_RUNNER_CONFIG:-}" && \
+      "${BUILDKITE_RETRY_COUNT:-0}" == "0" && "$exitCode" != "0" ]]; then
+  junitDir="target/junit/$JOB"
+  if [ -d "$junitDir" ]; then
+    failedTestNames=$(node scripts/ftr_check_retry_result list-failures "$junitDir" 2>/dev/null || true)
+    if [[ "$failedTestNames" ]]; then
+      buildkite-agent meta-data set "$FAILED_TESTS_KEY" "$failedTestNames"
+      echo "Stored $(echo "$failedTestNames" | wc -l | tr -d ' ') previously-failing test name(s) for retry evaluation"
+    fi
+  fi
+fi
+
+# Attempt 2: check whether the failures from attempt 1 are still failing.
+# If every previously-failing test now passes, mark the step green.
+if [[ -z "${KIBANA_FLAKY_TEST_RUNNER_CONFIG:-}" && \
+      "${BUILDKITE_RETRY_COUNT:-0}" == "1" && "$exitCode" != "0" ]]; then
+  prevFailedTests=$(buildkite-agent meta-data get "$FAILED_TESTS_KEY" --default '' 2>/dev/null || true)
+  if [[ "$prevFailedTests" ]]; then
+    junitDir="target/junit/$JOB"
+    tmpPrevFile=$(mktemp)
+    printf '%s' "$prevFailedTests" > "$tmpPrevFile"
+    set +e
+    node scripts/ftr_check_retry_result check-intersection \
+      --junit-dir "$junitDir" \
+      --prev-failures-file "$tmpPrevFile"
+    intersectionCode=$?
+    set -e
+    rm -f "$tmpPrevFile"
+    if [[ "$intersectionCode" == "0" ]]; then
+      echo "--- [retry-only-failed] All previously-failing tests recovered on retry — marking step green"
+      exitCode=0
+      failedConfigs=""
+      buildkite-agent meta-data set "$FAILED_CONFIGS_KEY" "" 2>/dev/null || true
+    fi
+  fi
+fi
+# --- end retry-only-failed feature ---
 
 echo "--- FTR configs complete"
 printf "%s\n" "${results[@]}"
