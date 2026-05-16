@@ -151,6 +151,14 @@ export class CasePlugin
       // surface (mapping migrations, sustained writer failures, dev
       // iteration).
       enableAdminRoutes: this.caseConfig.analyticsV2.enable_admin_routes,
+      // Reset-task tunables. Threaded through to the
+      // `cases.analyticsV2.fullReset` task type's `timeout` and to the
+      // reconciliation runner's inter-page sleep when invoked from the
+      // reset task. Both have safe defaults; large-tenant administrators
+      // raise them in `kibana.yml` to keep the post-`/reset` backfill
+      // within budget without blocking the HTTP request.
+      resetTaskTimeoutMinutes: this.caseConfig.analyticsV2.resetTaskTimeoutMinutes,
+      resetPageDelayMs: this.caseConfig.analyticsV2.resetPageDelayMs,
     });
     this.casesAnalyticsV2Service.setup({ core, taskManager: plugins.taskManager });
 

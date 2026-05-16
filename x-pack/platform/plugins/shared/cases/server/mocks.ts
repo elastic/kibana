@@ -795,6 +795,8 @@ export const mockCasesContract = (): CasesServerStart => ({
       enabled: false,
       reconciliationIntervalMinutes: 30,
       enable_admin_routes: false,
+      resetTaskTimeoutMinutes: 60,
+      resetPageDelayMs: 0,
     },
     incrementalId: {
       enabled: true,

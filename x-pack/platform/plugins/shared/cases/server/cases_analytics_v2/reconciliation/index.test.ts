@@ -107,7 +107,7 @@ describe('resetReconciliationTask', () => {
       taskManager: tm,
       logger,
       intervalMinutes: 30,
-      initialState: { last_run_at: '2026-05-14T20:00:00.000Z' },
+      initialState: { cases_last_run_at: '2026-05-14T20:00:00.000Z' },
     });
 
     expect(tm.remove).not.toHaveBeenCalled();
@@ -119,8 +119,10 @@ describe('resetReconciliationTask', () => {
     // refactor that "preserves" old fields can't silently undo the
     // reset.
     expect(typeof mapFn).toBe('function');
-    expect(mapFn({ last_run_at: 'stale-cursor', other: 'field' }, RECONCILIATION_TASK_ID)).toEqual({
-      last_run_at: '2026-05-14T20:00:00.000Z',
+    expect(
+      mapFn({ cases_last_run_at: 'stale-cursor', other: 'field' }, RECONCILIATION_TASK_ID)
+    ).toEqual({
+      cases_last_run_at: '2026-05-14T20:00:00.000Z',
     });
   });
 
@@ -134,7 +136,7 @@ describe('resetReconciliationTask', () => {
     });
 
     const [, mapFn] = (tm.bulkUpdateState as jest.Mock).mock.calls[0];
-    expect(mapFn({ last_run_at: 'anything' }, RECONCILIATION_TASK_ID)).toEqual({});
+    expect(mapFn({ cases_last_run_at: 'anything' }, RECONCILIATION_TASK_ID)).toEqual({});
   });
 
   it('does not throw past the boundary when bulkUpdateState fails (logs at WARN)', async () => {

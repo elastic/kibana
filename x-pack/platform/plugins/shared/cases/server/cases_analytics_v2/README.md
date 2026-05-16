@@ -10,9 +10,11 @@ v2 is gated by `xpack.cases.analyticsV2.enabled` (default `false`). v1
 (`server/cases_analytics/`) remains the primary path while v2 is being
 validated.
 
-This module ships only the **case surface** (`.cases`). The activity
-surface (`.cases-activity`) lands in a follow-up PR; the file-layout,
-data-view, and reconciliation infrastructure here is structured to
+This module ships the **case surface** (`.cases`) plus the full v2
+infrastructure — async `/reset` task, configurable tuning knobs,
+per-space data view management, live progress reporting. The activity
+surface (`.cases-activity`) lands in a follow-up PR; the file layout,
+reset task, dual-cursor schema, and routes are already structured to
 accept it without rework.
 
 ## Architecture
@@ -75,6 +77,21 @@ xpack.cases.analyticsV2:
     # route is unaffected (always registered
     # while analyticsV2.enabled is true). See
     # "Admin routes" below for the rationale.
+  resetTaskTimeoutMinutes:
+    60 # default — wall-clock budget for the
+    # one-shot backfill task scheduled by /reset.
+    # Comfortable through ~2K spaces; raise for
+    # larger tenants (see "Tuning /reset at
+    # scale" below). Min 5, max 1440 (24h).
+  resetPageDelayMs:
+    0 # default — inter-page sleep applied by the
+    # reconciliation runner ONLY when invoked
+    # from the reset task. Default 0 keeps the
+    # post-reset backfill as fast as possible.
+    # Administrators on shared / capacity-
+    # constrained ES clusters raise this to
+    # throttle bulk-write pressure during the
+    # backfill. Min 0, max 5000.
 ```
 
 When `analyticsV2.enabled: false`, the v2 service is a no-op. Nothing
@@ -200,8 +217,9 @@ asserts every emitted path resolves in the mapping (see
 GET /internal/cases/_analyticsV2/state
 ```
 
-Returns the enabled flag, index info, and the reconciliation task's last
-run. Superuser only.
+Returns the enabled flag, per-surface index info (with backwards-
+compatible top-level cases fields), the reconciliation task's last run,
+and the live or most-recently-failed reset task. Superuser only.
 
 Example response:
 
@@ -210,27 +228,69 @@ Example response:
   "enabled": true,
   "index": ".cases",
   "index_exists": true,
+  "surfaces": {
+    "cases": {
+      "index": ".cases",
+      "index_exists": true
+    }
+  },
   "reconciliation": {
     "task_type": "cases.analyticsV2.reconciliation",
     "last_run": {
-      "last_run_at": "2026-05-15T15:30:00.000Z",
+      "cases_last_run_at": "2026-05-15T15:30:00.000Z",
       "runs": 0,
       "next_run_at": "2026-05-15T16:00:00.000Z",
       "status": "idle"
     }
+  },
+  "active_reset": null
+}
+```
+
+`active_reset` is `null` when no reset is in flight AND the most recent
+reset succeeded (Task Manager auto-removes one-shot tasks on success).
+A non-null value reflects either an in-flight reset or the most recent
+failed one.
+
+**Live progress.** During the walk, the reset task's wall-clock-throttled
+progress writer flushes the partial state to the task SO every ~30
+seconds. Administrators polling `/state` see the cumulative
+`cases_processed` count tick up live, and the `phase` field reports
+which surface is currently being walked:
+
+```json
+"active_reset": {
+  "task_id": "cases-analyticsV2-reset",
+  "status": "running",
+  "scheduled_at": "2026-05-15T16:02:00.000Z",
+  "attempts": 1,
+  "state": {
+    "phase": "cases",
+    "cases_processed": 50000,
+    "started_at": "2026-05-15T16:02:13.000Z"
   }
 }
 ```
 
+**Final state.** When the walk completes, Task Manager writes the full
+`ResetTaskState` from the runner's return value (including
+`cases_cursor`, `completed_at`, and any error message) and then — on
+success — removes the SO. The brief window between the final write and
+the SO removal is when consumers polling `/state` see `phase:
+"completed"`. After the SO removal, `active_reset` returns to `null`.
+On failure the SO is preserved with `status: "failed"` and the most
+recent throttled state intact (so `phase` shows where the walk died and
+`cases_processed` shows how far it got).
+
 If `enabled: true` but `index_exists: false`, the bootstrap
-(`ensureCaseIndex`) hit an error at plugin start and logged at ERROR; check
-Kibana logs and consider `POST /reset`.
+(`ensureCaseIndex`) hit an error at plugin start and logged at ERROR;
+check Kibana logs and consider `POST /reset`.
 
 ### Admin routes (mutating)
 
 The two routes below mutate subsystem state cluster-wide and operate
-**globally** across every space even when invoked from a single space's URL.
-They're gated behind a second flag:
+**globally** across every space even when invoked from a single space's
+URL. They're gated behind a second flag:
 
 ```yaml
 xpack.cases.analyticsV2.enable_admin_routes: true # default false
@@ -254,27 +314,98 @@ suspect the primary write path dropped a case. **Requires
 
 ```
 POST /internal/cases/_analyticsV2/reset
-→ 200 OK
+→ 202 Accepted
 {
   "reset": ".cases",
-  "data_views_deleted": 12
+  "data_views_deleted": 12,
+  "reset_task": {
+    "id": "cases-analyticsV2-reset",
+    "task_type": "cases.analyticsV2.fullReset",
+    "scheduled_at": "2026-05-15T16:02:00.000Z",
+    "poll": "/internal/cases/_analyticsV2/state"
+  }
 }
 ```
 
-Synchronous, destructive cleanup:
-
-1. Drops `.cases`.
-2. Recreates it from scratch using the same bootstrap path as plugin start.
-3. Deletes every per-space managed `Case Analytics` data view.
-4. Clears the in-memory data view bootstrap cache.
-5. Clears the reconciliation task's persisted cursor so the next periodic
-   tick walks every case from scratch.
-
-The next periodic reconciliation tick (or an explicit
-`/reconcile/run_soon`) repopulates the index. Use for mapping migrations,
-recovery from sustained writer failures, or administrator-initiated full
-backfills. Superuser only. **Requires
+**Two-phase contract.** The destructive cleanup is synchronous (drops the
+index, recreates it from scratch using the same bootstrap path as plugin
+start, deletes every per-space managed `Case Analytics` data view, clears
+the data view bootstrap cache). The full backfill walk that repopulates
+`.cases` from the SO source of truth runs **asynchronously** in a one-shot
+Task Manager job (`cases.analyticsV2.fullReset`). The route returns 202
+once the synchronous portion completes; the administrator polls
+`/state.active_reset` to track the backfill. **Requires
 `xpack.cases.analyticsV2.enable_admin_routes: true`.**
+
+**Why async.** Even at PR-1 scale (~50K cases on a ~1K-space tenant) the
+backfill walk runs for several minutes — well past any reasonable HTTP
+request budget. Running the walk in a dedicated Task Manager job means:
+
+- `/reset` returns in seconds at any tenant size.
+- The walk is durable across Kibana node restarts (Task Manager re-claims
+  a stuck task on another node).
+- Two `/reset` calls can't race — the second call removes the in-flight
+  reset task SO before scheduling its own (latest-wins).
+- The walk timeout is configurable per tenant
+  (`resetTaskTimeoutMinutes`) instead of capped by the HTTP request
+  timeout.
+- A configurable inter-page delay (`resetPageDelayMs`) lets administrators
+  throttle bulk-write pressure on shared clusters.
+
+**Polling for completion.** While the backfill task is running,
+`/state.active_reset.status` reports `"running"`. On success, Task Manager
+auto-removes the task SO and `/state.active_reset` returns `null`. On
+failure, the SO is preserved with `status: "failed"` and `state.cases_error`
+populated. The seed step omits the cursor on failure, so the next periodic
+tick falls back to a full walk and recovers any docs the partial reset
+missed.
+
+Use for mapping migrations, recovery from sustained writer failures, or
+administrator-initiated full backfills. Superuser only.
+
+### Tuning `/reset` at scale
+
+Two configuration knobs control the post-reset backfill's behaviour:
+
+| Setting | Default | Bounds | Effect |
+| ------- | ------- | ------ | ------ |
+| `xpack.cases.analyticsV2.resetTaskTimeoutMinutes` | `60` | `5`–`1440` (24h) | Wall-clock budget for the one-shot reset task. Task Manager kills the task and marks it failed if it exceeds this. |
+| `xpack.cases.analyticsV2.resetPageDelayMs` | `0` | `0`–`5000` | Inter-page sleep (in ms) between reconciliation runner pages. `0` = no throttle (runner still yields via `setImmediate`). |
+
+**Sizing the timeout.** The backfill walk is `O(documents)` not `O(spaces)` —
+what matters is total case volume. Approximate wall-clock at typical tenant
+shapes (default `resetPageDelayMs: 0`):
+
+| Tenant scale | Cases | Wall-clock | `resetTaskTimeoutMinutes` |
+| ------------ | ----- | ---------- | ------------------------- |
+| ≤ 100 spaces | ~5K | < 1 min | `60` (default) |
+| ~1K spaces | ~50K | ~3 min | `60` (default) |
+| ~5K spaces | ~250K | ~12 min | `60` (default) |
+| ~10K spaces | ~500K | ~25 min | `60` (default) |
+| ≥ 25K spaces | ~1.25M | ~60 min | `120` recommended |
+
+Numbers are extrapolated from a 3-space measurement of ~100 cases per space.
+Real tenants will vary — the WARN log line `cases-analyticsV2: reset failed:
+... task timeout exceeded` is the signal to raise the timeout. (When the
+activity surface lands in PR 2, total document volume ~20× — re-tune
+accordingly.)
+
+**Sizing the page delay.** A non-zero delay halves (at 50ms) or thirds (at
+100ms) the sustained ES bulk-write rate the backfill puts on the cluster, at
+proportional cost to wall-clock. The default `0` is the right call for most
+administrators — set this above zero only when the backfill is observably
+impacting concurrent workloads on a shared ES cluster. Always raise
+`resetTaskTimeoutMinutes` first if you raise `resetPageDelayMs` — a higher
+delay means a longer walk, which needs a bigger budget.
+
+**PIT lifetime caveat.** The reset task's reconciliation runner holds a
+Point-In-Time snapshot open for the duration of the walk. At multi-hour
+walks this prevents ES from merging segments that fall behind the snapshot's
+view, which can affect merge cadence and disk usage on busy clusters.
+Mitigation if you observe segment-merge stalls during a long backfill: drop
+the task timeout to a few hours (forcing a fresh PIT after each timeout) and
+let the periodic task fill in the residual delta — slower convergence but
+lighter merge pressure.
 
 ### Failure modes
 
@@ -285,6 +416,9 @@ backfills. Superuser only. **Requires
 | Reconciliation tick logs `processed=0` forever                 | Task state cursor stuck in the future                                 | POST /reset (clears state + repopulates)                                                                     |
 | Runtime fields missing from `Cases` data view                  | Template SOs have no extended fields                                  | Check template SOs; reconciliation tick re-syncs runtime fields                                              |
 | Case missing from `.cases` long after creation, no edits since | Out-of-band drift on a never-patched case (e.g. a direct ES delete)   | POST /reset. Periodic reconciliation only catches never-patched cases whose `created_at` is later than the cursor; older never-patched cases need the cursor cleared, which `/reset` does. |
+| `/state.active_reset.status: "failed"`                         | Reset task threw during the walk                                      | Inspect Kibana logs for the `cases-analyticsV2: full reset failed` ERROR; address the root cause; re-run POST /reset |
+| `/state.active_reset.status: "running"` for a long time        | Backfill task is mid-walk on a large tenant                           | Wait. Raise `resetTaskTimeoutMinutes` in `kibana.yml` if it exceeds your tolerance window (see "Tuning /reset at scale") |
+| `Event loop utilization exceeded threshold` from the reset task | A runner page is slower than expected on this hardware                | Raise `resetPageDelayMs` to 50–100 to throttle further                                                       |
 
 ## File layout
 
@@ -312,15 +446,32 @@ cases_analytics_v2/
 │
 ├── reconciliation/
 │   ├── index.ts             periodic task type registration + scheduling
-│   └── runner.ts            walks cases by `updated_at > last_run_at OR
-│                            (updated_at IS MISSING AND created_at >
-│                            last_run_at)` using PIT. The null branch picks up
-│                            never-patched cases the writer missed at create
-│                            time; the `created_at` guard keeps the per-tick
-│                            walk bounded. Both the PIT open and every paged
-│                            `find` opt into `namespaces: ['*']` — the
-│                            unscoped internal SO client otherwise silently
-│                            scopes to `default`.
+│   │                        (`maxAttempts: 1`; per-surface cursor named
+│   │                        `cases_last_run_at` for forward-compat with the
+│   │                        activity surface in PR 2)
+│   ├── runner.ts            walks cases by `updated_at > last_run_at OR
+│   │                        (updated_at IS MISSING AND created_at >
+│   │                        last_run_at)` using PIT. The null branch picks up
+│   │                        never-patched cases the writer missed at create
+│   │                        time; the `created_at` guard keeps the per-tick
+│   │                        walk bounded. Both the PIT open and every paged
+│   │                        `find` opt into `namespaces: ['*']` — the
+│   │                        unscoped internal SO client otherwise silently
+│   │                        scopes to `default`. Configurable inter-page
+│   │                        delay (`pageDelayMs`); periodic ticks pass `0`
+│   │                        and yield via `setImmediate`, the reset task
+│   │                        passes `resetPageDelayMs` for ES throttling.
+│   ├── reset_runner.ts      "walk + seed cursor" coordinator called by the
+│   │                        one-shot reset task. Per-surface failure
+│   │                        isolation; cursor-omit-on-failure so the next
+│   │                        periodic tick re-walks instead of accepting
+│   │                        silent data loss.
+│   └── reset_task.ts        one-shot Task Manager task type for the async
+│                            backfill (`cases.analyticsV2.fullReset`).
+│                            Singleton ID, configurable timeout + page delay,
+│                            wall-clock-throttled live progress reporting,
+│                            throws on failure to preserve
+│                            `/state.active_reset` visibility.
 │
 ├── data_view/
 │   ├── service.ts                   ensures Cases data view; syncs runtime fields

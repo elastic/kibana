@@ -14,13 +14,43 @@ import {
   CASE_INDEX_NAME,
 } from '../constants';
 import { CASE_DATA_VIEW_ID_PREFIX } from '../data_view/data_view_specs';
+import { RECONCILIATION_TASK_ID, RECONCILIATION_TASK_TYPE } from '../reconciliation';
 import {
-  RECONCILIATION_TASK_ID,
-  RECONCILIATION_TASK_TYPE,
-  resetReconciliationTask,
-} from '../reconciliation';
+  fetchResetTask,
+  RESET_TASK_TYPE,
+  scheduleResetTask,
+  type ResetTaskState,
+} from '../reconciliation/reset_task';
 import { ensureCaseIndex } from '../ensure_indices/case';
 import type { CasesAnalyticsV2WriterContract } from '../writer';
+
+/**
+ * Shape surfaced under `/state.active_reset` for the live or
+ * most-recently-failed reset task. `null` when no reset task SO exists
+ * — Task Manager auto-deletes one-shot tasks on success, so `null`
+ * means either "no reset has ever been scheduled" or "the last reset
+ * succeeded and was cleaned up". A populated value with
+ * `status: 'failed'` is the administrator's signal that the last reset
+ * threw on the cases walk; the periodic task continues to fill in the
+ * gap regardless.
+ *
+ * `state` evolves over the task's lifetime:
+ *   - At schedule time (before any throttled write): `{}`.
+ *   - During the walk: `phase`, `cases_processed`, and `started_at`
+ *     populate progressively via the reset task's wall-clock-throttled
+ *     progress writer.
+ *   - At task completion: full `ResetTaskState` written by Task
+ *     Manager from the runner's return value, including `cases_cursor`,
+ *     `completed_at`, and any error message.
+ */
+interface ActiveResetSnapshot {
+  task_id: string;
+  status: string;
+  scheduled_at: string;
+  /** Most recent attempt count from Task Manager. */
+  attempts: number;
+  state: Partial<ResetTaskState> | Record<string, never>;
+}
 
 const DATA_VIEW_SO_TYPE = 'index-pattern';
 
@@ -85,14 +115,6 @@ interface RegisterArgs {
   enabled: boolean;
   /**
    * Resolved config value for
-   * `xpack.cases.analyticsV2.reconciliationIntervalMinutes`. Threaded
-   * through so `/reset` can re-`ensureScheduled` the reconciliation
-   * task at the configured cadence after clearing its persisted
-   * cursor (instead of falling back to a hard-coded interval).
-   */
-  reconciliationIntervalMinutes: number;
-  /**
-   * Resolved config value for
    * `xpack.cases.analyticsV2.enable_admin_routes`. Gates the mutating
    * administrator routes (`/reset` and `/reconcile/run_soon`) at
    * registration time — when false, neither route is registered and a
@@ -126,7 +148,6 @@ export const registerCasesAnalyticsV2Routes = ({
   clearDataViewBootstrapCache,
   enabled,
   enableAdminRoutes,
-  reconciliationIntervalMinutes,
 }: RegisterArgs): void => {
   const router = core.http.createRouter();
   const log = logger.get('routes');
@@ -143,14 +164,16 @@ export const registerCasesAnalyticsV2Routes = ({
       options: { access: 'internal' },
     },
     async (context, _request, response) => {
-      // Pull the live reconciliation task to surface its last run.
       const taskManager = getTaskManager();
       let lastRun: {
-        last_run_at?: string;
+        cases_last_run_at?: string;
         runs?: number;
         next_run_at?: string;
         status?: string;
       } | null = null;
+      // Live or most-recently-failed reset task. See `ActiveResetSnapshot`
+      // for the populated-vs-null semantics.
+      let activeReset: ActiveResetSnapshot | null = null;
 
       if (taskManager != null) {
         try {
@@ -159,9 +182,9 @@ export const registerCasesAnalyticsV2Routes = ({
           });
           const task = tasks.docs[0];
           if (task != null) {
-            const state = (task.state ?? {}) as { last_run_at?: string };
+            const state = (task.state ?? {}) as { cases_last_run_at?: string };
             lastRun = {
-              last_run_at: state.last_run_at,
+              cases_last_run_at: state.cases_last_run_at,
               runs: task.attempts,
               next_run_at:
                 task.runAt instanceof Date
@@ -176,6 +199,31 @@ export const registerCasesAnalyticsV2Routes = ({
               err instanceof Error ? err.message : String(err)
             }`
           );
+        }
+
+        // Reset task fetch is by ID (singleton). 404 → null (no
+        // reset scheduled, or the last one succeeded and Task Manager
+        // removed it). A populated value with `status: 'failed'` is
+        // how administrators detect that the last reset threw.
+        const resetTask = await fetchResetTask({ taskManager, logger: log });
+        if (resetTask != null) {
+          activeReset = {
+            task_id: resetTask.id,
+            status: resetTask.status,
+            scheduled_at:
+              resetTask.scheduledAt instanceof Date
+                ? resetTask.scheduledAt.toISOString()
+                : (resetTask.scheduledAt as unknown as string),
+            attempts: resetTask.attempts,
+            // Task Manager's `state` is `Record<string, unknown>` at
+            // the type layer; the shape is owned by this task type's
+            // runner. While `idle`, state is `{}`; while `running`,
+            // the throttled progress writer pushes partial state every
+            // ~30s (`phase`, `cases_processed`, `started_at`); after
+            // the runner returns, state is a populated `ResetTaskState`
+            // (or the partial mid-walk state on a thrown failure).
+            state: (resetTask.state ?? {}) as Partial<ResetTaskState> | Record<string, never>,
+          };
         }
       }
 
@@ -199,12 +247,27 @@ export const registerCasesAnalyticsV2Routes = ({
       return response.ok({
         body: {
           enabled,
+          // Top-level `index` / `index_exists` are aliases pointing at
+          // the cases surface, alongside the per-surface block under
+          // `surfaces`. The aliases stay even after the activity
+          // surface lands so existing consumers keep working.
           index: CASE_INDEX_NAME,
           index_exists: indexExists,
+          surfaces: {
+            cases: {
+              index: CASE_INDEX_NAME,
+              index_exists: indexExists,
+            },
+          },
           reconciliation: {
             task_type: RECONCILIATION_TASK_TYPE,
             last_run: lastRun,
           },
+          // Live or most-recently-failed reset task. `null` means
+          // either "no reset scheduled" or "last reset succeeded and
+          // its SO was auto-removed". A populated value with
+          // `status: 'failed'` is the failure signal.
+          active_reset: activeReset,
         },
       });
     }
@@ -259,11 +322,29 @@ export const registerCasesAnalyticsV2Routes = ({
   //
   // Full subsystem reset: drops the analytics index, recreates it,
   // deletes every per-space `Cases` data view, clears the data view
-  // bootstrap cache, then clears the reconciliation task's persisted
-  // cursor so the next periodic tick walks every case from scratch.
-  // Returns 200 once the destructive cleanup has succeeded; the
-  // backfill is the next reconciliation tick (or `/reconcile/run_soon`
-  // if the administrator wants to trigger it immediately).
+  // bootstrap cache, then schedules a one-shot Task Manager job to
+  // backfill the index from the SO source of truth. Returns 202 before
+  // the backfill begins — the backfill runs durably in the background
+  // and the administrator polls `/state.active_reset` for progress /
+  // completion.
+  //
+  // The backfill runs as a Task Manager job
+  // (`cases.analyticsV2.fullReset`) so that:
+  //   - `/reset` returns in seconds at any tenant size.
+  //   - The walk is durable across Kibana node restarts (Task
+  //     Manager re-claims a stuck task on another node).
+  //   - Two `/reset` calls can't race — `scheduleResetTask` removes
+  //     any in-flight reset task SO before scheduling a fresh one.
+  //   - The walk timeout is configurable via
+  //     `xpack.cases.analyticsV2.resetTaskTimeoutMinutes`.
+  //   - An inter-page delay
+  //     (`xpack.cases.analyticsV2.resetPageDelayMs`) lets administrators
+  //     throttle bulk-write pressure on shared clusters.
+  //
+  // Steps 1–4 (drop, recreate, delete data views, clear cache) stay
+  // in-handler because they're `O(spaces)` not `O(documents)` and
+  // benefit from synchronous confirmation that destructive cleanup
+  // succeeded before the (much slower) walk begins.
   router.post(
     {
       path: CASES_ANALYTICS_V2_RESET_URL,
@@ -276,9 +357,11 @@ export const registerCasesAnalyticsV2Routes = ({
       const coreContext = await context.core;
       const esClient = coreContext.elasticsearch.client.asInternalUser;
       // Per-space data view cleanup needs the unscoped SO client (see
-      // `getInternalSavedObjectsClient` JSDoc). The route is gated on
-      // writer availability so administrators get a clear 503 here
-      // rather than on the next reconciliation tick.
+      // `getInternalSavedObjectsClient` JSDoc). The reset task itself
+      // resolves the writer and SO client from its own getRunnerDeps
+      // closure, but the route is still gated on writer availability so
+      // administrators get a clear 503 here rather than scheduling a
+      // task that immediately throws when its getRunnerDeps fires.
       const internalSoClient = getInternalSavedObjectsClient();
       const writer = getWriter();
       if (internalSoClient == null || writer == null || taskManager == null) {
@@ -318,20 +401,34 @@ export const registerCasesAnalyticsV2Routes = ({
         //    until process restart.
         clearDataViewBootstrapCache();
 
-        // 5. Clear the reconciliation task's persisted cursor so the
-        //    next tick walks every case from scratch. Reconciliation
-        //    is the backfill path here; the next tick (or an
-        //    explicit `/reconcile/run_soon`) repopulates the index.
-        await resetReconciliationTask({
-          taskManager,
-          logger: log,
-          intervalMinutes: reconciliationIntervalMinutes,
-        });
+        // 5. Schedule the one-shot backfill. `scheduleResetTask`
+        //    removes any existing reset task SO before scheduling a
+        //    fresh one, so a second `/reset` cleanly replaces an
+        //    in-flight reset (latest-wins).
+        const scheduledTask = await scheduleResetTask({ taskManager, logger: log });
 
-        return response.ok({
+        return response.custom({
+          // 202 Accepted: the destructive cleanup succeeded
+          // synchronously (index dropped and recreated, data views
+          // wiped, cache cleared) but the backfill walk is still
+          // running. `/state.active_reset` is the canonical progress
+          // and completion surface.
+          statusCode: 202,
           body: {
             reset: CASE_INDEX_NAME,
             data_views_deleted: deletedDataViews,
+            // The reset task ID and scheduled-at give the administrator
+            // everything they need to poll `/state.active_reset` and
+            // correlate logs.
+            reset_task: {
+              id: scheduledTask.id,
+              task_type: RESET_TASK_TYPE,
+              scheduled_at:
+                scheduledTask.scheduledAt instanceof Date
+                  ? scheduledTask.scheduledAt.toISOString()
+                  : (scheduledTask.scheduledAt as unknown as string),
+              poll: CASES_ANALYTICS_V2_STATE_URL,
+            },
           },
         });
       } catch (err) {

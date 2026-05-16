@@ -108,20 +108,66 @@ export async function getAnalyticsCase(es: Client, caseId: string): Promise<Anal
 }
 
 /**
- * Trigger the `/reset` administrator route. The handler synchronously
- * drops `.cases`, recreates it, deletes every per-space data view,
- * clears the bootstrap cache, and clears the reconciliation task's
- * persisted cursor. Returns the response body for callers that want to
- * assert on `data_views_deleted`.
+ * `/reset` returns 202 — the destructive cleanup (drop + recreate
+ * index, delete data views, clear cache) is synchronous, but the
+ * full backfill walk runs asynchronously in a one-shot Task Manager
+ * job (`cases.analyticsV2.fullReset`). This helper:
+ *   1. Posts to `/reset` and asserts the 202 + `reset_task.id`
+ *      envelope.
+ *   2. Polls `/state.active_reset` until the task SO disappears
+ *      (Task Manager auto-removes one-shot tasks on success) or
+ *      transitions to `'failed'`.
+ * Returns the final reset task snapshot (`null` on success).
+ *
+ * Tests that need to assert specific docs are present after reset
+ * still call `waitForAnalyticsCase` — this helper just ensures the
+ * backfill walk has completed before the test moves on.
  */
 export async function resetV2(
-  supertest: SuperTest.Agent
-): Promise<{ reset: string; data_views_deleted: number }> {
+  supertest: SuperTest.Agent,
+  options: { timeoutMs?: number } = {}
+): Promise<V2StateBody['active_reset']> {
   const response = await supertest
     .post('/internal/cases/_analyticsV2/reset')
     .set(INTERNAL_HEADERS)
-    .expect(200);
-  return response.body;
+    .expect(202);
+
+  // Sanity-check the response envelope so a regression that returns
+  // 200 (synchronous walk) or omits the task-id payload fails here
+  // instead of passing silently.
+  if (response.body?.reset_task?.id == null) {
+    throw new Error(
+      `/reset returned 202 but the body is missing reset_task.id. body=${JSON.stringify(
+        response.body
+      )}`
+    );
+  }
+
+  return waitForResetComplete(supertest, options.timeoutMs);
+}
+
+/**
+ * Polls `/state` until the in-flight reset task either disappears
+ * (Task Manager auto-removes one-shot tasks on successful return)
+ * or transitions to `'failed'`. Returns the final snapshot (`null`
+ * on success, the failed task on failure).
+ *
+ * Separate from `resetV2` so tests that schedule a reset via a
+ * custom handler call (e.g. asserting the 202 response shape
+ * directly) can still wait for completion afterward.
+ */
+export async function waitForResetComplete(
+  supertest: SuperTest.Agent,
+  timeoutMs = BOOTSTRAP_TIMEOUT_MS
+): Promise<V2StateBody['active_reset']> {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    const state = await getV2State(supertest);
+    if (state.active_reset == null) return null;
+    if (state.active_reset.status === 'failed') return state.active_reset;
+    await sleep(POLL_INTERVAL_MS);
+  }
+  throw new Error(`Timed out waiting for reset task to complete (${timeoutMs}ms)`);
 }
 
 /** GET the /state route. */
@@ -164,15 +210,50 @@ export interface AnalyticsCaseSource {
 
 export interface V2StateBody {
   enabled: boolean;
+  /** Aliases for the cases-surface fields under `surfaces.cases`. */
   index: string;
   index_exists: boolean;
+  surfaces: {
+    cases: { index: string; index_exists: boolean };
+  };
   reconciliation: {
     task_type: string;
     last_run: {
-      last_run_at?: string;
+      cases_last_run_at?: string;
       runs?: number;
       next_run_at?: string;
       status?: string;
     } | null;
   };
+  /**
+   * Live or most-recently-failed reset task. `null` when no reset
+   * is scheduled, or when the most recent reset succeeded (Task
+   * Manager auto-removes one-shot tasks on success). A non-null
+   * snapshot with `status: 'failed'` is the administrator's signal
+   * that the backfill walk threw.
+   */
+  active_reset: {
+    task_id: string;
+    status: string;
+    scheduled_at: string;
+    attempts: number;
+    /**
+     * Mirrors `ResetTaskState` in `reset_task.ts`. Updated live by
+     * the reset task's wall-clock-throttled progress writer (every
+     * ~30s during the walk): `phase`, `cases_processed`, and
+     * `started_at` populate progressively. `cases_cursor`,
+     * `completed_at`, and `cases_error` only land in the final
+     * write at task completion.
+     */
+    state: ActiveResetState;
+  } | null;
+}
+
+export interface ActiveResetState {
+  phase?: 'cases' | 'completed' | null;
+  cases_processed?: number | null;
+  cases_cursor?: string | null;
+  started_at?: string;
+  completed_at?: string | null;
+  cases_error?: string | null;
 }

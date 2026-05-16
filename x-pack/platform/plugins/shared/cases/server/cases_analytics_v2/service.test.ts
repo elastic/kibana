@@ -24,6 +24,8 @@ describe('CasesAnalyticsV2Service', () => {
         enabled: false, // doesn't matter for proxy shape
         reconciliationIntervalMinutes: 30,
         enableAdminRoutes: false,
+        resetTaskTimeoutMinutes: 60,
+        resetPageDelayMs: 0,
       });
       const proxy = service.getWriter();
 
@@ -52,6 +54,8 @@ describe('CasesAnalyticsV2Service', () => {
         enabled: false,
         reconciliationIntervalMinutes: 30,
         enableAdminRoutes: false,
+        resetTaskTimeoutMinutes: 60,
+        resetPageDelayMs: 0,
       });
       const refA = service.getDataViewRefresher();
       const refB = service.getDataViewRefresher();
@@ -66,6 +70,8 @@ describe('CasesAnalyticsV2Service', () => {
         enabled: false,
         reconciliationIntervalMinutes: 30,
         enableAdminRoutes: false,
+        resetTaskTimeoutMinutes: 60,
+        resetPageDelayMs: 0,
       });
       const refresher = service.getDataViewRefresher();
 

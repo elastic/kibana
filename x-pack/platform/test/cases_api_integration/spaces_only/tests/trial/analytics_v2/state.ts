@@ -31,6 +31,8 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(state.enabled).to.eql(true);
       expect(state.index).to.eql('.cases');
       expect(state.index_exists).to.eql(true);
+      expect(state.surfaces.cases.index).to.eql('.cases');
+      expect(state.surfaces.cases.index_exists).to.eql(true);
       expect(state.reconciliation.task_type).to.eql('cases.analyticsV2.reconciliation');
       // The reconciliation task may or may not have run yet —
       // accept either. What matters is that `last_run` is
@@ -54,6 +56,16 @@ export default ({ getService }: FtrProviderContext): void => {
       await resetV2(supertest);
       const afterReset = await getV2State(supertest);
       expect(afterReset.index_exists).to.eql(true);
+    });
+
+    it('exposes active_reset on the response shape (null when no reset is in flight)', async () => {
+      // resetV2 in afterEach already drains any in-flight reset, so
+      // a fresh `/state` call should see no active reset task SO.
+      // The field must exist (even when null) so consumers can rely
+      // on its presence as the "no reset is happening" signal.
+      const state = await getV2State(supertest);
+      expect(state).to.have.property('active_reset');
+      expect(state.active_reset).to.eql(null);
     });
   });
 };

@@ -356,7 +356,6 @@ describe('registerCasesAnalyticsV2Routes — enableAdminRoutes gating', () => {
       clearDataViewBootstrapCache: jest.fn(),
       enabled: true,
       enableAdminRoutes: false,
-      reconciliationIntervalMinutes: 30,
       ...overrides,
     };
   }

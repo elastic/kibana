@@ -12,9 +12,9 @@ import { createCase, deleteAllCaseItems, getAuthWithSuperUser } from '../../../.
 import {
   CASE_INDEX,
   resetV2,
-  runReconcileSoon,
   waitForAnalyticsCase,
   waitForCaseIndexExists,
+  waitForResetComplete,
 } from './helpers';
 
 const INTERNAL_HEADERS = {
@@ -23,11 +23,11 @@ const INTERNAL_HEADERS = {
 } as const;
 
 /**
- * `/reset` is the administrator escape hatch. Synchronously drops
- * `.cases`, recreates it, deletes every per-space data view, clears
- * the data view bootstrap cache, and clears the reconciliation task's
- * persisted cursor so the next periodic tick (or
- * `/reconcile/run_soon`) walks every case from scratch.
+ * `/reset` is the administrator escape hatch. It returns 202 and runs
+ * the backfill walk asynchronously in a one-shot Task Manager task. The
+ * synchronous portion (drop + recreate index, delete data views, clear
+ * cache) happens in-handler; only the `O(documents)` walk is moved out.
+ * Tests assert both phases.
  */
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
@@ -41,23 +41,39 @@ export default ({ getService }: FtrProviderContext): void => {
       await resetV2(supertest);
     });
 
-    it('drops `.cases` and recreates it, returns 200 with the reset envelope', async () => {
+    it('drops `.cases` and recreates it, returns 202 with a reset_task envelope', async () => {
       const created = await createCase(supertestWithoutAuth, getPostCaseRequest(), 200, auth);
       await waitForAnalyticsCase(es, created.id);
 
+      // Reset — 202, not 200. Destructive cleanup is synchronous;
+      // the backfill walk is scheduled.
       const response = await supertest
         .post('/internal/cases/_analyticsV2/reset')
         .set(INTERNAL_HEADERS)
-        .expect(200);
+        .expect(202);
 
       expect(response.body.reset).to.eql(CASE_INDEX);
-      expect(response.body).to.have.property('data_views_deleted');
+      expect(response.body.reset_task).to.have.property('id', 'cases-analyticsV2-reset');
+      expect(response.body.reset_task).to.have.property(
+        'task_type',
+        'cases.analyticsV2.fullReset'
+      );
+      expect(response.body.reset_task).to.have.property('scheduled_at');
+      expect(response.body.reset_task).to.have.property(
+        'poll',
+        '/internal/cases/_analyticsV2/state'
+      );
 
-      // The index exists again (recreated by the handler before the
-      // response returned).
+      // The index exists again (recreated by the synchronous
+      // portion before the response returned).
       await waitForCaseIndexExists(es);
       const exists = await es.indices.exists({ index: CASE_INDEX });
       expect(exists).to.eql(true);
+
+      // Wait for the async walk to complete; otherwise the next
+      // test's afterEach `resetV2` would race the in-flight reset
+      // task.
+      await waitForResetComplete(supertest);
     });
 
     it('reports the number of per-space data views deleted', async () => {
@@ -93,7 +109,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const response = await supertest
         .post('/internal/cases/_analyticsV2/reset')
         .set(INTERNAL_HEADERS)
-        .expect(200);
+        .expect(202);
 
       expect(response.body).to.have.property('data_views_deleted');
       // At least one — the default-space view from the createCase
@@ -101,6 +117,8 @@ export default ({ getService }: FtrProviderContext): void => {
       // afterEach resets state, so this test is the only one
       // running here.
       expect(response.body.data_views_deleted).to.be.greaterThan(0);
+
+      await waitForResetComplete(supertest);
     });
 
     it('clears reconciliation task state so the follow-up backfill walks every case', async () => {
@@ -114,17 +132,40 @@ export default ({ getService }: FtrProviderContext): void => {
       await waitForAnalyticsCase(es, oldCase.id);
 
       // Bump the cursor by running an explicit reconciliation.
-      await runReconcileSoon(supertest);
+      await supertest
+        .post('/internal/cases/_analyticsV2/reconcile/run_soon')
+        .set(INTERNAL_HEADERS)
+        .expect(200);
 
       // Without `/reset`, the cursor would now be ahead of
       // `oldCase.created_at` and a periodic tick wouldn't re-emit
-      // oldCase. `/reset` clears the cursor (`lastRunAt: undefined →
-      // no filter → walk every case`), so the pre-existing case
-      // lands in `.cases` again after the next reconciliation tick.
+      // oldCase. `/reset` schedules a full backfill (`lastRunAt:
+      // undefined → no filter → walk every case`), so the
+      // pre-existing case lands in `.cases` again after the reset
+      // task completes.
       await resetV2(supertest);
-      await runReconcileSoon(supertest);
 
       await waitForAnalyticsCase(es, oldCase.id, { expect: 'present' });
+    });
+
+    it('schedules a one-shot reset task whose status is observable via /state.active_reset', async () => {
+      // Schedule a reset; the task should be visible via
+      // `/state.active_reset` (idle/running/completed) for at least
+      // the brief window before Task Manager auto-cleans it on
+      // success. Catching it as `idle` vs `running` vs already
+      // gone depends on timing — what matters is that the field
+      // exists and converges to `null` (success) within the
+      // bootstrap timeout.
+      await supertest
+        .post('/internal/cases/_analyticsV2/reset')
+        .set(INTERNAL_HEADERS)
+        .expect(202);
+
+      // After the task completes, Task Manager auto-removes the
+      // SO and `/state.active_reset` returns null.
+      // `waitForResetComplete` handles the polling loop.
+      const final = await waitForResetComplete(supertest);
+      expect(final).to.eql(null);
     });
   });
 };

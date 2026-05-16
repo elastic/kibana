@@ -70,6 +70,48 @@ export const ConfigSchema = schema.object({
      * ever sunset together.
      */
     enable_admin_routes: schema.boolean({ defaultValue: true }),
+    /**
+     * Wall-clock budget for the one-shot reset task scheduled by
+     * `POST /internal/cases/_analyticsV2/reset`. The reset task does a
+     * full re-walk of every case across every space, which is
+     * `O(documents)` not `O(spaces)`. At small/medium tenant sizes
+     * (≤ ~2K spaces) the default 60 minutes is comfortable. At larger
+     * tenants it must be raised — measured wall-clock at 10K spaces
+     * with default `resetPageDelayMs` is ~10 minutes for the cases
+     * surface alone. The 24-hour ceiling (`max: 1440`) prevents
+     * typo-driven zombie tasks from holding a Task Manager slot
+     * indefinitely.
+     *
+     * Tuning this DOES NOT touch the periodic reconciliation task — that
+     * one runs `O(delta)` and finishes in seconds regardless of tenant
+     * size, so it doesn't need a separate timeout knob.
+     */
+    resetTaskTimeoutMinutes: schema.number({
+      defaultValue: 60,
+      min: 5,
+      max: 1440,
+    }),
+    /**
+     * Inter-page sleep applied between reconciliation runner pages
+     * **only when the runner is invoked from the reset task** (not from
+     * the periodic task). Default `0` keeps the post-reset backfill as
+     * fast as possible — the right behaviour for most administrators,
+     * who just want `/reset` to converge.
+     *
+     * Administrators on shared / capacity-constrained ES clusters can
+     * raise this to throttle the bulk-write pressure the backfill puts
+     * on the cluster. The trade-off is wall-clock vs cluster
+     * friendliness — a backfill is a one-shot operation, so accepting a
+     * longer wall-clock to be a better neighbour to other workloads is
+     * often the right call on busy clusters.
+     *
+     * 5-second ceiling — beyond that it's not throttling, it's stalling.
+     */
+    resetPageDelayMs: schema.number({
+      defaultValue: 0,
+      min: 0,
+      max: 5000,
+    }),
   }),
   attachments: schema.object({
     enabled: schema.boolean({ defaultValue: false }),

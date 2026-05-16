@@ -45,9 +45,13 @@ interface RegisterReconciliationTaskArgs {
   }>;
 }
 
-/** Persisted task state. Single cursor field for the cases surface. */
+/**
+ * Persisted task state. Per-surface cursor naming so the activity
+ * surface can plug in its own field (`activity_last_run_at`) without a
+ * one-shot migration when it lands.
+ */
 interface ReconciliationTaskState {
-  last_run_at?: string;
+  cases_last_run_at?: string;
 }
 
 /**
@@ -76,7 +80,7 @@ export function registerReconciliationTask({
       createTaskRunner: ({ taskInstance }) => ({
         run: async () => {
           const previousState = (taskInstance.state ?? {}) as ReconciliationTaskState;
-          const lastRunAt = clampCursorToNotFuture(previousState.last_run_at, logger);
+          const lastRunAt = clampCursorToNotFuture(previousState.cases_last_run_at, logger);
 
           const deps = await getRunnerDeps();
           const result = await runReconciliation({
@@ -85,7 +89,7 @@ export function registerReconciliationTask({
             logger,
             lastRunAt,
           });
-          return { state: { last_run_at: result.newLastRunAt } };
+          return { state: { cases_last_run_at: result.newLastRunAt } };
         },
         cancel: async () => {
           // The runner is an SO walk plus writer dispatches — no
