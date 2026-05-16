@@ -125,7 +125,7 @@ function createRecursiveStepSchema(
 
     // Return discriminated union with all step types
     // This creates proper JSON schema validation that Monaco YAML can handle
-    return z.discriminatedUnion('type', [
+    const discriminated = z.discriminatedUnion('type', [
       forEachSchema,
       whileSchema,
       ifSchema,
@@ -144,6 +144,30 @@ function createRecursiveStepSchema(
       ...connectorSchemas,
       ...aliasSchemas,
     ]);
+
+    if (!loose) {
+      return discriminated;
+    }
+
+    // In loose mode, fall back to a permissive passthrough step for any
+    // step type that is not in the discriminated union above. The loose
+    // schema is used by `getWorkflowZodSchemaLoose()` for built-in
+    // workflow registration (`BuiltinWorkflowsService`), which runs at
+    // plugin setup time *before* stack-connector action types (e.g.
+    // `.http`, `.slack`) are queryable via the actions client. Without
+    // this fallback every reference to such a connector would fail
+    // schema validation with "Invalid step type", and the workflow
+    // would be persisted with `valid: false` — leaving operators
+    // unable to enable the bundled workflow until they re-saved its
+    // YAML through the strict-schema PUT endpoint.
+    const unknownStepFallback = z
+      .object({
+        name: z.string().min(1),
+        type: z.string().min(1),
+      })
+      .passthrough();
+
+    return z.union([discriminated, unknownStepFallback]);
   });
 
   return stepSchema;

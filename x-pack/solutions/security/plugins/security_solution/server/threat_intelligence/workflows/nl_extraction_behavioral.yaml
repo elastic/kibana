@@ -92,6 +92,17 @@ steps:
           body:
             text: "{{ foreach.item._source.content.body_text }}"
             defang: true
+        on-failure:
+          # A single oversized or malformed report should not abort the
+          # entire batch. `registerExtractIocsRoute` lifts Kibana's default
+          # 1 MiB body cap to 10 MiB, but RSS/STIX/TAXII feeds occasionally
+          # exceed even that — and the regex extractor itself can in
+          # principle reject pathological input. Downstream steps already
+          # tolerate a missing IOC output: `find_related_reports` is gated
+          # on `if: "steps.extract_iocs.output.ioc_set_hash : *"`, and
+          # `persist_extractions` drops undefined fields from the partial
+          # update doc (see its long comment on Liquid string coercion).
+          continue: true
 
       - name: extract_behaviors
         type: ai.agent
