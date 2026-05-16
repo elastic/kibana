@@ -1,0 +1,180 @@
+# Alerting v2 — Error contract
+
+All `alerting_v2` HTTP routes emit error responses that conform to the shared
+`errorResponseSchema` (defined in
+[`@kbn/alerting-v2-schemas`](../../../../../packages/shared/response-ops/alerting-v2-schemas/src/error_response_schema.ts)):
+
+```jsonc
+{
+  "code": "RULE_NOT_FOUND",         // stable, machine-readable — safe to branch on
+  "error": "Not Found",              // short, human-readable category
+  "message": "Rule with id=foo …",  // human-friendly explanation — NOT part of the contract
+  "details": { "rule_id": "foo" }  // optional structured context
+}
+```
+
+This shape is centralized in `BaseAlertingRoute.onError`. Clients SHOULD branch
+on `code`. The `message` field is intentionally NOT part of the API contract —
+do not parse it.
+
+Tracking issue: <https://github.com/elastic/rna-program/issues/431>
+
+> [!NOTE]
+> Zod validation errors raised by Kibana core (before a route's handler runs)
+> currently come out via core's default error path and do not yet follow the
+> shape above. See <https://github.com/elastic/kibana/issues/265514> for the
+> upstream work to align that path.
+
+## How error codes are produced
+
+```
+                ┌────────────────────────────────────────────┐
+                │  Domain layer (clients, services, utils)   │
+                │   throws Boom.<status>(msg, {              │
+                │     code: ALERTING_V2_ERROR_CODES.X,       │
+                │     details: { … }                          │
+                │   })                                        │
+                └─────────────────────┬──────────────────────┘
+                                      ▼
+                ┌────────────────────────────────────────────┐
+                │  BaseAlertingRoute.onError                 │
+                │  • Pulls `code` / `details` from boom.data │
+                │  • Falls back to deriveCodeFromStatus()    │
+                │    when no domain code is attached         │
+                │  • Emits the standard body via             │
+                │    response.customError(...)               │
+                └────────────────────────────────────────────┘
+```
+
+Two helper sources of codes:
+
+- `server/lib/errors/error_codes.ts` — `ALERTING_V2_ERROR_CODES`: the
+  authoritative catalog of domain-specific codes.
+- `server/routes/derive_error_code.ts` — `deriveCodeFromStatus(statusCode)`:
+  the floor mapping from HTTP status to a generic code (`NOT_FOUND`,
+  `CONFLICT`, …). Used only when a domain code is not attached.
+
+## Domain catalog
+
+Code source of truth: `server/lib/errors/error_codes.ts`. Adding a new code is
+backwards compatible. Renaming or removing a code is a breaking change.
+
+### Rules (`server/lib/rules_client/`)
+
+| Code                          | Status | When                                                                 | `details`                                  |
+| ----------------------------- | ------ | -------------------------------------------------------------------- | ------------------------------------------ |
+| `RULE_NOT_FOUND`              | 404    | `getRule` / `updateRule` / `deleteRule` cannot find a rule by id     | `{ rule_id }`                              |
+| `RULE_ALREADY_EXISTS`         | 409    | `createRule` collides with an existing id                            | `{ rule_id }`                              |
+| `RULE_VERSION_CONFLICT`       | 409    | An update / delete races another writer (`if_seq_no` mismatch)       | `{ rule_id }`                              |
+| `INVALID_RULE_DATA`           | 400    | The submitted body fails the domain-level schema check               | `{ issues }` (Zod issue tree)              |
+| `INVALID_STATE_TRANSITION`    | 400    | `state_transition` is incompatible with the rule's `kind`            | `{ rule_id, kind, transition }`            |
+| `INVALID_BULK_PARAMS`         | 400    | Bulk operation combines `ids` with `filter` / `search` / `match_all` | `{ params }`                               |
+| `IMMUTABLE_FIELDS_CHANGED`    | 400    | PUT (upsert) request changes a field flagged as immutable            | `{ fields }`                               |
+| `INVALID_FILTER_FIELD`        | 400    | The `filter` references a field that is not in the allow-list        | `{ field, allowed_fields }`                |
+| `UNSUPPORTED_FILTER_FUNCTION` | 400    | The `filter` uses a KQL function we do not translate yet             | `{ function }`                             |
+
+### Action policies (`server/lib/action_policy_client/`)
+
+| Code                              | Status | When                                                                | `details`              |
+| --------------------------------- | ------ | ------------------------------------------------------------------- | ---------------------- |
+| `ACTION_POLICY_NOT_FOUND`         | 404    | `get` / `update` / `delete` cannot find an action policy by id      | `{ action_policy_id }` |
+| `ACTION_POLICY_ALREADY_EXISTS`    | 409    | `createActionPolicy` collides with an existing id                   | `{ action_policy_id }` |
+| `ACTION_POLICY_VERSION_CONFLICT`  | 409    | An update / delete races another writer                             | `{ action_policy_id }` |
+| `INVALID_ACTION_POLICY_DATA`      | 400    | The submitted body fails the domain-level schema check              | `{ issues }`           |
+| `RULE_NOT_FOUND_FOR_POLICY`       | 400    | A `single_rule` action policy references a non-existent rule        | `{ rule_id }`          |
+| `INVALID_DATE_STRING`             | 400    | A user-supplied date (e.g. `snoozed_until`) fails ISO-8601 parsing  | `{ value }`            |
+
+### Alert actions (`server/lib/alert_actions_client/`)
+
+| Code                    | Status | When                                                        | `details`                       |
+| ----------------------- | ------ | ----------------------------------------------------------- | ------------------------------- |
+| `ALERT_EVENT_NOT_FOUND` | 404    | No alert event matches the supplied `group_hash` (+ optional `episode_id`) | `{ group_hash, episode_id? }`   |
+
+### Rule doctor insights (`server/lib/rule_doctor_insights_client/`)
+
+| Code                | Status | When                                                          | `details`        |
+| ------------------- | ------ | ------------------------------------------------------------- | ---------------- |
+| `INSIGHT_NOT_FOUND` | 404    | `getInsight` / `updateInsightStatus` cannot find an insight by id | `{ insight_id }` |
+
+### Generic
+
+| Code                    | Status | When                                                                        |
+| ----------------------- | ------ | --------------------------------------------------------------------------- |
+| `INTERNAL_SERVER_ERROR` | 5xx    | Catch-all when the handler boomifies an unexpected error and no domain code applies. |
+
+## HTTP status code → code fallbacks
+
+`deriveCodeFromStatus(statusCode)` is the floor — used only when no domain code
+is attached to `boom.data`. Prefer domain codes whenever possible.
+
+| HTTP status | Fallback `code`         |
+| ----------- | ----------------------- |
+| 400         | `BAD_REQUEST`           |
+| 401         | `UNAUTHORIZED`          |
+| 403         | `FORBIDDEN`             |
+| 404         | `NOT_FOUND`             |
+| 409         | `CONFLICT`              |
+| 422         | `UNPROCESSABLE_ENTITY`  |
+| 429         | `TOO_MANY_REQUESTS`     |
+| 500         | `INTERNAL_SERVER_ERROR` |
+| 502         | `BAD_GATEWAY`           |
+| 503         | `SERVICE_UNAVAILABLE`   |
+| 504         | `GATEWAY_TIMEOUT`       |
+| other 4xx   | `BAD_REQUEST`           |
+| other       | `INTERNAL_SERVER_ERROR` |
+
+## How to throw a domain error
+
+Use `Boom.<status>(message, data)` and pass the catalog code:
+
+```ts
+import Boom from '@hapi/boom';
+import { ALERTING_V2_ERROR_CODES } from '../errors/error_codes';
+
+throw Boom.notFound(`Rule with id=${id} not found`, {
+  code: ALERTING_V2_ERROR_CODES.RULE_NOT_FOUND,
+  details: { rule_id: id },
+});
+```
+
+The base route picks up `boom.data.code` and `boom.data.details` and emits the
+standard body. No further work is needed at the route layer.
+
+## How to add a new code
+
+1. Add a new entry to `ALERTING_V2_ERROR_CODES` in `error_codes.ts`. Use
+   `UPPER_SNAKE_CASE`. Add a one-line JSDoc explaining when it fires.
+2. Use it via `Boom.<status>(msg, { code, details })` at the throw site.
+3. Add a unit test that asserts the boomified error carries the expected
+   `code` and `details` (see e.g. `rules_client.test.ts → 'error codes and details'`).
+4. Update the matching table in this README.
+
+## How to declare a route response
+
+Routes declare their request/response schemas on `static schemas = {...}` and
+`BaseAlertingRoute` wraps them with `buildRouteValidationWithZod` via the
+inherited `static get validate()` getter:
+
+```ts
+import { errorResponseSchema, ruleResponseSchema } from '@kbn/alerting-v2-schemas';
+
+static schemas = {
+  request: {
+    body: createRuleDataSchema,
+  },
+  response: {
+    201: {
+      body: () => ruleResponseSchema,
+      description: 'Indicates a successful call.',
+    },
+    400: {
+      body: () => errorResponseSchema,
+      description: 'Indicates an invalid schema or parameters.',
+    },
+  },
+};
+```
+
+Every documented error status (400, 404, 409, …) SHOULD reference
+`errorResponseSchema` so the generated OAS captures the `{ code, error,
+message, details? }` contract.
