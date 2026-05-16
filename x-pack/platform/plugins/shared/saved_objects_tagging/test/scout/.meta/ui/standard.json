@@ -1,5 +1,5 @@
 {
-  "sha1": "48f9495d3b98224373f26217265a1591d5fe5bd7",
+  "sha1": "903121de57d681229acf0c76675b6c4eabe742e5",
   "tests": [
     {
       "id": "693cb822f00b147-c7297dddd0937a8",
@@ -110,6 +110,90 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_dashboard_integration.spec.ts",
         "line": 132,
+        "column": 7
+      }
+    },
+    {
+      "id": "d2407247b78ab3c-761d33ee630fcfe",
+      "title": "Tags - discover integration open search allows manually typing tag filter query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_discover_integration.spec.ts",
+        "line": 58,
+        "column": 7
+      }
+    },
+    {
+      "id": "d2407247b78ab3c-c6d3a4c924ee663",
+      "title": "Tags - discover integration open search allows filtering by selecting a tag in the filter menu",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_discover_integration.spec.ts",
+        "line": 68,
+        "column": 7
+      }
+    },
+    {
+      "id": "d2407247b78ab3c-0cfe296f0e0ce27",
+      "title": "Tags - discover integration open search allows filtering by selecting multiple tags",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_discover_integration.spec.ts",
+        "line": 79,
+        "column": 7
+      }
+    },
+    {
+      "id": "d2407247b78ab3c-e84cb15e5827420",
+      "title": "Tags - discover integration creating allows selecting tags for a new saved search",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_discover_integration.spec.ts",
+        "line": 93,
+        "column": 7
+      }
+    },
+    {
+      "id": "d2407247b78ab3c-7cedeb6b60eead1",
+      "title": "Tags - discover integration creating allows creating a tag from the tag selector",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_discover_integration.spec.ts",
+        "line": 115,
+        "column": 7
+      }
+    },
+    {
+      "id": "d2407247b78ab3c-03d76a95b52d8f5",
+      "title": "Tags - discover integration editing allows selecting tags for an existing saved search",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_discover_integration.spec.ts",
+        "line": 141,
         "column": 7
       }
     },
@@ -519,6 +603,76 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_maps_integration.spec.ts",
         "line": 105,
+        "column": 7
+      }
+    },
+    {
+      "id": "493e84ac313f8f1-39a5aee977a83e1",
+      "title": "Tags - saved objects management integration accesses saved objects management from tags with pre-applied filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_som_integration.spec.ts",
+        "line": 59,
+        "column": 7
+      }
+    },
+    {
+      "id": "493e84ac313f8f1-6f2979e3e3dc47c",
+      "title": "Tags - saved objects management integration allows manually typing tag filter query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_som_integration.spec.ts",
+        "line": 80,
+        "column": 7
+      }
+    },
+    {
+      "id": "493e84ac313f8f1-d489363d45a978f",
+      "title": "Tags - saved objects management integration allows filtering by selecting a single tag in the filter menu",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_som_integration.spec.ts",
+        "line": 90,
+        "column": 7
+      }
+    },
+    {
+      "id": "493e84ac313f8f1-497a22abd27b13c",
+      "title": "Tags - saved objects management integration allows filtering by selecting multiple tags in the filter menu",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_som_integration.spec.ts",
+        "line": 98,
+        "column": 7
+      }
+    },
+    {
+      "id": "493e84ac313f8f1-3ba4a4cdaa00b59",
+      "title": "Tags - saved objects management integration displays all tags for an object row",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/saved_objects_tagging/test/scout/ui/tests/tags_som_integration.spec.ts",
+        "line": 107,
         "column": 7
       }
     },

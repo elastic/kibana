@@ -1,5 +1,5 @@
 {
-  "sha1": "5c7d61ab5983c3b2fa10070ad4c1c93cf7dcf385",
+  "sha1": "c12167e53cb9629ca0102ed3d78c73e638e56981",
   "tests": [
     {
       "id": "71242d88739937b-70753e6cedbcd4d",
@@ -1000,7 +1000,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/ui/parallel_tests/traces_experience/custom_columns.spec.ts",
-        "line": 51,
+        "line": 48,
         "column": 14
       }
     },
