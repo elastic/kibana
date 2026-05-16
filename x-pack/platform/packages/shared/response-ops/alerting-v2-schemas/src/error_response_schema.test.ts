@@ -9,34 +9,28 @@ import { errorResponseSchema } from './error_response_schema';
 
 describe('errorResponseSchema', () => {
   it('accepts a minimal payload with code, error, and message', () => {
-    const result = errorResponseSchema.safeParse({
+    const parsed = errorResponseSchema.parse({
       code: 'RULE_NOT_FOUND',
       error: 'Not Found',
       message: 'Rule "abc-123" not found.',
     });
 
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data).toEqual({
-        code: 'RULE_NOT_FOUND',
-        error: 'Not Found',
-        message: 'Rule "abc-123" not found.',
-      });
-    }
+    expect(parsed).toEqual({
+      code: 'RULE_NOT_FOUND',
+      error: 'Not Found',
+      message: 'Rule "abc-123" not found.',
+    });
   });
 
   it('accepts a payload with optional details', () => {
-    const result = errorResponseSchema.safeParse({
+    const parsed = errorResponseSchema.parse({
       code: 'RULE_NOT_FOUND',
       error: 'Not Found',
       message: 'Rule "abc-123" not found.',
       details: { rule_id: 'abc-123' },
     });
 
-    expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.details).toEqual({ rule_id: 'abc-123' });
-    }
+    expect(parsed.details).toEqual({ rule_id: 'abc-123' });
   });
 
   it('rejects payloads missing required code', () => {

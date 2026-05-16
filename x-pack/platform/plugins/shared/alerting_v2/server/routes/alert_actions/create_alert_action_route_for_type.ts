@@ -59,12 +59,6 @@ export const createAlertActionRouteForType = <
       summary: `Create an alert ${pathSuffix} action`,
       description: 'Create an action for a specific alert group.',
     };
-    // NOTE: This factory produces a `RouteDefinition` with a specific
-    // `<P, Q, B>` generic, so we keep the explicit `static validate` shape
-    // here (the base class's widened `static schemas` getter doesn't preserve
-    // those type parameters). Error responses still reference the shared
-    // `errorResponseSchema` so OAS docs stay consistent with the rest of the
-    // alerting_v2 surface.
     static validate = {
       request: {
         params: buildRouteValidationWithZod(createAlertActionParamsSchema),

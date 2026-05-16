@@ -8,15 +8,17 @@
 import Boom from '@hapi/boom';
 import type { KibanaResponseFactory, RouteConfigOptions, RouteMethod } from '@kbn/core-http-server';
 import type { Logger } from '@kbn/logging';
+import { errorResponseSchema } from '@kbn/alerting-v2-schemas';
 import { z } from '@kbn/zod/v4';
 import { BaseAlertingRoute, type AlertingRouteSchemas } from './base_alerting_route';
+import { deriveErrorCodeFromStatus } from './derive_error_code';
 import { createRouteDependencies } from './test_utils';
+import type { computeRouteValidate } from './compute_route_validate';
+
+type ComputedValidate = Exclude<ReturnType<typeof computeRouteValidate>, false>;
 
 class TestRoute extends BaseAlertingRoute {
   static routeOptions: RouteConfigOptions<RouteMethod> = {};
-  // Widened from `protected static` so tests can swap in route-specific
-  // declarations and assert how `static get validate()` merges them with
-  // the base `commonResponses`.
   public static schemas: AlertingRouteSchemas = {};
 
   protected readonly routeName = 'test route';
@@ -60,7 +62,7 @@ describe('BaseAlertingRoute', () => {
     expect(route.executeFn).toHaveBeenCalledTimes(1);
   });
 
-  describe('onError - standard error response shape', () => {
+  describe('onError', () => {
     it('returns { code, error, message } for plain Boom errors (no data attached)', async () => {
       route.executeFn.mockRejectedValue(Boom.notFound('rule not found'));
 
@@ -114,15 +116,54 @@ describe('BaseAlertingRoute', () => {
       });
     });
 
-    it('omits details when boom.data does not include them', async () => {
+    it('preserves an empty details object when boom.data explicitly attaches one', async () => {
       route.executeFn.mockRejectedValue(
-        Boom.badRequest('Invalid input', { code: 'INVALID_INPUT' })
+        Boom.badRequest('Invalid input', { code: 'INVALID_INPUT', details: {} })
       );
 
       await route.handle();
 
-      const call = response.customError.mock.calls[0][0];
-      expect(call.body).not.toHaveProperty('details');
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 400,
+        body: {
+          code: 'INVALID_INPUT',
+          error: 'Bad Request',
+          message: 'Invalid input',
+          details: {},
+        },
+      });
+    });
+
+    it('lets a domain-specific code win over the status-derived fallback', async () => {
+      route.executeFn.mockRejectedValue(
+        Boom.internal('downstream offline', { code: 'DOWNSTREAM_UNAVAILABLE' })
+      );
+
+      await route.handle();
+
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 500,
+        body: {
+          code: 'DOWNSTREAM_UNAVAILABLE',
+          error: 'Internal Server Error',
+          message: 'An internal server error occurred',
+        },
+      });
+    });
+
+    it('derives the code from the status via deriveErrorCodeFromStatus for unusual statuses', async () => {
+      route.executeFn.mockRejectedValue(Boom.boomify(new Error('teapot'), { statusCode: 418 }));
+
+      await route.handle();
+
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 418,
+        body: {
+          code: deriveErrorCodeFromStatus(418),
+          error: "I'm a teapot",
+          message: 'teapot',
+        },
+      });
     });
 
     it('boomifies non-Boom errors to 500 with a derived code', async () => {
@@ -217,36 +258,23 @@ describe('BaseAlertingRoute', () => {
     });
   });
 
-  describe('static validate - common error responses', () => {
+  describe('static validate getter', () => {
     afterEach(() => {
       TestRoute.schemas = {};
     });
 
     it('emits the shared 401/403/500 responses even when the subclass declares no schemas', () => {
-      const validate = TestRoute.validate;
-
-      if (validate === false) {
-        throw new Error('expected validate to be an object when commonResponses are merged');
-      }
+      const validate = TestRoute.validate as ComputedValidate;
 
       expect(
         Object.keys(validate.response ?? {})
           .map(Number)
           .sort()
       ).toEqual([401, 403, 500]);
-      expect(validate.response?.[401]?.description).toBe(
-        'Indicates the request was not authenticated.'
-      );
-      expect(validate.response?.[403]?.description).toBe(
-        'Indicates the user does not have the required privileges to perform the request.'
-      );
-      expect(validate.response?.[500]?.description).toBe(
-        'Indicates an unexpected server-side error.'
-      );
-      // Each common response references the shared errorResponseSchema.
-      expect(typeof validate.response?.[401]?.body).toBe('function');
-      expect(typeof validate.response?.[403]?.body).toBe('function');
-      expect(typeof validate.response?.[500]?.body).toBe('function');
+
+      expect(validate.response?.[401]?.body?.()).toEqual(errorResponseSchema);
+      expect(validate.response?.[403]?.body?.()).toEqual(errorResponseSchema);
+      expect(validate.response?.[500]?.body?.()).toEqual(errorResponseSchema);
     });
 
     it('merges the subclass response schemas with the common ones', () => {
@@ -261,18 +289,15 @@ describe('BaseAlertingRoute', () => {
         },
       };
 
-      const validate = TestRoute.validate;
-
-      if (validate === false) {
-        throw new Error('expected validate to be an object');
-      }
+      const validate = TestRoute.validate as ComputedValidate;
 
       expect(
         Object.keys(validate.response ?? {})
           .map(Number)
           .sort()
       ).toEqual([200, 401, 403, 500]);
-      expect(validate.response?.[200]?.body).toBe(okSchemaFactory);
+
+      expect(validate.response?.[200]?.body).toEqual(okSchemaFactory);
     });
 
     it('lets the subclass override a common status code (e.g. a specialized 500 description)', () => {
@@ -284,44 +309,59 @@ describe('BaseAlertingRoute', () => {
         },
       };
 
-      const validate = TestRoute.validate;
-
-      if (validate === false) {
-        throw new Error('expected validate to be an object');
-      }
+      const validate = TestRoute.validate as ComputedValidate;
 
       expect(validate.response?.[500]?.description).toBe(
         'Specialized 500 description for this route.'
       );
-      // 401 / 403 stay on their common descriptions.
-      expect(validate.response?.[401]?.description).toBe(
-        'Indicates the request was not authenticated.'
-      );
-      expect(validate.response?.[403]?.description).toBe(
-        'Indicates the user does not have the required privileges to perform the request.'
-      );
     });
 
-    it('still wraps subclass request schemas with buildRouteValidationWithZod', () => {
+    it('replaces (does not deep-merge) a common response when the subclass declares the same status', () => {
       TestRoute.schemas = {
-        request: {
-          params: z.object({ id: z.string() }),
+        response: {
+          500: {
+            description: 'Specialized 500 description for this route.',
+          },
         },
       };
 
-      const validate = TestRoute.validate;
+      const validate = TestRoute.validate as ComputedValidate;
 
-      if (validate === false) {
-        throw new Error('expected validate to be an object');
-      }
+      expect(validate.response?.[500]?.body).toBeUndefined();
+    });
 
-      expect(typeof validate.request?.params).toBe('function');
-      // Common responses are still merged in alongside the request schemas.
-      expect(
-        Object.keys(validate.response ?? {})
-          .map(Number)
-          .sort()
-      ).toEqual([401, 403, 500]);
+    it('lets the subclass override a common response body with its own schema', () => {
+      const subclassUnauthorizedBody = jest.fn(() => z.object({ reason: z.string() }));
+
+      TestRoute.schemas = {
+        response: {
+          401: {
+            body: subclassUnauthorizedBody,
+            description: 'Custom unauthorized payload.',
+          },
+        },
+      };
+
+      const validate = TestRoute.validate as ComputedValidate;
+
+      expect(validate.response?.[401]?.body).toEqual(subclassUnauthorizedBody);
+      expect(validate.response?.[401]?.description).toBe('Custom unauthorized payload.');
+    });
+
+    it('returns the subclass request schemas correctly', () => {
+      TestRoute.schemas = {
+        request: {
+          params: z.object({ id: z.string() }),
+          query: z.object({ page: z.number().optional() }),
+          body: z.object({ name: z.string() }),
+        },
+      };
+
+      const validate = TestRoute.validate as ComputedValidate;
+
+      expect(validate.request?.params).toBeDefined();
+      expect(validate.request?.query).toBeDefined();
+      expect(validate.request?.body).toBeDefined();
     });
   });
 });

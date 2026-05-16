@@ -2055,6 +2055,27 @@ describe('RulesClient', () => {
       });
     });
 
+    it('attaches RULE_NOT_FOUND code and rule_id details when deleting a missing rule', async () => {
+      const client = createClient();
+      mockSavedObjectsClient.get.mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createGenericNotFoundError(
+          RULE_SAVED_OBJECT_TYPE,
+          'rule-del-missing'
+        )
+      );
+
+      await expect(client.deleteRule({ id: 'rule-del-missing' })).rejects.toMatchObject({
+        output: { statusCode: 404 },
+        data: {
+          code: 'RULE_NOT_FOUND',
+          details: { rule_id: 'rule-del-missing' },
+        },
+      });
+
+      expect(taskManager.removeIfExists).not.toHaveBeenCalled();
+      expect(mockSavedObjectsClient.delete).not.toHaveBeenCalled();
+    });
+
     it('attaches RULE_ALREADY_EXISTS code and rule_id details when create conflicts', async () => {
       const client = createClient();
       mockSavedObjectsClient.create.mockRejectedValueOnce(
@@ -2072,31 +2093,43 @@ describe('RulesClient', () => {
       });
     });
 
-    it('attaches INVALID_RULE_DATA code and structured Zod issues when create body is invalid', async () => {
+    it('attaches INVALID_RULE_DATA code and structured Zod errors when create body is invalid', async () => {
       const client = createClient();
 
-      const result = await client
-        .createRule({
+      await expect(
+        client.createRule({
           data: {
             ...baseCreateData,
             schedule: { every: '1ms', lookback: '1m' },
           },
         })
-        .catch((e) => e);
-
-      expect(result.output.statusCode).toBe(400);
-      expect(result.data.code).toBe('INVALID_RULE_DATA');
-      expect(result.data.details.context).toBe('create');
-      expect(Array.isArray(result.data.details.issues)).toBe(true);
+      ).rejects.toMatchObject({
+        output: { statusCode: 400 },
+        data: {
+          code: 'INVALID_RULE_DATA',
+          details: {
+            context: 'create',
+            errors: {
+              errors: [],
+              properties: {
+                schedule: {
+                  errors: [],
+                  properties: {
+                    every: {
+                      errors: ['Duration "1ms" is below the minimum allowed value of "5s"'],
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      });
     });
 
     it('attaches INVALID_BULK_PARAMS code when ids and filter are combined', async () => {
       const client = createClient();
 
-      // The `BulkRulesParams` type enforces XOR between `ids` and
-      // `filter`/`search`; the *runtime* guard inside `resolveRuleIds` is what
-      // we are exercising here, so the parameter shape is intentionally cast
-      // to bypass the compile-time check.
       const bulkParams = { ids: ['a'], filter: 'enabled: true' } as unknown as Parameters<
         typeof client.bulkDeleteRules
       >[0];

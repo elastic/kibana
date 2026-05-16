@@ -8,11 +8,10 @@
 /**
  * Default fallback mapping from HTTP status codes to machine-readable error
  * codes. Used by `BaseAlertingRoute.onError` when an error reaches the route
- * boundary without a domain-specific code attached via `Boom.boomify(err, {
- * data: { code: '...' } })` / `Boom.notFound(msg, { code: '...' })`.
+ * boundary without a domain-specific code.
  *
  * Domain-specific codes (e.g. `RULE_NOT_FOUND`, `DUPLICATE_ID`) are preferred
- * — they carry intent that a status-derived code cannot. The codes here are
+ * because they carry intent that a status-derived code cannot. The codes here are
  * the floor, not the ceiling.
  */
 const STATUS_CODE_MAP: Readonly<Record<number, string>> = Object.freeze({
@@ -29,7 +28,7 @@ const STATUS_CODE_MAP: Readonly<Record<number, string>> = Object.freeze({
   504: 'GATEWAY_TIMEOUT',
 });
 
-export const deriveCodeFromStatus = (statusCode: number): string => {
+export const deriveErrorCodeFromStatus = (statusCode: number): string => {
   const mapped = STATUS_CODE_MAP[statusCode];
   if (mapped) {
     return mapped;

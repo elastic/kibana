@@ -1,56 +1,45 @@
 # Alerting v2 — Error contract
 
-All `alerting_v2` HTTP routes emit error responses that conform to the shared
+All HTTP routes emit error responses that conform to the shared
 `errorResponseSchema` (defined in
 [`@kbn/alerting-v2-schemas`](../../../../../packages/shared/response-ops/alerting-v2-schemas/src/error_response_schema.ts)):
 
 ```jsonc
 {
-  "code": "RULE_NOT_FOUND",         // stable, machine-readable — safe to branch on
-  "error": "Not Found",              // short, human-readable category
-  "message": "Rule with id=foo …",  // human-friendly explanation — NOT part of the contract
-  "details": { "rule_id": "foo" }  // optional structured context
+  "code": "RULE_NOT_FOUND",         
+  "error": "Not Found",              
+  "message": "Rule with id=foo …",  
+  "details": { "rule_id": "foo" }  
 }
 ```
 
-This shape is centralized in `BaseAlertingRoute.onError`. Clients SHOULD branch
-on `code`. The `message` field is intentionally NOT part of the API contract —
-do not parse it.
+This shape is centralized in `BaseAlertingRoute.onError`. Clients should branch
+on `code`. The `message` field is intentionally NOT part of the API contract. Do not parse it. It is subject to change.
 
-Tracking issue: <https://github.com/elastic/rna-program/issues/431>
+## Quick rules
 
-> [!NOTE]
-> Zod validation errors raised by Kibana core (before a route's handler runs)
-> currently come out via core's default error path and do not yet follow the
-> shape above. See <https://github.com/elastic/kibana/issues/265514> for the
-> upstream work to align that path.
+- Branch on `code`, not on `message`.
+- Treat `message` as human-facing text only.
+- Treat `details` as structured context whose shape depends on `code`.
+- Prefer a domain-specific code from `ALERTING_V2_ERROR_CODES` over a generic
+  fallback.
 
 ## How error codes are produced
 
-```
-                ┌────────────────────────────────────────────┐
-                │  Domain layer (clients, services, utils)   │
-                │   throws Boom.<status>(msg, {              │
-                │     code: ALERTING_V2_ERROR_CODES.X,       │
-                │     details: { … }                          │
-                │   })                                        │
-                └─────────────────────┬──────────────────────┘
-                                      ▼
-                ┌────────────────────────────────────────────┐
-                │  BaseAlertingRoute.onError                 │
-                │  • Pulls `code` / `details` from boom.data │
-                │  • Falls back to deriveCodeFromStatus()    │
-                │    when no domain code is attached         │
-                │  • Emits the standard body via             │
-                │    response.customError(...)               │
-                └────────────────────────────────────────────┘
-```
+1. The domain layer (`clients`, `services`, `utils`) throws
+   `Boom.<status>(message, { code, details })`.
+2. `BaseAlertingRoute.onError` reads `boom.data.code` and
+   `boom.data.details`.
+3. If no domain code is attached, `BaseAlertingRoute.onError` falls back to
+   `deriveErrorCodeFromStatus(statusCode)`.
+4. The route emits the normalized `{ code, error, message, details? }` body via
+   `response.customError(...)`.
 
 Two helper sources of codes:
 
 - `server/lib/errors/error_codes.ts` — `ALERTING_V2_ERROR_CODES`: the
   authoritative catalog of domain-specific codes.
-- `server/routes/derive_error_code.ts` — `deriveCodeFromStatus(statusCode)`:
+- `server/routes/derive_error_code.ts` — `deriveErrorCodeFromStatus(statusCode)`:
   the floor mapping from HTTP status to a generic code (`NOT_FOUND`,
   `CONFLICT`, …). Used only when a domain code is not attached.
 
@@ -66,7 +55,7 @@ backwards compatible. Renaming or removing a code is a breaking change.
 | `RULE_NOT_FOUND`              | 404    | `getRule` / `updateRule` / `deleteRule` cannot find a rule by id     | `{ rule_id }`                              |
 | `RULE_ALREADY_EXISTS`         | 409    | `createRule` collides with an existing id                            | `{ rule_id }`                              |
 | `RULE_VERSION_CONFLICT`       | 409    | An update / delete races another writer (`if_seq_no` mismatch)       | `{ rule_id }`                              |
-| `INVALID_RULE_DATA`           | 400    | The submitted body fails the domain-level schema check               | `{ issues }` (Zod issue tree)              |
+| `INVALID_RULE_DATA`           | 400    | The submitted body fails the domain-level schema check               | `{ context, errors }` (tree-shaped errors) |
 | `INVALID_STATE_TRANSITION`    | 400    | `state_transition` is incompatible with the rule's `kind`            | `{ rule_id, kind, transition }`            |
 | `INVALID_BULK_PARAMS`         | 400    | Bulk operation combines `ids` with `filter` / `search` / `match_all` | `{ params }`                               |
 | `IMMUTABLE_FIELDS_CHANGED`    | 400    | PUT (upsert) request changes a field flagged as immutable            | `{ fields }`                               |
@@ -80,15 +69,15 @@ backwards compatible. Renaming or removing a code is a breaking change.
 | `ACTION_POLICY_NOT_FOUND`         | 404    | `get` / `update` / `delete` cannot find an action policy by id      | `{ action_policy_id }` |
 | `ACTION_POLICY_ALREADY_EXISTS`    | 409    | `createActionPolicy` collides with an existing id                   | `{ action_policy_id }` |
 | `ACTION_POLICY_VERSION_CONFLICT`  | 409    | An update / delete races another writer                             | `{ action_policy_id }` |
-| `INVALID_ACTION_POLICY_DATA`      | 400    | The submitted body fails the domain-level schema check              | `{ issues }`           |
+| `INVALID_ACTION_POLICY_DATA`      | 400    | The submitted body fails the domain-level schema check              | `{ context, errors }`  |
 | `RULE_NOT_FOUND_FOR_POLICY`       | 400    | A `single_rule` action policy references a non-existent rule        | `{ rule_id }`          |
 | `INVALID_DATE_STRING`             | 400    | A user-supplied date (e.g. `snoozed_until`) fails ISO-8601 parsing  | `{ value }`            |
 
 ### Alert actions (`server/lib/alert_actions_client/`)
 
-| Code                    | Status | When                                                        | `details`                       |
-| ----------------------- | ------ | ----------------------------------------------------------- | ------------------------------- |
-| `ALERT_EVENT_NOT_FOUND` | 404    | No alert event matches the supplied `group_hash` (+ optional `episode_id`) | `{ group_hash, episode_id? }`   |
+| Code                    | Status | When                                                                     | `details`                     |
+| ----------------------- | ------ | ------------------------------------------------------------------------ | ----------------------------- |
+| `ALERT_EVENT_NOT_FOUND` | 404    | No alert event matches the supplied `group_hash` (+ optional `episode_id`) | `{ group_hash, episode_id? }` |
 
 ### Rule doctor insights (`server/lib/rule_doctor_insights_client/`)
 
@@ -96,7 +85,7 @@ backwards compatible. Renaming or removing a code is a breaking change.
 | ------------------- | ------ | ------------------------------------------------------------- | ---------------- |
 | `INSIGHT_NOT_FOUND` | 404    | `getInsight` / `updateInsightStatus` cannot find an insight by id | `{ insight_id }` |
 
-### Generic
+### Generic fallback codes
 
 | Code                    | Status | When                                                                        |
 | ----------------------- | ------ | --------------------------------------------------------------------------- |
@@ -105,23 +94,26 @@ backwards compatible. Renaming or removing a code is a breaking change.
 ## Common error responses (every route)
 
 `BaseAlertingRoute` declares a `commonResponses` block that `static get
-validate()` merges into each subclass's `schemas.response`. Every alerting_v2
-route therefore documents these three OAS responses without restating them:
+validate()` merges into each subclass's `schemas.response`. Every route therefore documents these three OAS responses without restating them:
 
 | HTTP status | When                                                                            |
 | ----------- | ------------------------------------------------------------------------------- |
 | `401`       | The request was not authenticated.                                              |
 | `403`       | The caller lacks the route's `requiredPrivileges`.                              |
-| `500`       | Any uncaught throw in `execute()` boomifies to 500.                             |
+| `500`       | Any uncaught throw boomifies to 500.                             |
 
-Subclass-declared status codes take precedence — a route can override e.g.
-`500` with a more specific description by declaring it on its own
-`static schemas.response`. Route-specific codes (`400` / `404` / `409` / …)
-stay on each subclass.
+Important distinction:
+
+- These are OpenAPI response declarations shared by every route.
+- They do not replace domain-specific `code` values attached at throw sites.
+- Subclass-declared statuses take precedence. A route can override, for example,
+  `500` with a more specific description in its own `static schemas.response`.
+- Route-specific statuses (`400`, `404`, `409`, ...) still belong on each
+  subclass.
 
 ## HTTP status code → code fallbacks
 
-`deriveCodeFromStatus(statusCode)` is the floor — used only when no domain code
+`deriveErrorCodeFromStatus(statusCode)` is the floor. Used only when no domain code
 is attached to `boom.data`. Prefer domain codes whenever possible.
 
 | HTTP status | Fallback `code`         |
@@ -142,7 +134,8 @@ is attached to `boom.data`. Prefer domain codes whenever possible.
 
 ## How to throw a domain error
 
-Use `Boom.<status>(message, data)` and pass the catalog code:
+Use `Boom.<status>(message, data)` and attach the catalog code at the throw
+site:
 
 ```ts
 import Boom from '@hapi/boom';
@@ -154,8 +147,8 @@ throw Boom.notFound(`Rule with id=${id} not found`, {
 });
 ```
 
-The base route picks up `boom.data.code` and `boom.data.details` and emits the
-standard body. No further work is needed at the route layer.
+`BaseAlertingRoute` picks up `boom.data.code` and `boom.data.details` and emits
+the standard body. No additional route-layer mapping is needed.
 
 ## How to add a new code
 
@@ -163,7 +156,8 @@ standard body. No further work is needed at the route layer.
    `UPPER_SNAKE_CASE`. Add a one-line JSDoc explaining when it fires.
 2. Use it via `Boom.<status>(msg, { code, details })` at the throw site.
 3. Add a unit test that asserts the boomified error carries the expected
-   `code` and `details` (see e.g. `rules_client.test.ts → 'error codes and details'`).
+   `code` and `details` (see `rules_client.test.ts` and
+   `action_policy_client.test.ts`, in the `error codes and details` blocks).
 4. Update the matching table in this README.
 
 ## How to declare a route response
@@ -192,6 +186,6 @@ static schemas = {
 };
 ```
 
-Every documented error status (400, 404, 409, …) SHOULD reference
+Every documented error status (`400`, `404`, `409`, ...) should reference
 `errorResponseSchema` so the generated OAS captures the `{ code, error,
 message, details? }` contract.

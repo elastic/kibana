@@ -17,7 +17,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type { KibanaRequest as CoreKibanaRequest } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { stringifyZodError } from '@kbn/zod-helpers/v4';
-import type { z } from '@kbn/zod/v4';
+import { treeifyError, type z } from '@kbn/zod/v4';
 import { type RuleSavedObjectAttributes } from '../../saved_objects';
 import { type ActionPolicyClient } from '../action_policy_client';
 import { withApm as withApmDecorator } from '../apm/with_apm_decorator';
@@ -120,7 +120,7 @@ export class RulesClient {
         `Error validating ${context} rule data - ${stringifyZodError(parsed.error)}`,
         {
           code: ALERTING_V2_ERROR_CODES.INVALID_RULE_DATA,
-          details: { context, issues: parsed.error.issues },
+          details: { context, errors: treeifyError(parsed.error) },
         }
       );
     }

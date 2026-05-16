@@ -154,30 +154,6 @@ describe('RuleDoctorInsightsClient', () => {
         })
       );
     });
-
-    it('throws 404 when insight does not exist', async () => {
-      esClient.search.mockResolvedValue({
-        hits: { hits: [] },
-      } as never);
-
-      await expect(client.getInsight('missing', 'default')).rejects.toThrow(
-        /Insight missing not found/
-      );
-    });
-
-    it('attaches INSIGHT_NOT_FOUND code and insight_id details', async () => {
-      esClient.search.mockResolvedValue({
-        hits: { hits: [] },
-      } as never);
-
-      await expect(client.getInsight('missing', 'default')).rejects.toMatchObject({
-        output: { statusCode: 404 },
-        data: {
-          code: 'INSIGHT_NOT_FOUND',
-          details: { insight_id: 'missing' },
-        },
-      });
-    });
   });
 
   describe('updateInsightStatus', () => {
@@ -206,18 +182,6 @@ describe('RuleDoctorInsightsClient', () => {
         doc: { status: 'dismissed' },
         refresh: 'wait_for',
       });
-    });
-
-    it('throws 404 when insight does not exist in the space', async () => {
-      esClient.search.mockResolvedValue({
-        hits: { hits: [] },
-      } as never);
-
-      await expect(client.updateInsightStatus('missing', 'dismissed', 'default')).rejects.toThrow(
-        /Insight missing not found/
-      );
-
-      expect(esClient.update).not.toHaveBeenCalled();
     });
   });
 
@@ -272,6 +236,40 @@ describe('RuleDoctorInsightsClient', () => {
           code: 'BULK_INDEX_INSIGHTS_ERROR',
         })
       );
+    });
+  });
+
+  describe('error codes and details', () => {
+    it('attaches INSIGHT_NOT_FOUND code and insight_id details on getInsight', async () => {
+      esClient.search.mockResolvedValue({
+        hits: { hits: [] },
+      } as never);
+
+      await expect(client.getInsight('missing', 'default')).rejects.toMatchObject({
+        output: { statusCode: 404 },
+        data: {
+          code: 'INSIGHT_NOT_FOUND',
+          details: { insight_id: 'missing' },
+        },
+      });
+    });
+
+    it('attaches INSIGHT_NOT_FOUND code and insight_id details on updateInsightStatus', async () => {
+      esClient.search.mockResolvedValue({
+        hits: { hits: [] },
+      } as never);
+
+      await expect(
+        client.updateInsightStatus('missing', 'dismissed', 'default')
+      ).rejects.toMatchObject({
+        output: { statusCode: 404 },
+        data: {
+          code: 'INSIGHT_NOT_FOUND',
+          details: { insight_id: 'missing' },
+        },
+      });
+
+      expect(esClient.update).not.toHaveBeenCalled();
     });
   });
 });

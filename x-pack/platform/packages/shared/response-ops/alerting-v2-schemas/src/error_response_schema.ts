@@ -10,23 +10,15 @@ import { z } from '@kbn/zod/v4';
 /**
  * Standard error response shape returned by every alerting v2 route handler.
  *
- * Modeled on Geewax, *API Design Patterns*, Chapter 10 §10.3.4 ("Error handling")
- * with field naming aligned to the Kibana API guidelines:
- *
- * - `code`    — the contract. A stable, machine-readable identifier (e.g.
- *               `RULE_NOT_FOUND`, `INVALID_SCHEDULE`). Clients branch on this.
+ * - `code`    — A stable, machine-readable identifier (e.g. `RULE_NOT_FOUND`, `INVALID_SCHEDULE`).
  *               Changing this value is a breaking change.
- * - `error`   — short category label (e.g. `Not Found`, `Bad Request`). For
+ * - `error`   — A short category label (e.g. `Not Found`, `Bad Request`). For
  *               display and logs.
- * - `message` — human-friendly explanation. NOT part of the contract — can be
+ * - `message` — A human-friendly explanation. Can be
  *               rephrased, localized, or have typos fixed without breaking
  *               clients. Do not parse this field in client code.
- * - `details` — optional structured context (e.g. the resource id that
+ * - `details` — An optional structured context (e.g. the resource id that
  *               conflicted, per-field validation issues).
- *
- * Note: the response intentionally omits a redundant `statusCode` body field
- * (the HTTP status line is the source of truth) and omits `ok: false` (any
- * non-2xx status already signals failure).
  */
 export const errorResponseSchema = z.object({
   code: z
@@ -37,12 +29,12 @@ export const errorResponseSchema = z.object({
   error: z
     .string()
     .describe(
-      'A short human-readable summary of the error category (e.g., "Not Found", "Bad Request").'
+      'A short human-readable summary of the error category (e.g., "Not Found", "Bad Request"). Subject to change without notice. Do not parse or rely on its content.'
     ),
   message: z
     .string()
     .describe(
-      'A human-friendly explanation of the error. NOT part of the API contract — do not parse.'
+      'A human-friendly explanation of the error. Subject to change without notice. Do not parse or rely on its content.'
     ),
   details: z
     .record(z.string(), z.unknown())

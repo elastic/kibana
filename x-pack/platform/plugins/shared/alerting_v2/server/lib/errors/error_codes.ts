@@ -6,9 +6,9 @@
  */
 
 /**
- * Catalog of stable, machine-readable error codes returned by alerting v2
- * routes. Codes are part of the public API contract — adding new codes is
- * backwards compatible; renaming or removing a code is a breaking change.
+ * Catalog of stable, machine-readable error codes returned by the routes.
+ * These codes are part of the public API contract. Adding new codes is
+ * backwards compatible, while renaming or removing a code is a breaking change.
  *
  * Each code's metadata (HTTP status, when it's thrown, `details` shape) is
  * documented in the README at
@@ -22,7 +22,7 @@ export const ALERTING_V2_ERROR_CODES = {
   RULE_ALREADY_EXISTS: 'RULE_ALREADY_EXISTS',
   /** A rule was modified by another writer since it was loaded. */
   RULE_VERSION_CONFLICT: 'RULE_VERSION_CONFLICT',
-  /** The submitted rule body failed Zod schema validation. */
+  /** The submitted rule body failed schema validation. */
   INVALID_RULE_DATA: 'INVALID_RULE_DATA',
   /** `state_transition` cannot be applied to the rule's `kind`. */
   INVALID_STATE_TRANSITION: 'INVALID_STATE_TRANSITION',
@@ -42,7 +42,7 @@ export const ALERTING_V2_ERROR_CODES = {
   ACTION_POLICY_ALREADY_EXISTS: 'ACTION_POLICY_ALREADY_EXISTS',
   /** An action policy was modified by another writer since it was loaded. */
   ACTION_POLICY_VERSION_CONFLICT: 'ACTION_POLICY_VERSION_CONFLICT',
-  /** The submitted action policy body failed Zod schema validation. */
+  /** The submitted action policy body failed schema validation. */
   INVALID_ACTION_POLICY_DATA: 'INVALID_ACTION_POLICY_DATA',
   /** A `single_rule` action policy referenced a rule that does not exist. */
   RULE_NOT_FOUND_FOR_POLICY: 'RULE_NOT_FOUND_FOR_POLICY',

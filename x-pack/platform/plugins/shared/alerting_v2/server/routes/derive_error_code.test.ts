@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { deriveCodeFromStatus } from './derive_error_code';
+import { deriveErrorCodeFromStatus } from './derive_error_code';
 
-describe('deriveCodeFromStatus', () => {
+describe('deriveErrorCodeFromStatus', () => {
   it.each([
     [400, 'BAD_REQUEST'],
     [401, 'UNAUTHORIZED'],
@@ -21,20 +21,18 @@ describe('deriveCodeFromStatus', () => {
     [503, 'SERVICE_UNAVAILABLE'],
     [504, 'GATEWAY_TIMEOUT'],
   ])('maps %i to "%s"', (status, expected) => {
-    expect(deriveCodeFromStatus(status)).toBe(expected);
+    expect(deriveErrorCodeFromStatus(status)).toBe(expected);
   });
 
   it('falls back to BAD_REQUEST for unknown 4xx codes', () => {
-    expect(deriveCodeFromStatus(418)).toBe('BAD_REQUEST');
+    expect(deriveErrorCodeFromStatus(418)).toBe('BAD_REQUEST');
   });
 
   it('falls back to INTERNAL_SERVER_ERROR for unknown 5xx codes', () => {
-    expect(deriveCodeFromStatus(599)).toBe('INTERNAL_SERVER_ERROR');
+    expect(deriveErrorCodeFromStatus(599)).toBe('INTERNAL_SERVER_ERROR');
   });
 
   it('falls back to INTERNAL_SERVER_ERROR for non-error status codes', () => {
-    // The helper is only invoked from onError() so this branch is mainly
-    // defensive — we should never return a "success" code on the error path.
-    expect(deriveCodeFromStatus(200)).toBe('INTERNAL_SERVER_ERROR');
+    expect(deriveErrorCodeFromStatus(200)).toBe('INTERNAL_SERVER_ERROR');
   });
 });

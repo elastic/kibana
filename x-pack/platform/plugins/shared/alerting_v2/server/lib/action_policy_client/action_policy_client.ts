@@ -20,7 +20,7 @@ import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-p
 import type { KueryNode } from '@kbn/es-query';
 import { nodeBuilder } from '@kbn/es-query';
 import { stringifyZodError } from '@kbn/zod-helpers/v4';
-import type { z } from '@kbn/zod/v4';
+import { treeifyError, type z } from '@kbn/zod/v4';
 import { inject, injectable } from 'inversify';
 import { partition } from 'lodash';
 import {
@@ -104,7 +104,7 @@ export class ActionPolicyClient {
         `Error validating ${context} action policy data - ${stringifyZodError(parsed.error)}`,
         {
           code: ALERTING_V2_ERROR_CODES.INVALID_ACTION_POLICY_DATA,
-          details: { context, issues: parsed.error.issues },
+          details: { context, errors: treeifyError(parsed.error) },
         }
       );
     }

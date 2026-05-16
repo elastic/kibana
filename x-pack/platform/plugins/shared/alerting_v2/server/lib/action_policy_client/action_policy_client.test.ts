@@ -2903,20 +2903,118 @@ describe('ActionPolicyClient', () => {
     });
 
     it('attaches INVALID_ACTION_POLICY_DATA code with Zod issues when data is invalid', async () => {
-      const result = await client
-        .createActionPolicy({
+      await expect(
+        client.createActionPolicy({
           data: {
             name: 'my-policy',
             description: 'my-policy description',
             destinations: [],
           },
         })
-        .catch((e) => e);
+      ).rejects.toMatchObject({
+        output: { statusCode: 400 },
+        data: {
+          code: 'INVALID_ACTION_POLICY_DATA',
+          details: {
+            context: 'create',
+            errors: {
+              errors: [],
+              properties: {
+                destinations: {
+                  errors: ['At least one destination must be provided'],
+                },
+              },
+            },
+          },
+        },
+      });
+    });
 
-      expect(result.output.statusCode).toBe(400);
-      expect(result.data.code).toBe('INVALID_ACTION_POLICY_DATA');
-      expect(result.data.details.context).toBe('create');
-      expect(Array.isArray(result.data.details.issues)).toBe(true);
+    it('attaches ACTION_POLICY_VERSION_CONFLICT code on update version conflict', async () => {
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
+        id: 'policy-version-conflict',
+        type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+        references: [],
+        version: 'WzEsMV0=',
+        attributes: {
+          name: 'original',
+          description: 'original description',
+          type: 'global',
+          enabled: true,
+          destinations: [{ type: 'workflow', id: 'w' }],
+          auth: { apiKey: 'old-api-key', owner: 'old-user', createdByUser: false },
+          createdBy: 'creator_profile_uid',
+          createdByUsername: 'creator',
+          createdAt: '2024-12-01T00:00:00.000Z',
+          updatedBy: 'updater_profile_uid',
+          updatedByUsername: 'updater',
+          updatedAt: '2024-12-01T00:00:00.000Z',
+        },
+      });
+      mockSavedObjectsClient.update.mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createConflictError(
+          ACTION_POLICY_SAVED_OBJECT_TYPE,
+          'policy-version-conflict'
+        )
+      );
+
+      await expect(
+        client.updateActionPolicy({
+          data: { destinations: [{ type: 'workflow', id: 'new-workflow' }] },
+          options: { id: 'policy-version-conflict', version: 'WzEsMV0=' },
+        })
+      ).rejects.toMatchObject({
+        output: { statusCode: 409 },
+        data: {
+          code: 'ACTION_POLICY_VERSION_CONFLICT',
+          details: { action_policy_id: 'policy-version-conflict' },
+        },
+      });
+    });
+
+    it('attaches RULE_NOT_FOUND_FOR_POLICY code when single_rule policy references a missing rule', async () => {
+      jest
+        .spyOn(rulesSavedObjectService, 'get')
+        .mockRejectedValueOnce(
+          SavedObjectsErrorHelpers.createGenericNotFoundError('rule', 'rule-missing')
+        );
+
+      await expect(
+        client.createActionPolicy({
+          data: {
+            name: 'my-policy',
+            description: 'my-policy description',
+            destinations: [{ type: 'workflow', id: 'my-workflow' }],
+            type: 'single_rule',
+            ruleId: 'rule-missing',
+          },
+        })
+      ).rejects.toMatchObject({
+        output: { statusCode: 400 },
+        data: {
+          code: 'RULE_NOT_FOUND_FOR_POLICY',
+          details: { rule_id: 'rule-missing' },
+        },
+      });
+
+      expect(mockSavedObjectsClient.create).not.toHaveBeenCalled();
+    });
+
+    it('attaches INVALID_DATE_STRING code when snoozedUntil is not a valid ISO datetime', async () => {
+      await expect(
+        client.snoozeActionPolicy({
+          id: 'policy-id-snooze-bad-date',
+          snoozedUntil: 'not-a-date',
+        })
+      ).rejects.toMatchObject({
+        output: { statusCode: 400 },
+        data: {
+          code: 'INVALID_DATE_STRING',
+          details: { value: 'not-a-date' },
+        },
+      });
+
+      expect(mockSavedObjectsClient.update).not.toHaveBeenCalled();
     });
   });
 });
