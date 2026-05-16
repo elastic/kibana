@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { css } from '@emotion/css';
+import { css } from '@emotion/react';
 import type { LayoutConfig } from '../../../lib/layout/layout_config';
 import { calculateRowLayout } from '../../../lib/layout/calculate_layout';
 
@@ -25,7 +25,7 @@ export const RowPattern = ({ layoutConfig, viewportHeight }: Props) => {
       {Array.from({ length: layoutConfig.count }, (_, i) => (
         <div
           key={i}
-          className={css({
+          css={css({
             position: 'fixed',
             top: `${offsetTop + i * (rowHeight + layoutConfig.gutterSize)}px`,
             left: 0,

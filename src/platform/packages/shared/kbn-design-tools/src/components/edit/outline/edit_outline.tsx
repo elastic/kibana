@@ -8,7 +8,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { css } from '@emotion/css';
+import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 import {
   ALL_HANDLES,
@@ -55,6 +55,7 @@ export const EditOutline = ({ target, onDelete, onDuplicate, onEdit }: Props) =>
   }, [euiTheme.colors.primary, zIndex.highlight]);
 
   const rect = useElementRect(target);
+
   const mode = getHandleMode(rect);
   const visibleHandles =
     mode === 'none'
@@ -67,7 +68,7 @@ export const EditOutline = ({ target, onDelete, onDuplicate, onEdit }: Props) =>
 
   return (
     <div
-      className={outlineCss}
+      css={outlineCss}
       style={{
         top: rect.top,
         left: rect.left,
@@ -79,7 +80,7 @@ export const EditOutline = ({ target, onDelete, onDuplicate, onEdit }: Props) =>
       {visibleHandles.map((h) => (
         <div
           key={h}
-          className={handleCss}
+          css={handleCss}
           style={{
             top: handlePositions[h].top,
             left: handlePositions[h].left,

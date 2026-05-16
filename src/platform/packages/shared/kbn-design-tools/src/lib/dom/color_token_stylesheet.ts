@@ -30,7 +30,7 @@ export const getTokenVar = (tokenName: string, fallbackHex?: string): string => 
 };
 
 /**
- * Extract the token name from a CSS `var(--dt-…)` value.
+ * Extracts the token name from a CSS `var(--dt-…)` value.
  * Returns `undefined` if the value is not a design-tool CSS var.
  */
 export const parseTokenVar = (value: string): string | undefined => {
@@ -43,7 +43,7 @@ export const parseTokenVar = (value: string): string | undefined => {
  * for every EUI color token in the current color mode.
  *
  * All clones that use `var(--dt-*)` inline styles will automatically
- * pick up the new values via the CSS cascade — no DOM walk needed.
+ * pick up the new values via the CSS cascade, no DOM walk needed.
  */
 export const syncTokenStylesheet = (): void => {
   const mode = getPageColorMode();

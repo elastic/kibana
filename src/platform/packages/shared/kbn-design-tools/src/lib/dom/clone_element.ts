@@ -33,6 +33,19 @@ export const setImportant = (el: HTMLElement, prop: string, value: string): void
   el.style.setProperty(prop, value, 'important');
 };
 
+export const softHideElement = (el: HTMLElement, savedTransform?: string): void => {
+  el.setAttribute(DEVTOOL_HIDDEN_ATTR, savedTransform ?? (el.style.transform || ''));
+  setImportant(el, 'visibility', 'hidden');
+  setImportant(el, 'pointer-events', 'none');
+};
+
+export const restoreHiddenElement = (el: HTMLElement): void => {
+  el.style.transform = el.getAttribute(DEVTOOL_HIDDEN_ATTR) ?? '';
+  el.style.removeProperty('visibility');
+  el.style.removeProperty('pointer-events');
+  el.removeAttribute(DEVTOOL_HIDDEN_ATTR);
+};
+
 const MEDIA_TAGS = new Set(['IMG', 'SVG', 'VIDEO', 'PICTURE', 'CANVAS', 'OBJECT', 'EMBED']);
 
 /**
@@ -62,6 +75,195 @@ export const unfreezeChildren = (
       }
       unfreezeChildren(child, property, depth + 1);
     }
+  }
+};
+
+/**
+ * Walk from `el` up to (but not including) `root`, removing frozen inline
+ * dimensions and max-* constraints so each ancestor can grow to fit its
+ * content. Stops at `root` to avoid unfreezing the clone root itself
+ * (whose dimensions are managed separately).
+ *
+ * NOTE: sizing mode — this always unfreezes, implementing implicit "hug"
+ * behaviour. To add a "fixed" mode, check a per-element flag here and
+ * stop walking when an ancestor is marked as fixed-size.
+ */
+const unfreezeAncestors = (
+  el: HTMLElement,
+  property: 'width' | 'height',
+  root?: HTMLElement | null
+): void => {
+  const maxProp = property === 'width' ? 'max-width' : 'max-height';
+  let ancestor = el.parentElement;
+  while (ancestor && ancestor !== root?.parentElement) {
+    ancestor.style.removeProperty(property);
+    ancestor.style.removeProperty(maxProp);
+    ancestor = ancestor.parentElement;
+  }
+};
+
+/**
+ * Unfreeze children after a style property change so they reflow naturally.
+ * For width/height, only the changed dimension is unfrozen.
+ * For padding/margin, both dimensions are unfrozen since the content area changes.
+ *
+ * When `root` is provided, ancestors between `el` and `root` are also
+ * unfrozen so the parent chain can grow to accommodate the new size.
+ * This gives "hug contents" behaviour by default: parents resize to fit
+ * their children.
+ *
+ * NOTE: sizing mode — currently all elements use implicit "hug" behaviour
+ * (ancestors unfreeze). To support explicit sizing modes (fixed / hug /
+ * fill) in the future, gate the ancestor walk on a per-element mode flag
+ * and skip unfreezing for ancestors marked as "fixed".
+ */
+export const reflowAfterStyleChange = (
+  el: HTMLElement,
+  cssProp: string,
+  root?: HTMLElement | null
+): void => {
+  if (cssProp === 'width' || cssProp === 'height') {
+    unfreezeChildren(el, cssProp);
+    unfreezeAncestors(el, cssProp, root);
+  } else if (cssProp === 'padding' || cssProp === 'margin') {
+    unfreezeChildren(el, 'width');
+    unfreezeChildren(el, 'height');
+    unfreezeAncestors(el, 'width', root);
+    unfreezeAncestors(el, 'height', root);
+  }
+};
+
+/**
+ * Unfreeze a text node's parent and its descendants after a text content,
+ * font-size, or font-weight change so the parent resizes to fit.
+ */
+export const reflowAfterTextChange = (parent: HTMLElement): void => {
+  parent.style.removeProperty('width');
+  parent.style.removeProperty('height');
+  unfreezeChildren(parent, 'width');
+  unfreezeChildren(parent, 'height');
+};
+
+/**
+ * Reflow a managed element after a style property has been applied.
+ *
+ * Call this after setting any inline style on a managed element so that
+ * frozen ancestor/child dimensions are unfrozen as needed. This is the
+ * single entry point for post-edit reflow — used by both live editing
+ * (`applyEditChanges`) and session import (`importState`).
+ */
+export const reflowManagedStyle = (element: HTMLElement, cssProp: string): void => {
+  if (element.closest(`[${DEVTOOL_MANAGED_ATTR}]`)) {
+    reflowAfterStyleChange(element, cssProp);
+  }
+};
+
+/**
+ * Reflow a managed element after a text content, font-size, or font-weight
+ * change. Counterpart of `reflowManagedStyle` for text edits.
+ */
+export const reflowManagedText = (parent: HTMLElement | null): void => {
+  if (parent?.closest(`[${DEVTOOL_MANAGED_ATTR}]`)) {
+    reflowAfterTextChange(parent);
+  }
+};
+
+/**
+ * A frozen inline dimension captured before reflow removes it.
+ * Used to restore dimensions on undo/revert.
+ */
+export interface DimensionRecord {
+  readonly element: HTMLElement;
+  readonly property: string;
+  readonly value: string;
+  readonly priority: string;
+}
+
+const recordDim = (el: HTMLElement, prop: string, out: DimensionRecord[]): void => {
+  const value = el.style.getPropertyValue(prop);
+  if (value) {
+    out.push({ element: el, property: prop, value, priority: el.style.getPropertyPriority(prop) });
+  }
+};
+
+const collectChildDims = (
+  parent: HTMLElement,
+  property: 'width' | 'height',
+  out: DimensionRecord[],
+  depth = 0
+): void => {
+  if (depth > MAX_TREE_DEPTH) return;
+  for (let i = 0; i < parent.children.length; i++) {
+    const child = parent.children[i];
+    if (child instanceof HTMLElement) {
+      recordDim(child, property, out);
+      if (MEDIA_TAGS.has(child.tagName)) {
+        const otherProp = property === 'width' ? 'height' : 'width';
+        recordDim(child, otherProp, out);
+        recordDim(child, 'max-width', out);
+        recordDim(child, 'max-height', out);
+      }
+      collectChildDims(child, property, out, depth + 1);
+    }
+  }
+};
+
+const collectAncestorDims = (
+  el: HTMLElement,
+  property: 'width' | 'height',
+  root: HTMLElement | null | undefined,
+  out: DimensionRecord[]
+): void => {
+  const maxProp = property === 'width' ? 'max-width' : 'max-height';
+  let ancestor = el.parentElement;
+  while (ancestor && ancestor !== root?.parentElement) {
+    recordDim(ancestor, property, out);
+    recordDim(ancestor, maxProp, out);
+    ancestor = ancestor.parentElement;
+  }
+};
+
+/**
+ * Collect the frozen inline dimensions that {@link reflowAfterTextChange}
+ * will remove. Call BEFORE reflow to capture state for undo/revert.
+ */
+export const collectTextReflowDimensions = (parent: HTMLElement): DimensionRecord[] => {
+  const out: DimensionRecord[] = [];
+  recordDim(parent, 'width', out);
+  recordDim(parent, 'height', out);
+  collectChildDims(parent, 'width', out);
+  collectChildDims(parent, 'height', out);
+  return out;
+};
+
+/**
+ * Collect the frozen inline dimensions that {@link reflowAfterStyleChange}
+ * will remove. Call BEFORE reflow to capture state for undo/revert.
+ */
+export const collectStyleReflowDimensions = (
+  el: HTMLElement,
+  cssProp: string,
+  root?: HTMLElement | null
+): DimensionRecord[] => {
+  const out: DimensionRecord[] = [];
+  if (cssProp === 'width' || cssProp === 'height') {
+    collectChildDims(el, cssProp, out);
+    collectAncestorDims(el, cssProp, root, out);
+  } else if (cssProp === 'padding' || cssProp === 'margin') {
+    collectChildDims(el, 'width', out);
+    collectChildDims(el, 'height', out);
+    collectAncestorDims(el, 'width', root, out);
+    collectAncestorDims(el, 'height', root, out);
+  }
+  return out;
+};
+
+/**
+ * Restore frozen dimensions that were previously collected before a reflow.
+ */
+export const restoreDimensions = (records: DimensionRecord[]): void => {
+  for (const { element, property, value, priority } of records) {
+    element.style.setProperty(property, value, priority);
   }
 };
 
@@ -96,7 +298,7 @@ const XLINK_NS = 'http://www.w3.org/1999/xlink';
 /**
  * Rewrite all IDs inside SVGs within `root` to unique values and update
  * every internal reference (`url(#id)`, `xlink:href="#id"`, `href="#id"`).
- * This prevents ID collisions when the original and its clone coexist in
+ * Prevents ID collisions when the original and its clone coexist in
  * the same document, which causes masks, clip-paths, and use-references
  * to resolve to the wrong (hidden original) element.
  */
@@ -107,7 +309,7 @@ export const deduplicateSvgIds = (root: HTMLElement): void => {
     const suffix = uuidv4().slice(0, 8);
 
     for (const el of svg.querySelectorAll('[id]')) {
-      const oldId = el.getAttribute('id')!;
+      const oldId = el.id;
       const newId = `${oldId}_${suffix}`;
       idMap.set(oldId, newId);
       el.setAttribute('id', newId);
@@ -196,11 +398,12 @@ const copyInheritedStyles = (target: HTMLElement, clone: HTMLElement): void => {
 
   // Copy backgrounds only when the element is not in an interactive
   // pseudo-class state, so we capture the resting appearance.
-  // Always copy for replaced/media elements — they don't change
+  // Always copy for replaced/media elements. They don't change
   // background on hover, and their background-color is often used as
   // a fill behind semi-transparent content (e.g. SVG icons).
   const isReplacedElement = /^(IMG|SVG|VIDEO|CANVAS|PICTURE)$/.test(target.tagName);
-  if (isReplacedElement || !target.matches(':hover, :focus, :active')) {
+  const shouldCopyBackground = isReplacedElement || !target.matches(':hover, :focus, :active');
+  if (shouldCopyBackground) {
     for (const prop of BACKGROUND_CSS_PROPS) {
       clone.style.setProperty(prop, computed.getPropertyValue(prop));
     }
@@ -211,10 +414,11 @@ const copyInheritedStyles = (target: HTMLElement, clone: HTMLElement): void => {
   // inherited global var (--kbn-layout-*, --kbn-application-*, etc.)
   // which bloats the clone and can break layout. CSS-rule-based
   // custom properties cascade naturally via the preserved class names.
-  // Skip --dt-* tokens — those are managed by the :root stylesheet.
+  // Skip --dt-* tokens; those are managed by the :root stylesheet.
   for (let i = 0; i < target.style.length; i++) {
     const prop = target.style[i];
-    if (prop.startsWith('--') && !prop.startsWith(CSS_VAR_PREFIX)) {
+    const isExternalCustomProperty = prop.startsWith('--') && !prop.startsWith(CSS_VAR_PREFIX);
+    if (isExternalCustomProperty) {
       clone.style.setProperty(prop, target.style.getPropertyValue(prop));
     }
   }
@@ -237,7 +441,8 @@ const applyPseudoStyle = (
   const computed = getComputedStyle(original, pseudo);
   const content = computed.getPropertyValue('content');
 
-  if (!content || content === 'none' || content === 'normal') {
+  const hasNoPseudoContent = !content || content === 'none' || content === 'normal';
+  if (hasNoPseudoContent) {
     return;
   }
 
@@ -254,7 +459,7 @@ const applyPseudoStyle = (
     // them on the pseudo-element creates self-referencing var() cycles
     // that resolve to empty strings in subsequent clones.
     if (prop.startsWith(CSS_VAR_PREFIX)) continue;
-    // Skip background props for hovered elements — the CSS class on the
+    // Skip background props for hovered elements. The CSS class on the
     // clone provides the correct resting-state appearance.
     if (isInteractive && BACKGROUND_CSS_PROPS.has(prop)) continue;
     const rawValue = computed.getPropertyValue(prop);
@@ -310,13 +515,6 @@ export const copyStylesDeep = (
   const ctx = counter ?? { count: 0 };
   ctx.count++;
   if (ctx.count > MAX_CLONE_ELEMENTS) {
-    if (ctx.count === MAX_CLONE_ELEMENTS + 1) {
-      // eslint-disable-next-line no-console
-      console.warn(
-        `[kbn-design-tools] copyStylesDeep: element tree exceeds ${MAX_CLONE_ELEMENTS} nodes. ` +
-          'Remaining children will retain class-based styling but lose inlined computed styles.'
-      );
-    }
     return;
   }
 
@@ -332,7 +530,8 @@ export const copyStylesDeep = (
     }
   }
 
-  if (!isRoot && !hadTruncationClass) {
+  const shouldPinDimensions = !isRoot && !hadTruncationClass;
+  if (shouldPinDimensions) {
     const childRect = original.getBoundingClientRect();
     // Round dimensions for text-bearing elements to prevent subpixel
     // blur. Layout-only containers keep exact float values so flex/grid
@@ -356,6 +555,37 @@ export const copyStylesDeep = (
   }
 };
 
+const TRUNCATION_SELECTOR = TRUNCATION_CLASSES.map((c) => `.${c}`).join(',');
+
+/**
+ * Check whether the target or any descendant has a truncation class, and if
+ * so temporarily append the clone to the body to measure its natural
+ * `scrollWidth`. When the clone is wider than `rect`, update both the clone's
+ * CSS width and the returned rect.
+ */
+export const widenForTruncation = (
+  target: HTMLElement,
+  clone: HTMLElement,
+  rect: DOMRect
+): DOMRect => {
+  const hadTruncation =
+    TRUNCATION_CLASSES.some((cls) => target.classList.contains(cls)) ||
+    target.querySelector(TRUNCATION_SELECTOR) !== null;
+  if (!hadTruncation) return rect;
+
+  clone.style.visibility = 'hidden';
+  document.body.appendChild(clone);
+  const naturalWidth = clone.scrollWidth;
+  document.body.removeChild(clone);
+  clone.style.visibility = 'visible';
+  if (naturalWidth > rect.width) {
+    const w = Math.ceil(naturalWidth);
+    setImportant(clone, 'width', `${w}px`);
+    return new DOMRect(rect.x, rect.y, w, rect.height);
+  }
+  return rect;
+};
+
 /**
  * Create a fixed-position clone of an element. The clone keeps its original
  * classes so CSS rules still apply. Inherited properties, custom properties,
@@ -365,7 +595,8 @@ export const cloneElement = (
   target: HTMLElement,
   zIndex: number
 ): { clone: HTMLElement; rect: DOMRect } => {
-  const rect = roundRect(target.getBoundingClientRect());
+  let rect = roundRect(target.getBoundingClientRect());
+
   const clone = target.cloneNode(true) as HTMLElement;
 
   copyCanvasContent(target, clone);
@@ -393,6 +624,10 @@ export const cloneElement = (
   setImportant(clone, 'transition', 'none');
   clone.style.visibility = 'visible';
   clone.setAttribute(DEVTOOL_MANAGED_ATTR, '');
+
+  // copyStylesDeep strips truncation classes (eui-textTruncate etc.) from
+  // the clone and all descendants, so text that was clipped may now be wider.
+  rect = widenForTruncation(target, clone, rect);
 
   return { clone, rect };
 };
@@ -463,7 +698,7 @@ export const buildTextNodeMap = (original: HTMLElement, clone: HTMLElement): Map
 };
 
 /**
- * Clone an element in a "clean" visual state — temporarily restoring any
+ * Clone an element in a "clean" visual state, temporarily restoring any
  * styles modified by the editing system so cloneElement reads correct
  * computed styles and bounding rects.
  */

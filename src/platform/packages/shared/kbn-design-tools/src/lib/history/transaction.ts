@@ -11,10 +11,10 @@ import type { ReactElement } from 'react';
 import type {
   StyleEdit,
   TextEdit,
-  SourceEdit,
+  MediaEdit,
   StyleChange,
   TextNodeChange,
-  SourceChange,
+  MediaChange,
 } from '../dom/element_registry';
 
 /**
@@ -22,7 +22,7 @@ import type {
  * {@link UndoRedoStack} when a transaction is pushed.
  */
 export interface TransactionBase {
-  /** Monotonically increasing ID — defines ordering within a session. */
+  /** Monotonically increasing ID that defines ordering within a session. */
   readonly id: number;
   /** Wall-clock timestamp (for UI display / debugging, not ordering). */
   readonly timestamp: number;
@@ -73,12 +73,12 @@ export interface ResizeTransaction extends TransactionBase {
 }
 
 /**
- * A batch of style / text / source edits applied via the edit modal.
+ * A batch of style / text / media edits applied via the edit modal.
  *
  * The entire modal "Save" becomes a single transaction so it can be
  * undone/redone atomically.
  *
- * - `styleChanges`, `textChanges`, `sourceChanges` are the forward
+ * - `styleChanges`, `textChanges`, `mediaChanges` are the forward
  *   descriptors needed for redo.
  * - `undoRecords` are the original-value records produced by
  *   `applyEdits`, needed for undo.
@@ -92,10 +92,10 @@ export interface EditTransaction extends TransactionBase {
    * during save, this stores the hidden original so undo can restore it.
    */
   readonly promotedFrom?: HTMLElement;
-  /** Forward descriptors — re-applied on redo. */
+  /** Forward descriptors, re-applied on redo. */
   readonly styleChanges: StyleChange[];
   readonly textChanges: TextNodeChange[];
-  readonly sourceChanges: SourceChange[];
+  readonly mediaChanges: MediaChange[];
   /**
    * Original-value records created during forward application.
    * Used by the edit executor to reverse the changes on undo.
@@ -105,7 +105,7 @@ export interface EditTransaction extends TransactionBase {
   readonly undoRecords: {
     styleEdits: StyleEdit[];
     textEdits: TextEdit[];
-    sourceEdits: SourceEdit[];
+    mediaEdits: MediaEdit[];
   };
 }
 
@@ -143,7 +143,7 @@ export interface DeleteTransaction extends TransactionBase {
   /** The element that was removed / hidden. */
   readonly element: HTMLElement;
   /**
-   * Session snapshot — present when the deleted element had a registered
+   * Session snapshot. Present when the deleted element had a registered
    * session. Contains position, edits, React state, and DOM location.
    */
   readonly sessionSnapshot?: ElementSessionSnapshot;
@@ -176,6 +176,27 @@ export interface CloneTransaction extends TransactionBase {
   readonly referenceEl: HTMLElement;
 }
 
+/**
+ * An entire file import treated as a single atomic operation.
+ *
+ * On undo every imported session is removed from the registry and DOM,
+ * and every soft-deleted element is un-hidden. On redo the sessions are
+ * re-inserted and the deletions re-applied.
+ */
+export interface ImportTransaction extends TransactionBase {
+  readonly type: 'import';
+  /** Snapshots of all sessions that were created by the import. */
+  readonly sessionSnapshots: Array<{
+    readonly element: HTMLElement;
+    readonly snapshot: ElementSessionSnapshot;
+  }>;
+  /** Elements that were soft-hidden by the import's deletion list. */
+  readonly deletions: Array<{
+    readonly element: HTMLElement;
+    readonly originalTransform: string;
+  }>;
+}
+
 /** Discriminated union of all transaction types. */
 export type Transaction =
   | MoveTransaction
@@ -183,10 +204,11 @@ export type Transaction =
   | EditTransaction
   | DuplicateTransaction
   | DeleteTransaction
-  | CloneTransaction;
+  | CloneTransaction
+  | ImportTransaction;
 
 /**
- * Input type for {@link UndoRedoStack.push} — the `id` and `timestamp`
+ * Input type for {@link UndoRedoStack.push}. The `id` and `timestamp`
  * fields are assigned automatically by the stack.
  *
  * Uses a distributive conditional to preserve the union discriminant
@@ -206,7 +228,7 @@ export type TransactionInput = Transaction extends infer T
  * the state of the element before removal and re-insert it on undo.
  *
  * The `parentNode` / `nextSibling` pair records the element's DOM
- * position so it can be re-inserted at the exact same spot — not just
+ * position so it can be re-inserted at the exact same spot, not just
  * appended to `document.body`.
  */
 export interface ElementSessionSnapshot {
@@ -230,16 +252,16 @@ export interface ElementSessionSnapshot {
   readonly liveReactElement?: { readonly element: ReactElement; readonly zIndex: number };
   /** Snapshot of React hook state for restoration after undo. */
   readonly componentState?: unknown[][];
-  /** Parent node at the time of snapshot — for DOM re-insertion. */
+  /** Parent node at the time of snapshot, for DOM re-insertion. */
   readonly parentNode: Node;
-  /** Next sibling at the time of snapshot — for DOM re-insertion. */
+  /** Next sibling at the time of snapshot, for DOM re-insertion. */
   readonly nextSibling: Node | null;
   /** Copy of style edits accumulated at snapshot time. */
   readonly styleEdits: StyleEdit[];
   /** Copy of text edits accumulated at snapshot time. */
   readonly textEdits: TextEdit[];
-  /** Copy of source/attribute edits accumulated at snapshot time. */
-  readonly sourceEdits: SourceEdit[];
+  /** Copy of media/attribute edits accumulated at snapshot time. */
+  readonly mediaEdits: MediaEdit[];
   /** Cleanup callback for live React roots. */
   readonly cleanup?: () => void;
 }

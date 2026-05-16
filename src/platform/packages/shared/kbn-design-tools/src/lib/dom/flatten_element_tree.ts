@@ -25,10 +25,10 @@ export const flattenElementTree = (el: Element, depth: number): TreeNode[] => {
   if (el.hasAttribute(DEVTOOL_HIDDEN_ATTR)) return [];
 
   const tag = resolveTag(el);
-  const children = Array.from(el.children);
+  const { children } = el;
   const nodes: TreeNode[] = [];
 
-  // Treat SVG containers as leaf nodes — don't recurse into path/g/circle etc.
+  // Treat SVG containers as leaf nodes. Don't recurse into path/g/circle etc.
   const isSvg = el.tagName.toLowerCase() === 'svg';
   const isSvgInternal = SVG_INTERNALS.has(el.tagName.toLowerCase());
 
@@ -36,7 +36,7 @@ export const flattenElementTree = (el: Element, depth: number): TreeNode[] => {
     return nodes;
   }
 
-  // Skip <style> tags — they're injected by Emotion and aren't meaningful
+  // Skip <style> tags. They're injected by Emotion and aren't meaningful
   // in the element tree.
   if (el.tagName.toLowerCase() === 'style') {
     return nodes;

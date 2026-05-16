@@ -50,7 +50,7 @@ export const isBgToken = (name: string): boolean => classifyToken(name) === 'bac
 export const isBorderToken = (name: string): boolean => classifyToken(name) === 'border';
 
 /**
- * Normalise any CSS color string to a lowercase hex value.
+ * Normalises any CSS color string to a lowercase hex value.
  * Returns `null` for non-color values or fully-transparent values.
  */
 export const toHex = (value: string): string | null => {
@@ -121,8 +121,13 @@ const buildLookup = (): TokenLookup => {
 
 const getLookup = (() => {
   let cache: TokenLookup | null = null;
+  let cachedMode: string | null = null;
   return (): TokenLookup => {
-    if (!cache) cache = buildLookup();
+    const mode = getPageColorMode();
+    if (!cache || mode !== cachedMode) {
+      cache = buildLookup();
+      cachedMode = mode;
+    }
     return cache;
   };
 })();

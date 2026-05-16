@@ -41,6 +41,7 @@ import { renderEuiComponentLive, centerInViewport } from '../lib/dom/insert_elem
 import { DEVTOOL_LIBRARY_ID_ATTR } from '../lib/constants';
 import { preloadAllEuiIcons } from '../lib/eui_icon_cache';
 import { pickJsonFile } from '../lib/history/serialization/session_io';
+import { ContextMenuSkeleton } from './context_menu_skeleton';
 
 /**
  * Toggles a column layout overlay and provides layout settings.
@@ -49,6 +50,7 @@ export const DesignToolsButtonImpl = ({ initiallyOpen }: { initiallyOpen?: boole
   const { euiTheme } = useEuiTheme();
   const [isLayoutVisible, setIsLayoutVisible] = useState(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState(initiallyOpen ?? false);
+  const [iconsReady, setIconsReady] = useState(false);
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [moveCount, setMoveCount] = useState(0);
@@ -65,7 +67,7 @@ export const DesignToolsButtonImpl = ({ initiallyOpen }: { initiallyOpen?: boole
 
   useEffect(() => {
     if (initiallyOpen) {
-      preloadAllEuiIcons();
+      preloadAllEuiIcons().finally(() => setIconsReady(true));
     }
   }, [initiallyOpen]);
 
@@ -77,30 +79,32 @@ export const DesignToolsButtonImpl = ({ initiallyOpen }: { initiallyOpen?: boole
     event.preventDefault();
   };
 
+  const closePopover = useCallback(() => setIsPopoverOpen(false), []);
+
   const handleToggleLayout = () => {
     setIsLayoutVisible((prev) => !prev);
-    setIsPopoverOpen(false);
+    closePopover();
   };
 
   const handleOpenSettings = () => {
-    setIsPopoverOpen(false);
+    closePopover();
     setIsFlyoutOpen(true);
   };
 
   const handleToggleEditMode = () => {
     setIsEditMode((prev) => !prev);
-    setIsPopoverOpen(false);
+    closePopover();
   };
 
   const handleResetEdits = () => {
     editHandleRef.current?.resetAll();
     setMoveCount(0);
-    setIsPopoverOpen(false);
+    closePopover();
   };
 
   const handleExport = () => {
     editHandleRef.current?.exportSessions();
-    setIsPopoverOpen(false);
+    closePopover();
   };
 
   const handleImport = async () => {
@@ -112,7 +116,7 @@ export const DesignToolsButtonImpl = ({ initiallyOpen }: { initiallyOpen?: boole
     // the async context causes React to defer the commit, leaving the
     // ref null when we read it.
     flushSync(() => {
-      setIsPopoverOpen(false);
+      closePopover();
       setIsEditMode(true);
     });
 
@@ -124,7 +128,7 @@ export const DesignToolsButtonImpl = ({ initiallyOpen }: { initiallyOpen?: boole
 
   const handleInsertEui = useCallback(
     async (element: ReactElement, libraryId?: string) => {
-      setIsPopoverOpen(false);
+      closePopover();
       await preloadAllEuiIcons();
 
       const live = await renderEuiComponentLive(element, zIndex.clone);
@@ -148,7 +152,7 @@ export const DesignToolsButtonImpl = ({ initiallyOpen }: { initiallyOpen?: boole
 
       editHandleRef.current?.insertElement(el, live.liveReactElement, live.cleanup);
     },
-    [zIndex.clone]
+    [closePopover, zIndex.clone]
   );
 
   const addEuiPanels = buildAddEuiPanels({
@@ -260,7 +264,7 @@ export const DesignToolsButtonImpl = ({ initiallyOpen }: { initiallyOpen?: boole
           >
             <EuiButtonIcon
               onClick={() => {
-                preloadAllEuiIcons();
+                preloadAllEuiIcons().finally(() => setIconsReady(true));
                 setIsPopoverOpen((prev) => !prev);
                 setIsFlyoutOpen(false);
               }}
@@ -287,7 +291,11 @@ export const DesignToolsButtonImpl = ({ initiallyOpen }: { initiallyOpen?: boole
           defaultMessage: 'Toggle layout',
         })}
       >
-        <EuiContextMenu initialPanelId={0} panels={contextMenuPanels} />
+        {iconsReady ? (
+          <EuiContextMenu initialPanelId={0} panels={contextMenuPanels} />
+        ) : (
+          <ContextMenuSkeleton />
+        )}
       </EuiPopover>
       {isFlyoutOpen && (
         <EuiFlyout

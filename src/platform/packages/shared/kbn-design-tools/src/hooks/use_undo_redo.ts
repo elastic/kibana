@@ -19,14 +19,14 @@ import type { TransactionInput } from '../lib/history/transaction';
  * React bridge for the {@link UndoRedoStack}.
  *
  * Provides:
- * - `push` — record a new transaction (callable from 60 Hz handlers
+ * - `push` - record a new transaction (callable from pointer handlers
  *   without triggering renders).
- * - `undo` / `redo` — execute the reverse/forward operation and move
+ * - `undo` / `redo` - execute the reverse/forward operation and move
  *   the transaction between stacks.
- * - `clear` — wipe all history (called by `resetAll`).
- * - `state` — reactive snapshot of `canUndo/canRedo/undoLabel/redoLabel`
+ * - `clear` - wipe all history (called by `resetAll`).
+ * - `state` - reactive snapshot of `canUndo/canRedo/undoLabel/redoLabel`
  *   for toolbar buttons, powered by `useSyncExternalStore`.
- * - `stack` — the underlying `UndoRedoStack` instance (via ref) for
+ * - `stack` - the underlying `UndoRedoStack` instance (via ref) for
  *   direct access when needed (e.g. serialization).
  *
  * The stack itself lives in a `useRef` so pointer handlers can call
@@ -50,14 +50,14 @@ export const useUndoRedo = (registryRef: MutableRefObject<ElementRegistry>) => {
   );
 
   /**
-   * Push a new transaction onto the undo stack. Safe to call from
-   * pointer handlers — does not trigger a React re-render directly
+   * Pushes a new transaction onto the undo stack. Safe to call from
+   * pointer handlers; does not trigger a React re-render directly
    * (subscribers are notified, but `useSyncExternalStore` batches).
    */
   const push = useCallback((input: TransactionInput) => stack.push(input), [stack]);
 
   /**
-   * Undo the most recent transaction: pops it from the undo stack,
+   * Undoes the most recent transaction: pops it from the undo stack,
    * executes its reverse operation via the appropriate executor, and
    * pushes it onto the redo stack.
    *
@@ -72,7 +72,7 @@ export const useUndoRedo = (registryRef: MutableRefObject<ElementRegistry>) => {
   }, [stack, registryRef]);
 
   /**
-   * Redo the most recently undone transaction: pops it from the redo
+   * Redoes the most recently undone transaction: pops it from the redo
    * stack, executes its forward operation, and pushes it back onto the
    * undo stack.
    *

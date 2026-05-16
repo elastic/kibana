@@ -11,8 +11,8 @@ import { MANAGED_ELEMENT_SELECTOR, DEVTOOL_HIDDEN_ATTR, DEVTOOL_MANAGED_ATTR } f
 import { isIgnoredElement } from './is_ignored_element';
 
 /**
- * Find the deepest targetable element at the given coordinates.
- * Managed elements are atomic (returns the root, not children).
+ * Finds the deepest targetable element at the given coordinates.
+ * Managed elements are atomic: returns the root, not children.
  * Ignored UI elements block interaction (returns null).
  * Hidden originals are skipped.
  */
@@ -20,13 +20,13 @@ export const getElementUnder = (x: number, y: number): HTMLElement | null => {
   const elements = document.elementsFromPoint(x, y);
   for (const el of elements) {
     if (!(el instanceof HTMLElement)) {
-      // SVG elements are not HTMLElement — check for a managed ancestor
+      // SVG elements are not HTMLElement. Check for a managed ancestor.
       const managed = el.closest?.(MANAGED_ELEMENT_SELECTOR) as HTMLElement | null;
       if (managed) return managed;
       continue;
     }
     if (el.hasAttribute(DEVTOOL_HIDDEN_ATTR) || el.closest(`[${DEVTOOL_HIDDEN_ATTR}]`)) continue;
-    if (el.style.visibility === 'hidden') continue;
+    if (getComputedStyle(el).visibility === 'hidden') continue;
     if (isIgnoredElement(el)) {
       const isInsideAtomic = el.closest(MANAGED_ELEMENT_SELECTOR);
       if (!isInsideAtomic) return null;

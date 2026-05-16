@@ -27,22 +27,22 @@ export const calculateSpacingLines = (anchorRect: DOMRect, targetRect: DOMRect):
   const hOverlap = hasHorizontalOverlap(anchorRect, targetRect);
   const vOverlap = hasVerticalOverlap(anchorRect, targetRect);
 
-  // No overlap at all — elements are diagonal. Nothing to show.
+  // No overlap at all. Elements are diagonal, nothing to show.
   if (!hOverlap && !vOverlap) {
     return [];
   }
 
-  // Overlap in both axes — one contains the other (or they partially overlap).
+  // Overlap in both axes. One contains the other (or they partially overlap).
   if (hOverlap && vOverlap) {
     return containmentLines(anchorRect, targetRect);
   }
 
-  // Overlap only vertically — they are side-by-side horizontally.
+  // Overlap only vertically. They are side-by-side horizontally.
   if (vOverlap) {
     return horizontalGap(anchorRect, targetRect);
   }
 
-  // Overlap only horizontally — they are stacked vertically.
+  // Overlap only horizontally. They are stacked vertically.
   return verticalGap(anchorRect, targetRect);
 };
 
@@ -96,7 +96,7 @@ const verticalGap = (a: DOMRect, b: DOMRect): SpacingLine[] => {
  */
 const containmentLines = (a: DOMRect, b: DOMRect): SpacingLine[] => {
   const outer = contains(a, b) ? a : contains(b, a) ? b : null;
-  if (!outer) return []; // partial overlap — no useful lines
+  if (!outer) return []; // partial overlap, no useful lines
 
   const inner = outer === a ? b : a;
   const lines: SpacingLine[] = [];

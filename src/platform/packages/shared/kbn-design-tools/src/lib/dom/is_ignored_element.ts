@@ -17,22 +17,22 @@ import {
 
 /**
  * Returns true if the element is, is inside, or contains a tool overlay
- * or the developer toolbar — i.e. it should be ignored by measure/edit interactions.
+ * or the developer toolbar - i.e. it should be ignored by measure/edit interactions.
  *
  * Elements can also be ignored by adding the `data-devtool-ignore` attribute.
  */
 export const isIgnoredElement = (el: Element): boolean => {
   if (IGNORED_ELEMENT_IDS.has(el.id)) return true;
   if (el.hasAttribute(DEVTOOL_IGNORE_ATTR)) return true;
-  // className may be an SVGAnimatedString on SVG elements — guard with typeof check.
+  // className may be an SVGAnimatedString on SVG elements. Guard with typeof check.
   const cls = typeof el.className === 'string' ? el.className : '';
   // Skip EUI components that are purely structural (e.g. spacers)
   if (IGNORED_CLASS_LABELS.some((label) => cls.includes(label))) return true;
   // Skip Kibana chrome layout elements (e.g. kbnChromeLayoutFooter)
   if (IGNORED_CLASS_PREFIXES.some((prefix) => cls.includes(prefix))) return true;
-  // Element is inside an ignored container
+  // Element is inside an ignored container.
   if (el.closest(IGNORED_SELECTOR)) return true;
-  // Element contains an ignored container (e.g. footer wrapping the toolbar)
+  // Element contains an ignored container (e.g. footer wrapping the toolbar).
   if (el.querySelector(IGNORED_SELECTOR)) return true;
   return false;
 };

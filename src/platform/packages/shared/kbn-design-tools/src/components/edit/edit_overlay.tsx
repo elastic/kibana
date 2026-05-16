@@ -39,23 +39,27 @@ import type { LayoutConfig } from '../../lib/layout/layout_config';
 import { GlobalCursorOverride } from '../global_cursor_override';
 import type { ElementSession } from '../../lib/dom/element_registry';
 import { ElementRegistry, applyEditChanges } from '../../lib/dom/element_registry';
-import type { StyleEdit, TextEdit, SourceEdit } from '../../lib/dom/element_registry';
+import type { StyleEdit, TextEdit, MediaEdit } from '../../lib/dom/element_registry';
 import { createDuplicate } from '../../lib/dom/duplicate_helpers';
 import {
   cloneClean,
-  setImportant,
+  softHideElement,
   buildElementMap,
   buildTextNodeMap,
 } from '../../lib/dom/clone_element';
 import { useUndoRedo } from '../../hooks/use_undo_redo';
 import { snapshotSession } from '../../lib/history/snapshot';
 import { captureOriginalStyles } from '../../lib/history/snapshot';
-import type { DuplicateTransaction } from '../../lib/history/transaction';
+import type { DuplicateTransaction, ImportTransaction } from '../../lib/history/transaction';
 import { closePortaledPopovers } from '../../lib/dom/drag_helpers';
 import { EditOutline } from './outline/edit_outline';
 import { EditModal } from './modal/edit_modal';
-import type { StyleChange, TextNodeChange, SourceChange } from './modal/edit_modal';
-import { exportState, importState, downloadJson } from '../../lib/history/serialization/session_io';
+import type { StyleChange, TextNodeChange, MediaChange } from './modal/edit_modal';
+import {
+  exportState,
+  importState,
+  downloadAsJsonFile,
+} from '../../lib/history/serialization/session_io';
 import type { ImportResult, ExportedState } from '../../lib/history/serialization/session_io';
 
 export interface EditOverlayHandle {
@@ -86,8 +90,8 @@ interface Props {
  *
  * Several pieces of state are stored in `useRef` rather than `useState`:
  * `interaction`, `registry`, `rafId`, `stickyHover`, `roundedTargets`, and
- * `hoverTargetRef`.  This is intentional — pointer-move handlers fire at
- * 60 Hz and reading or writing React state on every frame would trigger
+ * `hoverTargetRef`.  This is intentional - pointer-move handlers fire
+ * every frame and reading or writing React state each time would trigger
  * costly re-renders with no visible benefit.
  *
  * The refs form a **parallel mutable state system** that lives outside
@@ -96,11 +100,11 @@ interface Props {
  * bridged explicitly via `setCursor`, `updateHoverTarget`, etc.
  *
  * When modifying this component, keep the following invariants:
- * - Only write to a ref inside a callback, effect, or event handler —
+ * - Only write to a ref inside a callback, effect, or event handler -
  *   never during render.
  * - When a ref change must be visible to React, call the corresponding
  *   state setter in the same handler (see `updateHoverTarget`).
- * - Treat `interaction.current` as a finite state machine — transitions
+ * - Treat `interaction.current` as a finite state machine - transitions
  *   must be exhaustive and deterministic.
  */
 export const EditOverlay = ({
@@ -139,7 +143,7 @@ export const EditOverlay = ({
 
   const { isInsideHoverLock, clearLock } = useHoverLock(hoverTarget);
 
-  const { deleteElement: rawDeleteElement, restoreAll } = useDeleteElement();
+  const { deleteElement: rawDeleteElement, trackDeletion, restoreAll } = useDeleteElement();
 
   const notifyCount = useCallback(() => {
     const hiddenOriginals = document.querySelectorAll(`[${DEVTOOL_HIDDEN_ATTR}]`).length;
@@ -178,6 +182,7 @@ export const EditOverlay = ({
           sessionSnapshot: snapshot,
         });
         registry.current.delete(session);
+        trackDeletion(el);
         el.remove();
       } else {
         const originalStyles = captureOriginalStyles(el);
@@ -190,7 +195,7 @@ export const EditOverlay = ({
       setCursor('');
       notifyCount();
     },
-    [rawDeleteElement, clearLock, notifyCount, updateHoverTarget, pushTransaction]
+    [rawDeleteElement, trackDeletion, clearLock, notifyCount, updateHoverTarget, pushTransaction]
   );
 
   const resetAll = useCallback(() => {
@@ -227,7 +232,7 @@ export const EditOverlay = ({
         liveReactElement,
         styleEdits: [],
         textEdits: [],
-        sourceEdits: [],
+        mediaEdits: [],
         cleanup,
       };
       registry.current.set(session);
@@ -252,24 +257,33 @@ export const EditOverlay = ({
       insertElement,
       exportSessions: () => {
         const state = exportState(registry.current);
-        downloadJson(state, `design-tools-export-${Date.now()}.json`);
+        downloadAsJsonFile(state, `design-tools-export-${Date.now()}.json`);
       },
       importSessions: async (file: ExportedState) => {
-        // Clear existing sessions before importing to prevent duplicate
-        // elements when importing the same file twice.
-        resetAll();
         const result = await importState(file, registry.current);
         if (result.restoredCount > 0 || result.deletedCount > 0) {
+          const sessionSnapshots = result.importedElements.map((element) => {
+            const session = registry.current.get(element)!;
+            return { element, snapshot: snapshotSession(session) };
+          });
+
+          pushTransaction({
+            type: 'import',
+            label: 'Import',
+            sessionSnapshots,
+            deletions: result.importedDeletions,
+          } satisfies Omit<ImportTransaction, 'id' | 'timestamp'>);
+
           notifyCount();
         }
         return result;
       },
     }),
-    [resetAll, insertElement, notifyCount]
+    [resetAll, insertElement, notifyCount, pushTransaction]
   );
 
   // Reset all edits when SPA navigation removes the edited originals.
-  // Hidden originals are marked with DEVTOOL_HIDDEN_ATTR — when React
+  // Hidden originals are marked with DEVTOOL_HIDDEN_ATTR. When React
   // unmounts them during navigation we detect the removal and reset.
   // Duplicates have no hidden original, so we also check whether any
   // session's referenceEl was disconnected from the document.
@@ -277,9 +291,12 @@ export const EditOverlay = ({
     let lastHref = window.location.href;
 
     const observer = new MutationObserver((mutations) => {
+      // Nothing to invalidate when no sessions are active.
+      if (registry.current.size === 0) return;
+
       // Detect SPA navigation by comparing the current URL to the last
       // seen value. MutationObserver fires naturally when React swaps
-      // page content — no History monkeypatching needed.
+      // page content, no History monkeypatching needed.
       const currentHref = window.location.href;
       if (currentHref !== lastHref) {
         lastHref = currentHref;
@@ -287,7 +304,10 @@ export const EditOverlay = ({
         return;
       }
 
+      let hasRemovals = false;
       for (const mutation of mutations) {
+        if (mutation.removedNodes.length === 0) continue;
+        hasRemovals = true;
         for (const removed of mutation.removedNodes) {
           if (!(removed instanceof HTMLElement)) continue;
           if (
@@ -299,6 +319,9 @@ export const EditOverlay = ({
           }
         }
       }
+
+      // Only check referenceEl connectivity when nodes were actually removed.
+      if (!hasRemovals) return;
 
       // Duplicates live on document.body and survive navigation, but their
       // referenceEl (the original page element) gets removed by React.
@@ -385,6 +408,8 @@ export const EditOverlay = ({
 
       if (completion.gesture === 'move') {
         if (completion.isNewClone && completion.referenceEl) {
+          // Promotion + move is a single user action. The snapshot
+          // captures the final position so no separate move is needed.
           pushTransaction({
             type: 'clone',
             label: 'Clone',
@@ -392,22 +417,22 @@ export const EditOverlay = ({
             sessionSnapshot: snapshotSession(completion.session),
             referenceEl: completion.referenceEl,
           });
-        }
-
-        const pendingDup = pendingDuplicateRef.current;
-        if (pendingDup && pendingDup.element === completion.target) {
-          // Merge the auto-drag into the duplicate transaction so
-          // undo/redo treats creation + placement as a single action.
-          pendingDup.sessionSnapshot = snapshotSession(completion.session);
-          pendingDuplicateRef.current = null;
         } else {
-          pushTransaction({
-            type: 'move',
-            label: 'Move',
-            target: completion.target,
-            before: completion.before,
-            after: completion.after,
-          });
+          const pendingDup = pendingDuplicateRef.current;
+          if (pendingDup && pendingDup.element === completion.target) {
+            // Merge the auto-drag into the duplicate transaction so
+            // undo/redo treats creation + placement as a single action.
+            pendingDup.sessionSnapshot = snapshotSession(completion.session);
+            pendingDuplicateRef.current = null;
+          } else {
+            pushTransaction({
+              type: 'move',
+              label: 'Move',
+              target: completion.target,
+              before: completion.before,
+              after: completion.after,
+            });
+          }
         }
       } else if (completion.gesture === 'resize') {
         pushTransaction({
@@ -542,7 +567,7 @@ export const EditOverlay = ({
     (
       savedStyleChanges: StyleChange[],
       savedTextChanges: TextNodeChange[],
-      savedSourceChanges: SourceChange[]
+      savedMediaChanges: MediaChange[]
     ) => {
       if (editModalTarget) {
         const isManaged = editModalTarget.hasAttribute(DEVTOOL_MANAGED_ATTR);
@@ -550,69 +575,83 @@ export const EditOverlay = ({
         let effectiveTarget = editModalTarget;
         let styleChanges = savedStyleChanges;
         let textChanges = savedTextChanges;
-        let sourceChanges = savedSourceChanges;
+        let mediaChanges = savedMediaChanges;
 
         if (!isManaged) {
-          const { clone, rect } = cloneClean(editModalTarget, zIndex.clone);
-          clone.style.transformOrigin = '0 0';
-          document.body.appendChild(clone);
+          // Guard: if the element was already promoted (e.g. by a concurrent
+          // save), skip the clone+hide step and use the existing session.
+          if (editModalTarget.hasAttribute(DEVTOOL_HIDDEN_ATTR)) {
+            let found = false;
+            for (const s of registry.current.values()) {
+              if (s.referenceEl === editModalTarget) {
+                effectiveTarget = s.el;
+                found = true;
+                break;
+              }
+            }
+            if (!found) {
+              setEditModalTarget(null);
+              return;
+            }
+          } else {
+            const { clone, rect } = cloneClean(editModalTarget, zIndex.clone);
+            clone.style.transformOrigin = '0 0';
+            document.body.appendChild(clone);
 
-          const originalTransform = editModalTarget.style.transform || '';
-          editModalTarget.setAttribute(DEVTOOL_HIDDEN_ATTR, originalTransform);
-          setImportant(editModalTarget, 'visibility', 'hidden');
-          setImportant(editModalTarget, 'pointer-events', 'none');
+            softHideElement(editModalTarget);
 
-          const elMap = buildElementMap(editModalTarget, clone);
-          const textMap = buildTextNodeMap(editModalTarget, clone);
+            const elMap = buildElementMap(editModalTarget, clone);
+            const textMap = buildTextNodeMap(editModalTarget, clone);
 
-          styleChanges = savedStyleChanges.map((c) => ({
-            ...c,
-            element: (elMap.get(c.element) as HTMLElement) ?? c.element,
-          }));
-          textChanges = savedTextChanges.map((c) => ({
-            ...c,
-            node: textMap.get(c.node) ?? c.node,
-          }));
-          sourceChanges = savedSourceChanges.map((c) => ({
-            ...c,
-            element: elMap.get(c.element) ?? c.element,
-          }));
+            styleChanges = savedStyleChanges.map((c) => ({
+              ...c,
+              element: (elMap.get(c.element) as HTMLElement) ?? c.element,
+            }));
+            textChanges = savedTextChanges.map((c) => ({
+              ...c,
+              node: textMap.get(c.node) ?? c.node,
+            }));
+            mediaChanges = savedMediaChanges.map((c) => ({
+              ...c,
+              element: elMap.get(c.element) ?? c.element,
+            }));
 
-          const session: ElementSession = {
-            el: clone,
-            dx: 0,
-            dy: 0,
-            dw: 0,
-            dh: 0,
-            originalRect: new DOMRect(rect.left, rect.top, rect.width, rect.height),
-            isDuplicate: false,
-            referenceEl: editModalTarget,
-            styleEdits: [],
-            textEdits: [],
-            sourceEdits: [],
-          };
-          registry.current.set(session);
-          effectiveTarget = clone;
+            const session: ElementSession = {
+              el: clone,
+              dx: 0,
+              dy: 0,
+              dw: 0,
+              dh: 0,
+              originalRect: new DOMRect(rect.left, rect.top, rect.width, rect.height),
+              isDuplicate: false,
+              referenceEl: editModalTarget,
+              styleEdits: [],
+              textEdits: [],
+              mediaEdits: [],
+            };
+            registry.current.set(session);
+            effectiveTarget = clone;
+          }
         }
 
         const session = registry.current.getOrCreate(effectiveTarget);
 
         const styleEdits: StyleEdit[] = [];
         const textEdits: TextEdit[] = [];
-        const sourceEdits: SourceEdit[] = [];
+        const mediaEdits: MediaEdit[] = [];
 
         applyEditChanges(
           styleChanges,
           textChanges,
-          sourceChanges,
+          mediaChanges,
           styleEdits,
           textEdits,
-          sourceEdits
+          mediaEdits
         );
 
         session.styleEdits.push(...styleEdits);
         session.textEdits.push(...textEdits);
-        session.sourceEdits.push(...sourceEdits);
+        session.mediaEdits.push(...mediaEdits);
 
         pushTransaction({
           type: 'edit',
@@ -621,8 +660,8 @@ export const EditOverlay = ({
           promotedFrom: isManaged ? undefined : editModalTarget,
           styleChanges,
           textChanges,
-          sourceChanges,
-          undoRecords: { styleEdits, textEdits, sourceEdits },
+          mediaChanges,
+          undoRecords: { styleEdits, textEdits, mediaEdits },
         });
       }
       setEditModalTarget(null);

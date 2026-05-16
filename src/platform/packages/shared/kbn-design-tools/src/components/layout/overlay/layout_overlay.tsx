@@ -9,7 +9,7 @@
 
 import type { ReactNode } from 'react';
 import React, { useCallback, useMemo, useState } from 'react';
-import { css } from '@emotion/css';
+import { css } from '@emotion/react';
 import { EuiPortal, useResizeObserver } from '@elastic/eui';
 import type { LayoutConfig } from '../../../lib/layout/layout_config';
 import { LAYOUT_OVERLAY_ID, DEVELOPER_TOOLBAR_HEIGHT } from '../../../lib/constants';
@@ -58,7 +58,7 @@ export const LayoutOverlay = ({ layoutConfig }: Props) => {
       <div
         ref={containerRef}
         id={LAYOUT_OVERLAY_ID}
-        className={containerCss}
+        css={containerCss}
         data-test-subj="layoutOverlayContainer"
       >
         {content}

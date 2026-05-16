@@ -48,7 +48,7 @@ const matchSourceAttribute = (el: Element): { attr: string; label: string } | un
  * For EUI icon SVGs without `data-icon-type`, the icon type is identified
  * asynchronously by matching path data against known icons.
  */
-export const collectSourceElements = async (root: Element): Promise<SourceEntry[]> => {
+export const collectMediaElements = async (root: Element): Promise<SourceEntry[]> => {
   const entries: SourceEntry[] = [];
   const pendingIdentifications: Array<{ entry: SourceEntry; element: Element }> = [];
 
@@ -88,7 +88,10 @@ export const collectSourceElements = async (root: Element): Promise<SourceEntry[
       pendingIdentifications.map(({ element }) => identifyIconType(element))
     );
     for (let i = 0; i < results.length; i++) {
-      pendingIdentifications[i].entry.value = results[i];
+      if (results[i]) {
+        pendingIdentifications[i].entry.value = results[i];
+        pendingIdentifications[i].element.setAttribute('data-icon-type', results[i]);
+      }
     }
   }
 

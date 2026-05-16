@@ -234,6 +234,25 @@ describe('resolveReactComponentName', () => {
     // Fake EUI component — should be filtered
     expect(testEuiName('EuiFakeComponent')).toBeNull();
   });
+
+  it('should strip Class suffix from internal EUI displayNames', () => {
+    const testEuiName = (name: string) => {
+      const el = document.createElement('div');
+      const hostFiber = { type: 'div', return: null as unknown };
+      const componentFiber = {
+        type: { displayName: name },
+        return: null,
+        child: hostFiber,
+      };
+      hostFiber.return = componentFiber;
+      attachFiber(el, hostFiber);
+      return resolveReactComponentName(el);
+    };
+
+    expect(testEuiName('EuiAccordionClass')).toBe('EuiAccordion');
+    expect(testEuiName('EuiRangeClass')).toBe('EuiRange');
+    expect(testEuiName('EuiFakeClass')).toBeNull();
+  });
 });
 
 describe('resolveTag', () => {

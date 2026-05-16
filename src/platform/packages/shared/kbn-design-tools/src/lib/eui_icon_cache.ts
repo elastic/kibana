@@ -22,7 +22,7 @@ const lazyIconTypes = { names: undefined as string[] | undefined };
 export const getIconTypes = async (): Promise<string[]> => {
   if (!lazyIconTypes.names) {
     const { typeToPathMap } = await import(
-      // @ts-expect-error — no declarations for this internal module
+      // @ts-expect-error - no declarations for this internal module
       '@elastic/eui/optimize/es/components/icon/icon_map'
     );
     lazyIconTypes.names = Object.keys(typeToPathMap);
@@ -40,7 +40,7 @@ export const preloadAllEuiIcons = (() => {
     if (!promise) {
       promise = (async () => {
         const { typeToPathMap } = await import(
-          // @ts-expect-error — no declarations for this internal module
+          // @ts-expect-error - no declarations for this internal module
           '@elastic/eui/optimize/es/components/icon/icon_map'
         );
 
@@ -60,7 +60,7 @@ export const preloadAllEuiIcons = (() => {
         );
 
         const { appendIconComponentCache } = await import(
-          // @ts-expect-error — no declarations for this internal module
+          // @ts-expect-error - no declarations for this internal module
           '@elastic/eui/optimize/es/components/icon/icon'
         );
         appendIconComponentCache(cache);
@@ -86,7 +86,7 @@ export const replaceIconContent = (container: Element, iconType: string): void =
     while (targetSvg.firstChild) {
       targetSvg.removeChild(targetSvg.firstChild);
     }
-    for (const child of Array.from(cached.children)) {
+    for (const child of cached.children) {
       targetSvg.appendChild(child.cloneNode(true));
     }
     for (const attr of ['viewBox', 'width', 'height']) {
@@ -116,7 +116,7 @@ export const replaceIconContent = (container: Element, iconType: string): void =
         while (targetSvg.firstChild) {
           targetSvg.removeChild(targetSvg.firstChild);
         }
-        for (const child of Array.from(newSvg.childNodes)) {
+        for (const child of newSvg.childNodes) {
           targetSvg.appendChild(child.cloneNode(true));
         }
         for (const attr of ['viewBox', 'width', 'height']) {
@@ -134,8 +134,16 @@ export const replaceIconContent = (container: Element, iconType: string): void =
       tmp.remove();
     }
   } catch {
-    // Fallback render failed — the icon content is unchanged.
+    // Fallback render failed. The icon content is unchanged.
     // This is non-critical: the user simply sees the previous icon.
+  }
+};
+
+export const applySourceAttribute = (element: Element, attribute: string, value: string): void => {
+  if (attribute === 'data-icon-type') {
+    replaceIconContent(element, value);
+  } else {
+    element.setAttribute(attribute, value);
   }
 };
 
@@ -177,10 +185,17 @@ const buildIconCacheImpl = async (): Promise<Map<string, string>> => {
   const root = createRoot(tmp);
 
   try {
-    for (const iconType of types) {
+    for (let i = 0; i < types.length; i++) {
+      const iconType = types[i];
       flushSync(() => {
         root.render(createElement(EuiIcon, { type: iconType, key: iconType }));
       });
+
+      // Yield to the event loop every 50 icons to avoid monopolizing
+      // the main thread.
+      if (i % 50 === 49) {
+        await new Promise<void>((r) => setTimeout(r, 0));
+      }
       const rendered = tmp.firstElementChild;
       if (!rendered) continue;
       const isSvg = rendered.tagName.toLowerCase() === 'svg';

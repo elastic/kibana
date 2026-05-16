@@ -11,7 +11,7 @@ import type { ElementSession } from '../dom/element_registry';
 import type { ElementSessionSnapshot } from './transaction';
 
 /**
- * Capture a point-in-time snapshot of an {@link ElementSession}.
+ * Captures a point-in-time snapshot of an {@link ElementSession}.
  *
  * The snapshot includes:
  * - All positional state (dx, dy, dw, dh, originalRect)
@@ -21,7 +21,7 @@ import type { ElementSessionSnapshot } from './transaction';
  * - Deep copies of all edit arrays so they are immune to future
  *   mutations on the session
  *
- * This is used by structural transactions (duplicate, delete, clone) to
+ * Used by structural transactions (duplicate, delete, clone) to
  * record enough state to fully reverse the operation.
  *
  * @param session - The live session to snapshot.
@@ -52,20 +52,22 @@ export const snapshotSession = (session: ElementSession): ElementSessionSnapshot
     // re-insert it at the same position on undo.
     parentNode: el.parentNode ?? document.body,
     nextSibling: el.nextSibling,
-    // Deep-copy edit arrays — the session's arrays may be mutated later.
+    // Shallow-copy edit arrays. Entries share element references with
+    // the session intentionally (undo/redo operates on the same DOM
+    // nodes). Only the array identity is decoupled.
     styleEdits: [...session.styleEdits],
     textEdits: [...session.textEdits],
-    sourceEdits: [...session.sourceEdits],
+    mediaEdits: [...session.mediaEdits],
     cleanup: session.cleanup,
   };
 };
 
 /**
- * Restore a session from a snapshot.
+ * Restores a session from a snapshot.
  *
  * Creates a fresh {@link ElementSession} from the snapshot's values.
  * Does NOT re-insert the element into the DOM or register it with the
- * registry — callers are responsible for those operations.
+ * registry. Callers are responsible for those operations.
  *
  * @param snapshot - The snapshot to restore from.
  * @returns A new session object with the snapshot's state.
@@ -92,7 +94,7 @@ export const restoreSession = (snapshot: ElementSessionSnapshot): ElementSession
   // independently.
   styleEdits: [...snapshot.styleEdits],
   textEdits: [...snapshot.textEdits],
-  sourceEdits: [...snapshot.sourceEdits],
+  mediaEdits: [...snapshot.mediaEdits],
   cleanup: snapshot.cleanup,
 });
 
@@ -100,7 +102,7 @@ export const restoreSession = (snapshot: ElementSessionSnapshot): ElementSession
  * Capture the original inline styles of an unmanaged page element
  * before a soft-delete (fade-out + visibility:hidden).
  *
- * These values are stored on a {@link DeleteTransaction} so the delete
+ * Stored on a {@link DeleteTransaction} so the delete
  * executor can restore them on undo.
  *
  * @param el - The page element about to be soft-deleted.

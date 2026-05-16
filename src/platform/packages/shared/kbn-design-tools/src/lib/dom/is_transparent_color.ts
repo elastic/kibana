@@ -10,7 +10,7 @@
 import { TRANSPARENT_COLOR_RE } from '../constants';
 
 /**
- * Check whether a CSS color value represents a transparent background
+ * Checks whether a CSS color value represents a transparent background
  * (empty, literal "transparent", or rgba(0,0,0,0)).
  */
 export const isTransparentColor = (color: string): boolean =>

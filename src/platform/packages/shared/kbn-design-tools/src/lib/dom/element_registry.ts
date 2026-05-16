@@ -9,8 +9,15 @@
 
 import type { ReactElement } from 'react';
 import { DEVTOOL_HIDDEN_ATTR, DEVTOOL_MANAGED_ATTR } from '../constants';
-import { replaceIconContent } from '../eui_icon_cache';
-import { setImportant, unfreezeChildren } from './clone_element';
+import { applySourceAttribute } from '../eui_icon_cache';
+import {
+  setImportant,
+  reflowManagedStyle,
+  reflowManagedText,
+  restoreHiddenElement,
+  collectStyleReflowDimensions,
+  collectTextReflowDimensions,
+} from './clone_element';
 
 /**
  * A forward style change descriptor produced by the edit modal.
@@ -33,9 +40,9 @@ export interface TextNodeChange {
 }
 
 /**
- * A forward source/attribute change descriptor produced by the edit modal.
+ * A forward media/attribute change descriptor produced by the edit modal.
  */
-export interface SourceChange {
+export interface MediaChange {
   element: Element;
   attribute: string;
   value: string;
@@ -56,8 +63,8 @@ export interface TextEdit {
   original: string;
 }
 
-/** A recorded source/attribute change (for undo). */
-export interface SourceEdit {
+/** A recorded media/attribute change (for undo). */
+export interface MediaEdit {
   element: Element;
   attribute: string;
   original: string;
@@ -72,7 +79,7 @@ export interface SourceEdit {
 export const revertEdits = (
   styleEdits: StyleEdit[],
   textEdits: TextEdit[],
-  sourceEdits: SourceEdit[]
+  mediaEdits: MediaEdit[]
 ): void => {
   for (const { element, property, original, originalPriority } of styleEdits) {
     if (original) {
@@ -88,28 +95,24 @@ export const revertEdits = (
   }
   textEdits.length = 0;
 
-  for (const { element, attribute, original } of sourceEdits) {
-    if (attribute === 'data-icon-type') {
-      replaceIconContent(element, original);
-    } else {
-      element.setAttribute(attribute, original);
-    }
+  for (const { element, attribute, original } of mediaEdits) {
+    applySourceAttribute(element, attribute, original);
   }
-  sourceEdits.length = 0;
+  mediaEdits.length = 0;
 };
 
 /**
- * Apply a batch of style, text, and source changes to the DOM, recording
+ * Apply a batch of style, text, and media changes to the DOM, recording
  * undo entries in the provided arrays. Shared by `editExecutor.apply` and
  * `useEditChangeTracker.applyEdits`.
  */
 export const applyEditChanges = (
   styleChanges: StyleChange[],
   textChanges: TextNodeChange[],
-  sourceChanges: SourceChange[],
+  mediaChanges: MediaChange[],
   styleEdits: StyleEdit[],
   textEdits: TextEdit[],
-  sourceEdits: SourceEdit[]
+  mediaEdits: MediaEdit[]
 ): void => {
   for (const { element, property, value } of styleChanges) {
     const cssProp = property.replace(/([A-Z])/g, '-$1').toLowerCase();
@@ -117,12 +120,17 @@ export const applyEditChanges = (
     const originalPriority = element.style.getPropertyPriority(cssProp);
     styleEdits.push({ element, property: cssProp, original, originalPriority });
     setImportant(element, cssProp, value);
-    if (
-      (cssProp === 'width' || cssProp === 'height') &&
-      element.closest(`[${DEVTOOL_MANAGED_ATTR}]`)
-    ) {
-      unfreezeChildren(element, cssProp);
+    if (element.closest(`[${DEVTOOL_MANAGED_ATTR}]`)) {
+      for (const d of collectStyleReflowDimensions(element, cssProp)) {
+        styleEdits.push({
+          element: d.element,
+          property: d.property,
+          original: d.value,
+          originalPriority: d.priority,
+        });
+      }
     }
+    reflowManagedStyle(element, cssProp);
   }
 
   for (const { node, text, color: textColor, fontSize, fontWeight } of textChanges) {
@@ -130,8 +138,22 @@ export const applyEditChanges = (
       textEdits.push({ node, original: node.textContent ?? '' });
       node.textContent = text;
     }
-    if (textColor !== undefined && node.parentElement) {
-      const parent = node.parentElement;
+    const parent = node.parentElement;
+    const needsReflow = text !== undefined || fontSize !== undefined || fontWeight !== undefined;
+    if (needsReflow && parent?.closest(`[${DEVTOOL_MANAGED_ATTR}]`)) {
+      for (const d of collectTextReflowDimensions(parent)) {
+        styleEdits.push({
+          element: d.element,
+          property: d.property,
+          original: d.value,
+          originalPriority: d.priority,
+        });
+      }
+    }
+    if (needsReflow) {
+      reflowManagedText(parent);
+    }
+    if (textColor !== undefined && parent) {
       styleEdits.push({
         element: parent,
         property: 'color',
@@ -147,8 +169,7 @@ export const applyEditChanges = (
       setImportant(parent, 'color', textColor);
       setImportant(parent, '-webkit-text-fill-color', textColor);
     }
-    if (fontSize !== undefined && node.parentElement) {
-      const parent = node.parentElement;
+    if (fontSize !== undefined && parent) {
       styleEdits.push({
         element: parent,
         property: 'font-size',
@@ -157,8 +178,7 @@ export const applyEditChanges = (
       });
       setImportant(parent, 'font-size', fontSize);
     }
-    if (fontWeight !== undefined && node.parentElement) {
-      const parent = node.parentElement;
+    if (fontWeight !== undefined && parent) {
       styleEdits.push({
         element: parent,
         property: 'font-weight',
@@ -169,14 +189,10 @@ export const applyEditChanges = (
     }
   }
 
-  for (const { element, attribute, value } of sourceChanges) {
+  for (const { element, attribute, value } of mediaChanges) {
     const original = element.getAttribute(attribute) ?? '';
-    sourceEdits.push({ element, attribute, original });
-    if (attribute === 'data-icon-type') {
-      replaceIconContent(element, value);
-    } else {
-      element.setAttribute(attribute, value);
-    }
+    mediaEdits.push({ element, attribute, original });
+    applySourceAttribute(element, attribute, value);
   }
 };
 
@@ -194,7 +210,7 @@ export interface ElementSession {
   dw: number;
   /** Height delta from resize operations. */
   dh: number;
-  /** The element's bounding rect before any editing — used for snap calculations. */
+  /** The element's bounding rect before any editing - used for snap calculations. */
   originalRect: DOMRect;
   /** True when this is a duplicate (no hidden original to restore on reset). */
   isDuplicate: boolean;
@@ -208,14 +224,20 @@ export interface ElementSession {
   styleEdits: StyleEdit[];
   /** Tracked text node edits applied via the edit modal. */
   textEdits: TextEdit[];
-  /** Tracked source/attribute edits applied via the edit modal. */
-  sourceEdits: SourceEdit[];
+  /** Tracked media/attribute edits applied via the edit modal. */
+  mediaEdits: MediaEdit[];
   /** Tear-down callback for live React roots. Called on delete/reset. */
   cleanup?: () => void;
 }
 
 /**
  * Registry for managed elements. Keyed by the visible element.
+ *
+ * **Important**: sessions are keyed by the exact `HTMLElement` object
+ * reference. Undo/redo transactions store the same reference so that
+ * lookups succeed after an undo re-inserts the element. If any code
+ * path recreates (rather than reuses) the DOM node, the session
+ * lookup will silently miss.
  */
 export class ElementRegistry {
   private readonly sessions = new Map<HTMLElement, ElementSession>();
@@ -250,7 +272,7 @@ export class ElementRegistry {
    * Whether a session's element should be removed from the DOM on cleanup.
    *
    * Sessions created by drag (clone + hidden original) or duplicate/insert
-   * own their element — it must be removed. Edit-only sessions track an
+   * own their element - it must be removed. Edit-only sessions track an
    * in-place page element that was never cloned; removing it would destroy
    * the original page content.
    *
@@ -267,7 +289,7 @@ export class ElementRegistry {
    */
   resetAll(): void {
     for (const session of this.sessions.values()) {
-      revertEdits(session.styleEdits, session.textEdits, session.sourceEdits);
+      revertEdits(session.styleEdits, session.textEdits, session.mediaEdits);
       session.cleanup?.();
       if (this.isOwnedElement(session)) {
         session.el.remove();
@@ -277,10 +299,7 @@ export class ElementRegistry {
 
     const hidden = document.querySelectorAll<HTMLElement>(`[${DEVTOOL_HIDDEN_ATTR}]`);
     for (const el of hidden) {
-      el.style.transform = el.getAttribute(DEVTOOL_HIDDEN_ATTR) ?? '';
-      el.style.removeProperty('visibility');
-      el.style.removeProperty('pointer-events');
-      el.removeAttribute(DEVTOOL_HIDDEN_ATTR);
+      restoreHiddenElement(el);
     }
   }
 
@@ -290,7 +309,7 @@ export class ElementRegistry {
    * sessions on in-place page elements are simply unregistered.
    */
   removeSession(session: ElementSession): void {
-    revertEdits(session.styleEdits, session.textEdits, session.sourceEdits);
+    revertEdits(session.styleEdits, session.textEdits, session.mediaEdits);
     session.cleanup?.();
     if (this.isOwnedElement(session)) {
       session.el.remove();
@@ -300,7 +319,7 @@ export class ElementRegistry {
 
   /**
    * Get or create a session for `el`. If no session exists, a lightweight
-   * edit-only session is registered — the element is NOT cloned or hidden.
+   * edit-only session is registered - the element is NOT cloned or hidden.
    */
   getOrCreate(el: HTMLElement): ElementSession {
     const existing = this.sessions.get(el);
@@ -317,7 +336,7 @@ export class ElementRegistry {
       isDuplicate: false,
       styleEdits: [],
       textEdits: [],
-      sourceEdits: [],
+      mediaEdits: [],
     };
     this.set(session);
     return session;

@@ -29,6 +29,13 @@ export interface ElementPath {
   readonly fingerprint: string;
 }
 
+const childIndex = (parent: Element, child: Element): number => {
+  for (let i = 0; i < parent.children.length; i++) {
+    if (parent.children[i] === child) return i + 1;
+  }
+  return 1;
+};
+
 /**
  * Build a structural CSS selector path from `el` up to (but not
  * including) `document`. Each segment is `tagName:nth-child(n)` to
@@ -50,9 +57,7 @@ const buildSelector = (el: Element): string => {
       break;
     }
 
-    const siblings = Array.from(parent.children);
-    const index = siblings.indexOf(current) + 1;
-    segments.unshift(`${tag}:nth-child(${index})`);
+    segments.unshift(`${tag}:nth-child(${childIndex(parent, current)})`);
     current = parent;
   }
 
@@ -74,9 +79,7 @@ export const buildRelativeSelector = (root: Element, descendant: Element): strin
     const parent: Element | null = current.parentElement;
     if (!parent) return undefined;
 
-    const siblings = Array.from(parent.children);
-    const index = siblings.indexOf(current) + 1;
-    segments.unshift(`${tag}:nth-child(${index})`);
+    segments.unshift(`${tag}:nth-child(${childIndex(parent, current)})`);
     current = parent;
   }
 
@@ -88,7 +91,7 @@ export const buildRelativeSelector = (root: Element, descendant: Element): strin
  * Build a lightweight content fingerprint for an element.
  * Format: `"TAG|classSnippet|first50CharsOfTextContent"`.
  *
- * This is NOT a cryptographic hash — it's a best-effort disambiguation
+ * Not a cryptographic hash. A best-effort disambiguation
  * check for import validation. The class snippet is truncated to 80
  * characters to keep paths compact while remaining unique enough for
  * structural comparison.
@@ -102,7 +105,7 @@ const buildContentFingerprint = (el: Element): string => {
 };
 
 /**
- * Resolve a DOM element to a stable {@link ElementPath}.
+ * Resolves a DOM element to a stable {@link ElementPath}.
  *
  * @param el - The element to address.
  * @returns A path that can be serialized to JSON and resolved later.
@@ -121,18 +124,18 @@ interface ResolveResult {
   element: Element | null;
   /**
    * Whether the fingerprint matched. `false` means the element was found
-   * by selector but its content has changed — the caller should surface
+   * by selector but its content has changed. The caller should surface
    * a warning.
    */
   fingerprintMatch: boolean;
 }
 
 /**
- * Resolve an {@link ElementPath} back to a DOM element.
+ * Resolves an {@link ElementPath} back to a DOM element.
  *
  * Uses `querySelector` with the structural selector. If the element is
  * found, checks the fingerprint for confidence. If the fingerprint
- * mismatches, `fingerprintMatch` is `false` — the caller decides
+ * mismatches, `fingerprintMatch` is `false` and the caller decides
  * whether to proceed or warn.
  *
  * @param path - The path to resolve.

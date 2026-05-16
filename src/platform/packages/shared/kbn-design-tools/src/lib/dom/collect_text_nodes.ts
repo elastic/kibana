@@ -8,7 +8,7 @@
  */
 
 /**
- * Returns true if the element is visually hidden and should be skipped
+ * Checks whether the element is visually hidden and should be skipped
  * when collecting editable text nodes.
  */
 const isHiddenElement = (el: Element): boolean => {
@@ -19,7 +19,9 @@ const isHiddenElement = (el: Element): boolean => {
   if (display === 'none' || visibility === 'hidden' || opacity === '0') return true;
   // Screen-reader-only patterns (e.g. EUI's .euiScreenReaderOnly)
   if (el.classList.contains('euiScreenReaderOnly')) return true;
-  if (el.offsetWidth === 0 && el.offsetHeight === 0) return true;
+  // offsetWidth/offsetHeight are 0 for detached elements; skip this check
+  // when the element is not connected to the document (e.g. clones).
+  if (el.isConnected && el.offsetWidth === 0 && el.offsetHeight === 0) return true;
   return false;
 };
 

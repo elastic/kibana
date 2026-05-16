@@ -53,7 +53,7 @@ export interface InteractionMachineOptions {
  *
  * Manages transitions between idle → hover → pending-drag → drag → resize,
  * and exposes handler functions for pointer events. The state lives in a ref
- * (not React state) because pointer-move handlers fire at 60 Hz.
+ * (not React state) because pointer-move handlers fire every frame.
  *
  * See `InteractionState` for the full state diagram.
  */
@@ -280,7 +280,7 @@ export const useInteractionMachine = (options: InteractionMachineOptions) => {
       event.stopPropagation();
       (event.target as Element)?.setPointerCapture?.(event.pointerId);
 
-      // Don't start a real drag yet — wait for the pointer to move beyond
+      // Don't start a real drag yet. Wait for the pointer to move beyond
       // a minimum threshold so that plain clicks don't create clones.
       interaction.current = {
         type: 'pending-drag',

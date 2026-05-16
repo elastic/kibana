@@ -127,6 +127,18 @@ export const IMPORT_CLONE_Z_INDEX = 9001;
 /** Width (px) of the edge zone where dead-zone compensation applies. */
 export const EDGE_ZONE = 16;
 
+const stopEvent = (e: { stopPropagation: () => void }) => e.stopPropagation();
+
+/**
+ * Shared popover props for combo boxes rendered inside the edit modal.
+ * Prevents pointer events from leaking through to the edit overlay
+ * which would otherwise trigger unintended drag/resize gestures.
+ */
+export const COMBO_POPOVER_PROPS = {
+  onMouseDown: stopEvent,
+  onClick: stopEvent,
+};
+
 /** SVG child element tag names that are not meaningful to show in UI trees. */
 export const SVG_INTERNALS = new Set([
   'path',
@@ -251,7 +263,7 @@ export const IGNORED_ELEMENT_IDS = new Set([
 
 /** Combined selector matching all ignored tool UI elements. */
 export const IGNORED_SELECTOR = [
-  ...Array.from(IGNORED_ELEMENT_IDS).map((id) => `#${id}`),
+  ...[...IGNORED_ELEMENT_IDS].map((id) => `#${id}`),
   DEVTOOL_IGNORE_SELECTOR,
   DEVTOOL_RESIZE_SELECTOR,
 ].join(',');

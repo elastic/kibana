@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { css } from '@emotion/css';
+import { css } from '@emotion/react';
 import type { LayoutConfig } from '../../../lib/layout/layout_config';
 
 interface Props {
@@ -20,7 +20,7 @@ export const GridPattern = ({ layoutConfig }: Props) => {
 
   return (
     <div
-      className={css({
+      css={css({
         position: 'absolute',
         inset: 0,
         pointerEvents: 'none',

@@ -35,11 +35,11 @@ export const usePortalZIndex = (elementId: string, zIndex: number, isOpen: boole
       return false;
     };
 
-    // Try immediately via rAF — this covers the common case.
+    // Try immediately via rAF. This covers the common case.
     const rafId = requestAnimationFrame(() => {
       if (applyZIndex()) return;
 
-      // Portal not yet rendered — observe DOM additions and retry.
+      // Portal not yet rendered. Observe DOM additions and retry.
       // This handles cases where React defers the portal render
       // (e.g. concurrent mode, Suspense).
       observer = new MutationObserver(() => {

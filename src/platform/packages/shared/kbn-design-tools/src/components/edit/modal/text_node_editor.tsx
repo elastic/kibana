@@ -14,28 +14,26 @@ import {
   EuiFlexItem,
   EuiComboBox,
   EuiSelect,
-  EuiButtonIcon,
-  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { css } from '@emotion/css';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { COMBO_POPOVER_PROPS } from '../../../lib/constants';
 import { EuiColorTokenSelect } from '../../eui_color_token_select';
 import { ExpandableTextInput } from './expandable_text_input';
 
 const colorColumnCss = css({ minWidth: 140 });
-const fontSizeColumnCss = css({ minWidth: 120 });
-const weightColumnCss = css({ minWidth: 100 });
+const fontSizeColumnCss = css({ width: 200 });
+const weightColumnCss = css({ width: 144 });
 
-const FONT_WEIGHT_OPTIONS = [
-  { value: '', text: '—' },
-  { value: '300', text: '300 (Light)' },
-  { value: '400', text: '400 (Regular)' },
-  { value: '500', text: '500 (Medium)' },
-  { value: '600', text: '600 (Semi Bold)' },
-  { value: '700', text: '700 (Bold)' },
-];
+const FONT_WEIGHT_LABELS: Record<string, string> = {
+  light: 'Light',
+  regular: 'Regular',
+  medium: 'Medium',
+  semiBold: 'Semi Bold',
+  bold: 'Bold',
+};
 
 export interface TextNodeEntry {
   node: Text;
@@ -60,11 +58,10 @@ interface Props {
       fontWeight?: string;
     }
   ) => void;
-  onReset?: (index: number) => void;
   onFocus?: (index: number) => void;
 }
 
-export const TextNodeEditor = ({ entries, onChange, onReset, onFocus }: Props) => {
+export const TextNodeEditor = ({ entries, onChange, onFocus }: Props) => {
   const { euiTheme } = useEuiTheme();
 
   const fontSizeOptions: Array<EuiComboBoxOptionOption<string>> = useMemo(() => {
@@ -74,6 +71,15 @@ export const TextNodeEditor = ({ entries, onChange, onReset, onFocus }: Props) =
     }
     return opts;
   }, [euiTheme.size]);
+
+  const fontWeightOptions = useMemo(() => {
+    const opts = [];
+    for (const [key, weight] of Object.entries(euiTheme.font.weight)) {
+      const label = FONT_WEIGHT_LABELS[key] ?? key;
+      opts.push({ value: String(weight), text: `${weight} (${label})` });
+    }
+    return opts;
+  }, [euiTheme.font.weight]);
 
   const handleTextChange = useCallback(
     (index: number, value: string) => {
@@ -118,8 +124,11 @@ export const TextNodeEditor = ({ entries, onChange, onReset, onFocus }: Props) =
     <>
       {entries.map((entry, idx) => {
         const selectedFontSize = entry.fontSize
-          ? fontSizeOptions.find((o) => o.value === entry.fontSize) ?? [
-              { label: entry.fontSize, value: entry.fontSize },
+          ? [
+              fontSizeOptions.find((o) => o.value === entry.fontSize) ?? {
+                label: entry.fontSize,
+                value: entry.fontSize,
+              },
             ]
           : [];
 
@@ -140,7 +149,7 @@ export const TextNodeEditor = ({ entries, onChange, onReset, onFocus }: Props) =
                   rows={4}
                 />
               </EuiFlexItem>
-              <EuiFlexItem grow={false} className={colorColumnCss}>
+              <EuiFlexItem grow={false} css={colorColumnCss}>
                 <EuiColorTokenSelect
                   color={entry.color}
                   onChange={(value) => handleColorChange(idx, value)}
@@ -149,18 +158,17 @@ export const TextNodeEditor = ({ entries, onChange, onReset, onFocus }: Props) =
                   colorPickerLabel={i18n.translate('kbnDesignTools.edit.modal.textColor', {
                     defaultMessage: 'Text color',
                   })}
+                  inputPopoverProps={COMBO_POPOVER_PROPS}
                 />
               </EuiFlexItem>
-              <EuiFlexItem grow={false} className={fontSizeColumnCss}>
+              <EuiFlexItem grow={false} css={fontSizeColumnCss}>
                 <div onFocusCapture={() => onFocus?.(idx)}>
                   <EuiComboBox
                     aria-label={i18n.translate('kbnDesignTools.edit.modal.fontSize', {
                       defaultMessage: 'Font size',
                     })}
                     options={fontSizeOptions}
-                    selectedOptions={
-                      Array.isArray(selectedFontSize) ? selectedFontSize : [selectedFontSize]
-                    }
+                    selectedOptions={selectedFontSize}
                     onChange={(selected) => handleFontSizeChange(idx, selected)}
                     onCreateOption={(searchValue) => handleFontSizeCreate(idx, searchValue)}
                     singleSelection={{ asPlainText: true }}
@@ -176,44 +184,22 @@ export const TextNodeEditor = ({ entries, onChange, onReset, onFocus }: Props) =
                         values: { searchValue: '{searchValue}' },
                       }
                     )}
+                    inputPopoverProps={COMBO_POPOVER_PROPS}
                   />
                 </div>
               </EuiFlexItem>
-              <EuiFlexItem grow={false} className={weightColumnCss}>
+              <EuiFlexItem grow={false} css={weightColumnCss}>
                 <div onFocusCapture={() => onFocus?.(idx)}>
                   <EuiSelect
                     aria-label={i18n.translate('kbnDesignTools.edit.modal.fontWeight', {
                       defaultMessage: 'Font weight',
                     })}
-                    options={FONT_WEIGHT_OPTIONS}
+                    options={fontWeightOptions}
                     value={entry.fontWeight}
                     onChange={(e) => handleFontWeightChange(idx, e.target.value)}
                     compressed
                   />
                 </div>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiToolTip
-                  content={i18n.translate('kbnDesignTools.edit.modal.resetText', {
-                    defaultMessage: 'Reset to original value',
-                  })}
-                >
-                  <EuiButtonIcon
-                    iconType="undo"
-                    aria-label={i18n.translate('kbnDesignTools.edit.modal.resetTextAria', {
-                      defaultMessage: 'Reset text {index} to original value',
-                      values: { index: idx + 1 },
-                    })}
-                    onClick={() => onReset?.(idx)}
-                    disabled={
-                      entry.text === entry.originalText &&
-                      entry.color === entry.originalColor &&
-                      entry.fontSize === entry.originalFontSize &&
-                      entry.fontWeight === entry.originalFontWeight
-                    }
-                    size="s"
-                  />
-                </EuiToolTip>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFormRow>

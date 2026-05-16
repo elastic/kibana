@@ -236,7 +236,7 @@ describe('useInteractionMachine', () => {
       isDuplicate: true,
       styleEdits: [],
       textEdits: [],
-      sourceEdits: [],
+      mediaEdits: [],
     };
 
     const { result } = renderHook(() => useInteractionMachine(opts));

@@ -9,12 +9,20 @@
 
 import DOMPurify from 'dompurify';
 import type { ReactElement } from 'react';
+import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
 import { EUI_LIBRARY } from '../../../components/edit/library/library_entries';
 import type { ElementRegistry, ElementSession } from '../../dom/element_registry';
 import { toPath, fromPath, buildRelativeSelector } from './element_path';
 import type { ElementPath } from './element_path';
 import { buildTransform } from '../../dom/resize_helpers';
-import { setImportant, unfreezeChildren } from '../../dom/clone_element';
+import {
+  setImportant,
+  unfreezeChildren,
+  softHideElement,
+  reflowManagedStyle,
+  reflowManagedText,
+  roundRect,
+} from '../../dom/clone_element';
 import { cloneElement } from '../../dom/clone_element';
 import {
   DEVTOOL_HIDDEN_ATTR,
@@ -24,14 +32,17 @@ import {
 
 import { renderEuiComponentLive } from '../../dom/insert_element';
 import { readStateAttributes } from '../../../components/edit/library/serializable_state';
-import { replaceIconContent } from '../../eui_icon_cache';
+import { replaceIconContent, applySourceAttribute } from '../../eui_icon_cache';
 import { getPageColorScheme } from '../../dom/get_page_color_mode';
 import type { PageColorScheme } from '../../dom/get_page_color_mode';
 import { resolveColorTokensDeep } from '../../dom/color_token_lookup';
 import { buildEmotionClassMap, remapEmotionClasses } from '../../dom/remap_emotion_classes';
 
+/** Attributes allowed to be restored during media edit import. */
+const ALLOWED_SOURCE_ATTRIBUTES: ReadonlySet<string> = new Set(['src', 'href', 'data-icon-type']);
+
 /**
- * Portable version of a single style edit — element replaced by path.
+ * Portable version of a single style edit. Element replaced by path.
  */
 interface SerializedStyleEditEntry {
   readonly targetPath: ElementPath;
@@ -44,7 +55,7 @@ interface SerializedStyleEditEntry {
 }
 
 /**
- * Portable version of a single text edit — Text node replaced by
+ * Portable version of a single text edit. Text node replaced by
  * parent path + child index.
  */
 interface SerializedTextEditEntry {
@@ -56,9 +67,9 @@ interface SerializedTextEditEntry {
 }
 
 /**
- * Portable version of a single source/attribute edit.
+ * Portable version of a single media/attribute edit.
  */
-interface SerializedSourceEditEntry {
+interface SerializedMediaEditEntry {
   readonly targetPath: ElementPath;
   readonly relativeSelector?: string;
   readonly attribute: string;
@@ -81,7 +92,7 @@ interface ExportedSession {
   readonly referenceElPath?: ElementPath;
   readonly styleEdits: SerializedStyleEditEntry[];
   readonly textEdits: SerializedTextEditEntry[];
-  readonly sourceEdits: SerializedSourceEditEntry[];
+  readonly mediaEdits: SerializedMediaEditEntry[];
   readonly outerHTML?: string;
   readonly inlineStyles?: string;
   readonly libraryId?: string;
@@ -89,7 +100,7 @@ interface ExportedSession {
 }
 
 /**
- * A soft-deleted page element — hidden via visibility:hidden and
+ * A soft-deleted page element, hidden via visibility:hidden and
  * DEVTOOL_HIDDEN_ATTR but not removed from the DOM.
  */
 interface ExportedDeletion {
@@ -106,6 +117,12 @@ export interface ExportedState {
   readonly exportedAt: string;
   readonly pageUrl: string;
   readonly viewport: { width: number; height: number };
+  /**
+   * Scroll position of the main Kibana scroll container at export time.
+   * Used to adjust element positions on import so they map back to the
+   * same document coordinates regardless of current scroll.
+   */
+  readonly scroll?: { x: number; y: number };
   /**
    * Color scheme active when the export was created. Used to detect
    * light/dark mode and forced-colors (high contrast) mismatches on import.
@@ -149,7 +166,15 @@ export const exportState = (registry: ElementRegistry): ExportedState => {
       const parent = e.node.parentElement;
       const parentPath = parent ? toPath(parent) : toPath(session.el);
       const parentRelativeSelector = parent ? buildRelativeSelector(session.el, parent) : undefined;
-      const childIndex = parent ? Array.from(parent.childNodes).indexOf(e.node) : 0;
+      let childIndex = 0;
+      if (parent) {
+        for (let i = 0; i < parent.childNodes.length; i++) {
+          if (parent.childNodes[i] === e.node) {
+            childIndex = i;
+            break;
+          }
+        }
+      }
       return {
         parentPath,
         parentRelativeSelector,
@@ -159,7 +184,7 @@ export const exportState = (registry: ElementRegistry): ExportedState => {
       };
     });
 
-    const sourceEdits: SerializedSourceEditEntry[] = session.sourceEdits.map((e) => ({
+    const mediaEdits: SerializedMediaEditEntry[] = session.mediaEdits.map((e) => ({
       targetPath: toPath(e.element),
       relativeSelector: buildRelativeSelector(session.el, e.element),
       attribute: e.attribute,
@@ -167,8 +192,8 @@ export const exportState = (registry: ElementRegistry): ExportedState => {
       current: e.element.getAttribute(e.attribute) ?? '',
     }));
 
-    // Note: componentState (React hook snapshots for live elements)
-    // is intentionally omitted — hook values may contain
+    // componentState (React hook snapshots for live elements)
+    // is intentionally omitted. Hook values may contain
     // non-serializable data (DOM refs, callbacks). Interactive
     // components rely on stateAttributes for round-trip fidelity.
     const base: ExportedSession = {
@@ -186,7 +211,7 @@ export const exportState = (registry: ElementRegistry): ExportedState => {
       referenceElPath,
       styleEdits,
       textEdits,
-      sourceEdits,
+      mediaEdits,
       libraryId: session.el.getAttribute(DEVTOOL_LIBRARY_ID_ATTR) ?? undefined,
       stateAttributes: (() => {
         const attrs = readStateAttributes(session.el);
@@ -231,6 +256,10 @@ export const exportState = (registry: ElementRegistry): ExportedState => {
     exportedAt: new Date().toISOString(),
     pageUrl: window.location.href,
     viewport: { width: window.innerWidth, height: window.innerHeight },
+    scroll: (() => {
+      const scrollEl = document.getElementById(APP_MAIN_SCROLL_CONTAINER_ID);
+      return scrollEl ? { x: scrollEl.scrollLeft, y: scrollEl.scrollTop } : { x: 0, y: 0 };
+    })(),
     colorScheme: getPageColorScheme(),
     sessions,
     ...(deletions.length > 0 ? { deletions } : {}),
@@ -251,6 +280,10 @@ export interface ImportResult {
   failedCount: number;
   /** True when the export's color scheme differs from the current page. */
   colorSchemeMismatch: boolean;
+  /** Elements imported as sessions (for undo transaction snapshots). */
+  importedElements: HTMLElement[];
+  /** Elements soft-hidden by the import's deletion list (for undo). */
+  importedDeletions: Array<{ element: HTMLElement; originalTransform: string }>;
 }
 
 /**
@@ -300,28 +333,31 @@ const findLibraryElement = (libraryId: string) => {
  * Sanitize HTML to prevent script execution when importing untrusted
  * outerHTML. Returns the sanitized string.
  */
-const sanitizeHTML = (html: string): string => {
-  DOMPurify.addHook('afterSanitizeAttributes', (node) => {
+const purifier = (() => {
+  const instance = DOMPurify();
+  instance.addHook('afterSanitizeAttributes', (node) => {
     const href = node.getAttribute('xlink:href') ?? node.getAttribute('href');
     if (href && !href.startsWith('#')) {
       node.removeAttribute('xlink:href');
       node.removeAttribute('href');
     }
   });
-  const clean = DOMPurify.sanitize(html, {
+  return instance;
+})();
+
+const sanitizeHTML = (html: string): string => {
+  return purifier.sanitize(html, {
     ADD_TAGS: ['use'],
     ADD_ATTR: ['xlink:href', 'data-icon-type'],
     FORBID_TAGS: ['script', 'iframe', 'object', 'embed'],
   });
-  DOMPurify.removeHook('afterSanitizeAttributes');
-  return clean;
 };
 
 /**
  * Sanitize inline CSS text to prevent script execution.
  *
  * Applies the styles to a detached element and reads them back via
- * `style.cssText` — the browser's CSS parser rejects any non-standard
+ * `style.cssText`. The browser's CSS parser rejects any non-standard
  * constructs (e.g. `expression()`, `behavior:`, `javascript:`,
  * `-moz-binding:`) without needing fragile regex patterns.
  */
@@ -337,14 +373,14 @@ const recreateFromOuterHTML = (
   warnings: string[]
 ): HTMLElement | null => {
   if (!exported.outerHTML) {
-    warnings.push('Duplicate session missing outerHTML — skipping.');
+    warnings.push('Duplicate session missing outerHTML. Skipping.');
     return null;
   }
   const cleanHTML = sanitizeHTML(exported.outerHTML);
   const doc = new DOMParser().parseFromString(cleanHTML, 'text/html');
   const recreated = doc.body.firstElementChild as HTMLElement | null;
   if (!recreated) {
-    warnings.push('Could not recreate element from outerHTML — skipping.');
+    warnings.push('Could not recreate element from outerHTML. Skipping.');
     return null;
   }
   const adopted = document.adoptNode(recreated);
@@ -359,7 +395,7 @@ const recreateFromOuterHTML = (
 const PSEUDO_CLASS_RE = /^__pseudo_[0-9a-f]{8}$/;
 
 const stripPseudoStyles = (root: HTMLElement): void => {
-  for (const style of Array.from(root.querySelectorAll('style'))) {
+  for (const style of root.querySelectorAll('style')) {
     const text = style.textContent ?? '';
     if (text.includes('__pseudo_') && /\.__pseudo_[0-9a-f]{8}::(?:before|after)/.test(text)) {
       style.remove();
@@ -385,12 +421,13 @@ const applyIconOverrides = (outerHTML: string | undefined, liveEl: HTMLElement):
   if (savedIcons.length === 0) return;
 
   const liveSvgs = liveEl.querySelectorAll('svg');
-  const savedSvgs = doc.querySelectorAll('svg');
+  const savedSvgList = Array.from(doc.querySelectorAll('svg'));
+  const svgIndexMap = new Map(savedSvgList.map((svg, i) => [svg, i]));
 
-  for (const savedIcon of Array.from(savedIcons)) {
+  for (const savedIcon of savedIcons) {
     const savedType = savedIcon.getAttribute('data-icon-type');
     if (!savedType) continue;
-    const savedIndex = Array.from(savedSvgs).indexOf(savedIcon as SVGSVGElement);
+    const savedIndex = svgIndexMap.get(savedIcon as SVGSVGElement) ?? -1;
     if (savedIndex < 0 || savedIndex >= liveSvgs.length) continue;
     replaceIconContent(liveSvgs[savedIndex], savedType);
   }
@@ -416,6 +453,21 @@ export const importState = async (
   let restoredCount = 0;
   let failedCount = 0;
   let colorModeMismatch = false;
+  const importedElements: HTMLElement[] = [];
+
+  // Compute scroll delta between export and import. Duplicate elements
+  // (library inserts, outerHTML clones) have no in-flow reference, so
+  // their exported viewport positions must be shifted by the scroll
+  // difference. Non-duplicate re-clones are positioned by cloneElement
+  // from the reference element's current BCR, which already reflects
+  // the current scroll — useScrollSync then keeps them in sync.
+  const scrollEl = document.getElementById(APP_MAIN_SCROLL_CONTAINER_ID);
+  const currentScroll = scrollEl
+    ? { x: scrollEl.scrollLeft, y: scrollEl.scrollTop }
+    : { x: 0, y: 0 };
+  const exportScroll = state.scroll ?? { x: 0, y: 0 };
+  const scrollDx = currentScroll.x - exportScroll.x;
+  const scrollDy = currentScroll.y - exportScroll.y;
 
   if (state.viewport) {
     const { width, height } = state.viewport;
@@ -450,6 +502,22 @@ export const importState = async (
     let el: HTMLElement;
     let liveReactElement: { element: ReactElement; zIndex: number } | undefined;
     let cleanup: (() => void) | undefined;
+    let cloneRect: DOMRect | undefined;
+
+    // For duplicates (library inserts / outerHTML clones), shift the
+    // exported viewport position by the scroll delta. For non-duplicate
+    // re-clones, cloneElement positions from the reference's current
+    // BCR which already accounts for scroll — no adjustment needed.
+    const scrollAdjustedRect = exported.isDuplicate
+      ? roundRect(
+          new DOMRect(
+            exported.originalRect.x - scrollDx,
+            exported.originalRect.y - scrollDy,
+            exported.originalRect.width,
+            exported.originalRect.height
+          )
+        )
+      : null;
 
     if (exported.isDuplicate) {
       const libraryMatch = exported.libraryId ? findLibraryElement(exported.libraryId) : null;
@@ -464,8 +532,8 @@ export const importState = async (
           el = live.wrapper;
           liveReactElement = live.liveReactElement;
           cleanup = live.cleanup;
-          setImportant(el, 'left', `${exported.originalRect.x}px`);
-          setImportant(el, 'top', `${exported.originalRect.y}px`);
+          setImportant(el, 'left', `${scrollAdjustedRect!.left}px`);
+          setImportant(el, 'top', `${scrollAdjustedRect!.top}px`);
           el.style.pointerEvents = 'auto';
           if (exported.libraryId) {
             el.setAttribute(DEVTOOL_LIBRARY_ID_ATTR, exported.libraryId);
@@ -473,18 +541,20 @@ export const importState = async (
           applyIconOverrides(exported.outerHTML, el);
         } catch {
           warnings.push(
-            `Fresh render failed for ${exported.libraryId} — falling back to outerHTML.`
+            `Fresh render failed for ${exported.libraryId}. Falling back to outerHTML.`
           );
           const fallback = recreateFromOuterHTML(exported, warnings);
           if (!fallback) {
             failedCount++;
             continue;
           }
+          setImportant(fallback, 'left', `${scrollAdjustedRect!.left}px`);
+          setImportant(fallback, 'top', `${scrollAdjustedRect!.top}px`);
           el = fallback;
         }
       } else {
         if (!exported.outerHTML) {
-          warnings.push('Duplicate session missing outerHTML — skipping.');
+          warnings.push('Duplicate session missing outerHTML. Skipping.');
           failedCount++;
           continue;
         }
@@ -493,18 +563,24 @@ export const importState = async (
           failedCount++;
           continue;
         }
+        setImportant(recreated, 'left', `${scrollAdjustedRect!.left}px`);
+        setImportant(recreated, 'top', `${scrollAdjustedRect!.top}px`);
         el = recreated;
       }
     } else {
       if (!exported.elPath) {
-        warnings.push('Non-duplicate session missing elPath — skipping.');
+        warnings.push('Non-duplicate session missing elPath. Skipping.');
         failedCount++;
         continue;
       }
       const elResult = fromPath(exported.elPath);
       const elResolved = elResult.element instanceof HTMLElement ? elResult.element : null;
 
-      if (elResolved && (elResult.fingerprintMatch || !exported.referenceElPath)) {
+      if (
+        elResolved &&
+        !registry.has(elResolved) &&
+        (elResult.fingerprintMatch || !exported.referenceElPath)
+      ) {
         if (!elResult.fingerprintMatch) {
           warnings.push(
             `session element was found but its content has changed (selector: ${exported.elPath.selector}).`
@@ -523,11 +599,11 @@ export const importState = async (
           failedCount++;
           continue;
         }
-        const { clone } = cloneElement(original, IMPORT_CLONE_Z_INDEX);
+        const cloneResult = cloneElement(original, IMPORT_CLONE_Z_INDEX);
+        const clone = cloneResult.clone;
+        cloneRect = cloneResult.rect;
         clone.style.pointerEvents = 'auto';
 
-        setImportant(clone, 'left', `${exported.originalRect.x}px`);
-        setImportant(clone, 'top', `${exported.originalRect.y}px`);
         setImportant(clone, 'width', `${exported.originalRect.width}px`);
         setImportant(clone, 'height', `${exported.originalRect.height}px`);
 
@@ -548,9 +624,7 @@ export const importState = async (
         // Hide the original so there's no visual duplication,
         // same as the drag system does. Preserve the original's
         // current transform so resetAll can restore it.
-        setImportant(original, 'visibility', 'hidden');
-        setImportant(original, 'pointer-events', 'none');
-        original.setAttribute(DEVTOOL_HIDDEN_ATTR, original.style.transform || '');
+        softHideElement(original);
 
         document.body.appendChild(clone);
         el = clone;
@@ -598,14 +672,6 @@ export const importState = async (
       return resolved ?? (el instanceof HTMLElement ? el : null);
     };
 
-    const resolveEditParent = (
-      path: ElementPath,
-      label: string,
-      relativeSelector?: string
-    ): HTMLElement | null => {
-      return resolveEditElement(path, label, relativeSelector);
-    };
-
     const styleEdits = exported.styleEdits
       .map((e) => {
         const element = resolveEditElement(
@@ -615,6 +681,7 @@ export const importState = async (
         );
         if (!element) return null;
         element.style.setProperty(e.property, e.current, e.currentPriority);
+        reflowManagedStyle(element, e.property);
         return {
           element,
           property: e.property,
@@ -626,7 +693,7 @@ export const importState = async (
 
     const textEdits = exported.textEdits
       .map((e) => {
-        const parent = resolveEditParent(
+        const parent = resolveEditElement(
           e.parentPath,
           'text edit parent',
           e.parentRelativeSelector
@@ -635,34 +702,52 @@ export const importState = async (
         const node = parent.childNodes[e.childIndex];
         if (!node || node.nodeType !== Node.TEXT_NODE) return null;
         // Re-apply the current text content.
-        if (e.current !== undefined) node.textContent = e.current;
+        if (e.current !== undefined) {
+          node.textContent = e.current;
+          reflowManagedText(parent);
+        }
         return { node: node as Text, original: e.original };
       })
       .filter((e): e is NonNullable<typeof e> => e !== null);
 
-    const sourceEdits = exported.sourceEdits
+    const mediaEdits = exported.mediaEdits
       .map((e) => {
-        if (/^on/i.test(e.attribute)) return null;
+        if (!ALLOWED_SOURCE_ATTRIBUTES.has(e.attribute)) return null;
         const element = resolveEditElement(
           e.targetPath,
-          `source edit (${e.attribute})`,
+          `media edit (${e.attribute})`,
           e.relativeSelector
         );
         if (!element) return null;
         // Re-apply the current attribute value.
         if (e.current !== undefined) {
-          if (e.attribute === 'data-icon-type') {
-            replaceIconContent(element, e.current);
-          } else {
-            element.setAttribute(e.attribute, e.current);
-          }
+          applySourceAttribute(element, e.attribute, e.current);
         }
         return { element, attribute: e.attribute, original: e.original };
       })
       .filter((e): e is NonNullable<typeof e> => e !== null);
 
-    const { x, y, width, height } = exported.originalRect;
-    const originalRect = new DOMRect(x, y, width, height);
+    // For duplicates, use the scroll-adjusted position. For re-clones,
+    // use the position from cloneElement (reflects reference element's
+    // current BCR). For existing elements, use their current parsed position.
+    let rectLeft: number;
+    let rectTop: number;
+    if (scrollAdjustedRect) {
+      rectLeft = scrollAdjustedRect.left;
+      rectTop = scrollAdjustedRect.top;
+    } else if (cloneRect) {
+      rectLeft = cloneRect.left;
+      rectTop = cloneRect.top;
+    } else {
+      rectLeft = parseFloat(el.style.left) || exported.originalRect.x;
+      rectTop = parseFloat(el.style.top) || exported.originalRect.y;
+    }
+    const originalRect = new DOMRect(
+      rectLeft,
+      rectTop,
+      exported.originalRect.width,
+      exported.originalRect.height
+    );
 
     const session: ElementSession = {
       el,
@@ -676,32 +761,42 @@ export const importState = async (
       liveReactElement,
       styleEdits,
       textEdits,
-      sourceEdits,
+      mediaEdits,
       cleanup,
     };
 
     registry.set(session);
 
+    // Style-edit reflow may strip the root's frozen width/height
+    // (unfreezeAncestors walks up from the edited child). Re-apply
+    // the root dimensions so the managed element keeps its size.
+    const finalW = exported.originalRect.width + exported.dw;
+    const finalH = exported.originalRect.height + exported.dh;
+    setImportant(el, 'width', `${finalW}px`);
+    setImportant(el, 'height', `${finalH}px`);
+
     // Re-apply the CSS transform so the element visually moves.
     // transform-origin must be 0 0 so scale pivots from the top-left
     // corner, matching what drag/duplicate/resize set at runtime.
     el.style.transformOrigin = '0 0';
-    const scaleX = (originalRect.width + exported.dw) / originalRect.width;
-    const scaleY = (originalRect.height + exported.dh) / originalRect.height;
+    const hasZeroDimension = originalRect.width === 0 || originalRect.height === 0;
+    const scaleX = hasZeroDimension ? 1 : (originalRect.width + exported.dw) / originalRect.width;
+    const scaleY = hasZeroDimension ? 1 : (originalRect.height + exported.dh) / originalRect.height;
     setImportant(el, 'transform', buildTransform(exported.dx, exported.dy, scaleX, scaleY));
 
+    importedElements.push(el);
     restoredCount++;
   }
 
   // Re-apply soft-deletions: hide elements that were deleted before export.
   let deletedCount = 0;
+  const importedDeletions: Array<{ element: HTMLElement; originalTransform: string }> = [];
   if (state.deletions) {
     for (const deletion of state.deletions) {
       const el = resolveElement(deletion.elPath, 'deleted element', warnings);
       if (!el) continue;
-      setImportant(el, 'visibility', 'hidden');
-      setImportant(el, 'pointer-events', 'none');
-      el.setAttribute(DEVTOOL_HIDDEN_ATTR, deletion.originalTransform);
+      softHideElement(el, deletion.originalTransform);
+      importedDeletions.push({ element: el, originalTransform: deletion.originalTransform });
       deletedCount++;
     }
   }
@@ -712,6 +807,8 @@ export const importState = async (
     warnings,
     failedCount,
     colorSchemeMismatch: colorModeMismatch,
+    importedElements,
+    importedDeletions,
   };
 };
 
@@ -721,13 +818,15 @@ export const importState = async (
  * @param data - The object to serialize.
  * @param filename - The download filename.
  */
-export const downloadJson = (data: unknown, filename: string): void => {
+export const downloadAsJsonFile = (data: unknown, filename: string): void => {
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
   a.download = filename;
+  document.body.appendChild(a);
   a.click();
+  a.remove();
   // Defer revocation so the browser can finish initiating the download.
   setTimeout(() => URL.revokeObjectURL(url), 100);
 };

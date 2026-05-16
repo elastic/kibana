@@ -8,9 +8,10 @@
  */
 
 import React, { useMemo } from 'react';
-import { css } from '@emotion/css';
+import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 import { flattenElementTree } from '../../../lib/dom/flatten_element_tree';
+import { isEnterKey } from '../../../lib/keyboard_shortcuts';
 
 interface Props {
   root: Element;
@@ -69,20 +70,22 @@ export const ElementTree = ({ root, selectedElement, onSelect }: Props) => {
   const tagColor = euiTheme.colors.textPrimary;
 
   return (
-    <div className={containerCss}>
+    <div css={containerCss}>
       {nodes.map((node, i) => {
         const isSelected = node.element === selectedElement;
         const indent = '  '.repeat(node.depth);
 
         return (
           <div
-            key={i}
-            className={`${lineCss} ${isSelected ? selectedCss : ''}`}
+            key={node.depth + node.element.tagName + i}
+            css={[lineCss, isSelected && selectedCss]}
             onClick={() => onSelect(node.element)}
             role="button"
             tabIndex={0}
             onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') onSelect(node.element);
+              if (isEnterKey(e.nativeEvent) || e.key === ' ') {
+                onSelect(node.element);
+              }
             }}
           >
             <span style={{ color: bracketColor }}>{indent}&lt;</span>

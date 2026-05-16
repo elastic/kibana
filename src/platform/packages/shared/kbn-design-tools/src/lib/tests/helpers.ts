@@ -10,11 +10,13 @@
 import type { ReactElement } from 'react';
 import { createRoot } from 'react-dom/client';
 import { flushSync } from 'react-dom';
+import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
 import type { ElementSession } from '../dom/element_registry';
 import { ElementRegistry } from '../dom/element_registry';
 import type { LayoutConfig } from '../layout/layout_config';
 import type { ElementSessionSnapshot } from '../history/transaction';
 import type { InteractionMachineOptions } from '../../hooks/use_interaction_machine';
+import type { ExportedState } from '../history/serialization/session_io';
 import './mocks';
 
 export const makeRect = (
@@ -61,7 +63,7 @@ export const makeSession = (overrides: Partial<ElementSession> = {}): ElementSes
   isDuplicate: false,
   styleEdits: [],
   textEdits: [],
-  sourceEdits: [],
+  mediaEdits: [],
   ...overrides,
 });
 
@@ -116,7 +118,7 @@ export const makeSnapshot = (session: ElementSession, parent?: Node): ElementSes
   nextSibling: session.el.nextSibling,
   styleEdits: [...session.styleEdits],
   textEdits: [...session.textEdits],
-  sourceEdits: [...session.sourceEdits],
+  mediaEdits: [...session.mediaEdits],
   cleanup: session.cleanup,
 });
 
@@ -139,4 +141,41 @@ export const makeInteractionOptions = (
     cloneZIndex: 1000,
     ...overrides,
   };
+};
+
+export const makeMinimalExport = (
+  overrides: Partial<ExportedState> = {},
+  sessionOverrides: Record<string, unknown> = {}
+): ExportedState => ({
+  version: 1,
+  exportedAt: new Date().toISOString(),
+  pageUrl: 'http://localhost:5601/app/test',
+  viewport: { width: 1280, height: 720 },
+  sessions: [
+    {
+      dx: 10,
+      dy: 20,
+      dw: 0,
+      dh: 0,
+      originalRect: { x: 100, y: 200, width: 80, height: 40 },
+      isDuplicate: true,
+      styleEdits: [],
+      textEdits: [],
+      mediaEdits: [],
+      outerHTML:
+        '<div style="position:fixed;left:100px;top:200px;width:80px;height:40px;">test</div>',
+      inlineStyles: 'position: fixed; left: 100px; top: 200px; width: 80px; height: 40px;',
+      ...sessionOverrides,
+    },
+  ],
+  ...overrides,
+});
+
+export const createScrollContainer = (scrollLeft = 0, scrollTop = 0): HTMLDivElement => {
+  const el = document.createElement('div');
+  el.id = APP_MAIN_SCROLL_CONTAINER_ID;
+  Object.defineProperty(el, 'scrollLeft', { value: scrollLeft, writable: true });
+  Object.defineProperty(el, 'scrollTop', { value: scrollTop, writable: true });
+  document.body.appendChild(el);
+  return el;
 };

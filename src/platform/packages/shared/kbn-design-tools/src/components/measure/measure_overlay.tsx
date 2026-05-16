@@ -9,7 +9,7 @@
 
 import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import type { Dispatch, PointerEvent as ReactPointerEvent, SetStateAction } from 'react';
-import { css } from '@emotion/css';
+import { css } from '@emotion/react';
 import { EuiBadge, EuiPortal, transparentize, useEuiTheme } from '@elastic/eui';
 import { SpacingMeasurement } from './spacing_measurement';
 import { getElementFromPoint } from '../../lib/dom/get_element_from_point';
@@ -161,17 +161,18 @@ export const MeasureOverlay = ({ setIsMeasuring }: Props) => {
     <EuiPortal>
       <GlobalCursorOverride cursor="crosshair" />
       <div
-        className={overlayCss}
+        css={overlayCss}
         id={MEASURE_OVERLAY_ID}
         data-test-subj="measureOverlayContainer"
         onPointerMove={handlePointerMove}
+        aria-hidden="true"
       />
       {anchorRect && (
         <>
           <div className={anchorHighlightCss} data-test-subj="measureAnchorHighlight" />
           <div
             ref={anchorBadgeRef}
-            className={css({
+            css={css({
               position: 'fixed',
               pointerEvents: 'none',
               whiteSpace: 'nowrap',

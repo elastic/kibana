@@ -8,7 +8,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { css } from '@emotion/css';
+import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 import { DEVTOOL_IGNORE_ATTR } from '../../../../lib/constants';
 import { DeleteButton } from './delete_button';
@@ -44,7 +44,7 @@ export const OutlineControls = ({ onDelete, onDuplicate, onEdit }: Props) => {
   );
 
   return (
-    <div className={panelCss} {...{ [DEVTOOL_IGNORE_ATTR]: '' }}>
+    <div css={panelCss} {...{ [DEVTOOL_IGNORE_ATTR]: '' }}>
       <EditButton onClick={onEdit} />
       <DuplicateButton onClick={onDuplicate} />
       <DeleteButton onClick={onDelete} />

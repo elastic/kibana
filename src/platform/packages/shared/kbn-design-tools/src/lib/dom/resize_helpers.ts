@@ -33,19 +33,24 @@ export const calcResizeDeltas = (
   let dx = baseDx;
   let dy = baseDy;
 
-  // Horizontal component — round to prevent sub-pixel jitter during continuous resize
-  if (handle === 'e' || handle === 'ne' || handle === 'se') {
+  const hasEastComponent = handle === 'e' || handle === 'ne' || handle === 'se';
+  const hasWestComponent = handle === 'w' || handle === 'nw' || handle === 'sw';
+  const hasSouthComponent = handle === 's' || handle === 'se' || handle === 'sw';
+  const hasNorthComponent = handle === 'n' || handle === 'nw' || handle === 'ne';
+
+  // Horizontal component. Round to prevent sub-pixel jitter during continuous resize
+  if (hasEastComponent) {
     width = Math.round(Math.max(minSize, baseWidth + mouseDx));
-  } else if (handle === 'w' || handle === 'nw' || handle === 'sw') {
+  } else if (hasWestComponent) {
     width = Math.round(Math.max(minSize, baseWidth - mouseDx));
     // Clamp dx so the element doesn't drift past its anchor when hitting minSize
     dx = baseDx + (baseWidth - width);
   }
 
   // Vertical component
-  if (handle === 's' || handle === 'se' || handle === 'sw') {
+  if (hasSouthComponent) {
     height = Math.round(Math.max(minSize, baseHeight + mouseDy));
-  } else if (handle === 'n' || handle === 'nw' || handle === 'ne') {
+  } else if (hasNorthComponent) {
     height = Math.round(Math.max(minSize, baseHeight - mouseDy));
     dy = baseDy + (baseHeight - height);
   }
@@ -146,7 +151,7 @@ export const findNearHandle = (
 };
 
 /**
- * Build a CSS transform string combining translate and optional scale.
+ * Builds a CSS transform string combining translate and optional scale.
  * Uses transform-origin: 0 0 so scale grows from top-left.
  */
 export const buildTransform = (dx: number, dy: number, scaleX: number, scaleY: number): string => {
@@ -155,14 +160,15 @@ export const buildTransform = (dx: number, dy: number, scaleX: number, scaleY: n
   // resulting in blurry rendering.
   const rdx = Math.round(dx);
   const rdy = Math.round(dy);
-  if (scaleX === 1 && scaleY === 1) {
+  const isUnscaled = scaleX === 1 && scaleY === 1;
+  if (isUnscaled) {
     return `translate(${rdx}px, ${rdy}px)`;
   }
   return `translate(${rdx}px, ${rdy}px) scale(${scaleX}, ${scaleY})`;
 };
 
 /**
- * Apply a resize frame: computes deltas, updates the transform, and
+ * Applies a resize frame: computes deltas, updates the transform, and
  * writes the new offsets back to the session.
  */
 export const applyResizeMove = (state: ResizeState, clientX: number, clientY: number): void => {
@@ -180,7 +186,8 @@ export const applyResizeMove = (state: ResizeState, clientX: number, clientY: nu
     baseDy
   );
 
-  if (originalRect.width === 0 || originalRect.height === 0) return;
+  const hasZeroDimension = originalRect.width === 0 || originalRect.height === 0;
+  if (hasZeroDimension) return;
   const scaleX = width / originalRect.width;
   const scaleY = height / originalRect.height;
   const newTransform = buildTransform(dx, dy, scaleX, scaleY);

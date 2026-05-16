@@ -14,6 +14,7 @@ import {
   deduplicateSvgIds,
   setImportant,
   roundRect,
+  widenForTruncation,
 } from './clone_element';
 import { isLiveElement } from './managed_element';
 
@@ -32,35 +33,36 @@ const stripTranslate = (transform: string): string => {
 };
 
 /**
- * Create a clone of the target element for the preview panel.
+ * Creates a clone of the target element for the preview panel.
  *
  * If the target is a managed clone (has DEVTOOL_MANAGED_ATTR), it already has
- * all computed styles inlined — a plain cloneNode(true) is enough.
- * If it's an original DOM element, we run copyStylesDeep to capture computed styles.
+ * all computed styles inlined, so a plain cloneNode(true) is enough.
+ * For original DOM elements, copyStylesDeep captures computed styles.
  */
 export const createPreviewClone = (target: HTMLElement): PreviewCloneResult => {
   const isManaged = target.hasAttribute(DEVTOOL_MANAGED_ATTR);
   const isLive = isLiveElement(target);
-  // Visual dimensions (post-transform) — what the user actually sees
-  const visualRect = roundRect(target.getBoundingClientRect());
+  // Visual dimensions (post-transform): what the user actually sees
+  let visualRect = roundRect(target.getBoundingClientRect());
 
   const clone = target.cloneNode(true) as HTMLElement;
   copyCanvasContent(target, clone);
   deduplicateSvgIds(clone);
 
-  if (!isManaged || isLive) {
+  const needsInlinedStyles = !isManaged || isLive;
+  if (needsInlinedStyles) {
     // Non-managed elements need styles inlined. Live elements are managed
     // but use Emotion CSS classes instead of inlined styles, so they also
     // need copyStylesDeep to avoid inheriting wrong theme values in the
     // dark-mode edit modal.
     copyStylesDeep(target, clone);
-    // Original elements may have relative sizing (width:100% etc.) — pin to actual size
+    // Original elements may have relative sizing (width:100% etc.), so pin to actual size
     setImportant(clone, 'width', `${visualRect.width}px`);
     setImportant(clone, 'height', `${visualRect.height}px`);
     setImportant(clone, 'box-sizing', 'border-box');
   }
 
-  // Fix positioning for preview layout — setImportant to override any
+  // Fix positioning for preview layout. Uses setImportant to override any
   // !important inline styles from drag/resize
   const scale = stripTranslate(target.style.getPropertyValue('transform'));
   setImportant(clone, 'position', 'relative');
@@ -78,7 +80,7 @@ export const createPreviewClone = (target: HTMLElement): PreviewCloneResult => {
   setImportant(clone, 'opacity', '1');
 
   // Strip devtool markers from the clone root.
-  // Children with DEVTOOL_HIDDEN_ATTR remain hidden — they were soft-deleted
+  // Children with DEVTOOL_HIDDEN_ATTR remain hidden. They were soft-deleted
   // by the user and the preview should reflect the current editing state.
   // Collect hidden subtree roots first so descendants are not accidentally
   // made visible (CSS visibility:visible on a child overrides the parent).
@@ -96,22 +98,28 @@ export const createPreviewClone = (target: HTMLElement): PreviewCloneResult => {
     const isHidden = child.hasAttribute(DEVTOOL_HIDDEN_ATTR);
     child.removeAttribute(DEVTOOL_MANAGED_ATTR);
     child.removeAttribute(DEVTOOL_HIDDEN_ATTR);
-    if (!isHidden && !insideHidden.has(child)) {
+    const isVisibleChild = !isHidden && !insideHidden.has(child);
+    if (isVisibleChild) {
       if (child.style.visibility === 'hidden') child.style.visibility = 'visible';
       if (child.style.opacity === '0') child.style.opacity = '1';
     }
   }
 
-  // CSS transform: scale() doesn't change the element's layout box — the
-  // scaled visual overflows the layout dimensions. Wrap in a container sized
-  // to the visual (post-scale) dimensions so the preview layout accounts
-  // for the actual rendered size.
+  // copyStylesDeep strips truncation classes from the clone tree, so
+  // text that was clipped may now be wider than the pinned dimensions.
+  visualRect = widenForTruncation(target, clone, visualRect);
+
+  // CSS transform: scale() doesn't change the element's layout box. The
+  // scaled visual overflows the layout dimensions. Wrap in a container
+  // that is at least as large as the visual (post-scale) dimensions so
+  // the preview layout accounts for the actual rendered size, but can
+  // grow when dimension edits make the clone wider/taller.
   const wrapper = document.createElement('div');
-  wrapper.style.width = `${visualRect.width}px`;
-  wrapper.style.height = `${visualRect.height}px`;
+  wrapper.style.minWidth = `${visualRect.width}px`;
+  wrapper.style.minHeight = `${visualRect.height}px`;
+  wrapper.style.width = 'fit-content';
   wrapper.style.position = 'relative';
   wrapper.style.margin = '0 auto';
-  wrapper.style.overflow = 'hidden';
   wrapper.appendChild(clone);
 
   const elementMap = new Map<Element, Element>();

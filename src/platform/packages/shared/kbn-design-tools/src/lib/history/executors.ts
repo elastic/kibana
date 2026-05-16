@@ -9,7 +9,7 @@
 
 import type { ElementRegistry } from '../dom/element_registry';
 import { revertEdits, applyEditChanges } from '../dom/element_registry';
-import { setImportant } from '../dom/clone_element';
+import { setImportant, softHideElement, restoreHiddenElement } from '../dom/clone_element';
 import { buildTransform } from '../dom/resize_helpers';
 import { DEVTOOL_HIDDEN_ATTR } from '../constants';
 import { restoreSession } from './snapshot';
@@ -21,12 +21,13 @@ import type {
   DuplicateTransaction,
   DeleteTransaction,
   CloneTransaction,
+  ImportTransaction,
   ElementSessionSnapshot,
 } from './transaction';
 
 /**
  * A pair of functions that know how to apply a transaction forward (redo)
- * and reverse it (undo). Executors are stateless — all state lives on the
+ * and reverse it (undo). Executors are stateless; all state lives on the
  * transaction and the registry.
  */
 export interface TransactionExecutor<T extends Transaction> {
@@ -63,8 +64,8 @@ const rebuildTransform = (
   dh: number,
   originalRect: DOMRect
 ): void => {
-  const scaleX = (originalRect.width + dw) / originalRect.width;
-  const scaleY = (originalRect.height + dh) / originalRect.height;
+  const scaleX = originalRect.width ? (originalRect.width + dw) / originalRect.width : 1;
+  const scaleY = originalRect.height ? (originalRect.height + dh) / originalRect.height : 1;
   setImportant(el, 'transform', buildTransform(dx, dy, scaleX, scaleY));
 };
 
@@ -72,7 +73,7 @@ const rebuildTransform = (
  * Applies or reverses a move by writing the target position offsets to
  * the session and rebuilding the CSS transform.
  *
- * No DOM structural changes — just updates `session.dx/dy` and the
+ * No DOM structural changes; just updates `session.dx/dy` and the
  * element's inline `transform`.
  */
 export const moveExecutor: TransactionExecutor<MoveTransaction> = {
@@ -150,7 +151,7 @@ export const resizeExecutor: TransactionExecutor<ResizeTransaction> = {
 };
 
 /**
- * Applies or reverses a batch of style/text/source edits from the edit
+ * Applies or reverses a batch of style/text/media edits from the edit
  * modal.
  *
  * Forward: re-applies the saved change descriptors using `setImportant`
@@ -159,7 +160,7 @@ export const resizeExecutor: TransactionExecutor<ResizeTransaction> = {
  * Reverse: delegates to `revertEdits` which restores original values
  * from the undo records and clears the arrays.
  *
- * Note: after reversing, the `undoRecords` arrays are empty (cleared by
+ * After reversing, the `undoRecords` arrays are empty (cleared by
  * `revertEdits`). A subsequent redo will re-populate them.
  */
 export const editExecutor: TransactionExecutor<EditTransaction> = {
@@ -167,10 +168,7 @@ export const editExecutor: TransactionExecutor<EditTransaction> = {
     if (tx.promotedFrom) {
       const original = tx.promotedFrom;
       if (!original.hasAttribute(DEVTOOL_HIDDEN_ATTR)) {
-        const originalTransform = original.style.transform || '';
-        original.setAttribute(DEVTOOL_HIDDEN_ATTR, originalTransform);
-        setImportant(original, 'visibility', 'hidden');
-        setImportant(original, 'pointer-events', 'none');
+        softHideElement(original);
       }
       if (!tx.target.isConnected) {
         document.body.appendChild(tx.target);
@@ -188,7 +186,7 @@ export const editExecutor: TransactionExecutor<EditTransaction> = {
           referenceEl: original,
           styleEdits: [],
           textEdits: [],
-          sourceEdits: [],
+          mediaEdits: [],
         });
       }
     }
@@ -199,17 +197,21 @@ export const editExecutor: TransactionExecutor<EditTransaction> = {
     applyEditChanges(
       tx.styleChanges,
       tx.textChanges,
-      tx.sourceChanges,
+      tx.mediaChanges,
       tx.undoRecords.styleEdits,
       tx.undoRecords.textEdits,
-      tx.undoRecords.sourceEdits
+      tx.undoRecords.mediaEdits
     );
   },
 
   reverse(tx, registry) {
-    const { styleEdits, textEdits, sourceEdits } = tx.undoRecords;
-    if (styleEdits.length > 0 || textEdits.length > 0 || sourceEdits.length > 0) {
-      revertEdits(styleEdits, textEdits, sourceEdits);
+    // revertEdits restores original values and clears the arrays to
+    // length 0 (mutable). A subsequent redo will re-populate them
+    // via applyEditChanges in the apply() path above.
+    const { styleEdits, textEdits, mediaEdits: mediaEdits } = tx.undoRecords;
+    const hasEditsToRevert = styleEdits.length > 0 || textEdits.length > 0 || mediaEdits.length > 0;
+    if (hasEditsToRevert) {
+      revertEdits(styleEdits, textEdits, mediaEdits);
     }
 
     if (tx.promotedFrom) {
@@ -220,25 +222,13 @@ export const editExecutor: TransactionExecutor<EditTransaction> = {
       tx.target.remove();
 
       const original = tx.promotedFrom;
-      const savedTransform = original.getAttribute(DEVTOOL_HIDDEN_ATTR) ?? '';
-      original.style.transform = savedTransform;
-      original.style.removeProperty('visibility');
-      original.style.removeProperty('pointer-events');
-      original.removeAttribute(DEVTOOL_HIDDEN_ATTR);
+      restoreHiddenElement(original);
     }
   },
 };
 
 /**
- * Applies or reverses a duplication.
- *
- * Forward: re-inserts the duplicate element at its recorded DOM position
- * and re-registers the session.
- *
- * Reverse: removes the element from the DOM and unregisters the session.
- */
-/**
- * Re-insert an element from a session snapshot and rebuild its CSS
+ * Re-inserts an element from a session snapshot and rebuilds its CSS
  * transform so the visual position matches the session's dx/dy.
  *
  * Used by structural executors (duplicate, delete, clone) that remove
@@ -258,6 +248,14 @@ const restoreAndRebuild = (
   rebuildTransform(element, session.dx, session.dy, session.dw, session.dh, session.originalRect);
 };
 
+/**
+ * Applies or reverses a duplication.
+ *
+ * Forward: re-inserts the duplicate element at its recorded DOM position
+ * and re-registers the session.
+ *
+ * Reverse: removes the element from the DOM and unregisters the session.
+ */
 export const duplicateExecutor: TransactionExecutor<DuplicateTransaction> = {
   apply(tx, registry) {
     restoreAndRebuild(tx.element, tx.sessionSnapshot, registry);
@@ -292,9 +290,7 @@ export const deleteExecutor: TransactionExecutor<DeleteTransaction> = {
       }
       tx.element.remove();
     } else if (tx.originalStyles) {
-      setImportant(tx.element, 'visibility', 'hidden');
-      setImportant(tx.element, 'pointer-events', 'none');
-      tx.element.setAttribute(DEVTOOL_HIDDEN_ATTR, tx.originalStyles.transform);
+      softHideElement(tx.element, tx.originalStyles.transform);
     }
   },
 
@@ -326,10 +322,7 @@ export const cloneExecutor: TransactionExecutor<CloneTransaction> = {
     const { sessionSnapshot, referenceEl } = tx;
     restoreAndRebuild(tx.element, sessionSnapshot, registry);
 
-    const originalTransform = referenceEl.style.transform || '';
-    referenceEl.setAttribute(DEVTOOL_HIDDEN_ATTR, originalTransform);
-    setImportant(referenceEl, 'visibility', 'hidden');
-    setImportant(referenceEl, 'pointer-events', 'none');
+    softHideElement(referenceEl);
   },
 
   reverse(tx, registry) {
@@ -341,10 +334,46 @@ export const cloneExecutor: TransactionExecutor<CloneTransaction> = {
 
     const { referenceEl } = tx;
     if (referenceEl.hasAttribute(DEVTOOL_HIDDEN_ATTR)) {
-      referenceEl.style.transform = referenceEl.getAttribute(DEVTOOL_HIDDEN_ATTR) ?? '';
-      referenceEl.style.removeProperty('visibility');
-      referenceEl.style.removeProperty('pointer-events');
-      referenceEl.removeAttribute(DEVTOOL_HIDDEN_ATTR);
+      restoreHiddenElement(referenceEl);
+    }
+  },
+};
+
+/**
+ * Applies or reverses a file import as a single atomic operation.
+ *
+ * Forward: re-inserts every imported session and re-applies soft-deletions.
+ * Reverse: removes every imported session and un-hides all soft-deleted elements.
+ */
+export const importExecutor: TransactionExecutor<ImportTransaction> = {
+  apply(tx, registry) {
+    for (const { element, snapshot } of tx.sessionSnapshots) {
+      restoreAndRebuild(element, snapshot, registry);
+    }
+    for (const { element, originalTransform } of tx.deletions) {
+      softHideElement(element, originalTransform);
+    }
+  },
+
+  reverse(tx, registry) {
+    for (const { element, snapshot } of tx.sessionSnapshots) {
+      const session = registry.get(element);
+      if (session) {
+        registry.delete(session);
+      }
+      element.remove();
+      // Unhide the original in-flow element that was hidden during import.
+      if (
+        snapshot.referenceEl instanceof HTMLElement &&
+        snapshot.referenceEl.hasAttribute(DEVTOOL_HIDDEN_ATTR)
+      ) {
+        restoreHiddenElement(snapshot.referenceEl);
+      }
+    }
+    for (const { element } of tx.deletions) {
+      if (element.hasAttribute(DEVTOOL_HIDDEN_ATTR)) {
+        restoreHiddenElement(element);
+      }
     }
   },
 };
@@ -380,6 +409,9 @@ export const executeTransaction = (
       break;
     case 'clone':
       cloneExecutor[direction](tx, registry);
+      break;
+    case 'import':
+      importExecutor[direction](tx, registry);
       break;
   }
 };

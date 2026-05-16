@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DEVTOOL_MANAGED_ATTR, DEVTOOL_HIDDEN_ATTR, DEVELOPER_TOOLBAR_HEIGHT } from '../constants';
-import { cloneClean, setImportant } from './clone_element';
+import { DEVTOOL_MANAGED_ATTR, DEVELOPER_TOOLBAR_HEIGHT } from '../constants';
+import { cloneClean, setImportant, softHideElement } from './clone_element';
 import { snapToGrid } from './snap_to_grid';
 import type { LayoutConfig } from '../layout/layout_config';
 import type { ElementSession, ElementRegistry } from './element_registry';
@@ -16,10 +16,7 @@ import type { DragState } from './interaction_state';
 import { buildTransform } from './resize_helpers';
 
 /**
- * Begin dragging an existing managed element (re-grab).
- */
-/**
- * Close portaled EUI popovers inside an element.
+ * Closes portaled EUI popovers inside an element.
  *
  * EUI renders popover panels as portals on `document.body`, so they stay
  * anchored to the old position when the element moves or is removed.
@@ -77,10 +74,7 @@ export const startDragFromElement = (
   clone.style.transformOrigin = '0 0';
   document.body.appendChild(clone);
 
-  const originalTransform = target.style.transform || '';
-  target.setAttribute(DEVTOOL_HIDDEN_ATTR, originalTransform);
-  setImportant(target, 'visibility', 'hidden');
-  setImportant(target, 'pointer-events', 'none');
+  softHideElement(target);
 
   const session: ElementSession = {
     el: clone,
@@ -93,7 +87,7 @@ export const startDragFromElement = (
     referenceEl: target,
     styleEdits: [],
     textEdits: [],
-    sourceEdits: [],
+    mediaEdits: [],
   };
   registry.set(session);
 
@@ -108,7 +102,7 @@ export const startDragFromElement = (
 };
 
 /**
- * Check if the target is a managed element and find its tracked session.
+ * Checks if the target is a managed element and finds its tracked session.
  */
 export const findManagedSession = (
   target: HTMLElement,
@@ -121,7 +115,7 @@ export const findManagedSession = (
 };
 
 /**
- * Apply a drag frame: computes translate with optional snap-to-grid and
+ * Applies a drag frame: computes translate with optional snap-to-grid and
  * writes the new offsets back to the session.
  */
 export const applyDragMove = (
@@ -141,7 +135,8 @@ export const applyDragMove = (
   let dx = baseOffsetX + mouseDx;
   let dy = baseOffsetY + mouseDy;
 
-  if (!shiftKey && options.isLayoutVisible) {
+  const shouldSnapToGrid = !shiftKey && options.isLayoutVisible;
+  if (shouldSnapToGrid) {
     const snapped = snapToGrid(
       dx,
       dy,
@@ -155,8 +150,8 @@ export const applyDragMove = (
     dy = snapped.dy;
   }
 
-  const scaleX = (originalRect.width + session.dw) / originalRect.width;
-  const scaleY = (originalRect.height + session.dh) / originalRect.height;
+  const scaleX = originalRect.width ? (originalRect.width + session.dw) / originalRect.width : 1;
+  const scaleY = originalRect.height ? (originalRect.height + session.dh) / originalRect.height : 1;
   const newTransform = buildTransform(dx, dy, scaleX, scaleY);
   setImportant(el, 'transform', newTransform);
 

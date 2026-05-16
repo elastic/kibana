@@ -10,7 +10,7 @@
 /**
  * Emotion generates CSS class names in the format `css-{hash}-{label}`.
  * The hash is derived from the CSS content (which includes color values),
- * so it changes between color modes. The label (suffix) is stable —
+ * so it changes between color modes. The label (suffix) is stable -
  * it encodes the component name and variant props.
  *
  * When importing elements serialized in a different color mode, the
@@ -56,7 +56,7 @@ export const buildEmotionClassMap = (): ReadonlyMap<string, string> => {
     try {
       collectRules(sheet.cssRules, map);
     } catch {
-      // Cross-origin sheets — skip
+      // Cross-origin sheets, skip
     }
   }
 
@@ -74,7 +74,7 @@ export const remapEmotionClasses = (
   if (emotionMap.size === 0) return;
 
   const remap = (el: Element): void => {
-    for (const cls of Array.from(el.classList)) {
+    for (const cls of el.classList) {
       const parts = cls.match(EMOTION_CLASS_RE);
       if (!parts) continue;
       const label = parts[1];

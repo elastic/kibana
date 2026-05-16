@@ -157,8 +157,8 @@ describe('editExecutor', () => {
       target: el,
       styleChanges: [{ element: el, property: 'color', value: 'red' }],
       textChanges: [],
-      sourceChanges: [],
-      undoRecords: { styleEdits: [], textEdits: [], sourceEdits: [] },
+      mediaChanges: [],
+      undoRecords: { styleEdits: [], textEdits: [], mediaEdits: [] },
     };
 
     editExecutor.apply(tx, registry);
@@ -175,8 +175,8 @@ describe('editExecutor', () => {
       target: el,
       styleChanges: [{ element: el, property: 'color', value: 'red' }],
       textChanges: [],
-      sourceChanges: [],
-      undoRecords: { styleEdits: [], textEdits: [], sourceEdits: [] },
+      mediaChanges: [],
+      undoRecords: { styleEdits: [], textEdits: [], mediaEdits: [] },
     };
 
     editExecutor.apply(tx, registry);
@@ -194,8 +194,8 @@ describe('editExecutor', () => {
       target: el,
       styleChanges: [],
       textChanges: [],
-      sourceChanges: [{ element: el, attribute: 'aria-label', value: 'updated' }],
-      undoRecords: { styleEdits: [], textEdits: [], sourceEdits: [] },
+      mediaChanges: [{ element: el, attribute: 'aria-label', value: 'updated' }],
+      undoRecords: { styleEdits: [], textEdits: [], mediaEdits: [] },
     };
 
     editExecutor.apply(tx, registry);

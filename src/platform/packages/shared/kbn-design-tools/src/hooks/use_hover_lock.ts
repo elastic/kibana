@@ -21,7 +21,7 @@ interface HoverLockBounds {
 /**
  * Tracks an expanded bounds zone below the hovered element (where the controls
  * panel lives) and provides a check to determine if the pointer is inside it.
- * This prevents retargeting when the cursor moves toward the controls, while
+ * Prevents retargeting when the cursor moves toward the controls, while
  * still allowing children inside the element to be targeted normally.
  */
 export const useHoverLock = (hoverTarget: HTMLElement | null) => {

@@ -15,12 +15,12 @@ interface SnapResult {
   dy: number;
 }
 
-/** Snap a value to the nearest multiple of `step`, offset by `origin`. */
+/** Snaps a value to the nearest multiple of `step`, offset by `origin`. */
 const snap = (value: number, step: number, origin = 0): number =>
   Math.round((value - origin) / step) * step + origin;
 
 /**
- * Snap a value but only if it falls within the layout extent.
+ * Snaps a value but only if it falls within the layout extent.
  * Returns the original value unchanged when outside the layout area.
  */
 const snapWithinBounds = (value: number, step: number, origin: number, extent: number): number => {

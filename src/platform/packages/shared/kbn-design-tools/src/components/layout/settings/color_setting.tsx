@@ -25,6 +25,10 @@ export const ColorSetting = ({ color, onChange }: Props) => (
       defaultMessage: 'Color',
     })}
   >
-    <EuiColorTokenSelect color={color} onChange={(newColor) => onChange({ color: newColor })} />
+    <EuiColorTokenSelect
+      color={color}
+      onChange={(newColor) => onChange({ color: newColor })}
+      fullWidth
+    />
   </EuiFormRow>
 );

@@ -11,14 +11,14 @@ import type { MutableRefObject } from 'react';
 import { useCallback } from 'react';
 import type { ElementRegistry } from '../lib/dom/element_registry';
 import { applyEditChanges } from '../lib/dom/element_registry';
-import type { StyleChange, TextNodeChange, SourceChange } from '../lib/dom/element_registry';
+import type { StyleChange, TextNodeChange, MediaChange } from '../lib/dom/element_registry';
 
 /**
- * Tracks style, text, and source attribute edits applied via the edit modal.
+ * Tracks style, text, and media edits applied via the edit modal.
  *
  * All edits are stored on the target's `ElementSession`. If no session exists
  * yet (the element hasn't been dragged/duplicated), a lightweight edit-only
- * session is auto-created via `registry.getOrCreate` — the element is NOT
+ * session is auto-created via `registry.getOrCreate` - the element is NOT
  * cloned or hidden.
  *
  * Revert is handled per-session by `ElementRegistry.resetAll` /
@@ -29,7 +29,7 @@ export const useEditChangeTracker = (registryRef: MutableRefObject<ElementRegist
   const editCount = useCallback(() => {
     let count = 0;
     for (const session of registryRef.current.values()) {
-      count += session.styleEdits.length + session.textEdits.length + session.sourceEdits.length;
+      count += session.styleEdits.length + session.textEdits.length + session.mediaEdits.length;
     }
     return count;
   }, [registryRef]);
@@ -43,16 +43,16 @@ export const useEditChangeTracker = (registryRef: MutableRefObject<ElementRegist
       target: HTMLElement,
       savedStyleChanges: StyleChange[],
       savedTextChanges: TextNodeChange[],
-      savedSourceChanges: SourceChange[]
+      savedMediaChanges: MediaChange[]
     ) => {
       const session = registryRef.current.getOrCreate(target);
       applyEditChanges(
         savedStyleChanges,
         savedTextChanges,
-        savedSourceChanges,
+        savedMediaChanges,
         session.styleEdits,
         session.textEdits,
-        session.sourceEdits
+        session.mediaEdits
       );
     },
     [registryRef]

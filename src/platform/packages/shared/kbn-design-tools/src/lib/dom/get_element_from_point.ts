@@ -45,7 +45,7 @@ export const getElementFromPoint = (event: MouseEvent): HTMLElement | null => {
       const svg = el.closest('svg');
       const ancestor = svg?.parentElement ?? el.ownerSVGElement?.parentElement ?? null;
       if (ancestor instanceof HTMLElement) return ancestor;
-      return null;
+      continue;
     }
   }
 

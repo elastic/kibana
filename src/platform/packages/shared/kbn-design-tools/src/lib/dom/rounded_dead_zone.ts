@@ -28,8 +28,8 @@ export const hasSignificantRounding = (el: HTMLElement): boolean => {
 };
 
 /**
- * Return `true` when the pointer is inside an element's bounding rect but
- * near its edges — the "dead zone" between a rounded hit-test shape and the
+ * Returns `true` when the pointer is inside an element's bounding rect but
+ * near its edges. Covers the "dead zone" between a rounded hit-test shape and the
  * rectangular bounding box where resize handles live.
  */
 export const isInRoundedDeadZone = (x: number, y: number, rect: DOMRect): boolean => {

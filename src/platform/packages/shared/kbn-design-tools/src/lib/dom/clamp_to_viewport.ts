@@ -15,8 +15,8 @@ interface ClampedPosition {
 }
 
 /**
- * Clamp a label position so it stays fully within the viewport.
- * The label is assumed to be a small fixed-position element.
+ * Clamps a label position so it stays fully within the viewport.
+ * Assumes the label is a small fixed-position element.
  *
  * @param left - Desired left position (px)
  * @param top - Desired top position (px)

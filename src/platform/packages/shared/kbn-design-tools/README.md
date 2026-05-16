@@ -8,12 +8,9 @@ Developer toolbar design tools addon - an interactive DOM editor overlaid on Kib
 flowchart LR
 
   DT["Design Tools"]
-
-  subgraph Overlays
-    EO["Edit Overlay"]
-    LO["Layout Overlay"]
-    MO["Measure Overlay"]
-  end
+  EO["Edit Overlay"]
+  LO["Layout Overlay"]
+  MO["Measure Overlay"]
 
   subgraph Interaction
     IM["Interaction Engine"]
@@ -31,6 +28,17 @@ flowchart LR
     LR["React Live Root"]
   end
 
+  subgraph SessionIO["Session I/O"]
+    EX["Export"]
+    IM2["Import"]
+  end
+
+  subgraph ColorSystem["Color Tokens"]
+    CTS["Token Stylesheet"]
+    CTL["Token Lookup"]
+    REC["Emotion Class Remap"]
+  end
+
   DT --> EO
   DT --> LO
   DT --> MO
@@ -44,6 +52,15 @@ flowchart LR
 
   EO --> IE
   IE --> LR
+
+  EO --> EX
+  EO --> IM2
+  IM2 --> ER
+  IM2 --> UR
+
+  EO --> CTS
+  CTS --> CTL
+  IM2 --> REC
 ```
 
 ### Key Architectural Concepts
@@ -89,11 +106,32 @@ Every edit records the **original value before applying changes** (store-then-mu
 
 - **`StyleEdit`**: captures `element`, CSS `property`, `original` value, and `originalPriority`
 - **`TextEdit`**: captures the `Text` node and its original content
-- **`SourceEdit`**: captures the `Element`, attribute name, and original value
+- **`MediaEdit`**: captures the `Element`, attribute name, and original value
 
 The `UndoRedoStack` maintains a linear history of transactions in a `useRef`, allowing edits to be recorded without triggering React renders. It exposes a `useSyncExternalStore` subscription so toolbar controls stay in sync with available undo/redo state.
 
-Supported transaction types include `move`, `resize`, `edit`, `duplicate`, `delete`, and `clone`. An `edit` transaction bundles style, text, and source changes together; when it promotes an original element to a managed clone, the `promotedFrom` field lets undo tear down the clone and restore the original. The stack is responsible only for ordering and history; applying and reverting changes is handled by executor functions.
+Supported transaction types include `move`, `resize`, `edit`, `duplicate`, `delete`, `clone`, and `import`. An `edit` transaction bundles style, text, and media changes together; when it promotes an original element to a managed clone, the `promotedFrom` field lets undo tear down the clone and restore the original. An `import` transaction captures snapshots of all imported sessions and soft-deletions, so the entire file import can be atomically undone (removing all imported elements and un-hiding deleted ones) or redone. The stack is responsible only for ordering and history; applying and reverting changes is handled by executor functions.
+
+#### Draft History (Edit Modal)
+
+The edit modal uses a **draft history** system — a local `UndoRedoStack` instance that lives only while the modal is open. This gives users granular undo/redo within the modal while collapsing all changes into a single bulk `EditTransaction` on save.
+
+**How it works:**
+
+1. Each individual change (color, dimension, text, media) pushes a `DraftEdit` to the local stack via `useDraftHistory`. The edit applies the visual change to the preview clone and records `before`/`after` values.
+2. `Cmd+Z` / `Cmd+Shift+Z` (captured in a capture-phase listener with `stopPropagation` to avoid triggering the main overlay's undo) reverses or re-applies individual draft edits on the preview clone and syncs the editor UI state.
+3. Undo/redo buttons in the modal footer provide mouse-driven access with label tooltips.
+4. Reset actions (reset color, reset dimension, reset text node) are recorded as regular draft edits — they can be undone too.
+5. On **Save**, `flattenDraftEdits()` computes the **net effect** per `(element, property)` pair — deduplicating intermediate changes and filtering out no-ops where the value returned to its original — then produces the `StyleChange[]`, `TextNodeChange[]`, and `MediaChange[]` arrays passed to `onSave`, which become a single `EditTransaction` on the main stack.
+6. On **Cancel**, the draft stack is discarded with the modal (the preview clone is ephemeral).
+
+**Key types:**
+
+| Type | Fields | Purpose |
+|---|---|---|
+| `DraftStyleEdit` | `element`, `cloneElement`, `property`, `before`, `after` | Background color, dimensions, overflow |
+| `DraftTextEdit` | `index`, `originalNode`, `cloneNode`, `field`, `before`, `after` | Text content, color, font-size, font-weight |
+| `DraftMediaEdit` | `index`, `originalElement`, `cloneElement`, `attribute`, `before`, `after` | Image src, SVG href, icon type |
 
 #### Component Library
 

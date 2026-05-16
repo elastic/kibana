@@ -66,6 +66,7 @@ export const IconPicker = ({ value, onChange, onFocus, 'aria-label': ariaLabel }
 
   return (
     <EuiComboBox
+      css={{ width: 344 }}
       aria-label={ariaLabel ?? 'Select an icon'}
       singleSelection={{ asPlainText: true }}
       options={allOptions}

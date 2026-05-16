@@ -16,13 +16,13 @@ import {
   EuiThemeProvider,
 } from '@elastic/eui';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { css } from '@emotion/css';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useEuiColorTokens } from '../hooks/use_eui_color_tokens';
 import type { EuiColorToken } from '../hooks/use_eui_color_tokens';
 import { getPageColorMode } from '../lib/dom/get_page_color_mode';
 import { isTextToken, isBgToken } from '../lib/dom/color_token_lookup';
-import { getTokenVar } from '../lib/dom/color_token_stylesheet';
+import { getTokenVar, parseTokenVar } from '../lib/dom/color_token_stylesheet';
 
 interface Props {
   color: string;
@@ -33,15 +33,22 @@ interface Props {
   preferText?: boolean;
   /** Called when the color picker receives focus (click on combobox or swatch). */
   onFocus?: () => void;
+  /** Extra props forwarded to the combobox input popover panel. */
+  inputPopoverProps?: Record<string, unknown>;
+  /** When true, the container stretches to fill its parent instead of using a fixed width. */
+  fullWidth?: boolean;
 }
 
-const CONTAINER_WIDTH = 160;
+const CONTAINER_WIDTH = 344;
 
-const containerCss = css({
-  width: CONTAINER_WIDTH,
+const comboInputCss = css({
   '& .euiComboBox__input': {
     textOverflow: 'ellipsis',
   },
+});
+
+const fixedWidthCss = css({
+  width: CONTAINER_WIDTH,
 });
 
 const optionCss = css({
@@ -64,6 +71,8 @@ export const EuiColorTokenSelect = ({
   colorPickerLabel = 'Color',
   preferText = false,
   onFocus,
+  inputPopoverProps,
+  fullWidth = false,
 }: Props) => {
   const pageColorMode = getPageColorMode();
 
@@ -77,6 +86,8 @@ export const EuiColorTokenSelect = ({
         colorPickerLabel={colorPickerLabel}
         preferText={preferText}
         onFocus={onFocus}
+        inputPopoverProps={inputPopoverProps}
+        fullWidth={fullWidth}
       />
     </EuiThemeProvider>
   );
@@ -103,6 +114,8 @@ const EuiColorTokenSelectInner = ({
   colorPickerLabel = 'Color',
   preferText = false,
   onFocus,
+  inputPopoverProps: extraPopoverProps,
+  fullWidth = false,
   tokens,
 }: Props & { tokens: EuiColorToken[] }) => {
   // Track the last label selected from the dropdown so that tokens sharing
@@ -119,6 +132,14 @@ const EuiColorTokenSelectInner = ({
   );
 
   const selectedOptions = useMemo(() => {
+    // When the value is a var(--dt-*) reference, extract the token name
+    // and match by label instead of hex value.
+    const tokenName = parseTokenVar(color);
+    if (tokenName) {
+      const byLabel = options.find((o) => o.label === tokenName);
+      if (byLabel) return [byLabel];
+    }
+
     const normalized = color.toLowerCase();
 
     // Prefer the last explicitly selected label when multiple tokens share a hex
@@ -157,9 +178,9 @@ const EuiColorTokenSelectInner = ({
 
   const renderOption = useCallback(
     (option: EuiComboBoxOptionOption<string>) => (
-      <span className={optionCss}>
+      <span css={optionCss}>
         <EuiIcon type="stopFilled" color={option.value ?? ''} size="s" aria-hidden />
-        <span className={labelCss}>{option.label}</span>
+        <span css={labelCss}>{option.label}</span>
       </span>
     ),
     []
@@ -168,29 +189,40 @@ const EuiColorTokenSelectInner = ({
   const handleSwatchChange = useCallback(
     (newColor: string) => {
       setSelectedLabel(null);
-      // Raw color picker — no token name available.
+      // Raw color picker, no token name available.
       onChange(newColor);
     },
     [onChange]
   );
 
+  // Resolve the display color: when the value is a var() reference,
+  // use the matched option's hex so the swatch shows the right color.
+  const displayColor = useMemo(() => {
+    if (parseTokenVar(color)) {
+      return selectedOptions[0]?.value ?? color;
+    }
+    return color;
+  }, [color, selectedOptions]);
+
   const appendSwatch = useMemo(
     () => (
       <EuiColorPicker
-        color={color}
+        color={displayColor}
         onChange={handleSwatchChange}
         showAlpha
         swatches={[]}
         isClearable
         aria-label={colorPickerLabel}
-        button={<EuiColorPickerSwatch color={color || undefined} aria-label={colorPickerLabel} />}
+        button={
+          <EuiColorPickerSwatch color={displayColor || undefined} aria-label={colorPickerLabel} />
+        }
       />
     ),
-    [color, handleSwatchChange, colorPickerLabel]
+    [displayColor, handleSwatchChange, colorPickerLabel]
   );
 
   return (
-    <div className={containerCss} onFocusCapture={onFocus}>
+    <div css={[comboInputCss, !fullWidth && fixedWidthCss]} onFocusCapture={onFocus}>
       <EuiComboBox
         aria-label={i18n.translate('kbnDesignTools.colorTokenSelect.ariaLabel', {
           defaultMessage: 'Select color token',
@@ -204,7 +236,7 @@ const EuiColorTokenSelectInner = ({
         isClearable={false}
         truncationProps={{ truncation: 'end' }}
         append={appendSwatch}
-        inputPopoverProps={{ panelMinWidth: CONTAINER_WIDTH * 2 }}
+        inputPopoverProps={{ ...extraPopoverProps }}
       />
     </div>
   );

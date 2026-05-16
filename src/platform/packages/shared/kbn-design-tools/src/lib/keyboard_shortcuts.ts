@@ -15,6 +15,11 @@ const isDot = (event: KeyboardEvent): boolean => event.code === 'Period' || even
 export const isEscapeKey = (event: KeyboardEvent): boolean => event.key === 'Escape';
 
 /**
+ * Check if Enter key was pressed.
+ */
+export const isEnterKey = (event: KeyboardEvent): boolean => event.key === 'Enter';
+
+/**
  * Check if Delete or Backspace key was pressed.
  */
 export const isDeleteKey = (event: KeyboardEvent): boolean =>
@@ -36,7 +41,7 @@ export const isDuplicateShortcut = (event: KeyboardEvent): boolean =>
  * Check if Enter was pressed without modifiers to open the edit modal.
  */
 export const isEditShortcut = (event: KeyboardEvent): boolean =>
-  event.key === 'Enter' && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey;
+  isEnterKey(event) && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey;
 
 /**
  * Check if the keyboard event corresponds to the undo shortcut (Meta/Ctrl + Z, no Shift).

@@ -7,19 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo } from 'react';
+import type { ChangeEvent, KeyboardEvent } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiFormRow,
   EuiComboBox,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonIcon,
-  EuiToolTip,
+  EuiFieldNumber,
   useEuiTheme,
 } from '@elastic/eui';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { css } from '@emotion/css';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { COMBO_POPOVER_PROPS } from '../../../lib/constants';
+import { isEnterKey } from '../../../lib/keyboard_shortcuts';
 
 interface DimensionEntry {
   property: string;
@@ -28,10 +30,11 @@ interface DimensionEntry {
   originalValue: string;
 }
 
+export type { DimensionEntry };
+
 interface Props {
   entries: DimensionEntry[];
-  onChange: (property: string, value: string) => void;
-  onReset?: (property: string) => void;
+  onChange: (property: DimensionEntry['property'], value: string) => void;
   onFocus?: () => void;
 }
 
@@ -40,14 +43,10 @@ const parsePx = (value: string): number => {
   return Number.isFinite(n) ? Math.round(n) : 0;
 };
 
-const comboCss = css({ minWidth: 160 });
+const comboCss = css({ width: 200 });
+const pxInputCss = css({ width: 144 });
 
-/**
- * Editor for CSS dimension properties (width, height, padding, margin,
- * border-radius). Shows a numeric input with "px" append and an EUI
- * size-token preset selector.
- */
-export const DimensionsEditor = ({ entries, onChange, onReset, onFocus }: Props) => {
+export const DimensionsEditor = ({ entries, onChange, onFocus }: Props) => {
   const { euiTheme } = useEuiTheme();
 
   const sizeEntries = useMemo(
@@ -68,7 +67,6 @@ export const DimensionsEditor = ({ entries, onChange, onReset, onFocus }: Props)
           entry={entry}
           sizeEntries={sizeEntries}
           onChange={onChange}
-          onReset={onReset}
           onFocus={onFocus}
         />
       ))}
@@ -80,16 +78,25 @@ const DimensionField = ({
   entry,
   sizeEntries,
   onChange,
-  onReset,
   onFocus,
 }: {
   entry: DimensionEntry;
   sizeEntries: Array<{ key: string; value: string; px: number }>;
   onChange: (property: string, value: string) => void;
-  onReset?: (property: string) => void;
   onFocus?: () => void;
 }) => {
   const numericValue = parsePx(entry.value);
+  const [localPx, setLocalPx] = useState<string>(String(numericValue));
+  const inputRef = useRef<HTMLInputElement | null>(null);
+
+  // Sync local px input when the value changes externally (e.g. undo/redo)
+  useEffect(() => {
+    const externalPx = parsePx(entry.value);
+    // Only sync if the input is not focused (user is not actively editing)
+    if (!inputRef.current?.contains(document.activeElement)) {
+      setLocalPx(String(externalPx));
+    }
+  }, [entry.value]);
 
   const options: Array<EuiComboBoxOptionOption<string>> = useMemo(
     () =>
@@ -105,73 +112,86 @@ const DimensionField = ({
     if (match) {
       return [{ label: `${match.key} (${match.value})`, value: match.value }];
     }
-    return [{ label: String(numericValue), value: `${numericValue}px` }];
+    return [];
   }, [sizeEntries, numericValue]);
 
-  const handleChange = useCallback(
+  const handleTokenChange = useCallback(
     (selected: Array<EuiComboBoxOptionOption<string>>) => {
       if (selected.length > 0 && selected[0].value) {
+        const px = parsePx(selected[0].value);
+        setLocalPx(String(px));
         onChange(entry.property, selected[0].value);
       }
     },
     [onChange, entry.property]
   );
 
-  const handleCreateOption = useCallback(
-    (searchValue: string) => {
-      const trimmed = searchValue.replace(/px$/i, '').trim();
-      const num = Number(trimmed);
-      if (trimmed === '' || isNaN(num)) return false;
-      const rounded = Math.max(0, Math.round(num));
-      onChange(entry.property, `${rounded}px`);
-      return true;
-    },
-    [onChange, entry.property]
-  );
+  const handlePxChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+    setLocalPx(e.target.value);
+  }, []);
 
-  const isChanged = entry.value !== entry.originalValue;
+  const commitPxValue = useCallback(() => {
+    const num = Number(localPx);
+    if (localPx === '' || isNaN(num)) {
+      setLocalPx(String(numericValue));
+      return;
+    }
+    const rounded = Math.max(0, Math.round(num));
+    setLocalPx(String(rounded));
+    onChange(entry.property, `${rounded}px`);
+  }, [localPx, numericValue, onChange, entry.property]);
+
+  const handlePxKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      if (isEnterKey(e.nativeEvent)) {
+        commitPxValue();
+      }
+    },
+    [commitPxValue]
+  );
 
   return (
     <EuiFormRow label={entry.label}>
       <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
-          <div className={comboCss} onFocusCapture={onFocus}>
+          <div css={comboCss} onFocusCapture={onFocus}>
             <EuiComboBox
-              aria-label={entry.label}
+              aria-label={i18n.translate('kbnDesignTools.edit.modal.dimensions.tokenAriaLabel', {
+                defaultMessage: '{label} token',
+                values: { label: entry.label },
+              })}
               options={options}
               selectedOptions={selectedOptions}
-              onChange={handleChange}
-              onCreateOption={handleCreateOption}
+              onChange={handleTokenChange}
               singleSelection={{ asPlainText: true }}
               compressed
               isClearable={false}
-              customOptionText={i18n.translate(
-                'kbnDesignTools.edit.modal.dimensions.customOption',
-                {
-                  defaultMessage: 'Set to {searchValue}px',
-                  values: { searchValue: '{searchValue}' },
-                }
-              )}
+              placeholder={i18n.translate('kbnDesignTools.edit.modal.dimensions.tokenPlaceholder', {
+                defaultMessage: 'EUI token',
+              })}
+              inputPopoverProps={COMBO_POPOVER_PROPS}
             />
           </div>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiToolTip
-            content={i18n.translate('kbnDesignTools.edit.modal.resetDimension', {
-              defaultMessage: 'Reset to original value',
-            })}
-          >
-            <EuiButtonIcon
-              iconType="undo"
-              aria-label={i18n.translate('kbnDesignTools.edit.modal.resetDimensionAria', {
-                defaultMessage: 'Reset {label} to original value',
+          <div css={pxInputCss} onFocusCapture={onFocus}>
+            <EuiFieldNumber
+              inputRef={(el) => {
+                inputRef.current = el;
+              }}
+              aria-label={i18n.translate('kbnDesignTools.edit.modal.dimensions.pxAriaLabel', {
+                defaultMessage: '{label} pixels',
                 values: { label: entry.label },
               })}
-              onClick={() => onReset?.(entry.property)}
-              disabled={!isChanged}
-              size="s"
+              value={localPx}
+              onChange={handlePxChange}
+              onBlur={commitPxValue}
+              onKeyDown={handlePxKeyDown}
+              compressed
+              append="px"
+              min={0}
             />
-          </EuiToolTip>
+          </div>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFormRow>

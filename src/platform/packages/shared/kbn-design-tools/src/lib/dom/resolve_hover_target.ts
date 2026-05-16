@@ -40,8 +40,9 @@ export const resolveHoverTarget = (
   isInsideHoverLock: (px: number, py: number) => boolean,
   isCurrentTargetRounded: boolean
 ): HoverResolution => {
-  // Strategy 1: hover-lock zone — pointer is in the controls area below the element
-  if (currentTarget && isInsideHoverLock(x, y)) {
+  // Strategy 1: hover-lock zone. Pointer is in the controls area below the element.
+  const isInHoverLockZone = currentTarget && isInsideHoverLock(x, y);
+  if (isInHoverLockZone) {
     const handle = findNearHandle(x, y, currentTarget.getBoundingClientRect());
     return { target: currentTarget, handle, isRounded: false };
   }
@@ -56,12 +57,13 @@ export const resolveHoverTarget = (
 
   const nextTarget = getElementUnder(x, y);
 
-  // Strategy 2: rounded dead-zone — the pointer left the rounded hit-test shape
+  // Strategy 2: rounded dead-zone. The pointer left the rounded hit-test shape
   // but is still in the bounding-rect edge zone. Keep the current target so
   // the user can reach resize handles in the dead zone corners.
-  // Skip when the new target is a child — the cursor moved to a descendant,
+  // Skip when the new target is a child. The cursor moved to a descendant,
   // not a dead zone.
-  if (currentTarget && nextTarget !== currentTarget) {
+  const targetChanged = currentTarget && nextTarget !== currentTarget;
+  if (targetChanged) {
     const isChild = nextTarget && currentTarget.contains(nextTarget);
 
     if (

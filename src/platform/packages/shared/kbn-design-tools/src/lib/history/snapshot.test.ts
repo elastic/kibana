@@ -32,7 +32,7 @@ const makeSnapshotSession = (overrides: Partial<ElementSession> = {}): ElementSe
       },
     ],
     textEdits: [],
-    sourceEdits: [],
+    mediaEdits: [],
     ...overrides,
   };
 };

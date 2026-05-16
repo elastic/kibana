@@ -10,13 +10,13 @@
 import { DEVTOOL_LIVE_ATTR } from '../constants';
 
 /**
- * Return the meaningful content root for a managed element.
+ * Returns the meaningful content root for a managed element.
  *
  * Live elements are wrapped in a container div that holds the `data-devtool-live`
- * attribute. The actual component content is typically the first child of that
+ * attribute. The actual component content is the first child of that
  * wrapper, but some EUI components prepend invisible helper elements (e.g. a
- * screen-reader-only `<p>` in EuiTreeView). We skip those and return the first
- * visible child instead.
+ * screen-reader-only `<p>` in EuiTreeView). Those are skipped in favour of the first
+ * visible child.
  *
  * Static clones and regular DOM elements use themselves as the content root.
  */
@@ -26,7 +26,7 @@ export const getContentRoot = (target: HTMLElement): HTMLElement => {
       const child = target.children[i] as HTMLElement;
       if (!isHiddenHelper(child)) return child;
     }
-    // All children are hidden helpers — fall back to the first child or target.
+    // All children are hidden helpers. Fall back to the first child or target.
     if (target.firstElementChild) return target.firstElementChild as HTMLElement;
   }
   return target;

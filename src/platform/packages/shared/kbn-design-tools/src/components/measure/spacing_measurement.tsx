@@ -8,7 +8,7 @@
  */
 
 import React, { Fragment, useCallback } from 'react';
-import { css } from '@emotion/css';
+import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 import { useEuiSizeLookup } from '../../hooks/use_eui_size_lookup';
 import { useOverlayZIndex } from '../../hooks/use_overlay_z_index';
@@ -141,12 +141,12 @@ export const SpacingMeasurement = ({ lines }: Props) => {
 
         return (
           <Fragment key={index}>
-            <div className={lineCss} data-test-subj="spacingMeasurementLine" />
-            <div className={startCapCss} data-test-subj="spacingMeasurementStartCap" />
-            <div className={endCapCss} data-test-subj="spacingMeasurementEndCap" />
+            <div css={lineCss} data-test-subj="spacingMeasurementLine" />
+            <div css={startCapCss} data-test-subj="spacingMeasurementStartCap" />
+            <div css={endCapCss} data-test-subj="spacingMeasurementEndCap" />
             <div
               ref={(el) => clampLabel(el, labelMidpoint, isHorizontal)}
-              className={labelCss}
+              css={labelCss}
               data-test-subj="spacingMeasurementLabel"
             >
               {euiSizeKey ? `${line.distance}px (${euiSizeKey})` : `${line.distance}px`}

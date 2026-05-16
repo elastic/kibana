@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { collectSourceElements } from './collect_source_elements';
+import { collectMediaElements } from './collect_media_elements';
 
 jest.mock('../eui_icon_cache', () => ({
   identifyIconType: jest.fn().mockResolvedValue(''),
 }));
 
-describe('collectSourceElements', () => {
+describe('collectMediaElements', () => {
   let root: HTMLDivElement;
 
   beforeEach(() => {
@@ -27,12 +27,12 @@ describe('collectSourceElements', () => {
 
   it('should return empty array when no source elements exist', async () => {
     root.innerHTML = '<p>hello</p>';
-    expect(await collectSourceElements(root)).toEqual([]);
+    expect(await collectMediaElements(root)).toEqual([]);
   });
 
   it('should collect img elements with src', async () => {
     root.innerHTML = '<img src="https://example.com/photo.png" />';
-    const entries = await collectSourceElements(root);
+    const entries = await collectMediaElements(root);
 
     expect(entries).toHaveLength(1);
     expect(entries[0].attribute).toBe('src');
@@ -46,7 +46,7 @@ describe('collectSourceElements', () => {
       <video src="video.mp4"></video>
       <img src="img2.png" />
     `;
-    const entries = await collectSourceElements(root);
+    const entries = await collectMediaElements(root);
 
     expect(entries).toHaveLength(3);
     expect(entries[0].label).toBe('img');
@@ -56,7 +56,7 @@ describe('collectSourceElements', () => {
 
   it('should collect iframe src', async () => {
     root.innerHTML = '<iframe src="https://example.com"></iframe>';
-    const entries = await collectSourceElements(root);
+    const entries = await collectMediaElements(root);
 
     expect(entries).toHaveLength(1);
     expect(entries[0].label).toBe('iframe');
@@ -65,7 +65,7 @@ describe('collectSourceElements', () => {
 
   it('should collect source elements inside video', async () => {
     root.innerHTML = '<video><source src="video.mp4" /></video>';
-    const entries = await collectSourceElements(root);
+    const entries = await collectMediaElements(root);
 
     expect(entries).toHaveLength(1);
     expect(entries[0].label).toBe('source');
@@ -74,7 +74,7 @@ describe('collectSourceElements', () => {
 
   it('should collect SVG image elements with href', async () => {
     root.innerHTML = '<svg><image href="icon.svg" /></svg>';
-    const entries = await collectSourceElements(root);
+    const entries = await collectMediaElements(root);
 
     expect(entries).toHaveLength(1);
     expect(entries[0].attribute).toBe('href');
@@ -83,7 +83,7 @@ describe('collectSourceElements', () => {
 
   it('should collect SVG use elements with href', async () => {
     root.innerHTML = '<svg><use href="#my-symbol" /></svg>';
-    const entries = await collectSourceElements(root);
+    const entries = await collectMediaElements(root);
 
     expect(entries).toHaveLength(1);
     expect(entries[0].attribute).toBe('href');
@@ -92,7 +92,7 @@ describe('collectSourceElements', () => {
 
   it('should not duplicate elements that match multiple selectors', async () => {
     root.innerHTML = '<img src="photo.png" />';
-    const entries = await collectSourceElements(root);
+    const entries = await collectMediaElements(root);
     expect(entries).toHaveLength(1);
   });
 
@@ -101,7 +101,7 @@ describe('collectSourceElements', () => {
     img.src = 'root.png';
     document.body.appendChild(img);
 
-    const entries = await collectSourceElements(img);
+    const entries = await collectMediaElements(img);
 
     expect(entries).toHaveLength(1);
     expect(entries[0].value).toBe('root.png');
@@ -117,7 +117,7 @@ describe('collectSourceElements', () => {
         </div>
       </div>
     `;
-    const entries = await collectSourceElements(root);
+    const entries = await collectMediaElements(root);
 
     expect(entries).toHaveLength(1);
     expect(entries[0].value).toBe('deep.png');

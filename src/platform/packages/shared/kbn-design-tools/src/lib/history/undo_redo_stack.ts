@@ -7,8 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Transaction, TransactionInput } from './transaction';
+import type { Transaction } from './transaction';
 import { MAX_UNDO_ENTRIES } from '../constants';
+
+/**
+ * Minimal shape required by the stack for each entry.
+ * The default type parameter uses {@link Transaction}, but lighter
+ * entry types (e.g. draft edits) can satisfy this constraint too.
+ */
+export interface StackEntry {
+  readonly id: number;
+  readonly timestamp: number;
+  readonly label: string;
+}
 
 /**
  * Snapshot of the stack's observable state. Consumed by the React bridge
@@ -31,24 +42,20 @@ export interface UndoRedoSnapshot {
  *
  * ## Design
  *
- * - Lives in a `useRef` — pointer handlers at 60 Hz can push transactions
+ * - Lives in a `useRef` so pointer handlers can push transactions
  *   without triggering React re-renders.
  * - Any new forward mutation clears the redo stack (standard behaviour).
  * - Supports a subscriber model so a React bridge (via
  *   `useSyncExternalStore`) can observe state changes cheaply.
- * - Does NOT execute transactions — it only manages ordering. Actual DOM
+ * - Does NOT execute transactions. It only manages ordering; actual DOM
  *   mutations are delegated to {@link TransactionExecutor} functions.
- *
- * ## Thread safety
- *
- * This class is single-threaded (browser main thread). No locking needed.
  */
-export class UndoRedoStack {
+export class UndoRedoStack<T extends StackEntry = Transaction> {
   /** Transactions that can be undone, oldest first. */
-  private readonly undoEntries: Transaction[] = [];
+  private readonly undoEntries: T[] = [];
 
   /** Transactions that can be redone, most-recently-undone first. */
-  private readonly redoEntries: Transaction[] = [];
+  private readonly redoEntries: T[] = [];
 
   /** Monotonically increasing counter for transaction IDs. */
   private nextId = 1;
@@ -56,7 +63,7 @@ export class UndoRedoStack {
   /** Set of subscriber callbacks notified on every stack mutation. */
   private readonly listeners = new Set<() => void>();
 
-  /** Cached snapshot — replaced only on mutation so `useSyncExternalStore`
+  /** Cached snapshot, replaced only on mutation so `useSyncExternalStore`
    *  sees a stable reference between changes. */
   private cachedSnapshot: UndoRedoSnapshot = {
     canUndo: false,
@@ -66,10 +73,10 @@ export class UndoRedoStack {
   };
 
   /**
-   * Push a new transaction onto the undo stack.
+   * Pushes a new transaction onto the undo stack.
    *
-   * Assigns a monotonic `id` and wall-clock `timestamp`, then clears the
-   * redo stack (standard undo/redo behaviour — a new forward action
+   * Assigns a monotonic `id` and `timestamp`, then clears the
+   * redo stack (standard undo/redo behaviour: a new forward action
    * invalidates any undone future).
    *
    * Notifies all subscribers after the mutation.
@@ -77,12 +84,12 @@ export class UndoRedoStack {
    * @param input - The transaction descriptor without `id`/`timestamp`.
    * @returns The fully-stamped transaction that was pushed.
    */
-  public push(input: TransactionInput): Transaction {
-    const tx = {
-      ...input,
+  public push(input: Omit<T, 'id' | 'timestamp'>): T {
+    const tx: T = {
+      ...(input as T),
       id: this.nextId++,
       timestamp: Date.now(),
-    } as Transaction;
+    };
     this.undoEntries.push(tx);
     // Drop the oldest entries when the stack exceeds the limit.
     while (this.undoEntries.length > MAX_UNDO_ENTRIES) {
@@ -94,7 +101,7 @@ export class UndoRedoStack {
   }
 
   /**
-   * Pop the most recent transaction from the undo stack and move it to
+   * Pops the most recent transaction from the undo stack and moves it to
    * the redo stack.
    *
    * The caller is responsible for executing the transaction's reverse
@@ -102,7 +109,7 @@ export class UndoRedoStack {
    *
    * @returns The undone transaction, or `null` if the undo stack is empty.
    */
-  public undo(): Transaction | null {
+  public undo(): T | null {
     const tx = this.undoEntries.pop();
     if (!tx) return null;
     this.redoEntries.push(tx);
@@ -111,7 +118,7 @@ export class UndoRedoStack {
   }
 
   /**
-   * Pop the most recently undone transaction from the redo stack and move
+   * Pops the most recently undone transaction from the redo stack and moves
    * it back onto the undo stack.
    *
    * The caller is responsible for executing the transaction's forward
@@ -119,7 +126,7 @@ export class UndoRedoStack {
    *
    * @returns The redone transaction, or `null` if the redo stack is empty.
    */
-  public redo(): Transaction | null {
+  public redo(): T | null {
     const tx = this.redoEntries.pop();
     if (!tx) return null;
     this.undoEntries.push(tx);
@@ -128,7 +135,7 @@ export class UndoRedoStack {
   }
 
   /**
-   * Clear both stacks entirely.
+   * Clears both stacks entirely.
    *
    * Called when the user exits edit mode (`resetAll`) or navigates away.
    * History is not preserved across edit sessions.
@@ -171,11 +178,11 @@ export class UndoRedoStack {
   }
 
   /**
-   * Return a cached snapshot of the stack's observable state.
+   * Returns a cached snapshot of the stack's observable state.
    *
    * Used by the React bridge (`useSyncExternalStore`) as the
    * `getSnapshot` function. Returns the same object reference until
-   * the stack is mutated — this is critical for avoiding infinite
+   * the stack is mutated, which is critical for avoiding infinite
    * re-render loops in `useSyncExternalStore`.
    */
   public getSnapshot(): UndoRedoSnapshot {
@@ -183,7 +190,7 @@ export class UndoRedoStack {
   }
 
   /**
-   * Subscribe to stack mutations.
+   * Subscribes to stack mutations.
    *
    * The callback is invoked synchronously after every `push`, `undo`,
    * `redo`, or `clear` call. Designed for use with
@@ -200,7 +207,7 @@ export class UndoRedoStack {
   }
 
   /**
-   * Rebuild the cached snapshot and notify all subscribers that the
+   * Rebuilds the cached snapshot and notifies all subscribers that the
    * stack state has changed. Called after every public mutator method.
    */
   private notify(): void {

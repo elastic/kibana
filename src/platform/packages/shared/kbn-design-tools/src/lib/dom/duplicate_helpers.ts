@@ -10,27 +10,27 @@
 import { flushSync } from 'react-dom';
 import { DUPLICATE_OFFSET, DEVTOOL_LIBRARY_ID_ATTR } from '../constants';
 import { cloneClean, setImportant, roundRect } from './clone_element';
-import type { ElementSession, ElementRegistry, SourceEdit } from './element_registry';
+import type { ElementSession, ElementRegistry, MediaEdit } from './element_registry';
 import { buildTransform } from './resize_helpers';
 import { renderEuiComponentLive } from './insert_element';
-import { replaceIconContent } from '../eui_icon_cache';
+import { applySourceAttribute } from '../eui_icon_cache';
 
 /**
- * Replay source edits (e.g. icon replacements) from a source element tree
+ * Replay media edits (e.g. icon replacements) from a source element tree
  * onto a freshly created duplicate. Matches elements by structural
  * fingerprint so the correct target is updated.
  *
- * Returns new {@link SourceEdit} entries mapped to the target elements so
+ * Returns new {@link MediaEdit} entries mapped to the target elements so
  * the duplicate's session can carry the edits forward to further duplicates.
  */
-const transferSourceEdits = (
-  sourceEdits: SourceEdit[],
+const transferMediaEdits = (
+  mediaEdits: MediaEdit[],
   source: HTMLElement,
   target: HTMLElement
-): SourceEdit[] => {
-  if (sourceEdits.length === 0) return [];
+): MediaEdit[] => {
+  if (mediaEdits.length === 0) return [];
 
-  const transferred: SourceEdit[] = [];
+  const transferred: MediaEdit[] = [];
 
   // Build fingerprint maps for both trees (including roots)
   const allSource = [source, ...source.querySelectorAll<Element>('*')];
@@ -52,39 +52,33 @@ const transferSourceEdits = (
     }
   }
 
-  // For each source edit, find the matching target element
+  // For each media edit, find the matching target element
   // Build source element order for consistent indexing
-  const sourceByFingerprint = new Map<string, Element[]>();
+  const sourceIndexByFingerprint = new Map<Element, number>();
+  const sourceCountByFingerprint = new Map<string, number>();
   for (const el of allSource) {
     const key = sourceFingerprints.get(el)!;
-    const list = sourceByFingerprint.get(key);
-    if (list) {
-      list.push(el);
-    } else {
-      sourceByFingerprint.set(key, [el]);
-    }
+    const count = sourceCountByFingerprint.get(key) ?? 0;
+    sourceIndexByFingerprint.set(el, count);
+    sourceCountByFingerprint.set(key, count + 1);
   }
 
-  for (const edit of sourceEdits) {
+  for (const edit of mediaEdits) {
     const key = sourceFingerprints.get(edit.element);
     if (!key) continue;
 
     // Find the index of this element among same-fingerprint siblings in source
-    const sourceSiblings = sourceByFingerprint.get(key);
-    const sourceIdx = sourceSiblings?.indexOf(edit.element) ?? -1;
+    const sourceIdx = sourceIndexByFingerprint.get(edit.element) ?? -1;
     if (sourceIdx < 0) continue;
 
     const targetSiblings = targetByFingerprint.get(key);
-    if (!targetSiblings || sourceIdx >= targetSiblings.length) continue;
+    const hasNoMatchingTarget = !targetSiblings || sourceIdx >= targetSiblings.length;
+    if (hasNoMatchingTarget) continue;
 
     const targetEl = targetSiblings[sourceIdx];
     const currentValue = edit.element.getAttribute(edit.attribute) ?? '';
 
-    if (edit.attribute === 'data-icon-type') {
-      replaceIconContent(targetEl, currentValue);
-    } else {
-      targetEl.setAttribute(edit.attribute, currentValue);
-    }
+    applySourceAttribute(targetEl, edit.attribute, currentValue);
 
     transferred.push({
       element: targetEl,
@@ -99,7 +93,7 @@ const transferSourceEdits = (
 /**
  * Build a structural fingerprint for matching elements across two structurally
  * similar DOM trees. Uses tag name, stable class names, and position among
- * same-tag siblings — more resilient than flat index when React re-renders
+ * same-tag siblings - more resilient than flat index when React re-renders
  * change child counts (e.g. toggling a switch).
  *
  * Emotion class names (`css-{hash}-{label}`) have their volatile hash
@@ -149,7 +143,8 @@ const transferDomEdits = (source: HTMLElement, target: HTMLElement): void => {
 
   const sourceEls = source.querySelectorAll<HTMLElement>('*');
   for (const src of sourceEls) {
-    if (src.style.length === 0 && !hasModifiedTextNodes(src)) continue;
+    const isUnmodified = src.style.length === 0 && !hasDirectTextContent(src);
+    if (isUnmodified) continue;
 
     const key = buildTreeFingerprint(src);
     const targets = targetMap.get(key);
@@ -185,10 +180,12 @@ const transferDomEdits = (source: HTMLElement, target: HTMLElement): void => {
 };
 
 /**
- * Check whether an element has any direct text node children that could
- * have been user-modified (non-empty text content).
+ * Check whether an element has any direct text node children with
+ * non-empty content. Used to identify elements that *may* carry
+ * user-modified text - the actual modification check happens in
+ * `transferDomEdits` by comparing source and target text.
  */
-const hasModifiedTextNodes = (el: HTMLElement): boolean => {
+const hasDirectTextContent = (el: HTMLElement): boolean => {
   for (const child of el.childNodes) {
     if (child.nodeType === Node.TEXT_NODE && child.nodeValue?.trim()) return true;
   }
@@ -201,7 +198,7 @@ const hasModifiedTextNodes = (el: HTMLElement): boolean => {
  * double-buffering the stored fiber may be the pre-commit tree; the
  * committed tree with actual components lives on `alternate` in that case.
  *
- * **WARNING — React Fiber Internals**
+ * **WARNING - React Fiber Internals**
  *
  * The functions below (`getRootFiber`, `collectComponentFibers`,
  * `readHookValues`, `snapshotComponentState`, `restoreComponentState`)
@@ -214,7 +211,7 @@ const hasModifiedTextNodes = (el: HTMLElement): boolean => {
  *    can corrupt React's reconciler state if a concurrent render is
  *    in progress.
  *
- * All call sites are wrapped in `try/catch` and gracefully degrade —
+ * All call sites are wrapped in `try/catch` and gracefully degrade -
  * duplicates still work without state transfer, they just start with
  * default state. If React's fiber structure changes, these functions
  * will silently return `undefined` / bail out.
@@ -245,7 +242,9 @@ const collectComponentFibers = (root: Record<string, unknown>): Array<Record<str
   const walk = (node: Record<string, unknown> | null) => {
     if (!node) return;
     const tag = node.tag as number;
-    if ((tag === 0 || tag === 11 || tag === 15) && node.memoizedState) {
+    const isFunctionComponentWithState =
+      (tag === 0 || tag === 11 || tag === 15) && node.memoizedState;
+    if (isFunctionComponentWithState) {
       result.push(node);
     }
     walk(node.child as Record<string, unknown> | null);
@@ -257,7 +256,7 @@ const collectComponentFibers = (root: Record<string, unknown>): Array<Record<str
 
 /**
  * Read all useState/useReducer values from a fiber's hook linked list.
- * Returns just the values — a simple serializable array.
+ * Returns just the values - a simple serializable array.
  */
 const readHookValues = (fiber: Record<string, unknown>): unknown[] => {
   const values: unknown[] = [];
@@ -274,7 +273,7 @@ const readHookValues = (fiber: Record<string, unknown>): unknown[] => {
 
 /**
  * Snapshot the React hook state of every function component inside a live
- * element's fiber tree. Returns a simple `unknown[][]` — one array of
+ * element's fiber tree. Returns a simple `unknown[][]` - one array of
  * hook values per component, ordered by DFS position.
  *
  * Store the result on `ElementSession.componentState` so it survives
@@ -291,7 +290,7 @@ export const snapshotComponentState = (el: HTMLElement): unknown[][] | undefined
     return fibers.map(readHookValues);
   } catch {
     // React fiber internals are undocumented and may change across versions.
-    // Gracefully degrade — duplicates will still work without state transfer.
+    // Gracefully degrade. Duplicates will still work without state transfer.
     return undefined;
   }
 };
@@ -316,7 +315,7 @@ export const restoreComponentState = async (
     fibers = collectComponentFibers(root);
   } catch {
     // React fiber internals are undocumented and may change across versions.
-    // Gracefully degrade — the duplicate will render with default state.
+    // Gracefully degrade. The duplicate will render with default state.
     return;
   }
 
@@ -341,25 +340,28 @@ export const restoreComponentState = async (
         hook = hook.next as Record<string, unknown> | null;
       }
     } catch {
-      // Skip this fiber — its structure may not match expectations.
+      // Skip this fiber. Its structure may not match expectations.
       continue;
     }
   }
 
   if (updates.length === 0) return;
 
-  // Suppress transitions on the target tree only so the state change
+  // Suppress transitions on elements that have them so the state change
   // appears instant without affecting the rest of the page.
   const descendants = el.querySelectorAll<HTMLElement>('*');
   const saved: Array<{ el: HTMLElement; t: string; a: string }> = [];
   for (const d of [el, ...descendants]) {
+    const hasTransition = d.style.transition || d.style.transitionProperty;
+    const hasAnimation = d.style.animation || d.style.animationName;
+    if (!hasTransition && !hasAnimation) continue;
     saved.push({
       el: d,
       t: d.style.transition,
       a: d.style.animation,
     });
-    setImportant(d, 'transition', 'none');
-    setImportant(d, 'animation', 'none');
+    if (hasTransition) setImportant(d, 'transition', 'none');
+    if (hasAnimation) setImportant(d, 'animation', 'none');
   }
 
   flushSync(() => {
@@ -405,7 +407,7 @@ export const createDuplicate = async (
   let duplicate: HTMLElement;
   let rect: DOMRect;
   let cleanup: (() => void) | undefined;
-  let transferredSourceEdits: SourceEdit[] = [];
+  let transferredMediaEdits: MediaEdit[] = [];
 
   if (liveInfo) {
     // Snapshot the source's React state before rendering the duplicate.
@@ -420,13 +422,9 @@ export const createDuplicate = async (
     duplicate.style.transformOrigin = '0 0';
     transferDomEdits(sourceEl, duplicate);
 
-    // Replay source edits (icon changes, etc.) from the source session.
-    if (existingSession?.sourceEdits.length) {
-      transferredSourceEdits = transferSourceEdits(
-        existingSession.sourceEdits,
-        sourceEl,
-        duplicate
-      );
+    // Replay media edits (icon changes, etc.) from the source session.
+    if (existingSession?.mediaEdits.length) {
+      transferredMediaEdits = transferMediaEdits(existingSession.mediaEdits, sourceEl, duplicate);
     }
 
     // Restore the snapshotted state (with transitions suppressed).
@@ -435,14 +433,14 @@ export const createDuplicate = async (
     if (stateSnapshot) {
       try {
         await restoreComponentState(duplicate, stateSnapshot);
-        // Re-measure after state restore — the element's dimensions may have
+        // Re-measure after state restore. The element's dimensions may have
         // changed (e.g. an accordion that expanded).
         const rendered = duplicate.firstElementChild as HTMLElement | null;
         if (rendered) {
           rect = rendered.getBoundingClientRect();
         }
       } catch {
-        // State restore failed — the duplicate will use default state.
+        // State restore failed. The duplicate will use default state.
       }
     }
   } else {
@@ -494,7 +492,7 @@ export const createDuplicate = async (
     componentState: liveInfo ? snapshotComponentState(duplicate) : undefined,
     styleEdits: [],
     textEdits: [],
-    sourceEdits: transferredSourceEdits,
+    mediaEdits: transferredMediaEdits,
     cleanup,
   };
   registry.set(session);

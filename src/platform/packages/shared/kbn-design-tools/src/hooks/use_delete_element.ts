@@ -26,6 +26,10 @@ export const useDeleteElement = (onDelete?: () => void) => {
     return true;
   }, []);
 
+  const trackDeletion = useCallback((el: HTMLElement) => {
+    deletedElements.current.add(el);
+  }, []);
+
   const deleteElement = useCallback(
     (el: HTMLElement) => {
       if (!isDeletable(el)) return;
@@ -37,7 +41,7 @@ export const useDeleteElement = (onDelete?: () => void) => {
       const timerId = setTimeout(() => {
         pendingTimers.current.delete(timerId);
         // Guard: if undo restored this element during the fade, the attr
-        // will have been removed — skip the visibility change.
+        // will have been removed. Skip the visibility change.
         if (!el.hasAttribute(DEVTOOL_HIDDEN_ATTR)) return;
         setImportant(el, 'visibility', 'hidden');
         el.style.transition = '';
@@ -80,5 +84,5 @@ export const useDeleteElement = (onDelete?: () => void) => {
 
   const deletedCount = useCallback(() => deletedElements.current.size, []);
 
-  return { deleteElement, restoreAll, deletedCount };
+  return { deleteElement, trackDeletion, restoreAll, deletedCount };
 };
