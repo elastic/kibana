@@ -296,16 +296,20 @@ describe('WorkflowContextManager', () => {
       description: 'A test workflow',
       enabled: true,
       consts: {},
-      triggers: [],
-      steps: [],
-      inputs: [
+      triggers: [
         {
-          name: 'name',
-          type: 'string',
-          required: false,
-          default: '',
+          type: 'manual',
+          inputs: [
+            {
+              name: 'name',
+              type: 'string',
+              required: false,
+              default: '',
+            },
+          ],
         },
       ],
+      steps: [],
     } as WorkflowYaml;
     let testContainer: ReturnType<typeof createTestContainer>;
 

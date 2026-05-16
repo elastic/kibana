@@ -65,7 +65,7 @@ export const ActionsMenu = memo<{ hostInfo: HostInfo }>(({ hostInfo }) => {
       anchorPosition="downLeft"
       data-test-subj="endpointDetailsActionsPopover"
     >
-      <EuiContextMenuPanel size="s" items={takeActionItems} />
+      <EuiContextMenuPanel items={takeActionItems} />
     </EuiPopover>
   );
 });
