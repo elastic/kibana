@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-ACCESS_BROKER_URL="${ACCESS_BROKER_URL:-https://access-broker-261553193300.us-central1.run.app}"
+ACCESS_BROKER_URL="${ACCESS_BROKER_URL:-https://access-broker.kibana.dev}"
 CAPABILITY="kibana.litellm"
 MODEL="llm-gateway/gpt-5.4-mini"
 
