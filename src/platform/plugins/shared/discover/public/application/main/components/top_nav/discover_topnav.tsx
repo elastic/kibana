@@ -18,7 +18,6 @@ import type { ESQLEditorRestorableState } from '@kbn/esql-editor';
 import { useESQLQueryStats } from '@kbn/esql/public';
 import { type Query, type TimeRange, type AggregateQuery } from '@kbn/es-query';
 import type { DataViewPickerProps, UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
-import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
 import {
@@ -47,24 +46,6 @@ import { DiscoverSessionSaveModalContainer } from './save_discover_session';
 import { useDiscoverTopNav } from './use_discover_topnav';
 import { useESQLVariables } from './use_esql_variables';
 import type { UpdateESQLQueryFn } from '../../../../context_awareness/types';
-
-function DiscoverTopNavMenuSection({
-  onOpenSaveModal,
-  onOpenSaveAsModal,
-  persistedDiscoverSession,
-}: {
-  onOpenSaveModal: () => void;
-  onOpenSaveAsModal: () => void;
-  persistedDiscoverSession: DiscoverSession | undefined;
-}) {
-  const { topNavBadges, topNavMenu } = useDiscoverTopNav({
-    onOpenSaveModal,
-    onOpenSaveAsModal,
-    persistedDiscoverSession,
-  });
-
-  return <DiscoverTopNavMenu topNavBadges={topNavBadges} topNavMenu={topNavMenu} />;
-}
 
 export interface DiscoverTopNavProps {
   savedQuery?: string;
@@ -367,16 +348,18 @@ export const DiscoverTopNav = ({
     [esqlModeErrors]
   );
 
+  const { topNavBadges, topNavMenu } = useDiscoverTopNav({
+    onOpenSaveModal,
+    onOpenSaveAsModal,
+    persistedDiscoverSession,
+  });
+
   const shouldHideDefaultDataviewPicker =
     !!searchBarCustomization?.CustomDataViewPicker || !!searchBarCustomization?.hideDataViewPicker;
 
   return (
     <span>
-      <DiscoverTopNavMenuSection
-        onOpenSaveModal={onOpenSaveModal}
-        onOpenSaveAsModal={onOpenSaveAsModal}
-        persistedDiscoverSession={persistedDiscoverSession}
-      />
+      <DiscoverTopNavMenu topNavBadges={topNavBadges} topNavMenu={topNavMenu} />;
       <SearchBar
         useBackgroundSearchButton={
           customizationContext.displayMode !== 'embedded' &&

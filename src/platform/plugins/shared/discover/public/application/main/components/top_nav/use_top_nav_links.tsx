@@ -56,12 +56,11 @@ import { useCurrentTabViewActions } from '../../hooks/use_current_tab_view_actio
 import { useDataState } from '../../hooks/use_data_state';
 import { TransferAction } from '../../../../plugin_imports/embeddable_editor_service';
 
-const SWITCH_LANGUAGE_MODE_APP_MENU_ID = 'switchLanguageMode';
 const TAB_SCOPED_APP_MENU_ITEM_IDS = new Set<string>([
   AppMenuActionId.alerts,
   AppMenuActionId.export,
   AppMenuActionId.inspect,
-  SWITCH_LANGUAGE_MODE_APP_MENU_ID,
+  AppMenuActionId.switchLanguageMode,
 ]);
 
 /**
@@ -240,7 +239,7 @@ export const useTopNavLinks = ({
 
     if (canSwitchLanguageMode) {
       items.push({
-        id: SWITCH_LANGUAGE_MODE_APP_MENU_ID,
+        id: AppMenuActionId.switchLanguageMode,
         order: 10,
         label: isDataViewMode
           ? i18n.translate('discover.localMenu.switchToESQLTitle', {

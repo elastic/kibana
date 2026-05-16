@@ -21,9 +21,13 @@ import {
 } from '../../state_management/redux';
 import { useHasShareIntegration } from '../../hooks/use_has_share_integration';
 
-const useDiscoverTopNavShared = ({
+export const useDiscoverTopNav = ({
+  onOpenSaveModal,
+  onOpenSaveAsModal,
   persistedDiscoverSession,
 }: {
+  onOpenSaveModal: () => void;
+  onOpenSaveAsModal: () => void;
   persistedDiscoverSession: DiscoverSession | undefined;
 }) => {
   const services = useDiscoverServices();
@@ -45,46 +49,19 @@ const useDiscoverTopNavShared = ({
   const isEsqlMode = useIsEsqlMode();
   const hasShareIntegration = useHasShareIntegration(services);
 
-  return {
-    services,
+  const topNavMenu = useTopNavLinks({
     dataView,
-    adHocDataViews,
+    services,
     hasUnsavedChanges,
     isEsqlMode,
+    adHocDataViews,
     hasShareIntegration,
-    topNavBadges,
-  };
-};
-
-export const useDiscoverTopNav = ({
-  onOpenSaveModal,
-  onOpenSaveAsModal,
-  persistedDiscoverSession,
-}: {
-  onOpenSaveModal: () => void;
-  onOpenSaveAsModal: () => void;
-  persistedDiscoverSession: DiscoverSession | undefined;
-}) => {
-  const shared = useDiscoverTopNavShared({
-    persistedDiscoverSession,
-  });
-
-  const topNavMenu = useTopNavLinks({
-    dataView: shared.dataView,
-    services: shared.services,
-    hasUnsavedChanges: shared.hasUnsavedChanges,
-    isEsqlMode: shared.isEsqlMode,
-    adHocDataViews: shared.adHocDataViews,
-    hasShareIntegration: shared.hasShareIntegration,
     persistedDiscoverSession,
     onOpenSaveModal,
     onOpenSaveAsModal,
   });
 
-  return {
-    topNavMenu,
-    topNavBadges: shared.topNavBadges,
-  };
+  return { topNavMenu, topNavBadges };
 };
 
 export type DiscoverTopNavHookResult = ReturnType<typeof useDiscoverTopNav>;

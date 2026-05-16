@@ -48,7 +48,7 @@ export const useAppMenuData = ({ currentDataView }: UseAppMenuDataParams): UseAp
       const tab = allTabs.find((t) => t.id === item.id);
       const isCurrentTab = tab?.id === currentTabId;
 
-      if (!isCurrentTab || !currentDataView) {
+      if (!isCurrentTab) {
         return [];
       }
 
@@ -59,11 +59,11 @@ export const useAppMenuData = ({ currentDataView }: UseAppMenuDataParams): UseAp
           label: i18n.translate('discover.tabsView.tabMenu.inspectTitle', {
             defaultMessage: 'Inspect',
           }),
-          onClick: () => openInspector(),
+          onClick: openInspector,
         },
       ];
     },
-    [allTabs, currentDataView, currentTabId, openInspector]
+    [allTabs, currentTabId, openInspector]
   );
 
   // Provide "Switch to ES|QL" and "Switch to Classic" menu items for the selected tab
@@ -74,7 +74,7 @@ export const useAppMenuData = ({ currentDataView }: UseAppMenuDataParams): UseAp
       const tab = allTabs.find((t) => t.id === item.id);
       const isCurrentTab = tab?.id === currentTabId;
 
-      if (!isCurrentTab || !canSwitchLanguageMode || !currentDataView) {
+      if (!isCurrentTab || !canSwitchLanguageMode) {
         return [];
       }
 
@@ -102,14 +102,7 @@ export const useAppMenuData = ({ currentDataView }: UseAppMenuDataParams): UseAp
         },
       ];
     },
-    [
-      allTabs,
-      canSwitchLanguageMode,
-      currentDataView,
-      currentTabId,
-      isDataViewMode,
-      switchLanguageMode,
-    ]
+    [allTabs, canSwitchLanguageMode, currentTabId, isDataViewMode, switchLanguageMode]
   );
 
   const topNavMenuItems = useTopNavMenuItems();
