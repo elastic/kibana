@@ -116,22 +116,33 @@ interface ScheduleReconciliationTaskArgs {
 }
 
 /**
- * Ensures the singleton reconciliation task instance exists on the cluster.
+ * Ensures the singleton reconciliation task instance exists on the cluster
+ * AND that its schedule matches the currently-configured interval.
  * Idempotent — safe to call on every node start; Task Manager dedupes by id.
+ *
+ * Two steps because `ensureScheduled` is a no-op when the task SO already
+ * exists: an administrator who changes
+ * `xpack.cases.analyticsV2.reconciliationIntervalMinutes` and restarts
+ * Kibana would otherwise see no effect from their config change (the
+ * pre-existing task keeps firing at the old interval). `bulkUpdateSchedules`
+ * reconciles the persisted task's schedule with the configured value;
+ * Task Manager's implementation skips the write when the schedule is
+ * already equal, so the happy-path cost is one no-op call.
  */
 export async function scheduleReconciliationTask({
   taskManager,
   logger,
   intervalMinutes,
 }: ScheduleReconciliationTaskArgs): Promise<void> {
+  // Task Manager parses the "Nm" form as "every N minutes". The number
+  // is config-validated upstream (see `xpack.cases.analyticsV2.reconciliationIntervalMinutes`).
+  const interval = `${intervalMinutes}m`;
   try {
     await taskManager.ensureScheduled({
       id: RECONCILIATION_TASK_ID,
       taskType: RECONCILIATION_TASK_TYPE,
       params: {},
-      // Task Manager parses the "Nm" form as "every N minutes". The number
-      // is config-validated upstream (see `xpack.cases.analyticsV2.reconciliationIntervalMinutes`).
-      schedule: { interval: `${intervalMinutes}m` },
+      schedule: { interval },
       state: {},
     });
   } catch (err) {
@@ -142,6 +153,21 @@ export async function scheduleReconciliationTask({
         err instanceof Error ? err.message : String(err)
       }`,
       { error: err }
+    );
+    return;
+  }
+
+  // Reconcile the persisted task's schedule with the configured interval
+  // in case it already existed at a different value. `bulkUpdateSchedules`
+  // is internally `task.schedule != configured` gated, so the happy path
+  // is a single SO read with no write.
+  try {
+    await taskManager.bulkUpdateSchedules([RECONCILIATION_TASK_ID], { interval });
+  } catch (err) {
+    logger.warn(
+      `cases-analyticsV2: failed to align reconciliation task schedule to interval=${interval}: ${
+        err instanceof Error ? err.message : String(err)
+      }. The previously-scheduled task will continue firing at its old interval until the next successful schedule alignment or a /reset.`
     );
   }
 }

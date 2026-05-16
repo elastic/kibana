@@ -67,9 +67,13 @@ xpack.cases.analyticsV2:
     # values catch up faster after a hook
     # failure but cost more SO walks against
     # the cases index. Picked up at plugin
-    # start; runtime changes require a Kibana
-    # restart (the next /reset re-applies the
-    # current value to the rescheduled task).
+    # start: on every Kibana boot, the
+    # reconciliation task's persisted schedule
+    # is reconciled against this value via
+    # `bulkUpdateSchedules`. Changing the value
+    # therefore requires a Kibana restart to
+    # take effect — runtime changes are not
+    # picked up automatically.
   enable_admin_routes:
     false # default — set to true to register the
     # mutating administrator routes (/reset and

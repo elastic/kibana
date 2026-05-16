@@ -18,7 +18,7 @@ describe('config validation', () => {
             },
           },
           "analyticsV2": Object {
-            "enable_admin_routes": true,
+            "enable_admin_routes": false,
             "enabled": false,
             "reconciliationIntervalMinutes": 30,
             "resetPageDelayMs": 0,

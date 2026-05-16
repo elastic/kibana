@@ -179,6 +179,12 @@ export const registerCasesAnalyticsV2Routes = ({
         try {
           const tasks = await taskManager.fetch({
             query: { bool: { filter: [{ term: { 'task.taskType': RECONCILIATION_TASK_TYPE } }] } },
+            // The reconciliation task is a singleton (see
+            // `RECONCILIATION_TASK_ID`); defensively cap the fetch so an
+            // unusual failure that orphaned duplicate task SOs (e.g. a
+            // concurrent first-boot race that lost the dedupe) doesn't
+            // make this handler process stale rows.
+            size: 1,
           });
           const task = tasks.docs[0];
           if (task != null) {
