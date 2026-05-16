@@ -373,7 +373,7 @@ export class FeatureClient {
             const { [FEATURE_SEARCH_EMBEDDING]: _, ...rest } = doc;
             return rest as StoredFeatureDoc;
           });
-      const response = await dataStreamClient.create({ documents: docs });
+      const response = await dataStreamClient.create({ documents: docs, refresh: 'wait_for' });
       return {
         errors: response.errors,
         items: response.items as Array<Record<string, BulkResponseItem>>,
@@ -402,7 +402,7 @@ export class FeatureClient {
     const tombstones = hits
       .filter((h) => h[FEATURE_ID])
       .map((h) => toTombstone(stream, h[FEATURE_ID]!, now));
-    await this.clients.dataStreamClient.create({ documents: tombstones });
+    await this.clients.dataStreamClient.create({ documents: tombstones, refresh: 'wait_for' });
   }
 
   // -------------------------------------------------------------------------
