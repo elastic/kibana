@@ -9,6 +9,7 @@ import type { CoreSetup, Logger, SavedObjectsClientContract } from '@kbn/core/se
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import {
   ACTIVITY_INDEX_NAME,
+  ATTACHMENTS_INDEX_NAME,
   CASES_ANALYTICS_V2_RECONCILE_RUN_SOON_URL,
   CASES_ANALYTICS_V2_RESET_URL,
   CASES_ANALYTICS_V2_STATE_URL,
@@ -24,8 +25,10 @@ import {
 } from '../reconciliation/reset_task';
 import { ensureCaseIndex } from '../ensure_indices/case';
 import { ensureActivityIndex } from '../ensure_indices/activity';
+import { ensureAttachmentsIndex } from '../ensure_indices/attachments';
 import type { CasesAnalyticsV2WriterContract } from '../writer';
 import type { CasesActivityV2WriterContract } from '../writer/activity';
+import type { CasesAttachmentsV2WriterContract } from '../writer/attachments';
 
 /**
  * Shape surfaced under `/state.active_reset` for the live or
@@ -104,6 +107,8 @@ interface RegisterArgs {
   getWriter: () => CasesAnalyticsV2WriterContract | null;
   /** Activity-surface companion to `getWriter`. Same lifetime and semantics. */
   getActivityWriter: () => CasesActivityV2WriterContract | null;
+  /** Attachments-surface companion to `getWriter`. Same lifetime and semantics. */
+  getAttachmentsWriter: () => CasesAttachmentsV2WriterContract | null;
   /**
    * Wipes the data view service's in-memory bootstrapped-spaces cache.
    * `/reset` deletes per-space data views directly via the SO API, so
@@ -151,6 +156,7 @@ export const registerCasesAnalyticsV2Routes = ({
   getInternalSavedObjectsClient,
   getWriter,
   getActivityWriter,
+  getAttachmentsWriter,
   clearDataViewBootstrapCache,
   enabled,
   enableAdminRoutes,
@@ -174,6 +180,7 @@ export const registerCasesAnalyticsV2Routes = ({
       let lastRun: {
         cases_last_run_at?: string;
         activity_last_run_at?: string;
+        attachments_last_run_at?: string;
         runs?: number;
         next_run_at?: string;
         status?: string;
@@ -198,10 +205,12 @@ export const registerCasesAnalyticsV2Routes = ({
             const state = (task.state ?? {}) as {
               cases_last_run_at?: string;
               activity_last_run_at?: string;
+              attachments_last_run_at?: string;
             };
             lastRun = {
               cases_last_run_at: state.cases_last_run_at,
               activity_last_run_at: state.activity_last_run_at,
+              attachments_last_run_at: state.attachments_last_run_at,
               runs: task.attempts,
               next_run_at:
                 task.runAt instanceof Date
@@ -244,23 +253,26 @@ export const registerCasesAnalyticsV2Routes = ({
         }
       }
 
-      // Check both indices' existence so `/state` reports each
+      // Check every index's existence so `/state` reports each
       // bootstrap's result independently. `ensure*Index` logs and
-      // continues on failure, so a partial bootstrap (one index up,
-      // one missing) is possible — surfacing per-index status here
-      // makes that visible. Both lookups run in parallel so `/state`
+      // continues on failure, so a partial bootstrap (some indices up,
+      // others missing) is possible — surfacing per-index status here
+      // makes that visible. All lookups run in parallel so `/state`
       // stays cheap.
       let casesIndexExists = false;
       let activityIndexExists = false;
+      let attachmentsIndexExists = false;
       try {
         const coreContext = await context.core;
         const esClient = coreContext.elasticsearch.client.asInternalUser;
-        const [casesExists, activityExists] = await Promise.all([
+        const [casesExists, activityExists, attachmentsExists] = await Promise.all([
           esClient.indices.exists({ index: CASE_INDEX_NAME }),
           esClient.indices.exists({ index: ACTIVITY_INDEX_NAME }),
+          esClient.indices.exists({ index: ATTACHMENTS_INDEX_NAME }),
         ]);
         casesIndexExists = casesExists;
         activityIndexExists = activityExists;
+        attachmentsIndexExists = attachmentsExists;
       } catch (err) {
         log.warn(
           `failed to check analytics index existence: ${
@@ -285,6 +297,10 @@ export const registerCasesAnalyticsV2Routes = ({
             activity: {
               index: ACTIVITY_INDEX_NAME,
               index_exists: activityIndexExists,
+            },
+            attachments: {
+              index: ATTACHMENTS_INDEX_NAME,
+              index_exists: attachmentsIndexExists,
             },
           },
           reconciliation: {
@@ -393,24 +409,26 @@ export const registerCasesAnalyticsV2Routes = ({
       const internalSoClient = getInternalSavedObjectsClient();
       const writer = getWriter();
       const activityWriter = getActivityWriter();
+      const attachmentsWriter = getAttachmentsWriter();
       if (
         internalSoClient == null ||
         writer == null ||
         activityWriter == null ||
+        attachmentsWriter == null ||
         taskManager == null
       ) {
         return response.customError({
           statusCode: 503,
           body: {
             message:
-              'cases-analyticsV2 is not ready (writer, activity writer, internal SO client, or task manager unavailable); v2 is likely disabled or still starting.',
+              'cases-analyticsV2 is not ready (writers, internal SO client, or task manager unavailable); v2 is likely disabled or still starting.',
           },
         });
       }
 
       try {
-        // 1. Drop existing indices in parallel. 404 is fine on either
-        //    (reset on an empty cluster, or only one index ever
+        // 1. Drop existing indices in parallel. 404 is fine on any
+        //    (reset on an empty cluster, or only some indices ever
         //    bootstrapped).
         await Promise.all([
           esClient.indices
@@ -427,14 +445,22 @@ export const registerCasesAnalyticsV2Routes = ({
               if (status === 404) return;
               throw err;
             }),
+          esClient.indices
+            .delete({ index: ATTACHMENTS_INDEX_NAME })
+            .catch((err: { meta?: { statusCode?: number }; statusCode?: number }) => {
+              const status = err?.statusCode ?? err?.meta?.statusCode;
+              if (status === 404) return;
+              throw err;
+            }),
         ]);
 
-        // 2. Recreate both indices via the same bootstrap used at
+        // 2. Recreate all three indices via the same bootstrap used at
         //    plugin start. Idempotent and independent; parallel for
         //    symmetry with step 1.
         await Promise.all([
           ensureCaseIndex({ esClient, logger: log }),
           ensureActivityIndex({ esClient, logger: log }),
+          ensureAttachmentsIndex({ esClient, logger: log }),
         ]);
 
         // 3. Delete every per-space `Cases` data view. See
@@ -483,6 +509,7 @@ export const registerCasesAnalyticsV2Routes = ({
             surfaces: {
               cases: { reset: CASE_INDEX_NAME },
               activity: { reset: ACTIVITY_INDEX_NAME },
+              attachments: { reset: ATTACHMENTS_INDEX_NAME },
             },
           },
         });

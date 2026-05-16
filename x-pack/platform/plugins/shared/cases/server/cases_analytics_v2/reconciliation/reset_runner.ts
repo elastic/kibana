@@ -9,11 +9,16 @@ import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { CasesAnalyticsV2WriterContract } from '../writer';
 import type { CasesActivityV2WriterContract } from '../writer/activity';
+import type { CasesAttachmentsV2WriterContract } from '../writer/attachments';
 import { runReconciliation, type RunReconciliationResult } from './runner';
 import {
   runActivityReconciliation,
   type RunActivityReconciliationResult,
 } from './activity_runner';
+import {
+  runAttachmentsReconciliation,
+  type RunAttachmentsReconciliationResult,
+} from './attachments_runner';
 import { resetReconciliationTask } from './index';
 
 /** Inputs for `runFullReset`. */
@@ -24,6 +29,8 @@ export interface RunFullResetDeps {
   writer: CasesAnalyticsV2WriterContract;
   /** Activity-surface writer. Real instance, not the noop. */
   activityWriter: CasesActivityV2WriterContract;
+  /** Attachments-surface writer. Real instance, not the noop. */
+  attachmentsWriter: CasesAttachmentsV2WriterContract;
   /**
    * Task Manager start contract. Used after both walks complete to
    * atomically reset the periodic reconciliation task's persisted state.
@@ -54,7 +61,10 @@ export interface RunFullResetDeps {
    * `bulkUpdateState`) themselves so the per-page semantics here stay
    * obvious.
    */
-  onProgress?: (info: { phase: 'cases' | 'activity'; processed: number }) => void;
+  onProgress?: (info: {
+    phase: 'cases' | 'activity' | 'attachments';
+    processed: number;
+  }) => void;
   logger: Logger;
 }
 
@@ -62,6 +72,7 @@ export interface RunFullResetResult {
   /** Per-surface walk outcomes. `null` if that surface's walk threw mid-flight. */
   cases: RunReconciliationResult | null;
   activity: RunActivityReconciliationResult | null;
+  attachments: RunAttachmentsReconciliationResult | null;
   /**
    * ISO timestamp seeded into the periodic task's cases-surface
    * cursor on a successful walk, or `null` when the cases walk
@@ -77,13 +88,20 @@ export interface RunFullResetResult {
    */
   activityCursor: string | null;
   /**
+   * ISO timestamp seeded into the periodic task's attachments-surface
+   * cursor on a successful walk, or `null` when the attachments walk
+   * failed. Same recovery semantics as `casesCursor`.
+   */
+  attachmentsCursor: string | null;
+  /**
    * Per-walk error captured for surface-level isolation. `null` on
    * success. Surfaced so callers can decide whether to log or report a
    * partial failure; this function never throws on a per-surface walk
-   * error, so the successful surface's cursor still gets seeded.
+   * error, so the successful surfaces' cursors still get seeded.
    */
   casesError: unknown;
   activityError: unknown;
+  attachmentsError: unknown;
 }
 
 /**
@@ -112,16 +130,17 @@ export async function runFullReset({
   savedObjectsClient,
   writer,
   activityWriter,
+  attachmentsWriter,
   taskManager,
   intervalMinutes,
   pageDelayMs,
   onProgress,
   logger,
 }: RunFullResetDeps): Promise<RunFullResetResult> {
-  // Cases first, then activity. Same ordering as the periodic task: a
-  // `LOOKUP JOIN .cases ON cases.id` from any post-activity consumer
-  // sees the joined case row at least as up-to-date as the activity row
-  // that referenced it.
+  // Cases first, then activity, then attachments. Same ordering as the
+  // periodic task: a `LOOKUP JOIN .cases ON cases.id` from any
+  // post-fact-table consumer sees the joined case row at least as
+  // up-to-date as the activity / attachment row that referenced it.
   let casesResult: RunReconciliationResult | null = null;
   let casesError: unknown = null;
   try {
@@ -165,12 +184,33 @@ export async function runFullReset({
     );
   }
 
+  let attachmentsResult: RunAttachmentsReconciliationResult | null = null;
+  let attachmentsError: unknown = null;
+  try {
+    attachmentsResult = await runAttachmentsReconciliation({
+      savedObjectsClient,
+      attachmentsWriter,
+      logger,
+      lastRunAt: undefined,
+      pageDelayMs,
+      onPageComplete: ({ processed }) => onProgress?.({ phase: 'attachments', processed }),
+    });
+  } catch (err) {
+    attachmentsError = err;
+    logger.warn(
+      `reset: full attachments re-walk failed mid-flight: ${
+        err instanceof Error ? err.message : String(err)
+      }. Attachments index is partially populated; the attachments cursor is left unset so the next periodic tick will fall back to a full walk and recover the missing docs.`
+    );
+  }
+
   // Per-surface cursor: the walk's tick-start timestamp on success, or
   // `null` on failure. Seeding `null` clears the persisted cursor so
   // the next periodic tick walks the whole surface and repairs any
   // docs the failed reset left behind.
   const casesCursor = casesResult?.newLastRunAt ?? null;
   const activityCursor = activityResult?.newLastRunAt ?? null;
+  const attachmentsCursor = attachmentsResult?.newLastRunAt ?? null;
 
   if (taskManager != null) {
     // Build the seed state with only the surfaces whose cursor we want
@@ -180,6 +220,7 @@ export async function runFullReset({
     const initialState: Record<string, string> = {};
     if (casesCursor != null) initialState.cases_last_run_at = casesCursor;
     if (activityCursor != null) initialState.activity_last_run_at = activityCursor;
+    if (attachmentsCursor != null) initialState.attachments_last_run_at = attachmentsCursor;
     try {
       await resetReconciliationTask({
         taskManager,
@@ -199,9 +240,12 @@ export async function runFullReset({
   return {
     cases: casesResult,
     activity: activityResult,
+    attachments: attachmentsResult,
     casesCursor,
     activityCursor,
+    attachmentsCursor,
     casesError,
     activityError,
+    attachmentsError,
   };
 }

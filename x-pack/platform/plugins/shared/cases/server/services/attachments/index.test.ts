@@ -9,6 +9,7 @@ import { unset } from 'lodash';
 
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
+import { V2_NOOP_ATTACHMENTS_WRITER } from '../../cases_analytics_v2';
 import { AttachmentService } from '.';
 import {
   externalReferenceAttachmentES,
@@ -46,6 +47,7 @@ describe('AttachmentService', () => {
       persistableStateAttachmentTypeRegistry,
       unsecuredSavedObjectsClient,
       config: createAttachmentServiceConfig(),
+      analyticsV2AttachmentsWriter: V2_NOOP_ATTACHMENTS_WRITER,
     });
   });
 
@@ -238,6 +240,7 @@ describe('AttachmentService', () => {
         persistableStateAttachmentTypeRegistry,
         unsecuredSavedObjectsClient,
         config: createAttachmentServiceConfig(true),
+        analyticsV2AttachmentsWriter: V2_NOOP_ATTACHMENTS_WRITER,
       });
       const unifiedAttrs = {
         type: 'comment',
@@ -276,6 +279,7 @@ describe('AttachmentService', () => {
         persistableStateAttachmentTypeRegistry,
         unsecuredSavedObjectsClient,
         config: createAttachmentServiceConfig(true),
+        analyticsV2AttachmentsWriter: V2_NOOP_ATTACHMENTS_WRITER,
       });
 
       const fileMetadata = {
@@ -356,6 +360,7 @@ describe('AttachmentService', () => {
         persistableStateAttachmentTypeRegistry,
         unsecuredSavedObjectsClient,
         config: createAttachmentServiceConfig(true),
+        analyticsV2AttachmentsWriter: V2_NOOP_ATTACHMENTS_WRITER,
       });
       const unifiedAttrs = {
         type: 'comment',
@@ -396,6 +401,7 @@ describe('AttachmentService', () => {
         persistableStateAttachmentTypeRegistry,
         unsecuredSavedObjectsClient,
         config: createAttachmentServiceConfig(true),
+        analyticsV2AttachmentsWriter: V2_NOOP_ATTACHMENTS_WRITER,
       });
       const unifiedAttrs = {
         type: 'comment',
@@ -453,6 +459,7 @@ describe('AttachmentService', () => {
         persistableStateAttachmentTypeRegistry,
         unsecuredSavedObjectsClient,
         config: createAttachmentServiceConfig(true),
+        analyticsV2AttachmentsWriter: V2_NOOP_ATTACHMENTS_WRITER,
       });
 
       await expect(
@@ -958,6 +965,7 @@ describe('AttachmentService', () => {
         persistableStateAttachmentTypeRegistry,
         unsecuredSavedObjectsClient,
         config: createAttachmentServiceConfig(true),
+        analyticsV2AttachmentsWriter: V2_NOOP_ATTACHMENTS_WRITER,
       });
       unsecuredSavedObjectsClient.find.mockResolvedValue(
         createSOFindResponse([{ ...createUserAttachment(), score: 0 }])
@@ -1001,6 +1009,7 @@ describe('AttachmentService', () => {
         persistableStateAttachmentTypeRegistry,
         unsecuredSavedObjectsClient,
         config: createAttachmentServiceConfig(true),
+        analyticsV2AttachmentsWriter: V2_NOOP_ATTACHMENTS_WRITER,
       });
       unsecuredSavedObjectsClient.find.mockResolvedValue(
         createSOFindResponse([{ ...createUserAttachment(), score: 0 }])
@@ -1021,6 +1030,7 @@ describe('AttachmentService', () => {
         persistableStateAttachmentTypeRegistry,
         unsecuredSavedObjectsClient,
         config: createAttachmentServiceConfig(true),
+        analyticsV2AttachmentsWriter: V2_NOOP_ATTACHMENTS_WRITER,
       });
       unsecuredSavedObjectsClient.find.mockResolvedValue(
         createSOFindResponse([
@@ -1200,6 +1210,7 @@ describe('AttachmentService', () => {
         persistableStateAttachmentTypeRegistry,
         unsecuredSavedObjectsClient,
         config: createAttachmentServiceConfig(true),
+        analyticsV2AttachmentsWriter: V2_NOOP_ATTACHMENTS_WRITER,
       });
 
       unsecuredSavedObjectsClient.find

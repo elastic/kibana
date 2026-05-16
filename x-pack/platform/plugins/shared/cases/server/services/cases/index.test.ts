@@ -39,7 +39,11 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { CONNECTOR_ID_REFERENCE_NAME } from '../../common/constants';
 import { getNoneCaseConnector } from '../../common/utils';
 import { CasesService } from '.';
-import { V2_NOOP_ACTIVITY_WRITER, V2_NOOP_WRITER } from '../../cases_analytics_v2';
+import {
+  V2_NOOP_ACTIVITY_WRITER,
+  V2_NOOP_ATTACHMENTS_WRITER,
+  V2_NOOP_WRITER,
+} from '../../cases_analytics_v2';
 import type { ESCaseConnectorWithId } from '../test_utils';
 import {
   createESJiraConnector,
@@ -191,6 +195,7 @@ describe('CasesService', () => {
       // keep every hook a tight no-op.
       analyticsV2Writer: V2_NOOP_WRITER,
       analyticsV2ActivityWriter: V2_NOOP_ACTIVITY_WRITER,
+      analyticsV2AttachmentsWriter: V2_NOOP_ATTACHMENTS_WRITER,
     });
   });
 
@@ -3688,14 +3693,23 @@ describe('CasesService', () => {
         bulkDeleteActionsByCaseIds: jest.fn(),
         bulkUpsertActionsAwait: jest.fn().mockResolvedValue(undefined),
       };
+      const analyticsV2AttachmentsWriter = {
+        upsertAttachment: jest.fn(),
+        deleteAttachment: jest.fn(),
+        bulkUpsertAttachments: jest.fn(),
+        bulkDeleteAttachments: jest.fn(),
+        bulkDeleteAttachmentsByCaseIds: jest.fn(),
+        bulkUpsertAttachmentsAwait: jest.fn().mockResolvedValue(undefined),
+      };
       const svc = new CasesService({
         log: mockLogger,
         unsecuredSavedObjectsClient,
         attachmentService,
         analyticsV2Writer,
         analyticsV2ActivityWriter,
+        analyticsV2AttachmentsWriter,
       });
-      return { svc, analyticsV2Writer, analyticsV2ActivityWriter };
+      return { svc, analyticsV2Writer, analyticsV2ActivityWriter, analyticsV2AttachmentsWriter };
     };
 
     describe('bulkDeleteCaseEntities', () => {

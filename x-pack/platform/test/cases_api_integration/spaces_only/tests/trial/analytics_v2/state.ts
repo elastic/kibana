@@ -38,6 +38,16 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(state.reconciliation).to.have.property('last_run');
     });
 
+    it('reports per-surface index existence under surfaces.{cases,activity,attachments}', async () => {
+      const state = await getV2State(supertest);
+      expect(state.surfaces.cases.index).to.eql('.cases');
+      expect(state.surfaces.cases.index_exists).to.eql(true);
+      expect(state.surfaces.activity.index).to.eql('.cases-activity');
+      expect(state.surfaces.activity.index_exists).to.eql(true);
+      expect(state.surfaces.attachments.index).to.eql('.cases-attachments');
+      expect(state.surfaces.attachments.index_exists).to.eql(true);
+    });
+
     it('reports index_exists=false when `.cases` was dropped out-of-band', async () => {
       // Simulate the silent-bootstrap-failure case: delete the
       // index directly via ES; `/state` should report the index as

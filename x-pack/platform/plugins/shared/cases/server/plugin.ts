@@ -23,6 +23,8 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
 import {
   APP_ID,
+  CASE_ATTACHMENT_SAVED_OBJECT,
+  CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   CASE_TEMPLATE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
@@ -64,6 +66,7 @@ import { scheduleCAISchedulerTask } from './cases_analytics/tasks/scheduler_task
 import {
   CasesAnalyticsV2Service,
   V2_NOOP_ACTIVITY_WRITER,
+  V2_NOOP_ATTACHMENTS_WRITER,
   V2_NOOP_DATA_VIEW_REFRESHER,
   V2_NOOP_WRITER,
 } from './cases_analytics_v2';
@@ -338,11 +341,17 @@ export class CasePlugin
             'Skipping v2 start.'
         );
       } else {
-        // The internal repo serves four consumers:
+        // The internal repo serves five consumers:
         //  - The cases-surface reconciliation runner walks `cases` SOs.
         //  - The activity-surface reconciliation runner walks
         //    `cases-user-actions` SOs (created-only, no `updated_at`
         //    filter — see `reconciliation/activity_runner.ts`).
+        //  - The attachments-surface reconciliation runner walks BOTH
+        //    `cases-comments` (legacy) AND `cases-attachments` (new
+        //    unified) SOs into a single analytics index, so the surface
+        //    works regardless of where in the in-flight SO migration
+        //    (security-team#15066) a tenant sits — see
+        //    `reconciliation/attachments_runner.ts`.
         //  - The data view sub-service reads `cases-templates` SOs per-space
         //    to derive runtime fields.
         //  - The `/reset` admin route deletes per-space `index-pattern` SOs
@@ -358,6 +367,8 @@ export class CasePlugin
         const v2InternalRepository = core.savedObjects.createInternalRepository([
           CASE_SAVED_OBJECT,
           CASE_USER_ACTION_SAVED_OBJECT,
+          CASE_COMMENT_SAVED_OBJECT,
+          CASE_ATTACHMENT_SAVED_OBJECT,
           CASE_TEMPLATE_SAVED_OBJECT,
           'index-pattern',
         ]);
@@ -436,6 +447,12 @@ export class CasePlugin
       // the cases client factory.
       analyticsV2ActivityWriter:
         this.casesAnalyticsV2Service?.getActivityWriter() ?? V2_NOOP_ACTIVITY_WRITER,
+      // Attachments surface companion. Same lifetime + same defensive
+      // fallback as `analyticsV2Writer`. Captured by the AttachmentService
+      // (write hooks) and by the CasesService (cascade-on-case-delete) via
+      // the cases client factory.
+      analyticsV2AttachmentsWriter:
+        this.casesAnalyticsV2Service?.getAttachmentsWriter() ?? V2_NOOP_ATTACHMENTS_WRITER,
       // Companion data-view refresher proxy. Same lifetime + same defensive
       // fallback as `analyticsV2Writer`. Captured by the templates service
       // through the cases client factory and called fire-and-forget after

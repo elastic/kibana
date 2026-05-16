@@ -10,8 +10,9 @@ v2 is gated by `xpack.cases.analyticsV2.enabled` (default `false`). v1
 (`server/cases_analytics/`) remains the primary path while v2 is being
 validated.
 
-v2 ships two surfaces: the **`case` surface** (`.cases`) and the
-**`activity` surface** (`.cases-activity`).
+v2 ships three surfaces: the **`case` surface** (`.cases`), the
+**`activity` surface** (`.cases-activity`), and the
+**`attachments` surface** (`.cases-attachments`).
 
 ## Architecture
 
@@ -42,21 +43,52 @@ catches anything the primary path missed). Both call `writer.upsertCase` /
 
 ## Index layout
 
-| Surface    | Index             | Mode                         | Source SO(s)         |
-| ---------- | ----------------- | ---------------------------- | -------------------- |
-| `case`     | `.cases`          | `index.mode: lookup`, hidden | `cases`              |
-| `activity` | `.cases-activity` | plain, hidden                | `cases-user-actions` |
+| Surface       | Index                | Mode                         | Source SO(s)                            |
+| ------------- | -------------------- | ---------------------------- | --------------------------------------- |
+| `case`        | `.cases`             | `index.mode: lookup`, hidden | `cases`                                 |
+| `activity`    | `.cases-activity`    | plain, hidden                | `cases-user-actions`                    |
+| `attachments` | `.cases-attachments` | plain, hidden                | `cases-comments` AND `cases-attachments` |
 
-`.cases` is **lookup-mode** so the activity surface can `LOOKUP JOIN` it from
-ES|QL — "for each activity row, what's the current case title / severity /
-owner?" without denormalization at write time. Lookup mode is Technical
-Preview as of Elasticsearch 8.18 / 9.0; the breaking-change risk is
-acceptable for cases data because the dataset fits comfortably (single shard
-handles ~50GB; a tenant with millions of cases at ~2KB/doc is a few GB at
-most).
+`.cases` is **lookup-mode** so the fact-table surfaces (activity, attachments)
+can `LOOKUP JOIN` it from ES|QL — "for each activity / attachment row,
+what's the current case title / severity / owner?" without denormalization
+at write time. Lookup mode is Technical Preview as of Elasticsearch 8.18 /
+9.0; the breaking-change risk is acceptable for cases data because the
+dataset fits comfortably (single shard handles ~50GB; a tenant with millions
+of cases at ~2KB/doc is a few GB at most).
 
-`.cases-activity` is a plain regular index — it grows per-event and shouldn't
-be locked to a single shard.
+`.cases-activity` and `.cases-attachments` are plain regular indices — they
+grow per-event and shouldn't be locked to a single shard.
+
+### Attachments dual-source
+
+The attachments surface is **populated from two source SO types** —
+`cases-comments` (legacy) and `cases-attachments` (new unified shape) —
+because Kibana is mid-migration from the former to the latter
+(security-team#15066). Both sources flow through the same writer; the
+doc-builder calls
+`getAttachmentTypeTransformers(...).toUnifiedSchema(...)` on the SO
+attributes so the analytics index always reflects the **unified** shape
+regardless of which source SO the AttachmentService wrote to.
+
+Concretely:
+- **Pre-migration tenants** (`xpack.cases.attachments.enabled: false`,
+  the current default): the AttachmentService writes to `cases-comments`;
+  the writer hook fires, the doc-builder normalizes legacy → unified,
+  the analytics doc lands in the unified shape.
+- **Post-migration tenants** (`xpack.cases.attachments.enabled: true`):
+  the AttachmentService writes to `cases-attachments`; the writer hook
+  fires with the already-unified attributes; the doc-builder is a near
+  no-op transform.
+- **Mid-migration tenants**: both SO types coexist on disk; both
+  writer hooks fire (one per source); reconciliation walks both SO
+  types into the same index.
+
+Doc `_id` is the source SO id verbatim. SO ids are unique across both
+source types (the `AttachmentService.bulkDelete` path issues parallel
+deletes against both types with the same id, confirming the
+constraint), so an attachment that gets migrated post-write doesn't
+double-emit — the second write overwrites the first by `_id`.
 
 ## Configuration
 
@@ -249,6 +281,10 @@ Example response:
     "activity": {
       "index": ".cases-activity",
       "index_exists": true
+    },
+    "attachments": {
+      "index": ".cases-attachments",
+      "index_exists": true
     }
   },
   "reconciliation": {
@@ -256,6 +292,7 @@ Example response:
     "last_run": {
       "cases_last_run_at": "2026-05-13T15:30:00.000Z",
       "activity_last_run_at": "2026-05-13T15:30:00.000Z",
+      "attachments_last_run_at": "2026-05-13T15:30:00.000Z",
       "runs": 0,
       "next_run_at": "2026-05-13T16:00:00.000Z",
       "status": "idle"
@@ -272,9 +309,10 @@ failed one.
 
 **Live progress.** During the walk, the reset task's wall-clock-throttled
 progress writer flushes the partial state to the task SO every ~30
-seconds. Administrators polling `/state` see the cumulative `cases_processed` /
-`activity_processed` counts tick up live, and the `phase` field
-discriminates which surface is currently being walked:
+seconds. Administrators polling `/state` see the cumulative
+`cases_processed` / `activity_processed` / `attachments_processed`
+counts tick up live, and the `phase` field discriminates which surface
+is currently being walked:
 
 ```json
 "active_reset": {
@@ -283,28 +321,34 @@ discriminates which surface is currently being walked:
   "scheduled_at": "2026-05-13T16:02:00.000Z",
   "attempts": 1,
   "state": {
-    "phase": "activity",
+    "phase": "attachments",
     "cases_processed": 50000,
     "activity_processed": 312000,
+    "attachments_processed": 18000,
     "started_at": "2026-05-13T16:02:13.000Z"
   }
 }
 ```
 
 **Final state.** When the walk completes, Task Manager writes the full
-`ResetTaskState` from the runner's return value (including `cases_cursor`,
-`activity_cursor`, `completed_at`, and any per-surface error messages)
-and then — on success — removes the SO. The brief window between the
-final write and the SO removal is when consumers polling `/state` see
+`ResetTaskState` from the runner's return value (including
+`cases_cursor`, `activity_cursor`, `attachments_cursor`,
+`completed_at`, and any per-surface error messages) and then — on
+success — removes the SO. The brief window between the final write
+and the SO removal is when consumers polling `/state` see
 `phase: "completed"`. After the SO removal, `active_reset` returns to
-`null`. On total failure the SO is preserved with `status: "failed"`
-and the most-recent throttled state intact (so `phase` shows which
-surface died and `*_processed` shows how far the walks got).
+`null`. On total failure (every surface threw) the SO is preserved
+with `status: "failed"` and the most-recent throttled state intact
+(so `phase` shows which surface died and the `*_processed` counts
+show how far the walks got). On partial failure (e.g. attachments
+threw mid-walk but cases + activity completed), the SO returns
+`status: "ok"` with the surviving cursors set and the failed
+surface's `*_error` populated for the administrator to triage.
 
-If `enabled: true` but either `index_exists` is `false`, the
-corresponding bootstrap (`ensureCaseIndex` / `ensureActivityIndex`)
-hit an error at plugin start and logged at ERROR; check Kibana logs
-and consider `POST /reset`.
+If `enabled: true` but any `index_exists` is `false`, the
+corresponding bootstrap (`ensureCaseIndex` / `ensureActivityIndex` /
+`ensureAttachmentsIndex`) hit an error at plugin start and logged at
+ERROR; check Kibana logs and consider `POST /reset`.
 
 ### Debug-mode routes (mutating)
 
@@ -349,19 +393,21 @@ POST /internal/cases/_analyticsV2/reset
   },
   "surfaces": {
     "cases": { "reset": ".cases" },
-    "activity": { "reset": ".cases-activity" }
+    "activity": { "reset": ".cases-activity" },
+    "attachments": { "reset": ".cases-attachments" }
   }
 }
 ```
 
-**Two-phase contract.** The destructive cleanup is synchronous (drops both
-indices, recreates them from scratch using the same bootstrap path as plugin
-start, deletes every per-space managed Case Analytics data view, clears the
-data view bootstrap cache). The full backfill walk that repopulates both
-indices from the SO source of truth runs **asynchronously** in a one-shot
-Task Manager job (`cases.analyticsV2.fullReset`). The route returns 202 once
-the synchronous portion completes; the administrator polls `/state.active_reset`
-to track the backfill. **Requires `xpack.cases.analyticsV2.enable_admin_routes: true`.**
+**Two-phase contract.** The destructive cleanup is synchronous (drops all
+three indices, recreates them from scratch using the same bootstrap path as
+plugin start, deletes every per-space managed Case Analytics data view,
+clears the data view bootstrap cache). The full backfill walk that
+repopulates all three indices from the SO source of truth runs
+**asynchronously** in a one-shot Task Manager job
+(`cases.analyticsV2.fullReset`). The route returns 202 once the synchronous
+portion completes; the administrator polls `/state.active_reset` to track the
+backfill. **Requires `xpack.cases.analyticsV2.enable_admin_routes: true`.**
 
 **Why async.** At ~1K+ spaces the backfill walk runs for many minutes, and
 at 10K+ spaces it can run for over an hour — well past any reasonable HTTP
@@ -473,7 +519,8 @@ Always raise `resetTaskTimeoutMinutes` first if you raise `resetPageDelayMs` —
 | Reconciliation tick logs `processed=0` forever  | Task state cursor stuck in the future  | POST /reset (clears state + repopulates)                        |
 | Runtime fields missing from `Cases` data view   | Template SOs have no extended fields   | Check template SOs; reconciliation tick re-syncs runtime fields |
 | Case missing from `.cases` long after creation, no edits since | Out-of-band drift on a never-patched case (e.g. a direct ES delete during incident response, or a schema migration that dropped some docs) | POST /reset. Periodic reconciliation only catches never-patched cases whose `created_at` is later than the cursor; older never-patched cases need the cursor cleared, which `/reset` does. |
-| `/state.active_reset.status: "failed"`          | Reset task threw on both surfaces      | Inspect Kibana logs for the `cases-analyticsV2: full reset failed on both surfaces` ERROR; address the root cause; re-run POST /reset |
+| `/state.active_reset.status: "failed"`          | Reset task threw on every surface      | Inspect Kibana logs for the `cases-analyticsV2: full reset failed on every surface` ERROR; address the root cause; re-run POST /reset |
+| `/state.active_reset.state.attachments_error` populated post-reset | Attachments walk threw mid-flight; cases + activity completed | Cursor is omitted from the seed so the next periodic tick walks the whole attachments surface and recovers any docs the partial walk missed. Inspect logs for the underlying ES error if it persists |
 | `/state.active_reset.status: "running"` for hours | Backfill task is mid-walk on a large tenant | Wait. Raise `resetTaskTimeoutMinutes` in `kibana.yml` if it exceeds your tolerance window (see "Tuning /reset at scale") |
 | `Event loop utilization exceeded threshold` from `/internal/cases/_analyticsV2/reset` | A runner page is slower than expected on this hardware | Raise `resetPageDelayMs` to 50–100 to throttle further |
 | `Case Analytics` data view missing in Discover / Lens after `/reset` | Lazy recreation hasn't fired in that space yet — `/reset` deletes every per-space data view, and they recreate on the next cases request per space | Open the Cases UI in the affected space, or run `curl /s/<spaceId>/api/cases/_find?perPage=1` to pre-warm. See "Per-space data views after /reset" above. |
@@ -516,16 +563,66 @@ deliberate differences driven by the user-action shape:
   case sync span between event-loop yields bounded; throughput is
   limited by ES bulk roundtrip latency, not page count.
 
-The same managed `Case Analytics` data view spans both surfaces — its
-title is `.cases,.cases-activity`, so a single Discover / Lens
-selection covers both. A `LOOKUP JOIN` from the activity surface to
-the cases surface is just `LOOKUP JOIN .cases ON cases.id` against the
-joined view.
+The same managed `Case Analytics` data view spans every surface — its
+title is `.cases,.cases-activity,.cases-attachments`, so a single
+Discover / Lens selection covers all three. A `LOOKUP JOIN` from the
+activity or attachments surface to the cases surface is just
+`LOOKUP JOIN .cases ON cases.id` against the joined view.
 
-The reconciliation task runs both surfaces sequentially per tick, with
-**independent cursors** (`cases_last_run_at`, `activity_last_run_at`).
-A sustained outage on one surface pins only its own cursor; the other
-keeps advancing. `/state` reports both, and `/reset` rebuilds both.
+The reconciliation task runs all three surfaces sequentially per tick,
+with **independent cursors** (`cases_last_run_at`,
+`activity_last_run_at`, `attachments_last_run_at`). A sustained outage
+on one surface pins only its own cursor; the others keep advancing.
+`/state` reports all three, and `/reset` rebuilds all three.
+
+## Attachments surface
+
+`.cases-attachments` mirrors **both** the legacy `cases-comments` SO
+and the new unified `cases-attachments` SO into a single analytics
+index in the unified shape — see "Attachments dual-source" above for
+the migration framing. Same fire-and-forget hook + reconciliation
+backstop architecture as the cases surface, with the following
+deliberate differences:
+
+- **Mutable.** Attachments support create + patch + delete. The
+  reconciliation runner uses the cases-surface filter shape
+  (`updated_at > tracker OR (updated_at IS MISSING AND created_at > tracker)`)
+  — same null-branch logic that handles never-patched cases applies
+  to never-patched attachments.
+- **Dual-source walk.** The reconciliation runner walks `cases-comments`
+  first, then `cases-attachments`, both into the same index. SO ids
+  are unique across the two types so an attachment that's been
+  migrated post-write doesn't double-emit (the second walk's upsert
+  overwrites by `_id`). Per-source per-space counts in the summary
+  log line surface migration progress at a glance — keys are
+  `legacy:<space>` / `unified:<space>`.
+- **Cascade on case delete.** Same shape as the activity cascade —
+  `bulkDeleteAttachmentsByCaseIds` runs a `delete_by_query` on
+  `cases.id` from `CasesService.deleteCase` and
+  `bulkDeleteCaseEntities`. Covers both source SO types in one
+  query because the analytics index is the unified normalization
+  point.
+- **Polymorphic data + metadata + curated extracts.** The unified
+  attachment shape carries `data` (for value subtypes — user comments,
+  persistable state) and `metadata` (for reference subtypes — alert
+  rule attribution, file metadata) as plugin-defined
+  `Record<string, JsonValue>`. The doc-builder strict-maps a curated
+  set of extracts (`attachment.comment`, `attachment.alert.rule.{id,name}`,
+  `attachment.alert.indices`, `attachment.actions.type`,
+  `attachment.external_reference.{type_id,storage_type}`,
+  `attachment.persistable_state.type_id`) for the common analytical
+  pivots, AND stringifies the full blobs as `attachment.data_json` /
+  `attachment.metadata_json` (`keyword`, `ignore_above: 32766`) so
+  analysts can reach into any plugin-defined sub-field via ES|QL
+  `MV_FROM_JSON`.
+- **No `index.mode: lookup`.** `.cases-attachments` is the **fact**
+  table in the analytics model, joined to `.cases` via ES|QL `LOOKUP
+  JOIN .cases ON cases.id`.
+- **`attachment_id` normalized to `string[]`.** Reference subtypes
+  carry the referenced entity ids as `string | string[]` on the SO
+  shape (single-id alert vs bulk multi-id alert). The doc-builder
+  normalizes to `string[]` so downstream queries don't have to
+  handle the union.
 
 ## File layout
 
@@ -537,29 +634,35 @@ cases_analytics_v2/
 ├── constants.ts       index name + administrator route URLs
 │
 ├── ensure_indices/
-│   ├── case.ts        idempotent bootstrap for .cases (lookup-mode)
-│   └── activity.ts    idempotent bootstrap for .cases-activity (fact table)
+│   ├── case.ts            idempotent bootstrap for .cases (lookup-mode)
+│   ├── activity.ts        idempotent bootstrap for .cases-activity (fact table)
+│   └── attachments.ts     idempotent bootstrap for .cases-attachments (fact table)
 │
 ├── mappings/
-│   ├── case.ts                          CASE_INDEX_MAPPING (dynamic: strict)
-│   ├── activity.ts                      ACTIVITY_INDEX_MAPPING (dynamic: strict)
-│   ├── dynamic_templates.ts             keyword template for observables denormalization
-│   ├── schema_drift.test.ts             round-trip + snake-key guards (cases)
-│   └── activity_schema_drift.test.ts    per-action-type guards (activity)
+│   ├── case.ts                             CASE_INDEX_MAPPING (dynamic: strict)
+│   ├── activity.ts                         ACTIVITY_INDEX_MAPPING (dynamic: strict)
+│   ├── attachments.ts                      ATTACHMENTS_INDEX_MAPPING (dynamic: strict; unified shape)
+│   ├── dynamic_templates.ts                keyword template for observables denormalization
+│   ├── schema_drift.test.ts                round-trip + snake-key guards (cases)
+│   ├── activity_schema_drift.test.ts       per-action-type guards (activity)
+│   └── attachments_schema_drift.test.ts    per-subtype guards (legacy + unified source paths)
 │
 ├── writer/
-│   ├── index.ts                       CasesAnalyticsV2Writer + V2_NOOP_WRITER
-│   ├── activity.ts                    CasesActivityV2Writer + V2_NOOP_ACTIVITY_WRITER
-│   ├── case_doc_builder.ts            pure transform: case SO → analytics doc
+│   ├── index.ts                          CasesAnalyticsV2Writer + V2_NOOP_WRITER
+│   ├── activity.ts                       CasesActivityV2Writer + V2_NOOP_ACTIVITY_WRITER
+│   ├── attachments.ts                    CasesAttachmentsV2Writer + V2_NOOP_ATTACHMENTS_WRITER
+│   ├── case_doc_builder.ts               pure transform: case SO → analytics doc
 │   ├── case_doc_builder.test.ts
-│   ├── activity_doc_builder.ts        pure transform: user-action SO → activity doc
-│   ├── retry.ts                       bounded jittered exponential backoff
+│   ├── activity_doc_builder.ts           pure transform: user-action SO → activity doc
+│   ├── attachments_doc_builder.ts        pure transform: legacy + unified attachment SO → unified analytics doc
+│   ├── retry.ts                          bounded jittered exponential backoff
 │   └── retry.test.ts
 │
 ├── reconciliation/
 │   ├── index.ts             periodic task type registration + scheduling
-│   │                        (cases first, activity second, per tick;
-│   │                        independent cursors; maxAttempts: 1)
+│   │                        (cases → activity → attachments per tick;
+│   │                        independent cursors; per-surface error
+│   │                        isolation via taskRunError; maxAttempts: 1)
 │   ├── runner.ts            walks cases by `updated_at > last_run_at OR
 │   │                        (updated_at IS MISSING AND created_at >
 │   │                        last_run_at)` using PIT. The null branch picks up
@@ -569,17 +672,20 @@ cases_analytics_v2/
 │   │                        `find` opt into `namespaces: ['*']` — the
 │   │                        unscoped internal SO client otherwise silently
 │   │                        scopes to `default`.
-│   ├── activity_runner.ts   walks user-actions by `created_at > last_run_at`
-│   │                        (immutable SOs — no `updated_at` branch needed).
-│   ├── reset_runner.ts      shared "walk both surfaces + seed cursors" helper
-│   │                        called by the one-shot reset task. Per-surface
-│   │                        failure isolation; no throws on per-surface walk
-│   │                        errors (logged at WARN).
-│   └── reset_task.ts        one-shot Task Manager task type for the async
-│                            backfill (`cases.analyticsV2.fullReset`). Singleton
-│                            ID, configurable timeout + page delay, throws on
-│                            total failure to preserve `/state.active_reset`
-│                            visibility.
+│   ├── activity_runner.ts      walks user-actions by `created_at > last_run_at`
+│   │                           (immutable SOs — no `updated_at` branch needed).
+│   ├── attachments_runner.ts   walks BOTH cases-comments AND cases-attachments
+│   │                           SOs into the unified analytics index. Same
+│   │                           filter shape as the cases runner (mutable SOs).
+│   ├── reset_runner.ts         shared "walk every surface + seed cursors"
+│   │                           helper called by the one-shot reset task.
+│   │                           Per-surface failure isolation; no throws on
+│   │                           per-surface walk errors (logged at WARN).
+│   └── reset_task.ts           one-shot Task Manager task type for the async
+│                               backfill (`cases.analyticsV2.fullReset`).
+│                               Singleton ID, configurable timeout + page
+│                               delay, throws on total failure (every surface)
+│                               to preserve `/state.active_reset` visibility.
 │
 ├── data_view/
 │   ├── service.ts                   ensures Cases data view; syncs runtime fields

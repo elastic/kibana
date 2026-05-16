@@ -64,6 +64,12 @@ export default ({ getService }: FtrProviderContext): void => {
         '/internal/cases/_analyticsV2/state'
       );
 
+      // Per-surface confirmation block — pinned shape so a regression
+      // that drops a surface from the response is caught here.
+      expect(response.body.surfaces.cases.reset).to.eql('.cases');
+      expect(response.body.surfaces.activity.reset).to.eql('.cases-activity');
+      expect(response.body.surfaces.attachments.reset).to.eql('.cases-attachments');
+
       // The index exists again (recreated by the synchronous
       // portion before the response returned).
       await waitForCaseIndexExists(es);

@@ -63,6 +63,7 @@ import {
 import { ConfigSchema } from '../config';
 import {
   V2_NOOP_ACTIVITY_WRITER,
+  V2_NOOP_ATTACHMENTS_WRITER,
   V2_NOOP_DATA_VIEW_REFRESHER,
   V2_NOOP_WRITER,
 } from '../cases_analytics_v2';
@@ -326,6 +327,7 @@ export const createCasesClientFactoryMockArgs = () => {
     // any wiring.
     analyticsV2Writer: V2_NOOP_WRITER,
     analyticsV2ActivityWriter: V2_NOOP_ACTIVITY_WRITER,
+    analyticsV2AttachmentsWriter: V2_NOOP_ATTACHMENTS_WRITER,
     analyticsV2DataViewRefresher: V2_NOOP_DATA_VIEW_REFRESHER,
   };
 };
