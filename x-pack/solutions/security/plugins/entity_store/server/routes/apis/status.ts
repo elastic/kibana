@@ -20,11 +20,15 @@ import { ENTITY_STORE_STATUS } from '../../domain/constants';
 /**
  * Legacy engine descriptor from V1. will be removed in a future version.
  */
-type LogExtractionStateForV1 = Omit<
-  LogExtractionConfig,
-  'additionalIndexPatterns' | 'docsLimit' | 'paginationTimestamp' | 'lastExecutionTimestamp'
->;
-interface LegacyEngineDescriptorV1 extends LogExtractionStateForV1 {
+interface LegacyEngineDescriptorV1 {
+  filter: '';
+  delay: string;
+  timeout: string;
+  frequency: string;
+  lookbackPeriod: string;
+  fieldHistoryLength: number;
+  maxLogsPerPage: number;
+  maxTimeWindowSize: string;
   docsPerSecond: -1;
   indexPattern: '';
   enrichPolicyExecutionInterval: null;
@@ -56,25 +60,33 @@ function toPublicEngine(
   logsExtractionConfig: LogExtractionConfig
 ): StatusEngine {
   const { versionState, logExtractionState, ...rest } = engine;
-  const { delay, timeout, frequency, lookbackPeriod, fieldHistoryLength, filter, maxLogsPerPage } =
-    logsExtractionConfig;
-
-  return {
-    ...rest,
-    // TODO: Remove the legacy fields once we stop supporting V1.
-    filter,
+  const {
     delay,
     timeout,
     frequency,
     lookbackPeriod,
     fieldHistoryLength,
     maxLogsPerPage,
+    maxTimeWindowSize,
+  } = logsExtractionConfig;
+
+  return {
+    ...rest,
+    // TODO: Remove the legacy fields once we stop supporting V1.
+    filter: '',
+    delay,
+    timeout,
+    frequency,
+    lookbackPeriod,
+    fieldHistoryLength,
+    maxLogsPerPage,
+    maxTimeWindowSize,
     docsPerSecond: -1,
     indexPattern: '',
     enrichPolicyExecutionInterval: null,
     timestampField: '@timestamp',
     maxPageSearchSize: 10000,
-    lastExecutionTimestamp: logExtractionState.lastExecutionTimestamp,
+    lastExecutionTimestamp: logExtractionState.lastExecutionTimestamp ?? undefined,
   };
 }
 

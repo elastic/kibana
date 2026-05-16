@@ -17,7 +17,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiHealth, useEuiTheme } from '@elastic/eui'
 import { i18n } from '@kbn/i18n';
 import { usePageUrlState } from '@kbn/ml-url-state';
 import { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils';
-import type { SeverityThreshold } from '../../../../../common/types/anomalies';
+import type { SeverityThreshold } from '@kbn/ml-server-schemas/embeddables/anomaly_charts';
 import { MultiSuperSelect } from '../../multi_super_select/multi_super_select';
 import { useSeverityOptions } from '../../../explorer/hooks/use_severity_options';
 import { resolveSeverityFormat } from './severity_format_resolver';
@@ -237,12 +237,15 @@ export const SelectSeverityUI: FC<
     [onChange, allSeverityOptions]
   );
 
+  const anomalyScoreLabel = i18n.translate('xpack.ml.explorer.severityThresholdLabel', {
+    defaultMessage: 'Anomaly score',
+  });
+
   return (
     <div data-test-subj={'mlAnomalySeverityThresholdControls'} className={classNames}>
       <MultiSuperSelect
-        prepend={i18n.translate('xpack.ml.explorer.severityThresholdLabel', {
-          defaultMessage: 'Anomaly score',
-        })}
+        prepend={anomalyScoreLabel}
+        aria-label={anomalyScoreLabel}
         inputDisplay={inputDisplay}
         options={multiSelectOptions}
         onOptionsChange={handleOptionsChange}

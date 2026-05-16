@@ -1,0 +1,25 @@
+{
+  "type": "plugin",
+  "id": "@kbn/serverless-vectordb",
+  "owner": [
+    "@elastic/search-kibana"
+  ],
+  "group": "vectordb",
+  "visibility": "private",
+  "description": "Serverless customizations for vectordb.",
+  "plugin": {
+    "id": "serverlessVectordb",
+    "browser": true,
+    "server": true,
+    "configPath": [
+      "xpack",
+      "serverless",
+      "vectordb"
+    ],
+    "requiredPlugins": [
+      "serverless"
+    ],
+    "optionalPlugins": [],
+    "requiredBundles": []
+  }
+}

@@ -9,7 +9,7 @@
 
 import type { TypedLensSerializedState, XYPersistedState } from '@kbn/lens-common';
 import type { SavedObjectReference } from '@kbn/core/server';
-import type { XYState } from '../../schema';
+import type { XYConfig } from '../../schema';
 import {
   getSharedChartLensStateToAPI,
   getSharedChartAPIToLensState,
@@ -29,7 +29,7 @@ type XYLensWithoutQueryAndFilters = Omit<XYLens, 'state'> & {
   state: Omit<XYLensState, 'visualization'> & { visualization: XYPersistedState };
 };
 
-export function fromAPItoLensState(config: XYState): XYLensWithoutQueryAndFilters {
+export function fromAPItoLensState(config: XYConfig): XYLensWithoutQueryAndFilters {
   // convert layers and produce references from them
   const { layers, usedDataviews } = buildDatasourceStates(
     config,
@@ -78,7 +78,7 @@ export function fromAPItoLensState(config: XYState): XYLensWithoutQueryAndFilter
   };
 }
 
-export function fromLensStateToAPI(config: LensAttributes): XYState {
+export function fromLensStateToAPI(config: LensAttributes): XYConfig {
   const { state } = config;
   const visualizationState = state.visualization as XYPersistedState;
   const layers = getDatasourceLayers(state);

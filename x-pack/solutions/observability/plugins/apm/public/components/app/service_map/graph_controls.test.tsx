@@ -27,6 +27,10 @@ jest.mock('./use_keyboard_navigation', () => ({
   })),
 }));
 
+jest.mock('./use_service_map_alerts_tab_href', () =>
+  jest.requireActual('./use_service_map_alerts_tab_href.test_mock')
+);
+
 jest.mock('@xyflow/react', () => {
   const original = jest.requireActual('@xyflow/react');
   return {
@@ -40,20 +44,6 @@ jest.mock('@xyflow/react', () => {
     ),
     Controls: ({ children }: { children?: React.ReactNode }) => (
       <div data-test-subj="serviceMapControls">{children}</div>
-    ),
-    ControlButton: ({
-      children,
-      onClick,
-      'data-test-subj': dataTestSubj,
-      ...rest
-    }: {
-      children?: React.ReactNode;
-      onClick?: () => void;
-      'data-test-subj'?: string;
-    }) => (
-      <button type="button" onClick={onClick} data-test-subj={dataTestSubj} {...rest}>
-        {children}
-      </button>
     ),
     useNodesState: jest.fn((initialNodes: unknown) => [initialNodes, jest.fn()]),
     useEdgesState: jest.fn((initialEdges: unknown) => [initialEdges, jest.fn()]),

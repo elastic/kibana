@@ -30,11 +30,15 @@ import semverLt from 'semver/functions/lt';
 import { getDeferredInstallationsCnt } from '../../../../../../services/has_deferred_installations';
 
 import {
-  getPackageReleaseLabel,
   isPackagePrerelease,
   splitPkgKey,
   packageToPackagePolicyInputs,
 } from '../../../../../../../common/services';
+import { getPackageReleaseLabel } from '../../../../../../../common/services/package_prerelease';
+import {
+  getAgentlessRelease,
+  isOnlyAgentlessIntegration,
+} from '../../../../../../../common/services/agentless_policy_helper';
 import { HIDDEN_API_REFERENCE_PACKAGES } from '../../../../../../../common/constants';
 
 import {
@@ -74,6 +78,7 @@ import {
   LoadingIconPanel,
   MiniIcon,
   AddIntegrationButton,
+  AddIntegrationButtonDisabledReason,
   EditIntegrationButton,
 } from './components';
 import { ALERTING_ASSET_TYPES, AlertingPage } from './alerting';
@@ -194,6 +199,31 @@ export function Detail() {
     'installationInfo' in packageInfo &&
     packageInfo.installationInfo?.version &&
     semverLt(packageInfo.installationInfo.version, packageInfo.latestVersion);
+
+  const isViewingOldPackage =
+    packageInfo && semverLt(packageInfo.version, packageInfo.latestVersion);
+
+  const isViewingDifferentVersion =
+    isInstalled &&
+    packageInfo &&
+    'installationInfo' in packageInfo &&
+    packageInfo.installationInfo?.version &&
+    packageInfo.version !== packageInfo.installationInfo.version;
+
+  const isViewingUnavailableVersion = Boolean(
+    isViewingDifferentVersion || (!isInstalled && isViewingOldPackage)
+  );
+
+  const addIntegrationDisabledReason: AddIntegrationButtonDisabledReason | undefined =
+    isViewingUnavailableVersion
+      ? isInstalled
+        ? AddIntegrationButtonDisabledReason.VERSION_MISMATCH
+        : AddIntegrationButtonDisabledReason.OUTDATED_VERSION
+      : !userCanInstallPackages
+      ? missingSecurityConfiguration
+        ? AddIntegrationButtonDisabledReason.MISSING_SECURITY
+        : AddIntegrationButtonDisabledReason.MISSING_PRIVILEGES
+      : undefined;
 
   const [prereleaseIntegrationsEnabled, setPrereleaseIntegrationsEnabled] = React.useState<
     boolean | undefined
@@ -345,6 +375,16 @@ export function Detail() {
     [packageInfo]
   );
 
+  const integrationName = integration ?? undefined;
+
+  const releaseLabel = useMemo(() => {
+    if (packageInfo && isOnlyAgentlessIntegration(packageInfo, integrationName)) {
+      const release = getAgentlessRelease(packageInfo, integrationName);
+      if (release !== undefined) return release;
+    }
+    return getPackageReleaseLabel(packageInfo?.version ?? '');
+  }, [packageInfo, integrationName]);
+
   const headerLeftContent = useMemo(
     () => (
       <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="headerLeft">
@@ -398,11 +438,9 @@ export function Detail() {
                           </EuiBadge>
                         </EuiFlexItem>
                       )}
-                      {packageInfo?.release && packageInfo.release !== 'ga' ? (
+                      {releaseLabel !== 'ga' ? (
                         <EuiFlexItem grow={false}>
-                          <HeaderReleaseBadge
-                            release={getPackageReleaseLabel(packageInfo.version)}
-                          />
+                          <HeaderReleaseBadge release={releaseLabel} />
                         </EuiFlexItem>
                       ) : null}
                     </EuiFlexGroup>
@@ -414,7 +452,15 @@ export function Detail() {
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
-    [integrationInfo, isLoading, packageInfo, fromIntegrationsPath, queryParams, packageInfoError]
+    [
+      integrationInfo,
+      isLoading,
+      packageInfo,
+      fromIntegrationsPath,
+      queryParams,
+      packageInfoError,
+      releaseLabel,
+    ]
   );
 
   const handleEditIntegrationClick = useCallback<ReactEventHandler>((ev) => {
@@ -436,6 +482,11 @@ export function Detail() {
         integration ?? undefined
       );
 
+      const isAgentlessByDefault =
+        agentlessStatus.isAgentless &&
+        (isOnlyAgentlessIntegration(packageInfo ?? undefined, integration ?? undefined) ||
+          agentlessStatus.isDefaultDeploymentMode);
+
       const defaultNavigateOptions: InstallPkgRouteOptions = getInstallPkgRouteOptions({
         agentPolicyId: agentPolicyIdFromContext,
         currentPath,
@@ -445,7 +496,7 @@ export function Detail() {
         pkgkey,
         prerelease,
         isAgentlessIntegration: agentlessStatus.isAgentless,
-        isAgentlessDefault: agentlessStatus.isDefaultDeploymentMode,
+        isAgentlessByDefault,
       });
 
       /** Users from Security and Observability Solution onboarding pages will have returnAppId and returnPath
@@ -592,7 +643,7 @@ export function Detail() {
                           )}
                           <EuiFlexItem grow={false}>
                             <AddIntegrationButton
-                              userCanInstallPackages={userCanInstallPackages}
+                              disabledReason={addIntegrationDisabledReason}
                               href={getHref('add_integration_to_policy', {
                                 pkgkey,
                                 ...(integration ? { integration } : {}),
@@ -600,7 +651,6 @@ export function Detail() {
                                   ? { agentPolicyId: agentPolicyIdFromContext }
                                   : {}),
                               })}
-                              missingSecurityConfiguration={missingSecurityConfiguration}
                               packageName={wrapTitleWithDeprecated({
                                 packageInfo,
                                 integrationInfo,
@@ -638,12 +688,11 @@ export function Detail() {
       isInstalled,
       isCustomPackage,
       handleEditIntegrationClick,
-      userCanInstallPackages,
+      addIntegrationDisabledReason,
       getHref,
       pkgkey,
       integration,
       agentPolicyIdFromContext,
-      missingSecurityConfiguration,
       integrationInfo,
       handleAddIntegrationPolicyClick,
       onVersionChange,

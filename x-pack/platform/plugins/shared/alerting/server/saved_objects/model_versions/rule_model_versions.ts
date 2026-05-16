@@ -18,6 +18,7 @@ import {
   rawRuleSchemaV9,
   rawRuleSchemaV10,
   rawRuleSchemaV11,
+  rawRuleSchemaV12,
 } from '../schemas/raw_rule';
 
 export const ruleModelVersions: SavedObjectsModelVersionMap = {
@@ -135,6 +136,31 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
     schemas: {
       forwardCompatibility: rawRuleSchemaV11.extends({}, { unknowns: 'ignore' }),
       create: rawRuleSchemaV11,
+    },
+  },
+  '12': {
+    changes: [
+      {
+        type: 'mappings_addition',
+        addedMappings: {
+          snoozedInstances: {
+            type: 'nested',
+            properties: {
+              instanceId: {
+                type: 'keyword',
+              },
+              snoozeSnapshot: {
+                type: 'object',
+                dynamic: false,
+              },
+            },
+          },
+        },
+      },
+    ],
+    schemas: {
+      forwardCompatibility: rawRuleSchemaV12.extends({}, { unknowns: 'ignore' }),
+      create: rawRuleSchemaV12,
     },
   },
 };

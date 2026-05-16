@@ -482,6 +482,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
         es_connection: `${ELASTIC_DOCS}troubleshoot/security/elastic-defend`,
       },
       responseActions: `${ELASTIC_DOCS}solutions/security/endpoint-response-actions`,
+      scriptLibrary: `${ELASTIC_DOCS}solutions/security/endpoint-response-actions/script-library`,
       configureEndpointIntegrationPolicy: `${ELASTIC_DOCS}solutions/security/configure-elastic-defend/configure-an-integration-policy-for-elastic-defend`,
       exceptions: {
         value_lists: `${ELASTIC_DOCS}solutions/security/detect-and-alert/create-manage-value-lists`,
@@ -527,6 +528,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       queryESQL: `${ELASTIC_DOCS}explore-analyze/query-filter/languages/esql`,
       queryESQLExamples: `${ELASTIC_DOCS}explore-analyze/query-filter/languages/esql`,
       queryESQLMultiValueControls: `${ELASTIC_DOCS}explore-analyze/query-filter/languages/esql-kibana#esql-multi-values-controls`,
+      queryESQLMvIntersects: `${ELASTIC_DOCS}reference/query-languages/esql/functions-operators/mv-functions/mv_intersects`,
     },
     search: {
       sessions: `${ELASTIC_DOCS}explore-analyze/discover/search-sessions`,
@@ -1073,7 +1075,10 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       models: `${ELASTIC_DOCS}explore-analyze/ai-features/agent-builder/models`,
       chat: `${ELASTIC_DOCS}explore-analyze/ai-features/agent-builder/chat`,
       agentBuilderAgents: `${ELASTIC_DOCS}explore-analyze/ai-features/agent-builder/agent-builder-agents`,
-      tools: `${ELASTIC_DOCS}explore-analyze/ai-features/agent-builder/tools`,
+      agentBuilderSkills: `${ELASTIC_DOCS}explore-analyze/ai-features/agent-builder/skills`,
+      agentBuilderPlugins: `${ELASTIC_DOCS}explore-analyze/ai-features/agent-builder/plugins`,
+      agentBuilderConnectors: `${ELASTIC_DOCS}explore-analyze/ai-features/agent-builder/connectors`,
+      agentBuilderTools: `${ELASTIC_DOCS}explore-analyze/ai-features/agent-builder/tools`,
       programmaticAccess: `${ELASTIC_DOCS}explore-analyze/ai-features/agent-builder/programmatic-access`,
       kibanaApi: `${ELASTIC_DOCS}explore-analyze/ai-features/agent-builder/kibana-api`,
       mcpServer: `${ELASTIC_DOCS}explore-analyze/ai-features/agent-builder/mcp-server`,
@@ -1085,6 +1090,8 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       inferenceAPIDocumentation: isServerless
         ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-inference-put`
         : `${ELASTICSEARCH_APIS}operation/operation-inference-put`,
+      featureSettings: `${ELASTIC_DOCS}explore-analyze/ai-features/manage-access-to-ai-assistant`,
+      externalInference: `${ELASTIC_DOCS}explore-analyze/elastic-inference/external`,
     },
     synonyms: {
       synonymsAPIDocumentation: isServerless
@@ -1106,6 +1113,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     subscriptions: `${ELASTIC_WEBSITE_URL}subscriptions`,
     cases: {
       casesPermissions: `${ELASTIC_DOCS}solutions/security/investigate/cases-requirements`,
+      configureCaseSettings: `${ELASTIC_DOCS}explore-analyze/cases/configure-case-settings`,
     },
   });
 };

@@ -36,6 +36,7 @@ import { AddToTimelineButton } from '../../timelines/add_to_timeline_button';
 import { TagsColumn } from '../../actions/components/tags_column';
 import { RowKebabMenu } from './row_kebab_menu';
 import { useIsExperimentalFeatureEnabled } from '../../common/experimental_features_context';
+import { ExportFiltersProvider } from '../../results/export_filters_context';
 import type { AddToTimelineHandler } from '../../types';
 
 const truncateTooltipTextCss = {
@@ -62,10 +63,9 @@ const queryClampFlexItemCss = {
   minWidth: 0,
 };
 
-// TODO fix types
-const euiBasicTableCss = {
+const euiBasicTableCss = ({ euiTheme }: UseEuiTheme) => ({
   '.euiTableRow.euiTableRow-isExpandedRow > td > div': {
-    border: '1px solid #d3dae6',
+    border: euiTheme.border.thin,
   },
 
   '.euiTableRow.euiTableRow-isExpandedRow .euiTableCellContent': {
@@ -87,7 +87,7 @@ const euiBasicTableCss = {
     borderLeft: '0px',
     borderRight: '0px',
   },
-};
+});
 
 const EMPTY_ARRAY: PackQueryStatusItem[] = [];
 
@@ -676,6 +676,8 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
           agentIds={agentIds}
           addToTimeline={addToTimeline}
           isScheduled={!!scheduleId}
+          scheduleId={scheduleId}
+          executionCount={executionCount}
           onSaveQuery={onSaveQuery}
         />
       )}
@@ -697,4 +699,10 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   );
 };
 
-export const PackQueriesStatusTable = React.memo(PackQueriesStatusTableComponent);
+const PackQueriesStatusTableMemo = React.memo(PackQueriesStatusTableComponent);
+
+export const PackQueriesStatusTable: React.FC<PackQueriesStatusTableProps> = (props) => (
+  <ExportFiltersProvider>
+    <PackQueriesStatusTableMemo {...props} />
+  </ExportFiltersProvider>
+);

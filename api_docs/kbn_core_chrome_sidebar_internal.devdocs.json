@@ -534,6 +534,7 @@
                 "lineNumber": 115,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SidebarAppConfig",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -780,6 +781,7 @@
                 "lineNumber": 160,
                 "columnNumber": 12,
                 "deprecated": false,
+                "docsReferencedTypeName": "SidebarAppId",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -822,6 +824,7 @@
                 "lineNumber": 163,
                 "columnNumber": 5,
                 "deprecated": false,
+                "docsReferencedTypeName": "SidebarAppId",
                 "trackAdoption": false,
                 "isRequired": true
               }
@@ -864,6 +867,7 @@
                 "lineNumber": 166,
                 "columnNumber": 22,
                 "deprecated": false,
+                "docsReferencedTypeName": "SidebarAppId",
                 "trackAdoption": false,
                 "isRequired": true
               }

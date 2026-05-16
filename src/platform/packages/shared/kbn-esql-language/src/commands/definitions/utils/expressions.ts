@@ -67,11 +67,10 @@ export function getExpressionType(
     }
 
     const fnDef = getFunctionDefinition(castFunction);
-    if (!fnDef) {
+    if (!fnDef || fnDef.signatures.length === 0) {
       return 'unknown';
     }
 
-    // Safe to get the first one as all cast functions have a single return type
     return fnDef.signatures[0].returnType;
   }
 
@@ -128,7 +127,7 @@ export function getExpressionType(
        * at least we know that the final argument to case will never be a conditional
        * expression, always a result expression.
        *
-       * One problem with this is that if a false case is not provided, the return type
+       * One problem with this is that if a elseValue is not provided, the return type
        * will be null, which we aren't detecting. But this is ok because we consider
        * userDefinedColumns and fields to be nullable anyways and account for that during validation.
        */

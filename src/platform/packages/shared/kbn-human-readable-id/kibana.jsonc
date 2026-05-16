@@ -1,0 +1,7 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/human-readable-id",
+  "owner": ["@elastic/workflows-eng"],
+  "group": "platform",
+  "visibility": "shared"
+}

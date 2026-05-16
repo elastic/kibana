@@ -364,7 +364,7 @@ export const initializeTabs = createInternalStateAsyncThunk(
       setBreadcrumbs({ services, titleBreadcrumbText: persistedDiscoverSession.title });
     }
 
-    const byValueEmbeddableTab = services.embeddableEditor.getByValueInput();
+    const byValueEmbeddableTab = services.embeddableEditor.getByValueTab();
     const byValueEmbeddableTabState = byValueEmbeddableTab
       ? fromSavedObjectTabToTabState({ tab: byValueEmbeddableTab })
       : undefined;

@@ -36,12 +36,19 @@ describe('scripts/generate_plugin', () => {
   afterEach(async () => await del([PLUGIN_DIR, TMP_DIR]));
 
   it('builds a generated plugin into a viable archive', async () => {
+    // extendEnv merges process.env then this object; must override CI's KBN_USE_RSPACK=true
+    const legacyOptimizerEnv = {
+      ...process.env,
+      KBN_USE_RSPACK: '',
+    };
+
     const generateProc = await execa(
       process.execPath,
       ['scripts/generate_plugin', '-y', '--name', 'fooTestPlugin'],
       {
         cwd: REPO_ROOT,
         all: true,
+        env: legacyOptimizerEnv,
       }
     );
     const filterLogs = (logs: string | undefined) => {
@@ -64,6 +71,7 @@ describe('scripts/generate_plugin', () => {
       {
         cwd: PLUGIN_DIR,
         all: true,
+        env: legacyOptimizerEnv,
       }
     );
 
@@ -125,5 +133,66 @@ describe('scripts/generate_plugin', () => {
       "version": "1.0.0",
     }
   `);
+  });
+
+  /**
+   * [rspack-transition] This test verifies the rspack build path in plugin-helpers.
+   * Once the legacy webpack optimizer is removed, this should become the only build test
+   * and the KBN_USE_RSPACK env gate should be removed from cli.ts.
+   */
+  it('builds a generated plugin with rspack when KBN_USE_RSPACK is set', async () => {
+    await execa(process.execPath, ['scripts/generate_plugin', '-y', '--name', 'fooTestPlugin'], {
+      cwd: REPO_ROOT,
+      all: true,
+    });
+
+    const filterLogs = (logs: string | undefined) => {
+      return logs
+        ?.split('\n')
+        .filter((l) => !l.includes('failed to reach ci-stats service'))
+        .join('\n');
+    };
+
+    const buildProc = await execa(
+      process.execPath,
+      ['../../scripts/plugin_helpers', 'build', '--kibana-version', '7.5.0'],
+      {
+        cwd: PLUGIN_DIR,
+        all: true,
+        env: {
+          ...process.env,
+          KBN_USE_RSPACK: 'true',
+        },
+      }
+    );
+
+    const logs = filterLogs(buildProc.all) ?? '';
+    expect(logs).toContain('Using RSPack optimizer');
+    expect(logs).toContain('browser bundle created');
+    expect(logs).toContain('plugin archive created');
+
+    await extract(PLUGIN_ARCHIVE, { dir: TMP_DIR });
+
+    const files = await globby(['**/*'], { cwd: TMP_DIR, dot: true });
+
+    const publicFiles = files.filter((f) => f.includes('target/public/'));
+    expect(publicFiles.length).toBeGreaterThanOrEqual(1);
+
+    const mainBundle = publicFiles.find(
+      (f) => f.endsWith('.plugin.js') || f.endsWith('.plugin.js.br')
+    );
+    expect(mainBundle).toBeDefined();
+
+    const serverFiles = files.filter((f) => f.includes('server/'));
+    expect(serverFiles.length).toBeGreaterThan(0);
+
+    expect(
+      loadJsonFile(Path.resolve(TMP_DIR, 'kibana', 'fooTestPlugin', 'kibana.json'))
+    ).toMatchObject({
+      id: 'fooTestPlugin',
+      kibanaVersion: '7.5.0',
+      server: true,
+      ui: true,
+    });
   });
 });

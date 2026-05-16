@@ -145,7 +145,7 @@ describe('FORK Autocomplete', () => {
     });
 
     test('suggests pipe and new branch after complete branch', async () => {
-      await forkExpectSuggestions('FROM a | FORK (LIMIT 100) ', ['($0)']);
+      await forkExpectSuggestions('FROM a | FORK (LIMIT 100) ', ['($0)', '| ']);
       await forkExpectSuggestions('FROM a | FORK (LIMIT 100) (SORT keywordField ASC) ', [
         '($0)',
         '| ',

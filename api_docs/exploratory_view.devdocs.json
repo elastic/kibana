@@ -136,6 +136,7 @@
             "lineNumber": 40,
             "columnNumber": 33,
             "deprecated": false,
+            "docsReferencedTypeName": "ExploratoryViewPageProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -175,6 +176,7 @@
             "lineNumber": 18,
             "columnNumber": 34,
             "deprecated": false,
+            "docsReferencedTypeName": "FilterValueLabelProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -212,6 +214,7 @@
             "lineNumber": 15,
             "columnNumber": 27,
             "deprecated": false,
+            "docsReferencedTypeName": "Record",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -251,6 +254,7 @@
             "lineNumber": 30,
             "columnNumber": 35,
             "deprecated": false,
+            "docsReferencedTypeName": "SelectableUrlListProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -1316,7 +1320,15 @@
                 "section": "def-public.ShowShareMenuOptions",
                 "text": "ShowShareMenuOptions"
               },
-              ") => Promise<void>; getExportHandler: (options: Omit<",
+              "<",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              ", Record<string, unknown>>) => Promise<void>; getExportHandler: (options: Omit<",
               {
                 "pluginId": "share",
                 "scope": "public",
@@ -1324,7 +1336,15 @@
                 "section": "def-public.ShowShareMenuOptions",
                 "text": "ShowShareMenuOptions"
               },
-              ", \"asExport\" | \"anchorElement\">, exportId: string, intl: ",
+              "<",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              ", Record<string, unknown>>, \"asExport\" | \"anchorElement\">, exportId: string, intl: ",
               "IntlShape",
               ") => Promise<(() => Promise<void>) | null>; getExportDerivativeHandler: (options: Omit<",
               {
@@ -1334,7 +1354,15 @@
                 "section": "def-public.ShowShareMenuOptions",
                 "text": "ShowShareMenuOptions"
               },
-              ", \"asExport\" | \"anchorElement\">, derivativeId: string) => Promise<(() => Promise<void>) | null>; } & { url: ",
+              "<",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              ", Record<string, unknown>>, \"asExport\" | \"anchorElement\">, derivativeId: string) => Promise<(() => Promise<void>) | null>; } & { url: ",
               {
                 "pluginId": "share",
                 "scope": "public",

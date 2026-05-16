@@ -19,11 +19,12 @@ import type {
   HeatmapGridConfigResult,
   HeatmapLegendConfigResult,
 } from '@kbn/lens-common/visualizations/heatmap/types';
+import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
 
 import { DEFAULT_LAYER_ID } from '../../../constants';
 import { legendSizeCompat } from '../legend_sizes';
 import { getSharedChartAPIToLensState, stripUndefined } from '../utils';
-import type { HeatmapState } from '../../../schema';
+import type { HeatmapConfig } from '../../../schema';
 import { fromColorByValueAPIToLensState, isAutoColor } from '../../coloring';
 import {
   addLayerColumn,
@@ -32,12 +33,13 @@ import {
   generateLayer,
   getAdhocDataviews,
 } from '../../utils';
-import type { HeatmapStateESQL, HeatmapStateNoESQL } from '../../../schema/charts/heatmap';
+import type { HeatmapConfigESQL, HeatmapConfigNoESQL } from '../../../schema/charts/heatmap';
 import { fromMetricAPItoLensState } from '../../columns/metric';
 import { fromBucketLensApiToLensState } from '../../columns/buckets';
 import type { LensApiBucketOperations } from '../../../schema/bucket_ops';
 import { getValueColumn } from '../../columns/esql_column';
 import { axisLabelOrientationCompat } from '../common';
+import { getColumnTypeFromScaleType } from '../utils';
 
 const ACCESSOR = 'heatmap_value_accessor';
 
@@ -45,7 +47,7 @@ function getAccessorName(type: 'x' | 'y' | 'value') {
   return `${ACCESSOR}_${type}`;
 }
 
-function buildVisualizationState(config: HeatmapState): HeatmapVisualizationState {
+function buildVisualizationState(config: HeatmapConfig): HeatmapVisualizationState {
   const layer = config;
   const valueAccessor = getAccessorName('value');
   const basePalette =
@@ -79,7 +81,7 @@ function buildVisualizationState(config: HeatmapState): HeatmapVisualizationStat
     legend: {
       isVisible: layer.legend?.visibility !== 'hidden',
       type: 'heatmap_legend',
-      position: 'right',
+      position: layer.legend?.position ?? 'right',
       ...stripUndefined<HeatmapLegendConfigResult>({
         maxLines: layer.legend?.truncate_after_lines,
         legendSize: legendSizeCompat.toState(layer.legend?.size),
@@ -95,7 +97,7 @@ function buildVisualizationState(config: HeatmapState): HeatmapVisualizationStat
   };
 }
 
-function buildFormBasedLayer(layer: HeatmapStateNoESQL): FormBasedPersistedState['layers'] {
+function buildFormBasedLayer(layer: HeatmapConfigNoESQL): FormBasedPersistedState['layers'] {
   const metricColumns = fromMetricAPItoLensState(layer.metric);
 
   const layers: Record<string, PersistedIndexPatternLayer> = generateLayer(DEFAULT_LAYER_ID, layer);
@@ -125,10 +127,13 @@ function buildFormBasedLayer(layer: HeatmapStateNoESQL): FormBasedPersistedState
   return layers;
 }
 
-function getValueColumns(layer: HeatmapStateESQL) {
+function getValueColumns(layer: HeatmapConfigESQL) {
+  const xFieldType = layer.axis?.x?.scale
+    ? getColumnTypeFromScaleType(layer.axis.x.scale)
+    : undefined;
   return [
     getValueColumn(getAccessorName('value'), layer.metric, 'number'),
-    ...(layer.x ? [getValueColumn(getAccessorName('x'), layer.x)] : []),
+    ...(layer.x ? [getValueColumn(getAccessorName('x'), layer.x, xFieldType)] : []),
     ...(layer.y ? [getValueColumn(getAccessorName('y'), layer.y)] : []),
   ];
 }
@@ -142,8 +147,8 @@ type HeatmapAttributesWithoutFiltersAndQuery = Omit<HeatmapAttributes, 'state'> 
   state: Omit<HeatmapAttributes['state'], 'filters' | 'query'>;
 };
 
-export function fromAPItoLensState(config: HeatmapState): HeatmapAttributesWithoutFiltersAndQuery {
-  const _buildDataLayer = (cfg: unknown) => buildFormBasedLayer(cfg as HeatmapStateNoESQL);
+export function fromAPItoLensState(config: HeatmapConfig): HeatmapAttributesWithoutFiltersAndQuery {
+  const _buildDataLayer = (cfg: unknown) => buildFormBasedLayer(cfg as HeatmapConfigNoESQL);
 
   const { layers, usedDataviews } = buildDatasourceStates(config, _buildDataLayer, getValueColumns);
 
@@ -161,6 +166,7 @@ export function fromAPItoLensState(config: HeatmapState): HeatmapAttributesWitho
     visualizationType: LENS_HEATMAP_ID,
     ...getSharedChartAPIToLensState(config),
     references,
+    version: LENS_ITEM_LATEST_VERSION,
     state: {
       datasourceStates: layers,
       internalReferences,

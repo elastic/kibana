@@ -47,12 +47,16 @@ export const useFullScreenWatcher = () => {
 export const EUI_DATA_GRID_FULL_SCREEN_CLASS = 'euiDataGrid--fullScreen';
 export const UNIFIED_DATA_TABLE_FULL_SCREEN_CLASS = 'unifiedDataTable__fullScreen';
 
-// Ensure full screen data grids are not covered by elements with a z-index
+// Ensure full screen data grids are not covered by elements with a z-index.
+// Elements can opt out of the z-index reset by setting data-kbn-preserve-zindex="true",
+// which preserves their stacking context and that of their descendants.
 const fullScreenStyles = css`
   *:not(
       .${EUI_DATA_GRID_FULL_SCREEN_CLASS}, .${EUI_DATA_GRID_FULL_SCREEN_CLASS} *,
       [data-euiportal='true'],
-      [data-euiportal='true'] *
+      [data-euiportal='true'] *,
+      [data-kbn-preserve-zindex],
+      [data-kbn-preserve-zindex] *
     ) {
     z-index: unset !important;
   }

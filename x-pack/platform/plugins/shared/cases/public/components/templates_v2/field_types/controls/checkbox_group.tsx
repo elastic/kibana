@@ -14,11 +14,13 @@ import {
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { EuiCheckboxGroup, EuiFormRow } from '@elastic/eui';
 import { CASE_EXTENDED_FIELDS } from '../../../../../common/constants';
+import { getFieldSnakeKey } from '../../../../../common/utils';
 import type {
   CheckboxGroupFieldSchema,
   ConditionRenderProps,
 } from '../../../../../common/types/domain/template/fields';
 import { FIELD_REQUIRED } from '../../translations';
+import { OptionalFieldLabel } from '../../../optional_field_label';
 
 type CheckboxGroupProps = z.infer<typeof CheckboxGroupFieldSchema> & ConditionRenderProps;
 
@@ -76,8 +78,15 @@ export const CheckboxGroup: React.FC<CheckboxGroupProps> = ({
         const next = selected.includes(id) ? selected.filter((s) => s !== id) : [...selected, id];
         field.setValue(JSON.stringify(next));
       };
+
       return (
-        <EuiFormRow label={label} error={errorMessage} isInvalid={isInvalid} fullWidth>
+        <EuiFormRow
+          label={label}
+          labelAppend={!isRequired ? OptionalFieldLabel : undefined}
+          error={errorMessage}
+          isInvalid={isInvalid}
+          fullWidth
+        >
           <EuiCheckboxGroup
             options={options}
             idToSelectedMap={Object.fromEntries(selected.map((id) => [id, true]))}
@@ -86,11 +95,15 @@ export const CheckboxGroup: React.FC<CheckboxGroupProps> = ({
         </EuiFormRow>
       );
     },
-    [label, options]
+    [label, options, isRequired]
   );
 
   return (
-    <UseField key={name} path={`${CASE_EXTENDED_FIELDS}.${name}_as_${type}`} config={config}>
+    <UseField
+      key={name}
+      path={`${CASE_EXTENDED_FIELDS}.${getFieldSnakeKey(name, type)}`}
+      config={config}
+    >
       {renderField}
     </UseField>
   );

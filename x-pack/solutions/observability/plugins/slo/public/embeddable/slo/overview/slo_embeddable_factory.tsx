@@ -38,6 +38,7 @@ import type {
   SingleOverviewCustomState,
 } from '../../../../common/embeddables/overview/types';
 import { openSloConfiguration } from './slo_overview_open_configuration';
+import { ensureLicense } from '../ensure_license';
 
 const getOverviewPanelTitle = () =>
   i18n.translate('xpack.slo.sloEmbeddable.displayName', {
@@ -61,10 +62,11 @@ export const getOverviewEmbeddableFactory = ({
     uuid,
     parentApi,
   }) => {
+    await ensureLicense(pluginsStart.licensing);
     const deps = { ...coreStart, ...pluginsStart };
     const state = initialState;
 
-    const drilldownsManager = await initializeDrilldownsManager(uuid, initialState);
+    const drilldownsManager = initializeDrilldownsManager(uuid, initialState);
 
     const titleManager = initializeTitleManager(state);
     const overviewMode$ = new BehaviorSubject<OverviewEmbeddableState['overview_mode'] | undefined>(

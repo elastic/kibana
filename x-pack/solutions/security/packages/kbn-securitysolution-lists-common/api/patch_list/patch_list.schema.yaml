@@ -35,6 +35,11 @@ paths:
               example:
                 id: ip_list
                 name: Bad ips list - UPDATED
+            examples:
+              patchName:
+                value:
+                  id: ip_list
+                  name: Bad ips list - UPDATED
       responses:
         200:
           description: Successful response

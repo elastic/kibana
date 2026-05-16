@@ -15,7 +15,7 @@ import {
 } from '@kbn/workflows/common/errors';
 import { registerExecutionRoutes } from '.';
 import type { RouteDependencies } from '../types';
-import { WorkflowManagementAuditLog } from '../utils/workflow_audit_logging';
+import { createWorkflowManagementAuditLogMock } from '../utils/workflow_audit_logging.mock';
 
 describe('Execution Routes', () => {
   let routeHandlers: Record<string, { handler: (...args: any[]) => Promise<any> }>;
@@ -23,6 +23,10 @@ describe('Execution Routes', () => {
   let mockSpaces: { getSpaceId: jest.Mock };
 
   const mockContext = {
+    workflows: Promise.resolve({
+      isWorkflowsAvailable: true,
+      emitEvent: jest.fn(),
+    }),
     licensing: Promise.resolve({
       license: {
         isAvailable: true,
@@ -121,7 +125,7 @@ describe('Execution Routes', () => {
       api: mockApi as any,
       logger: loggingSystemMock.createLogger(),
       spaces: mockSpaces as any,
-      audit: new WorkflowManagementAuditLog({ getSecurityServiceStart: () => undefined }),
+      audit: createWorkflowManagementAuditLogMock(),
     } as unknown as RouteDependencies);
   });
 
@@ -535,7 +539,9 @@ describe('Execution Routes', () => {
     });
 
     it('should call api.resumeWorkflowExecution with execution id, space, input, and request', async () => {
-      mockApi.resumeWorkflowExecution.mockResolvedValue(undefined);
+      mockApi.resumeWorkflowExecution.mockResolvedValue({
+        resumedBy: 'user',
+      });
       const h = handler('POST', path)!;
       const request = {
         params: { executionId: 'ex-1' },

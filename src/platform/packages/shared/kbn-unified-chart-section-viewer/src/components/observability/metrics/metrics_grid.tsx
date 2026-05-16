@@ -24,6 +24,7 @@ import { FieldsMetadataProvider } from '../../../context/fields_metadata';
 import { createESQLQuery, firstNonNullable } from '../../../common/utils';
 import { ACTION_OPEN_IN_DISCOVER } from '../../../common/constants';
 import { useChartLayers } from '../../chart/hooks/use_chart_layers';
+import { useMetricsExperienceState } from './context/metrics_experience_state_provider';
 
 export type MetricsGridProps = Pick<
   UnifiedMetricsGridProps,
@@ -36,6 +37,7 @@ export type MetricsGridProps = Pick<
   metricItems: ParsedMetricItem[];
   whereStatements?: string[];
   getUserMessages?: (metricItem: ParsedMetricItem) => EmbeddableComponentProps['userMessages'];
+  getDescription?: (metricItem: ParsedMetricItem) => EmbeddableComponentProps['description'];
 };
 
 const getItemKey = (metricItem: ParsedMetricItem, index: number) => {
@@ -54,6 +56,7 @@ export const MetricsGrid = ({
   discoverFetch$,
   searchTerm,
   getUserMessages,
+  getDescription,
 }: MetricsGridProps) => {
   const gridRef = useRef<HTMLDivElement>(null);
   const { euiTheme } = useEuiTheme();
@@ -153,6 +156,7 @@ export const MetricsGrid = ({
                   onViewDetails={handleViewDetails}
                   searchTerm={searchTerm}
                   whereStatements={whereStatements}
+                  description={getDescription?.(metricItem)}
                   userMessages={getUserMessages ? getUserMessages(metricItem) : undefined}
                 />
               </EuiFlexItem>
@@ -188,6 +192,7 @@ interface ChartItemProps
   searchTerm?: string;
   onFocusCell: (rowIndex: number, colIndex: number) => void;
   onViewDetails: (index: number, esqlQuery: string, metricItem: ParsedMetricItem) => void;
+  description?: string;
   whereStatements?: string[];
   userMessages?: EmbeddableComponentProps['userMessages'];
 }
@@ -210,10 +215,12 @@ const ChartItem = React.memo(
     isFocused,
     searchTerm,
     whereStatements,
+    description,
     onFocusCell,
     onViewDetails,
     userMessages,
   }: ChartItemProps) => {
+    const { profileId } = useMetricsExperienceState();
     const { euiTheme } = useEuiTheme();
     const colorPalette = useMemo(
       () => Object.values(euiTheme.colors.vis).slice(0, 10),
@@ -255,6 +262,7 @@ const ChartItem = React.memo(
         onFocus={onFocusCell}
       >
         <Chart
+          id={metricItem.metricName}
           esqlQuery={esqlQuery}
           size={size}
           discoverFetch$={discoverFetch$}
@@ -265,10 +273,14 @@ const ChartItem = React.memo(
           onExploreInDiscoverTab={actions.openInNewTab}
           onViewDetails={handleViewDetailsCallback}
           title={metricItem.metricName}
+          description={description}
           chartLayers={chartLayers}
+          syncCursor
+          syncTooltips={false}
           titleHighlight={searchTerm}
           extraDisabledActions={[ACTION_OPEN_IN_DISCOVER]}
           userMessages={userMessages}
+          profileId={profileId}
         />
       </A11yGridCell>
     );
