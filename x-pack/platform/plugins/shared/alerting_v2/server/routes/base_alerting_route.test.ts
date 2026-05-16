@@ -55,50 +55,106 @@ describe('BaseAlertingRoute', () => {
     expect(route.executeFn).toHaveBeenCalledTimes(1);
   });
 
-  it('preserves Boom error status codes', async () => {
-    route.executeFn.mockRejectedValue(Boom.notFound('rule not found'));
+  describe('onError - standard error response shape', () => {
+    it('returns { code, error, message } for plain Boom errors (no data attached)', async () => {
+      route.executeFn.mockRejectedValue(Boom.notFound('rule not found'));
 
-    await route.handle();
+      await route.handle();
 
-    expect(response.customError).toHaveBeenCalledWith({
-      statusCode: 404,
-      body: expect.objectContaining({ error: 'Not Found', message: 'rule not found' }),
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 404,
+        body: {
+          code: 'NOT_FOUND',
+          error: 'Not Found',
+          message: 'rule not found',
+        },
+      });
     });
-  });
 
-  it('converts non-Boom errors to 500', async () => {
-    route.executeFn.mockRejectedValue(new TypeError('cannot read property'));
+    it('uses the domain-specific code from boom.data when provided', async () => {
+      route.executeFn.mockRejectedValue(
+        Boom.notFound('Rule "abc" not found.', { code: 'RULE_NOT_FOUND' })
+      );
 
-    await route.handle();
+      await route.handle();
 
-    expect(response.customError).toHaveBeenCalledWith({
-      statusCode: 500,
-      body: expect.objectContaining({
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 404,
+        body: {
+          code: 'RULE_NOT_FOUND',
+          error: 'Not Found',
+          message: 'Rule "abc" not found.',
+        },
+      });
+    });
+
+    it('includes structured details from boom.data when provided', async () => {
+      route.executeFn.mockRejectedValue(
+        Boom.notFound('Rule "abc" not found.', {
+          code: 'RULE_NOT_FOUND',
+          details: { rule_id: 'abc' },
+        })
+      );
+
+      await route.handle();
+
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 404,
+        body: {
+          code: 'RULE_NOT_FOUND',
+          error: 'Not Found',
+          message: 'Rule "abc" not found.',
+          details: { rule_id: 'abc' },
+        },
+      });
+    });
+
+    it('omits details when boom.data does not include them', async () => {
+      route.executeFn.mockRejectedValue(
+        Boom.badRequest('Invalid input', { code: 'INVALID_INPUT' })
+      );
+
+      await route.handle();
+
+      const call = response.customError.mock.calls[0][0];
+      expect(call.body).not.toHaveProperty('details');
+    });
+
+    it('boomifies non-Boom errors to 500 with a derived code', async () => {
+      route.executeFn.mockRejectedValue(new TypeError('cannot read property'));
+
+      await route.handle();
+
+      expect(response.customError).toHaveBeenCalledWith({
         statusCode: 500,
-        error: 'Internal Server Error',
-      }),
+        body: {
+          code: 'INTERNAL_SERVER_ERROR',
+          error: 'Internal Server Error',
+          message: 'An internal server error occurred',
+        },
+      });
     });
-  });
 
-  it('logs 5xx errors at error level with the original error attached', async () => {
-    const cause = new TypeError('boom');
-    route.executeFn.mockRejectedValue(cause);
+    it('logs 5xx errors at error level with the original error attached', async () => {
+      const cause = new TypeError('boom');
+      route.executeFn.mockRejectedValue(cause);
 
-    await route.handle();
+      await route.handle();
 
-    expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('test route error'), {
-      error: cause,
+      expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('test route error'), {
+        error: cause,
+      });
+      expect(logger.debug).not.toHaveBeenCalled();
     });
-    expect(logger.debug).not.toHaveBeenCalled();
-  });
 
-  it('logs 4xx errors at debug level only', async () => {
-    route.executeFn.mockRejectedValue(Boom.notFound('rule not found'));
+    it('logs 4xx errors at debug level only', async () => {
+      route.executeFn.mockRejectedValue(Boom.notFound('rule not found'));
 
-    await route.handle();
+      await route.handle();
 
-    expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('test route error'));
-    expect(logger.error).not.toHaveBeenCalled();
+      expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('test route error'));
+      expect(logger.error).not.toHaveBeenCalled();
+    });
   });
 
   describe('static options merging', () => {
