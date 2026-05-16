@@ -23,32 +23,32 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { LayoutOverlay } from './overlay/layout_overlay';
-import { getDefaultLayoutConfig, type LayoutConfig } from '../../lib/layout/layout_config';
-import { LayoutSettingsPanel } from './settings/layout_settings_panel';
-import { EditOverlay } from '../edit/edit_overlay';
-import type { EditOverlayHandle } from '../edit/edit_overlay';
+import { LayoutOverlay } from './layout/overlay/layout_overlay';
+import { getDefaultLayoutConfig, type LayoutConfig } from '../lib/layout/layout_config';
+import { LayoutSettingsPanel } from './layout/settings/layout_settings_panel';
+import { EditOverlay } from './edit/edit_overlay';
+import type { EditOverlayHandle } from './edit/edit_overlay';
 import {
   ADD_EUI_PANEL_ID,
   DEVTOOL_IGNORE_ATTR,
   LAYOUT_POPOVER_ID,
   LAYOUT_SETTINGS_FLYOUT_ID,
-} from '../../lib/constants';
-import { useOverlayZIndex } from '../../hooks/use_overlay_z_index';
-import { usePortalZIndex } from '../../hooks/use_portal_z_index';
-import { buildAddEuiPanels } from '../edit/library/build_add_eui_panels';
-import { renderEuiComponentLive, centerInViewport } from '../../lib/dom/insert_element';
-import { DEVTOOL_LIBRARY_ID_ATTR } from '../../lib/constants';
-import { preloadAllEuiIcons } from '../../lib/eui_icon_cache';
-import { pickJsonFile } from '../../lib/history/serialization/session_io';
+} from '../lib/constants';
+import { useOverlayZIndex } from '../hooks/use_overlay_z_index';
+import { usePortalZIndex } from '../hooks/use_portal_z_index';
+import { buildAddEuiPanels } from './edit/library/build_add_eui_panels';
+import { renderEuiComponentLive, centerInViewport } from '../lib/dom/insert_element';
+import { DEVTOOL_LIBRARY_ID_ATTR } from '../lib/constants';
+import { preloadAllEuiIcons } from '../lib/eui_icon_cache';
+import { pickJsonFile } from '../lib/history/serialization/session_io';
 
 /**
  * Toggles a column layout overlay and provides layout settings.
  */
-export const DesignToolsButton = () => {
+export const DesignToolsButtonImpl = ({ initiallyOpen }: { initiallyOpen?: boolean }) => {
   const { euiTheme } = useEuiTheme();
   const [isLayoutVisible, setIsLayoutVisible] = useState(false);
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [isPopoverOpen, setIsPopoverOpen] = useState(initiallyOpen ?? false);
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [moveCount, setMoveCount] = useState(0);

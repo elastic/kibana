@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { MeasureButton } from './src/components/measure/measure_button';
-export { DesignToolsButton } from './src/components/layout/design_tools_button';
+export { MeasureButton } from './src/components/measure_button';
+export { DesignToolsButton } from './src/components/design_tools_button';

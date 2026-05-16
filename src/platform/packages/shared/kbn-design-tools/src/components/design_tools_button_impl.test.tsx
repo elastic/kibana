@@ -11,22 +11,22 @@ import React from 'react';
 import { screen, fireEvent, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
-import { DesignToolsButton } from './design_tools_button';
+import { DesignToolsButtonImpl } from './design_tools_button_impl';
 
-jest.mock('../../lib/eui_icon_cache', () => ({
+jest.mock('../lib/eui_icon_cache', () => ({
   preloadAllEuiIcons: jest.fn().mockResolvedValue(undefined),
   getIconTypes: jest.fn().mockResolvedValue([]),
 }));
 
-describe('DesignToolsButton', () => {
+describe('DesignToolsButtonImpl', () => {
   it('should render the button', () => {
-    renderWithI18n(<DesignToolsButton />);
+    renderWithI18n(<DesignToolsButtonImpl />);
 
     expect(screen.getByTestId('designToolsButton')).toBeInTheDocument();
   });
 
   it('should open context menu when clicked', async () => {
-    renderWithI18n(<DesignToolsButton />);
+    renderWithI18n(<DesignToolsButtonImpl />);
 
     await userEvent.click(screen.getByTestId('designToolsButton'));
 
@@ -35,7 +35,7 @@ describe('DesignToolsButton', () => {
   });
 
   it('should toggle layout visibility when Toggle layout is clicked', async () => {
-    renderWithI18n(<DesignToolsButton />);
+    renderWithI18n(<DesignToolsButtonImpl />);
 
     await userEvent.click(screen.getByTestId('designToolsButton'));
     await act(async () => {
@@ -53,7 +53,7 @@ describe('DesignToolsButton', () => {
   });
 
   it('should open flyout when Layout settings is clicked', async () => {
-    renderWithI18n(<DesignToolsButton />);
+    renderWithI18n(<DesignToolsButtonImpl />);
 
     await userEvent.click(screen.getByTestId('designToolsButton'));
     await act(async () => {
@@ -64,7 +64,7 @@ describe('DesignToolsButton', () => {
   });
 
   it('should close flyout via the flyout close button', async () => {
-    renderWithI18n(<DesignToolsButton />);
+    renderWithI18n(<DesignToolsButtonImpl />);
 
     await userEvent.click(screen.getByTestId('designToolsButton'));
     await act(async () => {
@@ -79,7 +79,7 @@ describe('DesignToolsButton', () => {
   });
 
   it('should prevent target from losing focus on mouse down', () => {
-    renderWithI18n(<DesignToolsButton />);
+    renderWithI18n(<DesignToolsButtonImpl />);
 
     const button = screen.getByTestId('designToolsButton');
     const mouseDownEvent = new MouseEvent('mousedown', { bubbles: true });

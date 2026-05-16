@@ -63,7 +63,7 @@ Every element the user touches gets an `ElementSession` - a per-element state co
 | Session Type | `isDuplicate` | `referenceEl` | Owns Element? | Use Case |
 |---|---|---|---|---|
 | Drag | `false` | original | Yes (clone) | User drags a page element - original hidden, clone visible |
-| Duplicate | `true` | source | Yes | Cmd+D copy of an existing element |
+| Duplicate | `true` | source | Yes | Cmd+C copy of an existing element |
 | Live/Insert | `true` | (optional) | Yes + cleanup | Library component rendered with a live React root |
 | Promoted Edit | `false` | original | Yes (clone) | Edit modal save on an original element - promoted to a managed clone |
 

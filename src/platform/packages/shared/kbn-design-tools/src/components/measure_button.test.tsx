@@ -12,9 +12,9 @@ import { screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { MeasureButton } from './measure_button';
-import { isMeasureShortcut } from '../../lib/keyboard_shortcuts';
+import { isMeasureShortcut } from '../lib/keyboard_shortcuts';
 
-jest.mock('../../lib/keyboard_shortcuts', () => ({
+jest.mock('../lib/keyboard_shortcuts', () => ({
   isEscapeKey: jest.fn(),
   isMeasureShortcut: jest.fn(),
 }));

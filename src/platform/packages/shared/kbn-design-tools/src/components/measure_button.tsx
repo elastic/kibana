@@ -7,13 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState } from 'react';
+import React, { Suspense, lazy, useState } from 'react';
 import type { MouseEvent } from 'react';
 import { EuiButtonIcon, EuiToolTip, EuiWindowEvent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isMac } from '@kbn/shared-ux-utility';
-import { MeasureOverlay } from './measure_overlay';
-import { isMeasureShortcut } from '../../lib/keyboard_shortcuts';
+import { isMeasureShortcut } from '../lib/keyboard_shortcuts';
+
+const LazyMeasureOverlay = lazy(() =>
+  import('./measure/measure_overlay').then(({ MeasureOverlay }) => ({ default: MeasureOverlay }))
+);
 
 /**
  * Toggles measure mode from the developer toolbar.
@@ -44,7 +47,6 @@ export const MeasureButton = () => {
                 defaultMessage: 'Measure spacing {keyboardShortcut}',
               })
         }
-        position="bottom"
       >
         <EuiButtonIcon
           onClick={() => setIsMeasuring((prev) => !prev)}
@@ -59,7 +61,11 @@ export const MeasureButton = () => {
           data-test-subj="measureSpacingButton"
         />
       </EuiToolTip>
-      {isMeasuring && <MeasureOverlay setIsMeasuring={setIsMeasuring} />}
+      {isMeasuring && (
+        <Suspense fallback={null}>
+          <LazyMeasureOverlay setIsMeasuring={setIsMeasuring} />
+        </Suspense>
+      )}
     </>
   );
 };
