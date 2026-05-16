@@ -189,12 +189,15 @@ export const importRulesRoute = (
 
           const ruleChunks = chunk(CHUNK_PARSED_OBJECT_SIZE, validatedResponseActionsRules);
 
+          const experimentalFeatures = ctx.securitySolution.getConfig().experimentalFeatures;
+
           const importRuleResponse = await importRules({
             ruleChunks,
             overwriteRules: request.query.overwrite,
             allowMissingConnectorSecrets: !!actionConnectors.length,
             ruleSourceImporter,
             detectionRulesClient,
+            experimentalFeatures,
           });
 
           const parseErrors = parsedRuleErrors.map((error) =>

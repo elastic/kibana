@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ExperimentalFeatures } from '../../../../../../common';
 import type { RuleToImport } from '../../../../../../common/api/detection_engine';
 import { type ImportRuleResponse, createBulkErrorObject } from '../../../routes/utils';
 import type { IRuleSourceImporter } from './rule_source_importer';
@@ -18,6 +19,9 @@ import { isRuleConflictError, isRuleImportError } from './errors';
  * @param overwriteRules {boolean} - whether to overwrite existing rules
  * with imported rules if their rule_id matches
  * @param detectionRulesClient {object}
+ * @param experimentalFeatures - feature flags; when `bulkCreateRulesEnabled` is on,
+ *   per-chunk import is dispatched through `detectionRulesClient.bulkImportRules`
+ *   (single bulk alerting call) instead of the per-rule loop.
  * @returns {Promise} an array of error and success messages from import
  */
 export const importRules = async ({
@@ -26,12 +30,14 @@ export const importRules = async ({
   detectionRulesClient,
   ruleSourceImporter,
   allowMissingConnectorSecrets,
+  experimentalFeatures,
 }: {
   ruleChunks: RuleToImport[][];
   overwriteRules: boolean;
   detectionRulesClient: IDetectionRulesClient;
   ruleSourceImporter: IRuleSourceImporter;
   allowMissingConnectorSecrets?: boolean;
+  experimentalFeatures?: ExperimentalFeatures;
 }): Promise<ImportRuleResponse[]> => {
   const response: ImportRuleResponse[] = [];
 
@@ -39,13 +45,22 @@ export const importRules = async ({
     return response;
   }
 
+  const useBulk = experimentalFeatures?.bulkCreateRulesEnabled ?? false;
+
   for (const rules of ruleChunks) {
-    const importedRulesResponse = await detectionRulesClient.importRules({
-      allowMissingConnectorSecrets,
-      overwriteRules,
-      ruleSourceImporter,
-      rules,
-    });
+    const importedRulesResponse = await (useBulk
+      ? detectionRulesClient.bulkImportRules({
+          allowMissingConnectorSecrets,
+          overwriteRules,
+          ruleSourceImporter,
+          rules,
+        })
+      : detectionRulesClient.importRules({
+          allowMissingConnectorSecrets,
+          overwriteRules,
+          ruleSourceImporter,
+          rules,
+        }));
 
     const importResponses = importedRulesResponse.map((rule) => {
       if (isRuleImportError(rule)) {
