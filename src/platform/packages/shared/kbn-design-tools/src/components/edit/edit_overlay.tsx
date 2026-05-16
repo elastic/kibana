@@ -17,30 +17,36 @@ import React, {
 } from 'react';
 import type { Dispatch, ReactElement, Ref, SetStateAction } from 'react';
 import { EuiPortal } from '@elastic/eui';
-import {
-  useHoverLock,
-  useDeleteElement,
-  useEditListeners,
-  useOverlayZIndex,
-  useScrollSync,
-  useLockedTarget,
-  useEditChangeTracker,
-  useInteractionMachine,
-} from '../../hooks';
+import { useHoverLock } from '../../hooks/use_hover_lock';
+import { useDeleteElement } from '../../hooks/use_delete_element';
+import { useEditListeners } from '../../hooks/use_edit_listeners';
+import { useOverlayZIndex } from '../../hooks/use_overlay_z_index';
+import { useScrollSync } from '../../hooks/use_scroll_sync';
+import { useLockedTarget } from '../../hooks/use_locked_target';
+import { useEditChangeTracker } from '../../hooks/use_edit_change_tracker';
+import { useInteractionMachine } from '../../hooks/use_interaction_machine';
 import { DEVTOOL_HIDDEN_ATTR, MEASURE_OVERLAY_ID } from '../../lib/constants';
 import {
   isEscapeKey,
   isDeleteKey,
   isDuplicateShortcut,
   isEditShortcut,
+  isUndoShortcut,
+  isRedoShortcut,
 } from '../../lib/keyboard_shortcuts';
 import { getElementUnder } from '../../lib/dom/get_element_under';
 import type { LayoutConfig } from '../../lib/layout/layout_config';
 import { GlobalCursorOverride } from '../global_cursor_override';
 import type { ElementSession } from '../../lib/dom/element_registry';
-import { ElementRegistry } from '../../lib/dom/element_registry';
+import { ElementRegistry, applyEditChanges } from '../../lib/dom/element_registry';
+import type { StyleEdit, TextEdit, SourceEdit } from '../../lib/dom/element_registry';
 import { createDuplicate } from '../../lib/dom/duplicate_helpers';
-import { EditOutline } from './outline';
+import { useUndoRedo } from '../../hooks/use_undo_redo';
+import { snapshotSession } from '../../lib/history/snapshot';
+import { captureOriginalStyles } from '../../lib/history/snapshot';
+import type { DuplicateTransaction } from '../../lib/history/transaction';
+import { closePortaledPopovers } from '../../lib/dom/drag_helpers';
+import { EditOutline } from './outline/edit_outline';
 import { EditModal } from './modal/edit_modal';
 import type { StyleChange, TextNodeChange, SourceChange } from './modal/edit_modal';
 import { exportState, importState, downloadJson } from '../../lib/history/serialization/session_io';
@@ -110,7 +116,14 @@ export const EditOverlay = ({
   const stickyHover = useRef<HTMLElement | null>(null);
   const roundedTargets = useRef(new WeakSet<HTMLElement>());
 
-  const { editCount, applyEdits } = useEditChangeTracker(registry);
+  /**
+   * Tracks the pending duplicate transaction so the auto-drag that
+   * follows can merge into it instead of pushing a separate move.
+   */
+  const pendingDuplicateRef = useRef<DuplicateTransaction | null>(null);
+
+  const { editCount } = useEditChangeTracker(registry);
+  const { push: pushTransaction, undo, redo, clear: clearHistory } = useUndoRedo(registry);
 
   // Keep ref in sync with state so stable callbacks can read the current value.
   const updateHoverTarget = useCallback((next: HTMLElement | null) => {
@@ -148,9 +161,21 @@ export const EditOverlay = ({
     (el: HTMLElement) => {
       const session = registry.current.get(el);
 
+      closePortaledPopovers(el);
+
       if (session) {
-        registry.current.removeSession(session);
+        const snapshot = snapshotSession(session);
+        pushTransaction({
+          type: 'delete',
+          label: 'Delete',
+          element: el,
+          sessionSnapshot: snapshot,
+        });
+        registry.current.delete(session);
+        el.remove();
       } else {
+        const originalStyles = captureOriginalStyles(el);
+        pushTransaction({ type: 'delete', label: 'Delete', element: el, originalStyles });
         rawDeleteElement(el);
       }
 
@@ -159,7 +184,7 @@ export const EditOverlay = ({
       setCursor('');
       notifyCount();
     },
-    [rawDeleteElement, clearLock, notifyCount, updateHoverTarget]
+    [rawDeleteElement, clearLock, notifyCount, updateHoverTarget, pushTransaction]
   );
 
   const resetAll = useCallback(() => {
@@ -169,10 +194,12 @@ export const EditOverlay = ({
     }
     machine.forceIdle();
     stickyHover.current = null;
+    pendingDuplicateRef.current = null;
     registry.current.resetAll();
     restoreAll();
+    clearHistory();
     onChangeCount?.(0);
-  }, [onChangeCount, restoreAll, machine]);
+  }, [onChangeCount, restoreAll, machine, clearHistory]);
 
   const insertElement = useCallback(
     (
@@ -198,12 +225,18 @@ export const EditOverlay = ({
         cleanup,
       };
       registry.current.set(session);
+      pushTransaction({
+        type: 'duplicate',
+        label: 'Insert',
+        element,
+        sessionSnapshot: snapshotSession(session),
+      });
       stickyHover.current = element;
       updateHoverTarget(element);
       setCursor('grab');
       notifyCount();
     },
-    [notifyCount, updateHoverTarget]
+    [notifyCount, updateHoverTarget, pushTransaction]
   );
 
   useImperativeHandle(
@@ -284,6 +317,18 @@ export const EditOverlay = ({
 
   const handlePointerDown = useCallback(
     (event: PointerEvent) => {
+      // When a keyboard-initiated auto-drag (e.g. Cmd+C duplicate) is
+      // active, pointerDown parks the drag without producing a gesture
+      // completion.  Merge the final position into the pending duplicate
+      // transaction before parking so undo/redo captures the drop site.
+      const pendingDup = pendingDuplicateRef.current;
+      if (pendingDup) {
+        const state = machine.getState();
+        if (state.type === 'drag' && state.session.el === pendingDup.element) {
+          pendingDup.sessionSnapshot = snapshotSession(state.session);
+          pendingDuplicateRef.current = null;
+        }
+      }
       machine.handlePointerDown(event);
     },
     [machine]
@@ -296,11 +341,24 @@ export const EditOverlay = ({
       // createDuplicate, don't overwrite it with a drag.
       const currentState = machine.getState();
       if (currentState.type !== 'idle' && currentState.type !== 'hover') {
+        // Clean up the orphaned clone so it doesn't linger in the DOM.
+        const orphanSession = registry.current.get(duplicate);
+        if (orphanSession) {
+          registry.current.delete(orphanSession);
+        }
+        duplicate.remove();
         notifyCount();
         return;
       }
       const session = registry.current.get(duplicate);
       if (session) {
+        const tx = pushTransaction({
+          type: 'duplicate',
+          label: 'Duplicate',
+          element: duplicate,
+          sessionSnapshot: snapshotSession(session),
+        }) as DuplicateTransaction;
+        pendingDuplicateRef.current = tx;
         const rect = duplicate.getBoundingClientRect();
         const cx = rect.left + rect.width / 2;
         const cy = rect.top + rect.height / 2;
@@ -311,14 +369,51 @@ export const EditOverlay = ({
       setCursor('grabbing');
       notifyCount();
     },
-    [zIndex.clone, clearLock, notifyCount, updateHoverTarget, machine]
+    [zIndex.clone, clearLock, notifyCount, updateHoverTarget, machine, pushTransaction]
   );
 
   const handlePointerUp = useCallback(
     (event: PointerEvent) => {
-      machine.handlePointerUp(event);
+      const completion = machine.handlePointerUp(event);
+      if (!completion) return;
+
+      if (completion.gesture === 'move') {
+        if (completion.isNewClone && completion.referenceEl) {
+          pushTransaction({
+            type: 'clone',
+            label: 'Clone',
+            element: completion.target,
+            sessionSnapshot: snapshotSession(completion.session),
+            referenceEl: completion.referenceEl,
+          });
+        }
+
+        const pendingDup = pendingDuplicateRef.current;
+        if (pendingDup && pendingDup.element === completion.target) {
+          // Merge the auto-drag into the duplicate transaction so
+          // undo/redo treats creation + placement as a single action.
+          pendingDup.sessionSnapshot = snapshotSession(completion.session);
+          pendingDuplicateRef.current = null;
+        } else {
+          pushTransaction({
+            type: 'move',
+            label: 'Move',
+            target: completion.target,
+            before: completion.before,
+            after: completion.after,
+          });
+        }
+      } else if (completion.gesture === 'resize') {
+        pushTransaction({
+          type: 'resize',
+          label: 'Resize',
+          target: completion.target,
+          before: completion.before,
+          after: completion.after,
+        });
+      }
     },
-    [machine]
+    [machine, pushTransaction]
   );
 
   const handleKeydown = useCallback(
@@ -353,9 +448,29 @@ export const EditOverlay = ({
         setEditModalTarget(currentHover);
         setCursor('');
         updateHoverTarget(null);
+        return;
+      }
+
+      if (isUndoShortcut(event)) {
+        event.preventDefault();
+        event.stopPropagation();
+        undo();
+        stickyHover.current = null;
+        updateHoverTarget(null);
+        notifyCount();
+        return;
+      }
+
+      if (isRedoShortcut(event)) {
+        event.preventDefault();
+        event.stopPropagation();
+        redo();
+        stickyHover.current = null;
+        updateHoverTarget(null);
+        notifyCount();
       }
     },
-    [setIsEditMode, deleteElement, duplicateAndDrag, updateHoverTarget]
+    [setIsEditMode, deleteElement, duplicateAndDrag, updateHoverTarget, undo, redo, notifyCount]
   );
 
   const handleClick = useCallback((event: MouseEvent) => {
@@ -370,6 +485,7 @@ export const EditOverlay = ({
       updateHoverTarget(null);
       machine.abortDrag();
       stickyHover.current = null;
+      pendingDuplicateRef.current = null;
     }
   }, [isActive, machine, updateHoverTarget]);
 
@@ -423,12 +539,44 @@ export const EditOverlay = ({
       savedSourceChanges: SourceChange[]
     ) => {
       if (editModalTarget) {
-        applyEdits(editModalTarget, savedStyleChanges, savedTextChanges, savedSourceChanges);
+        const session = registry.current.getOrCreate(editModalTarget);
+
+        // Shared mutable arrays: applyEditChanges populates them, and the
+        // transaction's undoRecords references them so the edit executor's
+        // reverse path can read the captured originals.
+        const styleEdits: StyleEdit[] = [];
+        const textEdits: TextEdit[] = [];
+        const sourceEdits: SourceEdit[] = [];
+
+        applyEditChanges(
+          savedStyleChanges,
+          savedTextChanges,
+          savedSourceChanges,
+          styleEdits,
+          textEdits,
+          sourceEdits
+        );
+
+        // Also append to the session's edit arrays so resetAll / removeSession
+        // can revert all edits when the user leaves edit mode.
+        session.styleEdits.push(...styleEdits);
+        session.textEdits.push(...textEdits);
+        session.sourceEdits.push(...sourceEdits);
+
+        pushTransaction({
+          type: 'edit',
+          label: 'Edit',
+          target: editModalTarget,
+          styleChanges: savedStyleChanges,
+          textChanges: savedTextChanges,
+          sourceChanges: savedSourceChanges,
+          undoRecords: { styleEdits, textEdits, sourceEdits },
+        });
       }
       setEditModalTarget(null);
       notifyCount();
     },
-    [editModalTarget, notifyCount, applyEdits]
+    [editModalTarget, notifyCount, pushTransaction]
   );
 
   const handleDuplicate = useCallback(() => {

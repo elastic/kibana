@@ -39,11 +39,6 @@ export const parseTokenVar = (value: string): string | undefined => {
 };
 
 /**
- * Test whether a CSS value is a design-tool token var reference.
- */
-export const isTokenVar = (value: string): boolean => value.startsWith('var(--dt-');
-
-/**
  * Inject or update the `<style>` element with CSS custom properties
  * for every EUI color token in the current color mode.
  *
@@ -81,11 +76,4 @@ export const syncTokenStylesheet = (): void => {
 
   el.textContent = css;
   el.dataset.devtoolColorMode = mode;
-};
-
-/**
- * Remove the stylesheet from the document. Called during teardown.
- */
-export const removeTokenStylesheet = (): void => {
-  findStyleEl()?.remove();
 };

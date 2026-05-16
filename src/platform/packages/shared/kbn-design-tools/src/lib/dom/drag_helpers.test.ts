@@ -8,55 +8,14 @@
  */
 
 import { DEVTOOL_MANAGED_ATTR } from '../constants';
-import type { LayoutConfig } from '../layout/layout_config';
-import type { ElementSession } from './element_registry';
 import type { DragState } from './interaction_state';
+import type { ElementRegistry } from './element_registry';
 import { startDragFromSession, findManagedSession, applyDragMove } from './drag_helpers';
+import { makeRect, makeSession, makeLayoutConfig } from '../tests/helpers';
 
-const makeRect = (overrides: Partial<DOMRect> = {}): DOMRect => ({
-  x: 0,
-  y: 0,
-  left: 100,
-  top: 200,
-  width: 80,
-  height: 40,
-  right: 180,
-  bottom: 240,
-  toJSON: jest.fn(),
-  ...overrides,
-});
-
-const makeSession = (overrides: Partial<ElementSession> = {}): ElementSession => ({
-  el: document.createElement('div'),
-  dx: 0,
-  dy: 0,
-  dw: 0,
-  dh: 0,
-  originalRect: makeRect(),
-  isDuplicate: false,
-  styleEdits: [],
-  textEdits: [],
-  sourceEdits: [],
-  ...overrides,
-});
-
-const makeLayoutConfig = (overrides: Partial<LayoutConfig> = {}): LayoutConfig => ({
-  layoutType: 'grid',
-  count: 12,
-  alignType: 'stretch',
-  rowAlignType: 'stretch',
-  cellSize: 8,
-  width: 0,
-  height: 0,
-  gutterSize: 16,
-  marginSize: 16,
-  color: '#FF00FF1A',
-  ...overrides,
-});
-
-describe('drag_helpers', () => {
+describe('dragHelpers', () => {
   describe('startDragFromSession', () => {
-    it('returns a DragState with correct start coordinates', () => {
+    it('should return a DragState with correct start coordinates', () => {
       const session = makeSession({ dx: 10, dy: 20 });
       const result = startDragFromSession(session, 500, 300);
 
@@ -69,27 +28,27 @@ describe('drag_helpers', () => {
   });
 
   describe('findManagedSession', () => {
-    it('returns null for unmanaged elements', () => {
+    it('should return null for unmanaged elements', () => {
       const el = document.createElement('div');
-      const registry = { get: jest.fn() } as any;
+      const registry = { get: jest.fn() } as unknown as ElementRegistry;
 
       expect(findManagedSession(el, registry)).toBeNull();
       expect(registry.get).not.toHaveBeenCalled();
     });
 
-    it('returns the session when the element is managed', () => {
+    it('should return the session when the element is managed', () => {
       const el = document.createElement('div');
       el.setAttribute(DEVTOOL_MANAGED_ATTR, '');
       const session = makeSession();
-      const registry = { get: jest.fn().mockReturnValue(session) } as any;
+      const registry = { get: jest.fn().mockReturnValue(session) } as unknown as ElementRegistry;
 
       expect(findManagedSession(el, registry)).toBe(session);
     });
 
-    it('returns null when the element is not tracked in the registry', () => {
+    it('should return null when the element is not tracked in the registry', () => {
       const el = document.createElement('div');
       el.setAttribute(DEVTOOL_MANAGED_ATTR, '');
-      const registry = { get: jest.fn().mockReturnValue(undefined) } as any;
+      const registry = { get: jest.fn().mockReturnValue(undefined) } as unknown as ElementRegistry;
 
       expect(findManagedSession(el, registry)).toBeNull();
     });
@@ -109,7 +68,7 @@ describe('drag_helpers', () => {
       };
     };
 
-    it('applies translate based on pointer delta', () => {
+    it('should apply translate based on pointer delta', () => {
       const session = makeSession();
       const state = makeState({ session, startX: 100, startY: 200 });
 
@@ -125,7 +84,7 @@ describe('drag_helpers', () => {
       expect(session.el.style.transform).toContain('translate');
     });
 
-    it('accumulates base offset from prior gestures', () => {
+    it('should accumulate base offset from prior gestures', () => {
       const session = makeSession({ dx: 20, dy: 30 });
       const state = makeState({
         session,
@@ -145,7 +104,7 @@ describe('drag_helpers', () => {
       expect(session.dy).toBe(40);
     });
 
-    it('applies snap-to-grid when shift is not held and layout is visible', () => {
+    it('should apply snap-to-grid when shift is not held and layout is visible', () => {
       const session = makeSession({ originalRect: makeRect({ left: 0, top: 0 }) });
       const state = makeState({ session, startX: 0, startY: 0 });
       const config = makeLayoutConfig({ cellSize: 10 });
@@ -160,7 +119,7 @@ describe('drag_helpers', () => {
       expect(session.dy).toBe(20);
     });
 
-    it('accounts for scale from prior resize (dw/dh)', () => {
+    it('should account for scale from prior resize (dw/dh)', () => {
       const rect = makeRect({ width: 100, height: 50 });
       // Session has a prior resize of +20 width, +10 height
       const session = makeSession({ dw: 20, dh: 10, originalRect: rect });

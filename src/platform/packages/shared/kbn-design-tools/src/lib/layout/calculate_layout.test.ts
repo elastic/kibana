@@ -8,17 +8,16 @@
  */
 
 import { calculateColumnLayout, calculateRowLayout } from './calculate_layout';
-import type { LayoutConfig } from './layout_config';
-import { getDefaultLayoutConfig } from './layout_config';
-
-const makeConfig = (overrides: Partial<LayoutConfig> = {}): LayoutConfig => ({
-  ...getDefaultLayoutConfig(16),
-  ...overrides,
-});
+import { makeLayoutConfig } from '../tests/helpers';
 
 describe('calculateColumnLayout', () => {
   it('should calculate stretch columns', () => {
-    const config = makeConfig({ alignType: 'stretch', count: 4, gutterSize: 8, marginSize: 16 });
+    const config = makeLayoutConfig({
+      alignType: 'stretch',
+      count: 4,
+      gutterSize: 8,
+      marginSize: 16,
+    });
     const { columnWidth, offsetLeft } = calculateColumnLayout(config, 1000);
 
     // available = 1000 - 2*16 = 968, totalGutter = 8*3 = 24, columnWidth = (968-24)/4 = 236
@@ -27,7 +26,7 @@ describe('calculateColumnLayout', () => {
   });
 
   it('should calculate center-aligned columns', () => {
-    const config = makeConfig({ alignType: 'center', count: 3, width: 100, gutterSize: 10 });
+    const config = makeLayoutConfig({ alignType: 'center', count: 3, width: 100, gutterSize: 10 });
     const { columnWidth, offsetLeft } = calculateColumnLayout(config, 800);
 
     // totalWidth = 3*100 + 2*10 = 320, offsetLeft = (800-320)/2 = 240
@@ -36,7 +35,7 @@ describe('calculateColumnLayout', () => {
   });
 
   it('should calculate left-aligned columns', () => {
-    const config = makeConfig({
+    const config = makeLayoutConfig({
       alignType: 'left',
       count: 2,
       width: 120,
@@ -50,7 +49,7 @@ describe('calculateColumnLayout', () => {
   });
 
   it('should calculate right-aligned columns', () => {
-    const config = makeConfig({
+    const config = makeLayoutConfig({
       alignType: 'right',
       count: 2,
       width: 100,
@@ -65,14 +64,19 @@ describe('calculateColumnLayout', () => {
   });
 
   it('should default width to 100 when width is 0', () => {
-    const config = makeConfig({ alignType: 'center', count: 2, width: 0, gutterSize: 0 });
+    const config = makeLayoutConfig({ alignType: 'center', count: 2, width: 0, gutterSize: 0 });
     const { columnWidth } = calculateColumnLayout(config, 400);
 
     expect(columnWidth).toBe(100);
   });
 
   it('should clamp count to at least 1', () => {
-    const config = makeConfig({ alignType: 'stretch', count: 0, gutterSize: 8, marginSize: 16 });
+    const config = makeLayoutConfig({
+      alignType: 'stretch',
+      count: 0,
+      gutterSize: 8,
+      marginSize: 16,
+    });
     const { columnWidth } = calculateColumnLayout(config, 1000);
 
     // count clamped to 1: available = 968, gutter = 0, width = 968
@@ -80,7 +84,12 @@ describe('calculateColumnLayout', () => {
   });
 
   it('should clamp column width to 0 when margins exceed viewport', () => {
-    const config = makeConfig({ alignType: 'stretch', count: 4, gutterSize: 8, marginSize: 600 });
+    const config = makeLayoutConfig({
+      alignType: 'stretch',
+      count: 4,
+      gutterSize: 8,
+      marginSize: 600,
+    });
     const { columnWidth } = calculateColumnLayout(config, 1000);
 
     // available = max(0, 1000 - 1200) = 0, width = max(0, (0 - 24)/4) = 0
@@ -90,7 +99,7 @@ describe('calculateColumnLayout', () => {
 
 describe('calculateRowLayout', () => {
   it('should calculate stretch rows', () => {
-    const config = makeConfig({
+    const config = makeLayoutConfig({
       rowAlignType: 'stretch',
       count: 3,
       gutterSize: 10,
@@ -104,7 +113,12 @@ describe('calculateRowLayout', () => {
   });
 
   it('should calculate center-aligned rows', () => {
-    const config = makeConfig({ rowAlignType: 'center', count: 2, height: 80, gutterSize: 10 });
+    const config = makeLayoutConfig({
+      rowAlignType: 'center',
+      count: 2,
+      height: 80,
+      gutterSize: 10,
+    });
     const { rowHeight, offsetTop } = calculateRowLayout(config, 600);
 
     // totalHeight = 2*80 + 1*10 = 170, offsetTop = (600-170)/2 = 215
@@ -113,7 +127,7 @@ describe('calculateRowLayout', () => {
   });
 
   it('should calculate top-aligned rows', () => {
-    const config = makeConfig({
+    const config = makeLayoutConfig({
       rowAlignType: 'top',
       count: 2,
       height: 100,
@@ -127,7 +141,7 @@ describe('calculateRowLayout', () => {
   });
 
   it('should calculate bottom-aligned rows', () => {
-    const config = makeConfig({
+    const config = makeLayoutConfig({
       rowAlignType: 'bottom',
       count: 2,
       height: 100,
@@ -142,14 +156,14 @@ describe('calculateRowLayout', () => {
   });
 
   it('should default height to 100 when height is 0', () => {
-    const config = makeConfig({ rowAlignType: 'center', count: 2, height: 0, gutterSize: 0 });
+    const config = makeLayoutConfig({ rowAlignType: 'center', count: 2, height: 0, gutterSize: 0 });
     const { rowHeight } = calculateRowLayout(config, 400);
 
     expect(rowHeight).toBe(100);
   });
 
   it('should clamp count to at least 1', () => {
-    const config = makeConfig({
+    const config = makeLayoutConfig({
       rowAlignType: 'stretch',
       count: 0,
       gutterSize: 10,
@@ -162,7 +176,7 @@ describe('calculateRowLayout', () => {
   });
 
   it('should clamp row height to 0 when margins exceed viewport', () => {
-    const config = makeConfig({
+    const config = makeLayoutConfig({
       rowAlignType: 'stretch',
       count: 3,
       gutterSize: 10,

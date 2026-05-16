@@ -13,8 +13,10 @@ import { css } from '@emotion/css';
 import { EuiPortal, useResizeObserver } from '@elastic/eui';
 import type { LayoutConfig } from '../../../lib/layout/layout_config';
 import { LAYOUT_OVERLAY_ID, DEVELOPER_TOOLBAR_HEIGHT } from '../../../lib/constants';
-import { useOverlayZIndex } from '../../../hooks';
-import { GridPattern, RowPattern, ColumnPattern } from '.';
+import { useOverlayZIndex } from '../../../hooks/use_overlay_z_index';
+import { GridPattern } from './grid_pattern';
+import { RowPattern } from './row_pattern';
+import { ColumnPattern } from './column_pattern';
 
 interface Props {
   layoutConfig: LayoutConfig;

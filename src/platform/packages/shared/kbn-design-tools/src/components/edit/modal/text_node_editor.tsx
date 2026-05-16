@@ -14,6 +14,8 @@ import {
   EuiFlexItem,
   EuiComboBox,
   EuiSelect,
+  EuiButtonIcon,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
@@ -41,6 +43,10 @@ export interface TextNodeEntry {
   color: string;
   fontSize: string;
   fontWeight: string;
+  originalText: string;
+  originalColor: string;
+  originalFontSize: string;
+  originalFontWeight: string;
 }
 
 interface Props {
@@ -54,10 +60,11 @@ interface Props {
       fontWeight?: string;
     }
   ) => void;
+  onReset?: (index: number) => void;
   onFocus?: (index: number) => void;
 }
 
-export const TextNodeEditor = ({ entries, onChange, onFocus }: Props) => {
+export const TextNodeEditor = ({ entries, onChange, onReset, onFocus }: Props) => {
   const { euiTheme } = useEuiTheme();
 
   const fontSizeOptions: Array<EuiComboBoxOptionOption<string>> = useMemo(() => {
@@ -184,6 +191,29 @@ export const TextNodeEditor = ({ entries, onChange, onFocus }: Props) => {
                     compressed
                   />
                 </div>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiToolTip
+                  content={i18n.translate('kbnDesignTools.edit.modal.resetText', {
+                    defaultMessage: 'Reset to original value',
+                  })}
+                >
+                  <EuiButtonIcon
+                    iconType="undo"
+                    aria-label={i18n.translate('kbnDesignTools.edit.modal.resetTextAria', {
+                      defaultMessage: 'Reset text {index} to original value',
+                      values: { index: idx + 1 },
+                    })}
+                    onClick={() => onReset?.(idx)}
+                    disabled={
+                      entry.text === entry.originalText &&
+                      entry.color === entry.originalColor &&
+                      entry.fontSize === entry.originalFontSize &&
+                      entry.fontWeight === entry.originalFontWeight
+                    }
+                    size="s"
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFormRow>

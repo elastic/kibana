@@ -8,7 +8,7 @@
  */
 
 import React, { createRef } from 'react';
-import { cleanup, act } from '@testing-library/react';
+import { act, fireEvent } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import {
   DEVELOPER_TOOLBAR_ID,
@@ -18,54 +18,9 @@ import {
 import { getDefaultLayoutConfig } from '../../lib/layout/layout_config';
 import { EditOverlay } from './edit_overlay';
 import type { EditOverlayHandle } from './edit_overlay';
+import '../../lib/tests/mocks';
 
 const defaultLayoutConfig = getDefaultLayoutConfig(16);
-
-// jsdom doesn't provide PointerEvent — polyfill with MouseEvent
-class PointerEventPolyfill extends MouseEvent {
-  readonly pointerId: number;
-  constructor(type: string, params: PointerEventInit = {}) {
-    super(type, params);
-    this.pointerId = params.pointerId ?? 0;
-  }
-}
-if (typeof globalThis.PointerEvent === 'undefined') {
-  (globalThis as unknown as Record<string, unknown>).PointerEvent =
-    PointerEventPolyfill as unknown as typeof PointerEvent;
-}
-
-const firePointerMove = (x: number, y: number, shiftKey = true) => {
-  const event = new PointerEvent('pointermove', {
-    clientX: x,
-    clientY: y,
-    shiftKey,
-    bubbles: true,
-  });
-  document.dispatchEvent(event);
-};
-
-const firePointerDown = (x: number, y: number) => {
-  const event = new PointerEvent('pointerdown', {
-    clientX: x,
-    clientY: y,
-    bubbles: true,
-  });
-  document.dispatchEvent(event);
-};
-
-const firePointerUp = (x: number, y: number) => {
-  const event = new PointerEvent('pointerup', {
-    clientX: x,
-    clientY: y,
-    bubbles: true,
-  });
-  document.dispatchEvent(event);
-};
-
-const fireKeydown = (key: string) => {
-  const event = new KeyboardEvent('keydown', { key, bubbles: true });
-  document.dispatchEvent(event);
-};
 
 describe('EditOverlay', () => {
   let setIsEditMode: jest.Mock;
@@ -86,28 +41,27 @@ describe('EditOverlay', () => {
     target = document.createElement('div');
     target.setAttribute('data-test-subj', 'movableTarget');
     target.style.transform = '';
-    target.getBoundingClientRect = () =>
-      ({
-        top: 50,
-        left: 50,
-        width: 100,
-        height: 40,
-        right: 150,
-        bottom: 90,
-        x: 50,
-        y: 50,
-        toJSON: () => {},
-      } as DOMRect);
+    target.getBoundingClientRect = () => ({
+      top: 50,
+      left: 50,
+      width: 100,
+      height: 40,
+      right: 150,
+      bottom: 90,
+      x: 50,
+      y: 50,
+      toJSON: () => {},
+    });
     document.body.appendChild(target);
   });
 
-  afterEach(() => {
-    cleanup();
+  afterEach(async () => {
+    await act(async () => {
+      target.remove();
+      document.querySelectorAll(`[${DEVTOOL_MANAGED_ATTR}]`).forEach((el) => el.remove());
+    });
     document.elementsFromPoint = originalElementsFromPoint;
     window.requestAnimationFrame = originalRAF;
-    target.remove();
-    // Clean up any clones
-    document.querySelectorAll(`[${DEVTOOL_MANAGED_ATTR}]`).forEach((el) => el.remove());
   });
 
   const getClone = () => document.querySelector(`[${DEVTOOL_MANAGED_ATTR}]`) as HTMLElement | null;
@@ -156,7 +110,7 @@ describe('EditOverlay', () => {
     );
 
     act(() => {
-      firePointerMove(75, 60);
+      fireEvent.pointerMove(document, { clientX: 75, clientY: 60, shiftKey: true });
     });
 
     const outline = document.querySelector('[data-test-subj="editOverlayOutline"]');
@@ -180,7 +134,7 @@ describe('EditOverlay', () => {
     );
 
     act(() => {
-      firePointerMove(75, 60);
+      fireEvent.pointerMove(document, { clientX: 75, clientY: 60, shiftKey: true });
     });
 
     const outline = document.querySelector('[data-test-subj="editOverlayOutline"]');
@@ -202,12 +156,12 @@ describe('EditOverlay', () => {
     );
 
     act(() => {
-      firePointerDown(75, 60);
+      fireEvent.pointerDown(document, { clientX: 75, clientY: 60 });
     });
 
     // Move pointer beyond threshold to promote pending-drag to real drag
     act(() => {
-      firePointerMove(80, 65);
+      fireEvent.pointerMove(document, { clientX: 80, clientY: 65, shiftKey: true });
     });
 
     // Original should be hidden, clone should exist
@@ -216,7 +170,7 @@ describe('EditOverlay', () => {
     expect(clone).toBeInTheDocument();
 
     act(() => {
-      firePointerMove(95, 80);
+      fireEvent.pointerMove(document, { clientX: 95, clientY: 80, shiftKey: true });
     });
 
     // Clone should be repositioned via transform (base left/top stays at original rect)
@@ -239,11 +193,11 @@ describe('EditOverlay', () => {
     );
 
     act(() => {
-      firePointerDown(75, 60);
+      fireEvent.pointerDown(document, { clientX: 75, clientY: 60 });
     });
 
     act(() => {
-      firePointerMove(95, 80);
+      fireEvent.pointerMove(document, { clientX: 95, clientY: 80, shiftKey: true });
     });
 
     // Original hidden, clone visible
@@ -251,7 +205,7 @@ describe('EditOverlay', () => {
     expect(getClone()).toBeInTheDocument();
 
     act(() => {
-      firePointerUp(95, 80);
+      fireEvent.pointerUp(document, { clientX: 95, clientY: 80 });
     });
 
     act(() => {
@@ -277,11 +231,11 @@ describe('EditOverlay', () => {
     );
 
     act(() => {
-      firePointerDown(75, 60);
+      fireEvent.pointerDown(document, { clientX: 75, clientY: 60 });
     });
 
     act(() => {
-      firePointerMove(85, 70);
+      fireEvent.pointerMove(document, { clientX: 85, clientY: 70, shiftKey: true });
     });
 
     const clone = getClone();
@@ -289,12 +243,12 @@ describe('EditOverlay', () => {
     expect(clone!.style.transform).toBe('translate(10px, 10px)');
 
     act(() => {
-      firePointerUp(85, 70);
+      fireEvent.pointerUp(document, { clientX: 85, clientY: 70 });
     });
 
     // Moving after release should not change the clone's position
     act(() => {
-      firePointerMove(200, 200);
+      fireEvent.pointerMove(document, { clientX: 200, clientY: 200, shiftKey: true });
     });
 
     expect(clone!.style.transform).toBe('translate(10px, 10px)');
@@ -314,13 +268,13 @@ describe('EditOverlay', () => {
 
     // First drag: move 10,10
     act(() => {
-      firePointerDown(75, 60);
+      fireEvent.pointerDown(document, { clientX: 75, clientY: 60 });
     });
     act(() => {
-      firePointerMove(85, 70);
+      fireEvent.pointerMove(document, { clientX: 85, clientY: 70, shiftKey: true });
     });
     act(() => {
-      firePointerUp(85, 70);
+      fireEvent.pointerUp(document, { clientX: 85, clientY: 70 });
     });
 
     const clone = getClone();
@@ -328,28 +282,27 @@ describe('EditOverlay', () => {
     expect(clone!.style.transform).toBe('translate(10px, 10px)');
 
     // Mock the clone's bounding rect for the re-grab (jsdom returns 0,0 by default)
-    clone!.getBoundingClientRect = () =>
-      ({
-        top: 60,
-        left: 60,
-        width: 100,
-        height: 40,
-        right: 160,
-        bottom: 100,
-        x: 60,
-        y: 60,
-        toJSON: () => {},
-      } as DOMRect);
+    clone!.getBoundingClientRect = () => ({
+      top: 60,
+      left: 60,
+      width: 100,
+      height: 40,
+      right: 160,
+      bottom: 100,
+      x: 60,
+      y: 60,
+      toJSON: () => {},
+    });
 
     // Second drag: re-grab the clone
     // Mock elementsFromPoint to return the clone this time
     document.elementsFromPoint = jest.fn().mockReturnValue([clone]);
 
     act(() => {
-      firePointerDown(85, 70);
+      fireEvent.pointerDown(document, { clientX: 85, clientY: 70 });
     });
     act(() => {
-      firePointerMove(105, 90);
+      fireEvent.pointerMove(document, { clientX: 105, clientY: 90, shiftKey: true });
     });
 
     // Total offset: base(10,10) + mouse delta(20,20) = (30,30)
@@ -369,20 +322,20 @@ describe('EditOverlay', () => {
     );
 
     act(() => {
-      firePointerDown(75, 60);
+      fireEvent.pointerDown(document, { clientX: 75, clientY: 60 });
     });
     act(() => {
-      firePointerMove(95, 80);
+      fireEvent.pointerMove(document, { clientX: 95, clientY: 80, shiftKey: true });
     });
     act(() => {
-      firePointerUp(95, 80);
+      fireEvent.pointerUp(document, { clientX: 95, clientY: 80 });
     });
 
     expect(target.style.visibility).toBe('hidden');
     expect(getClone()).toBeInTheDocument();
 
     act(() => {
-      fireKeydown('Escape');
+      fireEvent.keyDown(document, { key: 'Escape' });
     });
 
     // Edit mode exited but changes persist — clone stays, original stays hidden
@@ -408,17 +361,17 @@ describe('EditOverlay', () => {
     );
 
     act(() => {
-      firePointerDown(75, 60);
+      fireEvent.pointerDown(document, { clientX: 75, clientY: 60 });
     });
     act(() => {
-      firePointerMove(95, 80);
+      fireEvent.pointerMove(document, { clientX: 95, clientY: 80, shiftKey: true });
     });
     act(() => {
-      firePointerUp(95, 80);
+      fireEvent.pointerUp(document, { clientX: 95, clientY: 80 });
     });
 
     act(() => {
-      fireKeydown('Escape');
+      fireEvent.keyDown(document, { key: 'Escape' });
     });
 
     // Should NOT exit edit mode — measure overlay takes priority
@@ -475,12 +428,12 @@ describe('EditOverlay', () => {
     );
 
     act(() => {
-      firePointerDown(75, 60);
+      fireEvent.pointerDown(document, { clientX: 75, clientY: 60 });
     });
 
     // Move pointer beyond threshold to promote pending-drag to real drag
     act(() => {
-      firePointerMove(80, 65);
+      fireEvent.pointerMove(document, { clientX: 80, clientY: 65, shiftKey: true });
     });
 
     expect(target.style.visibility).toBe('hidden');

@@ -18,39 +18,36 @@ import { buildTransform } from './resize_helpers';
 /**
  * Begin dragging an existing managed element (re-grab).
  */
-export const startDragFromSession = (
-  session: ElementSession,
-  clientX: number,
-  clientY: number
-): DragState => {
-  // Close any portaled EUI popovers inside the element before dragging.
-  // EUI renders popover panels as portals on document.body, so they stay
-  // anchored to the old position when the element moves.
-  //
-  // We look up the controlled panel *inside* the managed element first
-  // (via querySelector) rather than using document.getElementById, because
-  // duplicated elements may share the same id attributes and getElementById
-  // would return the wrong (original) panel.
-  //
-  // Inline expansions (tree view nodes, accordions) have their controlled
-  // content as a descendant and are left alone. Only truly portaled panels
-  // (not inside session.el) are detached from the DOM.
-  const expandedToggles = session.el.querySelectorAll<HTMLElement>('[aria-expanded="true"]');
+/**
+ * Close portaled EUI popovers inside an element.
+ *
+ * EUI renders popover panels as portals on `document.body`, so they stay
+ * anchored to the old position when the element moves or is removed.
+ * This detaches any such panels and collapses the controlling toggle.
+ */
+export const closePortaledPopovers = (el: HTMLElement): void => {
+  const expandedToggles = el.querySelectorAll<HTMLElement>('[aria-expanded="true"]');
   for (const toggle of expandedToggles) {
     const controlsId = toggle.getAttribute('aria-controls');
     if (!controlsId) continue;
 
-    // If the panel lives inside the managed element it's inline content — skip.
     const escapedId = CSS.escape(controlsId);
-    if (session.el.querySelector(`#${escapedId}`)) continue;
+    if (el.querySelector(`#${escapedId}`)) continue;
 
-    // The panel is portaled outside — detach it and update the toggle.
     const panel = document.getElementById(controlsId);
     if (panel) {
       panel.remove();
       toggle.setAttribute('aria-expanded', 'false');
     }
   }
+};
+
+export const startDragFromSession = (
+  session: ElementSession,
+  clientX: number,
+  clientY: number
+): DragState => {
+  closePortaledPopovers(session.el);
 
   session.el.style.pointerEvents = 'none';
   session.el.style.willChange = 'transform';

@@ -8,12 +8,12 @@
  */
 
 import React from 'react';
-import { screen, cleanup } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { LayoutSettingsPanel } from './layout_settings_panel';
-import { getDefaultLayoutConfig } from '../../../lib/layout';
-import type { LayoutConfig } from '../../../lib/layout';
+import { getDefaultLayoutConfig } from '../../../lib/layout/layout_config';
+import type { LayoutConfig } from '../../../lib/layout/layout_config';
 
 describe('LayoutSettingsPanel', () => {
   const defaultConfig = getDefaultLayoutConfig(16);
@@ -25,21 +25,17 @@ describe('LayoutSettingsPanel', () => {
     setConfig = jest.fn();
   });
 
-  afterEach(() => {
-    cleanup();
-  });
-
   it('should render all form fields for columns layout', () => {
     renderWithI18n(
       <LayoutSettingsPanel config={config} defaultConfig={defaultConfig} setConfig={setConfig} />
     );
 
-    expect(screen.getByText('Layout')).toBeInTheDocument();
-    expect(screen.getByText('Count')).toBeInTheDocument();
-    expect(screen.getByText('Align')).toBeInTheDocument();
-    expect(screen.getByText('Gutter')).toBeInTheDocument();
-    expect(screen.getByText('Margin')).toBeInTheDocument();
-    expect(screen.getByText('Color')).toBeInTheDocument();
+    expect(screen.getByTestId('layoutSettingsLayoutType')).toBeInTheDocument();
+    expect(screen.getByTestId('layoutSettingsCount')).toBeInTheDocument();
+    expect(screen.getByTestId('layoutSettingsAlign')).toBeInTheDocument();
+    expect(screen.getByTestId('layoutSettingsGutter')).toBeInTheDocument();
+    expect(screen.getByTestId('layoutSettingsMargin')).toBeInTheDocument();
+    expect(screen.getByTestId('layoutSettingsColor')).toBeInTheDocument();
   });
 
   it('should display current count value', () => {
@@ -76,7 +72,7 @@ describe('LayoutSettingsPanel', () => {
       />
     );
 
-    expect(screen.getByText('Width')).toBeInTheDocument();
+    expect(screen.getByTestId('layoutSettingsWidth')).toBeInTheDocument();
   });
 
   it('should hide Width field when columns layout with stretch align', () => {
@@ -88,7 +84,7 @@ describe('LayoutSettingsPanel', () => {
       />
     );
 
-    expect(screen.queryByText('Width')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('layoutSettingsWidth')).not.toBeInTheDocument();
   });
 
   it('should show Size field for grid layout and hide count/align/gutter/margin', () => {
@@ -100,11 +96,11 @@ describe('LayoutSettingsPanel', () => {
       />
     );
 
-    expect(screen.getByText('Size')).toBeInTheDocument();
-    expect(screen.queryByText('Count')).not.toBeInTheDocument();
-    expect(screen.queryByText('Align')).not.toBeInTheDocument();
-    expect(screen.queryByText('Gutter')).not.toBeInTheDocument();
-    expect(screen.queryByText('Margin')).not.toBeInTheDocument();
+    expect(screen.getByTestId('layoutSettingsCellSize')).toBeInTheDocument();
+    expect(screen.queryByTestId('layoutSettingsCount')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('layoutSettingsAlign')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('layoutSettingsGutter')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('layoutSettingsMargin')).not.toBeInTheDocument();
   });
 
   it('should show Height field for rows layout with non-stretch align', () => {
@@ -116,7 +112,7 @@ describe('LayoutSettingsPanel', () => {
       />
     );
 
-    expect(screen.getByText('Height')).toBeInTheDocument();
-    expect(screen.queryByText('Width')).not.toBeInTheDocument();
+    expect(screen.getByTestId('layoutSettingsHeight')).toBeInTheDocument();
+    expect(screen.queryByTestId('layoutSettingsWidth')).not.toBeInTheDocument();
   });
 });

@@ -30,12 +30,12 @@ describe('useHoverLock', () => {
     return el;
   };
 
-  it('returns false when no hover target is set', () => {
+  it('should return false when no hover target is set', () => {
     const { result } = renderHook(() => useHoverLock(null));
     expect(result.current.isInsideHoverLock(50, 60)).toBe(false);
   });
 
-  it('returns true for pointer in the controls zone below the element', () => {
+  it('should return true for pointer in the controls zone below the element', () => {
     const el = makeElement({ left: 10, top: 20, right: 110, bottom: 70 });
     const { result } = renderHook(() => useHoverLock(el));
 
@@ -44,7 +44,7 @@ describe('useHoverLock', () => {
     expect(result.current.isInsideHoverLock(50, y)).toBe(true);
   });
 
-  it('returns false for pointer above the element bottom', () => {
+  it('should return false for pointer above the element bottom', () => {
     const el = makeElement({ left: 10, top: 20, right: 110, bottom: 70 });
     const { result } = renderHook(() => useHoverLock(el));
 
@@ -52,7 +52,7 @@ describe('useHoverLock', () => {
     expect(result.current.isInsideHoverLock(50, 50)).toBe(false);
   });
 
-  it('returns false for pointer too far below the controls zone', () => {
+  it('should return false for pointer too far below the controls zone', () => {
     const el = makeElement({ left: 10, top: 20, right: 110, bottom: 70 });
     const { result } = renderHook(() => useHoverLock(el));
 
@@ -60,7 +60,7 @@ describe('useHoverLock', () => {
     expect(result.current.isInsideHoverLock(50, y)).toBe(false);
   });
 
-  it('respects horizontal padding', () => {
+  it('should respect horizontal padding', () => {
     const el = makeElement({ left: 10, top: 20, right: 110, bottom: 70 });
     const { result } = renderHook(() => useHoverLock(el));
 
@@ -71,7 +71,7 @@ describe('useHoverLock', () => {
     expect(result.current.isInsideHoverLock(10 - LOCK_PADDING, y)).toBe(true);
   });
 
-  it('clearLock makes isInsideHoverLock return false', () => {
+  it('should clearLock makes isInsideHoverLock return false', () => {
     const el = makeElement({ left: 10, top: 20, right: 110, bottom: 70 });
     const { result } = renderHook(() => useHoverLock(el));
 

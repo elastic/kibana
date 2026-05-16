@@ -20,7 +20,7 @@ describe('useDeleteElement', () => {
     jest.useRealTimers();
   });
 
-  it('soft-deletes an element by hiding it', () => {
+  it('should soft-deletes an element by hiding it', () => {
     const onDelete = jest.fn();
     const { result } = renderHook(() => useDeleteElement(onDelete));
     const el = document.createElement('div');
@@ -42,7 +42,7 @@ describe('useDeleteElement', () => {
     el.remove();
   });
 
-  it('preserves original transform in the hidden attribute', () => {
+  it('should preserve original transform in the hidden attribute', () => {
     const { result } = renderHook(() => useDeleteElement());
     const el = document.createElement('div');
     el.style.transform = 'translateX(10px)';
@@ -56,7 +56,7 @@ describe('useDeleteElement', () => {
     el.remove();
   });
 
-  it('refuses to delete BODY and HTML elements', () => {
+  it('should refuse to delete BODY and HTML elements', () => {
     const { result } = renderHook(() => useDeleteElement());
     const body = document.body;
 
@@ -67,7 +67,7 @@ describe('useDeleteElement', () => {
     expect(body.hasAttribute(DEVTOOL_HIDDEN_ATTR)).toBe(false);
   });
 
-  it('refuses to delete elements containing the developer toolbar', () => {
+  it('should refuse to delete elements containing the developer toolbar', () => {
     const { result } = renderHook(() => useDeleteElement());
     const wrapper = document.createElement('div');
     const toolbar = document.createElement('div');
@@ -83,7 +83,7 @@ describe('useDeleteElement', () => {
     wrapper.remove();
   });
 
-  it('restoreAll restores all deleted elements', () => {
+  it('should restoreAll restores all deleted elements', () => {
     const { result } = renderHook(() => useDeleteElement());
     const el1 = document.createElement('div');
     el1.style.transform = 'scale(2)';
@@ -114,7 +114,7 @@ describe('useDeleteElement', () => {
     el2.remove();
   });
 
-  it('tracks deleted count', () => {
+  it('should tracks deleted count', () => {
     const { result } = renderHook(() => useDeleteElement());
     const el = document.createElement('div');
     document.body.appendChild(el);

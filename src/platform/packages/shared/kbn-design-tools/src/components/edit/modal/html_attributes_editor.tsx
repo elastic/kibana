@@ -8,29 +8,53 @@
  */
 
 import React from 'react';
-import { EuiFormRow } from '@elastic/eui';
+import { EuiFormRow, EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiColorTokenSelect } from '../../eui_color_token_select';
 
 interface Props {
   color: string;
+  originalColor: string;
   onChange: (color: string) => void;
+  onReset?: () => void;
 }
 
-export const HtmlAttributesEditor = ({ color, onChange }: Props) => {
+export const HtmlAttributesEditor = ({ color, originalColor, onChange, onReset }: Props) => {
   return (
     <EuiFormRow
+      data-test-subj="editModalBackgroundColor"
       label={i18n.translate('kbnDesignTools.edit.modal.backgroundColor', {
         defaultMessage: 'Background color',
       })}
     >
-      <EuiColorTokenSelect
-        color={color || '#ffffff'}
-        onChange={onChange}
-        colorPickerLabel={i18n.translate('kbnDesignTools.edit.modal.backgroundColor', {
-          defaultMessage: 'Background color',
-        })}
-      />
+      <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+        <EuiFlexItem>
+          <EuiColorTokenSelect
+            color={color || '#ffffff'}
+            onChange={onChange}
+            colorPickerLabel={i18n.translate('kbnDesignTools.edit.modal.backgroundColor', {
+              defaultMessage: 'Background color',
+            })}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiToolTip
+            content={i18n.translate('kbnDesignTools.edit.modal.resetColor', {
+              defaultMessage: 'Reset to original color',
+            })}
+          >
+            <EuiButtonIcon
+              iconType="undo"
+              aria-label={i18n.translate('kbnDesignTools.edit.modal.resetColorAria', {
+                defaultMessage: 'Reset background color to original value',
+              })}
+              onClick={onReset}
+              disabled={color === originalColor}
+              size="s"
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiFormRow>
   );
 };

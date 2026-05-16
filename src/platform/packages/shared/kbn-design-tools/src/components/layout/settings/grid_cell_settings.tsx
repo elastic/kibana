@@ -10,7 +10,7 @@
 import React from 'react';
 import { EuiFormRow, EuiFieldNumber, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { LayoutConfig } from '../../../lib/layout';
+import type { LayoutConfig } from '../../../lib/layout/layout_config';
 
 interface Props {
   config: LayoutConfig;
@@ -22,6 +22,7 @@ export const GridCellSettings = ({ config, onChange }: Props) => {
 
   return (
     <EuiFormRow
+      data-test-subj="layoutSettingsCellSize"
       label={i18n.translate('kbnDesignTools.layout.settings.cellSize', {
         defaultMessage: 'Size',
       })}

@@ -10,24 +10,25 @@
 import { cloneElement } from './clone_element';
 import { DEVTOOL_MANAGED_ATTR } from '../constants';
 
+const CLONE_Z_INDEX = 9001;
+
 describe('cloneElement', () => {
   let target: HTMLDivElement;
 
   beforeEach(() => {
     target = document.createElement('div');
     target.textContent = 'hello';
-    target.getBoundingClientRect = () =>
-      ({
-        top: 10,
-        left: 20,
-        width: 100,
-        height: 40,
-        right: 120,
-        bottom: 50,
-        x: 20,
-        y: 10,
-        toJSON: () => {},
-      } as DOMRect);
+    target.getBoundingClientRect = () => ({
+      top: 10,
+      left: 20,
+      width: 100,
+      height: 40,
+      right: 120,
+      bottom: 50,
+      x: 20,
+      y: 10,
+      toJSON: () => {},
+    });
     document.body.appendChild(target);
   });
 
@@ -36,7 +37,7 @@ describe('cloneElement', () => {
   });
 
   it('should return a clone and the original rect', () => {
-    const { clone, rect } = cloneElement(target, 9001);
+    const { clone, rect } = cloneElement(target, CLONE_Z_INDEX);
 
     expect(clone).toBeInstanceOf(HTMLElement);
     expect(clone.textContent).toBe('hello');
@@ -45,7 +46,7 @@ describe('cloneElement', () => {
   });
 
   it('should set the clone to fixed position at the original viewport coordinates', () => {
-    const { clone } = cloneElement(target, 9001);
+    const { clone } = cloneElement(target, CLONE_Z_INDEX);
 
     expect(clone.style.position).toBe('fixed');
     expect(clone.style.left).toBe('20px');
@@ -55,7 +56,7 @@ describe('cloneElement', () => {
   });
 
   it('should set the devtool managed attribute', () => {
-    const { clone } = cloneElement(target, 9001);
+    const { clone } = cloneElement(target, CLONE_Z_INDEX);
 
     expect(clone.hasAttribute(DEVTOOL_MANAGED_ATTR)).toBe(true);
   });
@@ -65,7 +66,7 @@ describe('cloneElement', () => {
     child.textContent = 'child';
     target.appendChild(child);
 
-    const { clone } = cloneElement(target, 9001);
+    const { clone } = cloneElement(target, CLONE_Z_INDEX);
 
     expect(clone.querySelector('span')).not.toBeNull();
     expect(clone.querySelector('span')!.textContent).toBe('child');

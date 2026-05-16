@@ -18,9 +18,9 @@ import {
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
-import { useEuiColorTokens } from '../hooks';
-import type { EuiColorToken } from '../hooks';
-import { getPageColorMode } from '../lib/dom';
+import { useEuiColorTokens } from '../hooks/use_eui_color_tokens';
+import type { EuiColorToken } from '../hooks/use_eui_color_tokens';
+import { getPageColorMode } from '../lib/dom/get_page_color_mode';
 import { isTextToken, isBgToken } from '../lib/dom/color_token_lookup';
 import { getTokenVar } from '../lib/dom/color_token_stylesheet';
 

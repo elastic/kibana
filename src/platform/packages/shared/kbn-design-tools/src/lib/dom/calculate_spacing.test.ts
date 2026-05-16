@@ -8,23 +8,11 @@
  */
 
 import { calculateSpacingLines } from './calculate_spacing';
-
-const makeRect = (x: number, y: number, w: number, h: number): DOMRect =>
-  ({
-    left: x,
-    top: y,
-    right: x + w,
-    bottom: y + h,
-    width: w,
-    height: h,
-    x,
-    y,
-    toJSON: () => {},
-  } as DOMRect);
+import { makeRect } from '../tests/helpers';
 
 describe('calculateSpacingLines', () => {
   describe('side-by-side (horizontal gap)', () => {
-    it('returns a horizontal line between two horizontally separated elements', () => {
+    it('should return a horizontal line between two horizontally separated elements', () => {
       const anchor = makeRect(0, 0, 100, 50);
       const target = makeRect(150, 10, 100, 50);
 
@@ -37,7 +25,7 @@ describe('calculateSpacingLines', () => {
       expect(lines[0].x2).toBe(150);
     });
 
-    it('works regardless of element order', () => {
+    it('should work regardless of element order', () => {
       const anchor = makeRect(200, 0, 100, 50);
       const target = makeRect(0, 10, 100, 50);
 
@@ -50,7 +38,7 @@ describe('calculateSpacingLines', () => {
   });
 
   describe('stacked (vertical gap)', () => {
-    it('returns a vertical line between two vertically separated elements', () => {
+    it('should return a vertical line between two vertically separated elements', () => {
       const anchor = makeRect(10, 0, 100, 50);
       const target = makeRect(20, 80, 100, 50);
 
@@ -63,7 +51,7 @@ describe('calculateSpacingLines', () => {
       expect(lines[0].y2).toBe(80);
     });
 
-    it('works regardless of element order', () => {
+    it('should work regardless of element order', () => {
       const anchor = makeRect(10, 200, 100, 50);
       const target = makeRect(20, 0, 100, 50);
 
@@ -76,7 +64,7 @@ describe('calculateSpacingLines', () => {
   });
 
   describe('containment', () => {
-    it('returns up to 4 lines when one element contains the other', () => {
+    it('should return up to 4 lines when one element contains the other', () => {
       const outer = makeRect(0, 0, 200, 200);
       const inner = makeRect(30, 40, 100, 80);
 
@@ -92,16 +80,16 @@ describe('calculateSpacingLines', () => {
       expect(vertical).toHaveLength(2);
 
       // Left distance: 30
-      expect(horizontal.find((l) => l.distance === 30)).toBeTruthy();
+      expect(horizontal.find((l) => l.distance === 30)).toBeDefined();
       // Right distance: 200 - 130 = 70
-      expect(horizontal.find((l) => l.distance === 70)).toBeTruthy();
+      expect(horizontal.find((l) => l.distance === 70)).toBeDefined();
       // Top distance: 40
-      expect(vertical.find((l) => l.distance === 40)).toBeTruthy();
+      expect(vertical.find((l) => l.distance === 40)).toBeDefined();
       // Bottom distance: 200 - 120 = 80
-      expect(vertical.find((l) => l.distance === 80)).toBeTruthy();
+      expect(vertical.find((l) => l.distance === 80)).toBeDefined();
     });
 
-    it('works when inner element is the anchor', () => {
+    it('should work when inner element is the anchor', () => {
       const inner = makeRect(30, 40, 100, 80);
       const outer = makeRect(0, 0, 200, 200);
 
@@ -112,7 +100,7 @@ describe('calculateSpacingLines', () => {
   });
 
   describe('diagonal (no overlap)', () => {
-    it('returns empty array for diagonally separated elements', () => {
+    it('should return empty array for diagonally separated elements', () => {
       const anchor = makeRect(0, 0, 50, 50);
       const target = makeRect(100, 100, 50, 50);
 
@@ -123,7 +111,7 @@ describe('calculateSpacingLines', () => {
   });
 
   describe('partial overlap', () => {
-    it('returns empty array for partially overlapping elements', () => {
+    it('should return empty array for partially overlapping elements', () => {
       const anchor = makeRect(0, 0, 100, 100);
       const target = makeRect(50, 50, 100, 100);
 
@@ -134,7 +122,7 @@ describe('calculateSpacingLines', () => {
   });
 
   describe('edge cases', () => {
-    it('returns empty for touching elements with no gap', () => {
+    it('should return empty for touching elements with no gap', () => {
       const anchor = makeRect(0, 0, 100, 50);
       const target = makeRect(100, 10, 100, 50);
 
@@ -143,7 +131,7 @@ describe('calculateSpacingLines', () => {
       expect(lines).toHaveLength(0);
     });
 
-    it('handles containment with flush edges (zero distance)', () => {
+    it('should handle containment with flush edges (zero distance)', () => {
       const outer = makeRect(0, 0, 200, 200);
       const inner = makeRect(0, 0, 100, 100);
 

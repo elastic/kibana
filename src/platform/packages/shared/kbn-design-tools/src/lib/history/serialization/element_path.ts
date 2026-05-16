@@ -116,7 +116,7 @@ export const toPath = (el: Element): ElementPath => ({
  * Result of attempting to resolve an {@link ElementPath} back to a DOM
  * element.
  */
-export interface ResolveResult {
+interface ResolveResult {
   /** The resolved element, or `null` if the selector matched nothing. */
   element: Element | null;
   /**

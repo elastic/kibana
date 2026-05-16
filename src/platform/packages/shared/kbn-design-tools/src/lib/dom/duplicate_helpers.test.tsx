@@ -8,23 +8,9 @@
  */
 
 import React, { useState } from 'react';
-import { createRoot } from 'react-dom/client';
-import { flushSync } from 'react-dom';
+import { act } from '@testing-library/react';
 import { snapshotComponentState, restoreComponentState } from './duplicate_helpers';
-
-/**
- * Helper: render a React component into a container via createRoot (the same
- * mechanism used by renderEuiComponentLive) and return the container element.
- */
-const renderIntoContainer = (element: React.ReactElement): HTMLElement => {
-  const container = document.createElement('div');
-  document.body.appendChild(container);
-  const root = createRoot(container);
-  flushSync(() => {
-    root.render(element);
-  });
-  return container;
-};
+import { renderIntoContainer } from '../tests/helpers';
 
 /** Simple toggle component with a single useState. */
 const Toggle = ({ initial = false }: { initial?: boolean }) => {
@@ -55,14 +41,17 @@ describe('snapshotComponentState', () => {
     document.body.innerHTML = '';
   });
 
-  it('returns undefined for a plain DOM element (no React root)', () => {
+  it('should return undefined for a plain DOM element (no React root)', () => {
     const el = document.createElement('div');
     document.body.appendChild(el);
     expect(snapshotComponentState(el)).toBeUndefined();
   });
 
-  it('snapshots a single useState value', () => {
-    const container = renderIntoContainer(<Toggle initial={false} />);
+  it('should snapshot a single useState value', () => {
+    let container!: HTMLElement;
+    act(() => {
+      container = renderIntoContainer(<Toggle initial={false} />);
+    });
     const snapshot = snapshotComponentState(container);
 
     expect(snapshot).toBeDefined();
@@ -72,8 +61,11 @@ describe('snapshotComponentState', () => {
     expect(snapshot![0]).toContain(false);
   });
 
-  it('snapshots multiple useState values', () => {
-    const container = renderIntoContainer(<MultiState />);
+  it('should snapshot multiple useState values', () => {
+    let container!: HTMLElement;
+    act(() => {
+      container = renderIntoContainer(<MultiState />);
+    });
     const snapshot = snapshotComponentState(container);
 
     expect(snapshot).toBeDefined();
@@ -83,12 +75,15 @@ describe('snapshotComponentState', () => {
     expect(allValues).toContain('hello');
   });
 
-  it('captures changed state after user interaction', () => {
-    const container = renderIntoContainer(<Toggle initial={false} />);
+  it('should capture changed state after user interaction', () => {
+    let container!: HTMLElement;
+    act(() => {
+      container = renderIntoContainer(<Toggle initial={false} />);
+    });
 
     // Simulate a state change
     const button = container.querySelector('[data-testid="toggle"]') as HTMLElement;
-    flushSync(() => {
+    act(() => {
       button.click();
     });
 
@@ -107,11 +102,14 @@ describe('restoreComponentState', () => {
     document.body.innerHTML = '';
   });
 
-  it('restores a differing state value', async () => {
+  it('should restore a differing state value', () => {
     // Render source with state = true
-    const source = renderIntoContainer(<Toggle initial={false} />);
+    let source!: HTMLElement;
+    act(() => {
+      source = renderIntoContainer(<Toggle initial={false} />);
+    });
     const sourceButton = source.querySelector('[data-testid="toggle"]') as HTMLElement;
-    flushSync(() => {
+    act(() => {
       sourceButton.click();
     });
     expect(sourceButton.textContent).toBe('ON');
@@ -121,37 +119,53 @@ describe('restoreComponentState', () => {
     expect(snapshot).toBeDefined();
 
     // Render a fresh target (starts with state = false)
-    const target = renderIntoContainer(<Toggle initial={false} />);
+    let target!: HTMLElement;
+    act(() => {
+      target = renderIntoContainer(<Toggle initial={false} />);
+    });
     const targetButton = target.querySelector('[data-testid="toggle"]') as HTMLElement;
     expect(targetButton.textContent).toBe('OFF');
 
     // Restore the snapshot onto the target
-    await restoreComponentState(target, snapshot);
+    act(() => {
+      restoreComponentState(target, snapshot);
+    });
 
     // Target should now show ON
     expect(targetButton.textContent).toBe('ON');
   });
 
-  it('does nothing when snapshot matches current state', async () => {
-    const container = renderIntoContainer(<Toggle initial={false} />);
+  it('should do nothing when snapshot matches current state', () => {
+    let container!: HTMLElement;
+    act(() => {
+      container = renderIntoContainer(<Toggle initial={false} />);
+    });
     const snapshot = snapshotComponentState(container)!;
 
     // Render a second instance with the same initial state
-    const target = renderIntoContainer(<Toggle initial={false} />);
+    let target!: HTMLElement;
+    act(() => {
+      target = renderIntoContainer(<Toggle initial={false} />);
+    });
     const targetButton = target.querySelector('[data-testid="toggle"]') as HTMLElement;
     expect(targetButton.textContent).toBe('OFF');
 
-    await restoreComponentState(target, snapshot);
+    act(() => {
+      restoreComponentState(target, snapshot);
+    });
 
     // Should still be OFF (no change)
     expect(targetButton.textContent).toBe('OFF');
   });
 
-  it('restores multiple hook values', async () => {
+  it('should restore multiple hook values', () => {
     // Render source and modify its state
-    const source = renderIntoContainer(<MultiState />);
+    let source!: HTMLElement;
+    act(() => {
+      source = renderIntoContainer(<MultiState />);
+    });
     const incButton = source.querySelector('[data-testid="inc"]') as HTMLElement;
-    flushSync(() => {
+    act(() => {
       incButton.click();
       incButton.click();
       incButton.click();
@@ -167,38 +181,51 @@ describe('restoreComponentState', () => {
     expect(snapshot[0].length).toBe(2); // count + label hooks
 
     // Render fresh target
-    const target = renderIntoContainer(<MultiState />);
+    let target!: HTMLElement;
+    act(() => {
+      target = renderIntoContainer(<MultiState />);
+    });
     expect(target.querySelector('[data-testid="count"]')!.textContent).toBe('0');
 
-    await restoreComponentState(target, snapshot);
+    act(() => {
+      restoreComponentState(target, snapshot);
+    });
 
     // Count hook should be restored
     expect(target.querySelector('[data-testid="count"]')!.textContent).toBe('3');
   });
 
-  it('suppresses transitions during restore', async () => {
-    const source = renderIntoContainer(<Toggle initial={false} />);
+  it('should suppress transitions during restore', () => {
+    let source!: HTMLElement;
+    act(() => {
+      source = renderIntoContainer(<Toggle initial={false} />);
+    });
     const sourceButton = source.querySelector('[data-testid="toggle"]') as HTMLElement;
-    flushSync(() => {
+    act(() => {
       sourceButton.click();
     });
     const snapshot = snapshotComponentState(source)!;
 
-    const target = renderIntoContainer(<Toggle initial={false} />);
+    let target!: HTMLElement;
+    act(() => {
+      target = renderIntoContainer(<Toggle initial={false} />);
+    });
     const targetButton = target.querySelector('[data-testid="toggle"]') as HTMLElement;
     targetButton.style.transition = 'opacity 300ms ease';
 
-    await restoreComponentState(target, snapshot);
+    act(() => {
+      restoreComponentState(target, snapshot);
+    });
 
     // After restore, the original transition should be restored
     expect(targetButton.style.transition).toBe('opacity 300ms ease');
   });
 
-  it('handles a non-React element gracefully', async () => {
+  it('should handle a non-React element gracefully', () => {
     const el = document.createElement('div');
     document.body.appendChild(el);
 
     // Should not throw
-    await restoreComponentState(el, [[true]]);
+    restoreComponentState(el, [[true]]);
   });
 });

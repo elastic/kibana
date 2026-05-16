@@ -15,13 +15,13 @@ import {
 } from './resolve_component_name';
 
 describe('EUI_COMPONENTS', () => {
-  it('contains known EUI components', () => {
+  it('should contain known EUI components', () => {
     expect(EUI_COMPONENTS.has('EuiButton')).toBe(true);
     expect(EUI_COMPONENTS.has('EuiPanel')).toBe(true);
     expect(EUI_COMPONENTS.has('EuiFlexGroup')).toBe(true);
   });
 
-  it('does not contain non-PascalCase exports', () => {
+  it('should not contain non-PascalCase exports', () => {
     // String constants or non-component exports should be excluded
     for (const name of EUI_COMPONENTS) {
       expect(name).toMatch(/^Eui[A-Z]/);
@@ -30,31 +30,31 @@ describe('EUI_COMPONENTS', () => {
 });
 
 describe('resolveEuiTag', () => {
-  it('resolves a class like euiButton to EuiButton', () => {
+  it('should resolve a class like euiButton to EuiButton', () => {
     const el = document.createElement('div');
     el.classList.add('euiButton');
     expect(resolveEuiTag(el)).toBe('EuiButton');
   });
 
-  it('returns null when no EUI class matches an actual component', () => {
+  it('should return null when no EUI class matches an actual component', () => {
     const el = document.createElement('div');
     el.classList.add('euiNonExistentThing');
     expect(resolveEuiTag(el)).toBeNull();
   });
 
-  it('returns null for elements without EUI classes', () => {
+  it('should return null for elements without EUI classes', () => {
     const el = document.createElement('div');
     el.classList.add('myCustomClass');
     expect(resolveEuiTag(el)).toBeNull();
   });
 
-  it('ignores classes that do not start with lowercase eui followed by uppercase', () => {
+  it('should ignores classes that do not start with lowercase eui followed by uppercase', () => {
     const el = document.createElement('div');
     el.classList.add('euibutton'); // lowercase 'b' — should not match
     expect(resolveEuiTag(el)).toBeNull();
   });
 
-  it('returns the first matching EUI component class', () => {
+  it('should return the first matching EUI component class', () => {
     const el = document.createElement('div');
     el.classList.add('someOtherClass', 'euiPanel');
     expect(resolveEuiTag(el)).toBe('EuiPanel');
@@ -67,18 +67,18 @@ describe('resolveReactComponentName', () => {
     Object.defineProperty(el, key, { value: fiber, configurable: true, enumerable: true });
   };
 
-  it('returns null when no React fiber is attached', () => {
+  it('should return null when no React fiber is attached', () => {
     const el = document.createElement('div');
     expect(resolveReactComponentName(el)).toBeNull();
   });
 
-  it('returns null when fiber key exists but value is null', () => {
+  it('should return null when fiber key exists but value is null', () => {
     const el = document.createElement('div');
     attachFiber(el, null);
     expect(resolveReactComponentName(el)).toBeNull();
   });
 
-  it('returns component name when element is the root child', () => {
+  it('should return component name when element is the root child', () => {
     const el = document.createElement('div');
     const hostFiber = { type: 'div', return: null as unknown };
 
@@ -93,7 +93,7 @@ describe('resolveReactComponentName', () => {
     expect(resolveReactComponentName(el)).toBe('EuiPanel');
   });
 
-  it('returns null for non-EUI component names', () => {
+  it('should return null for non-EUI component names', () => {
     const el = document.createElement('div');
     const hostFiber = { type: 'div', return: null as unknown };
 
@@ -108,7 +108,7 @@ describe('resolveReactComponentName', () => {
     expect(resolveReactComponentName(el)).toBeNull();
   });
 
-  it('returns displayName over name', () => {
+  it('should return displayName over name', () => {
     const el = document.createElement('div');
     const hostFiber = { type: 'div', return: null as unknown };
 
@@ -123,7 +123,7 @@ describe('resolveReactComponentName', () => {
     expect(resolveReactComponentName(el)).toBe('EuiButton');
   });
 
-  it('returns null when element is not the root child', () => {
+  it('should return null when element is not the root child', () => {
     const el = document.createElement('div');
     const innerFiber = { type: 'span' };
     const hostFiber = { type: 'div', return: null as unknown };
@@ -140,7 +140,7 @@ describe('resolveReactComponentName', () => {
     expect(resolveReactComponentName(el)).toBeNull();
   });
 
-  it('filters out React internals like ForwardRef, Memo, Fragment', () => {
+  it('should filter out React internals like ForwardRef, Memo, Fragment', () => {
     const testFilteredName = (name: string) => {
       const el = document.createElement('div');
       const hostFiber = { type: 'div', return: null as unknown };
@@ -164,7 +164,7 @@ describe('resolveReactComponentName', () => {
     expect(testFilteredName('Lazy')).toBeNull();
   });
 
-  it('filters out names ending in Wrapper/Inner/Internal', () => {
+  it('should filter out names ending in Wrapper/Inner/Internal', () => {
     const testFilteredName = (name: string) => {
       const el = document.createElement('div');
       const hostFiber = { type: 'div', return: null as unknown };
@@ -183,7 +183,7 @@ describe('resolveReactComponentName', () => {
     expect(testFilteredName('MenuInternal')).toBeNull();
   });
 
-  it('filters out names starting with underscore or shorter than 3 chars', () => {
+  it('should filter out names starting with underscore or shorter than 3 chars', () => {
     const testFilteredName = (name: string) => {
       const el = document.createElement('div');
       const hostFiber = { type: 'div', return: null as unknown };
@@ -202,7 +202,7 @@ describe('resolveReactComponentName', () => {
     expect(testFilteredName('x')).toBeNull();
   });
 
-  it('filters out lowercase-starting names', () => {
+  it('should filter out lowercase-starting names', () => {
     const el = document.createElement('div');
     const hostFiber = { type: 'div', return: null as unknown };
     const componentFiber = {
@@ -215,7 +215,7 @@ describe('resolveReactComponentName', () => {
     expect(resolveReactComponentName(el)).toBeNull();
   });
 
-  it('validates EUI names against the real export set', () => {
+  it('should validates EUI names against the real export set', () => {
     const testEuiName = (name: string) => {
       const el = document.createElement('div');
       const hostFiber = { type: 'div', return: null as unknown };
@@ -237,18 +237,18 @@ describe('resolveReactComponentName', () => {
 });
 
 describe('resolveTag', () => {
-  it('prefers EUI class name over fiber and tag', () => {
+  it('should prefer EUI class name over fiber and tag', () => {
     const el = document.createElement('div');
     el.classList.add('euiPanel');
     expect(resolveTag(el)).toBe('EuiPanel');
   });
 
-  it('falls back to HTML tag name when no EUI class or fiber', () => {
+  it('should fall back to HTML tag name when no EUI class or fiber', () => {
     const el = document.createElement('section');
     expect(resolveTag(el)).toBe('section');
   });
 
-  it('returns lowercase tag name for unknown elements', () => {
+  it('should return lowercase tag name for unknown elements', () => {
     const el = document.createElement('div');
     expect(resolveTag(el)).toBe('div');
   });

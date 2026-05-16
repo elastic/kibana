@@ -34,13 +34,10 @@ import {
   LAYOUT_POPOVER_ID,
   LAYOUT_SETTINGS_FLYOUT_ID,
 } from '../../lib/constants';
-import { useOverlayZIndex, usePortalZIndex } from '../../hooks';
-import { buildAddEuiPanels } from '../edit/library';
-import {
-  renderAndCloneEuiComponent,
-  renderEuiComponentLive,
-  centerInViewport,
-} from '../../lib/dom/insert_element';
+import { useOverlayZIndex } from '../../hooks/use_overlay_z_index';
+import { usePortalZIndex } from '../../hooks/use_portal_z_index';
+import { buildAddEuiPanels } from '../edit/library/build_add_eui_panels';
+import { renderEuiComponentLive, centerInViewport } from '../../lib/dom/insert_element';
 import { DEVTOOL_LIBRARY_ID_ATTR } from '../../lib/constants';
 import { preloadAllEuiIcons } from '../../lib/eui_icon_cache';
 import { pickJsonFile } from '../../lib/history/serialization/session_io';
@@ -120,36 +117,19 @@ export const DesignToolsButton = () => {
   };
 
   const handleInsertEui = useCallback(
-    async (element: ReactElement, interactive?: boolean, libraryId?: string) => {
+    async (element: ReactElement, libraryId?: string) => {
       setIsPopoverOpen(false);
       await preloadAllEuiIcons();
 
-      let el: HTMLElement;
-      let rect: DOMRect;
-      let liveReactElement: { element: ReactElement; zIndex: number } | undefined;
-      let cleanup: (() => void) | undefined;
-
-      if (interactive) {
-        const live = await renderEuiComponentLive(element, zIndex.clone);
-        el = live.wrapper;
-        rect = live.rect;
-        liveReactElement = live.liveReactElement;
-        cleanup = live.cleanup;
-      } else {
-        const cloned = await renderAndCloneEuiComponent(element, zIndex.clone);
-        el = cloned.clone;
-        rect = cloned.rect;
-      }
+      const live = await renderEuiComponentLive(element, zIndex.clone);
+      const el = live.wrapper;
 
       if (libraryId) {
         el.setAttribute(DEVTOOL_LIBRARY_ID_ATTR, libraryId);
       }
 
-      centerInViewport(el, rect);
+      centerInViewport(el, live.rect);
       el.style.pointerEvents = 'auto';
-      if (!interactive) {
-        document.body.appendChild(el);
-      }
       setIsEditMode(true);
       setMoveCount((prev) => prev + 1);
 
@@ -157,7 +137,7 @@ export const DesignToolsButton = () => {
       // The state updates above are batched, so editHandleRef.current
       // is null until the next commit.
       requestAnimationFrame(() => {
-        editHandleRef.current?.insertElement(el, liveReactElement, cleanup);
+        editHandleRef.current?.insertElement(el, live.liveReactElement, live.cleanup);
       });
     },
     [zIndex.clone]
@@ -184,6 +164,7 @@ export const DesignToolsButton = () => {
               }),
           icon: isLayoutVisible ? 'eyeClosed' : 'eye',
           onClick: handleToggleLayout,
+          'data-test-subj': 'designToolsToggleLayout',
         },
         {
           name: i18n.translate('kbnDesignTools.layout.popover.layoutSettingsLabel', {
@@ -191,6 +172,7 @@ export const DesignToolsButton = () => {
           }),
           icon: 'controlsHorizontal',
           onClick: handleOpenSettings,
+          'data-test-subj': 'designToolsLayoutSettings',
         },
         {
           isSeparator: true,
@@ -262,7 +244,7 @@ export const DesignToolsButton = () => {
             content={
               isPopoverOpen
                 ? ''
-                : i18n.translate('kbnDesignTools.designToolsButton.tooltip', {
+                : i18n.translate('kbnDesignTools.layout.button.tooltip', {
                     defaultMessage: 'Design tools',
                   })
             }
@@ -278,7 +260,7 @@ export const DesignToolsButton = () => {
               iconType="vectorSquare"
               isSelected={isLayoutVisible}
               aria-pressed={isLayoutVisible}
-              aria-label={i18n.translate('kbnDesignTools.designToolsButton.ariaLabel', {
+              aria-label={i18n.translate('kbnDesignTools.layout.button.ariaLabel', {
                 defaultMessage: 'Design tools',
               })}
               color="text"

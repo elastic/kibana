@@ -15,7 +15,7 @@ describe('element_path', () => {
   });
 
   describe('toPath', () => {
-    it('builds a selector that uniquely identifies the element', () => {
+    it('should build a selector that uniquely identifies the element', () => {
       const div = document.createElement('div');
       const p = document.createElement('p');
       div.appendChild(p);
@@ -26,7 +26,7 @@ describe('element_path', () => {
       expect(path.fingerprint).toContain('P|');
     });
 
-    it('includes nth-child for siblings', () => {
+    it('should include nth-child for siblings', () => {
       const parent = document.createElement('div');
       const first = document.createElement('span');
       const second = document.createElement('span');
@@ -40,7 +40,7 @@ describe('element_path', () => {
       expect(path2.selector).toContain('span:nth-child(2)');
     });
 
-    it('captures text content in fingerprint', () => {
+    it('should capture text content in fingerprint', () => {
       const el = document.createElement('div');
       el.textContent = 'Hello world';
       document.body.appendChild(el);
@@ -51,7 +51,7 @@ describe('element_path', () => {
   });
 
   describe('fromPath', () => {
-    it('resolves a path back to the same element', () => {
+    it('should resolve a path back to the same element', () => {
       const div = document.createElement('div');
       div.textContent = 'test content';
       document.body.appendChild(div);
@@ -62,7 +62,7 @@ describe('element_path', () => {
       expect(result.fingerprintMatch).toBe(true);
     });
 
-    it('returns null for non-existent selector', () => {
+    it('should return null for non-existent selector', () => {
       const result = fromPath({
         selector: 'body > div:nth-child(999)',
         fingerprint: 'DIV|abc|text',
@@ -71,7 +71,7 @@ describe('element_path', () => {
       expect(result.fingerprintMatch).toBe(false);
     });
 
-    it('detects fingerprint mismatch when content changes', () => {
+    it('should detect fingerprint mismatch when content changes', () => {
       const el = document.createElement('div');
       el.textContent = 'original';
       document.body.appendChild(el);
@@ -84,7 +84,7 @@ describe('element_path', () => {
       expect(result.fingerprintMatch).toBe(false);
     });
 
-    it('roundtrips through nested structures', () => {
+    it('should roundtrip through nested structures', () => {
       const outer = document.createElement('div');
       const inner = document.createElement('section');
       const target = document.createElement('p');

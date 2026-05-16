@@ -111,11 +111,6 @@ export interface EuiComponentVariant {
   label: string;
   /** The JSX element to render for this variant. */
   element: ReactElement;
-  /**
-   * When true, the component is rendered with a live React tree instead of
-   * a static clone so that event handlers (e.g. switch toggle) keep working.
-   */
-  interactive?: boolean;
 }
 
 /**
@@ -133,11 +128,6 @@ export interface EuiLibraryEntry {
    * in a nested sub-menu. If absent, clicking inserts with the default element.
    */
   variants?: EuiComponentVariant[];
-  /**
-   * When true, the component is rendered with a live React tree instead of
-   * a static clone so that event handlers keep working.
-   */
-  interactive?: boolean;
 }
 
 const buttonVariants: EuiComponentVariant[] = [
@@ -152,19 +142,19 @@ const buttonVariants: EuiComponentVariant[] = [
 ];
 
 const switchVariants: EuiComponentVariant[] = [
-  { label: 'Regular', element: <SwitchRegular />, interactive: true },
+  { label: 'Regular', element: <SwitchRegular /> },
   { label: 'Disabled', element: <SwitchDisabled /> },
-  { label: 'Compressed', element: <SwitchCompressed />, interactive: true },
-  { label: 'Mini', element: <SwitchMini />, interactive: true },
-  { label: 'No Label', element: <SwitchNoLabel />, interactive: true },
+  { label: 'Compressed', element: <SwitchCompressed /> },
+  { label: 'Mini', element: <SwitchMini /> },
+  { label: 'No Label', element: <SwitchNoLabel /> },
 ];
 
 const accordionVariants: EuiComponentVariant[] = [
-  { label: 'Regular', element: <AccordionRegular />, interactive: true },
-  { label: 'Opened', element: <AccordionOpen />, interactive: true },
-  { label: 'Arrow Right', element: <AccordionArrowRight />, interactive: true },
-  { label: 'With Borders', element: <AccordionBorders />, interactive: true },
-  { label: 'Multiple', element: <AccordionMultiple />, interactive: true },
+  { label: 'Regular', element: <AccordionRegular /> },
+  { label: 'Opened', element: <AccordionOpen /> },
+  { label: 'Arrow Right', element: <AccordionArrowRight /> },
+  { label: 'With Borders', element: <AccordionBorders /> },
+  { label: 'Multiple', element: <AccordionMultiple /> },
 ];
 
 const cardVariants: EuiComponentVariant[] = [
@@ -177,18 +167,18 @@ const cardVariants: EuiComponentVariant[] = [
 ];
 
 const splitButtonVariants: EuiComponentVariant[] = [
-  { label: 'Regular', element: <SplitButtonRegular />, interactive: true },
-  { label: 'Fill', element: <SplitButtonFill />, interactive: true },
+  { label: 'Regular', element: <SplitButtonRegular /> },
+  { label: 'Fill', element: <SplitButtonFill /> },
   { label: 'Small', element: <SplitButtonSmall /> },
   { label: 'Disabled', element: <SplitButtonDisabled /> },
-  { label: 'With Icon', element: <SplitButtonWithIcon />, interactive: true },
+  { label: 'With Icon', element: <SplitButtonWithIcon /> },
 ];
 
 const buttonGroupVariants: EuiComponentVariant[] = [
-  { label: 'Single Select', element: <ButtonGroupSingle />, interactive: true },
-  { label: 'Icon Only', element: <ButtonGroupIconOnly />, interactive: true },
-  { label: 'Multi Select', element: <ButtonGroupMulti />, interactive: true },
-  { label: 'Compressed', element: <ButtonGroupCompressed />, interactive: true },
+  { label: 'Single Select', element: <ButtonGroupSingle /> },
+  { label: 'Icon Only', element: <ButtonGroupIconOnly /> },
+  { label: 'Multi Select', element: <ButtonGroupMulti /> },
+  { label: 'Compressed', element: <ButtonGroupCompressed /> },
 ];
 
 const linkVariants: EuiComponentVariant[] = [
@@ -201,14 +191,14 @@ const linkVariants: EuiComponentVariant[] = [
 const stepsVariants: EuiComponentVariant[] = [
   { label: 'Regular', element: <StepsRegular /> },
   { label: 'With Status', element: <StepsWithStatus /> },
-  { label: 'Horizontal', element: <StepsHorizontal />, interactive: true },
+  { label: 'Horizontal', element: <StepsHorizontal /> },
   { label: 'Small', element: <StepsSmall /> },
 ];
 
 const treeViewVariants: EuiComponentVariant[] = [
-  { label: 'Regular', element: <TreeViewRegular />, interactive: true },
-  { label: 'Compressed', element: <TreeViewCompressed />, interactive: true },
-  { label: 'Expanded', element: <TreeViewExpanded />, interactive: true },
+  { label: 'Regular', element: <TreeViewRegular /> },
+  { label: 'Compressed', element: <TreeViewCompressed /> },
+  { label: 'Expanded', element: <TreeViewExpanded /> },
 ];
 
 const avatarVariants: EuiComponentVariant[] = [
@@ -256,15 +246,15 @@ const iconVariants: EuiComponentVariant[] = [
 ];
 
 const selectVariants: EuiComponentVariant[] = [
-  { label: 'Regular', element: <SelectRegular />, interactive: true },
-  { label: 'Compressed', element: <SelectCompressed />, interactive: true },
+  { label: 'Regular', element: <SelectRegular /> },
+  { label: 'Compressed', element: <SelectCompressed /> },
   { label: 'Disabled', element: <SelectDisabled /> },
   { label: 'Loading', element: <SelectLoading /> },
 ];
 
 const superSelectVariants: EuiComponentVariant[] = [
-  { label: 'Regular', element: <SuperSelectRegular />, interactive: true },
-  { label: 'Compressed', element: <SuperSelectCompressed />, interactive: true },
+  { label: 'Regular', element: <SuperSelectRegular /> },
+  { label: 'Compressed', element: <SuperSelectCompressed /> },
   { label: 'Disabled', element: <SuperSelectDisabled /> },
 ];
 
@@ -276,7 +266,6 @@ export const EUI_LIBRARY: EuiLibraryEntry[] = [
   {
     label: 'Accordion',
     element: <AccordionRegular />,
-    interactive: true,
     variants: accordionVariants,
   },
   {
@@ -297,13 +286,11 @@ export const EUI_LIBRARY: EuiLibraryEntry[] = [
   {
     label: 'Button',
     element: <ButtonRegular />,
-    interactive: true,
     variants: buttonVariants,
   },
   {
     label: 'Button Group',
     element: <ButtonGroupSingle />,
-    interactive: true,
     variants: buttonGroupVariants,
   },
   {
@@ -329,7 +316,6 @@ export const EUI_LIBRARY: EuiLibraryEntry[] = [
   {
     label: 'Select',
     element: <SelectRegular />,
-    interactive: true,
     variants: selectVariants,
   },
   {
@@ -345,19 +331,16 @@ export const EUI_LIBRARY: EuiLibraryEntry[] = [
   {
     label: 'Super Select',
     element: <SuperSelectRegular />,
-    interactive: true,
     variants: superSelectVariants,
   },
   {
     label: 'Switch',
     element: <SwitchRegular />,
-    interactive: true,
     variants: switchVariants,
   },
   {
     label: 'Tree View',
     element: <TreeViewRegular />,
-    interactive: true,
     variants: treeViewVariants,
   },
 ];

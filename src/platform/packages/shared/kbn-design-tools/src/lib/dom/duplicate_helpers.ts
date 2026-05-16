@@ -87,7 +87,7 @@ const transferSourceEdits = (
     }
 
     transferred.push({
-      element: targetEl as HTMLElement,
+      element: targetEl,
       attribute: edit.attribute,
       original: edit.original,
     });

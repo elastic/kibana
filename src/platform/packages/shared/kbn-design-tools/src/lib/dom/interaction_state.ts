@@ -17,11 +17,11 @@ import type { ElementSession } from './element_registry';
  */
 export type InteractionState = IdleState | HoverState | PendingDragState | DragState | ResizeState;
 
-export interface IdleState {
+interface IdleState {
   readonly type: 'idle';
 }
 
-export interface HoverState {
+interface HoverState {
   readonly type: 'hover';
   /** The element being hovered. */
   readonly target: HTMLElement;
@@ -33,7 +33,7 @@ export interface HoverState {
  * Pointer is down but hasn't moved enough to commit to a drag.
  * If the pointer is released before exceeding the threshold, no drag occurs.
  */
-export interface PendingDragState {
+interface PendingDragState {
   readonly type: 'pending-drag';
   /** The element the user pressed on. */
   readonly target: HTMLElement;
@@ -78,6 +78,37 @@ export interface ResizeState {
 }
 
 export const IDLE: IdleState = { type: 'idle' };
+
+/**
+ * Describes a gesture that just completed on pointer-up. Returned by the
+ * interaction machine so the overlay can push an undo transaction.
+ */
+export type GestureCompletion =
+  | {
+      readonly gesture: 'move';
+      readonly target: HTMLElement;
+      readonly before: { readonly dx: number; readonly dy: number };
+      readonly after: { readonly dx: number; readonly dy: number };
+      readonly isNewClone: boolean;
+      readonly referenceEl?: HTMLElement;
+      readonly session: ElementSession;
+    }
+  | {
+      readonly gesture: 'resize';
+      readonly target: HTMLElement;
+      readonly before: {
+        readonly dx: number;
+        readonly dy: number;
+        readonly dw: number;
+        readonly dh: number;
+      };
+      readonly after: {
+        readonly dx: number;
+        readonly dy: number;
+        readonly dw: number;
+        readonly dh: number;
+      };
+    };
 
 /**
  * Derive the CSS cursor from the current interaction state and hover target.

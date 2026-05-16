@@ -216,7 +216,7 @@ export const serializeTransaction = (tx: Transaction): SerializedTransaction => 
  * Result of deserializing a single transaction. If resolution failed
  * for any referenced element, `warnings` will contain descriptions.
  */
-export interface DeserializeResult {
+interface DeserializeResult {
   /** The live transaction, or `null` if critical elements couldn't resolve. */
   transaction: Transaction | null;
   /** Human-readable warnings about unresolved or mismatched elements. */
@@ -539,7 +539,7 @@ export const serializeSession = (transactions: Transaction[]): SerializedSession
 /**
  * Result of deserializing a full session.
  */
-export interface DeserializeSessionResult {
+interface DeserializeSessionResult {
   /** Successfully resolved transactions (in order). */
   transactions: Transaction[];
   /** Warnings from all transactions combined. */

@@ -10,7 +10,7 @@
 import React from 'react';
 import { EuiFormRow, EuiSelect, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { LayoutConfig, LayoutType } from '../../../lib/layout';
+import type { LayoutConfig, LayoutType } from '../../../lib/layout/layout_config';
 
 const layoutTypeOptions: Array<{ value: LayoutType; text: string }> = [
   {
@@ -43,6 +43,7 @@ export const LayoutTypeSelector = ({ layoutType, onChange }: Props) => {
 
   return (
     <EuiFormRow
+      data-test-subj="layoutSettingsLayoutType"
       label={i18n.translate('kbnDesignTools.layout.settings.layoutType', {
         defaultMessage: 'Layout',
       })}

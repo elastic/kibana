@@ -105,8 +105,7 @@ describe('getElementFromPoint', () => {
 
     document.elementsFromPoint = jest.fn().mockReturnValue([rect]);
 
-    // closest('svg') returns the parent svg element, cast as HTMLElement
-    expect(getElementFromPoint(mockEvent)).toBeTruthy();
+    expect(getElementFromPoint(mockEvent)).toBe(parent);
   });
 
   it('should return null when no valid elements exist', () => {

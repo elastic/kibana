@@ -8,9 +8,9 @@
  */
 
 import { DEVTOOL_HIDDEN_ATTR, SVG_INTERNALS } from '../constants';
-import { resolveTag } from '../fiber';
+import { resolveTag } from '../fiber/resolve_component_name';
 
-export interface TreeNode {
+interface TreeNode {
   tag: string;
   depth: number;
   element: Element;

@@ -7,57 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import '../lib/tests/mocks';
 import { renderHook, act } from '@testing-library/react';
 import { useUndoRedo } from './use_undo_redo';
 import { ElementRegistry } from '../lib/dom/element_registry';
-import type { ElementSession } from '../lib/dom/element_registry';
-
-if (typeof globalThis.DOMRect === 'undefined') {
-  (globalThis as unknown as Record<string, unknown>).DOMRect = class DOMRect {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-    top: number;
-    right: number;
-    bottom: number;
-    left: number;
-    constructor(x = 0, y = 0, w = 0, h = 0) {
-      this.x = x;
-      this.y = y;
-      this.width = w;
-      this.height = h;
-      this.top = y;
-      this.right = x + w;
-      this.bottom = y + h;
-      this.left = x;
-    }
-    toJSON() {
-      return { x: this.x, y: this.y, width: this.width, height: this.height };
-    }
-  };
-}
+import { makeSession } from '../lib/tests/helpers';
 
 const makeRegistry = () => {
   const registry = new ElementRegistry();
   return { current: registry };
 };
 
-const makeSession = (el: HTMLElement): ElementSession => ({
-  el,
-  dx: 0,
-  dy: 0,
-  dw: 0,
-  dh: 0,
-  originalRect: new DOMRect(0, 0, 100, 100),
-  isDuplicate: false,
-  styleEdits: [],
-  textEdits: [],
-  sourceEdits: [],
-});
-
 describe('useUndoRedo', () => {
-  it('starts with empty state', () => {
+  it('should start with empty state', () => {
     const registryRef = makeRegistry();
     const { result } = renderHook(() => useUndoRedo(registryRef));
 
@@ -65,10 +27,10 @@ describe('useUndoRedo', () => {
     expect(result.current.state.canRedo).toBe(false);
   });
 
-  it('push makes canUndo true', () => {
+  it('should push makes canUndo true', () => {
     const registryRef = makeRegistry();
     const el = document.createElement('div');
-    registryRef.current.set(makeSession(el));
+    registryRef.current.set(makeSession({ el }));
 
     const { result } = renderHook(() => useUndoRedo(registryRef));
 
@@ -86,12 +48,12 @@ describe('useUndoRedo', () => {
     expect(result.current.state.undoLabel).toBe('Move');
   });
 
-  it('undo reverses the transaction and enables redo', () => {
+  it('should undo reverses the transaction and enables redo', () => {
     const registryRef = makeRegistry();
     const el = document.createElement('div');
     el.style.transformOrigin = '0 0';
     document.body.appendChild(el);
-    const session = makeSession(el);
+    const session = makeSession({ el });
     session.dx = 10;
     session.dy = 20;
     registryRef.current.set(session);
@@ -119,12 +81,12 @@ describe('useUndoRedo', () => {
     expect(result.current.state.canRedo).toBe(true);
   });
 
-  it('redo re-applies the transaction', () => {
+  it('should redo re-applies the transaction', () => {
     const registryRef = makeRegistry();
     const el = document.createElement('div');
     el.style.transformOrigin = '0 0';
     document.body.appendChild(el);
-    const session = makeSession(el);
+    const session = makeSession({ el });
     registryRef.current.set(session);
 
     const { result } = renderHook(() => useUndoRedo(registryRef));
@@ -151,10 +113,10 @@ describe('useUndoRedo', () => {
     expect(result.current.state.canRedo).toBe(false);
   });
 
-  it('clear resets everything', () => {
+  it('should clear resets everything', () => {
     const registryRef = makeRegistry();
     const el = document.createElement('div');
-    registryRef.current.set(makeSession(el));
+    registryRef.current.set(makeSession({ el }));
 
     const { result } = renderHook(() => useUndoRedo(registryRef));
 
@@ -174,7 +136,7 @@ describe('useUndoRedo', () => {
     expect(result.current.state.canRedo).toBe(false);
   });
 
-  it('undo returns false when stack is empty', () => {
+  it('should undo returns false when stack is empty', () => {
     const registryRef = makeRegistry();
     const { result } = renderHook(() => useUndoRedo(registryRef));
 
@@ -183,7 +145,7 @@ describe('useUndoRedo', () => {
     });
   });
 
-  it('redo returns false when stack is empty', () => {
+  it('should redo returns false when stack is empty', () => {
     const registryRef = makeRegistry();
     const { result } = renderHook(() => useUndoRedo(registryRef));
 

@@ -13,12 +13,12 @@ import type { ElementPath } from './element_path';
  * Portable version of a move/resize before/after payload.
  * Already plain numbers — no DOM references.
  */
-export interface SerializedPositionPayload {
+interface SerializedPositionPayload {
   readonly dx: number;
   readonly dy: number;
 }
 
-export interface SerializedSizePayload extends SerializedPositionPayload {
+interface SerializedSizePayload extends SerializedPositionPayload {
   readonly dw: number;
   readonly dh: number;
 }
@@ -131,27 +131,27 @@ export type SerializedTransaction =
   | SerializedDeleteTransaction
   | SerializedCloneTransaction;
 
-export interface SerializedTransactionBase {
+interface SerializedTransactionBase {
   readonly id: number;
   readonly timestamp: number;
   readonly label: string;
 }
 
-export interface SerializedMoveTransaction extends SerializedTransactionBase {
+interface SerializedMoveTransaction extends SerializedTransactionBase {
   readonly type: 'move';
   readonly targetPath: ElementPath;
   readonly before: SerializedPositionPayload;
   readonly after: SerializedPositionPayload;
 }
 
-export interface SerializedResizeTransaction extends SerializedTransactionBase {
+interface SerializedResizeTransaction extends SerializedTransactionBase {
   readonly type: 'resize';
   readonly targetPath: ElementPath;
   readonly before: SerializedSizePayload;
   readonly after: SerializedSizePayload;
 }
 
-export interface SerializedEditTransaction extends SerializedTransactionBase {
+interface SerializedEditTransaction extends SerializedTransactionBase {
   readonly type: 'edit';
   readonly targetPath: ElementPath;
   readonly styleChanges: SerializedStyleChange[];
@@ -164,13 +164,13 @@ export interface SerializedEditTransaction extends SerializedTransactionBase {
   };
 }
 
-export interface SerializedDuplicateTransaction extends SerializedTransactionBase {
+interface SerializedDuplicateTransaction extends SerializedTransactionBase {
   readonly type: 'duplicate';
   readonly elPath: ElementPath;
   readonly sessionSnapshot: SerializedSessionSnapshot;
 }
 
-export interface SerializedDeleteTransaction extends SerializedTransactionBase {
+interface SerializedDeleteTransaction extends SerializedTransactionBase {
   readonly type: 'delete';
   readonly elPath: ElementPath;
   readonly sessionSnapshot?: SerializedSessionSnapshot;
@@ -183,7 +183,7 @@ export interface SerializedDeleteTransaction extends SerializedTransactionBase {
   };
 }
 
-export interface SerializedCloneTransaction extends SerializedTransactionBase {
+interface SerializedCloneTransaction extends SerializedTransactionBase {
   readonly type: 'clone';
   readonly elPath: ElementPath;
   readonly sessionSnapshot: SerializedSessionSnapshot;

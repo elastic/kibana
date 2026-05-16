@@ -13,65 +13,10 @@ import { createRoot } from 'react-dom/client';
 import { EuiProvider } from '@elastic/eui';
 import { EuiThemeBorealis } from '@elastic/eui-theme-borealis';
 import { flushSync } from 'react-dom';
-import { cloneClean, setImportant } from './clone_element';
+import { setImportant } from './clone_element';
 import { DEVTOOL_MANAGED_ATTR, DEVTOOL_LIVE_ATTR } from '../constants';
 import { getPageColorMode } from './get_page_color_mode';
 import { SerializedStateContext } from '../../components/edit/library/serializable_state';
-
-/**
- * Render a ReactElement into the DOM, run `cloneClean` to produce a fully
- * styled fixed-position clone (with computed styles inlined, pseudo-elements
- * replicated, etc.), then tear down the temporary React tree.
- *
- * The returned clone behaves identically to clones created by dragging an
- * existing page element — it is a plain DOM node, not managed by React.
- */
-export const renderAndCloneEuiComponent = async (
-  element: ReactElement,
-  zIndex: number
-): Promise<{ clone: HTMLElement; rect: DOMRect }> => {
-  // Render into a visible container so computed styles and bounding rects
-  // are available for cloneClean. Wrap in EuiProvider with the borealis
-  // theme and the page's color mode so Emotion-generated styles match
-  // the actual Kibana page, not the toolbar's dark-mode wrapper.
-  const container = document.createElement('div');
-  container.style.position = 'fixed';
-  container.style.left = '0px';
-  container.style.top = '0px';
-  container.style.opacity = '0';
-  container.style.pointerEvents = 'none';
-  document.body.appendChild(container);
-
-  const root = createRoot(container);
-
-  try {
-    // createRoot.render is async; we need a synchronous flush for
-    // cloneClean to read computed styles. Use flushSync.
-    flushSync(() => {
-      root.render(
-        React.createElement(EuiProvider, {
-          theme: EuiThemeBorealis,
-          colorMode: getPageColorMode(),
-          globalStyles: false,
-          children: element,
-        })
-      );
-    });
-
-    // The component's root element is the first (and only) child of container.
-    const rendered = container.firstElementChild as HTMLElement;
-    if (!rendered) {
-      throw new Error('EUI component did not render a DOM element');
-    }
-
-    // Use the same cloneClean path that drag/duplicate use — this copies
-    // all computed styles, pseudo-elements, canvas content, etc.
-    return cloneClean(rendered, zIndex);
-  } finally {
-    root.unmount();
-    container.remove();
-  }
-};
 
 /**
  * Render a ReactElement into a fixed-position container and keep the React
@@ -129,7 +74,8 @@ export const renderEuiComponentLive = async (
     throw err;
   }
 
-  const rendered = wrapper.firstElementChild as HTMLElement;
+  const rendered = wrapper.firstElementChild;
+
   if (!rendered) {
     root.unmount();
     wrapper.remove();

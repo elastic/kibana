@@ -11,24 +11,24 @@ import { renderHook } from '@testing-library/react';
 import { useLockedTarget } from './use_locked_target';
 
 describe('useLockedTarget', () => {
-  it('returns null when inactive', () => {
+  it('should return null when inactive', () => {
     const el = document.createElement('div');
     const { result } = renderHook(() => useLockedTarget(el, false));
     expect(result.current).toBeNull();
   });
 
-  it('returns null when candidate is null', () => {
+  it('should return null when candidate is null', () => {
     const { result } = renderHook(() => useLockedTarget(null, true));
     expect(result.current).toBeNull();
   });
 
-  it('locks to the first candidate', () => {
+  it('should lock to the first candidate', () => {
     const el = document.createElement('div');
     const { result } = renderHook(() => useLockedTarget(el, true));
     expect(result.current).toBe(el);
   });
 
-  it('keeps locked target when candidate is a parent (ancestor)', () => {
+  it('should keep locked target when candidate is a parent (ancestor)', () => {
     const parent = document.createElement('div');
     const child = document.createElement('span');
     parent.appendChild(child);
@@ -36,7 +36,7 @@ describe('useLockedTarget', () => {
     // First lock to the child
     const { result, rerender } = renderHook(
       ({ candidate, active }) => useLockedTarget(candidate, active),
-      { initialProps: { candidate: child as HTMLElement, active: true } }
+      { initialProps: { candidate: child, active: true } }
     );
     expect(result.current).toBe(child);
 
@@ -45,7 +45,7 @@ describe('useLockedTarget', () => {
     expect(result.current).toBe(child);
   });
 
-  it('updates to a new unrelated element', () => {
+  it('should update to a new unrelated element', () => {
     const el1 = document.createElement('div');
     const el2 = document.createElement('span');
 
@@ -59,7 +59,7 @@ describe('useLockedTarget', () => {
     expect(result.current).toBe(el2);
   });
 
-  it('updates to a child element (drills down)', () => {
+  it('should update to a child element (drills down)', () => {
     const parent = document.createElement('div');
     const child = document.createElement('span');
     parent.appendChild(child);
@@ -75,11 +75,11 @@ describe('useLockedTarget', () => {
     expect(result.current).toBe(child);
   });
 
-  it('clears when deactivated', () => {
+  it('should clear when deactivated', () => {
     const el = document.createElement('div');
     const { result, rerender } = renderHook(
       ({ candidate, active }) => useLockedTarget(candidate, active),
-      { initialProps: { candidate: el as HTMLElement, active: true } }
+      { initialProps: { candidate: el, active: true } }
     );
     expect(result.current).toBe(el);
 

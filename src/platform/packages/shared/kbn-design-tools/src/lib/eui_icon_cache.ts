@@ -12,21 +12,21 @@ import { createElement } from 'react';
 import { flushSync } from 'react-dom';
 import { createRoot } from 'react-dom/client';
 
-let iconTypeNames: string[] | undefined;
+const lazyIconTypes = { names: undefined as string[] | undefined };
 
 /**
  * Return all EUI icon type names. Derived at runtime from the EUI icon map
  * so the list is always in sync with the installed EUI version.
  */
 export const getIconTypes = async (): Promise<string[]> => {
-  if (!iconTypeNames) {
+  if (!lazyIconTypes.names) {
     const { typeToPathMap } = await import(
       // @ts-expect-error — no declarations for this internal module
       '@elastic/eui/optimize/es/components/icon/icon_map'
     );
-    iconTypeNames = Object.keys(typeToPathMap);
+    lazyIconTypes.names = Object.keys(typeToPathMap);
   }
-  return iconTypeNames;
+  return lazyIconTypes.names;
 };
 
 /**
@@ -45,8 +45,8 @@ export const preloadAllEuiIcons = (() => {
 
         // Populate iconTypeNames as a side-effect so getIconTypes() is free
         // after preloading.
-        if (!iconTypeNames) {
-          iconTypeNames = Object.keys(typeToPathMap);
+        if (!lazyIconTypes.names) {
+          lazyIconTypes.names = Object.keys(typeToPathMap);
         }
 
         const cache: Record<string, React.ComponentType> = {};
@@ -80,7 +80,7 @@ export const replaceIconContent = (container: Element, iconType: string): void =
   const targetSvg = isSvg(container) ? container : container.querySelector('svg');
 
   // Try the pre-built cache first (no React render needed)
-  const cached = iconSvgCache?.get(iconType);
+  const cached = lazyIconCache.svgs?.get(iconType);
   if (cached && targetSvg) {
     while (targetSvg.firstChild) {
       targetSvg.removeChild(targetSvg.firstChild);
@@ -146,9 +146,11 @@ interface IconSvgEntry {
   svg: SVGSVGElement;
 }
 
-let pathToTypeMap: Map<string, string> | undefined;
-let iconSvgCache: Map<string, IconSvgEntry> | undefined;
-let buildIconCachePromise: Promise<Map<string, string>> | undefined;
+const lazyIconCache = {
+  pathToType: undefined as Map<string, string> | undefined,
+  svgs: undefined as Map<string, IconSvgEntry> | undefined,
+  buildPromise: undefined as Promise<Map<string, string>> | undefined,
+};
 
 /**
  * Build a reverse lookup map from SVG path `d` attribute to icon type name,
@@ -156,14 +158,14 @@ let buildIconCachePromise: Promise<Map<string, string>> | undefined;
  * Built lazily on first call; requires icons to be preloaded.
  */
 const buildIconCache = (): Promise<Map<string, string>> => {
-  if (pathToTypeMap) return Promise.resolve(pathToTypeMap);
-  if (buildIconCachePromise) return buildIconCachePromise;
+  if (lazyIconCache.pathToType) return Promise.resolve(lazyIconCache.pathToType);
+  if (lazyIconCache.buildPromise) return lazyIconCache.buildPromise;
 
-  buildIconCachePromise = buildIconCacheImpl().catch((err) => {
-    buildIconCachePromise = undefined;
+  lazyIconCache.buildPromise = buildIconCacheImpl().catch((err) => {
+    lazyIconCache.buildPromise = undefined;
     throw err;
   });
-  return buildIconCachePromise;
+  return lazyIconCache.buildPromise;
 };
 
 const buildIconCacheImpl = async (): Promise<Map<string, string>> => {
@@ -203,8 +205,8 @@ const buildIconCacheImpl = async (): Promise<Map<string, string>> => {
     tmp.remove();
   }
 
-  pathToTypeMap = pMap;
-  iconSvgCache = svgMap;
+  lazyIconCache.pathToType = pMap;
+  lazyIconCache.svgs = svgMap;
   return pMap;
 };
 

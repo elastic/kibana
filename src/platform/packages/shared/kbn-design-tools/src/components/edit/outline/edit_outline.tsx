@@ -16,9 +16,10 @@ import {
   HANDLE_CURSORS,
   RESIZE_HANDLE_SIZE,
 } from '../../../lib/constants';
-import { useOverlayZIndex, useElementRect } from '../../../hooks';
+import { useOverlayZIndex } from '../../../hooks/use_overlay_z_index';
+import { useElementRect } from '../../../hooks/use_element_rect';
 import { getHandleMode, getHandlePositions } from '../../../lib/dom/resize_helpers';
-import { OutlineControls } from './controls';
+import { OutlineControls } from './controls/outline_controls';
 
 interface Props {
   target: HTMLElement;

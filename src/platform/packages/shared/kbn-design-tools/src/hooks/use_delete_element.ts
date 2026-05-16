@@ -36,6 +36,9 @@ export const useDeleteElement = (onDelete?: () => void) => {
       el.style.opacity = '0';
       const timerId = setTimeout(() => {
         pendingTimers.current.delete(timerId);
+        // Guard: if undo restored this element during the fade, the attr
+        // will have been removed — skip the visibility change.
+        if (!el.hasAttribute(DEVTOOL_HIDDEN_ATTR)) return;
         setImportant(el, 'visibility', 'hidden');
         el.style.transition = '';
         el.style.opacity = '';

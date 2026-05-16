@@ -9,6 +9,7 @@
 
 import DOMPurify from 'dompurify';
 import type { ReactElement } from 'react';
+import { EUI_LIBRARY } from '../../../components/edit/library/library_entries';
 import type { ElementRegistry, ElementSession } from '../../dom/element_registry';
 import { toPath, fromPath, buildRelativeSelector } from './element_path';
 import type { ElementPath } from './element_path';
@@ -20,8 +21,8 @@ import {
   DEVTOOL_LIBRARY_ID_ATTR,
   IMPORT_CLONE_Z_INDEX,
 } from '../../constants';
-import { EUI_LIBRARY } from '../../../components/edit/library';
-import { renderEuiComponentLive, renderAndCloneEuiComponent } from '../../dom/insert_element';
+
+import { renderEuiComponentLive } from '../../dom/insert_element';
 import { readStateAttributes } from '../../../components/edit/library/serializable_state';
 import { replaceIconContent } from '../../eui_icon_cache';
 import { getPageColorScheme } from '../../dom/get_page_color_mode';
@@ -69,7 +70,7 @@ interface SerializedSourceEditEntry {
  * Portable version of an {@link ElementSession}. All DOM references
  * are replaced by {@link ElementPath} locators.
  */
-export interface ExportedSession {
+interface ExportedSession {
   readonly elPath?: ElementPath;
   readonly dx: number;
   readonly dy: number;
@@ -91,7 +92,7 @@ export interface ExportedSession {
  * A soft-deleted page element — hidden via visibility:hidden and
  * DEVTOOL_HIDDEN_ATTR but not removed from the DOM.
  */
-export interface ExportedDeletion {
+interface ExportedDeletion {
   readonly elPath: ElementPath;
   /** Original CSS transform value, stored so resetAll can restore it. */
   readonly originalTransform: string;
@@ -275,7 +276,7 @@ const resolveElement = (
 
 /**
  * Look up an EUI library entry by its serialized ID (e.g. "Switch/Regular" or "Button").
- * Returns the ReactElement and whether it's interactive, or null if not found.
+ * Returns the ReactElement, or null if not found.
  */
 const findLibraryElement = (libraryId: string) => {
   const parts = libraryId.split('/');
@@ -288,14 +289,11 @@ const findLibraryElement = (libraryId: string) => {
   if (variantLabel && entry.variants) {
     const variant = entry.variants.find((v) => v.label === variantLabel);
     if (variant) {
-      return {
-        element: variant.element,
-        interactive: variant.interactive ?? entry.interactive ?? false,
-      };
+      return { element: variant.element };
     }
   }
 
-  return { element: entry.element, interactive: entry.interactive ?? false };
+  return { element: entry.element };
 };
 
 /**
@@ -425,26 +423,14 @@ export const importState = async (
 
       if (libraryMatch) {
         try {
-          if (libraryMatch.interactive) {
-            const live = await renderEuiComponentLive(
-              libraryMatch.element,
-              IMPORT_CLONE_Z_INDEX,
-              exported.stateAttributes
-            );
-            el = live.wrapper;
-            liveReactElement = live.liveReactElement;
-            cleanup = live.cleanup;
-          } else {
-            // Non-interactive library element — render a fresh clone so
-            // dimensions and colors match the current theme/viewport
-            // instead of using stale outerHTML with baked layout values.
-            const cloned = await renderAndCloneEuiComponent(
-              libraryMatch.element,
-              IMPORT_CLONE_Z_INDEX
-            );
-            el = cloned.clone;
-            document.body.appendChild(el);
-          }
+          const live = await renderEuiComponentLive(
+            libraryMatch.element,
+            IMPORT_CLONE_Z_INDEX,
+            exported.stateAttributes
+          );
+          el = live.wrapper;
+          liveReactElement = live.liveReactElement;
+          cleanup = live.cleanup;
           setImportant(el, 'left', `${exported.originalRect.x}px`);
           setImportant(el, 'top', `${exported.originalRect.y}px`);
           el.style.pointerEvents = 'auto';

@@ -12,6 +12,7 @@ import { renderHook, act } from '@testing-library/react';
 import { useScrollSync } from './use_scroll_sync';
 import { ElementRegistry } from '../lib/dom/element_registry';
 import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
+import { makeSession } from '../lib/tests/helpers';
 
 describe('useScrollSync', () => {
   let registry: ElementRegistry;
@@ -31,33 +32,12 @@ describe('useScrollSync', () => {
     scrollContainer.remove();
   });
 
-  const makeSession = (left: number, top: number) => {
+  const makeScrollSession = (left: number, top: number) => {
     const el = document.createElement('div');
     el.style.left = `${left}px`;
     el.style.top = `${top}px`;
     document.body.appendChild(el);
-    return {
-      el,
-      dx: 0,
-      dy: 0,
-      dw: 0,
-      dh: 0,
-      originalRect: {
-        x: left,
-        y: top,
-        width: 100,
-        height: 100,
-        top,
-        left,
-        right: left + 100,
-        bottom: top + 100,
-        toJSON: () => ({}),
-      } as DOMRect,
-      isDuplicate: false,
-      styleEdits: [],
-      textEdits: [],
-      sourceEdits: [],
-    };
+    return makeSession({ el, originalRect: new DOMRect(left, top, 100, 100) });
   };
 
   const scroll = (x: number, y: number) => {
@@ -68,15 +48,15 @@ describe('useScrollSync', () => {
     });
   };
 
-  it('attaches a scroll listener to the main scroll container', () => {
+  it('should attach a scroll listener to the main scroll container', () => {
     const addSpy = jest.spyOn(scrollContainer, 'addEventListener');
     renderHook(() => useScrollSync(registryRef));
     expect(addSpy).toHaveBeenCalledWith('scroll', expect.any(Function));
     addSpy.mockRestore();
   });
 
-  it('adjusts all managed elements on scroll', () => {
-    const session = makeSession(100, 200);
+  it('should adjust all managed elements on scroll', () => {
+    const session = makeScrollSession(100, 200);
     registry.set(session);
 
     renderHook(() => useScrollSync(registryRef));
@@ -90,8 +70,8 @@ describe('useScrollSync', () => {
     session.el.remove();
   });
 
-  it('adjusts live elements the same as clones', () => {
-    const liveSession = { ...makeSession(100, 200), isDuplicate: true };
+  it('should adjust live elements the same as clones', () => {
+    const liveSession = { ...makeScrollSession(100, 200), isDuplicate: true };
     registry.set(liveSession);
 
     renderHook(() => useScrollSync(registryRef));
@@ -105,7 +85,7 @@ describe('useScrollSync', () => {
     liveSession.el.remove();
   });
 
-  it('cleans up listener on unmount', () => {
+  it('should clean up listener on unmount', () => {
     const removeSpy = jest.spyOn(scrollContainer, 'removeEventListener');
     const { unmount } = renderHook(() => useScrollSync(registryRef));
 

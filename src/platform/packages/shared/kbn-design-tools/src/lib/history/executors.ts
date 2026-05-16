@@ -192,11 +192,30 @@ export const editExecutor: TransactionExecutor<EditTransaction> = {
  *
  * Reverse: removes the element from the DOM and unregisters the session.
  */
+/**
+ * Re-insert an element from a session snapshot and rebuild its CSS
+ * transform so the visual position matches the session's dx/dy.
+ *
+ * Used by structural executors (duplicate, delete, clone) that remove
+ * and re-insert elements.  Without the explicit rebuild the element
+ * retains whatever stale inline transform it had when it was detached,
+ * which can desynchronize from the session after an export/import
+ * round-trip.
+ */
+const restoreAndRebuild = (
+  element: HTMLElement,
+  snapshot: ElementSessionSnapshot,
+  registry: ElementRegistry
+): void => {
+  insertAtSnapshot(element, snapshot);
+  const session = restoreSession(snapshot);
+  registry.set(session);
+  rebuildTransform(element, session.dx, session.dy, session.dw, session.dh, session.originalRect);
+};
+
 export const duplicateExecutor: TransactionExecutor<DuplicateTransaction> = {
   apply(tx, registry) {
-    const { sessionSnapshot } = tx;
-    insertAtSnapshot(tx.element, sessionSnapshot);
-    registry.set(restoreSession(sessionSnapshot));
+    restoreAndRebuild(tx.element, tx.sessionSnapshot, registry);
   },
 
   reverse(tx, registry) {
@@ -236,8 +255,7 @@ export const deleteExecutor: TransactionExecutor<DeleteTransaction> = {
 
   reverse(tx, registry) {
     if (tx.sessionSnapshot) {
-      insertAtSnapshot(tx.element, tx.sessionSnapshot);
-      registry.set(restoreSession(tx.sessionSnapshot));
+      restoreAndRebuild(tx.element, tx.sessionSnapshot, registry);
     } else if (tx.originalStyles) {
       tx.element.style.transform = tx.originalStyles.transform;
       tx.element.style.visibility = tx.originalStyles.visibility;
@@ -261,8 +279,7 @@ export const deleteExecutor: TransactionExecutor<DeleteTransaction> = {
 export const cloneExecutor: TransactionExecutor<CloneTransaction> = {
   apply(tx, registry) {
     const { sessionSnapshot, referenceEl } = tx;
-    insertAtSnapshot(tx.element, sessionSnapshot);
-    registry.set(restoreSession(sessionSnapshot));
+    restoreAndRebuild(tx.element, sessionSnapshot, registry);
 
     const originalTransform = referenceEl.style.transform || '';
     referenceEl.setAttribute(DEVTOOL_HIDDEN_ATTR, originalTransform);

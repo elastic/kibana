@@ -114,8 +114,14 @@ export interface DuplicateTransaction extends TransactionBase {
   readonly type: 'duplicate';
   /** The newly created duplicate element. */
   readonly element: HTMLElement;
-  /** Full session snapshot for re-insertion on redo after an undo. */
-  readonly sessionSnapshot: ElementSessionSnapshot;
+  /**
+   * Full session snapshot for re-insertion on redo after an undo.
+   *
+   * Mutable so the auto-drag that follows creation can update the
+   * snapshot with the final dropped position, merging what would
+   * otherwise be two transactions (duplicate + move) into one.
+   */
+  sessionSnapshot: ElementSessionSnapshot;
 }
 
 /**

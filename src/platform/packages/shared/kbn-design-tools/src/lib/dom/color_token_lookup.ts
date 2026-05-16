@@ -14,7 +14,7 @@ import { getPageColorMode } from './get_page_color_mode';
 import { isTransparentColor } from './is_transparent_color';
 import { getTokenVar, parseTokenVar, syncTokenStylesheet } from './color_token_stylesheet';
 
-type TokenCategory = 'text' | 'background' | 'other';
+type TokenCategory = 'text' | 'background' | 'border' | 'other';
 
 /**
  * Override map for tokens whose names don't follow the standard
@@ -41,11 +41,13 @@ const classifyToken = (name: string): TokenCategory => {
   if (override) return override;
   if (name.startsWith('text')) return 'text';
   if (name.startsWith('background')) return 'background';
+  if (name.startsWith('border')) return 'border';
   return 'other';
 };
 
 export const isTextToken = (name: string): boolean => classifyToken(name) === 'text';
 export const isBgToken = (name: string): boolean => classifyToken(name) === 'background';
+export const isBorderToken = (name: string): boolean => classifyToken(name) === 'border';
 
 /**
  * Normalise any CSS color string to a lowercase hex value.
@@ -77,24 +79,26 @@ const COLOR_CSS_PROPS: ReadonlySet<string> = new Set([
   'background-color',
 ]);
 
+const isBorderColorProp = (prop: string): boolean =>
+  prop.startsWith('border-') && prop.endsWith('-color');
+
 interface TokenLookup {
   readonly forward: ReadonlyMap<string, string>;
   readonly textReverse: ReadonlyMap<string, string>;
   readonly bgReverse: ReadonlyMap<string, string>;
+  readonly borderReverse: ReadonlyMap<string, string>;
   readonly fallbackReverse: ReadonlyMap<string, string>;
 }
 
 const buildLookup = (): TokenLookup => {
   const mode = getPageColorMode();
-  const themeColors = EuiThemeBorealis.root.colors as unknown as Record<string, unknown>;
-  const palette = (mode === 'dark' ? themeColors.DARK : themeColors.LIGHT) as Record<
-    string,
-    unknown
-  >;
+  const themeColors = EuiThemeBorealis.root.colors;
+  const palette = mode === 'dark' ? themeColors.DARK : themeColors.LIGHT;
 
   const forward = new Map<string, string>();
   const textReverse = new Map<string, string>();
   const bgReverse = new Map<string, string>();
+  const borderReverse = new Map<string, string>();
   const fallbackReverse = new Map<string, string>();
 
   for (const [key, value] of Object.entries(palette)) {
@@ -106,31 +110,24 @@ const buildLookup = (): TokenLookup => {
     const category = classifyToken(key);
     if (category === 'text' && !textReverse.has(hex)) textReverse.set(hex, key);
     else if (category === 'background' && !bgReverse.has(hex)) bgReverse.set(hex, key);
+    else if (category === 'border' && !borderReverse.has(hex)) borderReverse.set(hex, key);
     if (!fallbackReverse.has(hex)) fallbackReverse.set(hex, key);
   }
 
   syncTokenStylesheet();
-  return { forward, textReverse, bgReverse, fallbackReverse };
+  return { forward, textReverse, bgReverse, borderReverse, fallbackReverse };
 };
 
-/** Lazily-initialised, rebuilt on each `initColorTokenLookup()` call. */
-let cache: TokenLookup | null = null;
+const getLookup = (() => {
+  let cache: TokenLookup | null = null;
+  return (): TokenLookup => {
+    if (!cache) cache = buildLookup();
+    return cache;
+  };
+})();
 
-const getLookup = (): TokenLookup => {
-  if (!cache) cache = buildLookup();
-  return cache;
-};
-
-/**
- * Rebuild the hex↔token lookup for the current color mode.
- * Call when the page color mode changes.
- */
-export const initColorTokenLookup = (): void => {
-  cache = buildLookup();
-};
-
-const colorToToken = (cssValue: string, cssProp: string): string | undefined => {
-  const { textReverse, bgReverse, fallbackReverse } = getLookup();
+export const colorToToken = (cssValue: string, cssProp: string): string | undefined => {
+  const { textReverse, bgReverse, borderReverse, fallbackReverse } = getLookup();
   const hex = toHex(cssValue);
   if (!hex) return undefined;
 
@@ -142,6 +139,9 @@ const colorToToken = (cssValue: string, cssProp: string): string | undefined => 
   }
   if (cssProp === 'color' || cssProp === '-webkit-text-fill-color') {
     return textReverse.get(hex) ?? fallbackReverse.get(hex);
+  }
+  if (isBorderColorProp(cssProp)) {
+    return borderReverse.get(hex) ?? fallbackReverse.get(hex);
   }
   return fallbackReverse.get(hex);
 };
@@ -176,6 +176,9 @@ export const resolveColorTokensDeep = (root: HTMLElement): void => {
   for (const el of root.querySelectorAll<HTMLElement>('*')) {
     refreshTokenVars(el);
   }
+  for (const style of root.querySelectorAll<HTMLStyleElement>('style')) {
+    refreshPseudoStyleTag(style);
+  }
 };
 
 const refreshTokenVars = (el: HTMLElement): void => {
@@ -202,4 +205,14 @@ const refreshTokenVars = (el: HTMLElement): void => {
       el.style.setProperty(prop, getTokenVar(token, tokenToColor(token)));
     }
   }
+};
+
+const TOKEN_VAR_RE = /var\(--dt-([^,)]+)(?:,\s*[^)]+)?\)/g;
+
+const refreshPseudoStyleTag = (style: HTMLStyleElement): void => {
+  const text = style.textContent;
+  if (!text || !text.includes(CSS_VAR_PREFIX)) return;
+  style.textContent = text.replace(TOKEN_VAR_RE, (_match, name: string) =>
+    getTokenVar(name, tokenToColor(name))
+  );
 };

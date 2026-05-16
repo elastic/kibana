@@ -21,7 +21,7 @@ import type { EuiComponentVariant, EuiLibraryEntry } from './library_entries';
 import { EUI_LIBRARY } from './library_entries';
 
 interface BuildPanelsOptions {
-  onInsert: (element: ReactElement, interactive?: boolean, libraryId?: string) => void;
+  onInsert: (element: ReactElement, libraryId?: string) => void;
   searchTerms: Record<string, string>;
   onSearchChange: (panelId: string, value: string) => void;
 }
@@ -62,14 +62,14 @@ export const buildAddEuiPanels = ({
 
   const mainPanel: EuiContextMenuPanelDescriptor = {
     id: ADD_EUI_PANEL_ID,
-    title: i18n.translate('kbnDesignTools.addEui.panelTitle', {
+    title: i18n.translate('kbnDesignTools.edit.library.panelTitle', {
       defaultMessage: 'Add from EUI',
     }),
     width: 200,
     items: [
       makeSearchItem(
         ADD_EUI_PANEL_ID,
-        i18n.translate('kbnDesignTools.addEui.searchPlaceholder', {
+        i18n.translate('kbnDesignTools.edit.library.searchPlaceholder', {
           defaultMessage: 'Search components...',
         }),
         searchTerms,
@@ -78,9 +78,7 @@ export const buildAddEuiPanels = ({
       ...filteredEntries.map((entry) => ({
         name: entry.label,
         panel: entry.variants ? `${VARIANT_PANEL_PREFIX}${entry.label}` : undefined,
-        onClick: entry.variants
-          ? undefined
-          : () => onInsert(entry.element, entry.interactive, entry.label),
+        onClick: entry.variants ? undefined : () => onInsert(entry.element, entry.label),
       })),
     ],
   };
@@ -101,7 +99,7 @@ export const buildAddEuiPanels = ({
       items: [
         makeSearchItem(
           panelId,
-          i18n.translate('kbnDesignTools.addEui.searchVariantsPlaceholder', {
+          i18n.translate('kbnDesignTools.edit.library.searchVariantsPlaceholder', {
             defaultMessage: 'Search {label}...',
             values: { label: entry.label.toLowerCase() },
           }),
@@ -110,12 +108,7 @@ export const buildAddEuiPanels = ({
         ),
         ...filtered.map((variant) => ({
           name: variant.label,
-          onClick: () =>
-            onInsert(
-              variant.element,
-              variant.interactive ?? entry.interactive,
-              `${entry.label}/${variant.label}`
-            ),
+          onClick: () => onInsert(variant.element, `${entry.label}/${variant.label}`),
         })),
       ],
     };

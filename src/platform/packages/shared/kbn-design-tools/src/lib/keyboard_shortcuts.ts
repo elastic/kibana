@@ -30,10 +30,22 @@ export const isMeasureShortcut = (event: KeyboardEvent) =>
  * Check if the keyboard event corresponds to the duplicate shortcut (Meta/Ctrl + D).
  */
 export const isDuplicateShortcut = (event: KeyboardEvent): boolean =>
-  (event.metaKey || event.ctrlKey) && event.key === 'd';
+  (event.metaKey || event.ctrlKey) && event.key === 'c';
 
 /**
  * Check if Enter was pressed without modifiers to open the edit modal.
  */
 export const isEditShortcut = (event: KeyboardEvent): boolean =>
   event.key === 'Enter' && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey;
+
+/**
+ * Check if the keyboard event corresponds to the undo shortcut (Meta/Ctrl + Z, no Shift).
+ */
+export const isUndoShortcut = (event: KeyboardEvent): boolean =>
+  (event.metaKey || event.ctrlKey) && event.key === 'z' && !event.shiftKey;
+
+/**
+ * Check if the keyboard event corresponds to the redo shortcut (Meta/Ctrl + Shift + Z).
+ */
+export const isRedoShortcut = (event: KeyboardEvent): boolean =>
+  (event.metaKey || event.ctrlKey) && event.key === 'z' && event.shiftKey;

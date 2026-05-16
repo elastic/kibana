@@ -16,7 +16,7 @@ import {
   applyDragMove,
 } from '../lib/dom/drag_helpers';
 import { startResize, applyResizeMove } from '../lib/dom/resize_helpers';
-import type { InteractionState, DragState } from '../lib/dom/interaction_state';
+import type { InteractionState, DragState, GestureCompletion } from '../lib/dom/interaction_state';
 import { IDLE, deriveCursor } from '../lib/dom/interaction_state';
 import { resolveHoverTarget } from '../lib/dom/resolve_hover_target';
 import { getElementUnder } from '../lib/dom/get_element_under';
@@ -30,7 +30,7 @@ import type { LayoutConfig } from '../lib/layout/layout_config';
  * It communicates state changes back to the component via this callback
  * interface so the component can bridge them into React (setCursor, etc.).
  */
-export interface InteractionEffects {
+interface InteractionEffects {
   setCursor: (cursor: string) => void;
   updateHoverTarget: (target: HTMLElement | null) => void;
   notifyCount: () => void;
@@ -58,6 +58,7 @@ export interface InteractionMachineOptions {
  */
 export const useInteractionMachine = (options: InteractionMachineOptions) => {
   const interaction = useRef<InteractionState>(IDLE);
+  const newCloneRef = useRef<HTMLElement | undefined>(undefined);
 
   const { registry, hoverTargetRef, stickyHover, roundedTargets, rafId, effects } = options;
   const { cloneZIndex, isInsideHoverLock } = options;
@@ -141,6 +142,7 @@ export const useInteractionMachine = (options: InteractionMachineOptions) => {
                 state.startX,
                 state.startY
               );
+              newCloneRef.current = (interaction.current as DragState).session.referenceEl;
             }
             effects.setCursor('grabbing');
             effects.notifyCount();
@@ -260,6 +262,7 @@ export const useInteractionMachine = (options: InteractionMachineOptions) => {
           );
           session = dragState.session;
           session.el.style.pointerEvents = 'auto';
+          newCloneRef.current = session.referenceEl;
         }
 
         interaction.current = startResize(session, corner, event.clientX, event.clientY);
@@ -296,25 +299,61 @@ export const useInteractionMachine = (options: InteractionMachineOptions) => {
    * Handle pointer-up: finalises drag/resize or cancels pending-drag.
    */
   const handlePointerUp = useCallback(
-    (event: PointerEvent) => {
+    (event: PointerEvent): GestureCompletion | null => {
       const state = interaction.current;
+
+      let completion: GestureCompletion | null = null;
 
       if (state.type === 'pending-drag') {
         interaction.current = IDLE;
         (event.target as Element)?.releasePointerCapture?.(event.pointerId);
-      } else if (state.type === 'drag' || state.type === 'resize') {
+      } else if (state.type === 'drag') {
         event.preventDefault();
         event.stopPropagation();
         (event.target as Element)?.releasePointerCapture?.(event.pointerId);
+
+        const { session, baseOffsetX, baseOffsetY } = state;
+        const isNewClone = newCloneRef.current === session.referenceEl;
+        newCloneRef.current = undefined;
+
+        completion = {
+          gesture: 'move',
+          target: session.el,
+          before: { dx: baseOffsetX, dy: baseOffsetY },
+          after: { dx: session.dx, dy: session.dy },
+          isNewClone: isNewClone && !!session.referenceEl,
+          referenceEl: session.referenceEl,
+          session,
+        };
+
+        parkInteraction();
+      } else if (state.type === 'resize') {
+        event.preventDefault();
+        event.stopPropagation();
+        (event.target as Element)?.releasePointerCapture?.(event.pointerId);
+
+        const { session, baseDx, baseDy, baseWidth, baseHeight } = state;
+        const beforeDw = baseWidth - session.originalRect.width;
+        const beforeDh = baseHeight - session.originalRect.height;
+
+        completion = {
+          gesture: 'resize',
+          target: session.el,
+          before: { dx: baseDx, dy: baseDy, dw: beforeDw, dh: beforeDh },
+          after: { dx: session.dx, dy: session.dy, dw: session.dw, dh: session.dh },
+        };
+
         parkInteraction();
       } else {
-        return;
+        return null;
       }
 
       // Re-resolve hover so the outline shows immediately
       const target = getElementUnder(event.clientX, event.clientY);
       effects.updateHoverTarget(target);
       effects.setCursor(target ? 'grab' : '');
+
+      return completion;
     },
     [parkInteraction, effects]
   );

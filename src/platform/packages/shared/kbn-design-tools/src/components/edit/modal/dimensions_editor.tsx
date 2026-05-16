@@ -8,7 +8,15 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiFormRow, EuiComboBox, useEuiTheme } from '@elastic/eui';
+import {
+  EuiFormRow,
+  EuiComboBox,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonIcon,
+  EuiToolTip,
+  useEuiTheme,
+} from '@elastic/eui';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
@@ -17,11 +25,13 @@ interface DimensionEntry {
   property: string;
   label: string;
   value: string;
+  originalValue: string;
 }
 
 interface Props {
   entries: DimensionEntry[];
   onChange: (property: string, value: string) => void;
+  onReset?: (property: string) => void;
   onFocus?: () => void;
 }
 
@@ -32,7 +42,7 @@ const fieldCss = css({ minWidth: 120 });
  * border-radius). Shows EUI size tokens as suggestions but allows freeform
  * CSS values.
  */
-export const DimensionsEditor = ({ entries, onChange, onFocus }: Props) => {
+export const DimensionsEditor = ({ entries, onChange, onReset, onFocus }: Props) => {
   const { euiTheme } = useEuiTheme();
 
   const sizeOptions: Array<EuiComboBoxOptionOption<string>> = useMemo(() => {
@@ -51,6 +61,7 @@ export const DimensionsEditor = ({ entries, onChange, onFocus }: Props) => {
           entry={entry}
           options={sizeOptions}
           onChange={onChange}
+          onReset={onReset}
           onFocus={onFocus}
         />
       ))}
@@ -62,11 +73,13 @@ const DimensionField = ({
   entry,
   options,
   onChange,
+  onReset,
   onFocus,
 }: {
   entry: DimensionEntry;
   options: Array<EuiComboBoxOptionOption<string>>;
   onChange: (property: string, value: string) => void;
+  onReset?: (property: string) => void;
   onFocus?: () => void;
 }) => {
   const selectedOptions = useMemo(() => {
@@ -92,24 +105,48 @@ const DimensionField = ({
     [onChange, entry.property]
   );
 
+  const isChanged = entry.value !== entry.originalValue;
+
   return (
     <EuiFormRow label={entry.label}>
-      <div className={fieldCss} onFocusCapture={onFocus}>
-        <EuiComboBox
-          aria-label={entry.label}
-          options={options}
-          selectedOptions={selectedOptions}
-          onChange={handleChange}
-          onCreateOption={handleCreate}
-          singleSelection={{ asPlainText: true }}
-          compressed
-          isClearable={false}
-          customOptionText={i18n.translate('kbnDesignTools.edit.modal.dimensions.customValue', {
-            defaultMessage: 'Use {searchValue}',
-            values: { searchValue: '{searchValue}' },
-          })}
-        />
-      </div>
+      <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+        <EuiFlexItem>
+          <div className={fieldCss} onFocusCapture={onFocus}>
+            <EuiComboBox
+              aria-label={entry.label}
+              options={options}
+              selectedOptions={selectedOptions}
+              onChange={handleChange}
+              onCreateOption={handleCreate}
+              singleSelection={{ asPlainText: true }}
+              compressed
+              isClearable={false}
+              customOptionText={i18n.translate('kbnDesignTools.edit.modal.dimensions.customValue', {
+                defaultMessage: 'Use {searchValue}',
+                values: { searchValue: '{searchValue}' },
+              })}
+            />
+          </div>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiToolTip
+            content={i18n.translate('kbnDesignTools.edit.modal.resetDimension', {
+              defaultMessage: 'Reset to original value',
+            })}
+          >
+            <EuiButtonIcon
+              iconType="undo"
+              aria-label={i18n.translate('kbnDesignTools.edit.modal.resetDimensionAria', {
+                defaultMessage: 'Reset {label} to original value',
+                values: { label: entry.label },
+              })}
+              onClick={() => onReset?.(entry.property)}
+              disabled={!isChanged}
+              size="s"
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiFormRow>
   );
 };

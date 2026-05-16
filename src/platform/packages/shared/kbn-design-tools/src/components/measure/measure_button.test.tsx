@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { screen, fireEvent, cleanup } from '@testing-library/react';
+import { screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { MeasureButton } from './measure_button';
@@ -28,10 +28,6 @@ describe('MeasureButton', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-  });
-
-  afterEach(() => {
-    cleanup();
   });
 
   it('should render the button', () => {

@@ -8,114 +8,100 @@
  */
 
 import { snapToGrid } from './snap_to_grid';
-import type { LayoutConfig } from '../layout/layout_config';
-
-const makeConfig = (overrides: Partial<LayoutConfig> = {}): LayoutConfig => ({
-  layoutType: 'grid',
-  count: 12,
-  alignType: 'stretch',
-  rowAlignType: 'stretch',
-  cellSize: 8,
-  width: 0,
-  height: 0,
-  gutterSize: 16,
-  marginSize: 16,
-  color: '#FF00FF1A',
-  ...overrides,
-});
+import { makeLayoutConfig } from '../tests/helpers';
 
 describe('snapToGrid', () => {
   describe('grid layout', () => {
-    it('snaps both axes to cell size', () => {
-      const config = makeConfig({ layoutType: 'grid', cellSize: 8 });
+    it('should snap both axes to cell size', () => {
+      const config = makeLayoutConfig({ layoutType: 'grid', cellSize: 8 });
       expect(snapToGrid(11, 13, 0, 0, config, 1024, 768)).toEqual({ dx: 8, dy: 16 });
     });
 
-    it('rounds to nearest increment', () => {
-      const config = makeConfig({ layoutType: 'grid', cellSize: 10 });
+    it('should rounds to nearest increment', () => {
+      const config = makeLayoutConfig({ layoutType: 'grid', cellSize: 10 });
       expect(snapToGrid(14, 26, 0, 0, config, 1024, 768)).toEqual({ dx: 10, dy: 30 });
     });
 
-    it('snaps negative deltas', () => {
-      const config = makeConfig({ layoutType: 'grid', cellSize: 8 });
+    it('should snap negative deltas', () => {
+      const config = makeLayoutConfig({ layoutType: 'grid', cellSize: 8 });
       expect(snapToGrid(-5, -13, 0, 0, config, 1024, 768)).toEqual({ dx: -8, dy: -16 });
     });
 
-    it('keeps zero unchanged', () => {
-      const config = makeConfig({ layoutType: 'grid', cellSize: 8 });
+    it('should keep zero unchanged', () => {
+      const config = makeLayoutConfig({ layoutType: 'grid', cellSize: 8 });
       expect(snapToGrid(0, 0, 0, 0, config, 1024, 768)).toEqual({ dx: 0, dy: 0 });
     });
 
-    it('falls back to 32 when cellSize is 0', () => {
-      const config = makeConfig({ layoutType: 'grid', cellSize: 0 });
+    it('should fall back to 32 when cellSize is 0', () => {
+      const config = makeLayoutConfig({ layoutType: 'grid', cellSize: 0 });
       expect(snapToGrid(50, 50, 0, 0, config, 1024, 768)).toEqual({ dx: 64, dy: 64 });
     });
 
-    it('snaps absolute position when origin is not on grid', () => {
-      const config = makeConfig({ layoutType: 'grid', cellSize: 8 });
+    it('should snap absolute position when origin is not on grid', () => {
+      const config = makeLayoutConfig({ layoutType: 'grid', cellSize: 8 });
       // origin at 53, delta 10 → absolute 63 → snaps to 64 → delta = 64 - 53 = 11
       expect(snapToGrid(10, 10, 53, 53, config, 1024, 768)).toEqual({ dx: 11, dy: 11 });
     });
   });
 
   describe('columns layout', () => {
-    it('snaps X to column left edges accounting for margin offset', () => {
+    it('should snap X to column left edges accounting for margin offset', () => {
       // stretch: 12 cols, 16px gutter, 16px margin in 1024px viewport
       // availableWidth = 1024 - 32 = 992, totalGutter = 16 * 11 = 176
       // columnWidth = (992 - 176) / 12 = 68, step = 68 + 16 = 84
       // offsetLeft = 16 (margin)
       // snap points: 16, 100, 184, 268, ...
-      const config = makeConfig({ layoutType: 'columns', count: 12 });
+      const config = makeLayoutConfig({ layoutType: 'columns', count: 12 });
       // origin=0, dx=50 → abs=50 → nearest snap point: 16 or 100 → 50 is closer to 16? no, (50-16)/84=0.40 rounds to 0 → 16
       const result = snapToGrid(50, 37, 0, 0, config, 1024, 768);
       expect(result.dx).toBe(16);
       expect(result.dy).toBe(37);
     });
 
-    it('snaps to second column when closer', () => {
+    it('should snap to second column when closer', () => {
       // snap points: 16, 100, 184...
       // origin=0, dx=60 → abs=60 → (60-16)/84=0.52 rounds to 1 → 16 + 84 = 100
-      const config = makeConfig({ layoutType: 'columns', count: 12 });
+      const config = makeLayoutConfig({ layoutType: 'columns', count: 12 });
       const result = snapToGrid(60, 0, 0, 0, config, 1024, 768);
       expect(result.dx).toBe(100);
     });
 
-    it('does not snap Y axis', () => {
-      const config = makeConfig({ layoutType: 'columns' });
+    it('should not snap Y axis', () => {
+      const config = makeLayoutConfig({ layoutType: 'columns' });
       const result = snapToGrid(0, 123.456, 0, 0, config, 1024, 768);
       expect(result.dy).toBe(123.456);
     });
   });
 
   describe('rows layout', () => {
-    it('snaps Y to row top edges accounting for margin offset', () => {
+    it('should snap Y to row top edges accounting for margin offset', () => {
       // stretch: 12 rows, 16px gutter, 16px margin in 768px viewport
       // available = 768 - 32 = 736, totalGutter = 16 * 11 = 176
       // rowHeight = (736 - 176) / 12 ≈ 46.67, step ≈ 62.67
       // offsetTop = 16 (margin)
       // snap points: 16, 78.67, 141.33, ...
-      const config = makeConfig({ layoutType: 'rows', count: 12 });
+      const config = makeLayoutConfig({ layoutType: 'rows', count: 12 });
       // origin=0, dx=37, dy=50 → absY=50 → (50-16)/62.67=0.54 rounds to 1 → 16 + 62.67 = 78.67
       const result = snapToGrid(37, 50, 0, 0, config, 1024, 768);
       expect(result.dx).toBe(37);
       expect(result.dy).toBeCloseTo(78.67, 0);
     });
 
-    it('does not snap X axis', () => {
-      const config = makeConfig({ layoutType: 'rows' });
+    it('should not snap X axis', () => {
+      const config = makeLayoutConfig({ layoutType: 'rows' });
       const result = snapToGrid(123.456, 0, 0, 0, config, 1024, 768);
       expect(result.dx).toBe(123.456);
     });
   });
 
   describe('bounds constraints', () => {
-    it('does not snap columns X outside the layout extent (centered)', () => {
+    it('should not snap columns X outside the layout extent (centered)', () => {
       // 4 centered columns, width=100, gutter=20, viewport=1024
       // totalWidth = 4*100 + 3*20 = 460
       // offsetLeft = (1024 - 460) / 2 = 282
       // extent = 460, so layout area is [282, 742]
       // snap points within: 282, 402, 522, 642
-      const config = makeConfig({
+      const config = makeLayoutConfig({
         layoutType: 'columns',
         count: 4,
         alignType: 'center',
@@ -136,12 +122,12 @@ describe('snapToGrid', () => {
       expect(inside.dx).toBe(402);
     });
 
-    it('does not snap rows Y outside the layout extent (centered)', () => {
+    it('should not snap rows Y outside the layout extent (centered)', () => {
       // 3 centered rows, height=80, gutter=10, viewport=768
       // totalHeight = 3*80 + 2*10 = 260
       // offsetTop = (768 - 260) / 2 = 254
       // extent = 260, so layout area is [254, 514]
-      const config = makeConfig({
+      const config = makeLayoutConfig({
         layoutType: 'rows',
         count: 3,
         rowAlignType: 'center',

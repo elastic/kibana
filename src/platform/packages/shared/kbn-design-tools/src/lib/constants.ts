@@ -231,10 +231,10 @@ export const BACKGROUND_CSS_PROPS = new Set([
 export const MANAGED_ELEMENT_SELECTOR = `[${DEVTOOL_MANAGED_ATTR}]`;
 
 /** Selector for elements marked with the devtool ignore attribute. */
-export const DEVTOOL_IGNORE_SELECTOR = `[${DEVTOOL_IGNORE_ATTR}]`;
+const DEVTOOL_IGNORE_SELECTOR = `[${DEVTOOL_IGNORE_ATTR}]`;
 
 /** Selector for resize handle elements. */
-export const DEVTOOL_RESIZE_SELECTOR = `[${DEVTOOL_RESIZE_HANDLE_ATTR}]`;
+const DEVTOOL_RESIZE_SELECTOR = `[${DEVTOOL_RESIZE_HANDLE_ATTR}]`;
 
 /** Set of element IDs belonging to tool overlays. */
 export const IGNORED_ELEMENT_IDS = new Set([

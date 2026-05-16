@@ -20,6 +20,7 @@ interface Props {
 
 export const ColorSetting = ({ color, onChange }: Props) => (
   <EuiFormRow
+    data-test-subj="layoutSettingsColor"
     label={i18n.translate('kbnDesignTools.layout.settings.color', {
       defaultMessage: 'Color',
     })}

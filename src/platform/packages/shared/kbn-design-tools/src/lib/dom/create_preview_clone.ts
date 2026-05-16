@@ -11,7 +11,7 @@ import { DEVTOOL_HIDDEN_ATTR, DEVTOOL_MANAGED_ATTR } from '../constants';
 import { copyCanvasContent, copyStylesDeep, setImportant, roundRect } from './clone_element';
 import { isLiveElement } from './managed_element';
 
-export interface PreviewCloneResult {
+interface PreviewCloneResult {
   clone: HTMLElement;
   elementMap: Map<Element, Element>;
 }

@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { screen, fireEvent, cleanup, act } from '@testing-library/react';
+import { screen, fireEvent, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { DesignToolsButton } from './design_tools_button';
@@ -19,10 +19,6 @@ jest.mock('../../lib/eui_icon_cache', () => ({
 }));
 
 describe('DesignToolsButton', () => {
-  afterEach(() => {
-    cleanup();
-  });
-
   it('should render the button', () => {
     renderWithI18n(<DesignToolsButton />);
 
@@ -34,8 +30,8 @@ describe('DesignToolsButton', () => {
 
     await userEvent.click(screen.getByTestId('designToolsButton'));
 
-    expect(screen.getByText('Show layout')).toBeInTheDocument();
-    expect(screen.getByText('Layout settings')).toBeInTheDocument();
+    expect(screen.getByTestId('designToolsToggleLayout')).toBeInTheDocument();
+    expect(screen.getByTestId('designToolsLayoutSettings')).toBeInTheDocument();
   });
 
   it('should toggle layout visibility when Toggle layout is clicked', async () => {
@@ -43,14 +39,14 @@ describe('DesignToolsButton', () => {
 
     await userEvent.click(screen.getByTestId('designToolsButton'));
     await act(async () => {
-      fireEvent.click(screen.getByText('Show layout'));
+      fireEvent.click(screen.getByTestId('designToolsToggleLayout'));
     });
 
     expect(screen.getByTestId('layoutOverlayContainer')).toBeInTheDocument();
 
     await userEvent.click(screen.getByTestId('designToolsButton'));
     await act(async () => {
-      fireEvent.click(screen.getByText('Hide layout'));
+      fireEvent.click(screen.getByTestId('designToolsToggleLayout'));
     });
 
     expect(screen.queryByTestId('layoutOverlayContainer')).not.toBeInTheDocument();
@@ -61,10 +57,10 @@ describe('DesignToolsButton', () => {
 
     await userEvent.click(screen.getByTestId('designToolsButton'));
     await act(async () => {
-      fireEvent.click(screen.getByText('Layout settings'));
+      fireEvent.click(screen.getByTestId('designToolsLayoutSettings'));
     });
 
-    expect(screen.getByText('Count')).toBeInTheDocument();
+    expect(screen.getByTestId('layoutSettingsCount')).toBeInTheDocument();
   });
 
   it('should close flyout via the flyout close button', async () => {
@@ -72,14 +68,14 @@ describe('DesignToolsButton', () => {
 
     await userEvent.click(screen.getByTestId('designToolsButton'));
     await act(async () => {
-      fireEvent.click(screen.getByText('Layout settings'));
+      fireEvent.click(screen.getByTestId('designToolsLayoutSettings'));
     });
 
-    expect(screen.getByText('Count')).toBeInTheDocument();
+    expect(screen.getByTestId('layoutSettingsCount')).toBeInTheDocument();
 
     fireEvent.click(screen.getByLabelText('Close this dialog'));
 
-    expect(screen.queryByText('Count')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('layoutSettingsCount')).not.toBeInTheDocument();
   });
 
   it('should prevent target from losing focus on mouse down', () => {

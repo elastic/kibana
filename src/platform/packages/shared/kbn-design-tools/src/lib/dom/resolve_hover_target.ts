@@ -12,7 +12,7 @@ import { findNearHandle } from './resize_helpers';
 import { getElementUnder } from './get_element_under';
 import { hasSignificantRounding, isInRoundedDeadZone } from './rounded_dead_zone';
 
-export interface HoverResolution {
+interface HoverResolution {
   /** The resolved hover target (may be the previous target if locked). */
   target: HTMLElement | null;
   /** Resize handle under the pointer, if any. */

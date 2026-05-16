@@ -9,7 +9,7 @@
 
 import { identifyIconType } from '../eui_icon_cache';
 
-export interface SourceEntry {
+interface SourceEntry {
   element: Element;
   attribute: string;
   value: string;

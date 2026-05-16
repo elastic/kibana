@@ -10,7 +10,8 @@
 import React, { Fragment, useCallback } from 'react';
 import { css } from '@emotion/css';
 import { useEuiTheme } from '@elastic/eui';
-import { useEuiSizeLookup, useOverlayZIndex } from '../../hooks';
+import { useEuiSizeLookup } from '../../hooks/use_eui_size_lookup';
+import { useOverlayZIndex } from '../../hooks/use_overlay_z_index';
 import type { SpacingLine } from '../../lib/dom/calculate_spacing';
 import { clampToViewport } from '../../lib/dom/clamp_to_viewport';
 import { ENDPOINT_SIZE } from '../../lib/constants';

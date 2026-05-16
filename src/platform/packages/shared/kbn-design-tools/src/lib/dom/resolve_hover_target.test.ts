@@ -8,6 +8,7 @@
  */
 
 import { resolveHoverTarget } from './resolve_hover_target';
+import { makeRect } from '../tests/helpers';
 
 const mockGetElementUnder = jest.fn<HTMLElement | null, [number, number]>();
 jest.mock('./get_element_under', () => ({
@@ -28,19 +29,6 @@ jest.mock('./rounded_dead_zone', () => ({
     mockHasSignificantRounding(...(args as [HTMLElement])),
 }));
 
-const makeRect = (left = 0, top = 0, width = 100, height = 100): DOMRect =>
-  ({
-    left,
-    top,
-    right: left + width,
-    bottom: top + height,
-    width,
-    height,
-    x: left,
-    y: top,
-    toJSON: () => {},
-  } as DOMRect);
-
 describe('resolveHoverTarget', () => {
   let currentTarget: HTMLElement;
   const noLock = () => false;
@@ -51,7 +39,7 @@ describe('resolveHoverTarget', () => {
     currentTarget.getBoundingClientRect = () => makeRect(50, 50, 100, 40);
   });
 
-  it('returns null target and no handle when nothing is under the pointer', () => {
+  it('should return null target and no handle when nothing is under the pointer', () => {
     mockGetElementUnder.mockReturnValue(null);
 
     const result = resolveHoverTarget(300, 300, null, noLock, false);
@@ -61,7 +49,7 @@ describe('resolveHoverTarget', () => {
     expect(result.isRounded).toBe(false);
   });
 
-  it('returns the element under the pointer with no handle for normal hover', () => {
+  it('should return the element under the pointer with no handle for normal hover', () => {
     const el = document.createElement('div');
     mockGetElementUnder.mockReturnValue(el);
     mockFindNearHandle.mockReturnValue(null);
@@ -74,7 +62,7 @@ describe('resolveHoverTarget', () => {
     expect(result.isRounded).toBe(false);
   });
 
-  it('detects resize handle on current target in hover-lock zone', () => {
+  it('should detect resize handle on current target in hover-lock zone', () => {
     const lockFn = jest.fn().mockReturnValue(true);
     mockFindNearHandle.mockReturnValue('se');
 
@@ -84,7 +72,7 @@ describe('resolveHoverTarget', () => {
     expect(result.handle).toBe('se');
   });
 
-  it('keeps current target in hover-lock zone with no handle', () => {
+  it('should keep current target in hover-lock zone with no handle', () => {
     const lockFn = jest.fn().mockReturnValue(true);
     mockFindNearHandle.mockReturnValue(null);
 
@@ -94,7 +82,7 @@ describe('resolveHoverTarget', () => {
     expect(result.handle).toBeNull();
   });
 
-  it('detects resize handle on current target before switching to new target', () => {
+  it('should detect resize handle on current target before switching to new target', () => {
     const newTarget = document.createElement('span');
     mockGetElementUnder.mockReturnValue(newTarget);
     mockFindNearHandle.mockReturnValue('n');
@@ -105,7 +93,7 @@ describe('resolveHoverTarget', () => {
     expect(result.handle).toBe('n');
   });
 
-  it('keeps target in rounded dead-zone when pointer leaves rounded element', () => {
+  it('should keep target in rounded dead-zone when pointer leaves rounded element', () => {
     const newTarget = document.createElement('span');
     mockGetElementUnder.mockReturnValue(newTarget);
     // First call: handle check on current target before element lookup — no handle
@@ -120,7 +108,7 @@ describe('resolveHoverTarget', () => {
     expect(mockIsInRoundedDeadZone).toHaveBeenCalled();
   });
 
-  it('skips dead-zone check when new target is a child of current target', () => {
+  it('should skip dead-zone check when new target is a child of current target', () => {
     const child = document.createElement('span');
     currentTarget.appendChild(child);
     mockGetElementUnder.mockReturnValue(child);
@@ -133,7 +121,7 @@ describe('resolveHoverTarget', () => {
     expect(mockIsInRoundedDeadZone).not.toHaveBeenCalled();
   });
 
-  it('marks new target as rounded when it has significant rounding', () => {
+  it('should mark new target as rounded when it has significant rounding', () => {
     const roundedEl = document.createElement('div');
     mockGetElementUnder.mockReturnValue(roundedEl);
     mockFindNearHandle.mockReturnValue(null);
@@ -145,7 +133,7 @@ describe('resolveHoverTarget', () => {
     expect(result.isRounded).toBe(true);
   });
 
-  it('switches to new target when current target has no rounding and pointer moves away', () => {
+  it('should switches to new target when current target has no rounding and pointer moves away', () => {
     const newTarget = document.createElement('div');
     mockGetElementUnder.mockReturnValue(newTarget);
     mockFindNearHandle.mockReturnValue(null);

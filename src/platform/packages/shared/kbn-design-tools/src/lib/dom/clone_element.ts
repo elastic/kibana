@@ -16,7 +16,8 @@ import {
   BACKGROUND_CSS_PROPS,
   CSS_VAR_PREFIX,
 } from '../constants';
-import { tagColorTokens } from './color_token_lookup';
+import { tagColorTokens, colorToToken, toHex } from './color_token_lookup';
+import { getTokenVar } from './color_token_stylesheet';
 
 /**
  * Set a CSS property with `!important` priority.
@@ -53,7 +54,7 @@ export const roundRect = (rect: DOMRect): DOMRect => {
     right: x + w,
     bottom: y + h,
     toJSON() {},
-  } as DOMRect;
+  };
 };
 
 /**
@@ -162,12 +163,40 @@ const applyPseudoStyle = (
     // Skip background props for hovered elements — the CSS class on the
     // clone provides the correct resting-state appearance.
     if (isInteractive && BACKGROUND_CSS_PROPS.has(prop)) continue;
-    rules.push(`${prop}: ${computed.getPropertyValue(prop)};`);
+    const rawValue = computed.getPropertyValue(prop);
+    const token = colorToToken(rawValue, prop);
+    if (token) {
+      const hex = toHex(rawValue);
+      rules.push(`${prop}: ${getTokenVar(token, hex ?? undefined)};`);
+    } else {
+      rules.push(`${prop}: ${rawValue};`);
+    }
   }
 
   const style = document.createElement('style');
   style.textContent = `.${className}${pseudo} { ${rules.join(' ')} }`;
   clone.appendChild(style);
+};
+
+/**
+ * Check whether an element has direct text content (non-whitespace
+ * Text nodes). Elements with text get blurry when rendered at subpixel
+ * boundaries, so their dimensions should be rounded to whole pixels.
+ * Pure layout containers (flex wrappers, spacers, images) keep exact
+ * subpixel dimensions to preserve layout math.
+ */
+const hasDirectText = (el: HTMLElement): boolean => {
+  for (let i = 0; i < el.childNodes.length; i++) {
+    const node = el.childNodes[i];
+    if (
+      node.nodeType === Node.TEXT_NODE &&
+      node.textContent &&
+      node.textContent.trim().length > 0
+    ) {
+      return true;
+    }
+  }
+  return false;
 };
 
 /**
@@ -210,9 +239,14 @@ export const copyStylesDeep = (
   }
 
   if (!isRoot && !hadTruncationClass) {
-    const rounded = roundRect(original.getBoundingClientRect());
-    clone.style.width = `${rounded.width}px`;
-    clone.style.height = `${rounded.height}px`;
+    const childRect = original.getBoundingClientRect();
+    // Round dimensions for text-bearing elements to prevent subpixel
+    // blur. Layout-only containers keep exact float values so flex/grid
+    // sibling widths sum correctly and text doesn't reflow.
+    const w = hasDirectText(original) ? Math.round(childRect.width) : childRect.width;
+    const h = hasDirectText(original) ? Math.round(childRect.height) : childRect.height;
+    clone.style.width = `${w}px`;
+    clone.style.height = `${h}px`;
     clone.style.boxSizing = 'border-box';
   }
 

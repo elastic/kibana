@@ -8,8 +8,8 @@
  */
 
 import { ElementRegistry } from '../dom/element_registry';
-import type { ElementSession } from '../dom/element_registry';
 import { DEVTOOL_HIDDEN_ATTR } from '../constants';
+import { makeSession, makeSnapshot } from '../tests/helpers';
 import {
   moveExecutor,
   resizeExecutor,
@@ -26,67 +26,8 @@ import type {
   DuplicateTransaction,
   DeleteTransaction,
   CloneTransaction,
-  ElementSessionSnapshot,
 } from './transaction';
-
-if (typeof globalThis.DOMRect === 'undefined') {
-  (globalThis as unknown as Record<string, unknown>).DOMRect = class DOMRect {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-    top: number;
-    right: number;
-    bottom: number;
-    left: number;
-    constructor(x = 0, y = 0, w = 0, h = 0) {
-      this.x = x;
-      this.y = y;
-      this.width = w;
-      this.height = h;
-      this.top = y;
-      this.right = x + w;
-      this.bottom = y + h;
-      this.left = x;
-    }
-    toJSON() {
-      return { x: this.x, y: this.y, width: this.width, height: this.height };
-    }
-  };
-}
-
-const makeSession = (el: HTMLElement, overrides: Partial<ElementSession> = {}): ElementSession => ({
-  el,
-  dx: 0,
-  dy: 0,
-  dw: 0,
-  dh: 0,
-  originalRect: new DOMRect(100, 100, 200, 150),
-  isDuplicate: false,
-  styleEdits: [],
-  textEdits: [],
-  sourceEdits: [],
-  ...overrides,
-});
-
-const makeSnapshot = (session: ElementSession, parent?: Node): ElementSessionSnapshot => ({
-  el: session.el,
-  dx: session.dx,
-  dy: session.dy,
-  dw: session.dw,
-  dh: session.dh,
-  originalRect: session.originalRect,
-  isDuplicate: session.isDuplicate,
-  referenceEl: session.referenceEl,
-  liveReactElement: session.liveReactElement,
-  componentState: session.componentState,
-  parentNode: parent ?? session.el.parentNode ?? document.body,
-  nextSibling: session.el.nextSibling,
-  styleEdits: [...session.styleEdits],
-  textEdits: [...session.textEdits],
-  sourceEdits: [...session.sourceEdits],
-  cleanup: session.cleanup,
-});
+import '../tests/mocks';
 
 const txBase = { id: 1, timestamp: Date.now(), label: 'test' };
 
@@ -99,11 +40,11 @@ describe('moveExecutor', () => {
     el = document.createElement('div');
     el.style.transformOrigin = '0 0';
     document.body.appendChild(el);
-    const session = makeSession(el);
+    const session = makeSession({ el });
     registry.set(session);
   });
 
-  it('apply sets session dx/dy to after values', () => {
+  it('should apply sets session dx/dy to after values', () => {
     const tx: MoveTransaction = {
       ...txBase,
       type: 'move',
@@ -118,7 +59,7 @@ describe('moveExecutor', () => {
     expect(session.dy).toBe(75);
   });
 
-  it('reverse restores session dx/dy to before values', () => {
+  it('should reverse restores session dx/dy to before values', () => {
     const session = registry.get(el)!;
     session.dx = 50;
     session.dy = 75;
@@ -136,7 +77,7 @@ describe('moveExecutor', () => {
     expect(session.dy).toBe(0);
   });
 
-  it('is a no-op when session is missing', () => {
+  it('should is a no-op when session is missing', () => {
     const tx: MoveTransaction = {
       ...txBase,
       type: 'move',
@@ -158,10 +99,10 @@ describe('resizeExecutor', () => {
     registry = new ElementRegistry();
     el = document.createElement('div');
     document.body.appendChild(el);
-    registry.set(makeSession(el));
+    registry.set(makeSession({ el }));
   });
 
-  it('apply sets all four deltas', () => {
+  it('should apply sets all four deltas', () => {
     const tx: ResizeTransaction = {
       ...txBase,
       type: 'resize',
@@ -178,7 +119,7 @@ describe('resizeExecutor', () => {
     expect(session.dh).toBe(50);
   });
 
-  it('reverse restores all four deltas', () => {
+  it('should reverse restores all four deltas', () => {
     const session = registry.get(el)!;
     Object.assign(session, { dx: 5, dy: 10, dw: 100, dh: 50 });
 
@@ -206,10 +147,10 @@ describe('editExecutor', () => {
     registry = new ElementRegistry();
     el = document.createElement('div');
     document.body.appendChild(el);
-    registry.set(makeSession(el));
+    registry.set(makeSession({ el }));
   });
 
-  it('apply sets inline styles and populates undoRecords', () => {
+  it('should apply sets inline styles and populates undoRecords', () => {
     const tx: EditTransaction = {
       ...txBase,
       type: 'edit',
@@ -226,7 +167,7 @@ describe('editExecutor', () => {
     expect(tx.undoRecords.styleEdits[0].original).toBe('');
   });
 
-  it('reverse restores original values and clears undoRecords', () => {
+  it('should reverse restores original values and clears undoRecords', () => {
     el.style.color = 'blue';
     const tx: EditTransaction = {
       ...txBase,
@@ -245,7 +186,7 @@ describe('editExecutor', () => {
     expect(tx.undoRecords.styleEdits).toHaveLength(0);
   });
 
-  it('handles source attribute changes', () => {
+  it('should handle source attribute changes', () => {
     el.setAttribute('aria-label', 'original');
     const tx: EditTransaction = {
       ...txBase,
@@ -271,9 +212,9 @@ describe('duplicateExecutor', () => {
     registry = new ElementRegistry();
   });
 
-  it('apply re-inserts element and registers session', () => {
+  it('should apply re-inserts element and registers session', () => {
     const el = document.createElement('div');
-    const session = makeSession(el, { isDuplicate: true });
+    const session = makeSession({ el, isDuplicate: true });
     const snapshot = makeSnapshot(session, document.body);
 
     const tx: DuplicateTransaction = {
@@ -288,10 +229,10 @@ describe('duplicateExecutor', () => {
     expect(registry.get(el)).toBeDefined();
   });
 
-  it('reverse removes element and unregisters session', () => {
+  it('should reverse removes element and unregisters session', () => {
     const el = document.createElement('div');
     document.body.appendChild(el);
-    const session = makeSession(el, { isDuplicate: true });
+    const session = makeSession({ el, isDuplicate: true });
     registry.set(session);
 
     const tx: DuplicateTransaction = {
@@ -314,10 +255,10 @@ describe('deleteExecutor', () => {
     registry = new ElementRegistry();
   });
 
-  it('apply removes a managed element', () => {
+  it('should apply removes a managed element', () => {
     const el = document.createElement('div');
     document.body.appendChild(el);
-    const session = makeSession(el, { isDuplicate: true });
+    const session = makeSession({ el, isDuplicate: true });
     registry.set(session);
 
     const tx: DeleteTransaction = {
@@ -332,9 +273,9 @@ describe('deleteExecutor', () => {
     expect(registry.get(el)).toBeUndefined();
   });
 
-  it('reverse re-inserts a managed element', () => {
+  it('should reverse re-inserts a managed element', () => {
     const el = document.createElement('div');
-    const session = makeSession(el, { isDuplicate: true });
+    const session = makeSession({ el, isDuplicate: true });
     const snapshot = makeSnapshot(session, document.body);
 
     const tx: DeleteTransaction = {
@@ -349,7 +290,7 @@ describe('deleteExecutor', () => {
     expect(registry.get(el)).toBeDefined();
   });
 
-  it('apply soft-hides an unmanaged element', () => {
+  it('should apply soft-hides an unmanaged element', () => {
     const el = document.createElement('div');
     document.body.appendChild(el);
 
@@ -371,7 +312,7 @@ describe('deleteExecutor', () => {
     expect(el.hasAttribute(DEVTOOL_HIDDEN_ATTR)).toBe(true);
   });
 
-  it('reverse restores an unmanaged element', () => {
+  it('should reverse restores an unmanaged element', () => {
     const el = document.createElement('div');
     document.body.appendChild(el);
     el.style.visibility = 'hidden';
@@ -404,11 +345,11 @@ describe('cloneExecutor', () => {
     registry = new ElementRegistry();
   });
 
-  it('apply re-inserts clone and hides original', () => {
+  it('should apply re-inserts clone and hides original', () => {
     const original = document.createElement('div');
     document.body.appendChild(original);
     const clone = document.createElement('div');
-    const session = makeSession(clone, { referenceEl: original });
+    const session = makeSession({ el: clone, referenceEl: original });
     const snapshot = makeSnapshot(session, document.body);
 
     const tx: CloneTransaction = {
@@ -426,7 +367,7 @@ describe('cloneExecutor', () => {
     expect(registry.get(clone)).toBeDefined();
   });
 
-  it('reverse removes clone and un-hides original', () => {
+  it('should reverse removes clone and un-hides original', () => {
     const original = document.createElement('div');
     document.body.appendChild(original);
     original.setAttribute(DEVTOOL_HIDDEN_ATTR, '');
@@ -434,7 +375,7 @@ describe('cloneExecutor', () => {
 
     const clone = document.createElement('div');
     document.body.appendChild(clone);
-    const session = makeSession(clone, { referenceEl: original });
+    const session = makeSession({ el: clone, referenceEl: original });
     registry.set(session);
 
     const tx: CloneTransaction = {
@@ -454,11 +395,11 @@ describe('cloneExecutor', () => {
 });
 
 describe('executeTransaction', () => {
-  it('dispatches to the correct executor', () => {
+  it('should dispatch to the correct executor', () => {
     const registry = new ElementRegistry();
     const el = document.createElement('div');
     document.body.appendChild(el);
-    registry.set(makeSession(el));
+    registry.set(makeSession({ el }));
 
     const tx: MoveTransaction = {
       ...txBase,

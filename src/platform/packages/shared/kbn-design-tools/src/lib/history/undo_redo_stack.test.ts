@@ -34,7 +34,7 @@ describe('UndoRedoStack', () => {
   });
 
   describe('initial state', () => {
-    it('starts empty', () => {
+    it('should start empty', () => {
       expect(stack.canUndo).toBe(false);
       expect(stack.canRedo).toBe(false);
       expect(stack.undoLabel).toBeUndefined();
@@ -45,7 +45,7 @@ describe('UndoRedoStack', () => {
   });
 
   describe('push', () => {
-    it('assigns monotonic IDs and timestamps', () => {
+    it('should assign monotonic IDs and timestamps', () => {
       const tx1 = stack.push(makeMove('A'));
       const tx2 = stack.push(makeMove('B'));
       expect(tx1.id).toBe(1);
@@ -53,13 +53,13 @@ describe('UndoRedoStack', () => {
       expect(tx1.timestamp).toBeLessThanOrEqual(tx2.timestamp);
     });
 
-    it('makes the stack undoable', () => {
+    it('should make the stack undoable', () => {
       stack.push(makeMove());
       expect(stack.canUndo).toBe(true);
       expect(stack.undoLabel).toBe('Move');
     });
 
-    it('clears the redo stack on new push', () => {
+    it('should clear the redo stack on new push', () => {
       stack.push(makeMove('A'));
       stack.undo();
       expect(stack.canRedo).toBe(true);
@@ -71,11 +71,11 @@ describe('UndoRedoStack', () => {
   });
 
   describe('undo', () => {
-    it('returns null when empty', () => {
+    it('should return null when empty', () => {
       expect(stack.undo()).toBeNull();
     });
 
-    it('returns the most recent transaction', () => {
+    it('should return the most recent transaction', () => {
       stack.push(makeMove('A'));
       stack.push(makeResize('B'));
       const tx = stack.undo();
@@ -83,7 +83,7 @@ describe('UndoRedoStack', () => {
       expect(tx?.type).toBe('resize');
     });
 
-    it('moves the transaction to the redo stack', () => {
+    it('should move the transaction to the redo stack', () => {
       stack.push(makeMove('A'));
       stack.undo();
       expect(stack.canUndo).toBe(false);
@@ -91,7 +91,7 @@ describe('UndoRedoStack', () => {
       expect(stack.redoLabel).toBe('A');
     });
 
-    it('undoes in LIFO order', () => {
+    it('should undoes in LIFO order', () => {
       stack.push(makeMove('A'));
       stack.push(makeMove('B'));
       stack.push(makeMove('C'));
@@ -104,11 +104,11 @@ describe('UndoRedoStack', () => {
   });
 
   describe('redo', () => {
-    it('returns null when empty', () => {
+    it('should return null when empty', () => {
       expect(stack.redo()).toBeNull();
     });
 
-    it('returns the most recently undone transaction', () => {
+    it('should return the most recently undone transaction', () => {
       stack.push(makeMove('A'));
       stack.push(makeMove('B'));
       stack.undo();
@@ -117,7 +117,7 @@ describe('UndoRedoStack', () => {
       expect(tx?.label).toBe('A');
     });
 
-    it('moves the transaction back to the undo stack', () => {
+    it('should move the transaction back to the undo stack', () => {
       stack.push(makeMove('A'));
       stack.undo();
       stack.redo();
@@ -127,7 +127,7 @@ describe('UndoRedoStack', () => {
   });
 
   describe('clear', () => {
-    it('empties both stacks', () => {
+    it('should empty both stacks', () => {
       stack.push(makeMove('A'));
       stack.push(makeMove('B'));
       stack.undo();
@@ -139,7 +139,7 @@ describe('UndoRedoStack', () => {
       expect(stack.redoSize).toBe(0);
     });
 
-    it('resets ID counter', () => {
+    it('should resets ID counter', () => {
       stack.push(makeMove());
       stack.clear();
       const tx = stack.push(makeMove());
@@ -148,7 +148,7 @@ describe('UndoRedoStack', () => {
   });
 
   describe('getSnapshot', () => {
-    it('returns current state as a plain object', () => {
+    it('should return current state as a plain object', () => {
       const snap = stack.getSnapshot();
       expect(snap).toEqual({
         canUndo: false,
@@ -158,7 +158,7 @@ describe('UndoRedoStack', () => {
       });
     });
 
-    it('reflects state after mutations', () => {
+    it('should reflect state after mutations', () => {
       stack.push(makeMove('X'));
       expect(stack.getSnapshot().canUndo).toBe(true);
       expect(stack.getSnapshot().undoLabel).toBe('X');
@@ -166,14 +166,14 @@ describe('UndoRedoStack', () => {
   });
 
   describe('subscribe', () => {
-    it('notifies on push', () => {
+    it('should notify on push', () => {
       const fn = jest.fn();
       stack.subscribe(fn);
       stack.push(makeMove());
       expect(fn).toHaveBeenCalledTimes(1);
     });
 
-    it('notifies on undo', () => {
+    it('should notify on undo', () => {
       stack.push(makeMove());
       const fn = jest.fn();
       stack.subscribe(fn);
@@ -181,7 +181,7 @@ describe('UndoRedoStack', () => {
       expect(fn).toHaveBeenCalledTimes(1);
     });
 
-    it('notifies on redo', () => {
+    it('should notify on redo', () => {
       stack.push(makeMove());
       stack.undo();
       const fn = jest.fn();
@@ -190,7 +190,7 @@ describe('UndoRedoStack', () => {
       expect(fn).toHaveBeenCalledTimes(1);
     });
 
-    it('notifies on clear', () => {
+    it('should notify on clear', () => {
       stack.push(makeMove());
       const fn = jest.fn();
       stack.subscribe(fn);
@@ -198,7 +198,7 @@ describe('UndoRedoStack', () => {
       expect(fn).toHaveBeenCalledTimes(1);
     });
 
-    it('unsubscribe stops notifications', () => {
+    it('should unsubscribe stops notifications', () => {
       const fn = jest.fn();
       const unsub = stack.subscribe(fn);
       unsub();
@@ -206,7 +206,7 @@ describe('UndoRedoStack', () => {
       expect(fn).not.toHaveBeenCalled();
     });
 
-    it('supports multiple subscribers', () => {
+    it('should supports multiple subscribers', () => {
       const fn1 = jest.fn();
       const fn2 = jest.fn();
       stack.subscribe(fn1);

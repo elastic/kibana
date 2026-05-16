@@ -18,7 +18,8 @@ import { buildHighlightCss } from '../../lib/dom/build_highlight_css';
 import { calculateSpacingLines } from '../../lib/dom/calculate_spacing';
 import type { SpacingLine } from '../../lib/dom/calculate_spacing';
 import { MEASURE_OVERLAY_ID } from '../../lib/constants';
-import { useEscapeKey, useOverlayZIndex } from '../../hooks';
+import { useEscapeKey } from '../../hooks/use_escape_key';
+import { useOverlayZIndex } from '../../hooks/use_overlay_z_index';
 import { GlobalCursorOverride } from '../global_cursor_override';
 
 interface Props {

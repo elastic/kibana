@@ -11,8 +11,12 @@ import React, { useCallback, useMemo } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
 import { EuiButton, EuiForm, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { LayoutConfig } from '../../../lib/layout';
-import { LayoutTypeSelector, ColumnSettings, RowSettings, GridCellSettings, ColorSetting } from '.';
+import type { LayoutConfig } from '../../../lib/layout/layout_config';
+import { LayoutTypeSelector } from './layout_type_selector';
+import { ColumnSettings } from './column_settings';
+import { RowSettings } from './row_settings';
+import { GridCellSettings } from './grid_cell_settings';
+import { ColorSetting } from './color_setting';
 
 interface Props {
   config: LayoutConfig;

@@ -10,7 +10,7 @@
 import React from 'react';
 import { EuiFormRow, EuiFieldNumber, EuiSelect, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { LayoutConfig, LayoutRowAlignType } from '../../../lib/layout';
+import type { LayoutConfig, LayoutRowAlignType } from '../../../lib/layout/layout_config';
 
 const alignOptions: Array<{ value: LayoutRowAlignType; text: string }> = [
   {
@@ -54,6 +54,7 @@ export const RowSettings = ({ config, onChange }: Props) => {
   return (
     <>
       <EuiFormRow
+        data-test-subj="layoutSettingsCount"
         label={i18n.translate('kbnDesignTools.layout.settings.count', {
           defaultMessage: 'Count',
         })}
@@ -68,6 +69,7 @@ export const RowSettings = ({ config, onChange }: Props) => {
         />
       </EuiFormRow>
       <EuiFormRow
+        data-test-subj="layoutSettingsAlign"
         label={i18n.translate('kbnDesignTools.layout.settings.alignType', {
           defaultMessage: 'Align',
         })}
@@ -82,6 +84,7 @@ export const RowSettings = ({ config, onChange }: Props) => {
       </EuiFormRow>
       {config.rowAlignType !== 'stretch' && (
         <EuiFormRow
+          data-test-subj="layoutSettingsHeight"
           label={i18n.translate('kbnDesignTools.layout.settings.height', {
             defaultMessage: 'Height',
           })}
@@ -98,6 +101,7 @@ export const RowSettings = ({ config, onChange }: Props) => {
         </EuiFormRow>
       )}
       <EuiFormRow
+        data-test-subj="layoutSettingsGutter"
         label={i18n.translate('kbnDesignTools.layout.settings.gutter', {
           defaultMessage: 'Gutter',
         })}
@@ -112,6 +116,7 @@ export const RowSettings = ({ config, onChange }: Props) => {
         />
       </EuiFormRow>
       <EuiFormRow
+        data-test-subj="layoutSettingsMargin"
         label={i18n.translate('kbnDesignTools.layout.settings.margin', {
           defaultMessage: 'Margin',
         })}

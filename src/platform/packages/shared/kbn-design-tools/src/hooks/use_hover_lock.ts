@@ -8,7 +8,6 @@
  */
 
 import { useCallback, useEffect, useRef } from 'react';
-
 import { CONTROLS_HEIGHT, LOCK_PADDING } from '../lib/constants';
 
 interface HoverLockBounds {

@@ -37,12 +37,12 @@ describe('hasSignificantRounding', () => {
     jest.restoreAllMocks();
   });
 
-  it('returns false for an element with no border-radius', () => {
+  it('should return false for an element with no border-radius', () => {
     const el = mockRounding({});
     expect(hasSignificantRounding(el)).toBe(false);
   });
 
-  it('returns false for border-radius at or below the threshold', () => {
+  it('should return false for border-radius at or below the threshold', () => {
     const el = mockRounding({
       topLeft: '4px',
       topRight: '4px',
@@ -52,7 +52,7 @@ describe('hasSignificantRounding', () => {
     expect(hasSignificantRounding(el)).toBe(false);
   });
 
-  it('returns true for border-radius above the threshold', () => {
+  it('should return true for border-radius above the threshold', () => {
     const el = mockRounding({
       topLeft: '8px',
       topRight: '8px',
@@ -62,7 +62,7 @@ describe('hasSignificantRounding', () => {
     expect(hasSignificantRounding(el)).toBe(true);
   });
 
-  it('returns true for border-radius: 50%', () => {
+  it('should return true for border-radius: 50%', () => {
     const el = mockRounding({
       topLeft: '50%',
       topRight: '50%',
@@ -72,12 +72,12 @@ describe('hasSignificantRounding', () => {
     expect(hasSignificantRounding(el)).toBe(true);
   });
 
-  it('returns true when only one corner exceeds the threshold', () => {
+  it('should return true when only one corner exceeds the threshold', () => {
     const el = mockRounding({ topLeft: '12px' });
     expect(hasSignificantRounding(el)).toBe(true);
   });
 
-  it('returns false when all corners are below the threshold', () => {
+  it('should return false when all corners are below the threshold', () => {
     const el = mockRounding({
       topLeft: '2px',
       topRight: '3px',
@@ -91,41 +91,41 @@ describe('hasSignificantRounding', () => {
 describe('isInRoundedDeadZone', () => {
   const rect = { left: 100, top: 200, right: 300, bottom: 400, width: 200, height: 200 } as DOMRect;
 
-  it('returns false when the pointer is outside the bounding rect', () => {
+  it('should return false when the pointer is outside the bounding rect', () => {
     expect(isInRoundedDeadZone(50, 250, rect)).toBe(false);
     expect(isInRoundedDeadZone(350, 250, rect)).toBe(false);
     expect(isInRoundedDeadZone(200, 150, rect)).toBe(false);
     expect(isInRoundedDeadZone(200, 450, rect)).toBe(false);
   });
 
-  it('returns false when the pointer is in the center of the rect', () => {
+  it('should return false when the pointer is in the center of the rect', () => {
     expect(isInRoundedDeadZone(200, 300, rect)).toBe(false);
   });
 
-  it('returns true near the left edge', () => {
+  it('should return true near the left edge', () => {
     expect(isInRoundedDeadZone(100 + EDGE_ZONE - 1, 300, rect)).toBe(true);
   });
 
-  it('returns true near the right edge', () => {
+  it('should return true near the right edge', () => {
     expect(isInRoundedDeadZone(300 - EDGE_ZONE + 1, 300, rect)).toBe(true);
   });
 
-  it('returns true near the top edge', () => {
+  it('should return true near the top edge', () => {
     expect(isInRoundedDeadZone(200, 200 + EDGE_ZONE - 1, rect)).toBe(true);
   });
 
-  it('returns true near the bottom edge', () => {
+  it('should return true near the bottom edge', () => {
     expect(isInRoundedDeadZone(200, 400 - EDGE_ZONE + 1, rect)).toBe(true);
   });
 
-  it('returns true at the exact corner of the bounding rect', () => {
+  it('should return true at the exact corner of the bounding rect', () => {
     expect(isInRoundedDeadZone(100, 200, rect)).toBe(true);
     expect(isInRoundedDeadZone(300, 200, rect)).toBe(true);
     expect(isInRoundedDeadZone(100, 400, rect)).toBe(true);
     expect(isInRoundedDeadZone(300, 400, rect)).toBe(true);
   });
 
-  it('returns false just past the edge zone threshold', () => {
+  it('should return false just past the edge zone threshold', () => {
     expect(isInRoundedDeadZone(100 + EDGE_ZONE + 1, 200 + EDGE_ZONE + 1, rect)).toBe(false);
   });
 });

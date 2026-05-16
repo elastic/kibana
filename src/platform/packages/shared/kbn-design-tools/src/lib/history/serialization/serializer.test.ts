@@ -21,7 +21,7 @@ describe('serializer', () => {
   });
 
   describe('serializeTransaction / deserializeTransaction roundtrip', () => {
-    it('roundtrips a move transaction', () => {
+    it('should roundtrip a move transaction', () => {
       const el = document.createElement('div');
       document.body.appendChild(el);
 
@@ -48,7 +48,7 @@ describe('serializer', () => {
       expect(warnings.length).toBe(0);
     });
 
-    it('roundtrips an edit transaction with style changes', () => {
+    it('should roundtrip an edit transaction with style changes', () => {
       const el = document.createElement('div');
       document.body.appendChild(el);
 
@@ -76,7 +76,7 @@ describe('serializer', () => {
       expect((transaction as EditTransaction).undoRecords.styleEdits).toHaveLength(1);
     });
 
-    it('reports warnings when elements cannot be resolved', () => {
+    it('should report warnings when elements cannot be resolved', () => {
       const el = document.createElement('div');
       document.body.appendChild(el);
 
@@ -100,7 +100,7 @@ describe('serializer', () => {
   });
 
   describe('serializeSession / deserializeSession', () => {
-    it('roundtrips a full session', () => {
+    it('should roundtrip a full session', () => {
       const el = document.createElement('div');
       document.body.appendChild(el);
 
@@ -126,7 +126,7 @@ describe('serializer', () => {
       expect(result.warnings).toHaveLength(0);
     });
 
-    it('reports failed count for unresolvable transactions', () => {
+    it('should report failed count for unresolvable transactions', () => {
       const el = document.createElement('div');
       document.body.appendChild(el);
 

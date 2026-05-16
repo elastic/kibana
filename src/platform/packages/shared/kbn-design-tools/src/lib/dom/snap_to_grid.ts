@@ -10,7 +10,7 @@
 import type { LayoutConfig } from '../layout/layout_config';
 import { calculateColumnLayout, calculateRowLayout } from '../layout/calculate_layout';
 
-export interface SnapResult {
+interface SnapResult {
   dx: number;
   dy: number;
 }

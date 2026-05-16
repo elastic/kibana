@@ -8,16 +8,12 @@
  */
 
 import React from 'react';
-import { screen, cleanup } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { LayoutOverlay } from './layout_overlay';
-import { getDefaultLayoutConfig } from '../../../lib/layout';
+import { getDefaultLayoutConfig } from '../../../lib/layout/layout_config';
 
 describe('LayoutOverlay', () => {
-  afterEach(() => {
-    cleanup();
-  });
-
   it('should render the overlay container', () => {
     const config = getDefaultLayoutConfig(16);
     renderWithI18n(<LayoutOverlay layoutConfig={config} />);

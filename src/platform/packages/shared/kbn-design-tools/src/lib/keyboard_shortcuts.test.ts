@@ -11,83 +11,83 @@ import { isEscapeKey, isDeleteKey, isMeasureShortcut } from './keyboard_shortcut
 
 describe('keyboard_shortcuts', () => {
   describe('isEscapeKey', () => {
-    it('returns true for Escape key', () => {
+    it('should return true for Escape key', () => {
       const event = { key: 'Escape' } as KeyboardEvent;
       expect(isEscapeKey(event)).toBe(true);
     });
 
-    it('returns false for other keys', () => {
+    it('should return false for other keys', () => {
       const event = { key: 'Enter' } as KeyboardEvent;
       expect(isEscapeKey(event)).toBe(false);
     });
   });
 
   describe('isDeleteKey', () => {
-    it('returns true for Delete key', () => {
+    it('should return true for Delete key', () => {
       const event = { key: 'Delete' } as KeyboardEvent;
       expect(isDeleteKey(event)).toBe(true);
     });
 
-    it('returns true for Backspace key', () => {
+    it('should return true for Backspace key', () => {
       const event = { key: 'Backspace' } as KeyboardEvent;
       expect(isDeleteKey(event)).toBe(true);
     });
 
-    it('returns false for other keys', () => {
+    it('should return false for other keys', () => {
       const event = { key: 'Enter' } as KeyboardEvent;
       expect(isDeleteKey(event)).toBe(false);
     });
   });
 
   describe('isMeasureShortcut', () => {
-    it('returns true for Meta + Period', () => {
+    it('should return true for Meta + Period', () => {
       const event = {
         metaKey: true,
         ctrlKey: false,
         code: 'Period',
         key: '.',
       } as KeyboardEvent;
-      expect(isMeasureShortcut(event)).toBeTruthy();
+      expect(isMeasureShortcut(event)).toBe(true);
     });
 
-    it('returns true for Ctrl + Period', () => {
+    it('should return true for Ctrl + Period', () => {
       const event = {
         metaKey: false,
         ctrlKey: true,
         code: 'Period',
         key: '.',
       } as KeyboardEvent;
-      expect(isMeasureShortcut(event)).toBeTruthy();
+      expect(isMeasureShortcut(event)).toBe(true);
     });
 
-    it('returns true for Meta + dot key', () => {
+    it('should return true for Meta + dot key', () => {
       const event = {
         metaKey: true,
         ctrlKey: false,
         code: '',
         key: '.',
       } as KeyboardEvent;
-      expect(isMeasureShortcut(event)).toBeTruthy();
+      expect(isMeasureShortcut(event)).toBe(true);
     });
 
-    it('returns false without modifier key', () => {
+    it('should return false without modifier key', () => {
       const event = {
         metaKey: false,
         ctrlKey: false,
         code: 'Period',
         key: '.',
       } as KeyboardEvent;
-      expect(isMeasureShortcut(event)).toBeFalsy();
+      expect(isMeasureShortcut(event)).toBe(false);
     });
 
-    it('returns false for wrong key', () => {
+    it('should return false for wrong key', () => {
       const event = {
         metaKey: true,
         ctrlKey: false,
         code: 'KeyA',
         key: 'a',
       } as KeyboardEvent;
-      expect(isMeasureShortcut(event)).toBeFalsy();
+      expect(isMeasureShortcut(event)).toBe(false);
     });
   });
 });

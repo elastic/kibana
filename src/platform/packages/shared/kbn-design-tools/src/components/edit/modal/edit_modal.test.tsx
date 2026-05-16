@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { cleanup, fireEvent, screen, act } from '@testing-library/react';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { EditModal } from './edit_modal';
 
@@ -25,65 +25,62 @@ describe('EditModal', () => {
     target.textContent = 'Hello world';
     target.style.color = 'rgb(0, 0, 0)';
     target.style.backgroundColor = 'rgb(255, 255, 255)';
-    target.getBoundingClientRect = () =>
-      ({
-        top: 10,
-        left: 10,
-        width: 200,
-        height: 100,
-        right: 210,
-        bottom: 110,
-        x: 10,
-        y: 10,
-        toJSON: () => {},
-      } as DOMRect);
+    target.getBoundingClientRect = () => ({
+      top: 10,
+      left: 10,
+      width: 200,
+      height: 100,
+      right: 210,
+      bottom: 110,
+      x: 10,
+      y: 10,
+      toJSON: () => {},
+    });
     document.body.appendChild(target);
   });
 
   afterEach(() => {
-    cleanup();
     target.remove();
   });
 
-  it('renders the modal with title and action buttons', async () => {
+  const renderModal = async () => {
     renderWithI18n(<EditModal target={target} onClose={onClose} onSave={onSave} />);
-    await act(async () => {});
+    await waitFor(() => {
+      expect(screen.getByTestId('editModalTitle')).toBeInTheDocument();
+    });
+  };
 
-    expect(screen.getByText('Edit element')).toBeInTheDocument();
-    expect(screen.getByText('Cancel')).toBeInTheDocument();
-    expect(screen.getByText('Save')).toBeInTheDocument();
+  it('should render the modal with title and action buttons', async () => {
+    await renderModal();
+
+    expect(screen.getByTestId('editModalTitle')).toBeInTheDocument();
+    expect(screen.getByTestId('editModalCancelButton')).toBeInTheDocument();
+    expect(screen.getByTestId('editModalSaveButton')).toBeInTheDocument();
   });
 
-  it('calls onClose when Cancel is clicked', async () => {
-    renderWithI18n(<EditModal target={target} onClose={onClose} onSave={onSave} />);
-    await act(async () => {});
+  it('should call onClose when Cancel is clicked', async () => {
+    await renderModal();
 
-    fireEvent.click(screen.getByText('Cancel'));
+    fireEvent.click(screen.getByTestId('editModalCancelButton'));
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  it('renders element tree with the target tag', async () => {
-    renderWithI18n(<EditModal target={target} onClose={onClose} onSave={onSave} />);
-    await act(async () => {});
+  it('should render element tree with the target tag', async () => {
+    await renderModal();
 
-    // The tree should show the 'div' tag
     expect(screen.getByText('div')).toBeInTheDocument();
   });
 
-  it('renders Attributes section with background color picker', async () => {
-    renderWithI18n(<EditModal target={target} onClose={onClose} onSave={onSave} />);
-    await act(async () => {});
+  it('should render Attributes section with background color picker', async () => {
+    await renderModal();
 
-    expect(screen.getByText('Attributes')).toBeInTheDocument();
-    expect(screen.getByText('Background color')).toBeInTheDocument();
+    expect(screen.getByTestId('editModalAttributesTitle')).toBeInTheDocument();
+    expect(screen.getByTestId('editModalBackgroundColor')).toBeInTheDocument();
   });
 
-  it('calls onSave with empty changes when Save is forced', async () => {
-    renderWithI18n(<EditModal target={target} onClose={onClose} onSave={onSave} />);
-    await act(async () => {});
+  it('should call onSave with empty changes when Save is forced', async () => {
+    await renderModal();
 
-    // Save button should be disabled when no changes
-    const saveButton = screen.getByText('Save').closest('button');
-    expect(saveButton).toBeDisabled();
+    expect(screen.getByTestId('editModalSaveButton')).toBeDisabled();
   });
 });

@@ -78,7 +78,7 @@ export const ExpandableTextInput = ({ value, onChange, onFocus, rows = 4, placeh
       panelPaddingSize="s"
       anchorPosition="downLeft"
       panelClassName={popoverPanelCss}
-      aria-label={i18n.translate('kbnDesignTools.expandableTextInput.ariaLabel', {
+      aria-label={i18n.translate('kbnDesignTools.edit.modal.expandableTextInput.ariaLabel', {
         defaultMessage: 'Expand text input',
       })}
     >

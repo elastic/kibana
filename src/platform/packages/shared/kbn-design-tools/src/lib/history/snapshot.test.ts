@@ -7,36 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ReactElement } from 'react';
 import type { ElementSession } from '../dom/element_registry';
 import { snapshotSession, restoreSession, captureOriginalStyles } from './snapshot';
+import '../tests/mocks';
 
-if (typeof globalThis.DOMRect === 'undefined') {
-  (globalThis as unknown as Record<string, unknown>).DOMRect = class DOMRect {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-    top: number;
-    right: number;
-    bottom: number;
-    left: number;
-    constructor(x = 0, y = 0, w = 0, h = 0) {
-      this.x = x;
-      this.y = y;
-      this.width = w;
-      this.height = h;
-      this.top = y;
-      this.right = x + w;
-      this.bottom = y + h;
-      this.left = x;
-    }
-    toJSON() {
-      return { x: this.x, y: this.y, width: this.width, height: this.height };
-    }
-  };
-}
-
-const makeSession = (overrides: Partial<ElementSession> = {}): ElementSession => {
+const makeSnapshotSession = (overrides: Partial<ElementSession> = {}): ElementSession => {
   const el = document.createElement('div');
   document.body.appendChild(el);
   return {
@@ -62,8 +38,8 @@ const makeSession = (overrides: Partial<ElementSession> = {}): ElementSession =>
 };
 
 describe('snapshotSession', () => {
-  it('captures all positional state', () => {
-    const session = makeSession();
+  it('should capture all positional state', () => {
+    const session = makeSnapshotSession();
     const snap = snapshotSession(session);
 
     expect(snap.dx).toBe(10);
@@ -72,8 +48,8 @@ describe('snapshotSession', () => {
     expect(snap.dh).toBe(40);
   });
 
-  it('deep-copies originalRect', () => {
-    const session = makeSession();
+  it('should deep-copies originalRect', () => {
+    const session = makeSnapshotSession();
     const snap = snapshotSession(session);
 
     expect(snap.originalRect.x).toBe(100);
@@ -82,8 +58,8 @@ describe('snapshotSession', () => {
     expect(snap.originalRect).not.toBe(session.originalRect);
   });
 
-  it('deep-copies edit arrays', () => {
-    const session = makeSession();
+  it('should deep-copies edit arrays', () => {
+    const session = makeSnapshotSession();
     const snap = snapshotSession(session);
 
     // Mutating the session shouldn't affect the snapshot
@@ -98,23 +74,23 @@ describe('snapshotSession', () => {
     expect(session.styleEdits).toHaveLength(2);
   });
 
-  it('records DOM insertion point', () => {
+  it('should record DOM insertion point', () => {
     const parent = document.createElement('div');
     const sibling = document.createElement('span');
     const el = document.createElement('p');
     parent.appendChild(el);
     parent.appendChild(sibling);
 
-    const session = makeSession({ el });
+    const session = makeSnapshotSession({ el });
     const snap = snapshotSession(session);
 
     expect(snap.parentNode).toBe(parent);
     expect(snap.nextSibling).toBe(sibling);
   });
 
-  it('captures componentState as deep copy', () => {
+  it('should capture componentState as deep copy', () => {
     const state = [[true, 42], ['hello']];
-    const session = makeSession({ componentState: state });
+    const session = makeSnapshotSession({ componentState: state });
     const snap = snapshotSession(session);
 
     expect(snap.componentState).toEqual([[true, 42], ['hello']]);
@@ -122,9 +98,9 @@ describe('snapshotSession', () => {
     expect(snap.componentState![0]).not.toBe(state[0]);
   });
 
-  it('preserves liveReactElement reference', () => {
-    const liveReactElement = { element: {} as any, zIndex: 5 };
-    const session = makeSession({ liveReactElement });
+  it('should preserve liveReactElement reference', () => {
+    const liveReactElement = { element: {} as ReactElement, zIndex: 5 };
+    const session = makeSnapshotSession({ liveReactElement });
     const snap = snapshotSession(session);
 
     expect(snap.liveReactElement).toBe(liveReactElement);
@@ -132,8 +108,8 @@ describe('snapshotSession', () => {
 });
 
 describe('restoreSession', () => {
-  it('creates a session with snapshot values', () => {
-    const session = makeSession();
+  it('should create a session with snapshot values', () => {
+    const session = makeSnapshotSession();
     const snap = snapshotSession(session);
     const restored = restoreSession(snap);
 
@@ -145,8 +121,8 @@ describe('restoreSession', () => {
     expect(restored.el).toBe(session.el);
   });
 
-  it('deep-copies edit arrays from snapshot', () => {
-    const session = makeSession();
+  it('should deep-copies edit arrays from snapshot', () => {
+    const session = makeSnapshotSession();
     const snap = snapshotSession(session);
     const restored = restoreSession(snap);
 
@@ -162,9 +138,9 @@ describe('restoreSession', () => {
     expect(restored.styleEdits).toHaveLength(2);
   });
 
-  it('deep-copies componentState', () => {
+  it('should deep-copies componentState', () => {
     const state = [[true]];
-    const session = makeSession({ componentState: state });
+    const session = makeSnapshotSession({ componentState: state });
     const snap = snapshotSession(session);
     const restored = restoreSession(snap);
 
@@ -174,7 +150,7 @@ describe('restoreSession', () => {
 });
 
 describe('captureOriginalStyles', () => {
-  it('captures all five style properties', () => {
+  it('should capture all five style properties', () => {
     const el = document.createElement('div');
     el.style.transform = 'translate(10px, 20px)';
     el.style.visibility = 'visible';
@@ -191,7 +167,7 @@ describe('captureOriginalStyles', () => {
     expect(styles.transition).toBe('opacity 120ms ease');
   });
 
-  it('captures empty strings for unset properties', () => {
+  it('should capture empty strings for unset properties', () => {
     const el = document.createElement('div');
     const styles = captureOriginalStyles(el);
 
