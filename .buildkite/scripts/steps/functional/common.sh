@@ -2,8 +2,6 @@
 
 set -euo pipefail
 
-# Note, changes here might also need to be made in other scripts, e.g. uptime.sh
-
 source .buildkite/scripts/common/util.sh
 
 # All functional/integration test steps run Kibana from the distributable,
