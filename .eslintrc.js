@@ -410,21 +410,15 @@ const RESTRICTED_IMPORTS = [
 const AXIOS_LEGACY_CONSUMERS = [
   '.buildkite/**/*.{js,mjs,ts,tsx,jsx}',
   'packages/kbn-ci-stats-performance-metrics/**/*.{js,mjs,ts,tsx}',
-  'packages/kbn-failed-test-reporter-cli/**/*.{js,mjs,ts,tsx}',
   'packages/kbn-generate/**/*.{js,mjs,ts,tsx}',
   'src/dev/build/lib/**/*.{js,mjs,ts,tsx}',
   'src/dev/build/tasks/**/*.{js,mjs,ts,tsx}',
   'src/dev/prs/**/*.{js,mjs,ts,tsx}',
   'src/platform/packages/private/kbn-ci-stats-reporter/**/*.{js,mjs,ts,tsx}',
-  'src/platform/packages/private/kbn-journeys/**/*.{js,mjs,ts,tsx}',
   'src/platform/packages/shared/kbn-connector-specs/**/*.{js,mjs,ts,tsx}',
   'src/platform/packages/shared/kbn-cypress-test-helper/**/*.{js,mjs,ts,tsx}',
   'src/platform/packages/shared/kbn-dev-utils/src/axios/**/*.{js,mjs,ts,tsx}',
-  'src/platform/packages/shared/kbn-kbn-client/**/*.{js,mjs,ts,tsx}',
   'src/platform/packages/shared/kbn-mcp-dev-server/**/*.{js,mjs,ts,tsx}',
-  'src/platform/packages/shared/kbn-test-saml-auth/**/*.{js,mjs,ts,tsx}',
-  'src/platform/plugins/shared/workflows_management/server/connectors/workflows/**/*.{js,mjs,ts,tsx}',
-  'src/platform/test/api_integration/apis/telemetry/**/*.{js,mjs,ts,tsx}',
   'x-pack/examples/alerting_example/server/rule_types/**/*.{js,mjs,ts,tsx}',
   'x-pack/packages/kbn-synthetics-private-location/**/*.{js,mjs,ts,tsx}',
   'x-pack/platform/packages/shared/kbn-data-forge/**/*.{js,mjs,ts,tsx}',
@@ -448,7 +442,6 @@ const AXIOS_LEGACY_CONSUMERS = [
   'x-pack/platform/test/alerting_api_integration/common/plugins/alerts/server/sub_action_connector.ts',
   'x-pack/platform/test/alerting_api_integration/security_and_spaces/group4/tests/alerting/mustache_templates.ts',
   'x-pack/platform/test/alerting_api_integration/spaces_only/tests/alerting/group4/mustache_templates.ts',
-  'x-pack/platform/test/api_integration/services/**/*.{js,mjs,ts,tsx}',
   'x-pack/platform/test/fleet_api_integration/**/*.{js,mjs,ts,tsx}',
   'x-pack/platform/test/fleet_cypress/agent.ts',
   'x-pack/platform/test/fleet_cypress/artifact_manager.ts',
@@ -471,11 +464,7 @@ const AXIOS_LEGACY_CONSUMERS = [
   'x-pack/solutions/security/plugins/security_solution/common/endpoint/format_axios_error.ts',
   'x-pack/solutions/security/plugins/security_solution/common/endpoint/utils/**/*.{js,mjs,ts,tsx}',
   'x-pack/solutions/security/plugins/security_solution/scripts/endpoint/**/*.{js,mjs,ts,tsx}',
-  'x-pack/solutions/security/plugins/security_solution/scripts/run_cypress/parallel_serverless.ts',
-  'x-pack/solutions/security/plugins/security_solution/scripts/run_cypress/project_handler/**/*.{js,mjs,ts,tsx}',
-  'x-pack/solutions/security/plugins/security_solution/scripts/telemetry/**/*.{js,mjs,ts,tsx}',
   'x-pack/solutions/security/plugins/security_solution/server/integration_tests/**/*.{js,mjs,ts,tsx}',
-  'x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/scripts/**/*.{js,mjs,ts,tsx}',
   'x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/**/*.{js,mjs,ts,tsx}',
   'x-pack/solutions/security/test/security_solution_api_integration/config/services/**/*.{js,mjs,ts,tsx}',
   'x-pack/solutions/security/test/security_solution_cypress/cypress/support/**/*.{js,mjs,ts,tsx}',
@@ -491,6 +480,11 @@ const DEPRECATED_IMPORTS = [
     name: 'enzyme',
     message:
       'Enzyme is deprecated and no longer maintained. Please use @testing-library/react instead.',
+  },
+  {
+    name: '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib',
+    message:
+      '`hook_form_lib` is deprecated and will no longer be supported. Consider using `react-hook-form` for new and existing forms.',
   },
 ];
 
@@ -1028,7 +1022,19 @@ module.exports = {
         '@kbn/eslint/no_unsafe_dynamic_http_path': 'warn',
         '@kbn/eslint/no_wrapped_error_in_logger': 'error',
         'no-restricted-imports': ['error', ...RESTRICTED_IMPORTS],
-        '@kbn/eslint/no_deprecated_imports': ['warn', ...DEPRECATED_IMPORTS],
+        '@kbn/eslint/no_deprecated_imports': [
+          'warn',
+          {
+            paths: DEPRECATED_IMPORTS,
+            patterns: [
+              {
+                group: ['@kbn/es-ui-shared-plugin/static/forms/hook_form_lib/**'],
+                message:
+                  '`hook_form_lib` is deprecated and will no longer be supported. Consider using `react-hook-form` for new and existing forms.',
+              },
+            ],
+          },
+        ],
         'no-restricted-modules': [
           'error',
           {

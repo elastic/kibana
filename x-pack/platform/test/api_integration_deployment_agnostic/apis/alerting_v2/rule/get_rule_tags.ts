@@ -71,7 +71,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       for (const [name, tags] of rulesWithTags) {
         const r = await createRule(roleAuthc, name, tags);
-        expect(r.status).to.be(200);
+        expect(r.status).to.be(201);
       }
 
       const expectedTags = [
@@ -105,7 +105,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     it('should include tags from a rule with no overlapping tag sets', async () => {
       const r = await createRule(roleAuthc, 'tags-rule-unique', ['custom-team', 'nightly']);
-      expect(r.status).to.be(200);
+      expect(r.status).to.be(201);
 
       const response = await supertestWithoutAuth
         .get(RULE_TAGS_PATH)
@@ -119,7 +119,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     it('should not include tags for rules without tags', async () => {
       const r = await createRule(roleAuthc, 'tags-rule-no-tags');
-      expect(r.status).to.be(200);
+      expect(r.status).to.be(201);
 
       const response = await supertestWithoutAuth
         .get(RULE_TAGS_PATH)

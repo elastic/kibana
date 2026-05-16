@@ -182,7 +182,6 @@ export function DependencyOperationDetailView() {
         <EuiPanel hasBorder>
           <ResettingHeightRetainer reset={!isWaterfallLoading}>
             <WaterfallWithSummary
-              environment={environment}
               traceSamples={samples}
               traceSamplesFetchStatus={spanFetch.status}
               onSampleClick={onSampleClick}

@@ -9,15 +9,27 @@
 
 import React from 'react';
 import { render, act } from '@testing-library/react';
+import { ESQLVariableType } from '@kbn/esql-types';
 import { CreateESQLRuleFlyout } from './create_esql_rule_flyout';
 import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
 import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_state.mock';
 import { internalStateActions } from '../../../state_management/redux';
 
+interface RenderFlyoutOptions {
+  onClose?: jest.Mock;
+  esqlQuery?: string;
+  esqlVariables?: Array<{
+    key: string;
+    value: string | number | Array<string | number>;
+    type: ESQLVariableType;
+  }>;
+}
+
 const renderFlyout = async ({
   onClose = jest.fn(),
   esqlQuery = 'FROM logs* | LIMIT 10',
-}: { onClose?: jest.Mock; esqlQuery?: string } = {}) => {
+  esqlVariables,
+}: RenderFlyoutOptions = {}) => {
   const services = createDiscoverServicesMock();
   services.history.push('/app/discover');
 
@@ -33,6 +45,12 @@ const renderFlyout = async ({
     })
   );
 
+  if (esqlVariables) {
+    toolkit.internalState.dispatch(
+      toolkit.injectCurrentTab(internalStateActions.setEsqlVariables)({ esqlVariables })
+    );
+  }
+
   render(
     <CreateESQLRuleFlyout
       services={services}
@@ -43,7 +61,8 @@ const renderFlyout = async ({
     />
   );
 
-  return { services, onClose };
+  const RuleFormFlyout = services.alertingVTwo!.DynamicRuleFormFlyout as jest.Mock;
+  return { services, onClose, toolkit, RuleFormFlyout };
 };
 
 describe('CreateESQLRuleFlyout', () => {
@@ -51,33 +70,12 @@ describe('CreateESQLRuleFlyout', () => {
     jest.clearAllMocks();
   });
 
-  it('should render DynamicRuleFormFlyout with the current ES|QL query', async () => {
-    const services = createDiscoverServicesMock();
-    services.history.push('/app/discover');
-    const RuleFormFlyout = services.alertingVTwo!.DynamicRuleFormFlyout as jest.Mock;
-
-    const toolkit = getDiscoverInternalStateMock({ services });
-    await toolkit.initializeTabs();
-    await toolkit.initializeSingleTab({ tabId: toolkit.getCurrentTab().id });
-    const tabId = toolkit.getCurrentTab().id;
-
-    toolkit.internalState.dispatch(
-      toolkit.injectCurrentTab(internalStateActions.setAppState)({
-        appState: { query: { esql: 'FROM my_index | WHERE status = "error"' } },
-      })
-    );
-
+  it('should pass the raw ES|QL query to DynamicRuleFormFlyout', async () => {
     const onClose = jest.fn();
-
-    render(
-      <CreateESQLRuleFlyout
-        services={services}
-        tabId={tabId}
-        getState={toolkit.internalState.getState}
-        subscribe={(listener: () => void) => toolkit.internalState.subscribe(listener)}
-        onClose={onClose}
-      />
-    );
+    const { RuleFormFlyout } = await renderFlyout({
+      esqlQuery: 'FROM my_index | WHERE status = "error"',
+      onClose,
+    });
 
     expect(RuleFormFlyout).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -86,6 +84,18 @@ describe('CreateESQLRuleFlyout', () => {
       }),
       expect.anything()
     );
+  });
+
+  it('should pass esqlVariables through to DynamicRuleFormFlyout', async () => {
+    const vars = [{ key: 'host', value: 'web-1', type: ESQLVariableType.VALUES }];
+    const { RuleFormFlyout } = await renderFlyout({
+      esqlQuery: 'FROM logs* | WHERE host == ?host | LIMIT 5',
+      esqlVariables: vars,
+    });
+
+    const lastCall = RuleFormFlyout.mock.calls.at(-1)?.[0];
+    expect(lastCall.query).toBe('FROM logs* | WHERE host == ?host | LIMIT 5');
+    expect(lastCall.esqlVariables).toEqual(vars);
   });
 
   it('should NOT close flyout when query parameters change but pathname stays the same', async () => {
@@ -99,30 +109,7 @@ describe('CreateESQLRuleFlyout', () => {
   });
 
   it('should re-render with updated query when store state changes', async () => {
-    const services = createDiscoverServicesMock();
-    services.history.push('/app/discover');
-    const RuleFormFlyout = services.alertingVTwo!.DynamicRuleFormFlyout as jest.Mock;
-
-    const toolkit = getDiscoverInternalStateMock({ services });
-    await toolkit.initializeTabs();
-    await toolkit.initializeSingleTab({ tabId: toolkit.getCurrentTab().id });
-    const tabId = toolkit.getCurrentTab().id;
-
-    toolkit.internalState.dispatch(
-      toolkit.injectCurrentTab(internalStateActions.setAppState)({
-        appState: { query: { esql: 'FROM logs*' } },
-      })
-    );
-
-    render(
-      <CreateESQLRuleFlyout
-        services={services}
-        tabId={tabId}
-        getState={toolkit.internalState.getState}
-        subscribe={(listener: () => void) => toolkit.internalState.subscribe(listener)}
-        onClose={jest.fn()}
-      />
-    );
+    const { RuleFormFlyout, toolkit } = await renderFlyout({ esqlQuery: 'FROM logs*' });
 
     expect(RuleFormFlyout).toHaveBeenLastCalledWith(
       expect.objectContaining({ query: 'FROM logs*' }),
@@ -151,7 +138,6 @@ describe('CreateESQLRuleFlyout', () => {
     await toolkit.initializeTabs();
     await toolkit.initializeSingleTab({ tabId: toolkit.getCurrentTab().id });
     const tabId = toolkit.getCurrentTab().id;
-
     const onClose = jest.fn();
 
     render(
@@ -176,5 +162,29 @@ describe('CreateESQLRuleFlyout', () => {
     });
 
     expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('should update esqlVariables when store state changes', async () => {
+    const { RuleFormFlyout, toolkit } = await renderFlyout({
+      esqlQuery: 'FROM logs* | WHERE host == ?host | LIMIT 5',
+    });
+
+    expect(RuleFormFlyout).toHaveBeenLastCalledWith(
+      expect.objectContaining({ esqlVariables: [] }),
+      expect.anything()
+    );
+
+    act(() => {
+      toolkit.internalState.dispatch(
+        toolkit.injectCurrentTab(internalStateActions.setEsqlVariables)({
+          esqlVariables: [{ key: 'host', value: 'web-2', type: ESQLVariableType.VALUES }],
+        })
+      );
+    });
+
+    const lastCall = RuleFormFlyout.mock.calls.at(-1)?.[0];
+    expect(lastCall.esqlVariables).toEqual([
+      { key: 'host', value: 'web-2', type: ESQLVariableType.VALUES },
+    ]);
   });
 });

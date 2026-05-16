@@ -10,6 +10,7 @@ import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider
 export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
   describe('action_policy', () => {
     loadTestFile(require.resolve('./create_action_policy'));
+    loadTestFile(require.resolve('./upsert_action_policy'));
     loadTestFile(require.resolve('./get_action_policy'));
     loadTestFile(require.resolve('./list_action_policies'));
     loadTestFile(require.resolve('./update_action_policy'));

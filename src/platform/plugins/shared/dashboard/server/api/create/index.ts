@@ -7,5 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { DashboardCreateRequestBody, DashboardCreateResponseBody } from './types';
+export type { DashboardCreateResponseBody } from './types';
+export { create } from './create';
 export { registerCreateRoute } from './register_create_route';

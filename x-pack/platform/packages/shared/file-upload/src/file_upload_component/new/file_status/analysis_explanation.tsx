@@ -60,7 +60,7 @@ export const AnalysisExplanation: FC<Props> = ({ fileStatus, index }) => {
         >
           <EuiModalHeader>
             <EuiModalHeaderTitle id={modalTitleId}>
-              <EuiIcon type="inspect" size={'l'} />{' '}
+              <EuiIcon aria-hidden={true} type="inspect" size={'l'} />{' '}
               <FormattedMessage
                 id="xpack.fileUpload.explanationFlyout.title"
                 defaultMessage="Analysis explanation"

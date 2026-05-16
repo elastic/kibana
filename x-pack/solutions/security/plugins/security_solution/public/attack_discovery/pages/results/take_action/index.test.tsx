@@ -62,7 +62,11 @@ jest.mock('./use_add_to_existing_case', () => ({
 }));
 
 jest.mock('../attack_discovery_panel/view_in_ai_assistant/use_view_in_ai_assistant', () => ({
-  useViewInAiAssistant: jest.fn(() => ({ showAssistantOverlay: jest.fn(), disabled: false })),
+  useViewInAiAssistant: jest.fn(() => ({
+    showAssistantOverlay: jest.fn(),
+    disabled: false,
+    isAssistantVisible: true,
+  })),
 }));
 
 jest.mock('./use_update_alerts_status', () => ({
@@ -599,6 +603,7 @@ describe('TakeAction', () => {
       useViewInAiAssistant.mockReturnValue({
         showAssistantOverlay: mockShowAssistantOverlay,
         disabled: false,
+        isAssistantVisible: true,
       });
     });
 
@@ -609,6 +614,7 @@ describe('TakeAction', () => {
       useViewInAiAssistant.mockReturnValue({
         showAssistantOverlay: mockShowAssistantOverlay,
         disabled: true,
+        isAssistantVisible: true,
       });
 
       render(
@@ -621,6 +627,26 @@ describe('TakeAction', () => {
       const viewInAiAssistantButton = screen.getByTestId('viewInAiAssistant');
 
       expect(viewInAiAssistantButton).toBeDisabled();
+    });
+
+    it('does not render view in AI assistant when isAssistantVisible is false', () => {
+      const { useViewInAiAssistant } = jest.requireMock(
+        '../attack_discovery_panel/view_in_ai_assistant/use_view_in_ai_assistant'
+      );
+      useViewInAiAssistant.mockReturnValue({
+        showAssistantOverlay: mockShowAssistantOverlay,
+        disabled: false,
+        isAssistantVisible: false,
+      });
+
+      render(
+        <TestProviders>
+          <TakeAction {...defaultProps} />
+        </TestProviders>
+      );
+
+      openPopover();
+      expect(screen.queryByTestId('viewInAiAssistant')).not.toBeInTheDocument();
     });
   });
 

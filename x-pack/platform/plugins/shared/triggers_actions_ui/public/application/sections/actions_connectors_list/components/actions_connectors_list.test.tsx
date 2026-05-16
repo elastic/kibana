@@ -904,7 +904,7 @@ describe('actions_connectors_list', () => {
       expect(screen.queryByTestId('authorizeConnector')).not.toBeInTheDocument();
     });
 
-    it('shows Cancel button when isAwaitingCallback is true (user in OAuth flow)', async () => {
+    it('shows "Connecting..." button with loading spinner and cancel icon when isAwaitingCallback is true', async () => {
       useConnectorOAuthConnect.mockReturnValue({
         connect: jest.fn(),
         cancelConnect: jest.fn(),
@@ -937,8 +937,94 @@ describe('actions_connectors_list', () => {
       );
 
       expect(await screen.findByTestId('actionsTable')).toBeInTheDocument();
+
+      const connectingButton = await screen.findByTestId('connectingConnector');
+      expect(connectingButton).toBeInTheDocument();
+      expect(connectingButton).toHaveTextContent('Connecting...');
+      expect(connectingButton).toBeDisabled();
+
       expect(await screen.findByTestId('cancelAuthorizeConnector')).toBeInTheDocument();
+
       expect(screen.queryByTestId('authorizeConnector')).not.toBeInTheDocument();
+    });
+
+    it('shows "Connecting..." button with loading spinner when isConnecting is true', async () => {
+      useConnectorOAuthConnect.mockReturnValue({
+        connect: jest.fn(),
+        cancelConnect: jest.fn(),
+        isConnecting: true,
+        isAwaitingCallback: false,
+      });
+
+      const actions: ActionConnector[] = [
+        createMockActionConnector({
+          id: 'oauth-connector',
+          actionTypeId: 'google-drive',
+          name: 'Google Drive Connector',
+          referencedByCount: 1,
+          config: { authType: 'oauth_authorization_code' },
+          userAuthStatus: 'not_connected',
+        }),
+      ];
+
+      render(
+        <IntlProvider>
+          <ActionsConnectorsList
+            setAddFlyoutVisibility={() => {}}
+            loadActions={async () => {}}
+            editItem={() => {}}
+            isLoadingActions={false}
+            actions={actions}
+            setActions={() => {}}
+          />
+        </IntlProvider>
+      );
+
+      expect(await screen.findByTestId('actionsTable')).toBeInTheDocument();
+      const connectButton = await screen.findByTestId('authorizeConnector');
+      expect(connectButton).toHaveTextContent('Connecting...');
+      expect(screen.queryByTestId('cancelAuthorizeConnector')).not.toBeInTheDocument();
+    });
+
+    it('calls cancelConnect when cancel icon is clicked during awaiting callback', async () => {
+      const cancelConnect = jest.fn();
+      const user = userEvent.setup();
+
+      useConnectorOAuthConnect.mockReturnValue({
+        connect: jest.fn(),
+        cancelConnect,
+        isConnecting: false,
+        isAwaitingCallback: true,
+      });
+
+      const actions: ActionConnector[] = [
+        createMockActionConnector({
+          id: 'oauth-connector',
+          actionTypeId: 'google-drive',
+          name: 'Google Drive Connector',
+          referencedByCount: 1,
+          config: { authType: 'oauth_authorization_code' },
+          userAuthStatus: 'not_connected',
+        }),
+      ];
+
+      render(
+        <IntlProvider>
+          <ActionsConnectorsList
+            setAddFlyoutVisibility={() => {}}
+            loadActions={async () => {}}
+            editItem={() => {}}
+            isLoadingActions={false}
+            actions={actions}
+            setActions={() => {}}
+          />
+        </IntlProvider>
+      );
+
+      const cancelButton = await screen.findByTestId('cancelAuthorizeConnector');
+      await user.click(cancelButton);
+
+      expect(cancelConnect).toHaveBeenCalled();
     });
 
     it('calls setActions with updated userAuthStatus to connected after successful authorization', async () => {

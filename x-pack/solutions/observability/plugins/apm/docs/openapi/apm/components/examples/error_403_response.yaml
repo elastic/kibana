@@ -1,0 +1,5 @@
+description: An example of a 403 Forbidden response, returned when the authenticated user lacks the required APM and User Experience privileges.
+value:
+  statusCode: 403
+  error: Forbidden
+  message: "Insufficient privileges to perform this action. The APM and User Experience feature requires `all` privileges."

@@ -24,3 +24,13 @@ groups:
           stack: ga 9.1
           ech: ga
           self: ga
+
+      - setting: xpack.product_intercept.interval
+        description: |
+          The time that elapses between Elastic product feedback prompts. Accepts a duration string with a number and a unit (`d`, `h`, `m`, `s`). For example, `20m`, `24h`, `7d`.
+        datatype: string
+        default: '90d'
+        applies_to:
+          stack: ga 9.1
+          ech: ga
+          self: ga

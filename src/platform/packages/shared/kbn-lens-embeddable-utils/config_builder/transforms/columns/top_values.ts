@@ -15,7 +15,7 @@ import type {
 } from '@kbn/lens-common';
 import type {
   LensApiTermsOperation,
-  TermOperationRankByCustomBaseType,
+  TermOperationRankByCustomOperationType,
   TermOperationRankByCustomPercentileRankType,
   TermOperationRankByCustomPercentileType,
 } from '../../schema/bucket_ops';
@@ -37,7 +37,7 @@ function isPercentileRanksOrderAgg(
 
 function isBaseCustomOperation(
   operation: string
-): operation is TermOperationRankByCustomBaseType['operation'] {
+): operation is TermOperationRankByCustomOperationType['operation'] {
   const ops: string[] = [
     'min',
     'max',
@@ -131,7 +131,7 @@ export function fromTermsLensApiToLensState(
 
 function getCustomOrderAgg(
   rankBy:
-    | TermOperationRankByCustomBaseType
+    | TermOperationRankByCustomOperationType
     | TermOperationRankByCustomPercentileType
     | TermOperationRankByCustomPercentileRankType
 ): TermsIndexPatternColumn['params']['orderAgg'] {
@@ -193,7 +193,7 @@ function getCustomRankByFromOrderAgg(
     return rankBy;
   }
   if (isBaseCustomOperation(orderAgg.operationType)) {
-    const rankBy: TermOperationRankByCustomBaseType = {
+    const rankBy: TermOperationRankByCustomOperationType = {
       type: 'custom',
       operation: orderAgg.operationType,
       field: sourceField,
