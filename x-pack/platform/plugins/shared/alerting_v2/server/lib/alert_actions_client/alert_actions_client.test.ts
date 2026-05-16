@@ -87,6 +87,26 @@ describe('AlertActionsClient', () => {
       expect(storageServiceEsClient.bulk).not.toHaveBeenCalled();
     });
 
+    it('attaches ALERT_EVENT_NOT_FOUND code with group_hash and episode_id details', async () => {
+      queryServiceEsClient.esql.query.mockResolvedValueOnce(getEmptyESQLResponse());
+
+      await expect(
+        client.createAction({
+          groupHash: 'unknown-group-hash',
+          action: actionData,
+        })
+      ).rejects.toMatchObject({
+        output: { statusCode: 404 },
+        data: {
+          code: 'ALERT_EVENT_NOT_FOUND',
+          details: {
+            group_hash: 'unknown-group-hash',
+            episode_id: 'episode-1',
+          },
+        },
+      });
+    });
+
     it('should handle action with episode_id', async () => {
       const actionWithEpisode: CreateAlertActionBody = {
         action_type: ALERT_EPISODE_ACTION_TYPE.ACK,
