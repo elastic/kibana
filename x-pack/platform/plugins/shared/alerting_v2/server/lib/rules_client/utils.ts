@@ -11,6 +11,7 @@ import type { CreateRuleData, UpdateRuleData, RuleResponse } from '@kbn/alerting
 import { IMMUTABLE_RULE_FIELDS, type ImmutableRuleField } from '@kbn/alerting-v2-schemas';
 
 import { type RuleSavedObjectAttributes } from '../../saved_objects';
+import { ALERTING_V2_ERROR_CODES } from '../errors/error_codes';
 
 /**
  * Source-of-truth helpers driven by {@link IMMUTABLE_RULE_FIELDS}. They keep
@@ -32,7 +33,10 @@ export function assertImmutableUnchanged(
 ): void {
   const changed = IMMUTABLE_RULE_FIELDS.filter((field) => !isEqual(parsed[field], existing[field]));
   if (changed.length > 0) {
-    throw Boom.conflict(`Some fields cannot be changed after creation: ${changed.join(', ')}.`);
+    throw Boom.conflict(`Some fields cannot be changed after creation: ${changed.join(', ')}.`, {
+      code: ALERTING_V2_ERROR_CODES.IMMUTABLE_FIELDS_CHANGED,
+      details: { fields: changed },
+    });
   }
 }
 

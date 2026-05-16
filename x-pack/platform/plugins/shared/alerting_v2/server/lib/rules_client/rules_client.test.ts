@@ -2038,4 +2038,135 @@ describe('RulesClient', () => {
       );
     });
   });
+
+  describe('error codes and details', () => {
+    it('attaches RULE_NOT_FOUND code and rule_id details when reading a missing rule', async () => {
+      const client = createClient();
+      mockSavedObjectsClient.get.mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createGenericNotFoundError(RULE_SAVED_OBJECT_TYPE, 'rule-x')
+      );
+
+      await expect(client.getRule({ id: 'rule-x' })).rejects.toMatchObject({
+        output: { statusCode: 404 },
+        data: {
+          code: 'RULE_NOT_FOUND',
+          details: { rule_id: 'rule-x' },
+        },
+      });
+    });
+
+    it('attaches RULE_ALREADY_EXISTS code and rule_id details when create conflicts', async () => {
+      const client = createClient();
+      mockSavedObjectsClient.create.mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createConflictError(RULE_SAVED_OBJECT_TYPE, 'rule-dup')
+      );
+
+      await expect(
+        client.createRule({ data: baseCreateData, options: { id: 'rule-dup' } })
+      ).rejects.toMatchObject({
+        output: { statusCode: 409 },
+        data: {
+          code: 'RULE_ALREADY_EXISTS',
+          details: { rule_id: 'rule-dup' },
+        },
+      });
+    });
+
+    it('attaches INVALID_RULE_DATA code and structured Zod issues when create body is invalid', async () => {
+      const client = createClient();
+
+      const result = await client
+        .createRule({
+          data: {
+            ...baseCreateData,
+            schedule: { every: '1ms', lookback: '1m' },
+          },
+        })
+        .catch((e) => e);
+
+      expect(result.output.statusCode).toBe(400);
+      expect(result.data.code).toBe('INVALID_RULE_DATA');
+      expect(result.data.details.context).toBe('create');
+      expect(Array.isArray(result.data.details.issues)).toBe(true);
+    });
+
+    it('attaches INVALID_BULK_PARAMS code when ids and filter are combined', async () => {
+      const client = createClient();
+
+      // The `BulkRulesParams` type enforces XOR between `ids` and
+      // `filter`/`search`; the *runtime* guard inside `resolveRuleIds` is what
+      // we are exercising here, so the parameter shape is intentionally cast
+      // to bypass the compile-time check.
+      const bulkParams = { ids: ['a'], filter: 'enabled: true' } as unknown as Parameters<
+        typeof client.bulkDeleteRules
+      >[0];
+
+      await expect(client.bulkDeleteRules(bulkParams)).rejects.toMatchObject({
+        output: { statusCode: 400 },
+        data: { code: 'INVALID_BULK_PARAMS' },
+      });
+    });
+
+    it('attaches RULE_VERSION_CONFLICT code on optimistic concurrency failure', async () => {
+      const client = createClient();
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
+        id: 'rule-id-x',
+        type: RULE_SAVED_OBJECT_TYPE,
+        attributes: baseSoAttrs,
+        version: 'v1',
+        references: [],
+      });
+      mockSavedObjectsClient.update.mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createConflictError(RULE_SAVED_OBJECT_TYPE, 'rule-id-x')
+      );
+
+      await expect(
+        client.updateRule({ id: 'rule-id-x', data: { metadata: { name: 'rename' } } })
+      ).rejects.toMatchObject({
+        output: { statusCode: 409 },
+        data: {
+          code: 'RULE_VERSION_CONFLICT',
+          details: { rule_id: 'rule-id-x' },
+        },
+      });
+    });
+
+    it('attaches INVALID_STATE_TRANSITION code when state_transition is set on a non-alert rule', async () => {
+      const client = createClient();
+      mockSavedObjectsClient.get.mockResolvedValueOnce({
+        id: 'rule-id-y',
+        type: RULE_SAVED_OBJECT_TYPE,
+        attributes: { ...baseSoAttrs, kind: 'signal' },
+        version: 'v1',
+        references: [],
+      });
+
+      await expect(
+        client.updateRule({
+          id: 'rule-id-y',
+          data: { state_transition: { pending_count: 2 } },
+        })
+      ).rejects.toMatchObject({
+        output: { statusCode: 400 },
+        data: {
+          code: 'INVALID_STATE_TRANSITION',
+          details: { rule_id: 'rule-id-y', rule_kind: 'signal' },
+        },
+      });
+    });
+
+    it('attaches INVALID_FILTER_FIELD code with allowed_fields when filter uses unknown field', async () => {
+      const client = createClient();
+
+      await expect(client.findRules({ filter: 'nonsense_field: value' })).rejects.toMatchObject({
+        output: { statusCode: 400 },
+        data: {
+          code: 'INVALID_FILTER_FIELD',
+          details: expect.objectContaining({
+            field: 'nonsense_field',
+          }),
+        },
+      });
+    });
+  });
 });
