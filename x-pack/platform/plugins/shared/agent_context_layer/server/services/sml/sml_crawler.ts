@@ -372,6 +372,9 @@ export class SmlCrawlerImpl implements SmlCrawler {
                 esClient,
                 savedObjectsClient,
                 logger: this.logger,
+                // Crawler operations are always resolved-mode: they use the
+                // type's `getSmlData` hook and must yield to direct chunks.
+                source: 'resolved',
               });
 
               if (action === 'delete') {

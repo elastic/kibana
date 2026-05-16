@@ -7,6 +7,7 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
+import { apiPrivileges } from '../common/features';
 import type {
   AgentContextLayerPluginSetup,
   AgentContextLayerPluginStart,
@@ -15,6 +16,7 @@ import type {
 } from './types';
 import { registerFeatures } from './features';
 import { registerSearchRoute } from './routes/search';
+import { registerSystemWorkflowsRoutes } from './routes/system_workflows';
 import { createSmlService, type SmlServiceInstance } from './services/sml/sml_service';
 import {
   registerSmlCrawlerTaskDefinition,
@@ -22,6 +24,8 @@ import {
 } from './services/sml/sml_task_definitions';
 import { resolveSmlAttachItems } from './services/sml/execute_sml_attach_items';
 import type { SmlService } from './services/sml/types';
+import { registerAgentContextLayerWorkflowSteps } from './workflow_steps';
+import { indexKpiSmlType } from './sml_types';
 
 export class AgentContextLayerPlugin
   implements
@@ -35,6 +39,9 @@ export class AgentContextLayerPlugin
   private logger: Logger;
   private smlServiceInstance: SmlServiceInstance;
   private smlService?: SmlService;
+  private startContract?: AgentContextLayerPluginStart;
+  private spaces?: AgentContextLayerStartDependencies['spaces'];
+  private workflowsManagementApi?: AgentContextLayerSetupDependencies['workflowsManagement']['management'];
 
   constructor(context: PluginInitializerContext) {
     this.logger = context.logger.get();
@@ -47,7 +54,14 @@ export class AgentContextLayerPlugin
   ): AgentContextLayerPluginSetup {
     registerFeatures({ features: setupDeps.features });
 
+    this.workflowsManagementApi = setupDeps.workflowsManagement.management;
+
     const smlSetup = this.smlServiceInstance.setup({ logger: this.logger.get('sml') });
+
+    // Built-in SML types owned by this plugin. The `index_kpi` type backs the
+    // bundled `workflow-sml-index-augmentation` workflow, which writes chunks
+    // directly via the `agentContextLayer.smlIndexAttachment` step.
+    smlSetup.registerType(indexKpiSmlType);
 
     registerSmlCrawlerTaskDefinition({
       taskManager: setupDeps.taskManager,
@@ -80,6 +94,34 @@ export class AgentContextLayerPlugin
       logger: this.logger,
       getSmlService,
     });
+    registerSystemWorkflowsRoutes({
+      router,
+      coreSetup,
+      logger: this.logger.get('system_workflows'),
+      getWorkflowsManagementApi: () => {
+        if (!this.workflowsManagementApi) {
+          throw new Error(
+            'Workflows management API not available — Agent Context Layer setup did not complete.'
+          );
+        }
+        return this.workflowsManagementApi;
+      },
+    });
+
+    if (setupDeps.workflowsExtensions) {
+      registerAgentContextLayerWorkflowSteps({
+        workflowsExtensions: setupDeps.workflowsExtensions,
+        getStartContract: () => {
+          if (!this.startContract) {
+            throw new Error(
+              'Agent Context Layer start contract is not available — plugin has not started'
+            );
+          }
+          return this.startContract;
+        },
+        getSpaces: () => this.spaces,
+      });
+    }
 
     return {
       registerType: smlSetup.registerType,
@@ -96,6 +138,7 @@ export class AgentContextLayerPlugin
       logger: this.logger.get('sml'),
       securityAuthz: security?.authz,
     });
+    this.spaces = spaces;
 
     const smlService = this.smlService;
 
@@ -107,7 +150,9 @@ export class AgentContextLayerPlugin
       this.logger.error(`Failed to schedule SML crawler tasks: ${error.message}`);
     });
 
-    return {
+    const securityAuthz = security?.authz;
+
+    const startContract: AgentContextLayerPluginStart = {
       search: smlService.search,
       getDocuments: async ({ ids, request, spaceId }) => {
         if (ids.length === 0) {
@@ -139,6 +184,26 @@ export class AgentContextLayerPlugin
       getTypeDefinition: smlService.getTypeDefinition,
       resolveSmlAttachItems: (params) => resolveSmlAttachItems({ ...params, sml: smlService }),
       indexAttachment: async (params) => {
+        // Gate every user-driven write on the `sml:write` API privilege.
+        // The crawler bypasses this start contract (it talks to the
+        // internal SmlService directly as the Kibana service account),
+        // so internal background indexing is unaffected.
+        if (securityAuthz) {
+          const checkPrivileges = securityAuthz.checkPrivilegesDynamicallyWithRequest(
+            params.request
+          );
+          const { hasAllRequested } = await checkPrivileges({
+            kibana: [
+              securityAuthz.actions.api.get(apiPrivileges.writeAgentContextLayer),
+            ],
+          });
+          if (!hasAllRequested) {
+            throw new Error(
+              `Forbidden: caller is missing the '${apiPrivileges.writeAgentContextLayer}' privilege required to index SML attachments.`
+            );
+          }
+        }
+
         const soClient = savedObjects.getScopedClient(params.request, {
           ...(params.includedHiddenTypes?.length
             ? { includedHiddenTypes: params.includedHiddenTypes }
@@ -150,13 +215,24 @@ export class AgentContextLayerPlugin
           originId: params.originId,
           attachmentType: params.attachmentType,
           action: params.action,
+          // For direct mode (chunks supplied) the indexer derives the
+          // effective spaces from `resolveOriginAccess` and ignores
+          // this value, so passing the caller's space here is just a
+          // sensible default for resolved-mode fallbacks.
           spaces: [spaceId],
+          spaceId,
           esClient: elasticsearch.client.asInternalUser,
           savedObjectsClient: soClient,
           logger: this.logger.get('sml'),
+          chunks: params.chunks,
+          source: params.source,
         });
       },
     };
+
+    this.startContract = startContract;
+
+    return startContract;
   }
 
   stop() {}

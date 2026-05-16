@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import type { PluginInitializer } from '@kbn/core-plugins-browser';
+import type { PluginInitializer, PluginInitializerContext } from '@kbn/core-plugins-browser';
+import {
+  AgentContextLayerPublicPlugin,
+  type AgentContextLayerPublicPluginSetup,
+  type AgentContextLayerPublicPluginSetupDeps,
+  type AgentContextLayerPublicPluginStart,
+  type AgentContextLayerPublicPluginStartDeps,
+} from './plugin';
 
 export { smlSearchPath, internalApiPath } from '../common/constants';
 export { SML_HTTP_SEARCH_QUERY_MAX_LENGTH, SmlSearchFilterType } from '../common/http_api/sml';
@@ -15,8 +22,9 @@ export type {
   SmlSearchHttpResultItem,
 } from '../common/http_api/sml';
 
-export const plugin: PluginInitializer<{}, {}> = () => ({
-  setup: () => ({}),
-  start: () => ({}),
-  stop: () => {},
-});
+export const plugin: PluginInitializer<
+  AgentContextLayerPublicPluginSetup,
+  AgentContextLayerPublicPluginStart,
+  AgentContextLayerPublicPluginSetupDeps,
+  AgentContextLayerPublicPluginStartDeps
+> = (context: PluginInitializerContext) => new AgentContextLayerPublicPlugin(context);

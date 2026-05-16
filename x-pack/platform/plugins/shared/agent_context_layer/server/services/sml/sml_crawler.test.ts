@@ -406,6 +406,9 @@ describe('SmlCrawlerImpl', () => {
           attachmentType: 'test-type',
           action: 'create',
           spaces: ['default'],
+          // Crawler must label its writes as resolved so direct-mode writes
+          // override them (and vice versa, the indexer skips when direct exists).
+          source: 'resolved',
         })
       );
 

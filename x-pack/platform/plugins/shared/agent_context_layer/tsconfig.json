@@ -17,6 +17,7 @@
     "@kbn/core-saved-objects-api-server",
     "@kbn/core-ui-settings-server",
     "@kbn/features-plugin",
+    "@kbn/management-plugin",
     "@kbn/task-manager-plugin",
     "@kbn/spaces-plugin",
     "@kbn/security-plugin-types-server",
@@ -26,6 +27,14 @@
     "@kbn/agent-builder-server",
     "@kbn/core-http-server-mocks",
     "@kbn/core-logging-server-mocks",
-    "@kbn/logging-mocks"
+    "@kbn/logging-mocks",
+    "@kbn/workflows-extensions",
+    "@kbn/workflows",
+    "@kbn/workflows-execution-engine",
+    "@kbn/workflows-yaml",
+    "@kbn/zod",
+    "@kbn/kibana-react-plugin",
+    "@kbn/i18n-react",
+    "@kbn/core-http-server-utils"
   ]
 }

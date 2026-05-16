@@ -39,6 +39,7 @@ const createSmlDoc = (overrides: Partial<SmlDocument> = {}): SmlDocument => ({
   updated_at: '2024-01-02',
   spaces: ['default'],
   permissions: [],
+  source: 'resolved',
   ...overrides,
 });
 

@@ -8,7 +8,8 @@
     "id": "agentContextLayer",
     "server": true,
     "browser": true,
-    "requiredPlugins": ["features", "taskManager"],
-    "optionalPlugins": ["security", "spaces"]
+    "requiredPlugins": ["features", "management", "taskManager", "workflowsManagement"],
+    "optionalPlugins": ["security", "spaces", "workflowsExtensions"],
+    "requiredBundles": ["kibanaReact", "workflowsExtensions"]
   }
 }
