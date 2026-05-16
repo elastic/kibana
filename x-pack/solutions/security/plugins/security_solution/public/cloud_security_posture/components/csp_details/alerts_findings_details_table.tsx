@@ -48,7 +48,7 @@ import { ALERTS_QUERY_NAMES } from '../../../detections/containers/detection_eng
 import { useSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { getSeverityColor } from '../../../detections/components/alerts_kpis/severity_level_panel/helpers';
 import { SeverityBadge } from '../../../common/components/severity_badge';
-import { ALERT_PREVIEW_BANNER } from '../../../flyout/document_details/preview/constants';
+import { ALERT_PREVIEW_BANNER } from '../../../flyout_v2/shared/constants/preview_banners';
 import { FILTER_OPEN, FILTER_ACKNOWLEDGED } from '../../../../common/types';
 import { useNonClosedAlerts } from '../../hooks/use_non_closed_alerts';
 import { useEntityFromStore } from '../../../flyout/entity_details/shared/hooks/use_entity_from_store';
@@ -435,7 +435,7 @@ export const AlertsDetailsTable = memo(
               {i18n.translate('xpack.securitySolution.flyout.left.insights.alerts.tableTitle', {
                 defaultMessage: 'Alerts ',
               })}
-              <EuiIcon type="external" />
+              <EuiIcon type="external" aria-hidden={true} />
             </h1>
           </EuiLink>
 

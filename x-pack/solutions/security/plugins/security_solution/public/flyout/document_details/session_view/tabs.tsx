@@ -22,7 +22,7 @@ import {
   DocumentDetailsLeftPanelKey,
   DocumentDetailsPreviewPanelKey,
 } from '../shared/constants/panel_keys';
-import { ALERT_PREVIEW_BANNER } from '../preview/constants';
+import { ALERT_PREVIEW_BANNER } from '../../../flyout_v2/shared/constants/preview_banners';
 
 export interface SessionViewPanelTabType {
   id: SessionViewPanelPaths;

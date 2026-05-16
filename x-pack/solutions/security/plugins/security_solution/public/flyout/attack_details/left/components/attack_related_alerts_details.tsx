@@ -13,7 +13,7 @@ import { useOriginalAlertIds } from '../../hooks/use_original_alert_ids';
 import { useAttackDetailsContext } from '../../context';
 import { ATTACK_DETAILS_LEFT_INSIGHTS_CORRELATION_TABLE } from '../../constants/test_ids';
 import { getColumns } from '../../../../flyout_v2/document/tools/correlations/utils/get_columns';
-import { ALERT_PREVIEW_BANNER } from '../../../document_details/preview/constants';
+import { ALERT_PREVIEW_BANNER } from '../../../../flyout_v2/shared/constants/preview_banners';
 import { DocumentDetailsPreviewPanelKey } from '../../../document_details/shared/constants/panel_keys';
 
 /**

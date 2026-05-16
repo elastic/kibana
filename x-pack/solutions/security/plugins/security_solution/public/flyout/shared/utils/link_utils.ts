@@ -27,7 +27,7 @@ import {
 } from '../../network_details';
 import { RulePanelKey, RulePreviewPanelKey, RULE_PREVIEW_BANNER } from '../../rule_details/right';
 import { DocumentDetailsPreviewPanelKey } from '../../document_details/shared/constants/panel_keys';
-import { EVENT_PREVIEW_BANNER } from '../../document_details/preview/constants';
+import { EVENT_PREVIEW_BANNER } from '../../../flyout_v2/shared/constants/preview_banners';
 import { EVENT_SOURCE_FIELD_DESCRIPTOR } from '../../../common/components/event_details/translations';
 import type { IdentityFields } from '../../document_details/shared/utils';
 

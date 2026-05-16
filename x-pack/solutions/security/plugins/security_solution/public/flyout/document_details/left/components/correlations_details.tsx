@@ -11,7 +11,7 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { CorrelationsDetailsView } from '../../../../flyout_v2/document/tools/correlations/components/correlations_details_view';
 import { DocumentDetailsPreviewPanelKey } from '../../shared/constants/panel_keys';
-import { ALERT_PREVIEW_BANNER } from '../../preview/constants';
+import { ALERT_PREVIEW_BANNER } from '../../../../flyout_v2/shared/constants/preview_banners';
 import { AttackDetailsPreviewPanelKey } from '../../../attack_details/constants/panel_keys';
 import { ATTACK_PREVIEW_BANNER } from '../../../attack_details/context';
 

@@ -21,7 +21,7 @@ import {
 } from '../../shared/constants/panel_keys';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useDocumentDetailsContext } from '../../shared/context';
-import { ALERT_PREVIEW_BANNER } from '../../preview/constants';
+import { ALERT_PREVIEW_BANNER } from '../../../../flyout_v2/shared/constants/preview_banners';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { useSessionViewConfig } from '../../../../flyout_v2/document/tools/session_view/hooks/use_session_view_config';
 import { SessionViewNotEnabled } from '../../../../flyout_v2/document/main/components/session_view_not_enabled';

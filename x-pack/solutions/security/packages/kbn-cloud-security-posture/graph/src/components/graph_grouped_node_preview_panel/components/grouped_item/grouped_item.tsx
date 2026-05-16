@@ -24,6 +24,7 @@ export type GroupedItemProps =
       isLoading: true;
       item?: EntityOrEventItem;
       scopeId?: string;
+      onOpenEventPreview?: (docId: string, indexName?: string) => void;
     }
   | {
       isLoading?: false;
@@ -32,42 +33,45 @@ export type GroupedItemProps =
        * Unique identifier for the graph instance, used to scope filter state.
        */
       scopeId: string;
+      onOpenEventPreview?: (docId: string, indexName?: string) => void;
     };
 
-export const GroupedItem = memo(({ item, isLoading, scopeId }: GroupedItemProps) => {
-  if (isLoading) {
+export const GroupedItem = memo(
+  ({ item, isLoading, scopeId, onOpenEventPreview }: GroupedItemProps) => {
+    if (isLoading) {
+      return (
+        <Panel grow={false}>
+          <Skeleton />
+        </Panel>
+      );
+    }
+
     return (
-      <Panel grow={false}>
-        <Skeleton />
+      <Panel isAlert={item.itemType === DOCUMENT_TYPE_ALERT}>
+        <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
+          <EuiFlexItem>
+            <HeaderRow item={item} scopeId={scopeId} onOpenEventPreview={onOpenEventPreview} />
+          </EuiFlexItem>
+
+          {item.timestamp && (
+            <EuiFlexItem>
+              <TimestampRow timestamp={item.timestamp} />
+            </EuiFlexItem>
+          )}
+
+          {item.itemType !== DOCUMENT_TYPE_ENTITY && item.actor && item.target && (
+            <EuiFlexItem>
+              <ActorsRow actor={item.actor} target={item.target} />
+            </EuiFlexItem>
+          )}
+
+          <EuiFlexItem>
+            <MetadataRow item={item} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </Panel>
     );
   }
-
-  return (
-    <Panel isAlert={item.itemType === DOCUMENT_TYPE_ALERT}>
-      <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
-        <EuiFlexItem>
-          <HeaderRow item={item} scopeId={scopeId} />
-        </EuiFlexItem>
-
-        {item.timestamp && (
-          <EuiFlexItem>
-            <TimestampRow timestamp={item.timestamp} />
-          </EuiFlexItem>
-        )}
-
-        {item.itemType !== DOCUMENT_TYPE_ENTITY && item.actor && item.target && (
-          <EuiFlexItem>
-            <ActorsRow actor={item.actor} target={item.target} />
-          </EuiFlexItem>
-        )}
-
-        <EuiFlexItem>
-          <MetadataRow item={item} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </Panel>
-  );
-});
+);
 
 GroupedItem.displayName = 'GroupedItem';

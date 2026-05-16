@@ -17,7 +17,10 @@ import { PanelHeader } from '../right/header';
 import { PanelContent } from '../right/content';
 import { PreviewPanelFooter } from './footer';
 import type { RightPanelTabType } from '../right/tabs';
-import { ALERT_PREVIEW_BANNER, EVENT_PREVIEW_BANNER } from './constants';
+import {
+  ALERT_PREVIEW_BANNER,
+  EVENT_PREVIEW_BANNER,
+} from '../../../flyout_v2/shared/constants/preview_banners';
 import { useBasicDataFromDetailsData } from '../shared/hooks/use_basic_data_from_details_data';
 
 /**

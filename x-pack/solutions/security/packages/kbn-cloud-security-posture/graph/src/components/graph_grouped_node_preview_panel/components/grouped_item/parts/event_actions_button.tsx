@@ -37,15 +37,21 @@ export interface EventActionsButtonProps {
    * Unique identifier for the graph instance, used to scope filter state.
    */
   scopeId: string;
+  onOpenEventPreview?: (docId: string, indexName?: string) => void;
 }
 
 /**
  * Actions button for event/alert items in the grouped node preview panel.
  * Shows a popover with filter toggle actions and event details option.
  * Uses FilterStore (scoped by scopeId) for filter state management.
- * Uses useExpandableFlyoutApi to open event/alert details preview panel.
+ * Uses onOpenEventPreview when provided (e.g. system flyout context), otherwise falls back
+ * to useExpandableFlyoutApi to open event/alert details preview panel.
  */
-export const EventActionsButton = ({ item, scopeId }: EventActionsButtonProps) => {
+export const EventActionsButton = ({
+  item,
+  scopeId,
+  onOpenEventPreview,
+}: EventActionsButtonProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const { openPreviewPanel } = useExpandableFlyoutApi();
 
@@ -53,6 +59,10 @@ export const EventActionsButton = ({ item, scopeId }: EventActionsButtonProps) =
   const togglePopover = useCallback(() => setIsPopoverOpen((prev) => !prev), []);
 
   const handleShowEventDetails = useCallback(() => {
+    if (onOpenEventPreview && item.docId) {
+      onOpenEventPreview(item.docId, item.index);
+      return;
+    }
     openPreviewPanel({
       id: DocumentDetailsPreviewPanelKey,
       params: {
@@ -63,7 +73,7 @@ export const EventActionsButton = ({ item, scopeId }: EventActionsButtonProps) =
         isPreviewMode: true,
       },
     });
-  }, [item, openPreviewPanel, scopeId]);
+  }, [item, openPreviewPanel, scopeId, onOpenEventPreview]);
 
   // Generate items fresh on each render to reflect current filter state
   const items = getLabelExpandItems({
@@ -81,6 +91,7 @@ export const EventActionsButton = ({ item, scopeId }: EventActionsButtonProps) =
 
   return (
     <EuiPopover
+      aria-label={actionsButtonAriaLabel}
       button={
         <EuiButtonIcon
           iconType="boxesHorizontal"

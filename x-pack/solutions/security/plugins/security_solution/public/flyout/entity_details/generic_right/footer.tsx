@@ -18,7 +18,7 @@ import {
   GENERIC_ENTITY_FLYOUT_FOOTER_TEST_SUBJ,
 } from './constants';
 import { GenericEntityPanelKey } from '../shared/constants';
-import { GENERIC_ENTITY_PREVIEW_BANNER } from '../../document_details/preview/constants';
+import { GENERIC_ENTITY_PREVIEW_BANNER } from '../../../flyout_v2/shared/constants/preview_banners';
 import { useKibana } from '../../../common/lib/kibana';
 import { ASK_AI_ASSISTANT } from '../shared/translations';
 import { useAssetInventoryAssistant } from './hooks/use_asset_inventory_assistant';

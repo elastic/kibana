@@ -53,9 +53,10 @@ export interface HeaderRowProps {
    * Unique identifier for the graph instance, used to scope filter state.
    */
   scopeId: string;
+  onOpenEventPreview?: (docId: string, indexName?: string) => void;
 }
 
-export const HeaderRow = ({ item, scopeId }: HeaderRowProps) => {
+export const HeaderRow = ({ item, scopeId, onOpenEventPreview }: HeaderRowProps) => {
   const { euiTheme } = useEuiTheme();
   const { openPreviewPanel } = useExpandableFlyoutApi();
   const openEntityPreviewPanel = useOpenEntityPreviewPanel();
@@ -82,6 +83,10 @@ export const HeaderRow = ({ item, scopeId }: HeaderRowProps) => {
       } else {
         // event or alert
         const eventOrAlertItem = item as EventItem | AlertItem;
+        if (onOpenEventPreview && eventOrAlertItem.docId) {
+          onOpenEventPreview(eventOrAlertItem.docId, eventOrAlertItem.index);
+          return;
+        }
         openPreviewPanel({
           id: DocumentDetailsPreviewPanelKey,
           params: {
@@ -95,7 +100,7 @@ export const HeaderRow = ({ item, scopeId }: HeaderRowProps) => {
         });
       }
     },
-    [item, openPreviewPanel, openEntityPreviewPanel, scopeId]
+    [item, openPreviewPanel, openEntityPreviewPanel, scopeId, onOpenEventPreview]
   );
 
   const isClickable =
@@ -166,7 +171,11 @@ export const HeaderRow = ({ item, scopeId }: HeaderRowProps) => {
         {item.itemType === DOCUMENT_TYPE_ENTITY ? (
           <EntityActionsButton item={item as EntityItem} scopeId={scopeId} />
         ) : (
-          <EventActionsButton item={item as EventItem | AlertItem} scopeId={scopeId} />
+          <EventActionsButton
+            item={item as EventItem | AlertItem}
+            scopeId={scopeId}
+            onOpenEventPreview={onOpenEventPreview}
+          />
         )}
       </EuiFlexItem>
     </EuiFlexGroup>

@@ -31,7 +31,7 @@ import {
 } from '../../../../../flyout/entity_details/shared/components/left_panel/left_panel_header';
 import type { CriticalityLevel } from '../../../../../../common/entity_analytics/asset_criticality/types';
 import { getWatchlistName } from '../../../../../../common/entity_analytics/watchlists/constants';
-import { ALERT_PREVIEW_BANNER } from '../../../../../flyout/document_details/preview/constants';
+import { ALERT_PREVIEW_BANNER } from '../../../../../flyout_v2/shared/constants/preview_banners';
 import { DocumentDetailsPreviewPanelKey } from '../../../../../flyout/document_details/shared/constants/panel_keys';
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 import { useQueryInspector } from '../../../../../common/components/page/manage_query';

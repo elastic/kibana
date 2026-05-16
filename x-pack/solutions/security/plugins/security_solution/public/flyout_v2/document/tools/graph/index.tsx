@@ -10,7 +10,11 @@ import { css } from '@emotion/react';
 import { EuiFlyoutBody, EuiFlyoutHeader, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getFieldValue, type DataTableRecord } from '@kbn/discover-utils';
-import { GRAPH_SCOPE_ID } from '@kbn/cloud-security-posture-graph';
+import {
+  GRAPH_SCOPE_ID,
+  GraphGroupedNodePreviewPanel,
+  type GraphGroupedNodePreviewPanelProps,
+} from '@kbn/cloud-security-posture-graph';
 import { EVENT_KIND } from '@kbn/rule-data-utils';
 import { useHistory } from 'react-router-dom';
 import { useStore } from 'react-redux';
@@ -27,6 +31,8 @@ import { documentFlyoutHistoryKey } from '../../../shared/constants/flyout_histo
 import { flyoutProviders } from '../../../shared/components/flyout_provider';
 import { DocumentFlyoutWrapper } from '../../main/document_flyout_wrapper';
 import { useDefaultDocumentFlyoutProperties } from '../../../shared/hooks/use_default_flyout_properties';
+import { Network } from '../../../network/main';
+import type { FlowTargetSourceDest } from '../../../../../common/search_strategy';
 
 export const GRAPH_TOOLS_TEST_ID = `${PREFIX}GraphTools` as const;
 
@@ -92,6 +98,52 @@ export const GraphDetails = memo(
       ]
     );
 
+    const onOpenNetworkPreview = useCallback(
+      (ip: string, flowTarget: FlowTargetSourceDest) =>
+        overlays.openSystemFlyout(
+          flyoutProviders({
+            services,
+            store,
+            history,
+            children: <Network ip={ip} flowTarget={flowTarget} />,
+          }),
+          { ...defaultFlyoutProperties, historyKey, session: 'inherit' }
+        ),
+      [defaultFlyoutProperties, history, historyKey, overlays, services, store]
+    );
+
+    // Entity panels (host, user, service) are not yet migrated to flyout_v2.
+    // Once they exist under flyout_v2/, wire this up the same way as onOpenDocumentPreview.
+    const onOpenEntityPreview = useCallback(() => {}, []);
+
+    const onOpenGroupedPreview = useCallback(
+      (params: Omit<GraphGroupedNodePreviewPanelProps, 'scopeId' | 'showLoadingState'>) =>
+        overlays.openSystemFlyout(
+          flyoutProviders({
+            services,
+            store,
+            history,
+            children: (
+              <GraphGroupedNodePreviewPanel
+                {...params}
+                scopeId={GRAPH_SCOPE_ID}
+                onOpenEventPreview={onOpenDocumentPreview}
+              />
+            ),
+          }),
+          { ...defaultFlyoutProperties, historyKey, session: 'inherit' }
+        ),
+      [
+        defaultFlyoutProperties,
+        history,
+        historyKey,
+        onOpenDocumentPreview,
+        overlays,
+        services,
+        store,
+      ]
+    );
+
     if (!eventId || !timestamp) {
       return null;
     }
@@ -120,6 +172,9 @@ export const GraphDetails = memo(
               timestamp={timestamp}
               isAlert={isAlert}
               onOpenDocumentPreview={onOpenDocumentPreview}
+              onOpenEntityPreview={onOpenEntityPreview}
+              onOpenNetworkPreview={onOpenNetworkPreview}
+              onOpenGroupedPreview={onOpenGroupedPreview}
             />
           </div>
         </EuiFlyoutBody>

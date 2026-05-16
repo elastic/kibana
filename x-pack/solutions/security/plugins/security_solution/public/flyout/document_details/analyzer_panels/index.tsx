@@ -13,7 +13,10 @@ import type { DocumentDetailsAnalyzerPanelKey } from '../shared/constants/panel_
 import { DocumentDetailsPreviewPanelKey } from '../shared/constants/panel_keys';
 import { DetailsPanel } from '../../../resolver/view/details_panel';
 import type { NodeEventOnClick } from '../../../resolver/view/panels/node_events_of_type';
-import { ALERT_PREVIEW_BANNER, EVENT_PREVIEW_BANNER } from '../preview/constants';
+import {
+  ALERT_PREVIEW_BANNER,
+  EVENT_PREVIEW_BANNER,
+} from '../../../flyout_v2/shared/constants/preview_banners';
 import { FlyoutBody } from '../../shared/components/flyout_body';
 
 interface AnalyzerPanelProps extends Record<string, unknown> {

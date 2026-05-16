@@ -18,6 +18,7 @@ import {
   GraphGroupedNodePreviewPanelKey,
   GROUP_PREVIEW_BANNER,
   NETWORK_PREVIEW_BANNER,
+  type GraphGroupedNodePreviewPanelProps,
   type NodeViewModel,
 } from '@kbn/cloud-security-posture-graph';
 import { type NodeDocumentDataModel } from '@kbn/cloud-security-posture-common/types/graph/v1';
@@ -27,7 +28,7 @@ import { useFlyoutBodyAvailableHeight } from '../hooks/use_flyout_body_available
 import { PageScope } from '../../../../../data_view_manager/constants';
 import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
 import { useGetScopedSourcererDataView } from '../../../../../sourcerer/components/use_get_sourcerer_data_view';
-import { GRAPH_VISUALIZATION_TEST_ID } from './test_ids';
+import { PREFIX } from '../../../../../flyout/shared/test_ids';
 import { useInvestigateInTimeline } from '../../../../../common/hooks/timeline/use_investigate_in_timeline';
 import { normalizeTimeRange } from '../../../../../common/utils/normalize_time_range';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
@@ -36,7 +37,7 @@ import {
   ALERT_PREVIEW_BANNER,
   EVENT_PREVIEW_BANNER,
   GENERIC_ENTITY_PREVIEW_BANNER,
-} from '../../../../../flyout/document_details/preview/constants';
+} from '../../../../shared/constants/preview_banners';
 import { useKibana, useToasts } from '../../../../../common/lib/kibana';
 import { extractTimelineCapabilities } from '../../../../../common/utils/timeline_capabilities';
 import {
@@ -51,6 +52,7 @@ const GraphInvestigationLazy = React.lazy(() =>
   }))
 );
 
+export const GRAPH_VISUALIZATION_TEST_ID = `${PREFIX}GraphVisualization` as const;
 export const GRAPH_ID = 'graph-visualization' as const;
 
 const MAX_DOCUMENTS_TO_LOAD = 50;
@@ -66,13 +68,20 @@ interface EventGraphVisualizationProps {
   timestamp: string;
   /** Whether the source document is an alert */
   isAlert: boolean;
-  /**
-   * Override for opening a single document (event or alert) from a graph node.
-   * When provided, replaces the default `openPreviewPanel` call so callers that
-   * don't have a registered expandable-flyout panel (e.g. flyout v2) can open
-   * the document their own way.
-   */
+  /** Override for opening a single document (event or alert) node — replaces `openPreviewPanel` when provided. */
   onOpenDocumentPreview?: (id: string, indexName?: string) => void;
+  /** Override for opening an entity node (host/user/service/generic) — replaces `openPreviewPanel` when provided. */
+  onOpenEntityPreview?: (params: {
+    engineType: string | undefined;
+    entityId: string;
+    entityName: string | undefined;
+  }) => void;
+  /** Override for opening a grouped-entities or grouped-events node — replaces `openPreviewPanel` when provided. */
+  onOpenGroupedPreview?: (
+    params: Omit<GraphGroupedNodePreviewPanelProps, 'scopeId' | 'showLoadingState'>
+  ) => void;
+  /** Override for opening a network (IP) node — replaces `openPreviewPanel` when provided. */
+  onOpenNetworkPreview?: (ip: string, flowTarget: FlowTargetSourceDest) => void;
 }
 
 /** Props for entity mode — drives the graph from an Entity Store entity ID */
@@ -82,13 +91,20 @@ interface EntityGraphVisualizationProps {
   scopeId: string;
   /** Entity Store v2 entity ID (`entity.id`) to center the graph on */
   entityId: string;
-  /**
-   * Override for opening a single document (event or alert) from a graph node.
-   * When provided, replaces the default `openPreviewPanel` call so callers that
-   * don't have a registered expandable-flyout panel (e.g. flyout v2) can open
-   * the document their own way.
-   */
+  /** Override for opening a single document (event or alert) node — replaces `openPreviewPanel` when provided. */
   onOpenDocumentPreview?: (id: string, indexName?: string) => void;
+  /** Override for opening an entity node (host/user/service/generic) — replaces `openPreviewPanel` when provided. */
+  onOpenEntityPreview?: (params: {
+    engineType: string | undefined;
+    entityId: string;
+    entityName: string | undefined;
+  }) => void;
+  /** Override for opening a grouped-entities or grouped-events node — replaces `openPreviewPanel` when provided. */
+  onOpenGroupedPreview?: (
+    params: Omit<GraphGroupedNodePreviewPanelProps, 'scopeId' | 'showLoadingState'>
+  ) => void;
+  /** Override for opening a network (IP) node — replaces `openPreviewPanel` when provided. */
+  onOpenNetworkPreview?: (ip: string, flowTarget: FlowTargetSourceDest) => void;
 }
 
 export type GraphVisualizationProps = EventGraphVisualizationProps | EntityGraphVisualizationProps;
@@ -100,7 +116,13 @@ export type GraphVisualizationProps = EventGraphVisualizationProps | EntityGraph
  * - 'entity': driven by an Entity Store entity ID (used in entity detail panels).
  */
 export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props) => {
-  const { scopeId, onOpenDocumentPreview } = props;
+  const {
+    scopeId,
+    onOpenDocumentPreview,
+    onOpenEntityPreview,
+    onOpenGroupedPreview,
+    onOpenNetworkPreview: onNetworkPreviewOverride,
+  } = props;
 
   const wrapperRef = useRef<HTMLDivElement>(null);
   const height = useFlyoutBodyAvailableHeight(wrapperRef);
@@ -125,6 +147,10 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props
 
   const onOpenNetworkPreview = useCallback(
     (ip: string, previewScopeId: string) => {
+      if (onNetworkPreviewOverride) {
+        onNetworkPreviewOverride(ip, FlowTargetSourceDest.source);
+        return;
+      }
       openPreviewPanel({
         id: 'network-preview',
         params: {
@@ -136,7 +162,7 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props
         },
       });
     },
-    [openPreviewPanel]
+    [openPreviewPanel, onNetworkPreviewOverride]
   );
 
   const onOpenEventPreview = useCallback(
@@ -150,6 +176,12 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props
         entity?: NodeDocumentDataModel['entity'];
       }) => {
         const engineType = item.entity?.engine_type;
+
+        if (onOpenEntityPreview) {
+          onOpenEntityPreview({ engineType, entityId: item.id, entityName: item.entity?.name });
+          return;
+        }
+
         const panelId =
           engineType && engineType in EntityPanelKeyByType
             ? EntityPanelKeyByType[engineType as keyof typeof EntityPanelKeyByType] ??
@@ -221,39 +253,55 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props
       } else if (docMode === 'single-entity' && singleDocumentData && isEntityNodeEnriched(node)) {
         showEntityPreview(singleDocumentData);
       } else if (docMode === 'grouped-entities' && documentsData.length > 0) {
-        openPreviewPanel({
-          id: GraphGroupedNodePreviewPanelKey,
-          params: {
-            id: node.id,
-            scopeId,
-            isPreviewMode: true,
-            banner: GROUP_PREVIEW_BANNER,
-            docMode,
-            entityItems: (node.documentsData as NodeDocumentDataModel[])
-              .slice(0, MAX_DOCUMENTS_TO_LOAD)
-              .map((doc) => ({
-                itemType: DOCUMENT_TYPE_ENTITY,
-                entity: doc.entity,
-                id: doc.id,
-                icon: node.icon,
-              })),
-          },
-        });
+        const entityItems = (node.documentsData as NodeDocumentDataModel[])
+          .slice(0, MAX_DOCUMENTS_TO_LOAD)
+          .map((doc) => ({
+            itemType: DOCUMENT_TYPE_ENTITY,
+            entity: doc.entity,
+            id: doc.id,
+            icon: node.icon,
+          }));
+        if (onOpenGroupedPreview) {
+          onOpenGroupedPreview({ docMode, entityItems, documentIds: [], dataViewId: undefined });
+        } else {
+          openPreviewPanel({
+            id: GraphGroupedNodePreviewPanelKey,
+            params: {
+              id: node.id,
+              scopeId,
+              isPreviewMode: true,
+              banner: GROUP_PREVIEW_BANNER,
+              docMode,
+              entityItems,
+            },
+          });
+        }
       } else if (docMode === 'grouped-events' && documentsData.length > 0) {
-        openPreviewPanel({
-          id: GraphGroupedNodePreviewPanelKey,
-          params: {
-            id: node.id,
-            scopeId,
-            isPreviewMode: true,
-            banner: GROUP_PREVIEW_BANNER,
+        const documentIds = (node.documentsData as NodeDocumentDataModel[])
+          .slice(0, MAX_DOCUMENTS_TO_LOAD)
+          .map((doc) => doc.event?.id)
+          .filter((id): id is string => id !== undefined);
+        if (onOpenGroupedPreview) {
+          onOpenGroupedPreview({
             docMode,
+            documentIds,
             dataViewId: dataViewIndexPattern,
-            documentIds: (node.documentsData as NodeDocumentDataModel[])
-              .slice(0, MAX_DOCUMENTS_TO_LOAD)
-              .map((doc) => doc.event?.id),
-          },
-        });
+            entityItems: [],
+          });
+        } else {
+          openPreviewPanel({
+            id: GraphGroupedNodePreviewPanelKey,
+            params: {
+              id: node.id,
+              scopeId,
+              isPreviewMode: true,
+              banner: GROUP_PREVIEW_BANNER,
+              docMode,
+              dataViewId: dataViewIndexPattern,
+              documentIds,
+            },
+          });
+        }
       } else {
         toasts.addDanger({
           title: i18n.translate('xpack.securitySolution.flyout.graph.errorOpenNodePreview', {
@@ -262,7 +310,15 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props
         });
       }
     },
-    [toasts, openPreviewPanel, scopeId, dataViewIndexPattern, onOpenDocumentPreview]
+    [
+      toasts,
+      openPreviewPanel,
+      scopeId,
+      dataViewIndexPattern,
+      onOpenDocumentPreview,
+      onOpenEntityPreview,
+      onOpenGroupedPreview,
+    ]
   );
 
   const { investigateInTimeline } = useInvestigateInTimeline();

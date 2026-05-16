@@ -10,9 +10,8 @@ import '@testing-library/jest-dom';
 import { render, waitFor } from '@testing-library/react';
 import { GraphInvestigation } from '@kbn/cloud-security-posture-graph';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { GraphVisualization } from './graph_visualization';
+import { GraphVisualization, GRAPH_VISUALIZATION_TEST_ID } from './graph_visualization';
 import { mockFlyoutApi } from '../../../../../flyout/document_details/shared/mocks/mock_flyout_context';
-import { GRAPH_VISUALIZATION_TEST_ID } from './test_ids';
 
 const mockToasts = {
   addDanger: jest.fn(),
@@ -47,9 +46,9 @@ jest.mock('@kbn/cloud-security-posture-graph', () => {
     GraphInvestigation: jest.fn(),
     isEntityNode,
     isEntityItem,
-    getNodeDocumentMode,
+    getNodeDocumentMode: jest.fn().mockImplementation(getNodeDocumentMode),
     hasNodeDocumentsData,
-    getSingleDocumentData,
+    getSingleDocumentData: jest.fn().mockImplementation(getSingleDocumentData),
     GraphGroupedNodePreviewPanelKey,
     GROUP_PREVIEW_BANNER,
   };
@@ -243,6 +242,50 @@ describe('GraphVisualization', () => {
       expect(jest.mocked(GraphInvestigation).mock.calls[0][0].showInvestigateInTimeline).toBe(
         false
       );
+    });
+  });
+
+  describe('onOpenDocumentPreview override', () => {
+    it('calls onOpenDocumentPreview instead of openPreviewPanel for a single-event node', async () => {
+      const mockOnOpenDocumentPreview = jest.fn();
+      const { getNodeDocumentMode, getSingleDocumentData } = jest.requireMock(
+        '@kbn/cloud-security-posture-graph'
+      );
+      getNodeDocumentMode.mockReturnValueOnce('single-event');
+      getSingleDocumentData.mockReturnValueOnce({ id: 'doc-id', index: 'logs-*' });
+
+      render(
+        <GraphVisualization {...EVENT_PROPS} onOpenDocumentPreview={mockOnOpenDocumentPreview} />
+      );
+
+      await waitFor(() => {
+        expect(GraphInvestigation).toHaveBeenCalledTimes(1);
+      });
+
+      const { onOpenEventPreview } = jest.mocked(GraphInvestigation).mock.calls[0][0];
+      onOpenEventPreview?.({} as never);
+
+      expect(mockOnOpenDocumentPreview).toHaveBeenCalledWith('doc-id', 'logs-*');
+      expect(mockFlyoutApi.openPreviewPanel).not.toHaveBeenCalled();
+    });
+
+    it('calls openPreviewPanel when onOpenDocumentPreview is not provided', async () => {
+      const { getNodeDocumentMode, getSingleDocumentData } = jest.requireMock(
+        '@kbn/cloud-security-posture-graph'
+      );
+      getNodeDocumentMode.mockReturnValueOnce('single-event');
+      getSingleDocumentData.mockReturnValueOnce({ id: 'doc-id', index: 'logs-*' });
+
+      render(<GraphVisualization {...EVENT_PROPS} />);
+
+      await waitFor(() => {
+        expect(GraphInvestigation).toHaveBeenCalledTimes(1);
+      });
+
+      const { onOpenEventPreview } = jest.mocked(GraphInvestigation).mock.calls[0][0];
+      onOpenEventPreview?.({} as never);
+
+      expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalled();
     });
   });
 

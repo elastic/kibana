@@ -32,6 +32,7 @@ export interface ContentBodyProps {
    * Unique identifier for the graph instance, used to scope filter state.
    */
   scopeId: string;
+  onOpenEventPreview?: (docId: string, indexName?: string) => void;
 }
 
 export const ContentBody: FC<ContentBodyProps> = ({
@@ -41,6 +42,7 @@ export const ContentBody: FC<ContentBodyProps> = ({
   groupedItemsType,
   pagination,
   scopeId,
+  onOpenEventPreview,
 }) => {
   // Show pagination only when there are more items than fit on a single page with default size
   const shouldShowPagination = totalHits > DEFAULT_PAGE_SIZE;
@@ -55,7 +57,7 @@ export const ContentBody: FC<ContentBodyProps> = ({
           // React key must be `docId` for fetched documents (events & alerts)
           // Fallback to `id` for non-fetched entities
           <li key={'docId' in item ? item.docId : item.id}>
-            <GroupedItem item={item} scopeId={scopeId} />
+            <GroupedItem item={item} scopeId={scopeId} onOpenEventPreview={onOpenEventPreview} />
           </li>
         ))}
       </List>
