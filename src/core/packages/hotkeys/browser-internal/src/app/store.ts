@@ -10,20 +10,25 @@
 import { z } from '@kbn/zod/v4';
 import { createSidebarStore, type SidebarStoreConfig } from '@kbn/core-chrome-sidebar';
 import type { HotkeysSidebarActions, HotkeysSidebarState } from '@kbn/core-hotkeys-browser';
+import type { HotkeyOverridesPersistence } from '../service/lib/overrides_source';
 
 const hotkeysSidebarSchema = z.object({
   pendingFeatureFocus: z.string().nullable().optional(),
 });
+
+/** @internal */
+export interface HotkeysSidebarStoreDeps {
+  readonly persistence: HotkeyOverridesPersistence;
+}
 
 /**
  * Sidebar store for the hotkeys panel (`openToFeature`, etc.).
  *
  * @internal
  */
-export const createHotkeysSidebarStore = (): SidebarStoreConfig<
-  HotkeysSidebarState,
-  HotkeysSidebarActions
-> =>
+export const createHotkeysSidebarStore = ({
+  persistence,
+}: HotkeysSidebarStoreDeps): SidebarStoreConfig<HotkeysSidebarState, HotkeysSidebarActions> =>
   createSidebarStore({
     schema: hotkeysSidebarSchema,
     actions: (set, _get, sidebar) => ({
@@ -33,6 +38,12 @@ export const createHotkeysSidebarStore = (): SidebarStoreConfig<
       },
       clearPendingFeatureFocus: () => {
         set({ pendingFeatureFocus: undefined });
+      },
+      setHotkeyOverride: (hotkeyId: string, keys) => {
+        persistence.setOverride(hotkeyId, { keys });
+      },
+      clearHotkeyOverride: (hotkeyId: string) => {
+        persistence.clearOverride(hotkeyId);
       },
     }),
   });

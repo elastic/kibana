@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { HotkeyDefinition } from './types';
+
 /**
  * Persisted sidebar store state for the `hotkeys` chrome sidebar app.
  *
@@ -27,4 +29,8 @@ export interface HotkeysSidebarActions {
   openToFeature: (featureId: string) => void;
   /** Clears {@link HotkeysSidebarState.pendingFeatureFocus} after the cheat sheet applies it (normally internal to the cheat sheet). */
   clearPendingFeatureFocus: () => void;
+  /** Persist a user override for the chord bound to `hotkeyId` (merged into any existing override for that id). */
+  setHotkeyOverride: (hotkeyId: string, keys: HotkeyDefinition['keys']) => void;
+  /** Drop the stored override for `hotkeyId` so the declared default chord applies again. */
+  clearHotkeyOverride: (hotkeyId: string) => void;
 }

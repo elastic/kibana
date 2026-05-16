@@ -71,6 +71,13 @@ export interface HotkeyDefinition {
   enabled?: boolean;
   /** DOM element/root to attach the listener to. Defaults to `document`. */
   target?: HTMLElement | Document | Window | null;
+  /**
+   * Discovery-only: invoked whenever the effective chord changes for this id (persisted override,
+   * cleared override, or declaration keys updated via {@link HotkeyHandle.update}). Surfaces such as
+   * Monaco should re-bind listeners here. Omitted ⇒ cheat-sheet rebinding for this row is disabled.
+   * Never persisted; not serialized into TanStack registration meta.
+   */
+  onEffectiveBindingChange?: (keys: Hotkey | RegisterableHotkey | (string & {})) => void;
 }
 
 /**

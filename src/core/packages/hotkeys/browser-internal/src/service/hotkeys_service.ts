@@ -31,12 +31,9 @@ import type { SidebarAppUpdater } from '@kbn/core-chrome-sidebar';
 import type { SidebarComponentProps } from '@kbn/core-chrome-sidebar';
 import { createAppScopedHotkeys } from './lib/app_scoped_hotkeys';
 import { createDerivedRegistrations, type DerivedRegistrations } from './lib/derive_registrations';
-import {
-  createEmptyOverridesSource,
-  type HotkeyOverride,
-  type HotkeyOverridesSource,
-} from './lib/overrides_source';
-import { createHotkeysSidebarStore } from '../hotkeys_sidebar_store';
+import { createLocalStorageHotkeyOverridesPersistence } from './lib/local_storage_hotkey_overrides_persistence';
+import type { HotkeyOverride, HotkeyOverridesSource } from './lib/overrides_source';
+import { createHotkeysSidebarStore } from '../app/store';
 
 export const OPEN_CHEAT_SHEET_HOTKEY_ID = 'platform:hotkeys.openCheatSheet';
 
@@ -48,10 +45,8 @@ export interface SetupDeps {
 /** @internal */
 export interface StartDeps extends Pick<CoreStart, 'chrome' | 'application'> {
   /**
-   * Optional source of user hotkey overrides. When omitted the service
-   * uses an empty source and every registration runs with its declared
-   * binding. Platform callers wire a real implementation once override
-   * storage is available.
+   * Optional source of user hotkey overrides. When omitted the service uses
+   * the default browser localStorage-backed persistence.
    */
   overrides?: HotkeyOverridesSource;
 }
@@ -70,7 +65,13 @@ interface InternalEntry {
   lastResolvedEnabled: boolean;
 }
 
-const buildMeta = ({ scope, keys, defaultKeys, ...defs }: HotkeyDefinition) => ({
+const buildMeta = ({
+  scope,
+  keys,
+  defaultKeys,
+  onEffectiveBindingChange: _dropEffectiveBindingCallback,
+  ...defs
+}: HotkeyDefinition) => ({
   kibana: {
     scope: scope ?? 'context',
     defaultKeys: defaultKeys ?? keys,
@@ -100,6 +101,8 @@ const keysEqual = (a: HotkeyDefinition['keys'], b: HotkeyDefinition['keys']): bo
  * @internal
  */
 export class HotkeysService {
+  private readonly hotkeysAppId = 'hotkeys' as const;
+  private readonly hotkeyOverridesPersistence = createLocalStorageHotkeyOverridesPersistence();
   private readonly manager: HotkeyManager = HotkeyManager.getInstance();
   private readonly discoveryRevision$ = new Subject<void>();
   private readonly discoveryInternal = new Map<string, HotkeyDefinition>();
@@ -119,10 +122,10 @@ export class HotkeysService {
 
   public setup({ chrome }: SetupDeps): HotkeysSetup {
     this.hotkeysAppUpdater = chrome.sidebar.registerApp({
-      appId: 'hotkeys',
-      store: createHotkeysSidebarStore(),
+      appId: this.hotkeysAppId,
+      store: createHotkeysSidebarStore({ persistence: this.hotkeyOverridesPersistence }),
       loadComponent: () =>
-        import('../components/hotkeys_cheat_sheet').then((m) => {
+        import('../app').then((m) => {
           return Promise.resolve(
             (props: SidebarComponentProps<HotkeysSidebarState, HotkeysSidebarActions>) =>
               createElement(m.HotkeysCheatSheet, {
@@ -141,7 +144,7 @@ export class HotkeysService {
   public start({
     application,
     chrome,
-    overrides = createEmptyOverridesSource(),
+    overrides = this.hotkeyOverridesPersistence,
   }: StartDeps): HotkeysStart {
     this.currentAppId$ = application.currentAppId$;
 
@@ -180,6 +183,9 @@ export class HotkeysService {
       registerForDiscovery: this.doRegisterForDiscovery.bind(this),
       registerMany,
       forApp,
+      get cheatSheet() {
+        return chrome.sidebar.getApp<HotkeysSidebarState, HotkeysSidebarActions>('hotkeys');
+      },
     };
   }
 
@@ -209,6 +215,7 @@ export class HotkeysService {
 
     this.discoveryInternal.set(stored.id, stored);
     this.discoveryRevision$.next();
+    this.tryDiscoveryEffectiveBinding(stored, this.resolveDiscoveryKeys(stored));
 
     return {
       id: stored.id,
@@ -217,12 +224,17 @@ export class HotkeysService {
         if (!current) {
           return;
         }
+        const prevResolved = this.resolveDiscoveryKeys(current);
         const next: HotkeyDefinition = { ...current, ...partial };
         if (partial.keys !== undefined) {
           next.defaultKeys = current.defaultKeys;
         }
         this.discoveryInternal.set(stored.id, next);
         this.discoveryRevision$.next();
+        const currResolved = this.resolveDiscoveryKeys(next);
+        if (!keysEqual(prevResolved, currResolved)) {
+          this.tryDiscoveryEffectiveBinding(next, currResolved);
+        }
       },
       unregister: () => {
         if (!this.discoveryInternal.delete(stored.id)) {
@@ -284,6 +296,34 @@ export class HotkeysService {
     };
   }
 
+  private resolveDiscoveryKeys(def: HotkeyDefinition): HotkeyDefinition['keys'] {
+    const override = this.userOverrides.get(def.id);
+    return override?.keys ?? def.keys;
+  }
+
+  private resolveDiscoveryKeysWithMap(
+    def: HotkeyDefinition,
+    overrides: ReadonlyMap<string, HotkeyOverride>
+  ): HotkeyDefinition['keys'] {
+    return overrides.get(def.id)?.keys ?? def.keys;
+  }
+
+  private tryDiscoveryEffectiveBinding(
+    def: HotkeyDefinition,
+    resolvedKeys: HotkeyDefinition['keys']
+  ): void {
+    const fn = def.onEffectiveBindingChange;
+    if (!fn) {
+      return;
+    }
+    try {
+      fn(resolvedKeys);
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.warn(`HotkeysService: onEffectiveBindingChange failed for "${def.id}"`, error);
+    }
+  }
+
   private applyOverrides(next: ReadonlyMap<string, HotkeyOverride>): void {
     const previous = this.userOverrides;
     this.userOverrides = next;
@@ -294,6 +334,14 @@ export class HotkeysService {
       if (prev !== curr) {
         discoveryAffected = true;
         break;
+      }
+    }
+
+    for (const def of this.discoveryInternal.values()) {
+      const prevR = this.resolveDiscoveryKeysWithMap(def, previous);
+      const currR = this.resolveDiscoveryKeysWithMap(def, next);
+      if (!keysEqual(prevR, currR)) {
+        this.tryDiscoveryEffectiveBinding(def, currR);
       }
     }
 
@@ -349,7 +397,7 @@ export class HotkeysService {
    */
   private registerCheatSheetHotkey({ sidebar }: Pick<CoreStart['chrome'], 'sidebar'>) {
     const handler = () => {
-      return sidebar.getApp('hotkeys').open();
+      return sidebar.getApp<HotkeysSidebarState, HotkeysSidebarActions>(this.hotkeysAppId).open();
     };
 
     this.doRegister(
