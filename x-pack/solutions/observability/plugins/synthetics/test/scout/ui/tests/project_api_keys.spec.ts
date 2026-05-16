@@ -101,7 +101,7 @@ const expectNoLegacyThemeDependency = async ({
 
 const expectVisibleBox = async (target: Locator) => {
   const box = await target.boundingBox();
-  expect(box, "Expected target to have a visible bounding box").not.toBeNull();
+  expect(box, 'Expected target to have a visible bounding box').not.toBeNull();
   expect(box!.width).toBeGreaterThan(0);
   expect(box!.height).toBeGreaterThan(0);
   return box!;
