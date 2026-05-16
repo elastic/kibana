@@ -7,15 +7,15 @@
 
 import React from 'react';
 import { EuiFlexItem } from '@elastic/eui';
-import styled from 'styled-components';
+import { css } from '@emotion/react';
 
 import { AndOrBadge } from '../and_or_badge';
 
-const MyInvisibleAndBadge = styled(EuiFlexItem)`
+const myInvisibleAndBadgeStyles = css`
   visibility: hidden;
 `;
 
-const MyFirstRowContainer = styled(EuiFlexItem)`
+const myFirstRowContainerStyles = css`
   padding-top: 20px;
 `;
 
@@ -30,15 +30,23 @@ export const BuilderAndBadgeComponent = React.memo<BuilderAndBadgeProps>(
 
     if (entriesLength > 1 && exceptionItemIndex === 0) {
       return (
-        <MyFirstRowContainer grow={false} data-test-subj="exceptionItemEntryFirstRowAndBadge">
+        <EuiFlexItem
+          css={myFirstRowContainerStyles}
+          grow={false}
+          data-test-subj="exceptionItemEntryFirstRowAndBadge"
+        >
           {badge}
-        </MyFirstRowContainer>
+        </EuiFlexItem>
       );
     } else if (entriesLength <= 1) {
       return (
-        <MyInvisibleAndBadge grow={false} data-test-subj="exceptionItemEntryInvisibleAndBadge">
+        <EuiFlexItem
+          css={myInvisibleAndBadgeStyles}
+          grow={false}
+          data-test-subj="exceptionItemEntryInvisibleAndBadge"
+        >
           {badge}
-        </MyInvisibleAndBadge>
+        </EuiFlexItem>
       );
     } else {
       return (

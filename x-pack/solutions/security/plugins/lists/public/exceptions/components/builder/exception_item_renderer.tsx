@@ -7,8 +7,8 @@
 
 import type { ElementType } from 'react';
 import React, { useCallback, useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import styled from 'styled-components';
+import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { AutocompleteStart } from '@kbn/kql/public';
 import type { HttpStart } from '@kbn/core/public';
 import type { ExceptionListType, OsTypeArray } from '@kbn/securitysolution-io-ts-list-types';
@@ -30,17 +30,7 @@ import { BuilderEntryDeleteButtonComponent } from './entry_delete_button';
 import { BuilderEntryItem } from './entry_renderer';
 import type { EntryFieldError } from './reducer';
 
-const MyBeautifulLine = styled(EuiFlexItem)`
-  &:after {
-    background: ${({ theme }): string => theme.eui.euiColorLightShade};
-    content: '';
-    width: 2px;
-    height: 40px;
-    margin: 0 15px;
-  }
-`;
-
-const MyOverflowContainer = styled(EuiFlexItem)`
+const myOverflowContainerStyles = css`
   overflow: hidden;
   width: 100%;
 `;
@@ -91,6 +81,17 @@ export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionList
     getExtendedFields,
     showValueListModal,
   }) => {
+    const { euiTheme } = useEuiTheme();
+    const myBeautifulLineStyles = css`
+      &:after {
+        background: ${euiTheme.colors.lightShade};
+        content: '';
+        width: 2px;
+        height: 40px;
+        margin: 0 15px;
+      }
+    `;
+
     const handleEntryChange = useCallback(
       (entry: BuilderEntry, entryIndex: number): void => {
         const updatedEntries: BuilderEntry[] = [
@@ -135,15 +136,17 @@ export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionList
               exceptionItemIndex={exceptionItemIndex}
             />
           )}
-          <MyOverflowContainer grow={6}>
+          <EuiFlexItem css={myOverflowContainerStyles} grow={6}>
             <EuiFlexGroup gutterSize="s" direction="column">
               {entries.map((item, index) => {
                 const key = (item as typeof item & { id?: string }).id ?? `${index}`;
                 return (
                   <EuiFlexItem key={key} grow={1}>
                     <EuiFlexGroup gutterSize="xs" direction="row">
-                      {item.nested === 'child' && <MyBeautifulLine grow={false} />}
-                      <MyOverflowContainer grow={1}>
+                      {item.nested === 'child' && (
+                        <EuiFlexItem css={myBeautifulLineStyles} grow={false} />
+                      )}
+                      <EuiFlexItem css={myOverflowContainerStyles} grow={1}>
                         <BuilderEntryItem
                           allowLargeValueLists={allowLargeValueLists}
                           autocompleteService={autocompleteService}
@@ -166,7 +169,7 @@ export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionList
                           exceptionItemIndex={exceptionItemIndex}
                           showValueListModal={showValueListModal}
                         />
-                      </MyOverflowContainer>
+                      </EuiFlexItem>
                       <BuilderEntryDeleteButtonComponent
                         entries={exceptionItem.entries}
                         entryIndex={item.entryIndex}
@@ -180,7 +183,7 @@ export const BuilderExceptionListItemComponent = React.memo<BuilderExceptionList
                 );
               })}
             </EuiFlexGroup>
-          </MyOverflowContainer>
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
     );

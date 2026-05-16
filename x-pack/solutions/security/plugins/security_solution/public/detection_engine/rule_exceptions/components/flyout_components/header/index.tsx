@@ -6,17 +6,10 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import styled, { css } from 'styled-components';
-
-import { EuiTitle, EuiSpacer, EuiFlyoutHeader } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { EuiTitle, EuiSpacer, EuiFlyoutHeader, useEuiTheme } from '@elastic/eui';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import * as i18n from './translations';
-
-const FlyoutHeader = styled(EuiFlyoutHeader)`
-  ${({ theme }) => css`
-    border-bottom: 1px solid ${theme.eui.euiColorLightShade};
-  `}
-`;
 
 export interface ExceptionFlyoutHeaderProps {
   isEdit?: boolean;
@@ -44,15 +37,19 @@ export const ExceptionFlyoutHeader = memo(function ExceptionFlyoutHeader({
   }, [listType]);
 
   const title = isEdit ? editTitle : addTitle;
+  const { euiTheme } = useEuiTheme();
+  const flyoutHeaderStyles = css`
+    border-bottom: 1px solid ${euiTheme.colors.lightShade};
+  `;
 
   return (
-    <FlyoutHeader>
+    <EuiFlyoutHeader css={flyoutHeaderStyles}>
       <EuiTitle>
         <h2 id={titleId} data-test-subj={dataTestSubjId}>
           {title}
         </h2>
       </EuiTitle>
       <EuiSpacer size="m" />
-    </FlyoutHeader>
+    </EuiFlyoutHeader>
   );
 });

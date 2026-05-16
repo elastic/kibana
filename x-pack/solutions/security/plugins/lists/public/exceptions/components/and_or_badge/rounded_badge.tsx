@@ -7,13 +7,13 @@
 
 import { EuiBadge } from '@elastic/eui';
 import React from 'react';
-import styled from 'styled-components';
+import { css } from '@emotion/react';
 
 import * as i18n from './translations';
 
 import type { AndOr } from '.';
 
-const RoundBadge = styled(EuiBadge)`
+const roundBadgeStyles = css`
   align-items: center;
   border-radius: 100%;
   display: inline-flex;
@@ -31,14 +31,12 @@ const RoundBadge = styled(EuiBadge)`
   .euiBadge__text {
     text-overflow: clip;
   }
-` as unknown as typeof EuiBadge;
-
-RoundBadge.displayName = 'RoundBadge';
+`;
 
 export const RoundedBadge: React.FC<{ type: AndOr }> = ({ type }) => (
-  <RoundBadge data-test-subj="and-or-badge" color="hollow">
+  <EuiBadge css={roundBadgeStyles} data-test-subj="and-or-badge" color="hollow">
     {type === 'and' ? i18n.AND : i18n.OR}
-  </RoundBadge>
+  </EuiBadge>
 );
 
 RoundedBadge.displayName = 'RoundedBadge';

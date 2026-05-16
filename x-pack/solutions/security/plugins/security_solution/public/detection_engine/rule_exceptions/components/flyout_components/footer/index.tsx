@@ -6,17 +6,16 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import styled, { css } from 'styled-components';
-
-import { EuiFlyoutFooter, EuiButton, EuiButtonEmpty, EuiFlexGroup } from '@elastic/eui';
+import { css } from '@emotion/react';
+import {
+  EuiFlyoutFooter,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  useEuiTheme,
+} from '@elastic/eui';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import * as i18n from './translations';
-
-const FlyoutFooterGroup = styled(EuiFlexGroup)`
-  ${({ theme }) => css`
-    padding: ${theme.eui.euiSizeS};
-  `}
-`;
 
 export interface ExceptionFlyoutFooterProps {
   isEdit?: boolean;
@@ -50,10 +49,14 @@ export const ExceptionFlyoutFooter = memo(function ExceptionFlyoutFooter({
   }, [listType]);
 
   const submitButtonMessage = isEdit ? editButtonMessage : addButtonMessage;
+  const { euiTheme } = useEuiTheme();
+  const flyoutFooterGroupStyles = css`
+    padding: ${euiTheme.size.s};
+  `;
 
   return (
     <EuiFlyoutFooter>
-      <FlyoutFooterGroup justifyContent="spaceBetween">
+      <EuiFlexGroup css={flyoutFooterGroupStyles} justifyContent="spaceBetween">
         <EuiButtonEmpty data-test-subj={cancelButtonDataTestSubjId} onClick={handleCloseFlyout}>
           {i18n.CANCEL}
         </EuiButtonEmpty>
@@ -66,7 +69,7 @@ export const ExceptionFlyoutFooter = memo(function ExceptionFlyoutFooter({
         >
           {submitButtonMessage}
         </EuiButton>
-      </FlyoutFooterGroup>
+      </EuiFlexGroup>
     </EuiFlyoutFooter>
   );
 });

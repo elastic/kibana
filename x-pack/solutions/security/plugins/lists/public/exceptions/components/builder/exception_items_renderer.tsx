@@ -8,7 +8,7 @@
 import type { ElementType } from 'react';
 import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import styled from 'styled-components';
+import { css } from '@emotion/react';
 import type { HttpStart } from '@kbn/core/public';
 import { addIdToItem } from '@kbn/securitysolution-utils';
 import type {
@@ -48,17 +48,18 @@ import { BuilderLogicButtons } from './logic_buttons';
 import { getTotalErrorExist } from './selectors';
 import type { EntryFieldError, State } from './reducer';
 import { exceptionsBuilderReducer } from './reducer';
-const MyInvisibleAndBadge = styled(EuiFlexItem)`
+
+const myInvisibleAndBadgeStyles = css`
   visibility: hidden;
 `;
 
-const MyAndBadge = styled(AndOrBadge)`
+const myAndBadgeStyles = css`
   & > .euiFlexItem {
     margin: 0;
   }
 `;
 
-const MyButtonsContainer = styled(EuiFlexItem)`
+const myButtonsContainerStyles = css`
   margin: 8px 0;
 `;
 
@@ -439,17 +440,17 @@ export const ExceptionBuilderComponent = ({
               (andLogicIncluded ? (
                 <EuiFlexItem grow={false}>
                   <EuiFlexGroup gutterSize="none" direction="row">
-                    <MyInvisibleAndBadge grow={false}>
-                      <MyAndBadge includeAntennas type="and" />
-                    </MyInvisibleAndBadge>
+                    <EuiFlexItem css={myInvisibleAndBadgeStyles} grow={false}>
+                      <AndOrBadge css={myAndBadgeStyles} includeAntennas type="and" />
+                    </EuiFlexItem>
                     <EuiFlexItem grow={false}>
-                      <MyAndBadge type="or" />
+                      <AndOrBadge css={myAndBadgeStyles} type="or" />
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiFlexItem>
               ) : (
                 <EuiFlexItem grow={false}>
-                  <MyAndBadge type="or" />
+                  <AndOrBadge css={myAndBadgeStyles} type="or" />
                 </EuiFlexItem>
               ))}
             <EuiFlexItem grow={false}>
@@ -481,12 +482,12 @@ export const ExceptionBuilderComponent = ({
         </EuiFlexItem>
       ))}
 
-      <MyButtonsContainer data-test-subj={`andOrOperatorButtons`}>
+      <EuiFlexItem css={myButtonsContainerStyles} data-test-subj={`andOrOperatorButtons`}>
         <EuiFlexGroup gutterSize="s">
           {andLogicIncluded && (
-            <MyInvisibleAndBadge grow={false}>
+            <EuiFlexItem css={myInvisibleAndBadgeStyles} grow={false}>
               <AndOrBadge includeAntennas type="and" />
-            </MyInvisibleAndBadge>
+            </EuiFlexItem>
           )}
           <EuiFlexItem grow={1}>
             <BuilderLogicButtons
@@ -503,7 +504,7 @@ export const ExceptionBuilderComponent = ({
             />
           </EuiFlexItem>
         </EuiFlexGroup>
-      </MyButtonsContainer>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

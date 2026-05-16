@@ -8,7 +8,7 @@
 import React from 'react';
 
 import type { Sort } from '@kbn/securitysolution-io-ts-list-types';
-import styled from 'styled-components';
+import { css } from '@emotion/react';
 import { EuiContextMenuPanel, EuiContextMenuItem, EuiIcon } from '@elastic/eui';
 
 import {
@@ -82,22 +82,25 @@ export const ExceptionsTableUtilityBar: React.FC<ExceptionsTableUtilityBarProps>
                             })
                           }
                         >
-                          <SortMenuItem>
+                          <div css={sortMenuItemStyles}>
                             {item.label}{' '}
                             {selectedSortField?.field === item.field && (
-                              <SortIcon type={sort.order === 'asc' ? 'sortUp' : 'sortDown'} />
+                              <EuiIcon
+                                css={sortIconStyles}
+                                type={sort.order === 'asc' ? 'sortUp' : 'sortDown'}
+                              />
                             )}
-                          </SortMenuItem>
+                          </div>
                         </EuiContextMenuItem>
                       );
                     })}
                   />
                 )}
               >
-                <SortMenuItem>
+                <div css={sortMenuItemStyles}>
                   {i18n.SORT_BY}{' '}
                   {sortFields?.find((sortField) => sortField.field === sort.field)?.label}
-                </SortMenuItem>
+                </div>
               </UtilityBarAction>
             )}
           </UtilityBarGroup>
@@ -107,12 +110,12 @@ export const ExceptionsTableUtilityBar: React.FC<ExceptionsTableUtilityBarProps>
   );
 };
 
-const SortMenuItem = styled('div')`
+const sortMenuItemStyles = css`
   display: flex;
   align-items: center;
 `;
 
-const SortIcon = styled(EuiIcon)`
+const sortIconStyles = css`
   margin-left: 8px;
 `;
 

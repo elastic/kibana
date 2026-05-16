@@ -7,10 +7,10 @@
 
 import React from 'react';
 import type { FC } from 'react';
-import styled from 'styled-components';
+import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Pagination } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
 
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
 import {
@@ -20,16 +20,11 @@ import {
   UtilityBarText,
 } from '../../../common/components/utility_bar';
 
-const StyledText = styled.span`
-  font-weight: bold;
-  color: ${({ theme }) => theme.eui.euiColorDarkestShade};
-`;
-
-const MyUtilities = styled(EuiFlexGroup)`
+const myUtilitiesStyles = css`
   height: 50px;
 `;
 
-const StyledCondition = styled.span`
+const styledConditionStyles = css`
   display: inline-block !important;
   vertical-align: middle !important;
   line-height: 1;
@@ -50,9 +45,14 @@ const ExceptionsUtilityComponent: FC<ExceptionsUtilityComponentProps> = ({
   lastUpdated,
   exceptionsTitle,
 }) => {
+  const { euiTheme } = useEuiTheme();
+  const styledTextStyles = css`
+    font-weight: bold;
+    color: ${euiTheme.colors.textParagraph};
+  `;
   const { pageSize, totalItemCount } = pagination;
   return (
-    <MyUtilities alignItems="center" justifyContent="spaceBetween">
+    <EuiFlexGroup css={myUtilitiesStyles} alignItems="center" justifyContent="spaceBetween">
       <EuiFlexItem grow={false}>
         <UtilityBar>
           <UtilityBarSection>
@@ -62,15 +62,20 @@ const ExceptionsUtilityComponent: FC<ExceptionsUtilityComponentProps> = ({
                   id="xpack.securitySolution.exceptions.viewer.paginationDetails"
                   defaultMessage="Showing {partOne} of {partTwo}"
                   values={{
-                    partOne: <StyledText>{`1-${Math.min(pageSize, totalItemCount)}`}</StyledText>,
-                    partTwo: <StyledText>{`${totalItemCount}`}</StyledText>,
+                    partOne: (
+                      <span css={styledTextStyles}>{`1-${Math.min(
+                        pageSize,
+                        totalItemCount
+                      )}`}</span>
+                    ),
+                    partTwo: <span css={styledTextStyles}>{`${totalItemCount}`}</span>,
                   }}
                 />
               </UtilityBarText>
               {exceptionsTitle && (
-                <StyledText data-test-subj={`${dataTestSubj}exceptionsTitle`}>
+                <span css={styledTextStyles} data-test-subj={`${dataTestSubj}exceptionsTitle`}>
                   {exceptionsTitle}
-                </StyledText>
+                </span>
               )}
             </UtilityBarGroup>
           </UtilityBarSection>
@@ -83,18 +88,18 @@ const ExceptionsUtilityComponent: FC<ExceptionsUtilityComponentProps> = ({
             defaultMessage="Updated {updated}"
             values={{
               updated: (
-                <StyledCondition>
+                <span css={styledConditionStyles}>
                   <FormattedRelativePreferenceDate
                     value={lastUpdated}
                     tooltipAnchorClassName="eui-textTruncate"
                   />
-                </StyledCondition>
+                </span>
               ),
             }}
           />
         </EuiText>
       </EuiFlexItem>
-    </MyUtilities>
+    </EuiFlexGroup>
   );
 };
 

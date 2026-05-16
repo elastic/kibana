@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiText, EuiButtonGroup, EuiFlexGroup } from '@elastic/eui';
-import styled from 'styled-components';
+import { css } from '@emotion/react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ExceptionsPagination } from '../../utils/types';
@@ -20,20 +20,16 @@ import {
 import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
 import * as i18n from './translations';
 
-const StyledText = styled.span`
+const styledTextStyles = css`
   font-weight: bold;
 `;
 
-const MyUtilities = styled.div`
+const myUtilitiesStyles = css`
   height: 50px;
 `;
 
-const StyledBarGroup = styled(EuiFlexGroup)`
+const styledBarGroupStyles = css`
   align-items: center;
-`;
-
-const PaginationUtilityBarText = styled(UtilityBarText)`
-  align-self: center;
 `;
 
 interface ExceptionsViewerUtilityProps {
@@ -56,29 +52,30 @@ const ExceptionsViewerUtilityComponent: React.FC<ExceptionsViewerUtilityProps> =
   isEndpoint,
 }): JSX.Element => {
   return (
-    <MyUtilities>
+    <div css={myUtilitiesStyles}>
       <UtilityBar>
         <UtilityBarSection>
           <UtilityBarGroup>
-            <PaginationUtilityBarText dataTestSubj="exceptionsShowing">
-              <FormattedMessage
-                id="xpack.securitySolution.exceptions.viewer.paginationDetails"
-                defaultMessage="Showing {partOne} of {partTwo}"
-                values={{
-                  partOne: (
-                    <StyledText>{`${pagination.totalItemCount === 0 ? '0' : '1'}-${Math.min(
-                      pagination.pageSize,
-                      pagination.totalItemCount
-                    )}`}</StyledText>
-                  ),
-                  partTwo: <StyledText>{`${pagination.totalItemCount}`}</StyledText>,
-                }}
-              />
-            </PaginationUtilityBarText>
+            <div css={{ alignSelf: 'center' }}>
+              <UtilityBarText dataTestSubj="exceptionsShowing">
+                <FormattedMessage
+                  id="xpack.securitySolution.exceptions.viewer.paginationDetails"
+                  defaultMessage="Showing {partOne} of {partTwo}"
+                  values={{
+                    partOne: (
+                      <span css={styledTextStyles}>{`${
+                        pagination.totalItemCount === 0 ? '0' : '1'
+                      }-${Math.min(pagination.pageSize, pagination.totalItemCount)}`}</span>
+                    ),
+                    partTwo: <span css={styledTextStyles}>{`${pagination.totalItemCount}`}</span>,
+                  }}
+                />
+              </UtilityBarText>
+            </div>
           </UtilityBarGroup>
         </UtilityBarSection>
         <UtilityBarSection>
-          <StyledBarGroup>
+          <EuiFlexGroup css={styledBarGroupStyles}>
             <UtilityBarText dataTestSubj="lastUpdated">
               <EuiText size="s" data-test-subj="exceptionsViewerLastUpdated">
                 <FormattedMessage
@@ -108,10 +105,10 @@ const ExceptionsViewerUtilityComponent: React.FC<ExceptionsViewerUtilityProps> =
                 type="multi"
               />
             )}
-          </StyledBarGroup>
+          </EuiFlexGroup>
         </UtilityBarSection>
       </UtilityBar>
-    </MyUtilities>
+    </div>
   );
 };
 

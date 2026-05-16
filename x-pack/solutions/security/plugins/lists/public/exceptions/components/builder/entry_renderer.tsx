@@ -19,7 +19,7 @@ import {
   EuiText,
   useEuiPaddingSize,
 } from '@elastic/eui';
-import styled from 'styled-components';
+import { css } from '@emotion/react';
 import type {
   ExceptionListType,
   ListSchema,
@@ -71,7 +71,7 @@ import { getEmptyValue } from '../../../common/empty_value';
 import * as i18n from './translations';
 import type { EntryFieldError } from './reducer';
 
-const FieldFlexItem = styled(EuiFlexItem)`
+const fieldFlexItemStyles = css`
   overflow: hidden;
 `;
 
@@ -553,14 +553,16 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
       className="exceptionItemEntryContainer"
       data-test-subj="exceptionItemEntryContainer"
     >
-      <FieldFlexItem grow={4}>{renderFieldInput(showLabel)}</FieldFlexItem>
+      <EuiFlexItem css={fieldFlexItemStyles} grow={4}>
+        {renderFieldInput(showLabel)}
+      </EuiFlexItem>
       <EuiFlexItem grow={false}>{renderOperatorInput(showLabel)}</EuiFlexItem>
-      <FieldFlexItem grow={5}>
+      <EuiFlexItem css={fieldFlexItemStyles} grow={5}>
         {renderFieldValueInput(
           showLabel,
           entry.nested === 'parent' ? OperatorTypeEnum.EXISTS : entry.operator.type
         )}
-      </FieldFlexItem>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

@@ -16,7 +16,6 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css, cx } from '@emotion/css';
-import styled from 'styled-components';
 import type {
   EntryExists,
   EntryList,
@@ -40,7 +39,7 @@ const OS_LABELS = Object.freeze({
   windows: i18n.OS_WINDOWS,
 });
 
-const EntryValueWrap = styled.span`
+const entryValueWrapStyles = css`
   white-space: pre-wrap;
 `;
 
@@ -61,16 +60,12 @@ const OPERATOR_TYPE_LABELS_EXCLUDED = Object.freeze({
   [ListOperatorTypeEnum.LIST]: i18n.CONDITION_OPERATOR_TYPE_NOT_IN_LIST,
 });
 
-const EuiFlexGroupNested = styled(EuiFlexGroup)`
-  margin-left: ${({ theme }) => theme.eui.euiSizeXL};
-`;
-
-const EuiFlexItemNested = styled(EuiFlexItem)`
+const euiFlexItemNestedStyles = css`
   margin-bottom: 6px !important;
   margin-top: 6px !important;
 `;
 
-const StyledCondition = styled('span')`
+const styledConditionStyles = css`
   margin-right: 6px;
 `;
 
@@ -87,6 +82,9 @@ export const ExceptionItemCardConditions = memo<CriteriaConditionsProps>(
       border: ${euiTheme.border.thin};
     `;
     const panelStyles = cx('eui-xScroll', borderStyles);
+    const euiFlexGroupNestedStyles = css`
+      margin-left: ${euiTheme.size.xl};
+    `;
 
     const osLabel = useMemo(() => {
       if (os != null && os.length > 0) {
@@ -102,7 +100,7 @@ export const ExceptionItemCardConditions = memo<CriteriaConditionsProps>(
       if (type === 'match_any' && Array.isArray(value)) {
         return value.map((currentValue) => (
           <EuiBadge color="hollow">
-            <EntryValueWrap>{currentValue}</EntryValueWrap>
+            <span className={entryValueWrapStyles}>{currentValue}</span>
           </EuiBadge>
         ));
       } else if (type === 'list' && value) {
@@ -113,7 +111,7 @@ export const ExceptionItemCardConditions = memo<CriteriaConditionsProps>(
         );
       }
       // @ts-expect-error upgrade typescript v5.9.3
-      return <EntryValueWrap>{value}</EntryValueWrap> ?? '';
+      return <span className={entryValueWrapStyles}>{value}</span> ?? '';
     };
 
     const getEntryOperator = (type: string, operator: string) => {
@@ -130,7 +128,8 @@ export const ExceptionItemCardConditions = memo<CriteriaConditionsProps>(
             const { field: nestedField, type: nestedType, operator: nestedOperator } = entry;
             const nestedValue = 'value' in entry ? entry.value : '';
             return (
-              <EuiFlexGroupNested
+              <EuiFlexGroup
+                className={euiFlexGroupNestedStyles}
                 data-test-subj={`${dataTestSubj}-nestedCondition`}
                 key={nestedField + nestedType + nestedValue}
                 direction="row"
@@ -138,25 +137,25 @@ export const ExceptionItemCardConditions = memo<CriteriaConditionsProps>(
                 gutterSize="m"
                 responsive={false}
               >
-                <EuiFlexItemNested grow={false}>
+                <EuiFlexItem className={euiFlexItemNestedStyles} grow={false}>
                   <EuiToken iconType="tokenNested" size="s" />
-                </EuiFlexItemNested>
-                <EuiFlexItemNested grow={false}>
+                </EuiFlexItem>
+                <EuiFlexItem className={euiFlexItemNestedStyles} grow={false}>
                   <EuiExpression description={''} value={nestedField} color="subdued" />
-                </EuiFlexItemNested>
-                <EuiFlexItemNested grow={false}>
+                </EuiFlexItem>
+                <EuiFlexItem className={euiFlexItemNestedStyles} grow={false}>
                   <EuiExpression
                     description={getEntryOperator(nestedType, nestedOperator)}
                     value={getEntryValue(nestedType, nestedValue)}
                   />
-                </EuiFlexItemNested>
+                </EuiFlexItem>
                 <ValueWithSpaceWarning value={nestedValue} />
-              </EuiFlexGroupNested>
+              </EuiFlexGroup>
             );
           });
         }
       },
-      [dataTestSubj]
+      [dataTestSubj, euiFlexGroupNestedStyles]
     );
 
     const getValue = useCallback(
@@ -205,7 +204,11 @@ export const ExceptionItemCardConditions = memo<CriteriaConditionsProps>(
               <div className="eui-xScroll">
                 <EuiExpression
                   description={
-                    index === 0 ? '' : <StyledCondition>{i18n.CONDITION_AND}</StyledCondition>
+                    index === 0 ? (
+                      ''
+                    ) : (
+                      <span className={styledConditionStyles}>{i18n.CONDITION_AND}</span>
+                    )
                   }
                   value={field}
                   color={index === 0 ? 'primary' : 'subdued'}

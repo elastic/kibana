@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import styled from 'styled-components';
+import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
@@ -16,13 +16,6 @@ import type { ExceptionListItemIdentifiers } from '../../utils/types';
 import type { RuleReferences } from '../../logic/use_find_references';
 import type { ViewerState } from './reducer';
 import { ExeptionItemsViewerEmptyPrompts } from './empty_viewer_state';
-
-const MyFlexItem = styled(EuiFlexItem)`
-  margin: ${({ theme }) => `${theme.eui.euiSize} 0`};
-  &:first-child {
-    margin: ${({ theme }) => `${theme.eui.euiSizeXS} 0 ${theme.eui.euiSize}`};
-  }
-`;
 
 interface ExceptionItemsViewerProps {
   isReadOnly: boolean;
@@ -47,6 +40,14 @@ const ExceptionItemsViewerComponent: React.FC<ExceptionItemsViewerProps> = ({
   onDeleteException,
   onEditExceptionItem,
 }): JSX.Element => {
+  const { euiTheme } = useEuiTheme();
+  const myFlexItemStyles = css`
+    margin: ${euiTheme.size.base} 0;
+    &:first-child {
+      margin: ${euiTheme.size.xs} 0 ${euiTheme.size.base};
+    }
+  `;
+
   return (
     <>
       {viewerState != null && viewerState !== 'deleting' ? (
@@ -61,7 +62,12 @@ const ExceptionItemsViewerComponent: React.FC<ExceptionItemsViewerProps> = ({
           <EuiFlexItem grow={false} className="eui-yScrollWithShadows">
             <EuiFlexGroup data-test-subj="exceptionsContainer" gutterSize="none" direction="column">
               {exceptions.map((exception) => (
-                <MyFlexItem data-test-subj="exceptionItemContainer" grow={false} key={exception.id}>
+                <EuiFlexItem
+                  css={myFlexItemStyles}
+                  data-test-subj="exceptionItemContainer"
+                  grow={false}
+                  key={exception.id}
+                >
                   <ExceptionItemCard
                     disableActions={disableActions}
                     exceptionItem={exception}
@@ -73,7 +79,7 @@ const ExceptionItemsViewerComponent: React.FC<ExceptionItemsViewerProps> = ({
                     onEditException={onEditExceptionItem}
                     dataTestSubj="exceptionItemsViewerItem"
                   />
-                </MyFlexItem>
+                </EuiFlexItem>
               ))}
             </EuiFlexGroup>
           </EuiFlexItem>

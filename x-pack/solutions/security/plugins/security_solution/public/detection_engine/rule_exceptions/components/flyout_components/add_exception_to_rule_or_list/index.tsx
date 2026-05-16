@@ -7,7 +7,6 @@
 
 import React, { useMemo } from 'react';
 import { EuiTitle, EuiSpacer, EuiPanel } from '@elastic/eui';
-import styled, { css } from 'styled-components';
 import type { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
@@ -26,12 +25,6 @@ interface ExceptionsAddToRulesOrListsComponentProps {
   onRuleSelectionChange: (rulesSelectedToAdd: Rule[]) => void;
   onRadioChange: (radioId: string) => void;
 }
-
-const SectionHeader = styled(EuiTitle)`
-  ${() => css`
-    font-weight: ${({ theme }) => theme.eui.euiFontWeightSemiBold};
-  `}
-`;
 
 const ExceptionsAddToRulesOrListsComponent: React.FC<ExceptionsAddToRulesOrListsComponentProps> = ({
   rules,
@@ -83,9 +76,9 @@ const ExceptionsAddToRulesOrListsComponent: React.FC<ExceptionsAddToRulesOrLists
       hasShadow={false}
       data-test-subj="exceptionItemAddToRuleOrListSection"
     >
-      <SectionHeader size="xs">
+      <EuiTitle size="xs" css={{ fontWeight: 600 }}>
         <h3>{i18n.ADD_TO_LISTS_SECTION_TITLE}</h3>
-      </SectionHeader>
+      </EuiTitle>
       <EuiSpacer size="s" />
       <ExceptionsAddToRulesOptions
         possibleRules={rules}

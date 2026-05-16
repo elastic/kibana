@@ -6,8 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo } from 'react';
-import styled, { css } from 'styled-components';
-
+import { css } from '@emotion/react';
 import { EuiTitle, EuiFormRow, EuiCheckbox, EuiSpacer, EuiText } from '@elastic/eui';
 import type { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
 import type { ExceptionsBuilderReturnExceptionItem } from '@kbn/securitysolution-list-utils';
@@ -19,18 +18,12 @@ import { shouldDisableBulkClose } from './utils';
 import * as i18n from './translations';
 import type { AlertData } from '../../../utils/types';
 
-const FlyoutCheckboxesSection = styled.section`
+const flyoutCheckboxesSectionStyles = css`
   overflow-y: inherit;
   height: auto;
   .euiFlyoutBody__overflowContent {
     padding-top: 0;
   }
-`;
-
-const SectionHeader = styled(EuiTitle)`
-  ${() => css`
-    font-weight: ${({ theme }) => theme.eui.euiFontWeightSemiBold};
-  `}
 `;
 
 interface ExceptionsFlyoutAlertsActionsComponentProps {
@@ -115,10 +108,10 @@ const ExceptionItemsFlyoutAlertsActionsComponent: React.FC<
   ]);
 
   return (
-    <FlyoutCheckboxesSection>
-      <SectionHeader size="xs">
+    <section css={flyoutCheckboxesSectionStyles}>
+      <EuiTitle size="xs" css={{ fontWeight: 600 }}>
         <h3>{i18n.CLOSE_ALERTS_SECTION_TITLE}</h3>
-      </SectionHeader>
+      </EuiTitle>
       <EuiSpacer size="s" />
       {alertData != null && alertStatus !== 'closed' && (
         <EuiFormRow fullWidth>
@@ -155,7 +148,7 @@ const ExceptionItemsFlyoutAlertsActionsComponent: React.FC<
           </EuiText>
         </>
       )}
-    </FlyoutCheckboxesSection>
+    </section>
   );
 };
 

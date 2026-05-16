@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useReducer } from 'react';
-import styled from 'styled-components';
+import { css } from '@emotion/react';
 
 import { EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 
@@ -51,7 +51,7 @@ import { useFindExceptionListReferences } from '../../logic/use_find_references'
 import type { Rule } from '../../../rule_management/logic/types';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
-const StyledText = styled(EuiText)`
+const styledTextStyles = css`
   font-style: italic;
 `;
 
@@ -587,9 +587,9 @@ const ExceptionsViewerComponent = ({
         <>
           {endpointExceptionsMovedCallout}
 
-          <StyledText size="s">
+          <EuiText css={styledTextStyles} size="s">
             {isEndpointSpecified ? i18n.ENDPOINT_EXCEPTIONS_TAB_ABOUT : i18n.EXCEPTIONS_TAB_ABOUT}
-          </StyledText>
+          </EuiText>
           <EuiSpacer size="l" />
           {!STATES_FILTERS_HIDDEN.includes(viewerState) && (
             <>

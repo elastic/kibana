@@ -6,31 +6,31 @@
  */
 import React from 'react';
 import type { FC } from 'react';
-import styled from 'styled-components';
-
-import { EuiIconTip } from '@elastic/eui';
+import { EuiIconTip, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { useValueWithSpaceWarning } from './use_value_with_space_warning';
 interface ValueWithSpaceWarningProps {
   value: string[] | string;
   tooltipIconType?: string;
   tooltipIconText?: string;
 }
-const Container = styled.div`
-  display: inline;
-  margin-left: ${({ theme }) => `${theme.eui.euiSizeXS}`};
-`;
 export const ValueWithSpaceWarning: FC<ValueWithSpaceWarningProps> = ({
   value,
   tooltipIconType = 'info',
   tooltipIconText,
 }) => {
+  const { euiTheme } = useEuiTheme();
+  const containerStyles = css`
+    display: inline;
+    margin-left: ${euiTheme.size.xs};
+  `;
   const { showSpaceWarningIcon, warningText } = useValueWithSpaceWarning({
     value,
     tooltipIconText,
   });
   if (!showSpaceWarningIcon || !value) return null;
   return (
-    <Container>
+    <div css={containerStyles}>
       <EuiIconTip
         content={warningText}
         position="top"
@@ -40,6 +40,6 @@ export const ValueWithSpaceWarning: FC<ValueWithSpaceWarningProps> = ({
         type={tooltipIconType}
         color="warning"
       />
-    </Container>
+    </div>
   );
 };

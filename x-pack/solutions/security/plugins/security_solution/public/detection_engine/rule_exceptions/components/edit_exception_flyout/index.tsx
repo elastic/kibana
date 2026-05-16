@@ -7,7 +7,7 @@
 
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
-import styled, { css } from 'styled-components';
+import { css } from '@emotion/react';
 import {
   EuiHorizontalRule,
   EuiFlyoutBody,
@@ -81,18 +81,10 @@ interface EditExceptionFlyoutProps {
   onConfirm: (arg: boolean) => void;
 }
 
-const FlyoutBodySection = styled(EuiFlyoutBody)`
-  ${() => css`
-    &.builder-section {
-      overflow-y: scroll;
-    }
-  `}
-`;
-
-const SectionHeader = styled(EuiTitle)`
-  ${() => css`
-    font-weight: ${({ theme }) => theme.eui.euiFontWeightSemiBold};
-  `}
+const flyoutBodySectionStyles = css`
+  &.builder-section {
+    overflow-y: scroll;
+  }
 `;
 
 const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
@@ -419,7 +411,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
         titleId={exceptionFlyoutTitleId}
         dataTestSubjId={'exceptionFlyoutTitle'}
       />
-      <FlyoutBodySection className="builder-section">
+      <EuiFlyoutBody css={flyoutBodySectionStyles} className="builder-section">
         {isLoading && <EuiSkeletonText data-test-subj="loadingEditExceptionFlyout" lines={4} />}
         <ExceptionsFlyoutMeta
           exceptionItemName={exceptionItemName}
@@ -463,9 +455,9 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
         <EuiHorizontalRule />
         <ExceptionItemComments
           accordionTitle={
-            <SectionHeader size="xs">
+            <EuiTitle size="xs" css={{ fontWeight: 600 }}>
               <h3>{i18n.COMMENTS_SECTION_TITLE(itemToEdit.comments.length ?? 0)}</h3>
-            </SectionHeader>
+            </EuiTitle>
           }
           exceptionItemComments={itemToEdit.comments}
           newCommentValue={newComment}
@@ -496,7 +488,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
             />
           </>
         )}
-      </FlyoutBodySection>
+      </EuiFlyoutBody>
       <ExceptionFlyoutFooter
         isEdit
         listType={listType}

@@ -9,7 +9,6 @@ import { EuiDatePicker, EuiFieldText, EuiFormRow, EuiSpacer, EuiTitle } from '@e
 import type { Moment } from 'moment';
 import moment from 'moment';
 import React, { useCallback, useState } from 'react';
-import styled, { css } from 'styled-components';
 import * as i18n from './translations';
 
 interface ExceptionItmeExpireTimeProps {
@@ -17,12 +16,6 @@ interface ExceptionItmeExpireTimeProps {
   setExpireTime: (date: Moment | undefined) => void;
   setExpireError: (errorExists: boolean) => void;
 }
-
-const SectionHeader = styled(EuiTitle)`
-  ${() => css`
-    font-weight: ${({ theme }) => theme.eui.euiFontWeightSemiBold};
-  `}
-`;
 
 const ExceptionItemExpireTime: React.FC<ExceptionItmeExpireTimeProps> = ({
   expireTime,
@@ -52,9 +45,9 @@ const ExceptionItemExpireTime: React.FC<ExceptionItmeExpireTimeProps> = ({
 
   return (
     <div>
-      <SectionHeader size="xs">
+      <EuiTitle size="xs" css={{ fontWeight: 600 }}>
         <h3>{i18n.EXCEPTION_EXPIRE_TIME_HEADER}</h3>
-      </SectionHeader>
+      </EuiTitle>
       <EuiSpacer size="s" />
       <EuiFormRow
         error={errors}

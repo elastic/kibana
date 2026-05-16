@@ -14,8 +14,6 @@ import { Provider } from 'react-redux';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import { ExpandableFlyoutProvider } from '@kbn/expandable-flyout';
 import { NavigationProvider } from '@kbn/security-solution-navigation';
-import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import { useDarkMode } from '@kbn/kibana-react-plugin/public';
 import { EntityStoreEuidApiProvider } from '@kbn/entity-store/public';
 import type { StartServices } from '../../../types';
 import { ReactQueryClientProvider } from '../../../common/containers/query_client/query_client_provider';
@@ -25,15 +23,6 @@ import { UpsellingProvider } from '../../../common/components/upselling_provider
 import { DiscoverInTimelineContextProvider } from '../../../common/components/discover_in_timeline/provider';
 import { AssistantProvider } from '../../../assistant/provider';
 import { CaseProvider } from '../../../cases/components/provider/provider';
-
-// The exception builder and its flyout_components still use styled-components and read
-// `theme.eui.*`.  This bridge provides them with a compatible theme context.
-// TODO: remove once the rule_exceptions/components and lists/exceptions/components/builder
-// directories are fully migrated to Emotion — approximately 24 production files remain.
-const StyledComponentsThemeProvider = ({ children }: { children: ReactNode }) => {
-  const darkMode = useDarkMode();
-  return <EuiThemeProvider darkMode={darkMode}>{children}</EuiThemeProvider>;
-};
 
 export const flyoutProviders = ({
   services,
@@ -58,29 +47,27 @@ export const flyoutProviders = ({
 
   return (
     <KibanaContextProvider services={services}>
-      <StyledComponentsThemeProvider>
-        <CellActionsProvider
-          getTriggerCompatibleActions={services.uiActions.getTriggerCompatibleActions}
-        >
-          <NavigationProvider core={services}>
-            <Provider store={store}>
-              <ReactQueryClientProvider>
-                <UserPrivilegesProvider kibanaCapabilities={services.application.capabilities}>
-                  <UpsellingProvider upsellingService={services.upselling}>
-                    <DiscoverInTimelineContextProvider>
-                      <CaseProvider>
-                        <EntityStoreEuidApiProvider>
-                          <AssistantProvider>{flyoutContent}</AssistantProvider>
-                        </EntityStoreEuidApiProvider>
-                      </CaseProvider>
-                    </DiscoverInTimelineContextProvider>
-                  </UpsellingProvider>
-                </UserPrivilegesProvider>
-              </ReactQueryClientProvider>
-            </Provider>
-          </NavigationProvider>
-        </CellActionsProvider>
-      </StyledComponentsThemeProvider>
+      <CellActionsProvider
+        getTriggerCompatibleActions={services.uiActions.getTriggerCompatibleActions}
+      >
+        <NavigationProvider core={services}>
+          <Provider store={store}>
+            <ReactQueryClientProvider>
+              <UserPrivilegesProvider kibanaCapabilities={services.application.capabilities}>
+                <UpsellingProvider upsellingService={services.upselling}>
+                  <DiscoverInTimelineContextProvider>
+                    <CaseProvider>
+                      <EntityStoreEuidApiProvider>
+                        <AssistantProvider>{flyoutContent}</AssistantProvider>
+                      </EntityStoreEuidApiProvider>
+                    </CaseProvider>
+                  </DiscoverInTimelineContextProvider>
+                </UpsellingProvider>
+              </UserPrivilegesProvider>
+            </ReactQueryClientProvider>
+          </Provider>
+        </NavigationProvider>
+      </CellActionsProvider>
     </KibanaContextProvider>
   );
 };

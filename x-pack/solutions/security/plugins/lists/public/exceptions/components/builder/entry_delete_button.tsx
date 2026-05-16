@@ -7,10 +7,10 @@
 
 import React, { useCallback } from 'react';
 import { EuiButtonIcon, EuiFlexItem } from '@elastic/eui';
-import styled from 'styled-components';
+import { css } from '@emotion/react';
 import type { BuilderEntry } from '@kbn/securitysolution-list-utils';
 
-const MyFirstRowContainer = styled(EuiFlexItem)`
+const myFirstRowContainerStyles = css`
   padding-top: 25px;
 `;
 
@@ -51,9 +51,13 @@ export const BuilderEntryDeleteButtonComponent = React.memo<BuilderEntryDeleteBu
       // This logic was added to work around it including the field
       // labels in centering the delete icon for the first row
       return (
-        <MyFirstRowContainer grow={false} data-test-subj="firstRowBuilderDeleteButton">
+        <EuiFlexItem
+          css={myFirstRowContainerStyles}
+          grow={false}
+          data-test-subj="firstRowBuilderDeleteButton"
+        >
           {button}
-        </MyFirstRowContainer>
+        </EuiFlexItem>
       );
     } else {
       return (

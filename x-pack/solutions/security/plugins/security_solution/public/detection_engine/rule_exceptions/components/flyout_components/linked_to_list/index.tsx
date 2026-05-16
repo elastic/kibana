@@ -7,7 +7,6 @@
 
 import React, { useEffect, useState } from 'react';
 import { EuiTitle, EuiSpacer, EuiPanel, EuiInMemoryTable, EuiSkeletonText } from '@elastic/eui';
-import styled, { css } from 'styled-components';
 
 import * as i18n from './translations';
 import type { ExceptionListRuleReferencesSchema } from '../../../../../../common/api/detection_engine/rule_exceptions';
@@ -18,12 +17,6 @@ interface ExceptionsLinkedToListComponentProps {
   errorFetchingReferences: boolean;
   listAndReferences: ExceptionListRuleReferencesSchema[];
 }
-
-const SectionHeader = styled(EuiTitle)`
-  ${() => css`
-    font-weight: ${({ theme }) => theme.eui.euiFontWeightSemiBold};
-  `}
-`;
 
 const ExceptionsLinkedToListsComponent: React.FC<ExceptionsLinkedToListComponentProps> = ({
   isLoadingReferences,
@@ -49,9 +42,9 @@ const ExceptionsLinkedToListsComponent: React.FC<ExceptionsLinkedToListComponent
       hasShadow={false}
       data-test-subj="exceptionItemLinkedToListSection"
     >
-      <SectionHeader size="xs">
+      <EuiTitle size="xs" css={{ fontWeight: 600 }}>
         <h3>{i18n.LINKED_TO_LIST_TITLE}</h3>
-      </SectionHeader>
+      </EuiTitle>
       <EuiSpacer size="s" />
       <EuiInMemoryTable<ExceptionListRuleReferencesSchema>
         tableCaption="Table of exception lists"

@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { EuiTitle, EuiSpacer, EuiInMemoryTable } from '@elastic/eui';
-import styled, { css } from 'styled-components';
 
 import * as i18n from './translations';
 import type { Rule } from '../../../../rule_management/logic/types';
@@ -17,20 +16,18 @@ interface ExceptionsLinkedToRuleComponentProps {
   rule: Rule;
 }
 
-const SectionHeader = styled(EuiTitle)`
-  ${() => css`
-    font-weight: ${({ theme }) => theme.eui.euiFontWeightSemiBold};
-  `}
-`;
-
 const ExceptionsLinkedToRuleComponent: React.FC<ExceptionsLinkedToRuleComponentProps> = ({
   rule,
 }): JSX.Element => {
   return (
     <>
-      <SectionHeader size="xs" data-test-subj="exceptionItemLinkedToRuleSection">
+      <EuiTitle
+        size="xs"
+        css={{ fontWeight: 600 }}
+        data-test-subj="exceptionItemLinkedToRuleSection"
+      >
         <h3>{i18n.LINKED_TO_RULE_TITLE}</h3>
-      </SectionHeader>
+      </EuiTitle>
       <EuiSpacer size="s" />
       <EuiInMemoryTable<Rule>
         tableCaption="Rules table"

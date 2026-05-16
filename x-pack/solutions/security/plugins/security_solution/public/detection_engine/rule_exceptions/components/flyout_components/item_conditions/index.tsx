@@ -25,7 +25,6 @@ import type {
   ExceptionsBuilderReturnExceptionItem,
 } from '@kbn/securitysolution-list-utils';
 import type { DataViewBase } from '@kbn/es-query';
-import styled, { css } from 'styled-components';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import { hasEqlSequenceQuery } from '../../../../../../common/detection_engine/utils';
 import type { Rule } from '../../../../rule_management/logic/types';
@@ -52,12 +51,6 @@ const OS_OPTIONS: Array<EuiComboBoxOptionOption<OsTypeArray>> = [
     value: ['windows', 'macos'],
   },
 ];
-
-const SectionHeader = styled(EuiTitle)`
-  ${() => css`
-    font-weight: ${({ theme }) => theme.eui.euiFontWeightSemiBold};
-  `}
-`;
 
 interface ExceptionsFlyoutConditionsComponentProps {
   /* Exception list item field value for "name" */
@@ -209,9 +202,9 @@ const ExceptionsConditionsComponent: React.FC<ExceptionsFlyoutConditionsComponen
 
   return (
     <>
-      <SectionHeader size="xs">
+      <EuiTitle size="xs" css={{ fontWeight: 600 }}>
         <h3>{i18n.RULE_EXCEPTION_CONDITIONS}</h3>
-      </SectionHeader>
+      </EuiTitle>
       {includesRuleWithEQLSequenceStatement && (
         <>
           <EuiCallOut

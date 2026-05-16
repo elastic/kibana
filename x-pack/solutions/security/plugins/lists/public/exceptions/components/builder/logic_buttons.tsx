@@ -7,11 +7,11 @@
 
 import React from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import styled from 'styled-components';
+import { css } from '@emotion/react';
 
 import * as i18n from './translations';
 
-const MyEuiButton = styled(EuiButton)`
+const myEuiButtonStyles = css`
   min-width: 95px;
 `;
 
@@ -42,7 +42,8 @@ export const BuilderLogicButtons: React.FC<BuilderLogicButtonsProps> = ({
 }) => (
   <EuiFlexGroup gutterSize="s" alignItems="center">
     <EuiFlexItem grow={false}>
-      <MyEuiButton
+      <EuiButton
+        css={myEuiButtonStyles}
         size="s"
         iconType="plusCircle"
         onClick={isNested ? onAddClickWhenNested : onAndClicked}
@@ -50,11 +51,12 @@ export const BuilderLogicButtons: React.FC<BuilderLogicButtonsProps> = ({
         isDisabled={isAndDisabled}
       >
         {i18n.AND}
-      </MyEuiButton>
+      </EuiButton>
     </EuiFlexItem>
     {!isOrHidden && (
       <EuiFlexItem grow={false}>
-        <MyEuiButton
+        <EuiButton
+          css={myEuiButtonStyles}
           fill
           size="s"
           iconType="plusCircle"
@@ -63,7 +65,7 @@ export const BuilderLogicButtons: React.FC<BuilderLogicButtonsProps> = ({
           data-test-subj="exceptionsOrButton"
         >
           {i18n.OR}
-        </MyEuiButton>
+        </EuiButton>
       </EuiFlexItem>
     )}
     {showNestedButton && (
