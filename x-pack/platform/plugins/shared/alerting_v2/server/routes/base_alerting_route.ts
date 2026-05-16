@@ -6,7 +6,12 @@
  */
 
 import Boom from '@hapi/boom';
-import type { IKibanaResponse, RouteConfigOptions, RouteMethod } from '@kbn/core-http-server';
+import type {
+  IKibanaResponse,
+  RouteConfigOptions,
+  RouteMethod,
+  RouteValidatorRequestAndResponses,
+} from '@kbn/core-http-server';
 import type { RouteHandler } from '@kbn/core-di-server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { injectable } from 'inversify';
@@ -56,31 +61,38 @@ export interface AlertingRouteSchemas {
  * Returns `false` when no schemas are declared — matching the contract of
  * Kibana's `RouteConfig['validate']` for routes that intentionally skip
  * validation.
+ *
+ * The return type is widened to `unknown, unknown, unknown` since the
+ * concrete request type narrowing happens via the `KibanaRequest` generic
+ * in each route's constructor — not via the validator config.
  */
-export const computeRouteValidate = (schemas: AlertingRouteSchemas) => {
+export const computeRouteValidate = (
+  schemas: AlertingRouteSchemas
+): RouteValidatorRequestAndResponses<unknown, unknown, unknown> | false => {
   const hasRequestSchemas = Boolean(
     schemas.request && (schemas.request.params || schemas.request.query || schemas.request.body)
   );
   const hasResponseSchemas = Boolean(schemas.response && Object.keys(schemas.response).length > 0);
 
   if (!hasRequestSchemas && !hasResponseSchemas) {
-    return false as const;
+    return false;
   }
 
+  // Always emit `request` (even when empty) — Kibana's
+  // `RouteValidatorRequestAndResponses` requires it, and routes that
+  // declare only response schemas still satisfy the interface this way.
   return {
-    ...(hasRequestSchemas && {
-      request: {
-        ...(schemas.request?.params && {
-          params: buildRouteValidationWithZod(schemas.request.params),
-        }),
-        ...(schemas.request?.query && {
-          query: buildRouteValidationWithZod(schemas.request.query),
-        }),
-        ...(schemas.request?.body && {
-          body: buildRouteValidationWithZod(schemas.request.body),
-        }),
-      },
-    }),
+    request: {
+      ...(schemas.request?.params && {
+        params: buildRouteValidationWithZod(schemas.request.params),
+      }),
+      ...(schemas.request?.query && {
+        query: buildRouteValidationWithZod(schemas.request.query),
+      }),
+      ...(schemas.request?.body && {
+        body: buildRouteValidationWithZod(schemas.request.body),
+      }),
+    },
     ...(hasResponseSchemas && { response: schemas.response }),
   };
 };

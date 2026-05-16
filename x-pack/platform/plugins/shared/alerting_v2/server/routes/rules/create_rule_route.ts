@@ -8,8 +8,11 @@
 import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
 import { inject, injectable } from 'inversify';
 import { Request } from '@kbn/core-di-server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
-import { createRuleDataSchema, ruleResponseSchema } from '@kbn/alerting-v2-schemas';
+import {
+  createRuleDataSchema,
+  errorResponseSchema,
+  ruleResponseSchema,
+} from '@kbn/alerting-v2-schemas';
 import type { CreateRuleData, RuleResponse } from '@kbn/alerting-v2-schemas';
 import { RulesClient } from '../../lib/rules_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
@@ -31,9 +34,9 @@ export class CreateRuleRoute extends BaseAlertingRoute {
     description:
       'Creates a rule with a server-generated identifier. To create or replace a rule with a client-supplied identifier, use PUT /api/alerting/v2/rules/.',
   } as const;
-  static validate = {
+  static schemas = {
     request: {
-      body: buildRouteValidationWithZod(createRuleDataSchema),
+      body: createRuleDataSchema,
     },
     response: {
       201: {
@@ -41,6 +44,7 @@ export class CreateRuleRoute extends BaseAlertingRoute {
         description: 'Indicates a successful call.',
       },
       400: {
+        body: () => errorResponseSchema,
         description: 'Indicates an invalid schema or parameters.',
       },
     },

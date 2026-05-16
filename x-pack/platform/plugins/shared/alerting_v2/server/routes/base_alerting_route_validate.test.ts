@@ -62,7 +62,7 @@ describe('computeRouteValidate', () => {
     expect(typeof validate.request?.body).toBe('function');
   });
 
-  it('omits the request key when only response schemas are declared', () => {
+  it('emits an empty request key when only response schemas are declared', () => {
     const validate = computeRouteValidate({
       response: { 200: { description: 'OK' } },
     });
@@ -71,7 +71,10 @@ describe('computeRouteValidate', () => {
       throw new Error('expected validate to be an object');
     }
 
-    expect(validate.request).toBeUndefined();
+    // Kibana's `RouteValidatorRequestAndResponses` requires `request` even
+    // when no request fields are validated — we emit an empty object so
+    // response-only routes still type-check.
+    expect(validate.request).toEqual({});
     expect(validate.response).toBeDefined();
   });
 });
