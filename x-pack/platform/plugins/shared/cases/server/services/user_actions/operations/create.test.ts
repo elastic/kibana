@@ -6,6 +6,7 @@
  */
 
 import { CASE_USER_ACTION_SAVED_OBJECT } from '../../../../common/constants';
+import { V2_NOOP_ACTIVITY_WRITER } from '../../../cases_analytics_v2';
 import { createSavedObjectsSerializerMock } from '../../../client/mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -72,6 +73,7 @@ describe('UserActionPersister', () => {
       unsecuredSavedObjectsClient,
       savedObjectsSerializer,
       auditLogger: auditMockLocker,
+      analyticsV2ActivityWriter: V2_NOOP_ACTIVITY_WRITER,
     });
   });
 

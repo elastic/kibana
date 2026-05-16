@@ -215,7 +215,7 @@ export const makeDataViewWithRuntime = (
     () =>
       ({
         id,
-        title: '.cases',
+        title: '.cases,.cases-activity',
         runtimeFieldMap: { ...dv.__runtimeFieldMap },
       } as DataViewSpec)
   );
