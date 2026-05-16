@@ -52,7 +52,7 @@ import {
   useRuntimeStateManager,
 } from '../../state_management/redux';
 import type { DiscoverAppState } from '../../state_management/redux';
-import { useCurrentTabViewActions } from '../../hooks/use_current_tab_view_actions';
+import { useCurrentTabMenuActions } from '../../hooks/use_current_tab_menu_actions';
 import { useDataState } from '../../hooks/use_data_state';
 import { TransferAction } from '../../../../plugin_imports/embeddable_editor_service';
 
@@ -104,7 +104,7 @@ export const useTopNavLinks = ({
   const totalHits$ = dataStateContainer.data$.totalHits$;
   const totalHitsState = useDataState(totalHits$);
   const { canSwitchLanguageMode, isDataViewMode, openInspector, switchLanguageMode } =
-    useCurrentTabViewActions({ currentDataView });
+    useCurrentTabMenuActions({ currentDataView });
 
   const getAuthorizedWriteConsumerIds = (ruleTypes: RuleTypeWithDescription[]): string[] =>
     ruleTypes

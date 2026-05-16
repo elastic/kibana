@@ -23,11 +23,11 @@ import {
   useInternalStateSelector,
 } from '../state_management/redux';
 
-interface UseCurrentTabViewActionsParams {
+interface UseCurrentTabMenuActionsParams {
   currentDataView: DataView | undefined;
 }
 
-export const useCurrentTabViewActions = ({ currentDataView }: UseCurrentTabViewActionsParams) => {
+export const useCurrentTabMenuActions = ({ currentDataView }: UseCurrentTabMenuActionsParams) => {
   const services = useDiscoverServices();
   const dispatch = useInternalStateDispatch();
   const currentTab = useCurrentTabSelector((tab) => tab);

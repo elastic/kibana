@@ -15,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { useInternalStateSelector, selectAllTabs } from '../../state_management/redux';
 import { useTopNavMenuItems } from '../top_nav/use_top_nav_menu_items';
-import { useCurrentTabViewActions } from '../../hooks/use_current_tab_view_actions';
+import { useCurrentTabMenuActions } from '../../hooks/use_current_tab_menu_actions';
 
 const APP_MENU_COLLAPSE_THRESHOLD = 800;
 
@@ -36,7 +36,7 @@ export const useAppMenuData = ({ currentDataView }: UseAppMenuDataParams): UseAp
   const currentTabId = useInternalStateSelector((state) => state.tabs.unsafeCurrentId);
   const [shouldCollapseAppMenu, setShouldCollapseAppMenu] = useState(false);
   const { canSwitchLanguageMode, isDataViewMode, openInspector, switchLanguageMode } =
-    useCurrentTabViewActions({ currentDataView });
+    useCurrentTabMenuActions({ currentDataView });
 
   const onResize: EuiResizeObserverProps['onResize'] = useCallback((dimensions) => {
     if (!dimensions) return;
