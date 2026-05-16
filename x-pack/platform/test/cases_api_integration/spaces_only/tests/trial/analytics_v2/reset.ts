@@ -52,7 +52,6 @@ export default ({ getService }: FtrProviderContext): void => {
         .set(INTERNAL_HEADERS)
         .expect(202);
 
-      expect(response.body.reset).to.eql(CASE_INDEX);
       expect(response.body.reset_task).to.have.property('id', 'cases-analyticsV2-reset');
       expect(response.body.reset_task).to.have.property(
         'task_type',

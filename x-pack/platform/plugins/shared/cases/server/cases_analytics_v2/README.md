@@ -383,7 +383,6 @@ suspect the primary write path dropped a case. **Requires
 POST /internal/cases/_analyticsV2/reset
 → 202 Accepted
 {
-  "reset": ".cases",
   "data_views_deleted": 12,
   "reset_task": {
     "id": "cases-analyticsV2-reset",

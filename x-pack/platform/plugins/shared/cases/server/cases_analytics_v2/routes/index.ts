@@ -489,7 +489,6 @@ export const registerCasesAnalyticsV2Routes = ({
           // progress and completion surface.
           statusCode: 202,
           body: {
-            reset: CASE_INDEX_NAME,
             data_views_deleted: deletedDataViews,
             // The reset task ID and scheduled-at give the administrator
             // everything they need to poll `/state.active_reset` and

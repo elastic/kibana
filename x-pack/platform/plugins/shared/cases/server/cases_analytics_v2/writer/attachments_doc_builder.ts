@@ -317,13 +317,25 @@ function extractCurated(
   if (Object.keys(alert).length > 0) out.alert = alert;
 
   // ----- Endpoint / actions subtype -----
-  // Legacy carries `actions.type` at the top level; unified value
-  // attachments carry it under `data.actions.type`.
+  // Three places to look, in priority order:
+  //   1. Unified `metadata.actionType` — this is where the unified
+  //      `security.endpoint` SO stores it (matches the indexed field
+  //      on the new `cases-attachments` SO mapping).
+  //   2. Unified `data.actions.type` — older draft of the unified
+  //      shape used during migration design; kept as a fallback in
+  //      case any plugin-registered subtype carries it that way.
+  //   3. Legacy `attributes.actions.type` — top-level on the
+  //      `cases-comments` SO for the `actions` subtype.
+  const unifiedMetadataActionType = (
+    unified as unknown as { metadata?: { actionType?: unknown } }
+  ).metadata?.actionType;
   const unifiedActions = (unified as unknown as { data?: { actions?: { type?: unknown } } }).data
     ?.actions;
   const legacyActions = (source as unknown as { actions?: { type?: unknown } }).actions;
   const actionsType =
-    typeof unifiedActions?.type === 'string'
+    typeof unifiedMetadataActionType === 'string'
+      ? unifiedMetadataActionType
+      : typeof unifiedActions?.type === 'string'
       ? unifiedActions.type
       : typeof legacyActions?.type === 'string'
       ? legacyActions.type

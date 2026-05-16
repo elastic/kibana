@@ -196,8 +196,10 @@ const FIXTURES = {
     externalReferenceStorage: { type: 'savedObject', soType: 'cases-files' },
     externalReferenceMetadata: { filename: 'evidence.pdf', mimeType: 'application/pdf' },
   } as unknown as Partial<AttachmentPersistedAttributes>),
+  // Distinct unified subtype from `actions_unified` so neither fixture
+  // shares a `type` value — keeps each Layer 2 assertion unambiguous.
   externalReference_unified: makeUnifiedSO('extref-unified', {
-    type: 'security.endpoint',
+    type: 'files',
     attachmentId: 'file-1',
     metadata: { filename: 'evidence.pdf', mimeType: 'application/pdf' },
   } as unknown as Partial<UnifiedAttachmentAttributes>),
@@ -264,6 +266,18 @@ describe('per-subtype curated extracts', () => {
     expect(doc.attachment.comment).toBe('Isolating endpoint');
   });
 
+  it('actions (unified): populates attachment.actions.type from metadata.actionType', () => {
+    // The unified `security.endpoint` SO carries the action type as
+    // `metadata.actionType` (matches the indexed field on the
+    // `cases-attachments` SO mapping). Pinning the extract here so a
+    // regression that drops the unified-path read silently degrades
+    // post-migration analytics fails this assertion immediately
+    // instead of leaving the column unpopulated in the index.
+    const doc = buildAttachmentDoc(FIXTURES.actions_unified);
+    expect(doc.attachment.actions?.type).toBe('isolate');
+    expect(doc.attachment.attachment_id).toEqual(['action-1']);
+  });
+
   it('externalReference (legacy): populates external_reference.type_id + storage_type', () => {
     const doc = buildAttachmentDoc(FIXTURES.externalReference_legacy);
     expect(doc.attachment.external_reference?.type_id).toBe('.files');
@@ -277,7 +291,7 @@ describe('per-subtype curated extracts', () => {
     // `type` field; the `external_reference.type_id` curated extract
     // is therefore absent on unified-only fixtures. Track the type via
     // `attachment.type`.
-    expect(doc.attachment.type).toBe('security.endpoint');
+    expect(doc.attachment.type).toBe('files');
     expect(doc.attachment.external_reference).toBeUndefined();
   });
 
