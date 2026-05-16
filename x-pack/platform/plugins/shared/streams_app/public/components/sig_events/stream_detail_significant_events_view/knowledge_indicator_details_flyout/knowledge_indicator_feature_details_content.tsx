@@ -21,6 +21,7 @@ import { upperFirst } from 'lodash';
 import React, { useMemo } from 'react';
 import { InfoPanel } from '../../../info_panel';
 import { getConfidenceColor } from '../utils/get_confidence_color';
+import { FeatureHistoryPanel } from './feature_history_panel';
 
 interface Props {
   feature: Feature;
@@ -81,14 +82,6 @@ export function KnowledgeIndicatorFeatureDetailsContent({ feature }: Props) {
           ) : (
             <EuiText size="s">{EMPTY_VALUE}</EuiText>
           ),
-      },
-      {
-        title: DETAILS_LAST_SEEN_LABEL,
-        description: <EuiText size="s">{feature.last_seen || EMPTY_VALUE}</EuiText>,
-      },
-      {
-        title: DETAILS_EXPIRES_AT_LABEL,
-        description: <EuiText size="s">{feature.expires_at ?? EMPTY_VALUE}</EuiText>,
       },
     ];
   }, [feature]);
@@ -157,6 +150,9 @@ export function KnowledgeIndicatorFeatureDetailsContent({ feature }: Props) {
           </EuiCodeBlock>
         </InfoPanel>
       </EuiFlexItem>
+      <EuiFlexItem data-test-subj="streamsAppFeatureDetailsFlyoutHistory">
+        <FeatureHistoryPanel streamName={feature.stream_name} featureId={feature.id} />
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 }
@@ -197,17 +193,6 @@ const DETAILS_CONFIDENCE_LABEL = i18n.translate(
 const DETAILS_TAGS_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.tagsLabel', {
   defaultMessage: 'Tags',
 });
-
-const DETAILS_LAST_SEEN_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.lastSeenLabel', {
-  defaultMessage: 'Last seen',
-});
-
-const DETAILS_EXPIRES_AT_LABEL = i18n.translate(
-  'xpack.streams.featureDetailsFlyout.expiresAtLabel',
-  {
-    defaultMessage: 'Expires at',
-  }
-);
 
 const DESCRIPTION_LABEL = i18n.translate('xpack.streams.featureDetailsFlyout.descriptionLabel', {
   defaultMessage: 'Description',

@@ -22,7 +22,6 @@ describe('partitionStream features_tool', () => {
   const sampleFeatures: Feature[] = [
     {
       id: 'feature-1',
-      uuid: 'uuid-1',
       stream_name: 'logs',
       type: 'technology',
       title: 'Node.js',
@@ -32,12 +31,9 @@ describe('partitionStream features_tool', () => {
       evidence: ['require statement', 'package.json reference'],
       tags: ['backend', 'javascript'],
       meta: { detected_at: '2024-01-01' },
-      status: 'active',
-      last_seen: '2024-01-15T00:00:00.000Z',
     },
     {
       id: 'feature-2',
-      uuid: 'uuid-2',
       stream_name: 'logs',
       type: 'entity',
       title: 'API Gateway',
@@ -47,8 +43,6 @@ describe('partitionStream features_tool', () => {
       evidence: ['HTTP routing patterns'],
       tags: ['api', 'gateway'],
       meta: {},
-      status: 'stale',
-      last_seen: '2024-01-14T00:00:00.000Z',
     },
   ];
 
@@ -76,7 +70,6 @@ describe('partitionStream features_tool', () => {
     it('should preserve nested properties objects', () => {
       const featureWithComplexProperties: Feature = {
         id: 'feature-3',
-        uuid: 'uuid-3',
         stream_name: 'logs',
         type: 'infrastructure',
         title: 'PostgreSQL',
@@ -92,8 +85,6 @@ describe('partitionStream features_tool', () => {
         evidence: ['connection string'],
         tags: ['database', 'sql'],
         meta: { tables: ['users', 'orders'] },
-        status: 'active',
-        last_seen: '2024-01-15T00:00:00.000Z',
       };
 
       const result = toFeatureForLlmContext(featureWithComplexProperties);

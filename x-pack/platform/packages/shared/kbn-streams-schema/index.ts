@@ -227,7 +227,7 @@ export {
   type BaseFeature,
   type IdentifiedFeature,
   type IgnoredFeature,
-  type FeatureStatus,
+  type FeatureHistoryEntry,
   DATASET_ANALYSIS_FEATURE_TYPE,
   LOG_SAMPLES_FEATURE_TYPE,
   LOG_PATTERNS_FEATURE_TYPE,
@@ -245,7 +245,7 @@ export {
   baseFeatureSchema,
   identifiedFeatureSchema,
   ignoredFeatureSchema,
-  featureStatusSchema,
+  featureHistoryEntrySchema,
 } from './src/feature';
 
 export { FeatureAccumulator } from './src/feature_accumulator';

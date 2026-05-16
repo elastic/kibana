@@ -484,9 +484,9 @@ export async function identifyInferredFeatures({
     );
   }
 
-  const discoveredMap = new Map(discoveredFeatures.map((f) => [f.uuid, f]));
+  const discoveredMap = new Map(discoveredFeatures.map((f) => [f.id, f]));
   for (const feature of allChanged) {
-    discoveredMap.set(feature.uuid, feature);
+    discoveredMap.set(feature.id, feature);
   }
 
   const iterationEntry: IterationResult = {

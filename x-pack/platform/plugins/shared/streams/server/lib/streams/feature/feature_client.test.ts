@@ -5,57 +5,49 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
-import { BulkOperationError, type IStorageClient } from '@kbn/storage-adapter';
 
 jest.mock('timers/promises', () => ({
   setTimeout: jest.fn().mockResolvedValue(undefined),
 }));
+
 import type { Feature } from '@kbn/streams-schema';
-import {
-  STREAM_NAME,
-  FEATURE_ID,
-  FEATURE_UUID,
-  FEATURE_TYPE,
-  FEATURE_SUBTYPE,
-  FEATURE_TITLE,
-  FEATURE_DESCRIPTION,
-  FEATURE_PROPERTIES,
-  FEATURE_CONFIDENCE,
-  FEATURE_EVIDENCE,
-  FEATURE_EVIDENCE_DOC_IDS,
-  FEATURE_STATUS,
-  FEATURE_LAST_SEEN,
-  FEATURE_TAGS,
-  FEATURE_EXPIRES_AT,
-  FEATURE_EXCLUDED_AT,
-  FEATURE_SEARCH_EMBEDDING,
-} from './fields';
+import type { MappingsDefinition } from '@kbn/es-mappings';
+import type { IDataStreamClient } from '@kbn/data-streams';
 import { FeatureClient, buildSearchEmbeddingText } from './feature_client';
-import type { FeatureStorageSettings } from './storage_settings';
-import type { StoredFeature } from './stored_feature';
+import { FEATURES_DATA_STREAM, type StoredFeatureDoc } from './data_stream';
+import { STREAM_NAME, FEATURE_ID, FEATURE_SEARCH_EMBEDDING, FEATURE_DELETED } from './fields';
 
 // ==================== Helpers ====================
 
 const createMockLogger = () => loggerMock.create();
 
-const createMockStorageClient = () => ({
-  search: jest.fn().mockResolvedValue({ hits: { hits: [], total: { value: 0 } } }),
-  bulk: jest.fn().mockResolvedValue({ errors: false, items: [] }),
-  index: jest.fn(),
-  delete: jest.fn().mockResolvedValue({ result: 'deleted', acknowledged: true }),
-  clean: jest.fn(),
-  get: jest.fn(),
-  existsIndex: jest.fn(),
+const createMockDataStreamClient = () =>
+  ({
+    create: jest.fn().mockResolvedValue({ errors: false, items: [] }),
+    search: jest.fn().mockResolvedValue({ hits: { hits: [], total: { value: 0 } } }),
+    exists: jest.fn().mockResolvedValue(true),
+    helpers: { getFieldsFromHit: jest.fn() },
+  } as unknown as IDataStreamClient<MappingsDefinition, StoredFeatureDoc>);
+
+const createMockEsClient = () => ({
+  esql: {
+    query: jest.fn().mockResolvedValue({ columns: [], values: [] }),
+  },
+  search: jest.fn().mockResolvedValue({
+    hits: { hits: [], total: { value: 0 } },
+  }),
 });
 
 const createFeatureClient = ({
-  storageClient = createMockStorageClient(),
+  dataStreamClient = createMockDataStreamClient(),
+  esClient = createMockEsClient(),
   logger = createMockLogger(),
   config,
 }: {
-  storageClient?: ReturnType<typeof createMockStorageClient>;
+  dataStreamClient?: ReturnType<typeof createMockDataStreamClient>;
+  esClient?: ReturnType<typeof createMockEsClient>;
   logger?: ReturnType<typeof createMockLogger>;
   config?: {
     feature_ttl_days: number;
@@ -65,20 +57,17 @@ const createFeatureClient = ({
 } = {}) => {
   const client = new FeatureClient(
     {
-      storageClient: storageClient as unknown as IStorageClient<
-        FeatureStorageSettings,
-        StoredFeature
-      >,
+      dataStreamClient,
+      esClient: esClient as unknown as ElasticsearchClient,
       logger: logger as unknown as Logger,
     },
     config
   );
-  return { client, storageClient, logger };
+  return { client, dataStreamClient, esClient, logger };
 };
 
 const createFeature = (overrides: Partial<Feature> = {}): Feature => ({
   id: 'feat-1',
-  uuid: 'uuid-1',
   stream_name: 'logs.test',
   type: 'service',
   subtype: 'http',
@@ -88,34 +77,14 @@ const createFeature = (overrides: Partial<Feature> = {}): Feature => ({
   confidence: 80,
   evidence: ['evidence-1'],
   evidence_doc_ids: ['doc-1'],
-  status: 'active',
-  last_seen: '2024-01-01T00:00:00.000Z',
   tags: ['tag-a'],
   ...overrides,
 });
 
-const createStoredFeature = (overrides: Partial<StoredFeature> = {}): StoredFeature =>
-  ({
-    [FEATURE_UUID]: 'uuid-1',
-    [FEATURE_ID]: 'feat-1',
-    [STREAM_NAME]: 'logs.test',
-    [FEATURE_TYPE]: 'service',
-    [FEATURE_SUBTYPE]: 'http',
-    [FEATURE_TITLE]: 'HTTP service',
-    [FEATURE_DESCRIPTION]: 'Detected HTTP traffic',
-    [FEATURE_PROPERTIES]: { protocol: 'http' },
-    [FEATURE_CONFIDENCE]: 80,
-    [FEATURE_EVIDENCE]: ['evidence-1'],
-    [FEATURE_EVIDENCE_DOC_IDS]: ['doc-1'],
-    [FEATURE_STATUS]: 'active',
-    [FEATURE_LAST_SEEN]: '2024-01-01T00:00:00.000Z',
-    [FEATURE_TAGS]: ['tag-a'],
-    ...overrides,
-  } as StoredFeature);
-
-const toSearchHit = (doc: StoredFeature) => ({
-  _id: doc[FEATURE_UUID],
-  _source: doc,
+// Simulate the ES|QL _source response for findLatest
+const makeEsqlSourceResponse = (sources: StoredFeatureDoc[]) => ({
+  columns: [{ name: '_source', type: 'keyword' }],
+  values: sources.map((s) => [s]),
 });
 
 // ==================== Tests ====================
@@ -145,203 +114,163 @@ describe('buildSearchEmbeddingText', () => {
 });
 
 describe('FeatureClient', () => {
-  describe('clean()', () => {
-    it('delegates to storageClient.clean()', async () => {
-      const { client, storageClient } = createFeatureClient();
-      await client.clean();
-      expect(storageClient.clean).toHaveBeenCalledTimes(1);
+  describe('getExcludedFeatures()', () => {
+    it('always returns empty (exclusions store not yet implemented)', async () => {
+      const { client } = createFeatureClient();
+      const result = await client.getExcludedFeatures('logs.test');
+      expect(result).toEqual({ hits: [], total: 0 });
     });
   });
 
   describe('getFeatures()', () => {
-    it('returns empty result without hitting storage when stream list is empty', async () => {
-      const { client, storageClient } = createFeatureClient();
+    it('returns empty result without hitting ES when stream list is empty', async () => {
+      const { client, esClient } = createFeatureClient();
       const result = await client.getFeatures([]);
       expect(result).toEqual({ hits: [], total: 0 });
-      expect(storageClient.search).not.toHaveBeenCalled();
+      expect(esClient.esql.query).not.toHaveBeenCalled();
     });
 
-    it('maps stored documents back to Feature shape', async () => {
-      const storageClient = createMockStorageClient();
-      storageClient.search.mockResolvedValue({
-        hits: { hits: [toSearchHit(createStoredFeature())], total: { value: 1 } },
-      });
-      const { client } = createFeatureClient({ storageClient });
+    it('maps ES|QL _source back to Feature shape', async () => {
+      const esClient = createMockEsClient();
+      const storedFeature: StoredFeatureDoc = {
+        '@timestamp': '2024-01-01T00:00:00.000Z',
+        'feature.id': 'feat-1',
+        [STREAM_NAME]: 'logs.test',
+        'feature.type': 'service',
+        'feature.subtype': 'http',
+        'feature.title': 'HTTP service',
+        'feature.description': 'Detected HTTP traffic',
+        'feature.properties': { protocol: 'http' },
+        'feature.confidence': 80,
+        'feature.evidence': ['evidence-1'],
+        'feature.evidence_doc_ids': ['doc-1'],
+        'feature.tags': ['tag-a'],
+      };
+      esClient.esql.query.mockResolvedValue(makeEsqlSourceResponse([storedFeature]));
+      const { client } = createFeatureClient({ esClient });
 
       const result = await client.getFeatures('logs.test');
 
       expect(result.total).toBe(1);
-      expect(result.hits).toEqual([
-        {
-          uuid: 'uuid-1',
-          id: 'feat-1',
-          stream_name: 'logs.test',
-          type: 'service',
-          subtype: 'http',
-          title: 'HTTP service',
-          description: 'Detected HTTP traffic',
-          properties: { protocol: 'http' },
-          confidence: 80,
-          evidence: ['evidence-1'],
-          evidence_doc_ids: ['doc-1'],
-          status: 'active',
-          last_seen: '2024-01-01T00:00:00.000Z',
-          tags: ['tag-a'],
-          meta: undefined,
-          expires_at: undefined,
-          excluded_at: undefined,
-          filter: undefined,
-        },
-      ]);
-    });
-
-    it('filters by stream name(s)', async () => {
-      const { client, storageClient } = createFeatureClient();
-      await client.getFeatures(['logs.a', 'logs.b']);
-
-      const filter = storageClient.search.mock.calls[0][0].query.bool.filter;
-      expect(filter).toContainEqual({ terms: { [STREAM_NAME]: ['logs.a', 'logs.b'] } });
-    });
-
-    it('filters by ids when provided', async () => {
-      const { client, storageClient } = createFeatureClient();
-      await client.getFeatures('logs.test', { id: ['feat-1', 'feat-2'] });
-
-      const filter = storageClient.search.mock.calls[0][0].query.bool.filter;
-      expect(filter).toContainEqual({ terms: { [FEATURE_ID]: ['feat-1', 'feat-2'] } });
-    });
-
-    it('filters by type when provided', async () => {
-      const { client, storageClient } = createFeatureClient();
-      await client.getFeatures('logs.test', { type: ['service', 'host'] });
-
-      const filter = storageClient.search.mock.calls[0][0].query.bool.filter;
-      const typeFilter = filter.find((f: Record<string, unknown>) => {
-        const should = (f?.bool as Record<string, unknown>)?.should as
-          | Array<Record<string, unknown>>
-          | undefined;
-        return should?.some(
-          (s) => (s?.term as Record<string, unknown>)?.[FEATURE_TYPE] !== undefined
-        );
+      expect(result.hits[0]).toMatchObject({
+        id: 'feat-1',
+        stream_name: 'logs.test',
+        type: 'service',
+        confidence: 80,
+        excluded_at: undefined,
       });
-      expect(typeFilter).toBeDefined();
     });
 
-    it('filters by minConfidence when provided', async () => {
-      const { client, storageClient } = createFeatureClient();
-      await client.getFeatures('logs.test', { minConfidence: 50 });
+    it('does not include deleted features', async () => {
+      const esClient = createMockEsClient();
+      // ES|QL query should filter deleted; client returns what ES|QL returns
+      esClient.esql.query.mockResolvedValue(makeEsqlSourceResponse([]));
+      const { client } = createFeatureClient({ esClient });
 
-      const filter = storageClient.search.mock.calls[0][0].query.bool.filter;
-      expect(filter).toContainEqual({ range: { [FEATURE_CONFIDENCE]: { gte: 50 } } });
+      const result = await client.getFeatures('logs.test');
+      expect(result.hits).toHaveLength(0);
     });
 
-    it('excludes expired and excluded features by default', async () => {
-      const { client, storageClient } = createFeatureClient();
+    it('applies the tombstone filter AFTER the latest-per-group reduction', async () => {
+      // The tombstone exclusion MUST run post-grouping. Applying it pre-grouping
+      // (i.e. before the INLINE STATS reductions) would drop tombstones from the
+      // candidate set and let an older non-deleted revision be re-elected as the
+      // "current" state of an already-deleted feature.
+      const esClient = createMockEsClient();
+      esClient.esql.query.mockResolvedValue({ columns: [], values: [] });
+      const { client } = createFeatureClient({ esClient });
+
       await client.getFeatures('logs.test');
 
-      const filter = storageClient.search.mock.calls[0][0].query.bool.filter;
-      const excludedFilter = filter.find(
-        (f: Record<string, unknown>) =>
-          (f?.bool as Record<string, Record<string, Record<string, string>>>)?.must_not?.exists
-            ?.field === FEATURE_EXCLUDED_AT
-      );
-      expect(excludedFilter).toBeDefined();
-      // Expiry filter is a bool.should clause referencing FEATURE_EXPIRES_AT
-      const expiredFilter = filter.find((f: Record<string, unknown>) =>
-        JSON.stringify(f).includes(FEATURE_EXPIRES_AT)
-      );
-      expect(expiredFilter).toBeDefined();
+      expect(esClient.esql.query).toHaveBeenCalledTimes(1);
+      const queryStr = (esClient.esql.query as jest.Mock).mock.calls[0][0].query as string;
+
+      expect(queryStr).toMatch(/feature\.deleted.*IS NULL.*feature\.deleted.*==\s*false/is);
+
+      const lastInlineStatsIdx = queryStr.lastIndexOf('INLINE STATS');
+      const firstFeatureDeletedIdx = queryStr.indexOf('feature.deleted');
+      expect(lastInlineStatsIdx).toBeGreaterThan(-1);
+      expect(firstFeatureDeletedIdx).toBeGreaterThan(lastInlineStatsIdx);
     });
 
-    it('does not apply expiry filter when includeExpired=true', async () => {
-      const { client, storageClient } = createFeatureClient();
+    it('applies the freshness filter AFTER the latest-per-group reduction by default', async () => {
+      // Replaces the pre-refactor `expires_at >= now` read filter. Computed
+      // dynamically against `@timestamp` of the latest surviving revision so
+      // that re-emitting a feature slides it back inside the TTL window and
+      // features the LLM stops producing age out without a stored expiry.
+      const esClient = createMockEsClient();
+      esClient.esql.query.mockResolvedValue({ columns: [], values: [] });
+      const { client } = createFeatureClient({ esClient });
+
+      await client.getFeatures('logs.test');
+
+      const queryStr = (esClient.esql.query as jest.Mock).mock.calls[0][0].query as string;
+
+      expect(queryStr).toMatch(/@timestamp\s*>=\s*TO_DATETIME\(/);
+
+      const lastInlineStatsIdx = queryStr.lastIndexOf('INLINE STATS');
+      const freshnessIdx = queryStr.search(/@timestamp\s*>=\s*TO_DATETIME\(/);
+      expect(freshnessIdx).toBeGreaterThan(lastInlineStatsIdx);
+    });
+
+    it('omits the freshness filter when includeExpired is true', async () => {
+      const esClient = createMockEsClient();
+      esClient.esql.query.mockResolvedValue({ columns: [], values: [] });
+      const { client } = createFeatureClient({ esClient });
+
       await client.getFeatures('logs.test', { includeExpired: true });
 
-      const filter = storageClient.search.mock.calls[0][0].query.bool.filter;
-      const expiredFilter = filter.find((f: Record<string, unknown>) =>
-        JSON.stringify(f).includes(FEATURE_EXPIRES_AT)
-      );
-      expect(expiredFilter).toBeUndefined();
+      const queryStr = (esClient.esql.query as jest.Mock).mock.calls[0][0].query as string;
+      expect(queryStr).not.toMatch(/@timestamp\s*>=\s*TO_DATETIME\(/);
+      // Tombstone filter must still be present.
+      expect(queryStr).toMatch(/feature\.deleted.*IS NULL.*feature\.deleted.*==\s*false/is);
     });
 
-    it('does not apply excluded filter when includeExcluded=true', async () => {
-      const { client, storageClient } = createFeatureClient();
-      await client.getFeatures('logs.test', { includeExcluded: true });
+    it('computes the freshness cutoff from the configured feature_ttl_days', async () => {
+      const esClient = createMockEsClient();
+      esClient.esql.query.mockResolvedValue({ columns: [], values: [] });
+      const { client } = createFeatureClient({
+        esClient,
+        config: { feature_ttl_days: 7, semantic_min_score: 0.5, rrf_rank_constant: 60 },
+      });
 
-      const filter = storageClient.search.mock.calls[0][0].query.bool.filter;
-      const excludedFilter = filter.find(
-        (f: Record<string, unknown>) =>
-          (f?.bool as Record<string, Record<string, Record<string, string>>>)?.must_not?.exists
-            ?.field === FEATURE_EXCLUDED_AT
-      );
-      expect(excludedFilter).toBeUndefined();
-    });
-
-    it('sorts by confidence descending', async () => {
-      const { client, storageClient } = createFeatureClient();
+      const before = Date.now();
       await client.getFeatures('logs.test');
+      const after = Date.now();
 
-      const sort = storageClient.search.mock.calls[0][0].sort;
-      expect(sort).toEqual([{ [FEATURE_CONFIDENCE]: { order: 'desc' } }]);
+      const queryStr = (esClient.esql.query as jest.Mock).mock.calls[0][0].query as string;
+      const match = queryStr.match(/TO_DATETIME\("([^"]+)"\)/);
+      expect(match).not.toBeNull();
+      const cutoffMs = Date.parse(match![1]);
+
+      const ttlMs = 7 * 24 * 60 * 60 * 1000;
+      // Allow for the cutoff being computed anywhere between `before - ttl` and
+      // `after - ttl` — both bounds inclusive.
+      expect(cutoffMs).toBeGreaterThanOrEqual(before - ttlMs);
+      expect(cutoffMs).toBeLessThanOrEqual(after - ttlMs);
     });
   });
 
   describe('getFeature()', () => {
-    it('returns the mapped feature when found and stream matches', async () => {
-      const storageClient = createMockStorageClient();
-      storageClient.get.mockResolvedValue({ _source: createStoredFeature() });
-      const { client } = createFeatureClient({ storageClient });
+    it('bypasses the freshness filter (direct id lookup)', async () => {
+      // Matches the pre-refactor `storageClient.get({ id })` behavior: a direct
+      // lookup by id should return the feature regardless of expiry.
+      const esClient = createMockEsClient();
+      esClient.esql.query.mockResolvedValue(
+        makeEsqlSourceResponse([
+          { 'feature.id': 'feat-1', 'stream.name': 'logs.test' } as StoredFeatureDoc,
+        ])
+      );
+      const { client } = createFeatureClient({ esClient });
 
-      const feature = await client.getFeature('logs.test', 'uuid-1');
+      await client.getFeature('logs.test', 'feat-1');
 
-      expect(feature.uuid).toBe('uuid-1');
-      expect(feature.stream_name).toBe('logs.test');
-    });
-
-    it('throws 404 when storage reports the document is missing', async () => {
-      const storageClient = createMockStorageClient();
-      const notFound = Object.assign(new Error('not found'), { statusCode: 404 });
-      storageClient.get.mockRejectedValue(notFound);
-      const { client } = createFeatureClient({ storageClient });
-
-      await expect(client.getFeature('logs.test', 'uuid-1')).rejects.toMatchObject({
-        statusCode: 404,
-      });
-    });
-
-    it('throws 404 when the stored feature belongs to a different stream', async () => {
-      const storageClient = createMockStorageClient();
-      storageClient.get.mockResolvedValue({
-        _source: createStoredFeature({ [STREAM_NAME]: 'logs.other' }),
-      });
-      const { client } = createFeatureClient({ storageClient });
-
-      await expect(client.getFeature('logs.test', 'uuid-1')).rejects.toMatchObject({
-        statusCode: 404,
-      });
+      const queryStr = (esClient.esql.query as jest.Mock).mock.calls[0][0].query as string;
+      expect(queryStr).not.toMatch(/@timestamp\s*>=\s*TO_DATETIME\(/);
     });
   });
 
-  describe('getExcludedFeatures()', () => {
-    it('filters by stream and requires excluded_at to exist', async () => {
-      const { client, storageClient } = createFeatureClient();
-      await client.getExcludedFeatures('logs.test');
-
-      const filter = storageClient.search.mock.calls[0][0].query.bool.filter;
-      expect(filter).toContainEqual({ term: { [STREAM_NAME]: 'logs.test' } });
-      expect(filter).toContainEqual({ exists: { field: FEATURE_EXCLUDED_AT } });
-    });
-
-    it('sorts by excluded_at descending', async () => {
-      const { client, storageClient } = createFeatureClient();
-      await client.getExcludedFeatures('logs.test');
-
-      const sort = storageClient.search.mock.calls[0][0].sort;
-      expect(sort).toEqual([{ [FEATURE_EXCLUDED_AT]: { order: 'desc' } }]);
-    });
-  });
-
-  describe('bulk()', () => {
+  describe('bulk() — index', () => {
     it('throws StatusError 400 when an indexed feature has an incomplete filter', async () => {
       const { client } = createFeatureClient();
 
@@ -361,134 +290,442 @@ describe('FeatureClient', () => {
       });
     });
 
-    it('passes index operations through to storage with throwOnFail and stable _id', async () => {
-      const { client, storageClient } = createFeatureClient();
+    it('appends a revision document via dataStreamClient.create on index op', async () => {
+      const { client, dataStreamClient } = createFeatureClient();
 
       await client.bulk('logs.test', [{ index: { feature: createFeature() } }]);
 
-      const call = storageClient.bulk.mock.calls[0][0];
-      expect(call.throwOnFail).toBe(true);
-      expect(call.operations).toHaveLength(1);
-      const op = call.operations[0];
-      expect(op.index._id).toBe('uuid-1');
-      expect(op.index.document[STREAM_NAME]).toBe('logs.test');
-      expect(op.index.document[FEATURE_UUID]).toBe('uuid-1');
+      expect(dataStreamClient.create).toHaveBeenCalledTimes(1);
+      const call = (dataStreamClient.create as jest.Mock).mock.calls[0][0];
+      expect(call.space).toBeUndefined();
+      expect(call.documents).toHaveLength(1);
+      const doc = call.documents[0];
+      expect(doc[FEATURE_ID]).toBe('feat-1');
+      expect(doc[STREAM_NAME]).toBe('logs.test');
+      expect(doc['@timestamp']).toEqual(expect.any(String));
     });
 
-    it('translates a delete operation into a storage delete (when the feature exists in the stream)', async () => {
-      const storageClient = createMockStorageClient();
-      storageClient.search.mockResolvedValueOnce({
-        hits: { hits: [{ _id: 'uuid-1', _source: createStoredFeature() }] },
-      });
-      const { client } = createFeatureClient({ storageClient });
+    it('includes the embedding field on the first attempt', async () => {
+      const { client, dataStreamClient } = createFeatureClient();
 
-      await client.bulk('logs.test', [{ delete: { id: 'uuid-1' } }]);
+      await client.bulk('logs.test', [{ index: { feature: createFeature() } }]);
 
-      const call = storageClient.bulk.mock.calls[0][0];
-      expect(call.operations).toEqual([{ delete: { _id: 'uuid-1' } }]);
+      const doc = (dataStreamClient.create as jest.Mock).mock.calls[0][0].documents[0];
+      expect(doc[FEATURE_SEARCH_EMBEDDING]).toEqual(expect.any(String));
     });
 
-    it('drops delete/exclude/restore operations whose target does not belong to the stream', async () => {
-      const storageClient = createMockStorageClient();
-      storageClient.search.mockResolvedValueOnce({ hits: { hits: [] } });
-      const { client } = createFeatureClient({ storageClient });
+    it('returns applied count equal to number of documents written', async () => {
+      const { client } = createFeatureClient();
 
       const result = await client.bulk('logs.test', [
-        { delete: { id: 'uuid-missing' } },
-        { exclude: { id: 'uuid-missing' } },
-        { restore: { id: 'uuid-missing' } },
+        { index: { feature: createFeature({ id: 'feat-a' }) } },
+        { index: { feature: createFeature({ id: 'feat-b' }) } },
       ]);
 
-      expect(result).toEqual({ applied: 0, skipped: 3 });
-      expect(storageClient.bulk).not.toHaveBeenCalled();
+      expect(result.applied).toBe(2);
+      expect(result.skipped).toBe(0);
     });
+  });
 
-    it('skips exclude/restore for computed features (server protects type invariants)', async () => {
-      const storageClient = createMockStorageClient();
-      const computed = createStoredFeature({ [FEATURE_TYPE]: 'log_patterns' });
-      storageClient.search.mockResolvedValueOnce({
-        hits: { hits: [{ _id: 'uuid-1', _source: computed }] },
-      });
-      const { client } = createFeatureClient({ storageClient });
+  describe('bulk() — delete', () => {
+    it('appends a tombstone document (deleted=true) on delete op', async () => {
+      const { client, dataStreamClient } = createFeatureClient();
+
+      await client.bulk('logs.test', [{ delete: { id: 'feat-1' } }]);
+
+      const call = (dataStreamClient.create as jest.Mock).mock.calls[0][0];
+      expect(call.documents).toHaveLength(1);
+      const doc = call.documents[0];
+      expect(doc[FEATURE_DELETED]).toBe(true);
+      expect(doc[FEATURE_ID]).toBe('feat-1');
+      expect(doc[STREAM_NAME]).toBe('logs.test');
+    });
+  });
+
+  describe('bulk() — exclude / restore (noops)', () => {
+    it('counts exclude ops as skipped without calling dataStreamClient', async () => {
+      const { client, dataStreamClient } = createFeatureClient();
 
       const result = await client.bulk('logs.test', [{ exclude: { id: 'uuid-1' } }]);
 
       expect(result).toEqual({ applied: 0, skipped: 1 });
-      expect(storageClient.bulk).not.toHaveBeenCalled();
+      expect(dataStreamClient.create).not.toHaveBeenCalled();
     });
 
-    it('translates exclude into an index op that stamps excluded_at on a non-computed feature', async () => {
-      const storageClient = createMockStorageClient();
-      storageClient.search.mockResolvedValueOnce({
-        hits: { hits: [{ _id: 'uuid-1', _source: createStoredFeature() }] },
-      });
-      const { client } = createFeatureClient({ storageClient });
+    it('counts restore ops as skipped without calling dataStreamClient', async () => {
+      const { client, dataStreamClient } = createFeatureClient();
+
+      const result = await client.bulk('logs.test', [{ restore: { id: 'uuid-1' } }]);
+
+      expect(result).toEqual({ applied: 0, skipped: 1 });
+      expect(dataStreamClient.create).not.toHaveBeenCalled();
+    });
+
+    it('logs a debug message for excluded/restored ops', async () => {
+      const { client, logger } = createFeatureClient();
 
       await client.bulk('logs.test', [{ exclude: { id: 'uuid-1' } }]);
 
-      const call = storageClient.bulk.mock.calls[0][0];
-      expect(call.operations).toHaveLength(1);
-      const op = call.operations[0];
-      expect(op.index).toBeDefined();
-      expect(op.index.document[FEATURE_EXCLUDED_AT]).toEqual(expect.any(String));
+      expect(logger.debug).toHaveBeenCalledWith(
+        expect.stringContaining('Exclusion store not implemented')
+      );
     });
 
-    it('translates restore into an index op that clears excluded_at and refreshes last_seen/expires_at', async () => {
-      const storageClient = createMockStorageClient();
-      const stored = createStoredFeature({ [FEATURE_EXCLUDED_AT]: '2024-01-01T00:00:00.000Z' });
-      storageClient.search.mockResolvedValueOnce({
-        hits: { hits: [{ _id: 'uuid-1', _source: stored }] },
-      });
-      const { client } = createFeatureClient({ storageClient });
+    it('mixes applied (index/delete) and skipped (exclude/restore) in one call', async () => {
+      const { client } = createFeatureClient();
 
-      await client.bulk('logs.test', [{ restore: { id: 'uuid-1' } }]);
+      const result = await client.bulk('logs.test', [
+        { index: { feature: createFeature() } },
+        { delete: { id: 'uuid-2' } },
+        { exclude: { id: 'uuid-3' } },
+        { restore: { id: 'uuid-4' } },
+      ]);
 
-      const call = storageClient.bulk.mock.calls[0][0];
-      expect(call.operations).toHaveLength(1);
-      const op = call.operations[0];
-      expect(op.index.document[FEATURE_EXCLUDED_AT]).toBeUndefined();
-      expect(op.index.document[FEATURE_LAST_SEEN]).toEqual(expect.any(String));
-      expect(op.index.document[FEATURE_EXPIRES_AT]).toEqual(expect.any(String));
+      expect(result.applied).toBe(2); // index + delete each produce a document
+      expect(result.skipped).toBe(2); // exclude + restore
     });
   });
 
-  describe('deleteFeature()', () => {
-    it('looks the feature up via getFeature, then issues a storage delete by uuid', async () => {
-      const storageClient = createMockStorageClient();
-      storageClient.get.mockResolvedValue({ _source: createStoredFeature() });
-      const { client } = createFeatureClient({ storageClient });
+  describe('bulk() — inference fallback', () => {
+    it('retries with embedding after inference error then falls back without embedding', async () => {
+      const dataStreamClient = createMockDataStreamClient();
+      const logger = createMockLogger();
 
-      await client.deleteFeature('logs.test', 'uuid-1');
+      const inferenceErrorResponse = {
+        errors: true,
+        items: [
+          {
+            create: {
+              _index: FEATURES_DATA_STREAM,
+              _id: 'doc-1',
+              status: 500,
+              error: {
+                type: 'exception',
+                reason:
+                  'Exception when running inference id [elser-endpoint] on field [feature.search_embedding]',
+                caused_by: {
+                  type: 'status_exception',
+                  reason: 'Unable to find model deployment task [elser-endpoint]',
+                },
+              },
+            },
+          },
+        ],
+      };
 
-      expect(storageClient.get).toHaveBeenCalledWith({ id: 'uuid-1' });
-      expect(storageClient.delete).toHaveBeenCalledWith({ id: 'uuid-1' });
+      (dataStreamClient.create as jest.Mock)
+        .mockResolvedValueOnce(inferenceErrorResponse)
+        .mockResolvedValueOnce(inferenceErrorResponse)
+        .mockResolvedValueOnce(inferenceErrorResponse)
+        .mockResolvedValueOnce({ errors: false, items: [] });
+
+      const { client } = createFeatureClient({ dataStreamClient, logger });
+
+      await client.bulk('logs.test', [{ index: { feature: createFeature() } }]);
+
+      // 3 attempts with embedding + 1 fallback without
+      expect(dataStreamClient.create).toHaveBeenCalledTimes(4);
+
+      const withEmbedding = (dataStreamClient.create as jest.Mock).mock.calls[0][0].documents[0];
+      expect(withEmbedding[FEATURE_SEARCH_EMBEDDING]).toEqual(expect.any(String));
+
+      const withoutEmbedding = (dataStreamClient.create as jest.Mock).mock.calls[3][0].documents[0];
+      expect(FEATURE_SEARCH_EMBEDDING in withoutEmbedding).toBe(false);
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('falling back to writing without semantic_text embedding')
+      );
+    });
+
+    it('does not retry when create succeeds on the first attempt', async () => {
+      const { client, dataStreamClient } = createFeatureClient();
+
+      await client.bulk('logs.test', [{ index: { feature: createFeature() } }]);
+
+      expect(dataStreamClient.create).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('deleteFeatures()', () => {
-    it('lists every feature for the stream (including excluded/expired) and bulk-deletes them', async () => {
-      const storageClient = createMockStorageClient();
-      const stored = [
-        createStoredFeature({ [FEATURE_UUID]: 'uuid-a' }),
-        createStoredFeature({ [FEATURE_UUID]: 'uuid-b' }),
-      ];
-      storageClient.search.mockResolvedValue({
-        hits: { hits: stored.map(toSearchHit), total: { value: stored.length } },
-      });
-      const { client } = createFeatureClient({ storageClient });
+    it('fetches latest features via ES|QL then appends tombstones', async () => {
+      const esClient = createMockEsClient();
+      esClient.esql.query.mockResolvedValue(
+        makeEsqlSourceResponse([
+          { 'feature.id': 'feat-a', 'stream.name': 'logs.test' } as StoredFeatureDoc,
+          { 'feature.id': 'feat-b', 'stream.name': 'logs.test' } as StoredFeatureDoc,
+        ])
+      );
+
+      const { client, dataStreamClient } = createFeatureClient({ esClient });
 
       await client.deleteFeatures('logs.test');
 
-      const searchArgs = storageClient.search.mock.calls[0][0];
-      expect(
-        searchArgs.query.bool.filter.find(
-          (f: Record<string, unknown>) => (f?.bool as Record<string, unknown>)?.must_not
-        )
-      ).toBeUndefined();
+      expect(dataStreamClient.create).toHaveBeenCalledTimes(1);
+      const docs = (dataStreamClient.create as jest.Mock).mock.calls[0][0].documents;
+      expect(docs).toHaveLength(2);
+      for (const doc of docs) {
+        expect(doc[FEATURE_DELETED]).toBe(true);
+        expect(doc[STREAM_NAME]).toBe('logs.test');
+      }
+      expect(docs.map((d: StoredFeatureDoc) => d[FEATURE_ID])).toEqual(
+        expect.arrayContaining(['feat-a', 'feat-b'])
+      );
+    });
 
-      expect(storageClient.bulk).toHaveBeenCalledWith({
-        operations: [{ delete: { _id: 'uuid-a' } }, { delete: { _id: 'uuid-b' } }],
+    it('does nothing when no features exist for the stream', async () => {
+      const esClient = createMockEsClient();
+      esClient.esql.query.mockResolvedValue({ columns: [], values: [] });
+
+      const { client, dataStreamClient } = createFeatureClient({ esClient });
+
+      await client.deleteFeatures('logs.test');
+
+      expect(dataStreamClient.create).not.toHaveBeenCalled();
+    });
+
+    it('bypasses the freshness filter so expired features are also tombstoned', async () => {
+      const esClient = createMockEsClient();
+      esClient.esql.query.mockResolvedValue({ columns: [], values: [] });
+      const { client } = createFeatureClient({ esClient });
+
+      await client.deleteFeatures('logs.test');
+
+      const queryStr = (esClient.esql.query as jest.Mock).mock.calls[0][0].query as string;
+      expect(queryStr).not.toMatch(/@timestamp\s*>=\s*TO_DATETIME\(/);
+    });
+  });
+
+  describe('getLatestRevisionTimestamp()', () => {
+    it('returns null when no features exist', async () => {
+      const esClient = createMockEsClient();
+      esClient.esql.query.mockResolvedValue(makeEsqlSourceResponse([]));
+      const { client } = createFeatureClient({ esClient });
+
+      const result = await client.getLatestRevisionTimestamp('logs.test');
+      expect(result).toBeNull();
+    });
+
+    it('returns the @timestamp of the latest revision', async () => {
+      const esClient = createMockEsClient();
+      esClient.esql.query.mockResolvedValue(
+        makeEsqlSourceResponse([{ '@timestamp': '2024-06-01T00:00:00.000Z' } as StoredFeatureDoc])
+      );
+      const { client } = createFeatureClient({ esClient });
+
+      const result = await client.getLatestRevisionTimestamp('logs.test', {
+        type: ['entity', 'schema'],
       });
+      expect(result).toEqual({ '@timestamp': '2024-06-01T00:00:00.000Z' });
+    });
+
+    it('bypasses the freshness filter so the caller can see stale streams', async () => {
+      // shouldIdentifyFeatures uses this to decide whether re-identification is
+      // due; a stream whose latest revision aged past the TTL must still report
+      // its timestamp, not appear empty.
+      const esClient = createMockEsClient();
+      esClient.esql.query.mockResolvedValue({ columns: [], values: [] });
+      const { client } = createFeatureClient({ esClient });
+
+      await client.getLatestRevisionTimestamp('logs.test');
+
+      const queryStr = (esClient.esql.query as jest.Mock).mock.calls[0][0].query as string;
+      expect(queryStr).not.toMatch(/@timestamp\s*>=\s*TO_DATETIME\(/);
+    });
+  });
+
+  describe('findFeatures() — query shape per mode', () => {
+    it('returns empty without hitting storage when stream list is empty', async () => {
+      const { client, esClient } = createFeatureClient();
+      const result = await client.findFeatures([], 'http');
+      expect(result).toEqual({ hits: [], total: 0 });
+      expect(esClient.esql.query).not.toHaveBeenCalled();
+    });
+
+    it('short-circuits when phase-1 returns no ids', async () => {
+      const esClient = createMockEsClient();
+      esClient.esql.query.mockResolvedValue({ columns: [], values: [] });
+      const { client } = createFeatureClient({ esClient });
+
+      const result = await client.findFeatures('logs.test', 'http');
+      expect(result).toEqual({ hits: [], total: 0 });
+      expect(esClient.search).not.toHaveBeenCalled();
+    });
+
+    it('keyword mode issues a top-level keyword query (no retriever)', async () => {
+      const esClient = createMockEsClient();
+      esClient.esql.query.mockResolvedValue({
+        columns: [{ name: '_id', type: 'keyword' }],
+        values: [['id-1']],
+      });
+      esClient.search.mockResolvedValue({ hits: { hits: [], total: { value: 0 } } });
+      const { client } = createFeatureClient({ esClient });
+
+      await client.findFeatures('logs.test', 'http', { searchMode: 'keyword' });
+
+      expect(esClient.search).toHaveBeenCalledTimes(1);
+      const args = esClient.search.mock.calls[0][0];
+      expect(args.query).toBeDefined();
+      expect(args.retriever).toBeUndefined();
+    });
+
+    it('semantic mode issues a linear retriever with embedding field', async () => {
+      const esClient = createMockEsClient();
+      esClient.esql.query.mockResolvedValue({
+        columns: [{ name: '_id', type: 'keyword' }],
+        values: [['id-1']],
+      });
+      esClient.search.mockResolvedValue({ hits: { hits: [], total: { value: 0 } } });
+      const { client } = createFeatureClient({ esClient });
+
+      await client.findFeatures('logs.test', 'http', { searchMode: 'semantic' });
+
+      const args = esClient.search.mock.calls[0][0];
+      expect(args.retriever?.linear).toBeDefined();
+      expect(JSON.stringify(args.retriever)).toContain(FEATURE_SEARCH_EMBEDDING);
+    });
+
+    it('hybrid mode issues an RRF retriever combining keyword and semantic legs', async () => {
+      const esClient = createMockEsClient();
+      esClient.esql.query.mockResolvedValue({
+        columns: [{ name: '_id', type: 'keyword' }],
+        values: [['id-1']],
+      });
+      esClient.search.mockResolvedValue({ hits: { hits: [], total: { value: 0 } } });
+      const { client } = createFeatureClient({ esClient });
+
+      await client.findFeatures('logs.test', 'http', { searchMode: 'hybrid' });
+
+      const args = esClient.search.mock.calls[0][0];
+      expect(args.retriever?.rrf?.retrievers).toHaveLength(2);
+    });
+
+    it('defaults to hybrid when no searchMode is provided', async () => {
+      const esClient = createMockEsClient();
+      esClient.esql.query.mockResolvedValue({
+        columns: [{ name: '_id', type: 'keyword' }],
+        values: [['id-1']],
+      });
+      esClient.search.mockResolvedValue({ hits: { hits: [], total: { value: 0 } } });
+      const { client } = createFeatureClient({ esClient });
+
+      await client.findFeatures('logs.test', 'http');
+
+      const args = esClient.search.mock.calls[0][0];
+      expect(args.retriever?.rrf?.retrievers).toHaveLength(2);
+    });
+
+    it('propagates the error when an explicit search mode fails', async () => {
+      const esClient = createMockEsClient();
+      esClient.esql.query.mockResolvedValue({
+        columns: [{ name: '_id', type: 'keyword' }],
+        values: [['id-1']],
+      });
+      esClient.search.mockRejectedValue(new Error('boom'));
+      const { client } = createFeatureClient({ esClient });
+
+      await expect(
+        client.findFeatures('logs.test', 'http', { searchMode: 'semantic' })
+      ).rejects.toThrow('boom');
+    });
+
+    it('falls back to keyword search when an auto-resolved non-keyword mode throws', async () => {
+      const esClient = createMockEsClient();
+      const logger = createMockLogger();
+      esClient.esql.query.mockResolvedValue({
+        columns: [{ name: '_id', type: 'keyword' }],
+        values: [['id-1']],
+      });
+      esClient.search
+        .mockRejectedValueOnce(new Error('retriever parse error'))
+        .mockResolvedValueOnce({ hits: { hits: [], total: { value: 0 } } });
+      const { client } = createFeatureClient({ esClient, logger });
+
+      await client.findFeatures('logs.test', 'http');
+
+      // Phase 1 ES|QL once, then search fails once (hybrid), then search succeeds (keyword)
+      expect(esClient.search).toHaveBeenCalledTimes(2);
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('falling back to keyword'));
+    });
+
+    it('scopes phase-2 search to the latest-revision ids from phase 1', async () => {
+      const esClient = createMockEsClient();
+      esClient.esql.query.mockResolvedValue({
+        columns: [{ name: '_id', type: 'keyword' }],
+        values: [['id-1'], ['id-2']],
+      });
+      esClient.search.mockResolvedValue({ hits: { hits: [], total: { value: 0 } } });
+      const { client } = createFeatureClient({ esClient });
+
+      await client.findFeatures('logs.test', 'http', { searchMode: 'keyword' });
+
+      const args = esClient.search.mock.calls[0][0];
+      const idsFilter = args.query?.bool?.filter?.find(
+        (f: { ids?: { values: string[] } }) => f.ids !== undefined
+      );
+      expect(idsFilter?.ids?.values).toEqual(expect.arrayContaining(['id-1', 'id-2']));
+    });
+
+    it('phase-1 ES|QL excludes tombstoned groups AFTER the latest-per-group reduction', async () => {
+      // Same invariant as getFeatures: the post-grouping filter is what guarantees
+      // that a (feature.id, stream.name) whose latest event is a tombstone never
+      // contributes an _id to phase 2.
+      const esClient = createMockEsClient();
+      esClient.esql.query.mockResolvedValue({
+        columns: [{ name: '_id', type: 'keyword' }],
+        values: [['id-1']],
+      });
+      esClient.search.mockResolvedValue({ hits: { hits: [], total: { value: 0 } } });
+      const { client } = createFeatureClient({ esClient });
+
+      await client.findFeatures('logs.test', 'http', { searchMode: 'keyword' });
+
+      expect(esClient.esql.query).toHaveBeenCalledTimes(1);
+      const queryStr = (esClient.esql.query as jest.Mock).mock.calls[0][0].query as string;
+
+      expect(queryStr).toMatch(/feature\.deleted.*IS NULL.*feature\.deleted.*==\s*false/is);
+
+      const lastInlineStatsIdx = queryStr.lastIndexOf('INLINE STATS');
+      const firstFeatureDeletedIdx = queryStr.indexOf('feature.deleted');
+      expect(lastInlineStatsIdx).toBeGreaterThan(-1);
+      expect(firstFeatureDeletedIdx).toBeGreaterThan(lastInlineStatsIdx);
+    });
+
+    it('phase-1 ES|QL excludes expired groups by default', async () => {
+      const esClient = createMockEsClient();
+      esClient.esql.query.mockResolvedValue({
+        columns: [{ name: '_id', type: 'keyword' }],
+        values: [['id-1']],
+      });
+      esClient.search.mockResolvedValue({ hits: { hits: [], total: { value: 0 } } });
+      const { client } = createFeatureClient({ esClient });
+
+      await client.findFeatures('logs.test', 'http', { searchMode: 'keyword' });
+
+      const queryStr = (esClient.esql.query as jest.Mock).mock.calls[0][0].query as string;
+      expect(queryStr).toMatch(/@timestamp\s*>=\s*TO_DATETIME\(/);
+
+      const lastInlineStatsIdx = queryStr.lastIndexOf('INLINE STATS');
+      const freshnessIdx = queryStr.search(/@timestamp\s*>=\s*TO_DATETIME\(/);
+      expect(freshnessIdx).toBeGreaterThan(lastInlineStatsIdx);
+    });
+
+    it('phase-1 ES|QL omits the freshness filter when includeExpired is true', async () => {
+      const esClient = createMockEsClient();
+      esClient.esql.query.mockResolvedValue({
+        columns: [{ name: '_id', type: 'keyword' }],
+        values: [['id-1']],
+      });
+      esClient.search.mockResolvedValue({ hits: { hits: [], total: { value: 0 } } });
+      const { client } = createFeatureClient({ esClient });
+
+      await client.findFeatures('logs.test', 'http', {
+        searchMode: 'keyword',
+        includeExpired: true,
+      });
+
+      const queryStr = (esClient.esql.query as jest.Mock).mock.calls[0][0].query as string;
+      expect(queryStr).not.toMatch(/@timestamp\s*>=\s*TO_DATETIME\(/);
+      expect(queryStr).toMatch(/feature\.deleted.*IS NULL.*feature\.deleted.*==\s*false/is);
     });
   });
 
@@ -513,197 +750,160 @@ describe('FeatureClient', () => {
     });
   });
 
-  describe('findFeatures() — query shape per mode', () => {
-    it('returns empty without hitting storage when stream list is empty', async () => {
-      const { client, storageClient } = createFeatureClient();
-      const result = await client.findFeatures([], 'http');
-      expect(result).toEqual({ hits: [], total: 0 });
-      expect(storageClient.search).not.toHaveBeenCalled();
+  describe('getFeatureHistory()', () => {
+    const makeDoc = (overrides: Partial<StoredFeatureDoc>): StoredFeatureDoc => ({
+      '@timestamp': '2024-01-01T00:00:00.000Z',
+      'feature.id': 'feat-1',
+      'stream.name': 'logs.test',
+      'feature.type': 'service',
+      'feature.description': 'desc',
+      'feature.properties': {},
+      'feature.confidence': 80,
+      ...overrides,
     });
 
-    it('keyword mode issues a top-level keyword query (no retriever)', async () => {
-      const { client, storageClient } = createFeatureClient();
-      await client.findFeatures('logs.test', 'http', { searchMode: 'keyword' });
+    it('returns empty when ES|QL returns no columns', async () => {
+      const esClient = createMockEsClient();
+      esClient.esql.query.mockResolvedValue({ columns: [], values: [] });
+      const { client } = createFeatureClient({ esClient });
 
-      const args = storageClient.search.mock.calls[0][0];
-      expect(args.query).toBeDefined();
-      expect(args.retriever).toBeUndefined();
+      const result = await client.getFeatureHistory('logs.test', 'feat-1');
+      expect(result).toEqual([]);
     });
 
-    it('semantic mode issues a standard retriever against the embedding field', async () => {
-      const { client, storageClient } = createFeatureClient();
-      await client.findFeatures('logs.test', 'http', { searchMode: 'semantic' });
-
-      const args = storageClient.search.mock.calls[0][0];
-      expect(args.retriever?.linear).toBeDefined();
-      expect(JSON.stringify(args.retriever)).toContain(FEATURE_SEARCH_EMBEDDING);
-    });
-
-    it('hybrid mode issues an RRF retriever combining keyword and semantic legs', async () => {
-      const { client, storageClient } = createFeatureClient();
-      await client.findFeatures('logs.test', 'http', { searchMode: 'hybrid' });
-
-      const args = storageClient.search.mock.calls[0][0];
-      expect(args.retriever?.rrf?.retrievers).toHaveLength(2);
-    });
-
-    it('defaults to hybrid when no searchMode is provided', async () => {
-      const { client, storageClient } = createFeatureClient();
-      await client.findFeatures('logs.test', 'http');
-
-      const args = storageClient.search.mock.calls[0][0];
-      expect(args.retriever?.rrf?.retrievers).toHaveLength(2);
-    });
-
-    it('propagates the error when an explicit search mode fails', async () => {
-      const storageClient = createMockStorageClient();
-      storageClient.search.mockRejectedValue(new Error('boom'));
-      const { client } = createFeatureClient({ storageClient });
-
-      await expect(
-        client.findFeatures('logs.test', 'http', { searchMode: 'semantic' })
-      ).rejects.toThrow('boom');
-    });
-
-    it('falls back to keyword search when an auto-resolved non-keyword mode throws', async () => {
-      const storageClient = createMockStorageClient();
-      const logger = createMockLogger();
-      storageClient.search
-        .mockRejectedValueOnce(new Error('retriever parse error'))
-        .mockResolvedValueOnce({ hits: { hits: [], total: { value: 0 } } });
-      const { client } = createFeatureClient({ storageClient, logger });
-
-      await client.findFeatures('logs.test', 'http');
-
-      expect(storageClient.search).toHaveBeenCalledTimes(2);
-      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('falling back to keyword'));
-      const fallbackArgs = storageClient.search.mock.calls[1][0];
-      expect(fallbackArgs.query).toBeDefined();
-      expect(fallbackArgs.retriever).toBeUndefined();
-    });
-
-    it('passes the limit through to the size argument', async () => {
-      const { client, storageClient } = createFeatureClient();
-      await client.findFeatures('logs.test', 'http', {
-        searchMode: 'keyword',
-        limit: 25,
-      });
-
-      const args = storageClient.search.mock.calls[0][0];
-      expect(args.size).toBe(25);
-    });
-  });
-
-  describe('bulk() inference fallback behaviour', () => {
-    it('includes the embedding field in the document on the first bulk attempt', async () => {
-      const { client, storageClient } = createFeatureClient();
-
-      await client.bulk('logs.test', [{ index: { feature: createFeature() } }]);
-
-      expect(storageClient.bulk).toHaveBeenCalledTimes(1);
-      const document = storageClient.bulk.mock.calls[0][0].operations[0].index.document;
-      expect(document[FEATURE_SEARCH_EMBEDDING]).toEqual(expect.any(String));
-    });
-
-    it('retries with the embedding field after a transient inference-related BulkOperationError', async () => {
-      const storageClient = createMockStorageClient();
-      const logger = createMockLogger();
-      const inferenceError = new BulkOperationError('inference unavailable', {
-        errors: true,
-        took: 0,
-        items: [
-          {
-            index: {
-              _index: '.kibana_streams_features',
-              _id: 'doc-1',
-              status: 500,
-              error: {
-                type: 'exception',
-                reason:
-                  'Exception when running inference id [elser-endpoint] on field [feature.search_embedding]',
-                caused_by: {
-                  type: 'status_exception',
-                  reason: 'Unable to find model deployment task [elser-endpoint]',
-                },
-              },
-            },
-          },
-        ],
-      });
-      storageClient.bulk
-        .mockRejectedValueOnce(inferenceError)
-        .mockResolvedValueOnce({ errors: false, items: [] });
-      const { client } = createFeatureClient({ storageClient, logger });
-
-      await client.bulk('logs.test', [{ index: { feature: createFeature() } }]);
-
-      expect(storageClient.bulk).toHaveBeenCalledTimes(2);
-      const firstDoc = storageClient.bulk.mock.calls[0][0].operations[0].index.document;
-      const secondDoc = storageClient.bulk.mock.calls[1][0].operations[0].index.document;
-      expect(firstDoc[FEATURE_SEARCH_EMBEDDING]).toEqual(expect.any(String));
-      expect(secondDoc[FEATURE_SEARCH_EMBEDDING]).toEqual(expect.any(String));
-      expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining('retrying in 2000ms (attempt 1/3)')
+    it('classifies a single entry with no run_id as new', async () => {
+      const esClient = createMockEsClient();
+      esClient.esql.query.mockResolvedValue(
+        makeEsqlSourceResponse([makeDoc({ '@timestamp': '2024-01-01T00:00:00.000Z' })])
       );
+      const { client } = createFeatureClient({ esClient });
+
+      const result = await client.getFeatureHistory('logs.test', 'feat-1');
+      expect(result).toHaveLength(1);
+      expect(result[0]).toMatchObject({ change_type: 'new' });
     });
 
-    it('falls back to writing without the embedding only after every backoff retry fails', async () => {
-      const storageClient = createMockStorageClient();
-      const logger = createMockLogger();
-      const inferenceError = new BulkOperationError('inference unavailable', {
-        errors: true,
-        took: 0,
-        items: [
-          {
-            index: {
-              _index: '.kibana_streams_features',
-              _id: 'doc-1',
-              status: 500,
-              error: {
-                type: 'exception',
-                reason:
-                  'Exception when running inference id [elser-endpoint] on field [feature.search_embedding]',
-                caused_by: {
-                  type: 'status_exception',
-                  reason: 'Unable to find model deployment task [elser-endpoint]',
-                },
-              },
-            },
-          },
-        ],
-      });
-      storageClient.bulk
-        .mockRejectedValueOnce(inferenceError)
-        .mockRejectedValueOnce(inferenceError)
-        .mockRejectedValueOnce(inferenceError)
-        .mockResolvedValueOnce({ errors: false, items: [] });
-      const { client } = createFeatureClient({ storageClient, logger });
-
-      await client.bulk('logs.test', [{ index: { feature: createFeature() } }]);
-
-      expect(storageClient.bulk).toHaveBeenCalledTimes(4);
-      const firstDoc = storageClient.bulk.mock.calls[0][0].operations[0].index.document;
-      const fallbackDoc = storageClient.bulk.mock.calls[3][0].operations[0].index.document;
-      expect(firstDoc[FEATURE_SEARCH_EMBEDDING]).toEqual(expect.any(String));
-      // FEATURE_SEARCH_EMBEDDING contains a dot, so we cannot use toHaveProperty
-      // (Jest treats dotted strings as nested paths).
-      expect(FEATURE_SEARCH_EMBEDDING in fallbackDoc).toBe(false);
-      expect(logger.warn).toHaveBeenCalledWith(
-        expect.stringContaining(
-          'after 3 attempts -- falling back to writing without semantic_text embedding'
-        )
+    it('classifies the first occurrence of a run_id as new', async () => {
+      const esClient = createMockEsClient();
+      esClient.esql.query.mockResolvedValue(
+        makeEsqlSourceResponse([
+          makeDoc({ '@timestamp': '2024-01-01T00:00:00.000Z', 'feature.run_id': 'run-a' }),
+        ])
       );
+      const { client } = createFeatureClient({ esClient });
+
+      const result = await client.getFeatureHistory('logs.test', 'feat-1');
+      expect(result[0]).toMatchObject({ change_type: 'new', run_id: 'run-a' });
     });
 
-    it('does not retry when the bulk write throws a non-BulkOperationError', async () => {
-      const storageClient = createMockStorageClient();
-      storageClient.bulk.mockRejectedValue(new Error('cluster unreachable'));
-      const { client } = createFeatureClient({ storageClient });
+    it('classifies subsequent entries with the same run_id as updated', async () => {
+      // docs in DESC order (newest first) as ES returns them
+      const esClient = createMockEsClient();
+      esClient.esql.query.mockResolvedValue(
+        makeEsqlSourceResponse([
+          makeDoc({ '@timestamp': '2024-01-03T00:00:00.000Z', 'feature.run_id': 'run-a' }),
+          makeDoc({ '@timestamp': '2024-01-02T00:00:00.000Z', 'feature.run_id': 'run-a' }),
+          makeDoc({ '@timestamp': '2024-01-01T00:00:00.000Z', 'feature.run_id': 'run-a' }),
+        ])
+      );
+      const { client } = createFeatureClient({ esClient });
 
-      await expect(
-        client.bulk('logs.test', [{ index: { feature: createFeature() } }])
-      ).rejects.toThrow('cluster unreachable');
-      expect(storageClient.bulk).toHaveBeenCalledTimes(1);
+      const result = await client.getFeatureHistory('logs.test', 'feat-1');
+      expect(result).toHaveLength(3);
+      expect(result[0]).toMatchObject({ change_type: 'updated' }); // 3rd occurrence (newest)
+      expect(result[1]).toMatchObject({ change_type: 'updated' }); // 2nd occurrence
+      expect(result[2]).toMatchObject({ change_type: 'new' }); // 1st occurrence (oldest)
+    });
+
+    it('classifies entries across multiple run_ids correctly', async () => {
+      const esClient = createMockEsClient();
+      esClient.esql.query.mockResolvedValue(
+        makeEsqlSourceResponse([
+          makeDoc({ '@timestamp': '2024-01-04T00:00:00.000Z', 'feature.run_id': 'run-b' }),
+          makeDoc({ '@timestamp': '2024-01-03T00:00:00.000Z', 'feature.run_id': 'run-b' }),
+          makeDoc({ '@timestamp': '2024-01-02T00:00:00.000Z', 'feature.run_id': 'run-a' }),
+          makeDoc({ '@timestamp': '2024-01-01T00:00:00.000Z', 'feature.run_id': 'run-a' }),
+        ])
+      );
+      const { client } = createFeatureClient({ esClient });
+
+      const result = await client.getFeatureHistory('logs.test', 'feat-1');
+      expect(result).toHaveLength(4);
+      expect(result[0]).toMatchObject({ change_type: 'updated' }); // run-b 2nd
+      expect(result[1]).toMatchObject({ change_type: 'new' }); // run-b 1st
+      expect(result[2]).toMatchObject({ change_type: 'updated' }); // run-a 2nd
+      expect(result[3]).toMatchObject({ change_type: 'new' }); // run-a 1st
+    });
+
+    it('classifies tombstones as deleted', async () => {
+      const esClient = createMockEsClient();
+      esClient.esql.query.mockResolvedValue(
+        makeEsqlSourceResponse([
+          makeDoc({ '@timestamp': '2024-01-02T00:00:00.000Z', 'feature.deleted': true }),
+          makeDoc({ '@timestamp': '2024-01-01T00:00:00.000Z', 'feature.run_id': 'run-a' }),
+        ])
+      );
+      const { client } = createFeatureClient({ esClient });
+
+      const result = await client.getFeatureHistory('logs.test', 'feat-1');
+      expect(result).toHaveLength(2);
+      expect(result[0]).toMatchObject({ change_type: 'deleted' });
+      expect(result[1]).toMatchObject({ change_type: 'new' });
+    });
+
+    it('classifies a re-emission after deletion as new when it uses a fresh run_id', async () => {
+      const esClient = createMockEsClient();
+      esClient.esql.query.mockResolvedValue(
+        makeEsqlSourceResponse([
+          makeDoc({ '@timestamp': '2024-01-04T00:00:00.000Z', 'feature.run_id': 'run-b' }),
+          makeDoc({ '@timestamp': '2024-01-03T00:00:00.000Z', 'feature.deleted': true }),
+          makeDoc({ '@timestamp': '2024-01-02T00:00:00.000Z', 'feature.run_id': 'run-a' }),
+          makeDoc({ '@timestamp': '2024-01-01T00:00:00.000Z', 'feature.run_id': 'run-a' }),
+        ])
+      );
+      const { client } = createFeatureClient({ esClient });
+
+      const result = await client.getFeatureHistory('logs.test', 'feat-1');
+      expect(result).toHaveLength(4);
+      expect(result[0]).toMatchObject({ change_type: 'new' }); // run-b 1st after deletion
+      expect(result[1]).toMatchObject({ change_type: 'deleted' }); // tombstone
+      expect(result[2]).toMatchObject({ change_type: 'updated' }); // run-a 2nd
+      expect(result[3]).toMatchObject({ change_type: 'new' }); // run-a 1st
+    });
+
+    it('treats each entry with undefined run_id as a separate new entry', async () => {
+      const esClient = createMockEsClient();
+      esClient.esql.query.mockResolvedValue(
+        makeEsqlSourceResponse([
+          makeDoc({ '@timestamp': '2024-01-02T00:00:00.000Z' }), // no run_id
+          makeDoc({ '@timestamp': '2024-01-01T00:00:00.000Z' }), // no run_id
+        ])
+      );
+      const { client } = createFeatureClient({ esClient });
+
+      const result = await client.getFeatureHistory('logs.test', 'feat-1');
+      expect(result).toHaveLength(2);
+      expect(result[0]).toMatchObject({ change_type: 'new' });
+      expect(result[1]).toMatchObject({ change_type: 'new' });
+    });
+
+    it('returns entries in DESC timestamp order matching the ES response', async () => {
+      const esClient = createMockEsClient();
+      esClient.esql.query.mockResolvedValue(
+        makeEsqlSourceResponse([
+          makeDoc({ '@timestamp': '2024-01-03T00:00:00.000Z', 'feature.run_id': 'run-a' }),
+          makeDoc({ '@timestamp': '2024-01-02T00:00:00.000Z', 'feature.run_id': 'run-a' }),
+          makeDoc({ '@timestamp': '2024-01-01T00:00:00.000Z', 'feature.run_id': 'run-a' }),
+        ])
+      );
+      const { client } = createFeatureClient({ esClient });
+
+      const result = await client.getFeatureHistory('logs.test', 'feat-1');
+      expect(result.map((e) => e['@timestamp'])).toEqual([
+        '2024-01-03T00:00:00.000Z',
+        '2024-01-02T00:00:00.000Z',
+        '2024-01-01T00:00:00.000Z',
+      ]);
     });
   });
 });

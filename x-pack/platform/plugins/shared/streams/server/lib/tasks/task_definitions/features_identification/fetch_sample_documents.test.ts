@@ -29,14 +29,14 @@ const createHit = (id: string): SearchHit<Record<string, unknown>> => ({
 
 const createFeature = ({
   id,
-  lastSeen,
   field,
   value,
+  confidence = 80,
 }: {
   id: string;
-  lastSeen: string;
   field: string;
   value: string;
+  confidence?: number;
 }): FeatureWithFilter =>
   ({
     uuid: id,
@@ -45,9 +45,7 @@ const createFeature = ({
     type: 'system',
     description: id,
     properties: {},
-    confidence: 80,
-    status: 'active',
-    last_seen: lastSeen,
+    confidence,
     filter: { field, eq: value },
   } as FeatureWithFilter);
 
@@ -126,16 +124,15 @@ describe('fetchSampleDocuments', () => {
     const esClient = { fieldCaps: jest.fn() } as unknown as ElasticsearchClient;
     const features = [
       createFeature({
-        id: 'older',
-        lastSeen: '2026-01-01T00:00:00.000Z',
+        id: 'lower-confidence',
         field: 'host.name',
         value: 'host-a',
       }),
       createFeature({
-        id: 'newer',
-        lastSeen: '2026-01-02T00:00:00.000Z',
+        id: 'higher-confidence',
         field: 'service.name',
         value: 'checkout',
+        confidence: 90,
       }),
     ];
 
@@ -203,7 +200,6 @@ describe('fetchSampleDocuments', () => {
     const features = [
       createFeature({
         id: 'feature-1',
-        lastSeen: '2026-01-02T00:00:00.000Z',
         field: 'service.name',
         value: 'checkout',
       }),

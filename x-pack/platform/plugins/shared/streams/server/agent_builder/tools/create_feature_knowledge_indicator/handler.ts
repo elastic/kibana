@@ -7,7 +7,6 @@
 
 import type { BaseFeature } from '@kbn/streams-schema';
 import type { Logger } from '@kbn/core/server';
-import { v4 as uuidv4 } from 'uuid';
 import type { FeatureClient } from '../../../lib/streams/feature/feature_client';
 
 export async function createFeatureKnowledgeIndicatorToolHandler({
@@ -20,27 +19,17 @@ export async function createFeatureKnowledgeIndicatorToolHandler({
   streamName: string;
   featureInput: Omit<BaseFeature, 'stream_name'>;
   logger: Logger;
-}): Promise<{ id: string; uuid: string }> {
+}): Promise<{ id: string }> {
   logger.debug(
     `ki_feature_create: creating feature KI for stream "${streamName}" with id "${featureInput.id}"`
   );
 
-  const feature = {
-    ...featureInput,
-    stream_name: streamName,
-    uuid: uuidv4(),
-    status: 'active' as const,
-    last_seen: new Date().toISOString(),
-  };
-
+  const feature = { ...featureInput, stream_name: streamName };
   await featureClient.bulk(streamName, [{ index: { feature } }]);
 
   logger.debug(
-    `ki_feature_create: created feature KI for stream "${streamName}" with id "${feature.id}" and uuid "${feature.uuid}"`
+    `ki_feature_create: created feature KI for stream "${streamName}" with id "${feature.id}"`
   );
 
-  return {
-    id: feature.id,
-    uuid: feature.uuid,
-  };
+  return { id: feature.id };
 }

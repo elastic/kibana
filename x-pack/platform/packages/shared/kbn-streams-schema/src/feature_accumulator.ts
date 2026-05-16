@@ -8,27 +8,27 @@
 import { isDuplicateFeature, type BaseFeature, type Feature } from './feature';
 
 export class FeatureAccumulator {
-  private readonly byUuid = new Map<string, Feature>();
+  private readonly byId = new Map<string, Feature>();
   private readonly byLowerId = new Map<string, Feature>();
   private readonly fromStorage = new Set<string>();
 
   constructor(initialFeatures: Feature[] = []) {
     for (const f of initialFeatures) {
       this.add(f);
-      this.fromStorage.add(f.uuid);
+      this.fromStorage.add(f.id);
     }
   }
 
   add(feature: Feature) {
-    this.byUuid.set(feature.uuid, feature);
+    this.byId.set(feature.id, feature);
     this.byLowerId.set(feature.id.toLowerCase(), feature);
   }
 
   update(feature: Feature) {
-    if (!this.byUuid.has(feature.uuid)) {
+    if (!this.byId.has(feature.id)) {
       return;
     }
-    this.byUuid.set(feature.uuid, feature);
+    this.byId.set(feature.id, feature);
     this.byLowerId.set(feature.id.toLowerCase(), feature);
   }
 
@@ -40,19 +40,19 @@ export class FeatureAccumulator {
   }
 
   isStoredFeature(feature: Feature): boolean {
-    return this.fromStorage.has(feature.uuid);
+    return this.fromStorage.has(feature.id);
   }
 
-  promoteFromStorage(featureUuid: string) {
-    this.fromStorage.delete(featureUuid);
+  promoteFromStorage(featureId: string) {
+    this.fromStorage.delete(featureId);
   }
 
   getAll(): Feature[] {
-    return Array.from(this.byUuid.values());
+    return Array.from(this.byId.values());
   }
 
   getDiscovered(): Feature[] {
-    return this.getAll().filter((f) => !this.fromStorage.has(f.uuid));
+    return this.getAll().filter((f) => !this.fromStorage.has(f.id));
   }
 
   getTopRanked(limit: number): Feature[] {
@@ -67,6 +67,6 @@ export class FeatureAccumulator {
   }
 
   public get length(): number {
-    return this.byUuid.size;
+    return this.byId.size;
   }
 }

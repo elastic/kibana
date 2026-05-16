@@ -13,8 +13,6 @@ export function getEntityFilters(features: FeatureWithFilter[], maxFilters: numb
     return [];
   }
 
-  const capped = [...features]
-    .sort((a, b) => b.last_seen.localeCompare(a.last_seen))
-    .slice(0, maxFilters);
+  const capped = [...features].sort((a, b) => b.confidence - a.confidence).slice(0, maxFilters);
   return capped.map(({ filter }) => filter);
 }

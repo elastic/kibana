@@ -10,17 +10,14 @@ import { tags } from '@kbn/scout';
 import { v4 as uuidv4 } from 'uuid';
 import { streamsApiTest as apiTest } from '../../fixtures';
 import { PUBLIC_API_HEADERS } from '../../fixtures/constants';
-import { featureStorageSettings } from '../../../../../server/lib/streams/feature/storage_settings';
+import { FEATURES_DATA_STREAM } from '../../../../../server/lib/streams/feature/data_stream';
 import { queryStorageSettings } from '../../../../../server/lib/streams/assets/storage_settings';
 import {
   FEATURE_CONFIDENCE,
   FEATURE_DESCRIPTION,
   FEATURE_ID,
-  FEATURE_LAST_SEEN,
   FEATURE_PROPERTIES,
-  FEATURE_STATUS,
   FEATURE_TYPE,
-  FEATURE_UUID,
   STREAM_NAME as FEATURE_STREAM_NAME,
 } from '../../../../../server/lib/streams/feature/fields';
 import {
@@ -48,8 +45,8 @@ apiTest.describe.skip(
     const rootStream = 'logs.otel';
     const streamName = `${rootStream}.kis_${uuidv4().slice(0, 8)}`;
 
-    const featureUuidLow = `feature-${uuidv4()}`;
-    const featureUuidHigh = `feature-${uuidv4()}`;
+    const featureIdLow = `feature-${uuidv4()}`;
+    const featureIdHigh = `feature-${uuidv4()}`;
 
     const queryIdPayment = `q-${uuidv4()}`;
     const queryIdOther = `q-${uuidv4()}`;
@@ -78,16 +75,16 @@ apiTest.describe.skip(
       await apiServices.streamsTest.disableSignificantEvents();
 
       await Promise.allSettled([
-        esClient.delete({ index: featureStorageSettings.name, id: featureUuidLow }),
-        esClient.delete({ index: featureStorageSettings.name, id: featureUuidHigh }),
+        esClient.deleteByQuery({
+          index: FEATURES_DATA_STREAM,
+          query: { terms: { 'feature.id': [featureIdLow, featureIdHigh] } },
+          refresh: true,
+        }),
         esClient.delete({ index: queryStorageSettings.name, id: paymentAssetUuid }),
         esClient.delete({ index: queryStorageSettings.name, id: otherAssetUuid }),
       ]);
 
-      await Promise.allSettled([
-        esClient.indices.refresh({ index: featureStorageSettings.name }),
-        esClient.indices.refresh({ index: queryStorageSettings.name }),
-      ]);
+      await esClient.indices.refresh({ index: queryStorageSettings.name });
     });
 
     apiTest(
@@ -97,35 +94,29 @@ apiTest.describe.skip(
 
         const now = new Date().toISOString();
         await esClient.index({
-          index: featureStorageSettings.name,
-          id: featureUuidLow,
+          index: FEATURES_DATA_STREAM,
           refresh: 'wait_for',
           document: {
-            [FEATURE_UUID]: featureUuidLow,
-            [FEATURE_ID]: 'feature-low',
+            '@timestamp': now,
+            [FEATURE_ID]: featureIdLow,
             [FEATURE_TYPE]: 'log_patterns',
             [FEATURE_DESCRIPTION]: 'low confidence feature',
             [FEATURE_PROPERTIES]: {},
             [FEATURE_CONFIDENCE]: 30,
-            [FEATURE_STATUS]: 'active',
-            [FEATURE_LAST_SEEN]: now,
             [FEATURE_STREAM_NAME]: streamName,
           },
         });
 
         await esClient.index({
-          index: featureStorageSettings.name,
-          id: featureUuidHigh,
+          index: FEATURES_DATA_STREAM,
           refresh: 'wait_for',
           document: {
-            [FEATURE_UUID]: featureUuidHigh,
-            [FEATURE_ID]: 'feature-high',
+            '@timestamp': now,
+            [FEATURE_ID]: featureIdHigh,
             [FEATURE_TYPE]: 'error_logs',
             [FEATURE_DESCRIPTION]: 'high confidence feature',
             [FEATURE_PROPERTIES]: {},
             [FEATURE_CONFIDENCE]: 90,
-            [FEATURE_STATUS]: 'active',
-            [FEATURE_LAST_SEEN]: now,
             [FEATURE_STREAM_NAME]: streamName,
           },
         });
