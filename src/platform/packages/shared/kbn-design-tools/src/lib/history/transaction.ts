@@ -87,6 +87,11 @@ export interface EditTransaction extends TransactionBase {
   readonly type: 'edit';
   /** The top-level element the edit modal was opened on. */
   readonly target: HTMLElement;
+  /**
+   * When an original (non-managed) element was promoted to a managed clone
+   * during save, this stores the hidden original so undo can restore it.
+   */
+  readonly promotedFrom?: HTMLElement;
   /** Forward descriptors — re-applied on redo. */
   readonly styleChanges: StyleChange[];
   readonly textChanges: TextNodeChange[];

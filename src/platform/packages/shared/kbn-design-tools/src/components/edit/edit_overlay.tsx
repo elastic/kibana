@@ -25,7 +25,7 @@ import { useScrollSync } from '../../hooks/use_scroll_sync';
 import { useLockedTarget } from '../../hooks/use_locked_target';
 import { useEditChangeTracker } from '../../hooks/use_edit_change_tracker';
 import { useInteractionMachine } from '../../hooks/use_interaction_machine';
-import { DEVTOOL_HIDDEN_ATTR, MEASURE_OVERLAY_ID } from '../../lib/constants';
+import { DEVTOOL_HIDDEN_ATTR, DEVTOOL_MANAGED_ATTR, MEASURE_OVERLAY_ID } from '../../lib/constants';
 import {
   isEscapeKey,
   isDeleteKey,
@@ -41,6 +41,12 @@ import type { ElementSession } from '../../lib/dom/element_registry';
 import { ElementRegistry, applyEditChanges } from '../../lib/dom/element_registry';
 import type { StyleEdit, TextEdit, SourceEdit } from '../../lib/dom/element_registry';
 import { createDuplicate } from '../../lib/dom/duplicate_helpers';
+import {
+  cloneClean,
+  setImportant,
+  buildElementMap,
+  buildTextNodeMap,
+} from '../../lib/dom/clone_element';
 import { useUndoRedo } from '../../hooks/use_undo_redo';
 import { snapshotSession } from '../../lib/history/snapshot';
 import { captureOriginalStyles } from '../../lib/history/snapshot';
@@ -539,26 +545,71 @@ export const EditOverlay = ({
       savedSourceChanges: SourceChange[]
     ) => {
       if (editModalTarget) {
-        const session = registry.current.getOrCreate(editModalTarget);
+        const isManaged = editModalTarget.hasAttribute(DEVTOOL_MANAGED_ATTR);
 
-        // Shared mutable arrays: applyEditChanges populates them, and the
-        // transaction's undoRecords references them so the edit executor's
-        // reverse path can read the captured originals.
+        let effectiveTarget = editModalTarget;
+        let styleChanges = savedStyleChanges;
+        let textChanges = savedTextChanges;
+        let sourceChanges = savedSourceChanges;
+
+        if (!isManaged) {
+          const { clone, rect } = cloneClean(editModalTarget, zIndex.clone);
+          clone.style.transformOrigin = '0 0';
+          document.body.appendChild(clone);
+
+          const originalTransform = editModalTarget.style.transform || '';
+          editModalTarget.setAttribute(DEVTOOL_HIDDEN_ATTR, originalTransform);
+          setImportant(editModalTarget, 'visibility', 'hidden');
+          setImportant(editModalTarget, 'pointer-events', 'none');
+
+          const elMap = buildElementMap(editModalTarget, clone);
+          const textMap = buildTextNodeMap(editModalTarget, clone);
+
+          styleChanges = savedStyleChanges.map((c) => ({
+            ...c,
+            element: (elMap.get(c.element) as HTMLElement) ?? c.element,
+          }));
+          textChanges = savedTextChanges.map((c) => ({
+            ...c,
+            node: textMap.get(c.node) ?? c.node,
+          }));
+          sourceChanges = savedSourceChanges.map((c) => ({
+            ...c,
+            element: elMap.get(c.element) ?? c.element,
+          }));
+
+          const session: ElementSession = {
+            el: clone,
+            dx: 0,
+            dy: 0,
+            dw: 0,
+            dh: 0,
+            originalRect: new DOMRect(rect.left, rect.top, rect.width, rect.height),
+            isDuplicate: false,
+            referenceEl: editModalTarget,
+            styleEdits: [],
+            textEdits: [],
+            sourceEdits: [],
+          };
+          registry.current.set(session);
+          effectiveTarget = clone;
+        }
+
+        const session = registry.current.getOrCreate(effectiveTarget);
+
         const styleEdits: StyleEdit[] = [];
         const textEdits: TextEdit[] = [];
         const sourceEdits: SourceEdit[] = [];
 
         applyEditChanges(
-          savedStyleChanges,
-          savedTextChanges,
-          savedSourceChanges,
+          styleChanges,
+          textChanges,
+          sourceChanges,
           styleEdits,
           textEdits,
           sourceEdits
         );
 
-        // Also append to the session's edit arrays so resetAll / removeSession
-        // can revert all edits when the user leaves edit mode.
         session.styleEdits.push(...styleEdits);
         session.textEdits.push(...textEdits);
         session.sourceEdits.push(...sourceEdits);
@@ -566,17 +617,18 @@ export const EditOverlay = ({
         pushTransaction({
           type: 'edit',
           label: 'Edit',
-          target: editModalTarget,
-          styleChanges: savedStyleChanges,
-          textChanges: savedTextChanges,
-          sourceChanges: savedSourceChanges,
+          target: effectiveTarget,
+          promotedFrom: isManaged ? undefined : editModalTarget,
+          styleChanges,
+          textChanges,
+          sourceChanges,
           undoRecords: { styleEdits, textEdits, sourceEdits },
         });
       }
       setEditModalTarget(null);
       notifyCount();
     },
-    [editModalTarget, notifyCount, pushTransaction]
+    [editModalTarget, notifyCount, pushTransaction, zIndex.clone]
   );
 
   const handleDuplicate = useCallback(() => {

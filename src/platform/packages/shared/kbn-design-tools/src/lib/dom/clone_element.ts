@@ -32,6 +32,33 @@ export const setImportant = (el: HTMLElement, prop: string, value: string): void
   el.style.setProperty(prop, value, 'important');
 };
 
+const MEDIA_TAGS = new Set(['IMG', 'SVG', 'VIDEO', 'PICTURE', 'CANVAS', 'OBJECT', 'EMBED']);
+
+/**
+ * Remove frozen inline dimensions from all descendants after a parent
+ * dimension change, so children reflow naturally. Media elements (img, svg,
+ * video, etc.) get max-width/max-height constraints to scale proportionally.
+ */
+export const unfreezeChildren = (parent: HTMLElement, property: 'width' | 'height'): void => {
+  for (let i = 0; i < parent.children.length; i++) {
+    const child = parent.children[i];
+    if (child instanceof HTMLElement) {
+      child.style.removeProperty(property);
+      if (MEDIA_TAGS.has(child.tagName)) {
+        const otherProp = property === 'width' ? 'height' : 'width';
+        child.style.removeProperty(otherProp);
+        setImportant(child, 'max-width', '100%');
+        setImportant(child, 'max-height', '100%');
+        if (child.tagName === 'IMG' || child.tagName === 'VIDEO') {
+          setImportant(child, 'height', 'auto');
+          setImportant(child, 'width', 'auto');
+        }
+      }
+      unfreezeChildren(child, property);
+    }
+  }
+};
+
 /**
  * Round a DOMRect's position and size to whole pixels.
  * Subpixel values from getBoundingClientRect() place elements between pixel
@@ -55,6 +82,63 @@ export const roundRect = (rect: DOMRect): DOMRect => {
     bottom: y + h,
     toJSON() {},
   };
+};
+
+const URL_ID_RE = /\burl\(#([^)]+)\)/g;
+const XLINK_NS = 'http://www.w3.org/1999/xlink';
+
+/**
+ * Rewrite all IDs inside SVGs within `root` to unique values and update
+ * every internal reference (`url(#id)`, `xlink:href="#id"`, `href="#id"`).
+ * This prevents ID collisions when the original and its clone coexist in
+ * the same document, which causes masks, clip-paths, and use-references
+ * to resolve to the wrong (hidden original) element.
+ */
+export const deduplicateSvgIds = (root: HTMLElement): void => {
+  const svgs = root.querySelectorAll('svg');
+  for (const svg of svgs) {
+    const idMap = new Map<string, string>();
+    const suffix = uuidv4().slice(0, 8);
+
+    for (const el of svg.querySelectorAll('[id]')) {
+      const oldId = el.getAttribute('id')!;
+      const newId = `${oldId}_${suffix}`;
+      idMap.set(oldId, newId);
+      el.setAttribute('id', newId);
+    }
+
+    if (idMap.size === 0) continue;
+
+    for (const el of svg.querySelectorAll('*')) {
+      for (const attr of Array.from(el.attributes)) {
+        if (attr.name === 'id') continue;
+        let updated = attr.value;
+        let changed = false;
+
+        updated = updated.replace(URL_ID_RE, (_match, id) => {
+          const newId = idMap.get(id);
+          if (newId) {
+            changed = true;
+            return `url(#${newId})`;
+          }
+          return _match;
+        });
+
+        if (updated.startsWith('#') && idMap.has(updated.slice(1))) {
+          updated = `#${idMap.get(updated.slice(1))}`;
+          changed = true;
+        }
+
+        if (changed) {
+          if (attr.namespaceURI === XLINK_NS) {
+            el.setAttributeNS(XLINK_NS, attr.name, updated);
+          } else {
+            el.setAttribute(attr.name, updated);
+          }
+        }
+      }
+    }
+  }
 };
 
 /**
@@ -276,6 +360,7 @@ export const cloneElement = (
 
   copyCanvasContent(target, clone);
   copyStylesDeep(target, clone);
+  deduplicateSvgIds(clone);
 
   // Keep descendants hidden by the editor invisible in the clone.
   // Remove DEVTOOL_HIDDEN_ATTR so DOM queries only find real originals.
@@ -325,6 +410,48 @@ const fixCloneVisibility = (el: HTMLElement, depth = 0): void => {
     const child = el.children[i];
     if (child instanceof HTMLElement) fixCloneVisibility(child, depth + 1);
   }
+};
+
+/**
+ * Build a mapping from every element in the `original` tree to its
+ * positional counterpart in the `clone` tree. Both trees must share
+ * the same DOM structure (as produced by `cloneNode(true)`).
+ */
+export const buildElementMap = (
+  original: HTMLElement,
+  clone: HTMLElement
+): Map<Element, Element> => {
+  const map = new Map<Element, Element>();
+  map.set(original, clone);
+  const originals = original.querySelectorAll('*');
+  const clones = clone.querySelectorAll('*');
+  for (let i = 0; i < originals.length && i < clones.length; i++) {
+    map.set(originals[i], clones[i]);
+  }
+  return map;
+};
+
+/**
+ * Build a mapping from every Text node in the `original` tree to its
+ * positional counterpart in the `clone` tree.
+ */
+export const buildTextNodeMap = (original: HTMLElement, clone: HTMLElement): Map<Text, Text> => {
+  const map = new Map<Text, Text>();
+  const walker = (root: Node): Text[] => {
+    const nodes: Text[] = [];
+    const tw = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    let node: Node | null;
+    while ((node = tw.nextNode())) {
+      nodes.push(node as Text);
+    }
+    return nodes;
+  };
+  const origTexts = walker(original);
+  const cloneTexts = walker(clone);
+  for (let i = 0; i < origTexts.length && i < cloneTexts.length; i++) {
+    map.set(origTexts[i], cloneTexts[i]);
+  }
+  return map;
 };
 
 /**

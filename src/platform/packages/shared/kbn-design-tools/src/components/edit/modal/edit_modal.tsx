@@ -29,7 +29,7 @@ import { i18n } from '@kbn/i18n';
 import { DEVTOOL_IGNORE_ATTR, EDIT_MODAL_ID } from '../../../lib/constants';
 import { collectAllTextNodes } from '../../../lib/dom/collect_text_nodes';
 import { collectSourceElements } from '../../../lib/dom/collect_source_elements';
-import { setImportant } from '../../../lib/dom/clone_element';
+import { setImportant, unfreezeChildren } from '../../../lib/dom/clone_element';
 import { useOverlayZIndex } from '../../../hooks/use_overlay_z_index';
 import { usePortalZIndex } from '../../../hooks/use_portal_z_index';
 import { useElementSelection } from '../../../hooks/use_element_selection';
@@ -48,6 +48,9 @@ import { createPreviewClone } from '../../../lib/dom/create_preview_clone';
 import type { StyleChange, TextNodeChange, SourceChange } from '../../../lib/dom/element_registry';
 
 export type { StyleChange, TextNodeChange, SourceChange };
+
+const roundPxValue = (value: string): string =>
+  value.replace(/(\d+\.\d+)px/g, (_m, n) => `${Math.round(parseFloat(n))}px`);
 
 interface Props {
   target: HTMLElement;
@@ -175,6 +178,7 @@ export const EditModal = ({ target, onClose, onSave }: Props) => {
       for (const { property } of DIMENSION_PROPS) {
         dims.set(property, computed.getPropertyValue(property));
       }
+      dims.set('overflow', computed.getPropertyValue('overflow'));
       originalDimensionsRef.current.set(selectedElement, dims);
     }
   }, [selectedElement]);
@@ -283,19 +287,47 @@ export const EditModal = ({ target, onClose, onSave }: Props) => {
   );
 
   const handleDimensionChange = useCallback(
-    (property: string, value: string) => {
+    (property: string, rawValue: string) => {
       if (!(selectedElement instanceof HTMLElement)) return;
+      const value = roundPxValue(rawValue);
 
       const cloneEl = elementMapRef.current.get(selectedElement);
       if (cloneEl instanceof HTMLElement) {
         setImportant(cloneEl, property, value);
+        if (property === 'width' || property === 'height') {
+          unfreezeChildren(cloneEl, property);
+          const origOverflow =
+            originalDimensionsRef.current.get(selectedElement)?.get('overflow') ?? 'visible';
+          if (origOverflow === 'visible') {
+            setImportant(cloneEl, 'overflow', 'hidden');
+          }
+        }
+        // Update the preview wrapper when the root clone's dimensions change
+        // so the container doesn't clip the resized element.
+        const wrapper = cloneRef.current;
+        if (wrapper && cloneEl.parentElement === wrapper) {
+          wrapper.style[property as 'width' | 'height'] = value;
+        }
       }
 
       setStyleChanges((prev) => {
         const filtered = prev.filter(
           (c) => !(c.element === selectedElement && c.property === property)
         );
-        return [...filtered, { element: selectedElement, property, value }];
+        const next = [...filtered, { element: selectedElement, property, value }];
+        if (property === 'width' || property === 'height') {
+          const origOverflow =
+            originalDimensionsRef.current.get(selectedElement)?.get('overflow') ?? 'visible';
+          if (origOverflow === 'visible') {
+            const hasOverflow = next.some(
+              (c) => c.element === selectedElement && c.property === 'overflow'
+            );
+            if (!hasOverflow) {
+              next.push({ element: selectedElement, property: 'overflow', value: 'hidden' });
+            }
+          }
+        }
+        return next;
       });
 
       refreshOverlay();
@@ -335,10 +367,37 @@ export const EditModal = ({ target, onClose, onSave }: Props) => {
       const cloneEl = elementMapRef.current.get(selectedElement);
       if (cloneEl instanceof HTMLElement) {
         setImportant(cloneEl, property, original);
+        const wrapper = cloneRef.current;
+        if (wrapper && cloneEl.parentElement === wrapper) {
+          wrapper.style[property as 'width' | 'height'] = original;
+        }
       }
-      setStyleChanges((prev) =>
-        prev.filter((c) => !(c.element === selectedElement && c.property === property))
-      );
+      setStyleChanges((prev) => {
+        const next = prev.filter(
+          (c) => !(c.element === selectedElement && c.property === property)
+        );
+        if (
+          (property === 'width' || property === 'height') &&
+          !next.some(
+            (c) =>
+              c.element === selectedElement && (c.property === 'width' || c.property === 'height')
+          )
+        ) {
+          const filtered = next.filter(
+            (c) => !(c.element === selectedElement && c.property === 'overflow')
+          );
+          if (cloneEl instanceof HTMLElement) {
+            const origOverflow = origDims?.get('overflow') ?? '';
+            if (origOverflow) {
+              setImportant(cloneEl, 'overflow', origOverflow);
+            } else {
+              cloneEl.style.removeProperty('overflow');
+            }
+          }
+          return filtered;
+        }
+        return next;
+      });
       refreshOverlay();
     },
     [selectedElement, refreshOverlay]
@@ -527,8 +586,8 @@ export const EditModal = ({ target, onClose, onSave }: Props) => {
     return DIMENSION_PROPS.map(({ property, label }) => ({
       property,
       label,
-      value: computed.getPropertyValue(property),
-      originalValue: origDims?.get(property) ?? computed.getPropertyValue(property),
+      value: roundPxValue(computed.getPropertyValue(property)),
+      originalValue: roundPxValue(origDims?.get(property) ?? computed.getPropertyValue(property)),
     }));
   })();
 

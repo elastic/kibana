@@ -168,6 +168,7 @@ export const serializeTransaction = (tx: Transaction): SerializedTransaction => 
         timestamp: tx.timestamp,
         label: tx.label,
         targetPath: toPath(tx.target),
+        ...(tx.promotedFrom ? { promotedFromPath: toPath(tx.promotedFrom) } : {}),
         styleChanges: tx.styleChanges.map(serializeStyleChange),
         textChanges: tx.textChanges.map(serializeTextNodeChange),
         sourceChanges: tx.sourceChanges.map(serializeSourceChange),
@@ -399,12 +400,17 @@ const deserializeEdit = (
   const target = resolveElement(stx.targetPath, 'edit target', warnings);
   if (!target) return null;
 
+  const promotedFrom = stx.promotedFromPath
+    ? resolveElement(stx.promotedFromPath, 'edit promotedFrom', warnings)
+    : undefined;
+
   return {
     id: stx.id,
     timestamp: stx.timestamp,
     label: stx.label,
     type: 'edit',
     target,
+    ...(promotedFrom ? { promotedFrom } : {}),
     styleChanges: deserializeStyleChanges(stx.styleChanges, warnings),
     textChanges: deserializeTextNodeChanges(stx.textChanges, warnings),
     sourceChanges: deserializeSourceChanges(stx.sourceChanges, warnings),

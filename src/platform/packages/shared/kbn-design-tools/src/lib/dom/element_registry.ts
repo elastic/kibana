@@ -8,9 +8,9 @@
  */
 
 import type { ReactElement } from 'react';
-import { DEVTOOL_HIDDEN_ATTR } from '../constants';
+import { DEVTOOL_HIDDEN_ATTR, DEVTOOL_MANAGED_ATTR } from '../constants';
 import { replaceIconContent } from '../eui_icon_cache';
-import { setImportant } from './clone_element';
+import { setImportant, unfreezeChildren } from './clone_element';
 
 /**
  * A forward style change descriptor produced by the edit modal.
@@ -117,6 +117,12 @@ export const applyEditChanges = (
     const originalPriority = element.style.getPropertyPriority(cssProp);
     styleEdits.push({ element, property: cssProp, original, originalPriority });
     setImportant(element, cssProp, value);
+    if (
+      (cssProp === 'width' || cssProp === 'height') &&
+      element.closest(`[${DEVTOOL_MANAGED_ATTR}]`)
+    ) {
+      unfreezeChildren(element, cssProp);
+    }
   }
 
   for (const { node, text, color: textColor, fontSize, fontWeight } of textChanges) {

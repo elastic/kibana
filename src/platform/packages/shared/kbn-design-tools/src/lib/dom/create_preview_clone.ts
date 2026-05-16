@@ -8,7 +8,13 @@
  */
 
 import { DEVTOOL_HIDDEN_ATTR, DEVTOOL_MANAGED_ATTR } from '../constants';
-import { copyCanvasContent, copyStylesDeep, setImportant, roundRect } from './clone_element';
+import {
+  copyCanvasContent,
+  copyStylesDeep,
+  deduplicateSvgIds,
+  setImportant,
+  roundRect,
+} from './clone_element';
 import { isLiveElement } from './managed_element';
 
 interface PreviewCloneResult {
@@ -40,6 +46,7 @@ export const createPreviewClone = (target: HTMLElement): PreviewCloneResult => {
 
   const clone = target.cloneNode(true) as HTMLElement;
   copyCanvasContent(target, clone);
+  deduplicateSvgIds(clone);
 
   if (!isManaged || isLive) {
     // Non-managed elements need styles inlined. Live elements are managed

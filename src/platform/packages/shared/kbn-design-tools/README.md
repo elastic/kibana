@@ -65,7 +65,7 @@ Every element the user touches gets an `ElementSession` - a per-element state co
 | Drag | `false` | original | Yes (clone) | User drags a page element - original hidden, clone visible |
 | Duplicate | `true` | source | Yes | Cmd+D copy of an existing element |
 | Live/Insert | `true` | (optional) | Yes + cleanup | Library component rendered with a live React root |
-| Edit-only | `false` | (none) | No | In-place style/text edits via the edit modal |
+| Promoted Edit | `false` | original | Yes (clone) | Edit modal save on an original element - promoted to a managed clone |
 
 #### Live Elements
 
@@ -93,7 +93,7 @@ Every edit records the **original value before applying changes** (store-then-mu
 
 The `UndoRedoStack` maintains a linear history of transactions in a `useRef`, allowing edits to be recorded without triggering React renders. It exposes a `useSyncExternalStore` subscription so toolbar controls stay in sync with available undo/redo state.
 
-Supported transaction types include `move`, `resize`, `style-edit`, `text-edit`, `source-edit`, `duplicate`, and `delete`. The stack is responsible only for ordering and history; applying and reverting changes is handled by executor functions.
+Supported transaction types include `move`, `resize`, `edit`, `duplicate`, `delete`, and `clone`. An `edit` transaction bundles style, text, and source changes together; when it promotes an original element to a managed clone, the `promotedFrom` field lets undo tear down the clone and restore the original. The stack is responsible only for ordering and history; applying and reverting changes is handled by executor functions.
 
 #### Component Library
 

@@ -154,6 +154,7 @@ interface SerializedResizeTransaction extends SerializedTransactionBase {
 interface SerializedEditTransaction extends SerializedTransactionBase {
   readonly type: 'edit';
   readonly targetPath: ElementPath;
+  readonly promotedFromPath?: ElementPath;
   readonly styleChanges: SerializedStyleChange[];
   readonly textChanges: SerializedTextNodeChange[];
   readonly sourceChanges: SerializedSourceChange[];

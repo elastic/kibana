@@ -35,23 +35,30 @@ interface Props {
   onFocus?: () => void;
 }
 
-const fieldCss = css({ minWidth: 120 });
+const parsePx = (value: string): number => {
+  const n = parseFloat(value);
+  return Number.isFinite(n) ? Math.round(n) : 0;
+};
+
+const comboCss = css({ minWidth: 160 });
 
 /**
  * Editor for CSS dimension properties (width, height, padding, margin,
- * border-radius). Shows EUI size tokens as suggestions but allows freeform
- * CSS values.
+ * border-radius). Shows a numeric input with "px" append and an EUI
+ * size-token preset selector.
  */
 export const DimensionsEditor = ({ entries, onChange, onReset, onFocus }: Props) => {
   const { euiTheme } = useEuiTheme();
 
-  const sizeOptions: Array<EuiComboBoxOptionOption<string>> = useMemo(() => {
-    const opts: Array<EuiComboBoxOptionOption<string>> = [];
-    for (const [key, value] of Object.entries(euiTheme.size)) {
-      opts.push({ label: `${key} (${value})`, value });
-    }
-    return opts;
-  }, [euiTheme.size]);
+  const sizeEntries = useMemo(
+    () =>
+      Object.entries(euiTheme.size).map(([key, value]) => ({
+        key,
+        value: String(value),
+        px: parsePx(String(value)),
+      })),
+    [euiTheme.size]
+  );
 
   return (
     <>
@@ -59,7 +66,7 @@ export const DimensionsEditor = ({ entries, onChange, onReset, onFocus }: Props)
         <DimensionField
           key={entry.property}
           entry={entry}
-          options={sizeOptions}
+          sizeEntries={sizeEntries}
           onChange={onChange}
           onReset={onReset}
           onFocus={onFocus}
@@ -71,23 +78,35 @@ export const DimensionsEditor = ({ entries, onChange, onReset, onFocus }: Props)
 
 const DimensionField = ({
   entry,
-  options,
+  sizeEntries,
   onChange,
   onReset,
   onFocus,
 }: {
   entry: DimensionEntry;
-  options: Array<EuiComboBoxOptionOption<string>>;
+  sizeEntries: Array<{ key: string; value: string; px: number }>;
   onChange: (property: string, value: string) => void;
   onReset?: (property: string) => void;
   onFocus?: () => void;
 }) => {
-  const selectedOptions = useMemo(() => {
-    if (!entry.value) return [];
-    const match = options.find((o) => o.value === entry.value);
-    if (match) return [match];
-    return [{ label: entry.value, value: entry.value }];
-  }, [entry.value, options]);
+  const numericValue = parsePx(entry.value);
+
+  const options: Array<EuiComboBoxOptionOption<string>> = useMemo(
+    () =>
+      sizeEntries.map((s) => ({
+        label: `${s.key} (${s.value})`,
+        value: s.value,
+      })),
+    [sizeEntries]
+  );
+
+  const selectedOptions: Array<EuiComboBoxOptionOption<string>> = useMemo(() => {
+    const match = sizeEntries.find((s) => s.px === numericValue);
+    if (match) {
+      return [{ label: `${match.key} (${match.value})`, value: match.value }];
+    }
+    return [{ label: String(numericValue), value: `${numericValue}px` }];
+  }, [sizeEntries, numericValue]);
 
   const handleChange = useCallback(
     (selected: Array<EuiComboBoxOptionOption<string>>) => {
@@ -98,9 +117,14 @@ const DimensionField = ({
     [onChange, entry.property]
   );
 
-  const handleCreate = useCallback(
+  const handleCreateOption = useCallback(
     (searchValue: string) => {
-      onChange(entry.property, searchValue);
+      const trimmed = searchValue.replace(/px$/i, '').trim();
+      const num = Number(trimmed);
+      if (trimmed === '' || isNaN(num)) return false;
+      const rounded = Math.max(0, Math.round(num));
+      onChange(entry.property, `${rounded}px`);
+      return true;
     },
     [onChange, entry.property]
   );
@@ -110,21 +134,24 @@ const DimensionField = ({
   return (
     <EuiFormRow label={entry.label}>
       <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-        <EuiFlexItem>
-          <div className={fieldCss} onFocusCapture={onFocus}>
+        <EuiFlexItem grow={false}>
+          <div className={comboCss} onFocusCapture={onFocus}>
             <EuiComboBox
               aria-label={entry.label}
               options={options}
               selectedOptions={selectedOptions}
               onChange={handleChange}
-              onCreateOption={handleCreate}
+              onCreateOption={handleCreateOption}
               singleSelection={{ asPlainText: true }}
               compressed
               isClearable={false}
-              customOptionText={i18n.translate('kbnDesignTools.edit.modal.dimensions.customValue', {
-                defaultMessage: 'Use {searchValue}',
-                values: { searchValue: '{searchValue}' },
-              })}
+              customOptionText={i18n.translate(
+                'kbnDesignTools.edit.modal.dimensions.customOption',
+                {
+                  defaultMessage: 'Set to {searchValue}px',
+                  values: { searchValue: '{searchValue}' },
+                }
+              )}
             />
           </div>
         </EuiFlexItem>

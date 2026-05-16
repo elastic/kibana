@@ -11,7 +11,7 @@ import type { ElementRegistry } from '../dom/element_registry';
 import { revertEdits, applyEditChanges } from '../dom/element_registry';
 import { setImportant } from '../dom/clone_element';
 import { buildTransform } from '../dom/resize_helpers';
-import { DEVTOOL_HIDDEN_ATTR } from '../constants';
+import { DEVTOOL_HIDDEN_ATTR, DEVTOOL_MANAGED_ATTR } from '../constants';
 import { restoreSession } from './snapshot';
 import type {
   Transaction,
@@ -164,6 +164,35 @@ export const resizeExecutor: TransactionExecutor<ResizeTransaction> = {
  */
 export const editExecutor: TransactionExecutor<EditTransaction> = {
   apply(tx, registry) {
+    if (tx.promotedFrom) {
+      const original = tx.promotedFrom;
+      if (!original.hasAttribute(DEVTOOL_HIDDEN_ATTR)) {
+        const originalTransform = original.style.transform || '';
+        original.setAttribute(DEVTOOL_HIDDEN_ATTR, originalTransform);
+        setImportant(original, 'visibility', 'hidden');
+        setImportant(original, 'pointer-events', 'none');
+      }
+      if (!tx.target.isConnected) {
+        document.body.appendChild(tx.target);
+      }
+      if (!registry.has(tx.target)) {
+        const rect = tx.target.getBoundingClientRect();
+        registry.set({
+          el: tx.target,
+          dx: 0,
+          dy: 0,
+          dw: 0,
+          dh: 0,
+          originalRect: new DOMRect(rect.left, rect.top, rect.width, rect.height),
+          isDuplicate: false,
+          referenceEl: original,
+          styleEdits: [],
+          textEdits: [],
+          sourceEdits: [],
+        });
+      }
+    }
+
     const session = registry.get(tx.target);
     if (!session) return;
 
@@ -177,10 +206,26 @@ export const editExecutor: TransactionExecutor<EditTransaction> = {
     );
   },
 
-  reverse(tx) {
+  reverse(tx, registry) {
     const { styleEdits, textEdits, sourceEdits } = tx.undoRecords;
-    if (styleEdits.length === 0 && textEdits.length === 0 && sourceEdits.length === 0) return;
-    revertEdits(styleEdits, textEdits, sourceEdits);
+    if (styleEdits.length > 0 || textEdits.length > 0 || sourceEdits.length > 0) {
+      revertEdits(styleEdits, textEdits, sourceEdits);
+    }
+
+    if (tx.promotedFrom) {
+      const session = registry.get(tx.target);
+      if (session) {
+        registry.delete(session);
+      }
+      tx.target.remove();
+
+      const original = tx.promotedFrom;
+      const savedTransform = original.getAttribute(DEVTOOL_HIDDEN_ATTR) ?? '';
+      original.style.transform = savedTransform;
+      original.style.removeProperty('visibility');
+      original.style.removeProperty('pointer-events');
+      original.removeAttribute(DEVTOOL_HIDDEN_ATTR);
+    }
   },
 };
 

@@ -14,7 +14,7 @@ import type { ElementRegistry, ElementSession } from '../../dom/element_registry
 import { toPath, fromPath, buildRelativeSelector } from './element_path';
 import type { ElementPath } from './element_path';
 import { buildTransform } from '../../dom/resize_helpers';
-import { setImportant } from '../../dom/clone_element';
+import { setImportant, unfreezeChildren } from '../../dom/clone_element';
 import { cloneElement } from '../../dom/clone_element';
 import {
   DEVTOOL_HIDDEN_ATTR,
@@ -497,6 +497,22 @@ export const importState = async (
         setImportant(clone, 'top', `${exported.originalRect.y}px`);
         setImportant(clone, 'width', `${exported.originalRect.width}px`);
         setImportant(clone, 'height', `${exported.originalRect.height}px`);
+
+        // The fresh clone has all children's dimensions frozen by
+        // copyStylesDeep at the original's full size. Only unfreeze
+        // properties that were actually edited so other frozen
+        // dimensions remain intact.
+        const editedProps = new Set(
+          exported.styleEdits
+            .filter((e) => e.relativeSelector === '')
+            .map((e) => e.property)
+        );
+        if (editedProps.has('width')) {
+          unfreezeChildren(clone, 'width');
+        }
+        if (editedProps.has('height')) {
+          unfreezeChildren(clone, 'height');
+        }
 
         // Hide the original so there's no visual duplication,
         // same as the drag system does. Preserve the original's
