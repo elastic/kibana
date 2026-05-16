@@ -50,6 +50,18 @@ export class CreateRecoveryEventsStep implements RuleExecutionStep {
         return;
       }
 
+      // Recovery is opt-in: rules without a `recovery_policy` never produce
+      // recovery events. The UI ensures new alert rules always get a default
+      // recovery option, so this branch is reached only for rules created via
+      // the API (or the agent builder) that explicitly omitted recovery.
+      if (!rule.recovery_policy) {
+        step.logger.debug({
+          message: `[${step.name}] Skipping recovery for rule ${input.ruleId} (no recovery_policy configured)`,
+        });
+        yield { type: 'continue', state };
+        return;
+      }
+
       const activeGroupHashes = await step.fetchActiveAlertGroupHashes(
         rule.id,
         input.executionContext
@@ -63,7 +75,7 @@ export class CreateRecoveryEventsStep implements RuleExecutionStep {
         return;
       }
 
-      const recoveryType = rule.recovery_policy?.type ?? recoveryPolicyType.no_breach;
+      const recoveryType = rule.recovery_policy.type;
 
       const recoveryEvents =
         recoveryType === recoveryPolicyType.query
