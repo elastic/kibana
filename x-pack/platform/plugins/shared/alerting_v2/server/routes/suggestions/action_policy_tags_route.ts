@@ -7,7 +7,7 @@
 
 import { Request } from '@kbn/core-di-server';
 import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
-import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { errorResponseSchema } from '@kbn/alerting-v2-schemas';
 import { z } from '@kbn/zod/v4';
 import { inject, injectable } from 'inversify';
 import { ActionPolicyClient } from '../../lib/action_policy_client';
@@ -33,11 +33,17 @@ export class ActionPolicyTagsRoute extends BaseAlertingRoute {
     summary: 'Get action policy tags suggestions',
     description: 'Get suggestions for action policy tags based on an optional search query.',
   } as const;
-  static validate = {
+  static schemas = {
     request: {
-      query: buildRouteValidationWithZod(actionPolicyTagsQuerySchema),
+      query: actionPolicyTagsQuerySchema,
     },
-  } as const;
+    response: {
+      400: {
+        body: () => errorResponseSchema,
+        description: 'Indicates invalid query parameters.',
+      },
+    },
+  };
 
   protected readonly routeName = 'action policy tags suggestions';
 
