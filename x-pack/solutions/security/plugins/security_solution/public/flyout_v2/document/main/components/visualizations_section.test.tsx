@@ -72,6 +72,14 @@ jest.mock('./session_preview_container', () => ({
   ),
 }));
 
+jest.mock('./graph_preview_container', () => ({
+  GraphPreviewContainer: () => <div data-test-subj="graphPreviewContainerMock" />,
+}));
+
+jest.mock('../hooks/use_graph_preview', () => ({
+  useGraphPreview: jest.fn(() => ({ hasGraphData: true })),
+}));
+
 const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord =>
   ({
     id: '1',
@@ -163,6 +171,7 @@ describe('VisualizationsSection', () => {
     expect(
       getByTestId(EXPANDABLE_PANEL_CONTENT_TEST_ID(ANALYZER_PREVIEW_TEST_ID))
     ).toBeInTheDocument();
+    expect(getByTestId('graphPreviewContainerMock')).toBeInTheDocument();
   });
 
   it('uses Security history key when opening session flyout in Security app', () => {
