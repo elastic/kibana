@@ -339,7 +339,7 @@ export function SloOverviewFlyout({ serviceName, agentName, onClose }: Props) {
               defaultMessage: 'Open SLO details',
             })}
           >
-            <EuiIcon type="maximize" color="subdued" />
+            <EuiIcon type="maximize" color="subdued" aria-hidden={true} />
           </EuiLink>
         ),
       },
