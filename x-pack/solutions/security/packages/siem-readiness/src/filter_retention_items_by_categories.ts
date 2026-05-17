@@ -27,9 +27,10 @@ export const filterRetentionItemsByCategories = (
   items: RetentionInfo[],
   categoriesData: CategoriesResponse | undefined
 ): RetentionInfo[] => {
-  if (!categoriesData?.mainCategoriesMap?.length) return [];
+  const { mainCategoriesMap } = categoriesData ?? {};
+  if (!mainCategoriesMap?.length) return [];
   return items.filter((item) =>
-    categoriesData.mainCategoriesMap!.some((group) =>
+    mainCategoriesMap.some((group) =>
       group.indices.some((idx) => idx.indexName.includes(item.indexName))
     )
   );
