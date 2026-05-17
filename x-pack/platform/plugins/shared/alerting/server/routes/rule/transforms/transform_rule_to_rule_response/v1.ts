@@ -117,6 +117,7 @@ export const transformRuleToRuleResponse = <Params extends RuleParams = never>(
   schedule: rule.schedule,
   actions: transformRuleActions(rule.actions, rule.systemActions ?? []),
   params: rule.params,
+  ...(rule.mapped_params ? { mapped_params: rule.mapped_params } : {}),
   ...(rule.scheduledTaskId !== undefined ? { scheduled_task_id: rule.scheduledTaskId } : {}),
   created_by: rule.createdBy,
   updated_by: rule.updatedBy,

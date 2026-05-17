@@ -527,6 +527,7 @@ export const ruleResponseSchema = schema.object({
   schedule: intervalScheduleSchema,
   actions: schema.arrayOf(actionSchema),
   params: ruleParamsSchemaV1,
+  mapped_params: schema.maybe(mappedParamsSchema),
   scheduled_task_id: schema.maybe(
     schema.string({
       meta: {

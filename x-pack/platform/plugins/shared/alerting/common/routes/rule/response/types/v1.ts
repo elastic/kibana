@@ -32,6 +32,7 @@ export interface RuleResponse<Params extends RuleParamsV1 = never> {
   schedule: RuleResponseSchemaType['schedule'];
   actions: RuleResponseSchemaType['actions'];
   params: Params;
+  mapped_params?: RuleResponseSchemaType['mapped_params'];
   scheduled_task_id?: RuleResponseSchemaType['scheduled_task_id'];
   created_by: RuleResponseSchemaType['created_by'];
   updated_by: RuleResponseSchemaType['updated_by'];

@@ -107,7 +107,21 @@ describe('transformGetResponse (external)', () => {
     expect(result).not.toHaveProperty('monitoring');
     expect(result).not.toHaveProperty('snooze_schedule');
     expect(result).not.toHaveProperty('active_snoozes');
-    expect(result).not.toHaveProperty('mapped_params');
     expect(result).not.toHaveProperty('view_in_app_relative_url');
+  });
+
+  it('should include mapped_params when present', () => {
+    const result = transformGetResponse({
+      ...mockedRule,
+      mapped_params: {
+        risk_score: 40,
+        severity: '40-medium',
+      },
+    });
+
+    expect(result.mapped_params).toEqual({
+      risk_score: 40,
+      severity: '40-medium',
+    });
   });
 });

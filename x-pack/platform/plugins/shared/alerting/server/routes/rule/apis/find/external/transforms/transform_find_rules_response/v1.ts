@@ -37,6 +37,7 @@ export const transformPartialRule = (
       ? { actions: transformRuleActionsV1(rule.actions || [], rule.systemActions || []) }
       : {}),
     ...(rule.params ? { params: rule.params } : {}),
+    ...(rule.mapped_params ? { mapped_params: rule.mapped_params } : {}),
     ...(rule.scheduledTaskId !== undefined ? { scheduled_task_id: rule.scheduledTaskId } : {}),
     ...(rule.createdBy !== undefined ? { created_by: rule.createdBy } : {}),
     ...(rule.updatedBy !== undefined ? { updated_by: rule.updatedBy } : {}),
