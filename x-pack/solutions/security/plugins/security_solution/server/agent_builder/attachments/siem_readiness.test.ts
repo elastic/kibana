@@ -29,10 +29,21 @@ const qualityData = {
   status: 'actionsRequired' as const,
   summary: '1 of 2 indices incompatible.',
   items: [
-    { indexName: 'logs-endpoint-default', incompatibleFieldCount: 3, totalFieldCount: 50, ecsFieldCount: 47, checkedAt: Date.now() },
+    {
+      indexName: 'logs-endpoint-default',
+      incompatibleFieldCount: 3,
+      totalFieldCount: 50,
+      ecsFieldCount: 47,
+      checkedAt: Date.now(),
+    },
   ],
   actionableFindings: [
-    { category: 'Endpoint', severity: 'warning' as const, message: '3 incompatible fields', resource: 'logs-endpoint-default' },
+    {
+      category: 'Endpoint',
+      severity: 'warning' as const,
+      message: '3 incompatible fields',
+      resource: 'logs-endpoint-default',
+    },
   ],
 };
 
@@ -41,10 +52,21 @@ const continuityData = {
   status: 'actionsRequired' as const,
   summary: 'One pipeline has failures.',
   items: [
-    { name: 'endpoint-pipeline', indices: ['logs-endpoint-000001'], docsCount: 100, failedDocsCount: 5, statsAvailable: true },
+    {
+      name: 'endpoint-pipeline',
+      indices: ['logs-endpoint-000001'],
+      docsCount: 100,
+      failedDocsCount: 5,
+      statsAvailable: true,
+    },
   ],
   actionableFindings: [
-    { category: 'Endpoint', severity: 'critical' as const, message: '5 failed docs', resource: 'endpoint-pipeline' },
+    {
+      category: 'Endpoint',
+      severity: 'critical' as const,
+      message: '5 failed docs',
+      resource: 'endpoint-pipeline',
+    },
   ],
 };
 
@@ -53,10 +75,23 @@ const retentionData = {
   status: 'actionsRequired' as const,
   summary: 'One data stream below threshold.',
   items: [
-    { indexName: 'logs-cloud-default', isDataStream: true, retentionType: 'ilm' as const, retentionPeriod: '30d', retentionDays: 30, policyName: 'my-policy', status: 'non-compliant' as const },
+    {
+      indexName: 'logs-cloud-default',
+      isDataStream: true,
+      retentionType: 'ilm' as const,
+      retentionPeriod: '30d',
+      retentionDays: 30,
+      policyName: 'my-policy',
+      status: 'non-compliant' as const,
+    },
   ],
   actionableFindings: [
-    { category: 'Cloud', severity: 'warning' as const, message: 'Retention below 365d', resource: 'logs-cloud-default' },
+    {
+      category: 'Cloud',
+      severity: 'warning' as const,
+      message: 'Retention below 365d',
+      resource: 'logs-cloud-default',
+    },
   ],
 };
 
@@ -100,7 +135,10 @@ describe('createSiemReadinessAttachmentType', () => {
   describe('validate', () => {
     it('returns valid: true for valid coverage data', async () => {
       const result = await Promise.resolve(attachmentType.validate(coverageData));
-      expect(result).toEqual({ valid: true, data: expect.objectContaining({ dimension: 'coverage' }) });
+      expect(result).toEqual({
+        valid: true,
+        data: expect.objectContaining({ dimension: 'coverage' }),
+      });
     });
 
     it('returns valid: false for invalid data', async () => {
@@ -110,7 +148,11 @@ describe('createSiemReadinessAttachmentType', () => {
   });
 
   describe('format — getRepresentation', () => {
-    const makeAttachment = (data: unknown) => ({ id: 'att-1', type: SIEM_READINESS_ATTACHMENT_ID, data });
+    const makeAttachment = (data: unknown) => ({
+      id: 'att-1',
+      type: SIEM_READINESS_ATTACHMENT_ID,
+      data,
+    });
 
     it('formats coverage as text containing human-readable status and category', async () => {
       const formatted = await Promise.resolve(attachmentType.format(makeAttachment(coverageData), mockFormatContext));

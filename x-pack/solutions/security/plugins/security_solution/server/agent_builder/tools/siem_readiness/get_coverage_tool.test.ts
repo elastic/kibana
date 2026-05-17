@@ -66,7 +66,12 @@ describe('getCoverageTool', () => {
           { category: 'Endpoint', indices: [{ indexName: 'logs-endpoint-default', docs: 500 }] },
         ],
         actionableFindings: [
-          { severity: 'warning', message: 'No data for Cloud.', resource: 'Cloud', category: 'Cloud' },
+          {
+            severity: 'warning',
+            message: 'No data for Cloud.',
+            resource: 'Cloud',
+            category: 'Cloud',
+          },
         ],
       });
       mockGetCoverage.mockResolvedValueOnce(payload);

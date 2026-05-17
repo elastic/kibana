@@ -16,7 +16,9 @@ const ALL: Array<'Endpoint' | 'Identity' | 'Network' | 'Cloud' | 'Application/Sa
   'Application/SaaS',
 ];
 
-const makeCategories = (entries: Array<{ category: string; indexName: string }>): CategoriesResponse => ({
+const makeCategories = (
+  entries: Array<{ category: string; indexName: string }>
+): CategoriesResponse => ({
   rawCategoriesMap: [],
   mainCategoriesMap: entries.map(({ category, indexName }) => ({
     category,
@@ -40,7 +42,15 @@ describe('getRetentionStatus', () => {
   it('returns noData when no retention item matches an active category index', () => {
     const cats = makeCategories([{ category: 'Endpoint', indexName: '.ds-logs-ep-000001' }]);
     const retention = makeRetentionData([
-      { indexName: 'unrelated-stream', isDataStream: true, retentionType: null, retentionPeriod: null, retentionDays: null, policyName: null, status: 'healthy' },
+      {
+        indexName: 'unrelated-stream',
+        isDataStream: true,
+        retentionType: null,
+        retentionPeriod: null,
+        retentionDays: null,
+        policyName: null,
+        status: 'healthy',
+      },
     ]);
     expect(getRetentionStatus(cats, retention, ALL)).toBe('noData');
   });
@@ -49,7 +59,15 @@ describe('getRetentionStatus', () => {
     // category index contains the data stream name as substring
     const cats = makeCategories([{ category: 'Cloud', indexName: '.ds-logs-cloud.stream-000001' }]);
     const retention = makeRetentionData([
-      { indexName: 'logs-cloud.stream', isDataStream: true, retentionType: 'ilm', retentionPeriod: '400d', retentionDays: 400, policyName: 'p1', status: 'healthy' },
+      {
+        indexName: 'logs-cloud.stream',
+        isDataStream: true,
+        retentionType: 'ilm',
+        retentionPeriod: '400d',
+        retentionDays: 400,
+        policyName: 'p1',
+        status: 'healthy',
+      },
     ]);
     expect(getRetentionStatus(cats, retention, ALL)).toBe('healthy');
   });
@@ -57,7 +75,15 @@ describe('getRetentionStatus', () => {
   it('returns actionsRequired when a categorized item is non-compliant', () => {
     const cats = makeCategories([{ category: 'Cloud', indexName: '.ds-logs-cloud.stream-000001' }]);
     const retention = makeRetentionData([
-      { indexName: 'logs-cloud.stream', isDataStream: true, retentionType: 'ilm', retentionPeriod: '30d', retentionDays: 30, policyName: 'p1', status: 'non-compliant' },
+      {
+        indexName: 'logs-cloud.stream',
+        isDataStream: true,
+        retentionType: 'ilm',
+        retentionPeriod: '30d',
+        retentionDays: 30,
+        policyName: 'p1',
+        status: 'non-compliant',
+      },
     ]);
     expect(getRetentionStatus(cats, retention, ALL)).toBe('actionsRequired');
   });
@@ -65,7 +91,15 @@ describe('getRetentionStatus', () => {
   it('respects activeCategories filter', () => {
     const cats = makeCategories([{ category: 'Cloud', indexName: '.ds-logs-cloud.stream-000001' }]);
     const retention = makeRetentionData([
-      { indexName: 'logs-cloud.stream', isDataStream: true, retentionType: 'ilm', retentionPeriod: '30d', retentionDays: 30, policyName: 'p1', status: 'non-compliant' },
+      {
+        indexName: 'logs-cloud.stream',
+        isDataStream: true,
+        retentionType: 'ilm',
+        retentionPeriod: '30d',
+        retentionDays: 30,
+        policyName: 'p1',
+        status: 'non-compliant',
+      },
     ]);
     // Cloud excluded from active categories
     expect(getRetentionStatus(cats, retention, ['Endpoint'])).toBe('noData');

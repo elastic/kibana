@@ -11,7 +11,11 @@ import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import type { Logger } from '@kbn/logging';
 import type { MainCategories } from '@kbn/siem-readiness';
-import { getIndexCategoryMap, isCriticalFailureRate, filterPipelinesByCategories } from '@kbn/siem-readiness';
+import {
+  getIndexCategoryMap,
+  isCriticalFailureRate,
+  filterPipelinesByCategories,
+} from '@kbn/siem-readiness';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
 import { getContinuity } from '../../../lib/siem_readiness/dimensions';

@@ -85,7 +85,14 @@ describe('getRetention', () => {
 
     it('finding message includes retention period and 365-day threshold', async () => {
       mockFetchRetention.mockResolvedValueOnce({
-        items: [makeItem({ indexName: 'logs-network.dns', status: 'non-compliant', retentionDays: 30, retentionPeriod: '30d' })],
+        items: [
+          makeItem({
+            indexName: 'logs-network.dns',
+            status: 'non-compliant',
+            retentionDays: 30,
+            retentionPeriod: '30d',
+          }),
+        ],
       });
       const result = await getRetention({ esClient, isServerless: false, logger });
       expect(result.actionableFindings[0].message).toContain('30d');
@@ -94,7 +101,14 @@ describe('getRetention', () => {
 
     it('describes items with no explicit retention as having no retention policy', async () => {
       mockFetchRetention.mockResolvedValueOnce({
-        items: [makeItem({ status: 'non-compliant', retentionDays: null, retentionPeriod: null, retentionType: null })],
+        items: [
+          makeItem({
+            status: 'non-compliant',
+            retentionDays: null,
+            retentionPeriod: null,
+            retentionType: null,
+          }),
+        ],
       });
       const result = await getRetention({ esClient, isServerless: false, logger });
       expect(result.actionableFindings[0].message).toContain('no retention policy');

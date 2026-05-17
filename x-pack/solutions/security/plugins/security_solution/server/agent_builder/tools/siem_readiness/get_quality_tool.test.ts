@@ -97,10 +97,7 @@ describe('getQualityTool', () => {
     it('keeps results whose indexName is in the category map', async () => {
       mockGetQuality.mockResolvedValueOnce(
         makePayload({
-          items: [
-            makeQualityResult(IDENTITY_INDEX, 2),
-            makeQualityResult('logs-uncategorized', 0),
-          ],
+          items: [makeQualityResult(IDENTITY_INDEX, 2), makeQualityResult('logs-uncategorized', 0)],
         })
       );
 

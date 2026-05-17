@@ -45,18 +45,12 @@ describe('filterRetentionItemsByCategories', () => {
   });
 
   it('filters out items whose data stream name does not appear in any backing index', () => {
-    const result = filterRetentionItemsByCategories(
-      [makeItem(ORPHAN_DATA_STREAM)],
-      mockCategories
-    );
+    const result = filterRetentionItemsByCategories([makeItem(ORPHAN_DATA_STREAM)], mockCategories);
     expect(result).toHaveLength(0);
   });
 
   it('keeps items whose data stream name is a substring of a category backing index', () => {
-    const result = filterRetentionItemsByCategories(
-      [makeItem(CLOUD_DATA_STREAM)],
-      mockCategories
-    );
+    const result = filterRetentionItemsByCategories([makeItem(CLOUD_DATA_STREAM)], mockCategories);
     expect(result).toHaveLength(1);
     expect(result[0].indexName).toBe(CLOUD_DATA_STREAM);
   });

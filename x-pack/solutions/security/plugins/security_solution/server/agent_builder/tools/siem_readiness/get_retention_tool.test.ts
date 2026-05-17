@@ -224,7 +224,7 @@ describe('getRetentionTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       )) as ToolHandlerStandardReturn;
 
-      const agentItemNames = ((result.results[0] as OtherResult<RetentionPayload>).data).items.map(
+      const agentItemNames = (result.results[0] as OtherResult<RetentionPayload>).data.items.map(
         (i) => i.indexName
       );
       // Apply the same shared predicate that the UI tab now uses
