@@ -203,6 +203,7 @@ describe('find()', () => {
                 "uuid": 100,
               },
             ],
+            "activeSnoozes": undefined,
             "alertTypeId": "myType",
             "artifacts": Object {
               "dashboards": Array [],
@@ -216,6 +217,7 @@ describe('find()', () => {
               "status": "pending",
             },
             "id": "1",
+            "isSnoozedUntil": null,
             "name": "fakeRuleName",
             "notifyWhen": "onActiveAlert",
             "params": Object {
@@ -324,6 +326,7 @@ describe('find()', () => {
                 "uuid": undefined,
               },
             ],
+            "activeSnoozes": undefined,
             "alertTypeId": "myType",
             "artifacts": Object {
               "dashboards": Array [],
@@ -337,6 +340,7 @@ describe('find()', () => {
               "status": "pending",
             },
             "id": "1",
+            "isSnoozedUntil": null,
             "notifyWhen": "onActiveAlert",
             "params": Object {
               "bar": true,
@@ -435,6 +439,7 @@ describe('find()', () => {
                 "uuid": undefined,
               },
             ],
+            "activeSnoozes": undefined,
             "alertTypeId": "myType",
             "artifacts": Object {
               "dashboards": Array [],
@@ -448,6 +453,7 @@ describe('find()', () => {
               "status": "pending",
             },
             "id": "1",
+            "isSnoozedUntil": null,
             "notifyWhen": "onActiveAlert",
             "params": Object {
               "bar": true,
@@ -728,6 +734,7 @@ describe('find()', () => {
                 "uuid": undefined,
               },
             ],
+            "activeSnoozes": undefined,
             "alertTypeId": "myType",
             "artifacts": Object {
               "dashboards": Array [],
@@ -741,6 +748,7 @@ describe('find()', () => {
               "status": "pending",
             },
             "id": "1",
+            "isSnoozedUntil": null,
             "notifyWhen": "onActiveAlert",
             "params": Object {
               "bar": true,
@@ -764,6 +772,7 @@ describe('find()', () => {
                 "uuid": undefined,
               },
             ],
+            "activeSnoozes": undefined,
             "alertTypeId": "123",
             "artifacts": Object {
               "dashboards": Array [],
@@ -777,6 +786,7 @@ describe('find()', () => {
               "status": "pending",
             },
             "id": "2",
+            "isSnoozedUntil": null,
             "notifyWhen": "onActiveAlert",
             "params": Object {
               "bar": true,
@@ -1046,6 +1056,7 @@ describe('find()', () => {
           "data": Array [
             Object {
               "actions": Array [],
+              "activeSnoozes": undefined,
               "artifacts": Object {
                 "dashboards": Array [],
                 "investigation_guide": Object {
@@ -1053,6 +1064,7 @@ describe('find()', () => {
                 },
               },
               "id": "1",
+              "isSnoozedUntil": null,
               "notifyWhen": undefined,
               "params": undefined,
               "schedule": undefined,
@@ -1459,6 +1471,7 @@ describe('find()', () => {
                   "uuid": 100,
                 },
               ],
+              "activeSnoozes": undefined,
               "alertTypeId": "myType",
               "artifacts": Object {
                 "dashboards": Array [
@@ -1476,6 +1489,7 @@ describe('find()', () => {
                 "status": "pending",
               },
               "id": "1",
+              "isSnoozedUntil": null,
               "name": "fakeRuleName",
               "notifyWhen": "onActiveAlert",
               "params": Object {
