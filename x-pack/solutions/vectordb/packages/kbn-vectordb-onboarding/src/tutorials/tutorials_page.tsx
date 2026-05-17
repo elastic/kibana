@@ -107,9 +107,7 @@ export const TutorialsPage: React.FC = () => {
                 data-test-subj={`tutorialCard-${tutorial.id}`}
                 href={tutorial.href}
                 target={tutorial.target}
-                onClick={
-                  tutorial.target === '_blank' ? () => markComplete(tutorial.id) : undefined
-                }
+                onClick={tutorial.target === '_blank' ? () => markComplete(tutorial.id) : undefined}
                 icon={
                   <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
                     <EuiFlexItem grow={false}>

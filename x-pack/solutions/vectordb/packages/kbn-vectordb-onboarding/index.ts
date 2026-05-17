@@ -18,7 +18,5 @@ export {
   useTutorialProgress,
 } from './src/tutorials/use_tutorial_progress';
 export type { OnboardingServices } from './src/services';
-export {
-  useOnboardingCredentials,
-} from './src/onboarding/use_onboarding_credentials';
+export { useOnboardingCredentials } from './src/onboarding/use_onboarding_credentials';
 export type { OnboardingCredentials } from './src/onboarding/use_onboarding_credentials';
