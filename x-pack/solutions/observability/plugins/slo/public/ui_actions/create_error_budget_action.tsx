@@ -20,6 +20,7 @@ import {
 } from '../embeddable/slo/error_budget/constants';
 import type { SLORepositoryClient } from '../types';
 import { openSloConfiguration } from '../embeddable/slo/error_budget/error_budget_open_configuration';
+import { isValidLicense } from './is_valid_license';
 
 export function createAddErrorBudgetPanelAction(
   coreStart: CoreStart,
@@ -32,7 +33,7 @@ export function createAddErrorBudgetPanelAction(
     order: 6,
     getIconType: () => 'chartLine',
     isCompatible: async ({ embeddable }) => {
-      return apiIsPresentationContainer(embeddable);
+      return (await isValidLicense(pluginsStart)) && apiIsPresentationContainer(embeddable);
     },
     execute: async ({ embeddable }) => {
       if (!apiIsPresentationContainer(embeddable)) throw new IncompatibleActionError();

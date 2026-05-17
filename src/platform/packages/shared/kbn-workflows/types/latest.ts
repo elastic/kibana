@@ -22,6 +22,7 @@ export type {
   RunWorkflowCommand,
   RunStepCommand,
   RunWorkflowResponseDto,
+  ResumeWorkflowExecutionResponseDto,
   TestWorkflowResponseDto,
   TestWorkflowCommand,
   StackFrame,

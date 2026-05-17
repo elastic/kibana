@@ -539,7 +539,9 @@ describe('Execution Routes', () => {
     });
 
     it('should call api.resumeWorkflowExecution with execution id, space, input, and request', async () => {
-      mockApi.resumeWorkflowExecution.mockResolvedValue(undefined);
+      mockApi.resumeWorkflowExecution.mockResolvedValue({
+        resumedBy: 'user',
+      });
       const h = handler('POST', path)!;
       const request = {
         params: { executionId: 'ex-1' },

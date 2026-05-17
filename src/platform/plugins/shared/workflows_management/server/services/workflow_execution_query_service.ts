@@ -23,7 +23,12 @@ import type {
 } from '@kbn/workflows-execution-engine/server/workflow_event_logger/types';
 
 import type { WorkflowExecutionQueryDeps } from './types';
-import { WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../common';
+import {
+  WORKFLOWS_EXECUTIONS_INDEX,
+  WORKFLOWS_INDEX,
+  WORKFLOWS_STEP_EXECUTIONS_INDEX,
+} from '../../common';
+import { isIndexNotFoundError } from '../api/lib/es_error_helpers';
 import { getChildWorkflowExecutions } from '../api/lib/get_child_workflow_executions';
 import { getWorkflowExecution } from '../api/lib/get_workflow_execution';
 import {
@@ -217,6 +222,146 @@ export class WorkflowExecutionQueryService {
       throw new Error('WorkflowEventLoggerService not initialized');
     }
     return this.deps.workflowEventLoggerService.getStepLogs(params);
+  }
+
+  /**
+   * Cross-workflow fan-out: returns every step execution currently blocked on
+   * `waitForInput` in the given space. Used by the Inbox plugin to surface
+   * pending HITL items across all workflows a user has access to.
+   *
+   * Intentionally minimal — the Inbox registry owns higher-level concerns
+   * like status filtering and paginated merge-sort across providers.
+   *
+   * NOTE: only `spaceId` and `status` are filtered here because those are the
+   * only keyword-indexed fields on `.workflows-step-executions`. An earlier
+   * draft also added `term: { stepType: 'waitForInput' }`, which silently
+   * matched zero docs and made the Inbox UI appear empty even when workflows
+   * were paused on `waitForInput`. The status filter is sufficient because
+   * `waiting_for_input` is only ever produced by the `waitForInput` step type.
+   *
+   * Defence-in-depth `must_not` on `finishedAt`: if a race between the
+   * workflow-level timeout monitor and the waitForInput step leaves a doc with
+   * `status: waiting_for_input` AND `finishedAt` set (the step is actually
+   * settled), we must not resurface it in the Inbox — responding to it is a
+   * no-op because the execution doc is terminal. The underlying race is fixed
+   * in `WaitForInputStepImpl`, but this keeps the Inbox honest even for
+   * pre-existing zombie docs or any future regression.
+   *
+   * Orphan filtering: `.workflows-step-executions` is NOT transactionally
+   * cleaned up when a workflow is soft-deleted (see `workflow_deletion.ts`
+   * — only hard-deletes call `deleteByQuery`). Without a join the Inbox
+   * would surface ghost actions for workflows the user has already removed
+   * from `/app/workflows`. We do this as a list-time filter rather than a
+   * delete-time cancel so soft-deletes stay reversible (step executions
+   * resurface if the workflow is restored) and so pre-existing orphans get
+   * cleaned up retroactively.
+   */
+  async listWaitingForInputSteps(
+    spaceId: string,
+    { page = 1, perPage = 100 }: { page?: number; perPage?: number } = {}
+  ): Promise<{ results: EsWorkflowStepExecution[]; total: number }> {
+    const from = Math.max(0, (page - 1) * perPage);
+    let response: estypes.SearchResponse<EsWorkflowStepExecution>;
+    try {
+      response = await this.deps.esClient.search<EsWorkflowStepExecution>({
+        index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
+        query: {
+          bool: {
+            must: [{ term: { spaceId } }, { term: { status: 'waiting_for_input' } }],
+            must_not: [{ exists: { field: 'finishedAt' } }],
+          },
+        },
+        sort: [{ startedAt: { order: 'desc' } }],
+        from,
+        size: perPage,
+        track_total_hits: true,
+      });
+    } catch (error) {
+      if (isIndexNotFoundError(error)) {
+        return { results: [], total: 0 };
+      }
+      this.deps.logger.error(`Failed to list waiting-for-input step executions: ${error}`);
+      throw error;
+    }
+
+    const total =
+      typeof response.hits.total === 'number'
+        ? response.hits.total
+        : response.hits.total?.value ?? 0;
+
+    const allResults = response.hits.hits
+      .map((hit) => hit._source)
+      .filter((src): src is EsWorkflowStepExecution => Boolean(src));
+
+    if (allResults.length === 0) {
+      return { results: allResults, total };
+    }
+
+    const distinctWorkflowIds = Array.from(
+      new Set(
+        allResults
+          .map((r) => r.workflowId)
+          .filter((id): id is string => typeof id === 'string' && id.length > 0)
+      )
+    );
+
+    const aliveIds = await this.getAliveWorkflowIds(distinctWorkflowIds, spaceId);
+
+    if (aliveIds === null) {
+      // Lookup itself failed (already logged). Fall back to unfiltered
+      // results so a transient ES error doesn't black-hole the Inbox.
+      return { results: allResults, total };
+    }
+
+    const results = allResults.filter((r) => r.workflowId && aliveIds.has(r.workflowId));
+    const dropped = allResults.length - results.length;
+    // `total` is per-page best-effort: we only know how many of the items in
+    // *this page* were orphaned. Across pages the reported total may be
+    // slightly optimistic, but it is monotonically corrected as the user
+    // pages through. A precise cardinality would require a second
+    // aggregation per call, which isn't worth it for a transient state.
+    return { results, total: Math.max(0, total - dropped) };
+  }
+
+  /**
+   * Returns the subset of `ids` that point to alive workflows in `spaceId`
+   * — i.e. exist in `.workflows-workflows` and are not soft-deleted
+   * (`deleted_at` not set). Returns `null` if the lookup itself errored so
+   * the caller can fall back to unfiltered behaviour.
+   */
+  private async getAliveWorkflowIds(ids: string[], spaceId: string): Promise<Set<string> | null> {
+    if (ids.length === 0) {
+      return new Set();
+    }
+    try {
+      const response = await this.deps.esClient.search<unknown>({
+        index: WORKFLOWS_INDEX,
+        query: {
+          bool: {
+            must: [{ ids: { values: ids } }, { term: { spaceId } }],
+            must_not: [{ exists: { field: 'deleted_at' } }],
+          },
+        },
+        _source: false,
+        size: ids.length,
+        track_total_hits: false,
+      });
+      const alive = new Set<string>();
+      for (const hit of response.hits.hits) {
+        if (hit._id) alive.add(hit._id);
+      }
+      return alive;
+    } catch (error) {
+      if (isIndexNotFoundError(error)) {
+        // Fresh install / test env: no workflows index yet means no alive
+        // workflows, so every step execution is by definition an orphan.
+        return new Set();
+      }
+      this.deps.logger.warn(
+        `Failed to validate parent workflows for inbox listing; returning unfiltered results: ${error}`
+      );
+      return null;
+    }
   }
 
   async getStepExecution(

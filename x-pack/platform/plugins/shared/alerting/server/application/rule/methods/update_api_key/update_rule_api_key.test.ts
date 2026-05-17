@@ -629,7 +629,6 @@ describe('updateRuleApiKey()', () => {
         {
           action: 'rule_update_api_key',
           spaceId: 'default',
-          data: { metadata: { bulkCount: 1 } },
         }
       );
     });
