@@ -12,7 +12,7 @@ import type { CommentUserAction } from '../../../../common/types/domain';
 import { UserActionActions, UserActionTypes } from '../../../../common/types/domain';
 import { UserActionBuilder } from '../abstract_builder';
 import type { EventDetails, UserActionParameters, UserActionEvent } from '../types';
-import { getAttachmentSOExtractor } from '../../so_references';
+import { buildUnifiedAttachmentSORefs, getAttachmentSOExtractor } from '../../so_references';
 import { getPastTenseVerb } from './audit_logger_utils';
 
 export class CommentUserActionBuilder extends UserActionBuilder {
@@ -37,11 +37,17 @@ export class CommentUserActionBuilder extends UserActionBuilder {
       value: { ...transformedFields, ...extractedAttributes },
       type: UserActionTypes.comment,
     });
+    const unifiedReferences = buildUnifiedAttachmentSORefs(args.payload.attachment);
 
     const parameters = {
       ...commentUserAction,
       references: uniqBy(
-        [...commentUserAction.references, ...refsWithExternalRefId, ...extractedReferences],
+        [
+          ...commentUserAction.references,
+          ...refsWithExternalRefId,
+          ...extractedReferences,
+          ...unifiedReferences,
+        ],
         'id'
       ),
     };

@@ -21,7 +21,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import imageUrl from './landing_background.png';
 
-const BACKGROUND_IMAGE_WIDTH = '296px';
+const BACKGROUND_IMAGE_MAX_WIDTH = '296px';
 const BACKGROUND_IMAGE_BOTTOM_OFFSET = '-60px';
 const HEADER_CONTENT_MIN_HEIGHT = '140px';
 
@@ -70,7 +70,7 @@ export const LandingHeader = () => {
               src={imageUrl}
               alt=""
               css={css`
-                width: ${BACKGROUND_IMAGE_WIDTH};
+                max-width: ${BACKGROUND_IMAGE_MAX_WIDTH};
               `}
             />
           </EuiFlexItem>
