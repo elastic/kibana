@@ -545,6 +545,16 @@ export function createDataCollectionFailureNotifier({
   };
 }
 
+export function notifyFetchMoreError(toasts: DataSourceMachineDeps['toasts'], error: unknown) {
+  const formattedError = getFormattedError(error);
+  toasts.addError(formattedError, {
+    title: i18n.translate('xpack.streams.enrichment.fetchMore.error', {
+      defaultMessage: 'Failed to load more matching samples.',
+    }),
+    toastMessage: formattedError.message,
+  });
+}
+
 export function createFetchMoreFailureNotifier({
   toasts,
 }: {
@@ -552,12 +562,6 @@ export function createFetchMoreFailureNotifier({
 }) {
   return (params: { event: unknown }) => {
     const event = params.event as ErrorActorEvent<esErrors.ResponseError, string>;
-    const error = getFormattedError(event.error);
-    toasts.addError(error, {
-      title: i18n.translate('xpack.streams.enrichment.fetchMore.error', {
-        defaultMessage: 'Failed to load more matching samples.',
-      }),
-      toastMessage: error.message,
-    });
+    notifyFetchMoreError(toasts, event.error);
   };
 }

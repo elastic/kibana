@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { i18n } from '@kbn/i18n';
 import type { IToasts } from '@kbn/core/public';
 import {
   getRoot,
@@ -58,7 +57,10 @@ import {
   dataSourceMachine,
 } from '../data_source_state_machine';
 import { findConditionById } from '../data_source_state_machine/fetch_more_actor';
-import { resolveDraftSampleSource } from '../data_source_state_machine/data_collector_actor';
+import {
+  notifyFetchMoreError,
+  resolveDraftSampleSource,
+} from '../data_source_state_machine/data_collector_actor';
 import { interactiveModeMachine } from '../interactive_mode_machine';
 import { createInteractiveModeMachineImplementations } from '../interactive_mode_machine/interactive_mode_machine';
 import {
@@ -826,11 +828,7 @@ function createFetchMoreSamplesAction({
         activeDataSourceRef.send({ type: 'dataSource.fetchMore', esqlQuery });
       })
       .catch((err) => {
-        toasts.addError(err instanceof Error ? err : new Error(String(err)), {
-          title: i18n.translate('xpack.streams.enrichment.fetchMore.buildQueryError', {
-            defaultMessage: 'Failed to load more matching samples.',
-          }),
-        });
+        notifyFetchMoreError(toasts, err);
       });
   };
 }
