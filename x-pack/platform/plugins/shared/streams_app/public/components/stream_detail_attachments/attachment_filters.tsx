@@ -154,6 +154,7 @@ export function AttachmentFilters({
                 checked: filters.types.includes(option.value) ? 'on' : undefined,
                 value: option.value,
               }))}
+              listProps={{ paddingSize: 's' }}
               onChange={(newOptions) => {
                 onFiltersChange((prev) => ({
                   ...prev,
@@ -196,6 +197,7 @@ export function AttachmentFilters({
                 checked: filters.tags.includes(tag.id) ? 'on' : undefined,
                 tagId: tag.id,
               }))}
+              listProps={{ paddingSize: 's' }}
               onChange={(newOptions) => {
                 onFiltersChange((prev) => ({
                   ...prev,

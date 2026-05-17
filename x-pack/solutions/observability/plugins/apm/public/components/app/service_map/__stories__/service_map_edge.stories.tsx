@@ -18,7 +18,7 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { EuiText, EuiSpacer, EuiCallOut } from '@elastic/eui';
-import { ServiceNode } from '../service_node';
+import { ServiceNode } from '../../../shared/service_map/service_node';
 import { DependencyNode } from '../../../shared/service_map/dependency_node';
 import { ServiceMapEdge } from '../service_map_edge';
 import { applyDagreLayout } from '../../../shared/service_map/layout';

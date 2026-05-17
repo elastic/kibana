@@ -36,6 +36,13 @@ responses:
                   totalActiveSockets: 4
                   totalIdleSockets: 2
                   totalQueuedRequests: 0
+          statusRedactedResponse:
+            summary: Kibana is available (redacted)
+            description: A redacted response returned when the caller is unauthenticated or lacks the `monitor` cluster privilege.
+            value:
+              status:
+                overall:
+                  level: available
   '503':
     description: Kibana or some of its essential services are unavailable. Kibana may be degraded or unavailable.
     content:

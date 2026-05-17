@@ -6,12 +6,7 @@
  */
 
 import { getCompositeSLOParamsSchema } from '@kbn/slo-schema';
-import {
-  DefaultBurnRatesClient,
-  DefaultCompositeSLORepository,
-  DefaultSummaryClient,
-  GetCompositeSLO,
-} from '../../../services';
+import { DefaultBurnRatesClient, DefaultSummaryClient, GetCompositeSLO } from '../../../services';
 import { createSloServerRoute } from '../../create_slo_server_route';
 import { assertPlatinumLicense } from '../utils/assert_platinum_license';
 
@@ -27,19 +22,24 @@ export const getCompositeSLORoute = createSloServerRoute({
   handler: async ({ params, logger, request, plugins, getScopedClients }) => {
     await assertPlatinumLicense(plugins);
 
-    const { soClient, scopedClusterClient, repository } = await getScopedClients({
-      request,
-      logger,
-    });
+    const { scopedClusterClient, repository, compositeSloRepository, spaceId } =
+      await getScopedClients({
+        request,
+        logger,
+      });
 
-    const compositeSloRepository = new DefaultCompositeSLORepository(soClient, logger);
     const burnRatesClient = new DefaultBurnRatesClient(scopedClusterClient.asCurrentUser);
     const summaryClient = new DefaultSummaryClient(
       scopedClusterClient.asCurrentUser,
       burnRatesClient
     );
-    const getCompositeSLO = new GetCompositeSLO(compositeSloRepository, repository, summaryClient);
+    const getCompositeSLO = new GetCompositeSLO(
+      compositeSloRepository,
+      repository,
+      summaryClient,
+      scopedClusterClient.asCurrentUser
+    );
 
-    return await getCompositeSLO.execute(params.path.id);
+    return await getCompositeSLO.execute(params.path.id, spaceId);
   },
 });
