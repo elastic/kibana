@@ -255,7 +255,6 @@ Without this, the LLM encounters tokens with no context and may hallucinate what
 **Override.** Workflow authors who want custom instruction wording set `systemPromptInstruction` on the `ai.pii` step input. The step echoes it through to its output; the inference plugin uses it instead of the auto-generated default. This is optional — most workflows should leave it unset.
 
 #### Per-consumer threading expectations
-
 `sessionId` is supplied by the caller through `ChatCompleteOptions.metadata.anonymization.sessionId`. Without it, the inference plugin generates a per-request UUID — anonymization works for that call, cross-turn token consistency is lost.
 
 | Consumer | Stable identifier available | Action required |
@@ -321,11 +320,10 @@ Reverse pass — scans input text for tokens and restores originals from the cal
 
 Single regex against the token format `{ENTITY_CLASS}_{HEX}` (deterministic from `generateToken`'s output shape) plus a map lookup per match.
 
-**Safety net for over-broad patterns:** Tool call argument restoration (`restoreInValue` on the assembled message's `toolCalls`) acts as a safety net for sloppy `customPatterns`. Even if a regex tokenizes file paths or identifiers it shouldn't, tool arguments are restored before any tool is invoked — preventing downstream breakage. This does not excuse over-broad patterns: the LLM's reasoning quality degrades when it sees tokens instead of real values, and the noise shows up in execution traces.
 
 ### 4.5 Default workflow shipped out of the box
 
-**Current execution model (Phase 2 — [implemented](https://github.com/elastic/kibana/pull/268994))**
+**Current execution model ([PoC implemented](https://github.com/elastic/kibana/pull/268994))**
 
 `invokeHook` queries the `.kibana-workflows` index for workflows subscribed to the trigger in the current space. If the trigger has `inlineExecution: true` and at least one enabled workflow is found, those workflows are executed inline via `executeWorkflowSync` — a lightweight in-process runner that evaluates YAML steps sequentially using the existing `WorkflowTemplatingEngine`, with no Task Manager involvement and no Elasticsearch state writes.
 
@@ -556,7 +554,7 @@ For each decision below: the recommendation, a one-paragraph rationale, and an a
 
 **Recommended:** A single hook pair at `inference.chatComplete`.
 
-**Rationale:** Every model-bound text in Kibana — agent prompts, tool outputs that ride along in the next prompt, observability summaries, attack-discovery prompts — passes through this one boundary. Hooking here gives complete coverage by induction (tool outputs become part of the next prompt and are anonymized at that point) and zero per-consumer wiring. The PM doc's framing of "before LLM call / after LLM call" maps onto this boundary verbatim.
+**Rationale:** Centralized placement covers all model-bound text path to LLMs (agent prompts, tool outputs, etc.) without per-consumer wiring. See [§4.1](#41-single-hook-point-at-chatcomplete) for full technical rationale.
 
 | Option | Coverage | Wiring | Risk |
 | :---- | :---- | :---- | :---- |
@@ -568,7 +566,7 @@ For each decision below: the recommendation, a one-paragraph rationale, and an a
 
 **Recommended:** The inference plugin derives the HMAC salt from `HMAC(serverSecret, sessionId)` on each call and holds the token map in a call-scoped `AnonymizationContext` that is threaded between the two hook invocations as an internal implementation detail. Workflow steps access it via an execution-context capability handle; the YAML never references the salt or map directly.
 
-**Rationale:** A derived salt is fully deterministic — the same `sessionId` always produces the same salt on any node, so cross-turn token consistency holds without any persistent state. The call-scoped token map avoids in-memory session management (no TTL, no eviction, no LRU, no distributed-state problem in multi-node Kibana deployments) while keeping the workflow YAML as clean as the session-store approach. The inference plugin remains stateless, which is appropriate for a platform infrastructure component.
+**Rationale:** Provides stateless consistency across turns and nodes without the overhead of session management or TTLs. See [§4.3](#43-the-pillars-of-statelessness) for full technical rationale.
 
 | Option | Pros | Cons |
 | :---- | :---- | :---- |
@@ -581,7 +579,7 @@ For each decision below: the recommendation, a one-paragraph rationale, and an a
 
 **Recommended:** Add an optional `sync` block to `registerTriggerDefinition`.
 
-**Rationale:** Workflow authors subscribe the same way to async events and sync hooks today; differentiating at registration time (rather than splitting into `registerTriggerDefinition` vs `registerHookDefinition`) preserves that uniformity. The change is one optional field — zero impact on every async trigger registered today.
+**Rationale:** Maintains uniformity with async triggers while providing the necessary sync contract. See [§4.2](#42-trigger-registrations-from-inference_workflows) for schema details.
 
 | Option | Pros | Cons |
 | :---- | :---- | :---- |
@@ -592,7 +590,7 @@ For each decision below: the recommendation, a one-paragraph rationale, and an a
 
 **Recommended:** Ship two default YAML workflows; admin enables per-space or per-agent.
 
-**Rationale:** Out-of-box safety with admin opt-in. The PM doc requires a small fixed regex set; shipping it as a workflow makes it the same author-surface as everything else (admins can clone/override/extend without touching code). Off-by-default protects existing deployments from unexpected behavior changes.
+**Rationale:** Provides secure-by-default logic (using the PM-mandated regex set) with zero-config activation while allowing full customizability. See [§4.5](#45-default-workflow-shipped-out-of-the-box) for implementation.
 
 | Option | Pros | Cons |
 | :---- | :---- | :---- |
@@ -622,7 +620,7 @@ Any steps listed in prior drafts as "future additions to `workflows_extensions`"
 
 **Recommended:** Default `failureMode: 'block'` (fail-closed). Admin can opt into `'allow_unsafe'` (fail-open) per space.
 
-**Rationale:** A broken anonymization workflow under fail-open silently sends raw PII to the model with no caller-side signal, no UI badge, no error — exactly the behavior the feature exists to prevent. PII leaks must not happen unnoticed. Fail-closed surfaces the failure to the user ("Anonymization is currently unavailable; the request was rejected") and lets the admin investigate. Operators who explicitly need service continuity over safety can opt in; no one gets the unsafe default by accident.
+**Rationale:** A broken anonymization workflow must not silently leak PII. Fail-closed ensures security by rejecting the inference call if anonymization fails, while allowing admins to opt into `'allow_unsafe'` if service continuity is prioritized. See [§9.1](#91-failure-mode-semantics) for detailed semantics.
 
 | Option | Pros | Cons |
 | :---- | :---- | :---- |
@@ -742,18 +740,18 @@ Inherited from `proposal.md` §"Lifecycle Hook Guardrails", with one important d
 | Space-level control | Enable or disable the seeded workflow in Workflow Management for the relevant space. When no workflows are enabled in the current space, `invokeHook` returns pass-through immediately |
 | Environment fallback | When `workflowsExtensions` is not loaded (OSS / non-workflows environments), `anonymizationHookInvoker` is null and the legacy path runs regardless of the server flag |
 
-### Failure-mode semantics in detail
+### 9.1 Failure-mode semantics
+
+The default `failureMode` is `'block'` (fail-closed) to prevent silent PII leaks. Admins who prioritize service continuity can opt into `'allow_unsafe'` per-space via `xpack.inference.anonymization.failureMode`.
 
 | Hook | Workflow result | `failureMode: 'block'` (default) | `failureMode: 'allow_unsafe'` |
 | :---- | :---- | :---- | :---- |
 | `beforeCompletion` | success | Use anonymized prompt | Use anonymized prompt |
 | `beforeCompletion` | failed / timeout | **Reject `chatComplete`** with `InferenceAnonymizationUnavailableError` | Log warn, send raw prompt to model |
 | `afterCompletion` | success | Return restored response | Return restored response |
-| `afterCompletion` | failed / timeout | **Reject `chatComplete`** with the same error class — caller does not see tokens | Log warn, return raw tokenized response (caller may show tokens or error to user) |
+| `afterCompletion` | failed / timeout | **Reject `chatComplete`** with the same error class — caller does not see tokens | Log warn, return raw tokenized response |
 
-The default is fail-closed because the alternative is a silent PII leak with no caller-side signal. Admins who explicitly need service continuity can opt into `allow_unsafe` per-space. Both modes emit metrics (`anonymization.workflow.failure.count`) so dashboards can alert.
-
-Streaming-specific: the buffering described in §4.6 is bounded (`MAX_TOKEN_LENGTH ≈ 128 bytes`) and adds a single-digit-millisecond latency floor; the regex-replace pass dominates. If the `afterCompletion` workflow fails mid-stream under `'block'`, the stream is aborted with the standard error class — partial chunks already emitted are unavoidable but those have already been de-anonymized by the streaming transform.
+**Streaming-specific behavior:** If the `afterCompletion` workflow fails mid-stream under `'block'`, the stream is aborted. Partial chunks already emitted are unavoidable but have already been de-anonymized by the streaming transform.
 
 ## 10\. Open questions
 
@@ -783,32 +781,17 @@ Streaming-specific: the buffering described in §4.6 is bounded (`MAX_TOKEN_LENG
 
 ## 11\. Success criteria
 
-Restated from the PM doc, scoped to this RFC:
-
-1. An admin can enable anonymization for an agent (or for an entire space) and configure which PII patterns are detected.
-
-2. An analyst can ask "Summarize this alert" and the LLM never sees raw IPs, emails, hostnames, or usernames that match configured patterns — verifiable in workflow execution traces and connector logs. Both `system` prompts and `messages` are covered.
-
-3. The analyst sees real values in the chat response (de-anonymized in the response stream/blob).
-
-4. Deterministic tokens preserve entity correlation: the same value yields the same token across every `chatComplete` call that shares a `sessionId`, on any Kibana node, across restarts. Token determinism derives from `HMAC(serverSecret, sessionId)` — no stored state required.
-
-5. No data persisted — the token map exists only for the duration of a single `chatComplete` call and is garbage-collected with the request. There is no session store, no TTL, and no eviction logic.
-
-6. **Fail-closed by default**: when anonymization is enabled and a regex workflow fails, no raw prompt is sent to the model. The user sees a clear "Anonymization unavailable" error; admins see a metric and warn log. Silent leaks under default settings are not possible. The opt-in `failureMode: 'allow_unsafe'` is logged distinctly so audits can detect it.
-
-7. **Token-cap exhaustion is loud, not silent**: when a single `chatComplete` call's prompt contains more than `maxTokensPerCall` unique PII values, new insertions produce a step failure that flows through `failureMode`. With the default, the call is rejected. The per-call cap is much harder to hit than a per-session cap — it requires a single prompt to contain more than 10 000 distinct PII values.
-
-8. Enterprise license required for the feature to be enabled.
-
-9. Works in air-gapped deployments — no external service dependency; HMAC and regex are local.
-
-10. Regex scanning adds \< 100 ms latency to prompt processing for the default rule set.
-
-11. Every consumer of the inference plugin benefits without modification, **subject to the Phase 1 sessionId audit (Q6)** — Observability AI Assistant, Security AI, attack-discovery, Agent Builder all anonymize the same way through the same hook. Multi-turn correlation requires the consumer to thread a stable `sessionId`.
-
-12. Every existing in-tree anonymization implementation listed in §8.1 is removed by the end of   
-    Phase 3\.
+- [ ] **Admin Control**: Enable/disable anonymization per space; configure PII patterns in YAML.
+- [ ] **Full Coverage**: LLM never sees raw PII matching patterns in `system` prompts or `messages`.
+- [ ] **Restoration**: Users see real values restored in responses (including streams).
+- [ ] **Determinism**: Same PII yields same token across turns and nodes via derived salt.
+- [ ] **Stateless**: No data persisted; token map exists only for the request duration.
+- [ ] **Fail-Closed**: No PII leaks on workflow failure by default; explicit `'allow_unsafe'` opt-in.
+- [ ] **Loud Failures**: Token-cap exhaustion and workflow errors surface as clear user/admin signals.
+- [ ] **Licensing**: Enterprise license required for activation.
+- [ ] **Air-gapped**: Operates locally with no external service dependencies (HMAC/Regex).
+- [ ] **Performance**: Regex scanning adds < 100ms latency to prompt processing.
+- [ ] **Unified Path**: All `chatComplete` consumers use the same hook; legacy paths removed.
 
 ## Appendix A — Future potential improvements
 
@@ -933,7 +916,7 @@ A reviewer should be able to skim this table and conclude "this is small."
 | `kbn-elastic-assistant-common/data_anonymization` | Removed |
 | `ai:anonymizationSettings` | Removed via one-shot import (regex rules → default workflow `customPatterns`; NER rules dropped with deprecation warning) |
 
-## Appendix B — Glossary
+## Appendix C — Glossary
 
 - **Lifecycle hook** — synchronous, blocking workflow execution at a named "before" or "after" point. Distinguished from async events (`emitEvent`) by the `sync` block on the trigger definition.  
 - **`invokeHook(triggerId, payload)`** — new method on `WorkflowsClient`, returns `Promise<HookResult>`. Sync sibling of `emitEvent`.  
