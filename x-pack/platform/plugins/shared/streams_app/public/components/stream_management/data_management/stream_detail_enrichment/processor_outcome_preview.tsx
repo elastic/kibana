@@ -13,7 +13,6 @@ import {
   EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIconTip,
   EuiLoadingSpinner,
   EuiSpacer,
   EuiText,
@@ -308,10 +307,6 @@ const FetchMoreMatchingSamples = () => {
     snapshot ? snapshot.context.isFetchingMore : false
   );
 
-  const fetchMoreError = useDataSourceSelector(activeDataSourceRef, (snapshot) =>
-    snapshot ? snapshot.context.fetchMoreError : undefined
-  );
-
   const shouldShow =
     selectedConditionId &&
     conditionMatchRate !== undefined &&
@@ -334,16 +329,6 @@ const FetchMoreMatchingSamples = () => {
           })}
         </EuiButton>
       </EuiFlexItem>
-      {fetchMoreError && (
-        <EuiFlexItem grow={false}>
-          <EuiIconTip
-            content={fetchMoreError}
-            type="warning"
-            color="danger"
-            data-test-subj="streamsAppFetchMoreMatchingSamplesError"
-          />
-        </EuiFlexItem>
-      )}
     </EuiFlexGroup>
   );
 };

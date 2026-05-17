@@ -47,7 +47,6 @@ export interface DataSourceContext {
   simulationMode: DataSourceSimulationMode;
   isDraft?: boolean;
   isFetchingMore: boolean;
-  fetchMoreError?: string;
 }
 
 export type DataSourceEvent =

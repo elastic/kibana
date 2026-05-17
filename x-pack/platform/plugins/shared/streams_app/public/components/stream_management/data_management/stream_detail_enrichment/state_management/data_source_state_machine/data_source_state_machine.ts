@@ -21,6 +21,7 @@ import type {
 import {
   createDataCollectionFailureNotifier,
   createDataCollectorActor,
+  createFetchMoreFailureNotifier,
 } from './data_collector_actor';
 import { createFetchMoreDocumentsActor } from './fetch_more_actor';
 import type { EnrichmentDataSourceWithUIAttributes } from '../../types';
@@ -42,6 +43,7 @@ export const dataSourceMachine = setup({
   },
   actions: {
     notifyDataCollectionFailure: getPlaceholderFor(createDataCollectionFailureNotifier),
+    notifyFetchMoreFailure: getPlaceholderFor(createFetchMoreFailureNotifier),
     restorePersistedCustomSamplesDocuments: assign(({ context }) => {
       if (context.dataSource.type === 'custom-samples' && context.dataSource.storageKey) {
         const dataSource = sessionStorage.getItem(context.dataSource.storageKey);
@@ -76,17 +78,11 @@ export const dataSourceMachine = setup({
     storeData: assign((_, params: { data: SampleDocument[] }) => ({
       data: params.data,
       isFetchingMore: false,
-      fetchMoreError: undefined,
     })),
-    setFetchingMore: assign({ isFetchingMore: true, fetchMoreError: undefined }),
+    setFetchingMore: assign({ isFetchingMore: true }),
     storeFetchMoreData: assign((_, params: { data: SampleDocument[] }) => ({
       data: params.data,
       isFetchingMore: false,
-      fetchMoreError: undefined,
-    })),
-    storeFetchMoreError: assign((_, params: { error: string }) => ({
-      isFetchingMore: false,
-      fetchMoreError: params.error,
     })),
     toggleDataSourceActivity: assign(({ context }) => ({
       dataSource: { ...context.dataSource, enabled: !context.dataSource.enabled },
@@ -129,7 +125,6 @@ export const dataSourceMachine = setup({
     simulationMode: getSimulationModeByDataSourceType(input.dataSource.type, input.isDraft),
     isDraft: input.isDraft,
     isFetchingMore: false,
-    fetchMoreError: undefined,
   }),
   initial: 'determining',
   states: {
@@ -256,14 +251,7 @@ export const dataSourceMachine = setup({
             },
             onError: {
               target: 'idle',
-              actions: [
-                {
-                  type: 'storeFetchMoreError',
-                  params: ({ event }) => ({
-                    error: (event.error as Error)?.message ?? 'Unknown error',
-                  }),
-                },
-              ],
+              actions: [{ type: 'notifyFetchMoreFailure' }],
             },
           },
         },
@@ -317,6 +305,7 @@ export const createDataSourceMachineImplementations = ({
   },
   actions: {
     notifyDataCollectionFailure: createDataCollectionFailureNotifier({ toasts }),
+    notifyFetchMoreFailure: createFetchMoreFailureNotifier({ toasts }),
   },
 });
 

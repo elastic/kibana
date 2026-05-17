@@ -544,3 +544,20 @@ export function createDataCollectionFailureNotifier({
     });
   };
 }
+
+export function createFetchMoreFailureNotifier({
+  toasts,
+}: {
+  toasts: DataSourceMachineDeps['toasts'];
+}) {
+  return (params: { event: unknown }) => {
+    const event = params.event as ErrorActorEvent<esErrors.ResponseError, string>;
+    const error = getFormattedError(event.error);
+    toasts.addError(error, {
+      title: i18n.translate('xpack.streams.enrichment.fetchMore.error', {
+        defaultMessage: 'Failed to load more matching samples.',
+      }),
+      toastMessage: error.message,
+    });
+  };
+}

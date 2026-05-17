@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { i18n } from '@kbn/i18n';
+import type { IToasts } from '@kbn/core/public';
 import {
   getRoot,
   isDraftStream,
@@ -724,7 +726,10 @@ export const createStreamEnrichmentMachineImplementations = ({
   actions: {
     refreshDefinition,
     syncUrlState: createUrlSyncAction({ urlStateStorageContainer }),
-    fetchMoreSamples: createFetchMoreSamplesAction({ streamsRepositoryClient }),
+    fetchMoreSamples: createFetchMoreSamplesAction({
+      streamsRepositoryClient,
+      toasts: core.notifications.toasts,
+    }),
     notifyUpsertStreamSuccess: createUpsertStreamSuccessNofitier({
       toasts: core.notifications.toasts,
     }),
@@ -782,8 +787,10 @@ async function buildFetchMoreEsqlQuery({
 
 function createFetchMoreSamplesAction({
   streamsRepositoryClient,
+  toasts,
 }: {
   streamsRepositoryClient: StreamsRepositoryClient;
+  toasts: IToasts;
 }) {
   return ({ context }: { context: StreamEnrichmentContextType }) => {
     const selectedConditionId = context.simulatorRef.getSnapshot().context.selectedConditionId;
@@ -808,16 +815,23 @@ function createFetchMoreSamplesAction({
     const processingDsl = convertUIStepsToDSL(stepsBeforeCondition);
     const conditionEsql = conditionToESQL(condition);
 
-    // Build and send the ESQL query asynchronously
     buildFetchMoreEsqlQuery({
       streamName,
       condition: conditionEsql,
       processingSteps: processingDsl,
       isDraft,
       streamsRepositoryClient,
-    }).then((esqlQuery) => {
-      activeDataSourceRef.send({ type: 'dataSource.fetchMore', esqlQuery });
-    });
+    })
+      .then((esqlQuery) => {
+        activeDataSourceRef.send({ type: 'dataSource.fetchMore', esqlQuery });
+      })
+      .catch((err) => {
+        toasts.addError(err instanceof Error ? err : new Error(String(err)), {
+          title: i18n.translate('xpack.streams.enrichment.fetchMore.buildQueryError', {
+            defaultMessage: 'Failed to load more matching samples.',
+          }),
+        });
+      });
   };
 }
 
