@@ -9,7 +9,7 @@ import { mount } from 'enzyme';
 import { render, screen, within } from '@testing-library/react';
 import React from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiComboBox } from '@elastic/eui';
+import { EuiComboBox, EuiToolTip } from '@elastic/eui';
 import userEvent from '@testing-library/user-event';
 
 import { EntryItem } from './entry_item';
@@ -314,5 +314,37 @@ describe('EntryItem', () => {
       { id: '123', field: 'ip', type: 'mapping', value: 'ip', negate: true },
       1
     );
+  });
+
+  test('does not wrap field selectors in EuiToolTip', () => {
+    const wrapper = mount(
+      <EntryItem
+        entry={{
+          id: '123',
+          field: getField('ip'),
+          type: 'mapping',
+          value: getField('ip'),
+          entryIndex: 0,
+        }}
+        indexPattern={
+          {
+            id: '1234',
+            title: 'logstash-*',
+            fields,
+          } as DataViewBase
+        }
+        threatIndexPatterns={
+          {
+            id: '1234',
+            title: 'logstash-*',
+            fields,
+          } as DataViewBase
+        }
+        showLabel={false}
+        onChange={jest.fn()}
+      />
+    );
+
+    expect(wrapper.find(EuiToolTip)).toHaveLength(0);
   });
 });
