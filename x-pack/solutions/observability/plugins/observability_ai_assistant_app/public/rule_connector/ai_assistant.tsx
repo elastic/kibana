@@ -44,6 +44,16 @@ export function getConnectorType({
     validateParams: async (
       actionParams: ObsAIAssistantActionParams
     ): Promise<GenericValidationResult<ObsAIAssistantActionParams>> => {
+      if (isDisabled) {
+        return {
+          errors: {
+            connector: [],
+            message: [],
+            prompts: [],
+          },
+        };
+      }
+
       const validatePrompt = (prompt: { message: string; statuses: string[] }): string[] => {
         const errors: string[] = [];
 
