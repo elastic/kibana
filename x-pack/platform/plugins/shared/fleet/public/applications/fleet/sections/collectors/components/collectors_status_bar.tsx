@@ -83,7 +83,7 @@ export const CollectorsStatusBar: React.FC<CollectorsStatusBarProps> = ({
               label={
                 <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
                   <EuiFlexItem grow={false}>
-                    <EuiIcon type="refresh" size="s" />
+                    <EuiIcon type="refresh" size="s" aria-hidden={true} />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     {isAutoRefreshOn
