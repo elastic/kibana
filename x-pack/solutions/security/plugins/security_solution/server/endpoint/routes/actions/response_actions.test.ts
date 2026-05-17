@@ -78,12 +78,14 @@ import { CustomHttpRequestError } from '../../../utils/custom_http_request_error
 import { omit } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
+import { RESPONSE_ACTION_AGENT_TYPE } from '../../../../common/endpoint/service/response_actions/constants';
 import { responseActionsClientMock } from '../../services/actions/clients/mocks';
 import type { ActionsApiRequestHandlerContext } from '@kbn/actions-plugin/server';
 import { sentinelOneMock } from '../../services/actions/clients/sentinelone/mocks';
 import { ResponseActionsClientError } from '../../services/actions/clients/errors';
 import type { EndpointAppContext } from '../../types';
 import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
+import { isActionSupportedByAgentType } from '../../../../common/endpoint/service/response_actions/is_response_action_supported';
 
 jest.mock('../../services', () => {
   const realModule = jest.requireActual('../../services');
@@ -1046,286 +1048,301 @@ describe('Response actions', () => {
     });
 
     describe('Cancel Action Authorization', () => {
-      let fetchActionByIdSpy: jest.SpyInstance;
-      let responseActionsClientMockInstance: jest.Mocked<Pick<ResponseActionsClient, 'cancel'>>;
-      let originalGetResponseActionsClientMock: ((...args: any) => any) | undefined;
-      const mockIsolateAction: Partial<LogsEndpointAction> = {
-        EndpointActions: {
-          action_id: 'test-action-id-1',
-          expiration: '2024-12-31T23:59:59.999Z',
-          type: 'INPUT_ACTION' as const,
-          input_type: 'microsoft_defender_endpoint' as const,
-          data: {
-            command: 'isolate',
-          },
-        },
-      };
-      const mockExecuteAction: Partial<LogsEndpointAction> = {
-        EndpointActions: {
-          action_id: 'test-action-id-2',
-          expiration: '2024-12-31T23:59:59.999Z',
-          type: 'INPUT_ACTION' as const,
-          input_type: 'microsoft_defender_endpoint' as const,
-          data: {
-            command: 'runscript',
-          },
-        },
-      };
-
-      beforeEach(() => {
-        // Enable the experimental feature for cancel actions
-        endpointContext.experimentalFeatures = {
-          ...endpointContext.experimentalFeatures,
-          microsoftDefenderEndpointCancelEnabled: true,
-        };
-
-        // Store the original mock implementation
-        originalGetResponseActionsClientMock =
-          (getResponseActionsClientMock as jest.Mock).getMockImplementation() || jest.fn();
-
-        fetchActionByIdSpy = jest
-          .spyOn(fetchActionUtils, 'fetchActionRequestById')
-          .mockResolvedValue(mockIsolateAction as LogsEndpointAction);
-
-        // Mock the response actions client
-        responseActionsClientMockInstance = {
-          cancel: jest.fn().mockResolvedValue({
-            id: 'mock-cancel-action-id',
-            agents: ['agent-id'],
-            command: 'cancel',
-            isCompleted: true,
-            isExpired: false,
-            wasSuccessful: true,
-            status: 'successful',
-            outputs: {},
-            agentState: {},
-            createdBy: 'test-user',
-            startedAt: '2023-05-01T12:00:00Z',
-            completedAt: '2023-05-01T12:01:00Z',
-            comment: '',
-            action_id: 'test-action-id',
-          }),
-        };
-
-        (getResponseActionsClientMock as jest.Mock).mockReturnValue(
-          responseActionsClientMockInstance
-        );
-      });
-
-      afterEach(() => {
-        fetchActionByIdSpy.mockRestore();
-        // Restore the original mock implementation
-        if (originalGetResponseActionsClientMock) {
-          (getResponseActionsClientMock as jest.Mock).mockImplementation(
-            originalGetResponseActionsClientMock
-          );
-        } else {
-          (getResponseActionsClientMock as jest.Mock).mockRestore();
+      const agentTypesSupportingCancelAction = RESPONSE_ACTION_AGENT_TYPE.reduce<
+        ResponseActionAgentType[]
+      >((acc, agentType) => {
+        if (isActionSupportedByAgentType(agentType, 'cancel', 'manual')) {
+          acc.push(agentType);
         }
-        jest.clearAllMocks();
-      });
 
-      it('allows cancel action when user has baseline permissions for isolate command', async () => {
-        fetchActionByIdSpy.mockResolvedValue({
+        return acc;
+      }, []);
+
+      describe.each(agentTypesSupportingCancelAction)(`for agent type: %s`, (agentType) => {
+        let fetchActionByIdSpy: jest.SpyInstance;
+        let responseActionsClientMockInstance: jest.Mocked<Pick<ResponseActionsClient, 'cancel'>>;
+        let originalGetResponseActionsClientMock: ((...args: any) => any) | undefined;
+
+        const mockIsolateAction: Partial<LogsEndpointAction> = {
           EndpointActions: {
-            data: { command: 'isolate' },
-            input_type: 'microsoft_defender_endpoint',
+            action_id: 'test-action-id-1',
+            expiration: '2024-12-31T23:59:59.999Z',
+            type: 'INPUT_ACTION' as const,
+            input_type: agentType,
+            data: {
+              command: 'isolate',
+            },
           },
-        });
-
-        await callRoute(CANCEL_ROUTE, {
-          body: {
-            endpoint_ids: ['test-endpoint-id'],
-            parameters: { id: 'test-action-id' },
-          } as CancelActionRequestBody,
-          authz: { canIsolateHost: true },
-          version: '2023-10-31',
-        });
-        expect(mockResponse.ok).toBeCalled();
-        expect(fetchActionByIdSpy).toHaveBeenCalledWith(
-          expect.anything(),
-          expect.anything(),
-          'test-action-id'
-        );
-        expect(responseActionsClientMockInstance.cancel).toHaveBeenCalledWith({
-          endpoint_ids: ['test-endpoint-id'],
-          parameters: { id: 'test-action-id' },
-        });
-      });
-
-      it('allows cancel action route access regardless of baseline permissions', async () => {
-        // Mock the command-specific validation to succeed
-        // (this simulates the user having the required permission for the specific command being cancelled)
-        fetchActionByIdSpy.mockResolvedValue({
+        };
+        const mockExecuteAction: Partial<LogsEndpointAction> = {
           EndpointActions: {
-            data: { command: 'isolate' },
-            input_type: 'microsoft_defender_endpoint',
+            action_id: 'test-action-id-2',
+            expiration: '2024-12-31T23:59:59.999Z',
+            type: 'INPUT_ACTION' as const,
+            input_type: agentType,
+            data: {
+              command: 'runscript',
+            },
           },
-        });
-
-        await callRoute(CANCEL_ROUTE, {
-          body: {
-            endpoint_ids: ['test-endpoint-id'],
-            parameters: { id: 'test-action-id' },
-          } as CancelActionRequestBody,
-          authz: { canReadActionsLogManagement: false, canIsolateHost: true }, // Has permission for the command being cancelled
-          version: '2023-10-31',
-        });
-        expect(mockResponse.ok).toBeCalled();
-      });
-
-      it('prohibits cancel action when user lacks command-specific permission for isolate', async () => {
-        fetchActionByIdSpy.mockResolvedValue({
-          EndpointActions: {
-            data: { command: 'isolate' },
-            input_type: 'microsoft_defender_endpoint',
-          },
-        });
-
-        await callRoute(CANCEL_ROUTE, {
-          body: {
-            endpoint_ids: ['test-endpoint-id'],
-            parameters: { id: 'test-action-id' },
-          } as CancelActionRequestBody,
-          authz: { canReadActionsLogManagement: true, canIsolateHost: false },
-          version: '2023-10-31',
-        });
-        expect(mockResponse.forbidden).toBeCalled();
-      });
-
-      it('allows cancel action for runscript command when user has required permissions', async () => {
-        fetchActionByIdSpy.mockResolvedValue(mockExecuteAction);
-        await callRoute(CANCEL_ROUTE, {
-          body: {
-            endpoint_ids: ['test-endpoint-id'],
-            parameters: { id: 'test-action-id' },
-          } as CancelActionRequestBody,
-          authz: { canReadActionsLogManagement: true, canWriteExecuteOperations: true },
-          version: '2023-10-31',
-        });
-        expect(mockResponse.ok).toBeCalled();
-        expect(responseActionsClientMockInstance.cancel).toHaveBeenCalledWith({
-          endpoint_ids: ['test-endpoint-id'],
-          parameters: { id: 'test-action-id' },
-        });
-      });
-
-      it('prohibits cancel action for runscript command when user lacks execute permissions', async () => {
-        fetchActionByIdSpy.mockResolvedValue(mockExecuteAction);
-        await callRoute(CANCEL_ROUTE, {
-          body: {
-            endpoint_ids: ['test-endpoint-id'],
-            parameters: { id: 'test-action-id' },
-          } as CancelActionRequestBody,
-          authz: { canReadActionsLogManagement: true, canWriteExecuteOperations: false },
-          version: '2023-10-31',
-        });
-        expect(mockResponse.forbidden).toBeCalled();
-      });
-
-      it('returns 404 when action to cancel is not found', async () => {
-        fetchActionByIdSpy.mockResolvedValue(null);
-        await callRoute(CANCEL_ROUTE, {
-          body: {
-            endpoint_ids: ['test-endpoint-id'],
-            parameters: { id: 'non-existent-action' },
-          } as CancelActionRequestBody,
-          authz: { canReadActionsLogManagement: true },
-          version: '2023-10-31',
-        });
-        expect(mockResponse.customError).toHaveBeenCalledWith({
-          body: expect.objectContaining({
-            message: "Action with id 'non-existent-action' not found.",
-          }),
-          statusCode: 404,
-        });
-      });
-
-      it('returns 400 when action has missing command information', async () => {
-        fetchActionByIdSpy.mockResolvedValue({ EndpointActions: { data: {} } });
-        await callRoute(CANCEL_ROUTE, {
-          body: {
-            endpoint_ids: ['test-endpoint-id'],
-            parameters: { id: 'test-action-id' },
-          } as CancelActionRequestBody,
-          authz: {},
-          version: '2023-10-31',
-        });
-        expect(mockResponse.customError).toHaveBeenCalledWith({
-          body: expect.objectContaining({
-            message: "Unable to determine command type for action 'test-action-id'",
-          }),
-          statusCode: 500,
-        });
-      });
-
-      it('returns 404 when user tries to cancel action from different space', async () => {
-        // Simulate action not found in current space (user in 'other-space', action in 'default')
-        fetchActionByIdSpy.mockResolvedValue(null);
-        await callRoute(CANCEL_ROUTE, {
-          body: {
-            endpoint_ids: ['test-endpoint-id'],
-            parameters: { id: 'action-from-different-space' },
-          } as CancelActionRequestBody,
-          authz: { canReadActionsLogManagement: true },
-          version: '2023-10-31',
-        });
-        expect(mockResponse.customError).toHaveBeenCalledWith({
-          body: expect.objectContaining({
-            message: "Action with id 'action-from-different-space' not found.",
-          }),
-          statusCode: 404,
-        });
-      });
-
-      it('handles race condition when action is completed between validation and cancellation', async () => {
-        // Mock the action as existing during validation
-        fetchActionByIdSpy.mockResolvedValue(mockIsolateAction);
-
-        // Mock the response actions client to simulate action already completed
-        responseActionsClientMockInstance.cancel = jest
-          .fn()
-          .mockRejectedValue(
-            new ResponseActionsClientError(
-              'Action cannot be cancelled as it has already completed',
-              400
-            )
-          );
-
-        await callRoute(CANCEL_ROUTE, {
-          body: {
-            endpoint_ids: ['test-endpoint-id'],
-            parameters: { id: 'already-completed-action' },
-          } as CancelActionRequestBody,
-          authz: { canReadActionsLogManagement: true, canIsolateHost: true },
-          version: '2023-10-31',
-        });
-
-        expect(mockResponse.customError).toHaveBeenCalledWith({
-          body: expect.objectContaining({
-            message: 'Action cannot be cancelled as it has already completed',
-          }),
-          statusCode: 400,
-        });
-      });
-
-      it('returns 403 when cancel feature flag is disabled', async () => {
-        // Disable the experimental feature for cancel actions
-        endpointContext.experimentalFeatures = {
-          ...endpointContext.experimentalFeatures,
-          microsoftDefenderEndpointCancelEnabled: false,
         };
 
-        await callRoute(CANCEL_ROUTE, {
-          body: {
-            endpoint_ids: ['test-endpoint-id'],
-            parameters: { id: 'test-action-id' },
-          } as CancelActionRequestBody,
-          authz: { canIsolateHost: true },
-          version: '2023-10-31',
+        beforeEach(() => {
+          // Enable the experimental feature for cancel actions
+          endpointContext.experimentalFeatures = {
+            ...endpointContext.experimentalFeatures,
+            microsoftDefenderEndpointCancelEnabled: true,
+            responseActionsEndpointCancel: true,
+          };
+
+          // Store the original mock implementation
+          originalGetResponseActionsClientMock =
+            (getResponseActionsClientMock as jest.Mock).getMockImplementation() || jest.fn();
+
+          fetchActionByIdSpy = jest
+            .spyOn(fetchActionUtils, 'fetchActionRequestById')
+            .mockResolvedValue(mockIsolateAction as LogsEndpointAction);
+
+          // Mock the response actions client
+          responseActionsClientMockInstance = {
+            cancel: jest.fn().mockResolvedValue({
+              id: 'mock-cancel-action-id',
+              agents: ['agent-id'],
+              command: 'cancel',
+              isCompleted: true,
+              isExpired: false,
+              wasSuccessful: true,
+              status: 'successful',
+              outputs: {},
+              agentState: {},
+              createdBy: 'test-user',
+              startedAt: '2023-05-01T12:00:00Z',
+              completedAt: '2023-05-01T12:01:00Z',
+              comment: '',
+              action_id: 'test-action-id',
+            }),
+          };
+
+          (getResponseActionsClientMock as jest.Mock).mockReturnValue(
+            responseActionsClientMockInstance
+          );
         });
 
-        expect(mockResponse.forbidden).toHaveBeenCalled();
+        afterEach(() => {
+          fetchActionByIdSpy.mockRestore();
+          // Restore the original mock implementation
+          if (originalGetResponseActionsClientMock) {
+            (getResponseActionsClientMock as jest.Mock).mockImplementation(
+              originalGetResponseActionsClientMock
+            );
+          } else {
+            (getResponseActionsClientMock as jest.Mock).mockRestore();
+          }
+          jest.clearAllMocks();
+        });
+
+        it('allows cancel action when user has baseline permissions for isolate command', async () => {
+          fetchActionByIdSpy.mockResolvedValue({
+            EndpointActions: {
+              data: { command: 'isolate' },
+              input_type: agentType,
+            },
+          });
+
+          await callRoute(CANCEL_ROUTE, {
+            body: {
+              endpoint_ids: ['test-endpoint-id'],
+              parameters: { id: 'test-action-id' },
+            } as CancelActionRequestBody,
+            authz: { canIsolateHost: true },
+            version: '2023-10-31',
+          });
+          expect(mockResponse.ok).toBeCalled();
+          expect(fetchActionByIdSpy).toHaveBeenCalledWith(
+            expect.anything(),
+            expect.anything(),
+            'test-action-id'
+          );
+          expect(responseActionsClientMockInstance.cancel).toHaveBeenCalledWith({
+            endpoint_ids: ['test-endpoint-id'],
+            parameters: { id: 'test-action-id' },
+          });
+        });
+
+        it('allows cancel action route access regardless of baseline permissions', async () => {
+          // Mock the command-specific validation to succeed
+          // (this simulates the user having the required permission for the specific command being cancelled)
+          fetchActionByIdSpy.mockResolvedValue({
+            EndpointActions: {
+              data: { command: 'isolate' },
+              input_type: agentType,
+            },
+          });
+
+          await callRoute(CANCEL_ROUTE, {
+            body: {
+              endpoint_ids: ['test-endpoint-id'],
+              parameters: { id: 'test-action-id' },
+            } as CancelActionRequestBody,
+            authz: { canReadActionsLogManagement: false, canIsolateHost: true }, // Has permission for the command being cancelled
+            version: '2023-10-31',
+          });
+          expect(mockResponse.ok).toBeCalled();
+        });
+
+        it('prohibits cancel action when user lacks command-specific permission for isolate', async () => {
+          fetchActionByIdSpy.mockResolvedValue({
+            EndpointActions: {
+              data: { command: 'isolate' },
+              input_type: agentType,
+            },
+          });
+
+          await callRoute(CANCEL_ROUTE, {
+            body: {
+              endpoint_ids: ['test-endpoint-id'],
+              parameters: { id: 'test-action-id' },
+            } as CancelActionRequestBody,
+            authz: { canReadActionsLogManagement: true, canIsolateHost: false },
+            version: '2023-10-31',
+          });
+          expect(mockResponse.forbidden).toBeCalled();
+        });
+
+        it('allows cancel action for runscript command when user has required permissions', async () => {
+          fetchActionByIdSpy.mockResolvedValue(mockExecuteAction);
+          await callRoute(CANCEL_ROUTE, {
+            body: {
+              endpoint_ids: ['test-endpoint-id'],
+              parameters: { id: 'test-action-id' },
+            } as CancelActionRequestBody,
+            authz: { canReadActionsLogManagement: true, canWriteExecuteOperations: true },
+            version: '2023-10-31',
+          });
+          expect(mockResponse.ok).toBeCalled();
+          expect(responseActionsClientMockInstance.cancel).toHaveBeenCalledWith({
+            endpoint_ids: ['test-endpoint-id'],
+            parameters: { id: 'test-action-id' },
+          });
+        });
+
+        it('prohibits cancel action for runscript command when user lacks execute permissions', async () => {
+          fetchActionByIdSpy.mockResolvedValue(mockExecuteAction);
+          await callRoute(CANCEL_ROUTE, {
+            body: {
+              endpoint_ids: ['test-endpoint-id'],
+              parameters: { id: 'test-action-id' },
+            } as CancelActionRequestBody,
+            authz: { canReadActionsLogManagement: true, canWriteExecuteOperations: false },
+            version: '2023-10-31',
+          });
+          expect(mockResponse.forbidden).toBeCalled();
+        });
+
+        it('returns 404 when action to cancel is not found', async () => {
+          fetchActionByIdSpy.mockResolvedValue(null);
+          await callRoute(CANCEL_ROUTE, {
+            body: {
+              endpoint_ids: ['test-endpoint-id'],
+              parameters: { id: 'non-existent-action' },
+            } as CancelActionRequestBody,
+            authz: { canReadActionsLogManagement: true },
+            version: '2023-10-31',
+          });
+          expect(mockResponse.customError).toHaveBeenCalledWith({
+            body: expect.objectContaining({
+              message: "Action with id 'non-existent-action' not found.",
+            }),
+            statusCode: 404,
+          });
+        });
+
+        it('returns 400 when action has missing command information', async () => {
+          fetchActionByIdSpy.mockResolvedValue({ EndpointActions: { data: {} } });
+          await callRoute(CANCEL_ROUTE, {
+            body: {
+              endpoint_ids: ['test-endpoint-id'],
+              parameters: { id: 'test-action-id' },
+            } as CancelActionRequestBody,
+            authz: {},
+            version: '2023-10-31',
+          });
+          expect(mockResponse.customError).toHaveBeenCalledWith({
+            body: expect.objectContaining({
+              message: "Unable to determine command type for action 'test-action-id'",
+            }),
+            statusCode: 500,
+          });
+        });
+
+        it('returns 404 when user tries to cancel action from different space', async () => {
+          // Simulate action not found in current space (user in 'other-space', action in 'default')
+          fetchActionByIdSpy.mockResolvedValue(null);
+          await callRoute(CANCEL_ROUTE, {
+            body: {
+              endpoint_ids: ['test-endpoint-id'],
+              parameters: { id: 'action-from-different-space' },
+            } as CancelActionRequestBody,
+            authz: { canReadActionsLogManagement: true },
+            version: '2023-10-31',
+          });
+          expect(mockResponse.customError).toHaveBeenCalledWith({
+            body: expect.objectContaining({
+              message: "Action with id 'action-from-different-space' not found.",
+            }),
+            statusCode: 404,
+          });
+        });
+
+        it('handles race condition when action is completed between validation and cancellation', async () => {
+          // Mock the action as existing during validation
+          fetchActionByIdSpy.mockResolvedValue(mockIsolateAction);
+
+          // Mock the response actions client to simulate action already completed
+          responseActionsClientMockInstance.cancel = jest
+            .fn()
+            .mockRejectedValue(
+              new ResponseActionsClientError(
+                'Action cannot be cancelled as it has already completed',
+                400
+              )
+            );
+
+          await callRoute(CANCEL_ROUTE, {
+            body: {
+              endpoint_ids: ['test-endpoint-id'],
+              parameters: { id: 'already-completed-action' },
+            } as CancelActionRequestBody,
+            authz: { canReadActionsLogManagement: true, canIsolateHost: true },
+            version: '2023-10-31',
+          });
+
+          expect(mockResponse.customError).toHaveBeenCalledWith({
+            body: expect.objectContaining({
+              message: 'Action cannot be cancelled as it has already completed',
+            }),
+            statusCode: 400,
+          });
+        });
+
+        it('returns 403 when cancel feature flag is disabled', async () => {
+          // Disable the experimental feature for cancel actions
+          endpointContext.experimentalFeatures = {
+            ...endpointContext.experimentalFeatures,
+            microsoftDefenderEndpointCancelEnabled: false,
+            responseActionsEndpointCancel: false,
+          };
+
+          await callRoute(CANCEL_ROUTE, {
+            body: {
+              endpoint_ids: ['test-endpoint-id'],
+              parameters: { id: 'test-action-id' },
+            } as CancelActionRequestBody,
+            authz: { canIsolateHost: true },
+            version: '2023-10-31',
+          });
+
+          expect(mockResponse.forbidden).toHaveBeenCalled();
+        });
       });
     });
   });
