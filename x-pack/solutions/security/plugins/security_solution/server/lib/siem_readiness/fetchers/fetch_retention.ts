@@ -161,8 +161,10 @@ export const fetchRetention = async ({
 
   let indexSettingsResponse: IndicesGetSettingsResponse = {};
   if (standaloneIndexNames.length > 0) {
+    // Use index: '*' instead of the explicit list to avoid "URI too long" errors
+    // when there are many standalone indices (150+).
     indexSettingsResponse = await esClient.indices.getSettings({
-      index: standaloneIndexNames,
+      index: '*',
       filter_path: '*.settings.index.lifecycle.name',
     });
   }
