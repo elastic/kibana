@@ -43,29 +43,28 @@ const makePayload = (overrides: Partial<QualityPayload> = {}): QualityPayload =>
   ...overrides,
 });
 
-const makeQualityResult = (indexName: string, incompatibleFieldCount = 0) =>
-  ({
-    indexName,
-    incompatibleFieldCount,
-    batchId: 'b1',
-    isCheckAll: false,
-    checkedAt: Date.now(),
-    docsCount: 100,
-    totalFieldCount: 50,
-    ecsFieldCount: 48,
-    customFieldCount: 2,
-    sameFamilyFieldCount: 0,
-    sameFamilyFields: [],
-    sameFamilyFieldItems: [],
-    incompatibleFieldMappingItems: [],
-    incompatibleFieldValueItems: [],
-    unallowedMappingFields: [],
-    unallowedValueFields: [],
-    sizeInBytes: 1024,
-    markdownComments: [],
-    ecsVersion: '8.11.0',
-    error: null,
-  });
+const makeQualityResult = (indexName: string, incompatibleFieldCount = 0) => ({
+  indexName,
+  incompatibleFieldCount,
+  batchId: 'b1',
+  isCheckAll: false,
+  checkedAt: Date.now(),
+  docsCount: 100,
+  totalFieldCount: 50,
+  ecsFieldCount: 48,
+  customFieldCount: 2,
+  sameFamilyFieldCount: 0,
+  sameFamilyFields: [],
+  sameFamilyFieldItems: [],
+  incompatibleFieldMappingItems: [],
+  incompatibleFieldValueItems: [],
+  unallowedMappingFields: [],
+  unallowedValueFields: [],
+  sizeInBytes: 1024,
+  markdownComments: [],
+  ecsVersion: '8.11.0',
+  error: null,
+});
 
 describe('getQualityTool', () => {
   const { mockCore, mockLogger, mockEsClient, mockRequest } = createToolTestMocks();

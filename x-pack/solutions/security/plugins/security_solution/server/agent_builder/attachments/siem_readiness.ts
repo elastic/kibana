@@ -6,7 +6,10 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { AttachmentTypeDefinition, AttachmentFormatContext } from '@kbn/agent-builder-server/attachments';
+import type {
+  AttachmentTypeDefinition,
+  AttachmentFormatContext,
+} from '@kbn/agent-builder-server/attachments';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type {
   ContinuityPayload,
