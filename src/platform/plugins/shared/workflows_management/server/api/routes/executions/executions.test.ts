@@ -323,6 +323,10 @@ describe('Execution Routes', () => {
           page: 2,
           size: 5,
           omitStepRuns: true,
+          finishedAfter: '2026-05-01T00:00:00.000Z',
+          finishedBefore: '2026-05-14T00:00:00.000Z',
+          sortField: 'finishedAt',
+          sortOrder: 'desc',
         },
       };
 
@@ -337,6 +341,10 @@ describe('Execution Routes', () => {
           page: 2,
           size: 5,
           omitStepRuns: true,
+          finishedAfter: '2026-05-01T00:00:00.000Z',
+          finishedBefore: '2026-05-14T00:00:00.000Z',
+          sortField: 'finishedAt',
+          sortOrder: 'desc',
         },
         'default'
       );
