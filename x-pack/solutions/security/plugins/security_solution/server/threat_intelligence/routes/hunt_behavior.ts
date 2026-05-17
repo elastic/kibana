@@ -20,6 +20,9 @@ const huntBehaviorBodySchema = schema.object({
   llm_confidence_threshold: schema.maybe(schema.number({ min: 0, max: 1 })),
 });
 
+// Same ceiling as `extract_iocs` — workflow 2 forwards full report bodies.
+const HUNT_BEHAVIOR_MAX_BODY_BYTES = 10 * 1024 * 1024;
+
 /**
  * Internal route for the `hunt_behavior` domain action.
  *
@@ -40,6 +43,12 @@ export const registerHuntBehaviorRoute = ({
       security: {
         authz: {
           requiredPrivileges: [THREAT_INTELLIGENCE_API_PRIVILEGES.read],
+        },
+      },
+      options: {
+        body: {
+          accepts: ['application/json'],
+          maxBytes: HUNT_BEHAVIOR_MAX_BODY_BYTES,
         },
       },
     })

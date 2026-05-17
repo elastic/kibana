@@ -87,6 +87,7 @@ import {
 } from './agent_builder/attachment_types';
 import type { SecurityCanvasEmbeddedBundle } from './agent_builder/components/security_redux_embedded_provider';
 import { registerWorkflowSteps } from './workflows/step_types';
+import { registerThreatIntelligenceWorkflowSteps } from './threat_intelligence/workflows/step_types';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private config: SecuritySolutionUiConfigType;
@@ -141,6 +142,15 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     if (workflowsExtensions) {
       registerWorkflowSteps(workflowsExtensions, core);
+
+      // Threat-intelligence step types (currently `threat_intel.fetch_source`).
+      // Mirrors the server-side gating in `setupThreatIntelligence` — when
+      // `threatIntelligenceSkillEnabled` is off the server never registers
+      // a handler, so advertising the step type to the editor would be
+      // misleading.
+      if (this.experimentalFeatures.threatIntelligenceSkillEnabled) {
+        registerThreatIntelligenceWorkflowSteps(workflowsExtensions);
+      }
     }
 
     // Lazily instantiate subPlugins and initialize services

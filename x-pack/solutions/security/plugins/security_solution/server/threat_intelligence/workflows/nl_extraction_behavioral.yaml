@@ -5,8 +5,8 @@
 # documents are available). Matches Workflow 1's 4h cadence so the extraction
 # pass doesn't lag the ingestion pass.
 # Purpose:  For each freshly-ingested report (where extraction_method == 'pending'),
-#           extract IOCs via the registry tool, behaviors via the LLM-driven
-#           hunt_behavior delegated through the AI agent, and the closed-set
+#           extract IOCs and behaviors via internal threat-intelligence routes
+#           (deterministic IOC regex + catalog-validated hunt_behavior), and the closed-set
 #           threat-category + geographic-region tags via a stage-2 LLM step.
 #           Skip documents whose content_fingerprint has already been processed
 #           (dedup gate).
@@ -105,31 +105,27 @@ steps:
           continue: true
 
       - name: extract_behaviors
-        type: ai.agent
-        # `agent-id` is intentionally omitted so the step falls back to
-        # `agentBuilderDefaultAgentId` (`elastic-ai-agent`) inside
-        # `run_agent_step.ts`. Passing the literal string `default` is
-        # treated as a real agent id by `agentRegistry.has(...)` and
-        # surfaces as `Agent "default" not found or not available` —
-        # there is no agent registered under that id.
+        type: kibana.request
         with:
-          # The agent loads the threat-intelligence skill and invokes
-          # hunt_behavior with the report text. The agent is responsible for
-          # delegating valid behaviors to security.create_detection_rule (or
-          # emitting copy-paste rule definitions when aiRuleCreationEnabled
-          # is off).
-          message: >-
-            Run threat_intel.hunt_behavior on this report. Report id is
-            {{ foreach.item._id }}. Report text:
-            {{ foreach.item._source.content.body_text }}
-          schema:
-            type: object
-            properties:
-              behaviors:
-                type: array
-                description: Behavioral findings from hunt_behavior for persistence
-            required:
-              - behaviors
+          method: POST
+          path: /internal/threat_intelligence/hunt_behavior
+          use_server_info: true
+          headers:
+            elastic-api-version: "1"
+            x-elastic-internal-origin: "kibana"
+          body:
+            # Truncate before the LLM call — same 30 KB cap the former
+            # `ai.agent` step used. Keeps connector latency predictable on
+            # syndicated RSS dumps while preserving advisory signal.
+            text: "{{ foreach.item._source.content.body_text | slice: 0, 30000 }}"
+            report_id: "{{ foreach.item._id }}"
+        on-failure:
+          # Behavior extraction is best-effort, mirroring `enrich_taxonomy`
+          # below. A missing GenAI connector (503) or LLM failure must not
+          # abort the foreach — downstream steps tolerate missing behaviors:
+          # `find_related_reports` falls back to the `__no_techniques__`
+          # sentinel and `persist_extractions` drops undefined fields.
+          continue: true
 
       # Stage 2 — closed-set taxonomy enrichment + detection-actionability
       # scoring. Drives the visual dashboard's category-breakdown panel,
@@ -142,9 +138,16 @@ steps:
       # dropped by `capture_ranking_signals` below via `| default:`.
       - name: enrich_taxonomy
         type: ai.agent
-        # Same default-agent fallback as `extract_behaviors` above —
-        # omit `agent-id` so the step routes to `elastic-ai-agent`
+        # Omit `agent-id` so the step routes to `elastic-ai-agent`
         # rather than failing the literal-string lookup for `default`.
+        #
+        # `body_text` is sliced to 30 000 characters for the same reason as
+        # `extract_behaviors` above (connector response-size limits on long
+        # syndicated feeds). Taxonomy classification only
+        # needs the report's gist (the agent picks a handful of closed-set
+        # labels) so the loss from truncation is negligible compared with
+        # the cost of an entire `enrich_taxonomy` step failing on a
+        # multi-megabyte vendor report.
         with:
           message: >-
             You are a threat intel taxonomist. Categorize the following report
@@ -186,7 +189,7 @@ steps:
             Report id: {{ foreach.item._id }}
             Report title: {{ foreach.item._source.content.title }}
             Report text:
-            {{ foreach.item._source.content.body_text }}
+            {{ foreach.item._source.content.body_text | slice: 0, 30000 }}
           schema:
             type: object
             properties:
@@ -238,15 +241,42 @@ steps:
           relevance: "${{ steps.enrich_taxonomy.output.structured_output.relevance | default: 0.5 }}"
           detection_actionability: "{{ steps.enrich_taxonomy.output.structured_output.detection_actionability | default: 'informational' }}"
           severity_score: "${{ foreach.item._source.severity.score | default: 0 }}"
+          # Hoist the technique-id list with a sentinel fallback so the
+          # `find_related_reports` `terms` clause downstream never receives
+          # an empty array. Elasticsearch's query parser rejects an empty
+          # `terms` value with `parsing_exception: No value specified for
+          # terms query` (verified in production), and there is no in-DSL
+          # way to omit the clause conditionally from a templated YAML
+          # `should[]`.
+          #
+          # Filter chain:
+          #   `map: 'technique_id'`  — pull the keyword the index mapping
+          #                            indexes on (see `extracted.behaviors`
+          #                            in `index_templates.ts`).
+          #   `join: ','`            — collapse to a CSV string; this also
+          #                            converts an empty array to the empty
+          #                            string so `default` can fire (Liquid
+          #                            `default` matches falsy values
+          #                            including '' / nil / false).
+          #   `default: '__no_techniques__'`
+          #                          — sentinel. ATT&CK technique ids are
+          #                            `T<digits>(.<digits>)?` so this
+          #                            literal cannot collide with a real
+          #                            indexed value, and the boost-1 nested
+          #                            terms clause contributes 0 to the
+          #                            `_score` (the comma never appears
+          #                            inside a single id either, so split
+          #                            is safe).
+          #   `split: ','`           — back to an array. Guarantees at
+          #                            least one element so Elasticsearch
+          #                            accepts the query unconditionally.
+          # `${{ … }}` (dollar-prefixed) preserves the JS array via
+          # `evaluateExpression` rather than coercing to a string.
+          technique_ids: "${{ steps.extract_behaviors.output.indexed_behaviors | map: 'technique_id' | join: ',' | default: '__no_techniques__' | split: ',' }}"
 
-      # Cross-report correlation: find OTHER reports that already share this
-      # report's IOC set hash. The exact-set match is cheap (one terms query
-      # against the keyword field) and high-signal — it catches RSS-syndicated
-      # variants and same-campaign reports that hit different feeds. Future
-      # iterations can layer a partial-overlap correlation on top.
-      #
-      # Three-tier relatedness scoring. Higher boost = stronger
-      # confidence the two reports describe the same incident:
+      # Cross-report correlation: find OTHER reports related to this one via a
+      # three-tier scoring. Higher boost = stronger confidence the two reports
+      # describe the same incident:
       #
       #  1. **Exact IOC set hash** (boost 5) — verbatim match on the
       #     stage-1 deterministic digest. Zero-FP but very low recall
@@ -269,19 +299,18 @@ steps:
       # `minimum_should_match: 1` means at least one signal must match;
       # the resulting `_score` ranking gives the persisted
       # `related_reports[]` a meaningful order without an explicit sort
-      # clause. `size: 50` widens the candidate pool slightly versus
-      # the v1 exact-match query — downstream consumers cap their own
-      # render count, so it's safe to overshoot.
+      # clause. `size: 50` caps the candidate pool; downstream consumers
+      # cap their own render count.
       #
       # Skipped when no IOCs were extracted from this report: with no
       # IOC values to seed signals (1) and (2), the partial-overlap
       # query would still return technique-only matches via signal (3)
       # — but a report with zero IOCs is by construction also a poor
       # *target* for relatedness scoring (no anchor for downstream
-      # corroboration). The `if` guard preserves the v1 semantics; an
-      # IOC-light + behavior-rich report still triggers cross-report
-      # correlation via the `hunt_for_threat` orchestrator path, which
-      # has its own (more expensive, LLM-grounded) recall mechanism.
+      # corroboration). An IOC-light + behavior-rich report still
+      # triggers cross-report correlation via the `hunt_for_threat`
+      # orchestrator path, which has its own (more expensive,
+      # LLM-grounded) recall mechanism.
       - name: find_related_reports
         type: elasticsearch.search
         if: "steps.extract_iocs.output.ioc_set_hash : *"
@@ -319,18 +348,26 @@ steps:
                         extracted.iocs.value: "${{ steps.extract_iocs.output.iocs | map: 'value' }}"
                 # Signal 3 — partial technique overlap. Same `score_mode: sum`
                 # rationale as signal 2 — more shared techniques means
-                # higher score. Safe against `behaviors=[]` (empty
-                # `terms` clause is a no-op in `should`).
+                # higher score. An empty `terms` clause causes
+                # Elasticsearch to reject the whole search with
+                # `parsing_exception: No value specified for terms query`,
+                # so `variables.technique_ids` is sourced from
+                # `capture_ranking_signals` above, which guarantees a
+                # non-empty array (falling back to the `__no_techniques__`
+                # sentinel when `extract_behaviors` returned no behaviors
+                # or hit `on-failure: continue: true`). The sentinel cannot
+                # collide with a real `Txxxx` technique id, so it
+                # contributes nothing to `_score`.
                 - nested:
                     path: extracted.behaviors
                     score_mode: sum
                     boost: 1
                     query:
                       terms:
-                        extracted.behaviors.technique_id: "${{ steps.extract_behaviors.output.structured_output.behaviors | map: 'technique_id' }}"
+                        extracted.behaviors.technique_id: "${{ variables.technique_ids }}"
         on-failure:
-          # If the field doesn't exist yet (first run after the v2 mapping bump)
-          # treat the related-reports list as empty rather than failing the doc.
+          # If the related-reports query fails, treat the result as empty
+          # rather than failing the doc.
           continue: true
 
       - name: persist_extractions
@@ -369,7 +406,7 @@ steps:
             extracted:
               iocs: "${{ steps.extract_iocs.output.iocs }}"
               ioc_set_hash: "{{ steps.extract_iocs.output.ioc_set_hash }}"
-              behaviors: "${{ steps.extract_behaviors.output.structured_output.behaviors }}"
+              behaviors: "${{ steps.extract_behaviors.output.indexed_behaviors }}"
               categories: "${{ steps.enrich_taxonomy.output.structured_output.categories }}"
               # Hoisted from `capture_ranking_signals` so the neutral
               # defaults (0.5 / 'informational') apply uniformly whether

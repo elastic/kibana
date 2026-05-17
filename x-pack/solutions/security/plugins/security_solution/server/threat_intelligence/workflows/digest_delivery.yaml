@@ -30,10 +30,9 @@ steps:
     type: foreach
     foreach: "{{ steps.load_subscriptions.output.hits.hits }}"
     steps:
-      # NOTE: cron evaluation against schedule_rrule is intentionally simplified
-      # in the v1 wrapper — a follow-up PR can add a pre-filter step (e.g. via
-      # a small `data.transform` step or an `ai.agent` call) that evaluates the
-      # RRULE for the current hour and short-circuits non-due subscriptions.
+      # NOTE: cron evaluation against schedule_rrule is intentionally
+      # simplified — this wrapper fans out to every loaded subscription and
+      # leaves per-subscription RRULE matching to a future pre-filter step.
       - name: render_digest
         type: ai.agent
         # `agent-id` is intentionally omitted so the step falls back to

@@ -50,8 +50,9 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.security}.pci_scope_discovery`,
   `${internalNamespaces.security}.pci_compliance`,
   `${internalNamespaces.security}.pci_field_mapper`,
-
-  // Threat Intelligence
+  // Threat Intelligence tools are owned by Security Solution but registered under
+  // the `threat_intel.` namespace to match the `threat-intelligence` skill ID
+  // (see `security_solution/common/threat_intelligence/hub/constants.ts`).
   'threat_intel.extract_iocs',
   'threat_intel.analyse_environment',
 

@@ -32,6 +32,9 @@ export type {
   ValidatedBehavior,
 } from './hunt_behavior';
 
+export { toIndexedBehaviors } from './indexed_behaviors';
+export type { IndexedBehavior } from './indexed_behaviors';
+
 export { huntForThreat } from './hunt_for_threat';
 export type {
   HuntForThreatParams,

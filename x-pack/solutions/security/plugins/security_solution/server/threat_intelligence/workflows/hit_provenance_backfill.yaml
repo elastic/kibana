@@ -11,9 +11,7 @@
 # Two sources of hits, mapped to the two implemented layers of the detection
 # model. (Layer 3 — Streams Query KIs — is intentionally not handled here;
 # see `docs/rfcs/0001_streams_layer3_grounded_hypothesis_flow.md` for the
-# proposed contract. Once the streams-side primitives land, a Layer-3 step
-# will be re-introduced and `provenance.environment_hits.layer_3_streams_ki`
-# re-added to the mapping.)
+# proposed contract.)
 #
 #   - **Layer 1 (IOC match)** — alerts produced by Indicator Match rules
 #     (`kibana.alert.rule.type == "threat_match"`). The IOC indicator-sync
@@ -60,11 +58,11 @@ steps:
             - exists:
                 field: extracted.behaviors
           minimum_should_match: 1
-      # `@timestamp` is always mapped on this data stream, so it's a safe sort
-      # field even when reports were ingested before `provenance.extracted_at`
-      # was added. Uses the `<field>:<direction>` shorthand because the
-      # workflow `elasticsearch.search` schema collapses the URL-param `sort`
-      # (`string | string[]`) over the body-param shape — see `search_sort` in
+      # `@timestamp` is always mapped on this data stream, so it's a safe
+      # sort field. Uses the `<field>:<direction>` shorthand because the
+      # workflow `elasticsearch.search` schema collapses the URL-param
+      # `sort` (`string | string[]`) over the body-param shape — see
+      # `search_sort` in
       # `kbn-workflows/spec/elasticsearch/generated/schemas/es_openapi_zod.gen.ts`.
       sort: "@timestamp:desc"
 
@@ -171,7 +169,7 @@ steps:
               # `layer2_search` case still produces a clean sum.
               environment_hits_total: "${{ steps.count_layer1_hits.output.hits.total.value | default: 0 | plus: steps.layer2_search.output.hits.total.value }}"
         on-failure:
-          # Doc deleted mid-run, mapping mismatch on first run after template
-          # bump, or version conflict from a concurrent ingest. Backfill is
-          # idempotent — the next hourly run will overwrite cleanly.
+          # Doc deleted mid-run, mapping mismatch, or version conflict from a
+          # concurrent ingest. Backfill is idempotent — the next hourly run
+          # will overwrite cleanly.
           continue: true

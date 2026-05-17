@@ -16,6 +16,7 @@ import {
   severityFromConfidence,
   type SeverityLevel,
 } from '../../../common/threat_intelligence/hub';
+import { toIndexedBehaviors, type IndexedBehavior } from './indexed_behaviors';
 
 /**
  * Domain capability module for the `hunt_behavior` action.
@@ -159,6 +160,11 @@ export interface HuntBehaviorResult {
   status: HuntBehaviorStatus;
   report_id?: string;
   behaviors: ValidatedBehavior[];
+  /**
+   * Mapping-safe projection for `.kibana-threat-reports` extraction
+   * workflows — strict nested `extracted.behaviors` rejects extra keys.
+   */
+  indexed_behaviors: IndexedBehavior[];
   attachment_hints: HuntBehaviorAttachmentHint[];
   dropped_unknown_ids?: string[];
   message?: string;
@@ -271,6 +277,7 @@ export const huntBehavior = async (
       status: 'no_behaviors_found',
       report_id: reportId,
       behaviors: [],
+      indexed_behaviors: [],
       attachment_hints: [],
       message:
         'No behavioral candidates passed the LLM-confidence threshold. ' +
@@ -376,6 +383,7 @@ export const huntBehavior = async (
     status: validated.length === 0 ? 'no_behaviors_validated' : 'behaviors_proposed',
     report_id: reportId,
     behaviors: validated,
+    indexed_behaviors: toIndexedBehaviors(validated),
     attachment_hints: attachmentHints,
     ...(droppedIds.length > 0 && { dropped_unknown_ids: droppedIds }),
     next_step:

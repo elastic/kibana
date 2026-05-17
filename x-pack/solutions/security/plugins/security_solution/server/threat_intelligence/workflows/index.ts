@@ -16,13 +16,9 @@ import SOURCE_INGESTION_YAML from './source_ingestion.yaml';
 /**
  * `owner` value written to every built-in threat-intelligence workflow.
  *
- * This MUST stay as the historical `threatIntelligence` string even though
- * the workflows are now installed by the `securitySolution` plugin (the
- * standalone threat-intelligence plugin was folded in). The
- * `bulkEnsureBuiltinWorkflows` upsert is keyed by `id` + `owner`; changing
- * the owner would either orphan existing operator-edited records or cause
- * them to be re-created (and any local edits wiped). Renaming is a separate,
- * deliberate migration — not something to slip into the merge.
+ * `bulkEnsureBuiltinWorkflows` upserts are keyed by `id` + `owner`; changing
+ * this value would either orphan existing operator-edited records or cause
+ * them to be re-created (wiping any local edits). Treat it as stable.
  */
 const THREAT_INTELLIGENCE_PLUGIN_ID = 'threatIntelligence';
 

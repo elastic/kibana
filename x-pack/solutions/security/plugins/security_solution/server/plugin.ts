@@ -30,6 +30,7 @@ import { registerRoutes as registerThreatIntelligenceRoutes } from './threat_int
 import { installIndexTemplates as installThreatIntelligenceIndexTemplates } from './threat_intelligence/setup/index_templates';
 import { seedDefaultSources as seedThreatIntelligenceDefaultSources } from './threat_intelligence/setup/seed_default_sources';
 import { installBuiltinWorkflows as installThreatIntelligenceBuiltinWorkflows } from './threat_intelligence/workflows';
+import { registerThreatIntelligenceWorkflowSteps } from './threat_intelligence/workflows/step_types';
 import { registerDeprecatedThreatIntelligenceFeature } from './threat_intelligence/feature_deprecation';
 import {
   registerIocIndicatorSyncTask,
@@ -356,6 +357,36 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.logger.info(
         'Threat Intelligence routes registered (threatIntelligenceSkillEnabled is on)'
       );
+
+      // Register the `threat_intel.fetch_source` workflow step. The
+      // step replaces the per-adapter `http` + parse + fingerprint
+      // chain that used to live inline in the source-ingestion YAML
+      // (see the top-of-file comment in
+      // `threat_intelligence/workflows/source_ingestion.yaml`).
+      // `workflowsExtensions` is an optional plugin — skip cleanly
+      // when it isn't installed, mirroring the
+      // `installThreatIntelligenceBuiltinWorkflows` skip in start().
+      if (plugins.workflowsExtensions) {
+        registerThreatIntelligenceWorkflowSteps({
+          workflowsExtensions: plugins.workflowsExtensions,
+          logger: this.logger.get('threatIntelligence'),
+          // Lazy resolver for the actions plugin's start contract.
+          // Used by the TAXII adapter when a source has a
+          // `config.connector_id` referencing a `.taxii` Connectors v2
+          // saved object. The thunk also serves vendor_api once that
+          // adapter migrates to the same pattern. Returning `undefined`
+          // makes adapters' connector path throw a clear error rather
+          // than silently fall back to anonymous fetches.
+          getActionsStart: async () => {
+            const [, startPlugins] = await core.getStartServices();
+            return startPlugins.actions;
+          },
+        });
+      } else {
+        this.logger.debug(
+          'workflowsExtensions plugin not available — skipping threat_intel.fetch_source registration'
+        );
+      }
     } else {
       this.logger.debug(
         'Threat Intelligence routes not registered. Enable via xpack.securitySolution.enableExperimental: ["threatIntelligenceSkillEnabled"]'

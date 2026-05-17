@@ -1,55 +1,44 @@
 # =============================================================================
 # Workflow 1 — source_ingestion
 #
-# Schedule: every 4 hours (matches the PRD's "feed ingestion cadence" target;
-#           previously 6h. The downstream Workflow 2 keeps its ~30-minute
-#           offset relative to this run via its own scheduled trigger).
-# Purpose:  Pull `.kibana-threat-intel-sources`, dispatch each enabled source
-#           by adapter_type via the engine's first-class `switch` step, and
-#           write normalized documents into the `.kibana-threat-reports` data
-#           stream (op_type: create on `content_fingerprint` so RSS-syndicated
+# Schedule: every 4 hours (matches the PRD's "feed ingestion cadence" target).
+#           The downstream Workflow 2 keeps its ~30-minute offset relative to
+#           this run via its own scheduled trigger.
+# Purpose:  Pull `.kibana-threat-intel-sources`, hand each enabled source to
+#           the server-side `threat_intel.fetch_source` step (registered by
+#           the security_solution plugin via `workflowsExtensions`), and
+#           write the per-item normalized documents the step returns into
+#           the `.kibana-threat-reports` data stream (op_type: create with
+#           an upstream-precomputed `content_fingerprint`, so RSS-syndicated
 #           duplicates short-circuit).
 #
-# Note: the http body schemas below are intentionally illustrative — the real
-# adapter implementations belong to follow-up PRs. The key shape this workflow
-# pins down is the `switch` dispatch + fingerprint-and-write pattern.
-#
-# `content_fingerprint` is the SHA-256 hex digest of the normalized
-# `<source.url>:<response.body>` pair so RSS-syndicated copies and
-# re-fetches of the same content collapse to the same fingerprint. The
-# `| sha256` Liquid filter is registered in the workflow engine — see
-# `src/platform/packages/shared/kbn-workflows/common/utils/create_workflow_liquid_engine`.
-# The HTTP step's response body lives on `.output.data` (see
-# `HttpResponseSchema` in
-# `src/platform/plugins/shared/workflows_management/common/stack_connectors_schema/http.ts`),
-# *not* `.output.body`. Pre-pending the source URL means two different
-# feeds that legitimately mirror the same upstream advisory both keep a
-# row each, while a re-fetch from the same URL collapses to a single
-# fingerprint.
+# Per-adapter logic lives in TypeScript under
+# `server/threat_intelligence/adapters/{rss,stix,taxii,vendor_api}/`:
+#   - Each adapter parses the upstream payload (xml2js for RSS, JSON +
+#     bundle splitter for STIX/TAXII, vendor-specific dispatch for
+#     vendor_api) and emits one normalized `.kibana-threat-reports`
+#     document per upstream item.
+#   - Each adapter computes the per-item fingerprint as
+#     `sha256(<source.url>:<item.id>:<item.modified|title>)` — a stable
+#     keyword-sized digest. Re-fetches collapse to one row; revised items
+#     produce a fresh row for `nl_extraction_behavioral` to re-extract.
+#   - `threat_intel.fetch_source` is an atomic step, so it consumes
+#     `foreach.item` directly without a `switch` / `data.set` wrapper.
 #
 # `_id` is intentionally NOT set on the `elasticsearch.index` step. The
 # target is a data stream and Elasticsearch rejects writes that combine
 # `op_type: create` with a caller-supplied `_id` against a data stream
 # (`op_type create with a provided id is not allowed in data streams`).
-# Dedup is therefore enforced upstream of the write via a
-# `check_already_ingested` `elasticsearch.search` step that aborts the
-# per-source branch when the same `content_fingerprint` is already
-# present in the data stream within the configured TTL window
-# (`DEDUP_TTL` below — defaults to the tradecraft 90-day horizon so
-# stale duplicates can re-enter the pipeline only after the upstream
-# advisory has had time to rotate).
+# Dedup is therefore enforced upstream of the write via the
+# `check_dedup` `elasticsearch.search` step that aborts the per-report
+# branch when the same `content_fingerprint` is already present in the
+# data stream within the configured TTL window (the tradecraft 90-day
+# horizon — stale duplicates can re-enter the pipeline only after the
+# upstream advisory has had time to rotate).
 #
-# The previous revision wrote the entire response body verbatim into
-# `content_fingerprint`. That field is mapped as `keyword`, and Lucene
-# rejects any term over 32766 bytes with `max_bytes_length_exceeded_exception`
-# — so RSS/STIX/TAXII feeds (which routinely exceed 32 KB) made every
-# `elasticsearch.index` step fail. The failure was then swallowed by
-# `on-failure: continue: true`, leaving `.kibana-threat-reports` empty
-# while the workflow reported success.
-#
-# Index names mirror the constants in `common/constants.ts`. They live under
-# `.kibana-*` so the `kibana_system` reserved role can create / read / write
-# them without a custom Elasticsearch role descriptor — see
+# Index names mirror the constants in `common/threat_intelligence/hub/`. They
+# live under `.kibana-*` so the `kibana_system` reserved role can create /
+# read / write them without a custom Elasticsearch role descriptor — see
 # `dev_docs/key_concepts/kibana_system_user.mdx`.
 # =============================================================================
 name: Threat intelligence — Source ingestion
@@ -77,340 +66,102 @@ steps:
     type: foreach
     foreach: "{{ steps.load_sources.output.hits.hits }}"
     steps:
-      # The YAML editor's variable validator builds the step context from the
-      # graph node ID, but `getStepContextSchemaEnrichmentEntries` is called
-      # with the bare step name. For container steps (switch/if/while) the
-      # node is `enterSwitch_<stepName>` etc., so the foreach enrichment is
-      # silently dropped — that's why `foreach.item.X` on the switch step's
-      # own `expression` / `default` fields reports "Variable ... is invalid"
-      # even though the same path validates fine inside `cases[i].steps[j]`
-      # (which resolve to atomic steps where stepId === nodeId).
+      # Fetch one source. The step is registered by the security_solution
+      # plugin via `workflowsExtensions.registerStepDefinition` (see
+      # `server/threat_intelligence/workflows/step_types/fetch_source/`),
+      # dispatches to the right adapter from the source's `adapter_type`,
+      # and returns one normalized `.kibana-threat-reports` document per
+      # upstream item with a precomputed per-item `content_fingerprint`.
       #
-      # Hoist the per-iteration values into `variables` via an atomic
-      # `data.set` step so the references the switch step needs (`expression`
-      # and the `default` branch's data.set `value`) only touch
-      # `variables.X` — those are populated by `getVariablesSchema` from
-      # predecessor `data.set` steps regardless of the container-step bug.
-      - name: capture_source_fields
-        type: data.set
+      # `source` is passed as `${{ foreach.item }}` (the `$` prefix), NOT
+      # `{{ foreach.item }}`. The two are not interchangeable: plain
+      # `{{ … }}` is Liquid rendering, which stringifies the hit to
+      # `"[object Object]"` before the step receives it — the adapter
+      # then throws `TypeError: Cannot read properties of undefined
+      # (reading 'adapter_type')` on every iteration. `${{ … }}`
+      # routes through `evaluateExpression` in
+      # `workflows_execution_engine/server/templating_engine.ts`, which
+      # preserves the structured `SourceHit` (`_id` / `_index` /
+      # `_source.adapter_type` / `_source.config` / …) the adapter
+      # contract requires.
+      #
+      # `on-failure: continue: true` keeps a single bad feed from
+      # aborting the run — the adapter raises a structured error which
+      # the engine logs, then the next iteration proceeds.
+      - name: fetch_source
+        type: threat_intel.fetch_source
         with:
-          adapter_type: "{{ foreach.item._source.adapter_type }}"
-          item_id: "{{ foreach.item._id }}"
-          source_url: "{{ foreach.item._source.config.url }}"
-          # `content_fingerprint` is computed inside each adapter case
-          # AFTER the fetch step lands, via `| sha256` on the
-          # `<source.url>:<response.body>` pair. See the per-case
-          # `*_compute_fingerprint` and `*_check_dedup` steps below for
-          # the dedup pipeline; the legacy `adapter_type:item_id:now`
-          # placeholder previously held this slot has been removed
-          # because (a) it made every run a fresh fingerprint and so
-          # never deduped anything, and (b) the real fingerprint depends
-          # on the response body which is not yet available at this
-          # point in the workflow.
+          source: "${{ foreach.item }}"
+        on-failure:
+          continue: true
 
-      - name: dispatch_by_adapter
-        type: switch
-        expression: "{{ variables.adapter_type }}"
-        cases:
-          - match: rss
-            steps:
-              - name: rss_fetch
-                type: http
-                with:
-                  method: GET
-                  url: "{{ foreach.item._source.config.url }}"
-                on-failure:
-                  continue: true
+      # Cheap pre-filter — skip the dedup-and-write block when the
+      # adapter ran cleanly but produced nothing (empty feed, unknown
+      # vendor handler, etc.). `total_fetched > 0` covers the happy
+      # path; the more permissive shape also tolerates the field being
+      # missing if an adapter ever forgets to set it.
+      - name: skip_empty_source
+        type: loop.continue
+        if: "NOT steps.fetch_source.output.total_fetched > 0"
 
-              # Cheap pre-filter — skip the rest of this adapter branch
-              # when the fetch failed (HTTP step swallowed via
-              # `on-failure: continue: true` above) or the feed returned
-              # an empty body. KQL's `field : *` matches docs where the
-              # field exists with a non-empty value, so `NOT … : *`
-              # short-circuits both "missing" and "empty string" without
-              # paying the cost of the sha256 hash or the dedup search.
-              - name: rss_skip_empty
-                type: loop.continue
-                if: "NOT steps.rss_fetch.output.data : *"
-
-              # Deterministic SHA-256 of `<source.url>:<response.body>`.
-              # Two feeds that legitimately mirror the same upstream
-              # advisory each keep a row (different URLs → different
-              # digests); a re-fetch from the same URL collapses to a
-              # single digest. The `| append:` chain is the only Liquid
-              # idiom that lets us hash a multi-token expression — `{{ a
-              # }}:{{ b }} | sha256` is parsed as two interpolations
-              # followed by literal text " | sha256".
-              - name: rss_compute_fingerprint
-                type: data.set
-                with:
-                  content_fingerprint: "{{ variables.source_url | append: ':' | append: steps.rss_fetch.output.data | sha256 }}"
-
-              # Pre-write dedup gate. The data stream target rejects
-              # `op_type: create` with a caller-supplied `_id`, so we
-              # can't push dedup into the write itself. The 90-day TTL
-              # mirrors tradecraft's URL-normalized seen-store horizon —
-              # an advisory that disappears for 90+ days can legitimately
-              # re-enter the pipeline as fresh content.
-              - name: rss_check_dedup
-                type: elasticsearch.search
-                with:
-                  index: .kibana-threat-reports
-                  size: 0
-                  track_total_hits: true
-                  query:
-                    bool:
-                      filter:
-                        - term:
-                            content_fingerprint: "{{ steps.rss_compute_fingerprint.output.content_fingerprint }}"
-                        - range:
-                            "@timestamp":
-                              gte: "now-90d"
-
-              - name: rss_skip_if_seen
-                type: loop.continue
-                if: "steps.rss_check_dedup.output.hits.total.value > 0"
-
-              - name: fingerprint_and_write_rss
-                type: elasticsearch.index
-                with:
-                  index: .kibana-threat-reports
-                  # Data stream target — `op_type: create` is required,
-                  # `_id` is intentionally omitted (see top-of-file
-                  # comment on the fingerprint shape).
-                  op_type: create
-                  document:
-                    "@timestamp": "{{ now | date_to_xmlschema }}"
-                    content_fingerprint: "{{ steps.rss_compute_fingerprint.output.content_fingerprint }}"
-                    space_id: "{{ foreach.item._source.space_id | default: '*' }}"
-                    source:
-                      type: rss
-                      name: "{{ foreach.item._source.name }}"
-                      url: "{{ foreach.item._source.config.url }}"
-                      adapter_id: "rss:{{ foreach.item._id }}"
-                    content:
-                      title: "{{ foreach.item._source.name }}"
-                      body_text: "{{ steps.rss_fetch.output.data }}"
-                      language: en
-                    severity:
-                      level: medium
-                      score: 40
-                    provenance:
-                      ingested_at: "{{ now | date_to_xmlschema }}"
-                      extraction_method: pending
-                on-failure:
-                  # Defensive — `rss_check_dedup` should have caught any
-                  # duplicate already. A 409 here means another worker
-                  # raced us on the same fingerprint in the dedup TTL
-                  # window; treat it the same as the dedup skip.
-                  continue: true
-          - match: stix
-            steps:
-              - name: stix_pull
-                type: http
-                with:
-                  method: GET
-                  url: "{{ foreach.item._source.config.url }}"
-                  headers:
-                    Accept: application/stix+json
-                on-failure:
-                  continue: true
-
-              # See the RSS case for the rationale behind each of these
-              # four gates — the pattern is identical and intentionally
-              # so, the only thing that varies per adapter is the fetch
-              # step name we hash and the `source.type` we write.
-              - name: stix_skip_empty
-                type: loop.continue
-                if: "NOT steps.stix_pull.output.data : *"
-
-              - name: stix_compute_fingerprint
-                type: data.set
-                with:
-                  content_fingerprint: "{{ variables.source_url | append: ':' | append: steps.stix_pull.output.data | sha256 }}"
-
-              - name: stix_check_dedup
-                type: elasticsearch.search
-                with:
-                  index: .kibana-threat-reports
-                  size: 0
-                  track_total_hits: true
-                  query:
-                    bool:
-                      filter:
-                        - term:
-                            content_fingerprint: "{{ steps.stix_compute_fingerprint.output.content_fingerprint }}"
-                        - range:
-                            "@timestamp":
-                              gte: "now-90d"
-
-              - name: stix_skip_if_seen
-                type: loop.continue
-                if: "steps.stix_check_dedup.output.hits.total.value > 0"
-
-              - name: fingerprint_and_write_stix
-                type: elasticsearch.index
-                with:
-                  index: .kibana-threat-reports
-                  op_type: create
-                  document:
-                    "@timestamp": "{{ now | date_to_xmlschema }}"
-                    content_fingerprint: "{{ steps.stix_compute_fingerprint.output.content_fingerprint }}"
-                    space_id: "{{ foreach.item._source.space_id | default: '*' }}"
-                    source:
-                      type: stix
-                      name: "{{ foreach.item._source.name }}"
-                      url: "{{ foreach.item._source.config.url }}"
-                      adapter_id: "stix:{{ foreach.item._id }}"
-                    content:
-                      title: "{{ foreach.item._source.name }}"
-                      body_text: "{{ steps.stix_pull.output.data }}"
-                      language: en
-                    severity:
-                      level: medium
-                      score: 40
-                    provenance:
-                      ingested_at: "{{ now | date_to_xmlschema }}"
-                      extraction_method: pending
-                on-failure:
-                  continue: true
-          - match: taxii
-            steps:
-              - name: taxii_poll
-                type: http
-                with:
-                  method: GET
-                  url: "{{ foreach.item._source.config.url }}"
-                  headers:
-                    Accept: application/taxii+json;version=2.1
-                on-failure:
-                  continue: true
-
-              - name: taxii_skip_empty
-                type: loop.continue
-                if: "NOT steps.taxii_poll.output.data : *"
-
-              - name: taxii_compute_fingerprint
-                type: data.set
-                with:
-                  content_fingerprint: "{{ variables.source_url | append: ':' | append: steps.taxii_poll.output.data | sha256 }}"
-
-              - name: taxii_check_dedup
-                type: elasticsearch.search
-                with:
-                  index: .kibana-threat-reports
-                  size: 0
-                  track_total_hits: true
-                  query:
-                    bool:
-                      filter:
-                        - term:
-                            content_fingerprint: "{{ steps.taxii_compute_fingerprint.output.content_fingerprint }}"
-                        - range:
-                            "@timestamp":
-                              gte: "now-90d"
-
-              - name: taxii_skip_if_seen
-                type: loop.continue
-                if: "steps.taxii_check_dedup.output.hits.total.value > 0"
-
-              - name: fingerprint_and_write_taxii
-                type: elasticsearch.index
-                with:
-                  index: .kibana-threat-reports
-                  op_type: create
-                  document:
-                    "@timestamp": "{{ now | date_to_xmlschema }}"
-                    content_fingerprint: "{{ steps.taxii_compute_fingerprint.output.content_fingerprint }}"
-                    space_id: "{{ foreach.item._source.space_id | default: '*' }}"
-                    source:
-                      type: taxii
-                      name: "{{ foreach.item._source.name }}"
-                      url: "{{ foreach.item._source.config.url }}"
-                      adapter_id: "taxii:{{ foreach.item._id }}"
-                    content:
-                      title: "{{ foreach.item._source.name }}"
-                      body_text: "{{ steps.taxii_poll.output.data }}"
-                      language: en
-                    severity:
-                      level: medium
-                      score: 40
-                    provenance:
-                      ingested_at: "{{ now | date_to_xmlschema }}"
-                      extraction_method: pending
-                on-failure:
-                  continue: true
-          - match: vendor_api
-            steps:
-              - name: vendor_call
-                type: http
-                with:
-                  method: GET
-                  url: "{{ foreach.item._source.config.url }}"
-                on-failure:
-                  continue: true
-
-              - name: vendor_skip_empty
-                type: loop.continue
-                if: "NOT steps.vendor_call.output.data : *"
-
-              - name: vendor_compute_fingerprint
-                type: data.set
-                with:
-                  content_fingerprint: "{{ variables.source_url | append: ':' | append: steps.vendor_call.output.data | sha256 }}"
-
-              - name: vendor_check_dedup
-                type: elasticsearch.search
-                with:
-                  index: .kibana-threat-reports
-                  size: 0
-                  track_total_hits: true
-                  query:
-                    bool:
-                      filter:
-                        - term:
-                            content_fingerprint: "{{ steps.vendor_compute_fingerprint.output.content_fingerprint }}"
-                        - range:
-                            "@timestamp":
-                              gte: "now-90d"
-
-              - name: vendor_skip_if_seen
-                type: loop.continue
-                if: "steps.vendor_check_dedup.output.hits.total.value > 0"
-
-              - name: fingerprint_and_write_vendor
-                type: elasticsearch.index
-                with:
-                  index: .kibana-threat-reports
-                  op_type: create
-                  document:
-                    "@timestamp": "{{ now | date_to_xmlschema }}"
-                    content_fingerprint: "{{ steps.vendor_compute_fingerprint.output.content_fingerprint }}"
-                    space_id: "{{ foreach.item._source.space_id | default: '*' }}"
-                    source:
-                      type: vendor_api
-                      name: "{{ foreach.item._source.name }}"
-                      url: "{{ foreach.item._source.config.url }}"
-                      adapter_id: "vendor_api:{{ foreach.item._id }}"
-                    content:
-                      title: "{{ foreach.item._source.name }}"
-                      body_text: "{{ steps.vendor_call.output.data }}"
-                      language: en
-                    severity:
-                      level: medium
-                      score: 40
-                    provenance:
-                      ingested_at: "{{ now | date_to_xmlschema }}"
-                      extraction_method: pending
-                on-failure:
-                  continue: true
-        default:
-          # Same workaround as the `expression` field above: read the loop
-          # variable through the hoisted `variables.*` instead of `foreach.*`
-          # so the validator can resolve the references on this step (which
-          # lives directly under the switch's `default` key).
-          - name: log_unknown_adapter
-            type: data.set
+      # Per-item dedup-and-write loop. Iterates over the adapter's
+      # normalized reports — each is a complete `.kibana-threat-reports`
+      # document, so this branch only does the bookkeeping the data
+      # stream's `op_type: create` semantics require.
+      - name: emit_reports
+        type: foreach
+        foreach: "{{ steps.fetch_source.output.reports }}"
+        steps:
+          # Pre-write dedup gate. The data stream target rejects
+          # `op_type: create` with a caller-supplied `_id`, so we
+          # can't push dedup into the write itself. The 90-day TTL
+          # mirrors tradecraft's URL-normalized seen-store horizon —
+          # an advisory that disappears for 90+ days can legitimately
+          # re-enter the pipeline as fresh content.
+          - name: check_dedup
+            type: elasticsearch.search
             with:
-              key: warning
-              value: "Skipping source {{ variables.item_id }} - unknown adapter_type {{ variables.adapter_type }}"
+              index: .kibana-threat-reports
+              size: 0
+              track_total_hits: true
+              query:
+                bool:
+                  filter:
+                    - term:
+                        content_fingerprint: "{{ foreach.item.content_fingerprint }}"
+                    - range:
+                        "@timestamp":
+                          gte: "now-90d"
+
+          - name: skip_if_seen
+            type: loop.continue
+            if: "steps.check_dedup.output.hits.total.value > 0"
+
+          - name: write_report
+            type: elasticsearch.index
+            with:
+              index: .kibana-threat-reports
+              # Data stream target — `op_type: create` is required,
+              # `_id` is intentionally omitted (see top-of-file
+              # comment on the fingerprint shape).
+              op_type: create
+              # The adapter already emitted the document in the exact
+              # `.kibana-threat-reports` mapping shape, so we hand it
+              # to ES verbatim. Re-mapping fields here would just
+              # introduce drift between the strict mapping and the
+              # adapter's TS shape — the common Zod schema in
+              # `common/threat_intelligence/workflows/step_types/fetch_source/`
+              # is the single source of truth for both.
+              #
+              # `${{ foreach.item }}` (with the `$` prefix), NOT
+              # `{{ foreach.item }}`. See the matching note on the
+              # `fetch_source` step above for why this matters — plain
+              # Liquid would stringify the document to
+              # `"[object Object]"` before ES sees it.
+              document: "${{ foreach.item }}"
+            on-failure:
+              # Defensive — `check_dedup` should have caught any
+              # duplicate already. A 409 here means another worker
+              # raced us on the same fingerprint in the dedup TTL
+              # window; treat it the same as the dedup skip.
+              continue: true

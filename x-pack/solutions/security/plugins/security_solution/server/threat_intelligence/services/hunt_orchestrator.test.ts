@@ -9,6 +9,7 @@ import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mo
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import type { HuntForThreatResult } from './hunt_for_threat';
 import type { HuntBehaviorResult } from './hunt_behavior';
+import { toIndexedBehaviors } from './indexed_behaviors';
 import { huntForThreat } from './hunt_for_threat';
 import { huntBehavior } from './hunt_behavior';
 import { writeHuntFeedbackSafe } from './write_hunt_feedback';
@@ -92,26 +93,29 @@ const tier1NoSearchableInput = (): HuntForThreatResult => ({
   next_step: 'Re-run with explicit IOCs / techniques.',
 });
 
+const tier2Behaviors = [
+  {
+    technique_id: 'T1059.003',
+    evidence_quote: 'The attacker invokes cmd.exe with a long obfuscated argument…',
+    llm_confidence: 0.9,
+    confidence: 0.9,
+    technique_name: 'Windows Command Shell',
+    reference: 'https://attack.mitre.org/techniques/T1059/003/',
+    tactic_ids: ['execution'],
+    parent_technique_id: 'T1059',
+    proposed_esql_rule: 'FROM logs-* | …',
+    rule_name: 'Cmd shell — T1059.003',
+    severity: 'high' as const,
+    risk_score: 73,
+    finding_id: 'report-1:T1059.003',
+  },
+];
+
 const tier2Result = (): HuntBehaviorResult => ({
   status: 'behaviors_proposed',
   report_id: 'report-1',
-  behaviors: [
-    {
-      technique_id: 'T1059.003',
-      evidence_quote: 'The attacker invokes cmd.exe with a long obfuscated argument…',
-      llm_confidence: 0.9,
-      confidence: 0.9,
-      technique_name: 'Windows Command Shell',
-      reference: 'https://attack.mitre.org/techniques/T1059/003/',
-      tactic_ids: ['execution'],
-      parent_technique_id: 'T1059',
-      proposed_esql_rule: 'FROM logs-* | …',
-      rule_name: 'Cmd shell — T1059.003',
-      severity: 'high',
-      risk_score: 73,
-      finding_id: 'report-1:T1059.003',
-    },
-  ],
+  behaviors: tier2Behaviors,
+  indexed_behaviors: toIndexedBehaviors(tier2Behaviors),
   attachment_hints: [],
   next_step: 'Emit each behavior as a finding card…',
 });
