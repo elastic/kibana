@@ -9,12 +9,14 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { ApplicationStart } from '@kbn/core-application-browser';
+import type { ISessionService } from '@kbn/data-plugin/public';
 import { APP_UI_ID } from '../../../../../common/constants';
 import type { EntityAttachmentIdentifier } from '../types';
 import {
   navigateToEntityAnalyticsHomePageInApp,
   navigateToEntityAnalyticsWithFlyoutInApp,
 } from '../../entity_explore_navigation';
+import { EntityAnalyticsAgentNavigationProvider } from '../../entity_analytics_agent_navigation_context';
 import { EntityCardActions } from './entity_card_actions';
 
 jest.mock('../../entity_explore_navigation', () => {
@@ -26,12 +28,6 @@ jest.mock('../../entity_explore_navigation', () => {
   };
 });
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: () => ({
-    services: { application: { navigateToApp: jest.fn() } },
-  }),
-}));
-
 const mockedNavigateToHome = navigateToEntityAnalyticsHomePageInApp as jest.Mock;
 const mockedNavigateToFlyout = navigateToEntityAnalyticsWithFlyoutInApp as jest.Mock;
 
@@ -40,12 +36,17 @@ const buildApplicationMock = (): ApplicationStart =>
 
 const renderActions = (
   identifier: EntityAttachmentIdentifier,
-  extraProps: Partial<React.ComponentProps<typeof EntityCardActions>> = {}
+  providerProps: { application?: ApplicationStart; searchSession?: ISessionService } = {}
 ) => {
-  const application = extraProps.application ?? buildApplicationMock();
+  const application = providerProps.application ?? buildApplicationMock();
   const utils = render(
     <I18nProvider>
-      <EntityCardActions identifier={identifier} application={application} {...extraProps} />
+      <EntityAnalyticsAgentNavigationProvider
+        application={application}
+        searchSession={providerProps.searchSession}
+      >
+        <EntityCardActions identifier={identifier} />
+      </EntityAnalyticsAgentNavigationProvider>
     </I18nProvider>
   );
   return { ...utils, application };

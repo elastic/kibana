@@ -17,6 +17,7 @@ import type {
   ConditionRenderProps,
 } from '../../../../../common/types/domain/template/fields';
 import { FIELD_REQUIRED, FIELD_MIN_VALUE, FIELD_MAX_VALUE } from '../../translations';
+import { OptionalFieldLabel } from '../../../optional_field_label';
 
 const { emptyField } = fieldValidators;
 
@@ -59,6 +60,7 @@ export const InputNumber = ({ label, name, type, isRequired, min, max }: InputNu
       config={{ validations }}
       componentProps={{
         label,
+        labelAppend: !isRequired ? OptionalFieldLabel : undefined,
       }}
     />
   );

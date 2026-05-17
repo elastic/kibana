@@ -9,11 +9,11 @@ import type { EntityType } from '@kbn/entity-store/common';
 
 /** Maps a correlation field value (e.g., "jdoe") to its EUID and entity type in the entity store */
 export interface CorrelationEntry {
-  euid: string;
+  euids: string[];
   entityType: EntityType;
 }
 
-/** Correlation field value → entity store EUID + type. Used for index source sync. */
+/** Correlation field value -> entity store EUIDs + type. Used for index source sync. */
 export type CorrelationMap = Map<string, CorrelationEntry>;
 
 export interface WatchlistEntityDoc {

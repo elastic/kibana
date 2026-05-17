@@ -824,7 +824,7 @@
           "\nAvatar stored in user profile."
         ],
         "path": "src/platform/packages/shared/kbn-user-profile-components/src/types.ts",
-        "lineNumber": 12,
+        "lineNumber": 14,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -842,7 +842,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-user-profile-components/src/types.ts",
-            "lineNumber": 16,
+            "lineNumber": 18,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -860,7 +860,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-user-profile-components/src/types.ts",
-            "lineNumber": 20,
+            "lineNumber": 22,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -878,7 +878,7 @@
               "string | null | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-user-profile-components/src/types.ts",
-            "lineNumber": 24,
+            "lineNumber": 26,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -894,7 +894,7 @@
         "label": "UserProfileData",
         "description": [],
         "path": "src/platform/packages/shared/kbn-user-profile-components/src/types.ts",
-        "lineNumber": 52,
+        "lineNumber": 63,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -917,7 +917,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-user-profile-components/src/types.ts",
-            "lineNumber": 53,
+            "lineNumber": 64,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -940,7 +940,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-user-profile-components/src/types.ts",
-            "lineNumber": 54,
+            "lineNumber": 65,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -956,7 +956,7 @@
               "[key: string]:  unknown"
             ],
             "path": "src/platform/packages/shared/kbn-user-profile-components/src/types.ts",
-            "lineNumber": 55,
+            "lineNumber": 66,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1670,7 +1670,7 @@
           "\nUser settings stored in the data object of the User Profile"
         ],
         "path": "src/platform/packages/shared/kbn-user-profile-components/src/types.ts",
-        "lineNumber": 34,
+        "lineNumber": 44,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1693,7 +1693,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-user-profile-components/src/types.ts",
-            "lineNumber": 38,
+            "lineNumber": 48,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1716,7 +1716,23 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-user-profile-components/src/types.ts",
-            "lineNumber": 39,
+            "lineNumber": 49,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/user-profile-components",
+            "id": "def-common.UserSettingsData.locale",
+            "type": "string",
+            "tags": [],
+            "label": "locale",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-user-profile-components/src/types.ts",
+            "lineNumber": 50,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1732,7 +1748,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-user-profile-components/src/types.ts",
-            "lineNumber": 40,
+            "lineNumber": 51,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1750,7 +1766,7 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-user-profile-components/src/types.ts",
-            "lineNumber": 41,
+            "lineNumber": 52,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1768,7 +1784,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-user-profile-components/src/types.ts",
-            "lineNumber": 45,
+            "lineNumber": 56,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1877,7 +1893,7 @@
           "\"standard\" | \"system\" | \"high\""
         ],
         "path": "src/platform/packages/shared/kbn-user-profile-components/src/types.ts",
-        "lineNumber": 32,
+        "lineNumber": 34,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1894,7 +1910,26 @@
           "\"system\" | \"light\" | \"dark\" | \"space_default\""
         ],
         "path": "src/platform/packages/shared/kbn-user-profile-components/src/types.ts",
-        "lineNumber": 30,
+        "lineNumber": 32,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/user-profile-components",
+        "id": "def-common.LocaleValue",
+        "type": "Type",
+        "tags": [],
+        "label": "LocaleValue",
+        "description": [
+          "\nValue stored in the user profile for the display language.\n\nAn empty string `\"\"` means \"no explicit choice\" (fall back to the server-configured\nlocale at render time). A `SupportedLocaleId` means the user has picked that locale."
+        ],
+        "signature": [
+          "string"
+        ],
+        "path": "src/platform/packages/shared/kbn-user-profile-components/src/types.ts",
+        "lineNumber": 36,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,

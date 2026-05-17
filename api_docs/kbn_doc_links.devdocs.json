@@ -1261,7 +1261,7 @@
             "label": "inferenceManagement",
             "description": [],
             "signature": [
-              "{ readonly inferenceAPIDocumentation: string; }"
+              "{ readonly inferenceAPIDocumentation: string; readonly featureSettings: string; readonly externalInference: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
             "lineNumber": 708,
@@ -1280,7 +1280,7 @@
               "{ readonly synonymsAPIDocumentation: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
-            "lineNumber": 711,
+            "lineNumber": 713,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1296,7 +1296,7 @@
               "{ readonly queryRulesAPIDocumentation: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
-            "lineNumber": 714,
+            "lineNumber": 716,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1312,7 +1312,7 @@
               "{ readonly failureStore: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
-            "lineNumber": 717,
+            "lineNumber": 719,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1328,7 +1328,7 @@
               "{ readonly agentBuilder: string; readonly getStarted: string; readonly models: string; readonly chat: string; readonly agentBuilderAgents: string; readonly agentBuilderSkills: string; readonly agentBuilderPlugins: string; readonly agentBuilderConnectors: string; readonly agentBuilderTools: string; readonly programmaticAccess: string; readonly kibanaApi: string; readonly mcpServer: string; readonly a2aServer: string; readonly limitationsKnownIssues: string; readonly learnMore: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
-            "lineNumber": 720,
+            "lineNumber": 722,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1344,7 +1344,7 @@
               "{ readonly componentTemplate: string; readonly indexAlias: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
-            "lineNumber": 737,
+            "lineNumber": 739,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1357,7 +1357,7 @@
             "label": "subscriptions",
             "description": [],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
-            "lineNumber": 741,
+            "lineNumber": 743,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1370,10 +1370,10 @@
             "label": "cases",
             "description": [],
             "signature": [
-              "{ readonly casesPermissions: string; }"
+              "{ readonly casesPermissions: string; readonly configureCaseSettings: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
-            "lineNumber": 742,
+            "lineNumber": 744,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

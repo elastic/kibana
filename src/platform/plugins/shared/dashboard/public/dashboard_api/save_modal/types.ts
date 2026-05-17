@@ -19,8 +19,6 @@ export interface DashboardSaveOptions {
   newTimeRestore: boolean;
   newAccessMode?: SavedObjectAccessControl['accessMode'];
   newProjectRoutingRestore: boolean;
-  onTitleDuplicate: () => void;
-  isTitleDuplicateConfirmed: boolean;
 }
 
 export type SavedDashboardSaveOpts = SavedObjectSaveOpts & { saveAsCopy?: boolean };

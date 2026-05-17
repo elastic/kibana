@@ -7,69 +7,12 @@
 
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import { SERVICE_PROVIDERS, ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
-import { i18n } from '@kbn/i18n';
 
-import { isInferenceEndpointWithDisplayCreatorMetadata } from '../../common/type_guards';
 import {
   type GroupedInferenceEndpointsData,
   type GroupByViewOptions,
   GroupByOptions,
 } from '../types';
-
-import { getModelId } from './get_model_id';
-import { KNOWN_MODEL_GROUPS, ELASTIC_GROUP_ID } from './known_models';
-
-export const UNKNOWN_MODEL_ID_FALLBACK = 'unknown_model';
-
-export const GroupByModelReducer = (
-  acc: Record<string, GroupedInferenceEndpointsData>,
-  endpoint: InferenceAPIConfigResponse
-): Record<string, GroupedInferenceEndpointsData> => {
-  const modelId = getModelId(endpoint) ?? UNKNOWN_MODEL_ID_FALLBACK;
-
-  if (isInferenceEndpointWithDisplayCreatorMetadata(endpoint)) {
-    const creator = endpoint.metadata.display.model_creator;
-    if (creator in acc) {
-      acc[creator].endpoints.push(endpoint);
-    } else {
-      acc[creator] = {
-        groupId: creator,
-        groupLabel: creator,
-        endpoints: [endpoint],
-      };
-    }
-    return acc;
-  }
-  const knownGroup = KNOWN_MODEL_GROUPS.find((group) => group.groupTest(modelId));
-  if (knownGroup) {
-    if (knownGroup.groupId in acc) {
-      acc[knownGroup.groupId].endpoints.push(endpoint);
-    } else {
-      acc[knownGroup.groupId] = {
-        groupId: knownGroup.groupId,
-        groupLabel: knownGroup.groupLabel,
-        endpoints: [endpoint],
-      };
-    }
-    return acc;
-  }
-
-  if (modelId in acc) {
-    acc[modelId].endpoints.push(endpoint);
-  } else {
-    acc[modelId] = {
-      groupId: modelId,
-      groupLabel:
-        modelId === UNKNOWN_MODEL_ID_FALLBACK
-          ? i18n.translate('xpack.searchInferenceEndpoints.groupedEndpoints.unknownModelLabel', {
-              defaultMessage: 'Unknown Model',
-            })
-          : modelId,
-      endpoints: [endpoint],
-    };
-  }
-  return acc;
-};
 
 export const GroupByServiceReducer = (
   acc: Record<string, GroupedInferenceEndpointsData>,
@@ -93,8 +36,6 @@ export const GroupByServiceReducer = (
 
 export function GroupByReducer(groupBy: GroupByViewOptions) {
   switch (groupBy) {
-    case GroupByOptions.Model:
-      return GroupByModelReducer;
     case GroupByOptions.Service:
       return GroupByServiceReducer;
     default:
@@ -108,28 +49,6 @@ export function defaultGroupedInferenceEndpointsDataCompare(
 ) {
   if (a.groupLabel === b.groupLabel) {
     return 0;
-  }
-  if (a.groupLabel < b.groupLabel) {
-    return -1;
-  }
-  if (a.groupLabel > b.groupLabel) {
-    return 1;
-  }
-  return 0;
-}
-
-export function ModelsGroupBySort(
-  a: GroupedInferenceEndpointsData,
-  b: GroupedInferenceEndpointsData
-) {
-  if (a.groupLabel === b.groupLabel) {
-    return 0;
-  }
-  if (a.groupId === ELASTIC_GROUP_ID) {
-    return -1;
-  }
-  if (b.groupId === ELASTIC_GROUP_ID) {
-    return 1;
   }
   if (a.groupLabel < b.groupLabel) {
     return -1;
@@ -172,8 +91,6 @@ export function ServiceGroupBySort(
 
 export function GroupBySort(groupBy: GroupByViewOptions) {
   switch (groupBy) {
-    case GroupByOptions.Model:
-      return ModelsGroupBySort;
     case GroupByOptions.Service:
       return ServiceGroupBySort;
     default:

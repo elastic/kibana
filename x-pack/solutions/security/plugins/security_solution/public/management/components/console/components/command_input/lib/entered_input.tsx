@@ -19,6 +19,8 @@ interface InputCharacter {
   argName: string;
   argIndex: number; // zero based
   argState: undefined | ArgSelectorState;
+  /** Indicates the character was inserted by console's code (ex. as part of adding an argument selector) */
+  internallyAdded: boolean;
 }
 
 const ARGUMENT_NAME_VALUE_SEPARATORS: readonly string[] = ['', ' ', '='];
@@ -31,6 +33,7 @@ const createInputCharacter = (overrides: Partial<InputCharacter> = {}): InputCha
     argName: '',
     argIndex: 0,
     argState: undefined,
+    internallyAdded: false,
     ...overrides,
   };
 };
@@ -78,7 +81,8 @@ export class EnteredInput {
     leftOfCursorText: string,
     rightOfCursorText: string,
     parsedInput: ParsedCommandInterface,
-    enteredCommand: undefined | EnteredCommand
+    enteredCommand: undefined | EnteredCommand,
+    keyCode?: string
   ) {
     this.leftOfCursorContent = getInputCharacters(leftOfCursorText);
     this.rightOfCursorContent = getInputCharacters(rightOfCursorText);
@@ -152,6 +156,23 @@ export class EnteredInput {
                   argIndex: argIndex++,
                   argState,
                 });
+
+                // We add an empty space after the argument name (if not already there) so that if
+                // the user continues to type in another argument name, after this Argument Selector
+                // is populated on the input area, that value will not just be appended to this argument
+                // name and make it invalid
+                const nextCharItemValue =
+                  side === 'left'
+                    ? items.at(pos + argChrLength)
+                      ? items.at(pos + argChrLength)?.value
+                      : this.rightOfCursorContent.at(0)?.value
+                    : items.at(pos + argChrLength)?.value;
+
+                if (keyCode !== 'Backspace' && !nextCharItemValue) {
+                  replaceValues.push(
+                    createInputCharacter({ value: ' ', renderValue: ' ', internallyAdded: true })
+                  );
+                }
 
                 items.splice(pos, argChrLength, ...replaceValues);
               }
@@ -306,7 +327,14 @@ export class EnteredInput {
     if (replaceSelection) {
       this.replaceSelection(replaceSelection, '');
     } else {
-      const removedChar = this.leftOfCursorContent.pop();
+      let removedChar = this.leftOfCursorContent.pop();
+
+      // Since we auto add a space after argument selectors, let's make sure that the character
+      // we just removed from the end of the left side of the cursor is actually a user-typed value
+      // and not an internally added character
+      if (removedChar?.internallyAdded) {
+        removedChar = this.leftOfCursorContent.pop();
+      }
 
       if (removedChar?.isArgSelector) {
         this.removeArgState([removedChar]);

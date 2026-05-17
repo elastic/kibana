@@ -70,7 +70,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       if (!isServerless) {
-        it('returns not found when the policy does not exist', async () => {
+        it('returns policy_missing: true when the referenced ILM policy does not exist', async () => {
           const indexName = 'logs.otel.ilmpolicydontexists';
           await putStream(apiClient, indexName, {
             ...emptyAssets,
@@ -88,7 +88,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               },
             },
           });
-          await getIlmStats(apiClient, indexName, 404);
+          const stats = await getIlmStats(apiClient, indexName, 200);
+          rawExpect(stats).toEqual({ policy_missing: true });
         });
 
         it('returns the effective ilm phases', async () => {
@@ -140,6 +141,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 min_age: '10d',
               },
             },
+            policy_missing: false,
           });
         });
       }

@@ -7,7 +7,6 @@
 
 import React from 'react';
 import type { z } from '@kbn/zod/v4';
-
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { SelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
@@ -18,6 +17,7 @@ import type {
   ConditionRenderProps,
 } from '../../../../../common/types/domain/template/fields';
 import { FIELD_REQUIRED } from '../../translations';
+import { OptionalFieldLabel } from '../../../optional_field_label';
 
 const { emptyField } = fieldValidators;
 
@@ -38,6 +38,7 @@ export const SelectBasic = ({ label, metadata, name, type, isRequired }: SelectB
       config={{ validations }}
       componentProps={{
         label,
+        labelAppend: !isRequired ? OptionalFieldLabel : undefined,
         euiFieldProps: {
           options: metadata.options.map((option) => ({
             value: option,

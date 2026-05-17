@@ -143,7 +143,7 @@ export const USERNAME_REQUIRED = i18n.translate(
 export const TO_CC_REQUIRED = i18n.translate(
   'xpack.stackConnectors.components.email.error.requiredEntryText',
   {
-    defaultMessage: 'No To, Cc, or Bcc entry.  At least one entry is required.',
+    defaultMessage: 'At least one recipient is required.',
   }
 );
 

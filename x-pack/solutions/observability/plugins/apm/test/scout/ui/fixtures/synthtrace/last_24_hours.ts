@@ -15,9 +15,11 @@ import {
 } from '../constants';
 
 export function servicesDataFromTheLast24Hours(): SynthtraceGenerator<ApmFields> {
-  const start = Date.now() - 1000 * 60 * 15;
-  const end = Date.now();
-  const range = timerange(new Date(start).getTime(), new Date(end).getTime());
+  // Custom-link filter suggestions query the last ~24h (see FiltersSection in the flyout).
+  // This generator used to emit only ~15m of spans (misnamed) which amplified clock/queue drift
+  // vs the UI interval on slow serverless pipelines (#262047).
+  const TWENTY_FOUR_H_MS = 1000 * 60 * 60 * 24;
+  const range = timerange(Date.now() - TWENTY_FOUR_H_MS, Date.now());
   const synthGo1 = apm
     .service({
       name: SERVICE_SYNTH_GO,

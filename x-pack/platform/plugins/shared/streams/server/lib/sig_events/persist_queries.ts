@@ -6,7 +6,7 @@
  */
 
 import type { GeneratedSignificantEventQuery } from '@kbn/streams-schema';
-import { normalizeEsqlSafe } from '@kbn/streams-schema';
+import { HIGH_SEVERITY_THRESHOLD, normalizeEsqlSafe, QUERY_TYPE_STATS } from '@kbn/streams-schema';
 import { v4 } from 'uuid';
 import type {
   QueryClient,
@@ -17,6 +17,10 @@ import type { StreamsClient } from '../streams/client';
 export interface PersistQueriesResult {
   persistedQueries: Array<GeneratedSignificantEventQuery & { id: string }>;
   skippedQueries: GeneratedSignificantEventQuery[];
+}
+
+function isRuleEligible(query: GeneratedSignificantEventQuery): boolean {
+  return query.type !== QUERY_TYPE_STATS && query.severity_score >= HIGH_SEVERITY_THRESHOLD;
 }
 
 export async function persistQueries(
@@ -45,7 +49,7 @@ export async function persistQueries(
   );
 
   const standardOps: QueryClientBulkIndexOperation[] = [];
-  const ruleBackedReplaceOps: QueryClientBulkIndexOperation[] = [];
+  const ruleOps: QueryClientBulkIndexOperation[] = [];
   const persistedQueries: Array<GeneratedSignificantEventQuery & { id: string }> = [];
   const skippedQueries: GeneratedSignificantEventQuery[] = [];
 
@@ -64,14 +68,19 @@ export async function persistQueries(
     if (replaces && existingById.has(replaces)) {
       const op = { index: { id: replaces, ...indexFields } };
       if (ruleBackedIds.has(replaces)) {
-        ruleBackedReplaceOps.push(op);
+        ruleOps.push(op);
       } else {
         standardOps.push(op);
       }
       persistedQueries.push({ ...query, id: replaces });
     } else {
       const id = v4();
-      standardOps.push({ index: { id, ...indexFields } });
+      const op = { index: { id, ...indexFields } };
+      if (isRuleEligible(query)) {
+        ruleOps.push(op);
+      } else {
+        standardOps.push(op);
+      }
       persistedQueries.push({ ...query, id });
     }
   }
@@ -80,11 +89,11 @@ export async function persistQueries(
     await queryClient.bulk(definition, standardOps, { createRules: false });
   }
 
-  // Rule-backed replacements go through the default path (syncQueries) so
-  // that backing Kibana rules are updated/recreated when the ES|QL changes,
-  // or properly uninstalled when the replacement is STATS-shaped.
-  if (ruleBackedReplaceOps.length > 0) {
-    await queryClient.bulk(definition, ruleBackedReplaceOps);
+  // Rule-backed replacements and new high-severity non-STATS queries go
+  // through the default path (syncQueries) so that backing Kibana rules
+  // are created, updated, or properly uninstalled.
+  if (ruleOps.length > 0) {
+    await queryClient.bulk(definition, ruleOps);
   }
 
   return { persistedQueries, skippedQueries };

@@ -46,6 +46,7 @@
   },
   "@elastic/appex-sharedux": {
     "src/core/packages/chrome/app-menu": "'app-menu' should be snake_case",
+    "src/core/packages/user-storage": "'user-storage' should be snake_case",
     "src/platform/kbn-ui": "'kbn-ui' should be snake_case",
     "src/platform/kbn-ui/side-navigation/packaging/I18N.md": "'I18N.md' should be snake_case",
     "src/platform/packages/shared/content-management/access_control/access_control_public": "'access_control_public' should be kebab-case",
@@ -72,7 +73,6 @@
     "src/platform/packages/shared/shared-ux/button_toolbar": "'button_toolbar' should be kebab-case",
     "src/platform/packages/shared/shared-ux/button/exit_full_screen": "'exit_full_screen' should be kebab-case",
     "src/platform/packages/shared/shared-ux/error_boundary": "'error_boundary' should be kebab-case",
-    "src/platform/packages/shared/shared-ux/feedback_snippet": "'feedback_snippet' should be kebab-case",
     "src/platform/packages/shared/shared-ux/label_formatter": "'label_formatter' should be kebab-case",
     "src/platform/packages/shared/shared-ux/page/solution_nav": "'solution_nav' should be kebab-case",
     "src/platform/packages/shared/shared-ux/prompt/not_found": "'not_found' should be kebab-case",
@@ -397,6 +397,7 @@
     "src/platform/packages/shared/deeplinks/agent_builder": "'agent_builder' should be kebab-case",
     "src/platform/packages/shared/deeplinks/workplace_ai": "'workplace_ai' should be kebab-case",
     "src/platform/packages/shared/serverless/settings/search_project": "'search_project' should be kebab-case",
+    "src/platform/packages/shared/serverless/settings/vectordb_project": "'vectordb_project' should be kebab-case",
     "src/platform/packages/shared/serverless/settings/workplace_ai_project": "'workplace_ai_project' should be kebab-case",
     "x-pack/solutions/search/packages/kbn-search-code-examples/src/api-tutorials": "'api-tutorials' should be snake_case",
     "x-pack/solutions/search/packages/kbn-search-code-examples/src/getting-started-tutorials": "'getting-started-tutorials' should be snake_case",

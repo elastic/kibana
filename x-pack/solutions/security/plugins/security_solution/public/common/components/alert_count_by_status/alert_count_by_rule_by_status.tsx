@@ -10,12 +10,12 @@ import React, { useCallback, useMemo } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiBasicTable, EuiEmptyPrompt, EuiLink, EuiPanel, EuiToolTip } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-
+import type { EntityType } from '@kbn/entity-store/public';
+import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
+import type { EntityStoreRecord } from '../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 import type { ESBoolQuery } from '../../../../common/typed_json';
 import type { Status } from '../../../../common/api/detection_engine';
 import { SecurityPageName } from '../../../../common/constants';
-import type { Filter } from '../../../overview/components/detection_response/hooks/use_navigate_to_timeline';
-import { useNavigateToTimeline } from '../../../overview/components/detection_response/hooks/use_navigate_to_timeline';
 import {
   SIGNAL_RULE_NAME_FIELD_NAME,
   SIGNAL_STATUS_FIELD_NAME,
@@ -33,14 +33,15 @@ import { MultiSelectPopover } from './components';
 import * as i18n from './translations';
 import type { AlertCountByRuleByStatusItem } from './use_alert_count_by_rule_by_status';
 import { useAlertCountByRuleByStatus } from './use_alert_count_by_rule_by_status';
+import { useUiSetting } from '../../lib/kibana/kibana_react';
+import { useInvestigateInTimeline } from '../../hooks/timeline/use_investigate_in_timeline';
 
 interface EntityFilter {
   field: string;
   value: string;
-  entityType?: string;
 }
 interface AlertCountByStatusProps {
-  entityFilter: EntityFilter;
+  entityFilter?: EntityFilter;
   /**
    * When set (e.g. host/user details from entity resolution), preferred over legacy `entityFilter.field`.
    * Same semantics as `AlertsByStatus` `identityFields`.
@@ -48,11 +49,15 @@ interface AlertCountByStatusProps {
   identityFields?: Record<string, string> | null;
   additionalFilters?: ESBoolQuery[];
   signalIndexName: string | null;
+  entityType?: string;
+  entityRecord?: EntityStoreRecord | null;
 }
 
 interface StatusSelection {
   [fieldName: string]: Status[];
 }
+
+const DEFAULT_STATUSES: Status[] = ['open'];
 
 type GetTableColumns = (
   openRuleInTimelineWithAdditionalFields: (ruleName: string) => void
@@ -72,36 +77,45 @@ const StyledEuiPanel = euiStyled(EuiPanel)`
 
 export const AlertCountByRuleByStatus = React.memo(
   ({
-    entityFilter,
-    identityFields,
-    signalIndexName,
     additionalFilters,
+    signalIndexName,
+    identityFields,
+    entityFilter,
+    entityType,
+    entityRecord,
   }: AlertCountByStatusProps) => {
-    const { field, value, entityType } = entityFilter;
-
+    const entityTypeCacheKey = entityType ?? 'generic';
+    const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2, false);
+    const euidApi = useEntityStoreEuidApi();
     const entityIdentifiersResolved = useMemo(
       () => resolveEntityIdentifiers(identityFields, entityFilter),
       [identityFields, entityFilter]
     );
 
-    const entityFiltersForTimeline: Filter[] = useMemo(() => {
-      if (entityIdentifiersResolved != null && Object.keys(entityIdentifiersResolved).length > 0) {
-        return Object.entries(entityIdentifiersResolved).map(([entityField, entityValue]) => ({
-          field: entityField,
-          value: entityValue,
-        }));
+    const euidEntityKqlFilter = useMemo((): string => {
+      let kqlFilter: string | null | undefined = '';
+      if (!entityStoreV2Enabled || !euidApi?.euid || !entityRecord || !entityType) {
+        kqlFilter = entityIdentifiersResolved
+          ? Object.entries(entityIdentifiersResolved)
+              .map(([field, value]) => `${field}: "${value}"`)
+              .join(' AND ')
+          : null;
+      } else {
+        kqlFilter = euidApi.euid.kql.getEuidFilterBasedOnDocument(
+          entityType as EntityType,
+          entityRecord
+        );
       }
-      return [{ field, value }];
-    }, [entityIdentifiersResolved, field, value]);
+      return kqlFilter && kqlFilter.length > 0 ? kqlFilter : '';
+    }, [euidApi?.euid, entityType, entityRecord, entityIdentifiersResolved, entityStoreV2Enabled]);
 
-    const queryId = `${ALERT_COUNT_BY_RULE_BY_STATUS}-by-${field}`;
+    const queryId = `${ALERT_COUNT_BY_RULE_BY_STATUS}-by-${entityType}`;
     const { toggleStatus, setToggleStatus } = useQueryToggle(queryId);
-
-    const { openTimelineWithFilters } = useNavigateToTimeline();
+    const { investigateInTimeline } = useInvestigateInTimeline();
 
     const [selectedStatusesByField, setSelectedStatusesByField] = useLocalStorage<StatusSelection>({
       defaultValue: {
-        [field]: ['open'],
+        [entityTypeCacheKey]: DEFAULT_STATUSES,
       },
       key: LOCAL_STORAGE_KEY,
       isInvalidDefault: (valueFromStorage) => {
@@ -111,40 +125,44 @@ export const AlertCountByRuleByStatus = React.memo(
 
     const columns = useMemo(() => {
       return getTableColumns((ruleName: string) => {
-        const timelineFilters: Filter[][] = [];
-
-        for (const status of selectedStatusesByField[field]) {
-          timelineFilters.push([
-            ...entityFiltersForTimeline,
-            { field: SIGNAL_RULE_NAME_FIELD_NAME, value: ruleName },
-            {
-              field: SIGNAL_STATUS_FIELD_NAME,
-              value: status,
-            },
-          ]);
+        if (!euidEntityKqlFilter || euidEntityKqlFilter.length === 0) {
+          return;
         }
-        openTimelineWithFilters(timelineFilters);
+
+        const timelineFilters: string[] = [];
+
+        for (const status of selectedStatusesByField[entityTypeCacheKey] || DEFAULT_STATUSES) {
+          timelineFilters.push(
+            `${euidEntityKqlFilter} AND ${SIGNAL_RULE_NAME_FIELD_NAME}: "${ruleName}" AND ${SIGNAL_STATUS_FIELD_NAME}: "${status}"`
+          );
+        }
+        investigateInTimeline({
+          keepDataView: true,
+          query: {
+            language: 'kuery',
+            query: timelineFilters.map((filter) => `(${filter})`).join(' OR '),
+          },
+        });
       });
-    }, [entityFiltersForTimeline, field, openTimelineWithFilters, selectedStatusesByField]);
+    }, [entityTypeCacheKey, euidEntityKqlFilter, investigateInTimeline, selectedStatusesByField]);
 
     const updateSelection = useCallback(
       (selection: Status[]) => {
         setSelectedStatusesByField({
           ...selectedStatusesByField,
-          [field]: selection,
+          [entityTypeCacheKey]: selection,
         });
       },
-      [field, selectedStatusesByField, setSelectedStatusesByField]
+      [entityTypeCacheKey, selectedStatusesByField, setSelectedStatusesByField]
     );
 
     const { items, isLoading, updatedAt } = useAlertCountByRuleByStatus({
       additionalFilters,
-      identityFields: entityIdentifiersResolved,
-      field,
-      value,
+      identityFields: entityIdentifiersResolved ?? identityFields ?? {},
       entityType,
+      entityRecord,
       queryId,
-      statuses: selectedStatusesByField[field] as Status[],
+      statuses: (selectedStatusesByField[entityTypeCacheKey] || DEFAULT_STATUSES) as Status[],
       skip: !toggleStatus,
       signalIndexName,
     });
@@ -164,7 +182,7 @@ export const AlertCountByRuleByStatus = React.memo(
               <MultiSelectPopover
                 title={i18n.Status}
                 allItems={STATUSES}
-                selectedItems={selectedStatusesByField[field] || ['open']}
+                selectedItems={selectedStatusesByField[entityTypeCacheKey] || DEFAULT_STATUSES}
                 onSelectedItemsChange={(selectedItems) =>
                   updateSelection(selectedItems as Status[])
                 }

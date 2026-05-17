@@ -64,6 +64,7 @@ export {
   getJoinIndices,
   getTimeseriesIndices,
   getViews,
+  getDatasets,
   getInferenceEndpoints,
   getEditorExtensions,
   getProjectRoutingFromEsqlQuery,
@@ -73,6 +74,9 @@ export {
   getQuerySummary,
   getEsqlControls,
   getAllEsqlControls,
+  convertFiltersToESQLExpression,
+  convertQueryToESQLExpression,
+  injectWhereClauseAfterSourceCommand,
   type ESQLStatsQueryMeta,
 } from './src';
 

@@ -14,11 +14,10 @@ export interface HasLibraryTransforms<
   ByReferenceSerializedState extends object = object,
   ByValueSerializedState extends object = object
 > {
-  checkForDuplicateTitle: (
-    newTitle: string,
-    isTitleDuplicateConfirmed: boolean,
-    onTitleDuplicate: () => void
-  ) => Promise<void>;
+  /**
+   * @returns {Promise<boolean>}
+   */
+  hasLibraryItemWithTitle: (title: string) => Promise<boolean>;
 
   /**
    *
@@ -68,6 +67,6 @@ export const apiHasLibraryTransforms = <StateT extends object = object>(
         'function' &&
       typeof (unknownApi as HasLibraryTransforms<StateT>).getSerializedStateByValue ===
         'function' &&
-      typeof (unknownApi as HasLibraryTransforms<StateT>).checkForDuplicateTitle === 'function'
+      typeof (unknownApi as HasLibraryTransforms<StateT>).hasLibraryItemWithTitle === 'function'
   );
 };

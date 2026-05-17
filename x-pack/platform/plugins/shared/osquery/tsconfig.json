@@ -13,8 +13,8 @@
     "server/**/*",
     "test/scout/**/*",
     "../../../../../typings/**/*",
-    // ECS and Osquery schema files
-    "public/common/schemas/*/*.json"
+    // ECS and Osquery schema files (JSON not matched by **/* globs)
+    "common/schemas/*/*.json"
   ],
   "kbn_references": [
     "@kbn/core",
