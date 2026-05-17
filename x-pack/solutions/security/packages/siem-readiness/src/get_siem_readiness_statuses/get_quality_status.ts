@@ -11,7 +11,7 @@ import type {
   MainCategories,
   VisibilityStatus,
 } from '../types';
-import { isQualityIncompatible } from './is_quality_incompatible';
+import { isQualityIncompatible } from './status_check_helpers';
 
 export const getQualityStatus = (
   categoriesData: CategoriesResponse | undefined,

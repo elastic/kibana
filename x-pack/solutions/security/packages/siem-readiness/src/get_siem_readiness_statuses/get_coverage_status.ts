@@ -7,7 +7,7 @@
 
 import type { CategoriesResponse, VisibilityStatus } from '../types';
 import { CATEGORY_ORDER } from '../constants';
-import { hasMissingIntegrations } from './has_missing_integrations';
+import { hasMissingIntegrations } from './status_check_helpers';
 
 interface RuleIntegrationCoverage {
   missingIntegrations?: string[];

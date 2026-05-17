@@ -11,7 +11,7 @@ import type {
   RetentionResponse,
   VisibilityStatus,
 } from '../types';
-import { isRetentionNonCompliant } from './is_retention_non_compliant';
+import { isRetentionNonCompliant } from './status_check_helpers';
 
 export const getRetentionStatus = (
   categoriesData: CategoriesResponse | undefined,

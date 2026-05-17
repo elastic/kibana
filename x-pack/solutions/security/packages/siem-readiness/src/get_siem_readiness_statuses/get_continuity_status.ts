@@ -6,7 +6,7 @@
  */
 
 import type { MainCategories, PipelineStats, VisibilityStatus } from '../types';
-import { isCriticalFailureRate } from './is_critical_failure_rate';
+import { isCriticalFailureRate } from './status_check_helpers';
 
 export const getContinuityStatus = (
   pipelinesData: PipelineStats[] | undefined,
