@@ -152,6 +152,7 @@ describe('WorkflowExecutionTelemetryClient', () => {
         spaceId: 'default',
         triggerType: 'manual',
         isTestRun: false,
+        isManaged: false,
         stepCount: 2,
         stepTypes: expect.arrayContaining(['slack.postMessage', 'http.post']),
         connectorTypes: expect.arrayContaining(['slack', 'http']),
@@ -326,6 +327,26 @@ describe('WorkflowExecutionTelemetryClient', () => {
       });
       expect(eventData).not.toHaveProperty('eventTriggerId');
     });
+
+    it('should include managed workflow execution fields when present', () => {
+      const workflowExecution = createMockWorkflowExecution({
+        managed: true,
+        managedBy: 'workflowsExtensionsExample',
+        originManagedWorkflowId: 'system-example-greeting',
+      });
+
+      client.reportWorkflowExecutionCompleted({
+        workflowExecution,
+        stepExecutions: [],
+      });
+
+      const [, eventData] = telemetry.reportEvent.mock.calls[0];
+      expect(eventData).toMatchObject({
+        isManaged: true,
+        managedBy: 'workflowsExtensionsExample',
+        originManagedWorkflowId: 'system-example-greeting',
+      });
+    });
   });
 
   describe('reportWorkflowExecutionFailed', () => {
@@ -485,6 +506,7 @@ describe('WorkflowExecutionTelemetryClient', () => {
         eventTriggerId: 'cases.updated',
         eventChainDepth: 2,
         isTestRun: false,
+        isManaged: false,
         logTriggerEventsEnabled: true,
       });
     });

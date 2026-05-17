@@ -98,10 +98,19 @@ export class WorkflowsMeteringService {
       status: execution.status,
       triggered_by: execution.triggeredBy || 'unknown',
       is_test_run: String(execution.isTestRun),
+      is_managed: String(execution.managed === true),
       workflow_id: execution.workflowId,
       space_id: execution.spaceId,
       step_count: String(stepCount),
     };
+
+    if (typeof execution.managedBy === 'string') {
+      metadata.managed_by = execution.managedBy;
+    }
+
+    if (typeof execution.originManagedWorkflowId === 'string') {
+      metadata.origin_managed_workflow_id = execution.originManagedWorkflowId;
+    }
 
     if (Object.keys(stepTypes).length > 0) {
       metadata.step_types = JSON.stringify(stepTypes);
