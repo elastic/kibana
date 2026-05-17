@@ -80,7 +80,7 @@ describe('getRetentionTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       )) as ToolHandlerStandardReturn;
 
-      const data = (result.results[0] as OtherResult).data as RetentionPayload;
+      const data = (result.results[0] as OtherResult<RetentionPayload>).data;
       expect(data.items).toHaveLength(0);
     });
 
@@ -99,7 +99,7 @@ describe('getRetentionTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       )) as ToolHandlerStandardReturn;
 
-      const data = (result.results[0] as OtherResult).data as RetentionPayload;
+      const data = (result.results[0] as OtherResult<RetentionPayload>).data;
       expect(data.items).toHaveLength(1);
       expect(data.items[0].indexName).toBe(CLOUD_DATA_STREAM);
     });
@@ -121,7 +121,7 @@ describe('getRetentionTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       )) as ToolHandlerStandardReturn;
 
-      const data = (result.results[0] as OtherResult).data as RetentionPayload;
+      const data = (result.results[0] as OtherResult<RetentionPayload>).data;
       expect(data.actionableFindings![0].category).toBe('Network');
     });
 
@@ -140,7 +140,7 @@ describe('getRetentionTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       )) as ToolHandlerStandardReturn;
 
-      const data = (result.results[0] as OtherResult).data as RetentionPayload;
+      const data = (result.results[0] as OtherResult<RetentionPayload>).data;
       // logs-orphan-default is not in any category backing index → finding is dropped
       expect(data.actionableFindings).toHaveLength(0);
     });
@@ -178,7 +178,7 @@ describe('getRetentionTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       )) as ToolHandlerStandardReturn;
 
-      const data = (result.results[0] as OtherResult).data as RetentionPayload;
+      const data = (result.results[0] as OtherResult<RetentionPayload>).data;
       // After filtering: only Cloud + Network (2 items)
       expect(data.items).toHaveLength(2);
       // Summary must reference 2, not 13
@@ -224,7 +224,7 @@ describe('getRetentionTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       )) as ToolHandlerStandardReturn;
 
-      const agentItemNames = ((result.results[0] as OtherResult).data as RetentionPayload).items.map(
+      const agentItemNames = ((result.results[0] as OtherResult<RetentionPayload>).data).items.map(
         (i) => i.indexName
       );
       // Apply the same shared predicate that the UI tab now uses

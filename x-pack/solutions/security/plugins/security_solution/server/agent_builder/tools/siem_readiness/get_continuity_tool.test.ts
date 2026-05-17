@@ -69,7 +69,7 @@ describe('getContinuityTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       )) as ToolHandlerStandardReturn;
 
-      const data = (result.results[0] as OtherResult).data as ContinuityPayload;
+      const data = (result.results[0] as OtherResult<ContinuityPayload>).data;
       expect(data.items).toHaveLength(0);
     });
 
@@ -88,7 +88,7 @@ describe('getContinuityTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       )) as ToolHandlerStandardReturn;
 
-      const data = (result.results[0] as OtherResult).data as ContinuityPayload;
+      const data = (result.results[0] as OtherResult<ContinuityPayload>).data;
       expect(data.items).toHaveLength(1);
       expect(data.items[0].name).toBe('endpoint-pipeline');
     });
@@ -112,7 +112,7 @@ describe('getContinuityTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       )) as ToolHandlerStandardReturn;
 
-      const data = (result.results[0] as OtherResult).data as ContinuityPayload;
+      const data = (result.results[0] as OtherResult<ContinuityPayload>).data;
       expect(data.actionableFindings![0].category).toBe('Endpoint');
     });
 
@@ -131,7 +131,7 @@ describe('getContinuityTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       )) as ToolHandlerStandardReturn;
 
-      const data = (result.results[0] as OtherResult).data as ContinuityPayload;
+      const data = (result.results[0] as OtherResult<ContinuityPayload>).data;
       // ghost-pipeline is not in categorizedItems → finding is dropped
       expect(data.actionableFindings).toHaveLength(0);
     });
@@ -157,7 +157,7 @@ describe('getContinuityTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       )) as ToolHandlerStandardReturn;
 
-      const data = (result.results[0] as OtherResult).data as ContinuityPayload;
+      const data = (result.results[0] as OtherResult<ContinuityPayload>).data;
       // After filtering: only endpoint-pipeline remains
       expect(data.items).toHaveLength(1);
       // Summary must reference 1, not 3
@@ -201,7 +201,7 @@ describe('getContinuityTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       )) as ToolHandlerStandardReturn;
 
-      const agentItemNames = ((result.results[0] as OtherResult).data as ContinuityPayload).items.map(
+      const agentItemNames = ((result.results[0] as OtherResult<ContinuityPayload>).data).items.map(
         (p) => p.name
       );
       // Apply the same shared predicate that the UI tab now uses

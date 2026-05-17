@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
+import type { AttachmentTypeDefinition, AttachmentFormatContext } from '@kbn/agent-builder-server/attachments';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type {
   ContinuityPayload,
@@ -40,7 +40,7 @@ export const siemReadinessCoverageDataSchema = securityAttachmentDataSchema.exte
       indices: z.array(z.object({ indexName: z.string(), docs: z.number() })),
     })
   ),
-  actionableFindings: z.array(actionableFindingSchema).optional(),
+  actionableFindings: z.array(actionableFindingSchema),
 });
 
 // ---- Quality ----
@@ -58,7 +58,7 @@ export const siemReadinessQualityDataSchema = securityAttachmentDataSchema.exten
       checkedAt: z.number(),
     })
   ),
-  actionableFindings: z.array(actionableFindingSchema).optional(),
+  actionableFindings: z.array(actionableFindingSchema),
 });
 
 // ---- Continuity ----
@@ -77,7 +77,7 @@ export const siemReadinessContinuityDataSchema = securityAttachmentDataSchema.ex
       categories: z.array(z.string()).optional(),
     })
   ),
-  actionableFindings: z.array(actionableFindingSchema).optional(),
+  actionableFindings: z.array(actionableFindingSchema),
 });
 
 // ---- Retention ----
@@ -98,7 +98,7 @@ export const siemReadinessRetentionDataSchema = securityAttachmentDataSchema.ext
       categories: z.array(z.string()).optional(),
     })
   ),
-  actionableFindings: z.array(actionableFindingSchema).optional(),
+  actionableFindings: z.array(actionableFindingSchema),
 });
 
 // ---- Union schema ----
@@ -245,7 +245,7 @@ export const createSiemReadinessAttachmentType = (): AttachmentTypeDefinition =>
     }
     return { valid: false, error: parseResult.error.message };
   },
-  format: (attachment: Attachment<string, unknown>) => {
+  format: (attachment: Attachment<string, unknown>, _context: AttachmentFormatContext) => {
     const parseResult = siemReadinessAttachmentDataSchema.safeParse(attachment.data);
     if (!parseResult.success) {
       throw new Error(`Invalid SIEM readiness attachment data for attachment ${attachment.id}`);

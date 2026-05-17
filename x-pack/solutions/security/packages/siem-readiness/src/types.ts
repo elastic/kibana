@@ -98,6 +98,7 @@ export interface PipelineStats {
   failedDocsCount: number;
   /** False when the server cannot provide ingestion stats (e.g. serverless mode). */
   statsAvailable: boolean;
+  categories?: string[];
 }
 export interface CasesSearchResponse {
   total: number;
@@ -144,26 +145,26 @@ export interface CoveragePayload {
   status: VisibilityStatus;
   summary: string;
   items: CategoryGroup[];
-  actionableFindings?: ActionableFinding[];
+  actionableFindings: ActionableFinding[];
 }
 
 export interface QualityPayload {
   status: VisibilityStatus;
   summary: string;
   items: DataQualityResultDocument[];
-  actionableFindings?: ActionableFinding[];
+  actionableFindings: ActionableFinding[];
 }
 
 export interface ContinuityPayload {
   status: VisibilityStatus;
   summary: string;
   items: PipelineStats[];
-  actionableFindings?: ActionableFinding[];
+  actionableFindings: ActionableFinding[];
 }
 
 export interface RetentionPayload {
   status: VisibilityStatus;
   summary: string;
   items: RetentionInfo[];
-  actionableFindings?: ActionableFinding[];
+  actionableFindings: ActionableFinding[];
 }

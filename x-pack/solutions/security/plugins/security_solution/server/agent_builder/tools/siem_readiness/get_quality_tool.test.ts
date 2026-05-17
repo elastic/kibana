@@ -65,7 +65,7 @@ const makeQualityResult = (indexName: string, incompatibleFieldCount = 0) =>
     markdownComments: [],
     ecsVersion: '8.11.0',
     error: null,
-  } as const);
+  });
 
 describe('getQualityTool', () => {
   const { mockCore, mockLogger, mockEsClient, mockRequest } = createToolTestMocks();
@@ -90,7 +90,7 @@ describe('getQualityTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       )) as ToolHandlerStandardReturn;
 
-      const data = (result.results[0] as OtherResult).data as QualityPayload;
+      const data = (result.results[0] as OtherResult<QualityPayload>).data;
       expect(data.items).toHaveLength(0);
     });
 
@@ -109,7 +109,7 @@ describe('getQualityTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       )) as ToolHandlerStandardReturn;
 
-      const data = (result.results[0] as OtherResult).data as QualityPayload;
+      const data = (result.results[0] as OtherResult<QualityPayload>).data;
       expect(data.items).toHaveLength(1);
       expect(data.items[0].indexName).toBe(IDENTITY_INDEX);
     });
@@ -126,7 +126,7 @@ describe('getQualityTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       )) as ToolHandlerStandardReturn;
 
-      const data = (result.results[0] as OtherResult).data as QualityPayload;
+      const data = (result.results[0] as OtherResult<QualityPayload>).data;
       expect(data.items).toHaveLength(2);
     });
   });
@@ -147,7 +147,7 @@ describe('getQualityTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       )) as ToolHandlerStandardReturn;
 
-      const data = (result.results[0] as OtherResult).data as QualityPayload;
+      const data = (result.results[0] as OtherResult<QualityPayload>).data;
       expect(data.actionableFindings![0].category).toBe('Cloud');
     });
 
@@ -166,7 +166,7 @@ describe('getQualityTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       )) as ToolHandlerStandardReturn;
 
-      const data = (result.results[0] as OtherResult).data as QualityPayload;
+      const data = (result.results[0] as OtherResult<QualityPayload>).data;
       expect(data.actionableFindings![0].category).toBeUndefined();
     });
   });

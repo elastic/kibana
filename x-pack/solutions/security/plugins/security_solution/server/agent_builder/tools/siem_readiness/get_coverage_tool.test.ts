@@ -76,7 +76,7 @@ describe('getCoverageTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       )) as ToolHandlerStandardReturn;
 
-      const data = (result.results[0] as OtherResult).data as CoveragePayload;
+      const data = (result.results[0] as OtherResult<CoveragePayload>).data;
       expect(data.status).toBe('actionsRequired');
       expect(data.items).toHaveLength(1);
       expect(data.actionableFindings).toHaveLength(1);
