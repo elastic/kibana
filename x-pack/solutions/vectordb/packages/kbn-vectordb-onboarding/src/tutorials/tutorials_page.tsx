@@ -22,37 +22,21 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useHistory } from 'react-router-dom';
 import { useKibana } from '../services';
-import { getTutorials, type Tutorial } from './tutorial_data';
+import { getTutorials } from './tutorial_data';
 import { useTutorialProgress } from './use_tutorial_progress';
 
-const isExternal = (href: string): boolean => /^https?:\/\//.test(href);
-
 export const TutorialsPage: React.FC = () => {
-  const history = useHistory();
   const { euiTheme } = useEuiTheme();
   const { completed, markComplete } = useTutorialProgress();
   const {
-    services: { docLinks },
+    services: { docLinks, application },
   } = useKibana();
 
-  const tutorials = getTutorials(docLinks);
+  const tutorials = getTutorials(docLinks, application);
   const total = tutorials.length;
   const doneCount = tutorials.filter((t) => completed.has(t.id)).length;
   const percent = total === 0 ? 0 : Math.round((doneCount / total) * 100);
-
-  const onTutorialClick = (tutorial: Tutorial) => {
-    if (isExternal(tutorial.href)) {
-      // Mark complete for external tutorials when the user opens them.
-      markComplete(tutorial.id);
-      window.open(tutorial.href, '_blank', 'noopener,noreferrer');
-    } else {
-      // For in-app tutorials (e.g. the wizard), completion happens at the
-      // tutorial's own "done" event, not on click.
-      history.push(tutorial.href);
-    }
-  };
 
   return (
     <EuiPageTemplate restrictWidth="1100px" panelled={false} grow={false}>
@@ -121,6 +105,11 @@ export const TutorialsPage: React.FC = () => {
               <EuiCard
                 key={tutorial.id}
                 data-test-subj={`tutorialCard-${tutorial.id}`}
+                href={tutorial.href}
+                target={tutorial.target}
+                onClick={
+                  tutorial.target === '_blank' ? () => markComplete(tutorial.id) : undefined
+                }
                 icon={
                   <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
                     <EuiFlexItem grow={false}>
@@ -166,7 +155,6 @@ export const TutorialsPage: React.FC = () => {
                     </EuiFlexGroup>
                   </>
                 }
-                onClick={() => onTutorialClick(tutorial)}
               />
             );
           })}

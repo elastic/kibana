@@ -24,6 +24,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useOnboardingCredentials } from '@kbn/vectordb-onboarding';
 import { useKibana } from '../hooks/use_kibana';
 import { NewConversationPrompt } from './new_conversation_prompt';
 import { formatBytes, formatNumber, useDeploymentStats } from './use_deployment_stats';
@@ -49,6 +50,7 @@ export const HomePage: React.FC = () => {
   } = useKibana();
   const { stats, isLoading } = useDeploymentStats();
   const elasticsearchUrl = stats.elasticsearchUrl ?? '';
+  const { apiKey, isLoading: isApiKeyLoading } = useOnboardingCredentials();
 
   const goToApiKeys = () =>
     application.navigateToApp('management', { path: '/security/api_keys/create' });
@@ -163,17 +165,55 @@ export const HomePage: React.FC = () => {
                 </EuiText>
               )}
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                iconType="key"
-                onClick={goToApiKeys}
-                data-test-subj="vectordbHomeCreateApiKey"
-              >
-                {i18n.translate('xpack.serverlessVectordb.home.connect.createApiKey', {
-                  defaultMessage: 'Create API key',
-                })}
-              </EuiButton>
-            </EuiFlexItem>
+            {isApiKeyLoading ? (
+              <EuiFlexItem grow={false}>
+                <EuiLoadingSpinner size="m" />
+              </EuiFlexItem>
+            ) : apiKey ? (
+              <EuiFlexItem>
+                <EuiText size="xs" color="subdued">
+                  <label htmlFor="vectordbHomeApiKey">
+                    {i18n.translate('xpack.serverlessVectordb.home.connect.apiKeyLabel', {
+                      defaultMessage: 'API key',
+                    })}
+                  </label>
+                </EuiText>
+                <EuiSpacer size="xs" />
+                <EuiFieldText
+                  id="vectordbHomeApiKey"
+                  readOnly
+                  value={apiKey}
+                  data-test-subj="vectordbHomeApiKey"
+                  append={
+                    <EuiCopy textToCopy={apiKey}>
+                      {(copy) => (
+                        <EuiButtonEmpty
+                          iconType="copyClipboard"
+                          size="xs"
+                          onClick={copy}
+                          aria-label={i18n.translate(
+                            'xpack.serverlessVectordb.home.connect.copyApiKey',
+                            { defaultMessage: 'Copy API key' }
+                          )}
+                        />
+                      )}
+                    </EuiCopy>
+                  }
+                />
+              </EuiFlexItem>
+            ) : (
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  iconType="key"
+                  onClick={goToApiKeys}
+                  data-test-subj="vectordbHomeCreateApiKey"
+                >
+                  {i18n.translate('xpack.serverlessVectordb.home.connect.createApiKey', {
+                    defaultMessage: 'Create API key',
+                  })}
+                </EuiButton>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiPanel>
 

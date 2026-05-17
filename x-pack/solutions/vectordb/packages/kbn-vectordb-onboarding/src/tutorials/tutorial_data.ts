@@ -6,7 +6,7 @@
  */
 
 import type { IconType } from '@elastic/eui';
-import type { DocLinksStart } from '@kbn/core/public';
+import type { ApplicationStart, DocLinksStart } from '@kbn/core/public';
 
 export interface Tutorial {
   /** Stable id used for localStorage progress tracking. */
@@ -14,11 +14,10 @@ export interface Tutorial {
   title: string;
   description: string;
   icon: IconType;
-  /**
-   * In-app sub-route to navigate to via React Router (e.g. `/onboarding`),
-   * or an absolute external URL (will open in a new tab).
-   */
+  /** Navigation target — in-app sub-route or absolute external URL. */
   href: string;
+  /** Set to `'_blank'` for external URLs; omit for in-app routes. */
+  target?: '_blank';
   /** Estimated effort, shown as a small badge. */
   duration: string;
   /** Free-form tag chips. */
@@ -33,14 +32,17 @@ export const ONBOARDING_TUTORIAL_ID = 'onboarding-wizard';
  * Kibana's source of truth for Elastic documentation URLs (no hard-coded
  * paths that can rot).
  */
-export const getTutorials = (docLinks: DocLinksStart): readonly Tutorial[] => [
+export const getTutorials = (
+  docLinks: DocLinksStart,
+  application: ApplicationStart
+): readonly Tutorial[] => [
   {
     id: ONBOARDING_TUTORIAL_ID,
     title: 'Onboarding: ingest and search vectors',
     description:
       'A 3-step walkthrough that creates an index, loads a few documents, and runs your first vector query.',
     icon: 'rocket',
-    href: '/onboarding',
+    href: application.getUrlForApp('vectordb', { path: '/onboarding' }),
     duration: '5 min',
     tags: ['Beginner', 'Wizard'],
   },
@@ -51,6 +53,7 @@ export const getTutorials = (docLinks: DocLinksStart): readonly Tutorial[] => [
       'Boost recall by combining lexical and vector retrieval into a single ranked result set.',
     icon: 'visBarHorizontalStacked',
     href: docLinks.links.enterpriseSearch.knnSearchCombine,
+    target: '_blank',
     duration: '15 min',
     tags: ['Intermediate', 'Hybrid'],
   },
@@ -61,6 +64,7 @@ export const getTutorials = (docLinks: DocLinksStart): readonly Tutorial[] => [
       'Wire vector search into a retrieval-augmented generation flow with the in-Kibana Playground.',
     icon: 'sparkles',
     href: docLinks.links.playground.chatPlayground,
+    target: '_blank',
     duration: '15 min',
     tags: ['RAG', 'Playground'],
   },
@@ -71,6 +75,7 @@ export const getTutorials = (docLinks: DocLinksStart): readonly Tutorial[] => [
       'Skip the embedding step and let Elasticsearch generate vectors for you on ingest and at query time.',
     icon: 'tokenSemanticText',
     href: docLinks.links.enterpriseSearch.semanticSearch,
+    target: '_blank',
     duration: '10 min',
     tags: ['Beginner', 'semantic_text'],
   },

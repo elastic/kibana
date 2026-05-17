@@ -60,7 +60,8 @@ const CredentialField: React.FC<{
   value: string | null;
   isLoading: boolean;
   copyAriaLabel: string;
-}> = ({ label, value, isLoading, copyAriaLabel }) => (
+  fallback?: React.ReactNode;
+}> = ({ label, value, isLoading, copyAriaLabel, fallback }) => (
   <>
     <EuiText size="xs" color="subdued">
       {label}
@@ -68,6 +69,8 @@ const CredentialField: React.FC<{
     <EuiSpacer size="xs" />
     {isLoading ? (
       <EuiLoadingSpinner size="s" />
+    ) : !value && fallback ? (
+      fallback
     ) : (
       <EuiFieldText
         compressed
@@ -99,6 +102,12 @@ const StepRail: React.FC<{
   docsHref?: string;
 }> = ({ currentStep, onSkip, docsLabel, docsHref }) => {
   const { elasticsearchUrl, apiKey, isLoading } = useOnboardingCredentials();
+  const {
+    services: { application },
+  } = useKibana();
+
+  const goToApiKeys = () =>
+    application.navigateToApp('management', { path: '/security/api_keys/create' });
 
   return (
     <EuiPanel hasShadow={false} hasBorder paddingSize="l">
@@ -150,6 +159,18 @@ const StepRail: React.FC<{
             copyAriaLabel={i18n.translate('vectordbOnboarding.wizard.rail.copyApiKey', {
               defaultMessage: 'Copy API key',
             })}
+            fallback={
+              <EuiButton
+                size="s"
+                iconType="key"
+                onClick={goToApiKeys}
+                data-test-subj="vectordbWizardCreateApiKey"
+              >
+                {i18n.translate('vectordbOnboarding.wizard.rail.createApiKey', {
+                  defaultMessage: 'Create API key',
+                })}
+              </EuiButton>
+            }
           />
         </EuiFlexItem>
 
