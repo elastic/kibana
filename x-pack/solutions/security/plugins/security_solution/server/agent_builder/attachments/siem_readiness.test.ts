@@ -155,7 +155,9 @@ describe('createSiemReadinessAttachmentType', () => {
     });
 
     it('formats coverage as text containing human-readable status and category', async () => {
-      const formatted = await Promise.resolve(attachmentType.format(makeAttachment(coverageData), mockFormatContext));
+      const formatted = await Promise.resolve(
+        attachmentType.format(makeAttachment(coverageData), mockFormatContext)
+      );
       const rep = await Promise.resolve(formatted.getRepresentation?.());
       expect(rep?.type).toBe('text');
       expect(rep?.value).toContain('Healthy'); // not 'healthy'
@@ -163,7 +165,9 @@ describe('createSiemReadinessAttachmentType', () => {
     });
 
     it('formats quality as text containing human-readable status and findings', async () => {
-      const formatted = await Promise.resolve(attachmentType.format(makeAttachment(qualityData), mockFormatContext));
+      const formatted = await Promise.resolve(
+        attachmentType.format(makeAttachment(qualityData), mockFormatContext)
+      );
       const rep = await Promise.resolve(formatted.getRepresentation?.());
       expect(rep?.type).toBe('text');
       expect(rep?.value).toContain('Actions Required'); // not 'actionsRequired'
@@ -171,7 +175,9 @@ describe('createSiemReadinessAttachmentType', () => {
     });
 
     it('formats continuity as text containing human-readable status and pipeline info', async () => {
-      const formatted = await Promise.resolve(attachmentType.format(makeAttachment(continuityData), mockFormatContext));
+      const formatted = await Promise.resolve(
+        attachmentType.format(makeAttachment(continuityData), mockFormatContext)
+      );
       const rep = await Promise.resolve(formatted.getRepresentation?.());
       expect(rep?.type).toBe('text');
       expect(rep?.value).toContain('Actions Required'); // not 'actionsRequired'
@@ -179,7 +185,9 @@ describe('createSiemReadinessAttachmentType', () => {
     });
 
     it('formats retention as text containing human-readable status and retention info', async () => {
-      const formatted = await Promise.resolve(attachmentType.format(makeAttachment(retentionData), mockFormatContext));
+      const formatted = await Promise.resolve(
+        attachmentType.format(makeAttachment(retentionData), mockFormatContext)
+      );
       const rep = await Promise.resolve(formatted.getRepresentation?.());
       expect(rep?.type).toBe('text');
       expect(rep?.value).toContain('Actions Required'); // not 'actionsRequired'
@@ -187,7 +195,9 @@ describe('createSiemReadinessAttachmentType', () => {
     });
 
     it('throws when data does not match any dimension schema', () => {
-      expect(() => attachmentType.format(makeAttachment({ dimension: 'bad' }), mockFormatContext)).toThrow();
+      expect(() =>
+        attachmentType.format(makeAttachment({ dimension: 'bad' }), mockFormatContext)
+      ).toThrow();
     });
   });
 });
