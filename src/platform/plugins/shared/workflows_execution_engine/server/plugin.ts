@@ -622,12 +622,12 @@ export class WorkflowsExecutionEnginePlugin
     // Re-check that a workflow is still enabled right before persisting an
     // execution document.  The route-level check may have read a stale value
     // if a concurrent hard-delete disabled the workflow in the meantime.
-    // Skipped for test runs — unsaved workflows don't exist in the index.
+    // Skipped for ephemeral workflows — unsaved workflows don't exist in the workflow index.
     const ensureWorkflowEnabled = async (
       workflow: WorkflowExecutionEngineModel,
       spaceId: string
     ) => {
-      if (workflow.isTestRun) {
+      if (workflow.isEphemeral) {
         return;
       }
       const stillEnabled = await workflowRepository.isWorkflowEnabled(workflow.id, spaceId);
@@ -923,9 +923,9 @@ export class WorkflowsExecutionEnginePlugin
         (item.context.spaceId as string | undefined) || 'default';
 
       // Single ES search for the enabled flags of every (workflowId, spaceId)
-      // referenced by the batch. Skips `isTestRun` items (they are not indexed).
+      // referenced by the batch. Skips ephemeral items (they are not indexed as workflows).
       const enabledRefs = items
-        .filter((item) => !item.workflow.isTestRun)
+        .filter((item) => !item.workflow.isEphemeral)
         .map((item) => ({ workflowId: item.workflow.id, spaceId: spaceIdFor(item) }));
       const enabledMap =
         enabledRefs.length === 0
@@ -941,7 +941,7 @@ export class WorkflowsExecutionEnginePlugin
       for (let idx = 0; idx < items.length; idx++) {
         const item = items[idx];
         try {
-          if (!item.workflow.isTestRun) {
+          if (!item.workflow.isEphemeral) {
             const spaceId = spaceIdFor(item);
             const enabled = enabledMap.get(`${spaceId}:${item.workflow.id}`) ?? false;
             if (!enabled) {

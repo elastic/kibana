@@ -400,6 +400,7 @@ export interface WorkflowListDto {
 export interface WorkflowExecutionEngineModel
   extends Pick<EsWorkflow, 'id' | 'name' | 'enabled' | 'definition' | 'yaml'> {
   isTestRun?: boolean;
+  isEphemeral?: boolean;
   spaceId?: string;
 }
 

@@ -15,7 +15,11 @@ import type {
 } from '@kbn/agent-context-layer-plugin/server';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { getWorkflowJsonSchema, transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
+import {
+  ExecutionStatus,
+  getWorkflowJsonSchema,
+  transformWorkflowYamlJsontoEsWorkflow,
+} from '@kbn/workflows';
 import type {
   BulkScheduleWorkflowResult,
   CreateWorkflowCommand,
@@ -144,6 +148,54 @@ export interface BulkScheduleWorkflowItem {
   triggeredBy: string;
   metadata?: WorkflowExecutionEventDispatchMetadata;
 }
+
+const DEFAULT_EXECUTE_WORKFLOW_COMPLETION_TIMEOUT_SEC = 120;
+const INITIAL_EXECUTE_WORKFLOW_WAIT_MS = 1_000;
+const EXECUTE_WORKFLOW_CHECK_INTERVAL_MS = 2_500;
+
+const executeWorkflowFinalStatuses = [
+  ExecutionStatus.COMPLETED,
+  ExecutionStatus.FAILED,
+  ExecutionStatus.WAITING_FOR_INPUT,
+];
+
+export interface ExecuteWorkflowBaseParams {
+  request: KibanaRequest;
+  spaceId: string;
+  inputs?: Record<string, unknown>;
+  waitForCompletion?: boolean;
+  completionTimeoutSec?: number;
+  triggeredBy?: string;
+  metadata?: Record<string, unknown>;
+}
+
+export interface ExecuteSavedWorkflowParams extends ExecuteWorkflowBaseParams {
+  workflowId: string;
+  definition?: never;
+  yaml?: never;
+  name?: never;
+  isTestRun?: never;
+}
+
+export interface ExecuteInlineWorkflowParams extends ExecuteWorkflowBaseParams {
+  workflowId?: string;
+  definition: WorkflowYaml;
+  yaml: string;
+  name?: string;
+  isTestRun?: boolean;
+}
+
+export type ExecuteWorkflowParams = ExecuteSavedWorkflowParams | ExecuteInlineWorkflowParams;
+
+export interface ExecuteWorkflowResult {
+  workflowExecutionId: string;
+  execution?: WorkflowExecutionDto;
+  timedOut?: boolean;
+}
+
+const isExecuteInlineWorkflowParams = (
+  params: ExecuteWorkflowParams
+): params is ExecuteInlineWorkflowParams => params.definition !== undefined;
 
 export class WorkflowsManagementApi {
   private smlIndexAttachment: SmlIndexAttachmentFn | null = null;
@@ -346,6 +398,127 @@ export class WorkflowsManagementApi {
     return executeResponse.workflowExecutionId;
   }
 
+  public async executeWorkflow(params: ExecuteWorkflowParams): Promise<ExecuteWorkflowResult> {
+    const {
+      spaceId,
+      request,
+      inputs = {},
+      waitForCompletion = true,
+      completionTimeoutSec = DEFAULT_EXECUTE_WORKFLOW_COMPLETION_TIMEOUT_SEC,
+      triggeredBy,
+      metadata,
+    } = params;
+
+    const workflow = isExecuteInlineWorkflowParams(params)
+      ? this.createEphemeralWorkflowExecutionModel(params)
+      : await this.getSavedWorkflowExecutionModel(params.workflowId, spaceId);
+
+    const workflowExecutionId = await this.runWorkflow(
+      workflow,
+      spaceId,
+      inputs,
+      request,
+      triggeredBy,
+      metadata
+    );
+
+    const { execution, timedOut } = await this.waitForWorkflowExecution({
+      workflowExecutionId,
+      spaceId,
+      waitForCompletion,
+      completionTimeoutSec,
+    });
+
+    return {
+      workflowExecutionId,
+      ...(execution ? { execution } : {}),
+      ...(timedOut ? { timedOut } : {}),
+    };
+  }
+
+  private createEphemeralWorkflowExecutionModel(
+    params: ExecuteInlineWorkflowParams
+  ): WorkflowExecutionEngineModel {
+    return {
+      id: params.workflowId ?? 'ephemeral-workflow',
+      name: params.name ?? params.definition.name,
+      enabled: params.definition.enabled,
+      definition: params.definition,
+      yaml: params.yaml,
+      isTestRun: params.isTestRun,
+      isEphemeral: true,
+    };
+  }
+
+  private async getSavedWorkflowExecutionModel(
+    workflowId: string,
+    spaceId: string
+  ): Promise<WorkflowExecutionEngineModel> {
+    const workflow = await this.getWorkflow(workflowId, spaceId);
+
+    if (!workflow) {
+      throw new WorkflowNotFoundError(workflowId);
+    }
+    if (!workflow.enabled) {
+      throw new Error(`Workflow '${workflowId}' is disabled and cannot be executed.`);
+    }
+    if (!workflow.valid) {
+      throw new Error(`Workflow '${workflowId}' has validation errors and cannot be executed.`);
+    }
+    if (!workflow.definition) {
+      throw new Error(`Workflow '${workflowId}' has no definition and cannot be executed.`);
+    }
+
+    return {
+      id: workflow.id,
+      name: workflow.name,
+      enabled: workflow.enabled,
+      definition: workflow.definition,
+      yaml: workflow.yaml,
+    };
+  }
+
+  private async waitForWorkflowExecution({
+    workflowExecutionId,
+    spaceId,
+    waitForCompletion,
+    completionTimeoutSec,
+  }: {
+    workflowExecutionId: string;
+    spaceId: string;
+    waitForCompletion: boolean;
+    completionTimeoutSec: number;
+  }): Promise<{ execution?: WorkflowExecutionDto; timedOut?: boolean }> {
+    const waitLimit = Date.now() + completionTimeoutSec * 1000;
+    await waitMs(INITIAL_EXECUTE_WORKFLOW_WAIT_MS);
+
+    let execution: WorkflowExecutionDto | null | undefined;
+    do {
+      try {
+        execution = await this.getWorkflowExecution(workflowExecutionId, spaceId, {
+          includeOutput: true,
+        });
+
+        const shouldReturn = waitForCompletion
+          ? execution && executeWorkflowFinalStatuses.includes(execution.status)
+          : execution;
+
+        if (shouldReturn && execution) {
+          return { execution };
+        }
+      } catch (e) {
+        // Keep polling until timeout; execution documents can lag immediately after scheduling.
+      }
+
+      await waitMs(EXECUTE_WORKFLOW_CHECK_INTERVAL_MS);
+    } while (Date.now() < waitLimit);
+
+    return {
+      ...(execution ? { execution } : {}),
+      timedOut: true,
+    };
+  }
+
   public async scheduleWorkflow(
     workflow: WorkflowExecutionEngineModel,
     spaceId: string,
@@ -446,6 +619,7 @@ export class WorkflowsManagementApi {
         definition: workflowJson.definition,
         yaml: resolvedYaml,
         isTestRun: true,
+        isEphemeral: true,
       },
       context,
       request
@@ -480,6 +654,7 @@ export class WorkflowsManagementApi {
         definition: workflowToCreate.definition,
         yaml: workflowYaml,
         isTestRun: true,
+        isEphemeral: true,
         spaceId,
       },
       stepId,
@@ -658,3 +833,6 @@ export class WorkflowsManagementApi {
     return 'stepExecutionId' in params && params.stepExecutionId != null;
   }
 }
+
+const waitMs = (durationMs: number): Promise<void> =>
+  new Promise((resolve) => setTimeout(resolve, durationMs));
