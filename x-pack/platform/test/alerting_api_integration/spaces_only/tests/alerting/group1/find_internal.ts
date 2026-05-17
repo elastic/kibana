@@ -137,6 +137,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
           monitoring: match.monitoring,
           snooze_schedule: match.snooze_schedule,
           ...(hasActiveSnoozes && { active_snoozes: activeSnoozes }),
+          is_snoozed_until: null,
         });
         expect(Date.parse(match.created_at)).to.be.greaterThan(0);
         expect(Date.parse(match.updated_at)).to.be.greaterThan(0);

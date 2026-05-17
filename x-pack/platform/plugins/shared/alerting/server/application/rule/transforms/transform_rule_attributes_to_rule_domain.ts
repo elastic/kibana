@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { isEmpty } from 'lodash';
 import type { Logger } from '@kbn/core/server';
 import type { SavedObjectReference } from '@kbn/core/server';
 import { migrateLegacyLastRunOutcomeMsg } from '../../../rules_client/lib';
@@ -138,13 +137,10 @@ export const transformRuleAttributesToRuleDomain = <Params extends RuleParams = 
     },
   }));
 
-  const includeSnoozeSchedule = snoozeSchedule !== undefined && !isEmpty(snoozeSchedule);
-  const isSnoozedUntil = includeSnoozeSchedule
-    ? getRuleSnoozeEndTime({
-        muteAll: esRule.muteAll ?? false,
-        snoozeSchedule: snoozeSchedule as SanitizedRule<Params>['snoozeSchedule'],
-      })?.toISOString()
-    : null;
+  const isSnoozedUntil = getRuleSnoozeEndTime({
+    muteAll: esRule.muteAll ?? false,
+    snoozeSchedule: snoozeSchedule as SanitizedRule<Params>['snoozeSchedule'],
+  });
 
   const ruleDomainActions: RuleDomain['actions'] = transformRawActionsToDomainActions({
     ruleId: id,
@@ -209,9 +205,7 @@ export const transformRuleAttributesToRuleDomain = <Params extends RuleParams = 
     ...(monitoring ? { monitoring: transformEsMonitoring(logger, id, monitoring) } : {}),
     snoozeSchedule: snoozeScheduleDates ?? [],
     activeSnoozes,
-    ...(isSnoozedUntil !== undefined
-      ? { isSnoozedUntil: isSnoozedUntil ? new Date(isSnoozedUntil) : null }
-      : {}),
+    isSnoozedUntil,
     ...(lastRun ? { lastRun: migrateLegacyLastRunOutcomeMsg(lastRun) } : {}),
     ...(esRule.nextRun ? { nextRun: new Date(esRule.nextRun) } : {}),
     ...(esRule.lastEnabledAt ? { lastEnabledAt: new Date(esRule.lastEnabledAt) } : {}),

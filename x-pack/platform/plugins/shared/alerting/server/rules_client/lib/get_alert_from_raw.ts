@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash';
 import type { Logger, SavedObjectReference } from '@kbn/core/server';
 import type {
   Rule,
@@ -105,13 +104,15 @@ function getPartialRuleFromRaw<Params extends RuleTypeParams>(
       ...(s.rRule.until ? { until: new Date(s.rRule.until).toISOString() } : {}),
     },
   }));
-  const includeSnoozeSchedule = snoozeSchedule !== undefined && !isEmpty(snoozeSchedule);
-  const isSnoozedUntil = includeSnoozeSchedule
-    ? getRuleSnoozeEndTime({
-        muteAll: partialRawRule.muteAll ?? false,
-        snoozeSchedule,
-      })
-    : null;
+  const isSnoozedUntil = getRuleSnoozeEndTime({
+    muteAll: partialRawRule.muteAll ?? false,
+    snoozeSchedule,
+  });
+
+  const activeSnoozes = getActiveScheduledSnoozes({
+    snoozeSchedule,
+    muteAll: partialRawRule.muteAll ?? false,
+  })?.map((s) => s.id);
 
   const includeMonitoring = monitoring;
 
@@ -146,15 +147,8 @@ function getPartialRuleFromRaw<Params extends RuleTypeParams>(
       opts.references || []
     ) as Params,
     snoozeSchedule: snoozeScheduleDates ?? [],
-    ...(includeSnoozeSchedule
-      ? {
-          activeSnoozes: getActiveScheduledSnoozes({
-            snoozeSchedule,
-            muteAll: partialRawRule.muteAll ?? false,
-          })?.map((s) => s.id),
-          isSnoozedUntil: isSnoozedUntil as PartialRule['isSnoozedUntil'],
-        }
-      : {}),
+    activeSnoozes,
+    isSnoozedUntil,
     ...(updatedAt ? { updatedAt: new Date(updatedAt) } : {}),
     ...(createdAt ? { createdAt: new Date(createdAt) } : {}),
     ...(lastEnabledAt ? { lastEnabledAt: new Date(lastEnabledAt) } : {}),
