@@ -96,6 +96,13 @@ export {
   severityFromConfidence,
 } from './rule_export';
 export type { DashboardOverviewResponse } from './dashboard_types';
+export type { ResolvedTimeRange, TimeRangePresetId } from './time_range';
+export {
+  DEFAULT_TIME_RANGE_PRESET,
+  TIME_RANGE_PRESET_IDS,
+  isTimeRangePresetId,
+  resolveTimeRangeFromPreset,
+} from './time_range';
 export type { SavedViewAttributes, SavedViewSummary } from './saved_views';
 export type {
   MitreHeatmapPayload,

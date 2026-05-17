@@ -8,6 +8,7 @@
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedRelative } from '@kbn/i18n-react';
 import {
   EuiBadge,
   EuiButton,
@@ -23,6 +24,7 @@ import {
   EuiFormRow,
   EuiHorizontalRule,
   EuiIcon,
+  EuiLink,
   EuiLoadingSpinner,
   EuiModal,
   EuiModalBody,
@@ -44,7 +46,11 @@ import {
 import {
   DASHBOARD_OVERVIEW_API_PATH,
   DEFAULT_REGIONS_SETTING_KEY,
+  DEFAULT_TIME_RANGE_PRESET,
   SAVED_VIEWS_API_PATH,
+  TIME_RANGE_PRESET_IDS,
+  isTimeRangePresetId,
+  resolveTimeRangeFromPreset,
   SEVERITY_LEVELS,
   SUBMIT_SUBSCRIPTION_API_PATH,
   SUBSCRIPTION_TEMPLATES,
@@ -57,6 +63,7 @@ import {
   type SubscriptionTemplate,
   type ThreatCategory,
   type ThreatRegion,
+  type TimeRangePresetId,
 } from '../../../../../common/threat_intelligence/hub';
 import { useKibana } from '../../../../common/lib/kibana';
 
@@ -88,6 +95,16 @@ const SEVERITY_RANK: Record<SeverityLevel, number> = {
   critical: 3,
 };
 
+const isBrowsableArticleUrl = (url: string | undefined): url is string => {
+  if (!url) return false;
+  try {
+    const { protocol } = new URL(url);
+    return protocol === 'http:' || protocol === 'https:';
+  } catch {
+    return false;
+  }
+};
+
 interface FilterState {
   regions: ThreatRegion[];
   categories: ThreatCategory[];
@@ -99,6 +116,28 @@ const emptyFilters: FilterState = {
   regions: [],
   categories: [],
   severities: [],
+};
+
+const timeRangePresetLabel = (preset: TimeRangePresetId): string => {
+  switch (preset) {
+    case '24h':
+      return i18n.translate(
+        'xpack.securitySolution.threatIntelligence.app.timeRange24h',
+        { defaultMessage: 'Last 24 hours' }
+      );
+    case '7d':
+      return i18n.translate('xpack.securitySolution.threatIntelligence.app.timeRange7d', {
+        defaultMessage: 'Last 7 days',
+      });
+    case '30d':
+      return i18n.translate('xpack.securitySolution.threatIntelligence.app.timeRange30d', {
+        defaultMessage: 'Last 30 days',
+      });
+    case '90d':
+      return i18n.translate('xpack.securitySolution.threatIntelligence.app.timeRange90d', {
+        defaultMessage: 'Last 90 days',
+      });
+  }
 };
 
 /**
@@ -145,6 +184,9 @@ export const IntelligenceHubPage: FC = () => {
   const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [savedViewsLoaded, setSavedViewsLoaded] = useState(false);
   const [sortBy, setSortBy] = useState<ArticleSort>('relevance');
+  const [timeRangePreset, setTimeRangePreset] =
+    useState<TimeRangePresetId>(DEFAULT_TIME_RANGE_PRESET);
+  const [lastUpdatedAt, setLastUpdatedAt] = useState<number | null>(null);
 
   useEffect(() => {
     const defaultRegions = (uiSettings.get(DEFAULT_REGIONS_SETTING_KEY, []) ??
@@ -157,21 +199,25 @@ export const IntelligenceHubPage: FC = () => {
   const fetchOverview = useCallback(async () => {
     setLoading(true);
     setError(null);
+    const { from, to } = resolveTimeRangeFromPreset(timeRangePreset);
     try {
       const response = await http.get<DashboardOverviewResponse>(DASHBOARD_OVERVIEW_API_PATH, {
         version: '1',
         query: {
+          from,
+          to,
           ...(filters.regions.length ? { regions: filters.regions } : {}),
           ...(filters.categories.length ? { categories: filters.categories } : {}),
         },
       });
       setData(response);
+      setLastUpdatedAt(Date.now());
     } catch (err) {
       setError(err?.body?.message ?? err?.message ?? 'Unknown error');
     } finally {
       setLoading(false);
     }
-  }, [http, filters.regions, filters.categories]);
+  }, [http, filters.regions, filters.categories, timeRangePreset]);
 
   const fetchSavedViews = useCallback(async () => {
     try {
@@ -206,9 +252,18 @@ export const IntelligenceHubPage: FC = () => {
         regions: found.filters.regions ?? [],
         categories: found.filters.categories ?? [],
       }));
+      const preset = found.filters.time_range_preset;
+      setTimeRangePreset(
+        preset && isTimeRangePresetId(preset) ? preset : DEFAULT_TIME_RANGE_PRESET
+      );
     },
     [savedViews]
   );
+
+  const onTimeRangePresetChange = useCallback((preset: TimeRangePresetId) => {
+    setTimeRangePreset(preset);
+    setActiveViewId('');
+  }, []);
 
   const saveCurrentView = useCallback(
     async (name: string, description?: string) => {
@@ -221,6 +276,7 @@ export const IntelligenceHubPage: FC = () => {
             filters: {
               ...(filters.regions.length ? { regions: filters.regions } : {}),
               ...(filters.categories.length ? { categories: filters.categories } : {}),
+              time_range_preset: timeRangePreset,
             },
           }),
         });
@@ -241,8 +297,10 @@ export const IntelligenceHubPage: FC = () => {
         });
       }
     },
-    [http, notifications.toasts, filters.regions, filters.categories]
+    [http, notifications.toasts, filters.regions, filters.categories, timeRangePreset]
   );
+
+  const isRefreshing = loading && data !== null;
 
   const exportToPdf = useCallback(() => {
     // No hard dependency on the Reporting plugin: trigger the browser's
@@ -338,15 +396,56 @@ export const IntelligenceHubPage: FC = () => {
         pageTitle={i18n.translate('xpack.securitySolution.threatIntelligence.app.pageTitle', {
           defaultMessage: 'Intelligence Hub',
         })}
-        description={
-          data
-            ? i18n.translate('xpack.securitySolution.threatIntelligence.app.pageDescription', {
-                defaultMessage: 'Reports observed in the last {label}.',
-                values: { label: data.time_range_label },
-              })
-            : undefined
-        }
+        description={i18n.translate('xpack.securitySolution.threatIntelligence.app.pageDescription', {
+          defaultMessage: 'Threat reports from {timeRange}.',
+          values: { timeRange: timeRangePresetLabel(timeRangePreset) },
+        })}
         rightSideItems={[
+          <EuiFlexGroup
+            key="refresh"
+            gutterSize="s"
+            alignItems="center"
+            responsive={false}
+            wrap={false}
+          >
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued" data-test-subj="threatIntelLastUpdated">
+                {isRefreshing ? (
+                  i18n.translate(
+                    'xpack.securitySolution.threatIntelligence.app.refreshingLabel',
+                    { defaultMessage: 'Refreshing…' }
+                  )
+                ) : lastUpdatedAt ? (
+                  <>
+                    {i18n.translate(
+                      'xpack.securitySolution.threatIntelligence.app.lastUpdatedLabel',
+                      { defaultMessage: 'Updated' }
+                    )}
+                    &nbsp;
+                    <FormattedRelative value={new Date(lastUpdatedAt)} />
+                  </>
+                ) : null}
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                iconType="refresh"
+                onClick={() => {
+                  void fetchOverview();
+                }}
+                isLoading={isRefreshing}
+                aria-label={i18n.translate(
+                  'xpack.securitySolution.threatIntelligence.app.refreshAriaLabel',
+                  { defaultMessage: 'Refresh dashboard' }
+                )}
+                data-test-subj="threatIntelRefreshBtn"
+              >
+                {i18n.translate('xpack.securitySolution.threatIntelligence.app.refreshBtn', {
+                  defaultMessage: 'Refresh',
+                })}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>,
           <EuiButton
             key="schedule"
             iconType="email"
@@ -385,6 +484,8 @@ export const IntelligenceHubPage: FC = () => {
         <FilterBar
           filters={filters}
           onFiltersChange={setFilters}
+          timeRangePreset={timeRangePreset}
+          onTimeRangePresetChange={onTimeRangePresetChange}
           savedViews={savedViews}
           activeViewId={activeViewId}
           onApplySavedView={applySavedView}
@@ -411,6 +512,8 @@ export const IntelligenceHubPage: FC = () => {
 const FilterBar: React.FC<{
   filters: FilterState;
   onFiltersChange: (next: FilterState) => void;
+  timeRangePreset: TimeRangePresetId;
+  onTimeRangePresetChange: (preset: TimeRangePresetId) => void;
   savedViews: SavedViewSummary[];
   activeViewId: string;
   onApplySavedView: (id: string) => void;
@@ -419,6 +522,8 @@ const FilterBar: React.FC<{
 }> = ({
   filters,
   onFiltersChange,
+  timeRangePreset,
+  onTimeRangePresetChange,
   savedViews,
   activeViewId,
   onApplySavedView,
@@ -427,12 +532,39 @@ const FilterBar: React.FC<{
 }) => {
   const regionOptions = useMemo(() => THREAT_REGIONS.map((r) => ({ label: r, value: r })), []);
   const categoryOptions = useMemo(() => THREAT_CATEGORIES.map((c) => ({ label: c, value: c })), []);
+  const timeRangeOptions = useMemo(
+    () =>
+      TIME_RANGE_PRESET_IDS.map((id) => ({
+        id,
+        label: timeRangePresetLabel(id),
+      })),
+    []
+  );
 
   const hasFilters = filters.regions.length > 0 || filters.categories.length > 0;
 
   return (
     <EuiPanel hasBorder paddingSize="m">
       <EuiFlexGroup gutterSize="m" wrap alignItems="flexEnd">
+        <EuiFlexItem grow={false}>
+          <EuiFormRow
+            label={i18n.translate('xpack.securitySolution.threatIntelligence.app.filterTimeRange', {
+              defaultMessage: 'Time range',
+            })}
+          >
+            <EuiButtonGroup
+              legend={i18n.translate(
+                'xpack.securitySolution.threatIntelligence.app.filterTimeRangeLegend',
+                { defaultMessage: 'Time range' }
+              )}
+              options={timeRangeOptions}
+              idSelected={timeRangePreset}
+              onChange={(id) => onTimeRangePresetChange(id as TimeRangePresetId)}
+              buttonSize="compressed"
+              data-test-subj="threatIntelTimeRangeBtnGroup"
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
         <EuiFlexItem style={{ minWidth: 240 }}>
           <EuiFormRow
             label={i18n.translate('xpack.securitySolution.threatIntelligence.app.filterRegions', {
@@ -1911,57 +2043,73 @@ const ArticleGrid: React.FC<{
 
 const ArticleCard: React.FC<{
   article: DashboardOverviewResponse['recent_articles'][number];
-}> = ({ article }) => (
-  <EuiPanel
-    hasBorder
-    paddingSize="m"
-    style={{
-      borderLeft: `4px solid ${SEVERITY_HEX[article.severity]}`,
-    }}
-  >
-    <EuiText size="s">
-      <strong>{article.title || article.report_id}</strong>
-    </EuiText>
-    <EuiSpacer size="xs" />
-    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap>
-      <EuiFlexItem grow={false}>
-        <EuiBadge color={SEVERITY_COLOR[article.severity]}>{article.severity}</EuiBadge>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiText size="xs" color="subdued">
-          {article.source_name || 'unknown'}
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiText size="xs" color="subdued">
-          {article['@timestamp']}
-        </EuiText>
-      </EuiFlexItem>
-      {article.environment_hits_total > 0 ? (
+}> = ({ article }) => {
+  const displayTitle = article.title || article.report_id;
+  const articleUrl = isBrowsableArticleUrl(article.source_url) ? article.source_url : undefined;
+
+  return (
+    <EuiPanel
+      hasBorder
+      paddingSize="m"
+      style={{
+        borderLeft: `4px solid ${SEVERITY_HEX[article.severity]}`,
+      }}
+    >
+      <EuiText size="s">
+        {articleUrl ? (
+          <EuiLink
+            href={articleUrl}
+            target="_blank"
+            external
+            data-test-subj={`threatIntelArticleLink-${article.report_id}`}
+          >
+            <strong>{displayTitle}</strong>
+          </EuiLink>
+        ) : (
+          <strong>{displayTitle}</strong>
+        )}
+      </EuiText>
+      <EuiSpacer size="xs" />
+      <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap>
         <EuiFlexItem grow={false}>
-          <EuiBadge color="danger" iconType="dot">
-            {i18n.translate('xpack.securitySolution.threatIntelligence.app.envHitsBadge', {
-              defaultMessage: '{count} env hits',
-              values: { count: article.environment_hits_total },
-            })}
-          </EuiBadge>
+          <EuiBadge color={SEVERITY_COLOR[article.severity]}>{article.severity}</EuiBadge>
         </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" color="subdued">
+            {article.source_name || 'unknown'}
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" color="subdued">
+            {article['@timestamp']}
+          </EuiText>
+        </EuiFlexItem>
+        {article.environment_hits_total > 0 ? (
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="danger" iconType="dot">
+              {i18n.translate('xpack.securitySolution.threatIntelligence.app.envHitsBadge', {
+                defaultMessage: '{count} env hits',
+                values: { count: article.environment_hits_total },
+              })}
+            </EuiBadge>
+          </EuiFlexItem>
+        ) : null}
+      </EuiFlexGroup>
+      {article.categories.length > 0 ? (
+        <>
+          <EuiSpacer size="xs" />
+          <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
+            {article.categories.slice(0, 3).map((category) => (
+              <EuiFlexItem key={`${article.report_id}-cat-${category}`} grow={false}>
+                <EuiBadge color="hollow">{category}</EuiBadge>
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
+        </>
       ) : null}
-    </EuiFlexGroup>
-    {article.categories.length > 0 ? (
-      <>
-        <EuiSpacer size="xs" />
-        <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
-          {article.categories.slice(0, 3).map((category) => (
-            <EuiFlexItem key={`${article.report_id}-cat-${category}`} grow={false}>
-              <EuiBadge color="hollow">{category}</EuiBadge>
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGroup>
-      </>
-    ) : null}
-  </EuiPanel>
-);
+    </EuiPanel>
+  );
+};
 
 const EnvironmentImpact: React.FC<{
   impact: DashboardOverviewResponse['environment_impact'];

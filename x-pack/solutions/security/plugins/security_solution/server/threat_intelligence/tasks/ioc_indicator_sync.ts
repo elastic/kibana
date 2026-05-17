@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import {
@@ -29,6 +30,17 @@ const DEFAULT_INTERVAL = '15m';
 const LOOKBACK_ON_FIRST_RUN = 'now-30d';
 const PAGE_SIZE = 200;
 const TASK_TIMEOUT = '2m';
+
+/**
+ * Tie-breakers for `search_after` without a PIT. `_shard_doc` and `_id` both
+ * require fielddata on `_id` (disabled by default); `_seq_no` + `_primary_term`
+ * are stable per document and safe on data streams.
+ */
+const REPORT_SCAN_SORT: estypes.Sort = [
+  { 'provenance.extracted_at': { order: 'asc' } },
+  { _seq_no: { order: 'asc' } },
+  { _primary_term: { order: 'asc' } },
+];
 
 const stateSchemaV1 = schema.object({
   /**
@@ -61,6 +73,8 @@ interface IocIndicatorSyncState {
 
 interface ReportHit {
   _id: string;
+  /** Present when the search request includes `sort`; used for `search_after`. */
+  sort?: Array<string | number | null>;
   _source?: {
     '@timestamp'?: string;
     source?: { name?: string; url?: string };
@@ -247,7 +261,7 @@ export const registerIocIndicatorSyncTask = ({
                       ],
                     },
                   },
-                  sort: [{ 'provenance.extracted_at': 'asc' }, { _id: 'asc' }],
+                  sort: REPORT_SCAN_SORT,
                   ...(searchAfter ? { search_after: searchAfter } : {}),
                 },
                 { signal: abortController.signal }
@@ -317,9 +331,16 @@ export const registerIocIndicatorSyncTask = ({
             const lastHit = hits[hits.length - 1];
             const lastExtractedAt = lastHit?._source?.provenance?.extracted_at ?? null;
             if (typeof lastExtractedAt === 'string') latestExtractedAt = lastExtractedAt;
-            // search_after over [extracted_at, _id] so we don't re-process
+            // search_after over [extracted_at, _seq_no, _primary_term] so we don't
             // docs that share an extracted_at tick with the page boundary.
-            searchAfter = [lastExtractedAt, lastHit?._id ?? null];
+            if (!lastHit?.sort) {
+              throwUnrecoverableError(
+                new Error(
+                  'Threat report scan returned hits without sort values — cannot paginate safely'
+                )
+              );
+            }
+            searchAfter = lastHit.sort;
 
             if (hits.length < PAGE_SIZE) break;
           }

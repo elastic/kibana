@@ -59,12 +59,14 @@ steps:
                 field: extracted.behaviors
           minimum_should_match: 1
       # `@timestamp` is always mapped on this data stream, so it's a safe
-      # sort field. Uses the `<field>:<direction>` shorthand because the
-      # workflow `elasticsearch.search` schema collapses the URL-param
-      # `sort` (`string | string[]`) over the body-param shape — see
-      # `search_sort` in
-      # `kbn-workflows/spec/elasticsearch/generated/schemas/es_openapi_zod.gen.ts`.
-      sort: "@timestamp:desc"
+      # sort field. The `<field>:<direction>` shorthand (`search_sort`) only
+      # applies when `sort` is sent as a URL query param; `buildElasticsearchRequest`
+      # in `kbn-workflows` prefers body params when both are declared, so
+      # `"@timestamp:desc"` lands in the request body and ES treats the whole
+      # string as a field name. Use the body `types_sort` array form instead
+      # (same as `nl_extraction_behavioral.yaml`'s `load_pending_reports`).
+      sort:
+        - "@timestamp"
 
   - name: backfill_each_report
     type: foreach

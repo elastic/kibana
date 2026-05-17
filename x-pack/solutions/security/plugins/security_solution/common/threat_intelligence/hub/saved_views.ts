@@ -6,6 +6,7 @@
  */
 
 import type { ThreatCategory, ThreatRegion } from './constants';
+import type { TimeRangePresetId } from './time_range';
 
 /**
  * Attributes stored on the `threat-intelligence-saved-view` saved object.
@@ -19,8 +20,14 @@ export interface SavedViewAttributes {
     regions?: ThreatRegion[];
     categories?: ThreatCategory[];
     /**
-     * Optional fixed time window. When omitted, the dashboard's current
-     * default (last 7 days) is applied at load time.
+     * Quick-range preset for the dashboard time filter. Preferred over
+     * `time_range` because presets stay relative when a saved view is
+     * reopened days later.
+     */
+    time_range_preset?: TimeRangePresetId;
+    /**
+     * Legacy fixed ISO window. New saves use `time_range_preset` instead.
+     * When omitted, the dashboard default (last 7 days) applies at load time.
      */
     time_range?: {
       from: string;

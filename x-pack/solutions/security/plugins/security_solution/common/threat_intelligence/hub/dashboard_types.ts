@@ -44,6 +44,8 @@ export interface DashboardOverviewResponse {
     report_id: string;
     title: string;
     source_name: string;
+    /** Per-report upstream URL (`source.url` on the indexed document). */
+    source_url?: string;
     severity: SeverityLevel;
     '@timestamp': string;
     environment_hits_total: number;

@@ -64,7 +64,7 @@ interface ReportsAggregations {
         _id: string;
         _source: {
           '@timestamp'?: string;
-          source?: { name?: string };
+          source?: { name?: string; url?: string };
           content?: { title?: string };
           severity?: { level?: SeverityLevel };
           extracted?: { categories?: ThreatCategory[] };
@@ -135,6 +135,7 @@ const fetchReportsOverview = async (
           _source: [
             '@timestamp',
             'source.name',
+            'source.url',
             'content.title',
             'severity.level',
             'extracted.categories',
@@ -284,6 +285,7 @@ export const registerDashboardOverviewRoute = ({
             report_id: hit._id,
             title: hit._source.content?.title ?? '(untitled)',
             source_name: hit._source.source?.name ?? '<unknown>',
+            ...(hit._source.source?.url ? { source_url: hit._source.source.url } : {}),
             severity: (hit._source.severity?.level ?? 'medium') as SeverityLevel,
             '@timestamp': hit._source['@timestamp'] ?? '',
             environment_hits_total: hit._source.provenance?.environment_hits_total ?? 0,

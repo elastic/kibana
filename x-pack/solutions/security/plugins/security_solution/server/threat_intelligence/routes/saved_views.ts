@@ -12,6 +12,7 @@ import {
   THREAT_CATEGORIES,
   THREAT_INTELLIGENCE_API_PRIVILEGES,
   THREAT_REGIONS,
+  TIME_RANGE_PRESET_IDS,
   type SavedViewAttributes,
   type SavedViewSummary,
 } from '../../../common/threat_intelligence/hub';
@@ -37,6 +38,9 @@ const filtersSchema = schema.object({
             : `unknown category: ${value}`,
       })
     )
+  ),
+  time_range_preset: schema.maybe(
+    schema.oneOf(TIME_RANGE_PRESET_IDS.map((id) => schema.literal(id)))
   ),
   time_range: schema.maybe(
     schema.object({
