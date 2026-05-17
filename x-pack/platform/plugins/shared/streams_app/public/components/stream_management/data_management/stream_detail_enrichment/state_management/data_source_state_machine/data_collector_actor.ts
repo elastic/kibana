@@ -469,7 +469,10 @@ function isValidSearchResult(result: IEsSearchResponse): boolean {
  * Extracts documents from search result
  */
 function extractDocumentsFromResult(result: IEsSearchResponse): SampleDocument[] {
-  return result.rawResponse.hits.hits.map((doc) => doc._source);
+  return result.rawResponse.hits.hits.map((doc) => ({
+    ...(doc._source as SampleDocument),
+    _id: doc._id,
+  }));
 }
 
 /**

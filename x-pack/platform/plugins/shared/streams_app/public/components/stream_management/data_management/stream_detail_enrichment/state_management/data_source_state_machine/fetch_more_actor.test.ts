@@ -63,12 +63,12 @@ describe('fetch_more_actor', () => {
   });
 
   describe('deduplicateDocuments', () => {
-    it('returns all documents when there are no duplicates', () => {
+    it('returns all documents when there are no duplicate _ids', () => {
       const existing: SampleDocument[] = [
-        { '@timestamp': '2025-01-01T00:01:00.000Z', message: 'doc1' },
+        { _id: 'id-1', '@timestamp': '2025-01-01T00:01:00.000Z', message: 'doc1' },
       ];
       const newDocs: SampleDocument[] = [
-        { '@timestamp': '2025-01-01T00:02:00.000Z', message: 'doc2' },
+        { _id: 'id-2', '@timestamp': '2025-01-01T00:02:00.000Z', message: 'doc2' },
       ];
 
       const result = deduplicateDocuments(existing, newDocs);
@@ -76,31 +76,29 @@ describe('fetch_more_actor', () => {
       expect(result).toEqual([...existing, ...newDocs]);
     });
 
-    it('removes documents that already exist in the existing set', () => {
+    it('removes documents whose _id already exists in the existing set', () => {
       const existing: SampleDocument[] = [
-        { '@timestamp': '2025-01-01T00:01:00.000Z', message: 'doc1' },
-        { '@timestamp': '2025-01-01T00:02:00.000Z', message: 'doc2' },
+        { _id: 'id-1', '@timestamp': '2025-01-01T00:01:00.000Z', message: 'doc1' },
+        { _id: 'id-2', '@timestamp': '2025-01-01T00:02:00.000Z', message: 'doc2' },
       ];
       const newDocs: SampleDocument[] = [
-        { '@timestamp': '2025-01-01T00:01:00.000Z', message: 'doc1' },
-        { '@timestamp': '2025-01-01T00:03:00.000Z', message: 'doc3' },
+        { _id: 'id-1', '@timestamp': '2025-01-01T00:01:00.000Z', message: 'doc1' },
+        { _id: 'id-3', '@timestamp': '2025-01-01T00:03:00.000Z', message: 'doc3' },
       ];
 
       const result = deduplicateDocuments(existing, newDocs);
       expect(result).toHaveLength(3);
-      expect(result).toEqual([
-        { '@timestamp': '2025-01-01T00:01:00.000Z', message: 'doc1' },
-        { '@timestamp': '2025-01-01T00:02:00.000Z', message: 'doc2' },
-        { '@timestamp': '2025-01-01T00:03:00.000Z', message: 'doc3' },
-      ]);
+      expect(result[0]._id).toBe('id-1');
+      expect(result[1]._id).toBe('id-2');
+      expect(result[2]._id).toBe('id-3');
     });
 
     it('returns only existing docs when all new docs are duplicates', () => {
       const existing: SampleDocument[] = [
-        { '@timestamp': '2025-01-01T00:01:00.000Z', message: 'doc1' },
+        { _id: 'id-1', '@timestamp': '2025-01-01T00:01:00.000Z', message: 'doc1' },
       ];
       const newDocs: SampleDocument[] = [
-        { '@timestamp': '2025-01-01T00:01:00.000Z', message: 'doc1' },
+        { _id: 'id-1', '@timestamp': '2025-01-01T00:01:00.000Z', message: 'doc1' },
       ];
 
       const result = deduplicateDocuments(existing, newDocs);
@@ -110,8 +108,8 @@ describe('fetch_more_actor', () => {
 
     it('handles empty existing documents', () => {
       const newDocs: SampleDocument[] = [
-        { '@timestamp': '2025-01-01T00:01:00.000Z', message: 'doc1' },
-        { '@timestamp': '2025-01-01T00:02:00.000Z', message: 'doc2' },
+        { _id: 'id-1', '@timestamp': '2025-01-01T00:01:00.000Z', message: 'doc1' },
+        { _id: 'id-2', '@timestamp': '2025-01-01T00:02:00.000Z', message: 'doc2' },
       ];
 
       const result = deduplicateDocuments([], newDocs);
@@ -121,7 +119,7 @@ describe('fetch_more_actor', () => {
 
     it('handles empty new documents', () => {
       const existing: SampleDocument[] = [
-        { '@timestamp': '2025-01-01T00:01:00.000Z', message: 'doc1' },
+        { _id: 'id-1', '@timestamp': '2025-01-01T00:01:00.000Z', message: 'doc1' },
       ];
 
       const result = deduplicateDocuments(existing, []);
@@ -129,23 +127,18 @@ describe('fetch_more_actor', () => {
       expect(result).toEqual(existing);
     });
 
-    it('uses deep equality for deduplication', () => {
+    it('falls back to appending all docs when existing docs have no _id', () => {
       const existing: SampleDocument[] = [
-        { '@timestamp': '2025-01-01T00:01:00.000Z', message: 'doc1', nested: { key: 'value' } },
+        { '@timestamp': '2025-01-01T00:01:00.000Z', message: 'doc1' },
       ];
-      const newDocsWithSameContent: SampleDocument[] = [
-        { '@timestamp': '2025-01-01T00:01:00.000Z', message: 'doc1', nested: { key: 'value' } },
-      ];
-      const newDocsWithDifferentContent: SampleDocument[] = [
-        {
-          '@timestamp': '2025-01-01T00:01:00.000Z',
-          message: 'doc1',
-          nested: { key: 'different' },
-        },
+      const newDocs: SampleDocument[] = [
+        { '@timestamp': '2025-01-01T00:01:00.000Z', message: 'doc1' },
+        { '@timestamp': '2025-01-01T00:02:00.000Z', message: 'doc2' },
       ];
 
-      expect(deduplicateDocuments(existing, newDocsWithSameContent)).toHaveLength(1);
-      expect(deduplicateDocuments(existing, newDocsWithDifferentContent)).toHaveLength(2);
+      const result = deduplicateDocuments(existing, newDocs);
+      expect(result).toHaveLength(3);
+      expect(result).toEqual([...existing, ...newDocs]);
     });
   });
 });

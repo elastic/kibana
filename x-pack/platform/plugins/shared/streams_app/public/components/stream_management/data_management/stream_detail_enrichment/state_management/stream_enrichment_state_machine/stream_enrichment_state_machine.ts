@@ -770,7 +770,7 @@ async function buildFetchMoreEsqlQuery({
     );
     baseQuery = draftBaseQuery;
   } else {
-    baseQuery = `FROM ${streamName} METADATA _source`;
+    baseQuery = `FROM ${streamName} METADATA _id, _source`;
   }
 
   if (processingSteps.steps.length > 0) {

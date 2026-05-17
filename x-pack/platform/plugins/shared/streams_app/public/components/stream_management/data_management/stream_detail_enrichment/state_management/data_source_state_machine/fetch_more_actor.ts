@@ -42,9 +42,18 @@ export function deduplicateDocuments(
   existingDocs: SampleDocument[],
   newDocs: SampleDocument[]
 ): SampleDocument[] {
-  const existingSet = new Set(existingDocs.map((doc) => JSON.stringify(doc)));
-  const uniqueNewDocs = newDocs.filter((doc) => !existingSet.has(JSON.stringify(doc)));
-  return [...existingDocs, ...uniqueNewDocs];
+  const existingIds = new Set(
+    existingDocs.map((doc) => doc._id).filter((id): id is string => typeof id === 'string')
+  );
+
+  if (existingIds.size > 0) {
+    const uniqueNewDocs = newDocs.filter(
+      (doc) => typeof doc._id !== 'string' || !existingIds.has(doc._id)
+    );
+    return [...existingDocs, ...uniqueNewDocs];
+  }
+
+  return [...existingDocs, ...newDocs];
 }
 
 export function createFetchMoreDocumentsActor({ data }: FetchMoreDeps) {
