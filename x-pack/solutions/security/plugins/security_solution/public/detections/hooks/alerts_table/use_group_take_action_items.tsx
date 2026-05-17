@@ -222,6 +222,7 @@ export const useGroupTakeActionsItems = ({
             renderItem: () => (
               <EuiContextMenuItem
                 key="open"
+                role="menuitem"
                 data-test-subj="open-alert-status"
                 onClick={() =>
                   onClickUpdate({
@@ -244,6 +245,7 @@ export const useGroupTakeActionsItems = ({
             renderItem: () => (
               <EuiContextMenuItem
                 key="acknowledge"
+                role="menuitem"
                 data-test-subj="acknowledged-alert-status"
                 onClick={() =>
                   onClickUpdate({
@@ -287,6 +289,7 @@ export const useGroupTakeActionsItems = ({
               renderItem: () => (
                 <EuiContextMenuItem
                   key={workflowStatus}
+                  role="menuitem"
                   data-test-subj={`${workflowStatus}-alert-status`}
                   onClick={() =>
                     onClickUpdate({

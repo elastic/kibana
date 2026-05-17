@@ -339,7 +339,7 @@ export const RuleActionsConnectorsBody = ({
           button={button}
           closePopover={closeFilterPopover}
           isOpen={isConenctorFilterPopoverOpen}
-          panelPaddingSize="none"
+          panelPaddingSize="s"
         >
           <EuiSelectable singleSelection options={options}>
             {(list) => <div style={{ width: 400 }}>{list}</div>}
@@ -426,7 +426,7 @@ export const RuleActionsConnectorsBody = ({
               icon={
                 <div style={{ marginInlineEnd: `16px` }}>
                   <Suspense fallback={<EuiLoadingSpinner />}>
-                    <EuiIcon size="l" type={actionTypeModel.iconClass} />
+                    <EuiIcon size="l" type={actionTypeModel.iconClass} aria-hidden={true} />
                   </Suspense>
                 </div>
               }
