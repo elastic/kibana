@@ -212,13 +212,14 @@ export function useDynamicTypeIcons(
     }
     const registry = actionTypeRegistryRef.current;
     const connectorTypes = Object.values(connectorTypesData ?? {}).map((connector) => {
+      // API can list types not registered in the UI registry => get() throws if missing.
       const icon = registry.has(connector.actionTypeId)
-        ? registry.get(connector.actionTypeId).iconClass
+        ? registry.get(connector.actionTypeId)?.iconClass
         : undefined;
       return {
         actionTypeId: connector.actionTypeId,
         displayName: connector.displayName,
-        icon,
+        ...(icon !== undefined && { icon }),
       };
     });
 
