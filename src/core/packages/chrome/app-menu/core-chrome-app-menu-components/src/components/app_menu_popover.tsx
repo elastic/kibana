@@ -90,7 +90,7 @@ export const AppMenuPopover = ({
       anchorPosition="downLeft"
       aria-label={title || content}
     >
-      <EuiContextMenu initialPanelId={0} panels={panels} />
+      <EuiContextMenu initialPanelId={0} panels={panels} css={{ minWidth: 180 }} />
     </EuiPopover>
   );
 };
