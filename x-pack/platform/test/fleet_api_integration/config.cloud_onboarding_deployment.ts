@@ -14,7 +14,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const baseServerArgs: string[] = baseConfig.kbnTestServer.serverArgs;
   const experimentalFeaturesArg = baseServerArgs.find((arg) =>
     arg.startsWith('--xpack.fleet.experimentalFeatures=')
-  )!;
+  );
   const experimentalFeaturesValue = experimentalFeaturesArg
     ? JSON.parse(experimentalFeaturesArg.replace('--xpack.fleet.experimentalFeatures=', ''))
     : {};

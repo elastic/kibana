@@ -71,18 +71,14 @@ class CloudOnboardingDeploymentService {
     soClient: SavedObjectsClientContract,
     connectorId: string
   ): Promise<CloudOnboardingDeployment[]> {
-    const finder =
-      await this.encryptedSoClient.createPointInTimeFinderDecryptedAsInternalUser<CloudOnboardingDeploymentSOAttributes>(
-        {
-          type: CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
-          filter: nodeBuilder.is(
-            `${CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE}.attributes.connectorId`,
-            connectorId
-          ),
-          perPage: CLOUD_ONBOARDING_DEPLOYMENT_LIMIT,
-        },
-        { client: soClient }
-      );
+    const finder = soClient.createPointInTimeFinder<CloudOnboardingDeploymentSOAttributes>({
+      type: CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
+      filter: nodeBuilder.is(
+        `${CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE}.attributes.connectorId`,
+        connectorId
+      ),
+      perPage: CLOUD_ONBOARDING_DEPLOYMENT_LIMIT,
+    });
 
     const deployments: CloudOnboardingDeployment[] = [];
     try {

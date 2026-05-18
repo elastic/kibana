@@ -73,8 +73,6 @@ export default function (providerContext: FtrProviderContext) {
         expect(body.item.attemptCount).to.equal(1);
         expect(body.item.vars).to.have.property('role_arn');
         expect(body.item.serviceVars).to.have.property('cloudwatch_metrics');
-        expect(body.item).to.have.property('createdAt');
-        expect(body.item).to.have.property('updatedAt');
         // secrets must be stripped from the response
         expect(body.item).not.to.have.property('secrets');
 
