@@ -169,6 +169,10 @@ export class TypedSearchService implements ITypedSearchService {
       runtime_mappings: params.runtimeMappings,
       highlight: params.highlight,
       track_total_hits: options?.trackTotalHits,
+      // Allow any additional parameters for safe backwards compatibility in the DSL expression function
+      // It could make sense to lock this down further if we get more confident or if expression functions
+      // can no longer be used directly in Canvas
+      ...params,
     };
 
     return {

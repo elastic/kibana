@@ -36,8 +36,7 @@ export function getEql({
       const [core, { dataViews }, { search }] = await getStartServices();
       return {
         uiSettingsClient: core.uiSettings as unknown as UiSettingsCommon,
-        search: search.search,
-        typed: search.typed,
+        searchService: search.typed,
         dataViews,
       };
     },

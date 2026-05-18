@@ -37,11 +37,15 @@ export function getEssql({
         ,
         {
           nowProvider,
-          search: { search, typed },
+          search: { typed },
         },
       ] = await getStartServices();
 
-      return { nowProvider, search, typed, uiSettings: uiSettings as unknown as UiSettingsCommon };
+      return {
+        nowProvider,
+        searchService: typed,
+        uiSettings: uiSettings as unknown as UiSettingsCommon,
+      };
     },
   });
 }

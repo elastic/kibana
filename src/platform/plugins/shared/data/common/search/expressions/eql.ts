@@ -40,7 +40,7 @@ export type EqlExpressionFunctionDefinition = ExpressionFunctionDefinition<
 >;
 
 interface EqlStartDependencies {
-  typed: ITypedSearchService;
+  searchService: ITypedSearchService;
   uiSettingsClient: UiSettingsCommon;
   dataViews: DataViewsContract;
 }
@@ -91,7 +91,9 @@ export const getEqlFn = ({
       },
     },
     async fn(input, args, { inspectorAdapters, abortSignal, getKibanaRequest }) {
-      const { typed, uiSettingsClient, dataViews } = await getStartDependencies(getKibanaRequest);
+      const { searchService, uiSettingsClient, dataViews } = await getStartDependencies(
+        getKibanaRequest
+      );
 
       const dsl = {
         query: args.query,
@@ -141,7 +143,7 @@ export const getEqlFn = ({
       });
 
       try {
-        const { rawResponse, requestParams } = await typed.searchEQL(
+        const { rawResponse, requestParams } = await searchService.searchEQL(
           {
             index: args.index,
             query: args.query,

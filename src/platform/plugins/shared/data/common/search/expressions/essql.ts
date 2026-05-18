@@ -47,7 +47,7 @@ interface EssqlFnArguments {
 
 interface EssqlStartDependencies {
   nowProvider?: NowProviderPublicContract;
-  typed: ITypedSearchService;
+  searchService: ITypedSearchService;
   uiSettings: UiSettingsCommon;
 }
 
@@ -130,7 +130,7 @@ export const getEssqlFn = ({ getStartDependencies }: EssqlFnArguments) => {
       { count, parameter, query, timeField, timezone },
       { abortSignal, inspectorAdapters, getKibanaRequest }
     ) {
-      const { nowProvider, typed, uiSettings } = await getStartDependencies(() => {
+      const { nowProvider, searchService, uiSettings } = await getStartDependencies(() => {
         const request = getKibanaRequest?.();
         if (!request) {
           throw new Error(
@@ -193,7 +193,7 @@ export const getEssqlFn = ({ getStartDependencies }: EssqlFnArguments) => {
       };
 
       try {
-        const { rawResponse, took, requestParams } = await typed.searchSQL(
+        const { rawResponse, took, requestParams } = await searchService.searchSQL(
           {
             query,
             params: parameter,
