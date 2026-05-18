@@ -104,180 +104,181 @@ export const snapshot: Command = {
 
     if (options.eis) {
       options.license = 'trial';
-      const userEsArgs = options.esArgs
+      const eisUserEsArgs = options.esArgs
         ? Array.isArray(options.esArgs)
           ? options.esArgs
           : [options.esArgs]
         : [];
-      options.esArgs = [EIS_ES_ARG, ...userEsArgs];
+      options.esArgs = [EIS_ES_ARG, ...eisUserEsArgs];
 
       // Skip key resolution for download-only runs — the key is only needed
       // when starting ES and setting up CCM.
       if (!options['download-only']) {
         eisApiKey = await resolveCcmApiKey(log);
       }
-      // When --ssl is used and no explicit --kibana-url was provided, switch the
-      // default Kibana URL to https:// so the SAML realm ACS endpoint matches.
-      if (options.ssl && options.kibanaUrl === MOCK_IDP_KIBANA_URL) {
-        options.kibanaUrl = MOCK_IDP_KIBANA_URL.replace('http://', 'https://');
+    }
+
+    // When --ssl is used and no explicit --kibana-url was provided, switch the
+    // default Kibana URL to https:// so the SAML realm ACS endpoint matches.
+    if (options.ssl && options.kibanaUrl === MOCK_IDP_KIBANA_URL) {
+      options.kibanaUrl = MOCK_IDP_KIBANA_URL.replace('http://', 'https://');
+    }
+
+    const cluster = new Cluster({ ssl: options.ssl });
+
+    if (options.docker) {
+      throw createCliError(
+        `The --docker flag has been removed from 'es snapshot'. Use 'yarn es docker --snapshot' instead.`
+      );
+    } else if (options['download-only']) {
+      await cluster.downloadSnapshot({
+        version: options.version,
+        license: options.license,
+        basePath: options.basePath,
+        log,
+        useCached: options.useCached,
+      });
+    } else {
+      // Collect user-provided esArgs
+      const userEsArgs: string[] = Array.isArray(options.esArgs)
+        ? options.esArgs
+        : options.esArgs
+        ? [options.esArgs]
+        : [];
+
+      let samlResources: string[] = [];
+
+      // Auto-configure SAML realm unless user has already provided SAML realm args via -E
+      // or is using a basic license (SAML requires trial or higher)
+      const hasSamlConfig = userEsArgs.some((arg) =>
+        arg.includes(`authc.realms.saml.${MOCK_IDP_REALM_NAME}.`)
+      );
+
+      const kibanaUrl: string = options.kibanaUrl || MOCK_IDP_KIBANA_URL;
+
+      if (!hasSamlConfig && options.license !== 'basic') {
+        log.info('Configuring SAML realm for Mock IdP with Kibana at %s', kibanaUrl);
+
+        // Generate IDP metadata with the correct Kibana URL
+        const metadata = await createMockIdpMetadata(kibanaUrl);
+        const metadataPath = resolve(tmpdir(), 'mock_idp_metadata.xml');
+        writeFileSync(metadataPath, metadata);
+
+        const samlEsArgs = [
+          'xpack.security.authc.token.enabled=true',
+          `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.order=0`,
+          `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.idp.metadata.path=${metadataPath}`,
+          `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.idp.entity_id=${MOCK_IDP_ENTITY_ID}`,
+          `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.entity_id=${kibanaUrl}`,
+          `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.acs=${kibanaUrl}/api/security/saml/callback`,
+          `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.logout=${kibanaUrl}/logout`,
+          `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.principal=${MOCK_IDP_ATTRIBUTE_PRINCIPAL}`,
+          `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.groups=${MOCK_IDP_ATTRIBUTE_ROLES}`,
+          `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.name=${MOCK_IDP_ATTRIBUTE_NAME}`,
+          `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.mail=${MOCK_IDP_ATTRIBUTE_EMAIL}`,
+        ];
+
+        // SAML args go first so user -E args can override them
+        options.esArgs = [...samlEsArgs, ...userEsArgs];
+
+        // Copy stateful roles.yml so ES knows about viewer, editor, admin, system_indices_superuser
+        samlResources = [resolve(STATEFUL_ROLES_ROOT_PATH, 'roles.yml')];
+      } else if (options.license === 'basic') {
+        log.warning(
+          `Skipping SAML Mock IdP realm auto-configuration because --license=basic does not support the SAML realm. ` +
+            `Run Kibana with \`--mockIdpPlugin.enabled=false\` (or set it in kibana.dev.yml) so it doesn't try to enable the SAML provider.`
+        );
+      } else {
+        log.warning(
+          `Skipping SAML Mock IdP realm auto-configuration because user-provided -E args already configure the "${MOCK_IDP_REALM_NAME}" SAML realm.`
+        );
       }
 
-      const cluster = new Cluster({ ssl: options.ssl });
+      const installStartTime = Date.now();
+      const { installPath } = await cluster.installSnapshot({
+        version: options.version,
+        license: options.license,
+        basePath: options.basePath,
+        log,
+        useCached: options.useCached,
+        password: options.password,
+        esArgs: options.esArgs,
+        resources: samlResources,
+      });
 
-      if (options.docker) {
-        throw createCliError(
-          `The --docker flag has been removed from 'es snapshot'. Use 'yarn es docker --snapshot' instead.`
-        );
-      } else if (options['download-only']) {
-        await cluster.downloadSnapshot({
-          version: options.version,
-          license: options.license,
-          basePath: options.basePath,
-          log,
-          useCached: options.useCached,
-        });
-      } else {
-        // Collect user-provided esArgs
-        const userEsArgs: string[] = Array.isArray(options.esArgs)
-          ? options.esArgs
-          : options.esArgs
-          ? [options.esArgs]
-          : [];
+      if (options.dataArchive) {
+        await cluster.extractDataDirectory(installPath, options.dataArchive);
+      }
+      if (options.plugins) {
+        await cluster.installPlugins(installPath, options.plugins, options.esJavaOpts);
+      }
+      if (typeof options.secureFiles === 'string' && options.secureFiles) {
+        const pairs = options.secureFiles
+          .split(',')
+          .map((kv: string) => kv.split('=').map((v: string) => v.trim()));
+        await cluster.configureKeystoreWithSecureSettingsFiles(installPath, pairs);
+      }
 
-        let samlResources: string[] = [];
+      reportTime(installStartTime, 'installed', {
+        success: true,
+        ...options,
+      });
 
-        // Auto-configure SAML realm unless user has already provided SAML realm args via -E
-        // or is using a basic license (SAML requires trial or higher)
-        const hasSamlConfig = userEsArgs.some((arg) =>
-          arg.includes(`authc.realms.saml.${MOCK_IDP_REALM_NAME}.`)
-        );
-
-        const kibanaUrl: string = options.kibanaUrl || MOCK_IDP_KIBANA_URL;
-
-        if (!hasSamlConfig && options.license !== 'basic') {
-          log.info('Configuring SAML realm for Mock IdP with Kibana at %s', kibanaUrl);
-
-          // Generate IDP metadata with the correct Kibana URL
-          const metadata = await createMockIdpMetadata(kibanaUrl);
-          const metadataPath = resolve(tmpdir(), 'mock_idp_metadata.xml');
-          writeFileSync(metadataPath, metadata);
-
-          const samlEsArgs = [
-            'xpack.security.authc.token.enabled=true',
-            `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.order=0`,
-            `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.idp.metadata.path=${metadataPath}`,
-            `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.idp.entity_id=${MOCK_IDP_ENTITY_ID}`,
-            `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.entity_id=${kibanaUrl}`,
-            `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.acs=${kibanaUrl}/api/security/saml/callback`,
-            `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.logout=${kibanaUrl}/logout`,
-            `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.principal=${MOCK_IDP_ATTRIBUTE_PRINCIPAL}`,
-            `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.groups=${MOCK_IDP_ATTRIBUTE_ROLES}`,
-            `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.name=${MOCK_IDP_ATTRIBUTE_NAME}`,
-            `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.mail=${MOCK_IDP_ATTRIBUTE_EMAIL}`,
-          ];
-
-          // SAML args go first so user -E args can override them
-          options.esArgs = [...samlEsArgs, ...userEsArgs];
-
-          // Copy stateful roles.yml so ES knows about viewer, editor, admin, system_indices_superuser
-          samlResources = [resolve(STATEFUL_ROLES_ROOT_PATH, 'roles.yml')];
-        } else if (options.license === 'basic') {
-          log.warning(
-            `Skipping SAML Mock IdP realm auto-configuration because --license=basic does not support the SAML realm. ` +
-              `Run Kibana with \`--mockIdpPlugin.enabled=false\` (or set it in kibana.dev.yml) so it doesn't try to enable the SAML provider.`
-          );
-        } else {
-          log.warning(
-            `Skipping SAML Mock IdP realm auto-configuration because user-provided -E args already configure the "${MOCK_IDP_REALM_NAME}" SAML realm.`
-          );
-        }
-
-        const installStartTime = Date.now();
-        const { installPath } = await cluster.installSnapshot({
-          version: options.version,
-          license: options.license,
-          basePath: options.basePath,
-          log,
-          useCached: options.useCached,
-          password: options.password,
-          esArgs: options.esArgs,
-          resources: samlResources,
-        });
-
-        if (options.dataArchive) {
-          await cluster.extractDataDirectory(installPath, options.dataArchive);
-        }
-        if (options.plugins) {
-          await cluster.installPlugins(installPath, options.plugins, options.esJavaOpts);
-        }
-        if (typeof options.secureFiles === 'string' && options.secureFiles) {
-          const pairs = options.secureFiles
-            .split(',')
-            .map((kv: string) => kv.split('=').map((v: string) => v.trim()));
-          await cluster.configureKeystoreWithSecureSettingsFiles(installPath, pairs);
-        }
-
-        reportTime(installStartTime, 'installed', {
-          success: true,
+      if (options.eis) {
+        // EIS mode.
+        // Start ES, set the key, then wait for shutdown. We use cluster.start()
+        // (returns when ES is ready) instead of cluster.run() (blocks until
+        // exit) so we can perform the CCM setup in between.
+        await cluster.start(installPath, {
+          reportTime,
+          startTime: runStartTime,
           ...options,
+          esStdoutLogLevel: options.esLogLevel || 'info',
+          readyTimeout: parseTimeoutToMs(options.readyTimeout),
+          onEarlyExit: (msg) => {
+            log.error(`ES exited unexpectedly: ${msg}`);
+            process.exit(1);
+          },
         });
 
-        if (options.eis) {
-          // EIS mode.
-          // Start ES, set the key, then wait for shutdown. We use cluster.start()
-          // (returns when ES is ready) instead of cluster.run() (blocks until
-          // exit) so we can perform the CCM setup in between.
-          await cluster.start(installPath, {
-            reportTime,
-            startTime: runStartTime,
-            ...options,
-            esStdoutLogLevel: options.esLogLevel || 'info',
-            readyTimeout: parseTimeoutToMs(options.readyTimeout),
-            onEarlyExit: (msg) => {
-              log.error(`ES exited unexpectedly: ${msg}`);
-              process.exit(1);
-            },
-          });
-
-          try {
-            if (!eisApiKey) {
-              throw new Error(
-                'EIS: CCM API key was not resolved before starting Elasticsearch. This is a bug in the --eis flow.'
-              );
-            }
-
-            const protocol = options.ssl ? 'https' : 'http';
-            const es = {
-              baseUrl: `${protocol}://localhost:${options.port || 9200}`,
-              credentials: { username: 'elastic', password: options.password || 'changeme' },
-              ssl: !!options.ssl,
-            };
-
-            await setCcmApiKey(eisApiKey, es, log);
-            log.success('EIS: CCM API key set in Elasticsearch');
-          } catch (error) {
-            log.error('EIS setup failed, stopping Elasticsearch...');
-            await cluster.stop();
-            throw error;
+        try {
+          if (!eisApiKey) {
+            throw new Error(
+              'EIS: CCM API key was not resolved before starting Elasticsearch. This is a bug in the --eis flow.'
+            );
           }
 
-          // Keep the process alive until the user sends SIGINT/SIGTERM (Ctrl+C).
-          await new Promise<void>((resolveShutdown) => {
-            const shutdown = () => {
-              cluster.stop().finally(resolveShutdown);
-            };
-            process.on('SIGINT', shutdown);
-            process.on('SIGTERM', shutdown);
-          });
-        } else {
-          await cluster.run(installPath, {
-            reportTime,
-            startTime: runStartTime,
-            ...options,
-            esStdoutLogLevel: options.esLogLevel || 'info',
-            readyTimeout: parseTimeoutToMs(options.readyTimeout),
-          });
+          const protocol = options.ssl ? 'https' : 'http';
+          const es = {
+            baseUrl: `${protocol}://localhost:${options.port || 9200}`,
+            credentials: { username: 'elastic', password: options.password || 'changeme' },
+            ssl: !!options.ssl,
+          };
+
+          await setCcmApiKey(eisApiKey, es, log);
+          log.success('EIS: CCM API key set in Elasticsearch');
+        } catch (error) {
+          log.error('EIS setup failed, stopping Elasticsearch...');
+          await cluster.stop();
+          throw error;
         }
+
+        // Keep the process alive until the user sends SIGINT/SIGTERM (Ctrl+C).
+        await new Promise<void>((resolveShutdown) => {
+          const shutdown = () => {
+            cluster.stop().finally(resolveShutdown);
+          };
+          process.on('SIGINT', shutdown);
+          process.on('SIGTERM', shutdown);
+        });
+      } else {
+        await cluster.run(installPath, {
+          reportTime,
+          startTime: runStartTime,
+          ...options,
+          esStdoutLogLevel: options.esLogLevel || 'info',
+          readyTimeout: parseTimeoutToMs(options.readyTimeout),
+        });
       }
     }
   },
