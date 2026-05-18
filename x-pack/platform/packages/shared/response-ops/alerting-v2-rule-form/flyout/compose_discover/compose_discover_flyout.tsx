@@ -38,6 +38,7 @@ import {
 import type { ComposeDiscoverMode, SandboxApplyData } from './types';
 import { useComposeDiscoverState, getSandboxTabConfig } from './use_compose_discover_state';
 import { ComposeDiscoverForm, getSteps } from './compose_discover_form';
+import { HorizontalMinimalStepper, type MinimalStep } from './horizontal_minimal_stepper';
 import { ComposeDiscoverChild } from './compose_discover_child';
 import { useEsqlAutocomplete } from './use_esql_providers';
 import { useSplitQueryCompletion } from './use_split_query_completion';
@@ -396,7 +397,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
               responsive={false}
               style={{ marginTop: 8 }}
             >
-              <EuiFlexItem grow={false}>
+              <EuiFlexItem grow>
                 {uiState.yamlMode ? (
                   <EuiBadge color="hollow" data-test-subj="composeDiscoverYamlBadge">
                     {i18n.translate('xpack.alertingV2.composeDiscover.yamlMode.badge', {
@@ -404,7 +405,19 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
                     })}
                   </EuiBadge>
                 ) : (
-                  <>{/* Step indicator coming in PR A — HorizontalMinimalStepper */}</>
+                  <HorizontalMinimalStepper
+                    steps={steps.map(
+                      (s, i): MinimalStep => ({
+                        title: s.title,
+                        status:
+                          i < uiState.step
+                            ? 'complete'
+                            : i === uiState.step
+                            ? 'current'
+                            : 'incomplete',
+                      })
+                    )}
+                  />
                 )}
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
