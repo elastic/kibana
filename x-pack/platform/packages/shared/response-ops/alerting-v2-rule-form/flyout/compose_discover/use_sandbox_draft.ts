@@ -28,6 +28,8 @@ export function draftToRuleQuery(draft: SandboxDraft, tracking: boolean): RuleQu
       },
     };
   }
+  // Non-tracking rules have no separate recovery state; draft.recover is always
+  // empty in this branch (DISABLE_TRACKING clears it), so we drop it intentionally.
   return { format: 'standalone', breach: draft.breach };
 }
 

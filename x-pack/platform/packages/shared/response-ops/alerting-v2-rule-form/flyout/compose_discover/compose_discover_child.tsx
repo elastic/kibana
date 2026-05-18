@@ -81,7 +81,7 @@ export interface ComposeDiscoverChildProps {
    * remains interactive even when query editors are read-only.
    */
   timeField: string;
-  onTimeFieldChange: (field: string) => void;
+  onTimeFieldChange?: (field: string) => void;
   /** Controls whether the Sandbox renders a single editor or a split Base/Alert/Recovery layout. */
   tabConfig: SandboxTabConfig;
   /** Active tab, owned by the parent reducer and passed down as a controlled value. */
@@ -178,9 +178,9 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
       .map((f) => f.name);
 
     if (dateFieldNames.length === 0) {
-      if (timeField !== '@timestamp') onTimeFieldChange('@timestamp');
+      if (timeField !== '@timestamp') onTimeFieldChange?.('@timestamp');
     } else if (!dateFieldNames.includes(timeField)) {
-      onTimeFieldChange(dateFieldNames[0]);
+      onTimeFieldChange?.(dateFieldNames[0]);
     }
   }, [fieldMap, timeField, onTimeFieldChange]);
 
@@ -308,7 +308,7 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
               options={timeFieldOptions}
               value={timeField}
               aria-label="Time field for rule execution"
-              onChange={(e) => onTimeFieldChange(e.target.value)}
+              onChange={(e) => onTimeFieldChange?.(e.target.value)}
               compressed
               prepend="Time field"
               data-test-subj="composeDiscoverTimeField"
