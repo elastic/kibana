@@ -85,7 +85,12 @@ describe('UserStorageClient', () => {
       await client.set('key', 'new');
 
       expect(client.get('key')).toBe('new');
-      await expect(updates).resolves.toEqual({ key: 'key', newValue: 'new', oldValue: 'old' });
+      await expect(updates).resolves.toEqual({
+        type: 'set',
+        key: 'key',
+        newValue: 'new',
+        oldValue: 'old',
+      });
     });
 
     it('does not mutate cache or emit when the HTTP call fails, and rejects', async () => {
@@ -110,11 +115,7 @@ describe('UserStorageClient', () => {
       await client.remove('key');
 
       expect(client.get('key')).toBeUndefined();
-      await expect(updates).resolves.toEqual({
-        key: 'key',
-        newValue: undefined,
-        oldValue: 'old',
-      });
+      await expect(updates).resolves.toEqual({ type: 'remove', key: 'key', oldValue: 'old' });
     });
 
     it('rejects and emits on errors$ when the HTTP call fails', async () => {

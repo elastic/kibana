@@ -80,7 +80,7 @@ export class UserStorageClient implements IUserStorageClient {
 
     const oldValue = this.cache[key];
     this.cache[key] = value;
-    this.update$.next({ key, newValue: value, oldValue });
+    this.update$.next({ type: 'set', key, newValue: value, oldValue });
   }
 
   public async remove(key: string): Promise<void> {
@@ -94,7 +94,7 @@ export class UserStorageClient implements IUserStorageClient {
 
     const oldValue = this.cache[key];
     delete this.cache[key];
-    this.update$.next({ key, newValue: undefined, oldValue });
+    this.update$.next({ type: 'remove', key, oldValue });
   }
 
   public getUpdate$(): Observable<UserStorageUpdate> {

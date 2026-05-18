@@ -12,13 +12,16 @@ import type { Observable } from 'rxjs';
 /**
  * An update emission published when a stored value changes.
  *
+ * Use the `type` discriminant to distinguish a value write (`'set'`) from a
+ * user-override removal (`'remove'`). The `'remove'` variant has no `newValue`
+ * because the effective value reverts to the registered default — callers
+ * should read the post-removal state via `get()` if needed.
+ *
  * @public
  */
-export interface UserStorageUpdate<T = unknown> {
-  key: string;
-  newValue: T;
-  oldValue: T | undefined;
-}
+export type UserStorageUpdate<T = unknown> =
+  | { type: 'set'; key: string; newValue: T; oldValue: T | undefined }
+  | { type: 'remove'; key: string; oldValue: T | undefined };
 
 /**
  * Browser-side user storage client. Returns synchronously from an in-memory
