@@ -21,7 +21,7 @@ export const DeprecationIssue = (props: Props) => {
       <EuiText color={color}>
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiIcon type={iconType} />
+            <EuiIcon type={iconType} aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s" alignItems="center">

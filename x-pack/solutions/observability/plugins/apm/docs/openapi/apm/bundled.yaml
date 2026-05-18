@@ -57,24 +57,36 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
+              examples:
+                badRequestResponse:
+                  $ref: '#/components/examples/error_400_response'
         '401':
           description: Unauthorized response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+              examples:
+                unauthorizedResponse:
+                  $ref: '#/components/examples/error_401_response'
         '403':
           description: Forbidden response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/403_response'
+              examples:
+                forbiddenResponse:
+                  $ref: '#/components/examples/error_403_response'
         '500':
           description: Internal Server Error response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/500_response'
+              examples:
+                internalServerErrorResponse:
+                  $ref: '#/components/examples/error_500_response'
   /api/apm/services/{serviceName}/annotation/search:
     get:
       summary: Search for annotations
@@ -119,24 +131,36 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/annotation_search_response'
+              examples:
+                getAnnotationResponse1:
+                  $ref: '#/components/examples/annotation_search_get_200_response1'
         '400':
           description: Bad Request response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
+              examples:
+                badRequestResponse:
+                  $ref: '#/components/examples/error_400_response'
         '401':
           description: Unauthorized response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+              examples:
+                unauthorizedResponse:
+                  $ref: '#/components/examples/error_401_response'
         '500':
           description: Internal Server Error response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/500_response'
+              examples:
+                internalServerErrorResponse:
+                  $ref: '#/components/examples/error_500_response'
   /api/apm/services/{serviceName}/annotation:
     post:
       summary: Create a service annotation
@@ -178,24 +202,36 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
+              examples:
+                badRequestResponse:
+                  $ref: '#/components/examples/error_400_response'
         '401':
           description: Unauthorized response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+              examples:
+                unauthorizedResponse:
+                  $ref: '#/components/examples/error_401_response'
         '403':
           description: Forbidden response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/403_response'
+              examples:
+                forbiddenResponse:
+                  $ref: '#/components/examples/error_403_response'
         '404':
           description: Not found response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/404_response'
+              examples:
+                notFoundResponse:
+                  $ref: '#/components/examples/error_404_response'
       x-codeSamples:
         - lang: Curl
           source: |
@@ -237,18 +273,27 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
+              examples:
+                badRequestResponse:
+                  $ref: '#/components/examples/error_400_response'
         '401':
           description: Unauthorized response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+              examples:
+                unauthorizedResponse:
+                  $ref: '#/components/examples/error_401_response'
         '404':
           description: Not found response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/404_response'
+              examples:
+                notFoundResponse:
+                  $ref: '#/components/examples/error_404_response'
     delete:
       summary: Delete agent configuration
       description: |
@@ -284,24 +329,36 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
+              examples:
+                badRequestResponse:
+                  $ref: '#/components/examples/error_400_response'
         '401':
           description: Unauthorized response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+              examples:
+                unauthorizedResponse:
+                  $ref: '#/components/examples/error_401_response'
         '403':
           description: Forbidden response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/403_response'
+              examples:
+                forbiddenResponse:
+                  $ref: '#/components/examples/error_403_response'
         '404':
           description: Not found response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/404_response'
+              examples:
+                notFoundResponse:
+                  $ref: '#/components/examples/error_404_response'
     put:
       summary: Create or update agent configuration
       description: |
@@ -344,24 +401,36 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
+              examples:
+                badRequestResponse:
+                  $ref: '#/components/examples/error_400_response'
         '401':
           description: Unauthorized response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+              examples:
+                unauthorizedResponse:
+                  $ref: '#/components/examples/error_401_response'
         '403':
           description: Forbidden response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/403_response'
+              examples:
+                forbiddenResponse:
+                  $ref: '#/components/examples/error_403_response'
         '404':
           description: Not found response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/404_response'
+              examples:
+                notFoundResponse:
+                  $ref: '#/components/examples/error_404_response'
   /api/apm/settings/agent-configuration/view:
     get:
       summary: Get single agent configuration
@@ -400,18 +469,27 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
+              examples:
+                badRequestResponse:
+                  $ref: '#/components/examples/error_400_response'
         '401':
           description: Unauthorized response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+              examples:
+                unauthorizedResponse:
+                  $ref: '#/components/examples/error_401_response'
         '404':
           description: Not found response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/404_response'
+              examples:
+                notFoundResponse:
+                  $ref: '#/components/examples/error_404_response'
   /api/apm/settings/agent-configuration/search:
     post:
       summary: Lookup single agent configuration
@@ -449,18 +527,27 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
+              examples:
+                badRequestResponse:
+                  $ref: '#/components/examples/error_400_response'
         '401':
           description: Unauthorized response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+              examples:
+                unauthorizedResponse:
+                  $ref: '#/components/examples/error_401_response'
         '404':
           description: Not found response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/404_response'
+              examples:
+                notFoundResponse:
+                  $ref: '#/components/examples/error_404_response'
   /api/apm/settings/agent-configuration/environments:
     get:
       summary: Get environments for service
@@ -493,18 +580,27 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
+              examples:
+                badRequestResponse:
+                  $ref: '#/components/examples/error_400_response'
         '401':
           description: Unauthorized response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+              examples:
+                unauthorizedResponse:
+                  $ref: '#/components/examples/error_401_response'
         '404':
           description: Not found response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/404_response'
+              examples:
+                notFoundResponse:
+                  $ref: '#/components/examples/error_404_response'
   /api/apm/settings/agent-configuration/agent_name:
     get:
       summary: Get agent name for service
@@ -528,24 +624,36 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/service_agent_name_response'
+              examples:
+                getAgentNameForServiceResponse1:
+                  $ref: '#/components/examples/service_agent_name_get_200_response1'
         '400':
           description: Bad Request response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
+              examples:
+                badRequestResponse:
+                  $ref: '#/components/examples/error_400_response'
         '401':
           description: Unauthorized response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+              examples:
+                unauthorizedResponse:
+                  $ref: '#/components/examples/error_401_response'
         '404':
           description: Not found response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/404_response'
+              examples:
+                notFoundResponse:
+                  $ref: '#/components/examples/error_404_response'
   /api/apm/sourcemaps:
     get:
       summary: Get source maps
@@ -582,24 +690,36 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
+              examples:
+                badRequestResponse:
+                  $ref: '#/components/examples/error_400_response'
         '401':
           description: Unauthorized response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+              examples:
+                unauthorizedResponse:
+                  $ref: '#/components/examples/error_401_response'
         '500':
           description: Internal Server Error response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/500_response'
+              examples:
+                internalServerErrorResponse:
+                  $ref: '#/components/examples/error_500_response'
         '501':
           description: Not Implemented response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/501_response'
+              examples:
+                notImplementedResponse:
+                  $ref: '#/components/examples/error_501_response'
       x-codeSamples:
         - lang: Curl
           source: |
@@ -624,6 +744,9 @@ paths:
           multipart/form-data:
             schema:
               $ref: '#/components/schemas/upload_source_map_object'
+            examples:
+              uploadSourceMapRequest:
+                $ref: '#/components/examples/source_maps_upload_request1'
       responses:
         '200':
           description: Successful response
@@ -640,30 +763,45 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
+              examples:
+                badRequestResponse:
+                  $ref: '#/components/examples/error_400_response'
         '401':
           description: Unauthorized response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+              examples:
+                unauthorizedResponse:
+                  $ref: '#/components/examples/error_401_response'
         '403':
           description: Forbidden response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/403_response'
+              examples:
+                forbiddenResponse:
+                  $ref: '#/components/examples/error_403_response'
         '500':
           description: Internal Server Error response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/500_response'
+              examples:
+                internalServerErrorResponse:
+                  $ref: '#/components/examples/error_500_response'
         '501':
           description: Not Implemented response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/501_response'
+              examples:
+                notImplementedResponse:
+                  $ref: '#/components/examples/error_501_response'
       x-codeSamples:
         - lang: Curl
           source: |
@@ -710,30 +848,45 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
+              examples:
+                badRequestResponse:
+                  $ref: '#/components/examples/error_400_response'
         '401':
           description: Unauthorized response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+              examples:
+                unauthorizedResponse:
+                  $ref: '#/components/examples/error_401_response'
         '403':
           description: Forbidden response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/403_response'
+              examples:
+                forbiddenResponse:
+                  $ref: '#/components/examples/error_403_response'
         '500':
           description: Internal Server Error response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/500_response'
+              examples:
+                internalServerErrorResponse:
+                  $ref: '#/components/examples/error_500_response'
         '501':
           description: Not Implemented response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/501_response'
+              examples:
+                notImplementedResponse:
+                  $ref: '#/components/examples/error_501_response'
       x-codeSamples:
         - lang: Curl
           source: |
@@ -766,6 +919,12 @@ paths:
                   additionalProperties: true
                   example:
                     foo: bar
+            examples:
+              saveApmServerSchemaRequest:
+                description: An example request payload for `POST /api/apm/fleet/apm_server_schema`.
+                value:
+                  schema:
+                    foo: bar
       responses:
         '200':
           description: Successful response
@@ -784,24 +943,36 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
+              examples:
+                badRequestResponse:
+                  $ref: '#/components/examples/error_400_response'
         '401':
           description: Unauthorized response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
+              examples:
+                unauthorizedResponse:
+                  $ref: '#/components/examples/error_401_response'
         '403':
           description: Forbidden response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/403_response'
+              examples:
+                forbiddenResponse:
+                  $ref: '#/components/examples/error_403_response'
         '404':
           description: Not found response
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/404_response'
+              examples:
+                notFoundResponse:
+                  $ref: '#/components/examples/error_404_response'
 components:
   parameters:
     elastic_api_version:
@@ -1317,6 +1488,42 @@ components:
           name: apm-key
           api_key: PjGloCGOTzaZr8ilUPvkjA
           encoded: M0RDTG1uMEIzWk1oTFVhN1dCRzk6UGpHbG9DR09UemFacjhpbFVQdmtqQQ==
+    error_400_response:
+      description: An example of a 400 Bad Request response, returned when the request payload or query parameters fail validation.
+      value:
+        statusCode: 400
+        error: Bad Request
+        message: '[request body]: expected value of type [string] but got [undefined]'
+    error_401_response:
+      description: An example of a 401 Unauthorized response, returned when the request is missing valid authentication credentials.
+      value:
+        statusCode: 401
+        error: Unauthorized
+        message: '[security_exception]: missing authentication credentials for REST request'
+    error_403_response:
+      description: An example of a 403 Forbidden response, returned when the authenticated user lacks the required APM and User Experience privileges.
+      value:
+        statusCode: 403
+        error: Forbidden
+        message: Insufficient privileges to perform this action. The APM and User Experience feature requires `all` privileges.
+    error_500_response:
+      description: An example of a 500 Internal Server Error response, returned when an unexpected error occurs while processing the request.
+      value:
+        statusCode: 500
+        error: Internal Server Error
+        message: An internal server error occurred. Check the Kibana server logs for details.
+    annotation_search_get_200_response1:
+      description: An example of a successful response from `GET /api/apm/services/{serviceName}/annotation/search`, which returns the annotations associated with a service over the given time range.
+      value:
+        annotations:
+          - type: version
+            id: opbeans-node@2.0.0
+            '@timestamp': 1735689600000
+            text: opbeans-node@2.0.0
+          - type: version
+            id: opbeans-node@2.1.0
+            '@timestamp': 1736294400000
+            text: opbeans-node@2.1.0
     annotation_object_post_request1:
       description: Run `POST /api/apm/services/{serviceName}/annotation` to create a deployment annotation for a service.
       value:
@@ -1351,6 +1558,12 @@ components:
             type: deployment
           event:
             created: '2020-05-09T02:34:43.937Z'
+    error_404_response:
+      description: An example of a 404 Not Found response, returned when the requested resource does not exist or the feature is not available on the current deployment.
+      value:
+        statusCode: 404
+        error: Not Found
+        message: Not Found
     agent_configuration_intake_object_get_200_response1:
       description: An example of a successful response from `GET /api/apm/settings/agent-configuration`.
       value:
@@ -1454,6 +1667,10 @@ components:
             alreadyConfigured: false
           - name: ALL_OPTION_VALUE
             alreadyConfigured: false
+    service_agent_name_get_200_response1:
+      description: An example of a successful response from `GET /api/apm/settings/agent-configuration/agent_name`, which returns the detected APM agent name for a service.
+      value:
+        agentName: nodejs
     source_maps_get_200_response1:
       description: A successful response from `GET /api/apm/sourcemaps`.
       value:
@@ -1487,6 +1704,21 @@ components:
             encodedSize: 237
             encryptionAlgorithm: none
             packageName: apm
+    error_501_response:
+      description: An example of a 501 Not Implemented response, returned when the source map feature is not available on the current deployment.
+      value:
+        statusCode: 501
+        error: Not Implemented
+        message: Not Implemented
+    source_maps_upload_request1:
+      description: |
+        An example of a multipart/form-data request body for `POST /api/apm/sourcemaps`.
+        Each field is a separate form part; `sourcemap` is the source map file content (typically uploaded as a file).
+      value:
+        service_name: opbeans-node
+        service_version: 1.0.0
+        bundle_filepath: /test/e2e/general-usecase/bundle.js.map
+        sourcemap: '{"version":3,"sources":["bundle.js"],"names":[],"mappings":"AAAA","file":"bundle.js","sourcesContent":["console.log(''hello'');"]}'
     source_maps_upload_200_response1:
       description: A successful response from `POST /api/apm/sourcemaps`.
       value:

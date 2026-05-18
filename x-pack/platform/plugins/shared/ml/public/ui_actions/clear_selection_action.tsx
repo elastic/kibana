@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import type { MlCoreSetup } from '../plugin';
-import { isValidLicense } from './action_license_check';
+import { checkPermissionAsync } from '../application/capabilities/check_capabilities';
 
 export const CLEAR_SELECTION_ACTION = 'clearSelectionAction';
 
@@ -34,7 +34,7 @@ export function createClearSelectionAction(
       updateCallback();
     },
     async isCompatible({ updateCallback }) {
-      if (!(await isValidLicense(getStartServices))) return false;
+      if (!(await checkPermissionAsync(getStartServices, 'canGetJobs'))) return false;
       return typeof updateCallback === 'function';
     },
   };

@@ -281,11 +281,6 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                       target: 'doneFetchingQualityIssues',
                       actions: ['storeQualityIssuesTableOptions'],
                     },
-                    OPEN_QUALITY_ISSUE_FLYOUT: {
-                      target:
-                        '#DatasetQualityDetailsController.initializing.qualityIssueFlyout.open',
-                      actions: ['storeExpandedQualityIssue', 'resetFieldLimitServerResponse'],
-                    },
                     TOGGLE_CURRENT_QUALITY_ISSUES: {
                       target:
                         '#DatasetQualityDetailsController.initializing.dataStreamSettings.qualityIssues.dataStreamDegradedFields.fetchingDataStreamDegradedFields',
@@ -529,6 +524,11 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                       target: 'closed',
                       actions: ['storeExpandedQualityIssue'],
                     },
+                    OPEN_QUALITY_ISSUE_FLYOUT: {
+                      target:
+                        '#DatasetQualityDetailsController.initializing.qualityIssueFlyout.open',
+                      actions: ['storeExpandedQualityIssue', 'resetFieldLimitServerResponse'],
+                    },
                     UPDATE_TIME_RANGE: {
                       target:
                         '#DatasetQualityDetailsController.initializing.qualityIssueFlyout.open',
@@ -540,7 +540,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                     OPEN_QUALITY_ISSUE_FLYOUT: {
                       target:
                         '#DatasetQualityDetailsController.initializing.qualityIssueFlyout.open',
-                      actions: ['storeExpandedQualityIssue'],
+                      actions: ['storeExpandedQualityIssue', 'resetFieldLimitServerResponse'],
                     },
                   },
                 },

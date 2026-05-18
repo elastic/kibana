@@ -41,7 +41,7 @@ import { LazyAnomalyChartsContainer } from './lazy_anomaly_charts_container';
 import { getAnomalyChartsServiceDependencies } from './get_anomaly_charts_services_dependencies';
 import { buildDataViewPublishingApi } from '../common/build_data_view_publishing_api';
 import { EmbeddableAnomalyChartsUserInput } from './anomaly_charts_setup_flyout';
-import { ensureLicense } from '../ensure_license';
+import { checkPermissionAsync } from '../../application/capabilities/check_capabilities';
 
 export const getAnomalyChartsReactEmbeddableFactory = (
   getStartServices: StartServicesAccessor<MlStartDependencies, MlPluginStart>,
@@ -50,7 +50,7 @@ export const getAnomalyChartsReactEmbeddableFactory = (
   const factory: EmbeddableFactory<AnomalyChartsEmbeddableState, AnomalyChartsEmbeddableApi> = {
     type: ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
-      await ensureLicense(getStartServices);
+      await checkPermissionAsync(getStartServices, 'canGetJobs', true);
       if (!apiHasExecutionContext(parentApi)) {
         throw new Error('Parent API does not have execution context');
       }

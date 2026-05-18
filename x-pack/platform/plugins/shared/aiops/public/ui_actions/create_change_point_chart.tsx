@@ -13,12 +13,11 @@ import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { EMBEDDABLE_CHANGE_POINT_CHART_TYPE } from '@kbn/aiops-change-point-detection/constants';
-import type { CoreStart } from '@kbn/core-lifecycle-browser';
-
-import type { AiopsPluginStartDeps } from '../types';
 
 import type { ChangePointChartActionContext } from './change_point_action_context';
 import type { ChangePointEmbeddableState } from '../../common/embeddables/change_point_chart/types';
+import type { AiopsCoreSetup } from '../types';
+import { canUseAiops } from '../capabilities';
 
 const parentApiIsCompatible = async (
   parentApi: unknown
@@ -29,8 +28,7 @@ const parentApiIsCompatible = async (
 };
 
 export function createAddChangePointChartAction(
-  coreStart: CoreStart,
-  pluginStart: AiopsPluginStartDeps
+  getStartServices: AiopsCoreSetup['getStartServices']
 ): UiActionsActionDefinition<ChangePointChartActionContext> {
   return {
     id: 'create-change-point-chart',
@@ -51,10 +49,14 @@ export function createAddChangePointChartAction(
         defaultMessage: 'Change point detection',
       }),
     async isCompatible(context: EmbeddableApiContext) {
-      return Boolean(await parentApiIsCompatible(context.embeddable));
+      const [coreStart] = await getStartServices();
+      return Boolean(await parentApiIsCompatible(context.embeddable)) && canUseAiops(coreStart);
     },
     async execute(context) {
-      const presentationContainerParent = await parentApiIsCompatible(context.embeddable);
+      const [[coreStart, pluginStart], presentationContainerParent] = await Promise.all([
+        getStartServices(),
+        parentApiIsCompatible(context.embeddable),
+      ]);
       if (!presentationContainerParent) throw new IncompatibleActionError();
 
       openLazyFlyout({

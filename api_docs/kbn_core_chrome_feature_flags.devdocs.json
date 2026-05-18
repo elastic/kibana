@@ -1,0 +1,139 @@
+{
+  "id": "@kbn/core-chrome-feature-flags",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/core-chrome-feature-flags",
+        "id": "def-public.isNextChrome",
+        "type": "Function",
+        "tags": [],
+        "label": "isNextChrome",
+        "description": [],
+        "signature": [
+          "(featureFlags: FeatureFlagsBooleanReader) => boolean"
+        ],
+        "path": "src/core/packages/chrome/feature-flags/index.ts",
+        "lineNumber": 20,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-feature-flags",
+            "id": "def-public.isNextChrome.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "featureFlags",
+            "description": [],
+            "signature": [
+              "FeatureFlagsBooleanReader"
+            ],
+            "path": "src/core/packages/chrome/feature-flags/index.ts",
+            "lineNumber": 20,
+            "columnNumber": 30,
+            "deprecated": false,
+            "docsReferencedTypeName": "FeatureFlagsBooleanReader",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-feature-flags",
+        "id": "def-public.toggleNextChrome",
+        "type": "Function",
+        "tags": [],
+        "label": "toggleNextChrome",
+        "description": [],
+        "signature": [
+          "(featureFlags: FeatureFlagsBooleanReader) => void"
+        ],
+        "path": "src/core/packages/chrome/feature-flags/index.ts",
+        "lineNumber": 33,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-feature-flags",
+            "id": "def-public.toggleNextChrome.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "featureFlags",
+            "description": [],
+            "signature": [
+              "FeatureFlagsBooleanReader"
+            ],
+            "path": "src/core/packages/chrome/feature-flags/index.ts",
+            "lineNumber": 33,
+            "columnNumber": 34,
+            "deprecated": false,
+            "docsReferencedTypeName": "FeatureFlagsBooleanReader",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-chrome-feature-flags",
+        "id": "def-public.NEXT_CHROME_FEATURE_FLAG_KEY",
+        "type": "string",
+        "tags": [],
+        "label": "NEXT_CHROME_FEATURE_FLAG_KEY",
+        "description": [],
+        "signature": [
+          "\"core.chrome.next\""
+        ],
+        "path": "src/core/packages/chrome/feature-flags/index.ts",
+        "lineNumber": 12,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-feature-flags",
+        "id": "def-public.NEXT_CHROME_SESSION_STORAGE_KEY",
+        "type": "string",
+        "tags": [],
+        "label": "NEXT_CHROME_SESSION_STORAGE_KEY",
+        "description": [],
+        "signature": [
+          "\"dev.core.chrome.next\""
+        ],
+        "path": "src/core/packages/chrome/feature-flags/index.ts",
+        "lineNumber": 13,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

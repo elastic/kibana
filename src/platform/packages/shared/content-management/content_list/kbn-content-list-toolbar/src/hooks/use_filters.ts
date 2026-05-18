@@ -89,8 +89,7 @@ export const useFilters = (children: ReactNode): SearchFilterConfig[] => {
   // Note: `children` is used as a memo dependency. React children are often
   // unstable references (new JSX objects each render), so this memo may
   // recompute more than expected. The parsing logic is cheap, so this is
-  // acceptable today. If the filter set grows or resolution becomes expensive,
-  // consider keying on a more stable signal.
+  // acceptable today.
   return useMemo(() => {
     const parts = parseFilterParts(children);
     const context: FilterContext = { hasSorting, hasTags, hasStarred, hasCreatedBy };
