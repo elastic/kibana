@@ -2337,34 +2337,42 @@
         "type": "integer"
       },
       "connectionId": {
+        "ignore_above": 1024,
         "type": "keyword"
       },
       "createdAt": {
         "type": "date"
       },
       "deploymentId": {
+        "ignore_above": 1024,
         "type": "keyword"
       },
       "deploymentName": {
+        "ignore_above": 1024,
         "type": "keyword"
       },
       "mechanisms": {
+        "ignore_above": 1024,
         "type": "keyword"
       },
       "packagePolicyIds": {
+        "ignore_above": 1024,
         "type": "keyword"
       },
       "provider": {
+        "ignore_above": 1024,
         "type": "keyword"
       },
       "serviceVars": {
-        "enabled": false,
+        "dynamic": false,
         "type": "object"
       },
       "services": {
+        "ignore_above": 1024,
         "type": "keyword"
       },
       "status": {
+        "ignore_above": 1024,
         "type": "keyword"
       },
       "statusMessage": {
@@ -2374,6 +2382,7 @@
         "type": "date"
       },
       "vars": {
+        "ignore_above": 1024,
         "type": "flattened"
       }
     }
