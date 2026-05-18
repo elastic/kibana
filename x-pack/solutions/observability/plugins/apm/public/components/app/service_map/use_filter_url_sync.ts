@@ -9,6 +9,7 @@ import { useEffect, useRef, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import type { Filter } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
+import { decode as decodeRison } from '@kbn/rison';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
@@ -28,6 +29,24 @@ export type ControlSelections = Record<string, string[]>;
 interface AppFilterState {
   filters?: Filter[];
   controlSelections?: ControlSelections;
+}
+
+/**
+ * Reads `_a` from the raw browser URL on initial load.
+ * This is needed because the APM typed router strips unknown query params
+ * (via deepExactRt) before React components mount — so kbnUrlStateStorage
+ * won't find `_a` in history.location.search.
+ */
+function readInitialAppStateFromRawUrl(): AppFilterState | null {
+  try {
+    const raw = window.location.href;
+    const match = raw.match(/[?&]_a=([^&#]+)/);
+    if (!match) return null;
+    const decoded = decodeURIComponent(match[1]);
+    return decodeRison(decoded) as AppFilterState;
+  } catch {
+    return null;
+  }
 }
 
 /**
@@ -64,8 +83,13 @@ export function useFilterUrlSync() {
   useEffect(() => {
     const kbnUrlStateStorage = storageRef.current!;
 
-    // Restore filters from URL on mount
-    const initialState = kbnUrlStateStorage.get<AppFilterState>(APP_STATE_KEY);
+    // Try kbnUrlStateStorage first, fall back to raw URL parsing
+    // (the typed router strips `_a` from history.location.search).
+    let initialState = kbnUrlStateStorage.get<AppFilterState>(APP_STATE_KEY);
+    if (!initialState) {
+      initialState = readInitialAppStateFromRawUrl();
+    }
+
     if (initialState?.filters && initialState.filters.length > 0) {
       const restoredFilters = initialState.filters.map((f) => ({
         ...f,
@@ -112,8 +136,11 @@ export function useFilterUrlSync() {
 
   const getRestoredControlSelections = useCallback((): ControlSelections | undefined => {
     if (!storageRef.current) return undefined;
-    const state = storageRef.current.get<AppFilterState>(APP_STATE_KEY);
-    return state?.controlSelections;
+    let state = storageRef.current.get<AppFilterState>(APP_STATE_KEY);
+    if (!state) {
+      state = readInitialAppStateFromRawUrl();
+    }
+    return state?.controlSelections ?? undefined;
   }, []);
 
   return { persistControlSelections, getRestoredControlSelections };
