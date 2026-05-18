@@ -36,14 +36,14 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
       config = await readConfigFile(log, options.esVersion, options.config);
     }
 
-    const shutdownEs = await runElasticsearch({
+    const esPromise = runElasticsearch({
       config,
       log,
       esFrom: options.esFrom,
       logsDir: options.logsDir,
     });
 
-    await runKibanaServer({
+    const kibanaPromise = runKibanaServer({
       procs,
       config,
       installDir: options.installDir,
@@ -58,6 +58,8 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
               : '--server.versioned.versionResolution=oldest',
           ],
     });
+
+    const [shutdownEs] = await Promise.all([esPromise, kibanaPromise]);
 
     const startRemoteKibana = config.get('kbnTestServer.startRemoteKibana');
 
