@@ -120,18 +120,6 @@ export function FieldTypeFilter<T extends FieldListItem = DataViewField>({
     [euiTheme.size.m, euiTheme.size.xs]
   );
 
-  const itemStyle = useMemo(
-    () => css`
-      font-size: ${euiTheme.size.m};
-      padding: ${euiTheme.size.s} ${euiTheme.size.m};
-
-      & + & {
-        border-top: 1px solid ${euiTheme.colors.lightestShade};
-      }
-    `,
-    [euiTheme]
-  );
-
   useEffect(() => {
     // calculate counts only if user opened the popover
     if (!isOpen || !allFields?.length) {
@@ -217,6 +205,7 @@ export function FieldTypeFilter<T extends FieldListItem = DataViewField>({
             )}
           </EuiFlexGroup>
         </EuiPopoverTitle>
+        {/* NOTE: This should use an EuiSelectable, EuiContextMenu is for menu actions not selections */}
         {availableFieldTypes.length > 0 ? (
           <EuiContextMenuPanel
             data-test-subj={`${testSubj}Options`}
@@ -244,7 +233,6 @@ export function FieldTypeFilter<T extends FieldListItem = DataViewField>({
                   key={type}
                   icon={isSelected ? 'check' : 'empty'}
                   data-test-subj={`typeFilter-${type}`}
-                  css={itemStyle}
                   onClick={() => {
                     onChange(
                       selectedFieldTypes.includes(type)

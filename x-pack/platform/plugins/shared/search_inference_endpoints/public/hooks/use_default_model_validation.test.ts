@@ -7,17 +7,17 @@
 
 import { renderHook } from '@testing-library/react';
 import { useDefaultModelValidation } from './use_default_model_validation';
-import { useConnectorExists } from './use_connector_exists';
+import { useConnectors } from './use_connectors';
 import { NO_DEFAULT_MODEL } from '../../common/constants';
 
-jest.mock('./use_connector_exists');
+jest.mock('./use_connectors');
 
-const mockUseConnectorExists = useConnectorExists as jest.Mock;
+const mockUseConnectors = useConnectors as jest.Mock;
 
 describe('useDefaultModelValidation', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseConnectorExists.mockReturnValue({ exists: true, loading: false });
+    mockUseConnectors.mockReturnValue({ data: [], isLoading: false });
   });
 
   it('is valid when AI features are disabled regardless of other fields', () => {
@@ -36,6 +36,11 @@ describe('useDefaultModelValidation', () => {
   });
 
   it('is valid when AI is enabled and a real default model exists', () => {
+    mockUseConnectors.mockReturnValue({
+      data: [{ connectorId: 'pre-1' }],
+      isLoading: false,
+    });
+
     const { result } = renderHook(() =>
       useDefaultModelValidation({
         enableAi: true,
@@ -75,8 +80,6 @@ describe('useDefaultModelValidation', () => {
   });
 
   it('reports connector-not-exist when the selected model is missing', () => {
-    mockUseConnectorExists.mockReturnValue({ exists: false, loading: false });
-
     const { result } = renderHook(() =>
       useDefaultModelValidation({
         enableAi: true,
@@ -90,7 +93,7 @@ describe('useDefaultModelValidation', () => {
   });
 
   it('does not report connector-not-exist while the existence check is still loading', () => {
-    mockUseConnectorExists.mockReturnValue({ exists: false, loading: true });
+    mockUseConnectors.mockReturnValue({ data: undefined, isLoading: true });
 
     const { result } = renderHook(() =>
       useDefaultModelValidation({
@@ -102,5 +105,72 @@ describe('useDefaultModelValidation', () => {
 
     expect(result.current.isValid).toBe(true);
     expect(result.current.errors).toEqual([]);
+  });
+
+  it('does not report an error when the selected model is deprecated with a future EOL date', () => {
+    mockUseConnectors.mockReturnValue({
+      data: [
+        {
+          connectorId: 'deprecated-model',
+          metadata: { heuristics: { status: 'deprecated', end_of_life_date: '2027-01-01' } },
+        },
+      ],
+      isLoading: false,
+    });
+
+    const { result } = renderHook(() =>
+      useDefaultModelValidation({
+        enableAi: true,
+        defaultModelId: 'deprecated-model',
+        featureSpecificModels: true,
+      })
+    );
+
+    expect(result.current.isValid).toBe(true);
+  });
+
+  it('does not report an error when the selected model has no EOL date but is deprecated', () => {
+    mockUseConnectors.mockReturnValue({
+      data: [
+        {
+          connectorId: 'deprecated-no-date',
+          metadata: { heuristics: { status: 'deprecated' } },
+        },
+      ],
+      isLoading: false,
+    });
+
+    const { result } = renderHook(() =>
+      useDefaultModelValidation({
+        enableAi: true,
+        defaultModelId: 'deprecated-no-date',
+        featureSpecificModels: true,
+      })
+    );
+
+    expect(result.current.isValid).toBe(true);
+  });
+
+  it('reports an error when the selected model has passed its end-of-life date', () => {
+    mockUseConnectors.mockReturnValue({
+      data: [
+        {
+          connectorId: 'eol-model',
+          metadata: { heuristics: { end_of_life_date: '2024-01-01' } },
+        },
+      ],
+      isLoading: false,
+    });
+
+    const { result } = renderHook(() =>
+      useDefaultModelValidation({
+        enableAi: true,
+        defaultModelId: 'eol-model',
+        featureSpecificModels: true,
+      })
+    );
+
+    expect(result.current.isValid).toBe(false);
+    expect(result.current.errors[0]).toMatch(/end of life/i);
   });
 });
