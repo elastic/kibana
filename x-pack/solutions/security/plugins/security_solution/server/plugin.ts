@@ -101,6 +101,7 @@ import {
   createSecurityRuleTypeWrapper,
   securityRuleTypeFieldMap,
 } from './lib/detection_engine/rule_types/create_security_rule_type_wrapper';
+import { registerSecuritySolutionAlertingV2RowEnricher } from './lib/detection_engine/alerting_v2/register_row_enricher';
 
 import { RequestContextFactory } from './request_context_factory';
 
@@ -622,6 +623,12 @@ export class Plugin implements ISecuritySolutionPlugin {
     );
     plugins.alerting.registerType(securityRuleTypeWrapper(createThresholdAlertType()));
     plugins.alerting.registerType(securityRuleTypeWrapper(createNewTermsAlertType()));
+
+    registerSecuritySolutionAlertingV2RowEnricher({
+      logger: this.logger,
+      getStartServices: core.getStartServices,
+      getExperimentalFeatures: () => this.config.experimentalFeatures,
+    });
 
     const trialCompanionDeps: TrialCompanionRoutesDeps = {
       router,

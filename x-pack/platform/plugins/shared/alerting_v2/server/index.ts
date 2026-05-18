@@ -35,3 +35,8 @@ export const module = new ContainerModule((options) => {
 
 export type { PluginConfig as AlertingV2Config } from './config';
 export type { AlertingServerStart, RulesClientApi } from './types';
+export { registerRuleExecutionRowEnricher } from './lib/rule_executor/row_enrichment/register_row_enricher';
+export type {
+  RuleExecutionRowEnrichContext,
+  RuleExecutionRowEnricher,
+} from './lib/rule_executor/row_enrichment/types';

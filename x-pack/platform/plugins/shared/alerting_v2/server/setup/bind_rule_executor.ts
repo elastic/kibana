@@ -16,6 +16,7 @@ import {
   FetchRuleStep,
   ValidateRuleStep,
   ExecuteRuleQueryStep,
+  EnrichEsqlRowsStep,
   CreateAlertEventsStep,
   ApplyDetectionEngineFeaturesStep,
   CreateRecoveryEventsStep,
@@ -52,6 +53,7 @@ export const bindRuleExecutionServices = ({ bind }: ContainerModuleLoadOptions) 
   bind(RuleExecutionStepsToken).to(FetchRuleStep).inRequestScope();
   bind(RuleExecutionStepsToken).to(ValidateRuleStep).inSingletonScope();
   bind(RuleExecutionStepsToken).to(ExecuteRuleQueryStep).inRequestScope();
+  bind(RuleExecutionStepsToken).to(EnrichEsqlRowsStep).inRequestScope();
   bind(RuleExecutionStepsToken).to(CreateAlertEventsStep).inSingletonScope();
   bind(RuleExecutionStepsToken).to(ApplyDetectionEngineFeaturesStep).inSingletonScope();
   bind(RuleExecutionStepsToken).to(CreateRecoveryEventsStep).inRequestScope();

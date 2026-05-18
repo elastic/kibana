@@ -27,6 +27,7 @@ import { RulesClient } from '../lib/rules_client';
 import { RulesClientSpaceIdToken } from '../lib/rules_client/tokens';
 import { ApiKeyService } from '../lib/services/api_key_service/api_key_service';
 import { EsServiceInternalToken, EsServiceScopedToken } from '../lib/services/es_service/tokens';
+import { ScopedClusterClientToken } from '../lib/services/es_service/scoped_cluster_tokens';
 import { EventLogService } from '../lib/services/event_log_service/event_log_service';
 import { EventLogServiceToken } from '../lib/services/event_log_service/tokens';
 import { LoggerService, LoggerServiceToken } from '../lib/services/logger_service/logger_service';
@@ -161,6 +162,14 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
       const request = get(Request);
       const elasticsearch = get(CoreStart('elasticsearch'));
       return elasticsearch.client.asScoped(request).asCurrentUser;
+    })
+    .inRequestScope();
+
+  bind(ScopedClusterClientToken)
+    .toDynamicValue(({ get }) => {
+      const request = get(Request);
+      const elasticsearch = get(CoreStart('elasticsearch'));
+      return elasticsearch.client.asScoped(request);
     })
     .inRequestScope();
 

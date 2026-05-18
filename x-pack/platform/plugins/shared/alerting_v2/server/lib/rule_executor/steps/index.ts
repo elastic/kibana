@@ -9,6 +9,7 @@ export { WaitForResourcesStep } from './wait_for_resources_step';
 export { FetchRuleStep } from './fetch_rule_step';
 export { ValidateRuleStep } from './validate_rule_step';
 export { ExecuteRuleQueryStep } from './execute_rule_query_step';
+export { EnrichEsqlRowsStep } from './enrich_esql_rows_step';
 export { CreateAlertEventsStep } from './create_alert_events_step';
 export { ApplyDetectionEngineFeaturesStep } from './apply_detection_engine_features_step';
 export { CreateRecoveryEventsStep } from './create_recovery_events_step';
