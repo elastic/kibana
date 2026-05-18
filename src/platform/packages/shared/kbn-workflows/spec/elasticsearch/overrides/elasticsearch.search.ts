@@ -146,6 +146,8 @@ This situation can occur because the splitting criterion is based on Lucene docu
     ...search.shape,
     ...getShapeAt(search_request, 'query'),
     index: types_indices,
+    // Elasticsearch accepts several body sort syntaxes that are stricter in the OpenAPI schema.
+    sort: z.any().optional(),
   }),
   outputSchema: global_search_response_body,
 };
