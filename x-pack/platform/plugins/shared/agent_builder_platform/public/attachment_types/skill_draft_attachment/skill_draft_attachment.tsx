@@ -29,19 +29,16 @@ import {
 import type { SkillReferencedContent } from '@kbn/agent-builder-common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
+  type CreateSkillResponse,
+  SKILLS_API_PATH,
+} from '@kbn/agent-builder-plugin/common/http_api/skills';
+import { AGENTBUILDER_APP_ID } from '@kbn/agent-builder-plugin/public';
+import {
   SKILL_DRAFT_ATTACHMENT_TYPE,
   type SkillDraftAttachment,
   type SkillDraftAttachmentData,
 } from '../../../common/attachments';
 
-/**
- * Path of the agent builder public skills API. Matches the constant
- * `publicApiPath` from `@kbn/agent-builder-plugin/common/constants` (we
- * inline it to avoid pulling in the entire agent_builder public package
- * just for one string).
- */
-const SKILLS_CREATE_API_PATH = '/api/agent_builder/skills';
-const AGENT_BUILDER_APP_ID = 'agent_builder';
 const SKILLS_MANAGE_PATH = '/manage/skills';
 
 const PREVIEW_MAX_LINES = 30;
@@ -371,7 +368,7 @@ export const createSkillDraftAttachmentDefinition = ({
       const actionButtons: ActionButton[] = [];
       const createSkill = async () => {
         try {
-          const response = await http.post<{ id: string; name: string }>(SKILLS_CREATE_API_PATH, {
+          const response = await http.post<CreateSkillResponse>(SKILLS_API_PATH, {
             body: JSON.stringify(attachment.data satisfies SkillDraftAttachmentData),
           });
           await updateOrigin(response.id);
@@ -414,7 +411,7 @@ export const createSkillDraftAttachmentDefinition = ({
             label: editInManagementLabel,
             icon: 'pencil',
             type: ActionButtonType.PRIMARY,
-            href: application.getUrlForApp(AGENT_BUILDER_APP_ID, {
+            href: application.getUrlForApp(AGENTBUILDER_APP_ID, {
               path: `${SKILLS_MANAGE_PATH}/${skillId}`,
             }),
             target: '_blank',
