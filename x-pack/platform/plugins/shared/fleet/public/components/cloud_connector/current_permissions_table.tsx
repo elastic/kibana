@@ -122,11 +122,6 @@ export const CurrentPermissionsTable: React.FC<CurrentPermissionsTableProps> = (
   );
 
   return (
-    // `items` is pre-sorted by STATUS_PRIORITY (worst-first). We deliberately omit
-    // the `sorting` prop because EuiInMemoryTable's default sort would alpha-sort by
-    // the status string value (denied → error → required → skipped → verified),
-    // overriding our priority-based order. Re-add `sorting` only if columns also get
-    // `sortable: (item) => STATUS_PRIORITY[item.status]` to preserve worst-first.
     <EuiInMemoryTable<PermissionResult>
       items={items}
       columns={columns}

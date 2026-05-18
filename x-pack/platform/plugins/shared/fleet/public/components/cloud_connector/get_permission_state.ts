@@ -68,13 +68,6 @@ export function getPermissionStateFromSummary(
   return { state: 'unknown' };
 }
 
-/**
- * Aggregate counts across every permission of every package_policy summary.
- *
- * Used by Story 4 (identity-level header rollup): the per-row roll-up operates on
- * one summary; this operates on the whole `verification_permissions[]` array,
- * summing each status across all summaries.
- */
 export interface IdentityPermissionTotals {
   verified: number;
   required: number;

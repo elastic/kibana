@@ -147,18 +147,8 @@ function visualFor(state: CellState, hideCount: boolean): BadgeVisual {
 
 interface PermissionStateBadgeProps {
   state: CellState;
-  /** Optional click handler (cell wrapper attaches popover trigger here). */
   onClick?: () => void;
-  /**
-   * When true, the badge looks/behaves like an interactive element with hover
-   * affordance. Off when used as a non-clickable display badge.
-   */
   isClickable?: boolean;
-  /**
-   * When true, omits the `(count)` suffix from `required` / `denied` / `error` labels.
-   * Use in single-permission contexts (e.g. per-row in `CurrentPermissionsTable`) where
-   * the count would always be 1 and reads as redundant noise.
-   */
   hideCount?: boolean;
 }
 

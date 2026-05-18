@@ -486,10 +486,6 @@ async function verifyConnector(
   try {
     throwIfAborted(abortController);
     const { cloudProvider } = connector.attributes;
-    // Ensure the cloud-provider package is installed so the verifier receiver can
-    // reference its policy templates at run time. Per-policy package metadata
-    // (name, title, version) is sourced from each verified package policy SO and
-    // flows through `verifiedPackagePolicies`, so we don't need a getPackageInfo() lookup here.
     const ensureResult = await ensureInstalledPackage({
       savedObjectsClient: soClient,
       esClient,
@@ -503,11 +499,6 @@ async function verifyConnector(
 
     const verificationInfo: ConnectorVerificationInfo = { verifiedPackagePolicies };
 
-    // Record "verification attempted" as soon as we begin, so the connector's lifecycle
-    // timeline shows a `verification_started` event even on failed attempts. Previously
-    // this write happened after createVerifierPolicy succeeded — but the field name
-    // ("started") implies the start of an attempt, not its success. Story 7's timeline
-    // consumes this field and renders one event per verification attempt.
     const startedAt = new Date().toISOString();
     await updateConnectorStatus(soClient, connector.id, {
       verification_started_at: startedAt,

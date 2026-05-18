@@ -261,8 +261,6 @@ export const getCloudConnectorUsageHandler: FleetRequestHandler<
   const fleetContext = await context.fleet;
   const { internalSoClient } = fleetContext;
   const cloudConnectorId = request.params.cloudConnectorId;
-  // page/perPage arrive as strings from the URL; matches the parseInt pattern used by
-  // `getCloudConnectorsHandler`. Default to 1 / 10 when omitted.
   const page = request.query?.page ? parseInt(request.query.page, 10) : 1;
   const perPage = request.query?.perPage ? parseInt(request.query.perPage, 10) : 10;
   const logger = appContextService

@@ -32,18 +32,6 @@ import type {
 import type { CellState } from './get_permission_state';
 import { IntegrationActionButtons } from './integration_action_buttons';
 
-/**
- * L2 popover content for one integration row.
- *
- * Header: integration display name + last verified (relative + absolute on hover).
- * Body:   permission groups ordered by worst-state-first (error > denied > required > verified).
- *         Within each group, inline list capped at INLINE_CAP with "and N more" expander.
- * Footer: action buttons (Open dashboard + Learn more) via IntegrationActionButtons.
- *
- * Non-result states (verifying / verification_failed / unknown) render explanatory copy
- * instead of permission groups.
- */
-
 const INLINE_CAP = 5;
 
 const GROUP_ORDER: ReadonlyArray<{
@@ -100,7 +88,6 @@ interface PermissionGroupProps {
   color: string;
   label: string;
   permissions: PermissionResult[];
-  /** When true, group renders collapsed (used for 'verified' by default). */
   initiallyCollapsed?: boolean;
 }
 
@@ -127,10 +114,6 @@ const PermissionGroup: React.FC<PermissionGroupProps> = ({
         alignItems="center"
         responsive={false}
         onClick={toggle}
-        // Accessibility: make this row keyboard-activatable. `role="button"` + `tabIndex={0}`
-        // makes the row reachable via Tab; `onKeyDown` mirrors the click for Enter/Space (the
-        // two keys assistive tech and keyboard users expect for a "button"). `aria-expanded`
-        // tells screen readers whether the permissions list is shown.
         role="button"
         tabIndex={0}
         aria-expanded={expanded}
@@ -180,12 +163,6 @@ const PermissionGroup: React.FC<PermissionGroupProps> = ({
             ))}
             {overflow > 0 && (
               <li>
-                {/*
-                  EuiLink (with onClick, no href) renders as a button under the hood —
-                  keyboard-navigable, screen-reader-announced as interactive, and styled
-                  to match the surrounding primary-color affordance. Replaces a previous
-                  `EuiText onClick` that was mouse-only.
-                */}
                 <EuiLink onClick={() => setShowAll(true)}>
                   <FormattedMessage
                     id="xpack.fleet.cloudConnector.permissionStatus.popover.showMore"
@@ -235,13 +212,9 @@ const NonResultBody: React.FC<NonResultBodyProps> = ({ state }) => {
 };
 
 interface PermissionStatusPopoverProps {
-  /** The derived cell state for this integration row. */
   cellState: CellState;
-  /** The full summary for this package_policy, if it exists. */
   summary: PackagePolicyPermissionSummary | undefined;
-  /** Display name of the integration (table row's name column). */
   integrationName: string;
-  /** The TARGET package policy id (used by the action buttons' dashboard link). */
   packagePolicyId: string;
 }
 

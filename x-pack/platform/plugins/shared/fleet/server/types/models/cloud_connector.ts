@@ -40,8 +40,6 @@ export const CloudConnectorSchemaV4 = CloudConnectorSchemaV3.extends({
 
 export const PermissionResultSchema = schema.object({
   action: schema.string(),
-  // Narrow union — must match `PermissionStatus` in common/types/models/cloud_connector.ts.
-  // Keep this literal list in sync if new statuses are added.
   status: schema.oneOf([
     schema.literal('verified'),
     schema.literal('required'),

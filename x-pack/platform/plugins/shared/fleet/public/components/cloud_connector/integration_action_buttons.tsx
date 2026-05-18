@@ -15,27 +15,12 @@ import { PERMISSION_STATUS_TEST_SUBJECTS } from '../../../common/services/cloud_
 
 import { getDashboardLink } from './dashboard_links';
 
-/**
- * Shared two-button footer for the L2 popover and L3 row-expand:
- *   [📊 Open <integration> dashboard →]   [📚 Learn more →]
- *
- * Dashboard link resolution is per `policy_template` (see `dashboard_links.ts`).
- * The dashboard button only enables when at least one permission has verified — otherwise
- * the integration has no data to show in its dashboard, and we surface that explicitly
- * via a tooltip rather than letting the user open an empty view.
- */
-
 const LEARN_MORE_HREF =
   'https://www.elastic.co/guide/en/fleet/current/cloud-connectors-permission-verification.html';
 
 interface IntegrationActionButtonsProps {
   policyTemplate: string;
   packagePolicyId: string;
-  /**
-   * True when the integration has at least one permission with `status: 'verified'`.
-   * When false, the dashboard button renders disabled with an explanatory tooltip —
-   * the dashboard would be empty without verified permissions.
-   */
   hasVerifiedPermission: boolean;
 }
 
@@ -49,17 +34,12 @@ export const IntegrationActionButtons: React.FC<IntegrationActionButtonsProps> =
 
   const handleOpenDashboard = (event: React.MouseEvent) => {
     event.preventDefault();
-    // Prepend the Kibana basePath so links resolve correctly on deployments that
-    // mount Kibana at a non-default path (e.g. server.basePath="/kbn"). `window.open`
-    // bypasses SPA routing and the browser doesn't know about basePath, so we have
-    // to prepend explicitly. `navigateToUrl` handles basePath internally.
     const href = dashboardLink.newTab
       ? http?.basePath.prepend(dashboardLink.href) ?? dashboardLink.href
       : dashboardLink.href;
     if (dashboardLink.newTab) {
       window.open(href, '_blank', 'noopener');
     } else {
-      // navigateToUrl preserves SPA navigation when staying within Kibana.
       application?.navigateToUrl(href);
     }
   };

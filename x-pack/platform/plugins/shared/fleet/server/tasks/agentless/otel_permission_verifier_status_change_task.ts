@@ -29,30 +29,8 @@ const TASK_ID = `${TASK_TYPE}:1.0.0`;
 const TASK_INTERVAL = '5m';
 export const STATUS_CHANGE_TASK_LOG = '[OTel Permission Verifier Status Change Task]';
 
-// The OTel verifier receiver emits to dataset `verifierreceiver.otel` (component name +
-// signal type) — distinct from the integration package's `verifier_otel.verifierreceiver`
-// dataset constant. Both indices may exist in different Kibana versions; this matches what
-// the deployed receiver actually writes to.
 const VERIFIER_LOG_INDEX = 'logs-verifierreceiver.otel-*';
-/**
- * Upper bound on package-policy buckets returned per connector. Anchored to the
- * Cloud agentless deployment limit (5 concurrent agentless agent policies); cloud
- * connectors require agentless mode, so at most 5 agent policies host
- * cloud-connector-using integrations at one time. Assuming up to ~5 integrations
- * per agent policy share a connector (multi-integration support from Story 1),
- * 25 = 5 × 5 gives a comfortable ceiling. Matches the `perPage: 25` cap used by
- * `verify_permissions_task.ts` for the same physical constraint. Revisit when the
- * agentless concurrency limit grows. Truncation surfaces via `sum_other_doc_count`
- * warnings if exceeded.
- */
 const MAX_PACKAGE_POLICY_BUCKETS_PER_CONNECTOR = 25;
-/**
- * Upper bound on the number of permission docs retrieved per (connector, package_policy)
- * bucket. The verifier emits ONE log per permission check; capped at 100 because the
- * verifier-receiver datastream's `index.max_inner_result_window` is the ES default of
- * 100 and any larger value triggers `illegal_argument_exception` at query time. Current
- * max permissions per policy template is 5 (cloudtrail) — 100 leaves a 20× buffer.
- */
 const PERMISSION_HITS_PER_BUCKET = 100;
 
 /**
@@ -84,11 +62,6 @@ interface VerifierLogSource {
   '@timestamp'?: string;
   attributes?: VerifierLogAttributes;
   resource?: { attributes?: VerifierLogResourceAttributes };
-  /**
-   * Human-readable summary line emitted by the verifier, e.g.
-   * `"Permission check: aws/arn:aws:iam::aws:policy/SecurityAudit - error"`.
-   * Mapped to `PermissionResult.message` and shown in the row-expand "Message" column.
-   */
   body?: { text?: string };
 }
 
@@ -375,10 +348,6 @@ function buildSummaryFromBucket(
   );
   if (latestRunHits.length === 0) return null;
 
-  // Take metadata from the first hit — within one verification run all docs
-  // share policy/template/package fields. Only the keys the UI actually reads
-  // are extracted; redundant descriptive fields (policy_name, package_title,
-  // package_version) are resolved live from the package policy SO at render time.
   const refAttrs = latestRunHits[0]._source.attributes ?? {};
   const policyId = refAttrs['policy.id'];
   const policyTemplate = refAttrs.policy_template;

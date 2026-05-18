@@ -19,30 +19,9 @@ import { VerificationTimeline } from './verification_timeline';
 import { CurrentPermissionsTable } from './current_permissions_table';
 import { IntegrationActionButtons } from './integration_action_buttons';
 
-/**
- * Story 7 (delivered inline with Story 3+4 UI) — the deep-drill view that opens
- * when a user clicks the chevron on an integration row in the Cloud Connector
- * flyout's integrations table.
- *
- * Three sections, top-down:
- *   1. Verification Timeline — chronological event stream (currently one event from
- *      the latest run; backend endpoint will fill in older runs)
- *   2. Current Permissions — full sortable table of permissions from the latest run
- *   3. Action buttons — Open dashboard + Learn more (shared with popover)
- *
- * When no summary exists for this integration (verifier hasn't run, or run failed
- * at deployment), renders an empty-state explaining the situation per the
- * Layer 1 `verificationStatus`.
- */
-
 interface PermissionStatusRowExpansionProps {
   summary: PackagePolicyPermissionSummary | undefined;
   verificationStatus: VerificationStatus | undefined;
-  /**
-   * Identity-level Layer 1 timestamps (from the connector SO). Same value for every
-   * integration on this connector; surfaces as `verification_started` / `verification_failed`
-   * events in this row's timeline.
-   */
   verificationStartedAt?: string;
   verificationFailedAt?: string;
   packagePolicyId: string;
@@ -55,9 +34,6 @@ export const PermissionStatusRowExpansion: React.FC<PermissionStatusRowExpansion
   verificationFailedAt,
   packagePolicyId,
 }) => {
-  // Empty-state when there's no summary (e.g., verifier hasn't shipped logs for
-  // this integration yet, or the verifier deployment failed). The cell state
-  // already surfaces the badge variant; this expands on it for the drill-down.
   if (!summary) {
     const emptyTitle =
       verificationStatus === 'pending'
@@ -113,7 +89,6 @@ export const PermissionStatusRowExpansion: React.FC<PermissionStatusRowExpansion
 
   return (
     <div data-test-subj={PERMISSION_STATUS_ROW_EXPAND_TEST_SUBJECTS.CONTAINER}>
-      {/* Section 1 — Verification Timeline */}
       <EuiText size="xs">
         <h5>
           {i18n.translate('xpack.fleet.cloudConnector.permissionStatus.rowExpand.timelineHeader', {
@@ -130,7 +105,6 @@ export const PermissionStatusRowExpansion: React.FC<PermissionStatusRowExpansion
 
       <EuiHorizontalRule margin="m" />
 
-      {/* Section 2 — Current Permissions table */}
       <EuiText size="xs">
         <h5>
           {i18n.translate(
@@ -144,7 +118,6 @@ export const PermissionStatusRowExpansion: React.FC<PermissionStatusRowExpansion
 
       <EuiHorizontalRule margin="m" />
 
-      {/* Section 3 — Action buttons (reused from popover) */}
       <IntegrationActionButtons
         policyTemplate={summary.policy_template}
         packagePolicyId={packagePolicyId}

@@ -21,20 +21,6 @@ import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import { PERMISSION_STATUS_ROW_EXPAND_TEST_SUBJECTS } from '../../../common/services/cloud_connectors/test_subjects';
 import type { PackagePolicyPermissionSummary } from '../../../common/types/models/cloud_connector';
 
-/**
- * Verification Timeline (Story 7, MVP slice within Story 3+4 UI).
- *
- * Renders a vertical event stream for one integration. Each event has a timestamp,
- * type-specific icon + label, and an optional per-event permission breakdown.
- * Events are ordered oldest first (verification started → verification failed → run completed).
- * When identity-level verification has failed, `run_completed` is omitted (no successful run).
- *
- * Today's data source: optionally a single `run_completed` event derived from the integration's
- * `last_verified_at` + per-status counts from `permissions[]` (omitted when verification failed).
- * The Story 7 backend endpoint (proposed: `GET /api/fleet/cloud_connectors/{id}/integrations/{packagePolicyId}/timeline`)
- * will return historical events; this component renders all of them with the same shape.
- */
-
 interface RunCompletedEvent {
   type: 'run_completed';
   timestamp: string;
@@ -69,27 +55,10 @@ const TIMELINE_EVENT_ORDER: Record<TimelineEvent['type'], number> = {
 
 interface VerificationTimelineProps {
   summary: PackagePolicyPermissionSummary;
-  /**
-   * Identity-level Layer 1 lifecycle timestamps (from the cloud-connector SO).
-   * The same `started`/`failed` apply across every integration on the connector;
-   * each row's timeline includes them alongside the per-integration `run_completed`
-   * (unless `verification_failed_at` is set, in which case `run_completed` is hidden).
-   */
   verificationStartedAt?: string;
   verificationFailedAt?: string;
 }
 
-/**
- * Compose a chronological (oldest-first) event stream from the data we have today:
- *   - verification_started — from the connector's `verification_started_at`
- *   - verification_failed  — from the connector's `verification_failed_at`
- *   - run_completed       — from the integration's `last_verified_at` + per-status counts
- *     (skipped when `verification_failed_at` is present)
- *
- * Today the SO only retains the *latest* start/failed timestamps, so at most one of each
- * appears. When the Story 7 history endpoint lands, it returns a paginated stream of all
- * three types and this function gets replaced by the endpoint's response.
- */
 function buildEvents(
   summary: PackagePolicyPermissionSummary,
   verificationStartedAt: string | undefined,
@@ -123,14 +92,6 @@ function buildEvents(
   });
 }
 
-/**
- * Build the props for a single `EuiTimelineItem` from one event.
- *
- * EuiTimelineItem auto-draws the connecting vertical line between adjacent items
- * (EUI handles the line as a decorative pseudo-element with ARIA-hidden semantics),
- * so each event only needs to describe its own icon + content. Visual continuity is
- * the parent `EuiTimeline`'s responsibility.
- */
 function buildRunCompleted(event: RunCompletedEvent): EuiTimelineItemProps {
   const { counts, timestamp } = event;
   const iconColor =

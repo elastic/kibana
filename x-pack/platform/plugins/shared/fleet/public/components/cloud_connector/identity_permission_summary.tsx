@@ -20,24 +20,6 @@ import { PermissionStateBadge } from './permission_state_badge';
 import { getIdentityPermissionState, getIdentityPermissionTotals } from './get_permission_state';
 import { getIdentityLastVerifiedAt } from './get_last_verified_at';
 
-/**
- * Story 4 — Identity-Level Permission Summary in Flyout Header.
- *
- * Renders a single rollup line above the integrations table:
- *
- *   [🚨 Error (2)]  Last verified 3 min ago
- *   4 verified · 0 required · 0 denied · 2 error  across 2 integrations
- *
- * Badge state and counts are computed from `verificationPermissions` (Layer 2);
- * fallback to `verificationStatus` (Layer 1) when Layer 2 is empty. Plain-text
- * counts intentionally — preserves visual hierarchy with the per-row badges
- * inside the table below.
- *
- * The header badge is intentionally non-clickable in MVP: per-row badges drive
- * the drill-down flow. Adding a header-level popover (listing all integrations
- * with their states) is a viable follow-up.
- */
-
 interface IdentityPermissionSummaryProps {
   verificationPermissions: PackagePolicyPermissionSummary[] | undefined;
   verificationStatus: VerificationStatus | undefined;
