@@ -158,7 +158,6 @@ export const getRecoverEsqlQuery = (query: Query): string | undefined => {
   } else if (query.format === 'standalone' && query.recover) {
     return query.recover.trimEnd();
   }
-  return undefined;
 };
 
 /**
