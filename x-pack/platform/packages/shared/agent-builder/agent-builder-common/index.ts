@@ -126,6 +126,7 @@ export {
   isAgentAclRole,
   aclRoleMeets,
   maxAclRole,
+  getEmptyAgentAcl,
   type AgentAcl,
   type AgentAclEntry,
   type AgentAclPrincipalType,

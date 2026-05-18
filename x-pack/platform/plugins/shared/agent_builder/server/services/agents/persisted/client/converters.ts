@@ -6,7 +6,12 @@
  */
 
 import type { GetResponse } from '@elastic/elasticsearch/lib/api/types';
-import { agentBuilderDefaultAgentId, AgentType, AgentVisibility } from '@kbn/agent-builder-common';
+import {
+  agentBuilderDefaultAgentId,
+  AgentType,
+  AgentVisibility,
+  getEmptyAgentAcl,
+} from '@kbn/agent-builder-common';
 import type { AgentAcl, UserIdAndName } from '@kbn/agent-builder-common';
 import type { AgentCreateRequest, AgentUpdateRequest } from '../../../../../common/agents';
 import type { AgentConfigurationProperties, AgentProperties } from './storage';
@@ -124,12 +129,6 @@ export const updateRequestToEs = ({
   };
 
   return updated;
-};
-
-const getEmptyAgentAcl = (): AgentAcl => {
-  return {
-    entries: [],
-  };
 };
 
 const normalizeAcl = (acl: AgentAcl | undefined): AgentAcl => {
