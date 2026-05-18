@@ -145,7 +145,6 @@ export const SearchEmbeddableInlineEditHoverActions = ({
         <EuiContextMenuPanel
           data-test-subj="discoverEmbeddableInlineEditSelectTabPopover"
           items={items}
-          size="s"
           title={i18n.translate('discover.embeddable.inlineEdit.selectTabMenuTitle', {
             defaultMessage: 'Selected tab',
           })}
