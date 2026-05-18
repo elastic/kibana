@@ -72,6 +72,20 @@ describe('alertAnalysisInlineApiToolSkill', () => {
       expect(inlineTools).toHaveLength(1);
       expect(inlineTools![0].id).toBe('security.alert-analysis.get-related-alerts');
     });
+
+    it('inline tool schema exposes alertId, timeWindowHours, and optional entity shortcut params', async () => {
+      const inlineTools = await alertAnalysisInlineApiToolSkill.getInlineTools?.();
+      const tool = inlineTools![0] as BuiltinSkillBoundedTool;
+      const shape = (tool.schema as { shape?: Record<string, unknown> }).shape ?? {};
+      expect(Object.keys(shape)).toEqual([
+        'alertId',
+        'timeWindowHours',
+        'hostNames',
+        'userNames',
+        'sourceIps',
+        'destIps',
+      ]);
+    });
   });
 
   describe('get-related-alerts inline tool handler', () => {
@@ -102,7 +116,7 @@ describe('alertAnalysisInlineApiToolSkill', () => {
       ) as Promise<ToolHandlerStandardReturn>;
     };
 
-    it('calls findRelatedAlerts with correct params including maxResults: 25', async () => {
+    it('calls findRelatedAlerts with alertId, alertsIndex, timeWindowHours, and maxResults: 50', async () => {
       findRelatedAlerts.mockResolvedValueOnce(
         makeSuccess({
           message: 'Found 1 related alerts sharing entities with alert alert-123.',
@@ -111,7 +125,7 @@ describe('alertAnalysisInlineApiToolSkill', () => {
         })
       );
 
-      await callHandler({ alertId: 'alert-123', timeWindowHours: 48, hostNames: ['host-1'] });
+      await callHandler({ alertId: 'alert-123', timeWindowHours: 48 });
 
       expect(findRelatedAlerts).toHaveBeenCalledWith(
         mockEsClient.asCurrentUser,
@@ -119,8 +133,21 @@ describe('alertAnalysisInlineApiToolSkill', () => {
           alertId: 'alert-123',
           alertsIndex: '.alerts-security.alerts-default',
           timeWindowHours: 48,
-          maxResults: 25,
+          maxResults: 50,
+        })
+      );
+    });
+
+    it('passes entity shortcut params through to findRelatedAlerts when provided', async () => {
+      findRelatedAlerts.mockResolvedValueOnce(makeSuccess());
+
+      await callHandler({ alertId: 'alert-123', hostNames: ['host-1'], userNames: ['user-1'] });
+
+      expect(findRelatedAlerts).toHaveBeenCalledWith(
+        mockEsClient.asCurrentUser,
+        expect.objectContaining({
           hostNames: ['host-1'],
+          userNames: ['user-1'],
         })
       );
     });
@@ -138,7 +165,7 @@ describe('alertAnalysisInlineApiToolSkill', () => {
       );
     });
 
-    it('returns other result with message, sourceEntities, and relatedAlerts only', async () => {
+    it('returns message, sourceEntities, and relatedAlerts only — no surplus metadata', async () => {
       findRelatedAlerts.mockResolvedValueOnce(
         makeSuccess({
           message: 'Found 2 related alerts sharing entities with alert alert-123.',
@@ -167,17 +194,6 @@ describe('alertAnalysisInlineApiToolSkill', () => {
 
       expect(result.results[0].type).toBe(ToolResultType.error);
       expect(getData(result).message).toBe('Alert not found');
-    });
-
-    it('passes maxResults: 25 (compact default) to the service', async () => {
-      findRelatedAlerts.mockResolvedValueOnce(makeSuccess());
-
-      await callHandler({ alertId: 'alert-123' });
-
-      expect(findRelatedAlerts).toHaveBeenCalledWith(
-        mockEsClient.asCurrentUser,
-        expect.objectContaining({ maxResults: 25 })
-      );
     });
   });
 });

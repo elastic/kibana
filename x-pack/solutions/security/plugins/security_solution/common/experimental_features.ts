@@ -247,15 +247,8 @@ export const allowedExperimentalValues = Object.freeze({
   entityAnalyticsEntityStoreV2: false,
 
   /**
-   * Enables API-driven alert-analysis skill registration.
-   * When disabled, the legacy inline implementation is used.
-   */
-  alertAnalysisApiDrivenSkill: false,
-
-  /**
-   * Enables the inline-api-tool alert-analysis skill: replaces workflow_execute_step / YAML
-   * with a focused inline tool that calls findRelatedAlerts directly, eliminating YAML
-   * authoring overhead. Takes precedence over alertAnalysisApiDrivenSkill when both are set.
+   * Enables the inline-api-tool alert-analysis skill: replaces the legacy inline ES implementation
+   * with a focused inline tool that calls the findRelatedAlerts service directly.
    */
   alertAnalysisInlineApiToolSkill: false,
 

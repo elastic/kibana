@@ -131,17 +131,14 @@ Use this skill when:
             'Optional: destination.ip values from the alert. If provided along with other entity fields, skips refetching the alert.'
           ),
       }),
-      handler: async (
-        { alertId, timeWindowHours, hostNames, userNames, sourceIps, destIps },
-        context
-      ) => {
+      handler: async ({ alertId, timeWindowHours, hostNames, userNames, sourceIps, destIps }, context) => {
         const alertsIndex = `${DEFAULT_ALERTS_INDEX}-${context.spaceId}`;
 
         const result = await findRelatedAlerts(context.esClient.asCurrentUser, {
           alertId,
           alertsIndex,
           timeWindowHours,
-          maxResults: 25,
+          maxResults: 50,
           hostNames,
           userNames,
           sourceIps,

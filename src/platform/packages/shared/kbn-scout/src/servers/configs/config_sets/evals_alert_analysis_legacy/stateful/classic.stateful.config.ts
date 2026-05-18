@@ -10,15 +10,17 @@
 import type { ScoutServerConfig } from '../../../../../types';
 import { servers as evalsTracingConfig } from '../../evals_tracing/stateful/classic.stateful.config';
 
+/**
+ * Alert analysis v1 (legacy) eval config: evals_tracing base (AI connectors provisioned)
+ * with Agent Builder experimental UI enabled but WITHOUT alertAnalysisInlineApiToolSkill,
+ * so the legacy alert-analysis skill is used.
+ */
 export const servers: ScoutServerConfig = {
   ...evalsTracingConfig,
   kbnTestServer: {
     ...evalsTracingConfig.kbnTestServer,
     serverArgs: [
       ...evalsTracingConfig.kbnTestServer.serverArgs,
-      `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-        'alertAnalysisApiDrivenSkill',
-      ])}`,
       '--uiSettings.overrides.agentBuilder:experimentalFeatures=true',
     ],
   },
