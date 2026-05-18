@@ -130,12 +130,12 @@ describe('OAuthEntraClientCertificate', () => {
       expect(encrypted.success).toBe(true);
     });
 
-    it('exposes textarea/secretTextarea widget hints for PEM fields', () => {
+    it('exposes textarea widget hints for PEM fields', () => {
       const shape = OAuthEntraClientCertificate.schema.shape;
       const certMeta = shape.certificate.meta() ?? {};
       const keyMeta = shape.privateKey.meta() ?? {};
       expect(certMeta.widget).toBe('textarea');
-      expect(keyMeta.widget).toBe('secretTextarea');
+      expect(keyMeta.widget).toBe('textarea');
       expect(keyMeta.sensitive).toBe(true);
     });
 

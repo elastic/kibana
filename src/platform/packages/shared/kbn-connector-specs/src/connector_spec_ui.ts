@@ -28,7 +28,6 @@ export enum WidgetType {
   Text = 'text',
   Textarea = 'textarea',
   Password = 'password',
-  SecretTextarea = 'secretTextarea',
   Select = 'select',
   FormFieldset = 'formFieldset',
   KeyValue = 'keyValue',

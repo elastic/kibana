@@ -67,7 +67,7 @@ const authSchema = lazySchema(() =>
         .meta({
           label: i18n.OAUTH_CERT_PRIVATE_KEY_LABEL,
           sensitive: true,
-          widget: 'secretTextarea',
+          widget: 'textarea',
         }),
       passphrase: z
         .string()
