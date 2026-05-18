@@ -332,6 +332,9 @@ export function DataTableDocumentToolbarBtn({
 
   const selectedRowsMenuButton = (
     <EuiPopover
+      aria-label={i18n.translate('unifiedDataTable.selectedRowsPopover', {
+        defaultMessage: 'Selected documents',
+      })}
       closePopover={() => setIsSelectionPopoverOpen(false)}
       isOpen={isSelectionPopoverOpen}
       panelPaddingSize="none"
