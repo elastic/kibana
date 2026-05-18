@@ -220,7 +220,9 @@ export class TypedSearchService implements ITypedSearchService {
 
     return {
       hasNextPage,
-      nextPage: async (abortSignal?: AbortSignal): Promise<IDSLSearchResult | null> => {
+      nextPage: async (pageOptions): Promise<IDSLSearchResult | null> => {
+        const { abortSignal, executionContext } = pageOptions ?? {};
+
         if (!hasNextPage || !lastHit?.sort) {
           return null;
         }
@@ -229,6 +231,7 @@ export class TypedSearchService implements ITypedSearchService {
         const paginationOptions = {
           ...options,
           abortSignal,
+          executionContext: executionContext ?? options.executionContext,
           // Strip session ID for pagination calls (pagination fetches shouldn't be cached)
           sessionId: undefined,
         };

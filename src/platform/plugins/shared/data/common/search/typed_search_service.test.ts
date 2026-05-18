@@ -481,6 +481,199 @@ describe('TypedSearchService', () => {
 
         expect(pages).toHaveLength(3);
       });
+
+      it('nextPage() does not include the original session ID', async () => {
+        const firstPageResponse = {
+          hits: {
+            hits: [
+              { _id: '1', sort: [1000] },
+              { _id: '2', sort: [2000] },
+            ],
+            total: { value: 100 },
+          },
+        };
+        const secondPageResponse = {
+          hits: {
+            hits: [{ _id: '3', sort: [3000] }],
+            total: { value: 100 },
+          },
+        };
+
+        mockSearch
+          .mockReturnValueOnce(createMockResponse(firstPageResponse))
+          .mockReturnValueOnce(createMockResponse(secondPageResponse));
+
+        const result = await service.searchDSL(
+          { index: 'logs-*', query: { match_all: {} }, sort: [{ timestamp: 'desc' }] },
+          { paginate: true, sessionId: 'original-session-id' }
+        );
+
+        await result.pagination?.nextPage();
+
+        expect(mockSearch).toHaveBeenNthCalledWith(
+          2,
+          expect.anything(),
+          expect.objectContaining({ sessionId: undefined })
+        );
+      });
+
+      it('nextPage() does not include the original abort signal', async () => {
+        const originalAbortController = new AbortController();
+        const firstPageResponse = {
+          hits: {
+            hits: [
+              { _id: '1', sort: [1000] },
+              { _id: '2', sort: [2000] },
+            ],
+            total: { value: 100 },
+          },
+        };
+        const secondPageResponse = {
+          hits: {
+            hits: [{ _id: '3', sort: [3000] }],
+            total: { value: 100 },
+          },
+        };
+
+        mockSearch
+          .mockReturnValueOnce(createMockResponse(firstPageResponse))
+          .mockReturnValueOnce(createMockResponse(secondPageResponse));
+
+        const result = await service.searchDSL(
+          { index: 'logs-*', query: { match_all: {} }, sort: [{ timestamp: 'desc' }] },
+          { paginate: true, abortSignal: originalAbortController.signal }
+        );
+
+        await result.pagination?.nextPage();
+
+        expect(mockSearch).toHaveBeenNthCalledWith(
+          2,
+          expect.anything(),
+          expect.objectContaining({ abortSignal: undefined })
+        );
+      });
+
+      it('nextPage() inherits execution context from parent by default', async () => {
+        const executionContext = {
+          type: 'application' as const,
+          name: 'discover',
+          description: 'fetch documents',
+        };
+        const firstPageResponse = {
+          hits: {
+            hits: [
+              { _id: '1', sort: [1000] },
+              { _id: '2', sort: [2000] },
+            ],
+            total: { value: 100 },
+          },
+        };
+        const secondPageResponse = {
+          hits: {
+            hits: [{ _id: '3', sort: [3000] }],
+            total: { value: 100 },
+          },
+        };
+
+        mockSearch
+          .mockReturnValueOnce(createMockResponse(firstPageResponse))
+          .mockReturnValueOnce(createMockResponse(secondPageResponse));
+
+        const result = await service.searchDSL(
+          { index: 'logs-*', query: { match_all: {} }, sort: [{ timestamp: 'desc' }] },
+          { paginate: true, executionContext }
+        );
+
+        await result.pagination?.nextPage();
+
+        expect(mockSearch).toHaveBeenNthCalledWith(
+          2,
+          expect.anything(),
+          expect.objectContaining({ executionContext })
+        );
+      });
+
+      it('nextPage() allows overriding abort signal', async () => {
+        const originalAbortController = new AbortController();
+        const newAbortController = new AbortController();
+        const firstPageResponse = {
+          hits: {
+            hits: [
+              { _id: '1', sort: [1000] },
+              { _id: '2', sort: [2000] },
+            ],
+            total: { value: 100 },
+          },
+        };
+        const secondPageResponse = {
+          hits: {
+            hits: [{ _id: '3', sort: [3000] }],
+            total: { value: 100 },
+          },
+        };
+
+        mockSearch
+          .mockReturnValueOnce(createMockResponse(firstPageResponse))
+          .mockReturnValueOnce(createMockResponse(secondPageResponse));
+
+        const result = await service.searchDSL(
+          { index: 'logs-*', query: { match_all: {} }, sort: [{ timestamp: 'desc' }] },
+          { paginate: true, abortSignal: originalAbortController.signal }
+        );
+
+        await result.pagination?.nextPage({ abortSignal: newAbortController.signal });
+
+        expect(mockSearch).toHaveBeenNthCalledWith(
+          2,
+          expect.anything(),
+          expect.objectContaining({ abortSignal: newAbortController.signal })
+        );
+      });
+
+      it('nextPage() allows overriding execution context', async () => {
+        const originalContext = {
+          type: 'application' as const,
+          name: 'discover',
+          description: 'fetch documents',
+        };
+        const overrideContext = {
+          type: 'application' as const,
+          name: 'discover',
+          description: 'fetch more documents',
+        };
+        const firstPageResponse = {
+          hits: {
+            hits: [
+              { _id: '1', sort: [1000] },
+              { _id: '2', sort: [2000] },
+            ],
+            total: { value: 100 },
+          },
+        };
+        const secondPageResponse = {
+          hits: {
+            hits: [{ _id: '3', sort: [3000] }],
+            total: { value: 100 },
+          },
+        };
+
+        mockSearch
+          .mockReturnValueOnce(createMockResponse(firstPageResponse))
+          .mockReturnValueOnce(createMockResponse(secondPageResponse));
+
+        const result = await service.searchDSL(
+          { index: 'logs-*', query: { match_all: {} }, sort: [{ timestamp: 'desc' }] },
+          { paginate: true, executionContext: originalContext }
+        );
+
+        await result.pagination?.nextPage({ executionContext: overrideContext });
+
+        expect(mockSearch).toHaveBeenNthCalledWith(
+          2,
+          expect.anything(),
+          expect.objectContaining({ executionContext: overrideContext })
+        );
+      });
     });
   });
 

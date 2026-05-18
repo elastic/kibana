@@ -129,7 +129,9 @@ export interface IDSLPagination {
   /**
    * Fetch the next page of results using search_after
    */
-  nextPage: () => Promise<IDSLSearchResult | null>;
+  nextPage: (
+    options?: Pick<IBaseSearchOptions, 'abortSignal' | 'executionContext'>
+  ) => Promise<IDSLSearchResult | null>;
 
   /**
    * Iterate through all pages (up to maxPages)

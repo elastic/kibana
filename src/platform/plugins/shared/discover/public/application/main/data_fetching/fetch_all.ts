@@ -271,8 +271,10 @@ export async function fetchMoreDocuments(params: CommonFetchParams): Promise<voi
     // Mark as loading
     sendLoadingMoreMsg(dataSubjects.documents$);
 
-    // Fetch next page
-    const nextPageResult = await pagination.nextPage(abortController.signal);
+    const nextPageResult = await pagination.nextPage({
+      abortSignal: abortController.signal,
+      executionContext: { description: 'fetch more documents' },
+    });
 
     if (!nextPageResult) {
       sendLoadingMoreFinishedMsg(dataSubjects.documents$, {
