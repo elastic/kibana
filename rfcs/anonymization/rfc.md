@@ -1,6 +1,8 @@
 # RFC: Workflow-Driven LLM Anonymization at the Inference Layer
 
-**Status:** Draft **Date:** May 2026 **Companion: [https://github.com/talboren/workflows-aop](https://github.com/talboren/workflows-aop)** — workflow lifecycle hooks platform proposal **Supersedes:** the abandoned three-layer anonymization platform [RFC](https://docs.google.com/document/d/10ZlcUZhrnxpWc6NDgv1YIXIUxc6AtNVhTpto_yQl9PU/edit?tab=t.hw4nla3wvw7h#heading=h.56qq4m6loqaw)
+**Status:** Draft **Date:** May 2026   
+**Companion:** [workflow lifecycle hooks platform proposal](https://github.com/talboren/workflows-aop)   
+**Supersedes:** the abandoned three-layer anonymization platform [RFC](https://docs.google.com/document/d/10ZlcUZhrnxpWc6NDgv1YIXIUxc6AtNVhTpto_yQl9PU/edit?tab=t.hw4nla3wvw7h#heading=h.56qq4m6loqaw)
 
 ## 1\. Summary
 
@@ -9,7 +11,7 @@ Anonymize what we send to a language model — nothing more, nothing less. Place
 **Mental model**
 
 1. **Scope is model-bound traffic** — when `xpack.inference.anonymization.experimental_workflow_driven: true` is set and the seeded workflows are enabled, hooks fire on every qualifying `chatComplete` call. There is no temporal coupling to unrelated async workflows (e.g. a "case opened" workflow running in parallel does not affect anonymization).  
-2. **"Workflow" in the anonymization story means inference lifecycle hooks** — `inference.beforeCompletion` / `inference.afterCompletion`. Admin customization is done via saved workflows attached to those hooks (Phase 2), not via general Kibana workflows.  
+2. **"Workflow" in the anonymization story means inference lifecycle hooks** — `inference.beforeCompletion` / `inference.afterCompletion`. Admin customization is done via standard Kibana workflows managed in the Workflows UI (`app/workflows`), which are triggered synchronously by these hooks rather than by asynchronous background events.  
 3. **Does not redact stored data** — Elasticsearch documents, case comments, exports, and emails are unaffected unless those flows separately route through `chatComplete`.  
 4. **Policy layer is distinct from "any workflow that mentions PII"** — `failureMode`, `maxTokensPerCall`, and the per-space workflow `enabled` toggle are the admin-controlled policy surface.
 
@@ -28,10 +30,10 @@ Two new step types — `ai.pii` and `transform.pii_restore` — make the anonymi
 
 ### Non-goals
 
-- **N1.** Field-level allow/anonymize/deny. ESQL lineage gaps make this unworkable for tool outputs (ESQL operators like `EVAL`, `STATS`, `MV_*` produce derived columns whose lineage to source fields cannot be reconstructed). Documented in [`MEMORY`](#) and the PM doc; this RFC operates strictly at text level.  
+- **N1.** Field-level allow/anonymize/deny. ESQL lineage gaps make this unworkable for tool outputs (ESQL operators like `EVAL`, `STATS`, `MV_*` produce derived columns whose lineage to source fields cannot be reconstructed). Documented in [the PM doc](https://docs.google.com/document/d/1vDW-EZsxt7rcnxpwNRVtcsJYaRArs4qLze0616zrAiM/edit?tab=t.0#heading=h.eln9elyc42u5); this RFC operates strictly at text level.  
 - **N2.** Persistent replacements. PM directive: transient state only. No system index, no encryption-at-rest, no cross-session correlation.  
 - **N3.** NER-based PII detection. Deferred to a phase-2 RFC; the regex set covers the structured-PII cases in scope today.  
-- **N4.** Cases / Dashboards lifecycle hook integrations. Those are covered by [`proposal.md`](http://./proposal.md); this RFC narrows to inference.  
+- **N4. Plugin-specific hooks (Cases, Dashboards, etc.).** This RFC is limited to the inference boundary. While any LLM traffic from these plugins is automatically covered, adding lifecycle hooks to their internal operations (e.g., `cases.beforeSave` or `dashboards.onView`) is out of scope for this phase.  
 - **N5.** Guardrail-style policy denial (`ai.guardrail`, off-topic checks). Same hook platform, separate concern, separate workflow.  
 - **N6.** Reshaping or rewriting either the workflow engine or Agent Builder. Both gain additive surface area only.
 
@@ -39,7 +41,7 @@ Two new step types — `ai.pii` and `transform.pii_restore` — make the anonymi
 
 ### 3.1 PM constraints
 
-The PM milestone doc (`Anonymization P1 Milestone_ Bare-Bones LLM Data Protection.md`) sets three hard constraints inherited from prior team direction:
+The [PM milestone doc](https://docs.google.com/document/d/1vDW-EZsxt7rcnxpwNRVtcsJYaRArs4qLze0616zrAiM/edit?tab=t.0#heading=h.eln9elyc42u5) sets three hard constraints inherited from prior team direction:
 
 1. **LLM-only scope** — anonymize what we send to the model; everything else is a nice-to-have.  
 2. **Transient state** — no persistence; in-memory mapping between before/after callbacks.  
@@ -49,7 +51,7 @@ The PM doc also names what is explicitly out of scope: field-level rules, NER, p
 
 ### 3.2 ESQL lineage limitation → text-level not field-level
 
-The abandoned three-layer RFC documented an irreducible problem: per-field Allow/Anonymize/Deny only works when you can trace which source field produced a given column. ESQL operators (`EVAL`, `STATS`, `MV_*`, renames, complex expressions) produce derived columns whose lineage is ambiguous or unrecoverable outside the ESQL planner. Because Agent Builder tools are defined in ESQL, any data flowing through tool outputs has typically been transformed beyond field-level traceability.
+The abandoned three-layer [RFC](https://docs.google.com/document/d/10ZlcUZhrnxpWc6NDgv1YIXIUxc6AtNVhTpto_yQl9PU/edit?tab=t.hw4nla3wvw7h#heading=h.56qq4m6loqaw) documented an irreducible problem: per-field Allow/Anonymize/Deny only works when you can trace which source field produced a given column. ESQL operators (`EVAL`, `STATS`, `MV_*`, renames, complex expressions) produce derived columns whose lineage is ambiguous or unrecoverable outside the ESQL planner. Because Agent Builder tools are defined in ESQL, any data flowing through tool outputs has typically been transformed beyond field-level traceability.
 
 The fallback for unknown lineage is either deny (drop the value entirely) or over-anonymize (mask everything), both of which degrade usability. Achieving comprehensive field-level coverage would require either ESQL-native lineage support or a maintained lineage extractor — neither exists, neither is planned.
 
@@ -57,7 +59,7 @@ Operating at the **text/prompt level** sidesteps the lineage problem entirely: r
 
 ### 3.3 Inventory of existing anonymization implementations
 
-Eight implementations exist in the repo today. All are deprecated by this RFC; reusable utilities are extracted, the rest is removed. The full table is in [§8 Deprecation & Migration](#8-deprecation--migration). Headlines:
+Three implementations exist in the repo today. All are deprecated by this RFC; reusable utilities are extracted, the rest is removed. The full table is in [§8 Deprecation & Migration](#8-deprecation--migration). Headlines:
 
 | Location | What it does | Fate |
 | :---- | :---- | :---- |
@@ -75,15 +77,19 @@ Eight implementations exist in the repo today. All are deprecated by this RFC; r
 The implementation introduces a new `inferenceWorkflows` x-pack plugin to keep `workflowsExtensions` free of inference/AI knowledge. The dependency graph is a clean DAG:
 
 ```
-workflowsExtensions   (pure framework — zero inference/AI knowledge)
+workflowsExtensions               (pure framework — zero inference/AI knowledge)
         ↑
-  inference           (optionally depends on workflowsExtensions; calls invokeHook at chatComplete boundary)
+  inference                       (optionally depends on workflowsExtensions; calls                                                            
+                                   invokeHook at chatComplete boundary)
         ↑
-  inference_workflows (x-pack plugin; registers trigger definitions, AI steps, PII steps; deps on inference + workflowsExtensions)
+  inference_workflows             (x-pack plugin; registers trigger definitions, AI steps, 
+                                   PII steps; deps on inference + workflowsExtensions)
         ↑
-  workflowsManagement (seeds default workflows; optional dep on inferenceWorkflows)
+  workflowsManagement             (seeds default workflows; optional dep on 
+                                  inferenceWorkflows)
         ↑
-  agent_builder       (depends on inference + workflowsExtensions + inferenceWorkflows)
+  agent_builder                   (depends on inference + workflowsExtensions 
+                                   inferenceWorkflows)
 ```
 
 `inference_workflows` registers both the trigger definitions (`registerTriggerDefinition`) and the step types (`ai.pii`, `transform.pii_restore`, `ai.prompt`, `ai.classify`, `ai.summarize`) with `workflowsExtensions`. The `inference` plugin itself does not call `registerTriggerDefinition` — it only calls `invokeHook` at the `chatComplete` boundary. This one-way dependency is what keeps `workflowsExtensions` free of inference/AI knowledge while letting `inference_workflows` depend on both. `workflowsManagement` has `inferenceWorkflows` as an optional dependency to support workflow seeding at startup without creating a circular reference.
@@ -110,17 +116,17 @@ The following table documents the verified call path for each current consumer (
 
 **Exception — Security AI legacy path.** The `elastic_assistant` plugin has a feature-flagged bypass (`inferenceChatModelDisabled`) that instantiates LangChain model classes directly against the actions connector, skipping the inference plugin entirely. When this flag is `true`, no `chatComplete` call is made and neither anonymization hook fires. The flag exists as a compatibility escape hatch from the migration to inference-routed models. Phase 3 of this RFC's migration (§8.3) must include removing this bypass path; until it is removed, Security AI sessions that hit the legacy path receive no anonymization. The Phase 1 implementation checklist must verify that `inferenceChatModelDisabled` is never `true` in production deployments, and Phase 3 deletes the flag and the three `ActionsClientChat*` model classes it selects.
 
-The RFC places exactly two synchronous hooks around the connector call:
+The RFC places two synchronous hooks around the connector call (with a potentially third “around” hook):
 
 ```
                                      ┌──────────────────────────────────────────────┐
-                                     │  inference plugin · chatComplete             │
-                                     │                                              │
-caller (AB graph node, OAS,    ──→   │   1. resolve options                         │
-attack-discovery, etc.)              │   2. invokeHook('beforeCompletion')          │
-                                     │   3. connector.chatComplete(…)               │
-                                     │   4. invokeHook('afterCompletion')           │
-                                     │   5. return                                  │
+                                     │  inference plugin · chatComplete       │
+                                     │                                        │
+caller (AB graph node, OAS,   ──→  │   1. resolve options                   │
+attack-discovery, etc.)              │   2. invokeHook('beforeCompletion')    │
+                                     │   3. connector.chatComplete(…)         │
+                                     │   4. invokeHook('afterCompletion')     │
+                                     │   5. return                            │
                                      └──────────────────────────────────────────────┘
 ```
 
@@ -181,7 +187,7 @@ workflowsExtensions.registerTriggerDefinition({
 
 **Note on trigger schema location:** The event schemas (`beforeCompletionEventSchema`, `afterCompletionEventSchema`) and trigger IDs (`BEFORE_COMPLETION_TRIGGER_ID`, `AFTER_COMPLETION_TRIGGER_ID`) are declared in `@kbn/workflows-extensions/common` rather than inside `inference` or `inference_workflows`. This lets any plugin import them without taking a dependency on either heavier plugin.
 
-Both triggers follow `proposal.md`'s shape exactly: an event schema for the input, a `sync` block with an output schema, a timeout, and a failure policy. The implicit-output rule from `proposal.md` §4.3 applies — when input and output schemas have the same shape, no `workflow.output` step is required.
+Both triggers follow [workflow lifecycle hooks platform proposal](https://github.com/talboren/workflows-aop)’s shape exactly: an event schema for the input, a `sync` block with an output schema, a timeout, and a failure policy. The implicit-output rule from the proposal §4.3 applies — when input and output schemas have the same shape, no `workflow.output` step is required.
 
 ### 4.3 Derived salt and call-scoped token map
 
@@ -255,6 +261,7 @@ Without this, the LLM encounters tokens with no context and may hallucinate what
 **Override.** Workflow authors who want custom instruction wording set `systemPromptInstruction` on the `ai.pii` step input. The step echoes it through to its output; the inference plugin uses it instead of the auto-generated default. This is optional — most workflows should leave it unset.
 
 #### Per-consumer threading expectations
+
 `sessionId` is supplied by the caller through `ChatCompleteOptions.metadata.anonymization.sessionId`. Without it, the inference plugin generates a per-request UUID — anonymization works for that call, cross-turn token consistency is lost.
 
 | Consumer | Stable identifier available | Action required |
@@ -268,7 +275,12 @@ Without this, the LLM encounters tokens with no context and may hallucinate what
 
 ### 4.4 New step types — `ai.pii` and `transform.pii_restore`
 
-Both shipped server-side, registered via `inference_workflows` (the domain plugin that owns AI and PII steps — see §3.4). Both reuse existing utilities so the surface area is small.
+Both are shipped server-side and registered via `inference_workflows`. To minimize architectural surface area, they reuse several mature utilities from the existing codebase:
+
+- **`generateToken()`**: The deterministic HMAC-SHA256 tokenizer from `@kbn/ai-infra/anonymization-common`.  
+- **`TOKEN_RESTORE_REGEX`**: The shared regex pattern that identifies tokens of the form `ENTITY_TYPE_<hex>`.  
+- **Position-tracked Regex Executor**: Extracted from the existing inference-plugin anonymization logic to ensure longest-match-first replacement.  
+- **Entity Class Taxonomy**: The PM-mandated regex set for IPs, Emails, and Hostnames.
 
 #### `ai.pii`
 
@@ -302,11 +314,6 @@ Internally:
 2. For each match, look up the original in the call-scoped token map (return existing token if already seen in this call), else compute `generateToken(salt, entityClass, '', value)` from the derived salt and insert into the map.  
 3. Return the substituted text, longest-match-first to avoid partial overlaps (e.g., `192.168.1.50` before `192.168.1.5`).
 
-Reused utilities:
-
-- `generateToken()` from `@kbn/ai-infra/anonymization-common/generate_token.ts:33-56`.  
-- The regex executor and entity-class taxonomy currently live in `default_rules.ts` inside `inference_workflows` as an interim location. Extraction into `@kbn/ai-infra/pii-detection` is a **Phase 2** step — it is not a Phase 1 prerequisite.
-
 #### `transform.pii_restore`
 
 Reverse pass — scans input text for tokens and restores originals from the call-scoped token map. No-ops if the map is empty.
@@ -320,7 +327,6 @@ Reverse pass — scans input text for tokens and restores originals from the cal
 
 Single regex against the token format `{ENTITY_CLASS}_{HEX}` (deterministic from `generateToken`'s output shape) plus a map lookup per match.
 
-
 ### 4.5 Default workflow shipped out of the box
 
 **Current execution model ([PoC implemented](https://github.com/elastic/kibana/pull/268994))**
@@ -331,7 +337,7 @@ The two default YAML workflows (`Default PII Anonymization (before completion)` 
 
 When no enabled workflows are found for a trigger, `invokeHook` delegates to any registered in-memory handlers (a fallback that resolves to a pass-through when no handlers are registered, which is the case by default).
 
-Two YAML workflows ship in a small companion package (`@kbn/ai-infra/default-anonymization-workflows` — content-only, no plugin code). They subscribe to the two triggers and use the standard regex set from the PM doc:
+Two YAML workflows ship in a small companion package (`@kbn/ai-infra/default-anonymization-workflows` — content-only, no plugin code). They subscribe to the two triggers and use the standard regex set from the [PM doc](https://docs.google.com/document/d/1vDW-EZsxt7rcnxpwNRVtcsJYaRArs4qLze0616zrAiM/edit?tab=t.0#heading=h.eln9elyc42u5):
 
 ```
 # Default before-completion anonymization — seeded with enabled: false
@@ -400,9 +406,9 @@ Admin can:
 
 #### Multi-workflow ordering and the shared session store
 
-`proposal.md` §5 specifies that multiple workflows on the same hook run **sequentially in priority order**, each receiving the **original event** as input, with outputs merged "last writer wins per field." That model works for guardrail-style workflows (independent assertions) but does **not** compose for anonymization, where each workflow modifies the same field (`messages` / `system`) and a naive last-writer-wins erases earlier substitutions.
+[Workflow lifecycle hooks platform proposal](https://github.com/talboren/workflows-aop) §5 specifies that multiple workflows on the same hook run **sequentially in priority order**, each receiving the **original event** as input, with outputs merged "last writer wins per field." That model works for guardrail-style workflows (independent assertions) but does **not** compose for anonymization, where each workflow modifies the same field (`messages` / `system`) and a naive last-writer-wins erases earlier substitutions.
 
-This RFC pins down the semantics for the two anonymization triggers specifically: **sync hooks marked as `chained: true` in the trigger definition pass the *previous workflow's output* (not the original event) as the next workflow's input.** The trigger registrations in §4.2 set `chained: true`. This adds one optional field to the trigger registration API; it does not change `proposal.md`'s default merge model for other hooks.
+This RFC pins down the semantics for the two anonymization triggers specifically: **sync hooks marked as `chained: true` in the trigger definition pass the *previous workflow's output* (not the original event) as the next workflow's input.** The trigger registrations in §4.2 set `chained: true`. This adds one optional field to the trigger registration API; it does not change  [workflow lifecycle hooks platform proposal](https://github.com/talboren/workflows-aop)'s default merge model for other hooks.
 
 Concretely:
 
@@ -415,13 +421,11 @@ invokeHook('inference.beforeCompletion', { messages, system, sessionId })
 
 The session token map is mutated incrementally by each `ai.pii` invocation across both workflows, so a value matched by workflow A and again by workflow B yields the same token (HMAC determinism \+ map idempotency).
 
-**Recommended pattern**: keep anonymization in a single workflow and add entities/customPatterns to it. Multi-workflow chaining is supported for the case where one team owns "core PII" and another owns "org-specific patterns," but adds operational complexity. The default ships as one workflow.
-
-**Read-only auditing workflows** (e.g., a workflow that wants to *observe* what was anonymized without modifying anything) should subscribe to the async `inference.promptAnonymized` event — a separate event trigger to be added if the audit use case materializes. They must not subscribe to the sync hooks; subscribing read-only workflows to a chained sync hook is rejected at save time.
+**Recommended pattern**: keep anonymization in a single workflow and add entities/customPatterns to it. Multi-workflow chaining is supported for cases where different teams own different patterns, but adds complexity. **Read-only auditing workflows** (e.g., a workflow that wants to *observe* what was anonymized without modifying anything) should ideally subscribe to the async `inference.promptAnonymized` event (to be added if the audit use case materializes) rather than synchronous hooks, to avoid adding unnecessary latency to the LLM call path.
 
 **Tool call argument restoration is outside the hook payload.** The `afterCompletion` hook payload is `{ sessionId, response: string }` — text only. Tool call argument restoration (`restoreInValue` on the assembled message's `toolCalls`) happens in the inference pipeline outside the hook and is not part of the hook contract. Workflow handlers for `inference.afterCompletion` only need to handle the `response` text field.
 
-**Phase 1 limitation — session capability registry:** The `AnonymizationContext` instance is stored in a per-session registry for the duration of each hook invocation (for YAML step executors like `ai.pii` to look up), then deleted in a `finally` block. Two concurrent `chatComplete` calls sharing the same `sessionId` on the same node will race on this registry. This is acceptable for Phase 1 (Agent Builder drives sequential calls) but must be fixed before production: thread the context through the workflow engine's per-execution context rather than a module-level map.
+**Session capability registry:** The `AnonymizationContext` instance is stored in a per-session registry for the duration of each hook invocation (for YAML step executors like `ai.pii` to look up), then deleted in a `finally` block. Two concurrent `chatComplete` calls sharing the same `sessionId` on the same node will race on this registry. This is acceptable for Phase 1 (Agent Builder drives sequential calls) but must be fixed before production: thread the context through the workflow engine's per-execution context rather than a module-level map.
 
 ### 4.6 Streaming de-anonymization
 
@@ -443,6 +447,8 @@ The hook runs exactly once per call. The buffer is an inference-plugin implement
 ## 5\. End-to-end flow
 
 ### 5.1 Single-cycle round
+
+### ![][image1]
 
 ```
 sequenceDiagram
@@ -469,6 +475,8 @@ sequenceDiagram
 ### 5.2 Multi-cycle round with a tool that doesn't call the LLM
 
 This is where the "single hook covers tool outputs" property is most visible. The tool produces raw PII; the next inference cycle anonymizes it on its way to the model. No separate tool hook is required.
+
+![][image2]
 
 ```
 sequenceDiagram
@@ -509,7 +517,7 @@ The key property: **tokens are stable across cycles** because the salt is derive
 | Change | Where | Surface |
 | :---- | :---- | :---- |
 | Optional `sync` block on trigger registration | `workflows_extensions/server/types.ts` | One new optional field on the trigger definition — backward compatible |
-| `sync.chained` flag on trigger registration | same | One new optional sub-field — defaults to `false` (proposal.md merge model) |
+| `sync.chained` flag on trigger registration | same | One new optional sub-field — defaults to `false` ( [workflow lifecycle hooks platform proposal](https://github.com/talboren/workflows-aop) merge model) |
 | `WorkflowsClient.invokeHook(triggerId, payload)` | `kbn-workflows/server/types.ts` | One new method on the public client |
 | Internal sync execution path | New file alongside the existing async machinery | Reuses `executeWorkflow({ waitForCompletion: true })` |
 | Save-time validation: chained sync triggers reject read-only workflows | workflow editor / save handler | Small validation rule |
@@ -572,8 +580,8 @@ For each decision below: the recommendation, a one-paragraph rationale, and an a
 | :---- | :---- | :---- |
 | **Derived salt \+ call-scoped context (recommended)** | Stateless; works across nodes; no TTL/eviction; clean YAML; deterministic cross-turn consistency | HMAC recomputed per match per turn (negligible cost); requires `serverSecret` in inference plugin |
 | Session-store (`SessionStore` keyed by `sessionId`) | Salt cached after first call | Node-local in-memory state; breaks in multi-node clusters without sticky sessions; requires TTL, eviction, and `maxSessions` cap in a platform plugin that should be stateless |
-| Caller-passed `tokenMap` in hook payload (proposal.md Alt A) | Pure functional; no side-channel | Every consumer must thread the map; cross-turn consistency requires callers to hold and forward the map themselves |
-| Engine-side ephemeral state (proposal.md Alt B) | Engine owns it | New storage subsystem; key-collision risk; cleanup problem on after-hook failure; opaque in execution logs |
+| Caller-passed `tokenMap` in hook payload ( [workflow lifecycle hooks platform proposal](https://github.com/talboren/workflows-aop) Alt A) | Pure functional; no side-channel | Every consumer must thread the map; cross-turn consistency requires callers to hold and forward the map themselves |
+| Engine-side ephemeral state ( [workflow lifecycle hooks platform proposal](https://github.com/talboren/workflows-aop) Alt B) | Engine owns it | New storage subsystem; key-collision risk; cleanup problem on after-hook failure; opaque in execution logs |
 
 ### 7.3 Sync hook registration: extend existing API
 
@@ -583,7 +591,7 @@ For each decision below: the recommendation, a one-paragraph rationale, and an a
 
 | Option | Pros | Cons |
 | :---- | :---- | :---- |
-| **Optional `sync` block (recommended)** | Single API; backward compatible; matches `proposal.md` | Slightly more discriminated-union complexity in the registry type |
+| **Optional `sync` block (recommended)** | Single API; backward compatible; matches [workflow lifecycle hooks platform proposal](https://github.com/talboren/workflows-aop) | Slightly more discriminated-union complexity in the registry type |
 | New `registerHookDefinition()` | Visually clearer separation | Two APIs; two registries; subscribers need to know which is which |
 
 ### 7.4 Default workflow: shipped baked-in (off by default)
@@ -625,7 +633,7 @@ Any steps listed in prior drafts as "future additions to `workflows_extensions`"
 | Option | Pros | Cons |
 | :---- | :---- | :---- |
 | **Fail-closed default (recommended)** | No silent leaks; admin sees the failure; clear signal to investigate | Service interruption when a regex workflow is misconfigured |
-| Fail-open default (proposal.md original) | Service continuity | Silent PII leak; defeats the feature's purpose; no caller-side signal |
+| Fail-open default ( [workflow lifecycle hooks platform proposal](https://github.com/talboren/workflows-aop) original) | Service continuity | Silent PII leak; defeats the feature's purpose; no caller-side signal |
 | Hard fail-closed (no opt-in) | Strongest safety | Some deployments need to keep chat working during anonymization outages; removing the option creates pressure to disable anonymization entirely |
 
 The opt-in (`'allow_unsafe'`) is named deliberately so it appears in audit logs as such; admins cannot enable it without a setting name that calls out the risk.
@@ -636,20 +644,21 @@ The opt-in (`'allow_unsafe'`) is named deliberately so it appears in audit logs 
 
 **Rationale:** Separating the hooks keeps the streaming path unobstructed and allows independent composition. `beforeCompletion` runs before the connector call with no awareness of the response; `afterCompletion` runs after the stream is fully assembled without needing to set up the call. Either hook can be attached to independently, which means different teams can own different concerns without merging their YAML:
 
-- A compliance workflow on `beforeCompletion` logs every request (no interest in the response).
-- A PII anonymization workflow on `beforeCompletion` masks inputs before the LLM sees them.
-- A response-audit workflow on `afterCompletion` archives every assembled response for regulatory purposes.
+- A compliance workflow on `beforeCompletion` logs every request (no interest in the response).  
+- A PII anonymization workflow on `beforeCompletion` masks inputs before the LLM sees them.  
+- A response-audit workflow on `afterCompletion` archives every assembled response for regulatory purposes.  
 - A token-restoration workflow on `afterCompletion` restores original PII values in the response.
 
 All of these run independently — the compliance team, the platform team, and the security team each own their workflow without knowing about the others.
 
-**Streaming preservation.** Both hooks preserve streaming. `beforeCompletion` fires before the stream starts; `afterCompletion` fires after the stream completes. Neither hook buffers the LLM response or adds latency to the streaming path. This is the decisive reason not to use a single wrapping trigger as the default: a single "around" hook that needs to inspect the response must buffer it, which loses streaming.
+**Streaming preservation.** The choice of separate hooks is driven by the technical requirement to support LLM streaming.
 
-**Safety.** `beforeCompletion` and `afterCompletion` cannot gate the LLM call — the call always runs between them. A misconfigured or failing workflow causes a `failureMode`-controlled error but does not prevent other requests from proceeding. This is a simpler failure surface than a wrapping hook that controls whether the LLM call happens at all.
+*   **Separate Hooks (Streaming):** The inference plugin remains "in the driver's seat." It invokes the `before` hook, handles the streaming response itself—using a side-channel `tokenMap` to de-anonymize chunks progressively as they arrive—and only invokes the `after` hook once the message is assembled. This allows for real-time chunk delivery.
+*   **Around Hook (Buffered):** The workflow engine "owns" the execution. When a workflow hits a `call_site.proceed` step, it suspends. Subsequent steps typically depend on the LLM response (e.g., `input: "{{ steps.proceed.output.response }}"`). Because the Liquid templating engine cannot resolve a variable until its full value is known, the entire LLM response must be buffered before the workflow can resume and execute the restoration step.
 
 | Option | Streaming | Composition | Response access in YAML |
 | :---- | :---- | :---- | :---- |
-| **Separate before + after (recommended)** | ✓ | Independent | After only |
+| **Separate before \+ after (recommended)** | ✓ | Independent | After only |
 | Single wrapping trigger (future, see Appendix A) | ✗ if response accessed | Merged | Before and after |
 
 **Forward reference.** A future `inference.aroundCompletion` trigger (see Appendix A) would provide a single-workflow alternative for authors who need to access the LLM response and are willing to accept buffered execution. That does not invalidate the separate-triggers default; the two patterns are complementary and composable.
@@ -700,7 +709,7 @@ The import is implemented as a one-shot migration in the inference plugin's star
 
 **Phase 1 runtime model (historical):** `invokeHook` dispatched to in-memory `HookHandler` chains registered by `inference_workflows`. No saved objects were queried; the workflow execution engine was not involved. The shipped YAML was the canonical spec and authoring surface — not the runtime source of truth. This was superseded by Phase 2 on the same branch.
 
-**Phase 2 — Ship default workflow** 
+**Phase 2 — Ship default workflow**
 
 - Default YAML workflows shipped via `@kbn/ai-infra/default-anonymization-workflows` and seeded automatically on startup into `.kibana-workflows` (idempotent; `enabled: false` so they don't run until the admin explicitly enables them).  
 - `executeWorkflowSync` inline executor added to `workflowsExecutionEngine` — runs YAML steps in-process without Task Manager, using the existing `WorkflowTemplatingEngine`.  
@@ -724,7 +733,7 @@ The RFC itself ships **no code changes**; the phases above are the implementatio
 
 ## 9\. Guardrails
 
-Inherited from `proposal.md` §"Lifecycle Hook Guardrails", with one important deviation: **failure policy defaults to `'closed'`** for anonymization. A broken anonymization workflow must not silently send raw PII to the model; the inference call is rejected and the caller surfaces an error.
+Inherited from [workflow lifecycle hooks platform proposal](https://github.com/talboren/workflows-aop) §"Lifecycle Hook Guardrails", with one important deviation: **failure policy defaults to `'closed'`** for anonymization. A broken anonymization workflow must not silently send raw PII to the model; the inference call is rejected and the caller surfaces an error.
 
 | Guardrail | Setting |
 | :---- | :---- |
@@ -755,43 +764,58 @@ The default `failureMode` is `'block'` (fail-closed) to prevent silent PII leaks
 
 ## 10\. Open questions
 
-- **Q1.** *Resolved in §4.3*. `metadata.anonymization.sessionId` becomes the canonical field. `replacementsId` accepted as fallback in Phase 1, removed by Phase 3\.
-
-- **Q2.** *Resolved.* The default YAML lives in a content-only package (`@kbn/ai-infra/default-anonymization-workflows`) and is seeded into `.kibana-workflows` on startup by `workflowsManagement`. Admins discover and edit it in the Workflow Management UI; the package copy serves as a versioned reference and reset point.
-
-- **Q3.** *Resolved.* A `workflowIds` UI setting was considered and prototyped but removed. Per-space control is achieved entirely through the standard workflow `enabled` toggle: each workflow document is space-scoped, so enabling a workflow in one space has no effect on other spaces. No separate setting is needed, and no IDs need to be copied manually.
-
-- **Q4.** Streaming \+ multiple workflows on the same trigger under `chained: true` — the streaming transform is applied to the final merged response. If two chained workflows produce different token-restoration logic, the second's output is what's streamed. Recommendation: hold; the realistic use case is one PII workflow \+ optional read-only audit workflows (which don't subscribe to sync triggers anyway).
-
-- **Q5.** Custom-pattern UX surface — does this RFC need to specify the admin UI for managing custom regex rules, or does that ride along with the workflow-authoring UI that already exists? Recommendation: ride along — adding/editing custom rules means cloning the default workflow and editing its `customPatterns` field.
-
-- **Q6.** **`sessionId` threading audit per consumer** (introduced in §4.3). Phase 1 implementation work must include a verification pass:
-
-  - **AB**: confirm `conversationId` is threaded into `ChatCompleteOptions.metadata.anonymization.sessionId` from every chat-round inference call site (research agent, answer agent, any tool that calls the LLM internally).
-
-  - **Observability AI Assistant**: confirm conversation saved-object ID is threaded the same way; if OAS allocates per-call IDs today, decide whether to thread the saved-object ID or to accept lost cross-turn correlation as the OAS migration cost.
-
-  - **Security AI / attack-discovery / future consumers**: per-call UUID is acceptable but document explicitly so reviewers don't assume cross-call consistency.
-
+- **Q1.** *Resolved in §4.3*. `metadata.anonymization.sessionId` becomes the canonical field. `replacementsId` accepted as fallback in Phase 1, removed by Phase 3\.  
+    
+- **Q2.** *Resolved.* The default YAML lives in a content-only package (`@kbn/ai-infra/default-anonymization-workflows`) and is seeded into `.kibana-workflows` on startup by `workflowsManagement`. Admins discover and edit it in the Workflow Management UI; the package copy serves as a versioned reference and reset point.  
+    
+- **Q3.** *Resolved.* A `workflowIds` UI setting was considered and prototyped but removed. Per-space control is achieved entirely through the standard workflow `enabled` toggle: each workflow document is space-scoped, so enabling a workflow in one space has no effect on other spaces. No separate setting is needed, and no IDs need to be copied manually.  
+    
+- **Q4.** Streaming \+ multiple workflows on the same trigger under `chained: true` — the streaming transform is applied to the final merged response. If two chained workflows produce different token-restoration logic, the second's output is what's streamed. Recommendation: hold; the realistic use case is one PII workflow \+ optional read-only audit workflows (which don't subscribe to sync triggers anyway).  
+    
+- **Q5.** Custom-pattern UX surface — does this RFC need to specify the admin UI for managing custom regex rules, or does that ride along with the workflow-authoring UI that already exists? Recommendation: ride along — adding/editing custom rules means cloning the default workflow and editing its `customPatterns` field.  
+    
+- **Q6.** **`sessionId` threading audit per consumer** (introduced in §4.3). Phase 1 implementation work must include a verification pass:  
+    
+  - **AB**: confirm `conversationId` is threaded into `ChatCompleteOptions.metadata.anonymization.sessionId` from every chat-round inference call site (research agent, answer agent, any tool that calls the LLM internally).  
+      
+  - **Observability AI Assistant**: confirm conversation saved-object ID is threaded the same way; if OAS allocates per-call IDs today, decide whether to thread the saved-object ID or to accept lost cross-turn correlation as the OAS migration cost.  
+      
+  - **Security AI / attack-discovery / future consumers**: per-call UUID is acceptable but document explicitly so reviewers don't assume cross-call consistency.  
+      
   - The Phase 1 PR introducing the inference-plugin hook must include this audit as a checklist item; the RFC can't pre-resolve it because it requires reading current inference call sites that may change before implementation.
 
-- **Q7.** Failure-mode default at the granularity level. The RFC sets `failureMode: 'block'` globally per space. Should agents/consumers be allowed to override it per call (e.g., a trusted internal pipeline that can tolerate temporary regex outage)? Recommendation: no — keep the default at the admin-policy layer, not the per-call layer, so individual consumers cannot weaken the security posture.
 
+- **Q7.** Failure-mode default at the granularity level. The RFC sets `failureMode: 'block'` globally per space. Should agents/consumers be allowed to override it per call (e.g., a trusted internal pipeline that can tolerate temporary regex outage)? Recommendation: no — keep the default at the admin-policy layer, not the per-call layer, so individual consumers cannot weaken the security posture.  
+    
 - **Q8.** Token-cap monitoring. Beyond the `anonymization.workflow.failure.count` metric in §9, do we need per-call cap-utilization metrics for early-warning? Recommendation: yes — surface `anonymization.call.tokens.count` histogram so admins can size the cap correctly. The per-call cap is far less likely to be hit than a per-session cap was (it requires a single prompt to contain more than 10 000 unique PII values), but the metric is still useful for sizing. Implementation detail, not a design question.
 
 ## 11\. Success criteria
 
-- [ ] **Admin Control**: Enable/disable anonymization per space; configure PII patterns in YAML.
-- [ ] **Full Coverage**: LLM never sees raw PII matching patterns in `system` prompts or `messages`.
-- [ ] **Restoration**: Users see real values restored in responses (including streams).
-- [ ] **Determinism**: Same PII yields same token across turns and nodes via derived salt.
-- [ ] **Stateless**: No data persisted; token map exists only for the request duration.
-- [ ] **Fail-Closed**: No PII leaks on workflow failure by default; explicit `'allow_unsafe'` opt-in.
-- [ ] **Loud Failures**: Token-cap exhaustion and workflow errors surface as clear user/admin signals.
-- [ ] **Licensing**: Enterprise license required for activation.
-- [ ] **Air-gapped**: Operates locally with no external service dependencies (HMAC/Regex).
-- [ ] **Performance**: Regex scanning adds < 100ms latency to prompt processing.
+- [ ] **Admin Control**: Enable/disable anonymization per space; configure PII patterns in YAML.  
+- [ ] **Full Coverage**: LLM never sees raw PII matching patterns in `system` prompts or `messages`.  
+- [ ] **Restoration**: Users see real values restored in responses (including streams).  
+- [ ] **Determinism**: Same PII yields same token across turns and nodes via derived salt.  
+- [ ] **Stateless**: No data persisted; token map exists only for the request duration.  
+- [ ] **Fail-Closed**: No PII leaks on workflow failure by default; explicit `'allow_unsafe'` opt-in.  
+- [ ] **Loud Failures**: Token-cap exhaustion and workflow errors surface as clear user/admin signals.  
+- [ ] **Licensing**: Enterprise license required for activation.  
+- [ ] **Air-gapped**: Operates locally with no external service dependencies (HMAC/Regex).  
+- [ ] **Performance**: Regex scanning adds \< 100ms latency to prompt processing.  
 - [ ] **Unified Path**: All `chatComplete` consumers use the same hook; legacy paths removed.
+
+## 12\. Questions for reviewers
+
+1. **Failure mode:** Fail-closed means a misconfigured regex workflow causes a user-visible error instead of a response. Is that the right trade-off, or should the default be fail-open with audit logging?  
+     
+2. **SessionId threading:** Callers must pass a stable `sessionId` for cross-turn token consistency. Does this feel like an acceptable caller responsibility, or should the inference plugin handle correlation differently?  
+     
+3. **Tool output coverage:** The LLM never sees raw PII in either direction of a tool call — tool call arguments are de-anonymized before the tool executes, and tool results are anonymized before the next LLM call. However, real PII values do exist in agent memory between a tool's return and the next `chatComplete` call. Are there logging, tracing, or error-reporting paths in your stack that could capture that in-process state and need to be accounted for?  
+     
+4. **Admin control surface:** Per-space anonymization is controlled entirely by enabling/disabling the workflow document in Workflow Management. Is a single toggle per space the right granularity, or is there a need for per-agent or per-connector control?  
+     
+5. **Scope boundary:** This RFC covers only what is sent to the LLM. Cases, dashboards, exports, and emails are explicitly out of scope. Does that boundary match where the team's risk lies, or should the scope be wider?
+
+## 
 
 ## Appendix A — Future potential improvements
 
@@ -890,7 +914,7 @@ steps:
 
 #### Mechanism
 
-`WorkflowsClient.invokeHook` already orchestrates the full suspend/resume cycle: it reads `capabilities.proceedFn`, branches on `firstResult.status === 'suspended'`, awaits the `proceedFn` with the checkpoint's `proceedInput`, and re-enters `executeWorkflowSync` with `resumeFrom` + `proceedResult`. The executor emits the suspension checkpoint when it encounters a `call_site.proceed` step — this is the only executor change. `invokeAroundCompletion` detects the execution path from the hook result: if `result.output.response` is a string the workflow used `call_site.proceed` (buffered); otherwise it used `setField` (streaming).
+`WorkflowsClient.invokeHook` already orchestrates the full suspend/resume cycle: it reads `capabilities.proceedFn`, branches on `firstResult.status === 'suspended'`, awaits the `proceedFn` with the checkpoint's `proceedInput`, and re-enters `executeWorkflowSync` with `resumeFrom` \+ `proceedResult`. The executor emits the suspension checkpoint when it encounters a `call_site.proceed` step — this is the only executor change. `invokeAroundCompletion` detects the execution path from the hook result: if `result.output.response` is a string the workflow used `call_site.proceed` (buffered); otherwise it used `setField` (streaming).
 
 The `AnonymizationContext` is the shared communication channel in both paths. In the default path it carries anonymized field values via `setField`/`getField`; in the advanced path it carries the `tokenMap` used by `transform.pii_restore`. Neither path exposes the salt or token map in the YAML `with:` block.
 
@@ -918,15 +942,26 @@ A reviewer should be able to skim this table and conclude "this is small."
 
 ## Appendix C — Glossary
 
-- **Lifecycle hook** — synchronous, blocking workflow execution at a named "before" or "after" point. Distinguished from async events (`emitEvent`) by the `sync` block on the trigger definition.  
-- **`invokeHook(triggerId, payload)`** — new method on `WorkflowsClient`, returns `Promise<HookResult>`. Sync sibling of `emitEvent`.  
-- **`HookResult`** — `{ status, output, error? }`. `output` matches the trigger's declared `outputSchema`.  
-- **Session** — a logical conversation identified by `sessionId`. Used only as input to `deriveSalt`; the inference plugin holds no per-session state.  
-- **Derived salt** — `HMAC(serverSecret, sessionId)`. Pure function; same inputs always produce the same salt on any node. The salt is what makes tokens deterministic across turns. `serverSecret` is sourced from `xpack.inference.anonymization.encryptionKey` (Kibana keystore); if absent at startup a random per-process key is used and a warning is logged.  
-- **`AnonymizationContext`** — call-scoped object holding `{ salt, tokenMap }`, created at the start of each `chatComplete` call and discarded when the call returns. Threaded between `beforeCompletion` and `afterCompletion` as an internal implementation detail; never exposed in workflow YAML.  
-- **Token** — a deterministic HMAC-SHA256 string of the form `{ENTITY_CLASS}_{HEX}` substituted for a PII value.  
-- **Token map** — the `Map<token, { original, entityClass }>` inside `AnonymizationContext`. Exists only for the duration of one `chatComplete` call.  
-- **`failurePolicy: 'open' | 'closed'`** — workflow failure causes the caller to proceed (`open`) or to surface an error (`closed`). Anonymization defaults to `'closed'`; admin can opt into `'open'` via `failureMode: 'allow_unsafe'`.  
-- **`inference_workflows` plugin** — x-pack plugin that registers AI steps (`ai.prompt`, `ai.classify`, `ai.summarize`), PII steps (`ai.pii`, `transform.pii_restore`), and the default anonymization hook handlers with `workflowsExtensions`. The reference implementation of the domain-package pattern (§7.5); `workflowsExtensions` has no direct dependency on it.  
-- **Phase 1 execution model** — `invokeHook` dispatches to in-memory `HookHandler` chains registered at plugin startup. No saved objects, no workflow execution engine involvement. Default behavior is implemented as TypeScript handlers that mirror the shipped YAML spec.  
+- **Lifecycle hook** — synchronous, blocking workflow execution at a named "before" or "after" point. Distinguished from async events (`emitEvent`) by the `sync` block on the trigger definition.
+
+- **`invokeHook(triggerId, payload)`** — new method on `WorkflowsClient`, returns `Promise<HookResult>`. Sync sibling of `emitEvent`.
+
+- **`HookResult`** — `{ status, output, error? }`. `output` matches the trigger's declared `outputSchema`.
+
+- **Session** — a logical conversation identified by `sessionId`. Used only as input to `deriveSalt`; the inference plugin holds no per-session state.
+
+- **Derived salt** — `HMAC(serverSecret, sessionId)`. Pure function; same inputs always produce the same salt on any node. The salt is what makes tokens deterministic across turns. `serverSecret` is sourced from `xpack.inference.anonymization.encryptionKey` (Kibana keystore); if absent at startup a random per-process key is used and a warning is logged.
+
+- **`AnonymizationContext`** — call-scoped object holding `{ salt, tokenMap }`, created at the start of each `chatComplete` call and discarded when the call returns. Threaded between `beforeCompletion` and `afterCompletion` as an internal implementation detail; never exposed in workflow YAML.
+
+- **Token** — a deterministic HMAC-SHA256 string of the form `{ENTITY_CLASS}_{HEX}` substituted for a PII value.
+
+- **Token map** — the `Map<token, { original, entityClass }>` inside `AnonymizationContext`. Exists only for the duration of one `chatComplete` call.
+
+- **`failurePolicy: 'open' | 'closed'`** — workflow failure causes the caller to proceed (`open`) or to surface an error (`closed`). Anonymization defaults to `'closed'`; admin can opt into `'open'` via `failureMode: 'allow_unsafe'`.
+
+- **`inference_workflows` plugin** — x-pack plugin that registers AI steps (`ai.prompt`, `ai.classify`, `ai.summarize`), PII steps (`ai.pii`, `transform.pii_restore`), and the default anonymization hook handlers with `workflowsExtensions`. The reference implementation of the domain-package pattern (§7.5); `workflowsExtensions` has no direct dependency on it.
+
+- **Phase 1 execution model** — `invokeHook` dispatches to in-memory `HookHandler` chains registered at plugin startup. No saved objects, no workflow execution engine involvement. Default behavior is implemented as TypeScript handlers that mirror the shipped YAML spec.
+
 - **Phase 2 execution model** — `invokeHook` resolves persisted trigger-subscription saved objects and routes matching workflows through the execution engine. The OOTB workflow is a seeded or importable saved object; admins can discover, clone, and edit it in Workflow Management.
