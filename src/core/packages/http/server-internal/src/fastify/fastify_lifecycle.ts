@@ -77,7 +77,7 @@ const preResponseToolkit: OnPreResponseToolkit = {
  * builder reads that to populate `route.settings.app` so consumers like the security
  * plugin can read `KibanaRequest.route.options.security`.
  */
-const buildKibanaRequest = (req: FastifyRequest): HapiRequest => {
+const buildKibanaRequest = (req: FastifyRequest, reply: FastifyReply): HapiRequest => {
   const existingCompat = (req as any).app?.[KIBANA_HAPI_COMPAT_REQUEST] as HapiRequest | undefined;
   if (existingCompat) {
     return existingCompat;
@@ -129,7 +129,9 @@ const buildKibanaRequest = (req: FastifyRequest): HapiRequest => {
     query: (req as any).query ?? {},
     payload: (req as any).body,
     path: url.pathname,
-    raw: { req: req.raw, res: (req as any).server?.server?.res ?? undefined },
+    // `reply.raw` is required so {@link CoreKibanaRequest} wires `request.events.completed$`
+    // from the response `close` event (e.g. Security Solution limited-concurrency onPreAuth).
+    raw: { req: req.raw, res: reply.raw },
     auth: { isAuthenticated: false },
     info: { host: hostHeader, referrer: '' },
     route: {
@@ -173,7 +175,7 @@ export function adoptToFastifyOnPreRouting(fn: OnPreRoutingHandler, log: Logger)
   ): Promise<FastifyReply | void> {
     try {
       const result = await fn(
-        CoreKibanaRequest.from(buildKibanaRequest(req)),
+        CoreKibanaRequest.from(buildKibanaRequest(req, reply)),
         lifecycleResponseFactory,
         preRoutingToolkit
       );
@@ -212,7 +214,7 @@ export function adoptToFastifyOnPreAuth(fn: OnPreAuthHandler, log: Logger) {
   ): Promise<FastifyReply | void> {
     try {
       const result = await fn(
-        CoreKibanaRequest.from(buildKibanaRequest(req)),
+        CoreKibanaRequest.from(buildKibanaRequest(req, reply)),
         lifecycleResponseFactory,
         preAuthToolkit
       );
@@ -235,7 +237,7 @@ export function adoptToFastifyOnPostAuth(fn: OnPostAuthHandler, log: Logger) {
   ): Promise<FastifyReply | void> {
     try {
       const result = await fn(
-        CoreKibanaRequest.from(buildKibanaRequest(req)),
+        CoreKibanaRequest.from(buildKibanaRequest(req, reply)),
         lifecycleResponseFactory,
         postAuthToolkit
       );
@@ -269,7 +271,7 @@ export function adoptToFastifyOnPreResponse(fn: OnPreResponseHandler, log: Logge
     try {
       const statusCode = reply.statusCode;
       const result = await fn(
-        CoreKibanaRequest.from(buildKibanaRequest(req)),
+        CoreKibanaRequest.from(buildKibanaRequest(req, reply)),
         { statusCode },
         preResponseToolkit
       );

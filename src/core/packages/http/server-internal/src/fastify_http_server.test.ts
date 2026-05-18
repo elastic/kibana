@@ -1369,6 +1369,61 @@ describe('FastifyHttpServer', () => {
     });
   });
 
+  it('onPreAuth lifecycle requests emit completed$ when the response closes', async () => {
+    const ctx = createCoreContext();
+    const config = createHttpConfig(PORT);
+    const config$ = new BehaviorSubject(config);
+    const limitedConcurrencyTag = 'test:limitedConcurrency:1';
+
+    const server = new FastifyHttpServer(ctx, 'Kibana', new BehaviorSubject(config.shutdownTimeout));
+    const setup = await server.setup({ config$ });
+
+    let active = 0;
+    setup.registerOnPreAuth((request, response, toolkit) => {
+      if (!request.route.options.tags?.includes(limitedConcurrencyTag)) {
+        return toolkit.next();
+      }
+      if (active >= 1) {
+        return response.customError({ statusCode: 429, body: 'Too Many Requests' });
+      }
+      active += 1;
+      request.events.completed$.subscribe(() => {
+        active -= 1;
+      });
+      return toolkit.next();
+    });
+
+    const enhanceHandler = (handler: any) => async (req: any, res: any) =>
+      handler({} as any, req, res);
+    const router = new Router('/api/concurrency', ctx.logger.get('router'), enhanceHandler, {
+      env,
+    });
+    router.get(
+      {
+        path: '/ok',
+        security: { authz: { enabled: false, reason: 'test' } },
+        validate: false,
+        options: { tags: [limitedConcurrencyTag] },
+      },
+      async (_context, _req, res) => res.ok({ body: { ok: true } })
+    );
+
+    setup.registerRouter(router);
+    await server.start();
+
+    const address = (setup.server as any).server.address();
+    const listenPort = typeof address === 'object' && address ? address.port : 0;
+    expect(listenPort).toBeGreaterThan(0);
+
+    for (let i = 0; i < 3; i++) {
+      const res = await httpRequest(listenPort, '/api/concurrency/ok');
+      expect(res.statusCode).toBe(200);
+    }
+    expect(active).toBe(0);
+
+    await server.stop();
+  }, 15000);
+
   it('stop() is a no-op safe to call before setup()', async () => {
     const fhs = new FastifyHttpServer(
       createCoreContext(),
