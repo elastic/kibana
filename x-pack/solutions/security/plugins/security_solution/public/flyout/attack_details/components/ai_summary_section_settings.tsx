@@ -138,7 +138,6 @@ export const AISummarySectionSettings: React.FC<AISummarySectionSettingsProps> =
           width: 280px;
         `}
         initialPanelId={0}
-        size="m"
         panels={panels}
       />
     </EuiPopover>

@@ -10,6 +10,7 @@ import { renderHook, act } from '@testing-library/react';
 import {
   useServiceMapAlertsTabHref,
   useServiceMapAlertsTabNavigate,
+  useServiceMapAlertsNavigateFactory,
 } from './use_service_map_alerts_tab_href';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
@@ -189,5 +190,86 @@ describe('useServiceMapAlertsTabNavigate', () => {
     const search = new URL(`http://x${href}`).searchParams;
     expect(search.get('kuery')).toBe('');
     expect(search.get('environment')).toBe('production');
+  });
+});
+
+describe('useServiceMapAlertsNavigateFactory', () => {
+  const navigateToUrl = jest.fn();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockedUseApmRouter.mockReturnValue({ link: mockedLink } as unknown as ReturnType<
+      typeof useApmRouter
+    >);
+    mockedUseAnyOfApmParams.mockReturnValue({ query: serviceMapQuery } as unknown as ReturnType<
+      typeof useAnyOfApmParams
+    >);
+    mockedUseApmRoutePath.mockReturnValue(
+      '/service-map' as unknown as ReturnType<typeof useApmRoutePath>
+    );
+    mockedUseApmPluginContext.mockReturnValue({
+      core: { application: { navigateToUrl } },
+    } as unknown as ReturnType<typeof useApmPluginContext>);
+  });
+
+  it('navigates to the kuery-stripped alerts URL when the per-service handler fires', () => {
+    const { result } = renderHook(() => useServiceMapAlertsNavigateFactory());
+
+    const handler = result.current('opbeans-node');
+    expect(handler).toBeDefined();
+
+    const event = {
+      preventDefault: jest.fn(),
+      stopPropagation: jest.fn(),
+    } as unknown as MouseEvent;
+
+    act(() => {
+      handler!(event);
+    });
+
+    expect(event.preventDefault).toHaveBeenCalled();
+    expect(event.stopPropagation).toHaveBeenCalled();
+    expect(navigateToUrl).toHaveBeenCalledTimes(1);
+
+    const href = navigateToUrl.mock.calls[0][0] as string;
+    expect(href).toContain('/app/apm/services/opbeans-node/alerts');
+    const search = new URL(`http://x${href}`).searchParams;
+    // Regression guard: the per-node alerts badge must not carry the map's
+    // kuery filter (which is typically scoped to a different service) into
+    // the alerts tab.
+    expect(search.get('kuery')).toBe('');
+    expect(search.get('environment')).toBe('production');
+  });
+
+  it('returns undefined when SPA navigation is unavailable (Agent Builder fallback)', () => {
+    mockedUseApmPluginContext.mockReturnValue({
+      core: { application: {} },
+    } as unknown as ReturnType<typeof useApmPluginContext>);
+
+    const { result } = renderHook(() => useServiceMapAlertsNavigateFactory());
+
+    expect(result.current('opbeans-node')).toBeUndefined();
+  });
+
+  it('routes through /mobile-services on the mobile map context', () => {
+    mockedUseApmRoutePath.mockReturnValue(
+      '/mobile-services/{serviceName}/service-map' as unknown as ReturnType<typeof useApmRoutePath>
+    );
+
+    const { result } = renderHook(() => useServiceMapAlertsNavigateFactory());
+    const handler = result.current('opbeans-rum');
+    const event = {
+      preventDefault: jest.fn(),
+      stopPropagation: jest.fn(),
+    } as unknown as MouseEvent;
+
+    act(() => {
+      handler!(event);
+    });
+
+    const href = navigateToUrl.mock.calls[0][0] as string;
+    expect(href).toContain('/app/apm/mobile-services/opbeans-rum/alerts');
+    const search = new URL(`http://x${href}`).searchParams;
+    expect(search.get('kuery')).toBe('');
   });
 });
