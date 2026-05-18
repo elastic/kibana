@@ -165,13 +165,6 @@ export class ESQLService extends FtrService {
   public async openEsqlControlFlyout(query: string) {
     await this.retry.waitFor('control flyout to open', async () => {
       await this.typeEsqlEditorQuery(query);
-      // Wait until the suggestion widget actually has rows rendered
-      await this.retry.try(async () => {
-        const suggestionWidget = await this.monacoEditor.getCodeEditorSuggestWidget();
-        expect(await suggestionWidget.isDisplayed()).to.be(true);
-        const rows = await suggestionWidget.findAllByCssSelector('.monaco-list-row');
-        expect(rows.length).to.be.greaterThan(0);
-      });
       await this.selectEsqlSuggestionByLabel('Create control');
 
       return await this.testSubjects.exists('create_esql_control_flyout');
