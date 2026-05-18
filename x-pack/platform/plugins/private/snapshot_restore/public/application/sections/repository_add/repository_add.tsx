@@ -34,7 +34,9 @@ export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({
   const canSetDefaultRepository = useCanSetDefaultRepository();
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveError, setSaveError] = useState<any>(null);
-  const [isDefaultRepository, setIsDefaultRepository] = useState<boolean>(false);
+  const [defaultRepositorySelectionOverride, setDefaultRepositorySelectionOverride] = useState<
+    boolean | undefined
+  >(undefined);
   const [pendingSave, setPendingSave] = useState<Repository | EmptyRepository | null>(null);
 
   const {
@@ -56,6 +58,19 @@ export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({
   const isDefaultRepositoryKnown = defaultRepositoryStatus === 'loaded';
   const defaultRepositoryLoadError = defaultRepositoryStatus === 'error';
   const canSetOrChangeDefaultRepository = canSetDefaultRepository && !defaultRepositoryLoadError;
+
+  const defaultRepositorySwitchDefaultValue =
+    canSetOrChangeDefaultRepository &&
+    isDefaultRepositoryKnown &&
+    isFirstRepository &&
+    normalizedDefaultRepository === null;
+
+  const effectiveIsDefaultRepository =
+    defaultRepositorySelectionOverride ?? defaultRepositorySwitchDefaultValue;
+
+  const onToggleDefault = (nextIsDefault: boolean) => {
+    setDefaultRepositorySelectionOverride(nextIsDefault);
+  };
 
   // Set breadcrumb and page title
   useEffect(() => {
@@ -89,10 +104,7 @@ export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({
     } else {
       const isReadOnly = isRepositoryReadOnly(newRepository);
       const shouldSetDefault =
-        canSetOrChangeDefaultRepository &&
-        (isDefaultRepository ||
-          (!isReadOnly && isFirstRepository) ||
-          (!isReadOnly && isDefaultRepositoryKnown && normalizedDefaultRepository === null));
+        canSetOrChangeDefaultRepository && effectiveIsDefaultRepository && !isReadOnly;
 
       if (shouldSetDefault) {
         const defaultResponse = await setDefaultRepositoryRequest(name);
@@ -124,10 +136,7 @@ export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({
     const name = newRepository.name;
     const isReadOnly = isRepositoryReadOnly(newRepository);
     const shouldSetDefault =
-      canSetOrChangeDefaultRepository &&
-      (isDefaultRepository ||
-        (!isReadOnly && isFirstRepository) ||
-        (!isReadOnly && isDefaultRepositoryKnown && normalizedDefaultRepository === null));
+      canSetOrChangeDefaultRepository && effectiveIsDefaultRepository && !isReadOnly;
     const isChangingDefault =
       shouldSetDefault &&
       isDefaultRepositoryKnown &&
@@ -223,8 +232,8 @@ export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({
         onSave={onSave}
         onCancel={onCancel}
         isFirstRepository={isFirstRepository}
-        isDefaultRepository={isDefaultRepository}
-        onToggleDefault={canSetOrChangeDefaultRepository ? setIsDefaultRepository : undefined}
+        isDefaultRepository={effectiveIsDefaultRepository}
+        onToggleDefault={canSetOrChangeDefaultRepository ? onToggleDefault : undefined}
       />
     </EuiPageSection>
   );

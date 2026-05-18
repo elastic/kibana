@@ -60,22 +60,19 @@ export const RepositoryFormStepTwo: React.FunctionComponent<Props> = ({
   onCancel,
   isDefaultRepository,
   isAlreadyDefaultRepository,
-  isFirstRepository,
   onToggleDefault,
 }) => {
   const { docLinks } = useCore();
   const hasValidationErrors: boolean = !validation.isValid;
   const isReadOnly = isRepositoryReadOnly(repository);
-  const isFirstRegister = Boolean(isFirstRepository && !isEditing && !isReadOnly);
-  const isDefaultRepositorySelected = Boolean(
-    isFirstRegister || isAlreadyDefaultRepository || isDefaultRepository
-  );
+  const isDefaultRepositorySelected = Boolean(isAlreadyDefaultRepository || isDefaultRepository);
   const {
     name,
     type,
     settings: { delegateType },
   } = repository;
   const typeForDocs = type === REPOSITORY_TYPES.source ? delegateType : type;
+  const isUrlRepository = type === REPOSITORY_TYPES.url;
 
   const renderSettings = () => (
     <Fragment>
@@ -136,18 +133,13 @@ export const RepositoryFormStepTwo: React.FunctionComponent<Props> = ({
   );
 
   const renderDefaultSetting = () => {
-    if (!onToggleDefault) {
+    if (!onToggleDefault || isUrlRepository) {
       return null;
     }
 
-    const isDisabled = Boolean(isFirstRegister || isAlreadyDefaultRepository || isReadOnly);
+    const isDisabled = Boolean(isAlreadyDefaultRepository || isReadOnly);
 
-    const tooltipContent = isFirstRegister ? (
-      <FormattedMessage
-        id="xpack.snapshotRestore.repositoryForm.fields.firstRepositoryDefaultTooltip"
-        defaultMessage="Your first repository is automatically set as the default."
-      />
-    ) : isAlreadyDefaultRepository ? (
+    const tooltipContent = isAlreadyDefaultRepository ? (
       <FormattedMessage
         id="xpack.snapshotRestore.repositoryForm.fields.defaultRepositoryDisabledTooltip"
         defaultMessage="This is currently the default repository. To unassign it, you must set another repository as the default."
@@ -167,7 +159,7 @@ export const RepositoryFormStepTwo: React.FunctionComponent<Props> = ({
             defaultMessage="Set as default repository"
           />
         }
-        checked={isFirstRegister || Boolean(isDefaultRepository)}
+        checked={Boolean(isDefaultRepository)}
         onChange={(e) => onToggleDefault(e.target.checked)}
         disabled={isDisabled}
         data-test-subj="defaultRepositorySwitch"

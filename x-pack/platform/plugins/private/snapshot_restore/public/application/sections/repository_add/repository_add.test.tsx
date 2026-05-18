@@ -39,6 +39,7 @@ jest.mock('../../components/repository_form', () => ({
     isDefaultRepository?: boolean;
   }) => (
     <div>
+      <div data-test-subj="repositoryFormIsDefault">{String(Boolean(isDefaultRepository))}</div>
       {onToggleDefault && (
         <button
           data-test-subj="repositoryFormToggleDefault"
@@ -238,6 +239,52 @@ describe('<RepositoryAdd />', () => {
     });
   });
 
+  it('SHOULD default the switch on for the first repository but allow toggling it off', async () => {
+    const { addRepository, useLoadRepositories } = await import('../../services/http');
+    jest.mocked(addRepository).mockResolvedValueOnce({ data: null, error: null });
+    jest.mocked(useLoadRepositories).mockReturnValue({
+      isLoading: false,
+      error: null,
+      data: { repositories: [] },
+      resendRequest: jest.fn(),
+    } as any);
+
+    const setDefaultRepository = jest.fn().mockResolvedValue({ data: null, error: null });
+    mockUseDefaultRepository.mockReturnValue({
+      defaultRepository: null,
+      isLoadingDefaultRepository: false,
+      defaultRepositoryStatus: 'loaded',
+      setDefaultRepository,
+    });
+
+    const history = createMemoryHistory({ initialEntries: ['/add_repository'] });
+    render(
+      <I18nProvider>
+        <Router history={history}>
+          <RepositoryAdd
+            history={history}
+            location={history.location}
+            match={{ params: {}, isExact: true, path: '', url: '' }}
+          />
+        </Router>
+      </I18nProvider>
+    );
+
+    expect(screen.getByTestId('repositoryFormIsDefault')).toHaveTextContent('true');
+
+    fireEvent.click(screen.getByTestId('repositoryFormToggleDefault'));
+    await waitFor(() => {
+      expect(screen.getByTestId('repositoryFormIsDefault')).toHaveTextContent('false');
+    });
+
+    fireEvent.click(screen.getByTestId('repositoryFormSave'));
+
+    await waitFor(() => {
+      expect(setDefaultRepository).not.toHaveBeenCalled();
+      expect(history.location.pathname).toBe('/repositories');
+    });
+  });
+
   it('SHOULD set the first created repository as default', async () => {
     const { addRepository, useLoadRepositories } = await import('../../services/http');
     jest.mocked(addRepository).mockResolvedValueOnce({ data: null, error: null });
@@ -268,6 +315,10 @@ describe('<RepositoryAdd />', () => {
         </Router>
       </I18nProvider>
     );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('repositoryFormIsDefault')).toHaveTextContent('true');
+    });
 
     fireEvent.click(screen.getByTestId('repositoryFormSave'));
 
@@ -404,6 +455,38 @@ describe('<RepositoryAdd />', () => {
     });
     expect(jest.mocked(addRepository)).not.toHaveBeenCalled();
     expect(setDefaultRepository).not.toHaveBeenCalled();
+  });
+
+  it('SHOULD default the switch off when a default repository is already assigned', async () => {
+    const { useLoadRepositories } = await import('../../services/http');
+    jest.mocked(useLoadRepositories).mockReturnValue({
+      isLoading: false,
+      error: null,
+      data: { repositories: [{ name: 'existing', type: 'fs', settings: {} }] },
+      resendRequest: jest.fn(),
+    } as any);
+
+    mockUseDefaultRepository.mockReturnValue({
+      defaultRepository: 'old-default',
+      isLoadingDefaultRepository: false,
+      defaultRepositoryStatus: 'loaded',
+      setDefaultRepository: jest.fn().mockResolvedValue({ data: null, error: null }),
+    });
+
+    const history = createMemoryHistory({ initialEntries: ['/add_repository'] });
+    render(
+      <I18nProvider>
+        <Router history={history}>
+          <RepositoryAdd
+            history={history}
+            location={history.location}
+            match={{ params: {}, isExact: true, path: '', url: '' }}
+          />
+        </Router>
+      </I18nProvider>
+    );
+
+    expect(screen.getByTestId('repositoryFormIsDefault')).toHaveTextContent('false');
   });
 
   it('SHOULD not confirm when default repository is an empty string', async () => {

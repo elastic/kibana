@@ -470,7 +470,7 @@ describe('<RepositoryForm />', () => {
       expect(screen.getByTestId('defaultRepositorySwitch')).toBeDisabled();
     });
 
-    it('disables default repository switch for URL repositories', () => {
+    it('omits default repository switch for URL repositories', () => {
       render(
         <I18nProvider>
           <RepositoryFormWithDefaultState
@@ -479,7 +479,7 @@ describe('<RepositoryForm />', () => {
         </I18nProvider>
       );
 
-      expect(screen.getByTestId('defaultRepositorySwitch')).toBeDisabled();
+      expect(screen.queryByTestId('defaultRepositorySwitch')).not.toBeInTheDocument();
     });
 
     it('disables read-only toggle when editing a repository that is already default', () => {
