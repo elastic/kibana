@@ -7,7 +7,7 @@
 
 export const TIMELINE_SEARCHBOX = '[data-test-subj="timeline-super-select-search-box"]';
 
-export const EUI_FILTER_SELECT_ITEM = '.euiFilterSelectItem';
+export const EUI_FILTER_SELECT_ITEM = '.euiComboBoxOption';
 
 export const EUI_SELECTABLE_LIST_ITEM = '[data-test-subj="euiSelectableList"] li';
 
