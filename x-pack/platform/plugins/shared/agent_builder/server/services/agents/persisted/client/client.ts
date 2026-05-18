@@ -37,6 +37,7 @@ import type {
   AgentsUsingToolsResult,
   PersistedAgentDefinition,
 } from '../types';
+import type { AgentAccess } from '../../agent_source';
 import type { AgentProfileStorage } from './storage';
 import { createStorage } from './storage';
 import {
@@ -61,8 +62,6 @@ import {
 } from './utils/access_control';
 import { hasRequiredDocumentFields } from './utils/helper';
 import { validateAclUpdate } from './utils/acl';
-
-export type AgentAccess = 'read' | 'use' | 'write' | 'delete' | 'manageAcl';
 
 export interface GetAgentAclResult {
   /** True when the caller is allowed to read the principal list. */

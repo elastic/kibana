@@ -27,7 +27,12 @@ import type {
   AgentDeleteRequest,
   AgentUpdateRequest,
 } from '../../../common/agents';
-import type { AgentAclResult, WritableAgentProvider, ReadonlyAgentProvider } from './agent_source';
+import type {
+  AgentAclResult,
+  GetAgentOptions,
+  WritableAgentProvider,
+  ReadonlyAgentProvider,
+} from './agent_source';
 import { isReadonlyProvider } from './agent_source';
 
 // internal definition for our agents
@@ -41,9 +46,11 @@ export type InternalAgentDefinitionAvailabilityHandler = (
 
 export interface AgentRegistry {
   has(agentId: string): Promise<boolean>;
-  get(agentId: string): Promise<InternalAgentDefinition>;
-  /** Get an agent for run/converse. Throws agent-not-found if the caller lacks 'use' access. */
-  getForRun(agentId: string): Promise<InternalAgentDefinition>;
+  /**
+   * Fetch an agent and assert the caller has at least `opts.access` rights (default: 'read').
+   * Throws `agentNotFound` if the agent doesn't exist OR the caller lacks the requested access.
+   */
+  get(agentId: string, opts?: GetAgentOptions): Promise<InternalAgentDefinition>;
   list(opts?: AgentListOptions): Promise<InternalAgentDefinition[]>;
   create(createRequest: AgentCreateRequest): Promise<InternalAgentDefinition>;
   update(agentId: string, update: AgentUpdateRequest): Promise<InternalAgentDefinition>;
@@ -102,25 +109,10 @@ class AgentRegistryImpl implements AgentRegistry {
     return false;
   }
 
-  async get(agentId: string): Promise<InternalAgentDefinition> {
+  async get(agentId: string, opts?: GetAgentOptions): Promise<InternalAgentDefinition> {
     for (const provider of this.orderedProviders) {
       if (await provider.has(agentId)) {
-        const agent = await provider.get(agentId);
-        if (!(await this.isAvailable(agent))) {
-          throw createBadRequestError(`Agent ${agentId} is not available`);
-        }
-        return agent;
-      }
-    }
-    throw createAgentNotFoundError({ agentId });
-  }
-
-  async getForRun(agentId: string): Promise<InternalAgentDefinition> {
-    for (const provider of this.orderedProviders) {
-      if (await provider.has(agentId)) {
-        const agent = provider.getForRun
-          ? await provider.getForRun(agentId)
-          : await provider.get(agentId);
+        const agent = await provider.get(agentId, opts);
         if (!(await this.isAvailable(agent))) {
           throw createBadRequestError(`Agent ${agentId} is not available`);
         }

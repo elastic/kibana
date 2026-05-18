@@ -39,7 +39,6 @@ describe('runAgent', () => {
 
     agentClient = createMockedAgentRegistry();
     agentClient.get.mockResolvedValue(agent);
-    agentClient.getForRun.mockResolvedValue(agent);
 
     const {
       agentsService: { getRegistry },
@@ -68,8 +67,8 @@ describe('runAgent', () => {
       parentManager: runnerManager,
     });
 
-    expect(agentClient.getForRun).toHaveBeenCalledTimes(1);
-    expect(agentClient.getForRun).toHaveBeenCalledWith(params.agentId);
+    expect(agentClient.get).toHaveBeenCalledTimes(1);
+    expect(agentClient.get).toHaveBeenCalledWith(params.agentId, { access: 'use' });
   });
 
   it('calls the agent handler with the expected parameters', async () => {

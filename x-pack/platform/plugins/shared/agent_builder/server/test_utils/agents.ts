@@ -19,7 +19,6 @@ export const createMockedAgentRegistry = (): AgentRegistryMock => {
   return {
     has: jest.fn(),
     get: jest.fn(),
-    getForRun: jest.fn(),
     create: jest.fn(),
     update: jest.fn(),
     list: jest.fn(),

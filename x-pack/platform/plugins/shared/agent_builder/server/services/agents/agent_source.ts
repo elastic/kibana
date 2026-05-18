@@ -16,9 +16,14 @@ import type {
 } from '../../../common/agents';
 import type { InternalAgentDefinition } from './agent_registry';
 
+export type AgentAccess = 'read' | 'use' | 'write' | 'delete' | 'manageAcl';
+
+export interface GetAgentOptions {
+  access?: AgentAccess;
+}
+
 export interface AgentAclResult {
-  /** True when the caller may edit the ACL via PUT. */
-  canManage: boolean;
+  can_manage: boolean;
   acl: AgentAcl;
 }
 
@@ -26,12 +31,7 @@ export interface ReadonlyAgentProvider {
   id: string;
   readonly: true;
   has(agentId: string): MaybePromise<boolean>;
-  get(agentId: string): MaybePromise<InternalAgentDefinition>;
-  /**
-   * Get an agent for run/converse. Defaults to {@link ReadonlyAgentProvider.get} when the
-   * provider has no concept of object-level access control (e.g. built-in agents).
-   */
-  getForRun?(agentId: string): MaybePromise<InternalAgentDefinition>;
+  get(agentId: string, opts?: GetAgentOptions): MaybePromise<InternalAgentDefinition>;
   list(opts: AgentListOptions): MaybePromise<InternalAgentDefinition[]>;
 }
 
