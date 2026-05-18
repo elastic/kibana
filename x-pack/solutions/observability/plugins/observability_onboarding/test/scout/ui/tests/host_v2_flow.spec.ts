@@ -41,7 +41,7 @@ test.describe.serial(
       await pageObjects.hostV2.clickHostTile('linux');
 
       await expect(pageObjects.hostV2.layout('linux')).toBeVisible();
-      expect(page.url()).toContain('/host/linux');
+      await expect(page).toHaveURL(/\/host\/linux/);
       await expect(pageObjects.hostV2.approachSelector()).toBeVisible();
       await expect(pageObjects.hostV2.approachCard('otel')).toHaveAttribute(
         'data-selected',
@@ -56,10 +56,13 @@ test.describe.serial(
       await pageObjects.hostV2.gotoPath('/host/linux');
 
       await pageObjects.hostV2.approachCard('auto-detect').click();
-      await expect.poll(() => page.url()).toContain('/host/linux/auto-detect');
+      await expect(page).toHaveURL(/\/host\/linux\/auto-detect/);
 
       await pageObjects.hostV2.approachCard('otel').click();
-      await expect.poll(() => page.url()).toMatch(/\/host\/linux(?!\/auto-detect)/);
+      // Tightened from the open-ended lookahead so the assertion only passes on
+      // a real /host/linux landing — `/host/linuxxyz` and `/host/linux/foo` no
+      // longer slip through.
+      await expect(page).toHaveURL(/\/host\/linux(\?|$|#)/);
     });
 
     test('Linux ingestion mode persists across the approach toggle', async ({
@@ -69,30 +72,29 @@ test.describe.serial(
       await pageObjects.hostV2.gotoPath('/host/linux');
       await pageObjects.hostV2.ingestionSelector().waitFor({ state: 'visible' });
 
-      await pageObjects.onboarding.selectWiredStreams();
-      try {
-        await pageObjects.onboarding.enableWiredStreamsModal.waitFor({
-          state: 'visible',
-          timeout: 2_000,
-        });
-        await pageObjects.onboarding.confirmEnableWiredStreamsModal();
-      } catch {
-        /* Modal omitted when Wired Streams is already enabled */
-      }
-      await expect.poll(() => page.url()).toContain('ingestion=wired');
+      await test.step('select Wired Streams ingestion', async () => {
+        await pageObjects.onboarding.selectWiredStreams();
+        await pageObjects.onboarding.confirmEnableWiredStreamsModalIfPresent();
+        await expect(page).toHaveURL(/ingestion=wired/);
+      });
 
-      await pageObjects.hostV2.approachCard('auto-detect').click();
-      await expect.poll(() => page.url()).toMatch(/\/host\/linux\/auto-detect.*ingestion=wired/);
-      await expect(pageObjects.onboarding.wiredStreamsOption).toHaveAttribute(
-        'aria-pressed',
-        'true'
-      );
+      await test.step('switch approach to Elastic Agent', async () => {
+        await pageObjects.hostV2.approachCard('auto-detect').click();
+        await expect(page).toHaveURL(/\/host\/linux\/auto-detect.*ingestion=wired/);
+      });
+
+      await test.step('ingestion mode survives the approach switch', async () => {
+        await expect(pageObjects.onboarding.wiredStreamsOption).toHaveAttribute(
+          'aria-pressed',
+          'true'
+        );
+      });
     });
 
     test('macOS landing has the OTel approach selected', async ({ pageObjects, page }) => {
       await pageObjects.hostV2.gotoPath('/host/macos');
       await expect(pageObjects.hostV2.layout('mac')).toBeVisible();
-      expect(page.url()).toContain('/host/macos');
+      await expect(page).toHaveURL(/\/host\/macos/);
       await expect(pageObjects.hostV2.approachSelector()).toBeVisible();
       await expect(pageObjects.hostV2.approachCard('otel')).toHaveAttribute(
         'data-selected',
@@ -108,7 +110,7 @@ test.describe.serial(
       await pageObjects.hostV2.clickHostTile('macos');
 
       await expect(pageObjects.hostV2.layout('mac')).toBeVisible();
-      expect(page.url()).toContain('/host/macos');
+      await expect(page).toHaveURL(/\/host\/macos/);
       await expect(pageObjects.hostV2.approachSelector()).toBeVisible();
       await expect(pageObjects.hostV2.approachCard('otel')).toHaveAttribute(
         'data-selected',
@@ -122,14 +124,13 @@ test.describe.serial(
     }) => {
       await pageObjects.hostV2.gotoPath('/host/windows');
       await expect(pageObjects.hostV2.layout('windows')).toBeVisible();
-      expect(page.url()).toContain('/host/windows');
+      await expect(page).toHaveURL(/\/host\/windows/);
       await expect(pageObjects.hostV2.approachSelector()).toHaveCount(0);
 
       const codeBlock = pageObjects.hostV2.otelInstallCodeBlock();
       await expect(codeBlock).toBeVisible();
       // PowerShell install commands include Invoke-WebRequest and a .ps1 entry point.
-      const command = (await codeBlock.textContent()) ?? '';
-      expect(command).toMatch(/Invoke-WebRequest|otelcol\.ps1/);
+      await expect(codeBlock).toContainText(/Invoke-WebRequest|otelcol\.ps1/);
     });
 
     test('setup failure keeps the V2 chrome visible with an inline error and a working retry', async ({
@@ -184,7 +185,7 @@ test.describe.serial(
       await expect(pageObjects.hostV2.layout('linux')).toHaveCount(0);
       // Spec requires the original /host/* path to survive when FF is off so
       // deep links and analytics keep their pathname.
-      expect(page.url()).toContain('/host/linux');
+      await expect(page).toHaveURL(/\/host\/linux/);
     });
   }
 );

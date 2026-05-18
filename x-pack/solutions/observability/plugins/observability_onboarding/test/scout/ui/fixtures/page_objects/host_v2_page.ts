@@ -48,12 +48,6 @@ export class HostV2Page {
     return this.page.getByTestId('observabilityOnboardingIngestionModeSelector');
   }
 
-  installCodeBlock() {
-    return this.page
-      .getByTestId('observabilityOnboardingAutoDetectPanelCodeSnippet')
-      .or(this.page.getByTestId('observabilityOnboardingOtelLogsPanelCodeBlock'));
-  }
-
   otelInstallCodeBlock() {
     return this.page.getByTestId('observabilityOnboardingOtelLogsPanelCodeBlock');
   }
