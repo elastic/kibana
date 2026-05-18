@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useRef } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlyout,
@@ -26,6 +26,7 @@ export interface RuleFormFlyoutProps {
   push?: boolean;
   onClose?: () => void;
   isLoading?: boolean;
+  isSaveDisabled?: boolean;
   children: React.ReactNode;
 }
 
@@ -34,18 +35,40 @@ export interface RuleFormFlyoutProps {
  *
  * Use DynamicRuleFormFlyout or StandaloneRuleFormFlyout for pre-composed
  * flyouts that handle form submission and state management.
+ *
+ * In push mode, EUI disables its built-in focus trap so both the flyout
+ * and the page remain interactive. A lightweight `onFocusCapture` handler
+ * on the content wrapper redirects keyboard-initiated focus (Tab / Enter)
+ * back to the source element, while click-initiated focus passes through
+ * unaffected. Autocomplete on unfocused editors is separately suppressed
+ * by the `sharedEsqlSuggestionProvider` focus-check in `esql_editor.tsx`.
  */
 export const RuleFormFlyout = ({
   push = true,
   onClose,
   isLoading = false,
+  isSaveDisabled = false,
   children,
 }: RuleFormFlyoutProps) => {
+  const clickedRef = useRef(false);
+
+  const onFocusCapture = useCallback(
+    (e: React.FocusEvent<HTMLDivElement>) => {
+      if (!push || clickedRef.current) return;
+      const from = e.relatedTarget as HTMLElement | null;
+      if (from && !e.currentTarget.contains(from)) {
+        (e.target as HTMLElement).blur();
+        from.focus({ preventScroll: true });
+      }
+    },
+    [push]
+  );
+
   return (
     <EuiFlyout
       session="start"
       flyoutMenuProps={{
-        title: 'Create Alert Rule',
+        title: 'Create Rule',
         hideTitle: true,
       }}
       type={push ? 'push' : 'overlay'}
@@ -54,43 +77,55 @@ export const RuleFormFlyout = ({
       size="l"
       maxWidth={600}
     >
-      <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m" id={FLYOUT_TITLE_ID}>
-          <h2>
-            <FormattedMessage
-              id="xpack.alertingV2.ruleForm.flyoutTitle"
-              defaultMessage="Create Alert Rule"
-            />
-          </h2>
-        </EuiTitle>
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody>{children}</EuiFlyoutBody>
-      <EuiFlyoutFooter>
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={onClose} isLoading={isLoading}>
+      <div
+        style={{ display: 'contents' }}
+        onPointerDown={() => {
+          clickedRef.current = true;
+        }}
+        onPointerUp={() => {
+          clickedRef.current = false;
+        }}
+        onFocusCapture={onFocusCapture}
+      >
+        <EuiFlyoutHeader hasBorder>
+          <EuiTitle size="m" id={FLYOUT_TITLE_ID}>
+            <h2>
               <FormattedMessage
-                id="xpack.alertingV2.ruleForm.cancelButtonLabel"
-                defaultMessage="Cancel"
+                id="xpack.alertingV2.ruleForm.flyoutTitle"
+                defaultMessage="Create Rule"
               />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              fill
-              isLoading={isLoading}
-              form={RULE_FORM_ID}
-              type="submit"
-              data-test-subj="ruleV2FlyoutSaveButton"
-            >
-              <FormattedMessage
-                id="xpack.alertingV2.ruleForm.createRuleButtonLabel"
-                defaultMessage="Create rule"
-              />
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutFooter>
+            </h2>
+          </EuiTitle>
+        </EuiFlyoutHeader>
+        <EuiFlyoutBody>{children}</EuiFlyoutBody>
+        <EuiFlyoutFooter>
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty onClick={onClose} isLoading={isLoading}>
+                <FormattedMessage
+                  id="xpack.alertingV2.ruleForm.cancelButtonLabel"
+                  defaultMessage="Cancel"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                fill
+                isLoading={isLoading}
+                isDisabled={isSaveDisabled}
+                form={RULE_FORM_ID}
+                type="submit"
+                data-test-subj="ruleV2FlyoutSaveButton"
+              >
+                <FormattedMessage
+                  id="xpack.alertingV2.ruleForm.createRuleButtonLabel"
+                  defaultMessage="Create rule"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlyoutFooter>
+      </div>
     </EuiFlyout>
   );
 };

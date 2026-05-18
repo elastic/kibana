@@ -102,7 +102,7 @@ export function SloManagementBulkActions({ items, setSelectedItems }: Props) {
             defaultMessage: 'Selected {count} {count, plural, =1 {SLO} other {SLOs}}',
             values: { count: items.length },
           })}{' '}
-          <EuiIcon type="arrowDown" size="s" />
+          <EuiIcon type="chevronSingleDown" size="s" aria-hidden={true} />
         </EuiButtonEmpty>
       }
       isOpen={isOpen}
@@ -111,7 +111,6 @@ export function SloManagementBulkActions({ items, setSelectedItems }: Props) {
     >
       <EuiContextMenu
         initialPanelId={0}
-        size="s"
         panels={panels}
         data-test-subj="detailsCollapsedActionPanel"
       />

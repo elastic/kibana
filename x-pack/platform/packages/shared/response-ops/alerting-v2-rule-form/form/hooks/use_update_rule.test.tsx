@@ -44,7 +44,7 @@ describe('useUpdateRule', () => {
     metadata: {
       name: 'Updated Rule',
       enabled: true,
-      labels: ['tag1', 'tag2'],
+      tags: ['tag1', 'tag2'],
     },
     timeField: '@timestamp',
     schedule: { every: '5m', lookback: '1m' },
@@ -127,7 +127,7 @@ describe('useUpdateRule', () => {
     });
 
     const expectedPayload = {
-      metadata: { name: 'Updated Rule', labels: ['tag1', 'tag2'] },
+      metadata: { name: 'Updated Rule', tags: ['tag1', 'tag2'] },
       time_field: '@timestamp',
       schedule: { every: '5m', lookback: '1m' },
       evaluation: { query: { base: 'FROM logs | LIMIT 10' } },
@@ -226,6 +226,7 @@ describe('useUpdateRule', () => {
       expect(body.state_transition).toEqual({
         pending_count: 3,
         pending_timeframe: '10m',
+        recovering_count: 0,
       });
     });
   });

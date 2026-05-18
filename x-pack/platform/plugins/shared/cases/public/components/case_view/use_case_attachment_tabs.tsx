@@ -19,7 +19,11 @@ import { useCaseObservables } from './use_case_observables';
 import { ExperimentalBadge } from '../experimental_badge/experimental_badge';
 import { useCasesFeatures } from '../../common/use_cases_features';
 import { AttachmentType } from '../../../common/types/domain';
-import { isLegacyAttachmentRequest } from '../../../common/utils/attachments/v1_type_guards';
+import {
+  isEventAttachmentType,
+  isLegacyAttachmentRequest,
+} from '../../../common/utils/attachments';
+import { isUnifiedEventAttachment } from '../../../common/utils/attachments/v2_type_guards';
 
 const FilesBadge = ({
   activeTab,
@@ -206,6 +210,10 @@ export const useCaseAttachmentTabs = ({
     caseId: caseData.id,
     searchTerm,
   });
+
+  const showAlertsTab = features.alerts.enabled;
+  const showEventsTab = features.events.enabled;
+
   const { observables, isLoading: isLoadingObservables } = useCaseObservables(caseData, searchTerm);
   const { observablesAuthorized: canShowObservableTabs, isObservablesFeatureEnabled } =
     useCasesFeatures();
@@ -227,14 +235,16 @@ export const useCaseAttachmentTabs = ({
           acc.totalAlerts = Array.isArray(comment.alertId)
             ? acc.totalAlerts + comment.alertId.length
             : acc.totalAlerts + 1;
-        } else if (
-          isLegacyAttachmentRequest(comment) &&
-          comment.type === AttachmentType.event &&
-          features.events.enabled
-        ) {
-          acc.totalEvents = Array.isArray(comment.eventId)
-            ? acc.totalEvents + comment.eventId.length
-            : acc.totalEvents + 1;
+        } else if (isEventAttachmentType(comment.type) && features.events.enabled) {
+          if (isLegacyAttachmentRequest(comment) && comment.type === AttachmentType.event) {
+            acc.totalEvents = Array.isArray(comment.eventId)
+              ? acc.totalEvents + comment.eventId.length
+              : acc.totalEvents + 1;
+          } else if (isUnifiedEventAttachment(comment)) {
+            acc.totalEvents = Array.isArray(comment.attachmentId)
+              ? acc.totalEvents + comment.attachmentId.length
+              : acc.totalEvents + 1;
+          }
         }
         return acc;
       },
@@ -250,7 +260,7 @@ export const useCaseAttachmentTabs = ({
 
   const tabsConfig = useMemo(
     () => [
-      ...(features.alerts.enabled
+      ...(showAlertsTab
         ? [
             {
               id: CASE_VIEW_PAGE_TABS.ALERTS,
@@ -266,7 +276,7 @@ export const useCaseAttachmentTabs = ({
             },
           ]
         : []),
-      ...(features.events.enabled
+      ...(showEventsTab
         ? [
             {
               id: CASE_VIEW_PAGE_TABS.EVENTS,
@@ -316,9 +326,9 @@ export const useCaseAttachmentTabs = ({
       stats.totalAlerts,
       stats.totalEvents,
       euiTheme,
-      features.alerts.enabled,
+      showAlertsTab,
+      showEventsTab,
       features.alerts.isExperimental,
-      features.events.enabled,
       fileStatsData,
       isLoadingFiles,
       isLoadingObservables,

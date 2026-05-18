@@ -1,0 +1,16 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`buildLogPaginationCursorProbeEsql adds sort, cap, inline count, and slice-end row after the probe WHERE 1`] = `
+"FROM logs-*
+    METADATA _index, _id
+  | WHERE
+      @timestamp >= TO_DATETIME(\\"2024-01-01T00:00:00.000Z\\")
+      AND @timestamp <= TO_DATETIME(\\"2024-01-02T00:00:00.000Z\\")
+      AND ((\`event.outcome\` IS NULL OR COALESCE(\`event.outcome\` != \\"failure\\", TRUE)) AND (NOT(\`user.email\` IS NULL) AND COALESCE(\`user.email\` != \\"\\", TRUE) OR NOT(\`user.id\` IS NULL) AND COALESCE(\`user.id\` != \\"\\", TRUE) OR NOT(\`user.name\` IS NULL) AND COALESCE(\`user.name\` != \\"\\", TRUE)))
+  | INLINE STATS total_logs = count(*)
+  | SORT @timestamp ASC, \`_id\` ASC
+  | LIMIT 100
+  | SORT @timestamp DESC, \`_id\` DESC
+  | LIMIT 1
+  | KEEP @timestamp, \`_id\`, total_logs"
+`;

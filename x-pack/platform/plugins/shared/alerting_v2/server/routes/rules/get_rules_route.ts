@@ -9,32 +9,14 @@ import type { KibanaRequest, RouteSecurity } from '@kbn/core-http-server';
 import { inject, injectable } from 'inversify';
 import { Request } from '@kbn/core-di-server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
-import { z } from '@kbn/zod/v4';
-import { findRulesResponseSchema } from '@kbn/alerting-v2-schemas';
+import type { z } from '@kbn/zod/v4';
+import { findRulesParamsSchema, findRulesResponseSchema } from '@kbn/alerting-v2-schemas';
 
 import { RulesClient } from '../../lib/rules_client';
 import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { ALERTING_V2_RULE_API_PATH } from '../constants';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
-
-const getRulesQuerySchema = z.object({
-  page: z.coerce.number().min(1).optional().describe('The page number to return.'),
-  perPage: z.coerce
-    .number()
-    .min(1)
-    .max(1000)
-    .optional()
-    .describe('The number of rules to return per page.'),
-
-  filter: z.string().optional().describe('A KQL string to filter the rules.'),
-  search: z
-    .string()
-    .trim()
-    .min(1)
-    .optional()
-    .describe('A text string to search across rule fields.'),
-});
 
 @injectable()
 export class GetRulesRoute extends BaseAlertingRoute {
@@ -50,7 +32,7 @@ export class GetRulesRoute extends BaseAlertingRoute {
   } as const;
   static validate = {
     request: {
-      query: buildRouteValidationWithZod(getRulesQuerySchema),
+      query: buildRouteValidationWithZod(findRulesParamsSchema),
     },
     response: {
       200: {
@@ -68,7 +50,11 @@ export class GetRulesRoute extends BaseAlertingRoute {
   constructor(
     @inject(AlertingRouteContext) ctx: AlertingRouteContext,
     @inject(Request)
-    private readonly request: KibanaRequest<unknown, z.infer<typeof getRulesQuerySchema>, unknown>,
+    private readonly request: KibanaRequest<
+      unknown,
+      z.infer<typeof findRulesParamsSchema>,
+      unknown
+    >,
     @inject(RulesClient) private readonly rulesClient: RulesClient
   ) {
     super(ctx);
@@ -80,6 +66,8 @@ export class GetRulesRoute extends BaseAlertingRoute {
       perPage: this.request.query.perPage,
       filter: this.request.query.filter,
       search: this.request.query.search,
+      sortField: this.request.query.sortField,
+      sortOrder: this.request.query.sortOrder,
     });
     return this.ctx.response.ok({ body: result });
   }

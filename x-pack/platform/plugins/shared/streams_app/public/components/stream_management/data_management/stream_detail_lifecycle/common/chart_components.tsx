@@ -24,7 +24,7 @@ import type { IlmPolicyPhases, PhaseName, Streams } from '@kbn/streams-schema';
 import { capitalize } from 'lodash';
 import moment from 'moment';
 import React, { useMemo } from 'react';
-import { orderIlmPhases } from '../helpers/helpers';
+import { orderIlmPhases } from '../../../../../util/ilm_policy_phases';
 import { formatBytes } from '../helpers/format_bytes';
 import { useIlmPhasesColorAndDescription } from '../hooks/use_ilm_phases_color_and_description';
 import type { StreamAggregations } from '../hooks/use_ingestion_rate';
@@ -296,7 +296,7 @@ export function ChartBarPhasesSeries({
   );
 }
 
-function PhasesLegend({ phases }: { phases?: IlmPolicyPhases }) {
+export function PhasesLegend({ phases }: { phases?: IlmPolicyPhases }) {
   const { ilmPhases } = useIlmPhasesColorAndDescription();
   const availablePhases = useMemo(() => {
     if (!phases) return [];

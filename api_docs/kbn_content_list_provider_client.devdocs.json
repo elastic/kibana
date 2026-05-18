@@ -10,10 +10,10 @@
         "tags": [],
         "label": "ContentListClientProvider",
         "description": [
-          "\nClient-side content list provider.\n\nWraps an existing `TableListView`-style `findItems` function and provides\nclient-side sorting, filtering, and pagination. The strategy handles transformation\nof `UserContentCommonSchema` items to `ContentListItem` format.\n"
+          "\nClient-side content list provider.\n\nWraps an existing `TableListView`-style `findItems` function and provides\nclient-side sorting, filtering, and pagination. The strategy handles transformation\nof `UserContentCommonSchema` items to `ContentListItem` format and caches the\nfull item set for use by `getFacets` implementations.\n\nWhen `services.tags` is provided, it constructs a `FilterFacetConfig<Tag>`\nfor `features.tags` that computes tag facets from the cached item set.\nWhen `services.userProfiles` is provided, it constructs a\n`FilterFacetConfig<UserProfileEntry>` for `features.userProfiles` the same way.\n\nThe `services.uiSettings` is read once at mount to determine the default page size\nfrom the `savedObjects:perPage` user setting. An explicit\n`features.pagination.initialPageSize` takes priority over the uiSettings value.\n"
         ],
         "signature": [
-          "({ children, findItems: tableListViewFindItems, ...rest }: ",
+          "({ children, findItems: tableListViewFindItems, features: featuresProp, services, onFetchSuccess, contentEditor, item: itemConfigProp, ...rest }: ",
           {
             "pluginId": "@kbn/content-list-provider-client",
             "scope": "public",
@@ -24,7 +24,7 @@
           ") => JSX.Element"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/provider.tsx",
-        "lineNumber": 56,
+        "lineNumber": 182,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -34,7 +34,7 @@
             "id": "def-public.ContentListClientProvider.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  children,\n  findItems: tableListViewFindItems,\n  ...rest\n}",
+            "label": "{\n  children,\n  findItems: tableListViewFindItems,\n  features: featuresProp = {},\n  services,\n  onFetchSuccess,\n  contentEditor,\n  item: itemConfigProp,\n  ...rest\n}",
             "description": [],
             "signature": [
               {
@@ -46,9 +46,10 @@
               }
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/provider.tsx",
-            "lineNumber": 56,
+            "lineNumber": 182,
             "columnNumber": 43,
             "deprecated": false,
+            "docsReferencedTypeName": "ContentListClientProviderProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -58,12 +59,20 @@
       },
       {
         "parentPluginId": "@kbn/content-list-provider-client",
-        "id": "def-public.createFindItemsFn",
+        "id": "def-public.createClientStrategy",
         "type": "Function",
         "tags": [],
-        "label": "createFindItemsFn",
+        "label": "createClientStrategy",
         "description": [
-          "\nCreates a `FindItemsFn` that wraps a `TableListView`-style `findItems` function.\n\nThis adapter:\n- Translates between the old and new API signatures.\n- Applies client-side sorting and pagination (matching original `TableListView` behavior).\n- Transforms results to `ContentListItem` format (only for the returned page).\n- Forwards the `AbortSignal` for request cancellation (consumers may optionally respect it).\n\n**Limitations:**\n- Only `searchQuery` is passed to the underlying `findItems`. The `params.filters` object\n  and `refs` (references/referencesToExclude) from the second parameter are not forwarded.\n"
+          "\nCreates a client strategy that wraps a `TableListView`-style `findItems` function.\n\nThe strategy caches the server response keyed by `searchQuery`. When filters,\nsort, or page change without a new search query, the cached items are reused\nand only the client-side transforms are reapplied — no server fetch occurs.\n\nThe core provider calls ",
+          {
+            "pluginId": "@kbn/content-list-provider-client",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderClientPluginApi",
+            "section": "def-public.ClientStrategy.onInvalidate",
+            "text": "ClientStrategy.onInvalidate"
+          },
+          " before any\nexplicit refetch (e.g. after a delete) to force the next `findItems` call\nto hit the server.\n"
         ],
         "signature": [
           "(tableListViewFindItems: ",
@@ -74,24 +83,26 @@
             "section": "def-public.TableListViewFindItemsFn",
             "text": "TableListViewFindItemsFn"
           },
-          ") => ",
+          ", decorate?: ",
+          "ItemDecorator",
+          " | undefined, listingLimit?: number | undefined) => ",
           {
-            "pluginId": "@kbn/content-list-provider",
+            "pluginId": "@kbn/content-list-provider-client",
             "scope": "public",
-            "docId": "kibKbnContentListProviderPluginApi",
-            "section": "def-public.FindItemsFn",
-            "text": "FindItemsFn"
+            "docId": "kibKbnContentListProviderClientPluginApi",
+            "section": "def-public.ClientStrategy",
+            "text": "ClientStrategy"
           }
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/strategy.ts",
-        "lineNumber": 148,
+        "lineNumber": 317,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/content-list-provider-client",
-            "id": "def-public.createFindItemsFn.$1",
+            "id": "def-public.createClientStrategy.$1",
             "type": "Function",
             "tags": [],
             "label": "tableListViewFindItems",
@@ -108,20 +119,2261 @@
               }
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/strategy.ts",
-            "lineNumber": 149,
+            "lineNumber": 318,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TableListViewFindItemsFn",
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider-client",
+            "id": "def-public.createClientStrategy.$2",
+            "type": "Function",
+            "tags": [],
+            "label": "decorate",
+            "description": [
+              "- Optional callback that enriches raw items with external data."
+            ],
+            "signature": [
+              "ItemDecorator",
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/strategy.ts",
+            "lineNumber": 319,
+            "columnNumber": 3,
+            "deprecated": false,
+            "docsReferencedTypeName": "ItemDecorator",
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider-client",
+            "id": "def-public.createClientStrategy.$3",
+            "type": "number",
+            "tags": [],
+            "label": "listingLimit",
+            "description": [
+              "- Maximum number of items to fetch from the server per request."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/strategy.ts",
+            "lineNumber": 320,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [
+          "A ",
+          {
+            "pluginId": "@kbn/content-list-provider-client",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderClientPluginApi",
+            "section": "def-public.ClientStrategy",
+            "text": "ClientStrategy"
+          },
+          " with `findItems`, `onInvalidate`, `onRefresh`, and `getItems`."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider-client",
+        "id": "def-public.createContentInsightsService",
+        "type": "Function",
+        "tags": [],
+        "label": "createContentInsightsService",
+        "description": [
+          "\nBuild a content-insights service for ",
+          {
+            "pluginId": "@kbn/content-list-provider-client",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderClientPluginApi",
+            "section": "def-public.SavedObjectActivityRow",
+            "text": "SavedObjectActivityRow"
+          },
+          " from the\nstandard core services.\n\nReturns the upstream ",
+          {
+            "pluginId": "@kbn/content-list-provider-client",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderClientPluginApi",
+            "section": "def-public.ContentInsightsClient",
+            "text": "ContentInsightsClient"
+          },
+          " typed as\n",
+          {
+            "pluginId": "@kbn/content-list-provider-client",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderClientPluginApi",
+            "section": "def-public.ContentInsightsClientPublic",
+            "text": "ContentInsightsClientPublic"
+          },
+          " so consumers can substitute their own\nimplementation if needed.\n\nThe returned service is intended for use with `<SavedObjectActivityRow>` —\npass it as the component's `service` prop from `contentEditor.appendRows`.\n"
+        ],
+        "signature": [
+          "({ http, logger, domainId, }: ",
+          {
+            "pluginId": "@kbn/content-list-provider-client",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderClientPluginApi",
+            "section": "def-public.ContentInsightsServiceOptions",
+            "text": "ContentInsightsServiceOptions"
+          },
+          ") => ",
+          {
+            "pluginId": "@kbn/content-management-content-insights-public",
+            "scope": "public",
+            "docId": "kibKbnContentManagementContentInsightsPublicPluginApi",
+            "section": "def-public.ContentInsightsClientPublic",
+            "text": "ContentInsightsClientPublic"
+          }
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/content_insights/content_insights_service.ts",
+        "lineNumber": 49,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-provider-client",
+            "id": "def-public.createContentInsightsService.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  http,\n  logger,\n  domainId,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/content-list-provider-client",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderClientPluginApi",
+                "section": "def-public.ContentInsightsServiceOptions",
+                "text": "ContentInsightsServiceOptions"
+              }
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/content_insights/content_insights_service.ts",
+            "lineNumber": 49,
+            "columnNumber": 46,
+            "deprecated": false,
+            "docsReferencedTypeName": "ContentInsightsServiceOptions",
             "trackAdoption": false,
             "isRequired": true
           }
         ],
-        "returnComment": [
-          "A `FindItemsFn` compatible with `ContentListProvider`."
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider-client",
+        "id": "def-public.createDuplicateTitleValidator",
+        "type": "Function",
+        "tags": [],
+        "label": "createDuplicateTitleValidator",
+        "description": [
+          "\nBuild a `customValidators.title` warning entry that flags duplicate titles\nduring inline editing in the content editor flyout.\n\nBails when called without an `id` (new items haven't been persisted yet).\nBails when `findCurrentTitle` returns `undefined` (item not found / in\nerror state — leave validation to the save handler). Otherwise calls\n`checkForDuplicate` and converts a `false` resolution or thrown error into\nthe warning string returned by `getDuplicateTitleWarning`. Unexpected errors\nare logged to the console (dev only) and treated the same as a duplicate.\n"
         ],
+        "signature": [
+          "({ findCurrentTitle, checkForDuplicate, getDuplicateTitleWarning, }: ",
+          {
+            "pluginId": "@kbn/content-list-provider-client",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderClientPluginApi",
+            "section": "def-public.DuplicateTitleValidatorOptions",
+            "text": "DuplicateTitleValidatorOptions"
+          },
+          ") => ",
+          {
+            "pluginId": "@kbn/content-list-provider-client",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderClientPluginApi",
+            "section": "def-public.TitleValidator",
+            "text": "TitleValidator"
+          }
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/duplicate_title/duplicate_title_validator.ts",
+        "lineNumber": 92,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-provider-client",
+            "id": "def-public.createDuplicateTitleValidator.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  findCurrentTitle,\n  checkForDuplicate,\n  getDuplicateTitleWarning = defaultDuplicateTitleWarning,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/content-list-provider-client",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderClientPluginApi",
+                "section": "def-public.DuplicateTitleValidatorOptions",
+                "text": "DuplicateTitleValidatorOptions"
+              }
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/duplicate_title/duplicate_title_validator.ts",
+            "lineNumber": 92,
+            "columnNumber": 47,
+            "deprecated": false,
+            "docsReferencedTypeName": "DuplicateTitleValidatorOptions",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider-client",
+        "id": "def-public.createFavoritesService",
+        "type": "Function",
+        "tags": [],
+        "label": "createFavoritesService",
+        "description": [
+          "\nBuild a favorites service for `ContentListClientProvider`'s\n`services.favorites` slot from the standard core services.\n\nReturns the upstream ",
+          {
+            "pluginId": "@kbn/content-list-provider-client",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderClientPluginApi",
+            "section": "def-public.FavoritesClient",
+            "text": "FavoritesClient"
+          },
+          " typed as\n",
+          {
+            "pluginId": "@kbn/content-list-provider-client",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderClientPluginApi",
+            "section": "def-public.FavoritesClientPublic",
+            "text": "FavoritesClientPublic"
+          },
+          " so consumers can substitute their own\nimplementation if needed.\n"
+        ],
+        "signature": [
+          "<Metadata extends void | object = void>({ appId, savedObjectType, http, userProfile, usageCollection, }: ",
+          {
+            "pluginId": "@kbn/content-list-provider-client",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderClientPluginApi",
+            "section": "def-public.FavoritesServiceOptions",
+            "text": "FavoritesServiceOptions"
+          },
+          ") => ",
+          {
+            "pluginId": "@kbn/content-management-favorites-public",
+            "scope": "public",
+            "docId": "kibKbnContentManagementFavoritesPublicPluginApi",
+            "section": "def-public.FavoritesClientPublic",
+            "text": "FavoritesClientPublic"
+          },
+          "<Metadata>"
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/favorites/favorites_service.ts",
+        "lineNumber": 56,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-provider-client",
+            "id": "def-public.createFavoritesService.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  appId,\n  savedObjectType,\n  http,\n  userProfile,\n  usageCollection,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/content-list-provider-client",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderClientPluginApi",
+                "section": "def-public.FavoritesServiceOptions",
+                "text": "FavoritesServiceOptions"
+              }
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/favorites/favorites_service.ts",
+            "lineNumber": 56,
+            "columnNumber": 79,
+            "deprecated": false,
+            "docsReferencedTypeName": "FavoritesServiceOptions",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider-client",
+        "id": "def-public.createTagsService",
+        "type": "Function",
+        "tags": [],
+        "label": "createTagsService",
+        "description": [
+          "\nBuild a ",
+          {
+            "pluginId": "@kbn/content-list-provider-client",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderClientPluginApi",
+            "section": "def-public.ContentManagementTagsServices",
+            "text": "ContentManagementTagsServices"
+          },
+          " suitable for\n`ContentListClientProvider`'s `services.tags` slot from a tagging API.\n\nPass `taggingApi.ui` from `SavedObjectsTaggingApi` (see\n`@kbn/saved-objects-tagging-oss-plugin/public`) directly:\n\n```ts\nconst tags = createTagsService(savedObjectsTagging.getTaggingApi()?.ui);\n```\n\nReturns `undefined` when no API is supplied so callers can pass the result\nstraight through without a guard:\n\n```tsx\n<ContentListClientProvider services={{ ...core, tags: createTagsService(api) }} />\n```"
+        ],
+        "signature": [
+          "(taggingApi: ",
+          {
+            "pluginId": "@kbn/content-list-provider-client",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderClientPluginApi",
+            "section": "def-public.TagsApi",
+            "text": "TagsApi"
+          },
+          " | null | undefined) => Services | undefined"
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/tags/tags_service.ts",
+        "lineNumber": 41,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-provider-client",
+            "id": "def-public.createTagsService.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "taggingApi",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/content-list-provider-client",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderClientPluginApi",
+                "section": "def-public.TagsApi",
+                "text": "TagsApi"
+              },
+              " | null | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/tags/tags_service.ts",
+            "lineNumber": 42,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider-client",
+        "id": "def-public.createUserProfilesService",
+        "type": "Function",
+        "tags": [],
+        "label": "createUserProfilesService",
+        "description": [
+          "\nBuild a ",
+          {
+            "pluginId": "@kbn/content-list-provider-client",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderClientPluginApi",
+            "section": "def-public.ContentListUserProfilesServices",
+            "text": "ContentListUserProfilesServices"
+          },
+          " for\n`ContentListClientProvider`'s `services.userProfiles` slot from the core\nuser-profile service.\n\nThe factory wraps `userProfile.bulkGet({ uids, dataPath: 'avatar' })` and\nshapes each profile into the `UserProfileEntry` form used by the provider's\n`ProfileCache` (`{ uid, user, avatar, email, fullName }`).\n\n`email` is coalesced to `''` and `fullName` falls back to the username when\nunset, matching the convention used by the legacy `TableListView` user\nprofile filter.\n\nCalls with an empty `uids` array short-circuit and return `[]` without\nissuing a request.\n"
+        ],
+        "signature": [
+          "(userProfile: ",
+          "UserProfileService",
+          ") => ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.ContentListUserProfilesServices",
+            "text": "ContentListUserProfilesServices"
+          }
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/user_profiles/user_profiles_service.ts",
+        "lineNumber": 35,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-provider-client",
+            "id": "def-public.createUserProfilesService.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "userProfile",
+            "description": [],
+            "signature": [
+              "UserProfileService"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/user_profiles/user_profiles_service.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
+            "deprecated": false,
+            "docsReferencedTypeName": "UserProfileServiceStart",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider-client",
+        "id": "def-public.RecentsFilterRenderer",
+        "type": "Function",
+        "tags": [],
+        "label": "RecentsFilterRenderer",
+        "description": [
+          "\nRenders an `EuiFilterButton` that toggles `is:recent` in the\n`EuiSearchBar` query — visible only when the recently-accessed source has\nat least one entry.\n\nThe companion `useRecentlyAccessedDecoration` hook builds a\n`filter.createComponent`-wrapped form of this renderer, so consumers\nnormally do not import this directly."
+        ],
+        "signature": [
+          "({ query, onChange, service, label, \"data-test-subj\": dataTestSubj, }: ",
+          {
+            "pluginId": "@kbn/content-list-provider-client",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderClientPluginApi",
+            "section": "def-public.RecentsFilterRendererProps",
+            "text": "RecentsFilterRendererProps"
+          },
+          ") => React.JSX.Element | null"
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/recently_accessed/recents_filter_renderer.tsx",
+        "lineNumber": 56,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-provider-client",
+            "id": "def-public.RecentsFilterRenderer.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  query,\n  onChange,\n  service,\n  label = defaultLabel,\n  'data-test-subj': dataTestSubj = 'contentListRecentsRenderer',\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/content-list-provider-client",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderClientPluginApi",
+                "section": "def-public.RecentsFilterRendererProps",
+                "text": "RecentsFilterRendererProps"
+              }
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/recently_accessed/recents_filter_renderer.tsx",
+            "lineNumber": 56,
+            "columnNumber": 39,
+            "deprecated": false,
+            "docsReferencedTypeName": "RecentsFilterRendererProps",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider-client",
+        "id": "def-public.SavedObjectActivityRow",
+        "type": "Function",
+        "tags": [],
+        "label": "SavedObjectActivityRow",
+        "description": [
+          "\nActivity row for the content editor flyout — renders the shared\n`ActivityView` plus `ViewsStats` inside a `ContentInsightsProvider`.\n\nDrop into `contentEditor.appendRows`:\n\n```tsx\ncontentEditor={{\n  appendRows: (item) => (\n    <SavedObjectActivityRow service={insights} item={item} entityNamePlural=\"dashboards\" />\n  ),\n}}\n```\n\nWraps a fresh provider on every mount because the flyout renders outside\nthe listing's tree, so we cannot rely on a parent provider being in scope."
+        ],
+        "signature": [
+          "({ service, item, entityNamePlural, }: ",
+          {
+            "pluginId": "@kbn/content-list-provider-client",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderClientPluginApi",
+            "section": "def-public.SavedObjectActivityRowProps",
+            "text": "SavedObjectActivityRowProps"
+          },
+          ") => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/content_insights/saved_object_activity_row.tsx",
+        "lineNumber": 59,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-provider-client",
+            "id": "def-public.SavedObjectActivityRow.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  service,\n  item,\n  entityNamePlural,\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/content-list-provider-client",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderClientPluginApi",
+                "section": "def-public.SavedObjectActivityRowProps",
+                "text": "SavedObjectActivityRowProps"
+              }
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/content_insights/saved_object_activity_row.tsx",
+            "lineNumber": 59,
+            "columnNumber": 40,
+            "deprecated": false,
+            "docsReferencedTypeName": "SavedObjectActivityRowProps",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider-client",
+        "id": "def-public.useRecentlyAccessedDecoration",
+        "type": "Function",
+        "tags": [],
+        "label": "useRecentlyAccessedDecoration",
+        "description": [
+          "\nBuild the recently-accessed integration for a saved-object listing in one\ncall: a `findItems` decorator, the `features.flags` entry, and a\ntoolbar-ready `RecentsFilter` component.\n\nThe supplied `source` is closure-captured by the filter component, so\nconsumers don't have to forward it themselves. Pass any `{ get(): { id }[] }`\n— typically a `RecentlyAccessed` from `@kbn/recently-accessed`.\n"
+        ],
+        "signature": [
+          "(source: ",
+          {
+            "pluginId": "@kbn/content-list-provider-client",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderClientPluginApi",
+            "section": "def-public.RecentlyAccessedHistorySource",
+            "text": "RecentlyAccessedHistorySource"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/content-list-provider-client",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderClientPluginApi",
+            "section": "def-public.RecentlyAccessedEntry",
+            "text": "RecentlyAccessedEntry"
+          },
+          ">) => ",
+          {
+            "pluginId": "@kbn/content-list-provider-client",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderClientPluginApi",
+            "section": "def-public.RecentlyAccessedDecoration",
+            "text": "RecentlyAccessedDecoration"
+          }
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/recently_accessed/use_recently_accessed_decoration.tsx",
+        "lineNumber": 107,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-provider-client",
+            "id": "def-public.useRecentlyAccessedDecoration.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "source",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/content-list-provider-client",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderClientPluginApi",
+                "section": "def-public.RecentlyAccessedHistorySource",
+                "text": "RecentlyAccessedHistorySource"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/content-list-provider-client",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderClientPluginApi",
+                "section": "def-public.RecentlyAccessedEntry",
+                "text": "RecentlyAccessedEntry"
+              },
+              ">"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/recently_accessed/use_recently_accessed_decoration.tsx",
+            "lineNumber": 108,
+            "columnNumber": 3,
+            "deprecated": false,
+            "docsReferencedTypeName": "RecentlyAccessedHistorySource",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider-client",
+        "id": "def-public.withPerformanceMetrics",
+        "type": "Function",
+        "tags": [],
+        "label": "withPerformanceMetrics",
+        "description": [
+          "\nWrap a function (typically `findItems` or a bulk delete) so that each call\nreports a `reportPerformanceMetricEvent` with the elapsed `duration` in ms.\n\nThe wrapped function's return value passes through unchanged. Errors\npropagate without reporting — the caller decides whether to count failed\ncalls as observations.\n"
+        ],
+        "signature": [
+          "<Args extends unknown[], Result>(fn: (...args: Args) => Promise<Result>, { analytics, eventName, savedObjectType, meta }: ",
+          {
+            "pluginId": "@kbn/content-list-provider-client",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderClientPluginApi",
+            "section": "def-public.PerformanceMetricsOptions",
+            "text": "PerformanceMetricsOptions"
+          },
+          ") => (...args: Args) => Promise<Result>"
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/performance_metrics/with_performance_metrics.ts",
+        "lineNumber": 60,
+        "columnNumber": 14,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-provider-client",
+            "id": "def-public.withPerformanceMetrics.$1",
+            "type": "Function",
+            "tags": [],
+            "label": "fn",
+            "description": [],
+            "signature": [
+              "(...args: Args) => Promise<Result>"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/performance_metrics/with_performance_metrics.ts",
+            "lineNumber": 61,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider-client",
+            "id": "def-public.withPerformanceMetrics.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "{ analytics, eventName, savedObjectType, meta }",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/content-list-provider-client",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderClientPluginApi",
+                "section": "def-public.PerformanceMetricsOptions",
+                "text": "PerformanceMetricsOptions"
+              }
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/performance_metrics/with_performance_metrics.ts",
+            "lineNumber": 62,
+            "columnNumber": 3,
+            "deprecated": false,
+            "docsReferencedTypeName": "PerformanceMetricsOptions",
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
         "initialIsOpen": false
       }
     ],
     "interfaces": [
+      {
+        "parentPluginId": "@kbn/content-list-provider-client",
+        "id": "def-public.ClientStrategy",
+        "type": "Interface",
+        "tags": [],
+        "label": "ClientStrategy",
+        "description": [
+          "\nReturn type from ",
+          {
+            "pluginId": "@kbn/content-list-provider-client",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderClientPluginApi",
+            "section": "def-public.createClientStrategy",
+            "text": "createClientStrategy"
+          },
+          "."
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/strategy.ts",
+        "lineNumber": 48,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-provider-client",
+            "id": "def-public.ClientStrategy.findItems",
+            "type": "Function",
+            "tags": [],
+            "label": "findItems",
+            "description": [
+              "\nFetches items and applies client-side filtering, sorting, and pagination.\n\nInternally caches the server response keyed by `searchQuery`. Calls to\n`findItems` with the same `searchQuery` reuse the cache and only\nrecompute the client-side transforms. A new `searchQuery` triggers a\nfresh server fetch.\n\nThe core provider calls ",
+              {
+                "pluginId": "@kbn/content-list-provider-client",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderClientPluginApi",
+                "section": "def-public.ClientStrategy.onInvalidate",
+                "text": "ClientStrategy.onInvalidate"
+              },
+              " before\nrefetching after mutations so the next call always hits the server."
+            ],
+            "signature": [
+              "(params: ",
+              {
+                "pluginId": "@kbn/content-list-provider",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderPluginApi",
+                "section": "def-public.FindItemsParams",
+                "text": "FindItemsParams"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "@kbn/content-list-provider",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderPluginApi",
+                "section": "def-public.FindItemsResult",
+                "text": "FindItemsResult"
+              },
+              ">"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/strategy.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-list-provider-client",
+                "id": "def-public.ClientStrategy.findItems.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/content-list-provider",
+                    "scope": "public",
+                    "docId": "kibKbnContentListProviderPluginApi",
+                    "section": "def-public.FindItemsParams",
+                    "text": "FindItemsParams"
+                  }
+                ],
+                "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider/src/datasource/types.ts",
+                "lineNumber": 134,
+                "columnNumber": 28,
+                "deprecated": false,
+                "docsReferencedTypeName": "FindItemsParams",
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider-client",
+            "id": "def-public.ClientStrategy.onInvalidate",
+            "type": "Function",
+            "tags": [],
+            "label": "onInvalidate",
+            "description": [
+              "\nCalled by the core provider before an explicit refetch (e.g. after a\nmutation) to clear the internal item cache. The next `findItems` call\nwill fetch from the server regardless of `searchQuery`."
+            ],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/strategy.ts",
+            "lineNumber": 64,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider-client",
+            "id": "def-public.ClientStrategy.onRefresh",
+            "type": "Function",
+            "tags": [],
+            "label": "onRefresh",
+            "description": [
+              "\nRe-runs the `decorate` callback on existing raw items without a\nserver round-trip. Call after external data mutations (e.g. star/unstar)\nso the cached decorated items are refreshed."
+            ],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/strategy.ts",
+            "lineNumber": 70,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider-client",
+            "id": "def-public.ClientStrategy.getItems",
+            "type": "Function",
+            "tags": [],
+            "label": "getItems",
+            "description": [
+              "Returns the full (unfiltered, decorated) item set from the most recent fetch."
+            ],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/content-management-table-list-view-common",
+                "scope": "common",
+                "docId": "kibKbnContentManagementTableListViewCommonPluginApi",
+                "section": "def-common.UserContentCommonSchema",
+                "text": "UserContentCommonSchema"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/strategy.ts",
+            "lineNumber": 76,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider-client",
+        "id": "def-public.ContentEditorConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "ContentEditorConfig",
+        "description": [
+          "\nContent editor configuration for `ContentListClientProvider`.\n\nThis is the Kibana-specific content editor integration. The base\n`ContentListProvider` only knows about a simple `onInspect` callback;\nthis config produces that callback by wiring it to the Kibana content\neditor flyout."
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/content_editor/types.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-provider-client",
+            "id": "def-public.ContentEditorConfig.openContentEditor",
+            "type": "Function",
+            "tags": [],
+            "label": "openContentEditor",
+            "description": [
+              "\nCallback to open the content editor flyout.\nObtained from `useOpenContentEditor()` in `@kbn/content-management-content-editor`."
+            ],
+            "signature": [
+              "(params: ",
+              {
+                "pluginId": "@kbn/content-management-content-editor",
+                "scope": "public",
+                "docId": "kibKbnContentManagementContentEditorPluginApi",
+                "section": "def-public.OpenContentEditorParams",
+                "text": "OpenContentEditorParams"
+              },
+              ") => () => void"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/content_editor/types.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-list-provider-client",
+                "id": "def-public.ContentEditorConfig.openContentEditor.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/content-management-content-editor",
+                    "scope": "public",
+                    "docId": "kibKbnContentManagementContentEditorPluginApi",
+                    "section": "def-public.OpenContentEditorParams",
+                    "text": "OpenContentEditorParams"
+                  }
+                ],
+                "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/content_editor/types.ts",
+                "lineNumber": 30,
+                "columnNumber": 23,
+                "deprecated": false,
+                "docsReferencedTypeName": "OpenContentEditorParams",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider-client",
+            "id": "def-public.ContentEditorConfig.isReadonly",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isReadonly",
+            "description": [
+              "Whether the content editor is readonly. Defaults to `false`."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/content_editor/types.ts",
+            "lineNumber": 32,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider-client",
+            "id": "def-public.ContentEditorConfig.customValidators",
+            "type": "Object",
+            "tags": [],
+            "label": "customValidators",
+            "description": [
+              "Custom validators for title/description fields."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/content-management-content-editor",
+                "scope": "public",
+                "docId": "kibKbnContentManagementContentEditorPluginApi",
+                "section": "def-public.CustomValidators",
+                "text": "CustomValidators"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/content_editor/types.ts",
+            "lineNumber": 35,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider-client",
+            "id": "def-public.ContentEditorConfig.onSave",
+            "type": "Function",
+            "tags": [],
+            "label": "onSave",
+            "description": [
+              "\nCalled when the user saves metadata edits.\nReceives the updated metadata fields. The callback should persist changes\nand return a resolved promise on success."
+            ],
+            "signature": [
+              "((args: { id: string; title: string; description?: string | undefined; tags: string[]; }) => Promise<void>) | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/content_editor/types.ts",
+            "lineNumber": 38,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-list-provider-client",
+                "id": "def-public.ContentEditorConfig.onSave.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "args",
+                "description": [],
+                "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/content_editor/types.ts",
+                "lineNumber": 43,
+                "columnNumber": 19,
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/content-list-provider-client",
+                    "id": "def-public.ContentEditorConfig.onSave.$1.id",
+                    "type": "string",
+                    "tags": [],
+                    "label": "id",
+                    "description": [],
+                    "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/content_editor/types.ts",
+                    "lineNumber": 44,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/content-list-provider-client",
+                    "id": "def-public.ContentEditorConfig.onSave.$1.title",
+                    "type": "string",
+                    "tags": [],
+                    "label": "title",
+                    "description": [],
+                    "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/content_editor/types.ts",
+                    "lineNumber": 45,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/content-list-provider-client",
+                    "id": "def-public.ContentEditorConfig.onSave.$1.description",
+                    "type": "string",
+                    "tags": [],
+                    "label": "description",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/content_editor/types.ts",
+                    "lineNumber": 46,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/content-list-provider-client",
+                    "id": "def-public.ContentEditorConfig.onSave.$1.tags",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "tags",
+                    "description": [],
+                    "signature": [
+                      "string[]"
+                    ],
+                    "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/content_editor/types.ts",
+                    "lineNumber": 47,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider-client",
+            "id": "def-public.ContentEditorConfig.appendRows",
+            "type": "Function",
+            "tags": [],
+            "label": "appendRows",
+            "description": [
+              "\nOptional render prop for additional rows in the content editor flyout.\nUsed by Dashboard to show content insights (panel counts, activity, etc.)."
+            ],
+            "signature": [
+              "((item: ",
+              {
+                "pluginId": "@kbn/content-list-provider",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderPluginApi",
+                "section": "def-public.ContentListItem",
+                "text": "ContentListItem"
+              },
+              "<Record<string, unknown>>) => React.ReactNode) | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/content_editor/types.ts",
+            "lineNumber": 50,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-list-provider-client",
+                "id": "def-public.ContentEditorConfig.appendRows.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "item",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/content-list-provider",
+                    "scope": "public",
+                    "docId": "kibKbnContentListProviderPluginApi",
+                    "section": "def-public.ContentListItem",
+                    "text": "ContentListItem"
+                  },
+                  "<Record<string, unknown>>"
+                ],
+                "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/content_editor/types.ts",
+                "lineNumber": 54,
+                "columnNumber": 17,
+                "deprecated": false,
+                "docsReferencedTypeName": "ContentListItem",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider-client",
+        "id": "def-public.ContentInsightsServiceOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "ContentInsightsServiceOptions",
+        "description": [
+          "\nOptions for ",
+          {
+            "pluginId": "@kbn/content-list-provider-client",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderClientPluginApi",
+            "section": "def-public.createContentInsightsService",
+            "text": "createContentInsightsService"
+          },
+          "."
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/content_insights/content_insights_service.ts",
+        "lineNumber": 17,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-provider-client",
+            "id": "def-public.ContentInsightsServiceOptions.http",
+            "type": "Object",
+            "tags": [],
+            "label": "http",
+            "description": [
+              "Core HTTP service."
+            ],
+            "signature": [
+              "HttpSetup"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/content_insights/content_insights_service.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider-client",
+            "id": "def-public.ContentInsightsServiceOptions.logger",
+            "type": "Object",
+            "tags": [],
+            "label": "logger",
+            "description": [
+              "Logger used for warnings on tracking failures."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "common",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-common.Logger",
+                "text": "Logger"
+              }
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/content_insights/content_insights_service.ts",
+            "lineNumber": 23,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider-client",
+            "id": "def-public.ContentInsightsServiceOptions.domainId",
+            "type": "string",
+            "tags": [],
+            "label": "domainId",
+            "description": [
+              "Domain identifier (e.g. `'dashboard'`, `'visualization'`) used to scope insights."
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/content_insights/content_insights_service.ts",
+            "lineNumber": 25,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider-client",
+        "id": "def-public.ContentListClientServices",
+        "type": "Interface",
+        "tags": [],
+        "label": "ContentListClientServices",
+        "description": [
+          "\nServices required by the client provider.\n\nExtends the base `ContentListServices` with `uiSettings`, which is used to read\nthe `savedObjects:perPage` and `savedObjects:listingLimit` settings."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/content-list-provider-client",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderClientPluginApi",
+            "section": "def-public.ContentListClientServices",
+            "text": "ContentListClientServices"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.ContentListServices",
+            "text": "ContentListServices"
+          }
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/types.ts",
+        "lineNumber": 22,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-provider-client",
+            "id": "def-public.ContentListClientServices.uiSettings",
+            "type": "Object",
+            "tags": [],
+            "label": "uiSettings",
+            "description": [
+              "UI settings accessor. Required for reading defaults like page size and listing limit."
+            ],
+            "signature": [
+              "UiSettingsAccessor"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/types.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider-client",
+        "id": "def-public.DecorableFindItemsResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "DecorableFindItemsResult",
+        "description": [
+          "\nMinimal shape consumed by ",
+          {
+            "pluginId": "@kbn/content-list-provider-client",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderClientPluginApi",
+            "section": "def-public.RecentlyAccessedDecoration.decorate",
+            "text": "RecentlyAccessedDecoration.decorate"
+          },
+          ".\n\nDefined locally rather than re-using `TableListViewFindItemsResult` so the\ndecorator can stay generic over the consumer's hit type without forcing\n`TableListViewFindItemsResult` itself to become generic (which would be a\nbreaking change for existing consumers)."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/content-list-provider-client",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderClientPluginApi",
+            "section": "def-public.DecorableFindItemsResult",
+            "text": "DecorableFindItemsResult"
+          },
+          "<Hit>"
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/recently_accessed/use_recently_accessed_decoration.tsx",
+        "lineNumber": 15,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-provider-client",
+            "id": "def-public.DecorableFindItemsResult.total",
+            "type": "number",
+            "tags": [],
+            "label": "total",
+            "description": [],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/recently_accessed/use_recently_accessed_decoration.tsx",
+            "lineNumber": 24,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider-client",
+            "id": "def-public.DecorableFindItemsResult.hits",
+            "type": "Array",
+            "tags": [],
+            "label": "hits",
+            "description": [],
+            "signature": [
+              "Hit[]"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/recently_accessed/use_recently_accessed_decoration.tsx",
+            "lineNumber": 25,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider-client",
+        "id": "def-public.DuplicateTitleValidatorOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "DuplicateTitleValidatorOptions",
+        "description": [
+          "\nOptions for ",
+          {
+            "pluginId": "@kbn/content-list-provider-client",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderClientPluginApi",
+            "section": "def-public.createDuplicateTitleValidator",
+            "text": "createDuplicateTitleValidator"
+          },
+          "."
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/duplicate_title/duplicate_title_validator.ts",
+        "lineNumber": 25,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-provider-client",
+            "id": "def-public.DuplicateTitleValidatorOptions.findCurrentTitle",
+            "type": "Function",
+            "tags": [],
+            "label": "findCurrentTitle",
+            "description": [
+              "\nLookup callback returning the current saved title for the item identified\nby `id`, or `undefined` if the item cannot be found / is in an error\nstate. Used as `lastSavedTitle` so the consumer's check can ignore\n\"duplicates\" against the item being edited."
+            ],
+            "signature": [
+              "(id: string) => Promise<string | undefined>"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/duplicate_title/duplicate_title_validator.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-list-provider-client",
+                "id": "def-public.DuplicateTitleValidatorOptions.findCurrentTitle.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/duplicate_title/duplicate_title_validator.ts",
+                "lineNumber": 35,
+                "columnNumber": 22,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider-client",
+            "id": "def-public.DuplicateTitleValidatorOptions.checkForDuplicate",
+            "type": "Function",
+            "tags": [],
+            "label": "checkForDuplicate",
+            "description": [
+              "\nReturns `true` when the new title is valid (no duplicate exists). Throw\nor resolve to `false` when a duplicate is detected."
+            ],
+            "signature": [
+              "(args: { id: string; title: string; lastSavedTitle: string; }) => Promise<boolean | void>"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/duplicate_title/duplicate_title_validator.ts",
+            "lineNumber": 36,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-list-provider-client",
+                "id": "def-public.DuplicateTitleValidatorOptions.checkForDuplicate.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "args",
+                "description": [],
+                "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/duplicate_title/duplicate_title_validator.ts",
+                "lineNumber": 40,
+                "columnNumber": 29,
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/content-list-provider-client",
+                    "id": "def-public.DuplicateTitleValidatorOptions.checkForDuplicate.$1.id",
+                    "type": "string",
+                    "tags": [],
+                    "label": "id",
+                    "description": [],
+                    "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/duplicate_title/duplicate_title_validator.ts",
+                    "lineNumber": 41,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/content-list-provider-client",
+                    "id": "def-public.DuplicateTitleValidatorOptions.checkForDuplicate.$1.title",
+                    "type": "string",
+                    "tags": [],
+                    "label": "title",
+                    "description": [],
+                    "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/duplicate_title/duplicate_title_validator.ts",
+                    "lineNumber": 42,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/content-list-provider-client",
+                    "id": "def-public.DuplicateTitleValidatorOptions.checkForDuplicate.$1.lastSavedTitle",
+                    "type": "string",
+                    "tags": [],
+                    "label": "lastSavedTitle",
+                    "description": [],
+                    "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/duplicate_title/duplicate_title_validator.ts",
+                    "lineNumber": 43,
+                    "columnNumber": 5,
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider-client",
+            "id": "def-public.DuplicateTitleValidatorOptions.getDuplicateTitleWarning",
+            "type": "Function",
+            "tags": [],
+            "label": "getDuplicateTitleWarning",
+            "description": [
+              "\nOptional formatter for the warning message. Defaults to a generic\n\"Saving \\\"{value}\\\" creates a duplicate title.\" string."
+            ],
+            "signature": [
+              "((value: string) => string) | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/duplicate_title/duplicate_title_validator.ts",
+            "lineNumber": 45,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-list-provider-client",
+                "id": "def-public.DuplicateTitleValidatorOptions.getDuplicateTitleWarning.$1",
+                "type": "string",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/duplicate_title/duplicate_title_validator.ts",
+                "lineNumber": 49,
+                "columnNumber": 31,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider-client",
+        "id": "def-public.FavoritesServiceOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "FavoritesServiceOptions",
+        "description": [
+          "\nOptions for ",
+          {
+            "pluginId": "@kbn/content-list-provider-client",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderClientPluginApi",
+            "section": "def-public.createFavoritesService",
+            "text": "createFavoritesService"
+          },
+          "."
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/favorites/favorites_service.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-provider-client",
+            "id": "def-public.FavoritesServiceOptions.appId",
+            "type": "string",
+            "tags": [],
+            "label": "appId",
+            "description": [
+              "\nApplication identifier reported to the favorites usage collector\n(e.g. `'dashboards'`, `'visualize'`)."
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/favorites/favorites_service.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider-client",
+            "id": "def-public.FavoritesServiceOptions.savedObjectType",
+            "type": "string",
+            "tags": [],
+            "label": "savedObjectType",
+            "description": [
+              "Saved object type that owns the favorited items (e.g. `'dashboard'`)."
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/favorites/favorites_service.ts",
+            "lineNumber": 27,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider-client",
+            "id": "def-public.FavoritesServiceOptions.http",
+            "type": "Object",
+            "tags": [],
+            "label": "http",
+            "description": [
+              "Core HTTP service."
+            ],
+            "signature": [
+              "HttpSetup"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/favorites/favorites_service.ts",
+            "lineNumber": 29,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider-client",
+            "id": "def-public.FavoritesServiceOptions.userProfile",
+            "type": "Object",
+            "tags": [],
+            "label": "userProfile",
+            "description": [
+              "Core user-profile service — required to gate per-user availability."
+            ],
+            "signature": [
+              "UserProfileService"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/favorites/favorites_service.ts",
+            "lineNumber": 31,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider-client",
+            "id": "def-public.FavoritesServiceOptions.usageCollection",
+            "type": "Object",
+            "tags": [],
+            "label": "usageCollection",
+            "description": [
+              "Optional usage collection start, used to record click events."
+            ],
+            "signature": [
+              {
+                "pluginId": "usageCollection",
+                "scope": "public",
+                "docId": "kibUsageCollectionPluginApi",
+                "section": "def-public.UsageCollectionStart",
+                "text": "UsageCollectionStart"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/favorites/favorites_service.ts",
+            "lineNumber": 33,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider-client",
+        "id": "def-public.PerformanceMetricsOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "PerformanceMetricsOptions",
+        "description": [
+          "\nOptions accepted by ",
+          {
+            "pluginId": "@kbn/content-list-provider-client",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderClientPluginApi",
+            "section": "def-public.withPerformanceMetrics",
+            "text": "withPerformanceMetrics"
+          },
+          "."
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/performance_metrics/with_performance_metrics.ts",
+        "lineNumber": 13,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-provider-client",
+            "id": "def-public.PerformanceMetricsOptions.analytics",
+            "type": "Object",
+            "tags": [],
+            "label": "analytics",
+            "description": [
+              "Analytics service used to report the EBT event (typically `coreServices.analytics`)."
+            ],
+            "signature": [
+              "{ optIn: (optInConfig: ",
+              "OptInConfig",
+              ") => void; reportEvent: <EventTypeData extends object>(eventType: string, eventData: EventTypeData) => void; readonly telemetryCounter$: ",
+              "Observable",
+              "<",
+              "TelemetryCounter",
+              ">; }"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/performance_metrics/with_performance_metrics.ts",
+            "lineNumber": 17,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider-client",
+            "id": "def-public.PerformanceMetricsOptions.eventName",
+            "type": "string",
+            "tags": [],
+            "label": "eventName",
+            "description": [
+              "\nEBT event name to report — see `SAVED_OBJECT_LOADED_TIME` /\n`SAVED_OBJECT_DELETE_TIME` in consumers."
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/performance_metrics/with_performance_metrics.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider-client",
+            "id": "def-public.PerformanceMetricsOptions.savedObjectType",
+            "type": "string",
+            "tags": [],
+            "label": "savedObjectType",
+            "description": [
+              "Saved object type, recorded as `meta.saved_object_type`."
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/performance_metrics/with_performance_metrics.ts",
+            "lineNumber": 24,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider-client",
+            "id": "def-public.PerformanceMetricsOptions.meta",
+            "type": "Function",
+            "tags": [],
+            "label": "meta",
+            "description": [
+              "\nExtra metadata merged into the EBT event's `meta`. Useful for `total`\ncounts on bulk operations."
+            ],
+            "signature": [
+              "((args: unknown[], result: unknown) => Record<string, unknown>) | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/performance_metrics/with_performance_metrics.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-list-provider-client",
+                "id": "def-public.PerformanceMetricsOptions.meta.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "args",
+                "description": [],
+                "signature": [
+                  "unknown[]"
+                ],
+                "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/performance_metrics/with_performance_metrics.ts",
+                "lineNumber": 30,
+                "columnNumber": 11,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/content-list-provider-client",
+                "id": "def-public.PerformanceMetricsOptions.meta.$2",
+                "type": "Unknown",
+                "tags": [],
+                "label": "result",
+                "description": [],
+                "signature": [
+                  "unknown"
+                ],
+                "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/performance_metrics/with_performance_metrics.ts",
+                "lineNumber": 30,
+                "columnNumber": 28,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider-client",
+        "id": "def-public.RecentDecoration",
+        "type": "Interface",
+        "tags": [],
+        "label": "RecentDecoration",
+        "description": [
+          "\nDecoration added to each hit by ",
+          {
+            "pluginId": "@kbn/content-list-provider-client",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderClientPluginApi",
+            "section": "def-public.RecentlyAccessedDecoration.decorate",
+            "text": "RecentlyAccessedDecoration.decorate"
+          },
+          ".\nConsumers should extend their item type with these fields so\n`Column.UpdatedAt`-style sort fields and `is:recent` filtering work\nend-to-end.\n\n- `recent` powers the toolbar's `is:recent` filter via the strategy's\n  generic flag matcher (see `features.flags`).\n- `accessedAt` is a numeric score (`history.length - index`) that can drive\n  an opt-in \"Recently viewed\" sort field."
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/recently_accessed/use_recently_accessed_decoration.tsx",
+        "lineNumber": 28,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-provider-client",
+            "id": "def-public.RecentDecoration.recent",
+            "type": "boolean",
+            "tags": [],
+            "label": "recent",
+            "description": [
+              "True when the item appears in the recently-accessed history."
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/recently_accessed/use_recently_accessed_decoration.tsx",
+            "lineNumber": 40,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider-client",
+            "id": "def-public.RecentDecoration.accessedAt",
+            "type": "number",
+            "tags": [],
+            "label": "accessedAt",
+            "description": [
+              "\nRecency score — higher means more recently viewed. `0` for items not in\nthe history. A `desc` sort on this field mirrors the legacy\n`sortByRecentlyAccessed` ordering."
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/recently_accessed/use_recently_accessed_decoration.tsx",
+            "lineNumber": 42,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider-client",
+        "id": "def-public.RecentlyAccessedDecoration",
+        "type": "Interface",
+        "tags": [],
+        "label": "RecentlyAccessedDecoration",
+        "description": [
+          "\nResult returned by ",
+          {
+            "pluginId": "@kbn/content-list-provider-client",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderClientPluginApi",
+            "section": "def-public.useRecentlyAccessedDecoration",
+            "text": "useRecentlyAccessedDecoration"
+          },
+          "."
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/recently_accessed/use_recently_accessed_decoration.tsx",
+        "lineNumber": 50,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-provider-client",
+            "id": "def-public.RecentlyAccessedDecoration.decorate",
+            "type": "Function",
+            "tags": [],
+            "label": "decorate",
+            "description": [
+              "\nDecorate a `findItems` result with `recent`/`accessedAt` based on the\nsupplied source. Reads the source synchronously at call time so each\nfetch picks up the latest history."
+            ],
+            "signature": [
+              "<Hit extends { id: string; }>(result: ",
+              {
+                "pluginId": "@kbn/content-list-provider-client",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderClientPluginApi",
+                "section": "def-public.DecorableFindItemsResult",
+                "text": "DecorableFindItemsResult"
+              },
+              "<Hit>) => ",
+              {
+                "pluginId": "@kbn/content-list-provider-client",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderClientPluginApi",
+                "section": "def-public.DecorableFindItemsResult",
+                "text": "DecorableFindItemsResult"
+              },
+              "<Hit & ",
+              {
+                "pluginId": "@kbn/content-list-provider-client",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderClientPluginApi",
+                "section": "def-public.RecentDecoration",
+                "text": "RecentDecoration"
+              },
+              ">"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/recently_accessed/use_recently_accessed_decoration.tsx",
+            "lineNumber": 54,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-list-provider-client",
+                "id": "def-public.RecentlyAccessedDecoration.decorate.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "result",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/content-list-provider-client",
+                    "scope": "public",
+                    "docId": "kibKbnContentListProviderClientPluginApi",
+                    "section": "def-public.DecorableFindItemsResult",
+                    "text": "DecorableFindItemsResult"
+                  },
+                  "<Hit>"
+                ],
+                "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/recently_accessed/use_recently_accessed_decoration.tsx",
+                "lineNumber": 60,
+                "columnNumber": 5,
+                "deprecated": false,
+                "docsReferencedTypeName": "DecorableFindItemsResult",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider-client",
+            "id": "def-public.RecentlyAccessedDecoration.flag",
+            "type": "Object",
+            "tags": [],
+            "label": "flag",
+            "description": [
+              "\nFlag entry to add to `features.flags` so `EuiSearchBar` parses\n`is:recent` into `filters.recent`."
+            ],
+            "signature": [
+              "{ flagName: string; modelKey: keyof ",
+              {
+                "pluginId": "@kbn/content-list-provider-client",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderClientPluginApi",
+                "section": "def-public.RecentDecoration",
+                "text": "RecentDecoration"
+              },
+              "; }"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/recently_accessed/use_recently_accessed_decoration.tsx",
+            "lineNumber": 62,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider-client",
+            "id": "def-public.RecentlyAccessedDecoration.RecentsFilter",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "RecentsFilter",
+            "description": [
+              "\nDeclarative filter component for the toolbar's `<Filters>` slot. The\nunderlying renderer is closure-bound to the supplied source, so consumers\njust `<recents.RecentsFilter />` without re-passing the service."
+            ],
+            "signature": [
+              "React.ComponentClass<Record<never, never>, any> | React.FunctionComponent<Record<never, never>>"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/recently_accessed/use_recently_accessed_decoration.tsx",
+            "lineNumber": 67,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider-client",
+        "id": "def-public.RecentlyAccessedEntry",
+        "type": "Interface",
+        "tags": [],
+        "label": "RecentlyAccessedEntry",
+        "description": [
+          "\nMinimal entry shape needed to compute recency. Compatible with\n`RecentlyAccessedHistoryItem` from `@kbn/recently-accessed`."
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/recently_accessed/types.ts",
+        "lineNumber": 10,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-provider-client",
+            "id": "def-public.RecentlyAccessedEntry.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/recently_accessed/types.ts",
+            "lineNumber": 15,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider-client",
+        "id": "def-public.RecentlyAccessedHistorySource",
+        "type": "Interface",
+        "tags": [],
+        "label": "RecentlyAccessedHistorySource",
+        "description": [
+          "\nMinimal source contract — anything that can return a most-recent-first\nlist of `{ id }` entries. Compatible with `RecentlyAccessed` from\n`@kbn/recently-accessed` (consumers typically pass that directly)."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/content-list-provider-client",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderClientPluginApi",
+            "section": "def-public.RecentlyAccessedHistorySource",
+            "text": "RecentlyAccessedHistorySource"
+          },
+          "<Entry>"
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/recently_accessed/types.ts",
+        "lineNumber": 18,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-provider-client",
+            "id": "def-public.RecentlyAccessedHistorySource.get",
+            "type": "Function",
+            "tags": [],
+            "label": "get",
+            "description": [
+              "Returns the current most-recent-first list of entries."
+            ],
+            "signature": [
+              "() => Entry[]"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/recently_accessed/types.ts",
+            "lineNumber": 26,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider-client",
+        "id": "def-public.RecentsFilterRendererProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "RecentsFilterRendererProps",
+        "description": [
+          "\nProps for ",
+          {
+            "pluginId": "@kbn/content-list-provider-client",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderClientPluginApi",
+            "section": "def-public.RecentsFilterRenderer",
+            "text": "RecentsFilterRenderer"
+          },
+          ".\n\n`EuiSearchBar`'s `custom_component` filters receive `query` and `onChange`.\nThe toolbar's `filter.createComponent` does not forward declarative\nattributes, so the recently-accessed source and label are bound via\nclosure when the renderer is registered (see\n",
+          {
+            "pluginId": "@kbn/content-list-provider-client",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderClientPluginApi",
+            "section": "def-public.useRecentlyAccessedDecoration",
+            "text": "useRecentlyAccessedDecoration"
+          },
+          ")."
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/recently_accessed/recents_filter_renderer.tsx",
+        "lineNumber": 22,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-provider-client",
+            "id": "def-public.RecentsFilterRendererProps.query",
+            "type": "Object",
+            "tags": [],
+            "label": "query",
+            "description": [
+              "Query object from `EuiSearchBar`."
+            ],
+            "signature": [
+              "Query",
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/recently_accessed/recents_filter_renderer.tsx",
+            "lineNumber": 32,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider-client",
+            "id": "def-public.RecentsFilterRendererProps.onChange",
+            "type": "Function",
+            "tags": [],
+            "label": "onChange",
+            "description": [
+              "`onChange` callback from `EuiSearchBar`."
+            ],
+            "signature": [
+              "((query: ",
+              "Query",
+              ") => void) | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/recently_accessed/recents_filter_renderer.tsx",
+            "lineNumber": 34,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-list-provider-client",
+                "id": "def-public.RecentsFilterRendererProps.onChange.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "query",
+                "description": [],
+                "signature": [
+                  "Query"
+                ],
+                "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/recently_accessed/recents_filter_renderer.tsx",
+                "lineNumber": 35,
+                "columnNumber": 15,
+                "deprecated": false,
+                "docsReferencedTypeName": "Query",
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider-client",
+            "id": "def-public.RecentsFilterRendererProps.service",
+            "type": "Object",
+            "tags": [],
+            "label": "service",
+            "description": [
+              "\nRecently-accessed source to read from. The renderer reads `.get()`\nsynchronously to determine whether to show itself."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/content-list-provider-client",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderClientPluginApi",
+                "section": "def-public.RecentlyAccessedHistorySource",
+                "text": "RecentlyAccessedHistorySource"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/content-list-provider-client",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderClientPluginApi",
+                "section": "def-public.RecentlyAccessedEntry",
+                "text": "RecentlyAccessedEntry"
+              },
+              ">"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/recently_accessed/recents_filter_renderer.tsx",
+            "lineNumber": 36,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider-client",
+            "id": "def-public.RecentsFilterRendererProps.label",
+            "type": "string",
+            "tags": [],
+            "label": "label",
+            "description": [
+              "Optional label override. Defaults to \"Recent\"."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/recently_accessed/recents_filter_renderer.tsx",
+            "lineNumber": 41,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider-client",
+            "id": "def-public.RecentsFilterRendererProps.datatestsubj",
+            "type": "string",
+            "tags": [],
+            "label": "'data-test-subj'",
+            "description": [
+              "Optional `data-test-subj`."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/recently_accessed/recents_filter_renderer.tsx",
+            "lineNumber": 43,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider-client",
+        "id": "def-public.SavedObjectActivityRowProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "SavedObjectActivityRowProps",
+        "description": [
+          "\nProps for ",
+          {
+            "pluginId": "@kbn/content-list-provider-client",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderClientPluginApi",
+            "section": "def-public.SavedObjectActivityRow",
+            "text": "SavedObjectActivityRow"
+          },
+          "."
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/content_insights/saved_object_activity_row.tsx",
+        "lineNumber": 21,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-provider-client",
+            "id": "def-public.SavedObjectActivityRowProps.service",
+            "type": "Object",
+            "tags": [],
+            "label": "service",
+            "description": [
+              "\nContent-insights client for this listing's domain (typically built with\n",
+              {
+                "pluginId": "@kbn/content-list-provider-client",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderClientPluginApi",
+                "section": "def-public.createContentInsightsService",
+                "text": "createContentInsightsService"
+              },
+              "). Wrapped in a fresh\n`ContentInsightsProvider` so the component works inside the content\neditor flyout, which renders outside the listing's React tree."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/content-management-content-insights-public",
+                "scope": "public",
+                "docId": "kibKbnContentManagementContentInsightsPublicPluginApi",
+                "section": "def-public.ContentInsightsClientPublic",
+                "text": "ContentInsightsClientPublic"
+              }
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/content_insights/saved_object_activity_row.tsx",
+            "lineNumber": 25,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider-client",
+            "id": "def-public.SavedObjectActivityRowProps.item",
+            "type": "Object",
+            "tags": [],
+            "label": "item",
+            "description": [
+              "\nThe item being inspected. The row reads `createdBy`, `createdAt`,\n`updatedBy`, `updatedAt`, and `managed` for the activity card and uses\n`id` to fetch view stats."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/content-management-table-list-view-common",
+                "scope": "common",
+                "docId": "kibKbnContentManagementTableListViewCommonPluginApi",
+                "section": "def-common.UserContentCommonSchema",
+                "text": "UserContentCommonSchema"
+              }
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/content_insights/saved_object_activity_row.tsx",
+            "lineNumber": 32,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider-client",
+            "id": "def-public.SavedObjectActivityRowProps.entityNamePlural",
+            "type": "string",
+            "tags": [],
+            "label": "entityNamePlural",
+            "description": [
+              "Plural entity label used by the activity card's \"no creator/updater\" tip."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/content_insights/saved_object_activity_row.tsx",
+            "lineNumber": 38,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/content-list-provider-client",
         "id": "def-public.SavedObjectReference",
@@ -132,7 +2384,7 @@
           "\nReference type matching `SavedObjectsFindOptionsReference` from Kibana core."
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/types.ts",
-        "lineNumber": 12,
+        "lineNumber": 33,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -145,7 +2397,7 @@
             "label": "type",
             "description": [],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/types.ts",
-            "lineNumber": 16,
+            "lineNumber": 37,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -158,7 +2410,7 @@
             "label": "id",
             "description": [],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/types.ts",
-            "lineNumber": 17,
+            "lineNumber": 38,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -174,7 +2426,109 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/types.ts",
-            "lineNumber": 18,
+            "lineNumber": 39,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider-client",
+        "id": "def-public.TableListViewFindItemsOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "TableListViewFindItemsOptions",
+        "description": [
+          "\nOptions passed to ",
+          {
+            "pluginId": "@kbn/content-list-provider-client",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderClientPluginApi",
+            "section": "def-public.TableListViewFindItemsFn",
+            "text": "TableListViewFindItemsFn"
+          },
+          " alongside the search query."
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/types.ts",
+        "lineNumber": 52,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-provider-client",
+            "id": "def-public.TableListViewFindItemsOptions.references",
+            "type": "Array",
+            "tags": [],
+            "label": "references",
+            "description": [
+              "Saved object references to filter by."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/content-list-provider-client",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderClientPluginApi",
+                "section": "def-public.SavedObjectReference",
+                "text": "SavedObjectReference"
+              },
+              "[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/types.ts",
+            "lineNumber": 56,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider-client",
+            "id": "def-public.TableListViewFindItemsOptions.referencesToExclude",
+            "type": "Array",
+            "tags": [],
+            "label": "referencesToExclude",
+            "description": [
+              "Saved object references to exclude."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/content-list-provider-client",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderClientPluginApi",
+                "section": "def-public.SavedObjectReference",
+                "text": "SavedObjectReference"
+              },
+              "[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/types.ts",
+            "lineNumber": 58,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider-client",
+            "id": "def-public.TableListViewFindItemsOptions.listingLimit",
+            "type": "number",
+            "tags": [],
+            "label": "listingLimit",
+            "description": [
+              "\nMaximum number of items to fetch from the server.\n\nPopulated automatically by ",
+              {
+                "pluginId": "@kbn/content-list-provider-client",
+                "scope": "public",
+                "docId": "kibKbnContentListProviderClientPluginApi",
+                "section": "def-public.ContentListClientProvider",
+                "text": "ContentListClientProvider"
+              },
+              " from the\n`savedObjects:listingLimit` UI setting. Consumers should forward this value\nto their underlying search call so they do not need to read the setting themselves."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/types.ts",
+            "lineNumber": 60,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -192,7 +2546,7 @@
           "\nResult type from the `TableListView` `findItems` function."
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/types.ts",
-        "lineNumber": 21,
+        "lineNumber": 42,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -207,7 +2561,7 @@
               "Total count of matching items."
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/types.ts",
-            "lineNumber": 25,
+            "lineNumber": 46,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -232,10 +2586,143 @@
               "[]"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/types.ts",
-            "lineNumber": 27,
+            "lineNumber": 48,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider-client",
+        "id": "def-public.TagsApi",
+        "type": "Interface",
+        "tags": [],
+        "label": "TagsApi",
+        "description": [
+          "\nMinimal structural type describing the part of `SavedObjectsTaggingApiUi`\nneeded to fill `services.tags`. Accepting a structural type rather than the\nfull plugin interface keeps the helper usable from any consumer that can\nsynthesize a `getTagList()` (e.g. Visualize's flattened tagging API)."
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/tags/tags_service.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-provider-client",
+            "id": "def-public.TagsApi.getTagList",
+            "type": "Function",
+            "tags": [],
+            "label": "getTagList",
+            "description": [
+              "Synchronously return the list of available tags."
+            ],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/content-management-tags",
+                "scope": "public",
+                "docId": "kibKbnContentManagementTagsPluginApi",
+                "section": "def-public.Tag",
+                "text": "Tag"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/tags/tags_service.ts",
+            "lineNumber": 19,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/content-list-provider-client",
+        "id": "def-public.TitleValidator",
+        "type": "Interface",
+        "tags": [],
+        "label": "TitleValidator",
+        "description": [
+          "\nShape of a single entry in\n`OpenContentEditorParams['customValidators']['title']`.\n\nRe-declared locally to avoid importing the editor package's\n`OpenContentEditorParams` (its `customValidators` is typed as a record of\narrays and would force the consumer to wrap this in another array)."
+        ],
+        "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/duplicate_title/duplicate_title_validator.ts",
+        "lineNumber": 12,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/content-list-provider-client",
+            "id": "def-public.TitleValidator.type",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"error\" | \"warning\""
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/duplicate_title/duplicate_title_validator.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/content-list-provider-client",
+            "id": "def-public.TitleValidator.fn",
+            "type": "Function",
+            "tags": [],
+            "label": "fn",
+            "description": [],
+            "signature": [
+              "(value: string, id: string) => Promise<string | undefined>"
+            ],
+            "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/duplicate_title/duplicate_title_validator.ts",
+            "lineNumber": 22,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/content-list-provider-client",
+                "id": "def-public.TitleValidator.fn.$1",
+                "type": "string",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/duplicate_title/duplicate_title_validator.ts",
+                "lineNumber": 22,
+                "columnNumber": 8,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/content-list-provider-client",
+                "id": "def-public.TitleValidator.fn.$2",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/services/duplicate_title/duplicate_title_validator.ts",
+                "lineNumber": 22,
+                "columnNumber": 23,
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -276,10 +2763,34 @@
             "section": "def-public.ContentListFeatures",
             "text": "ContentListFeatures"
           },
+          " | undefined; services: ",
+          {
+            "pluginId": "@kbn/content-list-provider-client",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderClientPluginApi",
+            "section": "def-public.ContentListClientServices",
+            "text": "ContentListClientServices"
+          },
+          "; onFetchSuccess?: ((result: ",
+          {
+            "pluginId": "@kbn/content-list-provider",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderPluginApi",
+            "section": "def-public.FindItemsResult",
+            "text": "FindItemsResult"
+          },
+          ") => void) | undefined; contentEditor?: ",
+          {
+            "pluginId": "@kbn/content-list-provider-client",
+            "scope": "public",
+            "docId": "kibKbnContentListProviderClientPluginApi",
+            "section": "def-public.ContentEditorConfig",
+            "text": "ContentEditorConfig"
+          },
           " | undefined; }"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/provider.tsx",
-        "lineNumber": 20,
+        "lineNumber": 108,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -295,23 +2806,15 @@
           "\nThe existing `TableListView` `findItems` signature that consumers already have.\n\nThis matches the signature expected by `TableListViewTableProps.findItems`, with an\noptional `signal` parameter for request cancellation."
         ],
         "signature": [
-          "(searchQuery: string, refs?: { references?: ",
+          "(searchQuery: string, options?: ",
           {
             "pluginId": "@kbn/content-list-provider-client",
             "scope": "public",
             "docId": "kibKbnContentListProviderClientPluginApi",
-            "section": "def-public.SavedObjectReference",
-            "text": "SavedObjectReference"
+            "section": "def-public.TableListViewFindItemsOptions",
+            "text": "TableListViewFindItemsOptions"
           },
-          "[] | undefined; referencesToExclude?: ",
-          {
-            "pluginId": "@kbn/content-list-provider-client",
-            "scope": "public",
-            "docId": "kibKbnContentListProviderClientPluginApi",
-            "section": "def-public.SavedObjectReference",
-            "text": "SavedObjectReference"
-          },
-          "[] | undefined; } | undefined, signal?: AbortSignal | undefined) => Promise<",
+          " | undefined, signal?: AbortSignal | undefined) => Promise<",
           {
             "pluginId": "@kbn/content-list-provider-client",
             "scope": "public",
@@ -322,7 +2825,7 @@
           ">"
         ],
         "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/types.ts",
-        "lineNumber": 31,
+        "lineNumber": 70,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -336,7 +2839,7 @@
             "label": "searchQuery",
             "description": [],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/types.ts",
-            "lineNumber": 38,
+            "lineNumber": 77,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -346,31 +2849,23 @@
             "id": "def-public.TableListViewFindItemsFn.$2",
             "type": "Object",
             "tags": [],
-            "label": "refs",
+            "label": "options",
             "description": [],
             "signature": [
-              "{ references?: ",
               {
                 "pluginId": "@kbn/content-list-provider-client",
                 "scope": "public",
                 "docId": "kibKbnContentListProviderClientPluginApi",
-                "section": "def-public.SavedObjectReference",
-                "text": "SavedObjectReference"
+                "section": "def-public.TableListViewFindItemsOptions",
+                "text": "TableListViewFindItemsOptions"
               },
-              "[] | undefined; referencesToExclude?: ",
-              {
-                "pluginId": "@kbn/content-list-provider-client",
-                "scope": "public",
-                "docId": "kibKbnContentListProviderClientPluginApi",
-                "section": "def-public.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
-              "[] | undefined; } | undefined"
+              " | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/types.ts",
-            "lineNumber": 39,
+            "lineNumber": 78,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "TableListViewFindItemsOptions",
             "trackAdoption": false
           },
           {
@@ -384,9 +2879,10 @@
               "AbortSignal | undefined"
             ],
             "path": "src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client/src/types.ts",
-            "lineNumber": 43,
+            "lineNumber": 79,
             "columnNumber": 3,
             "deprecated": false,
+            "docsReferencedTypeName": "AbortSignal",
             "trackAdoption": false
           }
         ],

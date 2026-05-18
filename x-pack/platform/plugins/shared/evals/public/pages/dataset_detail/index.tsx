@@ -15,7 +15,6 @@ import {
   EuiButtonIcon,
   EuiCodeBlock,
   EuiConfirmModal,
-  EuiDescriptionList,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
@@ -27,6 +26,7 @@ import {
   EuiFormRow,
   EuiHorizontalRule,
   EuiLink,
+  EuiEmptyPrompt,
   EuiLoadingSpinner,
   EuiModal,
   EuiModalBody,
@@ -44,7 +44,9 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { CodeEditor } from '@kbn/code-editor';
+import { isHttpFetchError } from '@kbn/core-http-browser';
 import { useHistory, useParams } from 'react-router-dom';
+import { TraceWaterfall, useTraceSpans } from '@kbn/llm-trace-waterfall';
 import type {
   DatasetExample,
   EvaluationRunSummary,
@@ -54,12 +56,13 @@ import {
   useAddExamples,
   useDataset,
   useDeleteExample,
+  useEvalsTraceFetcher,
   useExampleScores,
   useEvaluationRuns,
   useUpdateDataset,
   useUpdateExample,
 } from '../../hooks/use_evals_api';
-import { TraceWaterfall } from '../../components/trace_waterfall';
+import { useEvalsPermissions } from '../../hooks/use_evals_permissions';
 import * as i18n from './translations';
 
 type JsonObject = Record<string, unknown>;
@@ -75,7 +78,7 @@ const parseJsonObject = (value: string, fieldLabel: string): JsonObject => {
   try {
     const parsed = JSON.parse(value) as unknown;
     if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
-      throw new Error(`${fieldLabel} must be a JSON object.`);
+      throw new Error(i18n.getJsonObjectRequiredError(fieldLabel));
     }
     return parsed as JsonObject;
   } catch (error) {
@@ -101,6 +104,7 @@ export const DatasetDetailPage: React.FC = () => {
   const { datasetId } = useParams<{ datasetId: string }>();
   const history = useHistory();
   const { euiTheme } = useEuiTheme();
+  const { canManage } = useEvalsPermissions();
 
   const { data: dataset, isLoading: isDatasetLoading, error: datasetError } = useDataset(datasetId);
   const {
@@ -133,6 +137,13 @@ export const DatasetDetailPage: React.FC = () => {
   const [formError, setFormError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTraceId, setSelectedTraceId] = useState<string | null>(null);
+  const fetchTrace = useEvalsTraceFetcher();
+  const {
+    spans,
+    durationMs,
+    isLoading: traceLoading,
+    error: traceError,
+  } = useTraceSpans(selectedTraceId, { fetchTrace });
 
   const {
     data: exampleScoresData,
@@ -279,18 +290,27 @@ export const DatasetDetailPage: React.FC = () => {
         name: i18n.COLUMN_EXAMPLE_ID,
         width: '160px',
         render: (value: string) => (
-          <EuiLink className={truncatedCellStyles}>{value.slice(0, 16)}...</EuiLink>
+          <EuiText size="xs" className={truncatedCellStyles}>
+            {truncate(value, 16)}
+          </EuiText>
         ),
       },
       {
         field: 'input',
         name: i18n.COLUMN_INPUT,
+        truncateText: true,
         render: (value: unknown) => {
-          if (value == null) return <EuiText size="s">-</EuiText>;
+          if (value == null) {
+            return (
+              <EuiText size="xs" color="subdued">
+                {'-'}
+              </EuiText>
+            );
+          }
           const text = compactJson(value);
           return (
             <EuiToolTip content={truncate(text, 300)} position="top">
-              <EuiText size="s" className={truncatedCellStyles}>
+              <EuiText size="xs" color="subdued" tabIndex={0}>
                 {truncate(text)}
               </EuiText>
             </EuiToolTip>
@@ -300,12 +320,19 @@ export const DatasetDetailPage: React.FC = () => {
       {
         field: 'output',
         name: i18n.COLUMN_OUTPUT,
+        truncateText: true,
         render: (value: unknown) => {
-          if (value == null) return <EuiText size="s">-</EuiText>;
+          if (value == null) {
+            return (
+              <EuiText size="xs" color="subdued">
+                {'-'}
+              </EuiText>
+            );
+          }
           const text = compactJson(value);
           return (
             <EuiToolTip content={truncate(text, 300)} position="top">
-              <EuiText size="s" className={truncatedCellStyles}>
+              <EuiText size="xs" color="subdued" tabIndex={0}>
                 {truncate(text)}
               </EuiText>
             </EuiToolTip>
@@ -315,12 +342,19 @@ export const DatasetDetailPage: React.FC = () => {
       {
         field: 'metadata',
         name: i18n.COLUMN_METADATA,
+        truncateText: true,
         render: (value: unknown) => {
-          if (value == null) return <EuiText size="s">-</EuiText>;
+          if (value == null) {
+            return (
+              <EuiText size="xs" color="subdued">
+                {'-'}
+              </EuiText>
+            );
+          }
           const text = compactJson(value);
           return (
             <EuiToolTip content={truncate(text, 300)} position="top">
-              <EuiText size="s" className={truncatedCellStyles}>
+              <EuiText size="xs" color="subdued" tabIndex={0}>
                 {truncate(text)}
               </EuiText>
             </EuiToolTip>
@@ -342,7 +376,7 @@ export const DatasetDetailPage: React.FC = () => {
               history.push(`/runs/${runId}?dataset_id=${encodeURIComponent(datasetId)}`)
             }
           >
-            {runId.slice(0, 12)}...
+            {truncate(runId, 12)}
           </EuiLink>
         ),
       },
@@ -370,13 +404,16 @@ export const DatasetDetailPage: React.FC = () => {
     [datasetId, history]
   );
 
-  const metadataListItems = useMemo(() => {
-    if (!dataset) return [];
-    return [
-      { title: i18n.METADATA_DESCRIPTION_LABEL, description: dataset.description || '-' },
-      { title: i18n.METADATA_CREATED_AT_LABEL, description: formatDate(dataset.created_at) },
-      { title: i18n.METADATA_UPDATED_AT_LABEL, description: formatDate(dataset.updated_at) },
-    ];
+  const datesSummary = useMemo(() => {
+    if (!dataset) return '';
+    const parts: string[] = [];
+    if (dataset.created_at) {
+      parts.push(`${i18n.METADATA_CREATED_AT_LABEL} ${formatDate(dataset.created_at)}`);
+    }
+    if (dataset.updated_at) {
+      parts.push(`${i18n.METADATA_UPDATED_AT_LABEL} ${formatDate(dataset.updated_at)}`);
+    }
+    return parts.join(' · ');
   }, [dataset]);
 
   interface RunScoreRow {
@@ -434,7 +471,7 @@ export const DatasetDetailPage: React.FC = () => {
               history.push(`/runs/${runId}?dataset_id=${encodeURIComponent(datasetId)}`)
             }
           >
-            {runId.slice(0, 12)}...
+            {truncate(runId, 12)}
           </EuiLink>
         ),
       },
@@ -469,7 +506,7 @@ export const DatasetDetailPage: React.FC = () => {
               {sortedScores.map((score) => {
                 const includeRepetition = (evaluatorCounts[score.evaluator.name] ?? 0) > 1;
                 const repetitionLabel = includeRepetition
-                  ? ` (r${score.task.repetition_index + 1})`
+                  ? i18n.getRepetitionLabel(score.task.repetition_index + 1)
                   : '';
                 return (
                   <EuiFlexItem
@@ -507,7 +544,7 @@ export const DatasetDetailPage: React.FC = () => {
                     iconType="apmTrace"
                     onClick={() => setSelectedTraceId(traceId)}
                   >
-                    {traceId.slice(0, 12)}...
+                    {truncate(traceId, 12)}
                   </EuiButtonEmpty>
                 </EuiFlexItem>
               ))}
@@ -520,79 +557,117 @@ export const DatasetDetailPage: React.FC = () => {
     [datasetId, history]
   );
 
+  if (isDatasetLoading) {
+    return (
+      <EuiPageSection paddingSize="none" css={{ paddingTop: euiTheme.size.l }}>
+        <EuiLoadingSpinner size="xl" />
+      </EuiPageSection>
+    );
+  }
+
+  if (datasetError) {
+    const isNotFound = isHttpFetchError(datasetError) && datasetError.response?.status === 404;
+    return (
+      <EuiPageSection paddingSize="none" css={{ paddingTop: euiTheme.size.l }}>
+        <EuiEmptyPrompt
+          color={isNotFound ? 'subdued' : 'danger'}
+          iconType={isNotFound ? 'search' : 'warning'}
+          title={
+            <h2>{isNotFound ? i18n.DATASET_NOT_FOUND_TITLE : i18n.DATASET_LOAD_ERROR_TITLE}</h2>
+          }
+          body={
+            <p>
+              {isNotFound
+                ? i18n.getDatasetNotFoundBody(datasetId)
+                : i18n.getDatasetLoadErrorBody(String(datasetError))}
+            </p>
+          }
+          actions={[
+            <EuiButton onClick={() => history.push('/datasets')}>
+              {i18n.BACK_TO_DATASETS}
+            </EuiButton>,
+          ]}
+        />
+      </EuiPageSection>
+    );
+  }
+
   return (
     <>
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
-        <EuiFlexItem>
-          <EuiTitle size="l">
-            <h2>{i18n.getPageTitle(dataset?.name ?? datasetId)}</h2>
-          </EuiTitle>
-        </EuiFlexItem>
-        {dataset ? (
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiButton iconType="plusInCircle" onClick={openCreateExampleFlyout} fill>
-                  {i18n.ADD_EXAMPLE_BUTTON}
-                </EuiButton>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty iconType="pencil" onClick={openMetadataModal}>
-                  {i18n.EDIT_METADATA_BUTTON}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        ) : null}
-      </EuiFlexGroup>
-
       <EuiPageSection paddingSize="none" css={{ paddingTop: euiTheme.size.l }}>
-        {datasetError ? (
-          <EuiText color="danger" size="s">
-            <p>{String(datasetError)}</p>
-          </EuiText>
-        ) : null}
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
+          <EuiFlexItem>
+            <EuiTitle size="m">
+              <h2>{i18n.getPageTitle(dataset?.name ?? datasetId)}</h2>
+            </EuiTitle>
+          </EuiFlexItem>
+          {dataset && canManage ? (
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                <EuiFlexItem grow={false}>
+                  <EuiButton iconType="plusInCircle" onClick={openCreateExampleFlyout} fill>
+                    {i18n.ADD_EXAMPLE_BUTTON}
+                  </EuiButton>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty iconType="pencil" onClick={openMetadataModal}>
+                    {i18n.EDIT_METADATA_BUTTON}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          ) : null}
+        </EuiFlexGroup>
+        <EuiSpacer size="l" />
+
         {runsError ? (
           <EuiText color="danger" size="s">
             <p>{String(runsError)}</p>
           </EuiText>
         ) : null}
 
-        {isDatasetLoading ? (
-          <EuiLoadingSpinner size="xl" />
-        ) : dataset ? (
+        {dataset ? (
           <>
             {formError && !selectedExample && !isCreateExampleOpen ? (
               <>
                 <EuiText color="danger" size="s">
                   <p>{formError}</p>
                 </EuiText>
-                <EuiSpacer size="m" />
+                <EuiSpacer size="s" />
               </>
             ) : null}
 
-            <EuiDescriptionList type="inline" listItems={metadataListItems} compressed />
+            {dataset.description ? (
+              <>
+                <EuiText size="s" color="subdued">
+                  <p>{dataset.description}</p>
+                </EuiText>
+                <EuiSpacer size="s" />
+              </>
+            ) : null}
+            <EuiText size="xs" color="subdued">
+              <p>{datesSummary}</p>
+            </EuiText>
 
             <EuiSpacer size="l" />
 
-            <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-              <EuiFlexItem grow={false}>
-                <EuiTitle size="xs">
-                  <h3>{i18n.getExamplesCountTitle(dataset.examples.length)} </h3>
-                </EuiTitle>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false} style={{ minWidth: 300 }}>
+            <EuiTitle size="xs">
+              <h3>{i18n.getExamplesCountTitle(dataset.examples.length)}</h3>
+            </EuiTitle>
+            <EuiSpacer size="m" />
+            <EuiFlexGroup>
+              <EuiFlexItem>
                 <EuiFieldSearch
                   placeholder={i18n.SEARCH_EXAMPLES_PLACEHOLDER}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   isClearable
-                  compressed
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
-            <EuiSpacer size="s" />
+            <EuiSpacer size="m" />
             <EuiBasicTable<DatasetExample>
+              tableCaption={i18n.EXAMPLES_SECTION_TITLE}
               items={filteredExamples}
               columns={examplesColumns}
               loading={addExamples.isLoading || updateExample.isLoading || deleteExample.isLoading}
@@ -620,6 +695,7 @@ export const DatasetDetailPage: React.FC = () => {
             </EuiTitle>
             <EuiSpacer size="s" />
             <EuiBasicTable<EvaluationRunSummary>
+              tableCaption={i18n.RUNS_SECTION_TITLE}
               items={runsData?.runs ?? []}
               columns={runsColumns}
               loading={isRunsLoading}
@@ -648,27 +724,29 @@ export const DatasetDetailPage: React.FC = () => {
                   </h2>
                 </EuiTitle>
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup gutterSize="s" responsive={false}>
-                  {!isEditingExample ? (
-                    <>
-                      <EuiFlexItem grow={false}>
-                        <EuiButton size="s" iconType="pencil" onClick={enterEditMode}>
-                          {i18n.EDIT_EXAMPLE_BUTTON}
-                        </EuiButton>
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiButtonIcon
-                          aria-label={i18n.DELETE_EXAMPLE_BUTTON}
-                          iconType="trash"
-                          color="danger"
-                          onClick={() => setDeletingExample(selectedExample)}
-                        />
-                      </EuiFlexItem>
-                    </>
-                  ) : null}
-                </EuiFlexGroup>
-              </EuiFlexItem>
+              {canManage ? (
+                <EuiFlexItem grow={false}>
+                  <EuiFlexGroup gutterSize="s" responsive={false}>
+                    {!isEditingExample ? (
+                      <>
+                        <EuiFlexItem grow={false}>
+                          <EuiButton size="s" iconType="pencil" onClick={enterEditMode}>
+                            {i18n.EDIT_EXAMPLE_BUTTON}
+                          </EuiButton>
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <EuiButtonIcon
+                            aria-label={i18n.DELETE_EXAMPLE_BUTTON}
+                            iconType="trash"
+                            color="danger"
+                            onClick={() => setDeletingExample(selectedExample)}
+                          />
+                        </EuiFlexItem>
+                      </>
+                    ) : null}
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+              ) : null}
             </EuiFlexGroup>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
@@ -777,6 +855,7 @@ export const DatasetDetailPage: React.FC = () => {
                   </EuiText>
                 ) : (
                   <EuiBasicTable<RunScoreRow>
+                    tableCaption={i18n.FLYOUT_EXPERIMENT_RUNS_SECTION}
                     items={exampleRunRows}
                     columns={exampleRunColumns}
                     loading={isExampleScoresLoading}
@@ -897,11 +976,21 @@ export const DatasetDetailPage: React.FC = () => {
 
       {/* Edit metadata modal */}
       {isMetadataModalOpen ? (
-        <EuiModal onClose={closeModals}>
+        <EuiModal onClose={closeModals} aria-labelledby="editMetadataModalTitle">
           <EuiModalHeader>
-            <EuiModalHeaderTitle>{i18n.EDIT_METADATA_MODAL_TITLE}</EuiModalHeaderTitle>
+            <EuiModalHeaderTitle id="editMetadataModalTitle">
+              {i18n.EDIT_METADATA_MODAL_TITLE}
+            </EuiModalHeaderTitle>
           </EuiModalHeader>
           <EuiModalBody>
+            {formError && isMetadataModalOpen ? (
+              <>
+                <EuiText color="danger" size="s">
+                  <p>{formError}</p>
+                </EuiText>
+                <EuiSpacer size="s" />
+              </>
+            ) : null}
             <EuiForm component="form">
               <EuiFormRow label={i18n.METADATA_DESCRIPTION_LABEL}>
                 <EuiTextArea
@@ -923,6 +1012,7 @@ export const DatasetDetailPage: React.FC = () => {
       {/* Delete example confirmation */}
       {deletingExample ? (
         <EuiConfirmModal
+          aria-label={i18n.CONFIRM_DELETE_EXAMPLE_TITLE}
           title={i18n.CONFIRM_DELETE_EXAMPLE_TITLE}
           onCancel={closeModals}
           onConfirm={onDeleteExample}
@@ -963,7 +1053,13 @@ export const DatasetDetailPage: React.FC = () => {
             `}
           >
             <div style={{ height: '100%', padding: 16 }}>
-              <TraceWaterfall traceId={selectedTraceId} />
+              <TraceWaterfall
+                spans={spans}
+                traceId={selectedTraceId}
+                durationMs={durationMs}
+                isLoading={traceLoading}
+                error={traceError}
+              />
             </div>
           </EuiFlyoutBody>
         </EuiFlyoutResizable>

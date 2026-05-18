@@ -22,7 +22,6 @@ interface QueryTemplate {
   label: string;
   description: string;
   queryString: string;
-  sortText?: string;
   category?: SuggestionCategory;
 }
 
@@ -58,7 +57,6 @@ export const getRecommendedQueriesTemplates = ({
         }
       ),
       queryString: `${fromCommand}\n  | WHERE KQL("term") /* Search all fields using KQL – e.g. WHERE KQL("debug") */`,
-      sortText: 'D',
       category: SuggestionCategory.RECOMMENDED_QUERY_WITH_PRIORITY,
     },
     {
@@ -184,6 +182,23 @@ export const getRecommendedQueriesTemplates = ({
           },
         ]
       : []),
+    ...(fromCommand
+      ? [
+          {
+            label: i18n.translate('kbn-esql-language.recommendedQueries.loadUnmappedFields.label', {
+              defaultMessage: 'Load unmapped fields',
+            }),
+            description: i18n.translate(
+              'kbn-esql-language.recommendedQueries.loadUnmappedFields.description',
+              {
+                defaultMessage:
+                  'Allows querying unmapped fields, loading their values from the _source if present.',
+              }
+            ),
+            queryString: `SET unmapped_fields = "LOAD"; ${fromCommand} `,
+          },
+        ]
+      : []),
   ];
 
   // prettify the query string
@@ -192,6 +207,7 @@ export const getRecommendedQueriesTemplates = ({
     const formattedQuery = fromCommand
       ? prettifyQuery(query.queryString)
       : prettifyQueryTemplate(`FROM index ${query.queryString}`);
+
     query.queryString = formattedQuery;
   });
   return queries;
@@ -246,7 +262,6 @@ export const getRecommendedQueriesSuggestionsFromStaticTemplates = async (
       text: query.queryString,
       kind: 'Issue',
       detail: query.description,
-      sortText: query?.sortText ?? 'E',
       category: query.category ?? SuggestionCategory.RECOMMENDED_QUERY,
       command: buildRecommendedQueryCommand(query.label),
     };
@@ -267,7 +282,6 @@ const buildExtensionSuggestion = (
     ? { documentation: { value: recommendedQuery.description } }
     : {}),
   kind: 'Issue',
-  sortText: 'D',
   category: SuggestionCategory.RECOMMENDED_QUERY_WITH_PRIORITY,
   ...(command ? { command } : {}),
 });

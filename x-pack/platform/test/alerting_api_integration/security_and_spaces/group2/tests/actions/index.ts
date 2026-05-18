@@ -18,6 +18,8 @@ export default function connectorsTests({ loadTestFile, getService }: FtrProvide
       await tearDown(getService);
     });
 
+    loadTestFile(require.resolve('./get_connector_spec'));
+
     // Connector types A-P (first ~15 alphabetically)
     loadTestFile(require.resolve('./connector_types/bedrock'));
     loadTestFile(require.resolve('./connector_types/cases_webhook'));
@@ -31,6 +33,11 @@ export default function connectorsTests({ loadTestFile, getService }: FtrProvide
     loadTestFile(require.resolve('./connector_types/jira'));
     loadTestFile(require.resolve('./connector_types/jira_service_management'));
     loadTestFile(require.resolve('./connector_types/oauth_access_token'));
+    loadTestFile(require.resolve('./connector_types/oauth_start_flow'));
+    loadTestFile(require.resolve('./connector_types/oauth_callback'));
+    loadTestFile(require.resolve('./connector_types/oauth_full_flow'));
+    loadTestFile(require.resolve('./connector_types/oauth_security'));
+    loadTestFile(require.resolve('./connector_types/oauth_disconnect'));
     loadTestFile(require.resolve('./connector_types/openai'));
     loadTestFile(require.resolve('./connector_types/opsgenie'));
     loadTestFile(require.resolve('./connector_types/pagerduty'));

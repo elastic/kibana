@@ -20,10 +20,21 @@
       "lens",
       "security",
       "encryptedSavedObjects",
-      "workflowsManagement"
+      "workflowsManagement",
+      "workflowsExtensions",
+      "expressions",
+      "uiActions",
+      "fieldFormats",
+      "charts",
+      "management",
+      "kibanaUtils",
+      "share",
+      "unifiedDocViewer",
+      "maintenanceWindows",
+      "eventLog"
     ],
-    "optionalPlugins": ["management"],
-    "requiredBundles": ["alerting"],
+    "optionalPlugins": ["usageCollection", "agentBuilder", "agentContextLayer"],
+    "requiredBundles": ["alerting", "kibanaReact"],
     "extraPublicDirs": []
   }
 }

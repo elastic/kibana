@@ -9,7 +9,7 @@
 import { type EsqlFieldType, esqlFieldTypes } from '@kbn/esql-types';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
-import type { ESQLNumericLiteralType } from '@elastic/esql/types';
+import type { ESQLLocation, ESQLNumericLiteralType } from '@elastic/esql/types';
 import type { Location } from '../registry/types';
 import type { inlineCastsMapping } from './generated/inline_casts_mapping';
 
@@ -102,9 +102,14 @@ export const isReturnType = (str: string | FunctionParameterType): str is Functi
 
 export const parameterHintEntityTypes = ['inference_endpoint'] as const;
 export type ParameterHintEntityType = (typeof parameterHintEntityTypes)[number];
+
+export const parameterHintKinds = ['entity', 'aggregation'] as const;
+export type ParameterHintKind = (typeof parameterHintKinds)[number];
+
 export interface ParameterHint {
-  entityType: ParameterHintEntityType;
+  entityType?: ParameterHintEntityType;
   constraints?: Record<string, string>;
+  kind?: ParameterHintKind;
 }
 
 export interface FunctionParameter {
@@ -210,6 +215,7 @@ export enum PromQLFunctionDefinitionTypes {
   OPERATOR = 'operator',
   LABEL_MATCHING_OPERATOR = 'label_matching_operator',
   SCALAR_CONVERSION = 'scalar_conversion',
+  TIME = 'time',
 }
 
 export type PromQLFunctionParamType = 'instant_vector' | 'range_vector' | 'scalar' | 'string';
@@ -308,6 +314,10 @@ export interface ValidationErrors {
     message: string;
     type: { name: string };
   };
+  unknownDataSource: {
+    message: string;
+    type: { name: string };
+  };
   unknownSetting: {
     message: string;
     type: { name: string };
@@ -347,6 +357,10 @@ export interface ValidationErrors {
   nestedAggFunction: {
     message: string;
     type: { parentName: string; name: string };
+  };
+  expectedAggregationArgument: {
+    message: string;
+    type: { parentName: string };
   };
   unknownAggregateFunction: {
     message: string;
@@ -448,15 +462,7 @@ export interface ValidationErrors {
     message: string;
     type: {};
   };
-  forkTooFewBranches: {
-    message: string;
-    type: {};
-  };
   forkNotAllowedWithSubqueries: {
-    message: string;
-    type: {};
-  };
-  inlineStatsNotAllowedAfterLimit: {
     message: string;
     type: {};
   };
@@ -488,6 +494,16 @@ export interface ValidationErrors {
 
 export type ErrorTypes = keyof ValidationErrors;
 export type ErrorValues<K extends ErrorTypes> = ValidationErrors[K]['type'];
+
+export interface ESQLMessage {
+  type: 'error' | 'warning';
+  text: string;
+  location: ESQLLocation;
+  code: string;
+  errorType?: 'semantic';
+  requiresCallback?: 'getColumnsFor' | 'getSources' | 'getPolicies' | 'getJoinIndices' | string;
+  underlinedWarning?: boolean;
+}
 
 /**
  * Handles numeric types in ES|QL.

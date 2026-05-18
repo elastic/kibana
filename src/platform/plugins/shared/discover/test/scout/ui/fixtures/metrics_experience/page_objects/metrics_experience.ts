@@ -36,6 +36,7 @@ export class MetricsExperiencePage {
   public readonly breakdownSelector: BreakdownSelector;
   public readonly share: ShareHelper;
   public readonly fullscreenButton: Locator;
+  public readonly chromeHeader: Locator;
 
   constructor(page: ScoutPage) {
     // metricsExperienceRendered is the outer wrapper containing header, grid, and pagination
@@ -53,10 +54,22 @@ export class MetricsExperiencePage {
     this.emptyState = page.testSubj.locator('metricsExperienceNoData');
     this.share = createShareHelper(page);
     this.fullscreenButton = page.testSubj.locator('metricsExperienceToolbarFullScreen');
+    this.chromeHeader = page.testSubj.locator('kbnChromeLayoutHeader');
   }
 
   public getCardByIndex(index: number): Locator {
     return this.grid.locator(`[data-chart-index="${index}"]`);
+  }
+
+  /**
+   * Waits until the first chart card matches the expected id (since pagination/query updates replace cards
+   * asynchronously). Call before `expect(cards).toHaveCount(...)` so the count is not asserted
+   * against a stale page.
+   */
+  public async waitForFirstCard(expectedFirstCardId: string): Promise<void> {
+    await this.grid
+      .locator(`[data-chart-index="0"][id="${expectedFirstCardId}"]`)
+      .waitFor({ state: 'visible' });
   }
 
   /**
@@ -91,7 +104,13 @@ export class MetricsExperiencePage {
   }
 
   public async toggleFullscreen(): Promise<void> {
+    // Entering fullscreen triggers `handleEuiFullScreenChanges` which calls
+    // `chrome.setIsVisible(false)` asynchronously. Wait for the chrome header
+    // to actually hide/show before resolving, otherwise subsequent clicks on
+    // the toolbar can be intercepted by the still-sticky chrome header.
+    const isFullscreen = await this.fullscreen.isVisible();
     await this.fullscreenButton.click();
+    await this.chromeHeader.waitFor({ state: isFullscreen ? 'visible' : 'hidden' });
   }
 
   /**

@@ -12,7 +12,7 @@
         "label": "DashboardAgentPluginPublicSetupDependencies",
         "description": [],
         "path": "x-pack/platform/plugins/shared/dashboard_agent/public/types.ts",
-        "lineNumber": 20,
+        "lineNumber": 21,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -27,7 +27,7 @@
         "label": "DashboardAgentPluginPublicStartDependencies",
         "description": [],
         "path": "x-pack/platform/plugins/shared/dashboard_agent/public/types.ts",
-        "lineNumber": 22,
+        "lineNumber": 23,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -41,15 +41,37 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "agentBuilder",
-                "scope": "public",
-                "docId": "kibAgentBuilderPluginApi",
-                "section": "def-public.AgentBuilderPluginStart",
+                "pluginId": "@kbn/agent-builder-browser",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderBrowserPluginApi",
+                "section": "def-common.AgentBuilderPluginStart",
                 "text": "AgentBuilderPluginStart"
               }
             ],
             "path": "x-pack/platform/plugins/shared/dashboard_agent/public/types.ts",
-            "lineNumber": 23,
+            "lineNumber": 24,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "dashboardAgent",
+            "id": "def-public.DashboardAgentPluginPublicStartDependencies.data",
+            "type": "Object",
+            "tags": [],
+            "label": "data",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "public",
+                "docId": "kibDataPluginApi",
+                "section": "def-public.DataPublicPluginStart",
+                "text": "DataPublicPluginStart"
+              }
+            ],
+            "path": "x-pack/platform/plugins/shared/dashboard_agent/public/types.ts",
+            "lineNumber": 25,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -71,7 +93,7 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/dashboard_agent/public/types.ts",
-            "lineNumber": 24,
+            "lineNumber": 26,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -92,7 +114,15 @@
                 "section": "def-public.ShowShareMenuOptions",
                 "text": "ShowShareMenuOptions"
               },
-              ") => Promise<void>; getExportHandler: (options: Omit<",
+              "<",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              ", Record<string, unknown>>) => Promise<void>; getExportHandler: (options: Omit<",
               {
                 "pluginId": "share",
                 "scope": "public",
@@ -100,7 +130,15 @@
                 "section": "def-public.ShowShareMenuOptions",
                 "text": "ShowShareMenuOptions"
               },
-              ", \"asExport\" | \"anchorElement\">, exportId: string, intl: ",
+              "<",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              ", Record<string, unknown>>, \"asExport\" | \"anchorElement\">, exportId: string, intl: ",
               "IntlShape",
               ") => Promise<(() => Promise<void>) | null>; getExportDerivativeHandler: (options: Omit<",
               {
@@ -110,7 +148,15 @@
                 "section": "def-public.ShowShareMenuOptions",
                 "text": "ShowShareMenuOptions"
               },
-              ", \"asExport\" | \"anchorElement\">, derivativeId: string) => Promise<(() => Promise<void>) | null>; } & { url: ",
+              "<",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              ", Record<string, unknown>>, \"asExport\" | \"anchorElement\">, derivativeId: string) => Promise<(() => Promise<void>) | null>; } & { url: ",
               {
                 "pluginId": "share",
                 "scope": "public",
@@ -133,7 +179,7 @@
               "[]; }"
             ],
             "path": "x-pack/platform/plugins/shared/dashboard_agent/public/types.ts",
-            "lineNumber": 25,
+            "lineNumber": 27,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -155,7 +201,7 @@
               }
             ],
             "path": "x-pack/platform/plugins/shared/dashboard_agent/public/types.ts",
-            "lineNumber": 26,
+            "lineNumber": 28,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -175,7 +221,7 @@
       "label": "DashboardAgentPluginPublicSetup",
       "description": [],
       "path": "x-pack/platform/plugins/shared/dashboard_agent/public/types.ts",
-      "lineNumber": 14,
+      "lineNumber": 15,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -191,7 +237,7 @@
       "label": "DashboardAgentPluginPublicStart",
       "description": [],
       "path": "x-pack/platform/plugins/shared/dashboard_agent/public/types.ts",
-      "lineNumber": 17,
+      "lineNumber": 18,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -215,7 +261,7 @@
       "label": "DashboardAgentPluginSetup",
       "description": [],
       "path": "x-pack/platform/plugins/shared/dashboard_agent/server/types.ts",
-      "lineNumber": 18,
+      "lineNumber": 22,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,
@@ -231,7 +277,7 @@
       "label": "DashboardAgentPluginStart",
       "description": [],
       "path": "x-pack/platform/plugins/shared/dashboard_agent/server/types.ts",
-      "lineNumber": 21,
+      "lineNumber": 25,
       "columnNumber": 1,
       "deprecated": false,
       "trackAdoption": false,

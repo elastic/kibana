@@ -87,6 +87,7 @@ const SelectableFilterPopoverComponent: React.FC<SelectableFilterPopoverProps> =
       panelPaddingSize="none"
       repositionOnScroll
       panelProps={panelProps}
+      aria-label={label}
     >
       <EuiSelectable aria-label={label} options={selectableOptions} onChange={handleChange}>
         {(list) => <div style={POPOVER_CONTENT_STYLE}>{list}</div>}

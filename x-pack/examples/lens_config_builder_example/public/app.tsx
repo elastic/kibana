@@ -23,13 +23,13 @@ import type { CoreStart } from '@kbn/core/public';
 import type { LensEmbeddableInput } from '@kbn/lens-plugin/public';
 
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
-import { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder';
+import {
+  LensConfigBuilder,
+  lensApiConfigSchema,
+  type LensApiConfig,
+} from '@kbn/lens-embeddable-utils';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
-import {
-  type LensApiState,
-  lensApiStateSchema,
-} from '@kbn/lens-embeddable-utils/config_builder/schema';
 import type { StartDependencies } from './plugin';
 
 export const App = (props: {
@@ -47,10 +47,10 @@ export const App = (props: {
     props.plugins.data.search.session.start()
   );
 
-  const [lensConfig, setLensConfig] = useState<LensApiState>({
+  const [lensConfig, setLensConfig] = useState<LensApiConfig>({
     type: 'metric',
     title: 'Total Sales',
-    dataset: {
+    data_source: {
       type: 'esql',
       query: 'from kibana_sample_data_logs | stats totalBytes = sum(bytes)',
     },
@@ -59,14 +59,17 @@ export const App = (props: {
         type: 'primary',
         column: 'totalBytes',
         label: 'Total Bytes Value',
-        fit: false,
-        value: { alignment: 'left' },
-        labels: { alignment: 'left' },
       },
     ],
+    styling: {
+      primary: {
+        value: { alignment: 'left', sizing: 'auto' },
+        labels: { alignment: 'left' },
+      },
+    },
     ignore_global_filters: true,
     sampling: 1,
-  } satisfies LensApiState);
+  } satisfies LensApiConfig);
   const [lensConfigString, setLensConfigString] = useState(JSON.stringify(lensConfig));
 
   const LensComponent = props.plugins.lens.EmbeddableComponent;
@@ -77,7 +80,7 @@ export const App = (props: {
       const configBuilder = new LensConfigBuilder(props.dataViews);
       // eslint-disable-next-line no-console
       console.log('lensConfig', lensConfig);
-      const validatedConfig = lensApiStateSchema.validate(lensConfig);
+      const validatedConfig = lensApiConfigSchema.validate(lensConfig);
       // eslint-disable-next-line no-console
       console.log('validatedConfig', validatedConfig);
       const lensState = configBuilder.fromAPIFormat(validatedConfig);

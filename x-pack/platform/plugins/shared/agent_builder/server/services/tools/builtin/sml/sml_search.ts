@@ -11,6 +11,7 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
+import { SmlSearchFilterType } from '@kbn/agent-context-layer-plugin/server';
 import type { SmlToolsOptions } from './types';
 
 const smlSearchSchema = z.object({
@@ -35,13 +36,14 @@ const smlSearchSchema = z.object({
  * Searches the Semantic Metadata Layer for items matching a query.
  */
 export const createSmlSearchTool = ({
-  getSmlService,
+  getAgentContextLayer,
 }: SmlToolsOptions): BuiltinToolDefinition<typeof smlSearchSchema> => ({
   id: platformCoreTools.smlSearch,
   type: ToolType.builtin,
   description:
-    'Search the Semantic Metadata Layer (SML) for saved visualizations and other Kibana assets. ' +
+    'Search the Semantic Metadata Layer (SML) for Kibana assets such as saved visualizations, dashboards, workflows, and more. ' +
     'Provide a natural-language query string; titles and types are matched using Elasticsearch text analysis (bool_prefix on search_as_you_type fields). ' +
+    'Pass "*" to return all available assets. ' +
     'Each result includes a title, content snippet, attachment_id, attachment_type, and chunk_id. ' +
     'To bring a result into the conversation as an attachment, pass its chunk_id to sml_attach.',
   schema: smlSearchSchema,
@@ -59,17 +61,24 @@ export const createSmlSearchTool = ({
     },
   },
   handler: async ({ query, size }, context) => {
-    const smlService = getSmlService();
-    const { spaceId, esClient, request } = context;
+    const agentContextLayer = getAgentContextLayer();
+    const { spaceId, esClient, request, agentConfiguration } = context;
+
+    const connectorIds = agentConfiguration?.connector_ids;
+    const filters =
+      connectorIds !== undefined
+        ? { [SmlSearchFilterType.connector]: { ids: connectorIds } }
+        : undefined;
 
     let searchResult;
     try {
-      searchResult = await smlService.search({
+      searchResult = await agentContextLayer.search({
         query,
         size,
         spaceId,
-        esClient: esClient.asCurrentUser,
+        esClient,
         request,
+        filters,
       });
     } catch (error) {
       return {

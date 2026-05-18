@@ -7,9 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// TODO: Remove eslint exceptions comments
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import agent from 'elastic-apm-node';
 import { addTransactionLabels } from '@kbn/apm-utils';
 import type { CoreStart } from '@kbn/core/server';
@@ -21,8 +18,10 @@ import {
 } from '@kbn/workflows';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
 import { ExecutionError } from '@kbn/workflows/server';
+import { getAlertingRuleId, getTraceId, setCurrentTransaction } from './apm_internal';
 import { buildWorkflowContext } from './build_workflow_context';
 import type { StepExecutionRuntimeFactory } from './step_execution_runtime_factory';
+import type { StepIoService } from './step_io_service';
 import type { ContextDependencies } from './types';
 import type { WorkflowExecutionState } from './workflow_execution_state';
 import type { ScopeData } from './workflow_scope_stack';
@@ -32,6 +31,7 @@ import type { IWorkflowEventLogger } from '../workflow_event_logger';
 
 interface WorkflowExecutionRuntimeManagerInit {
   workflowExecutionState: WorkflowExecutionState;
+  stepIoService: StepIoService;
   workflowExecution: EsWorkflowExecution;
   workflowExecutionGraph: WorkflowGraph;
   workflowLogger: IWorkflowEventLogger;
@@ -59,10 +59,12 @@ interface WorkflowExecutionRuntimeManagerInit {
  * This class assumes that workflow steps are represented as nodes in a directed acyclic graph (DAG),
  * and uses topological sorting to determine execution order.
  */
+
 export class WorkflowExecutionRuntimeManager {
   private workflowLogger: IWorkflowEventLogger | null = null;
 
   private workflowExecutionState: WorkflowExecutionState;
+  private stepIoService: StepIoService;
   private entryTransactionId?: string;
   private workflowTransaction?: agent.Transaction; // APM transaction instance
   private workflowGraph: WorkflowGraph;
@@ -81,6 +83,7 @@ export class WorkflowExecutionRuntimeManager {
     // Use workflow execution ID as traceId for APM compatibility
     this.workflowLogger = workflowExecutionRuntimeManagerInit.workflowLogger;
     this.workflowExecutionState = workflowExecutionRuntimeManagerInit.workflowExecutionState;
+    this.stepIoService = workflowExecutionRuntimeManagerInit.stepIoService;
     this.coreStart = workflowExecutionRuntimeManagerInit.coreStart;
     this.dependencies = workflowExecutionRuntimeManagerInit.dependencies;
     this.telemetryClient = workflowExecutionRuntimeManagerInit.telemetryClient;
@@ -328,14 +331,15 @@ export class WorkflowExecutionRuntimeManager {
 
     if (existingTransaction) {
       // Check if this is triggered by alerting (has alerting labels) or task manager directly
-      const isTriggeredByAlerting = !!(existingTransaction as any)._labels?.alerting_rule_id;
+      const alertingRuleId = getAlertingRuleId(existingTransaction);
+      const isTriggeredByAlerting = alertingRuleId !== undefined;
 
       this.workflowLogger?.logDebug('Found existing transaction context', {
         transaction: {
           name: existingTransaction.name,
           type: existingTransaction.type,
           is_triggered_by_alerting: isTriggeredByAlerting,
-          alerting_rule_id: (existingTransaction as any)._labels?.alerting_rule_id,
+          alerting_rule_id: alertingRuleId,
           transaction_id: existingTransaction.ids?.['transaction.id'],
         },
       });
@@ -354,7 +358,7 @@ export class WorkflowExecutionRuntimeManager {
 
         this.workflowTransaction = workflowTransaction;
 
-        (agent as any).setCurrentTransaction(workflowTransaction);
+        setCurrentTransaction(agent, workflowTransaction);
 
         addTransactionLabels({
           workflow_execution_id: this.workflowExecution.id,
@@ -362,7 +366,7 @@ export class WorkflowExecutionRuntimeManager {
           service_name: 'kibana',
           transaction_hierarchy: 'alerting->workflow->steps',
           triggered_by: 'alerting',
-          parent_alerting_rule_id: (existingTransaction as any)._labels?.alerting_rule_id,
+          parent_alerting_rule_id: alertingRuleId,
         });
 
         // Store the workflow transaction ID (not the alerting transaction ID)
@@ -380,14 +384,7 @@ export class WorkflowExecutionRuntimeManager {
         }
 
         // Capture trace ID from the workflow transaction
-        let realTraceId: string | undefined;
-        if ((workflowTransaction as any)?.traceId) {
-          realTraceId = (workflowTransaction as any).traceId;
-        } else if (workflowTransaction.ids?.['trace.id']) {
-          realTraceId = workflowTransaction.ids['trace.id'];
-        } else if ((workflowTransaction as any)?.trace?.id) {
-          realTraceId = (workflowTransaction as any).trace.id;
-        }
+        const realTraceId = getTraceId(workflowTransaction);
 
         if (realTraceId) {
           this.workflowLogger?.logDebug('Captured APM trace ID from workflow transaction', {
@@ -433,14 +430,7 @@ export class WorkflowExecutionRuntimeManager {
         }
 
         // Capture trace ID from the task transaction
-        let realTraceId: string | undefined;
-        if ((existingTransaction as any)?.traceId) {
-          realTraceId = (existingTransaction as any).traceId;
-        } else if (existingTransaction.ids?.['trace.id']) {
-          realTraceId = existingTransaction.ids['trace.id'];
-        } else if ((existingTransaction as any)?.trace?.id) {
-          realTraceId = (existingTransaction as any).trace.id;
-        }
+        const realTraceId = getTraceId(existingTransaction);
 
         if (realTraceId) {
           this.workflowLogger?.logDebug('Captured APM trace ID from task transaction', {
@@ -471,11 +461,12 @@ export class WorkflowExecutionRuntimeManager {
     };
     this.workflowExecutionState.updateWorkflowExecution(updatedWorkflowExecution);
     this.logWorkflowStart();
-    await this.workflowExecutionState.flush();
+    await this.stepIoService.flush();
   }
 
   public async resume(): Promise<void> {
-    await this.workflowExecutionState.load();
+    await this.stepIoService.load();
+    this.stepIoService.evictCompletedLoopsOnResume(this.workflowGraph);
     this.nextNodeId = this.workflowExecution.currentNodeId;
     const updatedWorkflowExecution: Partial<EsWorkflowExecution> = {
       status: ExecutionStatus.RUNNING,
@@ -585,10 +576,12 @@ export class WorkflowExecutionRuntimeManager {
       status: finalStatus,
     } as EsWorkflowExecution;
 
+    const outputSizeStats = this.stepIoService.getOutputSizeStats();
     this.telemetryClient.reportWorkflowExecutionTerminated({
       workflowExecution: finalWorkflowExecution,
       stepExecutions,
       finalStatus,
+      outputSizeStats,
     });
   }
 }

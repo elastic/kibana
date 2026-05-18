@@ -44,6 +44,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       ? `${ELASTIC_DOCS}deploy-manage/deploy/elastic-cloud/serverless`
       : `${ELASTIC_DOCS}get-started`,
     apiReference: `${API_DOCS}`,
+    releaseNotes: `${ELASTIC_DOCS}release-notes`,
     serverlessReleaseNotes: `${ELASTIC_DOCS}release-notes/cloud-serverless`,
     hostedCloudReleaseNotes: `${ELASTIC_DOCS}release-notes/cloud-hosted`,
     upgrade: {
@@ -471,6 +472,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       blocklist: `${ELASTIC_DOCS}solutions/security/manage-elastic-defend/blocklist`,
       threatIntelInt: `${ELASTIC_DOCS}solutions/security/get-started/enable-threat-intelligence-integrations`,
       endpointArtifacts: `${ELASTIC_DOCS}solutions/security/manage-elastic-defend/optimize-elastic-defend`,
+      endpointArtifactsNoEscaping: `${ELASTIC_DOCS}solutions/security/manage-elastic-defend/exception-types-and-syntax#endpoint-no-escaping`,
       eventMerging: `${ELASTIC_DOCS}solutions/security/configure-elastic-defend/configure-data-volume-for-elastic-endpoint`,
       policyResponseTroubleshooting: {
         full_disk_access: `${ELASTIC_DOCS}solutions/security/configure-elastic-defend/enable-access-for-macos-monterey#enable-fda-endpoint`,
@@ -481,6 +483,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
         es_connection: `${ELASTIC_DOCS}troubleshoot/security/elastic-defend`,
       },
       responseActions: `${ELASTIC_DOCS}solutions/security/endpoint-response-actions`,
+      scriptLibrary: `${ELASTIC_DOCS}solutions/security/endpoint-response-actions/script-library`,
       configureEndpointIntegrationPolicy: `${ELASTIC_DOCS}solutions/security/configure-elastic-defend/configure-an-integration-policy-for-elastic-defend`,
       exceptions: {
         value_lists: `${ELASTIC_DOCS}solutions/security/detect-and-alert/create-manage-value-lists`,
@@ -526,6 +529,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       queryESQL: `${ELASTIC_DOCS}explore-analyze/query-filter/languages/esql`,
       queryESQLExamples: `${ELASTIC_DOCS}explore-analyze/query-filter/languages/esql`,
       queryESQLMultiValueControls: `${ELASTIC_DOCS}explore-analyze/query-filter/languages/esql-kibana#esql-multi-values-controls`,
+      queryESQLMvIntersects: `${ELASTIC_DOCS}reference/query-languages/esql/functions-operators/mv-functions/mv_intersects`,
     },
     search: {
       sessions: `${ELASTIC_DOCS}explore-analyze/discover/search-sessions`,
@@ -551,6 +555,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
         ? `${KIBANA_SERVERLESS_APIS}group/endpoint-saved-objects`
         : `${KIBANA_APIS}group/endpoint-saved-objects`,
       apiKeys: `${ELASTIC_DOCS}deploy-manage/api-keys/elasticsearch-api-keys`,
+      queryActivity: `${ELASTIC_DOCS}deploy-manage/monitor/query-activity`,
     },
     ml: {
       guide: `${ELASTIC_DOCS}explore-analyze/machine-learning`,
@@ -667,6 +672,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       slackAction: `${ELASTIC_DOCS}reference/kibana/connectors-kibana/slack-action-type#configuring-slack-webhook`,
       slackApiAction: `${ELASTIC_DOCS}reference/kibana/connectors-kibana/slack-action-type#configuring-slack-web-api`,
       teamsAction: `${ELASTIC_DOCS}reference/kibana/connectors-kibana/teams-action-type#configuring-teams`,
+      casesWebhookAction: `${ELASTIC_DOCS}reference/kibana/connectors-kibana/cases-webhook-action-type`,
       connectors: `${ELASTIC_DOCS}reference/kibana/connectors-kibana`,
     },
     taskManager: {
@@ -1070,7 +1076,10 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       models: `${ELASTIC_DOCS}explore-analyze/ai-features/agent-builder/models`,
       chat: `${ELASTIC_DOCS}explore-analyze/ai-features/agent-builder/chat`,
       agentBuilderAgents: `${ELASTIC_DOCS}explore-analyze/ai-features/agent-builder/agent-builder-agents`,
-      tools: `${ELASTIC_DOCS}explore-analyze/ai-features/agent-builder/tools`,
+      agentBuilderSkills: `${ELASTIC_DOCS}explore-analyze/ai-features/agent-builder/skills`,
+      agentBuilderPlugins: `${ELASTIC_DOCS}explore-analyze/ai-features/agent-builder/plugins`,
+      agentBuilderConnectors: `${ELASTIC_DOCS}explore-analyze/ai-features/agent-builder/connectors`,
+      agentBuilderTools: `${ELASTIC_DOCS}explore-analyze/ai-features/agent-builder/tools`,
       programmaticAccess: `${ELASTIC_DOCS}explore-analyze/ai-features/agent-builder/programmatic-access`,
       kibanaApi: `${ELASTIC_DOCS}explore-analyze/ai-features/agent-builder/kibana-api`,
       mcpServer: `${ELASTIC_DOCS}explore-analyze/ai-features/agent-builder/mcp-server`,
@@ -1082,6 +1091,8 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       inferenceAPIDocumentation: isServerless
         ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-inference-put`
         : `${ELASTICSEARCH_APIS}operation/operation-inference-put`,
+      featureSettings: `${ELASTIC_DOCS}explore-analyze/ai-features/manage-access-to-ai-assistant`,
+      externalInference: `${ELASTIC_DOCS}explore-analyze/elastic-inference/external`,
     },
     synonyms: {
       synonymsAPIDocumentation: isServerless
@@ -1103,6 +1114,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     subscriptions: `${ELASTIC_WEBSITE_URL}subscriptions`,
     cases: {
       casesPermissions: `${ELASTIC_DOCS}solutions/security/investigate/cases-requirements`,
+      configureCaseSettings: `${ELASTIC_DOCS}explore-analyze/cases/configure-case-settings`,
     },
   });
 };

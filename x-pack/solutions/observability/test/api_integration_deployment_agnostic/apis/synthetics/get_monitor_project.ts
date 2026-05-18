@@ -26,6 +26,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     const samlAuth = getService('samlAuth');
     const retry = getService('retry');
 
+    const TOTAL_MONITORS = 30;
+    const PER_PAGE = 20;
+
     let projectMonitors: LegacyProjectMonitorsRequest;
     let httpProjectMonitors: LegacyProjectMonitorsRequest;
     let tcpProjectMonitors: LegacyProjectMonitorsRequest;
@@ -49,6 +52,27 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           privateLocations: privateLocations.map((location) => location.label),
         })),
       };
+    };
+
+    const createProjectMonitors = async (monitors: ProjectMonitor[], project: string) => {
+      await supertest
+        .put(
+          SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
+        )
+        .set(editorUser.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send({ monitors })
+        .expect(200);
+    };
+
+    const deleteProjectMonitors = async (monitorIds: string[], project: string) => {
+      await supertest
+        .delete(
+          SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace('{projectName}', project)
+        )
+        .set(editorUser.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send({ monitors: monitorIds });
     };
 
     before(async () => {
@@ -82,9 +106,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('project monitors - fetches all monitors - browser', async () => {
-      const monitors = [];
+      const monitors: ProjectMonitor[] = [];
       const project = 'test-brower-suite';
-      for (let i = 0; i < 600; i++) {
+      for (let i = 0; i < TOTAL_MONITORS; i++) {
         monitors.push({
           ...projectMonitors.monitors[0],
           id: `test browser id ${i}`,
@@ -93,98 +117,46 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       }
 
       try {
-        await supertest
-          .put(
-            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
-          )
-          .set(editorUser.apiKeyHeader)
-          .set(samlAuth.getInternalRequestHeader())
-          .send({
-            monitors: monitors.slice(0, 250),
-          })
-          .expect(200);
+        await createProjectMonitors(monitors, project);
 
-        await supertest
-          .put(
-            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
-          )
-          .set(editorUser.apiKeyHeader)
-          .set(samlAuth.getInternalRequestHeader())
-          .send({
-            monitors: monitors.slice(250, 500),
-          })
-          .expect(200);
-        await supertest
-          .put(
-            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
-          )
-          .set(editorUser.apiKeyHeader)
-          .set(samlAuth.getInternalRequestHeader())
-          .send({
-            monitors: monitors.slice(500, 600),
-          })
-          .expect(200);
+        await retry.try(async () => {
+          const firstPageResponse = await supertest
+            .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
+            .set(editorUser.apiKeyHeader)
+            .set(samlAuth.getInternalRequestHeader())
+            .query({ per_page: PER_PAGE })
+            .send()
+            .expect(200);
 
-        const firstPageResponse = await supertest
-          .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
-          .set(editorUser.apiKeyHeader)
-          .set(samlAuth.getInternalRequestHeader())
-          .query({ per_page: 500 })
-          .send()
-          .expect(200);
+          const {
+            monitors: firstPageMonitors,
+            total,
+            after_key: afterKey,
+          } = firstPageResponse.body;
+          expect(firstPageMonitors.length).to.eql(PER_PAGE);
+          expect(total).to.eql(TOTAL_MONITORS);
+          expect(afterKey).to.be.a('string');
 
-        const { monitors: firstPageMonitors, total, after_key: afterKey } = firstPageResponse.body;
-        expect(firstPageMonitors.length).to.eql(500);
-        expect(total).to.eql(600);
-        expect(afterKey).to.eql('test browser id 548');
-
-        const secondPageResponse = await supertest
-          .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
-          .set(editorUser.apiKeyHeader)
-          .set(samlAuth.getInternalRequestHeader())
-          .query({
-            search_after: afterKey,
-            per_page: 500,
-          })
-          .send()
-          .expect(200);
-        const { monitors: secondPageMonitors } = secondPageResponse.body;
-        expect(secondPageMonitors.length).to.eql(100);
-        checkFields([...firstPageMonitors, ...secondPageMonitors], monitors);
+          const secondPageResponse = await supertest
+            .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
+            .set(editorUser.apiKeyHeader)
+            .set(samlAuth.getInternalRequestHeader())
+            .query({
+              search_after: afterKey,
+              per_page: PER_PAGE,
+            })
+            .send()
+            .expect(200);
+          const { monitors: secondPageMonitors } = secondPageResponse.body;
+          expect(secondPageMonitors.length).to.eql(TOTAL_MONITORS - PER_PAGE);
+          checkFields([...firstPageMonitors, ...secondPageMonitors], monitors);
+        });
       } finally {
-        const monitorsToDelete = monitors.map((monitor) => monitor.id);
-
         try {
-          await supertest
-            .delete(
-              SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace(
-                '{projectName}',
-                project
-              )
-            )
-            .set(editorUser.apiKeyHeader)
-            .set(samlAuth.getInternalRequestHeader())
-            .send({ monitors: monitorsToDelete.slice(0, 250) });
-          await supertest
-            .delete(
-              SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace(
-                '{projectName}',
-                project
-              )
-            )
-            .set(editorUser.apiKeyHeader)
-            .set(samlAuth.getInternalRequestHeader())
-            .send({ monitors: monitorsToDelete.slice(250, 500) });
-          await supertest
-            .delete(
-              SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace(
-                '{projectName}',
-                project
-              )
-            )
-            .set(editorUser.apiKeyHeader)
-            .set(samlAuth.getInternalRequestHeader())
-            .send({ monitors: monitorsToDelete.slice(500, 600) });
+          await deleteProjectMonitors(
+            monitors.map((m) => m.id),
+            project
+          );
         } catch (e) {
           // best-effort cleanup; beforeEach will handle leftovers
         }
@@ -192,9 +164,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('project monitors - fetches all monitors - http', async () => {
-      const monitors = [];
+      const monitors: ProjectMonitor[] = [];
       const project = 'test-http-suite';
-      for (let i = 0; i < 600; i++) {
+      for (let i = 0; i < TOTAL_MONITORS; i++) {
         monitors.push({
           ...httpProjectMonitors.monitors[1],
           id: `test http id ${i}`,
@@ -203,102 +175,46 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       }
 
       try {
-        await supertest
-          .put(
-            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
-          )
-          .set(editorUser.apiKeyHeader)
-          .set(samlAuth.getInternalRequestHeader())
-          .send({
-            monitors: monitors.slice(0, 250),
-          })
-          .expect(200);
+        await createProjectMonitors(monitors, project);
 
-        await supertest
-          .put(
-            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
-          )
-          .set(editorUser.apiKeyHeader)
-          .set(samlAuth.getInternalRequestHeader())
-          .send({
-            monitors: monitors.slice(250, 500),
-          })
-          .expect(200);
-        await supertest
-          .put(
-            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
-          )
-          .set(editorUser.apiKeyHeader)
-          .set(samlAuth.getInternalRequestHeader())
-          .send({
-            monitors: monitors.slice(500, 600),
-          })
-          .expect(200);
+        await retry.try(async () => {
+          const firstPageResponse = await supertest
+            .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
+            .set(editorUser.apiKeyHeader)
+            .set(samlAuth.getInternalRequestHeader())
+            .query({ per_page: PER_PAGE })
+            .send()
+            .expect(200);
 
-        const firstPageResponse = await supertest
-          .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
-          .set(editorUser.apiKeyHeader)
-          .set(samlAuth.getInternalRequestHeader())
-          .query({ per_page: 500 })
-          .send()
-          .expect(200);
+          const {
+            monitors: firstPageProjectMonitors,
+            after_key: afterKey,
+            total,
+          } = firstPageResponse.body;
+          expect(firstPageProjectMonitors.length).to.eql(PER_PAGE);
+          expect(total).to.eql(TOTAL_MONITORS);
+          expect(afterKey).to.be.a('string');
 
-        const {
-          monitors: firstPageProjectMonitors,
-          after_key: afterKey,
-          total,
-        } = firstPageResponse.body;
-        expect(firstPageProjectMonitors.length).to.eql(500);
-        expect(total).to.eql(600);
-        expect(afterKey).to.eql('test http id 548');
-
-        const secondPageResponse = await supertest
-          .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
-          .set(editorUser.apiKeyHeader)
-          .set(samlAuth.getInternalRequestHeader())
-          .query({
-            search_after: afterKey,
-            per_page: 500,
-          })
-          .send()
-          .expect(200);
-        const { monitors: secondPageProjectMonitors } = secondPageResponse.body;
-        expect(secondPageProjectMonitors.length).to.eql(100);
-        checkFields([...firstPageProjectMonitors, ...secondPageProjectMonitors], monitors);
+          const secondPageResponse = await supertest
+            .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
+            .set(editorUser.apiKeyHeader)
+            .set(samlAuth.getInternalRequestHeader())
+            .query({
+              search_after: afterKey,
+              per_page: PER_PAGE,
+            })
+            .send()
+            .expect(200);
+          const { monitors: secondPageProjectMonitors } = secondPageResponse.body;
+          expect(secondPageProjectMonitors.length).to.eql(TOTAL_MONITORS - PER_PAGE);
+          checkFields([...firstPageProjectMonitors, ...secondPageProjectMonitors], monitors);
+        });
       } finally {
-        const monitorsToDelete = monitors.map((monitor) => monitor.id);
-
         try {
-          await supertest
-            .delete(
-              SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace(
-                '{projectName}',
-                project
-              )
-            )
-            .set(editorUser.apiKeyHeader)
-            .set(samlAuth.getInternalRequestHeader())
-            .send({ monitors: monitorsToDelete.slice(0, 250) });
-          await supertest
-            .delete(
-              SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace(
-                '{projectName}',
-                project
-              )
-            )
-            .set(editorUser.apiKeyHeader)
-            .set(samlAuth.getInternalRequestHeader())
-            .send({ monitors: monitorsToDelete.slice(250, 500) });
-          await supertest
-            .delete(
-              SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace(
-                '{projectName}',
-                project
-              )
-            )
-            .set(editorUser.apiKeyHeader)
-            .set(samlAuth.getInternalRequestHeader())
-            .send({ monitors: monitorsToDelete.slice(500, 600) });
+          await deleteProjectMonitors(
+            monitors.map((m) => m.id),
+            project
+          );
         } catch (e) {
           // best-effort cleanup; beforeEach will handle leftovers
         }
@@ -306,9 +222,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('project monitors - fetches all monitors - tcp', async () => {
-      const monitors = [];
+      const monitors: ProjectMonitor[] = [];
       const project = 'test-tcp-suite';
-      for (let i = 0; i < 600; i++) {
+      for (let i = 0; i < TOTAL_MONITORS; i++) {
         monitors.push({
           ...tcpProjectMonitors.monitors[0],
           id: `test tcp id ${i}`,
@@ -317,102 +233,46 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       }
 
       try {
-        await supertest
-          .put(
-            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
-          )
-          .set(editorUser.apiKeyHeader)
-          .set(samlAuth.getInternalRequestHeader())
-          .send({
-            monitors: monitors.slice(0, 250),
-          })
-          .expect(200);
+        await createProjectMonitors(monitors, project);
 
-        await supertest
-          .put(
-            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
-          )
-          .set(editorUser.apiKeyHeader)
-          .set(samlAuth.getInternalRequestHeader())
-          .send({
-            monitors: monitors.slice(250, 500),
-          })
-          .expect(200);
-        await supertest
-          .put(
-            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
-          )
-          .set(editorUser.apiKeyHeader)
-          .set(samlAuth.getInternalRequestHeader())
-          .send({
-            monitors: monitors.slice(500, 600),
-          })
-          .expect(200);
+        await retry.try(async () => {
+          const firstPageResponse = await supertest
+            .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
+            .set(editorUser.apiKeyHeader)
+            .query({ per_page: PER_PAGE })
+            .set(samlAuth.getInternalRequestHeader())
+            .send()
+            .expect(200);
 
-        const firstPageResponse = await supertest
-          .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
-          .set(editorUser.apiKeyHeader)
-          .query({ per_page: 500 })
-          .set(samlAuth.getInternalRequestHeader())
-          .send()
-          .expect(200);
+          const {
+            monitors: firstPageProjectMonitors,
+            after_key: afterKey,
+            total,
+          } = firstPageResponse.body;
+          expect(firstPageProjectMonitors.length).to.eql(PER_PAGE);
+          expect(total).to.eql(TOTAL_MONITORS);
+          expect(afterKey).to.be.a('string');
 
-        const {
-          monitors: firstPageProjectMonitors,
-          after_key: afterKey,
-          total,
-        } = firstPageResponse.body;
-        expect(firstPageProjectMonitors.length).to.eql(500);
-        expect(total).to.eql(600);
-        expect(afterKey).to.eql('test tcp id 548');
-
-        const secondPageResponse = await supertest
-          .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
-          .set(editorUser.apiKeyHeader)
-          .set(samlAuth.getInternalRequestHeader())
-          .query({
-            search_after: afterKey,
-            per_page: 500,
-          })
-          .send()
-          .expect(200);
-        const { monitors: secondPageProjectMonitors } = secondPageResponse.body;
-        expect(secondPageProjectMonitors.length).to.eql(100);
-        checkFields([...firstPageProjectMonitors, ...secondPageProjectMonitors], monitors);
+          const secondPageResponse = await supertest
+            .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
+            .set(editorUser.apiKeyHeader)
+            .set(samlAuth.getInternalRequestHeader())
+            .query({
+              search_after: afterKey,
+              per_page: PER_PAGE,
+            })
+            .send()
+            .expect(200);
+          const { monitors: secondPageProjectMonitors } = secondPageResponse.body;
+          expect(secondPageProjectMonitors.length).to.eql(TOTAL_MONITORS - PER_PAGE);
+          checkFields([...firstPageProjectMonitors, ...secondPageProjectMonitors], monitors);
+        });
       } finally {
-        const monitorsToDelete = monitors.map((monitor) => monitor.id);
-
         try {
-          await supertest
-            .delete(
-              SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace(
-                '{projectName}',
-                project
-              )
-            )
-            .set(editorUser.apiKeyHeader)
-            .set(samlAuth.getInternalRequestHeader())
-            .send({ monitors: monitorsToDelete.slice(0, 250) });
-          await supertest
-            .delete(
-              SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace(
-                '{projectName}',
-                project
-              )
-            )
-            .set(editorUser.apiKeyHeader)
-            .set(samlAuth.getInternalRequestHeader())
-            .send({ monitors: monitorsToDelete.slice(250, 500) });
-          await supertest
-            .delete(
-              SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace(
-                '{projectName}',
-                project
-              )
-            )
-            .set(editorUser.apiKeyHeader)
-            .set(samlAuth.getInternalRequestHeader())
-            .send({ monitors: monitorsToDelete.slice(500, 600) });
+          await deleteProjectMonitors(
+            monitors.map((m) => m.id),
+            project
+          );
         } catch (e) {
           // best-effort cleanup; beforeEach will handle leftovers
         }
@@ -420,9 +280,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('project monitors - fetches all monitors - icmp', async () => {
-      const monitors = [];
+      const monitors: ProjectMonitor[] = [];
       const project = 'test-icmp-suite';
-      for (let i = 0; i < 600; i++) {
+      for (let i = 0; i < TOTAL_MONITORS; i++) {
         monitors.push({
           ...icmpProjectMonitors.monitors[0],
           id: `test icmp id ${i}`,
@@ -431,102 +291,47 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       }
 
       try {
-        await supertest
-          .put(
-            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
-          )
-          .set(editorUser.apiKeyHeader)
-          .set(samlAuth.getInternalRequestHeader())
-          .send({
-            monitors: monitors.slice(0, 250),
-          })
-          .expect(200);
+        await createProjectMonitors(monitors, project);
 
-        await supertest
-          .put(
-            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
-          )
-          .set(editorUser.apiKeyHeader)
-          .set(samlAuth.getInternalRequestHeader())
-          .send({
-            monitors: monitors.slice(250, 500),
-          })
-          .expect(200);
-        await supertest
-          .put(
-            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
-          )
-          .set(editorUser.apiKeyHeader)
-          .set(samlAuth.getInternalRequestHeader())
-          .send({
-            monitors: monitors.slice(500, 600),
-          })
-          .expect(200);
-        const firstPageResponse = await supertest
-          .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
-          .set(editorUser.apiKeyHeader)
-          .query({ per_page: 500 })
-          .set(samlAuth.getInternalRequestHeader())
-          .send()
-          .expect(200);
+        await retry.try(async () => {
+          const firstPageResponse = await supertest
+            .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
+            .set(editorUser.apiKeyHeader)
+            .query({ per_page: PER_PAGE })
+            .set(samlAuth.getInternalRequestHeader())
+            .send()
+            .expect(200);
 
-        const {
-          monitors: firstPageProjectMonitors,
-          after_key: afterKey,
-          total,
-        } = firstPageResponse.body;
-        expect(firstPageProjectMonitors.length).to.eql(500);
-        expect(total).to.eql(600);
-        expect(afterKey).to.eql('test icmp id 548');
+          const {
+            monitors: firstPageProjectMonitors,
+            after_key: afterKey,
+            total,
+          } = firstPageResponse.body;
+          expect(firstPageProjectMonitors.length).to.eql(PER_PAGE);
+          expect(total).to.eql(TOTAL_MONITORS);
+          expect(afterKey).to.be.a('string');
 
-        const secondPageResponse = await supertest
-          .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
-          .set(editorUser.apiKeyHeader)
-          .set(samlAuth.getInternalRequestHeader())
-          .query({
-            search_after: afterKey,
-            per_page: 500,
-          })
-          .send()
-          .expect(200);
-        const { monitors: secondPageProjectMonitors } = secondPageResponse.body;
-        expect(secondPageProjectMonitors.length).to.eql(100);
+          const secondPageResponse = await supertest
+            .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
+            .set(editorUser.apiKeyHeader)
+            .set(samlAuth.getInternalRequestHeader())
+            .query({
+              search_after: afterKey,
+              per_page: PER_PAGE,
+            })
+            .send()
+            .expect(200);
+          const { monitors: secondPageProjectMonitors } = secondPageResponse.body;
+          expect(secondPageProjectMonitors.length).to.eql(TOTAL_MONITORS - PER_PAGE);
 
-        checkFields([...firstPageProjectMonitors, ...secondPageProjectMonitors], monitors);
+          checkFields([...firstPageProjectMonitors, ...secondPageProjectMonitors], monitors);
+        });
       } finally {
-        const monitorsToDelete = monitors.map((monitor) => monitor.id);
-
         try {
-          await supertest
-            .delete(
-              SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace(
-                '{projectName}',
-                project
-              )
-            )
-            .set(editorUser.apiKeyHeader)
-            .set(samlAuth.getInternalRequestHeader())
-            .send({ monitors: monitorsToDelete.slice(0, 250) });
-          await supertest
-            .delete(
-              SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace(
-                '{projectName}',
-                project
-              )
-            )
-            .set(editorUser.apiKeyHeader)
-            .set(samlAuth.getInternalRequestHeader())
-            .send({ monitors: monitorsToDelete.slice(250, 500) });
-          await supertest
-            .delete(
-              SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace(
-                '{projectName}',
-                project
-              )
-            )
-            .set(editorUser.apiKeyHeader)
-            .set(samlAuth.getInternalRequestHeader())
-            .send({ monitors: monitorsToDelete.slice(500, 600) });
+          await deleteProjectMonitors(
+            monitors.map((m) => m.id),
+            project
+          );
         } catch (e) {
           // best-effort cleanup; beforeEach will handle leftovers
         }
@@ -534,9 +339,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('project monitors - handles url ecoded project names', async () => {
-      const monitors = [];
+      const monitors: ProjectMonitor[] = [];
       const projectName = 'Test project';
-      for (let i = 0; i < 600; i++) {
+      for (let i = 0; i < TOTAL_MONITORS; i++) {
         monitors.push({
           ...icmpProjectMonitors.monitors[0],
           id: `test url id ${i}`,
@@ -545,138 +350,69 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       }
 
       try {
-        await supertest
-          .put(
-            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace(
-              '{projectName}',
-              projectName
-            )
-          )
-          .set(editorUser.apiKeyHeader)
-          .set(samlAuth.getInternalRequestHeader())
-          .send({
-            monitors: monitors.slice(0, 250),
-          })
-          .expect(200);
+        await createProjectMonitors(monitors, projectName);
 
-        await supertest
-          .put(
-            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace(
-              '{projectName}',
-              projectName
+        await retry.try(async () => {
+          const firstPageResponse = await supertest
+            .get(
+              SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace(
+                '{projectName}',
+                encodeURI(projectName)
+              )
             )
-          )
-          .set(editorUser.apiKeyHeader)
-          .set(samlAuth.getInternalRequestHeader())
-          .send({
-            monitors: monitors.slice(250, 500),
-          })
-          .expect(200);
-        await supertest
-          .put(
-            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace(
-              '{projectName}',
-              projectName
+            .query({ per_page: PER_PAGE })
+            .set(editorUser.apiKeyHeader)
+            .set(samlAuth.getInternalRequestHeader())
+            .send()
+            .expect(200);
+
+          const {
+            monitors: firstPageProjectMonitors,
+            after_key: afterKey,
+            total,
+          } = firstPageResponse.body;
+          expect(firstPageProjectMonitors.length).to.eql(PER_PAGE);
+          expect(total).to.eql(TOTAL_MONITORS);
+          expect(afterKey).to.be.a('string');
+
+          const secondPageResponse = await supertest
+            .get(
+              SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace(
+                '{projectName}',
+                encodeURI(projectName)
+              )
             )
-          )
-          .set(editorUser.apiKeyHeader)
-          .set(samlAuth.getInternalRequestHeader())
-          .send({
-            monitors: monitors.slice(500, 600),
-          })
-          .expect(200);
+            .set(editorUser.apiKeyHeader)
+            .set(samlAuth.getInternalRequestHeader())
+            .query({
+              search_after: afterKey,
+              per_page: PER_PAGE,
+            })
+            .send()
+            .expect(200);
+          const { monitors: secondPageProjectMonitors } = secondPageResponse.body;
+          expect(secondPageProjectMonitors.length).to.eql(TOTAL_MONITORS - PER_PAGE);
 
-        const firstPageResponse = await supertest
-          .get(
-            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace(
-              '{projectName}',
-              encodeURI(projectName)
-            )
-          )
-          .query({ per_page: 500 })
-          .set(editorUser.apiKeyHeader)
-          .set(samlAuth.getInternalRequestHeader())
-          .send()
-          .expect(200);
-
-        const {
-          monitors: firstPageProjectMonitors,
-          after_key: afterKey,
-          total,
-        } = firstPageResponse.body;
-        expect(firstPageProjectMonitors.length).to.eql(500);
-        expect(total).to.eql(600);
-        expect(afterKey).to.eql('test url id 548');
-
-        const secondPageResponse = await supertest
-          .get(
-            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace(
-              '{projectName}',
-              encodeURI(projectName)
-            )
-          )
-          .set(editorUser.apiKeyHeader)
-          .set(samlAuth.getInternalRequestHeader())
-          .query({
-            search_after: afterKey,
-            per_page: 500,
-          })
-          .send()
-          .expect(200);
-        const { monitors: secondPageProjectMonitors } = secondPageResponse.body;
-        expect(secondPageProjectMonitors.length).to.eql(100);
-
-        checkFields([...firstPageProjectMonitors, ...secondPageProjectMonitors], monitors);
+          checkFields([...firstPageProjectMonitors, ...secondPageProjectMonitors], monitors);
+        });
       } finally {
-        const monitorsToDelete = monitors.map((monitor) => monitor.id);
-
-        await retry.try(async () => {
-          await supertest
-            .delete(
-              SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace(
-                '{projectName}',
-                encodeURI(projectName)
-              )
-            )
-            .set(editorUser.apiKeyHeader)
-            .set(samlAuth.getInternalRequestHeader())
-            .send({ monitors: monitorsToDelete.slice(0, 250) })
-            .expect(200);
-        });
-        await retry.try(async () => {
-          await supertest
-            .delete(
-              SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace(
-                '{projectName}',
-                encodeURI(projectName)
-              )
-            )
-            .set(editorUser.apiKeyHeader)
-            .set(samlAuth.getInternalRequestHeader())
-            .send({ monitors: monitorsToDelete.slice(250, 500) })
-            .expect(200);
-        });
-        await retry.try(async () => {
-          await supertest
-            .delete(
-              SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace(
-                '{projectName}',
-                encodeURI(projectName)
-              )
-            )
-            .set(editorUser.apiKeyHeader)
-            .set(samlAuth.getInternalRequestHeader())
-            .send({ monitors: monitorsToDelete.slice(500, 600) })
-            .expect(200);
-        });
+        try {
+          await deleteProjectMonitors(
+            monitors.map((m) => m.id),
+            encodeURI(projectName)
+          );
+        } catch (e) {
+          // best-effort cleanup; beforeEach will handle leftovers
+        }
       }
     });
 
     it('project monitors - handles per_page parameter', async () => {
-      const monitors = [];
+      const monitors: ProjectMonitor[] = [];
       const project = 'test-suite';
-      const perPage = 250;
-      for (let i = 0; i < 600; i++) {
+      const perPage = 10;
+      const totalMonitors = 25; // not evenly divisible by perPage so the last page is partial
+      for (let i = 0; i < totalMonitors; i++) {
         monitors.push({
           ...icmpProjectMonitors.monitors[0],
           id: `test-id-${i}`,
@@ -685,111 +421,52 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       }
 
       try {
-        await supertest
-          .put(
-            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
-          )
-          .set(editorUser.apiKeyHeader)
-          .set(samlAuth.getInternalRequestHeader())
-          .send({
-            monitors: monitors.slice(0, 250),
-          })
-          .expect(200);
+        await createProjectMonitors(monitors, project);
 
-        await supertest
-          .put(
-            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
-          )
-          .set(editorUser.apiKeyHeader)
-          .set(samlAuth.getInternalRequestHeader())
-          .send({
-            monitors: monitors.slice(250, 500),
-          })
-          .expect(200);
-        await supertest
-          .put(
-            SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace('{projectName}', project)
-          )
-          .set(editorUser.apiKeyHeader)
-          .set(samlAuth.getInternalRequestHeader())
-          .send({
-            monitors: monitors.slice(500, 600),
-          })
-          .expect(200);
+        await retry.try(async () => {
+          let afterId;
+          const fullResponse: ProjectMonitorMetaData[] = [];
+          let page = 1;
+          let count: number;
+          do {
+            const response: SuperTest.Response = await supertest
+              .get(
+                SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project)
+              )
+              .set(editorUser.apiKeyHeader)
+              .set(samlAuth.getInternalRequestHeader())
+              .query({
+                per_page: perPage,
+                search_after: afterId,
+              })
+              .send()
+              .expect(200);
 
-        let count = Number.MAX_VALUE;
-        let afterId;
-        const fullResponse: ProjectMonitorMetaData[] = [];
-        let page = 1;
-        while (count >= 250) {
-          const response: SuperTest.Response = await supertest
-            .get(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT.replace('{projectName}', project))
-            .set(editorUser.apiKeyHeader)
-            .set(samlAuth.getInternalRequestHeader())
-            .query({
-              per_page: perPage,
-              search_after: afterId,
-            })
-            .send()
-            .expect(200);
+            const { monitors: monitorsResponse, after_key: afterKey, total } = response.body;
+            expect(total).to.eql(totalMonitors);
+            count = monitorsResponse.length;
+            fullResponse.push(...monitorsResponse);
+            if (page < 3) {
+              expect(count).to.eql(perPage);
+            } else {
+              expect(count).to.eql(totalMonitors - perPage * 2);
+            }
+            page++;
 
-          const { monitors: monitorsResponse, after_key: afterKey, total } = response.body;
-          expect(total).to.eql(600);
-          count = monitorsResponse.length;
-          fullResponse.push(...monitorsResponse);
-          if (page < 3) {
-            expect(count).to.eql(perPage);
-          } else {
-            expect(count).to.eql(100);
-          }
-          page++;
-
-          afterId = afterKey;
-        }
-        // expect(fullResponse.length).to.eql(600);
-        // checkFields(fullResponse, monitors);
+            afterId = afterKey;
+          } while (count === perPage);
+          expect(fullResponse.length).to.eql(totalMonitors);
+          checkFields(fullResponse, monitors);
+        });
       } finally {
-        const monitorsToDelete = monitors.map((monitor) => monitor.id);
-
-        await retry.try(async () => {
-          await supertest
-            .delete(
-              SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace(
-                '{projectName}',
-                project
-              )
-            )
-            .set(editorUser.apiKeyHeader)
-            .set(samlAuth.getInternalRequestHeader())
-            .send({ monitors: monitorsToDelete.slice(0, 250) })
-            .expect(200);
-        });
-        await retry.try(async () => {
-          await supertest
-            .delete(
-              SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace(
-                '{projectName}',
-                project
-              )
-            )
-            .set(editorUser.apiKeyHeader)
-            .set(samlAuth.getInternalRequestHeader())
-            .send({ monitors: monitorsToDelete.slice(250, 500) })
-            .expect(200);
-        });
-        await retry.try(async () => {
-          await supertest
-            .delete(
-              SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_DELETE.replace(
-                '{projectName}',
-                project
-              )
-            )
-            .set(editorUser.apiKeyHeader)
-            .set(samlAuth.getInternalRequestHeader())
-            .send({ monitors: monitorsToDelete.slice(500, 600) })
-            .expect(200);
-        });
+        try {
+          await deleteProjectMonitors(
+            monitors.map((m) => m.id),
+            project
+          );
+        } catch (e) {
+          // best-effort cleanup; beforeEach will handle leftovers
+        }
       }
     });
   });

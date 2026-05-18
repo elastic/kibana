@@ -67,6 +67,7 @@
             "lineNumber": 152,
             "columnNumber": 36,
             "deprecated": false,
+            "docsReferencedTypeName": "GetUserDisplayNameParams",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -333,6 +334,7 @@
             "lineNumber": 39,
             "columnNumber": 82,
             "deprecated": false,
+            "docsReferencedTypeName": "UserProfilesPopoverProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -438,6 +440,7 @@
             "lineNumber": 134,
             "columnNumber": 85,
             "deprecated": false,
+            "docsReferencedTypeName": "UserProfilesSelectableProps",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -544,6 +547,7 @@
             "lineNumber": 53,
             "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "Props",
             "trackAdoption": false,
             "isRequired": true
           }
@@ -629,7 +633,15 @@
         "tags": [],
         "label": "UserAvatarProps",
         "description": [
-          "\nProps of {@link UserAvatar} component"
+          "\nProps of ",
+          {
+            "pluginId": "@kbn/user-profile-components",
+            "scope": "common",
+            "docId": "kibKbnUserProfileComponentsPluginApi",
+            "section": "def-common.UserAvatar",
+            "text": "UserAvatar"
+          },
+          " component"
         ],
         "signature": [
           {
@@ -812,7 +824,7 @@
           "\nAvatar stored in user profile."
         ],
         "path": "src/platform/packages/shared/kbn-user-profile-components/src/types.ts",
-        "lineNumber": 12,
+        "lineNumber": 14,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -830,7 +842,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-user-profile-components/src/types.ts",
-            "lineNumber": 16,
+            "lineNumber": 18,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -848,7 +860,7 @@
               "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-user-profile-components/src/types.ts",
-            "lineNumber": 20,
+            "lineNumber": 22,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -866,7 +878,7 @@
               "string | null | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-user-profile-components/src/types.ts",
-            "lineNumber": 24,
+            "lineNumber": 26,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -882,7 +894,7 @@
         "label": "UserProfileData",
         "description": [],
         "path": "src/platform/packages/shared/kbn-user-profile-components/src/types.ts",
-        "lineNumber": 43,
+        "lineNumber": 63,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -905,7 +917,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-user-profile-components/src/types.ts",
-            "lineNumber": 44,
+            "lineNumber": 64,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -928,7 +940,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-user-profile-components/src/types.ts",
-            "lineNumber": 45,
+            "lineNumber": 65,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -944,7 +956,7 @@
               "[key: string]:  unknown"
             ],
             "path": "src/platform/packages/shared/kbn-user-profile-components/src/types.ts",
-            "lineNumber": 46,
+            "lineNumber": 66,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1071,6 +1083,7 @@
                 "lineNumber": 39,
                 "columnNumber": 53,
                 "deprecated": false,
+                "docsReferencedTypeName": "ToMountPointParams",
                 "trackAdoption": false
               }
             ]
@@ -1085,7 +1098,15 @@
         "tags": [],
         "label": "UserProfilesPopoverProps",
         "description": [
-          "\nProps of {@link UserProfilesPopover} component"
+          "\nProps of ",
+          {
+            "pluginId": "@kbn/user-profile-components",
+            "scope": "common",
+            "docId": "kibKbnUserProfileComponentsPluginApi",
+            "section": "def-common.UserProfilesPopover",
+            "text": "UserProfilesPopover"
+          },
+          " component"
         ],
         "signature": [
           {
@@ -1161,7 +1182,15 @@
         "tags": [],
         "label": "UserProfilesSelectableProps",
         "description": [
-          "\nProps of {@link UserProfilesSelectable} component"
+          "\nProps of ",
+          {
+            "pluginId": "@kbn/user-profile-components",
+            "scope": "common",
+            "docId": "kibKbnUserProfileComponentsPluginApi",
+            "section": "def-common.UserProfilesSelectable",
+            "text": "UserProfilesSelectable"
+          },
+          " component"
         ],
         "signature": [
           {
@@ -1173,7 +1202,7 @@
           },
           "<Option> extends Pick<",
           "EuiSelectableProps",
-          "<{}>, \"data-test-subj\" | \"errorMessage\" | \"height\" | \"singleSelection\" | \"emptyMessage\" | \"noMatchesMessage\" | \"loadingMessage\">"
+          "<{}>, \"data-test-subj\" | \"height\" | \"errorMessage\" | \"singleSelection\" | \"emptyMessage\" | \"noMatchesMessage\" | \"loadingMessage\">"
         ],
         "path": "src/platform/packages/shared/kbn-user-profile-components/src/user_profiles_selectable.tsx",
         "lineNumber": 35,
@@ -1641,7 +1670,7 @@
           "\nUser settings stored in the data object of the User Profile"
         ],
         "path": "src/platform/packages/shared/kbn-user-profile-components/src/types.ts",
-        "lineNumber": 34,
+        "lineNumber": 44,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1664,7 +1693,7 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-user-profile-components/src/types.ts",
-            "lineNumber": 38,
+            "lineNumber": 48,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1687,7 +1716,23 @@
               " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-user-profile-components/src/types.ts",
-            "lineNumber": 39,
+            "lineNumber": 49,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/user-profile-components",
+            "id": "def-common.UserSettingsData.locale",
+            "type": "string",
+            "tags": [],
+            "label": "locale",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-user-profile-components/src/types.ts",
+            "lineNumber": 50,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1703,7 +1748,43 @@
               "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-user-profile-components/src/types.ts",
-            "lineNumber": 40,
+            "lineNumber": 51,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/user-profile-components",
+            "id": "def-common.UserSettingsData.agentBuilderAnnouncementModalSeen",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "agentBuilderAnnouncementModalSeen",
+            "description": [
+              "\nWhether the Agent Builder announcement modal was dismissed for the current user (all spaces)."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-user-profile-components/src/types.ts",
+            "lineNumber": 52,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/user-profile-components",
+            "id": "def-common.UserSettingsData.agentBuilderAnnouncementModalSeenBySpaceJson",
+            "type": "string",
+            "tags": [],
+            "label": "agentBuilderAnnouncementModalSeenBySpaceJson",
+            "description": [
+              "\nLegacy: stringified JSON map of space id → dismissed (`true`). Superseded by\n`agentBuilderAnnouncementModalSeen`; read for backward compatibility."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-user-profile-components/src/types.ts",
+            "lineNumber": 56,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -1718,7 +1799,15 @@
         "tags": [],
         "label": "UserToolTipProps",
         "description": [
-          "\nProps of {@link UserToolTip} component"
+          "\nProps of ",
+          {
+            "pluginId": "@kbn/user-profile-components",
+            "scope": "common",
+            "docId": "kibKbnUserProfileComponentsPluginApi",
+            "section": "def-common.UserToolTip",
+            "text": "UserToolTip"
+          },
+          " component"
         ],
         "signature": [
           {
@@ -1804,7 +1893,7 @@
           "\"standard\" | \"system\" | \"high\""
         ],
         "path": "src/platform/packages/shared/kbn-user-profile-components/src/types.ts",
-        "lineNumber": 32,
+        "lineNumber": 34,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1821,7 +1910,26 @@
           "\"system\" | \"light\" | \"dark\" | \"space_default\""
         ],
         "path": "src/platform/packages/shared/kbn-user-profile-components/src/types.ts",
-        "lineNumber": 30,
+        "lineNumber": 32,
+        "columnNumber": 1,
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/user-profile-components",
+        "id": "def-common.LocaleValue",
+        "type": "Type",
+        "tags": [],
+        "label": "LocaleValue",
+        "description": [
+          "\nValue stored in the user profile for the display language.\n\nAn empty string `\"\"` means \"no explicit choice\" (fall back to the server-configured\nlocale at render time). A `SupportedLocaleId` means the user has picked that locale."
+        ],
+        "signature": [
+          "string"
+        ],
+        "path": "src/platform/packages/shared/kbn-user-profile-components/src/types.ts",
+        "lineNumber": 36,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1865,7 +1973,7 @@
             "id": "def-common.UpdateUserProfileHook.$1",
             "type": "Object",
             "tags": [],
-            "label": "__0",
+            "label": "{\n  notificationSuccess = {},\n  pageReloadChecker,\n}",
             "description": [],
             "signature": [
               "Props"
@@ -1874,6 +1982,7 @@
             "lineNumber": 53,
             "columnNumber": 38,
             "deprecated": false,
+            "docsReferencedTypeName": "Props",
             "trackAdoption": false
           }
         ],
@@ -1886,7 +1995,15 @@
         "tags": [],
         "label": "UserProfileWithAvatar",
         "description": [
-          "\nConvenience type for a {@link UserProfile} with avatar data"
+          "\nConvenience type for a ",
+          {
+            "pluginId": "@kbn/user-profile-components",
+            "scope": "common",
+            "docId": "kibKbnUserProfileComponentsPluginApi",
+            "section": "def-common.UserProfile",
+            "text": "UserProfile"
+          },
+          " with avatar data"
         ],
         "signature": [
           {

@@ -35,6 +35,9 @@ jest.mock('react-redux', () => {
 });
 
 jest.mock('../../../utils/route/use_route_spy');
+jest.mock('../../../../flyout_v2/shared/components/flyout_provider', () => ({
+  flyoutProviders: ({ children }: { children: React.ReactNode }) => children,
+}));
 
 const mockOpenFlyout = jest.fn();
 jest.mock('@kbn/expandable-flyout');
@@ -64,7 +67,7 @@ jest.mock('../../../lib/kibana', () => {
 jest.mock('../../../../flyout_v2/shared/components/flyout_provider', () => ({
   flyoutProviders: ({ children }: { children: React.ReactNode }) => children,
 }));
-jest.mock('../../../../flyout_v2/document/document_flyout_wrapper', () => ({
+jest.mock('../../../../flyout_v2/document/main/document_flyout_wrapper', () => ({
   DocumentFlyoutWrapper: (props: unknown) => mockDocumentFlyoutWrapper(props),
 }));
 jest.mock('@kbn/kibana-react-plugin/public', () => {
@@ -183,10 +186,11 @@ describe('RowAction', () => {
 
   test('should open system flyout when newFlyoutSystemEnabled is enabled', () => {
     jest.mocked(useIsExperimentalFeatureEnabled).mockReturnValue(true);
+    const refetch = jest.fn();
 
     const wrapper = render(
       <TestProviders>
-        <RowAction {...defaultProps} />
+        <RowAction {...defaultProps} refetch={refetch} />
       </TestProviders>
     );
 
@@ -200,7 +204,7 @@ describe('RowAction', () => {
     expect(flyoutElement.props.renderCellActions).toBeDefined();
     expect(flyoutElement.props.onAlertUpdated).toEqual(expect.any(Function));
     flyoutElement.props.onAlertUpdated();
-    expect(defaultProps.refetch).toHaveBeenCalledTimes(1);
+    expect(refetch).toHaveBeenCalledTimes(1);
   });
 
   describe('privileges', () => {

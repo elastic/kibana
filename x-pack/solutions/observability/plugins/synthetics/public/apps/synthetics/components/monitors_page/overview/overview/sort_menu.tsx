@@ -51,7 +51,7 @@ export const SortMenu = ({ sortOptions, orderOptions, sortField }: Props) => {
     <EuiButtonEmpty
       data-test-subj="syntheticsSortMenuButton"
       size="xs"
-      iconType="arrowDown"
+      iconType="chevronSingleDown"
       iconSide="right"
       onClick={onButtonClick}
     >
@@ -90,7 +90,7 @@ export const SortMenu = ({ sortOptions, orderOptions, sortField }: Props) => {
       panelPaddingSize="none"
       anchorPosition="downLeft"
     >
-      <EuiContextMenuPanel size="s" items={items} style={{ minWidth: 160 }} />
+      <EuiContextMenuPanel items={items} style={{ minWidth: 160 }} />
     </EuiPopover>
   );
 };
@@ -108,7 +108,6 @@ const ContextMenuItem = ({
 
   return (
     <EuiContextMenuItem
-      size="s"
       key={option.value}
       icon={getIconType(option.checked)}
       onClick={() => {

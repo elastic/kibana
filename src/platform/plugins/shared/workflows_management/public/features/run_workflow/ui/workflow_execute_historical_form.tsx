@@ -24,6 +24,7 @@ import { CodeEditor, monaco } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import { buildFieldsZodValidator } from '@kbn/workflows/spec/lib/build_fields_zod_validator';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
+import { WORKFLOWS_MONACO_EDITOR_THEME } from '@kbn/workflows-ui';
 import { InputValidationCallout } from './input_validation_callout';
 import { TRIGGER_TABS_LABELS } from './translations';
 import { useWorkflowExecution } from '../../../entities/workflows/model/use_workflow_execution';
@@ -31,7 +32,6 @@ import { useWorkflowExecutions } from '../../../entities/workflows/model/use_wor
 import { formatDuration } from '../../../shared/lib/format_duration';
 import { getExecutionStatusIcon } from '../../../shared/ui/status_badge';
 import { useGetFormattedDateTime } from '../../../shared/ui/use_formatted_date';
-import { WORKFLOWS_MONACO_EDITOR_THEME } from '../../../widgets/workflow_yaml_editor/styles/use_workflows_monaco_theme';
 
 /**
  * Sentinel error value used to signal "not ready" to the parent (no execution
@@ -169,7 +169,13 @@ export const WorkflowExecuteHistoricalForm = React.memo<WorkflowExecuteHistorica
     );
 
     return (
-      <EuiFlexGroup direction="column" gutterSize="m">
+      <EuiFlexGroup
+        direction="column"
+        gutterSize="m"
+        css={css`
+          min-height: 0;
+        `}
+      >
         <EuiFlexItem grow={false}>
           <EuiFormRow label={translations.selectExecutionLabel} fullWidth>
             <EuiComboBox
@@ -191,29 +197,52 @@ export const WorkflowExecuteHistoricalForm = React.memo<WorkflowExecuteHistorica
         </EuiFlexItem>
 
         {selectedExecution && (
-          <EuiFlexItem>
-            <EuiFlexGroup direction="column" gutterSize="s">
+          <EuiFlexItem
+            css={css`
+              overflow: hidden;
+            `}
+          >
+            <EuiFlexGroup
+              direction="column"
+              gutterSize="s"
+              css={css`
+                min-height: 0;
+              `}
+            >
               {errors && errors !== NOT_READY_SENTINEL && (
                 <EuiFlexItem grow={false}>
                   <InputValidationCallout errors={errors} />
                 </EuiFlexItem>
               )}
 
-              <EuiFlexItem>
+              <EuiFlexItem
+                css={css`
+                  overflow: hidden;
+                `}
+              >
                 <EuiFormRow
                   label={translations.getInputDataLabel(
                     getTriggerTypeLabel(selectedExecution.context)
                   )}
                   fullWidth
+                  css={css`
+                    flex: 1;
+                    display: flex;
+                    flex-direction: column;
+                    min-height: 0;
+                    .euiFormRow__fieldWrapper {
+                      flex: 1;
+                      min-height: 0;
+                      display: flex;
+                      flex-direction: column;
+                    }
+                  `}
                 >
                   <CodeEditor
                     languageId="json"
                     value={value}
-                    fitToContent={{
-                      minLines: 5,
-                      maxLines: 15,
-                    }}
                     width="100%"
+                    height="100%"
                     onChange={setValue}
                     editorDidMount={handleMount}
                     dataTestSubj={'workflow-historical-json-editor'}

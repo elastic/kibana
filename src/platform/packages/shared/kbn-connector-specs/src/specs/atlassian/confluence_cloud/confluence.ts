@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { ActionContext, ConnectorSpec } from '../../../..';
 import {
   ListPagesInputSchema,
@@ -17,9 +17,6 @@ import {
   GetSpaceInputSchema,
 } from './types';
 import type { ListPagesInput, GetPageInput, ListSpacesInput, GetSpaceInput } from './types';
-import getResourceWorkflow from './workflows/get_resource.yaml';
-import listResourceWorkflow from './workflows/list_resource.yaml';
-
 /** Bare subdomain: alphanumeric and hyphens only (no dots, no .atlassian.net suffix). */
 const BARE_SUBDOMAIN_REGEX = /^[a-z0-9-]+$/i;
 const ATLASSIAN_NET_SUFFIX = '.atlassian.net';
@@ -92,35 +89,42 @@ export const ConfluenceCloudConnector: ConnectorSpec = {
       },
     ],
   },
-  schema: z.object({
-    subdomain: z
-      .string()
-      .trim()
-      .min(1)
-      .regex(BARE_SUBDOMAIN_REGEX, {
-        message:
-          'Subdomain may only contain letters, numbers, and hyphens (for example, your-domain)',
-      })
-      .describe(
-        i18n.translate('core.kibanaConnectorSpecs.confluence.config.subdomain.description', {
-          defaultMessage: 'Your Atlassian subdomain',
+  schema: lazySchema(() =>
+    z.object({
+      subdomain: z
+        .string()
+        .trim()
+        .min(1)
+        .regex(BARE_SUBDOMAIN_REGEX, {
+          message:
+            'Subdomain may only contain letters, numbers, and hyphens (for example, your-domain)',
         })
-      )
-      .meta({
-        widget: 'text',
-        label: i18n.translate('core.kibanaConnectorSpecs.confluence.config.subdomain.label', {
-          defaultMessage: 'Subdomain',
+        .describe(
+          i18n.translate('core.kibanaConnectorSpecs.confluence.config.subdomain.description', {
+            defaultMessage: 'Your Atlassian subdomain',
+          })
+        )
+        .meta({
+          widget: 'text',
+          label: i18n.translate('core.kibanaConnectorSpecs.confluence.config.subdomain.label', {
+            defaultMessage: 'Subdomain',
+          }),
+          placeholder: 'your-domain',
+          helpText: i18n.translate(
+            'core.kibanaConnectorSpecs.confluence.config.subdomain.helpText',
+            {
+              defaultMessage:
+                'The subdomain for your Confluence Cloud site (for example, your-domain for https://your-domain.atlassian.net)',
+            }
+          ),
         }),
-        placeholder: 'your-domain',
-        helpText: i18n.translate('core.kibanaConnectorSpecs.confluence.config.subdomain.helpText', {
-          defaultMessage:
-            'The subdomain for your Confluence Cloud site (for example, your-domain for https://your-domain.atlassian.net)',
-        }),
-      }),
-  }),
+    })
+  ),
   actions: {
     listPages: {
-      isTool: false,
+      description:
+        'List Confluence pages. Use when you need to find pages, optionally filtered by space, title, or status. Supports pagination via cursor.',
+      isTool: true,
       input: ListPagesInputSchema,
       handler: async (ctx, input: ListPagesInput) => {
         const baseUrl = buildBaseUrl(ctx);
@@ -144,7 +148,9 @@ export const ConfluenceCloudConnector: ConnectorSpec = {
       },
     },
     getPage: {
-      isTool: false,
+      description:
+        'Fetch full details of a single Confluence page by its ID. Use when you already have the page ID and need the complete record including its content.',
+      isTool: true,
       input: GetPageInputSchema,
       handler: async (ctx, input: GetPageInput) => {
         const baseUrl = buildBaseUrl(ctx);
@@ -158,7 +164,9 @@ export const ConfluenceCloudConnector: ConnectorSpec = {
       },
     },
     listSpaces: {
-      isTool: false,
+      description:
+        'List Confluence spaces. Use when you need to discover available spaces or find a specific space by ID, key, type, or status. Supports pagination via cursor.',
+      isTool: true,
       input: ListSpacesInputSchema,
       handler: async (ctx, input: ListSpacesInput) => {
         const baseUrl = buildBaseUrl(ctx);
@@ -182,7 +190,9 @@ export const ConfluenceCloudConnector: ConnectorSpec = {
       },
     },
     getSpace: {
-      isTool: false,
+      description:
+        'Fetch full details of a single Confluence space by its ID. Use when you already have the space ID and need the complete record.',
+      isTool: true,
       input: GetSpaceInputSchema,
       handler: async (ctx, input: GetSpaceInput) => {
         const baseUrl = buildBaseUrl(ctx);
@@ -193,6 +203,9 @@ export const ConfluenceCloudConnector: ConnectorSpec = {
       },
     },
   },
+  skill: [
+    'Typical pattern: listSpaces → listPages (with spaceId) → getPage (with bodyFormat) to retrieve full page content.',
+  ].join('\n'),
   test: {
     description: i18n.translate('core.kibanaConnectorSpecs.confluence.test.description', {
       defaultMessage: 'Verifies Confluence Cloud connection by listing spaces',
@@ -219,6 +232,4 @@ export const ConfluenceCloudConnector: ConnectorSpec = {
       }
     },
   },
-
-  agentBuilderWorkflows: [getResourceWorkflow, listResourceWorkflow],
 };

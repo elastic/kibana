@@ -46,12 +46,12 @@ import { detectionRulesClientMock } from '../../rule_management/logic/detection_
 import { packageServiceMock } from '@kbn/fleet-plugin/server/services/epm/package_service.mock';
 import type { EndpointInternalFleetServicesInterface } from '../../../../endpoint/services/fleet';
 import { siemMigrationsServiceMock } from '../../../siem_migrations/__mocks__/mocks';
-import { AssetInventoryDataClientMock } from '../../../asset_inventory/asset_inventory_data_client.mock';
 import { createProductFeaturesServiceMock } from '../../../product_features_service/mocks';
 import type { EndpointAppContextService } from '../../../../endpoint/endpoint_app_context_services';
 import { padPackageInstallationClientMock } from '../../../entity_analytics/privilege_monitoring/privileged_access_detection/pad_package_installation_client.mock';
 import { privilegeMonitorDataClientMock } from '../../../entity_analytics/privilege_monitoring/engine/data_client.mock';
 import { entityStoreCrudClientMock } from '../../../entity_analytics/entity_store/entity_store_crud_client.mock';
+import { getMockRulesAuthz } from '../../rule_management/__mocks__/authz';
 
 export const createMockClients = () => {
   const core = coreMock.createRequestHandlerContext();
@@ -94,7 +94,6 @@ export const createMockClients = () => {
     siemRuleMigrationsClient: siemMigrationsServiceMock.createRulesClient(),
     siemDashboardMigrationsClient: siemMigrationsServiceMock.createDashboardsClient(),
     getInferenceClient: jest.fn(),
-    assetInventoryDataClient: AssetInventoryDataClientMock.create(),
     productFeaturesService: createProductFeaturesServiceMock(),
     logger: loggerMock.create(),
   };
@@ -160,6 +159,7 @@ const createSecuritySolutionRequestContextMock = (
     getEndpointAuthz: jest.fn(async () =>
       getEndpointAuthzInitialStateMock(overrides.endpointAuthz)
     ),
+    getCheckOsqueryResponseActionAuthz: jest.fn(() => jest.fn()),
     getEndpointService: jest.fn(() => {
       if (overrides.endpointAppServices) {
         return overrides.endpointAppServices;
@@ -213,11 +213,11 @@ const createSecuritySolutionRequestContextMock = (
       getDashboardsClient: jest.fn(() => clients.siemDashboardMigrationsClient),
     },
     getInferenceClient: jest.fn(() => clients.getInferenceClient()),
-    getAssetInventoryClient: jest.fn(() => clients.assetInventoryDataClient),
     getProductFeatureService: jest.fn(() => clients.productFeaturesService),
     getMlAuthz: jest.fn(() => ({
       validateRuleType: jest.fn(async () => ({ valid: true, message: undefined })),
     })),
+    getRulesAuthz: jest.fn(() => getMockRulesAuthz()),
   };
 };
 

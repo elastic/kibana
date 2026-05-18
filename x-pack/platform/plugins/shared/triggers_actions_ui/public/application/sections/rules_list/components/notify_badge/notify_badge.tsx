@@ -410,6 +410,10 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
       button={buttonWithToolTip}
       anchorPosition="rightCenter"
       panelStyle={{ maxHeight: '100vh', overflowY: 'auto' }}
+      aria-label={i18n.translate(
+        'xpack.triggersActionsUI.sections.rulesList.notifyBadge.popoverAriaLabel',
+        { defaultMessage: 'Snooze notifications' }
+      )}
     >
       <SnoozePanel
         snoozeRule={onApplySnooze}

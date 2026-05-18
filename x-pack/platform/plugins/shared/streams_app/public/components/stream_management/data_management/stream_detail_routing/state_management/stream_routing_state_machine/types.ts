@@ -18,8 +18,12 @@ import type { DocumentMatchFilterOptions } from '.';
 import type { RoutingSamplesContext } from './routing_samples_state_machine';
 import type { PartitionSuggestion } from '../../review_suggestions_form/use_review_suggestions_form';
 
+export type PartitionableDefinition =
+  | Streams.ingest.all.GetResponse
+  | Streams.QueryStream.GetResponse;
+
 export interface StreamRoutingServiceDependencies {
-  forkSuccessNofitier: (streamName: string) => void;
+  forkSuccessNotifier?: (streamName: string) => void;
   refreshDefinition: () => void;
   streamsRepositoryClient: StreamsRepositoryClient;
   timeState$: TimefilterHook['timeState$'];
@@ -29,7 +33,7 @@ export interface StreamRoutingServiceDependencies {
 }
 
 export interface StreamRoutingInput {
-  definition: Streams.WiredStream.GetResponse;
+  definition: PartitionableDefinition;
 }
 
 export interface BulkForkItem {
@@ -44,13 +48,14 @@ export interface BulkForkResult {
 
 export interface StreamRoutingContext {
   currentRuleId: string | null;
-  definition: Streams.WiredStream.GetResponse;
+  definition: PartitionableDefinition;
   initialRouting: RoutingDefinitionWithUIAttributes[];
   routing: RoutingDefinitionWithUIAttributes[];
   suggestedRuleId: string | null;
   editingSuggestionIndex: number | null;
   editedSuggestion: PartitionSuggestion | null;
   isRefreshing: boolean;
+  editingQueryStreamName: string | null;
   isConditionEditorValid: boolean;
   bulkFork: {
     items: BulkForkItem[];
@@ -64,11 +69,15 @@ export type StreamRoutingEvent =
   | { type: 'queryStream.create' }
   | { type: 'queryStream.cancel' }
   | { type: 'queryStream.save'; name: string; esqlQuery: string }
+  | { type: 'queryStream.edit'; name: string }
+  | { type: 'queryStream.cancelEdit' }
+  | { type: 'queryStream.delete' }
+  | { type: 'queryStream.update'; name: string; esqlQuery: string }
   | { type: 'routingRule.cancel' }
   | { type: 'routingRule.change'; routingRule: Partial<RoutingDefinitionWithUIAttributes> }
   | { type: 'routingRule.create' }
   | { type: 'routingRule.edit'; id: string }
-  | { type: 'routingRule.fork'; routingRule?: RoutingDefinition }
+  | { type: 'routingRule.fork'; routingRule?: RoutingDefinition; draft?: boolean }
   | { type: 'routingRule.bulkFork'; items: BulkForkItem[] }
   | { type: 'routingRule.reorder'; routing: RoutingDefinitionWithUIAttributes[] }
   | { type: 'routingRule.remove' }
@@ -84,7 +93,7 @@ export type StreamRoutingEvent =
       toggle?: boolean;
     }
   | { type: 'routingRule.reviewSuggested'; id: string }
-  | { type: 'stream.received'; definition: Streams.WiredStream.GetResponse }
+  | { type: 'stream.received'; definition: PartitionableDefinition }
   | { type: 'suggestion.edit'; index: number; suggestion: PartitionSuggestion }
   | { type: 'suggestion.changeName'; name: string }
   | { type: 'suggestion.changeCondition'; condition: Condition }

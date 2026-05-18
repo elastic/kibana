@@ -86,7 +86,12 @@ components:
           queryName: 'uptime'
           queryText: 'select * from uptime;'
           timestamp: '2024-07-26T09:00:00.000Z'
-        edges: [{}]
+        edges:
+          - _id: 'result-001'
+            fields:
+              agent_id: '16d7caf5-efd2-4212-9b62-73dafc91fa13'
+              status: 'success'
+              rows_count: 5
         total: 10
         currentPage: 0
         pageSize: 20

@@ -367,8 +367,9 @@ function DiscoverDocumentsComponent({
     () => ({
       openInNewTab: (params) => dispatch(internalStateActions.openInNewTabExtPointAction(params)),
       updateESQLQuery: onUpdateESQLQuery,
+      refreshData: () => dataStateContainer.refetch$.next(undefined),
     }),
-    [dispatch, onUpdateESQLQuery]
+    [dispatch, onUpdateESQLQuery, dataStateContainer]
   );
 
   const docViewerUiState = useCurrentTabSelector((state) => state.uiState.docViewer);
@@ -484,11 +485,23 @@ function DiscoverDocumentsComponent({
   const cascadedDocumentsFetcher = useCurrentTabRuntimeState(
     (runtimeState) => runtimeState.cascadedDocumentsFetcher$
   );
-  const { availableCascadeGroups, selectedCascadeGroups } = useCurrentTabSelector(
-    (tab) => tab.cascadedDocumentsState
+  const latestDataCascadeUiState = useLatest(
+    useCurrentTabSelector((tab) => tab.uiState.dataCascade)
   );
+  const latestCascadedDocumentsDataGridsUiState = useLatest(
+    useCurrentTabSelector((tab) => tab.uiState.cascadedDocumentsDataGridMap)
+  );
+  const {
+    availableCascadeGroups,
+    selectedCascadeGroups,
+    columnsMeta: cascadedColumnsMeta,
+  } = useCurrentTabSelector((tab) => tab.cascadedDocumentsState);
   const setSelectedCascadeGroups = useCurrentTabAction(
     internalStateActions.setSelectedCascadeGroups
+  );
+  const setDataCascadeUiState = useCurrentTabAction(internalStateActions.setDataCascadeUiState);
+  const setCascadedDocumentsDataGridUiState = useCurrentTabAction(
+    internalStateActions.setCascadedDocumentsDataGridUiState
   );
   const esqlVariables = useCurrentTabSelector((tab) => tab.esqlVariables);
   const cascadedDocumentsContext = useMemo<CascadedDocumentsContext | undefined>(() => {
@@ -503,6 +516,7 @@ function DiscoverDocumentsComponent({
       cascadedDocumentsFetcher,
       availableCascadeGroups,
       selectedCascadeGroups,
+      cascadedColumnsMeta,
       esqlQuery: query,
       esqlVariables,
       timeRange: requestParams.timeRangeAbsolute,
@@ -511,6 +525,12 @@ function DiscoverDocumentsComponent({
       expandedDocOwner$,
       getExpandedDocSetter,
       getRenderDocumentViewMetaSetter,
+      getDataCascadeUiState: () => latestDataCascadeUiState.current,
+      getDataGridUiStateMap: () => latestCascadedDocumentsDataGridsUiState.current,
+      setDataCascadeUiState: (nextUiState) =>
+        dispatch(setDataCascadeUiState({ dataCascadeUiState: nextUiState })),
+      setDataGridUiState: (nodeId, uiState) =>
+        dispatch(setCascadedDocumentsDataGridUiState({ nodeId, dataGridUiState: uiState })),
       cascadeGroupingChangeHandler: (newSelectedCascadeGroups) => {
         dispatch(setSelectedCascadeGroups({ selectedCascadeGroups: newSelectedCascadeGroups }));
       },
@@ -520,19 +540,31 @@ function DiscoverDocumentsComponent({
   }, [
     availableCascadeGroups,
     cascadedDocumentsFetcher,
+    cascadedColumnsMeta,
     dispatch,
     esqlVariables,
     expandedDoc$,
     expandedDocOwner$,
     getExpandedDocSetter,
     getRenderDocumentViewMetaSetter,
+    latestCascadedDocumentsDataGridsUiState,
+    latestDataCascadeUiState,
     onUpdateESQLQuery,
     query,
     requestParams.timeRangeAbsolute,
     selectedCascadeGroups,
+    setCascadedDocumentsDataGridUiState,
+    setDataCascadeUiState,
     setSelectedCascadeGroups,
     viewModeToggle,
   ]);
+
+  const flyoutColumnsMeta = useMemo(() => {
+    if (!expandedDocOwner || expandedDocOwner === DEFAULT_EXPANDED_DOC_OWNER) {
+      return columnsMeta;
+    }
+    return cascadedColumnsMeta;
+  }, [expandedDocOwner, columnsMeta, cascadedColumnsMeta]);
 
   if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {
     return (
@@ -629,7 +661,7 @@ function DiscoverDocumentsComponent({
           hits={renderDocumentViewMeta.displayedRows}
           // if default columns are used, don't make them part of the URL - the context state handling will take care to restore them
           columns={renderDocumentViewMeta.displayedColumns}
-          columnsMeta={columnsMeta}
+          columnsMeta={flyoutColumnsMeta}
           savedSearchId={persistedDiscoverSession?.id!}
           query={query}
           initialTabId={initialDocViewerTabId}

@@ -29,11 +29,9 @@ import { Link } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowListItemDto } from '@kbn/workflows';
-import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
+import { WorkflowTriggersAndSteps } from './workflow_triggers_and_steps';
 import { getRunTooltipContent, StatusBadge, WorkflowStatus } from '../../../shared/ui';
 import { NextExecutionTime } from '../../../shared/ui/next_execution_time';
-import { WorkflowsTriggersList } from '../../../widgets/worflows_triggers_list/worflows_triggers_list';
-import { WorkflowsStepTypesList } from '../../../widgets/workflows_step_types_list/workflows_step_types_list';
 import { WORKFLOWS_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
 
 export interface WorkflowListTableProps {
@@ -50,6 +48,12 @@ export interface WorkflowListTableProps {
   onExportWorkflow: (item: WorkflowListItemDto) => void;
   onRequestRun: (item: WorkflowListItemDto) => void;
   getEditHref: (item: WorkflowListItemDto) => string;
+  canCreateWorkflow: boolean;
+  canReadWorkflow: boolean;
+  canReadWorkflowExecution: boolean;
+  canUpdateWorkflow: boolean;
+  canDeleteWorkflow: boolean;
+  canExecuteWorkflow: boolean;
 }
 
 export const WorkflowListTable = ({
@@ -66,14 +70,14 @@ export const WorkflowListTable = ({
   onExportWorkflow,
   onRequestRun,
   getEditHref,
+  canCreateWorkflow,
+  canReadWorkflow,
+  canReadWorkflowExecution,
+  canUpdateWorkflow,
+  canDeleteWorkflow,
+  canExecuteWorkflow,
 }: WorkflowListTableProps) => {
-  const {
-    canCreateWorkflow,
-    canExecuteWorkflow,
-    canUpdateWorkflow,
-    canDeleteWorkflow,
-    canReadWorkflowExecution,
-  } = useWorkflowsCapabilities();
+  const allowRowSelection = canUpdateWorkflow || canDeleteWorkflow || canReadWorkflow;
 
   const columns = useMemo<Array<EuiBasicTableColumn<WorkflowListItemDto>>>(
     () => [
@@ -97,9 +101,26 @@ export const WorkflowListTable = ({
                       min-width: 0;
                     `}
                   >
-                    <EuiLink>
-                      <Link
-                        to={`/${item.id}`}
+                    {canReadWorkflow ? (
+                      <EuiLink>
+                        <Link
+                          to={`/${item.id}`}
+                          css={css`
+                            white-space: nowrap;
+                            overflow: hidden;
+                            text-overflow: ellipsis;
+                            display: block;
+                            max-width: 100%;
+                          `}
+                          title={name}
+                          data-test-subj="workflowNameLink"
+                        >
+                          {name}
+                        </Link>
+                      </EuiLink>
+                    ) : (
+                      <EuiText
+                        size="s"
                         css={css`
                           white-space: nowrap;
                           overflow: hidden;
@@ -108,11 +129,11 @@ export const WorkflowListTable = ({
                           max-width: 100%;
                         `}
                         title={name}
-                        data-test-subj="workflowNameLink"
+                        data-test-subj="workflowNameText"
                       >
                         {name}
-                      </Link>
-                    </EuiLink>
+                      </EuiText>
+                    )}
                   </EuiFlexItem>
                   <WorkflowTagsBadge tags={item.definition?.tags} />
                 </EuiFlexGroup>
@@ -145,52 +166,50 @@ export const WorkflowListTable = ({
       },
       {
         field: 'triggers',
-        name: i18n.translate('workflows.workflowList.column.trigger', {
-          defaultMessage: 'Trigger',
+        name: i18n.translate('workflows.workflowList.column.triggersAndSteps', {
+          defaultMessage: 'Triggers and Steps',
         }),
-        width: '12%',
+        width: '24%',
         render: (value: unknown, item: WorkflowListItemDto) => {
-          if (!item.history || item.history.length === 0) {
-            return <WorkflowsTriggersList triggers={item.definition?.triggers ?? []} />;
+          const triggers = item.definition?.triggers ?? [];
+          const steps = item.definition?.steps ?? [];
+          const history = item.history ?? [];
+
+          const cell = <WorkflowTriggersAndSteps triggers={triggers} steps={steps} />;
+
+          if (history.length > 0 && triggers.length > 0) {
+            return (
+              <NextExecutionTime triggers={triggers} history={history}>
+                {cell}
+              </NextExecutionTime>
+            );
           }
-          return (
-            <NextExecutionTime triggers={item.definition?.triggers ?? []} history={item.history}>
-              <WorkflowsTriggersList triggers={item.definition?.triggers ?? []} />
-            </NextExecutionTime>
-          );
+          return cell;
         },
       },
       {
-        field: 'steps',
-        name: i18n.translate('workflows.workflowList.column.steps', {
-          defaultMessage: 'Steps',
+        name: i18n.translate('workflows.workflowList.column.lastRun', {
+          defaultMessage: 'Last run',
         }),
-        width: '12%',
-        render: (value: unknown, item: WorkflowListItemDto) => (
-          <WorkflowsStepTypesList steps={item.definition?.steps ?? []} />
-        ),
+        field: 'runHistory',
+        width: '10%',
+        render: (value: unknown, item: WorkflowListItemDto) => {
+          if (!canReadWorkflowExecution) {
+            return (
+              <EuiText size="xs" color="subdued" data-test-subj="workflowLastRunRestricted">
+                {i18n.translate('workflows.workflowList.lastRun.restricted', {
+                  defaultMessage: '—',
+                })}
+              </EuiText>
+            );
+          }
+          if (!item.history || item.history.length === 0) return null;
+          const lastRun = item.history[0];
+          return (
+            <StatusBadge status={lastRun.status} date={lastRun.finishedAt || lastRun.startedAt} />
+          );
+        },
       },
-      ...(canReadWorkflowExecution
-        ? [
-            {
-              name: i18n.translate('workflows.workflowList.column.lastRun', {
-                defaultMessage: 'Last run',
-              }),
-              field: 'runHistory',
-              width: '10%',
-              render: (value: unknown, item: WorkflowListItemDto) => {
-                if (!item.history || item.history.length === 0) return null;
-                const lastRun = item.history[0];
-                return (
-                  <StatusBadge
-                    status={lastRun.status}
-                    date={lastRun.finishedAt || lastRun.startedAt}
-                  />
-                );
-              },
-            },
-          ]
-        : []),
       {
         name: i18n.translate('workflows.workflowList.column.enabled', {
           defaultMessage: 'Enabled',
@@ -271,7 +290,7 @@ export const WorkflowListTable = ({
             href: (item: WorkflowListItemDto) => getEditHref(item),
           },
           {
-            enabled: () => canCreateWorkflow,
+            enabled: () => canCreateWorkflow && canReadWorkflow,
             type: 'icon',
             color: 'primary',
             name: i18n.translate('workflows.workflowList.clone', { defaultMessage: 'Clone' }),
@@ -283,7 +302,7 @@ export const WorkflowListTable = ({
             onClick: (item: WorkflowListItemDto) => onCloneWorkflow(item),
           },
           {
-            enabled: (item) => item.definition !== null,
+            enabled: (item) => item.definition !== null && canReadWorkflow,
             type: 'icon',
             color: 'primary',
             name: i18n.translate('workflows.workflowList.export', { defaultMessage: 'Export' }),
@@ -310,11 +329,12 @@ export const WorkflowListTable = ({
       },
     ],
     [
+      canReadWorkflow,
+      canReadWorkflowExecution,
       canUpdateWorkflow,
       canExecuteWorkflow,
       canCreateWorkflow,
       canDeleteWorkflow,
-      canReadWorkflowExecution,
       getEditHref,
       onToggleWorkflow,
       onCloneWorkflow,
@@ -348,11 +368,15 @@ export const WorkflowListTable = ({
       onChange={({
         page: { index: pageIndex, size: pageSize },
       }: CriteriaWithPagination<WorkflowListItemDto>) => onPageChange(pageIndex, pageSize)}
-      selection={{
-        onSelectionChange,
-        selectable: () => true,
-        selected: selectedItems,
-      }}
+      {...(allowRowSelection
+        ? {
+            selection: {
+              onSelectionChange,
+              selectable: () => true,
+              selected: selectedItems,
+            },
+          }
+        : {})}
       pagination={{
         pageSize: size,
         pageSizeOptions: WORKFLOWS_TABLE_PAGE_SIZE_OPTIONS,

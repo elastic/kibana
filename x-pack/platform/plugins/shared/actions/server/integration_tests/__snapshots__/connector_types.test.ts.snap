@@ -1358,6 +1358,23 @@ Object {
       ],
       "default": null,
     },
+    "secretQueryParams": Object {
+      "anyOf": Array [
+        Object {
+          "additionalProperties": Object {
+            "type": "string",
+          },
+          "propertyNames": Object {
+            "type": "string",
+          },
+          "type": "object",
+        },
+        Object {
+          "type": "null",
+        },
+      ],
+      "default": null,
+    },
     "user": Object {
       "anyOf": Array [
         Object {
@@ -1379,7 +1396,22 @@ Object {
   "additionalProperties": false,
   "properties": Object {
     "body": Object {
-      "type": "string",
+      "anyOf": Array [
+        Object {
+          "type": "string",
+        },
+        Object {
+          "items": Object {},
+          "type": "array",
+        },
+        Object {
+          "additionalProperties": Object {},
+          "propertyNames": Object {
+            "type": "string",
+          },
+          "type": "object",
+        },
+      ],
     },
     "fetcher": Object {
       "properties": Object {
@@ -1464,7 +1496,22 @@ Object {
   "additionalProperties": false,
   "properties": Object {
     "body": Object {
-      "type": "string",
+      "anyOf": Array [
+        Object {
+          "type": "string",
+        },
+        Object {
+          "items": Object {},
+          "type": "array",
+        },
+        Object {
+          "additionalProperties": Object {},
+          "propertyNames": Object {
+            "type": "string",
+          },
+          "type": "object",
+        },
+      ],
     },
     "fetcher": Object {
       "properties": Object {

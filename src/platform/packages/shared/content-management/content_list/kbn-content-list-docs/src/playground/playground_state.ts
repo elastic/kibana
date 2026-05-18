@@ -11,7 +11,7 @@
 // Types
 // =============================================================================
 
-export type ColumnType = 'name' | 'updatedAt' | 'actions' | 'type' | 'starred';
+export type ColumnType = 'name' | 'updatedAt' | 'actions' | 'type' | 'starred' | 'createdBy';
 
 export interface ActiveColumn {
   instanceId: string;
@@ -21,14 +21,14 @@ export interface ActiveColumn {
   actions: ActiveAction[];
 }
 
-export type ActionType = 'edit' | 'delete' | 'export';
+export type ActionType = 'edit' | 'delete' | 'inspect' | 'export';
 
 export interface ActiveAction {
   instanceId: string;
   type: ActionType;
 }
 
-export type FilterType = 'sort' | 'tags' | 'starred';
+export type FilterType = 'sort' | 'tags' | 'starred' | 'createdBy';
 
 export interface ActiveFilter {
   instanceId: string;
@@ -46,6 +46,8 @@ export interface PlaygroundState {
     pagination: boolean;
     search: boolean;
     starred: boolean;
+    tags: boolean;
+    userProfiles: boolean;
     initialPageSize: number;
   };
   item: {
@@ -53,6 +55,7 @@ export interface PlaygroundState {
     getEditUrl: boolean;
     onEdit: boolean;
     onDelete: boolean;
+    onInspect: boolean;
   };
   table: {
     columns: ActiveColumn[];
@@ -89,6 +92,18 @@ export interface PropDefinition {
   defaultValue: unknown;
 }
 
+/**
+ * Each preset (`Column.Name`, `Column.UpdatedAt`, `Column.CreatedBy`,
+ * `Column.Starred`, `Column.Actions`) ships with a baked-in default `width`
+ * (and matching `minWidth` / `maxWidth`) — see the package README's
+ * "Defaults" section for the full table. The `width` input on every column
+ * below is therefore an **override**: leave it blank (`defaultValue: ''`)
+ * to use the preset default, or supply a CSS length (e.g. `'14em'`,
+ * `'200px'`) to override it. The reducer's `UPDATE_COLUMN_PROPS` case
+ * propagates the override into the rendered preset attributes; an empty
+ * string is filtered out before reaching the preset, so the default still
+ * fires.
+ */
 export const COLUMN_DEFINITIONS: ColumnDefinition[] = [
   {
     type: 'name',
@@ -99,7 +114,7 @@ export const COLUMN_DEFINITIONS: ColumnDefinition[] = [
       { name: 'showDescription', label: 'showDescription', type: 'boolean', defaultValue: true },
       { name: 'showTags', label: 'showTags', type: 'boolean', defaultValue: false },
       { name: 'showStarred', label: 'showStarred', type: 'boolean', defaultValue: false },
-      { name: 'width', label: 'width', type: 'string', defaultValue: '' },
+      { name: 'width', label: 'width (override)', type: 'string', defaultValue: '' },
       { name: 'columnTitle', label: 'columnTitle', type: 'string', defaultValue: '' },
     ],
   },
@@ -109,7 +124,7 @@ export const COLUMN_DEFINITIONS: ColumnDefinition[] = [
     allowMultiple: false,
     defaultProps: {},
     configurableProps: [
-      { name: 'width', label: 'width', type: 'string', defaultValue: '' },
+      { name: 'width', label: 'width (override)', type: 'string', defaultValue: '' },
       { name: 'columnTitle', label: 'columnTitle', type: 'string', defaultValue: '' },
     ],
   },
@@ -119,6 +134,7 @@ export const COLUMN_DEFINITIONS: ColumnDefinition[] = [
     allowMultiple: false,
     defaultProps: {},
     configurableProps: [
+      // Generic `<Column>` has no preset default; this is a required width.
       { name: 'width', label: 'width', type: 'string', defaultValue: '' },
       { name: 'columnTitle', label: 'columnTitle', type: 'string', defaultValue: '' },
     ],
@@ -128,7 +144,19 @@ export const COLUMN_DEFINITIONS: ColumnDefinition[] = [
     label: 'Column.Starred',
     allowMultiple: false,
     defaultProps: {},
-    configurableProps: [{ name: 'width', label: 'width', type: 'string', defaultValue: '' }],
+    configurableProps: [
+      { name: 'width', label: 'width (override)', type: 'string', defaultValue: '' },
+    ],
+  },
+  {
+    type: 'createdBy',
+    label: 'Column.CreatedBy',
+    allowMultiple: false,
+    defaultProps: {},
+    configurableProps: [
+      { name: 'width', label: 'width (override)', type: 'string', defaultValue: '' },
+      { name: 'columnTitle', label: 'columnTitle', type: 'string', defaultValue: '' },
+    ],
   },
   {
     type: 'actions',
@@ -136,7 +164,7 @@ export const COLUMN_DEFINITIONS: ColumnDefinition[] = [
     allowMultiple: false,
     defaultProps: {},
     configurableProps: [
-      { name: 'width', label: 'width', type: 'string', defaultValue: '' },
+      { name: 'width', label: 'width (override)', type: 'string', defaultValue: '' },
       { name: 'columnTitle', label: 'columnTitle', type: 'string', defaultValue: '' },
     ],
   },
@@ -144,12 +172,14 @@ export const COLUMN_DEFINITIONS: ColumnDefinition[] = [
 
 export const FILTER_DEFINITIONS: { type: FilterType; label: string }[] = [
   { type: 'starred', label: 'Filters.Starred' },
-  { type: 'sort', label: 'Filters.Sort' },
   { type: 'tags', label: 'Filters.Tags' },
+  { type: 'createdBy', label: 'Filters.CreatedBy' },
+  { type: 'sort', label: 'Filters.Sort' },
 ];
 
 export const ACTION_DEFINITIONS: { type: ActionType; label: string }[] = [
   { type: 'edit', label: 'Action.Edit' },
+  { type: 'inspect', label: 'Action.Inspect' },
   { type: 'delete', label: 'Action.Delete' },
   { type: 'export', label: 'Action (Export)' },
 ];
@@ -200,6 +230,8 @@ export const INITIAL_STATE: PlaygroundState = {
     pagination: true,
     search: true,
     starred: false,
+    tags: true,
+    userProfiles: true,
     initialPageSize: 10,
   },
   item: {
@@ -207,6 +239,7 @@ export const INITIAL_STATE: PlaygroundState = {
     getEditUrl: false,
     onEdit: false,
     onDelete: false,
+    onInspect: false,
   },
   table: {
     columns: [],

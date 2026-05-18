@@ -39,7 +39,7 @@ import { useStartMlJobs } from '../../../rule_management/logic/use_start_ml_jobs
 import { RULES_TABLE_PAGE_SIZE_OPTIONS } from './constants';
 import { useRuleManagementFilters } from '../../../rule_management/logic/use_rule_management_filters';
 import type { FindRulesSortField } from '../../../../../common/api/detection_engine/rule_management';
-import { useIsUpgradingSecurityPackages } from '../../../rule_management/logic/use_upgrade_security_packages';
+import { useIsInitializingPrebuiltRulesPackage } from '../../../rule_management/logic/prebuilt_rules/use_is_initializing_prebuilt_rules_package';
 import { useManualRuleRunConfirmation } from '../../../rule_gaps/components/manual_rule_run/use_manual_rule_run_confirmation';
 import { ManualRuleRunModal } from '../../../rule_gaps/components/manual_rule_run';
 import { BulkManualRuleRunLimitErrorModal } from './bulk_actions/bulk_manual_rule_run_limit_error_modal';
@@ -74,8 +74,10 @@ const NO_ITEMS_MESSAGE = (
 export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
   const modalTitleId = useGeneratedHtmlId();
 
-  const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
-  const isUpgradingSecurityPackages = useIsUpgradingSecurityPackages();
+  const {
+    rules: { read: canReadRules },
+  } = useUserPrivileges().rulesPrivileges;
+  const isInitializingPrebuiltRulesPackage = useIsInitializingPrebuiltRulesPackage();
 
   const rulesTableContext = useRulesTableContext();
   const { data: ruleManagementFilters } = useRuleManagementFilters();
@@ -205,7 +207,6 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
 
   const { loading: isLoadingJobs, jobs: mlJobs, startMlJobs } = useStartMlJobs();
   const rulesColumns = useRulesColumns({
-    hasCRUDPermissions: canEditRules,
     isLoadingJobs,
     mlJobs,
     startMlJobs,
@@ -215,7 +216,6 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
   });
 
   const monitoringColumns = useMonitoringColumns({
-    hasCRUDPermissions: canEditRules,
     isLoadingJobs,
     mlJobs,
     startMlJobs,
@@ -227,7 +227,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
   const isSelectAllCalled = useRef(false);
 
   const isTableSelectable =
-    canEditRules &&
+    canReadRules &&
     (selectedTab === AllRulesTabs.management || selectedTab === AllRulesTabs.monitoring);
 
   const euiBasicTableSelectionProps = useMemo(
@@ -281,7 +281,8 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
       break;
   }
 
-  const shouldShowLinearProgress = (isFetched && isRefetching) || isUpgradingSecurityPackages;
+  const shouldShowLinearProgress =
+    (isFetched && isRefetching) || isInitializingPrebuiltRulesPackage;
   const shouldShowLoadingOverlay = (!isFetched && isRefetching) || isPreflightInProgress;
   const rulesCount = Math.max(isAllSelected ? pagination.total : selectedRuleIds?.length ?? 0, 1);
 
@@ -385,7 +386,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
           <RulesTableFilters selectedTab={selectedTab} />
           <RulesTableWarnings warnings={warnings} />
           <RulesTableUtilityBar
-            canBulkEdit={canEditRules}
+            canBulkEdit={canReadRules}
             onGetBulkItemsPopoverContent={getBulkItemsPopoverContent}
             onToggleSelectAll={toggleSelectAll}
             isBulkActionInProgress={isBulkActionsDryRunLoading || loadingRulesAction != null}

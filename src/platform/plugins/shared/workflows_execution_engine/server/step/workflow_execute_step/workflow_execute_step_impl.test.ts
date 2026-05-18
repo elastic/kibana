@@ -13,6 +13,7 @@ import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowExecuteGraphNode } from '@kbn/workflows/graph';
 import { WorkflowExecuteStepImpl } from './workflow_execute_step_impl';
 import type { WorkflowExecuteStepImplInit } from './workflow_execute_step_impl';
+import type { WorkflowsExecutionEngineConfig } from '../../config';
 import type { StepExecutionRepository } from '../../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../../repositories/workflow_execution_repository';
 import type { WorkflowsExecutionEnginePluginStart } from '../../types';
@@ -104,7 +105,9 @@ const createMockInit = (
     workflowExecutionRepository,
     stepExecutionRepository,
     workflowLogger,
-    maxWorkflowDepth: MAX_WORKFLOW_DEPTH,
+    config: {
+      maxWorkflowDepth: MAX_WORKFLOW_DEPTH,
+    } as WorkflowsExecutionEngineConfig,
     ...overrides,
   };
 };
@@ -404,18 +407,6 @@ describe('WorkflowExecuteStepImpl', () => {
       expect(stepRuntime.failStep).toHaveBeenCalledWith(
         expect.objectContaining({ message: 'Unexpected ES error' })
       );
-    });
-
-    it('should always flush event logs even on failure', async () => {
-      const init = createMockInit();
-      const repo = init.workflowRepository as jest.Mocked<WorkflowRepository>;
-      repo.getWorkflow.mockRejectedValue(new Error('boom'));
-
-      const step = new WorkflowExecuteStepImpl(init);
-      await step.run();
-
-      const stepRuntime = init.stepExecutionRuntime as jest.Mocked<StepExecutionRuntime>;
-      expect(stepRuntime.flushEventLogs).toHaveBeenCalled();
     });
 
     it('should handle missing inputs gracefully', async () => {

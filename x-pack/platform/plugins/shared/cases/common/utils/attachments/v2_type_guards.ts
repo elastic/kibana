@@ -5,12 +5,26 @@
  * 2.0.
  */
 import type { AttachmentRequestV2 } from '../../types/api';
+import { AttachmentType } from '../../types/domain';
 import type {
   UnifiedAttachmentPayload,
   UnifiedReferenceAttachmentPayload,
   UnifiedValueAttachmentPayload,
 } from '../../types/domain';
-import { COMMENT_ATTACHMENT_TYPE } from '../../constants/attachments';
+import {
+  COMMENT_ATTACHMENT_TYPE,
+  SECURITY_EVENT_ATTACHMENT_TYPE,
+  SECURITY_ALERT_ATTACHMENT_TYPE,
+  OBSERVABILITY_ALERT_ATTACHMENT_TYPE,
+  STACK_ALERT_ATTACHMENT_TYPE,
+} from '../../constants/attachments';
+
+const isReferenceAttachmentId = (value: unknown): value is string | string[] => {
+  if (typeof value === 'string') {
+    return true;
+  }
+  return Array.isArray(value) && value.every((item) => typeof item === 'string');
+};
 
 /**
  * A type narrowing function for  reference-based unified attachment.
@@ -18,7 +32,7 @@ import { COMMENT_ATTACHMENT_TYPE } from '../../constants/attachments';
 export const isUnifiedReferenceAttachmentRequest = (
   context: AttachmentRequestV2
 ): context is UnifiedReferenceAttachmentPayload => {
-  return 'attachmentId' in context && typeof context.attachmentId === 'string';
+  return 'attachmentId' in context && isReferenceAttachmentId(context.attachmentId);
 };
 
 /**
@@ -39,9 +53,10 @@ export const isUnifiedAttachmentRequest = (
   return isUnifiedReferenceAttachmentRequest(context) || isUnifiedValueAttachmentRequest(context);
 };
 
-/**
- * A type narrowing function for unified comment attachment.
- */
+// ------ Comment -------
+export const isCommentAttachmentType = (type: string): boolean =>
+  type === AttachmentType.user || type === COMMENT_ATTACHMENT_TYPE;
+
 export const isUnifiedCommentAttachment = (
   attachment: AttachmentRequestV2
 ): attachment is UnifiedValueAttachmentPayload & {
@@ -51,3 +66,28 @@ export const isUnifiedCommentAttachment = (
   isUnifiedValueAttachmentRequest(attachment) &&
   attachment.type === COMMENT_ATTACHMENT_TYPE &&
   typeof attachment.data.content === 'string';
+
+// ------ Event -------
+export const isEventAttachmentType = (type: string): boolean =>
+  type === AttachmentType.event || type === SECURITY_EVENT_ATTACHMENT_TYPE;
+
+export const isUnifiedEventAttachment = (
+  attachment: AttachmentRequestV2
+): attachment is UnifiedReferenceAttachmentPayload =>
+  isUnifiedReferenceAttachmentRequest(attachment) && isEventAttachmentType(attachment.type);
+
+// ------ Alert -------
+export const UNIFIED_ALERT_TYPES_ARRAY: string[] = [
+  SECURITY_ALERT_ATTACHMENT_TYPE,
+  OBSERVABILITY_ALERT_ATTACHMENT_TYPE,
+  STACK_ALERT_ATTACHMENT_TYPE,
+];
+export const UNIFIED_ALERT_TYPES = new Set<string>(UNIFIED_ALERT_TYPES_ARRAY);
+
+export const isAlertAttachmentType = (type: string): boolean =>
+  type === AttachmentType.alert || UNIFIED_ALERT_TYPES.has(type);
+
+export const isUnifiedAlertAttachment = (
+  attachment: AttachmentRequestV2
+): attachment is UnifiedReferenceAttachmentPayload =>
+  isUnifiedReferenceAttachmentRequest(attachment) && UNIFIED_ALERT_TYPES.has(attachment.type);

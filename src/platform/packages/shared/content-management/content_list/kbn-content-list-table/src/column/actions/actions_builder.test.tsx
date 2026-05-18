@@ -33,6 +33,7 @@ const defaultContext: ColumnBuilderContext = {
     selection: true,
     tags: false,
     starred: false,
+    userProfiles: false,
   },
 };
 
@@ -107,7 +108,7 @@ describe('actions column builder', () => {
         expect(result).toBeUndefined();
       });
 
-      it('returns `undefined` in read-only mode', () => {
+      it('returns `undefined` in read-only mode when onInspect is not configured', () => {
         const context: ColumnBuilderContext = {
           ...defaultContext,
           isReadOnly: true,
@@ -115,6 +116,36 @@ describe('actions column builder', () => {
         const result = buildActionsColumn({}, context);
 
         expect(result).toBeUndefined();
+      });
+
+      it('returns only inspect action in read-only mode when onInspect is configured', () => {
+        const context: ColumnBuilderContext = {
+          ...defaultContext,
+          isReadOnly: true,
+          itemConfig: { ...defaultContext.itemConfig, onInspect: jest.fn() },
+        };
+        const result = buildActionsColumn({}, context) as ActionsColumn;
+
+        expect(result).toBeDefined();
+        expect(result.actions).toHaveLength(1);
+        expect(result.actions[0]).toMatchObject({
+          icon: 'inspect',
+          'data-test-subj': 'content-list-table-action-inspect',
+        });
+      });
+
+      it('includes inspect action alongside edit and delete when onInspect is configured', () => {
+        const context: ColumnBuilderContext = {
+          ...defaultContext,
+          itemConfig: { ...defaultContext.itemConfig, onInspect: jest.fn() },
+        };
+        const result = buildActionsColumn({}, context) as ActionsColumn;
+
+        expect(result).toBeDefined();
+        expect(result.actions).toHaveLength(3);
+        expect(result.actions[0]).toMatchObject({ icon: 'pencil' });
+        expect(result.actions[1]).toMatchObject({ icon: 'trash' });
+        expect(result.actions[2]).toMatchObject({ icon: 'inspect' });
       });
     });
 
@@ -161,16 +192,62 @@ describe('actions column builder', () => {
 
     describe('custom configuration', () => {
       it('applies custom width', () => {
-        const props: ActionsColumnProps = { width: '150px' };
+        const props: ActionsColumnProps = {
+          width: '5em',
+          minWidth: '5em',
+          maxWidth: '5em',
+        };
         const result = buildActionsColumn(props, defaultContext);
 
-        expect(result).toMatchObject({ width: '150px' });
+        expect(result).toMatchObject({ width: '5em', minWidth: '5em', maxWidth: '5em' });
       });
 
-      it('does not include width when not specified', () => {
+      it('computes default width / minWidth / maxWidth from the action count when not specified', () => {
         const result = buildActionsColumn({}, defaultContext);
 
-        expect(result).not.toHaveProperty('width');
+        // `2 * 32` (icon-button width) + `1 * 4` (gap) + `2 * 8` (cell padding) = 84px.
+        // `minWidth: 'max-content'` lets translated headers expand the column
+        // when wider than the icon row; `maxWidth` pins it to the derived
+        // width so the column never absorbs slack on full-width pages.
+        expect(result).toMatchObject({
+          width: '84px',
+          minWidth: 'max-content',
+          maxWidth: '84px',
+        });
+      });
+
+      it('falls back maxWidth to the consumer-supplied width when only width is overridden', () => {
+        const result = buildActionsColumn({ width: '128px' }, defaultContext);
+
+        expect(result).toMatchObject({
+          width: '128px',
+          minWidth: 'max-content',
+          maxWidth: '128px',
+        });
+      });
+
+      it('treats explicit `undefined` as an opt-out — clears the cap so the column can absorb slack', () => {
+        const result = buildActionsColumn(
+          { maxWidth: undefined } satisfies ActionsColumnProps,
+          defaultContext
+        );
+
+        // The derived width (84px for two actions) and the `'max-content'`
+        // floor are still applied — only the cap is cleared.
+        expect(result).toMatchObject({ width: '84px', minWidth: 'max-content' });
+        expect(result).not.toHaveProperty('maxWidth');
+      });
+
+      it('sticks the actions column by default', () => {
+        const result = buildActionsColumn({}, defaultContext);
+
+        expect(result).toMatchObject({ sticky: true });
+      });
+
+      it('allows sticky behavior to be disabled', () => {
+        const result = buildActionsColumn({ sticky: false }, defaultContext);
+
+        expect(result).toMatchObject({ sticky: false });
       });
 
       it('applies custom column title', () => {

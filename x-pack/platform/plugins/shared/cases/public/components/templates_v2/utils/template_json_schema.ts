@@ -12,8 +12,9 @@ import { ParsedTemplateDefinitionSchema } from '../../../../common/types/domain/
  * URI identifier for the template JSON Schema.
  * This is an arbitrary unique identifier used by monaco-yaml to associate
  * the schema with YAML files in the editor.
+ * Note: This URI is displayed in Monaco hover tooltips as the schema source.
  */
-export const TEMPLATE_SCHEMA_URI = 'file:///cases-template-schema.json';
+export const TEMPLATE_SCHEMA_URI = 'kibana://cases/template-definition-schema';
 
 interface OverrideCtx {
   zodSchema: z.core.$ZodTypes;
@@ -24,6 +25,7 @@ interface OverrideCtx {
 function applySchemaOverrides(ctx: OverrideCtx) {
   removeAdditionalPropertiesFromAllOfItems(ctx);
   addDiscriminatorEnumHints(ctx);
+  addUniqueItemsToOptionsArrays(ctx);
 }
 
 /**
@@ -101,6 +103,21 @@ function addDiscriminatorEnumHints(ctx: OverrideCtx) {
         enum: values,
       };
     }
+  }
+}
+
+/**
+ * Adds `uniqueItems: true` to string array schemas for CHECKBOX_GROUP's
+ * `options` and `default` properties so Monaco YAML flags duplicate values.
+ */
+function addUniqueItemsToOptionsArrays(ctx: OverrideCtx) {
+  const lastPathPart = ctx.path[ctx.path.length - 1];
+  if (
+    (lastPathPart === 'options' || lastPathPart === 'default') &&
+    ctx.jsonSchema.type === 'array'
+  ) {
+    const schema = ctx.jsonSchema as Record<string, unknown>;
+    schema.uniqueItems = true;
   }
 }
 

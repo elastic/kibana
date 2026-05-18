@@ -55,7 +55,7 @@ export function ClassicStreamBadge() {
       })}
       content={i18n.translate('xpack.streams.badges.classic.description', {
         defaultMessage:
-          "Classic streams are based on existing data streams and don't support all Streams features like partitioning.",
+          "Classic streams are based on existing data streams and don't support all Streams features like ingest-time partitioning.",
       })}
       anchorProps={{
         css: css`
@@ -88,6 +88,21 @@ export function WiredStreamBadge() {
     >
       {i18n.translate('xpack.streams.entityDetailViewWithoutParams.managedBadgeLabel', {
         defaultMessage: 'Wired',
+      })}
+    </EuiBadge>
+  );
+}
+
+export function DraftStreamBadge() {
+  return (
+    <EuiBadge
+      color="hollow"
+      iconType="editorCodeBlock"
+      iconSide="left"
+      data-test-subj="draftStreamBadge"
+    >
+      {i18n.translate('xpack.streams.entityDetailViewWithoutParams.draftBadgeLabel', {
+        defaultMessage: 'Draft',
       })}
     </EuiBadge>
   );

@@ -96,3 +96,36 @@ export const createRuleAssetSavedObject = (overrideParams: Partial<PrebuiltRuleA
   updated_at: '2022-11-01T12:56:39.717Z',
   created_at: '2022-11-01T12:56:39.717Z',
 });
+
+/**
+ * A helper function to create a deprecated rule asset saved object (type: security-rule).
+ * Deprecated assets are minimal stubs — they only carry the fields needed to identify
+ * the rule as deprecated; the full rule schema fields are intentionally absent.
+ *
+ * @param params Identifying params for the deprecated rule asset
+ * @returns Created deprecated rule asset saved object
+ */
+export const createDeprecatedRuleAssetSavedObject = ({
+  rule_id,
+  version,
+  name = rule_id,
+  deprecated_reason,
+}: {
+  rule_id: string;
+  version: number;
+  name?: string;
+  deprecated_reason?: string;
+}) => ({
+  'security-rule': {
+    rule_id,
+    version,
+    name,
+    deprecated: true as const,
+    ...(deprecated_reason != null && { deprecated_reason }),
+  },
+  type: 'security-rule',
+  references: [],
+  coreMigrationVersion: '8.6.0',
+  updated_at: '2022-11-01T12:56:39.717Z',
+  created_at: '2022-11-01T12:56:39.717Z',
+});

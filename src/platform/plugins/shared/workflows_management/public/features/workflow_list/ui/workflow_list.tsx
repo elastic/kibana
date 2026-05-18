@@ -46,12 +46,29 @@ interface WorkflowListProps {
 export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowListProps) {
   const { page = 1, size = WORKFLOWS_TABLE_INITIAL_PAGE_SIZE } = search;
   const { application, notifications } = useKibana().services;
-  const { canCreateWorkflow } = useWorkflowsCapabilities();
+  const {
+    canCreateWorkflow,
+    canReadWorkflow,
+    canReadWorkflowExecution,
+    canExecuteWorkflow,
+    canUpdateWorkflow,
+    canDeleteWorkflow,
+  } = useWorkflowsCapabilities();
 
   const searchParams = useMemo(() => {
     if (search.enabled != null) {
-      // The stats aggs return enabled as 0 (false) and 1 (true), we need to convert the values to booleans for the search params.
-      return { ...search, enabled: search.enabled.map((enabled) => Boolean(enabled)) };
+      return {
+        ...search,
+        enabled: search.enabled.map((enabled) => {
+          if (typeof enabled === 'string') {
+            return (enabled as string).trim().toLowerCase() === 'true';
+          }
+          if (typeof enabled === 'number') {
+            return enabled === 1;
+          }
+          return Boolean(enabled);
+        }),
+      };
     }
     return search;
   }, [search]);
@@ -324,6 +341,12 @@ export function WorkflowList({ search, setSearch, onCreateWorkflow }: WorkflowLi
         onExportWorkflow={handleExportWorkflow}
         onRequestRun={setExecuteWorkflow}
         getEditHref={getEditHref}
+        canCreateWorkflow={!!canCreateWorkflow}
+        canReadWorkflow={!!canReadWorkflow}
+        canReadWorkflowExecution={!!canReadWorkflowExecution}
+        canUpdateWorkflow={!!canUpdateWorkflow}
+        canDeleteWorkflow={!!canDeleteWorkflow}
+        canExecuteWorkflow={!!canExecuteWorkflow}
       />
       {executeWorkflow?.definition && (
         <WorkflowExecuteModal

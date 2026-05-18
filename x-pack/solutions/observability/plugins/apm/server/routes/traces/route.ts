@@ -10,7 +10,6 @@ import * as t from 'io-ts';
 import type { Error } from '@kbn/apm-types';
 import { type ErrorsByTraceId, type UnifiedSpanDocument, type TraceRootSpan } from '@kbn/apm-types';
 import type { TraceItem } from '../../../common/waterfall/unified_trace_item';
-import { TraceSearchType } from '../../../common/trace_explorer';
 import type { Span } from '../../../typings/es_schemas/ui/span';
 import type { Transaction } from '../../../typings/es_schemas/ui/transaction';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
@@ -29,10 +28,6 @@ import type { FocusedTraceItems } from './build_focused_trace_items';
 import { buildFocusedTraceItems, findRootItem } from './build_focused_trace_items';
 import type { TopTracesPrimaryStatsResponse } from './get_top_traces_primary_stats';
 import { getTopTracesPrimaryStats } from './get_top_traces_primary_stats';
-import type { TraceItems } from './get_trace_items';
-import { getTraceItems } from './get_trace_items';
-import type { TraceSamplesResponse } from './get_trace_samples_by_query';
-import { getTraceSamplesByQuery } from './get_trace_samples_by_query';
 import { getTraceSummaryCount } from './get_trace_summary_count';
 import { getUnifiedTraceItems } from './get_unified_trace_items';
 import { getUnifiedTraceErrors } from './get_unified_trace_errors';
@@ -81,54 +76,6 @@ const tracesRoute = createApmServerRoute({
       end,
       randomSampler,
     });
-  },
-});
-
-const tracesByIdRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/traces/{traceId}',
-  params: t.type({
-    path: t.type({
-      traceId: t.string,
-    }),
-    query: t.intersection([
-      rangeRt,
-      t.type({ entryTransactionId: t.string }),
-      t.partial({ maxTraceItems: toNumberRt }),
-    ]),
-  }),
-  security: { authz: { requiredPrivileges: ['apm'] } },
-  handler: async (
-    resources
-  ): Promise<{
-    traceItems: TraceItems;
-    entryTransaction?: Transaction;
-  }> => {
-    const apmEventClient = await getApmEventClient(resources);
-    const { params, config, logger } = resources;
-    const { traceId } = params.path;
-    const { start, end, entryTransactionId } = params.query;
-    const [traceItems, entryTransaction] = await Promise.all([
-      getTraceItems({
-        traceId,
-        config,
-        apmEventClient,
-        start,
-        end,
-        maxTraceItemsFromUrlParam: params.query.maxTraceItems,
-        logger,
-      }),
-      getTransaction({
-        transactionId: entryTransactionId,
-        traceId,
-        apmEventClient,
-        start,
-        end,
-      }),
-    ]);
-    return {
-      traceItems,
-      entryTransaction,
-    };
   },
 });
 
@@ -437,41 +384,6 @@ const transactionByNameRoute = createApmServerRoute({
   },
 });
 
-const findTracesRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/traces/find',
-  params: t.type({
-    query: t.intersection([
-      rangeRt,
-      environmentRt,
-      t.type({
-        query: t.string,
-        type: t.union([t.literal(TraceSearchType.kql), t.literal(TraceSearchType.eql)]),
-      }),
-    ]),
-  }),
-  security: { authz: { requiredPrivileges: ['apm'] } },
-  handler: async (
-    resources
-  ): Promise<{
-    traceSamples: TraceSamplesResponse;
-  }> => {
-    const { start, end, environment, query, type } = resources.params.query;
-
-    const apmEventClient = await getApmEventClient(resources);
-
-    return {
-      traceSamples: await getTraceSamplesByQuery({
-        apmEventClient,
-        start,
-        end,
-        environment,
-        query,
-        type,
-      }),
-    };
-  },
-});
-
 const transactionFromTraceByIdRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/traces/{traceId}/transactions/{transactionId}',
   params: t.type({
@@ -562,13 +474,11 @@ const unifiedTraceSpanRoute = createApmServerRoute({
 });
 
 export const traceRouteRepository = {
-  ...tracesByIdRoute,
   ...unifiedTracesByIdRoute,
   ...tracesRoute,
   ...rootTransactionByTraceIdRoute,
   ...rootItemByTraceIdRoute,
   ...transactionByIdRoute,
-  ...findTracesRoute,
   ...transactionFromTraceByIdRoute,
   ...spanFromTraceByIdRoute,
   ...transactionByNameRoute,

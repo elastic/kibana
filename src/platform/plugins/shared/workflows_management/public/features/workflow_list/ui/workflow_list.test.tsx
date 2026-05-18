@@ -10,22 +10,25 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import type { WorkflowListDto, WorkflowListItemDto, WorkflowsSearchParams } from '@kbn/workflows';
-import { createMockWorkflowsCapabilities } from '@kbn/workflows-ui/mocks';
+import { createMockWorkflowsCapabilities as mockCreateMockWorkflowsCapabilities } from '@kbn/workflows-ui/mocks';
 import { WorkflowList } from './workflow_list';
 import { createUseKibanaMockValue } from '../../../mocks';
-import { TestWrapper } from '../../../shared/test_utils';
+import { TestProvider } from '../../../shared/mocks/test_providers';
 
 // --- Mocks ---
 
 jest.mock('../../../hooks/use_kibana');
 
 const mockUseWorkflows = jest.fn();
-const mockWorkflowsCapabilities = createMockWorkflowsCapabilities();
 
-jest.mock('@kbn/workflows-ui', () => ({
-  useWorkflows: (...args: unknown[]) => mockUseWorkflows(...args),
-  useWorkflowsCapabilities: jest.fn(() => mockWorkflowsCapabilities),
-}));
+jest.mock('@kbn/workflows-ui', () => {
+  const actual = jest.requireActual('@kbn/workflows-ui');
+  return {
+    ...actual,
+    useWorkflows: (...args: unknown[]) => mockUseWorkflows(...args),
+    useWorkflowsCapabilities: jest.fn(() => mockCreateMockWorkflowsCapabilities()),
+  };
+});
 
 const mockKibanaValue = createUseKibanaMockValue();
 const { application: mockApplication } = mockKibanaValue.services;
@@ -176,9 +179,9 @@ describe('WorkflowList', () => {
 
   const renderComponent = (overrides: Partial<typeof defaultProps> = {}) => {
     return render(
-      <TestWrapper>
+      <TestProvider>
         <WorkflowList {...defaultProps} {...overrides} />
-      </TestWrapper>
+      </TestProvider>
     );
   };
 
@@ -245,6 +248,23 @@ describe('WorkflowList', () => {
   });
 
   describe('with workflow data', () => {
+    it('normalizes string enabled filters to booleans before querying workflows', () => {
+      const searchWithStringEnabled = {
+        ...defaultSearch,
+        enabled: ['false'],
+      } as unknown as WorkflowsSearchParams;
+
+      renderComponent({
+        search: searchWithStringEnabled,
+      });
+
+      expect(mockUseWorkflows).toHaveBeenCalledWith(
+        expect.objectContaining({
+          enabled: [false],
+        })
+      );
+    });
+
     it('renders the workflows table', () => {
       renderComponent();
       expect(screen.getByTestId('workflowListTable')).toBeInTheDocument();

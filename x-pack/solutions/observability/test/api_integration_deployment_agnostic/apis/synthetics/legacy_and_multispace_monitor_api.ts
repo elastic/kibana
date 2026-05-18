@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
+import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import {
   syntheticsMonitorSavedObjectType,
@@ -14,7 +15,10 @@ import {
 } from '@kbn/synthetics-plugin/common/types/saved_objects';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helpers/get_fixture_json';
-import { PrivateLocationTestService } from '../../services/synthetics_private_location';
+import {
+  PrivateLocationTestService,
+  cleanSyntheticsTestData,
+} from '../../services/synthetics_private_location';
 import type { SupertestWithRoleScopeType } from '../../services';
 
 const runTests = (
@@ -74,12 +78,17 @@ const runTests = (
   };
 
   before(async () => {
-    await kibanaServer.savedObjects.cleanStandardList();
+    await cleanSyntheticsTestData(kibanaServer);
     supertestEditorWithApiKey = await roleScopedSupertest.getSupertestWithRoleScope('editor', {
       withInternalHeaders: true,
     });
+    // Several tests in this suite share monitors to ad-hoc spaces, which is
+    // only allowed when the monitor's private locations cover those spaces.
+    // Provision the shared test private location as all-spaces so it mirrors
+    // a typical "globally available private location" setup and avoids having
+    // to re-share the location from inside individual tests.
     privateLocation = usePrivateLocations
-      ? await privateLocationService.addTestPrivateLocation()
+      ? await privateLocationService.addTestPrivateLocation([ALL_SPACES_ID])
       : undefined;
   });
 
@@ -87,7 +96,7 @@ const runTests = (
 
   after(async () => {
     await supertestEditorWithApiKey.destroy();
-    await kibanaServer.savedObjects.cleanStandardList();
+    await cleanSyntheticsTestData(kibanaServer);
     await Promise.all(spacesToDeleteIds.map((id) => kibanaServer.spaces.delete(id)));
   });
 
@@ -412,22 +421,32 @@ const runTests = (
   });
 
   describe('Monitor space validation', () => {
+    let validationSpaceId: string;
+    let validationPrivateLocation: any;
+
+    before(async () => {
+      validationSpaceId = `validation-space-${uuidv4()}`;
+      await kibanaServer.spaces.create({
+        id: validationSpaceId,
+        name: `Validation Space`,
+      });
+      spacesToDeleteIds.push(validationSpaceId);
+      validationPrivateLocation = usePrivateLocations
+        ? await privateLocationService.addTestPrivateLocation(validationSpaceId)
+        : undefined;
+    });
+
     it('should throw error if spaces list does not include the calling space on create', async () => {
-      const INVALID_SPACE = `invalid-space-${uuidv4()}`;
-      await kibanaServer.spaces.create({ id: INVALID_SPACE, name: `Invalid Space` });
-      spacesToDeleteIds.push(INVALID_SPACE);
       const monitorData = applyLocation(
         {
           ...getFixtureJson('http_monitor'),
           name: `invalid-create-${uuidv4()}`,
           spaces: ['default'],
         },
-        usePrivateLocations
-          ? await privateLocationService.addTestPrivateLocation(INVALID_SPACE)
-          : undefined
+        validationPrivateLocation
       );
       const resp = await supertestEditorWithApiKey
-        .post(`/s/${INVALID_SPACE}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}?internal=true`)
+        .post(`/s/${validationSpaceId}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}?internal=true`)
         .send(monitorData);
 
       expect(resp.status).to.be(400);
@@ -437,30 +456,23 @@ const runTests = (
     });
 
     it('should throw error if spaces list does not include the calling space on edit', async () => {
-      const EDIT_SPACE = `edit-space-${uuidv4()}`;
-      await kibanaServer.spaces.create({ id: EDIT_SPACE, name: `Edit Space` });
-      spacesToDeleteIds.push(EDIT_SPACE);
       const monitorData = applyLocation(
         {
           ...getFixtureJson('http_monitor'),
           name: `edit-invalid-${uuidv4()}`,
-          spaces: [EDIT_SPACE],
+          spaces: [validationSpaceId],
         },
-        usePrivateLocations
-          ? await privateLocationService.addTestPrivateLocation(EDIT_SPACE)
-          : undefined
+        validationPrivateLocation
       );
-      // Create monitor in EDIT_SPACE
       const res = await supertestEditorWithApiKey
         .post(
-          `/s/${EDIT_SPACE}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}?internal=true&savedObjectType=${syntheticsMonitorSavedObjectType}`
+          `/s/${validationSpaceId}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}?internal=true&savedObjectType=${syntheticsMonitorSavedObjectType}`
         )
         .send(monitorData);
       expect(res.status).eql(200, JSON.stringify(res.body));
-      // Try to edit monitor with spaces not including EDIT_SPACE
       const resp = await supertestEditorWithApiKey
         .put(
-          `/s/${EDIT_SPACE}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${res.body.id}?internal=true`
+          `/s/${validationSpaceId}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${res.body.id}?internal=true`
         )
         .send({ name: `edit-invalid-${uuidv4()}`, spaces: ['default'] });
 
@@ -469,6 +481,64 @@ const runTests = (
         'Invalid space ID provided in monitor configuration. It should always include the current space ID.'
       );
     });
+
+    // The private-location-space-coverage validation only applies when the
+    // monitor actually has a private location configured.
+    if (usePrivateLocations) {
+      it('should throw error if a private location is not shared to all monitor spaces on edit', async () => {
+        // Spin up a single-space private location dedicated to this test so we
+        // can assert the validation rejects sharing the monitor to a space the
+        // private location does not cover. The suite-level `privateLocation`
+        // is intentionally all-spaces for the happy-path tests above.
+        const singleSpacePrivateLocation = await privateLocationService.addTestPrivateLocation();
+
+        const otherSpaceId = `pl-coverage-other-${uuidv4()}`;
+        await kibanaServer.spaces.create({
+          id: otherSpaceId,
+          name: `PL Coverage Other Space`,
+        });
+        spacesToDeleteIds.push(otherSpaceId);
+
+        const monitorData = applyLocation(
+          {
+            ...getFixtureJson('http_monitor'),
+            name: `pl-coverage-${uuidv4()}`,
+          },
+          singleSpacePrivateLocation
+        );
+
+        const createRes = await supertestEditorWithApiKey
+          .post(
+            `${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}?internal=true&savedObjectType=${syntheticsMonitorSavedObjectType}`
+          )
+          .send(monitorData);
+        expect(createRes.status).eql(200, JSON.stringify(createRes.body));
+
+        const editRes = await supertestEditorWithApiKey
+          .put(`${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${createRes.body.id}?internal=true`)
+          .send({
+            name: `pl-coverage-edit-${uuidv4()}`,
+            spaces: ['default', otherSpaceId],
+          });
+
+        expect(editRes.status).to.be(400);
+        expect(editRes.body.message).to.contain(
+          'The following private locations are not available in all spaces this monitor is shared to'
+        );
+        expect(editRes.body.message).to.contain(singleSpacePrivateLocation.label);
+        expect(editRes.body.attributes?.errors).to.be.an('array');
+        expect(editRes.body.attributes?.errors?.[0]?.locationId).to.eql(
+          singleSpacePrivateLocation.id
+        );
+        expect(editRes.body.attributes?.errors?.[0]?.missingSpaces).to.eql([otherSpaceId]);
+
+        // Cleanup the monitor; it was never updated, so it still lives in the
+        // legacy or multi-space SO type with its original single space.
+        await supertestEditorWithApiKey
+          .delete(`${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${createRes.body.id}`)
+          .send();
+      });
+    }
   });
 };
 

@@ -7,47 +7,43 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import Boom from '@hapi/boom';
-import type { RequestHandlerContext } from '@kbn/core/server';
 import type { DashboardState, Warnings } from '../types';
 import type { DashboardSanitizeResponseBody } from './types';
-import type { getDashboardStateSchema } from '../dashboard_state_schemas';
 import { transformDashboardIn, transformDashboardOut } from '../transforms';
 import { stripUnmappedKeys } from '../scope_tooling';
+import type { getDashboardStateSchema } from '../dashboard_state_schemas';
 
 export async function sanitize(
-  requestCtx: RequestHandlerContext,
   dashboardStateSchema: ReturnType<typeof getDashboardStateSchema>,
   dashboardState: DashboardState
 ): Promise<DashboardSanitizeResponseBody> {
   const warnings: Warnings = [];
-  try {
-    /**
-     * Temporary escape hatch for lens as code
-     * TODO remove transforms when lens as code transforms are ready for production
-     * We need to run the full round-trip transform on the incoming state since Lens embeddable serializes
-     * state in the editor format. Once we the Lens embeddable supports the API format we can remove the
-     * transformDashboardIn and transformDashboardOut calls.
-     */
-    const {
-      attributes: storedDashboardState,
-      references,
-      error,
-    } = transformDashboardIn(dashboardState);
-    if (error) throw error;
-    const { dashboardState: transformedApiDashboardState, warnings: dashboardStateWarnings } =
-      transformDashboardOut(storedDashboardState ?? {}, references ?? []);
 
-    const { data: scopedDashboardState, warnings: scopeWarnings } = stripUnmappedKeys(
-      transformedApiDashboardState as Partial<DashboardState>
-    );
-    warnings.push(...dashboardStateWarnings, ...scopeWarnings);
-    const sanitizedDashboardState = dashboardStateSchema.validate(scopedDashboardState);
-    return {
-      data: sanitizedDashboardState,
-      ...(warnings.length ? { warnings } : {}),
-    };
-  } catch (sanitizeError) {
-    throw Boom.badRequest(`Invalid response. ${sanitizeError.message}`);
-  }
+  /**
+   * Temporary escape hatch for lens as code
+   * TODO remove transforms when lens as code transforms are ready for production
+   * We need to run the full round-trip transform on the incoming state since Lens embeddable serializes
+   * state in the editor format. Once we the Lens embeddable supports the API format we can remove the
+   * transformDashboardIn and transformDashboardOut calls.
+   */
+  const { attributes: storedDashboardState, references } = transformDashboardIn(dashboardState);
+  const { dashboardState: transformedApiDashboardState, warnings: dashboardStateWarnings } =
+    transformDashboardOut(storedDashboardState ?? {}, references ?? []);
+
+  const { data: scopedDashboardState, warnings: scopeWarnings } = stripUnmappedKeys(
+    transformedApiDashboardState as Partial<DashboardState>
+  );
+  warnings.push(...dashboardStateWarnings, ...scopeWarnings);
+  const sanitizedDashboardState = dashboardStateSchema.validate(scopedDashboardState);
+  // access_control is separate from the transforms and stripping logic since it is not part of the
+  // dashboard saved object attributes but it should be preserved in the sanitized output if present
+  // in the incoming dashboard state
+  const { access_control } = dashboardState;
+  return {
+    data: {
+      ...sanitizedDashboardState,
+      ...(access_control !== undefined && { access_control }),
+    },
+    ...(warnings.length ? { warnings } : {}),
+  };
 }

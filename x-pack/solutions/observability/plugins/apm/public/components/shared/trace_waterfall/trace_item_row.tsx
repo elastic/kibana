@@ -10,6 +10,7 @@ import { css } from '@emotion/react';
 import { transparentize } from 'polished';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
 import type { CriticalPathSegment } from './critical_path';
 import { Bar, type BarSegment } from './bar';
 import { BarDetails } from './bar_details';
@@ -35,11 +36,14 @@ export function TraceItemRow({ item, childrenCount, state, onToggle }: Props) {
     margin,
     showAccordion,
     onClick,
-    highlightedSpanId,
+    contextSpanIds,
+    selectedSpanId,
     criticalPathSegmentsById,
     showCriticalPath,
+    ebt,
   } = useTraceWaterfallContext();
-  const isHighlighted = highlightedSpanId === item.id;
+  const isContext = contextSpanIds?.includes(item.id) ?? false;
+  const isSelected = selectedSpanId === item.id;
   const widthPercent = (item.duration / duration) * 100;
   const leftPercent = ((item.offset + item.skew) / duration) * 100;
   const hasToggle = showAccordion && childrenCount > 0;
@@ -70,7 +74,8 @@ export function TraceItemRow({ item, childrenCount, state, onToggle }: Props) {
           border-bottom: ${euiTheme.border.thin};
           ${onClick || hasToggle ? 'cursor: pointer;' : 'cursor: default'}
         `}
-        onClick={() => {
+        onClick={(e) => {
+          if ((e.target as HTMLElement).closest('[data-prevent-row-click]')) return;
           if (!hasToggle && onClick) {
             onClick(item.id);
           }
@@ -88,11 +93,18 @@ export function TraceItemRow({ item, childrenCount, state, onToggle }: Props) {
               : `${euiTheme.border.thin};`
           }
           padding: 6px 0;
-          ${isHighlighted ? `background-color: ${euiTheme.colors.lightestShade};` : undefined}
+          ${
+            isSelected
+              ? `background-color: ${euiTheme.colors.backgroundBaseInteractiveSelect};`
+              : isContext
+              ? `background-color: ${euiTheme.colors.backgroundBaseWarning};`
+              : undefined
+          }
           ${
             !!onClick &&
+            !isSelected &&
             ` &:hover {
-            background-color: ${euiTheme.colors.lightestShade};
+            background-color: ${euiTheme.colors.backgroundBaseInteractiveHover};
           }`
           }
         `}
@@ -110,10 +122,14 @@ export function TraceItemRow({ item, childrenCount, state, onToggle }: Props) {
           <EuiFlexItem>
             <div
               data-test-subj="traceItemRowContent"
+              {...(onClick && ebt?.row
+                ? getEbtProps({ action: EBT_CLICK_ACTIONS.VIEW_SPAN, element: ebt.row.element })
+                : {})}
               css={css`
                 margin-left: ${calculateMarginLeft()}px;
               `}
-              onClick={() => {
+              onClick={(e) => {
+                if ((e.target as HTMLElement).closest('[data-prevent-row-click]')) return;
                 if (hasToggle && onClick) {
                   onClick(item.id);
                 }

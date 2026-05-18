@@ -125,7 +125,6 @@ describe('JOIN Autocomplete', () => {
           incomplete: true,
           kind: 'Issue',
           label: 'Create lookup index',
-          sortText: '0',
           text: '',
         })
       );
@@ -202,7 +201,6 @@ describe('JOIN Autocomplete', () => {
           end: 37,
           start: 23,
         },
-        sortText: '0',
         text: 'new_join_index',
       });
     });

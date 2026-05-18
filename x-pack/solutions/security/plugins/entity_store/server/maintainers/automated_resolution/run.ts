@@ -119,7 +119,7 @@ async function collectNewEmailValues(
 
   if (state.lastProcessedTimestamp) {
     filters.push({
-      range: { 'entity.lifecycle.last_seen': { gt: state.lastProcessedTimestamp } },
+      range: { 'entity.lifecycle.first_seen': { gt: state.lastProcessedTimestamp } },
     });
   }
 
@@ -139,7 +139,7 @@ async function collectNewEmailValues(
             ...(afterKey ? { after: afterKey } : {}),
           },
         },
-        max_timestamp: { max: { field: 'entity.lifecycle.last_seen' } },
+        max_timestamp: { max: { field: 'entity.lifecycle.first_seen' } },
       },
     });
 
@@ -302,7 +302,7 @@ async function resolveMatchBuckets(
           .map((e) => e.entityId);
         if (aliasIds.length === 0) continue;
 
-        const result = await resolutionClient.linkEntities(targetId, aliasIds);
+        const result = await resolutionClient.linkEntities(targetId, aliasIds, { refresh: false });
         resolutionsCreated += result.linked.length;
       } else if (unresolvedEntities.length >= 2) {
         // New group: pick target via namespace priority, link the rest
@@ -311,7 +311,9 @@ async function resolveMatchBuckets(
           .filter((e) => e.entityId !== targetEntity.entityId)
           .map((e) => e.entityId);
 
-        const result = await resolutionClient.linkEntities(targetEntity.entityId, aliasIds);
+        const result = await resolutionClient.linkEntities(targetEntity.entityId, aliasIds, {
+          refresh: false,
+        });
         resolutionsCreated += result.linked.length;
       }
       // else: only 1 unresolved, no existing targets → no match, skip

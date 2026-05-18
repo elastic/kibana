@@ -144,7 +144,7 @@ export function AlertActions(
           >
             <EuiButtonIcon
               data-test-subj="expand-event"
-              iconType="expand"
+              iconType="maximize"
               onClick={onExpandEvent}
               size="s"
               color="text"
@@ -191,7 +191,7 @@ export function AlertActions(
                 color="text"
                 data-test-subj="alertsTableRowActionMore"
                 display="empty"
-                iconType="boxesHorizontal"
+                iconType="boxesVertical"
                 onClick={toggleActionsPopover}
                 size="s"
               />
@@ -201,11 +201,7 @@ export function AlertActions(
           isOpen={isPopoverOpen}
           panelPaddingSize="none"
         >
-          <EuiContextMenuPanel
-            size="s"
-            items={actionsMenuItems}
-            data-test-subj="alertsTableActionsMenu"
-          />
+          <EuiContextMenuPanel items={actionsMenuItems} data-test-subj="alertsTableActionsMenu" />
         </EuiPopover>
       </EuiFlexItem>
     </>

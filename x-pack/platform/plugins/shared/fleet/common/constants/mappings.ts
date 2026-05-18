@@ -440,6 +440,48 @@ export const AGENT_MAPPINGS = {
             },
           },
         },
+        elastic: {
+          properties: {
+            display: {
+              properties: {
+                name: {
+                  type: 'keyword',
+                },
+              },
+            },
+            collector: {
+              properties: {
+                group: {
+                  type: 'keyword',
+                },
+                group_name: {
+                  type: 'keyword',
+                },
+              },
+            },
+          },
+        },
+        config: {
+          properties: {
+            description: {
+              type: 'keyword',
+            },
+            name: {
+              type: 'keyword',
+            },
+          },
+        },
+        deployment: {
+          properties: {
+            environment: {
+              properties: {
+                name: {
+                  type: 'keyword',
+                },
+              },
+            },
+          },
+        },
       },
     },
     host: {
@@ -459,6 +501,48 @@ export const AGENT_MAPPINGS = {
         },
         description: {
           type: 'keyword',
+        },
+      },
+    },
+    elastic: {
+      properties: {
+        display: {
+          properties: {
+            name: {
+              type: 'keyword',
+            },
+          },
+        },
+        collector: {
+          properties: {
+            group: {
+              type: 'keyword',
+            },
+            group_name: {
+              type: 'keyword',
+            },
+          },
+        },
+      },
+    },
+    config: {
+      properties: {
+        description: {
+          type: 'keyword',
+        },
+        name: {
+          type: 'keyword',
+        },
+      },
+    },
+    deployment: {
+      properties: {
+        environment: {
+          properties: {
+            name: {
+              type: 'keyword',
+            },
+          },
         },
       },
     },

@@ -38,9 +38,11 @@ interface ConsoleSelectorsAndActionsMock {
       inputOnly: boolean;
       /**
        * if true, then the keyboard keys will be used to send the command.
-       * Use this if wanting ot press keyboard keys other than letter/punctuation
+       * Use this if wanting to press keyboard keys other than letter/punctuation
        */
       useKeyboard: boolean;
+      /** Paste the command into the console input. `useKeyboard` must be false */
+      paste: boolean;
     }>
   ): Promise<void>;
 }
@@ -168,6 +170,7 @@ const getInputTextFullValue = (
 /**
  * Finds the console in the Render Result and enters the command provided
  * @param renderResult
+ * @param user
  * @param cmd
  * @param inputOnly
  * @param useKeyboard
@@ -180,10 +183,12 @@ export const enterConsoleCommand = async (
   {
     inputOnly = false,
     useKeyboard = false,
+    paste = false,
     dataTestSubj = 'test',
   }: Partial<{
     inputOnly: boolean;
     useKeyboard: boolean;
+    paste: boolean;
     dataTestSubj: string;
   }> = {}
 ): Promise<void> => {
@@ -197,7 +202,12 @@ export const enterConsoleCommand = async (
   if (useKeyboard) {
     await user.keyboard(cmd);
   } else {
-    await user.type(keyCaptureInput, cmd);
+    if (paste) {
+      await user.click(keyCaptureInput);
+      await user.paste(cmd);
+    } else {
+      await user.type(keyCaptureInput, cmd);
+    }
   }
 
   if (!inputOnly) {

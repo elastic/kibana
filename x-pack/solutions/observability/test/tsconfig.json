@@ -27,6 +27,7 @@
     "@kbn/scout-info",
     "@kbn/security-plugin",
     "@kbn/ftr-common-functional-services",
+    "@kbn/ftr-llm-proxy",
     "@kbn/ml-plugin",
     "@kbn/fleet-plugin",
     "@kbn/logs-shared-plugin",
@@ -95,6 +96,8 @@
     "@kbn/aiops-log-rate-analysis",
     "@kbn/observability-agent-builder-plugin",
     "@kbn/maintenance-windows-plugin",
-    "@kbn/product-doc-common"
+    "@kbn/product-doc-common",
+    "@kbn/kbn-client",
+    "@kbn/spaces-plugin"
   ]
 }

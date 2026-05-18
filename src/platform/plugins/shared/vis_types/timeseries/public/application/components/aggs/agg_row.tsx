@@ -28,7 +28,7 @@ interface AggRowProps {
 }
 
 export function AggRow(props: AggRowProps) {
-  let iconType = 'eyeClosed';
+  let iconType = 'eyeSlash';
   let iconColor = 'subdued';
   const lastSibling = last(props.siblings) as Metric;
 
@@ -48,7 +48,12 @@ export function AggRow(props: AggRowProps) {
         responsive={false}
       >
         <EuiFlexItem grow={false}>
-          <EuiIcon type={iconType} color={iconColor} css={{ marginTop: euiTheme.size.xs }} />
+          <EuiIcon
+            type={iconType}
+            color={iconColor}
+            css={{ marginTop: euiTheme.size.xs }}
+            aria-hidden={true}
+          />
         </EuiFlexItem>
         <EuiFlexItem css={aggRowChildrenStyles(euiTheme)}>{props.children}</EuiFlexItem>
 

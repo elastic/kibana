@@ -6,15 +6,16 @@
  */
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
-import { inject, injectable } from 'inversify';
 import { flattenObject } from '@kbn/object-utils';
-import { EsServiceScopedToken } from '../es_service/tokens';
-import { RuleSavedObjectsClientToken } from '../rules_saved_object_service/tokens';
+import { inject, injectable } from 'inversify';
 import {
   ALERT_EVENTS_DATA_STREAM,
   alertEpisodeStatus,
 } from '../../../resources/datastreams/alert_events';
 import { RULE_SAVED_OBJECT_TYPE, type RuleSavedObjectAttributes } from '../../../saved_objects';
+import { EsServiceScopedToken } from '../es_service/tokens';
+import { RuleSavedObjectsClientToken } from '../rules_saved_object_service/tokens';
+import { buildAlertEventsFiltersFromMatcher } from './build_alert_events_filters_from_matcher';
 
 const MAX_SUGGESTIONS = 10;
 const MAX_DATA_FIELDS = 100;
@@ -27,7 +28,7 @@ enum MatcherField {
   EpisodeStatus = 'episode_status',
   RuleName = 'rule.name',
   RuleDescription = 'rule.description',
-  RuleLabels = 'rule.labels',
+  RuleTags = 'rule.tags',
   RuleId = 'rule.id',
   EpisodeId = 'episode_id',
   GroupHash = 'group_hash',
@@ -93,8 +94,8 @@ export class MatcherSuggestionsService {
       case MatcherField.EpisodeStatus:
         return this.getStaticSuggestions(EPISODE_STATUS_VALUES, query);
 
-      case MatcherField.RuleLabels:
-        return this.getRuleLabelsSuggestions(query);
+      case MatcherField.RuleTags:
+        return this.getRuleTagsSuggestions(query);
 
       case MatcherField.RuleId:
         return this.getRuleIdSuggestions(query);
@@ -107,12 +108,13 @@ export class MatcherSuggestionsService {
     }
   }
 
-  async getDataFieldNames(): Promise<string[]> {
+  async getDataFieldNames(matcher?: string): Promise<string[]> {
     try {
       const result = await this.esClient.search({
         index: ALERT_EVENTS_DATA_STREAM,
         size: DATA_FIELD_SAMPLE_SIZE,
         timeout: '10s',
+        terminate_after: DATA_FIELD_SAMPLE_SIZE,
         _source: ['data'],
         query: {
           bool: {
@@ -121,6 +123,7 @@ export class MatcherSuggestionsService {
               { range: { '@timestamp': { gte: ALERT_EVENTS_LOOKBACK } } },
               { exists: { field: 'data' } },
               { terms: { 'episode.status': ['pending', 'active', 'recovering'] } },
+              ...buildAlertEventsFiltersFromMatcher(matcher ?? ''),
             ],
           },
         },
@@ -172,29 +175,29 @@ export class MatcherSuggestionsService {
       .filter((v): v is string => typeof v === 'string' && v.length > 0);
   }
 
-  private async getRuleLabelsSuggestions(query: string): Promise<string[]> {
+  private async getRuleTagsSuggestions(query: string): Promise<string[]> {
     const result = await this.ruleSoClient.find<RuleSavedObjectAttributes>({
       type: RULE_SAVED_OBJECT_TYPE,
       page: 1,
       perPage: 100,
-      fields: ['metadata.labels'],
+      fields: ['metadata.tags'],
       sortField: 'updatedAt',
       sortOrder: 'desc',
     });
 
-    const allLabels = new Set<string>();
+    const allTags = new Set<string>();
     for (const so of result.saved_objects) {
-      const labels = so.attributes.metadata?.labels;
-      if (Array.isArray(labels)) {
-        for (const label of labels) {
-          allLabels.add(label);
+      const tags = so.attributes.metadata?.tags;
+      if (Array.isArray(tags)) {
+        for (const tag of tags) {
+          allTags.add(tag);
         }
       }
     }
 
     const lowerQuery = query.toLowerCase();
-    return Array.from(allLabels)
-      .filter((label) => !lowerQuery || label.toLowerCase().startsWith(lowerQuery))
+    return Array.from(allTags)
+      .filter((tag) => !lowerQuery || tag.toLowerCase().startsWith(lowerQuery))
       .sort()
       .slice(0, MAX_SUGGESTIONS);
   }

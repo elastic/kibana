@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import path from 'node:path';
 import { buildRouteValidationWithZod, BooleanFromString } from '@kbn/zod-helpers/v4';
 import { z } from '@kbn/zod/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
@@ -19,11 +20,15 @@ import { ENTITY_STORE_STATUS } from '../../domain/constants';
 /**
  * Legacy engine descriptor from V1. will be removed in a future version.
  */
-type LogExtractionStateForV1 = Omit<
-  LogExtractionConfig,
-  'additionalIndexPatterns' | 'docsLimit' | 'paginationTimestamp' | 'lastExecutionTimestamp'
->;
-interface LegacyEngineDescriptorV1 extends LogExtractionStateForV1 {
+interface LegacyEngineDescriptorV1 {
+  filter: '';
+  delay: string;
+  timeout: string;
+  frequency: string;
+  lookbackPeriod: string;
+  fieldHistoryLength: number;
+  maxLogsPerPage: number;
+  maxTimeWindowSize: string;
   docsPerSecond: -1;
   indexPattern: '';
   enrichPolicyExecutionInterval: null;
@@ -44,7 +49,9 @@ interface EntityStoreStatusResponseBody {
 }
 
 const querySchema = z.object({
-  include_components: BooleanFromString.optional().default(false),
+  include_components: BooleanFromString.optional()
+    .default(false)
+    .describe('If true, returns a detailed status of each engine including all its components.'),
 });
 export type StatusRequestQuery = z.infer<typeof querySchema>;
 
@@ -53,24 +60,33 @@ function toPublicEngine(
   logsExtractionConfig: LogExtractionConfig
 ): StatusEngine {
   const { versionState, logExtractionState, ...rest } = engine;
-  const { delay, timeout, frequency, lookbackPeriod, fieldHistoryLength, filter } =
-    logsExtractionConfig;
-
-  return {
-    ...rest,
-    // TODO: Remove the legacy fields once we stop supporting V1.
-    filter,
+  const {
     delay,
     timeout,
     frequency,
     lookbackPeriod,
     fieldHistoryLength,
+    maxLogsPerPage,
+    maxTimeWindowSize,
+  } = logsExtractionConfig;
+
+  return {
+    ...rest,
+    // TODO: Remove the legacy fields once we stop supporting V1.
+    filter: '',
+    delay,
+    timeout,
+    frequency,
+    lookbackPeriod,
+    fieldHistoryLength,
+    maxLogsPerPage,
+    maxTimeWindowSize,
     docsPerSecond: -1,
     indexPattern: '',
     enrichPolicyExecutionInterval: null,
     timestampField: '@timestamp',
     maxPageSearchSize: 10000,
-    lastExecutionTimestamp: logExtractionState.lastExecutionTimestamp,
+    lastExecutionTimestamp: logExtractionState.lastExecutionTimestamp ?? undefined,
   };
 }
 
@@ -79,6 +95,12 @@ export function registerStatus(router: EntityStorePluginRouter) {
     .get({
       path: ENTITY_STORE_ROUTES.public.STATUS,
       access: 'public',
+      summary: 'Get Entity Store status',
+      description:
+        'Get the overall Entity Store status and per-engine statuses, optionally including component-level health details.',
+      options: {
+        tags: ['oas-tag:Security entity store'],
+      },
       security: {
         authz: DEFAULT_ENTITY_STORE_PERMISSIONS,
       },
@@ -91,6 +113,9 @@ export function registerStatus(router: EntityStorePluginRouter) {
           request: {
             query: buildRouteValidationWithZod(querySchema),
           },
+        },
+        options: {
+          oasOperationObject: () => path.join(__dirname, 'examples/entity_store_status.yaml'),
         },
       },
       wrapMiddlewares(

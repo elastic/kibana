@@ -42,6 +42,7 @@ import {
 } from '../../../../../../../common/services';
 import type { NewAgentPolicy, PackagePolicyEditExtensionComponentProps } from '../../../../types';
 import { SetupTechnology } from '../../../../types';
+import { getAgentlessRelease } from '../../../../../../../common/services/agentless_policy_helper';
 import {
   sendGetAgentStatus,
   useConfig,
@@ -102,6 +103,7 @@ import { useAgentless } from './hooks/setup_technology';
 
 export const StepsWithLessPadding = styled(EuiSteps)`
   .euiStep__content {
+    padding-top: ${(props) => props.theme.eui.euiSizeXS};
     padding-bottom: ${(props) => props.theme.eui.euiSizeM};
   }
 
@@ -473,7 +475,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       "'package-policy-create' and 'package-policy-replace-define-step' cannot both be registered as UI extensions"
     );
   }
-  const { getAgentlessStatusForPackage, isAgentlessDefault } = useAgentless();
+  const { getAgentlessStatusForPackage } = useAgentless();
   const { isAgentless, isDefaultDeploymentMode } = getAgentlessStatusForPackage(packageInfo);
   const enableSimplifiedAgentlessUX = ExperimentalFeaturesService.get().enableSimplifiedAgentlessUX;
 
@@ -506,6 +508,8 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
 
   const setupTechnologySelector = useMemo(() => {
     if (!addIntegrationFlyoutProps && isAgentless && packageInfo) {
+      const release = getAgentlessRelease(packageInfo, integrationToEnable);
+      const showBetaBadge = release !== undefined && release !== 'ga';
       return (
         <SetupTechnologySelector
           disabled={false}
@@ -514,7 +518,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
           setupTechnology={selectedSetupTechnology}
           onSetupTechnologyChange={handleSetupTechnologyChange}
           isAgentlessDefault={isDefaultDeploymentMode}
-          showBetaBadge={!isAgentlessDefault}
+          showBetaBadge={showBetaBadge}
           useDescribedFormGroup={!useCheckableCardsForSetupTechnologySelector}
           useCheckableCards={useCheckableCardsForSetupTechnologySelector}
           hideTitle={useCheckableCardsForSetupTechnologySelector}
@@ -526,11 +530,11 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     useCheckableCardsForSetupTechnologySelector,
     isAgentless,
     isDefaultDeploymentMode,
+    integrationToEnable,
     addIntegrationFlyoutProps,
     allowedSetupTechnologies,
     selectedSetupTechnology,
     handleSetupTechnologyChange,
-    isAgentlessDefault,
     packageInfo,
   ]);
 
@@ -551,6 +555,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             validationResults={validationResults}
             submitAttempted={formState === 'INVALID'}
             isAgentlessSelected={isAgentlessSelected}
+            agentPolicies={agentPolicies}
           />
 
           {/* Show SetupTechnologySelector for all agentless integrations, including extension views, if agentless is default display as a separate step  */}

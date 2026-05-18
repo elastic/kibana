@@ -767,7 +767,7 @@ export default function (providerContext: FtrProviderContext) {
                 entity: expectExpect.objectContaining({
                   availableInEntityStore: false,
                   sourceFields: expectExpect.objectContaining({
-                    'entity.target.id': 'projects/your-project-id/roles/customRole',
+                    'entity.id': 'projects/your-project-id/roles/customRole',
                   }),
                 }),
               })
@@ -1116,7 +1116,7 @@ export default function (providerContext: FtrProviderContext) {
             entity: expectExpect.objectContaining({
               availableInEntityStore: false,
               sourceFields: expectExpect.objectContaining({
-                'entity.target.id': 'target-mv-1',
+                'entity.id': 'target-mv-1',
               }),
             }),
           })
@@ -1128,7 +1128,7 @@ export default function (providerContext: FtrProviderContext) {
             entity: expectExpect.objectContaining({
               availableInEntityStore: false,
               sourceFields: expectExpect.objectContaining({
-                'entity.target.id': 'target-mv-2',
+                'entity.id': 'target-mv-2',
               }),
             }),
           })
@@ -1140,7 +1140,7 @@ export default function (providerContext: FtrProviderContext) {
             entity: expectExpect.objectContaining({
               availableInEntityStore: false,
               sourceFields: expectExpect.objectContaining({
-                'entity.target.id': 'target-mv-3',
+                'entity.id': 'target-mv-3',
               }),
             }),
           })
@@ -1784,7 +1784,7 @@ export default function (providerContext: FtrProviderContext) {
                 entity: expectExpect.objectContaining({
                   availableInEntityStore: false,
                   sourceFields: expectExpect.objectContaining({
-                    'entity.target.id': 'projects/your-project-id/roles/customRole',
+                    'entity.id': 'projects/your-project-id/roles/customRole',
                   }),
                 }),
               })
@@ -1930,6 +1930,7 @@ export default function (providerContext: FtrProviderContext) {
                     type: 'Service',
                     sub_type: 'GCP Service Account',
                     availableInEntityStore: true,
+                    engine_type: 'service',
                     sourceFields: expectExpect.objectContaining({
                       'service.name': 'ServiceAccount123',
                     }),
@@ -1959,8 +1960,9 @@ export default function (providerContext: FtrProviderContext) {
                     type: 'Container',
                     sub_type: 'GCP Compute Instance',
                     availableInEntityStore: true,
+                    engine_type: 'host',
                     sourceFields: expectExpect.objectContaining({
-                      'host.target.id': 'host-instance-1',
+                      'host.id': 'host-instance-1',
                     }),
                   }),
                 })
@@ -1974,8 +1976,9 @@ export default function (providerContext: FtrProviderContext) {
                     type: 'Container',
                     sub_type: 'GCP Compute Instance',
                     availableInEntityStore: true,
+                    engine_type: 'host',
                     sourceFields: expectExpect.objectContaining({
-                      'host.target.id': 'host-instance-2',
+                      'host.id': 'host-instance-2',
                     }),
                   }),
                 })
@@ -2021,6 +2024,7 @@ export default function (providerContext: FtrProviderContext) {
                     type: 'Identity',
                     sub_type: 'GCP IAM User',
                     availableInEntityStore: true,
+                    engine_type: 'user',
                     sourceFields: expectExpect.objectContaining({
                       'user.id': 'entity-user@example.com',
                     }),
@@ -2046,8 +2050,9 @@ export default function (providerContext: FtrProviderContext) {
                     type: 'Compute',
                     sub_type: 'GCP Compute Instance',
                     availableInEntityStore: true,
+                    engine_type: 'generic',
                     sourceFields: expectExpect.objectContaining({
-                      'entity.target.id': 'entity-service-target-1',
+                      'entity.id': 'entity-service-target-1',
                     }),
                   }),
                 })
@@ -2127,6 +2132,7 @@ export default function (providerContext: FtrProviderContext) {
                     type: 'Identity',
                     sub_type: 'GCP IAM User',
                     availableInEntityStore: true,
+                    engine_type: 'user',
                     sourceFields: expectExpect.objectContaining({
                       'user.id': 'multi-target-user@example.com',
                     }),
@@ -2155,9 +2161,9 @@ export default function (providerContext: FtrProviderContext) {
                     type: 'Storage',
                     sub_type: 'GCP Storage Bucket',
                     availableInEntityStore: true,
+                    engine_type: 'generic',
                     sourceFields: expectExpect.objectContaining({
-                      'entity.target.id':
-                        'projects/multi-target-project-id/buckets/target-bucket-a',
+                      'entity.id': 'projects/multi-target-project-id/buckets/target-bucket-a',
                     }),
                   }),
                 })
@@ -2171,9 +2177,9 @@ export default function (providerContext: FtrProviderContext) {
                     type: 'Storage',
                     sub_type: 'GCP Storage Bucket',
                     availableInEntityStore: true,
+                    engine_type: 'generic',
                     sourceFields: expectExpect.objectContaining({
-                      'entity.target.id':
-                        'projects/multi-target-project-id/buckets/target-bucket-b',
+                      'entity.id': 'projects/multi-target-project-id/buckets/target-bucket-b',
                     }),
                   }),
                 })
@@ -2187,9 +2193,9 @@ export default function (providerContext: FtrProviderContext) {
                     type: 'Storage',
                     sub_type: 'GCP Storage Bucket',
                     availableInEntityStore: true,
+                    engine_type: 'generic',
                     sourceFields: expectExpect.objectContaining({
-                      'entity.target.id':
-                        'projects/multi-target-project-id/buckets/target-bucket-c',
+                      'entity.id': 'projects/multi-target-project-id/buckets/target-bucket-c',
                     }),
                   }),
                 })
@@ -2215,8 +2221,9 @@ export default function (providerContext: FtrProviderContext) {
                     type: 'Service',
                     sub_type: 'GCP Service Account',
                     availableInEntityStore: true,
+                    engine_type: 'service',
                     sourceFields: expectExpect.objectContaining({
-                      'service.target.name': 'TargetServiceDifferent',
+                      'service.name': 'TargetServiceDifferent',
                     }),
                   }),
                 })
@@ -2287,6 +2294,7 @@ export default function (providerContext: FtrProviderContext) {
                   entity: expectExpect.objectContaining({
                     name: 'PartialUserNameOnly',
                     availableInEntityStore: true,
+                    engine_type: 'user',
                     sourceFields: expectExpect.objectContaining({
                       'user.id': 'partial-user@example.com',
                     }),
@@ -2315,8 +2323,9 @@ export default function (providerContext: FtrProviderContext) {
                     type: 'Container',
                     sub_type: 'GCP Compute Instance',
                     availableInEntityStore: true,
+                    engine_type: 'host',
                     sourceFields: expectExpect.objectContaining({
-                      'host.target.id': 'partial-host-instance-1',
+                      'host.id': 'partial-host-instance-1',
                     }),
                   }),
                 })
@@ -2331,6 +2340,266 @@ export default function (providerContext: FtrProviderContext) {
               expect(labelNode).not.to.be(undefined);
               expect(labelNode.label).to.equal('google.compute.v1.Instances.start');
               expect(labelNode.color).to.equal('primary');
+            });
+          });
+
+          it('should return doc data when host ip is singular', async () => {
+            await retry.tryForTime(enrichmentRetryTimeout, async () => {
+              const response = await postGraph(
+                supertest,
+                {
+                  query: {
+                    originEventIds: [],
+                    entityIds: [{ id: 'host:host-with-single-ip', isOrigin: false }],
+                    start: '2024-09-01T00:00:00Z',
+                    end: '2024-09-02T00:00:00Z',
+                  },
+                },
+                undefined,
+                entitiesSpaceId
+              ).expect(result(200));
+
+              expect(response.body).to.have.property('nodes').length(1);
+              expect(response.body).to.have.property('edges').length(0);
+              expect(response.body).not.to.have.property('messages');
+              // Find the actor node directly by entity ID (single entity uses entity ID as node ID)
+              const entityNode = response.body.nodes.find(
+                (node: EntityNodeDataModel) => node.id === 'host:host-with-single-ip'
+              ) as EntityNodeDataModel;
+
+              // Verify entity enrichment
+              expect(entityNode).not.to.be(undefined);
+              // For single enriched entities, label should be entity.name
+              expect(entityNode.label).to.equal('Host with single ip');
+              expect(entityNode.icon).to.equal('storage');
+              expect(entityNode.shape).to.equal('hexagon');
+              expect(entityNode.tag).to.equal('Host');
+              expect(entityNode.documentsData).to.have.length(1);
+              expect(entityNode.documentsData![0].entity?.host?.ip).to.have.length(1);
+            });
+          });
+
+          it('should return doc data when host ip is missing', async () => {
+            await retry.tryForTime(enrichmentRetryTimeout, async () => {
+              const response = await postGraph(
+                supertest,
+                {
+                  query: {
+                    originEventIds: [],
+                    entityIds: [{ id: 'host:host-with-no-ip', isOrigin: false }],
+                    start: '2024-09-01T00:00:00Z',
+                    end: '2024-09-02T00:00:00Z',
+                  },
+                },
+                undefined,
+                entitiesSpaceId
+              ).expect(result(200));
+
+              expect(response.body).to.have.property('nodes').length(1);
+              expect(response.body).to.have.property('edges').length(0);
+              expect(response.body).not.to.have.property('messages');
+              // Find the actor node directly by entity ID (single entity uses entity ID as node ID)
+              const entityNode = response.body.nodes.find(
+                (node: EntityNodeDataModel) => node.id === 'host:host-with-no-ip'
+              ) as EntityNodeDataModel;
+
+              // Verify entity enrichment
+              expect(entityNode).not.to.be(undefined);
+              // For single enriched entities, label should be entity.name
+              expect(entityNode.label).to.equal('Host with no ip');
+              expect(entityNode.icon).to.equal('storage');
+              expect(entityNode.shape).to.equal('hexagon');
+              expect(entityNode.tag).to.equal('Host');
+              expect(entityNode.documentsData).to.have.length(1);
+              expect(entityNode.documentsData![0].entity).not.to.have.property('host');
+            });
+          });
+
+          it('should return doc data when host ip is multiple', async () => {
+            await retry.tryForTime(enrichmentRetryTimeout, async () => {
+              const response = await postGraph(
+                supertest,
+                {
+                  query: {
+                    originEventIds: [],
+                    entityIds: [{ id: 'host:host-with-multiple-ips', isOrigin: false }],
+                    start: '2024-09-01T00:00:00Z',
+                    end: '2024-09-02T00:00:00Z',
+                  },
+                },
+                undefined,
+                entitiesSpaceId
+              ).expect(result(200));
+
+              expect(response.body).to.have.property('nodes').length(1);
+              expect(response.body).to.have.property('edges').length(0);
+              expect(response.body).not.to.have.property('messages');
+              // Find the actor node directly by entity ID (single entity uses entity ID as node ID)
+              const entityNode = response.body.nodes.find(
+                (node: EntityNodeDataModel) => node.id === 'host:host-with-multiple-ips'
+              ) as EntityNodeDataModel;
+
+              // Verify entity enrichment
+              expect(entityNode).not.to.be(undefined);
+              // For single enriched entities, label should be entity.name
+              expect(entityNode.label).to.equal('Host with multiple ips');
+              expect(entityNode.icon).to.equal('storage');
+              expect(entityNode.shape).to.equal('hexagon');
+              expect(entityNode.tag).to.equal('Host');
+              expect(entityNode.documentsData).to.have.length(1);
+              expect(entityNode.documentsData![0].entity?.host?.ip).to.have.length(3);
+            });
+          });
+
+          it('should return doc data when relationship actor host ip is multiple', async () => {
+            await retry.tryForTime(enrichmentRetryTimeout, async () => {
+              const response = await postGraph(
+                supertest,
+                {
+                  query: {
+                    originEventIds: [],
+                    entityIds: [{ id: 'host:host-with-multiple-ips-actor', isOrigin: false }],
+                    start: '2024-09-01T00:00:00Z',
+                    end: '2024-09-02T00:00:00Z',
+                  },
+                },
+                undefined,
+                entitiesSpaceId
+              ).expect(result(200));
+
+              expect(response.body).to.have.property('nodes').length(3);
+              expect(response.body).to.have.property('edges').length(2);
+              expect(response.body).not.to.have.property('messages');
+              // Find the actor node directly by entity ID (single entity uses entity ID as node ID)
+              const actorEntityNode = response.body.nodes.find(
+                (node: EntityNodeDataModel) => node.id === 'host:host-with-multiple-ips-actor'
+              ) as EntityNodeDataModel;
+
+              // Verify entity enrichment
+              expect(actorEntityNode).not.to.be(undefined);
+              // For single enriched entities, label should be entity.name
+              expect(actorEntityNode.label).to.equal('Actor Host with multiple ips');
+              expect(actorEntityNode.icon).to.equal('storage');
+              expect(actorEntityNode.shape).to.equal('hexagon');
+              expect(actorEntityNode.tag).to.equal('Host');
+              expect(actorEntityNode.documentsData).to.have.length(1);
+              expect(actorEntityNode.documentsData![0].entity?.host?.ip).to.have.length(3);
+
+              // Find the actor node directly by entity ID (single entity uses entity ID as node ID)
+              const targetEntityNode = response.body.nodes.find(
+                (node: EntityNodeDataModel) => node.id === 'host:host-with-multiple-ips-target'
+              ) as EntityNodeDataModel;
+
+              // Verify entity enrichment
+              expect(targetEntityNode).not.to.be(undefined);
+              // For single enriched entities, label should be entity.name
+              expect(targetEntityNode.label).to.equal('Target Host with multiple ips');
+              expect(targetEntityNode.icon).to.equal('storage');
+              expect(targetEntityNode.shape).to.equal('hexagon');
+              expect(targetEntityNode.tag).to.equal('Host');
+              expect(targetEntityNode.documentsData).to.have.length(1);
+              expect(targetEntityNode.documentsData![0].entity?.host?.ip).to.have.length(3);
+            });
+          });
+
+          it('should return doc data when relationship target host ip is multiple', async () => {
+            await retry.tryForTime(enrichmentRetryTimeout, async () => {
+              const response = await postGraph(
+                supertest,
+                {
+                  query: {
+                    originEventIds: [],
+                    entityIds: [{ id: 'host:host-with-multiple-ips-target', isOrigin: false }],
+                    start: '2024-09-01T00:00:00Z',
+                    end: '2024-09-02T00:00:00Z',
+                  },
+                },
+                undefined,
+                entitiesSpaceId
+              ).expect(result(200));
+
+              expect(response.body).to.have.property('nodes').length(3);
+              expect(response.body).to.have.property('edges').length(2);
+              expect(response.body).not.to.have.property('messages');
+              // Find the actor node directly by entity ID (single entity uses entity ID as node ID)
+              const actorEntityNode = response.body.nodes.find(
+                (node: EntityNodeDataModel) => node.id === 'host:host-with-multiple-ips-actor'
+              ) as EntityNodeDataModel;
+
+              // Verify entity enrichment
+              expect(actorEntityNode).not.to.be(undefined);
+              // For single enriched entities, label should be entity.name
+              expect(actorEntityNode.label).to.equal('Actor Host with multiple ips');
+              expect(actorEntityNode.icon).to.equal('storage');
+              expect(actorEntityNode.shape).to.equal('hexagon');
+              expect(actorEntityNode.tag).to.equal('Host');
+              expect(actorEntityNode.documentsData).to.have.length(1);
+              expect(actorEntityNode.documentsData![0].entity?.host?.ip).to.have.length(3);
+
+              // Find the actor node directly by entity ID (single entity uses entity ID as node ID)
+              const targetEntityNode = response.body.nodes.find(
+                (node: EntityNodeDataModel) => node.id === 'host:host-with-multiple-ips-target'
+              ) as EntityNodeDataModel;
+
+              // Verify entity enrichment
+              expect(targetEntityNode).not.to.be(undefined);
+              // For single enriched entities, label should be entity.name
+              expect(targetEntityNode.label).to.equal('Target Host with multiple ips');
+              expect(targetEntityNode.icon).to.equal('storage');
+              expect(targetEntityNode.shape).to.equal('hexagon');
+              expect(targetEntityNode.tag).to.equal('Host');
+              expect(targetEntityNode.documentsData).to.have.length(1);
+              expect(targetEntityNode.documentsData![0].entity?.host?.ip).to.have.length(3);
+            });
+          });
+
+          it('should return doc data for event nodes when both actor and target host have multiple IPs', async () => {
+            await retry.tryForTime(enrichmentRetryTimeout, async () => {
+              const response = await postGraph(
+                supertest,
+                {
+                  query: {
+                    originEventIds: [{ id: 'entities-host-multiple-ips-event-id', isAlert: false }],
+                    start: '2024-09-01T00:00:00Z',
+                    end: '2024-09-02T00:00:00Z',
+                  },
+                },
+                undefined,
+                entitiesSpaceId
+              ).expect(result(200));
+
+              expect(response.body).to.have.property('nodes').length(3);
+              expect(response.body).to.have.property('edges').length(2);
+              expect(response.body).not.to.have.property('messages');
+              // Find the actor node directly by entity ID (single entity uses entity ID as node ID)
+              const actorEntityNode = response.body.nodes.find(
+                (node: EntityNodeDataModel) => node.id === 'host:host-with-multiple-ips-actor'
+              ) as EntityNodeDataModel;
+
+              // Verify entity enrichment
+              expect(actorEntityNode).not.to.be(undefined);
+              // For single enriched entities, label should be entity.name
+              expect(actorEntityNode.label).to.equal('Actor Host with multiple ips');
+              expect(actorEntityNode.icon).to.equal('storage');
+              expect(actorEntityNode.shape).to.equal('hexagon');
+              expect(actorEntityNode.tag).to.equal('Host');
+              expect(actorEntityNode.documentsData).to.have.length(1);
+              expect(actorEntityNode.documentsData![0].entity?.host?.ip).to.have.length(3);
+
+              // Find the actor node directly by entity ID (single entity uses entity ID as node ID)
+              const targetEntityNode = response.body.nodes.find(
+                (node: EntityNodeDataModel) => node.id === 'host:host-with-multiple-ips-target'
+              ) as EntityNodeDataModel;
+
+              // Verify entity enrichment
+              expect(targetEntityNode).not.to.be(undefined);
+              // For single enriched entities, label should be entity.name
+              expect(targetEntityNode.label).to.equal('Target Host with multiple ips');
+              expect(targetEntityNode.icon).to.equal('storage');
+              expect(targetEntityNode.shape).to.equal('hexagon');
+              expect(targetEntityNode.tag).to.equal('Host');
+              expect(targetEntityNode.documentsData).to.have.length(1);
+              expect(targetEntityNode.documentsData![0].entity?.host?.ip).to.have.length(3);
             });
           });
         };
@@ -2400,7 +2669,7 @@ export default function (providerContext: FtrProviderContext) {
               logger,
               retry,
               entitiesIndex: getEntitiesLatestIndexName(entitiesSpaceId),
-              expectedCount: 35,
+              expectedCount: 40,
             });
           });
 
@@ -2445,6 +2714,7 @@ export default function (providerContext: FtrProviderContext) {
                   type: 'entity',
                   entity: expectExpect.objectContaining({
                     availableInEntityStore: true,
+                    engine_type: 'user',
                     name: 'Relationships Test User',
                     type: 'Identity',
                     sub_type: 'AWS IAM User',
@@ -2473,8 +2743,9 @@ export default function (providerContext: FtrProviderContext) {
                     type: 'Service',
                     sub_type: 'AWS Lambda',
                     availableInEntityStore: true,
+                    engine_type: 'service',
                     sourceFields: expectExpect.objectContaining({
-                      'service.target.name': 'Relationships Target Service',
+                      'service.name': 'Relationships Target Service',
                     }),
                   }),
                 })
@@ -2499,6 +2770,7 @@ export default function (providerContext: FtrProviderContext) {
                     type: 'Host',
                     sub_type: 'AWS EC2 Instance',
                     availableInEntityStore: true,
+                    engine_type: 'host',
                   }),
                 })
               );
@@ -2573,6 +2845,7 @@ export default function (providerContext: FtrProviderContext) {
                   type: 'entity',
                   entity: expectExpect.objectContaining({
                     availableInEntityStore: true,
+                    engine_type: 'user',
                     name: 'Relationships Test User',
                     type: 'Identity',
                     sub_type: 'AWS IAM User',
@@ -2599,6 +2872,7 @@ export default function (providerContext: FtrProviderContext) {
                     type: 'Host',
                     sub_type: 'AWS EC2 Instance',
                     availableInEntityStore: true,
+                    engine_type: 'host',
                   }),
                 })
               );
@@ -2742,6 +3016,7 @@ export default function (providerContext: FtrProviderContext) {
                   type: 'entity',
                   entity: expectExpect.objectContaining({
                     availableInEntityStore: true,
+                    engine_type: 'user',
                     name: 'GCP Admin User',
                     type: 'Service Account',
                     sub_type: 'GCP Service Account',
@@ -2770,6 +3045,7 @@ export default function (providerContext: FtrProviderContext) {
                   type: 'entity',
                   entity: expectExpect.objectContaining({
                     availableInEntityStore: true,
+                    engine_type: 'user',
                     name: 'GCP Compute Operator',
                     type: 'Identity',
                     sub_type: 'GCP IAM User',
@@ -2798,11 +3074,12 @@ export default function (providerContext: FtrProviderContext) {
                   type: 'entity',
                   entity: expectExpect.objectContaining({
                     availableInEntityStore: true,
+                    engine_type: 'user',
                     name: 'data-pipeline Service Account',
                     type: 'Service Account',
                     sub_type: 'GCP Service Account',
                     sourceFields: expectExpect.objectContaining({
-                      'user.target.id': 'data-pipeline@my-gcp-project.iam.gserviceaccount.com',
+                      'user.id': 'data-pipeline@my-gcp-project.iam.gserviceaccount.com',
                     }),
                   }),
                 })
@@ -2827,11 +3104,12 @@ export default function (providerContext: FtrProviderContext) {
                   type: 'entity',
                   entity: expectExpect.objectContaining({
                     availableInEntityStore: true,
+                    engine_type: 'host',
                     name: 'database-server-prod-1',
                     type: 'Host',
                     sub_type: 'GCP Compute Instance',
                     sourceFields: expectExpect.objectContaining({
-                      'host.target.id':
+                      'host.id':
                         'projects/my-gcp-project/zones/us-west1-a/instances/database-server-prod-1',
                     }),
                   }),
@@ -2854,6 +3132,7 @@ export default function (providerContext: FtrProviderContext) {
                   type: 'entity',
                   entity: expectExpect.objectContaining({
                     availableInEntityStore: true,
+                    engine_type: 'host',
                     name: 'web-server-prod-1',
                     type: 'Host',
                     sub_type: 'GCP Compute Instance',
@@ -2866,6 +3145,7 @@ export default function (providerContext: FtrProviderContext) {
                   type: 'entity',
                   entity: expectExpect.objectContaining({
                     availableInEntityStore: true,
+                    engine_type: 'host',
                     name: 'api-gateway-prod-1',
                     type: 'Host',
                     sub_type: 'GCP Compute Instance',
@@ -3013,6 +3293,7 @@ export default function (providerContext: FtrProviderContext) {
                     type: 'Identity',
                     sub_type: 'AWS IAM User',
                     availableInEntityStore: true,
+                    engine_type: 'user',
                     sourceFields: expectExpect.objectContaining({
                       'user.id': 'rel-hierarchy-root-user',
                     }),
@@ -3128,8 +3409,9 @@ export default function (providerContext: FtrProviderContext) {
                     type: 'User',
                     sub_type: 'AWS Organizations Admin',
                     availableInEntityStore: true,
+                    engine_type: 'user',
                     sourceFields: expectExpect.objectContaining({
-                      'user.target.id': 'rel-hierarchy-delegate-1',
+                      'user.id': 'rel-hierarchy-delegate-1',
                     }),
                   }),
                 })
@@ -3155,6 +3437,7 @@ export default function (providerContext: FtrProviderContext) {
                     type: 'Service',
                     sub_type: 'AWS Lambda Function',
                     availableInEntityStore: true,
+                    engine_type: 'service',
                   }),
                 })
               );

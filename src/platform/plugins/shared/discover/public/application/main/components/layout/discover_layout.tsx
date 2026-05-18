@@ -29,7 +29,11 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { useDragDropContext } from '@kbn/dom-drag-drop';
 import { DataViewType, type DataView, type DataViewField } from '@kbn/data-views-plugin/public';
-import { SHOW_FIELD_STATISTICS, SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
+import {
+  ErrorCallout,
+  SHOW_FIELD_STATISTICS,
+  SORT_DEFAULT_ORDER_SETTING,
+} from '@kbn/discover-utils';
 import type { UseColumnsProps } from '@kbn/unified-data-table';
 import { popularizeField, useColumns } from '@kbn/unified-data-table';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
@@ -53,7 +57,6 @@ import type { SidebarToggleState } from '../../../types';
 import { FetchStatus } from '../../../types';
 import { useDataState } from '../../hooks/use_data_state';
 import { SavedSearchURLConflictCallout } from '../../../../components/saved_search_url_conflict_callout/saved_search_url_conflict_callout';
-import { ErrorCallout } from '../../../../components/common/error_callout';
 import { addLog } from '../../../../utils/add_log';
 import { DiscoverResizableLayout } from './discover_resizable_layout';
 import { PanelsToggle } from '../../../../components/panels_toggle';
@@ -84,6 +87,8 @@ const TopNavMemoized = React.memo((props: DiscoverTopNavProps) => (
 
 export function DiscoverLayout() {
   const {
+    core,
+    docLinks,
     trackUiMetric,
     capabilities,
     dataViews,
@@ -124,11 +129,12 @@ export function DiscoverLayout() {
   const dataState: DataMainMsg = useDataState(main$);
   const discoverSession = useInternalStateSelector((state) => state.persistedDiscoverSession);
   const esqlVariables = useCurrentTabSelector((state) => state.esqlVariables);
-  const isCascadeLayoutSelected = useCurrentTabSelector((tab) =>
-    isCascadedDocumentsVisible(
-      tab.cascadedDocumentsState.availableCascadeGroups,
-      tab.appState.query
-    )
+  const isCascadeLayoutSelected = useCurrentTabSelector(
+    (tab) =>
+      isCascadedDocumentsVisible(
+        tab.cascadedDocumentsState.availableCascadeGroups,
+        tab.appState.query
+      ) && tab.cascadedDocumentsState.selectedCascadeGroups.length > 0
   );
 
   const fetchCounter = useRef<number>(0);
@@ -237,6 +243,7 @@ export function DiscoverLayout() {
       const fieldName = typeof field === 'string' ? field : field.name;
       // send the field type for casting
       const fieldType = typeof field !== 'string' ? field.type : undefined;
+      const esFieldType = typeof field !== 'string' ? field.esTypes?.[0] : undefined;
       // weird existence logic from Discover components
       // in the field it comes the operator _exists_ and in the value the field
       // I need to take care of it here but I think it should be handled on the fieldlist instead
@@ -255,7 +262,8 @@ export function DiscoverLayout() {
             fieldName === '_exists_' ? String(values) : fieldName,
             fieldName === '_exists_' || values == null ? undefined : values,
             getOperator(fieldName, values, operation),
-            fieldType
+            fieldType,
+            esFieldType
           );
 
       if (!updatedQuery) {
@@ -517,6 +525,10 @@ export function DiscoverLayout() {
                         )}
                         error={dataState.error}
                         isEsqlMode={isEsqlMode}
+                        showErrorDialog={({ title, error }) =>
+                          core.notifications.showErrorDialog({ title, error })
+                        }
+                        esqlReferenceHref={docLinks.links.query.queryESQL}
                       />
                     ) : (
                       <DiscoverNoResults

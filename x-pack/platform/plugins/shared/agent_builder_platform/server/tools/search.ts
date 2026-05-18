@@ -6,8 +6,11 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import type { CoreSetup } from '@kbn/core-lifecycle-server';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
+import type { TopSnippetsConfig } from '@kbn/agent-builder-genai-utils/tools';
 import { runSearchTool } from '@kbn/agent-builder-genai-utils/tools';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { resolveTimeRange } from './screen_context_utils';
 
@@ -32,7 +35,22 @@ const searchSchema = z.object({
     ),
 });
 
-export const searchTool = (): BuiltinToolDefinition<typeof searchSchema> => {
+export const searchTool = ({
+  coreSetup,
+  topSnippetsDefaults,
+}: {
+  coreSetup: CoreSetup;
+  topSnippetsDefaults: TopSnippetsConfig;
+}): BuiltinToolDefinition<typeof searchSchema> => {
+  // Cache the start services promise so it is resolved at most once.
+  let startServicesPromise: ReturnType<CoreSetup['getStartServices']> | undefined;
+  const getStartServices = () => {
+    if (!startServicesPromise) {
+      startServicesPromise = coreSetup.getStartServices();
+    }
+    return startServicesPromise;
+  };
+
   return {
     id: platformCoreTools.search,
     type: ToolType.builtin,
@@ -58,10 +76,30 @@ Note:
     schema: searchSchema,
     handler: async (
       { query: nlQuery, index, time_range: explicitTimeRange },
-      { esClient, modelProvider, logger, events, attachments }
+      { esClient, modelProvider, logger, events, attachments, savedObjectsClient }
     ) => {
       logger.debug(`search tool called with query: ${nlQuery}, index: ${index}`);
       const timeRange = resolveTimeRange(attachments, explicitTimeRange);
+
+      // Resolve top snippets config from UI setting + server config defaults
+      let topSnippetsConfig: TopSnippetsConfig | undefined;
+      try {
+        const [coreStart] = await getStartServices();
+        const uiSettingsClient = coreStart.uiSettings.asScopedToClient(savedObjectsClient);
+        const isEnabled = await uiSettingsClient.get<boolean>(
+          AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID
+        );
+        if (isEnabled) {
+          topSnippetsConfig = topSnippetsDefaults;
+        }
+      } catch (error) {
+        logger.debug(
+          `Failed to read experimentalFeatures setting, falling back to highlighting: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+      }
+
       const results = await runSearchTool({
         nlQuery,
         index,
@@ -71,6 +109,8 @@ Note:
         model: await modelProvider.getDefaultModel(),
         events,
         logger,
+        topSnippetsConfig,
+        rowLimit: 100,
       });
       return { results };
     },

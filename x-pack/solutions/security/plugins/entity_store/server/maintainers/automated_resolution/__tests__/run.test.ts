@@ -126,10 +126,10 @@ describe('Automated Resolution', () => {
 
       const step1Query = mockEsClient.search.mock.calls[0][0] as any;
       const filters = step1Query.query.bool.filter;
-      const hasLastSeenFilter = filters.some(
-        (f: any) => f.range && f.range['entity.lifecycle.last_seen']
+      const hasFirstSeenFilter = filters.some(
+        (f: any) => f.range && f.range['entity.lifecycle.first_seen']
       );
-      expect(hasLastSeenFilter).toBe(false);
+      expect(hasFirstSeenFilter).toBe(false);
     });
 
     it('should include timestamp range filter for incremental scan', async () => {
@@ -155,11 +155,11 @@ describe('Automated Resolution', () => {
 
       const step1Query = mockEsClient.search.mock.calls[0][0] as any;
       const filters = step1Query.query.bool.filter;
-      const lastSeenFilter = filters.find(
-        (f: any) => f.range && f.range['entity.lifecycle.last_seen']
+      const firstSeenFilter = filters.find(
+        (f: any) => f.range && f.range['entity.lifecycle.first_seen']
       );
-      expect(lastSeenFilter).toEqual({
-        range: { 'entity.lifecycle.last_seen': { gt: '2026-03-09T00:00:00Z' } },
+      expect(firstSeenFilter).toEqual({
+        range: { 'entity.lifecycle.first_seen': { gt: '2026-03-09T00:00:00Z' } },
       });
     });
 
@@ -206,7 +206,9 @@ describe('Automated Resolution', () => {
         createDeps(state, mockEsClient, mockResolutionClient)
       );
 
-      expect(mockLinkEntities).toHaveBeenCalledWith('user-okta', ['user-entra']);
+      expect(mockLinkEntities).toHaveBeenCalledWith('user-okta', ['user-entra'], {
+        refresh: false,
+      });
       expect(result.lastRun?.resolutionsCreated).toBe(1);
     });
 
@@ -236,7 +238,9 @@ describe('Automated Resolution', () => {
         createDeps(state, mockEsClient, mockResolutionClient)
       );
 
-      expect(mockLinkEntities).toHaveBeenCalledWith('user-existing-target', ['user-new']);
+      expect(mockLinkEntities).toHaveBeenCalledWith('user-existing-target', ['user-new'], {
+        refresh: false,
+      });
       expect(result.lastRun?.resolutionsCreated).toBe(1);
     });
 

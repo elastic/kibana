@@ -13,8 +13,8 @@ import type {
   ESQLCallbacks,
   ESQLFieldWithMetadata,
   InferenceEndpointAutocompleteItem,
+  EsqlDataset,
 } from '@kbn/esql-types';
-import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import { METADATA_FIELDS } from '../../..';
 
 export const metadataFields: ESQLFieldWithMetadata[] = METADATA_FIELDS.map((field) => ({
@@ -115,6 +115,19 @@ export const views = [
   },
 ];
 
+export const datasets: EsqlDataset[] = [
+  {
+    name: 'dataset_1',
+    data_source: 'data_source_1',
+    resource: 's3://bucket/path/**/*.parquet',
+  },
+  {
+    name: 'dataset_2',
+    data_source: 'data_source_2',
+    resource: 'db.schema.table',
+  },
+];
+
 export const editorExtensions = {
   recommendedQueries: [
     {
@@ -179,6 +192,7 @@ export function getCallbackMocks(): ESQLCallbacks {
     getJoinIndices: jest.fn(async () => ({ indices: joinIndices })),
     getTimeseriesIndices: jest.fn(async () => ({ indices: timeseriesIndices })),
     getViews: jest.fn(async () => ({ views })),
+    getDatasets: jest.fn(async () => ({ datasets })),
     getEditorExtensions: jest.fn(async (queryString: string) => {
       if (queryString.includes('logs*')) {
         return {
@@ -188,7 +202,9 @@ export function getCallbackMocks(): ESQLCallbacks {
       }
       return { recommendedQueries: [], recommendedFields: [] };
     }),
-    getInferenceEndpoints: jest.fn(async (taskType: InferenceTaskType) => ({ inferenceEndpoints })),
+    getInferenceEndpoints: jest.fn(async (taskType: string) => ({
+      inferenceEndpoints,
+    })),
   };
 }
 

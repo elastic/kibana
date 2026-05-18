@@ -16,7 +16,10 @@ import { omit } from 'lodash';
 import { SyntheticsMonitorTestService } from './services/synthetics_monitor_test_service';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
-import { PrivateLocationTestService } from './services/private_location_test_service';
+import {
+  PrivateLocationTestService,
+  cleanSyntheticsTestData,
+} from './services/private_location_test_service';
 import { comparePolicies, getTestSyntheticsPolicy } from './sample_data/test_policy';
 import { omitMonitorKeys } from './add_monitor';
 
@@ -41,8 +44,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     before(async () => {
       await testPrivateLocations.cleanupFleetPolicies();
-      await kServer.savedObjects.cleanStandardList();
-      await testPrivateLocations.installSyntheticsPackage();
+      await cleanSyntheticsTestData(kServer);
       _browserMonitorJson = getFixtureJson('browser_monitor');
     });
 

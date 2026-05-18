@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { renderHook } from '@testing-library/react';
-import { ContentListProvider } from '@kbn/content-list-provider';
+import { ContentListProvider, type SelectionConfig } from '@kbn/content-list-provider';
 import type { FindItemsResult, FindItemsParams, ContentListItem } from '@kbn/content-list-provider';
 import { useSelection } from './use_selection';
 
@@ -26,8 +26,11 @@ describe('useSelection', () => {
     })
   );
 
-  const createWrapper = (options?: { selectionDisabled?: boolean; isReadOnly?: boolean }) => {
-    const { selectionDisabled, isReadOnly } = options ?? {};
+  const createWrapper = (options?: {
+    selection?: boolean | SelectionConfig;
+    isReadOnly?: boolean;
+  }) => {
+    const { selection, isReadOnly } = options ?? {};
 
     return ({ children }: { children: React.ReactNode }) => (
       <ContentListProvider
@@ -36,7 +39,7 @@ describe('useSelection', () => {
         dataSource={{ findItems: mockFindItems }}
         isReadOnly={isReadOnly}
         features={{
-          ...(selectionDisabled !== undefined && { selection: !selectionDisabled }),
+          ...(selection !== undefined && { selection }),
         }}
       >
         {children}
@@ -83,7 +86,7 @@ describe('useSelection', () => {
   describe('when selection is disabled', () => {
     it('returns `undefined` when selection feature is disabled', () => {
       const { result } = renderHook(() => useSelection(), {
-        wrapper: createWrapper({ selectionDisabled: true }),
+        wrapper: createWrapper({ selection: false }),
       });
 
       expect(result.current.selection).toBeUndefined();
@@ -95,6 +98,61 @@ describe('useSelection', () => {
       });
 
       expect(result.current.selection).toBeUndefined();
+    });
+  });
+
+  describe('with a SelectionConfig', () => {
+    it('forwards the `selectable` predicate to EUI', () => {
+      const selectable = jest.fn((item: ContentListItem) => item.id !== '2');
+
+      const { result } = renderHook(() => useSelection(), {
+        wrapper: createWrapper({ selection: { selectable } }),
+      });
+
+      const { selectable: forwardedSelectable } = result.current.selection!;
+      expect(forwardedSelectable!(mockItems[0])).toBe(true);
+      expect(forwardedSelectable!(mockItems[1])).toBe(false);
+      expect(selectable).toHaveBeenCalledWith(mockItems[0]);
+      expect(selectable).toHaveBeenCalledWith(mockItems[1]);
+    });
+
+    it('forwards the `selectableMessage` callback to EUI and coerces `undefined` to an empty string', () => {
+      const selectableMessage = jest.fn(
+        (selectable: boolean, item: ContentListItem): string | undefined =>
+          selectable ? undefined : `${item.title} cannot be selected`
+      );
+
+      const { result } = renderHook(() => useSelection(), {
+        wrapper: createWrapper({ selection: { selectableMessage } }),
+      });
+
+      const forwarded = result.current.selection!.selectableMessage!;
+
+      // EUI only consults the message when `selectable` is `false`, but the
+      // adapter must still be called for both branches and `undefined` must be
+      // coerced to an empty string so the EUI signature is satisfied.
+      expect(forwarded(true, mockItems[0])).toBe('');
+      expect(forwarded(false, mockItems[1])).toBe('Dashboard B cannot be selected');
+      expect(selectableMessage).toHaveBeenCalledWith(true, mockItems[0]);
+      expect(selectableMessage).toHaveBeenCalledWith(false, mockItems[1]);
+    });
+
+    it('falls back to the default `selectable` when none is provided', () => {
+      const { result } = renderHook(() => useSelection(), {
+        wrapper: createWrapper({ selection: {} }),
+      });
+
+      const { selectable } = result.current.selection!;
+      expect(selectable!(mockItems[0])).toBe(true);
+      expect(selectable!(mockItems[1])).toBe(true);
+    });
+
+    it('omits `selectableMessage` when none is provided', () => {
+      const { result } = renderHook(() => useSelection(), {
+        wrapper: createWrapper({ selection: {} }),
+      });
+
+      expect(result.current.selection!).not.toHaveProperty('selectableMessage');
     });
   });
 

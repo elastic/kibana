@@ -13,7 +13,14 @@ import { licenseService } from '../../hooks/use_license';
 import type { ActionsComponentProps } from './actions';
 import { Actions } from './actions';
 import { useIsAnalyzerEnabled } from '../../../detections/hooks/use_is_analyzer_enabled';
+import { AlertContextMenu } from '../../../detections/components/alerts_table/timeline_actions/alert_context_menu';
 
+jest.mock(
+  '../../../detections/components/alerts_table/timeline_actions/alert_context_menu',
+  () => ({
+    AlertContextMenu: jest.fn(() => null),
+  })
+);
 jest.mock('../../hooks/use_selector');
 jest.mock('../../../detections/hooks/use_is_analyzer_enabled');
 jest.mock('../../hooks/use_license', () => {
@@ -202,6 +209,46 @@ describe('Actions', () => {
   });
 
   describe('alert context menu', () => {
+    describe('more actions button', () => {
+      beforeEach(() => {
+        jest.mocked(AlertContextMenu).mockClear();
+      });
+
+      it('should not be disabled when document is local', () => {
+        render(
+          <TestProviders>
+            <Actions {...defaultProps} />
+          </TestProviders>
+        );
+
+        expect(jest.mocked(AlertContextMenu)).toHaveBeenCalledWith(
+          expect.objectContaining({ disabled: false }),
+          expect.anything()
+        );
+      });
+
+      it('should be disabled when document is remote', () => {
+        const props = {
+          ...defaultProps,
+          ecsData: {
+            ...mockTimelineData[0].ecs,
+            _index: 'remote_cluster:.ds-logs-endpoint.events.process-default',
+          },
+        };
+
+        render(
+          <TestProviders>
+            <Actions {...props} />
+          </TestProviders>
+        );
+
+        expect(jest.mocked(AlertContextMenu)).toHaveBeenCalledWith(
+          expect.objectContaining({ disabled: true }),
+          expect.anything()
+        );
+      });
+    });
+
     describe('analyzer icon', () => {
       it('should render', () => {
         (useIsAnalyzerEnabled as jest.Mock).mockReturnValue(true);

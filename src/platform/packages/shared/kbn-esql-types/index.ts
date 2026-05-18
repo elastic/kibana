@@ -14,9 +14,13 @@ export {
   type ESQLControlVariable,
   type PublishesESQLVariable,
   type PublishesESQLVariables,
+  type StaticESQLControl,
+  type QueryESQLControl,
   apiPublishesESQLVariable,
   apiPublishesESQLVariables,
   controlHasVariableName,
+  isStaticESQLControl,
+  isQueryESQLControl,
 } from './src/variables_types';
 
 export {
@@ -26,6 +30,8 @@ export {
   type ESQLSourceResult,
   type EsqlView,
   type EsqlViewsResult,
+  type EsqlDataset,
+  type EsqlDatasetsResult,
 } from './src/sources_autocomplete_types';
 
 export {
@@ -45,6 +51,7 @@ export {
   SOURCES_AUTOCOMPLETE_ROUTE,
   TIMEFIELD_ROUTE,
   VIEWS_ROUTE,
+  DATASETS_ROUTE,
   NL_TO_ESQL_ROUTE,
   SOURCES_TYPES,
   LOOKUP_INDEX_CREATE_ROUTE,

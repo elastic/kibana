@@ -13,6 +13,7 @@ import { i18n } from '@kbn/i18n';
 import type { ContentListItem } from '@kbn/content-list-provider';
 import type { ColumnBuilderContext } from '../types';
 import { column } from '../part';
+import { getColumnLayoutProps, pickAttribute, type ColumnLayoutProps } from '../layout';
 import { UpdatedAtCell } from './updated_at_cell';
 
 /** Default i18n-translated column title for the updated at column. */
@@ -22,14 +23,24 @@ const DEFAULT_UPDATED_AT_COLUMN_TITLE = i18n.translate(
 );
 
 /**
+ * English baseline width for the updated-at column.
+ *
+ * `9.5em` matches the legacy `TableListView` width — chosen so the column
+ * always fits both relative time strings ("2 hours ago") and abbreviated
+ * absolute dates ("Jan 5, 2025"). With `tableLayout='auto'`, longer
+ * translated headers (e.g. de "Letzte Aktualisierung", fr "Dernière mise à
+ * jour") still expand the column past this width via the `'max-content'`
+ * `minWidth` floor below — `min-width` trumps `max-width` per the CSS spec.
+ */
+const DEFAULT_UPDATED_AT_WIDTH = '9.5em';
+
+/**
  * Props for the `Column.UpdatedAt` preset component.
  *
  * These are the declarative attributes consumers pass in JSX. The builder
  * reads them directly from the parsed attributes.
  */
-export interface UpdatedAtColumnProps {
-  /** Column width (CSS value like `'150px'` or `'20%'`). */
-  width?: string;
+export interface UpdatedAtColumnProps extends ColumnLayoutProps {
   /** Custom column title. Defaults to `'Last updated'`. */
   columnTitle?: string;
   /**
@@ -51,18 +62,28 @@ export const buildUpdatedAtColumn = (
   attributes: UpdatedAtColumnProps,
   context: ColumnBuilderContext
 ): EuiBasicTableColumn<ContentListItem> => {
-  const { columnTitle, width, sortable: sortableProp } = attributes;
+  const { columnTitle, sortable: sortableProp } = attributes;
 
   const supportsSorting = context.supports?.sorting ?? true;
 
   // Default sortable to `true` for the updatedAt field, when sorting is supported.
   const sortable = supportsSorting ? sortableProp ?? true : false;
 
+  const resolvedWidth = pickAttribute(attributes, 'width', DEFAULT_UPDATED_AT_WIDTH);
+
   return {
     field: 'updatedAt',
     name: columnTitle ?? DEFAULT_UPDATED_AT_COLUMN_TITLE,
     sortable,
-    ...(width && { width }),
+    ...getColumnLayoutProps({
+      width: resolvedWidth,
+      minWidth: pickAttribute(attributes, 'minWidth', 'max-content'),
+      // `maxWidth` cascades from `width`: if the consumer overrides `width`
+      // (and doesn't override `maxWidth`), the cap follows the new width so
+      // the column stays locked at the consumer's preferred footprint.
+      maxWidth: pickAttribute(attributes, 'maxWidth', resolvedWidth),
+      truncateText: pickAttribute(attributes, 'truncateText', undefined),
+    }),
     'data-test-subj': 'content-list-table-column-updatedAt',
     render: (_value: Date | undefined, item: ContentListItem) => {
       return <UpdatedAtCell updatedAt={item.updatedAt} />;
@@ -102,4 +123,8 @@ export const buildUpdatedAtColumn = (
 export const UpdatedAtColumn = column.createPreset({
   name: 'updatedAt',
   resolve: buildUpdatedAtColumn,
+  skeleton: (attributes) => ({
+    shape: 'text',
+    width: attributes.width ?? DEFAULT_UPDATED_AT_WIDTH,
+  }),
 });
