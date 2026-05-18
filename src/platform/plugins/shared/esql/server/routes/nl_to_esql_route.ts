@@ -15,6 +15,10 @@ import { createScopedModel, resolveConnectorId } from './helpers';
 
 const MAX_NL_INSTRUCTION_LENGTH = 2000;
 
+/**
+ * Wraps the editor's current buffer as additional context for {@link generateEsql} when
+ * the request is not a completion: the user has typed something but is asking for a fresh query.
+ */
 const buildNlToEsqlAdditionalContext = (currentQuery: string): string => {
   if (!currentQuery) return '';
   return [

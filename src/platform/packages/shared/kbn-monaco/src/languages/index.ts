@@ -56,11 +56,7 @@ export {
   PromQLLang,
 };
 
-export {
-  ESQL_DARK_THEME_ID,
-  ESQL_LIGHT_THEME_ID,
-  ESQL_AUTOCOMPLETE_TRIGGER_CHARS,
-} from './esql';
+export { ESQL_DARK_THEME_ID, ESQL_LIGHT_THEME_ID, ESQL_AUTOCOMPLETE_TRIGGER_CHARS } from './esql';
 export type { ESQLDependencies, MonacoMessage } from './esql/language';
 export {
   CONSOLE_THEME_ID,

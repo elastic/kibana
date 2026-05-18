@@ -12,24 +12,25 @@ import { monaco } from '@kbn/code-editor';
 import { useCallback, useEffect, useRef } from 'react';
 import type { MutableRefObject } from 'react';
 import { i18n } from '@kbn/i18n';
-import { SUGGEST_FIX_ROUTE } from '@kbn/esql-types';
+import { SUGGEST_FIX_ROUTE, FIX_WITH_AI_COMMAND_ID } from '@kbn/esql-types';
 import type { HttpStart, NotificationsStart } from '@kbn/core/public';
 import { ReviewActionsWidget } from '../comment_to_esql/review_actions_widget';
 import {
   CODE_ADDED_CLASS,
   GENERATING_HINT_CLASS,
   LINE_REPLACED_CLASS,
-} from '../comment_to_esql/comment_to_esql.styles';
+} from '../editor_ai_constants';
 
-// Must match FIX_WITH_AI_COMMAND_ID in fix_with_ai_command.ts (kbn-monaco).
-// Defined here as a literal to avoid a cross-bundle import of a newly-added export.
-const FIX_WITH_AI_COMMAND_ID = 'esql.fixWithAI';
-
-// Module-level singletons: the command is registered once for the lifetime of
+// The command is registered once for the lifetime of
 // the app; the handler reads _runSuggestFixFn so we never need to re-register.
 const _runSuggestFixFn: {
   current:
-    | ((queryString: string, errorMessage: string, errorCode?: string | null, errorLineNumber?: number) => void)
+    | ((
+        queryString: string,
+        errorMessage: string,
+        errorCode?: string | null,
+        errorLineNumber?: number
+      ) => void)
     | undefined;
 } = { current: undefined };
 let _commandRegistered = false;
@@ -51,17 +52,22 @@ function ensureCommandRegistered() {
   );
 }
 
-// Returns the number of identical lines at the start and end of both arrays.
-// Lines are compared after trimming so that indentation differences introduced
-// by the LLM (e.g. dropping leading spaces from pipe-separated lines) don't
-// cause unchanged lines to appear in the diff.
+/**
+ * Returns the number of identical lines at the start and end of both arrays.
+ * Lines are compared after trimming so that indentation differences introduced
+ * by the LLM (e.g. dropping leading spaces from pipe-separated lines) don't
+ * cause unchanged lines to appear in the diff.
+ */
 function findChangedRegion(
   originalLines: string[],
   fixedLines: string[]
 ): { prefixLen: number; suffixLen: number } {
   const maxPrefix = Math.min(originalLines.length, fixedLines.length);
   let prefixLen = 0;
-  while (prefixLen < maxPrefix && originalLines[prefixLen].trim() === fixedLines[prefixLen].trim()) {
+  while (
+    prefixLen < maxPrefix &&
+    originalLines[prefixLen].trim() === fixedLines[prefixLen].trim()
+  ) {
     prefixLen++;
   }
 
@@ -202,7 +208,11 @@ export const useSuggestFix = ({
 
       const decorations: monaco.editor.IModelDeltaDecoration[] = [];
 
-      for (let line = state.firstChangedOriginalLine; line <= state.lastChangedOriginalLine; line++) {
+      for (
+        let line = state.firstChangedOriginalLine;
+        line <= state.lastChangedOriginalLine;
+        line++
+      ) {
         decorations.push({
           range: new monaco.Range(line, 1, line, 1),
           options: { isWholeLine: true, className: LINE_REPLACED_CLASS },

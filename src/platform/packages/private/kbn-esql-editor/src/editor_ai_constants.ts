@@ -7,4 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { FIX_WITH_AI_COMMAND_ID } from '@kbn/esql-types';
+export const CODE_ADDED_CLASS = 'esqlCodeAdded';
+export const LINE_REPLACED_CLASS = 'esqlLineReplaced';
+export const GENERATING_HINT_CLASS = 'esqlGeneratingHint';

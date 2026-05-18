@@ -41,7 +41,7 @@ export const registerSuggestFixRoute = (
         body: schema.object({
           queryString: schema.string({ maxLength: 50000 }),
           errorMessage: schema.string({ maxLength: 4000 }),
-          errorCode: schema.maybe(schema.nullable(schema.string({ maxLength: 200 }))),
+          errorCode: schema.maybe(schema.nullable(schema.string({ maxLength: 1000 }))),
         }),
       },
       security: {

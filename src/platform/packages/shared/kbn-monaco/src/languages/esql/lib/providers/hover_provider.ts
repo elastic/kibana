@@ -26,7 +26,8 @@ export function getHoverProvider(deps?: ESQLDependencies): monaco.languages.Hove
           const fullText = safeModel.getValue();
           const offset = monacoPositionToOffset(fullText, position);
           const hoveredWord = safeModel.getWordAtPosition(position);
-
+          // Monaco triggers the hover event on each char of the word,
+          // we only want to track the hover event if the word changed.
           if (
             hoveredWord &&
             hoveredWord.word !== lastHoveredWord &&
@@ -62,8 +63,15 @@ export function getHoverProvider(deps?: ESQLDependencies): monaco.languages.Hove
 
           const rawCode = errorAtPosition.code;
           const errorCode = typeof rawCode === 'string' ? rawCode : rawCode?.value;
-          const args = [fullText, errorAtPosition.message, errorCode, errorAtPosition.startLineNumber];
-          const commandUri = `command:${FIX_WITH_AI_COMMAND_ID}?${encodeURIComponent(JSON.stringify(args))}`;
+          const args = [
+            fullText,
+            errorAtPosition.message,
+            errorCode,
+            errorAtPosition.startLineNumber,
+          ];
+          const commandUri = `command:${FIX_WITH_AI_COMMAND_ID}?${encodeURIComponent(
+            JSON.stringify(args)
+          )}`;
           const fixLink: monaco.IMarkdownString = {
             value: `[${i18n.translate('kbnMonaco.esql.fixWithAI.hoverLink', {
               defaultMessage: '✨ Fix with AI',
