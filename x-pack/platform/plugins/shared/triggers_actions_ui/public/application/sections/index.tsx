@@ -41,9 +41,6 @@ export const RulesListNotifyBadgeWithApi = suspendedComponentWithProps(
 export const RuleSnoozeModal = suspendedComponentWithProps(
   lazy(() => import('./rules_list/components/rule_snooze_modal'))
 );
-export const RuleDefinition = suspendedComponentWithProps(
-  lazy(() => import('./rule_details/components/rule_definition'))
-);
 export const RuleTagBadge = suspendedComponentWithProps(
   lazy(() => import('./rules_list/components/rule_tag_badge'))
 );

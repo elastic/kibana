@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { formatDuration } from '@kbn/alerting-plugin/common';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared/src/common/hooks';
 import type { RuleDefinitionProps } from '../../../../types';
-import type { RuleType } from '../../../..';
+import type { RuleType, RuleTypeModel } from '../../../..';
 import { useKibana } from '../../../../common/lib/kibana';
 import {
   hasAllPrivilege,
@@ -34,7 +34,11 @@ import { useRuleDescriptionFields } from './use_rule_description_fields';
 
 const INITIAL_FILTERED_RULE_TYPES: string[] = [];
 
-export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = memo(
+interface Props extends Omit<RuleDefinitionProps, 'ruleTypeRegistry'> {
+  ruleTypeModel: RuleTypeModel | undefined;
+};
+
+export const RuleDefinition: React.FunctionComponent<Props> = memo(
   ({
     rule,
     actionTypeRegistry,

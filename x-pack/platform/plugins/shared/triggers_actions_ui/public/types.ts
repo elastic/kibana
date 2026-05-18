@@ -386,7 +386,7 @@ export interface RuleAddProps<
 
 export interface RuleDefinitionProps<Params extends RuleTypeParams = RuleTypeParams> {
   rule: Rule<Params>;
-  ruleTypeModel: RuleTypeModel | undefined;
+  ruleTypeRegistry: RuleTypeRegistryContract;
   actionTypeRegistry: ActionTypeRegistryContract;
   onEditRule: () => Promise<void>;
   hideEditButton?: boolean;

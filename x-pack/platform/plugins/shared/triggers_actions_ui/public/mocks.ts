@@ -37,7 +37,6 @@ import type { EditConnectorFlyoutProps } from './application/sections/action_con
 import { getActionFormLazy } from './common/get_action_form';
 import type { ActionAccordionFormProps } from './application/sections/action_connector_form/action_form';
 import { getAlertSummaryWidgetLazy } from './common/get_rule_alerts_summary';
-import { getRuleDefinitionLazy } from './common/get_rule_definition';
 import { getRuleStatusPanelLazy } from './common/get_rule_status_panel';
 import { getRuleSnoozeModalLazy } from './common/get_rule_snooze_modal';
 import { getRulesSettingsLinkLazy } from './common/get_rules_settings_link';
@@ -45,6 +44,7 @@ import type { AlertSummaryWidgetDependencies } from './application/sections/aler
 import { isRuleSnoozed } from './application/lib';
 import { getNextRuleSnoozeSchedule } from './application/sections/rules_list/components/notify_badge/helpers';
 import { getUntrackModalLazy } from './common/get_untrack_modal';
+import { LazyRuleDefinition } from './application/sections/rule_details/components/lazy_rule_definition';
 
 function createStartMock(): TriggersAndActionsUIPublicPluginStart {
   const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
@@ -114,7 +114,7 @@ function createStartMock(): TriggersAndActionsUIPublicPluginStart {
       return getAlertSummaryWidgetLazy({ ...props, dependencies });
     },
     getRuleDefinition: (props) => {
-      return getRuleDefinitionLazy({ ...props, actionTypeRegistry, ruleTypeRegistry });
+      return LazyRuleDefinition({ ...props, actionTypeRegistry, ruleTypeRegistry });
     },
     getRuleStatusPanel: (props) => {
       return getRuleStatusPanelLazy(props);

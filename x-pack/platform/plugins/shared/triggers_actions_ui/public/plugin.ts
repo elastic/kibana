@@ -77,7 +77,6 @@ import { ALERTS_PAGE_ID, CONNECTORS_PLUGIN_ID, PLUGIN_ID } from './common/consta
 import { getAlertsSearchBarLazy } from './common/get_alerts_search_bar';
 import { getGlobalRuleEventLogListLazy } from './common/get_global_rule_event_log_list';
 import { getAlertSummaryWidgetLazy } from './common/get_rule_alerts_summary';
-import { getRuleDefinitionLazy } from './common/get_rule_definition';
 import { getRuleSnoozeModalLazy } from './common/get_rule_snooze_modal';
 import { getRulesSettingsLinkLazy } from './common/get_rules_settings_link';
 import { AlertRuleFromVisAction } from './common/alert_rule_from_vis_ui_action';
@@ -106,6 +105,7 @@ import type { UntrackAlertsModalProps } from './application/sections/common/comp
 import { isRuleSnoozed } from './application/lib';
 import { getNextRuleSnoozeSchedule } from './application/sections/rules_list/components/notify_badge/helpers';
 import { getUntrackModalLazy } from './common/get_untrack_modal';
+import { LazyRuleDefinition } from './application/sections/rule_details/components/lazy_rule_definition';
 
 export interface TriggersAndActionsUIPublicPluginSetup {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
@@ -592,11 +592,11 @@ export class Plugin
       getRuleDefinition: (
         props: Omit<RuleDefinitionProps, 'actionTypeRegistry' | 'ruleTypeRegistry'>
       ) => {
-        return getRuleDefinitionLazy({
+        return LazyRuleDefinition({
           ...props,
           actionTypeRegistry: this.actionTypeRegistry,
           ruleTypeRegistry: this.ruleTypeRegistry,
-        });
+        })
       },
       getRuleStatusPanel: (props: RuleStatusPanelProps) => {
         return getRuleStatusPanelLazy(props);
