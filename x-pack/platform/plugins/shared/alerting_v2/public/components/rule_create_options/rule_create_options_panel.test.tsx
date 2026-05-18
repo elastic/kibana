@@ -11,11 +11,15 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { RuleCreateOptionsPanel } from './rule_create_options_panel';
 
 const onCreateEsqlRule = jest.fn();
+const onCreateThresholdAlert = jest.fn();
 
 const renderPanel = () =>
   render(
     <I18nProvider>
-      <RuleCreateOptionsPanel onCreateEsqlRule={onCreateEsqlRule} />
+      <RuleCreateOptionsPanel
+        onCreateEsqlRule={onCreateEsqlRule}
+        onCreateThresholdAlert={onCreateThresholdAlert}
+      />
     </I18nProvider>
   );
 

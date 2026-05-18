@@ -20,19 +20,15 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { CoreStart, useService } from '@kbn/core-di-browser';
-import { paths } from '../../constants';
-
 interface RuleCreateOptionsPanelProps {
   onCreateEsqlRule: () => void;
-  onCreateThresholdAlert?: () => void;
+  onCreateThresholdAlert: () => void;
 }
 
 export const RuleCreateOptionsPanel: React.FC<RuleCreateOptionsPanelProps> = ({
   onCreateEsqlRule,
   onCreateThresholdAlert,
 }) => {
-  const { basePath } = useService(CoreStart('http'));
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -159,9 +155,6 @@ export const RuleCreateOptionsPanel: React.FC<RuleCreateOptionsPanelProps> = ({
                 }
               )}
               onClick={onCreateThresholdAlert}
-              href={
-                onCreateThresholdAlert ? undefined : basePath.prepend(paths.thresholdRuleCreate)
-              }
               icon={<EuiIcon type="chartThreshold" color="text" size="l" aria-hidden={true} />}
               css={{
                 width: '50%',
