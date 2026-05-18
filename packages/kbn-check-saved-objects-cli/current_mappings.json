@@ -4450,9 +4450,11 @@
     "dynamic": false,
     "properties": {
       "budgetingMethod": {
+        "ignore_above": 256,
         "type": "keyword"
       },
       "compositeMethod": {
+        "ignore_above": 256,
         "type": "keyword"
       },
       "createdAt": {
@@ -4465,14 +4467,17 @@
         "type": "boolean"
       },
       "id": {
+        "ignore_above": 256,
         "type": "keyword"
       },
       "members": {
         "properties": {
           "instanceId": {
+            "ignore_above": 256,
             "type": "keyword"
           },
           "sloId": {
+            "ignore_above": 256,
             "type": "keyword"
           }
         }
@@ -4480,12 +4485,14 @@
       "name": {
         "fields": {
           "keyword": {
+            "ignore_above": 256,
             "type": "keyword"
           }
         },
         "type": "text"
       },
       "tags": {
+        "ignore_above": 256,
         "type": "keyword"
       },
       "updatedAt": {

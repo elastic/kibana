@@ -59,19 +59,19 @@ export const sloComposite: SavedObjectsType = {
   mappings: {
     dynamic: false,
     properties: {
-      id: { type: 'keyword' },
-      name: { type: 'text', fields: { keyword: { type: 'keyword' } } },
+      id: { type: 'keyword', ignore_above: 256 },
+      name: { type: 'text', fields: { keyword: { type: 'keyword', ignore_above: 256 } } },
       description: { type: 'text' },
       members: {
         properties: {
-          sloId: { type: 'keyword' },
-          instanceId: { type: 'keyword' },
+          sloId: { type: 'keyword', ignore_above: 256 },
+          instanceId: { type: 'keyword', ignore_above: 256 },
         },
       },
-      compositeMethod: { type: 'keyword' },
-      budgetingMethod: { type: 'keyword' },
+      compositeMethod: { type: 'keyword', ignore_above: 256 },
+      budgetingMethod: { type: 'keyword', ignore_above: 256 },
       enabled: { type: 'boolean' },
-      tags: { type: 'keyword' },
+      tags: { type: 'keyword', ignore_above: 256 },
       createdAt: { type: 'date' },
       updatedAt: { type: 'date' },
     },
