@@ -18,9 +18,9 @@ import type { ContentListItem } from '@kbn/content-list-provider';
  * Content editor configuration for `ContentListClientProvider`.
  *
  * This is the Kibana-specific content editor integration. The base
- * `ContentListProvider` only knows about a simple `onInspect` callback;
- * this config produces that callback by wiring it to the Kibana content
- * editor flyout.
+ * `ContentListProvider` only knows about an `actions.inspect.onItemAction`
+ * callback; this config produces that callback by wiring it to the
+ * Kibana content editor flyout.
  */
 export interface ContentEditorConfig {
   /**

@@ -107,10 +107,14 @@ const useFilesProviderProps = (onInspect?: (item: ContentListItem) => void) => {
 
   const item = useMemo(
     () => ({
-      onDelete: async () => {
-        await wait(250);
+      actions: {
+        delete: {
+          onBulkAction: async () => {
+            await wait(250);
+          },
+        },
+        ...(onInspect ? { inspect: { onItemAction: onInspect } } : {}),
       },
-      ...(onInspect ? { onInspect } : {}),
     }),
     [onInspect]
   );

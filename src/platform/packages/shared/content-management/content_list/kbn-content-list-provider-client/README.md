@@ -121,7 +121,7 @@ Each subfolder is named after the `ContentListClientProvider` field it serves:
 | `createContentInsightsService(opts)` + `<SavedObjectActivityRow>` | `services/content_insights/` | `contentEditor.appendRows`            |
 | `createDuplicateTitleValidator(opts)` | `services/duplicate_title/` | `contentEditor.customValidators.title`|
 | `useRecentlyAccessedDecoration(src)`  | `services/recently_accessed/` | `findItems` decoration + `features.flags` + a closure-bound `RecentsFilter` |
-| `withPerformanceMetrics(fn, opts)`    | `services/performance_metrics/` | wraps `findItems` / `onDelete` |
+| `withPerformanceMetrics(fn, opts)`    | `services/performance_metrics/` | wraps `findItems` / `actions.delete.onBulkAction` |
 
 Each helper is tested in isolation and is independently optional. Use one, several, or none — `ContentListClientProvider` accepts the raw types either way.
 

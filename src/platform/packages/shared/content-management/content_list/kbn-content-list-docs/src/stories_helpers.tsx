@@ -108,13 +108,14 @@ const InspectFlyout = ({ item, onClose }: { item: ContentListItem; onClose: () =
 /**
  * Hook that manages the open/close state for a mock inspect flyout.
  *
- * Returns an `onInspect` callback suitable for `ContentListItemConfig.onInspect`
- * and a `flyout` element to render in the component tree.
+ * Returns an `onInspect` callback suitable for
+ * `ContentListItemConfig.actions.inspect.onItemAction` and a `flyout`
+ * element to render in the component tree.
  *
  * @example
  * ```tsx
  * const { onInspect, flyout } = useInspectFlyout();
- * // pass onInspect to item config, render {flyout} in JSX
+ * // pass onInspect via `actions.inspect.onItemAction`, render `{flyout}` in JSX
  * ```
  */
 export const useInspectFlyout = (): {
