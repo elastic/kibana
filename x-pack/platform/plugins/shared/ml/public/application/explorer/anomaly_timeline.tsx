@@ -270,7 +270,6 @@ export const AnomalyTimeline: FC = () => {
 
       panels.push({
         id: 'addToDashboardPanel',
-        size: 's',
         title: i18n.translate('xpack.ml.explorer.addToDashboardLabel', {
           defaultMessage: 'Add to dashboard',
         }),
