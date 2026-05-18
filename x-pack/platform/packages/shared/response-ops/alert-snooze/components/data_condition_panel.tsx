@@ -142,6 +142,8 @@ export const DataConditionPanel = ({
           <EuiFlexGroup gutterSize="s" responsive={false}>
             <EuiFlexItem>
               <EuiSelect
+                compressed
+                fullWidth
                 options={typeOptions}
                 value={entry.type}
                 onChange={(e) => onChange({ ...entry, type: e.target.value })}
@@ -149,9 +151,10 @@ export const DataConditionPanel = ({
                 data-test-subj={`dataConditionType-${entry.id}`}
               />
             </EuiFlexItem>
-            {activeDescriptor.renderInput(entry, onChange) && (
-              <EuiFlexItem>{activeDescriptor.renderInput(entry, onChange)}</EuiFlexItem>
-            )}
+            {(() => {
+              const input = activeDescriptor.renderInput(entry, onChange);
+              return input ? <EuiFlexItem>{input}</EuiFlexItem> : null;
+            })()}
           </EuiFlexGroup>
         </>
       )}

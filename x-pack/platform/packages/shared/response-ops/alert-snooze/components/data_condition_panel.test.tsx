@@ -8,7 +8,13 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { ALERT_SEVERITY_VALUES } from '@kbn/rule-data-utils';
+import {
+  ALERT_SEVERITY_CRITICAL,
+  ALERT_SEVERITY_HIGH,
+  ALERT_SEVERITY_MEDIUM,
+  ALERT_SEVERITY_LOW,
+  ALERT_SEVERITY_INFO,
+} from '@kbn/rule-data-utils';
 import { EuiFieldText } from '@elastic/eui';
 import { DataConditionPanel } from './data_condition_panel';
 import type { DataConditionEntry, DataConditionTypeDescriptor } from './types';
@@ -309,7 +315,7 @@ describe('DataConditionPanel', () => {
   });
 
   describe('severity_equals dropdown', () => {
-    it('lists every canonical severity value in the same order as ALERT_SEVERITY_VALUES', () => {
+    it('lists only the five primary severity levels in highest → lowest order', () => {
       render(
         <DataConditionPanel
           entry={createEntry({ type: DataConditionType.SEVERITY_EQUALS, value: undefined })}
@@ -324,7 +330,13 @@ describe('DataConditionPanel', () => {
         .map((o) => o.value)
         .filter(Boolean);
 
-      expect(offered).toEqual([...ALERT_SEVERITY_VALUES]);
+      expect(offered).toEqual([
+        ALERT_SEVERITY_CRITICAL,
+        ALERT_SEVERITY_HIGH,
+        ALERT_SEVERITY_MEDIUM,
+        ALERT_SEVERITY_LOW,
+        ALERT_SEVERITY_INFO,
+      ]);
     });
   });
 });

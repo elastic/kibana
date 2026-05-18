@@ -66,6 +66,7 @@ export const SnoozeDurationPicker = ({
                 isInvalid={isDurationInvalid}
                 aria-label={i18n.CUSTOM_VALUE_ARIA_LABEL}
                 data-test-subj="durationValue"
+                compressed
               />
             </EuiFlexItem>
             <EuiFlexItem>
@@ -75,6 +76,7 @@ export const SnoozeDurationPicker = ({
                 options={SNOOZE_UNIT_OPTIONS}
                 aria-label={i18n.CUSTOM_UNIT_ARIA_LABEL}
                 data-test-subj="durationUnit"
+                compressed
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -98,6 +100,7 @@ export const SnoozeDurationPicker = ({
                 data-test-subj="dateTimePicker"
                 placeholder={i18n.SELECT_DATE_AND_TIME}
                 fullWidth
+                compressed
               />
             </EuiFlexItem>
             {dateTime !== null && (
