@@ -17,6 +17,7 @@
     "@kbn/shared-ux-utility",
     "@kbn/react-kibana-mount",
     "@kbn/core-hotkeys-browser",
+    "@kbn/core-hotkeys-browser-mocks",
   ],
   "exclude": [
     "target/**/*",

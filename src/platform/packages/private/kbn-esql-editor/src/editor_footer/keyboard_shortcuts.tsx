@@ -24,7 +24,6 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { HotkeysSidebarState, HotkeysSidebarActions } from '@kbn/core-hotkeys-browser';
 import { esqlKeyboardShortcuts } from './esql_keyboard_shortcuts';
 import type { ESQLEditorDeps } from '../types';
 
@@ -39,10 +38,8 @@ const renderShortcutKeys = (keys: readonly string[]) =>
 export function KeyboardShortcuts() {
   const euiThemeContext = useEuiTheme();
   const kibana = useKibana<ESQLEditorDeps>();
-  const { chrome } = kibana.services;
+  const { hotkeys } = kibana.services;
   const { euiTheme } = euiThemeContext;
-
-  const hotkeysApp = chrome.sidebar.getApp<HotkeysSidebarState, HotkeysSidebarActions>('hotkeys');
 
   const [isOpen, setIsOpen] = useState(false);
 
@@ -79,7 +76,7 @@ export function KeyboardShortcuts() {
               size="xs"
               iconType="keyboard"
               data-test-subj="editorKeyboardShortcutsButton"
-              onClick={() => hotkeysApp.actions.openToFeature('esql:editor')}
+              onClick={() => hotkeys?.cheatSheet?.actions?.openToFeature('esql:editor')}
               aria-label={label}
               color="text"
             />

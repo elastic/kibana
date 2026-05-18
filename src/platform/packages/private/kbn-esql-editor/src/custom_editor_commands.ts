@@ -336,6 +336,7 @@ export const addEditorKeyBindings = (
     featureId: 'esql:editor',
     group: shortcutsGroup,
     scope: 'context' as const,
+    allowUserRebinding: true as const,
   });
 
   // Actions, not commands: `addCommand` keybindings are page-wide and fire while another editor on
