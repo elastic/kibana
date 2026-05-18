@@ -325,10 +325,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
                   isFullWidth
                   buttonSize="m"
                   color="primary"
-                  legend={i18n.translate(
-                    'xpack.triggersActionsUI.sections.createConnectorFlyout.subtypeGroupLegend',
-                    { defaultMessage: 'Connector subtype' }
-                  )}
+                  legend=""
                   options={groupActionButtons}
                   idSelected={actionType.id}
                   onChange={onChangeGroupAction}
@@ -344,7 +341,6 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
                 justifyContent="center"
                 alignItems="center"
                 style={{ minHeight: 200 }}
-                aria-live="polite"
               >
                 <EuiFlexItem grow={false}>
                   <EuiLoadingSpinner size="xl" />
