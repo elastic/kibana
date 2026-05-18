@@ -36,19 +36,12 @@ export function narrowSecretsSchemaForAuthMode(
   // Zod v4: discriminator key lives on `def`, not a stable public accessor. We rely on the same
   // shape as `fromConnectorSpecSchema` / `ZodDiscriminatedUnion`; if Zod internals change, update here.
   const discriminator = secrets.def.discriminator;
-  const filteredOptions: Array<ZodObject<ZodRawShape>> = [];
-  for (const option of secrets.options) {
-    if (!(option instanceof ZodObject)) {
-      continue;
-    }
-    const discField = option.shape[discriminator];
-    if (!(discField instanceof z.ZodLiteral) || typeof discField.value !== 'string') {
-      continue;
-    }
-    if (getAuthModeForAuthTypeId(discField.value) === authMode) {
-      filteredOptions.push(option);
-    }
-  }
+  const filteredOptions = secrets.options.filter((option): option is ZodObject<ZodRawShape> => {
+    if (!(option instanceof ZodObject)) return false;
+    const discField = (option as ZodObject<ZodRawShape>).shape[discriminator];
+    if (!(discField instanceof z.ZodLiteral) || typeof discField.value !== 'string') return false;
+    return getAuthModeForAuthTypeId(discField.value) === authMode;
+  });
 
   if (filteredOptions.length === 0 || filteredOptions.length === secrets.options.length) {
     return schema;
