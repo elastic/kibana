@@ -137,9 +137,11 @@ This startup only installs:
 
 After `ready()`: the two instances that were not re-installed (`system-monitor-host-a:prod` and `system-monitor-host-a:staging`) are removed.
 
-### Dynamic workflows are excluded
+### Dynamic workflows are excluded from cleanup
 
-Reconciliation only targets documents whose definition has `lifecycle: 'static'`. Dynamic workflows are never auto-cleaned — their lifecycle is explicitly managed by the owning plugin via `install`/`uninstall`.
+Orphan reconciliation only targets documents whose definition has `lifecycle: 'static'`. Dynamic workflows are never auto-cleaned — their create/remove lifecycle is explicitly managed by the owning plugin via `install`/`uninstall`.
+
+Dynamic workflows with `versionStrategy: 'auto'` are still eligible for startup upgrades: when the owning plugin calls `ready()`, persisted dynamic instances for that plugin are re-applied from the current registry definition while preserving their stored template values.
 
 ## 4) Space-scoped vs global installs
 
@@ -259,8 +261,8 @@ management: {
 | Field | Value | Behavior |
 |---|---|---|
 | `lifecycle` | `static` | Baseline workflow that must be installed every startup before `ready()`. Any persisted static instance not re-installed during the startup window is removed by reconciliation. |
-| `lifecycle` | `dynamic` | Instance-like workflow created on-demand from runtime context (per entity / tenant / etc.). Not auto-removed by per-plugin reconciliation — lifecycle is explicitly managed by the owning plugin via `install`/`uninstall`. |
-| `versionStrategy` | `auto` | Startup reconciliation may re-apply updates when the definition version changes. |
+| `lifecycle` | `dynamic` | Instance-like workflow created on-demand from runtime context (per entity / tenant / etc.). Not auto-removed by per-plugin reconciliation, but startup upgrades are applied when paired with `versionStrategy: 'auto'`. |
+| `versionStrategy` | `auto` | Startup reconciliation may re-apply updates when the installed managed workflow differs from the current definition. |
 | `versionStrategy` | `on_adopt` | Startup never auto-upgrades. Updates only happen on explicit `install`. |
 | `enablement` | `enforced` | Managed updates always re-apply enabled state from the definition. |
 | `enablement` | `restorable` | User-driven enabled/disabled state is preserved across managed updates. |
