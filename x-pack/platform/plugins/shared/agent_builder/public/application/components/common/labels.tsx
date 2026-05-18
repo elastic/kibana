@@ -80,8 +80,8 @@ const ViewMorePopover: React.FC<{
           aria-label={viewMoreAriaLabel}
           aria-expanded={isOpen}
           data-test-subj="agentBuilderLabelsViewMoreButton"
-          {...(viewMoreEbtElement != null ? { 'data-ebt-element': viewMoreEbtElement } : {})}
-          {...(viewMoreEbtAction != null ? { 'data-ebt-action': viewMoreEbtAction } : {})}
+          data-ebt-element={viewMoreEbtElement}
+          data-ebt-action={viewMoreEbtAction}
         >
           <FormattedMessage
             id="xpack.agentBuilder.labels.viewMore.buttonLabel"

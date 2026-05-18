@@ -79,6 +79,7 @@ export const AGENT_BUILDER_UI_EBT = {
       SIDEBAR_LAYER_TRANSITION: 'sidebar_layer_transition',
       SIDEBAR_NAVIGATION_CLICK: 'sidebar_navigation_click',
       MANAGE_ALL_AGENTS_CLICK: 'manage_all_agents_click',
+      AGENT_SELECTOR_OPEN: 'agent_selector_open',
     },
     conversation: {
       CONVERSATION_START: 'conversation_start',
@@ -132,6 +133,7 @@ export const AGENT_BUILDER_UI_EBT = {
       EMBEDDABLE_CONVERSATIONS_OPEN: 'conversation_embeddable_conversations_open',
       STALE_ATTACHMENT_DISMISS: 'conversation_stale_attachment_dismiss',
       STALE_ATTACHMENT_RETRY: 'conversation_stale_attachment_retry',
+      ATTACHMENT_HEADER_CLOSE: 'conversation_attachment_header_close',
       ATTACHMENT_HEADER_PRIMARY_CLICK: 'conversation_attachment_header_primary_click',
       ATTACHMENT_HEADER_SECONDARY_CLICK: 'conversation_attachment_header_secondary_click',
       ATTACHMENT_HEADER_OVERFLOW_OPEN: 'conversation_attachment_header_overflow_open',

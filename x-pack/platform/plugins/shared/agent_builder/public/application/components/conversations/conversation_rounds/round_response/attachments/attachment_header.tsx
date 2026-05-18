@@ -18,6 +18,7 @@ import {
 import { css } from '@emotion/react';
 import type { ActionButton } from '@kbn/agent-builder-browser/attachments';
 import { i18n } from '@kbn/i18n';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import { AttachmentActions } from './attachment_actions';
 
 const PREVIEW_ONLY_LABEL = i18n.translate('xpack.agentBuilder.attachmentHeader.previewOnly', {
@@ -124,6 +125,8 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
               onClick={onClose}
               size="s"
               color="text"
+              data-ebt-element={AGENT_BUILDER_UI_EBT.element.CONVERSATION_ROUND_RESPONSE}
+              data-ebt-action={AGENT_BUILDER_UI_EBT.action.conversation.ATTACHMENT_HEADER_CLOSE}
             />
           </EuiFlexItem>
         )}

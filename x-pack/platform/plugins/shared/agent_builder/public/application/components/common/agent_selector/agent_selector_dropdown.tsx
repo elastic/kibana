@@ -175,6 +175,8 @@ export const AgentSelectorDropdown: React.FC<AgentSelectorDropdownProps> = ({
       color="text"
       onClick={() => setIsPopoverOpen((v) => !v)}
       data-test-subj="agentBuilderAgentSelectorButton"
+      data-ebt-element={AGENT_BUILDER_UI_EBT.element.SIDEBAR}
+      data-ebt-action={AGENT_BUILDER_UI_EBT.action.navSidebar.AGENT_SELECTOR_OPEN}
     >
       <EuiText size="m">
         <strong>

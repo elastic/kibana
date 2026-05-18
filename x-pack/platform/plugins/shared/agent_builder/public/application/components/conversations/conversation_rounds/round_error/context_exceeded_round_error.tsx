@@ -9,6 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiText, EuiLink } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import { useAgentBuilderServices } from '../../../../hooks/use_agent_builder_service';
 
 const labels = {
@@ -38,6 +39,8 @@ export const ContextExceededRoundError: React.FC = () => {
                     href={docLinksService.limitationsKnownIssuesConversationLengthExceeded}
                     external
                     target="_blank"
+                    data-ebt-element={AGENT_BUILDER_UI_EBT.element.CONVERSATION_ROUNDS}
+                    data-ebt-action={AGENT_BUILDER_UI_EBT.action.access.OPEN_EXTERNAL_DOCS}
                   >
                     {labels.learnMore}
                   </EuiLink>

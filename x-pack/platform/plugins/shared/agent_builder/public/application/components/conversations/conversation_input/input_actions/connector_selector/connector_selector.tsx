@@ -149,6 +149,8 @@ const ConnectorListFooter: React.FC = () => {
             aria-label={manageConnectorsAriaLabel}
             href={manageConnectorsUrl}
             disabled={!hasWritePrivilege}
+            data-ebt-element={AGENT_BUILDER_UI_EBT.element.CONVERSATION_INPUT}
+            data-ebt-action={AGENT_BUILDER_UI_EBT.action.uiChrome.CROSS_NAVIGATE}
           >
             <FormattedMessage
               id="xpack.agentBuilder.conversationInput.agentSelector.manageAgents"
