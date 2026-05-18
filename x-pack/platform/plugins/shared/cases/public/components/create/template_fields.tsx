@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useContext, useEffect, useMemo } from 'react';
 import { EuiCallOut, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormProvider, useForm } from 'react-hook-form';
 import {
@@ -17,6 +17,7 @@ import { useTemplateFormSync } from './use_template_form_sync';
 import * as i18n from './translations';
 import { FieldsRenderer } from '../templates_v2/field_types/field_renderer';
 import { useResolvedFields } from '../field_library/hooks/use_resolved_fields';
+import { TemplateFieldsValidationContext } from './template_fields_validation_context';
 
 type FormShape = Record<string, Record<string, unknown>>;
 
@@ -39,6 +40,17 @@ export const CreateCaseTemplateFields: React.FC = () => {
     });
     return () => subscription.unsubscribe();
   }, [innerForm, parentForm]);
+
+  // Register the inner form's trigger with the validation context so the submit
+  // button can run RHF Controller validation (pattern, required_when, etc.) before
+  // the parent form-lib submits.
+  const triggerRef = useContext(TemplateFieldsValidationContext);
+  useEffect(() => {
+    triggerRef.current = () => innerForm.trigger();
+    return () => {
+      triggerRef.current = null;
+    };
+  }, [innerForm, triggerRef]);
 
   const { resolvedFields, isLoading: isLoadingFields } = useResolvedFields(
     template?.definition?.fields ?? [],
