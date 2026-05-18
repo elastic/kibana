@@ -81,6 +81,7 @@ export {
   type BuildChangePointLineDataQueryOptions,
   isComputedColumn,
   getQuerySummary,
+  buildRenameSourceFieldMap,
   getEsqlControls,
   getAllEsqlControls,
   convertFiltersToESQLExpression,

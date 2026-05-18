@@ -30,13 +30,14 @@ export const changePointCommand: ICommand = {
     description: i18n.translate('kbn-esql-language.esql.definitions.changePointDoc', {
       defaultMessage: 'Detect change point in the query results',
     }),
-    declaration: `CHANGE_POINT <value> ON <field_name> [BY <group_field>[, ...]] [AS <type>, <pvalue>]`,
+    declaration: `CHANGE_POINT <value> ON <field_name> AS <type>, <pvalue> BY <grouping>`,
     examples: [
       '… | CHANGE_POINT value',
       '… | CHANGE_POINT value ON timestamp',
       '… | CHANGE_POINT value ON timestamp BY category',
       '… | CHANGE_POINT value ON timestamp BY host, response.keyword',
       '… | CHANGE_POINT value ON timestamp AS type, pvalue',
+      '… | CHANGE_POINT value ON timestamp AS type, pvalue BY host',
     ],
   },
 };
