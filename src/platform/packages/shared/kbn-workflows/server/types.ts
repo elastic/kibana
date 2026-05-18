@@ -37,6 +37,32 @@ export type ExecuteManagedWorkflowOptions<TId extends ManagedWorkflowId = Manage
   metadata?: Record<string, unknown>;
 };
 
+export type ManagedWorkflowStatus =
+  | 'intact'
+  | 'missing'
+  | 'disabled'
+  | 'invalid'
+  | 'drifted'
+  | 'not_managed';
+
+export interface ManagedWorkflowStatusReport {
+  status: ManagedWorkflowStatus;
+  workflowId: string;
+  definitionId: ManagedWorkflowId;
+  spaceId: string;
+  installed: boolean;
+  enabled: boolean | null;
+  valid: boolean | null;
+  managedBy: string | null;
+  storedVersion: number | null;
+  registryVersion: number;
+  storedHash: string | null;
+  registryHash: string;
+}
+
+export type GetManagedWorkflowStatusOptions<TId extends ManagedWorkflowId = ManagedWorkflowId> =
+  Omit<ManagedWorkflowOperationOptions<TId>, 'values'>;
+
 /**
  * Requestless lifecycle API returned by the managed workflows system provider.
  */
@@ -57,6 +83,17 @@ export interface RegisteredManagedWorkflowsLifecycleApi {
    * Static workflow installs after ready() will log a warning.
    */
   ready: () => Promise<void>;
+  /**
+   * Read-only pre-flight status for an installed managed workflow instance.
+   *
+   * Validates that the calling plugin owns the registered definition before
+   * reading storage. If several problems apply, the returned status follows
+   * this priority: missing, not_managed, invalid, disabled, drifted, intact.
+   */
+  getWorkflowStatus: <TId extends ManagedWorkflowId>(
+    id: TId,
+    options: GetManagedWorkflowStatusOptions<TId>
+  ) => Promise<ManagedWorkflowStatusReport>;
 }
 
 /**
@@ -83,6 +120,11 @@ export interface ManagedWorkflowsApi {
     id: TId,
     options: ManagedWorkflowOperationOptions<TId>
   ) => Promise<void>;
+  getWorkflowStatus: <TId extends ManagedWorkflowId>(
+    pluginId: string,
+    id: TId,
+    options: GetManagedWorkflowStatusOptions<TId>
+  ) => Promise<ManagedWorkflowStatusReport>;
   execute: <TId extends ManagedWorkflowId>(
     pluginId: string,
     id: TId,

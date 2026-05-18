@@ -191,6 +191,12 @@ export class WorkflowsExtensionsServerPlugin
           );
           throw new Error('Workflows client provider is not available');
         },
+        getWorkflowStatus: async () => {
+          this.logger.warn(
+            'No workflows client provider set, using noop managedWorkflows.getWorkflowStatus to avoid errors.'
+          );
+          throw new Error('Workflows client provider is not available');
+        },
       },
     };
   }
@@ -212,6 +218,12 @@ export class WorkflowsExtensionsServerPlugin
           'No managed workflows system API provider set, using noop ready to avoid errors.'
         );
       },
+      getWorkflowStatus: async () => {
+        this.logger.warn(
+          'No managed workflows system API provider set, using noop getWorkflowStatus to avoid errors.'
+        );
+        throw new Error('Managed workflows system API provider is not available');
+      },
     };
   }
 
@@ -223,6 +235,7 @@ export class WorkflowsExtensionsServerPlugin
       install: lifecycleClient.install,
       uninstall: lifecycleClient.uninstall,
       ready: lifecycleClient.ready,
+      getWorkflowStatus: lifecycleClient.getWorkflowStatus,
       execute: async (request, id, options) => {
         const requestClient = this.workflowsClientProvider
           ? await this.workflowsClientProvider(request)
