@@ -273,7 +273,6 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
 
   // ── YAML mode state ──────────────────────────────────────────────────────
   const [yamlText, setYamlText] = useState('');
-  const preYamlFormSnapshotRef = useRef<ComposeFormValues | null>(null);
   const debouncedParseRef = useRef<ReturnType<typeof setTimeout>>();
 
   // Wraps setYamlText with a debounced (~300 ms) lenient parse that pushes
@@ -297,7 +296,6 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
   const handleToggleYamlMode = useCallback(
     (enabled: boolean) => {
       if (enabled) {
-        preYamlFormSnapshotRef.current = methods.getValues();
         setYamlText(serializeFormToYaml(composeFormValuesForYamlSerialize(methods.getValues())));
       } else {
         clearTimeout(debouncedParseRef.current);
@@ -308,22 +306,11 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
           resetFromRhf();
           dispatch({ type: 'COMMIT_QUERY' });
         }
-        preYamlFormSnapshotRef.current = null;
       }
       dispatch({ type: 'SET_YAML_MODE', enabled });
     },
     [methods, yamlText, resetFromRhf, dispatch]
   );
-
-  const handleCancelYaml = useCallback(() => {
-    clearTimeout(debouncedParseRef.current);
-    if (preYamlFormSnapshotRef.current) {
-      methods.reset(preYamlFormSnapshotRef.current);
-      resetFromRhf();
-      preYamlFormSnapshotRef.current = null;
-    }
-    dispatch({ type: 'SET_YAML_MODE', enabled: false });
-  }, [methods, resetFromRhf, dispatch]);
 
   const handleSandboxApply = useCallback(() => {
     const updatedQuery = draftToRuleQuery(draft, uiState.tracking);
@@ -449,17 +436,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
 
           <EuiFlyoutFooter>
             {uiState.yamlMode ? (
-              <EuiFlexGroup justifyContent="spaceBetween">
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    onClick={handleCancelYaml}
-                    data-test-subj="composeDiscoverYamlCancel"
-                  >
-                    {i18n.translate('xpack.alertingV2.composeDiscover.yamlMode.cancelButton', {
-                      defaultMessage: 'Cancel YAML',
-                    })}
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
+              <EuiFlexGroup justifyContent="flexEnd">
                 <EuiFlexItem grow={false}>
                   <EuiButton
                     fill
