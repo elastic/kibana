@@ -16,7 +16,7 @@ import type { AlertingRequestHandlerContext } from '../types';
 import { createRuleRoute } from './rule/apis/create';
 import { getRuleRoute, getInternalRuleRoute } from './rule/apis/get/get_rule_route';
 import { updateRuleRoute } from './rule/apis/update/update_rule_route';
-import { deleteRuleRoute } from './rule/apis/delete/delete_rule_route';
+import { deleteRuleRoute, deleteInternalRuleRoute } from './rule/apis/delete/delete_rule_route';
 import { aggregateRulesRoute } from './rule/apis/aggregate/aggregate_rules_route';
 import { disableRuleRoute } from './rule/apis/disable/disable_rule_route';
 import { enableRuleRoute } from './rule/apis/enable/enable_rule_route';
@@ -127,6 +127,7 @@ export function defineRoutes(opts: RouteOptions) {
   resolveRuleRoute(router, licenseState);
   updateRuleRoute(router, licenseState);
   deleteRuleRoute(router, licenseState);
+  deleteInternalRuleRoute(router, licenseState);
   aggregateRulesRoute(router, licenseState);
   disableRuleRoute(router, licenseState);
   enableRuleRoute(router, licenseState);

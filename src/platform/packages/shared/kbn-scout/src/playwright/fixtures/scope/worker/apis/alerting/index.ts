@@ -248,7 +248,7 @@ export const getAlertingApiHelper = (
           async () => {
             await kbnClient.request({
               method: 'DELETE',
-              path: `${buildSpacePath(spaceId)}/api/alerting/rule/${ruleId}`,
+              path: `${buildSpacePath(spaceId)}/internal/alerting/rule/${ruleId}`,
               query: { invalidate_api_key_now: true },
               retries: 0,
               ignoreErrors: [204, 404],
@@ -721,7 +721,7 @@ export const getAlertingApiHelper = (
               rulesData.data.map(async (rule: any) => {
                 await kbnClient.request({
                   method: 'DELETE',
-                  path: `${buildSpacePath(spaceId)}/api/alerting/rule/${rule.id}`,
+                  path: `${buildSpacePath(spaceId)}/internal/alerting/rule/${rule.id}`,
                   query: { invalidate_api_key_now: true },
                   retries: 3,
                   ignoreErrors: [404],
@@ -776,7 +776,7 @@ export const getAlertingApiHelper = (
               rulesData.data.map(async (rule: any) => {
                 await kbnClient.request({
                   method: 'DELETE',
-                  path: `${buildSpacePath(spaceId)}/api/alerting/rule/${rule.id}`,
+                  path: `${buildSpacePath(spaceId)}/internal/alerting/rule/${rule.id}`,
                   query: { invalidate_api_key_now: true },
                   retries: 3,
                   ignoreErrors: [404],
