@@ -28,6 +28,8 @@ export class ServiceMapPage {
   public serviceMapDependencyDetailsButton: Locator;
   public serviceMapEdgeExploreTracesButton: Locator;
   public serviceMapOptionsPanel: Locator;
+  public serviceMapHideControlsButton: Locator;
+  public serviceMapShowControlsButton: Locator;
   public serviceMapFindInPageInput: Locator;
   /**
    * Native search `<input>` (`SERVICE_MAP_FIND_INPUT_ID`). Prefer this for fill/focus so React
@@ -61,6 +63,8 @@ export class ServiceMapPage {
       'apmEdgeContentsOpenInDiscoverButton'
     );
     this.serviceMapOptionsPanel = page.testSubj.locator('serviceMapOptionsPanel');
+    this.serviceMapHideControlsButton = page.testSubj.locator('serviceMapHideControlsButton');
+    this.serviceMapShowControlsButton = page.testSubj.locator('serviceMapShowControlsButton');
     this.serviceMapFindInPageInput = page.testSubj.locator('serviceMapControlsSearch');
     this.serviceMapFindInPageNativeInput = page.locator('#serviceMapFindInPageInput');
     this.serviceMapFindMatchSummary = page.testSubj.locator('serviceMapFindMatchSummary');
@@ -344,6 +348,17 @@ export class ServiceMapPage {
   async dismissPopoverIfOpen() {
     await this.page.keyboard.press('Escape');
     await this.waitForPopoverToBeHidden({ timeout: 2000 }).catch(() => {});
+  }
+
+  /**
+   * Collapse the options panel if it is currently open. Use in tests that don't exercise the
+   * panel itself so the expanded menu can't overlap nodes/edges/badges after fit view.
+   */
+  async closeOptionsPanelIfOpen() {
+    if (await this.serviceMapHideControlsButton.isVisible().catch(() => false)) {
+      await this.serviceMapHideControlsButton.click();
+      await this.serviceMapOptionsPanel.waitFor({ state: 'hidden', timeout: 2000 }).catch(() => {});
+    }
   }
 
   async getPopoverTitle() {

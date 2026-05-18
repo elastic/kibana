@@ -19,6 +19,9 @@ test.describe(
       await serviceMapPage.gotoWithDateSelected(testData.START_DATE, testData.END_DATE);
       await serviceMapPage.waitForMapToLoad();
       await serviceMapPage.dismissPopoverIfOpen();
+      // Close the options menu by default so its expanded panel can't overlap nodes/badges;
+      // tests that need the panel (find-in-page) open it explicitly via the Ctrl+K shortcut.
+      await serviceMapPage.closeOptionsPanelIfOpen();
     });
 
     test('axe-core automated accessibility checks pass', async ({ page }) => {
