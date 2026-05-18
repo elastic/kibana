@@ -8,7 +8,7 @@
  */
 
 import type { ISuggestionItem } from '../../../../registry/types';
-import type { FunctionParameterType } from '../../../types';
+import type { FunctionParameterType, FunctionDefinitionTypes } from '../../../types';
 import { getFieldsSuggestions, getFunctionsSuggestions, getLiteralsSuggestions } from '../helpers';
 import { getOperatorSuggestions } from '../../operators';
 import type { ExpressionContext } from './types';
@@ -63,6 +63,7 @@ export class SuggestionBuilder {
     addSpaceAfterFunction?: boolean;
     constantGeneratingOnly?: boolean;
     excludeParentFunctions?: boolean;
+    functionTypes?: FunctionDefinitionTypes[];
   }): this {
     const types = options?.types ?? ['any'];
     const excludeParentFunctions = options?.excludeParentFunctions ?? false;
@@ -79,6 +80,7 @@ export class SuggestionBuilder {
         suggestOnlyName: this.context.options.isCursorFollowedByParens,
         addSpaceAfterFunction,
         constantGeneratingOnly,
+        functionTypes: options?.functionTypes,
       },
       context: this.context.context,
       callbacks: {

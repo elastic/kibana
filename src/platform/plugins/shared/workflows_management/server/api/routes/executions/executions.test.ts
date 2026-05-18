@@ -323,6 +323,7 @@ describe('Execution Routes', () => {
           page: 2,
           size: 5,
           omitStepRuns: true,
+          concurrencyGroupKey: 'streams-ki-onboarding-my-stream',
         },
       };
 
@@ -334,6 +335,7 @@ describe('Execution Routes', () => {
           statuses: ['running'],
           executionTypes: undefined,
           executedBy: undefined,
+          concurrencyGroupKey: 'streams-ki-onboarding-my-stream',
           page: 2,
           size: 5,
           omitStepRuns: true,
@@ -539,7 +541,9 @@ describe('Execution Routes', () => {
     });
 
     it('should call api.resumeWorkflowExecution with execution id, space, input, and request', async () => {
-      mockApi.resumeWorkflowExecution.mockResolvedValue(undefined);
+      mockApi.resumeWorkflowExecution.mockResolvedValue({
+        resumedBy: 'user',
+      });
       const h = handler('POST', path)!;
       const request = {
         params: { executionId: 'ex-1' },

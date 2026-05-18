@@ -272,7 +272,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                 defaultMessage: 'Privilege mode',
               }),
               description:
-                agent.local_metadata.elastic.agent.unprivileged === true ? (
+                agent?.local_metadata.elastic?.agent.unprivileged === true ? (
                   <FormattedMessage
                     id="xpack.fleet.agentDetails.privilegeModeUnprivilegedText"
                     defaultMessage="Running as non-root"
@@ -359,7 +359,7 @@ export const AgentDetailsOverviewSection: React.FunctionComponent<{
                 defaultMessage: 'FIPS mode',
               }),
               description:
-                agent.local_metadata.elastic.agent.fips === true ? (
+                agent.local_metadata.elastic?.agent.fips === true ? (
                   <FormattedMessage
                     id="xpack.fleet.agentDetails.fipsModeCompliantText"
                     defaultMessage="Enabled"

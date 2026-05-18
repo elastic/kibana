@@ -47,13 +47,11 @@ This tool executes ordered dashboard operations against a dashboard attachment i
 
 Use operations[] to:
 1. set metadata
-2. add markdown
-3. add panels from attachments
-4. create Lens visualization panels inline from natural language
-5. edit existing Lens visualization panels
-6. update panel layouts without changing content
-7. add / remove sections, including inline section panels during add_section
-8. remove panels`,
+2. add panels (markdown, attachments, or inline Lens visualizations)
+3. edit existing visualization or markdown panel content
+4. update panel layouts without changing content
+5. add / remove sections, including inline section panels during add_section
+6. remove panels`,
     schema: manageDashboardSchema,
     handler: async (
       { dashboardAttachmentId: previousAttachmentId, operations },

@@ -106,7 +106,7 @@ export const RunFromSourceStep: React.FC<RunFromSourceStepProps> = ({
               })}
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiIcon type="external" />
+              <EuiIcon type="external" aria-hidden />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiButton>

@@ -6,42 +6,23 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { panelGridSchema, sectionGridSchema } from '@kbn/dashboard-agent-common';
-import type { DashboardSection } from '@kbn/dashboard-agent-common';
-import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
+import { sectionGridSchema } from '@kbn/dashboard-agent-common';
+import type { AttachmentPanel, DashboardSection } from '@kbn/dashboard-agent-common';
+import { MARKDOWN_EMBEDDABLE_TYPE } from '@kbn/dashboard-markdown/server';
 import { z } from '@kbn/zod/v4';
-import {
-  getResolvedVisualizationCreationRequests,
-  materializeResolvedVisualizationPanels,
-} from './visualization_creation';
+import { getResolvedVisualizationCreationRequests } from './visualization_creation';
 import { defineOperation } from './types';
+import {
+  attachmentPanelInputSchema,
+  markdownPanelInputSchema,
+  visualizationPanelInputSchema,
+} from './panel_kinds';
 
-export const visualizationPanelInputSchema = z.object({
-  query: z.string().describe('A natural language query describing the desired visualization.'),
-  index: z
-    .string()
-    .optional()
-    .describe(
-      '(optional) Index, alias, or datastream to target. If not provided, the tool will attempt to discover the best index to use.'
-    ),
-  chartType: z
-    .nativeEnum(SupportedChartType)
-    .optional()
-    .describe(
-      '(optional) The type of chart to create as indicated by the user. If not provided, the LLM will suggest the best chart type.'
-    ),
-  esql: z
-    .string()
-    .optional()
-    .describe(
-      '(optional) An ES|QL query. If not provided, the tool will generate the query. Only pass ES|QL queries from reliable sources (other tool calls or the user) and NEVER invent queries directly.'
-    ),
-  grid: panelGridSchema.describe(
-    'Panel layout in grid units. w: width (1–48), h: height, x: column (0–47), y: row. The dashboard is 48 columns wide. Always set x and y to place panels without gaps.'
-  ),
-});
-
-export type VisualizationPanelInput = z.infer<typeof visualizationPanelInputSchema>;
+const addSectionPanelItemSchema = z.discriminatedUnion('kind', [
+  markdownPanelInputSchema,
+  attachmentPanelInputSchema,
+  visualizationPanelInputSchema,
+]);
 
 export const addSectionOperation = defineOperation({
   schema: z.object({
@@ -49,11 +30,11 @@ export const addSectionOperation = defineOperation({
     title: z.string().describe('Section title.'),
     grid: sectionGridSchema,
     panels: z
-      .array(visualizationPanelInputSchema)
+      .array(addSectionPanelItemSchema)
       .min(1)
       .optional()
       .describe(
-        'Optional inline Lens visualization panels to create inside the new section. Panel grids are section-relative.'
+        'Optional inline panels (markdown, attachment, or visualization) to create inside the new section. Panel grids are section-relative.'
       ),
   }),
   handler: ({ dashboardData, operation, operationIndex, context }) => {
@@ -66,14 +47,54 @@ export const addSectionOperation = defineOperation({
     };
 
     if (operation.panels) {
-      const sectionPanels = materializeResolvedVisualizationPanels({
-        resolvedRequests: getResolvedVisualizationCreationRequests({
+      const resolvedRequestsByInputIndex = new Map(
+        getResolvedVisualizationCreationRequests({
           resolvedRequestsByOperationIndex: context.resolvedVisualizationCreationRequests,
           operationIndex,
-          operationType: operation.operation,
-        }),
-        failures: context.failures,
-      }).map(({ panel }) => panel);
+        }).map((resolvedRequest) => [resolvedRequest.request.panelInputIndex, resolvedRequest])
+      );
+
+      const sectionPanels: AttachmentPanel[] = [];
+
+      for (const [panelInputIndex, item] of operation.panels.entries()) {
+        switch (item.kind) {
+          case 'markdown':
+            sectionPanels.push({
+              id: uuidv4(),
+              type: MARKDOWN_EMBEDDABLE_TYPE,
+              config: { content: item.markdownContent },
+              grid: item.grid,
+            });
+            break;
+          case 'attachment': {
+            const result = context.resolvePanelsFromAttachments([
+              { attachmentId: item.attachmentId, grid: item.grid },
+            ]);
+            sectionPanels.push(...result.panels);
+            context.failures.push(...result.failures);
+            break;
+          }
+          case 'visualization': {
+            const resolvedRequest = resolvedRequestsByInputIndex.get(panelInputIndex);
+            if (!resolvedRequest) {
+              throw new Error(
+                `Missing pre-resolved visualization request for ${operation.operation} operation at index ${operationIndex}, panel input index ${panelInputIndex}.`
+              );
+            }
+            if (resolvedRequest.resolvedPanel.type === 'failure') {
+              context.failures.push(resolvedRequest.resolvedPanel.failure);
+            } else {
+              sectionPanels.push({
+                id: uuidv4(),
+                type: resolvedRequest.resolvedPanel.visContent.type,
+                config: resolvedRequest.resolvedPanel.visContent.config,
+                grid: item.grid,
+              });
+            }
+            break;
+          }
+        }
+      }
 
       nextSection = {
         ...nextSection,
