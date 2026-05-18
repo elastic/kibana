@@ -33,7 +33,10 @@ const searchTechniqueSchema = schema.maybe(
 );
 
 const selectedOptionsSchema = schema.maybe(
-  schema.oneOf([schema.arrayOf(schema.string()), schema.arrayOf(schema.number())])
+  schema.oneOf([
+    schema.arrayOf(schema.string(), { maxSize: 999 }), // maxSize for DoS prevention
+    schema.arrayOf(schema.number(), { maxSize: 999 }),
+  ])
 );
 
 const dslFetchBodySchema = schema.object(
@@ -62,7 +65,7 @@ const esqlFetchBodySchema = schema.object(
     esql: schema.string(),
     timeRange: schema.maybe(schema.any()),
     filter: schema.maybe(schema.any()),
-    esqlVariables: schema.maybe(schema.arrayOf(schema.any())),
+    esqlVariables: schema.maybe(schema.arrayOf(schema.any(), { maxSize: 999 })),
     searchString: schema.maybe(schema.string()),
     searchTechnique: searchTechniqueSchema,
     selectedOptions: selectedOptionsSchema,
