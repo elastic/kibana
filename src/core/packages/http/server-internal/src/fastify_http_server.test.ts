@@ -485,6 +485,81 @@ describe('FastifyHttpServer', () => {
       expect(JSON.parse(res.body)).toEqual({ len: pngHeader.length });
     }, 15000);
 
+    it('accepts application/zip with parse: false and default output data (Fleet upload parity)', async () => {
+      const ctx = createCoreContext();
+      const config = createHttpConfig(PORT);
+      const config$ = new BehaviorSubject(config);
+
+      server = new FastifyHttpServer(ctx, 'Kibana', new BehaviorSubject(config.shutdownTimeout));
+      const setup = await server.setup({ config$ });
+
+      const enhanceHandler = (handler: any) => async (req: any, res: any) =>
+        handler({} as any, req, res);
+
+      const router = new Router('/api/fastify-mvp', ctx.logger.get('router'), enhanceHandler, {
+        env,
+      });
+
+      const zipBytes = Buffer.from([0x50, 0x4b, 0x03, 0x04]);
+      router.post(
+        {
+          path: '/fleet-upload',
+          security: { authz: { enabled: false, reason: 'test' } },
+          validate: {
+            body: schema.buffer(),
+          },
+          options: {
+            body: {
+              accepts: ['application/zip', 'application/gzip'],
+              parse: false,
+              maxBytes: 1024 * 1024,
+            },
+          },
+        },
+        async (_context, req, res) => {
+          expect(Buffer.isBuffer(req.body)).toBe(true);
+          return res.ok({ body: { len: (req.body as Buffer).length } });
+        }
+      );
+
+      setup.registerRouter(router);
+      await server.start();
+
+      const address = (setup.server as any).server.address();
+      listenPort = typeof address === 'object' && address ? address.port : 0;
+
+      const res = await new Promise<{ statusCode: number; body: string }>((resolve, reject) => {
+        const req = http.request(
+          {
+            hostname: '127.0.0.1',
+            port: listenPort,
+            path: '/api/fastify-mvp/fleet-upload',
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/zip',
+              'Content-Length': zipBytes.length,
+            },
+          },
+          (incoming) => {
+            const chunks: Buffer[] = [];
+            incoming.on('data', (c) => chunks.push(Buffer.from(c)));
+            incoming.on('end', () =>
+              resolve({
+                statusCode: incoming.statusCode ?? 0,
+                body: Buffer.concat(chunks).toString('utf8'),
+              })
+            );
+          }
+        );
+        req.on('error', reject);
+        req.write(zipBytes);
+        req.end();
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(JSON.parse(res.body)).toEqual({ len: zipBytes.length });
+    }, 15000);
+
     it('applies Hapi default Cache-Control to router JSON responses', async () => {
       const ctx = createCoreContext();
       const config = createHttpConfig(PORT);

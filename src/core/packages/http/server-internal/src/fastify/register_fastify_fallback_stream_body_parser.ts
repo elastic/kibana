@@ -11,13 +11,16 @@ import { Readable } from 'node:stream';
 import type { FastifyInstance, FastifyRequest } from 'fastify';
 import type { RouterRoute } from '@kbn/core-http-server';
 
+import { routeHasUnparsedPayload, routeWantsStreamPayload } from './fastify_route_body_options';
+
 /**
  * Hapi `payload.output: 'stream'` routes accept arbitrary `Content-Type` values listed in
- * `options.body.accepts` (e.g. Files upload with `image/png`). Fastify only ships parsers for
- * `application/json` and `text/plain`; anything else would yield {@link FST_ERR_CTP_INVALID_MEDIA_TYPE}
- * (415) before the router runs. Register a catch-all parser **after** `@fastify/multipart` so
- * `multipart/form-data` keeps working, and only synthesize a Readable for routes that declare
- * stream + non-parsed bodies.
+ * `options.body.accepts` (e.g. Files upload with `image/png`). Routes with `parse: false` and
+ * `output: 'data'` (default when body validation exists, e.g. Fleet package upload with
+ * `application/zip`) receive a raw Buffer. Fastify only ships parsers for `application/json`
+ * and `text/plain`; anything else would yield {@link FST_ERR_CTP_INVALID_MEDIA_TYPE} (415)
+ * before the router runs. Register a catch-all parser **after** `@fastify/multipart` so
+ * `multipart/form-data` keeps working.
  *
  * @internal
  */
@@ -33,15 +36,15 @@ export function registerFastifyFallbackStreamBodyParser(fastify: FastifyInstance
       }
 
       const route = (request as { app?: { matchedRoute?: RouterRoute } }).app?.matchedRoute;
-      const bodyOpts = route?.options?.body as { output?: string; parse?: boolean } | undefined;
-      if (bodyOpts?.output === 'stream' && bodyOpts.parse !== true) {
-        const buf = Buffer.isBuffer(body) ? body : Buffer.from(body);
-        done(null, Readable.from(buf.length > 0 ? buf : Buffer.alloc(0)));
+      if (!routeHasUnparsedPayload(route)) {
+        const err = Object.assign(new Error('Unsupported Media Type'), { statusCode: 415 });
+        done(err);
         return;
       }
 
-      const err = Object.assign(new Error('Unsupported Media Type'), { statusCode: 415 });
-      done(err);
+      const buf = Buffer.isBuffer(body) ? body : Buffer.from(body);
+      const payload = buf.length > 0 ? buf : Buffer.alloc(0);
+      done(null, routeWantsStreamPayload(route) ? Readable.from(payload) : payload);
     }
   );
 }

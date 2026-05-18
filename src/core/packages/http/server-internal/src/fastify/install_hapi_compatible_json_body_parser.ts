@@ -11,19 +11,14 @@ import { Readable } from 'node:stream';
 import type { FastifyInstance, FastifyRequest } from 'fastify';
 import type { RouterRoute } from '@kbn/core-http-server';
 
+import { routeHasUnparsedPayload, routeWantsStreamPayload } from './fastify_route_body_options';
+
 /**
- * Routes that declare {@link RouterRoute} `options.body.output: 'stream'` with
- * `parse` not true (Hapi `payload.output: 'stream'`, `parse: false`) must see the raw
- * request payload as a Node Readable — e.g. Console `/api/console/proxy` pipes the body
- * to Elasticsearch. Fastify's default JSON parser would turn the body into an object and
- * break `schema.stream()` validation (`expected value of type [Stream] but got [Object]`).
+ * JSON routes that declare `parse: false` and `output: 'stream'` must see the raw payload
+ * as a Node Readable — e.g. Console `/api/console/proxy` pipes the body to Elasticsearch.
  */
 function routeWantsUnparsedJsonBodyStream(route: RouterRoute | undefined): boolean {
-  const body = route?.options?.body as { output?: string; parse?: boolean } | undefined;
-  if (body?.output !== 'stream') {
-    return false;
-  }
-  return body.parse !== true;
+  return routeHasUnparsedPayload(route) && routeWantsStreamPayload(route);
 }
 
 /**
