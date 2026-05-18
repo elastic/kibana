@@ -311,7 +311,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
                   button={button}
                   isOpen={isPopoverOpen}
                   closePopover={closePopover}
-                  panelPaddingSize="none"
+                  panelPaddingSize="s"
                 >
                   <EuiSelectable
                     allowExclusions
