@@ -875,7 +875,7 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
         query: { term: { 'host.name': 'host-alert-no-recovery-policy' } },
       });
 
-      await apiServices.alertingV2.taskExecutions.waitForExecutorRuns({
+      await apiServices.alertingV2.ruleExecutions.waitForRuns({
         ruleId: rule.id,
         runs: 2,
       });
