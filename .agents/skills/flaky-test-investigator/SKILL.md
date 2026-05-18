@@ -139,5 +139,6 @@ When you report your conclusion, include these details:
 3. **Where it ran** (Cloud or local pipelines, or both)
 4. **Root cause hypothesis** (a few sentences describing the outcome of the investigation)
 5. **Evidence supporting that hypothesis**, and evidence against it (if you considered alternative hypotheses, include them alongside their confidence level)
-6. **Recommended next step** (this won't always be a code change). If you are recommending a code fix, give an honest note on expected durability
-7. **Open questions** the investigation could not resolve
+6. **Failure screenshot description**: what did you observe in the failure screenshot?
+7. **Recommended next step** (this won't always be a code change). If you are recommending a code fix, give an honest note on expected durability
+8. **Open questions** the investigation could not resolve
