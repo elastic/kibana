@@ -5,23 +5,72 @@
  * 2.0.
  */
 
+import { formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
+import type { UseMutationOptions } from '@kbn/react-query';
+import { useMutation, useQueryClient } from '@kbn/react-query';
 import { useCallback } from 'react';
-import { useQueryClient } from '@kbn/react-query';
+import { queryKeys } from '../../query_keys';
+import { labels } from '../../utils/i18n';
 import { useAgentBuilderAgentById } from '../agents/use_agent_by_id';
 import { useAgentBuilderServices } from '../use_agent_builder_service';
-import { queryKeys } from '../../query_keys';
+import { useToasts } from '../use_toasts';
 
-export const useUpdateAgent = (agentId: string) => {
+interface UpdateAgentMutationVariables {
+  agentId: string;
+  updates: { connector_ids?: string[] };
+}
+
+type UpdateAgentMutationOptions = UseMutationOptions<void, Error, UpdateAgentMutationVariables>;
+
+interface UseUpdateAgentProps {
+  agentId: string;
+  onSuccess?: UpdateAgentMutationOptions['onSuccess'];
+  onError?: UpdateAgentMutationOptions['onError'];
+}
+
+export const useUpdateAgent = ({ agentId, onSuccess, onError }: UseUpdateAgentProps) => {
   const { agent } = useAgentBuilderAgentById(agentId);
   const { agentService } = useAgentBuilderServices();
   const queryClient = useQueryClient();
+  const { addSuccessToast, addErrorToast } = useToasts();
 
-  return useCallback(
-    async (updates: { connector_ids?: string[] }) => {
-      if (!agent) return;
-      await agentService.update(agent.id, { configuration: updates });
-      queryClient.invalidateQueries({ queryKey: queryKeys.agentProfiles.byId(agent.id) });
+  const handleSuccess = useCallback<NonNullable<UpdateAgentMutationOptions['onSuccess']>>(
+    (data, variables, context) => {
+      addSuccessToast({ title: labels.connectors.assignConnectorSuccessToast });
+      onSuccess?.(data, variables, context);
     },
-    [agent, agentService, queryClient]
+    [addSuccessToast, onSuccess]
   );
+
+  const handleError = useCallback<NonNullable<UpdateAgentMutationOptions['onError']>>(
+    (error, variables, context) => {
+      addErrorToast({
+        title: labels.connectors.assignConnectorErrorToast,
+        text: formatAgentBuilderErrorMessage(error),
+      });
+      onError?.(error, variables, context);
+    },
+    [addErrorToast, onError]
+  );
+
+  const { mutateAsync, isLoading } = useMutation<void, Error, UpdateAgentMutationVariables>({
+    mutationFn: async ({ agentId: id, updates }) => {
+      await agentService.update(id, { configuration: updates });
+    },
+    onSuccess: handleSuccess,
+    onError: handleError,
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.agentProfiles.byId(agentId) });
+    },
+  });
+
+  const updateAgent = useCallback(
+    (updates: { connector_ids?: string[] }) => {
+      if (!agent) return Promise.resolve();
+      return mutateAsync({ agentId, updates });
+    },
+    [agent, agentId, mutateAsync]
+  );
+
+  return { updateAgent, isLoading };
 };

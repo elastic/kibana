@@ -44,7 +44,7 @@ export const AssignConnectorsFlyout = ({
   onClose,
 }: AssignConnectorsFlyoutProps) => {
   const titleId = useGeneratedHtmlId({ prefix: 'assignConnectorsFlyout' });
-  const updateAgent = useUpdateAgent(agentId);
+  const { updateAgent, isLoading } = useUpdateAgent({ agentId, onSuccess: onClose });
   const [selected, setSelected] = useState<ConnectorOption[]>([]);
   const {
     services: {
@@ -116,12 +116,12 @@ export const AssignConnectorsFlyout = ({
           <EuiButtonEmpty onClick={onClose}>{labels.connectors.cancelButtonLabel}</EuiButtonEmpty>
           <EuiButton
             fill
-            isDisabled={selected.length === 0}
+            isLoading={isLoading}
+            isDisabled={selected.length === 0 || isLoading}
             onClick={() => {
               const connector = selected[0].value;
               if (!connector) return;
               updateAgent({ connector_ids: [...selectedIds, connector.id] });
-              onClose();
             }}
           >
             {labels.connectors.assignButtonLabel}

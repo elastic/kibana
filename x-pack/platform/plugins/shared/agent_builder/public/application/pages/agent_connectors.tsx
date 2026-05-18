@@ -18,7 +18,7 @@ import { labels } from '../utils/i18n';
 export const AgentBuilderAgentConnectorsPage: React.FC = () => {
   const { agentId } = useParams<{ agentId: string }>();
   const { agent } = useAgentBuilderAgentById(agentId);
-  const updateAgent = useUpdateAgent(agentId);
+  const { updateAgent } = useUpdateAgent({ agentId });
 
   const breadcrumbs = useMemo(
     () => [
@@ -35,7 +35,7 @@ export const AgentBuilderAgentConnectorsPage: React.FC = () => {
       onConnectorCreated={(connector) =>
         updateAgent({
           connector_ids: [...(agent?.configuration?.connector_ids ?? []), connector.id],
-        })
+        }).catch(() => {})
       }
     >
       <AgentConnectors agentId={agentId} />
