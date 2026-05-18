@@ -111,7 +111,6 @@ export function SloManagementBulkActions({ items, setSelectedItems }: Props) {
     >
       <EuiContextMenu
         initialPanelId={0}
-        size="s"
         panels={panels}
         data-test-subj="detailsCollapsedActionPanel"
       />
