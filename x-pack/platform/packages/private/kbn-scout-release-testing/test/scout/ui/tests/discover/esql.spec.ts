@@ -25,6 +25,9 @@ const SUM_QUERY = 'FROM kibana_sample_data_logs | LIMIT 1000 | STATS total = sum
 const KEEP_QUERY =
   'FROM kibana_sample_data_logs | LIMIT 1000 | KEEP agent.keyword, tags.keyword, geo.coordinates';
 const HISTOGRAM_QUERY = 'FROM kibana_sample_data_logs | LIMIT 1000';
+// Trailing space is required so the ES|QL language server treats the cursor as
+// the next argument position and surfaces the "Create control" suggestion.
+const CREATE_CONTROL_QUERY = 'FROM kibana_sample_data_logs | WHERE agent.keyword == ';
 
 const KEPT_FIELDS = ['agent.keyword', 'tags.keyword', 'geo.coordinates'];
 const DROPPED_FIELDS = ['bytes', 'clientip', 'extension', 'response'];
@@ -35,6 +38,11 @@ const METRIC_VIS = 'mtrVis';
 const EDIT_FLYOUT_HEADER = 'editFlyoutHeader';
 const CANCEL_FLYOUT_BUTTON = 'cancelFlyoutButton';
 const PANEL_ACTION_EDIT = 'embeddablePanelAction-editPanel';
+const CREATE_ESQL_CONTROL_FLYOUT = 'create_esql_control_flyout';
+const ESQL_VARIABLE_NAME_INPUT = 'esqlVariableName';
+const ESQL_CONTROL_LABEL_INPUT = 'esqlControlLabel';
+const SAVE_ESQL_CONTROL_BUTTON = 'saveEsqlControlsFlyoutButton';
+const CONTROLS_GROUP_WRAPPER = 'controls-group-wrapper';
 
 const tracker = new SavedObjectsTracker();
 
@@ -74,6 +82,57 @@ test.describe('Discover ES|QL', { tag: tags.stateful.classic }, () => {
     await test.step('verify histogram and document grid are rendered for the sample query', async () => {
       await pageObjects.discover.waitUntilSearchingHasFinished();
       await expect(page.testSubj.locator('unifiedHistogramRendered')).toBeVisible();
+      await expect(page.testSubj.locator('discoverDocTable')).toBeVisible();
+    });
+  });
+
+  test('should create an ES|QL value variable control from the Discover editor', async ({
+    page,
+    pageObjects,
+  }) => {
+    const variableName = '?agent_keyword';
+    const controlLabel = 'Agent keyword';
+    const { codeEditor } = pageObjects.discover;
+
+    await pageObjects.discover.selectTextBaseLang();
+
+    await test.step('open the Create control flyout from the Monaco suggestion list', async () => {
+      await codeEditor.setCodeEditorValue(CREATE_CONTROL_QUERY);
+
+      const suggestWidget = codeEditor.getCodeEditorSuggestWidget();
+      const createControlRow = suggestWidget.locator('.monaco-list-row', {
+        hasText: 'Create control',
+      });
+
+      // The ES|QL language server may take a moment to surface "Create control"
+      // after the model is updated. Retry triggering the suggest widget until
+      // the row appears rather than relying on an arbitrary sleep.
+      await expect(async () => {
+        await codeEditor.triggerSuggest(CREATE_CONTROL_QUERY);
+        await expect(createControlRow).toBeVisible({ timeout: 2_000 });
+      }).toPass({ timeout: 30_000 });
+
+      await createControlRow.click();
+      await expect(page.testSubj.locator(CREATE_ESQL_CONTROL_FLYOUT)).toBeVisible();
+    });
+
+    await test.step('configure the variable name and label, then save the control', async () => {
+      await page.testSubj.fill(ESQL_VARIABLE_NAME_INPUT, variableName);
+      await page.testSubj.fill(ESQL_CONTROL_LABEL_INPUT, controlLabel);
+
+      const saveButton = page.testSubj.locator(SAVE_ESQL_CONTROL_BUTTON);
+      await expect(saveButton).toBeEnabled();
+      await saveButton.click();
+      await expect(page.testSubj.locator(CREATE_ESQL_CONTROL_FLYOUT)).toBeHidden();
+    });
+
+    await test.step('verify the control renders and the editor query references the variable', async () => {
+      await expect(page.testSubj.locator(CONTROLS_GROUP_WRAPPER)).toBeVisible();
+
+      const updatedQuery = await pageObjects.discover.getEsqlQueryValue();
+      expect(updatedQuery).toContain(`agent.keyword == ${variableName}`);
+
+      await pageObjects.discover.waitUntilSearchingHasFinished();
       await expect(page.testSubj.locator('discoverDocTable')).toBeVisible();
     });
   });
