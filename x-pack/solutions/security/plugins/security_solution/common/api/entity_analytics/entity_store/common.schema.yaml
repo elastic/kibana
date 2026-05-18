@@ -73,18 +73,6 @@ components:
           pattern: '[smdh]$'
           description: The delay before the transform processes new data, allowing late-arriving documents to be included.
           example: '1m'
-        maxLogsPerWindow:
-          type: integer
-          minimum: 0
-          default: 500000
-          description: Maximum number of raw log documents processed per task run. 0 disables the cap.
-          example: 500000
-        maxLogsPerWindowCapBehavior:
-          type: string
-          enum: [defer, drop]
-          default: defer
-          description: What to do when the volume cap fires — `defer` preserves the cursor so the next run resumes; `drop` advances the cursor to the window end, skipping uncapped logs.
-          example: defer
         docsPerSecond:
           type: integer
           description: Throttle value for the number of documents processed per second. Use -1 for no throttle.
