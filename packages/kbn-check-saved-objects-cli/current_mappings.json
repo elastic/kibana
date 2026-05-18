@@ -336,9 +336,7 @@
       "createdBy": {
         "type": "keyword"
       },
-      "createdByUsername": {
-        "type": "keyword"
-      },
+
       "description": {
         "fields": {
           "keyword": {
@@ -401,9 +399,6 @@
         "type": "date"
       },
       "updatedBy": {
-        "type": "keyword"
-      },
-      "updatedByUsername": {
         "type": "keyword"
       }
     }
