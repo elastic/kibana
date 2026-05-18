@@ -7,17 +7,11 @@
 
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup, IRouter, Logger } from '@kbn/core/server';
-import type { RouteSecurity } from '@kbn/core-http-server';
-import { AGENT_CONTEXT_LAYER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
-import { apiPrivileges } from '../../common/features';
 import type { SmlDeleteHttpResponse } from '../../common/http_api/sml';
 import { smlByIdPath } from '../../common/constants';
 import type { SmlService } from '../services/sml/types';
 import type { AgentContextLayerStartDependencies, AgentContextLayerPluginStart } from '../types';
-
-const AGENT_CONTEXT_LAYER_WRITE_SECURITY: RouteSecurity = {
-  authz: { requiredPrivileges: [apiPrivileges.writeAgentContextLayer] },
-};
+import { WRITE_SECURITY, withSmlFeatureFlag } from './common';
 
 export const registerDeleteRoute = ({
   router,
@@ -39,26 +33,22 @@ export const registerDeleteRoute = ({
         }),
       },
       options: { access: 'internal' },
-      security: AGENT_CONTEXT_LAYER_WRITE_SECURITY,
+      security: WRITE_SECURITY,
     },
-    async (ctx, request, response) => {
+    withSmlFeatureFlag(async (ctx, request, response) => {
       try {
-        const coreContext = await ctx.core;
-        const uiSettingsClient = coreContext.uiSettings.client;
-
-        const isEnabled = await uiSettingsClient.get<boolean>(
-          AGENT_CONTEXT_LAYER_EXPERIMENTAL_FEATURES_SETTING_ID
-        );
-        if (!isEnabled) {
-          return response.notFound();
-        }
-
         const sml = getSmlService();
-        const { id } = request.params;
+        const { id } = request.params as { id: string };
+        const coreContext = await ctx.core;
         const esClient = coreContext.elasticsearch.client;
 
         const [, startDeps] = await coreSetup.getStartServices();
         const spaceId = startDeps.spaces?.spacesService?.getSpaceId(request) ?? 'default';
+
+        const accessMap = await sml.checkItemsAccess({ ids: [id], spaceId, esClient, request });
+        if (!accessMap.get(id)) {
+          return response.notFound({ body: { message: `SML document '${id}' not found` } });
+        }
 
         const deleted = await sml.deleteDocument({ id, spaceId, esClient });
         if (!deleted) {
@@ -71,6 +61,6 @@ export const registerDeleteRoute = ({
         logger.error(`SML delete route error: ${(error as Error).message}`);
         throw error;
       }
-    }
+    })
   );
 };

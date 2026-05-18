@@ -7,9 +7,6 @@
 
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup, IRouter, Logger } from '@kbn/core/server';
-import type { RouteSecurity } from '@kbn/core-http-server';
-import { AGENT_CONTEXT_LAYER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
-import { apiPrivileges } from '../../common/features';
 import type { SmlListHttpResponse } from '../../common/http_api/sml';
 import {
   SML_HTTP_LIST_PAGE_DEFAULT,
@@ -19,12 +16,8 @@ import {
 import { smlBasePath } from '../../common/constants';
 import type { SmlService } from '../services/sml/types';
 import type { AgentContextLayerStartDependencies, AgentContextLayerPluginStart } from '../types';
-import { toSmlHttpItem } from './common';
+import { READ_SECURITY, toSmlHttpItem, withSmlFeatureFlag } from './common';
 import { SmlResultWindowExceededError } from '../services/sml/sml_errors';
-
-const AGENT_CONTEXT_LAYER_READ_SECURITY: RouteSecurity = {
-  authz: { requiredPrivileges: [apiPrivileges.readAgentContextLayer] },
-};
 
 export const registerListRoute = ({
   router,
@@ -53,28 +46,29 @@ export const registerListRoute = ({
         }),
       },
       options: { access: 'internal' },
-      security: AGENT_CONTEXT_LAYER_READ_SECURITY,
+      security: READ_SECURITY,
     },
-    async (ctx, request, response) => {
+    withSmlFeatureFlag(async (ctx, request, response) => {
       try {
-        const coreContext = await ctx.core;
-        const uiSettingsClient = coreContext.uiSettings.client;
-
-        const isEnabled = await uiSettingsClient.get<boolean>(
-          AGENT_CONTEXT_LAYER_EXPERIMENTAL_FEATURES_SETTING_ID
-        );
-        if (!isEnabled) {
-          return response.notFound();
-        }
-
         const sml = getSmlService();
-        const { page, per_page: perPage, type, origin_id: originId } = request.query;
+        const {
+          page,
+          per_page: perPage,
+          type,
+          origin_id: originId,
+        } = request.query as {
+          page: number;
+          per_page: number;
+          type?: string;
+          origin_id?: string;
+        };
+        const coreContext = await ctx.core;
         const esClient = coreContext.elasticsearch.client;
 
         const [, startDeps] = await coreSetup.getStartServices();
         const spaceId = startDeps.spaces?.spacesService?.getSpaceId(request) ?? 'default';
 
-        const { results, total } = await sml.listDocuments({
+        const { results, total: rawTotal } = await sml.listDocuments({
           spaceId,
           esClient,
           page,
@@ -83,11 +77,20 @@ export const registerListRoute = ({
           originId,
         });
 
+        // TODO: Push permission filtering into the ES query for accurate pagination.
+        // Post-filtering means the returned total may be less than the actual count.
+        let filteredResults = results;
+        if (results.length > 0) {
+          const ids = results.map((r) => r.id);
+          const accessMap = await sml.checkItemsAccess({ ids, spaceId, esClient, request });
+          filteredResults = results.filter((r) => accessMap.get(r.id) !== false);
+        }
+
         const body: SmlListHttpResponse = {
-          total,
+          total: filteredResults.length < results.length ? filteredResults.length : rawTotal,
           page,
           per_page: perPage,
-          items: results.map(toSmlHttpItem),
+          items: filteredResults.map(toSmlHttpItem),
         };
 
         return response.ok({ body });
@@ -98,6 +101,6 @@ export const registerListRoute = ({
         logger.error(`SML list route error: ${(error as Error).message}`);
         throw error;
       }
-    }
+    })
   );
 };

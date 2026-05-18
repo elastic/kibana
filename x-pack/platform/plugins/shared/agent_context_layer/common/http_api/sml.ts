@@ -87,20 +87,6 @@ export interface SmlListHttpResponse {
 }
 
 /**
- * Body for `PUT /internal/agent_context_layer/sml/{id}`.
- *
- * `spaces` is intentionally omitted: documents are created in the caller's
- * current space, and the server preserves `spaces` on update.
- */
-export interface SmlUpsertHttpRequestBody {
-  type: string;
-  title: string;
-  origin_id: string;
-  content: string;
-  permissions?: string[];
-}
-
-/**
  * Response body for `PUT /internal/agent_context_layer/sml/{id}`.
  */
 export interface SmlUpsertHttpResponse {

@@ -7,18 +7,11 @@
 
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup, IRouter, Logger } from '@kbn/core/server';
-import type { RouteSecurity } from '@kbn/core-http-server';
-import { AGENT_CONTEXT_LAYER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
-import { apiPrivileges } from '../../common/features';
 import type { SmlUpsertHttpResponse } from '../../common/http_api/sml';
 import { smlByIdPath } from '../../common/constants';
 import type { SmlService } from '../services/sml/types';
 import type { AgentContextLayerStartDependencies, AgentContextLayerPluginStart } from '../types';
-import { toSmlHttpItem } from './common';
-
-const AGENT_CONTEXT_LAYER_WRITE_SECURITY: RouteSecurity = {
-  authz: { requiredPrivileges: [apiPrivileges.writeAgentContextLayer] },
-};
+import { WRITE_SECURITY, toSmlHttpItem, withSmlFeatureFlag } from './common';
 
 export const registerUpsertRoute = ({
   router,
@@ -38,6 +31,8 @@ export const registerUpsertRoute = ({
         params: schema.object({
           id: schema.string({ minLength: 1 }),
         }),
+        // TODO: Add maxLength bounds to string fields (type, title, origin_id, content) to
+        // prevent abuse with excessively long values.
         body: schema.object({
           type: schema.string({ minLength: 1 }),
           title: schema.string({ minLength: 1 }),
@@ -49,22 +44,13 @@ export const registerUpsertRoute = ({
         }),
       },
       options: { access: 'internal' },
-      security: AGENT_CONTEXT_LAYER_WRITE_SECURITY,
+      security: WRITE_SECURITY,
     },
-    async (ctx, request, response) => {
+    withSmlFeatureFlag(async (ctx, request, response) => {
       try {
-        const coreContext = await ctx.core;
-        const uiSettingsClient = coreContext.uiSettings.client;
-
-        const isEnabled = await uiSettingsClient.get<boolean>(
-          AGENT_CONTEXT_LAYER_EXPERIMENTAL_FEATURES_SETTING_ID
-        );
-        if (!isEnabled) {
-          return response.notFound();
-        }
-
         const sml = getSmlService();
-        const { id } = request.params;
+        const { id } = request.params as { id: string };
+        const coreContext = await ctx.core;
         const esClient = coreContext.elasticsearch.client;
 
         const [, startDeps] = await coreSetup.getStartServices();
@@ -73,7 +59,13 @@ export const registerUpsertRoute = ({
         const result = await sml.upsertDocument({
           id,
           spaceId,
-          document: request.body,
+          document: request.body as {
+            type: string;
+            title: string;
+            origin_id: string;
+            content: string;
+            permissions?: string[];
+          },
           esClient,
         });
         if (!result) {
@@ -90,6 +82,6 @@ export const registerUpsertRoute = ({
         logger.error(`SML upsert route error: ${(error as Error).message}`);
         throw error;
       }
-    }
+    })
   );
 };

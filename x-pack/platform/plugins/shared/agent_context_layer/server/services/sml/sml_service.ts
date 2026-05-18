@@ -26,6 +26,12 @@ import type { SmlCrawler } from './types';
 import { smlIndexName, createSmlStorage } from './sml_storage';
 import { SmlResultWindowExceededError } from './sml_errors';
 
+// ES client usage pattern in this module:
+// - Read operations (search, get, list, checkAccess) use `esClient.asInternalUser` directly with
+//   `allow_no_indices: true` / `ignore_unavailable: true` so they silently handle a missing index.
+// - Write operations (upsert, delete) use `createSmlStorage` / `smlClient` so that
+//   StorageIndexAdapter auto-creates the index on first write.
+
 export interface SmlServiceSetup {
   /**
    * Register an SML type definition.
@@ -799,6 +805,16 @@ const upsertDocument = async ({
   esClient: IScopedClusterClient;
   logger: Logger;
 }): Promise<SmlUpsertResult | null> => {
+  // TODO: Implement optimistic concurrency using _seq_no/_primary_term to prevent lost-update
+  // races. The current get-then-index pattern allows two concurrent upserts to silently overwrite
+  // each other. A fix should use esClient.asInternalUser.get() (which reliably returns
+  // _seq_no/_primary_term) and pass if_seq_no/if_primary_term to the index call.
+  // Note: StorageIndexAdapter.get() uses search internally and does not request
+  // seq_no_primary_term, so _seq_no is unreliable via that path.
+
+  // We use smlClient.get() rather than the space-aware getDocumentById() here intentionally:
+  // we need to detect documents that exist in another space (to block cross-space overwrites).
+  // getDocumentById() would return undefined for those, causing us to silently overwrite them.
   const internalEsClient = esClient.asInternalUser;
   const storage = createSmlStorage({ logger, esClient: internalEsClient });
   const smlClient = storage.getClient();

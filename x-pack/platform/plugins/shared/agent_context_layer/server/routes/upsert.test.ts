@@ -5,45 +5,17 @@
  * 2.0.
  */
 
-import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
-import { coreMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { AGENT_CONTEXT_LAYER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
-import type { SmlDocument } from '../services/sml/types';
+import {
+  buildMockContext,
+  createMockSmlService,
+  createTestCoreSetup,
+  createTestCoreSetupNoSpaces,
+  httpServerMock,
+  httpServiceMock,
+  sampleDocument,
+} from './test_helpers';
 import { registerUpsertRoute } from './upsert';
-
-const createMockSmlService = () => ({
-  search: jest.fn(),
-  checkItemsAccess: jest.fn(),
-  indexAttachment: jest.fn(),
-  getDocuments: jest.fn(),
-  getDocument: jest.fn(),
-  listDocuments: jest.fn(),
-  upsertDocument: jest.fn(),
-  deleteDocument: jest.fn(),
-  getTypeDefinition: jest.fn(),
-  listTypeDefinitions: jest.fn(),
-  getCrawler: jest.fn(),
-});
-
-const createMockUiSettingsClient = (enabled = true) => ({
-  get: jest.fn().mockImplementation(async (key: string) => {
-    if (key === AGENT_CONTEXT_LAYER_EXPERIMENTAL_FEATURES_SETTING_ID) return enabled;
-    return undefined;
-  }),
-});
-
-const sampleDocument: SmlDocument = {
-  id: 'chunk-1',
-  type: 'visualization',
-  title: 'Test Viz',
-  origin_id: 'viz-1',
-  content: 'some content',
-  created_at: '2024-01-01',
-  updated_at: '2024-01-02',
-  spaces: ['test-space'],
-  permissions: [],
-};
 
 const validBody = {
   type: 'visualization',
@@ -62,16 +34,9 @@ describe('registerUpsertRoute', () => {
     router = httpServiceMock.createRouter();
     mockSmlService = createMockSmlService();
 
-    const coreSetup = coreMock.createSetup();
-    (coreSetup.getStartServices as jest.Mock).mockResolvedValue([
-      {},
-      { spaces: { spacesService: { getSpaceId: jest.fn().mockReturnValue('test-space') } } },
-      {},
-    ]);
-
     registerUpsertRoute({
       router: router as any,
-      coreSetup: coreSetup as any,
+      coreSetup: createTestCoreSetup() as any,
       logger,
       getSmlService: () => mockSmlService as any,
     });
@@ -86,14 +51,7 @@ describe('registerUpsertRoute', () => {
   ) => {
     const request = httpServerMock.createKibanaRequest({ params, body });
     const response = httpServerMock.createResponseFactory();
-    const mockUiSettings = createMockUiSettingsClient(uiSettingsEnabled);
-    const ctx = {
-      core: Promise.resolve({
-        uiSettings: { client: mockUiSettings },
-        elasticsearch: { client: { asInternalUser: {}, asCurrentUser: {} } },
-      }),
-    };
-    await handler(ctx, request, response);
+    await handler(buildMockContext(uiSettingsEnabled), request, response);
     return response;
   };
 
@@ -137,13 +95,10 @@ describe('registerUpsertRoute', () => {
   });
 
   it('falls back to default space when spaces plugin is unavailable', async () => {
-    const coreSetup = coreMock.createSetup();
-    (coreSetup.getStartServices as jest.Mock).mockResolvedValue([{}, {}, {}]);
-
     const localRouter = httpServiceMock.createRouter();
     registerUpsertRoute({
       router: localRouter as any,
-      coreSetup: coreSetup as any,
+      coreSetup: createTestCoreSetupNoSpaces() as any,
       logger,
       getSmlService: () => mockSmlService as any,
     });
@@ -154,15 +109,9 @@ describe('registerUpsertRoute', () => {
       body: validBody,
     });
     const response = httpServerMock.createResponseFactory();
-    const ctx = {
-      core: Promise.resolve({
-        uiSettings: { client: createMockUiSettingsClient(true) },
-        elasticsearch: { client: {} },
-      }),
-    };
 
     mockSmlService.upsertDocument.mockResolvedValue({ document: sampleDocument, created: true });
-    await localHandler(ctx, request, response);
+    await localHandler(buildMockContext(true), request, response);
     expect(mockSmlService.upsertDocument).toHaveBeenCalledWith(
       expect.objectContaining({ spaceId: 'default' })
     );
