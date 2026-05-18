@@ -15,9 +15,8 @@ import { EvaluationIndices, type IngestScoresRequestBodyInput } from '@kbn/evals
 import { EvaluationScoreService } from '../storage/evaluation_score_service';
 import { evaluationsDataStreamDefinition } from '../storage/scores_index_template';
 
-const getPayload = (runId: string): IngestScoresRequestBodyInput => ({
-  run_id: runId,
-  experiment_id: 'experiment-1',
+const getPayload = (experimentId: string): IngestScoresRequestBodyInput => ({
+  experiment_id: experimentId,
   suite_id: 'suite-1',
   task_model: {
     id: 'task-model-1',
@@ -29,7 +28,7 @@ const getPayload = (runId: string): IngestScoresRequestBodyInput => ({
     family: 'family-b',
     provider: 'provider-b',
   },
-  run_metadata: {
+  experiment_metadata: {
     git_branch: 'main',
     git_commit_sha: 'abc123',
     total_repetitions: 1,
@@ -127,8 +126,8 @@ describe('EvaluationScoreService integration', () => {
 
   it('ingests scores with deterministic conflicts on rewrite', async () => {
     const service = new EvaluationScoreService(loggingSystemMock.createLogger(), coreDataStreams);
-    const runId = `service-integration-run-${Date.now()}`;
-    const payload = getPayload(runId);
+    const experimentId = `service-integration-experiment-${Date.now()}`;
+    const payload = getPayload(experimentId);
 
     expect(
       await esClient.indices.existsIndexTemplate({
@@ -147,7 +146,7 @@ describe('EvaluationScoreService integration', () => {
     const searchResult = await service.search({
       query: {
         term: {
-          run_id: runId,
+          experiment_id: experimentId,
         },
       },
     });

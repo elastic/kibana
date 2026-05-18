@@ -14,4 +14,4 @@ export const BAGGAGE_TRACKING_BEACON_VALUE = '1';
  * This is intended to be set by clients (e.g. Scout/evals test runner) via the `baggage` HTTP header,
  * and then propagated through tracing context.
  */
-export const EVAL_RUN_ID_BAGGAGE_KEY = 'kibana.evals.run_id';
+export const EVAL_EXPERIMENT_ID_BAGGAGE_KEY = 'kibana.evals.experiment_id';

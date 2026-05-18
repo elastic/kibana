@@ -9,13 +9,13 @@ import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
-import { EVALS_RUNS_COMPARE_URL, API_VERSIONS } from '@kbn/evals-common';
+import { EVALS_EXPERIMENTS_COMPARE_URL, API_VERSIONS } from '@kbn/evals-common';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
-import { registerCompareRunsRoute } from './compare_runs';
+import { registerCompareExperimentsRoute } from './compare_experiments';
 
 const makeScoreDoc = ({
-  runId = 'run-a',
+  experimentId = 'experiment-a',
   datasetId = 'ds-1',
   datasetName = 'Dataset 1',
   exampleId = 'ex-1',
@@ -23,7 +23,7 @@ const makeScoreDoc = ({
   score = 0.8,
   repetitionIndex = 0,
 }: {
-  runId?: string;
+  experimentId?: string;
   datasetId?: string;
   datasetName?: string;
   exampleId?: string;
@@ -32,8 +32,7 @@ const makeScoreDoc = ({
   repetitionIndex?: number;
 } = {}) => ({
   '@timestamp': '2025-01-01T00:00:00Z',
-  run_id: runId,
-  experiment_id: 'exp-1',
+  experiment_id: experimentId,
   example: {
     id: exampleId,
     index: 0,
@@ -53,7 +52,7 @@ const makeScoreDoc = ({
     trace_id: null,
     model: { id: 'claude-3', family: 'claude', provider: 'anthropic' },
   },
-  run_metadata: {
+  experiment_metadata: {
     git_branch: 'main',
     git_commit_sha: 'abc123',
     total_repetitions: 1,
@@ -61,11 +60,11 @@ const makeScoreDoc = ({
   environment: { hostname: 'test' },
 });
 
-describe('GET /internal/evals/runs/compare', () => {
+describe('GET /internal/evals/experiments/compare', () => {
   const setup = () => {
     const router = httpServiceMock.createRouter();
     const logger = loggingSystemMock.createLogger();
-    registerCompareRunsRoute({
+    registerCompareExperimentsRoute({
       router,
       logger,
       canEncrypt: false,
@@ -74,7 +73,7 @@ describe('GET /internal/evals/runs/compare', () => {
     });
 
     const versionedRouter = router.versioned as MockedVersionedRouter;
-    const { handler } = versionedRouter.getRoute('get', EVALS_RUNS_COMPARE_URL).versions[
+    const { handler } = versionedRouter.getRoute('get', EVALS_EXPERIMENTS_COMPARE_URL).versions[
       API_VERSIONS.internal.v1
     ];
 
@@ -92,14 +91,14 @@ describe('GET /internal/evals/runs/compare', () => {
     return { handler, context, evaluationScoreService, logger };
   };
 
-  const makeRequest = (runIdA = 'run-a', runIdB = 'run-b') =>
+  const makeRequest = (experimentIdA = 'experiment-a', experimentIdB = 'experiment-b') =>
     httpServerMock.createKibanaRequest({
       method: 'get',
-      path: EVALS_RUNS_COMPARE_URL,
-      query: { run_id_a: runIdA, run_id_b: runIdB },
+      path: EVALS_EXPERIMENTS_COMPARE_URL,
+      query: { experiment_id_a: experimentIdA, experiment_id_b: experimentIdB },
     });
 
-  it('queries both runs through evaluationScoreService.search', async () => {
+  it('queries both experiments through evaluationScoreService.search', async () => {
     const { handler, context, evaluationScoreService } = setup();
     evaluationScoreService.search.mockResolvedValue({
       hits: { hits: [], total: { value: 0, relation: 'eq' } },
@@ -110,13 +109,13 @@ describe('GET /internal/evals/runs/compare', () => {
     expect(evaluationScoreService.search).toHaveBeenCalledTimes(2);
   });
 
-  it('returns 404 when no scores exist for the first run', async () => {
+  it('returns 404 when no scores exist for the first experiment', async () => {
     const { handler, context, evaluationScoreService } = setup();
     evaluationScoreService.search
       .mockResolvedValueOnce({ hits: { hits: [], total: { value: 0, relation: 'eq' } } } as any)
       .mockResolvedValueOnce({
         hits: {
-          hits: [{ _source: makeScoreDoc({ runId: 'run-b' }) }],
+          hits: [{ _source: makeScoreDoc({ experimentId: 'experiment-b' }) }],
           total: { value: 1, relation: 'eq' },
         },
       } as any);
@@ -124,15 +123,15 @@ describe('GET /internal/evals/runs/compare', () => {
     const response = await handler(context, makeRequest(), kibanaResponseFactory);
 
     expect(response.status).toBe(404);
-    expect(response.payload.message).toContain('run-a');
+    expect(response.payload.message).toContain('experiment-a');
   });
 
-  it('returns 404 when no scores exist for the second run', async () => {
+  it('returns 404 when no scores exist for the second experiment', async () => {
     const { handler, context, evaluationScoreService } = setup();
     evaluationScoreService.search
       .mockResolvedValueOnce({
         hits: {
-          hits: [{ _source: makeScoreDoc({ runId: 'run-a' }) }],
+          hits: [{ _source: makeScoreDoc({ experimentId: 'experiment-a' }) }],
           total: { value: 1, relation: 'eq' },
         },
       } as any)
@@ -141,7 +140,7 @@ describe('GET /internal/evals/runs/compare', () => {
     const response = await handler(context, makeRequest(), kibanaResponseFactory);
 
     expect(response.status).toBe(404);
-    expect(response.payload.message).toContain('run-b');
+    expect(response.payload.message).toContain('experiment-b');
   });
 
   it('returns empty results when datasets do not overlap', async () => {

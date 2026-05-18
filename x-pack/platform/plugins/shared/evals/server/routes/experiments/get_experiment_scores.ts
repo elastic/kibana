@@ -6,45 +6,45 @@
  */
 
 import {
-  EVALS_RUN_SCORES_URL,
+  EVALS_EXPERIMENT_SCORES_URL,
   API_VERSIONS,
   INTERNAL_API_ACCESS,
-  buildRouteValidationWithZod,
-  buildRunFilterQuery,
+  buildExperimentFilterQuery,
   SCORES_SORT_ORDER,
-  GetEvaluationRunScoresRequestParams,
-  GetEvaluationRunScoresRequestQuery,
+  GetEvaluationExperimentScoresRequestParams,
+  GetEvaluationExperimentScoresRequestQuery,
 } from '@kbn/evals-common';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { PLUGIN_ID } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
 
-export const registerGetRunScoresRoute = ({ router, logger }: RouteDependencies) => {
+export const registerGetExperimentScoresRoute = ({ router, logger }: RouteDependencies) => {
   router.versioned
     .get({
-      path: EVALS_RUN_SCORES_URL,
+      path: EVALS_EXPERIMENT_SCORES_URL,
       access: INTERNAL_API_ACCESS,
       security: {
         authz: { requiredPrivileges: [PLUGIN_ID] },
       },
-      summary: 'Get evaluation run scores',
+      summary: 'Get evaluation experiment scores',
     })
     .addVersion(
       {
         version: API_VERSIONS.internal.v1,
         validate: {
           request: {
-            params: buildRouteValidationWithZod(GetEvaluationRunScoresRequestParams),
-            query: buildRouteValidationWithZod(GetEvaluationRunScoresRequestQuery),
+            params: buildRouteValidationWithZod(GetEvaluationExperimentScoresRequestParams),
+            query: buildRouteValidationWithZod(GetEvaluationExperimentScoresRequestQuery),
           },
         },
       },
       async (context, request, response) => {
         try {
-          const { runId } = request.params;
+          const { experimentId } = request.params;
           const { suite_id: suiteId, model_id: modelId } = request.query;
           const evalsContext = await context.evals;
 
-          const query = buildRunFilterQuery(runId, { suiteId, modelId });
+          const query = buildExperimentFilterQuery(experimentId, { suiteId, modelId });
 
           const searchResponse = await evalsContext.evaluationScoreService.search({
             query,
@@ -61,10 +61,10 @@ export const registerGetRunScoresRoute = ({ router, logger }: RouteDependencies)
             body: { scores, total: scores.length },
           });
         } catch (error) {
-          logger.error(`Failed to get evaluation run scores: ${error}`);
+          logger.error(`Failed to get evaluation experiment scores: ${error}`);
           return response.customError({
             statusCode: 500,
-            body: { message: 'Failed to get evaluation run scores' },
+            body: { message: 'Failed to get evaluation experiment scores' },
           });
         }
       }

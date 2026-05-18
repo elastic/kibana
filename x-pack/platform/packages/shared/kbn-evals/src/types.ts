@@ -135,7 +135,12 @@ export interface EvalsExecutorClient {
     TTaskOutput extends TaskOutput = TaskOutput
   >(
     options: {
-      dataset: TEvaluationDataset;
+      /**
+       * One or more datasets to run the experiment against.
+       * When an array is provided, each dataset is processed independently
+       * and a separate {@link RanExperiment} is returned per dataset.
+       */
+      dataset: TEvaluationDataset | TEvaluationDataset[];
       metadata?: Record<string, unknown>;
       task: ExperimentTask<TEvaluationDataset['examples'][number], TTaskOutput>;
       concurrency?: number;
@@ -149,7 +154,7 @@ export interface EvalsExecutorClient {
       trustUpstreamDataset?: boolean;
     },
     evaluators: Array<Evaluator<TEvaluationDataset['examples'][number], TTaskOutput>>
-  ): Promise<RanExperiment>;
+  ): Promise<RanExperiment | RanExperiment[]>;
 
   getRanExperiments(): Promise<RanExperiment[]>;
 }
@@ -221,10 +226,10 @@ export interface EvaluationReport {
   model: Model;
   evaluatorModel: Model;
   repetitions: number;
-  runId: string;
+  experimentId: string;
 }
 
-export interface WorkerRunIdRef {
+export interface WorkerExperimentIdRef {
   current: string | undefined;
 }
 
@@ -238,7 +243,7 @@ export interface EvaluationSpecificWorkerFixtures {
   executorClient: EvalsExecutorClient;
   evaluators: DefaultEvaluators;
   fetch: HttpHandler;
-  workerRunId: WorkerRunIdRef;
+  workerExperimentId: WorkerExperimentIdRef;
   connector: AvailableConnectorWithId;
   evaluationConnector: AvailableConnectorWithId;
   repetitions: number;

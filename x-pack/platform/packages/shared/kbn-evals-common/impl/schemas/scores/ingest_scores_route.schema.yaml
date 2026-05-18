@@ -19,8 +19,6 @@ paths:
             schema:
               type: object
               properties:
-                run_id:
-                  type: string
                 experiment_id:
                   type: string
                 suite_id:
@@ -29,7 +27,7 @@ paths:
                   $ref: '../common_attributes.schema.yaml#/components/schemas/Model'
                 evaluator_model:
                   $ref: '../common_attributes.schema.yaml#/components/schemas/Model'
-                run_metadata:
+                experiment_metadata:
                   type: object
                   properties:
                     git_branch:
@@ -121,11 +119,10 @@ paths:
                       - task
                       - evaluator
               required:
-                - run_id
                 - experiment_id
                 - task_model
                 - evaluator_model
-                - run_metadata
+                - experiment_metadata
                 - environment
                 - scores
       responses:

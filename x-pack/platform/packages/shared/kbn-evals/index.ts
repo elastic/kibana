@@ -71,7 +71,7 @@ export type {
   EvaluatorDisplayGroup,
 } from './src/utils/reporting/report_table';
 export { createTable } from './src/utils/reporting/report_table';
-export { EvalsClient, type EvaluatorStats, type RunStats } from './src/utils/evals_client';
+export { EvalsClient, type EvaluatorStats, type ExperimentStats } from './src/utils/evals_client';
 export { getBuildkiteCiMetadataFromEnv, type BuildkiteCiMetadata } from './src/utils/ci_metadata';
 export { buildIngestRequest } from './src/utils/build_ingest_request';
 

@@ -10,6 +10,7 @@ import type { InferenceConnectorType, InferenceConnector, Model } from '@kbn/inf
 import { getConnectorModel, getConnectorFamily, getConnectorProvider } from '@kbn/inference-common';
 import { createRestClient } from '@kbn/inference-plugin/common';
 import {
+  API_VERSIONS,
   DATASET_UUID_NAMESPACE,
   EVALS_DATASET_UPSERT_URL,
   EVALS_DATASET_URL,
@@ -269,9 +270,9 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
       const suiteId = process.env.EVAL_SUITE_ID;
       const buildkiteMetadata = getBuildkiteCiMetadataFromEnv();
 
-      const currentRunId = process.env.TEST_RUN_ID;
-      if (!currentRunId) {
-        throw new Error('runId must be provided via TEST_RUN_ID environment variable');
+      const currentExperimentId = process.env.TEST_RUN_ID;
+      if (!currentExperimentId) {
+        throw new Error('experiment ID must be provided via TEST_RUN_ID environment variable');
       }
 
       const upsertDataset = async (dataset: EvaluationDataset) => {
@@ -283,6 +284,7 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
             description: dataset.description,
             examples: dataset.examples.map(toDatasetRouteExample),
           },
+          headers: { 'elastic-api-version': API_VERSIONS.internal.v1 },
           retries: 0,
         });
       };
@@ -294,6 +296,7 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
         const response = await evaluationsKbnClient.request({
           path: EVALS_DATASET_URL.replace('{datasetId}', encodeURIComponent(datasetId)),
           method: 'GET',
+          headers: { 'elastic-api-version': API_VERSIONS.internal.v1 },
           retries: 0,
         });
         const datasetResponse = GetEvaluationDatasetResponse.parse(response.data);
@@ -317,13 +320,13 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
       const executorClient = new KibanaEvalsClient({
         log,
         model,
-        runId: currentRunId,
+        experimentId: currentExperimentId,
         repetitions,
         upsertDataset,
         getDatasetByName,
         onEvaluationComplete: async (event) => {
           const ingestRequests = buildIngestRequest({
-            runId: currentRunId,
+            experimentId: currentExperimentId,
             taskModel: model,
             evaluatorModel,
             repetitions,
@@ -342,16 +345,16 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
 
       await use(executorClient);
 
-      if (!currentRunId) {
+      if (!currentExperimentId) {
         throw new Error(
-          'runId must be provided via TEST_RUN_ID environment variable before exporting scores'
+          'experiment ID must be provided via TEST_RUN_ID environment variable before exporting scores'
         );
       }
 
       const experiments = await executorClient.getRanExperiments();
       const ingestRequests = buildIngestRequest({
         source: { kind: 'experiments', experiments },
-        runId: currentRunId,
+        experimentId: currentExperimentId,
         taskModel: model,
         evaluatorModel,
         repetitions,
@@ -368,14 +371,15 @@ export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
         );
       } catch (error) {
         log.error(
-          new Error(`Failed to ingest evaluation results for run ID: ${currentRunId}.`, {
-            cause: error,
-          })
+          new Error(
+            `Failed to ingest evaluation results for experiment ID: ${currentExperimentId}.`,
+            { cause: error }
+          )
         );
         throw error;
       }
 
-      await reportModelScore(evalsClient, currentRunId, log, {
+      await reportModelScore(evalsClient, currentExperimentId, log, {
         taskModelId: model.id,
         suiteId,
       });

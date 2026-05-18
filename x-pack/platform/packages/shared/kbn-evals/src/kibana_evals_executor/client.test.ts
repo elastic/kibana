@@ -40,7 +40,7 @@ describe('KibanaEvalsClient', () => {
     new KibanaEvalsClient({
       log: mockLog,
       model,
-      runId: 'run-1',
+      experimentId: 'experiment-1',
       repetitions: 1,
       ...overrides,
     });
@@ -174,7 +174,7 @@ describe('KibanaEvalsClient', () => {
     expect(exp.experimentMetadata).toMatchObject({
       foo: 'bar',
       model,
-      runId: 'run-1',
+      experimentId: 'experiment-1',
     });
 
     const all = await client.getRanExperiments();

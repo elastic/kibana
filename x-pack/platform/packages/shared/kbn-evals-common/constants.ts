@@ -7,13 +7,14 @@
 
 export const EVALS_INTERNAL_URL = '/internal/evals' as const;
 
-export const EVALS_RUNS_URL = `${EVALS_INTERNAL_URL}/runs` as const;
-export const EVALS_RUN_URL = `${EVALS_INTERNAL_URL}/runs/{runId}` as const;
-export const EVALS_RUN_SCORES_URL = `${EVALS_INTERNAL_URL}/runs/{runId}/scores` as const;
+export const EVALS_EXPERIMENTS_URL = `${EVALS_INTERNAL_URL}/experiments` as const;
+export const EVALS_EXPERIMENT_URL = `${EVALS_INTERNAL_URL}/experiments/{experimentId}` as const;
+export const EVALS_EXPERIMENT_SCORES_URL =
+  `${EVALS_INTERNAL_URL}/experiments/{experimentId}/scores` as const;
 export const EVALS_SCORES_URL = `${EVALS_INTERNAL_URL}/scores` as const;
-export const EVALS_RUNS_COMPARE_URL = `${EVALS_INTERNAL_URL}/runs/compare` as const;
-export const EVALS_RUN_DATASET_EXAMPLES_URL =
-  `${EVALS_INTERNAL_URL}/runs/{runId}/datasets/{datasetId}/examples` as const;
+export const EVALS_EXPERIMENTS_COMPARE_URL = `${EVALS_INTERNAL_URL}/experiments/compare` as const;
+export const EVALS_EXPERIMENT_DATASET_EXAMPLES_URL =
+  `${EVALS_INTERNAL_URL}/experiments/{experimentId}/datasets/{datasetId}/examples` as const;
 export const EVALS_EXAMPLE_SCORES_URL =
   `${EVALS_INTERNAL_URL}/examples/{exampleId}/scores` as const;
 export const EVALS_TRACE_URL = `${EVALS_INTERNAL_URL}/traces/{traceId}` as const;

@@ -1,19 +1,19 @@
 openapi: 3.0.0
 info:
-  title: Get Evaluation Run API endpoint
+  title: Get Evaluation Experiment API endpoint
   version: "1"
 paths:
-  /internal/evals/runs/{runId}:
+  /internal/evals/experiments/{experimentId}:
     get:
       x-codegen-enabled: true
       x-labels: [ess, serverless]
-      operationId: GetEvaluationRun
-      description: Get details and statistics for a single evaluation run
-      summary: Get evaluation run detail
+      operationId: GetEvaluationExperiment
+      description: Get details and statistics for a single evaluation experiment
+      summary: Get evaluation experiment detail
       tags:
         - Evals API
       parameters:
-        - name: runId
+        - name: experimentId
           in: path
           required: true
           schema:
@@ -38,7 +38,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  run_id:
+                  experiment_id:
                     type: string
                   timestamp:
                     type: string
@@ -61,10 +61,10 @@ paths:
                     items:
                       $ref: '../common_attributes.schema.yaml#/components/schemas/EvaluatorStats'
                 required:
-                  - run_id
+                  - experiment_id
                   - stats
         "404":
-          description: Run not found
+          description: Experiment not found
           content:
             application/json:
               schema:

@@ -12,7 +12,6 @@ import { EvaluationIndices } from '@kbn/evals-common';
 const evaluationsDataStreamMappings = {
   properties: {
     '@timestamp': { type: 'date' },
-    run_id: { type: 'keyword' },
     experiment_id: { type: 'keyword' },
     suite: {
       type: 'object',
@@ -87,7 +86,7 @@ const evaluationsDataStreamMappings = {
         },
       },
     },
-    run_metadata: {
+    experiment_metadata: {
       type: 'object',
       properties: {
         git_branch: { type: 'keyword' },

@@ -29,7 +29,7 @@ type DataStreamSearchResponse = Awaited<ReturnType<AnyIDataStreamClient['search'
 export const computeScoreDocumentId = (document: EvaluationScoreDocument): string => {
   const suiteId = document.suite?.id ?? DEFAULT_SUITE_ID;
   return [
-    document.run_id,
+    document.experiment_id,
     suiteId,
     document.task.model.id,
     document.example.dataset.id,
@@ -46,7 +46,6 @@ const toEvaluationScoreDocuments = (
   return request.scores.map((score) => {
     const payload: EvaluationScoreDocument = {
       '@timestamp': timestamp,
-      run_id: request.run_id,
       experiment_id: request.experiment_id,
       suite: request.suite_id ? { id: request.suite_id } : undefined,
       ci: request.ci,
@@ -71,10 +70,10 @@ const toEvaluationScoreDocuments = (
         trace_id: score.evaluator.trace_id,
         model: request.evaluator_model,
       },
-      run_metadata: {
-        git_branch: request.run_metadata.git_branch ?? null,
-        git_commit_sha: request.run_metadata.git_commit_sha ?? null,
-        total_repetitions: request.run_metadata.total_repetitions,
+      experiment_metadata: {
+        git_branch: request.experiment_metadata.git_branch ?? null,
+        git_commit_sha: request.experiment_metadata.git_commit_sha ?? null,
+        total_repetitions: request.experiment_metadata.total_repetitions,
       },
       environment: {
         hostname: request.environment.hostname,

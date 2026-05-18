@@ -14,70 +14,73 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { Model, BuildkiteMetadata } from '../common_attributes.gen';
 
-export type IngestScoresRequestBody = z.infer<typeof IngestScoresRequestBody>;
-export const IngestScoresRequestBody = z.object({
-  run_id: z.string(),
-  experiment_id: z.string(),
-  suite_id: z.string().optional(),
-  task_model: Model,
-  evaluator_model: Model,
-  run_metadata: z.object({
-    git_branch: z.string().optional(),
-    git_commit_sha: z.string().optional(),
-    total_repetitions: z.number().int(),
-  }),
-  environment: z.object({
-    hostname: z.string(),
-  }),
-  ci: z
-    .object({
-      buildkite: BuildkiteMetadata.optional(),
-    })
-    .optional(),
-  scores: z
-    .array(
-      z.object({
-        example: z.object({
-          id: z.string(),
-          index: z.number().int(),
-          input: z.object({}).catchall(z.unknown()).optional(),
-          dataset: z.object({
-            id: z.string(),
-            name: z.string(),
-          }),
-        }),
-        task: z.object({
-          trace_id: z.string().optional(),
-          repetition_index: z.number().int(),
-          output: z.object({}).catchall(z.unknown()).optional(),
-        }),
-        evaluator: z.object({
-          name: z.string(),
-          score: z.number().nullable().optional(),
-          label: z.string().nullable().optional(),
-          explanation: z.string().nullable().optional(),
-          metadata: z.object({}).catchall(z.unknown()).optional(),
-          trace_id: z.string().nullable().optional(),
-        }),
+export const IngestScoresRequestBody = lazySchema(() =>
+  z.object({
+    experiment_id: z.string(),
+    suite_id: z.string().optional(),
+    task_model: Model,
+    evaluator_model: Model,
+    experiment_metadata: z.object({
+      git_branch: z.string().optional(),
+      git_commit_sha: z.string().optional(),
+      total_repetitions: z.number().int(),
+    }),
+    environment: z.object({
+      hostname: z.string(),
+    }),
+    ci: z
+      .object({
+        buildkite: BuildkiteMetadata.optional(),
       })
-    )
-    .max(1000),
-});
+      .optional(),
+    scores: z
+      .array(
+        z.object({
+          example: z.object({
+            id: z.string(),
+            index: z.number().int(),
+            input: z.object({}).catchall(z.unknown()).optional(),
+            dataset: z.object({
+              id: z.string(),
+              name: z.string(),
+            }),
+          }),
+          task: z.object({
+            trace_id: z.string().optional(),
+            repetition_index: z.number().int(),
+            output: z.object({}).catchall(z.unknown()).optional(),
+          }),
+          evaluator: z.object({
+            name: z.string(),
+            score: z.number().nullable().optional(),
+            label: z.string().nullable().optional(),
+            explanation: z.string().nullable().optional(),
+            metadata: z.object({}).catchall(z.unknown()).optional(),
+            trace_id: z.string().nullable().optional(),
+          }),
+        })
+      )
+      .max(1000),
+  })
+);
+export type IngestScoresRequestBody = z.infer<typeof IngestScoresRequestBody>;
 export type IngestScoresRequestBodyInput = z.input<typeof IngestScoresRequestBody>;
 
+export const IngestScoresResponse = lazySchema(() =>
+  z.object({
+    ingested: z.number().int(),
+    conflicted: z.number().int(),
+    failed: z.array(
+      z.object({
+        index: z.number().int(),
+        status: z.number().int(),
+        reason: z.string(),
+      })
+    ),
+  })
+);
 export type IngestScoresResponse = z.infer<typeof IngestScoresResponse>;
-export const IngestScoresResponse = z.object({
-  ingested: z.number().int(),
-  conflicted: z.number().int(),
-  failed: z.array(
-    z.object({
-      index: z.number().int(),
-      status: z.number().int(),
-      reason: z.string(),
-    })
-  ),
-});

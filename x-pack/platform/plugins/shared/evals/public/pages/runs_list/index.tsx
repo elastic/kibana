@@ -25,7 +25,7 @@ import {
   type EuiTableSelectionType,
 } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
-import type { EvaluationRunSummary } from '@kbn/evals-common';
+import type { EvaluationExperimentSummary } from '@kbn/evals-common';
 import { useEvaluationRuns } from '../../hooks/use_evals_api';
 import { resolvePrUrl } from '../../utils/pr_url';
 import * as i18n from './translations';
@@ -37,7 +37,7 @@ export const RunsListPage: React.FC = () => {
   const [pageSize, setPageSize] = useState(25);
   const [searchText, setSearchText] = useState('');
   const [suiteIdFilter, setSuiteIdFilter] = useState('');
-  const [selectedRuns, setSelectedRuns] = useState<EvaluationRunSummary[]>([]);
+  const [selectedRuns, setSelectedRuns] = useState<EvaluationExperimentSummary[]>([]);
 
   const { data, isLoading, error, refetch } = useEvaluationRuns({
     page: pageIndex + 1,
@@ -56,9 +56,9 @@ export const RunsListPage: React.FC = () => {
     const options = [{ value: '', text: i18n.SUITE_FILTER_ALL_OPTION }];
     const suiteSet = new Set<string>();
 
-    for (const run of suiteFilterData?.runs ?? []) {
-      if (run.suite_id) {
-        suiteSet.add(run.suite_id);
+    for (const experiment of suiteFilterData?.experiments ?? []) {
+      if (experiment.suite_id) {
+        suiteSet.add(experiment.suite_id);
       }
     }
 
@@ -67,19 +67,19 @@ export const RunsListPage: React.FC = () => {
     }
 
     return options;
-  }, [suiteFilterData?.runs]);
+  }, [suiteFilterData?.experiments]);
 
-  const columns: Array<EuiBasicTableColumn<EvaluationRunSummary>> = useMemo(
+  const columns: Array<EuiBasicTableColumn<EvaluationExperimentSummary>> = useMemo(
     () => [
       {
-        field: 'run_id',
+        field: 'experiment_id',
         name: i18n.COLUMN_RUN_ID,
         sortable: true,
         truncateText: true,
         width: '200px',
-        render: (runId: string) => (
-          <EuiLink onClick={() => history.push(`/runs/${encodeURIComponent(runId)}`)}>
-            {runId.slice(0, 12)}...
+        render: (experimentId: string) => (
+          <EuiLink onClick={() => history.push(`/runs/${encodeURIComponent(experimentId)}`)}>
+            {experimentId.slice(0, 12)}...
           </EuiLink>
         ),
       },
@@ -98,13 +98,13 @@ export const RunsListPage: React.FC = () => {
       {
         field: 'task_model',
         name: i18n.COLUMN_TASK_MODEL,
-        render: (model: EvaluationRunSummary['task_model']) =>
+        render: (model: EvaluationExperimentSummary['task_model']) =>
           model ? <EuiBadge color="primary">{model.id}</EuiBadge> : '-',
       },
       {
         field: 'evaluator_model',
         name: i18n.COLUMN_EVALUATOR_MODEL,
-        render: (model: EvaluationRunSummary['evaluator_model']) =>
+        render: (model: EvaluationExperimentSummary['evaluator_model']) =>
           model ? <EuiBadge color="accent">{model.id}</EuiBadge> : '-',
       },
       {
@@ -120,7 +120,7 @@ export const RunsListPage: React.FC = () => {
       {
         field: 'ci',
         name: i18n.COLUMN_CI,
-        render: (ci: EvaluationRunSummary['ci']) =>
+        render: (ci: EvaluationExperimentSummary['ci']) =>
           ci?.build_url ? (
             <span
               onClick={(event) => event.stopPropagation()}
@@ -138,7 +138,7 @@ export const RunsListPage: React.FC = () => {
       {
         field: 'ci',
         name: i18n.COLUMN_PULL_REQUEST,
-        render: (ci: EvaluationRunSummary['ci']) => {
+        render: (ci: EvaluationExperimentSummary['ci']) => {
           const prRaw = ci?.pull_request;
           if (!prRaw) return '-';
           const prUrl = resolvePrUrl(prRaw);
@@ -167,7 +167,7 @@ export const RunsListPage: React.FC = () => {
     pageSizeOptions: [10, 25, 50],
   };
 
-  const onTableChange = ({ page }: CriteriaWithPagination<EvaluationRunSummary>) => {
+  const onTableChange = ({ page }: CriteriaWithPagination<EvaluationExperimentSummary>) => {
     if (page) {
       setPageIndex(page.index);
       setPageSize(page.size);
@@ -176,20 +176,24 @@ export const RunsListPage: React.FC = () => {
 
   const hasSelection = selectedRuns.length > 0;
   const lockedSuiteId = hasSelection ? selectedRuns[0].suite_id : undefined;
-  const selectedRunIds = useMemo(() => new Set(selectedRuns.map((r) => r.run_id)), [selectedRuns]);
+  const selectedRunIds = useMemo(
+    () => new Set(selectedRuns.map((r) => r.experiment_id)),
+    [selectedRuns]
+  );
   const selectionFull = selectedRuns.length >= 2;
 
-  const selection: EuiTableSelectionType<EvaluationRunSummary> = useMemo(
+  const selection: EuiTableSelectionType<EvaluationExperimentSummary> = useMemo(
     () => ({
-      onSelectionChange: (items: EvaluationRunSummary[]) => setSelectedRuns(items),
-      selectable: (run: EvaluationRunSummary) => {
-        if (selectedRunIds.has(run.run_id)) return true;
+      onSelectionChange: (items: EvaluationExperimentSummary[]) => setSelectedRuns(items),
+      selectable: (run: EvaluationExperimentSummary) => {
+        if (selectedRunIds.has(run.experiment_id)) return true;
         if (selectionFull) return false;
         return !hasSelection || run.suite_id === lockedSuiteId;
       },
-      selectableMessage: (selectable: boolean, run: EvaluationRunSummary) => {
+      selectableMessage: (selectable: boolean, run: EvaluationExperimentSummary) => {
         if (selectable) return '';
-        if (selectionFull && !selectedRunIds.has(run.run_id)) return i18n.COMPARE_MAX_SELECTED_HINT;
+        if (selectionFull && !selectedRunIds.has(run.experiment_id))
+          return i18n.COMPARE_MAX_SELECTED_HINT;
         return i18n.COMPARE_DIFFERENT_SUITE_HINT;
       },
     }),
@@ -204,7 +208,9 @@ export const RunsListPage: React.FC = () => {
     if (!canCompare) return;
     const [runA, runB] = selectedRuns;
     history.push(
-      `/compare?runA=${encodeURIComponent(runA.run_id)}&runB=${encodeURIComponent(runB.run_id)}`
+      `/compare?runA=${encodeURIComponent(runA.experiment_id)}&runB=${encodeURIComponent(
+        runB.experiment_id
+      )}`
     );
   }, [canCompare, selectedRuns, history]);
 
@@ -262,10 +268,10 @@ export const RunsListPage: React.FC = () => {
           ]}
         />
       ) : (
-        <EuiBasicTable<EvaluationRunSummary>
+        <EuiBasicTable<EvaluationExperimentSummary>
           tableCaption={i18n.TABLE_CAPTION}
-          items={data?.runs ?? []}
-          itemId="run_id"
+          items={data?.experiments ?? []}
+          itemId="experiment_id"
           columns={columns}
           loading={isLoading}
           pagination={pagination}
@@ -275,7 +281,7 @@ export const RunsListPage: React.FC = () => {
             onClick: (e: React.MouseEvent) => {
               const target = e.target as HTMLElement;
               if (target.closest('.euiTableRowCellCheckbox, .euiLink, a')) return;
-              history.push(`/runs/${encodeURIComponent(item.run_id)}`);
+              history.push(`/runs/${encodeURIComponent(item.experiment_id)}`);
             },
             style: { cursor: 'pointer' },
           })}

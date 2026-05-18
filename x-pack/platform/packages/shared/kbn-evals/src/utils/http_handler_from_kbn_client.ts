@@ -34,15 +34,15 @@ export function httpHandlerFromKbnClient({
 
     const { method = 'GET', body, asResponse, rawResponse, query, signal, headers } = options;
 
-    // Add a W3C baggage entry so Kibana can tag OTEL spans with the eval run id.
-    // This enables correlating traces (traces-*) with eval score docs (.kibana-evaluation-scores*) via run_id.
-    const runId = process.env.TEST_RUN_ID;
+    // Add a W3C baggage entry so Kibana can tag OTEL spans with the eval experiment id.
+    // This enables correlating traces (traces-*) with eval score docs (.kibana-evaluation-scores*) via experiment_id.
+    const experimentId = process.env.TEST_RUN_ID;
     const nextHeaders: Record<string, string> = headers
       ? ({ ...(headers as Record<string, unknown>) } as Record<string, string>)
       : {};
 
-    if (runId) {
-      const baggageEntry = `kibana.evals.run_id=${encodeURIComponent(runId)}`;
+    if (experimentId) {
+      const baggageEntry = `kibana.evals.experiment_id=${encodeURIComponent(experimentId)}`;
       const existingKey = Object.keys(nextHeaders).find((k) => k.toLowerCase() === 'baggage');
       const existing = existingKey ? nextHeaders[existingKey] : undefined;
 

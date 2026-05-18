@@ -1,30 +1,30 @@
 openapi: 3.0.0
 info:
-  title: Compare Evaluation Runs API endpoint
+  title: Compare Evaluation Experiments API endpoint
   version: '1'
 paths:
-  /internal/evals/runs/compare:
+  /internal/evals/experiments/compare:
     get:
       x-codegen-enabled: true
       x-labels: [ess, serverless]
-      operationId: CompareRuns
-      description: Compare two evaluation runs using paired t-tests
-      summary: Compare two evaluation runs
+      operationId: CompareExperiments
+      description: Compare two evaluation experiments using paired t-tests
+      summary: Compare two evaluation experiments
       tags:
         - Evals API
       parameters:
-        - name: run_id_a
+        - name: experiment_id_a
           in: query
           required: true
           schema:
             type: string
-          description: First run ID
-        - name: run_id_b
+          description: First experiment ID
+        - name: experiment_id_b
           in: query
           required: true
           schema:
             type: string
-          description: Second run ID
+          description: Second experiment ID
       responses:
         '200':
           description: Successful response
@@ -48,10 +48,10 @@ paths:
                         type: integer
                       truncatedA:
                         type: boolean
-                        description: Whether Run A scores were truncated due to size limits
+                        description: Whether Experiment A scores were truncated due to size limits
                       truncatedB:
                         type: boolean
-                        description: Whether Run B scores were truncated due to size limits
+                        description: Whether Experiment B scores were truncated due to size limits
                     required:
                       - totalPairs
                       - skippedMissingPairs

@@ -14,7 +14,7 @@ import type { ReportDisplayOptions } from '../../types';
 
 export type EvaluationReporter = (
   evalsClient: EvalsClient,
-  runId: string,
+  experimentId: string,
   log: SomeDevLog,
   options?: { taskModelId?: string; suiteId?: string }
 ) => Promise<void>;
@@ -30,10 +30,10 @@ function buildReportHeader(taskModel: Model, evaluatorModel: Model): string[] {
 export function createDefaultTerminalReporter(
   options: { reportDisplayOptions?: ReportDisplayOptions } = {}
 ): EvaluationReporter {
-  return async (evalsClient: EvalsClient, runId: string, log: SomeDevLog, filter) => {
-    const runStats = await evalsClient.getRunStats(runId, filter);
+  return async (evalsClient: EvalsClient, experimentId: string, log: SomeDevLog, filter) => {
+    const experimentStats = await evalsClient.getExperimentStats(experimentId, filter);
 
-    if (!runStats || runStats.stats.length === 0) {
+    if (!experimentStats || experimentStats.stats.length === 0) {
       const filterSuffix = [
         filter?.taskModelId ? `task.model.id=${filter.taskModelId}` : null,
         filter?.suiteId ? `suite.id=${filter.suiteId}` : null,
@@ -42,17 +42,17 @@ export function createDefaultTerminalReporter(
         .join(', ');
 
       log.error(
-        `No evaluation results found for run ID: ${runId}${
+        `No evaluation results found for experiment ID: ${experimentId}${
           filterSuffix ? ` (${filterSuffix})` : ''
         }`
       );
       return;
     }
 
-    const header = buildReportHeader(runStats.taskModel, runStats.evaluatorModel);
+    const header = buildReportHeader(experimentStats.taskModel, experimentStats.evaluatorModel);
     const summaryTable = createTable(
-      runStats.stats,
-      runStats.totalRepetitions,
+      experimentStats.stats,
+      experimentStats.totalRepetitions,
       options.reportDisplayOptions
     );
 

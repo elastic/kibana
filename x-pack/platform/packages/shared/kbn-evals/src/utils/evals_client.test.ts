@@ -8,8 +8,8 @@
 import type { KbnClient } from '@kbn/kbn-client';
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import {
-  EVALS_RUN_SCORES_URL,
-  EVALS_RUN_URL,
+  EVALS_EXPERIMENT_SCORES_URL,
+  EVALS_EXPERIMENT_URL,
   EVALS_SCORES_URL,
   MAX_SCORES_PER_QUERY,
   type EvaluationScoreDocument,
@@ -41,12 +41,11 @@ const createLog = (): jest.Mocked<SomeDevLog> =>
   } as unknown as jest.Mocked<SomeDevLog>);
 
 const createIngestRequest = (): IngestScoresRequestBodyInput => ({
-  run_id: 'run-123',
   experiment_id: 'experiment-1',
   suite_id: 'suite-a',
   task_model: { id: 'gpt-4', family: 'gpt', provider: 'openai' },
   evaluator_model: { id: 'gpt-4o-mini', family: 'gpt', provider: 'openai' },
-  run_metadata: { git_branch: 'main', git_commit_sha: 'abc123', total_repetitions: 2 },
+  experiment_metadata: { git_branch: 'main', git_commit_sha: 'abc123', total_repetitions: 2 },
   environment: { hostname: 'ci-host' },
   ci: {
     buildkite: {
@@ -84,7 +83,6 @@ const createIngestRequest = (): IngestScoresRequestBodyInput => ({
 
 const createScoreDocument = (id: string): EvaluationScoreDocument => ({
   '@timestamp': '2026-05-01T11:00:00.000Z',
-  run_id: 'run-123',
   experiment_id: 'experiment-1',
   suite: { id: 'suite-a' },
   example: {
@@ -111,7 +109,7 @@ const createScoreDocument = (id: string): EvaluationScoreDocument => ({
     trace_id: null,
     model: { id: 'gpt-4o-mini', family: 'gpt', provider: 'openai' },
   },
-  run_metadata: {
+  experiment_metadata: {
     git_branch: 'main',
     git_commit_sha: 'abc123',
     total_repetitions: 2,
@@ -193,12 +191,12 @@ describe('EvalsClient', () => {
     }
   );
 
-  it('getRunStats maps API response to RunStats shape', async () => {
+  it('getExperimentStats maps API response to ExperimentStats shape', async () => {
     const kbnClient = createMockKbnClient();
     const log = createLog();
     kbnClient.request.mockResolvedValue(
       asKbnResponse({
-        run_id: 'run-123',
+        experiment_id: 'experiment-123',
         timestamp: '2026-05-01T11:00:00.000Z',
         task_model: { id: 'gpt-4', family: 'gpt', provider: 'openai' },
         evaluator_model: { id: 'gpt-4o-mini', family: 'gpt', provider: 'openai' },
@@ -222,14 +220,14 @@ describe('EvalsClient', () => {
     );
     const client = new EvalsClient(kbnClient, log);
 
-    const result = await client.getRunStats('run-123', {
+    const result = await client.getExperimentStats('experiment-123', {
       suiteId: 'suite-a',
       taskModelId: 'gpt-4',
     });
 
     expect(kbnClient.request).toHaveBeenCalledWith(
       expect.objectContaining({
-        path: EVALS_RUN_URL.replace('{runId}', 'run-123'),
+        path: EVALS_EXPERIMENT_URL.replace('{experimentId}', 'experiment-123'),
         method: 'GET',
         query: { suite_id: 'suite-a', model_id: 'gpt-4' },
       })
@@ -256,24 +254,24 @@ describe('EvalsClient', () => {
     });
   });
 
-  it('getRunScores returns parsed score documents', async () => {
+  it('getExperimentScores returns parsed score documents', async () => {
     const kbnClient = createMockKbnClient();
     const log = createLog();
     const scores = [createScoreDocument('example-1'), createScoreDocument('example-2')];
     kbnClient.request.mockResolvedValue(asKbnResponse({ scores, total: scores.length }));
     const client = new EvalsClient(kbnClient, log);
 
-    await expect(client.getRunScores('run-123')).resolves.toEqual(scores);
+    await expect(client.getExperimentScores('experiment-123')).resolves.toEqual(scores);
 
     expect(kbnClient.request).toHaveBeenCalledWith(
       expect.objectContaining({
-        path: EVALS_RUN_SCORES_URL.replace('{runId}', 'run-123'),
+        path: EVALS_EXPERIMENT_SCORES_URL.replace('{experimentId}', 'experiment-123'),
         method: 'GET',
       })
     );
   });
 
-  it('getRunScores returns [] and logs when response exceeds MAX_SCORES_PER_QUERY', async () => {
+  it('getExperimentScores returns [] and logs when response exceeds MAX_SCORES_PER_QUERY', async () => {
     const kbnClient = createMockKbnClient();
     const log = createLog();
     kbnClient.request.mockResolvedValue(
@@ -284,10 +282,10 @@ describe('EvalsClient', () => {
     );
     const client = new EvalsClient(kbnClient, log);
 
-    await expect(client.getRunScores('run-123')).resolves.toEqual([]);
+    await expect(client.getExperimentScores('experiment-123')).resolves.toEqual([]);
 
     expect(log.error).toHaveBeenCalledWith(
-      'Failed to retrieve scores for run ID run-123:',
+      'Failed to retrieve scores for experiment ID experiment-123:',
       expect.objectContaining({
         message: expect.stringContaining('exceeds MAX_SCORES_PER_QUERY'),
       })

@@ -49,7 +49,7 @@ import { useHistory, useParams } from 'react-router-dom';
 import { TraceWaterfall, useTraceSpans } from '@kbn/llm-trace-waterfall';
 import type {
   DatasetExample,
-  EvaluationRunSummary,
+  EvaluationExperimentSummary,
   EvaluationScoreDocument,
 } from '@kbn/evals-common';
 import {
@@ -365,18 +365,18 @@ export const DatasetDetailPage: React.FC = () => {
     []
   );
 
-  const runsColumns: Array<EuiBasicTableColumn<EvaluationRunSummary>> = useMemo(
+  const runsColumns: Array<EuiBasicTableColumn<EvaluationExperimentSummary>> = useMemo(
     () => [
       {
-        field: 'run_id',
+        field: 'experiment_id',
         name: i18n.COLUMN_RUN_ID,
-        render: (runId: string) => (
+        render: (experimentId: string) => (
           <EuiLink
             onClick={() =>
-              history.push(`/runs/${runId}?dataset_id=${encodeURIComponent(datasetId)}`)
+              history.push(`/runs/${experimentId}?dataset_id=${encodeURIComponent(datasetId)}`)
             }
           >
-            {truncate(runId, 12)}
+            {truncate(experimentId, 12)}
           </EuiLink>
         ),
       },
@@ -393,12 +393,12 @@ export const DatasetDetailPage: React.FC = () => {
       {
         field: 'task_model',
         name: i18n.COLUMN_RUN_TASK_MODEL,
-        render: (value: EvaluationRunSummary['task_model']) => value?.id ?? '-',
+        render: (value: EvaluationExperimentSummary['task_model']) => value?.id ?? '-',
       },
       {
         field: 'evaluator_model',
         name: i18n.COLUMN_RUN_EVALUATOR_MODEL,
-        render: (value: EvaluationRunSummary['evaluator_model']) => value?.id ?? '-',
+        render: (value: EvaluationExperimentSummary['evaluator_model']) => value?.id ?? '-',
       },
     ],
     [datasetId, history]
@@ -427,10 +427,10 @@ export const DatasetDetailPage: React.FC = () => {
   const exampleRunRows = useMemo<RunScoreRow[]>(() => {
     const groupedRuns = new Map<string, RunScoreRow>();
     for (const score of exampleScoresData?.scores ?? []) {
-      const existing = groupedRuns.get(score.run_id);
+      const existing = groupedRuns.get(score.experiment_id);
       if (!existing) {
-        groupedRuns.set(score.run_id, {
-          runId: score.run_id,
+        groupedRuns.set(score.experiment_id, {
+          runId: score.experiment_id,
           timestamp: score['@timestamp'],
           taskModelId: score.task.model.id,
           scores: [score],
@@ -694,9 +694,9 @@ export const DatasetDetailPage: React.FC = () => {
               <h3>{i18n.RUNS_SECTION_TITLE}</h3>
             </EuiTitle>
             <EuiSpacer size="s" />
-            <EuiBasicTable<EvaluationRunSummary>
+            <EuiBasicTable<EvaluationExperimentSummary>
               tableCaption={i18n.RUNS_SECTION_TITLE}
-              items={runsData?.runs ?? []}
+              items={runsData?.experiments ?? []}
               columns={runsColumns}
               loading={isRunsLoading}
               noItemsMessage={i18n.RUNS_EMPTY_MESSAGE}

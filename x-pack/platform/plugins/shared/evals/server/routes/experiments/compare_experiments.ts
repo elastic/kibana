@@ -6,21 +6,21 @@
  */
 
 import {
-  EVALS_RUNS_COMPARE_URL,
+  EVALS_EXPERIMENTS_COMPARE_URL,
   API_VERSIONS,
   INTERNAL_API_ACCESS,
-  buildRouteValidationWithZod,
-  buildRunFilterQuery,
+  buildExperimentFilterQuery,
   SCORES_SORT_ORDER,
-  CompareRunsRequestQuery,
+  CompareExperimentsRequestQuery,
   pairScores,
   computePairedTTestResults,
 } from '@kbn/evals-common';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { EvaluationScoreDocument } from '@kbn/evals-common';
 import { PLUGIN_ID } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
 
-const MAX_SCORES_PER_RUN = 10_000;
+const MAX_SCORES_PER_EXPERIMENT = 10_000;
 
 const COMPARE_SOURCE_FIELDS = [
   'example.dataset.id',
@@ -31,42 +31,42 @@ const COMPARE_SOURCE_FIELDS = [
   'task.repetition_index',
 ];
 
-export const registerCompareRunsRoute = ({ router, logger }: RouteDependencies) => {
+export const registerCompareExperimentsRoute = ({ router, logger }: RouteDependencies) => {
   router.versioned
     .get({
-      path: EVALS_RUNS_COMPARE_URL,
+      path: EVALS_EXPERIMENTS_COMPARE_URL,
       access: INTERNAL_API_ACCESS,
       security: {
         authz: { requiredPrivileges: [PLUGIN_ID] },
       },
-      summary: 'Compare two evaluation runs',
+      summary: 'Compare two evaluation experiments',
     })
     .addVersion(
       {
         version: API_VERSIONS.internal.v1,
         validate: {
           request: {
-            query: buildRouteValidationWithZod(CompareRunsRequestQuery),
+            query: buildRouteValidationWithZod(CompareExperimentsRequestQuery),
           },
         },
       },
       async (context, request, response) => {
         try {
-          const { run_id_a: runIdA, run_id_b: runIdB } = request.query;
+          const { experiment_id_a: experimentIdA, experiment_id_b: experimentIdB } = request.query;
           const evalsContext = await context.evals;
 
           const [responseA, responseB] = await Promise.all([
             evalsContext.evaluationScoreService.search({
-              query: buildRunFilterQuery(runIdA),
+              query: buildExperimentFilterQuery(experimentIdA),
               sort: SCORES_SORT_ORDER,
-              size: MAX_SCORES_PER_RUN,
+              size: MAX_SCORES_PER_EXPERIMENT,
               _source: COMPARE_SOURCE_FIELDS,
               track_total_hits: true,
             }),
             evalsContext.evaluationScoreService.search({
-              query: buildRunFilterQuery(runIdB),
+              query: buildExperimentFilterQuery(experimentIdB),
               sort: SCORES_SORT_ORDER,
-              size: MAX_SCORES_PER_RUN,
+              size: MAX_SCORES_PER_EXPERIMENT,
               _source: COMPARE_SOURCE_FIELDS,
               track_total_hits: true,
             }),
@@ -80,13 +80,13 @@ export const registerCompareRunsRoute = ({ router, logger }: RouteDependencies) 
             typeof responseB.hits.total === 'number'
               ? responseB.hits.total
               : responseB.hits.total?.value ?? 0;
-          const truncatedA = totalHitsA > MAX_SCORES_PER_RUN;
-          const truncatedB = totalHitsB > MAX_SCORES_PER_RUN;
+          const truncatedA = totalHitsA > MAX_SCORES_PER_EXPERIMENT;
+          const truncatedB = totalHitsB > MAX_SCORES_PER_EXPERIMENT;
 
           if (truncatedA || truncatedB) {
             logger.warn(
-              `Compare runs: results truncated to ${MAX_SCORES_PER_RUN} scores per run. ` +
-                `Run A (${runIdA}): ${totalHitsA} total, Run B (${runIdB}): ${totalHitsB} total.`
+              `Compare experiments: results truncated to ${MAX_SCORES_PER_EXPERIMENT} scores per experiment. ` +
+                `Experiment A (${experimentIdA}): ${totalHitsA} total, Experiment B (${experimentIdB}): ${totalHitsB} total.`
             );
           }
 
@@ -99,10 +99,14 @@ export const registerCompareRunsRoute = ({ router, logger }: RouteDependencies) 
             .filter((source): source is EvaluationScoreDocument => source !== undefined);
 
           if (scoresA.length === 0) {
-            return response.notFound({ body: { message: `No scores found for run: ${runIdA}` } });
+            return response.notFound({
+              body: { message: `No scores found for experiment: ${experimentIdA}` },
+            });
           }
           if (scoresB.length === 0) {
-            return response.notFound({ body: { message: `No scores found for run: ${runIdB}` } });
+            return response.notFound({
+              body: { message: `No scores found for experiment: ${experimentIdB}` },
+            });
           }
 
           const datasetsA = new Set(scoresA.map((s) => s.example.dataset.id));
@@ -148,7 +152,7 @@ export const registerCompareRunsRoute = ({ router, logger }: RouteDependencies) 
           });
         } catch (error) {
           logger.error(
-            `Failed to compare evaluation runs: ${
+            `Failed to compare evaluation experiments: ${
               error instanceof Error ? error.message : String(error)
             }`
           );
@@ -157,7 +161,7 @@ export const registerCompareRunsRoute = ({ router, logger }: RouteDependencies) 
           }
           return response.customError({
             statusCode: 500,
-            body: { message: 'Failed to compare evaluation runs' },
+            body: { message: 'Failed to compare evaluation experiments' },
           });
         }
       }

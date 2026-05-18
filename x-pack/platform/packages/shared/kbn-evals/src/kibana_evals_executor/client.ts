@@ -35,7 +35,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
     private readonly options: {
       log: SomeDevLog;
       model: Model;
-      runId: string;
+      experimentId: string;
       repetitions?: number;
       upsertDataset?: (dataset: EvaluationDataset) => Promise<void>;
       getDatasetByName?: (
@@ -85,6 +85,52 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
       concurrency,
       trustUpstreamDataset = false,
     }: {
+      dataset: TEvaluationDataset | TEvaluationDataset[];
+      metadata?: Record<string, unknown>;
+      task: ExperimentTask<TEvaluationDataset['examples'][number], TTaskOutput>;
+      concurrency?: number;
+      trustUpstreamDataset?: boolean;
+    },
+    evaluators: Array<Evaluator<TEvaluationDataset['examples'][number], TTaskOutput>>
+  ): Promise<RanExperiment | RanExperiment[]> {
+    const datasets = Array.isArray(dataset) ? dataset : [dataset];
+
+    if (datasets.length > 1) {
+      const results: RanExperiment[] = [];
+      for (const ds of datasets) {
+        results.push(
+          await this.runSingleDatasetExperiment(
+            { dataset: ds, task, metadata: experimentMetadata, concurrency, trustUpstreamDataset },
+            evaluators
+          )
+        );
+      }
+      return results;
+    }
+
+    return this.runSingleDatasetExperiment(
+      {
+        dataset: datasets[0],
+        task,
+        metadata: experimentMetadata,
+        concurrency,
+        trustUpstreamDataset,
+      },
+      evaluators
+    );
+  }
+
+  private async runSingleDatasetExperiment<
+    TEvaluationDataset extends EvaluationDataset,
+    TTaskOutput extends TaskOutput = TaskOutput
+  >(
+    {
+      dataset,
+      task,
+      metadata: experimentMetadata,
+      concurrency,
+      trustUpstreamDataset = false,
+    }: {
       dataset: TEvaluationDataset;
       metadata?: Record<string, unknown>;
       task: ExperimentTask<TEvaluationDataset['examples'][number], TTaskOutput>;
@@ -109,7 +155,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
       const runJobs: Array<Promise<void>> = [];
 
       this.options.log.info(
-        `🧪 Starting experiment "Run ID: ${this.options.runId} - Dataset: ${resolvedDataset.name}" with ${evaluators.length} evaluators and ${runConcurrency} concurrent runs`
+        `🧪 Starting experiment "${this.options.experimentId} - Dataset: ${resolvedDataset.name}" with ${evaluators.length} evaluators and ${runConcurrency} concurrent runs`
       );
 
       for (let rep = 0; rep < repetitions; rep++) {
@@ -205,7 +251,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
                     });
                   } catch (err) {
                     this.options.log.warning(
-                      `Incremental score export failed for run "${this.options.runId}" (example=${exampleIndex}, repetition=${rep}): ${err}`
+                      `Incremental score export failed for experiment "${this.options.experimentId}" (example=${exampleIndex}, repetition=${rep}): ${err}`
                     );
                   }
                 }
@@ -228,7 +274,7 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
         experimentMetadata: {
           ...experimentMetadata,
           model: this.options.model,
-          runId: this.options.runId,
+          experimentId: this.options.experimentId,
         },
       };
 

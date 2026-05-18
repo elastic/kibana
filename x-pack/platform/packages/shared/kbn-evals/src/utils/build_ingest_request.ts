@@ -21,7 +21,7 @@ type BuildIngestRequestSource =
   | { kind: 'experiments'; experiments: RanExperiment[] };
 
 interface BuildIngestRequestArgs {
-  runId: string;
+  experimentId: string;
   taskModel: InferenceModel;
   evaluatorModel: InferenceModel;
   repetitions: number;
@@ -148,7 +148,7 @@ function buildScores(source: BuildIngestRequestSource): BuildableScore[] {
 }
 
 export function buildIngestRequest({
-  runId,
+  experimentId: topLevelExperimentId,
   taskModel,
   evaluatorModel,
   repetitions,
@@ -167,7 +167,7 @@ export function buildIngestRequest({
   if (!taskModelId || !evaluatorModelId) {
     if (scores.length > 0) {
       log?.warning?.(
-        `Skipped ${scores.length} score(s) for run "${runId}" due to missing model id`
+        `Skipped ${scores.length} score(s) for experiment "${topLevelExperimentId}" due to missing model id`
       );
     }
     return [];
@@ -183,7 +183,7 @@ export function buildIngestRequest({
   const ingestTaskModel = toTaskModel(taskModel, taskModelId);
   const ingestEvaluatorModel = toEvaluatorModel(evaluatorModel, evaluatorModelId);
 
-  for (const [experimentId, experimentScores] of requestsByExperiment) {
+  for (const [, experimentScores] of requestsByExperiment) {
     for (let offset = 0; offset < experimentScores.length; offset += MAX_INGEST_BATCH_SIZE) {
       const chunk = experimentScores.slice(offset, offset + MAX_INGEST_BATCH_SIZE);
       if (chunk.length === 0) {
@@ -191,12 +191,11 @@ export function buildIngestRequest({
       }
 
       requests.push({
-        run_id: runId,
-        experiment_id: experimentId,
+        experiment_id: topLevelExperimentId,
         ...(suiteId != null && { suite_id: suiteId }),
         task_model: ingestTaskModel,
         evaluator_model: ingestEvaluatorModel,
-        run_metadata: {
+        experiment_metadata: {
           total_repetitions: repetitions,
           ...(gitMetadata.branch != null && { git_branch: gitMetadata.branch }),
           ...(gitMetadata.commitSha != null && { git_commit_sha: gitMetadata.commitSha }),

@@ -11,11 +11,11 @@ import { isHttpFetchError } from '@kbn/core-http-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { TraceFetcher, TraceSpan } from '@kbn/llm-trace-waterfall';
 import {
-  EVALS_RUNS_URL,
-  EVALS_RUN_URL,
-  EVALS_RUN_SCORES_URL,
-  EVALS_RUN_DATASET_EXAMPLES_URL,
-  EVALS_RUNS_COMPARE_URL,
+  EVALS_EXPERIMENTS_URL,
+  EVALS_EXPERIMENT_URL,
+  EVALS_EXPERIMENT_SCORES_URL,
+  EVALS_EXPERIMENT_DATASET_EXAMPLES_URL,
+  EVALS_EXPERIMENTS_COMPARE_URL,
   EVALS_EXAMPLE_SCORES_URL,
   EVALS_TRACE_URL,
   EVALS_TRACING_PROJECTS_URL,
@@ -37,15 +37,15 @@ import {
   type UpdateEvaluationDatasetExampleRequestBodyInput,
   type UpdateEvaluationDatasetExampleResponse,
   type DeleteEvaluationDatasetExampleResponse,
-  type GetEvaluationRunsResponse,
-  type GetEvaluationRunResponse,
-  type GetEvaluationRunScoresResponse,
-  type GetEvaluationRunDatasetExamplesResponse,
+  type GetEvaluationExperimentsResponse,
+  type GetEvaluationExperimentResponse,
+  type GetEvaluationExperimentScoresResponse,
+  type GetEvaluationExperimentDatasetExamplesResponse,
   type GetExampleScoresResponse,
   type GetTraceResponse,
   type GetTracingProjectsResponse,
   type GetProjectTracesResponse,
-  type CompareRunsResponse,
+  type CompareExperimentsResponse,
 } from '@kbn/evals-common';
 import { queryKeys } from '../query_keys';
 
@@ -381,7 +381,7 @@ export const useEvaluationRuns = (filters: RunsListFilters = {}) => {
 
   return useQuery({
     queryKey: queryKeys.runs.list(filters),
-    queryFn: async (): Promise<GetEvaluationRunsResponse> => {
+    queryFn: async (): Promise<GetEvaluationExperimentsResponse> => {
       const query: Record<string, string | number> = {};
       if (filters.suiteId) query.suite_id = filters.suiteId;
       if (filters.modelId) query.model_id = filters.modelId;
@@ -390,7 +390,7 @@ export const useEvaluationRuns = (filters: RunsListFilters = {}) => {
       if (filters.page) query.page = filters.page;
       if (filters.perPage) query.per_page = filters.perPage;
 
-      return services.http!.get<GetEvaluationRunsResponse>(EVALS_RUNS_URL, {
+      return services.http!.get<GetEvaluationExperimentsResponse>(EVALS_EXPERIMENTS_URL, {
         query,
         version: API_VERSIONS.internal.v1,
       });
@@ -410,9 +410,9 @@ export const useEvaluationRun = (runId: string) => {
 
   return useQuery({
     queryKey: queryKeys.runs.detail(runId),
-    queryFn: async (): Promise<GetEvaluationRunResponse> => {
-      const url = EVALS_RUN_URL.replace('{runId}', encodeURIComponent(runId));
-      return services.http!.get<GetEvaluationRunResponse>(url, {
+    queryFn: async (): Promise<GetEvaluationExperimentResponse> => {
+      const url = EVALS_EXPERIMENT_URL.replace('{experimentId}', encodeURIComponent(runId));
+      return services.http!.get<GetEvaluationExperimentResponse>(url, {
         version: API_VERSIONS.internal.v1,
       });
     },
@@ -432,9 +432,9 @@ export const useEvaluationRunScores = (runId: string) => {
 
   return useQuery({
     queryKey: queryKeys.runs.scores(runId),
-    queryFn: async (): Promise<GetEvaluationRunScoresResponse> => {
-      const url = EVALS_RUN_SCORES_URL.replace('{runId}', encodeURIComponent(runId));
-      return services.http!.get<GetEvaluationRunScoresResponse>(url, {
+    queryFn: async (): Promise<GetEvaluationExperimentScoresResponse> => {
+      const url = EVALS_EXPERIMENT_SCORES_URL.replace('{experimentId}', encodeURIComponent(runId));
+      return services.http!.get<GetEvaluationExperimentScoresResponse>(url, {
         version: API_VERSIONS.internal.v1,
       });
     },
@@ -446,9 +446,9 @@ export const useCompareRuns = (runIdA: string, runIdB: string) => {
 
   return useQuery({
     queryKey: queryKeys.runs.compare(runIdA, runIdB),
-    queryFn: async (): Promise<CompareRunsResponse> => {
-      return services.http!.get<CompareRunsResponse>(EVALS_RUNS_COMPARE_URL, {
-        query: { run_id_a: runIdA, run_id_b: runIdB },
+    queryFn: async (): Promise<CompareExperimentsResponse> => {
+      return services.http!.get<CompareExperimentsResponse>(EVALS_EXPERIMENTS_COMPARE_URL, {
+        query: { experiment_id_a: runIdA, experiment_id_b: runIdB },
         version: API_VERSIONS.internal.v1,
       });
     },
@@ -468,12 +468,12 @@ export const useRunDatasetExamples = (runId: string, datasetId: string) => {
 
   return useQuery({
     queryKey: queryKeys.runs.datasetExamples(runId, datasetId),
-    queryFn: async (): Promise<GetEvaluationRunDatasetExamplesResponse> => {
-      const url = EVALS_RUN_DATASET_EXAMPLES_URL.replace(
-        '{runId}',
+    queryFn: async (): Promise<GetEvaluationExperimentDatasetExamplesResponse> => {
+      const url = EVALS_EXPERIMENT_DATASET_EXAMPLES_URL.replace(
+        '{experimentId}',
         encodeURIComponent(runId)
       ).replace('{datasetId}', encodeURIComponent(datasetId));
-      return services.http!.get<GetEvaluationRunDatasetExamplesResponse>(url, {
+      return services.http!.get<GetEvaluationExperimentDatasetExamplesResponse>(url, {
         version: API_VERSIONS.internal.v1,
       });
     },

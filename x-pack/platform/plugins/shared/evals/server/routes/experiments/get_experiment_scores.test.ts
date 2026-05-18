@@ -9,16 +9,16 @@ import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
-import { EVALS_RUN_URL, API_VERSIONS } from '@kbn/evals-common';
+import { EVALS_EXPERIMENT_SCORES_URL, API_VERSIONS, SCORES_SORT_ORDER } from '@kbn/evals-common';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
-import { registerGetRunRoute } from './get_run';
+import { registerGetExperimentScoresRoute } from './get_experiment_scores';
 
-describe('GET /internal/evals/runs/{runId}', () => {
+describe('GET /internal/evals/experiments/{experimentId}/scores', () => {
   const setup = () => {
     const router = httpServiceMock.createRouter();
     const logger = loggingSystemMock.createLogger();
-    registerGetRunRoute({
+    registerGetExperimentScoresRoute({
       router,
       logger,
       canEncrypt: false,
@@ -27,7 +27,7 @@ describe('GET /internal/evals/runs/{runId}', () => {
     });
 
     const versionedRouter = router.versioned as MockedVersionedRouter;
-    const { handler } = versionedRouter.getRoute('get', EVALS_RUN_URL).versions[
+    const { handler } = versionedRouter.getRoute('get', EVALS_EXPERIMENT_SCORES_URL).versions[
       API_VERSIONS.internal.v1
     ];
 
@@ -43,86 +43,58 @@ describe('GET /internal/evals/runs/{runId}', () => {
     return { handler, context, evaluationScoreService, logger };
   };
 
-  const makeRequest = (runId = 'run-abc') =>
+  const makeRequest = (experimentId = 'experiment-abc') =>
     httpServerMock.createKibanaRequest({
       method: 'get',
-      path: EVALS_RUN_URL.replace('{runId}', runId),
-      params: { runId },
+      path: EVALS_EXPERIMENT_SCORES_URL.replace('{experimentId}', experimentId),
+      params: { experimentId },
       query: {},
     });
 
-  it('returns 404 when no documents match the run', async () => {
+  it('uses the correct sort order and size', async () => {
     const { handler, context, evaluationScoreService } = setup();
     evaluationScoreService.search.mockResolvedValueOnce({ hits: { hits: [] } } as any);
 
-    const response = await handler(context, makeRequest(), kibanaResponseFactory);
+    await handler(context, makeRequest(), kibanaResponseFactory);
 
-    expect(response.status).toBe(404);
-    expect(response.payload).toEqual({ message: 'Run not found: run-abc' });
+    expect(evaluationScoreService.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        sort: SCORES_SORT_ORDER,
+        size: 10000,
+      })
+    );
   });
 
-  it('returns run detail with stats on success', async () => {
+  it('returns scores and total count on success', async () => {
     const { handler, context, evaluationScoreService } = setup();
-
-    // First search: metadata doc
+    const scoreDoc = {
+      experiment_id: 'experiment-abc',
+      evaluator: { name: 'correctness', score: 0.9 },
+    };
     evaluationScoreService.search.mockResolvedValueOnce({
-      hits: {
-        hits: [
-          {
-            _source: {
-              task: { model: { id: 'gpt-4', family: 'gpt-4', provider: 'openai' } },
-              evaluator: { model: { id: 'claude-3', family: 'claude-3', provider: 'anthropic' } },
-              run_metadata: { total_repetitions: 3 },
-            },
-          },
-        ],
-      },
+      hits: { hits: [{ _source: scoreDoc }, { _source: scoreDoc }] },
     } as any);
 
-    // Second search: aggregations
+    const response = await handler(context, makeRequest(), kibanaResponseFactory);
+
+    expect(response.status).toBe(200);
+    expect(response.payload.scores).toHaveLength(2);
+    expect(response.payload.total).toBe(2);
+  });
+
+  it('filters out hits with no _source', async () => {
+    const { handler, context, evaluationScoreService } = setup();
     evaluationScoreService.search.mockResolvedValueOnce({
-      aggregations: {
-        by_dataset: {
-          buckets: [
-            {
-              key: 'dataset-1',
-              dataset_name: { buckets: [{ key: 'My Dataset' }] },
-              by_evaluator: {
-                buckets: [
-                  {
-                    key: 'correctness',
-                    score_stats: { avg: 0.85, std_deviation: 0.1, min: 0.5, max: 1.0, count: 10 },
-                    score_median: { values: { '50.0': 0.9 } },
-                  },
-                ],
-              },
-            },
-          ],
-        },
+      hits: {
+        hits: [{ _source: { experiment_id: 'experiment-abc' } }, { _source: undefined }],
       },
     } as any);
 
     const response = await handler(context, makeRequest(), kibanaResponseFactory);
 
     expect(response.status).toBe(200);
-    expect(response.payload.run_id).toBe('run-abc');
-    expect(response.payload.task_model.id).toBe('gpt-4');
-    expect(response.payload.evaluator_model.id).toBe('claude-3');
-    expect(response.payload.total_repetitions).toBe(3);
-    expect(response.payload.stats).toHaveLength(1);
-    expect(response.payload.stats[0]).toEqual({
-      dataset_id: 'dataset-1',
-      dataset_name: 'My Dataset',
-      evaluator_name: 'correctness',
-      stats: {
-        mean: 0.85,
-        median: 0.9,
-        std_dev: 0.1,
-        min: 0.5,
-        max: 1.0,
-        count: 10,
-      },
-    });
+    expect(response.payload.scores).toHaveLength(1);
+    expect(response.payload.total).toBe(1);
   });
 
   it('returns 500 when ES throws', async () => {

@@ -22,8 +22,6 @@ components:
       properties:
         '@timestamp':
           type: string
-        run_id:
-          type: string
         experiment_id:
           type: string
         suite:
@@ -42,8 +40,8 @@ components:
           $ref: '#/components/schemas/TaskInfo'
         evaluator:
           $ref: '#/components/schemas/EvaluatorInfo'
-        run_metadata:
-          $ref: '#/components/schemas/RunMetadata'
+        experiment_metadata:
+          $ref: '#/components/schemas/ExperimentMetadata'
         environment:
           type: object
           properties:
@@ -51,12 +49,11 @@ components:
               type: string
       required:
         - '@timestamp'
-        - run_id
         - experiment_id
         - example
         - task
         - evaluator
-        - run_metadata
+        - experiment_metadata
         - environment
 
     BuildkiteMetadata:
@@ -148,7 +145,7 @@ components:
         - name
         - model
 
-    RunMetadata:
+    ExperimentMetadata:
       type: object
       properties:
         git_branch:

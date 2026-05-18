@@ -1,19 +1,19 @@
 openapi: 3.0.0
 info:
-  title: Get Evaluation Run Scores API endpoint
+  title: Get Evaluation Experiment Scores API endpoint
   version: "1"
 paths:
-  /internal/evals/runs/{runId}/scores:
+  /internal/evals/experiments/{experimentId}/scores:
     get:
       x-codegen-enabled: true
       x-labels: [ess, serverless]
-      operationId: GetEvaluationRunScores
-      description: Get individual score documents for an evaluation run
-      summary: Get evaluation run scores
+      operationId: GetEvaluationExperimentScores
+      description: Get individual score documents for an evaluation experiment
+      summary: Get evaluation experiment scores
       tags:
         - Evals API
       parameters:
-        - name: runId
+        - name: experimentId
           in: path
           required: true
           schema:

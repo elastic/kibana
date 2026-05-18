@@ -6,34 +6,34 @@
  */
 
 import {
-  EVALS_RUNS_URL,
+  EVALS_EXPERIMENTS_URL,
   API_VERSIONS,
   INTERNAL_API_ACCESS,
-  buildRouteValidationWithZod,
-  GetEvaluationRunsRequestQuery,
-  buildRunsListingFilterQuery,
-  buildRunsListingAggregation,
-  parseRunsListingResponse,
+  GetEvaluationExperimentsRequestQuery,
+  buildExperimentsListingFilterQuery,
+  buildExperimentsListingAggregation,
+  parseExperimentsListingResponse,
 } from '@kbn/evals-common';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { PLUGIN_ID } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
 
-export const registerGetRunsRoute = ({ router, logger }: RouteDependencies) => {
+export const registerGetExperimentsRoute = ({ router, logger }: RouteDependencies) => {
   router.versioned
     .get({
-      path: EVALS_RUNS_URL,
+      path: EVALS_EXPERIMENTS_URL,
       access: INTERNAL_API_ACCESS,
       security: {
         authz: { requiredPrivileges: [PLUGIN_ID] },
       },
-      summary: 'List evaluation runs',
+      summary: 'List evaluation experiments',
     })
     .addVersion(
       {
         version: API_VERSIONS.internal.v1,
         validate: {
           request: {
-            query: buildRouteValidationWithZod(GetEvaluationRunsRequestQuery),
+            query: buildRouteValidationWithZod(GetEvaluationExperimentsRequestQuery),
           },
         },
       },
@@ -52,18 +52,18 @@ export const registerGetRunsRoute = ({ router, logger }: RouteDependencies) => {
           const pagination = { page, perPage };
           const aggResponse = await evalsContext.evaluationScoreService.search({
             size: 0,
-            query: buildRunsListingFilterQuery({ suiteId, modelId, branch, datasetId }),
-            aggs: buildRunsListingAggregation(pagination),
+            query: buildExperimentsListingFilterQuery({ suiteId, modelId, branch, datasetId }),
+            aggs: buildExperimentsListingAggregation(pagination),
           });
 
           return response.ok({
-            body: parseRunsListingResponse(aggResponse.aggregations, pagination),
+            body: parseExperimentsListingResponse(aggResponse.aggregations, pagination),
           });
         } catch (error) {
-          logger.error(`Failed to list evaluation runs: ${error}`);
+          logger.error(`Failed to list evaluation experiments: ${error}`);
           return response.customError({
             statusCode: 500,
-            body: { message: 'Failed to list evaluation runs' },
+            body: { message: 'Failed to list evaluation experiments' },
           });
         }
       }

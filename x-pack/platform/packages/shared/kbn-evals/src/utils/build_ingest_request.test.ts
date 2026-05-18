@@ -60,7 +60,7 @@ const createEvent = (
 describe('buildIngestRequest', () => {
   it('builds a single request for a single event source', () => {
     const requests = buildIngestRequest({
-      runId: 'run-123',
+      experimentId: 'experiment-123',
       taskModel,
       evaluatorModel,
       repetitions: 2,
@@ -73,12 +73,11 @@ describe('buildIngestRequest', () => {
 
     expect(requests).toHaveLength(1);
     expect(requests[0]).toMatchObject({
-      run_id: 'run-123',
-      experiment_id: 'exp-1',
+      experiment_id: 'experiment-123',
       suite_id: 'suite-a',
       task_model: taskModel,
       evaluator_model: evaluatorModel,
-      run_metadata: {
+      experiment_metadata: {
         total_repetitions: 2,
         git_branch: 'main',
         git_commit_sha: 'abc123',
@@ -128,7 +127,7 @@ describe('buildIngestRequest', () => {
     ];
 
     const requests = buildIngestRequest({
-      runId: 'run-456',
+      experimentId: 'experiment-456',
       taskModel,
       evaluatorModel,
       repetitions: 1,
@@ -138,7 +137,6 @@ describe('buildIngestRequest', () => {
     });
 
     expect(requests).toHaveLength(2);
-    expect(requests.map((request) => request.experiment_id).sort()).toEqual(['exp-1', 'exp-2']);
   });
 
   it('chunks scores into requests of at most 1000 items', () => {
@@ -159,7 +157,7 @@ describe('buildIngestRequest', () => {
     );
 
     const requests = buildIngestRequest({
-      runId: 'run-789',
+      experimentId: 'experiment-789',
       taskModel,
       evaluatorModel,
       repetitions: 3,
@@ -187,7 +185,7 @@ describe('buildIngestRequest', () => {
   it('skips scores and logs warning when model id is missing', () => {
     const log = createLog();
     const requests = buildIngestRequest({
-      runId: 'run-000',
+      experimentId: 'experiment-000',
       taskModel: { ...taskModel, id: '' },
       evaluatorModel,
       repetitions: 1,
@@ -223,7 +221,7 @@ describe('buildIngestRequest', () => {
 
     expect(requests).toEqual([]);
     expect(log.warning).toHaveBeenCalledWith(
-      'Skipped 2 score(s) for run "run-000" due to missing model id'
+      'Skipped 2 score(s) for experiment "experiment-000" due to missing model id'
     );
   });
 });

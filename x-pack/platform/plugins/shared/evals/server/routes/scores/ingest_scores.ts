@@ -10,8 +10,8 @@ import {
   EVALS_SCORES_URL,
   INTERNAL_API_ACCESS,
   IngestScoresRequestBody,
-  buildRouteValidationWithZod,
 } from '@kbn/evals-common';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { PLUGIN_ID } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
 

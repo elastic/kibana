@@ -8,12 +8,13 @@
 import type { KbnClient } from '@kbn/kbn-client';
 import type { SomeDevLog } from '@kbn/some-dev-log';
 import {
+  API_VERSIONS,
   EVALS_DATASETS_URL,
-  EVALS_RUN_SCORES_URL,
-  EVALS_RUN_URL,
+  EVALS_EXPERIMENT_SCORES_URL,
+  EVALS_EXPERIMENT_URL,
   EVALS_SCORES_URL,
-  GetEvaluationRunResponse,
-  GetEvaluationRunScoresResponse,
+  GetEvaluationExperimentResponse,
+  GetEvaluationExperimentScoresResponse,
   IngestScoresRequestBody,
   IngestScoresResponse,
   MAX_SCORES_PER_QUERY,
@@ -36,14 +37,14 @@ export interface EvaluatorStats {
   };
 }
 
-export interface RunStats {
+export interface ExperimentStats {
   stats: EvaluatorStats[];
   taskModel: EvalsModel;
   evaluatorModel: EvalsModel;
   totalRepetitions: number;
 }
 
-interface GetRunFilters {
+interface GetExperimentFilters {
   taskModelId?: string;
   suiteId?: string;
 }
@@ -90,11 +91,11 @@ const toIngestScoresError = (statusCode: 400 | 429 | 500, body: IngestScoresResu
   }) as IngestScoresError;
 
 const mapStatsResponse = (
-  response: ReturnType<typeof GetEvaluationRunResponse.parse>
-): RunStats => {
+  response: ReturnType<typeof GetEvaluationExperimentResponse.parse>
+): ExperimentStats => {
   const { task_model: taskModel, evaluator_model: evaluatorModel } = response;
   if (!taskModel || !evaluatorModel) {
-    throw new Error('Evaluation run is missing model metadata');
+    throw new Error('Evaluation experiment is missing model metadata');
   }
 
   return {
@@ -117,10 +118,12 @@ const mapStatsResponse = (
   };
 };
 
-const buildRunQuery = (options?: GetRunFilters) => ({
+const buildExperimentQuery = (options?: GetExperimentFilters) => ({
   suite_id: options?.suiteId,
   model_id: options?.taskModelId,
 });
+
+const VERSIONED_HEADERS = { 'elastic-api-version': API_VERSIONS.internal.v1 };
 
 export class EvalsClient {
   constructor(private readonly kbnClient: KbnClient, private readonly log: SomeDevLog) {}
@@ -131,6 +134,7 @@ export class EvalsClient {
       path: EVALS_SCORES_URL,
       method: 'POST',
       body,
+      headers: VERSIONED_HEADERS,
       ignoreErrors: [400, 429, 500],
     });
     const statusCode = getResponseStatusCode(response);
@@ -155,48 +159,61 @@ export class EvalsClient {
     return IngestScoresResponse.parse(data);
   }
 
-  async getRunStats(runId: string, options?: GetRunFilters): Promise<RunStats | null> {
+  async getExperimentStats(
+    experimentId: string,
+    options?: GetExperimentFilters
+  ): Promise<ExperimentStats | null> {
     try {
       const response = await this.kbnClient.request({
-        path: EVALS_RUN_URL.replace('{runId}', encodeURIComponent(runId)),
+        path: EVALS_EXPERIMENT_URL.replace('{experimentId}', encodeURIComponent(experimentId)),
         method: 'GET',
-        query: buildRunQuery(options),
+        query: buildExperimentQuery(options),
+        headers: VERSIONED_HEADERS,
       });
 
-      return mapStatsResponse(GetEvaluationRunResponse.parse(getResponseData(response)));
+      return mapStatsResponse(GetEvaluationExperimentResponse.parse(getResponseData(response)));
     } catch (error: unknown) {
-      this.log.error(`Failed to retrieve stats for run ID ${runId}:`, error);
+      this.log.error(`Failed to retrieve stats for experiment ID ${experimentId}:`, error);
       return null;
     }
   }
 
-  async getRunScores(runId: string, options?: GetRunFilters): Promise<EvaluationScoreDocument[]> {
+  async getExperimentScores(
+    experimentId: string,
+    options?: GetExperimentFilters
+  ): Promise<EvaluationScoreDocument[]> {
     try {
       const response = await this.kbnClient.request({
-        path: EVALS_RUN_SCORES_URL.replace('{runId}', encodeURIComponent(runId)),
+        path: EVALS_EXPERIMENT_SCORES_URL.replace(
+          '{experimentId}',
+          encodeURIComponent(experimentId)
+        ),
         method: 'GET',
-        query: buildRunQuery(options),
+        query: buildExperimentQuery(options),
+        headers: VERSIONED_HEADERS,
       });
-      const parsed = GetEvaluationRunScoresResponse.parse(getResponseData(response));
+      const parsed = GetEvaluationExperimentScoresResponse.parse(getResponseData(response));
 
       if (parsed.total > MAX_SCORES_PER_QUERY) {
         throw new Error(
-          `Run ${runId} returned ${parsed.total} scores, which exceeds MAX_SCORES_PER_QUERY (${MAX_SCORES_PER_QUERY})`
+          `Experiment ${experimentId} returned ${parsed.total} scores, which exceeds MAX_SCORES_PER_QUERY (${MAX_SCORES_PER_QUERY})`
         );
       }
 
       return parsed.scores;
     } catch (error: unknown) {
-      this.log.error(`Failed to retrieve scores for run ID ${runId}:`, error);
+      this.log.error(`Failed to retrieve scores for experiment ID ${experimentId}:`, error);
       return [];
     }
   }
+
   async assertPluginEnabled(): Promise<void> {
     try {
       await this.kbnClient.request({
         path: EVALS_DATASETS_URL,
         method: 'GET',
         query: { page: 1, per_page: 1 },
+        headers: VERSIONED_HEADERS,
         retries: 0,
       });
     } catch {

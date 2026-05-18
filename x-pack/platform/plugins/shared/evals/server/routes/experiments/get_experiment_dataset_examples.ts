@@ -6,21 +6,21 @@
  */
 
 import {
-  EVALS_RUN_DATASET_EXAMPLES_URL,
+  EVALS_EXPERIMENT_DATASET_EXAMPLES_URL,
   API_VERSIONS,
   INTERNAL_API_ACCESS,
   MAX_SCORES_PER_QUERY,
   buildDatasetExampleScoresQuery,
   SCORES_SORT_ORDER,
-  GetEvaluationRunDatasetExamplesRequestParams,
+  GetEvaluationExperimentDatasetExamplesRequestParams,
   type EvaluationScoreDocument,
-  type GetEvaluationRunDatasetExamplesResponse,
+  type GetEvaluationExperimentDatasetExamplesResponse,
 } from '@kbn/evals-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
 
-type GroupedExampleScores = GetEvaluationRunDatasetExamplesResponse['examples'][number];
+type GroupedExampleScores = GetEvaluationExperimentDatasetExamplesResponse['examples'][number];
 
 const getExampleId = ({ example }: EvaluationScoreDocument): string => example.id;
 
@@ -36,32 +36,37 @@ const isValidScoreDocument = (source: unknown): source is EvaluationScoreDocumen
   return typeof maybeScore.example?.id === 'string' && maybeScore.example.id.length > 0;
 };
 
-export const registerGetRunDatasetExamplesRoute = ({ router, logger }: RouteDependencies) => {
+export const registerGetExperimentDatasetExamplesRoute = ({
+  router,
+  logger,
+}: RouteDependencies) => {
   router.versioned
     .get({
-      path: EVALS_RUN_DATASET_EXAMPLES_URL,
+      path: EVALS_EXPERIMENT_DATASET_EXAMPLES_URL,
       access: INTERNAL_API_ACCESS,
       security: {
         authz: { requiredPrivileges: [EVALS_API_PRIVILEGES.read] },
       },
-      summary: 'Get run dataset example scores',
+      summary: 'Get experiment dataset example scores',
     })
     .addVersion(
       {
         version: API_VERSIONS.internal.v1,
         validate: {
           request: {
-            params: buildRouteValidationWithZod(GetEvaluationRunDatasetExamplesRequestParams),
+            params: buildRouteValidationWithZod(
+              GetEvaluationExperimentDatasetExamplesRequestParams
+            ),
           },
         },
       },
       async (context, request, response) => {
         try {
-          const { runId, datasetId } = request.params;
+          const { experimentId, datasetId } = request.params;
           const evalsContext = await context.evals;
 
           const searchResponse = await evalsContext.evaluationScoreService.search({
-            query: buildDatasetExampleScoresQuery(datasetId, runId),
+            query: buildDatasetExampleScoresQuery(datasetId, experimentId),
             sort: SCORES_SORT_ORDER,
             size: MAX_SCORES_PER_QUERY,
           });
@@ -96,10 +101,10 @@ export const registerGetRunDatasetExamplesRoute = ({ router, logger }: RouteDepe
             body: { examples },
           });
         } catch (error) {
-          logger.error(`Failed to get run dataset examples: ${error}`);
+          logger.error(`Failed to get experiment dataset examples: ${error}`);
           return response.customError({
             statusCode: 500,
-            body: { message: 'Failed to get run dataset examples' },
+            body: { message: 'Failed to get experiment dataset examples' },
           });
         }
       }

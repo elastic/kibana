@@ -74,19 +74,18 @@ export const EvaluatorInfo = lazySchema(() =>
 );
 export type EvaluatorInfo = z.infer<typeof EvaluatorInfo>;
 
-export const RunMetadata = lazySchema(() =>
+export const ExperimentMetadata = lazySchema(() =>
   z.object({
     git_branch: z.string().nullable().optional(),
     git_commit_sha: z.string().nullable().optional(),
     total_repetitions: z.number().int(),
   })
 );
-export type RunMetadata = z.infer<typeof RunMetadata>;
+export type ExperimentMetadata = z.infer<typeof ExperimentMetadata>;
 
 export const EvaluationScoreDocument = lazySchema(() =>
   z.object({
     '@timestamp': z.string(),
-    run_id: z.string(),
     experiment_id: z.string(),
     suite: z
       .object({
@@ -101,7 +100,7 @@ export const EvaluationScoreDocument = lazySchema(() =>
     example: ExampleInfo,
     task: TaskInfo,
     evaluator: EvaluatorInfo,
-    run_metadata: RunMetadata,
+    experiment_metadata: ExperimentMetadata,
     environment: z.object({
       hostname: z.string().optional(),
     }),

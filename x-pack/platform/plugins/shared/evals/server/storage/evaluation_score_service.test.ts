@@ -17,7 +17,6 @@ import {
 } from './evaluation_score_service';
 
 const getBaseRequest = (): IngestScoresRequestBody => ({
-  run_id: 'run-1',
   experiment_id: 'exp-1',
   suite_id: 'suite-1',
   task_model: {
@@ -30,7 +29,7 @@ const getBaseRequest = (): IngestScoresRequestBody => ({
     family: 'eval-family',
     provider: 'anthropic',
   },
-  run_metadata: {
+  experiment_metadata: {
     git_branch: 'main',
     git_commit_sha: 'abc123',
     total_repetitions: 2,
@@ -116,21 +115,20 @@ describe('EvaluationScoreService', () => {
       refresh: 'wait_for',
     });
     expect(capturedDocuments.map(({ _id }) => _id)).toEqual([
-      'run-1-suite-1-task-model-dataset-1-example-1-correctness-0',
+      'exp-1-suite-1-task-model-dataset-1-example-1-correctness-0',
     ]);
 
     const firstDocument = capturedDocuments[0];
     expect(firstDocument).toMatchObject({
       '@timestamp': expect.any(String),
       _id: expect.any(String),
-      run_id: request.run_id,
       experiment_id: request.experiment_id,
       suite: { id: request.suite_id },
       task: { model: request.task_model, repetition_index: 0 },
       evaluator: { model: request.evaluator_model, name: 'correctness' },
     });
     expect(computeScoreDocumentId(capturedDocuments[0])).toBe(
-      'run-1-suite-1-task-model-dataset-1-example-1-correctness-0'
+      'exp-1-suite-1-task-model-dataset-1-example-1-correctness-0'
     );
   });
 

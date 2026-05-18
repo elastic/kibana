@@ -21,7 +21,6 @@ import type { WriteResult } from '../../storage/evaluation_score_service';
 import { registerIngestScoresRoute } from './ingest_scores';
 
 const getBasePayload = (): IngestScoresRequestBodyInput => ({
-  run_id: 'run-1',
   experiment_id: 'experiment-1',
   suite_id: 'suite-1',
   task_model: {
@@ -34,7 +33,7 @@ const getBasePayload = (): IngestScoresRequestBodyInput => ({
     family: 'family-b',
     provider: 'provider-b',
   },
-  run_metadata: {
+  experiment_metadata: {
     git_branch: 'main',
     git_commit_sha: 'abc123',
     total_repetitions: 1,
@@ -219,9 +218,9 @@ describe('POST /internal/evals/scores', () => {
     });
   });
 
-  it('fails validation when run_id is missing', () => {
+  it('fails validation when experiment_id is missing', () => {
     const payload = getBasePayload();
-    const { run_id: _runId, ...invalidPayload } = payload;
+    const { experiment_id: _experimentId, ...invalidPayload } = payload;
 
     const result = IngestScoresRequestBody.safeParse(invalidPayload);
 

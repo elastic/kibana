@@ -1,15 +1,15 @@
 openapi: 3.0.0
 info:
-  title: Get Evaluation Runs API endpoint
+  title: Get Evaluation Experiments API endpoint
   version: '1'
 paths:
-  /internal/evals/runs:
+  /internal/evals/experiments:
     get:
       x-codegen-enabled: true
       x-labels: [ess, serverless]
-      operationId: GetEvaluationRuns
-      description: List evaluation runs with summary metadata
-      summary: List evaluation runs
+      operationId: GetEvaluationExperiments
+      description: List evaluation experiments with summary metadata
+      summary: List evaluation experiments
       tags:
         - Evals API
       parameters:
@@ -60,22 +60,22 @@ paths:
               schema:
                 type: object
                 properties:
-                  runs:
+                  experiments:
                     type: array
                     items:
-                      $ref: '#/components/schemas/EvaluationRunSummary'
+                      $ref: '#/components/schemas/EvaluationExperimentSummary'
                   total:
                     type: integer
                 required:
-                  - runs
+                  - experiments
                   - total
 
 components:
   schemas:
-    EvaluationRunSummary:
+    EvaluationExperimentSummary:
       type: object
       properties:
-        run_id:
+        experiment_id:
           type: string
         timestamp:
           type: string
@@ -102,5 +102,5 @@ components:
         ci:
           $ref: '../common_attributes.schema.yaml#/components/schemas/BuildkiteMetadata'
       required:
-        - run_id
+        - experiment_id
         - timestamp

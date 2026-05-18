@@ -9,16 +9,20 @@ import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
-import { EVALS_RUN_DATASET_EXAMPLES_URL, API_VERSIONS, SCORES_SORT_ORDER } from '@kbn/evals-common';
+import {
+  EVALS_EXPERIMENT_DATASET_EXAMPLES_URL,
+  API_VERSIONS,
+  SCORES_SORT_ORDER,
+} from '@kbn/evals-common';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
-import { registerGetRunDatasetExamplesRoute } from './get_run_dataset_examples';
+import { registerGetExperimentDatasetExamplesRoute } from './get_experiment_dataset_examples';
 
-describe('GET /internal/evals/runs/{runId}/datasets/{datasetId}/examples', () => {
+describe('GET /internal/evals/experiments/{experimentId}/datasets/{datasetId}/examples', () => {
   const setup = () => {
     const router = httpServiceMock.createRouter();
     const logger = loggingSystemMock.createLogger();
-    registerGetRunDatasetExamplesRoute({
+    registerGetExperimentDatasetExamplesRoute({
       router,
       logger,
       canEncrypt: false,
@@ -27,9 +31,8 @@ describe('GET /internal/evals/runs/{runId}/datasets/{datasetId}/examples', () =>
     });
 
     const versionedRouter = router.versioned as MockedVersionedRouter;
-    const { handler } = versionedRouter.getRoute('get', EVALS_RUN_DATASET_EXAMPLES_URL).versions[
-      API_VERSIONS.internal.v1
-    ];
+    const { handler } = versionedRouter.getRoute('get', EVALS_EXPERIMENT_DATASET_EXAMPLES_URL)
+      .versions[API_VERSIONS.internal.v1];
 
     const evaluationScoreService = {
       search: jest.fn().mockResolvedValue({ hits: { hits: [] } }),
@@ -43,14 +46,14 @@ describe('GET /internal/evals/runs/{runId}/datasets/{datasetId}/examples', () =>
     return { handler, context, evaluationScoreService, logger };
   };
 
-  const makeRequest = (runId = 'run-123', datasetId = 'dataset-123') =>
+  const makeRequest = (experimentId = 'experiment-123', datasetId = 'dataset-123') =>
     httpServerMock.createKibanaRequest({
       method: 'get',
-      path: EVALS_RUN_DATASET_EXAMPLES_URL.replace('{runId}', runId).replace(
+      path: EVALS_EXPERIMENT_DATASET_EXAMPLES_URL.replace('{experimentId}', experimentId).replace(
         '{datasetId}',
         datasetId
       ),
-      params: { runId, datasetId },
+      params: { experimentId, datasetId },
       query: {},
     });
 
@@ -68,7 +71,7 @@ describe('GET /internal/evals/runs/{runId}/datasets/{datasetId}/examples', () =>
           bool: {
             must: [
               { term: { 'example.dataset.id': 'dataset-123' } },
-              { term: { run_id: 'run-123' } },
+              { term: { experiment_id: 'experiment-123' } },
             ],
           },
         },
@@ -118,7 +121,7 @@ describe('GET /internal/evals/runs/{runId}/datasets/{datasetId}/examples', () =>
 
     expect(response.status).toBe(500);
     expect(response.payload).toEqual({
-      message: 'Failed to get run dataset examples',
+      message: 'Failed to get experiment dataset examples',
     });
     expect(logger.error).toHaveBeenCalled();
   });
