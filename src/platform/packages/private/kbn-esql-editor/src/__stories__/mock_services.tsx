@@ -133,9 +133,9 @@ const mockData = {
     search: (request: { params?: { query?: string } }) => {
       const query: string = (request as any)?.params?.query ?? '';
       const matchedIndex = Object.keys(MOCK_COLUMNS_BY_INDEX).find((idx) => query.includes(idx));
-      const all_columns = matchedIndex ? MOCK_COLUMNS_BY_INDEX[matchedIndex] : [];
+      const allColumns = matchedIndex ? MOCK_COLUMNS_BY_INDEX[matchedIndex] : [];
       return of({
-        rawResponse: { columns: all_columns, all_columns, values: [] },
+        rawResponse: { columns: allColumns, all_columns: allColumns, values: [] },
         isPartial: false,
         isRunning: false,
         total: 0,
