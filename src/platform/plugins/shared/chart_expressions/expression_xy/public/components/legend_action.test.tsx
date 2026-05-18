@@ -268,7 +268,7 @@ describe('getLegendAction', function () {
     );
   });
 
-  it('is not rendered if column has isComputedColumn set to true', () => {
+  it('disables filter actions if column has isComputedColumn set to true', () => {
     const tableWithComputedColumn: Datatable = {
       ...table,
       columns: table.columns.map((col) =>
@@ -313,8 +313,8 @@ describe('getLegendAction', function () {
       ] as unknown as SeriesIdentifier[],
     };
     wrapper = mountWithIntl(<ComponentWithComputedColumn {...newProps} />);
-    expect(wrapper).toEqual({});
-    expect(wrapper.find(EuiPopover).length).toBe(0);
+    expect(wrapper.find(EuiPopover).length).toBe(1);
+    expect(wrapper.find(LegendActionPopover).prop('filterActionsDisabled')).toBe(true);
   });
 
   it('is rendered if column has isComputedColumn set to false', () => {
