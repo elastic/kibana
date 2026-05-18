@@ -69,7 +69,7 @@ export function registerReadRoute(
       telemetryHandler(req, usageCounter, async () => {
         try {
           const { body, resolveHeaders } = await read(
-            ctx,
+            (await ctx.resolve(['core'])).core.savedObjects.client,
             getCachedDashboardStateSchema(),
             req.params.id,
             req.serverTiming,
