@@ -32,7 +32,8 @@ import {
   type EuiDataGridCellValueElementProps,
 } from '@elastic/eui';
 import { CodeEditor, ESQL_LANG_ID, type monaco } from '@kbn/code-editor';
-import type { FormValues } from '../../form/types';
+import type { ComposeFormValues } from './compose_form_types';
+import { getBreachQuery } from './compose_form_types';
 import { useRuleFormServices } from '../../form/contexts/rule_form_context';
 import { useDataFields } from '../../form/hooks/use_data_fields';
 import type {
@@ -87,9 +88,9 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
   const [localRecoveryBlock, setLocalRecoveryBlock] = useState(state.recoveryBlock);
 
   // Read timeField and the base query from RHF
-  const { setValue: setFormValue, watch: watchForm } = useFormContext<FormValues>();
+  const { setValue: setFormValue, watch: watchForm } = useFormContext<ComposeFormValues>();
   const timeField = watchForm('timeField') ?? '@timestamp';
-  const formQuery = watchForm('evaluation.query.base') ?? '';
+  const formQuery = getBreachQuery(watchForm('query'));
 
   // In single mode, sync localQuery when RHF's query changes externally
   // (e.g. from YAML edits that debounce into RHF). When the change comes
