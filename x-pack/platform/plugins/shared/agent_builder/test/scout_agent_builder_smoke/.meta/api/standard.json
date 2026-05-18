@@ -1,9 +1,9 @@
 {
-  "sha1": "",
+  "sha1": "477c0c903f235b6dd188aadd071768d598d2bd3f",
   "tests": [
     {
-      "id": "69056a2d02da36d-f607091c4746337",
-      "title": "Agent Builder — LLM smoke (converse API) EIS — models discovery gate",
+      "id": "69056a2d02da36d-4a8c5e89b96ac8d",
+      "title": "Agent Builder — LLM smoke (converse API) should skip - no EIS models discovered",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -11,8 +11,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder_smoke/api/tests/smoke_llm_converse.spec.ts",
-        "line": 235,
-        "column": 12
+        "line": 162,
+        "column": 14
       }
     }
   ]

@@ -131,7 +131,7 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
           const newId = await saveBook(undefined, bookStateManager.getLatestState());
           return newId;
         },
-        checkForDuplicateTitle: async (title) => {},
+        hasLibraryItemWithTitle: async (title) => false, // duplicate titles not implemented
         getSerializedStateByValue: () => serializeBook() as BookState,
         getSerializedStateByReference: (newId) => serializeBook(newId) as BookByReferenceState,
         canLinkToLibrary: async () => !isByReference,

@@ -55,6 +55,9 @@ export class WorkflowRunFixture {
       allowedHosts: ['*'],
     },
     maxResponseSize: new ByteSizeValue(10 * 1024 * 1024), // 10mb default
+    eviction: {
+      minPayloadSize: new ByteSizeValue(10 * 1024), // 10kb default
+    },
     collectQueueMetrics: false,
   };
   public readonly fakeKibanaRequest = {} as KibanaRequest;

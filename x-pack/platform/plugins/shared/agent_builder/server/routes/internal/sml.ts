@@ -11,7 +11,7 @@ import {
   ATTACHMENT_REF_ACTOR,
   type VersionedAttachment,
 } from '@kbn/agent-builder-common/attachments';
-import { AGENT_CONTEXT_LAYER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
+import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import type { RouteDependencies } from '../types';
 import { getHandlerWrapper } from '../wrap_handler';
 import { internalApiPath } from '../../../common/constants';
@@ -162,7 +162,7 @@ export function registerInternalSmlRoutes({
         return response.ok({ body });
       },
       {
-        featureFlag: AGENT_CONTEXT_LAYER_EXPERIMENTAL_FEATURES_SETTING_ID,
+        featureFlag: AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
       }
     )
   );

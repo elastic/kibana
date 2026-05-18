@@ -13,6 +13,13 @@ export class RulesListPage {
   public readonly bulkActionsButton: Locator;
   public readonly bulkDisableMenuItem: Locator;
   public readonly rulesListTable: Locator;
+  public readonly quickEditFlyout: Locator;
+  public readonly quickEditCloseButton: Locator;
+  public readonly quickEditCancelButton: Locator;
+  public readonly quickEditSubmitButton: Locator;
+  public readonly quickEditNameInput: Locator;
+  public readonly ruleSummaryFlyout: Locator;
+  public readonly ruleSummaryQuickEditButton: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.tagsFilterButton = this.page.testSubj.locator('rulesListTagsFilter');
@@ -20,6 +27,16 @@ export class RulesListPage {
     this.bulkActionsButton = this.page.testSubj.locator('bulkActionsButton');
     this.bulkDisableMenuItem = this.page.testSubj.locator('bulkDisableRules');
     this.rulesListTable = this.page.testSubj.locator('rulesListTable');
+    this.quickEditFlyout = this.page.testSubj.locator('quickEditRuleFlyout');
+    this.quickEditCloseButton = this.page.testSubj.locator('quickEditRuleFlyoutCloseButton');
+    this.quickEditCancelButton = this.page.testSubj.locator('quickEditRuleFlyoutCancelButton');
+    this.quickEditSubmitButton = this.page.testSubj.locator('quickEditRuleFlyoutSubmitButton');
+    // Scoped to the flyout because `ruleNameInput` also exists on the create/edit page
+    this.quickEditNameInput = this.quickEditFlyout.locator('[data-test-subj="ruleNameInput"]');
+    this.ruleSummaryFlyout = this.page.testSubj.locator('ruleSummaryFlyout');
+    this.ruleSummaryQuickEditButton = this.page.testSubj.locator(
+      'ruleSummaryFlyoutQuickEditButton'
+    );
   }
 
   async goto() {
@@ -32,6 +49,14 @@ export class RulesListPage {
 
   rowCheckbox(ruleId: string) {
     return this.page.testSubj.locator(`checkboxSelectRow-${ruleId}`);
+  }
+
+  expandRuleButton(ruleId: string) {
+    return this.page.testSubj.locator(`expandRule-${ruleId}`);
+  }
+
+  quickEditButton(ruleId: string) {
+    return this.page.testSubj.locator(`quickEditRule-${ruleId}`);
   }
 
   /**

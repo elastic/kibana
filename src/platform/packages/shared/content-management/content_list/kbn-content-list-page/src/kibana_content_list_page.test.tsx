@@ -10,7 +10,26 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { EuiButton } from '@elastic/eui';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { KibanaContentListPage } from './kibana_content_list_page';
+
+jest.mock('@kbn/shared-ux-page-kibana-template', () => {
+  const actual = jest.requireActual('@kbn/shared-ux-page-kibana-template');
+  // Wrap the real `KibanaPageTemplate` in a jest.fn so callers can assert
+  // forwarded props (`restrictWidth`, etc.) without losing the real
+  // sub-component slots (`Header`, `Section`).
+  const KibanaPageTemplateMock = jest.fn(actual.KibanaPageTemplate);
+  // Preserve the compound API EUI exposes via `Object.assign` in the
+  // upstream module.
+  Object.assign(KibanaPageTemplateMock, actual.KibanaPageTemplate);
+  return { ...actual, KibanaPageTemplate: KibanaPageTemplateMock };
+});
+
+const KibanaPageTemplateMock = KibanaPageTemplate as unknown as jest.Mock;
+
+beforeEach(() => {
+  KibanaPageTemplateMock.mockClear();
+});
 
 describe('KibanaContentListPage', () => {
   it('renders children verbatim inside the page template', () => {
@@ -32,6 +51,34 @@ describe('KibanaContentListPage', () => {
     );
 
     expect(screen.getByTestId('maps-page')).toBeInTheDocument();
+  });
+
+  describe('restrictWidth', () => {
+    it('defaults to `false` so listing pages run full-width', () => {
+      render(
+        <KibanaContentListPage>
+          <div />
+        </KibanaContentListPage>
+      );
+
+      expect(KibanaPageTemplateMock).toHaveBeenCalledWith(
+        expect.objectContaining({ restrictWidth: false }),
+        expect.anything()
+      );
+    });
+
+    it('forwards an explicit `restrictWidth` to `KibanaPageTemplate`', () => {
+      render(
+        <KibanaContentListPage restrictWidth={1024}>
+          <div />
+        </KibanaContentListPage>
+      );
+
+      expect(KibanaPageTemplateMock).toHaveBeenCalledWith(
+        expect.objectContaining({ restrictWidth: 1024 }),
+        expect.anything()
+      );
+    });
   });
 
   describe('KibanaContentListPage.Header', () => {
