@@ -38,7 +38,7 @@ export function useFetchMetricsData({
   isComponentVisible: boolean;
   selectedDimensionNames?: Dimension[];
   /** Forwarded as `profile_id` APM label on captured errors. */
-  profileId?: string;
+  profileId: string;
 }): MetricsInfo {
   const { trackMetricsInfo } = useTelemetry();
   const { trackRequest } = useChartSectionInspector();
@@ -168,7 +168,7 @@ export function useFetchMetricsData({
       error,
       source: 'useFetchMetricsData',
       labels: {
-        profile_id: profileId ?? '',
+        profile_id: profileId,
       },
     });
   }, [error, profileId]);
