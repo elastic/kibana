@@ -218,8 +218,7 @@ export interface ElementSession {
   referenceEl?: HTMLElement;
   /** When set, this element is a live React render (not a static clone). */
   liveReactElement?: { element: ReactElement; zIndex: number };
-  /** Snapshot of React hook state for live elements, used to restore state on duplicate. */
-  componentState?: unknown[][];
+
   /** Tracked style edits applied via the edit modal. */
   styleEdits: StyleEdit[];
   /** Tracked text node edits applied via the edit modal. */

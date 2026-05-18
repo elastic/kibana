@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { EuiButtonGroup } from '@elastic/eui';
 import { useSerializableState } from './serializable_state';
 
@@ -55,16 +55,27 @@ export const ButtonGroupIconOnly = () => {
 };
 
 export const ButtonGroupMulti = () => {
-  const [selectedMap, setSelectedMap] = useState<Record<string, boolean>>({
-    'dt-bg-multi1': true,
-  });
+  const [selectedStr, setSelectedStr] = useSerializableState('selected', 'dt-bg-multi1');
+  const selectedMap: Record<string, boolean> = {};
+  if (selectedStr) {
+    for (const id of selectedStr.split(',')) {
+      selectedMap[id] = true;
+    }
+  }
   return (
     <EuiButtonGroup
       legend="Text style"
       options={multiOptions}
       type="multi"
       idToSelectedMap={selectedMap}
-      onChange={(id) => setSelectedMap((prev) => ({ ...prev, [id]: !prev[id] }))}
+      onChange={(id) => {
+        setSelectedStr((prev) => {
+          const set = new Set(prev ? prev.split(',') : []);
+          if (set.has(id)) set.delete(id);
+          else set.add(id);
+          return [...set].join(',');
+        });
+      }}
       isIconOnly
     />
   );

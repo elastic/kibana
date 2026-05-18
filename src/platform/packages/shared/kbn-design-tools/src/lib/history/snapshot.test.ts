@@ -88,16 +88,6 @@ describe('snapshotSession', () => {
     expect(snap.nextSibling).toBe(sibling);
   });
 
-  it('should capture componentState as deep copy', () => {
-    const state = [[true, 42], ['hello']];
-    const session = makeSnapshotSession({ componentState: state });
-    const snap = snapshotSession(session);
-
-    expect(snap.componentState).toEqual([[true, 42], ['hello']]);
-    // Verify inner arrays are copies
-    expect(snap.componentState![0]).not.toBe(state[0]);
-  });
-
   it('should preserve liveReactElement reference', () => {
     const liveReactElement = { element: {} as ReactElement, zIndex: 5 };
     const session = makeSnapshotSession({ liveReactElement });
@@ -136,16 +126,6 @@ describe('restoreSession', () => {
 
     expect(snap.styleEdits).toHaveLength(1);
     expect(restored.styleEdits).toHaveLength(2);
-  });
-
-  it('should deep-copies componentState', () => {
-    const state = [[true]];
-    const session = makeSnapshotSession({ componentState: state });
-    const snap = snapshotSession(session);
-    const restored = restoreSession(snap);
-
-    expect(restored.componentState).toEqual([[true]]);
-    expect(restored.componentState![0]).not.toBe(snap.componentState![0]);
   });
 });
 

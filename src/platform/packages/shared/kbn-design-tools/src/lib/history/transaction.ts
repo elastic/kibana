@@ -250,8 +250,7 @@ export interface ElementSessionSnapshot {
   readonly referenceEl?: HTMLElement;
   /** Live React element descriptor (for live-rendered elements). */
   readonly liveReactElement?: { readonly element: ReactElement; readonly zIndex: number };
-  /** Snapshot of React hook state for restoration after undo. */
-  readonly componentState?: unknown[][];
+
   /** Parent node at the time of snapshot, for DOM re-insertion. */
   readonly parentNode: Node;
   /** Next sibling at the time of snapshot, for DOM re-insertion. */

@@ -45,9 +45,6 @@ export const snapshotSession = (session: ElementSession): ElementSessionSnapshot
     isDuplicate: session.isDuplicate,
     referenceEl: session.referenceEl,
     liveReactElement: session.liveReactElement,
-    componentState: session.componentState
-      ? session.componentState.map((hooks) => [...hooks])
-      : undefined,
     // Record where the element currently lives in the DOM so we can
     // re-insert it at the same position on undo.
     parentNode: el.parentNode ?? document.body,
@@ -87,9 +84,6 @@ export const restoreSession = (snapshot: ElementSessionSnapshot): ElementSession
   isDuplicate: snapshot.isDuplicate,
   referenceEl: snapshot.referenceEl,
   liveReactElement: snapshot.liveReactElement,
-  componentState: snapshot.componentState
-    ? snapshot.componentState.map((hooks) => [...hooks])
-    : undefined,
   // Restore copies of the edit arrays so they can accumulate new edits
   // independently.
   styleEdits: [...snapshot.styleEdits],

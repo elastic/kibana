@@ -113,7 +113,6 @@ export const makeSnapshot = (session: ElementSession, parent?: Node): ElementSes
   isDuplicate: session.isDuplicate,
   referenceEl: session.referenceEl,
   liveReactElement: session.liveReactElement,
-  componentState: session.componentState,
   parentNode: parent ?? session.el.parentNode ?? document.body,
   nextSibling: session.el.nextSibling,
   styleEdits: [...session.styleEdits],

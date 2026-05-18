@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { flushSync } from 'react-dom';
 import { DUPLICATE_OFFSET, DEVTOOL_LIBRARY_ID_ATTR } from '../constants';
 import { cloneClean, setImportant, roundRect } from './clone_element';
 import type { ElementSession, ElementRegistry, MediaEdit } from './element_registry';
 import { buildTransform } from './resize_helpers';
 import { renderEuiComponentLive } from './insert_element';
 import { applySourceAttribute } from '../eui_icon_cache';
+import { readStateAttributes } from '../../components/edit/library/serializable_state';
 
 /**
  * Replay media edits (e.g. icon replacements) from a source element tree
@@ -193,201 +193,6 @@ const hasDirectTextContent = (el: HTMLElement): boolean => {
 };
 
 /**
- * Get the committed React Fiber root from a createRoot container element.
- * React attaches `__reactContainer$<hash>` to the container. Due to
- * double-buffering the stored fiber may be the pre-commit tree; the
- * committed tree with actual components lives on `alternate` in that case.
- *
- * **WARNING - React Fiber Internals**
- *
- * The functions below (`getRootFiber`, `collectComponentFibers`,
- * `readHookValues`, `snapshotComponentState`, `restoreComponentState`)
- * depend on undocumented React fiber internals (`__reactContainer$`,
- * `memoizedState`, `tag`, `alternate`, `queue.dispatch`). These are
- * implementation details of React's reconciler and:
- *
- * 1. **Will break on React major upgrades** (and possibly minors).
- * 2. `flushSync` + dispatching into foreign fibers' hook dispatchers
- *    can corrupt React's reconciler state if a concurrent render is
- *    in progress.
- *
- * All call sites are wrapped in `try/catch` and gracefully degrade -
- * duplicates still work without state transfer, they just start with
- * default state. If React's fiber structure changes, these functions
- * will silently return `undefined` / bail out.
- */
-const getRootFiber = (el: Element): Record<string, unknown> | null => {
-  const props = Object.keys(el);
-  const containerKey = props.find((k) => k.startsWith('__reactContainer$'));
-  if (containerKey) {
-    const fiber = (el as unknown as Record<string, unknown>)[containerKey] as Record<
-      string,
-      unknown
-    >;
-    // Return whichever side has children (the committed tree)
-    if (!fiber.child && fiber.alternate) {
-      return fiber.alternate as Record<string, unknown>;
-    }
-    return fiber;
-  }
-  return null;
-};
-
-/**
- * DFS-collect all function component fibers with hooks from a fiber tree.
- * Tag 0 = FunctionComponent, 11 = ForwardRef, 15 = SimpleMemoComponent.
- */
-const collectComponentFibers = (root: Record<string, unknown>): Array<Record<string, unknown>> => {
-  const result: Array<Record<string, unknown>> = [];
-  const walk = (node: Record<string, unknown> | null) => {
-    if (!node) return;
-    const tag = node.tag as number;
-    const isFunctionComponentWithState =
-      (tag === 0 || tag === 11 || tag === 15) && node.memoizedState;
-    if (isFunctionComponentWithState) {
-      result.push(node);
-    }
-    walk(node.child as Record<string, unknown> | null);
-    walk(node.sibling as Record<string, unknown> | null);
-  };
-  walk(root);
-  return result;
-};
-
-/**
- * Read all useState/useReducer values from a fiber's hook linked list.
- * Returns just the values - a simple serializable array.
- */
-const readHookValues = (fiber: Record<string, unknown>): unknown[] => {
-  const values: unknown[] = [];
-  let hook = fiber.memoizedState as Record<string, unknown> | null;
-  while (hook) {
-    const queue = hook.queue as { dispatch?: unknown } | null;
-    if (queue && typeof queue.dispatch === 'function') {
-      values.push(hook.memoizedState);
-    }
-    hook = hook.next as Record<string, unknown> | null;
-  }
-  return values;
-};
-
-/**
- * Snapshot the React hook state of every function component inside a live
- * element's fiber tree. Returns a simple `unknown[][]` - one array of
- * hook values per component, ordered by DFS position.
- *
- * Store the result on `ElementSession.componentState` so it survives
- * across duplicates without needing to re-read fibers.
- *
- * See the warning on `getRootFiber` about React fiber internals risk.
- */
-export const snapshotComponentState = (el: HTMLElement): unknown[][] | undefined => {
-  try {
-    const root = getRootFiber(el);
-    if (!root) return undefined;
-    const fibers = collectComponentFibers(root);
-    if (fibers.length === 0) return undefined;
-    return fibers.map(readHookValues);
-  } catch {
-    // React fiber internals are undocumented and may change across versions.
-    // Gracefully degrade. Duplicates will still work without state transfer.
-    return undefined;
-  }
-};
-
-/**
- * Restore a previously-snapshotted component state onto a freshly rendered
- * live element. Dispatches differ values into the target's hook setters
- * inside `flushSync`, with CSS transitions suppressed so there's no
- * visible animation (the duplicate should appear already in the right state).
- *
- * See the warning on `getRootFiber` about React fiber internals risk.
- */
-export const restoreComponentState = async (
-  el: HTMLElement,
-  snapshot: unknown[][]
-): Promise<void> => {
-  let root: Record<string, unknown> | null;
-  let fibers: Array<Record<string, unknown>>;
-  try {
-    root = getRootFiber(el);
-    if (!root) return;
-    fibers = collectComponentFibers(root);
-  } catch {
-    // React fiber internals are undocumented and may change across versions.
-    // Gracefully degrade. The duplicate will render with default state.
-    return;
-  }
-
-  const updates: Array<{ dispatch: (v: unknown) => void; value: unknown }> = [];
-
-  for (let i = 0; i < snapshot.length && i < fibers.length; i++) {
-    const values = snapshot[i];
-    const hookValues = readHookValues(fibers[i]);
-
-    // Walk the hook list again to find dispatchers
-    try {
-      let hook = fibers[i].memoizedState as Record<string, unknown> | null;
-      let j = 0;
-      while (hook && j < values.length) {
-        const queue = hook.queue as { dispatch: (v: unknown) => void } | null;
-        if (queue && typeof queue.dispatch === 'function') {
-          if (j < hookValues.length && values[j] !== hookValues[j]) {
-            updates.push({ dispatch: queue.dispatch, value: values[j] });
-          }
-          j++;
-        }
-        hook = hook.next as Record<string, unknown> | null;
-      }
-    } catch {
-      // Skip this fiber. Its structure may not match expectations.
-      continue;
-    }
-  }
-
-  if (updates.length === 0) return;
-
-  // Suppress transitions on elements that have them so the state change
-  // appears instant without affecting the rest of the page.
-  const descendants = el.querySelectorAll<HTMLElement>('*');
-  const saved: Array<{ el: HTMLElement; t: string; a: string }> = [];
-  for (const d of [el, ...descendants]) {
-    const hasTransition = d.style.transition || d.style.transitionProperty;
-    const hasAnimation = d.style.animation || d.style.animationName;
-    if (!hasTransition && !hasAnimation) continue;
-    saved.push({
-      el: d,
-      t: d.style.transition,
-      a: d.style.animation,
-    });
-    if (hasTransition) setImportant(d, 'transition', 'none');
-    if (hasAnimation) setImportant(d, 'animation', 'none');
-  }
-
-  flushSync(() => {
-    for (const { dispatch, value } of updates) {
-      dispatch(value);
-    }
-  });
-
-  // Force a reflow so the browser commits the no-transition frame,
-  // then restore original values.
-  void el.offsetHeight;
-  for (const s of saved) {
-    if (s.t) {
-      s.el.style.transition = s.t;
-    } else {
-      s.el.style.removeProperty('transition');
-    }
-    if (s.a) {
-      s.el.style.animation = s.a;
-    } else {
-      s.el.style.removeProperty('animation');
-    }
-  }
-};
-
-/**
  * Create a duplicate of the hovered element and register it in the registry.
  * Returns the new element so the caller can update hover state.
  */
@@ -410,12 +215,16 @@ export const createDuplicate = async (
   let transferredMediaEdits: MediaEdit[] = [];
 
   if (liveInfo) {
-    // Snapshot the source's React state before rendering the duplicate.
-    const stateSnapshot = existingSession?.componentState ?? snapshotComponentState(sourceEl);
+    // Read serialized state from the source's DOM attributes and pass it
+    // as initialState so the duplicate renders with the same state.
+    const initialState = readStateAttributes(sourceEl);
+    const hasState = Object.keys(initialState).length > 0;
 
-    // Create a fresh live instance for interactivity, then transfer any
-    // user edits (inline style overrides, text changes) from the source.
-    const live = await renderEuiComponentLive(liveInfo.element, liveInfo.zIndex);
+    const live = await renderEuiComponentLive(
+      liveInfo.element,
+      liveInfo.zIndex,
+      hasState ? initialState : undefined
+    );
     duplicate = live.wrapper;
     rect = live.rect;
     cleanup = live.cleanup;
@@ -425,23 +234,6 @@ export const createDuplicate = async (
     // Replay media edits (icon changes, etc.) from the source session.
     if (existingSession?.mediaEdits.length) {
       transferredMediaEdits = transferMediaEdits(existingSession.mediaEdits, sourceEl, duplicate);
-    }
-
-    // Restore the snapshotted state (with transitions suppressed).
-    // Wrapped in try/catch because this touches React fiber internals
-    // which may change across React versions.
-    if (stateSnapshot) {
-      try {
-        await restoreComponentState(duplicate, stateSnapshot);
-        // Re-measure after state restore. The element's dimensions may have
-        // changed (e.g. an accordion that expanded).
-        const rendered = duplicate.firstElementChild as HTMLElement | null;
-        if (rendered) {
-          rect = rendered.getBoundingClientRect();
-        }
-      } catch {
-        // State restore failed. The duplicate will use default state.
-      }
     }
   } else {
     const cloned = cloneClean(sourceEl, cloneZIndex);
@@ -489,7 +281,6 @@ export const createDuplicate = async (
       ? existingSession?.referenceEl
       : existingSession?.referenceEl ?? hoverTarget,
     liveReactElement: liveInfo,
-    componentState: liveInfo ? snapshotComponentState(duplicate) : undefined,
     styleEdits: [],
     textEdits: [],
     mediaEdits: transferredMediaEdits,
