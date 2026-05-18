@@ -109,7 +109,7 @@ export class EntityStoreGlobalStateClient {
   }
 
   private getSavedObjectId(): string {
-    return `entity-store-global-state-${this.namespace}`;
+    return `${EntityStoreGlobalStateTypeName}-${this.namespace}`;
   }
 
   private findSO(): Promise<SavedObjectsFindResponse<EntityStoreGlobalState>> {
