@@ -55,3 +55,5 @@ patch-package
 fastify
 find-my-way
 @opentelemetry/otlp-transformer
+@fastify/compress
+@fastify/cors
