@@ -30,7 +30,7 @@ signal" column in this file is not enough to disambiguate.
 
 1. Scan the image systematically: chrome first → page structure → sections
    → micro-components. Follow the scan order in
-   [`mockup-reading.md`](./mockup-reading.md).
+   [`mockup-reading.md`](./mockup-reading.md). <!-- TODO -->
 2. For each visual element, match what you see against the
    **Visual signal** column in the table below.
 3. When two components look identical in a screenshot, use the
