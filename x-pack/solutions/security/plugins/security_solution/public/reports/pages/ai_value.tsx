@@ -83,6 +83,7 @@ const BaseComponent = () => {
       isServerless ? (
         <EuiButtonEmpty
           className="exportPdfButton"
+          data-test-subj="aiValueExportButton"
           iconType="export"
           onClick={() => exportPDFRef.current?.()}
           size="s"
@@ -94,6 +95,7 @@ const BaseComponent = () => {
       ) : (
         <EuiButtonEmpty
           className="exportPdfButton"
+          data-test-subj="aiValueExportButton"
           iconType="export"
           buttonRef={setExportButtonElement}
           size="s"

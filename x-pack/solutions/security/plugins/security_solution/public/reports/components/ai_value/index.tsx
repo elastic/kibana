@@ -139,6 +139,7 @@ export const AIValueReport: React.FC<Props> = (props) => {
             <EuiFlexItem grow={false}>
               <EuiBadge
                 color="warning"
+                data-test-subj="aiValueSampleDataBadge"
                 css={css`
                   text-transform: uppercase;
                 `}
