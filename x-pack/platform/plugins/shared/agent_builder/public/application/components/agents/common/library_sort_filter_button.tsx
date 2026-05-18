@@ -115,7 +115,6 @@ export const LibrarySortFilterButton: React.FC<LibrarySortFilterButtonProps> = (
         <SectionTitle id={sortTitleId} title={labels.sortSectionTitle} />
       </EuiPopoverTitle>
       <EuiContextMenuPanel
-        size="s"
         items={[
           <EuiContextMenuItem
             key="sort-asc"
@@ -137,7 +136,6 @@ export const LibrarySortFilterButton: React.FC<LibrarySortFilterButtonProps> = (
       <SectionTitle title={labels.filterSectionTitle} />
       <EuiHorizontalRule margin="none" />
       <EuiContextMenuPanel
-        size="s"
         items={[
           <EuiContextMenuItem
             key="filter-all"
