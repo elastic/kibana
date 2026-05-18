@@ -20,7 +20,7 @@ export const servers: ScoutServerConfig = {
       ...defaultConfig.kbnTestServer.serverArgs,
       `--plugin-path=${resolve(
         REPO_ROOT,
-        'src/core/packages/user-storage/test/plugins/user_storage_test'
+        'src/platform/test/user_storage/plugins/user_storage_test'
       )}`,
     ],
   },
