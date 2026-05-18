@@ -117,7 +117,10 @@ export const generateEsql = async ({
     `[generateEsql] tight prompts active — syntax: ${tightPrompts.syntax.length} chars, examples: ${tightPrompts.examples.length} chars (vs baseline ~16856 / ~9186)`
   );
   logger?.debug(
-    `[generateEsql] tight syntax preview:\n${tightPrompts.syntax.slice(0, 300)}\n...\n[generateEsql] tight examples preview:\n${tightPrompts.examples.slice(0, 300)}`
+    `[generateEsql] tight syntax preview:\n${tightPrompts.syntax.slice(
+      0,
+      300
+    )}\n...\n[generateEsql] tight examples preview:\n${tightPrompts.examples.slice(0, 300)}`
   );
 
   const graph = createNlToEsqlGraph({

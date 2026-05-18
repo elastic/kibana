@@ -12,6 +12,7 @@ import type { ScopedModel } from '@kbn/agent-builder-server';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EsqlDocumentBase } from '@kbn/inference-plugin/server/tasks/nl_to_esql/doc_base';
 import { correctCommonEsqlMistakes } from '@kbn/inference-plugin/common';
+import type { EsqlPrompts } from '@kbn/inference-plugin/server/tasks/nl_to_esql/doc_base/load_data';
 import { extractTextContent } from '../../langchain/messages';
 import type { EsqlResponse } from '../utils/esql';
 import { resolveResourceForEsqlWithSamplingStats } from '../utils/resources';
@@ -29,7 +30,6 @@ import {
   createGenerateEsqlPromptTight,
   createGenerateEsqlPromptFromSkill,
 } from './prompts';
-import type { EsqlPrompts } from '@kbn/inference-plugin/server/tasks/nl_to_esql/doc_base/load_data';
 import type { ResolvedResourceWithSampling } from '../utils/resources';
 import type {
   Action,

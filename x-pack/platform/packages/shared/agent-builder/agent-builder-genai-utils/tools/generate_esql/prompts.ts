@@ -6,9 +6,9 @@
  */
 
 import type { BaseMessageLike } from '@langchain/core/messages';
+import type { EsqlPrompts } from '@kbn/inference-plugin/server/tasks/nl_to_esql/doc_base/load_data';
 import type { ResolvedResourceWithSampling } from '../utils/resources';
 import { formatResourceWithSampledValues } from '../utils/resources';
-import type { EsqlPrompts } from '@kbn/inference-plugin/server/tasks/nl_to_esql/doc_base/load_data';
 import type { Action } from './actions';
 import { formatAction, isRequestDocumentationAction } from './actions';
 import { getEsqlInstructions, getTightEsqlInstructions } from './prompts/instructions_template';
@@ -251,7 +251,9 @@ ${
       'user',
       `${nlQuery}
 
-${additionalContext ? `${additionalContext}\n\n` : ''}${formatResourceWithSampledValues({ resource })}`,
+${additionalContext ? `${additionalContext}\n\n` : ''}${formatResourceWithSampledValues({
+        resource,
+      })}`,
     ],
     ...previousActions.flatMap((a) => formatAction(a)),
   ];
