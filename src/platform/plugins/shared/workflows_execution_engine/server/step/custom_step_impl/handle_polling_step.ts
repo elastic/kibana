@@ -6,16 +6,15 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+/* eslint-disable complexity */
 
 import type { AtomicGraphNode } from '@kbn/workflows/graph';
 import { ExecutionError } from '@kbn/workflows/server';
 import { DEFAULT_POLL_CEILINGS } from '@kbn/workflows-extensions/server';
 import type {
   PollCeilings,
-  PollContinueResult,
   PollHandlerContext,
   PollOnlyMode,
-  RunHandoffResult,
   RunPlusPollMode,
 } from '@kbn/workflows-extensions/server';
 import type { z } from '@kbn/zod/v4';
@@ -27,7 +26,7 @@ import type { RunStepResult } from '../node_implementation';
 
 const bookkeepingKey = '__durableStepState';
 
-interface DurableStepState<State = unknown> extends Record<string, unknown> {
+interface DurableStepState<State extends Record<string, unknown>> extends Record<string, unknown> {
   customState?: State;
   initialRunState?: {
     isRun: boolean;
@@ -48,14 +47,6 @@ type PollStepDefinition<
   State
 > = PollOnlyMode<Input, Output, Config, State> | RunPlusPollMode<Input, Output, Config, State>;
 
-interface PolicyData {
-  nextAttempt: number;
-  startedAt: Date;
-  /** Epoch ms of the most recent poll handler invocation. */
-  lastPollAt: Date;
-  nextPollAt: Date;
-}
-
 export interface StepHandler {
   onCancel(): Promise<void>;
   run<State>(
@@ -66,9 +57,9 @@ export interface StepHandler {
 }
 
 type PolicyCalculationResult =
-  | { outcome: 'success'; data: PolicyData }
+  | { outcome: 'success'; nextPollAt: string }
   | { outcome: 'maxAttemptReached' }
-  | { outcome: 'maxWaitMsExceeded'; attempt: number };
+  | { outcome: 'maxWaitMsExceeded' };
 
 export class PollPolicyStepHandler implements StepHandler {
   constructor(
@@ -82,7 +73,7 @@ export class PollPolicyStepHandler implements StepHandler {
     // TBD: Implement cancellation cleanup for polling steps
   }
 
-  public async run<State>(
+  public async run<State extends Record<string, unknown>>(
     input: unknown,
     rawInput: unknown,
     config: Record<string, unknown>
@@ -90,6 +81,7 @@ export class PollPolicyStepHandler implements StepHandler {
     let stepState = (await this.stepExecutionRuntime.getCurrentStepState())?.[bookkeepingKey] as
       | DurableStepState<State>
       | undefined;
+    stepState = stepState ? { ...stepState } : {};
 
     if (this.stepDefinition.run) {
       if (!stepState?.initialRunState?.isRun) {
@@ -104,7 +96,7 @@ export class PollPolicyStepHandler implements StepHandler {
           )
         );
 
-        if (result.output || result.error) {
+        if (result && (result.output || result.error)) {
           return {
             input,
             output: result.output,
@@ -113,65 +105,121 @@ export class PollPolicyStepHandler implements StepHandler {
               : undefined,
           };
         }
+        const customState = result && 'state' in result && result.state ? result.state : undefined;
 
         stepState = {
           ...stepState,
           startedAt: new Date().toISOString(),
-          customState: (result as RunHandoffResult<State>).state || undefined,
+          customState: customState as State | undefined,
           initialRunState: {
             isRun: true,
           },
         };
       }
     }
+    let nextPollAtOverride: Date | undefined;
+    let customState = stepState.customState;
 
-    const policyCalculationResult = await this.calculatePolicyData(stepState || {});
+    if (stepState?.pollState) {
+      const pollResult = await this.stepDefinition.poll.handler(
+        this.createPollHandlerContext(
+          input,
+          rawInput,
+          config,
+          stepState?.pollState?.attempt ?? 0,
+          stepState?.customState
+        )
+      );
 
-    if (policyCalculationResult.outcome === 'maxAttemptReached') {
+      if (pollResult.output || pollResult.error) {
+        return {
+          input,
+          output: pollResult.output,
+          error: pollResult.error
+            ? ExecutionError.fromError(pollResult.error).toSerializableObject()
+            : undefined,
+        };
+      }
+
+      if ('nextPollDelayMs' in pollResult && pollResult?.nextPollDelayMs) {
+        nextPollAtOverride = new Date(Date.now() + pollResult.nextPollDelayMs);
+      }
+
+      if ('state' in pollResult && pollResult.state !== undefined) {
+        if (pollResult.state === null) {
+          customState = undefined;
+        } else {
+          customState = pollResult.state as State | undefined;
+        }
+      }
+    }
+
+    const startedAt = stepState.startedAt ?? new Date().toISOString();
+
+    let nextPollAt: string | undefined;
+    const attempt = stepState?.pollState?.attempt ?? 0;
+    const lastPollAt = stepState?.pollState?.lastPollAt ?? startedAt;
+    const nextAttempt = attempt + 1;
+
+    if (nextPollAtOverride) {
+      nextPollAt = nextPollAtOverride.toISOString();
+    }
+
+    if (!nextPollAt) {
+      nextPollAt = await this.calculateNextPollAt({
+        currentNextPollAt: stepState.pollState?.nextPollAt ?? startedAt,
+        currentAttempt: attempt,
+      });
+    }
+
+    const data = await this.enforceCeilings({
+      ceilings: this.stepDefinition.poll.ceilings,
+      attempt,
+      nextPollAt,
+      lastPollAt: stepState?.pollState?.lastPollAt ?? startedAt,
+      startedAt,
+    });
+
+    if (data.outcome !== 'success') {
       throw ExecutionError.fromError(new Error('Step execution failed.'));
     }
 
-    const attempt =
-      policyCalculationResult.outcome === 'maxWaitMsExceeded'
-        ? policyCalculationResult.attempt
-        : policyCalculationResult.data.nextAttempt;
-
-    const pollResult = await this.stepDefinition.poll.handler(
-      this.createPollHandlerContext(input, rawInput, config, attempt, stepState?.customState)
-    );
-
-    if (pollResult.output || pollResult.error) {
-      return {
-        input,
-        output: pollResult.output,
-        error: pollResult.error
-          ? ExecutionError.fromError(pollResult.error).toSerializableObject()
-          : undefined,
-      };
-    }
-
-    if (policyCalculationResult.outcome === 'maxWaitMsExceeded') {
-      throw ExecutionError.fromError(new Error('Step execution failed.'));
-    }
+    nextPollAt = data.nextPollAt;
 
     stepState = {
       ...stepState,
-      customState: (pollResult as PollContinueResult<State>).state || undefined,
       pollState: {
-        attempt: policyCalculationResult.data.nextAttempt,
-        nextPollAt: policyCalculationResult.data.nextPollAt.toISOString(),
-        lastPollAt: policyCalculationResult.data.lastPollAt?.toISOString(),
+        attempt: nextAttempt,
+        nextPollAt,
+        lastPollAt,
       },
+      customState,
     };
+    this.setDurableStepState(stepState);
 
     this.stepExecutionRuntime.enterWaitUntil(
-      policyCalculationResult.data.nextPollAt,
+      new Date(nextPollAt),
       {
         [bookkeepingKey]: stepState,
       },
-      policyCalculationResult.data.nextAttempt >= 2 // force task schedule for more than 2 attempts
+      nextAttempt >= 2 // force task schedule for more than 2 attempts
     );
     return { suspended: true, input };
+  }
+
+  private getDurableStepState<State extends Record<string, unknown>>(): DurableStepState<State> {
+    const durableStepState =
+      this.stepExecutionRuntime.getCurrentStepState()?.[bookkeepingKey] || {};
+
+    return durableStepState as DurableStepState<State>;
+  }
+
+  private setDurableStepState<State extends Record<string, unknown>>(
+    durableStepState: DurableStepState<State>
+  ): void {
+    this.stepExecutionRuntime.setCurrentStepState({
+      [bookkeepingKey]: durableStepState,
+    });
   }
 
   private createPollHandlerContext<
@@ -199,92 +247,69 @@ export class PollPolicyStepHandler implements StepHandler {
     } as PollHandlerContext<Input, Config, State>;
   }
 
-  private async calculatePolicyData<State>(
-    durableStepState: DurableStepState
-  ): Promise<PolicyCalculationResult> {
+  private async calculateNextPollAt(params: {
+    currentNextPollAt: string;
+    currentAttempt: number;
+  }): Promise<string> {
+    const { currentNextPollAt: currentNextPollAtString, currentAttempt } = params;
+    const currentNextPollAt = new Date(currentNextPollAtString);
     const policy = this.stepDefinition.poll.policy;
-    const ceilings = this.stepDefinition.poll.ceilings ?? DEFAULT_POLL_CEILINGS;
-    const currentAttempt = durableStepState.pollState?.attempt ?? 0;
-    const startedAt = durableStepState.startedAt
-      ? new Date(durableStepState.startedAt)
-      : new Date();
 
-    const lastPollAt = durableStepState.pollState?.nextPollAt
-      ? new Date(durableStepState.pollState.nextPollAt)
-      : startedAt;
-    let policyData: PolicyData;
+    const lastPollAt = new Date(currentNextPollAt);
 
     switch (policy.strategy) {
-      case 'fixed': {
-        policyData = {
-          startedAt,
-          lastPollAt,
-          nextPollAt: new Date(lastPollAt.getTime() + policy.intervalMs),
-          nextAttempt: currentAttempt + 1,
-        };
-        break;
-      }
+      case 'fixed':
+        return new Date(currentNextPollAt.getTime() + policy.intervalMs).toISOString();
       case 'exponential': {
         const multiplier = policy.multiplier ?? 2;
         const exponent = Math.max(currentAttempt, 0);
         const raw = policy.initialMs * Math.pow(multiplier, exponent);
         const capped = Math.min(raw, policy.maxMs);
         const delayMs = policy.jitter ? applyBackoffJitter(capped) : Math.floor(capped);
-        policyData = {
-          startedAt,
-          lastPollAt,
-          nextPollAt: new Date(lastPollAt.getTime() + Math.max(0, delayMs)),
-          nextAttempt: currentAttempt + 1,
-        };
-        break;
+        return new Date(lastPollAt.getTime() + Math.max(0, delayMs)).toISOString();
       }
-      case 'dynamic': {
-        const nextResult = await policy.next({
-          attempt: currentAttempt,
-          startedAt: startedAt.toISOString(),
-          lastPollAt: lastPollAt?.toISOString(),
-          state: durableStepState.customState as State | undefined,
-        });
 
-        policyData = {
-          startedAt,
-          lastPollAt,
-          nextPollAt: new Date(lastPollAt.getTime() + nextResult),
-          nextAttempt: currentAttempt + 1,
-        };
-        break;
-      }
       default: {
         const unknownPolicy = policy as { strategy: string };
         throw new Error(`Unknown poll policy strategy: ${unknownPolicy.strategy}`);
       }
     }
-
-    return this.enforceCeilings(ceilings, policyData);
   }
 
-  private enforceCeilings(
-    ceilings: PollCeilings,
-    pollPolicyData: PolicyData
-  ): PolicyCalculationResult {
-    const maxWaitMs = ceilings.maxWaitMs ?? DEFAULT_POLL_CEILINGS.maxWaitMs;
-    const maxAttempts = ceilings.maxAttempts ?? DEFAULT_POLL_CEILINGS.maxAttempts;
-    const startedAt = pollPolicyData.startedAt;
+  private enforceCeilings(params: {
+    ceilings?: PollCeilings;
+    attempt: number;
+    nextPollAt: string;
+    lastPollAt: string;
+    startedAt: string;
+  }): PolicyCalculationResult {
+    const {
+      ceilings,
+      attempt,
+      nextPollAt: currentNextPollAtString,
+      startedAt: startedAtString,
+      lastPollAt: lastPollAtString,
+    } = params;
+    const maxWaitMs = ceilings?.maxWaitMs ?? DEFAULT_POLL_CEILINGS.maxWaitMs;
+    const maxAttempts = ceilings?.maxAttempts ?? DEFAULT_POLL_CEILINGS.maxAttempts;
 
-    const lastPollAt = pollPolicyData.lastPollAt;
-    let nextPollAt = pollPolicyData.nextPollAt;
-
-    if (pollPolicyData.nextAttempt >= maxAttempts) {
+    if (attempt >= maxAttempts) {
       // Max attempts exceeded, return undefined to indicate that the step should fail.
       return { outcome: 'maxAttemptReached' };
     }
+
+    const startedAt = new Date(startedAtString);
+    let nextPollAt = new Date(currentNextPollAtString);
+    const lastPollAt = lastPollAtString ? new Date(lastPollAtString) : startedAt;
 
     if (nextPollAt.getTime() - startedAt.getTime() > maxWaitMs) {
       const timeLeft = startedAt.getTime() + maxWaitMs - lastPollAt.getTime();
 
       if (timeLeft <= 0) {
         // If no time left, we don't need to schedule a next poll.
-        return { outcome: 'maxWaitMsExceeded', attempt: pollPolicyData.nextAttempt };
+        return {
+          outcome: 'maxWaitMsExceeded',
+        };
       }
 
       nextPollAt = new Date(lastPollAt.getTime() + timeLeft);
@@ -292,10 +317,7 @@ export class PollPolicyStepHandler implements StepHandler {
 
     return {
       outcome: 'success',
-      data: {
-        ...pollPolicyData,
-        nextPollAt,
-      },
+      nextPollAt: nextPollAt.toISOString(),
     };
   }
 }

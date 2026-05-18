@@ -56,7 +56,7 @@ export type {
   RunDoneOnlyHandler,
   RunWithHandoffHandler,
   PollHandler,
-  PollHandlerContext,
+  PollContext as PollHandlerContext,
   PollLifecycle,
   PollPolicy,
   PollPolicyContext,

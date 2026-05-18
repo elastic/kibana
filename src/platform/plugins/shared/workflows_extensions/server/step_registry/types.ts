@@ -38,24 +38,29 @@ export interface PhaseDoneResult<TOutput> {
  * Run-phase hand-off: the step has started its work and now needs the engine
  * to drive the {@link PollLifecycle.handler} until the work completes.
  */
-export interface RunHandoffResult<TState> {
-  output?: never;
-  state: TState;
-  error?: never;
-}
+export type RunHandoffResult<TState extends Record<string, unknown>> =
+  | {
+      output?: never;
+      state?: TState | null;
+      pollDelayMs?: number;
+      error?: never;
+    }
+  | undefined;
 
 /**
  * Poll-phase continuation: the step is not done yet. Engine schedules the next
  * wake-up using the step definition's {@link PollPolicy}. The handler may
  * optionally update the persisted author state.
  */
-export interface PollContinueResult<TState> {
+export interface PollContinueResult<TState extends Record<string, unknown>> {
   output?: never;
   /**
    * Optional updated author state. Omit to keep the previously persisted state.
    * Pass `null` to explicitly clear it.
    */
   state?: TState | null;
+  /** The number of milliseconds until the next poll. */
+  nextPollDelayMs?: number;
   error?: never;
 }
 
@@ -117,7 +122,7 @@ export type PollHandler<
   Config extends z.ZodObject = z.ZodObject,
   State = unknown
 > = (
-  context: PollHandlerContext<Input, Config, State>
+  context: PollContext<Input, Config, State>
 ) => Promise<PhaseDoneResult<z.infer<Output>> | PollContinueResult<State> | PhaseErrorResult>;
 
 /**
@@ -173,7 +178,11 @@ export type OnCancelHandler<
  *                    system gives explicit timing hints (e.g. HTTP
  *                    `Retry-After`, ML job progress).
  */
-export type PollPolicy<State = unknown> =
+export type PollPolicy<
+  Input extends z.ZodType = z.ZodType,
+  Config extends z.ZodObject = z.ZodObject,
+  State = unknown
+> =
   | { strategy: 'fixed'; intervalMs: number }
   | {
       strategy: 'exponential';
@@ -181,26 +190,7 @@ export type PollPolicy<State = unknown> =
       maxMs: number;
       multiplier?: number;
       jitter?: boolean;
-    }
-  | {
-      strategy: 'dynamic';
-      next: (ctx: PollPolicyContext<State>) => Promise<number>;
     };
-
-/**
- * Context passed to {@link PollPolicy} `dynamic.next`. All fields are derived
- * from engine bookkeeping or the persisted author state.
- */
-export interface PollPolicyContext<State = unknown> {
-  /** 1-based count of poll invocations so far (does not include `run`). */
-  attempt: number;
-  /** Epoch ms when the step entered its poll loop (after `run`). */
-  startedAt: string;
-  /** Epoch ms of the most recent poll handler invocation. */
-  lastPollAt: string;
-  /** Persisted author state, as returned by the previous handler call. */
-  state: State | undefined;
-}
 
 /**
  * Engine-enforced ceilings for a poll-based step. Both default to
@@ -227,7 +217,7 @@ export interface PollLifecycle<
   State = unknown
 > {
   handler: PollHandler<Input, Output, Config, State>;
-  policy: PollPolicy<State>;
+  policy: PollPolicy<Input, Config, State>;
   ceilings?: PollCeilings;
 }
 
@@ -595,7 +585,7 @@ export interface StepHandlerContext<TInput = z.ZodType, TConfig = z.ZodObject> {
  * Context passed to a {@link PollHandler}. Extends {@link StepHandlerContext}
  * with the persisted author `state` from the previous run/poll invocation.
  */
-export interface PollHandlerContext<TInput = z.ZodType, TConfig = z.ZodObject, TState = unknown>
+export interface PollContext<TInput = z.ZodType, TConfig = z.ZodObject, TState = unknown>
   extends StepHandlerContext<TInput, TConfig> {
   /**
    * Author state persisted by the most recent run/poll invocation.

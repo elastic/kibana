@@ -40,10 +40,16 @@ export const durablePollStepDefinition = createServerStepDefinition({
 
       context.logger.debug(`Durable poll demo: attempt ${context.attempt}/${pollsBeforeDone}`);
       return {
-        state: context.state ? { ...context.state, lastAttempt: context.attempt } : undefined,
+        state: context.state
+          ? {
+              ...context.state,
+              lastAttempt: context.attempt,
+              foo: [...(context.state.foo || []), context.state.jobId],
+            }
+          : undefined,
       };
     },
-    policy: { strategy: 'fixed', intervalMs: 7_000 },
+    policy: { strategy: 'fixed', intervalMs: 2 },
     ceilings: { maxAttempts: 5, maxWaitMs: 36 * 1000 },
   },
 }) as ServerStepDefinition;
