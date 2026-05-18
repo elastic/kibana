@@ -65,7 +65,6 @@ export const sloComposite: SavedObjectsType = {
       members: {
         properties: {
           sloId: { type: 'keyword' },
-          weight: { type: 'float' },
           instanceId: { type: 'keyword' },
         },
       },

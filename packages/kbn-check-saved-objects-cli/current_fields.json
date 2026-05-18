@@ -1372,7 +1372,6 @@
     "members",
     "members.instanceId",
     "members.sloId",
-    "members.weight",
     "name",
     "tags",
     "updatedAt"
