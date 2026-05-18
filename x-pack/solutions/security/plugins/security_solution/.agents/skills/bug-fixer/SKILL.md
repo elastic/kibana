@@ -34,6 +34,15 @@ the findings before proceeding.
 Reads the reproduction artifacts, presents a fix plan for your explicit approval,
 implements a TDD fix, verifies in a clean environment, and optionally opens a draft PR.
 
+## Quick Reference
+
+| Step | Skill | Produces |
+|------|-------|---------|
+| 1 | bug-reproduce | `.bug-fixer-session/analysis.json`, `reproduction-report.md`, `before.png` |
+| 2 | bug-fix | Fix + test + verified browser repro + optional draft PR with `after.png` |
+
+**Scope:** Stateful (ECH) only — decline serverless bugs before starting either step.
+
 ## Scope
 
 Stateful (ECH) environments only. If the ticket is a serverless bug, tell the user and

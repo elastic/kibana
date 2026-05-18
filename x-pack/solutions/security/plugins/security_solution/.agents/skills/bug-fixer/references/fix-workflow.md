@@ -6,11 +6,10 @@ Detailed checklists and templates for Phase 4 (Fix) and the Knowledge Update. Re
 
 Answer all six using evidence gathered from your parallel research tasks:
 
-1. _"How does the codebase already solve this kind of problem?"_ — `rg` for existing patterns (e.g., `rg 'multiple-isolated'` for saved object namespace handling, `rg 'namespace.*id'` for ID construction). Adopt the established convention; do not invent a new mechanism.
-2. _"Are there hardcoded namespace references in the affected code path?"_ — If the bug involves non-default spaces, `rg "'default'" <affected-module>` and `rg '"default"' <affected-module>`. Any value derived from a namespace (IDs, index patterns, stream patterns) must be parameterized.
-3. _"Do the caller and callee belong to the same plugin?"_ — Read `kibana.jsonc` for both. If they're in different plugins, use routes or contracts instead of direct function imports.
-4. _"Which lifecycle phase does this logic belong in?"_ — Trace the full feature lifecycle (install / start / stop / uninstall). Place initialization logic in the correct phase; don't default to the most generic entry point.
+1–4. Complete the **Pre-Fix Checklist** in `x-pack/solutions/security/plugins/security_solution/.agents/skills/bug-fixer/references/classification-guide.md` — answer all four checks (existing patterns, hardcoded namespaces, plugin boundaries, feature lifecycle) using the gathered evidence.
+
 5. _"Have I found ALL call sites of the broken action?"_ — `rg` across the codebase for every place the broken hook/utility/action is invoked. UI bugs that appear in one component (e.g., a flyout footer) almost always have sibling entry points (table inline action, context menu, preview panel) that share the exact same broken code path. All of them must be fixed in the same PR.
+
 6. _"Am I threading data around the problem, or fixing the layer that owns it?"_ — When the root cause is a data model change (e.g., which fields an entity exposes), fix the layer that constructs queries/filters from that data, not the component tree above it. Passing a "correct" value down via props is a band-aid; the right fix lives in the shared utility that builds the query from the data record. Before writing a fix, check if such a utility already exists.
 
 ## Root Cause Analysis Template
