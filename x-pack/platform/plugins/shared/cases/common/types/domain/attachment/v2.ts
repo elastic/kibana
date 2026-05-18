@@ -7,7 +7,12 @@
 
 import { z } from '@kbn/zod/v4';
 import { jsonValueSchema } from '../../../schema';
-import { SECURITY_EVENT_ATTACHMENT_TYPE } from '../../../constants/attachments';
+import {
+  SECURITY_EVENT_ATTACHMENT_TYPE,
+  SECURITY_ALERT_ATTACHMENT_TYPE,
+  OBSERVABILITY_ALERT_ATTACHMENT_TYPE,
+  STACK_ALERT_ATTACHMENT_TYPE,
+} from '../../../constants/attachments';
 import {
   AlertAttachmentAttributesSchema,
   AttachmentAttributesBasicSchema,
@@ -114,38 +119,51 @@ export const AttachmentPatchAttributesSchemaV2 = z.union([
   UnifiedAttachmentPatchAttributesSchema,
 ]);
 
-const UnifiedEventDocumentAttachmentMetadataSchema = z
+const UnifiedDocumentAttachmentMetadataSchema = z
   .union([
     z.null(),
     z
       .object({
         index: z.union([z.string(), z.array(z.string())]),
+        rule: z.union([
+          z.null(),
+          z.object({
+            id: z.union([z.string(), z.null()]),
+            name: z.union([z.string(), z.null()]),
+          }),
+        ]),
       })
       .partial(),
   ])
   .optional();
 
-const UnifiedEventDocumentAttachmentPayloadSchema = z
+const UnifiedDocumentAttachmentPayloadSchema = z
   .object({
-    type: z.literal(SECURITY_EVENT_ATTACHMENT_TYPE),
+    type: z.union([
+      z.literal(SECURITY_EVENT_ATTACHMENT_TYPE),
+      z.literal(SECURITY_ALERT_ATTACHMENT_TYPE),
+      z.literal(OBSERVABILITY_ALERT_ATTACHMENT_TYPE),
+      z.literal(STACK_ALERT_ATTACHMENT_TYPE),
+    ]),
     attachmentId: z.union([z.string(), z.array(z.string())]),
     owner: z.string(),
   })
   .and(
     z
       .object({
-        metadata: UnifiedEventDocumentAttachmentMetadataSchema,
+        metadata: UnifiedDocumentAttachmentMetadataSchema,
       })
       .partial()
   );
 
-const UnifiedEventDocumentAttachmentAttributesSchema =
-  UnifiedEventDocumentAttachmentPayloadSchema.and(AttachmentAttributesBasicSchema);
+const UnifiedDocumentAttachmentAttributesSchema = UnifiedDocumentAttachmentPayloadSchema.and(
+  AttachmentAttributesBasicSchema
+);
 
 export const DocumentAttachmentAttributesSchemaV2 = z.union([
   AlertAttachmentAttributesSchema,
   EventAttachmentAttributesSchema,
-  UnifiedEventDocumentAttachmentAttributesSchema,
+  UnifiedDocumentAttachmentAttributesSchema,
 ]);
 
 export type AttachmentV2 = z.infer<typeof AttachmentSchemaV2>;
