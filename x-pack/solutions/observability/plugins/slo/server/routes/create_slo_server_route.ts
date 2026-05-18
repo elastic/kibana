@@ -7,6 +7,7 @@
 import { createServerRouteFactory } from '@kbn/server-route-repository';
 import type { Boom } from '@hapi/boom';
 import { forbidden, notFound, conflict, badRequest } from '@hapi/boom';
+import { addSpanLabels } from '@kbn/apm-utils';
 import type { CreateServerRouteFactory } from '@kbn/server-route-repository-utils/src/typings';
 import { inspectableEsQueriesMap } from '../lib/inspect/inspectable_es_queries_map';
 import type { SLORouteHandlerResources } from './types';
@@ -47,6 +48,7 @@ export const createSloServerRoute: CreateServerRouteFactory<
   return createPlainSloServerRoute({
     ...config,
     handler: async (options) => {
+      addSpanLabels({ plugin: 'slo' });
       const { request } = options;
       inspectableEsQueriesMap.set(request, []);
 

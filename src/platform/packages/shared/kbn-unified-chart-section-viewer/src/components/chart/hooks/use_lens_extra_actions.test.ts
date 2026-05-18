@@ -38,7 +38,7 @@ describe('useLensExtraActions', () => {
         })
       );
 
-      expect(action.getIconType({} as ActionExecutionContext)).toBe('dashboardApp');
+      expect(action.getIconType({} as ActionExecutionContext)).toBe('addToDashboard');
     });
 
     it('should call onClick when execute is invoked', async () => {

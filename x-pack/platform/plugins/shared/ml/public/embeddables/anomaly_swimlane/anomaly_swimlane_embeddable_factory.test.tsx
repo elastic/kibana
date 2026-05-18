@@ -33,9 +33,9 @@ const mockResponse = of([
   },
 ]);
 
-jest.mock('../../../common/license/ml_license', () => {
+jest.mock('../../application/capabilities/check_capabilities', () => {
   return {
-    ensureMlAvailable: jest.fn(),
+    checkPermissionAsync: jest.fn().mockResolvedValue(true),
   };
 });
 

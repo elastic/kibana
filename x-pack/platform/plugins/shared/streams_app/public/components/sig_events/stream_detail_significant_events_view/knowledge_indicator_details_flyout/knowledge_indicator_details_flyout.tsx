@@ -214,7 +214,7 @@ export function KnowledgeIndicatorDetailsFlyout({
               panelPaddingSize="none"
               anchorPosition="downRight"
             >
-              <EuiContextMenuPanel size="s" items={[...featureActionItems, ...queryActionItems]} />
+              <EuiContextMenuPanel items={[...featureActionItems, ...queryActionItems]} />
             </EuiPopover>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

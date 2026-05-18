@@ -12,7 +12,11 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { DOC_VIEWER_VIEWED_EVENT_TYPE, DOC_VIEWER_VIEWED_ROOT_CONTENT_ID } from './constants';
-import { useDocViewerTabViewedEvent, useDocViewerViewedEvent } from './doc_viewer_viewed_event';
+import {
+  useDocViewerSpanLogViewedEvent,
+  useDocViewerTabViewedEvent,
+  useDocViewerViewedEvent,
+} from './doc_viewer_viewed_event';
 
 const createReportEvent = () => analyticsServiceMock.createAnalyticsServiceStart().reportEvent;
 
@@ -72,6 +76,46 @@ describe('useDocViewerViewedEvent', () => {
     expect(reportEvent).toHaveBeenNthCalledWith(2, DOC_VIEWER_VIEWED_EVENT_TYPE, {
       contentId: 'content-1',
       tabId: 'tab-2',
+    });
+  });
+
+  test('reports originDocType and includes it in the dedup key', () => {
+    const reportEvent = createReportEvent();
+    const onEventKeyChange = jest.fn();
+
+    const { rerender } = renderHook(useDocViewerViewedEvent, {
+      initialProps: {
+        reportEvent,
+        contentId: 'content-1',
+        tabId: 'tab-1',
+        keys: ['doc-1'],
+        originDocType: 'trace',
+        onEventKeyChange,
+      },
+    });
+
+    expect(onEventKeyChange).toHaveBeenCalledWith('content-1|tab-1|trace|doc-1');
+    expect(reportEvent).toHaveBeenCalledWith(DOC_VIEWER_VIEWED_EVENT_TYPE, {
+      originDocType: 'trace',
+      contentId: 'content-1',
+      tabId: 'tab-1',
+    });
+
+    // Switching origin doc type (but same tab/content/doc) should re-emit.
+    rerender({
+      reportEvent,
+      contentId: 'content-1',
+      tabId: 'tab-1',
+      keys: ['doc-1'],
+      originDocType: 'log',
+      onEventKeyChange,
+    });
+
+    expect(reportEvent).toHaveBeenCalledTimes(2);
+    expect(reportEvent).toHaveBeenNthCalledWith(2, DOC_VIEWER_VIEWED_EVENT_TYPE, {
+      originDocType: 'log',
+      contentId: 'content-1',
+      tabId: 'tab-1',
     });
   });
 
@@ -220,5 +264,76 @@ describe('useDocViewerTabViewedEvent', () => {
     });
 
     expect(reportEvent).toHaveBeenCalledTimes(2);
+  });
+
+  test('forwards originDocType to the reported event', () => {
+    const reportEvent = createReportEvent();
+
+    renderHook(useDocViewerTabViewedEvent, {
+      initialProps: {
+        reportEvent,
+        hit: createHit('doc-1'),
+        tabId: 'table',
+        originDocType: 'log',
+      },
+    });
+
+    expect(reportEvent).toHaveBeenCalledWith(DOC_VIEWER_VIEWED_EVENT_TYPE, {
+      originDocType: 'log',
+      contentId: DOC_VIEWER_VIEWED_ROOT_CONTENT_ID,
+      tabId: 'table',
+    });
+  });
+});
+
+describe('useDocViewerSpanLogViewedEvent', () => {
+  test('forwards originDocType to the reported event', () => {
+    const reportEvent = createReportEvent();
+
+    renderHook(useDocViewerSpanLogViewedEvent, {
+      initialProps: {
+        reportEvent,
+        contentId: 'span_detail',
+        tabId: 'overview',
+        hit: createHit('span-1'),
+        originDocType: 'log',
+      },
+    });
+
+    expect(reportEvent).toHaveBeenCalledWith(DOC_VIEWER_VIEWED_EVENT_TYPE, {
+      originDocType: 'log',
+      contentId: 'span_detail',
+      tabId: 'overview',
+    });
+  });
+
+  test('does not report until a hit is provided', () => {
+    const reportEvent = createReportEvent();
+
+    const { rerender } = renderHook(useDocViewerSpanLogViewedEvent, {
+      initialProps: {
+        reportEvent,
+        contentId: 'span_detail',
+        tabId: 'overview',
+        hit: null as ReturnType<typeof createHit> | null,
+        originDocType: 'trace',
+      },
+    });
+
+    expect(reportEvent).not.toHaveBeenCalled();
+
+    rerender({
+      reportEvent,
+      contentId: 'span_detail',
+      tabId: 'overview',
+      hit: createHit('span-1'),
+      originDocType: 'trace',
+    });
+
+    expect(reportEvent).toHaveBeenCalledWith(DOC_VIEWER_VIEWED_EVENT_TYPE, {
+      originDocType: 'trace',
+      contentId: 'span_detail',
+      tabId: 'overview',
+    });
   });
 });

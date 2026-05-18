@@ -648,6 +648,7 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
               name="value"
               value={blocklistEntry.value as string}
               fullWidth
+              isInvalid={valueVisited.value && !!Object.keys(errorsRef.current.value).length}
               onChange={handleSingleValueUpdate}
               onBlur={handleOnValueBlur}
               data-test-subj={getTestId('value-input')}
@@ -655,6 +656,7 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
           ) : (
             <EuiComboBox
               selectedOptions={selectedValues}
+              isInvalid={valueVisited.value && !!Object.keys(errorsRef.current.value).length}
               onBlur={handleOnValueBlur}
               onSearchChange={handleOnValueTextChange}
               onChange={handleOnValueChange}

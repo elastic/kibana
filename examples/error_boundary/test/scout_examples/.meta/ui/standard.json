@@ -1,0 +1,31 @@
+{
+  "sha1": "b53aecbf8726637d9875ee295a25aa0ffbb0a970",
+  "tests": [
+    {
+      "id": "21a7ddcdeb201c8-d8f2f2c8a5c03a2",
+      "title": "Error Boundary Examples fatal error shows error boundary and recovers on reload",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/error_boundary/test/scout_examples/ui/tests/error_boundary.spec.ts",
+        "line": 20,
+        "column": 7
+      }
+    },
+    {
+      "id": "21a7ddcdeb201c8-4187891acf43433",
+      "title": "Error Boundary Examples recoverable error shows error boundary and recovers on reload",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "examples/error_boundary/test/scout_examples/ui/tests/error_boundary.spec.ts",
+        "line": 37,
+        "column": 7
+      }
+    }
+  ]
+}
