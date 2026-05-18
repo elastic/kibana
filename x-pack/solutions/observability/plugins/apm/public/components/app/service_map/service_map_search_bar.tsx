@@ -93,19 +93,22 @@ export function ServiceMapSearchBar() {
   }, []);
 
   // Extract selected values from each control filter by field name.
-  const extractSelectionsFromFilters = useCallback((filters: Filter[]): Record<string, string[]> => {
-    const selections: Record<string, string[]> = {};
-    for (const f of filters) {
-      const key = f.meta?.key;
-      if (!key || f.meta?.disabled || f.meta?.negate) continue;
-      if (isPhraseFilter(f)) {
-        selections[key] = [String(getPhraseFilterValue(f))];
-      } else if (isPhrasesFilter(f)) {
-        selections[key] = f.meta.params.map(String);
+  const extractSelectionsFromFilters = useCallback(
+    (filters: Filter[]): Record<string, string[]> => {
+      const selections: Record<string, string[]> = {};
+      for (const f of filters) {
+        const key = f.meta?.key;
+        if (!key || f.meta?.disabled || f.meta?.negate) continue;
+        if (isPhraseFilter(f)) {
+          selections[key] = [String(getPhraseFilterValue(f))];
+        } else if (isPhrasesFilter(f)) {
+          selections[key] = f.meta.params.map(String);
+        }
       }
-    }
-    return selections;
-  }, []);
+      return selections;
+    },
+    []
+  );
 
   // Extract the environment selected in Controls from panelFilters.
   const envFromControls = useMemo(() => {
@@ -140,8 +143,8 @@ export function ServiceMapSearchBar() {
       ...location,
       search: fromQuery({ ...existing, environment: envFromControls }),
     });
-  // location.search as the dep (not the object) to avoid infinite loops.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // location.search as the dep (not the object) to avoid infinite loops.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [envFromControls, history, location.search]);
 
   // Rebuild esQuery whenever any input changes.
@@ -178,12 +181,18 @@ export function ServiceMapSearchBar() {
     <>
       <SearchBar showFilterBar />
       <EuiSpacer size="s" />
-      <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center" wrap>
+      <EuiFlexGroup
+        gutterSize="s"
+        responsive={false}
+        alignItems="center"
+        wrap
+        css={{ minWidth: 0 }}
+      >
         <EuiFlexItem grow={false}>
           <TimeComparison compressed />
         </EuiFlexItem>
         {dataView && (
-          <EuiFlexItem grow>
+          <EuiFlexItem grow css={{ minWidth: 0 }}>
             <ServiceMapControls
               dataView={dataView}
               timeRange={{ from: rangeFrom, to: rangeTo }}

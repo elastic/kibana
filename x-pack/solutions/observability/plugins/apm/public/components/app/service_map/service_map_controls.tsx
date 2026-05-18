@@ -103,6 +103,7 @@ export function ServiceMapControls({
       timeRange={timeRange}
       query={query}
       filters={filters}
+      compressed
     />
   );
 }
