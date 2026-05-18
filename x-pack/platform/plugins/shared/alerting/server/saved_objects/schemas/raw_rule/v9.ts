@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-// No data-shape change in model version 13 (mapping-only fix for actions.params ignore_above).
-export { rawRuleSchema } from './v12';
+// No data-shape change in model version 9 (mapping-only fix for actions.params ignore_above).
+export { rawRuleSchema } from './v8';
