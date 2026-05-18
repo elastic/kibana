@@ -23,23 +23,9 @@ import { fromStoredFields } from './from_stored_fields';
  * @param index String id (referenced data view), inline {@link DataViewSpec}, or null/undefined
  * @returns As-code `data_source` object for classic (KQL/Lucene) tabs
  */
-
-export function fromStoredDataView<
-  IndexType extends string | DataViewSpec | null | undefined,
-  UseSavedSchema extends boolean = false
->(
-  index: IndexType,
-  useSavedSchema?: UseSavedSchema
-): IndexType extends string
-  ? AsCodeDataView
-  : UseSavedSchema extends true
-  ? AsCodeSavedDataView
-  : AsCodeDataView;
-
 export function fromStoredDataView(
-  index: string | DataViewSpec | null | undefined,
-  useSavedSchema?: boolean
-): AsCodeDataView | AsCodeSavedDataView {
+  index: string | DataViewSpec | null | undefined
+): AsCodeDataView {
   if (!index) throw new Error('Cannot derive data view from empty index');
   if (typeof index === 'string') {
     return { type: AS_CODE_DATA_VIEW_REFERENCE_TYPE, ref_id: index };
@@ -48,25 +34,32 @@ export function fromStoredDataView(
   const fieldSettings = fromStoredFields(
     index.runtimeFieldMap,
     index.fieldFormats,
-    index.fieldAttrs,
-    useSavedSchema
+    index.fieldAttrs
   );
-
-  if (useSavedSchema) {
-    return {
-      id: index.id,
-      name: index.name,
-      index_pattern: index.title,
-      time_field: index.timeFieldName,
-      allow_hidden_indices: index.allowHidden,
-      field_settings: fieldSettings,
-    };
-  }
 
   return {
     type: AS_CODE_DATA_VIEW_SPEC_TYPE,
     index_pattern: index.title,
     time_field: index.timeFieldName,
     ...(fieldSettings && { field_settings: fieldSettings }),
+  };
+}
+
+export function fromStoredDataViewToAsCodeSavedSchema(index: DataViewSpec): AsCodeSavedDataView {
+  if (!index.title) throw new Error('Cannot derive data view without `title`');
+  const fieldSettings = fromStoredFields(
+    index.runtimeFieldMap,
+    index.fieldFormats,
+    index.fieldAttrs,
+    true
+  );
+
+  return {
+    id: index.id,
+    name: index.name,
+    index_pattern: index.title,
+    time_field: index.timeFieldName,
+    allow_hidden_indices: index.allowHidden,
+    field_settings: fieldSettings,
   };
 }

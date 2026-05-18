@@ -52,7 +52,7 @@ function isSavedDataView(
   return 'id' in dataView || 'name' in dataView || 'allow_hidden_indices' in dataView;
 }
 
-function getSavedDataViewFields(dataView: AsCodeSavedDataView) {
+function getSavedDataViewFields(dataView: AsCodeSavedDataView): Partial<DataViewSpec> {
   if (!isSavedDataView(dataView)) return {};
   return {
     id: dataView.id,
