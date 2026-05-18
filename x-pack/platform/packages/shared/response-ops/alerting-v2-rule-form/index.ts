@@ -46,11 +46,13 @@ export {
   KindField,
   RulePreviewPanel,
   GroupFieldSelect,
+  DurationInput,
   SubmissionButtons,
   ErrorCallOut,
   useFormDefaults,
 } from './form';
 
+export type { DurationInputProps } from './form';
 export type { SubmissionButtonsProps } from './form';
 
 

@@ -24,6 +24,7 @@ import * as i18n from '../translations';
 import { RuleTypeSwitcher } from './rule_type_switcher';
 import { ThresholdFields } from './threshold_fields';
 import { SecurityDetectionFields } from './security_detection_fields';
+import { SuppressionDurationField } from './suppression_duration_field';
 
 type ThreatEntry = NonNullable<RuleParams['threat']>[number];
 type RelatedIntegration = NonNullable<RuleParams['related_integrations']>[number];
@@ -132,10 +133,9 @@ export const SecurityGuiRuleForm = ({
         <ConditionFieldGroup
           includeBase={ruleType !== 'threshold'}
           groupFieldLabel={i18n.SUPPRESSION_FIELDS_LABEL}
-          showGroupingDuration
-          groupingDurationLabel={i18n.SUPPRESSION_DURATION_LABEL}
-          groupingDurationHelpText={i18n.SUPPRESSION_DURATION_HELP}
         />
+        <EuiSpacer size="m" />
+        <SuppressionDurationField />
         <EuiSpacer size="m" />
         <RuleExecutionFieldGroup />
         <EuiSpacer size="m" />

@@ -59,8 +59,13 @@ const mapEvaluation = (evaluation: FormValues['evaluation']) => ({
   },
 });
 
-const mapGrouping = (grouping: FormValues['grouping']) =>
-  grouping?.fields?.length ? { fields: grouping.fields } : undefined;
+const mapGrouping = (grouping: FormValues['grouping']) => {
+  if (!grouping?.fields?.length) return undefined;
+  return {
+    fields: grouping.fields,
+    ...(grouping.duration ? { duration: grouping.duration } : {}),
+  };
+};
 
 const mapRecoveryPolicy = (recoveryPolicy: FormValues['recoveryPolicy']) => {
   if (!recoveryPolicy) return undefined;
@@ -142,7 +147,7 @@ export interface RuleRequestCommon {
   time_field: string;
   schedule: { every: string; lookback?: string };
   evaluation: { query: { base: string } };
-  grouping?: { fields: string[] };
+  grouping?: { fields: string[]; duration?: string };
   recovery_policy?: { type: RecoveryPolicyType; query?: { base?: string } };
   state_transition?: {
     pending_count?: number;
@@ -268,7 +273,14 @@ export const mapRuleResponseToFormValues = (rule: RuleResponse): Partial<FormVal
         base: rule.evaluation.query.base,
       },
     },
-    ...(rule.grouping ? { grouping: { fields: rule.grouping.fields } } : {}),
+    ...(rule.grouping
+      ? {
+          grouping: {
+            fields: rule.grouping.fields,
+            ...(rule.grouping.duration ? { duration: rule.grouping.duration } : {}),
+          },
+        }
+      : {}),
     ...(rule.recovery_policy
       ? {
           recoveryPolicy: {

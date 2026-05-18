@@ -56,7 +56,7 @@ interface YamlRuleObject {
   time_field: string;
   schedule: { every: string; lookback: string };
   evaluation: { query: { base: string } };
-  grouping?: { fields: string[] };
+  grouping?: { fields: string[]; duration?: string };
   state_transition?: YamlStateTransition;
   recovery_policy?: YamlRecoveryPolicy;
   artifacts?: Array<{ id: string; type: string; value: string }>;
@@ -112,7 +112,12 @@ export const formValuesToYamlObject = (values: FormValues): YamlRuleObject => {
         base: values.evaluation.query.base,
       },
     },
-    ...(values.grouping?.fields?.length && { grouping: { fields: values.grouping.fields } }),
+    ...(values.grouping?.fields?.length && {
+      grouping: {
+        fields: values.grouping.fields,
+        ...(values.grouping.duration ? { duration: values.grouping.duration } : {}),
+      },
+    }),
     ...(st && { state_transition: st }),
     ...(rp && { recovery_policy: rp }),
     ...(values.artifacts?.length && { artifacts: values.artifacts }),
@@ -257,7 +262,10 @@ export const parseYamlToFormValues = (yamlString: string): YamlParseResult => {
         },
       },
       grouping: Array.isArray(grouping?.fields)
-        ? { fields: grouping.fields as string[] }
+        ? {
+            fields: grouping.fields as string[],
+            ...(typeof grouping?.duration === 'string' ? { duration: grouping.duration } : {}),
+          }
         : undefined,
       artifacts,
       recoveryPolicy: recoveryPolicy ?? { type: 'no_breach' },

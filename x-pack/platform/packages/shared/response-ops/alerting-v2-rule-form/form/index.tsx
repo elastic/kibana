@@ -71,6 +71,8 @@ export { AlertConditionsFieldGroup } from './field_groups/alert_conditions_field
 export { KindField } from './fields/kind_field';
 export { RulePreviewPanel } from './fields/rule_preview_panel';
 export { GroupFieldSelect } from './fields/group_field_select';
+export { DurationInput } from './fields/duration_input';
+export type { DurationInputProps } from './fields/duration_input';
 export { SubmissionButtons } from './components/submission_buttons';
 export type { SubmissionButtonsProps } from './components/submission_buttons';
 export { ErrorCallOut } from './error_callout';
