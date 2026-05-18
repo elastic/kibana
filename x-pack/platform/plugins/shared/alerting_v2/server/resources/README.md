@@ -80,7 +80,7 @@ This stream is the durable history of rule evaluation.
 | `@timestamp` | `date` | When the document was written. |
 | `scheduled_timestamp` | `date` | When the rule run was scheduled. |
 | `rule.id` | `keyword` | Rule identifier. |
-| `rule.version` | `long` | Rule version at execution time. |
+| `rule.version` | `long` | Change-history `object.sequence` for the rule config at execution time. |
 | `group_hash` | `keyword` | Per-rule series identity. |
 | `data` | `flattened` | ES\|QL row payload. |
 | `status` | `keyword` | `breached`, `recovered`, or `no_data`. |

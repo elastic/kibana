@@ -92,6 +92,7 @@ dependsOn:
   - '@kbn/ui-actions-plugin'
   - '@kbn/field-formats-plugin'
   - '@kbn/charts-plugin'
+  - '@kbn/change-history'
   - '@kbn/unified-data-table'
   - '@kbn/cell-actions'
   - '@kbn/discover-utils'

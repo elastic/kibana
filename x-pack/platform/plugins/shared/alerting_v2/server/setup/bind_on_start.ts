@@ -19,6 +19,7 @@ import { scheduleDispatcherTask } from '../lib/dispatcher/schedule_task';
 import { scheduleCleanupInsightsTask } from '../lib/tasks/cleanup_insights/schedule_task';
 import { scheduleTelemetryTask } from '../lib/usage/schedule_task';
 import { ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID } from '../../common/advanced_settings';
+import { RuleChangeHistoryService } from '../lib/rule_change_history';
 
 export function bindOnStart({ bind }: ContainerModuleLoadOptions) {
   bind(OnStart).toConstantValue(async (container) => {
@@ -46,6 +47,18 @@ export function bindOnStart({ bind }: ContainerModuleLoadOptions) {
       logger,
       experimentalFeaturesEnabled,
     });
+
+    const ruleChangeHistoryService = container.get(RuleChangeHistoryService);
+    if (ruleChangeHistoryService.isEnabled()) {
+      ruleChangeHistoryService.initialize(esClient);
+    } else if (
+      ruleChangeHistoryService.isPluginConfigEnabled() &&
+      !ruleChangeHistoryService.isPackageEnabled()
+    ) {
+      logger.warn(
+        'xpack.alerting_v2.ruleChangeHistory.enabled is true but @kbn/change-history is disabled (FLAGS.FEATURE_ENABLED=false). Rule change history will not be initialized.'
+      );
+    }
 
     scheduleDispatcherTask({ taskManager, resourceManager }).catch((error) => {
       logger.error(error as Error, {

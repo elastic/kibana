@@ -11,7 +11,20 @@ import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { ActionPolicyClient } from '../action_policy_client';
 import { createRulesSavedObjectService } from '../services/rules_saved_object_service/rules_saved_object_service.mock';
 import { createUserService } from '../services/user_service/user_service.mock';
+import type { RuleChangeHistoryServiceContract } from '../rule_change_history';
 import { RulesClient } from './rules_client';
+
+const createRuleChangeHistoryServiceMock = (): RuleChangeHistoryServiceContract => ({
+  getScope: jest.fn(),
+  isPluginConfigEnabled: jest.fn().mockReturnValue(false),
+  isPackageEnabled: jest.fn().mockReturnValue(false),
+  isEnabled: jest.fn().mockReturnValue(false),
+  isInitialized: jest.fn().mockReturnValue(false),
+  initialize: jest.fn(),
+  getClient: jest.fn(),
+  getHistory: jest.fn(),
+  logRuleChanges: jest.fn().mockResolvedValue(undefined),
+});
 
 export function createRulesClient(): {
   rulesClient: RulesClient;
@@ -28,7 +41,14 @@ export function createRulesClient(): {
   } as unknown as ActionPolicyClient;
 
   const rulesClient = new RulesClient({
-    services: { request, rulesSavedObjectService, taskManager, userService, actionPolicyClient },
+    services: {
+      request,
+      rulesSavedObjectService,
+      taskManager,
+      userService,
+      actionPolicyClient,
+      ruleChangeHistoryService: createRuleChangeHistoryServiceMock(),
+    },
     options: { spaceId: 'default' },
   });
 

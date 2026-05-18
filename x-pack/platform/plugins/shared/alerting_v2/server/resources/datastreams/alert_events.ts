@@ -11,7 +11,7 @@ import { z } from '@kbn/zod/v4';
 import type { ResourceDefinition } from './types';
 
 export const ALERT_EVENTS_DATA_STREAM = '.rule-events';
-export const ALERT_EVENTS_DATA_STREAM_VERSION = 3;
+export const ALERT_EVENTS_DATA_STREAM_VERSION = 4;
 export const ALERT_EVENTS_BACKING_INDEX = '.ds-.rule-events-*';
 export const ALERT_EVENTS_ILM_POLICY_NAME = '.rule-events-ilm-policy';
 
