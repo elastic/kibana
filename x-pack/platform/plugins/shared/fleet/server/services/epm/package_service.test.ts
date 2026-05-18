@@ -133,8 +133,15 @@ function getTest(
       test = {
         method: mocks.packageClient.getPackage.bind(mocks.packageClient),
         args: ['package name', '8.0.0'],
-        spy: jest.spyOn(epmRegistry, 'getPackage'),
-        spyArgs: ['package name', '8.0.0', undefined],
+        spy: jest.spyOn(epmPackagesGet, 'getPackageFromSource'),
+        spyArgs: [
+          {
+            pkgName: 'package name',
+            pkgVersion: '8.0.0',
+            installedPkg: undefined,
+            savedObjectsClient: mocks.soClient,
+          },
+        ],
         spyResponse: {
           packageInfo: { name: 'getPackage test' },
           paths: ['/some/test/path'],
@@ -300,6 +307,9 @@ describe('PackageService', () => {
             .mockResolvedValue({ name: 'package name' } as any);
           jest.mocked(getEsPackage).mockResolvedValue({ name: 'package name' } as any);
         }
+        if (testKey === 'getPackage') {
+          jest.mocked(epmPackagesGet.getInstallation).mockResolvedValue(undefined);
+        }
 
         await expect(method(...args)).resolves.toEqual(expectedReturnValue);
         expect(spy).toHaveBeenCalledWith(...spyArgs);
@@ -326,9 +336,74 @@ describe('PackageService', () => {
           .mockResolvedValue({ name: 'package name' } as any);
         jest.mocked(getEsPackage).mockResolvedValue({ name: 'package name' } as any);
       }
+      if (testKey === 'getPackage') {
+        jest.mocked(epmPackagesGet.getInstallation).mockResolvedValue(undefined);
+      }
 
       await expect(method(...args)).resolves.toEqual(expectedReturnValue);
       expect(spy).toHaveBeenCalledWith(...spyArgs);
+    });
+  });
+
+  describe('getPackage - bundled package fallback', () => {
+    const pkgName = 'apm';
+    const pkgVersion = '9.3.1';
+    const packageInfo = { name: pkgName, version: pkgVersion };
+    const paths = ['/some/bundled/path'];
+
+    beforeEach(() => {
+      jest.spyOn(epmPackagesGet, 'getInstallation').mockResolvedValue(undefined);
+    });
+
+    it('returns package from getPackageFromSource when EPR would return 404 for bundled package', async () => {
+      jest
+        .spyOn(epmPackagesGet, 'getPackageFromSource')
+        .mockResolvedValue({ packageInfo: packageInfo as any, paths });
+
+      const result = await mockPackageService.asInternalUser.getPackage(pkgName, pkgVersion);
+
+      expect(result).toEqual({ packageInfo, paths });
+      expect(epmPackagesGet.getPackageFromSource).toHaveBeenCalledWith({
+        pkgName,
+        pkgVersion,
+        installedPkg: undefined,
+        savedObjectsClient: mockSoClient,
+      });
+    });
+
+    it('passes installed package to getPackageFromSource so ES assets are tried first', async () => {
+      const installedPkg = {
+        name: pkgName,
+        version: pkgVersion,
+        install_status: 'installed',
+        install_source: 'bundled',
+        package_assets: [{ id: 'asset-1', type: 'epm-packages-assets' }],
+      } as any;
+
+      jest.spyOn(epmPackagesGet, 'getInstallation').mockResolvedValue(installedPkg);
+      jest
+        .spyOn(epmPackagesGet, 'getPackageFromSource')
+        .mockResolvedValue({ packageInfo: packageInfo as any, paths });
+
+      await mockPackageService.asInternalUser.getPackage(pkgName, pkgVersion);
+
+      expect(epmPackagesGet.getPackageFromSource).toHaveBeenCalledWith({
+        pkgName,
+        pkgVersion,
+        installedPkg,
+        savedObjectsClient: mockSoClient,
+      });
+    });
+
+    it('propagates PackageNotFoundError when package cannot be found anywhere', async () => {
+      const { PackageNotFoundError } = jest.requireActual('../../errors');
+      jest
+        .spyOn(epmPackagesGet, 'getPackageFromSource')
+        .mockRejectedValue(new PackageNotFoundError(`Package info for ${pkgName}-${pkgVersion} does not exist`));
+
+      await expect(
+        mockPackageService.asInternalUser.getPackage(pkgName, pkgVersion)
+      ).rejects.toThrow(`Package info for ${pkgName}-${pkgVersion} does not exist`);
     });
   });
 });
