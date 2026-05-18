@@ -4,7 +4,7 @@ info:
   title: Risk Score History API
   description: Retrieve historical risk score changes for an entity.
 paths:
-  /internal/risk_score/history:
+  /api/risk_score/history:
     get:
       x-labels: [ess, serverless]
       x-codegen-enabled: true

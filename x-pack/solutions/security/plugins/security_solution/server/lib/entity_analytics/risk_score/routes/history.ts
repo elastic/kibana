@@ -26,7 +26,7 @@ export const riskScoreHistoryRoute = (
   router.versioned
     .get({
       path: RISK_SCORE_HISTORY_URL,
-      access: 'internal',
+      access: 'public',
       security: {
         authz: {
           requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],

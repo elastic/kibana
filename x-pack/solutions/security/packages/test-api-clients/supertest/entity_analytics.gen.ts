@@ -545,7 +545,7 @@ The entity will be immediately deleted from the latest index.  It will remain av
    */
   getRiskScoreHistory(props: GetRiskScoreHistoryProps, kibanaSpace: string = 'default') {
     return supertest
-      .get(getRouteUrlForSpace('/internal/risk_score/history', kibanaSpace))
+      .get(getRouteUrlForSpace('/api/risk_score/history', kibanaSpace))
       .set('kbn-xsrf', 'true')
       .set(ELASTIC_HTTP_VERSION_HEADER, '1')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')

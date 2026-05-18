@@ -2134,7 +2134,7 @@ Requires the **Timeline and Notes** read privilege (`notes_read`).
     this.log.info(`${new Date().toISOString()} Calling API GetRiskScoreHistory`);
     return this.kbnClient
       .request<GetRiskScoreHistoryResponse>({
-        path: '/internal/risk_score/history',
+        path: '/api/risk_score/history',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
