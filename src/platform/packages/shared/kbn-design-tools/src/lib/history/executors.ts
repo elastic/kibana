@@ -349,6 +349,9 @@ export const importExecutor: TransactionExecutor<ImportTransaction> = {
   apply(tx, registry) {
     for (const { element, snapshot } of tx.sessionSnapshots) {
       restoreAndRebuild(element, snapshot, registry);
+      if (snapshot.referenceEl instanceof HTMLElement) {
+        softHideElement(snapshot.referenceEl);
+      }
     }
     for (const { element, originalTransform } of tx.deletions) {
       softHideElement(element, originalTransform);
