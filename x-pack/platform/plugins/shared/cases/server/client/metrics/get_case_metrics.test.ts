@@ -221,6 +221,7 @@ function createMockClientArgs() {
       alertsService,
       userActionService,
     },
+    config: { attachments: { enabled: false } },
   };
 
   return { mockServices: clientArgs, clientArgs: clientArgs as unknown as CasesClientArgs };
