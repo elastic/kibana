@@ -175,7 +175,7 @@ function normalizeFormBasedAdHocDataViews(
     if (adHocId && adHocDataViews[adHocId]) {
       const adHocDataView: DataViewSpec = adHocDataViews[adHocId];
       const newId = generateAdHocDataViewId({
-        index: adHocDataView.title ?? adHocDataView.name ?? '',
+        index: adHocDataView.title ?? '',
         timeFieldName: adHocDataView.timeFieldName,
       });
 
