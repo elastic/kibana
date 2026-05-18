@@ -269,6 +269,10 @@ export const TemplateDetailsContent = ({
               {/* Manage templates context menu */}
               <EuiPopover
                 id="manageTemplatePanel"
+                aria-label={i18n.translate(
+                  'xpack.idxMgmt.templateDetails.managePopoverAriaLabel',
+                  { defaultMessage: 'Manage template' }
+                )}
                 button={
                   <EuiButton
                     fill
