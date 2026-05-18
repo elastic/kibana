@@ -13,7 +13,7 @@ import type { WorkflowListDto, WorkflowListItemDto, WorkflowsSearchParams } from
 import { createMockWorkflowsCapabilities as mockCreateMockWorkflowsCapabilities } from '@kbn/workflows-ui/mocks';
 import { WorkflowList } from './workflow_list';
 import { createUseKibanaMockValue } from '../../../mocks';
-import { TestWrapper } from '../../../shared/test_utils';
+import { TestProvider } from '../../../shared/mocks/test_providers';
 
 // --- Mocks ---
 
@@ -179,9 +179,9 @@ describe('WorkflowList', () => {
 
   const renderComponent = (overrides: Partial<typeof defaultProps> = {}) => {
     return render(
-      <TestWrapper>
+      <TestProvider>
         <WorkflowList {...defaultProps} {...overrides} />
-      </TestWrapper>
+      </TestProvider>
     );
   };
 
