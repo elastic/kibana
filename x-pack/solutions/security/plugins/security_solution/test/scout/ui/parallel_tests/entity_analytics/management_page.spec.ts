@@ -56,12 +56,8 @@ spaceTest.describe(
       await expect(managementPage.assetCriticalityTab).toBeVisible();
     });
 
-    // TODO: Fix flaky test - backend race condition when toggling entity analytics
-    // The entity store cleanup is async and may still be in progress when re-enabling
-    // See: https://github.com/elastic/security-team/issues/16300
-    // eslint-disable-next-line playwright/no-skipped-test
-    spaceTest.skip('should init and disable entity analytics', async ({ pageObjects }) => {
-      spaceTest.setTimeout(180000);
+    spaceTest('should init and disable entity analytics', async ({ pageObjects, apiServices }) => {
+      spaceTest.setTimeout(240000);
       const managementPage = pageObjects.entityAnalyticsManagementPage;
 
       await spaceTest.step('Navigate and verify initial off state', async () => {
@@ -72,14 +68,28 @@ spaceTest.describe(
 
       await spaceTest.step('Toggle on and verify enabled state', async () => {
         await managementPage.toggleEntityAnalytics();
+        // Sync on backend readiness first. The UI shows "Off" while the entity
+        // store is in `installing` state (status === 'enabling'), so asserting
+        // UI text alone races against install completion. Mirrors
+        // engine_status_management.spec.ts. See #259664.
+        await apiServices.entityAnalytics.waitForEntityStoreStatus('running', 180000);
         await managementPage.waitForStatusLoaded();
-        await expect(managementPage.entityAnalyticsHealth).toContainText('On', { timeout: 90000 });
+        await expect(managementPage.entityAnalyticsHealth).toContainText('On', {
+          timeout: 30000,
+        });
       });
 
       await spaceTest.step('Toggle off and verify disabled state', async () => {
         await managementPage.toggleEntityAnalytics();
+        // Toggle OFF stops the engines (status `stopped`) — it does not delete
+        // them. Full deletion to `not_installed` only happens in afterEach via
+        // deleteEntityStoreEngines. Wait for the post-stop backend state, then
+        // assert the UI flip.
+        await apiServices.entityAnalytics.waitForEntityStoreStatus('stopped', 60000);
         await managementPage.waitForStatusLoaded();
-        await expect(managementPage.entityAnalyticsHealth).toContainText('Off', { timeout: 90000 });
+        await expect(managementPage.entityAnalyticsHealth).toContainText('Off', {
+          timeout: 30000,
+        });
       });
     });
 

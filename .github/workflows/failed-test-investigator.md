@@ -58,6 +58,8 @@ network:
 sandbox:
   agent: awf # Migrated from deprecated network setting
 safe-outputs:
+  noop:
+    report-as-issue: false
   activation-comments: false
   report-failure-as-issue: false
   add-comment:

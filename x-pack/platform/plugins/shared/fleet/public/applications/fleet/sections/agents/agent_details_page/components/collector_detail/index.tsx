@@ -12,8 +12,9 @@ import { EuiLoadingSpinner, EuiPanel, EuiSpacer } from '@elastic/eui';
 import type { Agent } from '../../../../../types';
 import { useGetAgentEffectiveConfigQuery } from '../../../../../hooks';
 import { CollectorConfigView } from '../../../../../../../components/otel_ui';
-import { CollectorMetricsProvider } from '../../../../../../../components/otel_ui/collector_config_view/collector_metrics_context';
+import { CollectorContextProvider } from '../../../../../../../components/otel_ui/collector_config_view/collector_context';
 import { CollectorDetailTabs } from '../../../../../../../components/otel_ui/collector_config_view/collector_detail/collector_detail_tabs';
+import { ErrorPatternPanel } from '../../../../../../../components/otel_ui/collector_config_view/error_pattern_panel';
 
 export const CollectorDetailsContent: React.FunctionComponent<{ agent: Agent }> = ({ agent }) => {
   const { data: configData, isLoading } = useGetAgentEffectiveConfigQuery(agent.id);
@@ -27,7 +28,7 @@ export const CollectorDetailsContent: React.FunctionComponent<{ agent: Agent }> 
   }
 
   return (
-    <CollectorMetricsProvider serviceInstanceId={serviceInstanceId}>
+    <CollectorContextProvider serviceInstanceId={serviceInstanceId}>
       <EuiPanel paddingSize="m" hasBorder>
         <CollectorConfigView config={config} health={agent.health} />
       </EuiPanel>
@@ -44,6 +45,10 @@ export const CollectorDetailsContent: React.FunctionComponent<{ agent: Agent }> 
       </EuiPanel>
 
       <EuiSpacer size="m" />
-    </CollectorMetricsProvider>
+
+      <ErrorPatternPanel />
+
+      <EuiSpacer size="m" />
+    </CollectorContextProvider>
   );
 };

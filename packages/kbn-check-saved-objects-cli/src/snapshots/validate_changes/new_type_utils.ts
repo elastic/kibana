@@ -9,7 +9,30 @@
 
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import type { MigrationInfoRecord } from '../../types';
-import { getInvalidNameTitleFields, isSearchableViaManagement } from './common_utils';
+import {
+  getFieldsMissingIgnoreAbove,
+  getInvalidNameTitleFields,
+  isSearchableViaManagement,
+} from './common_utils';
+
+/**
+ * Validates that all `keyword` and `flattened` mapping fields on a **new** SO type define
+ * `ignore_above`. Without this constraint, Elasticsearch silently drops strings that exceed
+ * the default length limit during indexing, which can cause hard-to-diagnose data loss.
+ *
+ * Throws if any field is missing `ignore_above`.
+ */
+export function validateIgnoreAboveNewType(name: string, to: MigrationInfoRecord): void {
+  const fieldsMissing = getFieldsMissingIgnoreAbove(to.mappings);
+  if (fieldsMissing.length > 0) {
+    throw new Error(
+      `❌ The SO type '${name}' has 'keyword' or 'flattened' mapping fields without 'ignore_above': ${fieldsMissing.join(
+        ', '
+      )}. ` +
+        `Add 'ignore_above' to prevent Elasticsearch from silently dropping strings that exceed the limit.`
+    );
+  }
+}
 
 /**
  * Validates that `name` and `title` mapping fields use `type: text` on a **new** SO type being

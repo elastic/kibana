@@ -14,7 +14,20 @@ import type {
   InboxStartDependencies,
 } from './types';
 
-export type { InboxPluginSetup, InboxPluginStart };
+export type {
+  InboxPluginSetup,
+  InboxPluginStart,
+  InboxActionProvider,
+  InboxActionProviderListParams,
+  InboxActionProviderListResult,
+  InboxRequestContext,
+} from './types';
+
+export type { InboxActionConflictError } from './services/inbox_action_registry';
+export {
+  createInboxActionConflictError,
+  isInboxActionConflictError,
+} from './services/inbox_action_registry';
 
 export const plugin: PluginInitializer<
   InboxPluginSetup,
