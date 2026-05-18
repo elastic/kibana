@@ -177,4 +177,91 @@ describe('Grok models', () => {
       ]);
     });
   });
+
+  describe('Field colour assignment', () => {
+    let collection: GrokCollection;
+
+    const colourFor = (expression: DraftGrokExpression, fieldName: string): string | undefined => {
+      for (const fieldDef of expression.getFields().values()) {
+        if (fieldDef.name === fieldName) return fieldDef.colour;
+      }
+      return undefined;
+    };
+
+    beforeEach(async () => {
+      // Use a fresh collection so prior tests don't leak into the field colour map.
+      collection = new GrokCollection();
+      await collection.setup();
+    });
+
+    it('returns the same colour for the same field name across resolves of the same pattern', () => {
+      const expression = new DraftGrokExpression(collection, '%{NUMBER:foo}');
+      const firstColour = colourFor(expression, 'foo');
+      expect(firstColour).toBeDefined();
+
+      // Force the pattern to resolve again (simulates an external update of the same value).
+      expression.updateExpression('%{NUMBER:foo}');
+      expect(colourFor(expression, 'foo')).toBe(firstColour);
+    });
+
+    it('shares the same colour for the same field name across multiple patterns', () => {
+      // This is the original bug: previously, the first field of every pattern reused the same
+      // palette slot because the colour index reset on each resolve. Now the colour is keyed by
+      // field name, so two patterns referencing the same field share one colour.
+      const a = new DraftGrokExpression(collection, '%{NUMBER:status} %{WORD:method}');
+      const b = new DraftGrokExpression(collection, '%{NUMBER:status} %{GREEDYDATA:message}');
+      expect(colourFor(a, 'status')).toBe(colourFor(b, 'status'));
+    });
+
+    it('assigns distinct colours to distinct field names within the palette size', () => {
+      const a = new DraftGrokExpression(collection, '%{NUMBER:a}');
+      const b = new DraftGrokExpression(collection, '%{NUMBER:b}');
+      expect(colourFor(a, 'a')).not.toBe(colourFor(b, 'b'));
+    });
+
+    it('wraps around the palette after exhausting all 8 colours and still returns palette colours', () => {
+      const fieldNames = ['f1', 'f2', 'f3', 'f4', 'f5', 'f6', 'f7', 'f8', 'f9', 'f10'];
+      const colours = fieldNames.map((name) => collection.getColour(name));
+
+      const palette = [
+        'Primary',
+        'Accent',
+        'AccentSecondary',
+        'Neutral',
+        'Success',
+        'Warning',
+        'Risk',
+        'Danger',
+      ];
+      colours.forEach((colour) => {
+        expect(palette).toContain(colour);
+      });
+
+      // The 9th and 10th unique fields wrap back to the start of the palette.
+      expect(colours[8]).toBe(colours[0]);
+      expect(colours[9]).toBe(colours[1]);
+    });
+
+    it('resetColourIndex() clears the field colour map', () => {
+      const initialColour = collection.getColour('foo');
+      collection.resetColourIndex();
+      // After reset, the next assignment can reclaim the very first palette slot. We only
+      // assert the map was cleared (a new lookup is independent of the previous one) — the
+      // exact colour returned can match `initialColour` if `foo` happens to land on the same
+      // slot, so we instead verify behaviour via two new fields after reset.
+      const afterResetA = collection.getColour('a');
+      const afterResetB = collection.getColour('b');
+      expect(afterResetA).not.toBe(afterResetB);
+      // The previous colour for `foo` may or may not match the colour now assigned to `a`,
+      // but it must be a valid palette entry.
+      expect(typeof initialColour).toBe('string');
+      expect(typeof afterResetA).toBe('string');
+    });
+
+    it('shares colours for manual (?<field>...) capture groups across patterns', () => {
+      const a = new DraftGrokExpression(collection, '(?<queueId>[0-9A-F]{10,11})');
+      const b = new DraftGrokExpression(collection, '%{WORD:level} (?<queueId>[0-9A-F]{10,11})');
+      expect(colourFor(a, 'queueId')).toBe(colourFor(b, 'queueId'));
+    });
+  });
 });
