@@ -307,6 +307,10 @@ export const DetailsPanel: FunctionComponent<Props> = ({
                       button={actionsPopoverButton}
                       panelPaddingSize="none"
                       repositionOnScroll
+                      aria-label={i18n.translate(
+                        'xpack.ingestPipelines.list.pipelineDetails.actionsPopoverAriaLabel',
+                        { defaultMessage: 'Pipeline actions' }
+                      )}
                     >
                       <EuiContextMenu
                         initialPanelId={0}
