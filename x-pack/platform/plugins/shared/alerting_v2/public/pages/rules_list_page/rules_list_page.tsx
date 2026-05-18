@@ -7,8 +7,8 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import {
+  EuiButton,
   EuiCallOut,
-  EuiContextMenu,
   EuiFieldSearch,
   EuiFilterGroup,
   EuiFlexGroup,
@@ -16,11 +16,8 @@ import {
   EuiLoadingSpinner,
   EuiPageHeader,
   EuiSpacer,
-  EuiSplitButton,
-  useGeneratedHtmlId,
   type Criteria,
 } from '@elastic/eui';
-import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useBoolean, useDebouncedValue } from '@kbn/react-hooks';
@@ -30,7 +27,6 @@ import { useFetchRules } from '../../hooks/use_fetch_rules';
 import { useFetchRuleTags } from '../../hooks/use_fetch_rule_tags';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useComposeDiscoverFlyout } from '../../hooks/use_compose_discover_flyout';
-import { paths } from '../../constants';
 
 import { RulesListTableContainer } from './rules_list_table_container';
 import type { RulesListTableSortField } from './rules_list_table';
@@ -39,6 +35,7 @@ import { StatusFilterPopover } from '../../components/rule/popovers/status_filte
 import { TagsFilterPopover } from '../../components/rule/popovers/tag_filter_popover';
 import { buildRulesListFilter } from './utils';
 import { RuleCreateOptionsPanel } from '../../components/rule_create_options/rule_create_options_panel';
+import { RuleCreateOptionsFlyout } from '../../components/rule_create_options_flyout/rule_create_options_flyout';
 
 const DEFAULT_PER_PAGE = 20;
 export const SEARCH_DEBOUNCE_MS = 300;
@@ -54,11 +51,12 @@ const TABLE_FIELD_TO_API_SORT_FIELD = Object.fromEntries(
 ) as Partial<Record<string, FindRulesSortField>>;
 
 export const RulesListPage = () => {
-  const http = useService(CoreStart('http'));
   useBreadcrumbs('rules_list');
 
-  const [isCreateMenuOpen, { off: closeCreateMenu, toggle: toggleCreateMenu }] = useBoolean(false);
-  const createMenuId = useGeneratedHtmlId({ prefix: 'createRuleMenu' });
+  const [
+    isCreateOptionsFlyoutOpen,
+    { on: openCreateOptionsFlyout, off: closeCreateOptionsFlyout },
+  ] = useBoolean(false);
   const { flyout, openCreateFlyout, openEditFlyout } = useComposeDiscoverFlyout();
 
   const [page, setPage] = useState(1);
@@ -125,6 +123,10 @@ export const RulesListPage = () => {
   const isInitialLoad = isLoading && rulesData === undefined;
   const hasRules = (rulesData?.total ?? 0) > 0;
   const showEmptyState = !isInitialLoad && !isError && !hasRules && !hasActiveFilters;
+  const onCreateEsqlRuleFromOptionsFlyout = () => {
+    closeCreateOptionsFlyout();
+    openCreateFlyout();
+  };
 
   return (
     <div>
@@ -135,61 +137,18 @@ export const RulesListPage = () => {
         rightSideItems={
           hasRules || hasActiveFilters
             ? [
-                <EuiSplitButton
-                  key="create-rule-split"
+                <EuiButton
+                  key="create-rule"
                   color="primary"
-                  size="m"
-                  data-test-subj="createRuleSplitButton"
+                  fill
+                  onClick={openCreateOptionsFlyout}
+                  data-test-subj="createRuleButton"
                 >
-                  <EuiSplitButton.ActionPrimary
-                    href={http.basePath.prepend(paths.ruleCreateOptions)}
-                    data-test-subj="createRuleButton"
-                  >
-                    <FormattedMessage
-                      id="xpack.alertingV2.rulesList.createRuleButton"
-                      defaultMessage="Create rule"
-                    />
-                  </EuiSplitButton.ActionPrimary>
-                  <EuiSplitButton.ActionSecondary
-                    iconType="arrowDown"
-                    aria-label={i18n.translate('xpack.alertingV2.rulesList.createRuleMoreOptions', {
-                      defaultMessage: 'More create options',
-                    })}
-                    onClick={toggleCreateMenu}
-                    data-test-subj="createRulePopoverButton"
-                    popoverProps={{
-                      id: createMenuId,
-                      isOpen: isCreateMenuOpen,
-                      closePopover: closeCreateMenu,
-                      anchorPosition: 'downRight',
-                      panelPaddingSize: 'none',
-                      children: (
-                        <EuiContextMenu
-                          initialPanelId={0}
-                          panels={[
-                            {
-                              id: 0,
-                              items: [
-                                {
-                                  name: i18n.translate(
-                                    'xpack.alertingV2.rulesList.createRuleFlyoutButton',
-                                    { defaultMessage: 'Create with flyout' }
-                                  ),
-                                  icon: 'popout',
-                                  onClick: () => {
-                                    closeCreateMenu();
-                                    openCreateFlyout();
-                                  },
-                                  'data-test-subj': 'createRuleFlyoutButton',
-                                },
-                              ],
-                            },
-                          ]}
-                        />
-                      ),
-                    }}
+                  <FormattedMessage
+                    id="xpack.alertingV2.rulesList.createRuleButton"
+                    defaultMessage="Create rule"
                   />
-                </EuiSplitButton>,
+                </EuiButton>,
               ]
             : []
         }
@@ -264,6 +223,12 @@ export const RulesListPage = () => {
             onEditInFlyout={openEditFlyout}
           />
         </>
+      ) : null}
+      {isCreateOptionsFlyoutOpen ? (
+        <RuleCreateOptionsFlyout
+          onClose={closeCreateOptionsFlyout}
+          onCreateEsqlRule={onCreateEsqlRuleFromOptionsFlyout}
+        />
       ) : null}
       {flyout}
     </div>

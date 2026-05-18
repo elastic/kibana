@@ -11,7 +11,6 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { MemoryRouter } from 'react-router-dom';
 import { RulesListPage, SEARCH_DEBOUNCE_MS } from './rules_list_page';
-import { paths } from '../../constants';
 
 const mockNavigateToUrl = jest.fn();
 const mockGetUrlForApp = jest.fn((appId: string, options?: { path?: string }) => {
@@ -663,7 +662,7 @@ describe('RulesListPage', () => {
     });
   });
 
-  it('navigates to rule selector page when create button is clicked', () => {
+  it('opens create rule options in a flyout when create button is clicked', () => {
     mockUseFetchRules.mockReturnValue({
       data: { items: mockRules, total: 2, page: 1, perPage: 20 },
       isLoading: false,
@@ -673,7 +672,47 @@ describe('RulesListPage', () => {
 
     renderPage();
 
-    expect(screen.getByTestId('createRuleButton')).toHaveAttribute('href', paths.ruleCreateOptions);
+    fireEvent.click(screen.getByTestId('createRuleButton'));
+
+    expect(screen.getByTestId('ruleCreateOptionsFlyout')).toBeInTheDocument();
+    expect(screen.getByText('Create ES|QL rule')).toBeInTheDocument();
+    expect(mockNavigateToUrl).not.toHaveBeenCalled();
+  });
+
+  it('closes create rule options flyout without navigating', () => {
+    mockUseFetchRules.mockReturnValue({
+      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    renderPage();
+
+    fireEvent.click(screen.getByTestId('createRuleButton'));
+    fireEvent.click(screen.getByTestId('ruleCreateOptionsFlyoutCloseButton'));
+
+    expect(screen.queryByTestId('ruleCreateOptionsFlyout')).not.toBeInTheDocument();
+    expect(screen.getByTestId('rulesListTable')).toBeInTheDocument();
+    expect(mockNavigateToUrl).not.toHaveBeenCalled();
+  });
+
+  it('opens the rule creation flow from the create rule options flyout', () => {
+    mockUseFetchRules.mockReturnValue({
+      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    renderPage();
+
+    fireEvent.click(screen.getByTestId('createRuleButton'));
+    fireEvent.click(screen.getByRole('button', { name: /create es\|ql rule/i }));
+
+    expect(screen.queryByTestId('ruleCreateOptionsFlyout')).not.toBeInTheDocument();
+    expect(screen.getByTestId('composeDiscoverFlyout')).toBeInTheDocument();
+    expect(mockNavigateToUrl).not.toHaveBeenCalled();
   });
 
   it('shows delete confirmation modal when delete action is clicked', async () => {
