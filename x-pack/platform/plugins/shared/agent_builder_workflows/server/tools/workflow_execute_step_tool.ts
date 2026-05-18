@@ -37,7 +37,34 @@ export type WorkflowsExtensionsGetter = () =>
   | WorkflowsExtensionsServerPluginStart
   | undefined;
 
+/**
+ * Lazy accessor for a set of `kibana.request` (method, path) pairs that callers
+ * have declared read-only and safe to execute without a HITL confirmation
+ * dialog. Each entry is the literal string `${METHOD}:${path}` — method is
+ * compared case-insensitively, path must match exactly.
+ *
+ * Returns `undefined` when no callers have registered any safe paths (the
+ * default in production setup and in every unit test that doesn't exercise
+ * the allow-list). The getter pattern mirrors `WorkflowsExtensionsGetter`
+ * so downstream plugins can register paths from their own plugin start
+ * without coupling this tool to any specific solution.
+ *
+ * Example entry: `'POST:/internal/security_solution/alert_analysis/related_alerts'`
+ */
+export type SafeKibanaRequestPathsGetter = () =>
+  | Promise<Iterable<string> | undefined>
+  | Iterable<string>
+  | undefined;
+
 export const WORKFLOW_EXECUTE_STEP_TOOL_ID = 'platform.workflows.workflow_execute_step';
+
+/**
+ * Stable tool id for the discovery hint returned alongside blocked
+ * `kibana.request` steps in standalone mode. Exposed as a constant so the
+ * suggestion stays in sync with the tool that actually surfaces the
+ * workflows-extensions step registry.
+ */
+const GET_STEP_DEFINITIONS_TOOL_ID = 'platform.workflows.get_step_definitions';
 
 export const SAFE_STEP_TYPES = new Set([
   'console',
@@ -516,6 +543,24 @@ const createUnsafeStepResult = async ({
     ? `Step "${stepName}" contains child step "${unsafeStep.stepId}" (type "${unsafeStep.stepType}") which has external side effects`
     : `Step type "${unsafeStep.stepType}" has external side effects and cannot be auto-executed`;
 
+  // A blocked `kibana.request` in standalone mode (evals, A2A, background
+  // jobs) cannot be unblocked by re-prompting — there's no human in the
+  // loop. Surface a structured next-action pointing the caller at
+  // `get_step_definitions`, which is where the hosting plugin's registered
+  // safer alternatives live. Non-`kibana.request` blocks keep the original
+  // "ask the user" hint since they're typically connector-mediated side
+  // effects with no programmatic discovery path.
+  const isKibanaRequest = unsafeStep.stepType === 'kibana.request';
+  const hint = isKibanaRequest
+    ? 'No safe `kibana.request` path matched. Call `platform.workflows.get_step_definitions({ step_types: ["kibana.request"] })` to discover registered alternatives, or escalate to a human-mode invocation.'
+    : 'Ask the user to test this step manually using the "Run step" button in the editor.';
+  const nextAction = isKibanaRequest
+    ? {
+        tool_id: GET_STEP_DEFINITIONS_TOOL_ID,
+        params: { step_types: ['kibana.request'] },
+      }
+    : undefined;
+
   return createToolResult({
     blocked: true,
     reason,
@@ -523,7 +568,8 @@ const createUnsafeStepResult = async ({
     unsafeStepType: unsafeStep.stepType,
     ...(isChildUnsafe ? { unsafeChildStepId: unsafeStep.stepId } : {}),
     ...(validation ? { validation } : {}),
-    hint: 'Ask the user to test this step manually using the "Run step" button in the editor.',
+    hint,
+    ...(nextAction ? { nextAction } : {}),
   });
 };
 
@@ -617,6 +663,46 @@ function containsMustacheRef(value: unknown): boolean {
     return Object.values(value as Record<string, unknown>).some(containsMustacheRef);
   }
   return false;
+}
+
+/**
+ * Builds the allow-list signature for a `kibana.request` step's `with:`
+ * block. Returns `null` when the with-block is missing, the method/path
+ * fields aren't both literal strings, or either value contains a Mustache
+ * template ref (we can't safely match a templated path against a static
+ * allow-list — the resolved value isn't known until execution).
+ */
+export function getKibanaRequestSignature(withBlock: unknown): string | null {
+  if (!withBlock || typeof withBlock !== 'object') return null;
+  const block = withBlock as Record<string, unknown>;
+  const { method, path } = block;
+  if (typeof method !== 'string' || typeof path !== 'string') return null;
+  if (containsMustacheRef(method) || containsMustacheRef(path)) return null;
+  return `${method.toUpperCase()}:${path}`;
+}
+
+/**
+ * Returns `true` when `stepType` is `kibana.request` AND the resolved
+ * (method, path) pair is present in the caller-supplied allow-list.
+ * Allow-listed calls skip the unsafe-step branch entirely — no HITL
+ * confirmation, no standalone preview short-circuit — and run straight
+ * through the executor.
+ *
+ * The allow-list lives outside this tool: callers register entries via the
+ * `getSafeKibanaRequestPaths` getter passed to `registerWorkflowExecuteStepTool`.
+ * The signature format is `${METHOD}:${path}` (method uppercased,
+ * path matched literally). See `SafeKibanaRequestPathsGetter` for details.
+ */
+export function isAllowedReadOnlyKibanaRequest(
+  stepType: string,
+  withBlock: unknown,
+  safePaths: ReadonlySet<string> | undefined
+): boolean {
+  if (stepType !== 'kibana.request') return false;
+  if (!safePaths || safePaths.size === 0) return false;
+  const signature = getKibanaRequestSignature(withBlock);
+  if (!signature) return false;
+  return safePaths.has(signature);
 }
 
 /**
@@ -739,7 +825,8 @@ function extractWithBlock(steps: unknown, stepName: string): unknown {
 export function registerWorkflowExecuteStepTool(
   agentBuilder: AgentBuilderPluginSetup,
   api: WorkflowsManagementApi,
-  getWorkflowsExtensions: WorkflowsExtensionsGetter = () => undefined
+  getWorkflowsExtensions: WorkflowsExtensionsGetter = () => undefined,
+  getSafeKibanaRequestPaths: SafeKibanaRequestPathsGetter = () => undefined
 ): void {
   // Cache the resolution promise so the start contract is fetched at most once
   // per tool registration, regardless of how many tool invocations happen.
@@ -755,6 +842,19 @@ export function registerWorkflowExecuteStepTool(
     return workflowsExtensionsPromise;
   };
 
+  // Cache the resolved allow-list as a Set for O(1) membership checks. The
+  // getter is invoked at most once per tool registration; resolution errors
+  // fall through to an empty allow-list (HITL behavior preserved).
+  let safeKibanaRequestPathsPromise: Promise<ReadonlySet<string> | undefined> | undefined;
+  const resolveSafeKibanaRequestPaths = (): Promise<ReadonlySet<string> | undefined> => {
+    if (!safeKibanaRequestPathsPromise) {
+      safeKibanaRequestPathsPromise = Promise.resolve(getSafeKibanaRequestPaths())
+        .then((paths) => (paths ? new Set(paths) : undefined))
+        .catch(() => undefined);
+    }
+    return safeKibanaRequestPathsPromise;
+  };
+
   agentBuilder.tools.register({
     id: WORKFLOW_EXECUTE_STEP_TOOL_ID,
     type: ToolType.builtin,
@@ -768,6 +868,8 @@ Schema errors on the step's \`with:\` block are returned BEFORE execution, with 
 
 - Safe steps (data, ES reads, cases reads): executed and output returned with no prompt.
 - Unsafe steps (slack.sendMessage, elasticsearch.indices.delete, ES writes, kibana.request, http, …): execution is gated by a user confirmation dialog. ALWAYS populate \`confirmation_body\` with a Markdown preview describing: (1) resolved inputs (e.g. Slack channel + message text, ES index + operation + approximate doc count), (2) the side effect this step will produce, (3) whether the action is reversible. Without \`confirmation_body\` the dialog falls back to a flat key/value dump, which is a degraded UX.
+- \`kibana.request\` steps whose (method, path) pair has been registered as read-only by the hosting plugin run with no prompt — they're treated as safe data fetches. Unregistered paths still go through the standard confirmation flow.
+- If a \`kibana.request\` step is blocked in standalone mode, the result carries a \`nextAction\` hint pointing at \`get_step_definitions\`; use it to look up registered safer alternatives before retrying.
 - if/while steps containing unsafe children: children are auto-replaced with safe stubs so the condition can be tested — returns which branch was taken (no prompt).
 - Other safe-container steps with unsafe descendants (e.g. foreach with an unsafe child): conversation mode prompts once and authorizes the whole container; standalone mode returns a preview with validation (no prompt).
 
@@ -867,8 +969,38 @@ If the user declines a confirmation, do NOT retry the same step. Acknowledge the
         });
       }
 
-      const isStepUnsafe = !SAFE_STEP_TYPES.has(stepInfo.stepType);
-      const unsafeStep = isStepUnsafe ? stepInfo : findUnsafeStep(stepName, lookup.steps);
+      // Allow-list lookup for `kibana.request` happens once, here, so the
+      // resolved with-block can be reused by both the unsafe-step gate and
+      // the standalone discovery hint below. Other step types skip the
+      // YAML re-parse — the with-block isn't needed for them.
+      let resolvedKibanaRequestWith: unknown;
+      let isAllowlistedKibanaRequest = false;
+      if (stepInfo.stepType === 'kibana.request') {
+        try {
+          const parsed = YAML.parse(yaml) as { steps?: unknown[] } | undefined;
+          resolvedKibanaRequestWith = extractWithBlock(parsed?.steps, stepName);
+        } catch {
+          resolvedKibanaRequestWith = undefined;
+        }
+        isAllowlistedKibanaRequest = isAllowedReadOnlyKibanaRequest(
+          stepInfo.stepType,
+          resolvedKibanaRequestWith,
+          await resolveSafeKibanaRequestPaths()
+        );
+      }
+
+      const isStepUnsafe =
+        !SAFE_STEP_TYPES.has(stepInfo.stepType) && !isAllowlistedKibanaRequest;
+      // When the top-level step is an allow-listed `kibana.request` we
+      // explicitly skip the descendant walk. `findUnsafeStep` is unaware of
+      // the allow-list and would re-flag the step itself via its self-check.
+      // `kibana.request` is always a leaf step (no children), so there are
+      // no descendants to legitimately surface here.
+      const unsafeStep = isAllowlistedKibanaRequest
+        ? null
+        : isStepUnsafe
+        ? stepInfo
+        : findUnsafeStep(stepName, lookup.steps);
       const isCondition = CONDITION_STEP_TYPES.has(stepInfo.stepType);
 
       // Conditions with unsafe descendants: stub the children and run the
