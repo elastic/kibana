@@ -17,7 +17,7 @@ import {
 import { DEFAULT_ALERTS_INDEX } from '../../../../common/constants';
 import { findRelatedAlerts } from '../../../lib/alert_analysis/services/find_related_alerts';
 
-export const alertAnalysisInlineApiToolSkill = defineSkillType({
+export const alertAnalysisSkill = defineSkillType({
   id: 'alert-analysis',
   name: 'alert-analysis',
   basePath: 'skills/security/alerts',

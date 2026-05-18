@@ -16,9 +16,6 @@ export const servers: ScoutServerConfig = {
     ...evalsTracingConfig.kbnTestServer,
     serverArgs: [
       ...evalsTracingConfig.kbnTestServer.serverArgs,
-      `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-        'alertAnalysisInlineApiToolSkill',
-      ])}`,
       '--uiSettings.overrides.agentBuilder:experimentalFeatures=true',
     ],
   },

@@ -247,12 +247,6 @@ export const allowedExperimentalValues = Object.freeze({
   entityAnalyticsEntityStoreV2: false,
 
   /**
-   * Enables the inline-api-tool alert-analysis skill: replaces the legacy inline ES implementation
-   * with a focused inline tool that calls the findRelatedAlerts service directly.
-   */
-  alertAnalysisInlineApiToolSkill: false,
-
-  /**
    * Enables the deprecated prebuilt rules UI
    * Release: 9.4
    */

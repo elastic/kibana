@@ -14,7 +14,7 @@ import { getDetectionRuleEditSkill } from './detection_rule_edit';
 import { getEntityAnalyticsSkill } from './entity_analytics';
 import { pciComplianceSkill } from './pci_compliance';
 import { threatHuntingSkill } from './threat_hunting';
-import { alertAnalysisSkill, alertAnalysisInlineApiToolSkill } from './alert_analysis';
+import { alertAnalysisSkill } from './alert_analysis';
 import type { EntityAnalyticsRoutesDeps } from '../../lib/entity_analytics/types';
 import { findSecurityMlJobsSkill } from './find_security_ml_jobs';
 
@@ -59,11 +59,7 @@ export const registerSkills = async ({
   );
 
   await agentBuilder.skills.register(threatHuntingSkill);
-  await agentBuilder.skills.register(
-    experimentalFeatures.alertAnalysisInlineApiToolSkill
-      ? alertAnalysisInlineApiToolSkill
-      : alertAnalysisSkill
-  );
+  await agentBuilder.skills.register(alertAnalysisSkill);
 
   if (experimentalFeatures.pciComplianceAgentBuilder) {
     agentBuilder.skills.register(pciComplianceSkill);

@@ -11,7 +11,7 @@ import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools'
 import { validateSkillDefinition } from '@kbn/agent-builder-server/skills/type_definition';
 import { WORKFLOW_EXECUTE_STEP_TOOL_ID } from '@kbn/agent-builder-workflows-plugin/server';
 import { createToolHandlerContext, createToolTestMocks } from '../../__mocks__/test_helpers';
-import { alertAnalysisInlineApiToolSkill } from './alert_analysis_skill_inline_api_tool';
+import { alertAnalysisSkill } from './alert_analysis_skill_inline_api_tool';
 import type { FindRelatedAlertsResult } from '../../../lib/alert_analysis/services/find_related_alerts';
 
 jest.mock('../../../lib/alert_analysis/services/find_related_alerts');
@@ -45,36 +45,36 @@ const makeSuccess = (overrides: Partial<FindRelatedAlertsResult> = {}): FindRela
   ...overrides,
 });
 
-describe('alertAnalysisInlineApiToolSkill', () => {
+describe('alertAnalysisSkill', () => {
   describe('skill definition', () => {
     it('has stable skill identity', () => {
-      expect(alertAnalysisInlineApiToolSkill.id).toBe('alert-analysis');
-      expect(alertAnalysisInlineApiToolSkill.name).toBe('alert-analysis');
-      expect(alertAnalysisInlineApiToolSkill.basePath).toBe('skills/security/alerts');
+      expect(alertAnalysisSkill.id).toBe('alert-analysis');
+      expect(alertAnalysisSkill.name).toBe('alert-analysis');
+      expect(alertAnalysisSkill.basePath).toBe('skills/security/alerts');
     });
 
     it('validates successfully', async () => {
-      await expect(validateSkillDefinition(alertAnalysisInlineApiToolSkill)).resolves.toBeDefined();
+      await expect(validateSkillDefinition(alertAnalysisSkill)).resolves.toBeDefined();
     });
 
     it('returns 3 registry tool IDs', () => {
-      const tools = alertAnalysisInlineApiToolSkill.getRegistryTools?.();
+      const tools = alertAnalysisSkill.getRegistryTools?.();
       expect(tools).toHaveLength(3);
     });
 
     it('does not register workflow_execute_step', () => {
-      const tools = alertAnalysisInlineApiToolSkill.getRegistryTools?.();
+      const tools = alertAnalysisSkill.getRegistryTools?.();
       expect(tools).not.toContain(WORKFLOW_EXECUTE_STEP_TOOL_ID);
     });
 
     it('defines one inline tool with the correct id', async () => {
-      const inlineTools = await alertAnalysisInlineApiToolSkill.getInlineTools?.();
+      const inlineTools = await alertAnalysisSkill.getInlineTools?.();
       expect(inlineTools).toHaveLength(1);
       expect(inlineTools![0].id).toBe('security.alert-analysis.get-related-alerts');
     });
 
     it('inline tool schema exposes alertId, timeWindowHours, and optional entity shortcut params', async () => {
-      const inlineTools = await alertAnalysisInlineApiToolSkill.getInlineTools?.();
+      const inlineTools = await alertAnalysisSkill.getInlineTools?.();
       const tool = inlineTools![0] as BuiltinSkillBoundedTool;
       const shape = (tool.schema as { shape?: Record<string, unknown> }).shape ?? {};
       expect(Object.keys(shape)).toEqual([
@@ -95,7 +95,7 @@ describe('alertAnalysisInlineApiToolSkill', () => {
 
     beforeEach(async () => {
       jest.clearAllMocks();
-      const inlineTools = await alertAnalysisInlineApiToolSkill.getInlineTools?.();
+      const inlineTools = await alertAnalysisSkill.getInlineTools?.();
       tool = inlineTools![0] as BuiltinSkillBoundedTool;
     });
 

@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { alertAnalysisSkill } from './alert_analysis_skill';
-export { alertAnalysisInlineApiToolSkill } from './alert_analysis_skill_inline_api_tool';
+export { alertAnalysisSkill } from './alert_analysis_skill_inline_api_tool';
