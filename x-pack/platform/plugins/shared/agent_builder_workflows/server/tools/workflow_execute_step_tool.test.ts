@@ -1045,17 +1045,20 @@ describe('preValidateStepWith', () => {
     expect(failure).toBeNull();
   });
 
-  it('returns unknown_step_type when the registry has no definition', async () => {
+  it('returns null when the step type is not in the workflowsExtensions registry', async () => {
+    // `workflowsExtensions` only covers step types plugins explicitly
+    // registered (data.*, ai.*, plus skill-specific steps). The execution
+    // engine knows several hundred more (connector-derived steps like
+    // `kibana.request`, `cases.*`, `slack2.*`). Pre-validation should skip
+    // — not block — anything outside the workflowsExtensions registry so
+    // valid engine-known steps still execute.
     const failure = await preValidateStepWith(
       yamlWithStep({ index: 'logs-*' }),
       'my_step',
       'mystery.step',
       buildExtensions('mystery.step')
     );
-    expect(failure).not.toBeNull();
-    expect(failure!.reason).toBe('unknown_step_type');
-    expect(failure!.schemaErrors).toBeUndefined();
-    expect(failure!.message).toContain('mystery.step');
+    expect(failure).toBeNull();
   });
 
   it('returns null when the step type has no inputSchema', async () => {
