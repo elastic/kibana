@@ -9,20 +9,21 @@
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { QueryPointEventAnnotationConfig } from '@kbn/event-annotation-common';
-import type {
-  FormBasedPersistedState,
-  PersistedIndexPatternLayer,
-  TextBasedLayerColumn,
-  XYByValueAnnotationLayerConfig,
-  XYDataLayerConfig,
-  XYReferenceLineLayerConfig,
-  XYVisualizationState,
+import {
+  LENS_DATASOURCE_ID,
+  type FormBasedPersistedState,
+  type PersistedIndexPatternLayer,
+  type TextBasedLayerColumn,
+  type XYAnnotationLayerConfig,
+  type XYByValueAnnotationLayerConfig,
+  type XYDataLayerConfig,
+  type XYReferenceLineLayerConfig,
+  type XYVisualizationState,
 } from '@kbn/lens-common';
 import { getBreakdownColumn, getFormulaColumn, getValueColumn } from '../columns';
 import { addLayerColumn, buildDatasourceStates, extractReferences, mapToFormula } from '../utils';
 import type {
   BuildDependencies,
-  LensAnnotationLayer,
   LensAttributes,
   LensBreakdownConfig,
   LensReferenceLineLayer,
@@ -218,7 +219,7 @@ function getXValueColumn(
 }
 
 function buildAllFormulasInLayer(
-  layer: LensSeriesLayer | LensAnnotationLayer | LensReferenceLineLayer,
+  layer: LensSeriesLayer | LensReferenceLineLayer,
   i: number,
   dataView: DataView
 ): PersistedIndexPatternLayer {
@@ -234,44 +235,70 @@ function buildAllFormulasInLayer(
 }
 
 function buildFormulaLayer(
-  layer: LensSeriesLayer | LensAnnotationLayer | LensReferenceLineLayer,
+  layer: LensSeriesLayer | LensReferenceLineLayer,
   i: number,
   dataView: DataView
 ): FormBasedPersistedState['layers'][0] {
-  if (layer.type === 'series') {
-    const resultLayer = buildAllFormulasInLayer(layer, i, dataView);
-
-    if (layer.xAxis) {
-      const columnName = `x_${ACCESSOR}${i}`;
-      const breakdownColumn = getBreakdownColumn({
-        options: layer.xAxis,
-        dataView,
-      });
-      addLayerColumn(resultLayer, columnName, breakdownColumn, true);
-    }
-
-    const layerBreakdown = normalizeBreakdown(layer.breakdown);
-    if (layerBreakdown.length > 0) {
-      layerBreakdown.forEach((breakdown, breakdownIndex) => {
-        const columnName = `${ACCESSOR}${i}_breakdown_${breakdownIndex}`;
-        const breakdownColumn = getBreakdownColumn({
-          options: breakdown,
-          dataView,
-        });
-        addLayerColumn(resultLayer, columnName, breakdownColumn, true);
-      });
-    }
-
-    return resultLayer;
-  } else if (layer.type === 'annotation') {
-    // nothing ?
-  } else if (layer.type === 'reference') {
+  if (layer.type === 'reference') {
     return buildAllFormulasInLayer(layer, i, dataView);
   }
 
+  // layer.type === 'series'
+  const resultLayer = buildAllFormulasInLayer(layer, i, dataView);
+
+  if (layer.xAxis) {
+    const columnName = `x_${ACCESSOR}${i}`;
+    const breakdownColumn = getBreakdownColumn({
+      options: layer.xAxis,
+      dataView,
+    });
+    addLayerColumn(resultLayer, columnName, breakdownColumn, true);
+  }
+
+  const layerBreakdown = normalizeBreakdown(layer.breakdown);
+  layerBreakdown.forEach((breakdown, breakdownIndex) => {
+    const columnName = `${ACCESSOR}${i}_breakdown_${breakdownIndex}`;
+    const breakdownColumn = getBreakdownColumn({
+      options: breakdown,
+      dataView,
+    });
+    addLayerColumn(resultLayer, columnName, breakdownColumn, true);
+  });
+
+  return resultLayer;
+}
+
+/**
+ * Manual / by-value annotation layers require {@link XYByValueAnnotationLayerConfig.indexPatternId}
+ * so `eventAnnotationService.toFetchExpression` can call `indexPatternLoad`. ES|QL (text-based) XY
+ * charts only set `index` on the data layer; this copies that id onto annotation layers.
+ */
+function injectAnnotationIndexPatternIdsFromTextBasedDatasource(
+  visualization: XYVisualizationState,
+  datasourceStates: LensAttributes['state']['datasourceStates']
+): XYVisualizationState {
+  const textLayers = datasourceStates?.[LENS_DATASOURCE_ID.TEXT_BASED]?.layers;
+  if (!textLayers) {
+    return visualization;
+  }
+
+  const adHocDataViewId = Object.values(textLayers).find((layer) => layer.index)?.index;
+  if (!adHocDataViewId) {
+    return visualization;
+  }
+
   return {
-    columns: {},
-    columnOrder: [],
+    ...visualization,
+    layers: visualization.layers.map((layer): XYAnnotationLayerConfig | typeof layer => {
+      if (layer.layerType !== 'annotations' || 'annotationGroupId' in layer) {
+        return layer;
+      }
+      const byValue = layer as XYByValueAnnotationLayerConfig;
+      if (byValue.indexPatternId) {
+        return layer;
+      }
+      return { ...byValue, indexPatternId: adHocDataViewId };
+    }),
   };
 }
 
@@ -291,6 +318,11 @@ export async function buildXY(
   );
   const { references, internalReferences, adHocDataViews } = extractReferences(dataviews);
 
+  const visualization = injectAnnotationIndexPatternIdsFromTextBasedDatasource(
+    buildVisualizationState(config),
+    datasourceStates
+  );
+
   return {
     title: config.title,
     description: config.description,
@@ -301,7 +333,7 @@ export async function buildXY(
       internalReferences,
       filters: [],
       query: { language: 'kuery', query: '' },
-      visualization: buildVisualizationState(config),
+      visualization,
       adHocDataViews,
     },
   };

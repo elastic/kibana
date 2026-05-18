@@ -264,7 +264,14 @@ export const buildDatasourceStates = async (
     const layerId = `layer_${i}`;
     const dataset = layer.dataset ?? mainDataset;
 
-    if (!dataset && 'type' in layer && (layer as LensAnnotationLayer).type !== 'annotation') {
+    // Annotation layers belong only to visualization state; skip them here so they never
+    // create a datasource entry — they have no columns and would produce an empty/broken layer
+    // even when a top-level mainDataset is present and would otherwise be inherited.
+    if ('type' in layer && (layer as LensAnnotationLayer).type === 'annotation') {
+      continue;
+    }
+
+    if (!dataset) {
       throw Error('dataset must be defined');
     }
     if (dataset) {
