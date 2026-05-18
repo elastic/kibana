@@ -297,17 +297,16 @@ function diffSchemas(
   after: false | Record<string, unknown>,
   schemaType: 'create' | 'forwardCompatibility'
 ): SchemaDiffResult {
-  if (before === false && after === false) {
+  if (before === false) {
+    // Schema absent in the baseline: either still absent (false/false = no change) or newly added
+    // to an existing model version (non-breaking, since it was previously unenforced).
     return { breaking: [], warnings: [] };
   }
-  if (before !== false && after === false) {
+  if (after === false) {
     // Schema existed but was removed — breaking, since existing callers can no longer rely on it.
     return { breaking: [`${schemaType} schema removed from model version`], warnings: [] };
   }
-  if (before === false) {
-    // Schema added to an existing model version — non-breaking (was previously unenforced).
-    return { breaking: [], warnings: [] };
-  }
+  // Both are objects — TypeScript now correctly narrows both to Record<string, unknown>.
 
   const beforeFields = new Map(extractFieldDescriptions(before, '').map((f) => [f.path, f]));
   const afterFields = new Map(extractFieldDescriptions(after, '').map((f) => [f.path, f]));
