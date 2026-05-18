@@ -38,3 +38,18 @@ export const Default: Story = {
     </FlyoutWithTabs>
   ),
 };
+
+export const WithBackButton: Story = {
+  render: () => (
+    <FlyoutWithTabs
+      title="My flyout"
+      showBackButton
+      tabsAriaLabel="Demo tabs"
+      tabs={TABS}
+      onBack={action('onBack')}
+      onClose={action('onClose')}
+    >
+      {(selectedTab) => <p style={{ padding: 24 }}>Selected: {selectedTab}</p>}
+    </FlyoutWithTabs>
+  ),
+};

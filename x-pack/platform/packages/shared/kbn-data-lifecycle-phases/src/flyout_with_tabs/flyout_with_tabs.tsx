@@ -36,6 +36,7 @@ export type NonEmptyFlyoutTabs<TId extends string> = readonly [
 export interface FlyoutWithTabsProps<TId extends string> {
   title: string;
   showBackButton?: boolean;
+  onBack?: () => void;
   tabsAriaLabel: string;
   tabs: NonEmptyFlyoutTabs<TId>;
   initialTabId?: TId;
@@ -48,6 +49,7 @@ export interface FlyoutWithTabsProps<TId extends string> {
 export const FlyoutWithTabs = <TId extends string>({
   title,
   showBackButton = false,
+  onBack,
   tabsAriaLabel,
   tabs,
   initialTabId,
@@ -58,18 +60,13 @@ export const FlyoutWithTabs = <TId extends string>({
 }: FlyoutWithTabsProps<TId>) => {
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'flyoutWithTabs' });
   const { euiTheme } = useEuiTheme();
-  const [selectedTab, setSelectedTab] = useState<TId | undefined>(
-    () => initialTabId ?? tabs[0]?.id
-  );
-
-  if (!tabs.length) {
-    throw new Error('FlyoutWithTabs requires at least one tab.');
-  }
+  const [selectedTab, setSelectedTab] = useState<TId | undefined>(() => initialTabId ?? tabs[0].id);
 
   const resolvedSelectedTab =
     selectedTab !== undefined && tabs.some(({ id }) => id === selectedTab)
       ? selectedTab
       : tabs[0].id;
+  const handleBack = onBack ?? onClose;
 
   const headerStyles = css`
     padding: ${euiTheme.size.l} ${euiTheme.size.l} 0;
@@ -110,7 +107,7 @@ export const FlyoutWithTabs = <TId extends string>({
                       'xpack.dataLifecyclePhases.flyoutWithTabs.backButtonAriaLabel',
                       { defaultMessage: 'Back' }
                     )}
-                    onClick={onClose}
+                    onClick={handleBack}
                     data-test-subj="flyoutWithTabsBackButton"
                     color="text"
                   />

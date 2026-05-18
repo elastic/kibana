@@ -56,6 +56,7 @@ export const InspectIlmPolicyFlyout = ({
       tabs={TABS}
       initialTabId="summary"
       onClose={onBack}
+      onBack={onBack}
       type={type}
     >
       {(selectedTab) => (

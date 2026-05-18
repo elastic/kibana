@@ -102,7 +102,7 @@ export const PhaseAccordion = ({ phase, phases }: PhaseAccordionProps) => {
         id={`ilm-inspect-phase-${phase}`}
         data-test-subj={`ilmInspectPhaseAccordion-${phase}`}
         buttonContent={buttonContent}
-        initialIsOpen={content.length > 0}
+        initialIsOpen={false}
         paddingSize="none"
         arrowDisplay="right"
         buttonProps={{ paddingSize: 'l' }}
