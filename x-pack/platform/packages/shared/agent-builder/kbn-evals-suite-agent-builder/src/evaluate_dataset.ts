@@ -48,50 +48,6 @@ interface DatasetExample extends Example {
   };
 }
 
-const WORKFLOW_EXECUTE_STEP_TOOL_ID = 'platform.workflows.workflow_execute_step';
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null;
-
-const matchesWorkflowRequestExpectation = ({
-  params,
-  expectedPath,
-  expectedStepType,
-}: {
-  params: unknown;
-  expectedPath: string;
-  expectedStepType: string;
-}): boolean => {
-  if (!isRecord(params)) return false;
-
-  const yaml = params.yaml;
-  if (typeof yaml === 'string') {
-    const hasPath = yaml.includes(expectedPath);
-    const hasStepType = yaml.includes(`type: ${expectedStepType}`);
-    if (hasPath && hasStepType) return true;
-  }
-
-  const step = params.step;
-  if (!isRecord(step)) return false;
-
-  const stepType = step.type;
-  const withArgs = step.with;
-  if (!isRecord(withArgs)) return false;
-
-  return stepType === expectedStepType && withArgs.path === expectedPath;
-};
-
-const extractWorkflowExecuteParams = (output: TaskOutput): unknown[] => {
-  const steps = (output as { steps?: unknown[] }).steps;
-  if (!Array.isArray(steps)) return [];
-
-  return steps
-    .filter((step): step is Record<string, unknown> => isRecord(step))
-    .filter((step) => step.type === 'tool_call' && step.tool_id === WORKFLOW_EXECUTE_STEP_TOOL_ID)
-    .map((step) => step.params)
-    .filter((params) => params != null);
-};
-
 export type EvaluateDataset = ({
   dataset: { name, description, examples },
 }: {
@@ -165,45 +121,6 @@ function configureExperiment({
   });
 
   const selectedEvaluators = selectEvaluators([
-    {
-      name: 'ExpectedWorkflowRequest',
-      kind: 'CODE' as const,
-      evaluate: async ({ output, metadata }) => {
-        const expectedPath = getStringMeta(metadata, 'expectedWorkflowRequestPath');
-        if (!expectedPath) return { score: 1 };
-
-        const expectedStepType =
-          getStringMeta(metadata, 'expectedWorkflowStepType') ?? 'kibana.request';
-        const workflowParams = extractWorkflowExecuteParams(output as TaskOutput);
-        if (workflowParams.length === 0) {
-          return {
-            score: 0,
-            metadata: {
-              reason: 'No workflow execute step calls found',
-              expectedPath,
-              expectedStepType,
-            },
-          };
-        }
-
-        const matched = workflowParams.some((params) =>
-          matchesWorkflowRequestExpectation({
-            params,
-            expectedPath,
-            expectedStepType,
-          })
-        );
-
-        return {
-          score: matched ? 1 : 0,
-          metadata: {
-            expectedPath,
-            expectedStepType,
-            workflowCallCount: workflowParams.length,
-          },
-        };
-      },
-    },
     {
       name: 'ExpectedToolCalled',
       kind: 'CODE' as const,
