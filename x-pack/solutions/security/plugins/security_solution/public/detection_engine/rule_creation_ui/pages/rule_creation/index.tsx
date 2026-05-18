@@ -297,6 +297,22 @@ const CreateRulePageComponent: React.FC<{}> = () => {
     (isOpen: boolean) => handleAccordionToggle(RuleStep.ruleActions, isOpen),
     [handleAccordionToggle]
   );
+
+  const toggleStepAccordion = useCallback(
+    (step: RuleStep | null) => {
+      if (step === RuleStep.defineRule) {
+        handleAccordionToggle(RuleStep.defineRule, true);
+      } else if (step === RuleStep.aboutRule) {
+        handleAccordionToggle(RuleStep.aboutRule, true);
+      } else if (step === RuleStep.scheduleRule) {
+        handleAccordionToggle(RuleStep.scheduleRule, true);
+      } else if (step === RuleStep.ruleActions) {
+        handleAccordionToggle(RuleStep.ruleActions, true);
+      }
+    },
+    [handleAccordionToggle]
+  );
+
   const goToStep = useCallback(
     (step: RuleStep) => {
       if (
@@ -308,20 +324,8 @@ const CreateRulePageComponent: React.FC<{}> = () => {
       }
       setActiveStep(step);
     },
-    [activeStep, isAiRuleAppliedRef, openSteps]
+    [activeStep, isAiRuleAppliedRef, openSteps, toggleStepAccordion]
   );
-
-  const toggleStepAccordion = (step: RuleStep | null) => {
-    if (step === RuleStep.defineRule) {
-      handleAccordionToggle(RuleStep.defineRule, true);
-    } else if (step === RuleStep.aboutRule) {
-      handleAccordionToggle(RuleStep.aboutRule, true);
-    } else if (step === RuleStep.scheduleRule) {
-      handleAccordionToggle(RuleStep.scheduleRule, true);
-    } else if (step === RuleStep.ruleActions) {
-      handleAccordionToggle(RuleStep.ruleActions, true);
-    }
-  };
 
   const openStepsRef = useRef(openSteps);
   openStepsRef.current = openSteps;
