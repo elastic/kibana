@@ -9,8 +9,11 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useForm, FormProvider } from 'react-hook-form';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import type { RuleResponse } from '@kbn/alerting-v2-schemas';
+import type { RuleResponse, RuleParams } from '@kbn/alerting-v2-schemas';
 import { ALERTING_V2_RULE_API_PATH } from '@kbn/alerting-v2-constants';
+
+type ThreatEntry = NonNullable<RuleParams['threat']>[number];
+type RelatedIntegration = NonNullable<RuleParams['related_integrations']>[number];
 import type { FormValues, RuleFormServices } from '@kbn/alerting-v2-rule-form';
 import {
   RuleFormProvider,
@@ -42,7 +45,8 @@ interface SecurityRuleFormProps {
   ruleId?: string;
   initialValues?: Partial<FormValues>;
   initialQuery?: string;
-  onSuccess?: () => void;
+  initialParams?: RuleParams;
+  onSuccess?: (savedRuleId: string) => void;
   onCancel?: () => void;
 }
 
@@ -56,6 +60,7 @@ export const SecurityRuleForm = ({
   ruleId,
   initialValues,
   initialQuery,
+  initialParams,
   onSuccess,
   onCancel,
 }: SecurityRuleFormProps) => {
@@ -88,6 +93,17 @@ export const SecurityRuleForm = ({
   const [cardinalityValue, setCardinalityValue] = useState(
     parsedThreshold?.cardinalityValue ?? 0
   );
+
+  const [threat, setThreat] = useState<ThreatEntry[]>(initialParams?.threat ?? []);
+  const [note, setNote] = useState(initialParams?.note ?? '');
+  const [setup, setSetup] = useState(initialParams?.setup ?? '');
+  const [relatedIntegrations, setRelatedIntegrations] = useState<RelatedIntegration[]>(
+    initialParams?.related_integrations ?? []
+  );
+  const [investigationFieldNames, setInvestigationFieldNames] = useState<string[]>(
+    initialParams?.investigation_fields?.field_names ?? []
+  );
+  const [references, setReferences] = useState<string[]>(initialParams?.references ?? []);
 
   const generatedQuery = useMemo(() => {
     if (ruleType !== 'threshold' || indexPatterns.length === 0) {
@@ -201,20 +217,41 @@ export const SecurityRuleForm = ({
         enriched.evaluation = { query: { base: generatedQuery } };
       }
 
+      const filteredRefs = references.filter((r) => r.trim().length > 0);
+      const filteredIntegrations = relatedIntegrations.filter((ri) => ri.package.trim().length > 0);
+
+      const securityParams: RuleParams = {
+        ...(threat.length > 0 ? { threat } : {}),
+        ...(note.trim() ? { note: note.trim() } : {}),
+        ...(setup.trim() ? { setup: setup.trim() } : {}),
+        ...(filteredIntegrations.length > 0
+          ? { related_integrations: filteredIntegrations }
+          : {}),
+        ...(investigationFieldNames.length > 0
+          ? { investigation_fields: { field_names: investigationFieldNames } }
+          : {}),
+        ...(filteredRefs.length > 0 ? { references: filteredRefs } : {}),
+      };
+
       setIsSubmitting(true);
       try {
+        let savedRuleId: string;
         if (ruleId) {
+          const updateBody = { ...mapFormValuesToUpdateRequest(enriched), params: securityParams };
           await services.http.patch<RuleResponse>(`${ALERTING_V2_RULE_API_PATH}/${ruleId}`, {
-            body: JSON.stringify(mapFormValuesToUpdateRequest(enriched)),
+            body: JSON.stringify(updateBody),
           });
           services.notifications.toasts.addSuccess(`Rule '${enriched.metadata.name}' updated`);
+          savedRuleId = ruleId;
         } else {
-          await services.http.post<RuleResponse>(ALERTING_V2_RULE_API_PATH, {
-            body: JSON.stringify(mapFormValuesToCreateRequest(enriched)),
+          const createBody = { ...mapFormValuesToCreateRequest(enriched), params: securityParams };
+          const created = await services.http.post<RuleResponse>(ALERTING_V2_RULE_API_PATH, {
+            body: JSON.stringify(createBody),
           });
           services.notifications.toasts.addSuccess(`Rule '${enriched.metadata.name}' created`);
+          savedRuleId = created.id;
         }
-        onSuccessRef.current?.();
+        onSuccessRef.current?.(savedRuleId);
       } catch (error) {
         services.notifications.toasts.addDanger(
           `Error ${ruleId ? 'updating' : 'creating'} rule: ${error instanceof Error ? error.message : String(error)}`
@@ -223,7 +260,7 @@ export const SecurityRuleForm = ({
         setIsSubmitting(false);
       }
     },
-    [ruleType, generatedQuery, ruleId, services]
+    [ruleType, generatedQuery, ruleId, services, threat, note, setup, relatedIntegrations, investigationFieldNames, references]
   );
 
   return (
@@ -252,6 +289,18 @@ export const SecurityRuleForm = ({
                 onCardinalityValueChange={setCardinalityValue}
                 generatedQuery={generatedQuery}
                 search={services.data.search.search}
+                threat={threat}
+                onThreatChange={setThreat}
+                note={note}
+                onNoteChange={setNote}
+                setup={setup}
+                onSetupChange={setSetup}
+                relatedIntegrations={relatedIntegrations}
+                onRelatedIntegrationsChange={setRelatedIntegrations}
+                investigationFieldNames={investigationFieldNames}
+                onInvestigationFieldNamesChange={setInvestigationFieldNames}
+                references={references}
+                onReferencesChange={setReferences}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={1} style={{ minWidth: 0 }}>

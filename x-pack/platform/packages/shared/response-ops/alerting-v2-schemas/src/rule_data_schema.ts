@@ -194,6 +194,68 @@ const noDataSchema = z
   .strict()
   .describe('No data handling configuration.');
 
+/** Consumer-defined params (optional) */
+
+const threatSubtechniqueSchema = z.object({
+  id: z.string().min(1).max(256),
+  name: z.string().min(1).max(256),
+  reference: z.string().max(1024),
+});
+
+const threatTechniqueSchema = z.object({
+  id: z.string().min(1).max(256),
+  name: z.string().min(1).max(256),
+  reference: z.string().max(1024),
+  subtechnique: z.array(threatSubtechniqueSchema).optional(),
+});
+
+const threatTacticSchema = z.object({
+  id: z.string().min(1).max(256),
+  name: z.string().min(1).max(256),
+  reference: z.string().max(1024),
+});
+
+const threatEntrySchema = z.object({
+  framework: z.string().min(1).max(256),
+  tactic: threatTacticSchema,
+  technique: z.array(threatTechniqueSchema).optional(),
+});
+
+const relatedIntegrationSchema = z.object({
+  package: z.string().min(1).max(256),
+  version: z.string().min(1).max(64),
+  integration: z.string().max(256).optional(),
+});
+
+const investigationFieldsSchema = z.object({
+  field_names: z.array(z.string().min(1).max(MAX_FIELD_NAME_LENGTH)),
+});
+
+export const ruleParamsSchema = z
+  .object({
+    threat: z
+      .array(threatEntrySchema)
+      .optional()
+      .describe('MITRE ATT&CK tactic/technique/subtechnique mappings.'),
+    note: z.string().max(10000).optional().describe('Investigation guide markdown for analysts.'),
+    setup: z.string().max(10000).optional().describe('Setup/prerequisite guide markdown.'),
+    related_integrations: z
+      .array(relatedIntegrationSchema)
+      .optional()
+      .describe('Elastic integrations that provide required data.'),
+    investigation_fields: investigationFieldsSchema
+      .optional()
+      .describe('Fields highlighted in alert flyout for investigation.'),
+    references: z
+      .array(z.string().max(2048))
+      .optional()
+      .describe('External URLs (docs, blogs, threat intel).'),
+  })
+  .strict()
+  .describe('Consumer-defined rule parameters.');
+
+export type RuleParams = z.infer<typeof ruleParamsSchema>;
+
 /** Artifacts (optional) */
 
 const artifactSchema = z
@@ -238,6 +300,7 @@ const createRuleDataBaseSchema = z
     grouping: groupingSchema.optional(),
     no_data: noDataSchema.optional(),
     artifacts: z.array(artifactSchema).max(100).optional(),
+    params: ruleParamsSchema.optional(),
   })
   .strip();
 
@@ -289,6 +352,7 @@ export const updateRuleDataSchema = z
     grouping: groupingSchema.optional().nullable(),
     no_data: noDataSchema.optional().nullable(),
     artifacts: z.array(artifactSchema).max(100).optional().nullable(),
+    params: ruleParamsSchema.optional().nullable(),
     enabled: z.boolean().optional().describe('Whether the rule is enabled.'),
   })
   .strip();

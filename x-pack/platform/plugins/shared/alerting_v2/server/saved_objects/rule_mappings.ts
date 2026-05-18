@@ -59,6 +59,7 @@ export const ruleMappings: SavedObjectsTypeMappingDefinition = {
         timeframe: { type: 'keyword' },
       },
     },
+    params: { type: 'flattened', ignore_above: 4096 },
     enabled: { type: 'boolean' },
     createdBy: { type: 'keyword' },
     createdAt: { type: 'date' },

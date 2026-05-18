@@ -621,19 +621,31 @@ export const AlertsV2DetailsPanel: React.FC<AlertsV2DetailsPanelProps> = ({ para
               .filter((row) =>
                 expandedEventIds.has(`${row['@timestamp']}-${row['episode.id']}`)
               )
-              .map((row) => [
-                `${row['@timestamp']}-${row['episode.id']}`,
-                <EuiCodeBlock
-                  key={`${row['@timestamp']}-${row['episode.id']}`}
-                  language="json"
-                  isCopyable
-                  overflowHeight={300}
-                  paddingSize="s"
-                  fontSize="s"
-                >
-                  {JSON.stringify(row, null, 2)}
-                </EuiCodeBlock>,
-              ])
+              .map((row) => {
+                const { event_data: rawData, ...rest } = row;
+                let parsedData: unknown;
+                try {
+                  parsedData = rawData ? JSON.parse(rawData) : undefined;
+                } catch {
+                  parsedData = rawData;
+                }
+                const displayRow = parsedData !== undefined
+                  ? { ...rest, data: parsedData }
+                  : rest;
+                return [
+                  `${row['@timestamp']}-${row['episode.id']}`,
+                  <EuiCodeBlock
+                    key={`${row['@timestamp']}-${row['episode.id']}`}
+                    language="json"
+                    isCopyable
+                    overflowHeight={300}
+                    paddingSize="s"
+                    fontSize="s"
+                  >
+                    {JSON.stringify(displayRow, null, 2)}
+                  </EuiCodeBlock>,
+                ];
+              })
           )}
           tableCaption={i18n.FLYOUT_EVENTS_TITLE}
           tableLayout="auto"

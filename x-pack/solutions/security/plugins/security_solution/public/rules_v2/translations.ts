@@ -187,3 +187,120 @@ export const TAB_OVERVIEW = i18n.translate('xpack.securitySolution.rulesV2.tabOv
 export const TAB_ALERTS = i18n.translate('xpack.securitySolution.rulesV2.tabAlerts', {
   defaultMessage: 'Alerts',
 });
+
+export const DETECTION_FIELDS_ACCORDION = i18n.translate(
+  'xpack.securitySolution.rulesV2.detectionFieldsAccordion',
+  { defaultMessage: 'Advanced detection settings' }
+);
+
+export const THREAT_LABEL = i18n.translate('xpack.securitySolution.rulesV2.threatLabel', {
+  defaultMessage: 'MITRE ATT&CK\u2122 threats',
+});
+
+export const THREAT_HELP = i18n.translate('xpack.securitySolution.rulesV2.threatHelp', {
+  defaultMessage:
+    'Map this rule to MITRE ATT&CK tactics, techniques, and subtechniques.',
+});
+
+export const NOTE_LABEL = i18n.translate('xpack.securitySolution.rulesV2.noteLabel', {
+  defaultMessage: 'Investigation guide',
+});
+
+export const NOTE_HELP = i18n.translate('xpack.securitySolution.rulesV2.noteHelp', {
+  defaultMessage: 'Markdown-formatted investigation guide for analysts responding to alerts.',
+});
+
+export const SETUP_LABEL = i18n.translate('xpack.securitySolution.rulesV2.setupLabel', {
+  defaultMessage: 'Setup guide',
+});
+
+export const SETUP_HELP = i18n.translate('xpack.securitySolution.rulesV2.setupHelp', {
+  defaultMessage: 'Markdown-formatted prerequisite and setup instructions.',
+});
+
+export const RELATED_INTEGRATIONS_LABEL = i18n.translate(
+  'xpack.securitySolution.rulesV2.relatedIntegrationsLabel',
+  { defaultMessage: 'Related integrations' }
+);
+
+export const RELATED_INTEGRATIONS_HELP = i18n.translate(
+  'xpack.securitySolution.rulesV2.relatedIntegrationsHelp',
+  {
+    defaultMessage:
+      'Elastic integrations that provide the data this rule queries. Format: package:version (e.g. endpoint:8.0.0).',
+  }
+);
+
+export const INVESTIGATION_FIELDS_LABEL = i18n.translate(
+  'xpack.securitySolution.rulesV2.investigationFieldsLabel',
+  { defaultMessage: 'Custom highlighted fields' }
+);
+
+export const INVESTIGATION_FIELDS_HELP = i18n.translate(
+  'xpack.securitySolution.rulesV2.investigationFieldsHelp',
+  { defaultMessage: 'Fields highlighted in the alert detail flyout for faster investigation.' }
+);
+
+export const REFERENCES_LABEL = i18n.translate('xpack.securitySolution.rulesV2.referencesLabel', {
+  defaultMessage: 'Reference URLs',
+});
+
+export const REFERENCES_HELP = i18n.translate('xpack.securitySolution.rulesV2.referencesHelp', {
+  defaultMessage: 'External URLs such as documentation, blogs, or threat intelligence reports.',
+});
+
+export const ADD_REFERENCE = i18n.translate('xpack.securitySolution.rulesV2.addReference', {
+  defaultMessage: 'Add reference URL',
+});
+
+export const ADD_INTEGRATION = i18n.translate('xpack.securitySolution.rulesV2.addIntegration', {
+  defaultMessage: 'Add integration',
+});
+
+export const TACTIC_LABEL = i18n.translate('xpack.securitySolution.rulesV2.tacticLabel', {
+  defaultMessage: 'Tactic',
+});
+
+export const TECHNIQUE_LABEL = i18n.translate('xpack.securitySolution.rulesV2.techniqueLabel', {
+  defaultMessage: 'Technique',
+});
+
+export const SUBTECHNIQUE_LABEL = i18n.translate(
+  'xpack.securitySolution.rulesV2.subtechniqueLabel',
+  { defaultMessage: 'Subtechnique' }
+);
+
+export const TACTIC_PLACEHOLDER = i18n.translate(
+  'xpack.securitySolution.rulesV2.tacticPlaceholder',
+  { defaultMessage: 'Select a tactic ...' }
+);
+
+export const TECHNIQUE_PLACEHOLDER = i18n.translate(
+  'xpack.securitySolution.rulesV2.techniquePlaceholder',
+  { defaultMessage: 'Select a technique ...' }
+);
+
+export const SUBTECHNIQUE_PLACEHOLDER = i18n.translate(
+  'xpack.securitySolution.rulesV2.subtechniquePlaceholder',
+  { defaultMessage: 'Select a subtechnique ...' }
+);
+
+export const ADD_TACTIC = i18n.translate('xpack.securitySolution.rulesV2.addTactic', {
+  defaultMessage: 'Add tactic',
+});
+
+export const ADD_TECHNIQUE = i18n.translate('xpack.securitySolution.rulesV2.addTechnique', {
+  defaultMessage: 'Add technique',
+});
+
+export const ADD_SUBTECHNIQUE = i18n.translate('xpack.securitySolution.rulesV2.addSubtechnique', {
+  defaultMessage: 'Add subtechnique',
+});
+
+export const ENABLE_RULE = i18n.translate('xpack.securitySolution.rulesV2.enableRule', {
+  defaultMessage: 'Enable rule',
+});
+
+export const DISABLE_RULE = i18n.translate('xpack.securitySolution.rulesV2.disableRule', {
+  defaultMessage: 'Disable rule',
+});

@@ -87,6 +87,59 @@ export const ruleSavedObjectAttributesSchema = schema.object({
       { maxSize: 100 }
     )
   ),
+
+  params: schema.maybe(
+    schema.object({
+      threat: schema.maybe(
+        schema.arrayOf(
+          schema.object({
+            framework: schema.string(),
+            tactic: schema.object({
+              id: schema.string(),
+              name: schema.string(),
+              reference: schema.string(),
+            }),
+            technique: schema.maybe(
+              schema.arrayOf(
+                schema.object({
+                  id: schema.string(),
+                  name: schema.string(),
+                  reference: schema.string(),
+                  subtechnique: schema.maybe(
+                    schema.arrayOf(
+                      schema.object({
+                        id: schema.string(),
+                        name: schema.string(),
+                        reference: schema.string(),
+                      })
+                    )
+                  ),
+                })
+              )
+            ),
+          })
+        )
+      ),
+      note: schema.maybe(schema.string()),
+      setup: schema.maybe(schema.string()),
+      related_integrations: schema.maybe(
+        schema.arrayOf(
+          schema.object({
+            package: schema.string(),
+            version: schema.string(),
+            integration: schema.maybe(schema.string()),
+          })
+        )
+      ),
+      investigation_fields: schema.maybe(
+        schema.object({
+          field_names: schema.arrayOf(schema.string()),
+        })
+      ),
+      references: schema.maybe(schema.arrayOf(schema.string())),
+    })
+  ),
+
   // Server-managed fields
   enabled: schema.boolean(),
   createdBy: schema.nullable(schema.string()),

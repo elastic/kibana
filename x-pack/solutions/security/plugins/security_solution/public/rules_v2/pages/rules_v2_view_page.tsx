@@ -16,11 +16,13 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHealth,
+  EuiLink,
   EuiLoadingSpinner,
   EuiPageHeader,
   EuiPanel,
   EuiSpacer,
   EuiTabbedContent,
+  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import type { EuiTabbedContentTab } from '@elastic/eui';
@@ -32,6 +34,7 @@ import { useKibana } from '../../common/lib/kibana';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { RULES_V2_PATH } from '../../../common/constants';
 import { RuleAlertsTable } from '../components/rule_alerts_table';
+import { parseThresholdEsqlQuery } from '../utils/threshold_to_esql';
 import * as i18n from '../translations';
 
 const OverviewTab: React.FC<{ rule: RuleResponse }> = ({ rule }) => {
@@ -95,6 +98,133 @@ const OverviewTab: React.FC<{ rule: RuleResponse }> = ({ rule }) => {
       : []),
   ];
 
+  const isThreshold = rule.metadata.tags?.includes('threshold') ?? false;
+  const parsedThreshold = useMemo(
+    () => (isThreshold ? parseThresholdEsqlQuery(rule.evaluation.query.base) : null),
+    [isThreshold, rule.evaluation.query.base]
+  );
+
+  const thresholdItems = parsedThreshold
+    ? [
+        {
+          title: i18n.INDEX_PATTERNS_LABEL,
+          description: (
+            <EuiFlexGroup gutterSize="xs" wrap>
+              {parsedThreshold.indexPatterns.map((p) => (
+                <EuiFlexItem grow={false} key={p}>
+                  <EuiBadge color="hollow">{p}</EuiBadge>
+                </EuiFlexItem>
+              ))}
+            </EuiFlexGroup>
+          ),
+        },
+        {
+          title: i18n.THRESHOLD_VALUE_LABEL,
+          description: `>= ${parsedThreshold.thresholdValue}`,
+        },
+        ...(parsedThreshold.thresholdFields.length > 0
+          ? [
+              {
+                title: i18n.THRESHOLD_GROUP_BY_LABEL,
+                description: (
+                  <EuiFlexGroup gutterSize="xs" wrap>
+                    {parsedThreshold.thresholdFields.map((f) => (
+                      <EuiFlexItem grow={false} key={f}>
+                        <EuiBadge color="hollow">{f}</EuiBadge>
+                      </EuiFlexItem>
+                    ))}
+                  </EuiFlexGroup>
+                ),
+              },
+            ]
+          : []),
+        ...(parsedThreshold.cardinalityField
+          ? [
+              {
+                title: i18n.CARDINALITY_FIELD_LABEL,
+                description: parsedThreshold.cardinalityField,
+              },
+              {
+                title: i18n.CARDINALITY_VALUE_LABEL,
+                description: `>= ${parsedThreshold.cardinalityValue ?? 0}`,
+              },
+            ]
+          : []),
+      ]
+    : [];
+
+  const { params } = rule;
+  const paramsItems = [
+    ...(params?.note
+      ? [{ title: i18n.NOTE_LABEL, description: <EuiText size="s"><p>{params.note}</p></EuiText> }]
+      : []),
+    ...(params?.setup
+      ? [{ title: i18n.SETUP_LABEL, description: <EuiText size="s"><p>{params.setup}</p></EuiText> }]
+      : []),
+    ...(params?.references?.length
+      ? [{
+          title: i18n.REFERENCES_LABEL,
+          description: (
+            <EuiFlexGroup direction="column" gutterSize="xs">
+              {params.references.map((ref, idx) => (
+                <EuiFlexItem key={idx} grow={false}>
+                  <EuiLink href={ref} target="_blank" external>{ref}</EuiLink>
+                </EuiFlexItem>
+              ))}
+            </EuiFlexGroup>
+          ),
+        }]
+      : []),
+    ...(params?.investigation_fields?.field_names?.length
+      ? [{
+          title: i18n.INVESTIGATION_FIELDS_LABEL,
+          description: (
+            <EuiFlexGroup gutterSize="xs" wrap>
+              {params.investigation_fields.field_names.map((f) => (
+                <EuiFlexItem grow={false} key={f}>
+                  <EuiBadge color="hollow">{f}</EuiBadge>
+                </EuiFlexItem>
+              ))}
+            </EuiFlexGroup>
+          ),
+        }]
+      : []),
+    ...(params?.related_integrations?.length
+      ? [{
+          title: i18n.RELATED_INTEGRATIONS_LABEL,
+          description: (
+            <EuiFlexGroup gutterSize="xs" wrap>
+              {params.related_integrations.map((ri, idx) => (
+                <EuiFlexItem grow={false} key={idx}>
+                  <EuiBadge color="hollow">
+                    {ri.package}:{ri.version}
+                    {ri.integration ? ` (${ri.integration})` : ''}
+                  </EuiBadge>
+                </EuiFlexItem>
+              ))}
+            </EuiFlexGroup>
+          ),
+        }]
+      : []),
+    ...(params?.threat?.length
+      ? [{
+          title: i18n.THREAT_LABEL,
+          description: (
+            <EuiFlexGroup direction="column" gutterSize="xs">
+              {params.threat.map((t, idx) => (
+                <EuiFlexItem key={idx} grow={false}>
+                  <EuiBadge color="warning">
+                    {t.tactic.name}
+                    {t.technique?.length ? ` > ${t.technique.map((tech) => tech.name).join(', ')}` : ''}
+                  </EuiBadge>
+                </EuiFlexItem>
+              ))}
+            </EuiFlexGroup>
+          ),
+        }]
+      : []),
+  ];
+
   return (
     <>
       <EuiSpacer size="l" />
@@ -121,6 +251,32 @@ const OverviewTab: React.FC<{ rule: RuleResponse }> = ({ rule }) => {
           </EuiPanel>
         </EuiFlexItem>
       </EuiFlexGroup>
+
+      {thresholdItems.length > 0 && (
+        <>
+          <EuiSpacer size="l" />
+          <EuiPanel paddingSize="l">
+            <EuiTitle size="xs">
+              <h3>{i18n.THRESHOLD_LABEL}</h3>
+            </EuiTitle>
+            <EuiSpacer size="m" />
+            <EuiDescriptionList listItems={thresholdItems} type="column" />
+          </EuiPanel>
+        </>
+      )}
+
+      {paramsItems.length > 0 && (
+        <>
+          <EuiSpacer size="l" />
+          <EuiPanel paddingSize="l">
+            <EuiTitle size="xs">
+              <h3>{i18n.DETECTION_FIELDS_ACCORDION}</h3>
+            </EuiTitle>
+            <EuiSpacer size="m" />
+            <EuiDescriptionList listItems={paramsItems} type="column" />
+          </EuiPanel>
+        </>
+      )}
     </>
   );
 };

@@ -46,9 +46,12 @@ const CreateRulePage = () => {
   const history = useHistory();
   const services = useRuleFormServices();
 
-  const handleSuccess = useCallback(() => {
-    history.push(RULES_V2_PATH);
-  }, [history]);
+  const handleSuccess = useCallback(
+    (savedRuleId: string) => {
+      history.push(`/rules_v2/view/${savedRuleId}`);
+    },
+    [history]
+  );
 
   const handleCancel = useCallback(() => {
     history.push(RULES_V2_PATH);
@@ -89,9 +92,12 @@ const EditRulePage = ({ ruleId }: { ruleId: string }) => {
     () => services.http.get<RuleResponse>(`${ALERTING_V2_RULE_API_PATH}/${ruleId}`)
   );
 
-  const handleSuccess = useCallback(() => {
-    history.push(RULES_V2_PATH);
-  }, [history]);
+  const handleSuccess = useCallback(
+    (savedRuleId: string) => {
+      history.push(`/rules_v2/view/${savedRuleId}`);
+    },
+    [history]
+  );
 
   const handleCancel = useCallback(() => {
     history.push(`/rules_v2/view/${ruleId}`);
@@ -121,6 +127,7 @@ const EditRulePage = ({ ruleId }: { ruleId: string }) => {
 
   const initialValues: Partial<FormValues> = mapRuleResponseToFormValues(rule);
   const initialQuery = rule.evaluation?.query?.base ?? 'FROM logs-*';
+  const initialParams = rule.params;
 
   return (
     <SecuritySolutionPageWrapper>
@@ -142,6 +149,7 @@ const EditRulePage = ({ ruleId }: { ruleId: string }) => {
             ruleId={ruleId}
             initialValues={initialValues}
             initialQuery={initialQuery}
+            initialParams={initialParams}
             onSuccess={handleSuccess}
             onCancel={handleCancel}
           />

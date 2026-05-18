@@ -130,6 +130,7 @@ const buildSecurityEpisodesQuery = (
           )`;
 
   query.where`type == "alert"`;
+
   addEpisodeAggregation(query);
 
   if (filterState?.ruleId) {

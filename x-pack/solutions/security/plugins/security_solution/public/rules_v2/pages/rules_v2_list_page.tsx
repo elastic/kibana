@@ -14,10 +14,10 @@ import {
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHealth,
   EuiLink,
   EuiPageHeader,
   EuiSpacer,
+  EuiSwitch,
   type CriteriaWithPagination,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
@@ -30,6 +30,7 @@ import { useHistory } from 'react-router-dom';
 import { useKibana } from '../../common/lib/kibana';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { RULES_V2_CREATE_PATH } from '../../../common/constants';
+import { useToggleRuleEnabled } from '../hooks/use_toggle_rule_enabled';
 import * as i18n from '../translations';
 
 const SEARCH_DEBOUNCE_MS = 300;
@@ -39,6 +40,8 @@ const SIEM_OWNER_FILTER = 'metadata.owner: siem';
 export const RulesV2ListPage = () => {
   const { http } = useKibana().services;
   const history = useHistory();
+
+  const toggleEnabledMutation = useToggleRuleEnabled();
 
   const [page, setPage] = useState(0);
   const [perPage, setPerPage] = useState(DEFAULT_PER_PAGE);
@@ -96,14 +99,20 @@ export const RulesV2ListPage = () => {
       },
       {
         field: 'enabled',
-        name: 'Status',
-        width: '100px',
-        render: (enabled: boolean) =>
-          enabled ? (
-            <EuiHealth color="success">Enabled</EuiHealth>
-          ) : (
-            <EuiHealth color="subdued">Disabled</EuiHealth>
-          ),
+        name: 'Enabled',
+        width: '90px',
+        render: (enabled: boolean, rule: RuleResponse) => (
+          <EuiSwitch
+            label={enabled ? i18n.DISABLE_RULE : i18n.ENABLE_RULE}
+            showLabel={false}
+            checked={enabled}
+            onChange={() =>
+              toggleEnabledMutation.mutate({ id: rule.id, enabled: !enabled })
+            }
+            compressed
+            data-test-subj={`ruleSwitch-${rule.id}`}
+          />
+        ),
       },
       {
         field: 'metadata.tags',
@@ -121,7 +130,7 @@ export const RulesV2ListPage = () => {
         width: '120px',
       },
     ],
-    [history]
+    [history, toggleEnabledMutation]
   );
 
   const pagination = useMemo(
