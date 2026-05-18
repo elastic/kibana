@@ -116,7 +116,9 @@ export const CreateStepButton: React.FC<AddStepProps> = ({
       data-stream-type={streamType}
     >
       {mode === 'prominent' ? createTextProminent : createText}
-      {mode === 'prominent' || mode === 'subdued' ? <EuiIcon type="chevronSingleDown" /> : null}
+      {mode === 'prominent' || mode === 'subdued' ? (
+        <EuiIcon type="chevronSingleDown" aria-hidden={true} />
+      ) : null}
     </EuiButton>
   );
 
@@ -146,7 +148,7 @@ export const CreateStepButton: React.FC<AddStepProps> = ({
       panelPaddingSize="none"
       anchorPosition="downLeft"
     >
-      <EuiContextMenuPanel size="s" items={items} />
+      <EuiContextMenuPanel items={items} />
     </EuiPopover>
   );
 };

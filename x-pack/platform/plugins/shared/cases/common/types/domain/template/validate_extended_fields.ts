@@ -5,18 +5,15 @@
  * 2.0.
  */
 
-import type { z } from '@kbn/zod/v4';
-import type { FieldSchema } from './fields';
-import { FieldType } from './fields';
+import type { InlineField, RefField } from './fields';
+import { FieldType, isInlineField } from './fields';
 import { evaluateCondition } from './evaluate_conditions';
 import { getFieldSnakeKey } from '../../../utils';
-
-type FieldSchemaType = z.infer<typeof FieldSchema>;
 
 const validatePattern = (
   label: string,
   value: string,
-  validation: FieldSchemaType['validation'],
+  validation: InlineField['validation'],
   errors: string[]
 ): void => {
   if (!validation?.pattern) return;
@@ -33,7 +30,7 @@ const validatePattern = (
 const validateLengthConstraints = (
   label: string,
   value: string,
-  validation: FieldSchemaType['validation'],
+  validation: InlineField['validation'],
   errors: string[]
 ): void => {
   if (validation?.min_length !== undefined && value.length < validation.min_length) {
@@ -47,7 +44,7 @@ const validateLengthConstraints = (
 const validateNumericConstraints = (
   label: string,
   value: string,
-  validation: FieldSchemaType['validation'],
+  validation: InlineField['validation'],
   errors: string[]
 ): void => {
   const num = Number(value);
@@ -92,7 +89,7 @@ const validateCheckboxGroupOptions = (
   }
 };
 
-const validateField = (field: FieldSchemaType, value: string, errors: string[]): void => {
+const validateField = (field: InlineField, value: string, errors: string[]): void => {
   const label = field.label ?? field.name;
 
   validatePattern(label, value, field.validation, errors);
@@ -120,12 +117,13 @@ const validateField = (field: FieldSchemaType, value: string, errors: string[]):
 
 export const validateExtendedFields = (
   extendedFields: Record<string, string>,
-  fields: FieldSchemaType[]
+  fields: Array<RefField | InlineField>
 ): string[] => {
   const errors: string[] = [];
+  const inlineFields = fields.filter(isInlineField);
 
   // 1. Build valid key set
-  const validKeys = new Set(fields.map((f) => getFieldSnakeKey(f.name, f.type)));
+  const validKeys = new Set(inlineFields.map((f) => getFieldSnakeKey(f.name, f.type)));
 
   // 2. Unknown keys
   for (const key of Object.keys(extendedFields)) {
@@ -137,13 +135,13 @@ export const validateExtendedFields = (
   // 3. Build helper maps
   const fieldValues: Record<string, string | undefined> = {};
   const fieldTypeMap: Record<string, string> = {};
-  for (const field of fields) {
+  for (const field of inlineFields) {
     fieldValues[field.name] = extendedFields[getFieldSnakeKey(field.name, field.type)];
     fieldTypeMap[field.name] = field.type;
   }
 
   // 4. Per-field validation
-  for (const field of fields) {
+  for (const field of inlineFields) {
     const isHidden =
       field.display?.show_when != null &&
       !evaluateCondition(field.display.show_when, fieldValues, fieldTypeMap);
