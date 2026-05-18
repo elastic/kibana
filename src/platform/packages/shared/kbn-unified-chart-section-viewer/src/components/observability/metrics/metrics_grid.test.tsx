@@ -754,5 +754,44 @@ describe('MetricsGrid', () => {
 
       (global.requestAnimationFrame as unknown as jest.SpyInstance).mockRestore();
     });
+
+    it('returns focus to the live metric position when the grid reordered while the flyout was open', () => {
+      jest
+        .spyOn(global, 'requestAnimationFrame')
+        .mockImplementation((cb: FrameRequestCallback): number => {
+          cb(0);
+          return 0;
+        });
+
+      const { getByTestId, getAllByRole } = render(
+        <MetricsGridWithRestorableState
+          {...defaultProps}
+          discoverFetch$={discoverFetch$}
+          profileId="test-profile"
+          initialState={{
+            flyoutState: {
+              gridPosition: 0,
+              metricUniqueKey: `${metricItems[1].dataStream}::${metricItems[1].metricName}`,
+              esqlQuery: 'FROM metrics-* | STATS AVG(system.memory.utilization) BY TBUCKET(100)',
+              selectedTabId: 'overview',
+            },
+          }}
+        />
+      );
+
+      const gridCells = getAllByRole('gridcell');
+
+      act(() => {
+        fireEvent.keyDown(getByTestId('metricsExperienceFlyout'), {
+          key: 'Escape',
+          bubbles: true,
+          cancelable: true,
+        });
+      });
+
+      expect(document.activeElement).toBe(gridCells[1]);
+
+      (global.requestAnimationFrame as unknown as jest.SpyInstance).mockRestore();
+    });
   });
 });

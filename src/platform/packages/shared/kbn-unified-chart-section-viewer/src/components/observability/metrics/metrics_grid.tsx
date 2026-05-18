@@ -128,13 +128,21 @@ export const MetricsGrid = ({
       return;
     }
 
-    const { rowIndex, colIndex } = getRowColFromIndex(flyoutState.gridPosition);
+    const currentIndex = metricItems.findIndex(
+      (item) => getMetricUniqueKey(item) === flyoutState.metricUniqueKey
+    );
     onFlyoutStateChange(undefined);
+
+    if (currentIndex === -1) {
+      return;
+    }
+
+    const { rowIndex, colIndex } = getRowColFromIndex(currentIndex);
     // Use requestAnimationFrame to ensure the flyout is fully closed before focusing
     requestAnimationFrame(() => {
       focusCell(rowIndex, colIndex);
     });
-  }, [flyoutState, focusCell, getRowColFromIndex, onFlyoutStateChange]);
+  }, [flyoutState, focusCell, getRowColFromIndex, metricItems, onFlyoutStateChange]);
 
   if (metricItems.length === 0) {
     return <EmptyState />;
