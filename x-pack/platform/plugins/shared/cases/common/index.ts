@@ -59,6 +59,9 @@ export {
   CASES_REOPEN_CAPABILITY,
   ASSIGN_CASE_CAPABILITY,
   SECURITY_EVENT_ATTACHMENT_TYPE,
+  SECURITY_ALERT_ATTACHMENT_TYPE,
+  OBSERVABILITY_ALERT_ATTACHMENT_TYPE,
+  STACK_ALERT_ATTACHMENT_TYPE,
   SECURITY_ENDPOINT_ATTACHMENT_TYPE,
   MANAGE_TEMPLATES_CAPABILITY,
   ML_ANOMALY_SWIMLANE_ATTACHMENT_TYPE,
@@ -83,10 +86,18 @@ export { getSavedObjectsTypes } from './utils/saved_object_types';
 
 export {
   isEventAttachmentType,
+  isAlertAttachmentType,
   isLegacyAttachmentRequest,
   isUnifiedEventAttachment,
+  isUnifiedAlertAttachment,
   assertValidIndexMetadata,
   isIndexMetadata,
   toStringArray,
   toStringOrStringArray,
+  getNonEmptyField,
+  isStringArray,
+  getRuleInfo,
+  getManualAlertIds,
 } from './utils/attachments';
+
+export { AttachmentActionType } from './utils/attachment_actions';

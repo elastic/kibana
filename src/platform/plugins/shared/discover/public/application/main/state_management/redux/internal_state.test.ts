@@ -17,6 +17,7 @@ import {
   selectTabRuntimeState,
   selectTab,
 } from '.';
+import { discardFlyoutsOnTabChange } from './internal_state';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { mockControlState } from '../../../../__mocks__/esql_controls';
@@ -550,5 +551,51 @@ describe('InternalStateStore', () => {
     expect(selectTab(store.getState(), tabId).expandedDoc).toBeUndefined();
     expect(selectTab(store.getState(), tabId).expandedDocOwner).toBeUndefined();
     expect(selectTab(store.getState(), tabId).renderDocumentViewMeta).toBeUndefined();
+  });
+
+  describe('discardFlyoutsOnTabChange', () => {
+    // dismissFlyouts works by clicking known close buttons in the DOM. We
+    // simulate the Lens edit and metric insights flyouts via fake close
+    // buttons and assert which one is clicked when the action is dispatched.
+    const setupFakeFlyouts = () => {
+      const lensEditFlyout = document.createElement('div');
+      lensEditFlyout.id = 'lnsCancelEditOnFlyFlyout';
+      const lensEditClick = jest.fn();
+      lensEditFlyout.addEventListener('click', lensEditClick);
+
+      const metricsFlyout = document.createElement('div');
+      metricsFlyout.setAttribute('data-test-subj', 'metricsExperienceFlyout');
+      const metricsCloseButton = document.createElement('button');
+      metricsCloseButton.setAttribute('data-test-subj', 'euiFlyoutCloseButton');
+      const metricsClick = jest.fn();
+      metricsCloseButton.addEventListener('click', metricsClick);
+      metricsFlyout.appendChild(metricsCloseButton);
+
+      document.body.appendChild(lensEditFlyout);
+      document.body.appendChild(metricsFlyout);
+
+      return {
+        lensEditClick,
+        metricsClick,
+        cleanup: () => {
+          lensEditFlyout.remove();
+          metricsFlyout.remove();
+        },
+      };
+    };
+
+    it('dismisses the Lens edit flyout but preserves the metric insights flyout', async () => {
+      const { store } = await createTestStore();
+      const { lensEditClick, metricsClick, cleanup } = setupFakeFlyouts();
+
+      try {
+        store.dispatch(discardFlyoutsOnTabChange());
+
+        expect(lensEditClick).toHaveBeenCalledTimes(1);
+        expect(metricsClick).not.toHaveBeenCalled();
+      } finally {
+        cleanup();
+      }
+    });
   });
 });
