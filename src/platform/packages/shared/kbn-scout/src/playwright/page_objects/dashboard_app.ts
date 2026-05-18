@@ -205,6 +205,17 @@ export class DashboardApp {
   }
 
   /**
+   * Ensures the dashboard is in edit mode, switching from view mode if necessary.
+   * Useful after flows (e.g. saving an ES|QL viz from Discover) that already
+   * leave the dashboard in edit mode and therefore have no Edit button to click.
+   */
+  async ensureEditMode() {
+    if (await this.getIsInViewMode()) {
+      await this.switchToEditMode();
+    }
+  }
+
+  /**
    * Opens the "Add panel" flyout for selecting panel types to add to the dashboard.
    */
   async openAddPanelFlyout() {
