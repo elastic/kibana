@@ -17,6 +17,7 @@ import { getRouteConfig } from '../get_route_config';
 import { getReadResponseBodySchema } from './schemas';
 import { read } from './read';
 import { getDashboardStateSchema } from '../dashboard_state_schemas';
+import { getReadDashboardOASOperationObject } from '../oas_examples';
 
 export function registerReadRoute(
   router: VersionedRouter<RequestHandlerContext>,
@@ -41,6 +42,9 @@ export function registerReadRoute(
   readRoute.addVersion(
     {
       version: routeVersion,
+      options: {
+        oasOperationObject: getReadDashboardOASOperationObject,
+      },
       validate: () => ({
         request: {
           params: schema.object({

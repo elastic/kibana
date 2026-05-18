@@ -21,6 +21,7 @@ import type { LensSavedObject } from '../../../content_management';
 import { lensGetRequestParamsSchema, lensGetResponseBodySchema } from './schema';
 import { getLensResponseItem } from './utils';
 import type { RegisterAPIRouteFn } from '../../types';
+import { getReadLensVisualizationOASOperationObject } from './oas_examples';
 
 export const registerLensVisualizationsGetAPIRoute: RegisterAPIRouteFn = (
   router,
@@ -49,6 +50,9 @@ export const registerLensVisualizationsGetAPIRoute: RegisterAPIRouteFn = (
   getRoute.addVersion(
     {
       version: LENS_API_VERSION,
+      options: {
+        oasOperationObject: getReadLensVisualizationOASOperationObject,
+      },
       validate: {
         request: {
           params: lensGetRequestParamsSchema,

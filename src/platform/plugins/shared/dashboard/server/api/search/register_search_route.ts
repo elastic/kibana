@@ -14,6 +14,7 @@ import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
 import { getRouteConfig } from '../get_route_config';
 import { searchRequestParamsSchema, searchResponseBodySchema } from './schemas';
 import { search } from './search';
+import { getSearchDashboardOASOperationObject } from '../oas_examples';
 
 export function registerSearchRoute(
   router: VersionedRouter<RequestHandlerContext>,
@@ -31,6 +32,9 @@ export function registerSearchRoute(
   searchRoute.addVersion(
     {
       version: routeVersion,
+      options: {
+        oasOperationObject: getSearchDashboardOASOperationObject,
+      },
       validate: {
         request: {
           query: searchRequestParamsSchema,

@@ -21,6 +21,7 @@ import type { RegisterAPIRouteFn } from '../../types';
 import type { LensCreateResponseBody } from './types';
 import { getLensRequestConfig, getLensResponseItem } from './utils';
 import { lensCreateRequestBodySchema, lensCreateResponseBodySchema } from './schema';
+import { getCreateLensVisualizationOASOperationObject } from './oas_examples';
 
 export const registerLensVisualizationsCreateAPIRoute: RegisterAPIRouteFn = (
   router,
@@ -53,6 +54,9 @@ export const registerLensVisualizationsCreateAPIRoute: RegisterAPIRouteFn = (
   createRoute.addVersion(
     {
       version: LENS_API_VERSION,
+      options: {
+        oasOperationObject: getCreateLensVisualizationOASOperationObject,
+      },
       validate: {
         request: {
           body: lensCreateRequestBodySchema,

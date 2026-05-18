@@ -20,6 +20,7 @@ import type { LensSearchIn, LensSavedObject } from '../../../content_management'
 import type { RegisterAPIRouteFn } from '../../../types';
 import { lensSearchRequestQuerySchema, lensSearchResponseBodySchema } from './schema';
 import { getLensResponseItem } from './utils';
+import { getSearchLensVisualizationOASOperationObject } from './oas_examples';
 
 export const registerLensVisualizationsSearchAPIRoute: RegisterAPIRouteFn = (
   router,
@@ -49,6 +50,9 @@ export const registerLensVisualizationsSearchAPIRoute: RegisterAPIRouteFn = (
   searchRoute.addVersion(
     {
       version: LENS_API_VERSION,
+      options: {
+        oasOperationObject: getSearchLensVisualizationOASOperationObject,
+      },
       validate: {
         request: {
           query: lensSearchRequestQuerySchema,
