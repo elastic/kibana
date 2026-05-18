@@ -20,6 +20,24 @@ or `user_acknowledged: pending`, stop immediately and tell the user:
 _"Run `/bug-reproduce #NUMBER` first. This skill requires a confirmed browser
 reproduction before fix work can begin."_
 
+## Quick Reference
+
+| Phase | What it does | Exit condition |
+|-------|-------------|----------------|
+| **4 — Fix (TDD)** | Root cause analysis → fix plan → user approval → red test → green fix | User explicitly approves plan; test passes |
+| **5 — Verify** | Clean environment, browser re-reproduction, test suite | All pass + bug gone in browser |
+| **6 — PR** | Open draft PR with description and before/after screenshots | PR URL presented to user |
+
+## Red Flags — Stop and Re-read the Phase
+
+| If you're thinking this... | Reality |
+|---|---|
+| "The user said 'sounds good' earlier — that counts as approval" | Re-read their last message. Did they explicitly approve *this* plan? Prior approval of anything else does not count. |
+| "The fix is one line — a formal plan is overkill" | Plan approval catches misdiagnosis, not complexity. One-line fixes are misdiagnosed just as often as large ones. |
+| "I'll write the test after the fix — I already know what it should test" | Test-after verifies "does the code do what I wrote?" Test-first verifies "does the code do what is *correct*?" Only one catches the wrong fix. |
+| "I need to read source files to understand the area before checking the report" | Read the artifacts first. Source reading before context is how you import the reproduction-phase bias into the fix phase. |
+| "Silence / a question from the user means I can proceed" | Ambiguous or missing responses are not approval. Present the plan again and wait. |
+
 ## Phase 4: Fix (TDD)
 
 **Before doing anything in this phase**, verify:

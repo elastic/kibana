@@ -16,6 +16,25 @@ obvious after code analysis. Phase 0 analysis tells you where to look. Phase 3 b
 reproduction tells you what is actually broken. These are not the same thing. Skipping
 any phase is a protocol violation regardless of how clear the root cause appears.
 
+## Quick Reference
+
+| Phase | What it does | Exit condition |
+|-------|-------------|----------------|
+| **0 — Analyze** | Fetch ticket, start server in background, research similar issues | `analysis.json` written, server booting |
+| **1 — Start Services** | Wait for server ready; restart with feature flags if needed | `localhost:5620` returns `available` |
+| **2 — Prepare** | Create roles, users, data via API; walk through feature state | All prerequisites verified |
+| **3 — Reproduce** | Browser reproduction, diagnostics, report | User reads and replies to report |
+
+## Red Flags — Stop and Re-read the Phase
+
+| If you're thinking this... | Reality |
+|---|---|
+| "Root cause is obvious from code — Phase 3 is a formality" | Confidence before reproduction is a red flag, not a green light. Obvious-looking bugs are the most commonly misdiagnosed. |
+| "I called the API and confirmed the bug — that's reproduction" | The UI and API hit different code paths. An API shortcut can mask the real defect entirely. |
+| "I'll write `user_acknowledged: yes` now and confirm with the user after" | That field records a real user reply. Writing it before the reply is a protocol violation — treat it as `pending`. |
+| "Prerequisites look complex — I'll skip them and try to reproduce directly" | A skipped or wrong prerequisite silently prevents reproduction or reproduces the wrong state. Ask the user instead of guessing. |
+| "I've read the source code thoroughly — I know what's broken" | Source code reading is not reproduction. Phase 3 is required regardless. |
+
 ## Phase 0: Analyze
 
 Start the Scout server in the background immediately — it takes 5+ minutes to boot and
