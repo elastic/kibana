@@ -318,34 +318,6 @@ grep -rl '{sourcePath}' . --include="tsconfig.json" | head -5
 ```
 Remove any stale references found.
 
----
-
-## Phase 5 — Verify
-
-Tell the engineer to run:
-
-```bash
-# Re-bootstrap so yarn workspaces and kbn-ts-projects pick up the rename
-yarn kbn bootstrap
-
-# Regenerate moon.yml for the new package (auto-derived from kibana.jsonc + package.json)
-node scripts/regenerate_moon_projects.js --update --filter {packageName}
-
-# Type-check workspace package + unit tests (or run both at once with: node scripts/check.js)
-node scripts/type_check --project src/platform/kbn-ui/{folderName}/tsconfig.json
-node scripts/jest --testPathPattern="src/platform/kbn-ui/{folderName}"
-
-# Type-check packaging scaffold — standalone tsconfig outside Kibana's project graph;
-# not covered by scripts/check.js and must always be run explicitly
-node_modules/.bin/tsc --project src/platform/kbn-ui/{folderName}/packaging/tsconfig.json --noEmit
-
-# Full distribution build
-bash src/platform/kbn-ui/{folderName}/packaging/scripts/build.sh
-
-# Smoke-test the example app (requires the build above to have run first)
-cd src/platform/kbn-ui/{folderName}/packaging/example && ./start.sh
-```
-
 Remind the engineer:
 - **Review `packaging/react/types.ts`** — EUI/complex type simplifications need manual verification
 - **Review generated service stubs** — confirm no-op defaults are safe for the consumer context
