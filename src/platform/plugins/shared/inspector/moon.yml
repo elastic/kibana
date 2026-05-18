@@ -30,6 +30,7 @@ dependsOn:
   - '@kbn/code-editor'
   - '@kbn/core-lifecycle-browser'
   - '@kbn/presentation-util'
+  - '@kbn/shared-ux-utility'
 tags:
   - plugin
   - prod

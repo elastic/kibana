@@ -5,16 +5,21 @@
  * 2.0.
  */
 
-import { esql } from '@elastic/esql';
+import { esql, type ComposerQueryTagHole, type ComposerSortShorthand } from '@elastic/esql';
+import type { ESQLAstExpression } from '@elastic/esql/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import { type CommonSearchOptions } from './query_utils';
+
+export type LatestSourceWhereCondition = ESQLAstExpression & ComposerQueryTagHole;
 
 interface RunLatestSourceEsqlQueryArgs {
   esClient: ElasticsearchClient;
   space: string;
   options: CommonSearchOptions;
   index: string;
+  where?: LatestSourceWhereCondition;
+  sort?: ComposerSortShorthand[];
   groupBy: string;
 }
 
@@ -23,18 +28,22 @@ export const runLatestSourceEsqlQuery = async <T>({
   space,
   options,
   index,
+  where,
+  sort,
   groupBy,
 }: RunLatestSourceEsqlQueryArgs): Promise<{ hits: T[] }> => {
   let query = esql.from([index], ['_id', '_source']).where`\`kibana.space_ids\` == ${space}`;
 
   if (options.from !== undefined) {
-    const fromIso = new Date(options.from).toISOString();
-    query = query.where`@timestamp >= TO_DATETIME(${fromIso})`;
+    query = query.where`@timestamp >= TO_DATETIME(${esql.str(options.from)})`;
   }
 
   if (options.to !== undefined) {
-    const toIso = new Date(options.to).toISOString();
-    query = query.where`@timestamp <= TO_DATETIME(${toIso})`;
+    query = query.where`@timestamp <= TO_DATETIME(${esql.str(options.to)})`;
+  }
+
+  if (where) {
+    query = query.where`${where}`;
   }
 
   // pick the latest events by group
@@ -44,6 +53,10 @@ export const runLatestSourceEsqlQuery = async <T>({
   // use _id as a tiebreak in case multiple events share the same timestamp
   query = query.pipe`INLINE STATS tiebreaker_id = MAX(_id) BY ${esql.col(groupBy)}`
     .where`_id == tiebreaker_id`;
+
+  if (sort?.length) {
+    query = query.sort(sort[0], ...sort.slice(1));
+  }
 
   query = query.keep('_source');
 
