@@ -8,20 +8,8 @@
  */
 
 import { clientMock } from './client.mock';
-import { serviceContractMock } from './service_contract.mock';
-
-const createSetupContract = () => clientMock();
-const createStartContract = () => clientMock();
-
-const createMock = () => {
-  const mocked = serviceContractMock();
-  mocked.setup.mockReturnValue(createSetupContract());
-  mocked.start.mockReturnValue(createStartContract());
-  return mocked;
-};
 
 export const userStorageServiceMock = {
-  create: createMock,
-  createSetupContract,
-  createStartContract,
+  createSetupContract: () => clientMock(),
+  createStartContract: () => clientMock(),
 };
