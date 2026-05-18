@@ -7,76 +7,28 @@
 
 import type { StoryObj, Meta } from '@storybook/react';
 import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
-import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
-import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
-import { APMServiceContext } from '../../../../context/apm_service/apm_service_context';
 import { AnalyzeDataButton } from './analyze_data_button';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
-import type { ApmPluginContextValue } from '../../../../context/apm_plugin/apm_plugin_context';
-
-interface Args {
-  agentName: string;
-  canShowDashboard: boolean;
-  environment?: string;
-  serviceName: string;
-}
 
 export default {
   title: 'routing/templates/ApmServiceTemplate/AnalyzeDataButton',
   component: AnalyzeDataButton,
-  decorators: [
-    (StoryComponent, { args }) => {
-      const { agentName, canShowDashboard, environment, serviceName } = args as unknown as Args;
-
-      return (
-        <MemoryRouter
-          initialEntries={[
-            `/services/${serviceName}/overview?rangeFrom=now-15m&rangeTo=now&environment=${
-              environment ?? ENVIRONMENT_ALL.value
-            }&kuery=`,
-          ]}
-        >
-          <MockApmPluginContextWrapper
-            value={
-              {
-                core: {
-                  application: {
-                    capabilities: { dashboard_v2: { show: canShowDashboard } },
-                  },
-                  http: { basePath: { get: () => '' } },
-                },
-              } as unknown as ApmPluginContextValue
-            }
-          >
-            <APMServiceContext.Provider
-              value={{
-                agentName,
-                transactionTypeStatus: FETCH_STATUS.SUCCESS,
-                transactionTypes: [],
-                serviceName,
-                fallbackToTransactions: false,
-                serviceAgentStatus: FETCH_STATUS.SUCCESS,
-              }}
-            >
-              <StoryComponent />
-            </APMServiceContext.Provider>
-          </MockApmPluginContextWrapper>
-        </MemoryRouter>
-      );
+  parameters: {
+    routePath:
+      '/services/testServiceName/overview?rangeFrom=now-15m&rangeTo=now&environment=testEnvironment&kuery=',
+    serviceContextValue: {
+      agentName: 'iOS/swift',
+      serviceName: 'testServiceName',
+      transactionTypeStatus: FETCH_STATUS.SUCCESS,
+      transactionTypes: [],
+      fallbackToTransactions: false,
+      serviceAgentStatus: FETCH_STATUS.SUCCESS,
     },
-  ],
+  },
 } as Meta;
 
-export const Example: StoryObj<Args> = {
+export const Example: StoryObj = {
   render: () => {
     return <AnalyzeDataButton />;
-  },
-
-  args: {
-    agentName: 'iOS/swift',
-    canShowDashboard: true,
-    environment: 'testEnvironment',
-    serviceName: 'testServiceName',
   },
 };

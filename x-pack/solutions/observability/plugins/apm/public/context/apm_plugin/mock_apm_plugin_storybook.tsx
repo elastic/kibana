@@ -82,13 +82,14 @@ const mockPlugin = {
   },
 };
 
-const mockCore = {
+export const mockCore = {
   application: {
     capabilities: {
       apm: {},
       ml: {},
       slo: { read: true },
       savedObjectsManagement: {},
+      dashboard_v2: { show: true },
     },
     currentAppId$: new Observable(),
     getUrlForApp: (appId: string) => '',
@@ -106,6 +107,7 @@ const mockCore = {
     links: {
       apm: {},
       observability: { guide: '' },
+      security: { apiKeyServiceSettings: '' },
     },
   },
   http: {
@@ -157,7 +159,7 @@ const mockCore = {
 };
 
 /** Satisfies `useKibana` consumers (e.g. service map) that read `services.telemetry`. */
-const storybookTelemetry: ITelemetryClient = {
+export const storybookTelemetry: ITelemetryClient = {
   reportSearchQuerySubmitted: () => {},
   reportSloOverviewFlyoutViewed: () => {},
   reportSloOverviewFlyoutSearchQueried: () => {},
@@ -172,7 +174,7 @@ const mockUnifiedSearchBar = {
   },
 };
 
-const mockApmPluginContext = {
+export const mockApmPluginContext = {
   core: mockCore,
   plugins: mockPlugin,
   unifiedSearch: mockUnifiedSearchBar,
@@ -204,6 +206,18 @@ export function MockApmPluginStorybook({
   const KibanaReactContext = createKibanaReactContext(
     merge({}, contextMock.core, {
       telemetry: storybookTelemetry,
+      securityService: {
+        authc: {
+          getCurrentUser: async () => ({
+            username: 'storybook_user',
+            roles: ['superuser'],
+            enabled: true,
+            authentication_realm: { name: 'native', type: 'native' },
+            lookup_realm: { name: 'native', type: 'native' },
+            authentication_provider: { type: 'basic', name: 'basic' },
+          }),
+        },
+      },
       triggersActionsUi: {
         ruleTypeRegistry: { has: () => false, get: () => null, list: () => [] },
         actionTypeRegistry: { has: () => false, get: () => null, list: () => [] },
