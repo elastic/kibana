@@ -157,7 +157,7 @@ describe('RulesClient', () => {
         expect.objectContaining({
           metadata: expect.objectContaining({ name: 'rule-1' }),
           enabled: true,
-          createdBy: 'elastic',
+          createdBy: 'elastic_profile_uid',
         }),
         { id: 'rule-id-1', overwrite: false }
       );
@@ -176,8 +176,8 @@ describe('RulesClient', () => {
           id: 'rule-id-1',
           metadata: expect.objectContaining({ name: 'rule-1' }),
           enabled: true,
-          createdBy: 'elastic',
-          updatedBy: 'elastic',
+          createdBy: 'elastic_profile_uid',
+          updatedBy: 'elastic_profile_uid',
           createdAt: '2025-01-01T00:00:00.000Z',
           updatedAt: '2025-01-01T00:00:00.000Z',
         })
@@ -533,9 +533,9 @@ describe('RulesClient', () => {
           expect.objectContaining({
             metadata: expect.objectContaining({ name: 'rule-1' }),
             enabled: true,
-            createdBy: 'elastic',
+            createdBy: 'elastic_profile_uid',
             createdAt: '2025-01-01T00:00:00.000Z',
-            updatedBy: 'elastic',
+            updatedBy: 'elastic_profile_uid',
             updatedAt: '2025-01-01T00:00:00.000Z',
           }),
           { id: 'rule-id-1', overwrite: false }
@@ -630,7 +630,7 @@ describe('RulesClient', () => {
             enabled: false,
             createdBy: 'previous-creator',
             createdAt: '2024-06-01T00:00:00.000Z',
-            updatedBy: 'elastic',
+            updatedBy: 'elastic_profile_uid',
             updatedAt: '2025-01-01T00:00:00.000Z',
           }),
           { version: 'WzEsMV0=', mergeAttributes: false }
