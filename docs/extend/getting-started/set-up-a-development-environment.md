@@ -80,6 +80,52 @@ yarn start --no-base-path
 
 You can also set it explicitly via [`server.basePath`](/reference/configuration-reference/general-settings.md#server-basePath) and [`server.rewriteBasePath`](/reference/configuration-reference/general-settings.md#server-rewriteBasePath) in `config/kibana.dev.yml`.
 
+### Stateful startup options
+
+The following combinations cover the most common local development scenarios.
+
+**Default** — both SAML and basic login are supported; SAML is the default:
+
+```sh
+yarn es snapshot
+yarn start
+```
+
+**Without SAML login** — only basic login:
+
+```sh
+yarn es snapshot
+yarn start --mockIdpPlugin.enabled=false
+```
+
+**Basic license** — only basic login is supported:
+
+```sh
+yarn es snapshot --license basic
+yarn start --mockIdpPlugin.enabled=false
+```
+
+**No base path** — basic license, basic login, no random dev basepath:
+
+```sh
+yarn es snapshot --license basic
+yarn start --mockIdpPlugin.enabled=false --no-base-path
+```
+
+**Custom base path** — both SAML and basic login are supported; SAML is the default.
+
+```sh
+yarn es snapshot --kibanaUrl http://localhost:5601/your_path
+yarn start --server.basePath=/your_path
+```
+
+**No base path with SAML** — both SAML and basic login are supported; SAML is the default:
+
+```sh
+yarn es snapshot --kibanaUrl http://localhost:5601
+yarn start --no-base-path
+```
+
 ## Elasticians: Run in serverless mode
 
 To develop against serverless projects, you need to start both Elasticsearch and Kibana in serverless mode with matching project types.

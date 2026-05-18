@@ -100,7 +100,12 @@ describe('useContextOverrideData', () => {
       name: 'test-workflow',
       enabled: true,
       consts: { key: 'value' },
-      inputs: { type: 'object' },
+      triggers: [
+        {
+          type: 'manual',
+          inputs: { type: 'object', properties: { name: { type: 'string' } } },
+        },
+      ],
     };
 
     mockSelectWorkflowGraph.mockReturnValue(mockGraph);
@@ -121,7 +126,7 @@ describe('useContextOverrideData', () => {
         enabled: true,
         spaceId: 'default',
       },
-      inputsDefinition: { type: 'object' },
+      inputsDefinition: { properties: { name: { type: 'string' } }, type: 'object' },
     });
     expect(contextData).toEqual({ context: 'data' });
   });
@@ -141,7 +146,15 @@ describe('useContextOverrideData', () => {
     mockSelectWorkflowGraph.mockReturnValue(mockGraph);
     mockSelectWorkflowDefinition.mockReturnValue(mockDefinition);
     mockSelectYamlString.mockReturnValue(
-      'inputs:\n  type: object\n  properties:\n    name:\n      type: string'
+      `
+triggers:
+  - type: manual
+    inputs:
+      type: object
+      properties:
+        name:
+          type: string
+`.trim()
     );
     mockUseSpaceId.mockReturnValue('default');
     mockBuildContextOverride.mockReturnValue({ context: 'yaml-data' });
@@ -152,9 +165,7 @@ describe('useContextOverrideData', () => {
     expect(mockBuildContextOverride).toHaveBeenCalledWith(
       mockStepSubGraph,
       expect.objectContaining({
-        inputsDefinition: expect.objectContaining({
-          type: 'object',
-        }),
+        inputsDefinition: { properties: { name: { type: 'string' } }, type: 'object' },
       })
     );
   });

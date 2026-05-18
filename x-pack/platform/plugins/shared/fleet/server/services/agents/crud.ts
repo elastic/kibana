@@ -761,6 +761,7 @@ export async function updateAgent(
       index: AGENTS_INDEX,
       doc: agentSOAttributesToFleetServerAgentDoc(data),
       refresh: 'wait_for',
+      retry_on_conflict: 5,
     })
   );
 }

@@ -45,6 +45,7 @@ export const getConfigurationForMetric = (
     secondaryMetricAccessor: secondaryColumn?.columnId,
     breakdownByAccessor: bucket?.columnId,
     palette,
+    applyColorTo: model.background_color_rules || model.background_color ? 'background' : undefined,
     collapseFn: primaryMetricWithCollapseFn.collapseFn ?? secondaryMetricWithCollapseFn?.collapseFn,
   };
 };

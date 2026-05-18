@@ -31,6 +31,7 @@ import {
 import { Action as BaseAction, EditAction, DeleteAction, InspectAction } from './action';
 import { useColumns, useSorting, useSelection } from './hooks';
 import { TableSkeleton } from './skeleton/table_skeleton';
+import { WIDE_VIEWPORT_NAME_BREAKPOINT_PX } from './breakpoints';
 
 /**
  * Props for ContentListTable component.
@@ -135,6 +136,147 @@ const cssStickyCellRowStateSync = (euiTheme: EuiThemeComputed) => css`
 `;
 
 /**
+ * Render a trailing spacer column purely in CSS, via a `::after`
+ * pseudo-cell on every `<tr>`, activated only at viewports ≥
+ * {@link WIDE_VIEWPORT_NAME_BREAKPOINT_PX}.
+ *
+ * Browsers ignore `max-width` on table cells (per the
+ * [CSS Tables spec](https://drafts.csswg.org/css-tables/#computing-the-table-width)),
+ * so the only way to keep populated columns at their preferred widths on a
+ * wide page is to give the slack to a column that wants it. Without a
+ * trailing absorber, that role falls to whichever column has no explicit
+ * `width` (typically `Column.Name`), which then stretches to fill the table.
+ *
+ * Setting `display: table-cell` on a `tr::after` is the spec-defined way to
+ * inject an anonymous, unsized table cell into the layout algorithm without
+ * adding any markup. Because every preset ships with an explicit `width`,
+ * the pseudo-cell is the only column without one, so the browser hands it
+ * all the leftover horizontal space — populated columns sit left-aligned at
+ * their preferred widths and the trailing whitespace lives after the last
+ * populated column.
+ *
+ * The rule is scoped to the wide-viewport media query so the pseudo-cell
+ * does not appear on narrower viewports where the spacer is not needed.
+ *
+ * Why a pseudo-cell rather than a real `<td>` column:
+ * - **No DOM impact** — the rendered table has exactly the columns the
+ *   consumer declared.
+ * - **No accessibility impact** — pseudo-elements aren't in the
+ *   accessibility tree, so screen readers report the correct column count
+ *   and don't announce a phantom "blank cell" at the end of every row.
+ * - **No clipboard impact** — `content: ''` isn't selectable, so copying
+ *   rows into a spreadsheet doesn't add a trailing tab.
+ *
+ * `border-block` mirrors the `border-vertical: euiTheme.border.thin`
+ * declaration that EUI applies to every real `<th>` / `<td>` (see
+ * `table_row_cell.styles.js` and `table_cells_shared.styles.js` in
+ * `@elastic/eui`). Without it, the row separator would stop at the last
+ * populated cell and leave the trailing whitespace visually un-ruled.
+ *
+ * @see {@link DEFAULT_NAME_WIDTH} in `name_builder.tsx` for why
+ * `Column.Name` ships with an explicit `width`.
+ */
+const cssTrailingSpacer = (euiTheme: EuiThemeComputed) => css`
+  @media (min-width: ${WIDE_VIEWPORT_NAME_BREAKPOINT_PX}px) {
+    thead tr::after,
+    tbody tr::after {
+      content: '';
+      display: table-cell;
+      border-block: ${euiTheme.border.thin};
+    }
+  }
+`;
+
+/**
+ * Preferred {@link DEFAULT_NAME_WIDTH} bump applied at viewports
+ * ≥ {@link WIDE_VIEWPORT_NAME_BREAKPOINT_PX}.
+ *
+ * `90em` (~1440px) keeps the column inside a comfortable reading-line
+ * range while letting longer titles render without truncation. The
+ * trailing pseudo-cell from {@link cssTrailingSpacer} still absorbs
+ * everything beyond this width, so even on truly massive viewports the
+ * title column stops growing here.
+ */
+const WIDE_VIEWPORT_NAME_WIDTH = '90em';
+
+/**
+ * Widen `Column.Name` on viewports ≥ {@link WIDE_VIEWPORT_NAME_BREAKPOINT_PX}.
+ *
+ * EUI applies `width` / `max-width` as inline styles on every `<th>` and
+ * `<td>` (via `resolveWidthPropsAsStyle` in `@elastic/eui`), so the only
+ * way to override them from CSS is with `!important`. That trade is worth
+ * it here because the alternative — driving the bump from JS via
+ * `matchMedia` + `useState` + `useEffect` and either swapping the column's
+ * `width` or appending a layout-only column — adds either re-render churn
+ * on resize or a phantom DOM cell that screen readers see as a real column
+ * (no amount of imperative `aria-hidden`/`role="presentation"` hides it
+ * cleanly from the table grid).
+ *
+ * The trailing pseudo-cell from {@link cssTrailingSpacer} still absorbs
+ * leftover horizontal slack at every viewport size, so this rule only
+ * shifts the `Column.Name` / spacer ratio on wide pages — populated
+ * sibling columns (UpdatedAt, CreatedBy, Actions, etc.) keep their
+ * defaults.
+ *
+ * Selectors:
+ * - **Body** — `td[data-test-subj='content-list-table-column-name']`. The
+ *   column object's `data-test-subj` is forwarded by `EuiBasicTable`'s
+ *   `renderItemCell` via the spread `rest` props.
+ * - **Header** — `th[data-test-subj^='tableHeaderCell_title_']`. EUI's
+ *   `renderTableHead` always emits
+ *   `data-test-subj="tableHeaderCell_${field}_${index}"`, and
+ *   `Column.Name`'s `field` is `'title'`. The `^=` prefix match keeps the
+ *   selector stable regardless of the column index.
+ *
+ * Applies regardless of consumer-supplied `width` / `maxWidth` overrides
+ * — the wide-viewport bump is a cross-cutting layout decision rather than
+ * a per-instance default. Consumers who need the column to stay locked at
+ * their value can scope a more-specific CSS rule against the rendered
+ * table.
+ */
+const cssWideViewportNameWidth = css`
+  @media (min-width: ${WIDE_VIEWPORT_NAME_BREAKPOINT_PX}px) {
+    th[data-test-subj^='tableHeaderCell_title_'],
+    td[data-test-subj='content-list-table-column-name'] {
+      width: ${WIDE_VIEWPORT_NAME_WIDTH} !important;
+      max-width: ${WIDE_VIEWPORT_NAME_WIDTH} !important;
+    }
+  }
+`;
+
+/**
+ * Keep `Column.Actions` row icons (including the EUI-provided "All actions"
+ * 3-dot overflow trigger) on a single line at every viewport width.
+ *
+ * EUI's `euiTableCellContent` ships `flex-wrap: wrap` for action cells on
+ * desktop (see `_table_cell_content.styles.js` in `@elastic/eui`). With the
+ * wrap enabled, the cell's `max-content` intrinsic width collapses to the
+ * widest single icon (~28px) instead of the full inline row, so the auto
+ * table-layout algorithm happily shrinks the actions column whenever the
+ * container squeezes — which lands the overflow trigger on a second line
+ * underneath the primary icons.
+ *
+ * Pinning the cell's flex container to `flex-wrap: nowrap` restores the
+ * unwrapped intrinsic width (`36N + 12` at the default theme), so the
+ * column's `min-width: 'max-content'` floor (set in
+ * {@link buildActionsColumn}) actually holds at the icon-row width and the
+ * browser stops shrinking the column past that point. When the rest of the
+ * row genuinely cannot fit, `scrollableInline` takes over and the icons
+ * stay inline inside the horizontal scroll instead of wrapping vertically.
+ *
+ * Scoped via the column's `data-test-subj` rather than EUI's
+ * `.euiTableCellContent--hasActions` class so the rule is anchored to our
+ * column identity (stable across EUI internal CSS refactors) and limited
+ * to the Content List actions column — leaving any other action columns
+ * inside Kibana untouched.
+ */
+const cssActionsCellNoWrap = css`
+  td[data-test-subj='content-list-table-column-actions'] .euiTableCellContent {
+    flex-wrap: nowrap;
+  }
+`;
+
+/**
  * ContentListTable - Table renderer for content listings.
  *
  * Integrates with EUI's EuiBasicTable and ContentListProvider for state management.
@@ -157,7 +299,7 @@ const cssStickyCellRowStateSync = (euiTheme: EuiThemeComputed) => css`
  * const { Column, Action } = ContentListTable;
  *
  * <ContentListTable title="My Dashboards">
- *   <Column.Name width="40%" />
+ *   <Column.Name />
  *   <Column.Actions>
  *     <Action.Edit />
  *     <Action.Delete />
@@ -200,6 +342,17 @@ const ContentListTableComponent = ({
   const tableCss = useMemo(
     () => [
       cssStickyCellRowStateSync(euiTheme),
+      // Excess horizontal space is absorbed by `cssTrailingSpacer` so it lands
+      // after the last populated column rather than stretching `Column.Name`.
+      cssTrailingSpacer(euiTheme),
+      // On viewports ≥ 2560px (~4K), bump the Name column past its default
+      // 64em cap so users with wide displays see more of the title. The
+      // pseudo-cell still absorbs the rest of the slack.
+      cssWideViewportNameWidth,
+      // Keep the actions row icons + 3-dot overflow trigger inline at every
+      // viewport width. Without this, EUI's default `flex-wrap: wrap` on
+      // action cells lets the column collapse when the table squeezes.
+      cssActionsCellNoWrap,
       ...(supports.starred ? [cssFavoriteHoverWithinEuiTableRow(euiTheme)] : []),
     ],
     [euiTheme, supports.starred]

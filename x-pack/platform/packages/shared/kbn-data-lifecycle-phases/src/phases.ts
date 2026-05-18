@@ -6,6 +6,7 @@
  */
 
 import { useEuiTheme } from '@elastic/eui';
+import { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 
 /**
@@ -117,11 +118,20 @@ export type PhaseColorMap = Record<IlmPhase, string>;
 export const usePhaseColors = (): PhaseColorMap => {
   const { euiTheme } = useEuiTheme();
 
-  return {
-    hot: euiTheme.colors.severity.risk,
-    warm: euiTheme.colors.severity.warning,
-    cold: euiTheme.colors.severity.neutral,
-    frozen: euiTheme.colors.vis.euiColorVis3,
-    delete: euiTheme.colors.backgroundBaseSubdued,
-  };
+  return useMemo(
+    () => ({
+      hot: euiTheme.colors.severity.risk,
+      warm: euiTheme.colors.severity.warning,
+      cold: euiTheme.colors.severity.neutral,
+      frozen: euiTheme.colors.vis.euiColorVis3,
+      delete: euiTheme.colors.backgroundBaseSubdued,
+    }),
+    [
+      euiTheme.colors.severity.risk,
+      euiTheme.colors.severity.warning,
+      euiTheme.colors.severity.neutral,
+      euiTheme.colors.vis.euiColorVis3,
+      euiTheme.colors.backgroundBaseSubdued,
+    ]
+  );
 };

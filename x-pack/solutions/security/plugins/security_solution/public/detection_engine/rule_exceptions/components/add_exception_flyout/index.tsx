@@ -42,6 +42,7 @@ import type { Moment } from 'moment';
 import type { Status } from '../../../../../common/api/detection_engine';
 import * as i18n from './translations';
 import { ExceptionItemComments } from '../item_comments';
+import { useKibana } from '../../../../common/lib/kibana';
 import {
   defaultEndpointExceptionItems,
   getPrepopulatedRuleExceptionWithHighlightFields,
@@ -61,8 +62,10 @@ import { useCloseAlertsFromExceptions } from '../../logic/use_close_alerts';
 import { ruleTypesThatAllowLargeValueLists } from '../../utils/constants';
 import { useInvalidateFetchRuleByIdQuery } from '../../../rule_management/api/hooks/use_fetch_rule_by_id_query';
 import { ExceptionsExpireTime } from '../flyout_components/expire_time';
-import { CONFIRM_WARNING_MODAL_LABELS } from '../../../../management/common/translations';
-import { ArtifactConfirmModal } from '../../../../management/components/artifact_list_page/components/artifact_confirm_modal';
+import {
+  ArtifactConfirmModal,
+  CONFIRM_WARNING_MODAL_LABELS,
+} from '../../../../management/components/artifact_list_page/components/artifact_confirm_modal';
 import { ExceptionFlyoutFooter } from '../flyout_components/footer';
 import { ExceptionFlyoutHeader } from '../flyout_components/header';
 import * as headerI18n from '../flyout_components/header/translations';
@@ -114,6 +117,9 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   onCancel,
   onConfirm,
 }: AddExceptionFlyoutProps) {
+  const {
+    docLinks: { links },
+  } = useKibana().services;
   const { hasAlertsUpdate } = useAlertsPrivileges();
   const [showConfirmModal, setShowConfirmModal] = useState<boolean>(false);
   const { isLoading, indexPatterns, getExtendedFields } = useFetchIndexPatterns(rules);
@@ -503,22 +509,21 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   }, [listType]);
 
   const confirmModal = useMemo(() => {
-    const { title, body, confirmButton, cancelButton } = CONFIRM_WARNING_MODAL_LABELS(
-      listType === ExceptionListTypeEnum.ENDPOINT ? ENDPOINT_EXCEPTION : RULE_EXCEPTION
+    const labels = CONFIRM_WARNING_MODAL_LABELS(
+      listType === ExceptionListTypeEnum.ENDPOINT ? ENDPOINT_EXCEPTION : RULE_EXCEPTION,
+      { hasWildcardWithWrongOperator: wildcardWarningExists },
+      links
     );
 
     return (
       <ArtifactConfirmModal
-        title={title}
-        body={body}
-        confirmButton={confirmButton}
-        cancelButton={cancelButton}
+        labels={labels}
         onSuccess={submitException}
         onCancel={() => setShowConfirmModal(false)}
         data-test-subj="artifactConfirmModal"
       />
     );
-  }, [listType, submitException]);
+  }, [links, listType, submitException, wildcardWarningExists]);
 
   return (
     <EuiFlyout
