@@ -2317,6 +2317,9 @@
       "verification_failed_at": {
         "type": "date"
       },
+      "verification_permissions": {
+        "type": "flattened"
+      },
       "verification_started_at": {
         "type": "date"
       },

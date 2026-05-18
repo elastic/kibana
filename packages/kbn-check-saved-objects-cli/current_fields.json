@@ -688,6 +688,7 @@
     "updated_at",
     "vars",
     "verification_failed_at",
+    "verification_permissions",
     "verification_started_at",
     "verification_status"
   ],
