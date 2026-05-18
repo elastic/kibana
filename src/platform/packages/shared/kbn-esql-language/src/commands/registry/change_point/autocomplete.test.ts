@@ -154,5 +154,13 @@ describe('CHANGE_POINT Autocomplete', () => {
         PIPE,
       ]);
     });
+
+    it('suggests fields after BY in full form (value ON field AS type, pvalue BY)', async () => {
+      const expected = [...getFieldNamesByType('any'), ...allScalarFunctionsForBy];
+      await changePointExpectSuggestions(
+        `from a | change_point value on field as changePointType, pValue by `,
+        expected
+      );
+    });
   });
 });
