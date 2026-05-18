@@ -7,14 +7,33 @@
 
 import type { MouseEventHandler, ReactNode } from 'react';
 import React, { memo, useCallback, useEffect, useRef } from 'react';
-import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import styled from 'styled-components';
 import { useConsoleStateDispatch } from '../../../hooks/state_selectors/use_console_state_dispatch';
 import { useWithInputTextEntered } from '../../../hooks/state_selectors/use_with_input_text_entered';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import { useDataTestSubj } from '../../../hooks/state_selectors/use_data_test_subj';
 
 const SCROLLING_PADDING = 20;
+
+const InputDisplayContainer = styled.div`
+  overflow: hidden !important;
+
+  .inputDisplay {
+    & > * {
+      flex-direction: row;
+      align-items: center;
+    }
+  }
+
+  // Styles for when the console's input has focus are defined in '<CommandInput>' component
+  .cursor {
+    display: inline-block;
+    width: 1px;
+    height: ${({ theme: { eui } }) => eui.euiLineHeight}em;
+    background-color: ${({ theme }) => theme.eui.euiTextSubduedColor};
+  }
+`;
 
 export interface InputDisplayProps {
   leftOfCursor: ReactNode;
@@ -25,25 +44,6 @@ export const InputDisplay = memo<InputDisplayProps>(({ leftOfCursor, rightOfCurs
   const getTestId = useTestIdGenerator(useDataTestSubj());
   const dispatch = useConsoleStateDispatch();
   const { leftOfCursorText, fullTextEntered } = useWithInputTextEntered();
-  const { euiTheme } = useEuiTheme();
-  const inputDisplayContainerStyles = css`
-    overflow: hidden !important;
-
-    .inputDisplay {
-      & > * {
-        flex-direction: row;
-        align-items: center;
-      }
-    }
-
-    // Styles for when the console's input has focus are defined in '<CommandInput>' component
-    .cursor {
-      display: inline-block;
-      width: 1px;
-      height: ${euiTheme.base * 1.5}px;
-      background-color: ${euiTheme.colors.subduedText};
-    }
-  `;
 
   const observer = useRef<IntersectionObserver | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -145,7 +145,7 @@ export const InputDisplay = memo<InputDisplayProps>(({ leftOfCursor, rightOfCurs
   }, [currentCursorPosition]);
 
   return (
-    <div css={inputDisplayContainerStyles} ref={containerRef}>
+    <InputDisplayContainer ref={containerRef}>
       <EuiFlexGroup
         responsive={false}
         alignItems="center"
@@ -167,7 +167,7 @@ export const InputDisplay = memo<InputDisplayProps>(({ leftOfCursor, rightOfCurs
           {rightOfCursor}
         </EuiFlexItem>
       </EuiFlexGroup>
-    </div>
+    </InputDisplayContainer>
   );
 });
 InputDisplay.displayName = 'InputDisplay';

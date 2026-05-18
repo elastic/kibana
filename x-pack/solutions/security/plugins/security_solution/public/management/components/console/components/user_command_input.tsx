@@ -7,11 +7,11 @@
 
 import React, { memo, useMemo } from 'react';
 import { EuiCode, EuiTextColor } from '@elastic/eui';
-import { css } from '@emotion/react';
+import styled from 'styled-components';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { useDataTestSubj } from '../hooks/state_selectors/use_data_test_subj';
 
-const euiCodeStyles = css`
+const StyledEuiCode = styled(EuiCode)`
   padding-left: 0;
 `;
 
@@ -28,13 +28,9 @@ export const UserCommandInput = memo<UserCommandInputProps>(({ input, isValid = 
   }, [input, isValid]);
 
   return (
-    <EuiCode
-      transparentBackground={true}
-      data-test-subj={getTestId('userCommandText')}
-      css={euiCodeStyles}
-    >
+    <StyledEuiCode transparentBackground={true} data-test-subj={getTestId('userCommandText')}>
       {displayInputValue}
-    </EuiCode>
+    </StyledEuiCode>
   );
 });
 UserCommandInput.displayName = 'UserCommandInput';

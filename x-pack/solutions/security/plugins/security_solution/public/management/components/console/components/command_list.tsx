@@ -6,6 +6,7 @@
  */
 
 import React, { memo, useMemo, useCallback } from 'react';
+import styled from 'styled-components';
 import {
   EuiBadge,
   EuiBasicTable,
@@ -19,9 +20,7 @@ import {
   EuiCallOut,
   EuiLink,
   EuiToolTip,
-  useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { sortBy } from 'lodash';
@@ -49,6 +48,45 @@ export const convertToTestId = (value: string): string => {
   return value.replace(/[^A-Za-z0-9]/g, '');
 };
 
+// @ts-expect-error TS2769
+const StyledEuiBasicTable = styled(EuiBasicTable)`
+  margin-top: ${({ theme: { eui } }) => eui.euiSizeS};
+  .euiTableHeaderCell {
+    .euiTableCellContent__text {
+      color: ${({ theme: { eui } }) => eui.euiTextColor};
+      font-size: ${({ theme: { eui } }) => eui.euiFontSize};
+      padding-bottom: ${({ theme: { eui } }) => eui.euiSizeS};
+      padding-left: ${({ theme: { eui } }) => eui.euiSizeS};
+    }
+  }
+`;
+
+const StyledEuiCallOut = styled(EuiCallOut)`
+  margin: ${({ theme: { eui } }) => eui.euiSize};
+  padding: ${({ theme: { eui } }) => eui.euiSize};
+  border-radius: ${({ theme: { eui } }) => eui.euiSizeXS};
+`;
+
+const StyledEuiFlexGroup = styled(EuiFlexGroup)`
+  padding-left: ${({ theme: { eui } }) => eui.euiSizeS};
+`;
+
+const StyledEuiFlexGrid = styled(EuiFlexGrid)`
+  @media only screen and (min-width: ${(props) => props.theme.eui.euiBreakpoints.l}) {
+    max-width: 75%;
+  }
+  @media only screen and (min-width: ${(props) => props.theme.eui.euiBreakpoints.xl}) {
+    max-width: 50%;
+  }
+`;
+
+const StyledEuiBadge = styled(EuiBadge)`
+  font-size: 10px !important;
+  span {
+    color: ${({ theme: { eui } }) => eui.euiShadowColor} !important;
+  }
+`;
+
 export interface CommandListProps {
   commands: CommandDefinition[];
   display?: 'default' | 'table';
@@ -58,44 +96,6 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
   const getTestId = useTestIdGenerator(useDataTestSubj('commandList'));
   const dispatch = useConsoleStateDispatch();
   const { docLinks } = useKibana().services;
-  const { euiTheme } = useEuiTheme();
-
-  const styledEuiBasicTableStyles = css`
-    margin-top: ${euiTheme.size.s};
-    .euiTableHeaderCell {
-      .euiTableCellContent__text {
-        color: ${euiTheme.colors.textParagraph};
-        padding-bottom: ${euiTheme.size.s};
-        padding-left: ${euiTheme.size.s};
-      }
-    }
-  `;
-
-  const styledEuiCallOutStyles = css`
-    margin: ${euiTheme.size.base};
-    padding: ${euiTheme.size.base};
-    border-radius: ${euiTheme.size.xs};
-  `;
-
-  const styledEuiFlexGroupStyles = css`
-    padding-left: ${euiTheme.size.s};
-  `;
-
-  const styledEuiFlexGridStyles = css`
-    @media only screen and (min-width: ${euiTheme.breakpoint.l}px) {
-      max-width: 75%;
-    }
-    @media only screen and (min-width: ${euiTheme.breakpoint.xl}px) {
-      max-width: 50%;
-    }
-  `;
-
-  const styledEuiBadgeStyles = css`
-    font-size: 10px !important;
-    span {
-      color: ${euiTheme.colors.shadow} !important;
-    }
-  `;
 
   const footerMessage = useMemo(() => {
     return (
@@ -104,11 +104,11 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
         listItems={[
           {
             title: (
-              <EuiBadge css={styledEuiBadgeStyles}>
+              <StyledEuiBadge>
                 <ConsoleCodeBlock inline bold>
                   {COMMON_ARGS.find((current) => current.name === '--help')?.name}
                 </ConsoleCodeBlock>
-              </EuiBadge>
+              </StyledEuiBadge>
             ),
             description: (
               <EuiText color="subdued" size="xs">
@@ -122,7 +122,7 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
         ]}
       />
     );
-  }, [styledEuiBadgeStyles]);
+  }, []);
 
   const updateInputText = useCallback(
     (text: string) => () => {
@@ -227,8 +227,7 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
           render: (command: CommandDefinition) => {
             const commandNameWithArgs = getCommandNameWithArgs(command);
             return (
-              <EuiFlexGroup
-                css={styledEuiFlexGroupStyles}
+              <StyledEuiFlexGroup
                 alignItems="center"
                 data-test-subj={getTestId(`${groupTestIdSuffix}-${command.name}`)}
               >
@@ -283,13 +282,13 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
                       </EuiToolTip>
                     </EuiFlexItem>
                   )}
-              </EuiFlexGroup>
+              </StyledEuiFlexGroup>
             );
           },
         },
       ];
     },
-    [getTestId, styledEuiFlexGroupStyles, updateInputText]
+    [getTestId, updateInputText]
   );
 
   const getFilteredCommands = useCallback(
@@ -335,9 +334,7 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
     ];
 
     const callout = (
-      <EuiCallOut
-        announceOnMount
-        css={styledEuiCallOutStyles}
+      <StyledEuiCallOut
         title={
           <FormattedMessage
             id="xpack.securitySolution.console.commandList.callout.title"
@@ -353,14 +350,13 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
             </li>
           ))}
         </ul>
-      </EuiCallOut>
+      </StyledEuiCallOut>
     );
 
     return (
       <div data-test-subj={getTestId()}>
         {commandsByGroups.map((commandsByGroup, i) => (
-          <EuiBasicTable<Record<string, { name: string; about: React.ReactNode | string }>>
-            css={styledEuiBasicTableStyles}
+          <StyledEuiBasicTable
             data-test-subj={getTestId(
               convertToTestId(commandsByGroup[0].helpGroupLabel ?? otherCommandsGroupLabel)
             )}
@@ -386,8 +382,7 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
         }
 
         return (
-          <EuiFlexGrid
-            css={styledEuiFlexGridStyles}
+          <StyledEuiFlexGrid
             columns={3}
             responsive={false}
             gutterSize="l"
@@ -404,11 +399,11 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
                       {
                         title: (
                           <EuiToolTip content={commandNameWithArgs}>
-                            <EuiBadge css={styledEuiBadgeStyles}>
+                            <StyledEuiBadge>
                               <ConsoleCodeBlock inline bold>
                                 {commandNameWithArgs}
                               </ConsoleCodeBlock>
-                            </EuiBadge>
+                            </StyledEuiBadge>
                           </EuiToolTip>
                         ),
                         description: (
@@ -423,7 +418,7 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
                 </EuiFlexItem>
               );
             })}
-          </EuiFlexGrid>
+          </StyledEuiFlexGrid>
         );
       })}
       <EuiSpacer size="xl" />

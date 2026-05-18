@@ -6,10 +6,15 @@
  */
 
 import React, { memo } from 'react';
+import styled from 'styled-components';
 import { EuiLink, EuiEmptyPrompt } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { ManagementEmptyStateWrapper } from '../../management_empty_state_wrapper';
+
+const EmptyPrompt = styled(EuiEmptyPrompt)`
+  max-width: 100%;
+`;
 
 export const ActionsLogEmptyState = memo(
   ({ 'data-test-subj': dataTestSubj }: { 'data-test-subj'?: string }) => {
@@ -17,8 +22,7 @@ export const ActionsLogEmptyState = memo(
 
     return (
       <ManagementEmptyStateWrapper data-test-subj={dataTestSubj}>
-        <EuiEmptyPrompt
-          css={{ maxWidth: '100%' }}
+        <EmptyPrompt
           iconType="listBullet"
           title={
             <h2>

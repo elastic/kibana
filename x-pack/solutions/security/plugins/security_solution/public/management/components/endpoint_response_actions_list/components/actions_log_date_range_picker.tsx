@@ -6,9 +6,9 @@
  */
 
 import React, { memo, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSuperDatePicker, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSuperDatePicker } from '@elastic/eui';
 import type { IUnifiedSearchPluginServices } from '@kbn/unified-search-plugin/public';
-import { css } from '@emotion/react';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import type { EuiSuperDatePickerRecentRange } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type {
@@ -28,6 +28,10 @@ export interface DateRangePickerValues {
   recentlyUsedDateRanges: EuiSuperDatePickerRecentRange[];
 }
 
+const DatePickerWrapper = euiStyled.div`
+  padding-bottom: ${(props) => `${props.theme.eui.euiSizeL}`};
+`;
+
 export const ActionLogDateRangePicker = memo(
   ({
     dateRangePickerState,
@@ -45,10 +49,6 @@ export const ActionLogDateRangePicker = memo(
     'data-test-subj'?: string;
   }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
-    const { euiTheme } = useEuiTheme();
-    const datePickerWrapperStyles = css`
-      padding-bottom: ${euiTheme.size.l};
-    `;
     const kibana = useKibana<IUnifiedSearchPluginServices>();
     const { uiSettings } = kibana.services;
     const [commonlyUsedRanges] = useState(() => {
@@ -66,7 +66,7 @@ export const ActionLogDateRangePicker = memo(
     });
 
     return (
-      <div css={datePickerWrapperStyles} data-test-subj={getTestId('super-date-picker')}>
+      <DatePickerWrapper data-test-subj={getTestId('super-date-picker')}>
         <EuiFlexGroup alignItems="center" direction="row" responsive={false} gutterSize="s">
           <EuiFlexItem>
             <EuiSuperDatePicker
@@ -87,7 +87,7 @@ export const ActionLogDateRangePicker = memo(
             />
           </EuiFlexItem>
         </EuiFlexGroup>
-      </div>
+      </DatePickerWrapper>
     );
   }
 );

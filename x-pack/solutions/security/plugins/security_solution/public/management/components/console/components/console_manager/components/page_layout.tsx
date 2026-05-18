@@ -16,12 +16,12 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
+import styled from 'styled-components';
 import classnames from 'classnames';
 import type { EuiPageHeaderProps } from '@elastic/eui/src/components/page/page_header/page_header';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 
-const euiPanelStyles = css`
+const EuiPanelStyled = styled(EuiPanel)`
   &.full-height,
   .full-height {
     height: 100%;
@@ -106,13 +106,12 @@ export const PageLayout = memo<PageLayoutProps>(
     }, [getTestId, headerBackComponent, hideHeader, pageTitle]);
 
     return (
-      <EuiPanel
+      <EuiPanelStyled
         hasShadow={false}
         paddingSize={paddingSize}
         data-test-subj={dataTestSubj}
         className="full-height"
         color="transparent"
-        css={euiPanelStyles}
       >
         <EuiFlexGroup
           direction="column"
@@ -148,7 +147,7 @@ export const PageLayout = memo<PageLayoutProps>(
             </div>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiPanel>
+      </EuiPanelStyled>
     );
   }
 );

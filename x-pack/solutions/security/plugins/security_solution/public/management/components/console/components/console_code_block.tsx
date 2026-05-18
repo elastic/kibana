@@ -8,8 +8,12 @@
 import type { ReactNode } from 'react';
 import React, { memo } from 'react';
 import type { EuiTextProps } from '@elastic/eui';
-import { EuiText, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiText } from '@elastic/eui';
+import styled from 'styled-components';
+
+const CodeBlock = styled(EuiText)`
+  font-family: ${(props) => props.theme.eui.euiCodeFontFamily};
+`;
 
 export const ConsoleCodeBlock = memo<{
   children: ReactNode;
@@ -17,19 +21,10 @@ export const ConsoleCodeBlock = memo<{
   textColor?: EuiTextProps['color'];
   bold?: boolean;
 }>(({ children, inline = false, textColor = 'default', bold = false }) => {
-  const { euiTheme } = useEuiTheme();
-  const codeBlockStyles = css`
-    font-family: ${euiTheme.font.familyCode};
-  `;
   return (
-    <EuiText
-      size="relative"
-      color={textColor}
-      className={inline ? 'eui-displayInline' : ''}
-      css={codeBlockStyles}
-    >
+    <CodeBlock size="relative" color={textColor} className={inline ? 'eui-displayInline' : ''}>
       {bold ? <strong>{children}</strong> : children}
-    </EuiText>
+    </CodeBlock>
   );
 });
 ConsoleCodeBlock.displayName = 'ConsoleCodeBlock';

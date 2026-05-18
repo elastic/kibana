@@ -7,7 +7,7 @@
 
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiLoadingChart, EuiSpacer } from '@elastic/eui';
-import { css } from '@emotion/react';
+import styled from 'styled-components';
 import moment from 'moment';
 import { LongRunningCommandHint } from './long_running_command_hint';
 import { CommandExecutionResult } from './command_execution_result';
@@ -16,7 +16,7 @@ import type { CommandExecutionState, CommandHistoryItem } from './console_state/
 import { UserCommandInput } from './user_command_input';
 import { useConsoleStateDispatch } from '../hooks/state_selectors/use_console_state_dispatch';
 
-const commandOutputContainerStyles = css`
+const CommandOutputContainer = styled.div`
   position: relative;
 
   .busy-indicator {
@@ -90,7 +90,7 @@ export const CommandExecutionOutput = memo<CommandExecutionOutputProps>(
     }, [enteredAt, isLongRunningCommand, isRunning]);
 
     return (
-      <div css={commandOutputContainerStyles}>
+      <CommandOutputContainer>
         <div>
           <UserCommandInput input={command.inputDisplay} isValid={isValid} />
         </div>
@@ -117,7 +117,7 @@ export const CommandExecutionOutput = memo<CommandExecutionOutputProps>(
             </>
           )}
         </div>
-      </div>
+      </CommandOutputContainer>
     );
   }
 );

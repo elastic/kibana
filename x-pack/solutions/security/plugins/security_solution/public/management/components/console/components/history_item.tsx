@@ -7,26 +7,32 @@
 
 import type { PropsWithChildren } from 'react';
 import React, { memo } from 'react';
-import { EuiFlexItem, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiFlexItem } from '@elastic/eui';
+import styled from 'styled-components';
+import { css } from '@kbn/kibana-react-plugin/common';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { useDataTestSubj } from '../hooks/state_selectors/use_data_test_subj';
+
+const verticalSpacing = css`
+  ${({ theme: { eui } }) => eui.euiSizeL}
+`;
+
+const StyledEuiFlexItemHistoryItem = styled(EuiFlexItem)`
+  border-bottom: ${({ theme: { eui } }) => eui.euiBorderWidthThin} dashed
+    ${({ theme: { eui } }) => eui.euiBorderColor};
+  margin-bottom: ${verticalSpacing};
+  padding-bottom: ${verticalSpacing};
+`;
 
 export type HistoryItemProps = PropsWithChildren<{}>;
 
 export const HistoryItem = memo<HistoryItemProps>(({ children }) => {
   const getTestId = useTestIdGenerator(useDataTestSubj());
-  const { euiTheme } = useEuiTheme();
-  const historyItemStyles = css`
-    border-bottom: ${euiTheme.border.width.thin} dashed ${euiTheme.border.color};
-    margin-bottom: ${euiTheme.size.l};
-    padding-bottom: ${euiTheme.size.l};
-  `;
 
   return (
-    <EuiFlexItem grow={true} css={historyItemStyles} data-test-subj={getTestId('historyItem')}>
+    <StyledEuiFlexItemHistoryItem grow={true} data-test-subj={getTestId('historyItem')}>
       {children}
-    </EuiFlexItem>
+    </StyledEuiFlexItemHistoryItem>
   );
 });
 

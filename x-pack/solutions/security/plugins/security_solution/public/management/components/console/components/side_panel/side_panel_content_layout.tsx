@@ -8,7 +8,7 @@
 import type { ReactNode } from 'react';
 import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
-import { css } from '@emotion/react';
+import styled from 'styled-components';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 import { useDataTestSubj } from '../../hooks/state_selectors/use_data_test_subj';
 
@@ -17,7 +17,7 @@ export interface SidePanelContentLayoutProps {
   headerContent?: ReactNode;
 }
 
-const noPaddingStyles = css`
+const StyledEuiFlexItemNoPadding = styled(EuiFlexItem)`
   padding: 0 !important;
 `;
 
@@ -48,9 +48,9 @@ export const SidePanelContentLayout = memo<SidePanelContentLayoutProps>(
             <EuiHorizontalRule margin="none" />
           </>
         )}
-        <EuiFlexItem css={noPaddingStyles} className="eui-scrollBar eui-yScroll layout-container">
+        <StyledEuiFlexItemNoPadding className="eui-scrollBar eui-yScroll layout-container">
           <div data-test-subj={getTestId('body')}>{children}</div>
-        </EuiFlexItem>
+        </StyledEuiFlexItemNoPadding>
       </EuiFlexGroup>
     );
   }

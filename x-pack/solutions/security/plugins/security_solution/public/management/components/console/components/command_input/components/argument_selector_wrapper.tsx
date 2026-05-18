@@ -6,12 +6,43 @@
  */
 
 import React, { memo, useCallback } from 'react';
-import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import styled from 'styled-components';
 import { useInputCommand } from '../../../hooks/state_selectors/use_input_command';
 import { useConsoleStateDispatch } from '../../../hooks/state_selectors/use_console_state_dispatch';
 import { useWithCommandArgumentState } from '../../../hooks/state_selectors/use_with_command_argument_state';
 import type { CommandArgDefinition, CommandArgumentValueSelectorProps } from '../../../types';
+
+const ArgumentSelectorWrapperContainer = styled.span`
+  border: ${({ theme: { eui } }) => eui.euiBorderThin};
+  border-radius: ${({ theme: { eui } }) => eui.euiBorderRadiusSmall};
+  overflow: hidden;
+  user-select: none;
+
+  .flexGroup {
+    align-items: stretch;
+  }
+
+  .selectorContainer {
+    padding: 0 ${({ theme: { eui } }) => eui.euiSizeXS};
+    max-width: 25vw;
+    display: flex;
+    align-items: center;
+    height: 100%;
+  }
+
+  .argNameContainer {
+    background-color: ${({ theme: { eui } }) => eui.euiFormInputGroupLabelBackground};
+  }
+
+  .argName {
+    padding-left: ${({ theme: { eui } }) => eui.euiSizeXS};
+    height: 100%;
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+  }
+`;
 
 // Type to ensure that `SelectorComponent` is defined
 type ArgDefinitionWithRequiredSelector = Omit<CommandArgDefinition, 'SelectorComponent'> &
@@ -31,37 +62,6 @@ export const ArgumentSelectorWrapper = memo<ArgumentSelectorWrapperProps>(
     const dispatch = useConsoleStateDispatch();
     const command = useInputCommand();
     const { valueText, value, store } = useWithCommandArgumentState(argName, argIndex);
-    const { euiTheme } = useEuiTheme();
-    const argumentSelectorWrapperContainerStyles = css`
-      border: ${euiTheme.border.thin};
-      border-radius: ${euiTheme.border.radius.small};
-      overflow: hidden;
-      user-select: none;
-
-      .flexGroup {
-        align-items: stretch;
-      }
-
-      .selectorContainer {
-        padding: 0 ${euiTheme.size.xs};
-        max-width: 25vw;
-        display: flex;
-        align-items: center;
-        height: 100%;
-      }
-
-      .argNameContainer {
-        background-color: ${euiTheme.colors.backgroundBaseFormsPrepend};
-      }
-
-      .argName {
-        padding-left: ${euiTheme.size.xs};
-        height: 100%;
-        display: flex;
-        align-items: center;
-        white-space: nowrap;
-      }
-    `;
 
     if (!command) {
       // FIXME: PT we should not throw here as that would likely crash the UI.
@@ -90,7 +90,7 @@ export const ArgumentSelectorWrapper = memo<ArgumentSelectorWrapperProps>(
     );
 
     return (
-      <span css={argumentSelectorWrapperContainerStyles} className="eui-displayInlineBlock">
+      <ArgumentSelectorWrapperContainer className="eui-displayInlineBlock">
         <EuiFlexGroup
           className="flexGroup"
           responsive={false}
@@ -118,7 +118,7 @@ export const ArgumentSelectorWrapper = memo<ArgumentSelectorWrapperProps>(
             </div>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </span>
+      </ArgumentSelectorWrapperContainer>
     );
   }
 );

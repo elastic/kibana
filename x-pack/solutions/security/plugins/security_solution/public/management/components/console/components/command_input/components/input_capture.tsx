@@ -14,7 +14,7 @@ import type {
 } from 'react';
 import React, { memo, useCallback, useMemo, useRef } from 'react';
 import { pick } from 'lodash';
-import { css } from '@emotion/react';
+import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
@@ -36,7 +36,7 @@ const deSelectTextOnPage = () => {
   }
 };
 
-const inputCaptureContainerStyles = css`
+const InputCaptureContainer = styled.div`
   .focus-container {
     // Tried to find a way to not use '!important', but cant seem to figure
     // out right combination of pseudo selectors
@@ -67,7 +67,6 @@ const inputCaptureContainerStyles = css`
       top: -100vh;
       left: -100vw;
     }
-  }
 `;
 
 /**
@@ -306,8 +305,7 @@ export const InputCapture = memo<InputCaptureProps>(
     }
 
     return (
-      <div
-        css={inputCaptureContainerStyles}
+      <InputCaptureContainer
         data-test-subj={getTestId('inputCapture')}
         onKeyDown={handleOnKeyDown}
         onPaste={handleOnPaste}
@@ -345,7 +343,7 @@ export const InputCapture = memo<InputCaptureProps>(
             className="invisible-input"
           />
         </div>
-      </div>
+      </InputCaptureContainer>
     );
   }
 );
