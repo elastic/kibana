@@ -65,7 +65,7 @@ function getUniqueProviderSchema<TProperties extends Record<string, Type<any>>>(
 ) {
   return schema.maybe(
     schema.recordOf(
-      schema.string(),
+      schema.string({ maxLength: 1024 }),
       schema.object(
         properties
           ? { ...getCommonProviderSchemaProperties(overrides), ...properties }
@@ -122,7 +122,7 @@ const providersConfigSchema = schema.object(
     pki: getUniqueProviderSchema('pki'),
     saml: schema.maybe(
       schema.recordOf(
-        schema.string(),
+        schema.string({ maxLength: 1024 }),
         schema.object({
           ...getCommonProviderSchemaProperties(),
           realm: schema.string(),
@@ -133,7 +133,7 @@ const providersConfigSchema = schema.object(
     ),
     oidc: schema.maybe(
       schema.recordOf(
-        schema.string(),
+        schema.string({ maxLength: 1024 }),
         schema.object({ ...getCommonProviderSchemaProperties(), realm: schema.string() })
       )
     ),

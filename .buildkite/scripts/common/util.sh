@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-source "$(dirname "${BASH_SOURCE[0]}")/vault_fns.sh"
+SCRIPTS_COMMON_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPTS_COMMON_DIR}/vault_fns.sh"
 
 is_pr() {
   [[ "${GITHUB_PR_NUMBER-}" ]] && return
@@ -184,6 +185,40 @@ set_git_merge_base() {
 # times-out after 60 seconds and retries up to 3 times
 download_artifact() {
   retry 3 1 timeout 3m buildkite-agent artifact download "$@"
+}
+
+GCS_CI_ARTIFACT_REGIONS=("asia-south2" "europe-west2" "northamerica-northeast2" "southamerica-east1" "us-central1" "us-east1" "us-west1")
+download_tmp_artifact() {
+  local artifact_name="$1" dest_dir="$2" build_id="$3"
+  local region use_gcs=false
+
+  for region in "${GCS_CI_ARTIFACT_REGIONS[@]}"; do
+    if [[ "${BUILDKITE_AGENT_GCP_REGION:-}" == "$region" ]]; then
+      use_gcs=true
+      break
+    fi
+  done
+
+  if [[ "$use_gcs" == "true" ]]; then
+    "${SCRIPTS_COMMON_DIR}/activate_service_account.sh" "kibana-ci-artifacts-${BUILDKITE_AGENT_GCP_REGION}"
+    if gcloud storage cp \
+      "gs://kibana-ci-artifacts-${BUILDKITE_AGENT_GCP_REGION}/tmp/builds/${build_id}/${artifact_name}" \
+      "${dest_dir}/${artifact_name}"; then
+      return 0
+    fi
+    echo "GCS download failed for ${artifact_name} from kibana-ci-artifacts-${BUILDKITE_AGENT_GCP_REGION} (build ${build_id})."
+  fi
+
+  echo "Falling back to Buildkite artifact download for ${artifact_name} (build ${build_id})."
+  download_artifact "$artifact_name" "$dest_dir" --build "$build_id"
+}
+upload_tmp_artifact() {
+  local local_path="$1" artifact_name="$2" build_id="$3"
+
+  "${SCRIPTS_COMMON_DIR}/activate_service_account.sh" "kibana-ci-artifacts-${GCS_CI_ARTIFACT_REGIONS[0]}"
+
+  printf '%s\n' "${GCS_CI_ARTIFACT_REGIONS[@]}" | xargs -P 0 -I{} \
+    gcloud storage cp "$local_path" "gs://kibana-ci-artifacts-{}/tmp/builds/${build_id}/${artifact_name}"
 }
 
 print_if_dry_run() {
