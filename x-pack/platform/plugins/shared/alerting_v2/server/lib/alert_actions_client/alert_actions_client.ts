@@ -25,13 +25,15 @@ import type { StorageServiceContract } from '../services/storage_service/storage
 import { StorageServiceScopedToken } from '../services/storage_service/tokens';
 import type { UserServiceContract } from '../services/user_service/user_service';
 import { UserService } from '../services/user_service/user_service';
+import { RulesClientSpaceIdToken } from '../rules_client/tokens';
 
 @injectable()
 export class AlertActionsClient {
   constructor(
     @inject(QueryServiceInternalToken) private readonly queryService: QueryServiceContract,
     @inject(StorageServiceScopedToken) private readonly storageService: StorageServiceContract,
-    @inject(UserService) private readonly userService: UserServiceContract
+    @inject(UserService) private readonly userService: UserServiceContract,
+    @inject(RulesClientSpaceIdToken) private readonly spaceId: string
   ) {}
 
   public async createAction(params: {
@@ -114,7 +116,7 @@ export class AlertActionsClient {
 
     const query = esql`
       FROM ${ALERT_EVENTS_DATA_STREAM}
-      | WHERE type == "alert" AND (${whereClause})
+      | WHERE type == "alert" AND space_id == ${this.spaceId} AND (${whereClause})
       | STATS
         last_event_timestamp = MAX(@timestamp),
         last_episode_id = LAST(episode.id, @timestamp),
@@ -161,7 +163,7 @@ export class AlertActionsClient {
     const { groupHash, episodeId } = params;
     const query = esql`
       FROM ${ALERT_EVENTS_DATA_STREAM}
-      | WHERE type == "alert" AND group_hash == ${groupHash} AND ${
+      | WHERE type == "alert" AND space_id == ${this.spaceId} AND group_hash == ${groupHash} AND ${
       episodeId ? esql.exp`episode.id == ${episodeId}` : esql.exp`true`
     }
       | SORT @timestamp DESC
