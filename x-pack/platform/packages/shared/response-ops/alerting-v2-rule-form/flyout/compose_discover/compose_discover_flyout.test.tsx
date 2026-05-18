@@ -13,6 +13,7 @@ import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { applicationServiceMock } from '@kbn/core/public/mocks';
+import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
 import type { RuleFormServices } from '../../form/contexts/rule_form_context';
 import { ComposeDiscoverFlyout } from './compose_discover_flyout';
 import type { ComposeDiscoverFlyoutProps } from './compose_discover_flyout';
@@ -69,7 +70,7 @@ const createMockServices = (): RuleFormServices => ({
   dataViews: dataViewPluginMocks.createStartContract(),
   notifications: notificationServiceMock.createStartContract(),
   application: applicationServiceMock.createStartContract(),
-  lens: { createStartContract: jest.fn() } as unknown as RuleFormServices['lens'],
+  lens: lensPluginMock.createStartContract(),
 });
 
 const defaultProps: ComposeDiscoverFlyoutProps = {

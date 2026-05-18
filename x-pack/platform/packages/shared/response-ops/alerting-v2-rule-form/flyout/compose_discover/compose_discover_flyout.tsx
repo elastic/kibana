@@ -86,6 +86,12 @@ export interface ComposeDiscoverFlyoutProps {
 
 const FLYOUT_TITLE_ID = 'composeDiscoverFlyoutTitle';
 
+const getStepStatus = (currentStep: number, stepIndex: number): MinimalStep['status'] => {
+  if (stepIndex < currentStep) return 'complete';
+  if (stepIndex === currentStep) return 'current';
+  return 'incomplete';
+};
+
 /** Bridge YAML parse (FormValues) into compose form shape until yaml_form_utils adopts ComposeFormValues. */
 const formValuesFromYamlToCompose = (parsed: FormValues): ComposeFormValues => ({
   kind: parsed.kind,
@@ -409,12 +415,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
                     steps={steps.map(
                       (s, i): MinimalStep => ({
                         title: s.title,
-                        status:
-                          i < uiState.step
-                            ? 'complete'
-                            : i === uiState.step
-                            ? 'current'
-                            : 'incomplete',
+                        status: getStepStatus(uiState.step, i),
                       })
                     )}
                   />
