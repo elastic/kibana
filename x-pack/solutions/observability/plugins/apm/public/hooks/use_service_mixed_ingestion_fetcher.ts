@@ -14,10 +14,14 @@ const INITIAL_STATE = {
 
 export function useServiceMixedIngestionFetcher({
   serviceName,
+  environment,
+  kuery,
   start,
   end,
 }: {
   serviceName: string;
+  environment: string;
+  kuery: string;
   start: string;
   end: string;
 }) {
@@ -31,12 +35,12 @@ export function useServiceMixedIngestionFetcher({
         return callApmApi('GET /internal/apm/services/{serviceName}/metrics/mixed_ingestion', {
           params: {
             path: { serviceName },
-            query: { start, end },
+            query: { start, end, environment, kuery },
           },
         });
       }
     },
-    [serviceName, start, end]
+    [serviceName, environment, kuery, start, end]
   );
 
   return { ...data, status, error };

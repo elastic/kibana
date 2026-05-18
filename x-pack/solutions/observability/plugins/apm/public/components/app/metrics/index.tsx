@@ -40,13 +40,15 @@ export function Metrics() {
   } = useApmServiceContext();
 
   const {
-    query: { rangeFrom, rangeTo },
+    query: { environment, rangeFrom, rangeTo, kuery },
   } = useApmParams('/services/{serviceName}/metrics');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const { hasMultipleAgentTypes, ingestionTimeRanges } = useServiceMixedIngestionFetcher({
     serviceName,
+    environment,
+    kuery,
     start,
     end,
   });
@@ -69,19 +71,22 @@ export function Metrics() {
     snapshotTimeRangesRef.current = snapshotTimeRanges;
   }
 
-  const prevRangeRef = useRef({ rangeFrom, rangeTo });
+  const prevFiltersRef = useRef({ rangeFrom, rangeTo, environment, kuery });
   useEffect(() => {
-    const prev = prevRangeRef.current;
-    if (prev.rangeFrom !== rangeFrom || prev.rangeTo !== rangeTo) {
-      if (isInternalNavigationRef.current) {
+    const prev = prevFiltersRef.current;
+    const rangeChanged = prev.rangeFrom !== rangeFrom || prev.rangeTo !== rangeTo;
+    const filtersChanged = prev.environment !== environment || prev.kuery !== kuery;
+
+    if (rangeChanged || filtersChanged) {
+      if (rangeChanged && isInternalNavigationRef.current) {
         isInternalNavigationRef.current = false;
       } else if (forcedIngestionType !== null) {
         setForcedIngestionType(null);
         snapshotTimeRangesRef.current = undefined;
       }
-      prevRangeRef.current = { rangeFrom, rangeTo };
+      prevFiltersRef.current = { rangeFrom, rangeTo, environment, kuery };
     }
-  }, [rangeFrom, rangeTo, forcedIngestionType]);
+  }, [rangeFrom, rangeTo, environment, kuery, forcedIngestionType]);
 
   const handleNavigateToIngestionType = useCallback((type: IngestionType) => {
     isInternalNavigationRef.current = true;

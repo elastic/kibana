@@ -314,20 +314,22 @@ const serviceMixedIngestionRoute = createApmServerRoute({
     path: t.type({
       serviceName: t.string,
     }),
-    query: rangeRt,
+    query: t.intersection([environmentRt, kueryRt, rangeRt]),
   }),
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (resources): Promise<ServiceMixedIngestionResponse> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
     const { serviceName } = params.path;
-    const { start, end } = params.query;
+    const { environment, kuery, start, end } = params.query;
 
     return getServiceMixedIngestion({
       serviceName,
       apmEventClient,
       start,
       end,
+      environment,
+      kuery,
     });
   },
 });

@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { rangeQuery } from '@kbn/observability-plugin/server';
+import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   SERVICE_NAME,
   TELEMETRY_SDK_NAME,
   TELEMETRY_SDK_LANGUAGE,
 } from '../../../common/es_fields/apm';
+import { environmentQuery } from '../../../common/utils/environment_query';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import type { IngestionTimeRanges } from '../../../common/metrics_types';
 
@@ -25,11 +26,15 @@ export async function getServiceMixedIngestion({
   apmEventClient,
   start,
   end,
+  environment,
+  kuery,
 }: {
   serviceName: string;
   apmEventClient: APMEventClient;
   start: number;
   end: number;
+  environment: string;
+  kuery: string;
 }): Promise<ServiceMixedIngestionResponse> {
   const params = {
     apm: {
@@ -39,7 +44,12 @@ export async function getServiceMixedIngestion({
     size: 0,
     query: {
       bool: {
-        filter: [{ term: { [SERVICE_NAME]: serviceName } }, ...rangeQuery(start, end)],
+        filter: [
+          { term: { [SERVICE_NAME]: serviceName } },
+          ...rangeQuery(start, end),
+          ...environmentQuery(environment),
+          ...kqlQuery(kuery),
+        ],
       },
     },
     aggs: {
