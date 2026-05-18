@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 
 export const CloudOnboardingDeploymentSchemaV1 = schema.object({
   provider: schema.oneOf([schema.literal('aws'), schema.literal('azure'), schema.literal('gcp')]),
-  connectionId: schema.string(),
+  connectorId: schema.string(),
   mechanisms: schema.arrayOf(
     schema.oneOf([
       schema.literal('identity_federation'),

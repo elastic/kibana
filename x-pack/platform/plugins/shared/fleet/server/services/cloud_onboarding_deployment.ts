@@ -29,7 +29,7 @@ function soToDeployment(
   return {
     id,
     provider: attributes.provider as CloudOnboardingDeployment['provider'],
-    connectionId: attributes.connectionId,
+    connectorId: attributes.connectorId,
     mechanisms: attributes.mechanisms,
     deploymentId: attributes.deploymentId,
     deploymentName: attributes.deploymentName,
@@ -95,9 +95,9 @@ class CloudOnboardingDeploymentService {
     return soToDeployment(so.id, so.attributes);
   }
 
-  public async getByConnectionId(
+  public async getByConnectorId(
     soClient: SavedObjectsClientContract,
-    connectionId: string
+    connectorId: string
   ): Promise<CloudOnboardingDeployment[]> {
     const namespace = soClient.getCurrentNamespace();
     const finder =
@@ -106,8 +106,8 @@ class CloudOnboardingDeploymentService {
           type: CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
           namespaces: namespace ? [namespace] : ['default'],
           filter: nodeBuilder.is(
-            `${CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE}.attributes.connectionId`,
-            connectionId
+            `${CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE}.attributes.connectorId`,
+            connectorId
           ),
           perPage: CLOUD_ONBOARDING_DEPLOYMENT_LIMIT,
         }

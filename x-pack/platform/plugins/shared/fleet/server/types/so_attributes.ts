@@ -347,7 +347,7 @@ export interface CloudOnboardingDeploymentSOAttributes {
   /** Cloud provider — determines how deploymentId/deploymentName are interpreted (e.g. for AWS, deploymentId is the CFN stack ARN). */
   provider: CloudProvider;
   /** FK to fleet-cloud-connector — the AWS account connection this deployment belongs to. */
-  connectionId: string;
+  connectorId: string;
   /** Active delivery mechanisms included in this deployment's IaC stack (identity_federation, firehose, cloud_forwarder). */
   mechanisms: CloudOnboardingDeploymentMechanism[];
   /** Provider-specific deployment identifier. For AWS: the CloudFormation stack ARN. Set after the user deploys the stack. */

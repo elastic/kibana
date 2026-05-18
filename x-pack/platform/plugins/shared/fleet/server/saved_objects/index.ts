@@ -1896,7 +1896,7 @@ export const getSavedObjectTypes = (
         dynamic: false,
         properties: {
           provider: { type: 'keyword', ignore_above: 1024 },
-          connectionId: { type: 'keyword', ignore_above: 1024 },
+          connectorId: { type: 'keyword', ignore_above: 1024 },
           mechanisms: { type: 'keyword', ignore_above: 1024 },
           deploymentId: { type: 'keyword', ignore_above: 1024 },
           deploymentName: { type: 'keyword', ignore_above: 1024 },
@@ -1991,7 +1991,7 @@ export function registerEncryptedSavedObjects(
   encryptedSavedObjects.registerType({
     type: CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
     attributesToEncrypt: new Set(['secrets']),
-    attributesToIncludeInAAD: new Set(['provider', 'connectionId', 'mechanisms']),
+    attributesToIncludeInAAD: new Set(['provider', 'connectorId', 'mechanisms']),
     enforceRandomId: false,
   });
 }

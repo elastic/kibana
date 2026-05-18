@@ -21,7 +21,7 @@ export type CloudOnboardingDeploymentServiceVars = Array<Record<string, unknown>
 export interface CloudOnboardingDeployment {
   id: string;
   provider: CloudProvider;
-  connectionId: string;
+  connectorId: string;
   mechanisms: CloudOnboardingDeploymentMechanism[];
   deploymentId?: string;
   deploymentName?: string;
@@ -49,6 +49,6 @@ export type CreateCloudOnboardingDeploymentInput = Omit<
 export type UpdateCloudOnboardingDeploymentInput = Partial<
   Omit<
     CloudOnboardingDeployment,
-    'id' | 'provider' | 'connectionId' | 'secrets' | 'createdAt' | 'updatedAt'
+    'id' | 'provider' | 'connectorId' | 'secrets' | 'createdAt' | 'updatedAt'
   >
 >;

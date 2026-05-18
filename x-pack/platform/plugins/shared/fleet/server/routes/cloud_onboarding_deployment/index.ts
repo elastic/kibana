@@ -16,8 +16,8 @@ import {
   CreateCloudOnboardingDeploymentResponseSchema,
   GetCloudOnboardingDeploymentRequestSchema,
   GetCloudOnboardingDeploymentResponseSchema,
-  GetCloudOnboardingDeploymentsByConnectionIdRequestSchema,
-  GetCloudOnboardingDeploymentsByConnectionIdResponseSchema,
+  GetCloudOnboardingDeploymentsByConnectorIdRequestSchema,
+  GetCloudOnboardingDeploymentsByConnectorIdResponseSchema,
   UpdateCloudOnboardingDeploymentRequestSchema,
   UpdateCloudOnboardingDeploymentResponseSchema,
   DeleteCloudOnboardingDeploymentRequestSchema,
@@ -27,7 +27,7 @@ import {
 import {
   createCloudOnboardingDeploymentHandler,
   getCloudOnboardingDeploymentHandler,
-  getCloudOnboardingDeploymentsByConnectionIdHandler,
+  getCloudOnboardingDeploymentsByConnectorIdHandler,
   updateCloudOnboardingDeploymentHandler,
   deleteCloudOnboardingDeploymentHandler,
 } from './handlers';
@@ -125,10 +125,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       getCloudOnboardingDeploymentHandler
     );
 
-  // GET /api/fleet/cloud_onboarding_deployments/connection/{connectionId}
+  // GET /api/fleet/cloud_onboarding_deployments/connector/{connectorId}
   router.versioned
     .get({
-      path: CLOUD_ONBOARDING_DEPLOYMENT_API_ROUTES.BY_CONNECTION_PATTERN,
+      path: CLOUD_ONBOARDING_DEPLOYMENT_API_ROUTES.BY_CONNECTOR_PATTERN,
       security: {
         authz: {
           requiredPrivileges: [
@@ -141,8 +141,8 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           ],
         },
       },
-      summary: 'Get cloud onboarding deployments by connection ID',
-      description: 'List all cloud onboarding deployments for a given connection ID.',
+      summary: 'Get cloud onboarding deployments by connector ID',
+      description: 'List all cloud onboarding deployments for a given connector ID.',
       options: {
         tags: ['oas-tag:Fleet cloud onboarding deployments'],
         availability: {
@@ -155,10 +155,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       {
         version: API_VERSIONS.public.v1,
         validate: {
-          request: GetCloudOnboardingDeploymentsByConnectionIdRequestSchema,
+          request: GetCloudOnboardingDeploymentsByConnectorIdRequestSchema,
           response: {
             200: {
-              body: () => GetCloudOnboardingDeploymentsByConnectionIdResponseSchema,
+              body: () => GetCloudOnboardingDeploymentsByConnectorIdResponseSchema,
               description: 'OK: A successful request.',
             },
             400: {
@@ -168,7 +168,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           },
         },
       },
-      getCloudOnboardingDeploymentsByConnectionIdHandler
+      getCloudOnboardingDeploymentsByConnectorIdHandler
     );
 
   // PUT /api/fleet/cloud_onboarding_deployments/{deploymentId}

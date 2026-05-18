@@ -24,7 +24,7 @@ function makeAttributes(
 ): CloudOnboardingDeploymentSOAttributes {
   return {
     provider: 'aws',
-    connectionId: 'conn-1',
+    connectorId: 'conn-1',
     mechanisms: ['identity_federation'],
     services: ['cloudtrail'],
     status: 'pending',
@@ -73,7 +73,7 @@ describe('cloudOnboardingDeploymentService', () => {
 
       const result = await cloudOnboardingDeploymentService.create(soClient, {
         provider: 'aws',
-        connectionId: 'conn-1',
+        connectorId: 'conn-1',
         mechanisms: ['identity_federation'],
         services: ['cloudtrail'],
         vars: { role_arn: 'arn:aws:iam::123:role/Role' },
@@ -84,7 +84,7 @@ describe('cloudOnboardingDeploymentService', () => {
       expect(soClient.create).toHaveBeenCalledWith(
         CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
         expect.objectContaining({
-          connectionId: 'conn-1',
+          connectorId: 'conn-1',
           status: 'pending',
           attemptCount: 1,
           createdAt: expect.any(String),
@@ -92,7 +92,7 @@ describe('cloudOnboardingDeploymentService', () => {
         })
       );
       expect(result.id).toBe('deploy-1');
-      expect(result.connectionId).toBe('conn-1');
+      expect(result.connectorId).toBe('conn-1');
       expect(result.mechanisms).toEqual(['identity_federation']);
       expect(result.status).toBe('pending');
       expect(result.attemptCount).toBe(1);
@@ -113,7 +113,7 @@ describe('cloudOnboardingDeploymentService', () => {
       await expect(
         cloudOnboardingDeploymentService.create(soClient, {
           provider: 'aws',
-          connectionId: 'conn-1',
+          connectorId: 'conn-1',
           mechanisms: ['identity_federation'],
           services: [],
           vars: {},
@@ -175,7 +175,7 @@ describe('cloudOnboardingDeploymentService', () => {
     });
   });
 
-  describe('getByConnectionId', () => {
+  describe('getByConnectorId', () => {
     it('scopes the PIT finder to the request namespace', async () => {
       const attrs1 = makeAttributes({ mechanisms: ['identity_federation'] });
       const attrs2 = makeAttributes({ mechanisms: ['firehose'] });
@@ -197,7 +197,7 @@ describe('cloudOnboardingDeploymentService', () => {
       } as jest.Mocked<EncryptedSavedObjectsClient>;
       mockedAppContextService.getEncryptedSavedObjects.mockReturnValue(esoClientMock);
 
-      const results = await cloudOnboardingDeploymentService.getByConnectionId(soClient, 'conn-1');
+      const results = await cloudOnboardingDeploymentService.getByConnectorId(soClient, 'conn-1');
 
       expect(results).toHaveLength(2);
       expect(results[0].id).toBe('deploy-1');
@@ -225,7 +225,7 @@ describe('cloudOnboardingDeploymentService', () => {
       } as jest.Mocked<EncryptedSavedObjectsClient>;
       mockedAppContextService.getEncryptedSavedObjects.mockReturnValue(esoClientMock);
 
-      await cloudOnboardingDeploymentService.getByConnectionId(soClient, 'conn-none');
+      await cloudOnboardingDeploymentService.getByConnectorId(soClient, 'conn-none');
 
       expect(esoClientMock.createPointInTimeFinderDecryptedAsInternalUser).toHaveBeenCalledWith(
         expect.objectContaining({ namespaces: ['default'] })
@@ -244,7 +244,7 @@ describe('cloudOnboardingDeploymentService', () => {
       } as jest.Mocked<EncryptedSavedObjectsClient>;
       mockedAppContextService.getEncryptedSavedObjects.mockReturnValue(esoClientMock);
 
-      const results = await cloudOnboardingDeploymentService.getByConnectionId(
+      const results = await cloudOnboardingDeploymentService.getByConnectorId(
         soClient,
         'conn-none'
       );
@@ -473,7 +473,7 @@ describe('cloudOnboardingDeploymentService', () => {
 
         const result = await cloudOnboardingDeploymentService.create(soClient, {
           provider: 'aws',
-          connectionId: 'conn-1',
+          connectorId: 'conn-1',
           mechanisms: ['identity_federation'],
           services: ['cloudwatch_metrics'],
           serviceVars: { cloudwatch_metrics: [{ regions: ['us-east-1'], namespace: 'AWS/EC2' }] },
@@ -511,7 +511,7 @@ describe('cloudOnboardingDeploymentService', () => {
 
         const result = await cloudOnboardingDeploymentService.create(soClient, {
           provider: 'aws',
-          connectionId: 'conn-2',
+          connectorId: 'conn-2',
           mechanisms: [],
           services: ['cloudwatch_metrics'],
           serviceVars: { cloudwatch_metrics: [{ regions: ['us-east-1'], namespace: 'AWS/EC2' }] },
@@ -554,7 +554,7 @@ describe('cloudOnboardingDeploymentService', () => {
 
         const result = await cloudOnboardingDeploymentService.create(soClient, {
           provider: 'aws',
-          connectionId: 'conn-3',
+          connectorId: 'conn-3',
           mechanisms: ['cloud_forwarder'],
           services: ['cloudfront_logs'],
           serviceVars: {
@@ -615,7 +615,7 @@ describe('cloudOnboardingDeploymentService', () => {
 
           const result = await cloudOnboardingDeploymentService.create(soClient, {
             provider: 'aws',
-            connectionId: `conn-${_pushMechanism}`,
+            connectorId: `conn-${_pushMechanism}`,
             mechanisms,
             services: ['cloudfront_logs'],
             serviceVars: {

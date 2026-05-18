@@ -15,7 +15,7 @@ import type { FleetRequestHandler } from '../../types';
 import type {
   CreateCloudOnboardingDeploymentRequestSchema,
   GetCloudOnboardingDeploymentRequestSchema,
-  GetCloudOnboardingDeploymentsByConnectionIdRequestSchema,
+  GetCloudOnboardingDeploymentsByConnectorIdRequestSchema,
   UpdateCloudOnboardingDeploymentRequestSchema,
   DeleteCloudOnboardingDeploymentRequestSchema,
 } from '../../types/rest_spec/cloud_onboarding_deployment';
@@ -59,15 +59,15 @@ export const getCloudOnboardingDeploymentHandler: FleetRequestHandler<
   }
 };
 
-export const getCloudOnboardingDeploymentsByConnectionIdHandler: FleetRequestHandler<
-  TypeOf<typeof GetCloudOnboardingDeploymentsByConnectionIdRequestSchema.params>
+export const getCloudOnboardingDeploymentsByConnectorIdHandler: FleetRequestHandler<
+  TypeOf<typeof GetCloudOnboardingDeploymentsByConnectorIdRequestSchema.params>
 > = async (context, request, response) => {
   const fleetContext = await context.fleet;
   const { internalSoClient } = fleetContext;
 
-  const deployments = await cloudOnboardingDeploymentService.getByConnectionId(
+  const deployments = await cloudOnboardingDeploymentService.getByConnectorId(
     internalSoClient,
-    request.params.connectionId
+    request.params.connectorId
   );
   return response.ok({ body: { items: deployments.map(toResponseItem) } });
 };

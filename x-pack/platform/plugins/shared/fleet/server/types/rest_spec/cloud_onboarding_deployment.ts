@@ -54,7 +54,7 @@ const RequestSecretsSchema = schema.recordOf(schema.string({ minLength: 1 }), sc
   meta: { description: 'Deployment-level encrypted secrets (e.g. external_id).' },
 });
 
-const DeploymentIdParamSchema = schema.object({
+const OnboardingDeploymentIdParamSchema = schema.object({
   id: schema.string({
     meta: { description: 'The saved object ID of the cloud onboarding deployment.' },
   }),
@@ -65,7 +65,7 @@ const DeploymentIdParamSchema = schema.object({
 const CloudOnboardingDeploymentItemSchema = schema.object({
   id: schema.string(),
   provider: CloudOnboardingDeploymentProviderSchema,
-  connectionId: schema.string({
+  connectorId: schema.string({
     meta: { description: 'ID of the fleet-cloud-connector this deployment belongs to.' },
   }),
   mechanisms: schema.arrayOf(CloudOnboardingDeploymentMechanismSchema, { maxSize: 10 }),
@@ -124,7 +124,7 @@ const SingleItemResponseSchema = schema.object({ item: CloudOnboardingDeployment
 export const CreateCloudOnboardingDeploymentRequestSchema = {
   body: schema.object({
     provider: CloudOnboardingDeploymentProviderSchema,
-    connectionId: schema.string({
+    connectorId: schema.string({
       minLength: 1,
       meta: { description: 'ID of the fleet-cloud-connector to associate with this deployment.' },
     }),
@@ -145,25 +145,27 @@ export const CreateCloudOnboardingDeploymentRequestSchema = {
 
 export const CreateCloudOnboardingDeploymentResponseSchema = SingleItemResponseSchema;
 
-export const GetCloudOnboardingDeploymentRequestSchema = { params: DeploymentIdParamSchema };
+export const GetCloudOnboardingDeploymentRequestSchema = {
+  params: OnboardingDeploymentIdParamSchema,
+};
 
 export const GetCloudOnboardingDeploymentResponseSchema = SingleItemResponseSchema;
 
-export const GetCloudOnboardingDeploymentsByConnectionIdRequestSchema = {
+export const GetCloudOnboardingDeploymentsByConnectorIdRequestSchema = {
   params: schema.object({
-    connectionId: schema.string({
+    connectorId: schema.string({
       minLength: 1,
       meta: { description: 'The fleet-cloud-connector ID to list deployments for.' },
     }),
   }),
 };
 
-export const GetCloudOnboardingDeploymentsByConnectionIdResponseSchema = schema.object({
+export const GetCloudOnboardingDeploymentsByConnectorIdResponseSchema = schema.object({
   items: schema.arrayOf(CloudOnboardingDeploymentItemSchema, { maxSize: 100 }),
 });
 
 export const UpdateCloudOnboardingDeploymentRequestSchema = {
-  params: DeploymentIdParamSchema,
+  params: OnboardingDeploymentIdParamSchema,
   body: schema.object({
     status: schema.maybe(CloudOnboardingDeploymentStatusSchema),
     statusMessage: schema.maybe(
@@ -189,7 +191,9 @@ export const UpdateCloudOnboardingDeploymentRequestSchema = {
 
 export const UpdateCloudOnboardingDeploymentResponseSchema = SingleItemResponseSchema;
 
-export const DeleteCloudOnboardingDeploymentRequestSchema = { params: DeploymentIdParamSchema };
+export const DeleteCloudOnboardingDeploymentRequestSchema = {
+  params: OnboardingDeploymentIdParamSchema,
+};
 
 export const DeleteCloudOnboardingDeploymentResponseSchema = schema.object({
   id: schema.string(),
