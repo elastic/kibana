@@ -40,6 +40,8 @@ import type {
   CloudConnectorVars,
   AccountType,
   GcpCloudConnectorVars,
+  PackagePolicyPermissionSummary,
+  VerificationStatus,
 } from '../../../../common/types';
 import { CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS } from '../../../../common/services/cloud_connectors/test_subjects';
 import type { CloudProviders } from '../types';
@@ -55,6 +57,10 @@ import {
 } from '../utils';
 import { CloudConnectorNameField } from '../form/cloud_connector_name_field';
 import { AccountBadge } from '../components/account_badge';
+import { PermissionStatusCell } from '../permission_status_cell';
+import { IdentityPermissionSummary } from '../identity_permission_summary';
+import { PermissionStatusRowExpansion } from '../permission_status_row_expansion';
+import { PERMISSION_STATUS_ROW_EXPAND_TEST_SUBJECTS } from '../../../../common/services/cloud_connectors/test_subjects';
 
 interface CloudConnectorPoliciesFlyoutProps {
   cloudConnectorId: string;
@@ -62,6 +68,19 @@ interface CloudConnectorPoliciesFlyoutProps {
   cloudConnectorVars: CloudConnectorVars;
   accountType?: AccountType;
   provider: CloudProviders;
+  /**
+   * Per-target verification summaries written by `fleet:otel_permission_verifier_status_change`.
+   * Optional — Story 5 wires the React Query hook that populates this; until then, callers may pass `undefined`.
+   */
+  verificationPermissions?: PackagePolicyPermissionSummary[];
+  /**
+   * Connector-level Layer 1 status (`pending` / `success` / `failed`). Used as the fallback
+   * cell state when `verificationPermissions` has no entry for a given package policy.
+   */
+  verificationStatus?: VerificationStatus;
+  /** Layer 1 lifecycle timestamps — surfaced in each row's verification timeline. */
+  verificationStartedAt?: string;
+  verificationFailedAt?: string;
   onClose: () => void;
 }
 
@@ -71,6 +90,10 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
   cloudConnectorVars,
   accountType,
   provider,
+  verificationPermissions,
+  verificationStatus,
+  verificationStartedAt,
+  verificationFailedAt,
   onClose,
 }) => {
   const { application } = useKibana().services;
@@ -82,6 +105,8 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
+  // Story 7: which integration row is expanded (one at a time). Holds the row's id.
+  const [expandedRowId, setExpandedRowId] = useState<string | null>(null);
 
   const {
     data: usageData,
@@ -93,7 +118,11 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
     pageSize
   );
 
-  const usageItems = usageData?.items || [];
+  // Memoize so `usageItems` keeps a stable reference across renders when `usageData`
+  // hasn't changed — otherwise the `||` fallback produces a fresh `[]` every render,
+  // which causes the downstream useMemos that depend on `usageItems` (columns,
+  // itemIdToExpandedRowMap) to recompute unnecessarily.
+  const usageItems = useMemo(() => usageData?.items || [], [usageData?.items]);
   const totalItemCount = usageData?.total || 0;
 
   const { mutate: updateConnector, isLoading: isUpdating } = useUpdateCloudConnector(
@@ -215,6 +244,39 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
     [application]
   );
 
+  // Story 7: toggle the expanded row. One row at a time; clicking the open row collapses it.
+  const toggleExpandedRow = useCallback((itemId: string) => {
+    setExpandedRowId((current) => (current === itemId ? null : itemId));
+  }, []);
+
+  // Story 7: build the expanded-row React map for `EuiBasicTable.itemIdToExpandedRowMap`.
+  const itemIdToExpandedRowMap = useMemo(() => {
+    if (!expandedRowId) return {};
+    const expandedItem = usageItems.find((item) => item.id === expandedRowId);
+    if (!expandedItem) return {};
+    const summary = verificationPermissions?.find(
+      (entry) => entry.package_policy_id === expandedItem.id
+    );
+    return {
+      [expandedRowId]: (
+        <PermissionStatusRowExpansion
+          summary={summary}
+          verificationStatus={verificationStatus}
+          verificationStartedAt={verificationStartedAt}
+          verificationFailedAt={verificationFailedAt}
+          packagePolicyId={expandedItem.id}
+        />
+      ),
+    };
+  }, [
+    expandedRowId,
+    usageItems,
+    verificationPermissions,
+    verificationStatus,
+    verificationStartedAt,
+    verificationFailedAt,
+  ]);
+
   const columns: Array<EuiBasicTableColumn<(typeof usageItems)[0]>> = useMemo(
     () => [
       {
@@ -244,21 +306,53 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
         render: (pkg: (typeof usageItems)[0]['package']) => pkg?.title || pkg?.name || '-',
       },
       {
-        field: 'created_at',
-        name: i18n.translate('xpack.fleet.cloudConnector.policiesFlyout.createdColumn', {
-          defaultMessage: 'Created',
+        // Story 3: single roll-up Permission Status badge per integration, click → popover.
+        // Derived on render from `verificationPermissions` (Layer 2) + `verificationStatus` (Layer 1).
+        name: i18n.translate('xpack.fleet.cloudConnector.policiesFlyout.permissionStatusColumn', {
+          defaultMessage: 'Permission Status',
         }),
-        render: (createdAt: string) => new Date(createdAt).toLocaleDateString(),
+        render: (item: (typeof usageItems)[0]) => (
+          <PermissionStatusCell
+            packagePolicyId={item.id}
+            integrationName={item.package?.title || item.package?.name || item.name}
+            verificationPermissions={verificationPermissions}
+            verificationStatus={verificationStatus}
+          />
+        ),
       },
+      // Story 7: chevron column that toggles the row-expand drill-down.
       {
-        field: 'updated_at',
-        name: i18n.translate('xpack.fleet.cloudConnector.policiesFlyout.lastUpdatedColumn', {
-          defaultMessage: 'Last Updated',
-        }),
-        render: (updatedAt: string) => new Date(updatedAt).toLocaleDateString(),
+        align: 'right',
+        width: '40px',
+        isExpander: true,
+        name: '',
+        render: (item: (typeof usageItems)[0]) => (
+          <EuiButtonIcon
+            onClick={() => toggleExpandedRow(item.id)}
+            aria-label={
+              expandedRowId === item.id
+                ? i18n.translate('xpack.fleet.cloudConnector.policiesFlyout.collapseRowAriaLabel', {
+                    defaultMessage: 'Collapse {name}',
+                    values: { name: item.name },
+                  })
+                : i18n.translate('xpack.fleet.cloudConnector.policiesFlyout.expandRowAriaLabel', {
+                    defaultMessage: 'Expand {name}',
+                    values: { name: item.name },
+                  })
+            }
+            iconType={expandedRowId === item.id ? 'arrowDown' : 'arrowRight'}
+            data-test-subj={PERMISSION_STATUS_ROW_EXPAND_TEST_SUBJECTS.EXPAND_TOGGLE}
+          />
+        ),
       },
     ],
-    [handleNavigateToPolicy]
+    [
+      handleNavigateToPolicy,
+      verificationPermissions,
+      verificationStatus,
+      expandedRowId,
+      toggleExpandedRow,
+    ]
   );
 
   return (
@@ -317,6 +411,14 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
+
+        <EuiSpacer size="m" />
+
+        {/* Story 4: Identity-level permission summary (rollup across all integrations). */}
+        <IdentityPermissionSummary
+          verificationPermissions={verificationPermissions}
+          verificationStatus={verificationStatus}
+        />
 
         <EuiSpacer size="m" />
 
@@ -405,6 +507,11 @@ export const CloudConnectorPoliciesFlyout: React.FC<CloudConnectorPoliciesFlyout
             pagination={pagination}
             onChange={onTableChange}
             tableCaption={tableCaption}
+            // Story 7: identify rows by their package_policy id, and provide the per-row
+            // expanded content. `isExpandable` enables the EuiBasicTable chevron behavior.
+            itemId="id"
+            itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+            isExpandable
             data-test-subj={CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS.POLICIES_TABLE}
           />
         )}

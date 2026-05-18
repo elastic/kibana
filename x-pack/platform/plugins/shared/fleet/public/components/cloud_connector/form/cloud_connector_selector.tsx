@@ -250,6 +250,10 @@ export const CloudConnectorSelector = ({
           cloudConnectorVars={flyoutConnector.vars}
           accountType={flyoutConnector.accountType}
           provider={provider}
+          verificationPermissions={flyoutConnector.verification_permissions}
+          verificationStatus={flyoutConnector.verification_status}
+          verificationStartedAt={flyoutConnector.verification_started_at}
+          verificationFailedAt={flyoutConnector.verification_failed_at}
           onClose={handleCloseFlyout}
         />
       )}
