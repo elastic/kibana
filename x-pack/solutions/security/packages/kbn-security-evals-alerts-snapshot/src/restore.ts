@@ -7,47 +7,10 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { restoreSnapshot, createGcsRepository } from '@kbn/es-snapshot-loader';
-
-export interface AlertsSnapshotConfig {
-  bucket: string;
-  basePath: string;
-  snapshotName?: string;
-}
+import { createGcsRepository, restoreSnapshot } from '@kbn/es-snapshot-loader';
+import type { AlertsSnapshotConfig } from './config';
 
 const INDEX_REFRESH_WAIT_MS = 3_000;
-
-export const DEFAULT_ALERTS_SNAPSHOT_CONFIG: Required<AlertsSnapshotConfig> = {
-  bucket: 'security-ai-datasets',
-  basePath: 'attack-discovery/oh-my-malware/2026-03-26',
-  snapshotName: 'alerts-snapshot',
-};
-
-/**
- * Resolve the alerts snapshot configuration.
- *
- * - Defaults are pinned in code for repeatability.
- * - Env vars can override for experimentation and CI variants.
- * - Returns `null` when no GCS credentials are available (to avoid failing local runs).
- */
-export const resolveAlertsSnapshotConfig = (): AlertsSnapshotConfig | null => {
-  if (process.env.ATTACK_DISCOVERY_ALERTS_SNAPSHOT_DISABLE === 'true') return null;
-
-  const bucket =
-    process.env.ATTACK_DISCOVERY_ALERTS_SNAPSHOT_BUCKET ?? DEFAULT_ALERTS_SNAPSHOT_CONFIG.bucket;
-  const basePath =
-    process.env.ATTACK_DISCOVERY_ALERTS_SNAPSHOT_BASE_PATH ??
-    DEFAULT_ALERTS_SNAPSHOT_CONFIG.basePath;
-  const snapshotName =
-    process.env.ATTACK_DISCOVERY_ALERTS_SNAPSHOT_NAME ??
-    DEFAULT_ALERTS_SNAPSHOT_CONFIG.snapshotName;
-
-  // Snapshot restore requires Elasticsearch to have repository-gcs credentials configured.
-  // In our Scout setup, that is driven by the presence of the GCS_CREDENTIALS env var.
-  if (!process.env.GCS_CREDENTIALS) return null;
-
-  return { bucket, basePath, snapshotName };
-};
 
 const ALERT_INDICES_TO_RESTORE_AND_OVERWRITE = [
   '.internal.alerts-security.alerts-default-*',
@@ -62,8 +25,6 @@ const resolveIndicesByPattern = async (esClient: Client, pattern: string): Promi
       ignore_unavailable: true,
       allow_no_indices: true,
     })) as unknown as Record<string, unknown>;
-
-    // indices.get returns an object keyed by index name.
     return Object.keys(response);
   } catch {
     return [];
@@ -72,23 +33,23 @@ const resolveIndicesByPattern = async (esClient: Client, pattern: string): Promi
 
 const deleteExistingAlertIndices = async (esClient: Client, log: ToolingLog): Promise<void> => {
   log.info('Resolving existing alert indices to delete before restore...');
-  const resolvedToDelete = (
+  const resolved = (
     await Promise.all(
       ALERT_INDICES_TO_RESTORE_AND_OVERWRITE.map((pattern) =>
         resolveIndicesByPattern(esClient, pattern)
       )
     )
   ).flat();
-  const uniqueToDelete = [...new Set(resolvedToDelete)];
+  const unique = [...new Set(resolved)];
 
-  if (uniqueToDelete.length === 0) {
+  if (unique.length === 0) {
     log.info('No existing alert indices matched for deletion');
     return;
   }
 
-  log.info(`Deleting ${uniqueToDelete.length} existing indices before restore`);
+  log.info(`Deleting ${unique.length} existing indices before restore`);
   await esClient.indices.delete({
-    index: uniqueToDelete,
+    index: unique,
     ignore_unavailable: true,
     allow_no_indices: true,
   });
@@ -98,8 +59,17 @@ const isOpenIndexConflictError = (errors: string[]): boolean =>
   errors.some((e) => e.includes('open index with same name already exists in the cluster'));
 
 /**
- * Restores an alerts snapshot from GCS into the local ES cluster,
- * then waits briefly for refresh.
+ * Restore the shared security-alerts snapshot from GCS into the local
+ * Scout-managed ES cluster.
+ *
+ * Scout's Kibana boot eagerly creates the Security Solution alert index, so
+ * we delete any matching indices before restore to avoid `restore` conflicts.
+ * This is safe in the disposable eval cluster (and only there) — never call
+ * this against a production cluster.
+ *
+ * If restore fails with an open-index conflict (rare race when the alert
+ * index is recreated between the delete and the restore), we delete and
+ * retry once before failing hard.
  */
 export const restoreAlertsSnapshot = async ({
   esClient,
@@ -121,9 +91,6 @@ export const restoreAlertsSnapshot = async ({
     }`
   );
 
-  // Scout's Kibana boot will eagerly create the Security Solution alert index, which causes
-  // snapshot restore conflicts. For repeatability, we delete any matching indices first.
-  // This runs in a disposable eval cluster, so this is safe and expected.
   try {
     await deleteExistingAlertIndices(esClient, log);
   } catch (err) {
@@ -162,6 +129,5 @@ export const restoreAlertsSnapshot = async ({
 
   log.debug('Waiting for restored indices to refresh');
   await new Promise((resolve) => setTimeout(resolve, INDEX_REFRESH_WAIT_MS));
-
   await esClient.indices.refresh({ index: '_all' });
 };

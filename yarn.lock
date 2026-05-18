@@ -6866,6 +6866,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/evals-suite-alerts-rag@link:x-pack/solutions/security/packages/kbn-evals-suite-alerts-rag":
+  version "0.0.0"
+  uid ""
+
 "@kbn/evals-suite-attack-discovery@link:x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery":
   version "0.0.0"
   uid ""
@@ -8743,6 +8747,10 @@
   uid ""
 
 "@kbn/security-authorization-core@link:x-pack/platform/packages/private/security/authorization_core":
+  version "0.0.0"
+  uid ""
+
+"@kbn/security-evals-alerts-snapshot@link:x-pack/solutions/security/packages/kbn-security-evals-alerts-snapshot":
   version "0.0.0"
   uid ""
 
