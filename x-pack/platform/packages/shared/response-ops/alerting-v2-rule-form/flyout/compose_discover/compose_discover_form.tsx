@@ -533,7 +533,7 @@ function RuleBuilderAlertConditionStep({
   dispatch: React.Dispatch<ComposeDiscoverAction>;
   services: RuleFormServices;
 }) {
-  const parentForm = useFormContext<FormValues>();
+  const parentForm = useFormContext<ComposeFormValues>();
   const existingState = parentForm.getValues('ruleBuilderState') as
     | ThresholdRuleFormValues
     | undefined;
@@ -566,7 +566,7 @@ function RuleBuilderAlertConditionFields({
   state: ComposeDiscoverState;
   dispatch: React.Dispatch<ComposeDiscoverAction>;
   services: RuleFormServices;
-  parentForm: ReturnType<typeof useFormContext<FormValues>>;
+  parentForm: ReturnType<typeof useFormContext<ComposeFormValues>>;
 }) {
   const builderMethods = useFormContext<ThresholdRuleFormValues>();
 
@@ -622,7 +622,7 @@ function RuleBuilderAlertConditionFields({
 
     const snapshot = builderMethods.getValues();
     parentForm.setValue('ruleBuilderState', snapshot as unknown as Record<string, any>);
-    parentForm.setValue('evaluation.query.base', esqlQuery);
+    parentForm.setValue('query', { format: 'standalone', breach: esqlQuery });
     parentForm.setValue('timeField', snapshot.timeField || '@timestamp');
     if (snapshot.groupBy && snapshot.groupBy.length > 0) {
       parentForm.setValue('grouping', { fields: snapshot.groupBy });

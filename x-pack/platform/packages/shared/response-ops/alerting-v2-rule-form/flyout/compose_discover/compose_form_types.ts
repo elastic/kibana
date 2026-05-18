@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RuleKind, RecoveryPolicyType } from '@kbn/alerting-v2-schemas';
+import type { RuleKind, RecoveryPolicyType, EditMode } from '@kbn/alerting-v2-schemas';
 
 // ---------------------------------------------------------------------------
 // RuleQuery — the new composed/standalone query schema (#268984).
@@ -79,6 +79,8 @@ export interface ComposeFormValues {
   stateTransitionAlertDelayMode: 'immediate' | 'breaches' | 'recoveries' | 'duration';
   stateTransitionRecoveryDelayMode: 'immediate' | 'breaches' | 'recoveries' | 'duration';
   artifacts?: Array<{ id: string; type: string; value: string }>;
+  editMode?: EditMode;
+  ruleBuilderState?: Record<string, any>;
 }
 
 // Re-export for use by compose mappers
