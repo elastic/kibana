@@ -39,11 +39,28 @@ Always run `node scripts/check_changes.ts` to validate your changes
 Follow existing patterns in the target area first; below are common defaults.
 
 ### Type check
+
+> **Worktree rule**: always run type checks from the **root of the worktree that owns the branch**. Running `node scripts/type_check` from a different worktree (e.g. `main`) while pointing `--project` at another worktree's `tsconfig.json` anchors `REPO_ROOT` to the wrong directory and scatters `.d.ts` artifacts into that tree.
+
+#### Option A — `node scripts/type_check` (project-build mode)
 `node scripts/type_check [--project path/to/tsconfig.json]`
 - Without `--project` it checks **all** projects (very slow). Always scope to a single project:
-  `node scripts/type_check --project src/core/packages/http/server-internal/tsconfig.json`
+ `node scripts/type_check --project src/core/packages/http/server-internal/tsconfig.json`
 - Only one `--project` per run. To check multiple packages, run separate commands.
-- `.buildkite/` is **not** a valid target for `scripts/type_check`. Buildkite scripts live in a separate workspace; typecheck them with `npm run typecheck` (or `yarn typecheck`) from inside `.buildkite/`.
+- `.buildkite/` is **not** a valid target. Typecheck Buildkite scripts with `npm run typecheck` from inside `.buildkite/`.
+- ⚠️ Uses `tsc -b` internally: compiles all referenced composite projects and **emits `.d.ts` files** across the tree. Afterwards, clean stray files with:
+  ```bash
+  git ls-files --others --exclude-standard | grep '\.d\.ts$' | xargs rm -f
+  ```
+
+#### Option B — `tsc --noEmit` (lighter, no build artefacts)
+Preferred when you only need to verify your changed files without polluting the working tree:
+```bash
+./node_modules/typescript/bin/tsc --noEmit -p path/to/tsconfig.json 2>&1 | grep 'path/to/my/changed/file'
+```
+- Find the narrowest applicable `tsconfig.json` by walking up from the changed file until you hit one.
+- No `.d.ts` files are emitted for the root project. Referenced composite packages may still emit (TypeScript project-references limitation); use the cleanup command above if needed.
+- Pipe through `grep` to surface only errors in your changed files and ignore pre-existing failures in unrelated files.
 
 ### TypeScript & Types
 - Use TypeScript for all new code; avoid `any` and `unknown`.

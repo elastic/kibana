@@ -18,7 +18,7 @@ If `max_wait_ms` is exceeded, report a timeout and continue to the next workflow
 |---|---:|---:|
 | `git diff`, `git merge-base` | 15000 | 1000 |
 | `node scripts/check_changes.ts --ref "$BASE"` | 180000 | 2000 |
-| `node scripts/lint_ts_projects.js`, `yarn test:type_check --project` | 120000 | 2000 |
+| `node scripts/lint_ts_projects.js`, `tsc --noEmit -p tsconfig.json`, `yarn test:type_check --project` | 120000 | 2000 |
 | `node scripts/generate codeowners`, `node scripts/regenerate_moon_projects.js` | 60000 | 2000 |
 | `yarn test:jest` (per package) | 300000 | 5000 |
 
@@ -67,11 +67,24 @@ This runs repo-wide but is fast. Note files modified by `--fix` and report any r
 
 ### Step 3: Type check
 
+> **Worktree rule**: run this step from the **root of the worktree that owns the branch**, not from any other worktree (e.g. `main`). Running `node scripts/type_check` / `yarn test:type_check` from the wrong root anchors `REPO_ROOT` incorrectly and writes `.d.ts` artefacts into that root's tree.
+
 Run type checking scoped to each affected package's `tsconfig.json`.
 Only one `--project` flag per invocation — run separate commands for each package.
 
+**Preferred — `tsc --noEmit` (no build artefacts):**
 ```bash
-yarn test:type_check --project path/to/tsconfig.json
+./node_modules/typescript/bin/tsc --noEmit -p path/to/tsconfig.json 2>&1 | grep 'path/to/my/file'
+```
+Use `grep` to show only errors in your changed files and ignore pre-existing failures in unrelated files.
+
+**Alternative — `node scripts/type_check` (project-build mode):**
+```bash
+node scripts/type_check --project path/to/tsconfig.json
+```
+This runs `tsc -b` internally and **emits `.d.ts` files** across the dependency tree. After the run, clean stray files with:
+```bash
+git ls-files --others --exclude-standard | grep '\.d\.ts$' | xargs rm -f
 ```
 
 **Also check downstream dependents** — find packages whose `kbn_references` include any affected
