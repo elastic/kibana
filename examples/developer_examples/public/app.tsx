@@ -99,7 +99,7 @@ function DeveloperExamples({ examples, navigateToApp, getUrlForApp, rendering }:
                   </React.Fragment>
                 }
                 image={def.image}
-                footer={def.links ? <EuiListGroup size={'s'} listItems={def.links} /> : undefined}
+                footer={def.links ? <EuiListGroup listItems={def.links} /> : undefined}
               />
             </EuiFlexItem>
           ))}
