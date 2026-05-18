@@ -60,6 +60,18 @@ interface CasesAnalyticsV2ServiceDeps {
    * periodic ticks always use 0 (no throttle).
    */
   resetPageDelayMs: number;
+  /**
+   * Resolved value of `xpack.cases.templates.enabled`. When false, the
+   * `cases-templates` SO type is not registered with core, so the data
+   * view sub-service must skip its per-space template read (otherwise
+   * the internal SO client throws "Missing mappings for saved objects
+   * types: 'cases-templates'"). Threaded through to the data view
+   * sub-service at `start()` time; per-space data views are still
+   * bootstrapped with an empty runtime field overlay when templates is
+   * off, which is the correct shape (no templates → no extended-field
+   * projections).
+   */
+  templatesEnabled: boolean;
 }
 
 /**
@@ -132,6 +144,7 @@ export class CasesAnalyticsV2Service {
   private readonly enableAdminRoutes: boolean;
   private readonly resetTaskTimeoutMinutes: number;
   private readonly resetPageDelayMs: number;
+  private readonly templatesEnabled: boolean;
   /**
    * Active writer. Starts as `V2_NOOP_WRITER` so calls before `start()`
    * (or when v2 is disabled) silently no-op. Replaced with a real
@@ -190,6 +203,7 @@ export class CasesAnalyticsV2Service {
     this.enableAdminRoutes = deps.enableAdminRoutes;
     this.resetTaskTimeoutMinutes = deps.resetTaskTimeoutMinutes;
     this.resetPageDelayMs = deps.resetPageDelayMs;
+    this.templatesEnabled = deps.templatesEnabled;
   }
 
   /**
@@ -334,6 +348,7 @@ export class CasesAnalyticsV2Service {
       logger: this.logger,
       dataViewsService: deps.dataViewsService,
       internalSavedObjectsClient: deps.internalSavedObjectsClient,
+      templatesEnabled: this.templatesEnabled,
     });
 
     // Schedule the singleton reconciliation task. Idempotent and safe

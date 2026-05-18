@@ -35,7 +35,10 @@ describe('CasesAnalyticsV2DataViewService', () => {
    * and returns the deps any test needs to call `ensureForSpace` /
    * `refreshForSpace`.
    */
-  const setup = (templates: Array<SavedObject<TemplateLike>> = []) => {
+  const setup = (
+    templates: Array<SavedObject<TemplateLike>> = [],
+    { templatesEnabled = true }: { templatesEnabled?: boolean } = {}
+  ) => {
     const internalSoClient = savedObjectsClientMock.create();
     stubFindOnePage(internalSoClient, templates);
 
@@ -47,6 +50,7 @@ describe('CasesAnalyticsV2DataViewService', () => {
       logger,
       dataViewsService,
       internalSavedObjectsClient: internalSoClient,
+      templatesEnabled,
     });
 
     return {
@@ -143,6 +147,35 @@ describe('CasesAnalyticsV2DataViewService', () => {
 
       await expect(service.ensureForSpace(deps)).resolves.toBeUndefined();
       expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('cluster unavailable'));
+    });
+
+    /**
+     * Regression guard for the "templates off → cases-templates SO type
+     * not registered" path. When `xpack.cases.templates.enabled` is
+     * false, `caseTemplateSavedObjectType` is not registered with core
+     * (see `saved_object_types/index.ts`), so the internal SO client
+     * would throw "Missing mappings for saved objects types:
+     * 'cases-templates'" on any `find({ type: CASE_TEMPLATE_SAVED_OBJECT })`
+     * call. The service must skip the template walk entirely in that
+     * configuration — never touching the SO client for templates — and
+     * bootstrap the per-space data view with an empty runtime field
+     * overlay (the base data view is still useful for ES|QL against
+     * the analytics index; only the extended-field projections are
+     * absent).
+     */
+    it('skips the cases-templates SO walk when templates feature flag is off', async () => {
+      const { service, dvService, internalSoClient, deps } = setup(
+        [makeTemplate('tpl-1', [{ name: 'risk', type: 'long', control: 'INPUT_NUMBER' }])],
+        { templatesEnabled: false }
+      );
+      stubMissingDataView(dvService);
+
+      await service.ensureForSpace(deps);
+
+      expect(internalSoClient.find).not.toHaveBeenCalled();
+      expect(dvService.createAndSave).toHaveBeenCalledTimes(1);
+      const [spec] = dvService.createAndSave.mock.calls[0];
+      expect(Object.keys(spec.runtimeFieldMap ?? {})).toEqual([]);
     });
 
     /**
@@ -490,6 +523,7 @@ describe('CasesAnalyticsV2DataViewService', () => {
         logger: parentLogger,
         dataViewsService: makeDataViewsPluginStart(dvService),
         internalSavedObjectsClient: internalSoClient,
+        templatesEnabled: true,
       });
       // `logger.get('dataView')` is what the service holds for its
       // own log calls; the parent mock's `.get` returns a child mock

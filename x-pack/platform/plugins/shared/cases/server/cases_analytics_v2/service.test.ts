@@ -26,6 +26,7 @@ describe('CasesAnalyticsV2Service', () => {
         enableAdminRoutes: false,
         resetTaskTimeoutMinutes: 60,
         resetPageDelayMs: 0,
+        templatesEnabled: true,
       });
       const proxy = service.getWriter();
 
@@ -56,6 +57,7 @@ describe('CasesAnalyticsV2Service', () => {
         enableAdminRoutes: false,
         resetTaskTimeoutMinutes: 60,
         resetPageDelayMs: 0,
+        templatesEnabled: true,
       });
       const refA = service.getDataViewRefresher();
       const refB = service.getDataViewRefresher();
@@ -72,6 +74,7 @@ describe('CasesAnalyticsV2Service', () => {
         enableAdminRoutes: false,
         resetTaskTimeoutMinutes: 60,
         resetPageDelayMs: 0,
+        templatesEnabled: true,
       });
       const refresher = service.getDataViewRefresher();
 
