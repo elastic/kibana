@@ -200,7 +200,6 @@ describe('useQueryValidation debounced validation', () => {
     await waitFor(() => expect(pendingValidations).toHaveLength(1));
 
     const firstToken = pendingValidations[0].cancellationToken;
-    mockSetModelMarkers.mockClear();
 
     rerender(defaultParams({ code: 'FROM logs | LIMIT 10' }));
     advanceDebounce();

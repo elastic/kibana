@@ -278,7 +278,7 @@ export const useQueryValidation = ({
     await queryValidation({ invalidateColumnsCache: true });
   }, [esqlFieldsCache, queryValidation]);
 
-  // Debounced validation (256ms). Two paths:. Only runs when `code` changes. Two paths:
+  // Debounced validation (256ms). Only runs when `code` changes. Two paths:
   // 1. If the code hasn't changed since submission and there are server errors/warnings,
   //    show those directly (skip client validation to avoid flickering).
   // 2. Otherwise, run full client-side validation via queryValidation().
