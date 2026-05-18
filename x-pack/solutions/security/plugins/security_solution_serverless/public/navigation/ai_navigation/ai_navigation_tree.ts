@@ -177,8 +177,7 @@ export const createAiNavigationTree = (
                 renderAs: 'panelOpener' as const,
                 children: [
                   { link: 'management:rules' as const },
-                  { link: 'management:action_policies' as const },
-                  { link: 'management:execution_history' as const },
+                  { link: 'management:action_policies' as const },                  
                 ],
               },
             ]
