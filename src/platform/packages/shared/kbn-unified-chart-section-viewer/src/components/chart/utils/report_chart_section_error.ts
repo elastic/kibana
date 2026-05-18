@@ -17,11 +17,23 @@ export type ChartSectionErrorSource = 'useFetchMetricsData' | 'useLensProps';
 /** APM `error_type` label for non-render captures (vs. SectionFatalReactError). */
 export const CHART_SECTION_ERROR_TYPE_LABEL = 'ChartSectionNonRenderError';
 
+/**
+ * Correlation labels merged into the APM payload alongside the error.
+ *
+ * `profile_id` is required: it identifies which data source profile owns the
+ * failing chart section and is the only label that lets us filter these
+ * events in APM. `chart_id` is optional because not every call site has a
+ * stable chart identifier (e.g. the grid-level fetch).
+ */
+interface ChartSectionErrorLabels {
+  profile_id: string;
+  chart_id?: string;
+}
+
 interface ReportChartSectionErrorArgs {
   error: unknown;
   source: ChartSectionErrorSource;
-  /** Optional correlation labels (e.g. `profile_id`, `chart_id`) merged into the APM payload. */
-  labels?: Record<string, string>;
+  labels: ChartSectionErrorLabels;
 }
 
 /**
@@ -52,12 +64,11 @@ export const reportChartSectionError = ({
       labels.esql_status = String(error.status);
     }
   }
-  if (callerLabels) {
-    // Drop undefined / empty values.
-    for (const [key, value] of Object.entries(callerLabels)) {
-      if (value !== undefined && value !== '') {
-        labels[key] = value;
-      }
+  // Drop undefined / empty values so APM is not polluted with placeholder
+  // labels (e.g., an unset `chart_id`).
+  for (const [key, value] of Object.entries(callerLabels)) {
+    if (value !== undefined && value !== '') {
+      labels[key] = value;
     }
   }
 

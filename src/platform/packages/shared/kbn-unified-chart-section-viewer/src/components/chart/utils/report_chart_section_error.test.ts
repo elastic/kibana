@@ -51,10 +51,13 @@ describe('reportChartSectionError', () => {
     getCurrentTransactionMock.mockReturnValue(undefined);
   });
 
+  const PROFILE_ID = 'metrics-experience';
+
   it('is a no-op when error is undefined', () => {
     reportChartSectionError({
       error: undefined,
       source: 'useFetchMetricsData',
+      labels: { profile_id: PROFILE_ID },
     });
 
     expect(captureErrorMock).not.toHaveBeenCalled();
@@ -64,6 +67,7 @@ describe('reportChartSectionError', () => {
     reportChartSectionError({
       error: 'plain string',
       source: 'useFetchMetricsData',
+      labels: { profile_id: PROFILE_ID },
     });
 
     expect(captureErrorMock).not.toHaveBeenCalled();
@@ -76,6 +80,7 @@ describe('reportChartSectionError', () => {
     reportChartSectionError({
       error: abortError,
       source: 'useFetchMetricsData',
+      labels: { profile_id: PROFILE_ID },
     });
 
     expect(captureErrorMock).not.toHaveBeenCalled();
@@ -87,6 +92,7 @@ describe('reportChartSectionError', () => {
     reportChartSectionError({
       error: plainError,
       source: 'useFetchMetricsData',
+      labels: { profile_id: PROFILE_ID },
     });
 
     expect(captureErrorMock).toHaveBeenCalledTimes(1);
@@ -94,6 +100,7 @@ describe('reportChartSectionError', () => {
       labels: {
         error_type: CHART_SECTION_ERROR_TYPE_LABEL,
         chart_section_source: 'useFetchMetricsData',
+        profile_id: PROFILE_ID,
       },
     });
   });
@@ -111,6 +118,7 @@ describe('reportChartSectionError', () => {
     reportChartSectionError({
       error: esqlError,
       source: 'useLensProps',
+      labels: { profile_id: PROFILE_ID },
     });
 
     expect(captureErrorMock).toHaveBeenCalledTimes(1);
@@ -120,6 +128,7 @@ describe('reportChartSectionError', () => {
         chart_section_source: 'useLensProps',
         esql_error_type: 'verification_exception',
         esql_status: '400',
+        profile_id: PROFILE_ID,
       },
     });
   });
@@ -130,12 +139,14 @@ describe('reportChartSectionError', () => {
     reportChartSectionError({
       error: esqlError,
       source: 'useLensProps',
+      labels: { profile_id: PROFILE_ID },
     });
 
     expect(captureErrorMock).toHaveBeenCalledWith(esqlError, {
       labels: {
         error_type: CHART_SECTION_ERROR_TYPE_LABEL,
         chart_section_source: 'useLensProps',
+        profile_id: PROFILE_ID,
       },
     });
   });
@@ -152,6 +163,7 @@ describe('reportChartSectionError', () => {
     reportChartSectionError({
       error: plainError,
       source: 'useLensProps',
+      labels: { profile_id: PROFILE_ID },
     });
 
     expect(transaction.startSpan).toHaveBeenCalledTimes(1);
@@ -162,11 +174,13 @@ describe('reportChartSectionError', () => {
     expect(span.addLabels).toHaveBeenCalledWith({
       error_type: CHART_SECTION_ERROR_TYPE_LABEL,
       chart_section_source: 'useLensProps',
+      profile_id: PROFILE_ID,
     });
     expect(captureErrorMock).toHaveBeenCalledWith(plainError, {
       labels: {
         error_type: CHART_SECTION_ERROR_TYPE_LABEL,
         chart_section_source: 'useLensProps',
+        profile_id: PROFILE_ID,
       },
     });
     expect(span.outcome).toBe('failure');
@@ -184,6 +198,7 @@ describe('reportChartSectionError', () => {
     reportChartSectionError({
       error: plainError,
       source: 'useLensProps',
+      labels: { profile_id: PROFILE_ID },
     });
 
     expect(transaction.startSpan).toHaveBeenCalledTimes(1);
@@ -192,6 +207,7 @@ describe('reportChartSectionError', () => {
       labels: {
         error_type: CHART_SECTION_ERROR_TYPE_LABEL,
         chart_section_source: 'useLensProps',
+        profile_id: PROFILE_ID,
       },
     });
   });
@@ -244,13 +260,16 @@ describe('reportChartSectionError', () => {
     it('drops undefined and empty-string label values so APM is not polluted', () => {
       const plainError = new Error('boom');
 
+      // `profile_id` is typed as a required string and `chart_id` as optional,
+      // but the type system can't catch every runtime case (e.g. an upstream
+      // ref hasn't been hydrated yet). The merge loop is the defense-in-depth
+      // guard that keeps placeholder values out of APM.
       reportChartSectionError({
         error: plainError,
         source: 'useFetchMetricsData',
         labels: {
           profile_id: '',
-          chart_id: undefined as unknown as string,
-          valid_label: 'kept',
+          chart_id: undefined,
         },
       });
 
@@ -258,7 +277,6 @@ describe('reportChartSectionError', () => {
         labels: {
           error_type: CHART_SECTION_ERROR_TYPE_LABEL,
           chart_section_source: 'useFetchMetricsData',
-          valid_label: 'kept',
         },
       });
     });
