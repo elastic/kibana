@@ -116,7 +116,7 @@ export function SliChartPanelActions({ slo, timeRange }: SliChartPanelActionsPro
           data-action="openInApm"
           data-source={slo.indicator.type}
           data-ebt-action={EBT_CLICK_ACTIONS.OPEN_IN_APM}
-          data-ebt-element={SLO_DETAILS_EBT_ELEMENTS.SLI_CHART_PANEL}
+          data-ebt-element={SLO_DETAILS_EBT_ELEMENTS.SLI_CHART}
           data-ebt-detail={slo.indicator.type}
         >
           {inApmLabel}
@@ -128,7 +128,7 @@ export function SliChartPanelActions({ slo, timeRange }: SliChartPanelActionsPro
           data-action="openTracesInDiscover"
           data-source={slo.indicator.type}
           data-ebt-action={EBT_CLICK_ACTIONS.OPEN_IN_DISCOVER}
-          data-ebt-element={SLO_DETAILS_EBT_ELEMENTS.SLI_CHART_PANEL}
+          data-ebt-element={SLO_DETAILS_EBT_ELEMENTS.SLI_CHART}
           data-ebt-detail={slo.indicator.type}
         >
           {tracesInDiscoverLabel}

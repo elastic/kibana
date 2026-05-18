@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+export const SLO_DETAILS_EBT_ACTIONS = {
+  VIEW_GOOD_VS_BAD_EVENTS: 'viewGoodVsBadEvents',
+} as const;
+
 export const SLO_DETAILS_EBT_ELEMENTS = {
-  SLI_CHART_PANEL: 'sloDetailsSliChartPanel',
+  GOOD_VS_BAD_EVENTS_CHART: 'sloDetailsGoodVsBadEventsChart',
 } as const;
