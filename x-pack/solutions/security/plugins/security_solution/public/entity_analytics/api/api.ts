@@ -12,6 +12,7 @@ import {
   type EntityMaintainerResponseItem,
   ENTITY_STORE_ROUTES,
   type GetEntityMaintainersResponse,
+  type SaveEntityAiSummaryParams,
 } from '@kbn/entity-store/common';
 import { compact } from 'lodash';
 import type { EntityDetailsHighlightsResponse } from '../../../common/api/entity_analytics/entity_details/highlights.gen';
@@ -759,18 +760,9 @@ export const useEntityAnalyticsRoutes = () => {
         signal,
       });
 
-    const saveEntityAiSummary = (params: {
-      entityId: string;
-      entityType: string;
-      summary: {
-        highlights: Array<{ title: string; text: string }>;
-        recommendedActions: string[] | null | undefined;
-        generated_at: number;
-        risk_level_at_generation?: string | null;
-        anomaly_job_ids_at_generation?: string[] | null;
-        rule_names_at_generation?: string[] | null;
-      };
-    }): Promise<{ updated: boolean }> =>
+    const saveEntityAiSummary = (
+      params: SaveEntityAiSummaryParams
+    ): Promise<{ updated: boolean }> =>
       http.fetch(ENTITY_DETAILS_AI_SUMMARY_INTERNAL_URL, {
         version: API_VERSIONS.internal.v1,
         method: 'POST',

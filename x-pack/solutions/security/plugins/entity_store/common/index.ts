@@ -111,6 +111,21 @@ export type {
   Asset,
   EntitySummaryAttribute,
 } from './domain/definitions/entity.gen';
+export type {
+  EntitySummaryHighlight,
+  EntitySummaryStaleness,
+  EntitySummaryStalenessSignal,
+  EntitySummaryStalenessSnapshot,
+  EntitySummaryStalenessEntitySnapshot,
+  SaveEntityAiSummaryParams,
+  SaveEntityAiSummarySummary,
+} from './domain/definitions/entity_summary_staleness';
+export {
+  ENTITY_SUMMARY_STALENESS_SIGNALS,
+  DEFAULT_ENTITY_SUMMARY_STALENESS_SIGNALS,
+  buildEntitySummaryStaleness,
+  computeEntitySummaryStalenessReasons,
+} from './domain/definitions/entity_summary_staleness';
 
 export interface IdentitySourceFields {
   /** Fields that participate in identity (EUID composition). */

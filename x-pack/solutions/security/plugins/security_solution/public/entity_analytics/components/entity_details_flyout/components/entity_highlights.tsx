@@ -42,7 +42,12 @@ import { EntityHighlightsSettings } from './entity_highlights_settings';
 import { EntityHighlightsResult } from './entity_highlights_result';
 import type { StalenessDisplayMode } from './entity_highlights_result';
 import type { Entity } from '../../../../../common/api/entity_analytics';
-import type { EntitySummaryAttribute } from '@kbn/entity-store/common';
+import {
+  type EntitySummaryAttribute,
+  computeEntitySummaryStalenessReasons,
+} from '@kbn/entity-store/common';
+import { buildEntitySummaryStalenessEntitySnapshot } from '../../../../flyout/entity_details/shared/entity_store_risk_utils';
+import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 
 export const EntityHighlightsAccordion: React.FC<{
   entityIdentifier: string;
@@ -118,11 +123,13 @@ export const EntityHighlightsAccordion: React.FC<{
 
   // Snapshot of current entity signals — passed to the hook so they are persisted
   // alongside the summary at generation time for future staleness detection.
-  const entitySnapshot = useMemo(() => ({
-    riskLevel: entityRecord?.entity?.risk?.calculated_level ?? null,
-    anomalyJobIds: entityRecord?.entity?.behaviors?.anomaly_job_ids ?? [],
-    ruleNames: entityRecord?.entity?.behaviors?.rule_names ?? [],
-  }), [entityRecord]);
+  const entitySnapshot = useMemo(
+    () =>
+      buildEntitySummaryStalenessEntitySnapshot(
+        entityRecord ? (entityRecord as EntityStoreRecord) : null
+      ),
+    [entityRecord]
+  );
 
   // Staleness check — compare stored snapshot against current entity signals.
   // This is computed client-side using already-loaded entity data (no extra API call).
@@ -130,33 +137,7 @@ export const EntityHighlightsAccordion: React.FC<{
   // before GA so all surfaces (Agent Builder, external clients) share the same logic.
   const stalenessReasons = useMemo((): string[] => {
     if (!storedSummary) return [];
-    const reasons: string[] = [];
-
-    if (
-      storedSummary.risk_level_at_generation &&
-      entitySnapshot.riskLevel &&
-      entitySnapshot.riskLevel !== storedSummary.risk_level_at_generation
-    ) {
-      reasons.push(
-        `Risk level changed from ${storedSummary.risk_level_at_generation} to ${entitySnapshot.riskLevel}`
-      );
-    }
-
-    const newAnomalyJobs = (entitySnapshot.anomalyJobIds ?? []).filter(
-      (id) => !(storedSummary.anomaly_job_ids_at_generation ?? []).includes(id)
-    );
-    if (newAnomalyJobs.length > 0) {
-      reasons.push(`${newAnomalyJobs.length} new ML anomaly job(s) have fired`);
-    }
-
-    const newRules = (entitySnapshot.ruleNames ?? []).filter(
-      (r) => !(storedSummary.rule_names_at_generation ?? []).includes(r)
-    );
-    if (newRules.length > 0) {
-      reasons.push(`${newRules.length} new detection rule(s) have triggered`);
-    }
-
-    return reasons;
+    return computeEntitySummaryStalenessReasons(storedSummary, entitySnapshot);
   }, [storedSummary, entitySnapshot]);
 
   const {

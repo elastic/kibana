@@ -10,7 +10,10 @@ import type { ToolSchema } from '@kbn/inference-common';
 import { isInferenceRequestAbortedError } from '@kbn/inference-common';
 import { i18n } from '@kbn/i18n';
 import { ENTITY_ANOMALY_DEFAULT_LOOKBACK_DAYS } from '../../../../../common/constants';
-import type { EntitySummaryAttribute } from '@kbn/entity-store/common';
+import {
+  type EntitySummaryAttribute,
+  buildEntitySummaryStaleness,
+} from '@kbn/entity-store/common';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import { useCurrentUser } from '../../../../common/lib/kibana';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
@@ -94,6 +97,7 @@ export const useFetchEntityDetailsHighlights = ({
   /** Current entity signal values — snapshotted into the summary at generation time for staleness detection. */
   entitySnapshot?: {
     riskLevel?: string | null;
+    riskScore?: number | null;
     anomalyJobIds?: string[];
     ruleNames?: string[];
   } | null;
@@ -195,9 +199,12 @@ export const useFetchEntityDetailsHighlights = ({
           highlights: typedOutput.highlights,
           recommendedActions: typedOutput.recommendedActions,
           generated_at: generatedAt,
-          risk_level_at_generation: entitySnapshot?.riskLevel ?? null,
-          anomaly_job_ids_at_generation: entitySnapshot?.anomalyJobIds ?? null,
-          rule_names_at_generation: entitySnapshot?.ruleNames ?? null,
+          staleness: buildEntitySummaryStaleness({
+            riskLevel: entitySnapshot?.riskLevel ?? null,
+            riskScore: entitySnapshot?.riskScore ?? null,
+            anomalyJobIds: entitySnapshot?.anomalyJobIds ?? [],
+            ruleNames: entitySnapshot?.ruleNames ?? [],
+          }),
         },
       }).catch((persistError: Error) => {
         // Persist is best-effort — the in-memory result is still usable this session.

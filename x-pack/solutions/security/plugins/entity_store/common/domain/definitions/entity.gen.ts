@@ -175,17 +175,43 @@ export const EntityField = lazySchema(() =>
                */
               generated_by: z.string().optional(),
               /**
-               * The entity risk level at the time the summary was generated. Used for staleness detection.
+               * Policy and snapshot for summary staleness checks.
                */
-              risk_level_at_generation: z.string().nullable().optional(),
-              /**
-               * Snapshot of anomaly job IDs active at generation time. Used for staleness detection.
-               */
-              anomaly_job_ids_at_generation: z.array(z.string()).nullable().optional(),
-              /**
-               * Snapshot of detection rule names at generation time. Used for staleness detection.
-               */
-              rule_names_at_generation: z.array(z.string()).nullable().optional(),
+              staleness: z
+                .object({
+                  /**
+                   * Signal ids to compare when deciding if the summary is stale.
+                   */
+                  enabled_signals: z.array(
+                    z.enum(['risk_level', 'risk_score', 'anomaly_jobs', 'rule_names'])
+                  ),
+                  /**
+                   * Signal values captured at generation time.
+                   */
+                  snapshot: z
+                    .object({
+                      /**
+                       * entity.risk.calculated_level at generation time.
+                       */
+                      risk_level: z.string().nullable().optional(),
+                      /**
+                       * entity.risk.calculated_score at generation time.
+                       */
+                      risk_score: z.number().nullable().optional(),
+                      /**
+                       * entity.behaviors.anomaly_job_ids at generation time.
+                       */
+                      anomaly_job_ids: z.array(z.string()).nullable().optional(),
+                      /**
+                       * entity.behaviors.rule_names at generation time.
+                       */
+                      rule_names: z.array(z.string()).nullable().optional(),
+                    })
+                    .strict(),
+                })
+                .strict()
+                .nullable()
+                .optional(),
             })
             .strict()
             .nullable()

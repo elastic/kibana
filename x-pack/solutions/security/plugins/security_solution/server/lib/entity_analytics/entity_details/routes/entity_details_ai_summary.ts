@@ -22,6 +22,18 @@ const AiSummaryHighlightItem = z.object({
   text: z.string(),
 });
 
+const EntitySummaryStalenessSnapshotSchema = z.object({
+  risk_level: z.string().nullable().optional(),
+  risk_score: z.number().nullable().optional(),
+  anomaly_job_ids: z.array(z.string()).nullable().optional(),
+  rule_names: z.array(z.string()).nullable().optional(),
+});
+
+const EntitySummaryStalenessSchema = z.object({
+  enabled_signals: z.array(z.enum(['risk_level', 'risk_score', 'anomaly_jobs', 'rule_names'])),
+  snapshot: EntitySummaryStalenessSnapshotSchema,
+});
+
 const SaveAiSummaryRequestBody = z.object({
   entityId: z.string(),
   entityType: EntityType,
@@ -31,9 +43,7 @@ const SaveAiSummaryRequestBody = z.object({
     generated_at: z.number(),
     // generated_by is intentionally excluded from the request body —
     // it is derived server-side from the authenticated user to prevent spoofing.
-    risk_level_at_generation: z.string().nullable().optional(),
-    anomaly_job_ids_at_generation: z.array(z.string()).nullable().optional(),
-    rule_names_at_generation: z.array(z.string()).nullable().optional(),
+    staleness: EntitySummaryStalenessSchema,
   }),
 });
 
