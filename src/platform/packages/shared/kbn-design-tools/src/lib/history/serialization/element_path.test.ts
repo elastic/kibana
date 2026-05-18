@@ -48,6 +48,29 @@ describe('element_path', () => {
       const path = toPath(el);
       expect(path.fingerprint).toContain('Hello world');
     });
+
+    it('should not include descendant text in fingerprint', () => {
+      const parent = document.createElement('div');
+      parent.appendChild(document.createTextNode('Direct '));
+      const child = document.createElement('span');
+      child.textContent = 'nested counter: 42';
+      parent.appendChild(child);
+      document.body.appendChild(parent);
+
+      const path = toPath(parent);
+      expect(path.fingerprint).toContain('Direct');
+      expect(path.fingerprint).not.toContain('42');
+    });
+
+    it('should include child count in fingerprint for structural stability', () => {
+      const parent = document.createElement('div');
+      parent.appendChild(document.createElement('span'));
+      parent.appendChild(document.createElement('span'));
+      document.body.appendChild(parent);
+
+      const path = toPath(parent);
+      expect(path.fingerprint).toContain('|2|');
+    });
   });
 
   describe('fromPath', () => {

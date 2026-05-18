@@ -25,11 +25,35 @@ interface PreviewCloneResult {
 
 /**
  * Strip the translate() from a transform string, keeping everything else (e.g. scale()).
+ * Uses a balanced-parentheses approach to handle nested functions like calc().
  */
 const stripTranslate = (transform: string): string => {
   if (!transform || transform === 'none') return 'none';
-  const stripped = transform.replace(/translate\([^)]*\)\s*/g, '').trim();
-  return stripped || 'none';
+  let result = '';
+  let i = 0;
+  while (i < transform.length) {
+    const translateMatch = transform.slice(i).match(/^translate[XYZ3d]*\s*\(/);
+    if (translateMatch) {
+      let depth = 0;
+      let j = i + translateMatch[0].length - 1;
+      for (; j < transform.length; j++) {
+        if (transform[j] === '(') depth++;
+        else if (transform[j] === ')') {
+          depth--;
+          if (depth === 0) {
+            j++;
+            break;
+          }
+        }
+      }
+      i = j;
+      while (i < transform.length && transform[i] === ' ') i++;
+    } else {
+      result += transform[i];
+      i++;
+    }
+  }
+  return result.trim() || 'none';
 };
 
 /**
@@ -45,7 +69,11 @@ export const createPreviewClone = (target: HTMLElement): PreviewCloneResult => {
   // Visual dimensions (post-transform): what the user actually sees
   let visualRect = roundRect(target.getBoundingClientRect());
 
-  const clone = target.cloneNode(true) as HTMLElement;
+  const cloneNode = target.cloneNode(true);
+  if (!(cloneNode instanceof HTMLElement)) {
+    return { clone: target, elementMap: new Map() };
+  }
+  const clone = cloneNode;
   copyCanvasContent(target, clone);
   deduplicateSvgIds(clone);
 

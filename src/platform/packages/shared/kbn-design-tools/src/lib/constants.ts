@@ -127,6 +127,12 @@ export const IMPORT_CLONE_Z_INDEX = 9001;
 /** Width (px) of the edge zone where dead-zone compensation applies. */
 export const EDGE_ZONE = 16;
 
+/** Prefix used for generated pseudo-element class names on cloned elements. */
+export const PSEUDO_CLASS_PREFIX = '__pseudo_';
+
+/** Matches a generated pseudo-element class name (e.g. `__pseudo_1a2b3c4d`). */
+export const PSEUDO_CLASS_RE = /^__pseudo_[0-9a-f]+$/;
+
 const stopEvent = (e: { stopPropagation: () => void }) => e.stopPropagation();
 
 /**

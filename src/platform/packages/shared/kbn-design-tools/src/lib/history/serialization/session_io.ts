@@ -28,6 +28,8 @@ import {
   DEVTOOL_HIDDEN_ATTR,
   DEVTOOL_LIBRARY_ID_ATTR,
   IMPORT_CLONE_Z_INDEX,
+  PSEUDO_CLASS_PREFIX,
+  PSEUDO_CLASS_RE,
 } from '../../constants';
 
 import { renderEuiComponentLive } from '../../dom/insert_element';
@@ -370,7 +372,7 @@ const sanitizeInlineStyles = (raw: string): string => {
   return cleaned.replace(/url\(([^)]*)\)/gi, (_match, inner) => {
     const trimmed = inner.trim().replace(/^["']|["']$/g, '');
     if (trimmed.startsWith('#')) return _match;
-    return '';
+    return 'url("")';
   });
 };
 
@@ -398,18 +400,16 @@ const recreateFromOuterHTML = (
   return adopted;
 };
 
-const PSEUDO_CLASS_RE = /^__pseudo_[0-9a-f]{8}$/;
-
 const stripPseudoStyles = (root: HTMLElement): void => {
   for (const style of root.querySelectorAll('style')) {
     const text = style.textContent ?? '';
-    if (text.includes('__pseudo_') && /\.__pseudo_[0-9a-f]{8}::(?:before|after)/.test(text)) {
+    if (text.includes(PSEUDO_CLASS_PREFIX) && /\.__pseudo_[0-9a-f]+::(?:before|after)/.test(text)) {
       style.remove();
     }
   }
   const removeCls = (el: Element): void => {
     for (const cls of Array.from(el.classList)) {
-      if (PSEUDO_CLASS_RE.test(cls)) {
+      if (cls.startsWith(PSEUDO_CLASS_PREFIX) && PSEUDO_CLASS_RE.test(cls)) {
         el.classList.remove(cls);
       }
     }
@@ -843,7 +843,15 @@ export const downloadAsJsonFile = (data: unknown, filename: string): void => {
   a.click();
   a.remove();
   // Defer revocation so the browser can finish initiating the download.
-  setTimeout(() => URL.revokeObjectURL(url), 100);
+  // Use a generous timeout to account for slow disk I/O and large files.
+  const timer = setTimeout(() => URL.revokeObjectURL(url), 60_000);
+  // If the page unloads before the timer fires, revoke immediately to
+  // prevent the blob from leaking across navigations.
+  const cleanup = () => {
+    clearTimeout(timer);
+    URL.revokeObjectURL(url);
+  };
+  window.addEventListener('unload', cleanup, { once: true });
 };
 
 /**
@@ -874,6 +882,7 @@ export const pickJsonFile = (): Promise<ExportedState | null> =>
       reader.onload = () => {
         try {
           const parsed = JSON.parse(reader.result as string) as ExportedState;
+          // The lack of schema validation is intentional - this is a developer tool and we want to be forgiving of missing/extra fields as the format evolves. Just check the basics to avoid runtime errors during import.
           if (
             parsed.version !== 1 ||
             !Array.isArray(parsed.sessions) ||

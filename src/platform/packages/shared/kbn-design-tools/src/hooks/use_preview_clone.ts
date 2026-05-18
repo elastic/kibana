@@ -88,7 +88,10 @@ export const usePreviewClone = (target: HTMLElement): UsePreviewCloneResult => {
       mediaMap.current = srcMapping;
       setMediaEntries(srcEntries);
     };
-    collectMedia();
+    collectMedia().catch(() => {
+      // Swallow errors from media collection — the entries simply won't
+      // populate and the editor will show an empty media list.
+    });
     return () => {
       cancelled = true;
     };

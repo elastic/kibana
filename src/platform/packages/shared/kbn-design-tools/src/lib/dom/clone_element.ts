@@ -16,6 +16,7 @@ import {
   BACKGROUND_CSS_PROPS,
   CSS_VAR_PREFIX,
   MAX_TREE_DEPTH,
+  PSEUDO_CLASS_PREFIX,
 } from '../constants';
 import { tagColorTokens, colorToToken, toHex } from './color_token_lookup';
 import { getTokenVar } from './color_token_stylesheet';
@@ -95,10 +96,12 @@ const unfreezeAncestors = (
 ): void => {
   const maxProp = property === 'width' ? 'max-width' : 'max-height';
   let ancestor = el.parentElement;
-  while (ancestor && ancestor !== root?.parentElement) {
+  let depth = 0;
+  while (ancestor && ancestor !== root?.parentElement && depth < MAX_TREE_DEPTH) {
     ancestor.style.removeProperty(property);
     ancestor.style.removeProperty(maxProp);
     ancestor = ancestor.parentElement;
+    depth++;
   }
 };
 
@@ -448,7 +451,10 @@ const applyPseudoStyle = (
 
   const isInteractive = original.matches(':hover, :focus, :active');
 
-  const className = `__pseudo_${uuidv4().replace(/-/g, '').slice(0, 8)}`;
+  const className = `${PSEUDO_CLASS_PREFIX}${crypto
+    .getRandomValues(new Uint32Array(1))[0]
+    .toString(16)
+    .padStart(8, '0')}`;
   clone.classList.add(className);
 
   const rules: string[] = [`content: ${content};`];
@@ -575,15 +581,18 @@ export const widenForTruncation = (
 
   clone.style.visibility = 'hidden';
   document.body.appendChild(clone);
-  const naturalWidth = clone.scrollWidth;
-  document.body.removeChild(clone);
-  clone.style.visibility = 'visible';
-  if (naturalWidth > rect.width) {
-    const w = Math.ceil(naturalWidth);
-    setImportant(clone, 'width', `${w}px`);
-    return new DOMRect(rect.x, rect.y, w, rect.height);
+  try {
+    const naturalWidth = clone.scrollWidth;
+    if (naturalWidth > rect.width) {
+      const w = Math.ceil(naturalWidth);
+      setImportant(clone, 'width', `${w}px`);
+      return new DOMRect(rect.x, rect.y, w, rect.height);
+    }
+    return rect;
+  } finally {
+    document.body.removeChild(clone);
+    clone.style.visibility = 'visible';
   }
-  return rect;
 };
 
 /**

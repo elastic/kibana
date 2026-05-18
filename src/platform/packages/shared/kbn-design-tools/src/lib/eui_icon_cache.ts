@@ -165,6 +165,11 @@ const lazyIconCache = {
  * Build a reverse lookup map from SVG path `d` attribute to icon type name,
  * and a forward cache of rendered SVG children per icon type.
  * Built lazily on first call; requires icons to be preloaded.
+ *
+ * NOTE: If called before `preloadAllEuiIcons` completes, the cache will
+ * only contain icons that have been loaded so far. Callers that hit a
+ * cache miss fall back to a temporary React render via `replaceIconContent`,
+ * so correctness is preserved - only performance is degraded.
  */
 const buildIconCache = (): Promise<Map<string, string>> => {
   if (lazyIconCache.pathToType) return Promise.resolve(lazyIconCache.pathToType);

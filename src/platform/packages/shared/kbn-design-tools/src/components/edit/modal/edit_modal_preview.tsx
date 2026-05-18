@@ -50,6 +50,7 @@ export const EditModalPreview = ({
     [euiTheme]
   );
 
+  // Checkerboard transparency pattern (fixed light colors are intentional)
   const previewCss = useMemo(() => {
     return css({
       border: `1px solid ${euiTheme.colors.borderBasePlain}`,

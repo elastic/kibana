@@ -76,6 +76,18 @@ export interface MediaEdit {
  * Exported for use by history executors that need to reverse edit
  * transactions independently of session lifecycle.
  */
+/**
+ * Revert edits and clear the arrays in-place.
+ *
+ * The arrays are intentionally mutated (set to length 0) rather than
+ * replaced. This is a deliberate design choice: the `EditTransaction`
+ * holds a reference to the same `undoRecords` arrays. On undo,
+ * `revertEdits` drains them; on a subsequent redo, `applyEditChanges`
+ * repopulates them via the same reference. This avoids needing to
+ * swap array references on the transaction object between undo/redo
+ * cycles. The tradeoff is that code must never hold a stale snapshot
+ * of these arrays across an undo boundary.
+ */
 export const revertEdits = (
   styleEdits: StyleEdit[],
   textEdits: TextEdit[],

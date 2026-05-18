@@ -24,7 +24,7 @@ export interface ElementPath {
   readonly selector: string;
   /**
    * Lightweight content fingerprint for disambiguation:
-   * `"TAG|classHash|textSnippet"`.
+   * `"TAG|childCount|classHash|directTextSnippet"`.
    */
   readonly fingerprint: string;
 }
@@ -88,20 +88,42 @@ export const buildRelativeSelector = (root: Element, descendant: Element): strin
 };
 
 /**
+ * Collect only the element's own direct Text node content, ignoring
+ * text inside child elements. This prevents unstable descendant content
+ * (badge counters, timestamps, loading spinners) from invalidating the
+ * fingerprint of a parent container.
+ */
+const directTextContent = (el: Element): string => {
+  let text = '';
+  for (let i = 0; i < el.childNodes.length; i++) {
+    const node = el.childNodes[i];
+    if (node.nodeType === Node.TEXT_NODE) {
+      text += node.textContent ?? '';
+    }
+  }
+  return text.trim();
+};
+
+/**
  * Build a lightweight content fingerprint for an element.
- * Format: `"TAG|classSnippet|first50CharsOfTextContent"`.
+ * Format: `"TAG|childCount|classSnippet|directText"`.
  *
- * Not a cryptographic hash. A best-effort disambiguation
- * check for import validation. The class snippet is truncated to 80
- * characters to keep paths compact while remaining unique enough for
- * structural comparison.
+ * Uses only the element's own characteristics (tag, direct child count,
+ * class names, and direct text nodes) so that changes deep in the subtree
+ * don't cause spurious mismatches.
+ *
+ * Not a cryptographic hash — a best-effort disambiguation check for
+ * import validation. The class snippet is truncated to 80 characters
+ * to keep paths compact while remaining unique enough for structural
+ * comparison.
  */
 const buildContentFingerprint = (el: Element): string => {
   const tag = el.tagName;
   const rawClass = typeof el.className === 'string' ? el.className : String(el.className ?? '');
   const classSnippet = rawClass.slice(0, 80);
-  const textSnippet = (el.textContent || '').trim().slice(0, 50);
-  return `${tag}|${classSnippet}|${textSnippet}`;
+  const textSnippet = directTextContent(el).slice(0, 50);
+  const childCount = el.children.length;
+  return `${tag}|${childCount}|${classSnippet}|${textSnippet}`;
 };
 
 /**
