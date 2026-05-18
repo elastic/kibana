@@ -15,6 +15,7 @@ const mockSearch = jest.fn();
 const getAgentContextLayer = jest.fn(() => ({
   search: mockSearch,
   indexAttachment: jest.fn(),
+  indexAttachmentSystem: jest.fn(),
   getDocuments: jest.fn(),
   getTypeDefinition: jest.fn(),
   resolveSmlAttachItems: jest.fn(),

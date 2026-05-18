@@ -34,10 +34,13 @@ const assertMemoryEnabled = async (uiSettingsClient: IUiSettingsClient) => {
   }
 };
 
+import type { MemoryIndexCallback } from '../../../lib/memory';
+
 const createMemoryService = (
   esClient: import('@kbn/core-elasticsearch-server').ElasticsearchClient,
-  logger: Logger
-) => new MemoryServiceImpl({ logger, esClient });
+  logger: Logger,
+  onAfterWrite?: MemoryIndexCallback
+) => new MemoryServiceImpl({ logger, esClient, onAfterWrite });
 
 const createEntryRoute = createServerRoute({
   endpoint: 'POST /internal/streams/memory/entries',
@@ -63,7 +66,7 @@ const createEntryRoute = createServerRoute({
   handler: async ({ params, request, server, logger, getScopedClients }): Promise<MemoryEntry> => {
     const { uiSettingsClient, scopedClusterClient } = await getScopedClients({ request });
     await assertMemoryEnabled(uiSettingsClient);
-    const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger);
+    const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger, server.memoryIndexCallback);
 
     const authUser = server.core.security.authc.getCurrentUser(request);
     const user = authUser?.username ?? 'unknown';
@@ -95,7 +98,7 @@ const getEntryRoute = createServerRoute({
   handler: async ({ params, request, server, logger, getScopedClients }): Promise<MemoryEntry> => {
     const { uiSettingsClient, scopedClusterClient } = await getScopedClients({ request });
     await assertMemoryEnabled(uiSettingsClient);
-    const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger);
+    const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger, server.memoryIndexCallback);
 
     return memory.get({ id: params.path.id });
   },
@@ -118,7 +121,7 @@ const getEntryByNameRoute = createServerRoute({
   handler: async ({ params, request, server, logger, getScopedClients }): Promise<MemoryEntry> => {
     const { uiSettingsClient, scopedClusterClient } = await getScopedClients({ request });
     await assertMemoryEnabled(uiSettingsClient);
-    const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger);
+    const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger, server.memoryIndexCallback);
 
     const entry = await memory.getByName({ name: params.query.name });
     if (!entry) {
@@ -154,7 +157,7 @@ const updateEntryRoute = createServerRoute({
   handler: async ({ params, request, server, logger, getScopedClients }): Promise<MemoryEntry> => {
     const { uiSettingsClient, scopedClusterClient } = await getScopedClients({ request });
     await assertMemoryEnabled(uiSettingsClient);
-    const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger);
+    const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger, server.memoryIndexCallback);
 
     const authUser = server.core.security.authc.getCurrentUser(request);
     const user = authUser?.username ?? 'unknown';
@@ -191,7 +194,7 @@ const deleteEntryRoute = createServerRoute({
   }): Promise<{ deleted: boolean }> => {
     const { uiSettingsClient, scopedClusterClient } = await getScopedClients({ request });
     await assertMemoryEnabled(uiSettingsClient);
-    const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger);
+    const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger, server.memoryIndexCallback);
 
     const authUser = server.core.security.authc.getCurrentUser(request);
     const user = authUser?.username ?? 'unknown';
@@ -219,7 +222,7 @@ const renameEntryRoute = createServerRoute({
   handler: async ({ params, request, server, logger, getScopedClients }): Promise<MemoryEntry> => {
     const { uiSettingsClient, scopedClusterClient } = await getScopedClients({ request });
     await assertMemoryEnabled(uiSettingsClient);
-    const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger);
+    const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger, server.memoryIndexCallback);
 
     const authUser = server.core.security.authc.getCurrentUser(request);
     const user = authUser?.username ?? 'unknown';
@@ -261,7 +264,7 @@ const searchRoute = createServerRoute({
   }): Promise<{ results: MemorySearchResult[] }> => {
     const { uiSettingsClient, scopedClusterClient } = await getScopedClients({ request });
     await assertMemoryEnabled(uiSettingsClient);
-    const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger);
+    const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger, server.memoryIndexCallback);
 
     const results = await memory.search({
       query: params.body.query,
@@ -294,7 +297,7 @@ const getCategoryTreeRoute = createServerRoute({
   }): Promise<{ tree: MemoryCategoryNode[] }> => {
     const { uiSettingsClient, scopedClusterClient } = await getScopedClients({ request });
     await assertMemoryEnabled(uiSettingsClient);
-    const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger);
+    const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger, server.memoryIndexCallback);
 
     const tree = await memory.getCategoryTree();
     return { tree };
@@ -330,7 +333,7 @@ const getHistoryRoute = createServerRoute({
   }): Promise<{ history: MemoryVersionRecord[] }> => {
     const { uiSettingsClient, scopedClusterClient } = await getScopedClients({ request });
     await assertMemoryEnabled(uiSettingsClient);
-    const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger);
+    const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger, server.memoryIndexCallback);
 
     const history = await memory.getHistory({
       entryId: params.path.id,
@@ -366,7 +369,7 @@ const getVersionRoute = createServerRoute({
   }): Promise<MemoryVersionRecord> => {
     const { uiSettingsClient, scopedClusterClient } = await getScopedClients({ request });
     await assertMemoryEnabled(uiSettingsClient);
-    const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger);
+    const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger, server.memoryIndexCallback);
 
     return memory.getVersion({
       entryId: params.path.id,
@@ -403,7 +406,7 @@ const recentChangesRoute = createServerRoute({
   }): Promise<{ changes: MemoryVersionRecord[] }> => {
     const { uiSettingsClient, scopedClusterClient } = await getScopedClients({ request });
     await assertMemoryEnabled(uiSettingsClient);
-    const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger);
+    const memory = createMemoryService(scopedClusterClient.asCurrentUser, logger, server.memoryIndexCallback);
 
     const changes = await memory.getRecentChanges({
       size: params.query?.size,

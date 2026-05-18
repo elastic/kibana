@@ -32,6 +32,12 @@ const isIndexNotFoundError = (err: unknown): boolean => {
 
 type MemoryCollapseField = 'name' | 'id';
 
+/** Called after a memory entry is created, updated, or deleted so external systems (e.g. SML) can re-index. */
+export type MemoryIndexCallback = (params: {
+  id: string;
+  action: 'create' | 'update' | 'delete';
+}) => Promise<void>;
+
 /**
  * MemoryServiceImpl backed by two append-only data streams:
  *   - .significant_events-memories  (pages, latest version resolved via field collapse)
@@ -45,11 +51,31 @@ export class MemoryServiceImpl implements MemoryService {
   private readonly esClient: ElasticsearchClient;
   private readonly historyStorage: ReturnType<typeof createMemoryHistoryStorage>;
   private readonly logger: Logger;
+  private readonly onAfterWrite?: MemoryIndexCallback;
 
-  constructor({ logger, esClient }: { logger: Logger; esClient: ElasticsearchClient }) {
+  constructor({
+    logger,
+    esClient,
+    onAfterWrite,
+  }: {
+    logger: Logger;
+    esClient: ElasticsearchClient;
+    /** Optional callback fired after create/update/delete. Used for SML event-driven indexing. */
+    onAfterWrite?: MemoryIndexCallback;
+  }) {
     this.logger = logger;
     this.esClient = esClient;
     this.historyStorage = createMemoryHistoryStorage({ esClient });
+    this.onAfterWrite = onAfterWrite;
+  }
+
+  private fireIndexCallback(id: string, action: 'create' | 'update' | 'delete'): void {
+    if (!this.onAfterWrite) return;
+    this.onAfterWrite({ id, action }).catch((error) => {
+      this.logger.warn(
+        `Memory index callback failed for entry '${id}' (${action}): ${(error as Error).message}`
+      );
+    });
   }
 
   // ── Write helpers ──
@@ -176,6 +202,7 @@ export class MemoryServiceImpl implements MemoryService {
 
     await this._indexPage(entry);
     await this._writeHistory(entry, 'create', `Created entry "${name}"`, user);
+    this.fireIndexCallback(entry.id, 'create');
     return entry;
   }
 
@@ -233,6 +260,7 @@ export class MemoryServiceImpl implements MemoryService {
       changeSummary ?? `Updated entry "${updated.name}"`,
       user
     );
+    this.fireIndexCallback(updated.id, 'update');
     return updated;
   }
 
@@ -257,6 +285,7 @@ export class MemoryServiceImpl implements MemoryService {
       },
     });
     await this._writeHistory(tombstone, 'delete', `Deleted entry "${current.name}"`, user);
+    this.fireIndexCallback(id, 'delete');
   }
 
   async rename({

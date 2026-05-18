@@ -78,6 +78,12 @@ export interface AgentContextLayerPluginStart {
   }) => Promise<SmlResolvedItemResult[]>;
 
   indexAttachment: (params: SmlIndexAttachmentParams) => Promise<void>;
+
+  /**
+   * Index an attachment from a system/internal context where no HTTP request is available.
+   * Skips SO-client scoping; intended for background tasks (e.g. memory writes).
+   */
+  indexAttachmentSystem: (params: SmlIndexAttachmentSystemParams) => Promise<void>;
 }
 
 export interface SmlIndexAttachmentParams {
@@ -87,4 +93,12 @@ export interface SmlIndexAttachmentParams {
   action: SmlIndexAction;
   spaceId?: string;
   includedHiddenTypes?: string[];
+}
+
+export interface SmlIndexAttachmentSystemParams {
+  originId: string;
+  attachmentType: string;
+  action: SmlIndexAction;
+  /** Space IDs this item belongs to. Use ['*'] for space-agnostic content. */
+  spaces: string[];
 }

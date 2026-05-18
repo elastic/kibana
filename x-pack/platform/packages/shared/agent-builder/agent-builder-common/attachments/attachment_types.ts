@@ -18,6 +18,7 @@ export enum AttachmentType {
   esql = 'esql',
   visualization = 'visualization',
   connector = 'connector',
+  sigeventMemoryPage = 'sigevent_memory_page',
 }
 
 interface AttachmentDataMap {
@@ -26,6 +27,7 @@ interface AttachmentDataMap {
   [AttachmentType.screenContext]: ScreenContextAttachmentData;
   [AttachmentType.visualization]: VisualizationAttachmentData;
   [AttachmentType.connector]: ConnectorAttachmentData;
+  [AttachmentType.sigeventMemoryPage]: SigeventMemoryPageAttachmentData;
 }
 
 export const esqlAttachmentDataSchema = z.object({
@@ -156,3 +158,21 @@ export interface ConnectorAttachmentData {
 }
 
 export type AttachmentDataOf<Type extends AttachmentType> = AttachmentDataMap[Type];
+
+export const sigeventMemoryPageAttachmentDataSchema = z.object({
+  memory_page_id: z.string(),
+  memory_page_name: z.string(),
+  memory_page_title: z.string(),
+});
+
+/**
+ * Data for a sigevent memory page attachment.
+ */
+export interface SigeventMemoryPageAttachmentData {
+  /** The stable UUID of the memory page */
+  memory_page_id: string;
+  /** The unique name of the memory page */
+  memory_page_name: string;
+  /** The human-readable title of the memory page */
+  memory_page_title: string;
+}

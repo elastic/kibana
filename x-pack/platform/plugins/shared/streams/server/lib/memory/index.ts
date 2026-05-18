@@ -18,6 +18,7 @@ export type {
 } from './types';
 
 export { MemoryServiceImpl } from './memory_service';
+export type { MemoryIndexCallback } from './memory_service';
 
 export {
   formatExistingPages,

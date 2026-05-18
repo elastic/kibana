@@ -83,6 +83,10 @@ import {
   type ContinuousKiExtractionWorkflowService,
 } from './lib/workflows/continuous_extraction_workflow';
 import { installMemoryWorkflows } from './lib/memory/install_managed_workflows';
+import {
+  createSigeventMemoryPageSmlType,
+  SIGEVENT_MEMORY_PAGE_SML_TYPE,
+} from './sml_types/sigevent_memory_page';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StreamsPluginSetup {}
@@ -447,6 +451,14 @@ export class StreamsPlugin
       );
     }
 
+    if (plugins.agentContextLayer) {
+      plugins.agentContextLayer.registerType(
+        createSigeventMemoryPageSmlType({
+          getStartServices: core.getStartServices,
+        })
+      );
+    }
+
     core
       .getStartServices()
       .then(async ([coreStart]) => {
@@ -614,6 +626,30 @@ export class StreamsPlugin
       const memoryTriggerRegistry = new MemoryTriggerRegistry({ logger: this.logger });
       memoryTriggerRegistry.register(discoveryCompletedTrigger);
       this.server.memoryTriggerRegistry = memoryTriggerRegistry;
+
+      // Wire SML event-driven indexing for memory entries when agentContextLayer is available.
+      // The callback checks isMemoryEnabled at call time so it's a no-op while memory is off.
+      if (plugins.agentContextLayer) {
+        const isMemoryEnabled = async () => {
+          try {
+            const soClient = core.savedObjects.createInternalRepository();
+            const uiSettings = core.uiSettings.asScopedToClient(soClient);
+            return await uiSettings.get<boolean>(OBSERVABILITY_STREAMS_ENABLE_MEMORY);
+          } catch {
+            return false;
+          }
+        };
+        const agentContextLayer = plugins.agentContextLayer;
+        this.server.memoryIndexCallback = async ({ id, action }) => {
+          if (!(await isMemoryEnabled())) return;
+          await agentContextLayer.indexAttachmentSystem({
+            originId: id,
+            attachmentType: SIGEVENT_MEMORY_PAGE_SML_TYPE,
+            action,
+            spaces: ['*'],
+          });
+        };
+      }
     }
 
     this.processorSuggestionsService.setConsoleStart(plugins.console);

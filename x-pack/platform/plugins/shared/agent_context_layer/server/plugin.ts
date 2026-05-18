@@ -164,6 +164,17 @@ export class AgentContextLayerPlugin
           logger: this.logger.get('sml'),
         });
       },
+      indexAttachmentSystem: async (params) => {
+        return smlService.indexAttachment({
+          originId: params.originId,
+          attachmentType: params.attachmentType,
+          action: params.action,
+          spaces: params.spaces,
+          esClient: elasticsearch.client.asInternalUser,
+          savedObjectsClient: savedObjects.createInternalRepository(),
+          logger: this.logger.get('sml'),
+        });
+      },
     };
   }
 

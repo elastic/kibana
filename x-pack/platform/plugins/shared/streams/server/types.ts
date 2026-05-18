@@ -10,6 +10,10 @@ import type { AlertingServerStart as AlertingV2ServerStart } from '@kbn/alerting
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { CoreStart, ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import type {
+  AgentContextLayerPluginSetup,
+  AgentContextLayerPluginStart,
+} from '@kbn/agent-context-layer-plugin/server';
 import type { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/server';
 import type {
   EncryptedSavedObjectsPluginSetup,
@@ -46,6 +50,7 @@ import type {
 } from '@kbn/search-inference-endpoints/server';
 import type { StreamsConfig } from '../common/config';
 import type { MemoryTriggerRegistry } from './lib/memory/triggers';
+import type { MemoryIndexCallback } from './lib/memory/memory_service';
 
 export interface StreamsServer {
   core: CoreStart;
@@ -63,6 +68,8 @@ export interface StreamsServer {
   ensureMemorySkillRegistered?: () => void;
   workflowsManagement?: WorkflowsServerPluginSetup;
   spaces?: SpacesPluginStart;
+  /** Fires after memory create/update/delete to push changes into the SML index. */
+  memoryIndexCallback?: MemoryIndexCallback;
 }
 
 export interface ElasticsearchAccessorOptions {
@@ -71,6 +78,7 @@ export interface ElasticsearchAccessorOptions {
 
 export interface StreamsPluginSetupDependencies {
   agentBuilder?: AgentBuilderPluginSetup;
+  agentContextLayer?: AgentContextLayerPluginSetup;
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   taskManager: TaskManagerSetupContract;
   alerting: AlertingServerSetup;
@@ -98,6 +106,7 @@ export interface StreamsPluginStartDependencies {
   fieldsMetadata: FieldsMetadataServerStart;
   console: ConsoleServerStart;
   agentBuilder?: AgentBuilderPluginStart;
+  agentContextLayer?: AgentContextLayerPluginStart;
   spaces?: SpacesPluginStart;
   searchInferenceEndpoints?: SearchInferenceEndpointsPluginStart;
   workflowsExtensions?: WorkflowsExtensionsServerPluginStart;

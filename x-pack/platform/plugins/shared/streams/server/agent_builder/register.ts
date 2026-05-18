@@ -71,6 +71,7 @@ export const registerStreamsAgentBuilder = async ({
     new MemoryServiceImpl({
       logger: logger.get('memory'),
       esClient,
+      onAfterWrite: server.memoryIndexCallback,
     });
 
   const memoryToolsOptions = {

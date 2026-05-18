@@ -13,6 +13,7 @@ export type {
   EsqlAttachment,
   VisualizationAttachment,
   ConnectorAttachment,
+  SigeventMemoryPageAttachment,
 } from './attachments';
 
 export type {
@@ -29,6 +30,7 @@ export {
   screenContextAttachmentDataSchema,
   visualizationAttachmentDataSchema,
   connectorAttachmentDataSchema,
+  sigeventMemoryPageAttachmentDataSchema,
   CONNECTOR_TAG_PREFIX,
   type TextAttachmentData,
   type ScreenContextAttachmentData,
@@ -37,6 +39,7 @@ export {
   type EsqlAttachmentData,
   type VisualizationAttachmentData,
   type ConnectorAttachmentData,
+  type SigeventMemoryPageAttachmentData,
 } from './attachment_types';
 
 export type {
