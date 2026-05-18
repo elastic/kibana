@@ -9,7 +9,7 @@ import type { MouseEventHandler } from 'react';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { CommonProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiResizeObserver } from '@elastic/eui';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import classNames from 'classnames';
 import type { EuiResizeObserverProps } from '@elastic/eui/src/components/observer/resize_observer/resize_observer';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
@@ -30,20 +30,20 @@ import { useDataTestSubj } from '../../hooks/state_selectors/use_data_test_subj'
 import { useWithCommandList } from '../../hooks/state_selectors/use_with_command_list';
 import { detectAndPreProcessPastedCommand } from './lib/utils';
 const CommandInputContainer = styled.div`
-  background-color: ${({ theme: { eui } }) => eui.euiFormBackgroundColor};
-  border-radius: ${({ theme: { eui } }) => eui.euiBorderRadius};
-  padding: ${({ theme: { eui } }) => eui.euiSizeS};
-  outline: ${({ theme: { eui } }) => eui.euiBorderThin};
+  background-color: ${({ theme }) => theme.euiTheme.colors.body};
+  border-radius: ${({ theme }) => theme.euiTheme.border.radius.medium};
+  padding: ${({ theme }) => theme.euiTheme.size.s};
+  outline: ${({ theme }) => theme.euiTheme.border.thin};
 
-  border-bottom: ${({ theme: { eui } }) => eui.euiBorderThick};
+  border-bottom: ${({ theme }) => theme.euiTheme.border.thick};
   border-bottom-color: transparent;
 
   &:focus-within {
-    border-bottom-color: ${({ theme: { eui } }) => eui.euiColorPrimary};
+    border-bottom-color: ${({ theme }) => theme.euiTheme.colors.primary};
   }
 
   &.error {
-    border-bottom-color: ${({ theme: { eui } }) => eui.euiColorDanger};
+    border-bottom-color: ${({ theme }) => theme.euiTheme.colors.danger};
   }
 
   .textEntered {
@@ -62,7 +62,7 @@ const CommandInputContainer = styled.div`
   &.hasFocus {
     // Cursor is defined in '<InputDisplay>' component
     .cursor {
-      background-color: ${({ theme: { eui } }) => eui.euiTextColor};
+      background-color: ${({ theme }) => theme.euiTheme.colors.text};
       animation: cursor-blink-animation 1s steps(5, start) infinite;
       -webkit-animation: cursor-blink-animation 1s steps(5, start) infinite;
 
