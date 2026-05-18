@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingElastic, useEuiTheme } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLoadingElastic, useEuiTheme } from '@elastic/eui';
 import { AiButton } from '@kbn/shared-ux-ai-components';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { useQuery } from '@kbn/react-query';
 import React, { useCallback, useMemo } from 'react';
 import { useKibana } from '../../../hooks/use_kibana';
 import { getFormattedError } from '../../../util/errors';
@@ -60,23 +59,12 @@ export function SignificantEventsDiscoveryPage() {
   const {
     core: {
       application: { getUrlForApp },
-      http,
       notifications: { toasts },
     },
     dependencies: {
       start: { agentBuilder },
     },
   } = useKibana();
-
-  const { data: slackConnectors } = useQuery({
-    queryKey: ['streams', 'slack2-connectors'],
-    queryFn: () =>
-      http.get<Array<{ id: string; name: string; connector_type_id: string }>>(
-        '/api/actions/connectors'
-      ),
-    select: (connectors) => connectors.filter((c) => c.connector_type_id === '.slack2'),
-    enabled: Boolean(agentBuilder),
-  });
 
   const {
     features: { significantEventsDiscovery },
@@ -95,7 +83,6 @@ export function SignificantEventsDiscoveryPage() {
   const { isMemoryEnabled } = useDiscoverySettings();
 
   const handleOpenSystemOnboarding = useCallback(() => {
-    const slackConnector = slackConnectors?.[0];
     agentBuilder?.openChat({
       newConversation: true,
       initialMessage: i18n.translate(
@@ -106,20 +93,8 @@ export function SignificantEventsDiscoveryPage() {
         }
       ),
       autoSendInitialMessage: true,
-      attachments: slackConnector
-        ? [
-              {
-                  type: 'connector' as const,
-                  data: {
-                    connector_id: slackConnector.id,
-                    connector_name: slackConnector.name,
-                    connector_type: slackConnector.connector_type_id,
-                  },
-                },
-          ]
-        : [],
     });
-  }, [agentBuilder, slackConnectors]);
+  }, [agentBuilder]);
 
   useStreamsAppBreadcrumbs(() => {
     return [

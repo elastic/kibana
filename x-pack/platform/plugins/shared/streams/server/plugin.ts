@@ -90,6 +90,7 @@ import { StreamsKIsOnboardingClient } from './lib/workflows/onboarding_workflow_
 import { STREAMS_SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG } from '../common/feature_flags';
 
 const STREAMS_MANAGED_WORKFLOW_OWNER = 'streams';
+
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StreamsPluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -350,7 +351,6 @@ export class StreamsPlugin
 
     plugins.workflowsExtensions?.registerManagedWorkflowOwner(STREAMS_MANAGED_WORKFLOW_OWNER);
 
-
     taskService.registerTasks({
       getScopedClients: this.streamsGetScopedClients,
       logger: this.logger,
@@ -362,10 +362,6 @@ export class StreamsPlugin
           return undefined;
         }
         return startPlugins.agentBuilder.conversations.getScopedClient({ request });
-      },
-      getAgentBuilderTools: async (request) => {
-        const [, startPlugins] = await core.getStartServices();
-        return startPlugins.agentBuilder?.tools;
       },
       server: this.server,
     });

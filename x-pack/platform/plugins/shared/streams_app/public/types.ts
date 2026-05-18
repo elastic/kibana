@@ -78,7 +78,6 @@ export interface StreamsAppStartDependencies {
   spaces?: SpacesPluginStart;
   console: ConsolePluginStart;
   evals?: EvalsPublicStart;
-  agentBuilder?: AgentBuilderPluginStart;
 }
 
 export interface StreamsAppPublicSetup {}

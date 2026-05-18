@@ -36,11 +36,13 @@ export const createSigEventsOnboardingSkill = (options: MemoryToolsOptions) =>
     </goal>
 
     <workflow>
-    ## Step 1 — Check for existing knowledge
+    ## Step 1 — Discover available connectors and check existing knowledge
 
-    Start by silently reviewing what is already known about the system:
-    - Use memory_list to browse the category tree
-    - Use memory_search to look for entries about "system", "architecture", "deployment", "infrastructure", "services", "repositories", "flow", "access"
+    Before anything else, silently call \`sml_search\` with \`"*"\` to discover available connectors. Attach any useful ones (chat, code search, ticketing) with \`sml_attach\` so they are ready to query during the interview.
+
+    Then silently review what is already known about the system:
+    - Use platform_streams_memory_list to browse the category tree
+    - Use platform_streams_memory_search to look for entries about "system", "architecture", "deployment", "infrastructure", "services", "repositories", "flow", "access"
 
     **If memory is empty or nearly empty (no relevant pages found):**
     Skip to Step 2 immediately — there is no prior knowledge to confirm, so go straight into gathering information.
@@ -124,7 +126,7 @@ export const createSigEventsOnboardingSkill = (options: MemoryToolsOptions) =>
 
     As the user answers, write findings to memory incrementally. Do not wait until the end. After each significant answer:
     - Search memory to check if a relevant page already exists
-    - Update it with memory_patch (for additions to existing pages) or memory_write (for new pages)
+    - Update it with platform_streams_memory_patch (for additions to existing pages) or platform_streams_memory_write (for new pages)
     - Use categories like: "architecture", "services", "infrastructure", "operations", "deployment", "repositories", "access"
     - Tag pages with relevant terms (e.g. "deployment", "kubernetes", "ci-cd", "runbook", "github", "flow", "dashboard")
     - Reference related pages (e.g. a service page should reference its infrastructure page)
@@ -145,7 +147,7 @@ export const createSigEventsOnboardingSkill = (options: MemoryToolsOptions) =>
     - Runbooks and failure patterns belong in the "operations" category
     - Keep content factual and concise — focus on what helps with RCA and remediation
     - Always search before writing to avoid duplicates
-    - Use memory_patch for incremental updates, memory_write for new pages
+    - Use platform_streams_memory_patch for incremental updates, platform_streams_memory_write for new pages
     - Include specific details: tool names, commands, thresholds, URLs when provided
     - Note any MCP tools or external APIs that could augment agent capabilities
     </memory_writing_guidelines>
@@ -161,13 +163,28 @@ export const createSigEventsOnboardingSkill = (options: MemoryToolsOptions) =>
     <available_tools>
     You have 7 memory tools to read and write to the knowledge base:
 
-    - **memory_search** — Search memory by keyword. Use this first to find relevant pages.
-    - **memory_read** — Read the full content of a specific page by name or ID.
-    - **memory_write** — Create a new page or overwrite an existing one.
-    - **memory_patch** — Make surgical edits to an existing page using search-and-replace.
-    - **memory_list** — Browse memory pages by category or view the full category tree.
-    - **memory_delete** — Delete a memory page. Always confirm with the user before deleting.
-    - **memory_recent_changes** — View recent changes across all memory pages.
+    - **platform_streams_memory_search** — Search memory by keyword. Use this first to find relevant pages.
+    - **platform_streams_memory_read** — Read the full content of a specific page by name or ID.
+    - **platform_streams_memory_write** — Create a new page or overwrite an existing one.
+    - **platform_streams_memory_patch** — Make surgical edits to an existing page using search-and-replace.
+    - **platform_streams_memory_list** — Browse memory pages by category or view the full category tree.
+    - **platform_streams_memory_delete** — Delete a memory page. Always confirm with the user before deleting.
+    - **platform_streams_memory_recent_changes** — View recent changes across all memory pages.
+
+    You may also have access to connector tools for querying external systems:
+
+    - **sml_search** — Search the Semantic Metadata Layer for available connectors (e.g. chat, code search, ticketing). Pass \`"*"\` to list all, or search by type/name.
+    - **sml_attach** + **execute_connector_sub_action** — Attach a connector to the conversation and invoke its sub-actions directly.
+
+    **Auto-discover connectors at the start of the conversation:**
+    Before beginning the interview, call \`sml_search\` with \`"*"\` to discover what connectors are available. Look for connectors that can provide useful context about the system:
+    - **Chat connectors** (e.g. Slack, Teams, Google Chat) — can search message history for deployment discussions, incident threads, team announcements, alert channels
+    - **Code search connectors** — can inspect repository structure, read files, map ownership, trace call graphs
+    - **Ticketing / incident connectors** (e.g. Jira, PagerDuty, ServiceNow) — can retrieve past incidents, change tickets, or on-call schedules
+
+    For each useful connector found, call \`sml_attach\` with its chunk ID to make it available as a conversation attachment. Then during the interview you can call \`execute_connector_sub_action\` to query it directly — for example, searching Slack channels for deployment announcements, or reading a CODEOWNERS file to understand service ownership.
+
+    If no connectors are available, note this to the user and proceed with the interview using only the information they provide.
     </available_tools>
   `),
     getInlineTools: () =>
