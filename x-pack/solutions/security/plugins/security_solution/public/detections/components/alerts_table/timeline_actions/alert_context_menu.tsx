@@ -17,7 +17,7 @@ import { TableId } from '@kbn/securitysolution-data-table';
 import { flattenObject } from '@kbn/object-utils';
 import { buildDataTableRecord, getFieldValue } from '@kbn/discover-utils';
 import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils';
-import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
+import { ALERT_RULE_UUID, ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import { useRunAlertWorkflowPanel } from './use_run_alert_workflow_panel';
 import { useRunDocumentWorkflowPanel } from './use_run_document_workflow_panel';
 import { EndpointExceptionsFlyout } from '../../../../management/pages/endpoint_exceptions/view/components/endpoint_exceptions_flyout';
@@ -368,10 +368,8 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
         <AddExceptionFlyoutWrapper
           hit={hit}
           exceptionListType={exceptionFlyoutType}
-          eventId={ecsRowData._id}
           onCancel={onAddExceptionCancel}
           onConfirm={onAddExceptionConfirm}
-          alertStatus={alertStatus}
         />
       )}
       {isAddEventFilterModalOpen && ecsRowData != null && (
@@ -392,9 +390,9 @@ type AddExceptionFlyoutWrapperProps = Omit<
   | 'rules'
   | 'isBulkAction'
   | 'showAlertCloseOptions'
+  | 'alertStatus'
 > & {
   hit: DataTableRecord;
-  eventId?: string;
   exceptionListType: ExceptionListTypeEnum | null;
 };
 
@@ -406,11 +404,11 @@ type AddExceptionFlyoutWrapperProps = Omit<
 export const AddExceptionFlyoutWrapper: React.FC<AddExceptionFlyoutWrapperProps> = ({
   hit,
   exceptionListType,
-  eventId,
   onCancel,
   onConfirm,
-  alertStatus,
 }) => {
+  const eventId = hit.raw._id;
+  const alertStatus = getFieldValue(hit, ALERT_WORKFLOW_STATUS) as Status | undefined;
   const ruleId = (getFieldValue(hit, ALERT_RULE_UUID) ??
     getFieldValue(hit, 'signal.rule.id') ??
     '') as string;

@@ -310,9 +310,7 @@ export const TakeActionButton = memo(
         {isExceptionFlyoutOpen && (
           <AddExceptionFlyoutWrapper
             hit={hit}
-            eventId={documentId}
             exceptionListType={exceptionFlyoutType}
-            alertStatus={alertStatus}
             onCancel={handleExceptionCancel}
             onConfirm={handleExceptionConfirm}
           />

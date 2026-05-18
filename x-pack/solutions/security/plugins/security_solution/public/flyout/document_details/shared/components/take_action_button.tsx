@@ -140,8 +140,6 @@ export const TakeActionButton: FC = () => {
         alertSummaryData.eventId != null && (
           <AddExceptionFlyoutWrapper
             hit={hit}
-            alertStatus={alertSummaryData.alertStatus}
-            eventId={alertSummaryData.eventId}
             exceptionListType={exceptionFlyoutType}
             onCancel={onAddExceptionCancel}
             onConfirm={onAddExceptionConfirm}
