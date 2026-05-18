@@ -79,7 +79,6 @@ import {
   CaseTransformedAttributesSchema,
   CasePersistedStatus,
   getPartialCaseTransformedAttributesSchema,
-  OwnerSchema,
 } from '../../common/types/case';
 import type {
   GetCaseIdsByAlertIdArgs,
