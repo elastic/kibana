@@ -8,45 +8,6 @@
 import { i18n } from '@kbn/i18n';
 import { AgentAclRole, AgentVisibility } from '@kbn/agent-builder-common';
 
-export interface AgentAclCapabilities {
-  see: boolean;
-  use: boolean;
-  read: boolean;
-  update: boolean;
-  delete: boolean;
-}
-
-/**
- * Internal capability set granted by each ACL role.
- *
- * These are the user-visible labels of the discrete permissions the plan describes
- * (see/list/use/read/update/delete). The hierarchical role enum is the source of truth
- * server-side; this map exists to render UI tooltips and explanatory copy.
- */
-export const ROLE_CAPABILITIES: Record<AgentAclRole, AgentAclCapabilities> = {
-  [AgentAclRole.User]: {
-    see: true,
-    use: true,
-    read: true,
-    update: false,
-    delete: false,
-  },
-  [AgentAclRole.Editor]: {
-    see: true,
-    use: true,
-    read: true,
-    update: true,
-    delete: false,
-  },
-  [AgentAclRole.Manager]: {
-    see: true,
-    use: true,
-    read: true,
-    update: true,
-    delete: true,
-  },
-};
-
 export const ROLE_LABEL: Record<AgentAclRole, string> = {
   [AgentAclRole.User]: i18n.translate('xpack.agentBuilder.acl.role.user.label', {
     defaultMessage: 'User',
