@@ -136,8 +136,8 @@ export const ErrorsList = ({
         const link = (
           <ErrorDetailsLink
             configId={item.config_id ?? configId}
-            stateId={item.state?.id!}
-            label={formatter(item.state!.started_at)}
+            stateId={item.state.id}
+            label={formatter(item.state.started_at)}
             locationId={item.observer?.name}
           />
         );
@@ -290,7 +290,7 @@ export const ErrorsList = ({
 
   const getRowProps = (item: PingState) => {
     const { state } = item;
-    if (state?.id) {
+    if (state.id) {
       const itemConfigId = item.config_id ?? configId;
       const locationId = item.observer?.name ?? selectedLocation?.id;
       const locationQuery = locationId
