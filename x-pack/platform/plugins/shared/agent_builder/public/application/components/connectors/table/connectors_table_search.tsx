@@ -11,7 +11,6 @@ import { countBy } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ConnectorItem } from '../../../../../common/http_api/tools';
 import { OAUTH_STATUS } from '../../../../../common/http_api/tools';
-import { useListConnectors } from '../../../hooks/tools/use_mcp_connectors';
 import { useKibana } from '../../../hooks/use_kibana';
 import { labels } from '../../../utils/i18n';
 import { FilterOptionWithMatchesBadge } from '../../common/filter_option_with_matches_badge';
@@ -92,8 +91,9 @@ export interface ConnectorsTableSearch {
   results: ConnectorItem[];
 }
 
-export const useConnectorsTableSearch = (): ConnectorsTableSearch => {
-  const { connectors: readonlyConnectors } = useListConnectors({});
+export const useConnectorsTableSearch = (
+  readonlyConnectors: readonly ConnectorItem[]
+): ConnectorsTableSearch => {
   const connectors = useMemo(() => [...readonlyConnectors], [readonlyConnectors]);
   const {
     services: {
