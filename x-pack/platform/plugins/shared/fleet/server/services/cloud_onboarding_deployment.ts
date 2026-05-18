@@ -17,9 +17,10 @@ import type {
 } from '../../common/types/models/cloud_onboarding_deployment';
 import type { CloudOnboardingDeploymentSOAttributes } from '../types/so_attributes';
 import { FleetError } from '../errors';
-import { SO_SEARCH_LIMIT } from '../../common';
 
 import { appContextService } from './app_context';
+
+const CLOUD_ONBOARDING_DEPLOYMENT_LIMIT = 100;
 
 function soToDeployment(
   id: string,
@@ -29,11 +30,11 @@ function soToDeployment(
     id,
     provider: attributes.provider as CloudOnboardingDeployment['provider'],
     connectionId: attributes.connectionId,
-    mechanisms: attributes.mechanisms as CloudOnboardingDeployment['mechanisms'],
+    mechanisms: attributes.mechanisms,
     deploymentId: attributes.deploymentId,
     deploymentName: attributes.deploymentName,
     services: attributes.services,
-    status: attributes.status as CloudOnboardingDeploymentStatus,
+    status: attributes.status,
     statusMessage: attributes.statusMessage,
     attemptCount: attributes.attemptCount,
     vars: attributes.vars,
@@ -57,7 +58,7 @@ class CloudOnboardingDeploymentService {
     const now = new Date().toISOString();
     const attributes: CloudOnboardingDeploymentSOAttributes = {
       ...input,
-      mechanisms: input.mechanisms as string[],
+      mechanisms: input.mechanisms,
       status: 'pending',
       attemptCount: 1,
       createdAt: now,
@@ -99,7 +100,7 @@ class CloudOnboardingDeploymentService {
             `${CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE}.attributes.connectionId`,
             connectionId
           ),
-          perPage: SO_SEARCH_LIMIT,
+          perPage: CLOUD_ONBOARDING_DEPLOYMENT_LIMIT,
         }
       );
 
@@ -125,7 +126,7 @@ class CloudOnboardingDeploymentService {
     await soClient.update<CloudOnboardingDeploymentSOAttributes>(
       CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
       id,
-      { ...update, mechanisms: update.mechanisms as string[] | undefined, updatedAt: now }
+      { ...update, mechanisms: update.mechanisms, updatedAt: now }
     );
 
     return this.getById(id);

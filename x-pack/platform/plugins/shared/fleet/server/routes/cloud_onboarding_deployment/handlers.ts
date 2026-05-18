@@ -6,10 +6,12 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+
+import type { CloudOnboardingDeployment } from '../../../common/types';
 
 import { cloudOnboardingDeploymentService } from '../../services/cloud_onboarding_deployment';
 import type { FleetRequestHandler } from '../../types';
-import { appContextService } from '../../services/app_context';
 import type {
   CreateCloudOnboardingDeploymentRequestSchema,
   GetCloudOnboardingDeploymentRequestSchema,
@@ -17,6 +19,11 @@ import type {
   UpdateCloudOnboardingDeploymentRequestSchema,
   DeleteCloudOnboardingDeploymentRequestSchema,
 } from '../../types/rest_spec/cloud_onboarding_deployment';
+
+function toResponseItem(deployment: CloudOnboardingDeployment) {
+  const { secrets: _, ...rest } = deployment;
+  return rest;
+}
 
 // TODO validate connectionId in fleet-cloud-connector
 export const createCloudOnboardingDeploymentHandler: FleetRequestHandler<
@@ -26,63 +33,34 @@ export const createCloudOnboardingDeploymentHandler: FleetRequestHandler<
 > = async (context, request, response) => {
   const fleetContext = await context.fleet;
   const { internalSoClient } = fleetContext;
-  const logger = appContextService
-    .getLogger()
-    .get('CloudOnboardingDeploymentService createCloudOnboardingDeploymentHandler');
 
-  try {
-    const deployment = await cloudOnboardingDeploymentService.create(
-      internalSoClient,
-      request.body
-    );
-    return response.ok({ body: { item: deployment } });
-  } catch (error) {
-    logger.error(`Failed to create cloud onboarding deployment`, error.message);
-    return response.customError({
-      statusCode: 400,
-      body: { message: error.message },
-    });
-  }
+  const deployment = await cloudOnboardingDeploymentService.create(internalSoClient, request.body);
+  return response.ok({ body: { item: toResponseItem(deployment) } });
 };
 
 export const getCloudOnboardingDeploymentHandler: FleetRequestHandler<
   TypeOf<typeof GetCloudOnboardingDeploymentRequestSchema.params>
 > = async (context, request, response) => {
-  const logger = appContextService
-    .getLogger()
-    .get('CloudOnboardingDeploymentService getCloudOnboardingDeploymentHandler');
-
   try {
     const deployment = await cloudOnboardingDeploymentService.getById(request.params.id);
-    return response.ok({ body: { item: deployment } });
+    return response.ok({ body: { item: toResponseItem(deployment) } });
   } catch (error) {
-    logger.error(`Failed to get cloud onboarding deployment`, error.message);
-    return response.customError({
-      statusCode: 400,
-      body: { message: error.message },
-    });
+    if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+      return response.notFound({
+        body: { message: `Cloud onboarding deployment ${request.params.id} not found` },
+      });
+    }
+    throw error;
   }
 };
 
 export const getCloudOnboardingDeploymentsByConnectionIdHandler: FleetRequestHandler<
   TypeOf<typeof GetCloudOnboardingDeploymentsByConnectionIdRequestSchema.params>
 > = async (context, request, response) => {
-  const logger = appContextService
-    .getLogger()
-    .get('CloudOnboardingDeploymentService getCloudOnboardingDeploymentsByConnectionIdHandler');
-
-  try {
-    const deployments = await cloudOnboardingDeploymentService.getByConnectionId(
-      request.params.connectionId
-    );
-    return response.ok({ body: { items: deployments } });
-  } catch (error) {
-    logger.error(`Failed to get cloud onboarding deployments by connection id`, error.message);
-    return response.customError({
-      statusCode: 400,
-      body: { message: error.message },
-    });
-  }
+  const deployments = await cloudOnboardingDeploymentService.getByConnectionId(
+    request.params.connectionId
+  );
+  return response.ok({ body: { items: deployments.map(toResponseItem) } });
 };
 
 export const updateCloudOnboardingDeploymentHandler: FleetRequestHandler<
@@ -92,9 +70,6 @@ export const updateCloudOnboardingDeploymentHandler: FleetRequestHandler<
 > = async (context, request, response) => {
   const fleetContext = await context.fleet;
   const { internalSoClient } = fleetContext;
-  const logger = appContextService
-    .getLogger()
-    .get('CloudOnboardingDeploymentService updateCloudOnboardingDeploymentHandler');
 
   try {
     const deployment = await cloudOnboardingDeploymentService.update(
@@ -102,13 +77,14 @@ export const updateCloudOnboardingDeploymentHandler: FleetRequestHandler<
       request.params.id,
       request.body
     );
-    return response.ok({ body: { item: deployment } });
+    return response.ok({ body: { item: toResponseItem(deployment) } });
   } catch (error) {
-    logger.error(`Failed to update cloud onboarding deployment`, error.message);
-    return response.customError({
-      statusCode: 400,
-      body: { message: error.message },
-    });
+    if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+      return response.notFound({
+        body: { message: `Cloud onboarding deployment ${request.params.id} not found` },
+      });
+    }
+    throw error;
   }
 };
 
@@ -117,18 +93,16 @@ export const deleteCloudOnboardingDeploymentHandler: FleetRequestHandler<
 > = async (context, request, response) => {
   const fleetContext = await context.fleet;
   const { internalSoClient } = fleetContext;
-  const logger = appContextService
-    .getLogger()
-    .get('CloudOnboardingDeploymentService deleteCloudOnboardingDeploymentHandler');
 
   try {
     await cloudOnboardingDeploymentService.delete(internalSoClient, request.params.id);
     return response.ok({ body: { id: request.params.id } });
   } catch (error) {
-    logger.error(`Failed to delete cloud onboarding deployment`, error.message);
-    return response.customError({
-      statusCode: 400,
-      body: { message: error.message },
-    });
+    if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+      return response.notFound({
+        body: { message: `Cloud onboarding deployment ${request.params.id} not found` },
+      });
+    }
+    throw error;
   }
 };

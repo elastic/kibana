@@ -47,6 +47,10 @@ import type {
   AccountType,
   VerificationStatus,
 } from '../../common/types/models/cloud_connector';
+import type {
+  CloudOnboardingDeploymentMechanism,
+  CloudOnboardingDeploymentStatus,
+} from '../../common/types/models/cloud_onboarding_deployment';
 
 export type AgentPolicyStatus = typeof agentPolicyStatuses;
 
@@ -345,7 +349,7 @@ export interface CloudOnboardingDeploymentSOAttributes {
   /** FK to fleet-cloud-connector — the AWS account connection this deployment belongs to. */
   connectionId: string;
   /** Active delivery mechanisms included in this deployment's IaC stack (identity_federation, firehose, cloud_forwarder). */
-  mechanisms: string[];
+  mechanisms: CloudOnboardingDeploymentMechanism[];
   /** Provider-specific deployment identifier. For AWS: the CloudFormation stack ARN. Set after the user deploys the stack. */
   deploymentId?: string;
   /** Human-readable deployment name. For AWS: the CloudFormation stack name. */
@@ -353,7 +357,7 @@ export interface CloudOnboardingDeploymentSOAttributes {
   /** All service IDs (e.g. 'cloudtrail', 'elb_logs') covered across all mechanisms in this deployment. */
   services: string[];
   /** Lifecycle status: pending → deploying → succeeded | failed. */
-  status: string;
+  status: CloudOnboardingDeploymentStatus;
   /** Error detail when status is 'failed'. */
   statusMessage?: string;
   /** Number of deploy attempts — incremented on each retry. */

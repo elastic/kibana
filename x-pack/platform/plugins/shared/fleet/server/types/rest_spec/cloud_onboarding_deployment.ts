@@ -133,6 +133,7 @@ export const CreateCloudOnboardingDeploymentRequestSchema = {
       meta: { description: 'Delivery mechanisms active in this deployment.' },
     }),
     services: schema.arrayOf(schema.string({ minLength: 1 }), {
+      minSize: 1,
       maxSize: 1000,
       meta: { description: 'Service IDs to be covered by this deployment.' },
     }),
@@ -151,6 +152,7 @@ export const GetCloudOnboardingDeploymentResponseSchema = SingleItemResponseSche
 export const GetCloudOnboardingDeploymentsByConnectionIdRequestSchema = {
   params: schema.object({
     connectionId: schema.string({
+      minLength: 1,
       meta: { description: 'The fleet-cloud-connector ID to list deployments for.' },
     }),
   }),

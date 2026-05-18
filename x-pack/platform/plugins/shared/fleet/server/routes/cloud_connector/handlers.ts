@@ -12,7 +12,7 @@ import { buildPackagePolicyFilterExcludingHiddenPackages } from '../../../common
 import { cloudConnectorService, packagePolicyService } from '../../services';
 import type { FleetRequestHandler } from '../../types';
 import { appContextService } from '../../services/app_context';
-import { createSecrets } from '../../services/secrets';
+import { createSecrets, deleteSecrets } from '../../services/secrets';
 import type {
   GetCloudConnectorsResponse,
   GetOneCloudConnectorResponse,
@@ -55,6 +55,7 @@ export const createCloudConnectorHandler: FleetRequestHandler<
     const externalIdVar = body.vars.external_id as
       | { type?: string; value?: unknown; frozen?: boolean }
       | undefined;
+    let createdSecretId: string | undefined;
     if (
       externalIdVar &&
       typeof externalIdVar === 'object' &&
@@ -62,18 +63,29 @@ export const createCloudConnectorHandler: FleetRequestHandler<
     ) {
       logger.debug('external_id is a plain string — creating Fleet secret');
       const [secret] = await createSecrets({ esClient, values: [externalIdVar.value] });
-      const secretId = Array.isArray(secret) ? secret[0].id : secret.id;
+      createdSecretId = Array.isArray(secret) ? secret[0].id : secret.id;
       body.vars = {
         ...body.vars,
-        external_id: { type: 'password', value: { isSecretRef: true, id: secretId } },
+        external_id: { type: 'password', value: { isSecretRef: true, id: createdSecretId } },
       };
     }
 
-    const cloudConnector = await cloudConnectorService.create(
-      internalSoClient,
-      // Type assertion is safe: schema validation ensures structure, service validates vars against CloudConnectorVars
-      body as unknown as CreateCloudConnectorRequest
-    );
+    let cloudConnector;
+    try {
+      cloudConnector = await cloudConnectorService.create(
+        internalSoClient,
+        // Type assertion is safe: schema validation ensures structure, service validates vars against CloudConnectorVars
+        body as unknown as CreateCloudConnectorRequest
+      );
+    } catch (createError) {
+      if (createdSecretId) {
+        await deleteSecrets({ esClient, ids: [createdSecretId] }).catch((deleteError) => {
+          logger.error(`Failed to clean up orphaned secret ${createdSecretId}`, deleteError);
+        });
+      }
+      throw createError;
+    }
+
     logger.info(`Successfully created cloud connector ${cloudConnector.id}`);
     return response.ok({ body: { item: cloudConnector } as CreateCloudConnectorResponse });
   } catch (error) {
