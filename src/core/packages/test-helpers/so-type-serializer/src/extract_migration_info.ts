@@ -140,6 +140,29 @@ const serializeSchema = (schemaProp: unknown): Record<string, unknown> => {
 };
 
 /**
+ * Converts a stored schema value back to the stable hash string that the old
+ * `getSchemaPropertiesHashes` implementation would have produced.  This keeps
+ * `getMigrationHash` stable across the format change (hash strings → objects).
+ *
+ * Rules:
+ * - `false`                         → `'false'`   (no schema)
+ * - `string`                        → the string itself (already a legacy hash)
+ * - `{ __fn: string }`              → sha256(fn_source) — matches the old fn hash
+ * - `Record<string, unknown>` (Joi) → sha256(JSON.stringify(obj))
+ */
+export const hashStoredSchema = (
+  schema: false | string | Record<string, unknown>
+): string => {
+  if (schema === false) return 'false';
+  if (typeof schema === 'string') return schema;
+  const hash = createHash('sha256');
+  if ('__fn' in schema && typeof (schema as { __fn: unknown }).__fn === 'string') {
+    return hash.update((schema as { __fn: string }).__fn).digest('hex');
+  }
+  return hash.update(JSON.stringify(schema)).digest('hex');
+};
+
+/**
  * Recursively walks a value and replaces any `@kbn/config-schema` `Type` instances
  * with a Joi-version-stable representation derived from `schema.describe()`.
  * Non-schema functions are left as-is and will be dropped by `JSON.stringify`.
