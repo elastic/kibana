@@ -100,11 +100,26 @@ describe('registerGetStepDefinitionsTool', () => {
     expect(data.count).toBe(1);
     const step = data.stepTypes[0];
     expect(step.id).toBe('if');
-    expect(step).not.toHaveProperty('stepSchema');
+    // Single-step lookups now auto-include the JSON Schema so the model can
+    // construct a valid `with:` payload in one round-trip.
+    expect(step).toHaveProperty('stepSchema');
     expect(step).toHaveProperty('configParams');
     const configNames = step.configParams.map((p: any) => p.name);
     expect(configNames).toContain('condition');
     expect(configNames).toContain('steps');
+  });
+
+  it('omits stepSchema when results are a search/category browse, not a single-step lookup', async () => {
+    const result = await invokeHandler(
+      registeredTool,
+      { category: 'flowControl' },
+      { spaceId: 'default', request: {} }
+    );
+    const data = result.results[0].data as any;
+    expect(data.count).toBeGreaterThan(1);
+    for (const step of data.stepTypes) {
+      expect(step).not.toHaveProperty('stepSchema');
+    }
   });
 
   it('does not include common properties (name, type, if, timeout) in params', async () => {
@@ -317,5 +332,120 @@ describe('registerGetStepDefinitionsTool', () => {
     const data = result.results[0].data as any;
     expect(data.stepTypes[0].examples).toBeDefined();
     expect(data.stepTypes[0].examples[0]).toContain('kibana.createCase');
+  });
+});
+
+describe('registerGetStepDefinitionsTool with workflows-extensions registry', () => {
+  let registeredTool: BuiltinToolDefinition;
+  const api = {
+    getAvailableConnectors: jest.fn().mockResolvedValue({ connectorTypes: {}, totalConnectors: 0 }),
+  } as any;
+
+  beforeEach(async () => {
+    const { z } = await import('@kbn/zod/v4');
+    mockGetAllConnectors.mockReturnValue([]);
+
+    // Two extension-registered steps, plus one that intentionally collides
+    // with a built-in (`console`) to exercise the dedup precedence rule
+    // (built-in wins).
+    const extensionStepDefinitions = [
+      {
+        id: 'security.renderAlertNarrative',
+        label: 'Render alert narrative',
+        description: 'Render a human-readable narrative for an alert.',
+        category: 'external' as const,
+        inputSchema: z.object({
+          alert_id: z.string(),
+          narrative_style: z.enum(['concise', 'detailed']).optional(),
+        }),
+        outputSchema: z.object({ narrative: z.string() }),
+      },
+      {
+        id: 'data.find',
+        label: 'Find',
+        description: 'Locate the first matching record in a collection.',
+        category: 'data' as const,
+        inputSchema: z.object({
+          items: z.array(z.unknown()),
+          predicate: z.string(),
+        }),
+        outputSchema: z.object({ match: z.unknown().optional() }),
+      },
+      {
+        id: 'console', // collides with @kbn/workflows built-in
+        label: 'Console (extension)',
+        description: 'Should be shadowed by the built-in definition.',
+        category: 'external' as const,
+        inputSchema: z.object({ message: z.string() }),
+        outputSchema: z.object({}),
+      },
+    ];
+
+    const workflowsExtensions = {
+      getAllStepDefinitions: jest.fn().mockReturnValue(extensionStepDefinitions),
+    };
+
+    const agentBuilder = {
+      tools: {
+        register: jest.fn((tool: BuiltinToolDefinition) => {
+          registeredTool = tool;
+        }),
+      },
+    } as any;
+    registerGetStepDefinitionsTool(agentBuilder, api, () => workflowsExtensions as any);
+  });
+
+  it('surfaces extension-registered steps in the discovery listing', async () => {
+    const result = await invokeHandler(registeredTool, {}, { spaceId: 'default', request: {} });
+    const data = result.results[0].data as any;
+    const ids = data.stepTypes.map((step: any) => step.id);
+    expect(ids).toContain('security.renderAlertNarrative');
+    expect(ids).toContain('data.find');
+  });
+
+  it('returns full input schema on single-step lookup of an extension step', async () => {
+    const result = await invokeHandler(
+      registeredTool,
+      { stepType: 'security.renderAlertNarrative' },
+      { spaceId: 'default', request: {} }
+    );
+    const data = result.results[0].data as any;
+    expect(data.count).toBe(1);
+    const step = data.stepTypes[0];
+    expect(step.id).toBe('security.renderAlertNarrative');
+    expect(step).toHaveProperty('stepSchema');
+    expect(step.stepSchema).toHaveProperty('properties');
+    // The extension's inputSchema must round-trip into the JSON Schema:
+    // {properties: {with: {properties: {alert_id, narrative_style}}}}
+    const schemaJson = JSON.stringify(step.stepSchema);
+    expect(schemaJson).toContain('alert_id');
+    expect(schemaJson).toContain('narrative_style');
+  });
+
+  it('dedupes extension steps that collide with a built-in (built-in wins)', async () => {
+    const result = await invokeHandler(
+      registeredTool,
+      { stepType: 'console' },
+      { spaceId: 'default', request: {} }
+    );
+    const data = result.results[0].data as any;
+    expect(data.count).toBe(1);
+    const step = data.stepTypes[0];
+    // Built-in label should be preserved; the extension's "Console
+    // (extension)" label MUST NOT win.
+    expect(step.label).not.toBe('Console (extension)');
+  });
+
+  it('tolerates a missing workflows-extensions start contract', async () => {
+    const agentBuilder = {
+      tools: { register: jest.fn((tool: BuiltinToolDefinition) => (registeredTool = tool)) },
+    } as any;
+    // Default getter resolves to undefined; the tool must still register and
+    // serve built-in + connector sources only.
+    registerGetStepDefinitionsTool(agentBuilder, api);
+    const result = await invokeHandler(registeredTool, {}, { spaceId: 'default', request: {} });
+    const data = result.results[0].data as any;
+    expect(data.count).toBeGreaterThan(0);
+    expect(data.stepTypes.some((s: any) => s.id === 'security.renderAlertNarrative')).toBe(false);
   });
 });

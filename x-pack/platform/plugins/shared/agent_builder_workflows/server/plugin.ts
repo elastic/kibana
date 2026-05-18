@@ -60,16 +60,21 @@ export class AgentBuilderWorkflowsPlugin
 
     const aiTelemetryClient = new WorkflowsAiTelemetryClient(coreSetup.analytics, this.logger);
 
+    // Lazy accessor shared by every tool that needs the workflows-extensions
+    // registry. The plugin is declared optional, so the resolver must tolerate
+    // it being absent (unit tests, environments without the extension).
+    const getWorkflowsExtensions = async () => {
+      const [, startDeps] = await coreSetup.getStartServices();
+      return startDeps.workflowsExtensions;
+    };
+
     // Workflow tools
     registerValidateWorkflowTool(agentBuilder, api);
-    registerGetStepDefinitionsTool(agentBuilder, api);
+    registerGetStepDefinitionsTool(agentBuilder, api, getWorkflowsExtensions);
     registerGetTriggerDefinitionsTool(agentBuilder);
     registerGetConnectorsTool(agentBuilder, api);
     registerGetExamplesTool(agentBuilder);
-    registerWorkflowExecuteStepTool(agentBuilder, api, async () => {
-      const [, startDeps] = await coreSetup.getStartServices();
-      return startDeps.workflowsExtensions;
-    });
+    registerWorkflowExecuteStepTool(agentBuilder, api, getWorkflowsExtensions);
     registerWorkflowEditTools(agentBuilder, api, aiTelemetryClient);
 
     // Workflow attachment types

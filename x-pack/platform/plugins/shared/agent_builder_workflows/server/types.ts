@@ -23,10 +23,16 @@ export interface PluginStartDependencies {
   agentBuilder: AgentBuilderPluginStart;
   agentContextLayer: AgentContextLayerPluginStart;
   /**
-   * Optional — when present, `workflow_execute_step` pre-validates each step's
-   * `with:` block against the registered step's Zod schema before invoking the
-   * execution engine. Falls through silently if unavailable (e.g. for unit
-   * tests that don't wire the registry).
+   * Optional — workflow-side helpers query this start contract to enrich their
+   * behavior:
+   *  - `workflow_execute_step` pre-validates each step's `with:` block against
+   *    the registered Zod schema before invoking the execution engine.
+   *  - `get_step_definitions` merges the workflows-extensions registry into the
+   *    discovery surface (data.*, ai.*, security.*, …) so the model can find
+   *    plugin-registered steps and retrieve their JSON Schema in one round-trip.
+   *
+   * Falls through silently if unavailable (e.g. for unit tests or environments
+   * that don't load the workflows-extensions plugin).
    */
   workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
 }

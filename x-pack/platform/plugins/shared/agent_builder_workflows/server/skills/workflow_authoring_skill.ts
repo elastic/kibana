@@ -37,7 +37,7 @@ Use this skill when the user wants to:
 ## Available Tools
 
 ### Lookup Tools
-- **${workflowTools.getStepDefinitions}**: Look up available step types, their input params (\`with\` block), config params, and examples
+- **${workflowTools.getStepDefinitions}**: Look up available step types, their input params (\`with\` block), config params, and examples. Covers built-in flow-control primitives, extension-registered steps (data.*, ai.*, security.*, …), and connector-backed steps in one call. **When you call this with an exact \`stepType\` (single-step lookup), the response automatically includes the full JSON Schema for the step's \`with:\` block under \`stepSchema\`** — use it to construct a correct \`with:\` payload in one round-trip before calling \`${workflowTools.executeStep}\`. No need to set \`includeFullSchema\` for per-step retrievals.
 - **${workflowTools.getTriggerDefinitions}**: Look up available trigger types and their schemas
 - **${workflowTools.getExamples}**: Search the bundled example library for working workflow YAML patterns
 - **${workflowTools.getConnectors}**: Find connector instances configured in the user's environment
