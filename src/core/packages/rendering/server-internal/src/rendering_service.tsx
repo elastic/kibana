@@ -9,11 +9,10 @@
 
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { BehaviorSubject, defer, firstValueFrom, of, map, catchError, take, timeout } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, of, map, catchError, take, timeout } from 'rxjs';
 import { i18n as i18nLib } from '@kbn/i18n';
 import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 
-import type { Logger } from '@kbn/logging';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { KibanaRequest, HttpAuth } from '@kbn/core-http-server';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
@@ -73,12 +72,9 @@ export class RenderingService {
   private readonly themeName$ = new BehaviorSubject<ThemeName>(DEFAULT_THEME_NAME);
   private airgapped: boolean = false;
   private isCoreRenderingInReactConcurrentMode: boolean = true;
-  private readonly logger: Logger;
   // Optional so `render()` is safe to call before `start()` runs.
   private userStorageStart?: UserStorageServiceStart;
-  constructor(private readonly coreContext: CoreContext) {
-    this.logger = coreContext.logger.get('rendering');
-  }
+  constructor(private readonly coreContext: CoreContext) {}
 
   public async preboot({
     http,
@@ -196,12 +192,6 @@ export class RenderingService {
     const basePath = http.basePath.get(request);
     const { serverBasePath, publicBaseUrl } = http.basePath;
 
-    // 50ms budget inside `fetchUserStorageValues` so a slow ES read never
-    // blocks first paint. Anonymous pages have no profile_uid, so skip.
-    const userStorageValuesPromise: Promise<Record<string, unknown>> = isAnonymousPage
-      ? Promise.resolve({})
-      : this.fetchUserStorageValues(request);
-
     // Grouping all async HTTP requests to run them concurrently for performance reasons.
     // Anonymous pages skip user-scoped values and async default values (the latter typically
     // call ES via `asCurrentUser`, which would 401 on an unauthenticated request).
@@ -211,6 +201,7 @@ export class RenderingService {
       globalSettingsUserValues = {},
       userSettingDarkMode,
       userSettingLocale,
+      userStorageValues = {},
     ] = await Promise.all(
       isAnonymousPage
         ? [uiSettings.client?.getRegistered() ?? {}]
@@ -222,12 +213,15 @@ export class RenderingService {
             userSettings?.getUserSettingDarkMode(request),
             // locale
             userSettings?.getUserSettingLocale(request),
+            // user storage
+            this.fetchUserStorageValues(request),
           ] as [
             ReturnType<typeof withAsyncDefaultValues>,
             Promise<Record<string, UserProvidedValues>>,
             Promise<Record<string, UserProvidedValues>>,
             Promise<DarkModeValue> | undefined,
-            Promise<string> | undefined
+            Promise<string> | undefined,
+            Promise<Record<string, unknown>>
           ])
     );
 
@@ -308,8 +302,6 @@ export class RenderingService {
 
     const filteredPlugins = filterUiPlugins({ uiPlugins, isAnonymousPage });
     const bootstrapScript = isAnonymousPage ? 'bootstrap-anonymous.js' : 'bootstrap.js';
-
-    const userStorageValues = await userStorageValuesPromise;
 
     const useRspack = isRspackModeEnabled();
     const uiPublicUrl = `${staticAssetsHrefBase}/ui`;
@@ -417,20 +409,7 @@ export class RenderingService {
     const client = userStorage.asScoped(request);
     if (!client) return {};
 
-    return firstValueFrom(
-      defer(() => client.getAll()).pipe(
-        timeout(50),
-        catchError((err) => {
-          // debug, not warn: first-login (no SO yet) is the common case.
-          this.logger.debug(
-            `Falling back to default userStorage values for render: ${
-              err instanceof Error ? err.message : String(err)
-            }`
-          );
-          return of<Record<string, unknown>>({});
-        })
-      )
-    );
+    return client.getAll();
   }
 }
 
