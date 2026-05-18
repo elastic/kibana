@@ -92,6 +92,11 @@ export class InfraSynthtraceEsClientImpl
             ],
             properties: {
               '@timestamp': { type: 'date' },
+              metrics: {
+                type: 'passthrough',
+                dynamic: true,
+                priority: 1,
+              },
               host: {
                 properties: {
                   name: { type: 'keyword' },
