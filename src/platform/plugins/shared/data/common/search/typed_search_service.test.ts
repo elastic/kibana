@@ -10,6 +10,7 @@
 import { of } from 'rxjs';
 import { TypedSearchService } from './typed_search_service';
 import type { ISearchGeneric } from '@kbn/search-types';
+import type { AbstractDataView } from '@kbn/data-views-plugin/common';
 
 describe('TypedSearchService', () => {
   let mockSearch: jest.MockedFunction<ISearchGeneric>;
@@ -167,10 +168,8 @@ describe('TypedSearchService', () => {
       const mockResponse = { hits: { hits: [], total: 0 } };
       mockSearch.mockReturnValue(createMockResponse(mockResponse));
 
-      const mockDataView = { id: 'test-dataview' };
       const options = {
         legacyHitsTotal: false,
-        dataView: mockDataView as any,
       };
 
       await service.searchDSL(
@@ -185,7 +184,32 @@ describe('TypedSearchService', () => {
         expect.anything(),
         expect.objectContaining({
           legacyHitsTotal: options.legacyHitsTotal,
-          indexPattern: options.dataView,
+        })
+      );
+    });
+
+    it('accepts data view as index', async () => {
+      const mockResponse = { hits: { hits: [], total: 0 } };
+      mockSearch.mockReturnValue(createMockResponse(mockResponse));
+
+      const mockDataView = {
+        id: '1',
+        getIndexPattern: () => 'logs-*',
+      } as AbstractDataView;
+
+      await service.searchDSL({
+        index: mockDataView,
+        query: { match_all: {} },
+      });
+
+      expect(mockSearch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({
+            index: 'logs-*',
+          }),
+        }),
+        expect.objectContaining({
+          indexPattern: mockDataView,
         })
       );
     });

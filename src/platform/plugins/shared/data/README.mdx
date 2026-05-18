@@ -154,8 +154,7 @@ const result = await data.search.typed.searchESQL(
   {
     query: 'FROM logs-* | WHERE status >= 400 | STATS count = COUNT(*) BY status',
     timeZone: 'America/New_York'
-  },
-  { abortSignal }
+  }
 );
 
 console.log(result.rawResponse.values);
@@ -169,9 +168,7 @@ const result = await data.search.typed.searchDSL(
     index: 'logs-*',
     query: { match: { message: 'error' } },
     size: 100,
-    sort: [{ '@timestamp': 'desc' }]
-  },
-  { abortSignal }
+  }
 );
 
 console.log(result.rawResponse.hits.total);
@@ -187,7 +184,7 @@ const result = await data.search.typed.searchDSL(
     size: 1000,
     sort: [{ '@timestamp': 'desc' }]
   },
-  { paginate: true, abortSignal }
+  { paginate: true }
 );
 
 // Fetch next page
@@ -208,14 +205,8 @@ const result = await data.search.typed.searchEQL(
   {
     index: 'logs-*',
     query: 'process where process.name == "cmd.exe"',
-    size: 50,
     fields: ['process.name', 'process.pid', '@timestamp']
   },
-  {
-    abortSignal,
-    timestampField: '@timestamp',
-    eventCategoryField: 'event.category'
-  }
 );
 
 console.log(result.rawResponse.hits.events);
@@ -229,7 +220,7 @@ const result = await data.search.typed.searchSQL(
     query: 'SELECT status, COUNT(*) FROM "logs-*" GROUP BY status',
     fetchSize: 1000
   },
-  { abortSignal, timeZone: 'UTC' }
+  { timeZone: 'UTC' }
 );
 
 console.log(result.rawResponse.rows);

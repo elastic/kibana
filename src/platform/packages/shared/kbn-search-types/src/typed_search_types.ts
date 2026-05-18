@@ -23,7 +23,7 @@ export interface IBaseSearchOptions {
   abortSignal?: AbortSignal;
 
   /**
-   * A session ID, grouping multiple search requests into a single session.
+   * A background search ID.
    */
   sessionId?: string;
 
@@ -49,7 +49,7 @@ export interface IDSLSearchParams {
   /**
    * Index pattern to search
    */
-  index: string;
+  index: string | AbstractDataView;
 
   /**
    * Query DSL query
@@ -102,11 +102,6 @@ export interface IDSLSearchParams {
  */
 export interface IDSLSearchOptions extends IBaseSearchOptions {
   /**
-   * DataView for better error messages
-   */
-  dataView?: AbstractDataView;
-
-  /**
    * Request the legacy format for the total number of hits
    */
   legacyHitsTotal?: boolean;
@@ -145,11 +140,11 @@ export interface IDSLPagination {
 /**
  * Result from a DSL search
  */
-export interface IDSLSearchResult<TDoc = unknown> {
+export interface IDSLSearchResult {
   /**
    * Raw Elasticsearch search response
    */
-  rawResponse: estypes.SearchResponse<TDoc>;
+  rawResponse: estypes.SearchResponse;
   /**
    * Request parameters for inspector
    */
@@ -158,59 +153,6 @@ export interface IDSLSearchResult<TDoc = unknown> {
    * Pagination helpers (only present when paginate: true option is used)
    */
   pagination?: IDSLPagination;
-}
-
-// ============================================================================
-// Aggregation-Only Search Types
-// ============================================================================
-
-/**
- * Parameters for aggregation-only search (size: 0)
- */
-export interface IAggsSearchParams {
-  /**
-   * Index pattern to search
-   */
-  index: string;
-
-  /**
-   * Query to filter documents before aggregating
-   */
-  query?: estypes.QueryDslQueryContainer;
-
-  /**
-   * Aggregations to compute (required)
-   */
-  aggs: Record<string, estypes.AggregationsAggregationContainer>;
-
-  /**
-   * Runtime field mappings
-   */
-  runtimeMappings?: estypes.MappingRuntimeFields;
-}
-
-/**
- * Options specific to aggregation search
- */
-export interface IAggsSearchOptions extends IBaseSearchOptions {
-  /**
-   * DataView for better error messages
-   */
-  dataView?: AbstractDataView;
-}
-
-/**
- * Result from an aggregation-only search
- */
-export interface IAggsSearchResult {
-  /**
-   * Raw Elasticsearch search response (size: 0, contains aggregations)
-   */
-  rawResponse: estypes.SearchResponse;
-  /**
-   * Request parameters for inspector
-   */
-  requestParams?: SanitizedConnectionRequestParams;
 }
 
 // ============================================================================
@@ -287,7 +229,7 @@ export interface IEQLSearchParams {
   /**
    * Index to search
    */
-  index: string;
+  index: string | AbstractDataView;
 
   /**
    * EQL query string
@@ -382,11 +324,6 @@ export interface ISQLSearchParams {
  * Options specific to SQL search
  */
 export interface ISQLSearchOptions extends IBaseSearchOptions {
-  /**
-   * Response format
-   */
-  format?: 'json' | 'csv' | 'txt' | 'tsv' | 'yaml';
-
   /**
    * Time zone for date calculations
    */
