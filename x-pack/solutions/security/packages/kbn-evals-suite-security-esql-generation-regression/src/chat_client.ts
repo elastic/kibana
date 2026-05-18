@@ -65,6 +65,22 @@ export class EsqlRegressionAgentBuilderChatClient {
     agentId = agentBuilderDefaultAgentId,
   }: ConverseParams): Promise<ConverseResponse> {
     const call = async (): Promise<ConverseResponse> => {
+      // Local cast mirrors the server contract in
+      // `x-pack/platform/plugins/shared/agent_builder/common/http_api/chat.ts`:
+      // `response` is `Partial<AssistantResponse> & { prompts?: ... }`, so
+      // both the outer `response` field and the inner `message` must be
+      // treated as possibly absent. For tool-only turns where the agent
+      // surfaces its answer through a structured `generate_esql` /
+      // `execute_esql` step rather than free-form text, `response.message`
+      // can be missing — the extractor walks `steps` first (see
+      // `extract_esql.ts`) and only falls back to the final message
+      // when no tool result is available. Dereferencing
+      // `response.response.message` directly here would throw a
+      // `TypeError`, which `pRetry` would mistake for a transient
+      // failure and waste two more LLM round-trips before the outer
+      // catch drops the steps payload — exactly what the extractor
+      // needs. Returning an empty string instead lets the extractor
+      // continue working from `steps[]`.
       const response = (await this.fetch('/api/agent_builder/converse', {
         method: 'POST',
         version: '2023-10-31',
@@ -78,12 +94,12 @@ export class EsqlRegressionAgentBuilderChatClient {
         conversation_id?: string;
         trace_id?: string;
         steps?: ConverseStep[];
-        response: { message: string };
+        response?: { message?: string };
       };
 
       return {
         conversationId: response.conversation_id,
-        messages: [{ message: response.response.message }],
+        messages: [{ message: response.response?.message ?? '' }],
         steps: response.steps ?? [],
         traceId: response.trace_id,
         errors: [],
