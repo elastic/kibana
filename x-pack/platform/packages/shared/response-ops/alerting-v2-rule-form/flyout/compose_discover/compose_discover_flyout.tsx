@@ -167,7 +167,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
   const initialMapped =
     (mode === 'edit' || mode === 'clone') && rule ? mapRuleToComposeFormValues(rule) : undefined;
   const [uiState, dispatch] = useComposeDiscoverState({
-    mode: mode === 'clone' ? 'create' : mode,
+    mode: mode === 'clone' ? 'edit' : mode,
     initialQuery: getBreachQuery(initialMapped?.query),
     initialRecoveryQuery: getRecoverQuery(initialMapped?.query)?.trim() || undefined,
   });
