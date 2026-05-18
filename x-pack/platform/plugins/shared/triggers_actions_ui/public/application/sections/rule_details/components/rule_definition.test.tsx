@@ -114,14 +114,14 @@ describe('Rule Definition', () => {
       requiresAppContext: false,
     };
 
-    ruleTypeRegistry.get.mockImplementation((id) => {
+    ruleTypeRegistry.get.mockImplementation(async (id) => {
       if (id === 'siem_rule' || id === 'attack-discovery') {
         throw new Error('error');
       }
       return ruleTypeR;
     });
 
-    actionTypeRegistry.list.mockReturnValue([
+    actionTypeRegistry.list.mockResolvedValue([
       { id: '.server-log', iconClass: 'logsApp' },
       { id: '.slack', iconClass: 'logoSlack' },
       { id: '.email', iconClass: 'email' },

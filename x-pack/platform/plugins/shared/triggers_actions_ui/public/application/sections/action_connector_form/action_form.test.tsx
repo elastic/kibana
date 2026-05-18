@@ -264,7 +264,7 @@ describe('action_form', () => {
       isExperimental,
     };
 
-    actionTypeRegistry.list.mockReturnValue([
+    actionTypeRegistry.list.mockResolvedValue([
       newActionType,
       disabledByConfigActionType,
       disabledByLicenseActionType,
@@ -275,7 +275,7 @@ describe('action_form', () => {
     ]);
 
     actionTypeRegistry.has.mockReturnValue(true);
-    actionTypeRegistry.get.mockReturnValue(newActionType);
+    actionTypeRegistry.get.mockResolvedValue(newActionType);
     const initialAlert = {
       name: 'test',
       params: {},

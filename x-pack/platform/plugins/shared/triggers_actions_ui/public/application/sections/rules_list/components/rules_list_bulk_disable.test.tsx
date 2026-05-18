@@ -129,8 +129,8 @@ const { loadActionTypes, loadAllActions } = jest.requireMock('../../../lib/actio
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
 
-ruleTypeRegistry.list.mockReturnValue([ruleType]);
-actionTypeRegistry.list.mockReturnValue([]);
+ruleTypeRegistry.list.mockResolvedValue([ruleType]);
+actionTypeRegistry.list.mockResolvedValue([]);
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 const queryClient = new QueryClient({

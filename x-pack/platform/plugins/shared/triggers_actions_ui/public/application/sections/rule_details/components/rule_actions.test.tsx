@@ -26,7 +26,7 @@ const mockedUseFetchRuleActionConnectorsHook = jest.spyOn(
 describe('Rule Actions', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    actionTypeRegistry.get.mockReturnValue(actionType);
+    actionTypeRegistry.get.mockResolvedValue(actionType);
   });
 
   it("renders rule action connector icons for user's selected rule actions", async () => {
@@ -64,7 +64,7 @@ describe('Rule Actions', () => {
       reloadRuleActionConnectors: jest.fn(),
     });
 
-    actionTypeRegistry.list.mockReturnValue([
+    actionTypeRegistry.list.mockResolvedValue([
       { id: '.server-log', iconClass: 'logsApp' },
       { id: '.slack', iconClass: 'logoSlack' },
       { id: '.email', iconClass: 'email' },
@@ -149,7 +149,7 @@ describe('Rule Actions', () => {
       reloadRuleActionConnectors: jest.fn(),
     });
 
-    actionTypeRegistry.list.mockReturnValue([
+    actionTypeRegistry.list.mockResolvedValue([
       { id: '.server-log', iconClass: 'logsApp' },
       { id: '.slack', iconClass: 'logoSlack' },
       { id: '.email', iconClass: 'email' },
@@ -174,11 +174,11 @@ describe('Rule Actions', () => {
       },
     ];
 
-    actionTypeRegistry.list.mockReturnValue([
+    actionTypeRegistry.list.mockResolvedValue([
       { id: '.test-system-action', iconClass: 'logsApp' },
     ] as ActionTypeModel[]);
 
-    actionTypeRegistry.get.mockReturnValue({
+    actionTypeRegistry.get.mockResolvedValue({
       ...actionType,
       isSystemActionType: true,
       id: '.test-system-action',

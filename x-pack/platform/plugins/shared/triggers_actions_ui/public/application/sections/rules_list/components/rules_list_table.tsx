@@ -332,7 +332,9 @@ export const RulesListTable = (props: RulesListTableProps) => {
   const isRuleTypeEditableInContext = useCallback(
     (ruleTypeId: string) =>
       ruleTypeRegistry.has(ruleTypeId)
-        ? !ruleTypeRegistry.get(ruleTypeId).requiresAppContext
+       // ? !ruleTypeRegistry.get(ruleTypeId).requiresAppContext
+       // TODO load async
+        ? false
         : false,
     [ruleTypeRegistry]
   );
