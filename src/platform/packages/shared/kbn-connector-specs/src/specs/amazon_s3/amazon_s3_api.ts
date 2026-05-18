@@ -13,7 +13,7 @@ import {
   setConnectorActionErrorMeta,
   getEstimatedBase64OutputBytes,
   getResponseContentLengthBytes,
-} from '../../connector_spec';
+} from '../../connector_utils';
 import { calculateAWSA4Signature, sha256Hash } from '../../auth_types/aws_crypto_helpers';
 import type {
   AmazonS3BucketObjectListing,

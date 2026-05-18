@@ -13,7 +13,7 @@ import {
   getConnectorActionErrorMeta,
   getFinitePositiveNumber,
   getEstimatedBase64OutputBytes,
-} from '../../connector_spec';
+} from '../../connector_utils';
 import type { ConnectorSpec } from '../../connector_spec';
 // Google Drive API constants
 const GOOGLE_DRIVE_API_BASE = 'https://www.googleapis.com/drive/v3';

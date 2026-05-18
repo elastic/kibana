@@ -15,7 +15,7 @@ import {
   getResponseContentLengthBytes,
   getEstimatedBase64OutputBytes,
   ESTIMATED_JSON_OUTPUT_OVERHEAD_BYTES,
-} from './connector_spec';
+} from './connector_utils';
 
 describe('getFinitePositiveNumber', () => {
   it.each([

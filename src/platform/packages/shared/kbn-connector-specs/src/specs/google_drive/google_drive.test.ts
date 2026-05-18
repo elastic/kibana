@@ -10,7 +10,7 @@
 import {
   getConnectorActionErrorMeta,
   ESTIMATED_JSON_OUTPUT_OVERHEAD_BYTES,
-} from '../../connector_spec';
+} from '../../connector_utils';
 import type { ActionContext } from '../../connector_spec';
 import { GoogleDriveConnector } from './google_drive';
 

@@ -11,7 +11,7 @@ import type { ActionContext } from '../../connector_spec';
 import {
   getConnectorActionErrorMeta,
   ESTIMATED_JSON_OUTPUT_OVERHEAD_BYTES,
-} from '../../connector_spec';
+} from '../../connector_utils';
 import {
   listAmazonS3Buckets,
   listAmazonS3BucketObjects,
