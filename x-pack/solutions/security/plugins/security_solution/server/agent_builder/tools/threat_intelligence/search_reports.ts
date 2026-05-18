@@ -108,11 +108,13 @@ export const searchReportsTool: BuiltinSkillBoundedTool<typeof searchReportsSche
   type: ToolType.builtin,
   description:
     `Portability wrapper around POST ${SEARCH_REPORTS_API_PATH}. ` +
-    'Semantic + BM25 hybrid search over the `.kibana-threat-reports-*` data stream. Returns the top ' +
-    'matching threat intelligence reports across all sources (RSS feeds, STIX/TAXII, vendor ' +
-    'APIs, analyst-pasted documents). Use when the user asks about threats, advisories, ' +
-    'CVEs in the wild, threat actors, or wants a digest of recent intel matching a topic. ' +
-    'Inside Kibana, prefer calling the route directly via `execute_workflow_step` + `kibana-request`.',
+    'Semantic + BM25 hybrid search over the `.kibana-threat-reports-*` data stream (ingested ' +
+    'RSS/STIX/vendor feeds — NOT customer logs or alerts). **Required first step** for digest, ' +
+    'weekly summary, CISO brief, ransomware/supply-chain topic, or "what threat intel do we have" ' +
+    'questions: call this before answering or suggesting feed setup. Returns `{ total, reports[] }`; ' +
+    'only treat the database as empty when `total` is 0 after retrying without `categories` if ' +
+    'the first search used category filters. Prefer `sort_by: "rank"` and `time_range` last 7d ' +
+    'for weekly digests.',
   schema: searchReportsSchema,
   handler: async (params, { esClient, logger, spaceId }) => {
     try {

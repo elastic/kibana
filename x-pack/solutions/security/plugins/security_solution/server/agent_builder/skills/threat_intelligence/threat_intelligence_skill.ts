@@ -82,6 +82,30 @@ Do **not** use this skill when:
 - The user wants a hypothesis-driven hunt across their own data (use the \`threat-hunting\` skill)
 - The user is asking about PCI/SOC2/HIPAA compliance (use the \`pci-compliance\` skill)
 
+## Critical guardrails (digest / topic queries)
+
+Threat intelligence reports live **only** in \`.kibana-threat-reports-*\`, accessed via
+\`threat_intel.search_reports\` or \`POST ${SEARCH_REPORTS_API_PATH}\`. They are **not** in
+customer telemetry (\`logs-*\`, \`.alerts-security.*\`, CloudTrail, Azure audit, endpoint events).
+
+For digest, advisory, or "what's new on X" questions:
+
+1. **Always call \`search_reports\` first** — before answering, before suggesting feed setup,
+   and before searching any other index. Never claim the database is empty without a
+   successful \`search_reports\` response whose \`total\` you read.
+2. **Never redirect to the \`threat-hunting\` skill** for digest requests — that skill
+   searches the customer's environment, not ingested threat feeds.
+3. When \`total > 0\`, **deliver the digest** (see orchestration below). Do **not** offer
+   "configure feeds" or "paste a report" onboarding — those apply only when both search
+   attempts below return \`total: 0\`.
+4. If the first search uses \`categories[]\` and returns \`total: 0\`, **retry once** with
+   the same \`query\` and \`time_range\` but **omit \`categories\`** — most ingested
+   reports lack \`extracted.categories\` until \`nl_extraction_behavioral\` runs. Only
+   after both attempts are zero may you suggest ingestion or subscriptions.
+5. Prefer \`sort_by: "rank"\` and \`time_range: { from: "now-7d", to: "now" }\` for weekly
+   digests; call \`${THREAT_INTEL_TOOL_IDS.synthesizeAdvisory}\` (or
+   \`POST ${SYNTHESIZE_ADVISORY_API_PATH}\`) for an executive narrative when \`total >= 3\`.
+
 ## Architecture: Routes Are the Canonical Execution Surface
 
 This skill documents internal HTTP routes; **execution happens through
@@ -229,13 +253,21 @@ sources to enable. Body: \`{ lookback_days?, index_patterns? }\`.
 
 ### For digest queries ("what's new on X this week?")
 
-1. Issue \`POST ${SEARCH_REPORTS_API_PATH}\` with the user's topic + time range.
-2. For each high/critical-severity hit, optionally issue
-   \`POST ${HUNT_BEHAVIOR_API_PATH}\` to extract behaviors.
-3. Render as: \`threat-intel-mitre-heatmap\` attachment (top techniques) +
-   \`threat-intel-report-table\` attachment (reports with embedded IOCs) +
-   short prose summary. Optionally add \`threat-intel-severity-timeline\` when
-   the time range is wider than 7 days.
+1. Call \`threat_intel.search_reports\` (or \`POST ${SEARCH_REPORTS_API_PATH}\`) **immediately**
+   with \`query\` = the user's topic, \`time_range\` = last 7 days unless they specified
+   otherwise, \`sort_by: "rank"\`, \`size: 10\`. Map ransomware / supply chain topics to
+   \`categories: ["ransomware", "supply-chain"]\` only on the first attempt; retry without
+   \`categories\` if \`total\` is 0 (see guardrails above).
+2. When \`total > 0\`: call \`${THREAT_INTEL_TOOL_IDS.synthesizeAdvisory}\` (or
+   \`POST ${SYNTHESIZE_ADVISORY_API_PATH}\`) with the same window and category filters for
+   a 2–3 paragraph executive lede; then summarize top headlines in prose.
+3. Render \`threat-intel-report-table\` (from the search hits) and optionally
+   \`threat-intel-mitre-heatmap\` when techniques are present. Add
+   \`threat-intel-severity-timeline\` when the window is wider than 7 days.
+4. For high/critical hits only, optionally \`POST ${HUNT_BEHAVIOR_API_PATH}\` — do not block
+   the digest on hunt/extraction calls.
+5. Only when \`total\` is 0 after both search attempts: offer paste-ingest, feed setup, or
+   subscription (subscription flow below).
 
 ### For analyst paste ("here's a Mandiant blog, what should we do?")
 
