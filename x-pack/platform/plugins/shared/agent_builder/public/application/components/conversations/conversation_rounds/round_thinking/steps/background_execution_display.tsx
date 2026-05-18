@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { EuiText, EuiLink, EuiBadge } from '@elastic/eui';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { BackgroundAgentCompleteStep } from '@kbn/agent-builder-common';
 import { ExecutionStatus } from '@kbn/agent-builder-common';
@@ -38,7 +39,14 @@ export const BackgroundExecutionDisplay: React.FC<BackgroundExecutionDisplayProp
               values={{
                 status: <EuiBadge color="danger">{step.status}</EuiBadge>,
                 inspectResponse: (
-                  <EuiLink onClick={onInspect} role="button">
+                  <EuiLink
+                    onClick={onInspect}
+                    role="button"
+                    data-ebt-element={AGENT_BUILDER_UI_EBT.element.CONVERSATION_ROUND_THINKING}
+                    data-ebt-action={
+                      AGENT_BUILDER_UI_EBT.action.conversation.THINKING_TOOL_RESPONSE_INSPECT
+                    }
+                  >
                     <FormattedMessage
                       id="xpack.agentBuilder.thinking.inspectError"
                       defaultMessage="Inspect error"
@@ -53,7 +61,14 @@ export const BackgroundExecutionDisplay: React.FC<BackgroundExecutionDisplayProp
               defaultMessage="Background agent completed. {inspectResponse}"
               values={{
                 inspectResponse: (
-                  <EuiLink onClick={onInspect} role="button">
+                  <EuiLink
+                    onClick={onInspect}
+                    role="button"
+                    data-ebt-element={AGENT_BUILDER_UI_EBT.element.CONVERSATION_ROUND_THINKING}
+                    data-ebt-action={
+                      AGENT_BUILDER_UI_EBT.action.conversation.THINKING_TOOL_RESPONSE_INSPECT
+                    }
+                  >
                     <FormattedMessage
                       id="xpack.agentBuilder.thinking.inspectResponse"
                       defaultMessage="Inspect response"

@@ -9,6 +9,7 @@ import { EuiFlexGroup, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EsqlResults } from '@kbn/agent-builder-common/tools/tool_result';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import { useAgentBuilderServices } from '../../../../../hooks/use_agent_builder_service';
 
 interface EsqlResultsStepProps {
@@ -53,6 +54,10 @@ export const EsqlResultsStep: React.FC<EsqlResultsStepProps> = ({ result: { data
                   }
                 )}
                 target="_blank"
+                data-ebt-element={AGENT_BUILDER_UI_EBT.element.CONVERSATION_ROUND_THINKING}
+                data-ebt-action={
+                  AGENT_BUILDER_UI_EBT.action.conversation.THINKING_ESQL_OPEN_DISCOVER
+                }
               >
                 <FormattedMessage
                   id="xpack.agentBuilder.conversation.thinking.esqlResultsStep.resultsCount"

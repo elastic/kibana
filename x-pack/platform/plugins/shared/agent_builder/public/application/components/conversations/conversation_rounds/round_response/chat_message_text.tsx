@@ -6,6 +6,7 @@
  */
 
 import { css } from '@emotion/css';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import React, { useMemo, useState, useCallback } from 'react';
 import {
   EuiCodeBlock,
@@ -126,6 +127,8 @@ export function ChatMessageText({
           target="_blank"
           rel="noreferrer"
           external={false}
+          data-ebt-element={AGENT_BUILDER_UI_EBT.element.CONVERSATION_ROUND_RESPONSE}
+          data-ebt-action={AGENT_BUILDER_UI_EBT.action.conversation.EXTERNAL_LINK_OPEN}
           onClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
             if (props.href) handleLinkClick(props.href, e);
           }}

@@ -123,6 +123,8 @@ export const AGENT_BUILDER_UI_EBT = {
       THINKING_PANEL_EXPAND: 'conversation_thinking_panel_expand',
       THINKING_PANEL_COLLAPSE: 'conversation_thinking_panel_collapse',
       THINKING_TOOL_RESPONSE_INSPECT: 'conversation_thinking_tool_response_inspect',
+      THINKING_SUBAGENT_WATCH: 'conversation_thinking_subagent_watch',
+      THINKING_ESQL_OPEN_DISCOVER: 'conversation_thinking_esql_open_discover',
       EMBEDDABLE_POPOVER_BACK: 'conversation_embeddable_popover_back',
       EMBEDDABLE_MENU_OPEN: 'conversation_embeddable_menu_open',
       EMBEDDABLE_CLOSE: 'conversation_embeddable_close',

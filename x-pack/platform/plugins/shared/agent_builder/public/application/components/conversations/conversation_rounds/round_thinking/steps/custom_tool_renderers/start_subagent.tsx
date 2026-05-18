@@ -8,6 +8,7 @@
 import type { ToolCallStep } from '@kbn/agent-builder-common/chat/conversation';
 import type { ToolResult } from '@kbn/agent-builder-common/tools/tool_result';
 import { SubagentExecutionMode } from '@kbn/agent-builder-common/agents';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import type { ReactNode } from 'react';
 import React, { useState } from 'react';
 import { EuiLink, EuiText } from '@elastic/eui';
@@ -127,7 +128,12 @@ const SubAgentToolCallDisplay: React.FC<{
             {executionId && (
               <>
                 {' · '}
-                <EuiLink onClick={() => setWatchExecutionId(executionId)} role="button">
+                <EuiLink
+                  onClick={() => setWatchExecutionId(executionId)}
+                  role="button"
+                  data-ebt-element={AGENT_BUILDER_UI_EBT.element.CONVERSATION_ROUND_THINKING}
+                  data-ebt-action={AGENT_BUILDER_UI_EBT.action.conversation.THINKING_SUBAGENT_WATCH}
+                >
                   <FormattedMessage
                     id="xpack.agentBuilder.thinking.watchSubAgent"
                     defaultMessage="Watch"
@@ -169,7 +175,14 @@ const SubAgentResultDisplay: React.FC<{
               defaultMessage="Subagent execution completed. {inspectResponse}"
               values={{
                 inspectResponse: (
-                  <EuiLink onClick={() => setIsFlyoutOpen(true)} role="button">
+                  <EuiLink
+                    onClick={() => setIsFlyoutOpen(true)}
+                    role="button"
+                    data-ebt-element={AGENT_BUILDER_UI_EBT.element.CONVERSATION_ROUND_THINKING}
+                    data-ebt-action={
+                      AGENT_BUILDER_UI_EBT.action.conversation.THINKING_TOOL_RESPONSE_INSPECT
+                    }
+                  >
                     <FormattedMessage
                       id="xpack.agentBuilder.thinking.inspectSubAgentResponse"
                       defaultMessage="Inspect response"
