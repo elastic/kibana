@@ -48,7 +48,7 @@ export const LogLevelFilter: React.FunctionComponent<{
       }
       isOpen={isOpen}
       closePopover={closePopover}
-      panelPaddingSize="none"
+      panelPaddingSize="s"
     >
       <EuiSelectable
         options={options}
@@ -62,9 +62,6 @@ export const LogLevelFilter: React.FunctionComponent<{
           });
         }}
         data-test-subj="agentList.logLevelFilterOptions"
-        listProps={{
-          paddingSize: 's',
-        }}
       >
         {(list) => list}
       </EuiSelectable>
