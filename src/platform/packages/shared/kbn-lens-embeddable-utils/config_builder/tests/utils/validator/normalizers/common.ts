@@ -54,15 +54,12 @@ const COMMON_STATE_IGNORE_PATHS = [
   'state.datasourceStates.textBased.layers.*.timeField', // inferred at runtime from the data view -> original may have undefined while transform sets @timestamp from query.esql
   // TODO: check missing/different properties on adHocDataViews
   'state.adHocDataViews.*.timeFieldName', // not saved in API re-derived at runtime
-  // Lost through round-trip — may cause different runtime behavior. Check getAdHocDataViewSpec for details.
   'state.adHocDataViews.*.fieldAttrs',
   'state.adHocDataViews.*.managed',
-
   'state.adHocDataViews.*.allowNoIndex', // hardcoded to false by transform; if original was true, missing indices would error instead of returning empty
   'state.adHocDataViews.*.allowHidden', // hardcoded to false by transform; if original was true, hidden indices would no longer be queried
   'state.adHocDataViews.*.fieldFormats', // custom field formats (e.g. url formatters) will be lost
   'state.adHocDataViews.*.runtimeFieldMap', // runtime field definitions will be lost
-  'state.adHocDataViews.*.typeMeta', // metadata will be lost
 ];
 
 export const DEFAULT_LAYER_ID = 'layer_0';
@@ -232,10 +229,17 @@ function removeOrphanedAdHocDataViews(attributes: LensAttributes, internalRefere
 }
 
 function normalizeAdHocDataViews(attributes: LensAttributes) {
+  // Clear empty typeMeta objects
+  for (const dv of Object.values(attributes.state.adHocDataViews ?? {})) {
+    if (dv.typeMeta && Object.keys(dv.typeMeta).length === 0) {
+      delete dv.typeMeta;
+    }
+  }
+
   let internalReferences = attributes.state.internalReferences ?? [];
+  removeOrphanedAdHocDataViews(attributes, internalReferences);
   internalReferences = normalizeESQLAdHocDataViews(attributes, internalReferences);
   internalReferences = normalizeFormBasedAdHocDataViews(attributes, internalReferences);
-  removeOrphanedAdHocDataViews(attributes, internalReferences);
 
   if (Object.keys(attributes.state.adHocDataViews ?? {}).length === 0) {
     delete attributes.state.adHocDataViews;
