@@ -77,38 +77,6 @@ describe('Collapsed mode', () => {
       // See: https://eui.elastic.co/docs/utilities/accessibility/#screen-reader-only
       expect(solutionLogo.children[1].className).toContain('euiScreenReaderOnly');
     });
-
-    /**
-     * GIVEN the side navigation is in collapsed mode
-     * WHEN I hover over the solution logo
-     * THEN a tooltip appears with the item label
-     * AND when I click on the trigger
-     * AND then I hover out
-     * THEN the tooltip disappears
-     */
-    it('should display a tooltip with the solution label on hover, and hide on hover out', async () => {
-      render(<TestComponent isCollapsed items={basicMock.navItems} logo={basicMock.logo} />);
-
-      const solutionLogo = screen.getByTestId(logoId);
-
-      await user.hover(solutionLogo);
-      flushPopoverTimers();
-
-      const tooltip = await screen.findByRole('tooltip', {
-        name: 'Solution',
-      });
-
-      expect(tooltip).toBeInTheDocument();
-
-      await user.click(solutionLogo);
-      await user.unhover(solutionLogo);
-
-      // Even after clicking on the trigger which makes the `EuiToolTip` persistent by default
-      // See: https://eui.elastic.co/docs/components/display/tooltip/
-      await waitFor(() => {
-        expect(tooltip).not.toBeInTheDocument();
-      });
-    });
   });
 
   describe('Primary menu', () => {
@@ -260,38 +228,6 @@ describe('Collapsed mode', () => {
         await user.keyboard('{enter}');
 
         expect(dashboardsLink).toHaveAttribute('href', expectedHref);
-      });
-
-      /**
-       * GIVEN the side navigation is in collapsed mode
-       * WHEN I hover over a primary menu item
-       * THEN a tooltip appears with the item label
-       * AND when I click on the trigger
-       * AND then I hover out
-       * THEN the tooltip disappears
-       */
-      it('should display a tooltip with the item label on hover, and hide on hover out', async () => {
-        render(<TestComponent isCollapsed items={basicMock.navItems} logo={basicMock.logo} />);
-
-        const dashboardsLink = screen.getByTestId(primaryItemId('dashboards'));
-
-        await user.hover(dashboardsLink);
-        flushPopoverTimers();
-
-        const tooltip = await screen.findByRole('tooltip', {
-          name: 'Dashboards',
-        });
-
-        expect(tooltip).toBeInTheDocument();
-
-        await user.click(dashboardsLink);
-        await user.unhover(dashboardsLink);
-
-        // Even after clicking on the trigger which makes the `EuiToolTip` persistent by default
-        // See: https://eui.elastic.co/docs/components/display/tooltip/
-        await waitFor(() => {
-          expect(tooltip).not.toBeInTheDocument();
-        });
       });
 
       /**

@@ -29,6 +29,7 @@ import { hasLicenseExpired } from '../license';
 import { getCapabilities } from './get_capabilities';
 import type { MlApi } from '../services/ml_api_service';
 import type { MlGlobalServices } from '../app';
+import type { MlCoreSetup } from '../../plugin';
 
 let _capabilities: MlCapabilities = getDefaultMlCapabilities();
 
@@ -230,6 +231,20 @@ export function checkCreateJobsCapabilitiesResolver(
 export function checkPermission(capability: keyof MlCapabilities) {
   const licenseHasExpired = hasLicenseExpired();
   return _capabilities[capability] === true && licenseHasExpired !== true;
+}
+
+export async function checkPermissionAsync(
+  getStartServices: MlCoreSetup['getStartServices'],
+  capability: keyof MlCapabilities,
+  throwError: boolean = false
+) {
+  const [coreStart] = await getStartServices();
+  const hasPermission =
+    (coreStart.application.capabilities.ml as MlCapabilities)[capability] === true;
+  if (!hasPermission && throwError) {
+    throw new Error('You do not have permission to access this feature');
+  }
+  return hasPermission;
 }
 
 // create the text for the button's tooltips if the user's license has

@@ -17,7 +17,7 @@ import type { AnomalyChartsEmbeddableApi } from '../embeddables';
 import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '../embeddables';
 import type { MlCoreSetup } from '../plugin';
 import { EmbeddableAnomalyChartsUserInput } from '../embeddables/anomaly_charts/anomaly_charts_setup_flyout';
-import { isValidLicense } from './action_license_check';
+import { checkPermissionAsync } from '../application/capabilities/check_capabilities';
 
 export const EDIT_ANOMALY_CHARTS_PANEL_ACTION = 'editAnomalyChartsPanelAction';
 
@@ -56,7 +56,7 @@ export function createAddAnomalyChartsPanelAction(
         defaultMessage: 'View anomaly detection results in a chart.',
       }),
     async isCompatible(context: EmbeddableApiContext) {
-      if (!(await isValidLicense(getStartServices))) return false;
+      if (!(await checkPermissionAsync(getStartServices, 'canGetJobs'))) return false;
       return Boolean(await parentApiIsCompatible(context.embeddable));
     },
     async execute(context) {

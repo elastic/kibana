@@ -121,7 +121,7 @@ describe('getSampleDocumentsEsql', () => {
       end: 200,
       kql: 'log.level:"error"',
       whereCondition: esql.exp`NOT ${esql.col(['service', 'name'])} == ${esql.str('checkout')}`,
-      loadUnmappedFields: true,
+      unmappedFields: 'LOAD',
       size: 5,
     });
 
@@ -175,7 +175,7 @@ describe('getSampleDocumentsEsql', () => {
       end: 200,
       kql: 'log.level:"error"',
       whereCondition: esql.exp`${esql.col(['service', 'name'])} == ${esql.str('checkout')}`,
-      loadUnmappedFields: true,
+      unmappedFields: 'LOAD',
       sampleSize: 2,
     });
 
@@ -186,6 +186,25 @@ describe('getSampleDocumentsEsql', () => {
       'SET unmapped_fields = "LOAD"; FROM logs-* METADATA _id, _source | WHERE KQL("log.level:\\"error\\"") AND service.name == "checkout" | SAMPLE 0.6 | LIMIT 20'
     );
     expect(query.mock.calls[0][0].filter).toEqual(query.mock.calls[1][0].filter);
+  });
+
+  it('emits SET unmapped_fields = "NULLIFY" when unmappedFields is NULLIFY', async () => {
+    const { esClient, query } = createEsClient();
+    query.mockResolvedValueOnce(createResponse({ values: [] }));
+
+    await getSampleDocumentsEsql({
+      esClient,
+      index: 'logs-*',
+      start: 100,
+      end: 200,
+      whereCondition: esql.exp`MATCH_PHRASE(${esql.col('message')}, ${esql.str('error')})`,
+      unmappedFields: 'NULLIFY',
+      size: 5,
+    });
+
+    expect(query.mock.calls[0][0].query).toBe(
+      'SET unmapped_fields = "NULLIFY"; FROM logs-* METADATA _id, _source | WHERE MATCH_PHRASE(message, "error") | LIMIT 5'
+    );
   });
 
   it('omits SAMPLE when the calculated probability reaches one', async () => {

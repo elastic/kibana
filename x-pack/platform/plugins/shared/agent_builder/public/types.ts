@@ -23,7 +23,9 @@ import type { LicenseManagementUIPluginSetup } from '@kbn/license-management-plu
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 import type { AIAssistantManagementSelectionPluginPublicStart } from '@kbn/ai-assistant-management-plugin/public';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { EvalsPublicStart } from '@kbn/evals-plugin/public';
 
@@ -32,6 +34,7 @@ export type {
   AgentBuilderPluginStart,
   ConversationSidebarRef,
   OpenConversationSidebarReturn,
+  PublicEmbeddableConversationProps,
 } from '@kbn/agent-builder-browser';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
@@ -62,5 +65,7 @@ export interface AgentBuilderStartDependencies {
   share: SharePluginStart;
   uiActions: UiActionsStart;
   spaces?: SpacesPluginStart;
+  security?: SecurityPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }

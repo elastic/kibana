@@ -33,9 +33,9 @@ const mockResponse = of([
   },
 ]);
 
-jest.mock('../ensure_license', () => {
+jest.mock('../../application/capabilities/check_capabilities', () => {
   return {
-    ensureLicense: jest.fn(),
+    checkPermissionAsync: jest.fn().mockResolvedValue(true),
   };
 });
 

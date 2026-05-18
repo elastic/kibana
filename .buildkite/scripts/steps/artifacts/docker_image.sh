@@ -45,6 +45,11 @@ export KIBANA_SEARCH_IMAGE="$KIBANA_SEARCH_BASE_IMAGE:$KIBANA_IMAGE_TAG"
 KIBANA_SECURITY_BASE_IMAGE="docker.elastic.co/kibana-ci/kibana-serverless-security"
 export KIBANA_SECURITY_IMAGE="$KIBANA_SECURITY_BASE_IMAGE:$KIBANA_IMAGE_TAG"
 
+# TODO(vectordb): once the vectordb project type publishes its own Docker image,
+# declare KIBANA_VECTORDB_BASE_IMAGE/KIBANA_VECTORDB_IMAGE here and add the
+# corresponding retag, push, create_and_push_manifest, and ":latest" buildx
+# imagetools entries below, mirroring the workplaceai pattern.
+
 retag_image_with_architecture() {
   local image="$1"
   local artifact="$2"
