@@ -31,6 +31,7 @@ export const CASES_CONFIGURE_CREATE_TEMPLATE_PATH =
   `${CASES_CONFIGURE_TEMPLATES_PATH}/create` as const;
 export const CASES_CONFIGURE_EDIT_TEMPLATE_PATH =
   `${CASES_CONFIGURE_TEMPLATES_PATH}/:templateId/edit` as const;
+export const CASES_CONFIGURE_FIELD_LIBRARY_PATH = `${CASES_CONFIGURE_PATH}/field_library` as const;
 /**
  * The main Cases application is in the stack management under the
  * Alerts and Insights section. To do that, Cases registers to the management

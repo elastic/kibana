@@ -54,6 +54,7 @@ export interface ConversationListItemRowProps {
   title: string;
   isActive: boolean;
   routeConversationId: string | undefined;
+  showActionsMenu?: boolean;
   onItemClick?: () => void;
 }
 
@@ -63,6 +64,7 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
   title,
   isActive,
   routeConversationId,
+  showActionsMenu = true,
   onItemClick,
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -90,52 +92,51 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
     `,
   ]);
 
-  const rowLayoutStyles = css`
-    display: flex;
-    align-items: center;
-    gap: ${euiTheme.size.xxs};
-    border-radius: ${euiTheme.border.radius.small};
-    padding-inline-end: ${euiTheme.size.xxs};
-  `;
+  const rowStyles = useMemo(() => {
+    const bg = euiTheme.colors.backgroundLightPrimary;
+    return css`
+      display: flex;
+      align-items: center;
+      gap: ${euiTheme.size.xxs};
+      border-radius: ${euiTheme.border.radius.small};
+      padding-inline-end: ${showActionsMenu ? euiTheme.size.xxs : 0};
 
-  const rowHoverAndFocusStyles = css`
-    &:hover .${ACTIONS_CLASS}, &:focus-within .${ACTIONS_CLASS} {
-      opacity: 1;
-    }
-    &:hover,
-    &:focus-within {
-      background-color: ${euiTheme.colors.backgroundLightPrimary};
-    }
-  `;
+      &:hover,
+      &:focus-within {
+        background-color: ${bg};
+      }
 
-  const activeOrPopoverRowBg = css`
-    background-color: ${euiTheme.colors.backgroundLightPrimary};
-  `;
+      ${(isActive || isPopoverOpen) &&
+      css`
+        background-color: ${bg};
+      `}
 
-  const popoverOpenActionsVisible = css`
-    .${ACTIONS_CLASS} {
-      opacity: 1;
-    }
-  `;
+      ${showActionsMenu &&
+      css`
+        .${ACTIONS_CLASS} {
+          flex-shrink: 0;
+          opacity: 0;
+        }
 
-  const rowStyles = css([
-    rowLayoutStyles,
-    rowHoverAndFocusStyles,
-    (isActive || isPopoverOpen) && activeOrPopoverRowBg,
-    isPopoverOpen && popoverOpenActionsVisible,
-  ]);
+        &:hover .${ACTIONS_CLASS}, &:focus-within .${ACTIONS_CLASS} {
+          opacity: 1;
+        }
 
-  const actionsStyles = css`
-    flex-shrink: 0;
-    opacity: 0;
-  `;
+        ${isPopoverOpen &&
+        css`
+          .${ACTIONS_CLASS} {
+            opacity: 1;
+          }
+        `}
+      `}
+    `;
+  }, [euiTheme, isActive, isPopoverOpen, showActionsMenu]);
 
   const menuItems = useMemo(
     () => [
       <EuiContextMenuItem
         key="rename"
         icon="pencil"
-        size="s"
         data-test-subj={`agentBuilderSidebarConversationRename-${conversationId}`}
         onClick={() => {
           closePopover();
@@ -147,7 +148,6 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
       <EuiContextMenuItem
         key="delete"
         icon={<EuiIcon type="trash" color="danger" aria-hidden={true} />}
-        size="s"
         data-test-subj={`agentBuilderSidebarConversationDelete-${conversationId}`}
         css={css`
           color: ${euiTheme.colors.danger};
@@ -204,21 +204,23 @@ export const ConversationListItemRow: React.FC<ConversationListItemRowProps> = (
           </Link>
         </EuiFlexItem>
 
-        <EuiFlexItem grow={false}>
-          <div css={actionsStyles} className={ACTIONS_CLASS}>
-            <EuiPopover
-              button={menuButton}
-              isOpen={isPopoverOpen}
-              closePopover={closePopover}
-              panelPaddingSize="none"
-              anchorPosition="downRight"
-              repositionOnScroll
-              aria-label={labels.actionsMenu}
-            >
-              <EuiContextMenuPanel size="s" items={menuItems} />
-            </EuiPopover>
-          </div>
-        </EuiFlexItem>
+        {showActionsMenu ? (
+          <EuiFlexItem grow={false}>
+            <div className={ACTIONS_CLASS}>
+              <EuiPopover
+                button={menuButton}
+                isOpen={isPopoverOpen}
+                closePopover={closePopover}
+                panelPaddingSize="none"
+                anchorPosition="downRight"
+                repositionOnScroll
+                aria-label={labels.actionsMenu}
+              >
+                <EuiContextMenuPanel items={menuItems} />
+              </EuiPopover>
+            </div>
+          </EuiFlexItem>
+        ) : null}
       </EuiFlexGroup>
 
       {isRenameModalOpen ? (

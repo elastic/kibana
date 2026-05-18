@@ -359,7 +359,6 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
             repositionOnScroll
           >
             <EuiContextMenu
-              size="s"
               initialPanelId={0}
               panels={panels}
               data-test-subj="actions-context-menu"
