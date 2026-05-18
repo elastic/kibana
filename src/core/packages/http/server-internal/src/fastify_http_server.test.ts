@@ -1375,7 +1375,11 @@ describe('FastifyHttpServer', () => {
     const config$ = new BehaviorSubject(config);
     const limitedConcurrencyTag = 'test:limitedConcurrency:1';
 
-    const server = new FastifyHttpServer(ctx, 'Kibana', new BehaviorSubject(config.shutdownTimeout));
+    const server = new FastifyHttpServer(
+      ctx,
+      'Kibana',
+      new BehaviorSubject(config.shutdownTimeout)
+    );
     const setup = await server.setup({ config$ });
 
     let active = 0;
