@@ -45,7 +45,7 @@ const coverageGapBodySchema = schema.object({
 });
 
 /**
- * Internal route for the `coverage_gap` domain action — joins in-the-wild
+ * Public route for the `coverage_gap` domain action — joins in-the-wild
  * ATT&CK techniques in the threat-reports data stream against Detection
  * Engine rules (enabled and disabled) to recommend enable vs create.
  */
@@ -53,7 +53,7 @@ export const registerCoverageGapRoute = ({ router, logger }: RouteRegistrationDe
   router.versioned
     .post({
       path: COVERAGE_GAP_API_PATH,
-      access: 'internal',
+      access: 'public',
       security: {
         authz: {
           requiredPrivileges: [THREAT_INTELLIGENCE_API_PRIVILEGES.read],
@@ -62,7 +62,7 @@ export const registerCoverageGapRoute = ({ router, logger }: RouteRegistrationDe
     })
     .addVersion(
       {
-        version: '1',
+        version: '2023-10-31',
         validate: { request: { body: coverageGapBodySchema } },
       },
       async (context, request, response) => {

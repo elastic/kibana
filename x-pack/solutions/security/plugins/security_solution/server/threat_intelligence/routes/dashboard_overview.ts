@@ -27,6 +27,11 @@ import {
   type EsTechniqueBehaviorBucket,
   type EsTechniqueTtpBucket,
 } from '../lib/technique_report_counts';
+import {
+  collectRuleCoverageByTechnique,
+  coverageSummaryForTechniques,
+  enrichTechniquesWithRuleCoverage,
+} from '../services/coverage_gap';
 import type { RouteRegistrationDeps } from '.';
 
 const DEFAULT_LOOKBACK_DAYS = 7;
@@ -191,7 +196,7 @@ const fetchReportsOverview = async (
 };
 
 /**
- * Internal route that powers the visual dashboard. Returns the aggregations
+ * Public route that powers the visual dashboard. Returns the aggregations
  * the UI panels need in a single response so the dashboard renders without
  * fanning out to multiple endpoints. Gated on the `read` tier of the
  * `threatIntelligence` Kibana feature.
@@ -204,7 +209,7 @@ export const registerDashboardOverviewRoute = ({
   router.versioned
     .get({
       path: DASHBOARD_OVERVIEW_API_PATH,
-      access: 'internal',
+      access: 'public',
       security: {
         authz: {
           requiredPrivileges: [THREAT_INTELLIGENCE_API_PRIVILEGES.read],
@@ -213,7 +218,7 @@ export const registerDashboardOverviewRoute = ({
     })
     .addVersion(
       {
-        version: '1',
+        version: '2023-10-31',
         validate: {
           request: { query: overviewQuerySchema },
         },
@@ -238,6 +243,7 @@ export const registerDashboardOverviewRoute = ({
 
         const core = await context.core;
         const esClient = core.elasticsearch.client.asCurrentUser;
+        const savedObjectsClient = core.savedObjects.client;
 
         try {
           const reportsResponse = await fetchReportsOverview(esClient, from, to, filters);
@@ -290,7 +296,7 @@ export const registerDashboardOverviewRoute = ({
             };
           });
 
-          const topTechniques = topTechniqueBuckets(
+          const topTechniqueRows = topTechniqueBuckets(
             mergeTechniqueReportCounts(
               parseTechniqueCountsFromBehaviors(
                 aggs?.top_techniques_from_behaviors?.techniques?.buckets ?? []
@@ -299,6 +305,18 @@ export const registerDashboardOverviewRoute = ({
             ),
             15
           );
+
+          let topTechniques = enrichTechniquesWithRuleCoverage(topTechniqueRows, new Map());
+          try {
+            const coverageByTechnique = await collectRuleCoverageByTechnique(savedObjectsClient);
+            topTechniques = enrichTechniquesWithRuleCoverage(topTechniqueRows, coverageByTechnique);
+          } catch (coverageErr) {
+            logger.warn(
+              `dashboard_overview rule coverage walk failed: ${(coverageErr as Error).message}`
+            );
+          }
+
+          const coverageSummary = coverageSummaryForTechniques(topTechniques);
 
           const environmentHitsTotal = aggs?.environment_hits_total?.value ?? 0;
           const layer1Total = aggs?.layer_1_total?.value ?? 0;
@@ -341,6 +359,7 @@ export const registerDashboardOverviewRoute = ({
             by_region: byRegion,
             severity_timeline: severityTimeline,
             top_techniques: topTechniques,
+            coverage_summary: coverageSummary,
             recent_articles: recentArticles,
             environment_impact: {
               total_hits: environmentHitsTotal,

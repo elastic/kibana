@@ -33,7 +33,7 @@ const ingestReportBodySchema = schema.object({
 });
 
 /**
- * Internal route for the `ingest_report` domain action — the canonical
+ * Public route for the `ingest_report` domain action — the canonical
  * execution surface for analyst-paste / ad-hoc URL ingestion. Gated on
  * the `writeSubscriptions` privilege tier (analyst-paste requires the
  * "write" tier of the threat-intelligence feature).
@@ -46,7 +46,7 @@ export const registerIngestReportRoute = ({
   router.versioned
     .post({
       path: INGEST_REPORT_API_PATH,
-      access: 'internal',
+      access: 'public',
       security: {
         authz: {
           requiredPrivileges: [THREAT_INTELLIGENCE_API_PRIVILEGES.writeSubscriptions],
@@ -55,7 +55,7 @@ export const registerIngestReportRoute = ({
     })
     .addVersion(
       {
-        version: '1',
+        version: '2023-10-31',
         validate: { request: { body: ingestReportBodySchema } },
       },
       async (context, request, response) => {

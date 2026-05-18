@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { CoverageRecommendation } from './attachment_payloads';
 import type { SeverityLevel, ThreatCategory, ThreatRegion } from './constants';
 
 /**
@@ -41,7 +42,17 @@ export interface DashboardOverviewResponse {
   top_techniques: Array<{
     technique_id: string;
     report_count: number;
+    has_coverage: boolean;
+    matching_rule_count: number;
+    matching_disabled_rule_count: number;
+    coverage_recommendation: CoverageRecommendation;
+    matching_disabled_rule_ids?: string[];
   }>;
+  coverage_summary: {
+    covered: number;
+    enable_existing: number;
+    uncovered: number;
+  };
   recent_articles: Array<{
     report_id: string;
     title: string;

@@ -62,7 +62,7 @@ const synthesizeAdvisoryBodySchema = schema.object({
 });
 
 /**
- * Internal route for the `synthesize_advisory` domain action — pulls the
+ * Public route for the `synthesize_advisory` domain action — pulls the
  * top-N corroborated reports in a window and asks the LLM to produce a
  * cross-report advisory narrative. See `services/synthesize_advisory.ts`.
  *
@@ -88,7 +88,7 @@ export const registerSynthesizeAdvisoryRoute = ({
   router.versioned
     .post({
       path: SYNTHESIZE_ADVISORY_API_PATH,
-      access: 'internal',
+      access: 'public',
       security: {
         authz: {
           requiredPrivileges: [THREAT_INTELLIGENCE_API_PRIVILEGES.read],
@@ -97,7 +97,7 @@ export const registerSynthesizeAdvisoryRoute = ({
     })
     .addVersion(
       {
-        version: '1',
+        version: '2023-10-31',
         validate: { request: { body: synthesizeAdvisoryBodySchema } },
       },
       async (context, request, response) => {

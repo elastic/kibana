@@ -41,7 +41,7 @@ const huntForThreatBodySchema = schema.object({
 });
 
 /**
- * Internal route for the `hunt_for_threat` domain action — active forward
+ * Public route for the `hunt_for_threat` domain action — active forward
  * hunt across the customer environment indices for a report's IOCs and
  * ATT&CK technique IDs. The Agent Builder tool wrapper delegates to this
  * service.
@@ -50,7 +50,7 @@ export const registerHuntForThreatRoute = ({ router, logger }: RouteRegistration
   router.versioned
     .post({
       path: HUNT_FOR_THREAT_API_PATH,
-      access: 'internal',
+      access: 'public',
       security: {
         authz: {
           requiredPrivileges: [THREAT_INTELLIGENCE_API_PRIVILEGES.read],
@@ -59,7 +59,7 @@ export const registerHuntForThreatRoute = ({ router, logger }: RouteRegistration
     })
     .addVersion(
       {
-        version: '1',
+        version: '2023-10-31',
         validate: { request: { body: huntForThreatBodySchema } },
       },
       async (context, request, response) => {

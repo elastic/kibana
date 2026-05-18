@@ -119,6 +119,7 @@ export {
 export type { SavedViewAttributes, SavedViewSummary } from './saved_views';
 export type { ReportTableScope } from './attachment_payloads';
 export { resolveOverviewQueryFromScope } from './resolve_scope_overview';
+export type { CoverageRecommendation } from './attachment_payloads';
 export type {
   MitreHeatmapPayload,
   ReportTablePayload,

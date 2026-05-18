@@ -177,7 +177,7 @@ export const IntelligenceHubPage: FC = () => {
     const { from, to } = resolveTimeRangeFromPreset(timeRangePreset);
     try {
       const response = await http.get<DashboardOverviewResponse>(DASHBOARD_OVERVIEW_API_PATH, {
-        version: '1',
+        version: '2023-10-31',
         query: {
           from,
           to,
@@ -197,7 +197,7 @@ export const IntelligenceHubPage: FC = () => {
   const fetchSavedViews = useCallback(async () => {
     try {
       const response = await http.get<{ views: SavedViewSummary[] }>(SAVED_VIEWS_API_PATH, {
-        version: '1',
+        version: '2023-10-31',
       });
       setSavedViews(response.views ?? []);
     } catch {
@@ -244,7 +244,7 @@ export const IntelligenceHubPage: FC = () => {
     async (name: string, description?: string) => {
       try {
         const created = await http.post<SavedViewSummary>(SAVED_VIEWS_API_PATH, {
-          version: '1',
+          version: '2023-10-31',
           body: JSON.stringify({
             name,
             description,
@@ -849,7 +849,7 @@ const ScheduleDeliverModal: React.FC<{
         subscription_id: string;
         human_summary: string;
       }>(SUBMIT_SUBSCRIPTION_API_PATH, {
-        version: '1',
+        version: '2023-10-31',
         body: JSON.stringify({
           tags,
           severity_threshold: severityThreshold,

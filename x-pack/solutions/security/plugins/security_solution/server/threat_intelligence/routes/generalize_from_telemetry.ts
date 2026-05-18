@@ -30,7 +30,7 @@ const generalizeFromTelemetryBodySchema = schema.object({
 });
 
 /**
- * Internal route for the `generalize_from_telemetry` domain action
+ * Public route for the `generalize_from_telemetry` domain action
  * (Phase C — closes the brittle-alert → durable-behavioral-rule loop).
  *
  * Like `hunt_behavior`, requires a `ScopedModel` resolved via the
@@ -48,7 +48,7 @@ export const registerGeneralizeFromTelemetryRoute = ({
   router.versioned
     .post({
       path: GENERALIZE_FROM_TELEMETRY_API_PATH,
-      access: 'internal',
+      access: 'public',
       security: {
         authz: {
           requiredPrivileges: [THREAT_INTELLIGENCE_API_PRIVILEGES.writeSubscriptions],
@@ -57,7 +57,7 @@ export const registerGeneralizeFromTelemetryRoute = ({
     })
     .addVersion(
       {
-        version: '1',
+        version: '2023-10-31',
         validate: { request: { body: generalizeFromTelemetryBodySchema } },
       },
       async (context, request, response) => {

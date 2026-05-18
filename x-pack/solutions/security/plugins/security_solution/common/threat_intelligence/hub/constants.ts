@@ -159,18 +159,17 @@ export const THREAT_INTEL_TOOL_IDS = {
 } as const;
 
 /**
- * Internal HTTP routes owned by this plugin.
+ * Public HTTP routes owned by this plugin.
  *
- * Per the Agent Builder architecture guidance, every domain action exposes
- * an internal HTTP route at `/internal/threat_intelligence/<action>`. The
- * Agent Builder skill markdown documents these routes and the orchestrating
- * agent invokes them via `execute_workflow_step` with `kibana-request`. The
- * same routes are also callable from ECLI, workflows, and 3rd party agents
- * without rework. Inline tools survive as thin portability wrappers (for
- * Claude / Cursor) that delegate to the shared service modules these routes
- * call.
+ * Every domain action exposes a versioned route at
+ * `/api/threat_intelligence/<action>`. The Agent Builder skill markdown
+ * documents these routes; the orchestrating agent invokes them via
+ * `execute_workflow_step` with `kibana-request`. The same routes are
+ * callable from ECLI, workflows, MCP clients, and other HTTP integrations.
+ * Inline tools are thin portability wrappers that delegate to the shared
+ * service modules these routes call.
  */
-export const THREAT_INTELLIGENCE_API_BASE = '/internal/threat_intelligence' as const;
+export const THREAT_INTELLIGENCE_API_BASE = '/api/threat_intelligence' as const;
 
 /**
  * Domain action routes — these are the canonical execution surface of the
@@ -221,7 +220,7 @@ export const DELETE_SUBSCRIPTION_API_PATH =
   `${THREAT_INTELLIGENCE_API_BASE}/subscriptions/delete` as const;
 
 /**
- * Internal API path that powers the visual dashboard. Returns the
+ * API path that powers the visual dashboard. Returns the
  * aggregations the UI panels need in a single response — stats ribbon,
  * by-category breakdown, by-region "Affects You" panel, severity timeline,
  * top techniques (radar), recent-article grid, and environment-impact
@@ -232,7 +231,7 @@ export const DASHBOARD_OVERVIEW_API_PATH =
   `${THREAT_INTELLIGENCE_API_BASE}/dashboard/overview` as const;
 
 /**
- * Internal API path for the saved-view CRUD routes that back the dashboard's
+ * API path for the saved-view CRUD routes that back the dashboard's
  * "Save view" / "Load view" affordances. The view persists the dashboard
  * filter set (regions, categories, optional time range, dashboard flags) as
  * a saved object so users can share or revisit a curated cut of the data.
@@ -240,7 +239,7 @@ export const DASHBOARD_OVERVIEW_API_PATH =
 export const SAVED_VIEWS_API_PATH = `${THREAT_INTELLIGENCE_API_BASE}/saved_views` as const;
 
 /**
- * Internal API for the document flyout Threat intelligence panel — joins the
+ * API for the document flyout Threat intelligence panel — joins the
  * current alert to `.kibana-threat-reports*` via Layer 1 indicator reference
  * and/or Layer 2 MITRE technique overlap (see RFC 0002).
  */

@@ -7,7 +7,11 @@
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
-import { collectRuleCoverageByTechnique, coverageGap } from './coverage_gap';
+import {
+  collectRuleCoverageByTechnique,
+  coverageGap,
+  enrichTechniquesWithRuleCoverage,
+} from './coverage_gap';
 
 const TIME_RANGE = { from: '2026-05-01T00:00:00Z', to: '2026-05-14T00:00:00Z' } as const;
 
@@ -93,6 +97,49 @@ describe('collectRuleCoverageByTechnique', () => {
       enabledCount: 0,
       disabledCount: 1,
       disabledRuleIds: ['disabled-other'],
+    });
+  });
+});
+
+describe('enrichTechniquesWithRuleCoverage', () => {
+  it('merges rule coverage onto dashboard technique rows', async () => {
+    const savedObjectsClient = savedObjectsClientMock.create();
+    savedObjectsClient.find.mockResolvedValue({
+      page: 1,
+      per_page: 200,
+      total: 1,
+      saved_objects: [
+        {
+          id: 'disabled-rule',
+          type: 'alert',
+          attributes: {
+            enabled: false,
+            params: {
+              threat: [{ technique: [{ id: 'T1071', subtechnique: [] }] }],
+            },
+          },
+          references: [],
+        },
+      ],
+    });
+
+    const coverage = await collectRuleCoverageByTechnique(savedObjectsClient);
+    const enriched = enrichTechniquesWithRuleCoverage(
+      [
+        { technique_id: 'T1059', report_count: 5 },
+        { technique_id: 'T1071', report_count: 3 },
+      ],
+      coverage
+    );
+
+    expect(enriched[0]).toMatchObject({
+      technique_id: 'T1059',
+      coverage_recommendation: 'create_rule',
+    });
+    expect(enriched[1]).toMatchObject({
+      technique_id: 'T1071',
+      coverage_recommendation: 'enable_existing',
+      matching_disabled_rule_ids: ['disabled-rule'],
     });
   });
 });

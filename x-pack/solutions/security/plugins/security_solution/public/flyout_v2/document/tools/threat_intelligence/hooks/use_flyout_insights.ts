@@ -61,7 +61,7 @@ export const useFlyoutInsights = ({ hit }: UseFlyoutInsightsParams): UseFlyoutIn
 
     try {
       const response = await http.post<FlyoutInsightsResponse>(FLYOUT_INSIGHTS_API_PATH, {
-        version: '1',
+        version: '2023-10-31',
         body: JSON.stringify(requestBody),
       });
       setData(response);

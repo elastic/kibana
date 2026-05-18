@@ -102,7 +102,7 @@ const SubscriptionForm: React.FC<{
     try {
       const connectorId = form.delivery_connector_id.trim();
       const response = (await http.post(SUBMIT_SUBSCRIPTION_API_PATH, {
-        version: '1',
+        version: '2023-10-31',
         body: JSON.stringify({
           tags: form.tags,
           severity_threshold: form.severity_threshold,
@@ -389,7 +389,7 @@ const SubscriptionForm: React.FC<{
 /**
  * Editable subscription-confirmation card. Replaces the previous Phase A
  * read-only fallback. The Submit action button posts directly to
- * `/internal/threat_intelligence/subscriptions/submit`, bypassing a second
+ * `/api/threat_intelligence/subscriptions/submit`, bypassing a second
  * agent round-trip — no platform `interactive_form` primitive required.
  */
 export const buildSubscriptionConfirmationUiDefinition = (

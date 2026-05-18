@@ -78,16 +78,15 @@ steps:
         type: kibana.request
         with:
           method: POST
-          path: /internal/threat_intelligence/extract_iocs
+          path: /api/threat_intelligence/extract_iocs
           use_server_info: true
           headers:
             # Versioned Kibana route — `registerExtractIocsRoute` registers
-            # `version: '1'` on a `router.versioned.post` handler, which the
-            # core HTTP layer enforces via the `elastic-api-version` header.
-            # Without it the request fails with HTTP 400 "Please specify a
-            # version via elastic-api-version header. Available versions:
-            # [1]" before the body schema even runs.
-            elastic-api-version: "1"
+            # `version: '2023-10-31'` on a `router.versioned.post` handler,
+            # which the core HTTP layer enforces via the `elastic-api-version`
+            # header. Without it the request fails with HTTP 400 before the
+            # body schema even runs.
+            elastic-api-version: "2023-10-31"
             x-elastic-internal-origin: "kibana"
           body:
             text: "{{ foreach.item._source.content.body_text }}"
@@ -108,10 +107,10 @@ steps:
         type: kibana.request
         with:
           method: POST
-          path: /internal/threat_intelligence/hunt_behavior
+          path: /api/threat_intelligence/hunt_behavior
           use_server_info: true
           headers:
-            elastic-api-version: "1"
+            elastic-api-version: "2023-10-31"
             x-elastic-internal-origin: "kibana"
           body:
             # Truncate before the LLM call — same 30 KB cap the former

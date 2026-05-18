@@ -82,7 +82,13 @@ export type {
   CoverageGapTechniqueRow,
   CoverageRecommendation,
 } from './coverage_gap';
-export { collectRuleCoverageByTechnique } from './coverage_gap';
+export {
+  collectRuleCoverageByTechnique,
+  coverageSummaryForTechniques,
+  enrichTechniquesWithRuleCoverage,
+  techniqueCoverageFields,
+} from './coverage_gap';
+export type { TechniqueCoverageFields, TechniqueRuleCoverage } from './coverage_gap';
 
 export {
   generalizeFromTelemetry,

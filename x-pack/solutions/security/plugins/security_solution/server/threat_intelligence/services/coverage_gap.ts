@@ -118,10 +118,18 @@ interface RuleThreatBlock {
 
 const MAX_DISABLED_RULE_IDS_PER_TECHNIQUE = 10;
 
-interface TechniqueRuleCoverage {
+export interface TechniqueRuleCoverage {
   enabledCount: number;
   disabledCount: number;
   disabledRuleIds: string[];
+}
+
+export interface TechniqueCoverageFields {
+  has_coverage: boolean;
+  matching_rule_count: number;
+  matching_disabled_rule_count: number;
+  coverage_recommendation: CoverageRecommendation;
+  matching_disabled_rule_ids?: string[];
 }
 
 const emptyTechniqueCoverage = (): TechniqueRuleCoverage => ({
@@ -148,7 +156,7 @@ const recordTechniqueOnRule = (
   coverageByTechnique.set(techniqueId, entry);
 };
 
-const coverageRecommendationFor = (
+export const coverageRecommendationFor = (
   entry: TechniqueRuleCoverage | undefined
 ): CoverageRecommendation => {
   if (!entry || (entry.enabledCount === 0 && entry.disabledCount === 0)) {
@@ -159,6 +167,42 @@ const coverageRecommendationFor = (
   }
   return 'enable_existing';
 };
+
+export const techniqueCoverageFields = (
+  techniqueId: string,
+  coverageByTechnique: Map<string, TechniqueRuleCoverage>
+): TechniqueCoverageFields => {
+  const ruleCoverage = coverageByTechnique.get(techniqueId);
+  const recommendation = coverageRecommendationFor(ruleCoverage);
+  const disabledRuleIds = ruleCoverage?.disabledRuleIds;
+  return {
+    has_coverage: recommendation === 'covered',
+    matching_rule_count: ruleCoverage?.enabledCount ?? 0,
+    matching_disabled_rule_count: ruleCoverage?.disabledCount ?? 0,
+    coverage_recommendation: recommendation,
+    ...(recommendation === 'enable_existing' && disabledRuleIds?.length
+      ? { matching_disabled_rule_ids: disabledRuleIds }
+      : {}),
+  };
+};
+
+export const enrichTechniquesWithRuleCoverage = (
+  techniques: Array<{ technique_id: string; report_count: number }>,
+  coverageByTechnique: Map<string, TechniqueRuleCoverage>
+): Array<{ technique_id: string; report_count: number } & TechniqueCoverageFields> =>
+  techniques.map(({ technique_id, report_count }) => ({
+    technique_id,
+    report_count,
+    ...techniqueCoverageFields(technique_id, coverageByTechnique),
+  }));
+
+export const coverageSummaryForTechniques = (
+  techniques: Array<{ coverage_recommendation: CoverageRecommendation }>
+): { covered: number; enable_existing: number; uncovered: number } => ({
+  covered: techniques.filter((t) => t.coverage_recommendation === 'covered').length,
+  enable_existing: techniques.filter((t) => t.coverage_recommendation === 'enable_existing').length,
+  uncovered: techniques.filter((t) => t.coverage_recommendation === 'create_rule').length,
+});
 
 /**
  * Walks `params.threat[].technique[]` (and `.subtechnique[]`) on every
@@ -324,26 +368,15 @@ export const coverageGap = async (
   const techniqueRows: CoverageGapTechniqueRow[] = [...reportCounts.entries()]
     .sort((a, b) => b[1] - a[1])
     .slice(0, maxTechniques)
-    .map(([techniqueId, articleCount]) => {
-      const ruleCoverage = coverageByTechnique.get(techniqueId);
-      const recommendation = coverageRecommendationFor(ruleCoverage);
-      const disabledRuleIds = ruleCoverage?.disabledRuleIds;
-      return {
-        technique_id: techniqueId,
-        name: techniqueDisplayName(techniqueId),
-        tactic: tacticIdsForTechnique(techniqueId)[0] ?? '<unmapped>',
-        article_count: articleCount,
-        severity_max: severityForTechnique(techniqueId),
-        top_actors: [],
-        has_coverage: recommendation === 'covered',
-        matching_rule_count: ruleCoverage?.enabledCount ?? 0,
-        matching_disabled_rule_count: ruleCoverage?.disabledCount ?? 0,
-        coverage_recommendation: recommendation,
-        ...(recommendation === 'enable_existing' && disabledRuleIds?.length
-          ? { matching_disabled_rule_ids: disabledRuleIds }
-          : {}),
-      };
-    });
+    .map(([techniqueId, articleCount]) => ({
+      technique_id: techniqueId,
+      name: techniqueDisplayName(techniqueId),
+      tactic: tacticIdsForTechnique(techniqueId)[0] ?? '<unmapped>',
+      article_count: articleCount,
+      severity_max: severityForTechnique(techniqueId),
+      top_actors: [],
+      ...techniqueCoverageFields(techniqueId, coverageByTechnique),
+    }));
 
   const coveredRows = techniqueRows.filter((row) => row.coverage_recommendation === 'covered');
   const enableExistingRows = techniqueRows.filter(

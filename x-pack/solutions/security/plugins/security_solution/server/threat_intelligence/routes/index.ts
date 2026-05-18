@@ -43,7 +43,7 @@ export interface RouteRegistrationDeps {
 
 /**
  * Per the Agent Builder architecture guidance, every domain action exposes
- * an internal HTTP route. The skill markdown documents these routes; the
+ * a public HTTP route. The skill markdown documents these routes; the
  * orchestrating agent invokes them via `execute_workflow_step` with
  * `kibana-request`. The Agent Builder tool wrappers in
  * `server/agent_builder/tools/` are thin portability shims that call into

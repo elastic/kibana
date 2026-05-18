@@ -26,6 +26,7 @@ import {
 } from '@elastic/eui';
 import {
   SEVERITY_LEVELS,
+  type CoverageRecommendation,
   type DashboardOverviewResponse,
   type SeverityLevel,
   type ThreatCategory,
@@ -120,7 +121,7 @@ export const IntelligenceHubDashboardView: React.FC<{
       <EuiSpacer size="l" />
       <EuiFlexGroup gutterSize="l" wrap>
         <EuiFlexItem style={{ minWidth: 360 }}>
-          <TopTechniques buckets={data.top_techniques} />
+          <TopTechniques buckets={data.top_techniques} coverageSummary={data.coverage_summary} />
         </EuiFlexItem>
         <EuiFlexItem style={{ minWidth: 360 }}>
           <EnvironmentImpact
@@ -439,9 +440,22 @@ const RegionBreakdown: React.FC<{ buckets: DashboardOverviewResponse['by_region'
   </EuiPanel>
 );
 
-const TopTechniques: React.FC<{ buckets: DashboardOverviewResponse['top_techniques'] }> = ({
-  buckets,
-}) => {
+const COVERAGE_BADGE_COLOR = (
+  recommendation: CoverageRecommendation
+): 'success' | 'warning' | 'danger' => {
+  if (recommendation === 'covered') {
+    return 'success';
+  }
+  if (recommendation === 'enable_existing') {
+    return 'warning';
+  }
+  return 'danger';
+};
+
+const TopTechniques: React.FC<{
+  buckets: DashboardOverviewResponse['top_techniques'];
+  coverageSummary: DashboardOverviewResponse['coverage_summary'];
+}> = ({ buckets, coverageSummary }) => {
   const max = buckets[0]?.report_count ?? 0;
   const enrichedBuckets = useMemo(
     () =>
@@ -452,18 +466,34 @@ const TopTechniques: React.FC<{ buckets: DashboardOverviewResponse['top_techniqu
     [buckets]
   );
 
+  const coverageDescription =
+    buckets.length === 0
+      ? undefined
+      : i18n.translate(
+          'xpack.securitySolution.threatIntelligence.app.techniquesCoverageDescription',
+          {
+            defaultMessage:
+              '{uncovered} uncovered, {enableExisting} with disabled rules to enable, {covered} covered',
+            values: {
+              uncovered: coverageSummary.uncovered,
+              enableExisting: coverageSummary.enable_existing,
+              covered: coverageSummary.covered,
+            },
+          }
+        );
+
   return (
     <EuiPanel hasBorder paddingSize="m">
       <PanelHeader
         title={i18n.translate('xpack.securitySolution.threatIntelligence.app.techniquesTitle', {
           defaultMessage: 'Top ATT&CK techniques',
         })}
-        description={i18n.translate(
-          'xpack.securitySolution.threatIntelligence.app.techniquesDescription',
-          {
+        description={
+          coverageDescription ??
+          i18n.translate('xpack.securitySolution.threatIntelligence.app.techniquesDescription', {
             defaultMessage: 'Most frequent techniques extracted from reports',
-          }
-        )}
+          })
+        }
       />
       {buckets.length === 0 ? (
         <EuiText size="s" color="subdued">
@@ -510,6 +540,65 @@ const TopTechniques: React.FC<{ buckets: DashboardOverviewResponse['top_techniqu
                         <EuiBadge color="default">{bucket.metadata.tactic_name}</EuiBadge>
                       </EuiFlexItem>
                     ) : null}
+                    <EuiFlexItem grow={false}>
+                      <EuiToolTip
+                        content={
+                          bucket.coverage_recommendation === 'enable_existing' &&
+                          bucket.matching_disabled_rule_ids?.length
+                            ? i18n.translate(
+                                'xpack.securitySolution.threatIntelligence.app.techniqueEnableExistingTooltip',
+                                {
+                                  defaultMessage:
+                                    'Enable existing rule(s): {ruleIds}. Do not create a duplicate.',
+                                  values: {
+                                    ruleIds: bucket.matching_disabled_rule_ids.join(', '),
+                                  },
+                                }
+                              )
+                            : bucket.coverage_recommendation === 'covered'
+                            ? i18n.translate(
+                                'xpack.securitySolution.threatIntelligence.app.techniqueCoveredTooltip',
+                                {
+                                  defaultMessage:
+                                    'Covered by {count, plural, one {# enabled rule} other {# enabled rules}}',
+                                  values: { count: bucket.matching_rule_count },
+                                }
+                              )
+                            : i18n.translate(
+                                'xpack.securitySolution.threatIntelligence.app.techniqueUncoveredTooltip',
+                                {
+                                  defaultMessage:
+                                    'No matching Detection Engine rule — consider creating coverage',
+                                }
+                              )
+                        }
+                      >
+                        <EuiBadge color={COVERAGE_BADGE_COLOR(bucket.coverage_recommendation)}>
+                          {bucket.coverage_recommendation === 'enable_existing'
+                            ? i18n.translate(
+                                'xpack.securitySolution.threatIntelligence.app.techniqueEnableExistingBadge',
+                                {
+                                  defaultMessage: 'Enable existing ({count})',
+                                  values: { count: bucket.matching_disabled_rule_count },
+                                }
+                              )
+                            : bucket.coverage_recommendation === 'covered'
+                            ? i18n.translate(
+                                'xpack.securitySolution.threatIntelligence.app.techniqueCoveredBadge',
+                                {
+                                  defaultMessage: 'Covered ({count})',
+                                  values: { count: bucket.matching_rule_count },
+                                }
+                              )
+                            : i18n.translate(
+                                'xpack.securitySolution.threatIntelligence.app.techniqueUncoveredBadge',
+                                {
+                                  defaultMessage: 'Uncovered',
+                                }
+                              )}
+                        </EuiBadge>
+                      </EuiToolTip>
+                    </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -522,12 +611,7 @@ const TopTechniques: React.FC<{ buckets: DashboardOverviewResponse['top_techniqu
                   </EuiText>
                 </EuiFlexItem>
               </EuiFlexGroup>
-              <EuiProgress
-                value={bucket.report_count}
-                max={max || 1}
-                size="xs"
-                color="primary"
-              />
+              <EuiProgress value={bucket.report_count} max={max || 1} size="xs" color="primary" />
             </div>
           ))}
         </div>
@@ -806,7 +890,6 @@ const ActivityTimeline: React.FC<{
     </EuiPanel>
   );
 };
-
 
 const EnvironmentImpact: React.FC<{
   impact: DashboardOverviewResponse['environment_impact'];

@@ -24,7 +24,7 @@ const huntBehaviorBodySchema = schema.object({
 const HUNT_BEHAVIOR_MAX_BODY_BYTES = 10 * 1024 * 1024;
 
 /**
- * Internal route for the `hunt_behavior` domain action.
+ * Public route for the `hunt_behavior` domain action.
  *
  * Resolves a `ScopedModel` from the optional inference plugin (mirroring
  * `nl_to_esql_route.ts`) and delegates to the shared `huntBehavior`
@@ -39,7 +39,7 @@ export const registerHuntBehaviorRoute = ({
   router.versioned
     .post({
       path: HUNT_BEHAVIOR_API_PATH,
-      access: 'internal',
+      access: 'public',
       security: {
         authz: {
           requiredPrivileges: [THREAT_INTELLIGENCE_API_PRIVILEGES.read],
@@ -54,7 +54,7 @@ export const registerHuntBehaviorRoute = ({
     })
     .addVersion(
       {
-        version: '1',
+        version: '2023-10-31',
         validate: { request: { body: huntBehaviorBodySchema } },
       },
       async (context, request, response) => {

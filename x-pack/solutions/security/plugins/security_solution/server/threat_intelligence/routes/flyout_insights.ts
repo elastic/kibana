@@ -25,7 +25,7 @@ const flyoutInsightsBodySchema = schema.object({
 });
 
 /**
- * Internal route for alert flyout threat-report provenance (RFC 0002 P0).
+ * Public route for alert flyout threat-report provenance (RFC 0002 P0).
  */
 export const registerFlyoutInsightsRoute = ({
   router,
@@ -35,7 +35,7 @@ export const registerFlyoutInsightsRoute = ({
   router.versioned
     .post({
       path: FLYOUT_INSIGHTS_API_PATH,
-      access: 'internal',
+      access: 'public',
       security: {
         authz: {
           requiredPrivileges: [THREAT_INTELLIGENCE_API_PRIVILEGES.read],
@@ -44,7 +44,7 @@ export const registerFlyoutInsightsRoute = ({
     })
     .addVersion(
       {
-        version: '1',
+        version: '2023-10-31',
         validate: { request: { body: flyoutInsightsBodySchema } },
       },
       async (context, request, response) => {

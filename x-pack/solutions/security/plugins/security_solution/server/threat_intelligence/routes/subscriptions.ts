@@ -48,12 +48,12 @@ const deleteBodySchema = schema.object({
  * `manage_subscriptions` domain action plus the legacy `submit` path used
  * by the editable confirmation attachment.
  *
- * - POST `/internal/threat_intelligence/subscriptions/submit` — preserved
- *   for the interactive confirmation card. Posts directly from the
- *   browser-side renderer so a follow-up agent round-trip isn't required.
- * - POST `/internal/threat_intelligence/subscriptions/list` — list
- *   subscriptions visible from the current space.
- * - POST `/internal/threat_intelligence/subscriptions/delete` — remove a
+ * - POST `/api/threat_intelligence/subscriptions/submit` — preserved for the
+ *   interactive confirmation card. Posts directly from the browser-side
+ *   renderer so a follow-up agent round-trip isn't required.
+ * - POST `/api/threat_intelligence/subscriptions/list` — list subscriptions
+ *   visible from the current space.
+ * - POST `/api/threat_intelligence/subscriptions/delete` — remove a
  *   subscription by id.
  *
  * All three delegate to shared service helpers in `services/manage_subscriptions.ts`.
@@ -68,7 +68,7 @@ export const registerSubscriptionRoutes = ({
   router.versioned
     .post({
       path: SUBMIT_SUBSCRIPTION_API_PATH,
-      access: 'internal',
+      access: 'public',
       security: {
         authz: {
           requiredPrivileges: [THREAT_INTELLIGENCE_API_PRIVILEGES.writeSubscriptions],
@@ -77,7 +77,7 @@ export const registerSubscriptionRoutes = ({
     })
     .addVersion(
       {
-        version: '1',
+        version: '2023-10-31',
         validate: { request: { body: submitBodySchema } },
       },
       async (context, request, response) => {
@@ -114,7 +114,7 @@ export const registerSubscriptionRoutes = ({
   router.versioned
     .post({
       path: LIST_SUBSCRIPTIONS_API_PATH,
-      access: 'internal',
+      access: 'public',
       security: {
         authz: {
           requiredPrivileges: [THREAT_INTELLIGENCE_API_PRIVILEGES.read],
@@ -123,7 +123,7 @@ export const registerSubscriptionRoutes = ({
     })
     .addVersion(
       {
-        version: '1',
+        version: '2023-10-31',
         validate: { request: { body: listBodySchema } },
       },
       async (context, request, response) => {
@@ -151,7 +151,7 @@ export const registerSubscriptionRoutes = ({
   router.versioned
     .post({
       path: DELETE_SUBSCRIPTION_API_PATH,
-      access: 'internal',
+      access: 'public',
       security: {
         authz: {
           requiredPrivileges: [THREAT_INTELLIGENCE_API_PRIVILEGES.writeSubscriptions],
@@ -160,7 +160,7 @@ export const registerSubscriptionRoutes = ({
     })
     .addVersion(
       {
-        version: '1',
+        version: '2023-10-31',
         validate: { request: { body: deleteBodySchema } },
       },
       async (context, request, response) => {

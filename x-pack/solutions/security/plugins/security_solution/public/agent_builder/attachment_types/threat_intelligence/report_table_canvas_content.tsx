@@ -66,7 +66,7 @@ export const ReportTableCanvasContent: React.FC<AttachmentRenderProps<ReportTabl
     setError(null);
     try {
       const response = await http.get<DashboardOverviewResponse>(DASHBOARD_OVERVIEW_API_PATH, {
-        version: '1',
+        version: '2023-10-31',
         query: {
           from: overviewQuery.from,
           to: overviewQuery.to,

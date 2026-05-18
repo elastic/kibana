@@ -27,7 +27,7 @@ const extractIocsBodySchema = schema.object({
 const EXTRACT_IOCS_MAX_BODY_BYTES = 10 * 1024 * 1024;
 
 /**
- * Internal route for the `extract_iocs` domain action.
+ * Public route for the `extract_iocs` domain action.
  *
  * Pure regex-based extraction — no I/O, no LLM. Workflow 2 also calls
  * the same `extractIocs` service directly during automated ingestion.
@@ -36,7 +36,7 @@ export const registerExtractIocsRoute = ({ router, logger }: RouteRegistrationDe
   router.versioned
     .post({
       path: EXTRACT_IOCS_API_PATH,
-      access: 'internal',
+      access: 'public',
       security: {
         authz: {
           requiredPrivileges: [THREAT_INTELLIGENCE_API_PRIVILEGES.read],
@@ -51,7 +51,7 @@ export const registerExtractIocsRoute = ({ router, logger }: RouteRegistrationDe
     })
     .addVersion(
       {
-        version: '1',
+        version: '2023-10-31',
         validate: { request: { body: extractIocsBodySchema } },
       },
       async (_context, request, response) => {

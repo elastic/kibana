@@ -80,14 +80,14 @@ export const registerSavedViewsRoutes = ({ router, logger }: RouteRegistrationDe
   router.versioned
     .get({
       path: SAVED_VIEWS_API_PATH,
-      access: 'internal',
+      access: 'public',
       security: {
         authz: { requiredPrivileges: [THREAT_INTELLIGENCE_API_PRIVILEGES.read] },
       },
     })
     .addVersion(
       {
-        version: '1',
+        version: '2023-10-31',
         validate: {
           request: {
             query: schema.object({
@@ -128,14 +128,14 @@ export const registerSavedViewsRoutes = ({ router, logger }: RouteRegistrationDe
   router.versioned
     .get({
       path: `${SAVED_VIEWS_API_PATH}/{id}`,
-      access: 'internal',
+      access: 'public',
       security: {
         authz: { requiredPrivileges: [THREAT_INTELLIGENCE_API_PRIVILEGES.read] },
       },
     })
     .addVersion(
       {
-        version: '1',
+        version: '2023-10-31',
         validate: {
           request: {
             params: schema.object({ id: schema.string({ minLength: 1 }) }),
@@ -168,14 +168,14 @@ export const registerSavedViewsRoutes = ({ router, logger }: RouteRegistrationDe
   router.versioned
     .post({
       path: SAVED_VIEWS_API_PATH,
-      access: 'internal',
+      access: 'public',
       security: {
         authz: { requiredPrivileges: [THREAT_INTELLIGENCE_API_PRIVILEGES.writeSubscriptions] },
       },
     })
     .addVersion(
       {
-        version: '1',
+        version: '2023-10-31',
         validate: { request: { body: createBodySchema } },
       },
       async (context, request, response) => {
@@ -211,14 +211,14 @@ export const registerSavedViewsRoutes = ({ router, logger }: RouteRegistrationDe
   router.versioned
     .put({
       path: `${SAVED_VIEWS_API_PATH}/{id}`,
-      access: 'internal',
+      access: 'public',
       security: {
         authz: { requiredPrivileges: [THREAT_INTELLIGENCE_API_PRIVILEGES.writeSubscriptions] },
       },
     })
     .addVersion(
       {
-        version: '1',
+        version: '2023-10-31',
         validate: {
           request: {
             params: schema.object({ id: schema.string({ minLength: 1 }) }),
@@ -272,14 +272,14 @@ export const registerSavedViewsRoutes = ({ router, logger }: RouteRegistrationDe
   router.versioned
     .delete({
       path: `${SAVED_VIEWS_API_PATH}/{id}`,
-      access: 'internal',
+      access: 'public',
       security: {
         authz: { requiredPrivileges: [THREAT_INTELLIGENCE_API_PRIVILEGES.writeSubscriptions] },
       },
     })
     .addVersion(
       {
-        version: '1',
+        version: '2023-10-31',
         validate: {
           request: {
             params: schema.object({ id: schema.string({ minLength: 1 }) }),

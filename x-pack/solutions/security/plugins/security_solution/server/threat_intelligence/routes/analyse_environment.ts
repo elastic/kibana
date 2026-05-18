@@ -19,7 +19,7 @@ const analyseEnvironmentBodySchema = schema.object({
 });
 
 /**
- * Internal route for the `analyse_environment` domain action — coarse
+ * Public route for the `analyse_environment` domain action — coarse
  * customer profile (active integration data streams + OS family mix +
  * cloud-provider mix).
  */
@@ -30,7 +30,7 @@ export const registerAnalyseEnvironmentRoute = ({
   router.versioned
     .post({
       path: ANALYSE_ENVIRONMENT_API_PATH,
-      access: 'internal',
+      access: 'public',
       security: {
         authz: {
           requiredPrivileges: [THREAT_INTELLIGENCE_API_PRIVILEGES.read],
@@ -39,7 +39,7 @@ export const registerAnalyseEnvironmentRoute = ({
     })
     .addVersion(
       {
-        version: '1',
+        version: '2023-10-31',
         validate: { request: { body: analyseEnvironmentBodySchema } },
       },
       async (context, request, response) => {

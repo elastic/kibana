@@ -55,7 +55,7 @@ const huntOrchestratedBodySchema = schema.object({
 });
 
 /**
- * Internal route for the `hunt_orchestrated` domain action — the
+ * Public route for the `hunt_orchestrated` domain action — the
  * tradecraft-style Tier 1 → Tier 2 chain in a single call. Workflows
  * (digest delivery, hit provenance backfill, future advisory synthesis)
  * use this so they get Tier 2 corroboration without encoding the
@@ -77,7 +77,7 @@ export const registerHuntOrchestratedRoute = ({
   router.versioned
     .post({
       path: HUNT_ORCHESTRATED_API_PATH,
-      access: 'internal',
+      access: 'public',
       security: {
         authz: {
           requiredPrivileges: [THREAT_INTELLIGENCE_API_PRIVILEGES.read],
@@ -86,7 +86,7 @@ export const registerHuntOrchestratedRoute = ({
     })
     .addVersion(
       {
-        version: '1',
+        version: '2023-10-31',
         validate: { request: { body: huntOrchestratedBodySchema } },
       },
       async (context, request, response) => {

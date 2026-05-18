@@ -141,7 +141,7 @@ identifiers; behavior is durable because it's constrained by the OS.**
 
 ## HTTP Endpoints (Canonical Execution Surface)
 
-All paths are scoped to \`/internal/threat_intelligence/...\`. The agent
+All paths are scoped to \`/api/threat_intelligence/...\`. The agent
 should invoke them with \`execute_workflow_step\` using a \`kibana-request\`
 step (\`method: POST\`, \`path: <one of below>\`, \`body: { ... }\`). Each
 endpoint is gated by the threat-intelligence Kibana feature privilege

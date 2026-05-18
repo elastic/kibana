@@ -96,7 +96,7 @@ const searchReportsBodySchema = schema.object({
 });
 
 /**
- * Internal route exposing the `search_reports` domain action — hybrid
+ * Public route exposing the `search_reports` domain action — hybrid
  * semantic + BM25 search over `.kibana-threat-reports-*`. This is the
  * canonical execution surface; the agent calls it via
  * `execute_workflow_step` with `kibana-request`. The Agent Builder tool
@@ -110,7 +110,7 @@ export const registerSearchReportsRoute = ({
   router.versioned
     .post({
       path: SEARCH_REPORTS_API_PATH,
-      access: 'internal',
+      access: 'public',
       security: {
         authz: {
           requiredPrivileges: [THREAT_INTELLIGENCE_API_PRIVILEGES.read],
@@ -119,7 +119,7 @@ export const registerSearchReportsRoute = ({
     })
     .addVersion(
       {
-        version: '1',
+        version: '2023-10-31',
         validate: { request: { body: searchReportsBodySchema } },
       },
       async (context, request, response) => {
