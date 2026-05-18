@@ -20,9 +20,12 @@ test.describe.skip('Tags management — accessibility', { tag: tags.stateful.cla
   });
 
   test('tags management page a11y', async ({ page, browserAuth, pageObjects, kbnUrl }) => {
+    const { tagManagement } = pageObjects;
+    const { tagModal, assignFlyout, tagsTable } = tagManagement;
+
     await browserAuth.loginAsPrivilegedUser();
     await page.goto(kbnUrl.app('management/kibana/tags'));
-    await pageObjects.tagManagement.waitForTableLoaded();
+    await tagsTable.waitForLoaded();
 
     await test.step('main page', async () => {
       const { violations } = await page.checkA11y({ include: A11Y_SELECTORS });
@@ -30,55 +33,55 @@ test.describe.skip('Tags management — accessibility', { tag: tags.stateful.cla
     });
 
     await test.step('create tag panel', async () => {
-      await pageObjects.tagManagement.openCreateModal();
+      await tagModal.openCreate();
       const { violations } = await page.checkA11y({ include: A11Y_SELECTORS });
       expect(violations).toStrictEqual([]);
     });
 
     await test.step('tag listing after creation', async () => {
-      await pageObjects.tagManagement.fillForm(
-        { name: 'a11yTag', color: '#fc03db', description: 'a11y test tag' },
-        { submit: true }
-      );
+      await tagModal.fillForm({ name: 'a11yTag', color: '#fc03db', description: 'a11y test tag' });
+      await tagManagement.submitTagModal();
       const { violations } = await page.checkA11y({ include: A11Y_SELECTORS });
       expect(violations).toStrictEqual([]);
     });
 
     await test.step('tag actions panel', async () => {
-      await pageObjects.tagManagement.openCollapsedRowMenu(0);
+      await tagsTable.openCollapsedRowMenu('a11yTag');
       const { violations } = await page.checkA11y({ include: A11Y_SELECTORS });
       expect(violations).toStrictEqual([]);
       await page.keyboard.press('Escape');
     });
 
     await test.step('tag assignment flyout and listing', async () => {
-      await pageObjects.tagManagement.openCollapsedRowMenu(0);
-      await pageObjects.tagManagement.clickActionItem('assign');
+      await tagsTable.openCollapsedRowMenu('a11yTag');
+      await tagsTable.clickRowAction('assign');
       const { violations: flyoutViolations } = await page.checkA11y({ include: A11Y_SELECTORS });
       expect(flyoutViolations).toStrictEqual([]);
-      await page.testSubj.click('euiFlyoutCloseButton');
-      await pageObjects.tagManagement.getAssignFlyoutCloseButton().waitFor({ state: 'hidden' });
+      await assignFlyout.closeButton.click();
+      await assignFlyout.closeButton.waitFor({ state: 'hidden' });
       const { violations: pageViolations } = await page.checkA11y({ include: A11Y_SELECTORS });
       expect(pageViolations).toStrictEqual([]);
     });
 
     await test.step('edit tag panel', async () => {
-      await pageObjects.tagManagement.openCollapsedRowMenu(0);
-      await pageObjects.tagManagement.clickActionItem('edit');
-      await pageObjects.tagManagement.getTagModalForm().waitFor({ state: 'visible' });
+      await tagsTable.openCollapsedRowMenu('a11yTag');
+      await tagsTable.clickRowAction('edit');
+      await tagModal.form.waitFor({ state: 'visible' });
       const { violations } = await page.checkA11y({ include: A11Y_SELECTORS });
       expect(violations).toStrictEqual([]);
-      await page.testSubj.click('createModalCancelButton');
+      await tagModal.cancel();
     });
 
     await test.step('bulk actions panel', async () => {
-      await pageObjects.tagManagement.openCreateModal();
-      await pageObjects.tagManagement.fillForm(
-        { name: 'a11yTag2', color: '#fc04db', description: 'a11y test tag 2' },
-        { submit: true }
-      );
-      await pageObjects.tagManagement.selectAllTags();
-      await pageObjects.tagManagement.openBulkActionMenu();
+      await tagModal.openCreate();
+      await tagModal.fillForm({
+        name: 'a11yTag2',
+        color: '#fc04db',
+        description: 'a11y test tag 2',
+      });
+      await tagManagement.submitTagModal();
+      await tagsTable.selectAllTags();
+      await tagsTable.openBulkActionsMenu();
       const { violations } = await page.checkA11y({ include: A11Y_SELECTORS });
       expect(violations).toStrictEqual([]);
     });
