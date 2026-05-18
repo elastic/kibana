@@ -5,18 +5,6 @@
  * 2.0.
  */
 
-jest.mock('../../../lib/action_connector_api', () => {
-  const actual = jest.requireActual<typeof import('../../../lib/action_connector_api')>(
-    '../../../lib/action_connector_api'
-  );
-  return {
-    ...actual,
-    loadActionTypes: jest.fn((opts: Parameters<typeof actual.loadActionTypes>[0]) =>
-      actual.loadActionTypes(opts)
-    ),
-  };
-});
-
 import React, { lazy } from 'react';
 
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
@@ -28,29 +16,7 @@ import { EditConnectorTabs } from '../../../../types';
 import type { AppMockRenderer } from '../../test_utils';
 import { createAppMockRenderer } from '../../test_utils';
 import { TECH_PREVIEW_LABEL } from '../../translations';
-import type { ActionType } from '@kbn/actions-plugin/common';
 import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
-
-const { loadActionTypes } = jest.requireMock('../../../lib/action_connector_api') as {
-  loadActionTypes: jest.Mock;
-};
-const actualActionConnectorApi = jest.requireActual<
-  typeof import('../../../lib/action_connector_api')
->('../../../lib/action_connector_api');
-
-const defaultEditFlyoutLoadActionTypes: ActionType[] = [
-  {
-    id: '.test',
-    name: 'Test',
-    enabled: true,
-    enabledInConfig: true,
-    enabledInLicense: true,
-    minimumLicenseRequired: 'basic',
-    supportedFeatureIds: ['alerting', 'siem'],
-    isSystemActionType: false,
-    isDeprecated: false,
-  },
-];
 
 const updateConnectorResponse = {
   connector_type_id: 'test',
@@ -93,7 +59,6 @@ describe('EditConnectorFlyout', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    loadActionTypes.mockResolvedValue(defaultEditFlyoutLoadActionTypes);
     actionTypeRegistry.has.mockReturnValue(true);
     actionTypeRegistry.get.mockReturnValue(actionTypeModel);
     appMockRenderer = createAppMockRenderer();
@@ -101,6 +66,19 @@ describe('EditConnectorFlyout', () => {
       ...appMockRenderer.coreStart.application.capabilities,
       actions: { save: true, show: true, execute: true },
     };
+    appMockRenderer.coreStart.http.get = jest.fn().mockResolvedValue([
+      {
+        id: '.test',
+        name: 'Test',
+        enabled: true,
+        enabled_in_config: true,
+        enabled_in_license: true,
+        supported_feature_ids: [],
+        minimum_license_required: 'basic',
+        is_system_action_type: false,
+        is_deprecated: false,
+      },
+    ]);
     appMockRenderer.coreStart.http.put = jest.fn().mockResolvedValue(updateConnectorResponse);
     appMockRenderer.coreStart.http.post = jest.fn().mockResolvedValue(executeConnectorResponse);
   });
@@ -230,8 +208,8 @@ describe('EditConnectorFlyout', () => {
 
     await waitFor(() => {
       expect(getByTestId('edit-connector-flyout-save-btn')).toBeInTheDocument();
+      expect(getByTestId('edit-connector-flyout-close-btn')).toBeInTheDocument();
     });
-    expect(getByTestId('edit-connector-flyout-close-btn')).toBeInTheDocument();
   });
 
   it('does not show the save button if the use does not have permissions to update connector', async () => {
@@ -289,25 +267,6 @@ describe('EditConnectorFlyout', () => {
       expect(getByTestId('edit-connector-flyout-close-btn')).not.toBeDisabled();
       expect(getByTestId('edit-connector-flyout-save-btn')).toBeDisabled();
     });
-  });
-
-  it('shows an error callout and no form when loadActionTypes fails', async () => {
-    loadActionTypes.mockRejectedValue(new Error('network error'));
-
-    const { getByTestId, queryByTestId } = appMockRenderer.render(
-      <EditConnectorFlyout
-        actionTypeRegistry={actionTypeRegistry}
-        onClose={onClose}
-        connector={connector}
-        onConnectorUpdated={onConnectorUpdated}
-      />
-    );
-
-    await waitFor(() => {
-      expect(getByTestId('connector-action-types-load-error')).toBeInTheDocument();
-    });
-
-    expect(queryByTestId('nameInput')).not.toBeInTheDocument();
   });
 
   describe('Header', () => {
@@ -434,8 +393,8 @@ describe('EditConnectorFlyout', () => {
         />
       );
 
+      expect(getByTestId('configureConnectorTab')).toBeInTheDocument();
       await waitFor(() => {
-        expect(getByTestId('configureConnectorTab')).toBeInTheDocument();
         expect(getByTestId('testConnectorTab')).toBeInTheDocument();
       });
     });
@@ -450,12 +409,10 @@ describe('EditConnectorFlyout', () => {
         />
       );
 
+      expect(getByTestId('configureConnectorTab')).toBeInTheDocument();
       await waitFor(() => {
         expect(getByTestId('testConnectorTab')).toBeInTheDocument();
       });
-
-      expect(getByTestId('configureConnectorTab')).toBeInTheDocument();
-      expect(getByTestId('testConnectorTab')).toBeInTheDocument();
 
       await userEvent.click(getByTestId('testConnectorTab'));
 
@@ -652,7 +609,9 @@ describe('EditConnectorFlyout', () => {
         />
       );
 
-      expect(await screen.findByTestId('nameInput')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByTestId('nameInput')).toBeInTheDocument();
+      });
 
       await userEvent.clear(screen.getByTestId('nameInput'));
       await userEvent.type(screen.getByTestId('nameInput'), 'My new name');
@@ -841,9 +800,9 @@ describe('EditConnectorFlyout', () => {
         />
       );
 
+      expect(getByTestId('configureConnectorTab')).toBeInTheDocument();
       await waitFor(() => {
-        expect(getByTestId('configureConnectorTab')).toBeInTheDocument();
-        expect(screen.queryByTestId('testConnectorTab')).toBeEnabled();
+        expect(screen.getByTestId('testConnectorTab')).toBeEnabled();
       });
     });
   });
@@ -867,7 +826,6 @@ describe('is spec connector', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    loadActionTypes.mockResolvedValue(defaultEditFlyoutLoadActionTypes);
     actionTypeRegistry.has.mockReturnValue(true);
     actionTypeRegistry.get.mockReturnValue(actionTypeModel);
     appMockRenderer = createAppMockRenderer();
@@ -875,6 +833,19 @@ describe('is spec connector', () => {
       ...appMockRenderer.coreStart.application.capabilities,
       actions: { save: true, show: true, execute: true },
     };
+    appMockRenderer.coreStart.http.get = jest.fn().mockResolvedValue([
+      {
+        id: '.test',
+        name: 'Test',
+        enabled: true,
+        enabled_in_config: true,
+        enabled_in_license: true,
+        supported_feature_ids: [],
+        minimum_license_required: 'basic',
+        is_system_action_type: false,
+        is_deprecated: false,
+      },
+    ]);
     appMockRenderer.coreStart.http.put = jest.fn().mockResolvedValue(updateConnectorResponse);
     appMockRenderer.coreStart.http.post = jest.fn().mockResolvedValue(executeConnectorResponse);
   });
@@ -891,215 +862,5 @@ describe('is spec connector', () => {
 
     expect(getByTestId('configureConnectorTab')).toBeInTheDocument();
     expect(screen.queryByTestId('testConnectorTab')).not.toBeInTheDocument();
-  });
-});
-
-describe('EditConnectorFlyout spec loading', () => {
-  let appMockRenderer: AppMockRenderer;
-  const onClose = jest.fn();
-  const onConnectorUpdated = jest.fn();
-
-  const specConnectorType = {
-    id: 'spec-edit-connector',
-    name: 'Spec Edit Connector',
-    enabled: true,
-    enabledInConfig: true,
-    enabledInLicense: true,
-    minimumLicenseRequired: 'basic' as const,
-    supportedFeatureIds: ['workflows'],
-    source: 'spec',
-    description: 'Test spec connector description',
-  };
-
-  const mockSpecResponse = {
-    metadata: {
-      id: 'spec-edit-connector',
-      display_name: 'Spec Edit Connector',
-      description: 'Connect to Test API',
-      minimum_license: 'basic',
-      supported_feature_ids: ['workflows'],
-    },
-    schema: {
-      type: 'object',
-      properties: {
-        config: {
-          type: 'object',
-          properties: {},
-        },
-        secrets: {
-          anyOf: [
-            {
-              type: 'object',
-              properties: {
-                authType: { const: 'api_key_header', type: 'string' },
-                apiKey: {
-                  type: 'string',
-                  minLength: 1,
-                  label: 'API key',
-                  sensitive: true,
-                },
-              },
-              required: ['authType', 'apiKey'],
-              label: 'API key header authentication',
-            },
-          ],
-          label: 'Authentication',
-        },
-      },
-      required: ['config', 'secrets'],
-    },
-  };
-
-  const specConnector: ActionConnector = createMockActionConnector({
-    id: 'spec-conn-1',
-    name: 'Spec connector instance',
-    actionTypeId: 'spec-edit-connector',
-    config: {},
-    secrets: {},
-    authMode: 'shared',
-  });
-
-  const actionTypeRegistry = actionTypeRegistryMock.create();
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-    loadActionTypes.mockResolvedValue([specConnectorType as ActionType]);
-    actionTypeRegistry.has.mockReturnValue(false);
-    actionTypeRegistry.get.mockImplementation(() => {
-      throw new Error('Unexpected get for unregistered type');
-    });
-    appMockRenderer = createAppMockRenderer();
-    appMockRenderer.coreStart.application.capabilities = {
-      ...appMockRenderer.coreStart.application.capabilities,
-      actions: { save: true, show: true, execute: true },
-    };
-    appMockRenderer.coreStart.http.put = jest.fn().mockResolvedValue({
-      connector_type_id: 'spec-edit-connector',
-      is_preconfigured: false,
-      is_deprecated: false,
-      name: 'Spec connector instance',
-      config: {},
-      secrets: {},
-      id: 'spec-conn-1',
-    });
-    appMockRenderer.coreStart.http.post = jest.fn().mockResolvedValue(executeConnectorResponse);
-    appMockRenderer.coreStart.http.get = jest.fn().mockResolvedValue(mockSpecResponse);
-    appMockRenderer.coreStart.uiSettings.get = jest.fn().mockImplementation((key: string) => {
-      if (key === 'workflows:ui:enabled') {
-        return true;
-      }
-      return undefined;
-    });
-  });
-
-  afterEach(() => {
-    loadActionTypes.mockImplementation((opts) => actualActionConnectorApi.loadActionTypes(opts));
-  });
-
-  it('fetches spec from API when editing a spec-based connector', async () => {
-    appMockRenderer.render(
-      <EditConnectorFlyout
-        actionTypeRegistry={actionTypeRegistry}
-        onClose={onClose}
-        connector={specConnector}
-        onConnectorUpdated={onConnectorUpdated}
-      />
-    );
-
-    await waitFor(() => {
-      expect(appMockRenderer.coreStart.http.get).toHaveBeenCalledWith(
-        '/internal/actions/connector_types/spec-edit-connector/spec',
-        expect.objectContaining({ signal: expect.any(AbortSignal) })
-      );
-    });
-
-    await waitFor(() => {
-      expect(screen.getByTestId('nameInput')).toBeInTheDocument();
-    });
-  });
-
-  it('shows loading state while spec is being fetched', async () => {
-    let resolveSpec: (value: typeof mockSpecResponse) => void;
-    const specPromise = new Promise<typeof mockSpecResponse>((resolve) => {
-      resolveSpec = resolve;
-    });
-    appMockRenderer.coreStart.http.get = jest.fn().mockReturnValue(specPromise);
-
-    appMockRenderer.render(
-      <EditConnectorFlyout
-        actionTypeRegistry={actionTypeRegistry}
-        onClose={onClose}
-        connector={specConnector}
-        onConnectorUpdated={onConnectorUpdated}
-      />
-    );
-
-    await waitFor(() => {
-      expect(appMockRenderer.coreStart.http.get).toHaveBeenCalled();
-    });
-
-    expect(screen.queryByTestId('nameInput')).not.toBeInTheDocument();
-
-    resolveSpec!(mockSpecResponse);
-
-    await waitFor(() => {
-      expect(screen.getByTestId('nameInput')).toBeInTheDocument();
-    });
-  });
-
-  it('shows error state when spec fetch fails', async () => {
-    const errorMessage = 'Failed to fetch spec';
-    appMockRenderer.coreStart.http.get = jest.fn().mockRejectedValue(new Error(errorMessage));
-
-    appMockRenderer.render(
-      <EditConnectorFlyout
-        actionTypeRegistry={actionTypeRegistry}
-        onClose={onClose}
-        connector={specConnector}
-        onConnectorUpdated={onConnectorUpdated}
-      />
-    );
-
-    await waitFor(() => {
-      expect(screen.getByTestId('connector-spec-load-error')).toBeInTheDocument();
-    });
-  });
-
-  it('does not fetch spec when loadActionTypes has no match (unregistered connector type)', async () => {
-    loadActionTypes.mockResolvedValue([
-      {
-        id: 'other-type',
-        name: 'Other',
-        enabled: true,
-        enabledInConfig: true,
-        enabledInLicense: true,
-        minimumLicenseRequired: 'basic' as const,
-        supportedFeatureIds: ['alerting'],
-      },
-    ] as ActionType[]);
-
-    const orphanConnector: ActionConnector = createMockActionConnector({
-      id: 'orphan-1',
-      name: 'Orphan',
-      actionTypeId: '.orphan-plugin-type',
-      config: {},
-      secrets: {},
-      authMode: 'shared',
-    });
-
-    appMockRenderer.render(
-      <EditConnectorFlyout
-        actionTypeRegistry={actionTypeRegistry}
-        onClose={onClose}
-        connector={orphanConnector}
-        onConnectorUpdated={onConnectorUpdated}
-      />
-    );
-
-    await waitFor(() => {
-      expect(loadActionTypes).toHaveBeenCalled();
-    });
-
-    expect(appMockRenderer.coreStart.http.get).not.toHaveBeenCalled();
   });
 });

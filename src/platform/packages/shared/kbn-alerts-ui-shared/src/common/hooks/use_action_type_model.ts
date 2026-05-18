@@ -65,11 +65,11 @@ export function useActionTypeModel({
   const shouldFetchSpec = actionType != null && actionType.source === ACTION_TYPE_SOURCES.spec;
 
   const {
-    data: specBasedModel = null,
+    data = null,
     isLoading,
     error,
     refetch,
-  } = useQuery<ConnectorSpecResponse, Error, ActionTypeModel | null>({
+  } = useQuery<ConnectorSpecResponse, Error>({
     queryKey: [CONNECTOR_SPEC_QUERY_KEY, actionType?.id],
     queryFn: async ({ signal }) => {
       const spec = await fetchConnectorSpec(http, actionType!.id, signal);
@@ -80,11 +80,19 @@ export function useActionTypeModel({
       }
       return spec;
     },
-    select: (spec) => transformSpecToActionTypeModel(spec, uiSettings),
     enabled: shouldFetchSpec,
     staleTime: 5 * 60 * 1000,
     refetchOnWindowFocus: false,
   });
+
+  // transformSpecToActionTypeModel calls lazy() internally, producing new object references on
+  // every invocation. Memoizing on data keeps the ActionTypeModel reference stable between
+  // renders, preventing infinite re-render loops in React Query (which re-runs select when its
+  // function reference changes).
+  const specBasedModel = useMemo(
+    () => (data ? transformSpecToActionTypeModel(data, uiSettings) : null),
+    [data, uiSettings]
+  );
 
   return {
     actionTypeModel: shouldFetchSpec ? specBasedModel : registeredModel,
