@@ -33,12 +33,9 @@ export interface ExecuteEsqlParams {
   variables?: ESQLControlVariable[];
   uiSettings: IUiSettingsClient;
   /**
-   * Data source profile id (same value used in the Lens success path's
-   * `executionContext.meta.profile_id`). When provided, it is forwarded onto
-   * the request's executionContext so the standardized server-side propagation
-   * pipeline tags the APM transaction with `kibana_meta_profile_id`. Pairing
-   * the request label with the error label keeps both telemetry signals
-   * filterable by the same profile.
+   * When provided, forwarded onto `executionContext.meta` so the server-side
+   * pipeline tags the APM transaction with `kibana_meta_profile_id`, keeping
+   * request and error telemetry filterable by the same profile.
    */
   profileId?: string;
 }

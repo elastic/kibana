@@ -14,15 +14,9 @@ import type {
 } from './execution_context_enums';
 
 /**
- * Naming convention for metrics profile execution context labels in APM.
- * Returns options suitable for spreading into search calls. Pass enum values from constants.ts, e.g. getMetricsExecutionContext(MetricsExecutionContextAction.FETCH, MetricsExecutionContextName.METRICS_INFO).
- *
- * When `meta` is supplied, it is forwarded to `executionContext.meta` so the
- * standardized server-side propagation pipeline (see ExecutionContextService
- * `getAsLabels`, added in #263201) flattens the entries onto the APM
- * transaction as `kibana_meta_*` labels. Pass the same metadata used in
- * `use_lens_props.ts` (e.g. `profile_id`) so request and error telemetry share
- * the same granularity.
+ * Returns execution context options for spreading into search calls.
+ * When `meta` is provided it is forwarded to `executionContext.meta`,
+ * which the server-side pipeline flattens onto the APM transaction as `kibana_meta_*` labels.
  */
 export const getMetricsExecutionContext = (
   action: MetricsExecutionContextAction,
