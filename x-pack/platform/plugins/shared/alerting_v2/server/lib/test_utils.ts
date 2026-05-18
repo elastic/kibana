@@ -48,10 +48,6 @@ export function createMockLogger(): jest.Mocked<Logger> {
 
 /**
  * Creates a standard RuleResponse for testing.
- *
- * `recovery_policy` defaults to `{ type: 'no_breach' }` so the rule has an
- * explicit opt-in recovery policy — tests that need to exercise the opt-out
- * path can pass `recovery_policy: undefined` as an override.
  */
 export function createRuleResponse(overrides: Partial<RuleResponse> = {}): RuleResponse {
   return {
