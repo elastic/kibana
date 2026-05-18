@@ -7,7 +7,6 @@
 
 import {
   EuiButtonIcon,
-  EuiContextMenuItem,
   EuiFlexItem,
   EuiContextMenuPanel,
   EuiPopover,
@@ -20,8 +19,7 @@ import { useRouteMatch } from 'react-router-dom';
 import { SLO_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';
 import { getRulesAppDetailsRoute, rulesAppRoute } from '@kbn/rule-data-utils';
 import { DefaultAlertActions } from '@kbn/response-ops-alerts-table/components/default_alert_actions';
-import { useCaseActions } from '@kbn/response-ops-alerts-table/hooks/use_case_actions';
-import { ADD_TO_EXISTING_CASE, ADD_TO_NEW_CASE } from '@kbn/response-ops-alerts-table/translations';
+import { useCaseAlertActionItems } from '@kbn/response-ops-alerts-table/hooks/use_case_alert_action_items';
 import { useKibana } from '../../utils/kibana_react';
 import { RULE_DETAILS_PAGE_ID } from '../../pages/rule_details/constants';
 import { SLO_DETAIL_PATH } from '../../../common/locators/paths';
@@ -53,7 +51,6 @@ export function AlertActions(
 
   const isInApp = Boolean(tableId === SLO_ALERTS_TABLE_ID && isSLODetailsPage);
 
-  const userCasesPermissions = cases?.helpers.canUseCases([observabilityFeatureId]);
   const [viewInAppUrl, setViewInAppUrl] = useState<string>();
 
   const parseObservabilityAlert = useMemo(
@@ -73,8 +70,11 @@ export function AlertActions(
     setIsPopoverOpen((open) => !open);
   }, []);
 
-  const onAddToCase = useCallback(
-    ({ isNewCase }: { isNewCase: boolean }) => {
+  const caseAlertActionItems = useCaseAlertActionItems({
+    alert,
+    cases,
+    refresh,
+    onAddToCase({ isNewCase }) {
       telemetryClient.reportAlertAddedToCase(
         isNewCase,
         tableId || 'unknown',
@@ -82,13 +82,8 @@ export function AlertActions(
       );
       refresh?.();
     },
-    [telemetryClient, tableId, observabilityAlert.fields, refresh]
-  );
-
-  const { handleAddToExistingCaseClick, handleAddToNewCaseClick } = useCaseActions({
-    alerts: [alert],
-    cases,
-    onAddToCase,
+    onActionExecuted: closeActionsPopover,
+    owner: [observabilityFeatureId],
   });
 
   useEffect(() => {
@@ -109,40 +104,6 @@ export function AlertActions(
       setViewInAppUrl(alertLink);
     }
   }, [observabilityAlert.link, observabilityAlert.hasBasePath, prepend]);
-
-  const caseAlertActionItems = useMemo(() => {
-    if (!userCasesPermissions?.createComment || !userCasesPermissions?.read) {
-      return [];
-    }
-    return [
-      <EuiContextMenuItem
-        data-test-subj="add-to-existing-case-action"
-        key="addToExistingCase"
-        onClick={() => {
-          handleAddToExistingCaseClick();
-          closeActionsPopover();
-        }}
-      >
-        {ADD_TO_EXISTING_CASE}
-      </EuiContextMenuItem>,
-      <EuiContextMenuItem
-        data-test-subj="add-to-new-case-action"
-        key="addToNewCase"
-        onClick={() => {
-          handleAddToNewCaseClick();
-          closeActionsPopover();
-        }}
-      >
-        {ADD_TO_NEW_CASE}
-      </EuiContextMenuItem>,
-    ];
-  }, [
-    userCasesPermissions?.createComment,
-    userCasesPermissions?.read,
-    handleAddToExistingCaseClick,
-    handleAddToNewCaseClick,
-    closeActionsPopover,
-  ]);
 
   const actionsMenuItems = [
     ...caseAlertActionItems,
