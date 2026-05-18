@@ -301,20 +301,21 @@ function normalizeDescription(attributes: LensAttributes) {
  * actual field type at runtime. These are the known remappings the transform applies.
  */
 function normalizeDataTypes(col: GenericIndexPatternColumn) {
-  if (col.dataType === 'ip') {
+  const original = col.dataType;
+  if (col.operationType === 'terms' && original === 'number') {
     col.dataType = 'string';
+    return;
   }
-  if (col.dataType === 'boolean') {
-    col.dataType = 'string';
-  }
-  if (col.dataType === 'date' && !col.isBucketed) {
+  if (
+    !col.isBucketed &&
+    (original === 'date' || original === 'string' || original === 'ip' || original === 'boolean')
+  ) {
     col.dataType = 'number';
+    return;
   }
-  if (col.dataType === 'string' && !col.isBucketed) {
-    col.dataType = 'number';
-  }
-  if (col.dataType === 'number' && col.operationType === 'terms') {
+  if (col.isBucketed && (original === 'ip' || original === 'boolean')) {
     col.dataType = 'string';
+    return;
   }
 }
 
