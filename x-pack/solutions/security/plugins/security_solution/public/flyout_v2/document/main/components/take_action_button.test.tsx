@@ -334,10 +334,7 @@ describe('<TakeActionButton />', () => {
   it('should call useResponderActionItem with field-browser data and closePopover', () => {
     renderTakeActionButton();
 
-    expect(mockUseResponderActionItem).toHaveBeenCalledWith(
-      mockDetailsData,
-      expect.any(Function)
-    );
+    expect(mockUseResponderActionItem).toHaveBeenCalledWith(mockDetailsData, expect.any(Function));
   });
 
   it('should include the Respond action for local documents in Discover', () => {
