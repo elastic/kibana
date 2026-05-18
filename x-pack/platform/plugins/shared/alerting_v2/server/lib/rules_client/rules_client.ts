@@ -164,7 +164,7 @@ export class RulesClient {
     });
   }
 
-  private withNextChangeHistorySequence(
+  private updateRuleSequenceNumber(
     attrs: RuleSavedObjectAttributes,
     currentSequence?: number
   ): RuleSavedObjectAttributes {
@@ -226,7 +226,7 @@ export class RulesClient {
 
     const nowIso = new Date().toISOString();
 
-    const ruleAttributes = this.withNextChangeHistorySequence(
+    const ruleAttributes = this.updateRuleSequenceNumber(
       transformCreateRuleBodyToRuleSoAttributes(parsed, {
         enabled: true,
         createdBy: userProfileUid,
@@ -294,7 +294,7 @@ export class RulesClient {
       throw Boom.badRequest('stateTransition is only allowed for rules of kind "alert".');
     }
 
-    const nextAttrs = this.withNextChangeHistorySequence(
+    const nextAttrs = this.updateRuleSequenceNumber(
       buildUpdateRuleAttributes(existingAttrs, parsed, {
         updatedBy: userProfileUid,
         updatedAt: nowIso,
@@ -370,7 +370,7 @@ export class RulesClient {
       entries: [
         {
           id,
-          attributes: this.withNextChangeHistorySequence(attrs, attrs.change_history_sequence),
+          attributes: this.updateRuleSequenceNumber(attrs, attrs.change_history_sequence),
         },
       ],
       action: RuleChangeHistoryAction.ruleDelete,
@@ -387,7 +387,7 @@ export class RulesClient {
 
     const { attrs: existingAttrs, version: existingVersion } = await this.getExistingRule(id);
 
-    const nextAttrs = this.withNextChangeHistorySequence(
+    const nextAttrs = this.updateRuleSequenceNumber(
       {
         ...existingAttrs,
         enabled: true,
@@ -422,7 +422,7 @@ export class RulesClient {
 
     const { attrs: existingAttrs, version: existingVersion } = await this.getExistingRule(id);
 
-    const nextAttrs = this.withNextChangeHistorySequence(
+    const nextAttrs = this.updateRuleSequenceNumber(
       {
         ...existingAttrs,
         enabled: false,
@@ -593,10 +593,7 @@ export class RulesClient {
       if (attributes) {
         deletedEntries.push({
           id: result.id,
-          attributes: this.withNextChangeHistorySequence(
-            attributes,
-            attributes.change_history_sequence
-          ),
+          attributes: this.updateRuleSequenceNumber(attributes, attributes.change_history_sequence),
         });
       }
     }
@@ -649,7 +646,7 @@ export class RulesClient {
         continue;
       }
 
-      const nextAttrs = this.withNextChangeHistorySequence(
+      const nextAttrs = this.updateRuleSequenceNumber(
         {
           ...doc.attributes,
           enabled: true,
@@ -763,7 +760,7 @@ export class RulesClient {
         continue;
       }
 
-      const nextAttrs = this.withNextChangeHistorySequence(
+      const nextAttrs = this.updateRuleSequenceNumber(
         {
           ...doc.attributes,
           enabled: false,
@@ -849,7 +846,7 @@ export class RulesClient {
 
     assertImmutableUnchanged(parsed, existingAttrs);
 
-    const nextAttrs = this.withNextChangeHistorySequence(
+    const nextAttrs = this.updateRuleSequenceNumber(
       transformCreateRuleBodyToRuleSoAttributes(parsed, {
         enabled: existingAttrs.enabled,
         createdBy: existingAttrs.createdBy,
