@@ -268,10 +268,7 @@ function AlertConditionStep({
   // Callout when the heuristic split couldn't find a clear split point.
   // Only relevant after Apply (when the committed query is in composed format).
   const splitFailed =
-    isAlert &&
-    state.queryCommitted &&
-    query.format === 'composed' &&
-    !query.base.trim();
+    isAlert && state.queryCommitted && query.format === 'composed' && !query.base.trim();
 
   return (
     <>
@@ -404,7 +401,7 @@ function RecoveryConditionStep({
 }) {
   const query = useWatch<ComposeFormValues, 'query'>({ name: 'query' });
   const baseQuery = query?.format === 'composed' ? query.base : '';
-  const recoveryBlock = query?.format === 'composed' ? (query.blocks.recover ?? '') : '';
+  const recoveryBlock = query?.format === 'composed' ? query.blocks.recover ?? '' : '';
 
   return (
     <>
@@ -513,11 +510,7 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
     id: 'alertCondition',
     title: 'Alert Condition',
     render: (props) => (
-      <AlertConditionStep
-        state={props.state}
-        dispatch={props.dispatch}
-        services={props.services}
-      />
+      <AlertConditionStep state={props.state} dispatch={props.dispatch} services={props.services} />
     ),
     validate: (_methods, s) => s.queryCommitted,
   },

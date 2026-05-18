@@ -203,8 +203,10 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
 
   // Auto-run the active query when the sandbox opens. No-ops if the query is
   // empty, so a blank editor on first open shows the "Run your query" prompt.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => { run(); }, []);
+
+  useEffect(() => {
+    run();
+  }, []);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {

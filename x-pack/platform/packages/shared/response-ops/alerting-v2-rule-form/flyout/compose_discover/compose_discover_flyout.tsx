@@ -179,8 +179,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
     (mode === 'edit' || mode === 'clone') && rule ? mapRuleToComposeFormValues(rule) : undefined;
   const initialKind = initialMapped?.kind ?? 'signal';
   const hasInitialCustomRecovery =
-    initialMapped?.query?.format === 'composed' &&
-    !!initialMapped.query.blocks.recover?.trim();
+    initialMapped?.query?.format === 'composed' && !!initialMapped.query.blocks.recover?.trim();
   const [uiState, dispatch] = useComposeDiscoverState({
     mode: mode === 'clone' ? 'edit' : mode,
     initialKind,
@@ -248,7 +247,10 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
   const handleRecoveryTypeChange = useCallback(
     (type: RecoveryType) => {
       if (type === 'custom') {
-        setDraft((d) => ({ ...d, recover: d.recover.trim() ? d.recover : guessRecoveryBlock(d.breach) }));
+        setDraft((d) => ({
+          ...d,
+          recover: d.recover.trim() ? d.recover : guessRecoveryBlock(d.breach),
+        }));
       }
       dispatch({ type: 'SET_RECOVERY_TYPE', recoveryType: type });
     },
@@ -279,16 +281,13 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
 
   // Debounced (~300 ms) lenient parse that pushes every YAML keystroke into RHF.
   // The Sandbox watches RHF via props, so it sees YAML edits live.
-  const { run: runYamlParse, cancel: cancelYamlParse } = useDebounceFn(
-    (yaml: string) => {
-      const result = parseYamlToFormValues(yaml);
-      if (result.values) {
-        methods.reset(formValuesFromYamlToCompose(result.values));
-        resetFromRhf();
-      }
-    },
-    YAML_PARSE_DEBOUNCE_OPTIONS
-  );
+  const { run: runYamlParse, cancel: cancelYamlParse } = useDebounceFn((yaml: string) => {
+    const result = parseYamlToFormValues(yaml);
+    if (result.values) {
+      methods.reset(formValuesFromYamlToCompose(result.values));
+      resetFromRhf();
+    }
+  }, YAML_PARSE_DEBOUNCE_OPTIONS);
 
   const handleSetYamlText = useCallback(
     (yaml: string) => {
