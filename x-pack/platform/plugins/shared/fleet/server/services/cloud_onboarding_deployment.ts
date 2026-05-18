@@ -77,11 +77,15 @@ class CloudOnboardingDeploymentService {
     return soToDeployment(so.id, so.attributes);
   }
 
-  public async getById(id: string): Promise<CloudOnboardingDeployment> {
+  public async getById(
+    soClient: SavedObjectsClientContract,
+    id: string
+  ): Promise<CloudOnboardingDeployment> {
     const so =
       await this.encryptedSoClient.getDecryptedAsInternalUser<CloudOnboardingDeploymentSOAttributes>(
         CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
-        id
+        id,
+        { namespace: soClient.getCurrentNamespace() }
       );
 
     if (so.error) {
@@ -91,11 +95,16 @@ class CloudOnboardingDeploymentService {
     return soToDeployment(so.id, so.attributes);
   }
 
-  public async getByConnectionId(connectionId: string): Promise<CloudOnboardingDeployment[]> {
+  public async getByConnectionId(
+    soClient: SavedObjectsClientContract,
+    connectionId: string
+  ): Promise<CloudOnboardingDeployment[]> {
+    const namespace = soClient.getCurrentNamespace();
     const finder =
       await this.encryptedSoClient.createPointInTimeFinderDecryptedAsInternalUser<CloudOnboardingDeploymentSOAttributes>(
         {
           type: CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
+          namespaces: namespace ? [namespace] : ['default'],
           filter: nodeBuilder.is(
             `${CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE}.attributes.connectionId`,
             connectionId
@@ -129,7 +138,7 @@ class CloudOnboardingDeploymentService {
       { ...update, mechanisms: update.mechanisms, updatedAt: now }
     );
 
-    return this.getById(id);
+    return this.getById(soClient, id);
   }
 
   public async updateStatus(

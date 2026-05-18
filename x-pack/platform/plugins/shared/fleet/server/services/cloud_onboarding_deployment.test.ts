@@ -125,15 +125,35 @@ describe('cloudOnboardingDeploymentService', () => {
   });
 
   describe('getById', () => {
-    it('returns the decrypted deployment', async () => {
+    it('returns the decrypted deployment scoped to the request namespace', async () => {
       const attrs = makeAttributes({ status: 'succeeded' });
-      makeMockedEncryptedSoClient('deploy-1', attrs);
+      const esoClientMock = makeMockedEncryptedSoClient('deploy-1', attrs);
+      soClient.getCurrentNamespace.mockReturnValue('space-a');
 
-      const result = await cloudOnboardingDeploymentService.getById('deploy-1');
+      const result = await cloudOnboardingDeploymentService.getById(soClient, 'deploy-1');
 
+      expect(esoClientMock.getDecryptedAsInternalUser).toHaveBeenCalledWith(
+        CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
+        'deploy-1',
+        { namespace: 'space-a' }
+      );
       expect(result.id).toBe('deploy-1');
       expect(result.status).toBe('succeeded');
       expect(result.secrets).toEqual({ external_id: 'ext-123' });
+    });
+
+    it('uses undefined namespace for the default space', async () => {
+      const attrs = makeAttributes();
+      const esoClientMock = makeMockedEncryptedSoClient('deploy-1', attrs);
+      soClient.getCurrentNamespace.mockReturnValue(undefined);
+
+      await cloudOnboardingDeploymentService.getById(soClient, 'deploy-1');
+
+      expect(esoClientMock.getDecryptedAsInternalUser).toHaveBeenCalledWith(
+        CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
+        'deploy-1',
+        { namespace: undefined }
+      );
     });
 
     it('throws FleetError when the SO has an error field', async () => {
@@ -149,16 +169,17 @@ describe('cloudOnboardingDeploymentService', () => {
       };
       mockedAppContextService.getEncryptedSavedObjects.mockReturnValue(esoClientMock);
 
-      await expect(cloudOnboardingDeploymentService.getById('deploy-missing')).rejects.toThrow(
-        'not found'
-      );
+      await expect(
+        cloudOnboardingDeploymentService.getById(soClient, 'deploy-missing')
+      ).rejects.toThrow('not found');
     });
   });
 
   describe('getByConnectionId', () => {
-    it('returns all deployments for a connection', async () => {
+    it('scopes the PIT finder to the request namespace', async () => {
       const attrs1 = makeAttributes({ mechanisms: ['identity_federation'] });
       const attrs2 = makeAttributes({ mechanisms: ['firehose'] });
+      soClient.getCurrentNamespace.mockReturnValue('space-a');
 
       const esoClientMock: jest.Mocked<EncryptedSavedObjectsClient> = {
         getDecryptedAsInternalUser: jest.fn(),
@@ -176,7 +197,7 @@ describe('cloudOnboardingDeploymentService', () => {
       };
       mockedAppContextService.getEncryptedSavedObjects.mockReturnValue(esoClientMock);
 
-      const results = await cloudOnboardingDeploymentService.getByConnectionId('conn-1');
+      const results = await cloudOnboardingDeploymentService.getByConnectionId(soClient, 'conn-1');
 
       expect(results).toHaveLength(2);
       expect(results[0].id).toBe('deploy-1');
@@ -184,9 +205,30 @@ describe('cloudOnboardingDeploymentService', () => {
       expect(esoClientMock.createPointInTimeFinderDecryptedAsInternalUser).toHaveBeenCalledWith(
         expect.objectContaining({
           type: CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
-          // filter is a KueryNode object built by nodeBuilder.is, not a plain string
+          namespaces: ['space-a'],
           filter: expect.any(Object),
         })
+      );
+    });
+
+    it('falls back to default namespace when soClient is in the default space', async () => {
+      soClient.getCurrentNamespace.mockReturnValue(undefined);
+
+      const esoClientMock: jest.Mocked<EncryptedSavedObjectsClient> = {
+        getDecryptedAsInternalUser: jest.fn(),
+        createPointInTimeFinderDecryptedAsInternalUser: jest.fn().mockResolvedValue({
+          async *find() {
+            yield { saved_objects: [] };
+          },
+          close: jest.fn(),
+        }),
+      };
+      mockedAppContextService.getEncryptedSavedObjects.mockReturnValue(esoClientMock);
+
+      await cloudOnboardingDeploymentService.getByConnectionId(soClient, 'conn-none');
+
+      expect(esoClientMock.createPointInTimeFinderDecryptedAsInternalUser).toHaveBeenCalledWith(
+        expect.objectContaining({ namespaces: ['default'] })
       );
     });
 
@@ -202,7 +244,10 @@ describe('cloudOnboardingDeploymentService', () => {
       };
       mockedAppContextService.getEncryptedSavedObjects.mockReturnValue(esoClientMock);
 
-      const results = await cloudOnboardingDeploymentService.getByConnectionId('conn-none');
+      const results = await cloudOnboardingDeploymentService.getByConnectionId(
+        soClient,
+        'conn-none'
+      );
       expect(results).toEqual([]);
     });
   });

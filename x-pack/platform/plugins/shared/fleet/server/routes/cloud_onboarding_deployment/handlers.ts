@@ -25,7 +25,6 @@ function toResponseItem(deployment: CloudOnboardingDeployment) {
   return rest;
 }
 
-// TODO validate connectionId in fleet-cloud-connector
 export const createCloudOnboardingDeploymentHandler: FleetRequestHandler<
   undefined,
   undefined,
@@ -41,8 +40,14 @@ export const createCloudOnboardingDeploymentHandler: FleetRequestHandler<
 export const getCloudOnboardingDeploymentHandler: FleetRequestHandler<
   TypeOf<typeof GetCloudOnboardingDeploymentRequestSchema.params>
 > = async (context, request, response) => {
+  const fleetContext = await context.fleet;
+  const { internalSoClient } = fleetContext;
+
   try {
-    const deployment = await cloudOnboardingDeploymentService.getById(request.params.id);
+    const deployment = await cloudOnboardingDeploymentService.getById(
+      internalSoClient,
+      request.params.id
+    );
     return response.ok({ body: { item: toResponseItem(deployment) } });
   } catch (error) {
     if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
@@ -57,7 +62,11 @@ export const getCloudOnboardingDeploymentHandler: FleetRequestHandler<
 export const getCloudOnboardingDeploymentsByConnectionIdHandler: FleetRequestHandler<
   TypeOf<typeof GetCloudOnboardingDeploymentsByConnectionIdRequestSchema.params>
 > = async (context, request, response) => {
+  const fleetContext = await context.fleet;
+  const { internalSoClient } = fleetContext;
+
   const deployments = await cloudOnboardingDeploymentService.getByConnectionId(
+    internalSoClient,
     request.params.connectionId
   );
   return response.ok({ body: { items: deployments.map(toResponseItem) } });
