@@ -382,7 +382,9 @@ describe('validateChangesExistingType', () => {
       };
       expect(() =>
         validateChangesExistingType({ from: typeFrom, to: typeTo, registeredType, log })
-      ).toThrowError(/Breaking schema changes.*forwardCompatibility schema removed from model version/s);
+      ).toThrowError(
+        /Breaking schema changes.*forwardCompatibility schema removed from model version/s
+      );
     });
 
     it('should not flag an unchanged function-based schema when comparing against a legacy hash baseline', () => {

@@ -150,9 +150,7 @@ const serializeSchema = (schemaProp: unknown): Record<string, unknown> => {
  * - `{ __fn: string }`              → sha256(fn_source) — matches the old fn hash
  * - `Record<string, unknown>` (Joi) → sha256(JSON.stringify(obj))
  */
-export const hashStoredSchema = (
-  schema: false | string | Record<string, unknown>
-): string => {
+export const hashStoredSchema = (schema: false | string | Record<string, unknown>): string => {
   if (schema === false) return 'false';
   if (typeof schema === 'string') return schema;
   const hash = createHash('sha256');

@@ -198,7 +198,9 @@ function reportSchemaChanges(
       severity: 'error',
       typeName: name,
       message:
-        `Schema-only changes detected in model version(s) ${undiffable.join(', ')} of SO type '${name}', ` +
+        `Schema-only changes detected in model version(s) ${undiffable.join(
+          ', '
+        )} of SO type '${name}', ` +
         `but the baseline snapshot uses the legacy hash format — detailed diff is not possible.`,
       fixHint: `Re-generate the baseline snapshot to enable schema change validation.`,
       docsAnchor: '#defining-model-versions',
@@ -210,7 +212,9 @@ function reportSchemaChanges(
       ruleId: RULE_IDS.EXISTING_TYPE_SCHEMA_BREAKING_CHANGES,
       severity: 'error',
       typeName: name,
-      message: `Breaking schema changes detected in SO type '${name}':\n  - ${breaking.join('\n  - ')}`,
+      message: `Breaking schema changes detected in SO type '${name}':\n  - ${breaking.join(
+        '\n  - '
+      )}`,
       fixHint: `Revert the breaking schema change and introduce it as a new model version instead.`,
       docsAnchor: '#defining-model-versions',
     });
@@ -464,7 +468,9 @@ export function validateNewMappingsInModelVersion(
       ruleId: RULE_IDS.EXISTING_TYPE_NEW_MAPPINGS_NOT_IN_MODEL_VERSION,
       severity: 'error',
       typeName: name,
-      message: `The SO type '${name}' has new mapping fields that are not declared in model version '${newModelVersion.version}': ${undeclaredFields.join(', ')}.`,
+      message: `The SO type '${name}' has new mapping fields that are not declared in model version '${
+        newModelVersion.version
+      }': ${undeclaredFields.join(', ')}.`,
       fixHint: `Add the missing fields to the 'mappings_addition' change in model version '${newModelVersion.version}'.`,
       docsAnchor: '#defining-model-versions',
     });
@@ -504,7 +510,9 @@ export function validateIgnoreAboveExistingType(
       ruleId: RULE_IDS.EXISTING_TYPE_KEYWORD_MISSING_IGNORE_ABOVE,
       severity: 'error',
       typeName: name,
-      message: `The SO type '${name}' has newly introduced 'keyword' or 'flattened' mapping fields without 'ignore_above': ${newlyIntroduced.join(', ')}.`,
+      message: `The SO type '${name}' has newly introduced 'keyword' or 'flattened' mapping fields without 'ignore_above': ${newlyIntroduced.join(
+        ', '
+      )}.`,
       fixHint: `Add 'ignore_above: 1024' (or another appropriate limit) to each affected field to prevent Elasticsearch from silently dropping strings that exceed the limit.`,
       docsAnchor: '#defining-model-versions',
     });
@@ -561,7 +569,9 @@ export function validateNameTitleFieldTypesExistingType(
       ruleId: RULE_IDS.EXISTING_TYPE_INVALID_NAME_TITLE_FIELD_TYPE,
       severity: 'error',
       typeName: name,
-      message: `The SO type '${name}' has 'name' or 'title' fields with incorrect types: ${newlyIntroduced.map(({ description }) => description).join(', ')}.`,
+      message: `The SO type '${name}' has 'name' or 'title' fields with incorrect types: ${newlyIntroduced
+        .map(({ description }) => description)
+        .join(', ')}.`,
       fixHint: `Change the field mapping type to 'text'. If the field already exists in production, this requires a reindex.`,
       docsAnchor: '#defining-model-versions',
     });
