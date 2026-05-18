@@ -48,6 +48,9 @@ export const initTelemetry = (
   // resource.attributes.*
   const resource = buildOtelResources(serviceName);
 
+  // The context manager runs unconditionally (outside the telemetry.enabled gate) because the
+  // dedicated inference tracer provider needs context.active() for span parent-child propagation
+  // and baggage for inference context detection, even when global tracing is off.
   const contextManager = new AsyncLocalStorageContextManager();
   context.setGlobalContextManager(contextManager);
   contextManager.enable();

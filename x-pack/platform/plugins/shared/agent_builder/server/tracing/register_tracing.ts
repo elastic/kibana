@@ -8,8 +8,8 @@
 import type { CoreStart } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { tracing } from '@elastic/opentelemetry-node/sdk';
-import { resources } from '@elastic/opentelemetry-node/sdk';
 import { SavedObjectsClient } from '@kbn/core/server';
+import { buildOtelResources } from '@kbn/telemetry';
 import {
   ElasticsearchOtlpExporter,
   LateBindingSpanProcessor,
@@ -121,7 +121,7 @@ export const registerTracingExporter = async ({
 
   initInferenceTracerProvider({
     processors,
-    resource: resources.defaultResource(),
+    resource: buildOtelResources(),
   });
 
   return async () => {
