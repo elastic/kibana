@@ -1,0 +1,14 @@
+{
+  "type": "plugin",
+  "id": "@kbn/dynamic-home-plugin",
+  "owner": ["@elastic/appex-sharedux"],
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "dynamicHome",
+    "browser": true,
+    "server": true,
+    "optionalPlugins": ["agentBuilder", "alerting", "spaces"],
+    "requiredBundles": ["kibanaReact"]
+  }
+}

@@ -6606,6 +6606,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/dynamic-home-plugin@link:x-pack/platform/plugins/shared/dynamic_home":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ebt-click@link:src/platform/packages/shared/kbn-ebt-click":
   version "0.0.0"
   uid ""

@@ -1068,6 +1068,8 @@
       "@kbn/dot-text/*": ["src/platform/packages/private/kbn-dot-text/*"],
       "@kbn/dot-text-loader": ["src/platform/packages/private/kbn-dot-text-loader"],
       "@kbn/dot-text-loader/*": ["src/platform/packages/private/kbn-dot-text-loader/*"],
+      "@kbn/dynamic-home-plugin": ["x-pack/platform/plugins/shared/dynamic_home"],
+      "@kbn/dynamic-home-plugin/*": ["x-pack/platform/plugins/shared/dynamic_home/*"],
       "@kbn/ebt-click": ["src/platform/packages/shared/kbn-ebt-click"],
       "@kbn/ebt-click/*": ["src/platform/packages/shared/kbn-ebt-click/*"],
       "@kbn/ebt-tools": ["src/platform/packages/shared/kbn-ebt-tools"],
