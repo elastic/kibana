@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Parser } from '@elastic/esql';
+import { Parser, BasicPrettyPrinter } from '@elastic/esql';
 
 const DURATION_RE = /^(\d+)(ms|s|m|h|d|w)$/;
 
@@ -69,4 +69,22 @@ export function validateEsqlQuery(query: string): string | void {
   if (errors.length > 0) {
     return `Invalid ES|QL query: ${errors[0].message}`;
   }
+}
+
+/**
+ * Compose a base ES|QL query with a block fragment to avoiding fragile string concatenation.
+ * The block query must start with a pipe operator (e.g. `| WHERE x > 0`).
+ */
+export function composeEsqlQuery(base: string, block: string): string {
+  // validate the ES|QL queries
+  const { root: baseRoot } = Parser.parse(base);
+  const { root: blockRoot } = Parser.parse('FROM _\n' + block);
+  // drop the "FROM _" from the validated block command
+  const blockCommands = blockRoot.commands.slice(1);
+  // concatenate the queries
+  const composedRoot = {
+    ...baseRoot,
+    commands: [...baseRoot.commands, ...blockCommands],
+  };
+  return BasicPrettyPrinter.query(composedRoot);
 }

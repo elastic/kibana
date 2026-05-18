@@ -15,6 +15,9 @@ import {
   createRuleDataSchema,
   updateRuleDataSchema,
   IMMUTABLE_RULE_FIELDS,
+  getBreachEsqlQuery,
+  getRecoverEsqlQuery,
+  getRootEsqlQuery,
 } from './rule_data_schema';
 
 const validCreateData = {
@@ -309,6 +312,30 @@ describe('createRuleDataSchema', () => {
         },
       });
       expect(result.success).toBe(true);
+    });
+
+    it('rejects a composed query with a whitespace-only breach block', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        query: {
+          format: 'composed',
+          base: 'FROM metrics-*',
+          blocks: { breach: ' ' },
+        },
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it('rejects a composed query with a whitespace-only recover block', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        query: {
+          format: 'composed',
+          base: 'FROM metrics-*',
+          blocks: { breach: ' | WHERE cpu > 0.9', recover: ' ' },
+        },
+      });
+      expect(result.success).toBe(false);
     });
 
     it('rejects a signal rule with composed format', () => {
@@ -916,6 +943,99 @@ describe('updateRuleDataSchema', () => {
 
       expect(result.success).toBe(false);
     });
+  });
+});
+
+describe('getBreachEsqlQuery', () => {
+  it('returns the breach query verbatim for standalone format', () => {
+    const query = { format: 'standalone' as const, breach: 'FROM logs-* | LIMIT 1' };
+    expect(getBreachEsqlQuery(query)).toBe('FROM logs-* | LIMIT 1');
+  });
+
+  it('composes base and breach block for composed format', () => {
+    const query = {
+      format: 'composed' as const,
+      base: 'FROM metrics-*',
+      blocks: { breach: '| WHERE cpu > 0.9' },
+    };
+    expect(getBreachEsqlQuery(query)).toBe('FROM metrics-* | WHERE cpu > 0.9');
+  });
+
+  it('handles a trailing comment in base without corrupting the composed query', () => {
+    const query = {
+      format: 'composed' as const,
+      base: 'FROM logs-* // my query',
+      blocks: { breach: '| WHERE status == "error"' },
+    };
+    expect(getBreachEsqlQuery(query)).toBe('FROM logs-* | WHERE status == "error"');
+  });
+
+  it('handles a block with multiple pipeline commands', () => {
+    const query = {
+      format: 'composed' as const,
+      base: 'FROM metrics-*',
+      blocks: { breach: '| WHERE cpu > 0.9 | STATS count = COUNT(*)' },
+    };
+    expect(getBreachEsqlQuery(query)).toBe('FROM metrics-* | WHERE cpu > 0.9 | STATS count = COUNT(*)');
+  });
+});
+
+describe('getRecoverEsqlQuery', () => {
+  it('returns the recover query verbatim for standalone format', () => {
+    const query = {
+      format: 'standalone' as const,
+      breach: 'FROM logs-* | LIMIT 1',
+      recover: 'FROM logs-* | WHERE status == "ok"',
+    };
+    expect(getRecoverEsqlQuery(query)).toBe('FROM logs-* | WHERE status == "ok"');
+  });
+
+  it('returns undefined when standalone has no recover query', () => {
+    const query = { format: 'standalone' as const, breach: 'FROM logs-* | LIMIT 1' };
+    expect(getRecoverEsqlQuery(query)).toBeUndefined();
+  });
+
+  it('composes base and recover block for composed format', () => {
+    const query = {
+      format: 'composed' as const,
+      base: 'FROM metrics-*',
+      blocks: { breach: '| WHERE cpu > 0.9', recover: '| WHERE cpu <= 0.9' },
+    };
+    expect(getRecoverEsqlQuery(query)).toBe('FROM metrics-* | WHERE cpu <= 0.9');
+  });
+
+  it('returns undefined when composed has no recover block', () => {
+    const query = {
+      format: 'composed' as const,
+      base: 'FROM metrics-*',
+      blocks: { breach: '| WHERE cpu > 0.9' },
+    };
+    expect(getRecoverEsqlQuery(query)).toBeUndefined();
+  });
+
+  it('handles a trailing comment in base without corrupting the recover query', () => {
+    const query = {
+      format: 'composed' as const,
+      base: 'FROM logs-* // my query',
+      blocks: { breach: '| WHERE status == "error"', recover: '| WHERE status == "ok"' },
+    };
+    expect(getRecoverEsqlQuery(query)).toBe('FROM logs-* | WHERE status == "ok"');
+  });
+});
+
+describe('getRootEsqlQuery', () => {
+  it('returns base for composed format', () => {
+    const query = {
+      format: 'composed' as const,
+      base: 'FROM metrics-*',
+      blocks: { breach: '| WHERE cpu > 0.9' },
+    };
+    expect(getRootEsqlQuery(query)).toBe('FROM metrics-*');
+  });
+
+  it('returns breach for standalone format', () => {
+    const query = { format: 'standalone' as const, breach: 'FROM logs-* | LIMIT 1' };
+    expect(getRootEsqlQuery(query)).toBe('FROM logs-* | LIMIT 1');
   });
 });
 

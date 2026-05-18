@@ -11,7 +11,7 @@ import {
   ARTIFACT_VALUE_LIMITS,
   MAX_ARTIFACT_VALUE_LIMIT,
 } from '@kbn/alerting-v2-constants';
-import { validateEsqlQuery, validateMinDuration } from './validation';
+import { validateEsqlQuery, validateMinDuration, composeEsqlQuery } from './validation';
 import { durationSchema, tagsSchema } from './common';
 import {
   MAX_CONSECUTIVE_BREACHES,
@@ -99,7 +99,11 @@ export type QueryFormat = z.infer<typeof queryFormatSchema>;
  * own, so we only enforce length bounds here — full parser validation is
  * applied to the composed `base` it gets appended to.
  */
-export const esqlQueryBlockSchema = z.string().min(1).max(10000);
+export const esqlQueryBlockSchema = z
+  .string()
+  .min(1)
+  .max(10000)
+  .refine((s) => s.trim().length > 0, { message: 'Block query must not be whitespace-only' });
 
 export const composedQuerySchema = z
   .object({
@@ -143,9 +147,7 @@ export type Query = z.infer<typeof querySchema>;
  * `blocks.breach`; for standalone it's `breach` verbatim.
  */
 export const getBreachEsqlQuery = (query: Query): string =>
-  query.format === 'composed'
-    ? query.base.trimEnd() + query.blocks.breach.trimEnd()
-    : query.breach.trimEnd();
+  query.format === 'composed' ? composeEsqlQuery(query.base, query.blocks.breach) : query.breach;
 
 /**
  * Returns the recovery ES|QL query if the rule has one configured, otherwise
@@ -154,9 +156,9 @@ export const getBreachEsqlQuery = (query: Query): string =>
  */
 export const getRecoverEsqlQuery = (query: Query): string | undefined => {
   if (query.format === 'composed' && query.blocks.recover) {
-    return query.base.trimEnd() + query.blocks.recover.trimEnd();
+    return composeEsqlQuery(query.base, query.blocks.recover);
   } else if (query.format === 'standalone' && query.recover) {
-    return query.recover.trimEnd();
+    return query.recover;
   }
 };
 

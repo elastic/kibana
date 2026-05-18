@@ -11,6 +11,7 @@ import {
   validateMaxDuration,
   validateMinDuration,
   validateEsqlQuery,
+  composeEsqlQuery,
 } from './validation';
 
 describe('parseDurationToMs', () => {
@@ -128,5 +129,36 @@ describe('validateEsqlQuery', () => {
 
   it('rejects invalid ES|QL query', () => {
     expect(validateEsqlQuery('FROM |')).toMatch(/Invalid ES\|QL query/);
+  });
+});
+
+describe('composeEsqlQuery', () => {
+  it('appends a single pipeline command to the base', () => {
+    const result = composeEsqlQuery('FROM metrics-*', '| WHERE cpu > 0.9');
+    expect(result).toBe('FROM metrics-* | WHERE cpu > 0.9');
+  });
+
+  it('appends multiple pipeline commands to the base', () => {
+    const result = composeEsqlQuery('FROM metrics-*', '| WHERE cpu > 0.9 | STATS count = COUNT(*)');
+    expect(result).toBe('FROM metrics-* | WHERE cpu > 0.9 | STATS count = COUNT(*)');
+  });
+
+  it('preserves existing commands from the base', () => {
+    const result = composeEsqlQuery(
+      'FROM metrics-* | WHERE host.name == "web-1"',
+      '| STATS avg_cpu = AVG(cpu)'
+    );
+    expect(result).toBe('FROM metrics-* | WHERE host.name == "web-1" | STATS avg_cpu = AVG(cpu)');
+  });
+
+  it('handles a trailing comment in base without corrupting the result', () => {
+    const result = composeEsqlQuery('FROM logs-* // my query', '| WHERE status == "error"');
+    expect(result).toBe('FROM logs-* | WHERE status == "error"');
+  });
+
+  it('produces a result that re-parses without errors', () => {
+    const result = composeEsqlQuery('FROM metrics-*', '| WHERE cpu > 0.9');
+    // we would expect no errors to be returned
+    expect(validateEsqlQuery(result)).toBeUndefined();
   });
 });
