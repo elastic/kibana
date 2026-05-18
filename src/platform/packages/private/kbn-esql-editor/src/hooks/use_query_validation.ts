@@ -21,6 +21,7 @@ import {
 } from '../helpers';
 import { createTimedCallbacks } from '../telemetry/timed_callbacks';
 import { addQueriesToCache } from '../history_local_storage';
+import { reportEsqlError } from '../report_error';
 import type { DataErrorsControl } from '../types';
 
 interface ValidationLatencyTracking {
@@ -312,6 +313,8 @@ export const useQueryValidation = ({
         }
 
         await queryValidation({ cancellationToken }).catch(() => {});
+      } catch (error) {
+        reportEsqlError(error, { errorType: 'ValidationDebounced' });
       } finally {
         if (currentCancellationTokenRef.current === validationTokenSource) {
           cancelDebouncedValidation();
