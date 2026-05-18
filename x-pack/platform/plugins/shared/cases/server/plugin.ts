@@ -174,6 +174,16 @@ export class CasePlugin
       // current default) have only `cases-comments` on disk, so
       // walking only that type is the correct shape.
       unifiedAttachmentsSoEnabled: this.caseConfig.attachments?.enabled === true,
+      // `xpack.cases.templates.enabled` gates whether `cases-templates`
+      // is registered with core (see `saved_object_types/index.ts`). The
+      // v2 data view sub-service reads template SOs to derive per-space
+      // runtime field overlays; if templates is off there are no SOs to
+      // read, and asking the SO client for the type would throw
+      // "Missing mappings for saved objects types: 'cases-templates'".
+      // Threading the flag through here lets the data view sub-service
+      // short-circuit to an empty runtime field map (the base data view
+      // is still bootstrapped — it just has no extended-field overlays).
+      templatesEnabled: this.caseConfig.templates?.enabled === true,
     });
     this.casesAnalyticsV2Service.setup({ core, taskManager: plugins.taskManager });
 
@@ -364,7 +374,15 @@ export class CasePlugin
         //    (security-team#15066) a tenant sits — see
         //    `reconciliation/attachments_runner.ts`.
         //  - The data view sub-service reads `cases-templates` SOs per-space
-        //    to derive runtime fields.
+        //    to derive runtime fields. Only included when templates is on
+        //    — `cases-templates` is registered with core only when
+        //    `xpack.cases.templates.enabled` is true (see
+        //    `saved_object_types/index.ts`), and naming it here when the
+        //    mapping isn't registered throws "Missing mappings for saved
+        //    objects types: 'cases-templates'" from
+        //    `createInternalRepository`. With templates off, the data view
+        //    sub-service short-circuits its template read and bootstraps
+        //    per-space data views with an empty runtime field overlay.
         //  - The `/reset` admin route deletes per-space `index-pattern` SOs
         //    across namespaces. A request-scoped SO client can't do this:
         //    the spaces extension scopes `delete` to the request's namespace,
@@ -392,7 +410,7 @@ export class CasePlugin
           CASE_USER_ACTION_SAVED_OBJECT,
           CASE_COMMENT_SAVED_OBJECT,
           ...(isUnifiedAttachmentsRegistered ? [CASE_ATTACHMENT_SAVED_OBJECT] : []),
-          CASE_TEMPLATE_SAVED_OBJECT,
+          ...(this.caseConfig.templates?.enabled ? [CASE_TEMPLATE_SAVED_OBJECT] : []),
           'index-pattern',
         ]);
         const v2InternalSavedObjectsClient = new SavedObjectsClient(v2InternalRepository);

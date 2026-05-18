@@ -58,12 +58,24 @@ interface CasesAnalyticsV2DataViewServiceDeps {
    * Internal (no-request) SO client used for template reads. Templates are
    * a hidden SO type, and the request-scoped client passed at ensure time
    * may not include them in `includedHiddenTypes`. The internal client is
-   * opted in to both `cases` and `cases-templates` at plugin start.
+   * opted in to both `cases` and `cases-templates` at plugin start —
+   * the latter only when `templatesEnabled` is true (see below).
    *
    * `namespaces: [spaceId]` on the find call scopes results to a single
    * space even though the client itself is unscoped.
    */
   internalSavedObjectsClient: SavedObjectsClientContract;
+  /**
+   * Resolved value of `xpack.cases.templates.enabled`. Gates the
+   * per-space `cases-templates` SO walk inside `collectSnakeKeysForSpace`.
+   * When false the SO type is not registered with core, so calling
+   * `internalSavedObjectsClient.find({ type: 'cases-templates' })` would
+   * throw "Missing mappings for saved objects types: 'cases-templates'";
+   * the walk short-circuits to an empty list and the data view is
+   * bootstrapped with no runtime field overlay (which is the correct
+   * shape when there are no templates to project).
+   */
+  templatesEnabled: boolean;
 }
 
 /**
@@ -427,6 +439,13 @@ export class CasesAnalyticsV2DataViewService {
    * version.
    */
   private async collectSnakeKeysForSpace(spaceId: string): Promise<string[]> {
+    // Templates feature flag is off — the `cases-templates` SO type is not
+    // registered with core, so naming it in `find({ type })` would throw
+    // "Missing mappings for saved objects types: 'cases-templates'".
+    // Returning empty here is also semantically correct: with no templates
+    // there are no extended fields to project as runtime fields.
+    if (!this.deps.templatesEnabled) return [];
+
     const out: string[] = [];
     let page = 1;
 
