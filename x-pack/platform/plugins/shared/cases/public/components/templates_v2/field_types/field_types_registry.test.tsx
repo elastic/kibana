@@ -9,6 +9,17 @@ import React from 'react';
 import { load as parseYaml } from 'js-yaml';
 
 import { ParsedTemplateDefinitionSchema } from '../../../../common/types/domain/template/latest';
+
+jest.mock('../../field_library/hooks/use_resolved_fields', () => ({
+  useResolvedFields: (fields: Array<Record<string, unknown>>) => ({
+    resolvedFields: fields.filter((f) => 'control' in f),
+    isLoading: false,
+  }),
+}));
+
+jest.mock('../../cases_context/use_cases_context', () => ({
+  useCasesContext: () => ({ owner: ['cases'] }),
+}));
 import { render, screen } from '@testing-library/react';
 import { TemplateFieldRenderer } from './field_renderer';
 

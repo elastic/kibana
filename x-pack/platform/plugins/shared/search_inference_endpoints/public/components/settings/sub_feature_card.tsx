@@ -34,11 +34,13 @@ import { NO_DEFAULT_MODEL } from '../../../common/constants';
 import { useRegisteredFeatures } from '../../hooks/use_registered_features';
 import { getConnectorIcon } from '../../utils/connector_display';
 import type { InferenceFeatureResponse as InferenceFeatureConfig } from '../../../common/types';
+import { useConnectors } from '../../hooks/use_connectors';
+import type { EndpointDeprecationInfo } from '../../types';
+import { ModelStatusBadge } from '../model_status/model_status_badge';
 import { AddModelPopover } from './add_model_popover';
 import { CopyToModal } from './copy_to_modal';
 import { DisableRecommendedModelsModal } from './disable_recommended_models_modal';
 import { ResetDefaultsModal } from './reset_defaults_modal';
-import { useConnectors } from '../../hooks/use_connectors';
 
 const COLLAPSED_COUNT = 5;
 
@@ -52,6 +54,7 @@ interface SubFeatureCardProps {
   effectiveRecommendedEndpoints: string[];
   onEndpointsChange: (featureId: string, newEndpointIds: string[]) => void;
   invalidEndpointIds: Set<string>;
+  deprecatedEndpointsMap: Map<string, EndpointDeprecationInfo>;
   hasSavedObject: boolean;
   isFeatureDirty: boolean;
   globalDefaultId: string;
@@ -64,6 +67,7 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
   effectiveRecommendedEndpoints,
   onEndpointsChange,
   invalidEndpointIds,
+  deprecatedEndpointsMap,
   hasSavedObject,
   isFeatureDirty,
   globalDefaultId,
@@ -121,6 +125,10 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
   const showGlobalDefaultRow = !hasSavedObject && globalDefaultId !== NO_DEFAULT_MODEL;
   const { icon: globalDefaultIcon = 'compute', label: globalDefaultLabel = globalDefaultId } =
     endpointDisplayMap.get(globalDefaultId) ?? {};
+  const globalDefaultDeprecationInfo =
+    !hasSavedObject && globalDefaultId !== NO_DEFAULT_MODEL
+      ? deprecatedEndpointsMap.get(globalDefaultId)
+      : undefined;
 
   const handleRemove = useCallback(
     (index: number) => {
@@ -252,7 +260,7 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
             min-inline-size: min(20rem, 50%);
           `}
         >
-          <EuiPanel color="subdued" paddingSize="s" hasBorder={false}>
+          <EuiPanel paddingSize="s" hasBorder={false} hasShadow={false}>
             <EuiText size="xs" color="subdued">
               <strong>
                 {i18n.translate('xpack.searchInferenceEndpoints.settings.assignedModels', {
@@ -268,13 +276,15 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                 endpointIds={endpointIds}
                 endpointDisplayMap={endpointDisplayMap}
                 invalidEndpointIds={invalidEndpointIds}
+                deprecatedEndpointsMap={deprecatedEndpointsMap}
                 globalDefaultRow={
-                  showGlobalDefaultRow
+                  showGlobalDefaultRow && globalDefaultId
                     ? {
                         icon: globalDefaultIcon,
                         label: globalDefaultLabel,
                         showBadge: !isFeatureDirty,
                         globalDefaultId,
+                        deprecationInfo: globalDefaultDeprecationInfo,
                       }
                     : undefined
                 }
@@ -283,13 +293,14 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
               <EuiDragDropContext onDragEnd={handleDragEnd}>
                 <div ref={listRef}>
                   <EuiSplitPanel.Outer hasBorder>
-                    {showGlobalDefaultRow && (
+                    {showGlobalDefaultRow && globalDefaultId && (
                       <GlobalDefaultLockedRow
                         featureId={featureId}
                         icon={globalDefaultIcon}
                         label={globalDefaultLabel}
                         showBadge={!isFeatureDirty}
                         globalDefaultId={globalDefaultId}
+                        deprecationInfo={globalDefaultDeprecationInfo}
                       />
                     )}
                     <EuiDroppable droppableId={`assigned-models-${featureId}`} spacing="none">
@@ -305,6 +316,7 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                             const { icon = 'compute', label = endpointId } =
                               endpointDisplayMap.get(endpointId) ?? {};
                             const isInvalid = invalidEndpointIds.has(endpointId);
+                            const deprecationInfo = deprecatedEndpointsMap.get(endpointId);
                             return (
                               <div>
                                 <EuiSplitPanel.Inner
@@ -371,15 +383,12 @@ export const SubFeatureCard: React.FC<SubFeatureCardProps> = ({
                                         </EuiText>
                                       </EuiToolTip>
                                     </EuiFlexItem>
-                                    {index === 0 && !showGlobalDefaultRow && (
-                                      <EuiFlexItem grow={false}>
-                                        <EuiBadge color="hollow">
-                                          {i18n.translate(
-                                            'xpack.searchInferenceEndpoints.settings.defaultBadge',
-                                            { defaultMessage: 'Default' }
-                                          )}
-                                        </EuiBadge>
-                                      </EuiFlexItem>
+                                    {deprecationInfo && (
+                                      <ModelStatusBadge
+                                        id={endpointId}
+                                        status={deprecationInfo.status}
+                                        metadata={deprecationInfo.metadata}
+                                      />
                                     )}
                                     <EuiFlexItem grow={false}>
                                       <EuiButtonIcon
@@ -496,6 +505,7 @@ interface GlobalDefaultLockedRowProps {
   label: string;
   showBadge: boolean;
   globalDefaultId: string;
+  deprecationInfo?: EndpointDeprecationInfo;
 }
 
 const GlobalDefaultLockedRow: React.FC<GlobalDefaultLockedRowProps> = ({
@@ -504,13 +514,10 @@ const GlobalDefaultLockedRow: React.FC<GlobalDefaultLockedRowProps> = ({
   label,
   showBadge,
   globalDefaultId,
+  deprecationInfo,
 }) => (
   <>
-    <EuiSplitPanel.Inner
-      paddingSize="s"
-      color="subdued"
-      data-test-subj={`global-default-row-${featureId}`}
-    >
+    <EuiSplitPanel.Inner paddingSize="s" data-test-subj={`global-default-row-${featureId}`}>
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiPanel color="transparent" paddingSize="none">
@@ -550,6 +557,15 @@ const GlobalDefaultLockedRow: React.FC<GlobalDefaultLockedRowProps> = ({
             </EuiBadge>
           </EuiFlexItem>
         )}
+        {deprecationInfo && (
+          <EuiFlexItem grow={false}>
+            <ModelStatusBadge
+              id={globalDefaultId}
+              status={deprecationInfo.status}
+              metadata={deprecationInfo.metadata}
+            />
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </EuiSplitPanel.Inner>
     <EuiHorizontalRule margin="none" />
@@ -561,11 +577,13 @@ interface RecommendedEndpointsListProps {
   endpointIds: string[];
   endpointDisplayMap: Map<string, { icon: string; label: string }>;
   invalidEndpointIds: Set<string>;
+  deprecatedEndpointsMap: Map<string, EndpointDeprecationInfo>;
   globalDefaultRow?: {
     icon: string;
     label: string;
     showBadge: boolean;
     globalDefaultId: string;
+    deprecationInfo?: EndpointDeprecationInfo;
   };
 }
 
@@ -574,6 +592,7 @@ const RecommendedEndpointsList: React.FC<RecommendedEndpointsListProps> = ({
   endpointIds,
   endpointDisplayMap,
   invalidEndpointIds,
+  deprecatedEndpointsMap,
   globalDefaultRow,
 }) => {
   return (
@@ -585,18 +604,16 @@ const RecommendedEndpointsList: React.FC<RecommendedEndpointsListProps> = ({
           label={globalDefaultRow.label}
           showBadge={globalDefaultRow.showBadge}
           globalDefaultId={globalDefaultRow.globalDefaultId}
+          deprecationInfo={globalDefaultRow.deprecationInfo}
         />
       )}
       {endpointIds.map((endpointId, index) => {
         const { icon = 'compute', label = endpointId } = endpointDisplayMap.get(endpointId) ?? {};
         const isInvalid = invalidEndpointIds.has(endpointId);
+        const deprecationInfo = deprecatedEndpointsMap.get(endpointId);
         return (
           <div key={endpointId}>
-            <EuiSplitPanel.Inner
-              paddingSize="s"
-              data-test-subj={`endpoint-row-${endpointId}`}
-              color="subdued"
-            >
+            <EuiSplitPanel.Inner paddingSize="s" data-test-subj={`endpoint-row-${endpointId}`}>
               <EuiFlexGroup alignItems="center" gutterSize="s">
                 <EuiFlexItem grow={false}>
                   {isInvalid ? (
@@ -623,6 +640,13 @@ const RecommendedEndpointsList: React.FC<RecommendedEndpointsListProps> = ({
                     <span>{label}</span>
                   </EuiText>
                 </EuiFlexItem>
+                {deprecationInfo && (
+                  <ModelStatusBadge
+                    id={endpointId}
+                    status={deprecationInfo.status}
+                    metadata={deprecationInfo.metadata}
+                  />
+                )}
               </EuiFlexGroup>
             </EuiSplitPanel.Inner>
             {index !== endpointIds.length - 1 && <EuiHorizontalRule margin="none" />}
