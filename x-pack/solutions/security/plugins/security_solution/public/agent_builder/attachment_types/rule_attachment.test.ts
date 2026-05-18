@@ -6,8 +6,10 @@
  */
 
 import type { ApplicationStart } from '@kbn/core-application-browser';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser/attachments';
 import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
+import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { RULES_FEATURE_LATEST } from '@kbn/security-solution-features/constants';
 import { AiRuleCreationService } from '../../detection_engine/common/ai_rule_creation_store';
 import {
@@ -23,6 +25,14 @@ const validRule = {
   description: 'A test rule',
   severity: 'high',
   risk_score: 73,
+};
+
+const validEsqlRule = {
+  name: 'ES|QL Test Rule',
+  type: 'esql',
+  description: 'An ES|QL test rule',
+  severity: 'medium',
+  risk_score: 50,
 };
 
 const makeAttachment = (ruleJson: string, label?: string) => ({
@@ -42,6 +52,14 @@ const makeApplication = (canEdit: boolean) =>
     },
     navigateToApp: jest.fn(),
   } as unknown as ApplicationStart);
+
+const makeUiSettings = (esqlEnabled = true) =>
+  ({
+    get: jest.fn((key: string) => {
+      if (key === ENABLE_ESQL) return esqlEnabled;
+      return undefined;
+    }),
+  } as unknown as IUiSettingsClient);
 
 const makeActionButtonsParams = (ruleJson: string) => ({
   attachment: makeAttachment(ruleJson),
@@ -95,6 +113,7 @@ describe('createRuleAttachmentDefinition', () => {
         attachments: mockAttachments,
         application,
         aiRuleCreation,
+        uiSettings: makeUiSettings(),
       });
 
       expect(mockAddAttachmentType).toHaveBeenCalledTimes(1);
@@ -110,6 +129,7 @@ describe('createRuleAttachmentDefinition', () => {
         attachments: mockAttachments,
         application,
         aiRuleCreation,
+        uiSettings: makeUiSettings(),
       });
 
       const ruleCall = mockAddAttachmentType.mock.calls.find(
@@ -128,6 +148,7 @@ describe('createRuleAttachmentDefinition', () => {
         attachments: mockAttachments,
         application,
         aiRuleCreation,
+        uiSettings: makeUiSettings(),
       });
 
       const ruleCall = mockAddAttachmentType.mock.calls.find(
@@ -147,14 +168,22 @@ describe('createRuleAttachmentDefinition', () => {
   describe('getActionButtons', () => {
     it('returns empty array when attachment data is not parseable JSON', () => {
       const application = makeApplication(true);
-      const definition = createRuleAttachmentDefinition({ application, aiRuleCreation });
+      const definition = createRuleAttachmentDefinition({
+        application,
+        aiRuleCreation,
+        uiSettings: makeUiSettings(),
+      });
       const buttons = definition.getActionButtons!(makeActionButtonsParams('not-json') as never);
       expect(buttons).toEqual([]);
     });
 
     it('returns empty array when parsed rule has no name', () => {
       const application = makeApplication(true);
-      const definition = createRuleAttachmentDefinition({ application, aiRuleCreation });
+      const definition = createRuleAttachmentDefinition({
+        application,
+        aiRuleCreation,
+        uiSettings: makeUiSettings(),
+      });
       const buttons = definition.getActionButtons!(
         makeActionButtonsParams(JSON.stringify({ type: 'query' })) as never
       );
@@ -163,17 +192,64 @@ describe('createRuleAttachmentDefinition', () => {
 
     it('returns empty array when user lacks edit capabilities', () => {
       const application = makeApplication(false);
-      const definition = createRuleAttachmentDefinition({ application, aiRuleCreation });
+      const definition = createRuleAttachmentDefinition({
+        application,
+        aiRuleCreation,
+        uiSettings: makeUiSettings(),
+      });
       const buttons = definition.getActionButtons!(
         makeActionButtonsParams(JSON.stringify(validRule)) as never
       );
       expect(buttons).toEqual([]);
     });
 
+    it('returns empty array for esql rule when enableESQL setting is disabled', () => {
+      const application = makeApplication(true);
+      const definition = createRuleAttachmentDefinition({
+        application,
+        aiRuleCreation,
+        uiSettings: makeUiSettings(false),
+      });
+      const buttons = definition.getActionButtons!(
+        makeActionButtonsParams(JSON.stringify(validEsqlRule)) as never
+      );
+      expect(buttons).toEqual([]);
+    });
+
+    it('returns buttons for esql rule when enableESQL setting is enabled', () => {
+      const application = makeApplication(true);
+      const definition = createRuleAttachmentDefinition({
+        application,
+        aiRuleCreation,
+        uiSettings: makeUiSettings(true),
+      });
+      const buttons = definition.getActionButtons!(
+        makeActionButtonsParams(JSON.stringify(validEsqlRule)) as never
+      );
+      expect(buttons).toHaveLength(1);
+    });
+
+    it('returns buttons for non-esql rule even when enableESQL setting is disabled', () => {
+      const application = makeApplication(true);
+      const definition = createRuleAttachmentDefinition({
+        application,
+        aiRuleCreation,
+        uiSettings: makeUiSettings(false),
+      });
+      const buttons = definition.getActionButtons!(
+        makeActionButtonsParams(JSON.stringify(validRule)) as never
+      );
+      expect(buttons).toHaveLength(1);
+    });
+
     it('returns "Apply to creation" button when not on a rule form page', () => {
       (window as { location: unknown }).location = { pathname: '/app/security/overview' };
       const application = makeApplication(true);
-      const definition = createRuleAttachmentDefinition({ application, aiRuleCreation });
+      const definition = createRuleAttachmentDefinition({
+        application,
+        aiRuleCreation,
+        uiSettings: makeUiSettings(),
+      });
       const buttons = definition.getActionButtons!(
         makeActionButtonsParams(JSON.stringify(validRule)) as never
       );
@@ -187,7 +263,11 @@ describe('createRuleAttachmentDefinition', () => {
         pathname: '/app/security/rules/create',
       };
       const application = makeApplication(true);
-      const definition = createRuleAttachmentDefinition({ application, aiRuleCreation });
+      const definition = createRuleAttachmentDefinition({
+        application,
+        aiRuleCreation,
+        uiSettings: makeUiSettings(),
+      });
       const buttons = definition.getActionButtons!(
         makeActionButtonsParams(JSON.stringify(validRule)) as never
       );
@@ -200,7 +280,11 @@ describe('createRuleAttachmentDefinition', () => {
         pathname: '/app/security/rules/abc123/edit',
       };
       const application = makeApplication(true);
-      const definition = createRuleAttachmentDefinition({ application, aiRuleCreation });
+      const definition = createRuleAttachmentDefinition({
+        application,
+        aiRuleCreation,
+        uiSettings: makeUiSettings(),
+      });
       const buttons = definition.getActionButtons!(
         makeActionButtonsParams(JSON.stringify(validRule)) as never
       );
@@ -210,7 +294,11 @@ describe('createRuleAttachmentDefinition', () => {
 
     it('handler calls setAiCreatedRule with the parsed rule', () => {
       const application = makeApplication(true);
-      const definition = createRuleAttachmentDefinition({ application, aiRuleCreation });
+      const definition = createRuleAttachmentDefinition({
+        application,
+        aiRuleCreation,
+        uiSettings: makeUiSettings(),
+      });
       const buttons = definition.getActionButtons!(
         makeActionButtonsParams(JSON.stringify(validRule)) as never
       );
@@ -223,7 +311,11 @@ describe('createRuleAttachmentDefinition', () => {
     it('handler navigates to rule creation when not on a rule form page', () => {
       (window as { location: unknown }).location = { pathname: '/app/security/overview' };
       const application = makeApplication(true);
-      const definition = createRuleAttachmentDefinition({ application, aiRuleCreation });
+      const definition = createRuleAttachmentDefinition({
+        application,
+        aiRuleCreation,
+        uiSettings: makeUiSettings(),
+      });
       const params = makeActionButtonsParams(JSON.stringify(validRule));
       const buttons = definition.getActionButtons!(params as never);
 
@@ -237,7 +329,11 @@ describe('createRuleAttachmentDefinition', () => {
     it('handler opens sidebar conversation when navigating to rule creation', () => {
       (window as { location: unknown }).location = { pathname: '/app/security/overview' };
       const application = makeApplication(true);
-      const definition = createRuleAttachmentDefinition({ application, aiRuleCreation });
+      const definition = createRuleAttachmentDefinition({
+        application,
+        aiRuleCreation,
+        uiSettings: makeUiSettings(),
+      });
       const params = makeActionButtonsParams(JSON.stringify(validRule));
       const buttons = definition.getActionButtons!(params as never);
 
@@ -251,7 +347,11 @@ describe('createRuleAttachmentDefinition', () => {
         pathname: '/app/security/rules/create',
       };
       const application = makeApplication(true);
-      const definition = createRuleAttachmentDefinition({ application, aiRuleCreation });
+      const definition = createRuleAttachmentDefinition({
+        application,
+        aiRuleCreation,
+        uiSettings: makeUiSettings(),
+      });
       const params = makeActionButtonsParams(JSON.stringify(validRule));
       const buttons = definition.getActionButtons!(params as never);
 
@@ -265,7 +365,11 @@ describe('createRuleAttachmentDefinition', () => {
         pathname: '/app/security/rules/create',
       };
       const application = makeApplication(true);
-      const definition = createRuleAttachmentDefinition({ application, aiRuleCreation });
+      const definition = createRuleAttachmentDefinition({
+        application,
+        aiRuleCreation,
+        uiSettings: makeUiSettings(),
+      });
       const params = makeActionButtonsParams(JSON.stringify(validRule));
       const buttons = definition.getActionButtons!(params as never);
 
@@ -278,7 +382,11 @@ describe('createRuleAttachmentDefinition', () => {
   describe('getLabel', () => {
     it('returns attachmentLabel when provided', () => {
       const application = makeApplication(true);
-      const definition = createRuleAttachmentDefinition({ application, aiRuleCreation });
+      const definition = createRuleAttachmentDefinition({
+        application,
+        aiRuleCreation,
+        uiSettings: makeUiSettings(),
+      });
       const label = definition.getLabel(
         makeAttachment(JSON.stringify(validRule), 'My Rule') as never
       );
@@ -287,14 +395,22 @@ describe('createRuleAttachmentDefinition', () => {
 
     it('falls back to parsed rule name when no attachmentLabel', () => {
       const application = makeApplication(true);
-      const definition = createRuleAttachmentDefinition({ application, aiRuleCreation });
+      const definition = createRuleAttachmentDefinition({
+        application,
+        aiRuleCreation,
+        uiSettings: makeUiSettings(),
+      });
       const label = definition.getLabel(makeAttachment(JSON.stringify(validRule)) as never);
       expect(label).toBe('Test Rule');
     });
 
     it('returns default label when rule is not parseable', () => {
       const application = makeApplication(true);
-      const definition = createRuleAttachmentDefinition({ application, aiRuleCreation });
+      const definition = createRuleAttachmentDefinition({
+        application,
+        aiRuleCreation,
+        uiSettings: makeUiSettings(),
+      });
       const label = definition.getLabel(makeAttachment('invalid') as never);
       expect(label).toBe('Security Rule');
     });
