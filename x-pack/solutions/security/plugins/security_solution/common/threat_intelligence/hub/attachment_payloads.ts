@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IocType, SeverityLevel, ThreatCategory } from './constants';
+import type { IocType, SeverityLevel, ThreatCategory, ThreatRegion } from './constants';
 
 /**
  * Shared payload shapes for the four Phase A attachment types. Defined in
@@ -44,9 +44,19 @@ export interface MitreHeatmapPayload {
   techniques: MitreHeatmapTechniqueRow[];
 }
 
+/** Mirrors the filters passed to `threat_intel.search_reports` for canvas hub fetch. */
+export interface ReportTableScope {
+  query: string;
+  time_range?: { from: string; to: string };
+  categories?: ThreatCategory[];
+  regions?: ThreatRegion[];
+}
+
 export interface ReportTablePayload {
   attachmentLabel?: string;
   time_range_label: string;
+  /** When set, the AB canvas loads the full Intelligence Hub for this scope. */
+  scope?: ReportTableScope;
   reports: Array<{
     report_id: string;
     title: string;

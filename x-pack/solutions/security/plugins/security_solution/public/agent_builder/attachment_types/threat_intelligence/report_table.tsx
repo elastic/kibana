@@ -11,6 +11,7 @@ import {
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -37,6 +38,19 @@ type ReportTableAttachment = Attachment<'threat-intel-report-table', ReportTable
 
 const SECURITY_APP_ID = 'securitySolutionUI' as const;
 const CASES_CREATE_DEEP_LINK = 'cases_create' as const;
+const INTELLIGENCE_HUB_CANVAS_WIDTH = 'min(96vw, 1400px)';
+
+const CANVAS_PREVIEW_LABEL = i18n.translate(
+  'xpack.securitySolution.threatIntelligence.attachments.reportTable.canvasPreview',
+  { defaultMessage: 'Open Intelligence Hub' }
+);
+
+const LazyReportTableCanvasContent = React.lazy(() =>
+  import(
+    /* webpackChunkName: "security_threat_intel_report_table_canvas" */
+    './report_table_canvas_content'
+  ).then((m) => ({ default: m.ReportTableCanvasContent }))
+);
 
 interface ReportTableController {
   isDismissed: boolean;
@@ -216,8 +230,25 @@ export const buildReportTableUiDefinition = (
         defaultMessage: 'Threat report digest',
       }),
     getIcon: () => 'documents',
+    canvasWidth: INTELLIGENCE_HUB_CANVAS_WIDTH,
     renderInlineContent: ({ attachment }) => <ReportTableBody attachment={attachment} />,
-    getActionButtons: ({ attachment }) => {
+    renderCanvasContent: (props) =>
+      props.attachment.data.scope ? (
+        <React.Suspense
+          fallback={
+            <EuiFlexGroup alignItems="center" justifyContent="center" css={{ minHeight: 240 }}>
+              <EuiFlexItem grow={false}>
+                <EuiLoadingSpinner size="l" />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          }
+        >
+          <LazyReportTableCanvasContent {...props} />
+        </React.Suspense>
+      ) : (
+        <ReportTableBody attachment={props.attachment} />
+      ),
+    getActionButtons: ({ attachment, isCanvas, openCanvas }) => {
       const dismissed = readController(attachment.id)?.isDismissed === true;
       if (dismissed) {
         return [
@@ -232,8 +263,24 @@ export const buildReportTableUiDefinition = (
           },
         ];
       }
+      if (isCanvas) {
+        return [];
+      }
       const hasReports = attachment.data.reports.length > 0;
+      const hasScope = attachment.data.scope != null;
+      const canvasButton =
+        openCanvas && hasScope
+          ? [
+              {
+                label: CANVAS_PREVIEW_LABEL,
+                type: ActionButtonType.SECONDARY,
+                icon: 'eye',
+                handler: openCanvas,
+              },
+            ]
+          : [];
       return [
+        ...canvasButton,
         {
           label: i18n.translate(
             'xpack.securitySolution.threatIntelligence.attachments.reportTable.investigateAction',

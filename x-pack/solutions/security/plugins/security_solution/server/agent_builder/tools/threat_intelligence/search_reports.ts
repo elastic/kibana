@@ -132,6 +132,12 @@ export const searchReportsTool: BuiltinSkillBoundedTool<typeof searchReportsSche
         const payload = {
           attachmentLabel: `Threat intel: ${params.query}`,
           time_range_label: formatTimeRangeLabel(params.time_range),
+          scope: {
+            query: params.query,
+            ...(params.time_range ? { time_range: params.time_range } : {}),
+            ...(params.categories?.length ? { categories: params.categories } : {}),
+            ...(params.regions?.length ? { regions: params.regions } : {}),
+          },
           reports: data.reports.map(mapSearchReportHitToTableRow),
         };
         const attachmentResult = await ensureReportTableAttachment({

@@ -280,6 +280,11 @@ Do **not** build the tag yourself unless \`renderTag\` is missing (then use
 \`attachmentId\` + a \`version\` field if returned). Do **not** call \`attachments.add\`
 for the report table.
 
+The inline attachment shows a compact report feed; the analyst can click **Open Intelligence
+Hub** to expand the canvas flyout with the full filtered dashboard (stats ribbon, threat radar,
+timeline, category breakdown, report cards, environment impact) scoped to the same
+\`search_reports\` query, time range, and category/region filters.
+
 ### Other attachment types
 
 - \`${ATTACHMENT_TYPES.subscriptionConfirmation}\` — **only** type the agent may create via

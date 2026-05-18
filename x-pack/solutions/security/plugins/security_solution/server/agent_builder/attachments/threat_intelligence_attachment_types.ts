@@ -11,6 +11,7 @@ import {
   IOC_TYPES,
   SEVERITY_LEVELS,
   THREAT_CATEGORIES,
+  THREAT_REGIONS,
 } from '../../../common/threat_intelligence/hub';
 
 /**
@@ -123,9 +124,22 @@ const reportRowSchema = z.object({
     .optional(),
 });
 
+const reportTableScopeSchema = z.object({
+  query: z.string().min(1),
+  time_range: z
+    .object({
+      from: z.string().min(1),
+      to: z.string().min(1),
+    })
+    .optional(),
+  categories: z.array(z.enum(THREAT_CATEGORIES)).optional(),
+  regions: z.array(z.enum(THREAT_REGIONS)).optional(),
+});
+
 const reportTablePayloadSchema = z.object({
   attachmentLabel: z.string().optional(),
   time_range_label: z.string().min(1),
+  scope: reportTableScopeSchema.optional(),
   reports: z.array(reportRowSchema).min(0),
 });
 

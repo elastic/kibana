@@ -117,6 +117,8 @@ export {
   resolveTimeRangeFromPreset,
 } from './time_range';
 export type { SavedViewAttributes, SavedViewSummary } from './saved_views';
+export type { ReportTableScope } from './attachment_payloads';
+export { resolveOverviewQueryFromScope } from './resolve_scope_overview';
 export type {
   MitreHeatmapPayload,
   ReportTablePayload,
