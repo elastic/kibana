@@ -18,7 +18,6 @@ import {
 import type { LensSavedObject } from '../../../content_management';
 import type { RegisterAPIRouteFn } from '../../../types';
 import { lensDeleteRequestParamsSchema } from './schema';
-import { getDeleteLensVisualizationOASOperationObject } from './oas_examples';
 
 export const registerLensVisualizationsDeleteAPIRoute: RegisterAPIRouteFn = (
   router,
@@ -48,9 +47,6 @@ export const registerLensVisualizationsDeleteAPIRoute: RegisterAPIRouteFn = (
   deleteRoute.addVersion(
     {
       version: LENS_API_VERSION,
-      options: {
-        oasOperationObject: getDeleteLensVisualizationOASOperationObject,
-      },
       validate: {
         request: {
           params: lensDeleteRequestParamsSchema,

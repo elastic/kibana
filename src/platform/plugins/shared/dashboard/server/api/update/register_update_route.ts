@@ -18,7 +18,6 @@ import { getUpdateResponseBodySchema } from './schemas';
 import { update } from './update';
 import { getDashboardStateSchema } from '../dashboard_state_schemas';
 import { writeErrorHandler } from '../write_error_handler';
-import { getUpdateDashboardOASOperationObject } from '../oas_examples';
 
 export function registerUpdateRoute(
   router: VersionedRouter<RequestHandlerContext>,
@@ -42,9 +41,6 @@ export function registerUpdateRoute(
   updateRoute.addVersion(
     {
       version: routeVersion,
-      options: {
-        oasOperationObject: getUpdateDashboardOASOperationObject,
-      },
       validate: () => ({
         request: {
           params: schema.object({

@@ -28,7 +28,6 @@ import {
   lensUpdateResponseBodySchema,
 } from './schema';
 import { getLensRequestConfig, getLensResponseItem } from './utils';
-import { getUpdateLensVisualizationOASOperationObject } from './oas_examples';
 
 export const registerLensVisualizationsUpdateAPIRoute: RegisterAPIRouteFn = (
   router,
@@ -64,9 +63,6 @@ export const registerLensVisualizationsUpdateAPIRoute: RegisterAPIRouteFn = (
   updateRoute.addVersion(
     {
       version: LENS_API_VERSION,
-      options: {
-        oasOperationObject: getUpdateLensVisualizationOASOperationObject,
-      },
       validate: {
         request: {
           params: lensUpdateRequestParamsSchema,

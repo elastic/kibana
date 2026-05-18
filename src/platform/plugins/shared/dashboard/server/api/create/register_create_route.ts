@@ -17,7 +17,6 @@ import { getCreateResponseBodySchema } from './schemas';
 import { create } from './create';
 import { getDashboardStateSchema } from '../dashboard_state_schemas';
 import { writeErrorHandler } from '../write_error_handler';
-import { getCreateDashboardOASOperationObject } from '../oas_examples';
 
 export function registerCreateRoute(
   router: VersionedRouter<RequestHandlerContext>,
@@ -42,9 +41,6 @@ export function registerCreateRoute(
   createRoute.addVersion(
     {
       version: routeVersion,
-      options: {
-        oasOperationObject: getCreateDashboardOASOperationObject,
-      },
       validate: () => ({
         request: {
           body: getDashboardStateSchema(isDashboardAppRequest),

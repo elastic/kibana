@@ -36,26 +36,6 @@ export type SafeRouteMethod = 'get' | 'options';
 export type RouteMethod = SafeRouteMethod | DestructiveRouteMethod;
 
 /**
- * Code sample metadata rendered by the public API docs.
- * @public
- */
-export interface OASCodeSample {
-  lang: string;
-  label?: string;
-  source: string;
-}
-
-/**
- * Partial OpenAPI operation object merged into generated route docs.
- * @public
- */
-export type OASOperationObject = DeepPartial<
-  OpenAPIV3.OperationObject & {
-    'x-codeSamples': OASCodeSample[];
-  }
->;
-
-/**
  * The set of supported parseable Content-Types
  * @public
  */
@@ -443,7 +423,9 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
    *      },
    *  })
    */
-  oasOperationObject?: () => string | OASOperationObject;
+  oasOperationObject?: () =>
+    | string
+    | DeepPartial<Pick<OpenAPIV3.OperationObject, 'requestBody' | 'responses'>>;
 
   /**
    * Whether this route should be treated as "invisible" and excluded from router

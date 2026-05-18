@@ -14,7 +14,6 @@ import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
 import { getRouteConfig } from '../get_route_config';
 import { deleteDashboard } from './delete';
-import { getDeleteDashboardOASOperationObject } from '../oas_examples';
 
 export function registerDeleteRoute(
   router: VersionedRouter<RequestHandlerContext>,
@@ -31,9 +30,6 @@ export function registerDeleteRoute(
   deleteRoute.addVersion(
     {
       version: routeVersion,
-      options: {
-        oasOperationObject: getDeleteDashboardOASOperationObject,
-      },
       validate: {
         request: {
           params: schema.object({
