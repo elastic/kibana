@@ -11,6 +11,7 @@ import React, { useMemo } from 'react';
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
+  partitionByRestriction,
   useContentListConfig,
   useContentListSelection,
   useDeleteConfirmation,
@@ -25,8 +26,11 @@ export interface SelectionBarProps {
  * Selection actions rendered as `toolsLeft` inside the `EuiSearchBar`.
  *
  * When items are selected and `actions.delete.onBulkAction` is
- * configured, renders a "Delete {count} {entity}" button.
- * Clicking opens a {@link DeleteConfirmationModal}.
+ * configured, renders a "Delete {count} {entity}" button. The count
+ * matches what the modal will actually delete: it partitions the
+ * selection by `actions.delete.restriction` and labels the button with
+ * the deletable subset. Clicking opens a {@link DeleteConfirmationModal}
+ * which surfaces any skipped items.
  *
  * Returns `null` when nothing is selected or when
  * `actions.delete.onBulkAction` is not configured.
@@ -40,17 +44,38 @@ export const SelectionBar = ({
   const { selectedItems, selectedCount, clearSelection } = useContentListSelection();
   const { requestDelete, deleteModal } = useDeleteConfirmation({ onClose: clearSelection });
 
-  const buttonLabel = useMemo(
-    () =>
-      i18n.translate('contentManagement.contentList.toolbar.selectionBar.deleteButton', {
-        defaultMessage: 'Delete {itemCount} {entityName}',
-        values: {
-          itemCount: selectedCount,
-          entityName: selectedCount === 1 ? labels.entity : labels.entityPlural,
-        },
-      }),
-    [selectedCount, labels.entity, labels.entityPlural]
+  const deleteRestriction = itemConfig?.actions?.delete?.restriction;
+
+  // Partition the current selection so the button's count and the
+  // modal's `permitted`/`skipped` lists agree. `useSelection` already
+  // disables checkboxes for restricted rows, so this is normally a
+  // no-op; the partition is the defensive backstop for programmatic
+  // selection or stale restriction predicates.
+  const deletableCount = useMemo(
+    () => partitionByRestriction(selectedItems, deleteRestriction).permitted.length,
+    [selectedItems, deleteRestriction]
   );
+
+  const buttonLabel = useMemo(() => {
+    const hasDeletableItems = deletableCount > 0;
+    const itemCount = hasDeletableItems ? deletableCount : selectedCount;
+
+    return hasDeletableItems
+      ? i18n.translate('contentManagement.contentList.toolbar.selectionBar.deleteButton', {
+          defaultMessage: 'Delete {itemCount} {entityName}',
+          values: {
+            itemCount,
+            entityName: itemCount === 1 ? labels.entity : labels.entityPlural,
+          },
+        })
+      : i18n.translate('contentManagement.contentList.toolbar.selectionBar.reviewButton', {
+          defaultMessage: 'Review {itemCount} {entityName}',
+          values: {
+            itemCount,
+            entityName: itemCount === 1 ? labels.entity : labels.entityPlural,
+          },
+        });
+  }, [deletableCount, selectedCount, labels.entity, labels.entityPlural]);
 
   if (selectedCount === 0 || typeof itemConfig?.actions?.delete?.onBulkAction !== 'function') {
     return null;
