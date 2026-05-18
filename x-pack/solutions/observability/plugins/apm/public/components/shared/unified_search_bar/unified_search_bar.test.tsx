@@ -188,13 +188,15 @@ describe('UnifiedSearchBar', () => {
     render(
       <MockApmPluginContextWrapper
         history={history}
-        value={{
-          unifiedSearch: {
-            ui: {
-              SearchBar: searchBarSpy,
+        value={
+          {
+            unifiedSearch: {
+              ui: {
+                SearchBar: searchBarSpy,
+              },
             },
-          },
-        } as unknown as ApmPluginContextValue}
+          } as unknown as ApmPluginContextValue
+        }
       >
         <PerformanceContextProvider>
           <UnifiedSearchBar showFilterBar />
@@ -259,13 +261,15 @@ describe('UnifiedSearchBar', () => {
     render(
       <MockApmPluginContextWrapper
         history={history}
-        value={{
-          unifiedSearch: {
-            ui: {
-              SearchBar: searchBarSpy,
+        value={
+          {
+            unifiedSearch: {
+              ui: {
+                SearchBar: searchBarSpy,
+              },
             },
-          },
-        } as unknown as ApmPluginContextValue}
+          } as unknown as ApmPluginContextValue
+        }
       >
         <PerformanceContextProvider>
           <UnifiedSearchBar />

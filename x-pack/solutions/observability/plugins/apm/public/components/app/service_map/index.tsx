@@ -83,7 +83,9 @@ export function ServiceMapServiceDetail() {
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   const { esQuery } = useServiceMapSearchContext();
 
-  return <ServiceMap environment={environment} kuery={kuery} start={start} end={end} esQuery={esQuery} />;
+  return (
+    <ServiceMap environment={environment} kuery={kuery} start={start} end={end} esQuery={esQuery} />
+  );
 }
 
 export function ServiceMap({
