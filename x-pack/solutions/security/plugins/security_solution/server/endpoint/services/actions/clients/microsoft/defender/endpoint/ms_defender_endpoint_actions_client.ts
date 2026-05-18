@@ -627,7 +627,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
         }
 
         // Check if we're trying to cancel a cancel action (business rule validation)
-        if (!isResponseActionCancelable(originalAction.command, 'microsoft_defender_endpoint')) {
+        if (!isResponseActionCancelable(originalAction.command, this.agentType)) {
           return {
             isValid: false,
             error: new ResponseActionsClientError(

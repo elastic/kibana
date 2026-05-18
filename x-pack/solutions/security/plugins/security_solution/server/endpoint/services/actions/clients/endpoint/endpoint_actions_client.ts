@@ -216,7 +216,7 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
           );
         }
 
-        if (!isResponseActionCancelable(actionToCancel.command, 'endpoint')) {
+        if (!isResponseActionCancelable(actionToCancel.command, this.agentType)) {
           throw new ResponseActionsClientError(
             `Cancel does not support response action [${actionToCancel.command}]`,
             400
