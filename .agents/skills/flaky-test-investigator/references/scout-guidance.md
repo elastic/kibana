@@ -10,49 +10,31 @@ When investigating a Scout failure, weight these checks higher:
 
 ## Failure artifacts (Scout)
 
-Scout uses a custom Playwright reporter (`@kbn/scout-reporting`) that produces a self-contained HTML report per failure with the screenshot embedded. Artifacts live under `.scout/` in the Buildkite job. The standard Playwright outputs (`playwright-report/index.html`, `trace.zip`, video) are NOT what Scout publishes — don't look for them.
+Scout uses a custom Playwright reporter (`@kbn/scout-reporting`) that produces self-contained HTML reports per failure with the screenshot embedded. The standard Playwright outputs (`playwright-report/index.html`, `trace.zip`, video) are NOT what Scout publishes.
 
-Scout publishes four artifact kinds per failed run, in two different roots: **reports + NDJSON at the repo root**; **PNGs at per-plugin paths**.
+### What to download
 
-### Reports (always at the repo root)
+| Artifact | Path | What's in it |
+| --- | --- | --- |
+| Per-run index | `.scout/reports/scout-playwright-test-failures-<runId>/test-failures-summary.json` | Array of `{ name, htmlReportFilename }`. **Start here** to map a failing test name to its HTML report. |
+| Per-failure HTML | `.scout/reports/scout-playwright-test-failures-<runId>/<testId>.html` | Self-contained: test details, command, error stack, stdout, **embedded screenshot** (base64). For most investigations this is enough. |
+| Structured NDJSON | `.scout/reports/scout-playwright-test-failures-<runId>/scout-failures-<runId>.ndjson` | One JSON record per failure: `id` (= `<testId>`), `owner`, `target`, `command`, `kibanaModule`, `location`, `suite`, `title`, `error.message` / `error.stack_trace`. **Use this for programmatic investigation.** |
+| Separate PNG | `**/.scout/test-artifacts/<test-slug-with-target>/test-failed-<N>.png` | Playwright's default per-test screenshot. Nested under per-plugin test roots (the `**/` prefix is required). `<N>` is the attempt number — retries produce multiple PNGs. |
 
-- **Per-run failure index**: `.scout/reports/scout-playwright-test-failures-<runId>/test-failures-summary.json`. Array of `{ name, htmlReportFilename }`, one entry per failure in the run. Example real entry: `{ "name": "local-serverless-observability_complete - Workflow editor: validation performance - [...] setModelMarkers cascade completes within frame budget after edit", "htmlReportFilename": "3ff6decf4c25127-b92795356361dc9.html" }`. **Start here** to map a failing test name to its HTML report file.
-- **Per-failure HTML report**: `.scout/reports/scout-playwright-test-failures-<runId>/<testId>.html` (e.g. `3ff6decf4c25127-b92795356361dc9.html`). One self-contained HTML file per failed test. The failure screenshot is embedded inline (base64) along with test details (suite, title, target, duration, kibana module, code owners), the command that was run, the full error stack trace, captured stdout, and a "tracked branches" status section. **For most investigations this single file is sufficient — you do not need to download the separate PNG.**
-- **Structured failure NDJSON**: `.scout/reports/scout-playwright-test-failures-<runId>/scout-failures-<runId>.ndjson`. One JSON record per failure with fields `id` (matches `<testId>` in the HTML filename), `owner` (CODEOWNERS teams), `target` (Scout target tag, e.g. `local-serverless-observability_complete`), `command` (exact `npx playwright test ...` invocation), `kibanaModule` (`id` / `type` / `visibility` / `group`), `location` (test spec file path), `suite`, `title`, and `error.message` / `error.stack_trace`. **This is the artifact to use for programmatic / automated investigation** — it has everything the HTML report has, in structured form, and no base64 noise.
+`<testId>` (e.g. `3ff6decf4c25127-b92795356361dc9`) appears in **both** the HTML filename and the NDJSON `id`. The PNG does NOT contain `<testId>`; correlate via the spec file path (NDJSON's `location` matches the PNG's spec-basename prefix).
 
-### Screenshot PNGs (at per-plugin paths, NOT at the repo root)
+### How to retrieve
 
-- Path: `**/.scout/test-artifacts/<test-slug-with-target>/test-failed-<N>.png`. The leading `**/` is required because `.scout/test-artifacts/` is created relative to the Playwright process working directory; per-plugin Scout configs end up writing it inside their own test root.
-- Real examples observed in production builds:
-  - `src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/.scout/test-artifacts/workflow_editor_perf-Workf-d9a7e-hin-frame-budget-after-edit-local/test-failed-1.png`
-  - `x-pack/solutions/security/plugins/security_solution/test/scout/ui/.scout/test-artifacts/entity_analytics-privilege-55361-hout-risk-engine-privileges-local/test-failed-1.png`
-  - `x-pack/platform/plugins/shared/streams_app/test/scout/ui/.scout/test-artifacts/query_streams-delete_query-9d9be-ng-an-existing-query-stream-local/test-failed-1.png`
-- Filename anatomy:
-  - `<test-slug-with-target>` is Playwright's default per-test output directory: `<spec-basename>-<title-prefix>-<short-hash>-<title-suffix>-<target>`. It is **not** the `<testId>` from the HTML report — they use different naming schemes.
-  - `test-failed-<N>.png` is Playwright's default screenshot-on-failure filename. `N` is 1 for the first failing attempt, 2 for the first retry, etc., so a flaky test with retries will produce multiple PNGs.
+```sh
+bk artifact download <build> ".scout/reports/scout-playwright-test-failures-*/test-failures-summary.json" .
+bk artifact download <build> ".scout/reports/scout-playwright-test-failures-*/<testId>.html" .
+bk artifact download <build> ".scout/reports/scout-playwright-test-failures-*/scout-failures-*.ndjson" .
+bk artifact download <build> "**/.scout/test-artifacts/**/test-failed-*.png" .
+```
 
-### Server logs
+### Common patterns the screenshot reveals
 
-`kibana.log`, `elasticsearch.log`, etc., when the failing config uploads them.
-
-### Correlation between artifacts
-
-- `<testId>` (e.g. `3ff6decf4c25127-b92795356361dc9`) appears in **both** the HTML report filename and the NDJSON record's `id` field — use it to pair them.
-- The PNG path does **not** contain `<testId>`. To match a PNG back to its HTML report or NDJSON record, correlate via the test spec path: the NDJSON's `location` field is the full spec file path, and the PNG slug starts with the spec basename and the truncated test title.
-- In practice, **prefer the HTML report's embedded screenshot** over the separate PNG. The PNG is most useful when you want screenshots from each retry attempt (`test-failed-1.png`, `test-failed-2.png`, ...).
-
-### How to retrieve them
-
-- **From the Buildkite job page**: open the "Artifacts" tab. Easiest path is to download the whole `.scout/reports/scout-playwright-test-failures-<runId>/` folder — that gives you summary + HTMLs + NDJSON for the run.
-- **From the API / `bk artifact download <build> <glob> .`**:
-  - `".scout/reports/scout-playwright-test-failures-*/test-failures-summary.json"` — index first; pick your test's `htmlReportFilename`.
-  - `".scout/reports/scout-playwright-test-failures-*/<testId>.html"` — specific HTML report for one failure.
-  - `".scout/reports/scout-playwright-test-failures-*/scout-failures-*.ndjson"` — all structured failure records for the run.
-  - `"**/.scout/test-artifacts/**/test-failed-*.png"` — every Scout screenshot in the build (the `**/` prefix is required to discover the nested per-plugin paths).
-
-Scout-specific patterns the HTML report screenshot reveals:
-
-- **The locator was queried before the matching element rendered** → missing `waitForResponse` / `waitForSelector` upstream, NOT a reason to add a longer timeout to the locator itself.
-- **The page navigated mid-action** → race between an in-flight network response and the next test step; usually the test should wait for the response, not for the locator.
-- **A neighbor test left state in the shared server** (visible as unexpected pre-existing data in the screenshot) → lane pollution, see "Lane pollution" above.
-- **The screenshot shows what you expect but the assertion still failed** → assertion is testing a different attribute than the visible one (e.g. `data-test-subj` is correct but `aria-label` was the locator).
+- **Locator queried before the matching element rendered** → missing `waitForResponse` / `waitForSelector` upstream.
+- **Page navigated mid-action** → race between in-flight response and next test step.
+- **Neighbor test left state in the shared server** (unexpected pre-existing data) → lane pollution.
+- **Screenshot shows what you expect but assertion failed** → assertion is testing a different attribute than the visible one.

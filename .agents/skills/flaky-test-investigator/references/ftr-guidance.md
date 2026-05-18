@@ -13,22 +13,34 @@ When investigating an FTR failure, weight these checks higher:
 
 ## Failure artifacts (FTR)
 
-When an FTR test fails, the test runner uploads diagnostic artifacts to the Buildkite build. Pull these first before forming a hypothesis.
+When an FTR test fails, the test runner writes diagnostic artifacts that Buildkite uploads. **A single content `<hash>` links every artifact for one failure.**
 
-- **Screenshot**: `failure_screenshot_session_*_<test-name>.png`. The browser viewport at the moment `expect()` failed. For UI-driven FTR tests this is usually the highest-signal artifact.
-- **DOM snapshot**: `failure_debug_html_*_<test-name>.html`. The full DOM at failure time. Open it locally in a browser to see exactly what state the page was in — the awaited element may simply have a different `data-test-subj`, be inside a different shadow root, or not be in the DOM at all.
-- **Server logs**: `kibana.log`, `elasticsearch.log` (and `fleet-server.log`, `apm.log`, etc. depending on the test). Use the failure timestamp to find correlated errors. A 500 in `kibana.log` at the failure moment is strong evidence the bug is product-side.
-- **Test runner stdout**: contains the full stack trace, the `retry.tryForTime` budget reached, and any `log.debug` / `log.info` lines emitted by the test itself.
+### What to download (main CI: `kibana-pull-request`, `kibana-on-merge`)
 
-How to retrieve them:
+| Artifact | Path | What's in it |
+| --- | --- | --- |
+| Structured record | `target/test_failures/<jobId>_<hash>.{json,log,html}` | Test name, classname, owners, error, full test-runner stdout (incl. interleaved Kibana / ES server logs as `proc [kibana] [...]` lines), `commandLine` to repro, link to the existing `failed-test` issue (`githubIssue`), `failureCount`. **Start here.** `.json` is source of truth; `.log` is a human summary; `.html` is the rendered annotation. |
+| Failure screenshot | `<test-root>/screenshots/failure/<title-truncated>-<hash>.png` | Viewport at failure. UI tests only. |
+| DOM snapshot | `<test-root>/failure_debug/html/<title-truncated>-<hash>.html` | Full DOM at failure. UI tests only. |
+| Elasticsearch logs | `.es/*.log` | When the failure looks transport / cluster related. |
 
-- From the Buildkite job page: scroll to the "Artifacts" section.
-- From the CLI: `bk artifact download <build> "**/*.png" .` (requires `read_artifacts` scope).
-- Direct API call: `GET https://api.buildkite.com/v2/.../jobs/<job-id>/artifacts` then download by `download_url`.
+`<test-root>` is the FTR config's root (e.g. `src/platform/test/functional/`, `x-pack/platform/test/serverless/shared/`). The exact screenshot path is logged in `system-out` (`info Taking window screenshot "..."`). There is no separate `kibana.log` — Kibana output is in the `.json` record's `system-out` field. `target/test_failures/` is shared with Scout; filter by `.jobName` (e.g. `FTR Configs #90` vs `Scout Lane #12`) to keep only FTR.
 
-Common FTR-specific patterns the screenshot/DOM reveal:
+### How to retrieve
 
-- **The awaited element renders but with a different `data-test-subj`** → flaky selector, often introduced by a recent EUI bump or a refactor.
-- **A loading indicator is still visible at failure time** → the test asserts before the UI settles; usually means a missing `retry.waitFor` upstream of the assertion, not a missing one at the assertion (see "What the retry wraps matters" above).
-- **An unexpected error toast is visible** → real product error; trace it to `kibana.log`.
-- **Page is logged-out or in a different space** → cleanup / authentication / spaces issue; look at the suite's `before` / `after` hooks.
+```sh
+bk artifact download <build> "target/test_failures/<jobId>_*.json" .
+bk artifact download <build> "**/screenshots/failure/*<hash>*.png" .
+bk artifact download <build> "**/failure_debug/html/*<hash>*.html" .
+```
+
+### QA Cloud pipelines (`appex-qa-serverless-kibana-ftr-tests` and similar)
+
+Different layout: one self-contained HTML per failure at `<config-path-with-underscores>-<unix-timestamp>/html/<contentHash>.html`. Contains the same test title / command / owners / error / `system-out` as the main-CI `.html`, but **no** `target/test_failures/`, **no** separate screenshot / DOM artifacts. Use the HTML directly.
+
+### Common patterns the screenshot / DOM reveal
+
+- **Awaited element renders but with a different `data-test-subj`** → flaky selector (recent EUI bump or refactor).
+- **Loading indicator still visible** → assertion ran before UI settled; missing `retry.waitFor` upstream.
+- **Unexpected error toast** → real product error; find the matching `proc [kibana] [...][ERROR]` line in `system-out`.
+- **Page is logged-out / in a different space** → cleanup / auth / spaces issue in `before` / `after` hooks.
