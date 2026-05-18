@@ -168,7 +168,7 @@ pageLoadAssetSize:
   securitySolutionEss: 38689
   securitySolutionServerless: 52082
   serverless: 7412
-  serverlessObservability: 19104
+  serverlessObservability: 19200
   serverlessSearch: 26287
   serverlessVectordb: 7618
   serverlessWorkplaceAI: 4855
