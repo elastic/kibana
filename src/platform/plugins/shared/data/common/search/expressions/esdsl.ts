@@ -39,7 +39,7 @@ export type EsdslExpressionFunctionDefinition = ExpressionFunctionDefinition<
 >;
 
 interface EsdslStartDependencies {
-  typed: ITypedSearchService;
+  searchService: ITypedSearchService;
   uiSettingsClient: UiSettingsCommon;
 }
 
@@ -81,7 +81,7 @@ export const getEsdslFn = ({
       },
     },
     async fn(input, args, { inspectorAdapters, abortSignal, getKibanaRequest }) {
-      const { typed, uiSettingsClient } = await getStartDependencies(getKibanaRequest);
+      const { searchService, uiSettingsClient } = await getStartDependencies(getKibanaRequest);
 
       const dsl = JSON.parse(args.dsl);
 
@@ -130,7 +130,7 @@ export const getEsdslFn = ({
       });
 
       try {
-        const { rawResponse, requestParams } = await typed.searchDSL(
+        const { rawResponse, requestParams } = await searchService.searchDSL(
           {
             index: args.index,
             size: args.size,

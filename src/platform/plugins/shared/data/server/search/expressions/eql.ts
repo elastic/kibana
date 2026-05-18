@@ -46,8 +46,7 @@ export function getEql({
       const scopedClient = search.asScoped(request);
       return {
         uiSettingsClient: core.uiSettings.asScopedToClient(savedObjectsClient),
-        search: scopedClient.search,
-        typed: scopedClient.typed,
+        searchService: scopedClient.typed,
         dataViews,
       };
     },

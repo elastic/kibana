@@ -12,7 +12,6 @@ import type { MockedKeys } from '@kbn/utility-types-jest';
 import type { EsdslExpressionFunctionDefinition } from '../../../common/search/expressions';
 import type { StartServicesAccessor } from '@kbn/core/public';
 import type { DataPublicPluginStart, DataStartDependencies } from '../../types';
-import { of } from 'rxjs';
 
 jest.mock('@kbn/i18n', () => {
   return {
@@ -40,7 +39,6 @@ describe('esdsl', () => {
       {},
       {
         search: {
-          search: jest.fn((params: any) => of({ rawResponse: params })),
           typed: {
             searchDSL: jest.fn(async (params: any) => ({
               rawResponse: {
