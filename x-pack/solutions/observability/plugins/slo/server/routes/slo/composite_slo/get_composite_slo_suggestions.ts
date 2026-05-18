@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { GetCompositeSLOSuggestions } from '../../../services/get_composite_slo_suggestions';
+import { GetCompositeSLOSuggestions } from '../../../services/composites/get_composite_slo_suggestions';
 import { createSloServerRoute } from '../../create_slo_server_route';
 import { assertPlatinumLicense } from '../utils/assert_platinum_license';
 

@@ -10,21 +10,26 @@ export const ALERTING_V2_RULES_APP_ID = 'rules';
 export const ALERTING_V2_ACTION_POLICIES_APP_ID = 'action_policies';
 export const ALERTING_V2_EPISODES_APP_ID = 'episodes';
 export const ALERTING_V2_RULE_DOCTOR_APP_ID = 'rule_doctor';
+export const ALERTING_V2_EXECUTION_HISTORY_APP_ID = 'execution_history';
 
 export const ALERTING_V2_RULES_BASE_PATH = `/app/management/${ALERTING_V2_SECTION_ID}/${ALERTING_V2_RULES_APP_ID}`;
 export const ALERTING_V2_ACTION_POLICIES_BASE_PATH = `/app/management/${ALERTING_V2_SECTION_ID}/${ALERTING_V2_ACTION_POLICIES_APP_ID}`;
 export const ALERTING_V2_EPISODES_BASE_PATH = `/app/management/${ALERTING_V2_SECTION_ID}/${ALERTING_V2_EPISODES_APP_ID}`;
 export const ALERTING_V2_RULE_DOCTOR_BASE_PATH = `/app/management/${ALERTING_V2_SECTION_ID}/${ALERTING_V2_RULE_DOCTOR_APP_ID}`;
+export const ALERTING_V2_EXECUTION_HISTORY_BASE_PATH = `/app/management/${ALERTING_V2_SECTION_ID}/${ALERTING_V2_EXECUTION_HISTORY_APP_ID}`;
 
 export const ALERTING_V2_RULES_MANAGEMENT_PATH = `${ALERTING_V2_SECTION_ID}/${ALERTING_V2_RULES_APP_ID}`;
 export const ALERTING_V2_ACTION_POLICIES_MANAGEMENT_PATH = `${ALERTING_V2_SECTION_ID}/${ALERTING_V2_ACTION_POLICIES_APP_ID}`;
 export const ALERTING_V2_EPISODES_MANAGEMENT_PATH = `${ALERTING_V2_SECTION_ID}/${ALERTING_V2_EPISODES_APP_ID}`;
 export const ALERTING_V2_RULE_DOCTOR_MANAGEMENT_PATH = `${ALERTING_V2_SECTION_ID}/${ALERTING_V2_RULE_DOCTOR_APP_ID}`;
+export const ALERTING_V2_EXECUTION_HISTORY_MANAGEMENT_PATH = `${ALERTING_V2_SECTION_ID}/${ALERTING_V2_EXECUTION_HISTORY_APP_ID}`;
 
 export const MANAGEMENT_APP_ID = 'management';
 export {
   ALERTING_V2_RULE_API_PATH,
   ALERTING_V2_ACTION_POLICY_API_PATH,
+  ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_API_PATH,
+  ALERTING_V2_ACTION_POLICY_EXECUTION_HISTORY_COUNT_API_PATH,
 } from '@kbn/alerting-v2-constants';
 
 export const paths = {
@@ -32,6 +37,7 @@ export const paths = {
   ruleEdit: (id: string) => `${ALERTING_V2_RULES_BASE_PATH}/edit/${encodeURIComponent(id)}`,
   ruleDetails: (id: string) => `${ALERTING_V2_RULES_BASE_PATH}/${encodeURIComponent(id)}`,
   ruleList: ALERTING_V2_RULES_BASE_PATH,
+  ruleCreateOptions: `${ALERTING_V2_RULES_BASE_PATH}/create_options`,
   actionPolicyCreate: `${ALERTING_V2_ACTION_POLICIES_BASE_PATH}/create`,
   actionPolicyEdit: (id: string) =>
     `${ALERTING_V2_ACTION_POLICIES_BASE_PATH}/edit/${encodeURIComponent(id)}`,
@@ -40,4 +46,5 @@ export const paths = {
   alertEpisodeDetails: (episodeId: string) =>
     `${ALERTING_V2_EPISODES_BASE_PATH}/${encodeURIComponent(episodeId)}`,
   ruleDoctorOverview: ALERTING_V2_RULE_DOCTOR_BASE_PATH,
+  executionHistoryList: ALERTING_V2_EXECUTION_HISTORY_BASE_PATH,
 };
