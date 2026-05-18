@@ -30,7 +30,6 @@ import {
  * "deployments not using v2 are untouched" promise.
  */
 export default ({ getService }: FtrProviderContext): void => {
-  const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const es = getService('es');
   const auth = getAuthWithSuperUser();
