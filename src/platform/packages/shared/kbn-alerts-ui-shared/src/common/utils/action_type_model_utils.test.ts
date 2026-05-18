@@ -8,7 +8,8 @@
  */
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
-import { connectorsSpecs, serializeConnectorSpec } from '@kbn/connector-specs';
+import { connectorsSpecs } from '@kbn/connector-specs';
+import { serializeConnectorSpec } from '@kbn/connector-specs/src/lib/serialize_connector_spec';
 import type { ConnectorSpecWireResponse } from '../apis/fetch_connector_spec';
 import {
   fetchConnectorSpec,

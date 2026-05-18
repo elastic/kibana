@@ -11,7 +11,7 @@ import { useMemo } from 'react';
 import { useQuery } from '@kbn/react-query';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import type { ActionType } from '@kbn/actions-types';
-import { fromConnectorSpecSchema } from '@kbn/connector-specs';
+import { fromConnectorSpecSchema } from '@kbn/connector-specs/src/lib/deserialize_connector_spec';
 import type { HttpSetup, IUiSettingsClient } from '@kbn/core/public';
 import type { ActionTypeModel, ActionTypeRegistryContract } from '../types';
 import {

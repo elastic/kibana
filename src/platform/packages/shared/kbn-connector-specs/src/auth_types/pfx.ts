@@ -13,7 +13,7 @@ import { isString } from 'lodash';
 import type { SSLSettings } from '@kbn/actions-utils';
 import type { AuthContext, AuthTypeSpec } from '../connector_spec';
 import * as i18n from './translations';
-import { configureAxiosInstanceWithSsl } from '../lib';
+import { configureAxiosInstanceWithSsl } from '../lib/configure_axios_instance_with_ssl';
 
 const authSchema = lazySchema(() =>
   z
