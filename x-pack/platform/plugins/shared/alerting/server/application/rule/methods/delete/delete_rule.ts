@@ -28,16 +28,19 @@ export async function deleteRule(context: RulesClientContext, params: DeleteRule
     throw Boom.badRequest(`Error validating delete params - ${error.message}`);
   }
 
-  const { id } = params;
+  const { id, invalidateApiKeyNow } = params;
 
   return await retryIfConflicts(
     context.logger,
     `rulesClient.delete('${id}')`,
-    async () => await deleteRuleWithOCC(context, { id })
+    async () => await deleteRuleWithOCC(context, { id, invalidateApiKeyNow })
   );
 }
 
-async function deleteRuleWithOCC(context: RulesClientContext, { id }: { id: string }) {
+async function deleteRuleWithOCC(
+  context: RulesClientContext,
+  { id, invalidateApiKeyNow }: { id: string; invalidateApiKeyNow?: boolean }
+) {
   let taskIdToRemove: string | undefined | null;
   let apiKeyToInvalidate: string | null = null;
   let uiamApiKeyToInvalidate: string | null = null;
@@ -133,6 +136,43 @@ async function deleteRuleWithOCC(context: RulesClientContext, { id }: { id: stri
     id,
   });
 
+  const hasInvalidatableKey = Boolean(
+    (apiKeyToInvalidate || uiamApiKeyToInvalidate) && !apiKeyCreatedByUser
+  );
+
+  const queueApiKeysForInvalidation = () =>
+    bulkMarkApiKeysForInvalidation(
+      {
+        apiKeys: [
+          ...(apiKeyToInvalidate ? [apiKeyToInvalidate] : []),
+          ...(uiamApiKeyToInvalidate ? [uiamApiKeyToInvalidate] : []),
+        ],
+      },
+      context.logger,
+      context.unsecuredSavedObjectsClient
+    );
+
+  let invalidateKeysTask: Promise<unknown> | null = null;
+  if (hasInvalidatableKey) {
+    if (invalidateApiKeyNow) {
+      if (context.invalidateApiKeyNow) {
+        invalidateKeysTask = context.invalidateApiKeyNow({
+          ruleName: attributes.name,
+          apiKey: apiKeyToInvalidate,
+          uiamApiKey: uiamApiKeyToInvalidate,
+        });
+      } else {
+        // Fallback: queue and warn so we never silently skip invalidation.
+        context.logger.warn(
+          `delete(): invalidateApiKeyNow=true requested for rule ${id} but the rules client context does not support synchronous invalidation; falling back to queued invalidation.`
+        );
+        invalidateKeysTask = queueApiKeysForInvalidation();
+      }
+    } else {
+      invalidateKeysTask = queueApiKeysForInvalidation();
+    }
+  }
+
   await Promise.all([
     taskIdToRemove ? context.taskManager.removeIfExists(taskIdToRemove) : null,
     context.backfillClient.deleteBackfillForRules({
@@ -140,18 +180,7 @@ async function deleteRuleWithOCC(context: RulesClientContext, { id }: { id: stri
       namespace: context.namespace,
       unsecuredSavedObjectsClient: context.unsecuredSavedObjectsClient,
     }),
-    (apiKeyToInvalidate || uiamApiKeyToInvalidate) && !apiKeyCreatedByUser
-      ? bulkMarkApiKeysForInvalidation(
-          {
-            apiKeys: [
-              ...(apiKeyToInvalidate ? [apiKeyToInvalidate] : []),
-              ...(uiamApiKeyToInvalidate ? [uiamApiKeyToInvalidate] : []),
-            ],
-          },
-          context.logger,
-          context.unsecuredSavedObjectsClient
-        )
-      : null,
+    invalidateKeysTask,
   ]);
 
   return removeResult;

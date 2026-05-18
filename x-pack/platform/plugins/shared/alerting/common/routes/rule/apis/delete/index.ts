@@ -5,8 +5,14 @@
  * 2.0.
  */
 
-export { deleteRuleRequestParamsSchema } from './schemas/latest';
-export type { DeleteRuleRequestParams } from './types/latest';
+export { deleteRuleRequestParamsSchema, deleteRuleRequestQuerySchema } from './schemas/latest';
+export type { DeleteRuleRequestParams, DeleteRuleRequestQuery } from './types/latest';
 
-export { deleteRuleRequestParamsSchema as deleteRuleRequestParamsSchemaV1 } from './schemas/v1';
-export type { DeleteRuleRequestParams as DeleteRuleRequestParamsV1 } from './types/v1';
+export {
+  deleteRuleRequestParamsSchema as deleteRuleRequestParamsSchemaV1,
+  deleteRuleRequestQuerySchema as deleteRuleRequestQuerySchemaV1,
+} from './schemas/v1';
+export type {
+  DeleteRuleRequestParams as DeleteRuleRequestParamsV1,
+  DeleteRuleRequestQuery as DeleteRuleRequestQueryV1,
+} from './types/v1';

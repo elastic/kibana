@@ -61,6 +61,7 @@ describe('deleteRuleRoute', () => {
         params: {
           id: '1',
         },
+        query: {},
       },
       ['noContent']
     );
@@ -72,11 +73,39 @@ describe('deleteRuleRoute', () => {
       Array [
         Object {
           "id": "1",
+          "invalidateApiKeyNow": undefined,
         },
       ]
     `);
 
     expect(res.noContent).toHaveBeenCalled();
+  });
+
+  it('forwards invalidate_api_key_now=true to the rules client', async () => {
+    const licenseState = licenseStateMock.create();
+    const router = httpServiceMock.createRouter();
+
+    deleteRuleRoute(router, licenseState);
+
+    const [, handler] = router.delete.mock.calls[0];
+
+    rulesClient.delete.mockResolvedValueOnce({});
+
+    const [context, req, res] = mockHandlerArguments(
+      { rulesClient },
+      {
+        params: { id: '1' },
+        query: { invalidate_api_key_now: true },
+      },
+      ['noContent']
+    );
+
+    await handler(context, req, res);
+
+    expect(rulesClient.delete).toHaveBeenCalledWith({
+      id: '1',
+      invalidateApiKeyNow: true,
+    });
   });
 
   it('ensures the license allows deleting rules', async () => {
@@ -93,6 +122,7 @@ describe('deleteRuleRoute', () => {
       { rulesClient },
       {
         params: { id: '1' },
+        query: {},
       }
     );
 
@@ -119,6 +149,7 @@ describe('deleteRuleRoute', () => {
       { rulesClient },
       {
         id: '1',
+        query: {},
       }
     );
 
@@ -154,6 +185,7 @@ describe('deleteRuleRoute', () => {
           params: {
             id: '1',
           },
+          query: {},
         },
         ['noContent']
       );

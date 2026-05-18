@@ -8,8 +8,14 @@
 import type { IRouter } from '@kbn/core/server';
 import type { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
-import type { DeleteRuleRequestParamsV1 } from '../../../../../common/routes/rule/apis/delete';
-import { deleteRuleRequestParamsSchemaV1 } from '../../../../../common/routes/rule/apis/delete';
+import type {
+  DeleteRuleRequestParamsV1,
+  DeleteRuleRequestQueryV1,
+} from '../../../../../common/routes/rule/apis/delete';
+import {
+  deleteRuleRequestParamsSchemaV1,
+  deleteRuleRequestQuerySchemaV1,
+} from '../../../../../common/routes/rule/apis/delete';
 import type { AlertingRequestHandlerContext } from '../../../../types';
 import { BASE_ALERTING_API_PATH } from '../../../../types';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
@@ -31,6 +37,7 @@ export const deleteRuleRoute = (
       validate: {
         request: {
           params: deleteRuleRequestParamsSchemaV1,
+          query: deleteRuleRequestQuerySchemaV1,
         },
         response: {
           204: {
@@ -55,6 +62,7 @@ export const deleteRuleRoute = (
         const ruleTypes = alertingContext.listTypes();
 
         const params: DeleteRuleRequestParamsV1 = req.params;
+        const query: DeleteRuleRequestQueryV1 = req.query;
 
         const rule = await rulesClient.get({ id: params.id });
 
@@ -64,7 +72,10 @@ export const deleteRuleRoute = (
           operationText: 'delete',
         });
 
-        await rulesClient.delete({ id: params.id });
+        await rulesClient.delete({
+          id: params.id,
+          invalidateApiKeyNow: query.invalidate_api_key_now,
+        });
         return res.noContent();
       })
     )

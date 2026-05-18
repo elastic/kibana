@@ -6,6 +6,7 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import type { deleteRuleRequestParamsSchemaV1 } from '..';
+import type { deleteRuleRequestParamsSchemaV1, deleteRuleRequestQuerySchemaV1 } from '..';
 
 export type DeleteRuleRequestParams = TypeOf<typeof deleteRuleRequestParamsSchemaV1>;
+export type DeleteRuleRequestQuery = TypeOf<typeof deleteRuleRequestQuerySchemaV1>;
