@@ -118,7 +118,7 @@ Restart services for a clean environment — stale reproduction state produces f
 
 1. Stop and restart the Scout server (same commands as Phase 1, same `server_args` and `config_sets/bug_fixer/kibana.yml`)
 2. Re-create test data from scratch (same steps as Phase 2)
-3. Browser reproduction — bug should not reproduce
+3. Browser reproduction — bug should not reproduce; `browser_take_screenshot` → `.bug-fixer-session/after.png`
 4. `browser_console_messages` + `browser_network_requests` — Phase 3 errors gone, no new errors
 5. **Lifecycle edge case** — if the fix involves startup or boot-time seeding, create a new
    space/resource *after* services are running and verify it works
@@ -151,7 +151,62 @@ git checkout -b fix/<issue-number>
 git add -- <files listed in the Fix Plan>
 git commit -m "Fix #<number> — <short description>"
 git push -u origin HEAD
-gh pr create --draft --title "Fix #<number> — <short description>" --body "<Bug Fix Summary>"
+gh pr create --draft \
+  --title "Fix #<number> — <short description>" \
+  --body "$(cat <<'EOF'
+## Summary
+
+<1–2 sentences: what was broken and what the fix does>
+
+**Root cause**: <from reproduction-report.md — the specific broken code path and why it was wrong>
+**Fix**: <what changed and the codebase convention it follows>
+**Why this approach**: <why this fix strategy was chosen — alternatives considered, prior patterns referenced, constraints that ruled other approaches out>
+
+## Steps to reproduce (before fix)
+
+<reproduction_steps from .bug-fixer-session/analysis.json>
+
+## Test plan
+
+- [ ] Bug no longer reproduces: follow the steps above and verify correct behaviour
+- [ ] `node scripts/jest <test-path> --no-coverage` passes
+- [ ] No new browser console errors or network failures
+<any fix-specific verification steps from the Fix Plan>
+
+## Related
+
+Fixes #<number>
+<similar_issues and related_prs from .bug-fixer-session/analysis.json, if any>
+
+🤖 Generated with [Claude Code](https://claude.ai/claude-code)
+EOF
+)"
+
+# Attach before/after screenshots if both were captured
+if [ -f .bug-fixer-session/before.png ] && [ -f .bug-fixer-session/after.png ]; then
+  PR_NUMBER=$(gh pr view --json number -q '.number')
+  REPO=$(gh repo view --json nameWithOwner -q '.nameWithOwner')
+  BEFORE_URL=$(curl -s -X POST \
+    -H "Authorization: Bearer $(gh auth token)" \
+    -H "Content-Type: image/png" \
+    --data-binary @.bug-fixer-session/before.png \
+    "https://uploads.github.com/repos/${REPO}/issues/${PR_NUMBER}/assets?name=before.png" \
+    | jq -r '.browser_download_url')
+  AFTER_URL=$(curl -s -X POST \
+    -H "Authorization: Bearer $(gh auth token)" \
+    -H "Content-Type: image/png" \
+    --data-binary @.bug-fixer-session/after.png \
+    "https://uploads.github.com/repos/${REPO}/issues/${PR_NUMBER}/assets?name=after.png" \
+    | jq -r '.browser_download_url')
+  gh pr comment "$PR_NUMBER" --body "$(cat <<EOF
+## Screenshots
+
+| Before | After |
+|--------|-------|
+| ![before]($BEFORE_URL) | ![after]($AFTER_URL) |
+EOF
+)"
+fi
 ```
 
 Present the PR URL to the user.
@@ -162,9 +217,9 @@ Present the PR URL to the user.
 ## Bug Fix Summary
 - **Issue**: #<number> — <title>
 - **Classification**: <pattern> (confidence: <level>)
-- **Reproduction**: reproduced
-- **Test file**: <path>
+- **Root cause**: <brief description>
 - **Fix applied**: <description>
+- **Test file**: <path>
 - **Verification**: fix_verified
 - **PR**: <url> (draft) or "not requested"
 ```

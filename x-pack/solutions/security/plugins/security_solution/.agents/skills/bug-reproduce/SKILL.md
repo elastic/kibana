@@ -174,6 +174,7 @@ that now before reading any further.
 After the bug manifests, collect:
 - `browser_console_messages` — JS exceptions, React errors
 - `browser_network_requests` — 4xx/5xx, failed requests, stale payloads
+- `browser_take_screenshot` → save to `.bug-fixer-session/before.png` (documents the broken state for the PR)
 - For perf issues: `browser_profile_start` before, `browser_profile_stop` after
 
 **For "X is not visible" bugs**, trace the data path:
