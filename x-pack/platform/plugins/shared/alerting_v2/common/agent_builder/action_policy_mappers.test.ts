@@ -6,11 +6,11 @@
  */
 
 import type { ActionPolicyAttachmentData } from '@kbn/alerting-v2-schemas';
-import { buildActionPolicyPayload } from './action_policy_mappers';
+import { attachmentDataToActionPolicyPayload } from './action_policy_mappers';
 
-describe('buildActionPolicyPayload', () => {
+describe('attachmentDataToActionPolicyPayload', () => {
   it('fills required defaults for empty data', () => {
-    const result = buildActionPolicyPayload({});
+    const result = attachmentDataToActionPolicyPayload({});
 
     expect(result).toEqual({
       name: '',
@@ -33,7 +33,7 @@ describe('buildActionPolicyPayload', () => {
       throttle: { strategy: 'time_interval', interval: '5m' },
     };
 
-    const result = buildActionPolicyPayload(data);
+    const result = attachmentDataToActionPolicyPayload(data);
 
     expect(result).toEqual({
       name: 'My Policy',
@@ -57,7 +57,7 @@ describe('buildActionPolicyPayload', () => {
       destinations: [{ type: 'workflow', id: 'wf-1' }],
     };
 
-    const result = buildActionPolicyPayload(data);
+    const result = attachmentDataToActionPolicyPayload(data);
 
     expect(result.type).toBe('single_rule');
     expect(result.ruleId).toBe('rule-123');
@@ -71,7 +71,7 @@ describe('buildActionPolicyPayload', () => {
       destinations: [{ type: 'workflow', id: 'wf-1' }],
     };
 
-    const result = buildActionPolicyPayload(data);
+    const result = attachmentDataToActionPolicyPayload(data);
 
     expect(result.type).toBe('global');
     expect(result).not.toHaveProperty('ruleId');
@@ -86,7 +86,7 @@ describe('buildActionPolicyPayload', () => {
       destinations: [{ type: 'workflow', id: 'wf-1' }],
     };
 
-    const result = buildActionPolicyPayload(data);
+    const result = attachmentDataToActionPolicyPayload(data);
 
     expect(result.ruleId).toBeUndefined();
   });

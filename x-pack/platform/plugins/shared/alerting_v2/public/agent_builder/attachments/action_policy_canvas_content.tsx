@@ -19,7 +19,7 @@ import { paths } from '../../constants';
 import { ActionPoliciesApi } from '../../services/action_policies_api';
 import { RulesApi } from '../../services/rules_api';
 import { WorkflowsApi } from '../../services/workflows_api';
-import { buildActionPolicyPayload } from '../../../common/agent_builder/action_policy_mappers';
+import { attachmentDataToActionPolicyPayload } from '../../../common/agent_builder/action_policy_mappers';
 import type { ActionPolicyAttachment } from './action_policy_attachment_definition';
 
 const EMPTY_VALUE = '-';
@@ -120,7 +120,7 @@ export const ActionPolicyCanvasContent = ({
             : undefined,
           handler: async () => {
             try {
-              await actionPoliciesApi.upsertActionPolicy(data.id, buildActionPolicyPayload(data));
+              await actionPoliciesApi.upsertActionPolicy(data.id, attachmentDataToActionPolicyPayload(data));
               await updateOrigin(data.id);
               notifications.toasts.addSuccess(
                 i18n.translate('xpack.alertingV2.actionPolicyAttachment.createdSuccess', {
@@ -157,7 +157,7 @@ export const ActionPolicyCanvasContent = ({
           : undefined,
         handler: async () => {
           try {
-            await actionPoliciesApi.upsertActionPolicy(data.id, buildActionPolicyPayload(data));
+            await actionPoliciesApi.upsertActionPolicy(data.id, attachmentDataToActionPolicyPayload(data));
             notifications.toasts.addSuccess(
               i18n.translate('xpack.alertingV2.actionPolicyAttachment.updatedSuccess', {
                 defaultMessage: 'Policy "{name}" updated',
