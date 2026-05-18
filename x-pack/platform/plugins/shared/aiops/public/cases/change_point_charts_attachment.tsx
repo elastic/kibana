@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { memoize, omit } from 'lodash';
+import { memoize } from 'lodash';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import React from 'react';
 import type { UnifiedValueAttachmentViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
@@ -14,10 +14,24 @@ import type { TimeRange } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiDescriptionList } from '@elastic/eui';
 import deepEqual from 'fast-deep-equal';
+import type { ChangePointChartEmbeddableState } from '@kbn/aiops-server-schemas/embeddables/change_point_chart';
 import type {
   ChangePointDetectionProps,
   ChangePointDetectionSharedComponent,
 } from '../shared_components/change_point_detection';
+
+// Pre-9.5 case attachments stored these fields in camelCase.
+interface LegacyAttachmentFields {
+  timeRange?: TimeRange;
+  viewType?: ChangePointChartEmbeddableState['view_type'];
+  dataViewId?: string;
+  fn?: ChangePointChartEmbeddableState['aggregation_function'];
+  metricField?: string;
+  splitField?: string;
+  maxSeriesToPlot?: number;
+}
+
+type RawAttachmentState = Partial<ChangePointChartEmbeddableState> & LegacyAttachmentFields;
 
 export const initComponent = memoize(
   (
@@ -30,30 +44,17 @@ export const initComponent = memoize(
           id: FIELD_FORMAT_IDS.DATE,
         });
 
-        const rawState = props.data.state as Record<string, unknown>;
-        const timeRange = (rawState.time_range ?? rawState.timeRange) as TimeRange;
-        const rawUiState = omit(rawState, [
-          'aggregation_function',
-          'data_view_id',
-          'max_series_to_plot',
-          'metric_field',
-          'split_field',
-          'time_range',
-          'view_type',
-        ]);
-        const inputProps: ChangePointDetectionProps = {
-          ...(rawUiState as unknown as ChangePointDetectionProps),
-          viewType: (rawState.view_type ??
-            rawState.viewType) as ChangePointDetectionProps['viewType'],
-          dataViewId: (rawState.data_view_id ?? rawState.dataViewId) as string,
-          fn: (rawState.aggregation_function ?? rawState.fn) as ChangePointDetectionProps['fn'],
-          metricField: (rawState.metric_field ?? rawState.metricField) as string,
-          splitField: (rawState.split_field ?? rawState.splitField) as string | undefined,
-          maxSeriesToPlot: (rawState.max_series_to_plot ?? rawState.maxSeriesToPlot) as
-            | number
-            | undefined,
-          timeRange,
-        };
+        const rawState = props.data.state as RawAttachmentState;
+        const inputProps = {
+          timeRange: rawState.time_range ?? rawState.timeRange,
+          viewType: rawState.view_type ?? rawState.viewType,
+          dataViewId: rawState.data_view_id ?? rawState.dataViewId,
+          fn: rawState.aggregation_function ?? rawState.fn,
+          metricField: rawState.metric_field ?? rawState.metricField,
+          splitField: rawState.split_field ?? rawState.splitField,
+          partitions: rawState.partitions,
+          maxSeriesToPlot: rawState.max_series_to_plot ?? rawState.maxSeriesToPlot,
+        } as ChangePointDetectionProps;
 
         const listItems = [
           {
