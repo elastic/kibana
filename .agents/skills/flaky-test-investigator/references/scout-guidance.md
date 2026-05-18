@@ -12,24 +12,43 @@ When investigating a Scout failure, weight these checks higher:
 
 Scout uses a custom Playwright reporter (`@kbn/scout-reporting`) that produces a self-contained HTML report per failure with the screenshot embedded. Artifacts live under `.scout/` in the Buildkite job. The standard Playwright outputs (`playwright-report/index.html`, `trace.zip`, video) are NOT what Scout publishes — don't look for them.
 
-- **Per-run failure index**: `.scout/reports/scout-playwright-test-failures-<runId>/test-failures-summary.json`. Always at the repo root. Lists every failure in the run as `{ name, htmlReportFilename }`. **Start here** — it maps each failed test to its specific HTML report file.
-- **Per-failure HTML report**: `.scout/reports/scout-playwright-test-failures-<runId>/<testId>.html` (e.g. `f24ba03baeb5e26-0723e6c11fe5d87.html`). Always at the repo root, alongside the summary JSON. One self-contained HTML file per failed test. The failure screenshot is embedded inline (base64) along with: test details (suite, title, target, duration, kibana module, code owners), the command that was run, the full error stack trace, captured stdout, and a "tracked branches" status section indicating whether this failure also reproduces on a tracked branch.
-- **Individual screenshot PNGs**: `**/.scout/test-artifacts/<testId>_<attachmentName>_<timestamp>.png`. **Not at a fixed path** — the `.scout/test-artifacts/` directory is created relative to the process working directory, so for per-plugin Scout configs the PNGs may be nested under paths like `x-pack/.../test/scout/.scout/test-artifacts/...`. Buildkite uploads them with `**/.scout/test-artifacts/**/*.png` so the glob discovers them at any depth. Filename pieces:
-  - `<testId>` = same hash as the HTML report (a content hash of test file path + full title).
-  - `<attachmentName>` = the Playwright attachment name, typically `screenshot`.
-  - `<timestamp>` = ISO timestamp with `:` and `.` replaced by `-` (e.g. `2026-05-18T13-44-30-123Z`).
-- **Server logs** (`kibana.log`, `elasticsearch.log`) when the failing config uploads them.
+Scout publishes four artifact kinds per failed run, in two different roots: **reports + NDJSON at the repo root**; **PNGs at per-plugin paths**.
 
-`<runId>` is a per-run hash; `<testId>` is a hash of the test file path + full test title, so the same failing test re-emits the same `<testId>` across runs. This means you can correlate a PNG to its HTML report by matching `<testId>` even though the two files live in different artifact trees.
+### Reports (always at the repo root)
 
-How to retrieve them:
+- **Per-run failure index**: `.scout/reports/scout-playwright-test-failures-<runId>/test-failures-summary.json`. Array of `{ name, htmlReportFilename }`, one entry per failure in the run. Example real entry: `{ "name": "local-serverless-observability_complete - Workflow editor: validation performance - [...] setModelMarkers cascade completes within frame budget after edit", "htmlReportFilename": "3ff6decf4c25127-b92795356361dc9.html" }`. **Start here** to map a failing test name to its HTML report file.
+- **Per-failure HTML report**: `.scout/reports/scout-playwright-test-failures-<runId>/<testId>.html` (e.g. `3ff6decf4c25127-b92795356361dc9.html`). One self-contained HTML file per failed test. The failure screenshot is embedded inline (base64) along with test details (suite, title, target, duration, kibana module, code owners), the command that was run, the full error stack trace, captured stdout, and a "tracked branches" status section. **For most investigations this single file is sufficient — you do not need to download the separate PNG.**
+- **Structured failure NDJSON**: `.scout/reports/scout-playwright-test-failures-<runId>/scout-failures-<runId>.ndjson`. One JSON record per failure with fields `id` (matches `<testId>` in the HTML filename), `owner` (CODEOWNERS teams), `target` (Scout target tag, e.g. `local-serverless-observability_complete`), `command` (exact `npx playwright test ...` invocation), `kibanaModule` (`id` / `type` / `visibility` / `group`), `location` (test spec file path), `suite`, `title`, and `error.message` / `error.stack_trace`. **This is the artifact to use for programmatic / automated investigation** — it has everything the HTML report has, in structured form, and no base64 noise.
 
-- From the Buildkite job page: open the "Artifacts" tab. Either download the full `.scout/reports/scout-playwright-test-failures-<runId>/` folder, or pick the single summary JSON + the one HTML + the matching PNG(s).
-- From the CLI (`bk artifact download <build> <glob> .`):
-  - `".scout/reports/scout-playwright-test-failures-*/test-failures-summary.json"` — grab the index first to find your test's `htmlReportFilename`.
-  - `".scout/reports/scout-playwright-test-failures-*/<testId>.html"` — then the specific HTML report.
-  - `"**/.scout/test-artifacts/<testId>_*.png"` — all PNGs for that one failing test (note the `**/` prefix; without it the glob may not match nested paths).
-  - `"**/.scout/test-artifacts/**/*.png"` — every Scout screenshot in the build (use when you don't yet have a `<testId>`).
+### Screenshot PNGs (at per-plugin paths, NOT at the repo root)
+
+- Path: `**/.scout/test-artifacts/<test-slug-with-target>/test-failed-<N>.png`. The leading `**/` is required because `.scout/test-artifacts/` is created relative to the Playwright process working directory; per-plugin Scout configs end up writing it inside their own test root.
+- Real examples observed in production builds:
+  - `src/platform/plugins/shared/workflows_management/test/scout_workflows_ui/ui/.scout/test-artifacts/workflow_editor_perf-Workf-d9a7e-hin-frame-budget-after-edit-local/test-failed-1.png`
+  - `x-pack/solutions/security/plugins/security_solution/test/scout/ui/.scout/test-artifacts/entity_analytics-privilege-55361-hout-risk-engine-privileges-local/test-failed-1.png`
+  - `x-pack/platform/plugins/shared/streams_app/test/scout/ui/.scout/test-artifacts/query_streams-delete_query-9d9be-ng-an-existing-query-stream-local/test-failed-1.png`
+- Filename anatomy:
+  - `<test-slug-with-target>` is Playwright's default per-test output directory: `<spec-basename>-<title-prefix>-<short-hash>-<title-suffix>-<target>`. It is **not** the `<testId>` from the HTML report — they use different naming schemes.
+  - `test-failed-<N>.png` is Playwright's default screenshot-on-failure filename. `N` is 1 for the first failing attempt, 2 for the first retry, etc., so a flaky test with retries will produce multiple PNGs.
+
+### Server logs
+
+`kibana.log`, `elasticsearch.log`, etc., when the failing config uploads them.
+
+### Correlation between artifacts
+
+- `<testId>` (e.g. `3ff6decf4c25127-b92795356361dc9`) appears in **both** the HTML report filename and the NDJSON record's `id` field — use it to pair them.
+- The PNG path does **not** contain `<testId>`. To match a PNG back to its HTML report or NDJSON record, correlate via the test spec path: the NDJSON's `location` field is the full spec file path, and the PNG slug starts with the spec basename and the truncated test title.
+- In practice, **prefer the HTML report's embedded screenshot** over the separate PNG. The PNG is most useful when you want screenshots from each retry attempt (`test-failed-1.png`, `test-failed-2.png`, ...).
+
+### How to retrieve them
+
+- **From the Buildkite job page**: open the "Artifacts" tab. Easiest path is to download the whole `.scout/reports/scout-playwright-test-failures-<runId>/` folder — that gives you summary + HTMLs + NDJSON for the run.
+- **From the API / `bk artifact download <build> <glob> .`**:
+  - `".scout/reports/scout-playwright-test-failures-*/test-failures-summary.json"` — index first; pick your test's `htmlReportFilename`.
+  - `".scout/reports/scout-playwright-test-failures-*/<testId>.html"` — specific HTML report for one failure.
+  - `".scout/reports/scout-playwright-test-failures-*/scout-failures-*.ndjson"` — all structured failure records for the run.
+  - `"**/.scout/test-artifacts/**/test-failed-*.png"` — every Scout screenshot in the build (the `**/` prefix is required to discover the nested per-plugin paths).
 
 Scout-specific patterns the HTML report screenshot reveals:
 
