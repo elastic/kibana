@@ -19,9 +19,7 @@ import { getDocumentByIdTool } from './get_document_by_id';
 import { getIndexMappingsTool } from './get_index_mapping';
 import { listIndicesTool } from './list_indices';
 import { indexExplorerTool } from './index_explorer';
-import { generateEsqlTool } from './generate_esql';
 import { executeEsqlTool } from './execute_esql';
-import { searchTool } from './search';
 import { createVisualizationTool } from './create_visualization';
 
 export const registerTools = ({
@@ -34,10 +32,10 @@ export const registerTools = ({
   const { agentBuilder } = setupDeps;
 
   const tools: Array<BuiltinToolDefinition<any>> = [
-    searchTool({ coreSetup, topSnippetsDefaults: agentBuilder.topSnippets }),
+    // searchTool({ coreSetup, topSnippetsDefaults: agentBuilder.topSnippets }),
     getDocumentByIdTool(),
     executeEsqlTool(),
-    generateEsqlTool(),
+    // generateEsqlTool(),
     getIndexMappingsTool(),
     listIndicesTool(),
     indexExplorerTool(),
