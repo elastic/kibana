@@ -14,11 +14,11 @@ import { CONNECTOR_ID } from '@kbn/connector-schemas/swimlane/constants';
 
 let connectorTypeModel: ConnectorTypeModel;
 
-beforeAll(() => {
+beforeAll(async () => {
   const connectorTypeRegistry = new TypeRegistry<ConnectorTypeModel>();
   ExperimentalFeaturesService.init({ experimentalFeatures: experimentalFeaturesMock });
   registerConnectorTypes({ connectorTypeRegistry, services: registrationServicesMock });
-  const getResult = connectorTypeRegistry.get(CONNECTOR_ID);
+  const getResult = await connectorTypeRegistry.get(CONNECTOR_ID);
   if (getResult !== null) {
     connectorTypeModel = getResult;
   }

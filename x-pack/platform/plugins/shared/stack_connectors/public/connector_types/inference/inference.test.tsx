@@ -15,13 +15,13 @@ import { ExperimentalFeaturesService } from '../../common/experimental_features_
 const ACTION_TYPE_ID = '.inference';
 let actionTypeModel: ActionTypeModel;
 
-beforeAll(() => {
+beforeAll(async () => {
   ExperimentalFeaturesService.init({
     experimentalFeatures: { ...experimentalFeaturesMock } as any,
   });
   const connectorTypeRegistry = new TypeRegistry<ActionTypeModel>();
   registerConnectorTypes({ connectorTypeRegistry, services: registrationServicesMock });
-  const getResult = connectorTypeRegistry.get(ACTION_TYPE_ID);
+  const getResult = await connectorTypeRegistry.get(ACTION_TYPE_ID);
   if (getResult !== null) {
     actionTypeModel = getResult;
   }

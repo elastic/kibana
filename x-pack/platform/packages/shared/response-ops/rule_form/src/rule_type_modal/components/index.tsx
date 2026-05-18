@@ -6,23 +6,24 @@
  */
 
 import { countBy } from 'lodash';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
-import type { RuleTypeModel } from '@kbn/alerts-ui-shared';
+import type { RuleTypeModel, RuleTypeRegistryContract } from '@kbn/alerts-ui-shared';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
 import { useDebounceFn } from '@kbn/react-hooks';
 import { useFindTemplatesQuery } from '@kbn/response-ops-rules-apis/hooks/use_find_templates_query';
 import type { CPSPluginStart } from '@kbn/cps/public/types';
 import { RuleTypeModal, type RuleTypeModalProps } from './rule_type_modal';
 import { filterAndCountRuleTypes } from './helpers/filter_and_count_rule_types';
+import { EuiSkeletonText } from '@elastic/eui';
 
 export interface RuleTypeModalComponentProps {
   http: HttpStart;
   toasts: ToastsStart;
   cps?: CPSPluginStart;
   filteredRuleTypes: string[];
-  registeredRuleTypes: RuleTypeModel[];
+  ruleTypeRegistry: RuleTypeRegistryContract;
   onClose: RuleTypeModalProps['onClose'];
   onSelectRuleType: RuleTypeModalProps['onSelectRuleType'];
   onSelectTemplate: RuleTypeModalProps['onSelectTemplate'];
@@ -36,9 +37,29 @@ export const RuleTypeModalComponent: React.FC<RuleTypeModalComponentProps> = ({
   toasts,
   cps,
   filteredRuleTypes = EMPTY_ARRAY,
-  registeredRuleTypes,
+  ruleTypeRegistry,
   ...rest
 }) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [registeredRuleTypesWithAppContext, setRegisteredRuleTypesWithAppContext] = useState<RuleTypeModel[]>([]);
+  useEffect(() => {
+    let canceled = false;
+    setIsLoading(true);
+
+    ruleTypeRegistry.list().then(items => {
+      if (!canceled) {
+        setIsLoading(false);
+        setRegisteredRuleTypesWithAppContext(items.filter(
+          ({ requiresAppContext }) => !requiresAppContext
+        ));
+      }
+    });
+
+    return () => {
+      canceled = true;
+    }
+  }, [ruleTypeRegistry]);
+
   const [selectedProducer, setSelectedProducer] = useState<string | null>(null);
   const [searchString, setSearchString] = useState<string>('');
   const [selectedMode, setSelectedMode] = useState<'ruleType' | 'template'>('ruleType');
@@ -56,9 +77,6 @@ export const RuleTypeModalComponent: React.FC<RuleTypeModalComponentProps> = ({
     [updateDebouncedSearch]
   );
 
-  const registeredRuleTypesWithAppContext = registeredRuleTypes.filter(
-    ({ requiresAppContext }) => !requiresAppContext
-  );
   const {
     ruleTypesState: { data: ruleTypeIndex, isLoading: ruleTypesLoading },
   } = useGetRuleTypesPermissions({
@@ -98,24 +116,29 @@ export const RuleTypeModalComponent: React.FC<RuleTypeModalComponentProps> = ({
   });
 
   return (
-    <RuleTypeModal
-      {...rest}
-      ruleTypes={ruleTypes}
-      ruleTypeCountsByProducer={ruleTypeCountsByProducer}
-      ruleTypesLoading={ruleTypesLoading}
-      onChangeSearch={updateSearch}
-      onFilterByProducer={setSelectedProducer}
-      selectedProducer={selectedProducer}
-      searchString={searchString}
-      showCategories={!hasOnlyOneProducer}
-      selectedMode={selectedMode}
-      onChangeMode={setSelectedMode}
-      templates={templates}
-      templatesLoading={templatesLoading}
-      templatesLoadingMore={templatesLoadingMore}
-      hasMoreTemplates={hasMoreTemplates ?? false}
-      onLoadMoreTemplates={loadMoreTemplates}
-      cps={cps}
-    />
+    <EuiSkeletonText
+      lines={3}
+      isLoading={isLoading}
+    >
+      <RuleTypeModal
+        {...rest}
+        ruleTypes={ruleTypes}
+        ruleTypeCountsByProducer={ruleTypeCountsByProducer}
+        ruleTypesLoading={ruleTypesLoading}
+        onChangeSearch={updateSearch}
+        onFilterByProducer={setSelectedProducer}
+        selectedProducer={selectedProducer}
+        searchString={searchString}
+        showCategories={!hasOnlyOneProducer}
+        selectedMode={selectedMode}
+        onChangeMode={setSelectedMode}
+        templates={templates}
+        templatesLoading={templatesLoading}
+        templatesLoadingMore={templatesLoadingMore}
+        hasMoreTemplates={hasMoreTemplates ?? false}
+        onLoadMoreTemplates={loadMoreTemplates}
+        cps={cps}
+      />
+    </EuiSkeletonText>
   );
 };

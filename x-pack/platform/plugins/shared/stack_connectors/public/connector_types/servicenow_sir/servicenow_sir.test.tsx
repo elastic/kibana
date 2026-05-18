@@ -21,15 +21,15 @@ beforeAll(() => {
 });
 
 describe('connectorTypeRegistry.get() works', () => {
-  test(`${CONNECTOR_ID}: connector type static data is as expected`, () => {
-    const connectorTypeModel = connectorTypeRegistry.get(CONNECTOR_ID);
+  test(`${CONNECTOR_ID}: connector type static data is as expected`, async () => {
+    const connectorTypeModel = await connectorTypeRegistry.get(CONNECTOR_ID);
     expect(connectorTypeModel.id).toEqual(CONNECTOR_ID);
   });
 });
 
 describe('servicenow action params validation', () => {
   test(`${CONNECTOR_ID}: action params validation succeeds when action params is valid`, async () => {
-    const connectorTypeModel = connectorTypeRegistry.get(CONNECTOR_ID);
+    const connectorTypeModel = await connectorTypeRegistry.get(CONNECTOR_ID);
     const actionParams = {
       subActionParams: { incident: { short_description: 'some title {{test}}' }, comments: [] },
     };
@@ -43,7 +43,7 @@ describe('servicenow action params validation', () => {
   });
 
   test(`${CONNECTOR_ID}: params validation fails when short_description is not valid`, async () => {
-    const connectorTypeModel = connectorTypeRegistry.get(CONNECTOR_ID);
+    const connectorTypeModel = await connectorTypeRegistry.get(CONNECTOR_ID);
     const actionParams = {
       subActionParams: { incident: { short_description: '' }, comments: [] },
     };
@@ -57,7 +57,7 @@ describe('servicenow action params validation', () => {
   });
 
   test('params validation fails when additional_fields is not valid JSON', async () => {
-    const connectorTypeModel = connectorTypeRegistry.get(CONNECTOR_ID);
+    const connectorTypeModel = await connectorTypeRegistry.get(CONNECTOR_ID);
     const actionParams = {
       subActionParams: {
         incident: { short_description: 'some title', additional_fields: 'invalid json' },
@@ -80,7 +80,7 @@ describe('servicenow action params validation', () => {
       longJSON[`key${i}`] = 'value';
     }
 
-    const connectorTypeModel = connectorTypeRegistry.get(CONNECTOR_ID);
+    const connectorTypeModel = await connectorTypeRegistry.get(CONNECTOR_ID);
     const actionParams = {
       subActionParams: {
         incident: { short_description: 'some title', additional_fields: JSON.stringify(longJSON) },

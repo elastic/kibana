@@ -14,11 +14,11 @@ import { CONNECTOR_ID } from '@kbn/connector-schemas/torq/constants';
 
 let actionTypeModel: ActionTypeModel;
 
-beforeAll(() => {
+beforeAll(async () => {
   const connectorTypeRegistry = new TypeRegistry<ActionTypeModel>();
   ExperimentalFeaturesService.init({ experimentalFeatures: experimentalFeaturesMock });
   registerConnectorTypes({ connectorTypeRegistry, services: registrationServicesMock });
-  const getResult = connectorTypeRegistry.get(CONNECTOR_ID);
+  const getResult = await connectorTypeRegistry.get(CONNECTOR_ID);
   if (getResult !== null) {
     actionTypeModel = getResult;
   }
