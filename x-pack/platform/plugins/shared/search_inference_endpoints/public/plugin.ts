@@ -59,12 +59,13 @@ export class SearchInferenceEndpointsPlugin
               defaultMessage: 'Inference endpoints',
             }),
         order: 2,
-        async mount({ element, history }: ManagementAppMountParams) {
+        async mount({ element, history, setBreadcrumbs }: ManagementAppMountParams) {
           const { renderInferenceEndpointsMgmtApp } = await import('./application');
           const [coreStart, depsStart] = await core.getStartServices();
           const startDeps: AppPluginStartDependencies = {
             ...depsStart,
             history,
+            setBreadcrumbs,
           };
 
           return renderInferenceEndpointsMgmtApp(coreStart, startDeps, element);
@@ -79,12 +80,13 @@ export class SearchInferenceEndpointsPlugin
         }),
         order: 3,
 
-        async mount({ element, history }: ManagementAppMountParams) {
+        async mount({ element, history, setBreadcrumbs }: ManagementAppMountParams) {
           const { renderSettingsMgmtApp } = await import('./application');
           const [coreStart, depsStart] = await core.getStartServices();
           const startDeps: AppPluginStartDependencies = {
             ...depsStart,
             history,
+            setBreadcrumbs,
           };
 
           return renderSettingsMgmtApp(coreStart, startDeps, element);
