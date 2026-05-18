@@ -7,12 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './fetch_alerting_framework_health';
-export * from './fetch_alerts_fields';
-export * from './fetch_alerts_index_names';
-export * from './fetch_connector';
-export * from './fetch_connectors';
-export * from './fetch_connector_types';
-export * from './fetch_connector_spec';
-export * from './fetch_rule_type_alert_fields';
-export * from './fetch_ui_health_status';
+export type {
+  ConnectorSpecResponse,
+  ConnectorSpecWireResponse,
+} from './transform_connector_spec_response';
+export { transformConnectorSpecResponse } from './transform_connector_spec_response';
