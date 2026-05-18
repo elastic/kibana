@@ -180,7 +180,7 @@ export const PrivilegeSummaryTable = (props: PrivilegeSummaryTableProps) => {
             />
           );
         } else {
-          iconTip = <EuiIcon size="s" type="empty" />;
+          iconTip = <EuiIcon size="s" type="empty" aria-hidden={true} />;
         }
         return (
           <span
@@ -229,7 +229,7 @@ export const PrivilegeSummaryTable = (props: PrivilegeSummaryTableProps) => {
       >
         {category.euiIconType ? (
           <EuiFlexItem grow={false}>
-            <EuiIcon size="m" type={category.euiIconType} />
+            <EuiIcon size="m" type={category.euiIconType} aria-hidden={true} />
           </EuiFlexItem>
         ) : null}
         <EuiFlexItem grow={1}>

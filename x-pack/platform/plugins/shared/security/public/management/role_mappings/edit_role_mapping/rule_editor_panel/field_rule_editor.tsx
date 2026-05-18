@@ -170,7 +170,7 @@ export class FieldRuleEditor extends Component<Props, {}> {
               )}
             />
           ) : (
-            <EuiIcon size="s" type="empty" />
+            <EuiIcon size="s" type="empty" aria-hidden={true} />
           )}
         </EuiFormRow>
       </EuiFlexItem>
@@ -196,7 +196,7 @@ export class FieldRuleEditor extends Component<Props, {}> {
               onClick={() => this.onRemoveAlternateValue(valueIndex)}
             />
           ) : (
-            <EuiIcon size="s" type="empty" />
+            <EuiIcon size="s" type="empty" aria-hidden={true} />
           )}
         </EuiFormRow>
       </EuiFlexItem>
