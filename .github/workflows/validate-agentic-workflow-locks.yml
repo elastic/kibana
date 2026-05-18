@@ -5,6 +5,7 @@ on:
     paths:
       - '.github/workflows/*.md'
       - '.github/workflows/*.lock.yml'
+      - '.github/actionlint.yaml'
       - '.github/aw/actions-lock.json'
       - '.github/workflows/validate-agentic-workflow-locks.yml'
 
@@ -56,6 +57,9 @@ jobs:
 
       - name: Compile and validate all agentic workflows
         run: gh aw compile --purge --validate --no-check-update
+
+      - name: Lint generated workflow locks
+        run: gh aw lint
 
       - name: Verify generated outputs are up to date
         run: |
