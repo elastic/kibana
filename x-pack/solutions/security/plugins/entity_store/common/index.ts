@@ -97,6 +97,21 @@ export const EntityType = z.enum(['user', 'host', 'service', 'generic']);
 export const ALL_ENTITY_TYPES = Object.values(EntityType.enum);
 
 export type { Entity, EntitySummaryAttribute } from './domain/definitions/entity.gen';
+export type {
+  EntitySummaryHighlight,
+  EntitySummaryStaleness,
+  EntitySummaryStalenessSignal,
+  EntitySummaryStalenessSnapshot,
+  EntitySummaryStalenessEntitySnapshot,
+  SaveEntityAiSummaryParams,
+  SaveEntityAiSummarySummary,
+} from './domain/definitions/entity_summary_staleness';
+export {
+  ENTITY_SUMMARY_STALENESS_SIGNALS,
+  DEFAULT_ENTITY_SUMMARY_STALENESS_SIGNALS,
+  buildEntitySummaryStaleness,
+  computeEntitySummaryStalenessReasons,
+} from './domain/definitions/entity_summary_staleness';
 
 export interface IdentitySourceFields {
   /** Fields that participate in identity (EUID composition). */

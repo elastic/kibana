@@ -169,6 +169,7 @@ export const UserPanel = memo(function UserPanel({
 
   const { updateAssetCriticalityLevel } = useUpdateAssetCriticality('user', {
     onSuccess: calculateEntityRiskScore,
+    refetchEntityRecord: entityFromStoreResult.refetch,
   });
 
   const { hasMisconfigurationFindings } = useHasMisconfigurations(

@@ -169,22 +169,47 @@ components:
                 generated_by:
                   type: string
                   description: Username of the user who triggered the summary generation.
-                risk_level_at_generation:
-                  type: string
+                staleness:
+                  type: object
                   nullable: true
-                  description: The entity risk level at the time the summary was generated. Used for staleness detection.
-                anomaly_job_ids_at_generation:
-                  type: array
-                  nullable: true
-                  description: Snapshot of anomaly job IDs active at generation time. Used for staleness detection.
-                  items:
-                    type: string
-                rule_names_at_generation:
-                  type: array
-                  nullable: true
-                  description: Snapshot of detection rule names at generation time. Used for staleness detection.
-                  items:
-                    type: string
+                  description: Policy and snapshot for summary staleness checks.
+                  additionalProperties: false
+                  properties:
+                    enabled_signals:
+                      type: array
+                      description: Signal ids to compare when deciding if the summary is stale.
+                      items:
+                        type: string
+                        enum:
+                          - risk_level
+                          - risk_score
+                          - anomaly_jobs
+                          - rule_names
+                    snapshot:
+                      type: object
+                      description: Signal values captured at generation time.
+                      additionalProperties: false
+                      properties:
+                        risk_level:
+                          type: string
+                          nullable: true
+                          description: entity.risk.calculated_level at generation time.
+                        risk_score:
+                          type: number
+                          nullable: true
+                          description: entity.risk.calculated_score at generation time.
+                        anomaly_job_ids:
+                          type: array
+                          nullable: true
+                          description: entity.behaviors.anomaly_job_ids at generation time.
+                          items:
+                            type: string
+                        rule_names:
+                          type: array
+                          nullable: true
+                          description: entity.behaviors.rule_names at generation time.
+                          items:
+                            type: string
         behaviors:
           type: object
           description: Behavioral signals observed for the entity.
