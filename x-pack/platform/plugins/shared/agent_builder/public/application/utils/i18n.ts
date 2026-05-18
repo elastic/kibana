@@ -2201,6 +2201,14 @@ export const labels = {
     cancelButtonLabel: i18n.translate('xpack.agentBuilder.connectors.cancelButtonLabel', {
       defaultMessage: 'Cancel',
     }),
+    assignConnectorSuccessToast: i18n.translate(
+      'xpack.agentBuilder.connectors.assignConnectorSuccessToast',
+      { defaultMessage: 'Connector added' }
+    ),
+    assignConnectorErrorToast: i18n.translate(
+      'xpack.agentBuilder.connectors.assignConnectorErrorToast',
+      { defaultMessage: 'Failed to add connector' }
+    ),
 
     // Delete modal
     deleteConnectorTitle: (name: string) =>

@@ -10,7 +10,7 @@ import { useParams } from 'react-router-dom';
 import { ConnectorsProvider } from '../context/connectors_provider';
 import { AgentConnectors } from '../components/agents/connectors/agent_connectors';
 import { useAgentBuilderAgentById } from '../hooks/agents/use_agent_by_id';
-import { useUpdateAgent } from '../hooks/connectors/use_update_agent';
+import { useAgentConnectors } from '../hooks/connectors/use_agent_connectors';
 import { useBreadcrumb } from '../hooks/use_breadcrumbs';
 import { appPaths } from '../utils/app_paths';
 import { labels } from '../utils/i18n';
@@ -18,7 +18,7 @@ import { labels } from '../utils/i18n';
 export const AgentBuilderAgentConnectorsPage: React.FC = () => {
   const { agentId } = useParams<{ agentId: string }>();
   const { agent } = useAgentBuilderAgentById(agentId);
-  const { updateAgent } = useUpdateAgent({ agentId });
+  const { assign } = useAgentConnectors({ agentId });
 
   const breadcrumbs = useMemo(
     () => [
@@ -31,13 +31,7 @@ export const AgentBuilderAgentConnectorsPage: React.FC = () => {
   useBreadcrumb(breadcrumbs);
 
   return (
-    <ConnectorsProvider
-      onConnectorCreated={(connector) =>
-        updateAgent({
-          connector_ids: [...(agent?.configuration?.connector_ids ?? []), connector.id],
-        }).catch(() => {})
-      }
-    >
+    <ConnectorsProvider onConnectorCreated={(connector) => assign(connector.id).catch(() => {})}>
       <AgentConnectors agentId={agentId} />
     </ConnectorsProvider>
   );

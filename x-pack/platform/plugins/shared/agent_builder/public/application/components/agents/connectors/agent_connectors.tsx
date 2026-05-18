@@ -16,10 +16,10 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useListDetailPageStyles } from '../common/styles';
-import { useListConnectors } from '../../../hooks/tools/use_mcp_connectors';
+import { useAgentConnectors } from '../../../hooks/connectors/use_agent_connectors';
 import { useConnectorsActions } from '../../../context/connectors_provider';
 import { useAgentBuilderAgentById } from '../../../hooks/agents/use_agent_by_id';
 import { labels } from '../../../utils/i18n';
@@ -38,13 +38,11 @@ export const AgentConnectors = ({ agentId }: AgentConnectorsProps) => {
   const [activeLayer, setActiveLayer] = useState<'dropdown' | 'assign' | null>(null);
   const addConnectorPopoverId = useGeneratedHtmlId({ prefix: 'addConnectorPopover' });
   const hasAllPrivileges = useHasConnectorsAllPrivileges();
-  const connectorsQuery = useListConnectors({});
-
-  const agentConnectors = useMemo(() => {
-    const connectorIds = agentQuery.agent?.configuration?.connector_ids;
-    if (connectorIds === undefined) return connectorsQuery.connectors;
-    return connectorsQuery.connectors.filter((c) => connectorIds.includes(c.id));
-  }, [connectorsQuery.connectors, agentQuery.agent?.configuration?.connector_ids]);
+  const {
+    assignedConnectors,
+    isLoading: isConnectorsLoading,
+    error: connectorsError,
+  } = useAgentConnectors({ agentId });
 
   if (agentQuery.isLoading) {
     return (
@@ -127,18 +125,13 @@ export const AgentConnectors = ({ agentId }: AgentConnectorsProps) => {
       />
       <KibanaPageTemplate.Section>
         <AgentBuilderConnectorsTable
-          connectors={agentConnectors}
-          isLoading={connectorsQuery.isLoading}
-          error={connectorsQuery.error}
+          connectors={assignedConnectors}
+          isLoading={isConnectorsLoading}
+          error={connectorsError}
         />
       </KibanaPageTemplate.Section>
       {activeLayer === 'assign' && (
-        <AssignConnectorsFlyout
-          agentId={agentId}
-          connectors={connectorsQuery.connectors}
-          selectedIds={agentQuery.agent?.configuration?.connector_ids ?? []}
-          onClose={() => setActiveLayer(null)}
-        />
+        <AssignConnectorsFlyout agentId={agentId} onClose={() => setActiveLayer(null)} />
       )}
     </KibanaPageTemplate>
   );

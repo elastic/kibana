@@ -23,7 +23,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import type { ConnectorItem } from '../../../../../common/http_api/tools';
-import { useUpdateAgent } from '../../../hooks/connectors/use_update_agent';
+import { useAgentConnectors } from '../../../hooks/connectors/use_agent_connectors';
 import { useKibana } from '../../../hooks/use_kibana';
 import { labels } from '../../../utils/i18n';
 import { ConnectorTypeIcon } from '../../connectors/connector_type_icon';
@@ -32,19 +32,15 @@ type ConnectorOption = EuiComboBoxOptionOption<ConnectorItem>;
 
 interface AssignConnectorsFlyoutProps {
   agentId: string;
-  connectors: readonly ConnectorItem[];
-  selectedIds: string[];
   onClose: () => void;
 }
 
-export const AssignConnectorsFlyout = ({
-  agentId,
-  connectors,
-  selectedIds,
-  onClose,
-}: AssignConnectorsFlyoutProps) => {
+export const AssignConnectorsFlyout = ({ agentId, onClose }: AssignConnectorsFlyoutProps) => {
   const titleId = useGeneratedHtmlId({ prefix: 'assignConnectorsFlyout' });
-  const { updateAgent, isLoading } = useUpdateAgent({ agentId, onSuccess: onClose });
+  const { assign, isAssigning, unassignedConnectors } = useAgentConnectors({
+    agentId,
+    onSuccess: onClose,
+  });
   const [selected, setSelected] = useState<ConnectorOption[]>([]);
   const {
     services: {
@@ -54,11 +50,8 @@ export const AssignConnectorsFlyout = ({
   const { actionTypeRegistry } = triggersActionsUi;
 
   const options: ConnectorOption[] = useMemo(
-    () =>
-      connectors
-        .filter((c) => !selectedIds.includes(c.id))
-        .map((c) => ({ label: c.name, value: c, key: c.id })),
-    [connectors, selectedIds]
+    () => unassignedConnectors.map((c) => ({ label: c.name, value: c, key: c.id })),
+    [unassignedConnectors]
   );
 
   const renderOption = useCallback(
@@ -116,12 +109,12 @@ export const AssignConnectorsFlyout = ({
           <EuiButtonEmpty onClick={onClose}>{labels.connectors.cancelButtonLabel}</EuiButtonEmpty>
           <EuiButton
             fill
-            isLoading={isLoading}
-            isDisabled={selected.length === 0 || isLoading}
+            isLoading={isAssigning}
+            isDisabled={selected.length === 0 || isAssigning}
             onClick={() => {
               const connector = selected[0].value;
               if (!connector) return;
-              updateAgent({ connector_ids: [...selectedIds, connector.id] });
+              assign(connector.id);
             }}
           >
             {labels.connectors.assignButtonLabel}
