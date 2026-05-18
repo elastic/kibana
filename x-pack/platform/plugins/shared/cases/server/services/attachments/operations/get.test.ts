@@ -295,7 +295,7 @@ describe('AttachmentService getter', () => {
         await expect(
           attachmentGetter.getAllDocumentsAttachedToCase({ caseId: '1', owner: 'securitySolution' })
         ).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"type: Invalid input: expected \\"event\\", type: Invalid input: expected \\"security.event\\", Invalid input: expected array, received undefined, Invalid input: expected string, received undefined, Invalid input: expected array, received undefined, and 3 more"`
+          `"type: Invalid input: expected \\"event\\", Invalid input: expected array, received undefined, Invalid input: expected string, received undefined, Invalid input: expected array, received undefined, Invalid input: expected string, received undefined, and 6 more"`
         );
       });
     });
