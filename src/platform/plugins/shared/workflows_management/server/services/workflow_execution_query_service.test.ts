@@ -114,6 +114,21 @@ describe('WorkflowExecutionQueryService', () => {
       expect(must).toContainEqual({ terms: { executedBy: ['user1', 'user2'] } });
     });
 
+    it('adds concurrencyGroupKey filter', async () => {
+      mockEsClient.search.mockResolvedValue(emptyResponse as any);
+
+      await service.getWorkflowExecutions(
+        { workflowId: 'wf-1', concurrencyGroupKey: 'streams-ki-onboarding-my-stream' },
+        'default'
+      );
+
+      const call = mockEsClient.search.mock.calls[0][0] as any;
+      const must = call.query.bool.must;
+      expect(must).toContainEqual({
+        term: { concurrencyGroupKey: 'streams-ki-onboarding-my-stream' },
+      });
+    });
+
     it('adds omitStepRuns filter', async () => {
       mockEsClient.search.mockResolvedValue(emptyResponse as any);
 

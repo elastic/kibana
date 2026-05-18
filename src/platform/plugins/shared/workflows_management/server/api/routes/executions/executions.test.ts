@@ -327,6 +327,7 @@ describe('Execution Routes', () => {
           finishedBefore: '2026-05-14T00:00:00.000Z',
           sortField: 'finishedAt',
           sortOrder: 'desc',
+          concurrencyGroupKey: 'streams-ki-onboarding-my-stream',
         },
       };
 
@@ -338,6 +339,7 @@ describe('Execution Routes', () => {
           statuses: ['running'],
           executionTypes: undefined,
           executedBy: undefined,
+          concurrencyGroupKey: 'streams-ki-onboarding-my-stream',
           page: 2,
           size: 5,
           omitStepRuns: true,

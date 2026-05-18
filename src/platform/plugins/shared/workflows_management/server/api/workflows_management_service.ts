@@ -74,6 +74,7 @@ export interface SearchWorkflowExecutionsParams {
   statuses?: ExecutionStatus[];
   executionTypes?: ExecutionType[];
   executedBy?: string[];
+  concurrencyGroupKey?: string;
   omitStepRuns?: boolean;
   finishedAfter?: string;
   finishedBefore?: string;

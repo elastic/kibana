@@ -123,6 +123,10 @@ export class WorkflowExecutionQueryService {
       must.push({ terms: { executedBy: params.executedBy } });
     }
 
+    if (params.concurrencyGroupKey !== undefined) {
+      must.push({ term: { concurrencyGroupKey: params.concurrencyGroupKey } });
+    }
+
     if (params.omitStepRuns) {
       must.push({ bool: { must_not: { exists: { field: 'stepId' } } } });
     }
