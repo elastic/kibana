@@ -26,6 +26,7 @@ dependsOn:
   - '@kbn/core-base-server-internal'
   - '@kbn/core-http-server'
   - '@kbn/core-http-server-internal'
+  - '@kbn/core-http-request-handler-context-server'
   - '@kbn/core-metrics-server'
   - '@kbn/core-metrics-server-internal'
   - '@kbn/core-usage-data-server'

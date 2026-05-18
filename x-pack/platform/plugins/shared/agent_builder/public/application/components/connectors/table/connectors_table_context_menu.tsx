@@ -128,11 +128,10 @@ export const ConnectorContextMenu = ({ connector }: ConnectorContextMenuProps) =
         isOpen={isOpen}
         closePopover={closeMenu}
       >
-        <EuiContextMenuPanel size="s">
+        <EuiContextMenuPanel>
           <EuiContextMenuItem
             icon="pencil"
             key="edit"
-            size="s"
             onClick={() => {
               editConnector(connector);
               closeMenu();
@@ -147,7 +146,6 @@ export const ConnectorContextMenu = ({ connector }: ConnectorContextMenuProps) =
             <EuiContextMenuItem
               icon="linkSlash"
               key="disconnect"
-              size="s"
               onClick={() => {
                 setShowDisconnectConfirm(true);
                 closeMenu();
@@ -165,7 +163,6 @@ export const ConnectorContextMenu = ({ connector }: ConnectorContextMenuProps) =
             <EuiContextMenuItem
               icon="trash"
               key="delete"
-              size="s"
               css={({ euiTheme }) => ({
                 color: euiTheme.colors.textDanger,
               })}

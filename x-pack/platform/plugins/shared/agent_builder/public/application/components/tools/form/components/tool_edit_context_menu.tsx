@@ -49,13 +49,11 @@ export const ToolEditContextMenu = () => {
       }
     >
       <EuiContextMenuPanel
-        size="s"
         items={[
           <EuiContextMenuItem
             data-test-subj="agentBuilderToolCloneButton"
             key="clone"
             icon="copy"
-            size="s"
             onClick={() => {
               cloneTool(toolId);
             }}
@@ -69,7 +67,6 @@ export const ToolEditContextMenu = () => {
             data-test-subj="agentBuilderToolDeleteButton"
             key="delete"
             icon="trash"
-            size="s"
             css={css`
               color: ${euiTheme.colors.textDanger};
             `}
