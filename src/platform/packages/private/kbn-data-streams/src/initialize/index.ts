@@ -20,9 +20,13 @@ import { assertDeployedVersion } from './assert_deployed_version';
  *
  * Endeavour to be idempotent and race-condition safe.
  *
- * Phase order is load-bearing (see elastic/kibana#268853): migrate the existing write index
- * BEFORE bumping the index template's `_meta.version`. If migration fails, the on-disk
- * `_meta.version` stays at the old number and the next init can retry the migration cleanly.
+ * Phase order: update the index template first, then apply putMapping to the existing write
+ * index. This ensures any rollover that occurs between the two phases produces a new write
+ * index with the correct mappings from the updated template.
+ *
+ * Retry safety (elastic/kibana#268853): `initializeDataStream` always runs unconditionally —
+ * it has no version short-circuit — so a putMapping failure on a previous boot is always
+ * retried on the next init, regardless of the `_meta.version` on disk.
  */
 export async function initialize({
   logger,
@@ -61,10 +65,19 @@ export async function initialize({
   // The index template is created and updated in all cases except if the data stream does not exist and we will not create it now.
   const createIndexTemplateIfDoesntExist = existingDataStream ? true : !lazyCreation;
 
-  // Phase 1: migrate the existing data stream's write index. Resolves mappings from the NEW
-  // template body (via inline `simulateTemplate`) and applies them with `putMapping`. Runs
-  // BEFORE the template version is bumped so a migration failure leaves `_meta.version` on
-  // disk untouched.
+  // Phase 1: install / update the index template. Any rollover that occurs after this point
+  // will pick up the new mappings from the updated template.
+  const { uptoDate: indexTemplateReady } = await initializeIndexTemplate({
+    logger,
+    dataStream,
+    elasticsearchClient,
+    existingIndexTemplate,
+    deployedVersion,
+    skipCreation: !createIndexTemplateIfDoesntExist,
+  });
+
+  // Phase 2: apply mappings to the existing write index. Runs unconditionally (no version
+  // short-circuit) so a putMapping failure on a previous boot is always retried.
   let dataStreamReady: boolean;
   if (existingDataStream) {
     const { migrated } = await initializeDataStream({
@@ -79,17 +92,6 @@ export async function initialize({
   } else {
     dataStreamReady = false;
   }
-
-  // Phase 2: install / update the index template. This is the last write that bumps
-  // `_meta.version`, which acts as the "everything before this succeeded" marker.
-  const { uptoDate: indexTemplateReady } = await initializeIndexTemplate({
-    logger,
-    dataStream,
-    elasticsearchClient,
-    existingIndexTemplate,
-    deployedVersion,
-    skipCreation: !createIndexTemplateIfDoesntExist,
-  });
 
   // Phase 3: create the data stream if it doesn't exist and we're not in lazy mode. Must
   // run AFTER the index template is in place, otherwise ES has no template to bind to.

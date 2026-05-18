@@ -277,9 +277,9 @@ describe('initialize - versioning logic', () => {
       expect(updateCall?._meta?.previousVersions).toEqual([2, 1]);
     });
 
-    it('runs migration (simulateTemplate + putMapping) BEFORE putIndexTemplate', async () => {
-      // The load-bearing invariant for elastic/kibana#268853: the template version bump must
-      // be the LAST write. A migration failure must leave _meta.version on disk untouched.
+    it('runs putIndexTemplate BEFORE migration (simulateTemplate + putMapping)', async () => {
+      // Template-first order ensures any rollover that occurs between the two phases picks up
+      // the new mappings from the already-updated template.
       const updatedDataStream = createTestDataStream(2);
 
       mockExistingIndexTemplateAtVersion(updatedDataStream.name, 1);
@@ -302,24 +302,28 @@ describe('initialize - versioning logic', () => {
         lazyCreation: false,
       });
 
+      const putIndexTemplateOrder = (elasticsearchClient.indices.putIndexTemplate as jest.Mock).mock
+        .invocationCallOrder[0];
       const simulateOrder = (elasticsearchClient.indices.simulateTemplate as jest.Mock).mock
         .invocationCallOrder[0];
       const putMappingOrder = (elasticsearchClient.indices.putMapping as jest.Mock).mock
         .invocationCallOrder[0];
-      const putIndexTemplateOrder = (elasticsearchClient.indices.putIndexTemplate as jest.Mock).mock
-        .invocationCallOrder[0];
 
+      expect(putIndexTemplateOrder).toBeLessThan(simulateOrder);
       expect(simulateOrder).toBeLessThan(putMappingOrder);
-      expect(putMappingOrder).toBeLessThan(putIndexTemplateOrder);
     });
 
-    it('does not call putIndexTemplate when simulateTemplate rejects', async () => {
-      // AC #8: migration failure must leave the template version untouched.
+    it('does not call putMapping when simulateTemplate rejects', async () => {
+      // putIndexTemplate runs first (template-first order), so it will have been called.
+      // simulateTemplate failing stops putMapping from running.
       const updatedDataStream = createTestDataStream(2);
 
       mockExistingIndexTemplateAtVersion(updatedDataStream.name, 1);
       mockExistingDataStream(updatedDataStream.name);
 
+      (elasticsearchClient.indices.putIndexTemplate as jest.Mock).mockResolvedValueOnce({
+        acknowledged: true,
+      });
       const simulateError = new Error('simulated simulateTemplate failure');
       (elasticsearchClient.indices.simulateTemplate as jest.Mock).mockRejectedValueOnce(
         simulateError
@@ -334,21 +338,26 @@ describe('initialize - versioning logic', () => {
         })
       ).rejects.toBe(simulateError);
 
+      expect(elasticsearchClient.indices.putIndexTemplate).toHaveBeenCalledTimes(1);
       expect(elasticsearchClient.indices.putMapping).not.toHaveBeenCalled();
-      expect(elasticsearchClient.indices.putIndexTemplate).not.toHaveBeenCalled();
     });
 
-    it('does not call putIndexTemplate when putMapping rejects', async () => {
-      // AC #8: migration failure must leave the template version untouched.
+    it('retries putMapping on the next init when it failed after putIndexTemplate succeeded', async () => {
+      // Template-first order means putIndexTemplate may succeed before putMapping fails.
+      // Retry safety (elastic/kibana#268853): initializeDataStream runs unconditionally —
+      // no version short-circuit — so putMapping is retried on the next init regardless of
+      // the _meta.version already being current.
       const updatedDataStream = createTestDataStream(2);
 
+      // First init: putIndexTemplate succeeds, putMapping fails.
       mockExistingIndexTemplateAtVersion(updatedDataStream.name, 1);
       mockExistingDataStream(updatedDataStream.name);
-
+      (elasticsearchClient.indices.putIndexTemplate as jest.Mock).mockResolvedValueOnce({
+        acknowledged: true,
+      });
       (elasticsearchClient.indices.simulateTemplate as jest.Mock).mockResolvedValueOnce({
         template: { mappings: updatedDataStream.template.mappings },
       });
-
       const putMappingError = new Error('simulated putMapping failure');
       (elasticsearchClient.indices.putMapping as jest.Mock).mockRejectedValueOnce(putMappingError);
 
@@ -361,7 +370,29 @@ describe('initialize - versioning logic', () => {
         })
       ).rejects.toBe(putMappingError);
 
-      expect(elasticsearchClient.indices.putIndexTemplate).not.toHaveBeenCalled();
+      expect(elasticsearchClient.indices.putIndexTemplate).toHaveBeenCalledTimes(1);
+
+      // Second init (next boot): template is already at v2, but putMapping must still run.
+      mockExistingIndexTemplateAtVersion(updatedDataStream.name, 2);
+      mockExistingDataStream(updatedDataStream.name);
+      (elasticsearchClient.indices.simulateTemplate as jest.Mock).mockResolvedValueOnce({
+        template: { mappings: updatedDataStream.template.mappings },
+      });
+      (elasticsearchClient.indices.putMapping as jest.Mock).mockResolvedValueOnce({
+        acknowledged: true,
+      });
+
+      await initialize({
+        logger,
+        elasticsearchClient,
+        dataStream: updatedDataStream,
+        lazyCreation: false,
+      });
+
+      // putIndexTemplate not called again (version already current).
+      expect(elasticsearchClient.indices.putIndexTemplate).toHaveBeenCalledTimes(1);
+      // putMapping ran on both inits (once failed, once retried successfully).
+      expect(elasticsearchClient.indices.putMapping).toHaveBeenCalledTimes(2);
     });
   });
 
