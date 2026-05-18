@@ -82,7 +82,6 @@ const toFormValues = (values: ThresholdRuleFormValues, esqlQuery: string): FormV
   stateTransitionAlertDelayMode: values.stateTransitionAlertDelayMode,
   stateTransitionRecoveryDelayMode: values.stateTransitionRecoveryDelayMode,
   artifacts: values.artifacts,
-  editMode: 'rule_builder',
 });
 
 const buildRuleBuilderConfig = (values: ThresholdRuleFormValues) => ({

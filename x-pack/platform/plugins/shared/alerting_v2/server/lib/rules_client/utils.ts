@@ -120,7 +120,6 @@ export function transformCreateRuleBodyToRuleSoAttributes(
     grouping: data.grouping,
     no_data: data.no_data,
     artifacts: data.artifacts,
-    edit_mode: data.edit_mode,
     ...serverFields,
   };
 }
@@ -165,7 +164,7 @@ export function buildUpdateRuleAttributes(
     grouping: nullToUndefined(updateData.grouping, existingAttrs.grouping),
     no_data: nullToUndefined(updateData.no_data, existingAttrs.no_data),
     artifacts: nullToEmptyArray(updateData.artifacts, existingAttrs.artifacts),
-    edit_mode: updateData.edit_mode ?? existingAttrs.edit_mode,
+    edit_mode: existingAttrs.edit_mode,
     enabled: updateData.enabled ?? existingAttrs.enabled,
     // Server-managed fields — preserved as-is except timestamps and user.
     createdBy: existingAttrs.createdBy,

@@ -203,7 +203,6 @@ export const mapFormValuesToRuleRequest = (formValues: FormValues): RuleRequestC
     recovery_policy: mapRecoveryPolicy(recoveryPolicy),
     state_transition: mapStateTransition(formValues),
     ...(mappedArtifacts ? { artifacts: mappedArtifacts } : {}),
-    ...(formValues.editMode ? { edit_mode: formValues.editMode } : {}),
   };
 };
 
@@ -290,6 +289,5 @@ export const mapRuleResponseToFormValues = (rule: RuleResponse): Partial<FormVal
     stateTransitionAlertDelayMode: deriveAlertDelayModeFromStateTransition(stateTransition),
     stateTransitionRecoveryDelayMode: deriveRecoveryDelayModeFromStateTransition(stateTransition),
     ...(rule.artifacts ? { artifacts: rule.artifacts } : {}),
-    ...(rule.edit_mode ? { editMode: rule.edit_mode } : {}),
   };
 };

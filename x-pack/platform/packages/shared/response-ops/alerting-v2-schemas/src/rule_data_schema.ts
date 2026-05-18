@@ -266,7 +266,6 @@ export const createRuleDataBaseSchema = z
     grouping: groupingSchema.optional(),
     no_data: noDataSchema.optional(),
     artifacts: z.array(artifactSchema).max(100).optional(),
-    edit_mode: editModeSchema.optional(),
   })
   .strip();
 
@@ -339,7 +338,6 @@ export const updateRuleDataSchema = z
     grouping: groupingSchema.optional().nullable(),
     no_data: noDataSchema.optional().nullable(),
     artifacts: z.array(artifactSchema).max(100).optional().nullable(),
-    edit_mode: editModeSchema.optional(),
     enabled: z.boolean().optional().describe('Whether the rule is enabled.'),
   })
   .strip();
@@ -352,6 +350,7 @@ export type UpdateRuleData = z.infer<typeof updateRuleDataSchema>;
  */
 export const ruleResponseSchema = createRuleDataBaseSchema.extend({
   id: z.string().describe('Unique rule identifier.'),
+  edit_mode: editModeSchema.optional(),
   enabled: z.boolean().describe('Whether the rule is enabled.'),
   createdBy: z.string().nullable().describe('User who created the rule.'),
   createdAt: z.string().describe('ISO timestamp when the rule was created.'),

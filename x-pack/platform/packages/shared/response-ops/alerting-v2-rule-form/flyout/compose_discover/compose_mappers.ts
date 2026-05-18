@@ -193,7 +193,6 @@ export const composeFormToCreateRequest = (formValues: ComposeFormValues): Creat
     recovery_policy,
     state_transition: mapStateTransition(formValues),
     ...(artifacts ? { artifacts } : {}),
-    ...(formValues.editMode ? { edit_mode: formValues.editMode } : {}),
   };
 };
 

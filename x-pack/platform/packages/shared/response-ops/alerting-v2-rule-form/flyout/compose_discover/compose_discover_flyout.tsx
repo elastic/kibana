@@ -367,9 +367,6 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
   );
 
   const handleSubmit = methods.handleSubmit((values) => {
-    if (ruleBuilderMode) {
-      values.editMode = 'rule_builder';
-    }
     if (isCreate) {
       onCreateRule(composeFormToCreateRequest(values));
     } else if (ruleId && onUpdateRule) {

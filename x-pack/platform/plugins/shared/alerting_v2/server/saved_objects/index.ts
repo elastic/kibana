@@ -47,7 +47,7 @@ export function registerSavedObjects({
     namespaceType: 'multiple-isolated',
     mappings: ruleMappings,
     management: {
-      importableAndExportable: true,
+      importableAndExportable: false,
       getTitle(esqlRuleSavedObject: SavedObject<RuleSavedObjectAttributes>) {
         return `Rule: [${esqlRuleSavedObject.attributes.metadata.name}]`;
       },
@@ -62,7 +62,7 @@ export function registerSavedObjects({
     namespaceType: 'multiple-isolated',
     mappings: ruleBuilderConfigMappings,
     management: {
-      importableAndExportable: true,
+      importableAndExportable: false,
       getTitle(so: SavedObject<RuleBuilderConfigSavedObjectAttributes>) {
         return `Rule Builder Config: [${so.attributes.type}]`;
       },

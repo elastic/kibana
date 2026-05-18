@@ -12,7 +12,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 
 import type { RuleSavedObjectAttributes } from '../../saved_objects';
-import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
+import { RULE_SAVED_OBJECT_TYPE, RULE_BUILDER_CONFIG_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import type { ActionPolicyClient } from '../action_policy_client';
 import { createRulesSavedObjectService } from '../services/rules_saved_object_service/rules_saved_object_service.mock';
 import type { UserService } from '../services/user_service/user_service';
@@ -501,6 +501,95 @@ describe('RulesClient', () => {
         expect.objectContaining({ version: 'WzEsMV0=', mergeAttributes: false })
       );
     });
+
+    describe('auto-switch edit_mode on query change', () => {
+      const configRef = {
+        name: 'rule_builder_config',
+        type: RULE_BUILDER_CONFIG_SAVED_OBJECT_TYPE,
+        id: 'config-id-1',
+      };
+
+      it('switches edit_mode to esql without deleting config SO when query is changed on a rule_builder rule', async () => {
+        const client = createClient();
+
+        const existingAttributes: RuleSavedObjectAttributes = {
+          ...baseSoAttrs,
+          edit_mode: 'rule_builder',
+        };
+
+        mockSavedObjectsClient.get.mockResolvedValueOnce({
+          id: 'rule-rb-1',
+          attributes: existingAttributes,
+          version: 'WzEsMV0=',
+          type: RULE_SAVED_OBJECT_TYPE,
+          references: [configRef],
+        });
+
+        await client.updateRule({
+          id: 'rule-rb-1',
+          data: { evaluation: { query: { base: 'FROM new-index | LIMIT 5' } } },
+        });
+
+        expect(ruleBuilderConfigSavedObjectService.delete).not.toHaveBeenCalled();
+
+        const savedAttrs = mockSavedObjectsClient.update.mock
+          .calls[0][2] as RuleSavedObjectAttributes;
+        expect(savedAttrs.edit_mode).toBe('esql');
+
+        const updateOpts = mockSavedObjectsClient.update.mock.calls[0][3] as Record<
+          string,
+          unknown
+        >;
+        expect(updateOpts.references).toBeUndefined();
+      });
+
+      it('does not switch edit_mode when query is not changed', async () => {
+        const client = createClient();
+
+        const existingAttributes: RuleSavedObjectAttributes = {
+          ...baseSoAttrs,
+          edit_mode: 'rule_builder',
+        };
+
+        mockSavedObjectsClient.get.mockResolvedValueOnce({
+          id: 'rule-rb-3',
+          attributes: existingAttributes,
+          version: 'WzEsMV0=',
+          type: RULE_SAVED_OBJECT_TYPE,
+          references: [configRef],
+        });
+
+        await client.updateRule({
+          id: 'rule-rb-3',
+          data: { schedule: { every: '5m' } },
+        });
+
+        expect(ruleBuilderConfigSavedObjectService.delete).not.toHaveBeenCalled();
+
+        const savedAttrs = mockSavedObjectsClient.update.mock
+          .calls[0][2] as RuleSavedObjectAttributes;
+        expect(savedAttrs.edit_mode).toBe('rule_builder');
+      });
+
+      it('does not switch when edit_mode is already esql', async () => {
+        const client = createClient();
+
+        mockSavedObjectsClient.get.mockResolvedValueOnce({
+          id: 'rule-esql-1',
+          attributes: baseSoAttrs,
+          version: 'WzEsMV0=',
+          type: RULE_SAVED_OBJECT_TYPE,
+          references: [],
+        });
+
+        await client.updateRule({
+          id: 'rule-esql-1',
+          data: { evaluation: { query: { base: 'FROM new-index | LIMIT 5' } } },
+        });
+
+        expect(ruleBuilderConfigSavedObjectService.delete).not.toHaveBeenCalled();
+      });
+    });
   });
 
   describe('upsertRule', () => {
@@ -773,6 +862,46 @@ describe('RulesClient', () => {
       });
 
       expect(mockSavedObjectsClient.get).not.toHaveBeenCalled();
+    });
+
+    describe('auto-switch edit_mode on query change (replace path)', () => {
+      const configRef = {
+        name: 'rule_builder_config',
+        type: RULE_BUILDER_CONFIG_SAVED_OBJECT_TYPE,
+        id: 'config-id-upsert',
+      };
+
+      it('switches edit_mode to esql without deleting config SO when replacing a rule_builder rule', async () => {
+        const client = createClient();
+        const existing: RuleSavedObjectAttributes = {
+          ...baseSoAttrs,
+          edit_mode: 'rule_builder',
+        };
+        const existingDoc = {
+          id: 'rule-id-1',
+          attributes: existing,
+          version: 'WzEsMV0=',
+          type: RULE_SAVED_OBJECT_TYPE,
+          references: [configRef],
+        };
+        mockSavedObjectsClient.get
+          .mockResolvedValueOnce(existingDoc)
+          .mockResolvedValueOnce(existingDoc);
+
+        await client.upsertRule({ id: 'rule-id-1', data: baseCreateData });
+
+        expect(ruleBuilderConfigSavedObjectService.delete).not.toHaveBeenCalled();
+
+        const savedAttrs = mockSavedObjectsClient.update.mock
+          .calls[0][2] as RuleSavedObjectAttributes;
+        expect(savedAttrs.edit_mode).toBe('esql');
+
+        const updateOpts = mockSavedObjectsClient.update.mock.calls[0][3] as Record<
+          string,
+          unknown
+        >;
+        expect(updateOpts.references).toBeUndefined();
+      });
     });
   });
 

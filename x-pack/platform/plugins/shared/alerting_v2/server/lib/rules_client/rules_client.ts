@@ -202,6 +202,20 @@ export class RulesClient {
     }
   }
 
+  private async cleanupRuleBuilderConfig(
+    references: SavedObjectReference[] | undefined
+  ): Promise<{ nextReferences: SavedObjectReference[]; cleaned: boolean }> {
+    const configId = this.getRuleBuilderConfigIdFromReferences(references);
+    if (!configId) {
+      return { nextReferences: references ?? [], cleaned: false };
+    }
+    await this.ruleBuilderConfigSavedObjectService.delete({ id: configId }).catch(() => {});
+    const nextReferences = (references ?? []).filter(
+      (ref) => ref.name !== RULE_BUILDER_CONFIG_REFERENCE_NAME
+    );
+    return { nextReferences, cleaned: true };
+  }
+
   private async writeRuleAttrs({
     id,
     attrs,
@@ -293,10 +307,19 @@ export class RulesClient {
       throw Boom.badRequest('stateTransition is only allowed for rules of kind "alert".');
     }
 
-    const nextAttrs = buildUpdateRuleAttributes(existingAttrs, parsed, {
+    let nextAttrs = buildUpdateRuleAttributes(existingAttrs, parsed, {
       updatedBy: userProfileUid,
       updatedAt: nowIso,
     });
+
+    // Auto-switch from rule_builder to esql when the query is modified via the
+    // public API. Only the mode flag is flipped; the config SO is left in place
+    // so that saveRuleBuilderConfig (which follows immediately in the UI flow)
+    // can update it without a wasteful delete+recreate cycle. Orphaned config
+    // SOs are harmless and cleaned up by deleteRule or the DELETE config route.
+    if (existingAttrs.edit_mode === 'rule_builder' && parsed.evaluation?.query !== undefined) {
+      nextAttrs = { ...nextAttrs, edit_mode: 'esql' };
+    }
 
     await this.scheduleRuleExecutorTask({
       ruleId: id,
@@ -374,17 +397,11 @@ export class RulesClient {
   @withApm
   public async deleteRuleBuilderConfig({ ruleId }: { ruleId: string }): Promise<void> {
     const { attrs, version, references } = await this.getExistingRule(ruleId);
-    const existingConfigId = this.getRuleBuilderConfigIdFromReferences(references);
+    const { nextReferences, cleaned } = await this.cleanupRuleBuilderConfig(references);
 
-    if (!existingConfigId) {
+    if (!cleaned) {
       return;
     }
-
-    await this.ruleBuilderConfigSavedObjectService.delete({ id: existingConfigId }).catch(() => {});
-
-    const nextReferences = (references ?? []).filter(
-      (ref) => ref.name !== RULE_BUILDER_CONFIG_REFERENCE_NAME
-    );
 
     await this.writeRuleAttrs({
       id: ruleId,
@@ -845,13 +862,21 @@ export class RulesClient {
 
     assertImmutableUnchanged(parsed, existingAttrs);
 
-    const nextAttrs = transformCreateRuleBodyToRuleSoAttributes(parsed, {
+    let nextAttrs = transformCreateRuleBodyToRuleSoAttributes(parsed, {
       enabled: existingAttrs.enabled,
       createdBy: existingAttrs.createdBy,
       createdAt: existingAttrs.createdAt,
       updatedBy: userProfileUid,
       updatedAt: nowIso,
     });
+
+    // Auto-switch from rule_builder to esql: PUT always replaces the full rule
+    // body including the query, and edit_mode is not on the public input schema.
+    // Only the flag is flipped; the config SO is left for saveRuleBuilderConfig
+    // to update in-place (avoids a wasteful delete+recreate in the UI flow).
+    if (existingAttrs.edit_mode === 'rule_builder') {
+      nextAttrs = { ...nextAttrs, edit_mode: 'esql' };
+    }
 
     await this.scheduleRuleExecutorTask({
       ruleId: id,
