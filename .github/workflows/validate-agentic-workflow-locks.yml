@@ -55,11 +55,11 @@ jobs:
         with:
           version: ${{ env.GH_AW_VERSION }}
 
-      - name: Compile and validate all agentic workflows
-        run: gh aw compile --purge --validate --no-check-update
-
       - name: Lint generated workflow locks
         run: gh aw lint
+
+      - name: Compile and validate all agentic workflows
+        run: gh aw compile --purge --validate --no-check-update
 
       - name: Verify generated outputs are up to date
         run: |
