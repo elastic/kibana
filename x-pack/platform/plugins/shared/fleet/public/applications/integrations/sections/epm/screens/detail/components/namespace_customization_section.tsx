@@ -35,9 +35,6 @@ interface Props {
   onSave: (next: string[]) => void;
 }
 
-const toOptions = (values: string[]): Array<EuiComboBoxOptionOption<string>> =>
-  values.map((v) => ({ label: v, value: v }));
-
 const setsEqual = (a: string[], b: string[]): boolean => {
   if (a.length !== b.length) return false;
   const setB = new Set(b);
@@ -52,12 +49,9 @@ export const NamespaceCustomizationSection: React.FC<Props> = ({
   onSave,
 }) => {
   const [draftNamespaces, setDraftNamespaces] = useState<string[]>(savedNamespaces);
-  const [validationError, setValidationError] = useState<string | undefined>(undefined);
 
-  // Reset draft and clear error after a successful save (savedNamespaces prop changes).
   useEffect(() => {
     setDraftNamespaces(savedNamespaces);
-    setValidationError(undefined);
   }, [savedNamespaces]);
 
   const prefixesForCheck = useMemo(
@@ -70,69 +64,57 @@ export const NamespaceCustomizationSection: React.FC<Props> = ({
     [draftNamespaces, savedNamespaces]
   );
 
-  const selectedOptions = useMemo(() => toOptions(draftNamespaces), [draftNamespaces]);
-
-  const handleCreate = useCallback(
-    (rawInput: string) => {
-      const newNamespace = rawInput.trim();
-      if (!newNamespace) {
-        return;
-      }
-      if (draftNamespaces.includes(newNamespace)) {
-        setValidationError(
-          i18n.translate(
-            'xpack.fleet.integrations.settings.namespaceCustomization.duplicateError',
-            { defaultMessage: 'Namespace is already in the list.' }
-          )
-        );
-        return;
-      }
-
-      const { valid, error } = isValidNamespace(newNamespace);
-      if (!valid) {
-        setValidationError(error);
-        return;
-      }
-      if (!isNamespaceAllowedByPrefixes(newNamespace, prefixesForCheck)) {
-        setValidationError(
-          i18n.translate(
-            'xpack.fleet.integrations.settings.namespaceCustomization.notAllowedPrefixError',
-            {
-              defaultMessage:
-                'Namespace must start with one of the allowed prefixes for this space: {prefixes}',
-              values: { prefixes: allowedNamespacePrefixes.join(', ') },
-            }
-          )
-        );
-        return;
-      }
-      setValidationError(undefined);
-      setDraftNamespaces([...draftNamespaces, newNamespace]);
-    },
-    [draftNamespaces, prefixesForCheck, allowedNamespacePrefixes]
+  const selectedOptions = useMemo(
+    () =>
+      draftNamespaces.map((ns) => {
+        const { valid } = isValidNamespace(ns);
+        const isAllowed = isNamespaceAllowedByPrefixes(ns, prefixesForCheck);
+        return {
+          label: ns,
+          value: ns,
+          color: !valid || !isAllowed ? 'danger' : undefined,
+        } as EuiComboBoxOptionOption<string>;
+      }),
+    [draftNamespaces, prefixesForCheck]
   );
 
-  // EUI silently ignores Enter when the typed value matches a selected option, so
-  // onCreateOption never fires for duplicates. Detect them in real-time via onSearchChange.
-  const handleSearchChange = useCallback(
-    (value: string) => {
-      const trimmed = value.trim();
-      if (trimmed && draftNamespaces.includes(trimmed)) {
-        setValidationError(
-          i18n.translate(
-            'xpack.fleet.integrations.settings.namespaceCustomization.duplicateError',
-            { defaultMessage: 'Namespace is already in the list.' }
-          )
+  const validationErrors = useMemo(() => {
+    const seen = new Set<string>();
+    const errors: string[] = [];
+    for (const ns of draftNamespaces) {
+      const { valid, error } = isValidNamespace(ns);
+      if (!valid && error) {
+        if (!seen.has(error)) {
+          seen.add(error);
+          errors.push(error);
+        }
+      } else if (!isNamespaceAllowedByPrefixes(ns, prefixesForCheck)) {
+        const prefixError = i18n.translate(
+          'xpack.fleet.integrations.settings.namespaceCustomization.notAllowedPrefixError',
+          {
+            defaultMessage:
+              'Namespace must start with one of the allowed prefixes for this space: {prefixes}',
+            values: { prefixes: allowedNamespacePrefixes.join(', ') },
+          }
         );
-      } else {
-        setValidationError(undefined);
+        if (!seen.has(prefixError)) {
+          seen.add(prefixError);
+          errors.push(prefixError);
+        }
       }
-    },
-    [draftNamespaces]
-  );
+    }
+    return errors;
+  }, [draftNamespaces, prefixesForCheck, allowedNamespacePrefixes]);
+
+  const hasValidationError = validationErrors.length > 0;
+
+  const handleCreate = useCallback((rawInput: string) => {
+    const newNamespace = rawInput.trim();
+    if (!newNamespace) return;
+    setDraftNamespaces((prev) => [...prev, newNamespace]);
+  }, []);
 
   const handleChange = useCallback((next: Array<EuiComboBoxOptionOption<string>>) => {
-    setValidationError(undefined);
     setDraftNamespaces(next.map((option) => option.value ?? option.label));
   }, []);
 
@@ -142,7 +124,6 @@ export const NamespaceCustomizationSection: React.FC<Props> = ({
 
   const handleDiscard = useCallback(() => {
     setDraftNamespaces(savedNamespaces);
-    setValidationError(undefined);
   }, [savedNamespaces]);
 
   return (
@@ -163,8 +144,8 @@ export const NamespaceCustomizationSection: React.FC<Props> = ({
       </EuiText>
       <EuiSpacer size="m" />
       <EuiFormRow
-        isInvalid={!!validationError}
-        error={validationError}
+        isInvalid={hasValidationError}
+        error={validationErrors}
         label={i18n.translate('xpack.fleet.integrations.settings.namespaceCustomization.label', {
           defaultMessage: 'Namespaces with a dedicated index template',
         })}
@@ -182,7 +163,7 @@ export const NamespaceCustomizationSection: React.FC<Props> = ({
           data-test-subj="epmSettings.namespaceCustomizationInput"
           noSuggestions
           isDisabled={disabled || isSubmitting}
-          isInvalid={!!validationError}
+          isInvalid={hasValidationError}
           placeholder={i18n.translate(
             'xpack.fleet.integrations.settings.namespaceCustomization.placeholder',
             { defaultMessage: 'Add a namespace' }
@@ -190,7 +171,6 @@ export const NamespaceCustomizationSection: React.FC<Props> = ({
           selectedOptions={selectedOptions}
           onCreateOption={handleCreate}
           onChange={handleChange}
-          onSearchChange={handleSearchChange}
         />
       </EuiFormRow>
       {(isDirty || isSubmitting) && (
@@ -220,7 +200,7 @@ export const NamespaceCustomizationSection: React.FC<Props> = ({
                 <EuiButton
                   size="s"
                   fill
-                  disabled={!!validationError || disabled}
+                  disabled={hasValidationError || disabled}
                   onClick={handleSave}
                   data-test-subj="epmSettings.namespaceCustomizationSave"
                 >

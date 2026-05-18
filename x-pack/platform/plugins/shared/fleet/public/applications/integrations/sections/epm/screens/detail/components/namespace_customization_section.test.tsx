@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act } from '@testing-library/react';
+import { act, within } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 
 import { createIntegrationsTestRendererMock } from '../../../../../../../mock';
@@ -34,7 +34,7 @@ function renderSection(
 describe('NamespaceCustomizationSection', () => {
   it('renders the title and an empty combo box when no namespaces are saved', () => {
     const { getByText, getByTestId } = renderSection();
-    expect(getByText('Namespace customization')).toBeInTheDocument();
+    expect(getByText('Namespace index templates')).toBeInTheDocument();
     expect(getByTestId('epmSettings.namespaceCustomizationInput')).toBeInTheDocument();
   });
 
@@ -88,8 +88,8 @@ describe('NamespaceCustomizationSection', () => {
     expect(queryByTestId('epmSettings.namespaceCustomizationDiscard')).not.toBeInTheDocument();
   });
 
-  it('shows an error and does not add a namespace that violates prefix rules', async () => {
-    const { getByTestId, queryByText, queryByTestId } = renderSection({
+  it('adds an invalid namespace as a pill, shows a validation error, and disables Save', async () => {
+    const { getByTestId, queryByText } = renderSection({
       savedNamespaces: [],
       allowedNamespacePrefixes: ['prod'],
     });
@@ -98,24 +98,54 @@ describe('NamespaceCustomizationSection', () => {
     await userEvent.type(input, 'staging');
     await userEvent.keyboard('{Enter}');
 
-    expect(queryByText('staging')).not.toBeInTheDocument();
-    // Draft was not modified, so Save/Discard buttons do not appear.
-    expect(queryByTestId('epmSettings.namespaceCustomizationSave')).not.toBeInTheDocument();
-    // Validation error is shown in the form row.
-    expect(getByTestId('epmSettings.namespaceCustomizationInput')).toBeInTheDocument();
+    // Pill is added even though it violates the prefix rule.
+    expect(queryByText('staging')).toBeInTheDocument();
+    // Save/Discard are shown because the draft is dirty.
+    expect(getByTestId('epmSettings.namespaceCustomizationSave')).toBeInTheDocument();
+    expect(getByTestId('epmSettings.namespaceCustomizationDiscard')).toBeInTheDocument();
+    // Save is disabled until the invalid pill is removed.
+    expect(getByTestId('epmSettings.namespaceCustomizationSave')).toBeDisabled();
   });
 
-  it('shows a duplicate error in real-time as the user types a namespace already in the list', async () => {
-    const { getByTestId, getByText, queryAllByText } = renderSection({
+  it('enables Save after removing an invalid pill when other changes remain', async () => {
+    // Start with prod saved; add a valid prodqa pill and an invalid staging pill.
+    // After removing staging, draft=[prod, prodqa] is still dirty — Save should be enabled.
+    const { getByTestId } = renderSection({
       savedNamespaces: ['prod'],
+      allowedNamespacePrefixes: ['prod'],
     });
 
     const input = getByTestId('epmSettings.namespaceCustomizationInput').querySelector('input')!;
-    await userEvent.type(input, 'prod');
 
-    // Error appears while typing, before Enter is pressed.
-    expect(getByText('Namespace is already in the list.')).toBeInTheDocument();
-    // The namespace is not duplicated in the list.
+    await userEvent.type(input, 'prodqa');
+    await userEvent.keyboard('{Enter}');
+    await userEvent.type(input, 'staging');
+    await userEvent.keyboard('{Enter}');
+
+    // Save is disabled due to the invalid 'staging' pill.
+    expect(getByTestId('epmSettings.namespaceCustomizationSave')).toBeDisabled();
+
+    // Remove the invalid 'staging' pill via its close button.
+    const combobox = getByTestId('epmSettings.namespaceCustomizationInput');
+    const stagingPill = within(combobox)
+      .getAllByTestId('euiComboBoxPill')
+      .find((pill) => pill.textContent?.includes('staging'))!;
+    const removeStagingButton = within(stagingPill).getByRole('button');
+    await userEvent.click(removeStagingButton);
+
+    // Draft still differs from saved (prod-qa is new), so Save is shown and enabled.
+    expect(getByTestId('epmSettings.namespaceCustomizationSave')).toBeInTheDocument();
+    expect(getByTestId('epmSettings.namespaceCustomizationSave')).not.toBeDisabled();
+  });
+
+  it('does not add a duplicate namespace', async () => {
+    const { getByTestId, queryAllByText } = renderSection({ savedNamespaces: ['prod'] });
+
+    const input = getByTestId('epmSettings.namespaceCustomizationInput').querySelector('input')!;
+    await userEvent.type(input, 'prod');
+    await userEvent.keyboard('{Enter}');
+
+    // EUI prevents the duplicate from being added.
     expect(queryAllByText('prod')).toHaveLength(1);
   });
 
