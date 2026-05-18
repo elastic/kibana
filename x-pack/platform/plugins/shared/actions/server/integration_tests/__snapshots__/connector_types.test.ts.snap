@@ -1358,6 +1358,23 @@ Object {
       ],
       "default": null,
     },
+    "secretQueryParams": Object {
+      "anyOf": Array [
+        Object {
+          "additionalProperties": Object {
+            "type": "string",
+          },
+          "propertyNames": Object {
+            "type": "string",
+          },
+          "type": "object",
+        },
+        Object {
+          "type": "null",
+        },
+      ],
+      "default": null,
+    },
     "user": Object {
       "anyOf": Array [
         Object {

@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export { getWellKnownEmailServiceRoute } from './get_well_known_email_service';
-export { getWebhookSecretHeadersKeyRoute } from './get_webhook_secret_headers_key';
-export { getHttpSecretQueryParamsKeyRoute } from './get_http_secret_query_params_key';
+export const CONNECTORS_APP_PATH = 'management/insightsAndAlerting/triggersActionsConnectors';
+
+export const TIMEOUT = 10000 as const;
