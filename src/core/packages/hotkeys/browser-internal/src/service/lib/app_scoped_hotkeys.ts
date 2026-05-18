@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Observable, Subscription } from 'rxjs';
+import { bufferToggle, filter, Subject, type Observable, Subscription } from 'rxjs';
 import type { AppScopedHotkeys, HotkeyDefinition, HotkeyHandle } from '@kbn/core-hotkeys-browser';
 
 /**
@@ -18,8 +18,6 @@ export interface CreateAppScopedHotkeysDeps {
   register: (def: HotkeyDefinition, handler: (event: KeyboardEvent) => void) => HotkeyHandle;
   /** Pinned app id passed by the caller, if any. */
   pinnedAppId?: string;
-  /** Synchronous accessor for the latest `currentAppId$` emission. */
-  resolveAppId: () => string | undefined;
   /** Stream of `currentAppId$` values, used to flush the buffer. */
   currentAppId$: Observable<string | undefined>;
 }
@@ -80,21 +78,45 @@ const createDeferredHandle = (id: string): DeferredHandle => {
 export const createAppScopedHotkeys = ({
   register,
   pinnedAppId,
-  resolveAppId,
   currentAppId$,
 }: CreateAppScopedHotkeysDeps): AppScopedHotkeys => {
-  let resolvedAppId: string | undefined = pinnedAppId ?? resolveAppId();
+  let currentAppIdValue: string;
   const handles = new Set<HotkeyHandle>();
-  const buffer: Array<{
+  const subscriptions = new Subscription();
+  const deferredRegistrations$ = new Subject<{
     def: ScopedDef;
     handler: (event: KeyboardEvent) => void;
     deferred: DeferredHandle;
-  }> = [];
-  let flushSub: Subscription | undefined;
+  }>();
+
+  const getResolvedAppId = () => pinnedAppId ?? currentAppIdValue;
+
   let disposed = false;
 
+  subscriptions.add(
+    currentAppId$.subscribe((id) => {
+      if (id === undefined) {
+        return;
+      }
+      currentAppIdValue = id;
+    })
+  );
+
+  const on$ = currentAppId$.pipe(filter((id) => id !== undefined));
+  const off$ = currentAppId$.pipe(filter((id) => id === undefined));
+
+  // buffer the deferred registrations and flush them when the app id is resolved
+  subscriptions.add(
+    deferredRegistrations$.pipe(bufferToggle(off$, () => on$)).subscribe((pending) => {
+      for (const { def, handler, deferred } of pending) {
+        const real = registerNow(def, handler);
+        deferred.bind(real);
+      }
+    })
+  );
+
   const registerNow = (def: ScopedDef, handler: (event: KeyboardEvent) => void): HotkeyHandle => {
-    const appId = resolvedAppId;
+    const appId = getResolvedAppId();
     const handle = register({ ...def, appId, scope: 'app' }, handler);
     handles.add(handle);
     return {
@@ -107,35 +129,6 @@ export const createAppScopedHotkeys = ({
     };
   };
 
-  const flushBuffer = () => {
-    if (resolvedAppId === undefined || disposed) {
-      return;
-    }
-    const pending = buffer.splice(0, buffer.length);
-    for (const { def, handler, deferred } of pending) {
-      const real = registerNow(def, handler);
-      deferred.bind(real);
-    }
-  };
-
-  if (resolvedAppId === undefined) {
-    if (process.env.NODE_ENV !== 'production') {
-      // eslint-disable-next-line no-console
-      console.warn(
-        '[HotkeysService] forApp() called before `application.currentAppId$` emitted a defined value. Registrations will be buffered until the current app is known. Pass an explicit `appId` to forApp() or call it from within an app mount to avoid this warning.'
-      );
-    }
-    flushSub = currentAppId$.subscribe((id) => {
-      if (id === undefined || resolvedAppId !== undefined) {
-        return;
-      }
-      resolvedAppId = id;
-      flushSub?.unsubscribe();
-      flushSub = undefined;
-      flushBuffer();
-    });
-  }
-
   const registerInScope = (
     def: ScopedDef,
     handler: (event: KeyboardEvent) => void
@@ -145,11 +138,13 @@ export const createAppScopedHotkeys = ({
         `HotkeysService: cannot register "${def.id}" after the app scope has been disposed`
       );
     }
-    if (resolvedAppId !== undefined) {
+
+    if (getResolvedAppId() !== undefined) {
       return registerNow(def, handler);
     }
+
     const deferred = createDeferredHandle(def.id);
-    buffer.push({ def, handler, deferred });
+    deferredRegistrations$.next({ def, handler, deferred });
     return deferred.handle;
   };
 
@@ -166,10 +161,11 @@ export const createAppScopedHotkeys = ({
     if (disposed) {
       return;
     }
+
+    subscriptions.unsubscribe();
+
     disposed = true;
-    flushSub?.unsubscribe();
-    flushSub = undefined;
-    buffer.length = 0;
+
     for (const handle of handles) {
       handle.unregister();
     }

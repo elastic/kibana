@@ -14,6 +14,7 @@ import {
   type HotkeyCallback,
   type HotkeyRegistrationHandle,
   type RegisterableHotkey,
+  type HotkeyMeta,
 } from '@tanstack/hotkeys';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { CoreSetup, CoreStart } from '@kbn/core-lifecycle-browser';
@@ -25,6 +26,7 @@ import type {
   HotkeysSidebarState,
   HotkeysSetup,
   HotkeysStart,
+  DiscoveryOnlyHotkeyDefinition,
 } from '@kbn/core-hotkeys-browser';
 import { i18n } from '@kbn/i18n';
 import type { SidebarAppUpdater } from '@kbn/core-chrome-sidebar';
@@ -69,9 +71,8 @@ const buildMeta = ({
   scope,
   keys,
   defaultKeys,
-  onEffectiveBindingChange: _dropEffectiveBindingCallback,
   ...defs
-}: HotkeyDefinition) => ({
+}: NonNullable<HotkeyMeta['kibana']> & { keys: HotkeyDefinition['keys'] }) => ({
   kibana: {
     scope: scope ?? 'context',
     defaultKeys: defaultKeys ?? keys,
@@ -104,21 +105,21 @@ export class HotkeysService {
   private readonly hotkeysAppId = 'hotkeys' as const;
   private readonly hotkeyOverridesPersistence = createLocalStorageHotkeyOverridesPersistence();
   private readonly manager: HotkeyManager = HotkeyManager.getInstance();
+  // used to trigger a re-projection of the derived registrations
   private readonly discoveryRevision$ = new Subject<void>();
-  private readonly discoveryInternal = new Map<string, HotkeyDefinition>();
+  private readonly discoveryInternal = new Map<string, DiscoveryOnlyHotkeyDefinition>();
   private userOverrides: ReadonlyMap<string, HotkeyOverride> = new Map();
+  private readonly internal = new Map<string, InternalEntry>();
+  private readonly subscriptions = new Subscription();
+  private currentAppId$?: Observable<string | undefined>;
+  private hotkeysAppUpdater: SidebarAppUpdater | undefined;
+
   public readonly derived: DerivedRegistrations = createDerivedRegistrations({
     manager: this.manager,
     getDiscoveryRows: () => Array.from(this.discoveryInternal.values()),
     discoveryUpdates$: this.discoveryRevision$.asObservable(),
     getOverrides: () => this.userOverrides,
   });
-  private readonly internal = new Map<string, InternalEntry>();
-  private readonly subscriptions = new Subscription();
-  private latestAppId: string | undefined;
-  private currentAppId$?: Observable<string | undefined>;
-
-  private hotkeysAppUpdater: SidebarAppUpdater | undefined;
 
   public setup({ chrome }: SetupDeps): HotkeysSetup {
     this.hotkeysAppUpdater = chrome.sidebar.registerApp({
@@ -148,12 +149,6 @@ export class HotkeysService {
   }: StartDeps): HotkeysStart {
     this.currentAppId$ = application.currentAppId$;
 
-    this.subscriptions.add(
-      this.currentAppId$.subscribe((id) => {
-        this.latestAppId = id;
-      })
-    );
-
     this.subscriptions.add(overrides.overrides$.subscribe((next) => this.applyOverrides(next)));
 
     // register hotkey for opening the global cheat sheet
@@ -174,7 +169,6 @@ export class HotkeysService {
       createAppScopedHotkeys({
         register: this.doRegister.bind(this),
         pinnedAppId: appId,
-        resolveAppId: () => this.latestAppId,
         currentAppId$: application.currentAppId$,
       });
 
@@ -202,15 +196,18 @@ export class HotkeysService {
    * Register a hotkey for discovery UIs (cheat sheet). Unlike {@link HotkeysStart.register},
    * this does not attach a keyboard listener — execution stays with the owning surface (e.g. Monaco).
    */
-  private doRegisterForDiscovery(def: HotkeyDefinition): HotkeyHandle {
+  private doRegisterForDiscovery(
+    def: Omit<DiscoveryOnlyHotkeyDefinition, 'discoveryOnly'>
+  ): HotkeyHandle {
     if (this.internal.has(def.id) || this.discoveryInternal.has(def.id)) {
       throw new Error(`HotkeysService: a hotkey with id "${def.id}" is already registered`);
     }
 
-    const stored: HotkeyDefinition = {
+    const stored: DiscoveryOnlyHotkeyDefinition = {
       ...def,
       scope: def.scope ?? 'context',
       defaultKeys: def.defaultKeys ?? def.keys,
+      discoveryOnly: true,
     };
 
     this.discoveryInternal.set(stored.id, stored);
@@ -225,7 +222,7 @@ export class HotkeysService {
           return;
         }
         const prevResolved = this.resolveDiscoveryKeys(current);
-        const next: HotkeyDefinition = { ...current, ...partial };
+        const next: DiscoveryOnlyHotkeyDefinition = { ...current, ...partial };
         if (partial.keys !== undefined) {
           next.defaultKeys = current.defaultKeys;
         }
@@ -245,7 +242,10 @@ export class HotkeysService {
     };
   }
 
-  private doRegister(def: HotkeyDefinition, handler: (event: KeyboardEvent) => void): HotkeyHandle {
+  private doRegister(
+    def: Omit<HotkeyDefinition, 'discoveryOnly' | 'editable'>,
+    handler: (event: KeyboardEvent) => void
+  ): HotkeyHandle {
     if (this.internal.has(def.id) || this.discoveryInternal.has(def.id)) {
       throw new Error(`HotkeysService: a hotkey with id "${def.id}" is already registered`);
     }
@@ -254,6 +254,8 @@ export class HotkeysService {
       ...def,
       scope: def.scope ?? 'context',
       defaultKeys: def.keys,
+      discoveryOnly: false,
+      editable: true,
     };
 
     const callback: HotkeyCallback = (event) => handler(event);
@@ -263,7 +265,6 @@ export class HotkeysService {
 
     const managerHandle = this.manager.register(resolvedKeys as RegisterableHotkey, callback, {
       enabled: resolvedEnabled,
-      target: stored.target ?? undefined,
       meta: buildMeta(stored),
     });
 
@@ -296,21 +297,21 @@ export class HotkeysService {
     };
   }
 
-  private resolveDiscoveryKeys(def: HotkeyDefinition): HotkeyDefinition['keys'] {
+  private resolveDiscoveryKeys(def: DiscoveryOnlyHotkeyDefinition): HotkeyDefinition['keys'] {
     const override = this.userOverrides.get(def.id);
     return override?.keys ?? def.keys;
   }
 
   private resolveDiscoveryKeysWithMap(
-    def: HotkeyDefinition,
+    def: DiscoveryOnlyHotkeyDefinition,
     overrides: ReadonlyMap<string, HotkeyOverride>
-  ): HotkeyDefinition['keys'] {
+  ): DiscoveryOnlyHotkeyDefinition['keys'] {
     return overrides.get(def.id)?.keys ?? def.keys;
   }
 
   private tryDiscoveryEffectiveBinding(
-    def: HotkeyDefinition,
-    resolvedKeys: HotkeyDefinition['keys']
+    def: DiscoveryOnlyHotkeyDefinition,
+    resolvedKeys: DiscoveryOnlyHotkeyDefinition['keys']
   ): void {
     const fn = def.onEffectiveBindingChange;
     if (!fn) {
@@ -328,19 +329,13 @@ export class HotkeysService {
     const previous = this.userOverrides;
     this.userOverrides = next;
     let discoveryAffected = false;
-    for (const id of this.discoveryInternal.keys()) {
-      const prev = previous.get(id);
-      const curr = next.get(id);
-      if (prev !== curr) {
-        discoveryAffected = true;
-        break;
-      }
-    }
 
     for (const def of this.discoveryInternal.values()) {
       const prevR = this.resolveDiscoveryKeysWithMap(def, previous);
       const currR = this.resolveDiscoveryKeysWithMap(def, next);
+
       if (!keysEqual(prevR, currR)) {
+        discoveryAffected = true;
         this.tryDiscoveryEffectiveBinding(def, currR);
       }
     }

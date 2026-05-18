@@ -14,7 +14,8 @@
     "@kbn/core-chrome-browser-mocks",
     "@kbn/core-application-browser-mocks",
     "@kbn/core-lifecycle-browser",
-    "@kbn/zod"
+    "@kbn/zod",
+    "@kbn/core-chrome-sidebar-components"
   ],
   "exclude": ["target/**/*"]
 }

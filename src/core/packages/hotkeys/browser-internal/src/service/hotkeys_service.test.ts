@@ -14,7 +14,7 @@ import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { HotkeysService, OPEN_CHEAT_SHEET_HOTKEY_ID } from './hotkeys_service';
 import type { HotkeyOverride, HotkeyOverridesSource } from './lib/overrides_source';
 import {
-  HOTKEY_OVERRIDES_LOCAL_STORAGE_KEY,
+  HOTKEY_OVERRIDES_STORAGE_KEY,
   createLocalStorageHotkeyOverridesPersistence,
 } from './lib/local_storage_hotkey_overrides_persistence';
 
@@ -68,7 +68,7 @@ describe('HotkeysService', () => {
 
   beforeEach(() => {
     HotkeyManager.resetInstance();
-    localStorage.removeItem(HOTKEY_OVERRIDES_LOCAL_STORAGE_KEY);
+    localStorage.removeItem(HOTKEY_OVERRIDES_STORAGE_KEY);
     service = new HotkeysService();
   });
 

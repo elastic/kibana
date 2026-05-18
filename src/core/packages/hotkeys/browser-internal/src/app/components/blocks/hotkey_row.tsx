@@ -29,13 +29,22 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { HotkeyDefinition, HotkeysSidebarActions } from '@kbn/core-hotkeys-browser';
+import type {
+  DiscoveryOnlyHotkeyDefinition,
+  HotkeyDefinition,
+  HotkeysSidebarActions,
+} from '@kbn/core-hotkeys-browser';
 import { formatChord } from '../../utils';
+
+type HotkeyDefinitionOrDiscoveryOnlyHotkeyDefinition =
+  | HotkeyDefinition
+  | DiscoveryOnlyHotkeyDefinition;
 
 const separatorToken = '+' as const;
 
-const keysToEditableString = (keys: HotkeyDefinition['keys']): string =>
-  typeof keys === 'string' ? keys : JSON.stringify(keys);
+const keysToEditableString = (
+  keys: HotkeyDefinitionOrDiscoveryOnlyHotkeyDefinition['keys']
+): string => (typeof keys === 'string' ? keys : JSON.stringify(keys));
 
 const parseChordInput = (raw: string): HotkeyDefinition['keys'] | undefined => {
   const trimmed = raw.trim();
@@ -44,19 +53,19 @@ const parseChordInput = (raw: string): HotkeyDefinition['keys'] | undefined => {
   }
   if (trimmed.startsWith('{')) {
     try {
-      return JSON.parse(trimmed) as HotkeyDefinition['keys'];
+      return JSON.parse(trimmed) as HotkeyDefinitionOrDiscoveryOnlyHotkeyDefinition['keys'];
     } catch {
       return undefined;
     }
   }
-  return trimmed as HotkeyDefinition['keys'];
+  return trimmed as HotkeyDefinitionOrDiscoveryOnlyHotkeyDefinition['keys'];
 };
 
 export const HotkeyRow = ({
   def,
   actions,
 }: {
-  def: HotkeyDefinition;
+  def: HotkeyDefinitionOrDiscoveryOnlyHotkeyDefinition;
   actions: Pick<HotkeysSidebarActions, 'setHotkeyOverride' | 'clearHotkeyOverride'>;
 }) => {
   const modalTitleId = useGeneratedHtmlId();
@@ -65,19 +74,6 @@ export const HotkeyRow = ({
   const [error, setError] = useState<string | undefined>();
 
   const formattedChord = useMemo(() => formatChord(def.keys, { separatorToken }), [def.keys]);
-
-  const canEditBinding = typeof def.onEffectiveBindingChange === 'function';
-
-  const chordTooltipContent = useMemo(
-    () =>
-      canEditBinding
-        ? formattedChord
-        : i18n.translate('core.ui.chrome.hotkeysCheatSheet.managedShortcutTooltip', {
-            defaultMessage: 'This shortcut is handled by the focused editor. ({shortcut})',
-            values: { shortcut: formattedChord },
-          }),
-    [canEditBinding, formattedChord]
-  );
 
   const defaultChordDisplay = useMemo(() => {
     const dk = def.defaultKeys ?? def.keys;
@@ -207,7 +203,7 @@ export const HotkeyRow = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="xs">
-            {canEditBinding ? (
+            {def.editable ? (
               <EuiFlexItem
                 grow={false}
                 css={css`
@@ -233,7 +229,7 @@ export const HotkeyRow = ({
               </EuiFlexItem>
             ) : null}
             <EuiFlexItem grow={false}>
-              <EuiToolTip content={chordTooltipContent}>
+              <EuiToolTip content={formattedChord}>
                 <EuiFlexGroup gutterSize="xs">
                   {formattedChord.split(separatorToken).map((key) => (
                     <EuiFlexItem key={key} grow={false}>

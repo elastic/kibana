@@ -11,11 +11,11 @@ import { BehaviorSubject } from 'rxjs';
 import type { HotkeyOverride, HotkeyOverridesPersistence } from './overrides_source';
 
 /** @internal */
-export const HOTKEY_OVERRIDES_LOCAL_STORAGE_KEY = 'kibana.core.hotkeys.overrides.v1';
+export const HOTKEY_OVERRIDES_STORAGE_KEY = 'kibana.core.hotkeys.overrides.v1';
 
 /** @internal */
-export interface LocalStorageHotkeyOverridesPersistenceParams {
-  /** Defaults to {@link HOTKEY_OVERRIDES_LOCAL_STORAGE_KEY}. */
+export interface HotkeyOverridesPersistenceParams {
+  /** Defaults to {@link HOTKEY_OVERRIDES_STORAGE_KEY}. */
   readonly storageKey?: string;
   /** Defaults to `window.localStorage` when available. */
   readonly storage?: Storage;
@@ -77,25 +77,17 @@ const persistMap = (
  * @internal
  */
 export const createLocalStorageHotkeyOverridesPersistence = (
-  params?: LocalStorageHotkeyOverridesPersistenceParams
+  params: HotkeyOverridesPersistenceParams = { storage: window.localStorage }
 ): HotkeyOverridesPersistence => {
-  const storageKey = params?.storageKey ?? HOTKEY_OVERRIDES_LOCAL_STORAGE_KEY;
-  let storage: Storage | undefined = params?.storage;
-  if (storage === undefined && typeof window !== 'undefined') {
-    try {
-      storage = window.localStorage;
-    } catch {
-      storage = undefined;
-    }
-  }
+  const storageKey = params?.storageKey ?? HOTKEY_OVERRIDES_STORAGE_KEY;
 
-  let map = loadInitialMap(storageKey, storage);
+  let map = loadInitialMap(storageKey, params?.storage);
   const subject = new BehaviorSubject<ReadonlyMap<string, HotkeyOverride>>(map);
 
   const emitAndPersist = (next: Map<string, HotkeyOverride>): void => {
     map = next;
     subject.next(new Map(map));
-    persistMap(storageKey, storage, map);
+    persistMap(storageKey, params?.storage, map);
   };
 
   return {

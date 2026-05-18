@@ -9,26 +9,29 @@
 
 import { BehaviorSubject, Subscription, type Observable } from 'rxjs';
 import type { HotkeyManager } from '@tanstack/hotkeys';
-import type { HotkeyDefinition } from '@kbn/core-hotkeys-browser';
+import type { DiscoveryOnlyHotkeyDefinition, HotkeyDefinition } from '@kbn/core-hotkeys-browser';
 import type { HotkeyOverride } from './overrides_source';
 
+type HotkeyDefinitionOrDiscoveryOnlyHotkeyDefinition =
+  | HotkeyDefinition
+  | DiscoveryOnlyHotkeyDefinition;
+
 /**
- * Projects a live `HotkeyManager.registrations` store into the
- * {@link HotkeyDefinition} shape consumed by discovery UIs. Only
- * registrations that carry Kibana metadata (via `meta.kibana`) are included;
- * any registrations made directly against the manager by third-party code
+ * Collects all the registrations from the manager that carry Kibana metadata (via `meta.kibana`);
+ * any incidental registrations made directly against the manager by third-party code
  * are ignored so the stream is constrained to Kibana-owned hotkeys.
  *
  * @internal
  */
-const projectRegistrations = (manager: HotkeyManager): ReadonlyArray<HotkeyDefinition> => {
-  const out: HotkeyDefinition[] = [];
-  for (const reg of manager.registrations.state.values()) {
+const collectRegistrations = (manager: HotkeyManager): ReadonlyArray<HotkeyDefinition> => {
+  return manager.registrations.state.values().reduce((acc, reg) => {
     const kibana = reg.options.meta?.kibana;
+
     if (!kibana) {
-      continue;
+      return acc;
     }
-    out.push({
+
+    acc.push({
       id: kibana.id,
       keys: reg.hotkey,
       defaultKeys: kibana.defaultKeys,
@@ -39,15 +42,22 @@ const projectRegistrations = (manager: HotkeyManager): ReadonlyArray<HotkeyDefin
       featureId: kibana.featureId,
       group: kibana.group,
       enabled: reg.options.enabled !== false,
+      discoveryOnly: false,
+      editable: true,
     });
-  }
-  return out;
+
+    return acc;
+  }, [] as HotkeyDefinition[]);
 };
 
-const projectDiscoveryRows = (
-  rows: ReadonlyArray<HotkeyDefinition>,
+/**
+ * Returns list of hotkey definitions provided solely for are used
+ * for discovery (i.e. the invocation on matching a hotkey is not handled by the hotkeys service).
+ */
+const collectDiscoveryRows = (
+  rows: ReadonlyArray<DiscoveryOnlyHotkeyDefinition>,
   overrides: ReadonlyMap<string, HotkeyOverride>
-): HotkeyDefinition[] =>
+): DiscoveryOnlyHotkeyDefinition[] =>
   rows.map((def) => {
     const override = overrides.get(def.id);
     return {
@@ -65,9 +75,9 @@ const projectDiscoveryRows = (
  */
 export const mergeHotkeyProjections = (
   managerDefs: ReadonlyArray<HotkeyDefinition>,
-  discoveryDefs: ReadonlyArray<HotkeyDefinition>
-): HotkeyDefinition[] => {
-  const byId = new Map<string, HotkeyDefinition>();
+  discoveryDefs: ReadonlyArray<DiscoveryOnlyHotkeyDefinition>
+): ReadonlyArray<HotkeyDefinitionOrDiscoveryOnlyHotkeyDefinition> => {
+  const byId = new Map<string, HotkeyDefinitionOrDiscoveryOnlyHotkeyDefinition>();
   for (const def of discoveryDefs) {
     byId.set(def.id, def);
   }
@@ -84,7 +94,7 @@ export const mergeHotkeyProjections = (
  * which would otherwise cause downstream subscribers to re-render on every
  * shortcut invocation.
  */
-const signature = (regs: ReadonlyArray<HotkeyDefinition>): string =>
+const signature = (regs: ReadonlyArray<HotkeyDefinitionOrDiscoveryOnlyHotkeyDefinition>): string =>
   regs
     .map(
       (r) =>
@@ -98,14 +108,16 @@ const signature = (regs: ReadonlyArray<HotkeyDefinition>): string =>
 
 /** @internal */
 export interface DerivedRegistrations {
-  readonly registrations$: Observable<ReadonlyArray<HotkeyDefinition>>;
+  readonly registrations$: Observable<
+    ReadonlyArray<HotkeyDefinitionOrDiscoveryOnlyHotkeyDefinition>
+  >;
   dispose(): void;
 }
 
 /** @internal */
 export interface MergedDerivedRegistrationsDeps {
   readonly manager: HotkeyManager;
-  readonly getDiscoveryRows: () => ReadonlyArray<HotkeyDefinition>;
+  readonly getDiscoveryRows: () => ReadonlyArray<DiscoveryOnlyHotkeyDefinition>;
   readonly discoveryUpdates$: Observable<void>;
   readonly getOverrides: () => ReadonlyMap<string, HotkeyOverride>;
 }
@@ -123,18 +135,21 @@ export const createDerivedRegistrations = ({
   discoveryUpdates$,
   getOverrides,
 }: MergedDerivedRegistrationsDeps): DerivedRegistrations => {
-  const projectMerged = (): ReadonlyArray<HotkeyDefinition> => {
-    const fromManager = projectRegistrations(manager);
-    const discoveryProjected = projectDiscoveryRows(getDiscoveryRows(), getOverrides());
-    return mergeHotkeyProjections(fromManager, discoveryProjected);
-  };
+  const consolidatedRegistrations =
+    (): ReadonlyArray<HotkeyDefinitionOrDiscoveryOnlyHotkeyDefinition> => {
+      const fromManager = collectRegistrations(manager);
+      const discoveryProjected = collectDiscoveryRows(getDiscoveryRows(), getOverrides());
+      return mergeHotkeyProjections(fromManager, discoveryProjected);
+    };
 
-  let lastProjection = projectMerged();
+  let lastProjection = consolidatedRegistrations();
   let lastSignature = signature(lastProjection);
-  const subject = new BehaviorSubject<ReadonlyArray<HotkeyDefinition>>(lastProjection);
+  const subject = new BehaviorSubject<
+    ReadonlyArray<HotkeyDefinitionOrDiscoveryOnlyHotkeyDefinition>
+  >(lastProjection);
 
   const emitIfChanged = () => {
-    const nextProjection = projectMerged();
+    const nextProjection = consolidatedRegistrations();
     const nextSignature = signature(nextProjection);
     if (nextSignature === lastSignature) {
       return;

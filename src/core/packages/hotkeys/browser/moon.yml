@@ -16,7 +16,8 @@ project:
   channel: ''
   owner: '@elastic/appex-sharedux'
   sourceRoot: src/core/packages/hotkeys/browser
-dependsOn: []
+dependsOn:
+  - '@kbn/core-chrome-sidebar'
 tags:
   - shared-browser
   - package
