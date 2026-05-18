@@ -12,6 +12,7 @@ import {
   type Example,
   type EvaluationDataset,
   createQuantitativeGroundednessEvaluator,
+  createTrajectoryEvaluator,
   selectEvaluators,
   withEvaluatorSpan,
   createSpanLatencyEvaluator,
@@ -40,7 +41,16 @@ interface DatasetExample extends Example {
   };
   output: {
     expected?: string;
+    // Used by the RAG evaluators (Precision@K/Recall@K/F1@K). Non-RAG
+    // datasets (e.g. the security skills suites) leave this empty; the
+    // RAG evaluators short-circuit to a null score in that case.
     groundTruth?: GroundTruth;
+    // Golden tool-call sequence for trajectory scoring. Order matters (LCS),
+    // but extra tools are tolerated. Keep minimum-sufficient: just the
+    // tools whose presence + order is the actual claim about correctness.
+    // Examples without `tool_sequence` are skipped by the trajectory
+    // evaluator (returns N/A) so incremental annotation is safe.
+    tool_sequence?: string[];
   };
   metadata?: {
     [key: string]: unknown;
@@ -149,7 +159,9 @@ const extractWorkflowExecuteStepRecords = (output: TaskOutput): WorkflowExecuteS
       const results = Array.isArray(s.results) ? s.results : [];
       const firstResult = results.find((r): r is Record<string, unknown> => isRecord(r));
       const data =
-        firstResult && isRecord(firstResult.data) ? (firstResult.data as Record<string, unknown>) : null;
+        firstResult && isRecord(firstResult.data)
+          ? (firstResult.data as Record<string, unknown>)
+          : null;
       return {
         index,
         params: isRecord(s.params) ? (s.params as Record<string, unknown>) : null,
@@ -243,6 +255,42 @@ function configureExperiment({
     extractGroundTruth: (referenceOutput: DatasetExample['output']) =>
       referenceOutput?.groundTruth ?? {},
   });
+
+  // Tool-call trajectory evaluator (CODE-judged, zero LLM cost). Scores
+  // LCS-based order alignment (weight 0.6) + set-based coverage (weight
+  // 0.4) against the example's `tool_sequence` golden, after filtering
+  // infrastructure tools (`filestore.read` is already scored by
+  // `ExpectedSkillInvocation` and would otherwise inflate the "extra
+  // tools" delta). Examples without a `tool_sequence` annotation return
+  // `score: null, label: 'N/A'` so incremental annotation is safe — the
+  // raw evaluator would otherwise score 1.0 for unannotated examples
+  // when no tools are called and 0.0 when any are, both of which would
+  // pollute the suite average.
+  const TRAJECTORY_INFRA_TOOL_IDS = new Set(['filestore.read']);
+  const baseTrajectoryEvaluator = createTrajectoryEvaluator({
+    extractToolCalls: (output) =>
+      getToolCallSteps(output as TaskOutput)
+        .map((s) => s.tool_id)
+        .filter((id): id is string => Boolean(id) && !TRAJECTORY_INFRA_TOOL_IDS.has(id!)),
+    goldenPathExtractor: (expected) => (expected as DatasetExample['output'])?.tool_sequence ?? [],
+    orderWeight: 0.6,
+    coverageWeight: 0.4,
+  });
+  const trajectoryEvaluator = {
+    ...baseTrajectoryEvaluator,
+    name: 'Trajectory',
+    evaluate: async (args: Parameters<typeof baseTrajectoryEvaluator.evaluate>[0]) => {
+      const golden = (args.expected as DatasetExample['output'])?.tool_sequence;
+      if (!golden || golden.length === 0) {
+        return {
+          score: null as null,
+          label: 'N/A' as const,
+          explanation: 'No tool_sequence golden defined for this example — skipping trajectory.',
+        };
+      }
+      return baseTrajectoryEvaluator.evaluate(args);
+    },
+  };
 
   const selectedEvaluators = selectEvaluators([
     {
@@ -585,8 +633,22 @@ function configureExperiment({
         };
       },
     },
-    ...createQuantitativeCorrectnessEvaluators(),
+    // `createQuantitativeCorrectnessEvaluators()` returns three derived
+    // scores: Factuality, Relevance, Sequence Accuracy. Drop Sequence
+    // Accuracy here — it is an LLM-judged tool-ordering signal that
+    // duplicates the code-judged `Trajectory` evaluator above
+    // (LCS + set, zero LLM cost, sharper failure modes). Keep
+    // Factuality (and Relevance for now) as the LLM-judged content
+    // layer.
+    ...createQuantitativeCorrectnessEvaluators().filter((e) => e.name !== 'Sequence Accuracy'),
     createQuantitativeGroundednessEvaluator(),
+    trajectoryEvaluator,
+    // RAG evaluators (Precision@K/Recall@K/F1@K) stay wired so the
+    // sister kb.spec.ts dataset (which carries `groundTruth`) keeps its
+    // signal. They return `null` for examples without `groundTruth`
+    // (e.g. all security examples), so they appear as null columns in
+    // this suite's report without consuming LLM or ES budget. Removing
+    // them would silently regress the knowledge-base evaluation.
     ...ragEvaluators,
     ...Object.values({
       ...evaluators.traceBasedEvaluators,
@@ -711,9 +773,8 @@ export function createEvaluateDataset({
     // signal without crashing the box. The env var EVALUATION_CONCURRENCY can
     // override the default if a beefier env wants the original throughput.
     const concurrencyFromEnv = parseInt(process.env.EVALUATION_CONCURRENCY || '', 10);
-    const concurrency = Number.isFinite(concurrencyFromEnv) && concurrencyFromEnv > 0
-      ? concurrencyFromEnv
-      : 2;
+    const concurrency =
+      Number.isFinite(concurrencyFromEnv) && concurrencyFromEnv > 0 ? concurrencyFromEnv : 2;
 
     await executorClient.runExperiment(
       {

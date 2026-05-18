@@ -65,6 +65,16 @@ evaluate.describe(
                 output: {
                   expected:
                     'I will help triage this LSASS credential access alert by first fetching the alert details, then searching for related alerts on WIN-SRV01, checking threat intelligence in Security Labs, and assessing the host risk score.',
+                  // Skill body prescribes a four-step triage. No alertId in the
+                  // question so `workflow_execute_step` correlation is not
+                  // expected. Minimum-sufficient sequence: alert fetch, intel,
+                  // entity risk. Extras (e.g. entity-analytics inline) are
+                  // tolerated by LCS.
+                  tool_sequence: [
+                    'security.alerts',
+                    'security.security_labs_search',
+                    'security.entity_risk_score',
+                  ],
                 },
                 metadata: {
                   query_intent: 'Alert Triage',
@@ -80,6 +90,7 @@ evaluate.describe(
                 output: {
                   expected:
                     'I will search for high and critical severity alerts from the past 24 hours, correlate them with entity risk scores, and prioritize based on severity, affected entity criticality, and MITRE ATT&CK technique.',
+                  tool_sequence: ['security.alerts'],
                 },
                 metadata: {
                   query_intent: 'Alert Triage',
@@ -96,6 +107,7 @@ evaluate.describe(
                 output: {
                   expected:
                     'I will search Elastic Security Labs for threat intelligence on the Lazarus Group, including their known TTPs, malware families, and indicators of compromise.',
+                  tool_sequence: ['security.security_labs_search'],
                 },
                 metadata: {
                   query_intent: 'Threat Intelligence',
@@ -121,6 +133,7 @@ evaluate.describe(
                 output: {
                   expected:
                     'I will look up the entity risk score for host DC01 to assess its current risk level and any recent changes in risk indicators.',
+                  tool_sequence: ['security.entity_analytics.risk_score'],
                 },
                 metadata: {
                   query_intent: 'Risk Assessment',
@@ -147,6 +160,13 @@ evaluate.describe(
                 output: {
                   expected:
                     'I will call the related alerts internal API for alert test-alert-id-123 and summarize correlated entities from the last 24 hours.',
+                  // The B3 anchor: the v6 skill must dispatch through
+                  // workflow_execute_step. Discovery-first
+                  // (get_step_definitions) is intentionally NOT in this
+                  // golden because Discovery_First_Pattern_Usage already
+                  // measures that signal separately; over-specifying the
+                  // golden here would double-count.
+                  tool_sequence: ['platform.workflows.workflow_execute_step'],
                 },
                 metadata: {
                   query_intent: 'Alert Correlation',
