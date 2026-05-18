@@ -72,7 +72,6 @@ export class RenderingService {
   private readonly themeName$ = new BehaviorSubject<ThemeName>(DEFAULT_THEME_NAME);
   private airgapped: boolean = false;
   private isCoreRenderingInReactConcurrentMode: boolean = true;
-  // Optional so `render()` is safe to call before `start()` runs.
   private userStorageStart?: UserStorageServiceStart;
   constructor(private readonly coreContext: CoreContext) {}
 
