@@ -299,21 +299,16 @@ function normalizeDescription(attributes: LensAttributes) {
  * actual field type at runtime. These are the known remappings the transform applies.
  */
 function normalizeDataTypes(col: GenericIndexPatternColumn) {
-  const original = col.dataType;
-  if (col.operationType === 'terms' && original === 'number') {
+  const { dataType, isBucketed, operationType } = col;
+  if (operationType === 'terms' && dataType === 'number') {
     col.dataType = 'string';
-    return;
-  }
-  if (
-    !col.isBucketed &&
-    (original === 'date' || original === 'string' || original === 'ip' || original === 'boolean')
+  } else if (
+    !isBucketed &&
+    (dataType === 'date' || dataType === 'string' || dataType === 'ip' || dataType === 'boolean')
   ) {
     col.dataType = 'number';
-    return;
-  }
-  if (col.isBucketed && (original === 'ip' || original === 'boolean')) {
+  } else if (isBucketed && (dataType === 'ip' || dataType === 'boolean')) {
     col.dataType = 'string';
-    return;
   }
 }
 
