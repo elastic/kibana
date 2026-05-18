@@ -22,6 +22,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useDebounceFn } from '@kbn/react-hooks';
 import type { FormValues } from '../../form/types';
 import type { RuleFormServices } from '../../form/contexts/rule_form_context';
 import { RuleFormProvider } from '../../form/contexts/rule_form_context';
@@ -44,7 +45,6 @@ import { useEsqlAutocomplete } from './use_esql_providers';
 import { useSplitQueryCompletion } from './use_split_query_completion';
 import { useSandboxDraft, draftToRuleQuery } from './use_sandbox_draft';
 import { splitQuery, guessRecoveryBlock } from './use_heuristic_split';
-import { useDebounceFn } from '@kbn/react-hooks';
 
 const LazyYamlRuleForm = React.lazy(() =>
   import('../../form/yaml_rule_form').then((m) => ({ default: m.YamlRuleForm }))
