@@ -10,5 +10,6 @@ export const SLO_DETAILS_EBT_ACTIONS = {
 } as const;
 
 export const SLO_DETAILS_EBT_ELEMENTS = {
+  SLI_CHART: 'sloDetailsSliChart',
   GOOD_VS_BAD_EVENTS_CHART: 'sloDetailsGoodVsBadEventsChart',
 } as const;
