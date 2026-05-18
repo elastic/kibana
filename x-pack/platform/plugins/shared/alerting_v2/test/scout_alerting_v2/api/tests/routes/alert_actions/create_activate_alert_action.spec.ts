@@ -7,12 +7,14 @@
 
 import { expect } from '@kbn/scout/api';
 import type { RoleApiCredentials } from '@kbn/scout';
-import { ALL_ROLE, apiTest, NO_ACCESS_ROLE, READ_ROLE, testData } from '../../../fixtures';
-
-const ALERT_API_PATH = '/api/alerting/v2/alerts';
-
-const activateUrl = (groupHash: string) =>
-  `${ALERT_API_PATH}/${encodeURIComponent(groupHash)}/_activate`;
+import {
+  ALL_ROLE,
+  apiTest,
+  getActivateAlertActionUrl,
+  NO_ACCESS_ROLE,
+  READ_ROLE,
+  testData,
+} from '../../../fixtures';
 
 apiTest.describe('Create activate alert action API', { tag: '@local-stateful-classic' }, () => {
   let writerCredentials: RoleApiCredentials;
@@ -44,7 +46,7 @@ apiTest.describe('Create activate alert action API', { tag: '@local-stateful-cla
           episode: { id: 'activate-happy-episode', status: 'active' },
         },
       ]);
-      const response = await apiClient.post(activateUrl(groupHash), {
+      const response = await apiClient.post(getActivateAlertActionUrl(groupHash), {
         headers: writerHeaders,
         body: { reason },
       });
@@ -62,7 +64,7 @@ apiTest.describe('Create activate alert action API', { tag: '@local-stateful-cla
   );
 
   apiTest('schema: rejects body missing reason with 400', async ({ apiClient }) => {
-    const response = await apiClient.post(activateUrl('any-group'), {
+    const response = await apiClient.post(getActivateAlertActionUrl('any-group'), {
       headers: writerHeaders,
       body: {},
     });
@@ -70,7 +72,7 @@ apiTest.describe('Create activate alert action API', { tag: '@local-stateful-cla
   });
 
   apiTest('schema: rejects empty reason with 400', async ({ apiClient }) => {
-    const response = await apiClient.post(activateUrl('any-group'), {
+    const response = await apiClient.post(getActivateAlertActionUrl('any-group'), {
       headers: writerHeaders,
       body: { reason: '' },
     });
@@ -78,7 +80,7 @@ apiTest.describe('Create activate alert action API', { tag: '@local-stateful-cla
   });
 
   apiTest('schema: rejects reason over 1024 chars with 400', async ({ apiClient }) => {
-    const response = await apiClient.post(activateUrl('any-group'), {
+    const response = await apiClient.post(getActivateAlertActionUrl('any-group'), {
       headers: writerHeaders,
       body: { reason: 'a'.repeat(1025) },
     });
@@ -86,7 +88,7 @@ apiTest.describe('Create activate alert action API', { tag: '@local-stateful-cla
   });
 
   apiTest('schema: rejects unknown body fields (strict mode) with 400', async ({ apiClient }) => {
-    const response = await apiClient.post(activateUrl('any-group'), {
+    const response = await apiClient.post(getActivateAlertActionUrl('any-group'), {
       headers: writerHeaders,
       body: { reason: 'valid', extra: 'nope' },
     });
@@ -94,7 +96,7 @@ apiTest.describe('Create activate alert action API', { tag: '@local-stateful-cla
   });
 
   apiTest('schema: rejects group_hash over 256 chars with 400', async ({ apiClient }) => {
-    const response = await apiClient.post(activateUrl('a'.repeat(257)), {
+    const response = await apiClient.post(getActivateAlertActionUrl('a'.repeat(257)), {
       headers: writerHeaders,
       body: { reason: 'valid reason' },
     });
@@ -102,7 +104,7 @@ apiTest.describe('Create activate alert action API', { tag: '@local-stateful-cla
   });
 
   apiTest('returns 404 when group_hash matches no events', async ({ apiClient }) => {
-    const response = await apiClient.post(activateUrl('unknown-group'), {
+    const response = await apiClient.post(getActivateAlertActionUrl('unknown-group'), {
       headers: writerHeaders,
       body: { reason: 'valid reason' },
     });
@@ -122,7 +124,7 @@ apiTest.describe('Create activate alert action API', { tag: '@local-stateful-cla
         },
       ]);
       const readerCredentials = await requestAuth.getApiKeyForCustomRole(READ_ROLE);
-      const response = await apiClient.post(activateUrl(groupHash), {
+      const response = await apiClient.post(getActivateAlertActionUrl(groupHash), {
         headers: { ...testData.COMMON_HEADERS, ...readerCredentials.apiKeyHeader },
         body: { reason: 'valid reason' },
       });
@@ -143,7 +145,7 @@ apiTest.describe('Create activate alert action API', { tag: '@local-stateful-cla
         },
       ]);
       const noAccessCredentials = await requestAuth.getApiKeyForCustomRole(NO_ACCESS_ROLE);
-      const response = await apiClient.post(activateUrl(groupHash), {
+      const response = await apiClient.post(getActivateAlertActionUrl(groupHash), {
         headers: { ...testData.COMMON_HEADERS, ...noAccessCredentials.apiKeyHeader },
         body: { reason: 'valid reason' },
       });

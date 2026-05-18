@@ -7,12 +7,14 @@
 
 import { expect } from '@kbn/scout/api';
 import type { RoleApiCredentials } from '@kbn/scout';
-import { ALL_ROLE, apiTest, NO_ACCESS_ROLE, READ_ROLE, testData } from '../../../fixtures';
-
-const ALERT_API_PATH = '/api/alerting/v2/alerts';
-
-const deactivateUrl = (groupHash: string) =>
-  `${ALERT_API_PATH}/${encodeURIComponent(groupHash)}/_deactivate`;
+import {
+  ALL_ROLE,
+  apiTest,
+  getDeactivateAlertActionUrl,
+  NO_ACCESS_ROLE,
+  READ_ROLE,
+  testData,
+} from '../../../fixtures';
 
 apiTest.describe('Create deactivate alert action API', { tag: '@local-stateful-classic' }, () => {
   let writerCredentials: RoleApiCredentials;
@@ -46,7 +48,7 @@ apiTest.describe('Create deactivate alert action API', { tag: '@local-stateful-c
         },
       ]);
 
-      const response = await apiClient.post(deactivateUrl(groupHash), {
+      const response = await apiClient.post(getDeactivateAlertActionUrl(groupHash), {
         headers: writerHeaders,
         body: { reason },
       });
@@ -66,7 +68,7 @@ apiTest.describe('Create deactivate alert action API', { tag: '@local-stateful-c
   );
 
   apiTest('schema: rejects body missing reason with 400', async ({ apiClient }) => {
-    const response = await apiClient.post(deactivateUrl('any-group'), {
+    const response = await apiClient.post(getDeactivateAlertActionUrl('any-group'), {
       headers: writerHeaders,
       body: {},
     });
@@ -75,7 +77,7 @@ apiTest.describe('Create deactivate alert action API', { tag: '@local-stateful-c
   });
 
   apiTest('schema: rejects empty reason with 400', async ({ apiClient }) => {
-    const response = await apiClient.post(deactivateUrl('any-group'), {
+    const response = await apiClient.post(getDeactivateAlertActionUrl('any-group'), {
       headers: writerHeaders,
       body: { reason: '' },
     });
@@ -84,7 +86,7 @@ apiTest.describe('Create deactivate alert action API', { tag: '@local-stateful-c
   });
 
   apiTest('schema: rejects reason over 1024 chars with 400', async ({ apiClient }) => {
-    const response = await apiClient.post(deactivateUrl('any-group'), {
+    const response = await apiClient.post(getDeactivateAlertActionUrl('any-group'), {
       headers: writerHeaders,
       body: { reason: 'a'.repeat(1025) },
     });
@@ -93,7 +95,7 @@ apiTest.describe('Create deactivate alert action API', { tag: '@local-stateful-c
   });
 
   apiTest('schema: rejects unknown body fields (strict mode) with 400', async ({ apiClient }) => {
-    const response = await apiClient.post(deactivateUrl('any-group'), {
+    const response = await apiClient.post(getDeactivateAlertActionUrl('any-group'), {
       headers: writerHeaders,
       body: { reason: 'valid', extra: 'nope' },
     });
@@ -102,7 +104,7 @@ apiTest.describe('Create deactivate alert action API', { tag: '@local-stateful-c
   });
 
   apiTest('schema: rejects group_hash over 256 chars with 400', async ({ apiClient }) => {
-    const response = await apiClient.post(deactivateUrl('a'.repeat(257)), {
+    const response = await apiClient.post(getDeactivateAlertActionUrl('a'.repeat(257)), {
       headers: writerHeaders,
       body: { reason: 'valid reason' },
     });
@@ -111,7 +113,7 @@ apiTest.describe('Create deactivate alert action API', { tag: '@local-stateful-c
   });
 
   apiTest('returns 404 when group_hash matches no events', async ({ apiClient }) => {
-    const response = await apiClient.post(deactivateUrl('unknown-group'), {
+    const response = await apiClient.post(getDeactivateAlertActionUrl('unknown-group'), {
       headers: writerHeaders,
       body: { reason: 'valid reason' },
     });
@@ -135,7 +137,7 @@ apiTest.describe('Create deactivate alert action API', { tag: '@local-stateful-c
 
       const readerCredentials = await requestAuth.getApiKeyForCustomRole(READ_ROLE);
 
-      const response = await apiClient.post(deactivateUrl(groupHash), {
+      const response = await apiClient.post(getDeactivateAlertActionUrl(groupHash), {
         headers: { ...testData.COMMON_HEADERS, ...readerCredentials.apiKeyHeader },
         body: { reason: 'valid reason' },
       });
@@ -160,7 +162,7 @@ apiTest.describe('Create deactivate alert action API', { tag: '@local-stateful-c
 
       const noAccessCredentials = await requestAuth.getApiKeyForCustomRole(NO_ACCESS_ROLE);
 
-      const response = await apiClient.post(deactivateUrl(groupHash), {
+      const response = await apiClient.post(getDeactivateAlertActionUrl(groupHash), {
         headers: { ...testData.COMMON_HEADERS, ...noAccessCredentials.apiKeyHeader },
         body: { reason: 'valid reason' },
       });

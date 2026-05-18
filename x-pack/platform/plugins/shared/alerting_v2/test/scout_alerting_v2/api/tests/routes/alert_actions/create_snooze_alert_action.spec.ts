@@ -7,12 +7,14 @@
 
 import { expect } from '@kbn/scout/api';
 import type { RoleApiCredentials } from '@kbn/scout';
-import { ALL_ROLE, apiTest, NO_ACCESS_ROLE, READ_ROLE, testData } from '../../../fixtures';
-
-const ALERT_API_PATH = '/api/alerting/v2/alerts';
-
-const snoozeUrl = (groupHash: string) =>
-  `${ALERT_API_PATH}/${encodeURIComponent(groupHash)}/_snooze`;
+import {
+  ALL_ROLE,
+  apiTest,
+  getSnoozeAlertActionUrl,
+  NO_ACCESS_ROLE,
+  READ_ROLE,
+  testData,
+} from '../../../fixtures';
 
 apiTest.describe('Create snooze alert action API', { tag: '@local-stateful-classic' }, () => {
   let writerCredentials: RoleApiCredentials;
@@ -44,7 +46,7 @@ apiTest.describe('Create snooze alert action API', { tag: '@local-stateful-class
           episode: { id: 'snooze-happy-episode', status: 'active' },
         },
       ]);
-      const response = await apiClient.post(snoozeUrl(groupHash), {
+      const response = await apiClient.post(getSnoozeAlertActionUrl(groupHash), {
         headers: writerHeaders,
         body: { expiry },
       });
@@ -73,7 +75,7 @@ apiTest.describe('Create snooze alert action API', { tag: '@local-stateful-class
           episode: { id: 'snooze-no-expiry-episode', status: 'active' },
         },
       ]);
-      const response = await apiClient.post(snoozeUrl(groupHash), {
+      const response = await apiClient.post(getSnoozeAlertActionUrl(groupHash), {
         headers: writerHeaders,
         body: {},
       });
@@ -90,7 +92,7 @@ apiTest.describe('Create snooze alert action API', { tag: '@local-stateful-class
   );
 
   apiTest('schema: rejects expiry that is not ISO 8601 with 400', async ({ apiClient }) => {
-    const response = await apiClient.post(snoozeUrl('any-group'), {
+    const response = await apiClient.post(getSnoozeAlertActionUrl('any-group'), {
       headers: writerHeaders,
       body: { expiry: 'not-a-date' },
     });
@@ -100,7 +102,7 @@ apiTest.describe('Create snooze alert action API', { tag: '@local-stateful-class
   apiTest('schema: rejects expiry without the time component with 400', async ({ apiClient }) => {
     // `z.iso.datetime()` requires a full ISO 8601 datetime; a date-only value
     // like `2099-01-01` should be rejected.
-    const response = await apiClient.post(snoozeUrl('any-group'), {
+    const response = await apiClient.post(getSnoozeAlertActionUrl('any-group'), {
       headers: writerHeaders,
       body: { expiry: '2099-01-01' },
     });
@@ -108,7 +110,7 @@ apiTest.describe('Create snooze alert action API', { tag: '@local-stateful-class
   });
 
   apiTest('schema: rejects unknown body fields (strict mode) with 400', async ({ apiClient }) => {
-    const response = await apiClient.post(snoozeUrl('any-group'), {
+    const response = await apiClient.post(getSnoozeAlertActionUrl('any-group'), {
       headers: writerHeaders,
       body: { extra: 'nope' },
     });
@@ -116,7 +118,7 @@ apiTest.describe('Create snooze alert action API', { tag: '@local-stateful-class
   });
 
   apiTest('schema: rejects group_hash over 256 chars with 400', async ({ apiClient }) => {
-    const response = await apiClient.post(snoozeUrl('a'.repeat(257)), {
+    const response = await apiClient.post(getSnoozeAlertActionUrl('a'.repeat(257)), {
       headers: writerHeaders,
       body: {},
     });
@@ -124,7 +126,7 @@ apiTest.describe('Create snooze alert action API', { tag: '@local-stateful-class
   });
 
   apiTest('returns 404 when group_hash matches no events', async ({ apiClient }) => {
-    const response = await apiClient.post(snoozeUrl('unknown-group'), {
+    const response = await apiClient.post(getSnoozeAlertActionUrl('unknown-group'), {
       headers: writerHeaders,
       body: {},
     });
@@ -144,7 +146,7 @@ apiTest.describe('Create snooze alert action API', { tag: '@local-stateful-class
         },
       ]);
       const readerCredentials = await requestAuth.getApiKeyForCustomRole(READ_ROLE);
-      const response = await apiClient.post(snoozeUrl(groupHash), {
+      const response = await apiClient.post(getSnoozeAlertActionUrl(groupHash), {
         headers: { ...testData.COMMON_HEADERS, ...readerCredentials.apiKeyHeader },
         body: {},
       });
@@ -165,7 +167,7 @@ apiTest.describe('Create snooze alert action API', { tag: '@local-stateful-class
         },
       ]);
       const noAccessCredentials = await requestAuth.getApiKeyForCustomRole(NO_ACCESS_ROLE);
-      const response = await apiClient.post(snoozeUrl(groupHash), {
+      const response = await apiClient.post(getSnoozeAlertActionUrl(groupHash), {
         headers: { ...testData.COMMON_HEADERS, ...noAccessCredentials.apiKeyHeader },
         body: {},
       });

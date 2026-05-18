@@ -7,12 +7,14 @@
 
 import { expect } from '@kbn/scout/api';
 import type { RoleApiCredentials } from '@kbn/scout';
-import { ALL_ROLE, apiTest, NO_ACCESS_ROLE, READ_ROLE, testData } from '../../../fixtures';
-
-const ALERT_API_PATH = '/api/alerting/v2/alerts';
-
-const unsnoozeUrl = (groupHash: string) =>
-  `${ALERT_API_PATH}/${encodeURIComponent(groupHash)}/_unsnooze`;
+import {
+  ALL_ROLE,
+  apiTest,
+  getUnsnoozeAlertActionUrl,
+  NO_ACCESS_ROLE,
+  READ_ROLE,
+  testData,
+} from '../../../fixtures';
 
 apiTest.describe('Create unsnooze alert action API', { tag: '@local-stateful-classic' }, () => {
   let writerCredentials: RoleApiCredentials;
@@ -45,7 +47,7 @@ apiTest.describe('Create unsnooze alert action API', { tag: '@local-stateful-cla
         },
       ]);
 
-      const response = await apiClient.post(unsnoozeUrl(groupHash), {
+      const response = await apiClient.post(getUnsnoozeAlertActionUrl(groupHash), {
         headers: writerHeaders,
         body: {},
       });
@@ -64,7 +66,7 @@ apiTest.describe('Create unsnooze alert action API', { tag: '@local-stateful-cla
   );
 
   apiTest('schema: rejects unknown body fields (strict mode) with 400', async ({ apiClient }) => {
-    const response = await apiClient.post(unsnoozeUrl('any-group'), {
+    const response = await apiClient.post(getUnsnoozeAlertActionUrl('any-group'), {
       headers: writerHeaders,
       body: { extra: 'nope' },
     });
@@ -73,7 +75,7 @@ apiTest.describe('Create unsnooze alert action API', { tag: '@local-stateful-cla
   });
 
   apiTest('schema: rejects group_hash over 256 chars with 400', async ({ apiClient }) => {
-    const response = await apiClient.post(unsnoozeUrl('a'.repeat(257)), {
+    const response = await apiClient.post(getUnsnoozeAlertActionUrl('a'.repeat(257)), {
       headers: writerHeaders,
       body: {},
     });
@@ -82,7 +84,7 @@ apiTest.describe('Create unsnooze alert action API', { tag: '@local-stateful-cla
   });
 
   apiTest('returns 404 when group_hash matches no events', async ({ apiClient }) => {
-    const response = await apiClient.post(unsnoozeUrl('unknown-group'), {
+    const response = await apiClient.post(getUnsnoozeAlertActionUrl('unknown-group'), {
       headers: writerHeaders,
       body: {},
     });
@@ -106,7 +108,7 @@ apiTest.describe('Create unsnooze alert action API', { tag: '@local-stateful-cla
 
       const readerCredentials = await requestAuth.getApiKeyForCustomRole(READ_ROLE);
 
-      const response = await apiClient.post(unsnoozeUrl(groupHash), {
+      const response = await apiClient.post(getUnsnoozeAlertActionUrl(groupHash), {
         headers: { ...testData.COMMON_HEADERS, ...readerCredentials.apiKeyHeader },
         body: {},
       });
@@ -131,7 +133,7 @@ apiTest.describe('Create unsnooze alert action API', { tag: '@local-stateful-cla
 
       const noAccessCredentials = await requestAuth.getApiKeyForCustomRole(NO_ACCESS_ROLE);
 
-      const response = await apiClient.post(unsnoozeUrl(groupHash), {
+      const response = await apiClient.post(getUnsnoozeAlertActionUrl(groupHash), {
         headers: { ...testData.COMMON_HEADERS, ...noAccessCredentials.apiKeyHeader },
         body: {},
       });

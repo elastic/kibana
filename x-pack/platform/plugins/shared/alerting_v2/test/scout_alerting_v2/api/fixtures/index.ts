@@ -75,6 +75,17 @@ export const apiTest = baseApiTest.extend<{}, { apiServices: AlertingApiServices
 
 export { ALL_ROLE, NO_ACCESS_ROLE, READ_ROLE } from '../../common/roles';
 export { buildCreateRuleData } from '../../common/builders';
-export { getRuleUrl } from '../../common/urls';
+export {
+  getRuleUrl,
+  getAckAlertActionUrl,
+  getUnackAlertActionUrl,
+  getAssignAlertActionUrl,
+  getTagAlertActionUrl,
+  getSnoozeAlertActionUrl,
+  getUnsnoozeAlertActionUrl,
+  getActivateAlertActionUrl,
+  getDeactivateAlertActionUrl,
+  BULK_ALERT_ACTION_URL,
+} from '../../common/urls';
 export { expectNoBulkTruncationMetadata } from '../../common/assertions';
 export * as testData from '../../common/constants';

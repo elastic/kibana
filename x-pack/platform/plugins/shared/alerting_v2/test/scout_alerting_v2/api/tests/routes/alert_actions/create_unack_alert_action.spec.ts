@@ -6,10 +6,14 @@
  */
 import { expect } from '@kbn/scout/api';
 import type { RoleApiCredentials } from '@kbn/scout';
-import { ALL_ROLE, apiTest, NO_ACCESS_ROLE, READ_ROLE, testData } from '../../../fixtures';
-
-const ALERT_API_PATH = '/api/alerting/v2/alerts';
-const unackUrl = (groupHash: string) => `${ALERT_API_PATH}/${encodeURIComponent(groupHash)}/_unack`;
+import {
+  ALL_ROLE,
+  apiTest,
+  getUnackAlertActionUrl,
+  NO_ACCESS_ROLE,
+  READ_ROLE,
+  testData,
+} from '../../../fixtures';
 
 apiTest.describe('Create unack alert action API', { tag: '@local-stateful-classic' }, () => {
   let writerCredentials: RoleApiCredentials;
@@ -39,7 +43,7 @@ apiTest.describe('Create unack alert action API', { tag: '@local-stateful-classi
         episode: { id: episodeId, status: 'active' },
       },
     ]);
-    const response = await apiClient.post(unackUrl(groupHash), {
+    const response = await apiClient.post(getUnackAlertActionUrl(groupHash), {
       headers: writerHeaders,
       body: { episode_id: episodeId },
     });
@@ -56,7 +60,7 @@ apiTest.describe('Create unack alert action API', { tag: '@local-stateful-classi
   });
 
   apiTest('schema: rejects body missing episode_id with 400', async ({ apiClient }) => {
-    const response = await apiClient.post(unackUrl('any-group'), {
+    const response = await apiClient.post(getUnackAlertActionUrl('any-group'), {
       headers: writerHeaders,
       body: {},
     });
@@ -64,7 +68,7 @@ apiTest.describe('Create unack alert action API', { tag: '@local-stateful-classi
   });
 
   apiTest('schema: rejects empty episode_id with 400', async ({ apiClient }) => {
-    const response = await apiClient.post(unackUrl('any-group'), {
+    const response = await apiClient.post(getUnackAlertActionUrl('any-group'), {
       headers: writerHeaders,
       body: { episode_id: '' },
     });
@@ -72,7 +76,7 @@ apiTest.describe('Create unack alert action API', { tag: '@local-stateful-classi
   });
 
   apiTest('schema: rejects episode_id over 150 chars with 400', async ({ apiClient }) => {
-    const response = await apiClient.post(unackUrl('any-group'), {
+    const response = await apiClient.post(getUnackAlertActionUrl('any-group'), {
       headers: writerHeaders,
       body: { episode_id: 'a'.repeat(151) },
     });
@@ -80,7 +84,7 @@ apiTest.describe('Create unack alert action API', { tag: '@local-stateful-classi
   });
 
   apiTest('schema: rejects unknown body fields (strict mode) with 400', async ({ apiClient }) => {
-    const response = await apiClient.post(unackUrl('any-group'), {
+    const response = await apiClient.post(getUnackAlertActionUrl('any-group'), {
       headers: writerHeaders,
       body: { episode_id: 'some-episode', extra: 'nope' },
     });
@@ -88,7 +92,7 @@ apiTest.describe('Create unack alert action API', { tag: '@local-stateful-classi
   });
 
   apiTest('schema: rejects group_hash over 256 chars with 400', async ({ apiClient }) => {
-    const response = await apiClient.post(unackUrl('a'.repeat(257)), {
+    const response = await apiClient.post(getUnackAlertActionUrl('a'.repeat(257)), {
       headers: writerHeaders,
       body: { episode_id: 'some-episode' },
     });
@@ -96,7 +100,7 @@ apiTest.describe('Create unack alert action API', { tag: '@local-stateful-classi
   });
 
   apiTest('returns 404 when group_hash matches no events', async ({ apiClient }) => {
-    const response = await apiClient.post(unackUrl('unknown-group'), {
+    const response = await apiClient.post(getUnackAlertActionUrl('unknown-group'), {
       headers: writerHeaders,
       body: { episode_id: 'unknown-episode' },
     });
@@ -115,7 +119,7 @@ apiTest.describe('Create unack alert action API', { tag: '@local-stateful-classi
           episode: { id: 'real-episode', status: 'active' },
         },
       ]);
-      const response = await apiClient.post(unackUrl(groupHash), {
+      const response = await apiClient.post(getUnackAlertActionUrl(groupHash), {
         headers: writerHeaders,
         body: { episode_id: 'unknown-episode' },
       });
@@ -137,7 +141,7 @@ apiTest.describe('Create unack alert action API', { tag: '@local-stateful-classi
         },
       ]);
       const readerCredentials = await requestAuth.getApiKeyForCustomRole(READ_ROLE);
-      const response = await apiClient.post(unackUrl(groupHash), {
+      const response = await apiClient.post(getUnackAlertActionUrl(groupHash), {
         headers: { ...testData.COMMON_HEADERS, ...readerCredentials.apiKeyHeader },
         body: { episode_id: episodeId },
       });
@@ -159,7 +163,7 @@ apiTest.describe('Create unack alert action API', { tag: '@local-stateful-classi
         },
       ]);
       const noAccessCredentials = await requestAuth.getApiKeyForCustomRole(NO_ACCESS_ROLE);
-      const response = await apiClient.post(unackUrl(groupHash), {
+      const response = await apiClient.post(getUnackAlertActionUrl(groupHash), {
         headers: { ...testData.COMMON_HEADERS, ...noAccessCredentials.apiKeyHeader },
         body: { episode_id: episodeId },
       });

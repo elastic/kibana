@@ -7,11 +7,14 @@
 
 import { expect } from '@kbn/scout/api';
 import type { RoleApiCredentials } from '@kbn/scout';
-import { ALL_ROLE, apiTest, NO_ACCESS_ROLE, READ_ROLE, testData } from '../../../fixtures';
-
-const ALERT_API_PATH = '/api/alerting/v2/alerts';
-
-const ackUrl = (groupHash: string) => `${ALERT_API_PATH}/${encodeURIComponent(groupHash)}/_ack`;
+import {
+  ALL_ROLE,
+  apiTest,
+  getAckAlertActionUrl,
+  NO_ACCESS_ROLE,
+  READ_ROLE,
+  testData,
+} from '../../../fixtures';
 
 /*
  * Authorization tests below use `requestAuth.getApiKeyForCustomRole`, which
@@ -47,7 +50,7 @@ apiTest.describe('Create ack alert action API', { tag: '@local-stateful-classic'
         episode: { id: episodeId, status: 'active' },
       },
     ]);
-    const response = await apiClient.post(ackUrl(groupHash), {
+    const response = await apiClient.post(getAckAlertActionUrl(groupHash), {
       headers: writerHeaders,
       body: { episode_id: episodeId },
     });
@@ -64,7 +67,7 @@ apiTest.describe('Create ack alert action API', { tag: '@local-stateful-classic'
   });
 
   apiTest('schema: rejects body missing episode_id with 400', async ({ apiClient }) => {
-    const response = await apiClient.post(ackUrl('any-group'), {
+    const response = await apiClient.post(getAckAlertActionUrl('any-group'), {
       headers: writerHeaders,
       body: {},
     });
@@ -72,7 +75,7 @@ apiTest.describe('Create ack alert action API', { tag: '@local-stateful-classic'
   });
 
   apiTest('schema: rejects empty episode_id with 400', async ({ apiClient }) => {
-    const response = await apiClient.post(ackUrl('any-group'), {
+    const response = await apiClient.post(getAckAlertActionUrl('any-group'), {
       headers: writerHeaders,
       body: { episode_id: '' },
     });
@@ -80,7 +83,7 @@ apiTest.describe('Create ack alert action API', { tag: '@local-stateful-classic'
   });
 
   apiTest('schema: rejects episode_id over 150 chars with 400', async ({ apiClient }) => {
-    const response = await apiClient.post(ackUrl('any-group'), {
+    const response = await apiClient.post(getAckAlertActionUrl('any-group'), {
       headers: writerHeaders,
       body: { episode_id: 'a'.repeat(151) },
     });
@@ -88,7 +91,7 @@ apiTest.describe('Create ack alert action API', { tag: '@local-stateful-classic'
   });
 
   apiTest('schema: rejects unknown body fields (strict mode) with 400', async ({ apiClient }) => {
-    const response = await apiClient.post(ackUrl('any-group'), {
+    const response = await apiClient.post(getAckAlertActionUrl('any-group'), {
       headers: writerHeaders,
       body: { episode_id: 'some-episode', extra: 'nope' },
     });
@@ -96,7 +99,7 @@ apiTest.describe('Create ack alert action API', { tag: '@local-stateful-classic'
   });
 
   apiTest('schema: rejects group_hash over 256 chars with 400', async ({ apiClient }) => {
-    const response = await apiClient.post(ackUrl('a'.repeat(257)), {
+    const response = await apiClient.post(getAckAlertActionUrl('a'.repeat(257)), {
       headers: writerHeaders,
       body: { episode_id: 'some-episode' },
     });
@@ -104,7 +107,7 @@ apiTest.describe('Create ack alert action API', { tag: '@local-stateful-classic'
   });
 
   apiTest('returns 404 when group_hash matches no events', async ({ apiClient }) => {
-    const response = await apiClient.post(ackUrl('unknown-group'), {
+    const response = await apiClient.post(getAckAlertActionUrl('unknown-group'), {
       headers: writerHeaders,
       body: { episode_id: 'unknown-episode' },
     });
@@ -123,7 +126,7 @@ apiTest.describe('Create ack alert action API', { tag: '@local-stateful-classic'
           episode: { id: 'real-episode', status: 'active' },
         },
       ]);
-      const response = await apiClient.post(ackUrl(groupHash), {
+      const response = await apiClient.post(getAckAlertActionUrl(groupHash), {
         headers: writerHeaders,
         body: { episode_id: 'unknown-episode' },
       });
@@ -145,7 +148,7 @@ apiTest.describe('Create ack alert action API', { tag: '@local-stateful-classic'
         },
       ]);
       const readerCredentials = await requestAuth.getApiKeyForCustomRole(READ_ROLE);
-      const response = await apiClient.post(ackUrl(groupHash), {
+      const response = await apiClient.post(getAckAlertActionUrl(groupHash), {
         headers: { ...testData.COMMON_HEADERS, ...readerCredentials.apiKeyHeader },
         body: { episode_id: episodeId },
       });
@@ -167,7 +170,7 @@ apiTest.describe('Create ack alert action API', { tag: '@local-stateful-classic'
         },
       ]);
       const noAccessCredentials = await requestAuth.getApiKeyForCustomRole(NO_ACCESS_ROLE);
-      const response = await apiClient.post(ackUrl(groupHash), {
+      const response = await apiClient.post(getAckAlertActionUrl(groupHash), {
         headers: { ...testData.COMMON_HEADERS, ...noAccessCredentials.apiKeyHeader },
         body: { episode_id: episodeId },
       });

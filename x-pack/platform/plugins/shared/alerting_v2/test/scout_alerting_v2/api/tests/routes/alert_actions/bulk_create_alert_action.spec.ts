@@ -7,10 +7,14 @@
 
 import { expect } from '@kbn/scout/api';
 import type { RoleApiCredentials } from '@kbn/scout';
-import { ALL_ROLE, apiTest, NO_ACCESS_ROLE, READ_ROLE, testData } from '../../../fixtures';
-
-const ALERT_API_PATH = '/api/alerting/v2/alerts';
-const BULK_ACTION_PATH = `${ALERT_API_PATH}/_bulk_action`;
+import {
+  ALL_ROLE,
+  apiTest,
+  BULK_ALERT_ACTION_URL,
+  NO_ACCESS_ROLE,
+  READ_ROLE,
+  testData,
+} from '../../../fixtures';
 
 apiTest.describe('Bulk create alert actions API', { tag: '@local-stateful-classic' }, () => {
   let writerCredentials: RoleApiCredentials;
@@ -44,7 +48,7 @@ apiTest.describe('Bulk create alert actions API', { tag: '@local-stateful-classi
         },
       ]);
 
-      const response = await apiClient.post(BULK_ACTION_PATH, {
+      const response = await apiClient.post(BULK_ALERT_ACTION_URL, {
         headers: writerHeaders,
         body: [{ group_hash: groupHash, action_type: 'ack', episode_id: episodeId }],
       });
@@ -90,7 +94,7 @@ apiTest.describe('Bulk create alert actions API', { tag: '@local-stateful-classi
         },
       ]);
 
-      const response = await apiClient.post(BULK_ACTION_PATH, {
+      const response = await apiClient.post(BULK_ALERT_ACTION_URL, {
         headers: writerHeaders,
         body: [
           { group_hash: groupHashTag, action_type: 'tag', tags: ['important', 'reviewed'] },
@@ -136,7 +140,7 @@ apiTest.describe('Bulk create alert actions API', { tag: '@local-stateful-classi
         },
       ]);
 
-      const response = await apiClient.post(BULK_ACTION_PATH, {
+      const response = await apiClient.post(BULK_ALERT_ACTION_URL, {
         headers: writerHeaders,
         body: [
           { group_hash: knownGroup, action_type: 'ack', episode_id: knownEpisode },
@@ -166,7 +170,7 @@ apiTest.describe('Bulk create alert actions API', { tag: '@local-stateful-classi
     async ({ apiClient, apiServices }) => {
       const ruleId = 'bulk-allinvalid-rule';
 
-      const response = await apiClient.post(BULK_ACTION_PATH, {
+      const response = await apiClient.post(BULK_ALERT_ACTION_URL, {
         headers: writerHeaders,
         body: [
           {
@@ -187,7 +191,7 @@ apiTest.describe('Bulk create alert actions API', { tag: '@local-stateful-classi
   );
 
   apiTest('schema: rejects an empty array with 400', async ({ apiClient }) => {
-    const response = await apiClient.post(BULK_ACTION_PATH, {
+    const response = await apiClient.post(BULK_ALERT_ACTION_URL, {
       headers: writerHeaders,
       body: [],
     });
@@ -202,7 +206,7 @@ apiTest.describe('Bulk create alert actions API', { tag: '@local-stateful-classi
       episode_id: `bulk-too-many-ep-${i}`,
     }));
 
-    const response = await apiClient.post(BULK_ACTION_PATH, {
+    const response = await apiClient.post(BULK_ALERT_ACTION_URL, {
       headers: writerHeaders,
       body: items,
     });
@@ -211,7 +215,7 @@ apiTest.describe('Bulk create alert actions API', { tag: '@local-stateful-classi
   });
 
   apiTest('schema: rejects an item missing group_hash with 400', async ({ apiClient }) => {
-    const response = await apiClient.post(BULK_ACTION_PATH, {
+    const response = await apiClient.post(BULK_ALERT_ACTION_URL, {
       headers: writerHeaders,
       body: [{ action_type: 'ack', episode_id: 'some-episode' }],
     });
@@ -220,7 +224,7 @@ apiTest.describe('Bulk create alert actions API', { tag: '@local-stateful-classi
   });
 
   apiTest('schema: rejects an item with unknown action_type with 400', async ({ apiClient }) => {
-    const response = await apiClient.post(BULK_ACTION_PATH, {
+    const response = await apiClient.post(BULK_ALERT_ACTION_URL, {
       headers: writerHeaders,
       body: [{ group_hash: 'any-group', action_type: 'not-a-real-type' }],
     });
@@ -233,7 +237,7 @@ apiTest.describe('Bulk create alert actions API', { tag: '@local-stateful-classi
     async ({ apiClient }) => {
       // `tag` items require a `tags` array; sending `tags: 'string'` should
       // fail the discriminated-union validator.
-      const response = await apiClient.post(BULK_ACTION_PATH, {
+      const response = await apiClient.post(BULK_ALERT_ACTION_URL, {
         headers: writerHeaders,
         body: [{ group_hash: 'any-group', action_type: 'tag', tags: 'not-an-array' }],
       });
@@ -243,7 +247,7 @@ apiTest.describe('Bulk create alert actions API', { tag: '@local-stateful-classi
   );
 
   apiTest('schema: rejects an item with empty group_hash with 400', async ({ apiClient }) => {
-    const response = await apiClient.post(BULK_ACTION_PATH, {
+    const response = await apiClient.post(BULK_ALERT_ACTION_URL, {
       headers: writerHeaders,
       body: [{ group_hash: '', action_type: 'ack', episode_id: 'some-episode' }],
     });
@@ -254,7 +258,7 @@ apiTest.describe('Bulk create alert actions API', { tag: '@local-stateful-classi
   apiTest(
     'schema: rejects an item with group_hash over 256 chars with 400',
     async ({ apiClient }) => {
-      const response = await apiClient.post(BULK_ACTION_PATH, {
+      const response = await apiClient.post(BULK_ALERT_ACTION_URL, {
         headers: writerHeaders,
         body: [{ group_hash: 'a'.repeat(257), action_type: 'ack', episode_id: 'some-episode' }],
       });
@@ -264,7 +268,7 @@ apiTest.describe('Bulk create alert actions API', { tag: '@local-stateful-classi
   );
 
   apiTest('schema: rejects a non-array body with 400', async ({ apiClient }) => {
-    const response = await apiClient.post(BULK_ACTION_PATH, {
+    const response = await apiClient.post(BULK_ALERT_ACTION_URL, {
       headers: writerHeaders,
       body: { group_hash: 'any-group', action_type: 'ack', episode_id: 'some-episode' },
     });
@@ -289,7 +293,7 @@ apiTest.describe('Bulk create alert actions API', { tag: '@local-stateful-classi
 
       const readerCredentials = await requestAuth.getApiKeyForCustomRole(READ_ROLE);
 
-      const response = await apiClient.post(BULK_ACTION_PATH, {
+      const response = await apiClient.post(BULK_ALERT_ACTION_URL, {
         headers: { ...testData.COMMON_HEADERS, ...readerCredentials.apiKeyHeader },
         body: [{ group_hash: groupHash, action_type: 'ack', episode_id: episodeId }],
       });
@@ -315,7 +319,7 @@ apiTest.describe('Bulk create alert actions API', { tag: '@local-stateful-classi
 
       const noAccessCredentials = await requestAuth.getApiKeyForCustomRole(NO_ACCESS_ROLE);
 
-      const response = await apiClient.post(BULK_ACTION_PATH, {
+      const response = await apiClient.post(BULK_ALERT_ACTION_URL, {
         headers: { ...testData.COMMON_HEADERS, ...noAccessCredentials.apiKeyHeader },
         body: [{ group_hash: groupHash, action_type: 'ack', episode_id: episodeId }],
       });

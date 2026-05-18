@@ -7,12 +7,14 @@
 
 import { expect } from '@kbn/scout/api';
 import type { RoleApiCredentials } from '@kbn/scout';
-import { ALL_ROLE, apiTest, NO_ACCESS_ROLE, READ_ROLE, testData } from '../../../fixtures';
-
-const ALERT_API_PATH = '/api/alerting/v2/alerts';
-
-const assignUrl = (groupHash: string) =>
-  `${ALERT_API_PATH}/${encodeURIComponent(groupHash)}/_assign`;
+import {
+  ALL_ROLE,
+  apiTest,
+  getAssignAlertActionUrl,
+  NO_ACCESS_ROLE,
+  READ_ROLE,
+  testData,
+} from '../../../fixtures';
 
 apiTest.describe('Create assign alert action API', { tag: '@local-stateful-classic' }, () => {
   let writerCredentials: RoleApiCredentials;
@@ -45,7 +47,7 @@ apiTest.describe('Create assign alert action API', { tag: '@local-stateful-class
           episode: { id: episodeId, status: 'active' },
         },
       ]);
-      const response = await apiClient.post(assignUrl(groupHash), {
+      const response = await apiClient.post(getAssignAlertActionUrl(groupHash), {
         headers: writerHeaders,
         body: { episode_id: episodeId, assignee_uid: assigneeUid },
       });
@@ -76,7 +78,7 @@ apiTest.describe('Create assign alert action API', { tag: '@local-stateful-class
           episode: { id: episodeId, status: 'active' },
         },
       ]);
-      const response = await apiClient.post(assignUrl(groupHash), {
+      const response = await apiClient.post(getAssignAlertActionUrl(groupHash), {
         headers: writerHeaders,
         body: { episode_id: episodeId, assignee_uid: null },
       });
@@ -94,7 +96,7 @@ apiTest.describe('Create assign alert action API', { tag: '@local-stateful-class
   );
 
   apiTest('schema: rejects body missing episode_id with 400', async ({ apiClient }) => {
-    const response = await apiClient.post(assignUrl('any-group'), {
+    const response = await apiClient.post(getAssignAlertActionUrl('any-group'), {
       headers: writerHeaders,
       body: { assignee_uid: 'u_someone' },
     });
@@ -102,7 +104,7 @@ apiTest.describe('Create assign alert action API', { tag: '@local-stateful-class
   });
 
   apiTest('schema: rejects body missing assignee_uid with 400', async ({ apiClient }) => {
-    const response = await apiClient.post(assignUrl('any-group'), {
+    const response = await apiClient.post(getAssignAlertActionUrl('any-group'), {
       headers: writerHeaders,
       body: { episode_id: 'some-episode' },
     });
@@ -110,7 +112,7 @@ apiTest.describe('Create assign alert action API', { tag: '@local-stateful-class
   });
 
   apiTest('schema: rejects empty episode_id with 400', async ({ apiClient }) => {
-    const response = await apiClient.post(assignUrl('any-group'), {
+    const response = await apiClient.post(getAssignAlertActionUrl('any-group'), {
       headers: writerHeaders,
       body: { episode_id: '', assignee_uid: 'u_someone' },
     });
@@ -118,7 +120,7 @@ apiTest.describe('Create assign alert action API', { tag: '@local-stateful-class
   });
 
   apiTest('schema: rejects episode_id over 150 chars with 400', async ({ apiClient }) => {
-    const response = await apiClient.post(assignUrl('any-group'), {
+    const response = await apiClient.post(getAssignAlertActionUrl('any-group'), {
       headers: writerHeaders,
       body: { episode_id: 'a'.repeat(151), assignee_uid: 'u_someone' },
     });
@@ -127,7 +129,7 @@ apiTest.describe('Create assign alert action API', { tag: '@local-stateful-class
   });
 
   apiTest('schema: rejects assignee_uid over 256 chars with 400', async ({ apiClient }) => {
-    const response = await apiClient.post(assignUrl('any-group'), {
+    const response = await apiClient.post(getAssignAlertActionUrl('any-group'), {
       headers: writerHeaders,
       body: { episode_id: 'some-episode', assignee_uid: 'a'.repeat(257) },
     });
@@ -137,7 +139,7 @@ apiTest.describe('Create assign alert action API', { tag: '@local-stateful-class
   apiTest(
     'schema: rejects assignee_uid that is neither string nor null with 400',
     async ({ apiClient }) => {
-      const response = await apiClient.post(assignUrl('any-group'), {
+      const response = await apiClient.post(getAssignAlertActionUrl('any-group'), {
         headers: writerHeaders,
         body: { episode_id: 'some-episode', assignee_uid: 42 },
       });
@@ -146,7 +148,7 @@ apiTest.describe('Create assign alert action API', { tag: '@local-stateful-class
   );
 
   apiTest('schema: rejects unknown body fields (strict mode) with 400', async ({ apiClient }) => {
-    const response = await apiClient.post(assignUrl('any-group'), {
+    const response = await apiClient.post(getAssignAlertActionUrl('any-group'), {
       headers: writerHeaders,
       body: { episode_id: 'some-episode', assignee_uid: 'u_someone', extra: 'nope' },
     });
@@ -154,7 +156,7 @@ apiTest.describe('Create assign alert action API', { tag: '@local-stateful-class
   });
 
   apiTest('schema: rejects group_hash over 256 chars with 400', async ({ apiClient }) => {
-    const response = await apiClient.post(assignUrl('a'.repeat(257)), {
+    const response = await apiClient.post(getAssignAlertActionUrl('a'.repeat(257)), {
       headers: writerHeaders,
       body: { episode_id: 'some-episode', assignee_uid: 'u_someone' },
     });
@@ -162,7 +164,7 @@ apiTest.describe('Create assign alert action API', { tag: '@local-stateful-class
   });
 
   apiTest('returns 404 when group_hash matches no events', async ({ apiClient }) => {
-    const response = await apiClient.post(assignUrl('unknown-group'), {
+    const response = await apiClient.post(getAssignAlertActionUrl('unknown-group'), {
       headers: writerHeaders,
       body: { episode_id: 'unknown-episode', assignee_uid: 'u_someone' },
     });
@@ -181,7 +183,7 @@ apiTest.describe('Create assign alert action API', { tag: '@local-stateful-class
           episode: { id: 'real-episode', status: 'active' },
         },
       ]);
-      const response = await apiClient.post(assignUrl(groupHash), {
+      const response = await apiClient.post(getAssignAlertActionUrl(groupHash), {
         headers: writerHeaders,
         body: { episode_id: 'unknown-episode', assignee_uid: 'u_someone' },
       });
@@ -203,7 +205,7 @@ apiTest.describe('Create assign alert action API', { tag: '@local-stateful-class
         },
       ]);
       const readerCredentials = await requestAuth.getApiKeyForCustomRole(READ_ROLE);
-      const response = await apiClient.post(assignUrl(groupHash), {
+      const response = await apiClient.post(getAssignAlertActionUrl(groupHash), {
         headers: { ...testData.COMMON_HEADERS, ...readerCredentials.apiKeyHeader },
         body: { episode_id: episodeId, assignee_uid: 'u_someone' },
       });
@@ -225,7 +227,7 @@ apiTest.describe('Create assign alert action API', { tag: '@local-stateful-class
         },
       ]);
       const noAccessCredentials = await requestAuth.getApiKeyForCustomRole(NO_ACCESS_ROLE);
-      const response = await apiClient.post(assignUrl(groupHash), {
+      const response = await apiClient.post(getAssignAlertActionUrl(groupHash), {
         headers: { ...testData.COMMON_HEADERS, ...noAccessCredentials.apiKeyHeader },
         body: { episode_id: episodeId, assignee_uid: 'u_someone' },
       });

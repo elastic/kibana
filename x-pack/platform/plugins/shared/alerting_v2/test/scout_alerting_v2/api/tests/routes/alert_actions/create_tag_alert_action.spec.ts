@@ -7,11 +7,14 @@
 
 import { expect } from '@kbn/scout/api';
 import type { RoleApiCredentials } from '@kbn/scout';
-import { ALL_ROLE, apiTest, NO_ACCESS_ROLE, READ_ROLE, testData } from '../../../fixtures';
-
-const ALERT_API_PATH = '/api/alerting/v2/alerts';
-
-const tagUrl = (groupHash: string) => `${ALERT_API_PATH}/${encodeURIComponent(groupHash)}/_tag`;
+import {
+  ALL_ROLE,
+  apiTest,
+  getTagAlertActionUrl,
+  NO_ACCESS_ROLE,
+  READ_ROLE,
+  testData,
+} from '../../../fixtures';
 
 apiTest.describe('Create tag alert action API', { tag: '@local-stateful-classic' }, () => {
   let writerCredentials: RoleApiCredentials;
@@ -41,7 +44,7 @@ apiTest.describe('Create tag alert action API', { tag: '@local-stateful-classic'
         episode: { id: 'tag-happy-episode', status: 'active' },
       },
     ]);
-    const response = await apiClient.post(tagUrl(groupHash), {
+    const response = await apiClient.post(getTagAlertActionUrl(groupHash), {
       headers: writerHeaders,
       body: { tags },
     });
@@ -72,7 +75,7 @@ apiTest.describe('Create tag alert action API', { tag: '@local-stateful-classic'
           episode: { id: 'tag-empty-episode', status: 'active' },
         },
       ]);
-      const response = await apiClient.post(tagUrl(groupHash), {
+      const response = await apiClient.post(getTagAlertActionUrl(groupHash), {
         headers: writerHeaders,
         body: { tags: [] },
       });
@@ -88,7 +91,7 @@ apiTest.describe('Create tag alert action API', { tag: '@local-stateful-classic'
   );
 
   apiTest('schema: rejects body missing tags with 400', async ({ apiClient }) => {
-    const response = await apiClient.post(tagUrl('any-group'), {
+    const response = await apiClient.post(getTagAlertActionUrl('any-group'), {
       headers: writerHeaders,
       body: {},
     });
@@ -96,7 +99,7 @@ apiTest.describe('Create tag alert action API', { tag: '@local-stateful-classic'
   });
 
   apiTest('schema: rejects more than 20 tags with 400', async ({ apiClient }) => {
-    const response = await apiClient.post(tagUrl('any-group'), {
+    const response = await apiClient.post(getTagAlertActionUrl('any-group'), {
       headers: writerHeaders,
       body: { tags: Array.from({ length: 21 }, (_v, i) => `tag-${i}`) },
     });
@@ -104,7 +107,7 @@ apiTest.describe('Create tag alert action API', { tag: '@local-stateful-classic'
   });
 
   apiTest('schema: rejects an empty tag string with 400', async ({ apiClient }) => {
-    const response = await apiClient.post(tagUrl('any-group'), {
+    const response = await apiClient.post(getTagAlertActionUrl('any-group'), {
       headers: writerHeaders,
       body: { tags: ['valid', ''] },
     });
@@ -112,7 +115,7 @@ apiTest.describe('Create tag alert action API', { tag: '@local-stateful-classic'
   });
 
   apiTest('schema: rejects a tag over 128 chars with 400', async ({ apiClient }) => {
-    const response = await apiClient.post(tagUrl('any-group'), {
+    const response = await apiClient.post(getTagAlertActionUrl('any-group'), {
       headers: writerHeaders,
       body: { tags: ['a'.repeat(129)] },
     });
@@ -120,7 +123,7 @@ apiTest.describe('Create tag alert action API', { tag: '@local-stateful-classic'
   });
 
   apiTest('schema: rejects non-string tag elements with 400', async ({ apiClient }) => {
-    const response = await apiClient.post(tagUrl('any-group'), {
+    const response = await apiClient.post(getTagAlertActionUrl('any-group'), {
       headers: writerHeaders,
       body: { tags: ['valid', 42] },
     });
@@ -128,7 +131,7 @@ apiTest.describe('Create tag alert action API', { tag: '@local-stateful-classic'
   });
 
   apiTest('schema: rejects unknown body fields (strict mode) with 400', async ({ apiClient }) => {
-    const response = await apiClient.post(tagUrl('any-group'), {
+    const response = await apiClient.post(getTagAlertActionUrl('any-group'), {
       headers: writerHeaders,
       body: { tags: ['valid'], extra: 'nope' },
     });
@@ -136,7 +139,7 @@ apiTest.describe('Create tag alert action API', { tag: '@local-stateful-classic'
   });
 
   apiTest('schema: rejects group_hash over 256 chars with 400', async ({ apiClient }) => {
-    const response = await apiClient.post(tagUrl('a'.repeat(257)), {
+    const response = await apiClient.post(getTagAlertActionUrl('a'.repeat(257)), {
       headers: writerHeaders,
       body: { tags: ['production'] },
     });
@@ -144,7 +147,7 @@ apiTest.describe('Create tag alert action API', { tag: '@local-stateful-classic'
   });
 
   apiTest('returns 404 when group_hash matches no events', async ({ apiClient }) => {
-    const response = await apiClient.post(tagUrl('unknown-group'), {
+    const response = await apiClient.post(getTagAlertActionUrl('unknown-group'), {
       headers: writerHeaders,
       body: { tags: ['production'] },
     });
@@ -164,7 +167,7 @@ apiTest.describe('Create tag alert action API', { tag: '@local-stateful-classic'
         },
       ]);
       const readerCredentials = await requestAuth.getApiKeyForCustomRole(READ_ROLE);
-      const response = await apiClient.post(tagUrl(groupHash), {
+      const response = await apiClient.post(getTagAlertActionUrl(groupHash), {
         headers: { ...testData.COMMON_HEADERS, ...readerCredentials.apiKeyHeader },
         body: { tags: ['production'] },
       });
@@ -185,7 +188,7 @@ apiTest.describe('Create tag alert action API', { tag: '@local-stateful-classic'
         },
       ]);
       const noAccessCredentials = await requestAuth.getApiKeyForCustomRole(NO_ACCESS_ROLE);
-      const response = await apiClient.post(tagUrl(groupHash), {
+      const response = await apiClient.post(getTagAlertActionUrl(groupHash), {
         headers: { ...testData.COMMON_HEADERS, ...noAccessCredentials.apiKeyHeader },
         body: { tags: ['production'] },
       });
