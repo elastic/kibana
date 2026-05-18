@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-export { FeatureSettingsPage } from './feature_settings_page';
-export { EisModelsPage } from './eis_models_page';
-export { ExternalInferencePage } from './external_inference_page';
-export { PageNavigation } from './page_navigation';
+export const BREADCRUMBS = {
+  stateful: {
+    classic: ['Stack Management'],
+    searchSolution: ['Stack Management', 'Model Management'],
+  },
+  serverless: {
+    search: ['Model Management'],
+  },
+} as const;
