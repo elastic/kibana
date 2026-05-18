@@ -72,7 +72,7 @@ export function useActionTypeModel({
     error,
     refetch,
   } = useQuery<ConnectorSpecResponse, Error>({
-    queryKey: [CONNECTOR_SPEC_QUERY_KEY, actionTypeId],
+    queryKey: [CONNECTOR_SPEC_QUERY_KEY, actionType?.id],
     queryFn: async ({ signal }) => {
       const spec = await fetchConnectorSpec(http, actionTypeId!, signal);
       // Validate eagerly — fail fast before caching. The schema is re-parsed
