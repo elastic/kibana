@@ -194,17 +194,19 @@ const noDataSchema = z
   .strict()
   .describe('No data handling configuration.');
 
-/** Origin (optional) */
+/** Edit mode (optional) */
 
-export const originSchema = z
-  .string()
-  .min(1)
-  .max(128)
-  .describe('Where the rule was created, e.g. "discover", "rule_builder", "agent_builder".');
+export const editModeSchema = z
+  .enum(['rule_builder', 'esql'])
+  .describe(
+    'Authoring mode for this rule: "rule_builder" if created via a guided builder, "esql" if authored directly in ES|QL.'
+  );
 
-/** Builder config (optional) */
+export type EditMode = z.infer<typeof editModeSchema>;
 
-export const builderConfigSchema = z
+/** Rule builder config — used by the internal rule builder config routes, not the public rule API. */
+
+export const ruleBuilderConfigSchema = z
   .object({
     type: z
       .string()
@@ -264,8 +266,7 @@ export const createRuleDataBaseSchema = z
     grouping: groupingSchema.optional(),
     no_data: noDataSchema.optional(),
     artifacts: z.array(artifactSchema).max(100).optional(),
-    origin: originSchema.optional(),
-    builder_config: builderConfigSchema.optional(),
+    edit_mode: editModeSchema.optional(),
   })
   .strip();
 
@@ -338,8 +339,7 @@ export const updateRuleDataSchema = z
     grouping: groupingSchema.optional().nullable(),
     no_data: noDataSchema.optional().nullable(),
     artifacts: z.array(artifactSchema).max(100).optional().nullable(),
-    origin: originSchema.optional(),
-    builder_config: builderConfigSchema.optional().nullable(),
+    edit_mode: editModeSchema.optional(),
     enabled: z.boolean().optional().describe('Whether the rule is enabled.'),
   })
   .strip();

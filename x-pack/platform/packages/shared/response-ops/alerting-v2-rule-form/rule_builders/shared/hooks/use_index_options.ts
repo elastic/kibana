@@ -6,7 +6,7 @@
  */
 
 import { useState, useCallback } from 'react';
-import type { HttpStart } from '@kbn/core-http-browser';
+import type { HttpStart } from '@kbn/core/public';
 
 interface ResolveIndexResponse {
   indices: Array<{ name: string }>;

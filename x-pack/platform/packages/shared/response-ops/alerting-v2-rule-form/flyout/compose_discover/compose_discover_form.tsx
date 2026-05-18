@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import { useFormContext } from 'react-hook-form';
+import { FormProvider, useForm, useFormContext, useWatch } from 'react-hook-form';
 import { Parser, isColumn } from '@elastic/esql';
 import { useQuery } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
@@ -26,8 +26,10 @@ import {
   EuiSwitch,
   EuiText,
   EuiTitle,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiToolTip,
 } from '@elastic/eui';
 import type {
   ComposeDiscoverState,
@@ -45,11 +47,23 @@ import { RuleDetailsFieldGroup } from '../../form';
 import { ScheduleField } from '../../form/fields/schedule_field';
 import { LookbackWindowField } from '../../form/fields/lookback_window_field';
 import { RecoveryDelayField } from '../../form/fields/recovery_delay_field';
+import { DataSourceSection } from '../../rule_builders/shared/components/data_source_section';
+import { StatsFieldGroup } from '../../rule_builders/threshold/components/stats_field_group';
+import { EvaluationsFieldGroup } from '../../rule_builders/threshold/components/evaluations_field_group';
+import { ThresholdsFieldGroup } from '../../rule_builders/threshold/components/thresholds_field_group';
+import { useIndexColumns } from '../../rule_builders/shared/hooks/use_index_columns';
+import { buildEsqlQuery } from '../../rule_builders/threshold/esql_builder';
+import {
+  Aggregation,
+  Comparator,
+  type ThresholdRuleFormValues,
+} from '../../rule_builders/threshold/types';
 
 interface ComposeDiscoverFormProps {
   state: ComposeDiscoverState;
   dispatch: React.Dispatch<ComposeDiscoverAction>;
   services: RuleFormServices;
+  ruleBuilderMode?: boolean;
 }
 
 // ── Recovery type selector ────────────────────────────────────────────────────
@@ -490,6 +504,194 @@ function NotificationsStep() {
   );
 }
 
+// ── Rule Builder Alert Condition Step ──────────────────────────────────────────
+
+const DEFAULT_RULE_BUILDER_VALUES: ThresholdRuleFormValues = {
+  kind: 'alert',
+  metadata: { name: '', description: '', tags: [] },
+  indexPattern: '',
+  timeField: '@timestamp',
+  stats: [{ id: 'stat-initial', label: 'count', aggregation: Aggregation.COUNT }],
+  evaluations: [],
+  alertConditions: [
+    { id: 'ac-initial', metric: 'count', comparator: Comparator.GT, threshold: [100] },
+  ],
+  conditionOperator: 'AND',
+  groupBy: [],
+  schedule: { every: '1m', lookback: '5m' },
+  recoveryPolicy: { type: 'no_breach' },
+  stateTransitionAlertDelayMode: 'immediate',
+  stateTransitionRecoveryDelayMode: 'immediate',
+  artifacts: [],
+};
+
+function RuleBuilderAlertConditionStep({
+  state,
+  dispatch,
+  services,
+}: {
+  state: ComposeDiscoverState;
+  dispatch: React.Dispatch<ComposeDiscoverAction>;
+  services: RuleFormServices;
+}) {
+  const parentForm = useFormContext<FormValues>();
+  const existingState = parentForm.getValues('ruleBuilderState') as
+    | ThresholdRuleFormValues
+    | undefined;
+
+  const builderMethods = useForm<ThresholdRuleFormValues>({
+    defaultValues: existingState
+      ? { ...DEFAULT_RULE_BUILDER_VALUES, ...existingState }
+      : DEFAULT_RULE_BUILDER_VALUES,
+    mode: 'onBlur',
+  });
+
+  return (
+    <FormProvider {...builderMethods}>
+      <RuleBuilderAlertConditionFields
+        state={state}
+        dispatch={dispatch}
+        services={services}
+        parentForm={parentForm}
+      />
+    </FormProvider>
+  );
+}
+
+function RuleBuilderAlertConditionFields({
+  state,
+  dispatch,
+  services,
+  parentForm,
+}: {
+  state: ComposeDiscoverState;
+  dispatch: React.Dispatch<ComposeDiscoverAction>;
+  services: RuleFormServices;
+  parentForm: ReturnType<typeof useFormContext<FormValues>>;
+}) {
+  const builderMethods = useFormContext<ThresholdRuleFormValues>();
+
+  const {
+    allColumns,
+    numericColumns,
+    isLoading: isColumnsLoading,
+  } = useIndexColumns({
+    data: services.data,
+  });
+
+  const indexPattern = useWatch({ control: builderMethods.control, name: 'indexPattern' });
+  const timeField = useWatch({ control: builderMethods.control, name: 'timeField' });
+  const filterQuery = useWatch({ control: builderMethods.control, name: 'filterQuery' });
+  const stats = useWatch({ control: builderMethods.control, name: 'stats' });
+  const evaluations = useWatch({ control: builderMethods.control, name: 'evaluations' });
+  const alertConditions = useWatch({ control: builderMethods.control, name: 'alertConditions' });
+  const conditionOperator = useWatch({
+    control: builderMethods.control,
+    name: 'conditionOperator',
+  });
+  const groupBy = useWatch({ control: builderMethods.control, name: 'groupBy' });
+
+  const esqlQuery = useMemo(
+    () =>
+      buildEsqlQuery({
+        indexPattern,
+        timeField,
+        filterQuery,
+        stats,
+        evaluations,
+        alertConditions,
+        conditionOperator,
+        groupBy,
+      } as ThresholdRuleFormValues),
+    [
+      indexPattern,
+      timeField,
+      filterQuery,
+      stats,
+      evaluations,
+      alertConditions,
+      conditionOperator,
+      groupBy,
+    ]
+  );
+
+  const lastSyncedQueryRef = useRef('');
+
+  useEffect(() => {
+    if (esqlQuery === lastSyncedQueryRef.current) return;
+    lastSyncedQueryRef.current = esqlQuery;
+
+    const snapshot = builderMethods.getValues();
+    parentForm.setValue('ruleBuilderState', snapshot as unknown as Record<string, any>);
+    parentForm.setValue('evaluation.query.base', esqlQuery);
+    parentForm.setValue('timeField', snapshot.timeField || '@timestamp');
+    if (snapshot.groupBy && snapshot.groupBy.length > 0) {
+      parentForm.setValue('grouping', { fields: snapshot.groupBy });
+    } else {
+      parentForm.setValue('grouping', undefined);
+    }
+
+    if (esqlQuery) {
+      dispatch({ type: 'COMMIT_CHILD_QUERY', fullQuery: esqlQuery });
+    }
+  }, [esqlQuery, builderMethods, parentForm, dispatch]);
+
+  const handleTrackingToggle = useCallback(() => {
+    if (state.tracking) {
+      dispatch({ type: 'DISABLE_TRACKING' });
+    } else {
+      const { base, alertBlock } = splitQuery(esqlQuery);
+      dispatch({ type: 'ENABLE_TRACKING', base, alertBlock });
+    }
+  }, [state.tracking, esqlQuery, dispatch]);
+
+  const previewTooltip = i18n.translate(
+    'xpack.responseOps.alertingV2RuleForm.composeDiscover.ruleBuilder.previewButton',
+    { defaultMessage: 'Preview results' }
+  );
+
+  return (
+    <>
+      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+        <EuiToolTip content={previewTooltip} disableScreenReaderOutput>
+          <EuiButtonIcon
+            iconType="inspect"
+            display="base"
+            size="s"
+            isDisabled={!esqlQuery || state.childOpen}
+            onClick={() => dispatch({ type: 'OPEN_CHILD_FOR_STEP', step: state.step })}
+            aria-label={previewTooltip}
+            data-test-subj="ruleBuilderOpenPreview"
+          />
+        </EuiToolTip>
+      </div>
+      <EuiSpacer size="s" />
+      <DataSourceSection allColumns={allColumns} isColumnsLoading={isColumnsLoading} />
+      <EuiSpacer size="m" />
+      <StatsFieldGroup numericColumns={numericColumns} isColumnsLoading={isColumnsLoading} />
+      <EuiSpacer size="m" />
+      <EvaluationsFieldGroup />
+      <EuiSpacer size="m" />
+      <ThresholdsFieldGroup />
+      <EuiSpacer size="m" />
+      <EuiSwitch
+        label={i18n.translate(
+          'xpack.responseOps.alertingV2RuleForm.composeDiscover.ruleBuilder.trackingToggle',
+          { defaultMessage: 'Track active and recovered state over time' }
+        )}
+        checked={state.tracking}
+        onChange={handleTrackingToggle}
+        disabled={!esqlQuery}
+        data-test-subj="ruleBuilderTrackingToggle"
+      />
+      <EuiSpacer size="m" />
+      <ScheduleField />
+      <EuiSpacer size="m" />
+      <LookbackWindowField />
+    </>
+  );
+}
+
 // ── Step definitions ──────────────────────────────────────────────────────────
 
 const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
@@ -517,8 +719,19 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
   },
 };
 
-export const getSteps = (tracking: boolean): StepDefinition[] =>
-  getStepIds(tracking).map((id) => STEP_REGISTRY[id]);
+const RULE_BUILDER_STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
+  ...STEP_REGISTRY,
+  alertCondition: {
+    id: 'alertCondition',
+    title: 'Alert Condition',
+    render: (props) => <RuleBuilderAlertConditionStep {...props} />,
+  },
+};
+
+export const getSteps = (tracking: boolean, ruleBuilderMode = false): StepDefinition[] => {
+  const registry = ruleBuilderMode ? RULE_BUILDER_STEP_REGISTRY : STEP_REGISTRY;
+  return getStepIds(tracking).map((id) => registry[id]);
+};
 
 // ── Main form component ───────────────────────────────────────────────────────
 
@@ -526,7 +739,8 @@ export const ComposeDiscoverForm: React.FC<ComposeDiscoverFormProps> = ({
   state,
   dispatch,
   services,
+  ruleBuilderMode = false,
 }) => {
-  const steps = getSteps(state.tracking);
+  const steps = getSteps(state.tracking, ruleBuilderMode);
   return steps[state.step].render({ state, dispatch, services });
 };

@@ -10,11 +10,9 @@ import { EuiComboBox, EuiFormRow, EuiSelect, EuiSpacer } from '@elastic/eui';
 import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
 import type { DataViewFieldMap } from '@kbn/data-views-plugin/common';
-import {
-  useDataFields,
-  getTimeFieldOptions,
-  useRuleFormServices,
-} from '@kbn/alerting-v2-rule-form';
+import { useDataFields } from '../../../form/hooks/use_data_fields';
+import { getTimeFieldOptions } from '../../../form/utils';
+import { useRuleFormServices } from '../../../form/contexts/rule_form_context';
 import type { DataSourceFormValues } from '../types';
 import type { IndexColumn } from '../hooks/use_index_columns';
 import { useIndexOptions } from '../hooks/use_index_options';

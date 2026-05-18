@@ -98,6 +98,8 @@ export interface ComposeDiscoverState {
   sandboxDateEnd: string;
   /** When true the stepped form is replaced by a full YAML editor. */
   yamlMode: boolean;
+  /** When true the rule builder generates the query — sandbox stays open on commits. */
+  ruleBuilderMode: boolean;
 }
 
 export type ComposeDiscoverAction =

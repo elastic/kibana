@@ -10,6 +10,7 @@ import type {
   RecoveryPolicyType,
   CreateRuleData,
   UpdateRuleData,
+  EditMode,
 } from '@kbn/alerting-v2-schemas';
 import { RUNBOOK_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
 import { DELAY_MODE } from '../types';
@@ -151,8 +152,7 @@ export interface RuleRequestCommon {
     recovering_timeframe?: string;
   };
   artifacts?: RuleArtifactPayload;
-  origin?: string;
-  builder_config?: { type: string; config: string };
+  edit_mode?: EditMode;
 }
 
 const mapArtifacts = (artifacts: FormValues['artifacts']): RuleRequestCommon['artifacts'] => {
@@ -203,8 +203,7 @@ export const mapFormValuesToRuleRequest = (formValues: FormValues): RuleRequestC
     recovery_policy: mapRecoveryPolicy(recoveryPolicy),
     state_transition: mapStateTransition(formValues),
     ...(mappedArtifacts ? { artifacts: mappedArtifacts } : {}),
-    ...(formValues.origin ? { origin: formValues.origin } : {}),
-    ...(formValues.builderConfig ? { builder_config: formValues.builderConfig } : {}),
+    ...(formValues.editMode ? { edit_mode: formValues.editMode } : {}),
   };
 };
 
@@ -291,9 +290,6 @@ export const mapRuleResponseToFormValues = (rule: RuleResponse): Partial<FormVal
     stateTransitionAlertDelayMode: deriveAlertDelayModeFromStateTransition(stateTransition),
     stateTransitionRecoveryDelayMode: deriveRecoveryDelayModeFromStateTransition(stateTransition),
     ...(rule.artifacts ? { artifacts: rule.artifacts } : {}),
-    ...(rule.origin ? { origin: rule.origin } : {}),
-    ...(rule.builder_config
-      ? { builderConfig: { type: rule.builder_config.type, config: rule.builder_config.config } }
-      : {}),
+    ...(rule.edit_mode ? { editMode: rule.edit_mode } : {}),
   };
 };

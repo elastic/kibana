@@ -41,6 +41,13 @@ jest.mock('@kbn/core-di-browser', () => ({
     if (token === 'data' || token === 'dataViews' || token === 'lens') {
       return {};
     }
+    if (typeof token === 'function' && token.name === 'RulesApi') {
+      return {
+        getRuleBuilderConfig: jest.fn().mockResolvedValue(undefined),
+        saveRuleBuilderConfig: jest.fn().mockResolvedValue({}),
+        deleteRuleBuilderConfig: jest.fn().mockResolvedValue({}),
+      };
+    }
     throw new Error(`Unexpected token in useService mock: ${String(token)}`);
   },
   CoreStart: (key: string) => key,

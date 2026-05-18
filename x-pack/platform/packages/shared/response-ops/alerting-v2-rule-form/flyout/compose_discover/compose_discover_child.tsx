@@ -56,6 +56,8 @@ interface ComposeDiscoverChildProps {
   /** Called when the user clicks "Apply changes". The parent writes the query
    *  into RHF (the source of truth) and updates the reducer cache. */
   onApply: (data: SandboxApplyData) => void;
+  /** When true, the ES|QL editor is read-only (rule builder generates the query). */
+  readOnly?: boolean;
 }
 
 const CHILD_FLYOUT_TITLE_ID = 'composeDiscoverChildTitle';
@@ -75,6 +77,7 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
   onRecoveryEditorMount,
   onClose,
   onApply,
+  readOnly = false,
 }) => {
   const services = useRuleFormServices();
   const isSplit = tabConfig.type !== 'single';
@@ -336,18 +339,20 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
               onAlertEditorMount={onAlertEditorMount}
               onRecoveryEditorMount={onRecoveryEditorMount}
               hideTabBar
+              readOnly={readOnly}
             />
           ) : (
             <CodeEditor
               languageId={ESQL_LANG_ID}
               value={localQuery}
-              onChange={setLocalQuery}
+              onChange={readOnly ? undefined : setLocalQuery}
               height="100%"
               options={{
                 minimap: { enabled: false },
                 automaticLayout: true,
                 scrollBeyondLastLine: false,
                 fontSize: 13,
+                readOnly,
               }}
             />
           )}
@@ -438,8 +443,12 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
-            <EuiButton fill onClick={handleDone} data-test-subj="composeDiscoverChildDone">
-              Apply changes
+            <EuiButton
+              fill
+              onClick={readOnly ? onClose : handleDone}
+              data-test-subj="composeDiscoverChildDone"
+            >
+              {readOnly ? 'Close preview' : 'Apply changes'}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>

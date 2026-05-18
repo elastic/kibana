@@ -43,6 +43,14 @@ describe('createInitialState', () => {
     expect(state.queryCommitted).toBe(true);
   });
 
+  it('skips sandbox auto-open and marks committed in ruleBuilderMode', () => {
+    const state = createInitialState({ mode: 'create', ruleBuilderMode: true });
+
+    expect(state.childOpen).toBe(false);
+    expect(state.queryCommitted).toBe(true);
+    expect(state.ruleBuilderMode).toBe(true);
+  });
+
   it('does not enable tracking when no recovery query is provided', () => {
     const state = createInitialState({ mode: 'edit', initialQuery: FULL_QUERY });
 
@@ -79,6 +87,15 @@ describe('reducer', () => {
       expect(next.fullQuery).toBe(FULL_QUERY);
       expect(next.queryCommitted).toBe(true);
       expect(next.childOpen).toBe(false);
+    });
+
+    it('keeps childOpen when in ruleBuilderMode', () => {
+      const state = createState({ queryCommitted: false, childOpen: true, ruleBuilderMode: true });
+      const next = reducer(state, { type: 'COMMIT_CHILD_QUERY', fullQuery: FULL_QUERY });
+
+      expect(next.fullQuery).toBe(FULL_QUERY);
+      expect(next.queryCommitted).toBe(true);
+      expect(next.childOpen).toBe(true);
     });
   });
 

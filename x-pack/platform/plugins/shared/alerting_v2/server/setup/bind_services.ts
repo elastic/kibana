@@ -51,6 +51,11 @@ import {
 import { ResourceManager } from '../lib/services/resource_service/resource_manager';
 import { AlertingRetryService } from '../lib/services/retry_service';
 import { RetryServiceToken } from '../lib/services/retry_service/tokens';
+import { RuleBuilderConfigSavedObjectService } from '../lib/services/rule_builder_config_saved_object_service/rule_builder_config_saved_object_service';
+import {
+  RuleBuilderConfigSavedObjectsClientToken,
+  RuleBuilderConfigSavedObjectServiceScopedToken,
+} from '../lib/services/rule_builder_config_saved_object_service/tokens';
 import { RulesSavedObjectService } from '../lib/services/rules_saved_object_service/rules_saved_object_service';
 import {
   RuleSavedObjectsClientToken,
@@ -76,6 +81,7 @@ import { ApiKeyServiceSavedObjectsClientToken } from '../lib/services/api_key_se
 import {
   API_KEY_PENDING_INVALIDATION_TYPE,
   ACTION_POLICY_SAVED_OBJECT_TYPE,
+  RULE_BUILDER_CONFIG_SAVED_OBJECT_TYPE,
   RULE_SAVED_OBJECT_TYPE,
 } from '../saved_objects';
 import {
@@ -99,6 +105,7 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
         services: {
           request: get(Request),
           rulesSavedObjectService: get(RulesSavedObjectServiceScopedToken),
+          ruleBuilderConfigSavedObjectService: get(RuleBuilderConfigSavedObjectServiceScopedToken),
           taskManager: get(PluginStart<TaskManagerStartContract>('taskManager')),
           userService: get(UserService),
           actionPolicyClient: get(ActionPolicyClient),
@@ -183,10 +190,27 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(RuleSavedObjectsClientToken)
     .toResolvedValue(
       (savedObjectsClientFactory) =>
-        savedObjectsClientFactory({ includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE] }),
+        savedObjectsClientFactory({
+          includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE, RULE_BUILDER_CONFIG_SAVED_OBJECT_TYPE],
+        }),
       [SavedObjectsClientFactory]
     )
     .inRequestScope();
+
+  bind(RuleBuilderConfigSavedObjectsClientToken)
+    .toResolvedValue(
+      (savedObjectsClientFactory) =>
+        savedObjectsClientFactory({
+          includedHiddenTypes: [RULE_BUILDER_CONFIG_SAVED_OBJECT_TYPE],
+        }),
+      [SavedObjectsClientFactory]
+    )
+    .inRequestScope();
+
+  bind(RuleBuilderConfigSavedObjectService).toSelf().inRequestScope();
+  bind(RuleBuilderConfigSavedObjectServiceScopedToken).toService(
+    RuleBuilderConfigSavedObjectService
+  );
 
   bind(RulesSavedObjectService).toSelf().inRequestScope();
   bind(RulesSavedObjectServiceScopedToken).toService(RulesSavedObjectService);

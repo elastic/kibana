@@ -36,18 +36,29 @@ import {
   ShowRequestModal,
   mapFormValuesToCreateRequest,
   mapFormValuesToUpdateRequest,
+  DataSourceSection,
+  StatsFieldGroup,
+  EvaluationsFieldGroup,
+  ThresholdsFieldGroup,
+  EsqlPreviewPanel,
+  useIndexColumns,
+  useThresholdAlertPreview,
+  buildEsqlQuery,
+  Aggregation,
+  Comparator,
+  BUILDER_TYPE,
 } from '@kbn/alerting-v2-rule-form';
-import type { RuleFormServices, FormValues, BuildRequestBody } from '@kbn/alerting-v2-rule-form';
-import { DataSourceSection } from '../shared/components/data_source_section';
-import { StatsFieldGroup } from './components/stats_field_group';
-import { EvaluationsFieldGroup } from './components/evaluations_field_group';
-import { ThresholdsFieldGroup } from './components/thresholds_field_group';
-import { EsqlPreviewPanel } from '../shared/components/esql_preview_panel';
-import { useIndexColumns } from '../shared/hooks/use_index_columns';
-import { useThresholdAlertPreview } from './hooks/use_threshold_alert_preview';
-import { buildEsqlQuery } from './esql_builder';
-import { Aggregation, BUILDER_TYPE, Comparator, type ThresholdRuleFormValues } from './types';
-import { paths, ALERTING_V2_RULE_API_PATH } from '../../../constants';
+import type {
+  RuleFormServices,
+  FormValues,
+  BuildRequestBody,
+  ThresholdRuleFormValues,
+} from '@kbn/alerting-v2-rule-form';
+import {
+  paths,
+  ALERTING_V2_RULE_API_PATH,
+  ALERTING_V2_INTERNAL_RULE_BUILDER_CONFIG_API_PATH,
+} from '../../../constants';
 import { ruleKeys } from '../../../hooks/query_key_factory';
 
 const THRESHOLD_RULE_FORM_ID = 'thresholdRuleForm';
@@ -71,20 +82,21 @@ const toFormValues = (values: ThresholdRuleFormValues, esqlQuery: string): FormV
   stateTransitionAlertDelayMode: values.stateTransitionAlertDelayMode,
   stateTransitionRecoveryDelayMode: values.stateTransitionRecoveryDelayMode,
   artifacts: values.artifacts,
-  origin: 'rule_builder',
-  builderConfig: {
-    type: BUILDER_TYPE,
-    config: JSON.stringify({
-      indexPattern: values.indexPattern,
-      timeField: values.timeField,
-      filterQuery: values.filterQuery,
-      stats: values.stats,
-      evaluations: values.evaluations,
-      alertConditions: values.alertConditions,
-      conditionOperator: values.conditionOperator,
-      groupBy: values.groupBy,
-    }),
-  },
+  editMode: 'rule_builder',
+});
+
+const buildRuleBuilderConfig = (values: ThresholdRuleFormValues) => ({
+  type: BUILDER_TYPE,
+  config: JSON.stringify({
+    indexPattern: values.indexPattern,
+    timeField: values.timeField,
+    filterQuery: values.filterQuery,
+    stats: values.stats,
+    evaluations: values.evaluations,
+    alertConditions: values.alertConditions,
+    conditionOperator: values.conditionOperator,
+    groupBy: values.groupBy,
+  }),
 });
 
 const DEFAULT_FORM_VALUES: ThresholdRuleFormValues = {
@@ -213,6 +225,17 @@ export const ThresholdRuleFormContent = ({
     application.navigateToUrl(http.basePath.prepend(paths.ruleList));
   }, [application, http.basePath]);
 
+  const saveRuleBuilderConfigForRule = useCallback(
+    async (targetRuleId: string, values: ThresholdRuleFormValues) => {
+      const config = buildRuleBuilderConfig(values);
+      const url = `${ALERTING_V2_INTERNAL_RULE_BUILDER_CONFIG_API_PATH}/${encodeURIComponent(
+        targetRuleId
+      )}/rule_builder_config`;
+      await http.put(url, { body: JSON.stringify(config) });
+    },
+    [http]
+  );
+
   const onSubmit = useCallback(
     async (values: ThresholdRuleFormValues) => {
       const esqlQuery = buildEsqlQuery(values);
@@ -230,6 +253,8 @@ export const ThresholdRuleFormContent = ({
 
       try {
         let ruleName = values.metadata.name;
+        let targetRuleId = ruleId;
+
         if (isEditing && ruleId) {
           const updatePayload = mapFormValuesToUpdateRequest(formValues);
           await http.patch(`${ALERTING_V2_RULE_API_PATH}/${encodeURIComponent(ruleId)}`, {
@@ -240,8 +265,13 @@ export const ThresholdRuleFormContent = ({
           const response = await http.post(ALERTING_V2_RULE_API_PATH, {
             body: JSON.stringify(createPayload),
           });
-          const createResponse = response as { metadata?: { name?: string } };
+          const createResponse = response as { id?: string; metadata?: { name?: string } };
+          targetRuleId = createResponse?.id;
           ruleName = createResponse?.metadata?.name ?? ruleName;
+        }
+
+        if (targetRuleId) {
+          await saveRuleBuilderConfigForRule(targetRuleId, values);
         }
 
         notifications.toasts.addSuccess(
@@ -257,8 +287,8 @@ export const ThresholdRuleFormContent = ({
         );
 
         queryClient.invalidateQueries(ruleKeys.lists());
-        if (ruleId) {
-          queryClient.invalidateQueries(ruleKeys.detail(ruleId));
+        if (targetRuleId) {
+          queryClient.invalidateQueries(ruleKeys.detail(targetRuleId));
         }
         navigateToRuleList();
       } catch (err) {
@@ -282,7 +312,15 @@ export const ThresholdRuleFormContent = ({
         );
       }
     },
-    [http, notifications, isEditing, ruleId, queryClient, navigateToRuleList]
+    [
+      http,
+      notifications,
+      isEditing,
+      ruleId,
+      queryClient,
+      navigateToRuleList,
+      saveRuleBuilderConfigForRule,
+    ]
   );
 
   const submitLabel = useMemo(
@@ -315,7 +353,6 @@ export const ThresholdRuleFormContent = ({
       <FormProvider {...formMethods}>
         <RuleFormProvider services={ruleFormServices}>
           <ThresholdRuleFormBody
-            http={http}
             data={data}
             ruleId={ruleId}
             submitLabel={submitLabel}
@@ -329,7 +366,6 @@ export const ThresholdRuleFormContent = ({
 };
 
 interface ThresholdRuleFormBodyProps {
-  http: HttpStart;
   data: DataPublicPluginStart;
   ruleId?: string;
   submitLabel: string;
@@ -338,7 +374,6 @@ interface ThresholdRuleFormBodyProps {
 }
 
 const ThresholdRuleFormBody = ({
-  http,
   data,
   ruleId,
   submitLabel,

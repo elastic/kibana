@@ -6,7 +6,7 @@
  */
 
 // Import and re-export RuleKind and RecoveryPolicyType from schema
-import type { RuleKind, RecoveryPolicyType } from '@kbn/alerting-v2-schemas';
+import type { RuleKind, RecoveryPolicyType, EditMode } from '@kbn/alerting-v2-schemas';
 
 /** Alert / recovery delay segment control (matches `AlertDelayField` / `RecoveryDelayField`). */
 export const DELAY_MODE = {
@@ -56,7 +56,7 @@ export interface RuleArtifact {
   value: string;
 }
 
-export interface BuilderConfig {
+export interface RuleBuilderConfig {
   type: string;
   config: string;
 }
@@ -88,6 +88,6 @@ export interface FormValues {
   stateTransitionAlertDelayMode: StateTransitionDelayMode;
   stateTransitionRecoveryDelayMode: StateTransitionDelayMode;
   artifacts?: RuleArtifact[];
-  origin?: string;
-  builderConfig?: BuilderConfig;
+  editMode?: EditMode;
+  ruleBuilderState?: Record<string, any>;
 }

@@ -31,12 +31,15 @@ export interface InitialStateConfig {
    * recoveryBlock) so the edit form opens in tracking mode.
    */
   initialRecoveryQuery?: string;
+  /** When true, the rule builder generates the query — sandbox auto-open is skipped and queryCommitted starts true. */
+  ruleBuilderMode?: boolean;
 }
 
 export const createInitialState = ({
   mode,
   initialQuery = '',
   initialRecoveryQuery,
+  ruleBuilderMode = false,
 }: InitialStateConfig): ComposeDiscoverState => {
   const base: ComposeDiscoverState = {
     mode,
@@ -48,11 +51,12 @@ export const createInitialState = ({
     recoveryBlock: '',
     recoveryType: 'default',
     activeTab: 'alert',
-    childOpen: mode === 'create',
-    queryCommitted: mode === 'edit',
+    childOpen: mode === 'create' && !ruleBuilderMode,
+    queryCommitted: mode === 'edit' || ruleBuilderMode,
     sandboxDateStart: 'now-15m',
     sandboxDateEnd: 'now',
     yamlMode: false,
+    ruleBuilderMode,
   };
 
   if (!initialRecoveryQuery) return base;
@@ -180,7 +184,7 @@ export function reducer(
       return {
         ...state,
         fullQuery: action.fullQuery,
-        childOpen: state.yamlMode ? state.childOpen : false,
+        childOpen: state.yamlMode || state.ruleBuilderMode ? state.childOpen : false,
         queryCommitted: true,
       };
     case 'COMMIT_CHILD_SPLIT':
@@ -189,7 +193,7 @@ export function reducer(
         baseQuery: action.baseQuery,
         alertBlock: action.alertBlock,
         recoveryBlock: action.recoveryBlock,
-        childOpen: state.yamlMode ? state.childOpen : false,
+        childOpen: state.yamlMode || state.ruleBuilderMode ? state.childOpen : false,
         queryCommitted: true,
       };
     case 'SET_YAML_MODE':

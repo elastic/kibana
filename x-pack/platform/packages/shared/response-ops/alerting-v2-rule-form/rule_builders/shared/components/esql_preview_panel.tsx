@@ -8,8 +8,8 @@
 import React from 'react';
 import { EuiCodeBlock, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { QueryResultsGrid } from '@kbn/alerting-v2-rule-form';
-import type { QueryResultsGridProps } from '@kbn/alerting-v2-rule-form';
+import { QueryResultsGrid } from '../../../form/fields/query_results_grid';
+import type { QueryResultsGridProps } from '../../../form/fields/query_results_grid';
 
 interface EsqlPreviewPanelProps extends QueryResultsGridProps {
   query: string;

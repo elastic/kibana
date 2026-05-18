@@ -1,5 +1,5 @@
 {
-  "10.1.0": [
+  "0.0.0": [
     {
       "kind": "alert",
       "metadata": {
@@ -24,7 +24,7 @@
       "updatedAt": "2025-01-01T00:00:00.000Z"
     }
   ],
-  "10.2.0": [
+  "10.1.0": [
     {
       "kind": "alert",
       "metadata": {
@@ -42,7 +42,6 @@
           "base": "FROM logs-* | STATS count = COUNT(*) | WHERE count > 100"
         }
       },
-      "edit_mode": "rule_builder",
       "enabled": true,
       "createdBy": "elastic",
       "createdAt": "2025-01-01T00:00:00.000Z",

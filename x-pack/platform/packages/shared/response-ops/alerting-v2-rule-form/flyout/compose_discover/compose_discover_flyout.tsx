@@ -77,6 +77,12 @@ export interface ComposeDiscoverFlyoutProps {
   onUpdateRule?: (id: string, payload: ReturnType<typeof mapFormValuesToUpdateRequest>) => void;
   /** True while a create/update mutation is in flight. */
   isSaving?: boolean;
+  /** When true, the first step renders rule builder fields instead of the raw ES|QL editor. */
+  ruleBuilderMode?: boolean;
+  /** Initial rule builder state to seed the form with (edit flow). */
+  initialRuleBuilderState?: Record<string, unknown>;
+  /** Called after successful create/update in rule builder mode with the builder state for config persistence. */
+  onRuleBuilderConfigSave?: (ruleBuilderState: Record<string, unknown>) => void;
 }
 
 const FLYOUT_TITLE_ID = 'composeDiscoverFlyoutTitle';
@@ -105,6 +111,9 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
   onCreateRule,
   onUpdateRule,
   isSaving = false,
+  ruleBuilderMode = false,
+  initialRuleBuilderState,
+  onRuleBuilderConfigSave,
 }) => {
   /*
    * ── UI state (step navigation, sandbox open/close, tab selection, etc.) ──
@@ -121,6 +130,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
       initialMapped?.recoveryPolicy?.type === 'query'
         ? initialMapped.recoveryPolicy.query?.base ?? undefined
         : undefined,
+    ruleBuilderMode,
   });
 
   // Registered once here so providers persist across Sandbox open/close cycles.
@@ -142,40 +152,47 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
 
   // ── Form values (submitted to the API) ──
   const defaultValues = useMemo<FormValues>(() => {
-    if (rule) {
-      const mapped = mapRuleResponseToFormValues(rule);
-      return {
-        kind: mapped.kind ?? 'alert',
-        metadata: {
-          name: mapped.metadata?.name ?? '',
-          enabled: mapped.metadata?.enabled ?? true,
-          description: mapped.metadata?.description ?? '',
-          owner: mapped.metadata?.owner,
-          tags: mapped.metadata?.tags ?? [],
-        },
-        timeField: mapped.timeField ?? '@timestamp',
-        schedule: {
-          every: mapped.schedule?.every ?? '1m',
-          lookback: mapped.schedule?.lookback ?? '5m',
-        },
-        evaluation: { query: { base: mapped.evaluation?.query?.base ?? '' } },
-        grouping: mapped.grouping,
-        recoveryPolicy: mapped.recoveryPolicy ?? { type: 'no_breach' },
-        stateTransition: mapped.stateTransition,
-        stateTransitionAlertDelayMode: mapped.stateTransitionAlertDelayMode ?? 'immediate',
-        stateTransitionRecoveryDelayMode: mapped.stateTransitionRecoveryDelayMode ?? 'immediate',
-        artifacts: mapped.artifacts ?? [],
-      };
+    const base: FormValues = rule
+      ? (() => {
+          const mapped = mapRuleResponseToFormValues(rule);
+          return {
+            kind: mapped.kind ?? 'alert',
+            metadata: {
+              name: mapped.metadata?.name ?? '',
+              enabled: mapped.metadata?.enabled ?? true,
+              description: mapped.metadata?.description ?? '',
+              owner: mapped.metadata?.owner,
+              tags: mapped.metadata?.tags ?? [],
+            },
+            timeField: mapped.timeField ?? '@timestamp',
+            schedule: {
+              every: mapped.schedule?.every ?? '1m',
+              lookback: mapped.schedule?.lookback ?? '5m',
+            },
+            evaluation: { query: { base: mapped.evaluation?.query?.base ?? '' } },
+            grouping: mapped.grouping,
+            recoveryPolicy: mapped.recoveryPolicy ?? { type: 'no_breach' },
+            stateTransition: mapped.stateTransition,
+            stateTransitionAlertDelayMode: mapped.stateTransitionAlertDelayMode ?? 'immediate',
+            stateTransitionRecoveryDelayMode:
+              mapped.stateTransitionRecoveryDelayMode ?? 'immediate',
+            artifacts: mapped.artifacts ?? [],
+          };
+        })()
+      : EMPTY_FORM_VALUES;
+
+    if (ruleBuilderMode && initialRuleBuilderState) {
+      return { ...base, ruleBuilderState: initialRuleBuilderState };
     }
-    return EMPTY_FORM_VALUES;
-  }, [rule]);
+    return base;
+  }, [rule, ruleBuilderMode, initialRuleBuilderState]);
 
   const methods = useForm<FormValues>({ mode: 'onBlur', defaultValues });
 
   const isCreate = mode === 'create';
   const title = isCreate ? 'Create alert rule' : 'Edit alert rule';
 
-  const steps = getSteps(uiState.tracking);
+  const steps = getSteps(uiState.tracking, ruleBuilderMode);
   const currentStep = steps[uiState.step];
   const isLastStep = uiState.step === steps.length - 1;
 
@@ -290,10 +307,16 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
   );
 
   const handleSubmit = methods.handleSubmit((values) => {
+    if (ruleBuilderMode) {
+      values.editMode = 'rule_builder';
+    }
     if (isCreate) {
       onCreateRule(mapFormValuesToCreateRequest(values));
     } else if (ruleId && onUpdateRule) {
       onUpdateRule(ruleId, mapFormValuesToUpdateRequest(values));
+    }
+    if (ruleBuilderMode && values.ruleBuilderState && onRuleBuilderConfigSave) {
+      onRuleBuilderConfigSave(values.ruleBuilderState);
     }
   });
 
@@ -349,19 +372,21 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
                   <>{/* Step indicator coming in PR A — HorizontalMinimalStepper */}</>
                 )}
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonGroup
-                  legend={i18n.translate('xpack.alertingV2.composeDiscover.editMode.legend', {
-                    defaultMessage: 'Edit mode selection',
-                  })}
-                  options={EDIT_MODE_OPTIONS}
-                  idSelected={uiState.yamlMode ? 'yaml' : 'form'}
-                  onChange={(id) => handleToggleYamlMode(id === 'yaml')}
-                  isIconOnly
-                  buttonSize="compressed"
-                  data-test-subj="composeDiscoverEditModeToggle"
-                />
-              </EuiFlexItem>
+              {!ruleBuilderMode && (
+                <EuiFlexItem grow={false}>
+                  <EuiButtonGroup
+                    legend={i18n.translate('xpack.alertingV2.composeDiscover.editMode.legend', {
+                      defaultMessage: 'Edit mode selection',
+                    })}
+                    options={EDIT_MODE_OPTIONS}
+                    idSelected={uiState.yamlMode ? 'yaml' : 'form'}
+                    onChange={(id) => handleToggleYamlMode(id === 'yaml')}
+                    isIconOnly
+                    buttonSize="compressed"
+                    data-test-subj="composeDiscoverEditModeToggle"
+                  />
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
           </EuiFlyoutHeader>
 
@@ -376,7 +401,12 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
                 />
               </React.Suspense>
             ) : (
-              <ComposeDiscoverForm state={uiState} dispatch={dispatch} services={services} />
+              <ComposeDiscoverForm
+                state={uiState}
+                dispatch={dispatch}
+                services={services}
+                ruleBuilderMode={ruleBuilderMode}
+              />
             )}
           </EuiFlyoutBody>
 
@@ -436,7 +466,9 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
                       ) : (
                         <EuiToolTip
                           content={
-                            currentStep?.id === 'alertCondition' && !uiState.queryCommitted
+                            !ruleBuilderMode &&
+                            currentStep?.id === 'alertCondition' &&
+                            !uiState.queryCommitted
                               ? 'Define a query in the editor before continuing'
                               : undefined
                           }
@@ -447,7 +479,9 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
                             iconSide="right"
                             isDisabled={
                               uiState.childOpen ||
-                              (currentStep?.id === 'alertCondition' && !uiState.queryCommitted)
+                              (!ruleBuilderMode &&
+                                currentStep?.id === 'alertCondition' &&
+                                !uiState.queryCommitted)
                             }
                             onClick={handleNext}
                             data-test-subj="composeDiscoverNext"
@@ -472,6 +506,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
               onRecoveryEditorMount={onRecoveryEditorMount}
               onClose={() => dispatch({ type: 'CLOSE_CHILD' })}
               onApply={handleSandboxApply}
+              readOnly={ruleBuilderMode}
             />
           )}
         </EuiFlyout>

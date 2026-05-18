@@ -6,13 +6,13 @@
  */
 
 import type { RuleKind } from '@kbn/alerting-v2-schemas';
+import { i18n } from '@kbn/i18n';
 import type {
   StateTransitionDelayMode,
   RecoveryPolicy,
   StateTransition,
   RuleArtifact,
-} from '@kbn/alerting-v2-rule-form';
-import { i18n } from '@kbn/i18n';
+} from '../../form/types';
 import type { DataSourceFormValues } from '../shared/types';
 
 export enum Aggregation {

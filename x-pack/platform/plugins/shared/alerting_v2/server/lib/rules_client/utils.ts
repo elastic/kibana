@@ -120,8 +120,7 @@ export function transformCreateRuleBodyToRuleSoAttributes(
     grouping: data.grouping,
     no_data: data.no_data,
     artifacts: data.artifacts,
-    origin: data.origin,
-    builder_config: data.builder_config,
+    edit_mode: data.edit_mode,
     ...serverFields,
   };
 }
@@ -166,8 +165,7 @@ export function buildUpdateRuleAttributes(
     grouping: nullToUndefined(updateData.grouping, existingAttrs.grouping),
     no_data: nullToUndefined(updateData.no_data, existingAttrs.no_data),
     artifacts: nullToEmptyArray(updateData.artifacts, existingAttrs.artifacts),
-    origin: existingAttrs.origin,
-    builder_config: nullToUndefined(updateData.builder_config, existingAttrs.builder_config),
+    edit_mode: updateData.edit_mode ?? existingAttrs.edit_mode,
     enabled: updateData.enabled ?? existingAttrs.enabled,
     // Server-managed fields — preserved as-is except timestamps and user.
     createdBy: existingAttrs.createdBy,
@@ -181,6 +179,8 @@ export function buildUpdateRuleAttributes(
 
 /**
  * Converts saved object attributes into the public API response shape.
+ * rule_builder_config is intentionally excluded — it is only available through the
+ * internal rule builder config route.
  */
 export function transformRuleSoAttributesToRuleApiResponse(
   id: string,
@@ -210,8 +210,7 @@ export function transformRuleSoAttributesToRuleApiResponse(
     grouping: attrs.grouping,
     no_data: attrs.no_data,
     artifacts: attrs.artifacts,
-    origin: attrs.origin,
-    builder_config: attrs.builder_config,
+    edit_mode: attrs.edit_mode,
     enabled: attrs.enabled,
     createdBy: attrs.createdBy,
     createdAt: attrs.createdAt,

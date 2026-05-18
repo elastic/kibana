@@ -17,7 +17,10 @@ import type {
   RuleResponse,
   UpdateRuleData,
 } from '@kbn/alerting-v2-schemas';
-import { ALERTING_V2_RULE_API_PATH } from '../constants';
+import {
+  ALERTING_V2_RULE_API_PATH,
+  ALERTING_V2_INTERNAL_RULE_BUILDER_CONFIG_API_PATH,
+} from '../constants';
 
 /** Re-exported from the shared schemas package. */
 export type { RuleResponse as RuleApiResponse, FindRulesResponse };
@@ -90,5 +93,31 @@ export class RulesApi {
     return this.http.post<BulkOperationResponse>(`${ALERTING_V2_RULE_API_PATH}/_bulk_disable`, {
       body: JSON.stringify(params),
     });
+  }
+
+  private ruleBuilderConfigPath(ruleId: string) {
+    return `${ALERTING_V2_INTERNAL_RULE_BUILDER_CONFIG_API_PATH}/${encodeURIComponent(
+      ruleId
+    )}/rule_builder_config`;
+  }
+
+  public async getRuleBuilderConfig(ruleId: string) {
+    try {
+      return await this.http.get<{ type: string; config: string }>(
+        this.ruleBuilderConfigPath(ruleId)
+      );
+    } catch {
+      return undefined;
+    }
+  }
+
+  public async saveRuleBuilderConfig(ruleId: string, config: { type: string; config: string }) {
+    return this.http.put<{ type: string; config: string }>(this.ruleBuilderConfigPath(ruleId), {
+      body: JSON.stringify(config),
+    });
+  }
+
+  public async deleteRuleBuilderConfig(ruleId: string) {
+    return this.http.delete(this.ruleBuilderConfigPath(ruleId));
   }
 }

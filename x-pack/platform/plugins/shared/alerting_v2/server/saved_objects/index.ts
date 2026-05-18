@@ -11,15 +11,19 @@ import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-obje
 import {
   actionPolicyModelVersions,
   apiKeyPendingInvalidationModelVersions,
+  ruleBuilderConfigModelVersions,
   ruleModelVersions,
 } from './model_versions';
 import { apiKeyPendingInvalidationMappings } from './api_key_pending_invalidation_mappings';
 import { actionPolicyMappings } from './action_policy_mappings';
+import { ruleBuilderConfigMappings } from './rule_builder_config_mappings';
 import { ruleMappings } from './rule_mappings';
 import type { ActionPolicySavedObjectAttributes } from './schemas/action_policy_saved_object_attributes';
+import type { RuleBuilderConfigSavedObjectAttributes } from './schemas/rule_builder_config_saved_object_attributes';
 import type { RuleSavedObjectAttributes } from './schemas/rule_saved_object_attributes';
 
 export const RULE_SAVED_OBJECT_TYPE = 'alerting_rule';
+export const RULE_BUILDER_CONFIG_SAVED_OBJECT_TYPE = 'alerting_rule_builder_config';
 export const ACTION_POLICY_SAVED_OBJECT_TYPE = 'alerting_action_policy';
 export const API_KEY_PENDING_INVALIDATION_TYPE = 'alerting_api_key_pending_invalidation';
 
@@ -43,12 +47,27 @@ export function registerSavedObjects({
     namespaceType: 'multiple-isolated',
     mappings: ruleMappings,
     management: {
-      importableAndExportable: false,
+      importableAndExportable: true,
       getTitle(esqlRuleSavedObject: SavedObject<RuleSavedObjectAttributes>) {
         return `Rule: [${esqlRuleSavedObject.attributes.metadata.name}]`;
       },
     },
     modelVersions: ruleModelVersions,
+  });
+
+  savedObjects.registerType({
+    name: RULE_BUILDER_CONFIG_SAVED_OBJECT_TYPE,
+    indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
+    hidden: true,
+    namespaceType: 'multiple-isolated',
+    mappings: ruleBuilderConfigMappings,
+    management: {
+      importableAndExportable: true,
+      getTitle(so: SavedObject<RuleBuilderConfigSavedObjectAttributes>) {
+        return `Rule Builder Config: [${so.attributes.type}]`;
+      },
+    },
+    modelVersions: ruleBuilderConfigModelVersions,
   });
 
   savedObjects.registerType({
@@ -84,4 +103,5 @@ export function registerSavedObjects({
 }
 
 export type { ActionPolicySavedObjectAttributes } from './schemas/action_policy_saved_object_attributes';
+export type { RuleBuilderConfigSavedObjectAttributes } from './schemas/rule_builder_config_saved_object_attributes';
 export type { RuleSavedObjectAttributes } from './schemas/rule_saved_object_attributes';

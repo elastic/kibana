@@ -104,6 +104,13 @@ describe('RulesClient', () => {
     jest.useRealTimers();
   });
 
+  const ruleBuilderConfigSavedObjectService = {
+    create: jest.fn().mockResolvedValue('config-id-1'),
+    get: jest.fn().mockRejectedValue(new Error('not found')),
+    update: jest.fn().mockResolvedValue(undefined),
+    delete: jest.fn().mockResolvedValue(undefined),
+  };
+
   function createClient() {
     const actionPolicyClient = {
       deleteActionPoliciesByFilter: jest
@@ -112,7 +119,14 @@ describe('RulesClient', () => {
     } as unknown as ActionPolicyClient;
 
     return new RulesClient({
-      services: { request, rulesSavedObjectService, taskManager, userService, actionPolicyClient },
+      services: {
+        request,
+        rulesSavedObjectService,
+        ruleBuilderConfigSavedObjectService,
+        taskManager,
+        userService,
+        actionPolicyClient,
+      },
       options: { spaceId: 'space-1' },
     });
   }
@@ -298,7 +312,7 @@ describe('RulesClient', () => {
         expect.objectContaining({
           schedule: expect.objectContaining({ every: '5m' }),
         }),
-        { version: 'WzEsMV0=', mergeAttributes: false }
+        expect.objectContaining({ version: 'WzEsMV0=', mergeAttributes: false })
       );
     });
 
@@ -324,7 +338,7 @@ describe('RulesClient', () => {
         expect.objectContaining({
           metadata: expect.objectContaining({ description: 'New description' }),
         }),
-        { version: 'WzEsMV0=', mergeAttributes: false }
+        expect.objectContaining({ version: 'WzEsMV0=', mergeAttributes: false })
       );
 
       expect(res.metadata.description).toBe('New description');
@@ -484,7 +498,7 @@ describe('RulesClient', () => {
         expect.objectContaining({
           artifacts: [],
         }),
-        { version: 'WzEsMV0=', mergeAttributes: false }
+        expect.objectContaining({ version: 'WzEsMV0=', mergeAttributes: false })
       );
     });
   });
@@ -613,7 +627,7 @@ describe('RulesClient', () => {
             updatedBy: 'elastic',
             updatedAt: '2025-01-01T00:00:00.000Z',
           }),
-          { version: 'WzEsMV0=', mergeAttributes: false }
+          expect.objectContaining({ version: 'WzEsMV0=', mergeAttributes: false })
         );
         expect(res.created).toBe(false);
       });

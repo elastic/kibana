@@ -173,7 +173,7 @@ export const RulesListPage = () => {
                                 {
                                   name: i18n.translate(
                                     'xpack.alertingV2.rulesList.createRuleFlyoutButton',
-                                    { defaultMessage: 'Create with flyout' }
+                                    { defaultMessage: 'Create ES|QL rule' }
                                   ),
                                   icon: 'popout',
                                   onClick: () => {
@@ -181,6 +181,18 @@ export const RulesListPage = () => {
                                     openCreateFlyout();
                                   },
                                   'data-test-subj': 'createRuleFlyoutButton',
+                                },
+                                {
+                                  name: i18n.translate(
+                                    'xpack.alertingV2.rulesList.createThresholdAlertButton',
+                                    { defaultMessage: 'Threshold Alert' }
+                                  ),
+                                  icon: 'visGauge',
+                                  onClick: () => {
+                                    closeCreateMenu();
+                                    openCreateFlyout({ ruleBuilderMode: true });
+                                  },
+                                  'data-test-subj': 'createThresholdAlertButton',
                                 },
                               ],
                             },
@@ -220,7 +232,12 @@ export const RulesListPage = () => {
           <EuiSpacer />
         </>
       ) : null}
-      {showEmptyState ? <RuleCreateOptionsPanel onCreateEsqlRule={openCreateFlyout} /> : null}
+      {showEmptyState ? (
+        <RuleCreateOptionsPanel
+          onCreateEsqlRule={openCreateFlyout}
+          onCreateThresholdAlert={() => openCreateFlyout({ ruleBuilderMode: true })}
+        />
+      ) : null}
       {hasRules || hasActiveFilters ? (
         <>
           <EuiFlexGroup gutterSize="s">

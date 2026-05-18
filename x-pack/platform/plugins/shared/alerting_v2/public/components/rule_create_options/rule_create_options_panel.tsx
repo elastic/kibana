@@ -25,10 +25,12 @@ import { paths } from '../../constants';
 
 interface RuleCreateOptionsPanelProps {
   onCreateEsqlRule: () => void;
+  onCreateThresholdAlert?: () => void;
 }
 
 export const RuleCreateOptionsPanel: React.FC<RuleCreateOptionsPanelProps> = ({
   onCreateEsqlRule,
+  onCreateThresholdAlert,
 }) => {
   const { basePath } = useService(CoreStart('http'));
   const { euiTheme } = useEuiTheme();
@@ -156,7 +158,10 @@ export const RuleCreateOptionsPanel: React.FC<RuleCreateOptionsPanelProps> = ({
                     'Monitor one or more metrics and alert when they cross a threshold. Multi-condition support with custom aggregations.',
                 }
               )}
-              href={basePath.prepend(paths.thresholdRuleCreate)}
+              onClick={onCreateThresholdAlert}
+              href={
+                onCreateThresholdAlert ? undefined : basePath.prepend(paths.thresholdRuleCreate)
+              }
               icon={<EuiIcon type="chartThreshold" color="text" size="l" aria-hidden={true} />}
               css={{
                 width: '50%',

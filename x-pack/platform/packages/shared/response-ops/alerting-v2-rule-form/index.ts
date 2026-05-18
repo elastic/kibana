@@ -78,3 +78,39 @@ export type {
   DynamicRuleFormFlyoutProps,
   StandaloneRuleFormFlyoutProps,
 } from './flyout';
+
+// Rule builders — reusable components for guided rule authoring
+export {
+  DataSourceSection,
+  EsqlPreviewPanel,
+  FilterInput,
+  GroupByFields,
+  SectionWrapper,
+  useIndexColumns,
+  useIndexOptions,
+  StatsFieldGroup,
+  EvaluationsFieldGroup,
+  ThresholdsFieldGroup,
+  useThresholdAlertPreview,
+  buildEsqlQuery,
+  Aggregation,
+  Comparator,
+  BUILDER_TYPE,
+  DEFAULT_STAT,
+  DEFAULT_ALERT_CONDITION,
+  AGGREGATION_LABELS,
+  COMPARATOR_LABELS,
+  AGGREGATIONS_REQUIRING_FIELD,
+  deriveStatLabel,
+} from './rule_builders';
+
+export type {
+  DataSourceFormValues,
+  IndexColumn,
+  IndexOption,
+  ThresholdRuleFormValues,
+  StatDefinition,
+  EvaluationDefinition,
+  AlertCondition,
+  ConditionOperator,
+} from './rule_builders';

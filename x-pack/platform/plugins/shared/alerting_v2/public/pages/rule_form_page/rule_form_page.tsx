@@ -29,13 +29,14 @@ import {
 } from '@kbn/alerting-v2-rule-form';
 import type { FormValues, StateTransition } from '@kbn/alerting-v2-rule-form';
 import { i18n } from '@kbn/i18n';
+import type { ThresholdRuleFormValues } from '@kbn/alerting-v2-rule-form';
+import { BUILDER_TYPE } from '@kbn/alerting-v2-rule-form';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
+import { useFetchRuleBuilderConfig } from '../../hooks/use_fetch_rule_builder_config';
 import { ruleKeys } from '../../hooks/query_key_factory';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { paths } from '../../constants';
 import { ThresholdRuleFormContent } from '../rule_builders/threshold_alert/threshold_alert_form_content';
-import type { ThresholdRuleFormValues } from '../rule_builders/threshold_alert/types';
-import { BUILDER_TYPE } from '../rule_builders/threshold_alert/types';
 
 const DEFAULT_QUERY = 'FROM logs-*\n| LIMIT 1';
 
@@ -43,14 +44,14 @@ const CLONE_NAME_SUFFIX = i18n.translate('xpack.alertingV2.ruleFormPage.cloneNam
   defaultMessage: ' (clone)',
 });
 
-const parseBuilderConfig = (
-  builderConfig?: { type: string; config: string } | null
+const parseRuleBuilderConfig = (
+  ruleBuilderConfig?: { type: string; config: string } | null
 ): Partial<ThresholdRuleFormValues> | undefined => {
-  if (!builderConfig || builderConfig.type !== BUILDER_TYPE) {
+  if (!ruleBuilderConfig || ruleBuilderConfig.type !== BUILDER_TYPE) {
     return undefined;
   }
   try {
-    return JSON.parse(builderConfig.config) as Partial<ThresholdRuleFormValues>;
+    return JSON.parse(ruleBuilderConfig.config) as Partial<ThresholdRuleFormValues>;
   } catch {
     return undefined;
   }
@@ -97,7 +98,15 @@ const FetchedRuleFormPage = ({ ruleId, mode }: FetchedRuleFormPageProps) => {
     error,
   } = useFetchRule(ruleId);
 
-  if (isLoading || (!isFetchedAfterMount && isFetching)) {
+  const isBuilderRule = rule?.edit_mode === 'rule_builder';
+  const { data: ruleBuilderConfig, isLoading: isRuleBuilderConfigLoading } =
+    useFetchRuleBuilderConfig(ruleId, isBuilderRule);
+
+  if (
+    isLoading ||
+    (!isFetchedAfterMount && isFetching) ||
+    (isBuilderRule && isRuleBuilderConfigLoading)
+  ) {
     return <EuiLoadingSpinner size="xl" />;
   }
 
@@ -126,9 +135,11 @@ const FetchedRuleFormPage = ({ ruleId, mode }: FetchedRuleFormPageProps) => {
     );
   }
 
-  const builderInitialValues = parseBuilderConfig(rule.builder_config);
+  const builderInitialValues = isBuilderRule
+    ? parseRuleBuilderConfig(ruleBuilderConfig)
+    : undefined;
 
-  if (builderInitialValues) {
+  if (isBuilderRule) {
     const stateTransition: StateTransition = {
       pendingCount: rule.state_transition?.pending_count ?? null,
       pendingTimeframe: rule.state_transition?.pending_timeframe ?? null,
@@ -142,7 +153,7 @@ const FetchedRuleFormPage = ({ ruleId, mode }: FetchedRuleFormPageProps) => {
       <ThresholdRuleFormPageContent
         ruleId={isClone ? undefined : ruleId}
         initialValues={{
-          ...builderInitialValues,
+          ...(builderInitialValues ?? {}),
           kind: rule.kind,
           metadata: {
             name: ruleName,

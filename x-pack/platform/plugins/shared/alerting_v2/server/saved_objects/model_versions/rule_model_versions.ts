@@ -21,12 +21,7 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
       {
         type: 'mappings_addition',
         addedMappings: {
-          origin: { type: 'keyword' },
-          builder_config: {
-            properties: {
-              type: { type: 'keyword' },
-            },
-          },
+          edit_mode: { type: 'keyword' },
         },
       },
     ],

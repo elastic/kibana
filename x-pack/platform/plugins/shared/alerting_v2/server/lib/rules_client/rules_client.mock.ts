@@ -11,6 +11,7 @@ import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { ActionPolicyClient } from '../action_policy_client';
 import { createRulesSavedObjectService } from '../services/rules_saved_object_service/rules_saved_object_service.mock';
 import { createUserService } from '../services/user_service/user_service.mock';
+import type { RuleBuilderConfigSavedObjectServiceContract } from '../services/rule_builder_config_saved_object_service/rule_builder_config_saved_object_service';
 import { RulesClient } from './rules_client';
 
 export function createRulesClient(): {
@@ -26,9 +27,23 @@ export function createRulesClient(): {
       .fn()
       .mockResolvedValue({ processed: 0, total: 0, errors: [] }),
   } as unknown as ActionPolicyClient;
+  const ruleBuilderConfigSavedObjectService: jest.Mocked<RuleBuilderConfigSavedObjectServiceContract> =
+    {
+      get: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+    };
 
   const rulesClient = new RulesClient({
-    services: { request, rulesSavedObjectService, taskManager, userService, actionPolicyClient },
+    services: {
+      request,
+      rulesSavedObjectService,
+      ruleBuilderConfigSavedObjectService,
+      taskManager,
+      userService,
+      actionPolicyClient,
+    },
     options: { spaceId: 'default' },
   });
 

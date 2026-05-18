@@ -30,7 +30,10 @@ export const RuleCreateOptionsPage = () => {
         }
       />
       <EuiSpacer size="m" />
-      <RuleCreateOptionsPanel onCreateEsqlRule={openCreateFlyout} />
+      <RuleCreateOptionsPanel
+        onCreateEsqlRule={openCreateFlyout}
+        onCreateThresholdAlert={() => openCreateFlyout({ ruleBuilderMode: true })}
+      />
       {flyout}
     </div>
   );

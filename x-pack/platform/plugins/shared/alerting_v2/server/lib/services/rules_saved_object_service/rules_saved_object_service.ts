@@ -8,7 +8,7 @@
 import { PluginStart } from '@kbn/core-di';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { inject, injectable } from 'inversify';
-import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObjectReference, SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
 import type { SavedObjectError } from '@kbn/core/types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
@@ -43,14 +43,28 @@ export interface RulesFindAllResultItem {
 }
 
 export interface RulesSavedObjectServiceContract {
-  create(params: { attrs: RuleSavedObjectAttributes; id?: string }): Promise<string>;
+  create(params: {
+    attrs: RuleSavedObjectAttributes;
+    id?: string;
+    references?: SavedObjectReference[];
+  }): Promise<string>;
   get(
     id: string,
     spaceId?: string
-  ): Promise<{ id: string; attributes: RuleSavedObjectAttributes; version?: string }>;
+  ): Promise<{
+    id: string;
+    attributes: RuleSavedObjectAttributes;
+    version?: string;
+    references?: SavedObjectReference[];
+  }>;
   bulkGetByIds(ids: string[], spaceId?: string): Promise<RulesSavedObjectsBulkGetResultItem[]>;
   findByIds(ruleIds: string[], spaceId?: string): Promise<RulesFindAllResultItem[]>;
-  update(params: { id: string; attrs: RuleSavedObjectAttributes; version?: string }): Promise<void>;
+  update(params: {
+    id: string;
+    attrs: RuleSavedObjectAttributes;
+    version?: string;
+    references?: SavedObjectReference[];
+  }): Promise<void>;
   bulkUpdate(
     items: Array<{ id: string; attrs: RuleSavedObjectAttributes; version?: string }>
   ): Promise<BulkUpdateResultItem[]>;
@@ -82,28 +96,41 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
   public async create({
     attrs,
     id,
+    references,
   }: {
     attrs: RuleSavedObjectAttributes;
     id?: string;
+    references?: SavedObjectReference[];
   }): Promise<string> {
     const ruleId = id ?? SavedObjectsUtils.generateId();
     await this.client.create<RuleSavedObjectAttributes>(RULE_SAVED_OBJECT_TYPE, attrs, {
       id: ruleId,
       overwrite: false,
+      ...(references ? { references } : {}),
     });
     return ruleId;
   }
   public async get(
     id: string,
     spaceId?: string
-  ): Promise<{ id: string; attributes: RuleSavedObjectAttributes; version?: string }> {
+  ): Promise<{
+    id: string;
+    attributes: RuleSavedObjectAttributes;
+    version?: string;
+    references?: SavedObjectReference[];
+  }> {
     const namespace = spaceIdToNamespace(this.spaces, spaceId);
     const doc = await this.client.get<RuleSavedObjectAttributes>(
       RULE_SAVED_OBJECT_TYPE,
       id,
       namespace ? { namespace } : undefined
     );
-    return { id: doc.id, attributes: doc.attributes, version: doc.version };
+    return {
+      id: doc.id,
+      attributes: doc.attributes,
+      version: doc.version,
+      references: doc.references,
+    };
   }
 
   public async bulkGetByIds(
@@ -161,13 +188,16 @@ export class RulesSavedObjectService implements RulesSavedObjectServiceContract 
     id,
     attrs,
     version,
+    references,
   }: {
     id: string;
     attrs: RuleSavedObjectAttributes;
     version?: string;
+    references?: SavedObjectReference[];
   }): Promise<void> {
     await this.client.update<RuleSavedObjectAttributes>(RULE_SAVED_OBJECT_TYPE, id, attrs, {
       ...(version ? { version } : {}),
+      ...(references ? { references } : {}),
       mergeAttributes: false,
     });
   }

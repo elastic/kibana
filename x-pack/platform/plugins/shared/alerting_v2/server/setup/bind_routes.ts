@@ -47,6 +47,9 @@ import { ListInsightsRoute } from '../routes/rule_doctor_insights/list_insights_
 import { GetInsightRoute } from '../routes/rule_doctor_insights/get_insight_route';
 import { UpdateInsightStatusRoute } from '../routes/rule_doctor_insights/update_insight_status_route';
 import { UpsertRuleRoute } from '../routes/rules/upsert_rule_route';
+import { GetRuleBuilderConfigRoute } from '../routes/rules/get_rule_builder_config_route';
+import { PutRuleBuilderConfigRoute } from '../routes/rules/put_rule_builder_config_route';
+import { DeleteRuleBuilderConfigRoute } from '../routes/rules/delete_rule_builder_config_route';
 import { UpsertActionPolicyRoute } from '../routes/action_policies/upsert_action_policy_route';
 
 /**
@@ -101,4 +104,7 @@ export function bindRoutes({ bind }: ContainerModuleLoadOptions) {
   bind(Route).toConstantValue(ResetResourcesRoute);
   bind(Route).toConstantValue(UpsertRuleRoute);
   bind(Route).toConstantValue(UpsertActionPolicyRoute);
+  bind(Route).toConstantValue(GetRuleBuilderConfigRoute);
+  bind(Route).toConstantValue(PutRuleBuilderConfigRoute);
+  bind(Route).toConstantValue(DeleteRuleBuilderConfigRoute);
 }

@@ -18,12 +18,18 @@ import type { KibanaRequest as CoreKibanaRequest } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { stringifyZodError } from '@kbn/zod-helpers/v4';
 import type { z } from '@kbn/zod/v4';
-import { type RuleSavedObjectAttributes } from '../../saved_objects';
+import type { SavedObjectReference } from '@kbn/core/server';
+import {
+  type RuleSavedObjectAttributes,
+  RULE_BUILDER_CONFIG_SAVED_OBJECT_TYPE,
+} from '../../saved_objects';
+import type { RuleBuilderConfigSavedObjectAttributes } from '../../saved_objects';
 import { type ActionPolicyClient } from '../action_policy_client';
 import { withApm as withApmDecorator } from '../apm/with_apm_decorator';
 import { ALERTING_RULE_EXECUTOR_TASK_TYPE } from '../rule_executor';
 import { ensureRuleExecutorTaskScheduled, getRuleExecutorTaskId } from '../rule_executor/schedule';
 import type { RuleExecutorTaskParams } from '../rule_executor/types';
+import type { RuleBuilderConfigSavedObjectServiceContract } from '../services/rule_builder_config_saved_object_service/rule_builder_config_saved_object_service';
 import type { RulesSavedObjectServiceContract } from '../services/rules_saved_object_service/rules_saved_object_service';
 import type { UserServiceContract } from '../services/user_service/user_service';
 import { buildRuleSoFilter } from './build_rule_filter';
@@ -74,10 +80,13 @@ const mapSortField = (sortField?: FindRulesSortField): string | undefined => {
   return sortFieldMap[sortField];
 };
 
+const RULE_BUILDER_CONFIG_REFERENCE_NAME = 'rule_builder_config';
+
 interface RulesClientParams {
   services: {
     request: KibanaRequest;
     rulesSavedObjectService: RulesSavedObjectServiceContract;
+    ruleBuilderConfigSavedObjectService: RuleBuilderConfigSavedObjectServiceContract;
     taskManager: TaskManagerStartContract;
     userService: UserServiceContract;
     actionPolicyClient: ActionPolicyClient;
@@ -90,6 +99,7 @@ interface RulesClientParams {
 export class RulesClient {
   private readonly request: KibanaRequest;
   private readonly rulesSavedObjectService: RulesSavedObjectServiceContract;
+  private readonly ruleBuilderConfigSavedObjectService: RuleBuilderConfigSavedObjectServiceContract;
   private readonly taskManager: TaskManagerStartContract;
   private readonly userService: UserServiceContract;
   private readonly actionPolicyClient: ActionPolicyClient;
@@ -98,6 +108,7 @@ export class RulesClient {
   constructor({ services, options }: RulesClientParams) {
     this.request = services.request;
     this.rulesSavedObjectService = services.rulesSavedObjectService;
+    this.ruleBuilderConfigSavedObjectService = services.ruleBuilderConfigSavedObjectService;
     this.taskManager = services.taskManager;
     this.userService = services.userService;
     this.actionPolicyClient = services.actionPolicyClient;
@@ -122,12 +133,14 @@ export class RulesClient {
     return parsed.data;
   }
 
-  private async getExistingRule(
-    id: string
-  ): Promise<{ attrs: RuleSavedObjectAttributes; version: string | undefined }> {
+  private async getExistingRule(id: string): Promise<{
+    attrs: RuleSavedObjectAttributes;
+    version: string | undefined;
+    references: SavedObjectReference[] | undefined;
+  }> {
     try {
       const doc = await this.rulesSavedObjectService.get(id);
-      return { attrs: doc.attributes, version: doc.version };
+      return { attrs: doc.attributes, version: doc.version, references: doc.references };
     } catch (e) {
       if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
         throw Boom.notFound(`Rule with id "${id}" not found`);
@@ -156,17 +169,52 @@ export class RulesClient {
     });
   }
 
+  private buildRuleBuilderConfigReference(configId: string): SavedObjectReference {
+    return {
+      name: RULE_BUILDER_CONFIG_REFERENCE_NAME,
+      type: RULE_BUILDER_CONFIG_SAVED_OBJECT_TYPE,
+      id: configId,
+    };
+  }
+
+  private getRuleBuilderConfigIdFromReferences(
+    references?: SavedObjectReference[]
+  ): string | undefined {
+    return references?.find(
+      (ref) =>
+        ref.name === RULE_BUILDER_CONFIG_REFERENCE_NAME &&
+        ref.type === RULE_BUILDER_CONFIG_SAVED_OBJECT_TYPE
+    )?.id;
+  }
+
+  private async fetchRuleBuilderConfig(
+    references?: SavedObjectReference[]
+  ): Promise<RuleBuilderConfigSavedObjectAttributes | undefined> {
+    const configId = this.getRuleBuilderConfigIdFromReferences(references);
+    if (!configId) {
+      return undefined;
+    }
+    try {
+      const { attributes } = await this.ruleBuilderConfigSavedObjectService.get(configId);
+      return attributes;
+    } catch {
+      return undefined;
+    }
+  }
+
   private async writeRuleAttrs({
     id,
     attrs,
     version,
+    references,
   }: {
     id: string;
     attrs: RuleSavedObjectAttributes;
     version?: string;
+    references?: SavedObjectReference[];
   }): Promise<void> {
     try {
-      await this.rulesSavedObjectService.update({ id, attrs, version });
+      await this.rulesSavedObjectService.update({ id, attrs, version, references });
     } catch (e) {
       if (SavedObjectsErrorHelpers.isConflictError(e)) {
         throw Boom.conflict(`Rule with id "${id}" has already been updated by another user`);
@@ -255,7 +303,11 @@ export class RulesClient {
       scheduleEvery: nextAttrs.schedule.every,
     });
 
-    await this.writeRuleAttrs({ id, attrs: nextAttrs, version: existingVersion });
+    await this.writeRuleAttrs({
+      id,
+      attrs: nextAttrs,
+      version: existingVersion,
+    });
 
     return transformRuleSoAttributesToRuleApiResponse(id, nextAttrs);
   }
@@ -264,6 +316,81 @@ export class RulesClient {
   public async getRule({ id }: { id: string }): Promise<RuleResponse> {
     const { attrs } = await this.getExistingRule(id);
     return transformRuleSoAttributesToRuleApiResponse(id, attrs);
+  }
+
+  @withApm
+  public async getRuleBuilderConfig({
+    ruleId,
+  }: {
+    ruleId: string;
+  }): Promise<RuleBuilderConfigSavedObjectAttributes | undefined> {
+    const { references } = await this.getExistingRule(ruleId);
+    return this.fetchRuleBuilderConfig(references);
+  }
+
+  @withApm
+  public async saveRuleBuilderConfig({
+    ruleId,
+    config,
+  }: {
+    ruleId: string;
+    config: RuleBuilderConfigSavedObjectAttributes;
+  }): Promise<RuleBuilderConfigSavedObjectAttributes> {
+    const { attrs, version, references } = await this.getExistingRule(ruleId);
+    const existingConfigId = this.getRuleBuilderConfigIdFromReferences(references);
+
+    if (existingConfigId) {
+      await this.ruleBuilderConfigSavedObjectService.update({
+        id: existingConfigId,
+        attrs: config,
+      });
+    } else {
+      const newConfigId = await this.ruleBuilderConfigSavedObjectService.create({ attrs: config });
+      const otherRefs = (references ?? []).filter(
+        (ref) => ref.name !== RULE_BUILDER_CONFIG_REFERENCE_NAME
+      );
+      const nextReferences = [...otherRefs, this.buildRuleBuilderConfigReference(newConfigId)];
+
+      await this.writeRuleAttrs({
+        id: ruleId,
+        attrs: { ...attrs, edit_mode: 'rule_builder' },
+        version,
+        references: nextReferences,
+      });
+    }
+
+    if (attrs.edit_mode !== 'rule_builder' && existingConfigId) {
+      await this.writeRuleAttrs({
+        id: ruleId,
+        attrs: { ...attrs, edit_mode: 'rule_builder' },
+        version,
+      });
+    }
+
+    return config;
+  }
+
+  @withApm
+  public async deleteRuleBuilderConfig({ ruleId }: { ruleId: string }): Promise<void> {
+    const { attrs, version, references } = await this.getExistingRule(ruleId);
+    const existingConfigId = this.getRuleBuilderConfigIdFromReferences(references);
+
+    if (!existingConfigId) {
+      return;
+    }
+
+    await this.ruleBuilderConfigSavedObjectService.delete({ id: existingConfigId }).catch(() => {});
+
+    const nextReferences = (references ?? []).filter(
+      (ref) => ref.name !== RULE_BUILDER_CONFIG_REFERENCE_NAME
+    );
+
+    await this.writeRuleAttrs({
+      id: ruleId,
+      attrs: { ...attrs, edit_mode: 'esql' },
+      version,
+      references: nextReferences,
+    });
   }
 
   @withApm
@@ -296,14 +423,17 @@ export class RulesClient {
   public async deleteRule({ id }: { id: string }): Promise<void> {
     const { spaceId } = this.getSpaceContext();
 
-    if (!(await this.ruleExists({ id }))) {
-      throw Boom.notFound(`Rule with id "${id}" not found`);
-    }
+    const { references } = await this.getExistingRule(id);
 
     const taskId = getRuleExecutorTaskId({ ruleId: id, spaceId });
     await this.taskManager.removeIfExists(taskId);
 
     await this.rulesSavedObjectService.delete({ id });
+
+    const configId = this.getRuleBuilderConfigIdFromReferences(references);
+    if (configId) {
+      await this.ruleBuilderConfigSavedObjectService.delete({ id: configId }).catch(() => {});
+    }
 
     await this.actionPolicyClient.deleteActionPoliciesByFilter({
       type: 'single_rule',
@@ -728,7 +858,11 @@ export class RulesClient {
       scheduleEvery: nextAttrs.schedule.every,
     });
 
-    await this.writeRuleAttrs({ id, attrs: nextAttrs, version: existingVersion });
+    await this.writeRuleAttrs({
+      id,
+      attrs: nextAttrs,
+      version: existingVersion,
+    });
 
     return {
       rule: transformRuleSoAttributesToRuleApiResponse(id, nextAttrs),
