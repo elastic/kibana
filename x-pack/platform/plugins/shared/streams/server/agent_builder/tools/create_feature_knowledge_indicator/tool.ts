@@ -111,7 +111,7 @@ export function createFeatureKnowledgeIndicatorTool({
         streamType = getStreamTypeFromDefinition(definition);
 
         const featureClient = await getFeatureClient();
-        const { id, uuid } = await createFeatureKnowledgeIndicatorToolHandler({
+        const { id } = await createFeatureKnowledgeIndicatorToolHandler({
           featureClient,
           streamName,
           featureInput,
@@ -134,7 +134,6 @@ export function createFeatureKnowledgeIndicatorTool({
                 stream_name: streamName,
                 feature: {
                   id,
-                  uuid,
                 },
                 acknowledged: true,
               },

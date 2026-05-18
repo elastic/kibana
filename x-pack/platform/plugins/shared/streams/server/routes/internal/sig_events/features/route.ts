@@ -7,14 +7,12 @@
 
 import { z } from '@kbn/zod/v4';
 import { BooleanFromString } from '@kbn/zod-helpers/v4';
-import type { IdentifyFeaturesResult, TaskResult } from '@kbn/streams-schema';
+import type { IdentifyFeaturesResult, TaskResult, FeatureHistoryEntry } from '@kbn/streams-schema';
 import { baseFeatureSchema, featureSchema, type Feature } from '@kbn/streams-schema';
-import { v4 as uuid } from 'uuid';
 import { searchModeSchema } from '../../../utils/search_mode';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
-import { StatusError } from '../../../../lib/streams/errors/status_error';
 import {
   type FeaturesIdentificationTaskParams,
   getFeaturesIdentificationTaskId,
@@ -42,7 +40,7 @@ export const upsertFeatureRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({ name: z.string() }),
-    body: baseFeatureSchema.and(z.object({ uuid: z.string().optional() })),
+    body: baseFeatureSchema,
   }),
   handler: async ({
     params,
@@ -60,40 +58,14 @@ export const upsertFeatureRoute = createServerRoute({
     await streamsClient.ensureStream(params.path.name);
 
     const featureClient = await getFeatureClient();
-    const { uuid: existingUuid, ...baseBody } = params.body;
-
-    if (existingUuid) {
-      const [resolved] = await featureClient.findFeaturesByUuids([existingUuid]);
-      if (!resolved) {
-        throw new StatusError(`Feature ${existingUuid} not found`, 404);
-      }
-      if (resolved.stream_name !== params.path.name) {
-        throw new StatusError(
-          `Feature ${existingUuid} belongs to stream '${resolved.stream_name}', not '${params.path.name}'`,
-          400
-        );
-      }
-    }
-
-    await featureClient.bulk(params.path.name, [
-      {
-        index: {
-          feature: {
-            ...baseBody,
-            status: 'active' as const,
-            last_seen: new Date().toISOString(),
-            uuid: existingUuid ?? uuid(),
-          },
-        },
-      },
-    ]);
+    await featureClient.bulk(params.path.name, [{ index: { feature: params.body } }]);
 
     return { acknowledged: true };
   },
 });
 
 export const deleteFeatureRoute = createServerRoute({
-  endpoint: 'DELETE /internal/streams/{name}/features/{uuid}',
+  endpoint: 'DELETE /internal/streams/{name}/features/{id}',
   options: {
     access: 'internal',
     summary: 'Deletes a feature for a stream',
@@ -105,7 +77,7 @@ export const deleteFeatureRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ name: z.string(), uuid: z.string() }),
+    path: z.object({ name: z.string(), id: z.string() }),
   }),
   handler: async ({
     params,
@@ -123,7 +95,7 @@ export const deleteFeatureRoute = createServerRoute({
     await streamsClient.ensureStream(params.path.name);
 
     const featureClient = await getFeatureClient();
-    await featureClient.deleteFeature(params.path.name, params.path.uuid);
+    await featureClient.deleteFeature(params.path.name, params.path.id);
 
     return { acknowledged: true };
   },
@@ -301,13 +273,18 @@ export const bulkFeaturesRoute = createServerRoute({
   },
 });
 
+const crossStreamOpSchema = z.object({
+  id: z.string(),
+  stream_name: z.string(),
+});
+
 export const bulkFeaturesAcrossStreamsRoute = createServerRoute({
   endpoint: 'POST /internal/streams/features/_bulk',
   options: {
     access: 'internal',
     summary: 'Bulk feature operations across streams',
     description:
-      'Performs bulk delete / exclude / restore operations on features across multiple streams in a single request. Client sends flat operations keyed by feature UUID; the server resolves stream ownership via featureClient.findFeaturesByUuids and delegates per-stream to featureClient.bulk.',
+      'Performs bulk delete / exclude / restore operations on features across multiple streams in a single request. Each operation carries the feature id and stream_name; the server groups by stream and delegates to featureClient.bulk.',
   },
   security: {
     authz: {
@@ -319,9 +296,9 @@ export const bulkFeaturesAcrossStreamsRoute = createServerRoute({
       operations: z
         .array(
           z.union([
-            z.object({ delete: z.object({ id: z.string() }) }),
-            z.object({ exclude: z.object({ id: z.string() }) }),
-            z.object({ restore: z.object({ id: z.string() }) }),
+            z.object({ delete: crossStreamOpSchema }),
+            z.object({ exclude: crossStreamOpSchema }),
+            z.object({ restore: crossStreamOpSchema }),
           ])
         )
         .min(1),
@@ -340,45 +317,28 @@ export const bulkFeaturesAcrossStreamsRoute = createServerRoute({
 
     const featureClient = await getFeatureClient();
 
-    // Resolve UUID → stream_name server-side. UUIDs not found in storage are
-    // idempotent no-ops counted as `skipped` (matching the queries endpoint
-    // pattern, which uses getQueryLinks for the same purpose).
-    const opsByUuid = new Map<string, FeatureBulkOperation>();
+    // Group operations by stream_name — caller supplies stream ownership directly.
+    const byStream = new Map<string, FeatureBulkOperation[]>();
     for (const op of params.body.operations) {
-      const id = 'delete' in op ? op.delete.id : 'exclude' in op ? op.exclude.id : op.restore.id;
-      // Last write wins on duplicate UUIDs in the input — caller shouldn't
-      // pass duplicates, but if they do, the latter op replaces the former.
-      opsByUuid.set(id, op);
+      const { stream_name: streamName, id } =
+        'delete' in op ? op.delete : 'exclude' in op ? op.exclude : op.restore;
+      const streamOp: FeatureBulkOperation =
+        'delete' in op
+          ? { delete: { id } }
+          : 'exclude' in op
+          ? { exclude: { id } }
+          : { restore: { id } };
+      if (!byStream.has(streamName)) {
+        byStream.set(streamName, []);
+      }
+      byStream.get(streamName)!.push(streamOp);
     }
-    const requestedUuids = Array.from(opsByUuid.keys());
-    const resolved = await featureClient.findFeaturesByUuids(requestedUuids);
-    const skippedFromLookup = requestedUuids.length - resolved.length;
 
-    // Group resolved ops by stream.
-    const byStream = resolved.reduce<Record<string, FeatureBulkOperation[]>>(
-      (acc, { uuid: featureUuid, stream_name: streamName }) => {
-        const op = opsByUuid.get(featureUuid);
-        if (!op) {
-          return acc;
-        }
-        if (!acc[streamName]) {
-          acc[streamName] = [];
-        }
-        acc[streamName].push(op);
-        return acc;
-      },
-      {}
-    );
-
-    // featureClient.bulk silently drops exclude/restore ops targeting computed
-    // features (and any stale UUIDs that slipped through between the lookup
-    // and the bulk call). Both classes show up as additional `skipped` count.
-    // Only thrown batches count as `failed`.
     let succeeded = 0;
     let failed = 0;
-    let skipped = skippedFromLookup;
+    let skipped = 0;
 
-    for (const [streamName, ops] of Object.entries(byStream)) {
+    for (const [streamName, ops] of byStream) {
       try {
         const { applied, skipped: streamSkipped } = await featureClient.bulk(streamName, ops);
         succeeded += applied;
@@ -499,6 +459,42 @@ export const featuresTaskRoute = createServerRoute({
   },
 });
 
+export const getFeatureHistoryRoute = createServerRoute({
+  endpoint: 'GET /internal/streams/{name}/features/_history',
+  options: {
+    access: 'internal',
+    summary: 'Get the revision history of a feature',
+    description:
+      'Returns the append-only timeline of revisions for the specified feature, including tombstones, classified as new / updated / deleted.',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
+    },
+  },
+  params: z.object({
+    path: z.object({ name: z.string() }),
+    query: z.object({ id: z.string() }),
+  }),
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+  }): Promise<{ entries: FeatureHistoryEntry[] }> => {
+    const { getFeatureClient, licensing, uiSettingsClient, streamsClient } = await getScopedClients(
+      { request }
+    );
+
+    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
+    await streamsClient.ensureStream(params.path.name);
+
+    const featureClient = await getFeatureClient();
+    const entries = await featureClient.getFeatureHistory(params.path.name, params.query.id);
+    return { entries };
+  },
+});
+
 export const featureRoutes = {
   ...upsertFeatureRoute,
   ...deleteFeatureRoute,
@@ -508,4 +504,5 @@ export const featureRoutes = {
   ...bulkFeaturesAcrossStreamsRoute,
   ...featuresStatusRoute,
   ...featuresTaskRoute,
+  ...getFeatureHistoryRoute,
 };

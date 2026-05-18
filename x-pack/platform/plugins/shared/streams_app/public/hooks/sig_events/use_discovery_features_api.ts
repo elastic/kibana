@@ -15,9 +15,9 @@ export interface BulkOperationResult {
 }
 
 type CrossStreamOp =
-  | { delete: { id: string } }
-  | { exclude: { id: string } }
-  | { restore: { id: string } };
+  | { delete: { id: string; stream_name: string } }
+  | { exclude: { id: string; stream_name: string } }
+  | { restore: { id: string; stream_name: string } };
 
 type BuildOp = (feature: Feature) => CrossStreamOp;
 
@@ -57,11 +57,17 @@ export function useDiscoveryFeaturesApi(): DiscoveryFeaturesApi {
 
     return {
       deleteFeaturesInBulk: (features) =>
-        runBulk(features, (feature) => ({ delete: { id: feature.uuid } })),
+        runBulk(features, (feature) => ({
+          delete: { id: feature.id, stream_name: feature.stream_name },
+        })),
       excludeFeaturesInBulk: (features) =>
-        runBulk(features, (feature) => ({ exclude: { id: feature.uuid } })),
+        runBulk(features, (feature) => ({
+          exclude: { id: feature.id, stream_name: feature.stream_name },
+        })),
       restoreFeaturesInBulk: (features) =>
-        runBulk(features, (feature) => ({ restore: { id: feature.uuid } })),
+        runBulk(features, (feature) => ({
+          restore: { id: feature.id, stream_name: feature.stream_name },
+        })),
     };
   }, [streamsRepositoryClient]);
 }

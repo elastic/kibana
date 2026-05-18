@@ -72,6 +72,7 @@ export function IngestChartStatistics({
   );
 
   // Count docs for the equivalent period one week ago to compute trends.
+  // Trend data is informational; suppress toasts if the source is temporarily unavailable.
   const previousPeriodFetch = useStreamsAppFetch(
     ({ signal }) =>
       executeEsqlQuery({
@@ -82,7 +83,8 @@ export function IngestChartStatistics({
         end: timeEnd - WEEK_MS,
         uiSettings,
       }),
-    [esqlSource, timeStart, timeEnd, data.search.search, uiSettings]
+    [esqlSource, timeStart, timeEnd, data.search.search, uiSettings],
+    { disableToastOnError: true }
   );
 
   const storeStatsFetch = useStreamsAppFetch(

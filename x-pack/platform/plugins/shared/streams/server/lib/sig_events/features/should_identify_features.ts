@@ -6,7 +6,6 @@
  */
 
 import { INFERRED_FEATURE_TYPES } from '@kbn/streams-schema';
-import { FEATURE_LAST_SEEN } from '../../streams/feature/fields';
 import type { FeatureClient } from '../../streams/feature/feature_client';
 
 export interface ShouldIdentifyFeaturesResult {
@@ -22,25 +21,19 @@ export async function shouldIdentifyFeatures({
   streamName: string;
   thresholdHours: number;
 }): Promise<ShouldIdentifyFeaturesResult> {
-  const { hits } = await featureClient.getFeatures(streamName, {
+  const latest = await featureClient.getLatestRevisionTimestamp(streamName, {
     type: [...INFERRED_FEATURE_TYPES],
-    limit: 1,
-    sort: [{ [FEATURE_LAST_SEEN]: { order: 'desc' } }],
   });
 
-  if (hits.length === 0) {
+  if (!latest) {
     return { shouldIdentify: true };
   }
 
-  const newestTimestamp = new Date(hits[0].last_seen).getTime();
+  const ageMs = Date.now() - new Date(latest['@timestamp']).getTime();
 
-  if (Number.isNaN(newestTimestamp)) {
+  if (Number.isNaN(ageMs)) {
     return { shouldIdentify: true };
   }
 
-  const thresholdMs = thresholdHours * 3_600_000;
-
-  return {
-    shouldIdentify: Date.now() - newestTimestamp >= thresholdMs,
-  };
+  return { shouldIdentify: ageMs >= thresholdHours * 3_600_000 };
 }

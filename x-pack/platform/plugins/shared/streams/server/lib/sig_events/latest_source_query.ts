@@ -15,12 +15,31 @@ export type LatestSourceWhereCondition = ESQLAstExpression & ComposerQueryTagHol
 
 interface RunLatestSourceEsqlQueryArgs {
   esClient: ElasticsearchClient;
-  space: string;
+  /**
+   * When provided, the query is scoped to the given space via `kibana.space_ids`.
+   * When omitted, the data stream is treated as space-agnostic and no space
+   * filter is applied.
+   */
+  space?: string;
   options: CommonSearchOptions;
   index: string;
   where?: LatestSourceWhereCondition;
+  /**
+   * Filter applied AFTER the latest-per-group reduction, against the surviving
+   * "current state" rows. Use this to drop groups whose latest event is a
+   * tombstone (e.g. `feature.deleted IS NULL OR feature.deleted == false`).
+   *
+   * Distinct from `where`, which runs pre-grouping and would incorrectly let
+   * an older non-tombstone revision become the "latest" of its group.
+   */
+  postGroupingWhere?: LatestSourceWhereCondition;
   sort?: ComposerSortShorthand[];
-  groupBy: string;
+  /**
+   * Field(s) to group by for "latest revision" semantics. Pass a tuple to
+   * avoid collapsing entries that share the primary key but differ on the
+   * secondary field (e.g. same feature.id across different streams).
+   */
+  groupBy: string | [string, string];
 }
 
 export const runLatestSourceEsqlQuery = async <T>({
@@ -29,10 +48,14 @@ export const runLatestSourceEsqlQuery = async <T>({
   options,
   index,
   where,
+  postGroupingWhere,
   sort,
   groupBy,
 }: RunLatestSourceEsqlQueryArgs): Promise<{ hits: T[] }> => {
-  let query = esql.from([index], ['_id', '_source']).where`\`kibana.space_ids\` == ${space}`;
+  let query = esql.from([index], ['_id', '_source']);
+  if (space !== undefined) {
+    query = query.where`\`kibana.space_ids\` == ${space}`;
+  }
 
   if (options.from !== undefined) {
     query = query.where`@timestamp >= TO_DATETIME(${esql.str(options.from)})`;
@@ -47,12 +70,23 @@ export const runLatestSourceEsqlQuery = async <T>({
   }
 
   // pick the latest events by group
-  query = query.pipe`INLINE STATS latest_ts = MAX(@timestamp) BY ${esql.col(groupBy)}`
-    .where`@timestamp == latest_ts`;
+  if (Array.isArray(groupBy)) {
+    query = query.pipe`INLINE STATS latest_ts = MAX(@timestamp) BY ${esql.col(
+      groupBy[0]
+    )}, ${esql.col(groupBy[1])}`.where`@timestamp == latest_ts`;
+    query = query.pipe`INLINE STATS tiebreaker_id = MAX(_id) BY ${esql.col(groupBy[0])}, ${esql.col(
+      groupBy[1]
+    )}`.where`_id == tiebreaker_id`;
+  } else {
+    query = query.pipe`INLINE STATS latest_ts = MAX(@timestamp) BY ${esql.col(groupBy)}`
+      .where`@timestamp == latest_ts`;
+    query = query.pipe`INLINE STATS tiebreaker_id = MAX(_id) BY ${esql.col(groupBy)}`
+      .where`_id == tiebreaker_id`;
+  }
 
-  // use _id as a tiebreak in case multiple events share the same timestamp
-  query = query.pipe`INLINE STATS tiebreaker_id = MAX(_id) BY ${esql.col(groupBy)}`
-    .where`_id == tiebreaker_id`;
+  if (postGroupingWhere) {
+    query = query.where`${postGroupingWhere}`;
+  }
 
   if (sort?.length) {
     query = query.sort(sort[0], ...sort.slice(1));

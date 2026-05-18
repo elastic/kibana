@@ -52,7 +52,7 @@ export function KnowledgeIndicatorActionsCell({
             disabled={isMutating}
             onClick={() => {
               setIsActionsMenuOpen(false);
-              restoreFeature(knowledgeIndicator.feature.uuid);
+              restoreFeature(knowledgeIndicator.feature.id);
             }}
           >
             {RESTORE_LABEL}
@@ -66,7 +66,7 @@ export function KnowledgeIndicatorActionsCell({
             disabled={isMutating}
             onClick={() => {
               setIsActionsMenuOpen(false);
-              excludeFeature(knowledgeIndicator.feature.uuid);
+              excludeFeature(knowledgeIndicator.feature.id);
             }}
           >
             {EXCLUDE_LABEL}

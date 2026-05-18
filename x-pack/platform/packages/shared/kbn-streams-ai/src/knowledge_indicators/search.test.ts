@@ -10,15 +10,12 @@ import { searchKnowledgeIndicators } from './search';
 
 function makeFeature(overrides: Partial<Feature> = {}): Feature {
   return {
-    uuid: 'feature-uuid',
     id: 'feature-id',
     stream_name: 'logs.test',
     type: 'dataset_analysis',
     description: 'Feature description',
     properties: {},
     confidence: 90,
-    status: 'active',
-    last_seen: new Date().toISOString(),
     ...overrides,
   };
 }

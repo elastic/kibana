@@ -22,8 +22,6 @@ function makeFeature(overrides: Partial<Feature> = {}): Feature {
     description: 'A feature',
     properties: {},
     confidence: 90,
-    status: 'active',
-    last_seen: new Date().toISOString(),
     ...overrides,
   };
 }

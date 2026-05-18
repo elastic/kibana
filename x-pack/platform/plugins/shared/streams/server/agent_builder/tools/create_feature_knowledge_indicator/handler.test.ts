@@ -9,10 +9,6 @@ import type { BaseFeature } from '@kbn/streams-schema';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { createFeatureKnowledgeIndicatorToolHandler } from './handler';
 
-jest.mock('uuid', () => ({
-  v4: jest.fn(() => 'generated-feature-uuid'),
-}));
-
 describe('createFeatureKnowledgeIndicatorToolHandler', () => {
   const logger = loggingSystemMock.createLogger();
 
@@ -40,7 +36,7 @@ describe('createFeatureKnowledgeIndicatorToolHandler', () => {
       logger,
     });
 
-    expect(result).toEqual({ id: 'feature-1', uuid: 'generated-feature-uuid' });
+    expect(result).toEqual({ id: 'feature-1' });
     expect(featureClient.bulk).toHaveBeenCalledTimes(1);
 
     const [streamNameArg, operationsArg] = featureClient.bulk.mock.calls[0];
@@ -50,11 +46,8 @@ describe('createFeatureKnowledgeIndicatorToolHandler', () => {
       expect.objectContaining({
         ...featureInput,
         stream_name: 'logs.test',
-        uuid: 'generated-feature-uuid',
-        status: 'active',
       })
     );
-    expect(typeof operationsArg[0].index.feature.last_seen).toBe('string');
   });
 
   it('throws when feature storage fails', async () => {

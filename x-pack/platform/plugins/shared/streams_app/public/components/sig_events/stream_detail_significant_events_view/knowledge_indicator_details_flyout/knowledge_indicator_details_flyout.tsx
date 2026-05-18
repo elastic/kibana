@@ -41,25 +41,36 @@ import {
 } from '../hooks/use_knowledge_indicator_actions';
 import { DeleteTableItemsModal } from '../delete_table_items_modal';
 import { getKnowledgeIndicatorStreamName } from '../utils/get_knowledge_indicator_stream_name';
+import { getKnowledgeIndicatorItemId } from '../utils/get_knowledge_indicator_item_id';
 import { KnowledgeIndicatorFeatureDetailsContent } from './knowledge_indicator_feature_details_content';
 import { KnowledgeIndicatorQueryDetailsContent } from './knowledge_indicator_query_details_content';
 
 interface Props {
   knowledgeIndicator: KnowledgeIndicator;
+  knowledgeIndicators: KnowledgeIndicator[];
   occurrencesByQueryId: Record<string, Array<{ x: number; y: number }>>;
   onClose: () => void;
+  onNavigate: (knowledgeIndicator: KnowledgeIndicator) => void;
 }
 
 export function KnowledgeIndicatorDetailsFlyout({
   knowledgeIndicator,
+  knowledgeIndicators,
   occurrencesByQueryId,
   onClose,
+  onNavigate,
 }: Props) {
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'knowledgeIndicatorDetailsFlyoutTitle' });
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isActionsMenuOpen, setIsActionsMenuOpen] = useState(false);
 
   const streamName = getKnowledgeIndicatorStreamName(knowledgeIndicator);
+
+  const currentIdx = knowledgeIndicators.findIndex(
+    (ki) => getKnowledgeIndicatorItemId(ki) === getKnowledgeIndicatorItemId(knowledgeIndicator)
+  );
+  const canGoPrev = currentIdx > 0;
+  const canGoNext = currentIdx < knowledgeIndicators.length - 1;
 
   const {
     excludeFeature,
@@ -104,7 +115,7 @@ export function KnowledgeIndicatorDetailsFlyout({
             disabled={isMutating}
             onClick={() => {
               setIsActionsMenuOpen(false);
-              restoreFeature(knowledgeIndicator.feature.uuid);
+              restoreFeature(knowledgeIndicator.feature.id);
             }}
           >
             {RESTORE_LABEL}
@@ -118,7 +129,7 @@ export function KnowledgeIndicatorDetailsFlyout({
             disabled={isMutating}
             onClick={() => {
               setIsActionsMenuOpen(false);
-              excludeFeature(knowledgeIndicator.feature.uuid);
+              excludeFeature(knowledgeIndicator.feature.id);
             }}
           >
             {EXCLUDE_LABEL}
@@ -217,6 +228,28 @@ export function KnowledgeIndicatorDetailsFlyout({
               <EuiContextMenuPanel items={[...featureActionItems, ...queryActionItems]} />
             </EuiPopover>
           </EuiFlexItem>
+          {knowledgeIndicators.length > 1 && (
+            <>
+              <EuiFlexItem grow={false}>
+                <EuiButtonIcon
+                  iconType="arrowLeft"
+                  aria-label={PREV_LABEL}
+                  title={PREV_LABEL}
+                  disabled={!canGoPrev}
+                  onClick={() => onNavigate(knowledgeIndicators[currentIdx - 1])}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonIcon
+                  iconType="arrowRight"
+                  aria-label={NEXT_LABEL}
+                  title={NEXT_LABEL}
+                  disabled={!canGoNext}
+                  onClick={() => onNavigate(knowledgeIndicators[currentIdx + 1])}
+                />
+              </EuiFlexItem>
+            </>
+          )}
           <EuiFlexItem grow={false}>
             <EuiButtonIcon
               iconType="cross"
@@ -302,6 +335,16 @@ const CLOSE_BUTTON_ARIA_LABEL = i18n.translate(
   {
     defaultMessage: 'Close',
   }
+);
+
+const PREV_LABEL = i18n.translate(
+  'xpack.streams.knowledgeIndicatorDetailsFlyout.prevButtonAriaLabel',
+  { defaultMessage: 'Previous' }
+);
+
+const NEXT_LABEL = i18n.translate(
+  'xpack.streams.knowledgeIndicatorDetailsFlyout.nextButtonAriaLabel',
+  { defaultMessage: 'Next' }
 );
 
 const CONFIDENCE_LABEL = i18n.translate(

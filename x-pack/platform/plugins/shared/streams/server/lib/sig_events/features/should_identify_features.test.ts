@@ -6,18 +6,12 @@
  */
 
 import { INFERRED_FEATURE_TYPES } from '@kbn/streams-schema';
-import { FEATURE_LAST_SEEN } from '../../streams/feature/fields';
 import type { FeatureClient } from '../../streams/feature/feature_client';
 import { shouldIdentifyFeatures } from './should_identify_features';
 
-const createMockFeatureClient = (
-  response: { hits: Array<{ type: string; last_seen: string }>; total: number } = {
-    hits: [],
-    total: 0,
-  }
-) =>
+const createMockFeatureClient = (latestRevision: { '@timestamp': string } | null = null) =>
   ({
-    getFeatures: jest.fn().mockResolvedValue(response),
+    getLatestRevisionTimestamp: jest.fn().mockResolvedValue(latestRevision),
   } as unknown as FeatureClient);
 
 describe('shouldIdentifyFeatures', () => {
@@ -25,7 +19,7 @@ describe('shouldIdentifyFeatures', () => {
   const thresholdHours = 12;
 
   it('returns shouldIdentify: true when no inferred features exist', async () => {
-    const featureClient = createMockFeatureClient({ hits: [], total: 0 });
+    const featureClient = createMockFeatureClient(null);
 
     const result = await shouldIdentifyFeatures({
       featureClient,
@@ -36,8 +30,8 @@ describe('shouldIdentifyFeatures', () => {
     expect(result).toEqual({ shouldIdentify: true });
   });
 
-  it('passes INFERRED_FEATURE_TYPES as type filter with limit 1', async () => {
-    const featureClient = createMockFeatureClient({ hits: [], total: 0 });
+  it('calls getLatestRevisionTimestamp with INFERRED_FEATURE_TYPES', async () => {
+    const featureClient = createMockFeatureClient(null);
 
     await shouldIdentifyFeatures({
       featureClient,
@@ -45,19 +39,14 @@ describe('shouldIdentifyFeatures', () => {
       thresholdHours,
     });
 
-    expect(featureClient.getFeatures).toHaveBeenCalledWith(streamName, {
+    expect(featureClient.getLatestRevisionTimestamp).toHaveBeenCalledWith(streamName, {
       type: [...INFERRED_FEATURE_TYPES],
-      limit: 1,
-      sort: [{ [FEATURE_LAST_SEEN]: { order: 'desc' } }],
     });
   });
 
   it('returns shouldIdentify: false when newest inferred feature is within threshold', async () => {
     const recentDate = new Date(Date.now() - 1 * 3_600_000).toISOString();
-    const featureClient = createMockFeatureClient({
-      hits: [{ type: 'entity', last_seen: recentDate }],
-      total: 1,
-    });
+    const featureClient = createMockFeatureClient({ '@timestamp': recentDate });
 
     const result = await shouldIdentifyFeatures({
       featureClient,
@@ -70,10 +59,7 @@ describe('shouldIdentifyFeatures', () => {
 
   it('returns shouldIdentify: true when newest inferred feature exceeds threshold', async () => {
     const oldDate = new Date(Date.now() - 24 * 3_600_000).toISOString();
-    const featureClient = createMockFeatureClient({
-      hits: [{ type: 'schema', last_seen: oldDate }],
-      total: 1,
-    });
+    const featureClient = createMockFeatureClient({ '@timestamp': oldDate });
 
     const result = await shouldIdentifyFeatures({
       featureClient,
@@ -85,10 +71,7 @@ describe('shouldIdentifyFeatures', () => {
   });
 
   it('returns shouldIdentify: true for invalid timestamps', async () => {
-    const featureClient = createMockFeatureClient({
-      hits: [{ type: 'entity', last_seen: 'not-a-date' }],
-      total: 1,
-    });
+    const featureClient = createMockFeatureClient({ '@timestamp': 'not-a-date' });
 
     const result = await shouldIdentifyFeatures({
       featureClient,
@@ -103,10 +86,7 @@ describe('shouldIdentifyFeatures', () => {
     const justWithinThreshold = new Date(
       Date.now() - thresholdHours * 3_600_000 + 1000
     ).toISOString();
-    const featureClient = createMockFeatureClient({
-      hits: [{ type: 'entity', last_seen: justWithinThreshold }],
-      total: 1,
-    });
+    const featureClient = createMockFeatureClient({ '@timestamp': justWithinThreshold });
 
     const result = await shouldIdentifyFeatures({
       featureClient,

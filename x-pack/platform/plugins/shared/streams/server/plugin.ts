@@ -66,6 +66,7 @@ import {
   createSignificantEventsServices,
   initializeSignificantEventsTemplates,
 } from './lib/sig_events/significant_events_clients';
+import { initializeFeaturesTemplate } from './lib/streams/feature/initialize_features_template';
 import { baseFields } from './lib/streams/component_templates/logs_layer';
 import { ecsBaseFields } from './lib/streams/component_templates/logs_ecs_layer';
 import { registerStreamsAgentBuilder } from './agent_builder/register';
@@ -149,7 +150,7 @@ export class StreamsPlugin
     const significantEventsServices = createSignificantEventsServices();
     const attachmentService = new AttachmentService(core, this.logger);
     const streamsService = new StreamsService(core, this.logger, this.isDev);
-    const featureService = new FeatureService(core, this.logger);
+    const featureService = new FeatureService(this.logger);
     const insightService = new InsightService(core, this.logger);
     const contentService = new ContentService(core, this.logger);
     const queryService = new QueryService(core, this.logger);
@@ -188,10 +189,13 @@ export class StreamsPlugin
         getSigEventsTuningConfig(globalUiSettingsClient, this.logger),
       ]);
 
-      let featureClientPromise: Promise<FeatureClient> | undefined;
-      const getFeatureClient = (): Promise<FeatureClient> => {
-        featureClientPromise ??= featureService.getClient(tuningConfig);
-        return featureClientPromise;
+      let featureClientInstance: FeatureClient | undefined;
+      const getFeatureClient = async (): Promise<FeatureClient> => {
+        featureClientInstance ??= featureService.getClient(
+          { esClient: scopedClusterClient.asCurrentUser },
+          tuningConfig
+        );
+        return featureClientInstance;
       };
 
       const space = pluginsStart.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
@@ -516,6 +520,17 @@ export class StreamsPlugin
     }).catch((error) => {
       this.logger.error(
         `Failed to initialize significant events templates: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+    });
+
+    initializeFeaturesTemplate({
+      esClient: core.elasticsearch.client.asInternalUser,
+      logger: this.logger,
+    }).catch((error) => {
+      this.logger.error(
+        `Failed to initialize features template: ${
           error instanceof Error ? error.message : String(error)
         }`
       );
