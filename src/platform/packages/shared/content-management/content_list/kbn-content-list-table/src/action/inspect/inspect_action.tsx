@@ -10,9 +10,17 @@
 import { i18n } from '@kbn/i18n';
 import type { InspectActionProps, ActionOutput, ActionBuilderContext } from '../types';
 
-/** Default i18n-translated description for the inspect action. */
-const DEFAULT_INSPECT_DESCRIPTION = i18n.translate(
-  'contentManagement.contentList.table.action.inspect.description',
+/**
+ * Default i18n-translated label for the inspect action.
+ *
+ * Used as both the `name` (visible text / aria-label) and `description`
+ * (tooltip) on the underlying `DefaultItemAction` so the action reads as
+ * a simple "View details" affordance rather than per-item phrasing like
+ * "View {itemTitle} details". Override with the `label` prop on
+ * `Action.Inspect` when an item-aware label is desired.
+ */
+const DEFAULT_INSPECT_LABEL = i18n.translate(
+  'contentManagement.contentList.table.action.inspect.label',
   { defaultMessage: 'View details' }
 );
 
@@ -34,18 +42,11 @@ export const buildInspectAction = (
   }
 
   const { onInspect } = context.itemConfig;
-
-  const label =
-    attributes.label ??
-    ((item) =>
-      i18n.translate('contentManagement.contentList.table.action.inspect.label', {
-        defaultMessage: 'View {itemTitle} details',
-        values: { itemTitle: item.title },
-      }));
+  const label = attributes.label ?? DEFAULT_INSPECT_LABEL;
 
   return {
     name: label,
-    description: DEFAULT_INSPECT_DESCRIPTION,
+    description: DEFAULT_INSPECT_LABEL,
     icon: 'inspect',
     type: 'icon',
     onClick: (item) => onInspect(item),

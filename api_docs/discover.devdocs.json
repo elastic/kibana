@@ -831,10 +831,10 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "agentBuilder",
-                "scope": "public",
-                "docId": "kibAgentBuilderPluginApi",
-                "section": "def-public.AgentBuilderPluginStart",
+                "pluginId": "@kbn/agent-builder-browser",
+                "scope": "common",
+                "docId": "kibKbnAgentBuilderBrowserPluginApi",
+                "section": "def-common.AgentBuilderPluginStart",
                 "text": "AgentBuilderPluginStart"
               },
               " | undefined"
@@ -1296,7 +1296,7 @@
                 "section": "def-common.FieldFormatsRegistry",
                 "text": "FieldFormatsRegistry"
               },
-              ", \"register\" | \"init\"> & { deserialize: ",
+              ", \"init\" | \"register\"> & { deserialize: ",
               {
                 "pluginId": "fieldFormats",
                 "scope": "common",

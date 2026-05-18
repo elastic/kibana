@@ -179,7 +179,7 @@ describe('useFetchAgentsData', () => {
     );
 
     expect(result?.current.page).toEqual({ index: 0, size: 20 });
-    expect(result?.current.pageSizeOptions).toEqual([5, 20, 50]);
+    expect(result?.current.pageSizeOptions).toEqual([20, 50, 100, 200]);
   });
 
   it('sync querystring kuery with current search', async () => {

@@ -14,46 +14,52 @@
  *   version: 1
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
+export const PairedTTestResult = lazySchema(() =>
+  z.object({
+    datasetId: z.string(),
+    datasetName: z.string(),
+    evaluatorName: z.string(),
+    sampleSize: z.number().int(),
+    meanA: z.number(),
+    meanB: z.number(),
+    pValue: z.number().nullable(),
+  })
+);
 export type PairedTTestResult = z.infer<typeof PairedTTestResult>;
-export const PairedTTestResult = z.object({
-  datasetId: z.string(),
-  datasetName: z.string(),
-  evaluatorName: z.string(),
-  sampleSize: z.number().int(),
-  meanA: z.number(),
-  meanB: z.number(),
-  pValue: z.number().nullable(),
-});
 
+export const CompareRunsRequestQuery = lazySchema(() =>
+  z.object({
+    /**
+     * First run ID
+     */
+    run_id_a: z.string(),
+    /**
+     * Second run ID
+     */
+    run_id_b: z.string(),
+  })
+);
 export type CompareRunsRequestQuery = z.infer<typeof CompareRunsRequestQuery>;
-export const CompareRunsRequestQuery = z.object({
-  /**
-   * First run ID
-   */
-  run_id_a: z.string(),
-  /**
-   * Second run ID
-   */
-  run_id_b: z.string(),
-});
 export type CompareRunsRequestQueryInput = z.input<typeof CompareRunsRequestQuery>;
 
+export const CompareRunsResponse = lazySchema(() =>
+  z.object({
+    results: z.array(PairedTTestResult),
+    pairing: z.object({
+      totalPairs: z.number().int(),
+      skippedMissingPairs: z.number().int(),
+      skippedNullScores: z.number().int(),
+      /**
+       * Whether Run A scores were truncated due to size limits
+       */
+      truncatedA: z.boolean(),
+      /**
+       * Whether Run B scores were truncated due to size limits
+       */
+      truncatedB: z.boolean(),
+    }),
+  })
+);
 export type CompareRunsResponse = z.infer<typeof CompareRunsResponse>;
-export const CompareRunsResponse = z.object({
-  results: z.array(PairedTTestResult),
-  pairing: z.object({
-    totalPairs: z.number().int(),
-    skippedMissingPairs: z.number().int(),
-    skippedNullScores: z.number().int(),
-    /**
-     * Whether Run A scores were truncated due to size limits
-     */
-    truncatedA: z.boolean(),
-    /**
-     * Whether Run B scores were truncated due to size limits
-     */
-    truncatedB: z.boolean(),
-  }),
-});

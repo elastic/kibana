@@ -8,7 +8,7 @@
  */
 
 import { UrlFormat } from './url';
-import { TEXT_CONTEXT_TYPE, HTML_CONTEXT_TYPE } from '../content_types';
+import { TEXT_CONTEXT_TYPE } from '../content_types';
 import { expectReactElementWithNull, expectReactElementWithBlank } from '../test_utils';
 
 describe('UrlFormat', () => {
@@ -16,9 +16,6 @@ describe('UrlFormat', () => {
     const url = new UrlFormat({});
 
     expect(url.convert('http://elastic.co', TEXT_CONTEXT_TYPE)).toBe('http://elastic.co');
-    expect(url.convert('http://elastic.co', HTML_CONTEXT_TYPE)).toBe(
-      '<a href="http://elastic.co" target="_blank" rel="noopener noreferrer">http://elastic.co</a>'
-    );
     expect(url.reactConvert('http://elastic.co')).toMatchInlineSnapshot(`
       <a
         href="http://elastic.co"
@@ -33,8 +30,8 @@ describe('UrlFormat', () => {
   test('outputs a mailto: link when URL starts with mailto:', () => {
     const url = new UrlFormat({});
 
-    expect(url.convert('mailto:test@example.com', HTML_CONTEXT_TYPE)).toBe(
-      '<a href="mailto:test@example.com" target="_blank" rel="noopener noreferrer">mailto:test@example.com</a>'
+    expect(url.convert('mailto:test@example.com', TEXT_CONTEXT_TYPE)).toBe(
+      'mailto:test@example.com'
     );
     expect(url.reactConvert('mailto:test@example.com')).toMatchInlineSnapshot(`
       <a
@@ -53,15 +50,6 @@ describe('UrlFormat', () => {
     expect(url.convert(null, TEXT_CONTEXT_TYPE)).toBe('(null)');
     expect(url.convert(undefined, TEXT_CONTEXT_TYPE)).toBe('(null)');
     expect(url.convert('', TEXT_CONTEXT_TYPE)).toBe('(blank)');
-    expect(url.convert(null, HTML_CONTEXT_TYPE)).toBe(
-      '<span class="ffString__emptyValue">(null)</span>'
-    );
-    expect(url.convert(undefined, HTML_CONTEXT_TYPE)).toBe(
-      '<span class="ffString__emptyValue">(null)</span>'
-    );
-    expect(url.convert('', HTML_CONTEXT_TYPE)).toBe(
-      '<span class="ffString__emptyValue">(blank)</span>'
-    );
     expectReactElementWithNull(url.reactConvert(null));
     expectReactElementWithNull(url.reactConvert(undefined));
     expectReactElementWithBlank(url.reactConvert(''));
@@ -71,9 +59,6 @@ describe('UrlFormat', () => {
     const url = new UrlFormat({ type: 'audio' });
 
     expect(url.convert('http://elastic.co', TEXT_CONTEXT_TYPE)).toBe('http://elastic.co');
-    expect(url.convert('http://elastic.co', HTML_CONTEXT_TYPE)).toBe(
-      '<audio controls="" preload="none" src="http://elastic.co"></audio>'
-    );
     expect(url.reactConvert('http://elastic.co')).toMatchInlineSnapshot(`
       <audio
         controls={true}
@@ -88,10 +73,6 @@ describe('UrlFormat', () => {
       const url = new UrlFormat({ type: 'img' });
 
       expect(url.convert('http://elastic.co', TEXT_CONTEXT_TYPE)).toBe('http://elastic.co');
-      expect(url.convert('http://elastic.co', HTML_CONTEXT_TYPE)).toBe(
-        '<img src="http://elastic.co" alt="A dynamically-specified image located at http://elastic.co" ' +
-          'style="width:auto;height:auto;max-width:none;max-height:none"/>'
-      );
       expect(url.reactConvert('http://elastic.co')).toMatchInlineSnapshot(`
         <img
           alt="A dynamically-specified image located at http://elastic.co"
@@ -111,10 +92,7 @@ describe('UrlFormat', () => {
     test('with correct width and height set', () => {
       const url = new UrlFormat({ type: 'img', width: '12', height: '55' });
 
-      expect(url.convert('http://elastic.co', HTML_CONTEXT_TYPE)).toBe(
-        '<img src="http://elastic.co" alt="A dynamically-specified image located at http://elastic.co" ' +
-          'style="width:auto;height:auto;max-width:12px;max-height:55px"/>'
-      );
+      expect(url.convert('http://elastic.co', TEXT_CONTEXT_TYPE)).toBe('http://elastic.co');
       expect(url.reactConvert('http://elastic.co')).toMatchInlineSnapshot(`
         <img
           alt="A dynamically-specified image located at http://elastic.co"
@@ -134,10 +112,7 @@ describe('UrlFormat', () => {
     test('with correct width and height set if no width specified', () => {
       const url = new UrlFormat({ type: 'img', height: '55' });
 
-      expect(url.convert('http://elastic.co', HTML_CONTEXT_TYPE)).toBe(
-        '<img src="http://elastic.co" alt="A dynamically-specified image located at http://elastic.co" ' +
-          'style="width:auto;height:auto;max-width:none;max-height:55px"/>'
-      );
+      expect(url.convert('http://elastic.co', TEXT_CONTEXT_TYPE)).toBe('http://elastic.co');
       expect(url.reactConvert('http://elastic.co')).toMatchInlineSnapshot(`
         <img
           alt="A dynamically-specified image located at http://elastic.co"
@@ -157,10 +132,7 @@ describe('UrlFormat', () => {
     test('with correct width and height set if no height specified', () => {
       const url = new UrlFormat({ type: 'img', width: '22' });
 
-      expect(url.convert('http://elastic.co', HTML_CONTEXT_TYPE)).toBe(
-        '<img src="http://elastic.co" alt="A dynamically-specified image located at http://elastic.co" ' +
-          'style="width:auto;height:auto;max-width:22px;max-height:none"/>'
-      );
+      expect(url.convert('http://elastic.co', TEXT_CONTEXT_TYPE)).toBe('http://elastic.co');
       expect(url.reactConvert('http://elastic.co')).toMatchInlineSnapshot(`
         <img
           alt="A dynamically-specified image located at http://elastic.co"
@@ -180,10 +152,7 @@ describe('UrlFormat', () => {
     test('only accepts valid numbers for width', () => {
       const url = new UrlFormat({ type: 'img', width: 'not a number' });
 
-      expect(url.convert('http://elastic.co', HTML_CONTEXT_TYPE)).toBe(
-        '<img src="http://elastic.co" alt="A dynamically-specified image located at http://elastic.co" ' +
-          'style="width:auto;height:auto;max-width:none;max-height:none"/>'
-      );
+      expect(url.convert('http://elastic.co', TEXT_CONTEXT_TYPE)).toBe('http://elastic.co');
       expect(url.reactConvert('http://elastic.co')).toMatchInlineSnapshot(`
         <img
           alt="A dynamically-specified image located at http://elastic.co"
@@ -201,10 +170,7 @@ describe('UrlFormat', () => {
 
       const url2 = new UrlFormat({ type: 'img', width: '123not a number' });
 
-      expect(url2.convert('http://elastic.co', HTML_CONTEXT_TYPE)).toBe(
-        '<img src="http://elastic.co" alt="A dynamically-specified image located at http://elastic.co" ' +
-          'style="width:auto;height:auto;max-width:123px;max-height:none"/>'
-      );
+      expect(url2.convert('http://elastic.co', TEXT_CONTEXT_TYPE)).toBe('http://elastic.co');
       expect(url2.reactConvert('http://elastic.co')).toMatchInlineSnapshot(`
         <img
           alt="A dynamically-specified image located at http://elastic.co"
@@ -224,10 +190,7 @@ describe('UrlFormat', () => {
     test('only accepts valid numbers for height', () => {
       const url = new UrlFormat({ type: 'img', height: 'not a number' });
 
-      expect(url.convert('http://elastic.co', HTML_CONTEXT_TYPE)).toBe(
-        '<img src="http://elastic.co" alt="A dynamically-specified image located at http://elastic.co" ' +
-          'style="width:auto;height:auto;max-width:none;max-height:none"/>'
-      );
+      expect(url.convert('http://elastic.co', TEXT_CONTEXT_TYPE)).toBe('http://elastic.co');
       expect(url.reactConvert('http://elastic.co')).toMatchInlineSnapshot(`
         <img
           alt="A dynamically-specified image located at http://elastic.co"
@@ -245,10 +208,7 @@ describe('UrlFormat', () => {
 
       const url2 = new UrlFormat({ type: 'img', height: '123not a number' });
 
-      expect(url2.convert('http://elastic.co', HTML_CONTEXT_TYPE)).toBe(
-        '<img src="http://elastic.co" alt="A dynamically-specified image located at http://elastic.co" ' +
-          'style="width:auto;height:auto;max-width:none;max-height:123px"/>'
-      );
+      expect(url2.convert('http://elastic.co', TEXT_CONTEXT_TYPE)).toBe('http://elastic.co');
       expect(url2.reactConvert('http://elastic.co')).toMatchInlineSnapshot(`
         <img
           alt="A dynamically-specified image located at http://elastic.co"
@@ -270,9 +230,7 @@ describe('UrlFormat', () => {
     test('accepts a template', () => {
       const url = new UrlFormat({ urlTemplate: 'http://{{ value }}' });
 
-      expect(url.convert('url', HTML_CONTEXT_TYPE)).toBe(
-        '<a href="http://url" target="_blank" rel="noopener noreferrer">http://url</a>'
-      );
+      expect(url.convert('url', TEXT_CONTEXT_TYPE)).toBe('http://url');
       expect(url.reactConvert('url')).toMatchInlineSnapshot(`
         <a
           href="http://url"
@@ -333,9 +291,7 @@ describe('UrlFormat', () => {
         urlTemplate: 'http://www.{{value}}.com',
       });
 
-      expect(url.convert('php', HTML_CONTEXT_TYPE)).toBe(
-        '<a href="http://www.php.com" target="_blank" rel="noopener noreferrer">extension: php</a>'
-      );
+      expect(url.convert('php', TEXT_CONTEXT_TYPE)).toBe('extension: php');
       expect(url.reactConvert('php')).toMatchInlineSnapshot(`
         <a
           href="http://www.php.com"
@@ -420,11 +376,8 @@ describe('UrlFormat', () => {
         basePath: '',
       };
       const url = new UrlFormat({ parsedUrl });
-      const converter = url.getConverterFor(HTML_CONTEXT_TYPE) as Function;
 
-      expect(converter('www.elastic.co')).toBe(
-        '<a href="http://kibana/app/www.elastic.co" target="_blank" rel="noopener noreferrer">www.elastic.co</a>'
-      );
+      expect(url.convert('www.elastic.co', TEXT_CONTEXT_TYPE)).toBe('www.elastic.co');
       expect(url.reactConvert('www.elastic.co')).toMatchInlineSnapshot(`
         <a
           href="http://kibana/app/www.elastic.co"
@@ -435,9 +388,7 @@ describe('UrlFormat', () => {
         </a>
       `);
 
-      expect(converter('elastic.co')).toBe(
-        '<a href="http://kibana/app/elastic.co" target="_blank" rel="noopener noreferrer">elastic.co</a>'
-      );
+      expect(url.convert('elastic.co', TEXT_CONTEXT_TYPE)).toBe('elastic.co');
       expect(url.reactConvert('elastic.co')).toMatchInlineSnapshot(`
         <a
           href="http://kibana/app/elastic.co"
@@ -448,9 +399,7 @@ describe('UrlFormat', () => {
         </a>
       `);
 
-      expect(converter('elastic')).toBe(
-        '<a href="http://kibana/app/elastic" target="_blank" rel="noopener noreferrer">elastic</a>'
-      );
+      expect(url.convert('elastic', TEXT_CONTEXT_TYPE)).toBe('elastic');
       expect(url.reactConvert('elastic')).toMatchInlineSnapshot(`
         <a
           href="http://kibana/app/elastic"
@@ -461,9 +410,7 @@ describe('UrlFormat', () => {
         </a>
       `);
 
-      expect(converter('ftp://elastic.co')).toBe(
-        '<a href="http://kibana/app/ftp://elastic.co" target="_blank" rel="noopener noreferrer">ftp://elastic.co</a>'
-      );
+      expect(url.convert('ftp://elastic.co', TEXT_CONTEXT_TYPE)).toBe('ftp://elastic.co');
       expect(url.reactConvert('ftp://elastic.co')).toMatchInlineSnapshot(`
         <a
           href="http://kibana/app/ftp://elastic.co"
@@ -481,11 +428,8 @@ describe('UrlFormat', () => {
         basePath: '/xyz',
       };
       const url = new UrlFormat({ parsedUrl });
-      const converter = url.getConverterFor(HTML_CONTEXT_TYPE) as Function;
 
-      expect(converter('www.elastic.co')).toBe(
-        '<a href="http://kibana/xyz/app/www.elastic.co" target="_blank" rel="noopener noreferrer">www.elastic.co</a>'
-      );
+      expect(url.convert('www.elastic.co', TEXT_CONTEXT_TYPE)).toBe('www.elastic.co');
       expect(url.reactConvert('www.elastic.co')).toMatchInlineSnapshot(`
         <a
           href="http://kibana/xyz/app/www.elastic.co"
@@ -496,9 +440,7 @@ describe('UrlFormat', () => {
         </a>
       `);
 
-      expect(converter('elastic.co')).toBe(
-        '<a href="http://kibana/xyz/app/elastic.co" target="_blank" rel="noopener noreferrer">elastic.co</a>'
-      );
+      expect(url.convert('elastic.co', TEXT_CONTEXT_TYPE)).toBe('elastic.co');
       expect(url.reactConvert('elastic.co')).toMatchInlineSnapshot(`
         <a
           href="http://kibana/xyz/app/elastic.co"
@@ -509,9 +451,7 @@ describe('UrlFormat', () => {
         </a>
       `);
 
-      expect(converter('elastic')).toBe(
-        '<a href="http://kibana/xyz/app/elastic" target="_blank" rel="noopener noreferrer">elastic</a>'
-      );
+      expect(url.convert('elastic', TEXT_CONTEXT_TYPE)).toBe('elastic');
       expect(url.reactConvert('elastic')).toMatchInlineSnapshot(`
         <a
           href="http://kibana/xyz/app/elastic"
@@ -522,9 +462,7 @@ describe('UrlFormat', () => {
         </a>
       `);
 
-      expect(converter('ftp://elastic.co')).toBe(
-        '<a href="http://kibana/xyz/app/ftp://elastic.co" target="_blank" rel="noopener noreferrer">ftp://elastic.co</a>'
-      );
+      expect(url.convert('ftp://elastic.co', TEXT_CONTEXT_TYPE)).toBe('ftp://elastic.co');
       expect(url.reactConvert('ftp://elastic.co')).toMatchInlineSnapshot(`
         <a
           href="http://kibana/xyz/app/ftp://elastic.co"
@@ -542,11 +480,9 @@ describe('UrlFormat', () => {
         basePath: '/abc',
       };
       const url = new UrlFormat({ parsedUrl });
-      const converter = url.getConverterFor(HTML_CONTEXT_TYPE) as Function;
 
-      expect(converter('../app/kibana')).toBe(
-        '<a href="http://kibana.host.com/abc/app/../app/kibana" target="_blank" rel="noopener noreferrer">../app/kibana</a>'
-      );
+      expect(url.convert('../app/kibana', TEXT_CONTEXT_TYPE)).toBe('../app/kibana');
+
       expect(url.reactConvert('../app/kibana')).toMatchInlineSnapshot(`
         <a
           href="http://kibana.host.com/abc/app/../app/kibana"
@@ -561,12 +497,10 @@ describe('UrlFormat', () => {
     test('should fail gracefully if there are no parsedUrl provided', () => {
       const url = new UrlFormat({});
 
-      expect(url.convert('../app/kibana', HTML_CONTEXT_TYPE)).toBe('../app/kibana');
+      expect(url.convert('../app/kibana', TEXT_CONTEXT_TYPE)).toBe('../app/kibana');
       expect(url.reactConvert('../app/kibana')).toBe('../app/kibana');
 
-      expect(url.convert('http://www.elastic.co', HTML_CONTEXT_TYPE)).toBe(
-        '<a href="http://www.elastic.co" target="_blank" rel="noopener noreferrer">http://www.elastic.co</a>'
-      );
+      expect(url.convert('http://www.elastic.co', TEXT_CONTEXT_TYPE)).toBe('http://www.elastic.co');
       expect(url.reactConvert('http://www.elastic.co')).toMatchInlineSnapshot(`
         <a
           href="http://www.elastic.co"
@@ -585,11 +519,8 @@ describe('UrlFormat', () => {
         basePath: '/nbc',
       };
       const url = new UrlFormat({ parsedUrl });
-      const converter = url.getConverterFor(HTML_CONTEXT_TYPE) as Function;
 
-      expect(converter('#/foo')).toBe(
-        '<a href="http://kibana.host.com/nbc/app/discover#/#/foo" target="_blank" rel="noopener noreferrer">#/foo</a>'
-      );
+      expect(url.convert('#/foo', TEXT_CONTEXT_TYPE)).toBe('#/foo');
       expect(url.reactConvert('#/foo')).toMatchInlineSnapshot(`
         <a
           href="http://kibana.host.com/nbc/app/discover#/#/foo"
@@ -600,9 +531,7 @@ describe('UrlFormat', () => {
         </a>
       `);
 
-      expect(converter('/nbc/app/discover#/')).toBe(
-        '<a href="http://kibana.host.com/nbc/app/discover#/" target="_blank" rel="noopener noreferrer">/nbc/app/discover#/</a>'
-      );
+      expect(url.convert('/nbc/app/discover#/', TEXT_CONTEXT_TYPE)).toBe('/nbc/app/discover#/');
       expect(url.reactConvert('/nbc/app/discover#/')).toMatchInlineSnapshot(`
         <a
           href="http://kibana.host.com/nbc/app/discover#/"
@@ -613,9 +542,7 @@ describe('UrlFormat', () => {
         </a>
       `);
 
-      expect(converter('../foo/bar')).toBe(
-        '<a href="http://kibana.host.com/nbc/app/../foo/bar" target="_blank" rel="noopener noreferrer">../foo/bar</a>'
-      );
+      expect(url.convert('../foo/bar', TEXT_CONTEXT_TYPE)).toBe('../foo/bar');
       expect(url.reactConvert('../foo/bar')).toMatchInlineSnapshot(`
         <a
           href="http://kibana.host.com/nbc/app/../foo/bar"
@@ -633,11 +560,8 @@ describe('UrlFormat', () => {
         pathname: '/app/kibana',
       };
       const url = new UrlFormat({ parsedUrl });
-      const converter = url.getConverterFor(HTML_CONTEXT_TYPE) as Function;
 
-      expect(converter('10.22.55.66')).toBe(
-        '<a href="http://kibana.host.com/app/10.22.55.66" target="_blank" rel="noopener noreferrer">10.22.55.66</a>'
-      );
+      expect(url.convert('10.22.55.66', TEXT_CONTEXT_TYPE)).toBe('10.22.55.66');
       expect(url.reactConvert('10.22.55.66')).toMatchInlineSnapshot(`
         <a
           href="http://kibana.host.com/app/10.22.55.66"
@@ -648,8 +572,8 @@ describe('UrlFormat', () => {
         </a>
       `);
 
-      expect(converter('http://www.domain.name/app/kibana#/dashboard/')).toBe(
-        '<a href="http://www.domain.name/app/kibana#/dashboard/" target="_blank" rel="noopener noreferrer">http://www.domain.name/app/kibana#/dashboard/</a>'
+      expect(url.convert('http://www.domain.name/app/kibana#/dashboard/', TEXT_CONTEXT_TYPE)).toBe(
+        'http://www.domain.name/app/kibana#/dashboard/'
       );
       expect(url.reactConvert('http://www.domain.name/app/kibana#/dashboard/'))
         .toMatchInlineSnapshot(`
@@ -662,9 +586,7 @@ describe('UrlFormat', () => {
         </a>
       `);
 
-      expect(converter('/app/kibana')).toBe(
-        '<a href="http://kibana.host.com/app/kibana" target="_blank" rel="noopener noreferrer">/app/kibana</a>'
-      );
+      expect(url.convert('/app/kibana', TEXT_CONTEXT_TYPE)).toBe('/app/kibana');
       expect(url.reactConvert('/app/kibana')).toMatchInlineSnapshot(`
         <a
           href="http://kibana.host.com/app/kibana"
@@ -675,9 +597,7 @@ describe('UrlFormat', () => {
         </a>
       `);
 
-      expect(converter('kibana#/dashboard/')).toBe(
-        '<a href="http://kibana.host.com/app/kibana#/dashboard/" target="_blank" rel="noopener noreferrer">kibana#/dashboard/</a>'
-      );
+      expect(url.convert('kibana#/dashboard/', TEXT_CONTEXT_TYPE)).toBe('kibana#/dashboard/');
       expect(url.reactConvert('kibana#/dashboard/')).toMatchInlineSnapshot(`
         <a
           href="http://kibana.host.com/app/kibana#/dashboard/"
@@ -688,9 +608,7 @@ describe('UrlFormat', () => {
         </a>
       `);
 
-      expect(converter('#/dashboard/')).toBe(
-        '<a href="http://kibana.host.com/app/kibana#/dashboard/" target="_blank" rel="noopener noreferrer">#/dashboard/</a>'
-      );
+      expect(url.convert('#/dashboard/', TEXT_CONTEXT_TYPE)).toBe('#/dashboard/');
       expect(url.reactConvert('#/dashboard/')).toMatchInlineSnapshot(`
         <a
           href="http://kibana.host.com/app/kibana#/dashboard/"
@@ -708,10 +626,6 @@ describe('UrlFormat', () => {
         urlTemplate: 'http://example.com/{{value}}',
         labelTemplate: 'Link: {{value}}',
       });
-      const result = url.convert('<script>alert("test")</script>', HTML_CONTEXT_TYPE);
-      expect(result).toContain('&lt;script&gt;');
-      expect(result).toContain('alert(&quot;test&quot;)');
-      expect(result).not.toContain('<script>');
       expect(url.reactConvert('<script>alert("test")</script>')).toMatchInlineSnapshot(`
         <a
           href="http://example.com/%3Cscript%3Ealert(%22test%22)%3C%2Fscript%3E"
@@ -753,16 +667,14 @@ describe('UrlFormat', () => {
   test('renders a numeric value as text when no URL template is set', () => {
     const url = new UrlFormat({});
 
-    expect(url.convert(1234, HTML_CONTEXT_TYPE)).toBe('1234');
+    expect(url.convert(1234, TEXT_CONTEXT_TYPE)).toBe('1234');
     expect(url.reactConvert(1234)).toBe('1234');
   });
 
   test('renders a numeric value as a link when a URL template is set', () => {
     const url = new UrlFormat({ urlTemplate: 'https://elastic.co/?value={{value}}' });
 
-    expect(url.convert(1234, HTML_CONTEXT_TYPE)).toBe(
-      '<a href="https://elastic.co/?value=1234" target="_blank" rel="noopener noreferrer">https://elastic.co/?value=1234</a>'
-    );
+    expect(url.convert(1234, TEXT_CONTEXT_TYPE)).toBe('https://elastic.co/?value=1234');
     expect(url.reactConvert(1234)).toMatchInlineSnapshot(`
       <a
         href="https://elastic.co/?value=1234"
@@ -779,13 +691,6 @@ describe('UrlFormat', () => {
 
     expect(url.convert(['http://elastic.co', 'http://kibana.io'], TEXT_CONTEXT_TYPE)).toBe(
       '["http://elastic.co","http://kibana.io"]'
-    );
-    expect(url.convert(['http://elastic.co', 'http://kibana.io'], HTML_CONTEXT_TYPE)).toBe(
-      '<span class="ffArray__highlight">[</span>' +
-        '<a href="http://elastic.co" target="_blank" rel="noopener noreferrer">http://elastic.co</a>' +
-        '<span class="ffArray__highlight">,</span> ' +
-        '<a href="http://kibana.io" target="_blank" rel="noopener noreferrer">http://kibana.io</a>' +
-        '<span class="ffArray__highlight">]</span>'
     );
     expect(url.reactConvert(['http://elastic.co', 'http://kibana.io'])).toMatchInlineSnapshot(`
       <React.Fragment>
@@ -827,9 +732,6 @@ describe('UrlFormat', () => {
     const url = new UrlFormat({});
 
     expect(url.convert(['http://elastic.co'], TEXT_CONTEXT_TYPE)).toBe('["http://elastic.co"]');
-    expect(url.convert(['http://elastic.co'], HTML_CONTEXT_TYPE)).toBe(
-      '<a href="http://elastic.co" target="_blank" rel="noopener noreferrer">http://elastic.co</a>'
-    );
     expect(url.reactConvert(['http://elastic.co'])).toMatchInlineSnapshot(`
       <a
         href="http://elastic.co"

@@ -875,3 +875,32 @@ export const DEFAULT_RULE_NAME = (ruleTypeName: string) =>
     defaultMessage: `{ruleTypeName} rule`,
     values: { ruleTypeName },
   });
+
+export const DEPRECATED_LABEL = i18n.translate(
+  'responseOpsRuleForm.deprecatedConnectorBadgeLabel',
+  {
+    defaultMessage: 'Deprecated',
+  }
+);
+
+export const DEPRECATED_CONNECTOR_TOOLTIP_CONTENT = i18n.translate(
+  'responseOpsRuleForm.deprecatedConnectorTooltipLabel',
+  {
+    defaultMessage: 'This connector type is deprecated and may be removed in future versions.',
+  }
+);
+
+export const DEPRECATED_LLM_CONNECTOR_INFO = i18n.translate(
+  'responseOpsRuleForm.deprecatedLLMConnectorInfo',
+  {
+    defaultMessage:
+      'Use Elasticsearch inference endpoints to connect to large language models instead.',
+  }
+);
+
+export const DEPRECATED_LLM_CONNECTOR_CALLOUT_TITLE = i18n.translate(
+  'responseOpsRuleForm.deprecatedLLMConnectorCalloutTitle',
+  {
+    defaultMessage: 'This connector type is deprecated',
+  }
+);

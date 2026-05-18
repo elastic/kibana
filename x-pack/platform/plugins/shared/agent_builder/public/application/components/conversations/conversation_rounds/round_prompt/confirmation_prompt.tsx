@@ -50,6 +50,7 @@ export interface ConfirmationPromptProps {
   onConfirm: () => void;
   onCancel: () => void;
   isLoading?: boolean;
+  isDisabled?: boolean;
   isAnswered?: boolean;
   answeredValue?: boolean;
 }
@@ -59,6 +60,7 @@ export const ConfirmationPrompt: React.FC<ConfirmationPromptProps> = ({
   onConfirm,
   onCancel,
   isLoading = false,
+  isDisabled = false,
   isAnswered = false,
   answeredValue,
 }) => {
@@ -120,7 +122,7 @@ export const ConfirmationPrompt: React.FC<ConfirmationPromptProps> = ({
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               onClick={onCancel}
-              disabled={isLoading || isAnswered}
+              disabled={isDisabled || isLoading || isAnswered}
               size="s"
               color={isAnswered && answeredValue === false ? 'danger' : 'text'}
               data-test-subj="agentBuilderConfirmationPromptCancelButton"
@@ -132,7 +134,7 @@ export const ConfirmationPrompt: React.FC<ConfirmationPromptProps> = ({
             <EuiButton
               onClick={onConfirm}
               isLoading={isLoading}
-              disabled={isAnswered}
+              disabled={isDisabled || isAnswered}
               fill={!isAnswered || answeredValue === true}
               size="s"
               color={isAnswered && answeredValue === true ? 'success' : color}

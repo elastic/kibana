@@ -17,6 +17,7 @@ import {
   getBrowserLoggingConfigMock,
   getApmConfigMock,
   getIsThemeBundledMock,
+  isRspackModeEnabledMock,
 } from './rendering_service.test.mocks';
 
 import { load } from 'cheerio';
@@ -731,6 +732,65 @@ describe('RenderingService', () => {
 
       const renderResult = await render(createKibanaRequest(), uiSettings);
       expect(renderResult).toContain(',&quot;name&quot;:&quot;borealis&quot;');
+    });
+  });
+
+  describe('rspack mode metadata', () => {
+    let rspackService: RenderingService;
+
+    beforeEach(() => {
+      rspackService = new RenderingService(mockRenderingServiceParams);
+    });
+
+    afterEach(() => {
+      isRspackModeEnabledMock.mockReturnValue(false);
+    });
+
+    it('includes font preload links and font-display:swap when rspack mode is enabled', async () => {
+      isRspackModeEnabledMock.mockReturnValue(true);
+
+      const { render } = await rspackService.setup(mockRenderingSetupDeps);
+      rspackService.start(mockRenderingStartDeps);
+
+      const uiSettings = {
+        client: uiSettingsServiceMock.createClient(),
+        globalClient: uiSettingsServiceMock.createClient(),
+      };
+      uiSettings.client.getRegistered.mockReturnValue({});
+
+      const content = await render(createKibanaRequest(), uiSettings);
+      const dom = load(content);
+
+      const preloadLinks = dom('link[rel="preload"][as="font"]');
+      expect(preloadLinks.length).toBeGreaterThanOrEqual(3);
+
+      preloadLinks.each((_i, el) => {
+        const href = dom(el).attr('href');
+        expect(href).toContain('.woff2');
+      });
+
+      expect(content).toContain('font-display: swap');
+    });
+
+    it('does not include font preload links when rspack mode is disabled', async () => {
+      isRspackModeEnabledMock.mockReturnValue(false);
+
+      const { render } = await rspackService.setup(mockRenderingSetupDeps);
+      rspackService.start(mockRenderingStartDeps);
+
+      const uiSettings = {
+        client: uiSettingsServiceMock.createClient(),
+        globalClient: uiSettingsServiceMock.createClient(),
+      };
+      uiSettings.client.getRegistered.mockReturnValue({});
+
+      const content = await render(createKibanaRequest(), uiSettings);
+      const dom = load(content);
+
+      const preloadLinks = dom('link[rel="preload"][as="font"]');
+      expect(preloadLinks.length).toBe(0);
+
+      expect(content).not.toContain('font-display: swap');
     });
   });
 });
