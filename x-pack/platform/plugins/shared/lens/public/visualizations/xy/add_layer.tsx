@@ -143,7 +143,6 @@ export function AddLayerButton({
       >
         <EuiContextMenu
           initialPanelId={AddLayerPanelType.main}
-          size="s"
           panels={[
             {
               id: AddLayerPanelType.main,

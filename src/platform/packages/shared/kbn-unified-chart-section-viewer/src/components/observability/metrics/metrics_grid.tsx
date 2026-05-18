@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useState, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import type { EuiFlexGridProps } from '@elastic/eui';
 import { EuiFlexGrid, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -21,7 +21,7 @@ import { MetricInsightsFlyout } from '../../flyout';
 import { EmptyState } from '../../empty_state/empty_state';
 import { useGridNavigation } from '../../../hooks/use_grid_navigation';
 import { FieldsMetadataProvider } from '../../../context/fields_metadata';
-import { createESQLQuery, firstNonNullable } from '../../../common/utils';
+import { createESQLQuery, firstNonNullable, getMetricUniqueKey } from '../../../common/utils';
 import { ACTION_OPEN_IN_DISCOVER } from '../../../common/constants';
 import { useChartLayers } from '../../chart/hooks/use_chart_layers';
 import { useMetricsExperienceState } from './context/metrics_experience_state_provider';
@@ -37,6 +37,19 @@ export type MetricsGridProps = Pick<
   metricItems: ParsedMetricItem[];
   whereStatements?: string[];
   getUserMessages?: (metricItem: ParsedMetricItem) => EmbeddableComponentProps['userMessages'];
+  getDescription?: (metricItem: ParsedMetricItem) => EmbeddableComponentProps['description'];
+  /**
+   * Whether the owning Discover tab is the currently active one.
+   *
+   * Discover keeps inactive tabs' chart sections mounted to preserve internal
+   * state (e.g. Lens), so without this gate every tab with a persisted flyout
+   * would render its own `MetricInsightsFlyout` into `document.body` via
+   * `EuiPortal`, causing visual collisions and event-capture conflicts across
+   * tabs (e.g. opening a flyout in tab A would close the flyout in tab B,
+   * and duplicating a tab would lose the persisted flyout).
+   *
+   */
+  isTabSelected: boolean;
 };
 
 const getItemKey = (metricItem: ParsedMetricItem, index: number) => {
@@ -55,18 +68,12 @@ export const MetricsGrid = ({
   discoverFetch$,
   searchTerm,
   getUserMessages,
+  getDescription,
+  isTabSelected,
 }: MetricsGridProps) => {
   const gridRef = useRef<HTMLDivElement>(null);
   const { euiTheme } = useEuiTheme();
-
-  const [expandedMetric, setExpandedMetric] = useState<
-    | {
-        index: number;
-        metricItem: ParsedMetricItem;
-        esqlQuery: string;
-      }
-    | undefined
-  >();
+  const { flyoutState, onFlyoutStateChange } = useMetricsExperienceState();
 
   const gridColumns = columns || 1;
   const gridRows = Math.ceil(metricItems.length / gridColumns);
@@ -79,26 +86,63 @@ export const MetricsGrid = ({
       gridRef,
     });
 
+  const flyoutData = useMemo(() => {
+    if (!flyoutState) {
+      return undefined;
+    }
+    // `metricItems` is already scoped to the current page (see `PAGE_SIZE`), so
+    // this lookup is bounded and intentionally not indexed/memoized further.
+    const matchedItem = metricItems.find(
+      (item) => getMetricUniqueKey(item) === flyoutState.metricUniqueKey
+    );
+    if (!matchedItem) {
+      return undefined;
+    }
+    return { metricItem: matchedItem, esqlQuery: flyoutState.esqlQuery };
+  }, [flyoutState, metricItems]);
+
+  // Discard flyoutState when its metric is filtered out of the grid.
+  // `metricItems.length > 0` avoids clearing state on a duplicated tab's first
+  // render, where items are momentarily empty before the per-tab fetch resolves.
+  useEffect(() => {
+    if (flyoutState && metricItems.length > 0 && !flyoutData) {
+      onFlyoutStateChange(undefined);
+    }
+  }, [flyoutState, metricItems.length, flyoutData, onFlyoutStateChange]);
+
   const handleViewDetails = useCallback(
     (index: number, esqlQuery: string, metricItem: ParsedMetricItem) => {
       dismissAllFlyoutsExceptFor(DiscoverFlyouts.metricInsights);
-      setExpandedMetric({ index, metricItem, esqlQuery });
+      onFlyoutStateChange({
+        gridPosition: index,
+        metricUniqueKey: getMetricUniqueKey(metricItem),
+        esqlQuery,
+        selectedTabId: 'overview',
+      });
     },
-    []
+    [onFlyoutStateChange]
   );
 
   const handleCloseFlyout = useCallback(() => {
-    if (!expandedMetric) {
+    if (!flyoutState) {
       return;
     }
 
-    const { rowIndex, colIndex } = getRowColFromIndex(expandedMetric.index);
-    setExpandedMetric(undefined);
+    const currentIndex = metricItems.findIndex(
+      (item) => getMetricUniqueKey(item) === flyoutState.metricUniqueKey
+    );
+    onFlyoutStateChange(undefined);
+
+    if (currentIndex === -1) {
+      return;
+    }
+
+    const { rowIndex, colIndex } = getRowColFromIndex(currentIndex);
     // Use requestAnimationFrame to ensure the flyout is fully closed before focusing
     requestAnimationFrame(() => {
       focusCell(rowIndex, colIndex);
     });
-  }, [expandedMetric, focusCell, getRowColFromIndex]);
+  }, [flyoutState, focusCell, getRowColFromIndex, metricItems, onFlyoutStateChange]);
 
   if (metricItems.length === 0) {
     return <EmptyState />;
@@ -154,6 +198,7 @@ export const MetricsGrid = ({
                   onViewDetails={handleViewDetails}
                   searchTerm={searchTerm}
                   whereStatements={whereStatements}
+                  description={getDescription?.(metricItem)}
                   userMessages={getUserMessages ? getUserMessages(metricItem) : undefined}
                 />
               </EuiFlexItem>
@@ -161,10 +206,10 @@ export const MetricsGrid = ({
           })}
         </EuiFlexGrid>
       </A11yGridWrapper>
-      {expandedMetric && (
+      {flyoutData && isTabSelected && (
         <MetricInsightsFlyout
-          metricItem={expandedMetric.metricItem}
-          esqlQuery={expandedMetric.esqlQuery}
+          metricItem={flyoutData.metricItem}
+          esqlQuery={flyoutData.esqlQuery}
           onClose={handleCloseFlyout}
         />
       )}
@@ -189,6 +234,7 @@ interface ChartItemProps
   searchTerm?: string;
   onFocusCell: (rowIndex: number, colIndex: number) => void;
   onViewDetails: (index: number, esqlQuery: string, metricItem: ParsedMetricItem) => void;
+  description?: string;
   whereStatements?: string[];
   userMessages?: EmbeddableComponentProps['userMessages'];
 }
@@ -211,6 +257,7 @@ const ChartItem = React.memo(
     isFocused,
     searchTerm,
     whereStatements,
+    description,
     onFocusCell,
     onViewDetails,
     userMessages,
@@ -268,7 +315,10 @@ const ChartItem = React.memo(
           onExploreInDiscoverTab={actions.openInNewTab}
           onViewDetails={handleViewDetailsCallback}
           title={metricItem.metricName}
+          description={description}
           chartLayers={chartLayers}
+          syncCursor
+          syncTooltips={false}
           titleHighlight={searchTerm}
           extraDisabledActions={[ACTION_OPEN_IN_DISCOVER]}
           userMessages={userMessages}
