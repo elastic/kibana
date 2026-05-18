@@ -8,17 +8,18 @@
 import { BULK_FILTER_MAX_RULES } from '@kbn/alerting-v2-schemas';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 
-import type { CreateRuleParams, UpdateRuleData } from './types';
-import type { UserService } from '../services/user_service/user_service';
 import type { RuleSavedObjectAttributes } from '../../saved_objects';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
-import { RulesClient } from './rules_client';
+import type { ActionPolicyClient } from '../action_policy_client';
 import { createRulesSavedObjectService } from '../services/rules_saved_object_service/rules_saved_object_service.mock';
+import type { UserService } from '../services/user_service/user_service';
 import { createUserService } from '../services/user_service/user_service.mock';
 import { createRuleSoAttributes } from '../test_utils';
+import { RulesClient } from './rules_client';
+import type { CreateRuleParams, UpdateRuleData } from './types';
 
 jest.mock('../rule_executor/schedule', () => ({
   ensureRuleExecutorTaskScheduled: jest.fn(),
@@ -104,8 +105,14 @@ describe('RulesClient', () => {
   });
 
   function createClient() {
+    const actionPolicyClient = {
+      deleteActionPoliciesByFilter: jest
+        .fn()
+        .mockResolvedValue({ processed: 0, total: 0, errors: [] }),
+    } as unknown as ActionPolicyClient;
+
     return new RulesClient({
-      services: { request, rulesSavedObjectService, taskManager, userService },
+      services: { request, rulesSavedObjectService, taskManager, userService, actionPolicyClient },
       options: { spaceId: 'space-1' },
     });
   }
@@ -479,6 +486,279 @@ describe('RulesClient', () => {
         }),
         { version: 'WzEsMV0=', mergeAttributes: false }
       );
+    });
+  });
+
+  describe('upsertRule', () => {
+    describe('create rule (id does not exist)', () => {
+      beforeEach(() => {
+        mockSavedObjectsClient.get.mockRejectedValueOnce(
+          SavedObjectsErrorHelpers.createGenericNotFoundError(RULE_SAVED_OBJECT_TYPE, 'rule-id-1')
+        );
+      });
+
+      it('creates the rule SO with enabled=true and schedules the task', async () => {
+        const client = createClient();
+        mockSavedObjectsClient.create.mockResolvedValueOnce({
+          id: 'rule-id-1',
+          type: RULE_SAVED_OBJECT_TYPE,
+          attributes: baseSoAttrs,
+          references: [],
+        });
+
+        const res = await client.upsertRule({ id: 'rule-id-1', data: baseCreateData });
+
+        expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
+          RULE_SAVED_OBJECT_TYPE,
+          expect.objectContaining({
+            metadata: expect.objectContaining({ name: 'rule-1' }),
+            enabled: true,
+            createdBy: 'elastic',
+            createdAt: '2025-01-01T00:00:00.000Z',
+            updatedBy: 'elastic',
+            updatedAt: '2025-01-01T00:00:00.000Z',
+          }),
+          { id: 'rule-id-1', overwrite: false }
+        );
+        expect(ensureRuleExecutorTaskScheduledMock).toHaveBeenCalledWith({
+          services: { taskManager },
+          input: expect.objectContaining({
+            ruleId: 'rule-id-1',
+            schedule: { interval: '1m' },
+            spaceId: 'space-1',
+          }),
+        });
+        expect(res).toEqual({
+          created: true,
+          rule: expect.objectContaining({ id: 'rule-id-1', enabled: true }),
+        });
+      });
+
+      it('cleans up the saved object if scheduling fails', async () => {
+        const client = createClient();
+        mockSavedObjectsClient.create.mockResolvedValueOnce({
+          id: 'rule-id-1',
+          type: RULE_SAVED_OBJECT_TYPE,
+          attributes: baseSoAttrs,
+          references: [],
+        });
+        ensureRuleExecutorTaskScheduledMock.mockRejectedValueOnce(new Error('schedule failed'));
+
+        await expect(client.upsertRule({ id: 'rule-id-1', data: baseCreateData })).rejects.toThrow(
+          'schedule failed'
+        );
+
+        expect(mockSavedObjectsClient.delete).toHaveBeenCalledWith(
+          RULE_SAVED_OBJECT_TYPE,
+          'rule-id-1'
+        );
+      });
+
+      it('throws 409 when another caller created the rule between get and create', async () => {
+        const client = createClient();
+        mockSavedObjectsClient.create.mockRejectedValueOnce(
+          SavedObjectsErrorHelpers.createConflictError(RULE_SAVED_OBJECT_TYPE, 'rule-id-1')
+        );
+
+        await expect(
+          client.upsertRule({ id: 'rule-id-1', data: baseCreateData })
+        ).rejects.toMatchObject({
+          output: { statusCode: 409 },
+        });
+
+        expect(ensureRuleExecutorTaskScheduledMock).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('replace rule (id exists)', () => {
+      it('replaces fields from the body and preserves audit + enabled', async () => {
+        const client = createClient();
+        const existing: RuleSavedObjectAttributes = {
+          ...baseSoAttrs,
+          enabled: false,
+          createdBy: 'previous-creator',
+          createdAt: '2024-06-01T00:00:00.000Z',
+          metadata: { name: 'before' },
+        };
+        const existingDoc = {
+          id: 'rule-id-1',
+          attributes: existing,
+          version: 'WzEsMV0=',
+          type: RULE_SAVED_OBJECT_TYPE,
+          references: [],
+        };
+        mockSavedObjectsClient.get
+          .mockResolvedValueOnce(existingDoc)
+          .mockResolvedValueOnce(existingDoc);
+        mockSavedObjectsClient.update.mockResolvedValueOnce({
+          id: 'rule-id-1',
+          attributes: existing,
+          type: RULE_SAVED_OBJECT_TYPE,
+          references: [],
+        });
+
+        const res = await client.upsertRule({
+          id: 'rule-id-1',
+          data: { ...baseCreateData, metadata: { name: 'after' } },
+        });
+
+        expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
+          RULE_SAVED_OBJECT_TYPE,
+          'rule-id-1',
+          expect.objectContaining({
+            metadata: expect.objectContaining({ name: 'after' }),
+            enabled: false,
+            createdBy: 'previous-creator',
+            createdAt: '2024-06-01T00:00:00.000Z',
+            updatedBy: 'elastic',
+            updatedAt: '2025-01-01T00:00:00.000Z',
+          }),
+          { version: 'WzEsMV0=', mergeAttributes: false }
+        );
+        expect(res.created).toBe(false);
+      });
+
+      it('reschedules the task with the new interval', async () => {
+        const client = createClient();
+        const existingDoc = {
+          id: 'rule-id-1',
+          attributes: baseSoAttrs,
+          version: 'WzEsMV0=',
+          type: RULE_SAVED_OBJECT_TYPE,
+          references: [],
+        };
+        mockSavedObjectsClient.get
+          .mockResolvedValueOnce(existingDoc)
+          .mockResolvedValueOnce(existingDoc);
+
+        await client.upsertRule({
+          id: 'rule-id-1',
+          data: { ...baseCreateData, schedule: { every: '15m' } },
+        });
+
+        expect(ensureRuleExecutorTaskScheduledMock).toHaveBeenCalledWith({
+          services: { taskManager },
+          input: expect.objectContaining({
+            ruleId: 'rule-id-1',
+            schedule: { interval: '15m' },
+            spaceId: 'space-1',
+          }),
+        });
+      });
+
+      it('throws 409 when the version is stale', async () => {
+        const client = createClient();
+        const existingDoc = {
+          id: 'rule-id-1',
+          attributes: baseSoAttrs,
+          version: 'WzEsMV0=',
+          type: RULE_SAVED_OBJECT_TYPE,
+          references: [],
+        };
+        mockSavedObjectsClient.get
+          .mockResolvedValueOnce(existingDoc)
+          .mockResolvedValueOnce(existingDoc);
+        mockSavedObjectsClient.update.mockRejectedValueOnce(
+          SavedObjectsErrorHelpers.createConflictError(RULE_SAVED_OBJECT_TYPE, 'rule-id-1')
+        );
+
+        await expect(
+          client.upsertRule({ id: 'rule-id-1', data: baseCreateData })
+        ).rejects.toMatchObject({
+          output: { statusCode: 409 },
+        });
+      });
+
+      it('throws 409 when the request body changes the rule kind', async () => {
+        const client = createClient();
+        const existingDoc = {
+          id: 'rule-id-1',
+          attributes: baseSoAttrs,
+          version: 'WzEsMV0=',
+          type: RULE_SAVED_OBJECT_TYPE,
+          references: [],
+        };
+        mockSavedObjectsClient.get
+          .mockResolvedValueOnce(existingDoc)
+          .mockResolvedValueOnce(existingDoc);
+
+        await expect(
+          client.upsertRule({
+            id: 'rule-id-1',
+            data: { ...baseCreateData, kind: 'signal' },
+          })
+        ).rejects.toMatchObject({
+          output: { statusCode: 409 },
+          message: 'Some fields cannot be changed after creation: kind.',
+        });
+
+        expect(mockSavedObjectsClient.update).not.toHaveBeenCalled();
+      });
+
+      it('clears optional fields that are omitted from the request body', async () => {
+        const client = createClient();
+        const existing: RuleSavedObjectAttributes = {
+          ...baseSoAttrs,
+          metadata: { name: 'rule-1', tags: ['tag-a', 'tag-b'] },
+          grouping: { fields: ['host.name'] },
+        };
+        const existingDoc = {
+          id: 'rule-id-1',
+          attributes: existing,
+          version: 'WzEsMV0=',
+          type: RULE_SAVED_OBJECT_TYPE,
+          references: [],
+        };
+        mockSavedObjectsClient.get
+          .mockResolvedValueOnce(existingDoc)
+          .mockResolvedValueOnce(existingDoc);
+        mockSavedObjectsClient.update.mockResolvedValueOnce({
+          id: 'rule-id-1',
+          attributes: existing,
+          type: RULE_SAVED_OBJECT_TYPE,
+          references: [],
+        });
+
+        // baseCreateData omits both metadata.tags and grouping
+        await client.upsertRule({ id: 'rule-id-1', data: baseCreateData });
+
+        expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
+          RULE_SAVED_OBJECT_TYPE,
+          'rule-id-1',
+          expect.objectContaining({
+            metadata: { name: 'rule-1' },
+            grouping: undefined,
+          }),
+          expect.objectContaining({ mergeAttributes: false })
+        );
+      });
+    });
+
+    it('rethrows non-not-found errors from the existing-rule lookup', async () => {
+      const client = createClient();
+      mockSavedObjectsClient.get.mockRejectedValueOnce(new Error('elasticsearch unavailable'));
+
+      await expect(client.upsertRule({ id: 'rule-id-1', data: baseCreateData })).rejects.toThrow(
+        'elasticsearch unavailable'
+      );
+
+      expect(mockSavedObjectsClient.create).not.toHaveBeenCalled();
+      expect(mockSavedObjectsClient.update).not.toHaveBeenCalled();
+    });
+
+    it('throws 400 when the body is invalid', async () => {
+      const client = createClient();
+
+      await expect(
+        client.upsertRule({
+          id: 'rule-id-1',
+          data: { ...baseCreateData, schedule: { every: 'not-a-duration' } },
+        })
+      ).rejects.toMatchObject({
+        output: { statusCode: 400 },
+      });
+
+      expect(mockSavedObjectsClient.get).not.toHaveBeenCalled();
     });
   });
 

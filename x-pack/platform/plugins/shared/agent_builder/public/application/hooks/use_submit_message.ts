@@ -9,7 +9,7 @@ import { useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { useConversationContext } from '../context/conversation/conversation_context';
 import { useConversationId } from '../context/conversation/use_conversation_id';
-import { useSendMessage } from '../context/send_message/send_message_context';
+import { useConversationStream } from './use_conversation_stream';
 import { useNavigation } from './use_navigation';
 import { appPaths } from '../utils/app_paths';
 
@@ -24,7 +24,7 @@ import { appPaths } from '../utils/app_paths';
  */
 export const useSubmitMessage = () => {
   const conversationId = useConversationId();
-  const { sendMessage } = useSendMessage();
+  const { sendMessage } = useConversationStream();
   const { isEmbeddedContext, setConversationId, agentId } = useConversationContext();
   const { navigateToAgentBuilderUrl } = useNavigation();
 

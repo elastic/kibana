@@ -54,6 +54,7 @@ interface DataSourceBrowserProps {
   preloadedSources?: ESQLSourceResult[];
   selectedSources?: string[];
   onClose: () => void;
+  onCloseComplete?: () => void;
   onSelect: (sourceName: string, change: DataSourceSelectionChange) => void;
   position?: { top?: number; left?: number };
 }
@@ -64,6 +65,7 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
   preloadedSources,
   selectedSources = [],
   onClose,
+  onCloseComplete,
   onSelect,
   position,
 }) => {
@@ -284,7 +286,7 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
                   </EuiFlexItem>
                 )}
                 <EuiFlexItem grow={false}>
-                  <EuiIcon type="chevronSingleRight" />
+                  <EuiIcon type="chevronSingleRight" aria-hidden={true} />
                 </EuiFlexItem>
               </EuiFlexGroup>
             ) : (
@@ -307,7 +309,7 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
   const filterPanel = isIntegrationPopoverOpen ? (
     <>
       <EuiPopoverTitle paddingSize="s" onClick={() => setIsIntegrationPopoverOpen(false)}>
-        <EuiIcon type="chevronSingleLeft" />
+        <EuiIcon type="chevronSingleLeft" aria-hidden={true} />
         <EuiLink
           color="text"
           css={css`
@@ -348,6 +350,7 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
         }
         listProps={{
           bordered: false, // Doesn't work so we overwrite the border style with filterListStyles
+          paddingSize: 's',
         }}
       >
         {(list) => (
@@ -373,6 +376,7 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
       filterPanel={filterPanel}
       isOpen={isOpen}
       onClose={onClose}
+      onCloseComplete={onCloseComplete}
       onSelect={handleSelectionChange}
       isFilterOpen={isFilterPopoverOpen}
       setIsFilterOpen={setIsFilterPopoverOpen}
@@ -382,6 +386,7 @@ export const DataSourceBrowser: React.FC<DataSourceBrowserProps> = ({
       isLoading={isLoading}
       searchValue={searchValue}
       setSearchValue={setSearchValue}
+      dataTestSubj="esqlDataSourceBrowser"
     />
   );
 };

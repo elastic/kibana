@@ -13,13 +13,13 @@
  * This file is auto-generated. Do not edit manually.
  * Sources: resolved-semconv.yaml + hardcoded OTLP mappings
  * Registry groups: 143
- * Metric groups: 525
+ * Metric groups: 533
  * Hardcoded fields: 34
- * Total fields: 1252
+ * Total fields: 1196
  *
  * @internal
  *
- * WARNING: This object contains 1252+ field definitions (~50KB+ minified).
+ * WARNING: This object contains 1196+ field definitions (~50KB+ minified).
  * Direct import will significantly increase client bundle size.
  *
  * RECOMMENDED USAGE:
@@ -711,6 +711,13 @@ export const semconvFlat = {
     type: 'keyword',
     example: 'Not A;Brand 99,Chromium 99,Chrome 99',
   },
+  'browser.document.url.full': {
+    name: 'browser.document.url.full',
+    description:
+      'Absolute URL of the current browser document according to [RFC3986](https://www.rfc-editor.org/rfc/rfc3986).',
+    type: 'keyword',
+    example: 'https://www.example.com/search?q=OpenTelemetry#SemConv',
+  },
   'browser.language': {
     name: 'browser.language',
     description: 'Preferred language of the user using the browser',
@@ -837,25 +844,25 @@ export const semconvFlat = {
   },
   'cicd.system.component': {
     name: 'cicd.system.component',
-    description: 'The name of a component of the CICD system.',
+    description: 'The name of a component of the CI/CD system.',
     type: 'keyword',
     example: 'controller',
   },
   'cicd.worker.id': {
     name: 'cicd.worker.id',
-    description: 'The unique identifier of a worker within a CICD system.',
+    description: 'The unique identifier of a worker within a CI/CD system.',
     type: 'keyword',
     example: 'abc123',
   },
   'cicd.worker.name': {
     name: 'cicd.worker.name',
-    description: 'The name of a worker within a CICD system.',
+    description: 'The name of a worker within a CI/CD system.',
     type: 'keyword',
     example: 'agent-abc',
   },
   'cicd.worker.state': {
     name: 'cicd.worker.state',
-    description: 'The state of a CICD worker / agent.',
+    description: 'The state of a CI/CD worker / agent.',
     type: 'keyword',
     example: 'idle',
   },
@@ -1806,6 +1813,13 @@ export const semconvFlat = {
     type: 'keyword',
     example: 'my-host1234.example.com',
   },
+  'gcp.gce.instance.labels': {
+    name: 'gcp.gce.instance.labels',
+    description:
+      'GCE instance labels, `<key>` being the label name and the value being the label value.',
+    type: 'keyword',
+    example: 'observability',
+  },
   'gcp.gce.instance.name': {
     name: 'gcp.gce.instance.name',
     description:
@@ -1832,309 +1846,6 @@ export const semconvFlat = {
       'The zone of a **zonal** Instance Group Manager (e.g., `us-central1-a`). Set this **only** when the IGM is zonal.',
     type: 'keyword',
     example: 'us-central1-a',
-  },
-  'gen_ai.agent.description': {
-    name: 'gen_ai.agent.description',
-    description: 'Free-form description of the GenAI agent provided by the application.',
-    type: 'keyword',
-    example: 'Helps with math problems',
-  },
-  'gen_ai.agent.id': {
-    name: 'gen_ai.agent.id',
-    description: 'The unique identifier of the GenAI agent.',
-    type: 'keyword',
-    example: 'asst_5j66UpCpwteGg4YSxUnt7lPY',
-  },
-  'gen_ai.agent.name': {
-    name: 'gen_ai.agent.name',
-    description: 'Human-readable name of the GenAI agent provided by the application.',
-    type: 'keyword',
-    example: 'Math Tutor',
-  },
-  'gen_ai.agent.version': {
-    name: 'gen_ai.agent.version',
-    description: 'The version of the GenAI agent.',
-    type: 'keyword',
-    example: '1.0.0',
-  },
-  'gen_ai.conversation.id': {
-    name: 'gen_ai.conversation.id',
-    description:
-      'The unique identifier for a conversation (session, thread), used to store and correlate messages within this conversation.',
-    type: 'keyword',
-    example: 'conv_5j66UpCpwteGg4YSxUnt7lPY',
-  },
-  'gen_ai.data_source.id': {
-    name: 'gen_ai.data_source.id',
-    description: 'The data source identifier.',
-    type: 'keyword',
-    example: 'H7STPQYOND',
-  },
-  'gen_ai.embeddings.dimension.count': {
-    name: 'gen_ai.embeddings.dimension.count',
-    description: 'The number of dimensions the resulting output embeddings should have.',
-    type: 'long',
-    example: '512',
-  },
-  'gen_ai.evaluation.explanation': {
-    name: 'gen_ai.evaluation.explanation',
-    description: 'A free-form explanation for the assigned score provided by the evaluator.',
-    type: 'keyword',
-    example:
-      'The response is factually accurate but lacks sufficient detail to fully address the question.',
-  },
-  'gen_ai.evaluation.name': {
-    name: 'gen_ai.evaluation.name',
-    description: 'The name of the evaluation metric used for the GenAI response.',
-    type: 'keyword',
-    example: 'Relevance',
-  },
-  'gen_ai.evaluation.score.label': {
-    name: 'gen_ai.evaluation.score.label',
-    description: 'Human readable label for evaluation.',
-    type: 'keyword',
-    example: 'relevant',
-  },
-  'gen_ai.evaluation.score.value': {
-    name: 'gen_ai.evaluation.score.value',
-    description: 'The evaluation score returned by the evaluator.',
-    type: 'double',
-    example: '4',
-  },
-  'gen_ai.input.messages': {
-    name: 'gen_ai.input.messages',
-    description: 'The chat history provided to the model as an input.',
-    type: 'keyword',
-    example:
-      '[{"role":"user","parts":[{"type":"text","content":"Weather in Paris?"}]},{"role":"assistant","parts":[{"type":"tool_call","id":"call_VSPygqKTWdrhaFErNvMV18Yl","name":"get_weather","arguments":{"location":"Paris"}}]},{"role":"tool","parts":[{"type":"tool_call_response","id":" call_VSPygqKTWdrhaFErNvMV18Yl","result":"rainy, 57°F"}]}]',
-  },
-  'gen_ai.operation.name': {
-    name: 'gen_ai.operation.name',
-    description: 'The name of the GenAI operation being performed.',
-    type: 'keyword',
-    example: 'execute_tool',
-  },
-  'gen_ai.output.messages': {
-    name: 'gen_ai.output.messages',
-    description:
-      'Messages returned by the model where each message represents a specific model response (choice, candidate).',
-    type: 'keyword',
-    example:
-      '[{"role":"assistant","parts":[{"type":"text","content":"The weather in Paris is currently rainy with a temperature of 57°F."}],"finish_reason":"stop"}]',
-  },
-  'gen_ai.output.type': {
-    name: 'gen_ai.output.type',
-    description: 'Represents the content type requested by the client.',
-    type: 'keyword',
-  },
-  'gen_ai.prompt.name': {
-    name: 'gen_ai.prompt.name',
-    description: 'The name of the prompt or prompt template provided in the request or response.',
-    type: 'keyword',
-    example: 'analyze-code',
-  },
-  'gen_ai.provider.name': {
-    name: 'gen_ai.provider.name',
-    description:
-      'The Generative AI provider as identified by the client or server instrumentation.',
-    type: 'keyword',
-  },
-  'gen_ai.request.choice.count': {
-    name: 'gen_ai.request.choice.count',
-    description: 'The target number of candidate completions to return.',
-    type: 'long',
-    example: '3',
-  },
-  'gen_ai.request.encoding_formats': {
-    name: 'gen_ai.request.encoding_formats',
-    description: 'The encoding formats requested in an embeddings operation, if specified.',
-    type: 'keyword',
-    example: 'base64',
-  },
-  'gen_ai.request.frequency_penalty': {
-    name: 'gen_ai.request.frequency_penalty',
-    description: 'The frequency penalty setting for the GenAI request.',
-    type: 'double',
-    example: '0.1',
-  },
-  'gen_ai.request.max_tokens': {
-    name: 'gen_ai.request.max_tokens',
-    description: 'The maximum number of tokens the model generates for a request.',
-    type: 'long',
-    example: '100',
-  },
-  'gen_ai.request.model': {
-    name: 'gen_ai.request.model',
-    description: 'The name of the GenAI model a request is being made to.',
-    type: 'keyword',
-    example: 'g',
-  },
-  'gen_ai.request.presence_penalty': {
-    name: 'gen_ai.request.presence_penalty',
-    description: 'The presence penalty setting for the GenAI request.',
-    type: 'double',
-    example: '0.1',
-  },
-  'gen_ai.request.seed': {
-    name: 'gen_ai.request.seed',
-    description: 'Requests with same seed value more likely to return same result.',
-    type: 'long',
-    example: '100',
-  },
-  'gen_ai.request.stop_sequences': {
-    name: 'gen_ai.request.stop_sequences',
-    description: 'List of sequences that the model will use to stop generating further tokens.',
-    type: 'keyword',
-    example: 'forest,lived',
-  },
-  'gen_ai.request.stream': {
-    name: 'gen_ai.request.stream',
-    description: 'Indicates whether the GenAI request was made in streaming mode.',
-    type: 'boolean',
-  },
-  'gen_ai.request.temperature': {
-    name: 'gen_ai.request.temperature',
-    description: 'The temperature setting for the GenAI request.',
-    type: 'double',
-    example: '0',
-  },
-  'gen_ai.request.top_k': {
-    name: 'gen_ai.request.top_k',
-    description: 'The top_k sampling setting for the GenAI request.',
-    type: 'double',
-    example: '1',
-  },
-  'gen_ai.request.top_p': {
-    name: 'gen_ai.request.top_p',
-    description: 'The top_p sampling setting for the GenAI request.',
-    type: 'double',
-    example: '1',
-  },
-  'gen_ai.response.finish_reasons': {
-    name: 'gen_ai.response.finish_reasons',
-    description:
-      'Array of reasons the model stopped generating tokens, corresponding to each generation received.',
-    type: 'keyword',
-    example: 'stop',
-  },
-  'gen_ai.response.id': {
-    name: 'gen_ai.response.id',
-    description: 'The unique identifier for the completion.',
-    type: 'keyword',
-    example: 'chatcmpl-123',
-  },
-  'gen_ai.response.model': {
-    name: 'gen_ai.response.model',
-    description: 'The name of the model that generated the response.',
-    type: 'keyword',
-    example: 'gpt-4-0613',
-  },
-  'gen_ai.response.time_to_first_chunk': {
-    name: 'gen_ai.response.time_to_first_chunk',
-    description:
-      'Time to first chunk in a streaming response, measured from request issuance, in seconds. The value is measured from when the client issues the generation request to when the first chunk is received in the response stream.',
-    type: 'double',
-    example: '0.5',
-  },
-  'gen_ai.retrieval.documents': {
-    name: 'gen_ai.retrieval.documents',
-    description: 'The documents retrieved.',
-    type: 'keyword',
-    example:
-      '[{"id":"doc_123","score":0.95},{"id":"doc_456","score":0.87},{"id":"doc_789","score":0.82}]',
-  },
-  'gen_ai.retrieval.query.text': {
-    name: 'gen_ai.retrieval.query.text',
-    description: 'The query text used for retrieval.',
-    type: 'keyword',
-    example: 'What is the capital of France?',
-  },
-  'gen_ai.system_instructions': {
-    name: 'gen_ai.system_instructions',
-    description:
-      'The system message or instructions provided to the GenAI model separately from the chat history.',
-    type: 'keyword',
-    example:
-      '[{"type":"text","content":"You are an Agent that greet users, always use greetings tool to respond"}]',
-  },
-  'gen_ai.token.type': {
-    name: 'gen_ai.token.type',
-    description: 'The type of token being counted.',
-    type: 'keyword',
-    example: 'input',
-  },
-  'gen_ai.tool.call.arguments': {
-    name: 'gen_ai.tool.call.arguments',
-    description: 'Parameters passed to the tool call.',
-    type: 'keyword',
-    example: '{"location":"San Francisco?","date":"2025-10-01"}',
-  },
-  'gen_ai.tool.call.id': {
-    name: 'gen_ai.tool.call.id',
-    description: 'The tool call identifier.',
-    type: 'keyword',
-    example: 'call_mszuSIzqtI65i1wAUOE8w5H4',
-  },
-  'gen_ai.tool.call.result': {
-    name: 'gen_ai.tool.call.result',
-    description: 'The result returned by the tool call (if any and if execution was successful).',
-    type: 'keyword',
-    example: '{"temperature_range":{"high":75,"low":60},"conditions":"sunny"}',
-  },
-  'gen_ai.tool.definitions': {
-    name: 'gen_ai.tool.definitions',
-    description: 'The list of tool definitions available to the GenAI agent or model.',
-    type: 'keyword',
-    example:
-      '[{"type":"function","name":"get_current_weather","description":"Get the current weather in a given location","parameters":{"type":"object","properties":{"location":{"type":"string","description":"The city and state, e.g. San Francisco, CA"},"unit":{"type":"string","enum":["celsius","fahrenheit"]}},"required":["location","unit"]}}]',
-  },
-  'gen_ai.tool.description': {
-    name: 'gen_ai.tool.description',
-    description: 'The tool description.',
-    type: 'keyword',
-    example: 'Multiply two numbers',
-  },
-  'gen_ai.tool.name': {
-    name: 'gen_ai.tool.name',
-    description: 'Name of the tool utilized by the agent.',
-    type: 'keyword',
-    example: 'Flights',
-  },
-  'gen_ai.tool.type': {
-    name: 'gen_ai.tool.type',
-    description: 'Type of the tool utilized by the agent',
-    type: 'keyword',
-    example: 'function',
-  },
-  'gen_ai.usage.cache_creation.input_tokens': {
-    name: 'gen_ai.usage.cache_creation.input_tokens',
-    description: 'The number of input tokens written to a provider-managed cache.',
-    type: 'long',
-    example: '25',
-  },
-  'gen_ai.usage.cache_read.input_tokens': {
-    name: 'gen_ai.usage.cache_read.input_tokens',
-    description: 'The number of input tokens served from a provider-managed cache.',
-    type: 'long',
-    example: '50',
-  },
-  'gen_ai.usage.input_tokens': {
-    name: 'gen_ai.usage.input_tokens',
-    description: 'The number of tokens used in the GenAI input (prompt).',
-    type: 'long',
-    example: '100',
-  },
-  'gen_ai.usage.output_tokens': {
-    name: 'gen_ai.usage.output_tokens',
-    description: 'The number of tokens used in the GenAI response (completion).',
-    type: 'long',
-    example: '180',
-  },
-  'gen_ai.workflow.name': {
-    name: 'gen_ai.workflow.name',
-    description: 'Human-readable name of the GenAI workflow provided by the application.',
-    type: 'keyword',
-    example: 'multi_agent_rag',
   },
   'geo.continent.code': {
     name: 'geo.continent.code',
@@ -2181,6 +1892,24 @@ export const semconvFlat = {
     description: 'Region ISO code ([ISO 3166-2](https://wikipedia.org/wiki/ISO_3166-2)).',
     type: 'keyword',
     example: 'CA-QC',
+  },
+  'go.cpu.detailed_state': {
+    name: 'go.cpu.detailed_state',
+    description: 'The detailed state of the CPU.',
+    type: 'keyword',
+    example: 'gc/pause',
+  },
+  'go.cpu.state': {
+    name: 'go.cpu.state',
+    description: 'The state of the CPU.',
+    type: 'keyword',
+    example: 'user',
+  },
+  'go.memory.detailed_type': {
+    name: 'go.memory.detailed_type',
+    description: 'The detailed type of memory.',
+    type: 'keyword',
+    example: 'heap/objects',
   },
   'go.memory.type': {
     name: 'go.memory.type',
@@ -2633,6 +2362,12 @@ export const semconvFlat = {
     type: 'keyword',
     example: '218fc5a9-a5f1-4b54-aa05-46717d0ab26d',
   },
+  'k8s.container.ephemeral_storage.fs_type': {
+    name: 'k8s.container.ephemeral_storage.fs_type',
+    description: 'The type of file system component for ephemeral storage.',
+    type: 'keyword',
+    example: 'rootfs',
+  },
   'k8s.container.name': {
     name: 'k8s.container.name',
     description:
@@ -2655,14 +2390,14 @@ export const semconvFlat = {
   'k8s.container.status.reason': {
     name: 'k8s.container.status.reason',
     description:
-      'The reason for the container state. Corresponds to the `reason` field of the: [K8s ContainerStateWaiting](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#containerstatewaiting-v1-core) or [K8s ContainerStateTerminated](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#containerstateterminated-v1-core)',
+      'The reason for the container state. Corresponds to the `reason` field of the: [K8s ContainerStateWaiting](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.34/#containerstatewaiting-v1-core) or [K8s ContainerStateTerminated](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.34/#containerstateterminated-v1-core)',
     type: 'keyword',
     example: 'ContainerCreating',
   },
   'k8s.container.status.state': {
     name: 'k8s.container.status.state',
     description:
-      'The state of the container. [K8s ContainerState](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#containerstate-v1-core)',
+      'The state of the container. [K8s ContainerState](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.34/#containerstate-v1-core)',
     type: 'keyword',
     example: 'terminated',
   },
@@ -3164,7 +2899,7 @@ export const semconvFlat = {
   'k8s.storageclass.name': {
     name: 'k8s.storageclass.name',
     description:
-      'The name of K8s [StorageClass](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#storageclass-v1-storage-k8s-io) object.',
+      'The name of K8s [StorageClass](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.34/#storageclass-v1-storage-k8s-io) object.',
     type: 'keyword',
     example: 'gold.storageclass.storage.k8s.io',
   },
@@ -3262,31 +2997,6 @@ export const semconvFlat = {
       'Name of the logical partition that hosts a systems with a mainframe operating system.',
     type: 'keyword',
     example: 'LPAR01',
-  },
-  'mcp.method.name': {
-    name: 'mcp.method.name',
-    description: 'The name of the request or notification method.',
-    type: 'keyword',
-  },
-  'mcp.protocol.version': {
-    name: 'mcp.protocol.version',
-    description:
-      'The [version](https://modelcontextprotocol.io/specification/versioning) of the Model Context Protocol used.',
-    type: 'keyword',
-    example: 'Wed Jun 18 2025 00:00:00 GMT+0000 (Coordinated Universal Time)',
-  },
-  'mcp.resource.uri': {
-    name: 'mcp.resource.uri',
-    description: 'The value of the resource uri.',
-    type: 'keyword',
-    example: 'postgres://database/customers/schema',
-  },
-  'mcp.session.id': {
-    name: 'mcp.session.id',
-    description:
-      'Identifies [MCP session](https://modelcontextprotocol.io/specification/2025-06-18/basic/transports#session-management).',
-    type: 'keyword',
-    example: '191c4850af6c49e08843a3f6c80e5046',
   },
   'messaging.batch.message_count': {
     name: 'messaging.batch.message_count',
@@ -3687,12 +3397,12 @@ export const semconvFlat = {
   'metrics.cicd.system.errors': {
     name: 'metrics.cicd.system.errors',
     description:
-      'The number of errors in a component of the CICD system (eg. controller, scheduler, agent).',
+      'The number of errors in a component of the CI/CD system (eg. controller, scheduler, agent).',
     type: 'double',
   },
   'metrics.cicd.worker.count': {
     name: 'metrics.cicd.worker.count',
-    description: 'The number of workers on the CICD system by state.',
+    description: 'The number of workers on the CI/CD system by state.',
     type: 'double',
   },
   'metrics.container.cpu.time': {
@@ -3990,47 +3700,14 @@ export const semconvFlat = {
     description: 'Number of invocation timeouts.',
     type: 'double',
   },
-  'metrics.gen_ai.client.operation.duration': {
-    name: 'metrics.gen_ai.client.operation.duration',
-    description: 'GenAI operation duration.',
-    type: 'double',
-  },
-  'metrics.gen_ai.client.operation.time_per_output_chunk': {
-    name: 'metrics.gen_ai.client.operation.time_per_output_chunk',
-    description:
-      'Time per output chunk, recorded for each chunk received after the first one, measured as the time elapsed from the end of the previous chunk to the end of the current chunk.',
-    type: 'double',
-  },
-  'metrics.gen_ai.client.operation.time_to_first_chunk': {
-    name: 'metrics.gen_ai.client.operation.time_to_first_chunk',
-    description:
-      'Time to receive the first chunk, measured from when the client issues the generation request to when the first chunk is received in the response stream.',
-    type: 'double',
-  },
-  'metrics.gen_ai.client.token.usage': {
-    name: 'metrics.gen_ai.client.token.usage',
-    description: 'Number of input and output tokens used.',
-    type: 'double',
-  },
-  'metrics.gen_ai.server.request.duration': {
-    name: 'metrics.gen_ai.server.request.duration',
-    description:
-      'Generative AI server request duration such as time-to-last byte or last output token.',
-    type: 'double',
-  },
-  'metrics.gen_ai.server.time_per_output_token': {
-    name: 'metrics.gen_ai.server.time_per_output_token',
-    description: 'Time per output token generated after the first token for successful responses.',
-    type: 'double',
-  },
-  'metrics.gen_ai.server.time_to_first_token': {
-    name: 'metrics.gen_ai.server.time_to_first_token',
-    description: 'Time to generate first token for successful responses.',
-    type: 'double',
-  },
   'metrics.go.config.gogc': {
     name: 'metrics.go.config.gogc',
     description: 'Heap size target percentage configured by the user, otherwise 100.',
+    type: 'double',
+  },
+  'metrics.go.cpu.time': {
+    name: 'metrics.go.cpu.time',
+    description: 'Estimated CPU time spent by the Go runtime.',
     type: 'double',
   },
   'metrics.go.goroutine.count': {
@@ -4046,6 +3723,11 @@ export const semconvFlat = {
   'metrics.go.memory.allocations': {
     name: 'metrics.go.memory.allocations',
     description: 'Count of allocations to the heap by the application.',
+    type: 'double',
+  },
+  'metrics.go.memory.gc.cycles': {
+    name: 'metrics.go.memory.gc.cycles',
+    description: 'Number of completed GC cycles.',
     type: 'double',
   },
   'metrics.go.memory.gc.goal': {
@@ -4485,14 +4167,29 @@ export const semconvFlat = {
     description: 'Ephemeral storage resource requested for the container.',
     type: 'double',
   },
-  'metrics.k8s.container.memory.limit': {
-    name: 'metrics.k8s.container.memory.limit',
-    description: 'Maximum memory resource limit set for the container.',
+  'metrics.k8s.container.ephemeral_storage.usage': {
+    name: 'metrics.k8s.container.ephemeral_storage.usage',
+    description: 'The ephemeral storage used by a container.',
     type: 'double',
   },
-  'metrics.k8s.container.memory.request': {
-    name: 'metrics.k8s.container.memory.request',
-    description: 'Memory resource requested for the container.',
+  'metrics.k8s.container.memory.limit.current': {
+    name: 'metrics.k8s.container.memory.limit.current',
+    description: 'Maximum memory resource limit currently configured for a running container.',
+    type: 'double',
+  },
+  'metrics.k8s.container.memory.limit.desired': {
+    name: 'metrics.k8s.container.memory.limit.desired',
+    description: 'Maximum memory resource limit as defined by the container spec.',
+    type: 'double',
+  },
+  'metrics.k8s.container.memory.request.current': {
+    name: 'metrics.k8s.container.memory.request.current',
+    description: 'Memory resource request currently configured for a running container.',
+    type: 'double',
+  },
+  'metrics.k8s.container.memory.request.desired': {
+    name: 'metrics.k8s.container.memory.request.desired',
+    description: 'Memory resource requested as defined by the container spec.',
     type: 'double',
   },
   'metrics.k8s.container.ready': {
@@ -5094,28 +4791,6 @@ export const semconvFlat = {
   'metrics.kestrel.upgraded_connections': {
     name: 'metrics.kestrel.upgraded_connections',
     description: 'Number of connections that are currently upgraded (WebSockets). .',
-    type: 'double',
-  },
-  'metrics.mcp.client.operation.duration': {
-    name: 'metrics.mcp.client.operation.duration',
-    description:
-      'The duration of the MCP request or notification as observed on the sender from the time it was sent until the response or ack is received.',
-    type: 'double',
-  },
-  'metrics.mcp.client.session.duration': {
-    name: 'metrics.mcp.client.session.duration',
-    description: 'The duration of the MCP session as observed on the MCP client.',
-    type: 'double',
-  },
-  'metrics.mcp.server.operation.duration': {
-    name: 'metrics.mcp.server.operation.duration',
-    description:
-      'MCP request or notification duration as observed on the receiver from the time it was received until the result or ack is sent.',
-    type: 'double',
-  },
-  'metrics.mcp.server.session.duration': {
-    name: 'metrics.mcp.server.session.duration',
-    description: 'The duration of the MCP session as observed on the MCP server.',
     type: 'double',
   },
   'metrics.messaging.attributes': {
@@ -5755,7 +5430,7 @@ export const semconvFlat = {
   },
   'metrics.v8js.memory.heap.limit': {
     name: 'metrics.v8js.memory.heap.limit',
-    description: 'Total heap memory size pre-allocated.',
+    description: 'Maximum heap size allowed by the V8 engine.',
     type: 'double',
   },
   'metrics.v8js.memory.heap.space.available_size': {
@@ -5766,6 +5441,11 @@ export const semconvFlat = {
   'metrics.v8js.memory.heap.space.physical_size': {
     name: 'metrics.v8js.memory.heap.space.physical_size',
     description: 'Committed size of a heap space.',
+    type: 'double',
+  },
+  'metrics.v8js.memory.heap.space.size': {
+    name: 'metrics.v8js.memory.heap.space.size',
+    description: 'Total heap memory size pre-allocated for a heap space.',
     type: 'double',
   },
   'metrics.v8js.memory.heap.used': {
@@ -5998,29 +5678,6 @@ export const semconvFlat = {
     name: 'onc_rpc.version',
     description: 'ONC/Sun RPC program version.',
     type: 'long',
-  },
-  'openai.api.type': {
-    name: 'openai.api.type',
-    description: 'The type of OpenAI API being used.',
-    type: 'keyword',
-  },
-  'openai.request.service_tier': {
-    name: 'openai.request.service_tier',
-    description: 'The service tier requested. May be a specific tier, default, or auto.',
-    type: 'keyword',
-    example: 'auto',
-  },
-  'openai.response.service_tier': {
-    name: 'openai.response.service_tier',
-    description: 'The service tier used for the response.',
-    type: 'keyword',
-    example: 'scale',
-  },
-  'openai.response.system_fingerprint': {
-    name: 'openai.response.system_fingerprint',
-    description: 'A fingerprint to track any eventual change in the Generative AI environment.',
-    type: 'keyword',
-    example: 'fp_44709d6fcb',
   },
   'openshift.clusterquota.name': {
     name: 'openshift.clusterquota.name',

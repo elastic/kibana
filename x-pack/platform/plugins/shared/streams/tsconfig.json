@@ -93,6 +93,8 @@
     "@kbn/core-security-server",
     "@kbn/workflows-management-plugin",
     "@kbn/workflows",
-    "@kbn/agent-builder-plugin"
+    "@kbn/agent-builder-plugin",
+    "@kbn/data-streams",
+    "@kbn/es-mappings"
   ]
 }
