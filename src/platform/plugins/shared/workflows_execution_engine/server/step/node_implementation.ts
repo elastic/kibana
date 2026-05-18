@@ -154,8 +154,6 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
 
     let input: Record<string, unknown> = {};
     this.stepExecutionRuntime.startStep();
-    // flush event logs after start step
-    await this.stepExecutionRuntime.flushEventLogs();
 
     // Create APM span for step execution visibility in traces
     const stepSpan = apm.startSpan(`step: ${this.step.name}`, 'workflow', this.step.type);
@@ -227,9 +225,6 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
         stepSpan.end();
       }
     }
-
-    // flush event logs after finishing the step
-    await this.stepExecutionRuntime.flushEventLogs();
 
     this.workflowExecutionRuntime.navigateToNextNode();
   }

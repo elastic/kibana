@@ -96,6 +96,7 @@ export const listStreamsRoute = createServerRoute({
     oasOperationObject: () => ({
       responses: {
         200: {
+          description: 'A list of all streams.',
           content: {
             'application/json': {
               examples: {

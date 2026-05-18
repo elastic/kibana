@@ -68,7 +68,7 @@ function buildAzureEsqlQuery(namespace: string): string {
 | LIMIT ${COMPOSITE_PAGE_SIZE}`;
 }
 
-export const COMMUNICATES_WITH_ENGINE_CONFIGS: RelationshipIntegrationConfig[] = [
+export const COMMUNICATES_WITH_INTEGRATION_RELATIONSHIP_CONFIGS: RelationshipIntegrationConfig[] = [
   {
     kind: 'standard',
     id: 'okta',
