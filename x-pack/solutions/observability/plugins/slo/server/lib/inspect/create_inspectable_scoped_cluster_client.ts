@@ -5,8 +5,14 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, IScopedClusterClient, KibanaRequest } from '@kbn/core/server';
+import type {
+  ElasticsearchClient,
+  IScopedClusterClient,
+  IUiSettingsClient,
+  KibanaRequest,
+} from '@kbn/core/server';
 import { RequestStatus } from '@kbn/inspector-plugin/common';
+import { enableInspectEsQueries } from '@kbn/observability-plugin/common';
 import { getInspectResponse } from '@kbn/observability-shared-plugin/common';
 import { inspectableEsQueriesMap } from './inspectable_es_queries_map';
 
@@ -60,7 +66,7 @@ function createInspectableEsClient(
   });
 }
 
-export function createInspectableScopedClusterClient(
+function createInspectableScopedClusterClient(
   scopedClusterClient: IScopedClusterClient,
   request: KibanaRequest
 ): IScopedClusterClient {
@@ -74,4 +80,27 @@ export function createInspectableScopedClusterClient(
     asInternalUser: scopedClusterClient.asInternalUser,
     asSecondaryAuthUser: scopedClusterClient.asSecondaryAuthUser,
   };
+}
+
+export async function getScopedClusterClientWithInspect({
+  scopedClusterClient,
+  uiSettingsClient,
+  request,
+  isDev,
+}: {
+  scopedClusterClient: IScopedClusterClient;
+  uiSettingsClient: IUiSettingsClient;
+  request: KibanaRequest;
+  isDev: boolean;
+}): Promise<IScopedClusterClient> {
+  let isInspectorEnabled = false;
+  try {
+    isInspectorEnabled = (await uiSettingsClient.get<boolean>(enableInspectEsQueries)) || isDev;
+  } catch {
+    // ignore errors reading ui settings
+  }
+
+  return isInspectorEnabled
+    ? createInspectableScopedClusterClient(scopedClusterClient, request)
+    : scopedClusterClient;
 }
