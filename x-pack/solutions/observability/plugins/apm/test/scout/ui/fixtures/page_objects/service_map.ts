@@ -361,6 +361,19 @@ export class ServiceMapPage {
     }
   }
 
+  /**
+   * Expand the options panel if it is currently collapsed. Use in tests that assert on
+   * panel contents (find-in-page input, filters) after the panel was closed in beforeEach.
+   */
+  async openOptionsPanelIfClosed() {
+    if (await this.serviceMapShowControlsButton.isVisible().catch(() => false)) {
+      await this.serviceMapShowControlsButton.click();
+      await this.serviceMapOptionsPanel
+        .waitFor({ state: 'visible', timeout: 2000 })
+        .catch(() => {});
+    }
+  }
+
   async getPopoverTitle() {
     return this.serviceMapPopoverTitle.textContent();
   }

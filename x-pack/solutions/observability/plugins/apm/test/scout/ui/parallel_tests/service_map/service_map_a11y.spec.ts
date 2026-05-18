@@ -105,6 +105,9 @@ test.describe(
       });
 
       await test.step('polite live regions exist for keyboard announcements and find-in-page', async () => {
+        // The find-in-page input only renders when the options panel is open; beforeEach closes
+        // the panel to keep nodes clickable, so reopen it before asserting on its live regions.
+        await serviceMapPage.openOptionsPanelIfClosed();
         const serviceMapContainer = page.testSubj.locator('serviceMapGraph');
         await expect(page.testSubj.locator('serviceMapControlsSearch')).toBeVisible();
         const politeLiveRegions = serviceMapContainer.locator('[aria-live="polite"]');
