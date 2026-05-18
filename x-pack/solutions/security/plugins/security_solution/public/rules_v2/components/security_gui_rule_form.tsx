@@ -132,6 +132,9 @@ export const SecurityGuiRuleForm = ({
         <ConditionFieldGroup
           includeBase={ruleType !== 'threshold'}
           groupFieldLabel={i18n.SUPPRESSION_FIELDS_LABEL}
+          showGroupingDuration
+          groupingDurationLabel={i18n.SUPPRESSION_DURATION_LABEL}
+          groupingDurationHelpText={i18n.SUPPRESSION_DURATION_HELP}
         />
         <EuiSpacer size="m" />
         <RuleExecutionFieldGroup />

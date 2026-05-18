@@ -41,6 +41,7 @@ export interface RuleEvaluation {
 
 export interface RuleGrouping {
   fields: string[];
+  duration?: string;
 }
 
 export interface RecoveryPolicy {

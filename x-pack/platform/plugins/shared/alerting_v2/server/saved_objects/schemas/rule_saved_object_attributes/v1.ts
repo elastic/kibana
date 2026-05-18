@@ -62,6 +62,7 @@ export const ruleSavedObjectAttributesSchema = schema.object({
   grouping: schema.maybe(
     schema.object({
       fields: schema.arrayOf(schema.string(), { minSize: 1, maxSize: 10 }),
+      duration: schema.maybe(schema.string()),
     })
   ),
   no_data: schema.maybe(

@@ -81,6 +81,14 @@ const OverviewTab: React.FC<{ rule: RuleResponse }> = ({ rule }) => {
           },
         ]
       : []),
+    ...(rule.grouping?.duration
+      ? [
+          {
+            title: i18n.VIEW_SUPPRESSION_DURATION_LABEL,
+            description: rule.grouping.duration,
+          },
+        ]
+      : []),
     ...(rule.metadata.tags?.length
       ? [
           {

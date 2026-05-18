@@ -304,3 +304,21 @@ export const ENABLE_RULE = i18n.translate('xpack.securitySolution.rulesV2.enable
 export const DISABLE_RULE = i18n.translate('xpack.securitySolution.rulesV2.disableRule', {
   defaultMessage: 'Disable rule',
 });
+
+export const SUPPRESSION_DURATION_LABEL = i18n.translate(
+  'xpack.securitySolution.rulesV2.suppressionDurationLabel',
+  { defaultMessage: 'Suppression window' }
+);
+
+export const SUPPRESSION_DURATION_HELP = i18n.translate(
+  'xpack.securitySolution.rulesV2.suppressionDurationHelp',
+  {
+    defaultMessage:
+      'Max episode duration anchored to the first event. After this window, a new episode starts. E.g. "1h", "30m".',
+  }
+);
+
+export const VIEW_SUPPRESSION_DURATION_LABEL = i18n.translate(
+  'xpack.securitySolution.rulesV2.viewSuppressionDurationLabel',
+  { defaultMessage: 'Suppression window' }
+);

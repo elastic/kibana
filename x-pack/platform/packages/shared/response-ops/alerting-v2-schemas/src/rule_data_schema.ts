@@ -175,6 +175,11 @@ export const groupingSchema = z
       .describe(
         'Fields to group alerts by, e.g. ["host.name", "service.name"]. Should match ES|QL GROUP BY fields.'
       ),
+    duration: durationSchema
+      .optional()
+      .describe(
+        'Max episode duration anchored to the first event. After this window expires, a new episode starts. E.g. "1h", "30m".'
+      ),
   })
   .strict()
   .describe('Grouping configuration.');

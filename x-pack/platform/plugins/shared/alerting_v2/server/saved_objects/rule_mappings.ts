@@ -51,6 +51,7 @@ export const ruleMappings: SavedObjectsTypeMappingDefinition = {
     grouping: {
       properties: {
         fields: { type: 'keyword' },
+        duration: { type: 'keyword' },
       },
     },
     no_data: {

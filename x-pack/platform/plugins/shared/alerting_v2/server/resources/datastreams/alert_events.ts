@@ -11,7 +11,7 @@ import { z } from '@kbn/zod/v4';
 import type { ResourceDefinition } from './types';
 
 export const ALERT_EVENTS_DATA_STREAM = '.rule-events';
-export const ALERT_EVENTS_DATA_STREAM_VERSION = 3;
+export const ALERT_EVENTS_DATA_STREAM_VERSION = 4;
 export const ALERT_EVENTS_BACKING_INDEX = '.ds-.rule-events-*';
 export const ALERT_EVENTS_ILM_POLICY_NAME = '.rule-events-ilm-policy';
 
@@ -53,6 +53,7 @@ const mappings: MappingsDefinition = {
         id: { type: 'keyword' },
         status: { type: 'keyword' }, // inactive | pending | active | recovering
         status_count: { type: 'long' }, // only set for pending and recovering
+        started_at: { type: 'date' },
       },
     },
     space_id: { type: 'keyword' },
@@ -86,6 +87,7 @@ export const alertEventSchema = z.object({
       id: z.string(),
       status: alertEpisodeStatusSchema,
       status_count: alertEpisodeStatusCountSchema,
+      started_at: z.string().optional(),
     })
     .optional(),
   space_id: z.string(),

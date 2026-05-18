@@ -8,6 +8,7 @@
 import { v4 as uuidV4 } from 'uuid';
 import { inject, injectable } from 'inversify';
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
+import { parseDurationToMs } from '@kbn/alerting-v2-schemas';
 import type { LoggerServiceContract } from '../services/logger_service/logger_service';
 import { LoggerServiceToken } from '../services/logger_service/logger_service';
 import type { QueryServiceContract } from '../services/query_service/query_service';
@@ -116,18 +117,31 @@ export class DirectorService {
     previousAlertEvent,
     strategy,
   }: CalculateNextStateParams): AlertEvent {
-    const currentStatus = previousAlertEvent?.last_episode_status;
+    const groupingDuration = rule.grouping?.duration;
+    const expired = this.isEpisodeExpired(
+      previousAlertEvent?.last_episode_started_at,
+      groupingDuration
+    );
+
+    const effectivePrevious = expired ? undefined : previousAlertEvent;
+
+    const currentStatus = effectivePrevious?.last_episode_status;
 
     const result: StateTransitionResult = strategy.getNextState({
       rule,
       alertEvent: currentAlertEvent,
-      previousEpisode: previousAlertEvent,
+      previousEpisode: effectivePrevious,
     });
 
     const episodeId = this.resolveEpisodeId({
-      previousAlertEvent,
+      previousAlertEvent: effectivePrevious,
       nextStatus: result.status,
     });
+
+    const isNewEpisode = episodeId !== previousAlertEvent?.last_episode_id;
+    const startedAt = isNewEpisode
+      ? currentAlertEvent['@timestamp']
+      : previousAlertEvent?.last_episode_started_at ?? currentAlertEvent['@timestamp'];
 
     if (currentStatus !== result.status) {
       this.logger.debug({
@@ -144,6 +158,7 @@ export class DirectorService {
         id: episodeId,
         status: result.status,
         ...(result.statusCount != null ? { status_count: result.statusCount } : {}),
+        started_at: startedAt,
       },
     };
   }
@@ -169,5 +184,22 @@ export class DirectorService {
     }
 
     return currentEpisodeId ?? uuidV4();
+  }
+
+  private isEpisodeExpired(
+    startedAt: string | null | undefined,
+    duration: string | null | undefined
+  ): boolean {
+    if (!startedAt || !duration) {
+      return false;
+    }
+
+    const durationMs = parseDurationToMs(duration);
+    if (isNaN(durationMs)) {
+      return false;
+    }
+
+    const startMs = new Date(startedAt).getTime();
+    return Date.now() > startMs + durationMs;
   }
 }
