@@ -416,7 +416,7 @@ export const MisconfigurationFindingsDetailsTable = memo(
                 defaultMessage: 'Misconfigurations ',
               }
             )}
-            <EuiIcon type="external" />
+            <EuiIcon type="external" aria-hidden={true} />
           </SecuritySolutionLinkAnchor>
           <EuiSpacer size="xl" />
           <DistributionBar stats={misconfigurationStats} />

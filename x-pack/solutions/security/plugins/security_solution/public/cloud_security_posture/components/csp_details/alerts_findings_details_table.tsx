@@ -435,7 +435,7 @@ export const AlertsDetailsTable = memo(
               {i18n.translate('xpack.securitySolution.flyout.left.insights.alerts.tableTitle', {
                 defaultMessage: 'Alerts ',
               })}
-              <EuiIcon type="external" />
+              <EuiIcon type="external" aria-hidden={true} />
             </h1>
           </EuiLink>
 
