@@ -46,7 +46,7 @@ import {
   buildEsqlQuery,
   Aggregation,
   Comparator,
-  BUILDER_TYPE,
+  RULE_BUILDER_TYPE,
 } from '@kbn/alerting-v2-rule-form';
 import type {
   RuleFormServices,
@@ -86,7 +86,7 @@ const toFormValues = (values: ThresholdRuleFormValues, esqlQuery: string): FormV
 });
 
 const buildRuleBuilderConfig = (values: ThresholdRuleFormValues) => ({
-  type: BUILDER_TYPE,
+  type: RULE_BUILDER_TYPE,
   config: JSON.stringify({
     indexPattern: values.indexPattern,
     timeField: values.timeField,

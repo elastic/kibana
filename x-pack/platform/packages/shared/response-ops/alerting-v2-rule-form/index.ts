@@ -95,7 +95,7 @@ export {
   buildEsqlQuery,
   Aggregation,
   Comparator,
-  BUILDER_TYPE,
+  RULE_BUILDER_TYPE,
   DEFAULT_STAT,
   DEFAULT_ALERT_CONDITION,
   AGGREGATION_LABELS,

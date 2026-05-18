@@ -30,7 +30,7 @@ import {
 import type { FormValues, StateTransition } from '@kbn/alerting-v2-rule-form';
 import { i18n } from '@kbn/i18n';
 import type { ThresholdRuleFormValues } from '@kbn/alerting-v2-rule-form';
-import { BUILDER_TYPE } from '@kbn/alerting-v2-rule-form';
+import { RULE_BUILDER_TYPE } from '@kbn/alerting-v2-rule-form';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { useFetchRuleBuilderConfig } from '../../hooks/use_fetch_rule_builder_config';
 import { ruleKeys } from '../../hooks/query_key_factory';
@@ -47,7 +47,7 @@ const CLONE_NAME_SUFFIX = i18n.translate('xpack.alertingV2.ruleFormPage.cloneNam
 const parseRuleBuilderConfig = (
   ruleBuilderConfig?: { type: string; config: string } | null
 ): Partial<ThresholdRuleFormValues> | undefined => {
-  if (!ruleBuilderConfig || ruleBuilderConfig.type !== BUILDER_TYPE) {
+  if (!ruleBuilderConfig || ruleBuilderConfig.type !== RULE_BUILDER_TYPE) {
     return undefined;
   }
   try {

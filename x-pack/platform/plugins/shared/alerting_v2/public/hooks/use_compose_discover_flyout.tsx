@@ -11,7 +11,7 @@ import { PluginStart } from '@kbn/core-di';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
-import { ComposeDiscoverFlyout, BUILDER_TYPE } from '@kbn/alerting-v2-rule-form';
+import { ComposeDiscoverFlyout, RULE_BUILDER_TYPE } from '@kbn/alerting-v2-rule-form';
 import { RulesApi } from '../services/rules_api';
 import type { RuleApiResponse } from '../services/rules_api';
 import { useCreateRule } from './use_create_rule';
@@ -44,8 +44,11 @@ export const useComposeDiscoverFlyout = ({
   );
 
   const isRuleBuilderEdit = ruleBuilderMode && editRule?.id != null;
-  const { data: ruleBuilderConfigData, isLoading: isRuleBuilderConfigLoading } =
-    useFetchRuleBuilderConfig(editRule?.id, isRuleBuilderEdit);
+  const {
+    data: ruleBuilderConfigData,
+    isLoading: isRuleBuilderConfigLoading,
+    isError: isRuleBuilderConfigError,
+  } = useFetchRuleBuilderConfig(editRule?.id, isRuleBuilderEdit);
 
   const initialRuleBuilderState = useMemo(() => {
     if (!ruleBuilderConfigData?.config) return undefined;
@@ -66,7 +69,7 @@ export const useComposeDiscoverFlyout = ({
       pendingBuilderStateRef.current = null;
       try {
         await rulesApi.saveRuleBuilderConfig(targetRuleId, {
-          type: BUILDER_TYPE,
+          type: RULE_BUILDER_TYPE,
           config: JSON.stringify(builderState),
         });
       } catch {
@@ -135,6 +138,8 @@ export const useComposeDiscoverFlyout = ({
         isSaving={createRuleMutation.isLoading || updateRuleMutation.isLoading}
         ruleBuilderMode={ruleBuilderMode}
         initialRuleBuilderState={initialRuleBuilderState}
+        configLoadFailed={isRuleBuilderEdit && isRuleBuilderConfigError}
+        onSwitchToEsqlMode={() => setRuleBuilderMode(false)}
         onRuleBuilderConfigSave={(state) => {
           pendingBuilderStateRef.current = state;
         }}

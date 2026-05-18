@@ -80,7 +80,7 @@ export interface ThresholdRuleFormValues extends DataSourceFormValues {
   artifacts?: RuleArtifact[];
 }
 
-export const BUILDER_TYPE = 'threshold' as const;
+export const RULE_BUILDER_TYPE = 'threshold' as const;
 
 export const DEFAULT_STAT: Omit<StatDefinition, 'id'> = {
   label: 'count',
