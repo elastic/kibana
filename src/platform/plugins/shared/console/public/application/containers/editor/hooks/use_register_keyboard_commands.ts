@@ -9,9 +9,7 @@
 
 import { useRef } from 'react';
 import { i18n } from '@kbn/i18n';
-import { monaco } from '@kbn/monaco';
-
-import '@kbn/code-editor';
+import { monaco } from '@kbn/code-editor';
 
 interface RegisterKeyboardCommandsParams {
   /** The current Monaco editor instance. */

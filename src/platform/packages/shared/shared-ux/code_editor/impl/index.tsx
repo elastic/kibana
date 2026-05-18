@@ -177,7 +177,7 @@ declare module 'monaco-editor/esm/vs/editor/editor.api' {
       addCommand(
         keybinding: number,
         handler: ICommandHandler,
-        contextOrDiscoveryMeta?: MonacoHotkeyDiscoveryMeta
+        contextOrDiscoveryMeta?: Omit<MonacoHotkeyDiscoveryMeta, 'keys'>
       ): string | null;
     }
 
@@ -186,7 +186,7 @@ declare module 'monaco-editor/esm/vs/editor/editor.api' {
        * When hotkeys discovery is wired by Code Editor, optional metadata registers cheat-sheet rows
        * for `keybindings` via discovery (Monaco still owns shortcut execution).
        */
-      hotkeysDiscovery?: MonacoHotkeyDiscoveryMeta;
+      hotkeysDiscovery?: Omit<MonacoHotkeyDiscoveryMeta, 'keys'>;
     }
   }
 }
