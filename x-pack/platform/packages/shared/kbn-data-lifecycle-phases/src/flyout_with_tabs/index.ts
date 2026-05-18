@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-export * from './src/phases';
-export * from './src/inspect_ilm_policy_flyout';
-export * from './src/flyout_with_tabs';
+export { FlyoutWithTabs } from './flyout_with_tabs';
+export type { FlyoutHeaderTab, FlyoutWithTabsProps, NonEmptyFlyoutTabs } from './flyout_with_tabs';
