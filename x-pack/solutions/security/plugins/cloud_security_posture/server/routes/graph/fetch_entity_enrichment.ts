@@ -123,9 +123,14 @@ export const fetchEntityEnrichment = async (
   await Promise.all(
     chunkArray([...new Set(entityIds)], 100).map(async (chunk) => {
       const paramNames = chunk.map((_, i) => `?entityId${i}`).join(', ');
-      const query = `FROM ${indexName}
+      // Some entity-store mappings (e.g. tests inserting minimal entities) omit columns we
+      // KEEP below. unmapped_fields=nullify makes ESQL return NULL for those instead of erroring.
+      const query = `SET unmapped_fields="nullify";
+FROM ${indexName}
 | WHERE entity.id IN (${paramNames})
-| KEEP entity.id, entity.name, entity.type, entity.sub_type, \`entity.EngineMetadata.Type\`, host.ip${EXTRA_SOURCE_FIELD_COLUMNS.length > 0 ? ', ' + EXTRA_SOURCE_FIELD_COLUMNS.join(', ') : ''}`;
+| KEEP entity.id, entity.name, entity.type, entity.sub_type, \`entity.EngineMetadata.Type\`, host.ip${
+        EXTRA_SOURCE_FIELD_COLUMNS.length > 0 ? ', ' + EXTRA_SOURCE_FIELD_COLUMNS.join(', ') : ''
+      }`;
 
       try {
         const response = await esClient.asInternalUser.helpers
@@ -135,14 +140,16 @@ export const fetchEntityEnrichment = async (
             // @ts-ignore - types are not up to date
             params: chunk.map((id, i) => ({ [`entityId${i}`]: id })),
           })
-          .toRecords<{
-            'entity.id': string;
-            'entity.name'?: string | null;
-            'entity.type'?: string | null;
-            'entity.sub_type'?: string | null;
-            'entity.EngineMetadata.Type'?: string | null;
-            'host.ip'?: string | string[] | null;
-          } & Record<string, unknown>>();
+          .toRecords<
+            {
+              'entity.id': string;
+              'entity.name'?: string | null;
+              'entity.type'?: string | null;
+              'entity.sub_type'?: string | null;
+              'entity.EngineMetadata.Type'?: string | null;
+              'host.ip'?: string | string[] | null;
+            } & Record<string, unknown>
+          >();
 
         for (const record of response.records) {
           const id = record['entity.id'];
