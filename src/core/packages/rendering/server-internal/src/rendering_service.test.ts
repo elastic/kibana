@@ -815,35 +815,14 @@ describe('RenderingService', () => {
       expect(await renderAndReadUserStorage(content)).toEqual({ values: {} });
     });
 
-    it('falls back to empty values when getAll() rejects', async () => {
+    it('rejects when getAll() rejects', async () => {
       const { render } = await service.setup(mockRenderingSetupDeps);
 
       const getAll = jest.fn().mockRejectedValue(new Error('ES exploded'));
       const asScoped = jest.fn().mockReturnValue({ getAll });
       service.start({ ...mockRenderingStartDeps, userStorage: { asScoped } });
 
-      const content = await render(createKibanaRequest(), buildUiSettings());
-
-      expect(await renderAndReadUserStorage(content)).toEqual({ values: {} });
-    });
-
-    it('falls back to empty values when getAll() exceeds the timeout', async () => {
-      const { render } = await service.setup(mockRenderingSetupDeps);
-
-      // resolves after the 50ms render-time budget; the rendering path
-      // should not wait for it.
-      const getAll = jest
-        .fn()
-        .mockImplementation(() => new Promise((resolve) => setTimeout(() => resolve({}), 5_000)));
-      const asScoped = jest.fn().mockReturnValue({ getAll });
-      service.start({ ...mockRenderingStartDeps, userStorage: { asScoped } });
-
-      const renderPromise = render(createKibanaRequest(), buildUiSettings());
-      // advance past the 50ms timeout so RxJS' `timeout` operator fires.
-      await jest.advanceTimersByTimeAsync(60);
-      const content = await renderPromise;
-
-      expect(await renderAndReadUserStorage(content)).toEqual({ values: {} });
+      await expect(render(createKibanaRequest(), buildUiSettings())).rejects.toThrow('ES exploded');
     });
   });
 
