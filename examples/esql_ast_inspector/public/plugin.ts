@@ -44,7 +44,6 @@ export class ESQLASTInspectorPlugin
           label: 'README',
           href: 'https://github.com/elastic/esql-js/blob/main/src/parser/README.md',
           iconType: 'logoGithub',
-          size: 's',
           target: '_blank',
         },
       ],
