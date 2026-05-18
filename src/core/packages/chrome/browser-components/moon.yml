@@ -39,7 +39,6 @@ dependsOn:
   - '@kbn/core-custom-branding-common'
   - '@kbn/core-doc-links-browser'
   - '@kbn/core-doc-links-browser-mocks'
-  - '@kbn/core-hotkeys-browser'
   - '@kbn/core-http-browser'
   - '@kbn/core-http-browser-mocks'
   - '@kbn/core-mount-utils-browser'
@@ -50,6 +49,7 @@ dependsOn:
   - '@kbn/shared-ux-utility'
   - '@kbn/ui-chrome-layout'
   - '@kbn/app-header'
+  - '@kbn/core-hotkeys-browser-mocks'
 tags:
   - shared-browser
   - package
