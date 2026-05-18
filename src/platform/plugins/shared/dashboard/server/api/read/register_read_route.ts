@@ -89,7 +89,7 @@ export function registerReadRoute(
           });
         } catch (e) {
           if (e.isBoom && e.output.statusCode === 404) {
-            const message = `Dashboard with ID [${req.params.id}] not found.`;
+            const message = `A dashboard with ID [${req.params.id}] was not found.`;
             logRequest(logger, req, 'debug', message);
             return res.notFound({
               body: {
