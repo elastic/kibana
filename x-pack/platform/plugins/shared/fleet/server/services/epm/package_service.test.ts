@@ -399,7 +399,9 @@ describe('PackageService', () => {
       const { PackageNotFoundError } = jest.requireActual('../../errors');
       jest
         .spyOn(epmPackagesGet, 'getPackageFromSource')
-        .mockRejectedValue(new PackageNotFoundError(`Package info for ${pkgName}-${pkgVersion} does not exist`));
+        .mockRejectedValue(
+          new PackageNotFoundError(`Package info for ${pkgName}-${pkgVersion} does not exist`)
+        );
 
       await expect(
         mockPackageService.asInternalUser.getPackage(pkgName, pkgVersion)
