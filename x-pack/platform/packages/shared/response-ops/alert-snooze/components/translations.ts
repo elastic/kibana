@@ -204,18 +204,6 @@ export const SEVERITY_INFO = i18n.translate(
   'responseOpsAlertSnooze.conditionalSnoozePanel.severityInfo',
   { defaultMessage: 'Info' }
 );
-export const SEVERITY_MAJOR = i18n.translate(
-  'responseOpsAlertSnooze.conditionalSnoozePanel.severityMajor',
-  { defaultMessage: 'Major' }
-);
-export const SEVERITY_MINOR = i18n.translate(
-  'responseOpsAlertSnooze.conditionalSnoozePanel.severityMinor',
-  { defaultMessage: 'Minor' }
-);
-export const SEVERITY_WARNING = i18n.translate(
-  'responseOpsAlertSnooze.conditionalSnoozePanel.severityWarning',
-  { defaultMessage: 'Warning' }
-);
 export const CONDITIONAL_OPERATOR = (operator: string) =>
   i18n.translate('responseOpsAlertSnooze.conditionalSnoozePanel.operator', {
     defaultMessage: operator,
@@ -295,5 +283,5 @@ export const SNOOZE_ALERT_BUTTON = i18n.translate(
 );
 export const SNOOZE_TRIGGER_BUTTON = i18n.translate(
   'responseOpsAlertSnooze.alertSnoozePopover.triggerButton',
-  { defaultMessage: 'Snooze alert' }
+  { defaultMessage: 'Snooze' }
 );

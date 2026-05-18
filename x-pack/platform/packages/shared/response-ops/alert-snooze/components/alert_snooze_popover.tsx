@@ -8,8 +8,8 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiButton,
-  EuiButtonEmpty,
   EuiButtonGroup,
+  EuiContextMenuItem,
   EuiHorizontalRule,
   EuiPopover,
   EuiPopoverFooter,
@@ -67,13 +67,13 @@ export const AlertSnoozePopover = ({ onApply, dataConditionTypes }: AlertSnoozeP
 
   const triggerElement = useMemo(() => {
     return (
-      <EuiButtonEmpty
-        iconType="bellSlash"
+      <EuiContextMenuItem
         onClick={togglePopover}
         data-test-subj="alertSnoozePopoverTrigger"
+        size="s"
       >
         {i18n.SNOOZE_TRIGGER_BUTTON}
-      </EuiButtonEmpty>
+      </EuiContextMenuItem>
     );
   }, [togglePopover]);
 
