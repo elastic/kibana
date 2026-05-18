@@ -21,7 +21,7 @@ const getInitialTimeRange = (timeRange?: TimeRange): TimeRange => ({
 const areTimeRangesEqual = (current: TimeRange | undefined, next: TimeRange) =>
   current?.from === next.from && current?.to === next.to;
 
-export interface UseVisPreviewUnifiedSearchResult {
+interface UseVisPreviewUnifiedSearchResult {
   searchBarProps: StatefulSearchBarProps<Query>;
   effectiveTimeRange: TimeRange;
   onBrushEnd: NonNullable<TypedLensByValueInput['onBrushEnd']>;
