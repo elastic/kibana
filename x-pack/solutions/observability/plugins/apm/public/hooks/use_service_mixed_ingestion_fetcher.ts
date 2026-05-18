@@ -5,23 +5,19 @@
  * 2.0.
  */
 
-import { useFetcher } from '../../hooks/use_fetcher';
+import { useFetcher } from './use_fetcher';
 
 const INITIAL_STATE = {
-  agentName: undefined,
-  runtimeName: undefined,
-  runtimeVersion: undefined,
-  serverlessType: undefined,
-  telemetrySdkName: undefined,
-  telemetrySdkLanguage: undefined,
+  hasMultipleAgentTypes: false,
+  ingestionTimeRanges: undefined,
 };
 
-export function useServiceAgentFetcher({
+export function useServiceMixedIngestionFetcher({
   serviceName,
   start,
   end,
 }: {
-  serviceName?: string;
+  serviceName: string;
   start: string;
   end: string;
 }) {
@@ -32,7 +28,7 @@ export function useServiceAgentFetcher({
   } = useFetcher(
     (callApmApi) => {
       if (serviceName) {
-        return callApmApi('GET /internal/apm/services/{serviceName}/agent', {
+        return callApmApi('GET /internal/apm/services/{serviceName}/metrics/mixed_ingestion', {
           params: {
             path: { serviceName },
             query: { start, end },

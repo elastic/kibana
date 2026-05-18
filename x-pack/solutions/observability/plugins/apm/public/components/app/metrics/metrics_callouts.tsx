@@ -11,7 +11,7 @@ import { useHistory, useLocation } from 'react-router-dom';
 import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { IngestionTimeRange } from '../../../context/apm_service/apm_service_context';
+import type { IngestionTimeRange, IngestionTimeRanges } from '../../../../common/metrics_types';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { fromQuery, toQuery, isInactiveHistoryError } from '../../shared/links/url_helpers';
 
@@ -53,14 +53,15 @@ const formatRange = (range: IngestionTimeRange) =>
   `${formatTimestamp(range.from)} - ${formatTimestamp(range.to)}`;
 
 const INSTRUMENTATION_NAMES: Record<'classicApm' | 'otelNative', string> = {
-  classicApm: 'Classic APM',
-  otelNative: 'OpenTelemetry',
+  classicApm: i18n.translate('xpack.apm.metrics.instrumentationNames.classicApmLabel', {
+    defaultMessage: 'Classic APM',
+  }),
+  otelNative: i18n.translate('xpack.apm.metrics.instrumentationNames.otelNativeLabel', {
+    defaultMessage: 'OpenTelemetry',
+  }),
 };
 
-const getInstrumentationDetails = (ingestionTimeRanges: {
-  classicApm: IngestionTimeRange;
-  otelNative: IngestionTimeRange;
-}) => {
+const getInstrumentationDetails = (ingestionTimeRanges: IngestionTimeRanges) => {
   const otelIsMoreRecent = ingestionTimeRanges.otelNative.to >= ingestionTimeRanges.classicApm.to;
 
   const currentKey: IngestionType = otelIsMoreRecent ? 'otelNative' : 'classicApm';
@@ -83,17 +84,12 @@ const getInstrumentationDetails = (ingestionTimeRanges: {
 };
 
 interface MixedAgentCalloutProps {
-  hasMultipleAgentTypes?: boolean;
-  ingestionTimeRanges?: {
-    classicApm: IngestionTimeRange;
-    otelNative: IngestionTimeRange;
-  };
+  ingestionTimeRanges?: IngestionTimeRanges;
   forcedIngestionType?: IngestionType | null;
   onNavigateToIngestionType?: (type: IngestionType) => void;
 }
 
 export function MixedAgentCallout({
-  hasMultipleAgentTypes,
   ingestionTimeRanges,
   forcedIngestionType,
   onNavigateToIngestionType,
@@ -146,7 +142,7 @@ export function MixedAgentCallout({
     };
   }, [baseDetails, forcedIngestionType]);
 
-  if (!hasMultipleAgentTypes || !ingestionTimeRanges || !details) {
+  if (!ingestionTimeRanges || !details) {
     return null;
   }
 

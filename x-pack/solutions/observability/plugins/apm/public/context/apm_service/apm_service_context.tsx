@@ -21,11 +21,6 @@ import { FETCH_STATUS } from '../../hooks/use_fetcher';
 import type { ServerlessType } from '../../../common/serverless';
 import { usePreferredDataSourceAndBucketSize } from '../../hooks/use_preferred_data_source_and_bucket_size';
 
-export interface IngestionTimeRange {
-  from: number;
-  to: number;
-}
-
 export interface APMServiceContextValue {
   serviceName: string;
   agentName?: string;
@@ -39,11 +34,6 @@ export interface APMServiceContextValue {
   runtimeVersion?: string;
   fallbackToTransactions: boolean;
   serviceAgentStatus: FETCH_STATUS;
-  hasMultipleAgentTypes?: boolean;
-  ingestionTimeRanges?: {
-    classicApm: IngestionTimeRange;
-    otelNative: IngestionTimeRange;
-  };
 }
 
 export const APMServiceContext = createContext<APMServiceContextValue>({
@@ -71,8 +61,6 @@ export function ApmServiceContextProvider({ children }: { children: ReactNode })
     serverlessType,
     telemetrySdkName,
     telemetrySdkLanguage,
-    hasMultipleAgentTypes,
-    ingestionTimeRanges,
     status: serviceAgentStatus,
   } = useServiceAgentFetcher({
     serviceName,
@@ -122,8 +110,6 @@ export function ApmServiceContextProvider({ children }: { children: ReactNode })
         runtimeVersion,
         fallbackToTransactions,
         serviceAgentStatus,
-        hasMultipleAgentTypes,
-        ingestionTimeRanges,
       }}
       children={children}
     />

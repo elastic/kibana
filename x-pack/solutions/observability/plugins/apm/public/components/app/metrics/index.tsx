@@ -5,13 +5,16 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { isElasticAgentName, isJRubyAgentName } from '@kbn/elastic-agent-utils/src/agent_guards';
 import { isAWSLambdaAgentName } from '../../../../common/agent_name';
+import type { IngestionTimeRanges } from '../../../../common/metrics_types';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useAdHocApmDataView } from '../../../hooks/use_adhoc_apm_data_view';
 import { useApmParams } from '../../../hooks/use_apm_params';
+import { useServiceMixedIngestionFetcher } from '../../../hooks/use_service_mixed_ingestion_fetcher';
+import { useTimeRange } from '../../../hooks/use_time_range';
 import { ServerlessMetrics } from './serverless_metrics';
 import { ServiceMetrics } from './service_metrics';
 import { JsonMetricsDashboard } from './static_dashboard';
@@ -26,6 +29,7 @@ import type { IngestionType } from './metrics_callouts';
 
 export function Metrics() {
   const {
+    serviceName,
     agentName,
     runtimeName,
     runtimeVersion,
@@ -33,23 +37,36 @@ export function Metrics() {
     telemetrySdkName,
     telemetrySdkLanguage,
     serviceAgentStatus,
-    hasMultipleAgentTypes,
-    ingestionTimeRanges,
   } = useApmServiceContext();
 
   const {
     query: { rangeFrom, rangeTo },
   } = useApmParams('/services/{serviceName}/metrics');
 
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+
+  const { hasMultipleAgentTypes, ingestionTimeRanges } = useServiceMixedIngestionFetcher({
+    serviceName,
+    start,
+    end,
+  });
+
   const isAWSLambda = isAWSLambdaAgentName(serverlessType);
   const { dataView, apmIndices } = useAdHocApmDataView();
 
   const [forcedIngestionType, setForcedIngestionType] = useState<IngestionType | null>(null);
   const isInternalNavigationRef = useRef(false);
-  const snapshotTimeRangesRef = useRef(ingestionTimeRanges);
 
-  if (forcedIngestionType === null && ingestionTimeRanges) {
-    snapshotTimeRangesRef.current = ingestionTimeRanges;
+  const snapshotTimeRanges = useMemo<IngestionTimeRanges | undefined>(() => {
+    if (forcedIngestionType !== null) {
+      return undefined;
+    }
+    return ingestionTimeRanges;
+  }, [forcedIngestionType, ingestionTimeRanges]);
+
+  const snapshotTimeRangesRef = useRef(snapshotTimeRanges);
+  if (snapshotTimeRanges !== undefined) {
+    snapshotTimeRangesRef.current = snapshotTimeRanges;
   }
 
   const prevRangeRef = useRef({ rangeFrom, rangeTo });
@@ -101,9 +118,8 @@ export function Metrics() {
     return <NoDashboardFoundCallout />;
   }
 
-  const mixedAgentCallout = (
+  const mixedAgentCallout = (hasMultipleAgentTypes || forcedIngestionType !== null) && (
     <MixedAgentCallout
-      hasMultipleAgentTypes={hasMultipleAgentTypes || forcedIngestionType !== null}
       ingestionTimeRanges={calloutTimeRanges}
       forcedIngestionType={forcedIngestionType}
       onNavigateToIngestionType={handleNavigateToIngestionType}
