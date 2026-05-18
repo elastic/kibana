@@ -17,23 +17,31 @@ export interface SplitResult {
    * Machine-readable reason for the confidence level, useful for downstream
    * branching without string-matching the human-readable messages.
    *
-   * - 'no_stats'        — no STATS segment found; cannot identify a base query
-   * - 'no_where'        — STATS found but no WHERE after it; alert block is absent
-   * - 'split_succeeded' — both STATS and a post-STATS WHERE were found
+   * - 'no_stats'           — no STATS and no WHERE; entire query is base
+   * - 'no_where'           — STATS found but no WHERE after it; alert block is absent
+   * - 'split_succeeded'    — both STATS and a post-STATS WHERE were found
+   * - 'where_without_stats' — no STATS but a WHERE exists; split at the last WHERE
    */
-  reason: 'no_stats' | 'no_where' | 'split_succeeded';
+  reason: 'no_stats' | 'no_where' | 'split_succeeded' | 'where_without_stats';
 }
 
 /**
  * Splits an ES|QL query into a base portion and an alert-condition block
  * using the ANTLR-based AST parser from `@elastic/esql`.
  *
- * Strategy: find the last STATS command and the first WHERE after it.
- * Everything up to and including STATS is the base query. Everything from
- * that WHERE onward is the alert block (including its leading pipe).
+ * Heuristic (three rules, evaluated in order):
  *
- * Because splitting is performed against the real AST, pipes inside string
- * literals, comments, or other lexical contexts are handled correctly.
+ * 1. If there is at least one WHERE after a STATS, split directly before
+ *    the first WHERE after the last STATS.
+ * 2. If there is at least one WHERE but no STATS, split directly after
+ *    the last non-WHERE command that precedes the last WHERE. Consecutive
+ *    trailing WHEREs all become part of the alert block.
+ * 3. Otherwise (no WHERE, or only WHEREs before a STATS), we cannot
+ *    determine the split — the entire query is the base, alert block is
+ *    empty.
+ *
+ * Parsing uses the real AST, so pipes inside string literals, comments,
+ * or other lexical contexts are handled correctly.
  */
 export function splitQuery(query: string): SplitResult {
   if (!query.trim()) {
@@ -56,7 +64,46 @@ export function splitQuery(query: string): SplitResult {
   }
 
   if (lastStatsIdx === -1) {
-    return { base: '', alertBlock: query.trim(), confidence: 'none', reason: 'no_stats' };
+    // No STATS — find the last non-WHERE command that precedes the last WHERE.
+    // All commands from that point onward (a trailing chain of WHEREs, possibly
+    // interspersed with SORT/LIMIT/EVAL tail commands) become the alert block.
+    let lastWhereIdx = -1;
+    for (let j = commands.length - 1; j >= 0; j--) {
+      if (commands[j].name === 'where') {
+        lastWhereIdx = j;
+        break;
+      }
+    }
+
+    if (lastWhereIdx === -1) {
+      return { base: query.trim(), alertBlock: '', confidence: 'none', reason: 'no_stats' };
+    }
+
+    // Walk backwards from the last WHERE to find the last non-WHERE before it.
+    let splitAfterIdx = -1;
+    for (let j = lastWhereIdx - 1; j >= 0; j--) {
+      if (commands[j].name !== 'where') {
+        splitAfterIdx = j;
+        break;
+      }
+    }
+
+    // If every command up to the last WHERE is also a WHERE, there's no base.
+    if (splitAfterIdx === -1) {
+      return { base: '', alertBlock: query.trim(), confidence: 'none', reason: 'no_stats' };
+    }
+
+    // Split directly after the last non-WHERE command preceding the trailing WHERE chain.
+    const firstAlertCmd = commands[splitAfterIdx + 1];
+    const splitPos = query.lastIndexOf('|', firstAlertCmd.location.min);
+    const cutAt = splitPos >= 0 ? splitPos : firstAlertCmd.location.min;
+
+    return {
+      base: query.slice(0, cutAt).trim(),
+      alertBlock: query.slice(cutAt).trim(),
+      confidence: 'low',
+      reason: 'where_without_stats',
+    };
   }
 
   let firstWhereAfterStats = -1;
