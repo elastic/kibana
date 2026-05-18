@@ -123,10 +123,9 @@
     "uiamApiKey"
   ],
   "alerting_rule": [
-    "builder_config",
-    "builder_config.type",
     "createdAt",
     "createdBy",
+    "edit_mode",
     "enabled",
     "evaluation",
     "evaluation.query",
@@ -142,7 +141,6 @@
     "no_data",
     "no_data.behavior",
     "no_data.timeframe",
-    "origin",
     "recovery_policy",
     "recovery_policy.query",
     "recovery_policy.query.base",
@@ -153,6 +151,9 @@
     "time_field",
     "updatedAt",
     "updatedBy"
+  ],
+  "alerting_rule_builder_config": [
+    "type"
   ],
   "alerting_rule_template": [
     "description",

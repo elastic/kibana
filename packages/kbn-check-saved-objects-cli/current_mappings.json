@@ -420,17 +420,13 @@
   "alerting_rule": {
     "dynamic": false,
     "properties": {
-      "builder_config": {
-        "properties": {
-          "type": {
-            "type": "keyword"
-          }
-        }
-      },
       "createdAt": {
         "type": "date"
       },
       "createdBy": {
+        "type": "keyword"
+      },
+      "edit_mode": {
         "type": "keyword"
       },
       "enabled": {
@@ -488,9 +484,6 @@
           }
         }
       },
-      "origin": {
-        "type": "keyword"
-      },
       "recovery_policy": {
         "properties": {
           "query": {
@@ -522,6 +515,14 @@
         "type": "date"
       },
       "updatedBy": {
+        "type": "keyword"
+      }
+    }
+  },
+  "alerting_rule_builder_config": {
+    "dynamic": false,
+    "properties": {
+      "type": {
         "type": "keyword"
       }
     }
