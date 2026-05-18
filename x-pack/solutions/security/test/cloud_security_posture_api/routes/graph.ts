@@ -1654,8 +1654,9 @@ export default function (providerContext: FtrProviderContext) {
           expect(response.body).to.have.property('edges').length(2);
         });
 
-        // v2 index without lookup mode - verify graph API still works (no enrichment)
-        describe('v2 index without lookup mode (fallback to no enrichment)', () => {
+        // v2 index without lookup mode - enrichment now works via a follow-up ES|QL query
+        // against the entity store, so lookup mode is no longer required.
+        describe('v2 index without lookup mode (enrichment still applies)', () => {
           before(async () => {
             // Delete the v2 lookup index if it exists
             try {
@@ -1712,9 +1713,9 @@ export default function (providerContext: FtrProviderContext) {
             }
           });
 
-          it('should still return graph data without entity enrichment when v2 index is not in lookup mode', async () => {
-            // The graph API should work but without entity enrichment
-            // since the v2 index exists but is not in lookup mode
+          it('should still return enriched graph data when v2 index is not in lookup mode', async () => {
+            // The graph API enriches via a follow-up ES|QL query against the entity store
+            // (no LOOKUP JOIN), so lookup mode is not required for enrichment to apply.
             const response = await postGraph(supertest, {
               query: {
                 originEventIds: [],
@@ -1745,24 +1746,24 @@ export default function (providerContext: FtrProviderContext) {
             expect(response.body).to.have.property('edges').length(2);
             expect(response.body).not.to.have.property('messages');
 
-            // Find the actor node - it should NOT be enriched since v2 is not in lookup mode
+            // Find the actor node - enrichment applies even without lookup mode
             const actorNode = response.body.nodes.find(
               (node: EntityNodeDataModel) => node.id === 'user:admin@example.com@gcp'
             ) as EntityNodeDataModel;
 
             expect(actorNode).not.to.be(undefined);
-            // Without enrichment, the label should be the entity ID (not the enriched name)
-            expect(actorNode.label).to.equal('user:admin@example.com@gcp');
-            // Without enrichment, should have default icon/shape for unknown entity
-            expect(actorNode.icon).to.equal('magnifyExclamation');
-            // Entity should indicate it's NOT available in entity store
+            expect(actorNode.label).to.equal('AdminExample');
+            expect(actorNode.icon).to.equal('user');
             expect(actorNode.documentsData).to.have.length(1);
             expectExpect(actorNode.documentsData).toContainEqual(
               expectExpect.objectContaining({
                 id: 'user:admin@example.com@gcp',
                 type: 'entity',
                 entity: expectExpect.objectContaining({
-                  availableInEntityStore: false,
+                  availableInEntityStore: true,
+                  name: 'AdminExample',
+                  type: 'Identity',
+                  sub_type: 'GCP IAM User',
                   sourceFields: expectExpect.objectContaining({
                     'user.id': 'admin@example.com',
                   }),
@@ -1770,6 +1771,7 @@ export default function (providerContext: FtrProviderContext) {
               })
             );
 
+            // The customRole target is not in the entity store; it should remain unenriched.
             const targetNode = response.body.nodes.find(
               (node: EntityNodeDataModel) => node.id === 'projects/your-project-id/roles/customRole'
             ) as EntityNodeDataModel;
