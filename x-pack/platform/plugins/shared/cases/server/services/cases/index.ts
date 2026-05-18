@@ -79,6 +79,7 @@ import {
   CaseTransformedAttributesSchema,
   CasePersistedStatus,
   getPartialCaseTransformedAttributesSchema,
+  OwnerSchema,
 } from '../../common/types/case';
 import type {
   GetCaseIdsByAlertIdArgs,
@@ -295,7 +296,7 @@ export class CasesService {
 
     const owners: Array<SavedObjectsFindResult<{ owner: string }>> = [];
     for (const so of response.saved_objects) {
-      const validatedAttributes = decodeOrThrow(OwnerRt)(so.attributes);
+      const validatedAttributes = decodeOrThrowZod(OwnerSchema)(so.attributes);
 
       owners.push(Object.assign(so, { attributes: validatedAttributes }));
     }

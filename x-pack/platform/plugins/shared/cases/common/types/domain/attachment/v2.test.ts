@@ -483,7 +483,8 @@ describe('Unified Attachments', () => {
         pushed_by: null,
       };
 
-      expect(DocumentAttachmentAttributesRtV2.decode(unifiedAlert)._tag).toBe('Right');
+      const result = DocumentAttachmentAttributesSchemaV2.safeParse(unifiedAlert);
+      expect(result.success).toBe(true);
     });
   });
 });
