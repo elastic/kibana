@@ -226,6 +226,43 @@ describe('actions column builder', () => {
         expect(action.onClick).toEqual(expect.any(Function));
       });
 
+      it('composes a custom `<Action>` tooltip and enabled predicate with its restriction', () => {
+        const context: ColumnBuilderContext = {
+          ...defaultContext,
+          itemConfig: {
+            actions: {
+              archive: {
+                onItemAction: jest.fn(),
+                restriction: (item) =>
+                  item.managed ? 'Managed items cannot be archived.' : undefined,
+              },
+            },
+          },
+        };
+
+        const props: ActionsColumnProps = {
+          children: (
+            <Action
+              id="archive"
+              name="Archive"
+              description="Archive this item"
+              icon="folderClosed"
+            />
+          ),
+        };
+        const result = buildActionsColumn(props, context) as ActionsColumn;
+        const action = result.actions[0] as DefaultItemAction<ContentListItem>;
+
+        const freeItem = { id: '1', title: 'Free', managed: false };
+        const managedItem = { id: '2', title: 'Managed', managed: true };
+        expect(action.enabled?.(freeItem)).toBe(true);
+        expect(action.enabled?.(managedItem)).toBe(false);
+
+        const description = action.description as (item: ContentListItem) => string | undefined;
+        expect(description(freeItem)).toBe('Archive this item');
+        expect(description(managedItem)).toBe('Managed items cannot be archived.');
+      });
+
       it('skips a custom `<Action>` when its `itemConfig.actions[id]` config is missing', () => {
         // Regression: emitting an action object without `onClick`/`href`
         // crashes EUI at render. The resolver returns `undefined` so the

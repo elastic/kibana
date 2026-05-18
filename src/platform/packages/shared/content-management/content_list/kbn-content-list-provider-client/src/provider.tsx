@@ -405,7 +405,7 @@ export const ContentListClientProvider = ({
 
   // Merge the inspect handler into the item config.
   //
-  // - Preserve consumer-supplied fields on `actions.inspect`.
+  // - Preserve consumer-supplied fields on `actions.inspect` (e.g. `restriction`).
   // - When the consumer set `getItemActionHref`, respect their explicit
   //   link choice and skip the inject — `onItemAction` and
   //   `getItemActionHref` are mutually exclusive.

@@ -45,6 +45,8 @@ export const action = table.definePart<ActionPresets, ActionOutput, ActionBuilde
  *   `getItemActionHref` (link).
  * - Returns `undefined` if neither is configured, skipping the action
  *   to prevent EUI crashes.
+ * - Composes `enabled` and `description` with `restriction` to
+ *   disable the icon and surface the reason when restricted.
  */
 const resolveCustomAction = (
   {
@@ -78,19 +80,43 @@ const resolveCustomAction = (
   // discriminant and requires a cast.
   const resolvedType = actionType ?? (icon ? 'icon' : undefined);
 
+  const restriction = actionConfig?.restriction;
+
+  const composedEnabled = restriction
+    ? (item: ContentListItem): boolean => {
+        if (restriction(item) !== undefined) {
+          return false;
+        }
+        return consumerEnabled ? consumerEnabled(item) : true;
+      }
+    : consumerEnabled;
+
+  // EUI surfaces `description` as the icon's tooltip. When a restriction
+  // is configured we forward a function so the tooltip can carry the
+  // per-item reason; otherwise we keep the static string when one was
+  // provided (preserves EUI's fast-path for static descriptions).
+  //
+  // Force the function branch to always return a string (`?? ''`) so the
+  // composed value satisfies `ActionOutput['description']`, which is
+  // `string | ((item) => string)` and disallows `undefined` in the
+  // per-item branch.
+  const composedDescription: ActionOutput['description'] | undefined = restriction
+    ? (item) => restriction(item) ?? description ?? ''
+    : description;
+
   // Cast required: EUI's `DefaultItemAction` is a discriminated union keyed on
   // `icon`. The spread-conditional pattern loses the discriminant, but the
   // `resolvedType` guard above ensures the runtime object is always valid.
   return {
     name,
-    ...(description !== undefined && { description }),
+    ...(composedDescription !== undefined && { description: composedDescription }),
     ...(icon && { icon }),
     ...(resolvedType && { type: resolvedType }),
     ...(color && { color }),
     ...(getItemActionHref
       ? { href: (item: ContentListItem) => getItemActionHref(item) }
       : { onClick: (item: ContentListItem) => onItemAction!(item) }),
-    ...(consumerEnabled && { enabled: consumerEnabled }),
+    ...(composedEnabled && { enabled: composedEnabled }),
     ...(available && { available }),
     'data-test-subj': dataTestSubj ?? `content-list-table-action-${id}`,
   } as ActionOutput;

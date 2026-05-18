@@ -8,6 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { ContentListItem } from '@kbn/content-list-provider';
 import type { EditActionProps, ActionOutput, ActionBuilderContext } from '../types';
 
 /** Default i18n-translated label for the edit action. */
@@ -26,7 +27,9 @@ const DEFAULT_EDIT_DESCRIPTION = i18n.translate(
  *
  * Returns `undefined` when read-only or when neither
  * `actions.edit.onItemAction` nor `actions.edit.getItemActionHref` is
- * configured.
+ * configured. Composes `enabled` and `description` with
+ * `actions.edit.restriction` to disable the icon and surface the reason
+ * when restricted.
  *
  * When `getItemActionHref` is configured the row icon renders as an
  * `<a href>` link (with native right-click / middle-click open-in-new-tab
@@ -55,14 +58,34 @@ export const buildEditAction = (
   }
 
   const label = attributes.label ?? DEFAULT_EDIT_LABEL;
+  const { enabled: consumerEnabled } = attributes;
+  const restriction = editConfig?.restriction;
+
+  const enabled = (item: ContentListItem): boolean => {
+    if (restriction && restriction(item) !== undefined) {
+      return false;
+    }
+    return consumerEnabled ? consumerEnabled(item) : true;
+  };
+
+  // EUI surfaces `description` as the icon's tooltip. When a restriction
+  // predicate is configured we forward a function so the tooltip can carry
+  // the per-item reason; otherwise we keep the static string (preserves
+  // EUI's fast-path for static descriptions).
+  const description: ActionOutput['description'] = restriction
+    ? (item) => {
+        const reason = restriction(item);
+        return reason ?? DEFAULT_EDIT_DESCRIPTION;
+      }
+    : DEFAULT_EDIT_DESCRIPTION;
 
   return {
     name: label,
-    description: DEFAULT_EDIT_DESCRIPTION,
+    description,
     icon: 'pencil',
     type: 'icon',
     isPrimary: true,
-    ...(attributes.enabled && { enabled: attributes.enabled }),
+    enabled,
     'data-test-subj': 'content-list-table-action-edit',
     ...(getItemActionHref
       ? { href: (item) => getItemActionHref(item) }

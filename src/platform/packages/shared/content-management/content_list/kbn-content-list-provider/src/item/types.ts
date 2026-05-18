@@ -117,6 +117,18 @@ export type KnownActionId = 'edit' | 'delete' | 'inspect';
  */
 export type ActionId = KnownActionId | (string & {});
 
+interface ActionConfigBase {
+  /**
+   * Per-item restriction. Returns a reason string when the action is
+   * not permitted on the item; `undefined` otherwise. Drives row icon
+   * disabling and tooltip reasons.
+   */
+  restriction?: ActionRestriction;
+}
+
+/** Per-item action guard. Returns a reason when the action is not permitted. */
+export type ActionRestriction = (item: ContentListItem) => string | undefined;
+
 /** Per-item href getter for link-style row actions. */
 export type ItemActionHref = (item: ContentListItem) => string;
 
@@ -136,31 +148,33 @@ export type BulkActionHandler = (items: ContentListItem[]) => Promise<void>;
  * The discriminated union enforces that at least one of `onItemAction`,
  * `getItemActionHref`, or `onBulkAction` is supplied.
  */
-export type ActionConfig =
-  | {
-      /** Single-item click handler. */
-      onItemAction: ItemActionHandler;
-      getItemActionHref?: never;
-      /** Optional bulk handler. */
-      onBulkAction?: BulkActionHandler;
-    }
-  | {
-      onItemAction?: never;
-      /**
-       * Per-item href. When set, the row icon renders as an `<a>`
-       * link, preserving native link affordances (right-click,
-       * middle-click, keyboard activation, screen reader URL).
-       */
-      getItemActionHref: ItemActionHref;
-      /** Optional bulk handler. */
-      onBulkAction?: BulkActionHandler;
-    }
-  | {
-      onItemAction?: never;
-      getItemActionHref?: never;
-      /** Bulk-only handler (e.g. delete). */
-      onBulkAction: BulkActionHandler;
-    };
+export type ActionConfig = ActionConfigBase &
+  (
+    | {
+        /** Single-item click handler. */
+        onItemAction: ItemActionHandler;
+        getItemActionHref?: never;
+        /** Optional bulk handler. */
+        onBulkAction?: BulkActionHandler;
+      }
+    | {
+        onItemAction?: never;
+        /**
+         * Per-item href. When set, the row icon renders as an `<a>`
+         * link, preserving native link affordances (right-click,
+         * middle-click, keyboard activation, screen reader URL).
+         */
+        getItemActionHref: ItemActionHref;
+        /** Optional bulk handler. */
+        onBulkAction?: BulkActionHandler;
+      }
+    | {
+        onItemAction?: never;
+        getItemActionHref?: never;
+        /** Bulk-only handler (e.g. delete). */
+        onBulkAction: BulkActionHandler;
+      }
+  );
 
 /**
  * Action configuration map.
@@ -187,7 +201,7 @@ export interface ContentListItemConfig {
   getHref?: (item: ContentListItem) => string;
 
   /**
-   * Action handlers, keyed by action ID.
+   * Action handlers and per-item restrictions, keyed by action ID.
    */
   actions?: ContentListActions;
 }

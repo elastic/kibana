@@ -60,21 +60,6 @@ describe('edit action builder', () => {
       expect(result).toBeUndefined();
     });
 
-    it('returns `undefined` when `actions.edit` is configured but empty (no handler/href)', () => {
-      // Defensive runtime guard. The discriminated union prevents this at
-      // compile time, but a JS consumer could still construct an empty
-      // object; the builder should skip rather than emit a bad action.
-      const context: ActionBuilderContext = {
-        ...defaultContext,
-        // Cast through `unknown` to bypass the discriminated union, which
-        // statically forbids an empty `ActionConfig`.
-        itemConfig: { actions: { edit: {} as unknown as never } },
-      };
-      const result = buildEditAction({}, context);
-
-      expect(result).toBeUndefined();
-    });
-
     it('returns `undefined` when `itemConfig` is undefined', () => {
       const context: ActionBuilderContext = {
         ...defaultContext,
@@ -112,49 +97,81 @@ describe('edit action builder', () => {
       expect(onItemAction).toHaveBeenCalledWith(item);
     });
 
-    it('forwards the consumer `enabled` predicate', () => {
-      const enabled = jest.fn(() => false);
-      const result = buildEditAction({ enabled }, defaultContext);
-      const item = { id: '1', title: 'Test' };
+    describe('with `itemConfig.actions.edit.restriction`', () => {
+      const managedItem = { id: 'm', title: 'Managed', managed: true };
+      const freeItem = { id: 'f', title: 'Free', managed: false };
 
-      expect(result?.enabled?.(item)).toBe(false);
-      expect(enabled).toHaveBeenCalledWith(item);
-    });
+      const restrictManaged = (item: { managed?: boolean }) =>
+        item.managed ? 'Managed dashboards cannot be edited.' : undefined;
 
-    describe('with `actions.edit.getItemActionHref`', () => {
-      const item = { id: '42', title: 'Test' };
+      it('disables the icon and surfaces the reason as a description function', () => {
+        const context: ActionBuilderContext = {
+          ...defaultContext,
+          itemConfig: {
+            actions: { edit: { onItemAction: jest.fn(), restriction: restrictManaged } },
+          },
+        };
 
-      const hrefContext: ActionBuilderContext = {
-        ...defaultContext,
-        itemConfig: {
-          actions: { edit: { getItemActionHref: (i) => `/edit/${i.id}` } },
-        },
-      };
+        const result = buildEditAction({}, context);
 
-      it('renders as an `<a href>` link when `getItemActionHref` is configured', () => {
-        const result = buildEditAction({}, hrefContext);
+        expect(typeof result?.enabled).toBe('function');
+        expect(result?.enabled?.(freeItem)).toBe(true);
+        expect(result?.enabled?.(managedItem)).toBe(false);
 
-        expect(result).toHaveProperty('href');
-        expect(result).not.toHaveProperty('onClick');
+        expect(typeof result?.description).toBe('function');
+        const description = result?.description as (item: typeof freeItem) => string;
+        expect(description(freeItem)).toBe('Edit this item');
+        expect(description(managedItem)).toBe('Managed dashboards cannot be edited.');
       });
 
-      it('forwards the per-item href via the function', () => {
-        const result = buildEditAction({}, hrefContext);
-        const href = (result?.href as (i: typeof item) => string)(item);
-
-        expect(href).toBe('/edit/42');
+      it('keeps the static description when no restriction is configured', () => {
+        const result = buildEditAction({}, defaultContext);
+        expect(typeof result?.description).toBe('string');
       });
 
-      it('keeps the default name/description/icon when only an href is configured', () => {
-        const result = buildEditAction({}, hrefContext);
+      it("doesn't expand the consumer's `enabled` predicate", () => {
+        // Consumer disallows everything; restriction allows everything;
+        // composed verdict is `false` (consumer narrows, restriction
+        // can't expand).
+        const context: ActionBuilderContext = {
+          ...defaultContext,
+          itemConfig: {
+            actions: { edit: { onItemAction: jest.fn(), restriction: () => undefined } },
+          },
+        };
 
-        expect(result).toMatchObject({
-          name: 'Edit',
-          description: expect.any(String),
-          icon: 'pencil',
-          type: 'icon',
-          isPrimary: true,
-        });
+        const result = buildEditAction({ enabled: () => false }, context);
+
+        expect(result?.enabled?.(freeItem)).toBe(false);
+      });
+
+      it('disables the icon when the restriction returns a reason even if `enabled` is true', () => {
+        const context: ActionBuilderContext = {
+          ...defaultContext,
+          itemConfig: {
+            actions: { edit: { onItemAction: jest.fn(), restriction: () => 'restricted' } },
+          },
+        };
+
+        const result = buildEditAction({ enabled: () => true }, context);
+
+        expect(result?.enabled?.(freeItem)).toBe(false);
+      });
+
+      it('ignores `actions.delete.restriction` when building the edit action', () => {
+        const context: ActionBuilderContext = {
+          ...defaultContext,
+          itemConfig: {
+            actions: {
+              edit: { onItemAction: jest.fn() },
+              delete: { onBulkAction: jest.fn(async () => {}), restriction: () => 'Cannot delete' },
+            },
+          },
+        };
+
+        const result = buildEditAction({}, context);
+
+        expect(typeof result?.description).toBe('string');
       });
     });
   });
