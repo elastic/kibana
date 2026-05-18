@@ -238,7 +238,8 @@ export class FastifyHttpServer {
     name: string,
     _shutdownTimeout$: Observable<Duration>
   ) {
-    this.log = coreContext.logger.get('http', 'server', name, 'fastify');
+    // Same logger id as {@link HttpServer} so FTR/CLI wait patterns match (e.g. config.status.ts).
+    this.log = coreContext.logger.get('http', 'server', name);
     this.authState = new AuthStateStorage(() => this.authRegistered);
     this.authRequestHeaders = new AuthHeadersStorage();
     this.authResponseHeaders = new AuthHeadersStorage();
@@ -452,11 +453,12 @@ export class FastifyHttpServer {
     await this.fastify.listen({ port: this.config.port, host: this.config.host });
     this.listening = true;
 
-    const protocol =
-      this.config.protocol === 'http2' ? 'http2' : this.config.ssl.enabled ? 'https' : 'http';
-    this.log.info(
-      `Fastify http server running at ${protocol}://${this.config.host}:${this.config.port}`
-    );
+    // Match {@link HttpServer.start} log line so FTR/CLI can wait on the same pattern (e.g. config.status.ts).
+    const serverPath =
+      this.config.rewriteBasePath && this.config.basePath !== undefined ? this.config.basePath : '';
+    const protocol = this.config.ssl.enabled ? 'https' : 'http';
+    const uri = `${protocol}://${this.config.host}:${this.config.port}`;
+    this.log.info(`http server running at ${uri}${serverPath}`);
   }
 
   public async stop(): Promise<void> {
