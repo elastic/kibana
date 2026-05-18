@@ -88,6 +88,7 @@ describe('FeatureSection — ignoreGlobalDefault per-child suppression', () => {
           features={[makeFeatureItem(regularFeature)]}
           onEndpointsChange={jest.fn()}
           invalidEndpointIds={new Set()}
+          deprecatedEndpointsMap={new Map()}
           globalDefaultId="default-id"
         />
       </Wrapper>
@@ -105,6 +106,7 @@ describe('FeatureSection — ignoreGlobalDefault per-child suppression', () => {
           features={[makeFeatureItem(optOutFeature)]}
           onEndpointsChange={jest.fn()}
           invalidEndpointIds={new Set()}
+          deprecatedEndpointsMap={new Map()}
           globalDefaultId="default-id"
         />
       </Wrapper>
@@ -122,6 +124,7 @@ describe('FeatureSection — ignoreGlobalDefault per-child suppression', () => {
           features={[makeFeatureItem(regularFeature), makeFeatureItem(optOutFeature)]}
           onEndpointsChange={jest.fn()}
           invalidEndpointIds={new Set()}
+          deprecatedEndpointsMap={new Map()}
           globalDefaultId="default-id"
         />
       </Wrapper>
