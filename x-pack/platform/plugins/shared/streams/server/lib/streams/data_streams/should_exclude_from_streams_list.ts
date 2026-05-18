@@ -20,13 +20,9 @@ import type { IndicesDataStream } from '@elastic/elasticsearch/lib/api/types';
  * streams list (`handlers.ts`: dot-prefixed names such as `.workflows-events`).
  */
 export const shouldExcludeFromStreamsList = (
-  dataStream: Pick<IndicesDataStream, 'hidden' | '_meta'>
+  dataStream: Pick<IndicesDataStream, 'hidden'>
 ): boolean => {
   if (dataStream.hidden === true) {
-    return true;
-  }
-
-  if (dataStream._meta?.managed === true) {
     return true;
   }
 

@@ -9,8 +9,8 @@ import type { IndicesDataStream } from '@elastic/elasticsearch/lib/api/types';
 import { shouldExcludeFromStreamsList } from './should_exclude_from_streams_list';
 
 const createDataStream = (
-  overrides: Partial<Pick<IndicesDataStream, 'name' | 'hidden' | '_meta'>>
-): Pick<IndicesDataStream, 'name' | 'hidden' | '_meta'> => ({
+  overrides: Partial<Pick<IndicesDataStream, 'name' | 'hidden'>>
+): Pick<IndicesDataStream, 'hidden'> => ({
   name: 'logs-nginx-default',
   hidden: false,
   ...overrides,
@@ -23,7 +23,15 @@ describe('shouldExcludeFromStreamsList', () => {
     );
   });
 
-  it('excludes hidden data streams with a dot prefix', () => {
+  it('includes managed logs data streams that are not hidden', () => {
+    expect(
+      shouldExcludeFromStreamsList(
+        createDataStream({ name: 'logs-nginx.access-default', hidden: false })
+      )
+    ).toBe(false);
+  });
+
+  it('excludes hidden data streams', () => {
     expect(
       shouldExcludeFromStreamsList(createDataStream({ name: '.some-stream', hidden: true }))
     ).toBe(true);
@@ -40,30 +48,6 @@ describe('shouldExcludeFromStreamsList', () => {
   it('excludes hidden data streams without a dot prefix', () => {
     expect(
       shouldExcludeFromStreamsList(createDataStream({ name: 'some-stream', hidden: true }))
-    ).toBe(true);
-  });
-
-  it('excludes managed data streams with a dot prefix', () => {
-    expect(
-      shouldExcludeFromStreamsList(
-        createDataStream({ name: '.some-stream', _meta: { managed: true } })
-      )
-    ).toBe(true);
-    expect(
-      shouldExcludeFromStreamsList(
-        createDataStream({
-          name: '.workflows-execution-data-stream-logs',
-          hidden: true,
-        })
-      )
-    ).toBe(true);
-  });
-
-  it('excludes managed data streams without a dot prefix', () => {
-    expect(
-      shouldExcludeFromStreamsList(
-        createDataStream({ name: 'some-stream', _meta: { managed: true } })
-      )
     ).toBe(true);
   });
 });
