@@ -231,8 +231,12 @@ export const dataSourceMachine = setup({
                 { type: 'dataSource.fetchMore' }
               >;
               return {
-                esqlQuery: fetchMoreEvent.esqlQuery,
+                conditionEsql: fetchMoreEvent.conditionEsql,
+                processingSteps: fetchMoreEvent.processingSteps,
                 existingDocuments: context.data,
+                dataSource: context.dataSource,
+                streamName: context.streamName,
+                isDraft: context.isDraft,
               };
             },
             onSnapshot: {
@@ -301,7 +305,7 @@ export const createDataSourceMachineImplementations = ({
       streamsRepositoryClient,
       uiSettings,
     }),
-    fetchMoreDocuments: createFetchMoreDocumentsActor({ data }),
+    fetchMoreDocuments: createFetchMoreDocumentsActor({ data, streamsRepositoryClient }),
   },
   actions: {
     notifyDataCollectionFailure: createDataCollectionFailureNotifier({ toasts }),

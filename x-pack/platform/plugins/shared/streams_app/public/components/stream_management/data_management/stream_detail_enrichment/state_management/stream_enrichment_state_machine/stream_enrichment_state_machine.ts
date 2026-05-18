@@ -4,14 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { IToasts } from '@kbn/core/public';
 import {
   getRoot,
   isDraftStream,
   isEnabledFailureStore,
   LOGS_ECS_STREAM_NAME,
   Streams,
-  withUnmappedFieldsDirective,
 } from '@kbn/streams-schema';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import type { ActorRefFrom, MachineImplementationsFrom, SnapshotFrom } from 'xstate';
@@ -24,11 +22,9 @@ import {
   conditionToESQL,
   convertUIStepsToDSL,
   isConditionBlock,
-  transpileEsql,
   validateStreamlang,
   validateStreamlangModeCompatibility,
 } from '@kbn/streamlang';
-import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import { sanitiseForEditing } from '@kbn/streamlang-yaml-editor/src/utils/sanitise_for_editing';
 import {
   isStreamlangDSLSchema,
@@ -57,10 +53,6 @@ import {
   dataSourceMachine,
 } from '../data_source_state_machine';
 import { findConditionById } from '../data_source_state_machine/fetch_more_actor';
-import {
-  notifyFetchMoreError,
-  resolveDraftSampleSource,
-} from '../data_source_state_machine/data_collector_actor';
 import { interactiveModeMachine } from '../interactive_mode_machine';
 import { createInteractiveModeMachineImplementations } from '../interactive_mode_machine/interactive_mode_machine';
 import {
@@ -728,10 +720,7 @@ export const createStreamEnrichmentMachineImplementations = ({
   actions: {
     refreshDefinition,
     syncUrlState: createUrlSyncAction({ urlStateStorageContainer }),
-    fetchMoreSamples: createFetchMoreSamplesAction({
-      streamsRepositoryClient,
-      toasts: core.notifications.toasts,
-    }),
+    fetchMoreSamples: createFetchMoreSamplesAction(),
     notifyUpsertStreamSuccess: createUpsertStreamSuccessNofitier({
       toasts: core.notifications.toasts,
     }),
@@ -741,59 +730,7 @@ export const createStreamEnrichmentMachineImplementations = ({
   },
 });
 
-const FETCH_MORE_LIMIT = 100;
-
-/**
- * Builds an ES|QL query that applies processing steps and filters by a condition.
- * For non-draft streams: FROM <streamName> | <processing> | WHERE <condition>
- * For draft streams: uses the parent view with routing condition as the base query.
- */
-async function buildFetchMoreEsqlQuery({
-  streamName,
-  condition,
-  processingSteps,
-  isDraft,
-  streamsRepositoryClient,
-}: {
-  streamName: string;
-  condition: string;
-  processingSteps: ReturnType<typeof convertUIStepsToDSL>;
-  isDraft: boolean;
-  streamsRepositoryClient: StreamsRepositoryClient;
-}): Promise<string> {
-  let baseQuery: string;
-
-  if (isDraft) {
-    const { baseQuery: draftBaseQuery } = await resolveDraftSampleSource(
-      streamsRepositoryClient,
-      streamName
-    );
-    baseQuery = draftBaseQuery;
-  } else {
-    baseQuery = `FROM ${streamName} METADATA _id, _source`;
-  }
-
-  if (processingSteps.steps.length > 0) {
-    const result = await transpileEsql(processingSteps);
-    if (result.commands.length > 0) {
-      baseQuery += `\n| ${result.commands.join('\n| ')}`;
-    }
-  }
-
-  baseQuery += `\n| WHERE ${condition}`;
-  baseQuery += `\n| SORT @timestamp DESC`;
-  baseQuery += `\n| LIMIT ${FETCH_MORE_LIMIT}`;
-
-  return withUnmappedFieldsDirective(baseQuery);
-}
-
-function createFetchMoreSamplesAction({
-  streamsRepositoryClient,
-  toasts,
-}: {
-  streamsRepositoryClient: StreamsRepositoryClient;
-  toasts: IToasts;
-}) {
+function createFetchMoreSamplesAction() {
   return ({ context }: { context: StreamEnrichmentContextType }) => {
     const selectedConditionId = context.simulatorRef.getSnapshot().context.selectedConditionId;
     if (!selectedConditionId) return;
@@ -805,31 +742,18 @@ function createFetchMoreSamplesAction({
     const activeDataSourceRef = getActiveDataSourceRef(context.dataSourcesRefs);
     if (!activeDataSourceRef) return;
 
-    const streamName = context.definition.stream.name;
-    const isDraft = isDraftStream(context.definition.stream);
-
-    // Get steps before the selected condition to include as ESQL processing.
-    // The condition itself becomes the WHERE clause; its children are excluded.
     const conditionIndex = steps.findIndex(
       (s) => isConditionBlock(s) && s.customIdentifier === selectedConditionId
     );
     const stepsBeforeCondition = conditionIndex > 0 ? steps.slice(0, conditionIndex) : [];
-    const processingDsl = convertUIStepsToDSL(stepsBeforeCondition);
+    const processingSteps = convertUIStepsToDSL(stepsBeforeCondition);
     const conditionEsql = conditionToESQL(condition);
 
-    buildFetchMoreEsqlQuery({
-      streamName,
-      condition: conditionEsql,
-      processingSteps: processingDsl,
-      isDraft,
-      streamsRepositoryClient,
-    })
-      .then((esqlQuery) => {
-        activeDataSourceRef.send({ type: 'dataSource.fetchMore', esqlQuery });
-      })
-      .catch((err) => {
-        notifyFetchMoreError(toasts, err);
-      });
+    activeDataSourceRef.send({
+      type: 'dataSource.fetchMore',
+      conditionEsql,
+      processingSteps,
+    });
   };
 }
 

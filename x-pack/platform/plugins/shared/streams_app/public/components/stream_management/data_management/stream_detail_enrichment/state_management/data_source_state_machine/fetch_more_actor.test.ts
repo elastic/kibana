@@ -6,8 +6,9 @@
  */
 
 import type { SampleDocument } from '@kbn/streams-schema';
-import { findConditionById, deduplicateDocuments } from './fetch_more_actor';
+import { findConditionById, deduplicateDocuments, buildKqlWhereClause } from './fetch_more_actor';
 import type { StreamlangStepWithUIAttributes } from '@kbn/streamlang';
+import type { EnrichmentDataSourceWithUIAttributes } from '../../types';
 
 describe('fetch_more_actor', () => {
   describe('findConditionById', () => {
@@ -139,6 +140,65 @@ describe('fetch_more_actor', () => {
       const result = deduplicateDocuments(existing, newDocs);
       expect(result).toHaveLength(3);
       expect(result).toEqual([...existing, ...newDocs]);
+    });
+  });
+
+  describe('buildKqlWhereClause', () => {
+    const makeKqlDataSource = (
+      overrides: Partial<{ query: unknown; filters: unknown[]; timeRange: unknown }>
+    ): EnrichmentDataSourceWithUIAttributes =>
+      ({
+        id: 'ds-1',
+        type: 'kql-samples',
+        name: 'KQL Source',
+        enabled: true,
+        query: { language: 'kuery', query: '' },
+        ...overrides,
+      } as EnrichmentDataSourceWithUIAttributes);
+
+    it('returns empty string for non-kql data sources', () => {
+      const ds = {
+        id: 'ds-1',
+        type: 'latest-samples',
+        name: 'Latest',
+        enabled: true,
+      } as EnrichmentDataSourceWithUIAttributes;
+      expect(buildKqlWhereClause(ds)).toBe('');
+    });
+
+    it('converts a KQL query into an ES|QL KQL() expression', () => {
+      const ds = makeKqlDataSource({
+        query: { language: 'kuery', query: 'log.level: error' },
+      });
+      expect(buildKqlWhereClause(ds)).toBe('KQL("""log.level: error""")');
+    });
+
+    it('converts filters into ES|QL expressions', () => {
+      const ds = makeKqlDataSource({
+        filters: [
+          {
+            meta: { key: 'service.name', negate: false, disabled: false },
+            query: { match_phrase: { 'service.name': 'api-gateway' } },
+          },
+        ],
+      });
+      const result = buildKqlWhereClause(ds);
+      expect(result).toContain('service.name');
+    });
+
+    it('ignores time range to cast a wider net for matching samples', () => {
+      const ds = makeKqlDataSource({
+        query: { language: 'kuery', query: 'log.level: error' },
+        timeRange: { from: '2025-01-01T00:00:00.000Z', to: '2025-01-02T00:00:00.000Z' },
+      });
+      const result = buildKqlWhereClause(ds);
+      expect(result).toBe('KQL("""log.level: error""")');
+      expect(result).not.toContain('@timestamp');
+    });
+
+    it('returns empty string for empty KQL query with no filters or time range', () => {
+      const ds = makeKqlDataSource({});
+      expect(buildKqlWhereClause(ds)).toBe('');
     });
   });
 });

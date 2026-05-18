@@ -307,7 +307,14 @@ const FetchMoreMatchingSamples = () => {
     snapshot ? snapshot.context.isFetchingMore : false
   );
 
+  const dataSourceType = useDataSourceSelector(activeDataSourceRef, (snapshot) =>
+    snapshot ? snapshot.context.dataSource.type : undefined
+  );
+
+  const supportsFetchMore = dataSourceType === 'latest-samples' || dataSourceType === 'kql-samples';
+
   const shouldShow =
+    supportsFetchMore &&
     selectedConditionId &&
     conditionMatchRate !== undefined &&
     conditionMatchRate < FETCH_MORE_THRESHOLD;
