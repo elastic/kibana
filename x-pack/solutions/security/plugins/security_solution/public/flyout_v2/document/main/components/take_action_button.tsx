@@ -254,12 +254,7 @@ export const TakeActionButton = memo(
         anchorPosition="downLeft"
         repositionOnScroll
       >
-        <EuiContextMenu
-          size="s"
-          initialPanelId={0}
-          panels={panels}
-          data-test-subj="takeActionPanelMenu"
-        />
+        <EuiContextMenu initialPanelId={0} panels={panels} data-test-subj="takeActionPanelMenu" />
       </EuiPopover>
     );
   }
