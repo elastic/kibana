@@ -36,10 +36,6 @@ export interface StepRenderProps {
   state: ComposeDiscoverState;
   dispatch: React.Dispatch<ComposeDiscoverAction>;
   services: RuleFormServices;
-  /** Called when the user toggles tracking ON from the Alert Condition step. */
-  onEnableTracking: () => void;
-  /** Called when the user toggles tracking OFF from the Alert Condition step. */
-  onDisableTracking: () => void;
   /** Called when the user changes the recovery type selector. */
   onRecoveryTypeChange: (type: RecoveryType) => void;
 }

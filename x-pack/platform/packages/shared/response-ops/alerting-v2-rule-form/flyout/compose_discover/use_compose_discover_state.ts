@@ -6,6 +6,7 @@
  */
 
 import { useReducer } from 'react';
+import type { RuleKind } from './compose_form_types';
 import type {
   StepId,
   ComposeDiscoverState,
@@ -23,19 +24,19 @@ export const getStepIds = (tracking: boolean): StepId[] =>
 
 export interface InitialStateConfig {
   mode: ComposeDiscoverMode;
-  initialTracking?: boolean;
+  initialKind?: RuleKind;
   initialRecoveryType?: RecoveryType;
 }
 
 export const createInitialState = ({
   mode,
-  initialTracking = false,
+  initialKind = 'signal',
   initialRecoveryType = 'default',
 }: InitialStateConfig): ComposeDiscoverState => ({
   mode,
   step: 0,
-  tracking: initialTracking,
-  recoveryType: initialTracking ? initialRecoveryType : 'default',
+  tracking: initialKind === 'alert',
+  recoveryType: initialKind === 'alert' ? initialRecoveryType : 'default',
   activeTab: 'alert',
   childOpen: mode === 'create',
   queryCommitted: mode === 'edit',

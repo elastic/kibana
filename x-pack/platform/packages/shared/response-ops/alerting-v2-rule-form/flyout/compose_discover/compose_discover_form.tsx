@@ -49,8 +49,6 @@ interface ComposeDiscoverFormProps {
   state: ComposeDiscoverState;
   dispatch: React.Dispatch<ComposeDiscoverAction>;
   services: RuleFormServices;
-  onEnableTracking: () => void;
-  onDisableTracking: () => void;
   onRecoveryTypeChange: (type: RecoveryType) => void;
 }
 
@@ -183,16 +181,13 @@ function AlertConditionStep({
   state,
   dispatch,
   services,
-  onEnableTracking,
-  onDisableTracking,
 }: {
   state: ComposeDiscoverState;
   dispatch: React.Dispatch<ComposeDiscoverAction>;
   services: RuleFormServices;
-  onEnableTracking: () => void;
-  onDisableTracking: () => void;
 }) {
   const { setValue, watch } = useFormContext<ComposeFormValues>();
+  const isAlert = watch('kind') === 'alert';
   const timeField = watch('timeField') ?? '@timestamp';
   const grouping = watch('grouping');
   const groupFields = grouping?.fields ?? [];
@@ -204,9 +199,9 @@ function AlertConditionStep({
 
   // Use the base query for field lookup when tracking is on; fall back to full breach query.
   const committedQuery = useMemo(() => {
-    const q = state.tracking ? baseQuery : fullQuery;
+    const q = isAlert ? baseQuery : fullQuery;
     return /^\s*FROM\s+[a-zA-Z0-9_.*-]/i.test(q) && state.queryCommitted ? q : '';
-  }, [state.tracking, baseQuery, fullQuery, state.queryCommitted]);
+  }, [isAlert, baseQuery, fullQuery, state.queryCommitted]);
 
   const { data: fieldMap } = useDataFields({
     query: committedQuery,
@@ -267,17 +262,13 @@ function AlertConditionStep({
   }, [state.queryCommitted, committedQuery, groupFields.length, setValue]);
 
   const handleTrackingToggle = useCallback(() => {
-    if (state.tracking) {
-      onDisableTracking();
-    } else {
-      onEnableTracking();
-    }
-  }, [state.tracking, onEnableTracking, onDisableTracking]);
+    setValue('kind', isAlert ? 'signal' : 'alert');
+  }, [isAlert, setValue]);
 
   // Callout when the heuristic split couldn't find a clear split point.
   // Only relevant after Apply (when the committed query is in composed format).
   const splitFailed =
-    state.tracking &&
+    isAlert &&
     state.queryCommitted &&
     query.format === 'composed' &&
     !query.base.trim();
@@ -306,7 +297,7 @@ function AlertConditionStep({
             Open query editor
           </EuiButton>
         </>
-      ) : !state.tracking ? (
+      ) : !isAlert ? (
         <>
           <QuerySummary query={fullQuery} label="query" />
           <EuiSpacer size="s" />
@@ -387,7 +378,7 @@ function AlertConditionStep({
       <EuiSpacer size="m" />
       <EuiSwitch
         label="Track active and recovered state over time"
-        checked={state.tracking}
+        checked={isAlert}
         onChange={handleTrackingToggle}
         disabled={!state.queryCommitted}
         data-test-subj="composeDiscoverTrackingToggle"
@@ -526,8 +517,6 @@ const STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> = {
         state={props.state}
         dispatch={props.dispatch}
         services={props.services}
-        onEnableTracking={props.onEnableTracking}
-        onDisableTracking={props.onDisableTracking}
       />
     ),
     validate: (_methods, s) => s.queryCommitted,
@@ -565,8 +554,6 @@ export const ComposeDiscoverForm: React.FC<ComposeDiscoverFormProps> = ({
   state,
   dispatch,
   services,
-  onEnableTracking,
-  onDisableTracking,
   onRecoveryTypeChange,
 }) => {
   const steps = getSteps(state.tracking);
@@ -574,8 +561,6 @@ export const ComposeDiscoverForm: React.FC<ComposeDiscoverFormProps> = ({
     state,
     dispatch,
     services,
-    onEnableTracking,
-    onDisableTracking,
     onRecoveryTypeChange,
   });
 };

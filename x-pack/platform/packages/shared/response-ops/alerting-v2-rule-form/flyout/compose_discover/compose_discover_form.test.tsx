@@ -104,8 +104,6 @@ const renderRecoveryStep = (
       state,
       dispatch,
       services,
-      onEnableTracking: jest.fn(),
-      onDisableTracking: jest.fn(),
       onRecoveryTypeChange,
     }) as React.ReactElement,
     { wrapper: createComposeFormWrapper(queryOverride, services) }

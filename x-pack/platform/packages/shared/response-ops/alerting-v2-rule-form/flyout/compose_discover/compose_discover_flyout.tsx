@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { FormProvider, useForm } from 'react-hook-form';
+import { FormProvider, useForm, useWatch } from 'react-hook-form';
 import {
   EuiBadge,
   EuiButton,
@@ -143,7 +143,7 @@ const composeFormValuesForYamlSerialize = (compose: ComposeFormValues): FormValu
 };
 
 const EMPTY_FORM_VALUES: ComposeFormValues = {
-  kind: 'alert',
+  kind: 'signal',
   metadata: { name: '', enabled: true, description: '', tags: [] },
   timeField: '@timestamp',
   schedule: { every: '1m', lookback: '5m' },
@@ -175,13 +175,13 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
    */
   const initialMapped =
     (mode === 'edit' || mode === 'clone') && rule ? mapRuleToComposeFormValues(rule) : undefined;
-  const initialQuery = initialMapped?.query;
-  const hasInitialTracking = initialQuery?.format === 'composed';
+  const initialKind = initialMapped?.kind ?? 'signal';
   const hasInitialCustomRecovery =
-    initialQuery?.format === 'composed' && !!initialQuery.blocks.recover?.trim();
+    initialMapped?.query?.format === 'composed' &&
+    !!initialMapped.query.blocks.recover?.trim();
   const [uiState, dispatch] = useComposeDiscoverState({
     mode: mode === 'clone' ? 'edit' : mode,
-    initialTracking: hasInitialTracking,
+    initialKind,
     initialRecoveryType: hasInitialCustomRecovery ? 'custom' : 'default',
   });
 
@@ -222,19 +222,25 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
     search: services.data.search.search,
   });
 
-  const handleEnableTracking = useCallback(() => {
-    const full = getBreachQuery(methods.getValues('query'));
-    const { base, alertBlock } = splitQuery(full);
-    setDraft((d) => ({ ...d, base, breach: alertBlock }));
-    dispatch({ type: 'ENABLE_TRACKING' });
-  }, [methods, setDraft, dispatch]);
-
-  const handleDisableTracking = useCallback(() => {
-    const assembled = [draft.base, draft.breach].filter(Boolean).join('\n');
-    setDraft((d) => ({ ...d, base: '', breach: assembled, recover: '' }));
-    methods.setValue('query', { format: 'standalone', breach: assembled });
-    dispatch({ type: 'DISABLE_TRACKING' });
-  }, [draft.base, draft.breach, setDraft, methods, dispatch]);
+  // `kind` is the source of truth for tracking. Guard on divergence from uiState.tracking
+  // so this effect is a no-op on mount (both sides are seeded from the same initial kind).
+  const isAlert = useWatch({ control: methods.control, name: 'kind' }) === 'alert';
+  useEffect(() => {
+    if (isAlert === uiState.tracking) return;
+    if (isAlert) {
+      const full = getBreachQuery(methods.getValues('query'));
+      const { base, alertBlock } = splitQuery(full);
+      setDraft((d) => ({ ...d, base, breach: alertBlock }));
+      dispatch({ type: 'ENABLE_TRACKING' });
+    } else {
+      // Assemble from the last committed RHF query — not from draft — so
+      // any unapplied sandbox edits are discarded cleanly on tracking disable.
+      const assembled = getBreachQuery(methods.getValues('query'));
+      setDraft((d) => ({ ...d, base: '', breach: assembled, recover: '' }));
+      methods.setValue('query', { format: 'standalone', breach: assembled });
+      dispatch({ type: 'DISABLE_TRACKING' });
+    }
+  }, [isAlert, uiState.tracking, methods, setDraft, dispatch]);
 
   const handleRecoveryTypeChange = useCallback(
     (type: RecoveryType) => {
@@ -436,8 +442,6 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
                 state={uiState}
                 dispatch={dispatch}
                 services={services}
-                onEnableTracking={handleEnableTracking}
-                onDisableTracking={handleDisableTracking}
                 onRecoveryTypeChange={handleRecoveryTypeChange}
               />
             )}
