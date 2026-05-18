@@ -27,6 +27,10 @@ jest.mock('./use_keyboard_navigation', () => ({
   })),
 }));
 
+jest.mock('./use_service_map_alerts_tab_href', () =>
+  jest.requireActual('./use_service_map_alerts_tab_href.test_mock')
+);
+
 jest.mock('@xyflow/react', () => {
   const original = jest.requireActual('@xyflow/react');
   return {

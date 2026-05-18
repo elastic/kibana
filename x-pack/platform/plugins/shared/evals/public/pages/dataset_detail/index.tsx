@@ -46,6 +46,7 @@ import { css } from '@emotion/css';
 import { CodeEditor } from '@kbn/code-editor';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import { useHistory, useParams } from 'react-router-dom';
+import { TraceWaterfall, useTraceSpans } from '@kbn/llm-trace-waterfall';
 import type {
   DatasetExample,
   EvaluationRunSummary,
@@ -55,12 +56,12 @@ import {
   useAddExamples,
   useDataset,
   useDeleteExample,
+  useEvalsTraceFetcher,
   useExampleScores,
   useEvaluationRuns,
   useUpdateDataset,
   useUpdateExample,
 } from '../../hooks/use_evals_api';
-import { TraceWaterfall } from '../../components/trace_waterfall';
 import { useEvalsPermissions } from '../../hooks/use_evals_permissions';
 import * as i18n from './translations';
 
@@ -136,6 +137,13 @@ export const DatasetDetailPage: React.FC = () => {
   const [formError, setFormError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTraceId, setSelectedTraceId] = useState<string | null>(null);
+  const fetchTrace = useEvalsTraceFetcher();
+  const {
+    spans,
+    durationMs,
+    isLoading: traceLoading,
+    error: traceError,
+  } = useTraceSpans(selectedTraceId, { fetchTrace });
 
   const {
     data: exampleScoresData,
@@ -1045,7 +1053,13 @@ export const DatasetDetailPage: React.FC = () => {
             `}
           >
             <div style={{ height: '100%', padding: 16 }}>
-              <TraceWaterfall traceId={selectedTraceId} />
+              <TraceWaterfall
+                spans={spans}
+                traceId={selectedTraceId}
+                durationMs={durationMs}
+                isLoading={traceLoading}
+                error={traceError}
+              />
             </div>
           </EuiFlyoutBody>
         </EuiFlyoutResizable>

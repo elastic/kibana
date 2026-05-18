@@ -1,5 +1,5 @@
 {
-  "sha1": "793c734d0b28068c2c63f7a8019ed03f9761b8b3",
+  "sha1": "9f6b72bf4a69d037ef2952ec32b66041694133ce",
   "tests": [
     {
       "id": "208b6394ca1260b-100a2f007029fdb",
@@ -11,7 +11,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/task_manager/test/scout_task_manager_uiam/api/tests/task_api_keys.spec.ts",
-        "line": 51,
+        "line": 48,
         "column": 10
       }
     },
@@ -25,8 +25,36 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/task_manager/test/scout_task_manager_uiam/api/tests/task_api_keys.spec.ts",
-        "line": 64,
+        "line": 54,
         "column": 10
+      }
+    },
+    {
+      "id": "7b5a2f206f49d25-69ef74b960fb06c",
+      "title": "Task Manager UIAM API key provisioning (background task) provisions UIAM for tasks that still have an ES api key but no UIAM key, and skips tasks with no api key or a user–created api key",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/task_manager/test/scout_task_manager_uiam/api/tests/uiam_api_key_provisioning_background.spec.ts",
+        "line": 61,
+        "column": 12
+      }
+    },
+    {
+      "id": "7b5a2f206f49d25-17fb6e35ed1aa3a",
+      "title": "Task Manager UIAM API key provisioning (background task) on a later run, still provisions new candidate tasks and leaves tasks with a final provisioning status off the UIAM fetch query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/task_manager/test/scout_task_manager_uiam/api/tests/uiam_api_key_provisioning_background.spec.ts",
+        "line": 177,
+        "column": 12
       }
     }
   ]
