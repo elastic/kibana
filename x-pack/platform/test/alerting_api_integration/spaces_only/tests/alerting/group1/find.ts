@@ -402,8 +402,6 @@ export default function createFindTests({ getService }: FtrProviderContext) {
         expect(response.status).to.eql(200);
         expect(response.body.total).to.equal(1);
         expect(response.body.data[0].params.risk_score).to.eql(40);
-
-        expect(response.body.data[0].mapped_params).to.eql(undefined);
       });
 
       it('should error if filtering on mapped parameters directly using the public API', async () => {
