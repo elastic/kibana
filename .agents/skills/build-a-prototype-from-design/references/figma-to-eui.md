@@ -1,170 +1,161 @@
 # Figma → EUI component mapping
 
 This reference is Step 1 of the "Build a prototype from this design" skill.
-Its job is to resolve every design element in a mockup to its correct EUI or
-kbn-ui code equivalent **before any code is written**.
+Its job is to resolve every design element to its correct EUI or kbn-ui
+equivalent **before any code is written**.
 
 For routing decisions between raw EUI and Kibana-specific wrappers, see
 [`eui-vs-kbnui.md`](./eui-vs-kbnui.md).
 
-For full prop APIs and usage examples for any resolved component, read:
+For full prop APIs, usage examples, and detailed visual descriptions, read:
 `node_modules/@elastic/eui/metadata/components/[name].json`
 
-Each component JSON also contains a `visualDescription` field — a detailed
-visual recognition guide for the screenshot case. Read it when the "Visual
-signal" column in this file is not enough to disambiguate.
+---
+
+## Mode A — Figma file URL provided
+
+Code Connect handles the Figma component → code mapping automatically.
+
+1. Call `get_design_context(url)` to extract the layer tree.
+2. Call `get_code_connect_map()` to get the Figma → EUI mappings.
+3. For any components not covered by Code Connect, call `get_code_connect_suggestions()`.
+4. Check each resolved component against [`eui-vs-kbnui.md`](./eui-vs-kbnui.md)
+   to confirm whether to use the raw EUI component or a Kibana wrapper.
 
 ---
 
-## How to use this reference
+## Mode B — Screenshot (PNG / JPG) provided
 
-### Mode A — Figma file URL provided
+Scan the image systematically: **chrome first → page structure → sections →
+micro-components**. Follow the scan order in
+[`mockup-reading.md`](./mockup-reading.md). <!-- TODO: Person C deliverable -->
 
-1. Call `get_design_context(url)` via the Figma MCP to extract the layer tree.
-2. Call `get_code_connect_map()` to check for any existing Code Connect mappings.
-3. For each component layer, match its name against the **Figma layer name**
-   column in the table below.
-4. Use the resolved EUI/kbn-ui name as the output for Step 2 of the skill.
+For each visual element, match what you see against the table below.
+When two components look similar, use the **Disambiguation** column.
+For more detail on any entry, read the `visualDescription` field in
+`node_modules/@elastic/eui/metadata/components/[name].json`.
 
-### Mode B — Screenshot (PNG / JPG) provided
-
-1. Scan the image systematically: chrome first → page structure → sections
-   → micro-components. Follow the scan order in
-   [`mockup-reading.md`](./mockup-reading.md). <!-- TODO -->
-2. For each visual element, match what you see against the
-   **Visual signal** column in the table below.
-3. When two components look identical in a screenshot, use the
-   **Disambiguation** column to decide.
-4. Flag anything that cannot be determined from visual evidence alone —
-   list both candidates and the deciding factor rather than guessing silently.
+Flag anything that cannot be determined from visual evidence alone — list
+both candidates and the deciding factor rather than guessing silently.
 
 ---
 
-## Mapping table
-
-> ⚠️ **Figma layer names** — marked with 🔍 where the exact Figma library
-> naming needs verification by the EUI design team. EUI code names and visual
-> signals are reliable; correct any 🔍 entries before the Day 4 test.
+## Visual recognition table
 
 ### Buttons
 
-| Figma layer name 🔍 | EUI component | kbn-ui instead? | Visual signal | Disambiguation |
-|---|---|---|---|---|
-| `Button / Primary` | `EuiButton fill` | No | Solid colored background, rounded corners, text label | Filled = primary action |
-| `Button / Default` | `EuiButton` | No | Outlined border, transparent bg, text label | No fill = secondary action |
-| `Button / Empty` | `EuiButtonEmpty` | No | Text only, no border or background | Looks like a link but has button padding |
-| `Button / Icon` | `EuiButtonIcon` | No | Icon only, no text label visible | Always add `aria-label` |
-| `Button / Icon + Label` | `EuiButton iconType=…` | No | Icon left/right of text label inside a button box | Combined icon+label variant |
-| `Button Group` | `EuiButtonGroup` | No | Row of adjacent buttons sharing borders | Toggle group, not separate buttons |
+| What you see | EUI component | Disambiguation |
+|---|---|---|
+| Solid colored background, rounded corners, text label | `EuiButton fill` | Filled = primary action |
+| Outlined border, transparent background, text label | `EuiButton` | No fill = secondary |
+| Text only, no border or background, button padding | `EuiButtonEmpty` | Looks like a link — has padding |
+| Icon only, no text label | `EuiButtonIcon` | Always needs `aria-label` |
+| Icon + text label inside a button box | `EuiButton iconType=…` | |
+| Row of adjacent buttons sharing borders | `EuiButtonGroup` | Toggle group, not separate buttons |
 
 ### Display & status
 
-| Figma layer name 🔍 | EUI component | kbn-ui instead? | Visual signal | Disambiguation |
-|---|---|---|---|---|
-| `Badge` | `EuiBadge` | No | Pill shape, rounded ends, colored fill, short text | Has a container. NOT EuiHealth (dot only) |
-| `Badge / Notification` | `EuiNotificationBadge` | No | Small circle with a number, typically on a button | Count indicator, not a status label |
-| `Callout / Info` | `EuiCallOut color="primary"` | No | Box with blue left border accent + icon | NOT a panel (no shadow) |
-| `Callout / Success` | `EuiCallOut color="success"` | No | Box with green left border | |
-| `Callout / Warning` | `EuiCallOut color="warning"` | No | Box with yellow left border | |
-| `Callout / Danger` | `EuiCallOut color="danger"` | No | Box with red left border | |
-| `Health` | `EuiHealth` | No | Small colored dot + inline text label | NOT EuiBadge (no pill, just a dot) |
-| `Stat` | `EuiStat` | No | Large metric value + small descriptor label | Always paired label+value. NOT EuiTitle |
-| `Avatar` | `EuiAvatar` | No | Circular element with initials or image | NOT EuiIcon (circular, not square) |
-| `Token` | `EuiToken` | No | Small colored icon in a rounded square container | Used in search results and field lists |
-| `Loading / Spinner` | `EuiLoadingSpinner` | No | Animated circle arc | |
-| `Loading / Elastic` | `EuiLoadingElastic` | No | Animated Elastic logo mark | |
-| `Empty Prompt` | `EuiEmptyPrompt` | No | Centered illustration + heading + body + CTA buttons | Large, page-filling. NOT EuiCallOut |
-| `Toast` | `EuiToast` | No | Small floating notification at screen edge | NOT EuiCallOut (positioned/floating) |
+| What you see | EUI component | Disambiguation |
+|---|---|---|
+| Pill shape, rounded ends, colored fill, short text | `EuiBadge` | Has a container. NOT EuiHealth (dot only) |
+| Small circle with a number, on or near a button | `EuiNotificationBadge` | Count indicator, not a status label |
+| Box with colored left border accent + icon + title | `EuiCallOut` | Color = info/success/warning/danger. NOT EuiPanel (no shadow) |
+| Small colored dot + short inline text label | `EuiHealth` | Just a dot. NOT EuiBadge (no pill shape) |
+| Large metric value + small descriptor label | `EuiStat` | Always a paired label+value. NOT EuiTitle alone |
+| Circular element with initials or image | `EuiAvatar` | Circular. NOT EuiIcon (square) |
+| Small colored icon in a rounded square container | `EuiToken` | Used in search results and field lists |
+| Animated circle arc | `EuiLoadingSpinner` | |
+| Centered illustration + heading + body + CTA buttons | `EuiEmptyPrompt` | Large, page-filling. NOT EuiCallOut (not an alert strip) |
+| Small floating notification at screen edge | `EuiToast` | Floating/positioned. NOT EuiCallOut |
 
 ### Layout & containers
 
-| Figma layer name 🔍 | EUI component | kbn-ui instead? | Visual signal | Disambiguation |
-|---|---|---|---|---|
-| `Panel` | `EuiPanel` | No | White/light card with border or shadow, internal padding | No colored left border. NOT EuiCallOut |
-| `Panel / Split` | `EuiSplitPanel` | No | Two-pane panel with a shared border divider | |
-| `Flex Row` | `EuiFlexGroup` + `EuiFlexItem` | No | Horizontal arrangement of children with consistent gaps | Invisible in screenshots — infer from layout |
-| `Spacer` | `EuiSpacer` | No | Vertical whitespace block | Invisible — infer from gaps between elements |
-| `Horizontal Rule` | `EuiHorizontalRule` | No | Full-width divider line | Use instead of `<hr>` |
-| `Flyout` | `EuiFlyout` | No | Full-height panel sliding from viewport edge, dark overlay | NOT EuiModal (edge-anchored, not centered) |
-| `Modal` | `EuiModal` | No | Centered dialog over dark full-viewport overlay | NOT EuiFlyout (centered, not edge-anchored) |
-| `Popover` | `EuiPopover` | No | Small floating panel anchored to a trigger element | NOT EuiModal (small, trigger-anchored) |
+| What you see | EUI component | Disambiguation |
+|---|---|---|
+| White/light card, border or shadow, internal padding | `EuiPanel` | No colored left border. NOT EuiCallOut |
+| Two-pane container with a shared border divider | `EuiSplitPanel` | |
+| Children in a horizontal row with consistent gaps | `EuiFlexGroup` + `EuiFlexItem` | Invisible — infer from layout spacing |
+| Vertical whitespace gap between elements | `EuiSpacer` | Invisible — infer from the gap |
+| Full-width horizontal divider line | `EuiHorizontalRule` | |
+| Full-height panel sliding from viewport edge, dark overlay | `EuiFlyout` | Edge-anchored. NOT EuiModal (centered) |
+| Centered dialog over full-viewport dark overlay | `EuiModal` | Centered. NOT EuiFlyout (edge-anchored) |
+| Small floating panel anchored to a trigger | `EuiPopover` | Small, trigger-anchored. NOT EuiModal |
 
 ### Page structure
 
-| Figma layer name 🔍 | EUI component | kbn-ui instead? | Visual signal | Disambiguation |
-|---|---|---|---|---|
-| `Page Template` | — | **Yes → `KibanaPageTemplate`** | Full-page scaffold: sidebar + header + content | Never use `EuiPageTemplate` in Kibana |
-| `Page Header` | — | **Yes → `KibanaPageHeader`** 🔍 | Page-level title bar with breadcrumbs + actions | Never use `EuiPageHeader` in Kibana. See `eui-vs-kbnui.md` |
-| `Page Section` | `EuiPageSection` | No | Content region within the page body | |
-| `No Data` | — | **Yes → `KibanaNoDataPage`** | Full-page empty state with data onboarding | From `@kbn/shared-ux-page-kibana-no-data` |
+| What you see | EUI component | Disambiguation |
+|---|---|---|
+| Full-page scaffold: sidebar + header + content area | `KibanaPageTemplate` | Never use `EuiPageTemplate` in Kibana |
+| Page-level title bar with breadcrumbs + action buttons | See [`eui-vs-kbnui.md`](./eui-vs-kbnui.md) | Pattern varies by solution |
+| Full-page empty state with data onboarding flow | `KibanaNoDataPage` | First-time / no data source. NOT EuiEmptyPrompt |
+| Content region inside the page body | `EuiPageSection` | |
 
 ### Navigation
 
-| Figma layer name 🔍 | EUI component | kbn-ui instead? | Visual signal | Disambiguation |
-|---|---|---|---|---|
-| `Breadcrumbs` | `EuiBreadcrumbs` | No | Text items separated by › chevrons, last item plain | NOT EuiTabs, NOT EuiSteps |
-| `Tabs` | `EuiTabs` + `EuiTab` | No | Horizontal row of text tabs, active has underline | NOT EuiButtonGroup (tabs are non-exclusive nav) |
-| `Steps` | `EuiSteps` | No | Numbered vertical or horizontal progression | NOT EuiTabs (sequential, not navigational) |
-| `Side Nav` | `EuiSideNav` | No | Vertical tree menu with collapsible groups | App-level persistent nav |
-| `Solution Nav` | — | **Yes → `SolutionNav`** | Left-rail navigation in solution-scoped layouts | From `@kbn/shared-ux-page-solution-nav` |
-| `Pagination` | `EuiPagination` | No | Row of numbered page buttons with prev/next arrows | |
-| `Link` | `EuiLink` | No | Underlined or colored inline text link | NOT EuiButtonEmpty (not inline in text) |
+| What you see | EUI component | Disambiguation |
+|---|---|---|
+| Text items separated by › chevrons, last item plain | `EuiBreadcrumbs` | NOT EuiTabs, NOT EuiSteps |
+| Horizontal row of text tabs, active has underline | `EuiTabs` + `EuiTab` | NOT EuiButtonGroup |
+| Numbered vertical or horizontal progression | `EuiSteps` | Sequential. NOT EuiTabs |
+| Vertical tree menu with collapsible groups | `EuiSideNav` | Persistent app nav |
+| Persistent left-rail nav scoped to a solution | `SolutionNav` | NOT EuiSideNav directly — see `eui-vs-kbnui.md` |
+| Row of numbered page buttons with prev/next | `EuiPagination` | |
+| Underlined or colored inline text within a sentence | `EuiLink` | Inline in text. NOT EuiButtonEmpty |
 
 ### Forms
 
-| Figma layer name 🔍 | EUI component | kbn-ui instead? | Visual signal | Disambiguation |
-|---|---|---|---|---|
-| `Form Row` | `EuiFormRow` | No | Label + input + help/error text stacked vertically | Always wraps an input |
-| `Field / Text` | `EuiFieldText` | No | Single-line bordered text input | NOT EuiTextArea (single line) |
-| `Field / Number` | `EuiFieldNumber` | No | Numeric text input | |
-| `Field / Password` | `EuiFieldPassword` | No | Password input with eye toggle icon | |
-| `Field / Search` | `EuiFieldSearch` | No | Narrow search input with magnifier icon | Narrower than EuiSearchBar |
-| `Select` | `EuiSelect` | No | Native dropdown with chevron | No in-field pills. NOT EuiComboBox |
-| `Combo Box` | `EuiComboBox` | No | Input with pill-shaped selected items inside, chevron | In-field pills = EuiComboBox |
-| `Search Bar` | `EuiSearchBar` | No | Full-width search with filter pills, prominent | Wider/more prominent than EuiFieldSearch |
-| `Switch` | `EuiSwitch` | No | Toggle pill with a sliding thumb, label alongside | NOT EuiCheckbox (pill shape vs square) |
-| `Checkbox` | `EuiCheckbox` | No | Square tick box | |
-| `Radio` | `EuiRadio` | No | Circular selection dot | |
-| `Text Area` | `EuiTextArea` | No | Multi-line bordered text input | NOT EuiFieldText (multi-line) |
+| What you see | EUI component | Disambiguation |
+|---|---|---|
+| Label + input + help/error text stacked vertically | `EuiFormRow` | Always wraps an input |
+| Single-line bordered text input | `EuiFieldText` | Single line. NOT EuiTextArea |
+| Password input with eye-toggle icon | `EuiFieldPassword` | |
+| Narrow input with magnifier icon | `EuiFieldSearch` | Narrower than EuiSearchBar |
+| Native dropdown with chevron, no pills | `EuiSelect` | No in-field pills. NOT EuiComboBox |
+| Input with pill-shaped selected items inside + chevron | `EuiComboBox` | In-field pills = EuiComboBox. NOT EuiSelect |
+| Full-width search with filter pills, prominent | `EuiSearchBar` | Wider and more prominent than EuiFieldSearch |
+| Toggle pill with sliding thumb + label | `EuiSwitch` | Pill shape. NOT EuiCheckbox (square) |
+| Square tick box | `EuiCheckbox` | |
+| Circular selection dot | `EuiRadio` | |
+| Multi-line bordered text input | `EuiTextArea` | Multi-line. NOT EuiFieldText |
 
 ### Data
 
-| Figma layer name 🔍 | EUI component | kbn-ui instead? | Visual signal | Disambiguation |
-|---|---|---|---|---|
-| `Table / Basic` | `EuiBasicTable` | No | Header row + data rows, sort arrows, row actions | Visually identical to EuiInMemoryTable — differs by data source |
-| `Table / In Memory` | `EuiInMemoryTable` | No | Same visual as Basic Table + inline search/filter | Use when filtering/sorting is client-side |
-| `Data Grid` | `EuiDataGrid` | No | Cell-level editing, column resize handles, toolbar above | More complex than EuiBasicTable |
-| `Description List` | `EuiDescriptionList` | No | Key: value pairs stacked or inline | NOT a table (no columns/rows) |
+| What you see | EUI component | Disambiguation |
+|---|---|---|
+| Header row + data rows, sort arrows, row actions | `EuiBasicTable` or `EuiInMemoryTable` | Visually identical — use EuiInMemoryTable only if filtering is client-side |
+| Cell-level editing, column resize handles, toolbar above | `EuiDataGrid` | More complex than EuiBasicTable |
+| Key: value pairs, stacked or inline | `EuiDescriptionList` | NOT a table |
 
 ### Typography
 
-| Figma layer name 🔍 | EUI component | kbn-ui instead? | Visual signal | Disambiguation |
-|---|---|---|---|---|
-| `Title / XL–XXS` | `EuiTitle size="…"` | No | Large/heavy heading text, no background | Use `as` prop to set h1–h6 semantic level |
-| `Text` | `EuiText` | No | Regular body copy, may contain paragraphs and lists | |
-| `Code` | `EuiCode` | No | Inline monospace code snippet | NOT EuiCodeBlock (inline vs block) |
-| `Code Block` | `EuiCodeBlock` | No | Multi-line syntax-highlighted code with copy button | |
+| What you see | EUI component | Disambiguation |
+|---|---|---|
+| Large or heavy heading text, no background | `EuiTitle` | Use `as` prop to set heading level |
+| Regular body copy, paragraphs or lists | `EuiText` | |
+| Inline monospace code snippet | `EuiCode` | Inline. NOT EuiCodeBlock |
+| Multi-line syntax-highlighted code with copy button | `EuiCodeBlock` | Block. NOT EuiCode |
 
 ---
 
 ## Output format
 
-After resolving all components from the design, produce a structured list
-before moving to Step 2. Example:
+After resolving all components, produce this structured list before moving
+to Step 2:
 
 ```
 Resolved components:
 - Page scaffold       → KibanaPageTemplate  (@kbn/shared-ux-page-kibana-template)
-- Page header         → KibanaPageHeader    (verify import — see eui-vs-kbnui.md)
+- Page header         → [see eui-vs-kbnui.md — verify with solution team]
 - Alert banner        → EuiCallOut color="warning"
-- Data table          → EuiBasicTable       (server-side data — 3 columns visible)
-- Row action buttons  → EuiButtonIcon       (2 per row, need aria-label)
-- Status column       → EuiHealth           (3 states: success / warning / danger)
+- Data table          → EuiBasicTable       (server-side data, 3 columns)
+- Row action buttons  → EuiButtonIcon       (2 per row — need aria-label)
+- Status column       → EuiHealth           (success / warning / danger)
 - Primary CTA         → EuiButton fill
 - Cancel action       → EuiButtonEmpty
+
 UNCERTAIN:
-- Top search area     → EuiSearchBar OR EuiFieldSearch — cannot determine width context from screenshot
+- Top search area     → EuiSearchBar OR EuiFieldSearch
+                        cannot determine width context from screenshot alone
 ```
 
-Anything marked UNCERTAIN must be resolved with the product designer or
-inferred from surrounding layout context before scaffolding begins.
+Anything marked UNCERTAIN must be resolved before scaffolding begins.
