@@ -5,10 +5,19 @@
  * 2.0.
  */
 
+import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 
 export const SYNTHETICS_SETTINGS_MULTI_SPACE_SO_TYPE = 'synthetics-settings-multi-space';
+
+const syntheticsSettingsMultiSpaceSchemaV1 = schema.object(
+  {
+    useAllRemoteClusters: schema.maybe(schema.boolean()),
+    selectedRemoteClusters: schema.maybe(schema.arrayOf(schema.string())),
+  },
+  { unknowns: 'ignore' }
+);
 
 export const syntheticsSettingsMultiSpace: SavedObjectsType = {
   name: SYNTHETICS_SETTINGS_MULTI_SPACE_SO_TYPE,
@@ -17,6 +26,15 @@ export const syntheticsSettingsMultiSpace: SavedObjectsType = {
   mappings: {
     dynamic: false,
     properties: {},
+  },
+  modelVersions: {
+    1: {
+      changes: [],
+      schemas: {
+        create: syntheticsSettingsMultiSpaceSchemaV1,
+        forwardCompatibility: syntheticsSettingsMultiSpaceSchemaV1,
+      },
+    },
   },
   management: {
     displayName: i18n.translate(
