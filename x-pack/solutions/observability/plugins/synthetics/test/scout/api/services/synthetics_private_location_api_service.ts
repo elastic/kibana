@@ -8,7 +8,6 @@
 import type { KbnClient, ApiServicesFixture } from '@kbn/scout-oblt';
 
 export const DEFAULT_SYNTHETICS_VERSION = '1.5.0';
-const FLEET_API_VERSION = '2023-10-31';
 
 export interface ScoutPrivateLocation {
   id: string;
@@ -50,14 +49,8 @@ export function createSyntheticsPrivateLocationApi(
   let cachedInstalledVersion: string | null = null;
   let cachedSharedLocation: ScoutPrivateLocation | null = null;
 
-  const fleetHeaders = { 'elastic-api-version': FLEET_API_VERSION };
-
   const fetchSyntheticsPackageVersion = async (): Promise<string> => {
-    const { data } = await kbnClient.request<{ item?: { version: string } }>({
-      path: '/api/fleet/epm/packages/synthetics',
-      method: 'GET',
-      headers: fleetHeaders,
-    });
+    const { data } = await fleetApi.integration.getPackage('synthetics');
     return data?.item?.version ?? DEFAULT_SYNTHETICS_VERSION;
   };
 
@@ -71,26 +64,14 @@ export function createSyntheticsPrivateLocationApi(
     await fleetApi.internal.setup();
 
     try {
-      await kbnClient.request({
-        path: '/api/fleet/epm/packages/synthetics',
-        method: 'DELETE',
-        headers: fleetHeaders,
-      });
+      await fleetApi.integration.delete('synthetics');
     } catch {
       // Ignore — package may not be installed yet
     }
-    await kbnClient.request({
-      path: `/api/fleet/epm/packages/synthetics/${resolvedVersion}`,
-      method: 'POST',
-      body: { force: true },
-      headers: fleetHeaders,
-    });
 
-    const { data } = await kbnClient.request<{ item?: { version: string } }>({
-      path: '/api/fleet/epm/packages/synthetics',
-      method: 'GET',
-      headers: fleetHeaders,
-    });
+    await fleetApi.integration.installPackage('synthetics', resolvedVersion);
+
+    const { data } = await fleetApi.integration.getPackage('synthetics');
     const installedVersion = data?.item?.version ?? DEFAULT_SYNTHETICS_VERSION;
     if (installedVersion !== resolvedVersion) {
       throw new Error(
