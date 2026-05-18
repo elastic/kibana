@@ -93,6 +93,8 @@ params:
         with:
           method: POST
           path: ${ALERT_ANALYSIS_GET_RELATED_ALERTS_API_PATH}
+          headers:
+            elastic-api-version: "1"
           body:
             alertId: "<alert-id>"
             timeWindowHours: 24

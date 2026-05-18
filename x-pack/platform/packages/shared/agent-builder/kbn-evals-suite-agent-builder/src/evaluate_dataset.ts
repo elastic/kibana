@@ -159,9 +159,7 @@ const extractWorkflowExecuteStepRecords = (output: TaskOutput): WorkflowExecuteS
       const results = Array.isArray(s.results) ? s.results : [];
       const firstResult = results.find((r): r is Record<string, unknown> => isRecord(r));
       const data =
-        firstResult && isRecord(firstResult.data)
-          ? (firstResult.data as Record<string, unknown>)
-          : null;
+        firstResult && isRecord(firstResult.data) ? (firstResult.data as Record<string, unknown>) : null;
       return {
         index,
         params: isRecord(s.params) ? (s.params as Record<string, unknown>) : null,
@@ -272,7 +270,8 @@ function configureExperiment({
       getToolCallSteps(output as TaskOutput)
         .map((s) => s.tool_id)
         .filter((id): id is string => Boolean(id) && !TRAJECTORY_INFRA_TOOL_IDS.has(id!)),
-    goldenPathExtractor: (expected) => (expected as DatasetExample['output'])?.tool_sequence ?? [],
+    goldenPathExtractor: (expected) =>
+      (expected as DatasetExample['output'])?.tool_sequence ?? [],
     orderWeight: 0.6,
     coverageWeight: 0.4,
   });
@@ -288,7 +287,31 @@ function configureExperiment({
           explanation: 'No tool_sequence golden defined for this example — skipping trajectory.',
         };
       }
-      return baseTrajectoryEvaluator.evaluate(args);
+      const result = await baseTrajectoryEvaluator.evaluate(args);
+      // Attach the actual agent tool sequence + golden + a coverage/order
+      // breakdown to evaluator metadata so per-example 0 scores are
+      // debuggable from the eval ES export without re-running. The Scout
+      // tabular summary only carries mean/median/std/min/max; the metadata
+      // field is the only artefact that survives at per-example resolution.
+      const agentToolSequence = getToolCallSteps(args.output as TaskOutput)
+        .map((s) => s.tool_id)
+        .filter((id): id is string => Boolean(id) && !TRAJECTORY_INFRA_TOOL_IDS.has(id!));
+      const goldenSet = new Set(golden);
+      const agentSet = new Set(agentToolSequence);
+      const matched = [...goldenSet].filter((t) => agentSet.has(t));
+      const missing = [...goldenSet].filter((t) => !agentSet.has(t));
+      const extra = [...agentSet].filter((t) => !goldenSet.has(t));
+      return {
+        ...result,
+        metadata: {
+          ...((result as { metadata?: unknown }).metadata as Record<string, unknown> | undefined),
+          agentToolSequence,
+          goldenToolSequence: golden,
+          matched,
+          missing,
+          extra,
+        },
+      };
     },
   };
 
@@ -576,21 +599,43 @@ function configureExperiment({
           return { score: null, label: 'not_applicable' };
         }
 
+        // Primitive-A awareness: discovery only matters when at least ONE
+        // workflow_execute_step call was actually blocked (data.blocked === true).
+        // When every call executed cleanly — typical when the allow-list
+        // covers all the agent's targets — the agent had no signal that
+        // it needed to backtrack via get_step_definitions, so scoring this
+        // example 0 would unfairly penalise the very behaviour Primitive A
+        // is designed to produce. Return `not_applicable` instead and let
+        // ExpectedSkillInvocation / ExpectedToolCalled handle correctness.
+        const blockedRecords = records.filter((r) => r.data?.blocked === true);
+        if (blockedRecords.length === 0) {
+          return {
+            score: null,
+            label: 'not_applicable_no_blocked_steps',
+            metadata: {
+              workflowCallCount: records.length,
+              blockedCallCount: 0,
+              note: 'All workflow_execute_step calls executed (no block); discovery-first not required.',
+            },
+          };
+        }
+
         // Canary metric for whether the LLM is exercising B3's auto-schema
         // feature: was platform.workflows.get_step_definitions called BEFORE
-        // the first workflow_execute_step in the same trace? Counts the
-        // proportion of workflow_execute_step calls preceded by a discovery
-        // call so multi-call traces are not penalised for caching the schema
-        // after the first lookup.
+        // the first BLOCKED workflow_execute_step in the same trace? Counts
+        // the proportion of blocked calls preceded by a discovery call so
+        // multi-call traces are not penalised for caching the schema after
+        // the first lookup.
         const firstDiscoveryIdx = firstGetStepDefinitionsIndex(output as TaskOutput);
-        const precededCount = records.filter(
+        const precededCount = blockedRecords.filter(
           (r) => firstDiscoveryIdx !== null && firstDiscoveryIdx < r.index
         ).length;
 
         return {
-          score: precededCount / records.length,
+          score: precededCount / blockedRecords.length,
           metadata: {
             workflowCallCount: records.length,
+            blockedCallCount: blockedRecords.length,
             firstGetStepDefinitionsIndex: firstDiscoveryIdx,
             precededByDiscoveryCount: precededCount,
           },
@@ -773,8 +818,9 @@ export function createEvaluateDataset({
     // signal without crashing the box. The env var EVALUATION_CONCURRENCY can
     // override the default if a beefier env wants the original throughput.
     const concurrencyFromEnv = parseInt(process.env.EVALUATION_CONCURRENCY || '', 10);
-    const concurrency =
-      Number.isFinite(concurrencyFromEnv) && concurrencyFromEnv > 0 ? concurrencyFromEnv : 2;
+    const concurrency = Number.isFinite(concurrencyFromEnv) && concurrencyFromEnv > 0
+      ? concurrencyFromEnv
+      : 2;
 
     await executorClient.runExperiment(
       {
