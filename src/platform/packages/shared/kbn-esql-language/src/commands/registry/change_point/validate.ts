@@ -57,12 +57,10 @@ export const validate = (
 
   messages.push(
     ...validateCommandArguments(
-      // exclude AS and BY options from generic validation
+      // exclude AS option from generic validation
       {
         ...changePointCommand,
-        args: changePointCommand.args.filter(
-          (arg) => !(isOptionNode(arg) && (arg.name === 'as' || arg.name === 'by'))
-        ),
+        args: changePointCommand.args.filter((arg) => !(isOptionNode(arg) && arg.name === 'as')),
       },
       ast,
       context,

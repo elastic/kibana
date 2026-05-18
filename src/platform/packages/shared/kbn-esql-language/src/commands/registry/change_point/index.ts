@@ -34,8 +34,6 @@ export const changePointCommand: ICommand = {
     examples: [
       '… | CHANGE_POINT value',
       '… | CHANGE_POINT value ON timestamp',
-      '… | CHANGE_POINT value ON timestamp BY category',
-      '… | CHANGE_POINT value ON timestamp BY host, response.keyword',
       '… | CHANGE_POINT value ON timestamp AS type, pvalue',
       '… | CHANGE_POINT value ON timestamp AS type, pvalue BY host',
     ],
