@@ -207,7 +207,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
 
   const methods = useForm<ComposeFormValues>({ mode: 'onBlur', defaultValues });
 
-  const { draft, setDraft, syncDraft } = useSandboxDraft(methods);
+  const { draft, setDraft, syncForm } = useSandboxDraft(methods);
 
   /*
    * Split-query completion for alert and recovery block editors. Registered at
@@ -286,7 +286,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
     const result = parseYamlToFormValues(yaml);
     if (result.values) {
       methods.reset(formValuesFromYamlToCompose(result.values));
-      syncDraft();
+      syncForm();
     }
   }, YAML_PARSE_DEBOUNCE_OPTIONS);
 
@@ -308,16 +308,16 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
         if (result.values) {
           const compose = formValuesFromYamlToCompose(result.values);
           methods.reset(compose);
-          syncDraft();
+          syncForm();
           dispatch({ type: 'COMMIT_QUERY' });
         }
-        // No syncDraft() on parse-failure path: the debounced parse always calls
-        // methods.reset() + syncDraft() together, so RHF and draft are already in
+        // No syncForm() on parse-failure path: the debounced parse always calls
+        // methods.reset() + syncForm() together, so RHF and draft are already in
         // sync at the last valid parse state. The current yamlText simply can't be applied.
       }
       dispatch({ type: 'SET_YAML_MODE', enabled });
     },
-    [cancelYamlParse, methods, yamlText, syncDraft, dispatch]
+    [cancelYamlParse, methods, yamlText, syncForm, dispatch]
   );
 
   const handleSandboxApply = useCallback(() => {
@@ -354,7 +354,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
     const result = parseYamlToFormValues(yamlText);
     if (result.values) {
       methods.reset(formValuesFromYamlToCompose(result.values));
-      // No syncDraft() here: draft is temporarily stale after methods.reset(), but
+      // No syncForm() here: draft is temporarily stale after methods.reset(), but
       // we're about to submit. On success the flyout closes; on failure the user is still
       // in YAML mode and handleToggleYamlMode(false) will resync draft when they switch back.
     }

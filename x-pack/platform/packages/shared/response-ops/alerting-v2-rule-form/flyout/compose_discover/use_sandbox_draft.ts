@@ -40,9 +40,9 @@ export const useSandboxDraft = (methods: UseFormReturn<ComposeFormValues>) => {
     dateEnd: 'now',
   }));
 
-  const syncDraft = useCallback(() => {
+  const syncForm = useCallback(() => {
     setDraft((d) => ({ ...d, ...queryToDraftFields(methods.getValues('query')) }));
   }, [methods]);
 
-  return { draft, setDraft, syncDraft };
+  return { draft, setDraft, syncForm };
 };
