@@ -17,6 +17,7 @@ export interface StreamLinkContentProps {
   error: Error | undefined;
   locator: StreamsAppLocator;
   renderCpsWarning?: boolean;
+  remoteProject?: string;
 }
 
 export const StreamLinkContent = ({
@@ -26,6 +27,7 @@ export const StreamLinkContent = ({
   error,
   locator,
   renderCpsWarning,
+  remoteProject,
 }: StreamLinkContentProps) => {
   if (loading) return <EuiLoadingSpinner size="s" />;
 
@@ -38,7 +40,9 @@ export const StreamLinkContent = ({
           <EuiText size="xs">{name}</EuiText>
         </EuiLink>
       ) : (
-        <EuiText size="xs">{name}</EuiText>
+        <EuiText size="xs">
+          {name} {remoteProject ? `(Remote project: ${remoteProject})` : ''}
+        </EuiText>
       )}
       {renderCpsWarning && <CpsWarningIcon existsLocally={existsLocally ?? false} />}
     </EuiFlexGroup>

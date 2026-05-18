@@ -42,6 +42,7 @@ import type { FeaturesRegistry } from '../../../common';
 export interface ObservabilityStreamsFeatureRenderDeps {
   doc: DataTableRecord;
   dataView: DataView;
+  cpsHasLinkedProjects?: boolean;
   renderCpsWarning?: boolean;
 }
 

@@ -9,6 +9,12 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import { useAbortableAsync } from '@kbn/react-hooks';
 import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 
+export interface ResolvedDefinitionName {
+  name?: string;
+  existsLocally: boolean;
+  remoteProject?: string;
+}
+
 export function useResolvedDefinitionName({
   streamsRepositoryClient,
   index,
@@ -21,7 +27,7 @@ export function useResolvedDefinitionName({
   cpsHasLinkedProjects?: boolean;
 }) {
   return useAbortableAsync(
-    async ({ signal }) => {
+    async ({ signal }): Promise<ResolvedDefinitionName | undefined> => {
       if (!index) {
         if (!fallbackStreamName) {
           return undefined;
@@ -38,22 +44,48 @@ export function useResolvedDefinitionName({
         } catch {
           return { name: fallbackStreamName, existsLocally: false };
         }
-      }
-      const definition = await streamsRepositoryClient.fetch(
-        'GET /internal/streams/_resolve_index',
-        {
-          signal,
-          params: {
-            query: {
-              index,
-            },
-          },
+      } else {
+        try {
+          const definition = await streamsRepositoryClient.fetch(
+            'GET /internal/streams/_resolve_index',
+            {
+              signal,
+              params: {
+                query: {
+                  index,
+                },
+              },
+            }
+          );
+          return { name: definition?.stream?.name, existsLocally: true };
+        } catch {
+          const remoteInfo = parseRemoteIndex(index);
+          if (remoteInfo) {
+            return {
+              name: remoteInfo.streamName,
+              existsLocally: false,
+              remoteProject: remoteInfo.projectName,
+            };
+          }
+          return { name: fallbackStreamName, existsLocally: false };
         }
-      );
-      return { name: definition?.stream?.name, existsLocally: true };
+      }
     },
     [streamsRepositoryClient, index, fallbackStreamName, cpsHasLinkedProjects]
   );
+}
+
+function parseRemoteIndex(index: string): { projectName: string; streamName: string } | undefined {
+  const colonIdx = index.indexOf(':');
+  if (colonIdx <= 0) return undefined;
+
+  const projectName = index.substring(0, colonIdx);
+  const backingIndex = index.substring(colonIdx + 1);
+
+  const match = backingIndex.match(/^\.ds-(.+)-\d{4}\.\d{2}\.\d{2}-\d+$/);
+  if (!match) return undefined;
+
+  return { projectName, streamName: match[1] };
 }
 
 export function adaptDocToResolverInputs(doc: DataTableRecord) {

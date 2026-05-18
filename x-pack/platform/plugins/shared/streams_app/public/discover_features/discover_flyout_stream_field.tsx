@@ -21,6 +21,7 @@ export interface DiscoverFlyoutStreamFieldProps {
   doc: DataTableRecord;
   streamsRepositoryClient: StreamsRepositoryClient;
   locator: StreamsAppLocator;
+  cpsHasLinkedProjects?: boolean;
   renderCpsWarning?: boolean;
 }
 
@@ -41,6 +42,7 @@ function DiscoverFlyoutStreamFieldContent({
   streamsRepositoryClient,
   doc,
   locator,
+  cpsHasLinkedProjects,
   renderCpsWarning,
 }: DiscoverFlyoutStreamFieldProps) {
   const { index, fallbackStreamName } = adaptDocToResolverInputs(doc);
@@ -48,7 +50,7 @@ function DiscoverFlyoutStreamFieldContent({
     streamsRepositoryClient,
     index,
     fallbackStreamName,
-    cpsHasLinkedProjects: renderCpsWarning,
+    cpsHasLinkedProjects,
   });
 
   return (
@@ -59,6 +61,7 @@ function DiscoverFlyoutStreamFieldContent({
       error={error}
       locator={locator}
       renderCpsWarning={renderCpsWarning}
+      remoteProject={value?.remoteProject}
     />
   );
 }

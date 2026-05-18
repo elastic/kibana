@@ -117,6 +117,7 @@ const LogOverviewTab = ({
       renderAIInsight={logsAIInsightFeature?.render}
       renderFlyoutStreamField={streamsFeature?.renderFlyoutStreamField}
       renderFlyoutStreamProcessingLink={streamsFeature?.renderFlyoutStreamProcessingLink}
+      cpsHasLinkedProjects={cpsHasLinkedProjects}
       renderCpsWarning={renderCpsWarning}
       indexes={indexes}
       profileId={OBSERVABILITY_LOG_DOCUMENT_PROFILE_ID}
