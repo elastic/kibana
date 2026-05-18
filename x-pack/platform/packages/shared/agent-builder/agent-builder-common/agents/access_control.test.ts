@@ -374,19 +374,24 @@ describe('canCurrentUserEditAgent', () => {
 });
 
 describe('ACL-aware authorization', () => {
-  const owner: UserIdAndName = { id: 'owner-id', username: 'alice' };
+  // Renamed from `owner` to `aliceOwner` to avoid shadowing the module-scope
+  // `owner` declared at the top of this file. The ACL-aware suite needs a
+  // distinct owner whose username ("alice") is referenced explicitly in tests
+  // (e.g. when constructing a matching currentUser), so it can't reuse the
+  // outer fixture as-is.
+  const aliceOwner: UserIdAndName = { id: 'owner-id', username: 'alice' };
   const bob: CurrentUser = { id: 'bob-id', username: 'bob', roles: ['analyst'] };
   const carol: CurrentUser = { id: 'carol-id', username: 'carol', roles: ['viewer_role'] };
   const noOne: CurrentUser = { id: 'no-id', username: 'no-one', roles: [] };
 
-  const aclWith = (...entries: AgentAcl['entries']): AgentAcl => ({ entries, version: 0 });
+  const aclWith = (...entries: AgentAcl['entries']): AgentAcl => ({ entries });
 
   describe('getEffectiveAgentRole', () => {
     test('returns "admin" when isAdmin', () => {
       expect(
         getEffectiveAgentRole({
           visibility: AgentVisibility.Private,
-          owner,
+          owner: aliceOwner,
           currentUser: bob,
           isAdmin: true,
         })
@@ -397,7 +402,7 @@ describe('ACL-aware authorization', () => {
       expect(
         getEffectiveAgentRole({
           visibility: AgentVisibility.Private,
-          owner,
+          owner: aliceOwner,
           currentUser: { id: 'owner-id', username: 'alice' },
           isAdmin: false,
         })
@@ -408,7 +413,7 @@ describe('ACL-aware authorization', () => {
       expect(
         getEffectiveAgentRole({
           visibility: AgentVisibility.Private,
-          owner,
+          owner: aliceOwner,
           currentUser: bob,
           isAdmin: false,
         })
@@ -419,7 +424,7 @@ describe('ACL-aware authorization', () => {
       expect(
         getEffectiveAgentRole({
           visibility: AgentVisibility.Private,
-          owner,
+          owner: aliceOwner,
           acl: aclWith({ type: 'user', name: 'bob', role: AgentAclRole.User }),
           currentUser: bob,
           isAdmin: false,
@@ -431,7 +436,7 @@ describe('ACL-aware authorization', () => {
       expect(
         getEffectiveAgentRole({
           visibility: AgentVisibility.Private,
-          owner,
+          owner: aliceOwner,
           // type=user but the value is "analyst" — must not cross-match against bob.roles=['analyst'].
           acl: aclWith({ type: 'user', name: 'analyst', role: AgentAclRole.Manager }),
           currentUser: bob,
@@ -444,7 +449,7 @@ describe('ACL-aware authorization', () => {
       expect(
         getEffectiveAgentRole({
           visibility: AgentVisibility.Private,
-          owner,
+          owner: aliceOwner,
           acl: aclWith(
             { type: 'user', name: 'bob', role: AgentAclRole.User },
             { type: 'user', name: 'bob', role: AgentAclRole.Manager }
@@ -459,7 +464,7 @@ describe('ACL-aware authorization', () => {
       expect(
         getEffectiveAgentRole({
           visibility: AgentVisibility.Public,
-          owner,
+          owner: aliceOwner,
           currentUser: bob,
           isAdmin: false,
         })
@@ -470,7 +475,7 @@ describe('ACL-aware authorization', () => {
       expect(
         getEffectiveAgentRole({
           visibility: AgentVisibility.Shared,
-          owner,
+          owner: aliceOwner,
           currentUser: bob,
           isAdmin: false,
         })
@@ -482,7 +487,7 @@ describe('ACL-aware authorization', () => {
       expect(
         getEffectiveAgentRole({
           visibility: AgentVisibility.Public,
-          owner,
+          owner: aliceOwner,
           acl: aclWith({ type: 'user', name: 'bob', role: AgentAclRole.Manager }),
           currentUser: bob,
           isAdmin: false,
@@ -493,7 +498,7 @@ describe('ACL-aware authorization', () => {
     test('legacy agent (no visibility, no ACL) treats as Public Editor', () => {
       expect(
         getEffectiveAgentRole({
-          owner,
+          owner: aliceOwner,
           currentUser: bob,
           isAdmin: false,
         })
@@ -504,7 +509,7 @@ describe('ACL-aware authorization', () => {
   describe('hierarchy checks', () => {
     const privateAgent = {
       visibility: AgentVisibility.Private,
-      owner,
+      owner: aliceOwner,
       isAdmin: false,
     };
 
@@ -550,7 +555,7 @@ describe('ACL-aware authorization', () => {
       expect(
         canDeleteAgent({
           visibility: AgentVisibility.Public,
-          owner,
+          owner: aliceOwner,
           acl,
           currentUser: carol,
           isAdmin: false,
@@ -561,7 +566,7 @@ describe('ACL-aware authorization', () => {
     test('owner is implicitly Manager regardless of ACL', () => {
       const args = {
         visibility: AgentVisibility.Private,
-        owner,
+        owner: aliceOwner,
         currentUser: { id: 'owner-id', username: 'alice' } as CurrentUser,
         isAdmin: false,
       };
@@ -585,7 +590,7 @@ describe('ACL-aware authorization', () => {
       expect(
         canManageAgentAcl({
           visibility: AgentVisibility.Private,
-          owner,
+          owner: aliceOwner,
           currentUser: { id: 'owner-id', username: 'alice' },
           isAdmin: false,
         })
@@ -596,7 +601,7 @@ describe('ACL-aware authorization', () => {
       expect(
         canManageAgentAcl({
           visibility: AgentVisibility.Private,
-          owner,
+          owner: aliceOwner,
           currentUser: bob,
           isAdmin: false,
         })
@@ -607,7 +612,7 @@ describe('ACL-aware authorization', () => {
       expect(
         canManageAgentAcl({
           visibility: AgentVisibility.Private,
-          owner,
+          owner: aliceOwner,
           acl: aclWith({ type: 'user', name: 'bob', role: AgentAclRole.Editor }),
           currentUser: bob,
           isAdmin: false,
@@ -619,7 +624,7 @@ describe('ACL-aware authorization', () => {
       expect(
         canManageAgentAcl({
           visibility: AgentVisibility.Private,
-          owner,
+          owner: aliceOwner,
           acl: aclWith({ type: 'user', name: 'bob', role: AgentAclRole.Manager }),
           currentUser: bob,
           isAdmin: false,
@@ -631,7 +636,7 @@ describe('ACL-aware authorization', () => {
       expect(
         canManageAgentAcl({
           visibility: AgentVisibility.Public,
-          owner,
+          owner: aliceOwner,
           currentUser: bob,
           isAdmin: false,
         })
@@ -642,7 +647,7 @@ describe('ACL-aware authorization', () => {
       expect(
         canManageAgentAcl({
           visibility: AgentVisibility.Private,
-          owner,
+          owner: aliceOwner,
           currentUser: bob,
           isAdmin: true,
         })
@@ -654,7 +659,7 @@ describe('ACL-aware authorization', () => {
         canManageAgentAcl({
           agentId: agentBuilderDefaultAgentId,
           visibility: AgentVisibility.Public,
-          owner,
+          owner: aliceOwner,
           currentUser: bob,
           isAdmin: true,
         })
@@ -666,7 +671,7 @@ describe('ACL-aware authorization', () => {
         canManageAgentAcl({
           agentId: agentBuilderDefaultAgentId,
           visibility: AgentVisibility.Public,
-          owner,
+          owner: aliceOwner,
           currentUser: { id: 'owner-id', username: 'alice' },
           isAdmin: false,
         })
@@ -680,7 +685,7 @@ describe('ACL-aware authorization', () => {
         canChangeAgentVisibility({
           agentId: agentBuilderDefaultAgentId,
           visibility: AgentVisibility.Private,
-          owner,
+          owner: aliceOwner,
           acl: aclWith({ type: 'user', name: 'bob', role: AgentAclRole.Manager }),
           currentUser: bob,
           isAdmin: false,
@@ -693,7 +698,7 @@ describe('ACL-aware authorization', () => {
         canChangeAgentVisibility({
           agentId: 'custom-agent',
           visibility: AgentVisibility.Private,
-          owner,
+          owner: aliceOwner,
           acl: aclWith({ type: 'user', name: 'bob', role: AgentAclRole.Manager }),
           currentUser: bob,
           isAdmin: false,
