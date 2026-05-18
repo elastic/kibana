@@ -6,7 +6,9 @@
  */
 
 import { ToolType } from '@kbn/agent-builder-common';
-import { AlertEventSchema, BaseEventSchema, builtInTriggerDefinitions } from '@kbn/workflows';
+import { builtInTriggerDefinitions } from '@kbn/workflows';
+import { BaseEventSchema } from '@kbn/workflows/spec/schema/common/base_event';
+import { AlertEventSchema } from '@kbn/workflows/spec/schema/triggers/alert_trigger_schema';
 import { z } from '@kbn/zod/v4';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import { workflowTools } from '../../common/constants';
