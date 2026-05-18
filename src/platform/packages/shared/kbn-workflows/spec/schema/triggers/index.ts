@@ -26,6 +26,8 @@ export const TriggerSchema = z.discriminatedUnion('type', [
   ManualTriggerSchema,
 ]);
 
+export type Trigger = z.infer<typeof TriggerSchema>;
+
 /** Allowed values for `on.workflowEvents` on custom (event-driven) triggers. */
 const WORKFLOW_EVENTS_VALUES = ['ignore', 'allow-all', 'avoid-loop'] as const;
 export type WorkflowEventsValue = (typeof WORKFLOW_EVENTS_VALUES)[number];
