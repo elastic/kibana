@@ -87,6 +87,20 @@ function normalizeRows(
 }
 
 /**
+ * Result of comparing two multisets of serialised rows.
+ *
+ * Both the Jaccard score and the raw intersection count come out of a
+ * single pass over the row bags — callers that need both (e.g. the
+ * evaluator's `metadata.intersectionRowCount`) should reuse the same
+ * struct instead of recomputing the maps.
+ */
+interface RowMultisetComparison {
+  intersectionSize: number;
+  unionSize: number;
+  jaccard: number;
+}
+
+/**
  * Compute Jaccard similarity over two multisets of serialised rows.
  *
  * Jaccard = |intersection| / |union|
@@ -94,31 +108,34 @@ function normalizeRows(
  * Multiset intersection: for each unique row, count min(gold, candidate).
  * Multiset union: total_gold + total_candidate - intersection.
  *
- * Returns 1 when both sets are empty (vacuously equivalent).
+ * Returns a `jaccard` of 1 (and zero intersection / union) when both
+ * sets are empty (vacuously equivalent).
  */
-function jaccardMultiset(goldRows: string[], candidateRows: string[]): number {
+function compareRowMultisets(goldRows: string[], candidateRows: string[]): RowMultisetComparison {
   if (goldRows.length === 0 && candidateRows.length === 0) {
-    return 1;
+    return { intersectionSize: 0, unionSize: 0, jaccard: 1 };
   }
 
   const goldCounts = new Map<string, number>();
-  const candidateCounts = new Map<string, number>();
-
   for (const row of goldRows) {
     goldCounts.set(row, (goldCounts.get(row) ?? 0) + 1);
   }
+  const candidateCounts = new Map<string, number>();
   for (const row of candidateRows) {
     candidateCounts.set(row, (candidateCounts.get(row) ?? 0) + 1);
   }
 
   let intersectionSize = 0;
   for (const [row, goldCount] of goldCounts) {
-    const candidateCount = candidateCounts.get(row) ?? 0;
-    intersectionSize += Math.min(goldCount, candidateCount);
+    intersectionSize += Math.min(goldCount, candidateCounts.get(row) ?? 0);
   }
 
   const unionSize = goldRows.length + candidateRows.length - intersectionSize;
-  return unionSize === 0 ? 1 : intersectionSize / unionSize;
+  return {
+    intersectionSize,
+    unionSize,
+    jaccard: unionSize === 0 ? 1 : intersectionSize / unionSize,
+  };
 }
 
 function labelFromScore(score: number): string {
@@ -272,20 +289,15 @@ export function createEsqlResultEquivalenceEvaluator<
       const goldRowCount = goldRows.length;
       const candidateRowCount = candidateRows.length;
 
-      const goldCounts = new Map<string, number>();
-      for (const row of goldRows) {
-        goldCounts.set(row, (goldCounts.get(row) ?? 0) + 1);
-      }
-      const candidateCounts = new Map<string, number>();
-      for (const row of candidateRows) {
-        candidateCounts.set(row, (candidateCounts.get(row) ?? 0) + 1);
-      }
-      let intersectionRowCount = 0;
-      for (const [row, gc] of goldCounts) {
-        intersectionRowCount += Math.min(gc, candidateCounts.get(row) ?? 0);
-      }
-
-      const jaccard = jaccardMultiset(goldRows, candidateRows);
+      // Single pass over the row bags — `compareRowMultisets` builds the
+      // gold / candidate count maps and computes the intersection in one
+      // sweep, so the evaluator can reuse `intersectionSize` for the
+      // `metadata.intersectionRowCount` field without re-traversing the
+      // rows three times.
+      const { intersectionSize: intersectionRowCount, jaccard } = compareRowMultisets(
+        goldRows,
+        candidateRows
+      );
 
       const explanation =
         jaccard === 1
