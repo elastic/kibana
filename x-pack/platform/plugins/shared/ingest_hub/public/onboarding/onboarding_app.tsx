@@ -8,9 +8,20 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
+import { Router, Route } from '@kbn/shared-ux-router';
+
+import { OnboardingShell } from './onboarding_shell';
 
 export function renderOnboardingApp(coreStart: CoreStart, params: AppMountParameters) {
   const root = createRoot(params.element);
-  root.render(coreStart.rendering.addContext(<div data-test-subj="onboardingApp">Onboarding</div>));
+  root.render(
+    coreStart.rendering.addContext(
+      <Router history={params.history}>
+        <Route path="/:integrationId">
+          <OnboardingShell />
+        </Route>
+      </Router>
+    )
+  );
   return () => root.unmount();
 }
