@@ -213,10 +213,6 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown, true);
   }, [run]);
 
-  const handleDone = useCallback(() => {
-    onApply?.();
-  }, [onApply]);
-
   const gridColumns: EuiDataGridColumn[] = useMemo(
     () =>
       columns.map((col) => ({
@@ -463,7 +459,7 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
-              <EuiButton fill onClick={handleDone} data-test-subj="composeDiscoverChildDone">
+              <EuiButton fill onClick={onApply} data-test-subj="composeDiscoverChildDone">
                 Apply changes
               </EuiButton>
             </EuiFlexItem>
