@@ -12,6 +12,14 @@ spaceTest.describe(
   'Attacks execution with EIS inference connector',
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
+    spaceTest.beforeAll(async ({ scoutSpace }) => {
+      await scoutSpace.savedObjects.cleanStandardList();
+    });
+
+    spaceTest.afterAll(async ({ scoutSpace }) => {
+      await scoutSpace.savedObjects.cleanStandardList();
+    });
+
     spaceTest(
       'successfully executes manual _generate endpoint without "Saved object not found" error',
       async ({ kbnClient, scoutSpace }) => {

@@ -15,7 +15,8 @@ spaceTest.describe(
   'Attacks UI manual execution smoke',
   { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
-    spaceTest.beforeAll(async ({ apiServices }) => {
+    spaceTest.beforeAll(async ({ apiServices, scoutSpace }) => {
+      await scoutSpace.savedObjects.cleanStandardList();
       // Seed data so the Run button is available in the header
       await apiServices.attackDiscovery.seedAttackData();
     });
@@ -24,11 +25,15 @@ spaceTest.describe(
       await scoutSpace.uiSettings.set({
         [ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING]: true,
       });
-      await browserAuth.loginAsAdmin();
+      await browserAuth.loginAsPlatformEngineer();
     });
 
     spaceTest.afterEach(async ({ scoutSpace }) => {
       await scoutSpace.uiSettings.unset(ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING);
+    });
+
+    spaceTest.afterAll(async ({ scoutSpace }) => {
+      await scoutSpace.savedObjects.cleanStandardList();
     });
 
     spaceTest(
@@ -97,9 +102,8 @@ spaceTest.describe(
         expect(postData?.subAction).toBe('invokeAI');
 
         // Verify a toast appears indicating generation started
-        const toasts = page.locator('.euiGlobalToastList');
-        await expect(toasts).toBeVisible();
-        await expect(toasts).toContainText('started');
+        await expect(detectionsAttackDiscoveryPage.globalToastList).toBeVisible();
+        await expect(detectionsAttackDiscoveryPage.globalToastList).toContainText('started');
       }
     );
   }

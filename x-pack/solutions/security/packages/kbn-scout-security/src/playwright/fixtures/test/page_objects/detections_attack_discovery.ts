@@ -68,6 +68,7 @@ export class DetectionsAttackDiscoveryPage {
   public settingsButton: Locator;
   public generateButton: Locator;
   public runButton: Locator;
+  public globalToastList: Locator;
 
   constructor(private readonly page: ScoutPage, _config: ScoutTestConfig) {
     this.attacksPageContent = this.page.testSubj.locator(ATTACKS_PAGE_CONTENT_TEST_ID);
@@ -100,6 +101,7 @@ export class DetectionsAttackDiscoveryPage {
     this.settingsButton = this.page.testSubj.locator('settings');
     this.generateButton = this.page.testSubj.locator('generate');
     this.runButton = this.page.testSubj.locator('run');
+    this.globalToastList = this.page.testSubj.locator('globalToastList');
 
     if (_config.serverless) {
       this.standaloneAlertsNavItem = this.page.testSubj.locator(
