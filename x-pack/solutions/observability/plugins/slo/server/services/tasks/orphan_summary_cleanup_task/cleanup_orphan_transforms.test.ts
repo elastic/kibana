@@ -157,9 +157,7 @@ describe('cleanupOrphanTransforms', () => {
 
     soClient.find.mockResolvedValueOnce({
       total: 1,
-      saved_objects: [
-        { id: 'so-1', attributes: { id: 'my-slo', revision: 2, enabled: true } },
-      ],
+      saved_objects: [{ id: 'so-1', attributes: { id: 'my-slo', revision: 2, enabled: true } }],
       page: 1,
       per_page: 1,
     } as any);
@@ -193,9 +191,7 @@ describe('cleanupOrphanTransforms', () => {
     soClient.find
       .mockResolvedValueOnce({
         total: 1,
-        saved_objects: [
-          { id: 'so-1', attributes: { id: 'slo1', revision: 1, enabled: true } },
-        ],
+        saved_objects: [{ id: 'so-1', attributes: { id: 'slo1', revision: 1, enabled: true } }],
         page: 1,
         per_page: 1,
       } as any)
@@ -236,10 +232,7 @@ describe('cleanupOrphanTransforms', () => {
     );
 
     await expect(
-      cleanupOrphanTransforms(
-        {},
-        { esClient, soClient: soClient as any, logger, abortController }
-      )
+      cleanupOrphanTransforms({}, { esClient, soClient: soClient as any, logger, abortController })
     ).resolves.toBeUndefined();
 
     expect(logger.debug).toHaveBeenCalledWith('Orphan transforms cleanup aborted');
@@ -249,10 +242,7 @@ describe('cleanupOrphanTransforms', () => {
     esClient.transform.getTransformStats.mockRejectedValueOnce(new Error('Network error'));
 
     await expect(
-      cleanupOrphanTransforms(
-        {},
-        { esClient, soClient: soClient as any, logger, abortController }
-      )
+      cleanupOrphanTransforms({}, { esClient, soClient: soClient as any, logger, abortController })
     ).rejects.toThrow('Network error');
   });
 
@@ -299,9 +289,7 @@ describe('cleanupOrphanTransforms', () => {
 
     soClient.find.mockResolvedValueOnce({
       total: 1,
-      saved_objects: [
-        { id: 'so-1', attributes: { id: 'my-slo', revision: 1, enabled: true } },
-      ],
+      saved_objects: [{ id: 'so-1', attributes: { id: 'my-slo', revision: 1, enabled: true } }],
       page: 1,
       per_page: 1,
     } as any);

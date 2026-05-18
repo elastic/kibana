@@ -133,9 +133,7 @@ export async function cleanupOrphanTransforms(
         });
 
         if (disabledButRunning.length > 0) {
-          logger.debug(
-            `Stopping ${disabledButRunning.length} transforms for disabled SLOs`
-          );
+          logger.debug(`Stopping ${disabledButRunning.length} transforms for disabled SLOs`);
 
           for (const { transformId } of disabledButRunning) {
             try {
