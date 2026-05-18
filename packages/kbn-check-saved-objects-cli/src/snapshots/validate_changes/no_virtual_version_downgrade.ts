@@ -18,7 +18,7 @@ export function getVirtualVersionFromRecord(record: MigrationInfoRecord | undefi
     return DEFAULT_VIRTUAL_VERSION;
   }
   const latest = record.modelVersions.reduce((max, { version }) => {
-    const parsed = Number(version);
+    const parsed = parseInt(version, 10);
     return parsed > max ? parsed : max;
   }, 0);
   return latest === 0 ? DEFAULT_VIRTUAL_VERSION : `10.${latest}.0`;

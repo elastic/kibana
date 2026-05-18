@@ -36,7 +36,6 @@ export const validateSOChanges: Task = (ctx, task) => {
     {
       title: 'Ensure no virtual-version downgrade',
       task: () => validateNoVirtualVersionDowngrade({ from: ctx.from!, to: ctx.to! }),
-      skip: () => !ctx.from || !ctx.to,
     },
     {
       title: 'Validate new SO types',
