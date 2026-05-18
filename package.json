@@ -1321,7 +1321,6 @@
     "@opentelemetry/instrumentation-undici": "0.26.0",
     "@opentelemetry/otlp-exporter-base": "0.216.0",
     "@opentelemetry/otlp-transformer": "0.216.0",
-    "@opentelemetry/resources": "2.7.1",
     "@opentelemetry/sdk-logs": "0.216.0",
     "@opentelemetry/semantic-conventions": "1.40.0",
     "@reduxjs/toolkit": "1.9.7",
