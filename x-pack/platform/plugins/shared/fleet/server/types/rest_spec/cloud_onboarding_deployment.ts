@@ -85,12 +85,10 @@ const CloudOnboardingDeploymentItemSchema = schema.object({
   statusMessage: schema.maybe(
     schema.string({ meta: { description: 'Error context when status is failed.' } })
   ),
-  attemptCount: schema.maybe(
-    schema.number({
-      min: 1,
-      meta: { description: 'Number of deployment attempts, including the current one.' },
-    })
-  ),
+  attemptCount: schema.number({
+    min: 1,
+    meta: { description: 'Number of deployment attempts, including the current one.' },
+  }),
   vars: schema.maybe(
     schema.recordOf(schema.string(), schema.string(), {
       meta: { description: 'Deployment-level plaintext config (e.g. role_arn, api_key_id).' },
@@ -113,8 +111,6 @@ const CloudOnboardingDeploymentItemSchema = schema.object({
       },
     })
   ),
-  createdAt: schema.string(),
-  updatedAt: schema.string(),
 });
 
 const SingleItemResponseSchema = schema.object({ item: CloudOnboardingDeploymentItemSchema });

@@ -82,6 +82,12 @@ export const CloudOnboardingDeploymentDebugger: React.FunctionComponent = () => 
   const [getByIdResult, setGetByIdResult] = useState<string>('');
   const [getByIdError, setGetByIdError] = useState<string>('');
 
+  const [setDeployingIdValue, setSetDeployingIdValue] = useState<string>('');
+  const [setDeployingDeploymentId, setSetDeployingDeploymentId] = useState<string>('');
+  const [setDeployingDeploymentName, setSetDeployingDeploymentName] = useState<string>('');
+  const [setDeployingResult, setSetDeployingResult] = useState<string>('');
+  const [setDeployingError, setSetDeployingError] = useState<string>('');
+
   const [deleteIdValue, setDeleteIdValue] = useState<string>('');
   const [deleteResult, setDeleteResult] = useState<string>('');
   const [deleteError, setDeleteError] = useState<string>('');
@@ -234,6 +240,27 @@ export const CloudOnboardingDeploymentDebugger: React.FunctionComponent = () => 
       setGetByIdError(result.error.message ?? JSON.stringify(result.error));
     } else {
       setGetByIdResult(JSON.stringify(result.data, null, 2));
+    }
+  };
+
+  const handleSetDeploying = async () => {
+    setSetDeployingError('');
+    setSetDeployingResult('');
+    const result = await sendRequest({
+      method: 'put',
+      path: `/api/fleet/cloud_onboarding_deployments/${setDeployingIdValue}`,
+      body: {
+        status: 'deploying',
+        deploymentId: setDeployingDeploymentId || undefined,
+        deploymentName: setDeployingDeploymentName || undefined,
+      },
+      version: API_VERSIONS.public.v1,
+    });
+    if (result.error) {
+      setSetDeployingError(result.error.message ?? JSON.stringify(result.error));
+    } else {
+      setSetDeployingResult(JSON.stringify(result.data, null, 2));
+      await fetchDeployments(connectorId);
     }
   };
 
@@ -564,6 +591,71 @@ export const CloudOnboardingDeploymentDebugger: React.FunctionComponent = () => 
         <>
           <EuiSpacer size="m" />
           <CodeBlock value={getByIdResult} />
+        </>
+      )}
+
+      <EuiSpacer size="xl" />
+
+      <EuiTitle size="s">
+        <h3>Set Deploying</h3>
+      </EuiTitle>
+
+      <EuiSpacer size="m" />
+
+      <EuiFlexGroup alignItems="flexEnd" gutterSize="m" wrap>
+        <EuiFlexItem grow={false}>
+          <EuiFormRow label="Deployment">
+            <EuiSelect
+              value={setDeployingIdValue}
+              onChange={(e) => setSetDeployingIdValue(e.target.value)}
+              hasNoInitialSelection
+              options={deployments.map((d) => ({
+                value: d.id,
+                text: `${d.id.slice(0, 8)}… [${d.status}] (${d.mechanisms.join(', ')})`,
+              }))}
+              disabled={deploymentsLoading}
+              isLoading={deploymentsLoading}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false} style={{ minWidth: 340 }}>
+          <EuiFormRow label="Deployment ID (stack ARN)">
+            <EuiFieldText
+              value={setDeployingDeploymentId}
+              onChange={(e) => setSetDeployingDeploymentId(e.target.value)}
+              placeholder="arn:aws:cloudformation:us-east-1:123456789012:stack/elastic/aaa"
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFormRow label="Deployment name (stack name)">
+            <EuiFieldText
+              value={setDeployingDeploymentName}
+              onChange={(e) => setSetDeployingDeploymentName(e.target.value)}
+              placeholder="elastic-onboarding"
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton onClick={handleSetDeploying} isDisabled={!setDeployingIdValue}>
+            Set deploying
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      {setDeployingError && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiCallOut announceOnMount title="Error" color="danger">
+            {setDeployingError}
+          </EuiCallOut>
+        </>
+      )}
+
+      {setDeployingResult && (
+        <>
+          <EuiSpacer size="m" />
+          <CodeBlock value={setDeployingResult} />
         </>
       )}
 

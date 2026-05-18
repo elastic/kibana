@@ -28,27 +28,22 @@ export interface CloudOnboardingDeployment {
   services: string[];
   status: CloudOnboardingDeploymentStatus;
   statusMessage?: string;
-  attemptCount?: number;
+  attemptCount: number;
   vars?: Record<string, string>;
   serviceVars?: Record<string, CloudOnboardingDeploymentServiceVars>;
   secrets?: Record<string, string>;
   packagePolicyIds?: string[];
-  createdAt: string;
-  updatedAt: string;
 }
 
 export type NewCloudOnboardingDeployment = Omit<CloudOnboardingDeployment, 'id'>;
 
 export type CreateCloudOnboardingDeploymentInput = Omit<
   CloudOnboardingDeployment,
-  'id' | 'status' | 'attemptCount' | 'createdAt' | 'updatedAt'
+  'id' | 'status' | 'attemptCount' | 'deploymentId' | 'deploymentName' | 'packagePolicyIds'
 >;
 
 // Secrets are intentionally excluded: partial updates could silently clobber
 // existing keys. Use a dedicated secrets-update path when needed.
 export type UpdateCloudOnboardingDeploymentInput = Partial<
-  Omit<
-    CloudOnboardingDeployment,
-    'id' | 'provider' | 'connectorId' | 'secrets' | 'createdAt' | 'updatedAt'
-  >
+  Omit<CloudOnboardingDeployment, 'id' | 'provider' | 'connectorId' | 'secrets'>
 >;

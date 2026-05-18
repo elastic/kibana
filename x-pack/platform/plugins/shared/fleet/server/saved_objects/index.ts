@@ -1895,20 +1895,7 @@ export const getSavedObjectTypes = (
       mappings: {
         dynamic: false,
         properties: {
-          provider: { type: 'keyword', ignore_above: 1024 },
           connectorId: { type: 'keyword', ignore_above: 1024 },
-          mechanisms: { type: 'keyword', ignore_above: 1024 },
-          deploymentId: { type: 'keyword', ignore_above: 1024 },
-          deploymentName: { type: 'keyword', ignore_above: 1024 },
-          services: { type: 'keyword', ignore_above: 1024 },
-          status: { type: 'keyword', ignore_above: 1024 },
-          statusMessage: { type: 'text' },
-          attemptCount: { type: 'integer' },
-          vars: { type: 'flattened', ignore_above: 1024 },
-          serviceVars: { type: 'object', dynamic: false },
-          packagePolicyIds: { type: 'keyword', ignore_above: 1024 },
-          createdAt: { type: 'date' },
-          updatedAt: { type: 'date' },
         },
       },
       modelVersions: {

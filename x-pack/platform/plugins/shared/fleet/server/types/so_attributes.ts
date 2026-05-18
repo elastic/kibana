@@ -361,7 +361,7 @@ export interface CloudOnboardingDeploymentSOAttributes {
   /** Error detail when status is 'failed'. */
   statusMessage?: string;
   /** Number of deploy attempts — incremented on each retry. */
-  attemptCount?: number;
+  attemptCount: number;
   /** Deployment-level plaintext vars (e.g. role_arn, api_key_id). Stored unencrypted; suitable for searchable, non-sensitive values. */
   vars?: Record<string, string>;
   /** Per-service config arrays — serviceVars[serviceId] is an array where each entry represents one data source (region + S3 bucket + service-specific fields). Multiple entries support multiple buckets/sources for the same service. */
@@ -370,6 +370,4 @@ export interface CloudOnboardingDeploymentSOAttributes {
   secrets?: Record<string, string>;
   /** Fleet package policy IDs — one per distinct integration package (e.g. one for 'aws', one for 'aws_bedrock'). Present only when identity_federation is in mechanisms. In agentless, the agent policy ID equals the package policy ID, so these also serve as agent policy IDs. */
   packagePolicyIds?: string[];
-  createdAt: string;
-  updatedAt: string;
 }

@@ -13,7 +13,6 @@ import type {
   CloudOnboardingDeployment,
   CreateCloudOnboardingDeploymentInput,
   UpdateCloudOnboardingDeploymentInput,
-  CloudOnboardingDeploymentStatus,
 } from '../../common/types/models/cloud_onboarding_deployment';
 import type { CloudOnboardingDeploymentSOAttributes } from '../types/so_attributes';
 import { FleetError } from '../errors';
@@ -21,30 +20,6 @@ import { FleetError } from '../errors';
 import { appContextService } from './app_context';
 
 const CLOUD_ONBOARDING_DEPLOYMENT_LIMIT = 100;
-
-function soToDeployment(
-  id: string,
-  attributes: CloudOnboardingDeploymentSOAttributes
-): CloudOnboardingDeployment {
-  return {
-    id,
-    provider: attributes.provider as CloudOnboardingDeployment['provider'],
-    connectorId: attributes.connectorId,
-    mechanisms: attributes.mechanisms,
-    deploymentId: attributes.deploymentId,
-    deploymentName: attributes.deploymentName,
-    services: attributes.services,
-    status: attributes.status,
-    statusMessage: attributes.statusMessage,
-    attemptCount: attributes.attemptCount,
-    vars: attributes.vars,
-    serviceVars: attributes.serviceVars,
-    packagePolicyIds: attributes.packagePolicyIds,
-    secrets: attributes.secrets,
-    createdAt: attributes.createdAt,
-    updatedAt: attributes.updatedAt,
-  };
-}
 
 class CloudOnboardingDeploymentService {
   private get encryptedSoClient() {
@@ -55,14 +30,11 @@ class CloudOnboardingDeploymentService {
     soClient: SavedObjectsClientContract,
     input: CreateCloudOnboardingDeploymentInput
   ): Promise<CloudOnboardingDeployment> {
-    const now = new Date().toISOString();
     const attributes: CloudOnboardingDeploymentSOAttributes = {
       ...input,
       mechanisms: input.mechanisms,
       status: 'pending',
       attemptCount: 1,
-      createdAt: now,
-      updatedAt: now,
     };
 
     const so = await soClient.create<CloudOnboardingDeploymentSOAttributes>(
@@ -74,7 +46,7 @@ class CloudOnboardingDeploymentService {
       throw new FleetError(so.error.message);
     }
 
-    return soToDeployment(so.id, so.attributes);
+    return { id: so.id, ...so.attributes };
   }
 
   public async getById(
@@ -92,32 +64,31 @@ class CloudOnboardingDeploymentService {
       throw new FleetError(so.error.message);
     }
 
-    return soToDeployment(so.id, so.attributes);
+    return { id: so.id, ...so.attributes };
   }
 
   public async getByConnectorId(
     soClient: SavedObjectsClientContract,
     connectorId: string
   ): Promise<CloudOnboardingDeployment[]> {
-    const namespace = soClient.getCurrentNamespace();
     const finder =
       await this.encryptedSoClient.createPointInTimeFinderDecryptedAsInternalUser<CloudOnboardingDeploymentSOAttributes>(
         {
           type: CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
-          namespaces: namespace ? [namespace] : ['default'],
           filter: nodeBuilder.is(
             `${CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE}.attributes.connectorId`,
             connectorId
           ),
           perPage: CLOUD_ONBOARDING_DEPLOYMENT_LIMIT,
-        }
+        },
+        { client: soClient }
       );
 
     const deployments: CloudOnboardingDeployment[] = [];
     try {
       for await (const result of finder.find()) {
         for (const so of result.saved_objects) {
-          deployments.push(soToDeployment(so.id, so.attributes));
+          deployments.push({ id: so.id, ...so.attributes });
         }
       }
     } finally {
@@ -131,23 +102,13 @@ class CloudOnboardingDeploymentService {
     id: string,
     update: UpdateCloudOnboardingDeploymentInput
   ): Promise<CloudOnboardingDeployment> {
-    const now = new Date().toISOString();
     await soClient.update<CloudOnboardingDeploymentSOAttributes>(
       CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
       id,
-      { ...update, mechanisms: update.mechanisms, updatedAt: now }
+      { ...update, mechanisms: update.mechanisms }
     );
 
     return this.getById(soClient, id);
-  }
-
-  public async updateStatus(
-    soClient: SavedObjectsClientContract,
-    id: string,
-    status: CloudOnboardingDeploymentStatus,
-    statusMessage?: string
-  ): Promise<CloudOnboardingDeployment> {
-    return this.update(soClient, id, { status, statusMessage });
   }
 
   public async delete(soClient: SavedObjectsClientContract, id: string): Promise<void> {

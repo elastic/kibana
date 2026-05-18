@@ -32,8 +32,6 @@ function makeAttributes(
     vars: { role_arn: 'arn:aws:iam::123:role/Role' },
     serviceVars: {},
     secrets: { external_id: 'ext-123' },
-    createdAt: '2026-05-13T10:00:00.000Z',
-    updatedAt: '2026-05-13T10:00:00.000Z',
     ...overrides,
   };
 }
@@ -87,8 +85,6 @@ describe('cloudOnboardingDeploymentService', () => {
           connectorId: 'conn-1',
           status: 'pending',
           attemptCount: 1,
-          createdAt: expect.any(String),
-          updatedAt: expect.any(String),
         })
       );
       expect(result.id).toBe('deploy-1');
@@ -96,8 +92,6 @@ describe('cloudOnboardingDeploymentService', () => {
       expect(result.mechanisms).toEqual(['identity_federation']);
       expect(result.status).toBe('pending');
       expect(result.attemptCount).toBe(1);
-      expect(result.createdAt).toEqual(expect.any(String));
-      expect(result.updatedAt).toEqual(expect.any(String));
       expect(result.secrets).toEqual({ external_id: 'ext-123' });
     });
 
@@ -176,10 +170,9 @@ describe('cloudOnboardingDeploymentService', () => {
   });
 
   describe('getByConnectorId', () => {
-    it('scopes the PIT finder to the request namespace', async () => {
+    it('passes soClient as PIT finder dependency for namespace scoping', async () => {
       const attrs1 = makeAttributes({ mechanisms: ['identity_federation'] });
       const attrs2 = makeAttributes({ mechanisms: ['firehose'] });
-      soClient.getCurrentNamespace.mockReturnValue('space-a');
 
       const esoClientMock = {
         getDecryptedAsInternalUser: jest.fn(),
@@ -205,30 +198,9 @@ describe('cloudOnboardingDeploymentService', () => {
       expect(esoClientMock.createPointInTimeFinderDecryptedAsInternalUser).toHaveBeenCalledWith(
         expect.objectContaining({
           type: CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
-          namespaces: ['space-a'],
           filter: expect.any(Object),
-        })
-      );
-    });
-
-    it('falls back to default namespace when soClient is in the default space', async () => {
-      soClient.getCurrentNamespace.mockReturnValue(undefined);
-
-      const esoClientMock = {
-        getDecryptedAsInternalUser: jest.fn(),
-        createPointInTimeFinderDecryptedAsInternalUser: jest.fn().mockResolvedValue({
-          async *find() {
-            yield { saved_objects: [] };
-          },
-          close: jest.fn(),
         }),
-      } as jest.Mocked<EncryptedSavedObjectsClient>;
-      mockedAppContextService.getEncryptedSavedObjects.mockReturnValue(esoClientMock);
-
-      await cloudOnboardingDeploymentService.getByConnectorId(soClient, 'conn-none');
-
-      expect(esoClientMock.createPointInTimeFinderDecryptedAsInternalUser).toHaveBeenCalledWith(
-        expect.objectContaining({ namespaces: ['default'] })
+        { client: soClient }
       );
     });
 
@@ -322,7 +294,7 @@ describe('cloudOnboardingDeploymentService', () => {
     });
   });
 
-  describe('updateStatus', () => {
+  describe('update (status transitions)', () => {
     describe('status transitions', () => {
       function mockUpdateAndGet(id: string, attrs: CloudOnboardingDeploymentSOAttributes) {
         soClient.update.mockResolvedValue({
@@ -337,11 +309,9 @@ describe('cloudOnboardingDeploymentService', () => {
       it('pending → deploying: sets status without deploymentId', async () => {
         mockUpdateAndGet('deploy-1', makeAttributes({ status: 'deploying' }));
 
-        const result = await cloudOnboardingDeploymentService.updateStatus(
-          soClient,
-          'deploy-1',
-          'deploying'
-        );
+        const result = await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', {
+          status: 'deploying',
+        });
 
         expect(result.status).toBe('deploying');
         expect(result.deploymentId).toBeUndefined();
@@ -375,12 +345,10 @@ describe('cloudOnboardingDeploymentService', () => {
           makeAttributes({ status: 'failed', statusMessage: 'ROLLBACK_COMPLETE' })
         );
 
-        const result = await cloudOnboardingDeploymentService.updateStatus(
-          soClient,
-          'deploy-1',
-          'failed',
-          'ROLLBACK_COMPLETE'
-        );
+        const result = await cloudOnboardingDeploymentService.update(soClient, 'deploy-1', {
+          status: 'failed',
+          statusMessage: 'ROLLBACK_COMPLETE',
+        });
 
         expect(result.status).toBe('failed');
         expect(result.statusMessage).toBe('ROLLBACK_COMPLETE');
@@ -479,7 +447,6 @@ describe('cloudOnboardingDeploymentService', () => {
           serviceVars: { cloudwatch_metrics: [{ regions: ['us-east-1'], namespace: 'AWS/EC2' }] },
           vars: { role_arn: 'arn:aws:iam::123456789012:role/ElasticIFRole' },
           secrets: { external_id: 'ext-uc1' },
-          packagePolicyIds: ['pkg-aws-001'],
         });
 
         expect(soClient.create).toHaveBeenCalledWith(
@@ -488,12 +455,9 @@ describe('cloudOnboardingDeploymentService', () => {
         );
         expect(result.status).toBe('pending');
         expect(result.attemptCount).toBe(1);
-        expect(result.createdAt).toEqual(expect.any(String));
-        expect(result.updatedAt).toEqual(expect.any(String));
         expect(result.mechanisms).toEqual(['identity_federation']);
         expect(result.secrets).toEqual({ external_id: 'ext-uc1' });
         expect(result.vars).not.toHaveProperty('api_key_id');
-        expect(result.packagePolicyIds).toEqual(['pkg-aws-001']);
       });
     });
 
@@ -517,7 +481,6 @@ describe('cloudOnboardingDeploymentService', () => {
           serviceVars: { cloudwatch_metrics: [{ regions: ['us-east-1'], namespace: 'AWS/EC2' }] },
           vars: {},
           secrets: {},
-          packagePolicyIds: ['pkg-aws-002'],
         });
 
         expect(soClient.create).toHaveBeenCalledWith(
@@ -526,13 +489,10 @@ describe('cloudOnboardingDeploymentService', () => {
         );
         expect(result.status).toBe('pending');
         expect(result.attemptCount).toBe(1);
-        expect(result.createdAt).toEqual(expect.any(String));
-        expect(result.updatedAt).toEqual(expect.any(String));
         expect(result.mechanisms).toEqual([]);
         expect(result.secrets).toEqual({});
         expect(result.vars).not.toHaveProperty('api_key_id');
         expect(result.vars).not.toHaveProperty('role_arn');
-        expect(result.packagePolicyIds).toEqual(['pkg-aws-002']);
       });
     });
 
@@ -572,8 +532,6 @@ describe('cloudOnboardingDeploymentService', () => {
         );
         expect(result.status).toBe('pending');
         expect(result.attemptCount).toBe(1);
-        expect(result.createdAt).toEqual(expect.any(String));
-        expect(result.updatedAt).toEqual(expect.any(String));
         expect(result.mechanisms).toEqual(['cloud_forwarder']);
         expect(result.vars).toEqual({ api_key_id: 'abc123keyid' });
         expect(result.secrets).toEqual({});
@@ -636,8 +594,6 @@ describe('cloudOnboardingDeploymentService', () => {
           );
           expect(result.status).toBe('pending');
           expect(result.attemptCount).toBe(1);
-          expect(result.createdAt).toEqual(expect.any(String));
-          expect(result.updatedAt).toEqual(expect.any(String));
           expect(result.mechanisms).toEqual(mechanisms);
           expect(result.vars).toEqual({
             role_arn: 'arn:aws:iam::123456789012:role/ElasticIFRole',
