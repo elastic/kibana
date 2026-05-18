@@ -48,6 +48,19 @@ describe('createUnresolveAction', () => {
     ).toBe(false);
   });
 
+  it('compatible when last_deactivate_action is deactivate even if status is still ACTIVE', () => {
+    expect(
+      createUnresolveAction(makeDeps()).isCompatible({
+        episodes: [
+          makeEpisode({
+            'episode.status': ALERT_EPISODE_STATUS.ACTIVE,
+            last_deactivate_action: 'deactivate',
+          }),
+        ],
+      })
+    ).toBe(true);
+  });
+
   it('not compatible when every episode has status ACTIVE', () => {
     expect(
       createUnresolveAction(makeDeps()).isCompatible({
