@@ -277,7 +277,12 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
   );
 
   return (
-    <EuiFlyout type="overlay" size="fill" onClose={onClose} aria-labelledby={QUERY_SANDBOX_TITLE_ID}>
+    <EuiFlyout
+      type="overlay"
+      size="fill"
+      onClose={onClose}
+      aria-labelledby={QUERY_SANDBOX_TITLE_ID}
+    >
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s" id={QUERY_SANDBOX_TITLE_ID}>
           <h3>{title}</h3>
