@@ -182,6 +182,67 @@ describe('manageActionPolicyTool', () => {
     });
   });
 
+  describe('set_type operation', () => {
+    it('creates a single_rule policy with type and ruleId in the result', async () => {
+      const deps = createDeps();
+      const tool = manageActionPolicyTool(deps);
+      const ctx = createContext();
+
+      const result = await tool.handler(
+        {
+          operations: [
+            { operation: 'set_metadata', name: 'Single Rule Policy', description: 'desc' },
+            {
+              operation: 'set_destinations',
+              destinations: [{ type: 'workflow', id: 'wf-1' }],
+            },
+            { operation: 'set_type', type: 'single_rule', ruleId: 'rule-abc' },
+          ],
+        },
+        ctx
+      );
+
+      const { results } = result as {
+        results: Array<{
+          type: string;
+          data?: {
+            actionPolicyAttachment?: {
+              type?: string;
+              ruleId?: string;
+              name?: string;
+            };
+          };
+        }>;
+      };
+      expect(results[0].type).toBe(ToolResultType.other);
+      expect(results[0].data?.actionPolicyAttachment?.type).toBe('single_rule');
+      expect(results[0].data?.actionPolicyAttachment?.ruleId).toBe('rule-abc');
+      expect(results[0].data?.actionPolicyAttachment?.name).toBe('Single Rule Policy');
+    });
+
+    it('returns an error when set_type single_rule is used without ruleId', async () => {
+      const deps = createDeps();
+      const tool = manageActionPolicyTool(deps);
+      const ctx = createContext();
+
+      const result = await tool.handler(
+        {
+          operations: [
+            { operation: 'set_metadata', name: 'Bad Policy' },
+            { operation: 'set_type', type: 'single_rule' },
+          ],
+        },
+        ctx
+      );
+
+      const { results } = result as {
+        results: Array<{ type: string; data: { message: string } }>;
+      };
+      expect(results[0].type).toBe(ToolResultType.error);
+      expect(results[0].data.message).toContain('ruleId is required');
+    });
+  });
+
   describe('logger severity', () => {
     it('logs validation errors at debug level', async () => {
       const deps = createDeps();
