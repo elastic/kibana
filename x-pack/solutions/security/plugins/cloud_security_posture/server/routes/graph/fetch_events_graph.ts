@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { createHash } from 'crypto';
+import { castArray } from 'lodash';
 import type { Logger, IScopedClusterClient } from '@kbn/core/server';
 import {
   DOCUMENT_TYPE_ALERT,
@@ -22,12 +24,12 @@ import {
 } from '@kbn/entity-store/common/domain/euid';
 import {
   concatJsonObjectPropertyEsqlExprSafe,
-  concatJsonObjectPropertyBool,
   JSON_OBJECT_START,
   JSON_OBJECT_END,
   JSON_OBJECT_SEPARATOR,
   concatJsonObjectPropertyEsqlExprAsString,
   concatJsonObjectPropertyString,
+  rebuildDocData,
 } from './utils';
 import {
   type EuidSourceFields,
@@ -37,6 +39,7 @@ import {
 import { getTargetEuidEsqlEvaluation } from './target_euid';
 import { SECURITY_ALERTS_PARTIAL_IDENTIFIER } from '../../../common/constants';
 import type { EsQuery, OriginEventId, EventEdge } from './types';
+import type { EntityEnrichmentFields } from './fetch_entity_enrichment';
 
 interface BuildEsqlQueryParams {
   indexPatterns: string[];
@@ -414,29 +417,16 @@ ${buildSaveSourceFieldsEsql()}
 | MV_EXPAND actorEntityId
 | MV_EXPAND targetEntityId
 ${buildPinnedEsql(pinnedIds)}
-// Build entity fields with availableInEntityStore=false; TypeScript enrichment rebuilds post-enrichment
-| EVAL actorEntityField = CONCAT("\\"entity\\":",
-  ${JSON_OBJECT_START},
-    ${concatJsonObjectPropertyBool('availableInEntityStore', false)},
-    ${JSON_OBJECT_SEPARATOR}, ${buildActorSourceFieldsEsql()},
-  ${JSON_OBJECT_END})
-| EVAL targetEntityField = CONCAT("\\"entity\\":",
-  ${JSON_OBJECT_START},
-    ${concatJsonObjectPropertyBool('availableInEntityStore', false)},
-    ${JSON_OBJECT_SEPARATOR}, ${buildTargetSourceFieldsEsql()},
-  ${JSON_OBJECT_END})
-
-// Create actor and target data with entity data
-
+// Create actor and target data - entity object built by TypeScript enrichment
 | EVAL actorDocData = CONCAT(${JSON_OBJECT_START},
     ${concatJsonObjectPropertyEsqlExprAsString('id', 'actorEntityId')},
     ${JSON_OBJECT_SEPARATOR}, ${concatJsonObjectPropertyString('type', DOCUMENT_TYPE_ENTITY)},
-    ${JSON_OBJECT_SEPARATOR}, actorEntityField,
+    ${JSON_OBJECT_SEPARATOR}, ${buildActorSourceFieldsEsql()},
   ${JSON_OBJECT_END})
 | EVAL targetDocData = CONCAT(${JSON_OBJECT_START},
     ${concatJsonObjectPropertyEsqlExprAsString('id', 'COALESCE(targetEntityId, "")')},
     ${JSON_OBJECT_SEPARATOR}, ${concatJsonObjectPropertyString('type', DOCUMENT_TYPE_ENTITY)},
-    ${JSON_OBJECT_SEPARATOR}, targetEntityField,
+    ${JSON_OBJECT_SEPARATOR}, ${buildTargetSourceFieldsEsql()},
   ${JSON_OBJECT_END})
 
 // Map host and source values to enriched contextual data
@@ -510,4 +500,222 @@ ${buildPinnedEsql(pinnedIds)}
 | DROP pinnedSort`;
 
   return query;
+};
+
+interface EventGroup {
+  action: string;
+  actorType: string | null;
+  actorSubType: string | null;
+  targetType: string | null;
+  targetSubType: string | null;
+  isOrigin: boolean;
+  isOriginAlert: boolean;
+  pinned: string | null | undefined;
+  badge: number;
+  uniqueEventsCount: number;
+  uniqueAlertsCount: number;
+  isAlert: boolean;
+  docs: string[];
+  sourceIps: string[];
+  sourceCountryCodes: string[];
+  actorEntityIds: string[];
+  actorsDocData: string[];
+  targetEntityIds: string[];
+  targetsDocData: string[];
+  labelNodeId: string;
+}
+
+/**
+ * Re-groups entity-ID-level ESQL rows by (action, actorType, actorSubType, targetType,
+ * targetSubType, isOrigin, isOriginAlert, pinned), using entity store enrichment to determine
+ * group keys and compute node IDs/names/hostIps. Does NOT rebuild docData — raw ESQL strings
+ * are passed through as-is. Use enrichEventDocData to apply docData rebuilding.
+ */
+export const regroupEvents = (
+  records: EventEdge[],
+  enrichmentMap: Map<string, EntityEnrichmentFields>
+): EventEdge[] => {
+  const groups = new Map<string, EventGroup>();
+
+  for (const record of records) {
+    const actorId = record.actorEntityId ?? null;
+    const targetId = record.targetEntityId ?? null;
+    if (!actorId) continue; // actorEntityId is required
+
+    const actorEnrichment = actorId ? enrichmentMap.get(actorId) : undefined;
+    const targetEnrichment = targetId ? enrichmentMap.get(targetId) : undefined;
+
+    const actorType = actorEnrichment?.type ?? null;
+    const actorSubType = actorEnrichment?.subType ?? null;
+    const targetType = targetEnrichment?.type ?? null;
+    const targetSubType = targetEnrichment?.subType ?? null;
+
+    const groupKey = JSON.stringify([
+      record.action,
+      actorType,
+      actorSubType,
+      targetType,
+      targetSubType,
+      record.isOrigin,
+      record.isOriginAlert,
+      record.pinned ?? null,
+    ]);
+
+    const existing = groups.get(groupKey);
+    const docs = castArray(record.docs ?? []).filter((d): d is string => d != null);
+    const sourceIps = castArray(record.sourceIps ?? []).filter((d): d is string => d != null);
+    const sourceCountryCodes = castArray(record.sourceCountryCodes ?? []).filter(
+      (d): d is string => d != null
+    );
+    const actorsDocData = castArray(record.actorsDocData ?? []).filter(
+      (d): d is string => d != null
+    );
+    const targetsDocData = castArray(record.targetsDocData ?? []).filter(
+      (d): d is string => d != null
+    );
+
+    if (!existing) {
+      groups.set(groupKey, {
+        action: record.action,
+        actorType,
+        actorSubType,
+        targetType,
+        targetSubType,
+        isOrigin: record.isOrigin,
+        isOriginAlert: record.isOriginAlert,
+        pinned: record.pinned,
+        badge: record.badge,
+        uniqueEventsCount: record.uniqueEventsCount,
+        uniqueAlertsCount: record.uniqueAlertsCount,
+        isAlert: Boolean(record.isAlert),
+        docs,
+        sourceIps,
+        sourceCountryCodes,
+        actorEntityIds: [actorId],
+        actorsDocData,
+        targetEntityIds: targetId ? [targetId] : [],
+        targetsDocData,
+        labelNodeId: record.labelNodeId,
+      });
+    } else {
+      existing.badge += record.badge;
+      existing.uniqueEventsCount += record.uniqueEventsCount;
+      existing.uniqueAlertsCount += record.uniqueAlertsCount;
+      existing.isAlert = existing.isAlert || Boolean(record.isAlert);
+      existing.docs.push(...docs);
+      existing.sourceIps.push(...sourceIps);
+      existing.sourceCountryCodes.push(...sourceCountryCodes);
+      if (!existing.actorEntityIds.includes(actorId)) {
+        existing.actorEntityIds.push(actorId);
+      }
+      existing.actorsDocData.push(...actorsDocData);
+      if (targetId && !existing.targetEntityIds.includes(targetId)) {
+        existing.targetEntityIds.push(targetId);
+      }
+      existing.targetsDocData.push(...targetsDocData);
+    }
+  }
+
+  return Array.from(groups.values()).map((group): EventEdge => {
+    const actorEntityIds = [...new Set(group.actorEntityIds)];
+    const targetEntityIds = [...new Set(group.targetEntityIds)];
+
+    const actorNodeId =
+      actorEntityIds.length === 1
+        ? actorEntityIds[0]
+        : createHash('sha256').update(actorEntityIds.sort().join(',')).digest('hex');
+
+    const targetNodeId =
+      targetEntityIds.length === 0
+        ? null
+        : targetEntityIds.length === 1
+        ? targetEntityIds[0]
+        : createHash('sha256').update(targetEntityIds.sort().join(',')).digest('hex');
+
+    // Recompute labelNodeId from all document _ids embedded in docs JSON
+    const allDocIds = [
+      ...new Set(
+        group.docs
+          .map((docStr) => {
+            try {
+              return (JSON.parse(docStr) as { id?: string }).id ?? null;
+            } catch {
+              return null;
+            }
+          })
+          .filter((id): id is string => id != null)
+      ),
+    ].sort();
+    const labelNodeId =
+      allDocIds.length === 0
+        ? group.labelNodeId
+        : allDocIds.length === 1
+        ? allDocIds[0]
+        : createHash('sha256').update(allDocIds.join(',')).digest('hex');
+
+    const actorNames = actorEntityIds
+      .map((id) => enrichmentMap.get(id)?.name)
+      .filter((n): n is string => n != null);
+    const actorHostIps = [
+      ...new Set(actorEntityIds.flatMap((id) => enrichmentMap.get(id)?.hostIps ?? [])),
+    ];
+
+    const targetNames = targetEntityIds
+      .map((id) => enrichmentMap.get(id)?.name)
+      .filter((n): n is string => n != null);
+    const targetHostIps = [
+      ...new Set(targetEntityIds.flatMap((id) => enrichmentMap.get(id)?.hostIps ?? [])),
+    ];
+
+    const uniqueSourceIps = [...new Set(group.sourceIps)];
+    const uniqueSourceCountryCodes = [...new Set(group.sourceCountryCodes)];
+
+    return {
+      action: group.action,
+      badge: group.badge,
+      uniqueEventsCount: group.uniqueEventsCount,
+      uniqueAlertsCount: group.uniqueAlertsCount,
+      isAlert: group.isAlert,
+      isOrigin: group.isOrigin,
+      isOriginAlert: group.isOriginAlert,
+      pinned: group.pinned,
+      labelNodeId,
+      docs: group.docs,
+      sourceIps: uniqueSourceIps.length > 0 ? uniqueSourceIps : undefined,
+      sourceCountryCodes:
+        uniqueSourceCountryCodes.length > 0 ? uniqueSourceCountryCodes : undefined,
+      actorNodeId,
+      actorIdsCount: actorEntityIds.length,
+      actorEntityType: group.actorType,
+      actorEntitySubType: group.actorSubType,
+      actorEntityName:
+        actorNames.length === 0 ? null : actorNames.length === 1 ? actorNames[0] : actorNames,
+      actorHostIps: actorHostIps.length > 0 ? actorHostIps : undefined,
+      actorsDocData: group.actorsDocData,
+      targetNodeId,
+      targetIdsCount: targetEntityIds.length,
+      targetEntityType: group.targetType,
+      targetEntitySubType: group.targetSubType,
+      targetEntityName:
+        targetNames.length === 0 ? null : targetNames.length === 1 ? targetNames[0] : targetNames,
+      targetHostIps: targetHostIps.length > 0 ? targetHostIps : undefined,
+      targetsDocData: group.targetsDocData,
+    };
+  });
+};
+
+/**
+ * Rebuilds actorsDocData and targetsDocData for each event using entity store enrichment.
+ * Applies rebuildDocData to each event's actorsDocData and targetsDocData arrays.
+ * This is a separate step from regroupEvents, allowing enrichment to be applied after grouping.
+ */
+export const enrichEventDocData = (
+  events: EventEdge[],
+  enrichmentMap: Map<string, EntityEnrichmentFields>
+): EventEdge[] => {
+  return events.map((event) => ({
+    ...event,
+    actorsDocData: rebuildDocData(event.actorsDocData, enrichmentMap),
+    targetsDocData: rebuildDocData(event.targetsDocData, enrichmentMap),
+  }));
 };

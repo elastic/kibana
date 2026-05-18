@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { createHash } from 'crypto';
+import { castArray } from 'lodash';
 import type { Logger, IScopedClusterClient } from '@kbn/core/server';
 import type { EsqlToRecords } from '@elastic/elasticsearch/lib/helpers';
 import { getEntitiesLatestIndexName } from '@kbn/cloud-security-posture-common/utils/helpers';
@@ -19,8 +21,10 @@ import {
   JSON_OBJECT_SEPARATOR,
   JSON_OBJECT_START,
   concatJsonObjectPropertyEsqlExprAsString,
+  rebuildDocData,
 } from './utils';
 import type { EntityId, EntityRecord, RelationshipEdge } from './types';
+import type { EntityEnrichmentFields } from './fetch_entity_enrichment';
 
 interface BuildRelationshipsEsqlQueryParams {
   indexName: string;
@@ -101,13 +105,10 @@ ${forkBranches}
       ${JSON_OBJECT_SEPARATOR}, _source_source_fields,
     ${JSON_OBJECT_END},
   ${JSON_OBJECT_END})
-// Build target doc data with availableInEntityStore=false; TypeScript enrichment rebuilds it
+// Target entity data built by TypeScript enrichment
 | EVAL targetDocData = CONCAT(${JSON_OBJECT_START},
     ${concatJsonObjectPropertyEsqlExprSafe('id', '_target_id')},
     ${JSON_OBJECT_SEPARATOR}, ${concatJsonObjectPropertyString('type', 'entity')},
-    ${JSON_OBJECT_SEPARATOR}, "\\"entity\\":", ${JSON_OBJECT_START},
-      ${concatJsonObjectPropertyBool('availableInEntityStore', false)},
-    ${JSON_OBJECT_END},
   ${JSON_OBJECT_END})
 // Group by actor entity, relationship, and individual target entity ID.
 // TypeScript re-groups by target type/subtype after enrichment, restoring current behavior.
@@ -357,4 +358,156 @@ const buildSourceFieldsJson = (fields: EuidSourceFields): string => {
       REPLACE(CONCAT("\\"sourceFields\\":", ${JSON_OBJECT_START}, ${properties}, ${JSON_OBJECT_END}), "[,]+", ","),
     "\\\\{,", ${JSON_OBJECT_START}),
   ",}", ${JSON_OBJECT_END})`;
+};
+
+interface RelationshipGroup {
+  actorNodeId: string;
+  actorIds: string[];
+  actorIdsCount: number;
+  actorEntityType: string | null | undefined;
+  actorEntitySubType: string | null | undefined;
+  actorEntityName: string | string[] | null | undefined;
+  actorHostIps: string[] | undefined;
+  actorsDocData: string[];
+  relationship: string;
+  relationshipNodeId: string;
+  targetType: string | null;
+  targetSubType: string | null;
+  badge: number;
+  targetIds: string[];
+  targetsDocData: string[];
+}
+
+/**
+ * Re-groups entity-ID-level relationship rows by (actorNodeId, relationship, targetType,
+ * targetSubType), using entity store enrichment to determine group keys and compute
+ * targetNodeId/targetEntityName/targetHostIps. Does NOT rebuild docData — raw ESQL strings
+ * are passed through as-is. Use enrichRelationshipDocData to apply docData rebuilding.
+ */
+export const regroupRelationships = (
+  records: RelationshipEdge[],
+  enrichmentMap: Map<string, EntityEnrichmentFields>
+): RelationshipEdge[] => {
+  const groups = new Map<string, RelationshipGroup>();
+
+  for (const record of records) {
+    const targetId = record.targetId ?? null;
+    const targetEnrichment = targetId ? enrichmentMap.get(targetId) : undefined;
+    const targetType = targetEnrichment?.type ?? null;
+    const targetSubType = targetEnrichment?.subType ?? null;
+
+    const groupKey = JSON.stringify([
+      record.actorNodeId,
+      record.relationship,
+      targetType,
+      targetSubType,
+    ]);
+
+    const targetsDocData = castArray(record.targetsDocData ?? []).filter(
+      (d): d is string => d != null
+    );
+
+    const existing = groups.get(groupKey);
+    if (!existing) {
+      groups.set(groupKey, {
+        actorNodeId: record.actorNodeId,
+        actorIds: castArray(record.actorIds ?? []).filter(Boolean) as string[],
+        actorIdsCount: record.actorIdsCount,
+        actorEntityType: record.actorEntityType,
+        actorEntitySubType: record.actorEntitySubType,
+        actorEntityName: record.actorEntityName,
+        actorHostIps: record.actorHostIps
+          ? (castArray(record.actorHostIps).filter(Boolean) as string[])
+          : undefined,
+        actorsDocData: castArray(record.actorsDocData ?? []).filter((d): d is string => d != null),
+        relationship: record.relationship,
+        relationshipNodeId: record.relationshipNodeId,
+        targetType,
+        targetSubType,
+        badge: record.badge,
+        targetIds: targetId ? [targetId] : [],
+        targetsDocData,
+      });
+    } else {
+      existing.badge += record.badge;
+      if (targetId && !existing.targetIds.includes(targetId)) {
+        existing.targetIds.push(targetId);
+      }
+      existing.targetsDocData.push(...targetsDocData);
+    }
+  }
+
+  return Array.from(groups.values()).map((group): RelationshipEdge => {
+    const targetIds = [...new Set(group.targetIds)];
+    const targetNodeId =
+      targetIds.length === 0
+        ? ''
+        : targetIds.length === 1
+        ? targetIds[0]
+        : createHash('sha256').update(targetIds.sort().join(',')).digest('hex');
+
+    const targetNames = targetIds
+      .map((id) => enrichmentMap.get(id)?.name)
+      .filter((n): n is string => n != null);
+    const targetHostIps = [
+      ...new Set(targetIds.flatMap((id) => enrichmentMap.get(id)?.hostIps ?? [])),
+    ];
+
+    return {
+      badge: group.badge,
+      actorNodeId: group.actorNodeId,
+      actorIdsCount: group.actorIdsCount,
+      actorEntityType: group.actorEntityType,
+      actorEntitySubType: group.actorEntitySubType,
+      actorEntityName: group.actorEntityName,
+      actorHostIps: group.actorHostIps,
+      actorsDocData: group.actorsDocData,
+      targetNodeId,
+      targetIdsCount: targetIds.length,
+      targetEntityType: group.targetType,
+      targetEntitySubType: group.targetSubType,
+      targetEntityName:
+        targetNames.length === 0 ? null : targetNames.length === 1 ? targetNames[0] : targetNames,
+      targetHostIps: targetHostIps.length > 0 ? targetHostIps : undefined,
+      targetsDocData: group.targetsDocData,
+      relationship: group.relationship,
+      relationshipNodeId: group.relationshipNodeId,
+      actorIds: group.actorIds,
+      targetIds,
+    };
+  });
+};
+
+/**
+ * Rebuilds targetsDocData for each relationship using entity store enrichment.
+ * Applies rebuildDocData to each relationship's targetsDocData array.
+ * This is a separate step from regroupRelationships, allowing enrichment to be applied after grouping.
+ */
+export const enrichRelationshipDocData = (
+  relationships: RelationshipEdge[],
+  enrichmentMap: Map<string, EntityEnrichmentFields>
+): RelationshipEdge[] => {
+  return relationships.map((rel) => ({
+    ...rel,
+    targetsDocData: rebuildDocData(rel.targetsDocData, enrichmentMap),
+  }));
+};
+
+/**
+ * Applies enrichment to entity records from the entity store.
+ */
+export const enrichEntityRecords = (
+  records: EntityRecord[],
+  enrichmentMap: Map<string, EntityEnrichmentFields>
+): EntityRecord[] => {
+  return records.map((record) => {
+    const enrichment = enrichmentMap.get(record.id);
+    if (!enrichment) return record;
+    return {
+      ...record,
+      name: enrichment.name ?? record.name,
+      type: enrichment.type ?? record.type,
+      sub_type: enrichment.subType ?? record.sub_type,
+    };
+  });
 };

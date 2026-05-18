@@ -6,11 +6,17 @@
  */
 
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import { fetchEntityRelationships } from './fetch_entity_relationships_graph';
+import {
+  fetchEntityRelationships,
+  regroupRelationships,
+  enrichRelationshipDocData,
+  enrichEntityRecords,
+} from './fetch_entity_relationships_graph';
 import type { Logger } from '@kbn/core/server';
-import type { EntityId } from './types';
+import type { EntityId, RelationshipEdge, EntityRecord } from './types';
 import { getEntitiesLatestIndexName } from '@kbn/cloud-security-posture-common/utils/helpers';
 import { ENTITY_RELATIONSHIP_FIELDS } from '@kbn/cloud-security-posture-common/constants';
+import type { EntityEnrichmentFields } from './fetch_entity_enrichment';
 
 describe('fetchEntityRelationships', () => {
   const esClient = elasticsearchServiceMock.createScopedClusterClient();
@@ -276,5 +282,192 @@ describe('fetchEntityRelationships', () => {
       // Verify STATS groups BY _target_id (not target type/subtype)
       expect(query).toContain('BY entity.id, relationship, _target_id');
     });
+  });
+});
+
+// Helper to build a minimal RelationshipEdge for tests
+const buildRelationshipEdge = (
+  overrides: Partial<RelationshipEdge> & Pick<RelationshipEdge, 'actorNodeId' | 'targetId'>
+): RelationshipEdge => {
+  const { actorNodeId, targetId, ...rest } = overrides;
+  return {
+    badge: 1,
+    relationship: 'Owns',
+    relationshipNodeId: `${actorNodeId}-Owns`,
+    actorNodeId,
+    actorIdsCount: 1,
+    actorIds: [actorNodeId],
+    targetId,
+    targetNodeId: targetId ?? '',
+    targetIdsCount: targetId ? 1 : 0,
+    targetIds: targetId ? [targetId] : [],
+    targetsDocData: targetId ? [`{"id":"${targetId}","type":"entity"}`] : [],
+    ...rest,
+  };
+};
+
+describe('regroupRelationships', () => {
+  it('single record with no enrichment produces one group with targetNodeId equal to targetId and raw docData passed through', () => {
+    const record = buildRelationshipEdge({ actorNodeId: 'host:webserver', targetId: 'user:alice' });
+    const result = regroupRelationships([record], new Map());
+
+    expect(result).toHaveLength(1);
+    const [group] = result;
+    expect(group.targetNodeId).toBe('user:alice');
+    expect(group.targetEntityType).toBeNull();
+
+    // Raw docData should be passed through unchanged (no entity object built yet)
+    expect(group.targetsDocData).toEqual(record.targetsDocData);
+  });
+
+  it('single record with enrichment has correct targetEntityType/SubType/Name but raw docData', () => {
+    const record = buildRelationshipEdge({ actorNodeId: 'host:webserver', targetId: 'user:alice' });
+    const enrichmentMap = new Map<string, EntityEnrichmentFields>([
+      [
+        'user:alice',
+        { name: 'Alice', type: 'user', subType: 'admin', engineType: 'ecs', hostIps: [] },
+      ],
+    ]);
+
+    const result = regroupRelationships([record], enrichmentMap);
+
+    expect(result).toHaveLength(1);
+    const [group] = result;
+    expect(group.targetEntityType).toBe('user');
+    expect(group.targetEntitySubType).toBe('admin');
+    expect(group.targetEntityName).toBe('Alice');
+
+    // Raw docData still passed through (no entity object built yet)
+    expect(group.targetsDocData).toEqual(record.targetsDocData);
+  });
+
+  it('two records with same (actorNodeId, relationship, targetType, targetSubType) are merged and badge is summed', () => {
+    const record1 = buildRelationshipEdge({
+      actorNodeId: 'host:webserver',
+      targetId: 'user:alice',
+      badge: 1,
+    });
+    const record2 = buildRelationshipEdge({
+      actorNodeId: 'host:webserver',
+      targetId: 'user:alice',
+      badge: 2,
+    });
+
+    const enrichmentMap = new Map<string, EntityEnrichmentFields>([
+      ['user:alice', { name: 'Alice', type: 'user', subType: null, engineType: null, hostIps: [] }],
+    ]);
+
+    const result = regroupRelationships([record1, record2], enrichmentMap);
+
+    expect(result).toHaveLength(1);
+    expect(result[0].badge).toBe(3);
+  });
+
+  it('two records with different targetType produce two groups with MD5 targetNodeId for multi-target group', () => {
+    const record1 = buildRelationshipEdge({
+      actorNodeId: 'host:webserver',
+      targetId: 'user:alice',
+      badge: 1,
+    });
+    const record2 = buildRelationshipEdge({
+      actorNodeId: 'host:webserver',
+      targetId: 'host:db',
+      badge: 1,
+    });
+
+    const enrichmentMap = new Map<string, EntityEnrichmentFields>([
+      ['user:alice', { name: 'Alice', type: 'user', subType: null, engineType: null, hostIps: [] }],
+      ['host:db', { name: 'db', type: 'host', subType: null, engineType: null, hostIps: [] }],
+    ]);
+
+    const result = regroupRelationships([record1, record2], enrichmentMap);
+
+    // Different target types → two separate groups
+    expect(result).toHaveLength(2);
+    // Each group has a single target, so targetNodeId equals the targetId
+    const targetNodeIds = result.map((r) => r.targetNodeId).sort();
+    expect(targetNodeIds).toContain('user:alice');
+    expect(targetNodeIds).toContain('host:db');
+  });
+});
+
+describe('enrichRelationshipDocData', () => {
+  it('returns empty array for empty input', () => {
+    const result = enrichRelationshipDocData([], new Map());
+    expect(result).toEqual([]);
+  });
+
+  it('rebuilds targetsDocData with availableInEntityStore=false when no enrichment', () => {
+    const record = buildRelationshipEdge({ actorNodeId: 'host:webserver', targetId: 'user:alice' });
+    const grouped = regroupRelationships([record], new Map());
+    const result = enrichRelationshipDocData(grouped, new Map());
+
+    expect(result).toHaveLength(1);
+    const [group] = result;
+
+    const targetDoc = JSON.parse((group.targetsDocData as string[])[0]);
+    expect(targetDoc.entity.availableInEntityStore).toBe(false);
+  });
+
+  it('rebuilds targetsDocData with enrichment data when enrichment found', () => {
+    const record = buildRelationshipEdge({ actorNodeId: 'host:webserver', targetId: 'user:alice' });
+    const enrichmentMap = new Map<string, EntityEnrichmentFields>([
+      [
+        'user:alice',
+        { name: 'Alice', type: 'user', subType: 'admin', engineType: 'ecs', hostIps: [] },
+      ],
+    ]);
+
+    const grouped = regroupRelationships([record], enrichmentMap);
+    const result = enrichRelationshipDocData(grouped, enrichmentMap);
+
+    expect(result).toHaveLength(1);
+    const [group] = result;
+
+    const targetDoc = JSON.parse((group.targetsDocData as string[])[0]);
+    expect(targetDoc.entity.availableInEntityStore).toBe(true);
+    expect(targetDoc.entity.name).toBe('Alice');
+    expect(targetDoc.entity.type).toBe('user');
+    expect(targetDoc.entity.sub_type).toBe('admin');
+  });
+});
+
+describe('enrichEntityRecords', () => {
+  it('record with no enrichment is returned unchanged', () => {
+    const record: EntityRecord = {
+      id: 'user:alice',
+      name: 'alice',
+      type: 'user',
+      sub_type: '',
+      docData: '{}',
+    };
+
+    const result = enrichEntityRecords([record], new Map());
+
+    expect(result).toHaveLength(1);
+    expect(result[0]).toEqual(record);
+  });
+
+  it('record with enrichment gets name, type and sub_type updated', () => {
+    const record: EntityRecord = {
+      id: 'user:alice',
+      name: '',
+      type: '',
+      sub_type: '',
+      docData: '{}',
+    };
+    const enrichmentMap = new Map<string, EntityEnrichmentFields>([
+      [
+        'user:alice',
+        { name: 'Alice Smith', type: 'user', subType: 'admin', engineType: 'ecs', hostIps: [] },
+      ],
+    ]);
+
+    const result = enrichEntityRecords([record], enrichmentMap);
+
+    expect(result).toHaveLength(1);
+    expect(result[0].name).toBe('Alice Smith');
+    expect(result[0].type).toBe('user');
+    expect(result[0].sub_type).toBe('admin');
   });
 });

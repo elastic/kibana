@@ -8,10 +8,16 @@
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { fetchGraph } from './fetch_graph';
-import { fetchEvents } from './fetch_events_graph';
-import { fetchEntityRelationships, fetchEntities } from './fetch_entity_relationships_graph';
+import { fetchEvents, regroupEvents, enrichEventDocData } from './fetch_events_graph';
+import {
+  fetchEntityRelationships,
+  fetchEntities,
+  regroupRelationships,
+  enrichRelationshipDocData,
+  enrichEntityRecords,
+} from './fetch_entity_relationships_graph';
 import { fetchEntityEnrichment } from './fetch_entity_enrichment';
-import type { EventEdge, RelationshipEdge } from './types';
+import type { EventEdge, RelationshipEdge, EntityRecord } from './types';
 
 jest.mock('./fetch_events_graph');
 jest.mock('./fetch_entity_relationships_graph');
@@ -24,6 +30,19 @@ const mockedFetchEntityRelationships = fetchEntityRelationships as jest.MockedFu
 const mockedFetchEntities = fetchEntities as jest.MockedFunction<typeof fetchEntities>;
 const mockedFetchEntityEnrichment = fetchEntityEnrichment as jest.MockedFunction<
   typeof fetchEntityEnrichment
+>;
+const mockedRegroupEvents = regroupEvents as jest.MockedFunction<typeof regroupEvents>;
+const mockedEnrichEventDocData = enrichEventDocData as jest.MockedFunction<
+  typeof enrichEventDocData
+>;
+const mockedRegroupRelationships = regroupRelationships as jest.MockedFunction<
+  typeof regroupRelationships
+>;
+const mockedEnrichRelationshipDocData = enrichRelationshipDocData as jest.MockedFunction<
+  typeof enrichRelationshipDocData
+>;
+const mockedApplyEnrichmentToEntityRecords = enrichEntityRecords as jest.MockedFunction<
+  typeof enrichEntityRecords
 >;
 
 describe('fetchGraph', () => {
@@ -91,6 +110,12 @@ describe('fetchGraph', () => {
     } as any);
     // Return empty enrichment map by default (no entity store data)
     mockedFetchEntityEnrichment.mockResolvedValue(new Map());
+    // Mock re-grouping functions to return predictable results
+    mockedRegroupEvents.mockImplementation((records) => records);
+    mockedEnrichEventDocData.mockImplementation((events) => events);
+    mockedRegroupRelationships.mockImplementation((records) => records);
+    mockedEnrichRelationshipDocData.mockImplementation((rels) => rels);
+    mockedApplyEnrichmentToEntityRecords.mockImplementation((records: EntityRecord[]) => records);
   });
 
   afterEach(() => {

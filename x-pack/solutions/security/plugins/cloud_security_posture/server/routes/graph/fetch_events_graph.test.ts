@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { createHash } from 'crypto';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import { fetchEvents } from './fetch_events_graph';
+import { fetchEvents, regroupEvents, enrichEventDocData } from './fetch_events_graph';
 import type { Logger } from '@kbn/core/server';
-import type { OriginEventId, EsQuery } from './types';
+import type { OriginEventId, EsQuery, EventEdge } from './types';
 import { GRAPH_ACTOR_EUID_SOURCE_FIELDS, GRAPH_TARGET_EUID_SOURCE_FIELDS } from './constants';
+import type { EntityEnrichmentFields } from './fetch_entity_enrichment';
 
 describe('fetchEvents', () => {
   const esClient = elasticsearchServiceMock.createScopedClusterClient();
@@ -412,5 +414,200 @@ describe('fetchEvents', () => {
       );
       expect(hasTargetCheck).toBe(false);
     });
+  });
+});
+
+// Helper to build a minimal EventEdge for tests
+const buildEventEdge = (
+  overrides: Partial<EventEdge> & Pick<EventEdge, 'actorEntityId'>
+): EventEdge => ({
+  badge: 1,
+  action: 'test-action',
+  actorNodeId: overrides.actorEntityId ?? 'actor-id',
+  actorIdsCount: 1,
+  targetNodeId: overrides.targetEntityId ?? null,
+  targetIdsCount: overrides.targetEntityId ? 1 : 0,
+  docs: ['{"id":"doc-1","type":"event"}'],
+  isAlert: false,
+  isOrigin: false,
+  isOriginAlert: false,
+  uniqueEventsCount: 1,
+  uniqueAlertsCount: 0,
+  labelNodeId: 'doc-1',
+  actorsDocData: [`{"id":"${overrides.actorEntityId}","type":"entity","sourceFields":{}}`],
+  targetsDocData: overrides.targetEntityId
+    ? [`{"id":"${overrides.targetEntityId}","type":"entity","sourceFields":{}}`]
+    : [],
+  ...overrides,
+});
+
+describe('regroupEvents', () => {
+  it('returns empty array for empty input', () => {
+    const result = regroupEvents([], new Map());
+    expect(result).toEqual([]);
+  });
+
+  it('single record with no enrichment produces one group with null actorEntityType and raw docData passed through', () => {
+    const record = buildEventEdge({ actorEntityId: 'user:alice', targetEntityId: 'host:server1' });
+    const result = regroupEvents([record], new Map());
+
+    expect(result).toHaveLength(1);
+    const [group] = result;
+    expect(group.actorNodeId).toBe('user:alice');
+    expect(group.actorEntityType).toBeNull();
+
+    // Raw docData should be passed through unchanged (no entity object built yet)
+    expect(group.actorsDocData).toEqual(record.actorsDocData);
+    expect(group.targetsDocData).toEqual(record.targetsDocData);
+  });
+
+  it('single record with enrichment produces correct actorEntityType and actorEntitySubType', () => {
+    const record = buildEventEdge({ actorEntityId: 'user:alice', targetEntityId: 'host:server1' });
+    const enrichmentMap = new Map<string, EntityEnrichmentFields>([
+      [
+        'user:alice',
+        { name: 'Alice', type: 'user', subType: 'admin', engineType: 'ecs', hostIps: [] },
+      ],
+    ]);
+
+    const result = regroupEvents([record], enrichmentMap);
+
+    expect(result).toHaveLength(1);
+    const [group] = result;
+    expect(group.actorEntityType).toBe('user');
+    expect(group.actorEntitySubType).toBe('admin');
+
+    // Raw docData still passed through (no entity object built yet)
+    expect(group.actorsDocData).toEqual(record.actorsDocData);
+  });
+
+  it('two records with same action but different actorEntityIds in same type group are merged into one group with MD5 actorNodeId', () => {
+    const record1 = buildEventEdge({
+      actorEntityId: 'user:alice',
+      targetEntityId: 'host:server1',
+      badge: 1,
+      uniqueEventsCount: 1,
+      uniqueAlertsCount: 0,
+    });
+    const record2 = buildEventEdge({
+      actorEntityId: 'user:bob',
+      targetEntityId: 'host:server1',
+      badge: 2,
+      uniqueEventsCount: 2,
+      uniqueAlertsCount: 0,
+    });
+
+    // Both actors map to type 'user', so they share the same group key
+    const enrichmentMap = new Map<string, EntityEnrichmentFields>([
+      ['user:alice', { name: 'Alice', type: 'user', subType: null, engineType: null, hostIps: [] }],
+      ['user:bob', { name: 'Bob', type: 'user', subType: null, engineType: null, hostIps: [] }],
+      [
+        'host:server1',
+        { name: 'server1', type: 'host', subType: null, engineType: null, hostIps: [] },
+      ],
+    ]);
+
+    const result = regroupEvents([record1, record2], enrichmentMap);
+
+    expect(result).toHaveLength(1);
+    const [group] = result;
+    expect(group.badge).toBe(3);
+
+    // actorNodeId should be MD5 of sorted IDs joined by ","
+    const expectedNodeId = createHash('sha256')
+      .update(['user:alice', 'user:bob'].sort().join(','))
+      .digest('hex');
+    expect(group.actorNodeId).toBe(expectedNodeId);
+  });
+
+  it('two records with different actorType (after enrichment) produce two separate groups', () => {
+    const record1 = buildEventEdge({ actorEntityId: 'user:alice', targetEntityId: 'host:server1' });
+    const record2 = buildEventEdge({
+      actorEntityId: 'host:webserver',
+      targetEntityId: 'host:server1',
+    });
+
+    const enrichmentMap = new Map<string, EntityEnrichmentFields>([
+      ['user:alice', { name: 'Alice', type: 'user', subType: null, engineType: null, hostIps: [] }],
+      [
+        'host:webserver',
+        { name: 'webserver', type: 'host', subType: null, engineType: null, hostIps: [] },
+      ],
+    ]);
+
+    const result = regroupEvents([record1, record2], enrichmentMap);
+
+    expect(result).toHaveLength(2);
+  });
+
+  it('labelNodeId is MD5 of sorted doc IDs when multiple docs', () => {
+    const record1 = buildEventEdge({
+      actorEntityId: 'user:alice',
+      docs: ['{"id":"doc-a","type":"event"}'],
+      labelNodeId: 'doc-a',
+    });
+    const record2 = buildEventEdge({
+      actorEntityId: 'user:alice',
+      docs: ['{"id":"doc-b","type":"event"}'],
+      labelNodeId: 'doc-b',
+      badge: 2,
+      uniqueEventsCount: 2,
+      uniqueAlertsCount: 0,
+    });
+
+    // No enrichment so both stay in the same group (same null type)
+    const result = regroupEvents([record1, record2], new Map());
+
+    expect(result).toHaveLength(1);
+    const [group] = result;
+
+    const expectedLabelNodeId = createHash('sha256')
+      .update(['doc-a', 'doc-b'].join(','))
+      .digest('hex');
+    expect(group.labelNodeId).toBe(expectedLabelNodeId);
+  });
+});
+
+describe('enrichEventDocData', () => {
+  it('returns empty array for empty input', () => {
+    const result = enrichEventDocData([], new Map());
+    expect(result).toEqual([]);
+  });
+
+  it('rebuilds actorsDocData with availableInEntityStore=false when no enrichment', () => {
+    const record = buildEventEdge({ actorEntityId: 'user:alice', targetEntityId: 'host:server1' });
+    const grouped = regroupEvents([record], new Map());
+    const result = enrichEventDocData(grouped, new Map());
+
+    expect(result).toHaveLength(1);
+    const [group] = result;
+
+    const actorDoc = JSON.parse((group.actorsDocData as string[])[0]);
+    expect(actorDoc.entity.availableInEntityStore).toBe(false);
+
+    const targetDoc = JSON.parse((group.targetsDocData as string[])[0]);
+    expect(targetDoc.entity.availableInEntityStore).toBe(false);
+  });
+
+  it('rebuilds actorsDocData with availableInEntityStore=true and metadata when enrichment found', () => {
+    const record = buildEventEdge({ actorEntityId: 'user:alice', targetEntityId: 'host:server1' });
+    const enrichmentMap = new Map<string, EntityEnrichmentFields>([
+      [
+        'user:alice',
+        { name: 'Alice', type: 'user', subType: 'admin', engineType: 'ecs', hostIps: [] },
+      ],
+    ]);
+
+    const grouped = regroupEvents([record], enrichmentMap);
+    const result = enrichEventDocData(grouped, enrichmentMap);
+
+    expect(result).toHaveLength(1);
+    const [group] = result;
+
+    const actorDoc = JSON.parse((group.actorsDocData as string[])[0]);
+    expect(actorDoc.entity.availableInEntityStore).toBe(true);
+    expect(actorDoc.entity.name).toBe('Alice');
+    expect(actorDoc.entity.type).toBe('user');
+    expect(actorDoc.entity.sub_type).toBe('admin');
   });
 });
