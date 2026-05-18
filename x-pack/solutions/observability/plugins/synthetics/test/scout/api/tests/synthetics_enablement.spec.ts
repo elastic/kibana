@@ -6,7 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { getPlaywrightTagsFor } from '@kbn/scout/src/playwright/tags';
+import { getPlaywrightTagsFor } from '@kbn/scout-oblt';
 import type { ApiClientFixture } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import { apiTest, KIBANA_HEADERS, SYNTHETICS_API_URLS } from '../fixtures';

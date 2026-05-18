@@ -13,7 +13,7 @@ export { sloDataFixture } from './src/playwright/fixtures/worker';
 export type { SloDataFixture } from './src/playwright/fixtures/worker';
 
 // re-exported test framework from @kbn/scout
-export { lighthouseTest, tags } from '@kbn/scout';
+export { lighthouseTest, tags, getPlaywrightTagsFor } from '@kbn/scout';
 
 // Custom global setup/teardown hooks with profiling support
 export { globalSetupHook, globalTeardownHook } from './src/playwright/global_hook';

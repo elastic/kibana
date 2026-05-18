@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getPlaywrightTagsFor } from '@kbn/scout/src/playwright/tags';
+import { getPlaywrightTagsFor } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import { apiTest, mergeSyntheticsApiHeaders } from '../fixtures';
 import { addMonitor } from '../fixtures/monitors';
