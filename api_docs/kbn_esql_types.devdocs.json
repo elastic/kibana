@@ -1018,10 +1018,10 @@
         "children": [
           {
             "parentPluginId": "@kbn/esql-types",
-            "id": "def-common.EsqlDataset.dataset_id",
+            "id": "def-common.EsqlDataset.name",
             "type": "string",
             "tags": [],
-            "label": "dataset_id",
+            "label": "name",
             "description": [],
             "path": "src/platform/packages/shared/kbn-esql-types/src/sources_autocomplete_types.ts",
             "lineNumber": 55,
@@ -1031,10 +1031,10 @@
           },
           {
             "parentPluginId": "@kbn/esql-types",
-            "id": "def-common.EsqlDataset.datasource",
+            "id": "def-common.EsqlDataset.data_source",
             "type": "string",
             "tags": [],
-            "label": "datasource",
+            "label": "data_source",
             "description": [],
             "path": "src/platform/packages/shared/kbn-esql-types/src/sources_autocomplete_types.ts",
             "lineNumber": 56,
@@ -1054,6 +1054,38 @@
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-types",
+            "id": "def-common.EsqlDataset.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-types/src/sources_autocomplete_types.ts",
+            "lineNumber": 58,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-types",
+            "id": "def-common.EsqlDataset.settings",
+            "type": "Object",
+            "tags": [],
+            "label": "settings",
+            "description": [],
+            "signature": [
+              "Record<string, unknown> | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-types/src/sources_autocomplete_types.ts",
+            "lineNumber": 59,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1066,7 +1098,7 @@
         "label": "EsqlDatasetsResult",
         "description": [],
         "path": "src/platform/packages/shared/kbn-esql-types/src/sources_autocomplete_types.ts",
-        "lineNumber": 60,
+        "lineNumber": 62,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -1089,7 +1121,7 @@
               "[]"
             ],
             "path": "src/platform/packages/shared/kbn-esql-types/src/sources_autocomplete_types.ts",
-            "lineNumber": 61,
+            "lineNumber": 63,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

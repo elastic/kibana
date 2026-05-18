@@ -8,8 +8,8 @@
 export const DASHBOARD_OPERATION_FAILURE_TYPES = {
   attachmentPanels: 'attachment_panels',
   addSection: 'add_section',
-  createVisualizationPanels: 'create_visualization_panels',
-  editVisualizationPanels: 'edit_visualization_panels',
+  addPanels: 'add_panels',
+  editPanels: 'edit_panels',
   updatePanelLayouts: 'update_panel_layouts',
 } as const;
 

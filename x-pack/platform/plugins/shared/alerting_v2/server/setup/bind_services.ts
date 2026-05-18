@@ -24,6 +24,7 @@ import {
 import { ALERTING_V2_DISPATCHER_ENABLED_SETTING_ID } from '../../common/advanced_settings';
 import { ActionPolicyClient } from '../lib/action_policy_client';
 import { ActionPolicyNamespaceToken } from '../lib/action_policy_client/tokens';
+import { ActionPolicyExecutionHistoryClient } from '../lib/action_policy_execution_history_client';
 import { RulesClient } from '../lib/rules_client';
 import { RulesClientSpaceIdToken } from '../lib/rules_client/tokens';
 import { ApiKeyService } from '../lib/services/api_key_service/api_key_service';
@@ -100,6 +101,7 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
           rulesSavedObjectService: get(RulesSavedObjectServiceScopedToken),
           taskManager: get(PluginStart<TaskManagerStartContract>('taskManager')),
           userService: get(UserService),
+          actionPolicyClient: get(ActionPolicyClient),
         },
         options: {
           spaceId: get(RulesClientSpaceIdToken),
@@ -126,6 +128,7 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
     .toDynamicValue(({ get }) => {
       return new ActionPolicyClient(
         get(ActionPolicySavedObjectServiceScopedToken),
+        get(RulesSavedObjectServiceScopedToken),
         get(UserService),
         get(ApiKeyService),
         get(EncryptedSavedObjectsClientToken),
@@ -133,6 +136,7 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
       );
     })
     .inRequestScope();
+  bind(ActionPolicyExecutionHistoryClient).toSelf().inRequestScope();
   bind(UserService).toSelf().inRequestScope();
   bind(ApiKeyService).toSelf().inRequestScope();
   bind(AlertingRetryService).toSelf().inSingletonScope();

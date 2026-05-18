@@ -94,6 +94,7 @@ const AddFilterPopoverComponent = React.memo(function AddFilterPopover({
         ownFocus
         repositionOnScroll
         aria-label={strings.getAddFilterButtonLabel()}
+        focusTrapProps={{ clickOutsideDisables: false }}
       >
         <FilterEditorWrapper
           indexPatterns={indexPatterns}

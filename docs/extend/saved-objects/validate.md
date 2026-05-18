@@ -210,6 +210,48 @@ Matchers compose naturally with the rest of the fixture: you can use them at any
 
 When the check fails and reports a diff, fields covered by a passing matcher are omitted from the diff output (they are silently substituted with the actual value). Fields covered by a failing matcher appear as `<any uuid>`, `<any string>`, etc., so the diff still points directly at the real problem.
 
+## Work-in-progress Saved Object types [saved-objects-wip-types]
+
+If you are building a new Saved Object type whose schema and mappings are still evolving, the standard immutability constraints can slow down early iteration. The WIP types mechanism lets you iterate freely during development and then graduate the type to full constraints when it is production-ready.
+
+There are two approaches depending on how the owning plugin is deployed.
+
+### Scenario A — Plugin disabled by default; type registered unconditionally [saved-objects-wip-types-scenario-a]
+
+Use this when the feature and its plugin are only enabled in dedicated dev or QA environments and are not deployed to production or Serverless by default.
+
+**Workflow:**
+
+1. Open a PR adding the type name to `src/core/packages/saved-objects/server-internal/wip_types.json` (reviewed by `@elastic/kibana-core`). This file is the gate that Core team reviews.
+
+2. Add the type name to `migrations.allowWipTypes` in every `kibana.yml` where the plugin is enabled. Kibana will fail to start if the type is registered but absent from this list:
+
+   ```yaml
+   migrations.allowWipTypes:
+     - my_new_type
+   ```
+
+3. Iterate freely. The CI SO check treats the type as perpetually new on every PR — the same checks that apply when first introducing a type always apply, but history-based immutability constraints (e.g. "existing model versions cannot change") are never enforced.
+
+4. **Graduation**: when the type is stable and production-ready, open a PR removing it from `wip_types.json` and from all `migrations.allowWipTypes` entries. Full immutability constraints apply from that point forward.
+
+### Scenario B — Plugin enabled everywhere; type registered conditionally [saved-objects-wip-types-scenario-b]
+
+Use this when the plugin is always enabled (including in Serverless production), but the SO type should only be registered when a feature flag or configuration option is turned on.
+
+The `no_conditional_saved_object_type_registration` ESLint rule normally forbids conditional registration to avoid migration ON/OFF conflicts. For WIP types, suppress it with an inline comment and a TODO to remove it at graduation:
+
+```typescript
+if (config.featureFlags.myFeatureEnabled) {
+  // eslint-disable-next-line @kbn/eslint/no_conditional_saved_object_type_registration -- TODO: remove once my_new_type graduates from WIP
+  core.savedObjects.registerType(myNewType);
+}
+```
+
+Because the type is only registered when the flag is on, it is never registered in environments where the flag is off — so the CI SO check never sees it, and no `wip_types.json` entry or `migrations.allowWipTypes` config is needed.
+
+**Graduation**: remove the conditional and the ESLint suppression. The type becomes unconditionally registered and is subject to full SO type constraints from that point forward.
+
 ## Troubleshooting
 
 ### CI is failing for my PR
@@ -276,3 +318,15 @@ CI validates Saved Object type definitions. When you add or change a type, the *
 
 **Problem:** The type name was used before and then removed. Type names in `removed_types.json` cannot be reused.
 **Solution:** Choose a different type name. Names in `packages/kbn-check-saved-objects-cli/removed_types.json` are permanently reserved.
+
+```shell
+Kibana cannot start because the following WIP saved object types are registered but not listed in 'migrations.allowWipTypes': [<soType>].
+```
+
+**Problem:** A type listed in `wip_types.json` is registered by a plugin but has not been explicitly allowed in the Kibana configuration.
+**Solution:** Add the type name to `migrations.allowWipTypes` in `kibana.yml` for every environment where the plugin is enabled:
+```yaml
+migrations.allowWipTypes:
+  - <soType>
+```
+If you did not intend to register a WIP type, check whether the plugin should be disabled in this environment. See [Scenario A](./validate.md#saved-objects-wip-types-scenario-a) for the full workflow.
