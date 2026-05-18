@@ -140,7 +140,7 @@ export const DocumentationSection: React.FC<DocumentationSectionProps> = ({ prod
         render: (name: string, item: DocumentationItem) => (
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiIcon type={item.icon ?? 'documents'} />
+              <EuiIcon type={item.icon ?? 'documents'} aria-hidden={true} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiText size="s">{name}</EuiText>
