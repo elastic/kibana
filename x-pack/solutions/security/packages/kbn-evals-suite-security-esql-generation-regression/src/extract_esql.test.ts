@@ -270,6 +270,44 @@ describe('extractEsqlFromConverseResponse', () => {
       expect(extractEsqlFromConverseResponse(out)).toBe('FROM logs-* | LIMIT 10');
     });
 
+    it('accepts the FROM heuristic when the prose contains the English word "with"', () => {
+      // Regression for Garrett Spong's review comment on PR #268787:
+      // the SQL pre-check guard used to include a bare `\bWITH\b` in
+      // the case-insensitive verb list, which silently refused every
+      // legitimate ES|QL response whose surrounding prose contained
+      // "with" — one of the most common English words in assistant
+      // explanations ("the query with the filter applied").
+      const proseWithCases = [
+        "Sure, here's the query with the right filter applied: FROM logs-* | LIMIT 10",
+        'Below is the ES|QL with no time bound: FROM events-* | STATS COUNT(*)',
+        'Hello! Here is the query, with output grouped by host: FROM logs-* | STATS COUNT(*) BY host.name',
+      ];
+      for (const message of proseWithCases) {
+        const result = extractEsqlFromConverseResponse({ steps: [], messages: [{ message }] });
+        expect({ message, result }).toEqual({
+          message,
+          result: expect.stringMatching(/^FROM /),
+        });
+      }
+    });
+
+    it('still refuses SQL CTE shape `WITH foo AS (...)` (not English "with")', () => {
+      // The dedicated CTE regex picks up the SQL `WITH <name> AS (`
+      // structure without colliding with bare English "with".
+      const cteCases = [
+        'WITH cte AS (SELECT * FROM x) SELECT * FROM cte',
+        'with my_cte as (select id from users) select * from my_cte',
+        'WITH a AS (SELECT 1), b AS (SELECT 2) SELECT * FROM a, b',
+      ];
+      for (const message of cteCases) {
+        const out = { steps: [], messages: [{ message }] };
+        expect({ message, got: extractEsqlFromConverseResponse(out) }).toEqual({
+          message,
+          got: '',
+        });
+      }
+    });
+
     it('does NOT apply the guard to tool-call results (trusted contract)', () => {
       // The `generate_esql` / `execute_esql` tools are contracted to emit
       // ES|QL; if a tool's data field contains something unusual, we

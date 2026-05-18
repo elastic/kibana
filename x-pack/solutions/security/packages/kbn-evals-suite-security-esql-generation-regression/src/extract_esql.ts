@@ -76,9 +76,35 @@ const ESQL_SOURCE_COMMAND_REGEX = /^\s*(FROM|ROW|SHOW)\b/i;
  * `openai-gpt-oss-120b` that emit raw SQL — `SELECT user.name FROM
  * logs-* WHERE ...` would otherwise be sliced into `FROM logs-*
  * WHERE ...` and scored as a (broken) ES|QL candidate.
+ *
+ * `WITH` is intentionally NOT in this list because the bare keyword
+ * appears far too often as plain English in assistant prose (e.g.
+ * "here's the query with the right filter applied"), which would
+ * silently refuse legitimate ES|QL extractions. The SQL CTE shape
+ * `WITH <name> [, <name>]* AS (` is handled by {@link SQL_CTE_REGEX}
+ * separately, which disambiguates the two usages cleanly.
  */
 const SQL_PRECEDING_VERB_REGEX =
-  /\b(SELECT|INSERT|UPDATE|DELETE|ALTER|CREATE|DROP|TRUNCATE|MERGE|WITH)\b/i;
+  /\b(SELECT|INSERT|UPDATE|DELETE|ALTER|CREATE|DROP|TRUNCATE|MERGE)\b/i;
+
+/**
+ * SQL Common Table Expression shape: `WITH foo AS (SELECT ...)`. Matched
+ * separately from {@link SQL_PRECEDING_VERB_REGEX} so the FROM-guard does
+ * not get fooled by the English word "with" in assistant prose. The
+ * combination of `\w+` followed by `AS (` is structural enough that it
+ * does not collide with normal text (no English construction looks like
+ * `with foo as (`).
+ */
+const SQL_CTE_REGEX = /\bWITH\s+\w+(?:\s*,\s*\w+)*\s+AS\s*\(/i;
+
+/**
+ * Return `true` when `text` carries a SQL-shaped clause that would mark
+ * a downstream `FROM` keyword as the FROM-clause of a SQL statement
+ * rather than the source command of an ES|QL query.
+ */
+function precedingTextLooksLikeSql(text: string): boolean {
+  return SQL_PRECEDING_VERB_REGEX.test(text) || SQL_CTE_REGEX.test(text);
+}
 
 /**
  * Return `true` when `query` plausibly opens with an ES|QL source
@@ -115,11 +141,15 @@ function looksLikeEsql(query: string): boolean {
  *      {@link looksLikeEsql} shape check or the result is discarded
  *      and the FROM heuristic is tried.
  *   3. **`FROM` heuristic** — slice the final message from the first
- *      `FROM` keyword onward, AS LONG AS no SQL verb (`SELECT`,
- *      `INSERT`, `UPDATE`, `DELETE`, `ALTER`, `CREATE`, `DROP`,
- *      `TRUNCATE`, `MERGE`, `WITH`) appears before it. When a SQL
- *      verb precedes the `FROM`, the FROM is part of a SQL statement,
- *      not an ES|QL source command, and the extractor returns empty.
+ *      `FROM` keyword onward, AS LONG AS no SQL clause precedes it.
+ *      "SQL clause" here means either a SQL verb (`SELECT`, `INSERT`,
+ *      `UPDATE`, `DELETE`, `ALTER`, `CREATE`, `DROP`, `TRUNCATE`,
+ *      `MERGE`) or a CTE shape (`WITH <name> AS (`). When a SQL clause
+ *      precedes the `FROM`, the FROM is part of a SQL statement, not
+ *      an ES|QL source command, and the extractor returns empty.
+ *      Note that the bare word "with" in prose is NOT treated as a
+ *      SQL clause — too many assistant responses say things like
+ *      "here is the query with the right filter applied".
  *
  * Returns an empty string when no ES|QL could be extracted; the downstream
  * evaluators handle the empty-string case (validity returns 0, execution
@@ -158,9 +188,9 @@ export function extractEsqlFromConverseResponse(output: ConverseLikeOutput): str
   const fromMatch = finalMessage.match(FROM_HEURISTIC_REGEX);
   if (fromMatch && typeof fromMatch.index === 'number') {
     const beforeFrom = finalMessage.slice(0, fromMatch.index);
-    if (SQL_PRECEDING_VERB_REGEX.test(beforeFrom)) {
-      // SQL `SELECT col FROM table` (or sibling DDL/DML) — the `FROM`
-      // we matched is not an ES|QL source command. Refuse the
+    if (precedingTextLooksLikeSql(beforeFrom)) {
+      // SQL `SELECT col FROM table` (or sibling DDL/DML / CTE) — the
+      // `FROM` we matched is not an ES|QL source command. Refuse the
       // extraction so the validity evaluator scores it 0.
       return '';
     }
