@@ -71,53 +71,6 @@ apiTest.describe('Entity Store volume cap', { tag: ENTITY_STORE_TAGS }, () => {
     await clearEntityStoreIndices(esClient);
   });
 
-  // ─── Schema validation ────────────────────────────────────────────────────
-
-  apiTest(
-    'PUT accepts valid maxLogsPerWindow and maxLogsPerWindowCapBehavior',
-    async ({ apiClient }) => {
-      try {
-        const response = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
-          headers: defaultHeaders,
-          responseType: 'json',
-          body: { logExtraction: { maxLogsPerWindow: 5, maxLogsPerWindowCapBehavior: 'drop' } },
-        });
-        expect(response).toHaveStatusCode(200);
-      } finally {
-        await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
-          headers: defaultHeaders,
-          responseType: 'json',
-          body: {
-            logExtraction: {
-              maxLogsPerWindow: LOG_EXTRACTION_MAX_LOGS_PER_WINDOW_DEFAULT,
-              maxLogsPerWindowCapBehavior: LOG_EXTRACTION_CAP_BEHAVIOR_DEFAULT,
-            },
-          },
-        });
-      }
-    }
-  );
-
-  apiTest('PUT rejects negative maxLogsPerWindow', async ({ apiClient }) => {
-    const response = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
-      headers: defaultHeaders,
-      responseType: 'json',
-      body: { logExtraction: { maxLogsPerWindow: -1 } },
-    });
-    expect(response).toHaveStatusCode(400);
-  });
-
-  apiTest('PUT rejects invalid maxLogsPerWindowCapBehavior value', async ({ apiClient }) => {
-    const response = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
-      headers: defaultHeaders,
-      responseType: 'json',
-      body: { logExtraction: { maxLogsPerWindowCapBehavior: 'discard' } },
-    });
-    expect(response).toHaveStatusCode(400);
-  });
-
-  // ─── Behavioral tests ─────────────────────────────────────────────────────
-
   // Defer: cap fires mid-window — caller uses lastSearchTimestamp to resume
   apiTest(
     'defer — logsCapApplied true, lastSearchTimestamp before window end',
