@@ -34,6 +34,9 @@ jest.mock('@kbn/core-di-browser', () => ({
     if (token === 'data' || token === 'dataViews' || token === 'lens') {
       return {};
     }
+    if (typeof token === 'function' && token.name === 'RulesApi') {
+      return { saveRuleBuilderConfig: jest.fn(), getRuleBuilderConfig: jest.fn() };
+    }
     throw new Error(`Unexpected token in useService mock: ${String(token)}`);
   },
   CoreStart: (key: string) => key,
@@ -49,6 +52,11 @@ jest.mock('@kbn/alerting-v2-rule-form', () => ({
       Compose Discover flyout
     </button>
   ),
+  RULE_BUILDER_TYPE: 'threshold',
+}));
+
+jest.mock('../../hooks/use_fetch_rule_builder_config', () => ({
+  useFetchRuleBuilderConfig: () => ({ data: undefined, isLoading: false, isError: false }),
 }));
 
 const mockCreateRuleMutate = jest.fn();
