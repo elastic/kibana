@@ -55,12 +55,14 @@ export const rebuildDocData = (
     const entityId = doc.id as string;
     if (!entityId) return item;
 
-    // sourceFields may be at top level (events docData) or inside entity object (entity store docData)
+    const enrichment = enrichmentMap.get(entityId);
+
+    // sourceFields may be at top level (events docData), inside existing entity object (entity store
+    // docData), or from enrichment (relationship target docData that has no sourceFields in the doc).
     const topLevelSourceFields = doc.sourceFields;
     const existingEntity = (doc.entity as Record<string, unknown>) ?? {};
-    const sourceFields = topLevelSourceFields ?? existingEntity.sourceFields;
-
-    const enrichment = enrichmentMap.get(entityId);
+    const sourceFields =
+      topLevelSourceFields ?? existingEntity.sourceFields ?? enrichment?.sourceFields;
     const entityData: Record<string, unknown> = {
       availableInEntityStore: enrichment != null,
       ...(sourceFields ? { sourceFields } : {}),

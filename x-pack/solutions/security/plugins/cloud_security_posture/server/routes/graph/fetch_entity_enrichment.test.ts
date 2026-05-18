@@ -62,13 +62,119 @@ describe('fetchEntityEnrichment', () => {
     });
 
     const result = await fetchEntityEnrichment(esClient, logger, ['user:alice'], 'default');
-    expect(result.get('user:alice')).toEqual({
-      name: 'Alice',
-      type: 'user',
-      subType: 'okta_user',
-      engineType: 'ecs',
-      hostIps: [],
+    const enrichment = result.get('user:alice');
+    expect(enrichment?.name).toBe('Alice');
+    expect(enrichment?.type).toBe('user');
+    expect(enrichment?.subType).toBe('okta_user');
+    expect(enrichment?.engineType).toBe('ecs');
+    expect(enrichment?.hostIps).toEqual([]);
+  });
+
+  it('builds typed sourceFields for user entities', async () => {
+    (esClient.asInternalUser.indices as jest.Mocked<any>).exists = jest
+      .fn()
+      .mockResolvedValueOnce(true);
+
+    (esClient.asInternalUser.helpers.esql as unknown as jest.Mock).mockReturnValue({
+      toRecords: jest.fn().mockResolvedValue({
+        records: [
+          {
+            'entity.id': 'user:alice@example.com',
+            'entity.name': 'Alice',
+            'entity.type': 'user',
+            'entity.sub_type': null,
+            'entity.EngineMetadata.Type': null,
+            'host.ip': null,
+            'user.email': 'alice@example.com',
+            'user.id': 'alice',
+            'user.name': 'alice',
+            'user.domain': null,
+            'host.id': null,
+            'host.name': null,
+            'service.name': null,
+          },
+        ],
+      }),
     });
+
+    const result = await fetchEntityEnrichment(
+      esClient,
+      logger,
+      ['user:alice@example.com'],
+      'default'
+    );
+    const enrichment = result.get('user:alice@example.com');
+    expect(enrichment?.sourceFields).toBeDefined();
+    expect(enrichment?.sourceFields?.['user.email']).toBe('alice@example.com');
+    expect(enrichment?.sourceFields?.['user.id']).toBe('alice');
+    expect(enrichment?.sourceFields?.['user.name']).toBe('alice');
+    // Null fields are excluded
+    expect(enrichment?.sourceFields?.['user.domain']).toBeUndefined();
+    // Non-user fields are excluded for user entities
+    expect(enrichment?.sourceFields?.['service.name']).toBeUndefined();
+  });
+
+  it('builds typed sourceFields for host entities', async () => {
+    (esClient.asInternalUser.indices as jest.Mocked<any>).exists = jest
+      .fn()
+      .mockResolvedValueOnce(true);
+
+    (esClient.asInternalUser.helpers.esql as unknown as jest.Mock).mockReturnValue({
+      toRecords: jest.fn().mockResolvedValue({
+        records: [
+          {
+            'entity.id': 'host:my-server',
+            'entity.name': 'my-server',
+            'entity.type': 'host',
+            'entity.sub_type': null,
+            'entity.EngineMetadata.Type': null,
+            'host.ip': null,
+            'host.id': 'my-server',
+            'host.name': 'my-server',
+            'host.hostname': 'my-server.example.com',
+            'user.email': null,
+            'user.id': null,
+          },
+        ],
+      }),
+    });
+
+    const result = await fetchEntityEnrichment(esClient, logger, ['host:my-server'], 'default');
+    const enrichment = result.get('host:my-server');
+    expect(enrichment?.sourceFields?.['host.id']).toBe('my-server');
+    expect(enrichment?.sourceFields?.['host.name']).toBe('my-server');
+    expect(enrichment?.sourceFields?.['host.hostname']).toBe('my-server.example.com');
+    // User fields excluded for host entities
+    expect(enrichment?.sourceFields?.['user.email']).toBeUndefined();
+  });
+
+  it('omits sourceFields entirely when all source columns are null', async () => {
+    (esClient.asInternalUser.indices as jest.Mocked<any>).exists = jest
+      .fn()
+      .mockResolvedValueOnce(true);
+
+    (esClient.asInternalUser.helpers.esql as unknown as jest.Mock).mockReturnValue({
+      toRecords: jest.fn().mockResolvedValue({
+        records: [
+          {
+            'entity.id': 'user:alice',
+            'entity.name': 'Alice',
+            'entity.type': 'user',
+            'entity.sub_type': null,
+            'entity.EngineMetadata.Type': null,
+            'host.ip': null,
+            'user.email': null,
+            'user.id': null,
+            'user.name': null,
+            'user.domain': null,
+          },
+        ],
+      }),
+    });
+
+    const result = await fetchEntityEnrichment(esClient, logger, ['user:alice'], 'default');
+    const enrichment = result.get('user:alice');
+    expect(enrichment?.sourceFields).toBeUndefined();
   });
 
   it('chunks 101 entity IDs into two queries', async () => {

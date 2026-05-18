@@ -8,6 +8,7 @@
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { getEntitiesLatestIndexName } from '@kbn/cloud-security-posture-common/utils/helpers';
 import { checkIfEntitiesIndexExists } from './utils';
+import { GRAPH_ACTOR_EUID_SOURCE_FIELDS } from './constants';
 
 export interface EntityEnrichmentFields {
   name?: string | null;
@@ -15,7 +16,68 @@ export interface EntityEnrichmentFields {
   subType?: string | null;
   hostIps?: string[];
   engineType?: string | null;
+  sourceFields?: Record<string, string | string[]>;
 }
+
+const TYPED_ENTITY_PREFIXES = ['user', 'host', 'service'] as const;
+
+const BASE_ENRICHMENT_COLUMNS = new Set([
+  'entity.id',
+  'entity.name',
+  'entity.type',
+  'entity.sub_type',
+  'entity.EngineMetadata.Type',
+  'host.ip',
+]);
+
+// Additional entity-store columns needed to reconstruct sourceFields, beyond the base set.
+// Deduped; strips ".target" suffix so actor-namespace definitions map to store column names.
+const EXTRA_SOURCE_FIELD_COLUMNS = [
+  ...new Set(
+    [
+      ...GRAPH_ACTOR_EUID_SOURCE_FIELDS.all,
+      ...GRAPH_ACTOR_EUID_SOURCE_FIELDS.user,
+      ...GRAPH_ACTOR_EUID_SOURCE_FIELDS.host,
+      ...GRAPH_ACTOR_EUID_SOURCE_FIELDS.service,
+      ...GRAPH_ACTOR_EUID_SOURCE_FIELDS.generic,
+    ].map((f) => f.replace('.target', ''))
+  ),
+].filter((col) => !BASE_ENRICHMENT_COLUMNS.has(col));
+
+/**
+ * Builds a sourceFields object for an entity from its entity-store record columns.
+ * Mirrors the type-conditional logic in buildSourceFieldsJson: typed entities get their
+ * own type's fields, generic entities get the generic bucket, all entities get the "all" bucket.
+ */
+const buildSourceFields = (
+  entityId: string,
+  record: Record<string, unknown>
+): Record<string, string | string[]> => {
+  const result: Record<string, string | string[]> = {};
+
+  const addField = (col: string): void => {
+    const val = record[col];
+    if (val == null) return;
+    result[col] = Array.isArray(val) ? (val as string[]).map(String) : String(val);
+  };
+
+  for (const field of GRAPH_ACTOR_EUID_SOURCE_FIELDS.all) {
+    addField(field.replace('.target', ''));
+  }
+
+  const matchedType = TYPED_ENTITY_PREFIXES.find((p) => entityId.startsWith(`${p}:`));
+  if (matchedType) {
+    for (const field of GRAPH_ACTOR_EUID_SOURCE_FIELDS[matchedType]) {
+      addField(field.replace('.target', ''));
+    }
+  } else {
+    for (const field of GRAPH_ACTOR_EUID_SOURCE_FIELDS.generic) {
+      addField(field.replace('.target', ''));
+    }
+  }
+
+  return result;
+};
 
 /** Chunks an array into subarrays of at most `size` elements. */
 const chunkArray = <T>(arr: T[], size: number): T[][] => {
@@ -63,7 +125,7 @@ export const fetchEntityEnrichment = async (
       const paramNames = chunk.map((_, i) => `?entityId${i}`).join(', ');
       const query = `FROM ${indexName}
 | WHERE entity.id IN (${paramNames})
-| KEEP entity.id, entity.name, entity.type, entity.sub_type, \`entity.EngineMetadata.Type\`, host.ip`;
+| KEEP entity.id, entity.name, entity.type, entity.sub_type, \`entity.EngineMetadata.Type\`, host.ip${EXTRA_SOURCE_FIELD_COLUMNS.length > 0 ? ', ' + EXTRA_SOURCE_FIELD_COLUMNS.join(', ') : ''}`;
 
       try {
         const response = await esClient.asInternalUser.helpers
@@ -80,7 +142,7 @@ export const fetchEntityEnrichment = async (
             'entity.sub_type'?: string | null;
             'entity.EngineMetadata.Type'?: string | null;
             'host.ip'?: string | string[] | null;
-          }>();
+          } & Record<string, unknown>>();
 
         for (const record of response.records) {
           const id = record['entity.id'];
@@ -94,12 +156,14 @@ export const fetchEntityEnrichment = async (
                   ? rawHostIp.map(String)
                   : [String(rawHostIp)]
                 : [];
+            const sourceFields = buildSourceFields(id, record);
             result.set(id, {
               name: record['entity.name'] ?? null,
               type: record['entity.type'] ?? null,
               subType: record['entity.sub_type'] ?? null,
               engineType: record['entity.EngineMetadata.Type'] ?? null,
               hostIps,
+              ...(Object.keys(sourceFields).length > 0 ? { sourceFields } : {}),
             });
           }
         }

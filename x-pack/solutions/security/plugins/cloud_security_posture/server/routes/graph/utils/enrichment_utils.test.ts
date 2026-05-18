@@ -109,6 +109,60 @@ describe('rebuildDocData', () => {
     expect(doc.entity.availableInEntityStore).toBe(false);
   });
 
+  it('falls back to enrichment sourceFields when input doc has no sourceFields', () => {
+    // Relationship target docData has no sourceFields — enrichment provides them
+    const item = JSON.stringify({ id: 'user:alice', type: 'entity' });
+    const enrichmentMap = new Map<string, EntityEnrichmentFields>([
+      [
+        'user:alice',
+        {
+          name: 'Alice',
+          type: 'user',
+          subType: null,
+          engineType: null,
+          hostIps: [],
+          sourceFields: { 'user.id': 'alice', 'user.email': 'alice@example.com' },
+        },
+      ],
+    ]);
+
+    const result = rebuildDocData([item], enrichmentMap);
+
+    const doc = JSON.parse(result[0]);
+    expect(doc.entity.sourceFields).toEqual({
+      'user.id': 'alice',
+      'user.email': 'alice@example.com',
+    });
+    expect(doc.entity.availableInEntityStore).toBe(true);
+  });
+
+  it('prefers input sourceFields over enrichment sourceFields', () => {
+    // Events docData has sourceFields from the event row — those take precedence
+    const item = JSON.stringify({
+      id: 'user:alice',
+      type: 'entity',
+      sourceFields: { 'user.id': 'from-event' },
+    });
+    const enrichmentMap = new Map<string, EntityEnrichmentFields>([
+      [
+        'user:alice',
+        {
+          name: 'Alice',
+          type: 'user',
+          subType: null,
+          engineType: null,
+          hostIps: [],
+          sourceFields: { 'user.id': 'from-enrichment' },
+        },
+      ],
+    ]);
+
+    const result = rebuildDocData([item], enrichmentMap);
+
+    const doc = JSON.parse(result[0]);
+    expect(doc.entity.sourceFields?.['user.id']).toBe('from-event');
+  });
+
   it('handles host.ip array in enrichment', () => {
     const item = JSON.stringify({ id: 'host:server1', type: 'entity', sourceFields: {} });
     const enrichmentMap = new Map<string, EntityEnrichmentFields>([
