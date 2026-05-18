@@ -171,6 +171,9 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
         organizationInTrial: this.config.serverless?.in_trial,
       },
       fetchElasticsearchConfig: this.fetchElasticsearchConfig.bind(this, coreStart.http),
+      managedOtlp: {
+        url: this.config.managed_otlp?.url,
+      },
       ...this.cloudUrls.getUrls(), // TODO: Deprecate directly accessing URLs, use `getUrls` instead
       getPrivilegedUrls: this.cloudUrls.getPrivilegedUrls.bind(this.cloudUrls),
       getUrls: this.cloudUrls.getUrls.bind(this.cloudUrls),
