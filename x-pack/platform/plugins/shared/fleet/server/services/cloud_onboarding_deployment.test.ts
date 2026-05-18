@@ -51,10 +51,10 @@ function makeMockedEncryptedSoClient(
   id: string,
   attributes: CloudOnboardingDeploymentSOAttributes
 ) {
-  const esoClientMock: jest.Mocked<EncryptedSavedObjectsClient> = {
+  const esoClientMock = {
     getDecryptedAsInternalUser: jest.fn().mockResolvedValue(makeSOResponse(id, attributes)),
     createPointInTimeFinderDecryptedAsInternalUser: jest.fn(),
-  };
+  } as jest.Mocked<EncryptedSavedObjectsClient>;
   mockedAppContextService.getEncryptedSavedObjects.mockReturnValue(esoClientMock);
   return esoClientMock;
 }
@@ -157,7 +157,7 @@ describe('cloudOnboardingDeploymentService', () => {
     });
 
     it('throws FleetError when the SO has an error field', async () => {
-      const esoClientMock: jest.Mocked<EncryptedSavedObjectsClient> = {
+      const esoClientMock = {
         getDecryptedAsInternalUser: jest.fn().mockResolvedValue({
           id: 'deploy-1',
           type: CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
@@ -166,7 +166,7 @@ describe('cloudOnboardingDeploymentService', () => {
           error: { statusCode: 404, error: 'Not Found', message: 'not found' },
         }),
         createPointInTimeFinderDecryptedAsInternalUser: jest.fn(),
-      };
+      } as jest.Mocked<EncryptedSavedObjectsClient>;
       mockedAppContextService.getEncryptedSavedObjects.mockReturnValue(esoClientMock);
 
       await expect(
@@ -181,7 +181,7 @@ describe('cloudOnboardingDeploymentService', () => {
       const attrs2 = makeAttributes({ mechanisms: ['firehose'] });
       soClient.getCurrentNamespace.mockReturnValue('space-a');
 
-      const esoClientMock: jest.Mocked<EncryptedSavedObjectsClient> = {
+      const esoClientMock = {
         getDecryptedAsInternalUser: jest.fn(),
         createPointInTimeFinderDecryptedAsInternalUser: jest.fn().mockResolvedValue({
           async *find() {
@@ -194,7 +194,7 @@ describe('cloudOnboardingDeploymentService', () => {
           },
           close: jest.fn(),
         }),
-      };
+      } as jest.Mocked<EncryptedSavedObjectsClient>;
       mockedAppContextService.getEncryptedSavedObjects.mockReturnValue(esoClientMock);
 
       const results = await cloudOnboardingDeploymentService.getByConnectionId(soClient, 'conn-1');
@@ -214,7 +214,7 @@ describe('cloudOnboardingDeploymentService', () => {
     it('falls back to default namespace when soClient is in the default space', async () => {
       soClient.getCurrentNamespace.mockReturnValue(undefined);
 
-      const esoClientMock: jest.Mocked<EncryptedSavedObjectsClient> = {
+      const esoClientMock = {
         getDecryptedAsInternalUser: jest.fn(),
         createPointInTimeFinderDecryptedAsInternalUser: jest.fn().mockResolvedValue({
           async *find() {
@@ -222,7 +222,7 @@ describe('cloudOnboardingDeploymentService', () => {
           },
           close: jest.fn(),
         }),
-      };
+      } as jest.Mocked<EncryptedSavedObjectsClient>;
       mockedAppContextService.getEncryptedSavedObjects.mockReturnValue(esoClientMock);
 
       await cloudOnboardingDeploymentService.getByConnectionId(soClient, 'conn-none');
@@ -233,7 +233,7 @@ describe('cloudOnboardingDeploymentService', () => {
     });
 
     it('returns an empty array when no deployments exist', async () => {
-      const esoClientMock: jest.Mocked<EncryptedSavedObjectsClient> = {
+      const esoClientMock = {
         getDecryptedAsInternalUser: jest.fn(),
         createPointInTimeFinderDecryptedAsInternalUser: jest.fn().mockResolvedValue({
           async *find() {
@@ -241,7 +241,7 @@ describe('cloudOnboardingDeploymentService', () => {
           },
           close: jest.fn(),
         }),
-      };
+      } as jest.Mocked<EncryptedSavedObjectsClient>;
       mockedAppContextService.getEncryptedSavedObjects.mockReturnValue(esoClientMock);
 
       const results = await cloudOnboardingDeploymentService.getByConnectionId(
