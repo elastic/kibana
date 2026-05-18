@@ -87,6 +87,10 @@ export interface ComposeDiscoverFlyoutProps {
   initialRuleBuilderState?: Record<string, unknown>;
   /** Called after successful create/update in rule builder mode with the builder state for config persistence. */
   onRuleBuilderConfigSave?: (ruleBuilderState: Record<string, unknown>) => void;
+  /** True when the rule builder config could not be loaded (e.g. 404). */
+  configLoadFailed?: boolean;
+  /** Called when the user chooses to switch from rule builder to ES|QL mode. */
+  onSwitchToEsqlMode?: () => void;
 }
 
 const FLYOUT_TITLE_ID = 'composeDiscoverFlyoutTitle';
@@ -165,6 +169,8 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
   ruleBuilderMode = false,
   initialRuleBuilderState,
   onRuleBuilderConfigSave,
+  configLoadFailed = false,
+  onSwitchToEsqlMode,
 }) => {
   /*
    * ── UI state (step navigation, sandbox open/close, tab selection, etc.) ──
@@ -456,6 +462,8 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
                 dispatch={dispatch}
                 services={services}
                 ruleBuilderMode={ruleBuilderMode}
+                configLoadFailed={configLoadFailed}
+                onSwitchToEsqlMode={onSwitchToEsqlMode}
               />
             )}
           </EuiFlyoutBody>

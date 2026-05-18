@@ -64,6 +64,8 @@ interface ComposeDiscoverFormProps {
   dispatch: React.Dispatch<ComposeDiscoverAction>;
   services: RuleFormServices;
   ruleBuilderMode?: boolean;
+  configLoadFailed?: boolean;
+  onSwitchToEsqlMode?: () => void;
 }
 
 // ── Recovery type selector ────────────────────────────────────────────────────
@@ -528,10 +530,14 @@ function RuleBuilderAlertConditionStep({
   state,
   dispatch,
   services,
+  configLoadFailed,
+  onSwitchToEsqlMode,
 }: {
   state: ComposeDiscoverState;
   dispatch: React.Dispatch<ComposeDiscoverAction>;
   services: RuleFormServices;
+  configLoadFailed?: boolean;
+  onSwitchToEsqlMode?: () => void;
 }) {
   const parentForm = useFormContext<ComposeFormValues>();
   const existingState = parentForm.getValues('ruleBuilderState') as
@@ -544,6 +550,38 @@ function RuleBuilderAlertConditionStep({
       : DEFAULT_RULE_BUILDER_VALUES,
     mode: 'onBlur',
   });
+
+  if (configLoadFailed) {
+    return (
+      <EuiCallOut
+        announceOnMount
+        title={i18n.translate(
+          'xpack.responseOps.alertingV2RuleForm.composeDiscover.ruleBuilder.configLoadFailed.title',
+          { defaultMessage: 'Rule builder configuration could not be loaded' }
+        )}
+        color="warning"
+        iconType="warning"
+      >
+        <p>
+          {i18n.translate(
+            'xpack.responseOps.alertingV2RuleForm.composeDiscover.ruleBuilder.configLoadFailed.body',
+            {
+              defaultMessage:
+                'The saved rule builder fields for this rule are unavailable. You can switch to the ES|QL editor to continue editing with the existing query.',
+            }
+          )}
+        </p>
+        {onSwitchToEsqlMode && (
+          <EuiButton size="s" color="warning" onClick={onSwitchToEsqlMode}>
+            {i18n.translate(
+              'xpack.responseOps.alertingV2RuleForm.composeDiscover.ruleBuilder.configLoadFailed.switchButton',
+              { defaultMessage: 'Switch to ES|QL editor' }
+            )}
+          </EuiButton>
+        )}
+      </EuiCallOut>
+    );
+  }
 
   return (
     <FormProvider {...builderMethods}>
@@ -723,7 +761,13 @@ const RULE_BUILDER_STEP_REGISTRY: Record<StepDefinition['id'], StepDefinition> =
   alertCondition: {
     id: 'alertCondition',
     title: 'Alert Condition',
-    render: (props) => <RuleBuilderAlertConditionStep {...props} />,
+    render: (props) => (
+      <RuleBuilderAlertConditionStep
+        {...props}
+        configLoadFailed={props.configLoadFailed}
+        onSwitchToEsqlMode={props.onSwitchToEsqlMode}
+      />
+    ),
   },
 };
 
@@ -739,7 +783,15 @@ export const ComposeDiscoverForm: React.FC<ComposeDiscoverFormProps> = ({
   dispatch,
   services,
   ruleBuilderMode = false,
+  configLoadFailed,
+  onSwitchToEsqlMode,
 }) => {
   const steps = getSteps(state.tracking, ruleBuilderMode);
-  return steps[state.step].render({ state, dispatch, services });
+  return steps[state.step].render({
+    state,
+    dispatch,
+    services,
+    configLoadFailed,
+    onSwitchToEsqlMode,
+  });
 };

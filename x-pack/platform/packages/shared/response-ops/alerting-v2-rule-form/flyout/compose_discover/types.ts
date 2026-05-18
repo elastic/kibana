@@ -22,6 +22,8 @@ export interface StepRenderProps {
   state: ComposeDiscoverState;
   dispatch: React.Dispatch<ComposeDiscoverAction>;
   services: RuleFormServices;
+  configLoadFailed?: boolean;
+  onSwitchToEsqlMode?: () => void;
 }
 
 export interface StepDefinition {
