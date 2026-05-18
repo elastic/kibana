@@ -77,16 +77,73 @@ const mockUiActions = {
   getTrigger: (_id: string) => ({ exec: async () => {} }),
 };
 
+const MOCK_COLUMNS_BY_INDEX: Record<string, Array<{ name: string; type: string }>> = {
+  kibana_sample_data_logs: [
+    { name: '@timestamp', type: 'date' },
+    { name: 'bytes', type: 'long' },
+    { name: 'clientip', type: 'ip' },
+    { name: 'extension', type: 'keyword' },
+    { name: 'geo.coordinates', type: 'geo_point' },
+    { name: 'geo.dest', type: 'keyword' },
+    { name: 'geo.src', type: 'keyword' },
+    { name: 'host', type: 'keyword' },
+    { name: 'index', type: 'keyword' },
+    { name: 'ip', type: 'ip' },
+    { name: 'machine.os', type: 'keyword' },
+    { name: 'machine.ram', type: 'long' },
+    { name: 'message', type: 'text' },
+    { name: 'phpmemory', type: 'long' },
+    { name: 'referer', type: 'keyword' },
+    { name: 'request', type: 'keyword' },
+    { name: 'response', type: 'keyword' },
+    { name: 'tags', type: 'keyword' },
+    { name: 'url', type: 'keyword' },
+    { name: 'utc_time', type: 'date' },
+  ],
+  kibana_sample_data_ecommerce: [
+    { name: '@timestamp', type: 'date' },
+    { name: 'category', type: 'keyword' },
+    { name: 'currency', type: 'keyword' },
+    { name: 'customer_first_name', type: 'keyword' },
+    { name: 'customer_full_name', type: 'keyword' },
+    { name: 'customer_gender', type: 'keyword' },
+    { name: 'customer_id', type: 'keyword' },
+    { name: 'customer_last_name', type: 'keyword' },
+    { name: 'day_of_week', type: 'keyword' },
+    { name: 'email', type: 'keyword' },
+    { name: 'geoip.city_name', type: 'keyword' },
+    { name: 'geoip.continent_name', type: 'keyword' },
+    { name: 'geoip.country_iso_code', type: 'keyword' },
+    { name: 'geoip.location', type: 'geo_point' },
+    { name: 'geoip.region_name', type: 'keyword' },
+    { name: 'order_date', type: 'date' },
+    { name: 'order_id', type: 'keyword' },
+    { name: 'products.base_price', type: 'double' },
+    { name: 'products.product_name', type: 'keyword' },
+    { name: 'products.quantity', type: 'integer' },
+    { name: 'taxful_total_price', type: 'double' },
+    { name: 'taxless_total_price', type: 'double' },
+    { name: 'total_quantity', type: 'integer' },
+    { name: 'user', type: 'keyword' },
+  ],
+};
+
 const mockData = {
   search: {
-    search: () =>
-      of({
-        rawResponse: { columns: [], all_columns: [] },
+    search: (request: { params?: { query?: string } }) => {
+      const query: string = (request as any)?.params?.query ?? '';
+      const matchedIndex = Object.keys(MOCK_COLUMNS_BY_INDEX).find((idx) =>
+        query.includes(idx)
+      );
+      const all_columns = matchedIndex ? MOCK_COLUMNS_BY_INDEX[matchedIndex] : [];
+      return of({
+        rawResponse: { columns: all_columns, all_columns, values: [] },
         isPartial: false,
         isRunning: false,
         total: 0,
         loaded: 0,
-      }),
+      });
+    },
     session: { getSessionId: () => undefined },
   },
   query: {
