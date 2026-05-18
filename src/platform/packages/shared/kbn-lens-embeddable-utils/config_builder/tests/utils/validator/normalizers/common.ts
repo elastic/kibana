@@ -30,7 +30,7 @@ import type { LensAttributes } from '../../../../types';
 import { getValues, type NormalizerConfig } from './normalize';
 import { getContinuity, getRangeValue } from '../../../../transforms/coloring';
 import { stripUndefined } from '../../../../transforms/charts/utils';
-import { generateAdHocDataViewId } from '../../../../transforms/utils';
+import { generateAdHocDataViewId, getAdHocDataViewSpec } from '../../../../transforms/utils';
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
@@ -131,25 +131,16 @@ function normalizeESQLAdHocDataViews(
     } else if (esqlQuery) {
       // No adHocDataView exists: create one from the ES|QL query (matches what the transform produces)
       const indexPattern = getIndexPatternFromESQLQuery(esqlQuery);
-      const newId = generateAdHocDataViewId({
+      const spec = getAdHocDataViewSpec({
+        type: 'adHocDataView',
         index: indexPattern,
         dataSourceType: 'esql',
         esqlQuery,
         timeFieldName: getTimeFieldFromESQLQuery(esqlQuery),
       });
 
-      layer.index = newId;
-      attributes.state.adHocDataViews[newId] = {
-        id: newId,
-        title: indexPattern,
-        name: indexPattern,
-        sourceFilters: [],
-        fieldFormats: {},
-        runtimeFieldMap: {},
-        allowNoIndex: false,
-        allowHidden: false,
-        type: 'esql',
-      };
+      layer.index = spec.id;
+      attributes.state.adHocDataViews[spec.id] = spec;
     }
 
     if (layer.index) {

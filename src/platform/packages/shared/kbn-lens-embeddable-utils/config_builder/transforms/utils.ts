@@ -145,7 +145,7 @@ export function generateAdHocDataViewId(
   return base;
 }
 
-function getAdHocDataViewSpec(dataView: APIAdHocDataView) {
+export function getAdHocDataViewSpec(dataView: APIAdHocDataView) {
   return {
     // Improve id genertation to be more predictable and hit cache more often
     id: generateAdHocDataViewId(dataView),
