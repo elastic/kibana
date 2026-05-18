@@ -31,6 +31,28 @@ describe('threat_intel_attachment_utils', () => {
     });
   });
 
+  it('maps categories and published_at when present on the hit', () => {
+    expect(
+      mapSearchReportHitToTableRow({
+        report_id: 'abc123',
+        '@timestamp': '2026-05-10T12:00:00.000Z',
+        content: { title: 'Ransomware wave' },
+        source: { type: 'rss', name: 'SecurityWeek' },
+        severity: { level: 'critical' },
+        extracted: { categories: ['ransomware', 'financial'] },
+      })
+    ).toEqual({
+      report_id: 'abc123',
+      title: 'Ransomware wave',
+      source: { type: 'rss', name: 'SecurityWeek' },
+      severity: 'critical',
+      published_at: '2026-05-10T12:00:00.000Z',
+      categories: ['ransomware'],
+      techniques: [],
+      iocs: [],
+    });
+  });
+
   it('formats a weekly time range label', () => {
     expect(formatTimeRangeLabel({ from: 'now-7d', to: 'now' })).toBe('Last 7 days');
   });

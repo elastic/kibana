@@ -7,7 +7,11 @@
 
 import { z } from '@kbn/zod/v4';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
-import { IOC_TYPES, SEVERITY_LEVELS } from '../../../common/threat_intelligence/hub';
+import {
+  IOC_TYPES,
+  SEVERITY_LEVELS,
+  THREAT_CATEGORIES,
+} from '../../../common/threat_intelligence/hub';
 
 /**
  * IDs for the five attachment types. The `threat-intel-` prefix matches the
@@ -106,6 +110,8 @@ const reportRowSchema = z.object({
     url: z.string().optional(),
   }),
   severity: z.enum(SEVERITY_LEVELS),
+  published_at: z.string().optional(),
+  categories: z.array(z.enum(THREAT_CATEGORIES)).optional(),
   techniques: z.array(z.string()).default([]),
   iocs: z.array(iocRowSchema).default([]),
   environment_hits_total: z.number().int().min(0).optional(),

@@ -55,9 +55,18 @@ export interface DashboardOverviewResponse {
     regions: ThreatRegion[];
   }>;
   environment_impact: {
+    /** Sum of `provenance.environment_hits_total` across reports in scope. */
     total_hits: number;
     layer_1_hits: number;
     layer_2_hits: number;
-    affected_assets_sample: string[];
+    /** Reports with at least one correlated detection-engine alert. */
+    reports_with_hits: number;
+    top_reports: Array<{
+      report_id: string;
+      title: string;
+      environment_hits_total: number;
+      layer_1_hits: number;
+      layer_2_hits: number;
+    }>;
   };
 }

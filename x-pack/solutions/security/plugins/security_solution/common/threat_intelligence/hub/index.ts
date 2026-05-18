@@ -71,6 +71,12 @@ export {
   SAVED_VIEW_SO_TYPE,
   DEFAULT_REGIONS_SETTING_KEY,
 } from './constants';
+export {
+  THREAT_CATEGORY_LABELS,
+  THREAT_CATEGORY_BADGE_STYLES,
+  getThreatCategoryLabel,
+  getThreatCategoryBadgeStyle,
+} from './threat_category_labels';
 export type {
   FlyoutInsightsRequest,
   FlyoutInsightsResponse,

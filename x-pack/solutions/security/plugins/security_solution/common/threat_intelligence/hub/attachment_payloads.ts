@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IocType, SeverityLevel } from './constants';
+import type { IocType, SeverityLevel, ThreatCategory } from './constants';
 
 /**
  * Shared payload shapes for the four Phase A attachment types. Defined in
@@ -52,6 +52,9 @@ export interface ReportTablePayload {
     title: string;
     source: { type: string; name: string; url?: string };
     severity: SeverityLevel;
+    /** ISO-8601 ingest/publish time for card timestamps. */
+    published_at?: string;
+    categories?: ThreatCategory[];
     techniques: string[];
     iocs: Array<{ type: IocType; value: string }>;
     environment_hits_total?: number;

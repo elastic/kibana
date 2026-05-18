@@ -405,24 +405,28 @@ export const HUNT_FOR_THREAT_INDEX_PATTERNS = [
 ] as const;
 
 /**
- * Closed-set threat category taxonomy. Tracks the PRD's 15-category list so
- * the visual dashboard's category-breakdown panel + the
- * `threat_intel.search_reports` `categories[]` filter can both rely on the
- * same enum. The LLM enrichment step in `nl_extraction_behavioral` is
- * constrained to this enum so dashboards don't have to handle long-tail
- * free-text labels.
+ * Closed-set threat category taxonomy. Primary values match
+ * `elastic/security-ciso-news-aggregator` (`src/types/index.ts`). Legacy
+ * PRD slugs remain valid for documents indexed before the alignment.
  */
 export const THREAT_CATEGORIES = [
-  'apt',
-  'malware',
   'ransomware',
-  'vulnerability',
-  'data-breach',
   'phishing',
-  'cloud',
+  'malware',
+  'data-breach',
+  'vulnerability',
+  'nation-state',
   'supply-chain',
-  'cybercrime',
   'insider-threat',
+  'financial',
+  'regulatory',
+  'cloud-security',
+  'iot-ot',
+  'zero-day',
+  'apt',
+  'general',
+  'cloud',
+  'cybercrime',
   'iot',
   'ot-ics',
   'government-policy',

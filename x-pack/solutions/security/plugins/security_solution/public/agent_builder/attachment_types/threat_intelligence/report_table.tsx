@@ -5,15 +5,12 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiBadge,
-  EuiBasicTable,
-  type EuiBasicTableColumn,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -25,29 +22,22 @@ import {
   ActionButtonType,
   type AttachmentUIDefinition,
 } from '@kbn/agent-builder-browser/attachments';
-import type { ReportTablePayload } from '../../../../common/threat_intelligence/hub';
-
-const SEVERITY_COLOR: Record<
-  ReportTablePayload['reports'][number]['severity'],
-  'success' | 'warning' | 'danger' | 'default'
-> = {
-  low: 'default',
-  medium: 'warning',
-  high: 'danger',
-  critical: 'danger',
-};
+import type {
+  ReportTablePayload,
+  SeverityLevel,
+  ThreatCategory,
+} from '../../../../common/threat_intelligence/hub';
+import {
+  ThreatReportFeed,
+  fromReportTableRow,
+  type ReportFeedSort,
+} from '../../../threat_intelligence/components/report_feed';
 
 type ReportTableAttachment = Attachment<'threat-intel-report-table', ReportTablePayload>;
 
 const SECURITY_APP_ID = 'securitySolutionUI' as const;
 const CASES_CREATE_DEEP_LINK = 'cases_create' as const;
 
-/**
- * Controller bridge identical in spirit to the one used by the finding card:
- * the inline renderer publishes a small object on `window` keyed by
- * attachment id so the header `getActionButtons` handlers can flip the
- * local dismissed state.
- */
 interface ReportTableController {
   isDismissed: boolean;
   dismiss: () => void;
@@ -64,6 +54,28 @@ const readController = (attachmentId: string): ReportTableController | undefined
 const ReportTableBody: React.FC<{ attachment: ReportTableAttachment }> = ({ attachment }) => {
   const { reports, time_range_label: range } = attachment.data;
   const [isDismissed, setIsDismissed] = useState<boolean>(false);
+  const [selectedSeverities, setSelectedSeverities] = useState<SeverityLevel[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<ThreatCategory[]>([]);
+  const [sortBy, setSortBy] = useState<ReportFeedSort>('relevance');
+
+  const feedItems = useMemo(() => reports.map(fromReportTableRow), [reports]);
+
+  const onToggleSeverity = useCallback((severity: SeverityLevel) => {
+    setSelectedSeverities((current) =>
+      current.includes(severity) ? current.filter((s) => s !== severity) : [...current, severity]
+    );
+  }, []);
+
+  const onToggleCategory = useCallback((category: ThreatCategory) => {
+    setSelectedCategories((current) =>
+      current.includes(category) ? current.filter((c) => c !== category) : [...current, category]
+    );
+  }, []);
+
+  const onClearFilters = useCallback(() => {
+    setSelectedSeverities([]);
+    setSelectedCategories([]);
+  }, []);
 
   useEffect(() => {
     const key = controllerKey(attachment.id);
@@ -100,7 +112,7 @@ const ReportTableBody: React.FC<{ attachment: ReportTableAttachment }> = ({ atta
                 'xpack.securitySolution.threatIntelligence.attachments.reportTable.dismissedBody',
                 {
                   defaultMessage:
-                    'Report table for {range} dismissed locally — no server state was changed.',
+                    'Report digest for {range} dismissed locally — no server state was changed.',
                   values: { range },
                 }
               )}
@@ -111,117 +123,8 @@ const ReportTableBody: React.FC<{ attachment: ReportTableAttachment }> = ({ atta
     );
   }
 
-  const columns: Array<EuiBasicTableColumn<ReportTablePayload['reports'][number]>> = [
-    {
-      field: 'title',
-      name: i18n.translate(
-        'xpack.securitySolution.threatIntelligence.attachments.reportTable.col.title',
-        {
-          defaultMessage: 'Title',
-        }
-      ),
-      render: (title: string, row) =>
-        row.source.url ? (
-          <EuiLink href={row.source.url} target="_blank">
-            {title}
-          </EuiLink>
-        ) : (
-          title
-        ),
-    },
-    {
-      field: 'source.name',
-      name: i18n.translate(
-        'xpack.securitySolution.threatIntelligence.attachments.reportTable.col.source',
-        {
-          defaultMessage: 'Source',
-        }
-      ),
-    },
-    {
-      field: 'severity',
-      name: i18n.translate(
-        'xpack.securitySolution.threatIntelligence.attachments.reportTable.col.severity',
-        {
-          defaultMessage: 'Severity',
-        }
-      ),
-      render: (severity: ReportTablePayload['reports'][number]['severity']) => (
-        <EuiBadge color={SEVERITY_COLOR[severity]}>{severity}</EuiBadge>
-      ),
-    },
-    {
-      field: 'techniques',
-      name: i18n.translate(
-        'xpack.securitySolution.threatIntelligence.attachments.reportTable.col.techniques',
-        {
-          defaultMessage: 'Techniques',
-        }
-      ),
-      render: (techniques: string[]) => (
-        <EuiText size="xs">{techniques.slice(0, 4).join(', ') || '—'}</EuiText>
-      ),
-    },
-    {
-      field: 'iocs',
-      name: i18n.translate(
-        'xpack.securitySolution.threatIntelligence.attachments.reportTable.col.iocs',
-        {
-          defaultMessage: 'IOCs',
-        }
-      ),
-      render: (iocs: ReportTablePayload['reports'][number]['iocs']) => (
-        <EuiText size="xs">{iocs.length}</EuiText>
-      ),
-    },
-    {
-      field: 'environment_hits_total',
-      name: i18n.translate(
-        'xpack.securitySolution.threatIntelligence.attachments.reportTable.col.envHits',
-        {
-          defaultMessage: 'Env. hits',
-        }
-      ),
-      render: (hits?: number) => (hits ? <EuiBadge color="danger">{hits}</EuiBadge> : '—'),
-    },
-    {
-      field: 'related_reports',
-      name: i18n.translate(
-        'xpack.securitySolution.threatIntelligence.attachments.reportTable.col.related',
-        {
-          defaultMessage: 'Related',
-        }
-      ),
-      render: (related: ReportTablePayload['reports'][number]['related_reports']) => {
-        if (!related || related.count === 0) return <EuiText size="xs">{'—'}</EuiText>;
-        const sample = related.top_ids.slice(0, 3).join(', ');
-        return (
-          <EuiBadge
-            color="hollow"
-            title={i18n.translate(
-              'xpack.securitySolution.threatIntelligence.attachments.reportTable.relatedTooltip',
-              {
-                defaultMessage:
-                  'Shares its IOC set with {count} other report(s). Examples: {sample}.',
-                values: { count: related.count, sample },
-              }
-            )}
-          >
-            {i18n.translate(
-              'xpack.securitySolution.threatIntelligence.attachments.reportTable.relatedBadge',
-              {
-                defaultMessage: 'shares · {count}',
-                values: { count: related.count },
-              }
-            )}
-          </EuiBadge>
-        );
-      },
-    },
-  ];
-
   return (
-    <EuiPanel hasBorder paddingSize="m">
+    <EuiPanel hasBorder paddingSize="m" data-test-subj="threatIntelReportTableAttachment">
       <EuiTitle size="xs">
         <h4>
           {i18n.translate(
@@ -235,14 +138,21 @@ const ReportTableBody: React.FC<{ attachment: ReportTableAttachment }> = ({ atta
       <EuiText size="xs" color="subdued">
         {range}
       </EuiText>
-      <EuiSpacer size="s" />
-      <EuiBasicTable
-        items={reports}
-        columns={columns}
-        compressed
-        tableCaption={i18n.translate(
-          'xpack.securitySolution.threatIntelligence.attachments.reportTable.tableCaption',
-          { defaultMessage: 'Threat reports for {range}', values: { range } }
+      <EuiSpacer size="m" />
+      <ThreatReportFeed
+        items={feedItems}
+        selectedSeverities={selectedSeverities}
+        selectedCategories={selectedCategories}
+        onToggleSeverity={onToggleSeverity}
+        onToggleCategory={onToggleCategory}
+        onClearFilters={onClearFilters}
+        sortBy={sortBy}
+        onSortChange={setSortBy}
+        emptyMessage={i18n.translate(
+          'xpack.securitySolution.threatIntelligence.attachments.reportTable.empty',
+          {
+            defaultMessage: 'No reports in this digest.',
+          }
         )}
       />
     </EuiPanel>
@@ -303,7 +213,7 @@ export const buildReportTableUiDefinition = (
     getLabel: (attachment) =>
       attachment.data?.attachmentLabel ??
       i18n.translate('xpack.securitySolution.threatIntelligence.attachments.reportTable.label', {
-        defaultMessage: 'Threat report table',
+        defaultMessage: 'Threat report digest',
       }),
     getIcon: () => 'documents',
     renderInlineContent: ({ attachment }) => <ReportTableBody attachment={attachment} />,
@@ -336,7 +246,7 @@ export const buildReportTableUiDefinition = (
             ? undefined
             : i18n.translate(
                 'xpack.securitySolution.threatIntelligence.attachments.reportTable.investigateDisabledReason',
-                { defaultMessage: 'Nothing to investigate — the report table is empty.' }
+                { defaultMessage: 'Nothing to investigate — the report digest is empty.' }
               ),
           handler: () => handleInvestigate(attachment),
         },

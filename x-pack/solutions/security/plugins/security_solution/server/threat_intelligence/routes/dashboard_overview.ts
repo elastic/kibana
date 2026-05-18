@@ -30,8 +30,6 @@ import {
 import type { RouteRegistrationDeps } from '.';
 
 const DEFAULT_LOOKBACK_DAYS = 7;
-const ALERTS_INDEX_PATTERN = '.alerts-security.alerts-*';
-
 // Query strings serialize single-element arrays as a bare value (e.g.
 // `?regions=south-asia`), so accept either a string or an array and normalize
 // to an array in the handler.
@@ -88,11 +86,24 @@ interface ReportsAggregations {
       }>;
     };
   };
-}
-
-interface AlertsAggregations {
-  affected_hosts?: { buckets: BucketCount[] };
-  total?: { value: number };
+  reports_with_hits_filter?: { doc_count: number };
+  top_reports_with_hits?: {
+    hits: {
+      hits: Array<{
+        _id: string;
+        _source: {
+          content?: { title?: string };
+          provenance?: {
+            environment_hits_total?: number;
+            environment_hits?: {
+              layer_1_ioc_match?: number;
+              layer_2_behavioral?: number;
+            };
+          };
+        };
+      }>;
+    };
+  };
 }
 
 const fetchReportsOverview = async (
@@ -160,26 +171,23 @@ const fetchReportsOverview = async (
           ],
         },
       },
+      reports_with_hits_filter: {
+        filter: { range: { 'provenance.environment_hits_total': { gt: 0 } } },
+      },
+      top_reports_with_hits: {
+        top_hits: {
+          size: 5,
+          sort: [{ 'provenance.environment_hits_total': { order: 'desc', missing: '_last' } }],
+          _source: [
+            'content.title',
+            'provenance.environment_hits_total',
+            'provenance.environment_hits.layer_1_ioc_match',
+            'provenance.environment_hits.layer_2_behavioral',
+          ],
+        },
+      },
     },
   });
-};
-
-const fetchAlertsImpact = async (esClient: ElasticsearchClient, from: string, to: string) => {
-  try {
-    return await esClient.search({
-      index: ALERTS_INDEX_PATTERN,
-      ignore_unavailable: true,
-      allow_no_indices: true,
-      size: 0,
-      track_total_hits: true,
-      query: { range: { '@timestamp': { gte: from, lte: to } } },
-      aggs: {
-        affected_hosts: { terms: { field: 'host.name', size: 12 } },
-      },
-    });
-  } catch {
-    return undefined;
-  }
 };
 
 /**
@@ -233,7 +241,6 @@ export const registerDashboardOverviewRoute = ({
 
         try {
           const reportsResponse = await fetchReportsOverview(esClient, from, to, filters);
-          const alertsResponse = await fetchAlertsImpact(esClient, from, to);
 
           const totalReports =
             typeof reportsResponse.hits.total === 'number'
@@ -298,10 +305,16 @@ export const registerDashboardOverviewRoute = ({
           const layer2Total = aggs?.layer_2_total?.value ?? 0;
           const distinctSourceCount = Math.round(aggs?.distinct_source_count?.value ?? 0);
 
-          const alertsAggs = alertsResponse?.aggregations as AlertsAggregations | undefined;
-          const affectedAssetsSample = (alertsAggs?.affected_hosts?.buckets ?? []).map(
-            (b) => b.key
-          );
+          const reportsWithHits = aggs?.reports_with_hits_filter?.doc_count ?? 0;
+          const topReports = (aggs?.top_reports_with_hits?.hits.hits ?? [])
+            .map((hit) => ({
+              report_id: hit._id,
+              title: hit._source.content?.title ?? '(untitled)',
+              environment_hits_total: hit._source.provenance?.environment_hits_total ?? 0,
+              layer_1_hits: hit._source.provenance?.environment_hits?.layer_1_ioc_match ?? 0,
+              layer_2_hits: hit._source.provenance?.environment_hits?.layer_2_behavioral ?? 0,
+            }))
+            .filter((report) => report.environment_hits_total > 0);
 
           const recentArticles = (aggs?.recent_articles?.hits.hits ?? []).map((hit) => ({
             report_id: hit._id,
@@ -333,7 +346,8 @@ export const registerDashboardOverviewRoute = ({
               total_hits: environmentHitsTotal,
               layer_1_hits: layer1Total,
               layer_2_hits: layer2Total,
-              affected_assets_sample: affectedAssetsSample,
+              reports_with_hits: reportsWithHits,
+              top_reports: topReports,
             },
           };
 

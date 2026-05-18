@@ -156,10 +156,10 @@ steps:
             Return a strict JSON object with exactly four keys:
 
               categories: array of zero or more values from this closed set:
-                ["apt", "malware", "ransomware", "vulnerability", "data-breach",
-                 "phishing", "cloud", "supply-chain", "cybercrime",
-                 "insider-threat", "iot", "ot-ics", "government-policy",
-                 "privacy-compliance", "research-tools"]
+                ["ransomware", "phishing", "malware", "data-breach", "vulnerability",
+                 "nation-state", "supply-chain", "insider-threat", "financial",
+                 "regulatory", "cloud-security", "iot-ot", "zero-day", "apt",
+                 "general"]
 
               regions: array of zero or more values from this closed set:
                 ["north-america", "south-america", "europe", "middle-east",

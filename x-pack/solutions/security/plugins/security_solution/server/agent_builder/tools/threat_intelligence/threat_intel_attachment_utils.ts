@@ -11,15 +11,20 @@ import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachmen
 import { renderAttachmentElement } from '@kbn/agent-builder-common/tools/custom_rendering';
 import {
   SEVERITY_LEVELS,
+  THREAT_CATEGORIES,
   type ReportTablePayload,
   type SearchReportsParams,
   type SearchReportsResult,
   type SeverityLevel,
+  type ThreatCategory,
 } from '../../../../common/threat_intelligence/hub';
 import { ATTACHMENT_TYPES } from '../../attachments/threat_intelligence_attachment_types';
 
 const isSeverityLevel = (value: unknown): value is SeverityLevel =>
   typeof value === 'string' && (SEVERITY_LEVELS as readonly string[]).includes(value);
+
+const isThreatCategory = (value: unknown): value is ThreatCategory =>
+  typeof value === 'string' && (THREAT_CATEGORIES as readonly string[]).includes(value);
 
 /**
  * Map a `search_reports` hit (ES `_source` + `report_id`) into the
@@ -60,6 +65,19 @@ export const mapSearchReportHitToTableRow = (
     ? techniquesRaw.filter((t): t is string => typeof t === 'string')
     : [];
 
+  const categoriesRaw =
+    typeof hit.extracted === 'object' &&
+    hit.extracted !== null &&
+    'categories' in hit.extracted
+      ? (hit.extracted as { categories?: unknown }).categories
+      : undefined;
+  const categories = Array.isArray(categoriesRaw)
+    ? categoriesRaw.filter(isThreatCategory)
+    : undefined;
+
+  const publishedAt =
+    typeof hit['@timestamp'] === 'string' ? hit['@timestamp'] : undefined;
+
   return {
     report_id: String(hit.report_id ?? ''),
     title,
@@ -69,6 +87,8 @@ export const mapSearchReportHitToTableRow = (
       ...(typeof source.url === 'string' ? { url: source.url } : {}),
     },
     severity: isSeverityLevel(severityRaw) ? severityRaw : 'medium',
+    ...(publishedAt ? { published_at: publishedAt } : {}),
+    ...(categories && categories.length > 0 ? { categories } : {}),
     techniques,
     iocs: [],
   };

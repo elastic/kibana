@@ -37,7 +37,7 @@ import {
  * actions connector (email / slack) instead of the previous `data.set`
  * placeholder.
  *
- * v5: adds the 15-category `extracted.categories` keyword array and the
+ * v5: adds the `extracted.categories` keyword array and the
  * `geography.regions` macro-region keyword array to the threat-reports
  * data stream. Both fields are populated by the stage-2 LLM enrichment
  * step in `nl_extraction_behavioral` and consumed by the visual
