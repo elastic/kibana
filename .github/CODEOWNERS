@@ -949,7 +949,6 @@ x-pack/platform/packages/private/kbn-random-sampling @elastic/kibana-visualizati
 x-pack/platform/packages/private/kbn-scout-release-testing @elastic/appex-qa
 x-pack/platform/packages/private/maps/vector_tile_utils @elastic/kibana-presentation
 x-pack/platform/packages/private/ml/agg_utils @elastic/ml-ui
-x-pack/platform/packages/private/ml/aiops_change_point_detection @elastic/ml-ui
 x-pack/platform/packages/private/ml/aiops_components @elastic/ml-ui
 x-pack/platform/packages/private/ml/aiops_test_utils @elastic/ml-ui
 x-pack/platform/packages/private/ml/cancellable_search @elastic/ml-ui
@@ -1059,9 +1058,11 @@ x-pack/platform/packages/shared/kbn-streams-schema @elastic/obs-onboarding-team 
 x-pack/platform/packages/shared/kbn-uiam-api-keys-provisioning-status @elastic/response-ops
 x-pack/platform/packages/shared/llm-trace-waterfall @elastic/obs-ai-team @elastic/workchat-eng
 x-pack/platform/packages/shared/logs-overview @elastic/obs-exploration-team
+x-pack/platform/packages/shared/ml/aiops_change_point_detection @elastic/ml-ui
 x-pack/platform/packages/shared/ml/aiops_common @elastic/ml-ui
 x-pack/platform/packages/shared/ml/aiops_log_pattern_analysis @elastic/ml-ui
 x-pack/platform/packages/shared/ml/aiops_log_rate_analysis @elastic/ml-ui
+x-pack/platform/packages/shared/ml/aiops-server-schemas @elastic/ml-ui
 x-pack/platform/packages/shared/ml/anomaly_utils @elastic/ml-ui
 x-pack/platform/packages/shared/ml/chi2test @elastic/ml-ui
 x-pack/platform/packages/shared/ml/common-types @elastic/ml-ui
