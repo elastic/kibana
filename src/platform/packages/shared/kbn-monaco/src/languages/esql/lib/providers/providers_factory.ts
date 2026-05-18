@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// eslint-disable-next-line max-classes-per-file
 import type { ESQLCallbacks } from '@kbn/esql-types';
 import { isPromise } from '@kbn/std';
 import type { monaco } from '../../../../monaco_imports';
@@ -18,17 +17,15 @@ export interface CreateProviderParams<T> {
   emptyResult: T;
 }
 
-export class DisposedModelAccessError extends Error {
-  constructor() {
-    super('DisposedModelAccessError');
-    this.name = 'DisposedModelAccessError';
-  }
-}
-
-export class AbortedDueToCancellationError extends Error {
-  constructor() {
-    super('Execution aborted due to Moncao cancellation');
-    this.name = 'AbortedDueToCancellationError';
+/**
+ * Throwing ProviderEmptyResultError will cause the provider to stop execution and return the emptyResult.
+ */
+export type ProviderEmptyResultErrorCode =
+  | 'DisposedModelAccessError'
+  | 'AbortedDueToCancellationError';
+export class ProviderEmptyResultError extends Error {
+  constructor(public readonly code: ProviderEmptyResultErrorCode) {
+    super(code);
   }
 }
 
@@ -52,10 +49,7 @@ export async function createMonacoProvider<T>({
     const result = await Promise.resolve(run(safeModel));
     return model.isDisposed() ? emptyResult : result;
   } catch (error) {
-    if (
-      error instanceof DisposedModelAccessError ||
-      error instanceof AbortedDueToCancellationError
-    ) {
+    if (error instanceof ProviderEmptyResultError) {
       return emptyResult;
     }
     throw error;
@@ -90,7 +84,7 @@ export function createDisposedSafeModel(model: monaco.editor.ITextModel): monaco
 
 function assertModelIsUsable(target: monaco.editor.ITextModel) {
   if (target.isDisposed()) {
-    throw new DisposedModelAccessError();
+    throw new ProviderEmptyResultError('DisposedModelAccessError');
   }
 }
 
@@ -115,7 +109,7 @@ export function createCancellableCallbacks<TCallbacks extends ESQLCallbacks | un
 
   const abortIfCancelled = () => {
     if (token?.isCancellationRequested) {
-      throw new AbortedDueToCancellationError();
+      throw new ProviderEmptyResultError('AbortedDueToCancellationError');
     }
   };
 

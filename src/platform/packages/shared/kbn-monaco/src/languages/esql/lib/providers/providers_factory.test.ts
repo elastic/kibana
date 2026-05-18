@@ -11,7 +11,6 @@ import { monaco } from '../../../../monaco_imports';
 import {
   createMonacoProvider,
   createDisposedSafeModel,
-  DisposedModelAccessError,
   createCancellableCallbacks,
 } from './providers_factory';
 
@@ -72,10 +71,12 @@ describe('Providers Factory', () => {
       expect(safe.isDisposed()).toBe(true);
     });
 
-    it('throws DisposedModelAccessError when a disposed model property other than isDisposed is read', () => {
+    it('throws ProviderEmptyResultErrorCode when a disposed model property other than isDisposed is read', () => {
       const model = disposedModel();
       const safe = createDisposedSafeModel(model);
-      expect(() => safe.getValue()).toThrow(DisposedModelAccessError);
+      expect(() => safe.getValue()).toThrow(
+        expect.objectContaining({ code: 'DisposedModelAccessError' })
+      );
     });
   });
 
