@@ -112,7 +112,11 @@ export async function createAndIntegrateCloudConnector(params: {
 
       // Enforce policy group scope: connectors can only be reused within the same policy group
       if (policyTemplate && packageInfo.name) {
-        const requestingGroup = getPolicyGroupForIntegration(packageInfo.name, policyTemplate);
+        const requestingGroup = getPolicyGroupForIntegration(
+          cloudProvider,
+          packageInfo.name,
+          policyTemplate
+        );
 
         if (requestingGroup) {
           // Look up the connector's existing package policies to determine its policy group.
@@ -134,6 +138,7 @@ export async function createAndIntegrateCloudConnector(params: {
 
             if (existingPackageName && existingPolicyTemplate) {
               const connectorGroup = getPolicyGroupForIntegration(
+                existingConnector.cloudProvider,
                 existingPackageName,
                 existingPolicyTemplate
               );

@@ -46,7 +46,7 @@ export const CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS = {
   TITLE: 'cloudConnectorPoliciesFlyoutTitle',
   IDENTIFIER_TEXT: 'cloudConnectorIdentifierText',
   COPY_IDENTIFIER_BUTTON: 'cloudConnectorCopyIdentifier',
-  NAME_INPUT: 'cloudConnectorNameInput',
+  NAME_INPUT: 'cloudConnectorPoliciesFlyoutNameInput',
   SAVE_NAME_BUTTON: 'cloudConnectorSaveNameButton',
   USAGE_COUNT_TEXT: 'cloudConnectorUsageCountText',
   POLICIES_TABLE: 'cloudConnectorPoliciesTable',
@@ -57,4 +57,35 @@ export const CLOUD_CONNECTOR_POLICIES_FLYOUT_TEST_SUBJECTS = {
   FOOTER_SAVE_BUTTON: 'cloudConnectorFooterSaveButton',
   DELETE_CONFIRM_MODAL: 'cloudConnectorDeleteConfirmModal',
   DELETE_MODAL_CALLOUT: 'cloudConnectorDeleteModalCallout',
+};
+
+// Permission status — Story 3 (cell badge + popover)
+export const PERMISSION_STATUS_TEST_SUBJECTS = {
+  CELL: 'cloudConnectorPermissionStatusCell',
+  BADGE: 'cloudConnectorPermissionStatusBadge',
+  POPOVER: 'cloudConnectorPermissionStatusPopover',
+  POPOVER_TITLE: 'cloudConnectorPermissionStatusPopoverTitle',
+  POPOVER_LAST_VERIFIED: 'cloudConnectorPermissionStatusPopoverLastVerified',
+  PERMISSION_GROUP: 'cloudConnectorPermissionGroup',
+  PERMISSION_LIST_ITEM: 'cloudConnectorPermissionListItem',
+  OPEN_DASHBOARD_BUTTON: 'cloudConnectorOpenDashboardButton',
+  LEARN_MORE_LINK: 'cloudConnectorLearnMoreLink',
+};
+
+// Identity-level summary — Story 4 (flyout header rollup)
+export const IDENTITY_PERMISSION_SUMMARY_TEST_SUBJECTS = {
+  CONTAINER: 'cloudConnectorIdentityPermissionSummary',
+  BADGE: 'cloudConnectorIdentityPermissionBadge',
+  LAST_VERIFIED: 'cloudConnectorIdentityLastVerified',
+  COUNTS: 'cloudConnectorIdentityPermissionCounts',
+};
+
+// Row-expand + timeline — Story 7 (deep-drill view per integration)
+export const PERMISSION_STATUS_ROW_EXPAND_TEST_SUBJECTS = {
+  CONTAINER: 'cloudConnectorPermissionRowExpansion',
+  TIMELINE: 'cloudConnectorVerificationTimeline',
+  TIMELINE_EVENT: 'cloudConnectorVerificationTimelineEvent',
+  TIMELINE_EMPTY: 'cloudConnectorVerificationTimelineEmpty',
+  PERMISSIONS_TABLE: 'cloudConnectorCurrentPermissionsTable',
+  EXPAND_TOGGLE: 'cloudConnectorPermissionStatusExpandToggle',
 };

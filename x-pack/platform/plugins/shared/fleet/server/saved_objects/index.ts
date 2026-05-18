@@ -52,6 +52,7 @@ import {
   PackagePolicySchemaV24,
   PackagePolicySchemaV25,
   CloudConnectorSchemaV4,
+  CloudConnectorSchemaV5,
   CloudOnboardingDeploymentSchemaV1,
 } from '../types';
 
@@ -1782,6 +1783,7 @@ export const getSavedObjectTypes = (
           verification_status: { type: 'keyword' },
           verification_started_at: { type: 'date' },
           verification_failed_at: { type: 'date' },
+          verification_permissions: { type: 'flattened' },
         },
       },
       modelVersions: {
@@ -1895,6 +1897,20 @@ export const getSavedObjectTypes = (
           schemas: {
             forwardCompatibility: CloudConnectorSchemaV4.extends({}, { unknowns: 'ignore' }),
             create: CloudConnectorSchemaV4,
+          },
+        },
+        5: {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                verification_permissions: { type: 'flattened' },
+              },
+            },
+          ],
+          schemas: {
+            forwardCompatibility: CloudConnectorSchemaV5.extends({}, { unknowns: 'ignore' }),
+            create: CloudConnectorSchemaV5,
           },
         },
       },

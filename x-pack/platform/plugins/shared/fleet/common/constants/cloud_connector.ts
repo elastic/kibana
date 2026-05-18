@@ -46,6 +46,20 @@ export const VERIFIER_INPUT_TYPE = 'otelcol';
 export const VERIFIER_DATA_STREAM_TYPE = 'logs';
 export const VERIFIER_DATASET = `${VERIFIER_PKG_NAME}.${VERIFIER_POLICY_TEMPLATE}`;
 
+/**
+ * Minimum verifier_otel package version that supports the parallel-array multi-target
+ * shape (`policy_id[]`, `package_policy_id[]`, etc. all `multi: true`). Below this
+ * version the manifest declared `multi: false` and accepted only single scalars,
+ * supporting exactly one target integration per verifier deployment.
+ *
+ * `createVerifierPolicy` uses this gate (via `semver.gte`) to decide between the
+ * parallel-array stream-var shape (>= this version) and the legacy scalar shape
+ * (< this version). This makes Kibana producer code compatible with both manifest
+ * eras, so releasing the new package version doesn't break existing 9.5+ clusters
+ * that haven't yet picked up the parallel-array producer code.
+ */
+export const VERIFIER_MULTI_TARGET_MIN_VERSION = '0.1.0';
+
 // Packages that should be hidden from the Identity Federation Flyout usage list.
 // These are internal integrations (e.g. the permission verifier) that attach a
 // cloud_connector_id but should not be surfaced to users.
@@ -58,16 +72,21 @@ export const CLOUD_CONNECTOR_LIST_DEFAULT_PER_PAGE = 20;
  * Appends NOT package.name filters for {@link CLOUD_CONNECTOR_HIDDEN_PACKAGES} and
  * `latest_revision:true` to a package-policy Kuery fragment (same pattern as usage routes;
  * latest revision excludes rollback snapshot rows such as `:prev`).
+ *
+ * Built via the "collect-and-join" idiom so the resulting Kuery is well-formed
+ * regardless of whether {@link baseFilter} is empty or {@link CLOUD_CONNECTOR_HIDDEN_PACKAGES}
+ * is empty — neither leading nor trailing `AND` can sneak in.
  */
 export function buildPackagePolicyFilterExcludingHiddenPackages(baseFilter: string): string {
-  const hiddenFilter = CLOUD_CONNECTOR_HIDDEN_PACKAGES.map(
-    (pkg) => `NOT ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.package.name:"${pkg}"`
-  ).join(' AND ');
-  const latestRevision = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.latest_revision:true`;
-  if (hiddenFilter) {
-    return `${baseFilter} AND ${hiddenFilter} AND ${latestRevision}`;
+  const clauses: string[] = [];
+  if (baseFilter) {
+    clauses.push(baseFilter);
   }
-  return `${baseFilter} AND ${latestRevision}`;
+  for (const pkg of CLOUD_CONNECTOR_HIDDEN_PACKAGES) {
+    clauses.push(`NOT ${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.package.name:"${pkg}"`);
+  }
+  clauses.push(`${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.latest_revision:true`);
+  return clauses.join(' AND ');
 }
 
 // Account type variable names for different cloud providers
@@ -131,15 +150,27 @@ export const CLOUD_CONNECTOR_PERMISSION_ALLOWLIST: Record<
 
 /**
  * Returns the policy group that a given integration belongs to, or undefined if not in any group.
+ *
+ * The lookup matches on all three discriminating fields of {@link CloudConnectorAllowlistEntry}.
+ * Omitting `provider` would let an Azure cspm policy collide with the AWS cspm entry — the
+ * function's contract has to be at least as wide as the data's primary key.
  */
 export function getPolicyGroupForIntegration(
+  provider: CloudProvider,
   pkg: string,
   policyTemplate: string
 ): PolicyGroup | undefined {
   for (const [group, entries] of Object.entries(CLOUD_CONNECTOR_PERMISSION_ALLOWLIST) as Array<
     [PolicyGroup, ReadonlyArray<CloudConnectorAllowlistEntry>]
   >) {
-    if (entries.some((entry) => entry.package === pkg && entry.policyTemplate === policyTemplate)) {
+    if (
+      entries.some(
+        (entry) =>
+          entry.provider === provider &&
+          entry.package === pkg &&
+          entry.policyTemplate === policyTemplate
+      )
+    ) {
       return group;
     }
   }
