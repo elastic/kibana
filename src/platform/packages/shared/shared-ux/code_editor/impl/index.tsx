@@ -162,7 +162,8 @@ export const CodeEditorField: React.FunctionComponent<CodeEditorProps> = (props)
 };
 
 /**
- * Extend the Monaco editor API to account for the change to the `addCommand` and `addAction` method signature.
+ * Extend the Monaco editor API of the `addCommand` and `addAction` method signatures,
+ * to account for the monkey patching within the code editor wrapper.
  */
 declare module 'monaco-editor/esm/vs/editor/editor.api' {
   // eslint-disable-next-line @typescript-eslint/no-namespace

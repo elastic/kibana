@@ -12,6 +12,14 @@ declare module 'monaco-editor/esm/vs/basic-languages/markdown/markdown';
 declare module 'monaco-editor/esm/vs/basic-languages/css/css';
 declare module 'monaco-editor/esm/vs/basic-languages/yaml/yaml';
 
+// Monaco-bundled VS Code keybinding helpers (deep ESM paths, untyped upstream).
+// Loose declarations so `kbn-monaco/src/monaco_imports.ts` can import the runtime values
+// and re-export them with strong typing for consumers (see `KeyCodeChord` etc. there).
+declare module 'monaco-editor/esm/vs/base/common/keybindings.js';
+declare module 'monaco-editor/esm/vs/base/common/keyCodes.js';
+declare module 'monaco-editor/esm/vs/base/common/platform.js';
+declare module 'monaco-editor/esm/vs/platform/contextkey/common/contextkey.js';
+
 // Monaco internal services
 declare module 'monaco-editor/esm/vs/editor/standalone/browser/standaloneServices' {
   interface StandaloneServicesType {

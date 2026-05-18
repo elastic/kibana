@@ -7,6 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { installDiscoveryAwareAddCommand } from './add_command/install_discovery_aware_add_command';
-export { installDiscoveryAwareAddAction } from './add_action/install_discovery_aware_add_action';
+export { monkeyPatchEditorAddCommandForHotkeysDiscovery } from './add_command/monkey_patch_add_command';
+export { monkeyPatchEditorAddActionForHotkeysDiscovery } from './add_action/monkey_patch_add_action';
 export { type MonacoHotkeyDiscoveryMeta } from './types';
