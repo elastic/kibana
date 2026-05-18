@@ -37,7 +37,7 @@ If no link to a `failed-test` issue was provided, search for one in the `elastic
 
 - **Is it failing on `kibana-on-merge` (local pipeline), on Cloud pipelines, or both?**
   - _Why it matters:_ tells you whether the test is compatible with Elastic Cloud at all, and whether the failure is more likely environmental (more common on Cloud) or a defect in the test itself (more common when both fail).
-  - Recommended: learn more about local versus Elastic Cloud pipelines in `reference/local-vs-cloud-pipelines.md`
+  - Recommended: learn more about local versus Elastic Cloud pipelines in `references/local-vs-cloud-pipelines.md`
 - **Did it fail in Buildkite builds with many other unrelated test failures?**
   - _Why it matters:_ broad failure across unrelated tests points to an environment or infrastructure problem, not a problem with this test.
 - **Understand the test server configuration.** are Scout tests using the **default** or a **custom** test server configuration? Do FTR tests belong to a test config that defines custom server arguments that aren't supported on e.g., Elastic Cloud?
@@ -56,8 +56,8 @@ For every failure, try to retrieve:
 
 How to actually find and download each artifact type is framework-specific:
 
-- Scout (Playwright HTML report, traces, video): see `references/scout.md`.
-- FTR (failure_screenshot, failure_debug_html, server logs): see `references/ftr.md`.
+- Scout (Playwright HTML report, traces, video): see `references/scout-guidance.md`.
+- FTR (failure_screenshot, failure_debug_html, server logs): see `references/ftr-guidance.md`.
 
 Things to specifically check in the artifacts before forming a root-cause hypothesis:
 
@@ -104,8 +104,8 @@ Scout and FTR tests should also follow the general best practices in `docs/exten
 
 Identify the test runner for the failing test(s) and follow the framework-specific investigation guidance:
 
-- Scout: `reference/scout.md`
-- FTR: `reference/ftr.md`
+- Scout: `references/scout-guidance.md`
+- FTR: `references/ftr-guidance.md`
 
 ### Investigation pitfalls
 
