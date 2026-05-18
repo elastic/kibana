@@ -104,7 +104,8 @@ export async function getServiceStats({
   // `ServiceTransactionMetric` doesn't carry `transaction.name`; retry against the
   // per-transaction-group `TransactionMetric` rollup when the kuery referenced it.
   const hasKueryFilter = Boolean(kuery && kuery.trim() !== '');
-  const shouldRetry = shouldQueryMetrics && buckets.length === 0 && hasKueryFilter;
+  const hasEsQueryFilter = esQueryFilters.length > 0;
+  const shouldRetry = shouldQueryMetrics && buckets.length === 0 && (hasKueryFilter || hasEsQueryFilter);
 
   if (shouldRetry) {
     const fallbackResponse = await apmEventClient.search(

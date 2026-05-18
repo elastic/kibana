@@ -88,7 +88,8 @@ export async function getTraceSampleIds({
     },
   };
 
-  const isUnfilteredGlobalServiceMap = !serviceName && !serviceGroupKuery && !kuery;
+  const isUnfilteredGlobalServiceMap =
+    !serviceName && !serviceGroupKuery && !kuery && esQueryFilters.length === 0 && esQueryMustNot.length === 0;
 
   const fingerprintBucketSize = isUnfilteredGlobalServiceMap
     ? config.serviceMapFingerprintGlobalBucketSize
