@@ -13,6 +13,21 @@ GIT_SCOPE="renovate.json"
 KIBANA_MACHINE_USERNAME="kibanamachine"
 KIBANA_MACHINE_EMAIL="42973632+kibanamachine@users.noreply.github.com"
 
+SCRIPT_SOURCE="${BASH_SOURCE[0]:-$0}"
+SCRIPT_DIR="$(cd "$(dirname "$SCRIPT_SOURCE")" && pwd)"
+NODE_HELPERS_SCRIPT="${SCRIPT_DIR}/renovate_review_sync/helpers.js"
+
+# Title is used both to create the bot PR and to find/close a stale one when managed drift
+# self-heals on `main`, so it lives at script scope.
+PR_TITLE='[Renovate] Sync reviewers for managed rules'
+
+# Hidden HTML-comment marker embedded in the bot PR body; lets the next weekly run see
+# which teams the bot itself previously requested as reviewers, so removed teams can be
+# cleaned up symmetrically without touching humans (or teams that humans manually added).
+# Format: `<!-- bot-managed-reviewer-teams: elastic/team-a elastic/team-b -->`
+BOT_MANAGED_REVIEWERS_MARKER_PREFIX="<!-- bot-managed-reviewer-teams:"
+BOT_MANAGED_REVIEWERS_MARKER_SUFFIX="-->"
+
 report_main_step () {
   echo "--- $1"
 }
@@ -30,174 +45,8 @@ buildkite_annotate () {
   fi
 }
 
-node_report_metrics () {
-  local report_path="$1"
-
-  node - "$report_path" <<'NODE'
-const fs = require('fs');
-
-const reportPath = process.argv[2];
-const report = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
-
-const managedRuleDrift = Array.isArray(report.managedRuleDrift) ? report.managedRuleDrift : [];
-const managedSyncNeeded = Number.isFinite(report.managedSyncNeeded)
-  ? report.managedSyncNeeded
-  : managedRuleDrift.length;
-
-const packagesUsedButNotCovered = Array.isArray(report.packagesUsedButNotCovered)
-  ? report.packagesUsedButNotCovered
-  : [];
-
-const rulesWithNoComputedReviewers = Number.isFinite(report.rulesWithNoComputedReviewers)
-  ? report.rulesWithNoComputedReviewers
-  : 0;
-
-const safeInt = (n) => {
-  const i = Number.parseInt(String(n), 10);
-  return Number.isFinite(i) && i >= 0 ? i : 0;
-};
-
-process.stdout.write(
-  `managedSyncNeeded=${safeInt(managedSyncNeeded)}\n` +
-  `managedRuleDrift=${safeInt(managedRuleDrift.length)}\n` +
-  `untracked=${safeInt(packagesUsedButNotCovered.length)}\n` +
-  `noComputedReviewers=${safeInt(rulesWithNoComputedReviewers)}\n`
-);
-NODE
-}
-
-node_print_untracked_packages () {
-  local report_path="$1"
-  local limit="${2:-25}"
-
-  node - "$report_path" "$limit" <<'NODE'
-const fs = require('fs');
-
-const reportPath = process.argv[2];
-const limit = Number.parseInt(process.argv[3], 10);
-const report = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
-
-const pkgs = Array.isArray(report.packagesUsedButNotCovered) ? report.packagesUsedButNotCovered : [];
-const out = pkgs.slice(0, Number.isFinite(limit) && limit > 0 ? limit : 25);
-process.stdout.write(out.join('\n'));
-NODE
-}
-
-node_print_no_computed_reviewer_rules () {
-  local report_path="$1"
-  local limit="${2:-25}"
-
-  node - "$report_path" "$limit" <<'NODE'
-const fs = require('fs');
-
-const reportPath = process.argv[2];
-const limit = Number.parseInt(process.argv[3], 10);
-const report = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
-
-const details = Array.isArray(report.rulesWithNoComputedReviewersDetails)
-  ? report.rulesWithNoComputedReviewersDetails
-  : [];
-
-const lim = Number.isFinite(limit) && limit > 0 ? limit : 25;
-const slice = details.slice(0, lim);
-
-const fmt = (d) => {
-  const idx = typeof d.index === 'number' ? d.index : '?';
-  const groupName = typeof d.groupName === 'string' && d.groupName.length > 0 ? d.groupName : null;
-  const header = groupName ? `"${groupName}"` : `rule[${idx}]`;
-  const mode = typeof d.mode === 'string' ? d.mode : 'unknown';
-  const pkgs = Array.isArray(d.packages) ? d.packages : [];
-  const before = Array.isArray(d.before) ? d.before : [];
-  const pkgsStr = pkgs.length <= 6 ? pkgs.join(', ') : `${pkgs.slice(0, 6).join(', ')}, …(+${pkgs.length - 6})`;
-  const beforeStr = before.length === 0 ? '(no reviewers set)' : before.join(', ');
-  return `${header} (${mode}) packages: ${pkgsStr} | existing reviewers: ${beforeStr}`;
-};
-
-process.stdout.write(slice.map(fmt).join('\n'));
-NODE
-}
-
-node_print_reviewers () {
-  local report_path="$1"
-
-  node - "$report_path" <<'NODE'
-const fs = require('fs');
-
-const reportPath = process.argv[2];
-const report = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
-
-const drifts = Array.isArray(report.managedRuleDrift) ? report.managedRuleDrift : [];
-
-const reviewers = new Set();
-for (const d of drifts) {
-  const after = Array.isArray(d.after) ? d.after : [];
-  for (const r of after) {
-    if (typeof r === 'string' && r.startsWith('team:')) {
-      reviewers.add(`elastic/${r.slice('team:'.length)}`);
-    }
-  }
-}
-
-process.stdout.write(Array.from(reviewers).sort().join(' '));
-NODE
-}
-
-node_print_requested_reviewers () {
-  # Reads `gh pr view --json reviewRequests` from stdin and prints one reviewer per line in the
-  # same format `node_print_reviewers` emits, so the two sets can be set-differenced:
-  #   - teams  -> `elastic/<slug>`   (gh returns `slug` without the org prefix for teams)
-  #   - users  -> `<login>`
-  #
-  # Note: we pass the script via process substitution (`<(cat <<NODE ... NODE)`) rather than
-  # `node - <<NODE`. The latter would make the heredoc itself be node's stdin, leaving the
-  # caller's piped JSON unreadable.
-  node <(cat <<'NODE'
-let input = '';
-process.stdin.setEncoding('utf8');
-process.stdin.on('data', (c) => (input += c));
-process.stdin.on('end', () => {
-  const data = input.trim() ? JSON.parse(input) : {};
-  const reqs = Array.isArray(data.reviewRequests) ? data.reviewRequests : [];
-  const entries = reqs
-    .map((r) => {
-      if (!r || typeof r !== 'object') return null;
-      // `slug` identifies teams (bare slug, e.g. `kibana-operations`); `login` identifies users.
-      // Prefix team slugs with `elastic/` so they match the format used by the computed set and
-      // by `gh pr edit --add-reviewer`.
-      if (typeof r.slug === 'string') return `elastic/${r.slug}`;
-      if (typeof r.login === 'string') return r.login;
-      return null;
-    })
-    .filter(Boolean);
-  process.stdout.write(entries.join('\n'));
-});
-NODE
-)
-}
-
-node_print_mentions () {
-  local report_path="$1"
-
-  node - "$report_path" <<'NODE'
-const fs = require('fs');
-
-const reportPath = process.argv[2];
-const report = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
-
-const drifts = Array.isArray(report.managedRuleDrift) ? report.managedRuleDrift : [];
-
-const mentions = new Set();
-for (const d of drifts) {
-  const after = Array.isArray(d.after) ? d.after : [];
-  for (const r of after) {
-    if (typeof r === 'string' && r.startsWith('team:')) {
-      mentions.add(`@elastic/${r.slice('team:'.length)}`);
-    }
-  }
-}
-
-process.stdout.write(Array.from(mentions).sort().join(' '));
-NODE
+node_helper () {
+  node "$NODE_HELPERS_SCRIPT" "$@"
 }
 
 compute_new_reviewers_to_request () {
@@ -209,12 +58,12 @@ compute_new_reviewers_to_request () {
   fi
 
   local existing_reviewers
-  existing_reviewers="$(gh pr view "$pr_number" --json reviewRequests 2>/dev/null | node_print_requested_reviewers || true)"
+  existing_reviewers="$(gh pr view "$pr_number" --json reviewRequests 2>/dev/null | node_helper requested-reviewers || true)"
 
   # Use sorted set difference: computed - existing.
   # The computed side is a space-separated string; we intentionally word-split it into one
   # line per reviewer. The existing side is already newline-separated from
-  # `node_print_requested_reviewers`, so it stays quoted.
+  # `node_helper requested-reviewers`, so it stays quoted.
   # shellcheck disable=SC2086
   comm -23 \
     <(printf '%s\n' $computed_reviewers | sort -u) \
@@ -257,6 +106,129 @@ best_effort_add_labels () {
   done
 }
 
+extract_marker_teams_from_body () {
+  # Capture whatever sits between the marker prefix and suffix on a single line.
+  # Outputs one `elastic/<slug>` per line. Produces no output when the marker is missing
+  # or malformed (e.g. unclosed) so a missing/garbled marker can never trigger spurious
+  # removals downstream.
+  local body="$1"
+  printf '%s\n' "$body" | \
+    sed -n "s|.*${BOT_MANAGED_REVIEWERS_MARKER_PREFIX} \(.*\) ${BOT_MANAGED_REVIEWERS_MARKER_SUFFIX}.*|\1|p" | \
+    head -1 | \
+    tr -s ' ' '\n' | \
+    sed '/^$/d'
+}
+
+compute_stale_team_reviewers_to_remove () {
+  # Set difference: previous_marker - current_computed. Both inputs are space-separated.
+  # We word-split intentionally and drop empty lines so an empty input doesn't show up
+  # in the output.
+  local previous_teams="$1"
+  local current_teams="$2"
+  # shellcheck disable=SC2086
+  comm -23 \
+    <(printf '%s\n' ${previous_teams:-} | sort -u | sed '/^$/d') \
+    <(printf '%s\n' ${current_teams:-} | sort -u | sed '/^$/d')
+}
+
+compute_requested_stale_team_reviewers_to_remove () {
+  local pr_number="$1"
+  local previous_teams="$2"
+  local current_teams="$3"
+
+  local stale_teams
+  stale_teams="$(compute_stale_team_reviewers_to_remove "$previous_teams" "$current_teams")"
+  if [ -z "${stale_teams:-}" ]; then
+    return 0
+  fi
+
+  local existing_reviewers
+  existing_reviewers="$(gh pr view "$pr_number" --json reviewRequests 2>/dev/null | node_helper requested-reviewers || true)"
+
+  # Remove only teams that are both stale according to the marker and currently requested
+  # on GitHub. If a team already reviewed, was dismissed, or was manually removed, including
+  # it in the DELETE payload could make the whole best-effort cleanup fail.
+  # shellcheck disable=SC2086
+  comm -12 \
+    <(printf '%s\n' ${stale_teams:-} | sort -u | sed '/^$/d') \
+    <(printf '%s\n' ${existing_reviewers:-} | sort -u | sed '/^$/d') | \
+    sed -n '/^elastic\//p'
+}
+
+best_effort_remove_team_reviewers () {
+  local pr_number="$1"
+  shift
+
+  if [ "$#" -eq 0 ]; then
+    return 0
+  fi
+
+  # Strip the `elastic/` prefix; the GitHub API expects bare team slugs in `team_reviewers`.
+  # Defensive: skip anything that isn't `elastic/<slug>`. The bot only ever manages teams,
+  # so this guard ensures we never accidentally remove a user-level reviewer here.
+  local slugs=()
+  for r in "$@"; do
+    case "$r" in
+      elastic/*)
+        slugs+=("${r#elastic/}")
+        ;;
+      *)
+        echo "WARN: ignoring non-team reviewer '$r' in stale-reviewer removal"
+        ;;
+    esac
+  done
+
+  if [ "${#slugs[@]}" -eq 0 ]; then
+    return 0
+  fi
+
+  echo "--- Removing stale team reviewers (best-effort): ${slugs[*]}"
+
+  # Build the JSON payload via jq so unusual characters in slugs are escaped correctly.
+  local payload
+  payload="$(printf '%s\n' "${slugs[@]}" | jq -R . | jq -s '{team_reviewers: .}')"
+
+  if printf '%s' "$payload" | gh api \
+    --method DELETE \
+    "/repos/{owner}/{repo}/pulls/${pr_number}/requested_reviewers" \
+    --input - >/dev/null 2>&1; then
+    echo "Removed stale team reviewers: ${slugs[*]}"
+  else
+    echo "WARN: Failed to remove stale team reviewers (continuing)"
+  fi
+}
+
+maybe_close_stale_bot_pr () {
+  # When managed drift has self-healed on `main` (manual fix, or the rule changed away
+  # from `mode: "sync"`), any open bot PR is by definition stale. Close it and delete the
+  # branch so its currently-requested reviewers stop seeing it on their dashboards. The
+  # next weekly run will re-open a fresh PR if drift returns.
+  local stale_pr_number
+  stale_pr_number="$(gh pr list \
+    --search "$PR_TITLE" \
+    --state open \
+    --author "$KIBANA_MACHINE_USERNAME" \
+    --limit 1 \
+    --json number \
+    --jq '.[0].number // empty' 2>/dev/null || true)"
+
+  if [ -z "${stale_pr_number:-}" ]; then
+    return 0
+  fi
+
+  echo "--- Closing stale bot PR #${stale_pr_number} (managed drift resolved on main)"
+  # Backticks in the comment string are markdown code formatting, not shell expansion.
+  # shellcheck disable=SC2016
+  if gh pr close "$stale_pr_number" \
+    --delete-branch \
+    --comment 'Closing — the managed reviewer drift this PR was tracking has been resolved on `main` (either fixed directly, or the rule was changed away from `mode: "sync"`). This is auto-managed by the renovate-reviewer-sync pipeline; if drift reappears, a new PR will be opened automatically.' \
+    >/dev/null 2>&1; then
+    echo "Closed stale bot PR #${stale_pr_number} and deleted its branch."
+  else
+    echo "WARN: Failed to close stale bot PR #${stale_pr_number} (continuing)"
+  fi
+}
+
 main () {
   cd "$KIBANA_DIR"
 
@@ -283,7 +255,7 @@ main () {
   node scripts/sync_renovate_reviewers.js --write --report-json "$REPORT_JSON"
 
   # shellcheck disable=SC2046
-  eval "$(node_report_metrics "$REPORT_JSON")"
+  eval "$(node_helper report-metrics "$REPORT_JSON")"
 
   has_managed_drift=false
   has_untracked=false
@@ -305,7 +277,7 @@ main () {
   annotation+="- Rules with no computed reviewers (left unchanged): **${noComputedReviewers:-0}**\n"
 
   if [ "$has_untracked" = "true" ]; then
-    top_untracked="$(node_print_untracked_packages "$REPORT_JSON" 25 || true)"
+    top_untracked="$(node_helper untracked-packages "$REPORT_JSON" 25 || true)"
     annotation+=$'\n'
     annotation+=$'#### Untracked packages (top 25)\n'
     annotation+=$'```\n'
@@ -314,7 +286,7 @@ main () {
   fi
 
   if [ "$has_no_computed_reviewers" = "true" ]; then
-    no_comp_details="$(node_print_no_computed_reviewer_rules "$REPORT_JSON" 25 || true)"
+    no_comp_details="$(node_helper no-computed-reviewer-rules "$REPORT_JSON" 25 || true)"
     annotation+=$'\n'
     annotation+=$'#### Rules with no computed reviewers (top 25)\n'
     annotation+=$'```\n'
@@ -325,6 +297,9 @@ main () {
   fi
 
   if [ "$has_managed_drift" = "false" ] && [ "$has_untracked" = "false" ] && [ "$has_no_computed_reviewers" = "false" ]; then
+    # Drift fully resolved (or never existed): close any stale bot PR so its requested
+    # reviewers stop seeing it on their dashboards.
+    maybe_close_stale_bot_pr
     buildkite_annotate "$annotation" "success"
     echo "No managed drift and no missing coverage detected. Exiting."
     exit 0
@@ -340,6 +315,10 @@ main () {
     if [ "$has_managed_drift" = "true" ]; then
       echo "No changes in $GIT_SCOPE after applying updates."
     fi
+    # `git diff` clean means there is no managed-drift commit to push, so any open bot PR
+    # is stale even if the build is going red on a different signal (untracked /
+    # no-computed-reviewers). Close it before annotating either outcome.
+    maybe_close_stale_bot_pr
     if [ "$has_untracked" = "true" ] || [ "$has_no_computed_reviewers" = "true" ]; then
       buildkite_annotate "$annotation" "error"
       exit 1
@@ -353,17 +332,18 @@ main () {
   git config --global user.name "$KIBANA_MACHINE_USERNAME"
   git config --global user.email "$KIBANA_MACHINE_EMAIL"
 
-  PR_TITLE='[Renovate] Sync reviewers for managed rules'
   PR_BODY=$'This PR syncs `renovate.json` `packageRules[*].reviewers` for rules explicitly opted in via:\n\n- `x_kbn_reviewer_sync.mode: \"sync\"`\n\nThis is generated automatically and is intended to be non-disruptive (report-only rules are not updated).\n'
   if [ -n "${BUILDKITE_BUILD_URL:-}" ]; then
     PR_BODY+=$'\nGenerated by '"${BUILDKITE_BUILD_URL}"$'\n'
   fi
 
-  # Single lookup — pull all fields we need in one API call.
-  existing_pr_json="$(gh pr list --search "$PR_TITLE" --state open --author "$KIBANA_MACHINE_USERNAME" --limit 1 --json number,url,headRefName 2>/dev/null || echo '[]')"
+  # Single lookup — pull all fields we need in one API call. `body` lets us read the
+  # bot-managed-reviewer-teams marker from the previous run without an extra round-trip.
+  existing_pr_json="$(gh pr list --search "$PR_TITLE" --state open --author "$KIBANA_MACHINE_USERNAME" --limit 1 --json number,url,headRefName,body 2>/dev/null || echo '[]')"
   existing_pr_number="$(echo "$existing_pr_json" | jq -r '.[0].number // empty')"
   existing_pr_url="$(echo "$existing_pr_json" | jq -r '.[0].url // empty')"
   existing_pr_branch="$(echo "$existing_pr_json" | jq -r '.[0].headRefName // empty')"
+  existing_pr_body="$(echo "$existing_pr_json" | jq -r '.[0].body // empty')"
 
   if [ -n "${existing_pr_number:-}" ]; then
     echo "Existing PR found (#$existing_pr_number). Updating it."
@@ -374,10 +354,26 @@ main () {
     BRANCH_NAME="renovate_reviewer_sync"
   fi
 
-  reviewers="$(node_print_reviewers "$REPORT_JSON" || true)"
-  mentions="$(node_print_mentions "$REPORT_JSON" || true)"
+  # Snapshot the bot-managed team set from the previous run. Empty on first run, on a
+  # freshly-opened PR, or after a previous-run body without the marker (older versions of
+  # this script). In any of those cases, no removal will happen — we'll just write a fresh
+  # marker for the next run to compare against.
+  previous_managed_teams=""
+  if [ -n "${existing_pr_body:-}" ]; then
+    previous_managed_teams="$(extract_marker_teams_from_body "$existing_pr_body" | tr '\n' ' ')"
+  fi
+
+  reviewers="$(node_helper reviewers "$REPORT_JSON" || true)"
+  mentions="$(node_helper mentions "$REPORT_JSON" || true)"
   if [ -n "${mentions:-}" ]; then
     PR_BODY+=$'\n\nReview requested from computed owners: '"$mentions"$'\n'
+  fi
+
+  # Append the bot-managed-reviewer-teams marker so the next run can see exactly which
+  # teams the bot itself requested this run. Hidden (HTML comment), so it doesn't render
+  # in the PR description.
+  if [ -n "${reviewers:-}" ]; then
+    PR_BODY+=$'\n'"${BOT_MANAGED_REVIEWERS_MARKER_PREFIX} ${reviewers} ${BOT_MANAGED_REVIEWERS_MARKER_SUFFIX}"$'\n'
   fi
 
   # Create/update the bot branch on the current (fresh) main, keeping the computed changes in the working tree.
@@ -426,6 +422,19 @@ main () {
   if [ -n "${reviewers_to_request:-}" ]; then
     # shellcheck disable=SC2086
     best_effort_request_reviewers "$pr_number" $reviewers_to_request
+  fi
+
+  # Symmetric counterpart: drop teams the bot itself previously requested but that are no
+  # longer in the computed set. The previous-run marker defines what the bot owns; the
+  # current GitHub requested-reviewer list keeps the DELETE payload to reviewers that are
+  # still pending. That avoids touching humans / human-added teams and avoids failing the
+  # whole best-effort DELETE because one stale team already reviewed or was removed.
+  if [ -n "${existing_pr_number:-}" ] && [ -n "${previous_managed_teams:-}" ]; then
+    teams_to_remove="$(compute_requested_stale_team_reviewers_to_remove "$pr_number" "$previous_managed_teams" "${reviewers:-}" || true)"
+    if [ -n "${teams_to_remove:-}" ]; then
+      # shellcheck disable=SC2086
+      best_effort_remove_team_reviewers "$pr_number" $teams_to_remove
+    fi
   fi
 
   if [ -n "${pr_url:-}" ]; then
