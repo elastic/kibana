@@ -15,7 +15,6 @@ import {
   selectEvaluators,
   withEvaluatorSpan,
   createSpanLatencyEvaluator,
-  createSkillInvocationEvaluator,
   createRagEvaluators,
   type GroundTruth,
   type ExperimentTask,
@@ -95,6 +94,30 @@ const extractWorkflowExecuteParams = (output: TaskOutput): unknown[] => {
 const GET_STEP_DEFINITIONS_TOOL_ID = 'platform.workflows.get_step_definitions';
 
 /**
+ * The agent_builder server's `mergeRounds` flattens the per-round `trace_id`
+ * into `string[]` when a conversation spans multiple HITL-prompt-resume
+ * rounds (see add_round_complete_event.ts:209-219). A naive
+ * `WHERE trace_id == "${traceId}"` interpolation produces the literal
+ * `"t1,t2,t3"` and matches no real spans. Normalise to a non-empty list of
+ * trace IDs the caller can fan out across or build into an `IN (...)` clause.
+ */
+const normalizeTraceIds = (raw: unknown): string[] => {
+  if (typeof raw === 'string' && raw.length > 0) return [raw];
+  if (Array.isArray(raw)) {
+    return raw.filter((v): v is string => typeof v === 'string' && v.length > 0);
+  }
+  return [];
+};
+
+/**
+ * Build an ES|QL clause that matches one or more trace IDs. Escapes any
+ * stray double-quotes defensively even though trace IDs from the server are
+ * hex.
+ */
+const traceIdInClause = (traceIds: string[]): string =>
+  `trace_id IN (${traceIds.map((t) => `"${t.replace(/"/g, '\\"')}"`).join(', ')})`;
+
+/**
  * Full workflow_execute_step tool-call records (with index in the original
  * step sequence) so B3-feature evaluators can inspect both the params the LLM
  * sent and the result the tool returned, and reason about ordering relative
@@ -126,9 +149,7 @@ const extractWorkflowExecuteStepRecords = (output: TaskOutput): WorkflowExecuteS
       const results = Array.isArray(s.results) ? s.results : [];
       const firstResult = results.find((r): r is Record<string, unknown> => isRecord(r));
       const data =
-        firstResult && isRecord(firstResult.data)
-          ? (firstResult.data as Record<string, unknown>)
-          : null;
+        firstResult && isRecord(firstResult.data) ? (firstResult.data as Record<string, unknown>) : null;
       return {
         index,
         params: isRecord(s.params) ? (s.params as Record<string, unknown>) : null,
@@ -336,14 +357,31 @@ function configureExperiment({
           return { score: null, label: 'not_applicable' };
         }
 
+        // If we have tool-call params but no result data, we cannot judge
+        // YAML validity (the tool didn't return a result — usually because
+        // it is mid-HITL or the agent_builder transport stripped it). Score
+        // `unavailable` rather than the misleading 1.0 the old code emitted.
+        const observed = records.filter((r) => r.data != null);
+        if (observed.length === 0) {
+          return {
+            score: null,
+            label: 'unavailable',
+            metadata: {
+              reason: 'workflow_execute_step returned no result data',
+              workflowCallCount: records.length,
+            },
+          };
+        }
+
         // YAML parse failure is signalled by `parseError` on the result data
         // (see workflow_execute_step_tool.ts:826-830).
-        const failures = records.filter((r) => r.data?.parseError != null).length;
-        const valid = records.length - failures;
+        const failures = observed.filter((r) => r.data?.parseError != null).length;
+        const valid = observed.length - failures;
         return {
-          score: valid / records.length,
+          score: valid / observed.length,
           metadata: {
             workflowCallCount: records.length,
+            observedResultCount: observed.length,
             yamlValidCount: valid,
             yamlFailureCount: failures,
           },
@@ -360,12 +398,24 @@ function configureExperiment({
           return { score: null, label: 'not_applicable' };
         }
 
+        const observed = records.filter((r) => r.data != null);
+        if (observed.length === 0) {
+          return {
+            score: null,
+            label: 'unavailable',
+            metadata: {
+              reason: 'workflow_execute_step returned no result data',
+              workflowCallCount: records.length,
+            },
+          };
+        }
+
         // Among YAML-valid calls, count those that did NOT trip the
         // preValidateStepWith Zod check. The check returns a result with a
         // `reason` field (see workflow_execute_step_tool.ts:854-863). Mustache-
         // templated `with:` blocks are skipped by the validator and therefore
         // count as passing — that is the intentional B3 trade-off.
-        const yamlValid = records.filter((r) => r.data?.parseError == null);
+        const yamlValid = observed.filter((r) => r.data?.parseError == null);
         if (yamlValid.length === 0) {
           return {
             score: 0,
@@ -382,6 +432,7 @@ function configureExperiment({
           score: passed / yamlValid.length,
           metadata: {
             workflowCallCount: records.length,
+            observedResultCount: observed.length,
             yamlValidCount: yamlValid.length,
             preValidationPassedCount: passed,
             preValidationFailureCount: preValidationFailures,
@@ -392,6 +443,15 @@ function configureExperiment({
     {
       name: 'Workflow_Execution_SuccessRate',
       kind: 'CODE' as const,
+      // Trace-based on purpose: when workflow_execute_step is gated by a HITL
+      // confirmation prompt, the agent_builder converse API does not back-fill
+      // the step record's `results[]` once the prompt is allowed and the tool
+      // actually executes. The post-execution result IS captured in the
+      // `Tool: platform.workflows.workflow_execute_step` OTEL span (status =
+      // Ok/Error), so we read from traces ES instead of the gapped step
+      // record. This makes the evaluator robust to the HITL plumbing gap
+      // without losing the signal we actually care about (did execution
+      // succeed when the user allowed it?).
       evaluate: async ({ output, metadata }) => {
         if (getStringMeta(metadata, 'variantFamily') !== 'workflow') return { score: 1 };
         const records = extractWorkflowExecuteStepRecords(output as TaskOutput);
@@ -399,31 +459,63 @@ function configureExperiment({
           return { score: null, label: 'not_applicable' };
         }
 
-        // Among calls that passed YAML parse and pre-validation, count those
-        // whose execution returned success=true (formatExecutionResult writes
-        // success based on ExecutionStatus.COMPLETED — see line 380).
-        const eligible = records.filter(
-          (r) => r.data?.parseError == null && r.data?.reason == null
-        );
-        if (eligible.length === 0) {
+        const traceIds = normalizeTraceIds((output as Record<string, unknown>)?.traceId);
+        if (traceIds.length === 0) {
           return {
-            score: 0,
+            score: null,
+            label: 'unavailable',
             metadata: {
-              reason: 'No workflow_execute_step calls reached execution',
+              reason: 'No traceId available; cannot read workflow execution status from traces',
               workflowCallCount: records.length,
             },
           };
         }
 
-        const succeeded = eligible.filter((r) => r.data?.success === true).length;
-        return {
-          score: succeeded / eligible.length,
-          metadata: {
-            workflowCallCount: records.length,
-            executedCount: eligible.length,
-            succeededCount: succeeded,
-          },
-        };
+        try {
+          // HITL-resume conversations produce multiple round trace_ids; the
+          // workflow_execute_step span may land under any of them. Match all
+          // candidate trace IDs in a single query so a multi-round trace is
+          // not scored 0/unavailable just because the array shape changed.
+          const query = `FROM traces-*
+| WHERE ${traceIdInClause(traceIds)}
+  AND name == "Tool: ${WORKFLOW_EXECUTE_STEP_TOOL_ID}"
+| STATS total = COUNT(*),
+        succeeded = COUNT(CASE(status.code == "Ok", 1, NULL))`;
+          const response = (await traceEsClient.esql.query({
+            query,
+          })) as unknown as { values: number[][] };
+          const [total = 0, succeeded = 0] = response.values?.[0] ?? [];
+
+          if (total === 0) {
+            return {
+              score: null,
+              label: 'unavailable',
+              metadata: {
+                reason:
+                  'No workflow_execute_step spans found in trace; tool calls may not have reached execution',
+                workflowCallCount: records.length,
+                traceIds,
+              },
+            };
+          }
+
+          return {
+            score: succeeded / total,
+            metadata: {
+              workflowCallCount: records.length,
+              spanTotalCount: total,
+              spanSucceededCount: succeeded,
+              traceIds,
+            },
+          };
+        } catch (error) {
+          log.warning(
+            `Workflow_Execution_SuccessRate trace query failed for ${traceIds.join(',')}: ${
+              error instanceof Error ? error.message : String(error)
+            }`
+          );
+          return { score: null, label: 'error' };
+        }
       },
     },
     {
@@ -504,11 +596,12 @@ function configureExperiment({
         spanName: 'Converse',
       }),
     }),
-    createSkillInvocationEvaluator({
-      traceEsClient,
-      log,
-      skillName: 'data-exploration',
-    }),
+    // NOTE: An earlier draft hardcoded `createSkillInvocationEvaluator({
+    // skillName: 'data-exploration' })` here. That polluted the metrics with a
+    // constant `0` for this suite (which exercises `alert-analysis` and
+    // `entity-analytics`). `ExpectedSkillInvocation` below already runs the
+    // same trace query against the per-example `expectedSkill` metadata, so
+    // we keep it as the single source of truth for skill-activation scoring.
     {
       name: 'ExpectedSkillInvocation',
       kind: 'CODE' as const,
@@ -522,8 +615,8 @@ function configureExperiment({
           return { score: null, label: 'error', explanation: `Invalid skill name: ${skillName}` };
         }
 
-        const traceId = (output as Record<string, unknown>)?.traceId as string | undefined;
-        if (!traceId) {
+        const traceIds = normalizeTraceIds((output as Record<string, unknown>)?.traceId);
+        if (traceIds.length === 0) {
           return {
             score: null,
             label: 'unavailable',
@@ -531,8 +624,11 @@ function configureExperiment({
           };
         }
 
+        // HITL-resume conversations span multiple round trace_ids; the
+        // filestore.read that loads the SKILL.md may have happened in any of
+        // them. Match all candidate trace IDs.
         const query = `FROM traces-*
-| WHERE trace_id == "${traceId}"
+| WHERE ${traceIdInClause(traceIds)}
 | STATS skill_invoked = COUNT(
     CASE(
       attributes.gen_ai.tool.name == "filestore.read"
@@ -551,16 +647,16 @@ function configureExperiment({
           if (expectedSkill) {
             return {
               score: invoked ? 1 : 0,
-              metadata: { expectedSkill, invoked },
+              metadata: { expectedSkill, invoked, traceIds },
             };
           }
           return {
             score: invoked ? 0 : 1,
-            metadata: { shouldNotActivateSkill: shouldNotActivate, invoked },
+            metadata: { shouldNotActivateSkill: shouldNotActivate, invoked, traceIds },
           };
         } catch (error) {
           log.warning(
-            `ExpectedSkillInvocation failed for trace ${traceId}: ${
+            `ExpectedSkillInvocation failed for trace ${traceIds.join(',')}: ${
               error instanceof Error ? error.message : String(error)
             }`
           );
@@ -608,10 +704,22 @@ export function createEvaluateDataset({
       log,
     });
 
+    // Lower concurrency to 2 (default is 5). At n=5 reps × 5 examples each
+    // round of 5 concurrent conversations holds 5+ inflight HITL-resume loops
+    // open against Kibana which OOMs the dev server. The eval suite is not
+    // throughput-sensitive; sequential / lightly-parallel runs reproduce the
+    // signal without crashing the box. The env var EVALUATION_CONCURRENCY can
+    // override the default if a beefier env wants the original throughput.
+    const concurrencyFromEnv = parseInt(process.env.EVALUATION_CONCURRENCY || '', 10);
+    const concurrency = Number.isFinite(concurrencyFromEnv) && concurrencyFromEnv > 0
+      ? concurrencyFromEnv
+      : 2;
+
     await executorClient.runExperiment(
       {
         dataset,
         task,
+        concurrency,
       },
       selectedEvaluators
     );

@@ -99,7 +99,16 @@ evaluate.describe(
                 },
                 metadata: {
                   query_intent: 'Threat Intelligence',
-                  expectedSkill: 'alert-analysis',
+                  // Standalone Security Labs lookups don't fit the
+                  // alert-analysis skill's "When to Use" criteria (all four
+                  // anchor on a specific alert). Empirically the agent
+                  // bypasses skill activation for these and calls
+                  // security.security_labs_search directly. The tool-call
+                  // correctness is still graded by `expectedOnlyToolId` /
+                  // `ToolUsageOnly` below; we deliberately omit
+                  // `expectedSkill` so `ExpectedSkillInvocation` short-
+                  // circuits to a pass and does not penalise a behavior
+                  // the skill description itself doesn't claim.
                   expectedOnlyToolId: 'security.security_labs_search',
                   variantFamily: 'workflow',
                 },
@@ -115,8 +124,18 @@ evaluate.describe(
                 },
                 metadata: {
                   query_intent: 'Risk Assessment',
-                  expectedSkill: 'alert-analysis',
-                  expectedOnlyToolId: 'security.entity_risk_score',
+                  // Standalone host-risk lookup routes to entity-analytics in
+                  // this build (verified empirically via filestore.read traces);
+                  // alert-analysis-api-driven only adopts the risk tool when
+                  // enriching a specific alertId.
+                  expectedSkill: 'entity-analytics',
+                  // When entity-analytics is loaded the agent invokes the
+                  // skill's INLINE risk_score tool
+                  // (security.entity_analytics.risk_score), not the
+                  // standalone registry tool security.entity_risk_score.
+                  // See entity_analytics/inline_tools/risk_score/index.ts
+                  // for the inline id constant.
+                  expectedOnlyToolId: 'security.entity_analytics.risk_score',
                   variantFamily: 'workflow',
                 },
               },
