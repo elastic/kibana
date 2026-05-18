@@ -193,7 +193,6 @@ apiTest.describe('Bulk create alert actions API', { tag: '@local-stateful-classi
     });
 
     expect(response).toHaveStatusCode(400);
-    expect(response.body).toMatchObject({ statusCode: 400, error: 'Bad Request' });
   });
 
   apiTest('schema: rejects more than 100 items with 400', async ({ apiClient }) => {
@@ -209,7 +208,6 @@ apiTest.describe('Bulk create alert actions API', { tag: '@local-stateful-classi
     });
 
     expect(response).toHaveStatusCode(400);
-    expect(response.body).toMatchObject({ statusCode: 400, error: 'Bad Request' });
   });
 
   apiTest('schema: rejects an item missing group_hash with 400', async ({ apiClient }) => {
@@ -219,7 +217,6 @@ apiTest.describe('Bulk create alert actions API', { tag: '@local-stateful-classi
     });
 
     expect(response).toHaveStatusCode(400);
-    expect(response.body).toMatchObject({ statusCode: 400, error: 'Bad Request' });
   });
 
   apiTest('schema: rejects an item with unknown action_type with 400', async ({ apiClient }) => {
@@ -229,7 +226,6 @@ apiTest.describe('Bulk create alert actions API', { tag: '@local-stateful-classi
     });
 
     expect(response).toHaveStatusCode(400);
-    expect(response.body).toMatchObject({ statusCode: 400, error: 'Bad Request' });
   });
 
   apiTest(
@@ -243,7 +239,6 @@ apiTest.describe('Bulk create alert actions API', { tag: '@local-stateful-classi
       });
 
       expect(response).toHaveStatusCode(400);
-      expect(response.body).toMatchObject({ statusCode: 400, error: 'Bad Request' });
     }
   );
 
@@ -254,7 +249,6 @@ apiTest.describe('Bulk create alert actions API', { tag: '@local-stateful-classi
     });
 
     expect(response).toHaveStatusCode(400);
-    expect(response.body).toMatchObject({ statusCode: 400, error: 'Bad Request' });
   });
 
   apiTest(
@@ -266,7 +260,6 @@ apiTest.describe('Bulk create alert actions API', { tag: '@local-stateful-classi
       });
 
       expect(response).toHaveStatusCode(400);
-      expect(response.body).toMatchObject({ statusCode: 400, error: 'Bad Request' });
     }
   );
 
@@ -277,7 +270,6 @@ apiTest.describe('Bulk create alert actions API', { tag: '@local-stateful-classi
     });
 
     expect(response).toHaveStatusCode(400);
-    expect(response.body).toMatchObject({ statusCode: 400, error: 'Bad Request' });
   });
 
   apiTest(

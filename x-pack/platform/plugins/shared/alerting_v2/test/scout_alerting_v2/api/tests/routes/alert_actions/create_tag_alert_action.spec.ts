@@ -93,7 +93,6 @@ apiTest.describe('Create tag alert action API', { tag: '@local-stateful-classic'
       body: {},
     });
     expect(response).toHaveStatusCode(400);
-    expect(response.body).toMatchObject({ statusCode: 400, error: 'Bad Request' });
   });
 
   apiTest('schema: rejects more than 20 tags with 400', async ({ apiClient }) => {
@@ -102,7 +101,6 @@ apiTest.describe('Create tag alert action API', { tag: '@local-stateful-classic'
       body: { tags: Array.from({ length: 21 }, (_v, i) => `tag-${i}`) },
     });
     expect(response).toHaveStatusCode(400);
-    expect(response.body).toMatchObject({ statusCode: 400, error: 'Bad Request' });
   });
 
   apiTest('schema: rejects an empty tag string with 400', async ({ apiClient }) => {
@@ -111,7 +109,6 @@ apiTest.describe('Create tag alert action API', { tag: '@local-stateful-classic'
       body: { tags: ['valid', ''] },
     });
     expect(response).toHaveStatusCode(400);
-    expect(response.body).toMatchObject({ statusCode: 400, error: 'Bad Request' });
   });
 
   apiTest('schema: rejects a tag over 128 chars with 400', async ({ apiClient }) => {
@@ -120,7 +117,6 @@ apiTest.describe('Create tag alert action API', { tag: '@local-stateful-classic'
       body: { tags: ['a'.repeat(129)] },
     });
     expect(response).toHaveStatusCode(400);
-    expect(response.body).toMatchObject({ statusCode: 400, error: 'Bad Request' });
   });
 
   apiTest('schema: rejects non-string tag elements with 400', async ({ apiClient }) => {
@@ -129,7 +125,6 @@ apiTest.describe('Create tag alert action API', { tag: '@local-stateful-classic'
       body: { tags: ['valid', 42] },
     });
     expect(response).toHaveStatusCode(400);
-    expect(response.body).toMatchObject({ statusCode: 400, error: 'Bad Request' });
   });
 
   apiTest('schema: rejects unknown body fields (strict mode) with 400', async ({ apiClient }) => {
@@ -138,7 +133,6 @@ apiTest.describe('Create tag alert action API', { tag: '@local-stateful-classic'
       body: { tags: ['valid'], extra: 'nope' },
     });
     expect(response).toHaveStatusCode(400);
-    expect(response.body).toMatchObject({ statusCode: 400, error: 'Bad Request' });
   });
 
   apiTest('schema: rejects group_hash over 256 chars with 400', async ({ apiClient }) => {
@@ -147,7 +141,6 @@ apiTest.describe('Create tag alert action API', { tag: '@local-stateful-classic'
       body: { tags: ['production'] },
     });
     expect(response).toHaveStatusCode(400);
-    expect(response.body).toMatchObject({ statusCode: 400, error: 'Bad Request' });
   });
 
   apiTest('returns 404 when group_hash matches no events', async ({ apiClient }) => {

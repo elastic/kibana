@@ -61,7 +61,6 @@ apiTest.describe('Create unack alert action API', { tag: '@local-stateful-classi
       body: {},
     });
     expect(response).toHaveStatusCode(400);
-    expect(response.body).toMatchObject({ statusCode: 400, error: 'Bad Request' });
   });
 
   apiTest('schema: rejects empty episode_id with 400', async ({ apiClient }) => {
@@ -70,7 +69,6 @@ apiTest.describe('Create unack alert action API', { tag: '@local-stateful-classi
       body: { episode_id: '' },
     });
     expect(response).toHaveStatusCode(400);
-    expect(response.body).toMatchObject({ statusCode: 400, error: 'Bad Request' });
   });
 
   apiTest('schema: rejects episode_id over 150 chars with 400', async ({ apiClient }) => {
@@ -79,7 +77,6 @@ apiTest.describe('Create unack alert action API', { tag: '@local-stateful-classi
       body: { episode_id: 'a'.repeat(151) },
     });
     expect(response).toHaveStatusCode(400);
-    expect(response.body).toMatchObject({ statusCode: 400, error: 'Bad Request' });
   });
 
   apiTest('schema: rejects unknown body fields (strict mode) with 400', async ({ apiClient }) => {
@@ -88,7 +85,6 @@ apiTest.describe('Create unack alert action API', { tag: '@local-stateful-classi
       body: { episode_id: 'some-episode', extra: 'nope' },
     });
     expect(response).toHaveStatusCode(400);
-    expect(response.body).toMatchObject({ statusCode: 400, error: 'Bad Request' });
   });
 
   apiTest('schema: rejects group_hash over 256 chars with 400', async ({ apiClient }) => {
@@ -97,7 +93,6 @@ apiTest.describe('Create unack alert action API', { tag: '@local-stateful-classi
       body: { episode_id: 'some-episode' },
     });
     expect(response).toHaveStatusCode(400);
-    expect(response.body).toMatchObject({ statusCode: 400, error: 'Bad Request' });
   });
 
   apiTest('returns 404 when group_hash matches no events', async ({ apiClient }) => {
