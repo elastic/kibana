@@ -261,6 +261,11 @@ export const allowedExperimentalValues = Object.freeze({
    * records. Both must be enabled for the API to return non-empty results.
    */
   ruleChangesHistoryEnabled: false,
+
+  /**
+   * Enables the risk score history API endpoint for Entity Analytics.
+   */
+  riskScoreHistoryEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

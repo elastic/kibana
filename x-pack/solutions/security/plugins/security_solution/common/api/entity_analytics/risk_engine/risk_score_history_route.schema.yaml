@@ -1,0 +1,108 @@
+openapi: 3.0.0
+info:
+  version: '1'
+  title: Risk Score History API
+  description: Retrieve historical risk score changes for an entity.
+paths:
+  /internal/risk_score/history:
+    get:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: GetRiskScoreHistory
+      summary: Get risk score history for an entity
+      description: >-
+        Returns time-ordered historical risk score entries from the
+        risk score time-series index for a given entity.
+      parameters:
+        - name: entity_type
+          in: query
+          required: true
+          schema:
+            $ref: '../common/common.schema.yaml#/components/schemas/IdentifierType'
+        - name: entity_id
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: from
+          in: query
+          required: false
+          schema:
+            type: string
+            default: 'now-90d'
+        - name: to
+          in: query
+          required: false
+          schema:
+            type: string
+            default: 'now'
+        - name: score_type
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [base, propagated, resolution]
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 1000
+            default: 100
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RiskScoreHistoryResponse'
+        '400':
+          description: Invalid request
+
+components:
+  schemas:
+    RiskScoreHistoryEntry:
+      type: object
+      required:
+        - '@timestamp'
+        - calculated_score_norm
+        - calculated_level
+      properties:
+        '@timestamp':
+          type: string
+          format: date-time
+        calculated_score_norm:
+          type: number
+          format: double
+          minimum: 0
+          maximum: 100
+        calculated_level:
+          $ref: '../common/common.schema.yaml#/components/schemas/EntityRiskLevels'
+        calculated_score:
+          type: number
+          format: double
+        score_type:
+          type: string
+          enum: [base, propagated, resolution]
+        category_1_score:
+          type: number
+          format: double
+        category_1_count:
+          type: integer
+
+    RiskScoreHistoryResponse:
+      type: object
+      required:
+        - entity_id
+        - entity_type
+        - entries
+      properties:
+        entity_id:
+          type: string
+        entity_type:
+          $ref: '../common/common.schema.yaml#/components/schemas/IdentifierType'
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/RiskScoreHistoryEntry'
