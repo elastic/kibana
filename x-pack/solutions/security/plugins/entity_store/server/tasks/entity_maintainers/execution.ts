@@ -290,6 +290,18 @@ export async function runEntityMaintainerTask({
     }
   }
 
+  telemetryClient.flush({
+    durationMs: Date.now() - runStartedAt,
+    aborted,
+    errorClass:
+      caughtError instanceof Error
+        ? caughtError.constructor.name
+        : caughtError != null
+        ? 'Error'
+        : undefined,
+    errorMessage: caughtError instanceof Error ? caughtError.message : undefined,
+  });
+
   return {
     state: status,
   };
