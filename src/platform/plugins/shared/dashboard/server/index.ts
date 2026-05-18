@@ -49,12 +49,10 @@ export type {
   DashboardSection,
   DashboardOptions,
   DashboardSanitizeResponseBody,
-  DashboardCreateRequestBody,
   DashboardCreateResponseBody,
   DashboardReadResponseBody,
   DashboardSearchRequestParams,
   DashboardSearchResponseBody,
-  DashboardUpdateRequestBody,
   DashboardUpdateResponseBody,
   GridData,
 } from './api';

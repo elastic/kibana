@@ -50,7 +50,7 @@ export const TransformFunctionSelector: FC<TransformFunctionSelectorProps> = ({
         {transformFunctions.map(({ helpText, icon, name, title }) => (
           <EuiFlexItem key={name} style={{ width: 320 }} grow={false}>
             <EuiCard
-              icon={<EuiIcon size="xl" type={icon} />}
+              icon={<EuiIcon size="xl" type={icon} aria-hidden={true} />}
               title={title}
               description={helpText}
               data-test-subj={`transformCreation-${name}-option${
