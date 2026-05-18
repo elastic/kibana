@@ -184,6 +184,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
     mode,
     initialQuery: getBreachQuery(initialMapped?.query),
     initialRecoveryQuery: getRecoverQuery(initialMapped?.query)?.trim() || undefined,
+    ruleBuilderMode,
   });
 
   // Registered once here so providers persist across Sandbox open/close cycles.
@@ -204,10 +205,13 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
   });
 
   // ── Form values (submitted to the API) ──
-  const defaultValues = useMemo<ComposeFormValues>(
-    () => (rule ? mapRuleToComposeFormValues(rule) : EMPTY_FORM_VALUES),
-    [rule]
-  );
+  const defaultValues = useMemo<ComposeFormValues>(() => {
+    const base = rule ? mapRuleToComposeFormValues(rule) : EMPTY_FORM_VALUES;
+    if (initialRuleBuilderState) {
+      return { ...base, ruleBuilderState: initialRuleBuilderState };
+    }
+    return base;
+  }, [rule, initialRuleBuilderState]);
 
   const methods = useForm<ComposeFormValues>({ mode: 'onBlur', defaultValues });
 
