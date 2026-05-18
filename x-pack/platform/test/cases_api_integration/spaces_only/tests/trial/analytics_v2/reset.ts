@@ -12,6 +12,7 @@ import { createCase, deleteAllCaseItems, getAuthWithSuperUser } from '../../../.
 import {
   CASE_INDEX,
   resetV2,
+  runReconcileSoon,
   waitForAnalyticsCase,
   waitForCaseIndexExists,
   waitForResetComplete,
@@ -128,11 +129,11 @@ export default ({ getService }: FtrProviderContext): void => {
       );
       await waitForAnalyticsCase(es, oldCase.id);
 
-      // Bump the cursor by running an explicit reconciliation.
-      await supertest
-        .post('/internal/cases/_analyticsV2/reconcile/run_soon')
-        .set(INTERNAL_HEADERS)
-        .expect(200);
+      // Bump the cursor. The helper waits for cursor advance, so the
+      // "cursor is ahead of oldCase.created_at" precondition is
+      // actually established (a raw `.expect(200)` could no-op when
+      // TM is mid-tick and silently lose the precondition).
+      await runReconcileSoon(supertest);
 
       // Without `/reset`, the cursor would now be ahead of
       // `oldCase.created_at` and a periodic tick wouldn't re-emit

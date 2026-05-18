@@ -10,6 +10,7 @@ import type { FtrProviderContext } from '../../../../common/ftr_provider_context
 import { getPostCaseRequest } from '../../../../common/lib/mock';
 import {
   createCase,
+  deleteCases,
   updateCase,
   deleteAllCaseItems,
   getAuthWithSuperUser,
@@ -57,8 +58,10 @@ export default ({ getService }: FtrProviderContext): void => {
       // Doc-builder converts numeric SO enums to human strings.
       expect(doc.cases.status).to.eql('open');
       expect(doc.cases.severity).to.eql('low');
-      // Envelope fields are populated from SO namespaces.
-      expect(doc.kibana.space_ids).to.eql(['default']);
+      // `getAuthWithSuperUser()` defaults to `space1` → case lives in
+      // space1 → analytics doc inherits that namespace (non-default
+      // propagation).
+      expect(doc.kibana.space_ids).to.eql(['space1']);
     });
 
     it('updateCase → analytics doc is upserted (single doc, latest values)', async () => {
@@ -90,38 +93,38 @@ export default ({ getService }: FtrProviderContext): void => {
       const created = await createCase(supertestWithoutAuth, getPostCaseRequest(), 200, auth);
       await waitForAnalyticsCase(es, created.id);
 
-      await supertestWithoutAuth
-        .delete(`/api/cases?ids=${encodeURIComponent(JSON.stringify([created.id]))}`)
-        .set('kbn-xsrf', 'true')
-        .set('x-elastic-internal-origin', 'kibana')
-        .expect(204);
+      // `deleteCases` threads `auth.space` through `getSpaceUrlPrefix`
+      // — a raw `/api/cases` DELETE would 404 (case lives in space1).
+      await deleteCases({
+        supertest: supertestWithoutAuth,
+        caseIDs: [created.id],
+        auth,
+      });
 
       await waitForAnalyticsCase(es, created.id, { expect: 'absent' });
     });
 
-    it('deleting an already-deleted case is a no-op', async () => {
-      // The writer's `doDeleteCase` swallows 404s; re-issuing a
-      // delete shouldn't produce an error or log noise.
+    it('deleteCase succeeds when the analytics doc is already gone (writer 404 swallow)', async () => {
+      // Models the out-of-band drop scenario (writer missed a create,
+      // or `.cases` was wiped between create and delete). The case
+      // SO is still present, so the API must return 204; the writer
+      // fires, hits 404 on `.cases`, and swallows it. The 404-swallow
+      // itself is covered by writer/writer.test.ts ('treats per-item
+      // 404s as no-ops'); this is the end-to-end wiring check.
       const created = await createCase(supertestWithoutAuth, getPostCaseRequest(), 200, auth);
       await waitForAnalyticsCase(es, created.id);
 
-      const url = `/api/cases?ids=${encodeURIComponent(JSON.stringify([created.id]))}`;
-      await supertestWithoutAuth
-        .delete(url)
-        .set('kbn-xsrf', 'true')
-        .set('x-elastic-internal-origin', 'kibana')
-        .expect(204);
-
+      await es.delete({ index: '.cases', id: created.id });
       await waitForAnalyticsCase(es, created.id, { expect: 'absent' });
 
-      // Second delete: SO already gone, returns 204. The writer
-      // fires again (per-batch behavior), hits 404 on `.cases`,
-      // and swallows it. Just assert the API call still succeeds.
-      await supertestWithoutAuth
-        .delete(url)
-        .set('kbn-xsrf', 'true')
-        .set('x-elastic-internal-origin', 'kibana')
-        .expect(204);
+      await deleteCases({
+        supertest: supertestWithoutAuth,
+        caseIDs: [created.id],
+        auth,
+      });
+
+      // Still absent — the swallowed 404 didn't resurrect the doc.
+      await waitForAnalyticsCase(es, created.id, { expect: 'absent' });
     });
   });
 };

@@ -7,7 +7,12 @@
 
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { getPostCaseRequest } from '../../../../common/lib/mock';
-import { createCase, deleteAllCaseItems, getAuthWithSuperUser } from '../../../../common/lib/api';
+import {
+  createCase,
+  deleteAllCaseItems,
+  getAuthWithSuperUser,
+  updateCase,
+} from '../../../../common/lib/api';
 import { resetV2, runReconcileSoon, waitForAnalyticsCase } from './helpers';
 
 /**
@@ -102,16 +107,16 @@ export default ({ getService }: FtrProviderContext): void => {
 
       await runReconcileSoon(supertest);
 
-      // Patch the case (this also fires the writer; the test drops
-      // the resulting doc to model the writer missing the patch).
-      await supertestWithoutAuth
-        .patch('/api/cases')
-        .set('kbn-xsrf', 'true')
-        .set('x-elastic-internal-origin', 'kibana')
-        .send({
+      // Patch fires the writer; the test then drops the doc to
+      // model the writer missing the patch. `updateCase` is used
+      // for the space prefix — case lives in space1.
+      await updateCase({
+        supertest: supertestWithoutAuth,
+        params: {
           cases: [{ id: created.id, version: created.version, title: 'patched title' }],
-        })
-        .expect(200);
+        },
+        auth,
+      });
 
       await es.delete({ index: '.cases', id: created.id });
       await waitForAnalyticsCase(es, created.id, { expect: 'absent' });

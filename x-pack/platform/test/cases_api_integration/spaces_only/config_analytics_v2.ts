@@ -31,5 +31,10 @@ export default createTestConfig('spaces_only', {
   kbnServerArgs: [
     '--xpack.cases.analyticsV2.enabled=true',
     '--xpack.cases.analyticsV2.enable_admin_routes=true',
+    // Tighten Task Manager's poll interval (default 3s). reconcile /
+    // reset task latency dominates `runReconcileSoon` and
+    // `waitForResetComplete`; 500ms cuts the worst-case wait ~6×.
+    // Mirrors `security_solution_api_integration`, which uses 1000.
+    '--xpack.task_manager.poll_interval=500',
   ],
 });

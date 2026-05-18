@@ -6,12 +6,15 @@
  */
 
 import { coreMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
+import { TaskAlreadyRunningError } from '@kbn/task-manager-plugin/server/lib/errors';
 import {
   CASES_ANALYTICS_V2_RECONCILE_RUN_SOON_URL,
   CASES_ANALYTICS_V2_RESET_URL,
   CASES_ANALYTICS_V2_STATE_URL,
 } from '../constants';
+import { RECONCILIATION_TASK_ID } from '../reconciliation';
 import { deleteAllPerSpaceCasesDataViews, registerCasesAnalyticsV2Routes } from '.';
 
 describe('deleteAllPerSpaceCasesDataViews', () => {
@@ -404,5 +407,110 @@ describe('registerCasesAnalyticsV2Routes — enableAdminRoutes gating', () => {
 
     expect(registeredPaths).toContain(CASES_ANALYTICS_V2_RESET_URL);
     expect(registeredPaths).toContain(CASES_ANALYTICS_V2_RECONCILE_RUN_SOON_URL);
+  });
+});
+
+describe('POST /reconcile/run_soon handler', () => {
+  type RegisterArgs = Parameters<typeof registerCasesAnalyticsV2Routes>[0];
+
+  /** Resolve the runSoon handler from the mock router. */
+  function getRunSoonHandler(args: RegisterArgs) {
+    registerCasesAnalyticsV2Routes(args);
+    const router = (args.core.http.createRouter as jest.Mock).mock.results[0].value;
+    const postCalls = (router.post as jest.Mock).mock.calls as Array<
+      [{ path: string }, (...handlerArgs: unknown[]) => Promise<unknown>]
+    >;
+    const match = postCalls.find(
+      ([{ path }]) => path === CASES_ANALYTICS_V2_RECONCILE_RUN_SOON_URL
+    );
+    if (match == null) throw new Error('run_soon route was not registered');
+    return match[1];
+  }
+
+  function buildArgs(overrides: Partial<RegisterArgs> = {}): RegisterArgs {
+    return {
+      core: coreMock.createSetup(),
+      logger: loggerMock.create(),
+      getTaskManager: () => null,
+      getInternalSavedObjectsClient: () => null,
+      getWriter: () => null,
+      clearDataViewBootstrapCache: jest.fn(),
+      enabled: true,
+      enableAdminRoutes: true,
+      ...overrides,
+    };
+  }
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  /**
+   * Race regression: TM raises `TaskAlreadyRunningError` when the
+   * task is `Claiming`/`Running` (prior runSoon in flight, or the
+   * periodic tick was just claimed). Route surfaces this as 200 with
+   * `already_running: true` rather than 500 — same precedent as
+   * `rulesClient.runSoon`. Without this branch, back-to-back
+   * `runSoon` calls (and `runSoon` immediately after `/reset`) flake.
+   */
+  it('returns 200 with already_running when TaskAlreadyRunningError is thrown', async () => {
+    const taskManager = {
+      runSoon: jest.fn().mockRejectedValue(new TaskAlreadyRunningError(RECONCILIATION_TASK_ID)),
+    } as unknown as ReturnType<RegisterArgs['getTaskManager']>;
+    const args = buildArgs({ getTaskManager: () => taskManager });
+    const handler = getRunSoonHandler(args);
+
+    const response = httpServerMock.createResponseFactory();
+    await handler({} as never, httpServerMock.createKibanaRequest(), response as unknown as never);
+
+    expect(response.ok).toHaveBeenCalledWith({
+      body: { id: RECONCILIATION_TASK_ID, already_running: true },
+    });
+    expect(response.customError).not.toHaveBeenCalled();
+  });
+
+  it('returns 500 when runSoon throws an unrelated error', async () => {
+    // Non-race failures (SO repo blip, etc.) still 500 — the route
+    // must not swallow real problems just because the happy and
+    // already-running paths look similar to the caller.
+    const taskManager = {
+      runSoon: jest.fn().mockRejectedValue(new Error('something else')),
+    } as unknown as ReturnType<RegisterArgs['getTaskManager']>;
+    const args = buildArgs({ getTaskManager: () => taskManager });
+    const handler = getRunSoonHandler(args);
+
+    const response = httpServerMock.createResponseFactory();
+    await handler({} as never, httpServerMock.createKibanaRequest(), response as unknown as never);
+
+    expect(response.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 500 }));
+    expect(response.ok).not.toHaveBeenCalled();
+  });
+
+  it('returns 200 with the runSoon result on the happy path', async () => {
+    const runSoonResult = { id: RECONCILIATION_TASK_ID, state: { runAt: 'now' } };
+    const taskManager = {
+      runSoon: jest.fn().mockResolvedValue(runSoonResult),
+    } as unknown as ReturnType<RegisterArgs['getTaskManager']>;
+    const args = buildArgs({ getTaskManager: () => taskManager });
+    const handler = getRunSoonHandler(args);
+
+    const response = httpServerMock.createResponseFactory();
+    await handler({} as never, httpServerMock.createKibanaRequest(), response as unknown as never);
+
+    expect(response.ok).toHaveBeenCalledWith({
+      body: { id: RECONCILIATION_TASK_ID, result: runSoonResult },
+    });
+  });
+
+  it('returns 503 when Task Manager is not available', async () => {
+    // Optional `taskManager` plugin may be absent. 503 (vs 500/4xx)
+    // signals "try again later" rather than a permanent failure.
+    const args = buildArgs({ getTaskManager: () => null });
+    const handler = getRunSoonHandler(args);
+
+    const response = httpServerMock.createResponseFactory();
+    await handler({} as never, httpServerMock.createKibanaRequest(), response as unknown as never);
+
+    expect(response.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 503 }));
   });
 });

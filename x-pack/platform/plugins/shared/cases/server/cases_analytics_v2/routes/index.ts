@@ -7,6 +7,7 @@
 
 import type { CoreSetup, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import { TaskAlreadyRunningError } from '@kbn/task-manager-plugin/server/lib/errors';
 import {
   CASES_ANALYTICS_V2_RECONCILE_RUN_SOON_URL,
   CASES_ANALYTICS_V2_RESET_URL,
@@ -314,6 +315,18 @@ export const registerCasesAnalyticsV2Routes = ({
         const result = await taskManager.runSoon(RECONCILIATION_TASK_ID);
         return response.ok({ body: { id: RECONCILIATION_TASK_ID, result } });
       } catch (err) {
+        // `Claiming`/`Running` (prior runSoon in flight, or TM just
+        // claimed the periodic tick): the desired post-condition is
+        // already satisfied, so surface as 200 with `already_running`
+        // rather than 500. Matches the equivalent path in
+        // `@kbn/alerting-plugin`'s `rulesClient.runSoon` and keeps
+        // this admin route idempotent.
+        if (err instanceof TaskAlreadyRunningError) {
+          log.debug(`reconcile run_soon: task already running; treating as success`);
+          return response.ok({
+            body: { id: RECONCILIATION_TASK_ID, already_running: true },
+          });
+        }
         const message = err instanceof Error ? err.message : String(err);
         log.warn(`reconcile run_soon failed: ${message}`);
         return response.customError({

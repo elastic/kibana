@@ -179,12 +179,48 @@ export async function getV2State(supertest: SuperTest.Agent): Promise<V2StateBod
   return response.body as V2StateBody;
 }
 
-/** POST /reconcile/run_soon. */
-export async function runReconcileSoon(supertest: SuperTest.Agent): Promise<void> {
-  await supertest
-    .post('/internal/cases/_analyticsV2/reconcile/run_soon')
-    .set(INTERNAL_HEADERS)
-    .expect(200);
+/**
+ * POST `/reconcile/run_soon`, then block until a reconciliation tick
+ * scheduled by this call completes.
+ *
+ * The route is idempotent: when TM has the task `Claiming`/`Running`
+ * it returns 200 with `already_running: true` (right contract for
+ * operators, insufficient for tests — the in-flight tick may pre-date
+ * the caller's SO mutations). Retry until TM updates `runAt = now`,
+ * then wait for `cases_last_run_at` to advance, which the runner
+ * writes on a successful drain.
+ */
+export async function runReconcileSoon(
+  supertest: SuperTest.Agent,
+  options: { timeoutMs?: number } = {}
+): Promise<void> {
+  const { timeoutMs = BOOTSTRAP_TIMEOUT_MS } = options;
+  const deadline = Date.now() + timeoutMs;
+
+  while (true) {
+    if (Date.now() > deadline) {
+      throw new Error(
+        `Timed out scheduling a fresh reconciliation tick (TM reported already-running for ${timeoutMs}ms)`
+      );
+    }
+    const { body } = await supertest
+      .post('/internal/cases/_analyticsV2/reconcile/run_soon')
+      .set(INTERNAL_HEADERS)
+      .expect(200);
+    if (body?.already_running !== true) break;
+    await sleep(POLL_INTERVAL_MS);
+  }
+
+  // Capture cursor after the clean schedule so a stale in-flight tick
+  // that finished during the retry above can't satisfy the wait.
+  const baseline = (await getV2State(supertest)).reconciliation.last_run?.cases_last_run_at ?? null;
+
+  while (Date.now() < deadline) {
+    const cursor = (await getV2State(supertest)).reconciliation.last_run?.cases_last_run_at ?? null;
+    if (cursor != null && cursor !== baseline) return;
+    await sleep(POLL_INTERVAL_MS);
+  }
+  throw new Error(`Timed out waiting for reconciliation cursor to advance from ${baseline}`);
 }
 
 const sleep = (ms: number): Promise<void> => new Promise((r) => setTimeout(r, ms));
