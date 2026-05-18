@@ -2,6 +2,7 @@
 
 exports[`Calculate risk scores with ESQL ESQL query matches snapshot 1`] = `
 "
+  SET unmapped_fields=\\"nullify\\";
   FROM .alerts-security.alerts-default METADATA _index
     | WHERE kibana.alert.risk_score IS NOT NULL AND KQL(\\"host.name > abel and host.name <= zuzanna\\")
     | RENAME kibana.alert.risk_score as risk_score,

@@ -9,8 +9,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { ESQLCallbacks } from '@kbn/esql-types';
-import { ESQLLang, monaco } from '@kbn/monaco';
-import type { MonacoMessage } from '@kbn/monaco/src/languages/esql/language';
+import { ESQLLang, monaco, type MonacoMessage } from '@kbn/code-editor';
 import type { MapCache } from 'lodash';
 import {
   filterDataErrors,
@@ -22,6 +21,7 @@ import {
 } from '../helpers';
 import { createTimedCallbacks } from '../telemetry/timed_callbacks';
 import { addQueriesToCache } from '../history_local_storage';
+import { reportEsqlError } from '../report_error';
 import type { DataErrorsControl } from '../types';
 
 interface ValidationLatencyTracking {
@@ -276,7 +276,9 @@ export const useQueryValidation = ({
         return;
       }
       queryValidation(subscription)
-        .catch(() => {})
+        .catch((error) => {
+          reportEsqlError(error, { errorType: 'ValidationDebounced' });
+        })
         .finally(() => {
           subscription.active = false;
         });
