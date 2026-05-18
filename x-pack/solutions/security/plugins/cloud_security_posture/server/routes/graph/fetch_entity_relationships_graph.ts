@@ -129,7 +129,7 @@ ${forkBranches}
   targetNodeId = TO_STRING(_target_id),
   targetId = TO_STRING(_target_id),
   targetIds = VALUES(_target_id),
-  targetIdsCount = 1,
+  targetIdsCount = COUNT_DISTINCT(_target_id),
   targetsDocData = VALUES(targetDocData)
     BY entity.id, relationship, _target_id
 // Compute relationshipNodeId for deduplication (similar to labelNodeId for events)

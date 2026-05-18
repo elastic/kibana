@@ -484,11 +484,11 @@ ${buildPinnedEsql(pinnedIds)}
   ),
   // actor attributes - single value since we group BY actorEntityId
   actorNodeId = TO_STRING(actorEntityId),
-  actorIdsCount = 1,
+  actorIdsCount = COUNT_DISTINCT(actorEntityId),
   actorsDocData = VALUES(actorDocData),
   // target attributes - single value since we group BY targetEntityId
   targetNodeId = CASE(targetEntityId IS NULL, null, TO_STRING(targetEntityId)),
-  targetIdsCount = CASE(targetEntityId IS NULL, 0, 1),
+  targetIdsCount = COUNT_DISTINCT(targetEntityId),
   targetsDocData = VALUES(targetDocData)
     BY action = event.action,
       actorEntityId,
