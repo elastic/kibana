@@ -15,7 +15,10 @@ import type { DashboardReadResponseBody } from './api';
  * Client interface for dashboard CRUD operations
  */
 export interface DashboardServerClient {
-  read(savedObjectsClient: SavedObjectsClientContract, id: string): Promise<DashboardReadResponseBody>;
+  read(
+    savedObjectsClient: SavedObjectsClientContract,
+    id: string
+  ): Promise<DashboardReadResponseBody>;
 }
 
 /** The setup contract for the Dashboard plugin on the server. */
