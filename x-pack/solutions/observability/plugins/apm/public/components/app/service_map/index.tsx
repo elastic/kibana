@@ -117,7 +117,7 @@ export function ServiceMap({
             rangeFrom: query.rangeFrom,
             rangeTo: query.rangeTo,
             environment: query.environment,
-            kuery: query.kuery,
+            kuery: '',
             comparisonEnabled: query.comparisonEnabled,
             offset: query.offset,
             serviceGroup: 'serviceGroup' in query ? query.serviceGroup ?? '' : '',

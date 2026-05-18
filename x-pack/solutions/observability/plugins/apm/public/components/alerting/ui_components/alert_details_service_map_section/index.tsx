@@ -164,6 +164,7 @@ export function AlertDetailsServiceMapSection({ alert }: AlertDetailsAppSectionP
                 serviceName={serviceName}
                 core={embeddableDeps.coreStart}
                 onEmptyStateChange={setHasNoServices}
+                filterPills={filterPills}
               />
             </ApmEmbeddableContext>
           </EuiPanel>
