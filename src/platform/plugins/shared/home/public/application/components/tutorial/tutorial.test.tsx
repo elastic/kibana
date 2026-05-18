@@ -13,6 +13,8 @@ import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import { Tutorial } from './tutorial';
 import type { TutorialType } from '../../../services/tutorials/types';
 
+const mockSetBreadcrumbs = jest.fn();
+
 jest.mock('../../kibana_services', () => ({
   getServices: () => ({
     http: {
@@ -21,7 +23,7 @@ jest.mock('../../kibana_services', () => ({
     },
     getBasePath: jest.fn(() => 'path'),
     chrome: {
-      setBreadcrumbs: () => {},
+      setBreadcrumbs: mockSetBreadcrumbs,
     },
     tutorialService: {
       getModuleNotices: () => [],
@@ -234,6 +236,34 @@ describe('Tutorial component', () => {
       await waitFor(() => {
         expect(getByText('No data found')).toBeInTheDocument();
       });
+    });
+  });
+
+  describe('breadcrumbs', () => {
+    test('should set breadcrumbs with Integrations and tutorial name on mount', async () => {
+      mockSetBreadcrumbs.mockClear();
+      render(
+        <I18nProvider>
+          <Tutorial
+            addBasePath={addBasePath}
+            isCloudEnabled={false}
+            getTutorial={getTutorial}
+            replaceTemplateStrings={replaceTemplateStrings}
+            tutorialId={'my_testing_tutorial'}
+          />
+        </I18nProvider>
+      );
+      await act(async () => {
+        await loadTutorialPromise;
+      });
+
+      expect(mockSetBreadcrumbs).toHaveBeenCalledWith(
+        [
+          { text: 'Integrations', href: 'BASE_PATH//app/integrations/browse' },
+          { text: 'jest test tutorial' },
+        ],
+        expect.anything()
+      );
     });
   });
 });
