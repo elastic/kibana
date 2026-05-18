@@ -6,7 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import { EuiPanel, EuiToolTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiToolTip } from '@elastic/eui';
 import { CheckBoxField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { UseField, useFormData } from '../../../../shared_imports';
 import { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from './fields';
@@ -15,34 +15,40 @@ import * as i18n from './translations';
 
 interface ThresholdAlertSuppressionEditProps {
   suppressionFieldNames: string[] | undefined;
+  labelAppend?: React.ReactNode;
   disabled?: boolean;
   disabledText?: string;
 }
 
 export const ThresholdAlertSuppressionEdit = memo(function ThresholdAlertSuppressionEdit({
   suppressionFieldNames,
+  labelAppend,
   disabled,
   disabledText,
 }: ThresholdAlertSuppressionEditProps): JSX.Element {
   const [{ [THRESHOLD_ALERT_SUPPRESSION_ENABLED]: suppressionEnabled }] = useFormData({
     watch: THRESHOLD_ALERT_SUPPRESSION_ENABLED,
   });
+  const labelText = suppressionFieldNames?.length
+    ? i18n.enableSuppressionForFields(suppressionFieldNames)
+    : i18n.SUPPRESS_ALERTS;
+
   const content = (
     <>
-      <UseField
-        path={THRESHOLD_ALERT_SUPPRESSION_ENABLED}
-        component={CheckBoxField}
-        componentProps={{
-          idAria: 'thresholdAlertSuppressionEnabled',
-          'data-test-subj': 'thresholdAlertSuppressionEnabled',
-        }}
-        euiFieldProps={{
-          label: suppressionFieldNames?.length
-            ? i18n.enableSuppressionForFields(suppressionFieldNames)
-            : i18n.SUPPRESS_ALERTS,
-          disabled,
-        }}
-      />
+      <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+        <EuiFlexItem grow={true}>
+          <UseField
+            path={THRESHOLD_ALERT_SUPPRESSION_ENABLED}
+            component={CheckBoxField}
+            componentProps={{
+              idAria: 'thresholdAlertSuppressionEnabled',
+              'data-test-subj': 'thresholdAlertSuppressionEnabled',
+            }}
+            euiFieldProps={{ label: labelText, disabled }}
+          />
+        </EuiFlexItem>
+        {labelAppend && <EuiFlexItem grow={false}>{labelAppend}</EuiFlexItem>}
+      </EuiFlexGroup>
       <EuiPanel paddingSize="m" hasShadow={false}>
         <SuppressionDurationSelector
           onlyPerTimePeriod
