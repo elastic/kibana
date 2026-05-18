@@ -229,6 +229,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
   const isAlert = useWatch({ control: methods.control, name: 'kind' }) === 'alert';
   useEffect(() => {
     if (isAlert === uiState.tracking) return;
+    if (uiState.yamlMode) return;
     if (isAlert) {
       const full = getBreachQuery(methods.getValues('query'));
       const { base, alertBlock } = splitQuery(full);
@@ -242,7 +243,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
       methods.setValue('query', { format: 'standalone', breach: assembled });
       dispatch({ type: 'DISABLE_TRACKING' });
     }
-  }, [isAlert, uiState.tracking, methods, setDraft, dispatch]);
+  }, [isAlert, uiState.tracking, uiState.yamlMode, methods, setDraft, dispatch]);
 
   const handleRecoveryTypeChange = useCallback(
     (type: RecoveryType) => {
