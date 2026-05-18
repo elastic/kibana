@@ -80,6 +80,7 @@ const createChartSectionProps = (overrides: Partial<ChartSectionProps> = {}): Ch
     fetchParams: {} as unknown as UnifiedHistogramFetchParams,
     fetch$,
     isComponentVisible: true,
+    isTabSelected: true,
     ...overrides,
   };
 };

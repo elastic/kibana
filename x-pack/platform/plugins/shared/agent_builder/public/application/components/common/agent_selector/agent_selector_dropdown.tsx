@@ -240,6 +240,7 @@ export const AgentSelectorDropdown: React.FC<AgentSelectorDropdownProps> = ({
               rowHeight: AGENT_OPTION_ROW_HEIGHT,
               onFocusBadge: false,
               css: selectorListStyles,
+              paddingSize: 's',
             }}
           >
             {(list) => (

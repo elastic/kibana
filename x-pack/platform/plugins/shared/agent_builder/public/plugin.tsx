@@ -59,6 +59,7 @@ import type {
   ConversationSidebarRef,
 } from './types';
 import type { EmbeddableConversationProps } from './embeddable/types';
+import type { PublicEmbeddableConversationProps } from './types';
 import type { OpenConversationSidebarOptions, OpenSidebarInternalOptions } from './sidebar/types';
 import {
   setSidebarServices,
@@ -242,6 +243,33 @@ export class AgentBuilderPlugin
 
     setSidebarServices(core, internalServices);
 
+    const LazyConfiguredEmbeddableConversation = React.lazy(async () => {
+      const { createEmbeddableConversation } = await import(
+        './embeddable/create_embeddable_conversation'
+      );
+
+      return {
+        default: createEmbeddableConversation({
+          services: internalServices,
+          coreStart: core,
+        }),
+      };
+    });
+
+    const PublicEmbeddableConversation: React.FC<PublicEmbeddableConversationProps> = ({
+      onClose,
+      ariaLabelledBy,
+      ...rest
+    }) => (
+      <React.Suspense fallback={null}>
+        <LazyConfiguredEmbeddableConversation
+          {...rest}
+          onClose={onClose}
+          ariaLabelledBy={ariaLabelledBy ?? 'agent-builder-embeddable-conversation'}
+        />
+      </React.Suspense>
+    );
+
     this.experimentalDeepLinksSubscription = core.uiSettings
       .get$<boolean>(AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID)
       .pipe(distinctUntilChanged())
@@ -296,6 +324,7 @@ export class AgentBuilderPlugin
       updateAttachmentOrigin: (conversationId: string, attachmentId: string, origin: string) => {
         return attachmentsService.updateOrigin(conversationId, attachmentId, origin);
       },
+      EmbeddableConversation: PublicEmbeddableConversation,
     };
 
     if (hasAgentBuilder) {

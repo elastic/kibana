@@ -123,7 +123,6 @@ export const McpToolsSelectionTableHeader = memo<McpToolsSelectionTableHeaderPro
                       anchorPosition="downLeft"
                     >
                       <EuiContextMenuPanel
-                        size="s"
                         items={[
                           <EuiContextMenuItem
                             key="selectAll"

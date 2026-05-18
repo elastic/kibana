@@ -183,7 +183,6 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
         <EuiContextMenuItem
           key="addConversationToDataset"
           icon="beaker"
-          size="s"
           data-test-subj="agentBuilderAddConversationToDataset"
           data-ebt-element={AGENT_BUILDER_UI_EBT.element.CONVERSATION_HEADER}
           data-ebt-action={AGENT_BUILDER_UI_EBT.action.conversation.MORE_ADD_TO_DATASET}
@@ -198,7 +197,6 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
     <EuiContextMenuItem
       key="view-current-agent"
       icon="info"
-      size="s"
       disabled={!manageAgents}
       onClick={closePopover}
       href={agentId ? createAgentBuilderUrl(appPaths.agent.overview({ agentId })) : undefined}
@@ -212,7 +210,6 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
           <EuiContextMenuItem
             key="full-screen"
             icon="fullScreen"
-            size="s"
             disabled={!conversationId}
             data-test-subj="agentBuilderFullScreenMenuItem"
             data-ebt-element={AGENT_BUILDER_UI_EBT.element.CONVERSATION_HEADER}
@@ -245,7 +242,6 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
     <EuiContextMenuItem
       key="view-current-agent"
       icon="info"
-      size="s"
       disabled={!manageAgents}
       onClick={closePopover}
       href={agentId ? createAgentBuilderUrl(appPaths.agent.overview({ agentId })) : undefined}
@@ -299,7 +295,7 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
         anchorPosition="downCenter"
         aria-label={fullscreenLabels.actionsAriaLabel}
       >
-        <EuiContextMenuPanel size="s" items={menuItems} />
+        <EuiContextMenuPanel items={menuItems} />
         <EuiSpacer size="s" />
       </EuiPopover>
       <DeleteConversationModal
