@@ -311,6 +311,9 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
           resetFromRhf();
           dispatch({ type: 'COMMIT_QUERY' });
         }
+        // No resetFromRhf() on parse-failure path: the debounced parse always calls
+        // methods.reset() + resetFromRhf() together, so RHF and draft are already in
+        // sync at the last valid parse state. The current yamlText simply can't be applied.
       }
       dispatch({ type: 'SET_YAML_MODE', enabled });
     },
@@ -351,6 +354,9 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
     const result = parseYamlToFormValues(yamlText);
     if (result.values) {
       methods.reset(formValuesFromYamlToCompose(result.values));
+      // No resetFromRhf() here: draft is temporarily stale after methods.reset(), but
+      // we're about to submit. On success the flyout closes; on failure the user is still
+      // in YAML mode and handleToggleYamlMode(false) will resync draft when they switch back.
     }
     handleSubmit();
   }, [cancelYamlParse, yamlText, methods, handleSubmit]);
