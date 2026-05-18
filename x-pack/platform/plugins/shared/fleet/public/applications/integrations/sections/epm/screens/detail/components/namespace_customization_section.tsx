@@ -13,6 +13,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiLink,
   EuiLoadingSpinner,
   EuiSpacer,
   EuiText,
@@ -26,6 +27,7 @@ import {
   isValidNamespace,
   isNamespaceAllowedByPrefixes,
 } from '../../../../../../../../common/services';
+import { useStartServices } from '../../../../../hooks';
 
 interface Props {
   savedNamespaces: string[];
@@ -48,6 +50,7 @@ export const NamespaceCustomizationSection: React.FC<Props> = ({
   isSubmitting = false,
   onSave,
 }) => {
+  const { docLinks } = useStartServices();
   const [draftNamespaces, setDraftNamespaces] = useState<string[]>(savedNamespaces);
 
   useEffect(() => {
@@ -139,7 +142,17 @@ export const NamespaceCustomizationSection: React.FC<Props> = ({
       <EuiText>
         <FormattedMessage
           id="xpack.fleet.integrations.settings.namespaceCustomization.description"
-          defaultMessage="Select which namespaces use a dedicated index template for this integration. This enables independent settings and mappings per namespace."
+          defaultMessage="Select which namespaces use a dedicated index template for this integration. This enables independent settings and mappings per namespace. {learnMoreLink}"
+          values={{
+            learnMoreLink: (
+              <EuiLink href={docLinks.links.fleet.datastreams} external={true} target="_blank">
+                <FormattedMessage
+                  id="xpack.fleet.integrations.settings.namespaceCustomization.learnMoreLink"
+                  defaultMessage="Learn more"
+                />
+              </EuiLink>
+            ),
+          }}
         />
       </EuiText>
       <EuiSpacer size="m" />

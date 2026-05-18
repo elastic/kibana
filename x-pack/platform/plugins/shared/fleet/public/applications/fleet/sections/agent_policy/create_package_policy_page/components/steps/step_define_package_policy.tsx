@@ -507,7 +507,21 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                       <EuiText size="xs" color="subdued">
                         <FormattedMessage
                           id="xpack.fleet.createPackagePolicy.namespaceCustomization.helpText"
-                          defaultMessage="Enables independent settings and mappings for this namespace's data streams."
+                          defaultMessage="Enables independent settings and mappings for this namespace's data streams. {learnMoreLink}"
+                          values={{
+                            learnMoreLink: (
+                              <EuiLink
+                                href={docLinks.links.fleet.datastreams}
+                                external={true}
+                                target="_blank"
+                              >
+                                <FormattedMessage
+                                  id="xpack.fleet.createPackagePolicy.namespaceCustomization.learnMoreLink"
+                                  defaultMessage="Learn more"
+                                />
+                              </EuiLink>
+                            ),
+                          }}
                         />
                       </EuiText>
                       {showOptInImpactWarning && (
