@@ -4,18 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
 
 import React, { Suspense } from 'react';
 import { memoize, partition } from 'lodash';
 
 import { EuiCallOut, EuiCode, EuiLoadingSpinner, EuiButtonIcon, EuiFlexItem } from '@elastic/eui';
-import { AttachmentErrorBoundary } from './attachment_error_boundary';
 
 import type {
   AttachmentType,
@@ -70,23 +63,7 @@ const getAttachmentRenderer = memoize((cachingKey: string) => {
       AttachmentElement = React.cloneElement(AttachmentElement, props);
     }
 
-    // eslint-disable-next-line no-console
-    console.log(
-      '[Cases:AttachmentRenderer] rendering attachment.',
-      'cachingKey:',
-      cachingKey,
-      'AttachmentElement type:',
-      typeof AttachmentElement,
-      'AttachmentElement:',
-      AttachmentElement != null ? 'present' : 'NULL/UNDEFINED',
-      'attachmentViewObject.children:',
-      attachmentViewObject?.children != null ? 'present' : 'NULL/UNDEFINED'
-    );
-    return (
-      <AttachmentErrorBoundary attachmentId={cachingKey}>
-        <Suspense fallback={<EuiLoadingSpinner />}>{AttachmentElement}</Suspense>
-      </AttachmentErrorBoundary>
-    );
+    return <Suspense fallback={<EuiLoadingSpinner />}>{AttachmentElement}</Suspense>;
   };
 
   return renderCallback;

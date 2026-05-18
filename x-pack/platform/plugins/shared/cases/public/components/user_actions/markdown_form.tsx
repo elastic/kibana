@@ -30,23 +30,6 @@ const UserActionMarkdownComponent = forwardRef<
   const editorRef = useRef();
   const fieldName = 'content';
 
-  // eslint-disable-next-line no-console
-  console.error(
-    '[Cases:UserActionMarkdown] RENDER ENTRY.',
-    'id:',
-    id,
-    'isEditable:',
-    isEditable,
-    'content length:',
-    content?.length,
-    'content preview:',
-    content?.slice(0, 120),
-    'has ampersand:',
-    content?.includes('&'),
-    'will render:',
-    isEditable ? 'EditableMarkdown' : 'ScrollableMarkdown'
-  );
-
   return isEditable ? (
     <EditableMarkdown
       id={id}

@@ -26,25 +26,21 @@ Array [
         }
       />
     </Memo(UserActionContentToolbar)>,
-    "children": <AttachmentErrorBoundary
-      attachmentId="title-update"
+    "children": <React.Suspense
+      fallback={<EuiLoadingSpinner />}
     >
-      <React.Suspense
-        fallback={<EuiLoadingSpinner />}
-      >
-        <UNDEFINED
-          attachmentId="event-id-123"
-          caseData={
-            Object {
-              "id": "basic-case-id",
-              "title": "Another horrible breach!!",
-            }
+      <UNDEFINED
+        attachmentId="event-id-123"
+        caseData={
+          Object {
+            "id": "basic-case-id",
+            "title": "Another horrible breach!!",
           }
-          foo="bar"
-          savedObjectId="basic-comment-id"
-        />
-      </React.Suspense>
-    </AttachmentErrorBoundary>,
+        }
+        foo="bar"
+        savedObjectId="basic-comment-id"
+      />
+    </React.Suspense>,
     "className": "comment-user-attachment-test",
     "css": undefined,
     "data-test-subj": "comment-user-test",
@@ -129,25 +125,21 @@ Array [
         }
       />
     </Memo(UserActionContentToolbar)>,
-    "children": <AttachmentErrorBoundary
-      attachmentId="title-update"
+    "children": <React.Suspense
+      fallback={<EuiLoadingSpinner />}
     >
-      <React.Suspense
-        fallback={<EuiLoadingSpinner />}
-      >
-        <UNDEFINED
-          attachmentId="event-id-123"
-          caseData={
-            Object {
-              "id": "basic-case-id",
-              "title": "Another horrible breach!!",
-            }
+      <UNDEFINED
+        attachmentId="event-id-123"
+        caseData={
+          Object {
+            "id": "basic-case-id",
+            "title": "Another horrible breach!!",
           }
-          foo="bar"
-          savedObjectId="basic-comment-id"
-        />
-      </React.Suspense>
-    </AttachmentErrorBoundary>,
+        }
+        foo="bar"
+        savedObjectId="basic-comment-id"
+      />
+    </React.Suspense>,
     "className": "comment-user-attachment-test",
     "css": undefined,
     "data-test-subj": "comment-user-test",
@@ -219,24 +211,20 @@ Array [
         registeredAttachmentActions={Array []}
       />
     </Memo(UserActionContentToolbar)>,
-    "children": <AttachmentErrorBoundary
-      attachmentId="title-update"
+    "children": <React.Suspense
+      fallback={<EuiLoadingSpinner />}
     >
-      <React.Suspense
-        fallback={<EuiLoadingSpinner />}
-      >
-        <UNDEFINED
-          caseData={
-            Object {
-              "id": "basic-case-id",
-              "title": "Another horrible breach!!",
-            }
+      <UNDEFINED
+        caseData={
+          Object {
+            "id": "basic-case-id",
+            "title": "Another horrible breach!!",
           }
-          foo="bar"
-          savedObjectId="basic-comment-id"
-        />
-      </React.Suspense>
-    </AttachmentErrorBoundary>,
+        }
+        foo="bar"
+        savedObjectId="basic-comment-id"
+      />
+    </React.Suspense>,
     "className": "comment-user-attachment-test",
     "css": undefined,
     "data-test-subj": "comment-user-test",

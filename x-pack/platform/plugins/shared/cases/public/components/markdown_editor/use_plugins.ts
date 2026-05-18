@@ -32,35 +32,6 @@ export const usePlugins = (
     const parsingPlugins = getDefaultEuiMarkdownParsingPlugins();
     const processingPlugins = getDefaultEuiMarkdownProcessingPlugins();
 
-    // eslint-disable-next-line no-console
-    console.log(
-      '[Cases:usePlugins] getDefaultEuiMarkdownProcessingPlugins returned.',
-      'type:',
-      typeof processingPlugins,
-      'isArray:',
-      Array.isArray(processingPlugins),
-      'length:',
-      processingPlugins?.length,
-      '[0] type:',
-      typeof processingPlugins?.[0],
-      '[1] type:',
-      typeof processingPlugins?.[1],
-      '[1] isArray:',
-      Array.isArray(processingPlugins?.[1]),
-      '[1] length:',
-      (processingPlugins?.[1] as unknown[])?.length,
-      '[1][0] type:',
-      typeof processingPlugins?.[1]?.[0],
-      '[1][1] type:',
-      typeof processingPlugins?.[1]?.[1],
-      '[1][1]:',
-      processingPlugins?.[1]?.[1] != null ? 'exists' : 'NULL/UNDEFINED',
-      '[1][1].components:',
-      (processingPlugins?.[1]?.[1] as Record<string, unknown>)?.components != null
-        ? 'exists'
-        : 'NULL/UNDEFINED'
-    );
-
     if (timelinePlugins) {
       uiPlugins.push(timelinePlugins.uiPlugin);
 
@@ -81,12 +52,6 @@ export const usePlugins = (
     parsingPlugins.push(lensMarkdownPlugin.parser);
     // This line of code is TS-compatible and it will break if [1][1] change in the future.
     processingPlugins[1][1].components.lens = lensMarkdownPlugin.renderer;
-
-    // eslint-disable-next-line no-console
-    console.log(
-      '[Cases:usePlugins] final processingPlugins[1][1].components keys:',
-      Object.keys((processingPlugins?.[1]?.[1] as Record<string, unknown>)?.components ?? {})
-    );
 
     return {
       uiPlugins,

@@ -31,20 +31,6 @@ export const CommentChildren: React.FC<CommentChildrenProps> = ({
   caseId,
   version,
 }) => {
-  // eslint-disable-next-line no-console
-  console.error(
-    '[Cases:CommentChildren] RENDER ENTRY.',
-    'commentId:',
-    commentId,
-    'content length:',
-    content?.length,
-    'content preview:',
-    content?.slice(0, 120),
-    'has ampersand:',
-    content?.includes('&'),
-    'ampersand count:',
-    (content?.match(/&/g) || []).length
-  );
   const {
     appId = '',
     manageMarkdownEditIds = [],

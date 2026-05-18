@@ -13,23 +13,5 @@
  * HTML entity (e.g. `&timestamp=`), it emits a warning via VMessage which
  * throws `ReferenceError: parts is not defined`.
  */
-export const escapeUnterminatedEntities = (text: string): string => {
-  const result = text.replace(/&(?!(?:amp|lt|gt|quot|apos|nbsp|#\d+|#x[\da-fA-F]+);)/g, '&amp;');
-
-  // eslint-disable-next-line no-console
-  console.error(
-    '[Cases:sanitizeMarkdown] escapeUnterminatedEntities.',
-    'changed:',
-    result !== text,
-    'inputLen:',
-    text.length,
-    'outputLen:',
-    result.length,
-    'ampersandsBefore:',
-    (text.match(/&/g) || []).length,
-    'hasBareAmpAfter:',
-    /&(?!(?:amp|lt|gt|quot|apos|nbsp|#\d+|#x[\da-fA-F]+);)/.test(result)
-  );
-
-  return result;
-};
+export const escapeUnterminatedEntities = (text: string): string =>
+  text.replace(/&(?!(?:amp|lt|gt|quot|apos|nbsp|#\d+|#x[\da-fA-F]+);)/g, '&amp;');

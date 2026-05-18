@@ -12,9 +12,6 @@ import { EuiMarkdownFormat } from '@elastic/eui';
 import { MarkdownLink } from './markdown_link';
 import { usePlugins } from './use_plugins';
 
-// eslint-disable-next-line no-console
-console.log('[Cases:renderer.tsx] Module loaded — chunk evaluated successfully.');
-
 interface Props {
   children: string;
   disableLinks?: boolean;
@@ -32,21 +29,6 @@ const withDisabledLinks = (disableLinks?: boolean): React.FC<EuiLinkAnchorProps>
 };
 
 const MarkdownRendererComponent: React.FC<Props> = ({ children, disableLinks, textSize }) => {
-  // eslint-disable-next-line no-console
-  console.error(
-    '[Cases:MarkdownRenderer] COMPONENT ENTERED.',
-    'children length:',
-    (children as string)?.length,
-    'children type:',
-    typeof children,
-    'children preview:',
-    (children as string)?.slice(0, 200),
-    'disableLinks:',
-    disableLinks,
-    'has bare ampersand:',
-    /&(?!(?:amp|lt|gt|quot|apos|nbsp|#\d+|#x[\da-fA-F]+);)/.test(children as string)
-  );
-
   const { processingPlugins, parsingPlugins } = usePlugins();
 
   const linkComponent = useMemo(() => withDisabledLinks(disableLinks), [disableLinks]);
@@ -55,23 +37,7 @@ const MarkdownRendererComponent: React.FC<Props> = ({ children, disableLinks, te
   const rehypeConfig = processingPluginList?.[1]?.[1];
   if (rehypeConfig?.components) {
     rehypeConfig.components.a = linkComponent;
-  } else {
-    // eslint-disable-next-line no-console
-    console.warn(
-      '[Cases:MarkdownRenderer] WARNING: could not set linkComponent.',
-      'rehypeConfig:',
-      rehypeConfig
-    );
   }
-
-  // eslint-disable-next-line no-console
-  console.error(
-    '[Cases:MarkdownRenderer] ABOUT TO RENDER EuiMarkdownFormat.',
-    'children length:',
-    (children as string)?.length,
-    'has bare ampersand:',
-    /&(?!(?:amp|lt|gt|quot|apos|nbsp|#\d+|#x[\da-fA-F]+);)/.test(children as string)
-  );
 
   return (
     <EuiMarkdownFormat
