@@ -146,19 +146,19 @@ export const ConnectorsProvider = ({ children }: { children: React.ReactNode }) 
           titleProps={{ id: deleteConnectorTitleId }}
           onCancel={() => {
             reportAgentBuilderUiClick(analytics, {
-              ebt_element: AGENT_BUILDER_UI_EBT.element.MANAGE_CONNECTORS,
-              ebt_action: AGENT_BUILDER_UI_EBT.action.manageConnectors.DELETE_MODAL_CANCEL,
-              ebt_detail: AGENT_BUILDER_UI_EBT.entity.CONNECTOR,
-              element_kind: 'button',
+              element: AGENT_BUILDER_UI_EBT.element.MANAGE_CONNECTORS,
+              action: AGENT_BUILDER_UI_EBT.action.manageConnectors.DELETE_MODAL_CANCEL,
+              detail: AGENT_BUILDER_UI_EBT.entity.CONNECTOR,
+              kind: 'button',
             });
             cancelDelete();
           }}
           onConfirm={() => {
             reportAgentBuilderUiClick(analytics, {
-              ebt_element: AGENT_BUILDER_UI_EBT.element.MANAGE_CONNECTORS,
-              ebt_action: AGENT_BUILDER_UI_EBT.action.manageConnectors.DELETE_MODAL_CONFIRM,
-              ebt_detail: AGENT_BUILDER_UI_EBT.entity.CONNECTOR,
-              element_kind: 'button',
+              element: AGENT_BUILDER_UI_EBT.element.MANAGE_CONNECTORS,
+              action: AGENT_BUILDER_UI_EBT.action.manageConnectors.DELETE_MODAL_CONFIRM,
+              detail: AGENT_BUILDER_UI_EBT.entity.CONNECTOR,
+              kind: 'button',
             });
             confirmDelete();
           }}
@@ -178,19 +178,19 @@ export const ConnectorsProvider = ({ children }: { children: React.ReactNode }) 
           titleProps={{ id: bulkDeleteConnectorsTitleId }}
           onCancel={() => {
             reportAgentBuilderUiClick(analytics, {
-              ebt_element: AGENT_BUILDER_UI_EBT.element.MANAGE_CONNECTORS,
-              ebt_action: AGENT_BUILDER_UI_EBT.action.manageConnectors.BULK_DELETE_MODAL_CANCEL,
-              ebt_detail: AGENT_BUILDER_UI_EBT.entity.CONNECTOR,
-              element_kind: 'button',
+              element: AGENT_BUILDER_UI_EBT.element.MANAGE_CONNECTORS,
+              action: AGENT_BUILDER_UI_EBT.action.manageConnectors.BULK_DELETE_MODAL_CANCEL,
+              detail: AGENT_BUILDER_UI_EBT.entity.CONNECTOR,
+              kind: 'button',
             });
             cancelBulkDeleteConnectors();
           }}
           onConfirm={() => {
             reportAgentBuilderUiClick(analytics, {
-              ebt_element: AGENT_BUILDER_UI_EBT.element.MANAGE_CONNECTORS,
-              ebt_action: AGENT_BUILDER_UI_EBT.action.manageConnectors.BULK_DELETE_MODAL_CONFIRM,
-              ebt_detail: AGENT_BUILDER_UI_EBT.entity.CONNECTOR,
-              element_kind: 'button',
+              element: AGENT_BUILDER_UI_EBT.element.MANAGE_CONNECTORS,
+              action: AGENT_BUILDER_UI_EBT.action.manageConnectors.BULK_DELETE_MODAL_CONFIRM,
+              detail: AGENT_BUILDER_UI_EBT.entity.CONNECTOR,
+              kind: 'button',
             });
             confirmBulkDeleteConnectors();
           }}

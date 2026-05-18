@@ -128,19 +128,19 @@ export const AgentBuilderPluginsTable = memo(() => {
           titleProps={{ id: deleteModalTitleId }}
           onCancel={() => {
             reportAgentBuilderUiClick(analytics, {
-              ebt_element: AGENT_BUILDER_UI_EBT.element.MANAGE_PLUGINS_TABLE,
-              ebt_action: AGENT_BUILDER_UI_EBT.action.managePlugins.DELETE_MODAL_CANCEL,
-              ebt_detail: AGENT_BUILDER_UI_EBT.entity.PLUGIN,
-              element_kind: 'button',
+              element: AGENT_BUILDER_UI_EBT.element.MANAGE_PLUGINS_TABLE,
+              action: AGENT_BUILDER_UI_EBT.action.managePlugins.DELETE_MODAL_CANCEL,
+              detail: AGENT_BUILDER_UI_EBT.entity.PLUGIN,
+              kind: 'button',
             });
             cancelDelete();
           }}
           onConfirm={() => {
             reportAgentBuilderUiClick(analytics, {
-              ebt_element: AGENT_BUILDER_UI_EBT.element.MANAGE_PLUGINS_TABLE,
-              ebt_action: AGENT_BUILDER_UI_EBT.action.managePlugins.DELETE_MODAL_CONFIRM,
-              ebt_detail: AGENT_BUILDER_UI_EBT.entity.PLUGIN,
-              element_kind: 'button',
+              element: AGENT_BUILDER_UI_EBT.element.MANAGE_PLUGINS_TABLE,
+              action: AGENT_BUILDER_UI_EBT.action.managePlugins.DELETE_MODAL_CONFIRM,
+              detail: AGENT_BUILDER_UI_EBT.entity.PLUGIN,
+              kind: 'button',
             });
             void confirmDelete();
           }}
@@ -274,19 +274,19 @@ const PluginUsedByAgentsModal = ({
       titleProps={{ id: titleId }}
       onCancel={() => {
         reportAgentBuilderUiClick(analytics, {
-          ebt_element: AGENT_BUILDER_UI_EBT.element.MANAGE_PLUGINS_TABLE,
-          ebt_action: AGENT_BUILDER_UI_EBT.action.manageGlobal.USED_BY_WARNING_DISMISS,
-          ebt_detail: AGENT_BUILDER_UI_EBT.entity.PLUGIN,
-          element_kind: 'button',
+          element: AGENT_BUILDER_UI_EBT.element.MANAGE_PLUGINS_TABLE,
+          action: AGENT_BUILDER_UI_EBT.action.manageGlobal.USED_BY_WARNING_DISMISS,
+          detail: AGENT_BUILDER_UI_EBT.entity.PLUGIN,
+          kind: 'button',
         });
         onCancel();
       }}
       onConfirm={() => {
         reportAgentBuilderUiClick(analytics, {
-          ebt_element: AGENT_BUILDER_UI_EBT.element.MANAGE_PLUGINS_TABLE,
-          ebt_action: AGENT_BUILDER_UI_EBT.action.manageGlobal.USED_BY_WARNING_PROCEEDED,
-          ebt_detail: AGENT_BUILDER_UI_EBT.entity.PLUGIN,
-          element_kind: 'button',
+          element: AGENT_BUILDER_UI_EBT.element.MANAGE_PLUGINS_TABLE,
+          action: AGENT_BUILDER_UI_EBT.action.manageGlobal.USED_BY_WARNING_PROCEEDED,
+          detail: AGENT_BUILDER_UI_EBT.entity.PLUGIN,
+          kind: 'button',
         });
         void onConfirm();
       }}

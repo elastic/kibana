@@ -109,8 +109,8 @@ describe('agent_builder_ui_click_resolve', () => {
       btn.setAttribute('data-ebt-element', 'mySaveBtn');
       root.appendChild(btn);
       expect(resolveAgentBuilderUiClickPayload(clickEvent(btn), root, '/manage/agents')).toEqual({
-        ebt_element: 'mySaveBtn',
-        element_kind: 'button',
+        element: 'mySaveBtn',
+        kind: 'button',
         location_pathname: '/manage/agents',
       });
     });
@@ -122,8 +122,8 @@ describe('agent_builder_ui_click_resolve', () => {
       wrap.appendChild(btn);
       root.appendChild(wrap);
       expect(resolveAgentBuilderUiClickPayload(clickEvent(btn), root, '/')).toEqual({
-        ebt_element: 'panelActions',
-        element_kind: 'button',
+        element: 'panelActions',
+        kind: 'button',
         location_pathname: '/',
       });
     });
@@ -136,8 +136,8 @@ describe('agent_builder_ui_click_resolve', () => {
       wrap.appendChild(btn);
       root.appendChild(wrap);
       expect(resolveAgentBuilderUiClickPayload(clickEvent(btn), root, '/skills')).toEqual({
-        ebt_element: 'inner',
-        element_kind: 'button',
+        element: 'inner',
+        kind: 'button',
         location_pathname: '/skills',
       });
     });
@@ -151,10 +151,10 @@ describe('agent_builder_ui_click_resolve', () => {
       wrap.appendChild(btn);
       root.appendChild(wrap);
       expect(resolveAgentBuilderUiClickPayload(clickEvent(btn), root, '/skills')).toEqual({
-        ebt_element: 'skillsPanel',
-        ebt_action: 'openLibrary',
-        ebt_detail: 'v1',
-        element_kind: 'button',
+        element: 'skillsPanel',
+        action: 'openLibrary',
+        detail: 'v1',
+        kind: 'button',
         location_pathname: '/skills',
       });
     });
@@ -165,8 +165,8 @@ describe('agent_builder_ui_click_resolve', () => {
       a.setAttribute('data-ebt-element', 'docLink');
       root.appendChild(a);
       expect(resolveAgentBuilderUiClickPayload(clickEvent(a), root, '/x')).toEqual({
-        ebt_element: 'docLink',
-        element_kind: 'link',
+        element: 'docLink',
+        kind: 'link',
         location_pathname: '/x',
       });
     });
@@ -179,8 +179,8 @@ describe('agent_builder_ui_click_resolve', () => {
       portal.appendChild(btn);
       try {
         expect(resolveAgentBuilderUiClickPayload(clickEvent(btn), root, '/agents')).toEqual({
-          ebt_element: 'agentBuilder.test.portal',
-          element_kind: 'button',
+          element: 'agentBuilder.test.portal',
+          kind: 'button',
           location_pathname: '/agents',
         });
       } finally {

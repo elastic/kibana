@@ -162,10 +162,10 @@ export const DetailPanelLayout: React.FC<DetailPanelLayoutProps> = ({
             const ebt = confirmRemove.confirmModalUiClick;
             if (ebt) {
               reportAgentBuilderUiClick(analytics, {
-                ebt_element: ebt.ebtElement,
-                ebt_action: ebt.ebtActionCancel,
-                ...(ebt.ebtDetail ? { ebt_detail: ebt.ebtDetail } : {}),
-                element_kind: 'button',
+                element: ebt.ebtElement,
+                action: ebt.ebtActionCancel,
+                ...(ebt.ebtDetail ? { detail: ebt.ebtDetail } : {}),
+                kind: 'button',
               });
             }
             setIsConfirmOpen(false);
@@ -174,10 +174,10 @@ export const DetailPanelLayout: React.FC<DetailPanelLayoutProps> = ({
             const ebt = confirmRemove.confirmModalUiClick;
             if (ebt) {
               reportAgentBuilderUiClick(analytics, {
-                ebt_element: ebt.ebtElement,
-                ebt_action: ebt.ebtActionConfirm,
-                ...(ebt.ebtDetail ? { ebt_detail: ebt.ebtDetail } : {}),
-                element_kind: 'button',
+                element: ebt.ebtElement,
+                action: ebt.ebtActionConfirm,
+                ...(ebt.ebtDetail ? { detail: ebt.ebtDetail } : {}),
+                kind: 'button',
               });
             }
             setIsConfirmOpen(false);

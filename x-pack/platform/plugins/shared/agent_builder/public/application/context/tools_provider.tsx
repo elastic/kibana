@@ -185,19 +185,19 @@ export const ToolsProvider = ({ children }: { children: React.ReactNode }) => {
           titleProps={{ id: deleteEsqlToolTitleId }}
           onCancel={() => {
             reportAgentBuilderUiClick(analytics, {
-              ebt_element: AGENT_BUILDER_UI_EBT.element.MANAGE_TOOLS_TABLE,
-              ebt_action: AGENT_BUILDER_UI_EBT.action.manageTools.DELETE_MODAL_CANCEL,
-              ebt_detail: AGENT_BUILDER_UI_EBT.entity.TOOL,
-              element_kind: 'button',
+              element: AGENT_BUILDER_UI_EBT.element.MANAGE_TOOLS_TABLE,
+              action: AGENT_BUILDER_UI_EBT.action.manageTools.DELETE_MODAL_CANCEL,
+              detail: AGENT_BUILDER_UI_EBT.entity.TOOL,
+              kind: 'button',
             });
             cancelDelete();
           }}
           onConfirm={() => {
             reportAgentBuilderUiClick(analytics, {
-              ebt_element: AGENT_BUILDER_UI_EBT.element.MANAGE_TOOLS_TABLE,
-              ebt_action: AGENT_BUILDER_UI_EBT.action.manageTools.DELETE_MODAL_CONFIRM,
-              ebt_detail: AGENT_BUILDER_UI_EBT.entity.TOOL,
-              element_kind: 'button',
+              element: AGENT_BUILDER_UI_EBT.element.MANAGE_TOOLS_TABLE,
+              action: AGENT_BUILDER_UI_EBT.action.manageTools.DELETE_MODAL_CONFIRM,
+              detail: AGENT_BUILDER_UI_EBT.entity.TOOL,
+              kind: 'button',
             });
             void confirmDelete();
           }}
@@ -216,19 +216,19 @@ export const ToolsProvider = ({ children }: { children: React.ReactNode }) => {
           titleProps={{ id: deleteToolUsedByAgentsTitleId }}
           onCancel={() => {
             reportAgentBuilderUiClick(analytics, {
-              ebt_element: AGENT_BUILDER_UI_EBT.element.MANAGE_TOOLS_TABLE,
-              ebt_action: AGENT_BUILDER_UI_EBT.action.manageGlobal.USED_BY_WARNING_DISMISS,
-              ebt_detail: AGENT_BUILDER_UI_EBT.entity.TOOL,
-              element_kind: 'button',
+              element: AGENT_BUILDER_UI_EBT.element.MANAGE_TOOLS_TABLE,
+              action: AGENT_BUILDER_UI_EBT.action.manageGlobal.USED_BY_WARNING_DISMISS,
+              detail: AGENT_BUILDER_UI_EBT.entity.TOOL,
+              kind: 'button',
             });
             cancelForceDelete();
           }}
           onConfirm={() => {
             reportAgentBuilderUiClick(analytics, {
-              ebt_element: AGENT_BUILDER_UI_EBT.element.MANAGE_TOOLS_TABLE,
-              ebt_action: AGENT_BUILDER_UI_EBT.action.manageGlobal.USED_BY_WARNING_PROCEEDED,
-              ebt_detail: AGENT_BUILDER_UI_EBT.entity.TOOL,
-              element_kind: 'button',
+              element: AGENT_BUILDER_UI_EBT.element.MANAGE_TOOLS_TABLE,
+              action: AGENT_BUILDER_UI_EBT.action.manageGlobal.USED_BY_WARNING_PROCEEDED,
+              detail: AGENT_BUILDER_UI_EBT.entity.TOOL,
+              kind: 'button',
             });
             void confirmForceDelete();
           }}
@@ -257,19 +257,19 @@ export const ToolsProvider = ({ children }: { children: React.ReactNode }) => {
           titleProps={{ id: bulkDeleteEsqlToolsTitleId }}
           onCancel={() => {
             reportAgentBuilderUiClick(analytics, {
-              ebt_element: AGENT_BUILDER_UI_EBT.element.MANAGE_TOOLS_TABLE,
-              ebt_action: AGENT_BUILDER_UI_EBT.action.manageTools.BULK_DELETE_MODAL_CANCEL,
-              ebt_detail: AGENT_BUILDER_UI_EBT.entity.TOOL,
-              element_kind: 'button',
+              element: AGENT_BUILDER_UI_EBT.element.MANAGE_TOOLS_TABLE,
+              action: AGENT_BUILDER_UI_EBT.action.manageTools.BULK_DELETE_MODAL_CANCEL,
+              detail: AGENT_BUILDER_UI_EBT.entity.TOOL,
+              kind: 'button',
             });
             cancelBulkDeleteTools();
           }}
           onConfirm={() => {
             reportAgentBuilderUiClick(analytics, {
-              ebt_element: AGENT_BUILDER_UI_EBT.element.MANAGE_TOOLS_TABLE,
-              ebt_action: AGENT_BUILDER_UI_EBT.action.manageTools.BULK_DELETE_MODAL_CONFIRM,
-              ebt_detail: AGENT_BUILDER_UI_EBT.entity.TOOL,
-              element_kind: 'button',
+              element: AGENT_BUILDER_UI_EBT.element.MANAGE_TOOLS_TABLE,
+              action: AGENT_BUILDER_UI_EBT.action.manageTools.BULK_DELETE_MODAL_CONFIRM,
+              detail: AGENT_BUILDER_UI_EBT.entity.TOOL,
+              kind: 'button',
             });
             void confirmBulkDeleteTools();
           }}

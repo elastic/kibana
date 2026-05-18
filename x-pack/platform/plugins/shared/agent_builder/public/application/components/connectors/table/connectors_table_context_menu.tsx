@@ -70,19 +70,19 @@ const DisconnectConfirmModal: React.FC<{
       title={labels.connectors.disconnectConfirmTitle(connector.name)}
       onCancel={() => {
         reportAgentBuilderUiClick(analytics, {
-          ebt_element: AGENT_BUILDER_UI_EBT.element.MANAGE_CONNECTORS_TABLE,
-          ebt_action: AGENT_BUILDER_UI_EBT.action.manageConnectors.OAUTH_DISCONNECT_MODAL_CANCEL,
-          ebt_detail: AGENT_BUILDER_UI_EBT.entity.CONNECTOR,
-          element_kind: 'button',
+          element: AGENT_BUILDER_UI_EBT.element.MANAGE_CONNECTORS_TABLE,
+          action: AGENT_BUILDER_UI_EBT.action.manageConnectors.OAUTH_DISCONNECT_MODAL_CANCEL,
+          detail: AGENT_BUILDER_UI_EBT.entity.CONNECTOR,
+          kind: 'button',
         });
         onCancel();
       }}
       onConfirm={() => {
         reportAgentBuilderUiClick(analytics, {
-          ebt_element: AGENT_BUILDER_UI_EBT.element.MANAGE_CONNECTORS_TABLE,
-          ebt_action: AGENT_BUILDER_UI_EBT.action.manageConnectors.OAUTH_DISCONNECT_MODAL_CONFIRM,
-          ebt_detail: AGENT_BUILDER_UI_EBT.entity.CONNECTOR,
-          element_kind: 'button',
+          element: AGENT_BUILDER_UI_EBT.element.MANAGE_CONNECTORS_TABLE,
+          action: AGENT_BUILDER_UI_EBT.action.manageConnectors.OAUTH_DISCONNECT_MODAL_CONFIRM,
+          detail: AGENT_BUILDER_UI_EBT.entity.CONNECTOR,
+          kind: 'button',
         });
         disconnect();
       }}

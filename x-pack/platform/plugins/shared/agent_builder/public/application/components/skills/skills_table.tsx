@@ -145,19 +145,19 @@ export const AgentBuilderSkillsTable = memo(() => {
           titleProps={{ id: deleteSkillTitleId }}
           onCancel={() => {
             reportAgentBuilderUiClick(analytics, {
-              ebt_element: AGENT_BUILDER_UI_EBT.element.MANAGE_SKILLS_TABLE,
-              ebt_action: AGENT_BUILDER_UI_EBT.action.manageSkills.DELETE_MODAL_CANCEL,
-              ebt_detail: AGENT_BUILDER_UI_EBT.entity.SKILL,
-              element_kind: 'button',
+              element: AGENT_BUILDER_UI_EBT.element.MANAGE_SKILLS_TABLE,
+              action: AGENT_BUILDER_UI_EBT.action.manageSkills.DELETE_MODAL_CANCEL,
+              detail: AGENT_BUILDER_UI_EBT.entity.SKILL,
+              kind: 'button',
             });
             cancelDelete();
           }}
           onConfirm={() => {
             reportAgentBuilderUiClick(analytics, {
-              ebt_element: AGENT_BUILDER_UI_EBT.element.MANAGE_SKILLS_TABLE,
-              ebt_action: AGENT_BUILDER_UI_EBT.action.manageSkills.DELETE_MODAL_CONFIRM,
-              ebt_detail: AGENT_BUILDER_UI_EBT.entity.SKILL,
-              element_kind: 'button',
+              element: AGENT_BUILDER_UI_EBT.element.MANAGE_SKILLS_TABLE,
+              action: AGENT_BUILDER_UI_EBT.action.manageSkills.DELETE_MODAL_CONFIRM,
+              detail: AGENT_BUILDER_UI_EBT.entity.SKILL,
+              kind: 'button',
             });
             void confirmDelete();
           }}
@@ -176,19 +176,19 @@ export const AgentBuilderSkillsTable = memo(() => {
           titleProps={{ id: deleteSkillUsedByAgentsTitleId }}
           onCancel={() => {
             reportAgentBuilderUiClick(analytics, {
-              ebt_element: AGENT_BUILDER_UI_EBT.element.MANAGE_SKILLS_TABLE,
-              ebt_action: AGENT_BUILDER_UI_EBT.action.manageGlobal.USED_BY_WARNING_DISMISS,
-              ebt_detail: AGENT_BUILDER_UI_EBT.entity.SKILL,
-              element_kind: 'button',
+              element: AGENT_BUILDER_UI_EBT.element.MANAGE_SKILLS_TABLE,
+              action: AGENT_BUILDER_UI_EBT.action.manageGlobal.USED_BY_WARNING_DISMISS,
+              detail: AGENT_BUILDER_UI_EBT.entity.SKILL,
+              kind: 'button',
             });
             cancelForceDelete();
           }}
           onConfirm={() => {
             reportAgentBuilderUiClick(analytics, {
-              ebt_element: AGENT_BUILDER_UI_EBT.element.MANAGE_SKILLS_TABLE,
-              ebt_action: AGENT_BUILDER_UI_EBT.action.manageGlobal.USED_BY_WARNING_PROCEEDED,
-              ebt_detail: AGENT_BUILDER_UI_EBT.entity.SKILL,
-              element_kind: 'button',
+              element: AGENT_BUILDER_UI_EBT.element.MANAGE_SKILLS_TABLE,
+              action: AGENT_BUILDER_UI_EBT.action.manageGlobal.USED_BY_WARNING_PROCEEDED,
+              detail: AGENT_BUILDER_UI_EBT.entity.SKILL,
+              kind: 'button',
             });
             void confirmForceDelete();
           }}

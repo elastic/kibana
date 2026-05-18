@@ -39,9 +39,9 @@ export const BaseDeleteConversationModal: React.FC<BaseDeleteConversationModalPr
       return;
     }
     reportAgentBuilderUiClick(analytics, {
-      ebt_element: AGENT_BUILDER_UI_EBT.element.CONVERSATION_TITLE,
-      ebt_action: AGENT_BUILDER_UI_EBT.action.conversation.DELETE_CONFIRM,
-      element_kind: 'button',
+      element: AGENT_BUILDER_UI_EBT.element.CONVERSATION_TITLE,
+      action: AGENT_BUILDER_UI_EBT.action.conversation.DELETE_CONFIRM,
+      kind: 'button',
     });
     setIsLoading(true);
     try {
@@ -54,9 +54,9 @@ export const BaseDeleteConversationModal: React.FC<BaseDeleteConversationModalPr
 
   const handleCancel = useCallback(() => {
     reportAgentBuilderUiClick(analytics, {
-      ebt_element: AGENT_BUILDER_UI_EBT.element.CONVERSATION_TITLE,
-      ebt_action: AGENT_BUILDER_UI_EBT.action.conversation.DELETE_CANCEL,
-      element_kind: 'button',
+      element: AGENT_BUILDER_UI_EBT.element.CONVERSATION_TITLE,
+      action: AGENT_BUILDER_UI_EBT.action.conversation.DELETE_CANCEL,
+      kind: 'button',
     });
     onClose();
   }, [analytics, onClose]);

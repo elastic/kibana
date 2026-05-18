@@ -100,7 +100,7 @@ function findInteractiveAncestor(start: Element | null, boundary: HTMLElement): 
 function collectEbtFromAncestors(
   interactive: Element,
   boundary: HTMLElement
-): { ebt_element?: string; ebt_action?: string; ebt_detail?: string } {
+): { element?: string; action?: string; detail?: string } {
   let ebtElement: string | undefined;
   let ebtAction: string | undefined;
   let ebtDetail: string | undefined;
@@ -131,9 +131,9 @@ function collectEbtFromAncestors(
   }
 
   return {
-    ...(ebtElement ? { ebt_element: ebtElement } : {}),
-    ...(ebtAction ? { ebt_action: ebtAction } : {}),
-    ...(ebtDetail ? { ebt_detail: ebtDetail } : {}),
+    ...(ebtElement ? { element: ebtElement } : {}),
+    ...(ebtAction ? { action: ebtAction } : {}),
+    ...(ebtDetail ? { detail: ebtDetail } : {}),
   };
 }
 
@@ -169,16 +169,15 @@ export function resolveAgentBuilderUiClickPayload(
   }
 
   const ebt = collectEbtFromAncestors(interactive, boundary);
-  const ebtElement = ebt.ebt_element;
-  if (!ebtElement) {
+  if (!ebt.element) {
     return null;
   }
 
   return {
-    ebt_element: ebtElement,
-    ...(ebt.ebt_action ? { ebt_action: ebt.ebt_action } : {}),
-    ...(ebt.ebt_detail ? { ebt_detail: ebt.ebt_detail } : {}),
-    element_kind: classifyInteractiveKind(interactive),
+    element: ebt.element,
+    ...(ebt.action ? { action: ebt.action } : {}),
+    ...(ebt.detail ? { detail: ebt.detail } : {}),
+    kind: classifyInteractiveKind(interactive),
     location_pathname: locationPathname,
   };
 }

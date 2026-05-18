@@ -53,17 +53,17 @@ const ExternalLinkModalContent: React.FC<ExternalLinkModalContentProps> = ({ url
       titleProps={{ id: titleId }}
       onCancel={() => {
         reportAgentBuilderUiClick(analytics, {
-          ebt_element: AGENT_BUILDER_UI_EBT.element.CONVERSATION_ROUND_RESPONSE,
-          ebt_action: AGENT_BUILDER_UI_EBT.action.conversation.EXTERNAL_LINK_CANCEL,
-          element_kind: 'button',
+          element: AGENT_BUILDER_UI_EBT.element.CONVERSATION_ROUND_RESPONSE,
+          action: AGENT_BUILDER_UI_EBT.action.conversation.EXTERNAL_LINK_CANCEL,
+          kind: 'button',
         });
         onClose();
       }}
       onConfirm={() => {
         reportAgentBuilderUiClick(analytics, {
-          ebt_element: AGENT_BUILDER_UI_EBT.element.CONVERSATION_ROUND_RESPONSE,
-          ebt_action: AGENT_BUILDER_UI_EBT.action.conversation.EXTERNAL_LINK_OPEN,
-          element_kind: 'button',
+          element: AGENT_BUILDER_UI_EBT.element.CONVERSATION_ROUND_RESPONSE,
+          action: AGENT_BUILDER_UI_EBT.action.conversation.EXTERNAL_LINK_OPEN,
+          kind: 'button',
         });
         window.open(url, '_blank', 'noreferrer');
         onClose();

@@ -71,10 +71,10 @@ export type AgentBuilderUiClickElementKind =
   | 'other';
 
 export interface ReportUiClickParams {
-  ebt_element: string;
-  ebt_action?: string;
-  ebt_detail?: string;
-  element_kind: AgentBuilderUiClickElementKind;
+  element: string;
+  action?: string;
+  detail?: string;
+  kind: AgentBuilderUiClickElementKind;
   location_pathname: string;
 }
 
@@ -368,7 +368,7 @@ const OPT_OUT_EVENT: AgentBuilderTelemetryEvent = {
 const UI_CLICK_EVENT: AgentBuilderTelemetryEvent = {
   eventType: AGENT_BUILDER_EVENT_TYPES.UiClick,
   schema: {
-    ebt_element: {
+    element: {
       type: 'keyword',
       _meta: {
         description:
@@ -376,21 +376,21 @@ const UI_CLICK_EVENT: AgentBuilderTelemetryEvent = {
         optional: false,
       },
     },
-    ebt_action: {
+    action: {
       type: 'keyword',
       _meta: {
         description: 'Optional data-ebt-action from DOM',
         optional: true,
       },
     },
-    ebt_detail: {
+    detail: {
       type: 'keyword',
       _meta: {
         description: 'Optional data-ebt-detail from DOM',
         optional: true,
       },
     },
-    element_kind: {
+    kind: {
       type: 'keyword',
       _meta: {
         description: 'Kind of activated control (button|link|role_button|input_button|other)',
