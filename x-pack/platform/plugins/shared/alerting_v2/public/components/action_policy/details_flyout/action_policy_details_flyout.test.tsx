@@ -234,21 +234,27 @@ describe('ActionPolicyDetailsFlyout', () => {
     it('resolves createdBy / updatedBy UIDs to user full names in the metadata section', async () => {
       renderFlyout();
 
-      expect(await screen.findAllByText('Elastic User')).not.toHaveLength(0);
+      const elements = await screen.findAllByText('Elastic User');
+      expect(elements).toHaveLength(2);
+      elements.forEach((element) => expect(element).toBeInTheDocument());
     });
 
     it('falls back to the username when a profile has no full name', async () => {
       mockBulkGet.mockResolvedValueOnce([{ uid: ELASTIC_UID, user: { username: 'elastic' } }]);
       renderFlyout();
 
-      expect(await screen.findAllByText('elastic')).not.toHaveLength(0);
+      const elements = await screen.findAllByText('elastic');
+      expect(elements).toHaveLength(2);
+      elements.forEach((element) => expect(element).toBeInTheDocument());
     });
 
     it('falls back to the UID when no matching profile is returned', async () => {
       mockBulkGet.mockResolvedValueOnce([]);
       renderFlyout();
 
-      expect(await screen.findAllByText(ELASTIC_UID)).not.toHaveLength(0);
+      const elements = await screen.findAllByText(ELASTIC_UID);
+      expect(elements).toHaveLength(2);
+      elements.forEach((element) => expect(element).toBeInTheDocument());
     });
   });
 
