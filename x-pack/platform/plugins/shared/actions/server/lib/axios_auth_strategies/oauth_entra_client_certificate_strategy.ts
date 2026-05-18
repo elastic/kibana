@@ -7,9 +7,17 @@
 
 import type { AxiosInstance } from 'axios';
 import type { GetTokenOpts } from '@kbn/connector-specs';
+import { CLIENT_ASSERTION_TYPE, EntraAuthError } from '@kbn/connector-specs';
+import { buildClientAssertion } from '../build_client_assertion';
 import { getOAuthClientCredentialsAccessToken } from '../get_oauth_client_credentials_access_token';
 import { getDeleteTokenAxiosInterceptor } from '../delete_token_axios_interceptor';
 import type { AuthStrategyDeps, AxiosAuthStrategy } from './types';
+
+interface EntraCertSecrets {
+  certificate: string;
+  privateKey: string;
+  passphrase?: string;
+}
 
 export class OAuthEntraClientCertificateStrategy implements AxiosAuthStrategy {
   installResponseInterceptor(axiosInstance: AxiosInstance, deps: AuthStrategyDeps): void {
@@ -31,7 +39,8 @@ export class OAuthEntraClientCertificateStrategy implements AxiosAuthStrategy {
       );
     }
 
-    const { connectorId, connectorTokenClient, logger, configurationUtilities } = deps;
+    const { connectorId, connectorTokenClient, logger, configurationUtilities, secrets } = deps;
+    const { certificate, privateKey, passphrase } = secrets as unknown as EntraCertSecrets;
 
     return getOAuthClientCredentialsAccessToken({
       connectorId,
@@ -42,7 +51,26 @@ export class OAuthEntraClientCertificateStrategy implements AxiosAuthStrategy {
       credentials: {
         config: {
           clientId: opts.clientId,
-          buildAdditionalFields: opts.buildAdditionalFields,
+          buildAdditionalFields: () => {
+            try {
+              return {
+                client_assertion: buildClientAssertion({
+                  tokenUrl: opts.tokenUrl,
+                  clientId: opts.clientId,
+                  certificate,
+                  privateKey,
+                  passphrase,
+                }),
+                client_assertion_type: CLIENT_ASSERTION_TYPE,
+              };
+            } catch (error) {
+              throw new EntraAuthError(
+                'assertion',
+                `Unable to build client assertion (check certificate/privateKey/passphrase): ${error.message}`,
+                { cause: error }
+              );
+            }
+          },
         },
         secrets: {},
       },

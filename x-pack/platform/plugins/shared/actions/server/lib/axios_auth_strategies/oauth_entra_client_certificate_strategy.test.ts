@@ -7,12 +7,15 @@
 
 jest.mock('../get_oauth_client_credentials_access_token');
 jest.mock('../delete_token_axios_interceptor');
+jest.mock('../build_client_assertion');
 
 import type { AxiosInstance } from 'axios';
 import type { GetTokenOpts, OAuthWithCertificateGetTokenOpts } from '@kbn/connector-specs';
+import { CLIENT_ASSERTION_TYPE } from '@kbn/connector-specs';
 import { loggerMock } from '@kbn/logging-mocks';
 import { actionsConfigMock } from '../../actions_config.mock';
 import { connectorTokenClientMock } from '../connector_token_client.mock';
+import { buildClientAssertion } from '../build_client_assertion';
 import { getOAuthClientCredentialsAccessToken } from '../get_oauth_client_credentials_access_token';
 import { getDeleteTokenAxiosInterceptor } from '../delete_token_axios_interceptor';
 import { OAuthEntraClientCertificateStrategy } from './oauth_entra_client_certificate_strategy';
@@ -25,10 +28,17 @@ const mockGetOAuthClientCredentialsAccessToken =
 const mockGetDeleteTokenAxiosInterceptor = getDeleteTokenAxiosInterceptor as jest.MockedFunction<
   typeof getDeleteTokenAxiosInterceptor
 >;
+const mockBuildClientAssertion = buildClientAssertion as jest.MockedFunction<
+  typeof buildClientAssertion
+>;
 
 const logger = loggerMock.create();
 const configurationUtilities = actionsConfigMock.create();
 const connectorTokenClient = connectorTokenClientMock.create();
+
+const PEM_CERT = '-----BEGIN CERTIFICATE-----\nAAAA\n-----END CERTIFICATE-----';
+const PEM_KEY = '-----BEGIN ENCRYPTED PRIVATE KEY-----\nBBBB\n-----END ENCRYPTED PRIVATE KEY-----';
+const CLIENT_ASSERTION = 'signed.jwt.assertion';
 
 const baseDeps: AuthStrategyDeps = {
   connectorId: 'connector-1',
@@ -36,10 +46,20 @@ const baseDeps: AuthStrategyDeps = {
     clientId: 'my-client-id',
     tokenUrl: 'https://login.microsoftonline.com/tenant-id/oauth2/v2.0/token',
     scope: 'https://graph.microsoft.com/.default',
+    certificate: PEM_CERT,
+    privateKey: PEM_KEY,
+    passphrase: 'passphrase',
   },
   connectorTokenClient,
   logger,
   configurationUtilities,
+};
+
+const baseOpts: OAuthWithCertificateGetTokenOpts = {
+  authType: 'oauth_entra_client_certificate',
+  tokenUrl: 'https://login.microsoftonline.com/tenant-id/oauth2/v2.0/token',
+  clientId: 'the-client-id',
+  scope: 'https://graph.microsoft.com/.default',
 };
 
 const createMockAxiosInstance = () =>
@@ -60,6 +80,7 @@ describe('OAuthEntraClientCertificateStrategy', () => {
       onFulfilled: mockOnFulfilled,
       onRejected: mockOnRejected,
     });
+    mockBuildClientAssertion.mockReturnValue(CLIENT_ASSERTION);
   });
 
   describe('installResponseInterceptor', () => {
@@ -94,37 +115,75 @@ describe('OAuthEntraClientCertificateStrategy', () => {
       );
     });
 
-    it('delegates to getOAuthClientCredentialsAccessToken with the buildAdditionalFields factory', async () => {
+    it('delegates to getOAuthClientCredentialsAccessToken with a buildAdditionalFields factory', async () => {
       mockGetOAuthClientCredentialsAccessToken.mockResolvedValue('Bearer entra');
 
-      const buildAdditionalFields = jest.fn().mockReturnValue({
-        client_assertion: 'signed.jwt.assertion',
-        client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
-      });
-
-      const opts: OAuthWithCertificateGetTokenOpts = {
-        authType: 'oauth_entra_client_certificate',
-        tokenUrl: 'https://login.microsoftonline.com/tenant-id/oauth2/v2.0/token',
-        clientId: 'the-client-id',
-        scope: 'https://graph.microsoft.com/.default',
-        buildAdditionalFields,
-      };
-      const result = await strategy.getToken(opts, baseDeps);
+      const result = await strategy.getToken(baseOpts, baseDeps);
 
       expect(result).toBe('Bearer entra');
       expect(mockGetOAuthClientCredentialsAccessToken).toHaveBeenCalledWith(
         expect.objectContaining({
           connectorId: 'connector-1',
-          tokenUrl: 'https://login.microsoftonline.com/tenant-id/oauth2/v2.0/token',
-          oAuthScope: 'https://graph.microsoft.com/.default',
+          tokenUrl: baseOpts.tokenUrl,
+          oAuthScope: baseOpts.scope,
           credentials: {
             config: {
-              clientId: 'the-client-id',
-              buildAdditionalFields,
+              clientId: baseOpts.clientId,
+              buildAdditionalFields: expect.any(Function),
             },
             secrets: {},
           },
           connectorTokenClient,
+        })
+      );
+    });
+
+    it('does not build the assertion before the factory is invoked', async () => {
+      mockGetOAuthClientCredentialsAccessToken.mockResolvedValue('Bearer entra');
+      await strategy.getToken(baseOpts, baseDeps);
+
+      // Token endpoint cache hits should never trigger the crypto path
+      expect(mockBuildClientAssertion).not.toHaveBeenCalled();
+    });
+
+    it('factory builds the assertion using cert/key/passphrase from deps.secrets', async () => {
+      mockGetOAuthClientCredentialsAccessToken.mockResolvedValue('Bearer entra');
+      await strategy.getToken(baseOpts, baseDeps);
+
+      const { buildAdditionalFields } =
+        mockGetOAuthClientCredentialsAccessToken.mock.calls[0][0].credentials.config;
+      const fields = buildAdditionalFields!();
+
+      expect(mockBuildClientAssertion).toHaveBeenCalledWith({
+        tokenUrl: baseOpts.tokenUrl,
+        clientId: baseOpts.clientId,
+        certificate: PEM_CERT,
+        privateKey: PEM_KEY,
+        passphrase: 'passphrase',
+      });
+      expect(fields).toEqual({
+        client_assertion: CLIENT_ASSERTION,
+        client_assertion_type: CLIENT_ASSERTION_TYPE,
+      });
+    });
+
+    it('factory wraps buildClientAssertion errors as EntraAuthError(assertion)', async () => {
+      const rootCause = new Error('Invalid PEM certificate');
+      mockBuildClientAssertion.mockImplementation(() => {
+        throw rootCause;
+      });
+      mockGetOAuthClientCredentialsAccessToken.mockResolvedValue('Bearer entra');
+      await strategy.getToken(baseOpts, baseDeps);
+
+      const { buildAdditionalFields } =
+        mockGetOAuthClientCredentialsAccessToken.mock.calls[0][0].credentials.config;
+
+      expect(() => buildAdditionalFields!()).toThrow(
+        expect.objectContaining({
+          name: 'EntraAuthError',
+          kind: 'assertion',
+          message: expect.stringMatching(/Unable to build client assertion/),
+          cause: rootCause,
         })
       );
     });

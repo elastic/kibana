@@ -23,11 +23,14 @@ const PRIVATE_KEY_MARKER = /-----BEGIN (?:RSA |ENCRYPTED )?PRIVATE KEY-----/;
 export type EntraAuthErrorKind = 'assertion' | 'exchange';
 
 /**
- * Raised by `OAuthEntraClientCertificate.configure` for any failure in the
- * Entra cert auth flow. The `kind` discriminator separates user-fixable
- * configuration issues (`'assertion'`: malformed PEM, wrong passphrase, etc.)
- * from transport/authorization failures (`'exchange'`: token endpoint
- * rejected the assertion, network error, non-2xx response).
+ * Raised by the Entra cert auth flow for any failure. The `kind` discriminator
+ * separates user-fixable configuration issues (`'assertion'`: malformed PEM,
+ * wrong passphrase, etc.) from transport/authorization failures
+ * (`'exchange'`: token endpoint rejected the assertion, network error, non-2xx
+ * response).
+ *
+ * The `'assertion'` variant is thrown by the strategy (which owns the JWT
+ * signing crypto); the `'exchange'` variant is thrown by `configure` below.
  */
 export class EntraAuthError extends Error {
   public readonly kind: EntraAuthErrorKind;
@@ -86,9 +89,15 @@ type AuthSchemaType = z.infer<typeof authSchema>;
  * Uses a signed JWT client assertion (PS256 + x5t#S256) instead of a
  * client secret to authenticate with the Entra token endpoint.
  *
+ * The actual JWT signing lives in the actions plugin's
+ * `OAuthEntraClientCertificateStrategy` (which has the Node `crypto`
+ * dependency this shared-common package can't take). `configure` here just
+ * delegates to `ctx.getToken`; the strategy reads cert/key/passphrase from
+ * `secrets` and builds the assertion lazily on cache miss.
+ *
  * Intentionally Entra-shaped (PS256, x5t#S256, no `kid`, no RS256 fallback).
- * When a second consumer appears, promote the hard-coded knobs in
- * build_client_assertion.ts to parameters and introduce an
+ * When a second consumer appears, promote the hard-coded knobs in the
+ * actions-plugin assertion builder to parameters and introduce an
  * `oauth_private_key_jwt` auth type that supersedes this one.
  */
 export const OAuthEntraClientCertificate: AuthTypeSpec<AuthSchemaType> = {
@@ -106,26 +115,6 @@ export const OAuthEntraClientCertificate: AuthTypeSpec<AuthSchemaType> = {
         tokenUrl: secret.tokenUrl,
         scope: secret.scope,
         clientId: secret.clientId,
-        buildAdditionalFields: () => {
-          try {
-            return {
-              client_assertion: ctx.buildClientAssertion({
-                tokenUrl: secret.tokenUrl,
-                clientId: secret.clientId,
-                certificate: secret.certificate,
-                privateKey: secret.privateKey,
-                passphrase: secret.passphrase,
-              }),
-              client_assertion_type: CLIENT_ASSERTION_TYPE,
-            };
-          } catch (error) {
-            throw new EntraAuthError(
-              'assertion',
-              `Unable to build client assertion (check certificate/privateKey/passphrase): ${error.message}`,
-              { cause: error }
-            );
-          }
-        },
       });
     } catch (error) {
       if (error instanceof EntraAuthError) throw error;

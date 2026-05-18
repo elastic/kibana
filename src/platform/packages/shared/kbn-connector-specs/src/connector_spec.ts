@@ -97,7 +97,6 @@ export interface OAuthWithCertificateGetTokenOpts {
   tokenUrl: string;
   scope?: string;
   clientId: string;
-  buildAdditionalFields: () => Record<string, unknown>;
 }
 
 export interface EarsGetTokenOpts {
@@ -108,16 +107,7 @@ export interface EarsGetTokenOpts {
 
 export type GetTokenOpts = OAuthGetTokenOpts | OAuthWithCertificateGetTokenOpts | EarsGetTokenOpts;
 
-export interface BuildClientAssertionOpts {
-  tokenUrl: string;
-  clientId: string;
-  certificate: string;
-  privateKey: string;
-  passphrase?: string;
-}
-
 export interface AuthContext {
-  buildClientAssertion: (opts: BuildClientAssertionOpts) => string;
   getCustomHostSettings: (url: string) => CustomHostSettings | undefined;
   getToken: (opts: GetTokenOpts) => Promise<string | null>;
   logger: Logger;

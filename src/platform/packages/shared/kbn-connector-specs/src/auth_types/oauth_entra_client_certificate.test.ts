@@ -10,13 +10,13 @@
 import type { AxiosInstance } from 'axios';
 import type { AuthContext } from '../connector_spec';
 import {
-  CLIENT_ASSERTION_TYPE,
+  EntraAuthError,
+  OAUTH_ENTRA_CLIENT_CERTIFICATE_ID,
   OAuthEntraClientCertificate,
 } from './oauth_entra_client_certificate';
 
 const TOKEN_URL = 'https://login.microsoftonline.com/test-tenant/oauth2/v2.0/token';
 const CLIENT_ID = 'test-client-id';
-const CLIENT_ASSERTION = 'signed.jwt.assertion';
 const ACCESS_TOKEN = 'Bearer abc123';
 
 const PEM_CERT = '-----BEGIN CERTIFICATE-----\nAAAA\n-----END CERTIFICATE-----';
@@ -42,7 +42,6 @@ function createMockAxiosInstance(): AxiosInstance {
 
 function createMockContext(overrides: Partial<AuthContext> = {}): AuthContext {
   const ctx: Partial<AuthContext> = {
-    buildClientAssertion: jest.fn().mockReturnValue(CLIENT_ASSERTION),
     getToken: jest.fn().mockResolvedValue(ACCESS_TOKEN),
     logger: {
       debug: jest.fn(),
@@ -114,7 +113,7 @@ describe('OAuthEntraClientCertificate', () => {
       expect(result.success).toBe(false);
     });
 
-    it('accepts PKCS#1 (RSA PRIVATE KEY) and encrypted PKCS#8 keys', () => {
+    it('accepts PKCS#1 (RSA PRIVATE KEY) and PKCS#8 keys', () => {
       const pkcs1 = OAuthEntraClientCertificate.schema.safeParse({
         ...SECRETS,
         privateKey: PEM_RSA_KEY,
@@ -122,11 +121,12 @@ describe('OAuthEntraClientCertificate', () => {
       });
       expect(pkcs1.success).toBe(true);
 
-      const encrypted = OAuthEntraClientCertificate.schema.safeParse({
+      const pkcs8 = OAuthEntraClientCertificate.schema.safeParse({
         ...SECRETS,
-        privateKey: PEM_ENCRYPTED_KEY,
+        privateKey: PEM_KEY,
+        passphrase: undefined,
       });
-      expect(encrypted.success).toBe(true);
+      expect(pkcs8.success).toBe(true);
     });
 
     it('exposes textarea widget hints for PEM fields', () => {
@@ -146,105 +146,22 @@ describe('OAuthEntraClientCertificate', () => {
   });
 
   describe('configure', () => {
-    it('passes a buildAdditionalFields factory to getToken and only builds the assertion on cache miss', async () => {
-      // Simulate a cache miss: getToken calls buildAdditionalFields before resolving
-      const ctx = createMockContext({
-        getToken: jest.fn().mockImplementation(async (opts) => {
-          opts.buildAdditionalFields();
-          return ACCESS_TOKEN;
-        }),
-      });
+    it('delegates to ctx.getToken with the auth-type-discriminated opts', async () => {
+      const ctx = createMockContext();
       const axiosInstance = createMockAxiosInstance();
-
-      // buildClientAssertion must NOT be called before getToken decides it needs a fresh token
-      expect(ctx.buildClientAssertion).not.toHaveBeenCalled();
 
       const result = await OAuthEntraClientCertificate.configure(ctx, axiosInstance, SECRETS);
 
-      // After a cache miss the factory was invoked, which triggered buildClientAssertion
-      expect(ctx.buildClientAssertion).toHaveBeenCalledWith({
+      expect(ctx.getToken).toHaveBeenCalledWith({
+        authType: OAUTH_ENTRA_CLIENT_CERTIFICATE_ID,
         tokenUrl: SECRETS.tokenUrl,
+        scope: SECRETS.scope,
         clientId: SECRETS.clientId,
-        certificate: SECRETS.certificate,
-        privateKey: SECRETS.privateKey,
-        passphrase: SECRETS.passphrase,
       });
-
       expect(result.defaults.headers.common.Authorization).toBe(ACCESS_TOKEN);
     });
 
-    it('factory returns the correct assertion fields', async () => {
-      const ctx = createMockContext();
-      const axiosInstance = createMockAxiosInstance();
-
-      await OAuthEntraClientCertificate.configure(ctx, axiosInstance, SECRETS);
-
-      const { buildAdditionalFields } = (ctx.getToken as jest.Mock).mock.calls[0][0];
-      expect(typeof buildAdditionalFields).toBe('function');
-
-      const fields = buildAdditionalFields();
-      expect(fields).toEqual({
-        client_assertion: CLIENT_ASSERTION,
-        client_assertion_type: CLIENT_ASSERTION_TYPE,
-      });
-    });
-
-    it('does not call buildClientAssertion on a cache hit (getToken ignores factory)', async () => {
-      // Simulate a cache hit: getToken returns without calling buildAdditionalFields
-      const ctx = createMockContext();
-      const axiosInstance = createMockAxiosInstance();
-
-      await OAuthEntraClientCertificate.configure(ctx, axiosInstance, SECRETS);
-
-      expect(ctx.buildClientAssertion).not.toHaveBeenCalled();
-    });
-
-    it('works without an optional passphrase', async () => {
-      const ctx = createMockContext({
-        getToken: jest.fn().mockImplementation(async (opts) => {
-          opts.buildAdditionalFields();
-          return ACCESS_TOKEN;
-        }),
-      });
-      const axiosInstance = createMockAxiosInstance();
-      const secretsWithoutPassphrase = {
-        ...SECRETS,
-        privateKey: PEM_KEY,
-        passphrase: undefined,
-      };
-
-      await OAuthEntraClientCertificate.configure(ctx, axiosInstance, secretsWithoutPassphrase);
-
-      expect(ctx.buildClientAssertion).toHaveBeenCalledWith(
-        expect.objectContaining({ passphrase: undefined })
-      );
-    });
-
-    it('wraps buildClientAssertion errors as EntraAuthError(assertion) with a cause', async () => {
-      const rootCause = new Error('Invalid PEM certificate');
-      const ctx = createMockContext({
-        buildClientAssertion: jest.fn(() => {
-          throw rootCause;
-        }),
-        // Simulate cache miss so the factory (and buildClientAssertion) is actually invoked
-        getToken: jest.fn().mockImplementation(async (opts) => {
-          opts.buildAdditionalFields();
-          return ACCESS_TOKEN;
-        }),
-      });
-      const axiosInstance = createMockAxiosInstance();
-
-      await expect(
-        OAuthEntraClientCertificate.configure(ctx, axiosInstance, SECRETS)
-      ).rejects.toMatchObject({
-        name: 'EntraAuthError',
-        kind: 'assertion',
-        message: expect.stringMatching(/Unable to build client assertion/),
-        cause: rootCause,
-      });
-    });
-
-    it('wraps token-endpoint failures as EntraAuthError(exchange) with tokenUrl context', async () => {
+    it('wraps getToken failures as EntraAuthError(exchange) with tokenUrl context', async () => {
       const rootCause = new Error('invalid_client');
       const ctx = createMockContext({
         getToken: jest.fn().mockRejectedValue(rootCause),
@@ -259,6 +176,20 @@ describe('OAuthEntraClientCertificate', () => {
         message: expect.stringContaining(SECRETS.tokenUrl),
         cause: rootCause,
       });
+    });
+
+    it('re-throws EntraAuthError from getToken without re-wrapping', async () => {
+      // The strategy may surface an EntraAuthError('assertion') through getToken;
+      // configure must pass it through unchanged.
+      const original = new EntraAuthError('assertion', 'bad PEM');
+      const ctx = createMockContext({
+        getToken: jest.fn().mockRejectedValue(original),
+      });
+      const axiosInstance = createMockAxiosInstance();
+
+      await expect(OAuthEntraClientCertificate.configure(ctx, axiosInstance, SECRETS)).rejects.toBe(
+        original
+      );
     });
 
     it('throws EntraAuthError(exchange) when getToken resolves to a falsy value', async () => {

@@ -8,7 +8,7 @@
 import type { AxiosHeaderValue, AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 import axios from 'axios';
 import type { Logger } from '@kbn/core/server';
-import type { AuthMode, BuildClientAssertionOpts, GetTokenOpts } from '@kbn/connector-specs';
+import type { AuthMode, GetTokenOpts } from '@kbn/connector-specs';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { ActionInfo } from './action_executor';
 import type { AuthTypeRegistry } from '../auth_types';
@@ -16,7 +16,6 @@ import { getCustomAgents } from './get_custom_agents';
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import type { ConnectorTokenClientContract } from '../types';
 import { getBeforeRedirectFn } from './before_redirect';
-import { buildClientAssertion } from './build_client_assertion';
 import { getAxiosAuthStrategy } from './axios_auth_strategies';
 
 export type ConnectorInfo = Omit<ActionInfo, 'rawAction'>;
@@ -131,7 +130,6 @@ export const getAxiosInstanceWithAuth = ({
       }
 
       const configureCtx = {
-        buildClientAssertion: (opts: BuildClientAssertionOpts) => buildClientAssertion(opts),
         getCustomHostSettings: (url: string) => configurationUtilities.getCustomHostSettings(url),
         getToken: (opts: GetTokenOpts) => strategy.getToken(opts, strategyDeps),
         logger,
