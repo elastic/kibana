@@ -151,7 +151,7 @@ export type Action =
 
 export const createExceptionItemsReducer =
   () =>
-  /* eslint complexity: ["error", 23]*/
+  /* eslint complexity: ["error", 25]*/
   (state: State, action: Action): State => {
     switch (action.type) {
       case 'setExceptionItemMeta': {
