@@ -291,9 +291,9 @@ steps:
       #     ranking.
       #  3. **Partial technique overlap** (boost 1, score_mode=sum) —
       #     `nested terms` over `extracted.behaviors.technique_id` (the
-      #     field this workflow actually writes; `extracted.ttps.techniques`
-      #     is populated by `hit_provenance_backfill` and is intentionally
-      #     out of scope here). Catches "same tradecraft, different IOCs"
+      #     field this workflow writes; `hit_provenance_backfill` reads the
+      #     same path for Layer-2 env-hit attribution). Catches "same
+      #     tradecraft, different IOCs"
       #     relations.
       #
       # `minimum_should_match: 1` means at least one signal must match;

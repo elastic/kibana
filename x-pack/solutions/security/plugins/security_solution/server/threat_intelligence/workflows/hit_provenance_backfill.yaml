@@ -22,7 +22,8 @@
 #
 #   - **Layer 2 (behavioral DE rule)** — alerts whose
 #     `kibana.alert.rule.threat.technique[].id` overlaps with this report's
-#     `extracted.ttps.techniques`. The match is technique-level, not
+#     `extracted.behaviors.technique_id` values (written by
+#     `nl_extraction_behavioral`). The match is technique-level, not
 #     report-level, so we attribute the hit to every report that surfaced the
 #     same technique in the lookback window. This is intentional — the
 #     "Env. hits" badge measures the in-the-wild signal, not authorship.
@@ -43,9 +44,6 @@ steps:
     with:
       index: .kibana-threat-reports
       size: 500
-      _source:
-        - extracted.ttps.techniques
-        - extracted.iocs.value
       query:
         bool:
           filter:
@@ -53,10 +51,19 @@ steps:
                 provenance.extracted_at:
                   gte: "now-30d"
           should:
-            - exists:
-                field: extracted.iocs
-            - exists:
-                field: extracted.behaviors
+            # `extracted.iocs` / `extracted.behaviors` are `nested` in the
+            # reports mapping; `exists` on the parent path matches nothing (see
+            # `HAS_EXTRACTED_IOCS_FILTER` in `ioc_indicator_sync.ts`).
+            - nested:
+                path: extracted.iocs
+                query:
+                  exists:
+                    field: extracted.iocs.value
+            - nested:
+                path: extracted.behaviors
+                query:
+                  exists:
+                    field: extracted.behaviors.technique_id
           minimum_should_match: 1
       # `@timestamp` is always mapped on this data stream, so it's a safe
       # sort field. The `<field>:<direction>` shorthand (`search_sort`) only
@@ -97,50 +104,31 @@ steps:
           continue: true
 
       # Layer 2 — behavioral DE rule alerts whose ATT&CK techniques overlap
-      # with this report's extracted techniques. Skipped when the report has
-      # no techniques as a cheap short-circuit — `terms_lookup` against a
-      # missing path resolves to an empty terms list and returns zero hits
-      # anyway, but we avoid the round-trip when we already know the answer.
-      # The condition is in KQL form (workflow `if` steps don't accept Liquid
-      # here — see `IfStepConfigSchema` in `kbn-workflows/spec/schema.ts`).
-      # KQL `field : *` evaluates to true when the field has at least one
-      # value, which for an array means non-empty.
-      #
-      # The technique list itself is resolved by Elasticsearch via
-      # `terms_lookup` rather than interpolated as a Liquid variable. The
-      # generated ES schema types `_source` as `Record<string, unknown>`
-      # (see `global_search_types_hit._source` in
-      # `kbn-workflows/spec/elasticsearch/generated/schemas/es_openapi_zod.gen.ts`),
-      # so `{{ foreach.item._source.extracted.ttps.techniques }}` resolves to
-      # `unknown` in the workflow type checker and produces a "type is unknown"
-      # warning. `terms_lookup` only needs the report's `_index` + `_id` —
-      # both typed on `global_search_types_hit` — so the workflow validates
-      # cleanly without changing the schema.
-      - name: count_layer2_hits
-        type: if
-        condition: "foreach.item._source.extracted.ttps.techniques : *"
-        steps:
-          - name: layer2_search
-            type: elasticsearch.search
-            with:
-              index: .alerts-security.alerts-*
-              size: 0
-              query:
-                bool:
-                  filter:
-                    - range:
-                        "@timestamp":
-                          gte: "now-7d"
-                    - terms:
-                        kibana.alert.rule.threat.technique.id:
-                          index: "{{ foreach.item._index }}"
-                          id: "{{ foreach.item._id }}"
-                          path: extracted.ttps.techniques
-                  must_not:
-                    - term:
-                        kibana.alert.rule.type: threat_match
-            on-failure:
-              continue: true
+      # with this report's `extracted.behaviors.technique_id` values. The
+      # technique list is resolved by Elasticsearch via `terms_lookup` rather
+      # than interpolated as a Liquid variable — only the report's `_index` +
+      # `_id` are needed. IOC-only reports get an empty lookup and zero hits.
+      - name: layer2_search
+        type: elasticsearch.search
+        with:
+          index: .alerts-security.alerts-*
+          size: 0
+          query:
+            bool:
+              filter:
+                - range:
+                    "@timestamp":
+                      gte: "now-7d"
+                - terms:
+                    kibana.alert.rule.threat.technique.id:
+                      index: "{{ foreach.item._index }}"
+                      id: "{{ foreach.item._id }}"
+                      path: extracted.behaviors.technique_id
+              must_not:
+                - term:
+                    kibana.alert.rule.type: threat_match
+        on-failure:
+          continue: true
 
       # `index` is bound to the concrete backing index of the loaded hit
       # (`{{ foreach.item._index }}`) — `_update` cannot target a data-stream
@@ -167,8 +155,7 @@ steps:
                 layer_2_behavioral: "${{ steps.layer2_search.output.hits.total.value | default: 0 }}"
               # Liquid has no arithmetic operators — `(a) + (b)` is parsed as
               # a range literal and rejected. Use the `plus` filter, which
-              # coerces missing values to 0 internally so the `if`-skipped
-              # `layer2_search` case still produces a clean sum.
+              # coerces missing step outputs to 0 when a search step fails.
               environment_hits_total: "${{ steps.count_layer1_hits.output.hits.total.value | default: 0 | plus: steps.layer2_search.output.hits.total.value }}"
         on-failure:
           # Doc deleted mid-run, mapping mismatch, or version conflict from a

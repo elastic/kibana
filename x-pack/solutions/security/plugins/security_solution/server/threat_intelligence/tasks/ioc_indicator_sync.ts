@@ -32,15 +32,21 @@ const PAGE_SIZE = 200;
 const TASK_TIMEOUT = '2m';
 
 /**
- * Tie-breakers for `search_after` without a PIT. `_shard_doc` and `_id` both
- * require fielddata on `_id` (disabled by default); `_seq_no` + `_primary_term`
- * are stable per document and safe on data streams.
+ * Tie-breaker for `search_after` without a PIT. Sorting on `_id` or `_shard_doc`
+ * (without PIT) triggers fielddata on `_id` (disabled by default). `_doc` uses
+ * Lucene doc order and does not require `_id` fielddata.
  */
-const REPORT_SCAN_SORT: estypes.Sort = [
-  { 'provenance.extracted_at': { order: 'asc' } },
-  { _seq_no: { order: 'asc' } },
-  { _primary_term: { order: 'asc' } },
-];
+const REPORT_SCAN_SORT: estypes.Sort = [{ 'provenance.extracted_at': { order: 'asc' } }, '_doc'];
+
+/** `extracted.iocs` is `nested` in the reports mapping; `exists` on the parent path matches nothing. */
+const HAS_EXTRACTED_IOCS_FILTER: estypes.QueryDslQueryContainer = {
+  nested: {
+    path: 'extracted.iocs',
+    query: {
+      exists: { field: 'extracted.iocs.value' },
+    },
+  },
+};
 
 const stateSchemaV1 = schema.object({
   /**
@@ -257,7 +263,7 @@ export const registerIocIndicatorSyncTask = ({
                     bool: {
                       filter: [
                         { range: { 'provenance.extracted_at': { gt: lower } } },
-                        { exists: { field: 'extracted.iocs' } },
+                        HAS_EXTRACTED_IOCS_FILTER,
                       ],
                     },
                   },
@@ -331,7 +337,7 @@ export const registerIocIndicatorSyncTask = ({
             const lastHit = hits[hits.length - 1];
             const lastExtractedAt = lastHit?._source?.provenance?.extracted_at ?? null;
             if (typeof lastExtractedAt === 'string') latestExtractedAt = lastExtractedAt;
-            // search_after over [extracted_at, _seq_no, _primary_term] so we don't
+            // search_after over [extracted_at, _doc] so we don't
             // docs that share an extracted_at tick with the page boundary.
             if (!lastHit?.sort) {
               throwUnrecoverableError(
