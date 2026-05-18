@@ -197,25 +197,18 @@ export function registerGetStepDefinitionsTool(
   agentBuilder.tools.register({
     id: workflowTools.getStepDefinitions,
     type: ToolType.builtin,
-    description: `Get available workflow step types, their parameters, and usage examples.
+    description: `Get available workflow step types, their parameters, and usage examples. Covers built-in primitives, plugin-registered extension steps (data.*, ai.*, security.*, …), and connector-backed steps in one call.
 
-**When to use:** Before generating step YAML, to discover available step types, their input params (\`with\` block), config params (step-level fields like \`connector-id\`), and usage examples.
+**When to use:** Before generating step YAML, to discover step types, their input params (\`with\` block), config params, and examples.
 **When NOT to use:** To find connector instances configured in the environment (use get_connectors instead).
-
-Covers three sources combined:
-1. Built-in flow-control + data primitives (console, if, while, foreach, switch, wait, data.set, …)
-2. Extension-registered steps (data.*, ai.*, security.*, etc. — anything plugins register via workflowsExtensions.registerStepDefinition)
-3. Connector-backed steps (kibana.*, slack.*, http, elasticsearch.*, etc.)
 
 Supports filtering by exact step type, keyword search, or category. Deprecated steps are excluded from broad discovery by default, but exact step type lookups still return them.
 
-When a small number of results is returned, input/config parameter summaries and usage examples are included.
+**Exact \`stepType\` lookups (single match) automatically include the full JSON Schema for the step's \`with:\` block under \`stepSchema\`. Use it to construct a correct \`with:\` payload in one round-trip before calling \`${workflowTools.executeStep}\` — no need to set \`includeFullSchema\` for per-step retrievals.**
 
-**Exact \`stepType\` lookups (single match) automatically include the full JSON Schema for the step's \`with:\` block under \`stepSchema\` — the model should not need to set \`includeFullSchema\` for per-step retrievals. Use the returned schema to construct a correct \`with:\` payload in a single round-trip before calling \`${workflowTools.executeStep}\`.**
-
-Common step properties (name, type, if, timeout, on-failure) are NOT listed per step -- they apply to all steps (see skill prompt).
-Set includeOutputSummary=true to get a compact one-line summary of each step's output fields (useful for knowing what data is available via \`{{ steps.name.field }}\`).
-Set includeFullSchema=true to force-include the JSON Schema even for multi-step results (use sparingly).`,
+Common step properties (name, type, if, timeout, on-failure) apply to every step and are NOT listed per step (see skill prompt).
+Set includeOutputSummary=true to get a one-line summary of each step's output fields (useful for \`{{ steps.name.field }}\` references).
+Set includeFullSchema=true to force-include the JSON Schema on multi-step results (use sparingly).`,
     schema: z.object({
       stepType: z
         .string()

@@ -1135,6 +1135,73 @@ describe('preValidateStepWith', () => {
     expect(failure!.reason).toBe('with_schema_invalid');
     expect(failure!.schemaErrors!.some((issue) => issue.path === 'message')).toBe(true);
   });
+
+  it('skips validation when a top-level `with:` value contains a Mustache template ref', async () => {
+    // `items` is typed as an array — without the skip Zod would reject the
+    // literal string `{{ steps.fetch.output.items }}` and short-circuit the
+    // dispatch. The execution engine resolves the template at runtime, so
+    // the right behavior is to defer validation entirely.
+    const schema = z.object({
+      items: z.array(z.unknown()),
+      predicate: z.string(),
+    });
+    const failure = await preValidateStepWith(
+      yamlWithStep({
+        items: '{{ steps.fetch.output.items }}',
+        predicate: 'matches',
+      }),
+      'my_step',
+      'data.search',
+      buildExtensions('data.search', schema)
+    );
+    expect(failure).toBeNull();
+  });
+
+  it('skips validation when a nested `with:` value contains a Mustache template ref', async () => {
+    const schema = z.object({
+      config: z.object({
+        url: z.string().url(),
+      }),
+    });
+    const failure = await preValidateStepWith(
+      yamlWithStep({ config: { url: '{{ inputs.endpoint_url }}' } }),
+      'my_step',
+      'data.search',
+      buildExtensions('data.search', schema)
+    );
+    expect(failure).toBeNull();
+  });
+
+  it('skips validation when an array element contains a Mustache template ref', async () => {
+    const schema = z.object({
+      ids: z.array(z.string().uuid()),
+    });
+    const failure = await preValidateStepWith(
+      yamlWithStep({ ids: ['a-real-uuid-here', '{{ steps.lookup.output.id }}'] }),
+      'my_step',
+      'data.search',
+      buildExtensions('data.search', schema)
+    );
+    expect(failure).toBeNull();
+  });
+
+  it('still runs pre-validation when `with:` has no Mustache template refs', async () => {
+    // Sanity guard for the skip rule above: literal-only payloads with real
+    // schema violations must still surface as `with_schema_invalid`.
+    const schema = z.object({
+      index: z.string(),
+      size: z.number().int().positive(),
+    });
+    const failure = await preValidateStepWith(
+      yamlWithStep({ index: 'logs-*' }), // `size` missing, no template refs
+      'my_step',
+      'data.search',
+      buildExtensions('data.search', schema)
+    );
+    expect(failure).not.toBeNull();
+    expect(failure!.reason).toBe('with_schema_invalid');
+    expect(failure!.schemaErrors!.some((issue) => issue.path === 'size')).toBe(true);
+  });
 });
 
 describe('handler pre-validation short-circuit', () => {

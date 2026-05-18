@@ -596,21 +596,50 @@ export interface StepValidationFailure {
 }
 
 /**
+ * Matches `{{ … }}` template references anywhere in a string. The execution
+ * engine resolves these at runtime via the workflow context manager.
+ */
+const MUSTACHE_REF_PATTERN = /\{\{[^}]+\}\}/;
+
+/**
+ * Recursively scans `value` for any string containing a Mustache template
+ * reference. Returns `true` as soon as one is found. Used by
+ * `preValidateStepWith` to decide whether to skip static Zod validation —
+ * pre-validation can't see through templates and would emit false-positive
+ * schema errors on chained workflows where downstream values come from
+ * earlier steps / inputs / context.
+ */
+function containsMustacheRef(value: unknown): boolean {
+  if (value === null || value === undefined) return false;
+  if (typeof value === 'string') return MUSTACHE_REF_PATTERN.test(value);
+  if (Array.isArray(value)) return value.some(containsMustacheRef);
+  if (typeof value === 'object') {
+    return Object.values(value as Record<string, unknown>).some(containsMustacheRef);
+  }
+  return false;
+}
+
+/**
  * Best-effort pre-execution validation of a step's `with:` block. Returns
  * `null` when:
  *   - the workflows-extensions registry is unavailable (e.g. unit tests),
- *   - the step type has no registered `inputSchema`, or
+ *   - the step type has no registered `inputSchema`,
+ *   - the `with:` block contains any Mustache template ref (`{{ … }}`) — the
+ *     execution engine resolves these at runtime; Zod can't see through them
+ *     and would emit false-positive schema errors on chained workflows, or
  *   - the `with:` block parses cleanly.
  *
- * Returns a structured failure when the `with:` block fails Zod parsing. The
- * caller is expected to short-circuit before the (expensive) execution-engine
- * round-trip so the LLM gets the schema diagnosis cheaply.
+ * Returns a structured failure when the `with:` block fails Zod parsing on
+ * literal values. The caller is expected to short-circuit before the
+ * (expensive) execution-engine round-trip so the LLM gets the schema
+ * diagnosis cheaply.
  *
- * NOTE: This is intentionally a SOFT gate. If the YAML carries Mustache
- * placeholders (e.g. `{{ steps.prev.output.id }}`), they're left as strings
- * and Zod may reject them even though the live execution would resolve them.
- * For that reason any failure is surfaced as a tool error but does NOT throw;
- * the user can still retry with a corrected step.
+ * NOTE: This is intentionally a SOFT gate. The Mustache skip means a step
+ * that mixes literals and templates (`size: 10, query: "{{ inputs.q }}"`)
+ * loses pre-validation on the literal half too. The trade-off is correctness
+ * over coverage — false positives on chained workflows are far more painful
+ * than missed pre-validation on a templated step (the execution engine still
+ * validates the resolved values).
  */
 export async function preValidateStepWith(
   yaml: string,
@@ -641,6 +670,16 @@ export async function preValidateStepWith(
   } catch {
     // YAML errors are reported separately via `getYamlParseError`; if we
     // somehow reach this point with a malformed doc, just skip validation.
+    return null;
+  }
+
+  // Mustache template refs (`{{ steps.prev.output.id }}`, `{{ inputs.q }}`,
+  // `{{ consts.foo }}`, …) are resolved by the execution engine at run time.
+  // Zod can't see through them and would reject the literal string when the
+  // schema expects a non-string type (array, number, object, …). Skip
+  // pre-validation entirely when ANY templated value is present; the
+  // execution engine will validate the resolved payload.
+  if (containsMustacheRef(withBlock)) {
     return null;
   }
 
