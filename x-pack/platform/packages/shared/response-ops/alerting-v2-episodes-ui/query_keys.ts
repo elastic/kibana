@@ -15,15 +15,17 @@ export const queryKeys = {
   groupActionsAll: () => [...queryKeys.all, 'group-actions'] as const,
   groupActions: (spaceId: string, groupHashes: string[]) =>
     [...queryKeys.groupActionsAll(), spaceId, ...groupHashes] as const,
+  listAll: () => [...queryKeys.all, 'list'] as const,
   list: (
     spaceId: string,
     pageSize: number,
     filterState?: EpisodesFilterState,
     sortState?: EpisodesSortState,
     timeRange?: { from: string; to: string } | null
-  ) => [...queryKeys.all, 'list', spaceId, pageSize, filterState, sortState, timeRange] as const,
+  ) => [...queryKeys.listAll(), spaceId, pageSize, filterState, sortState, timeRange] as const,
+  episodeEventsAll: () => [...queryKeys.all, 'episode-events'] as const,
   episodeEvents: (spaceId: string, episodeId: string) =>
-    [...queryKeys.all, 'episode-events', spaceId, episodeId] as const,
+    [...queryKeys.episodeEventsAll(), spaceId, episodeId] as const,
   relatedSameGroupEpisodes: (
     spaceId: string,
     ruleId: string,
@@ -54,14 +56,14 @@ export const queryKeys = {
       currentGroupKey,
       excludeEpisodeId,
     ] as const,
+  episodeEventDataAll: () => [...queryKeys.all, 'episode-event-data'] as const,
   episodeEventData: (spaceId: string, episodeId: string) =>
-    [...queryKeys.all, 'episode-event-data', spaceId, episodeId] as const,
-  relatedEpisodes: (spaceId: string, ruleId: string, excludeEpisodeId: string, pageSize: number) =>
-    [...queryKeys.all, 'related-episodes', spaceId, ruleId, excludeEpisodeId, pageSize] as const,
+    [...queryKeys.episodeEventDataAll(), spaceId, episodeId] as const,
   tagOptionsAll: () => [...queryKeys.all, 'tag-options'] as const,
   tagOptions: (spaceId: string, timeRange?: { from: string; to: string } | null) =>
     [...queryKeys.tagOptionsAll(), spaceId, timeRange] as const,
-  tagSuggestions: (spaceId: string) => [...queryKeys.all, 'tag-suggestions', spaceId] as const,
+  tagSuggestionsAll: () => [...queryKeys.all, 'tag-suggestions'] as const,
+  tagSuggestions: (spaceId: string) => [...queryKeys.tagSuggestionsAll(), spaceId] as const,
   assigneeSuggestions: (searchTerm: string) =>
     [...queryKeys.all, 'assignee-suggestions', searchTerm] as const,
   bulkGetProfiles: (uids: string[]) => [...queryKeys.all, 'bulk-get-profiles', ...uids] as const,
