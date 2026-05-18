@@ -79,7 +79,7 @@ const SampleAlertFilteringMetricContent: React.FC = () => (
     title={i18n.FILTERING_RATE}
     value={SAMPLE_VALUE_METRICS.filteredAlertsPerc}
     valueFormatter={formatPercent}
-    icon="filter"
+    icon="chartLine"
   />
 );
 
