@@ -73,7 +73,7 @@ interface EsqlFnArguments {
 }
 
 interface EsqlStartDependencies {
-  typed: ITypedSearchService;
+  searchService: ITypedSearchService;
   uiSettings: UiSettingsCommon;
 }
 
@@ -243,7 +243,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
       { query, timeField, locale, titleForInspector, descriptionForInspector, ignoreGlobalFilters },
       { abortSignal, inspectorAdapters, getKibanaRequest, getSearchSessionId, getExecutionContext }
     ) {
-      const { typed, uiSettings } = await getStartDependencies(() => {
+      const { searchService, uiSettings } = await getStartDependencies(() => {
         const request = getKibanaRequest?.();
         if (!request) {
           throw new Error(
@@ -337,7 +337,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
       };
 
       try {
-        const { rawResponse, requestParams } = await typed.searchESQL(
+        const { rawResponse, requestParams } = await searchService.searchESQL(
           {
             query: fixedQuery,
             params: params.params as Array<{ name: string; value: unknown }> | undefined,

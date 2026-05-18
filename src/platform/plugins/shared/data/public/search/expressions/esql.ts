@@ -41,7 +41,12 @@ export function getEsql({
         },
       ] = await getStartServices();
 
-      return { nowProvider, search, typed, uiSettings: uiSettings as unknown as UiSettingsCommon };
+      return {
+        nowProvider,
+        search,
+        searchService: typed,
+        uiSettings: uiSettings as unknown as UiSettingsCommon,
+      };
     },
   });
 }

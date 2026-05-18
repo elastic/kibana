@@ -57,7 +57,7 @@ const getMockSearchService = (
 const createEsqlFn = (mockSearchService: MockTypedSearchService) =>
   getEsqlFn({
     getStartDependencies: async () => ({
-      typed: mockSearchService as unknown as ITypedSearchService,
+      searchService: mockSearchService as unknown as ITypedSearchService,
       uiSettings: mockUiSettings(),
     }),
   });
