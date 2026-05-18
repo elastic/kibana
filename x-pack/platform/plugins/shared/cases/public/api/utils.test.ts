@@ -121,7 +121,7 @@ describe('utils', () => {
     describe('comment content sanitization', () => {
       it('escapes bare ampersands in legacy user comment payloads', () => {
         const legacyUserComment = {
-          type: AttachmentType.user,
+          type: AttachmentType.user as const,
           owner: SECURITY_SOLUTION_OWNER,
           comment: 'See ?index=foo&timestamp=bar',
         };
@@ -149,7 +149,7 @@ describe('utils', () => {
 
       it('does not modify non-comment attachments such as alerts', () => {
         const alertAttachment = {
-          type: AttachmentType.alert,
+          type: AttachmentType.alert as const,
           alertId: 'alert-id',
           index: 'alert-index',
           rule: { id: 'rule-id', name: 'rule & alert name' },
@@ -167,7 +167,7 @@ describe('utils', () => {
 
       it('does not alter legacy comments that contain no ampersands', () => {
         const legacyUserComment = {
-          type: AttachmentType.user,
+          type: AttachmentType.user as const,
           owner: SECURITY_SOLUTION_OWNER,
           comment: 'plain text comment',
         };
