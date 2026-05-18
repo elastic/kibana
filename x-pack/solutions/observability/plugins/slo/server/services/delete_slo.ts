@@ -7,7 +7,7 @@
 
 import { addTransactionLabels } from '@kbn/apm-utils';
 import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
-import type { IScopedClusterClient } from '@kbn/core/server';
+import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import {
   SLI_DESTINATION_INDEX_PATTERN,
   SUMMARY_DESTINATION_INDEX_PATTERN,
@@ -33,6 +33,7 @@ export class DeleteSLO {
     private summaryTransformManager: TransformManager,
     private scopedClusterClient: IScopedClusterClient,
     private rulesClient: RulesClientApi,
+    private logger: Logger,
     private abortController: AbortController = new AbortController()
   ) {}
 
@@ -127,6 +128,7 @@ export class DeleteSLO {
       { signal: this.abortController.signal }
     );
   }
+
   private async deleteAssociatedRules(sloId: string, skip: boolean): Promise<void> {
     if (skip) {
       return;
@@ -137,7 +139,11 @@ export class DeleteSLO {
         filter: `alert.attributes.params.sloId:${sloId}`,
       });
     } catch (err) {
-      // no-op
+      this.logger.warn('Failed to delete associated rules for SLO.', {
+        service: { name: 'delete_slo' },
+        labels: { slo_id: sloId, error_type: 'cleanup_failed' },
+        error: err,
+      });
     }
   }
 }
