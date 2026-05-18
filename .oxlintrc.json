@@ -5,6 +5,13 @@
 
   "plugins": ["react", "typescript", "import", "jsx-a11y", "react-perf", "node", "jest"],
 
+  "jsPlugins": [
+    {
+      "name": "@kbn/eslint",
+      "specifier": "@kbn/eslint-plugin-eslint"
+    }
+  ],
+
   "categories": {
     "correctness": "off"
   },
@@ -42,93 +49,8 @@
         }
       }
     ],
-    "@typescript-eslint/member-ordering": [
-      "error",
-      {
-        "default": ["public-static-field", "static-field", "instance-field"]
-      }
-    ],
-    "@typescript-eslint/naming-convention": [
-      "error",
-      {
-        "selector": "default",
-        "format": ["camelCase", "PascalCase", "UPPER_CASE", "snake_case"],
-        "leadingUnderscore": "allowSingleOrDouble",
-        "trailingUnderscore": "allowSingleOrDouble"
-      },
-      {
-        "selector": "classMethod",
-        "filter": {
-          "regex": "^UNSAFE_",
-          "match": true
-        },
-        "prefix": ["UNSAFE_"],
-        "format": ["camelCase"]
-      },
-      {
-        "selector": "variable",
-        "format": [
-          "camelCase",
-          "UPPER_CASE", // e.g. const SOMETHING = ...
-          "PascalCase" // e.g. React.FunctionComponent =
-        ],
-        "leadingUnderscore": "allowSingleOrDouble",
-        "trailingUnderscore": "allowSingleOrDouble"
-      },
-      {
-        "selector": "variable",
-        "modifiers": ["destructured"],
-        "format": [
-          "camelCase",
-          "snake_case", // e.g. properties from ES response objects
-          "UPPER_CASE", // e.g. const SOMETHING = ...
-          "PascalCase" // e.g. React.FunctionComponent =
-        ],
-        "leadingUnderscore": "allowSingleOrDouble",
-        "trailingUnderscore": "allowSingleOrDouble"
-      },
-      {
-        "selector": "parameter",
-        "format": ["camelCase", "PascalCase", "snake_case"],
-        "leadingUnderscore": "allowSingleOrDouble",
-        "trailingUnderscore": "allowSingleOrDouble"
-      },
-      {
-        "selector": "function",
-        "format": [
-          "camelCase",
-          "PascalCase" // React.FunctionComponent =
-        ],
-        "leadingUnderscore": "allowSingleOrDouble",
-        "trailingUnderscore": "allowSingleOrDouble"
-      },
-      {
-        "selector": "typeLike",
-        "format": ["PascalCase", "UPPER_CASE"],
-        "leadingUnderscore": "allow",
-        "trailingUnderscore": "allow"
-      },
-      {
-        "selector": "enum",
-        "format": ["PascalCase", "UPPER_CASE", "camelCase"]
-      },
-      // https://typescript-eslint.io/rules/naming-convention/#ignore-properties-that-require-quotes
-      // restore check behavior before https://github.com/typescript-eslint/typescript-eslint/pull/4582
-      {
-        "selector": [
-          "classProperty",
-          "objectLiteralProperty",
-          "typeProperty",
-          "classMethod",
-          "objectLiteralMethod",
-          "typeMethod",
-          "accessor",
-          "enumMember"
-        ],
-        "format": null,
-        "modifiers": ["requiresQuotes"]
-      }
-    ],
+    // "@typescript-eslint/member-ordering": "error", // Not available in oxlint
+    // "@typescript-eslint/naming-convention": "error", // Not available in oxlint
     "@typescript-eslint/no-empty-interface": "error",
     // "@typescript-eslint/no-empty-object-type": "off",
     "@typescript-eslint/no-extra-non-null-assertion": "error",
@@ -146,7 +68,7 @@
       }
     ],
     // "@typescript-eslint/no-shadow": "error",
-    "@typescript-eslint/no-undef": "error",
+    // "@typescript-eslint/no-undef": "error", // Not available in oxlint
     // "@typescript-eslint/no-unsafe-function-type": "error",
     // "@typescript-eslint/no-unused-expressions": ["error", { "allowTaggedTemplates": true }],
     // "@typescript-eslint/no-var-requires": "error",
@@ -170,7 +92,7 @@
     //   { "name": ["testErrorsAndWarnings", "only"], "message": "No exclusive tests." }
     // ],
     "block-scoped-var": "error",
-    "camelcase": ["error", { "properties": "never", "allow": ["^UNSAFE_"] }],
+    // "camelcase": "error", // Not available in oxlint
     "consistent-return": "error",
     "constructor-super": "error",
     "dot-notation": ["error", { "allowKeywords": true }],
@@ -187,15 +109,10 @@
     // "import/no-dynamic-require": "error",
     // "import/no-named-as-default": "error",
     // "import/no-named-as-default-member": "error",
-    "import/order": [
-      "error",
-      {
-        "groups": [["external", "builtin"], "internal", ["parent", "sibling", "index"]]
-      }
-    ],
+    // "import/order": "error", // Not available in oxlint
     "jest/no-focused-tests": "error",
     // "jest/no-identical-title": "error",
-    "jsx-a11y/accessible-emoji": "error",
+    // "jsx-a11y/accessible-emoji": "error", // Not available in oxlint (deprecated rule)
     "jsx-a11y/alt-text": "error",
     "jsx-a11y/anchor-has-content": "error",
     "jsx-a11y/aria-activedescendant-has-tabindex": "error",
@@ -216,7 +133,7 @@
     "jsx-a11y/no-interactive-element-to-noninteractive-role": "error",
     "jsx-a11y/no-noninteractive-element-interactions": "error",
     "jsx-a11y/no-noninteractive-element-to-interactive-role": "error",
-    "jsx-a11y/no-onchange": "error",
+    // "jsx-a11y/no-onchange": "error", // Not available in oxlint (deprecated rule)
     "jsx-a11y/no-redundant-roles": "error",
     // "jsx-a11y/role-has-required-aria-props": "error",
     // "jsx-a11y/role-supports-aria-props": "error",
@@ -249,20 +166,14 @@
     // "no-restricted-globals": ["error", ...RESTRICTED_GLOBALS],
     // "no-restricted-imports": [2, RESTRICTED_MODULES],
     // "no-restricted-modules": [2, RESTRICTED_MODULES],
-    "no-restricted-syntax": [
-      "error",
-      {
-        "selector": "TSEnumDeclaration[const=true]",
-        "message": "Do not use `const` with enum declarations"
-      }
-    ],
+    // "no-restricted-syntax": "error", // Not available in oxlint
     // "no-return-assign": "error",
     "no-script-url": "error",
     // "no-sequences": "error",
     // "no-shadow": "error",
     // "no-throw-literal": "error",
     // "no-undef": "error",
-    "no-undef-init": "error",
+    // "no-undef-init": "error", // Not available in oxlint
     "no-underscore-dangle": "error",
     // "no-unsafe-finally": "error",
     // "no-unsanitized/method": "error",
@@ -274,7 +185,7 @@
     // "no-var": "error",
     "no-with": "error",
     "object-shorthand": "error",
-    "one-var": ["error", "never"],
+    // "one-var": "error", // Not available in oxlint
     // "prefer-const": "error",
     // "prefer-object-spread": "error",
     // "prefer-rest-params": "error",
@@ -284,8 +195,8 @@
     "react/jsx-no-duplicate-props": ["error"],
     "react/jsx-no-undef": "error",
     "react/jsx-pascal-case": "error",
-    "react/jsx-uses-react": "error",
-    "react/jsx-uses-vars": "error",
+    // "react/jsx-uses-react": "error", // Not available in oxlint
+    // "react/jsx-uses-vars": "error", // Not available in oxlint
     // "react/no-danger": "error",
     "react/no-is-mounted": "error",
     "react/no-multi-comp": ["error", { "ignoreStateless": true }],
@@ -293,19 +204,101 @@
     "react/no-unknown-property": ["error", { "ignore": ["css"] }],
     "react/no-will-update-set-state": "error",
     "react/prefer-es6-class": ["error", "always"],
-    "react/prefer-stateless-function": ["error", { "ignorePureComponents": true }],
+    // "react/prefer-stateless-function": "error", // Not available in oxlint
     // "react/react-in-jsx-scope": "error",
     "react/self-closing-comp": "error",
-    "spaced-comment": [
-      "error",
-      "always",
-      {
-        "exceptions": ["/"]
-      }
-    ],
-    "strict": ["error", "never"],
-    "use-isnan": "error"
+    // "spaced-comment": "error", // Not available in oxlint
+    // "strict": "error", // Not available in oxlint
+    "use-isnan": "error",
     // "valid-typeof": "error",
     // "yoda": "off",
-  }
+
+    // Custom Kibana rules via jsPlugins (@kbn/eslint-plugin-eslint)
+    "@kbn/eslint/no_async_foreach": "error",
+    "@kbn/eslint/no_trailing_import_slash": "error",
+    "@kbn/eslint/no_unsafe_console": "error",
+    "@kbn/eslint/no_wrapped_error_in_logger": "error",
+    "@kbn/eslint/no_unsafe_hash": "error"
+  },
+
+  "overrides": [
+    {
+      // Scout UI/API test rules for plugins and packages (mirrors .eslintrc.js)
+      "files": [
+        "src/platform/{packages,plugins}/**/test/{scout,scout_*}/**/*.ts",
+        "x-pack/platform/{packages,plugins}/**/test/{scout,scout_*}/**/*.ts",
+        "x-pack/solutions/**/{packages,plugins}/**/test/{scout,scout_*}/**/*.ts"
+      ],
+      "excludeFiles": ["src/platform/packages/shared/kbn-scout/test/**"],
+      "rules": {
+        "@kbn/eslint/scout_no_describe_configure": "error",
+        "@kbn/eslint/scout_max_one_describe": "error",
+        "@kbn/eslint/scout_test_file_naming": "error",
+        "@kbn/eslint/scout_require_global_setup_hook_in_parallel_tests": "error",
+        "@kbn/eslint/scout_no_es_archiver_in_parallel_tests": "error",
+        "@kbn/eslint/scout_no_cross_boundary_imports": "error",
+        "@kbn/eslint/scout_expect_import": "error",
+        "@kbn/eslint/scout_no_deprecated_tags": "error",
+        "@kbn/eslint/scout_no_at_in_test_titles": "warn",
+        "@kbn/eslint/scout_no_locators": ["error", { "restricted": ["globalLoadingIndicator"] }],
+        "@kbn/eslint/scout_no_promise_all_with_playwright_apis": "error",
+        "@kbn/eslint/require_include_in_check_a11y": "warn"
+      }
+    },
+    {
+      // Deployment-agnostic test files must use proper context and services
+      "files": [
+        "x-pack/platform/test/api_integration_deployment_agnostic/apis/**/*.{js,ts}",
+        "x-pack/platform/test/api_integration_deployment_agnostic/services/**/*.{js,ts}",
+        "x-pack/solutions/**/test/api_integration_deployment_agnostic/apis/**/*.{js,ts}",
+        "x-pack/solutions/**/test/api_integration_deployment_agnostic/services/**/*.{js,ts}"
+      ],
+      "rules": {
+        "@kbn/eslint/deployment_agnostic_test_context": "error"
+      }
+    },
+    {
+      // Restrict fs imports in production code (exclude test files, scripts, etc.)
+      "files": [
+        "src/platform/plugins/shared/**/*.ts",
+        "x-pack/solutions/**/*.ts",
+        "x-pack/plugins/**/*.ts",
+        "x-pack/platform/plugins/shared/**/*.ts"
+      ],
+      "excludeFiles": [
+        "**/*.{test,spec}.ts",
+        "**/*.test.ts",
+        "**/test/**",
+        "**/tests/**",
+        "**/__tests__/**",
+        "**/scripts/**",
+        "**/e2e/**",
+        "**/cypress/**",
+        "**/ftr_e2e/**",
+        "**/.storybook/**",
+        "**/json_schemas/**",
+        "src/platform/plugins/shared/telemetry/**",
+        "x-pack/solutions/security/packages/test-api-clients/**",
+        "x-pack/platform/plugins/shared/automatic_import/**"
+      ],
+      "rules": {
+        "@kbn/eslint/require_kbn_fs": [
+          "error",
+          {
+            "restrictedMethods": [
+              "writeFile",
+              "writeFileSync",
+              "createWriteStream",
+              "appendFile",
+              "appendFileSync"
+            ],
+            "disallowedMessage": "Use `@kbn/fs` for file write operations instead of direct `fs` in production code"
+          }
+        ]
+      }
+    }
+  ]
+
+  // Note: scout_require_api_client_in_api_test remains ESLint-only because it
+  // uses `eslint-traverse`, which is not supported by oxlint's jsPlugins.
 }
