@@ -114,19 +114,29 @@ export const DetailsPanel: FunctionComponent<Props> = ({
   ];
 
   const actionsPopoverButton = (
-    <EuiButtonIcon
-      display="base"
-      size="m"
-      data-test-subj="actionsPopoverButton"
-      aria-label={i18n.translate(
+    <EuiToolTip
+      content={i18n.translate(
         'xpack.ingestPipelines.list.pipelineDetails.popoverPipelineActionsAriaLabel',
         {
           defaultMessage: 'Other actions',
         }
       )}
-      onClick={() => setShowPopover((previousBool) => !previousBool)}
-      iconType="boxesVertical"
-    />
+      disableScreenReaderOutput
+    >
+      <EuiButtonIcon
+        display="base"
+        size="m"
+        data-test-subj="actionsPopoverButton"
+        aria-label={i18n.translate(
+          'xpack.ingestPipelines.list.pipelineDetails.popoverPipelineActionsAriaLabel',
+          {
+            defaultMessage: 'Other actions',
+          }
+        )}
+        onClick={() => setShowPopover((previousBool) => !previousBool)}
+        iconType="boxesVertical"
+      />
+    </EuiToolTip>
   );
   return (
     <EuiSplitPanel.Inner grow={true} paddingSize="none">

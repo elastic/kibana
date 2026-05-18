@@ -19,6 +19,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTextColor,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { Query } from '@kbn/es-query';
 import { fromKueryExpression } from '@kbn/es-query';
@@ -164,13 +165,15 @@ const CustomFilterChip: React.FC<CustomFilterChipProps> = ({
                     </EuiFlexItem>
                   )}
                   <EuiFlexItem grow={false}>
-                    <EuiButtonIcon
-                      iconType="cross"
-                      color="text"
-                      onClick={onRemove}
-                      aria-label={i18n.REMOVE_FILTER}
-                      size="xs"
-                    />
+                    <EuiToolTip content={i18n.REMOVE_FILTER} disableScreenReaderOutput>
+                      <EuiButtonIcon
+                        iconType="cross"
+                        color="text"
+                        onClick={onRemove}
+                        aria-label={i18n.REMOVE_FILTER}
+                        size="xs"
+                      />
+                    </EuiToolTip>
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiPanel>

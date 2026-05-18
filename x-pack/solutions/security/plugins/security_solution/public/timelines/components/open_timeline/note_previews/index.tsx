@@ -12,6 +12,7 @@ import {
   EuiCommentList,
   EuiScreenReaderOnly,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n-react';
 import React, { useCallback, useMemo } from 'react';
@@ -83,14 +84,15 @@ const ToggleEventDetailsButtonComponent: React.FC<ToggleEventDetailsButtonProps>
   }, [eventId, openFlyout, selectedPatterns, telemetry, timelineId]);
 
   return (
-    <EuiButtonIcon
-      data-test-subj="notes-toggle-event-details"
-      title={i18n.TOGGLE_EXPAND_EVENT_DETAILS}
-      aria-label={i18n.TOGGLE_EXPAND_EVENT_DETAILS}
-      color="text"
-      iconType="chevronSingleRight"
-      onClick={handleClick}
-    />
+    <EuiToolTip content={i18n.TOGGLE_EXPAND_EVENT_DETAILS} disableScreenReaderOutput>
+      <EuiButtonIcon
+        data-test-subj="notes-toggle-event-details"
+        aria-label={i18n.TOGGLE_EXPAND_EVENT_DETAILS}
+        color="text"
+        iconType="chevronSingleRight"
+        onClick={handleClick}
+      />
+    </EuiToolTip>
   );
 };
 
@@ -115,15 +117,16 @@ const DeleteNoteButton = React.memo<{
     return isLoading || savedObjectId == null;
   }, [isLoading, savedObjectId]);
   return (
-    <EuiButtonIcon
-      title={i18n.DELETE_NOTE}
-      aria-label={i18n.DELETE_NOTE}
-      data-test-subj={'delete-note'}
-      color="text"
-      iconType="trash"
-      onClick={handleOpenDeleteModal}
-      disabled={disableDelete}
-    />
+    <EuiToolTip content={i18n.DELETE_NOTE} disableScreenReaderOutput>
+      <EuiButtonIcon
+        aria-label={i18n.DELETE_NOTE}
+        data-test-subj={'delete-note'}
+        color="text"
+        iconType="trash"
+        onClick={handleOpenDeleteModal}
+        disabled={disableDelete}
+      />
+    </EuiToolTip>
   );
 });
 

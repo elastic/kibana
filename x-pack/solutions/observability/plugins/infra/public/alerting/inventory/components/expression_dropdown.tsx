@@ -8,7 +8,14 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiSelectOption } from '@elastic/eui';
-import { EuiExpression, EuiPopover, EuiFlexGroup, EuiFlexItem, EuiSelect } from '@elastic/eui';
+import {
+  EuiExpression,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPopover,
+  EuiSelect,
+  EuiToolTip,
+} from '@elastic/eui';
 import { EuiPopoverTitle, EuiButtonIcon } from '@elastic/eui';
 import { useBoolean } from '@kbn/react-hooks';
 
@@ -95,18 +102,28 @@ export const ClosablePopoverTitle = ({ children, onClose }: ClosablePopoverTitle
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem>{children}</EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            data-test-subj="infraClosablePopoverTitleButton"
-            iconType="cross"
-            color="danger"
-            aria-label={i18n.translate(
+          <EuiToolTip
+            content={i18n.translate(
               'xpack.infra.metrics.expressionItems.components.closablePopoverTitle.closeLabel',
               {
                 defaultMessage: 'Close',
               }
             )}
-            onClick={() => onClose()}
-          />
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              data-test-subj="infraClosablePopoverTitleButton"
+              iconType="cross"
+              color="danger"
+              aria-label={i18n.translate(
+                'xpack.infra.metrics.expressionItems.components.closablePopoverTitle.closeLabel',
+                {
+                  defaultMessage: 'Close',
+                }
+              )}
+              onClick={() => onClose()}
+            />
+          </EuiToolTip>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPopoverTitle>

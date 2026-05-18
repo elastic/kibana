@@ -11,25 +11,26 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import {
+  EuiAccordion,
+  EuiBadge,
+  EuiBetaBadge,
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiCallOut,
+  EuiErrorBoundary,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
-  EuiSpacer,
-  EuiFormRow,
-  EuiAccordion,
-  EuiButtonIcon,
-  EuiButtonEmpty,
-  EuiIconTip,
-  EuiText,
-  EuiSuperSelect,
-  EuiBadge,
-  EuiErrorBoundary,
-  EuiBetaBadge,
-  EuiSplitPanel,
-  useEuiTheme,
-  EuiCallOut,
-  EuiSwitch,
   EuiFormPrepend,
+  EuiFormRow,
+  EuiIcon,
+  EuiIconTip,
+  EuiSpacer,
+  EuiSplitPanel,
+  EuiSuperSelect,
+  EuiSwitch,
+  EuiText,
+  EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import { isEmpty, partition, some } from 'lodash';
 import type {
@@ -652,7 +653,7 @@ export const ActionTypeForm = ({
                 </EuiFlexItem>
               ) : (
                 <EuiFlexItem grow={false}>
-                  <EuiIcon type={actionTypeRegistered.iconClass} size="m" />
+                  <EuiIcon type={actionTypeRegistered.iconClass} size="m" aria-hidden={true} />
                 </EuiFlexItem>
               )}
               <EuiFlexItem>
@@ -741,18 +742,28 @@ export const ActionTypeForm = ({
             </EuiFlexGroup>
           }
           extraAction={
-            <EuiButtonIcon
-              iconType="minusCircle"
-              color="danger"
-              className="actAccordionActionForm__extraAction"
-              aria-label={i18n.translate(
+            <EuiToolTip
+              content={i18n.translate(
                 'xpack.triggersActionsUI.sections.actionTypeForm.accordion.deleteIconAriaLabel',
                 {
                   defaultMessage: 'Delete',
                 }
               )}
-              onClick={onDeleteAction}
-            />
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                iconType="minusCircle"
+                color="danger"
+                className="actAccordionActionForm__extraAction"
+                aria-label={i18n.translate(
+                  'xpack.triggersActionsUI.sections.actionTypeForm.accordion.deleteIconAriaLabel',
+                  {
+                    defaultMessage: 'Delete',
+                  }
+                )}
+                onClick={onDeleteAction}
+              />
+            </EuiToolTip>
           }
         >
           {accordionContent}

@@ -5,16 +5,17 @@
  * 2.0.
  */
 import {
-  EuiHorizontalRule,
   EuiButtonEmpty,
   EuiButtonIcon,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
+  EuiLoadingSpinner,
   EuiSpacer,
   EuiText,
   EuiTextArea,
-  EuiCallOut,
-  EuiLoadingSpinner,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { cloneDeep, isArray, isEmpty, last, once } from 'lodash';
@@ -228,29 +229,43 @@ function PromptEdit({
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          aria-label={i18n.translate('xpack.observabilityAiAssistant.insight.cancelPromptEdit', {
+        <EuiToolTip
+          content={i18n.translate('xpack.observabilityAiAssistant.insight.cancelPromptEdit', {
             defaultMessage: 'Cancel',
           })}
-          data-test-subj="observabilityAiAssistantInsightCancelEditPromptButtonIcon"
-          iconType="cross"
-          display="base"
-          color="danger"
-          size="m"
-          onClick={onCancel}
-        />
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            aria-label={i18n.translate('xpack.observabilityAiAssistant.insight.cancelPromptEdit', {
+              defaultMessage: 'Cancel',
+            })}
+            data-test-subj="observabilityAiAssistantInsightCancelEditPromptButtonIcon"
+            iconType="cross"
+            display="base"
+            color="danger"
+            size="m"
+            onClick={onCancel}
+          />
+        </EuiToolTip>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          aria-label={i18n.translate('xpack.observabilityAiAssistant.insight.sendPromptEdit', {
+        <EuiToolTip
+          content={i18n.translate('xpack.observabilityAiAssistant.insight.sendPromptEdit', {
             defaultMessage: 'Send prompt',
           })}
-          data-test-subj="observabilityAiAssistantInsightSendEditPromptButtonIcon"
-          iconType="kqlFunction"
-          display="fill"
-          size="m"
-          onClick={() => onSend(prompt)}
-        />
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            aria-label={i18n.translate('xpack.observabilityAiAssistant.insight.sendPromptEdit', {
+              defaultMessage: 'Send prompt',
+            })}
+            data-test-subj="observabilityAiAssistantInsightSendEditPromptButtonIcon"
+            iconType="kqlFunction"
+            display="fill"
+            size="m"
+            onClick={() => onSend(prompt)}
+          />
+        </EuiToolTip>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

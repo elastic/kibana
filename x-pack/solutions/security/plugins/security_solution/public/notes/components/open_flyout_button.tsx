@@ -7,7 +7,7 @@
 
 import React, { memo, useCallback } from 'react';
 import type { IconType } from '@elastic/eui';
-import { EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { TableId } from '@kbn/securitysolution-data-table';
@@ -78,14 +78,15 @@ export const OpenFlyoutButtonIcon = memo(
     }, [eventId, openFlyout, selectedPatterns, telemetry, timelineId]);
 
     return (
-      <EuiButtonIcon
-        data-test-subj={OPEN_FLYOUT_BUTTON_TEST_ID}
-        title={OPEN_FLYOUT_BUTTON}
-        aria-label={OPEN_FLYOUT_BUTTON}
-        color="text"
-        iconType={iconType}
-        onClick={handleClick}
-      />
+      <EuiToolTip content={OPEN_FLYOUT_BUTTON} disableScreenReaderOutput>
+        <EuiButtonIcon
+          data-test-subj={OPEN_FLYOUT_BUTTON_TEST_ID}
+          aria-label={OPEN_FLYOUT_BUTTON}
+          color="text"
+          iconType={iconType}
+          onClick={handleClick}
+        />
+      </EuiToolTip>
     );
   }
 );

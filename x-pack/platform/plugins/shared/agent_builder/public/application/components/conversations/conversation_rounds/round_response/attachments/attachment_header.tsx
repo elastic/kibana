@@ -13,6 +13,7 @@ import {
   EuiFlexItem,
   EuiSplitPanel,
   EuiText,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -120,18 +121,20 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
         )}
         {onClose && (
           <EuiFlexItem grow={false} style={{ flexShrink: 0 }}>
-            <EuiButtonIcon
-              aria-label={CLOSE_BUTTON_ARIA_LABEL}
-              iconType="cross"
-              onClick={onClose}
-              size="s"
-              color="text"
-              {...getEbtProps({
-                element: AGENT_BUILDER_UI_EBT.element.pageContent,
-                action: AGENT_BUILDER_UI_EBT.action.conversation.ATTACHMENT_CLOSE,
-                detail: 'attachment',
-              })}
-            />
+            <EuiToolTip content={CLOSE_BUTTON_ARIA_LABEL} disableScreenReaderOutput>
+              <EuiButtonIcon
+                aria-label={CLOSE_BUTTON_ARIA_LABEL}
+                iconType="cross"
+                onClick={onClose}
+                size="s"
+                color="text"
+                {...getEbtProps({
+                  element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                  action: AGENT_BUILDER_UI_EBT.action.conversation.ATTACHMENT_CLOSE,
+                  detail: 'attachment',
+                })}
+              />
+            </EuiToolTip>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>

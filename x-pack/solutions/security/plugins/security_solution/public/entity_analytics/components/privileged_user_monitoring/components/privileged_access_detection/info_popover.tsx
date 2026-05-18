@@ -13,6 +13,7 @@ import {
   EuiPopoverTitle,
   EuiText,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { useBoolean } from '@kbn/react-hooks';
 import React, { useCallback } from 'react';
@@ -45,7 +46,11 @@ export const PrivilegedAccessInfoPopover = () => {
     });
   }, [navigateTo, padPackage, state]);
 
-  const button = <EuiButtonIcon iconType="info" onClick={togglePopover} aria-label={'oi'} />;
+  const button = (
+    <EuiToolTip content={'oi'} disableScreenReaderOutput>
+      <EuiButtonIcon iconType="info" onClick={togglePopover} aria-label={'oi'} />
+    </EuiToolTip>
+  );
 
   return (
     <EuiPopover button={button} isOpen={isPopoverOpen} closePopover={closePopover}>

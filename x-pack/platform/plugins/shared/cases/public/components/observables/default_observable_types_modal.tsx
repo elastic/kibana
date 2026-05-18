@@ -7,17 +7,18 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import {
-  EuiModal,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  EuiModalBody,
-  EuiText,
-  EuiSpacer,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiTitle,
   EuiBadge,
   EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiModal,
+  EuiModalBody,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+  EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { EXTRACT_OBSERVABLES_LABEL } from '../create/translations';
@@ -122,14 +123,19 @@ export const DefaultObservableTypesModal = () => {
 
   return (
     <>
-      <EuiButtonIcon
-        iconType="gear"
-        onClick={onButtonClick}
-        size="s"
-        color="text"
-        data-test-subj="default-observable-types-modal-button"
-        aria-label={i18n.DEFAULT_OBSERVABLE_TYPES_MODAL_BUTTON_ARIA_LABEL}
-      />
+      <EuiToolTip
+        content={i18n.DEFAULT_OBSERVABLE_TYPES_MODAL_BUTTON_ARIA_LABEL}
+        disableScreenReaderOutput
+      >
+        <EuiButtonIcon
+          iconType="gear"
+          onClick={onButtonClick}
+          size="s"
+          color="text"
+          data-test-subj="default-observable-types-modal-button"
+          aria-label={i18n.DEFAULT_OBSERVABLE_TYPES_MODAL_BUTTON_ARIA_LABEL}
+        />
+      </EuiToolTip>
       {isModalOpen && modal}
     </>
   );

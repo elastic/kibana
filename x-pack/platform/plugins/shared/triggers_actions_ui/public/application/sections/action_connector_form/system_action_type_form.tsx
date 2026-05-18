@@ -10,19 +10,20 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { IconType } from '@elastic/eui';
 import {
+  EuiAccordion,
+  EuiBadge,
+  EuiBetaBadge,
+  EuiButtonIcon,
+  EuiCallOut,
+  EuiErrorBoundary,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiSpacer,
-  EuiAccordion,
-  EuiButtonIcon,
-  EuiText,
-  EuiBadge,
-  EuiErrorBoundary,
   EuiIconTip,
-  EuiBetaBadge,
+  EuiSpacer,
   EuiSplitPanel,
-  EuiCallOut,
+  EuiText,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -271,19 +272,29 @@ export const SystemActionTypeForm = ({
             />
           }
           extraAction={
-            <EuiButtonIcon
-              iconType="minusCircle"
-              color="danger"
-              className="actAccordionActionForm__extraAction"
-              aria-label={i18n.translate(
+            <EuiToolTip
+              content={i18n.translate(
                 'xpack.triggersActionsUI.sections.actionTypeForm.accordion.deleteIconAriaLabel',
                 {
                   defaultMessage: 'Delete',
                 }
               )}
-              onClick={onDeleteAction}
-              data-test-subj="system-action-delete-button"
-            />
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                iconType="minusCircle"
+                color="danger"
+                className="actAccordionActionForm__extraAction"
+                aria-label={i18n.translate(
+                  'xpack.triggersActionsUI.sections.actionTypeForm.accordion.deleteIconAriaLabel',
+                  {
+                    defaultMessage: 'Delete',
+                  }
+                )}
+                onClick={onDeleteAction}
+                data-test-subj="system-action-delete-button"
+              />
+            </EuiToolTip>
           }
         >
           {accordionContent}
@@ -346,7 +357,7 @@ const ButtonContent: React.FC<{
         </EuiFlexItem>
       ) : (
         <EuiFlexItem grow={false}>
-          <EuiIcon type={iconClass} size="m" />
+          <EuiIcon type={iconClass} size="m" aria-hidden={true} />
         </EuiFlexItem>
       )}
       <EuiFlexItem>

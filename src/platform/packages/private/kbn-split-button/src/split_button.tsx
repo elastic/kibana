@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiButton, EuiButtonIcon, useEuiTheme } from '@elastic/eui';
+import { EuiButton, EuiButtonIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import type { EuiButtonProps, IconType, UseEuiTheme } from '@elastic/eui';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import React from 'react';
@@ -81,19 +81,20 @@ export const SplitButton = ({
       ) : (
         <EuiButton iconType={iconType} {...commonMainButtonProps} />
       )}
-      <EuiButtonIcon
-        css={styles.secondaryButton}
-        data-test-subj={mainButtonProps['data-test-subj'] + `-secondary-button`}
-        aria-label={secondaryButtonAriaLabel}
-        display={secondaryButtonFill ? 'fill' : 'base'}
-        title={secondaryButtonTitle}
-        color={color}
-        size={size}
-        iconType={secondaryButtonIcon}
-        onClick={onSecondaryButtonClick}
-        isDisabled={areButtonsDisabled || isSecondaryButtonDisabled}
-        isLoading={isLoading || isSecondaryButtonLoading}
-      />
+      <EuiToolTip content={secondaryButtonTitle} disableScreenReaderOutput>
+        <EuiButtonIcon
+          css={styles.secondaryButton}
+          data-test-subj={mainButtonProps['data-test-subj'] + `-secondary-button`}
+          aria-label={secondaryButtonAriaLabel}
+          display={secondaryButtonFill ? 'fill' : 'base'}
+          color={color}
+          size={size}
+          iconType={secondaryButtonIcon}
+          onClick={onSecondaryButtonClick}
+          isDisabled={areButtonsDisabled || isSecondaryButtonDisabled}
+          isLoading={isLoading || isSecondaryButtonLoading}
+        />
+      </EuiToolTip>
     </div>
   );
 };

@@ -90,19 +90,27 @@ export const EntitySummaryGrid = memo(
                   >
                     <EuiCopy textToCopy={entityId}>
                       {(copy) => (
-                        <EuiButtonIcon
-                          iconType="copy"
-                          aria-label={i18n.translate(
+                        <EuiToolTip
+                          content={i18n.translate(
                             'xpack.securitySolution.flyout.entityDetails.grid.copyToClipboard',
                             { defaultMessage: 'Copy to clipboard' }
                           )}
-                          onClick={copy}
-                          iconSize="s"
-                          color="text"
-                          css={css`
-                            transform: translateY(-50%);
-                          `}
-                        />
+                          disableScreenReaderOutput
+                        >
+                          <EuiButtonIcon
+                            iconType="copy"
+                            aria-label={i18n.translate(
+                              'xpack.securitySolution.flyout.entityDetails.grid.copyToClipboard',
+                              { defaultMessage: 'Copy to clipboard' }
+                            )}
+                            onClick={copy}
+                            iconSize="s"
+                            color="text"
+                            css={css`
+                              transform: translateY(-50%);
+                            `}
+                          />
+                        </EuiToolTip>
                       )}
                     </EuiCopy>
                   </EuiToolTip>

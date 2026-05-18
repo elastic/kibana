@@ -7,7 +7,15 @@
 import { stringify, parse } from 'query-string';
 import React, { useEffect, useState } from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
-import { EuiBasicTable, EuiLink, EuiFlexGroup, EuiFlexItem, EuiText, EuiIcon } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiLink,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiIcon,
+  EuiToolTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedRelative, FormattedMessage } from '@kbn/i18n-react';
 
@@ -201,7 +209,7 @@ export const AgentBasedPackagePoliciesTable = ({
             }),
             truncateText: true,
             render(updatedBy: PackagePolicy['updated_by']) {
-              return <Persona size="s" name={updatedBy} title={updatedBy} />;
+              return <Persona size="s" name={updatedBy} />;
             },
           },
           {
@@ -212,9 +220,11 @@ export const AgentBasedPackagePoliciesTable = ({
             truncateText: true,
             render(updatedAt: PackagePolicy['updated_at']) {
               return (
-                <span className="eui-textTruncate" title={updatedAt}>
-                  <FormattedRelative value={updatedAt} />
-                </span>
+                <EuiToolTip content={updatedAt}>
+                  <span className="eui-textTruncate">
+                    <FormattedRelative value={updatedAt} />
+                  </span>
+                </EuiToolTip>
               );
             },
           },

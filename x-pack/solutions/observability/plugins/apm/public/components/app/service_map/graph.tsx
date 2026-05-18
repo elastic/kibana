@@ -21,14 +21,15 @@ import {
   type EdgeMouseHandler,
 } from '@xyflow/react';
 import {
-  useEuiTheme,
-  EuiScreenReaderOnly,
-  EuiScreenReaderLive,
-  EuiFlexGroup,
   EuiButtonIcon,
+  EuiFlexGroup,
   EuiPanel,
-  useGeneratedHtmlId,
+  EuiScreenReaderLive,
+  EuiScreenReaderOnly,
+  EuiToolTip,
   keys,
+  useEuiTheme,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -588,66 +589,71 @@ function GraphInner({
                     justifyContent="center"
                     responsive={false}
                   >
-                    <EuiButtonIcon
-                      display="empty"
-                      color="text"
-                      size="s"
-                      iconType="plus"
-                      onClick={() => zoomIn()}
-                      title={zoomInLabel}
-                      aria-label={zoomInLabel}
-                      data-test-subj="serviceMapZoomInButton"
-                      css={mapToolbarControlIconCss}
-                    />
-                    <EuiButtonIcon
-                      display="empty"
-                      color="text"
-                      size="s"
-                      iconType="minus"
-                      onClick={() => zoomOut()}
-                      title={zoomOutLabel}
-                      aria-label={zoomOutLabel}
-                      data-test-subj="serviceMapZoomOutButton"
-                      css={mapToolbarControlIconCss}
-                    />
-                    {!isEmbedded && (
+                    <EuiToolTip content={zoomInLabel} disableScreenReaderOutput>
                       <EuiButtonIcon
                         display="empty"
                         color="text"
                         size="s"
-                        iconType="crosshair"
-                        onClick={() => fitView(getFitViewOptions())}
-                        title={fitViewLabel}
-                        aria-label={fitViewLabel}
-                        data-test-subj="serviceMapFitViewButton"
+                        iconType="plus"
+                        onClick={() => zoomIn()}
+                        aria-label={zoomInLabel}
+                        data-test-subj="serviceMapZoomInButton"
                         css={mapToolbarControlIconCss}
                       />
+                    </EuiToolTip>
+                    <EuiToolTip content={zoomOutLabel} disableScreenReaderOutput>
+                      <EuiButtonIcon
+                        display="empty"
+                        color="text"
+                        size="s"
+                        iconType="minus"
+                        onClick={() => zoomOut()}
+                        aria-label={zoomOutLabel}
+                        data-test-subj="serviceMapZoomOutButton"
+                        css={mapToolbarControlIconCss}
+                      />
+                    </EuiToolTip>
+                    {!isEmbedded && (
+                      <EuiToolTip content={fitViewLabel} disableScreenReaderOutput>
+                        <EuiButtonIcon
+                          display="empty"
+                          color="text"
+                          size="s"
+                          iconType="crosshair"
+                          onClick={() => fitView(getFitViewOptions())}
+                          aria-label={fitViewLabel}
+                          data-test-subj="serviceMapFitViewButton"
+                          css={mapToolbarControlIconCss}
+                        />
+                      </EuiToolTip>
                     )}
                     {fullMapHref && (
-                      <EuiButtonIcon
-                        display="empty"
-                        color="text"
-                        size="s"
-                        iconType="apps"
-                        href={fullMapHref}
-                        title={viewFullMapButtonLabel}
-                        aria-label={viewFullMapButtonLabel}
-                        data-test-subj="serviceMapViewFullMapButton"
-                        css={mapToolbarControlIconCss}
-                      />
+                      <EuiToolTip content={viewFullMapButtonLabel} disableScreenReaderOutput>
+                        <EuiButtonIcon
+                          display="empty"
+                          color="text"
+                          size="s"
+                          iconType="apps"
+                          href={fullMapHref}
+                          aria-label={viewFullMapButtonLabel}
+                          data-test-subj="serviceMapViewFullMapButton"
+                          css={mapToolbarControlIconCss}
+                        />
+                      </EuiToolTip>
                     )}
                     {onToggleFullscreen && (
-                      <EuiButtonIcon
-                        display="empty"
-                        color="text"
-                        size="s"
-                        iconType={isFullscreen ? 'fullScreenExit' : 'fullScreen'}
-                        onClick={onToggleFullscreen}
-                        title={fullscreenButtonLabel}
-                        aria-label={fullscreenButtonLabel}
-                        data-test-subj="serviceMapFullScreenButton"
-                        css={mapToolbarControlIconCss}
-                      />
+                      <EuiToolTip content={fullscreenButtonLabel} disableScreenReaderOutput>
+                        <EuiButtonIcon
+                          display="empty"
+                          color="text"
+                          size="s"
+                          iconType={isFullscreen ? 'fullScreenExit' : 'fullScreen'}
+                          onClick={onToggleFullscreen}
+                          aria-label={fullscreenButtonLabel}
+                          data-test-subj="serviceMapFullScreenButton"
+                          css={mapToolbarControlIconCss}
+                        />
+                      </EuiToolTip>
                     )}
                   </EuiFlexGroup>
                 </EuiPanel>

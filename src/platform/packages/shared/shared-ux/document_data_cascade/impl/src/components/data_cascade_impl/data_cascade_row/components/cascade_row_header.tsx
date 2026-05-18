@@ -15,6 +15,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiProgress,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { getCascadeRowNodePath, getCascadeRowNodePathValueRecord } from '../../../../lib/utils';
@@ -169,11 +170,8 @@ export function CascadeRowHeaderPrimitive<G extends GroupNode, L extends LeafNod
               )}
             </React.Fragment>
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                color="text"
-                iconType={rowIsExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
-                onClick={rowToggleFn}
-                aria-label={
+              <EuiToolTip
+                content={
                   rowIsExpanded
                     ? i18n.translate('sharedUXPackages.dataCascade.collapseRowButtonLabel', {
                         defaultMessage: 'collapse row',
@@ -182,24 +180,47 @@ export function CascadeRowHeaderPrimitive<G extends GroupNode, L extends LeafNod
                         defaultMessage: 'expand row',
                       })
                 }
-                data-test-subj={`toggle-row-${rowId}-button`}
-              />
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  color="text"
+                  iconType={rowIsExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
+                  onClick={rowToggleFn}
+                  aria-label={
+                    rowIsExpanded
+                      ? i18n.translate('sharedUXPackages.dataCascade.collapseRowButtonLabel', {
+                          defaultMessage: 'collapse row',
+                        })
+                      : i18n.translate('sharedUXPackages.dataCascade.expandRowButtonLabel', {
+                          defaultMessage: 'expand row',
+                        })
+                  }
+                  data-test-subj={`toggle-row-${rowId}-button`}
+                />
+              </EuiToolTip>
             </EuiFlexItem>
             <React.Fragment>
               {enableSecondaryExpansionAction && (
                 <EuiFlexItem grow={false}>
-                  <EuiButtonIcon
-                    color="text"
-                    iconType="maximize"
-                    onClick={onCascadeSecondaryExpansion}
-                    aria-label={i18n.translate(
-                      'sharedUXPackages.dataCascade.expandRowButtonLabel',
-                      {
-                        defaultMessage: 'expand row',
-                      }
-                    )}
-                    data-test-subj={`expand-row-${rowId}-button`}
-                  />
+                  <EuiToolTip
+                    content={i18n.translate('sharedUXPackages.dataCascade.expandRowButtonLabel', {
+                      defaultMessage: 'expand row',
+                    })}
+                    disableScreenReaderOutput
+                  >
+                    <EuiButtonIcon
+                      color="text"
+                      iconType="maximize"
+                      onClick={onCascadeSecondaryExpansion}
+                      aria-label={i18n.translate(
+                        'sharedUXPackages.dataCascade.expandRowButtonLabel',
+                        {
+                          defaultMessage: 'expand row',
+                        }
+                      )}
+                      data-test-subj={`expand-row-${rowId}-button`}
+                    />
+                  </EuiToolTip>
                 </EuiFlexItem>
               )}
             </React.Fragment>

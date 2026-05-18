@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { DELETE_LABEL } from '../../i18n_strings';
 
 interface MetricRowControlProps {
@@ -15,16 +15,17 @@ interface MetricRowControlProps {
 
 export function MetricRowControls({ onDelete, disableDelete }: MetricRowControlProps) {
   return (
-    <EuiButtonIcon
-      data-test-subj="o11yMetricRowControlsButton"
-      aria-label={DELETE_LABEL}
-      iconType="cross"
-      color="text"
-      onClick={onDelete}
-      disabled={disableDelete}
-      title={DELETE_LABEL}
-      size="xs"
-      css={{ height: 16 }}
-    />
+    <EuiToolTip content={DELETE_LABEL} disableScreenReaderOutput>
+      <EuiButtonIcon
+        data-test-subj="o11yMetricRowControlsButton"
+        aria-label={DELETE_LABEL}
+        iconType="cross"
+        color="text"
+        onClick={onDelete}
+        disabled={disableDelete}
+        size="xs"
+        css={{ height: 16 }}
+      />
+    </EuiToolTip>
   );
 }

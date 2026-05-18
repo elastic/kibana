@@ -15,6 +15,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -103,18 +104,28 @@ export const QueryFormTypeChooser: React.FC<QueryFormTypeProps> = ({
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              iconType="cross"
-              color="danger"
-              data-test-subj="queryFormTypeChooserCancel"
-              aria-label={i18n.translate(
+            <EuiToolTip
+              content={i18n.translate(
                 'xpack.stackAlerts.esQuery.ui.selectQueryFormType.cancelSelectionAriaLabel',
                 {
                   defaultMessage: 'Cancel selection',
                 }
               )}
-              onClick={() => onFormTypeSelect(null)}
-            />
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                iconType="cross"
+                color="danger"
+                data-test-subj="queryFormTypeChooserCancel"
+                aria-label={i18n.translate(
+                  'xpack.stackAlerts.esQuery.ui.selectQueryFormType.cancelSelectionAriaLabel',
+                  {
+                    defaultMessage: 'Cancel selection',
+                  }
+                )}
+                onClick={() => onFormTypeSelect(null)}
+              />
+            </EuiToolTip>
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiText color="subdued" size="s" data-test-subj="selectedRuleFormTypeDescription">

@@ -8,9 +8,10 @@
 import { i18n } from '@kbn/i18n';
 import {
   EuiBasicTable,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonIcon,
+  EuiToolTip,
   RIGHT_ALIGNMENT,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
@@ -96,15 +97,22 @@ function ActionsCell<T extends object>({
       actions={resolvedActions}
       dataTestSubjPrefix="apmManagedTableActionsMenu"
       button={
-        <EuiButtonIcon
-          data-test-subj="apmManagedTableActionsCellButton"
-          aria-label={i18n.translate('xpack.apm.managedTable.actionsAriaLabel', {
+        <EuiToolTip
+          content={i18n.translate('xpack.apm.managedTable.actionsAriaLabel', {
             defaultMessage: 'Actions',
           })}
-          iconType="boxesVertical"
-          color="text"
-          isDisabled={disabled}
-        />
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            data-test-subj="apmManagedTableActionsCellButton"
+            aria-label={i18n.translate('xpack.apm.managedTable.actionsAriaLabel', {
+              defaultMessage: 'Actions',
+            })}
+            iconType="boxesVertical"
+            color="text"
+            isDisabled={disabled}
+          />
+        </EuiToolTip>
       }
     />
   );

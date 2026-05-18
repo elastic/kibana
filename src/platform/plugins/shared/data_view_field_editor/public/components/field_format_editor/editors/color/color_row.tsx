@@ -18,6 +18,7 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiSelect,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -195,17 +196,24 @@ export const ColorRow = ({
       </EuiFlexItem>
       {showDeleteButton && (
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            iconType="trash"
-            color="danger"
-            onClick={() => {
-              onRemoveColor(index);
-            }}
-            aria-label={i18n.translate('indexPatternFieldEditor.color.deleteTitle', {
+          <EuiToolTip
+            content={i18n.translate('indexPatternFieldEditor.color.deleteTitle', {
               defaultMessage: 'Delete color format',
             })}
-            data-test-subj="colorEditorRemoveColor"
-          />
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              iconType="trash"
+              color="danger"
+              onClick={() => {
+                onRemoveColor(index);
+              }}
+              aria-label={i18n.translate('indexPatternFieldEditor.color.deleteTitle', {
+                defaultMessage: 'Delete color format',
+              })}
+              data-test-subj="colorEditorRemoveColor"
+            />
+          </EuiToolTip>
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

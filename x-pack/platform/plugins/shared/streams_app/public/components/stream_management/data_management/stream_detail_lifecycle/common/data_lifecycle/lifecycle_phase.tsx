@@ -222,24 +222,35 @@ export const LifecyclePhase = (props: LifecyclePhaseProps) => {
                         />
                       </EuiToolTip>
                     ) : (
-                      <EuiButtonIcon
-                        iconType="trash"
-                        size="s"
-                        display="base"
-                        color="danger"
-                        aria-label={i18n.translate(
+                      <EuiToolTip
+                        content={i18n.translate(
                           'xpack.streams.streamDetailLifecycle.removePhaseButton.ariaLabel',
                           {
                             defaultMessage: 'Remove {phase} phase',
                             values: { phase: label ?? '' },
                           }
                         )}
-                        data-test-subj={`lifecyclePhase-${label}-removeButton`}
-                        onClick={() => {
-                          closePopover();
-                          onRemovePhase(label ?? '');
-                        }}
-                      />
+                        disableScreenReaderOutput
+                      >
+                        <EuiButtonIcon
+                          iconType="trash"
+                          size="s"
+                          display="base"
+                          color="danger"
+                          aria-label={i18n.translate(
+                            'xpack.streams.streamDetailLifecycle.removePhaseButton.ariaLabel',
+                            {
+                              defaultMessage: 'Remove {phase} phase',
+                              values: { phase: label ?? '' },
+                            }
+                          )}
+                          data-test-subj={`lifecyclePhase-${label}-removeButton`}
+                          onClick={() => {
+                            closePopover();
+                            onRemovePhase(label ?? '');
+                          }}
+                        />
+                      </EuiToolTip>
                     )}
                   </EuiFlexItem>
                 )}

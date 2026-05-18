@@ -15,6 +15,7 @@ import {
   EuiFormRow,
   EuiSpacer,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { Fragment, useState, type ReactNode } from 'react';
@@ -49,16 +50,24 @@ const InternalNetworksFieldInput = ({ index, onRemove }: InternalNetworksFieldIn
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          iconType="trash"
-          color="danger"
-          size="m"
-          onClick={() => onRemove(index)}
-          aria-label={i18n.translate(
+        <EuiToolTip
+          content={i18n.translate(
             'xpack.streams.streamDetailView.managementTab.enrichment.processor.networkDirectionsSelectorInternalNetworksRemoveButton',
             { defaultMessage: 'Remove' }
           )}
-        />
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            iconType="trash"
+            color="danger"
+            size="m"
+            onClick={() => onRemove(index)}
+            aria-label={i18n.translate(
+              'xpack.streams.streamDetailView.managementTab.enrichment.processor.networkDirectionsSelectorInternalNetworksRemoveButton',
+              { defaultMessage: 'Remove' }
+            )}
+          />
+        </EuiToolTip>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
@@ -88,16 +97,24 @@ const InternalNetworksContent = () => {
             <InternalNetworksFieldInput index={index} onRemove={handleRemove} />
           </EuiFlexItem>
         ))}
-        <EuiButtonIcon
-          iconType="plus"
-          display="base"
-          color="text"
-          onClick={handleAdd}
-          aria-label={i18n.translate(
+        <EuiToolTip
+          content={i18n.translate(
             'xpack.streams.streamDetailView.managementTab.enrichment.processor.networkDirectionsSelectorInternalNetworksAddButton',
             { defaultMessage: 'Add' }
           )}
-        />
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            iconType="plus"
+            display="base"
+            color="text"
+            onClick={handleAdd}
+            aria-label={i18n.translate(
+              'xpack.streams.streamDetailView.managementTab.enrichment.processor.networkDirectionsSelectorInternalNetworksAddButton',
+              { defaultMessage: 'Add' }
+            )}
+          />
+        </EuiToolTip>
       </EuiFlexGroup>
     </EuiFormRow>
   );

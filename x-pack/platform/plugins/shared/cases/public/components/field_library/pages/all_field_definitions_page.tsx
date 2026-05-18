@@ -18,6 +18,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -134,23 +135,25 @@ export const AllFieldDefinitionsPage: React.FC<AllFieldDefinitionsPageProps> = (
           render: (fd: FieldDefinition) => (
             <EuiFlexGroup gutterSize="xs" responsive={false}>
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  iconType="pencil"
-                  aria-label={i18n.EDIT_FIELD_DEFINITION}
-                  title={i18n.EDIT_FIELD_DEFINITION}
-                  onClick={() => handleEdit(fd)}
-                  data-test-subj="fieldDefinitionEditButton"
-                />
+                <EuiToolTip content={i18n.EDIT_FIELD_DEFINITION} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    iconType="pencil"
+                    aria-label={i18n.EDIT_FIELD_DEFINITION}
+                    onClick={() => handleEdit(fd)}
+                    data-test-subj="fieldDefinitionEditButton"
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  iconType="trash"
-                  aria-label={i18n.DELETE_FIELD_DEFINITION}
-                  title={i18n.DELETE_FIELD_DEFINITION}
-                  color="danger"
-                  onClick={() => handleDelete(fd)}
-                  data-test-subj="fieldDefinitionDeleteButton"
-                />
+                <EuiToolTip content={i18n.DELETE_FIELD_DEFINITION} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    iconType="trash"
+                    aria-label={i18n.DELETE_FIELD_DEFINITION}
+                    color="danger"
+                    onClick={() => handleDelete(fd)}
+                    data-test-subj="fieldDefinitionDeleteButton"
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
             </EuiFlexGroup>
           ),

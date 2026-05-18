@@ -15,8 +15,9 @@ import {
   EuiFlexItem,
   EuiLink,
   EuiText,
-  useEuiTheme,
+  EuiToolTip,
   type EuiBasicTableColumn,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -127,10 +128,8 @@ export function Summary({ count }: { count: number }) {
         render: (_: string, insight: Insight) => {
           const isSelected = selectedInsight?.id === insight.id;
           return (
-            <EuiButtonIcon
-              data-test-subj="streamsInsightExpandButton"
-              iconType={isSelected ? 'minimize' : 'expand'}
-              aria-label={
+            <EuiToolTip
+              content={
                 isSelected
                   ? i18n.translate('xpack.streams.insights.table.minimizeAriaLabel', {
                       defaultMessage: 'Close insight details',
@@ -139,8 +138,23 @@ export function Summary({ count }: { count: number }) {
                       defaultMessage: 'View insight details',
                     })
               }
-              onClick={() => (isSelected ? handleCloseFlyout() : handleSelectInsight(insight))}
-            />
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                data-test-subj="streamsInsightExpandButton"
+                iconType={isSelected ? 'minimize' : 'expand'}
+                aria-label={
+                  isSelected
+                    ? i18n.translate('xpack.streams.insights.table.minimizeAriaLabel', {
+                        defaultMessage: 'Close insight details',
+                      })
+                    : i18n.translate('xpack.streams.insights.table.expandAriaLabel', {
+                        defaultMessage: 'View insight details',
+                      })
+                }
+                onClick={() => (isSelected ? handleCloseFlyout() : handleSelectInsight(insight))}
+              />
+            </EuiToolTip>
           );
         },
       },

@@ -6,7 +6,15 @@
  */
 import React, { useEffect, useMemo, useState } from 'react';
 import type { HorizontalAlignment } from '@elastic/eui';
-import { EuiBadge, EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiBasicTable,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiText,
+  EuiToolTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedRelative, FormattedMessage } from '@kbn/i18n-react';
 
@@ -201,7 +209,7 @@ export const AgentlessPackagePoliciesTable = ({
             }),
             truncateText: true,
             render(updatedBy: PackagePolicy['updated_by']) {
-              return <Persona size="s" name={updatedBy} title={updatedBy} />;
+              return <Persona size="s" name={updatedBy} />;
             },
           },
           {
@@ -212,9 +220,11 @@ export const AgentlessPackagePoliciesTable = ({
             truncateText: true,
             render(updatedAt: PackagePolicy['updated_at']) {
               return (
-                <span className="eui-textTruncate" title={updatedAt}>
-                  <FormattedRelative value={updatedAt} />
-                </span>
+                <EuiToolTip content={updatedAt}>
+                  <span className="eui-textTruncate">
+                    <FormattedRelative value={updatedAt} />
+                  </span>
+                </EuiToolTip>
               );
             },
           },

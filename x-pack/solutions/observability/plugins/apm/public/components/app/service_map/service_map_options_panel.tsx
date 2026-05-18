@@ -16,6 +16,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
   htmlIdGenerator,
   useEuiTheme,
 } from '@elastic/eui';
@@ -213,20 +214,21 @@ export function ServiceMapOptionsPanelToggle({
         gutterSize="none"
         responsive={false}
       >
-        <EuiButtonIcon
-          display="empty"
-          color={isExpanded ? 'primary' : 'text'}
-          size="s"
-          iconType="controls"
-          css={mapToolbarToggleIconCss}
-          onClick={() => onExpandedChange(!isExpanded)}
-          aria-expanded={isExpanded}
-          title={toggleLabel}
-          aria-label={toggleLabel}
-          data-test-subj={
-            isExpanded ? 'serviceMapHideControlsButton' : 'serviceMapShowControlsButton'
-          }
-        />
+        <EuiToolTip content={toggleLabel} disableScreenReaderOutput>
+          <EuiButtonIcon
+            display="empty"
+            color={isExpanded ? 'primary' : 'text'}
+            size="s"
+            iconType="controls"
+            css={mapToolbarToggleIconCss}
+            onClick={() => onExpandedChange(!isExpanded)}
+            aria-expanded={isExpanded}
+            aria-label={toggleLabel}
+            data-test-subj={
+              isExpanded ? 'serviceMapHideControlsButton' : 'serviceMapShowControlsButton'
+            }
+          />
+        </EuiToolTip>
       </EuiFlexGroup>
     </EuiPanel>
   );

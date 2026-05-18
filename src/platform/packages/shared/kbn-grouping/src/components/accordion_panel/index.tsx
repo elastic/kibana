@@ -7,7 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiAccordion, EuiFlexGroup, EuiFlexItem, EuiTitle, EuiIconTip } from '@elastic/eui';
+import {
+  EuiAccordion,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTitle,
+  EuiIconTip,
+} from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import type { GroupChildComponentRenderer, GroupingBucket } from '../types';
 import { createGroupFilter, getNullGroupFilter } from '../../containers/query/helpers';
@@ -43,9 +49,7 @@ const DefaultGroupPanelRenderer = ({
     <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
       <EuiFlexItem grow={false} className="eui-textTruncate">
         <EuiTitle size="xs">
-          <h4 className="eui-textTruncate" title={title}>
-            {title}
-          </h4>
+          <h4 className="eui-textTruncate" title={title}>{title}</h4>
         </EuiTitle>
       </EuiFlexItem>
       {isNullGroup && nullGroupMessage && (

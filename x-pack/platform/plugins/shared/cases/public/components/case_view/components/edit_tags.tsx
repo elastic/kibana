@@ -7,14 +7,15 @@
 
 import React, { useCallback, useState } from 'react';
 import {
-  EuiTitle,
-  EuiHorizontalRule,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
   EuiLoadingSpinner,
+  EuiTitle,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -86,12 +87,14 @@ export const EditTags = React.memo(({ isLoading, onSubmit, tags }: EditTagsProps
         {isLoading && <EuiLoadingSpinner data-test-subj="tag-list-loading" />}
         {!isLoading && permissions.update && (
           <EuiFlexItem data-test-subj="tag-list-edit" grow={false}>
-            <EuiButtonIcon
-              data-test-subj="tag-list-edit-button"
-              aria-label={i18n.EDIT_TAGS_ARIA}
-              iconType={'pencil'}
-              onClick={() => setIsEditTags(true)}
-            />
+            <EuiToolTip content={i18n.EDIT_TAGS_ARIA} disableScreenReaderOutput>
+              <EuiButtonIcon
+                data-test-subj="tag-list-edit-button"
+                aria-label={i18n.EDIT_TAGS_ARIA}
+                iconType={'pencil'}
+                onClick={() => setIsEditTags(true)}
+              />
+            </EuiToolTip>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>

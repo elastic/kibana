@@ -16,6 +16,7 @@ import {
   EuiFlexItem,
   EuiText,
   EuiTitle,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import type { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
@@ -165,12 +166,17 @@ export const BrowserStepsList = ({
             width: '40px',
             isExpander: true,
             render: (item: JourneyStep) => (
-              <EuiButtonIcon
-                data-test-subj="syntheticsColumnsButton"
-                onClick={() => toggleDetails(item)}
-                aria-label={expandedMap[item._id] ? 'Collapse' : 'Expand'}
-                iconType={expandedMap[item._id] ? 'chevronSingleDown' : 'chevronSingleRight'}
-              />
+              <EuiToolTip
+                content={expandedMap[item._id] ? 'Collapse' : 'Expand'}
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  data-test-subj="syntheticsColumnsButton"
+                  onClick={() => toggleDetails(item)}
+                  aria-label={expandedMap[item._id] ? 'Collapse' : 'Expand'}
+                  iconType={expandedMap[item._id] ? 'chevronSingleDown' : 'chevronSingleRight'}
+                />
+              </EuiToolTip>
             ),
           },
         ]

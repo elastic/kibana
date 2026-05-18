@@ -74,9 +74,13 @@ export const MissingLookupsList = React.memo<MissingLookupsListProps>(
                     >
                       <EuiFlexItem grow={false}>
                         {uploadedLookups[lookupName] != null ? (
-                          <EuiIcon type="checkCircleFill" color={euiTheme.colors.success} />
+                          <EuiIcon
+                            type="checkCircleFill"
+                            color={euiTheme.colors.success}
+                            aria-hidden={true}
+                          />
                         ) : (
-                          <EuiIcon type="dot" />
+                          <EuiIcon type="dot" aria-hidden={true} />
                         )}
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
@@ -188,14 +192,16 @@ const OmitLookupButton = React.memo<OmitLookupButtonProps>(
 
     const button = useMemo(
       () => (
-        <EuiButtonIcon
-          onClick={onClick}
-          iconType="cross"
-          color="text"
-          aria-label={CONFIGS[migrationSource].label}
-          data-test-subj={testId}
-          isDisabled={isDisabled}
-        />
+        <EuiToolTip content={CONFIGS[migrationSource].label} disableScreenReaderOutput>
+          <EuiButtonIcon
+            onClick={onClick}
+            iconType="cross"
+            color="text"
+            aria-label={CONFIGS[migrationSource].label}
+            data-test-subj={testId}
+            isDisabled={isDisabled}
+          />
+        </EuiToolTip>
       ),
       [onClick, migrationSource, testId, isDisabled]
     );

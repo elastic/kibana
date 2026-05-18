@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiSuperSelect, useEuiTheme } from '@elastic/eui';
+import { EuiButtonIcon, EuiSuperSelect, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 
@@ -149,13 +149,15 @@ const TopNComponent: React.FC<Props> = ({
         )}
       </div>
 
-      <EuiButtonIcon
-        css={styles.closeButton}
-        aria-label={i18n.CLOSE}
-        data-test-subj="close"
-        iconType="cross"
-        onClick={toggleTopN}
-      />
+      <EuiToolTip content={i18n.CLOSE} disableScreenReaderOutput>
+        <EuiButtonIcon
+          css={styles.closeButton}
+          aria-label={i18n.CLOSE}
+          data-test-subj="close"
+          iconType="cross"
+          onClick={toggleTopN}
+        />
+      </EuiToolTip>
     </div>
   );
 };

@@ -24,6 +24,7 @@ import {
   EuiPopover,
   EuiSpacer,
   EuiSwitch,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { WindowParameters } from '@kbn/aiops-log-rate-analysis/window_parameters';
 import type { SignificantItem } from '@kbn/ml-agg-utils';
@@ -215,18 +216,28 @@ export const LogRateAnalysisAttachmentsMenu = ({
               defaultMessage: 'Attachments',
             })}
             button={
-              <EuiButtonIcon
-                data-test-subj="aiopsLogRateAnalysisAttachmentsMenuButton"
-                aria-label={i18n.translate('xpack.aiops.logRateAnalysis.attachmentsMenuAriaLabel', {
+              <EuiToolTip
+                content={i18n.translate('xpack.aiops.logRateAnalysis.attachmentsMenuAriaLabel', {
                   defaultMessage: 'Attachments',
                 })}
-                color="text"
-                display="base"
-                size="s"
-                isSelected={isActionMenuOpen}
-                iconType="boxesVertical"
-                onClick={() => setIsActionMenuOpen(!isActionMenuOpen)}
-              />
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  data-test-subj="aiopsLogRateAnalysisAttachmentsMenuButton"
+                  aria-label={i18n.translate(
+                    'xpack.aiops.logRateAnalysis.attachmentsMenuAriaLabel',
+                    {
+                      defaultMessage: 'Attachments',
+                    }
+                  )}
+                  color="text"
+                  display="base"
+                  size="s"
+                  isSelected={isActionMenuOpen}
+                  iconType="boxesVertical"
+                  onClick={() => setIsActionMenuOpen(!isActionMenuOpen)}
+                />
+              </EuiToolTip>
             }
             isOpen={isActionMenuOpen}
             closePopover={() => setIsActionMenuOpen(false)}

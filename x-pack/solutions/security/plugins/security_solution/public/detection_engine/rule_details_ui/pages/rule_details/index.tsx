@@ -463,14 +463,16 @@ export const RuleDetailsPage = connector(
             </EuiFlexItem>
           ) : (
             <RuleStatus status={lastExecutionStatus} date={lastExecutionDate}>
-              <EuiButtonIcon
-                data-test-subj="ruleLastExecutionStatusRefreshButton"
-                color="primary"
-                onClick={refreshRule}
-                iconType="refresh"
-                aria-label={ruleI18n.REFRESH}
-                isDisabled={!isExistingRule}
-              />
+              <EuiToolTip content={ruleI18n.REFRESH} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  data-test-subj="ruleLastExecutionStatusRefreshButton"
+                  color="primary"
+                  onClick={refreshRule}
+                  iconType="refresh"
+                  aria-label={ruleI18n.REFRESH}
+                  isDisabled={!isExistingRule}
+                />
+              </EuiToolTip>
             </RuleStatus>
           )}
           <EuiFlexItem grow={false}>

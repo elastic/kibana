@@ -11,9 +11,10 @@ import {
   EuiButtonIcon,
   EuiContextMenuItem,
   EuiContextMenuPanel,
-  EuiFlexItem,
   EuiFlexGroup,
+  EuiFlexItem,
   EuiPopover,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
@@ -60,24 +61,31 @@ export const CreateNewIntegrationButton: React.FC = () => {
           anchorPosition="downRight"
           style={{ display: 'flex', height: '100%' }}
           button={
-            <EuiButtonIcon
-              display="fill"
-              color="primary"
-              iconType="chevronSingleDown"
-              aria-label={i18n.translate(
-                'xpack.fleet.epmList.createNewIntegrationDropdownAriaLabel',
-                { defaultMessage: 'More integration creation options' }
-              )}
-              onClick={() => setIsPopoverOpen((prev) => !prev)}
-              style={{
-                borderTopLeftRadius: 0,
-                borderBottomLeftRadius: 0,
-                borderLeft: '1px solid rgba(255,255,255,0.3)',
-                height: 40,
-                minHeight: 0,
-              }}
-              data-test-subj="createNewIntegrationDropdownBtn"
-            />
+            <EuiToolTip
+              content={i18n.translate('xpack.fleet.epmList.createNewIntegrationDropdownAriaLabel', {
+                defaultMessage: 'More integration creation options',
+              })}
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                display="fill"
+                color="primary"
+                iconType="chevronSingleDown"
+                aria-label={i18n.translate(
+                  'xpack.fleet.epmList.createNewIntegrationDropdownAriaLabel',
+                  { defaultMessage: 'More integration creation options' }
+                )}
+                onClick={() => setIsPopoverOpen((prev) => !prev)}
+                style={{
+                  borderTopLeftRadius: 0,
+                  borderBottomLeftRadius: 0,
+                  borderLeft: '1px solid rgba(255,255,255,0.3)',
+                  height: 40,
+                  minHeight: 0,
+                }}
+                data-test-subj="createNewIntegrationDropdownBtn"
+              />
+            </EuiToolTip>
           }
         >
           <EuiContextMenuPanel

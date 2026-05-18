@@ -172,14 +172,22 @@ export function AboutPanel() {
                 transition: opacity 150ms;
               `}
             >
-              <EuiButtonIcon
-                iconType="pencil"
-                aria-label={i18n.translate(
+              <EuiToolTip
+                content={i18n.translate(
                   'xpack.streams.streamOverview.aboutPanel.editDescriptionAriaLabel',
                   { defaultMessage: 'Edit description' }
                 )}
-                onClick={handleClick}
-              />
+                disableScreenReaderOutput
+              >
+                <EuiButtonIcon
+                  iconType="pencil"
+                  aria-label={i18n.translate(
+                    'xpack.streams.streamOverview.aboutPanel.editDescriptionAriaLabel',
+                    { defaultMessage: 'Edit description' }
+                  )}
+                  onClick={handleClick}
+                />
+              </EuiToolTip>
             </EuiFlexItem>
           )}
         </EuiFlexGroup>

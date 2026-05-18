@@ -6,13 +6,14 @@
  */
 
 import {
+  EuiButtonIcon,
+  EuiHealth,
+  EuiIcon,
   EuiLink,
+  EuiScreenReaderOnly,
+  EuiToolTip,
   type EuiBasicTableColumn,
   type IconColor,
-  EuiHealth,
-  EuiScreenReaderOnly,
-  EuiButtonIcon,
-  EuiIcon,
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -105,9 +106,21 @@ export const useColumns = (
         align: 'center',
         render: (value: boolean) =>
           value ? (
-            <EuiIcon data-test-subj="installation-status" type="check" color="success" size="l" />
+            <EuiIcon
+              data-test-subj="installation-status"
+              type="check"
+              color="success"
+              size="l"
+              aria-hidden={true}
+            />
           ) : (
-            <EuiIcon data-test-subj="installation-status" type="cross" color="danger" size="l" />
+            <EuiIcon
+              data-test-subj="installation-status"
+              type="cross"
+              color="danger"
+              size="l"
+              aria-hidden={true}
+            />
           ),
       },
       {
@@ -146,11 +159,13 @@ export const useColumns = (
           const isItemExpanded = expandedItems.includes(component);
 
           return component.errors && component.errors.length > 0 ? (
-            <EuiButtonIcon
-              onClick={() => onToggleExpandedItem(component)}
-              aria-label={isItemExpanded ? 'Collapse' : 'Expand'}
-              iconType={isItemExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
-            />
+            <EuiToolTip content={isItemExpanded ? 'Collapse' : 'Expand'} disableScreenReaderOutput>
+              <EuiButtonIcon
+                onClick={() => onToggleExpandedItem(component)}
+                aria-label={isItemExpanded ? 'Collapse' : 'Expand'}
+                iconType={isItemExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
+              />
+            </EuiToolTip>
           ) : null;
         },
       },

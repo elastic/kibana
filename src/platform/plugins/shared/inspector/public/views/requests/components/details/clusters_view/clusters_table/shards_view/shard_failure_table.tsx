@@ -11,7 +11,13 @@ import type { ReactNode } from 'react';
 import React, { useState } from 'react';
 import type { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
-import { EuiBasicTable, type EuiBasicTableColumn, EuiButtonIcon, EuiText } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiButtonIcon,
+  EuiText,
+  EuiToolTip,
+  type EuiBasicTableColumn,
+} from '@elastic/eui';
 import { ShardFailureDetails } from './shard_failure_details';
 
 function getRowId(failure: estypes.ShardFailure) {
@@ -54,9 +60,8 @@ export function ShardFailureTable({ failures }: Props) {
       render: (shard: number, item: ShardRow) => {
         return (
           <>
-            <EuiButtonIcon
-              onClick={() => toggleDetails(item.rowId)}
-              aria-label={
+            <EuiToolTip
+              content={
                 item.rowId in expandedRows
                   ? i18n.translate('inspector.requests.clusters.shards.table.collapseRow', {
                       defaultMessage: 'Collapse table row to hide shard details',
@@ -65,8 +70,22 @@ export function ShardFailureTable({ failures }: Props) {
                       defaultMessage: 'Expand table row to view shard details',
                     })
               }
-              iconType={item.rowId in expandedRows ? 'chevronSingleDown' : 'chevronSingleRight'}
-            />
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                onClick={() => toggleDetails(item.rowId)}
+                aria-label={
+                  item.rowId in expandedRows
+                    ? i18n.translate('inspector.requests.clusters.shards.table.collapseRow', {
+                        defaultMessage: 'Collapse table row to hide shard details',
+                      })
+                    : i18n.translate('inspector.requests.clusters.shards.table.expandRow', {
+                        defaultMessage: 'Expand table row to view shard details',
+                      })
+                }
+                iconType={item.rowId in expandedRows ? 'chevronSingleDown' : 'chevronSingleRight'}
+              />
+            </EuiToolTip>
             <EuiText size="xs" color="subdued">
               {shard}
             </EuiText>

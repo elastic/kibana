@@ -17,6 +17,7 @@ import {
   EuiFlexItem,
   EuiPopover,
   EuiSpacer,
+  EuiToolTip,
 } from '@elastic/eui';
 import useDebounce from 'react-use/lib/useDebounce';
 import { METRIC_TYPE, useUiTracker } from '@kbn/observability-shared-plugin/public';
@@ -143,14 +144,16 @@ export const WaterfallFilter = ({
       <EuiFlexItem grow={false}>
         <EuiPopover
           button={
-            <EuiButtonIcon
-              data-test-subj="observabilitySolutionWaterfallFilterButton"
-              aria-label={FILTER_POPOVER_OPEN_LABEL}
-              iconType="filter"
-              onClick={() => setIsPopoverOpen((prevState) => !prevState)}
-              color={activeFilters.length > 0 ? 'primary' : 'text'}
-              isSelected={activeFilters.length > 0}
-            />
+            <EuiToolTip content={FILTER_POPOVER_OPEN_LABEL} disableScreenReaderOutput>
+              <EuiButtonIcon
+                data-test-subj="observabilitySolutionWaterfallFilterButton"
+                aria-label={FILTER_POPOVER_OPEN_LABEL}
+                iconType="filter"
+                onClick={() => setIsPopoverOpen((prevState) => !prevState)}
+                color={activeFilters.length > 0 ? 'primary' : 'text'}
+                isSelected={activeFilters.length > 0}
+              />
+            </EuiToolTip>
           }
           isOpen={isPopoverOpen}
           closePopover={() => setIsPopoverOpen(false)}

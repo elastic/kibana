@@ -13,6 +13,7 @@ import {
   EuiForm,
   EuiFormRow,
   EuiPopover,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -100,17 +101,24 @@ export function DependencyEditor({
   };
 
   const button = isEditMode ? (
-    <EuiButtonIcon
-      isDisabled={isLoading}
-      data-test-subj="sloBurnRateRuleEditDependencyButton"
-      color={'primary'}
-      size="s"
-      iconType={'pencil'}
-      onClick={handleOpenPopover}
-      aria-label={i18n.translate('xpack.slo.rules.editDependencyAriaLabel', {
+    <EuiToolTip
+      content={i18n.translate('xpack.slo.rules.editDependencyAriaLabel', {
         defaultMessage: 'Edit dependency',
       })}
-    />
+      disableScreenReaderOutput
+    >
+      <EuiButtonIcon
+        isDisabled={isLoading}
+        data-test-subj="sloBurnRateRuleEditDependencyButton"
+        color={'primary'}
+        size="s"
+        iconType={'pencil'}
+        onClick={handleOpenPopover}
+        aria-label={i18n.translate('xpack.slo.rules.editDependencyAriaLabel', {
+          defaultMessage: 'Edit dependency',
+        })}
+      />
+    </EuiToolTip>
   ) : (
     <EuiButtonEmpty
       isDisabled={isLoading || rules?.length === 0}

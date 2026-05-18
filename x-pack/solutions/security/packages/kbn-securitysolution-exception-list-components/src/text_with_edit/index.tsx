@@ -7,7 +7,7 @@
 
 import type { FC } from 'react';
 import React from 'react';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import type { Interpolation, Theme } from '@emotion/react';
 import { textWithEditContainerCss } from './text_with_edit.styles';
 interface TextWithEditProps {
@@ -34,12 +34,14 @@ const TextWithEditComponent: FC<TextWithEditProps> = ({
       </EuiFlexItem>
       <EuiFlexItem grow={false} component="span">
         {isReadonly ? null : (
-          <EuiButtonIcon
-            data-test-subj={`${dataTestSubj || ''}EditIcon`}
-            aria-label="Edit Text List Header"
-            iconType="pencil"
-            onClick={() => (typeof onEdit === 'function' ? onEdit() : null)}
-          />
+          <EuiToolTip content="Edit Text List Header" disableScreenReaderOutput>
+            <EuiButtonIcon
+              data-test-subj={`${dataTestSubj || ''}EditIcon`}
+              aria-label="Edit Text List Header"
+              iconType="pencil"
+              onClick={() => (typeof onEdit === 'function' ? onEdit() : null)}
+            />
+          </EuiToolTip>
         )}
       </EuiFlexItem>
     </EuiFlexGroup>

@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiButtonIcon, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import styled from 'styled-components';
 import type { BuilderEntry } from '@kbn/securitysolution-list-utils';
 
@@ -36,15 +36,17 @@ export const BuilderEntryDeleteButtonComponent = React.memo<BuilderEntryDeleteBu
     }, [onDelete, entryIndex, nestedParentIndex]);
 
     const button = (
-      <EuiButtonIcon
-        color="danger"
-        iconType="trash"
-        onClick={handleDelete}
-        isDisabled={isDisabled}
-        aria-label="entryDeleteButton"
-        className="exceptionItemEntryDeleteButton"
-        data-test-subj="builderItemEntryDeleteButton"
-      />
+      <EuiToolTip content="entryDeleteButton" disableScreenReaderOutput>
+        <EuiButtonIcon
+          color="danger"
+          iconType="trash"
+          onClick={handleDelete}
+          isDisabled={isDisabled}
+          aria-label="entryDeleteButton"
+          className="exceptionItemEntryDeleteButton"
+          data-test-subj="builderItemEntryDeleteButton"
+        />
+      </EuiToolTip>
     );
 
     if (entryIndex === 0 && exceptionItemIndex === 0 && nestedParentIndex == null) {

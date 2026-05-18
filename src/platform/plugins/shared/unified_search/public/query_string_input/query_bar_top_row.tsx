@@ -887,19 +887,21 @@ export const QueryBarTopRow = React.memo(
 
       if (submitButtonIconOnly) {
         return (
-          <EuiButtonIcon
-            iconType="cross"
-            aria-label={buttonLabelCancel}
-            onClick={onClickCancelButton}
-            size="s"
-            data-test-subj="queryCancelButton"
-            color="text"
-            display="base"
-            isLoading={isCancelling}
-            isDisabled={isCancelling}
-          >
-            {buttonLabelCancel}
-          </EuiButtonIcon>
+          <EuiToolTip content={buttonLabelCancel} disableScreenReaderOutput>
+            <EuiButtonIcon
+              iconType="cross"
+              aria-label={buttonLabelCancel}
+              onClick={onClickCancelButton}
+              size="s"
+              data-test-subj="queryCancelButton"
+              color="text"
+              display="base"
+              isLoading={isCancelling}
+              isDisabled={isCancelling}
+            >
+              {buttonLabelCancel}
+            </EuiButtonIcon>
+          </EuiToolTip>
         );
       }
 

@@ -16,6 +16,7 @@ import {
   EuiPopover,
   EuiPopoverTitle,
   EuiText,
+  EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -173,18 +174,28 @@ export const SwimLaneWrapper: FC<PropsWithChildren<SwimLaneWrapperProps>> = ({
                     />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiButtonIcon
-                      size="s"
-                      color={'text'}
-                      iconType={'cross'}
-                      onClick={closePopover}
-                      aria-label={i18n.translate(
+                    <EuiToolTip
+                      content={i18n.translate(
                         'xpack.ml.explorer.cellSelectionPopover.closeButtonAriaLabel',
                         {
                           defaultMessage: 'Close popover',
                         }
                       )}
-                    />
+                      disableScreenReaderOutput
+                    >
+                      <EuiButtonIcon
+                        size="s"
+                        color={'text'}
+                        iconType={'cross'}
+                        onClick={closePopover}
+                        aria-label={i18n.translate(
+                          'xpack.ml.explorer.cellSelectionPopover.closeButtonAriaLabel',
+                          {
+                            defaultMessage: 'Close popover',
+                          }
+                        )}
+                      />
+                    </EuiToolTip>
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>

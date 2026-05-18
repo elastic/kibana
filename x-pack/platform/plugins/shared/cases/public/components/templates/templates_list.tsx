@@ -7,15 +7,16 @@
 
 import React, { useCallback, useState } from 'react';
 import {
-  EuiPanel,
+  EuiBadge,
+  EuiBadgeGroup,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiPanel,
   EuiSpacer,
   EuiText,
-  EuiBadge,
+  EuiToolTip,
   useEuiTheme,
-  EuiButtonIcon,
-  EuiBadgeGroup,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { TruncatedText } from '../truncated_text';
@@ -90,22 +91,32 @@ const TemplatesListComponent: React.FC<Props> = (props) => {
                   <EuiFlexItem grow={false}>
                     <EuiFlexGroup alignItems="flexEnd" gutterSize="s">
                       <EuiFlexItem grow={false}>
-                        <EuiButtonIcon
-                          data-test-subj={`${template.key}-template-edit`}
-                          aria-label={`${template.key}-template-edit`}
-                          iconType="pencil"
-                          color="primary"
-                          onClick={() => onEditTemplate(template.key)}
-                        />
+                        <EuiToolTip
+                          content={`${template.key}-template-edit`}
+                          disableScreenReaderOutput
+                        >
+                          <EuiButtonIcon
+                            data-test-subj={`${template.key}-template-edit`}
+                            aria-label={`${template.key}-template-edit`}
+                            iconType="pencil"
+                            color="primary"
+                            onClick={() => onEditTemplate(template.key)}
+                          />
+                        </EuiToolTip>
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
-                        <EuiButtonIcon
-                          data-test-subj={`${template.key}-template-delete`}
-                          aria-label={`${template.key}-template-delete`}
-                          iconType="minusCircle"
-                          color="danger"
-                          onClick={() => setItemToBeDeleted(template)}
-                        />
+                        <EuiToolTip
+                          content={`${template.key}-template-delete`}
+                          disableScreenReaderOutput
+                        >
+                          <EuiButtonIcon
+                            data-test-subj={`${template.key}-template-delete`}
+                            aria-label={`${template.key}-template-delete`}
+                            iconType="minusCircle"
+                            color="danger"
+                            onClick={() => setItemToBeDeleted(template)}
+                          />
+                        </EuiToolTip>
                       </EuiFlexItem>
                     </EuiFlexGroup>
                   </EuiFlexItem>

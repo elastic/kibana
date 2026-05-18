@@ -8,12 +8,13 @@
 import React, { Suspense, useCallback, useState } from 'react';
 import type { EuiButtonProps } from '@elastic/eui';
 import {
+  EuiButtonEmpty,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPopover,
-  EuiButtonIcon,
-  EuiButtonEmpty,
   EuiLoadingSpinner,
+  EuiPopover,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import type { AttachmentAction } from '../../client/attachment_framework/types';
@@ -83,13 +84,15 @@ export const PropertyActions = React.memo<PropertyActionsProps>(
         data-test-subj={dataTestSubjPrepend}
         ownFocus
         button={
-          <EuiButtonIcon
-            data-test-subj={`${dataTestSubjPrepend}-ellipses`}
-            aria-label={i18n.ACTIONS_ARIA}
-            iconType="boxesVertical"
-            onClick={onButtonClick}
-            buttonRef={buttonRef}
-          />
+          <EuiToolTip content={i18n.ACTIONS_ARIA} disableScreenReaderOutput>
+            <EuiButtonIcon
+              data-test-subj={`${dataTestSubjPrepend}-ellipses`}
+              aria-label={i18n.ACTIONS_ARIA}
+              iconType="boxesVertical"
+              onClick={onButtonClick}
+              buttonRef={buttonRef}
+            />
+          </EuiToolTip>
         }
         id="settingsPopover"
         isOpen={showActions}

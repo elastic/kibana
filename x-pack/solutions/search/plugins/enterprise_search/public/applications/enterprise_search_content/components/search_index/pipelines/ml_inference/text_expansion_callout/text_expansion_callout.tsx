@@ -9,7 +9,7 @@ import React from 'react';
 
 import { useValues } from 'kea';
 
-import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonEmpty, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { KibanaLogic } from '../../../../../../shared/kibana';
@@ -45,19 +45,29 @@ export const TextExpansionDismissButton = ({
   dismiss,
 }: Pick<TextExpansionCallOutState, 'dismiss'>) => {
   return (
-    <EuiButtonIcon
-      aria-label={i18n.translate(
+    <EuiToolTip
+      content={i18n.translate(
         'xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.dismissButton',
         { defaultMessage: 'Dismiss ELSER call out' }
       )}
-      iconType="cross"
-      onClick={dismiss}
-    />
+      disableScreenReaderOutput
+    >
+      <EuiButtonIcon
+        data-test-subj="enterpriseSearchTextExpansionDismissButtonButton"
+        aria-label={i18n.translate(
+          'xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.dismissButton',
+          { defaultMessage: 'Dismiss ELSER call out' }
+        )}
+        iconType="cross"
+        onClick={dismiss}
+      />
+    </EuiToolTip>
   );
 };
 
 export const FineTuneModelsButton: React.FC = () => (
   <EuiButtonEmpty
+    data-test-subj="enterpriseSearchFineTuneModelsButtonFineTunePerformanceButton"
     iconSide="left"
     iconType="wrench"
     onClick={() =>

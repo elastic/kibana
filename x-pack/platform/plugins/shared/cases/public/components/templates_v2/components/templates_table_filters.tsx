@@ -7,10 +7,11 @@
 
 import React, { useCallback } from 'react';
 import {
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiButtonIcon,
   EuiFilterGroup,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -134,15 +135,17 @@ const TemplatesTableFiltersComponent: React.FC<TemplatesTableFiltersProps> = ({
         </EuiFilterGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          iconType="refresh"
-          onClick={onRefresh}
-          isLoading={isLoading}
-          aria-label={i18n.REFRESH_TEMPLATES}
-          data-test-subj="templates-refresh-button"
-          display="base"
-          size="m"
-        />
+        <EuiToolTip content={i18n.REFRESH_TEMPLATES} disableScreenReaderOutput>
+          <EuiButtonIcon
+            iconType="refresh"
+            onClick={onRefresh}
+            isLoading={isLoading}
+            aria-label={i18n.REFRESH_TEMPLATES}
+            data-test-subj="templates-refresh-button"
+            display="base"
+            size="m"
+          />
+        </EuiToolTip>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

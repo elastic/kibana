@@ -11,11 +11,13 @@ import {
   EuiHeaderSectionItemButton,
   EuiIcon,
   EuiSelectableTemplateSitewide,
+  EuiText,
+  EuiToolTip,
   euiSelectableTemplateSitewideRenderOptions,
-  useEuiTheme,
-  useEuiBreakpoint,
   mathWithUnits,
+  useEuiBreakpoint,
   useEuiMinBreakpoint,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useRef, useState } from 'react';
@@ -125,16 +127,18 @@ export const SearchBar = ({
   const getAppendForChromeStyle = () => {
     if (chromeStyle === 'project') {
       return (
-        <EuiButtonIcon
-          aria-label={i18nStrings.closeSearchAriaText}
-          color="text"
-          data-test-subj="nav-search-conceal"
-          iconType="cross"
-          onClick={() => {
-            reportEvent.searchBlur();
-            setIsVisible(false);
-          }}
-        />
+        <EuiToolTip content={i18nStrings.closeSearchAriaText} disableScreenReaderOutput>
+          <EuiButtonIcon
+            aria-label={i18nStrings.closeSearchAriaText}
+            color="text"
+            data-test-subj="nav-search-conceal"
+            iconType="cross"
+            onClick={() => {
+              reportEvent.searchBlur();
+              setIsVisible(false);
+            }}
+          />
+        </EuiToolTip>
       );
     }
 

@@ -6,7 +6,14 @@
  */
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiBadge, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiToolTip,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
 import { QUERY_TYPE_STATS } from '@kbn/streams-schema';
@@ -60,12 +67,17 @@ export const useKnowledgeIndicatorsColumns = ({
           return (
             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  data-test-subj="knowledgeIndicatorsDetailsButton"
-                  iconType={isExpanded ? 'minimize' : 'expand'}
-                  aria-label={isExpanded ? MINIMIZE_DETAILS_ARIA_LABEL : VIEW_DETAILS_ARIA_LABEL}
-                  onClick={() => toggleSelectedKnowledgeIndicator(ki)}
-                />
+                <EuiToolTip
+                  content={isExpanded ? MINIMIZE_DETAILS_ARIA_LABEL : VIEW_DETAILS_ARIA_LABEL}
+                  disableScreenReaderOutput
+                >
+                  <EuiButtonIcon
+                    data-test-subj="knowledgeIndicatorsDetailsButton"
+                    iconType={isExpanded ? 'minimize' : 'expand'}
+                    aria-label={isExpanded ? MINIMIZE_DETAILS_ARIA_LABEL : VIEW_DETAILS_ARIA_LABEL}
+                    onClick={() => toggleSelectedKnowledgeIndicator(ki)}
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiLink onClick={() => toggleSelectedKnowledgeIndicator(ki)}>{title}</EuiLink>

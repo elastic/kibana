@@ -378,16 +378,17 @@ export function ActionsPopover({
               renderButton(() => setIsPopoverOpen((b: boolean) => !b))
             ) : (
               <IconPanel hasPanel={iconHasPanel}>
-                <EuiButtonIcon
-                  data-test-subj="syntheticsActionsPopoverButton"
-                  aria-label={openActionsMenuAria}
-                  iconType="boxesVertical"
-                  color="primary"
-                  size={iconSize}
-                  display="empty"
-                  onClick={() => setIsPopoverOpen((b: boolean) => !b)}
-                  title={openActionsMenuAria}
-                />
+                <EuiToolTip content={openActionsMenuAria} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    data-test-subj="syntheticsActionsPopoverButton"
+                    aria-label={openActionsMenuAria}
+                    iconType="boxesVertical"
+                    color="primary"
+                    size={iconSize}
+                    display="empty"
+                    onClick={() => setIsPopoverOpen((b: boolean) => !b)}
+                  />
+                </EuiToolTip>
               </IconPanel>
             )
           }

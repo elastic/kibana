@@ -6,7 +6,7 @@
  */
 
 import React, { Component } from 'react';
-import { EuiButtonIcon, EuiPopover, EuiPopoverTitle, EuiText } from '@elastic/eui';
+import { EuiButtonIcon, EuiPopover, EuiPopoverTitle, EuiText, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -83,13 +83,20 @@ export class QueryThresholdHelpPopover extends Component<{}, State> {
         })}
         anchorPosition="upLeft"
         button={
-          <EuiButtonIcon
-            onClick={this._togglePopover}
-            iconType="documentation"
-            aria-label={i18n.translate('xpack.stackAlerts.esQuery.ui.thresholdHelp.ariaLabel', {
+          <EuiToolTip
+            content={i18n.translate('xpack.stackAlerts.esQuery.ui.thresholdHelp.ariaLabel', {
               defaultMessage: 'Help',
             })}
-          />
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              onClick={this._togglePopover}
+              iconType="documentation"
+              aria-label={i18n.translate('xpack.stackAlerts.esQuery.ui.thresholdHelp.ariaLabel', {
+                defaultMessage: 'Help',
+              })}
+            />
+          </EuiToolTip>
         }
         isOpen={this.state.isPopoverOpen}
         closePopover={this._closePopover}

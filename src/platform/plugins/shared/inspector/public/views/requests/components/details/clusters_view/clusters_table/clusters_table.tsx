@@ -15,9 +15,10 @@ import type { Criteria } from '@elastic/eui';
 import {
   Comparators,
   EuiBasicTable,
-  type EuiBasicTableColumn,
   EuiButtonIcon,
   EuiText,
+  EuiToolTip,
+  type EuiBasicTableColumn,
 } from '@elastic/eui';
 import { ClusterView } from './cluster_view';
 import { ClusterHealth } from '../clusters_health';
@@ -76,10 +77,8 @@ export function ClustersTable({ clusters }: Props) {
       render: (name: string) => {
         return (
           <>
-            <EuiButtonIcon
-              data-test-subj={`inspectorRequestToggleClusterDetails${name}`}
-              onClick={() => toggleDetails(name)}
-              aria-label={
+            <EuiToolTip
+              content={
                 name in expandedRows
                   ? i18n.translate('inspector.requests.clusters.table.collapseRow', {
                       defaultMessage: 'Collapse table row to hide cluster details',
@@ -88,8 +87,23 @@ export function ClustersTable({ clusters }: Props) {
                       defaultMessage: 'Expand table row to view cluster details',
                     })
               }
-              iconType={name in expandedRows ? 'chevronSingleDown' : 'chevronSingleRight'}
-            />
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                data-test-subj={`inspectorRequestToggleClusterDetails${name}`}
+                onClick={() => toggleDetails(name)}
+                aria-label={
+                  name in expandedRows
+                    ? i18n.translate('inspector.requests.clusters.table.collapseRow', {
+                        defaultMessage: 'Collapse table row to hide cluster details',
+                      })
+                    : i18n.translate('inspector.requests.clusters.table.expandRow', {
+                        defaultMessage: 'Expand table row to view cluster details',
+                      })
+                }
+                iconType={name in expandedRows ? 'chevronSingleDown' : 'chevronSingleRight'}
+              />
+            </EuiToolTip>
             <EuiText size="xs" color="subdued">
               {name === LOCAL_CLUSTER_KEY
                 ? i18n.translate('inspector.requests.clusters.table.localClusterDisplayName', {

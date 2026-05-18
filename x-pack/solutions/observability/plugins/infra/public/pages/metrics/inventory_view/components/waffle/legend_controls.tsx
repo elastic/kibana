@@ -7,21 +7,22 @@
 
 import type { EuiSwitchEvent } from '@elastic/eui';
 import {
-  EuiButtonEmpty,
   EuiButton,
+  EuiButtonEmpty,
   EuiButtonGroup,
   EuiButtonIcon,
   EuiFieldNumber,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiForm,
   EuiFormRow,
   EuiPopover,
   EuiPopoverTitle,
+  EuiRange,
+  EuiSelect,
   EuiSpacer,
   EuiSwitch,
-  EuiSelect,
-  EuiRange,
-  EuiFlexGroup,
-  EuiFlexItem,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -127,17 +128,24 @@ export const LegendControls = ({
   }, [autoBounds, boundsOverride, options, defaultLegendSteps]);
 
   const buttonComponent = (
-    <EuiButtonIcon
-      iconType="paintBucket"
-      color="text"
-      display="base"
-      size="s"
-      aria-label={i18n.translate('xpack.infra.legendControls.buttonLabel', {
+    <EuiToolTip
+      content={i18n.translate('xpack.infra.legendControls.buttonLabel', {
         defaultMessage: 'configure legend',
       })}
-      onClick={handleOpenPopover}
-      data-test-subj="openLegendControlsButton"
-    />
+      disableScreenReaderOutput
+    >
+      <EuiButtonIcon
+        iconType="paintBucket"
+        color="text"
+        display="base"
+        size="s"
+        aria-label={i18n.translate('xpack.infra.legendControls.buttonLabel', {
+          defaultMessage: 'configure legend',
+        })}
+        onClick={handleOpenPopover}
+        data-test-subj="openLegendControlsButton"
+      />
+    </EuiToolTip>
   );
 
   const handleAutoChange = useCallback(

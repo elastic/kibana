@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiIcon } from '@elastic/eui';
+import { EuiIcon, EuiTextTruncate } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedDate } from '@kbn/i18n-react';
 
@@ -43,9 +43,7 @@ export const getColumns = ({
       const agentPolicy = agentPoliciesById[policyId];
       const value = agentPolicy ? agentPolicy.name : policyId;
       return (
-        <span className="eui-textTruncate" title={value}>
-          {value}
-        </span>
+        <EuiTextTruncate text={value} />
       );
     },
   },

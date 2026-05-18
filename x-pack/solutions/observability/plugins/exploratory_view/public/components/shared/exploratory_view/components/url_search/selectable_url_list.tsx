@@ -9,16 +9,17 @@ import type { SetStateAction, KeyboardEvent, ReactNode, FormEventHandler } from 
 import React, { useRef, useState } from 'react';
 import type { EuiSelectableOption } from '@elastic/eui';
 import {
+  EuiButton,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiPopover,
+  EuiPopoverFooter,
   EuiPopoverTitle,
   EuiSelectable,
   EuiSelectableMessage,
-  EuiPopoverFooter,
-  EuiButton,
-  EuiButtonIcon,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import useEvent from 'react-use/lib/useEvent';
@@ -129,15 +130,22 @@ export function SelectableUrlList({
             {loading ? <EuiLoadingSpinner /> : titleText}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              data-test-subj="exploratoryViewPopOverTitleButton"
-              color="text"
-              onClick={() => closePopover()}
-              aria-label={i18n.translate('xpack.exploratoryView.search.url.close', {
+            <EuiToolTip
+              content={i18n.translate('xpack.exploratoryView.search.url.close', {
                 defaultMessage: 'Close',
               })}
-              iconType={'cross'}
-            />
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                data-test-subj="exploratoryViewPopOverTitleButton"
+                color="text"
+                onClick={() => closePopover()}
+                aria-label={i18n.translate('xpack.exploratoryView.search.url.close', {
+                  defaultMessage: 'Close',
+                })}
+                iconType={'cross'}
+              />
+            </EuiToolTip>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPopoverTitle>

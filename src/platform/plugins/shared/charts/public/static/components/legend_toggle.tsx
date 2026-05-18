@@ -9,7 +9,7 @@
 
 import React, { memo, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonIcon, useEuiTheme } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import type { Position } from '@elastic/charts';
 import { css } from '@emotion/react';
 
@@ -51,26 +51,30 @@ const LegendToggleComponent = ({ onClick, showLegend, legendPosition }: LegendTo
   );
 
   return (
-    <EuiButtonIcon
-      type="button"
-      iconType="listBullet"
-      color="text"
-      onClick={onClick}
-      css={[
-        baseStyles,
-        showLegend ? isOpenStyle : null,
-        ['left', 'bottom'].includes(legendPosition) ? positionStyle : null,
-      ]}
-      aria-label={i18n.translate('charts.legend.toggleLegendButtonAriaLabel', {
+    <EuiToolTip
+      content={i18n.translate('charts.legend.toggleLegendButtonTitle', {
         defaultMessage: 'Toggle legend',
       })}
-      aria-expanded={showLegend}
-      isSelected={showLegend}
-      data-test-subj="vislibToggleLegend"
-      title={i18n.translate('charts.legend.toggleLegendButtonTitle', {
-        defaultMessage: 'Toggle legend',
-      })}
-    />
+      disableScreenReaderOutput
+    >
+      <EuiButtonIcon
+        type="button"
+        iconType="listBullet"
+        color="text"
+        onClick={onClick}
+        css={[
+          baseStyles,
+          showLegend ? isOpenStyle : null,
+          ['left', 'bottom'].includes(legendPosition) ? positionStyle : null,
+        ]}
+        aria-label={i18n.translate('charts.legend.toggleLegendButtonAriaLabel', {
+          defaultMessage: 'Toggle legend',
+        })}
+        aria-expanded={showLegend}
+        isSelected={showLegend}
+        data-test-subj="vislibToggleLegend"
+      />
+    </EuiToolTip>
   );
 };
 

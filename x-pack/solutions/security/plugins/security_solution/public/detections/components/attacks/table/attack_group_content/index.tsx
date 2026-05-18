@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiTitle, EuiToolTip } from '@elastic/eui';
 import {
   replaceAnonymizedValuesWithOriginalValues,
   type AttackDiscoveryAlert,
@@ -59,17 +59,19 @@ export const AttackGroupContent = React.memo<AttackGroupContentProps>(
     return (
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={false}>
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            aria-label={EXPAND_BUTTON_ARIAL_LABEL}
-            color="text"
-            data-test-subj={EXPAND_ATTACK_BUTTON_TEST_ID}
-            iconType="maximize"
-            onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
-              event.stopPropagation();
-              openAttackDetailsFlyout();
-            }}
-            size="s"
-          />
+          <EuiToolTip content={EXPAND_BUTTON_ARIAL_LABEL} disableScreenReaderOutput>
+            <EuiButtonIcon
+              aria-label={EXPAND_BUTTON_ARIAL_LABEL}
+              color="text"
+              data-test-subj={EXPAND_ATTACK_BUTTON_TEST_ID}
+              iconType="maximize"
+              onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
+                event.stopPropagation();
+                openAttackDetailsFlyout();
+              }}
+              size="s"
+            />
+          </EuiToolTip>
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup

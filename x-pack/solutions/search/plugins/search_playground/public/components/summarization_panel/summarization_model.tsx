@@ -16,6 +16,7 @@ import {
   EuiButtonEmpty,
   type EuiSuperSelectOption,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -71,7 +72,9 @@ export const SummarizationModel: React.FC<SummarizationModelProps> = ({
                   color="subdued"
                   css={{ overflow: 'hidden', textOverflow: 'ellipsis', textWrap: 'nowrap' }}
                 >
-                  <span title={model.connectorName}>{model.connectorName}</span>
+                  <EuiToolTip content={model.connectorName} disableScreenReaderOutput>
+                    <span>{model.connectorName}</span>
+                  </EuiToolTip>
                 </EuiText>
               )}
             </EuiFlexGroup>

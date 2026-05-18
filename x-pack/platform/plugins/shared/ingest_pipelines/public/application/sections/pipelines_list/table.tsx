@@ -279,18 +279,25 @@ export const PipelineTable: FunctionComponent<Props> = ({
           </EuiButton>
         ) : undefined,
       toolsRight: [
-        <EuiButtonIcon
-          key="reloadButton"
-          iconType="refresh"
-          color="success"
-          aria-label={i18n.translate('xpack.ingestPipelines.list.table.reloadButtonAriaLabel', {
+        <EuiToolTip
+          content={i18n.translate('xpack.ingestPipelines.list.table.reloadButtonAriaLabel', {
             defaultMessage: 'refresh',
           })}
-          data-test-subj="reloadButton"
-          size="m"
-          display="base"
-          onClick={onReloadClick}
-        />,
+          disableScreenReaderOutput
+        >
+          <EuiButtonIcon
+            key="reloadButton"
+            iconType="refresh"
+            color="success"
+            aria-label={i18n.translate('xpack.ingestPipelines.list.table.reloadButtonAriaLabel', {
+              defaultMessage: 'refresh',
+            })}
+            data-test-subj="reloadButton"
+            size="m"
+            display="base"
+            onClick={onReloadClick}
+          />
+        </EuiToolTip>,
       ],
       box: {
         incremental: true,

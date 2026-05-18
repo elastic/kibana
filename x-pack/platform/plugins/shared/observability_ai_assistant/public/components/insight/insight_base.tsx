@@ -17,6 +17,7 @@ import {
   EuiPopover,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -100,22 +101,29 @@ export function InsightBase({
                   <EuiPopover
                     anchorPosition="downLeft"
                     button={
-                      <EuiButtonIcon
-                        aria-label={i18n.translate(
-                          'xpack.observabilityAiAssistant.insight.actions',
-                          {
-                            defaultMessage: 'Actions',
-                          }
-                        )}
-                        color="text"
-                        css={{ alignSelf: 'flex-start' }}
-                        data-test-subj="observabilityAiAssistantInsightBaseButtonIcon"
-                        disabled={actions?.length === 0}
-                        display="empty"
-                        iconType="boxesVertical"
-                        size="s"
-                        onClick={handleClickActions}
-                      />
+                      <EuiToolTip
+                        content={i18n.translate('xpack.observabilityAiAssistant.insight.actions', {
+                          defaultMessage: 'Actions',
+                        })}
+                        disableScreenReaderOutput
+                      >
+                        <EuiButtonIcon
+                          aria-label={i18n.translate(
+                            'xpack.observabilityAiAssistant.insight.actions',
+                            {
+                              defaultMessage: 'Actions',
+                            }
+                          )}
+                          color="text"
+                          css={{ alignSelf: 'flex-start' }}
+                          data-test-subj="observabilityAiAssistantInsightBaseButtonIcon"
+                          disabled={actions?.length === 0}
+                          display="empty"
+                          iconType="boxesVertical"
+                          size="s"
+                          onClick={handleClickActions}
+                        />
+                      </EuiToolTip>
                     }
                     panelPaddingSize="s"
                     closePopover={handleClickActions}

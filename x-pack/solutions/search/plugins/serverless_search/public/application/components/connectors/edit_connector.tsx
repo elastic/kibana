@@ -10,12 +10,13 @@ import {
   EuiContextMenu,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiForm,
   EuiPageTemplate,
   EuiPanel,
-  EuiForm,
   EuiPopover,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
@@ -120,14 +121,24 @@ export const EditConnector: React.FC = () => {
                 )}
                 id={'connectorMenu'}
                 button={
-                  <EuiButtonIcon
-                    data-test-subj="serverlessSearchEditConnectorButton"
-                    aria-label={i18n.translate('xpack.serverlessSearch.connectors.openMenuLabel', {
+                  <EuiToolTip
+                    content={i18n.translate('xpack.serverlessSearch.connectors.openMenuLabel', {
                       defaultMessage: 'Open menu',
                     })}
-                    iconType="boxesVertical"
-                    onClick={() => setMenuIsOpen(!menuIsOpen)}
-                  />
+                    disableScreenReaderOutput
+                  >
+                    <EuiButtonIcon
+                      data-test-subj="serverlessSearchEditConnectorButton"
+                      aria-label={i18n.translate(
+                        'xpack.serverlessSearch.connectors.openMenuLabel',
+                        {
+                          defaultMessage: 'Open menu',
+                        }
+                      )}
+                      iconType="boxesVertical"
+                      onClick={() => setMenuIsOpen(!menuIsOpen)}
+                    />
+                  </EuiToolTip>
                 }
                 isOpen={menuIsOpen}
                 closePopover={() => setMenuIsOpen(false)}

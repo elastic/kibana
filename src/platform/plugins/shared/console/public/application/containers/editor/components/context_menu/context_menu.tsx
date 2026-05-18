@@ -11,13 +11,14 @@ import React, { useState, useEffect } from 'react';
 import {
   EuiButtonIcon,
   EuiCode,
-  EuiContextMenuPanel,
   EuiContextMenuItem,
-  EuiPopover,
+  EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
+  EuiPopover,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { NotificationsStart } from '@kbn/core/public';
@@ -220,18 +221,25 @@ export const ContextMenu = ({
   };
 
   const button = (
-    <EuiButtonIcon
-      onClick={() => {
-        setIsPopoverOpen((prev) => !prev);
-        checkIsKbnRequestSelected();
-      }}
-      data-test-subj="toggleConsoleMenu"
-      aria-label={i18n.translate('console.requestOptionsButtonAriaLabel', {
+    <EuiToolTip
+      content={i18n.translate('console.requestOptionsButtonAriaLabel', {
         defaultMessage: 'Request options',
       })}
-      iconType="boxesVertical"
-      iconSize="s"
-    />
+      disableScreenReaderOutput
+    >
+      <EuiButtonIcon
+        onClick={() => {
+          setIsPopoverOpen((prev) => !prev);
+          checkIsKbnRequestSelected();
+        }}
+        data-test-subj="toggleConsoleMenu"
+        aria-label={i18n.translate('console.requestOptionsButtonAriaLabel', {
+          defaultMessage: 'Request options',
+        })}
+        iconType="boxesVertical"
+        iconSize="s"
+      />
+    </EuiToolTip>
   );
 
   const items = [
