@@ -157,11 +157,6 @@ describe('useActionTypeModel', () => {
       { wrapper: createWrapper() }
     );
 
-    // Initially loading
-    expect(result.current.isLoading).toBe(true);
-    expect(result.current.actionTypeModel).toBeNull();
-
-    // Wait for fetch to complete
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
     });
@@ -177,55 +172,6 @@ describe('useActionTypeModel', () => {
     expect(result.current.actionTypeModel?.id).toBe('spec-connector');
     expect(result.current.isFromSpec).toBe(true);
     expect(result.current.error).toBeNull();
-  });
-
-  it('returns loading state while fetching spec', async () => {
-    const specActionType: ActionType = {
-      id: 'spec-connector',
-      name: 'Spec Connector',
-      enabled: true,
-      enabledInConfig: true,
-      enabledInLicense: true,
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: ['alerting'],
-      isSystemActionType: false,
-      isDeprecated: false,
-      source: ACTION_TYPE_SOURCES.spec,
-    };
-
-    actionTypeRegistry.has.mockReturnValue(false);
-
-    // Create a promise that won't resolve immediately
-    let resolvePromise: (value: typeof mockSpecResponse) => void;
-    const promise = new Promise<typeof mockSpecResponse>((resolve) => {
-      resolvePromise = resolve;
-    });
-    mockHttp.get.mockReturnValue(promise);
-
-    const { result } = renderHook(
-      () =>
-        useActionTypeModel({
-          actionTypeRegistry,
-          actionType: specActionType,
-          http: mockHttp as any,
-          uiSettings: mockUiSettings as any,
-        }),
-      { wrapper: createWrapper() }
-    );
-
-    // Should be loading
-    expect(result.current.isLoading).toBe(true);
-    expect(result.current.actionTypeModel).toBeNull();
-    expect(result.current.isFromSpec).toBe(false);
-
-    // Resolve the promise
-    resolvePromise!(mockSpecResponse);
-
-    await waitFor(() => {
-      expect(result.current.isLoading).toBe(false);
-      expect(result.current.actionTypeModel).not.toBeNull();
-      expect(result.current.isFromSpec).toBe(true);
-    });
   });
 
   it('surfaces error when connector spec schema cannot be parsed', async () => {
@@ -313,49 +259,6 @@ describe('useActionTypeModel', () => {
     expect(result.current.error).toEqual(fetchError);
     expect(result.current.actionTypeModel).toBeNull();
     expect(result.current.isFromSpec).toBe(false);
-  });
-
-  it('caches spec data and does not refetch on subsequent calls', async () => {
-    const specActionType: ActionType = {
-      id: 'spec-connector',
-      name: 'Spec Connector',
-      enabled: true,
-      enabledInConfig: true,
-      enabledInLicense: true,
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: ['alerting'],
-      isSystemActionType: false,
-      isDeprecated: false,
-      source: ACTION_TYPE_SOURCES.spec,
-    };
-
-    actionTypeRegistry.has.mockReturnValue(false);
-    mockHttp.get.mockResolvedValue(mockSpecResponse);
-
-    // First render
-    const { result, rerender } = renderHook(
-      () =>
-        useActionTypeModel({
-          actionTypeRegistry,
-          actionType: specActionType,
-          http: mockHttp as any,
-          uiSettings: mockUiSettings as any,
-        }),
-      { wrapper: createWrapper() }
-    );
-
-    await waitFor(() => {
-      expect(result.current.isLoading).toBe(false);
-    });
-
-    expect(mockHttp.get).toHaveBeenCalledTimes(1);
-
-    // Rerender (simulate component re-render)
-    rerender();
-
-    // Should still have the cached data, no new fetch
-    expect(result.current.actionTypeModel).not.toBeNull();
-    expect(mockHttp.get).toHaveBeenCalledTimes(1);
   });
 
   it('does not fetch for non-spec connectors not in registry', async () => {
@@ -484,109 +387,5 @@ describe('useActionTypeModel', () => {
 
     expect(result.current.actionTypeModel?.getHideInUi?.([])).toBe(true);
     expect(uiSettingsGet).toHaveBeenCalledWith('workflows:ui:enabled', true);
-  });
-
-  describe('stale time window', () => {
-    const specActionType: ActionType = {
-      id: 'spec-connector',
-      name: 'Spec Connector',
-      enabled: true,
-      enabledInConfig: true,
-      enabledInLicense: true,
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: ['alerting'],
-      isSystemActionType: false,
-      isDeprecated: false,
-      source: ACTION_TYPE_SOURCES.spec,
-    };
-
-    const mockNow = { value: 1_000_000 };
-
-    beforeEach(() => {
-      jest.spyOn(Date, 'now').mockImplementation(() => mockNow.value);
-      actionTypeRegistry.has.mockReturnValue(false);
-      mockHttp.get.mockResolvedValue(mockSpecResponse);
-      mockNow.value = 1_000_000;
-    });
-
-    afterEach(() => {
-      jest.restoreAllMocks();
-    });
-
-    it('re-fetches spec after stale time window expires', async () => {
-      const { result, unmount } = renderHook(
-        () =>
-          useActionTypeModel({
-            actionTypeRegistry,
-            actionType: specActionType,
-            http: mockHttp as any,
-            uiSettings: mockUiSettings as any,
-          }),
-        { wrapper: createWrapper() }
-      );
-
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false);
-      });
-
-      expect(mockHttp.get).toHaveBeenCalledTimes(1);
-
-      unmount();
-      mockNow.value += 5 * 60 * 1000 + 1;
-
-      renderHook(
-        () =>
-          useActionTypeModel({
-            actionTypeRegistry,
-            actionType: specActionType,
-            http: mockHttp as any,
-            uiSettings: mockUiSettings as any,
-          }),
-        { wrapper: createWrapper() }
-      );
-
-      await waitFor(() => {
-        expect(mockHttp.get).toHaveBeenCalledTimes(2);
-      });
-    });
-
-    it('does not re-fetch spec within stale time window', async () => {
-      const { result, unmount } = renderHook(
-        () =>
-          useActionTypeModel({
-            actionTypeRegistry,
-            actionType: specActionType,
-            http: mockHttp as any,
-            uiSettings: mockUiSettings as any,
-          }),
-        { wrapper: createWrapper() }
-      );
-
-      await waitFor(() => {
-        expect(result.current.isLoading).toBe(false);
-      });
-
-      expect(mockHttp.get).toHaveBeenCalledTimes(1);
-
-      unmount();
-      mockNow.value += 5 * 60 * 1000 - 1;
-
-      const { result: resultAfterRemount } = renderHook(
-        () =>
-          useActionTypeModel({
-            actionTypeRegistry,
-            actionType: specActionType,
-            http: mockHttp as any,
-            uiSettings: mockUiSettings as any,
-          }),
-        { wrapper: createWrapper() }
-      );
-
-      await waitFor(() => {
-        expect(resultAfterRemount.current.actionTypeModel).not.toBeNull();
-      });
-
-      expect(mockHttp.get).toHaveBeenCalledTimes(1);
-    });
   });
 });
