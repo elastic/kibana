@@ -7,7 +7,7 @@
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
-import { partition } from 'lodash';
+import { groupBy } from 'lodash';
 import { isResourceSupportedVendor } from '../../../../../../common/siem_migrations/rules/resources/types';
 import { SIEM_RULE_MIGRATION_RESOURCES_PATH } from '../../../../../../common/siem_migrations/constants';
 import {
@@ -71,8 +71,12 @@ export const registerSiemRuleMigrationsResourceUpsertRoute = (
               return res.notFound({ body: { message: 'Migration not found' } });
             }
 
-            const hasWatchlistUploads = resources.some((resource) => resource.type === 'watchlist');
-            if (hasWatchlistUploads && rule.original_rule.vendor !== 'microsoft-sentinel') {
+            const resourcesByType = groupBy(resources, 'type');
+            const lookups = resourcesByType.lookup ?? [];
+            const macros = resourcesByType.macro ?? [];
+            const watchlists = resourcesByType.watchlist ?? [];
+
+            if (watchlists.length > 0 && rule.original_rule.vendor !== 'microsoft-sentinel') {
               return res.badRequest({
                 body: {
                   message:
@@ -81,15 +85,16 @@ export const registerSiemRuleMigrationsResourceUpsertRoute = (
               });
             }
 
-            let resourcesToUpsert = resources;
-            if (rule.original_rule.vendor === 'microsoft-sentinel' && resources.length > 0) {
+            let lookupsToProcess = lookups;
+            if (watchlists.length > 0) {
               try {
                 const VendorProcessor = getVendorProcessor('microsoft-sentinel');
-                resourcesToUpsert = new VendorProcessor({
+                const processedWatchlists = new VendorProcessor({
                   migrationId,
                   dataClient: ruleMigrationsClient.data.items,
                   logger,
-                }).getProcessor('resources')(resources);
+                }).getProcessor('resources')(watchlists);
+                lookupsToProcess = [...lookups, ...processedWatchlists];
               } catch (error) {
                 return res.badRequest({
                   body: {
@@ -99,9 +104,8 @@ export const registerSiemRuleMigrationsResourceUpsertRoute = (
               }
             }
 
-            const [lookups, macros] = partition(resourcesToUpsert, { type: 'lookup' });
             const processedLookups = await processLookups(
-              lookups,
+              lookupsToProcess,
               ruleMigrationsClient.data.lookups
             );
             const resourcesUpsert = [...macros, ...processedLookups].map((resource) => ({
