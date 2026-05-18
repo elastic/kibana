@@ -255,11 +255,7 @@ export const ErrorsList = ({
 
             activeDuration = currentDiff < diff ? currentDiff : diff;
           } else {
-            const resolvedState = getNextUpStateForResolvedError(
-              item,
-              upStates,
-              isGlobalView
-            );
+            const resolvedState = getNextUpStateForResolvedError(item, upStates, isGlobalView);
 
             activeDuration = resolvedState
               ? moment(resolvedState.state.started_at).diff(item['@timestamp'])
@@ -293,9 +289,7 @@ export const ErrorsList = ({
     if (state.id) {
       const itemConfigId = item.config_id ?? configId;
       const locationId = item.observer?.name ?? selectedLocation?.id;
-      const locationQuery = locationId
-        ? `?locationId=${encodeURIComponent(locationId)}`
-        : '';
+      const locationQuery = locationId ? `?locationId=${encodeURIComponent(locationId)}` : '';
       return {
         'data-test-subj': `row-${state.id}`,
         onClick: (evt: MouseEvent) => {
