@@ -59,7 +59,6 @@ jest.mock('../../../../../hooks/use_kibana', () => ({
   }),
 }));
 
-
 const mockUseStreamsPrivileges = useStreamsPrivileges as jest.MockedFunction<
   typeof useStreamsPrivileges
 >;
