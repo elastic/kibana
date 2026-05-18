@@ -19,6 +19,7 @@ import { silence } from '../../common';
 import {
   preCreateSecurityIndexesViaSamlAuth,
   runElasticsearch,
+  startDockerServers,
   runKibanaServer,
 } from '../../servers';
 import { getConfigRootDir, loadServersConfig } from '../../servers/configs';
@@ -133,6 +134,7 @@ async function runLocalServersAndTests(
   };
 
   let shutdownEs;
+  let shutdownDockerServers: (() => Promise<void>) | undefined;
 
   try {
     shutdownEs = await runElasticsearch({
@@ -142,6 +144,8 @@ async function runLocalServersAndTests(
       esFrom: options.esFrom,
       logsDir: options.logsDir,
     });
+
+    shutdownDockerServers = await startDockerServers(config, log);
 
     await runKibanaServer({
       procs,
@@ -162,8 +166,14 @@ async function runLocalServersAndTests(
     try {
       await procs.stop('kibana');
     } finally {
-      if (shutdownEs) {
-        await shutdownEs();
+      try {
+        if (shutdownDockerServers) {
+          await shutdownDockerServers();
+        }
+      } finally {
+        if (shutdownEs) {
+          await shutdownEs();
+        }
       }
     }
   }
