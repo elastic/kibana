@@ -19,7 +19,7 @@
  * MVP implementation focusing on core domain reputation actions.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { i18n } from '@kbn/i18n';
 
 import type { ConnectorSpec } from '../../connector_spec';
@@ -42,9 +42,11 @@ export const URLVoidConnector: ConnectorSpec = {
   actions: {
     scanDomain: {
       isTool: true,
-      input: z.object({
-        domain: z.string().describe('Domain name to scan'),
-      }),
+      input: lazySchema(() =>
+        z.object({
+          domain: z.string().describe('Domain name to scan'),
+        })
+      ),
       handler: async (ctx, input) => {
         const typedInput = input as { domain: string };
         const apiKey = ctx.secrets?.authType === 'api_key_header' ? ctx.secrets['X-Api-Key'] : '';
@@ -62,9 +64,11 @@ export const URLVoidConnector: ConnectorSpec = {
 
     checkUrl: {
       isTool: true,
-      input: z.object({
-        url: z.url().describe('URL to check'),
-      }),
+      input: lazySchema(() =>
+        z.object({
+          url: z.url().describe('URL to check'),
+        })
+      ),
       handler: async (ctx, input) => {
         const typedInput = input as { url: string };
         const domain = new URL(typedInput.url).hostname;
@@ -84,9 +88,11 @@ export const URLVoidConnector: ConnectorSpec = {
 
     getDomainInfo: {
       isTool: true,
-      input: z.object({
-        domain: z.string().describe('Domain name'),
-      }),
+      input: lazySchema(() =>
+        z.object({
+          domain: z.string().describe('Domain name'),
+        })
+      ),
       handler: async (ctx, input) => {
         const typedInput = input as { domain: string };
         const apiKey = ctx.secrets?.authType === 'api_key_header' ? ctx.secrets['X-Api-Key'] : '';
@@ -107,7 +113,7 @@ export const URLVoidConnector: ConnectorSpec = {
 
     scanDomainStats: {
       isTool: true,
-      input: z.object({}),
+      input: lazySchema(() => z.object({})),
       handler: async (ctx) => {
         const apiKey = ctx.secrets?.authType === 'api_key_header' ? ctx.secrets['X-Api-Key'] : '';
         const response = await ctx.client.get(

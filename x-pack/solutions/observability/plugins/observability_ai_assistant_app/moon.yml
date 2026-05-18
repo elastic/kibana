@@ -86,8 +86,6 @@ dependsOn:
   - '@kbn/i18n-react'
   - '@kbn/utility-types'
   - '@kbn/alerts-ui-shared'
-  - '@kbn/traced-es-client'
-  - '@kbn/licensing-types'
   - '@kbn/utility-types-jest'
   - '@kbn/zod'
   - '@kbn/connector-schemas'

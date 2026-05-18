@@ -265,7 +265,7 @@ describe('layout manager', () => {
       );
       layoutManager.api.registerChildApi({
         ...panel1Api,
-        checkForDuplicateTitle: jest.fn(),
+        hasLibraryItemWithTitle: jest.fn(),
         canLinkToLibrary: jest.fn(),
         canUnlinkFromLibrary: jest.fn(),
         saveToLibrary: jest.fn(),

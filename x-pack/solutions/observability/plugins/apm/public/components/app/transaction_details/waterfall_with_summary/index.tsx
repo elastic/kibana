@@ -22,20 +22,20 @@ import { TransactionActionMenu } from '../../../shared/transaction_action_menu/t
 import { MaybeViewTraceLink } from './maybe_view_trace_link';
 import type { TransactionTab } from './transaction_tabs';
 import { TransactionTabs } from './transaction_tabs';
-import type { Environment } from '../../../../../common/environment_rt';
 import type { FETCH_STATUS } from '../../../../hooks/use_fetcher';
+import { TraceWaterfallFlyout } from './trace_waterfall_flyout';
 import { isNotInitiated, isPending, isSuccess } from '../../../../hooks/use_fetcher';
 import type { UnifiedWaterfallFetcherResult } from '../use_unified_waterfall_fetcher';
 import { OpenInDiscover } from '../../../shared/links/discover_links/open_in_discover';
 import {
   getTraceParentChildrenMap,
   getRootItemOrFallback,
+  getSubtreeIds,
 } from '../../../shared/trace_waterfall/use_trace_waterfall';
 
 interface Props<TSample extends {}> {
   traceSamples?: TSample[];
   traceSamplesFetchStatus: FETCH_STATUS;
-  environment: Environment;
   onSampleClick: (sample: TSample) => void;
   onTabClick: (tab: TransactionTab) => void;
   serviceName?: string;
@@ -56,7 +56,6 @@ interface Props<TSample extends {}> {
 export function WaterfallWithSummary<TSample extends {}>({
   traceSamples,
   traceSamplesFetchStatus,
-  environment,
   onSampleClick,
   onTabClick,
   serviceName,
@@ -74,6 +73,7 @@ export function WaterfallWithSummary<TSample extends {}>({
   traceId,
 }: Props<TSample>) {
   const [sampleActivePage, setSampleActivePage] = useState(0);
+  const [isFullTraceFlyoutOpen, setIsFullTraceFlyoutOpen] = useState(false);
 
   const isControlled = selectedSample !== undefined;
 
@@ -107,6 +107,14 @@ export function WaterfallWithSummary<TSample extends {}>({
     : sampleActivePage;
 
   const entryTransaction = unifiedWaterfallFetchResult.entryTransaction;
+
+  const contextSpanIds = useMemo(() => {
+    if (!entryTransaction || unifiedWaterfallFetchResult.traceItems.length === 0) {
+      return undefined;
+    }
+    const parentChildMap = getTraceParentChildrenMap(unifiedWaterfallFetchResult.traceItems, false);
+    return getSubtreeIds(parentChildMap, entryTransaction.transaction.id);
+  }, [entryTransaction, unifiedWaterfallFetchResult.traceItems]);
 
   const unifiedRootTransactionDuration = useMemo(() => {
     if (unifiedWaterfallFetchResult.traceItems.length === 0) {
@@ -173,8 +181,8 @@ export function WaterfallWithSummary<TSample extends {}>({
                 <MaybeViewTraceLink
                   isLoading={isLoading}
                   transaction={entryTransaction}
-                  environment={environment}
                   traceItems={unifiedWaterfallFetchResult.traceItems}
+                  onViewFullTrace={() => setIsFullTraceFlyoutOpen(true)}
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
@@ -233,6 +241,16 @@ export function WaterfallWithSummary<TSample extends {}>({
           entryTransactionId={entryTransactionId}
         />
       </EuiFlexItem>
+      {traceId && (
+        <TraceWaterfallFlyout
+          traceId={traceId}
+          rangeFrom={rangeFrom}
+          rangeTo={rangeTo}
+          isOpen={isFullTraceFlyoutOpen}
+          onClose={() => setIsFullTraceFlyoutOpen(false)}
+          contextSpanIds={contextSpanIds}
+        />
+      )}
     </EuiFlexGroup>
   );
 }

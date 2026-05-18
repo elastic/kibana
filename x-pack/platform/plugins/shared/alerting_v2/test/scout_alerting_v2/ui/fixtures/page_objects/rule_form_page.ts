@@ -18,6 +18,7 @@ export class RuleFormPage {
   public readonly cancelButton: Locator;
   public readonly errorCallout: Locator;
   public readonly flyout: Locator;
+  public readonly flyoutValidationCallout: Locator;
   public readonly form: Locator;
   public readonly esqlModeButton: Locator;
   public readonly discoverQuerySubmitButton: Locator;
@@ -37,6 +38,7 @@ export class RuleFormPage {
     // The rule flyout doesn't have a dedicated `data-test-subj`; locate it via
     // its labelled-by attribute on the flyout title.
     this.flyout = this.page.locator('[aria-labelledby="ruleV2FormFlyoutTitle"]');
+    this.flyoutValidationCallout = this.page.testSubj.locator('ruleV2FlyoutValidationErrors');
     this.form = this.page.locator(`#${RULE_FORM_ID}`);
     this.esqlModeButton = this.page.testSubj.locator('select-text-based-language-btn');
     this.discoverQuerySubmitButton = this.page.testSubj.locator('querySubmitButton');

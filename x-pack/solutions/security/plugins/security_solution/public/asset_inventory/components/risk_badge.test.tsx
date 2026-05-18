@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { waitForEuiToolTipVisible } from '@elastic/eui/lib/test/rtl';
 import { screen, render, cleanup, fireEvent } from '@testing-library/react';
 import { RiskSeverity } from '../../../common/search_strategy';
 import { RiskBadge } from './risk_badge';
@@ -23,7 +22,6 @@ describe('AssetInventory', () => {
       expect(badge).toHaveTextContent('0');
 
       fireEvent.mouseOver(badge.parentElement as Node);
-      await waitForEuiToolTipVisible();
 
       const tooltip = screen.getByRole('tooltip');
       expect(tooltip).toHaveTextContent(RiskSeverity.Unknown);
@@ -34,7 +32,6 @@ describe('AssetInventory', () => {
       expect(badge).toHaveTextContent('19');
 
       fireEvent.mouseOver(badge.parentElement as Node);
-      await waitForEuiToolTipVisible();
 
       const tooltip = screen.getByRole('tooltip');
       expect(tooltip).toHaveTextContent(RiskSeverity.Unknown);
@@ -45,7 +42,6 @@ describe('AssetInventory', () => {
       expect(badge).toHaveTextContent('20');
 
       fireEvent.mouseOver(badge.parentElement as Node);
-      await waitForEuiToolTipVisible();
 
       const tooltip = screen.getByRole('tooltip');
       expect(tooltip).toHaveTextContent(RiskSeverity.Low);
@@ -56,7 +52,6 @@ describe('AssetInventory', () => {
       expect(badge).toHaveTextContent('39');
 
       fireEvent.mouseOver(badge.parentElement as Node);
-      await waitForEuiToolTipVisible();
 
       const tooltip = screen.getByRole('tooltip');
       expect(tooltip).toHaveTextContent(RiskSeverity.Low);
@@ -67,7 +62,6 @@ describe('AssetInventory', () => {
       expect(badge).toHaveTextContent('40');
 
       fireEvent.mouseOver(badge.parentElement as Node);
-      await waitForEuiToolTipVisible();
 
       const tooltip = screen.getByRole('tooltip');
       expect(tooltip).toHaveTextContent(RiskSeverity.Moderate);
@@ -78,7 +72,6 @@ describe('AssetInventory', () => {
       expect(badge).toHaveTextContent('69');
 
       fireEvent.mouseOver(badge.parentElement as Node);
-      await waitForEuiToolTipVisible();
 
       const tooltip = screen.getByRole('tooltip');
       expect(tooltip).toHaveTextContent(RiskSeverity.Moderate);
@@ -89,7 +82,6 @@ describe('AssetInventory', () => {
       expect(badge).toHaveTextContent('70');
 
       fireEvent.mouseOver(badge.parentElement as Node);
-      await waitForEuiToolTipVisible();
 
       const tooltip = screen.getByRole('tooltip');
       expect(tooltip).toHaveTextContent(RiskSeverity.High);
@@ -100,7 +92,6 @@ describe('AssetInventory', () => {
       expect(badge).toHaveTextContent('89');
 
       fireEvent.mouseOver(badge.parentElement as Node);
-      await waitForEuiToolTipVisible();
 
       const tooltip = screen.getByRole('tooltip');
       expect(tooltip).toHaveTextContent(RiskSeverity.High);
@@ -111,7 +102,6 @@ describe('AssetInventory', () => {
       expect(badge).toHaveTextContent('90');
 
       fireEvent.mouseOver(badge.parentElement as Node);
-      await waitForEuiToolTipVisible();
 
       const tooltip = screen.getByRole('tooltip');
       expect(tooltip).toHaveTextContent(RiskSeverity.Critical);
@@ -122,7 +112,6 @@ describe('AssetInventory', () => {
       expect(badge).toHaveTextContent('100');
 
       fireEvent.mouseOver(badge.parentElement as Node);
-      await waitForEuiToolTipVisible();
 
       const tooltip = screen.getByRole('tooltip');
       expect(tooltip).toHaveTextContent(RiskSeverity.Critical);
@@ -133,7 +122,6 @@ describe('AssetInventory', () => {
       expect(badge).toHaveTextContent('400');
 
       fireEvent.mouseOver(badge.parentElement as Node);
-      await waitForEuiToolTipVisible();
 
       const tooltip = screen.getByRole('tooltip');
       expect(tooltip).toHaveTextContent(RiskSeverity.Critical);

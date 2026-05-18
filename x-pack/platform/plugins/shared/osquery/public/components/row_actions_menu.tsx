@@ -152,7 +152,7 @@ const RowActionsMenuComponent: React.FC<RowActionsMenuProps> = ({
         anchorPosition="leftCenter"
         aria-label={actionsAriaLabel}
       >
-        <EuiContextMenuPanel size="s" items={menuItems} />
+        <EuiContextMenuPanel items={menuItems} />
       </EuiPopover>
       {isDeleteModalVisible && (
         <EuiConfirmModal

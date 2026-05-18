@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { getInputsFromDefinition } from '@kbn/workflows/spec/lib/field_conversion';
 import type { WorkflowYaml } from '@kbn/workflows/spec/schema';
+import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import {
   extractStepInfoFromWorkflowYaml,
   extractWorkflowMetadata,
@@ -32,6 +34,22 @@ jest.mock('@kbn/workflows-yaml', () => ({
   parseWorkflowYamlForAutocomplete: jest.fn(),
 }));
 
+// Format-shape coverage of `inputs` is owned by `getInputsFromDefinition` unit
+// tests. We mock the helper here so tests can drive `inputCount` without caring
+// about the workflow's input format.
+jest.mock('@kbn/workflows/spec/lib/field_conversion', () => ({
+  ...jest.requireActual('@kbn/workflows/spec/lib/field_conversion'),
+  getInputsFromDefinition: jest.fn(),
+}));
+
+const mockGetInputsFromDefinition = getInputsFromDefinition as jest.MockedFunction<
+  typeof getInputsFromDefinition
+>;
+
+const setInputsSchema = (schema: JsonModelSchemaType | undefined) => {
+  mockGetInputsFromDefinition.mockReturnValue(schema);
+};
+
 const { parseWorkflowYamlForAutocomplete } = jest.requireMock('@kbn/workflows-yaml') as {
   parseWorkflowYamlForAutocomplete: jest.Mock;
 };
@@ -39,11 +57,6 @@ const { parseWorkflowYamlForAutocomplete } = jest.requireMock('@kbn/workflows-ya
 /** Runtime triggers can include registered custom trigger ids (e.g. cases.updated). */
 function asRuntimeTriggers(triggers: unknown): WorkflowYaml['triggers'] {
   return triggers as WorkflowYaml['triggers'];
-}
-
-/** Legacy inputs array form is not fully expressed on `WorkflowYaml['inputs']` union typing. */
-function asRuntimeInputs(inputs: unknown): WorkflowYaml['inputs'] {
-  return inputs as WorkflowYaml['inputs'];
 }
 
 const minimalConsoleStep = { name: 's1', type: 'console', with: {} };
@@ -77,6 +90,11 @@ describe('extractWorkflowMetadata', () => {
     hasDescription: false,
     tagCount: 0,
   };
+
+  beforeEach(() => {
+    mockGetInputsFromDefinition.mockReset();
+    mockGetInputsFromDefinition.mockReturnValue(undefined);
+  });
 
   describe('extractWorkflowMetadata (workflows management UI)', () => {
     it('returns defaults for null and undefined', () => {
@@ -353,17 +371,10 @@ describe('extractWorkflowMetadata', () => {
       expect(result.hasTriggerWorkflowEventsAvoidLoop).toBe(false);
     });
 
-    it('reflects root field: inputs (array length)', () => {
-      expect(
-        metadata(
-          baseWorkflow({
-            inputs: asRuntimeInputs([
-              { name: 'a', type: 'string' },
-              { name: 'b', type: 'number' },
-            ]),
-          })
-        ).inputCount
-      ).toBe(2);
+    it('reflects inputCount from getInputsFromDefinition', () => {
+      setInputsSchema({ properties: { a: { type: 'string' }, b: { type: 'number' } } });
+
+      expect(metadata(baseWorkflow()).inputCount).toBe(2);
     });
 
     it('reflects root field: consts', () => {
@@ -463,26 +474,14 @@ describe('extractWorkflowMetadata', () => {
   });
 
   describe('inputs', () => {
-    it('counts inputs from array', () => {
-      const result = metadata({
-        inputs: [
-          { name: 'input-1', type: 'string' },
-          { name: 'input-2', type: 'number' },
-        ],
-      });
-      expect(result.inputCount).toBe(2);
+    it('returns 0 when getInputsFromDefinition returns undefined', () => {
+      expect(extractWorkflowMetadata({}).inputCount).toBe(0);
     });
 
-    it('returns 0 for undefined inputs', () => {
-      const result = extractWorkflowMetadata({});
-      expect(result.inputCount).toBe(0);
-    });
+    it('counts properties of the JSON Schema returned by getInputsFromDefinition', () => {
+      setInputsSchema({ properties: { a: { type: 'string' } } });
 
-    it('returns 0 for non-array inputs (e.g., JSON schema object)', () => {
-      const result = metadata({
-        inputs: { properties: { a: { type: 'string' } } },
-      });
-      expect(result.inputCount).toBe(0);
+      expect(metadata({}).inputCount).toBe(1);
     });
   });
 
@@ -596,16 +595,19 @@ describe('extractWorkflowMetadata', () => {
 
   describe('complex workflow', () => {
     it('correctly extracts metadata from a full workflow definition', () => {
+      setInputsSchema({
+        properties: {
+          'input-1': { type: 'string' },
+          'input-2': { type: 'number' },
+          'input-3': { type: 'boolean' },
+        },
+      });
+
       const result = metadata({
         enabled: true,
         description: 'A complex workflow',
         tags: ['prod', 'alerts'],
-        triggers: [{ type: 'scheduled' }, { type: 'alert' }],
-        inputs: [
-          { name: 'input-1', type: 'string' },
-          { name: 'input-2', type: 'number' },
-          { name: 'input-3', type: 'boolean' },
-        ],
+        triggers: [{ type: 'scheduled' }, { type: 'alert' }, { type: 'manual' }],
         consts: { API_KEY: 'abc', TIMEOUT: 30 },
         settings: {
           timeout: '60s',
@@ -641,8 +643,8 @@ describe('extractWorkflowMetadata', () => {
       expect(result.enabled).toBe(true);
       expect(result.hasDescription).toBe(true);
       expect(result.tagCount).toBe(2);
-      expect(result.triggerCount).toBe(2);
-      expect(result.triggerTypes).toEqual(expect.arrayContaining(['scheduled', 'alert']));
+      expect(result.triggerCount).toBe(3);
+      expect(result.triggerTypes).toEqual(expect.arrayContaining(['scheduled', 'alert', 'manual']));
       expect(result.inputCount).toBe(3);
       expect(result.constCount).toBe(2);
       expect(result.concurrencyMax).toBe(3);

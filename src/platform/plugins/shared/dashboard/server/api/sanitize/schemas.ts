@@ -11,10 +11,6 @@ import { schema } from '@kbn/config-schema';
 import { getDashboardStateSchema } from '../dashboard_state_schemas';
 import { warningsSchema } from '../warnings_schema';
 
-export function getSanitizeRequestBodySchema() {
-  return getDashboardStateSchema(true);
-}
-
 export function getSanitizeResponseBodySchema() {
   return schema.object({
     data: getDashboardStateSchema(false),

@@ -9,4 +9,6 @@
 
 export { runCheckSavedObjectsCli } from './src/commands/run_check_saved_objects_cli';
 export { runCheckMappingsUpdateCli } from './src/commands/run_check_mappings_update_cli';
+export { runSoMigrationSnapshotCli } from './src/commands/run_so_migration_snapshot_cli';
+export { runSoMigrationCompareCli } from './src/commands/run_so_migration_compare_cli';
 export { getRemovedTypes } from './src/migrations/removed_types/get_removed_types';

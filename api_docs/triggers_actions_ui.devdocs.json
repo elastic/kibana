@@ -3084,7 +3084,7 @@
             "label": "validNormalizedTypes",
             "description": [],
             "signature": [
-              "(\"string\" | \"number\" | \"boolean\" | \"object\" | \"geo_shape\" | \"geo_point\" | \"ip\" | \"date\" | \"murmur3\" | \"date_range\" | \"ip_range\" | \"histogram\" | \"exponential_histogram\" | \"null\" | \"number_range\" | \"tdigest\")[]"
+              "(\"string\" | \"number\" | \"boolean\" | \"object\" | \"geo_shape\" | \"geo_point\" | \"ip\" | \"date\" | \"murmur3\" | \"date_range\" | \"ip_range\" | \"flattened\" | \"histogram\" | \"exponential_histogram\" | \"null\" | \"number_range\" | \"tdigest\")[]"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/types.ts",
             "lineNumber": 24,
@@ -5904,7 +5904,7 @@
                   "[]"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
-                "lineNumber": 112,
+                "lineNumber": 119,
                 "columnNumber": 18,
                 "deprecated": false,
                 "trackAdoption": false
@@ -5921,7 +5921,7 @@
                   " | undefined"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
-                "lineNumber": 112,
+                "lineNumber": 119,
                 "columnNumber": 54,
                 "deprecated": false,
                 "docsReferencedTypeName": "ChromeSetBreadcrumbsParams",
@@ -7011,7 +7011,7 @@
           " | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
-        "lineNumber": 209,
+        "lineNumber": 222,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
@@ -7025,7 +7025,7 @@
         "label": "ValidNormalizedTypes",
         "description": [],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"geo_shape\" | \"geo_point\" | \"ip\" | \"date\" | \"murmur3\" | \"date_range\" | \"ip_range\" | \"histogram\" | \"exponential_histogram\" | \"null\" | \"number_range\" | \"tdigest\""
+          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"geo_shape\" | \"geo_point\" | \"ip\" | \"date\" | \"murmur3\" | \"date_range\" | \"ip_range\" | \"flattened\" | \"histogram\" | \"exponential_histogram\" | \"null\" | \"number_range\" | \"tdigest\""
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/types.ts",
         "lineNumber": 10,
