@@ -21,16 +21,37 @@
  * ```
  * node -e '
  *   const eui = require("@elastic/eui");
- *   const src = require("fs").readFileSync("src/platform/packages/shared/kbn-design-tools/src/lib/fiber/eui_component_names.ts", "utf8");
+ *   const React = require("react");
+ *   const { renderToString } = require("react-dom/server");
+ *   const src = require("fs").readFileSync("src/platform/packages/shared/kbn-design-tools/src/lib/dom/resolve_eui_tag.ts", "utf8");
  *   const existing = new Set(src.match(/'\''Eui[A-Z]\w*'\''/g).map(s => s.slice(1, -1)));
  *   const fresh = Object.keys(eui).filter(k => /^Eui[A-Z]/.test(k)).filter(k => !existing.has(k)).sort();
  *   if (fresh.length) console.log("New EUI exports to triage:\n" + fresh.join("\n"));
  *   else console.log("No new Eui* exports found.");
+ *   // List components whose root element lacks the expected euiXxx class:
+ *   const noClass = [];
+ *   for (const name of existing) {
+ *     const C = eui[name]; if (!C) continue;
+ *     const expected = name.charAt(0).toLowerCase() + name.slice(1);
+ *     try {
+ *       const html = renderToString(React.createElement(C, { children: "x", name: "t", onChange: ()=>{}, options: [], items: [], columns: [] }));
+ *       const cls = (html.match(/class="([^"]+)"/) || [])[1] || "";
+ *       if (!cls.split(" ").some(c => c === expected || c.startsWith(expected + "-") || c.startsWith(expected + "--")))
+ *         noClass.push(name);
+ *     } catch {}
+ *   }
+ *   if (noClass.length) console.log("\nComponents without matching CSS class (fall through to HTML tag):\n" + noClass.sort().join("\n"));
  * '
  * ```
  * Then manually add any new visual components to the set below.
+ *
+ * Resolution strategy: `resolveEuiTag` matches the convention where EUI renders
+ * a class `euiXxx` for component `EuiXxx`. Components that don't follow this
+ * (wrappers, providers, compound sub-components) fall through to the HTML tag
+ * name. Classes are preserved on clones (only truncation utility classes like
+ * `eui-textTruncate` are stripped).
  */
-export const EUI_COMPONENTS: ReadonlySet<string> = new Set([
+const EUI_COMPONENTS: ReadonlySet<string> = new Set([
   'EuiAbsoluteTab',
   'EuiAccordion',
   'EuiAspectRatio',
@@ -269,3 +290,26 @@ export const EUI_COMPONENTS: ReadonlySet<string> = new Set([
   'EuiTreeView',
   'EuiWrappingPopover',
 ]);
+
+/**
+ * Map a CSS class name (e.g. `euiAvatar`) to its EUI component name
+ * (e.g. `EuiAvatar`), but only if that component is exported
+ * from `@elastic/eui`.
+ */
+export const resolveEuiTag = (el: Element): string | null => {
+  for (const cls of el.classList) {
+    if (/^eui[A-Z]/.test(cls)) {
+      const candidate = cls.charAt(0).toUpperCase() + cls.slice(1);
+      if (EUI_COMPONENTS.has(candidate)) return candidate;
+    }
+  }
+  return null;
+};
+
+/**
+ * Resolves a human-readable tag name for an element. Tries EUI class names
+ * first, then falls back to the HTML tag.
+ */
+export const resolveTag = (el: Element): string => {
+  return resolveEuiTag(el) ?? el.tagName.toLowerCase();
+};

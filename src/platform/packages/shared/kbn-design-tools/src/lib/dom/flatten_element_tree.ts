@@ -8,7 +8,7 @@
  */
 
 import { DEVTOOL_HIDDEN_ATTR, SVG_INTERNALS, MAX_TREE_DEPTH } from '../constants';
-import { resolveTag } from '../fiber/resolve_component_name';
+import { resolveTag } from './resolve_eui_tag';
 
 interface TreeNode {
   tag: string;
