@@ -122,6 +122,7 @@ node scripts/evals start --suite agent-builder
 `evals init` walks you through EIS (Cloud Connected Mode) connector discovery or validates existing connectors in `kibana.dev.yml`. It outputs an `export KIBANA_TESTING_AI_CONNECTORS="..."` command to paste into your shell.
 
 `evals start` orchestrates the full stack in one terminal:
+
 1. Starts the EDOT collector (Docker) for trace capture -- exports traces to the configured tracing Elasticsearch cluster (via `TRACING_ES_URL`)
 2. Starts Scout (ES + Kibana with `evals_tracing` config)
 3. Enables EIS CCM on the Scout ES cluster (if using EIS connectors)
@@ -161,6 +162,7 @@ node scripts/evals start --suite attack-discovery --export-profile local
 ```
 
 Notes:
+
 - `--datasets-profile <name>` loads `EVALUATIONS_KBN_URL` / `EVALUATIONS_KBN_API_KEY` from `config.<name>.json`
 - `--export-profile <name>` loads `EVALUATIONS_ES_URL`, `TRACING_ES_URL`, and `TRACING_EXPORTERS` from `config.<name>.json`
 
@@ -210,6 +212,36 @@ The CLI uses suite metadata from:
 .buildkite/pipelines/evals/evals.suites.json
 ```
 
+### On-demand evals (Buildkite)
+
+Run a single suite and model on any branch without opening a PR or waiting for the full Kibana PR pipeline:
+
+1. Open [kibana-evals-on-demand](https://buildkite.com/elastic/kibana-evals-on-demand) on Buildkite (after RRE registration)
+2. Click **New build**, select the branch (or commit) to evaluate
+3. Under **Environment variables** (in New build options), add the required variables below — one `KEY=value` per line. These are build-level env vars read by `run_suite.sh`.
+
+Pipeline registration: [`.buildkite/pipeline-resource-definitions/evals/kibana-evals-on-demand.yml`](../../../../../.buildkite/pipeline-resource-definitions/evals/kibana-evals-on-demand.yml).
+
+| Variable                  | Required           | Description                                                                                             |
+| ------------------------- | ------------------ | ------------------------------------------------------------------------------------------------------- |
+| `EVAL_SUITE_ID`           | yes                | Suite id from `evals.suites.json` (same as `evals:<id>` PR labels without the prefix)                   |
+| `EVAL_MODEL_GROUPS`       | yes                | Model group (same as `models:<group>` PR labels without the prefix), e.g. `eis/openai-gpt-5.4`          |
+| `EVAL_INCLUDE_EIS_MODELS` | for `eis/*` models | Set to `1` when `EVAL_MODEL_GROUPS` uses `eis/...`                                                      |
+| `EVALUATION_CONNECTOR_ID` | no                 | LLM-as-judge connector id override (connector id, not `eis/...` model group)                            |
+| `EVAL_SERVER_CONFIG_SET`  | some suites        | From `serverConfigSet` on the suite entry in `evals.suites.json` (e.g. `evals_endpoint` for `endpoint`) |
+
+The eval pipeline step sets `FTR_EIS_CCM=1` and `EVAL_FANOUT=1`; `KBN_EVALS=1` is set on the pipeline.
+
+Example environment variables for Agent Builder + one EIS model:
+
+```text
+EVAL_SUITE_ID=agent-builder
+EVAL_MODEL_GROUPS=eis/openai-gpt-5.4
+EVAL_INCLUDE_EIS_MODELS=1
+```
+
+**Results:** Scores and traces are exported to the [golden cluster evals UI](https://kbn-evals-serverless-ed035a.kb.us-central1.gcp.elastic.cloud/app/evals). Filter by git branch on the runs list, or by run id prefix `bk-<buildkite_build_id>`.
+
 ### CI labels
 
 Eval suites can be triggered in PR CI by adding GitHub labels:
@@ -240,6 +272,7 @@ The `models:*` and `models:judge:*` labels are automatically synced from LiteLLM
 - **On demand**: Add the `ci:sync-model-labels` label to any PR to trigger label sync in PR CI.
 
 The sync step:
+
 1. Discovers available models from both **LiteLLM** (`GET /v1/models`) and **EIS** (via `discover_eis_models.js`)
 2. Creates/updates labels for all discovered models
 3. Marks stale labels as deprecated (renamed from `models:*` to `deprecated:models:*`)
@@ -384,7 +417,7 @@ node scripts/evals dataplex sync --dry-run
 node scripts/evals dataplex sync --print-commands
 ```
 
-Note: The **Dataplex "Aspect types"** console page lists *schemas*. Snapshot datasets themselves show up under Dataplex **Entries**.
+Note: The **Dataplex "Aspect types"** console page lists _schemas_. Snapshot datasets themselves show up under Dataplex **Entries**.
 
 <details>
 <summary>Manual flow (if you prefer full control)</summary>
@@ -667,11 +700,11 @@ This creates a dedicated `evaluationsEsClient` that connects to your evaluations
 
 Use these settings when traces, evaluation results, or managed datasets live outside the default Scout Kibana/Elasticsearch pair.
 
-| Variable | CLI flag | Purpose |
-| --- | --- | --- |
-| `TRACING_ES_URL` | `--trace-es-url` | Sends trace-based evaluator queries to a separate monitoring Elasticsearch cluster. |
-| `EVALUATIONS_ES_URL` | `--evaluations-es-url` | Exports evaluation scores to a separate Elasticsearch cluster. |
-| `EVALUATIONS_KBN_URL` | `--evaluations-kbn-url` | Routes dataset upsert and dataset lookup operations to a separate Kibana instance. |
+| Variable                  | CLI flag                    | Purpose                                                                                |
+| ------------------------- | --------------------------- | -------------------------------------------------------------------------------------- |
+| `TRACING_ES_URL`          | `--trace-es-url`            | Sends trace-based evaluator queries to a separate monitoring Elasticsearch cluster.    |
+| `EVALUATIONS_ES_URL`      | `--evaluations-es-url`      | Exports evaluation scores to a separate Elasticsearch cluster.                         |
+| `EVALUATIONS_KBN_URL`     | `--evaluations-kbn-url`     | Routes dataset upsert and dataset lookup operations to a separate Kibana instance.     |
 | `EVALUATIONS_KBN_API_KEY` | `--evaluations-kbn-api-key` | Optional API key used for dataset Kibana operations when `EVALUATIONS_KBN_URL` is set. |
 
 #### Using a Separate Kibana for Dataset Operations
@@ -765,12 +798,12 @@ This grants:
 
 Copy the returned `encoded` value and use it for all four secret fields in your vault config:
 
-| Config field | Env variable | Value |
-| --- | --- | --- |
-| `evaluationsEs.apiKey` | `EVALUATIONS_ES_API_KEY` | `<encoded>` |
-| `tracingEs.apiKey` | `TRACING_ES_API_KEY` | `<encoded>` |
-| `evaluationsKbn.apiKey` | `EVALUATIONS_KBN_API_KEY` | `<encoded>` |
-| `tracingExporters[0].http.headers.Authorization` | via `TRACING_EXPORTERS` | `ApiKey <encoded>` |
+| Config field                                     | Env variable              | Value              |
+| ------------------------------------------------ | ------------------------- | ------------------ |
+| `evaluationsEs.apiKey`                           | `EVALUATIONS_ES_API_KEY`  | `<encoded>`        |
+| `tracingEs.apiKey`                               | `TRACING_ES_API_KEY`      | `<encoded>`        |
+| `evaluationsKbn.apiKey`                          | `EVALUATIONS_KBN_API_KEY` | `<encoded>`        |
+| `tracingExporters[0].http.headers.Authorization` | via `TRACING_EXPORTERS`   | `ApiKey <encoded>` |
 
 ### Exporting to a separate Elasticsearch cluster
 
