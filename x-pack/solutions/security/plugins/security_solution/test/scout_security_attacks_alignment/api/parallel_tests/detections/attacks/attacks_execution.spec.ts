@@ -87,7 +87,7 @@ spaceTest.describe(
                 const schedule = body.data?.[0];
                 return schedule?.last_execution;
               },
-              { timeout: 90_000 }
+              { timeout: 45_000 }
             )
             .toMatchObject({
               status: 'error',
