@@ -219,8 +219,11 @@ export async function generateSignificantEvents({
                 }
 
                 const rawFeatureIds: string[] = query.feature_ids ?? [];
-                const validFeatureIds = rawFeatureIds.filter((id) => returnedFeatureIds.has(id));
-                const invalidFeatureIds = rawFeatureIds.filter((id) => !returnedFeatureIds.has(id));
+                const validFeatureIds: string[] = [];
+                const invalidFeatureIds: string[] = [];
+                for (const id of rawFeatureIds) {
+                  (returnedFeatureIds.has(id) ? validFeatureIds : invalidFeatureIds).push(id);
+                }
 
                 if (validFeatureIds.length === 0) {
                   hasFailures = true;

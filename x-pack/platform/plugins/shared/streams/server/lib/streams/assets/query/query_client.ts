@@ -204,6 +204,7 @@ type QueryLinkStorageFields = Omit<QueryLink, 'query' | 'stream_name'> & {
   [QUERY_ESQL_QUERY]: string;
   [QUERY_SEVERITY_SCORE]?: number;
   [QUERY_TYPE]?: string;
+  [QUERY_FEATURE_IDS]?: string[];
 };
 
 export type StoredQueryLink = QueryLinkStorageFields & {
@@ -245,11 +246,11 @@ function fromStorage(link: StoredQueryLink): QueryLink {
         query: esql,
       },
       severity_score: link[QUERY_SEVERITY_SCORE],
-      // QUERY_EVIDENCE and QUERY_FEATURE_IDS live under the dynamic-disabled
-      // 'experimental' object, so they can't be added to QueryLinkStorageFields
-      // without breaking the IStorageClient Exact type check.
+      feature_ids: link[QUERY_FEATURE_IDS],
+      // QUERY_EVIDENCE lives under the dynamic-disabled 'experimental' object,
+      // so it can't be added to QueryLinkStorageFields without breaking the
+      // IStorageClient Exact type check.
       evidence: (link as Record<string, unknown>)[QUERY_EVIDENCE] as string[] | undefined,
-      feature_ids: (link as Record<string, unknown>)[QUERY_FEATURE_IDS] as string[] | undefined,
     },
   };
 }
