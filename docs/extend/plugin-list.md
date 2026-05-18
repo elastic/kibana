@@ -112,6 +112,7 @@ mapped_pages:
 | [actions](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/actions/README.md) | The Kibana actions plugin provides a framework to create executable actions. You can: |
 | [agentBuilder](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/agent_builder/README.md) | Home of the Agent Builder framework. |
 | [agentBuilderPlatform](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/agent_builder_platform/README.md) | Contains the platform-owned agent builder entities |
+| [agentBuilderWorkflows](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/agent_builder_workflows/README.md) | Contains workflow-related entities for the agent builder. |
 | [agentContextLayer](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/agent_context_layer/README.md) | The Agent Context Layer plugin provides a centralized service for indexing, crawling, and searching Kibana assets (visualizations, dashboards, connectors, workflows, etc.) via the Semantic Metadata Layer (SML). |
 | [aiops](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/aiops/README.md) | The plugin provides APIs and components for AIOps features, including the “Log rate analysis” UI, maintained by the ML team. |
 | [alerting](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/alerting/README.md) | The Kibana Alerting plugin provides a common place to set up rules. You can: |

@@ -37,6 +37,7 @@ export interface TaskContext {
   to?: MigrationSnapshot;
   updatedTypes: SavedObjectsType<any>[];
   migrationTypes?: SavedObjectsType<any>[];
+  wipTypes: string[];
   currentRemovedTypes: string[];
   newRemovedTypes: string[];
   baselineMappings?: SavedObjectsTypeMappingDefinitions;

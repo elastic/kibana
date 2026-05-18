@@ -34,7 +34,7 @@ import { executeEsqlQuery } from '../../infra/elasticsearch/esql';
 import { ingestEntities } from '../../infra/elasticsearch/ingest';
 import { getUpdatesEntitiesDataStreamName } from '../asset_manager/updates_data_stream';
 import type { CcsLogExtractionStateClient } from '../saved_objects/ccs_log_extraction_state';
-import { parseDurationToMs } from '../../infra/time';
+import { capExtractionWindowEnd, resolveCcsExtractionWindow } from './extraction_window';
 
 interface CcsExtractToUpdatesParams {
   type: EntityType;
@@ -47,6 +47,8 @@ interface CcsExtractToUpdatesParams {
   abortController?: AbortController;
   /** Explicit time window override (API calls). When set, the internal checkpoint is not updated. */
   windowOverride?: { fromDateISO: string; toDateISO: string };
+  /** Cap each scheduled sub-window to this duration to bound probe cost in lagging environments. */
+  maxTimeWindowSize: string;
 }
 
 export interface CcsExtractToUpdatesResult {
@@ -77,64 +79,6 @@ export class CcsLogsExtractionClient {
     }
   }
 
-  private async resolveExtractionWindow(
-    type: EntityType,
-    lookbackPeriod: string,
-    delay: string,
-    windowOverride?: { fromDateISO: string; toDateISO: string }
-  ): Promise<{
-    effectiveFromDateISO: string;
-    toDateISO: string;
-    recoveryId: string | undefined;
-    isOverride: boolean;
-  }> {
-    if (windowOverride != null) {
-      return {
-        effectiveFromDateISO: windowOverride.fromDateISO,
-        toDateISO: windowOverride.toDateISO,
-        recoveryId: undefined,
-        isOverride: true,
-      };
-    }
-
-    const ccsState = await this.ccsStateClient.findOrInit(type);
-    const toDateISO = moment().utc().subtract(parseDurationToMs(delay), 'ms').toISOString();
-
-    if (ccsState.paginationRecoveryId && ccsState.checkpointTimestamp) {
-      const effectiveFromDateISO = ccsState.checkpointTimestamp;
-      const recoveryId = ccsState.paginationRecoveryId;
-      this.logger.warn(
-        `CCS extraction resuming from broken state: checkpointTimestamp=${effectiveFromDateISO}, paginationRecoveryId=${recoveryId}`
-      );
-      return { effectiveFromDateISO, toDateISO, recoveryId, isOverride: false };
-    }
-
-    if (ccsState.checkpointTimestamp) {
-      this.logger.debug(
-        `CCS extraction resuming after slice boundary: checkpointTimestamp=${ccsState.checkpointTimestamp}`
-      );
-      return {
-        effectiveFromDateISO: ccsState.checkpointTimestamp,
-        toDateISO,
-        recoveryId: undefined,
-        isOverride: false,
-      };
-    }
-
-    if (ccsState.paginationRecoveryId && !ccsState.checkpointTimestamp) {
-      this.logger.error(
-        `CCS extraction can't be resumed from broken state because checkpointTimestamp is null (recovery id is present), defaulting to lookback period`
-      );
-    }
-
-    const effectiveFromDateISO = moment()
-      .utc()
-      .subtract(parseDurationToMs(lookbackPeriod), 'ms')
-      .toISOString();
-    this.logger.debug(`CCS extraction starting fresh: fromDateISO=${effectiveFromDateISO}`);
-    return { effectiveFromDateISO, toDateISO, recoveryId: undefined, isOverride: false };
-  }
-
   private async doExtractToUpdates({
     type,
     remoteIndexPatterns,
@@ -145,35 +89,96 @@ export class CcsLogsExtractionClient {
     entityDefinition,
     abortController,
     windowOverride,
+    maxTimeWindowSize,
   }: CcsExtractToUpdatesParams): Promise<CcsExtractToUpdatesResult> {
-    const { effectiveFromDateISO, toDateISO, recoveryId, isOverride } =
-      await this.resolveExtractionWindow(type, lookbackPeriod, delay, windowOverride);
+    const ccsState =
+      windowOverride != null
+        ? { checkpointTimestamp: null, paginationRecoveryId: null }
+        : await this.ccsStateClient.findOrInit(type);
 
-    if (effectiveFromDateISO >= toDateISO) {
+    const { effectiveFromDateISO, effectiveWindowEnd, recoveryId, isWindowOverride } =
+      resolveCcsExtractionWindow({
+        config: { lookbackPeriod, delay },
+        ccsState,
+        windowOverride,
+        logger: this.logger,
+      });
+
+    if (effectiveFromDateISO >= effectiveWindowEnd) {
       this.logger.error(
-        `CCS extraction window is empty (from=${effectiveFromDateISO} >= to=${toDateISO}), skipping`
+        `CCS extraction window is empty (from=${effectiveFromDateISO} >= to=${effectiveWindowEnd}), skipping`
       );
       return { count: 0, pages: 0 };
     }
 
-    const result = await this.runLogsPaginationOuterLoop({
-      type,
-      remoteIndexPatterns,
-      toDateISO,
-      docsLimit,
-      maxLogsPerPage,
-      entityDefinition,
-      abortController,
-      effectiveFromDateISO,
-      recoveryId,
-      skipStateUpdates: isOverride,
-    });
+    if (isWindowOverride) {
+      // Manual `windowOverride` runs bypass the cap and run as a single pass.
+      const result = await this.runLogsPaginationOuterLoop({
+        type,
+        remoteIndexPatterns,
+        toDateISO: effectiveWindowEnd,
+        docsLimit,
+        maxLogsPerPage,
+        entityDefinition,
+        abortController,
+        effectiveFromDateISO,
+        recoveryId,
+        skipStateUpdates: true,
+      });
+      return result;
+    }
 
-    if (!isOverride && result.count === 0) {
+    let totalCount = 0;
+    let totalPages = 0;
+    let currentFromDateISO = effectiveFromDateISO;
+    // Recovery applies only to the first sub-window. The inner outer-loop persists
+    // `checkpointTimestamp` after every slice, so a crash mid-run resumes from the last
+    // completed slice's end — no per-sub-window checkpoint write is needed.
+    let recoveryIdForFirstSubWindow = recoveryId;
+
+    let hasNextPage = true;
+    while (hasNextPage) {
+      if (abortController?.signal.aborted) {
+        break;
+      }
+      if (currentFromDateISO >= effectiveWindowEnd) {
+        break;
+      }
+
+      const { toDateISO: subWindowEnd, isCapped } = capExtractionWindowEnd({
+        fromDateISO: currentFromDateISO,
+        effectiveWindowEnd,
+        maxTimeWindowSize,
+        logger: this.logger,
+      });
+
+      const subResult = await this.runLogsPaginationOuterLoop({
+        type,
+        remoteIndexPatterns,
+        toDateISO: subWindowEnd,
+        docsLimit,
+        maxLogsPerPage,
+        entityDefinition,
+        abortController,
+        effectiveFromDateISO: currentFromDateISO,
+        recoveryId: recoveryIdForFirstSubWindow,
+        skipStateUpdates: false,
+      });
+      recoveryIdForFirstSubWindow = undefined;
+
+      totalCount += subResult.count;
+      totalPages += subResult.pages;
+
+      // if the window was capped we consider we have a next page
+      hasNextPage = isCapped;
+      currentFromDateISO = subWindowEnd;
+    }
+
+    if (totalCount === 0) {
       await this.ccsStateClient.clearRecoveryId(type);
     }
 
-    return result;
+    return { count: totalCount, pages: totalPages };
   }
 
   /**

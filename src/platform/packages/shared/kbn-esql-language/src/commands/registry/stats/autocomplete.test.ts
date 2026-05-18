@@ -420,6 +420,28 @@ describe('STATS Autocomplete', () => {
         await statsExpectSuggestions('from a | stats a=min(b), b=max(', expected, mockCallbacks);
       });
 
+      test('inside a function arg with hint.kind === "aggregation" (e.g. SPARKLINE first arg), only aggregation functions are suggested', async () => {
+        // Mock fields just to verify they get suppressed even when the resolver would return them
+        const allFields = getFieldNamesByType('any');
+        (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
+          allFields.map((name) => ({ label: name, text: name }))
+        );
+
+        const expectedAggregations = getFunctionSignaturesByReturnType(
+          Location.STATS,
+          ['integer', 'long', 'double'],
+          { agg: true, timeseriesAgg: true },
+          undefined,
+          ['sparkline']
+        ).map((s) => `${s},`);
+
+        await statsExpectSuggestions(
+          'from a | stats SPARKLINE(',
+          expectedAggregations,
+          mockCallbacks
+        );
+      });
+
       test('inside function argument list', async () => {
         const expectedFieldsAvg = getFieldNamesByType(AVG_TYPES);
         (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
