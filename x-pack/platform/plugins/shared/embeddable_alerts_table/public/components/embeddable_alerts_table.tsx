@@ -149,7 +149,7 @@ export const EmbeddableAlertsTable = ({
   }
 
   return (
-    <div css={{  height: '100%', width: '100%' }}>
+    <div css={{ height: '100%', width: '100%' }}>
       <AlertsTable
         id={id}
         ruleTypeIds={ruleTypeIds}

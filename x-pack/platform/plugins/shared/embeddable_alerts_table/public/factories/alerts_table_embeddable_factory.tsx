@@ -138,12 +138,9 @@ export const getAlertsTableEmbeddableFactory = (
           }
         }, [fetchContext]);
 
-        const onLoadingChange = useCallback(
-          (isLoading: boolean) => {
-            queryLoading$.next(isLoading);
-          },
-          []
-        );
+        const onLoadingChange = useCallback((isLoading: boolean) => {
+          queryLoading$.next(isLoading);
+        }, []);
 
         return (
           <KibanaContextProvider services={services}>
