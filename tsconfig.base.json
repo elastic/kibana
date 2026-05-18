@@ -2272,6 +2272,8 @@
       "@kbn/share-plugin/*": ["src/platform/plugins/shared/share/*"],
       "@kbn/shared-svg": ["src/platform/packages/shared/kbn-shared-svg"],
       "@kbn/shared-svg/*": ["src/platform/packages/shared/kbn-shared-svg/*"],
+      "@kbn/shared-url-state": ["src/platform/packages/shared/kbn-shared-url-state"],
+      "@kbn/shared-url-state/*": ["src/platform/packages/shared/kbn-shared-url-state/*"],
       "@kbn/shared-ux-ai-components": ["src/platform/packages/shared/shared-ux/ai-components"],
       "@kbn/shared-ux-ai-components/*": ["src/platform/packages/shared/shared-ux/ai-components/*"],
       "@kbn/shared-ux-avatar-solution": ["src/platform/packages/shared/shared-ux/avatar/solution"],
