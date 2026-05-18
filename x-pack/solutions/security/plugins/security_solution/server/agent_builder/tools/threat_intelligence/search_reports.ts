@@ -20,6 +20,13 @@ import {
   THREAT_REGIONS,
 } from '../../../../common/threat_intelligence/hub';
 import { searchReports } from '../../../threat_intelligence/services';
+import {
+  buildDigestReportTableAttachmentId,
+  buildRenderAttachmentTag,
+  ensureReportTableAttachment,
+  formatTimeRangeLabel,
+  mapSearchReportHitToTableRow,
+} from './threat_intel_attachment_utils';
 
 /**
  * Thin Agent Builder tool wrapper for the `search_reports` domain action.
@@ -116,10 +123,43 @@ export const searchReportsTool: BuiltinSkillBoundedTool<typeof searchReportsSche
     'the first search used category filters. Prefer `sort_by: "rank"` and `time_range` last 7d ' +
     'for weekly digests.',
   schema: searchReportsSchema,
-  handler: async (params, { esClient, logger, spaceId }) => {
+  handler: async (params, { esClient, logger, spaceId, attachments }) => {
     try {
       const data = await searchReports(esClient.asCurrentUser, logger, spaceId, params);
-      return { results: [{ type: ToolResultType.other, data }] };
+
+      let renderTag: string | undefined;
+      if (data.reports.length > 0) {
+        const payload = {
+          attachmentLabel: `Threat intel: ${params.query}`,
+          time_range_label: formatTimeRangeLabel(params.time_range),
+          reports: data.reports.map(mapSearchReportHitToTableRow),
+        };
+        const attachmentResult = await ensureReportTableAttachment({
+          attachments,
+          id: buildDigestReportTableAttachmentId(params),
+          payload,
+          description: `Threat intelligence report table (${payload.time_range_label})`,
+          logger,
+        });
+        if (attachmentResult) {
+          renderTag = buildRenderAttachmentTag({
+            attachmentId: attachmentResult.attachmentId,
+            version: attachmentResult.version,
+          });
+        }
+      }
+
+      return {
+        results: [
+          {
+            type: ToolResultType.other,
+            data: {
+              ...data,
+              ...(renderTag ? { renderTag, attachmentId: buildDigestReportTableAttachmentId(params) } : {}),
+            },
+          },
+        ],
+      };
     } catch (err) {
       logger.warn(`search_reports failed: ${(err as Error).message}`);
       return {

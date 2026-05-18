@@ -88,3 +88,37 @@ export const truncate = (input: string, maxLength: number): string => {
   if (lastBoundary > maxLength * 0.6) return `${slice.slice(0, lastBoundary).trimEnd()}\u2026`;
   return `${slice.trimEnd()}\u2026`;
 };
+
+/** `content` block written by every ingest path (adapters + manual ingest). */
+export interface ReportContentDocument {
+  title: string;
+  body_text: string;
+  title_bm25: string;
+  body_text_bm25: string;
+  body_html?: string;
+  language?: string;
+}
+
+/**
+ * Build the `content` object for a threat report. Mirrors plain-text values into
+ * the `*_bm25` siblings so `search_reports` field-sorted modes can `multi_match`
+ * without touching `semantic_text` fields (which reject match queries).
+ */
+export const buildReportContent = ({
+  title,
+  bodyText,
+  bodyHtml,
+  language,
+}: {
+  title: string;
+  bodyText: string;
+  bodyHtml?: string;
+  language?: string;
+}): ReportContentDocument => ({
+  title,
+  body_text: bodyText,
+  title_bm25: title,
+  body_text_bm25: bodyText,
+  ...(bodyHtml !== undefined ? { body_html: bodyHtml } : {}),
+  ...(language !== undefined ? { language } : {}),
+});

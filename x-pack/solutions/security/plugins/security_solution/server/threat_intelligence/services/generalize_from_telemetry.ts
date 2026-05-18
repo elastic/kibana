@@ -8,6 +8,7 @@
 import { createHash } from 'crypto';
 import { z } from '@kbn/zod/v4';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { buildReportContent } from '../adapters/text';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import { subtechniqueById, tacticsToIds, techniqueById } from '@kbn/securitysolution-mitre-catalog';
 import {
@@ -274,11 +275,7 @@ export const generalizeFromTelemetry = async (
             name: 'Telemetry generalization',
             adapter_id: 'telemetry:generalize_from_telemetry',
           },
-          content: {
-            title,
-            body_text: bodyText,
-            language: 'en',
-          },
+          content: buildReportContent({ title, bodyText, language: 'en' }),
           severity: {
             level: validated[0].severity,
             score: severityToRiskScore(validated[0].severity),

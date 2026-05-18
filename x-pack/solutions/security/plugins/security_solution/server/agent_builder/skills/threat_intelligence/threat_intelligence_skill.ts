@@ -24,6 +24,7 @@ import {
   THREAT_INTELLIGENCE_SKILL_ID,
   THREAT_INTEL_TOOL_IDS,
 } from '../../../../common/threat_intelligence/hub';
+import { ATTACHMENT_TYPES } from '../../attachments/threat_intelligence_attachment_types';
 import {
   searchReportsTool,
   ingestReportTool,
@@ -249,6 +250,45 @@ sources to enable. Body: \`{ lookback_days?, index_patterns? }\`.
 - \`security.security_labs_search\` — search Elastic Security Labs publications.
 - \`${platformCoreTools.cases}\` — open cases for critical findings.
 
+## Rich attachments (inline Canvas UI)
+
+Digest answers **must** show the \`${ATTACHMENT_TYPES.reportTable}\` Canvas — not a \`text\`
+attachment or markdown table.
+
+**Never** call \`attachments.add\` with \`${ATTACHMENT_TYPES.reportTable}\`,
+\`${ATTACHMENT_TYPES.mitreHeatmap}\`, \`${ATTACHMENT_TYPES.severityTimeline}\`, or
+\`${ATTACHMENT_TYPES.findingCard}\` — those types are **read-only** in the
+\`attachments.add\` tool and will error. (They are created by skill tools or the
+subscription form, not by the generic add tool.)
+
+**Never** use \`type: "json"\` or \`type: "text"\` for a digest.
+
+### Report table (digest / search results)
+
+\`threat_intel.search_reports\` **automatically** stores a \`${ATTACHMENT_TYPES.reportTable}\`
+attachment when it returns hits. Its \`other\` result includes a ready-made \`renderTag\`
+string when the table was persisted.
+
+After \`search_reports\` with \`total > 0\`, copy \`renderTag\` **verbatim** onto its own line
+(blank lines before and after), then write your prose summary:
+
+\`\`\`
+<render_attachment id="threat-intel-report-table:digest:…" version="1" />
+\`\`\`
+
+Do **not** build the tag yourself unless \`renderTag\` is missing (then use
+\`attachmentId\` + a \`version\` field if returned). Do **not** call \`attachments.add\`
+for the report table.
+
+### Other attachment types
+
+- \`${ATTACHMENT_TYPES.subscriptionConfirmation}\` — **only** type the agent may create via
+  \`attachments.add\` (editable subscription form; not read-only).
+- \`${ATTACHMENT_TYPES.findingCard}\` — follow \`hunt_behavior\` \`attachment_hints[]\`; cards are
+  emitted by the hunt flow, not via \`attachments.add\`.
+- \`${ATTACHMENT_TYPES.mitreHeatmap}\` — use \`coverage_gap\`'s \`attachment_hint.payload\` in
+  prose until a dedicated emit path exists; do not use \`attachments.add\`.
+
 ## Orchestration Rules
 
 ### For digest queries ("what's new on X this week?")
@@ -258,15 +298,14 @@ sources to enable. Body: \`{ lookback_days?, index_patterns? }\`.
    otherwise, \`sort_by: "rank"\`, \`size: 10\`. Map ransomware / supply chain topics to
    \`categories: ["ransomware", "supply-chain"]\` only on the first attempt; retry without
    \`categories\` if \`total\` is 0 (see guardrails above).
-2. When \`total > 0\`: call \`${THREAT_INTEL_TOOL_IDS.synthesizeAdvisory}\` (or
-   \`POST ${SYNTHESIZE_ADVISORY_API_PATH}\`) with the same window and category filters for
-   a 2–3 paragraph executive lede; then summarize top headlines in prose.
-3. Render \`threat-intel-report-table\` (from the search hits) and optionally
-   \`threat-intel-mitre-heatmap\` when techniques are present. Add
-   \`threat-intel-severity-timeline\` when the window is wider than 7 days.
-4. For high/critical hits only, optionally \`POST ${HUNT_BEHAVIOR_API_PATH}\` — do not block
+2. When \`total > 0\`: copy the \`renderTag\` from the \`search_reports\` tool result verbatim
+   so the \`${ATTACHMENT_TYPES.reportTable}\` Canvas renders (see **Rich attachments**).
+3. Optionally call \`${THREAT_INTEL_TOOL_IDS.synthesizeAdvisory}\` for a 2–3 paragraph
+   executive lede in prose (do not put the lede in a \`text\` attachment).
+4. Optionally \`${ATTACHMENT_TYPES.mitreHeatmap}\` when techniques are present; \`${ATTACHMENT_TYPES.severityTimeline}\` when the window is wider than 7 days.
+5. For high/critical hits only, optionally \`POST ${HUNT_BEHAVIOR_API_PATH}\` — do not block
    the digest on hunt/extraction calls.
-5. Only when \`total\` is 0 after both search attempts: offer paste-ingest, feed setup, or
+6. Only when \`total\` is 0 after both search attempts: offer paste-ingest, feed setup, or
    subscription (subscription flow below).
 
 ### For analyst paste ("here's a Mandiant blog, what should we do?")
@@ -275,7 +314,8 @@ sources to enable. Body: \`{ lookback_days?, index_patterns? }\`.
 2. Issue \`POST ${HUNT_BEHAVIOR_API_PATH}\` against the same text using the
    returned \`report_id\` for provenance.
 3. For each entry in the response's \`attachment_hints[]\` (one per
-   surviving behavior), emit a \`threat-intel-finding-card\` attachment.
+   surviving behavior), emit a \`${ATTACHMENT_TYPES.findingCard}\` per the hint payload
+   (do not use \`attachments.add\` — the type is read-only there).
    The hint's \`payload_partial\` is already complete except for
    \`report_title\` and \`report_source_name\` — fill those in from the
    prior ingest / search response before emitting. Each card surfaces
@@ -294,8 +334,9 @@ sources to enable. Body: \`{ lookback_days?, index_patterns? }\`.
 
 1. Issue \`POST ${COVERAGE_GAP_API_PATH}\` with the user's time range and
    any tag/source filters they specified.
-2. Render the \`attachment_hint.payload\` as a \`threat-intel-mitre-heatmap\`
-   attachment with \`mode: "coverage"\` — uncovered techniques render red.
+2. Call \`attachments.add\` with \`type: "${ATTACHMENT_TYPES.mitreHeatmap}"\` and
+   \`data\` = the \`attachment_hint.payload\` with \`mode: "coverage"\` — uncovered
+   techniques render red. Emit \`<render_attachment … />\` after the add succeeds.
 3. For each uncovered technique, recommend issuing
    \`POST ${HUNT_BEHAVIOR_API_PATH}\` on the underlying reports to
    propose a durable rule.
@@ -305,8 +346,8 @@ sources to enable. Body: \`{ lookback_days?, index_patterns? }\`.
 1. Resolve the proposed parameters (locally or via the
    \`manage_subscriptions\` portability tool with \`confirm=false\`); the
    resolved shape carries \`status: pending_confirmation\`.
-2. Render a \`threat-intel-subscription-confirmation\` attachment with the
-   proposed parameters. The card is editable inline — the user can adjust
+2. Call \`attachments.add\` with \`type: "${ATTACHMENT_TYPES.subscriptionConfirmation}"\` and
+   the proposed parameters. The card is editable inline — the user can adjust
    tags, severity, schedule, delivery, and connector id before Submit.
 3. The Submit button posts directly to
    \`${SUBMIT_SUBSCRIPTION_API_PATH}\` so the agent does

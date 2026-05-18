@@ -113,6 +113,11 @@ import {
  * threat-reports data stream mapping in this bump — companion index
  * additions are always backwards-compatible.
  *
+ * v12: adds `copy_to` on `content.title` and `content.body_text` so the
+ * `content.title_bm25` / `content.body_text_bm25` siblings are populated at
+ * index time (the mapping declared these fields in v1 but omitted copy_to,
+ * which made `search_reports` field-sorted modes return zero hits).
+ *
  * v11: adds `advisory_id` (keyword) to the digests companion index
  * (`.kibana-threat-intel-digests`). Populated by `digest_delivery` when
  * the agent calls `threat_intel.synthesize_advisory` (with
@@ -125,7 +130,7 @@ import {
  * mapping is `dynamic: 'strict'` so the field MUST be declared up-front
  * before any write attempts it.
  */
-const TEMPLATE_VERSION = 11;
+const TEMPLATE_VERSION = 12;
 
 /** Keyword sentinel meaning "visible from every space". */
 export const SPACE_ID_GLOBAL = '*' as const;
@@ -184,10 +189,12 @@ const threatReportsTemplate = {
             title: {
               type: 'semantic_text' as const,
               // intentionally no inference_id — inherit cluster default
+              copy_to: ['title_bm25'],
             },
             title_bm25: { type: 'text' as const },
             body_text: {
               type: 'semantic_text' as const,
+              copy_to: ['body_text_bm25'],
             },
             body_text_bm25: { type: 'text' as const },
             body_html: { type: 'text' as const, index: false },

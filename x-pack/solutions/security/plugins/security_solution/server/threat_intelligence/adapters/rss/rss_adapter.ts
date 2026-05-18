@@ -9,7 +9,7 @@ import { GLOBAL_SPACE_ID } from '../../../../common/threat_intelligence/hub';
 import { fetchUrl } from '../http_client';
 import { buildFingerprint } from '../fingerprint';
 import { DEFAULT_SEVERITY_LEVEL, DEFAULT_SEVERITY_SCORE } from '../severity';
-import { collapseWhitespace, stripHtml, truncate } from '../text';
+import { buildReportContent, collapseWhitespace, stripHtml, truncate } from '../text';
 import type { AdapterRunContext, FetchAdapter, NormalizedReport, SourceHit } from '../types';
 import { parseRssFeed } from './parse_rss';
 
@@ -79,12 +79,12 @@ export const rssAdapter: FetchAdapter = {
           url: entry.link ?? feedUrl,
           adapter_id: adapterId,
         },
-        content: {
+        content: buildReportContent({
           title: truncate(title, TITLE_MAX_LENGTH),
-          body_text: bodyText,
-          body_html: entry.bodyHtml,
+          bodyText,
+          bodyHtml: entry.bodyHtml,
           language,
-        },
+        }),
         severity: {
           level: DEFAULT_SEVERITY_LEVEL,
           score: DEFAULT_SEVERITY_SCORE,

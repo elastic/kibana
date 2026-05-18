@@ -114,6 +114,15 @@ const SOURCE_FIELDS: string[] = [
 ];
 
 /**
+ * Lexical-only query targets for the BM25 retriever branch and for field-sorted
+ * (`rank` / `severity` / `recency`) modes. Must stay on `text` siblings — never
+ * `content.title` / `content.body_text` (`semantic_text` rejects match queries).
+ * Adapters populate these mirrors at ingest; `backfillBm25MirrorFields` repairs
+ * legacy rows missing them.
+ */
+const BM25_QUERY_FIELDS = ['content.title_bm25^2', 'content.body_text_bm25'] as const;
+
+/**
  * Translate a `sort_by` mode into an Elasticsearch `sort` clause.
  *
  * `'rank'` is a tiered sort that prefers the hunt-feedback-corroborated
@@ -211,7 +220,7 @@ export const searchReports = async (
                       {
                         multi_match: {
                           query,
-                          fields: ['content.title_bm25^2', 'content.body_text_bm25'],
+                          fields: [...BM25_QUERY_FIELDS],
                         },
                       },
                     ],
@@ -283,7 +292,7 @@ export const searchReports = async (
           {
             multi_match: {
               query,
-              fields: ['content.title_bm25^2', 'content.body_text_bm25'],
+              fields: [...BM25_QUERY_FIELDS],
             },
           },
         ],

@@ -12,6 +12,7 @@ import {
   THREAT_REPORTS_DATA_STREAM,
   type SeverityLevel,
 } from '../../../common/threat_intelligence/hub';
+import { buildReportContent } from '../adapters/text';
 
 /**
  * Domain capability module for the `ingest_report` action.
@@ -129,11 +130,7 @@ export const ingestReport = async (
         url: sourceUrl,
         adapter_id: 'manual:analyst-paste',
       },
-      content: {
-        title,
-        body_text: bodyText,
-        language,
-      },
+      content: buildReportContent({ title, bodyText, language }),
       severity: {
         level: severity,
         score: severityScore(severity),

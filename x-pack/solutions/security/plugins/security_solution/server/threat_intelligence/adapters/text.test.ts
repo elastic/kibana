@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { collapseWhitespace, stripHtml, truncate } from './text';
+import { buildReportContent, collapseWhitespace, stripHtml, truncate } from './text';
 
 describe('stripHtml', () => {
   it('returns an empty string for nullish input', () => {
@@ -64,5 +64,23 @@ describe('truncate', () => {
     const input = 'noboundariesatallnoboundariesatall';
     expect(truncate(input, 5).startsWith('nobou')).toBe(true);
     expect(truncate(input, 5).endsWith('\u2026')).toBe(true);
+  });
+});
+
+describe('buildReportContent', () => {
+  it('mirrors title and body into the bm25 text siblings', () => {
+    expect(
+      buildReportContent({
+        title: 'Ransomware uptick',
+        bodyText: 'Campaign details',
+        language: 'en',
+      })
+    ).toEqual({
+      title: 'Ransomware uptick',
+      body_text: 'Campaign details',
+      title_bm25: 'Ransomware uptick',
+      body_text_bm25: 'Campaign details',
+      language: 'en',
+    });
   });
 });

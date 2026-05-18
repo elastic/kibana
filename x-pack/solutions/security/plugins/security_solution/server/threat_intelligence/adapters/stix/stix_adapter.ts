@@ -9,7 +9,7 @@ import { GLOBAL_SPACE_ID } from '../../../../common/threat_intelligence/hub';
 import { fetchUrl } from '../http_client';
 import { buildFingerprint } from '../fingerprint';
 import { DEFAULT_SEVERITY_LEVEL, DEFAULT_SEVERITY_SCORE } from '../severity';
-import { collapseWhitespace, truncate } from '../text';
+import { buildReportContent, collapseWhitespace, truncate } from '../text';
 import type { AdapterRunContext, FetchAdapter, NormalizedReport, SourceHit } from '../types';
 import { composeStixBody, composeStixTitle, splitStixBundle } from './split_bundle';
 
@@ -83,11 +83,11 @@ export const stixAdapter: FetchAdapter = {
           url,
           adapter_id: adapterId,
         },
-        content: {
+        content: buildReportContent({
           title: truncate(title, TITLE_MAX_LENGTH),
-          body_text: bodyText,
+          bodyText,
           language: 'en',
-        },
+        }),
         severity: {
           level: DEFAULT_SEVERITY_LEVEL,
           score: DEFAULT_SEVERITY_SCORE,

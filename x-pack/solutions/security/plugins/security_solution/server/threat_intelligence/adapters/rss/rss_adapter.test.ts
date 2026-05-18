@@ -79,6 +79,8 @@ describe('rssAdapter', () => {
       content: {
         title: 'Item one',
         body_text: 'Body one',
+        title_bm25: 'Item one',
+        body_text_bm25: 'Body one',
         body_html: '<p>Body one</p>',
         language: 'en',
       },

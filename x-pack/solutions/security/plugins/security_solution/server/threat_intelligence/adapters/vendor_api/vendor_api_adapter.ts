@@ -10,7 +10,7 @@ import { fetchUrl } from '../http_client';
 import { buildFingerprint } from '../fingerprint';
 import { rssAdapter } from '../rss/rss_adapter';
 import { DEFAULT_SEVERITY_LEVEL, DEFAULT_SEVERITY_SCORE } from '../severity';
-import { collapseWhitespace, truncate } from '../text';
+import { buildReportContent, collapseWhitespace, truncate } from '../text';
 import type { AdapterRunContext, FetchAdapter, NormalizedReport, SourceHit } from '../types';
 import { resolveVendorHandler } from './builtin_vendors';
 
@@ -181,11 +181,11 @@ const runJsonList = async (
         url,
         adapter_id: adapterId,
       },
-      content: {
+      content: buildReportContent({
         title: truncate(title, TITLE_MAX_LENGTH),
-        body_text: truncate(body, BODY_TEXT_MAX_LENGTH),
+        bodyText: truncate(body, BODY_TEXT_MAX_LENGTH),
         language: 'en',
-      },
+      }),
       severity: {
         level: DEFAULT_SEVERITY_LEVEL,
         score: DEFAULT_SEVERITY_SCORE,
