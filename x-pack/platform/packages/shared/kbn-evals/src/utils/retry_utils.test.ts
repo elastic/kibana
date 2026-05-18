@@ -91,6 +91,18 @@ describe('withRetry', () => {
     expect(fn).toHaveBeenCalledTimes(3);
   });
 
+  it.each([
+    ['fetch failed', 'fetch failed'],
+    ['other side closed', 'other side closed'],
+    ['KbnClientRequesterError wrapping fetch failed', 'Status: N/A, Cause: fetch failed -- and ran out of retries'],
+  ])('retries on transient connection drop: %s', async (_label, message) => {
+    const err = new Error(message);
+    const fn = jest.fn().mockRejectedValueOnce(err).mockResolvedValueOnce('ok');
+    const result = await withRetry(fn, fastRetryOptions);
+    expect(result).toBe('ok');
+    expect(fn).toHaveBeenCalledTimes(2);
+  });
+
   it('invokes onRetry hook between attempts', async () => {
     const onRetry = jest.fn();
     const fn = jest.fn().mockRejectedValueOnce(makeStatusError(503)).mockResolvedValueOnce('ok');

@@ -120,8 +120,9 @@ function isRetryable(error: any): { retry: boolean; retryAfterMs?: number } {
     return { retry: true, retryAfterMs };
   }
 
-  // Common transient network issues (best-effort)
-  if (/ECONNRESET|ETIMEDOUT|EAI_AGAIN|ENOTFOUND/i.test(message)) {
+  // Common transient network issues (best-effort).
+  // "fetch failed" / "other side closed" are undici's signals for a dropped TCP connection.
+  if (/ECONNRESET|ETIMEDOUT|EAI_AGAIN|ENOTFOUND|fetch failed|other side closed/i.test(message)) {
     return { retry: true };
   }
 
