@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useKibana } from '../../../../../../common/lib/kibana';
 import { IconScriptLibrary } from '../../../../../../common/icons/script_library';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 
@@ -35,6 +36,11 @@ export const NewPageBanner: React.FC<NewPageBannerProps> = ({
 }) => {
   const getTestId = useTestIdGenerator(dataTestSubj);
   const { euiTheme } = useEuiTheme();
+  const {
+    docLinks: {
+      links: { securitySolution: securitySolutionDocLinks },
+    },
+  } = useKibana().services;
 
   const bannerStyle = useMemo(
     () => ({
@@ -74,7 +80,7 @@ export const NewPageBanner: React.FC<NewPageBannerProps> = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiLink
-              href="https://www.elastic.co/guide/en/security/current/scripts-library.html"
+              href={securitySolutionDocLinks.scriptLibrary}
               target="_blank"
               data-test-subj={getTestId('new-page-banner-learn-more-link')}
             >

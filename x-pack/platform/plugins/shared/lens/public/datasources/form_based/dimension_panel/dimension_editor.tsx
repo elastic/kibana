@@ -539,7 +539,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
         id: operationType as string,
         label,
         isActive,
-        size: 's',
         isDisabled: !!disabledStatus,
         css: operationsButtonStyles(euiThemeContext),
         'data-test-subj': `lns-indexPatternDimension-${operationType}${
@@ -749,7 +748,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
       >
         <EuiListGroup
           css={sideNavItems.length > 3 ? operationsTwoColumnsStyles(euiThemeContext) : undefined}
-          gutterSize="none"
           color="primary"
           listItems={
             // add a padding item containing a non breakable space if the number of operations is not even
