@@ -50,7 +50,11 @@ jest.mock('@kbn/core-di', () => ({
 }));
 
 jest.mock('@kbn/alerting-v2-rule-form', () => ({
-  ComposeDiscoverFlyout: () => <div data-test-subj="composeDiscoverFlyout" />,
+  ComposeDiscoverFlyout: ({ onCreateRule }: { onCreateRule: (payload: unknown) => void }) => (
+    <button data-test-subj="composeDiscoverFlyout" onClick={() => onCreateRule({})}>
+      Compose Discover flyout
+    </button>
+  ),
 }));
 
 const mockUseFetchRules = jest.fn();
@@ -712,6 +716,30 @@ describe('RulesListPage', () => {
 
     expect(screen.queryByTestId('ruleCreateOptionsFlyout')).not.toBeInTheDocument();
     expect(screen.getByTestId('composeDiscoverFlyout')).toBeInTheDocument();
+    expect(mockNavigateToUrl).not.toHaveBeenCalled();
+  });
+
+  it('stays on the rules list after creating a rule from the flyout', () => {
+    mockUseFetchRules.mockReturnValue({
+      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+    mockCreateRuleMutate.mockImplementationOnce((_payload, options) => options?.onSuccess?.());
+
+    renderPage();
+
+    fireEvent.click(screen.getByTestId('createRuleButton'));
+    fireEvent.click(screen.getByRole('button', { name: /create es\|ql rule/i }));
+    fireEvent.click(screen.getByTestId('composeDiscoverFlyout'));
+
+    expect(mockCreateRuleMutate).toHaveBeenCalledWith(
+      {},
+      expect.objectContaining({ onSuccess: expect.any(Function) })
+    );
+    expect(screen.queryByTestId('composeDiscoverFlyout')).not.toBeInTheDocument();
+    expect(screen.getByTestId('rulesListTable')).toBeInTheDocument();
     expect(mockNavigateToUrl).not.toHaveBeenCalled();
   });
 

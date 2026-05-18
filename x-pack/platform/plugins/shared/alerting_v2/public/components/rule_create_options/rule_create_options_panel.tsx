@@ -59,7 +59,7 @@ export const RuleCreateOptionsPanel: React.FC<RuleCreateOptionsPanelProps> = ({
               </h2>
             </EuiTitle>
             <EuiSpacer size="s" />
-            <EuiText size="s" color="subdued" textAlign={isVerticalLayout ? 'left' : 'center'}>
+            <EuiText size="s" color="subdued" textAlign="center">
               <FormattedMessage
                 id="xpack.alertingV2.ruleCreateOptionsPanel.welcomeDescription"
                 defaultMessage="Powerful ES|QL-driven rules and support for external alerts, it delivers consistent, high-quality alert data into a unified experience."

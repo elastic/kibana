@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { RuleCreateOptionsPanel } from '../rule_create_options/rule_create_options_panel';
+import { RuleCreateOptionsPanel } from './rule_create_options_panel';
 
 const FLYOUT_TITLE_ID = 'ruleCreateOptionsFlyoutTitle';
 
@@ -33,7 +33,6 @@ export const RuleCreateOptionsFlyout = ({
   return (
     <EuiFlyout
       type="push"
-      hasAnimation
       size="s"
       ownFocus
       hideCloseButton
