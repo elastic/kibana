@@ -149,9 +149,6 @@ export class MetricsExperiencePage {
    * actions menu of the given card.
    */
   public async openInspectorFlyout(cardIndex: number): Promise<void> {
-    await this.openCardContextMenu(cardIndex);
-    await this.getCardByIndex(cardIndex)
-      .locator('[data-test-subj="embeddablePanelAction-openInspector"]')
-      .click();
+    await this.clickVisibleQuickAction(cardIndex, this.chartActions.inspect);
   }
 }
