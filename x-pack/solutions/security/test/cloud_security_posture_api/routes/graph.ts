@@ -1050,7 +1050,7 @@ export default function (providerContext: FtrProviderContext) {
         }).expect(result(200));
 
         // After MV_EXPAND, the Cartesian product of 2 actors × 3 targets = 6 records
-        // These are grouped by MD5 hash into 2 entity nodes (one for actors, one for targets)
+        // These are grouped by hash into 2 entity nodes (one for actors, one for targets)
         // and 1 label node representing all 6 relationships
         expect(response.body).to.have.property('nodes');
         expect(response.body).to.have.property('edges');
@@ -1940,7 +1940,8 @@ export default function (providerContext: FtrProviderContext) {
 
               // Find grouped target node by checking for count property
               const targetNode = response.body.nodes.find(
-                (node: EntityNodeDataModel) => node.id === '9da97a47da11862817d60dcc1cfbaaef'
+                (node: EntityNodeDataModel) =>
+                  node.id === '081f21718bb4b854bda72b01719d0febe88b10520dede17fc2640260002ea339'
               ) as EntityNodeDataModel;
 
               // Verify entity enrichment for grouped targets (2 hosts of same type/subtype)
@@ -2142,7 +2143,8 @@ export default function (providerContext: FtrProviderContext) {
 
               // Find grouped Storage target node (should have 3 buckets: target-bucket-a, target-bucket-b, target-bucket-c)
               const storageGroupNode = response.body.nodes.find(
-                (node: EntityNodeDataModel) => node.id === '60829c004e98c57e5a2095bb4d6608bb'
+                (node: EntityNodeDataModel) =>
+                  node.id === '0b32687b565bbb4401472fad910ab3274f0cdf72ed77a785aed3b4a3712b5378'
               ) as EntityNodeDataModel;
               expect(storageGroupNode).not.to.be(undefined);
               expect(storageGroupNode.label).to.equal('GCP Storage Bucket'); // Shows sub_type for grouped entities
@@ -2752,7 +2754,8 @@ export default function (providerContext: FtrProviderContext) {
               );
 
               const relationshipGroupedNodeTarget = response.body.nodes.find(
-                (node: NodeDataModel) => node.id === '5125dc59a9ba3a4a163e0629e0c46f92'
+                (node: NodeDataModel) =>
+                  node.id === 'df6a654e7a91b7a1abd7fa722d0558b81a3a109fe009bd5be8046ddb606125af'
               ) as EntityNodeDataModel;
               expect(relationshipGroupedNodeTarget).not.to.be(undefined);
               expect(relationshipGroupedNodeTarget.label).to.equal('AWS EC2 Instance');
@@ -2854,7 +2857,8 @@ export default function (providerContext: FtrProviderContext) {
               );
 
               const relationshipGroupedNodeTarget = response.body.nodes.find(
-                (node: NodeDataModel) => node.id === '5125dc59a9ba3a4a163e0629e0c46f92'
+                (node: NodeDataModel) =>
+                  node.id === 'df6a654e7a91b7a1abd7fa722d0558b81a3a109fe009bd5be8046ddb606125af'
               ) as EntityNodeDataModel;
               expect(relationshipGroupedNodeTarget).not.to.be(undefined);
               expect(relationshipGroupedNodeTarget.label).to.equal('AWS EC2 Instance');
@@ -3117,7 +3121,8 @@ export default function (providerContext: FtrProviderContext) {
               );
 
               const relationshipsTargetNode = response.body.nodes.find(
-                (node: NodeDataModel) => node.id === '06530c8b5bd27028c4f78cb987f08cc0'
+                (node: NodeDataModel) =>
+                  node.id === 'c7d2fb4084505889f751c7a8ffcee9eb7d836a60c2e34f751b64faf34ac0b932'
               ) as EntityNodeDataModel;
               expect(relationshipsTargetNode.label).to.equal('GCP Compute Instance');
               expect(relationshipsTargetNode.shape).to.equal('hexagon');
