@@ -177,7 +177,7 @@ export function MachineLearningDataVisualizerTableProvider(
       await retry.tryForTime(30 * 1000, async () => {
         await this.ensureAllMenuPopoversClosed();
         await testSubjects.click(this.rowSelector(fieldName, 'euiCollapsedItemActionsButton'));
-        await find.existsByCssSelector('euiContextMenuPanel');
+        await find.byCssSelector('.euiContextMenuPanel');
       });
     }
 
