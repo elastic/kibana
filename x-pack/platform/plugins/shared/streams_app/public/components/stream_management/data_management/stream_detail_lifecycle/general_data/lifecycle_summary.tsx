@@ -16,12 +16,12 @@ import { DataLifecycleSummary } from '../common/data_lifecycle/data_lifecycle_su
 import { useUpdateStreamLifecycle } from '../hooks/use_update_stream_lifecycle';
 import { useIlmLifecycleSummary } from '../hooks/use_ilm_lifecycle_summary';
 import { useDslLifecycleSummary } from '../hooks/use_dsl_lifecycle_summary';
-import { MAX_DOWNSAMPLE_STEPS } from '../downsampling/edit_dsl_steps_flyout/form';
+import { MAX_DOWNSAMPLE_STEPS } from '../data_phases/edit_dsl_steps_flyout/form';
 import type {
   IlmPhaseSelectOption,
   IlmPhaseSelectRenderButtonProps,
-} from '../downsampling/ilm_phase_select/ilm_phase_select';
-import { IlmPhaseSelect } from '../downsampling/ilm_phase_select/ilm_phase_select';
+} from '../data_phases/ilm_phase_select/ilm_phase_select';
+import { IlmPhaseSelect } from '../data_phases/ilm_phase_select/ilm_phase_select';
 
 const addPhaseButtonLabel = i18n.translate(
   'xpack.streams.dataLifecycleSummary.addPhaseButtonLabel',
