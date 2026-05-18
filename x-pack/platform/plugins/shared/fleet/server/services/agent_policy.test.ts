@@ -3141,12 +3141,19 @@ describe('Agent policy', () => {
       },
     };
 
-    const baseVerificationInfo = {
-      policyTemplates: ['cspm'],
-      packageName: 'aws',
-      packageTitle: 'AWS',
-      packageVersion: '2.17.0',
-    };
+    const basePackagePolicies = [
+      {
+        package_policy_id: 'pp-aws-cspm',
+        policy_id: 'agent-policy-1',
+        policy_name: 'AWS CSPM Policy',
+        policy_template: 'cspm',
+        package_name: 'aws',
+        package_title: 'AWS',
+        package_version: '2.17.0',
+      },
+    ];
+
+    const baseVerificationInfo = { verifiedPackagePolicies: basePackagePolicies };
 
     let soClient: ReturnType<typeof createSavedObjectClientMock>;
 
@@ -3157,14 +3164,17 @@ describe('Agent policy', () => {
 
       mockedPackagePolicyService.create.mockResolvedValue({ id: 'pp-id' } as any);
 
+      // Default mock pins the verifier_otel package version to the current production
+      // baseline (VERIFIER_MULTI_TARGET_MIN_VERSION). Tests that need to exercise the
+      // legacy scalar branch override this per-test.
       jest.mocked(ensureInstalledPackage).mockResolvedValue({
         status: 'already_installed',
-        package: { version: '0.0.0' },
+        package: { version: '0.1.0' },
       } as any);
       jest.mocked(getPackageInfo).mockResolvedValue({
         name: 'verifier_otel',
         title: 'Permission Verifier',
-        version: '0.0.0',
+        version: '0.1.0',
       } as any);
 
       mockedAppContextService.getCloud.mockReturnValue({
@@ -3280,9 +3290,9 @@ describe('Agent policy', () => {
       expect(vars.verification_type).toEqual({ type: 'select', value: 'scheduled' });
       expect(vars.provider).toEqual({ type: 'text', value: 'aws' });
       expect(vars.policy_templates).toEqual({ type: 'text', value: ['cspm'] });
-      expect(vars.package_name).toEqual({ type: 'text', value: 'aws' });
-      expect(vars.package_title).toEqual({ type: 'text', value: 'AWS' });
-      expect(vars.package_version).toEqual({ type: 'text', value: '2.17.0' });
+      expect(vars.package_name).toEqual({ type: 'text', value: ['aws'] });
+      expect(vars.package_title).toEqual({ type: 'text', value: ['AWS'] });
+      expect(vars.package_version).toEqual({ type: 'text', value: ['2.17.0'] });
       expect(vars.namespace).toBeUndefined();
       expect(vars.default_region).toBeUndefined();
     });
@@ -3566,6 +3576,163 @@ describe('Agent policy', () => {
       expect(vars.namespace).toBeUndefined();
       expect(vars.cloud_connector_id).toBeUndefined();
       expect(vars.cloud_connector_name).toBeUndefined();
+    });
+
+    // ---------------------------------------------------------------------
+    // Version-gated producer shape — see VERIFIER_MULTI_TARGET_MIN_VERSION.
+    //
+    // `createVerifierPolicy` chooses between parallel-array stream vars
+    // (verifier_otel >= 0.1.0, multi:true manifest) and legacy scalar
+    // stream vars (verifier_otel < 0.1.0, multi:false manifest) based on
+    // the installed package version. These tests pin both branches.
+    // ---------------------------------------------------------------------
+    describe('version-gated stream var shape', () => {
+      const multiplePackagePolicies = [
+        basePackagePolicies[0],
+        {
+          package_policy_id: 'pp-aws-asset-inventory',
+          policy_id: 'agent-policy-2',
+          policy_name: 'AWS Asset Inventory Policy',
+          policy_template: 'asset_inventory',
+          package_name: 'cloud_asset_inventory',
+          package_title: 'Cloud Asset Inventory',
+          package_version: '1.2.0',
+        },
+      ];
+
+      it('should emit parallel-array stream vars when verifier_otel >= 0.1.0', async () => {
+        jest.mocked(ensureInstalledPackage).mockResolvedValue({
+          status: 'already_installed',
+          package: { version: '0.1.0' },
+        } as any);
+        jest.mocked(getPackageInfo).mockResolvedValue({
+          name: 'verifier_otel',
+          title: 'Permission Verifier',
+          version: '0.1.0',
+        } as any);
+
+        await agentPolicyService.createVerifierPolicy(soClient, esClient, baseConnector as any, {
+          verifiedPackagePolicies: multiplePackagePolicies,
+        });
+
+        const { streams } = mockedPackagePolicyService.create.mock.calls[0][2].inputs[0];
+        const vars = streams[0].vars!;
+
+        expect(vars.policy_id).toEqual({
+          type: 'text',
+          value: ['agent-policy-1', 'agent-policy-2'],
+        });
+        expect(vars.policy_name).toEqual({
+          type: 'text',
+          value: ['AWS CSPM Policy', 'AWS Asset Inventory Policy'],
+        });
+        expect(vars.policy_templates).toEqual({
+          type: 'text',
+          value: ['cspm', 'asset_inventory'],
+        });
+        expect(vars.package_policy_id).toEqual({
+          type: 'text',
+          value: ['pp-aws-cspm', 'pp-aws-asset-inventory'],
+        });
+        expect(vars.package_name).toEqual({
+          type: 'text',
+          value: ['aws', 'cloud_asset_inventory'],
+        });
+        expect(vars.package_title).toEqual({
+          type: 'text',
+          value: ['AWS', 'Cloud Asset Inventory'],
+        });
+        expect(vars.package_version).toEqual({
+          type: 'text',
+          value: ['2.17.0', '1.2.0'],
+        });
+      });
+
+      it('should emit scalar stream vars from verifiedPackagePolicies[0] when verifier_otel < 0.1.0 (legacy single-target manifest)', async () => {
+        jest.mocked(ensureInstalledPackage).mockResolvedValue({
+          status: 'already_installed',
+          package: { version: '0.0.1' },
+        } as any);
+        jest.mocked(getPackageInfo).mockResolvedValue({
+          name: 'verifier_otel',
+          title: 'Permission Verifier',
+          version: '0.0.1',
+        } as any);
+
+        await agentPolicyService.createVerifierPolicy(
+          soClient,
+          esClient,
+          baseConnector as any,
+          baseVerificationInfo
+        );
+
+        const { streams } = mockedPackagePolicyService.create.mock.calls[0][2].inputs[0];
+        const vars = streams[0].vars!;
+
+        // Scalars, not arrays — pre-0.1.0 manifest declared these `multi: false`.
+        expect(vars.policy_id).toEqual({ type: 'text', value: 'agent-policy-1' });
+        expect(vars.policy_name).toEqual({ type: 'text', value: 'AWS CSPM Policy' });
+        expect(vars.policy_templates).toEqual({ type: 'text', value: 'cspm' });
+        expect(vars.package_policy_id).toEqual({ type: 'text', value: 'pp-aws-cspm' });
+        expect(vars.package_name).toEqual({ type: 'text', value: 'aws' });
+        expect(vars.package_title).toEqual({ type: 'text', value: 'AWS' });
+        expect(vars.package_version).toEqual({ type: 'text', value: '2.17.0' });
+      });
+
+      it('should drop extras and use only verifiedPackagePolicies[0] when verifier_otel < 0.1.0 with multiple package policies', async () => {
+        jest.mocked(ensureInstalledPackage).mockResolvedValue({
+          status: 'already_installed',
+          package: { version: '0.0.1' },
+        } as any);
+        jest.mocked(getPackageInfo).mockResolvedValue({
+          name: 'verifier_otel',
+          title: 'Permission Verifier',
+          version: '0.0.1',
+        } as any);
+
+        await agentPolicyService.createVerifierPolicy(soClient, esClient, baseConnector as any, {
+          verifiedPackagePolicies: multiplePackagePolicies,
+        });
+
+        const { streams } = mockedPackagePolicyService.create.mock.calls[0][2].inputs[0];
+        const vars = streams[0].vars!;
+
+        // Only the first target is carried into the scalar manifest — second target is silently dropped.
+        expect(vars.policy_id).toEqual({ type: 'text', value: 'agent-policy-1' });
+        expect(vars.package_policy_id).toEqual({ type: 'text', value: 'pp-aws-cspm' });
+        expect(vars.package_name).toEqual({ type: 'text', value: 'aws' });
+        // Sanity check that the second target's values do NOT appear anywhere.
+        expect(JSON.stringify(vars)).not.toContain('agent-policy-2');
+        expect(JSON.stringify(vars)).not.toContain('pp-aws-asset-inventory');
+        expect(JSON.stringify(vars)).not.toContain('asset_inventory');
+      });
+
+      it('should emit parallel-array stream vars at the 0.1.0 boundary (gte semantics)', async () => {
+        // Exactly 0.1.0 should match the gate (>=), not fall through to the scalar branch.
+        jest.mocked(ensureInstalledPackage).mockResolvedValue({
+          status: 'already_installed',
+          package: { version: '0.1.0' },
+        } as any);
+        jest.mocked(getPackageInfo).mockResolvedValue({
+          name: 'verifier_otel',
+          title: 'Permission Verifier',
+          version: '0.1.0',
+        } as any);
+
+        await agentPolicyService.createVerifierPolicy(
+          soClient,
+          esClient,
+          baseConnector as any,
+          baseVerificationInfo
+        );
+
+        const { streams } = mockedPackagePolicyService.create.mock.calls[0][2].inputs[0];
+        const vars = streams[0].vars!;
+
+        // Even with a single target, the value is wrapped in an array because the manifest is multi:true.
+        expect(vars.policy_id).toEqual({ type: 'text', value: ['agent-policy-1'] });
+        expect(vars.package_policy_id).toEqual({ type: 'text', value: ['pp-aws-cspm'] });
+      });
     });
   });
 });

@@ -10,7 +10,7 @@ import { escapeKuery, escapeQuotes } from '@kbn/es-query';
 import { groupBy, isEqual, keyBy, omit, pick, uniq } from 'lodash';
 import { v4 as uuidv4, v5 as uuidv5 } from 'uuid';
 import pMap from 'p-map';
-import { lt, minVersion, gt } from 'semver';
+import { lt, minVersion, gt, gte } from 'semver';
 import type {
   AuthenticatedUser,
   ElasticsearchClient,
@@ -88,6 +88,7 @@ import {
   VERIFIER_INPUT_TYPE,
   VERIFIER_DATA_STREAM_TYPE,
   VERIFIER_DATASET,
+  VERIFIER_MULTI_TARGET_MIN_VERSION,
 } from '../../common/constants';
 import type {
   AwsCloudConnectorVars,
@@ -104,6 +105,7 @@ import type {
   IntegrationsOutput,
   PackageInfo,
   VerifierStreamVars,
+  VerifiedPackagePolicy,
 } from '../../common/types';
 import {
   AgentPolicyNameExistsError,
@@ -2621,10 +2623,13 @@ class AgentPolicyService {
     esClient: ElasticsearchClient,
     connector: { id: string; attributes: CloudConnectorSOAttributes },
     verificationInfo: {
-      policyTemplates: string[];
-      packageName: string;
-      packageTitle: string;
-      packageVersion: string;
+      /**
+       * One entry per package policy to verify; each entry becomes one index in
+       * the parallel-array stream vars (`policy_id[i]`, `policy_name[i]`,
+       * `policy_templates[i]`, `package_policy_id[i]`, `package_name[i]`,
+       * `package_title[i]`, `package_version[i]`).
+       */
+      verifiedPackagePolicies: VerifiedPackagePolicy[];
     }
   ): Promise<{ policyId: string }> {
     const logger = this.getLogger('createVerifierPolicy');
@@ -2635,10 +2640,9 @@ class AgentPolicyService {
       accountType,
       vars: connectorVars,
     } = connector.attributes;
-    const { policyTemplates, packageName, packageTitle, packageVersion } = verificationInfo;
+    const { verifiedPackagePolicies } = verificationInfo;
     const shortId = uuidv4().slice(0, 8);
     const policyName = `Verifier-Agent-Policy-${connectorName}-${shortId}`;
-    const verificationId = uuidv4();
 
     const agentPolicy = await this.create(
       soClient,
@@ -2688,21 +2692,70 @@ class AgentPolicyService {
       prerelease: true,
     });
 
+    // Version-gated producer shape (see VERIFIER_MULTI_TARGET_MIN_VERSION).
+    //
+    // - >= 0.1.0: emit parallel `multi: true` arrays (one index per verified package policy).
+    // - <  0.1.0: emit scalars from `verifiedPackagePolicies[0]` (legacy single-target manifest;
+    //   `multi: false` on those vars). On a pre-0.1.0 package, only the first
+    //   verified package policy is reflected — the old manifest's hard constraint
+    //   allows nothing else.
+    //
+    // This makes Kibana producer code compatible with both manifest eras, so a
+    // 0.1.0 integration release doesn't break clusters that already have 0.0.1
+    // installed, and a Kibana running this code doesn't break against either
+    // package version in EPR.
+    const supportsMultiTarget = gte(verifierPkgVersion, VERIFIER_MULTI_TARGET_MIN_VERSION);
+
+    const targetVars = supportsMultiTarget
+      ? {
+          // Parallel `multi: true` arrays — index i describes verified package policy i. Aligned by construction.
+          policy_id: { type: 'text', value: verifiedPackagePolicies.map((vpp) => vpp.policy_id) },
+          policy_name: {
+            type: 'text',
+            value: verifiedPackagePolicies.map((vpp) => vpp.policy_name),
+          },
+          policy_templates: {
+            type: 'text',
+            value: verifiedPackagePolicies.map((vpp) => vpp.policy_template),
+          },
+          package_policy_id: {
+            type: 'text',
+            value: verifiedPackagePolicies.map((vpp) => vpp.package_policy_id),
+          },
+          package_name: {
+            type: 'text',
+            value: verifiedPackagePolicies.map((vpp) => vpp.package_name),
+          },
+          package_title: {
+            type: 'text',
+            value: verifiedPackagePolicies.map((vpp) => vpp.package_title),
+          },
+          package_version: {
+            type: 'text',
+            value: verifiedPackagePolicies.map((vpp) => vpp.package_version),
+          },
+        }
+      : {
+          // Legacy scalar shape for pre-0.1.0 `multi: false` manifest. First entry only.
+          policy_id: { type: 'text', value: verifiedPackagePolicies[0].policy_id },
+          policy_name: { type: 'text', value: verifiedPackagePolicies[0].policy_name },
+          policy_templates: { type: 'text', value: verifiedPackagePolicies[0].policy_template },
+          package_policy_id: { type: 'text', value: verifiedPackagePolicies[0].package_policy_id },
+          package_name: { type: 'text', value: verifiedPackagePolicies[0].package_name },
+          package_title: { type: 'text', value: verifiedPackagePolicies[0].package_title },
+          package_version: { type: 'text', value: verifiedPackagePolicies[0].package_version },
+        };
+
     const streamVars: VerifierStreamVars = {
       'data_stream.dataset': { type: 'text', value: VERIFIER_DATASET },
       identity_federation_id: { type: 'text', value: connectorId },
       identity_federation_name: { type: 'text', value: connectorName },
-      verification_id: { type: 'text', value: verificationId },
+      verification_id: { type: 'text', value: agentPolicy.id },
       verification_type: { type: 'select', value: 'scheduled' },
       provider: { type: 'text', value: cloudProvider },
       account_type: { type: 'select', value: resolvedAccountType },
       ...credentialVars,
-      policy_id: { type: 'text', value: agentPolicy.id },
-      policy_name: { type: 'text', value: policyName },
-      policy_templates: { type: 'text', value: policyTemplates },
-      package_name: { type: 'text', value: packageName },
-      package_title: { type: 'text', value: packageTitle },
-      package_version: { type: 'text', value: packageVersion },
+      ...targetVars,
     };
 
     const verifierPackagePolicy: CloudConnectorPackagePolicy = {
@@ -2741,7 +2794,9 @@ class AgentPolicyService {
     try {
       logger.info(
         `${VERIFY_PERMISSIONS_TASK} Creating verifier_otel package policy for ` +
-          `connector ${connectorId}, templates [${policyTemplates.join(', ')}]`
+          `connector ${connectorId}, verified package policies [${verifiedPackagePolicies
+            .map((vpp) => `${vpp.package_name}:${vpp.policy_template}`)
+            .join(', ')}]`
       );
       const otelPackagePolicy = await packagePolicyService.create(
         soClient,

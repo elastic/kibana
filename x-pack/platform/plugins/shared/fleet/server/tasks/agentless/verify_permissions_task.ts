@@ -16,11 +16,12 @@ import type {
 import {
   CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  SO_SEARCH_LIMIT,
 } from '../../../common/constants';
+import type { VerifiedPackagePolicy } from '../../../common/types/models/cloud_connector';
 import type { CloudConnectorSOAttributes } from '../../types/so_attributes';
 import { appContextService } from '../../services';
 import { agentPolicyService, getAgentPolicySavedObjectType } from '../../services/agent_policy';
-import { getPackageInfo } from '../../services/epm/packages';
 import { ensureInstalledPackage } from '../../services/epm/packages/install';
 import { throwIfAborted } from '../utils';
 
@@ -30,9 +31,16 @@ const TASK_TYPE = 'fleet:verify_permissions';
 const TASK_TITLE = 'OTel Verify Permission Task';
 const TASK_TIMEOUT = '1d';
 const TASK_ID = `${TASK_TYPE}:1.0.0`;
-const TASK_INTERVAL = '12h';
+// TODO(temp): revert to '12h' before merging — lowered to '5m' for local dev iteration
+const TASK_INTERVAL = '5m';
 export const VERIFY_PERMISSIONS_TASK = '[OTel Verify Permissions Task]';
 const ELIGIBILITY_WINDOW_MS = 5 * 60 * 1000;
+/**
+ * Task-level cooldown: if every connector was verified within this window AND
+ * none are in a failed state, skip the whole task run. Saves the
+ * `getPackagePoliciesByConnector` lookup and the per-connector eligibility loop.
+ */
+const RECENT_VERIFICATION_WINDOW_MS = 60 * 60 * 1000;
 /** Buffer added to VERIFICATION_TTL_MS when computing `runAt` for the next run, so
  *  the verifier-policy cleanup task reliably sees the just-created verifier as expired on the
  *  next fire (protects against clock skew and task-manager polling jitter). */
@@ -98,8 +106,10 @@ export async function scheduleVerifyPermissionsTask(taskManager: TaskManagerStar
  * Phase 1 - Gate: If a non-expired verifier agent policy exists, skip this run.
  *
  * Phase 2 - Pre-filter: Fetch package policies with cloud_connector_id to build
- *           a map of connector ID -> package policy IDs. Then fetch only the
- *           cloud connectors that have installed packages via KQL id filter.
+ *           a map of connector ID -> verified package policies (one entry per
+ *           package policy, carrying the metadata the verifier_otel parallel-array
+ *           stream vars need). Then fetch only the cloud connectors that have
+ *           installed packages via KQL id filter.
  *
  * Phase 3 - Verify exactly one eligible connector per task run (one verifier
  *           deployment active at a time). Eligibility criteria:
@@ -165,16 +175,43 @@ async function runPermissionVerifierTask(
 
     throwIfAborted(abortController);
 
-    // Phase 2: Pre-filter package policies to build connector -> package policy IDs map
-    const packagePolicyMap = await getPackagePolicyMap(soClient);
+    // Phase 1.5 — Cooldown gate: if every connector was verified within the last
+    // RECENT_VERIFICATION_WINDOW_MS AND none are failed, skip the whole task run.
+    // Saves the package-policy lookup and the per-connector eligibility loop.
+    const allConnectorsResult = await soClient.find<CloudConnectorSOAttributes>({
+      type: CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+      perPage: SO_SEARCH_LIMIT,
+    });
 
-    if (packagePolicyMap.size === 0) {
+    if (allConnectorsResult.saved_objects.length > 0) {
+      const cooldownCutoff = Date.now() - RECENT_VERIFICATION_WINDOW_MS;
+      const allRecentlyVerified = allConnectorsResult.saved_objects.every((connector) => {
+        const startedAt = connector.attributes.verification_started_at;
+        if (!startedAt) return false; // never verified — needs verification
+        if (connector.attributes.verification_status === 'failed') return false; // failed — eligible for retry
+        return new Date(startedAt).getTime() >= cooldownCutoff; // recent and not failed
+      });
+
+      if (allRecentlyVerified) {
+        logger.debug(
+          `${VERIFY_PERMISSIONS_TASK} All ${allConnectorsResult.saved_objects.length} connector(s) verified within last hour; skipping task run`
+        );
+        return { shouldReschedule: false };
+      }
+    }
+
+    throwIfAborted(abortController);
+
+    // Phase 2: Pre-filter package policies to build connector -> package-policies map
+    const packagePoliciesByConnector = await getPackagePoliciesByConnector(soClient);
+
+    if (packagePoliciesByConnector.size === 0) {
       logger.info(`${VERIFY_PERMISSIONS_TASK} No connectors with installed packages found`);
       logger.info(`${VERIFY_PERMISSIONS_TASK} Task run completed`);
       return { shouldReschedule: false };
     }
 
-    const connectorIds = [...packagePolicyMap.keys()].filter((id) => id.length > 0);
+    const connectorIds = [...packagePoliciesByConnector.keys()].filter((id) => id.length > 0);
 
     if (connectorIds.length === 0) {
       logger.info(`${VERIFY_PERMISSIONS_TASK} No valid connector IDs found after filtering`);
@@ -221,10 +258,10 @@ async function runPermissionVerifierTask(
         })`
       );
 
-      const policyTemplates = packagePolicyMap.get(connector.id);
-      if (!policyTemplates || policyTemplates.length === 0) {
+      const packagePolicies = packagePoliciesByConnector.get(connector.id);
+      if (!packagePolicies || packagePolicies.length === 0) {
         logger.debug(
-          `${VERIFY_PERMISSIONS_TASK} Connector ${connector.id} has no policy templates, skipping`
+          `${VERIFY_PERMISSIONS_TASK} Connector ${connector.id} has no verified package policies, skipping`
         );
         continue;
       }
@@ -233,7 +270,7 @@ async function runPermissionVerifierTask(
           soClient,
           esClient,
           connector,
-          policyTemplates,
+          packagePolicies,
           abortController
         );
       } catch (error) {
@@ -258,7 +295,7 @@ async function runPermissionVerifierTask(
       (c) =>
         c.id !== verifiedConnectorId &&
         isConnectorEligible(c.attributes) &&
-        (packagePolicyMap.get(c.id)?.length ?? 0) > 0
+        (packagePoliciesByConnector.get(c.id)?.length ?? 0) > 0
     );
 
     // Reschedule when more connectors need verification, or when we created a
@@ -277,44 +314,95 @@ async function runPermissionVerifierTask(
 }
 
 interface ConnectorVerificationInfo {
-  policyTemplates: string[];
-  packageName: string;
-  packageTitle: string;
-  packageVersion: string;
+  /** One entry per package policy to verify; index-aligned across the verifier's parallel-array stream vars. */
+  verifiedPackagePolicies: VerifiedPackagePolicy[];
 }
 
 /**
- * Build a map of connector ID -> policy templates from package policies
- * that have a cloud_connector_id set. Extracts policy_templates from each
- * package policy's enabled input.
+ * Build a map of connector ID -> verified-package-policy tuples from package policies
+ * that have a `cloud_connector_id` set. Each verified package policy carries everything the
+ * verifier_otel package needs to render its parallel-array stream vars:
+ * package_policy_id, agent policy id+name, policy template, and package metadata.
  */
-async function getPackagePolicyMap(
+async function getPackagePoliciesByConnector(
   soClient: SavedObjectsClientContract
-): Promise<Map<string, string[]>> {
+): Promise<Map<string, VerifiedPackagePolicy[]>> {
+  // Cap derived from the Cloud agentless deployment limit (5 concurrent agentless
+  // agent policies). Cloud connectors require agentless mode, so at most 5 agent
+  // policies can host cloud-connector-using integrations at one time. Assuming up
+  // to ~5 integrations per agent policy share a connector (multi-integration support
+  // from Story 1), 25 = 5 × 5 gives a comfortable ceiling. Revisit when the
+  // agentless concurrency limit grows.
   const packagePolicies = await soClient.find<{
     cloud_connector_id?: string;
+    policy_ids?: string[];
     inputs?: Array<{ enabled: boolean; policy_template?: string }>;
+    package?: { name?: string; title?: string; version?: string };
   }>({
     type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
     filter: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.attributes.cloud_connector_id: *`,
-    perPage: 100,
+    perPage: 25,
   });
 
-  const map = new Map<string, string[]>();
+  // Gather distinct agent policy ids referenced by these PPs and resolve their names
+  // in one bulk lookup.
+  const agentPolicyIds = new Set<string>();
+  for (const pp of packagePolicies.saved_objects) {
+    pp.attributes.policy_ids?.forEach((id) => agentPolicyIds.add(id));
+  }
+  const agentPolicyNames = await getAgentPolicyNames(soClient, [...agentPolicyIds]);
+
+  const map = new Map<string, VerifiedPackagePolicy[]>();
   for (const pp of packagePolicies.saved_objects) {
     const connectorId = pp.attributes.cloud_connector_id?.trim();
     if (!connectorId) continue;
 
     const enabledInput = pp.attributes.inputs?.find((i) => i.enabled);
-    const template = enabledInput?.policy_template ?? '';
+    const template = enabledInput?.policy_template;
+    if (!template) continue;
+
+    const policyId = pp.attributes.policy_ids?.[0];
+    if (!policyId) continue;
+
+    const verifiedPackagePolicy: VerifiedPackagePolicy = {
+      package_policy_id: pp.id,
+      policy_id: policyId,
+      policy_name: agentPolicyNames.get(policyId) ?? '',
+      policy_template: template,
+      package_name: pp.attributes.package?.name ?? '',
+      package_title: pp.attributes.package?.title ?? '',
+      package_version: pp.attributes.package?.version ?? '',
+    };
 
     const existing = map.get(connectorId) ?? [];
-
-    if (template && !existing.includes(template)) {
-      existing.push(template);
+    // Dedupe by package_policy_id (defensive — find should not return duplicates).
+    if (
+      !existing.some((vpp) => vpp.package_policy_id === verifiedPackagePolicy.package_policy_id)
+    ) {
+      existing.push(verifiedPackagePolicy);
     }
-
     map.set(connectorId, existing);
+  }
+  return map;
+}
+
+/**
+ * Resolve agent-policy SO ids to their names via a single bulkGet. Errors on
+ * individual SOs (not found, etc.) are silently dropped — the caller falls back
+ * to an empty `policy_name` for any unresolved id.
+ */
+async function getAgentPolicyNames(
+  soClient: SavedObjectsClientContract,
+  ids: string[]
+): Promise<Map<string, string>> {
+  if (ids.length === 0) return new Map();
+  const soType = await getAgentPolicySavedObjectType();
+  const result = await soClient.bulkGet<{ name?: string }>(ids.map((id) => ({ type: soType, id })));
+  const map = new Map<string, string>();
+  for (const so of result.saved_objects) {
+    if (!so.error && so.attributes?.name) {
+      map.set(so.id, so.attributes.name);
+    }
   }
   return map;
 }
@@ -390,7 +478,7 @@ async function verifyConnector(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
   connector: SavedObject<CloudConnectorSOAttributes>,
-  policyTemplates: string[],
+  verifiedPackagePolicies: VerifiedPackagePolicy[],
   abortController: AbortController
 ): Promise<boolean> {
   const logger = appContextService.getLogger().get('otel-verifier');
@@ -398,6 +486,10 @@ async function verifyConnector(
   try {
     throwIfAborted(abortController);
     const { cloudProvider } = connector.attributes;
+    // Ensure the cloud-provider package is installed so the verifier receiver can
+    // reference its policy templates at run time. Per-policy package metadata
+    // (name, title, version) is sourced from each verified package policy SO and
+    // flows through `verifiedPackagePolicies`, so we don't need a getPackageInfo() lookup here.
     const ensureResult = await ensureInstalledPackage({
       savedObjectsClient: soClient,
       esClient,
@@ -409,24 +501,24 @@ async function verifyConnector(
       } (v${ensureResult.package.version})`
     );
 
-    throwIfAborted(abortController);
-    const pkgInfo = await getPackageInfo({
-      savedObjectsClient: soClient,
-      pkgName: cloudProvider,
-      pkgVersion: ensureResult.package.version,
-      skipArchive: true,
+    const verificationInfo: ConnectorVerificationInfo = { verifiedPackagePolicies };
+
+    // Record "verification attempted" as soon as we begin, so the connector's lifecycle
+    // timeline shows a `verification_started` event even on failed attempts. Previously
+    // this write happened after createVerifierPolicy succeeded — but the field name
+    // ("started") implies the start of an attempt, not its success. Story 7's timeline
+    // consumes this field and renders one event per verification attempt.
+    const startedAt = new Date().toISOString();
+    await updateConnectorStatus(soClient, connector.id, {
+      verification_started_at: startedAt,
+      verification_status: 'pending',
     });
 
-    const verificationInfo: ConnectorVerificationInfo = {
-      policyTemplates,
-      packageName: pkgInfo.name,
-      packageTitle: pkgInfo.title ?? cloudProvider,
-      packageVersion: pkgInfo.version,
-    };
-
     logger.info(
-      `${VERIFY_PERMISSIONS_TASK} Creating verifier policy for connector ${connector.id} with templates [` +
-        `${verificationInfo.policyTemplates.join(', ')}]`
+      `${VERIFY_PERMISSIONS_TASK} Creating verifier policy for connector ${connector.id} with ${verifiedPackagePolicies.length} verified package policy/policies [` +
+        `${verifiedPackagePolicies
+          .map((vpp) => `${vpp.policy_template}/${vpp.package_policy_id}`)
+          .join(', ')}]`
     );
     throwIfAborted(abortController);
     const { policyId } = await agentPolicyService.createVerifierPolicy(
@@ -436,15 +528,9 @@ async function verifyConnector(
       verificationInfo
     );
 
-    const startedAt = new Date().toISOString();
     logger.info(
       `${VERIFY_PERMISSIONS_TASK} Verifier policy ${policyId} created for connector ${connector.id}`
     );
-
-    await updateConnectorStatus(soClient, connector.id, {
-      verification_started_at: startedAt,
-      verification_status: 'pending',
-    });
     return true;
   } catch (err) {
     logger.error(
