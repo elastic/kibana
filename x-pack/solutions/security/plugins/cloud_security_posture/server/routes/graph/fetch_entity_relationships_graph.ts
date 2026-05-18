@@ -480,8 +480,9 @@ export const regroupRelationships = (
 
 /**
  * Rebuilds targetsDocData for each relationship using entity store enrichment.
- * Applies rebuildDocData to each relationship's targetsDocData array.
- * This is a separate step from regroupRelationships, allowing enrichment to be applied after grouping.
+ * actorsDocData is intentionally left unchanged: relationship actor docData is already
+ * built inline in the ES|QL query with full entity metadata (the actor IS the
+ * entity-store source row). Only target entities need TypeScript-side enrichment.
  */
 export const enrichRelationshipDocData = (
   relationships: RelationshipEdge[],

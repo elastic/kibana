@@ -398,6 +398,8 @@ const buildActorSourceFieldsEsql = (): string =>
 const buildTargetSourceFieldsEsql = (): string =>
   buildSourceFieldsJson(GRAPH_TARGET_EUID_SOURCE_FIELDS, 'targetEntityId');
 
+const EVENTS_ESQL_LIMIT = 50000;
+
 const buildEsqlQuery = ({
   indexPatterns,
   originEventIds,
@@ -496,7 +498,7 @@ ${buildPinnedEsql(pinnedIds)}
       pinned
 | EVAL pinnedSort = CASE(pinned IS NULL, 1, 0)
 | SORT action DESC, pinnedSort ASC, isOrigin
-| LIMIT 5000
+| LIMIT ${EVENTS_ESQL_LIMIT}
 | DROP pinnedSort`;
 
   return query;
@@ -533,8 +535,15 @@ interface EventGroup {
  */
 export const regroupEvents = (
   records: EventEdge[],
-  enrichmentMap: Map<string, EntityEnrichmentFields>
+  enrichmentMap: Map<string, EntityEnrichmentFields>,
+  logger: Logger
 ): EventEdge[] => {
+  if (records.length >= EVENTS_ESQL_LIMIT) {
+    logger.warn(
+      `Graph event records reached the ES|QL LIMIT (${EVENTS_ESQL_LIMIT}); badge counts and docs may be under-reported`
+    );
+  }
+
   const groups = new Map<string, EventGroup>();
 
   for (const record of records) {
@@ -599,8 +608,6 @@ export const regroupEvents = (
       });
     } else {
       existing.badge += record.badge;
-      existing.uniqueEventsCount += record.uniqueEventsCount;
-      existing.uniqueAlertsCount += record.uniqueAlertsCount;
       existing.isAlert = existing.isAlert || Boolean(record.isAlert);
       existing.docs.push(...docs);
       existing.sourceIps.push(...sourceIps);
@@ -616,7 +623,7 @@ export const regroupEvents = (
     }
   }
 
-  return Array.from(groups.values()).map((group): EventEdge => {
+  const result = Array.from(groups.values()).map((group): EventEdge => {
     const actorEntityIds = [...new Set(group.actorEntityIds)];
     const targetEntityIds = [...new Set(group.targetEntityIds)];
 
@@ -670,11 +677,26 @@ export const regroupEvents = (
     const uniqueSourceIps = [...new Set(group.sourceIps)];
     const uniqueSourceCountryCodes = [...new Set(group.sourceCountryCodes)];
 
+    // Recompute unique counts from the accumulated docs (Fix 1 — avoids double-counting on merge)
+    const parsedDocs = group.docs
+      .map((s) => {
+        try {
+          return JSON.parse(s) as { id?: string; type?: string };
+        } catch {
+          return null;
+        }
+      })
+      .filter((d): d is { id: string; type?: string } => !!d?.id);
+    const uniqueEventsCount = new Set(parsedDocs.filter((d) => d.type !== 'alert').map((d) => d.id))
+      .size;
+    const uniqueAlertsCount = new Set(parsedDocs.filter((d) => d.type === 'alert').map((d) => d.id))
+      .size;
+
     return {
       action: group.action,
       badge: group.badge,
-      uniqueEventsCount: group.uniqueEventsCount,
-      uniqueAlertsCount: group.uniqueAlertsCount,
+      uniqueEventsCount,
+      uniqueAlertsCount,
       isAlert: group.isAlert,
       isOrigin: group.isOrigin,
       isOriginAlert: group.isOriginAlert,
@@ -702,6 +724,20 @@ export const regroupEvents = (
       targetsDocData: group.targetsDocData,
     };
   });
+
+  result.sort((a, b) => {
+    // action DESC
+    if (a.action > b.action) return -1;
+    if (a.action < b.action) return 1;
+    // pinned ASC (pinned first)
+    const aPinned = a.pinned ? 0 : 1;
+    const bPinned = b.pinned ? 0 : 1;
+    if (aPinned !== bPinned) return aPinned - bPinned;
+    // isOrigin DESC
+    return (b.isOrigin ? 1 : 0) - (a.isOrigin ? 1 : 0);
+  });
+
+  return result;
 };
 
 /**

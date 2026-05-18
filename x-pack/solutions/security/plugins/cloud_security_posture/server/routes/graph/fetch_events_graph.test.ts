@@ -13,6 +13,9 @@ import type { OriginEventId, EsQuery, EventEdge } from './types';
 import { GRAPH_ACTOR_EUID_SOURCE_FIELDS, GRAPH_TARGET_EUID_SOURCE_FIELDS } from './constants';
 import type { EntityEnrichmentFields } from './fetch_entity_enrichment';
 
+// Expose the internal constant for tests
+const EVENTS_ESQL_LIMIT = 50000;
+
 describe('fetchEvents', () => {
   const esClient = elasticsearchServiceMock.createScopedClusterClient();
   let logger: Logger;
@@ -442,14 +445,26 @@ const buildEventEdge = (
 });
 
 describe('regroupEvents', () => {
+  let logger: Logger;
+
+  beforeEach(() => {
+    logger = {
+      trace: jest.fn(),
+      debug: jest.fn(),
+      info: jest.fn(),
+      warn: jest.fn(),
+      error: jest.fn(),
+    } as unknown as Logger;
+  });
+
   it('returns empty array for empty input', () => {
-    const result = regroupEvents([], new Map());
+    const result = regroupEvents([], new Map(), logger);
     expect(result).toEqual([]);
   });
 
   it('single record with no enrichment produces one group with null actorEntityType and raw docData passed through', () => {
     const record = buildEventEdge({ actorEntityId: 'user:alice', targetEntityId: 'host:server1' });
-    const result = regroupEvents([record], new Map());
+    const result = regroupEvents([record], new Map(), logger);
 
     expect(result).toHaveLength(1);
     const [group] = result;
@@ -470,7 +485,7 @@ describe('regroupEvents', () => {
       ],
     ]);
 
-    const result = regroupEvents([record], enrichmentMap);
+    const result = regroupEvents([record], enrichmentMap, logger);
 
     expect(result).toHaveLength(1);
     const [group] = result;
@@ -488,6 +503,7 @@ describe('regroupEvents', () => {
       badge: 1,
       uniqueEventsCount: 1,
       uniqueAlertsCount: 0,
+      docs: ['{"id":"doc-alice","type":"event"}'],
     });
     const record2 = buildEventEdge({
       actorEntityId: 'user:bob',
@@ -495,6 +511,7 @@ describe('regroupEvents', () => {
       badge: 2,
       uniqueEventsCount: 2,
       uniqueAlertsCount: 0,
+      docs: ['{"id":"doc-bob","type":"event"}'],
     });
 
     // Both actors map to type 'user', so they share the same group key
@@ -507,13 +524,13 @@ describe('regroupEvents', () => {
       ],
     ]);
 
-    const result = regroupEvents([record1, record2], enrichmentMap);
+    const result = regroupEvents([record1, record2], enrichmentMap, logger);
 
     expect(result).toHaveLength(1);
     const [group] = result;
     expect(group.badge).toBe(3);
 
-    // actorNodeId should be MD5 of sorted IDs joined by ","
+    // actorNodeId should be SHA-256 of sorted IDs joined by ","
     const expectedNodeId = createHash('sha256')
       .update(['user:alice', 'user:bob'].sort().join(','))
       .digest('hex');
@@ -535,7 +552,7 @@ describe('regroupEvents', () => {
       ],
     ]);
 
-    const result = regroupEvents([record1, record2], enrichmentMap);
+    const result = regroupEvents([record1, record2], enrichmentMap, logger);
 
     expect(result).toHaveLength(2);
   });
@@ -556,7 +573,7 @@ describe('regroupEvents', () => {
     });
 
     // No enrichment so both stay in the same group (same null type)
-    const result = regroupEvents([record1, record2], new Map());
+    const result = regroupEvents([record1, record2], new Map(), logger);
 
     expect(result).toHaveLength(1);
     const [group] = result;
@@ -566,9 +583,93 @@ describe('regroupEvents', () => {
       .digest('hex');
     expect(group.labelNodeId).toBe(expectedLabelNodeId);
   });
+
+  it('does not double-count uniqueEventsCount when same document expands to multiple actor EUIDs of same type', () => {
+    const sharedDoc = '{"id":"shared-doc-1","type":"event"}';
+    const record1 = buildEventEdge({
+      actorEntityId: 'user:alice',
+      targetEntityId: 'host:server1',
+      docs: [sharedDoc],
+      uniqueEventsCount: 1,
+      uniqueAlertsCount: 0,
+    });
+    const record2 = buildEventEdge({
+      actorEntityId: 'user:bob',
+      targetEntityId: 'host:server1',
+      docs: [sharedDoc],
+      uniqueEventsCount: 1,
+      uniqueAlertsCount: 0,
+    });
+
+    // Both actors map to type 'user', so they share the same group key
+    const enrichmentMap = new Map<string, EntityEnrichmentFields>([
+      ['user:alice', { name: 'Alice', type: 'user', subType: null, engineType: null, hostIps: [] }],
+      ['user:bob', { name: 'Bob', type: 'user', subType: null, engineType: null, hostIps: [] }],
+    ]);
+
+    const result = regroupEvents([record1, record2], enrichmentMap, logger);
+
+    expect(result).toHaveLength(1);
+    // The same doc appears in both records but should only be counted once
+    expect(result[0].uniqueEventsCount).toBe(1);
+    expect(result[0].uniqueAlertsCount).toBe(0);
+  });
+
+  it('logs warn when records count equals EVENTS_ESQL_LIMIT', () => {
+    const records = Array.from({ length: EVENTS_ESQL_LIMIT }, (_, i) =>
+      buildEventEdge({
+        actorEntityId: `user:entity${i}`,
+        docs: [`{"id":"doc-${i}","type":"event"}`],
+      })
+    );
+
+    regroupEvents(records, new Map(), logger);
+
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining(`${EVENTS_ESQL_LIMIT}`));
+  });
+
+  it('sorts groups by action DESC then pinned ASC then isOrigin DESC', () => {
+    const recordA = buildEventEdge({
+      actorEntityId: 'user:alice',
+      action: 'aaa-action',
+      isOrigin: false,
+      pinned: null,
+    });
+    const recordB = buildEventEdge({
+      actorEntityId: 'user:bob',
+      action: 'zzz-action',
+      isOrigin: true,
+      pinned: null,
+    });
+    const recordC = buildEventEdge({
+      actorEntityId: 'user:charlie',
+      action: 'mmm-action',
+      isOrigin: false,
+      pinned: 'user:charlie',
+    });
+
+    const result = regroupEvents([recordA, recordB, recordC], new Map(), logger);
+
+    // 'zzz-action' DESC first, then 'mmm-action', then 'aaa-action'
+    expect(result[0].action).toBe('zzz-action');
+    expect(result[1].action).toBe('mmm-action');
+    expect(result[2].action).toBe('aaa-action');
+  });
 });
 
 describe('enrichEventDocData', () => {
+  let logger: Logger;
+
+  beforeEach(() => {
+    logger = {
+      trace: jest.fn(),
+      debug: jest.fn(),
+      info: jest.fn(),
+      warn: jest.fn(),
+      error: jest.fn(),
+    } as unknown as Logger;
+  });
+
   it('returns empty array for empty input', () => {
     const result = enrichEventDocData([], new Map());
     expect(result).toEqual([]);
@@ -576,7 +677,7 @@ describe('enrichEventDocData', () => {
 
   it('rebuilds actorsDocData with availableInEntityStore=false when no enrichment', () => {
     const record = buildEventEdge({ actorEntityId: 'user:alice', targetEntityId: 'host:server1' });
-    const grouped = regroupEvents([record], new Map());
+    const grouped = regroupEvents([record], new Map(), logger);
     const result = enrichEventDocData(grouped, new Map());
 
     expect(result).toHaveLength(1);
@@ -598,7 +699,7 @@ describe('enrichEventDocData', () => {
       ],
     ]);
 
-    const grouped = regroupEvents([record], enrichmentMap);
+    const grouped = regroupEvents([record], enrichmentMap, logger);
     const result = enrichEventDocData(grouped, enrichmentMap);
 
     expect(result).toHaveLength(1);

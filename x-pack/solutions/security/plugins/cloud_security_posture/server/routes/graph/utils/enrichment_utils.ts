@@ -35,9 +35,10 @@ export const checkIfEntitiesIndexExists = async (
 
 /**
  * Rebuilds doc data JSON strings with enrichment data from the entity store.
- * Always builds the entity object, applying availableInEntityStore=false as default
- * when no enrichment is found. sourceFields may be at the top level (from events docData)
- * or inside an existing entity object.
+ * Builds the entity object for docs that have an id, applying availableInEntityStore=false
+ * as default when no enrichment is found. Returns docs unchanged if JSON parsing fails or
+ * no id is present. sourceFields may be at the top level (from events docData) or inside
+ * an existing entity object — both formats are handled.
  */
 export const rebuildDocData = (
   docDataItems: (string | null)[] | string | undefined,

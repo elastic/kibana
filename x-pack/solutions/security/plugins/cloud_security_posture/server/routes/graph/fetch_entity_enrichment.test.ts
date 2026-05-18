@@ -136,6 +136,60 @@ describe('fetchEntityEnrichment', () => {
 
     const result = await fetchEntityEnrichment(esClient, logger, ['user:alice'], 'default');
     expect(result.size).toBe(0);
-    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('Failed to check'));
+    // checkIfEntitiesIndexExists logs via logger.error on unexpected errors
+    expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('Network error'));
+  });
+
+  it('first-seen value wins when entity.id appears twice', async () => {
+    (esClient.asInternalUser.indices as jest.Mocked<any>).exists = jest
+      .fn()
+      .mockResolvedValueOnce(true);
+
+    (esClient.asInternalUser.helpers.esql as unknown as jest.Mock).mockReturnValue({
+      toRecords: jest.fn().mockResolvedValue({
+        records: [
+          {
+            'entity.id': 'user:alice',
+            'entity.name': 'First Alice',
+            'entity.type': 'user',
+            'entity.sub_type': null,
+            'entity.EngineMetadata.Type': null,
+            'host.ip': null,
+          },
+          {
+            'entity.id': 'user:alice',
+            'entity.name': 'Second Alice',
+            'entity.type': 'user',
+            'entity.sub_type': null,
+            'entity.EngineMetadata.Type': null,
+            'host.ip': null,
+          },
+        ],
+      }),
+    });
+
+    const result = await fetchEntityEnrichment(esClient, logger, ['user:alice'], 'default');
+    expect(result.get('user:alice')?.name).toBe('First Alice');
+  });
+
+  it('uses parameterized query format', async () => {
+    (esClient.asInternalUser.indices as jest.Mocked<any>).exists = jest
+      .fn()
+      .mockResolvedValueOnce(true);
+
+    (esClient.asInternalUser.helpers.esql as unknown as jest.Mock).mockReturnValue({
+      toRecords: jest.fn().mockResolvedValue({ records: [] }),
+    });
+
+    await fetchEntityEnrichment(esClient, logger, ['user:alice'], 'default');
+
+    const esqlCallArgs = (esClient.asInternalUser.helpers.esql as unknown as jest.Mock).mock
+      .calls[0];
+    const callArg = esqlCallArgs[0];
+    // Query should use parameter placeholders, not embedded IDs
+    expect(callArg.query).toContain('?entityId0');
+    expect(callArg.query).not.toContain('"user:alice"');
+    // Params should carry the actual ID values
+    expect(callArg.params).toEqual([{ entityId0: 'user:alice' }]);
   });
 });
