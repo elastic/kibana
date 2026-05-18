@@ -109,12 +109,6 @@ export const serializeSplay = (state: SplayFormState): string => {
 };
 
 /**
- * Parse a single-unit Go duration string (`"30s"`, `"5m"`, `"1h"`) into
- * {@link SplayFormState}. Compound durations (e.g. `"1h30m"`) are intentionally
- * rejected by this strict parser; use {@link parseSplayPermissive} when
- * round-tripping foreign formats. Beats enforces a 12-hour cap.
- */
-/**
  * Permissive parser for splay strings encountered on read. Accepts both
  * single-unit ({@link parseSplay}) and compound Go durations (`"1h30m"`,
  * `"45m30s"`). Compound durations are returned verbatim as `raw` so callers
@@ -148,6 +142,12 @@ export const parseSplayPermissive = (duration: string): SplayParseResult => {
   );
 };
 
+/**
+ * Parse a single-unit Go duration string (`"30s"`, `"5m"`, `"1h"`) into
+ * {@link SplayFormState}. Compound durations (e.g. `"1h30m"`) are intentionally
+ * rejected by this strict parser; use {@link parseSplayPermissive} when
+ * round-tripping foreign formats. Beats enforces a 12-hour cap.
+ */
 export const parseSplay = (duration: string): SplayFormState => {
   if (typeof duration !== 'string') {
     throw new Error('Splay duration must be a string');

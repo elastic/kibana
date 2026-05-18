@@ -23,9 +23,9 @@ export interface PackSavedObject {
     name: string;
     query: string;
     /**
-     * Legacy per-query interval (seconds). Optional because queries that opt
-     * into `schedule_type: 'rrule'` intentionally omit `interval` per
-     * `convertPackQueriesToSO`'s mutual-exclusivity logic.
+     * Per-query interval (seconds) for interval-mode queries. Optional because
+     * queries that opt into `schedule_type: 'rrule'` intentionally omit
+     * `interval` per `convertPackQueriesToSO`'s mutual-exclusivity logic.
      */
     interval?: number;
     timeout?: number;
@@ -52,13 +52,15 @@ export interface PackSavedObject {
   shards: SOShard;
   references: Array<{ name: string; type: string; id: string }>;
   /**
-   * Pack-level schedule type. When absent, legacy behavior applies (each query
-   * uses its own per-query `interval`).
+   * Pack-level schedule type. When absent, no pack-level schedule is set:
+   * each query supplies its own per-query `interval` and there is no default
+   * to inherit. Interval and rrule are equal-class modes — neither is the
+   * default.
    */
   schedule_type?: ScheduleType;
   /**
-   * Pack-level interval (seconds). New concept — previously `interval` was
-   * per-query only. Only present when `schedule_type === 'interval'`.
+   * Pack-level interval (seconds) — the default each query inherits when the
+   * pack runs in interval mode. Only present when `schedule_type === 'interval'`.
    */
   interval?: number;
   /**

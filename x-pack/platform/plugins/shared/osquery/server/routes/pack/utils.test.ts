@@ -160,5 +160,102 @@ describe('Pack utils', () => {
         start_date: '2024-06-15T12:00:00.000Z',
       });
     });
+
+    // Verifies the "inert under flag-off" claim of PR A: every existing pack
+    // write predates PR C wiring the new routes, so `schedule_type` is always
+    // undefined on input. The default-pick path MUST produce byte-identical
+    // output to its pre-PR-A shape — interval and rrule are equal-class modes;
+    // "no schedule_type" is the default-inheritance branch, not a legacy mode.
+    // See `design.md` D36, tasks.md 1.12.6/7.
+    describe('byte-identical default pick-list (no schedule_type on input)', () => {
+      test('emits the canonical pre-PR-A pick-list shape', () => {
+        const result = convertPackQueriesToSO({
+          q1: {
+            name: 'q1',
+            query: 'SELECT 1;',
+            interval: 60,
+            platform: 'linux',
+            version: '5.10.0',
+            snapshot: true,
+            removed: false,
+            timeout: 30,
+            schedule_id: 'sid-1',
+            start_date: '2026-05-01T00:00:00.000Z',
+          },
+        });
+
+        expect(result).toEqual([
+          {
+            id: 'q1',
+            name: 'q1',
+            query: 'SELECT 1;',
+            interval: 60,
+            platform: 'linux',
+            version: '5.10.0',
+            snapshot: true,
+            removed: false,
+            timeout: 30,
+            schedule_id: 'sid-1',
+            start_date: '2026-05-01T00:00:00.000Z',
+          },
+        ]);
+      });
+
+      test('does not introduce schedule_type / rrule_schedule keys when input omits schedule_type', () => {
+        const result = convertPackQueriesToSO({
+          q1: { name: 'q1', query: 'SELECT 1;', interval: 60 },
+        });
+        expect(result[0]).not.toHaveProperty('schedule_type');
+        expect(result[0]).not.toHaveProperty('rrule_schedule');
+      });
+
+      test('drops fields not on the default pick-list (no leak of extra props)', () => {
+        const result = convertPackQueriesToSO({
+          q1: {
+            name: 'q1',
+            query: 'SELECT 1;',
+            interval: 60,
+            extra_field: 'must-not-leak',
+          } as never,
+        });
+        expect(result[0]).not.toHaveProperty('extra_field');
+      });
+    });
+
+    // Mutual-exclusivity on the per-query override (only fires when input
+    // explicitly opts in via schedule_type). Dead code under flag-off; tested
+    // here so PR C inherits a correct foundation.
+    describe('per-query schedule_type override (PR C will exercise this)', () => {
+      test('schedule_type:"rrule" drops interval, keeps rrule_schedule', () => {
+        const result = convertPackQueriesToSO({
+          q1: {
+            query: 'SELECT 1;',
+            interval: 60,
+            schedule_type: 'rrule',
+            rrule_schedule: { rrule: 'FREQ=DAILY', start_date: '2026-05-01T00:00:00.000Z' },
+          },
+        });
+        expect(result[0]).not.toHaveProperty('interval');
+        expect(result[0]).toMatchObject({
+          schedule_type: 'rrule',
+          rrule_schedule: { rrule: 'FREQ=DAILY', start_date: '2026-05-01T00:00:00.000Z' },
+        });
+      });
+
+      test('schedule_type:"interval" keeps interval, stamps schedule_type', () => {
+        const result = convertPackQueriesToSO({
+          q1: {
+            query: 'SELECT 1;',
+            interval: 60,
+            schedule_type: 'interval',
+          },
+        });
+        expect(result[0]).toMatchObject({
+          interval: 60,
+          schedule_type: 'interval',
+        });
+        expect(result[0]).not.toHaveProperty('rrule_schedule');
+      });
+    });
   });
 });

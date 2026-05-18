@@ -100,6 +100,33 @@ describe('parseRRule', () => {
     });
   });
 
+  // Forward-compat tolerance for the beats wire-format contract. PR A bets that
+  // beats #48767 keeps DTSTART out of the RRULE string (osquerybeat uses the
+  // separate `start_date` field). If that decision is later reversed, current
+  // Kibana writes must survive — DTSTART (and friends like UNTIL, COUNT) MUST
+  // land in `_unknown` rather than throw. See `design.md` D37 / openspec
+  // requirement "RRULE parser tolerates RFC 5545 parts outside the Kibana subset".
+  describe('forward-compatibility with beats wire-format changes', () => {
+    it('puts DTSTART into _unknown (does not throw, does not consume)', () => {
+      const parsed = parseRRule('FREQ=DAILY;DTSTART=20260518T000000Z');
+      expect(parsed).toEqual({
+        freq: Frequency.DAILY,
+        _unknown: { DTSTART: '20260518T000000Z' },
+      });
+      expect(serializeRRule(parsed)).toBe('FREQ=DAILY;DTSTART=20260518T000000Z');
+    });
+
+    it('puts UNTIL into _unknown (Kibana uses end_date, not UNTIL)', () => {
+      const parsed = parseRRule('FREQ=WEEKLY;UNTIL=20271231T235959Z');
+      expect(parsed._unknown).toEqual({ UNTIL: '20271231T235959Z' });
+    });
+
+    it('puts COUNT into _unknown', () => {
+      const parsed = parseRRule('FREQ=DAILY;COUNT=10');
+      expect(parsed._unknown).toEqual({ COUNT: '10' });
+    });
+  });
+
   describe('error handling', () => {
     it('throws when the string is empty', () => {
       expect(() => parseRRule('')).toThrowError(/empty/);

@@ -59,12 +59,16 @@ export const convertPackQueriesToSO = (queries: Record<string, PackQueryInput>):
         ? convertECSMappingToArray(value.ecs_mapping as Record<string, object>)
         : undefined;
 
-      // Mutual exclusivity at the per-query override level: when the query
-      // explicitly opts into one schedule mode, only that mode's fields are
-      // picked. Without `schedule_type` we keep legacy behavior (interval).
-      const baseFields = [
+      // Default pick list (no `schedule_type` on the query): byte-identical to
+      // the pre-rrule-scheduling shape. `schedule_type` is undefined for every
+      // pack write that predates PR C wiring the new routes, so this is the
+      // only code path exercised under `rruleScheduling: false`. When the flag
+      // turns on, this is also the path taken by a query that inherits the
+      // pack's schedule without an explicit per-query override.
+      const baseFields = pick(value, [
         'name',
         'query',
+        'interval',
         'platform',
         'version',
         'snapshot',
@@ -72,18 +76,24 @@ export const convertPackQueriesToSO = (queries: Record<string, PackQueryInput>):
         'timeout',
         'schedule_id',
         'start_date',
-      ] as const;
+      ]);
 
-      const scheduleFields: Array<keyof PackQueryInput> =
-        value.schedule_type === 'rrule'
-          ? ['schedule_type', 'rrule_schedule']
-          : value.schedule_type === 'interval'
-          ? ['schedule_type', 'interval']
-          : ['interval'];
+      // Mutual exclusivity (only applies when `schedule_type` is set):
+      // - `'rrule'` → drop `interval` from the per-query SO, add rrule overrides.
+      // - `'interval'` → keep `interval`, stamp `schedule_type: 'interval'`.
+      // The SO never carries both `interval` and `rrule_schedule` on one query.
+      let scheduleOverride: Partial<SOPackQuery> = {};
+      if (value.schedule_type === 'rrule') {
+        delete (baseFields as Record<string, unknown>).interval;
+        scheduleOverride = pick(value, ['schedule_type', 'rrule_schedule']);
+      } else if (value.schedule_type === 'interval') {
+        scheduleOverride = pick(value, ['schedule_type']);
+      }
 
       acc.push({
         id: key,
-        ...pick(value, [...baseFields, ...scheduleFields]),
+        ...baseFields,
+        ...scheduleOverride,
         ...(ecsMapping ? { ecs_mapping: ecsMapping } : {}),
       } as SOPackQuery);
 

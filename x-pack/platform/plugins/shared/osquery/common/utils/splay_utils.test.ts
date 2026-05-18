@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { MAX_SPLAY_SECONDS } from '../schedule';
 import {
   isSplayWithinMax,
   parseSplay,
@@ -24,14 +25,14 @@ describe('splayInSeconds', () => {
 describe('isSplayWithinMax', () => {
   it('accepts values up to the 12-hour cap', () => {
     expect(isSplayWithinMax({ value: 1, unit: 'seconds' })).toBe(true);
-    expect(isSplayWithinMax({ value: 43200, unit: 'seconds' })).toBe(true);
+    expect(isSplayWithinMax({ value: MAX_SPLAY_SECONDS, unit: 'seconds' })).toBe(true);
     expect(isSplayWithinMax({ value: 720, unit: 'minutes' })).toBe(true);
     expect(isSplayWithinMax({ value: 2, unit: 'hours' })).toBe(true);
     expect(isSplayWithinMax({ value: 12, unit: 'hours' })).toBe(true);
   });
 
   it('rejects values above the 12-hour cap', () => {
-    expect(isSplayWithinMax({ value: 43201, unit: 'seconds' })).toBe(false);
+    expect(isSplayWithinMax({ value: MAX_SPLAY_SECONDS + 1, unit: 'seconds' })).toBe(false);
     expect(isSplayWithinMax({ value: 721, unit: 'minutes' })).toBe(false);
     expect(isSplayWithinMax({ value: 13, unit: 'hours' })).toBe(false);
   });
@@ -75,7 +76,7 @@ describe('serializeSplay', () => {
   });
 
   it('throws when the duration exceeds the 12-hour cap', () => {
-    expect(() => serializeSplay({ value: 43201, unit: 'seconds' })).toThrowError(
+    expect(() => serializeSplay({ value: MAX_SPLAY_SECONDS + 1, unit: 'seconds' })).toThrowError(
       /must not exceed 43200 seconds/
     );
     expect(() => serializeSplay({ value: 13, unit: 'hours' })).toThrowError(

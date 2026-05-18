@@ -19,8 +19,8 @@ export const MAX_SPLAY_SECONDS = 43200;
  * - `'rrule'`: osquerybeat RRULE-based recurrence scheduling. Mutually
  *   exclusive with `interval`.
  *
- * Absence of the field on a pack indicates legacy behavior: each query uses
- * its own per-query `interval` (no pack-level default).
+ * Absence of the field on a pack means no pack-level schedule is set: each
+ * query uses its own per-query `interval` and there is no default to inherit.
  */
 export type ScheduleType = 'interval' | 'rrule';
 
@@ -39,10 +39,17 @@ export interface RRuleScheduleConfig {
   /** Optional RFC 3339 datetime string for the schedule's end. */
   end_date?: string;
   /**
-   * Optional Go duration string for splay (random execution delay), e.g.
-   * `"30s"`, `"5m"`, `"1h"`. Maximum 12 hours (`MAX_SPLAY_SECONDS`).
+   * Optional Go duration string for splay (random execution delay).
+   * Single-unit only on write: suffix `s` (seconds), `m` (minutes), or `h`
+   * (hours) — e.g. `"30s"`, `"5m"`, `"1h"`. Compound durations like `"1h30m"`
+   * are tolerated only on read (osquerybeat parses via `time.ParseDuration`
+   * and may emit compound strings). Maximum 12 hours ({@link MAX_SPLAY_SECONDS}).
    */
   splay?: string;
-  /** Optional per-query timeout in seconds. */
+  /**
+   * Optional query execution timeout, in **seconds**. Field name is `timeout`
+   * to match osquerybeat's wire field (`RRuleScheduleConfig.Timeout int`
+   * in `elastic/beats#48767`). Default in beats is 60s when absent.
+   */
   timeout?: number;
 }

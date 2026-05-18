@@ -143,7 +143,7 @@ export class TelemetryEventsSender {
           type: 'keyword',
           _meta: {
             description:
-              'Pack-level schedule type: `interval`, `rrule`, or `null` for legacy packs',
+              'Pack-level schedule type: `interval`, `rrule`, or `null` when unspecified',
             optional: true,
           },
         },
@@ -152,6 +152,45 @@ export class TelemetryEventsSender {
           _meta: {
             description:
               'Count of queries whose persisted schedule_type differs from the pack-level schedule_type',
+            optional: true,
+          },
+        },
+        queries_count: {
+          type: 'short',
+          _meta: {
+            description: 'Number of queries in the pack (denominator for queries_with_override)',
+            optional: true,
+          },
+        },
+        has_splay: {
+          type: 'boolean',
+          _meta: {
+            description:
+              'True when the pack-level rrule_schedule.splay is set (any non-empty Go duration)',
+            optional: true,
+          },
+        },
+        splay_seconds_bucket: {
+          type: 'keyword',
+          _meta: {
+            description:
+              'Histogram bucket of pack-level splay: `none`, `lt_60s`, `lt_5m`, `lt_1h`, `lt_12h`',
+            optional: true,
+          },
+        },
+        rrule_freq: {
+          type: 'keyword',
+          _meta: {
+            description:
+              'Parsed FREQ from the pack-level RRULE: `MINUTELY` | `HOURLY` | `DAILY` | `WEEKLY` | `MONTHLY` | `YEARLY` | `null` (interval-mode, unspecified, or unparseable)',
+            optional: true,
+          },
+        },
+        has_unknown_rrule_parts: {
+          type: 'boolean',
+          _meta: {
+            description:
+              'True when the pack-level RRULE contains RFC 5545 parts unknown to the Kibana UI parser (early-warning for non-Kibana writers)',
             optional: true,
           },
         },

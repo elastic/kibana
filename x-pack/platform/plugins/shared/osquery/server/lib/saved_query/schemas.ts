@@ -32,6 +32,12 @@ export const savedQuerySchemaV2 = savedQuerySchemaV1.extends({
   updated_by_profile_uid: schema.maybe(schema.nullable(schema.string())),
 });
 
+// `unknowns: 'allow'` is load-bearing — do not tighten. The per-query RRULE
+// overrides (`schedule_type`, `rrule_schedule`) flow through this schema
+// without an explicit `queries.properties` mapping addition because the pack
+// SO's `queries` field is `dynamic: false` and this schema accepts unknown
+// keys at read time. Tightening to `forbid` silently breaks flag-on customers
+// with per-query RRULE overrides. See `design.md` D35.
 const packQuerySchema = schema.object(
   {
     id: schema.maybe(schema.string()),
@@ -58,6 +64,9 @@ const packSchemaV1 = schema.object({
       schema.arrayOf(packQuerySchema),
     ])
   ),
+  // Pack-asset version (prebuilt-pack version number). Name is taken — a future
+  // V4 / D29 "min osquery version" field MUST use a different name (e.g.
+  // `min_osquery_version`) to avoid type collision with this number field.
   version: schema.maybe(schema.number()),
   enabled: schema.maybe(schema.boolean()),
   created_at: schema.maybe(schema.string()),
