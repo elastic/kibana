@@ -17,7 +17,7 @@ import React from 'react';
 import { StreamingText } from './streaming_text';
 import { ChatMessageText } from './chat_message_text';
 import { RoundResponseActions } from './round_response_actions';
-import { useSendMessage } from '../../../../context/send_message/send_message_context';
+import { useConversationStream } from '../../../../hooks/use_conversation_stream';
 import { lineClampStyles } from '../../../../../common.styles';
 
 export interface RoundResponseProps {
@@ -41,7 +41,7 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
   attachmentRefs,
   conversationId,
 }) => {
-  const { agentReasoning } = useSendMessage();
+  const { agentReasoning } = useConversationStream();
   const hasMessage = Boolean(response.message);
   const showAgentReasoning = isLoading && !hasMessage && Boolean(agentReasoning);
 
