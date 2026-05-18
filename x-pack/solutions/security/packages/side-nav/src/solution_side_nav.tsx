@@ -266,7 +266,7 @@ const SolutionSideNavItem: React.FC<SolutionSideNavItemProps> = React.memo(
 
     const effectiveHref = firstPanelChild ? firstPanelChild.href : href;
 
-    const solutionSideNavItemStyles = SolutionSideNavItemStyles(euiTheme, 'primary');
+    const solutionSideNavItemStyles = SolutionSideNavItemStyles(euiTheme);
     const itemClassNames = classNames(
       'solutionSideNavItem',
       { 'solutionSideNavItem--isSelected': isSelected },
@@ -334,16 +334,16 @@ const SolutionSideNavItem: React.FC<SolutionSideNavItemProps> = React.memo(
         {prependSeparator ? <EuiHorizontalRule margin="xs" /> : null}
         <EuiFlexGroup alignItems="center" gutterSize="xs">
           <EuiFlexItem>
-            <EuiListGroup gutterSize="none">
+            <EuiListGroup>
               <EuiListGroupItem
                 iconType={iconType}
                 label={listItemLabel}
                 href={effectiveHref}
+                isActive={isSelected}
                 wrapText
                 onClick={onLinkClick}
                 className={itemClassNames}
                 color="text"
-                size="s"
                 id={`solutionSideNavItemLink-${id}`}
                 data-test-subj={`solutionSideNavItemLink-${id}`}
               />
