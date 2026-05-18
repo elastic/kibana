@@ -50,11 +50,6 @@ export interface IUserStorageClient {
   get$<T = unknown>(key: string, defaultValue: T): Observable<T>;
 
   /**
-   * Returns a clone of every cached key/value pair.
-   */
-  getAll(): Readonly<Record<string, unknown>>;
-
-  /**
    * Persists a new value via `PUT /internal/user_storage/{key}`. On success
    * the local cache is updated and subscribers to `get$` / `getUpdate$` are
    * notified. On HTTP failure the cache is left untouched, the error is

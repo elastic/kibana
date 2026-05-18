@@ -65,10 +65,6 @@ export class UserStorageClient implements IUserStorageClient {
     );
   }
 
-  public getAll(): Readonly<Record<string, unknown>> {
-    return cloneDeep(this.cache);
-  }
-
   public async set<T = unknown>(key: string, value: T): Promise<void> {
     try {
       await this.api.set(key, value);

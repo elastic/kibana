@@ -15,7 +15,6 @@ export const clientMock = (): jest.Mocked<IUserStorageClient> =>
   lazyObject({
     get: jest.fn(),
     get$: jest.fn().mockReturnValue(new Subject<unknown>()),
-    getAll: jest.fn().mockReturnValue({}),
     set: jest.fn().mockResolvedValue(undefined),
     remove: jest.fn().mockResolvedValue(undefined),
     getUpdate$: jest.fn().mockReturnValue(new Subject<unknown>()),

@@ -15,17 +15,9 @@ describe('UserStorageApi', () => {
   let api: UserStorageApi;
 
   beforeEach(() => {
-    http.get.mockReset();
     http.put.mockReset();
     http.delete.mockReset();
     api = new UserStorageApi(http);
-  });
-
-  it('GETs /internal/user_storage for getAll', async () => {
-    http.get.mockResolvedValue({ foo: 1 });
-
-    await expect(api.getAll()).resolves.toEqual({ foo: 1 });
-    expect(http.get).toHaveBeenCalledWith('/internal/user_storage');
   });
 
   it('PUTs /internal/user_storage/{key} with a value-wrapped body', async () => {

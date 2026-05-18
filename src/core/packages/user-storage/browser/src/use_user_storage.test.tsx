@@ -26,7 +26,6 @@ const buildClient = (initial: Record<string, unknown> = {}): IUserStorageClient 
         cache[key] !== undefined ? cache[key] : defaultValue
       ).asObservable();
     }) as IUserStorageClient['get$'],
-    getAll: () => ({ ...cache }),
     set: jest.fn(async (key: string, value: unknown) => {
       cache[key] = value;
       subject$.next({ ...cache });

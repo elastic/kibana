@@ -26,28 +26,18 @@ const buildClient = (initialValues: Record<string, unknown> = {}) => {
 };
 
 describe('UserStorageClient', () => {
-  describe('get / getAll', () => {
+  describe('get', () => {
     it('returns cached values seeded from initialValues', () => {
       const { client } = buildClient({ a: 1, b: 'two' });
 
       expect(client.get('a')).toBe(1);
       expect(client.get('b')).toBe('two');
-      expect(client.getAll()).toEqual({ a: 1, b: 'two' });
     });
 
     it('returns the defaultValue when the key is not cached', () => {
       const { client } = buildClient({});
 
       expect(client.get('missing', 'fallback')).toBe('fallback');
-    });
-
-    it('clones getAll output to prevent external mutation of cache', () => {
-      const { client } = buildClient({ list: [1, 2] });
-
-      const all = client.getAll() as { list: number[] };
-      all.list.push(3);
-
-      expect(client.get<number[]>('list')).toEqual([1, 2]);
     });
   });
 

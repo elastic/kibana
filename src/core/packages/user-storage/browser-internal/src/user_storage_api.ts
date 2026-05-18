@@ -20,10 +20,6 @@ const BASE_PATH = '/internal/user_storage';
 export class UserStorageApi {
   constructor(private readonly http: InternalHttpSetup) {}
 
-  public async getAll(): Promise<Record<string, unknown>> {
-    return this.http.get<Record<string, unknown>>(BASE_PATH);
-  }
-
   public async set(key: string, value: unknown): Promise<void> {
     await this.http.put(`${BASE_PATH}/${encodeURIComponent(key)}`, {
       body: JSON.stringify({ value }),
