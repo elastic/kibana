@@ -116,9 +116,12 @@ export const registerTracingExporter = async ({
     processors.push(new GlobalBridgeProcessor(lateBindingProcessor));
   }
 
+  const resource = buildOtelResources();
+  await resource.waitForAsyncAttributes?.();
+
   initInferenceTracerProvider({
     processors,
-    resource: buildOtelResources(),
+    resource,
   });
 
   return async () => {

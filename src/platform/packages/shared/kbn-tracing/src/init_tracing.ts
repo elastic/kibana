@@ -34,18 +34,18 @@ export function initTracing({
   resource: resources.Resource;
   tracingConfig: TracingConfig;
 }) {
-  propagation.setGlobalPropagator(
-    new core.CompositePropagator({
-      propagators: [new core.W3CTraceContextPropagator(), new core.W3CBaggagePropagator()],
-    })
-  );
-
   // this is used for late-binding of span processors
   const lateBindingProcessor = LateBindingSpanProcessor.get();
 
   lateBindingProcessor.register(new EvalSpanProcessor([{ baggageKey: EVAL_RUN_ID_BAGGAGE_KEY }]));
 
   const allSpanProcessors: tracing.SpanProcessor[] = [lateBindingProcessor];
+
+  propagation.setGlobalPropagator(
+    new core.CompositePropagator({
+      propagators: [new core.W3CTraceContextPropagator(), new core.W3CBaggagePropagator()],
+    })
+  );
 
   const traceIdSampler = new tracing.TraceIdRatioBasedSampler(tracingConfig.sample_rate);
 

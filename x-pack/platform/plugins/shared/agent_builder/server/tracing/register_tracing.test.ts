@@ -36,6 +36,15 @@ jest.mock('./opik_distributed_tracing', () => ({
   OpikDistributedTracingSpanProcessor: jest.fn(),
 }));
 
+const mockResource = {
+  attributes: { 'service.name': 'kibana' },
+  waitForAsyncAttributes: jest.fn().mockResolvedValue(undefined),
+};
+
+jest.mock('@kbn/telemetry', () => ({
+  buildOtelResources: jest.fn(() => mockResource),
+}));
+
 const mockLateBindingInstance = {
   onStart: jest.fn(),
   onEnd: jest.fn(),
@@ -180,7 +189,8 @@ describe('registerTracingExporter', () => {
     ]);
     const [providerOpts] = jest.mocked(initInferenceTracerProvider).mock.calls[0];
     expect(providerOpts.processors).toHaveLength(3);
-    expect(providerOpts.resource).toBeDefined();
+    expect(providerOpts.resource).toBe(mockResource);
+    expect(mockResource.waitForAsyncAttributes).toHaveBeenCalledTimes(1);
   });
 
   it('createCachedIsEnabled returns true after registerTracingExporter resolves', async () => {
