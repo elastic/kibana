@@ -78,9 +78,7 @@ export const getFormBasedDatasourceState = (
 
 export const isReferenceBasedColumn = (
   c: GenericIndexPatternColumn
-): c is ReferenceBasedIndexPatternColumn =>
-  Array.isArray((c as ReferenceBasedIndexPatternColumn).references);
-
+): c is ReferenceBasedIndexPatternColumn => 'references' in c && Array.isArray(c.references);
 /**
  * ES|QL ad-hoc data views: remap existing ones to deterministic IDs or create
  * new ones from the ES|QL query. Returns rebuilt internalReferences with standard naming.
