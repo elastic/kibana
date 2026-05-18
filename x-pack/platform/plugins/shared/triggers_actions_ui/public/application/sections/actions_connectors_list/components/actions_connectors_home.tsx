@@ -34,6 +34,7 @@ import { CreateConnectorFlyout } from '../../action_connector_form/create_connec
 import { EditConnectorFlyout } from '../../action_connector_form/edit_connector_flyout';
 import type { EditConnectorProps } from './types';
 import { loadAllActions } from '../../../lib/action_connector_api';
+import { getDevMockConnectors } from '../../../lib/dev_mock_connectors';
 import { hasSaveActionsCapability } from '../../../lib/capabilities';
 import { useSkippedPreconfiguredConnectorIds } from '../../../hooks/use_conflicted_connector_ids';
 
@@ -79,7 +80,11 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
     setIsLoadingActions(true);
     try {
       const actionsResponse = await loadAllActions({ http });
-      setActions(actionsResponse);
+      if (actionsResponse.length === 0) {
+        setActions(getDevMockConnectors());
+      } else {
+        setActions(actionsResponse);
+      }
     } catch (e) {
       toasts.addDanger({
         title: i18n.translate(

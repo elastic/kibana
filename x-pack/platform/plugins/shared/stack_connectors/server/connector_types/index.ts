@@ -42,6 +42,7 @@ import { getOpsgenieConnectorType } from './opsgenie';
 import { getSentinelOneConnectorType } from './sentinelone';
 import { getCrowdstrikeConnectorType } from './crowdstrike';
 import { getMcpConnectorType } from './mcp';
+import { getConnectorType as getEsqlExternalDataSourceConnectorType } from './esql_external_data_source';
 import type { ExperimentalFeatures } from '../../common/experimental_features';
 
 export { getConnectorType as getSwimlaneConnectorType } from './swimlane';
@@ -73,6 +74,7 @@ export function registerConnectorTypes({
   actions.registerType(getJiraConnectorType());
   actions.registerType(getTeamsConnectorType());
   actions.registerType(getTorqConnectorType());
+  actions.registerType(getEsqlExternalDataSourceConnectorType());
 
   actions.registerSubActionConnectorType(getOpsgenieConnectorType());
   actions.registerSubActionConnectorType(getJiraServiceManagementConnectorType());

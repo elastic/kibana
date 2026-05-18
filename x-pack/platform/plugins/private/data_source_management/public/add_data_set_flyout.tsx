@@ -38,7 +38,10 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 
-import { DATA_SET_FLOW_CONNECTOR_ACTION_TYPE_IDS } from '../common/data_set_flow_connector_allowlist';
+import {
+  DATA_SET_FLOW_CONNECTOR_ACTION_TYPE_IDS,
+  ESQL_EXTERNAL_DATA_SOURCE_ACTION_TYPE_ID,
+} from '../common/data_set_flow_connector_allowlist';
 import type { DataSourceListItem } from '../common/sample_data_sources_client';
 import type { DataSetPartitionDetection } from '../common/sample_data_sets_client';
 import { addDataSetFlyoutStrings } from './add_data_set_flyout_i18n';
@@ -159,6 +162,7 @@ export const AddDataSetFlyout: FunctionComponent<AddDataSetFlyoutProps> = ({
           }
         },
         allowedActionTypeIds: [...DATA_SET_FLOW_CONNECTOR_ACTION_TYPE_IDS],
+        initialConnector: { actionTypeId: ESQL_EXTERNAL_DATA_SOURCE_ACTION_TYPE_ID },
         connectorMenuHeader: createConnectorFlyoutMenuHeader,
       })
     );

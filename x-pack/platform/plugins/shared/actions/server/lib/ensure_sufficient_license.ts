@@ -11,8 +11,14 @@ import type { ActionTypeConfig, ActionTypeSecrets, ActionTypeParams } from '../t
 
 const ServerLogActionTypeId = '.server-log';
 const IndexActionTypeId = '.index';
+/** Stack connector in stack_connectors; keep id aligned with its server registration. */
+const EsqlExternalDataSourceActionTypeId = '.esql-external-data-source';
 
-const ACTIONS_SCOPED_WITHIN_STACK = new Set([ServerLogActionTypeId, IndexActionTypeId]);
+const ACTIONS_SCOPED_WITHIN_STACK = new Set([
+  ServerLogActionTypeId,
+  IndexActionTypeId,
+  EsqlExternalDataSourceActionTypeId,
+]);
 
 export function ensureSufficientLicense<
   Config extends ActionTypeConfig,

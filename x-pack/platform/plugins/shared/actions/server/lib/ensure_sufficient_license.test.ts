@@ -36,6 +36,13 @@ describe('ensureSufficientLicense()', () => {
         minimumLicenseRequired: 'basic',
       })
     ).not.toThrow();
+    expect(() =>
+      ensureSufficientLicense({
+        ...sampleActionType,
+        id: '.esql-external-data-source',
+        minimumLicenseRequired: 'basic',
+      })
+    ).not.toThrow();
   });
 
   it('allows licenses at gold', () => {

@@ -149,6 +149,11 @@ export interface ActionTypeModel<ActionConfig = any, ActionSecrets = any, Action
   defaultRecoveredActionParams?: RecursivePartial<ActionParams>;
   customConnectorSelectItem?: CustomConnectorSelectionItem;
   isExperimental?: boolean;
+  /**
+   * When true, the Connector ID field is hidden while creating a connector; the ID is derived from
+   * the connector name. The immutable ID remains visible in edit mode.
+   */
+  hideConnectorIdField?: boolean;
   subtype?: Array<{ id: string; name: string }>;
   convertParamsBetweenGroups?: (params: ActionParams) => ActionParams | {};
   getHideInUi?: (actionTypes: ActionType[]) => boolean;

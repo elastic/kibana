@@ -20,6 +20,7 @@ const ACTION_TYPE_IDS = [
   '.webhook',
   '.xmatters',
   '.torq',
+  '.esql-external-data-source',
 ];
 
 const mockedActions = actionsMock.createSetup();

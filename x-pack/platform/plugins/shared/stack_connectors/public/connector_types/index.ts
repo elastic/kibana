@@ -40,6 +40,7 @@ import { getCrowdStrikeConnectorType } from './crowdstrike';
 import { getXSOARConnectorType } from './xsoar';
 import { getJiraServiceManagementConnectorType } from './jira-service-management';
 import { getMcpConnectorType } from './mcp';
+import { getEsqlExternalDataSourceConnectorType } from './esql_external_data_source';
 
 export interface RegistrationServices {
   validateEmailAddresses: (
@@ -78,6 +79,7 @@ export function registerConnectorTypes({
   connectorTypeRegistry.register(getGeminiConnectorType());
   connectorTypeRegistry.register(getTeamsConnectorType());
   connectorTypeRegistry.register(getTorqConnectorType());
+  connectorTypeRegistry.register(getEsqlExternalDataSourceConnectorType());
   connectorTypeRegistry.register(getTinesConnectorType());
   connectorTypeRegistry.register(getD3SecurityConnectorType());
   connectorTypeRegistry.register(getTheHiveConnectorType());

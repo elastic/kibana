@@ -32,6 +32,7 @@ interface ConnectorFormData {
 interface ConnectorFormFieldsProps {
   canSave: boolean;
   isEdit: boolean;
+  hideConnectorIdField?: boolean;
 }
 
 const { emptyField, maxLengthField } = fieldValidators;
@@ -193,6 +194,7 @@ const createIdConfig = (
 const ConnectorFormFieldsGlobalComponent: React.FC<ConnectorFormFieldsProps> = ({
   canSave,
   isEdit,
+  hideConnectorIdField = false,
 }) => {
   const { http } = useKibana().services;
   const { setFieldValue } = useFormContext();
@@ -217,6 +219,7 @@ const ConnectorFormFieldsGlobalComponent: React.FC<ConnectorFormFieldsProps> = (
   );
 
   const idConfig = createIdConfig(isEdit, http);
+  const showConnectorIdField = isEdit || !hideConnectorIdField;
 
   return (
     <>
@@ -230,20 +233,24 @@ const ConnectorFormFieldsGlobalComponent: React.FC<ConnectorFormFieldsProps> = (
           euiFieldProps: { readOnly: !canSave, 'data-test-subj': 'nameInput', fullWidth: true },
         }}
       />
-      <UseField
-        path="id"
-        component={Field}
-        config={idConfig}
-        componentProps={{
-          euiFieldProps: {
-            readOnly: !canSave || isEdit,
-            disabled: isEdit,
-            'data-test-subj': 'connectorIdInput',
-            fullWidth: true,
-            onChange: handleIdChange,
-          },
-        }}
-      />
+      {showConnectorIdField ? (
+        <UseField
+          path="id"
+          component={Field}
+          config={idConfig}
+          componentProps={{
+            euiFieldProps: {
+              readOnly: !canSave || isEdit,
+              disabled: isEdit,
+              'data-test-subj': 'connectorIdInput',
+              fullWidth: true,
+              onChange: handleIdChange,
+            },
+          }}
+        />
+      ) : (
+        <UseField path="id" component={HiddenField} config={idConfig} />
+      )}
     </>
   );
 };

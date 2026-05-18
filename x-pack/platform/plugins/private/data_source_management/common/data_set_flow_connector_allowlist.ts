@@ -9,7 +9,10 @@
  * Action type ids shown when creating a connector from the data sets flow.
  * Align with storage / warehouse-oriented data sources in datasource_types.ts.
  */
+export const ESQL_EXTERNAL_DATA_SOURCE_ACTION_TYPE_ID = '.esql-external-data-source';
+
 export const DATA_SET_FLOW_CONNECTOR_ACTION_TYPE_IDS: readonly string[] = [
+  ESQL_EXTERNAL_DATA_SOURCE_ACTION_TYPE_ID,
   '.amazon_s3',
   '.azure-blob',
   '.google_cloud_storage',

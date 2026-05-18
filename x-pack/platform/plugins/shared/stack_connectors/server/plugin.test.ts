@@ -43,7 +43,7 @@ describe('Stack Connectors Plugin', () => {
       plugin.setup(coreSetup, { actions: actionsSetup });
 
       const specConnectorTypes = Object.values(connectorsSpecs);
-      const builtInConnectorTypesCount = 18;
+      const builtInConnectorTypesCount = 19;
 
       expect(actionsSetup.registerType).toHaveBeenCalledTimes(
         builtInConnectorTypesCount + specConnectorTypes.length
@@ -165,6 +165,12 @@ describe('Stack Connectors Plugin', () => {
         expect.objectContaining({
           id: '.torq',
           name: 'Torq',
+        })
+      );
+      expect(actionsSetup.registerType).toHaveBeenNthCalledWith(
+        19,
+        expect.objectContaining({
+          id: '.esql-external-data-source',
         })
       );
 

@@ -234,6 +234,31 @@ describe('ConnectorFormFieldsGlobal', () => {
     });
   });
 
+  it('hides connector ID on create when hideConnectorIdField is true and still submits derived id', async () => {
+    render(
+      <FormTestProvider onSubmit={onSubmit}>
+        <ConnectorFormFieldsGlobal canSave={true} isEdit={false} hideConnectorIdField={true} />
+      </FormTestProvider>
+    );
+
+    expect(screen.queryByTestId('connectorIdInput')).not.toBeInTheDocument();
+
+    const nameInput = screen.getByTestId('nameInput');
+    await userEvent.type(nameInput, 'My New Connector');
+
+    await userEvent.click(screen.getByTestId('form-test-provide-submit'));
+
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalledWith({
+        data: {
+          name: 'My New Connector',
+          id: 'my-new-connector',
+        },
+        isValid: true,
+      });
+    });
+  });
+
   it('auto-populates connector ID from name when creating', async () => {
     render(
       <FormTestProvider onSubmit={onSubmit}>

@@ -58,6 +58,11 @@ import {
 import { getAlertingSectionBreadcrumb } from '../../../lib/breadcrumb';
 import { getCurrentDocTitle } from '../../../lib/doc_title';
 import { routeToConnectors } from '../../../constants';
+import {
+  ESQL_EXTERNAL_DATA_SOURCE_ACTION_TYPE_ID,
+  getEsqlExternalDataSourceCompatibilityLabels,
+  getPrototypeEsqlExternalDataSourceActionType,
+} from '../../../lib/dev_mock_connectors';
 
 const ConnectorIconTipWithSpacing: React.FC = () => {
   return (
@@ -149,6 +154,10 @@ const ActionsConnectorsList = ({
         for (const actionTypeItem of actionTypes) {
           index[actionTypeItem.id] = actionTypeItem;
         }
+        if (!index[ESQL_EXTERNAL_DATA_SOURCE_ACTION_TYPE_ID]) {
+          const prototypeType = getPrototypeEsqlExternalDataSourceActionType();
+          index[prototypeType.id] = prototypeType;
+        }
         setActionTypesIndex(index);
       } catch (e) {
         toasts.addDanger({
@@ -166,14 +175,18 @@ const ActionsConnectorsList = ({
 
   const actionConnectorTableItems: ActionConnectorTableItem[] = actionTypesIndex
     ? actions.map((action) => {
+        const compatibility =
+          action.actionTypeId === ESQL_EXTERNAL_DATA_SOURCE_ACTION_TYPE_ID
+            ? getEsqlExternalDataSourceCompatibilityLabels()
+            : actionTypesIndex[action.actionTypeId]
+            ? getConnectorCompatibility(actionTypesIndex[action.actionTypeId].supportedFeatureIds)
+            : [];
         return {
           ...action,
           actionType: actionTypesIndex[action.actionTypeId]
             ? actionTypesIndex[action.actionTypeId].name
             : action.actionTypeId,
-          compatibility: actionTypesIndex[action.actionTypeId]
-            ? getConnectorCompatibility(actionTypesIndex[action.actionTypeId].supportedFeatureIds)
-            : [],
+          compatibility,
         };
       })
     : [];
