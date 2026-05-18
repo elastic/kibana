@@ -10,10 +10,30 @@ import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 
 test.describe('Onboarding app — FF enabled', { tag: tags.stateful.classic }, () => {
-  test('renders the onboarding page', async ({ browserAuth, page }) => {
+  test.beforeEach(async ({ browserAuth, page }) => {
     await browserAuth.loginAsAdmin();
-    await page.gotoApp('onboarding');
+    await page.goto('/app/onboarding/aws');
+  });
 
-    await expect(page.testSubj.locator('onboardingApp')).toBeVisible();
+  test('redirects to first step hash when no hash is present', async ({ page }) => {
+    await expect(page).toHaveURL(/#connect/);
+  });
+
+  test('renders the onboarding step shell', async ({ page }) => {
+    await expect(page.testSubj.locator('onboardingShell')).toBeVisible();
+  });
+
+  test('shows the connect step as current', async ({ page }) => {
+    await expect(page.testSubj.locator('onboardingStep-connect')).toBeVisible();
+  });
+
+  test('renders 5 step indicators', async ({ page }) => {
+    const steps = page.testSubj.locator('onboardingShell').locator('.euiStep');
+    await expect(steps).toHaveCount(5);
+  });
+
+  test('navigates directly to a step via hash', async ({ page }) => {
+    await page.goto('/app/onboarding/aws#services');
+    await expect(page.testSubj.locator('onboardingStep-services')).toBeVisible();
   });
 });
