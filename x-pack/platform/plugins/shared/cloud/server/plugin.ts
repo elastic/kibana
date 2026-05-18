@@ -113,12 +113,12 @@ export interface CloudSetup {
     secretToken?: string;
   };
   /**
-   * Managed OTLP service configuration.
+   * Managed OTLP service configuration. Only present when the deployment is configured to use the
+   * managed OTLP service (always on observability serverless projects, and feature-flagged on ECH).
    */
-  managedOtlp: {
+  managedOtlp?: {
     /**
-     * URL of the managed OTLP endpoint. Only set when the deployment is configured to use the
-     * managed OTLP service (always on observability serverless projects, and feature-flagged on ECH).
+     * URL of the managed OTLP endpoint.
      */
     url?: string;
   };
