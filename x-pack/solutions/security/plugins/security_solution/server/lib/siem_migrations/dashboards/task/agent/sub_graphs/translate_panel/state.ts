@@ -6,6 +6,7 @@
  */
 
 import { Annotation } from '@langchain/langgraph';
+import type { ResolvedResourceWithSampling } from '@kbn/agent-builder-genai-utils';
 import type { MigrationComments } from '../../../../../../../../common/siem_migrations/model/common.gen';
 import type { ParsedPanel } from '../../../../../../../../common/siem_migrations/parsers/types';
 import { MigrationTranslationResult } from '../../../../../../../../common/siem_migrations/constants';
@@ -16,10 +17,11 @@ export const translateDashboardPanelState = Annotation.Root({
   parsed_panel: Annotation<ParsedPanel>(),
   description: Annotation<string>(),
   dashboard_description: Annotation<string>(),
-  resources: Annotation<MigrationResources>(),
-  elastic_panel: Annotation<object | undefined>(), // The visualization panel object
+  resources: Annotation<MigrationResources>(), // The visualization panel object
+  elastic_panel: Annotation<object | undefined>(),
   index_pattern: Annotation<string | undefined>(),
-  index_mapping: Annotation<Record<string, object> | undefined>(),
+  /** includes mapping and field stats for a given index */
+  resolved_resource: Annotation<ResolvedResourceWithSampling | undefined>(),
   includes_ecs_mapping: Annotation<boolean>({
     reducer: (current, value) => value ?? current,
     default: () => false,
@@ -29,7 +31,7 @@ export const translateDashboardPanelState = Annotation.Root({
   esql_query_columns: Annotation<EsqlColumn[] | undefined>(),
   validation_errors: Annotation<ValidationErrors>({
     reducer: (current, value) => value ?? current,
-    default: () => ({ retries_left: 3 }), // Max self-healing ES|QL validation retries
+    default: () => ({ retries_left: 6 }), // Max self-healing ES|QL validation retries
   }),
   translation_result: Annotation<MigrationTranslationResult>({
     reducer: (current, value) => value ?? current,

@@ -14,10 +14,10 @@ import type { Tag, TagAttributes } from '../../../common/types';
 export type { ITagsCache };
 
 export interface ITagsChangeListener {
-  onDelete: (id: string) => void;
-  onCreate: (tag: Tag) => void;
-  onUpdate: (id: string, attributes: TagAttributes) => void;
-  onGetAll: (tags: Tag[]) => void;
+  onDidDelete: (id: string) => void;
+  onDidCreate: (tag: Tag) => void;
+  onDidUpdate: (id: string, attributes: TagAttributes) => void;
+  onDidGetAll: (tags: Tag[]) => void;
 }
 
 export type CacheRefreshHandler = () => Tag[] | Promise<Tag[]>;
@@ -86,15 +86,19 @@ export class TagsCache implements ITagsCache, ITagsChangeListener {
       : this.public$;
   }
 
-  public onDelete(id: string) {
+  public isInitialized(): boolean {
+    return this.isInitialized$.getValue();
+  }
+
+  public onDidDelete(id: string) {
     this.internal$.next(this.internal$.value.filter((tag) => tag.id !== id));
   }
 
-  public onCreate(tag: Tag) {
+  public onDidCreate(tag: Tag) {
     this.internal$.next([...this.internal$.value.filter((f) => f.id !== tag.id), tag]);
   }
 
-  public onUpdate(id: string, attributes: TagAttributes) {
+  public onDidUpdate(id: string, attributes: TagAttributes) {
     this.internal$.next(
       this.internal$.value.map((tag) => {
         if (tag.id === id) {
@@ -108,7 +112,7 @@ export class TagsCache implements ITagsCache, ITagsChangeListener {
     );
   }
 
-  public onGetAll(tags: Tag[]) {
+  public onDidGetAll(tags: Tag[]) {
     this.internal$.next(tags);
   }
 

@@ -5,16 +5,23 @@
  * 2.0.
  */
 
-import type { WorkflowExtensionsServiceContract } from '../services/workflow_extensions_service/workflow_extensions_service';
+import type {
+  ServerTriggerDefinition,
+  WorkflowsExtensionsServerPluginSetup,
+} from '@kbn/workflows-extensions/server';
 
 /**
  * Registers all alerting-v2 server-side workflow trigger definitions.
- * Call once during plugin setup with the resolved {@link WorkflowExtensionsService}.
+ * Call once during plugin setup .
  */
 export function registerTriggerDefinitions(
-  workflowExtensionsService: WorkflowExtensionsServiceContract
+  workflowsExtensions: WorkflowsExtensionsServerPluginSetup
 ): void {
-  workflowExtensionsService.registerTriggerDefinitions([
+  const triggerDefinitions: ServerTriggerDefinition[] = [
     // Add CommonTriggerDefinition-backed entries here (import from common when added).
-  ]);
+  ];
+
+  for (const definition of triggerDefinitions) {
+    workflowsExtensions.registerTriggerDefinition(definition);
+  }
 }

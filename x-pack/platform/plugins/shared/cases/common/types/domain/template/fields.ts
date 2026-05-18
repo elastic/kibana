@@ -205,9 +205,34 @@ export const RadioGroupFieldSchema = BaseFieldSchema.extend({
 });
 
 /**
- * This can be used to parse `fields` section in the YAML `definition` of the template.
+ * A reference to a named field definition in the owner's field library.
+ * When a template is parsed, the referenced field is resolved by looking up the library
+ * field by its `$ref` name. `name` is an optional local alias; if omitted the `$ref` value
+ * is used as the effective field name within the template.
+ *
+ * `metadata.default` is an optional per-template override for the resolved field's default
+ * value. It must satisfy the resolved field's control type — this is enforced when the
+ * override is merged onto the inline field at resolve time.
  */
-export const FieldSchema = z.discriminatedUnion('control', [
+export const RefFieldSchema = z.object({
+  name: z.string().optional(),
+  $ref: z.string().min(1),
+  metadata: z
+    .object({
+      default: z
+        .union([z.string(), z.number(), z.array(z.string()), UserPickerDefaultSchema])
+        .optional(),
+    })
+    .optional(),
+});
+
+export type RefField = z.infer<typeof RefFieldSchema>;
+
+/**
+ * This can be used to parse `fields` section in the YAML `definition` of the template.
+ * Includes both inline field definitions (with `control`) and library references (with `ref`).
+ */
+export const FieldSchema = z.union([
   InputTextFieldSchema,
   InputNumberFieldSchema,
   SelectBasicFieldSchema,
@@ -216,4 +241,15 @@ export const FieldSchema = z.discriminatedUnion('control', [
   UserPickerFieldSchema,
   CheckboxGroupFieldSchema,
   RadioGroupFieldSchema,
+  RefFieldSchema,
 ]);
+
+export type Field = z.infer<typeof FieldSchema>;
+
+/** Union of all inline (control-based) field types — excludes RefField. */
+export type InlineField = Exclude<Field, RefField>;
+
+export const isRefField = (field: Field): field is RefField =>
+  '$ref' in field && !('control' in field);
+
+export const isInlineField = (field: Field): field is InlineField => !isRefField(field);

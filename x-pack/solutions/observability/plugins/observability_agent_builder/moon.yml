@@ -66,6 +66,8 @@ dependsOn:
   - '@kbn/search-inference-endpoints'
   - '@kbn/inference-connectors'
   - '@kbn/react-query'
+  - '@kbn/sse-utils'
+  - '@kbn/cloud-plugin'
 tags:
   - plugin
   - prod

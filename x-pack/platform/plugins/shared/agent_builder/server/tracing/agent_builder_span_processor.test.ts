@@ -9,21 +9,13 @@ import type { Attributes } from '@opentelemetry/api';
 import { context, propagation, TraceFlags } from '@opentelemetry/api';
 import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-hooks';
 import type { tracing } from '@elastic/opentelemetry-node/sdk';
-import { tracing as elasticTracing } from '@elastic/opentelemetry-node/sdk';
+import { resources, tracing as elasticTracing } from '@elastic/opentelemetry-node/sdk';
 import { BAGGAGE_TRACKING_BEACON_KEY, BAGGAGE_TRACKING_BEACON_VALUE } from '@kbn/inference-tracing';
 import { AgentBuilderSpanProcessor } from './agent_builder_span_processor';
 
 const SHOULD_TRACK_ATTR = '_agent_builder_should_track';
 
-const emptyResource = {
-  attributes: {},
-  merge: jest.fn().mockImplementation((other: { attributes: Attributes }) => ({
-    attributes: { ...other.attributes },
-    merge: jest.fn(),
-    getRawAttributes: jest.fn().mockReturnValue([]),
-  })),
-  getRawAttributes: jest.fn().mockReturnValue([]),
-};
+const emptyResource = resources.resourceFromAttributes({});
 
 describe('AgentBuilderSpanProcessor', () => {
   let contextManager: AsyncLocalStorageContextManager;
@@ -213,6 +205,30 @@ describe('AgentBuilderSpanProcessor', () => {
     );
     expect(exported.spanContext().traceFlags).toBe(TraceFlags.NONE);
     expect(SHOULD_TRACK_ATTR in exported.attributes).toBe(false);
+  });
+
+  it('onEnd preserves span events without modifying their attributes', () => {
+    const processor = new AgentBuilderSpanProcessor({
+      exporter: createExporter(),
+      scheduledDelayMillis: 1,
+    });
+
+    const readable: tracing.ReadableSpan = {
+      ...createMockReadableSpan({
+        [SHOULD_TRACK_ATTR]: true,
+      }),
+      events: [
+        { name: 'gen_ai.system.message', time: [0, 0], attributes: { role: 'system' } },
+        { name: 'gen_ai.choice', time: [0, 0], attributes: { finish_reason: 'stop' } },
+      ],
+    };
+
+    processor.onEnd(readable);
+
+    const exported = (mockBatch.onEnd as jest.Mock).mock.calls[0][0] as tracing.ReadableSpan;
+    expect(exported.events).toHaveLength(2);
+    expect(exported.events[0].attributes).toEqual({ role: 'system' });
+    expect(exported.events[1].attributes).toEqual({ finish_reason: 'stop' });
   });
 
   it('forceFlush delegates to batch processor', async () => {
