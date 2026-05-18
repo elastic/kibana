@@ -98,7 +98,7 @@ ${forkBranches}
       CASE(
         host.ip IS NOT NULL,
         CONCAT(${JSON_OBJECT_SEPARATOR}, "\\"host\\":", ${JSON_OBJECT_START},
-          "\\"ip\\":[\\"", MV_CONCAT(host.ip, "\\",\\""), "\\"]",
+          "\\"ip\\":[\\"", MV_CONCAT(TO_STRING(host.ip), "\\",\\""), "\\"]",
           ${JSON_OBJECT_END}),
         ""
       ),
