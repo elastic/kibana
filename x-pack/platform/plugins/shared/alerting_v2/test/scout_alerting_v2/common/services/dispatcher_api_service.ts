@@ -9,7 +9,7 @@ import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ScoutLogger } from '@kbn/scout';
 import { measurePerformanceAsync } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
-import { DISPATCHER_TASK_ID } from '../../../../server/lib/dispatcher/task_definition';
+import { DISPATCHER_TASK_ID } from '../../../../server/lib/dispatcher/constants';
 import { POLL_INTERVAL_MS, POLL_TIMEOUT_MS } from '../constants';
 import { countTaskRuns } from './task_event_log';
 
