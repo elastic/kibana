@@ -142,10 +142,12 @@ export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
     [draft.dateStart, draft.dateEnd]
   );
 
-  // In split mode the "active" query is the assembled base + breach block.
-  const activeQuery = isSplit
-    ? [draft.base, draft.breach].filter(Boolean).join('\n')
-    : draft.breach;
+  // Always assemble base + breach for execution. In non-tracking mode draft.base
+  // is '' so this collapses to breach alone. In YAML mode, the parser may produce
+  // a composed-format draft while the reducer tracking flag hasn't caught up yet
+  // (the tracking effect is blocked by the yamlMode guard); assembling here makes
+  // the query executable regardless of that transient inconsistency.
+  const activeQuery = [draft.base, draft.breach].filter(Boolean).join('\n');
 
   // Only fetch fields when the query has a real index pattern after FROM.
   const queryForFields = /^\s*FROM\s+[a-zA-Z0-9_.*-]/i.test(activeQuery) ? activeQuery : '';
