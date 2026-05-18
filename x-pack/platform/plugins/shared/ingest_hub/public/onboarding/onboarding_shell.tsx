@@ -7,8 +7,19 @@
 
 import React, { useEffect, useMemo } from 'react';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
+import { css } from '@emotion/react';
 import type { EuiStepProps } from '@elastic/eui';
-import { EuiSteps } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiPageTemplate,
+  EuiSpacer,
+  EuiSteps,
+  EuiText,
+  EuiTitle,
+  useEuiTheme,
+} from '@elastic/eui';
 
 import { ONBOARDING_STEPS } from './steps';
 import { useStepState } from './use_step_state';
@@ -26,10 +37,18 @@ const STEP_COMPONENTS: Record<string, React.ComponentType> = {
   'see-data': SeeDataStep,
 };
 
+function formatIntegrationTitle(integrationId: string): string {
+  return integrationId
+    .split('-')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
+
 export function OnboardingShell() {
   const { integrationId } = useParams<{ integrationId: string }>();
   const history = useHistory();
   const location = useLocation();
+  const { euiTheme } = useEuiTheme();
   const { completedSteps, firstIncompleteStepId } = useStepState(integrationId);
 
   const currentStepId = location.hash ? location.hash.slice(1) : '';
@@ -75,5 +94,34 @@ export function OnboardingShell() {
     return null;
   }
 
-  return <EuiSteps steps={stepsConfig} data-test-subj="onboardingShell" />;
+  return (
+    <EuiPageTemplate data-test-subj="onboardingShell">
+      <EuiPageTemplate.Section
+        grow={false}
+        paddingSize="l"
+        restrictWidth
+        css={css`
+          border-bottom: ${euiTheme.border.thin};
+        `}
+      >
+        <EuiFlexGroup alignItems="center" gutterSize="l">
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="logoAWS" size="xxl" />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiTitle size="l">
+              <h1>{formatIntegrationTitle(integrationId)}</h1>
+            </EuiTitle>
+            <EuiSpacer size="xs" />
+            <EuiText size="m" color="subdued">
+              <p>Collect logs and metrics from {formatIntegrationTitle(integrationId)}.</p>
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPageTemplate.Section>
+      <EuiPageTemplate.Section paddingSize="xl" restrictWidth>
+        <EuiSteps steps={stepsConfig} data-test-subj="onboardingStepIndicator" />
+      </EuiPageTemplate.Section>
+    </EuiPageTemplate>
+  );
 }
