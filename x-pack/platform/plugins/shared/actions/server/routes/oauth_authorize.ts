@@ -26,6 +26,13 @@ import type { OAuthRateLimiter } from '../lib/oauth_rate_limiter';
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import { OAUTH_API_TAG } from '../feature';
 
+class OAuthRouteError extends Error {
+  constructor(message: string, readonly statusCode: number) {
+    super(message);
+    this.name = 'OAuthRouteError';
+  }
+}
+
 const paramsSchema = schema.object({
   connectorId: schema.string(),
 });
@@ -33,9 +40,6 @@ const paramsSchema = schema.object({
 const oauthStartReturnUrlFields = {
   returnUrl: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
 };
-
-const startOAuthFlowBodySchema = schema.object(oauthStartReturnUrlFields);
-const startOAuthFlowGetQuerySchema = schema.object(oauthStartReturnUrlFields);
 
 const validateOAuthUrlsAreAllowed = (
   oauthConfig: OAuthConfig,
@@ -83,7 +87,7 @@ export const oauthAuthorizeRoute = (
       },
       validate: {
         params: paramsSchema,
-        body: startOAuthFlowBodySchema,
+        body: schema.object(oauthStartReturnUrlFields),
       },
       options: {
         access: 'internal',
@@ -128,7 +132,7 @@ export const oauthAuthorizeRoute = (
       },
       validate: {
         params: paramsSchema,
-        query: startOAuthFlowGetQuerySchema,
+        query: schema.object(oauthStartReturnUrlFields),
       },
       options: {
         access: 'public',
@@ -198,19 +202,12 @@ async function startOAuthAuthorizationFlow(params: {
   const core = await context.core;
   const currentUser = core.security.authc.getCurrentUser();
   if (!currentUser) {
-    throw Object.assign(
-      new Error('User should be authenticated to initiate OAuth authorization.'),
-      {
-        statusCode: 401,
-      }
-    );
+    throw new OAuthRouteError('User should be authenticated to initiate OAuth authorization.', 401);
   }
   const { profile_uid } = currentUser;
 
   if (!profile_uid) {
-    throw Object.assign(new Error('Unable to retrieve Kibana user profile ID.'), {
-      statusCode: 500,
-    });
+    throw new OAuthRouteError('Unable to retrieve Kibana user profile ID.', 500);
   }
 
   oauthRateLimiter.log(profile_uid, 'authorize');
@@ -218,17 +215,15 @@ async function startOAuthAuthorizationFlow(params: {
     routeLogger.warn(
       `OAuth authorize rate limit exceeded for user: ${profile_uid}, connector: ${connectorId}`
     );
-    throw Object.assign(new Error('Too many authorization attempts. Please try again later.'), {
-      statusCode: 429,
-    });
+    throw new OAuthRouteError('Too many authorization attempts. Please try again later.', 429);
   }
 
   const [coreStart, { encryptedSavedObjects, spaces }] = await coreSetup.getStartServices();
   const kibanaUrl = coreStart.http.basePath.publicBaseUrl;
   if (!kibanaUrl) {
-    throw Object.assign(
-      new Error('Kibana public URL not configured. Please set server.publicBaseUrl in kibana.yml'),
-      { statusCode: 400 }
+    throw new OAuthRouteError(
+      'Kibana public URL not configured. Please set server.publicBaseUrl in kibana.yml',
+      400
     );
   }
 
@@ -253,9 +248,9 @@ async function startOAuthAuthorizationFlow(params: {
   } catch (allowedHostsErr) {
     const message =
       allowedHostsErr instanceof Error ? allowedHostsErr.message : String(allowedHostsErr);
-    throw Object.assign(
-      new Error(message || 'OAuth URL is not allowed by xpack.actions.allowedHosts'),
-      { statusCode: 400 }
+    throw new OAuthRouteError(
+      message || 'OAuth URL is not allowed by xpack.actions.allowedHosts',
+      400
     );
   }
 
@@ -267,11 +262,9 @@ async function startOAuthAuthorizationFlow(params: {
     const kibanaUrlObj = new URL(kibanaUrl);
 
     if (returnUrlObj.origin !== kibanaUrlObj.origin) {
-      throw Object.assign(
-        new Error(
-          `returnUrl must be same origin as Kibana. Expected: ${kibanaUrlObj.origin}, Got: ${returnUrlObj.origin}`
-        ),
-        { statusCode: 400 }
+      throw new OAuthRouteError(
+        `returnUrl must be same origin as Kibana. Expected: ${kibanaUrlObj.origin}, Got: ${returnUrlObj.origin}`,
+        400
       );
     }
     kibanaReturnUrl = returnUrl;
@@ -331,7 +324,9 @@ function handleOAuthStartError(
 ): IKibanaResponse {
   const errorMessage = err instanceof Error ? err.message : String(err);
   const statusCode =
-    err instanceof Error && 'statusCode' in err
+    err instanceof OAuthRouteError
+      ? err.statusCode
+      : err instanceof Error && typeof (err as { statusCode?: unknown }).statusCode === 'number'
       ? (err as Error & { statusCode: number }).statusCode
       : 500;
 

@@ -18,6 +18,7 @@ import { oauthAuthorizeRoute } from './oauth_authorize';
 import { OAuthStateClient } from '../lib/oauth_state_client';
 import { OAuthAuthorizationService } from '../lib/oauth_authorization_service';
 import { actionsConfigMock } from '../actions_config.mock';
+import { OAUTH_API_TAG } from '../feature';
 
 const MockOAuthStateClient = OAuthStateClient as jest.MockedClass<typeof OAuthStateClient>;
 const MockOAuthAuthorizationService = OAuthAuthorizationService as jest.MockedClass<
@@ -148,6 +149,27 @@ describe('oauthAuthorizeRoute', () => {
     const [getConfig] = router.get.mock.calls[0]!;
 
     expect(getConfig.path).toBe('/api/actions/connector/{connectorId}/oauth/start');
+  });
+
+  it('POST route requires OAUTH_API_TAG privilege', () => {
+    const [postConfig] = registerRoute();
+
+    expect(postConfig.security).toEqual({
+      authz: {
+        requiredPrivileges: [OAUTH_API_TAG],
+      },
+    });
+  });
+
+  it('GET route requires OAUTH_API_TAG privilege', () => {
+    registerRoute();
+    const [getConfig] = router.get.mock.calls[0]!;
+
+    expect(getConfig.security).toEqual({
+      authz: {
+        requiredPrivileges: [OAUTH_API_TAG],
+      },
+    });
   });
 
   it('returns unauthorized when no current user', async () => {
