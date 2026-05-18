@@ -653,11 +653,15 @@ export async function preValidateStepWith(
 
   const definition = workflowsExtensions.getStepDefinition(stepType);
   if (!definition) {
-    return {
-      stepType,
-      reason: 'unknown_step_type',
-      message: `Step type "${stepType}" is not registered. Use \`get_step_definitions\` to discover valid step types.`,
-    };
+    // The workflowsExtensions registry only covers step types plugins have
+    // explicitly registered (data.*, ai.*, plus skill-specific steps like
+    // renderAlertNarrative). The execution engine itself knows several
+    // hundred more (connector-derived steps such as `kibana.request`,
+    // `elasticsearch.search`, `cases.*`, `slack2.*`, etc.). Treating
+    // "missing from workflowsExtensions" as `unknown_step_type` produces
+    // false positives that block valid steps. Skip pre-validation in that
+    // case and let the execution engine surface any genuine errors.
+    return null;
   }
   if (!definition.inputSchema) {
     return null;
