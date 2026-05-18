@@ -61,7 +61,7 @@ export const ViewPolicyFlyout = ({ policy }: { policy: PolicyFromES }) => {
       name: i18n.translate('xpack.indexLifecycleMgmt.policyFlyout.editActionLabel', {
         defaultMessage: 'Edit',
       }),
-      icon: <EuiIcon type="pencil" />,
+      icon: <EuiIcon type="pencil" aria-hidden={true} />,
       onClick: () => onEdit(policy.name),
     },
     /**
@@ -71,7 +71,7 @@ export const ViewPolicyFlyout = ({ policy }: { policy: PolicyFromES }) => {
       name: i18n.translate('xpack.indexLifecycleMgmt.policyFlyout.addToIndexTemplate', {
         defaultMessage: 'Add to index template',
       }),
-      icon: <EuiIcon type="plusInCircle" />,
+      icon: <EuiIcon type="plusInCircle" aria-hidden={true} />,
       onClick: () => setListAction({ selectedPolicy: policy, actionType: 'addIndexTemplate' }),
     },
   ];
@@ -83,7 +83,7 @@ export const ViewPolicyFlyout = ({ policy }: { policy: PolicyFromES }) => {
       name: i18n.translate('xpack.indexLifecycleMgmt.policyFlyout.deleteActionLabel', {
         defaultMessage: 'Delete',
       }),
-      icon: <EuiIcon type="trash" />,
+      icon: <EuiIcon type="trash" aria-hidden={true} />,
       onClick: () => {
         setShowPopover(false);
         setListAction({ selectedPolicy: policy, actionType: 'deletePolicy' });

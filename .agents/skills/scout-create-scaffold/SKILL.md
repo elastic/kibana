@@ -58,6 +58,7 @@ Notes:
   - `test/<scout-root>/ui/parallel_tests/example_one.spec.ts`
   - `test/<scout-root>/ui/parallel_tests/example_two.spec.ts`
   - `test/<scout-root>/ui/parallel_tests/global.setup.ts`
+  - `test/<scout-root>/ui/parallel_tests/global.teardown.ts` is **not** generated; opt in by adding the file with a `globalTeardownHook(...)` call. See `scout-ui-testing/references/scout-ui-parallelism.md`.
 
 ## After Generating
 
