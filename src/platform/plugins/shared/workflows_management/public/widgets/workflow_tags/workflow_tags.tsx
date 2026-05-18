@@ -154,7 +154,7 @@ export const WorkflowTags = ({ tags }: WorkflowTagsProps) => {
         </EuiBadgeGroup>
       </>
     ),
-    [tags]
+    [tags, tagsPopoverTitleId]
   );
   if (!tags || tags.length === 0) return null;
 
