@@ -40,7 +40,7 @@ import type { ComposeDiscoverMode, RecoveryType } from './types';
 import { useComposeDiscoverState, getSandboxTabConfig } from './use_compose_discover_state';
 import { ComposeDiscoverForm, getSteps } from './compose_discover_form';
 import { HorizontalMinimalStepper, type MinimalStep } from './horizontal_minimal_stepper';
-import { ComposeDiscoverChild } from './compose_discover_child';
+import { QuerySandboxFlyout } from './query_sandbox_flyout';
 import { useEsqlAutocomplete } from './use_esql_providers';
 import { useSplitQueryCompletion } from './use_split_query_completion';
 import { useSandboxDraft, draftToRuleQuery } from './use_sandbox_draft';
@@ -518,7 +518,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
           </EuiFlyoutFooter>
 
           {uiState.childOpen && (
-            <ComposeDiscoverChild
+            <QuerySandboxFlyout
               draft={draft}
               onDraftChange={handleDraftChange}
               timeField={timeField}

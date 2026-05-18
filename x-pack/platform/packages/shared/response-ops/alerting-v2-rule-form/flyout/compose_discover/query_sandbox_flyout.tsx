@@ -56,7 +56,7 @@ import { ComposeDiscoverTabs, TAB_DEFINITIONS, visibleTabIds } from './compose_d
  *
  * ## State ownership
  *
- * `ComposeDiscoverChild` is a **props-only component** — it owns no query state.
+ * `QuerySandboxFlyout` is a **props-only component** — it owns no query state.
  * The parent is responsible for:
  * - Holding `SandboxDraft` (editing buffer) via `useSandboxDraft`
  * - Holding `timeField` in RHF (`ComposeFormValues.timeField`)
@@ -66,7 +66,7 @@ import { ComposeDiscoverTabs, TAB_DEFINITIONS, visibleTabIds } from './compose_d
  * @see useSandboxDraft — editing buffer hook; keeps draft across open/close cycles
  * @see draftToRuleQuery — converts draft + tracking flag to the `RuleQuery` API shape
  */
-export interface ComposeDiscoverChildProps {
+export interface QuerySandboxFlyoutProps {
   /** Editing buffer for all query strings and the preview date range. */
   draft: SandboxDraft;
   /**
@@ -109,7 +109,7 @@ export interface ComposeDiscoverChildProps {
   onRecoveryEditorMount?: (editor: monaco.editor.IStandaloneCodeEditor) => void;
 }
 
-const CHILD_FLYOUT_TITLE_ID = 'composeDiscoverChildTitle';
+const QUERY_SANDBOX_TITLE_ID = 'composeDiscoverChildTitle';
 const VISIBLE_ROWS = 10;
 const INITIAL_EDITOR_HEIGHT = 200;
 const MIN_EDITOR_HEIGHT = 80;
@@ -118,7 +118,7 @@ const MAX_EDITOR_HEIGHT = 600;
 const isMac = typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.userAgent);
 const RUN_SHORTCUT_LABEL = isMac ? '⌘⏎' : 'Ctrl+Enter';
 
-export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
+export const QuerySandboxFlyout: React.FC<QuerySandboxFlyoutProps> = ({
   draft,
   onDraftChange,
   timeField,
@@ -277,9 +277,9 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
   );
 
   return (
-    <EuiFlyout type="overlay" size="fill" onClose={onClose} aria-labelledby={CHILD_FLYOUT_TITLE_ID}>
+    <EuiFlyout type="overlay" size="fill" onClose={onClose} aria-labelledby={QUERY_SANDBOX_TITLE_ID}>
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="s" id={CHILD_FLYOUT_TITLE_ID}>
+        <EuiTitle size="s" id={QUERY_SANDBOX_TITLE_ID}>
           <h3>{title}</h3>
         </EuiTitle>
       </EuiFlyoutHeader>
@@ -466,7 +466,7 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
-              <EuiButton fill onClick={onApply} data-test-subj="composeDiscoverChildDone">
+              <EuiButton fill onClick={onApply} data-test-subj="querySandboxApply">
                 Apply changes
               </EuiButton>
             </EuiFlexItem>

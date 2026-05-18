@@ -14,9 +14,9 @@ export type { ComposeDiscoverFlyoutProps } from './flyout/compose_discover';
 export type { ComposeDiscoverMode } from './flyout/compose_discover/types';
 
 // Compose Discover sandbox — embeddable ES|QL editor + results panel (props-only)
-export { ComposeDiscoverChild, useSandboxDraft, draftToRuleQuery } from './flyout/compose_discover';
+export { QuerySandboxFlyout, useSandboxDraft, draftToRuleQuery } from './flyout/compose_discover';
 export type {
-  ComposeDiscoverChildProps,
+  QuerySandboxFlyoutProps,
   SandboxDraft,
   SandboxTabConfig,
   QueryTab,
