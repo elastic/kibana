@@ -277,6 +277,7 @@ const SkillDetailFlyout: React.FC<{
               <RenderMarkdownReadOnly
                 label={labels.agentPlugins.pluginDetailInstructionsLabel}
                 content={skill.content ?? ''}
+                ebtElement={AGENT_BUILDER_UI_EBT.element.CUSTOMIZE_PLUGINS}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

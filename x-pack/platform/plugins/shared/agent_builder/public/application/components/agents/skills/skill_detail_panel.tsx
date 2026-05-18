@@ -100,6 +100,7 @@ export const SkillDetailPanel: React.FC<SkillDetailPanelProps> = ({
         <RenderMarkdownReadOnly
           label={labels.agentSkills.skillDetailInstructionsLabel}
           content={skill?.content ?? ''}
+          ebtElement={AGENT_BUILDER_UI_EBT.element.CUSTOMIZE_SKILLS}
         />
         <SkillTools skillToolIds={skill?.tool_ids ?? []} onToolClick={setSelectedToolId} />
       </DetailPanelLayout>

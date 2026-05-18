@@ -18,6 +18,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import { labels } from '../../../utils/i18n';
 import { useToolService } from '../../../hooks/tools/use_tools';
 import { RenderMarkdownReadOnly } from '../common/render_markdown_read_only';
@@ -64,6 +65,7 @@ export const ToolReadOnlyFlyout: React.FC<ToolReadOnlyFlyoutProps> = ({ toolId, 
               <RenderMarkdownReadOnly
                 content={tool.description ?? ''}
                 label={labels.agentTools.toolDetailDescriptionLabel}
+                ebtElement={AGENT_BUILDER_UI_EBT.element.CUSTOMIZE_SKILLS}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

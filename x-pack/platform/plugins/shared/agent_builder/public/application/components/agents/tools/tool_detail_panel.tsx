@@ -86,6 +86,7 @@ export const ToolDetailPanel: React.FC<ToolDetailPanelProps> = ({
       <RenderMarkdownReadOnly
         content={tool?.description ?? ''}
         label={labels.agentTools.toolDetailDescriptionLabel}
+        ebtElement={AGENT_BUILDER_UI_EBT.element.CUSTOMIZE_TOOLS}
       />
     </DetailPanelLayout>
   );

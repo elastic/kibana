@@ -14,6 +14,7 @@ import {
   EuiMarkdownFormat,
   EuiTitle,
 } from '@elastic/eui';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import { labels } from '../../../utils/i18n';
 
 const viewToggleOptions = [
@@ -32,11 +33,13 @@ const viewToggleOptions = [
 interface RenderMarkdownReadOnlyProps {
   content: string;
   label?: string;
+  ebtElement: string;
 }
 
 export const RenderMarkdownReadOnly: React.FC<RenderMarkdownReadOnlyProps> = ({
   content,
   label,
+  ebtElement,
 }) => {
   const [showRaw, setShowRaw] = useState(false);
 
@@ -64,6 +67,8 @@ export const RenderMarkdownReadOnly: React.FC<RenderMarkdownReadOnlyProps> = ({
               onChange={(id) => setShowRaw(id === 'raw')}
               isIconOnly
               buttonSize="compressed"
+              data-ebt-element={ebtElement}
+              data-ebt-action={AGENT_BUILDER_UI_EBT.action.uiChrome.MARKDOWN_VIEW_TOGGLE}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

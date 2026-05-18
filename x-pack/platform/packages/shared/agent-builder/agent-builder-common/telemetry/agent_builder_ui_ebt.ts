@@ -181,6 +181,7 @@ export const AGENT_BUILDER_UI_EBT = {
       CROSS_NAVIGATE: 'cross_navigate',
       INSTALL_FROM_URL_OR_ZIP: 'install_from_url_or_zip',
       INSTALL_FLYOUT_CANCEL: 'install_flyout_cancel',
+      MARKDOWN_VIEW_TOGGLE: 'markdown_view_toggle',
     },
     manageTools: {
       NEW_TOOL_ESQL: 'manage_tools_new_tool_esql',
