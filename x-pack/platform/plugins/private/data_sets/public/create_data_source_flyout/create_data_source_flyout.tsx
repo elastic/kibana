@@ -6,7 +6,7 @@
  */
 
 import type { FunctionComponent } from 'react';
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -29,6 +29,13 @@ import type { DataSourceWithSecrets } from '../../common';
 import { ALL_DATA_SOURCE_TYPES } from '../../common';
 import type { DataSourceType } from '../../common/datasource_types';
 import { createDataSourceFlyoutStrings } from './create_data_source_flyout_i18n';
+import {
+  applyAuthenticationModeToDataSource,
+  getDefaultAuthenticationMode,
+  type CreateDataSourceAuthenticationMode,
+} from './create_data_source_flyout_authentication';
+import { CreateDataSourceFlyoutAuthenticationFields } from './create_data_source_flyout_authentication_fields';
+import { CreateDataSourceFlyoutAuthenticationSelect } from './create_data_source_flyout_authentication_select';
 import { CreateDataSourceFlyoutTypeSettingsBlock } from './create_data_source_flyout_type_settings';
 import { getDataSourceTypeLabel } from '../get_data_source_type_label';
 
@@ -86,6 +93,16 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
     []
   );
 
+  const dataSourceType = dataSourceTypeField.value as DataSourceType;
+
+  const [authenticationMode, setAuthenticationMode] = useState<CreateDataSourceAuthenticationMode>(
+    () => getDefaultAuthenticationMode(dataSourceType)
+  );
+
+  useEffect(() => {
+    setAuthenticationMode(getDefaultAuthenticationMode(dataSourceType));
+  }, [dataSourceType]);
+
   /*
   const handleSave = useCallback(async () => {
     const trimmedName = name.trim();
@@ -119,7 +136,8 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
   }, [dataSourceType, description, formSettings, name, onClose, onSave]);
   */
 
-  const handleSave = (data: DataSourceWithSecrets) => onSave(data);
+  const handleSave = (data: DataSourceWithSecrets) =>
+    onSave(applyAuthenticationModeToDataSource(data, authenticationMode));
 
   return (
     <EuiFlyout
@@ -187,7 +205,18 @@ export const CreateDataSourceFlyout: FunctionComponent<CreateDataSourceFlyoutPro
           </EuiFormRow>
           <CreateDataSourceFlyoutTypeSettingsBlock
             control={control}
-            dataSourceType={dataSourceTypeField.value as DataSourceType}
+            dataSourceType={dataSourceType}
+            unregister={unregister}
+          />
+          <CreateDataSourceFlyoutAuthenticationSelect
+            authenticationMode={authenticationMode}
+            dataSourceType={dataSourceType}
+            onAuthenticationModeChange={setAuthenticationMode}
+          />
+          <CreateDataSourceFlyoutAuthenticationFields
+            authenticationMode={authenticationMode}
+            control={control}
+            dataSourceType={dataSourceType}
             unregister={unregister}
           />
         </EuiForm>

@@ -23,7 +23,7 @@ const gcsSettingsWithSecretsSchema = schema.object({
   endpoint: optionalString,
   token_uri: optionalString,
   auth: optionalString,
-  credentials: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+  credentials: optionalString,
 });
 
 const azureBlobSettingsWithSecretsSchema = schema.object({

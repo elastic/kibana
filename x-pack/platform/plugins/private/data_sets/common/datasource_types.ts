@@ -72,7 +72,7 @@ export interface GCSDataSourceSettings {
 }
 
 export interface GCSDataSourceSettingsWithSecrets extends GCSDataSourceSettings {
-  credentials?: {};
+  credentials?: string;
 }
 
 export type AzureBlobDataSource = DataSourceCommon<'azure_blob', AzureBlobDataSourceSettings>;

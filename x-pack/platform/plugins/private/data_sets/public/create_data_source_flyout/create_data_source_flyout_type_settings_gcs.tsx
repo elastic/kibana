@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFieldText, EuiFormRow, EuiTextArea } from '@elastic/eui';
 
@@ -35,54 +35,14 @@ export function CreateDataSourceFlyoutTypeSettingsGcs({
     name: 'settings.token_uri',
     control,
   });
-  const { field: authField } = useController({
-    defaultValue: '',
-    name: 'settings.auth',
-    control,
-  });
-  const { field: credentialsField } = useController({
-    defaultValue: undefined,
-    name: 'settings.credentials',
-    control,
-  });
-
-  const [credentialsDraft, setCredentialsDraft] = useState('');
-  useEffect(() => {
-    const v = credentialsField.value;
-    if (v === undefined || v === null) {
-      setCredentialsDraft('');
-    } else if (typeof v === 'object') {
-      setCredentialsDraft(JSON.stringify(v));
-    } else {
-      setCredentialsDraft(String(v));
-    }
-  }, [credentialsField.value]);
 
   useEffect(() => {
     return () => {
       unregister('settings.project_id');
       unregister('settings.endpoint');
       unregister('settings.token_uri');
-      unregister('settings.auth');
-      unregister('settings.credentials');
     };
   }, [unregister]);
-
-  const onCredentialsBlur = () => {
-    const raw = credentialsDraft.trim();
-    if (!raw) {
-      credentialsField.onChange(undefined);
-      return;
-    }
-    try {
-      const parsed: unknown = JSON.parse(raw);
-      if (typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed)) {
-        credentialsField.onChange(parsed as Record<string, unknown>);
-      }
-    } catch {
-      // Invalid JSON: keep draft; user can fix and blur again.
-    }
-  };
 
   return (
     <>
@@ -134,41 +94,46 @@ export function CreateDataSourceFlyoutTypeSettingsGcs({
           inputRef={tokenUriField.ref}
         />
       </EuiFormRow>
-      <EuiFormRow
-        label={i18n.translate('dataSets.createFlyout.gcs.fields.auth', {
-          defaultMessage: 'Auth',
-        })}
-        fullWidth
-      >
-        <EuiFieldText
-          data-test-subj="createDataSourceFlyoutGcsAuth"
-          fullWidth
-          autoComplete="off"
-          value={authField.value}
-          onChange={(e) => authField.onChange(e.target.value)}
-          name={authField.name}
-          inputRef={authField.ref}
-        />
-      </EuiFormRow>
-      <EuiFormRow
-        label={i18n.translate('dataSets.createFlyout.gcs.fields.credentials', {
-          defaultMessage: 'Credentials (JSON object)',
-        })}
-        fullWidth
-      >
-        <EuiTextArea
-          data-test-subj="createDataSourceFlyoutGcsCredentials"
-          fullWidth
-          rows={3}
-          placeholder="{}"
-          autoComplete="off"
-          value={credentialsDraft}
-          onChange={(e) => setCredentialsDraft(e.target.value)}
-          onBlur={onCredentialsBlur}
-          name={credentialsField.name}
-          inputRef={credentialsField.ref}
-        />
-      </EuiFormRow>
     </>
+  );
+}
+
+export function CreateDataSourceFlyoutTypeSettingsGcsCredentials({
+  control,
+  unregister,
+}: {
+  control: Control<DataSourceWithSecrets, any>;
+  unregister: UseFormUnregister<DataSourceWithSecrets>;
+}) {
+  const { field: credentialsField } = useController({
+    defaultValue: '',
+    name: 'settings.credentials',
+    control,
+  });
+
+  useEffect(() => {
+    return () => {
+      unregister('settings.credentials');
+    };
+  }, [unregister]);
+
+  return (
+    <EuiFormRow
+      label={i18n.translate('dataSets.createFlyout.gcs.fields.credentials', {
+        defaultMessage: 'Credentials',
+      })}
+      fullWidth
+    >
+      <EuiTextArea
+        data-test-subj="createDataSourceFlyoutGcsCredentials"
+        fullWidth
+        rows={3}
+        autoComplete="off"
+        value={credentialsField.value ?? ''}
+        onChange={(e) => credentialsField.onChange(e.target.value)}
+        name={credentialsField.name}
+        inputRef={credentialsField.ref}
+      />
+    </EuiFormRow>
   );
 }

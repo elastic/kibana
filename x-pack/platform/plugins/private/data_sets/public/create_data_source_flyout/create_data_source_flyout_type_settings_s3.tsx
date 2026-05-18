@@ -30,29 +30,11 @@ export function CreateDataSourceFlyoutTypeSettingsS3({
     name: 'settings.endpoint',
     control,
   });
-  const { field: authField } = useController({
-    defaultValue: '',
-    name: 'settings.auth',
-    control,
-  });
-  const { field: accessKeyField } = useController({
-    defaultValue: '',
-    name: 'settings.access_key',
-    control,
-  });
-  const { field: secretKeyField } = useController({
-    defaultValue: '',
-    name: 'settings.secret_key',
-    control,
-  });
 
   useEffect(() => {
     return () => {
       unregister('settings.region');
       unregister('settings.endpoint');
-      unregister('settings.auth');
-      unregister('settings.access_key');
-      unregister('settings.secret_key');
     };
   }, [unregister]);
 
@@ -90,22 +72,37 @@ export function CreateDataSourceFlyoutTypeSettingsS3({
           inputRef={endpointField.ref}
         />
       </EuiFormRow>
-      <EuiFormRow
-        label={i18n.translate('dataSets.createFlyout.s3.fields.auth', {
-          defaultMessage: 'Auth',
-        })}
-        fullWidth
-      >
-        <EuiFieldText
-          data-test-subj="createDataSourceFlyoutS3Auth"
-          fullWidth
-          autoComplete="off"
-          value={authField.value}
-          onChange={(e) => authField.onChange(e.target.value)}
-          name={authField.name}
-          inputRef={authField.ref}
-        />
-      </EuiFormRow>
+    </>
+  );
+}
+
+export function CreateDataSourceFlyoutTypeSettingsS3Credentials({
+  control,
+  unregister,
+}: {
+  control: Control<DataSourceWithSecrets, any>;
+  unregister: UseFormUnregister<DataSourceWithSecrets>;
+}) {
+  const { field: accessKeyField } = useController({
+    defaultValue: '',
+    name: 'settings.access_key',
+    control,
+  });
+  const { field: secretKeyField } = useController({
+    defaultValue: '',
+    name: 'settings.secret_key',
+    control,
+  });
+
+  useEffect(() => {
+    return () => {
+      unregister('settings.access_key');
+      unregister('settings.secret_key');
+    };
+  }, [unregister]);
+
+  return (
+    <>
       <EuiFormRow
         label={i18n.translate('dataSets.createFlyout.s3.fields.accessKey', {
           defaultMessage: 'Access key',
