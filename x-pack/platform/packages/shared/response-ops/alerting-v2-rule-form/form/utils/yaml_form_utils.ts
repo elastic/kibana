@@ -124,7 +124,7 @@ export const formValuesToYamlObject = (values: FormValues): YamlRuleObject => {
  * Parses the YAML structure and extracts all recognised fields, providing
  * safe defaults for any that are missing. YAML syntax errors are still
  * reported. Field-level validation (required name, valid ES|QL, etc.)
- * is handled by RHF at submit time, keeping a single validation pipeline.
+ * is handled by react-hook-form at submit time, keeping a single validation pipeline.
  */
 export const parseYamlToFormValues = (yamlString: string): YamlParseResult => {
   let parsed: unknown;

@@ -43,11 +43,11 @@ export interface YamlRuleFormProps {
  *
  * Provides a YAML editor for editing rule configuration with ES|QL autocomplete.
  * Parsing is always lenient — YAML syntax errors are surfaced, but missing
- * required fields get safe defaults. Field-level validation is handled by RHF
+ * required fields get safe defaults. Field-level validation is handled by react-hook-form
  * at submit time through `methods.handleSubmit()`.
  *
  * In the compose-discover flyout context, the parent owns submission and
- * passes a debounced `setYamlText` that also syncs into RHF on every
+ * passes a debounced `setYamlText` that also syncs into react-hook-form on every
  * keystroke. The blur handler here acts as a "flush now" fallback.
  *
  * In the standalone RuleForm context, the parent passes `onSubmit` and

@@ -49,8 +49,8 @@ export type SandboxTabConfig =
 
 /**
  * Data passed from the Sandbox child to the flyout parent on "Apply changes".
- * The flyout writes these values into RHF (the source of truth) and updates
- * the reducer cache.
+ * The flyout writes these values into react-hook-form (the source of truth)
+ * and updates the reducer cache.
  */
 export interface SandboxApplyData {
   isSplit: boolean;
@@ -65,10 +65,10 @@ export interface SandboxApplyData {
  *
  * This reducer manages navigation, Sandbox state, and split-query cache.
  * All form values (name, schedule, delays, etc.) live in useForm<ComposeFormValues>()
- * via RHF and are never stored here. The query/split fields are a write-through
- * cache: written imperatively alongside RHF at Apply time. RHF is the source
- * of truth — these fields exist so the form view can display query summaries
- * without subscribing to RHF watchers.
+ * via react-hook-form and are never stored here. The query/split fields are a
+ * write-through cache: written imperatively alongside the form at Apply time.
+ * react-hook-form is the source of truth — these fields exist so the form view
+ * can display query summaries without subscribing to form watchers.
  */
 export interface ComposeDiscoverState {
   mode: ComposeDiscoverMode;

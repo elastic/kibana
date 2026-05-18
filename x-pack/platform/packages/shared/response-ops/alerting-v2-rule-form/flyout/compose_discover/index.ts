@@ -7,3 +7,9 @@
 
 export { ComposeDiscoverFlyout } from './compose_discover_flyout';
 export type { ComposeDiscoverFlyoutProps } from './compose_discover_flyout';
+
+export { DiscoverSandboxPanel } from './discover_sandbox_panel';
+export type {
+  DiscoverSandboxPanelProps,
+  DiscoverSandboxServices,
+} from './discover_sandbox_panel';

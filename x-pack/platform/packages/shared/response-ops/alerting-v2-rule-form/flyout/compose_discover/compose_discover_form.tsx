@@ -376,7 +376,7 @@ function AlertConditionStep({
         data-test-subj="composeDiscoverTrackingToggle"
       />
 
-      {/* Schedule and lookback — connected to RHF via useFormContext() internally */}
+      {/* Schedule and lookback — connected to react-hook-form via useFormContext() internally */}
       <EuiSpacer size="m" />
       <ScheduleField />
       <EuiSpacer size="m" />
@@ -443,7 +443,7 @@ function RecoveryConditionStep({
 function DetailsAndArtifactsStep() {
   return (
     <>
-      {/* Name, description, tags — connected to RHF via useFormContext() internally */}
+      {/* Name, description, tags — connected to react-hook-form via useFormContext() internally */}
       <RuleDetailsFieldGroup />
 
       <EuiHorizontalRule margin="m" />

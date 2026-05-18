@@ -12,6 +12,10 @@ export { DynamicRuleFormFlyout, StandaloneRuleFormFlyout } from './flyout';
 export { ComposeDiscoverFlyout } from './flyout/compose_discover';
 export type { ComposeDiscoverFlyoutProps } from './flyout/compose_discover';
 
+// Discover sandbox — reusable read-only ES|QL sandbox panel
+export { DiscoverSandboxPanel } from './flyout/compose_discover';
+export type { DiscoverSandboxPanelProps, DiscoverSandboxServices } from './flyout/compose_discover';
+
 // Lazy components (without Suspense wrapper) - for consumers who need full control
 export {
   LazyDynamicRuleFormFlyout,
@@ -30,6 +34,7 @@ export { RuleResultsPreview } from './form';
 
 // Context - for consumers who need custom integrations
 export { RuleFormProvider, useRuleFormServices, useRuleFormMeta } from './form';
+
 
 // Mappers
 export {

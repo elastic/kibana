@@ -13,8 +13,10 @@ jest.mock('@kbn/core-di-browser', () => ({
   Context: {
     Provider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
   },
-  useService: () => ({}),
-  CoreStart: (key: string) => key,
+}));
+
+jest.mock('./query_preview_flyout', () => ({
+  QueryPreviewFlyout: () => <div data-test-subj="mockQueryPreviewFlyout" />,
 }));
 
 jest.mock('../../components/rule_details/rule_context', () => ({
@@ -28,6 +30,16 @@ jest.mock('../../components/rule_details/rule_header_description', () => ({
 jest.mock('../../components/rule_details/sidebar/rule_sidebar', () => ({
   RuleSidebar: () => <div data-test-subj="mockRuleSidebar" />,
 }));
+
+const createMockContainer = () => {
+  const services: Record<string, unknown> = {
+    'core:http': { basePath: { prepend: (p: string) => p } },
+    'plugin:data': { search: { search: jest.fn() } },
+    'plugin:dataViews': {},
+    'plugin:lens': { EmbeddableComponent: () => null, stateHelperApi: jest.fn() },
+  };
+  return { get: (key: string) => services[key] ?? {} } as any;
+};
 
 const createMockServices = () => ({
   rulesApi: {
@@ -43,7 +55,7 @@ const createMockServices = () => ({
   notifications: {
     toasts: { addSuccess: jest.fn(), addError: jest.fn() },
   } as any,
-  container: {} as any,
+  container: createMockContainer(),
 });
 
 const createAttachment = (overrides: { origin?: string; enabled?: boolean } = {}) => ({
@@ -194,6 +206,20 @@ describe('RuleCanvasContent', () => {
       const { calls } = registerActionButtons.mock;
       expect(calls[0][0]).toEqual([]);
       expect(calls[calls.length - 1][0].length).toBeGreaterThan(0);
+    });
+  });
+
+  describe('preview query button', () => {
+    it('registers Preview query button for proposed rules', () => {
+      const { registerActionButtons } = renderCanvas();
+      const buttons = getLastRegisteredButtons(registerActionButtons);
+      expect(buttons.find((b) => b.label === 'Preview query')).toBeDefined();
+    });
+
+    it('registers Preview query button for persisted rules', () => {
+      const { registerActionButtons } = renderCanvas({ origin: 'rule-123' });
+      const buttons = getLastRegisteredButtons(registerActionButtons);
+      expect(buttons.find((b) => b.label === 'Preview query')).toBeDefined();
     });
   });
 });

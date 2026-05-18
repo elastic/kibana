@@ -69,7 +69,7 @@ const EDIT_MODE_OPTIONS = [
 export interface ComposeDiscoverFlyoutProps {
   historyKey: symbol;
   mode?: ComposeDiscoverMode;
-  /** The existing rule — provided when mode === 'edit'. Used to seed the RHF form. */
+  /** The existing rule — provided when mode === 'edit'. Used to seed the form. */
   rule?: Parameters<typeof mapRuleToComposeFormValues>[0];
   /** The ID of the rule being edited. Required when mode === 'edit'. */
   ruleId?: string;
@@ -204,7 +204,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
   const isLastStep = uiState.step === steps.length - 1;
 
   /*
-   * Sync recovery into RHF.query (composed blocks.recover or standalone recover).
+   * Sync recovery into the form query (composed blocks.recover or standalone recover).
    * When tracking + custom recovery, persist the Sandbox recovery block/shape.
    * Otherwise strip recover from the canonical query shape.
    */
@@ -262,8 +262,8 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
   const debouncedParseRef = useRef<ReturnType<typeof setTimeout>>();
 
   // Wraps setYamlText with a debounced (~300 ms) lenient parse that pushes
-  // every YAML keystroke into RHF. The Sandbox watches RHF, so it sees
-  // YAML edits live. Passed to YamlRuleForm as the setYamlText prop.
+  // every YAML keystroke into react-hook-form. The Sandbox watches the form,
+  // so it sees YAML edits live. Passed to YamlRuleForm as the setYamlText prop.
   const handleSetYamlText = useCallback(
     (yaml: string) => {
       setYamlText(yaml);
@@ -310,9 +310,8 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
   }, [methods, dispatch]);
 
   // Imperative handler for Sandbox "Apply changes". Writes the committed
-  // query into both RHF (the source of truth) and the reducer cache, then
-  // regenerates YAML if in YAML mode. No effects involved for the eval
-  // query — every Apply call executes this directly.
+  // query into both react-hook-form (the source of truth) and the reducer
+  // cache, then regenerates YAML if in YAML mode.
   const handleSandboxApply = useCallback(
     (data: SandboxApplyData) => {
       const updatedQuery: RuleQuery = data.isSplit
@@ -355,8 +354,8 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
     }
   });
 
-  // YAML "Save" — flush any pending debounce into RHF, then run the shared
-  // handleSubmit path so validation + submission use a single pipeline.
+  // YAML "Save" — flush any pending debounce into react-hook-form, then run
+  // the shared handleSubmit path so validation + submission use a single pipeline.
   const handleYamlSave = useCallback(() => {
     clearTimeout(debouncedParseRef.current);
     const result = parseYamlToFormValues(yamlText);

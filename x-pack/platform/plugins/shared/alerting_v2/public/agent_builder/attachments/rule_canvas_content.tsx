@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { EuiPanel, EuiSpacer } from '@elastic/eui';
 import {
   ActionButtonType,
@@ -16,6 +16,7 @@ import type { ApplicationStart, IBasePath, NotificationsStart } from '@kbn/core/
 import { Context } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import type { Container } from 'inversify';
+import { QueryPreviewFlyout } from './query_preview_flyout';
 import { RuleProvider } from '../../components/rule_details/rule_context';
 import { RuleHeaderDescription } from '../../components/rule_details/rule_header_description';
 import { RuleSidebar } from '../../components/rule_details/sidebar/rule_sidebar';
@@ -33,6 +34,10 @@ export interface RuleCanvasContentProps
   container: Container;
 }
 
+const PREVIEW_BUTTON_LABEL = i18n.translate('xpack.alertingV2.ruleAttachment.previewQuery', {
+  defaultMessage: 'Preview query',
+});
+
 export const RuleCanvasContent = ({
   attachment,
   registerActionButtons,
@@ -45,6 +50,7 @@ export const RuleCanvasContent = ({
 }: RuleCanvasContentProps) => {
   const { data, origin } = attachment;
   const isPersisted = hasOrigin(origin);
+  const [previewOpen, setPreviewOpen] = useState(false);
 
   // Start false so the first effect registers [],
   // matching the canvas_flyout clear effect. The second cycle (mounted=true)
@@ -60,6 +66,13 @@ export const RuleCanvasContent = ({
       registerActionButtons([]);
       return;
     }
+
+    const previewButton = {
+      label: PREVIEW_BUTTON_LABEL,
+      icon: 'playFilled' as const,
+      type: ActionButtonType.SECONDARY,
+      handler: () => setPreviewOpen(true),
+    };
 
     if (!isPersisted) {
       registerActionButtons([
@@ -83,6 +96,7 @@ export const RuleCanvasContent = ({
             );
           },
         },
+        previewButton,
       ]);
       return;
     }
@@ -108,6 +122,7 @@ export const RuleCanvasContent = ({
           );
         },
       },
+      previewButton,
       {
         label: i18n.translate('xpack.alertingV2.ruleAttachment.viewInRules', {
           defaultMessage: 'View in Rules',
@@ -141,6 +156,13 @@ export const RuleCanvasContent = ({
           <RuleSidebar />
         </EuiPanel>
       </RuleProvider>
+      {previewOpen && (
+        <QueryPreviewFlyout
+          query={data.evaluation.query.base}
+          timeField={data.time_field ?? '@timestamp'}
+          onClose={() => setPreviewOpen(false)}
+        />
+      )}
     </Context.Provider>
   );
 };
