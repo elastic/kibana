@@ -7,26 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiIcon } from '@elastic/eui';
+import { EuiIcon, useEuiTheme } from '@elastic/eui';
 import type { Node, NodeProps } from '@xyflow/react';
 import { Handle, Position } from '@xyflow/react';
-import React from 'react';
+import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
 
-// Match the step row's blue palette so the foreach container reads as a
-// natural wrapper for the steps it contains.
-const FOREACH_BORDER = '#bfdbff';
-const FOREACH_HEADER_BG = '#f1f6ff';
-const FOREACH_LABEL_COLOR = '#006bb8';
-
 interface ForeachGroupNodeData extends Record<string, unknown> {
-  label: string;
-  stepType: 'foreach';
+  readonly label: string;
+  readonly stepType: 'foreach';
 }
 
-export function WorkflowGraphForeachGroupNode(node: NodeProps<Node<ForeachGroupNodeData>>) {
+function WorkflowGraphForeachGroupNodeInner(node: NodeProps<Node<ForeachGroupNodeData>>) {
+  const { euiTheme } = useEuiTheme();
   const targetHandlePos = node.targetPosition ?? Position.Top;
   const sourceHandlePos = node.sourcePosition ?? Position.Bottom;
+  // Match the step row's blue (accentSecondary) palette so the foreach
+  // container reads as a natural wrapper for the steps it contains.
+  const borderColor = euiTheme.colors.borderBaseAccentSecondary;
+  const headerBg = euiTheme.colors.backgroundLightAccentSecondary;
+  const labelColor = euiTheme.colors.accentSecondary;
   return (
     <>
       <Handle type="target" position={targetHandlePos} style={{ opacity: 0 }} />
@@ -34,10 +34,10 @@ export function WorkflowGraphForeachGroupNode(node: NodeProps<Node<ForeachGroupN
         css={{
           width: '100%',
           height: '100%',
-          // 90% transparent white per design — barely tints the canvas so the
-          // foreach reads as a container without dominating the steps inside.
-          background: 'rgba(255, 255, 255, 0.1)',
-          border: `1px solid ${FOREACH_BORDER}`,
+          // Lightly tinted so the foreach reads as a container without dominating
+          // the steps inside.
+          background: euiTheme.colors.backgroundLightAccentSecondary,
+          border: `1px solid ${borderColor}`,
           borderRadius: 8,
           position: 'relative',
           overflow: 'hidden',
@@ -52,16 +52,16 @@ export function WorkflowGraphForeachGroupNode(node: NodeProps<Node<ForeachGroupN
             alignItems: 'center',
             gap: 8,
             padding: '8px 12px',
-            background: FOREACH_HEADER_BG,
-            borderBottom: `1px solid ${FOREACH_BORDER}`,
-            fontFamily: 'Inter, sans-serif',
+            background: headerBg,
+            borderBottom: `1px solid ${borderColor}`,
+            fontFamily: euiTheme.font.family,
             fontSize: 12,
             fontWeight: 500,
-            color: FOREACH_LABEL_COLOR,
+            color: labelColor,
             lineHeight: '20px',
           }}
         >
-          <EuiIcon type="refresh" size="s" color={FOREACH_LABEL_COLOR} aria-hidden />
+          <EuiIcon type="refresh" size="s" color={labelColor} aria-hidden />
           <span>
             {`${node.data.label} · ${i18n.translate('workflowsUi.graph.foreachLabel', {
               defaultMessage: 'for each item',
@@ -73,3 +73,5 @@ export function WorkflowGraphForeachGroupNode(node: NodeProps<Node<ForeachGroupN
     </>
   );
 }
+
+export const WorkflowGraphForeachGroupNode = memo(WorkflowGraphForeachGroupNodeInner);

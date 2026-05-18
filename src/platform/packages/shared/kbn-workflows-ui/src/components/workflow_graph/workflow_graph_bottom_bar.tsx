@@ -14,7 +14,9 @@ import {
   EuiIcon,
   EuiPopover,
   EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
+import type { CSSObject } from '@emotion/react';
 import { useReactFlow, useStore } from '@xyflow/react';
 import React, { type ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -46,14 +48,6 @@ interface WorkflowDetailBottomBarProps {
   bottomOffset?: number;
 }
 
-const PLACEHOLDER_TOOLS = [
-  { id: 'tool-doc', iconType: 'documentation', label: 'Documentation' },
-  { id: 'tool-search', iconType: 'search', label: 'Search' },
-  { id: 'tool-add', iconType: 'plusInCircle', label: 'Add' },
-  { id: 'tool-settings', iconType: 'controlsHorizontal', label: 'Settings' },
-  { id: 'tool-more', iconType: 'boxesHorizontal', label: 'More' },
-];
-
 // Figma Shadow/X-large composite.
 const BAR_SHADOW =
   '0 0 2px 0 rgba(43, 57, 79, 0.16), 0 5px 16px 0 rgba(43, 57, 79, 0.14), 0 10px 20px 0 rgba(43, 57, 79, 0.08)';
@@ -62,44 +56,10 @@ const BAR_SHADOW =
 const TOGGLE_ACTIVE_SHADOW =
   '0 0 2px 0 rgba(43, 57, 79, 0.16), 0 1px 4px 0 rgba(43, 57, 79, 0.06), 0 2px 8px 0 rgba(43, 57, 79, 0.05)';
 
-const SEPARATOR_COLOR = '#e3e8f2';
-const TOGGLE_BG = '#f6f9fc';
-const ICON_COLOR = '#1d2a3e'; // Figma Text/Default
-
 // Width (px) of the bar's position: relative container below which we switch
 // to the compact "…" pill. Chosen to give the full bar enough room before it
 // starts overlapping the minimap (bottom-left of the canvas).
 const COMPACT_THRESHOLD_PX = 800;
-
-const shortSeparator = (
-  <EuiFlexItem grow={false} css={{ width: 1, height: 32, background: SEPARATOR_COLOR }} />
-);
-const tallSeparator = (
-  <EuiFlexItem grow={false} css={{ width: 1, height: 54, background: SEPARATOR_COLOR }} />
-);
-
-const NOOP = () => {};
-
-function PlaceholderIconButton({
-  iconType,
-  label,
-  testId,
-}: {
-  iconType: string;
-  label: string;
-  testId: string;
-}) {
-  return (
-    <EuiButtonIcon
-      iconType={iconType}
-      aria-label={label}
-      color="text"
-      size="s"
-      onClick={NOOP}
-      data-test-subj={testId}
-    />
-  );
-}
 
 // Treat any zoom within this tolerance of 1.0 as "default" so floating-point
 // drift from React Flow's zoom animations doesn't keep the reset button
@@ -195,6 +155,7 @@ function ViewToggle({
   editorView: WorkflowDetailBottomBarView;
   onEditorViewChange: (next: WorkflowDetailBottomBarView) => void;
 }) {
+  const { euiTheme } = useEuiTheme();
   const items: Array<{ id: WorkflowDetailBottomBarView; iconType: string; label: string }> = [
     {
       id: 'graph',
@@ -215,8 +176,8 @@ function ViewToggle({
         defaultMessage: 'Editor view',
       })}
       css={{
-        background: TOGGLE_BG,
-        border: `1px solid ${SEPARATOR_COLOR}`,
+        background: euiTheme.colors.backgroundBaseSubdued,
+        border: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
         borderRadius: 6,
         padding: 3,
         display: 'flex',
@@ -244,20 +205,22 @@ function ViewToggle({
                 cursor: 'pointer',
                 borderRadius: 4,
                 padding: 0,
-                background: active ? '#ffffff' : 'transparent',
+                background: active ? euiTheme.colors.backgroundBasePlain : 'transparent',
                 boxShadow: active ? TOGGLE_ACTIVE_SHADOW : 'none',
-                color: ICON_COLOR,
+                color: euiTheme.colors.text,
                 transition: 'background 120ms ease, box-shadow 120ms ease',
                 '&:hover': {
-                  background: active ? '#ffffff' : 'rgba(29, 42, 62, 0.06)',
+                  background: active
+                    ? euiTheme.colors.backgroundBasePlain
+                    : euiTheme.colors.backgroundBaseInteractiveHover,
                 },
                 '&:focus-visible': {
-                  outline: '2px solid #006bb8',
+                  outline: `2px solid ${euiTheme.colors.primary}`,
                   outlineOffset: 2,
                 },
               }}
             >
-              <EuiIcon type={iconType} size="m" color={ICON_COLOR} aria-hidden={true} />
+              <EuiIcon type={iconType} size="m" color={euiTheme.colors.text} aria-hidden={true} />
             </button>
           </EuiToolTip>
         );
@@ -266,36 +229,34 @@ function ViewToggle({
   );
 }
 
-const ICON_COLOR_STYLES = {
-  '& .euiButtonIcon, & .euiButtonIcon svg': {
-    color: ICON_COLOR,
-  },
-} as const;
-
-const menuItemCss = {
-  display: 'flex',
-  alignItems: 'center',
-  gap: 8,
-  padding: '7px 14px',
-  width: '100%',
-  border: 'none',
-  background: 'transparent',
-  cursor: 'pointer',
-  color: ICON_COLOR,
-  fontSize: 13,
-  lineHeight: '20px',
-  textAlign: 'left' as const,
-  textDecoration: 'none',
-  whiteSpace: 'nowrap' as const,
-  transition: 'background 80ms ease',
-  '&:hover': { background: TOGGLE_BG },
-  '&:focus-visible': { outline: `2px solid #006bb8`, outlineOffset: -2 },
-};
-
 function CompactMenuItem({ iconType, label, onClick, href, target }: ToolMenuItemDef) {
+  const { euiTheme } = useEuiTheme();
+  const menuItemCss = {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 8,
+    padding: '7px 14px',
+    width: '100%',
+    border: 'none',
+    background: 'transparent',
+    cursor: 'pointer',
+    color: euiTheme.colors.text,
+    fontFamily: euiTheme.font.family,
+    fontSize: 13,
+    lineHeight: '20px',
+    textAlign: 'left',
+    textDecoration: 'none',
+    whiteSpace: 'nowrap',
+    transition: 'background 80ms ease',
+    '&:hover': { background: euiTheme.colors.backgroundBaseInteractiveHover },
+    '&:focus-visible': {
+      outline: `2px solid ${euiTheme.colors.primary}`,
+      outlineOffset: -2,
+    },
+  } satisfies CSSObject;
   const inner = (
     <>
-      <EuiIcon type={iconType} size="s" color={ICON_COLOR} aria-hidden />
+      <EuiIcon type={iconType} size="s" color={euiTheme.colors.text} aria-hidden />
       <span>{label}</span>
     </>
   );
@@ -353,6 +314,7 @@ export function WorkflowDetailBottomBar({
   testWorkflowButtonCompact,
   bottomOffset = 0,
 }: WorkflowDetailBottomBarProps) {
+  const { euiTheme } = useEuiTheme();
   // On mount isCompact is always false so the full bar (with barRef) renders
   // first, letting the effect walk up to offsetParent for width tracking.
   const barRef = useRef<HTMLDivElement>(null);
@@ -391,6 +353,19 @@ export function WorkflowDetailBottomBar({
       </EuiToolTip>
     );
 
+    const shortSep = (
+      <EuiFlexItem
+        grow={false}
+        css={{ width: 1, height: 32, background: euiTheme.colors.borderBaseSubdued }}
+      />
+    );
+    const tallSep = (
+      <EuiFlexItem
+        grow={false}
+        css={{ width: 1, height: 54, background: euiTheme.colors.borderBaseSubdued }}
+      />
+    );
+
     return (
       <div
         css={{
@@ -401,12 +376,14 @@ export function WorkflowDetailBottomBar({
           zIndex: 5,
           height: 54,
           borderRadius: 10,
-          background: '#ffffff',
+          background: euiTheme.colors.backgroundBasePlain,
           boxShadow: BAR_SHADOW,
           display: 'flex',
           alignItems: 'center',
           transition: 'bottom 180ms ease',
-          ...ICON_COLOR_STYLES,
+          '& .euiButtonIcon, & .euiButtonIcon svg': {
+            color: euiTheme.colors.text,
+          },
         }}
         data-test-subj="workflowDetailBottomBar"
         data-compact="true"
@@ -460,7 +437,12 @@ export function WorkflowDetailBottomBar({
                   <>
                     <ZoomMenuItems />
                     {toolsMenuItems && toolsMenuItems.length > 0 ? (
-                      <div css={{ borderTop: `1px solid ${SEPARATOR_COLOR}`, margin: '4px 0' }} />
+                      <div
+                        css={{
+                          borderTop: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
+                          margin: '4px 0',
+                        }}
+                      />
                     ) : null}
                   </>
                 ) : null}
@@ -471,7 +453,7 @@ export function WorkflowDetailBottomBar({
             </EuiPopover>
           </EuiFlexItem>
 
-          {shortSeparator}
+          {shortSep}
 
           {/* View toggle — always visible */}
           <EuiFlexItem grow={false} css={{ padding: '0 8px' }}>
@@ -481,7 +463,7 @@ export function WorkflowDetailBottomBar({
           {/* Test workflow button — always visible, icon-only variant preferred */}
           {testWorkflowButtonCompact ?? testWorkflowButton ? (
             <>
-              {tallSeparator}
+              {tallSep}
               <EuiFlexItem grow={false} css={{ padding: '7px 8px' }}>
                 {testWorkflowButtonCompact ?? testWorkflowButton}
               </EuiFlexItem>
@@ -491,6 +473,19 @@ export function WorkflowDetailBottomBar({
       </div>
     );
   }
+
+  const shortSep = (
+    <EuiFlexItem
+      grow={false}
+      css={{ width: 1, height: 32, background: euiTheme.colors.borderBaseSubdued }}
+    />
+  );
+  const tallSep = (
+    <EuiFlexItem
+      grow={false}
+      css={{ width: 1, height: 54, background: euiTheme.colors.borderBaseSubdued }}
+    />
+  );
 
   return (
     <div
@@ -503,7 +498,7 @@ export function WorkflowDetailBottomBar({
         zIndex: 5,
         height: 54,
         borderRadius: 10,
-        background: '#ffffff',
+        background: euiTheme.colors.backgroundBasePlain,
         boxShadow: BAR_SHADOW,
         display: 'flex',
         alignItems: 'center',
@@ -511,7 +506,7 @@ export function WorkflowDetailBottomBar({
         // Force a uniform icon color for every icon-button rendered inside
         // the bar, regardless of the EUI color prop each child uses.
         '& .euiButtonIcon, & .euiButtonIcon svg': {
-          color: ICON_COLOR,
+          color: euiTheme.colors.text,
         },
       }}
       data-test-subj="workflowDetailBottomBar"
@@ -530,27 +525,17 @@ export function WorkflowDetailBottomBar({
                 <ZoomControls />
               </EuiFlexGroup>
             </EuiFlexItem>
-            {shortSeparator}
+            {shortSep}
           </>
         ) : null}
 
-        <EuiFlexItem grow={false} css={{ padding: '0 12px' }}>
-          {toolsSlot ?? (
-            <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false} wrap={false}>
-              {PLACEHOLDER_TOOLS.map((btn) => (
-                <EuiFlexItem grow={false} key={btn.id}>
-                  <PlaceholderIconButton
-                    iconType={btn.iconType}
-                    label={btn.label}
-                    testId={`workflowBottomBar-${btn.id}`}
-                  />
-                </EuiFlexItem>
-              ))}
-            </EuiFlexGroup>
-          )}
-        </EuiFlexItem>
+        {toolsSlot ? (
+          <EuiFlexItem grow={false} css={{ padding: '0 12px' }}>
+            {toolsSlot}
+          </EuiFlexItem>
+        ) : null}
 
-        {shortSeparator}
+        {toolsSlot ? shortSep : null}
 
         <EuiFlexItem grow={false} css={{ padding: '0 8px' }}>
           <ViewToggle editorView={editorView} onEditorViewChange={onEditorViewChange} />
@@ -558,7 +543,7 @@ export function WorkflowDetailBottomBar({
 
         {testWorkflowButton && (
           <>
-            {tallSeparator}
+            {tallSep}
             <EuiFlexItem grow={false} css={{ padding: '7px 8px' }}>
               {testWorkflowButton}
             </EuiFlexItem>

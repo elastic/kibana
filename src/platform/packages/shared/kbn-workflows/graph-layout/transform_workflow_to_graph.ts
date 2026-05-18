@@ -18,11 +18,7 @@ import type {
   Step,
 } from './types';
 import { DEFAULT_NODE_STYLE } from './types';
-import type { WorkflowYaml } from '../spec/schema';
-
-function getStepProp<T>(step: Step, key: string): T | undefined {
-  return (step as unknown as Record<string, T>)[key];
-}
+import type { ForEachStep, IfStep, MergeStep, ParallelStep, WorkflowYaml } from '../spec/schema';
 
 const TRIGGER_LABEL: Record<string, string> = {
   manual: 'Manual',
@@ -130,10 +126,10 @@ function transformInternal(
     // nesting depth. The container is a self-contained "folder": one edge in
     // (from the previous outer step), one edge out (to the next outer step),
     // and inner steps only connect to each other.
-    const isForeachGroup =
-      step.type === 'foreach' && 'steps' in step && Array.isArray(step.steps);
+    const isForeachGroup = step.type === 'foreach';
 
     if (isForeachGroup) {
+      const foreachStep = step as ForEachStep;
       // Render the container as a `foreachGroup` node (full-width header +
       // body). The regular step node would overlap with the inner children.
       const groupNode: PreLayoutForeachGroupNode = {
@@ -144,7 +140,7 @@ function transformInternal(
       };
       nodes.push(groupNode);
 
-      const childSteps = getStepProp<Step[]>(step, 'steps') ?? [];
+      const childSteps = (foreachStep.steps as Step[]) ?? [];
       const inner = transformInternal([], childSteps, depth + 1, ids);
       foreachGroups.push({
         id,
@@ -169,10 +165,10 @@ function transformInternal(
       nodes.push(stepNode);
     }
 
-    if (step.type === 'if' && 'steps' in step && Array.isArray(step.steps)) {
-      const thenSteps = getStepProp<Step[]>(step, 'steps') ?? [];
-      const rawElse = getStepProp<unknown>(step, 'else');
-      const elseSteps: Step[] = Array.isArray(rawElse) ? (rawElse as Step[]) : [];
+    if (step.type === 'if') {
+      const ifStep = step as IfStep;
+      const thenSteps = (ifStep.steps as Step[]) ?? [];
+      const elseSteps: Step[] = Array.isArray(ifStep.else) ? (ifStep.else as Step[]) : [];
 
       const branchExits: string[] = [];
 
@@ -219,15 +215,16 @@ function transformInternal(
       }
 
       exitIds = branchExits;
-    } else if (
-      step.type === 'parallel' &&
-      'branches' in step &&
-      Array.isArray(getStepProp<unknown>(step, 'branches'))
-    ) {
-      const branches = getStepProp<Array<{ name?: string; steps: Step[] }>>(step, 'branches') ?? [];
+    } else if (step.type === 'parallel') {
+      const parallelStep = step as ParallelStep;
+      const branches = (parallelStep.branches as Array<{ name?: string; steps: Step[] }>) ?? [];
       const branchExits: string[] = [];
       branches.forEach((branch, idx) => {
-        if (!Array.isArray(branch.steps) || branch.steps.length === 0) return;
+        if (!Array.isArray(branch.steps) || branch.steps.length === 0) {
+          // Empty branch — fall through via the gate node's id (same semantics as `if`).
+          branchExits.push(id);
+          return;
+        }
         const inner = transformInternal([], branch.steps, depth + 1, ids);
         nodes.push(...inner.nodes);
         edges.push(...inner.edges);
@@ -245,12 +242,9 @@ function transformInternal(
         branchExits.push(...inner.leafIds);
       });
       if (branchExits.length > 0) exitIds = branchExits;
-    } else if (
-      (step.type === 'merge' || step.type === 'atomic') &&
-      'steps' in step &&
-      Array.isArray(getStepProp<unknown>(step, 'steps'))
-    ) {
-      const childSteps = getStepProp<Step[]>(step, 'steps') ?? [];
+    } else if (step.type === 'merge') {
+      const mergeStep = step as MergeStep;
+      const childSteps = (mergeStep.steps as Step[]) ?? [];
       const inner = transformInternal([], childSteps, depth + 1, ids);
       nodes.push(...inner.nodes);
       edges.push(...inner.edges);

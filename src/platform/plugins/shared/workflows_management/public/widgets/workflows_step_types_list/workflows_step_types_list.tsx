@@ -7,44 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiPopover,
-  EuiText,
-  useIsWithinBreakpoints,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import React, { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { Step, WorkflowYaml } from '@kbn/workflows';
+import type { Step } from '@kbn/workflows';
 import { collectAllSteps, getBuiltInStepDefinition } from '@kbn/workflows';
-import type { RenderStepIcon } from '@kbn/workflows-ui';
 import { getBaseConnectorType } from '../../shared/ui/step_icons/get_base_connector_type';
 import { StepIcon } from '../../shared/ui/step_icons/step_icon';
 import { PopoverItems } from '../worflows_triggers_list/popover_items';
 
-// Lazy-load the preview to keep `@xyflow/react` out of the list page bundle
-// until the user actually hovers a row.
-const WorkflowGraphPreviewLazy = React.lazy(async () => {
-  const m = await import('@kbn/workflows-ui');
-  return { default: m.WorkflowGraphPreview };
-});
-
 interface WorkflowsStepTypesListProps {
   steps: Step[];
-  /**
-   * Full parsed workflow definition. When provided and the viewport is wide
-   * enough, hovering the icon row opens a popover with a compact graph
-   * preview.
-   */
-  workflow?: WorkflowYaml | null;
 }
-
-const HOVER_CLOSE_DELAY_MS = 150;
-const PREVIEW_WIDTH = 320;
-const PREVIEW_HEIGHT = 240;
 
 const ICON_SIZE = 16;
 const ICON_GAP = 8;
@@ -95,39 +70,9 @@ export const calculateVisibleIconsCount = (containerWidth: number, totalIcons: n
   return Math.max(1, Math.min(Math.floor(availableForIcons / iconSlot), capped));
 };
 
-export const WorkflowsStepTypesList = ({ steps, workflow }: WorkflowsStepTypesListProps) => {
+export const WorkflowsStepTypesList = ({ steps }: WorkflowsStepTypesListProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [visibleCount, setVisibleCount] = useState<number | null>(null);
-  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-  const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const isNarrow = useIsWithinBreakpoints(['xs', 's']);
-  const canShowPreview = !!workflow && (workflow.steps ?? []).length > 0 && !isNarrow;
-
-  const renderStepIcon = useCallback<RenderStepIcon>(
-    ({ stepType }) => <StepIcon stepType={stepType} executionStatus={undefined} />,
-    []
-  );
-
-  const cancelClose = useCallback(() => {
-    if (closeTimeoutRef.current) {
-      clearTimeout(closeTimeoutRef.current);
-      closeTimeoutRef.current = null;
-    }
-  }, []);
-
-  const openPreview = useCallback(() => {
-    if (!canShowPreview) return;
-    cancelClose();
-    setIsPreviewOpen(true);
-  }, [canShowPreview, cancelClose]);
-
-  const scheduleClose = useCallback(() => {
-    cancelClose();
-    closeTimeoutRef.current = setTimeout(() => {
-      setIsPreviewOpen(false);
-      closeTimeoutRef.current = null;
-    }, HOVER_CLOSE_DELAY_MS);
-  }, [cancelClose]);
 
   const uniqueBaseTypes = useMemo(() => {
     const allSteps = collectAllSteps(steps);
@@ -174,14 +119,10 @@ export const WorkflowsStepTypesList = ({ steps, workflow }: WorkflowsStepTypesLi
   const visibleItems = uniqueBaseTypes.slice(0, displayCount);
   const hasOverflow = displayCount < uniqueBaseTypes.length;
 
-  const iconRow = (
+  return (
     <div
       ref={containerRef}
       css={stepTypesListStyles.container}
-      onMouseEnter={openPreview}
-      onMouseLeave={scheduleClose}
-      onFocus={openPreview}
-      onBlur={scheduleClose}
       data-test-subj="workflowsStepTypesList"
     >
       <EuiFlexGroup
@@ -234,51 +175,5 @@ export const WorkflowsStepTypesList = ({ steps, workflow }: WorkflowsStepTypesLi
         )}
       </EuiFlexGroup>
     </div>
-  );
-
-  if (!canShowPreview) return iconRow;
-
-  return (
-    <EuiPopover
-      isOpen={isPreviewOpen}
-      closePopover={() => setIsPreviewOpen(false)}
-      anchorPosition="rightCenter"
-      panelPaddingSize="none"
-      hasArrow
-      ownFocus={false}
-      button={iconRow}
-      data-test-subj="workflowsStepTypesListPreviewPopover"
-    >
-      <div
-        onMouseEnter={cancelClose}
-        onMouseLeave={scheduleClose}
-        css={{ width: PREVIEW_WIDTH, height: PREVIEW_HEIGHT }}
-      >
-        <React.Suspense
-          fallback={
-            <div
-              css={{
-                width: '100%',
-                height: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <EuiLoadingSpinner size="m" />
-            </div>
-          }
-        >
-          {workflow && (
-            <WorkflowGraphPreviewLazy
-              workflow={workflow}
-              width={PREVIEW_WIDTH}
-              height={PREVIEW_HEIGHT}
-              renderStepIcon={renderStepIcon}
-            />
-          )}
-        </React.Suspense>
-      </div>
-    </EuiPopover>
   );
 };

@@ -9,26 +9,48 @@
 
 import { EuiIcon, EuiLoadingSpinner, EuiScreenReaderOnly, useEuiTheme } from '@elastic/eui';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { ExecutionStatus } from '@kbn/workflows';
 import { getExecutionStatusVisual } from './get_execution_status_color';
 
-const LABELS: Record<string, string> = {
-  [ExecutionStatus.COMPLETED]: 'Completed',
-  [ExecutionStatus.FAILED]: 'Failed',
-  [ExecutionStatus.TIMED_OUT]: 'Timed out',
-  [ExecutionStatus.RUNNING]: 'Running',
-  [ExecutionStatus.SKIPPED]: 'Skipped',
-  [ExecutionStatus.WAITING]: 'Waiting',
-  [ExecutionStatus.WAITING_FOR_INPUT]: 'Waiting for input',
-  [ExecutionStatus.CANCELLED]: 'Cancelled',
-  [ExecutionStatus.PENDING]: 'Pending',
-};
+function getStatusLabel(status: ExecutionStatus): string {
+  switch (status) {
+    case ExecutionStatus.COMPLETED:
+      return i18n.translate('workflowsUi.executionStatus.completed', {
+        defaultMessage: 'Completed',
+      });
+    case ExecutionStatus.FAILED:
+      return i18n.translate('workflowsUi.executionStatus.failed', { defaultMessage: 'Failed' });
+    case ExecutionStatus.TIMED_OUT:
+      return i18n.translate('workflowsUi.executionStatus.timedOut', {
+        defaultMessage: 'Timed out',
+      });
+    case ExecutionStatus.RUNNING:
+      return i18n.translate('workflowsUi.executionStatus.running', { defaultMessage: 'Running' });
+    case ExecutionStatus.SKIPPED:
+      return i18n.translate('workflowsUi.executionStatus.skipped', { defaultMessage: 'Skipped' });
+    case ExecutionStatus.WAITING:
+      return i18n.translate('workflowsUi.executionStatus.waiting', { defaultMessage: 'Waiting' });
+    case ExecutionStatus.WAITING_FOR_INPUT:
+      return i18n.translate('workflowsUi.executionStatus.waitingForInput', {
+        defaultMessage: 'Waiting for input',
+      });
+    case ExecutionStatus.CANCELLED:
+      return i18n.translate('workflowsUi.executionStatus.cancelled', {
+        defaultMessage: 'Cancelled',
+      });
+    case ExecutionStatus.PENDING:
+      return i18n.translate('workflowsUi.executionStatus.pending', { defaultMessage: 'Pending' });
+    default:
+      return String(status);
+  }
+}
 
 export function StatusGlyph({ status }: { status: ExecutionStatus | null | undefined }) {
   const { euiTheme } = useEuiTheme();
   if (!status) return null;
   const visual = getExecutionStatusVisual(euiTheme, status);
-  const label = LABELS[status] ?? String(status);
+  const label = getStatusLabel(status);
   return (
     <span
       aria-label={label}

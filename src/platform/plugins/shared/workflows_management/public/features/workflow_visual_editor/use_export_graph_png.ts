@@ -8,10 +8,10 @@
  */
 
 import { getNodesBounds } from '@xyflow/react';
-import * as domtoimage from 'dom-to-image-more';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { useSelector } from 'react-redux';
+import { i18n } from '@kbn/i18n';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { applyGraphLayout, transformWorkflowToGraph } from '@kbn/workflows';
 import { WorkflowGraphCanvas } from '@kbn/workflows-ui';
@@ -19,6 +19,7 @@ import {
   selectEditorWorkflowDefinition,
   selectIsYamlSyntaxValid,
 } from '../../entities/workflows/store/workflow_detail/selectors';
+import { useKibana } from '../../hooks/use_kibana';
 
 // Extra time (ms) after onReady fires to let the browser finish painting
 // sub-pixel details before we hand off to dom-to-image-more.
@@ -66,6 +67,9 @@ function computeExportSize(workflow: WorkflowYaml): { width: number; height: num
 export function useExportGraphPng() {
   const workflow = useSelector(selectEditorWorkflowDefinition) as WorkflowYaml | undefined;
   const isYamlValid = useSelector(selectIsYamlSyntaxValid) ?? true;
+  const {
+    services: { notifications },
+  } = useKibana();
 
   const [isExporting, setIsExporting] = useState(false);
 
@@ -101,23 +105,31 @@ export function useExportGraphPng() {
     return { host: hostRef.current, root: rootRef.current };
   }, []);
 
-  // Tear down the portal on unmount.
+  // Tear down the portal on unmount. Unmount first, then remove the host so
+  // React's effect cleanups run while the element is still in the DOM.
   useEffect(() => {
     return () => {
-      if (rootRef.current) {
-        // React requires unmount to happen asynchronously after the render that
-        // scheduled it; wrapping in setTimeout satisfies that constraint.
-        const root = rootRef.current;
-        setTimeout(() => root.unmount(), 0);
-        rootRef.current = null;
-      }
-      hostRef.current?.remove();
+      const root = rootRef.current;
+      const host = hostRef.current;
+      rootRef.current = null;
       hostRef.current = null;
+      resolveReadyRef.current = null;
+      if (root) {
+        // React requires unmount to happen asynchronously.
+        setTimeout(() => {
+          root.unmount();
+          host?.remove();
+        }, 0);
+      } else {
+        host?.remove();
+      }
     };
   }, []);
 
   const exportPng = useCallback(async () => {
     if (!workflow || !isYamlValid) return;
+    // Guard against concurrent exports overwriting resolveReadyRef.
+    if (isExporting) return;
 
     const exportSize = computeExportSize(workflow);
     if (!exportSize) return;
@@ -158,7 +170,10 @@ export function useExportGraphPng() {
       // Let the browser finish sub-pixel painting before capture.
       await new Promise<void>((resolve) => setTimeout(resolve, SETTLE_MS));
 
-      const dataUrl: string | undefined = await domtoimage.toPng(host, {
+      // Lazy-load dom-to-image-more so it doesn't land in the initial bundle.
+      const { toPng } = await import('dom-to-image-more');
+
+      const dataUrl: string | undefined = await toPng(host, {
         width,
         height,
         // ReactFlow v12 renders each edge as its own zero-sized <svg> with
@@ -190,10 +205,17 @@ export function useExportGraphPng() {
         link.href = dataUrl;
         link.click();
       }
+    } catch (err) {
+      notifications.toasts.addError(err instanceof Error ? err : new Error(String(err)), {
+        title: i18n.translate('workflowsManagement.exportPng.errorTitle', {
+          defaultMessage: 'Failed to export graph as PNG',
+        }),
+      });
     } finally {
+      resolveReadyRef.current = null;
       setIsExporting(false);
     }
-  }, [workflow, isYamlValid, getHost]);
+  }, [workflow, isYamlValid, isExporting, getHost, notifications]);
 
   return { exportPng, isExporting };
 }

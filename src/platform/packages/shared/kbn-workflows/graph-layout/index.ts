@@ -11,29 +11,24 @@ export {
   DEFAULT_NODE_STYLE,
   FLOW_CONTROL_STEP_TYPES,
   TRIGGER_STEP_TYPES,
-  isStep as isGraphLayoutStep,
   type EdgeBranchType,
   type ForeachGroup,
   type ForeachGroupNodeData,
   type GraphEdge,
   type HandleSide,
+  type LayoutedEdge,
   type LayoutedNode,
   type NodeStyle,
-  type PreLayoutForeachGroupNode,
   type PreLayoutNode,
-  type PreLayoutNodeBase,
   type PreLayoutStepNode,
   type PreLayoutTriggerNode,
   type StepNodeData,
   type TriggerNodeData,
 } from './types';
-export { IdAllocator, slugify } from './id_allocator';
-export { walkStepTree, visitStepChildren } from './walk_step_tree';
 export { computeTopologyFingerprint } from './compute_topology_fingerprint';
 export { transformWorkflowToGraph, type TransformResult } from './transform_workflow_to_graph';
 export {
   applyGraphLayout,
-  layoutForeachGroup,
   type ApplyLayoutOptions,
   type ApplyLayoutResult,
   type LayoutDirection,

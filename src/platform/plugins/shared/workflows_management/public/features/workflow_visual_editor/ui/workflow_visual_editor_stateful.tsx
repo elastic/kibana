@@ -7,9 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiEmptyPrompt, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFocusTrap, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 import type { ColorMode } from '@xyflow/react';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+
+function toColorMode(euiColorMode: string): ColorMode {
+  switch (euiColorMode) {
+    case 'DARK':
+      return 'dark';
+    default:
+      return 'light';
+  }
+}
 import { useDispatch, useSelector } from 'react-redux';
 import { stringify as stringifyYaml } from 'yaml';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -66,7 +75,7 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
   onStepRun,
   direction = 'TB',
 }) => {
-  const { colorMode } = useEuiTheme();
+  const { colorMode, euiTheme } = useEuiTheme();
 
   const definition = useSelector(selectEditorWorkflowDefinition);
   const stepExecutions = useSelector(selectStepExecutions);
@@ -77,17 +86,26 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
   const { canExecuteWorkflow } = useWorkflowsCapabilities();
   const { selectedStepId, setSelectedStep, setEditorView } = useWorkflowUrlState();
   const dispatch = useDispatch();
+  const flyoutPanelRef = useRef<HTMLDivElement | null>(null);
 
   // POC pattern: cache the last valid WorkflowYaml so the canvas can stay
   // up while the user fixes a YAML syntax error.
   const lastValidRef = useRef<WorkflowYaml | undefined>(undefined);
   useEffect(() => {
     if (definition) {
-      lastValidRef.current = definition as WorkflowYaml;
+      lastValidRef.current = definition;
     }
   }, [definition]);
 
-  const workflow = (definition as WorkflowYaml | undefined) ?? lastValidRef.current;
+  // Focus the flyout panel when a step becomes selected so keyboard users
+  // land inside the panel rather than remaining on the canvas node.
+  useEffect(() => {
+    if (selectedStepId) {
+      flyoutPanelRef.current?.focus();
+    }
+  }, [selectedStepId]);
+
+  const workflow = definition ?? lastValidRef.current;
 
   // Build slug→step-name and slug→trigger maps by re-running the same
   // transform the canvas uses, so node ids line up with WorkflowLookup keys
@@ -108,7 +126,7 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
     // a top-level foreach container live in `foreachGroups[].innerNodes`.
     const allNodes = [...nodes, ...foreachGroups.flatMap((g) => g.innerNodes)];
     for (const n of allNodes) {
-      const data = n.data as { label?: string; stepType?: string };
+      const { data } = n;
       if (n.type === 'trigger') {
         const t = data.stepType ? triggersByType.get(data.stepType) : undefined;
         if (t) triggerMap[n.id] = t;
@@ -166,6 +184,55 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
     setEditorView('yaml');
   }, [dispatch, flyoutTarget, setEditorView]);
 
+  const handleStepSelect = useCallback(
+    (id: string | undefined) => setSelectedStep(id ?? null),
+    [setSelectedStep]
+  );
+
+  const handleStepRun = useCallback(
+    (stepName: string) => onStepRun?.({ stepId: stepName, actionType: 'run' }),
+    [onStepRun]
+  );
+
+  const handleOpenStepMenu = useCallback(
+    (stepName: string) => {
+      const info = workflowLookup?.steps?.[stepName];
+      if (info?.lineStart != null) {
+        dispatch(setCursorPosition({ lineNumber: info.lineStart, column: 1 }));
+      }
+    },
+    [dispatch, workflowLookup]
+  );
+
+  const handleFlyoutKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.stopPropagation();
+        setSelectedStep(null);
+      }
+    },
+    [setSelectedStep]
+  );
+
+  const handleFlyoutClose = useCallback(() => setSelectedStep(null), [setSelectedStep]);
+
+  const renderStepMenuItems = useCallback(
+    (close: () => void) => {
+      const stepInfo = workflowLookup?.steps?.[selectedStepId ?? ''];
+      const showDevTools =
+        stepInfo?.stepType?.startsWith('elasticsearch.') ||
+        stepInfo?.stepType?.startsWith('kibana.');
+      return (
+        <>
+          {showDevTools && <CopyDevToolsOption key="copy-as-console" onClick={close} />}
+          <CopyWorkflowStepOption key="copy-as-yaml" onClick={close} />
+          <CopyWorkflowStepJsonOption key="copy-as-json" onClick={close} />
+        </>
+      );
+    },
+    [workflowLookup, selectedStepId]
+  );
+
   if (!workflow) {
     return (
       <EuiEmptyPrompt
@@ -189,61 +256,50 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
         stepExecutions={stepExecutions}
         isYamlValid={isYamlValid}
         selectedStepId={selectedStepId}
-        onStepSelect={(id) => setSelectedStep(id ?? null)}
-        colorMode={colorMode.toLowerCase() as ColorMode}
+        onStepSelect={handleStepSelect}
+        colorMode={toColorMode(colorMode)}
         focusStepId={highlightedStepId}
         direction={direction}
         renderStepIcon={renderStepIcon}
-        onStepRun={(stepName) => onStepRun?.({ stepId: stepName, actionType: 'run' })}
+        onStepRun={handleStepRun}
         canRunSteps={Boolean(canExecuteWorkflow) && isYamlValid}
-        onOpenStepMenu={(stepName) => {
-          // Update the global focused-step state so the shared menu option
-          // components (which read `selectEditorFocusedStepInfo`) reflect
-          // this node's step.
-          const info = workflowLookup?.steps?.[stepName];
-          if (info?.lineStart != null) {
-            dispatch(setCursorPosition({ lineNumber: info.lineStart, column: 1 }));
-          }
-        }}
-        renderStepMenuItems={(close) => {
-          const stepInfo = workflowLookup?.steps?.[selectedStepId ?? ''];
-          const showDevTools =
-            stepInfo?.stepType?.startsWith('elasticsearch.') ||
-            stepInfo?.stepType?.startsWith('kibana.');
-          return (
-            <>
-              {showDevTools && <CopyDevToolsOption key="copy-as-console" onClick={close} />}
-              <CopyWorkflowStepOption key="copy-as-yaml" onClick={close} />
-              <CopyWorkflowStepJsonOption key="copy-as-json" onClick={close} />
-            </>
-          );
-        }}
+        onOpenStepMenu={handleOpenStepMenu}
+        renderStepMenuItems={renderStepMenuItems}
       />
       {flyoutTarget && (
-        <div
-          css={{
-            position: 'absolute',
-            top: 8,
-            right: 8,
-            bottom: 8,
-            width: 420,
-            zIndex: 10,
-            boxShadow:
-              '0 0 2px 0 rgba(43, 57, 79, 0.16), 0 4px 13px 0 rgba(43, 57, 79, 0.12), 0 8px 17px 0 rgba(43, 57, 79, 0.07)',
-            borderRadius: 8,
-            overflow: 'hidden',
-          }}
-        >
-          <WorkflowVisualEditorFlyout
-            target={flyoutTarget}
-            editorYaml={editorYaml}
-            canExecuteWorkflow={Boolean(canExecuteWorkflow)}
-            isYamlValid={isYamlValid}
-            onClose={() => setSelectedStep(null)}
-            onOpenInYaml={handleOpenInYaml}
-            onRunStep={handleRunStep}
-          />
-        </div>
+        <EuiFocusTrap returnFocus>
+          <div
+            ref={flyoutPanelRef}
+            // tabIndex={-1} makes the panel div programmatically focusable
+            // (so the useEffect above can call .focus()) without adding it to
+            // the natural tab order — EuiFocusTrap handles tab cycling inside.
+            tabIndex={-1}
+            onKeyDown={handleFlyoutKeyDown}
+            css={{
+              position: 'absolute',
+              top: 8,
+              right: 8,
+              bottom: 8,
+              width: 420,
+              zIndex: euiTheme.levels.flyout,
+              boxShadow:
+                '0 0 2px 0 rgba(43, 57, 79, 0.16), 0 4px 13px 0 rgba(43, 57, 79, 0.12), 0 8px 17px 0 rgba(43, 57, 79, 0.07)',
+              borderRadius: 8,
+              overflow: 'hidden',
+              outline: 'none',
+            }}
+          >
+            <WorkflowVisualEditorFlyout
+              target={flyoutTarget}
+              editorYaml={editorYaml}
+              canExecuteWorkflow={Boolean(canExecuteWorkflow)}
+              isYamlValid={isYamlValid}
+              onClose={handleFlyoutClose}
+              onOpenInYaml={handleOpenInYaml}
+              onRunStep={handleRunStep}
+            />
+          </div>
+        </EuiFocusTrap>
       )}
     </div>
   );

@@ -9,7 +9,7 @@
 
 import dagre, { graphlib } from '@dagrejs/dagre';
 import { Position } from '@xyflow/react';
-import type { ForeachGroup, GraphEdge, LayoutedNode, PreLayoutNode } from './types';
+import type { ForeachGroup, GraphEdge, LayoutedEdge, LayoutedNode, PreLayoutNode } from './types';
 import { DEFAULT_NODE_STYLE } from './types';
 
 // Foreach group inner padding. `TOP` includes the height of the header row
@@ -33,7 +33,7 @@ function applyDagre(
   edges: GraphEdge[],
   direction: LayoutDirection = 'TB',
   options: ApplyDagreInternalOptions = {}
-): { nodes: LayoutedNode[]; edges: GraphEdge[] } {
+): { nodes: LayoutedNode[]; edges: LayoutedEdge[] } {
   const g = new graphlib.Graph();
   g.setDefaultEdgeLabel(() => ({}));
   g.setGraph({
@@ -72,11 +72,17 @@ function applyDagre(
     };
   });
 
-  const routedEdges: GraphEdge[] = edges.map((edge) => {
+  const routedEdges: LayoutedEdge[] = edges.map((edge) => {
     const dagreEdge = g.edge(edge.source, edge.target);
-    const points = dagreEdge?.points;
-    if (!points || points.length < 2) return edge;
-    return { ...edge, points: points.map((p) => ({ x: p.x, y: p.y })) };
+    const rawPoints = dagreEdge?.points;
+    const points =
+      rawPoints && rawPoints.length >= 2
+        ? rawPoints.map((p) => ({ x: p.x, y: p.y }))
+        : [
+            { x: 0, y: 0 },
+            { x: 0, y: 0 },
+          ];
+    return { ...edge, points };
   });
 
   return { nodes: layouted, edges: routedEdges };
@@ -84,7 +90,7 @@ function applyDagre(
 
 interface ForeachGroupLayout {
   layoutedInnerNodes: LayoutedNode[];
-  innerEdges: GraphEdge[];
+  innerEdges: LayoutedEdge[];
   groupWidth: number;
   groupHeight: number;
 }
@@ -97,7 +103,11 @@ export function layoutForeachGroup(
   if (group.innerNodes.length === 0) {
     return {
       layoutedInnerNodes: [],
-      innerEdges: group.innerEdges,
+      // No dagre run — synthesize empty points arrays so the type is satisfied.
+      innerEdges: group.innerEdges.map((e) => ({
+        ...e,
+        points: [] as Array<{ x: number; y: number }>,
+      })),
       groupWidth: DEFAULT_NODE_STYLE.width,
       groupHeight: DEFAULT_NODE_STYLE.height,
     };
@@ -138,7 +148,7 @@ export function layoutForeachGroup(
 
 export interface ApplyLayoutResult {
   nodes: LayoutedNode[];
-  edges: GraphEdge[];
+  edges: LayoutedEdge[];
 }
 
 export interface ApplyLayoutOptions {
@@ -177,21 +187,27 @@ export function applyGraphLayout(
   const groupSizing = new Map<string, { width: number; height: number }>();
   const groupInnerById = new Map<
     string,
-    { layoutedInnerNodes: LayoutedNode[]; innerEdges: GraphEdge[] }
+    { layoutedInnerNodes: LayoutedNode[]; innerEdges: LayoutedEdge[] }
   >();
   const groupIds = new Set(foreachGroups.map((g) => g.id));
   const groupById = new Map(foreachGroups.map((g) => [g.id, g]));
   const visited = new Set<string>();
+  const currentlyVisiting = new Set<string>();
   const sortedGroups: ForeachGroup[] = [];
   const visit = (group: ForeachGroup) => {
     if (visited.has(group.id)) return;
-    visited.add(group.id);
+    if (currentlyVisiting.has(group.id)) {
+      throw new Error(`Foreach group graph contains a cycle at node "${group.id}"`);
+    }
+    currentlyVisiting.add(group.id);
     for (const node of group.innerNodes) {
       if (groupIds.has(node.id)) {
         const child = groupById.get(node.id);
         if (child) visit(child);
       }
     }
+    currentlyVisiting.delete(group.id);
+    visited.add(group.id);
     sortedGroups.push(group);
   };
   for (const group of foreachGroups) visit(group);
@@ -206,11 +222,7 @@ export function applyGraphLayout(
       }
       return n;
     });
-    const r = layoutForeachGroup(
-      { ...group, innerNodes: sizedInnerNodes },
-      direction,
-      { compact }
-    );
+    const r = layoutForeachGroup({ ...group, innerNodes: sizedInnerNodes }, direction, { compact });
     groupSizing.set(group.id, { width: r.groupWidth, height: r.groupHeight });
     groupInnerById.set(group.id, {
       layoutedInnerNodes: r.layoutedInnerNodes,
@@ -232,7 +244,7 @@ export function applyGraphLayout(
   // 3. Splice inner nodes back in at absolute positions (React Flow uses
   //    relative-to-parent positions when `extent: 'parent'`, so keep relative).
   const finalNodes: LayoutedNode[] = [...outerLayout.nodes];
-  const finalEdges: GraphEdge[] = [...outerLayout.edges];
+  const finalEdges: LayoutedEdge[] = [...outerLayout.edges];
   for (const [, inner] of groupInnerById) {
     finalNodes.push(...inner.layoutedInnerNodes);
     finalEdges.push(...inner.innerEdges);

@@ -10,12 +10,12 @@
 import { EuiToolTip } from '@elastic/eui';
 import type { EdgeProps } from '@xyflow/react';
 import { EdgeLabelRenderer, getSmoothStepPath, Position } from '@xyflow/react';
-import React from 'react';
+import React, { memo } from 'react';
 
 interface WorkflowEdgeData extends Record<string, unknown> {
-  label?: string;
-  traversed?: boolean;
-  points?: Array<{ x: number; y: number }>;
+  readonly label?: string;
+  readonly traversed?: boolean;
+  readonly points?: ReadonlyArray<{ readonly x: number; readonly y: number }>;
 }
 
 const LABEL_TRUNCATE = 24;
@@ -132,7 +132,7 @@ function buildRoundedOrthogonalPath(
   return { path: d, labelX: labelAnchor.x, labelY: labelAnchor.y };
 }
 
-export function WorkflowGraphEdge(props: EdgeProps) {
+function WorkflowGraphEdgeInner(props: EdgeProps) {
   const {
     id,
     sourceX,
@@ -238,52 +238,52 @@ export function WorkflowGraphEdge(props: EdgeProps) {
         labelX = straightX;
         labelY = (sourceY + targetY) / 2;
       } else {
-      // Find the FIRST horizontal segment in the dagre middle. Replace any
-      // points before it with a single endpoint at trunk-Y so the bend
-      // happens right after the source instead of at the mid-edge (where
-      // labels sit). Works for any shape — single-bend or multi-bend.
-      for (let i = 0; i < middle.length - 1; i++) {
-        const dx = Math.abs(middle[i].x - middle[i + 1].x);
-        const dy = Math.abs(middle[i].y - middle[i + 1].y);
-        if (dy < EPS && dx > EPS) {
-          middle = [
-            { x: middle[i].x, y: trunkSourceY },
-            { x: middle[i + 1].x, y: trunkSourceY },
-            ...middle.slice(i + 2),
-          ];
-          break;
+        // Find the FIRST horizontal segment in the dagre middle. Replace any
+        // points before it with a single endpoint at trunk-Y so the bend
+        // happens right after the source instead of at the mid-edge (where
+        // labels sit). Works for any shape — single-bend or multi-bend.
+        for (let i = 0; i < middle.length - 1; i++) {
+          const dx = Math.abs(middle[i].x - middle[i + 1].x);
+          const dy = Math.abs(middle[i].y - middle[i + 1].y);
+          if (dy < EPS && dx > EPS) {
+            middle = [
+              { x: middle[i].x, y: trunkSourceY },
+              { x: middle[i + 1].x, y: trunkSourceY },
+              ...middle.slice(i + 2),
+            ];
+            break;
+          }
         }
-      }
-      // Find the LAST horizontal segment and pull it down to trunk-Y of
-      // the target. Replace anything after it with a single endpoint so
-      // multiple incoming edges share their final approach.
-      for (let i = middle.length - 2; i >= 0; i--) {
-        const dx = Math.abs(middle[i].x - middle[i + 1].x);
-        const dy = Math.abs(middle[i].y - middle[i + 1].y);
-        if (dy < EPS && dx > EPS) {
-          middle = [
-            ...middle.slice(0, i),
-            { x: middle[i].x, y: trunkTargetY },
-            { x: middle[i + 1].x, y: trunkTargetY },
-          ];
-          break;
+        // Find the LAST horizontal segment and pull it down to trunk-Y of
+        // the target. Replace anything after it with a single endpoint so
+        // multiple incoming edges share their final approach.
+        for (let i = middle.length - 2; i >= 0; i--) {
+          const dx = Math.abs(middle[i].x - middle[i + 1].x);
+          const dy = Math.abs(middle[i].y - middle[i + 1].y);
+          if (dy < EPS && dx > EPS) {
+            middle = [
+              ...middle.slice(0, i),
+              { x: middle[i].x, y: trunkTargetY },
+              { x: middle[i + 1].x, y: trunkTargetY },
+            ];
+            break;
+          }
         }
-      }
-      const adjusted: Array<{ x: number; y: number }> = [
-        // Source: extend 2 px back into the node (hidden by the opaque
-        // body) so the line meets the bottom border with no visible gap.
-        // Target: end exactly on the border so no overshoot can bleed
-        // through a translucent container header.
-        { x: sourceX, y: sourceY - 2 },
-        { x: sourceX, y: trunkSourceY },
-        ...middle,
-        { x: targetX, y: trunkTargetY },
-        { x: targetX, y: targetY },
-      ];
-      const built = buildRoundedOrthogonalPath(adjusted, CORNER_RADIUS);
-      edgePath = built.path;
-      labelX = targetX;
-      labelY = (sourceY + targetY) / 2;
+        const adjusted: Array<{ x: number; y: number }> = [
+          // Source: extend 2 px back into the node (hidden by the opaque
+          // body) so the line meets the bottom border with no visible gap.
+          // Target: end exactly on the border so no overshoot can bleed
+          // through a translucent container header.
+          { x: sourceX, y: sourceY - 2 },
+          { x: sourceX, y: trunkSourceY },
+          ...middle,
+          { x: targetX, y: trunkTargetY },
+          { x: targetX, y: targetY },
+        ];
+        const built = buildRoundedOrthogonalPath(adjusted, CORNER_RADIUS);
+        edgePath = built.path;
+        labelX = targetX;
+        labelY = (sourceY + targetY) / 2;
       }
     }
   } else {
@@ -361,3 +361,20 @@ export function WorkflowGraphEdge(props: EdgeProps) {
     </>
   );
 }
+
+function edgePropsAreEqual(prev: EdgeProps, next: EdgeProps): boolean {
+  if (
+    prev.sourceX !== next.sourceX ||
+    prev.sourceY !== next.sourceY ||
+    prev.targetX !== next.targetX ||
+    prev.targetY !== next.targetY ||
+    prev.sourcePosition !== next.sourcePosition ||
+    prev.targetPosition !== next.targetPosition
+  )
+    return false;
+  const pd = prev.data as WorkflowEdgeData | undefined;
+  const nd = next.data as WorkflowEdgeData | undefined;
+  return pd?.traversed === nd?.traversed && pd?.label === nd?.label && pd?.points === nd?.points;
+}
+
+export const WorkflowGraphEdge = memo(WorkflowGraphEdgeInner, edgePropsAreEqual);

@@ -8,8 +8,16 @@
  */
 
 declare module 'dom-to-image-more' {
+  interface DomToImageOptions {
+    width?: number;
+    height?: number;
+    bgcolor?: string;
+    filter?: (node: HTMLElement) => boolean;
+    onclone?: (clone: HTMLElement) => void;
+  }
+
   const domtoimage: {
-    toPng: (node: HTMLElement, options?: Record<string, unknown>) => Promise<string>;
+    toPng: (node: HTMLElement, options?: DomToImageOptions) => Promise<string>;
   };
   export = domtoimage;
 }

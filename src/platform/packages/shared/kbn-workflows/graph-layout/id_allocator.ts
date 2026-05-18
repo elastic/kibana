@@ -16,9 +16,13 @@ export function slugify(name: string): string {
 
 /**
  * Returns a unique slug per name. Collisions get a numeric suffix (`-2`, `-3`, …).
+ *
+ * Uses a `nextCounter` map so repeated duplicates probe from where the last
+ * allocation left off rather than scanning from 2 each time — amortised O(1).
  */
 export class IdAllocator {
   private usedIds = new Set<string>();
+  private nextCounter = new Map<string, number>();
 
   allocate(name: string): string {
     const base = slugify(name) || 'step';
@@ -26,12 +30,13 @@ export class IdAllocator {
       this.usedIds.add(base);
       return base;
     }
-    let counter = 2;
+    let counter = this.nextCounter.get(base) ?? 2;
     while (this.usedIds.has(`${base}-${counter}`)) {
       counter++;
     }
     const uniqueId = `${base}-${counter}`;
     this.usedIds.add(uniqueId);
+    this.nextCounter.set(base, counter + 1);
     return uniqueId;
   }
 }

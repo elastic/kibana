@@ -167,7 +167,7 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
     false
   );
 
-  const { editorView, setEditorView } = useWorkflowUrlState();
+  const { editorView, setEditorView, graphDirection, setGraphDirection } = useWorkflowUrlState();
   const showGraph = editorView === 'graph';
 
   const hasUnsavedChanges = useSelector(selectHasChanges);
@@ -190,8 +190,8 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
           // as being inside the triggers block.
           const firstStepLine = Object.values(workflowLookup.steps).reduce<number | undefined>(
             (min, info) => {
-              const ls = (info as { lineStart: number }).lineStart;
-              return min == null || ls < min ? ls : min;
+              const { lineStart } = info;
+              return min == null || lineStart < min ? lineStart : min;
             },
             undefined
           );
@@ -200,9 +200,7 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
             dispatch(setHighlightedStepId({ stepId: HIGHLIGHTED_STEP_TRIGGER }));
           } else {
             const found = Object.entries(workflowLookup.steps).find(
-              ([, info]) =>
-                (info as { lineStart: number; lineEnd: number }).lineStart <= line &&
-                line <= (info as { lineStart: number; lineEnd: number }).lineEnd
+              ([, info]) => info.lineStart <= line && line <= info.lineEnd
             );
             if (found) {
               dispatch(setHighlightedStepId({ stepId: found[0] }));
@@ -217,7 +215,6 @@ export const WorkflowDetailEditor = React.memo<WorkflowDetailEditorProps>(({ hig
 
   const [showRunConfirmation, setShowRunConfirmation] = useState(false);
   const [isValidationOpen, setIsValidationOpen] = useState(false);
-  const [graphDirection, setGraphDirection] = useState<'TB' | 'LR'>('TB');
   // Keep the graph mounted for a moment after switching to YAML so the
   // cross-fade animation can play out before unmounting it.
   const [renderGraph, setRenderGraph] = useState(showGraph);

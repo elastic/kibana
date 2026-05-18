@@ -18,7 +18,7 @@ import {
   type ReactFlowInstance,
   ReactFlowProvider,
 } from '@xyflow/react';
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { Component, type ReactNode, useCallback, useEffect, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { LayoutDirection, WorkflowStepExecutionDto, WorkflowYaml } from '@kbn/workflows';
 import '@xyflow/react/dist/style.css';
@@ -27,6 +27,30 @@ import { type RenderStepIcon, WorkflowGraphActionsContext } from './workflow_gra
 import { WorkflowGraphEdge } from './workflow_graph_edge';
 import { WorkflowGraphForeachGroupNode } from './workflow_graph_foreach_group_node';
 import { WorkflowGraphNode } from './workflow_graph_node';
+
+interface GraphErrorBoundaryState {
+  error: Error | null;
+}
+
+class GraphErrorBoundary extends Component<
+  { children: ReactNode; onError?: (msg: string) => void },
+  GraphErrorBoundaryState
+> {
+  state: GraphErrorBoundaryState = { error: null };
+
+  static getDerivedStateFromError(error: Error): GraphErrorBoundaryState {
+    return { error };
+  }
+
+  componentDidCatch(error: Error) {
+    this.props.onError?.(error.message);
+  }
+
+  render() {
+    if (this.state.error) return null;
+    return this.props.children;
+  }
+}
 
 const NODE_TYPES: NodeTypes = {
   step: WorkflowGraphNode,
@@ -45,72 +69,76 @@ const INITIAL_ZOOM = 1;
 const TOP_PADDING = 80;
 
 export interface WorkflowGraphCanvasProps {
-  workflow: WorkflowYaml | undefined;
-  stepExecutions?: WorkflowStepExecutionDto[];
-  isYamlValid: boolean;
-  selectedStepId?: string;
-  onStepSelect: (stepId: string | undefined) => void;
-  onNodeClick?: (stepId: string, stepType: string) => void;
-  onLayoutFailed?: (reason: string) => void;
-  onPerfMark?: (name: 'transform_ms' | 'layout_ms' | 'first_paint_ms', ms: number) => void;
-  colorMode?: ColorMode;
+  readonly workflow: WorkflowYaml | undefined;
+  readonly stepExecutions?: WorkflowStepExecutionDto[];
+  readonly isYamlValid: boolean;
+  readonly selectedStepId?: string;
+  readonly onStepSelect: (stepId: string | undefined) => void;
+  readonly onNodeClick?: (stepId: string, stepType: string) => void;
+  readonly onLayoutFailed?: (reason: string) => void;
+  readonly onPerfMark?: (name: 'transform_ms' | 'layout_ms' | 'first_paint_ms', ms: number) => void;
+  readonly colorMode?: ColorMode;
   /**
    * When the canvas mounts (e.g. user switched from YAML to graph view),
    * centers on the node whose `data.label` equals this id. Falls back to
    * top-center of the graph if no match.
    */
-  focusStepId?: string | null;
+  readonly focusStepId?: string | null;
   /** Triggered by the hover "Run step" icon on a node. */
-  onStepRun?: (stepName: string) => void;
+  readonly onStepRun?: (stepName: string) => void;
   /** Disables the per-node Run action when false. */
-  canRunSteps?: boolean;
+  readonly canRunSteps?: boolean;
   /** Called before the per-node "More" popover opens. */
-  onOpenStepMenu?: (stepName: string) => void;
+  readonly onOpenStepMenu?: (stepName: string) => void;
   /** Renders the menu items for a node's "More" popover. */
-  renderStepMenuItems?: (close: () => void) => React.ReactNode;
+  readonly renderStepMenuItems?: (close: () => void) => React.ReactNode;
   /**
    * Optional renderer for step icons. When provided the canvas delegates icon
    * resolution to the caller (e.g. plugin's `<StepIcon/>`) instead of the
    * built-in fallback table. Falls back gracefully when omitted.
    */
-  renderStepIcon?: RenderStepIcon;
+  readonly renderStepIcon?: RenderStepIcon;
   /** Dagre rank direction (default `'TB'`). */
-  direction?: LayoutDirection;
+  readonly direction?: LayoutDirection;
   /**
    * Compact static-preview mode: icon-only nodes, no minimap, no banner, no
    * interaction. Used by the workflow-list hover preview.
    */
-  previewMode?: boolean;
+  readonly previewMode?: boolean;
   /**
    * When true the viewport is fitted to show all nodes on init, overriding the
    * default centre-on-top behaviour. Does not imply previewMode.
    */
-  fitView?: boolean;
+  readonly fitView?: boolean;
   /** Options forwarded to ReactFlow's fitView when `fitView` is true. */
-  fitViewOptions?: { padding?: number; minZoom?: number; maxZoom?: number };
+  readonly fitViewOptions?: {
+    readonly padding?: number;
+    readonly minZoom?: number;
+    readonly maxZoom?: number;
+  };
   /**
    * Whether to render the minimap. Defaults to true when not in previewMode.
    * Pass false to suppress it (e.g. for off-screen export canvases).
    */
-  showMinimap?: boolean;
+  readonly showMinimap?: boolean;
   /**
    * Whether to render the dot-pattern background and the coloured wrapper div
    * background. Pass false for export canvases that need a transparent output.
    */
-  showBackground?: boolean;
+  readonly showBackground?: boolean;
   /**
    * Override the z-index applied to every edge. The default (-1) keeps edges
    * below nodes in the live editor, but breaks DOM-to-image capture because
    * negative-z children are clipped by the stacking context. Pass 0 for
    * off-screen export canvases.
    */
-  edgeZIndex?: number;
+  readonly edgeZIndex?: number;
   /**
    * Called once after ReactFlow has initialised and positioned the viewport
    * (including any fitView). Useful for off-screen export canvases that need
    * to know when the graph is ready to capture.
    */
-  onReady?: () => void;
+  readonly onReady?: () => void;
 }
 
 function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
@@ -145,12 +173,19 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
     [edgeZIndex]
   );
   const actions = useMemo(
-    () => ({ onStepRun, canRunSteps, onOpenStepMenu, renderStepMenuItems, renderStepIcon }),
-    [onStepRun, canRunSteps, onOpenStepMenu, renderStepMenuItems, renderStepIcon]
+    () => ({
+      onStepRun,
+      canRunSteps,
+      onOpenStepMenu,
+      renderStepMenuItems,
+      renderStepIcon,
+      onStepSelect,
+    }),
+    [onStepRun, canRunSteps, onOpenStepMenu, renderStepMenuItems, renderStepIcon, onStepSelect]
   );
   const { euiTheme } = useEuiTheme();
 
-  const { nodes, edges, onNodesChange } = useWorkflowLayout({
+  const { nodes, edges } = useWorkflowLayout({
     workflow,
     stepExecutions,
     searchTerm: '',
@@ -160,14 +195,15 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
     onLayoutFailed,
   });
 
-  // First-paint mark
+  // First-paint mark: time from component mount, not from navigation start.
+  const mountTimeRef = useRef(performance.now());
   const firstPaintRecorded = useRef(false);
   useEffect(() => {
     if (firstPaintRecorded.current) return;
     if (nodes.length === 0) return;
     firstPaintRecorded.current = true;
     requestAnimationFrame(() => {
-      onPerfMark?.('first_paint_ms', performance.now());
+      onPerfMark?.('first_paint_ms', performance.now() - mountTimeRef.current);
     });
   }, [nodes.length, onPerfMark]);
 
@@ -199,18 +235,22 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
         [1000, 1000],
       ];
     }
-    const widthOf = (n: (typeof decoratedNodes)[number]) =>
-      typeof n.width === 'number' ? n.width : 300;
-    const heightOf = (n: (typeof decoratedNodes)[number]) =>
-      typeof n.height === 'number' ? n.height : 64;
-    const xs = decoratedNodes.map((n) => n.position.x);
-    const ys = decoratedNodes.map((n) => n.position.y);
-    const maxXs = decoratedNodes.map((n) => n.position.x + widthOf(n));
-    const maxYs = decoratedNodes.map((n) => n.position.y + heightOf(n));
     const PAD = 400;
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+    for (const n of decoratedNodes) {
+      const w = typeof n.width === 'number' ? n.width : 300;
+      const h = typeof n.height === 'number' ? n.height : 64;
+      if (n.position.x < minX) minX = n.position.x;
+      if (n.position.y < minY) minY = n.position.y;
+      if (n.position.x + w > maxX) maxX = n.position.x + w;
+      if (n.position.y + h > maxY) maxY = n.position.y + h;
+    }
     return [
-      [Math.min(...xs) - PAD, Math.min(...ys) - PAD],
-      [Math.max(...maxXs) + PAD, Math.max(...maxYs) + PAD],
+      [minX - PAD, minY - PAD],
+      [maxX + PAD, maxY + PAD],
     ];
   }, [decoratedNodes]);
 
@@ -271,12 +311,23 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
     readyFiredRef.current = true;
     // Two rAFs: first lets React commit the node positions, second lets
     // ReactFlow's fitView animation settle before we signal ready.
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
+    let raf2: number;
+    const raf1 = requestAnimationFrame(() => {
+      raf2 = requestAnimationFrame(() => {
         onReadyRef.current?.();
       });
     });
+    return () => {
+      cancelAnimationFrame(raf1);
+      cancelAnimationFrame(raf2);
+    };
   }, [previewMode, decoratedNodes.length]);
+
+  const minimapNodeColor = useCallback((n: { data?: unknown }) => {
+    const status = (n.data as { stepExecution?: { status?: string } } | undefined)?.stepExecution
+      ?.status;
+    return status === 'failed' ? '#c61e25' : '#0b64dd';
+  }, []);
 
   const wrapperRef = useRef<HTMLDivElement | null>(null);
 
@@ -323,74 +374,71 @@ function WorkflowGraphCanvasInner(props: WorkflowGraphCanvasProps) {
             transition: 'opacity 200ms ease',
           }}
         >
-          <ReactFlow
-            nodes={decoratedNodes}
-            edges={edges}
-            onNodesChange={onNodesChange}
-            nodeTypes={NODE_TYPES}
-            edgeTypes={EDGE_TYPES}
-            defaultEdgeOptions={defaultEdgeOptions}
-            proOptions={PRO_OPTIONS}
-            colorMode={colorMode}
-            onInit={previewMode ? undefined : handleInit}
-            fitView={previewMode || fitViewProp}
-            fitViewOptions={
-              previewMode
-                ? { padding: 0.08, minZoom: 0.2, maxZoom: 2 }
-                : fitViewProp
-                ? fitViewOptionsProp
-                : undefined
-            }
-            onNodeClick={previewMode ? undefined : handleNodeClick}
-            onPaneClick={previewMode ? undefined : handlePaneClick}
-            nodesDraggable={false}
-            nodesConnectable={false}
-            // Prevent React Flow from boosting a selected node's z-index above
-            // its siblings / parent. Without this, selecting an inner step of
-            // a foreach group lifts the (transparent) group body above the
-            // outer edges that pass behind it, making those edges visible
-            // through the body.
-            elevateNodesOnSelect={false}
-            elevateEdgesOnSelect={false}
-            elementsSelectable={!previewMode}
-            panOnScroll={!previewMode}
-            panOnDrag={!previewMode}
-            zoomOnScroll={false}
-            zoomOnPinch={false}
-            zoomOnDoubleClick={false}
-            translateExtent={previewMode ? undefined : translateExtent}
-          >
-            {showBackground && (
-              <Background
-                bgColor={euiTheme.colors.backgroundBaseSubdued}
-                color={euiTheme.colors.textSubdued}
-              />
-            )}
-            {!previewMode && showMinimap && (
-              <MiniMap
-                pannable
-                zoomable
-                position="bottom-left"
-                bgColor="#ffffff"
-                maskColor="rgba(227, 232, 242, 0.55)"
-                nodeColor={(n) => {
-                  const status = (n.data as { stepExecution?: { status?: string } } | undefined)
-                    ?.stepExecution?.status;
-                  return status === 'failed' ? '#c61e25' : '#0b64dd';
-                }}
-                nodeStrokeWidth={0}
-                nodeBorderRadius={1}
-                style={{
-                  width: 160,
-                  height: 120,
-                  background: '#f2f6fb',
-                  border: '1px solid #e3e8f2',
-                  borderRadius: 6,
-                  overflow: 'hidden',
-                }}
-              />
-            )}
-          </ReactFlow>
+          <GraphErrorBoundary onError={onLayoutFailed}>
+            <ReactFlow
+              nodes={decoratedNodes}
+              edges={edges}
+              nodeTypes={NODE_TYPES}
+              edgeTypes={EDGE_TYPES}
+              defaultEdgeOptions={defaultEdgeOptions}
+              proOptions={PRO_OPTIONS}
+              colorMode={colorMode}
+              onInit={previewMode ? undefined : handleInit}
+              fitView={previewMode || fitViewProp}
+              fitViewOptions={
+                previewMode
+                  ? { padding: 0.08, minZoom: 0.2, maxZoom: 2 }
+                  : fitViewProp
+                  ? fitViewOptionsProp
+                  : undefined
+              }
+              onNodeClick={previewMode ? undefined : handleNodeClick}
+              onPaneClick={previewMode ? undefined : handlePaneClick}
+              nodesDraggable={false}
+              nodesConnectable={false}
+              // Prevent React Flow from boosting a selected node's z-index above
+              // its siblings / parent. Without this, selecting an inner step of
+              // a foreach group lifts the (transparent) group body above the
+              // outer edges that pass behind it, making those edges visible
+              // through the body.
+              elevateNodesOnSelect={false}
+              elevateEdgesOnSelect={false}
+              elementsSelectable={!previewMode}
+              panOnScroll={!previewMode}
+              panOnDrag={!previewMode}
+              zoomOnScroll={false}
+              zoomOnPinch={false}
+              zoomOnDoubleClick={false}
+              translateExtent={previewMode ? undefined : translateExtent}
+            >
+              {showBackground && (
+                <Background
+                  bgColor={euiTheme.colors.backgroundBaseSubdued}
+                  color={euiTheme.colors.textSubdued}
+                />
+              )}
+              {!previewMode && showMinimap && (
+                <MiniMap
+                  pannable
+                  zoomable
+                  position="bottom-left"
+                  bgColor="#ffffff"
+                  maskColor="rgba(227, 232, 242, 0.55)"
+                  nodeColor={minimapNodeColor}
+                  nodeStrokeWidth={0}
+                  nodeBorderRadius={1}
+                  style={{
+                    width: 160,
+                    height: 120,
+                    background: '#f2f6fb',
+                    border: '1px solid #e3e8f2',
+                    borderRadius: 6,
+                    overflow: 'hidden',
+                  }}
+                />
+              )}
+            </ReactFlow>
+          </GraphErrorBoundary>
         </div>
       </div>
     </WorkflowGraphActionsContext.Provider>

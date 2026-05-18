@@ -16,6 +16,7 @@ import {
   EuiPopover,
   EuiText,
   EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
@@ -42,13 +43,13 @@ export type FlyoutTarget =
     };
 
 interface Props {
-  target: FlyoutTarget;
-  editorYaml: string;
-  canExecuteWorkflow: boolean;
-  isYamlValid: boolean;
-  onClose: () => void;
-  onOpenInYaml: () => void;
-  onRunStep: () => void;
+  readonly target: FlyoutTarget;
+  readonly editorYaml: string;
+  readonly canExecuteWorkflow: boolean;
+  readonly isYamlValid: boolean;
+  readonly onClose: () => void;
+  readonly onOpenInYaml: () => void;
+  readonly onRunStep: () => void;
 }
 
 function extractYamlSlice(editorYaml: string, stepInfo: StepInfo | undefined): string {
@@ -56,10 +57,6 @@ function extractYamlSlice(editorYaml: string, stepInfo: StepInfo | undefined): s
   const lines = editorYaml.split('\n');
   return lines.slice(Math.max(0, stepInfo.lineStart - 1), stepInfo.lineEnd).join('\n');
 }
-
-const PANEL_BORDER_COLOR = '#e3e8f2';
-const PANEL_SUBDUED_BG = '#f6f9fc';
-const ICON_BOX_BORDER = '#e4e7f1';
 
 export function WorkflowVisualEditorFlyout({
   target,
@@ -73,6 +70,7 @@ export function WorkflowVisualEditorFlyout({
   // Register the workflows Monaco theme so the CodeEditor below renders with
   // the same colors as the main YAML editor.
   useWorkflowsMonacoTheme();
+  const { euiTheme } = useEuiTheme();
   const dispatch = useDispatch();
   const isTrigger = target.kind === 'trigger';
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -122,10 +120,10 @@ export function WorkflowVisualEditorFlyout({
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
-        background: '#ffffff',
+        background: euiTheme.colors.backgroundBasePlain,
         borderRadius: 8,
         overflow: 'hidden',
-        border: `1px solid ${PANEL_BORDER_COLOR}`,
+        border: `1px solid ${euiTheme.colors.borderBasePlain}`,
       }}
     >
       {/* Header */}
@@ -136,7 +134,7 @@ export function WorkflowVisualEditorFlyout({
           display: 'flex',
           alignItems: 'center',
           gap: 16,
-          borderBottom: `1px solid ${PANEL_BORDER_COLOR}`,
+          borderBottom: `1px solid ${euiTheme.colors.borderBasePlain}`,
           flexShrink: 0,
         }}
       >
@@ -151,9 +149,9 @@ export function WorkflowVisualEditorFlyout({
               css={{
                 width: 40,
                 height: 40,
-                border: `1px solid ${ICON_BOX_BORDER}`,
+                border: `1px solid ${euiTheme.colors.borderBaseFloating}`,
                 borderRadius: 8,
-                background: '#ffffff',
+                background: euiTheme.colors.backgroundBasePlain,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -166,11 +164,11 @@ export function WorkflowVisualEditorFlyout({
           <EuiFlexItem css={{ minWidth: 0 }}>
             <div
               css={{
-                fontFamily: 'Inter, sans-serif',
+                fontFamily: euiTheme.font.family,
                 fontSize: 14,
                 fontWeight: 600,
                 lineHeight: '20px',
-                color: '#111c2c',
+                color: euiTheme.colors.textHeading,
                 whiteSpace: 'nowrap',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
@@ -182,11 +180,11 @@ export function WorkflowVisualEditorFlyout({
             {subtitle && (
               <div
                 css={{
-                  fontFamily: 'Inter, sans-serif',
+                  fontFamily: euiTheme.font.family,
                   fontSize: 12,
                   fontWeight: 400,
                   lineHeight: '20px',
-                  color: '#516381',
+                  color: euiTheme.colors.textSubdued,
                   whiteSpace: 'nowrap',
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
@@ -260,7 +258,12 @@ export function WorkflowVisualEditorFlyout({
           </EuiFlexItem>
           <EuiFlexItem
             grow={false}
-            css={{ width: 1, height: 32, background: PANEL_BORDER_COLOR, margin: '0 4px' }}
+            css={{
+              width: 1,
+              height: 32,
+              background: euiTheme.colors.borderBasePlain,
+              margin: '0 4px',
+            }}
           />
           <EuiFlexItem grow={false}>
             <EuiButtonIcon
@@ -282,7 +285,7 @@ export function WorkflowVisualEditorFlyout({
         css={{
           flex: '1 1 auto',
           overflow: 'hidden',
-          background: PANEL_SUBDUED_BG,
+          background: euiTheme.colors.backgroundBaseSubdued,
         }}
         data-test-subj="workflowVisualEditorFlyoutYamlSlice"
       >
@@ -323,9 +326,9 @@ export function WorkflowVisualEditorFlyout({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          borderTop: `1px solid ${PANEL_BORDER_COLOR}`,
+          borderTop: `1px solid ${euiTheme.colors.borderBasePlain}`,
           flexShrink: 0,
-          background: '#ffffff',
+          background: euiTheme.colors.backgroundBasePlain,
         }}
       >
         <EuiButtonEmpty

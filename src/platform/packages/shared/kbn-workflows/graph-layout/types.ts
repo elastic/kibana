@@ -28,7 +28,7 @@ export const TRIGGER_STEP_TYPES: ReadonlySet<string> = new Set([
   'document',
 ]);
 
-export type EdgeBranchType = 'then' | 'else' | 'case' | 'default' | 'foreachBody';
+export type EdgeBranchType = 'then' | 'else';
 
 export interface NodeStyle {
   width: number;
@@ -82,14 +82,17 @@ export interface GraphEdge {
   target: string;
   branchType?: EdgeBranchType;
   branchIndex?: number;
-  /** Display label rendered on the edge (e.g. 'true' / 'false' / case value / 'for each item'). */
+  /** Display label rendered on the edge (e.g. 'true' / 'false' / case value). */
   label?: string;
-  /**
-   * Orthogonal waypoints computed by dagre — the renderer uses these to draw
-   * the edge around other nodes instead of cutting through them. Coordinates
-   * are in graph (layout) space, same as node `position`.
-   */
-  points?: Array<{ x: number; y: number }>;
+}
+
+/**
+ * A `GraphEdge` after dagre layout has run. The `points` array holds the
+ * orthogonal waypoints dagre computed so the renderer can route the edge
+ * around other nodes instead of cutting through them.
+ */
+export interface LayoutedEdge extends GraphEdge {
+  points: Array<{ x: number; y: number }>;
 }
 
 export interface ForeachGroup {

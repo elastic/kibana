@@ -83,9 +83,14 @@ describe('transformWorkflowToGraph', () => {
     );
     expect(r.foreachGroups).toHaveLength(1);
     expect(r.foreachGroups[0].id).toBe('loop');
-    // edge from foreach to first inner step is labelled 'for each item'
-    const entry = r.edges.find((e) => e.source === 'loop');
-    expect(entry?.label).toBe('for each item');
+    // The foreach group is a self-contained folder: inner nodes are in the group,
+    // not connected to the outer graph. There is no edge from the group node to
+    // its inner steps in the outer edge list.
+    const outerEdgesFromLoop = r.edges.filter((e) => e.source === 'loop');
+    expect(outerEdgesFromLoop).toHaveLength(0);
+    // The inner step lives in the group's innerNodes, not in the top-level nodes.
+    expect(r.foreachGroups[0].innerNodes).toHaveLength(1);
+    expect(r.foreachGroups[0].innerNodes[0].data.label).toBe('inner');
   });
 
   it('connects branch leaves to the step that follows an if', () => {
@@ -150,6 +155,128 @@ describe('transformWorkflowToGraph', () => {
     const ids = r.nodes.filter((n) => n.type === 'step').map((n) => n.id);
     expect(new Set(ids).size).toBe(ids.length);
   });
+
+  it('nests foreach group inside an if-branch', () => {
+    const r = transformWorkflowToGraph(
+      minimal({
+        steps: [
+          {
+            name: 'gate',
+            type: 'if',
+            condition: 'x',
+            steps: [
+              {
+                name: 'loop',
+                type: 'foreach',
+                foreach: 'items',
+                steps: [{ name: 'inner', type: 'http' }],
+              },
+            ],
+          },
+        ] as unknown as WorkflowYaml['steps'],
+      })
+    );
+    expect(r.foreachGroups).toHaveLength(1);
+    expect(r.foreachGroups[0].id).toBe('loop');
+    // The gate's true path goes to the foreach group node.
+    expect(r.edges).toContainEqual(expect.objectContaining({ source: 'gate', target: 'loop' }));
+  });
+
+  it('handles parallel with N non-empty branches', () => {
+    const r = transformWorkflowToGraph(
+      minimal({
+        steps: [
+          {
+            name: 'par',
+            type: 'parallel',
+            branches: [
+              { name: 'a', steps: [{ name: 'a1', type: 'http' }] },
+              { name: 'b', steps: [{ name: 'b1', type: 'http' }] },
+              { name: 'c', steps: [{ name: 'c1', type: 'http' }] },
+            ],
+          },
+          { name: 'join', type: 'http' },
+        ] as unknown as WorkflowYaml['steps'],
+      })
+    );
+    // All branch leaves feed into 'join'.
+    const sourcesIntoJoin = r.edges
+      .filter((e) => e.target === 'join')
+      .map((e) => e.source)
+      .sort();
+    expect(sourcesIntoJoin).toEqual(['a1', 'b1', 'c1']);
+  });
+
+  it('falls through via gate id when all parallel branches are empty', () => {
+    const r = transformWorkflowToGraph(
+      minimal({
+        steps: [
+          {
+            name: 'par',
+            type: 'parallel',
+            branches: [
+              { name: 'a', steps: [] },
+              { name: 'b', steps: [] },
+            ],
+          },
+          { name: 'after', type: 'http' },
+        ] as unknown as WorkflowYaml['steps'],
+      })
+    );
+    // Both empty branches fall through via the parallel gate node's id.
+    const sourcesIntoAfter = r.edges
+      .filter((e) => e.target === 'after')
+      .map((e) => e.source)
+      .sort();
+    // deduplicate because both branches fall through via the same gate id
+    expect([...new Set(sourcesIntoAfter)]).toEqual(['par']);
+  });
+
+  it('handles merge step with a single contained body', () => {
+    const r = transformWorkflowToGraph(
+      minimal({
+        steps: [
+          {
+            name: 'atomic',
+            type: 'merge',
+            steps: [
+              { name: 'm1', type: 'http' },
+              { name: 'm2', type: 'http' },
+            ],
+          },
+          { name: 'after', type: 'http' },
+        ] as unknown as WorkflowYaml['steps'],
+      })
+    );
+    // merge node connects to its first inner step
+    expect(r.edges).toContainEqual(expect.objectContaining({ source: 'atomic', target: 'm1' }));
+    // the merge node itself (not m2) is the exit point for the next step
+    const sourcesIntoAfter = r.edges.filter((e) => e.target === 'after').map((e) => e.source);
+    expect(sourcesIntoAfter).toEqual(['atomic']);
+  });
+
+  it('falls through via if gate when both branches are empty', () => {
+    const r = transformWorkflowToGraph(
+      minimal({
+        steps: [
+          {
+            name: 'gate',
+            type: 'if',
+            condition: 'x',
+            steps: [],
+            else: [],
+          },
+          { name: 'after', type: 'http' },
+        ] as unknown as WorkflowYaml['steps'],
+      })
+    );
+    const sourcesIntoAfter = r.edges
+      .filter((e) => e.target === 'after')
+      .map((e) => e.source)
+      .sort();
+    // Both empty paths fall through via the gate id (may dedup to one).
+    expect([...new Set(sourcesIntoAfter)]).toEqual(['gate']);
+  });
 });
 
 describe('computeTopologyFingerprint', () => {
@@ -169,5 +296,31 @@ describe('computeTopologyFingerprint', () => {
       steps: [{ name: 'a', type: 'http', with: { url: 'x' } }] as unknown as WorkflowYaml['steps'],
     });
     expect(computeTopologyFingerprint(wfA)).toEqual(computeTopologyFingerprint(wfB));
+  });
+
+  it('changes when a step is added', () => {
+    const wfB = minimal({
+      steps: [
+        { name: 'a', type: 'http' },
+        { name: 'b', type: 'http' },
+      ] as unknown as WorkflowYaml['steps'],
+    });
+    expect(computeTopologyFingerprint(wfA)).not.toEqual(computeTopologyFingerprint(wfB));
+  });
+
+  it('changes when step order changes', () => {
+    const wfBase = minimal({
+      steps: [
+        { name: 'a', type: 'http' },
+        { name: 'b', type: 'http' },
+      ] as unknown as WorkflowYaml['steps'],
+    });
+    const wfReordered = minimal({
+      steps: [
+        { name: 'b', type: 'http' },
+        { name: 'a', type: 'http' },
+      ] as unknown as WorkflowYaml['steps'],
+    });
+    expect(computeTopologyFingerprint(wfBase)).not.toEqual(computeTopologyFingerprint(wfReordered));
   });
 });

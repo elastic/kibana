@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Edge, Node, OnNodesChange } from '@xyflow/react';
-import { applyNodeChanges, Position } from '@xyflow/react';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { Edge, Node } from '@xyflow/react';
+import { Position } from '@xyflow/react';
+import { useMemo, useRef } from 'react';
 import {
   applyGraphLayout,
   computeTopologyFingerprint,
@@ -19,6 +19,7 @@ import {
 import type {
   HandleSide,
   LayoutDirection,
+  LayoutedEdge,
   LayoutedNode,
   WorkflowStepExecutionDto,
   WorkflowYaml,
@@ -49,7 +50,6 @@ const PREVIEW_NODE_HEIGHT = 48;
 interface UseWorkflowLayoutResult {
   nodes: Node[];
   edges: Edge[];
-  onNodesChange: OnNodesChange;
   triggerNodeIds: string[];
   leafNodeIds: string[];
   topologyFingerprint: string;
@@ -195,7 +195,7 @@ export function useWorkflowLayout({
       return (label ? stepExecutionMap?.[label] : undefined) ?? stepExecutionMap?.[nodeId];
     };
 
-    return layoutResult.edges.map((e) => {
+    return (layoutResult.edges as LayoutedEdge[]).map((e) => {
       const sourceExec = getExec(e.source);
       // An arrow turns green once the source step has completed — that is
       // exactly when execution has passed through this edge.
@@ -216,24 +216,9 @@ export function useWorkflowLayout({
     });
   }, [layoutResult.edges, layoutResult.nodes, stepExecutionMap]);
 
-  const [nodes, setNodes] = useState<Node[]>(derivedNodes);
-  const [edges, setEdges] = useState<Edge[]>(derivedEdges);
-
-  useEffect(() => {
-    setNodes(derivedNodes);
-  }, [derivedNodes]);
-  useEffect(() => {
-    setEdges(derivedEdges);
-  }, [derivedEdges]);
-
-  const onNodesChange: OnNodesChange = useCallback((changes) => {
-    setNodes((nds) => applyNodeChanges(changes, nds));
-  }, []);
-
   return {
-    nodes,
-    edges,
-    onNodesChange,
+    nodes: derivedNodes,
+    edges: derivedEdges,
     triggerNodeIds: layoutResult.triggerNodeIds,
     leafNodeIds: layoutResult.leafNodeIds,
     topologyFingerprint,

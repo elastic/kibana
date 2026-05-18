@@ -16,24 +16,214 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiLink,
+  EuiLoadingSpinner,
   EuiPopover,
   EuiPopoverTitle,
   EuiSwitch,
   EuiText,
   EuiToolTip,
+  useIsWithinBreakpoints,
 } from '@elastic/eui';
 import type { CriteriaWithPagination } from '@elastic/eui/src/components/basic_table/basic_table';
 import { css } from '@emotion/react';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { WorkflowListItemDto } from '@kbn/workflows';
+import type { WorkflowListItemDto, WorkflowYaml } from '@kbn/workflows';
+import { collectAllSteps } from '@kbn/workflows';
+import type { RenderStepIcon } from '@kbn/workflows-ui';
 import { getRunTooltipContent, StatusBadge, WorkflowStatus } from '../../../shared/ui';
 import { NextExecutionTime } from '../../../shared/ui/next_execution_time';
+import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
 import { WorkflowsTriggersList } from '../../../widgets/worflows_triggers_list/worflows_triggers_list';
 import { WorkflowsStepTypesList } from '../../../widgets/workflows_step_types_list/workflows_step_types_list';
 import { WORKFLOWS_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
+
+// Lazy-load the preview to keep `@xyflow/react` out of the list page bundle
+// until the user actually hovers a workflow name.
+const WorkflowGraphPreviewLazy = React.lazy(async () => {
+  const m = await import('@kbn/workflows-ui');
+  return { default: m.WorkflowGraphPreview };
+});
+
+const HOVER_CLOSE_DELAY_MS = 150;
+const PREVIEW_WIDTH = 320;
+const PREVIEW_HEIGHT = 240;
+
+interface WorkflowNameCellProps {
+  name: string;
+  item: WorkflowListItemDto;
+  canReadWorkflow: boolean;
+}
+
+const WorkflowNameCell = React.memo(function WorkflowNameCell({
+  name,
+  item,
+  canReadWorkflow,
+}: WorkflowNameCellProps) {
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isNarrow = useIsWithinBreakpoints(['xs', 's']);
+  const workflow = item.definition as WorkflowYaml | undefined;
+  const canShowPreview =
+    !!workflow && collectAllSteps(workflow.steps ?? []).length > 0 && !isNarrow;
+
+  const renderStepIcon = useCallback<RenderStepIcon>(
+    ({ stepType }) => <StepIcon stepType={stepType} executionStatus={undefined} />,
+    []
+  );
+
+  const cancelClose = useCallback(() => {
+    if (closeTimeoutRef.current) {
+      clearTimeout(closeTimeoutRef.current);
+      closeTimeoutRef.current = null;
+    }
+  }, []);
+
+  const openPreview = useCallback(() => {
+    if (!canShowPreview) return;
+    cancelClose();
+    setIsPreviewOpen(true);
+  }, [canShowPreview, cancelClose]);
+
+  const scheduleClose = useCallback(() => {
+    cancelClose();
+    closeTimeoutRef.current = setTimeout(() => {
+      setIsPreviewOpen(false);
+      closeTimeoutRef.current = null;
+    }, HOVER_CLOSE_DELAY_MS);
+  }, [cancelClose]);
+
+  const nameContent = (
+    <div
+      css={css`
+        max-width: 100%;
+        overflow: hidden;
+      `}
+      onMouseEnter={openPreview}
+      onMouseLeave={scheduleClose}
+      onFocus={openPreview}
+      onBlur={scheduleClose}
+    >
+      <EuiFlexGroup direction="column" gutterSize="xs">
+        <EuiFlexItem>
+          <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false} wrap={false}>
+            <EuiFlexItem
+              grow={false}
+              css={css`
+                min-width: 0;
+              `}
+            >
+              {canReadWorkflow ? (
+                <EuiLink>
+                  <Link
+                    to={`/${item.id}`}
+                    css={css`
+                      white-space: nowrap;
+                      overflow: hidden;
+                      text-overflow: ellipsis;
+                      display: block;
+                      max-width: 100%;
+                    `}
+                    title={name}
+                    data-test-subj="workflowNameLink"
+                  >
+                    {name}
+                  </Link>
+                </EuiLink>
+              ) : (
+                <EuiText
+                  size="s"
+                  css={css`
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    display: block;
+                    max-width: 100%;
+                  `}
+                  title={name}
+                  data-test-subj="workflowNameText"
+                >
+                  {name}
+                </EuiText>
+              )}
+            </EuiFlexItem>
+            <WorkflowTagsBadge tags={item.definition?.tags} />
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiText
+            size="xs"
+            color="subdued"
+            title={item.description}
+            css={css`
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              max-width: 100%;
+              display: block;
+              width: 100%;
+            `}
+          >
+            {item.description || (
+              <FormattedMessage
+                id="workflows.workflowList.noDescription"
+                defaultMessage="No description"
+              />
+            )}
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </div>
+  );
+
+  if (!canShowPreview) return nameContent;
+
+  return (
+    <EuiPopover
+      isOpen={isPreviewOpen}
+      closePopover={() => setIsPreviewOpen(false)}
+      anchorPosition="rightCenter"
+      panelPaddingSize="none"
+      hasArrow
+      ownFocus={false}
+      button={nameContent}
+      data-test-subj="workflowNamePreviewPopover"
+    >
+      <div
+        onMouseEnter={cancelClose}
+        onMouseLeave={scheduleClose}
+        css={{ width: PREVIEW_WIDTH, height: PREVIEW_HEIGHT }}
+      >
+        <React.Suspense
+          fallback={
+            <div
+              css={{
+                width: '100%',
+                height: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <EuiLoadingSpinner size="m" />
+            </div>
+          }
+        >
+          {workflow && (
+            <WorkflowGraphPreviewLazy
+              workflow={workflow}
+              width={PREVIEW_WIDTH}
+              height={PREVIEW_HEIGHT}
+              renderStepIcon={renderStepIcon}
+            />
+          )}
+        </React.Suspense>
+      </div>
+    </EuiPopover>
+  );
+});
 
 export interface WorkflowListTableProps {
   items: WorkflowListItemDto[];
@@ -87,82 +277,7 @@ export const WorkflowListTable = ({
         name: i18n.translate('workflows.workflowList.column.name', { defaultMessage: 'Name' }),
         dataType: 'string',
         render: (name: string, item) => (
-          <div
-            css={css`
-              max-width: 100%;
-              overflow: hidden;
-            `}
-          >
-            <EuiFlexGroup direction="column" gutterSize="xs">
-              <EuiFlexItem>
-                <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false} wrap={false}>
-                  <EuiFlexItem
-                    grow={false}
-                    css={css`
-                      min-width: 0;
-                    `}
-                  >
-                    {canReadWorkflow ? (
-                      <EuiLink>
-                        <Link
-                          to={`/${item.id}`}
-                          css={css`
-                            white-space: nowrap;
-                            overflow: hidden;
-                            text-overflow: ellipsis;
-                            display: block;
-                            max-width: 100%;
-                          `}
-                          title={name}
-                          data-test-subj="workflowNameLink"
-                        >
-                          {name}
-                        </Link>
-                      </EuiLink>
-                    ) : (
-                      <EuiText
-                        size="s"
-                        css={css`
-                          white-space: nowrap;
-                          overflow: hidden;
-                          text-overflow: ellipsis;
-                          display: block;
-                          max-width: 100%;
-                        `}
-                        title={name}
-                        data-test-subj="workflowNameText"
-                      >
-                        {name}
-                      </EuiText>
-                    )}
-                  </EuiFlexItem>
-                  <WorkflowTagsBadge tags={item.definition?.tags} />
-                </EuiFlexGroup>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiText
-                  size="xs"
-                  color="subdued"
-                  title={item.description}
-                  css={css`
-                    white-space: nowrap;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                    max-width: 100%;
-                    display: block;
-                    width: 100%;
-                  `}
-                >
-                  {item.description || (
-                    <FormattedMessage
-                      id="workflows.workflowList.noDescription"
-                      defaultMessage="No description"
-                    />
-                  )}
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </div>
+          <WorkflowNameCell name={name} item={item} canReadWorkflow={canReadWorkflow} />
         ),
       },
       {
@@ -189,10 +304,7 @@ export const WorkflowListTable = ({
         }),
         width: '12%',
         render: (value: unknown, item: WorkflowListItemDto) => (
-          <WorkflowsStepTypesList
-            steps={item.definition?.steps ?? []}
-            workflow={item.definition ?? undefined}
-          />
+          <WorkflowsStepTypesList steps={item.definition?.steps ?? []} />
         ),
       },
       {

@@ -26,6 +26,8 @@ export interface WorkflowGraphActions {
   onStepRun?: (stepName: string) => void;
   /** Whether the workflow allows the user to run individual steps. */
   canRunSteps?: boolean;
+  /** Called when the user keyboard-activates (Enter/Space) a node. */
+  onStepSelect?: (nodeId: string) => void;
   /**
    * Called right before the "More" popover opens, so the caller can update
    * any per-step state (e.g. dispatch focused-step info to Redux) the menu
