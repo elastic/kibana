@@ -119,7 +119,7 @@ Apply the `ai:auto-flaky-fix` label to the triggering issue **only** when **all*
 
 - The GitHub issue represents a Scout test failure (it has the `scout-playwright` label)
 - The test failed in the `kibana-on-merge` pipeline
-- `classification` is `test-design` or `application`
+- `classification` is `test-design`, `test-environment`, or `application`
 - A concrete fix has been identified.
 
 No other side-effects beyond posting the comment and updating the label.
