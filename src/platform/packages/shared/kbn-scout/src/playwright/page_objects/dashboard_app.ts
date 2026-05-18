@@ -209,6 +209,17 @@ export class DashboardApp {
   }
 
   /**
+   * Ensures the dashboard is in edit mode, switching from view mode if necessary.
+   * Useful after flows (e.g. saving an ES|QL viz from Discover) that already
+   * leave the dashboard in edit mode and therefore have no Edit button to click.
+   */
+  async ensureEditMode() {
+    if (await this.getIsInViewMode()) {
+      await this.switchToEditMode();
+    }
+  }
+
+  /**
    * Opens the "Add panel" flyout for selecting panel types to add to the dashboard.
    */
   async openAddPanelFlyout() {
@@ -504,8 +515,19 @@ export class DashboardApp {
     );
   }
 
-  async getAddPanelFlyoutPanelTypesCount(): Promise<number> {
-    return this.panelSelectionFlyout.locator('[data-test-subj*="create-action-"]').count();
+  async getAddPanelFlyoutActions(): Promise<string[]> {
+    const addPanelActions = await this.panelSelectionFlyout
+      .locator('[data-test-subj*="create-action-"]:not([data-test-subj$="-wrapper"])')
+      .all();
+
+    return await Promise.all(
+      addPanelActions.map(async (action) => {
+        const testSubj = await action.getAttribute('data-test-subj');
+        // remove prefix so strings like 'create-action-Links' become 'Links'
+        const match = testSubj?.match(/create-action-(.*)/);
+        return match?.[1] ?? '';
+      })
+    );
   }
 
   /**
