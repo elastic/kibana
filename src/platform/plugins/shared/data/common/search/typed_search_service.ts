@@ -159,20 +159,32 @@ export class TypedSearchService implements ITypedSearchService {
   // ============================================================================
 
   private buildDSLRequest(params: IDSLSearchParams, options?: IDSLSearchOptions): IEsSearchRequest {
+    const {
+      index: _,
+      query,
+      aggs,
+      size,
+      sort,
+      fields,
+      _source,
+      runtimeMappings,
+      highlight,
+      ...rest
+    } = params;
     const body: Record<string, any> = {
-      query: params.query,
-      aggs: params.aggs,
-      size: params.size,
-      sort: params.sort,
-      fields: params.fields,
-      _source: params._source,
-      runtime_mappings: params.runtimeMappings,
-      highlight: params.highlight,
+      query,
+      aggs,
+      size,
+      sort,
+      fields,
+      _source,
+      runtime_mappings: runtimeMappings,
+      highlight,
       track_total_hits: options?.trackTotalHits,
       // Allow any additional parameters for safe backwards compatibility in the DSL expression function
       // It could make sense to lock this down further if we get more confident or if expression functions
       // can no longer be used directly in Canvas
-      ...params,
+      ...rest,
     };
 
     return {
