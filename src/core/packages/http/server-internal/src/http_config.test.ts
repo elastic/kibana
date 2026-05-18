@@ -772,7 +772,13 @@ describe('prototypeHardening', () => {
 
 describe('experimental.framework', () => {
   it('defaults to "hapi"', () => {
-    expect(config.schema.validate({}).experimental.framework).toBe('hapi');
+    expect(config.schema.validate({}).experimental.framework).toBe('fastify');
+  });
+
+  it('accepts "hapi" as an opt-in for the long-standing implementation', () => {
+    expect(
+      config.schema.validate({ experimental: { framework: 'hapi' } }).experimental.framework
+    ).toBe('hapi');
   });
 
   it('accepts "fastify" as an opt-in for the in-progress migration', () => {

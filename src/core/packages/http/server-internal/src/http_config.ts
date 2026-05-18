@@ -293,7 +293,8 @@ const configSchema = schema.object(
        * production.
        */
       framework: schema.oneOf([schema.literal('hapi'), schema.literal('fastify')], {
-        defaultValue: 'hapi',
+        // defaultValue: 'hapi',
+        defaultValue: 'fastify', // TODO: remove this before merging
       }),
     }),
   },
