@@ -10,6 +10,7 @@ import { cloneDeep } from 'lodash/fp';
 import type { EuiMarkdownFormatProps, EuiLinkAnchorProps } from '@elastic/eui';
 import { EuiMarkdownFormat } from '@elastic/eui';
 import { MarkdownLink } from './markdown_link';
+import { escapeUnterminatedEntities } from './sanitize_markdown';
 import { usePlugins } from './use_plugins';
 
 interface Props {
@@ -45,7 +46,7 @@ const MarkdownRendererComponent: React.FC<Props> = ({ children, disableLinks, te
       grow={true}
       textSize={textSize}
     >
-      {children}
+      {escapeUnterminatedEntities(children)}
     </EuiMarkdownFormat>
   );
 };

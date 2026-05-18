@@ -56,4 +56,8 @@ describe('escapeUnterminatedEntities', () => {
       'https://example.com/path?index=.internal.alerts-security.alerts-default-000001&amp;timestamp=2026-05-08T17:39:26.459Z'
     );
   });
+
+  it('escapes named entities beyond the basic set (known limitation)', () => {
+    expect(escapeUnterminatedEntities('&copy;')).toBe('&amp;copy;');
+  });
 });
