@@ -42,6 +42,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       // Install the package with 15000 prebuilt historical version of rules rules and 750 unique rules
+      // HERE
       await installPrebuiltRulesAndTimelines(es, supertest);
 
       // Verify that status is updated after package installation
