@@ -338,6 +338,7 @@ export interface DocLinks {
     readonly eventMerging: string;
     readonly blocklist: string;
     readonly endpointArtifacts: string;
+    readonly endpointArtifactsNoEscaping: string;
     readonly scriptLibrary: string;
     readonly policyResponseTroubleshooting: {
       full_disk_access: string;
