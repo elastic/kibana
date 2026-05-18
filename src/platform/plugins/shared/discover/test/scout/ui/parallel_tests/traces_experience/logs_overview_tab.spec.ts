@@ -28,7 +28,7 @@ const openTraceTimeline = async (pageObjects: {
     flyout: TracesFlyout;
   };
 }) => {
-  await pageObjects.discover.goto();
+  await pageObjects.discover.goto({ queryMode: 'esql' });
   await pageObjects.discover.writeAndSubmitEsqlQuery(
     `${TRACES.ESQL_QUERY} | WHERE transaction.name == "${RICH_TRACE.TRANSACTION_NAME}"`
   );
