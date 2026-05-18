@@ -115,7 +115,6 @@ export const RetentionSelectableRow = ({
 
   return (
     <EuiListGroupItem
-      size="s"
       color="text"
       iconType={iconType}
       isDisabled={isDisabled}

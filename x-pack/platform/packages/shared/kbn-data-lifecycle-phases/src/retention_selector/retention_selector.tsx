@@ -189,7 +189,7 @@ export const RetentionSelector = ({
 
   const list =
     visibleOptions.length > 0 ? (
-      <EuiListGroup gutterSize="none" maxWidth={false} wrapText flush>
+      <EuiListGroup maxWidth={false} wrapText>
         {visibleOptions.map((option, idx) => (
           <RetentionSelectableRow
             key={option.name}
