@@ -22,7 +22,7 @@ const REVIEWERS = Object.freeze({
   }),
 });
 
-const allowedPermissions = new Set(['admin', 'maintain', 'write']);
+const allowedPermissions = new Set(['admin', 'write']);
 const allowedRoles = new Set(['admin', 'maintain', 'write']);
 
 const getLabelNames = (labels = []) => labels.map((label) => label.name);
