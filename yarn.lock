@@ -2328,10 +2328,10 @@
     semver "7.7.4"
     topojson-client "^3.1.0"
 
-"@elastic/eslint-plugin-eui@2.12.0":
-  version "2.12.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-2.12.0.tgz#9333e558c6a5786f4aaf984eeda737d35edd17a0"
-  integrity sha512-nDOmel4ywBWrc6q/j0nqsXna/yD8yK+QyzS3UapxN9C13dhDZaTychqP7B9om95yYvlHd9k0kzKv6IHTUKfhqg==
+"@elastic/eslint-plugin-eui@2.13.0":
+  version "2.13.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-2.13.0.tgz#b9c079532257b7d4c46e3004ecb7b1f78f00a6b9"
+  integrity sha512-Itl7zn88GEYRAqfmuRzViNy03nVHkIVLAvtjIC0b3lhjBnJgUbEG8ImfdYUExMiGraFE+2/k6v/Z8LbWXxO+JA==
 
 "@elastic/esql@4.0.0":
   version "4.0.0"
@@ -2359,10 +2359,10 @@
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@116.0.0":
-  version "116.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-116.0.0.tgz#4b29ab193c6c2a95e86d57092f24214ac7191f00"
-  integrity sha512-1DqOgznqxtGYdeNPvjSjcmrnXfZLdxE32/wrHV52xBG0t2B9QJ6HO7ixNeX3GVo6HsMVb8BWtIQVmWh+ZeTAGA==
+"@elastic/eui@116.1.0":
+  version "116.1.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-116.1.0.tgz#e6071970bc6d488962514d427cbce066e79fbe7d"
+  integrity sha512-zhEODZxdKU8xP6itESAkhrj/8t8dyWxUON4DOF5+zOav5QtM6HdFidjMsSi2Xk0ByytTfAEKmlUuzSTJm2OpSA==
   dependencies:
     "@elastic/eui-theme-common" "10.0.0"
     "@elastic/prismjs-esql" "^1.1.2"
