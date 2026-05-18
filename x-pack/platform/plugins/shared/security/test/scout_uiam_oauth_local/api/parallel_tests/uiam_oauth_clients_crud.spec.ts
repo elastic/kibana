@@ -21,9 +21,8 @@ apiTest.describe(
   () => {
     let authHeaders: Record<string, string>;
 
-    apiTest.beforeAll(async ({ apiClient, kbnUrl, config: { organizationId, projectType } }) => {
+    apiTest.beforeAll(async ({ apiClient, config: { organizationId, projectType } }) => {
       const samlResponse = await createSAMLResponse({
-        kibanaUrl: kbnUrl.get('/api/security/saml/callback'),
         username: '1234567890',
         email: 'elastic_admin@elastic.co',
         roles: ['admin'],

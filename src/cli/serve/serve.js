@@ -8,7 +8,6 @@
  */
 
 import { set as lodashSet } from '@kbn/safer-lodash-set';
-import chalk from 'chalk';
 import _ from 'lodash';
 import { resolve } from 'path';
 import url from 'url';
@@ -317,11 +316,9 @@ export default function (program) {
       // We can tell users they only have to run with `yarn start --run-examples` to get those
       // local links to work.  Similar to what we do for "View in Console" links in our
       // elastic.co links.
-      // For Serverless SAML Mock IdP we also disable the base path because Serverless does not
-      // support a custom `server.basePath`. The stateful SAML Mock IdP path keeps the base path
-      // proxy enabled and pins it to a fixed value via `server.basePath` (see
-      // `tryConfigureStatefulSamlProvider`), so SP/ACS endpoints stay aligned with Kibana's URL.
-      basePath: opts.runExamples || isServerlessSamlSupported ? false : !!opts.basePath,
+      // Serverless Kibana does not support a custom `server.basePath`, so we also disable the
+      // dev proxy's randomized base path in serverless mode.
+      basePath: opts.runExamples || isServerlessMode ? false : !!opts.basePath,
       optimize: !!opts.optimize,
       disableOptimizer: !opts.optimizer,
       oss: !!opts.oss,
@@ -457,19 +454,6 @@ function tryConfigureServerlessSamlProvider(rawConfig, opts, extraCliOptions) {
     return false;
   }
 
-  if (_.has(rawConfig, 'server.basePath')) {
-    console.warn(
-      `Custom base path is not supported when running in Serverless, it will be removed.`
-    );
-    _.unset(rawConfig, 'server.basePath');
-  }
-
-  if (opts.ssl) {
-    console.info(
-      'Kibana is being served over HTTPS. Make sure to adjust the `--kibanaUrl` parameter while running the local Serverless ES cluster.'
-    );
-  }
-
   // Make SAML provider the first in the provider chain
   lodashSet(rawConfig, `xpack.security.authc.providers.saml.${MOCK_IDP_REALM_NAME}`, {
     order: 0,
@@ -564,7 +548,6 @@ function tryConfigureStatefulSamlProvider(rawConfig, opts, extraCliOptions) {
 
   // Ensure the plugin is loaded in dynamically to exclude from production build
   const {
-    MOCK_IDP_KIBANA_BASE_PATH,
     MOCK_IDP_REALM_NAME, // eslint-disable-next-line import/no-dynamic-require
   } = require(MOCK_IDP_PLUGIN_PATH);
 
@@ -606,33 +589,6 @@ function tryConfigureStatefulSamlProvider(rawConfig, opts, extraCliOptions) {
     lodashSet(rawConfig, 'xpack.security.authc.providers.basic.basic', {
       order: Number.MAX_SAFE_INTEGER,
     });
-  }
-
-  // Pin a stable base path so SP/ACS endpoints stay aligned with the SAML realm across restarts.
-  if (opts.basePath !== false && !opts.runExamples && !_.has(rawConfig, 'server.basePath')) {
-    lodashSet(rawConfig, 'server.basePath', MOCK_IDP_KIBANA_BASE_PATH);
-  }
-
-  const basePath =
-    _.get(extraCliOptions, 'server.basePath') ?? _.get(rawConfig, 'server.basePath', '');
-
-  if (!_.has(rawConfig, 'server.publicBaseUrl')) {
-    const protocol = _.get(rawConfig, 'server.ssl.enabled') ? 'https' : 'http';
-    const host = _.get(rawConfig, 'server.host', 'localhost');
-    const port = _.get(rawConfig, 'server.port', 5601);
-
-    lodashSet(rawConfig, 'server.publicBaseUrl', `${protocol}://${host}:${port}${basePath}`);
-  }
-
-  if (basePath !== MOCK_IDP_KIBANA_BASE_PATH) {
-    const publicBaseUrl = _.get(rawConfig, 'server.publicBaseUrl');
-    const label = chalk.black.bgYellow(' saml-mock-idp ');
-    console.warn(label, '='.repeat(100));
-    console.warn(
-      label,
-      `Kibana is running with a non-default base path. Make sure to use the --kibanaUrl=${publicBaseUrl} parameter while running the local ES cluster.`
-    );
-    console.warn(label, '='.repeat(100));
   }
 
   return true;
