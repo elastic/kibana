@@ -8,7 +8,10 @@
 import { renderHook, act } from '@testing-library/react';
 import { useService, CoreStart } from '@kbn/core-di-browser';
 import { useNavigateToAgentBuilder } from './use_navigate_to_agent_builder';
-import { CREATE_WITH_AGENT_INITIAL_PROMPT, AGENT_BUILDER_NEW_CONVERSATION_PATH } from '../constants';
+import {
+  CREATE_WITH_AGENT_INITIAL_PROMPT,
+  AGENT_BUILDER_NEW_CONVERSATION_PATH,
+} from '../constants';
 
 jest.mock('@kbn/core-di-browser');
 

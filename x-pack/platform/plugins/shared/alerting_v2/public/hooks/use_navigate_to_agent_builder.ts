@@ -8,7 +8,10 @@
 import { useCallback } from 'react';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { AGENT_BUILDER_APP_ID } from '@kbn/deeplinks-agent-builder';
-import { CREATE_WITH_AGENT_INITIAL_PROMPT, AGENT_BUILDER_NEW_CONVERSATION_PATH } from '../constants';
+import {
+  CREATE_WITH_AGENT_INITIAL_PROMPT,
+  AGENT_BUILDER_NEW_CONVERSATION_PATH,
+} from '../constants';
 
 export const useNavigateToAgentBuilder = () => {
   const { navigateToApp } = useService(CoreStart('application'));
