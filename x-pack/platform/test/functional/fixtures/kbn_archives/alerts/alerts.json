@@ -21,7 +21,14 @@
     "tags": [],
     "throttle": null,
     "updatedAt": "2020-06-17T15:35:38.497Z",
-    "updatedBy": "elastic"
+    "updatedBy": "elastic",
+    "revision": 0,
+    "executionStatus": {
+      "status": "unknown",
+      "lastExecutionDate": "2020-01-01T00:00:00.000Z",
+      "error": null
+    },
+    "legacyId": null
   },
   "references": [],
   "migrationVersion": {
@@ -120,7 +127,14 @@
     "tags": [],
     "throttle": null,
     "updatedAt": "2020-09-22T15:16:07.451Z",
-    "updatedBy": "elastic"
+    "updatedBy": "elastic",
+    "executionStatus": {
+      "status": "unknown",
+      "lastExecutionDate": "2020-01-01T00:00:00.000Z",
+      "error": null
+    },
+    "revision": 0,
+    "legacyId": null
   },
   "references": [
     {
@@ -183,7 +197,14 @@
     "tags": [],
     "throttle": null,
     "updatedAt": "2020-06-17T15:35:38.497Z",
-    "updatedBy": "elastic"
+    "updatedBy": "elastic",
+    "revision": 0,
+    "executionStatus": {
+      "status": "unknown",
+      "lastExecutionDate": "2020-01-01T00:00:00.000Z",
+      "error": null
+    },
+    "legacyId": null
   },
   "references": [],
   "migrationVersion": {
@@ -264,7 +285,14 @@
     ],
     "throttle": "1m",
     "updatedAt": "2020-09-22T15:16:07.451Z",
-    "updatedBy": null
+    "updatedBy": null,
+    "revision": 0,
+    "executionStatus": {
+      "status": "unknown",
+      "lastExecutionDate": "2020-01-01T00:00:00.000Z",
+      "error": null
+    },
+    "legacyId": null
   },
   "references": [
     {
@@ -329,7 +357,14 @@
     "muteAll": false,
     "mutedInstanceIds": [],
     "scheduledTaskId": null,
-    "tags": []
+    "tags": [],
+    "revision": 0,
+    "executionStatus": {
+      "status": "unknown",
+      "lastExecutionDate": "2020-01-01T00:00:00.000Z",
+      "error": null
+    },
+    "legacyId": null
   },
   "references": [],
   "migrationVersion": {
@@ -376,7 +411,14 @@
     "tags": [],
     "throttle": null,
     "updatedAt": "2020-09-22T15:16:07.451Z",
-    "updatedBy": "elastic"
+    "updatedBy": "elastic",
+    "executionStatus": {
+      "status": "unknown",
+      "lastExecutionDate": "2020-01-01T00:00:00.000Z",
+      "error": null
+    },
+    "revision": 0,
+    "legacyId": null
   },
   "references": [
     {
@@ -421,7 +463,14 @@
     "muteAll": false,
     "mutedInstanceIds": [],
     "scheduledTaskId": null,
-    "tags": []
+    "tags": [],
+    "revision": 0,
+    "executionStatus": {
+      "status": "unknown",
+      "lastExecutionDate": "2020-01-01T00:00:00.000Z",
+      "error": null
+    },
+    "legacyId": null
   },
   "references": [],
   "migrationVersion": {
@@ -455,7 +504,14 @@
     "muteAll": false,
     "mutedInstanceIds": [],
     "scheduledTaskId": null,
-    "tags": []
+    "tags": [],
+    "revision": 0,
+    "executionStatus": {
+      "status": "unknown",
+      "lastExecutionDate": "2020-01-01T00:00:00.000Z",
+      "error": null
+    },
+    "legacyId": null
   },
   "references": [],
   "migrationVersion": {
@@ -490,7 +546,14 @@
     "muteAll": false,
     "mutedInstanceIds": [],
     "scheduledTaskId": null,
-    "tags": []
+    "tags": [],
+    "revision": 0,
+    "executionStatus": {
+      "status": "unknown",
+      "lastExecutionDate": "2020-01-01T00:00:00.000Z",
+      "error": null
+    },
+    "legacyId": null
   },
   "references": [],
   "migrationVersion": {
@@ -524,7 +587,14 @@
     "muteAll": false,
     "mutedInstanceIds": [],
     "scheduledTaskId": null,
-    "tags": []
+    "tags": [],
+    "revision": 0,
+    "executionStatus": {
+      "status": "unknown",
+      "lastExecutionDate": "2020-01-01T00:00:00.000Z",
+      "error": null
+    },
+    "legacyId": null
   },
   "references": [],
   "migrationVersion": {
@@ -565,7 +635,15 @@
     "muteAll": false,
     "mutedInstanceIds": [],
     "scheduledTaskId": null,
-    "tags": []
+    "tags": [],
+    "revision": 0,
+    "executionStatus": {
+      "status": "unknown",
+      "lastExecutionDate": "2020-01-01T00:00:00.000Z",
+      "error": null
+    },
+    "name": "Test Metrics Inventory Threshold rule migration",
+    "legacyId": null
   },
   "references": [],
   "migrationVersion": {
@@ -634,7 +712,14 @@
     "updatedAt": "2021-07-27T20:42:55.896Z",
     "muteAll": true,
     "mutedInstanceIds": [],
-    "scheduledTaskId": "2030ade0-8ec7-11ec-a700-5524407a7653"
+    "scheduledTaskId": "2030ade0-8ec7-11ec-a700-5524407a7653",
+    "executionStatus": {
+      "status": "unknown",
+      "lastExecutionDate": "2020-01-01T00:00:00.000Z",
+      "error": null
+    },
+    "revision": 0,
+    "legacyId": null
   },
   "references": [],
   "migrationVersion": {
@@ -703,7 +788,14 @@
     "updatedAt": "2022-02-16T01:25:02.121Z",
     "muteAll": true,
     "mutedInstanceIds": [],
-    "scheduledTaskId": null
+    "scheduledTaskId": null,
+    "executionStatus": {
+      "status": "unknown",
+      "lastExecutionDate": "2020-01-01T00:00:00.000Z",
+      "error": null
+    },
+    "revision": 0,
+    "legacyId": null
   },
   "references": [],
   "migrationVersion": {
@@ -739,7 +831,14 @@
     "muteAll": false,
     "mutedInstanceIds": [],
     "scheduledTaskId": null,
-    "tags": []
+    "tags": [],
+    "revision": 0,
+    "executionStatus": {
+      "status": "unknown",
+      "lastExecutionDate": "2020-01-01T00:00:00.000Z",
+      "error": null
+    },
+    "legacyId": null
   },
   "references": [],
   "migrationVersion": {
@@ -783,7 +882,15 @@
     "muteAll": false,
     "mutedInstanceIds": [],
     "scheduledTaskId": "776cb5c0-ad1e-11ec-ab9e-5f5932f4fad8",
-    "tags": []
+    "tags": [],
+    "executionStatus": {
+      "status": "unknown",
+      "lastExecutionDate": "2020-01-01T00:00:00.000Z",
+      "error": null
+    },
+    "revision": 0,
+    "legacyId": null,
+    "apiKey": null
   },
   "references": [],
   "migrationVersion": {
@@ -866,7 +973,14 @@
       "__internal_immutable:false",
       "test-tag-1",
       "foo-tag"
-    ]
+    ],
+    "executionStatus": {
+      "status": "unknown",
+      "lastExecutionDate": "2020-01-01T00:00:00.000Z",
+      "error": null
+    },
+    "revision": 0,
+    "legacyId": null
   },
   "references": [],
   "migrationVersion": {
@@ -910,7 +1024,15 @@
     "muteAll": false,
     "mutedInstanceIds": [],
     "scheduledTaskId": "c8b39c29-d860-43b6-8817-b8058d80ddbc",
-    "tags": []
+    "tags": [],
+    "executionStatus": {
+      "status": "unknown",
+      "lastExecutionDate": "2020-01-01T00:00:00.000Z",
+      "error": null
+    },
+    "revision": 0,
+    "legacyId": null,
+    "apiKey": null
   },
   "references": [],
   "migrationVersion": {
@@ -954,7 +1076,15 @@
     "muteAll": false,
     "mutedInstanceIds": [],
     "scheduledTaskId": "62c62b7f-8bf3-4104-a064-6247b7bda44f",
-    "tags": []
+    "tags": [],
+    "executionStatus": {
+      "status": "unknown",
+      "lastExecutionDate": "2020-01-01T00:00:00.000Z",
+      "error": null
+    },
+    "revision": 0,
+    "legacyId": null,
+    "apiKey": null
   },
   "references": [],
   "migrationVersion": {
@@ -998,7 +1128,15 @@
     "muteAll": false,
     "mutedInstanceIds": [],
     "scheduledTaskId": "f0d13f4d-35ae-4554-897a-6392e97bb84c",
-    "tags": []
+    "tags": [],
+    "executionStatus": {
+      "status": "unknown",
+      "lastExecutionDate": "2020-01-01T00:00:00.000Z",
+      "error": null
+    },
+    "revision": 0,
+    "legacyId": null,
+    "apiKey": null
   },
   "references": [],
   "migrationVersion": {
@@ -1030,7 +1168,15 @@
     "throttle": null,
     "updatedBy": "elastic",
     "updatedAt": "2022-08-24T19:02:30.889Z",
-    "isSnoozedUntil": "2022-08-24T19:05:49.817Z"
+    "isSnoozedUntil": "2022-08-24T19:05:49.817Z",
+    "executionStatus": {
+      "status": "unknown",
+      "lastExecutionDate": "2020-01-01T00:00:00.000Z",
+      "error": null
+    },
+    "revision": 0,
+    "legacyId": null,
+    "actions": []
   },
   "references": [],
   "migrationVersion": {
@@ -1069,12 +1215,12 @@
       "lastDuration": 60000
     },
     "monitoring": {
-      "execution": {
+      "run": {
         "history": [
           {
             "duration": 60000,
             "success": true,
-            "timestamp": "2022-08-24T19:05:49.817Z"
+            "timestamp": 1661367949817
           }
         ],
         "calculated_metrics": {
@@ -1082,13 +1228,29 @@
           "p50": 0,
           "p95": 60000,
           "p99": 60000
+        },
+        "last_run": {
+          "timestamp": "2022-08-24T19:05:49.817Z",
+          "metrics": {
+            "duration": 60000
+          }
         }
       }
-    }
+    },
+    "revision": 0,
+    "lastRun": {
+      "outcome": "succeeded",
+      "outcomeMsg": null,
+      "outcomeOrder": 0,
+      "warning": null,
+      "alertsCount": {}
+    },
+    "legacyId": null,
+    "actions": []
   },
   "references": [],
   "migrationVersion": {
-    "alert": "8.0.1"
+    "alert": "8.8.0"
   },
   "updated_at": "2022-11-01T19:05:50.159Z"
 }
@@ -1127,12 +1289,12 @@
       }
     },
     "monitoring": {
-      "execution": {
+      "run": {
         "history": [
           {
             "duration": 60000,
             "success": true,
-            "timestamp": "2022-08-24T19:05:49.817Z"
+            "timestamp": 1661367949817
           }
         ],
         "calculated_metrics": {
@@ -1140,13 +1302,29 @@
           "p50": 0,
           "p95": 60000,
           "p99": 60000
+        },
+        "last_run": {
+          "timestamp": "2022-08-24T19:05:49.817Z",
+          "metrics": {
+            "duration": 60000
+          }
         }
       }
-    }
+    },
+    "revision": 0,
+    "lastRun": {
+      "outcome": "warning",
+      "outcomeMsg": "warning message",
+      "outcomeOrder": 10,
+      "warning": "warning reason",
+      "alertsCount": {}
+    },
+    "legacyId": null,
+    "actions": []
   },
   "references": [],
   "migrationVersion": {
-    "alert": "8.0.1"
+    "alert": "8.8.0"
   },
   "updated_at": "2022-11-01T19:05:50.159Z"
 }
@@ -1187,7 +1365,15 @@
     "muteAll": false,
     "mutedInstanceIds": [],
     "scheduledTaskId": "8bd01ff0-9d84-11ed-994d-f1971f849da5",
-    "tags": []
+    "tags": [],
+    "executionStatus": {
+      "status": "unknown",
+      "lastExecutionDate": "2020-01-01T00:00:00.000Z",
+      "error": null
+    },
+    "revision": 0,
+    "legacyId": null,
+    "apiKey": null
   },
   "references": [],
   "migrationVersion": {
@@ -1247,7 +1433,14 @@
     "muteAll": true,
     "mutedInstanceIds": [],
     "scheduledTaskId": null,
-    "tags": []
+    "tags": [],
+    "executionStatus": {
+      "status": "unknown",
+      "lastExecutionDate": "2020-01-01T00:00:00.000Z",
+      "error": null
+    },
+    "revision": 0,
+    "legacyId": null
   },
   "references": [],
   "migrationVersion": {

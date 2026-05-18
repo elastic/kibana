@@ -536,7 +536,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
             {
               duration: 60000,
               success: true,
-              timestamp: '2022-08-24T19:05:49.817Z',
+              timestamp: 1661367949817,
             },
           ],
           calculated_metrics: {
