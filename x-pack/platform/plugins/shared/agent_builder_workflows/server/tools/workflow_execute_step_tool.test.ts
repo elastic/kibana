@@ -15,7 +15,10 @@ import type {
 } from '@kbn/agent-builder-server/tools';
 import { ExecutionStatus, type InternalConnectorContract } from '@kbn/workflows';
 import { WorkflowValidationError } from '@kbn/workflows-yaml';
+import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
+import { z } from '@kbn/zod/v4';
 import {
+  preValidateStepWith,
   registerWorkflowExecuteStepTool,
   SAFE_STEP_TYPES,
   WORKFLOW_EXECUTE_STEP_TOOL_ID,
@@ -946,5 +949,240 @@ describe('SAFE_STEP_TYPES policy', () => {
     for (const [stepType, expectedMethods] of Object.entries(auditedSafeConnectorMethods)) {
       expect(internalConnectors.get(stepType)?.methods).toEqual(expectedMethods);
     }
+  });
+});
+
+describe('structured YAML parse errors', () => {
+  let registeredTool: BuiltinToolDefinition;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    const agentBuilder = {
+      tools: {
+        register: jest.fn((tool: BuiltinToolDefinition) => {
+          registeredTool = tool;
+        }),
+      },
+    } as any;
+    registerWorkflowExecuteStepTool(agentBuilder, {} as any);
+  });
+
+  it('returns a structured parseError with line, column, and snippet for malformed YAML', async () => {
+    const brokenYaml = `steps:
+  - name: log_step
+    type: console
+   with:
+      message: "oops"`; // misaligned `with:` (3-space indent) — triggers a YAML error
+    const context = createMockContext(brokenYaml);
+    const result = await invokeHandler(
+      registeredTool,
+      { stepName: 'log_step', yaml: brokenYaml },
+      context
+    );
+
+    const data = result.results[0].data as Record<string, unknown>;
+    expect(data.success).toBe(false);
+    expect(data.error).toMatch(/Invalid workflow YAML at line \d+/);
+    expect(data.parseError).toBeDefined();
+    const parseError = data.parseError as {
+      message: string;
+      line?: number;
+      column?: number;
+      snippet?: string;
+    };
+    expect(typeof parseError.message).toBe('string');
+    expect(parseError.line).toBeGreaterThan(0);
+    expect(parseError.column).toBeGreaterThan(0);
+    expect(parseError.snippet).toContain('^');
+  });
+
+  it('omits parseError when YAML parses cleanly', async () => {
+    const goodYaml = `steps:
+  - name: log_step
+    type: console
+    with:
+      message: "ok"`;
+    const context = createMockContext(goodYaml);
+    const result = await invokeHandler(
+      registeredTool,
+      { stepName: 'nonexistent', yaml: goodYaml },
+      context
+    );
+    const data = result.results[0].data as Record<string, unknown>;
+    expect(data.parseError).toBeUndefined();
+  });
+});
+
+describe('preValidateStepWith', () => {
+  const buildExtensions = (
+    stepType: string,
+    schema?: z.ZodTypeAny
+  ): WorkflowsExtensionsServerPluginStart =>
+    ({
+      getStepDefinition: jest.fn().mockReturnValue(
+        schema
+          ? {
+              id: stepType,
+              inputSchema: schema,
+              outputSchema: z.unknown(),
+              handler: jest.fn(),
+            }
+          : undefined
+      ),
+    } as any);
+
+  const yamlWithStep = (withBlock: Record<string, unknown>): string =>
+    `steps:
+  - name: my_step
+    type: data.search
+    with:
+      ${Object.entries(withBlock)
+        .map(([k, v]) => `${k}: ${JSON.stringify(v)}`)
+        .join('\n      ')}`;
+
+  it('returns null when the workflowsExtensions getter resolves to undefined', async () => {
+    const failure = await preValidateStepWith('steps: []', 'noop', 'data.search', undefined);
+    expect(failure).toBeNull();
+  });
+
+  it('returns unknown_step_type when the registry has no definition', async () => {
+    const failure = await preValidateStepWith(
+      yamlWithStep({ index: 'logs-*' }),
+      'my_step',
+      'mystery.step',
+      buildExtensions('mystery.step')
+    );
+    expect(failure).not.toBeNull();
+    expect(failure!.reason).toBe('unknown_step_type');
+    expect(failure!.schemaErrors).toBeUndefined();
+    expect(failure!.message).toContain('mystery.step');
+  });
+
+  it('returns null when the step type has no inputSchema', async () => {
+    const definition = {
+      id: 'data.search',
+      outputSchema: z.unknown(),
+      handler: jest.fn(),
+    };
+    const extensions = {
+      getStepDefinition: jest.fn().mockReturnValue(definition),
+    } as any;
+    const failure = await preValidateStepWith(
+      yamlWithStep({ index: 'logs-*' }),
+      'my_step',
+      'data.search',
+      extensions
+    );
+    expect(failure).toBeNull();
+  });
+
+  it('returns schemaErrors for invalid `with:` payloads', async () => {
+    const schema = z.object({
+      index: z.string(),
+      size: z.number().int().positive(),
+    });
+    const failure = await preValidateStepWith(
+      yamlWithStep({ index: 'logs-*' }), // `size` missing
+      'my_step',
+      'data.search',
+      buildExtensions('data.search', schema)
+    );
+
+    expect(failure).not.toBeNull();
+    expect(failure!.reason).toBe('with_schema_invalid');
+    expect(failure!.schemaErrors).toBeDefined();
+    expect(failure!.schemaErrors!.length).toBeGreaterThan(0);
+    // The single missing field is `size`.
+    expect(failure!.schemaErrors!.some((issue) => issue.path === 'size')).toBe(true);
+    expect(failure!.message).toContain('my_step');
+    expect(failure!.message).toContain('data.search');
+  });
+
+  it('returns null when the `with:` block matches the schema', async () => {
+    const schema = z.object({
+      index: z.string(),
+      size: z.number().int().positive(),
+    });
+    const failure = await preValidateStepWith(
+      yamlWithStep({ index: 'logs-*', size: 10 }),
+      'my_step',
+      'data.search',
+      buildExtensions('data.search', schema)
+    );
+    expect(failure).toBeNull();
+  });
+
+  it('walks nested step containers (if/steps) to find the target step', async () => {
+    const schema = z.object({
+      message: z.string().min(1),
+    });
+    const yaml = `steps:
+  - name: outer_if
+    type: if
+    condition: "true"
+    steps:
+      - name: nested_step
+        type: data.search
+        with:
+          message: ""`;
+    const failure = await preValidateStepWith(
+      yaml,
+      'nested_step',
+      'data.search',
+      buildExtensions('data.search', schema)
+    );
+    expect(failure).not.toBeNull();
+    expect(failure!.reason).toBe('with_schema_invalid');
+    expect(failure!.schemaErrors!.some((issue) => issue.path === 'message')).toBe(true);
+  });
+});
+
+describe('handler pre-validation short-circuit', () => {
+  let registeredTool: BuiltinToolDefinition;
+  const mockApi = {
+    testStep: jest.fn(),
+    getWorkflowExecution: jest.fn(),
+    validateWorkflow: jest.fn(),
+  } as any;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    const agentBuilder = {
+      tools: {
+        register: jest.fn((tool: BuiltinToolDefinition) => {
+          registeredTool = tool;
+        }),
+      },
+    } as any;
+
+    // Register with a workflowsExtensions getter that rejects `data.search`
+    // unless it carries a non-empty `index` string.
+    const extensions: WorkflowsExtensionsServerPluginStart = {
+      getStepDefinition: jest.fn().mockReturnValue({
+        id: 'data.search',
+        inputSchema: z.object({ index: z.string().min(1) }),
+        outputSchema: z.unknown(),
+        handler: jest.fn(),
+      }),
+    } as any;
+    registerWorkflowExecuteStepTool(agentBuilder, mockApi, () => extensions);
+  });
+
+  it('short-circuits before executeAndPollStep when `with:` is invalid', async () => {
+    const yaml = `steps:
+  - name: bad_search
+    type: data.search
+    with:
+      index: ""`;
+    const context = createMockContext(yaml);
+    const result = await invokeHandler(registeredTool, { stepName: 'bad_search', yaml }, context);
+
+    const data = result.results[0].data as Record<string, unknown>;
+    expect(data.success).toBe(false);
+    expect(data.reason).toBe('with_schema_invalid');
+    expect(data.stepType).toBe('data.search');
+    expect(data.schemaErrors).toBeDefined();
+    // The step never reached the execution-engine round-trip.
+    expect(mockApi.testStep).not.toHaveBeenCalled();
   });
 });

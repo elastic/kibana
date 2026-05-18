@@ -66,7 +66,10 @@ export class AgentBuilderWorkflowsPlugin
     registerGetTriggerDefinitionsTool(agentBuilder);
     registerGetConnectorsTool(agentBuilder, api);
     registerGetExamplesTool(agentBuilder);
-    registerWorkflowExecuteStepTool(agentBuilder, api);
+    registerWorkflowExecuteStepTool(agentBuilder, api, async () => {
+      const [, startDeps] = await coreSetup.getStartServices();
+      return startDeps.workflowsExtensions;
+    });
     registerWorkflowEditTools(agentBuilder, api, aiTelemetryClient);
 
     // Workflow attachment types

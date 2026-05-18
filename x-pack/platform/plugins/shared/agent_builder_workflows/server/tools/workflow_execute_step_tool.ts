@@ -24,6 +24,18 @@ import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 type WorkflowsManagementApi = WorkflowsServerPluginSetup['management'];
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
+import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
+
+/**
+ * Lazy accessor for the workflows-extensions start contract. The plugin
+ * declares workflows-extensions as an `optionalPlugin`; when it is not
+ * available (or not yet started — e.g. in unit tests), the getter resolves
+ * to `undefined` and pre-validation falls through silently.
+ */
+export type WorkflowsExtensionsGetter = () =>
+  | Promise<WorkflowsExtensionsServerPluginStart | undefined>
+  | WorkflowsExtensionsServerPluginStart
+  | undefined;
 
 export const WORKFLOW_EXECUTE_STEP_TOOL_ID = 'platform.workflows.workflow_execute_step';
 
@@ -105,15 +117,41 @@ const buildLookup = (yaml: string): WorkflowLookup => {
   return buildWorkflowLookup(doc, lineCounter);
 };
 
-const getYamlParseError = (yaml: string): string | null => {
+export interface YamlParseFailure {
+  /** Human-readable error message from the YAML parser. */
+  message: string;
+  /** 1-based line number of the offending token, when known. */
+  line?: number;
+  /** 1-based column of the offending token, when known. */
+  column?: number;
+  /** Source line plus a caret marker pointing at the column, when known. */
+  snippet?: string;
+}
+
+/**
+ * Returns a structured parse failure (line + column + snippet) so the LLM
+ * can do a surgical retry instead of re-emitting the whole YAML. Returns
+ * null if the document parses cleanly.
+ */
+const getYamlParseError = (yaml: string): YamlParseFailure | null => {
   try {
     const doc = parseDocument(yaml);
     if (doc.errors.length > 0) {
-      return doc.errors[0].message;
+      const err = doc.errors[0];
+      // YAMLError.linePos is `[start, end]`; both carry { line, col } (1-based).
+      const linePos = (err as { linePos?: Array<{ line: number; col: number }> }).linePos?.[0];
+      const lines = yaml.split('\n');
+      const line = linePos?.line;
+      const column = linePos?.col;
+      const snippet =
+        line !== undefined && line >= 1 && line <= lines.length
+          ? `${lines[line - 1]}\n${' '.repeat(Math.max(0, (column ?? 1) - 1))}^`
+          : undefined;
+      return { message: err.message, line, column, snippet };
     }
     return null;
   } catch (error) {
-    return error instanceof Error ? error.message : String(error);
+    return { message: error instanceof Error ? error.message : String(error) };
   }
 };
 
@@ -533,14 +571,158 @@ const pollExecution = async (
   };
 };
 
+export interface StepSchemaIssue {
+  /** Dot/bracket path inside the step's `with:` block (e.g. `endpoint_id`, `query.bool.must[0]`). */
+  path: string;
+  /** Zod issue code (e.g. `invalid_type`, `unrecognized_keys`). */
+  code: string;
+  /** Human-readable message produced by Zod. */
+  message: string;
+  /** Expected type when known (Zod populates this for `invalid_type`). */
+  expected?: string;
+  /** Actual value's type when known. */
+  received?: string;
+}
+
+export interface StepValidationFailure {
+  /** The step type id the step claims to be (e.g. `data.search`). */
+  stepType: string;
+  /** Top-level failure reason — the registry might not know this step, or the schema rejected the `with:`. */
+  reason: 'unknown_step_type' | 'with_schema_invalid';
+  /** Schema issues populated when `reason === 'with_schema_invalid'`. */
+  schemaErrors?: StepSchemaIssue[];
+  /** Convenience message suitable for an LLM-facing `error` field. */
+  message: string;
+}
+
+/**
+ * Best-effort pre-execution validation of a step's `with:` block. Returns
+ * `null` when:
+ *   - the workflows-extensions registry is unavailable (e.g. unit tests),
+ *   - the step type has no registered `inputSchema`, or
+ *   - the `with:` block parses cleanly.
+ *
+ * Returns a structured failure when the `with:` block fails Zod parsing. The
+ * caller is expected to short-circuit before the (expensive) execution-engine
+ * round-trip so the LLM gets the schema diagnosis cheaply.
+ *
+ * NOTE: This is intentionally a SOFT gate. If the YAML carries Mustache
+ * placeholders (e.g. `{{ steps.prev.output.id }}`), they're left as strings
+ * and Zod may reject them even though the live execution would resolve them.
+ * For that reason any failure is surfaced as a tool error but does NOT throw;
+ * the user can still retry with a corrected step.
+ */
+export async function preValidateStepWith(
+  yaml: string,
+  stepName: string,
+  stepType: string,
+  workflowsExtensions: WorkflowsExtensionsServerPluginStart | undefined
+): Promise<StepValidationFailure | null> {
+  if (!workflowsExtensions) {
+    return null;
+  }
+
+  const definition = workflowsExtensions.getStepDefinition(stepType);
+  if (!definition) {
+    return {
+      stepType,
+      reason: 'unknown_step_type',
+      message: `Step type "${stepType}" is not registered. Use \`get_step_definitions\` to discover valid step types.`,
+    };
+  }
+  if (!definition.inputSchema) {
+    return null;
+  }
+
+  let withBlock: unknown;
+  try {
+    const parsed = YAML.parse(yaml) as { steps?: unknown[] } | undefined;
+    withBlock = extractWithBlock(parsed?.steps, stepName);
+  } catch {
+    // YAML errors are reported separately via `getYamlParseError`; if we
+    // somehow reach this point with a malformed doc, just skip validation.
+    return null;
+  }
+
+  const result = definition.inputSchema.safeParse(withBlock ?? {});
+  if (result.success) {
+    return null;
+  }
+
+  const schemaErrors: StepSchemaIssue[] = result.error.issues.map((issue) => ({
+    path: issue.path.map(String).join('.') || '<root>',
+    code: issue.code,
+    message: issue.message,
+    expected: (issue as { expected?: string }).expected,
+    received: (issue as { received?: string }).received,
+  }));
+
+  return {
+    stepType,
+    reason: 'with_schema_invalid',
+    schemaErrors,
+    message: `Step "${stepName}" (${stepType}) has ${schemaErrors.length} schema error${
+      schemaErrors.length === 1 ? '' : 's'
+    } in \`with:\`. Fix only the listed paths.`,
+  };
+}
+
+/**
+ * Walks the parsed YAML steps tree to find a step by name and returns its
+ * `with:` value. Returns `undefined` if the step isn't found or the `with:`
+ * field is missing.
+ */
+function extractWithBlock(steps: unknown, stepName: string): unknown {
+  if (!Array.isArray(steps)) return undefined;
+  for (const step of steps) {
+    if (!step || typeof step !== 'object') continue;
+    const stepObj = step as Record<string, unknown>;
+    if (stepObj.name === stepName) {
+      return stepObj.with;
+    }
+    for (const nestedKey of NESTED_STEP_KEYS) {
+      if (isNestedStepKey(nestedKey)) {
+        const nested = stepObj[nestedKey];
+        const found = extractWithBlock(nested, stepName);
+        if (found !== undefined) {
+          return found;
+        }
+      }
+    }
+  }
+  return undefined;
+}
+
 export function registerWorkflowExecuteStepTool(
   agentBuilder: AgentBuilderPluginSetup,
-  api: WorkflowsManagementApi
+  api: WorkflowsManagementApi,
+  getWorkflowsExtensions: WorkflowsExtensionsGetter = () => undefined
 ): void {
+  // Cache the resolution promise so the start contract is fetched at most once
+  // per tool registration, regardless of how many tool invocations happen.
+  let workflowsExtensionsPromise:
+    | Promise<WorkflowsExtensionsServerPluginStart | undefined>
+    | undefined;
+  const resolveWorkflowsExtensions = (): Promise<
+    WorkflowsExtensionsServerPluginStart | undefined
+  > => {
+    if (!workflowsExtensionsPromise) {
+      workflowsExtensionsPromise = Promise.resolve(getWorkflowsExtensions()).catch(() => undefined);
+    }
+    return workflowsExtensionsPromise;
+  };
+
   agentBuilder.tools.register({
     id: WORKFLOW_EXECUTE_STEP_TOOL_ID,
     type: ToolType.builtin,
     description: `Execute a single workflow step against the real environment.
+
+Emit only the \`steps:\` block (and any anchored fragments it references). The envelope (\`version\`, \`name\`, \`enabled: false\`, \`triggers: [{ type: manual }]\`) is added automatically if you omit it — sending it just inflates tokens.
+
+YAML parse errors return a structured \`parseError\` carrying \`line\`, \`column\`, and a snippet with a caret marker. Use it to fix the exact offending token rather than re-emitting the whole document.
+
+Schema errors on the step's \`with:\` block are returned BEFORE execution, with \`schemaErrors\` listing each Zod issue (path, message, expected/received). Fix only the failing fields — do not regenerate untouched parts of the step.
+
 - Safe steps (data, ES reads, cases reads): executed and output returned with no prompt.
 - Unsafe steps (slack.sendMessage, elasticsearch.indices.delete, ES writes, kibana.request, http, …): execution is gated by a user confirmation dialog. ALWAYS populate \`confirmation_body\` with a Markdown preview describing: (1) resolved inputs (e.g. Slack channel + message text, ES index + operation + approximate doc count), (2) the side effect this step will produce, (3) whether the action is reversible. Without \`confirmation_body\` the dialog falls back to a flat key/value dump, which is a degraded UX.
 - if/while steps containing unsafe children: children are auto-replaced with safe stubs so the condition can be tested — returns which branch was taken (no prompt).
@@ -556,7 +738,7 @@ If the user declines a confirmation, do NOT retry the same step. Acknowledge the
         .string()
         .optional()
         .describe(
-          'Optional inline workflow YAML to execute from. If omitted, reads from the workflow.yaml attachment.'
+          'Optional inline workflow YAML. EMIT ONLY the `steps:` block — the workflow envelope (version/name/enabled/triggers) is auto-added if omitted. If omitted entirely, reads from the workflow.yaml attachment.'
         ),
       contextOverride: z
         .record(z.string(), z.unknown())
@@ -596,9 +778,16 @@ If the user declines a confirmation, do NOT retry the same step. Acknowledge the
 
       const yamlParseError = getYamlParseError(yaml);
       if (yamlParseError) {
+        const locator =
+          yamlParseError.line !== undefined
+            ? ` at line ${yamlParseError.line}${
+                yamlParseError.column !== undefined ? `, column ${yamlParseError.column}` : ''
+              }`
+            : '';
         return createToolResult({
           success: false,
-          error: `Invalid workflow YAML: ${yamlParseError}`,
+          error: `Invalid workflow YAML${locator}: ${yamlParseError.message}`,
+          parseError: yamlParseError,
         });
       }
 
@@ -611,6 +800,27 @@ If the user declines a confirmation, do NOT retry the same step. Acknowledge the
             defaultMessage: 'Step "{stepName}" not found in the workflow YAML',
             values: { stepName },
           }),
+        });
+      }
+
+      // Pre-execution schema validation: catch invalid `with:` payloads
+      // before the (expensive) execution-engine round-trip and before
+      // prompting the user with a confirmation dialog.
+      const validationFailure = await preValidateStepWith(
+        yaml,
+        stepName,
+        stepInfo.stepType,
+        await resolveWorkflowsExtensions()
+      );
+      if (validationFailure) {
+        return createToolResult({
+          success: false,
+          error: validationFailure.message,
+          stepType: validationFailure.stepType,
+          reason: validationFailure.reason,
+          ...(validationFailure.schemaErrors
+            ? { schemaErrors: validationFailure.schemaErrors }
+            : {}),
         });
       }
 

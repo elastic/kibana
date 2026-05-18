@@ -11,6 +11,7 @@ import type {
   AgentContextLayerPluginStart,
 } from '@kbn/agent-context-layer-plugin/server';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
+import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 
 export interface PluginSetupDependencies {
   agentBuilder: AgentBuilderPluginSetup;
@@ -21,6 +22,13 @@ export interface PluginSetupDependencies {
 export interface PluginStartDependencies {
   agentBuilder: AgentBuilderPluginStart;
   agentContextLayer: AgentContextLayerPluginStart;
+  /**
+   * Optional — when present, `workflow_execute_step` pre-validates each step's
+   * `with:` block against the registered step's Zod schema before invoking the
+   * execution engine. Falls through silently if unavailable (e.g. for unit
+   * tests that don't wire the registry).
+   */
+  workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
