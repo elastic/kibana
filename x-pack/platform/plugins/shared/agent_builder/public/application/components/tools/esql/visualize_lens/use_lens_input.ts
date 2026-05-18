@@ -28,9 +28,7 @@ interface ReturnValue {
 }
 
 export function useLensInput({ dataViews, lens, lensConfig, timeRange }: Params): ReturnValue {
-  const lensHelpersAsync = useAsync(() => {
-    return lens.stateHelperApi();
-  }, [lens]);
+  const lensHelpersAsync = useAsync(() => lens.stateHelperApi(), [lens]);
   // convert lens config to lens attributes
   const lensResult = useMemo(() => {
     try {

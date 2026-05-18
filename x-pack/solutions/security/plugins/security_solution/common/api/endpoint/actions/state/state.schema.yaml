@@ -17,21 +17,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ActionStateSuccessResponse'
+              examples:
+                actionsState:
+                  summary: Response actions state with encryption enabled
+                  value:
+                    data:
+                      canEncrypt: true
 components:
   schemas:
     ActionStateSuccessResponse:
-      required: ['body']
-      type:
-        object
+      type: object
+      required: ['data']
       properties:
-        body:
-          required: ['data']
+        data:
           type: object
           properties:
-            data:
-              type: object
-              properties:
-                canEncrypt:
-                  type: boolean
-                  description: Whether the Kibana instance has encryption enabled for response actions.
+            canEncrypt:
+              type: boolean
+              description: Whether the Kibana instance has encryption enabled for response actions.
 

@@ -59,7 +59,7 @@ export const MonitorType = ({
       isSelected={isSelected}
       data-test-subj={dataTestSubj}
     >
-      <EuiIcon type={icon} />
+      <EuiIcon type={icon} aria-hidden={true} />
     </EuiKeyPadMenuItem>
   );
 };

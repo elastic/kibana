@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import axios, { AxiosError } from 'axios';
 import pRetry from 'p-retry';
 import type {
   ProductType,
@@ -76,47 +75,61 @@ export class ProxyHandler extends ProjectHandler {
     }
 
     try {
-      const response = await axios.post(`${this.baseEnvUrl}/projects`, body, {
+      const response = await fetch(`${this.baseEnvUrl}/projects`, {
+        method: 'POST',
         headers: {
           Authorization: `Basic ${this.proxyAuth}`,
+          'Content-Type': 'application/json',
         },
+        body: JSON.stringify(body),
       });
+      if (!response.ok) {
+        throw new Error(`${response.status}:${await response.text()}`);
+      }
+
+      const data = (await response.json()) as {
+        name: string;
+        project_id: string;
+        region_id: string;
+        elasticsearch_endpoint: string;
+        kibana_endpoint: string;
+        project_type: string;
+        id: number;
+        organization_id: number;
+        organization_name: string;
+      };
       return {
-        name: response.data.name,
-        id: response.data.project_id,
-        region: response.data.region_id,
-        es_url: `${response.data.elasticsearch_endpoint}:443`,
-        kb_url: `${response.data.kibana_endpoint}:443`,
-        product: response.data.project_type,
-        proxy_id: response.data.id,
-        proxy_org_id: response.data.organization_id,
-        proxy_org_name: response.data.organization_name,
+        name: data.name,
+        id: data.project_id,
+        region: data.region_id,
+        es_url: `${data.elasticsearch_endpoint}:443`,
+        kb_url: `${data.kibana_endpoint}:443`,
+        product: data.project_type,
+        proxy_id: data.id,
+        proxy_org_id: data.organization_id,
+        proxy_org_name: data.organization_name,
       };
     } catch (error) {
-      if (error instanceof AxiosError) {
-        const errorData = JSON.stringify(error.response?.data);
-        this.log.error(`${error.response?.status}:${errorData}`);
-      } else {
-        this.log.error(`${error.message}`);
-      }
+      this.log.error(`${error.message}`);
     }
   }
 
   // Method to invoke the delete project API for serverless.
   async deleteSecurityProject(projectId: string, projectName: string): Promise<void> {
     try {
-      await axios.delete(`${this.baseEnvUrl}/projects/${projectId}`, {
+      const response = await fetch(`${this.baseEnvUrl}/projects/${projectId}`, {
+        method: 'DELETE',
         headers: {
           Authorization: `Basic ${this.proxyAuth}`,
         },
       });
+      if (!response.ok) {
+        throw new Error(`${response.status}:${await response.text()}`);
+      }
+
       this.log.info(`Project ${projectName} was successfully deleted!`);
     } catch (error) {
-      if (error instanceof AxiosError) {
-        this.log.error(`${error.response?.status}:${error.response?.data}`);
-      } else {
-        this.log.error(`${error.message}`);
-      }
+      this.log.error(`${error.message}`);
     }
   }
 
@@ -125,25 +138,32 @@ export class ProxyHandler extends ProjectHandler {
     this.log.info(`${projectId} : Reseting credentials`);
 
     const fetchResetCredentialsStatusAttempt = async (attemptNum: number) => {
-      const response = await axios.post(
+      const response = await fetch(
         `${this.baseEnvUrl}/projects/${projectId}/_reset-internal-credentials`,
-        {},
         {
+          method: 'POST',
           headers: {
             Authorization: `Basic ${this.proxyAuth}`,
+            'Content-Type': 'application/json',
           },
+          body: JSON.stringify({}),
         }
       );
+      if (!response.ok) {
+        throw new Error(`${response.status}:${await response.text()}`);
+      }
+
+      const data = (await response.json()) as { password: string; username: string };
       this.log.info('Credentials have been reset');
       return {
-        password: response.data.password,
-        username: response.data.username,
+        password: data.password,
+        username: data.username,
       };
     };
 
     const retryOptions = {
-      onFailedAttempt: (error: Error | AxiosError) => {
-        if (error instanceof AxiosError && error.code === 'ENOTFOUND') {
+      onFailedAttempt: (error: Error) => {
+        if ((error as { cause?: { code?: string } }).cause?.code === 'ENOTFOUND') {
           this.log.info('Project is not reachable. A retry will be triggered soon..');
         } else {
           this.log.error(`${error.message}`);
@@ -161,21 +181,26 @@ export class ProxyHandler extends ProjectHandler {
   waitForProjectInitialized(projectId: string): Promise<void> {
     const fetchProjectStatusAttempt = async (attemptNum: number) => {
       this.log.info(`Retry number ${attemptNum} to check if project is initialized.`);
-      const response = await axios.get(`${this.baseEnvUrl}/projects/${projectId}/status`, {
+      const response = await fetch(`${this.baseEnvUrl}/projects/${projectId}/status`, {
         headers: {
           Authorization: `Basic ${this.proxyAuth}`,
         },
       });
-      if (response.data.phase !== 'initialized') {
-        this.log.info(response.data);
+      if (!response.ok) {
+        throw new Error(`${response.status}:${await response.text()}`);
+      }
+
+      const data = (await response.json()) as { phase: string };
+      if (data.phase !== 'initialized') {
+        this.log.info(data);
         throw new Error('Project is not initialized. A retry will be triggered soon...');
       } else {
         this.log.info('Project is initialized');
       }
     };
     const retryOptions = {
-      onFailedAttempt: (error: Error | AxiosError) => {
-        if (error instanceof AxiosError && error.code === 'ENOTFOUND') {
+      onFailedAttempt: (error: Error) => {
+        if ((error as { cause?: { code?: string } }).cause?.code === 'ENOTFOUND') {
           this.log.info('Project is not reachable. A retry will be triggered soon...');
         } else {
           this.log.warning(`${error.message}`);
