@@ -36,15 +36,15 @@ export function isOperandMissing(operand: ESQLSingleAstItem | undefined): boolea
   return !operand || (operand?.type === 'unknown' && operand?.incomplete === true);
 }
 
-/** Returns true if we should suggest opening a list for the right operand */
-export function shouldSuggestOpenListForOperand(operand: ESQLSingleAstItem | undefined): boolean {
+/** Returns true when the IN-family right operand can still be started. */
+export function shouldSuggestRightOperandStart(operand: ESQLSingleAstItem | undefined): boolean {
   return (
     isOperandMissing(operand) ||
     (isList(operand) && operand.location.min === 0 && operand.location.max === 0)
   );
 }
 
-/** Suggestions for logical continuations after a complete list or null-check operator */
+/** Suggestions for logical continuations after a complete boolean operator expression. */
 export function getLogicalContinuationSuggestions(): ISuggestionItem[] {
   return logicalOperators.map(getOperatorSuggestion);
 }
