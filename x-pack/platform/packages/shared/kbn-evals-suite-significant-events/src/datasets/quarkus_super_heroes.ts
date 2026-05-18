@@ -815,11 +815,6 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
             score: 2,
           },
           {
-            id: 'feature-grounded',
-            text: 'Queries must be grounded in features from the input (entities, dependencies, dataset_analysis, error_logs) rather than being speculative or based solely on the stream name/description',
-            score: 2,
-          },
-          {
             id: 'stats-aggregate-monitoring',
             text: 'Should generate at least one STATS query for aggregate monitoring (e.g., fight simulation throughput at ~12 fights/min baseline, request volume per microservice) with calibrated thresholds documented in descriptions.',
             score: 1,
@@ -846,7 +841,7 @@ export const quarkusSuperHeroesDataset: DatasetConfig = {
         criteria: [
           {
             id: 'kafka-error-query',
-            text: 'Must generate an ES|QL query that catches SmallRye Kafka write/nack errors (SRMSG18206 unable to write, SRMSG18212 message nacked, TimeoutException topic not present in metadata)',
+            text: 'Must generate an ES|QL query that catches SmallRye Kafka write/nack errors (SRMSG18206 unable to write, SRMSG18212 message nacked, TimeoutException topic not present in metadata). Note: this criterion covers only rest-fights producer errors — event-statistics consumer errors are out of scope for this criterion',
             score: 3,
             sampling_filters: [
               {
