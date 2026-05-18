@@ -12,13 +12,11 @@ import {
   ALL_ROLE,
   apiTest,
   buildCreateActionPolicyData,
+  getDisableActionPolicyUrl,
   NO_ACCESS_ROLE,
   READ_ROLE,
   testData,
 } from '../../../fixtures';
-
-const getDisableUrl = (id: string): string =>
-  `${testData.ACTION_POLICY_API_PATH}/${encodeURIComponent(id)}/_disable`;
 
 /*
  * Custom-role auth (`requestAuth.getApiKeyForCustomRole`) is not yet supported
@@ -52,7 +50,7 @@ apiTest.describe('Disable action policy API', { tag: '@local-stateful-classic' }
         buildCreateActionPolicyData({ name: 'test-disable' })
       );
 
-      const response = await apiClient.post(getDisableUrl(created.id), {
+      const response = await apiClient.post(getDisableActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
       });
 
@@ -72,7 +70,7 @@ apiTest.describe('Disable action policy API', { tag: '@local-stateful-classic' }
       );
       await apiServices.alertingV2.actionPolicies.disable(created.id);
 
-      const response = await apiClient.post(getDisableUrl(created.id), {
+      const response = await apiClient.post(getDisableActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
       });
 
@@ -93,7 +91,7 @@ apiTest.describe('Disable action policy API', { tag: '@local-stateful-classic' }
 
       await apiServices.alertingV2.actionPolicies.snooze(created.id, futureDate);
 
-      const response = await apiClient.post(getDisableUrl(created.id), {
+      const response = await apiClient.post(getDisableActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
       });
 
@@ -106,7 +104,7 @@ apiTest.describe('Disable action policy API', { tag: '@local-stateful-classic' }
   // ---------- not found ----------
 
   apiTest('not found: returns 404 for a non-existent id', async ({ apiClient }) => {
-    const response = await apiClient.post(getDisableUrl('non-existent-id'), {
+    const response = await apiClient.post(getDisableActionPolicyUrl('non-existent-id'), {
       headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
     });
 
@@ -116,9 +114,12 @@ apiTest.describe('Disable action policy API', { tag: '@local-stateful-classic' }
   // ---------- schema validation ----------
 
   apiTest('validation: rejects id over the maximum length', async ({ apiClient }) => {
-    const response = await apiClient.post(getDisableUrl('a'.repeat(ID_MAX_LENGTH + 1)), {
-      headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
-    });
+    const response = await apiClient.post(
+      getDisableActionPolicyUrl('a'.repeat(ID_MAX_LENGTH + 1)),
+      {
+        headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+      }
+    );
 
     expect(response).toHaveStatusCode(400);
   });
@@ -133,7 +134,7 @@ apiTest.describe('Disable action policy API', { tag: '@local-stateful-classic' }
         buildCreateActionPolicyData({ name: 'writer-can-disable' })
       );
 
-      const response = await apiClient.post(getDisableUrl(created.id), {
+      const response = await apiClient.post(getDisableActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...writerCredentials.apiKeyHeader },
       });
 
@@ -150,7 +151,7 @@ apiTest.describe('Disable action policy API', { tag: '@local-stateful-classic' }
         buildCreateActionPolicyData({ name: 'reader-cannot-disable' })
       );
 
-      const response = await apiClient.post(getDisableUrl(created.id), {
+      const response = await apiClient.post(getDisableActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...readerCredentials.apiKeyHeader },
       });
 
@@ -166,7 +167,7 @@ apiTest.describe('Disable action policy API', { tag: '@local-stateful-classic' }
         buildCreateActionPolicyData({ name: 'no-access-cannot-disable' })
       );
 
-      const response = await apiClient.post(getDisableUrl(created.id), {
+      const response = await apiClient.post(getDisableActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...noAccessCredentials.apiKeyHeader },
       });
 

@@ -12,16 +12,13 @@ import {
   ALL_ROLE,
   apiTest,
   buildCreateActionPolicyData,
+  getSnoozeActionPolicyUrl,
   NO_ACCESS_ROLE,
   READ_ROLE,
   testData,
 } from '../../../fixtures';
 
-const getSnoozeUrl = (id: string): string =>
-  `${testData.ACTION_POLICY_API_PATH}/${encodeURIComponent(id)}/_snooze`;
-
-const futureIsoDate = (offsetMs: number = 86_400_000): string =>
-  new Date(Date.now() + offsetMs).toISOString();
+import { futureIsoDate } from '../../../../common/builders';
 
 /*
  * Custom-role auth (`requestAuth.getApiKeyForCustomRole`) is not yet supported
@@ -56,7 +53,7 @@ apiTest.describe('Snooze action policy API', { tag: '@local-stateful-classic' },
       );
       const snoozedUntil = futureIsoDate();
 
-      const response = await apiClient.post(getSnoozeUrl(created.id), {
+      const response = await apiClient.post(getSnoozeActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
         body: { snoozedUntil },
       });
@@ -79,7 +76,7 @@ apiTest.describe('Snooze action policy API', { tag: '@local-stateful-classic' },
       await apiServices.alertingV2.actionPolicies.disable(created.id);
       const snoozedUntil = futureIsoDate();
 
-      const response = await apiClient.post(getSnoozeUrl(created.id), {
+      const response = await apiClient.post(getSnoozeActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
         body: { snoozedUntil },
       });
@@ -103,7 +100,7 @@ apiTest.describe('Snooze action policy API', { tag: '@local-stateful-classic' },
 
       await apiServices.alertingV2.actionPolicies.snooze(created.id, firstDate);
 
-      const response = await apiClient.post(getSnoozeUrl(created.id), {
+      const response = await apiClient.post(getSnoozeActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
         body: { snoozedUntil: secondDate },
       });
@@ -116,7 +113,7 @@ apiTest.describe('Snooze action policy API', { tag: '@local-stateful-classic' },
   // ---------- not found ----------
 
   apiTest('not found: returns 404 for a non-existent id', async ({ apiClient }) => {
-    const response = await apiClient.post(getSnoozeUrl('non-existent-id'), {
+    const response = await apiClient.post(getSnoozeActionPolicyUrl('non-existent-id'), {
       headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
       body: { snoozedUntil: futureIsoDate() },
     });
@@ -131,7 +128,7 @@ apiTest.describe('Snooze action policy API', { tag: '@local-stateful-classic' },
       buildCreateActionPolicyData({ name: 'test-snooze-invalid-date' })
     );
 
-    const response = await apiClient.post(getSnoozeUrl(created.id), {
+    const response = await apiClient.post(getSnoozeActionPolicyUrl(created.id), {
       headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
       body: { snoozedUntil: 'not-a-date' },
     });
@@ -146,7 +143,7 @@ apiTest.describe('Snooze action policy API', { tag: '@local-stateful-classic' },
         buildCreateActionPolicyData({ name: 'test-snooze-date-only' })
       );
 
-      const response = await apiClient.post(getSnoozeUrl(created.id), {
+      const response = await apiClient.post(getSnoozeActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
         // z.iso.datetime() requires the full ISO 8601 datetime form (with T and time).
         body: { snoozedUntil: '2026-01-01' },
@@ -161,7 +158,7 @@ apiTest.describe('Snooze action policy API', { tag: '@local-stateful-classic' },
       buildCreateActionPolicyData({ name: 'test-snooze-empty' })
     );
 
-    const response = await apiClient.post(getSnoozeUrl(created.id), {
+    const response = await apiClient.post(getSnoozeActionPolicyUrl(created.id), {
       headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
       body: { snoozedUntil: '' },
     });
@@ -174,7 +171,7 @@ apiTest.describe('Snooze action policy API', { tag: '@local-stateful-classic' },
       buildCreateActionPolicyData({ name: 'test-snooze-missing' })
     );
 
-    const response = await apiClient.post(getSnoozeUrl(created.id), {
+    const response = await apiClient.post(getSnoozeActionPolicyUrl(created.id), {
       headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
       body: {},
     });
@@ -183,7 +180,7 @@ apiTest.describe('Snooze action policy API', { tag: '@local-stateful-classic' },
   });
 
   apiTest('validation: rejects id over the maximum length', async ({ apiClient }) => {
-    const response = await apiClient.post(getSnoozeUrl('a'.repeat(ID_MAX_LENGTH + 1)), {
+    const response = await apiClient.post(getSnoozeActionPolicyUrl('a'.repeat(ID_MAX_LENGTH + 1)), {
       headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
       body: { snoozedUntil: futureIsoDate() },
     });
@@ -202,7 +199,7 @@ apiTest.describe('Snooze action policy API', { tag: '@local-stateful-classic' },
       );
       const snoozedUntil = futureIsoDate();
 
-      const response = await apiClient.post(getSnoozeUrl(created.id), {
+      const response = await apiClient.post(getSnoozeActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...writerCredentials.apiKeyHeader },
         body: { snoozedUntil },
       });
@@ -220,7 +217,7 @@ apiTest.describe('Snooze action policy API', { tag: '@local-stateful-classic' },
         buildCreateActionPolicyData({ name: 'reader-cannot-snooze' })
       );
 
-      const response = await apiClient.post(getSnoozeUrl(created.id), {
+      const response = await apiClient.post(getSnoozeActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...readerCredentials.apiKeyHeader },
         body: { snoozedUntil: futureIsoDate() },
       });
@@ -237,7 +234,7 @@ apiTest.describe('Snooze action policy API', { tag: '@local-stateful-classic' },
         buildCreateActionPolicyData({ name: 'no-access-cannot-snooze' })
       );
 
-      const response = await apiClient.post(getSnoozeUrl(created.id), {
+      const response = await apiClient.post(getSnoozeActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...noAccessCredentials.apiKeyHeader },
         body: { snoozedUntil: futureIsoDate() },
       });

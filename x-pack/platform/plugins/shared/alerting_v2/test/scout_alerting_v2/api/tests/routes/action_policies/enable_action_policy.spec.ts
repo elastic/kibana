@@ -12,13 +12,11 @@ import {
   ALL_ROLE,
   apiTest,
   buildCreateActionPolicyData,
+  getEnableActionPolicyUrl,
   NO_ACCESS_ROLE,
   READ_ROLE,
   testData,
 } from '../../../fixtures';
-
-const getEnableUrl = (id: string): string =>
-  `${testData.ACTION_POLICY_API_PATH}/${encodeURIComponent(id)}/_enable`;
 
 /*
  * Custom-role auth (`requestAuth.getApiKeyForCustomRole`) is not yet supported
@@ -53,7 +51,7 @@ apiTest.describe('Enable action policy API', { tag: '@local-stateful-classic' },
       );
       await apiServices.alertingV2.actionPolicies.disable(created.id);
 
-      const response = await apiClient.post(getEnableUrl(created.id), {
+      const response = await apiClient.post(getEnableActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
       });
 
@@ -72,7 +70,7 @@ apiTest.describe('Enable action policy API', { tag: '@local-stateful-classic' },
         buildCreateActionPolicyData({ name: 'test-enable-noop' })
       );
 
-      const response = await apiClient.post(getEnableUrl(created.id), {
+      const response = await apiClient.post(getEnableActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
       });
 
@@ -94,7 +92,7 @@ apiTest.describe('Enable action policy API', { tag: '@local-stateful-classic' },
       await apiServices.alertingV2.actionPolicies.snooze(created.id, futureDate);
       await apiServices.alertingV2.actionPolicies.disable(created.id);
 
-      const response = await apiClient.post(getEnableUrl(created.id), {
+      const response = await apiClient.post(getEnableActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
       });
 
@@ -107,7 +105,7 @@ apiTest.describe('Enable action policy API', { tag: '@local-stateful-classic' },
   // ---------- not found ----------
 
   apiTest('not found: returns 404 for a non-existent id', async ({ apiClient }) => {
-    const response = await apiClient.post(getEnableUrl('non-existent-id'), {
+    const response = await apiClient.post(getEnableActionPolicyUrl('non-existent-id'), {
       headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
     });
 
@@ -117,7 +115,7 @@ apiTest.describe('Enable action policy API', { tag: '@local-stateful-classic' },
   // ---------- schema validation ----------
 
   apiTest('validation: rejects id over the maximum length', async ({ apiClient }) => {
-    const response = await apiClient.post(getEnableUrl('a'.repeat(ID_MAX_LENGTH + 1)), {
+    const response = await apiClient.post(getEnableActionPolicyUrl('a'.repeat(ID_MAX_LENGTH + 1)), {
       headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
     });
 
@@ -135,7 +133,7 @@ apiTest.describe('Enable action policy API', { tag: '@local-stateful-classic' },
       );
       await apiServices.alertingV2.actionPolicies.disable(created.id);
 
-      const response = await apiClient.post(getEnableUrl(created.id), {
+      const response = await apiClient.post(getEnableActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...writerCredentials.apiKeyHeader },
       });
 
@@ -153,7 +151,7 @@ apiTest.describe('Enable action policy API', { tag: '@local-stateful-classic' },
       );
       await apiServices.alertingV2.actionPolicies.disable(created.id);
 
-      const response = await apiClient.post(getEnableUrl(created.id), {
+      const response = await apiClient.post(getEnableActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...readerCredentials.apiKeyHeader },
       });
 
@@ -170,7 +168,7 @@ apiTest.describe('Enable action policy API', { tag: '@local-stateful-classic' },
       );
       await apiServices.alertingV2.actionPolicies.disable(created.id);
 
-      const response = await apiClient.post(getEnableUrl(created.id), {
+      const response = await apiClient.post(getEnableActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...noAccessCredentials.apiKeyHeader },
       });
 

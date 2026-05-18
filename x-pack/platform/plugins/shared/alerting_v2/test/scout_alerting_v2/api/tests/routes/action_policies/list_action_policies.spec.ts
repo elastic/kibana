@@ -8,35 +8,20 @@
 import { expect } from '@kbn/scout/api';
 import type { RoleApiCredentials } from '@kbn/scout';
 import {
+  ACTION_POLICY_CREATED_BY_MAX_LENGTH,
+  ACTION_POLICY_PER_PAGE_MAX,
+  ACTION_POLICY_SEARCH_MAX_LENGTH,
+  ACTION_POLICY_TAG_MAX_LENGTH,
+  ACTION_POLICY_TAGS_MAX_COUNT,
   ALL_ROLE,
   apiTest,
   buildCreateActionPolicyData,
+  getListActionPoliciesUrl,
   NO_ACCESS_ROLE,
   READ_ROLE,
   testData,
   type AlertingApiServicesFixture,
 } from '../../../fixtures';
-
-// Source-of-truth values from listActionPoliciesQuerySchema; kept as literals
-// here so a boundary test breaks loudly if the route ever loosens its limits.
-const PER_PAGE_MAX = 100;
-const SEARCH_MAX_LENGTH = 256;
-const TAGS_MAX_COUNT = 10;
-const TAG_MAX_LENGTH = 128;
-const CREATED_BY_MAX_LENGTH = 256;
-
-const listUrl = (query?: Record<string, string | number | string[]>): string => {
-  if (!query) return testData.ACTION_POLICY_API_PATH;
-  const params = new URLSearchParams();
-  for (const [key, value] of Object.entries(query)) {
-    if (Array.isArray(value)) {
-      value.forEach((v) => params.append(key, String(v)));
-    } else {
-      params.set(key, String(value));
-    }
-  }
-  return `${testData.ACTION_POLICY_API_PATH}?${params.toString()}`;
-};
 
 /**
  * Seeds the three policies (Alpha/Beta/Gamma) used by the search/filter/sort
@@ -103,7 +88,7 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
   apiTest(
     'list: returns empty list with documented defaults when no policies exist',
     async ({ apiClient }) => {
-      const response = await apiClient.get(listUrl(), {
+      const response = await apiClient.get(getListActionPoliciesUrl(), {
         headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
       });
 
@@ -125,7 +110,7 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
         buildCreateActionPolicyData({ name: 'policy-2' })
       );
 
-      const response = await apiClient.get(listUrl(), {
+      const response = await apiClient.get(getListActionPoliciesUrl(), {
         headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
       });
 
@@ -163,7 +148,7 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
       buildCreateActionPolicyData({ name: 'page-policy-3' })
     );
 
-    const firstPage = await apiClient.get(listUrl({ page: 1, perPage: 2 }), {
+    const firstPage = await apiClient.get(getListActionPoliciesUrl({ page: 1, perPage: 2 }), {
       headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
     });
     expect(firstPage).toHaveStatusCode(200);
@@ -172,7 +157,7 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
     expect(firstPage.body.page).toBe(1);
     expect(firstPage.body.perPage).toBe(2);
 
-    const secondPage = await apiClient.get(listUrl({ page: 2, perPage: 2 }), {
+    const secondPage = await apiClient.get(getListActionPoliciesUrl({ page: 2, perPage: 2 }), {
       headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
     });
     expect(secondPage).toHaveStatusCode(200);
@@ -187,7 +172,7 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
   apiTest('search: matches by name', async ({ apiClient, apiServices }) => {
     await seedAlphaBetaGamma(apiServices);
 
-    const response = await apiClient.get(listUrl({ search: 'Alpha' }), {
+    const response = await apiClient.get(getListActionPoliciesUrl({ search: 'Alpha' }), {
       headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
     });
     expect(response).toHaveStatusCode(200);
@@ -198,7 +183,7 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
   apiTest('search: matches by description', async ({ apiClient, apiServices }) => {
     await seedAlphaBetaGamma(apiServices);
 
-    const response = await apiClient.get(listUrl({ search: 'memory' }), {
+    const response = await apiClient.get(getListActionPoliciesUrl({ search: 'memory' }), {
       headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
     });
     expect(response).toHaveStatusCode(200);
@@ -209,7 +194,7 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
   apiTest('search: matches by destination id', async ({ apiClient, apiServices }) => {
     await seedAlphaBetaGamma(apiServices);
 
-    const response = await apiClient.get(listUrl({ search: 'wf-gamma' }), {
+    const response = await apiClient.get(getListActionPoliciesUrl({ search: 'wf-gamma' }), {
       headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
     });
     expect(response).toHaveStatusCode(200);
@@ -222,7 +207,7 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
     async ({ apiClient, apiServices }) => {
       await seedAlphaBetaGamma(apiServices);
 
-      const response = await apiClient.get(listUrl({ search: 'Monitors' }), {
+      const response = await apiClient.get(getListActionPoliciesUrl({ search: 'Monitors' }), {
         headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
       });
       expect(response).toHaveStatusCode(200);
@@ -238,7 +223,7 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
     async ({ apiClient, apiServices }) => {
       await seedAlphaBetaGamma(apiServices);
 
-      const response = await apiClient.get(listUrl({ search: 'nonexistent' }), {
+      const response = await apiClient.get(getListActionPoliciesUrl({ search: 'nonexistent' }), {
         headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
       });
       expect(response).toHaveStatusCode(200);
@@ -252,9 +237,12 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
   apiTest('filter: by destinationType=workflow', async ({ apiClient, apiServices }) => {
     await seedAlphaBetaGamma(apiServices);
 
-    const response = await apiClient.get(listUrl({ destinationType: 'workflow' }), {
-      headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
-    });
+    const response = await apiClient.get(
+      getListActionPoliciesUrl({ destinationType: 'workflow' }),
+      {
+        headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
+      }
+    );
     expect(response).toHaveStatusCode(200);
     expect(response.body.total).toBe(3);
   });
@@ -263,9 +251,12 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
     const alpha = await seedAlphaBetaGamma(apiServices);
     expect(alpha.createdBy).toBeDefined();
 
-    const response = await apiClient.get(listUrl({ createdBy: alpha.createdBy! }), {
-      headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
-    });
+    const response = await apiClient.get(
+      getListActionPoliciesUrl({ createdBy: alpha.createdBy! }),
+      {
+        headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
+      }
+    );
     expect(response).toHaveStatusCode(200);
     expect(response.body.total).toBe(3);
   });
@@ -274,7 +265,7 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
     const alpha = await seedAlphaBetaGamma(apiServices);
     await apiServices.alertingV2.actionPolicies.disable(alpha.id);
 
-    const enabledResponse = await apiClient.get(listUrl({ enabled: 'true' }), {
+    const enabledResponse = await apiClient.get(getListActionPoliciesUrl({ enabled: 'true' }), {
       headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
     });
     expect(enabledResponse).toHaveStatusCode(200);
@@ -282,7 +273,7 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
     const enabledNames = enabledResponse.body.items.map((item: { name: string }) => item.name);
     expect(enabledNames).not.toContain('Alpha Policy');
 
-    const disabledResponse = await apiClient.get(listUrl({ enabled: 'false' }), {
+    const disabledResponse = await apiClient.get(getListActionPoliciesUrl({ enabled: 'false' }), {
       headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
     });
     expect(disabledResponse).toHaveStatusCode(200);
@@ -295,7 +286,7 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
   apiTest('filter by tags: by a single tag (string)', async ({ apiClient, apiServices }) => {
     await seedAlphaBetaGamma(apiServices);
 
-    const response = await apiClient.get(listUrl({ tags: 'production' }), {
+    const response = await apiClient.get(getListActionPoliciesUrl({ tags: 'production' }), {
       headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
     });
     expect(response).toHaveStatusCode(200);
@@ -307,9 +298,12 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
   apiTest('filter by tags: by multiple tags (array)', async ({ apiClient, apiServices }) => {
     await seedAlphaBetaGamma(apiServices);
 
-    const response = await apiClient.get(listUrl({ tags: ['production', 'staging'] }), {
-      headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
-    });
+    const response = await apiClient.get(
+      getListActionPoliciesUrl({ tags: ['production', 'staging'] }),
+      {
+        headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
+      }
+    );
     expect(response).toHaveStatusCode(200);
     expect(response.body.total).toBe(2);
     const names = response.body.items.map((item: { name: string }) => item.name);
@@ -322,7 +316,7 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
     async ({ apiClient, apiServices }) => {
       await seedAlphaBetaGamma(apiServices);
 
-      const response = await apiClient.get(listUrl({ tags: 'nonexistent' }), {
+      const response = await apiClient.get(getListActionPoliciesUrl({ tags: 'nonexistent' }), {
         headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
       });
       expect(response).toHaveStatusCode(200);
@@ -336,7 +330,7 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
     async ({ apiClient, apiServices }) => {
       await seedAlphaBetaGamma(apiServices);
 
-      const response = await apiClient.get(listUrl({ tags: ['staging'] }), {
+      const response = await apiClient.get(getListActionPoliciesUrl({ tags: ['staging'] }), {
         headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
       });
       expect(response).toHaveStatusCode(200);
@@ -350,9 +344,12 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
   apiTest('sort: by name ascending', async ({ apiClient, apiServices }) => {
     await seedAlphaBetaGamma(apiServices);
 
-    const response = await apiClient.get(listUrl({ sortField: 'name', sortOrder: 'asc' }), {
-      headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
-    });
+    const response = await apiClient.get(
+      getListActionPoliciesUrl({ sortField: 'name', sortOrder: 'asc' }),
+      {
+        headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
+      }
+    );
     expect(response).toHaveStatusCode(200);
     const names = response.body.items.map((item: { name: string }) => item.name);
     expect(names).toStrictEqual(['Alpha Policy', 'Beta Policy', 'Gamma Policy']);
@@ -361,9 +358,12 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
   apiTest('sort: by name descending', async ({ apiClient, apiServices }) => {
     await seedAlphaBetaGamma(apiServices);
 
-    const response = await apiClient.get(listUrl({ sortField: 'name', sortOrder: 'desc' }), {
-      headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
-    });
+    const response = await apiClient.get(
+      getListActionPoliciesUrl({ sortField: 'name', sortOrder: 'desc' }),
+      {
+        headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
+      }
+    );
     expect(response).toHaveStatusCode(200);
     const names = response.body.items.map((item: { name: string }) => item.name);
     expect(names).toStrictEqual(['Gamma Policy', 'Beta Policy', 'Alpha Policy']);
@@ -372,9 +372,12 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
   apiTest('sort: by createdAt ascending', async ({ apiClient, apiServices }) => {
     await seedAlphaBetaGamma(apiServices);
 
-    const response = await apiClient.get(listUrl({ sortField: 'createdAt', sortOrder: 'asc' }), {
-      headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
-    });
+    const response = await apiClient.get(
+      getListActionPoliciesUrl({ sortField: 'createdAt', sortOrder: 'asc' }),
+      {
+        headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
+      }
+    );
     expect(response).toHaveStatusCode(200);
     expect(response.body.items).toHaveLength(3);
     expect(response.body.items[0].name).toBe('Alpha Policy');
@@ -384,9 +387,12 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
   apiTest('sort: by createdAt descending', async ({ apiClient, apiServices }) => {
     await seedAlphaBetaGamma(apiServices);
 
-    const response = await apiClient.get(listUrl({ sortField: 'createdAt', sortOrder: 'desc' }), {
-      headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
-    });
+    const response = await apiClient.get(
+      getListActionPoliciesUrl({ sortField: 'createdAt', sortOrder: 'desc' }),
+      {
+        headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
+      }
+    );
     expect(response).toHaveStatusCode(200);
     expect(response.body.items).toHaveLength(3);
     expect(response.body.items[0].name).toBe('Gamma Policy');
@@ -399,7 +405,7 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
     await seedAlphaBetaGamma(apiServices);
 
     const response = await apiClient.get(
-      listUrl({ search: 'Monitors', sortField: 'name', sortOrder: 'asc' }),
+      getListActionPoliciesUrl({ search: 'Monitors', sortField: 'name', sortOrder: 'asc' }),
       { headers: { ...testData.COMMON_HEADERS, ...readerHeaders } }
     );
     expect(response).toHaveStatusCode(200);
@@ -411,9 +417,12 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
   apiTest('combined: search + pagination', async ({ apiClient, apiServices }) => {
     await seedAlphaBetaGamma(apiServices);
 
-    const response = await apiClient.get(listUrl({ search: 'Policy', perPage: 2, page: 1 }), {
-      headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
-    });
+    const response = await apiClient.get(
+      getListActionPoliciesUrl({ search: 'Policy', perPage: 2, page: 1 }),
+      {
+        headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
+      }
+    );
     expect(response).toHaveStatusCode(200);
     expect(response.body.total).toBe(3);
     expect(response.body.items).toHaveLength(2);
@@ -424,42 +433,48 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
   // ---------- schema validation ----------
 
   apiTest('validation: rejects page=0', async ({ apiClient }) => {
-    const response = await apiClient.get(listUrl({ page: 0 }), {
+    const response = await apiClient.get(getListActionPoliciesUrl({ page: 0 }), {
       headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
     });
     expect(response).toHaveStatusCode(400);
   });
 
   apiTest('validation: rejects perPage=0', async ({ apiClient }) => {
-    const response = await apiClient.get(listUrl({ perPage: 0 }), {
+    const response = await apiClient.get(getListActionPoliciesUrl({ perPage: 0 }), {
       headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
     });
     expect(response).toHaveStatusCode(400);
   });
 
   apiTest('validation: rejects perPage over the maximum', async ({ apiClient }) => {
-    const response = await apiClient.get(listUrl({ perPage: PER_PAGE_MAX + 1 }), {
-      headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
-    });
+    const response = await apiClient.get(
+      getListActionPoliciesUrl({ perPage: ACTION_POLICY_PER_PAGE_MAX + 1 }),
+      {
+        headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
+      }
+    );
     expect(response).toHaveStatusCode(400);
   });
 
   apiTest('validation: rejects empty search', async ({ apiClient }) => {
-    const response = await apiClient.get(listUrl({ search: '' }), {
+    const response = await apiClient.get(getListActionPoliciesUrl({ search: '' }), {
       headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
     });
     expect(response).toHaveStatusCode(400);
   });
 
   apiTest('validation: rejects search over the maximum length', async ({ apiClient }) => {
-    const response = await apiClient.get(listUrl({ search: 'a'.repeat(SEARCH_MAX_LENGTH + 1) }), {
-      headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
-    });
+    const response = await apiClient.get(
+      getListActionPoliciesUrl({ search: 'a'.repeat(ACTION_POLICY_SEARCH_MAX_LENGTH + 1) }),
+      {
+        headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
+      }
+    );
     expect(response).toHaveStatusCode(400);
   });
 
   apiTest('validation: rejects unknown destinationType', async ({ apiClient }) => {
-    const response = await apiClient.get(listUrl({ destinationType: 'email' }), {
+    const response = await apiClient.get(getListActionPoliciesUrl({ destinationType: 'email' }), {
       headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
     });
     expect(response).toHaveStatusCode(400);
@@ -467,52 +482,58 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
 
   apiTest('validation: rejects createdBy over the maximum length', async ({ apiClient }) => {
     const response = await apiClient.get(
-      listUrl({ createdBy: 'a'.repeat(CREATED_BY_MAX_LENGTH + 1) }),
+      getListActionPoliciesUrl({ createdBy: 'a'.repeat(ACTION_POLICY_CREATED_BY_MAX_LENGTH + 1) }),
       { headers: { ...testData.COMMON_HEADERS, ...readerHeaders } }
     );
     expect(response).toHaveStatusCode(400);
   });
 
   apiTest('validation: rejects unknown enabled value', async ({ apiClient }) => {
-    const response = await apiClient.get(listUrl({ enabled: 'maybe' }), {
+    const response = await apiClient.get(getListActionPoliciesUrl({ enabled: 'maybe' }), {
       headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
     });
     expect(response).toHaveStatusCode(400);
   });
 
   apiTest('validation: rejects unknown sortField', async ({ apiClient }) => {
-    const response = await apiClient.get(listUrl({ sortField: 'description' }), {
+    const response = await apiClient.get(getListActionPoliciesUrl({ sortField: 'description' }), {
       headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
     });
     expect(response).toHaveStatusCode(400);
   });
 
   apiTest('validation: rejects unknown sortOrder', async ({ apiClient }) => {
-    const response = await apiClient.get(listUrl({ sortOrder: 'sideways' }), {
+    const response = await apiClient.get(getListActionPoliciesUrl({ sortOrder: 'sideways' }), {
       headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
     });
     expect(response).toHaveStatusCode(400);
   });
 
   apiTest('validation: rejects more than the maximum number of tags', async ({ apiClient }) => {
-    const tooManyTags = Array.from({ length: TAGS_MAX_COUNT + 1 }, (_, i) => `tag-${i}`);
-    const response = await apiClient.get(listUrl({ tags: tooManyTags }), {
+    const tooManyTags = Array.from(
+      { length: ACTION_POLICY_TAGS_MAX_COUNT + 1 },
+      (_, i) => `tag-${i}`
+    );
+    const response = await apiClient.get(getListActionPoliciesUrl({ tags: tooManyTags }), {
       headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
     });
     expect(response).toHaveStatusCode(400);
   });
 
   apiTest('validation: rejects tag over the maximum length', async ({ apiClient }) => {
-    const response = await apiClient.get(listUrl({ tags: 'a'.repeat(TAG_MAX_LENGTH + 1) }), {
-      headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
-    });
+    const response = await apiClient.get(
+      getListActionPoliciesUrl({ tags: 'a'.repeat(ACTION_POLICY_TAG_MAX_LENGTH + 1) }),
+      {
+        headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
+      }
+    );
     expect(response).toHaveStatusCode(400);
   });
 
   // ---------- authorization ----------
 
   apiTest('authorization: 200 with read-only alerting_v2 privileges', async ({ apiClient }) => {
-    const response = await apiClient.get(listUrl(), {
+    const response = await apiClient.get(getListActionPoliciesUrl(), {
       headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
     });
     expect(response).toHaveStatusCode(200);
@@ -522,7 +543,7 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
     'authorization: 200 with full alerting_v2 privileges',
     async ({ apiClient, requestAuth }) => {
       const writerCredentials = await requestAuth.getApiKeyForCustomRole(ALL_ROLE);
-      const response = await apiClient.get(listUrl(), {
+      const response = await apiClient.get(getListActionPoliciesUrl(), {
         headers: { ...testData.COMMON_HEADERS, ...writerCredentials.apiKeyHeader },
       });
       expect(response).toHaveStatusCode(200);
@@ -533,7 +554,7 @@ apiTest.describe('List action policies API', { tag: '@local-stateful-classic' },
     'authorization: 403 without alerting_v2 privileges',
     async ({ apiClient, requestAuth }) => {
       const noAccessCredentials = await requestAuth.getApiKeyForCustomRole(NO_ACCESS_ROLE);
-      const response = await apiClient.get(listUrl(), {
+      const response = await apiClient.get(getListActionPoliciesUrl(), {
         headers: { ...testData.COMMON_HEADERS, ...noAccessCredentials.apiKeyHeader },
       });
       expect(response).toHaveStatusCode(403);

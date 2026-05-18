@@ -15,7 +15,9 @@ import {
   MAX_KQL_LENGTH,
   MAX_NAME_LENGTH,
 } from '@kbn/alerting-v2-schemas';
+import { buildDestinations } from '../../../../common/builders';
 import {
+  ACTION_POLICY_MAX_DESTINATIONS,
   ALL_ROLE,
   apiTest,
   buildCreateActionPolicyData,
@@ -24,17 +26,6 @@ import {
   READ_ROLE,
   testData,
 } from '../../../fixtures';
-
-// Source of truth: MAX_DESTINATIONS in action_policy_data_schema.ts (not
-// exported — used here as a literal so the boundary test breaks loudly if the
-// schema limit ever changes).
-const MAX_DESTINATIONS = 10;
-
-const buildDestinations = (count: number) =>
-  Array.from({ length: count }, (_, i) => ({
-    type: 'workflow' as const,
-    id: `wf-${i}`,
-  }));
 
 /*
  * Custom-role auth (`requestAuth.getApiKeyForCustomRole`) is not yet supported
@@ -279,7 +270,7 @@ apiTest.describe('Create action policy API', { tag: '@local-stateful-classic' },
       const response = await apiClient.post(testData.ACTION_POLICY_API_PATH, {
         headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
         body: buildCreateActionPolicyData({
-          destinations: buildDestinations(MAX_DESTINATIONS + 1),
+          destinations: buildDestinations(ACTION_POLICY_MAX_DESTINATIONS + 1),
         }),
       });
 

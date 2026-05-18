@@ -13,13 +13,11 @@ import {
   apiTest,
   buildCreateActionPolicyData,
   buildCreateRuleData,
+  getActionPolicyUrl,
   NO_ACCESS_ROLE,
   READ_ROLE,
   testData,
 } from '../../../fixtures';
-
-const upsertUrl = (id: string): string =>
-  `${testData.ACTION_POLICY_API_PATH}/${encodeURIComponent(id)}`;
 
 /*
  * Custom-role auth (`requestAuth.getApiKeyForCustomRole`) is not yet supported
@@ -55,7 +53,7 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
         description: 'first version',
       });
 
-      const response = await apiClient.put(upsertUrl(id), {
+      const response = await apiClient.put(getActionPolicyUrl(id), {
         headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
         body,
       });
@@ -77,7 +75,7 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
   apiTest('type: defaults to "global" on create-via-PUT', async ({ apiClient }) => {
     const id = 'upsert-default-type';
 
-    const response = await apiClient.put(upsertUrl(id), {
+    const response = await apiClient.put(getActionPolicyUrl(id), {
       headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
       body: buildCreateActionPolicyData({ name: 'default-type-via-put' }),
     });
@@ -93,7 +91,7 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
         buildCreateRuleData({ metadata: { name: 'rule-for-upsert-single' } })
       );
 
-      const response = await apiClient.put(upsertUrl('upsert-single-rule-policy'), {
+      const response = await apiClient.put(getActionPolicyUrl('upsert-single-rule-policy'), {
         headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
         body: buildCreateActionPolicyData({
           name: 'single-rule-via-put',
@@ -125,7 +123,7 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
         { id }
       );
 
-      const replaced = await apiClient.put(upsertUrl(id), {
+      const replaced = await apiClient.put(getActionPolicyUrl(id), {
         headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
         body: buildCreateActionPolicyData({
           name: 'second-version',
@@ -169,7 +167,7 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
         { id }
       );
 
-      const replaced = await apiClient.put(upsertUrl(id), {
+      const replaced = await apiClient.put(getActionPolicyUrl(id), {
         headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
         body: buildCreateActionPolicyData({ name: 'minimal-replacement' }),
       });
@@ -192,7 +190,7 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
     );
     await apiServices.alertingV2.actionPolicies.disable(id);
 
-    const replaced = await apiClient.put(upsertUrl(id), {
+    const replaced = await apiClient.put(getActionPolicyUrl(id), {
       headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
       body: buildCreateActionPolicyData({ name: 'replaced-while-disabled' }),
     });
@@ -211,7 +209,7 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
     const snoozedUntil = new Date(Date.now() + 60 * 60 * 1000).toISOString();
     await apiServices.alertingV2.actionPolicies.snooze(id, snoozedUntil);
 
-    const replaced = await apiClient.put(upsertUrl(id), {
+    const replaced = await apiClient.put(getActionPolicyUrl(id), {
       headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
       body: buildCreateActionPolicyData({ name: 'replaced-while-snoozed' }),
     });
@@ -227,7 +225,7 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
   // the upsert route's validation wiring is verified independently.
 
   apiTest('validation: rejects missing name', async ({ apiClient }) => {
-    const response = await apiClient.put(upsertUrl('upsert-missing-name'), {
+    const response = await apiClient.put(getActionPolicyUrl('upsert-missing-name'), {
       headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
       body: {
         description: 'no name',
@@ -239,7 +237,7 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
   });
 
   apiTest('validation: rejects missing description', async ({ apiClient }) => {
-    const response = await apiClient.put(upsertUrl('upsert-missing-description'), {
+    const response = await apiClient.put(getActionPolicyUrl('upsert-missing-description'), {
       headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
       body: {
         name: 'no-description',
@@ -251,7 +249,7 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
   });
 
   apiTest('validation: rejects missing destinations', async ({ apiClient }) => {
-    const response = await apiClient.put(upsertUrl('upsert-missing-destinations'), {
+    const response = await apiClient.put(getActionPolicyUrl('upsert-missing-destinations'), {
       headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
       body: { name: 'incomplete', description: 'no destinations' },
     });
@@ -260,7 +258,7 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
   });
 
   apiTest('validation: rejects empty destinations array', async ({ apiClient }) => {
-    const response = await apiClient.put(upsertUrl('upsert-empty-destinations'), {
+    const response = await apiClient.put(getActionPolicyUrl('upsert-empty-destinations'), {
       headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
       body: buildCreateActionPolicyData({ destinations: [] }),
     });
@@ -269,7 +267,7 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
   });
 
   apiTest('validation: rejects name over the maximum length', async ({ apiClient }) => {
-    const response = await apiClient.put(upsertUrl('upsert-name-too-long'), {
+    const response = await apiClient.put(getActionPolicyUrl('upsert-name-too-long'), {
       headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
       body: buildCreateActionPolicyData({ name: 'a'.repeat(MAX_NAME_LENGTH + 1) }),
     });
@@ -278,7 +276,7 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
   });
 
   apiTest('validation: rejects destination with unknown type', async ({ apiClient }) => {
-    const response = await apiClient.put(upsertUrl('upsert-bad-destination'), {
+    const response = await apiClient.put(getActionPolicyUrl('upsert-bad-destination'), {
       headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
       body: buildCreateActionPolicyData({
         destinations: [
@@ -291,7 +289,7 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
   });
 
   apiTest('validation: rejects strategy/groupingMode combo mismatch', async ({ apiClient }) => {
-    const response = await apiClient.put(upsertUrl('upsert-bad-combo'), {
+    const response = await apiClient.put(getActionPolicyUrl('upsert-bad-combo'), {
       headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
       body: buildCreateActionPolicyData({
         groupingMode: 'all',
@@ -303,7 +301,7 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
   });
 
   apiTest('validation: rejects time_interval strategy without interval', async ({ apiClient }) => {
-    const response = await apiClient.put(upsertUrl('upsert-missing-interval'), {
+    const response = await apiClient.put(getActionPolicyUrl('upsert-missing-interval'), {
       headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
       body: buildCreateActionPolicyData({
         groupingMode: 'all',
@@ -315,7 +313,7 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
   });
 
   apiTest('validation: rejects type:"single_rule" without ruleId', async ({ apiClient }) => {
-    const response = await apiClient.put(upsertUrl('upsert-single-no-rule-id'), {
+    const response = await apiClient.put(getActionPolicyUrl('upsert-single-no-rule-id'), {
       headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
       body: buildCreateActionPolicyData({ type: 'single_rule' }),
     });
@@ -324,7 +322,7 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
   });
 
   apiTest('validation: rejects type:"global" with ruleId', async ({ apiClient }) => {
-    const response = await apiClient.put(upsertUrl('upsert-global-with-rule-id'), {
+    const response = await apiClient.put(getActionPolicyUrl('upsert-global-with-rule-id'), {
       headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
       body: buildCreateActionPolicyData({ type: 'global', ruleId: 'some-rule-id' }),
     });
@@ -339,7 +337,7 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
     async ({ apiClient, requestAuth }) => {
       const writerCredentials = await requestAuth.getApiKeyForCustomRole(ALL_ROLE);
 
-      const response = await apiClient.put(upsertUrl('upsert-authorized-write'), {
+      const response = await apiClient.put(getActionPolicyUrl('upsert-authorized-write'), {
         headers: { ...testData.COMMON_HEADERS, ...writerCredentials.apiKeyHeader },
         body: buildCreateActionPolicyData({ name: 'authorized-write' }),
       });
@@ -353,7 +351,7 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
     async ({ apiClient, requestAuth }) => {
       const readerCredentials = await requestAuth.getApiKeyForCustomRole(READ_ROLE);
 
-      const response = await apiClient.put(upsertUrl('upsert-unauthorized-write'), {
+      const response = await apiClient.put(getActionPolicyUrl('upsert-unauthorized-write'), {
         headers: { ...testData.COMMON_HEADERS, ...readerCredentials.apiKeyHeader },
         body: buildCreateActionPolicyData({ name: 'unauthorized-write' }),
       });
@@ -367,7 +365,7 @@ apiTest.describe('Upsert action policy API', { tag: '@local-stateful-classic' },
     async ({ apiClient, requestAuth }) => {
       const noAccessCredentials = await requestAuth.getApiKeyForCustomRole(NO_ACCESS_ROLE);
 
-      const response = await apiClient.put(upsertUrl('upsert-no-access'), {
+      const response = await apiClient.put(getActionPolicyUrl('upsert-no-access'), {
         headers: { ...testData.COMMON_HEADERS, ...noAccessCredentials.apiKeyHeader },
         body: buildCreateActionPolicyData({ name: 'no-access' }),
       });

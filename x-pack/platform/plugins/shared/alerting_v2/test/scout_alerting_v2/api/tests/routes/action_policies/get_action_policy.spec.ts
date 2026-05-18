@@ -13,13 +13,11 @@ import {
   apiTest,
   buildCreateActionPolicyData,
   buildCreateRuleData,
+  getActionPolicyUrl,
   NO_ACCESS_ROLE,
   READ_ROLE,
   testData,
 } from '../../../fixtures';
-
-const getUrl = (id: string): string =>
-  `${testData.ACTION_POLICY_API_PATH}/${encodeURIComponent(id)}`;
 
 /*
  * Custom-role auth (`requestAuth.getApiKeyForCustomRole`) is not yet supported
@@ -65,7 +63,7 @@ apiTest.describe('Get action policy API', { tag: '@local-stateful-classic' }, ()
         })
       );
 
-      const response = await apiClient.get(getUrl(created.id), {
+      const response = await apiClient.get(getActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
       });
 
@@ -96,7 +94,7 @@ apiTest.describe('Get action policy API', { tag: '@local-stateful-classic' }, ()
         destinations: [{ type: 'workflow', id: 'minimal-workflow-id' }],
       });
 
-      const response = await apiClient.get(getUrl(created.id), {
+      const response = await apiClient.get(getActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
       });
 
@@ -128,7 +126,7 @@ apiTest.describe('Get action policy API', { tag: '@local-stateful-classic' }, ()
         })
       );
 
-      const response = await apiClient.get(getUrl(created.id), {
+      const response = await apiClient.get(getActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
       });
 
@@ -141,7 +139,7 @@ apiTest.describe('Get action policy API', { tag: '@local-stateful-classic' }, ()
   // ---------- not found ----------
 
   apiTest('not found: returns 404 for a non-existent id', async ({ apiClient }) => {
-    const response = await apiClient.get(getUrl('non-existent-id'), {
+    const response = await apiClient.get(getActionPolicyUrl('non-existent-id'), {
       headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
     });
 
@@ -151,7 +149,7 @@ apiTest.describe('Get action policy API', { tag: '@local-stateful-classic' }, ()
   // ---------- schema validation ----------
 
   apiTest('validation: rejects id over the maximum length', async ({ apiClient }) => {
-    const response = await apiClient.get(getUrl('a'.repeat(ID_MAX_LENGTH + 1)), {
+    const response = await apiClient.get(getActionPolicyUrl('a'.repeat(ID_MAX_LENGTH + 1)), {
       headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
     });
 
@@ -167,7 +165,7 @@ apiTest.describe('Get action policy API', { tag: '@local-stateful-classic' }, ()
         buildCreateActionPolicyData({ name: 'reader-can-get' })
       );
 
-      const response = await apiClient.get(getUrl(created.id), {
+      const response = await apiClient.get(getActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...readerHeaders },
       });
 
@@ -184,7 +182,7 @@ apiTest.describe('Get action policy API', { tag: '@local-stateful-classic' }, ()
         buildCreateActionPolicyData({ name: 'writer-can-also-get' })
       );
 
-      const response = await apiClient.get(getUrl(created.id), {
+      const response = await apiClient.get(getActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...writerCredentials.apiKeyHeader },
       });
 
@@ -201,7 +199,7 @@ apiTest.describe('Get action policy API', { tag: '@local-stateful-classic' }, ()
         buildCreateActionPolicyData({ name: 'forbidden-get' })
       );
 
-      const response = await apiClient.get(getUrl(created.id), {
+      const response = await apiClient.get(getActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...noAccessCredentials.apiKeyHeader },
       });
 

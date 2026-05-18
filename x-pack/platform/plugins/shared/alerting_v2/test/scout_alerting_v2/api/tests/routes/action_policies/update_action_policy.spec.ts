@@ -9,18 +9,15 @@ import { expect } from '@kbn/scout/api';
 import type { RoleApiCredentials } from '@kbn/scout';
 import { ID_MAX_LENGTH, MAX_NAME_LENGTH } from '@kbn/alerting-v2-schemas';
 import {
+  ACTION_POLICY_VERSION_MAX_LENGTH,
   ALL_ROLE,
   apiTest,
   buildCreateActionPolicyData,
+  getActionPolicyUrl,
   NO_ACCESS_ROLE,
   READ_ROLE,
   testData,
 } from '../../../fixtures';
-
-const VERSION_MAX_LENGTH = 256;
-
-const patchUrl = (id: string): string =>
-  `${testData.ACTION_POLICY_API_PATH}/${encodeURIComponent(id)}`;
 
 /*
  * Custom-role auth (`requestAuth.getApiKeyForCustomRole`) is not yet supported
@@ -59,7 +56,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
       })
     );
 
-    const response = await apiClient.patch(patchUrl(created.id), {
+    const response = await apiClient.patch(getActionPolicyUrl(created.id), {
       headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
       body: {
         name: 'updated-policy',
@@ -104,7 +101,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
         })
       );
 
-      const response = await apiClient.patch(patchUrl(created.id), {
+      const response = await apiClient.patch(getActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
         body: { name: 'only-name-updated', version: created.version },
       });
@@ -135,7 +132,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
         })
       );
 
-      const response = await apiClient.patch(patchUrl(created.id), {
+      const response = await apiClient.patch(getActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
         body: { description: 'only-description-updated', version: created.version },
       });
@@ -166,7 +163,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
         })
       );
 
-      const response = await apiClient.patch(patchUrl(created.id), {
+      const response = await apiClient.patch(getActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
         body: {
           matcher: "env == 'staging' && region == 'eu-central-1'",
@@ -202,7 +199,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
         })
       );
 
-      const response = await apiClient.patch(patchUrl(created.id), {
+      const response = await apiClient.patch(getActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
         body: {
           destinations: [{ type: 'workflow', id: 'updated-dest-workflow' }],
@@ -235,7 +232,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
         })
       );
 
-      const response = await apiClient.patch(patchUrl(created.id), {
+      const response = await apiClient.patch(getActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
         body: {
           groupingMode: 'all',
@@ -267,7 +264,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
         })
       );
 
-      const updated = await apiClient.patch(patchUrl(created.id), {
+      const updated = await apiClient.patch(getActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
         body: {
           throttle: { strategy: 'on_status_change' },
@@ -303,7 +300,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
         })
       );
 
-      const response = await apiClient.patch(patchUrl(created.id), {
+      const response = await apiClient.patch(getActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
         body: {
           groupingMode: null,
@@ -334,7 +331,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
         })
       );
 
-      const response = await apiClient.patch(patchUrl(created.id), {
+      const response = await apiClient.patch(getActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
         body: {
           matcher: null,
@@ -367,13 +364,13 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
     );
     const staleVersion = created.version;
 
-    const firstUpdate = await apiClient.patch(patchUrl(created.id), {
+    const firstUpdate = await apiClient.patch(getActionPolicyUrl(created.id), {
       headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
       body: { name: 'first-update', version: staleVersion },
     });
     expect(firstUpdate).toHaveStatusCode(200);
 
-    const secondUpdate = await apiClient.patch(patchUrl(created.id), {
+    const secondUpdate = await apiClient.patch(getActionPolicyUrl(created.id), {
       headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
       body: { name: 'second-update', version: staleVersion },
     });
@@ -381,7 +378,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
   });
 
   apiTest('not found: returns 404 for a non-existent id', async ({ apiClient }) => {
-    const response = await apiClient.patch(patchUrl('non-existent-id'), {
+    const response = await apiClient.patch(getActionPolicyUrl('non-existent-id'), {
       headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
       body: {
         name: 'some-name',
@@ -401,7 +398,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
       buildCreateActionPolicyData({ name: 'empty-dest-policy' })
     );
 
-    const response = await apiClient.patch(patchUrl(created.id), {
+    const response = await apiClient.patch(getActionPolicyUrl(created.id), {
       headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
       body: { destinations: [], version: created.version },
     });
@@ -414,7 +411,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
       buildCreateActionPolicyData({ name: 'no-version-policy' })
     );
 
-    const response = await apiClient.patch(patchUrl(created.id), {
+    const response = await apiClient.patch(getActionPolicyUrl(created.id), {
       headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
       body: { name: 'no-version-update' },
     });
@@ -427,7 +424,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
       buildCreateActionPolicyData({ name: 'empty-version-policy' })
     );
 
-    const response = await apiClient.patch(patchUrl(created.id), {
+    const response = await apiClient.patch(getActionPolicyUrl(created.id), {
       headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
       body: { name: 'empty-version-update', version: '' },
     });
@@ -442,11 +439,11 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
         buildCreateActionPolicyData({ name: 'long-version-policy' })
       );
 
-      const response = await apiClient.patch(patchUrl(created.id), {
+      const response = await apiClient.patch(getActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
         body: {
           name: 'long-version-update',
-          version: 'a'.repeat(VERSION_MAX_LENGTH + 1),
+          version: 'a'.repeat(ACTION_POLICY_VERSION_MAX_LENGTH + 1),
         },
       });
 
@@ -461,7 +458,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
         buildCreateActionPolicyData({ name: 'empty-name-policy' })
       );
 
-      const response = await apiClient.patch(patchUrl(created.id), {
+      const response = await apiClient.patch(getActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
         body: { name: '', version: created.version },
       });
@@ -477,7 +474,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
         buildCreateActionPolicyData({ name: 'long-name-policy' })
       );
 
-      const response = await apiClient.patch(patchUrl(created.id), {
+      const response = await apiClient.patch(getActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
         body: {
           name: 'a'.repeat(MAX_NAME_LENGTH + 1),
@@ -499,7 +496,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
         buildCreateActionPolicyData({ name: 'mutate-type-policy' })
       );
 
-      const response = await apiClient.patch(patchUrl(created.id), {
+      const response = await apiClient.patch(getActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
         body: { type: 'single_rule', version: created.version },
       });
@@ -515,7 +512,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
         buildCreateActionPolicyData({ name: 'mutate-rule-id-policy' })
       );
 
-      const response = await apiClient.patch(patchUrl(created.id), {
+      const response = await apiClient.patch(getActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
         body: { ruleId: 'some-rule-id', version: created.version },
       });
@@ -531,7 +528,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
         buildCreateActionPolicyData({ name: 'extra-field-policy' })
       );
 
-      const response = await apiClient.patch(patchUrl(created.id), {
+      const response = await apiClient.patch(getActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
         body: { foo: 'bar', version: created.version } as unknown as { version: string },
       });
@@ -541,7 +538,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
   );
 
   apiTest('validation: rejects id over the maximum length', async ({ apiClient }) => {
-    const response = await apiClient.patch(patchUrl('a'.repeat(ID_MAX_LENGTH + 1)), {
+    const response = await apiClient.patch(getActionPolicyUrl('a'.repeat(ID_MAX_LENGTH + 1)), {
       headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
       body: {
         name: 'too-long-id-update',
@@ -562,7 +559,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
         buildCreateActionPolicyData({ name: 'writer-can-patch' })
       );
 
-      const response = await apiClient.patch(patchUrl(created.id), {
+      const response = await apiClient.patch(getActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...writerCredentials.apiKeyHeader },
         body: { name: 'writer-can-patch-updated', version: created.version },
       });
@@ -580,7 +577,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
         buildCreateActionPolicyData({ name: 'reader-cannot-patch' })
       );
 
-      const response = await apiClient.patch(patchUrl(created.id), {
+      const response = await apiClient.patch(getActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...readerCredentials.apiKeyHeader },
         body: { name: 'reader-cannot-patch-updated', version: created.version },
       });
@@ -597,7 +594,7 @@ apiTest.describe('Update action policy API', { tag: '@local-stateful-classic' },
         buildCreateActionPolicyData({ name: 'no-access-cannot-patch' })
       );
 
-      const response = await apiClient.patch(patchUrl(created.id), {
+      const response = await apiClient.patch(getActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...noAccessCredentials.apiKeyHeader },
         body: { name: 'no-access-cannot-patch-updated', version: created.version },
       });

@@ -12,13 +12,11 @@ import {
   ALL_ROLE,
   apiTest,
   buildCreateActionPolicyData,
+  getUpdateActionPolicyApiKeyUrl,
   NO_ACCESS_ROLE,
   READ_ROLE,
   testData,
 } from '../../../fixtures';
-
-const getUpdateApiKeyUrl = (id: string): string =>
-  `${testData.ACTION_POLICY_API_PATH}/${encodeURIComponent(id)}/_update_api_key`;
 
 /*
  * Custom-role auth (`requestAuth.getApiKeyForCustomRole`) is not yet supported
@@ -54,7 +52,7 @@ apiTest.describe('Update action policy API key API', { tag: '@local-stateful-cla
       })
     );
 
-    const response = await apiClient.post(getUpdateApiKeyUrl(created.id), {
+    const response = await apiClient.post(getUpdateActionPolicyApiKeyUrl(created.id), {
       headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
     });
 
@@ -85,7 +83,7 @@ apiTest.describe('Update action policy API key API', { tag: '@local-stateful-cla
         })
       );
 
-      const response = await apiClient.post(getUpdateApiKeyUrl(created.id), {
+      const response = await apiClient.post(getUpdateActionPolicyApiKeyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
       });
 
@@ -113,12 +111,12 @@ apiTest.describe('Update action policy API key API', { tag: '@local-stateful-cla
         buildCreateActionPolicyData({ name: 'rotate-twice-policy' })
       );
 
-      const firstRotate = await apiClient.post(getUpdateApiKeyUrl(created.id), {
+      const firstRotate = await apiClient.post(getUpdateActionPolicyApiKeyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
       });
       expect(firstRotate).toHaveStatusCode(204);
 
-      const secondRotate = await apiClient.post(getUpdateApiKeyUrl(created.id), {
+      const secondRotate = await apiClient.post(getUpdateActionPolicyApiKeyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
       });
       expect(secondRotate).toHaveStatusCode(204);
@@ -128,7 +126,7 @@ apiTest.describe('Update action policy API key API', { tag: '@local-stateful-cla
   // ---------- not found ----------
 
   apiTest('not found: returns 404 for a non-existent id', async ({ apiClient }) => {
-    const response = await apiClient.post(getUpdateApiKeyUrl('non-existent-id'), {
+    const response = await apiClient.post(getUpdateActionPolicyApiKeyUrl('non-existent-id'), {
       headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
     });
 
@@ -138,9 +136,12 @@ apiTest.describe('Update action policy API key API', { tag: '@local-stateful-cla
   // ---------- schema validation ----------
 
   apiTest('validation: rejects id over the maximum length', async ({ apiClient }) => {
-    const response = await apiClient.post(getUpdateApiKeyUrl('a'.repeat(ID_MAX_LENGTH + 1)), {
-      headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
-    });
+    const response = await apiClient.post(
+      getUpdateActionPolicyApiKeyUrl('a'.repeat(ID_MAX_LENGTH + 1)),
+      {
+        headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+      }
+    );
 
     expect(response).toHaveStatusCode(400);
   });
@@ -155,7 +156,7 @@ apiTest.describe('Update action policy API key API', { tag: '@local-stateful-cla
         buildCreateActionPolicyData({ name: 'writer-can-rotate' })
       );
 
-      const response = await apiClient.post(getUpdateApiKeyUrl(created.id), {
+      const response = await apiClient.post(getUpdateActionPolicyApiKeyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...writerCredentials.apiKeyHeader },
       });
 
@@ -171,7 +172,7 @@ apiTest.describe('Update action policy API key API', { tag: '@local-stateful-cla
         buildCreateActionPolicyData({ name: 'reader-cannot-rotate' })
       );
 
-      const response = await apiClient.post(getUpdateApiKeyUrl(created.id), {
+      const response = await apiClient.post(getUpdateActionPolicyApiKeyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...readerCredentials.apiKeyHeader },
       });
 
@@ -187,7 +188,7 @@ apiTest.describe('Update action policy API key API', { tag: '@local-stateful-cla
         buildCreateActionPolicyData({ name: 'no-access-cannot-rotate' })
       );
 
-      const response = await apiClient.post(getUpdateApiKeyUrl(created.id), {
+      const response = await apiClient.post(getUpdateActionPolicyApiKeyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...noAccessCredentials.apiKeyHeader },
       });
 

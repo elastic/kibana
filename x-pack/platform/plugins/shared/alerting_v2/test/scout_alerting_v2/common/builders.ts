@@ -59,3 +59,12 @@ export const buildCreateActionPolicyData = (
   ...ACTION_POLICY_DEFAULTS,
   ...input,
 });
+
+export const buildDestinations = (count: number) =>
+  Array.from({ length: count }, (_, i) => ({
+    type: 'workflow' as const,
+    id: `wf-${i}`,
+  }));
+
+export const futureIsoDate = (offsetMs: number = 86_400_000): string =>
+  new Date(Date.now() + offsetMs).toISOString();

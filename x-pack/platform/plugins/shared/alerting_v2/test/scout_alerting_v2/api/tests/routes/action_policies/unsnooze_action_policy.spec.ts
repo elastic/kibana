@@ -12,16 +12,13 @@ import {
   ALL_ROLE,
   apiTest,
   buildCreateActionPolicyData,
+  getUnsnoozeActionPolicyUrl,
   NO_ACCESS_ROLE,
   READ_ROLE,
   testData,
 } from '../../../fixtures';
 
-const getUnsnoozeUrl = (id: string): string =>
-  `${testData.ACTION_POLICY_API_PATH}/${encodeURIComponent(id)}/_unsnooze`;
-
-const futureIsoDate = (offsetMs: number = 86_400_000): string =>
-  new Date(Date.now() + offsetMs).toISOString();
+import { futureIsoDate } from '../../../../common/builders';
 
 /*
  * Custom-role auth (`requestAuth.getApiKeyForCustomRole`) is not yet supported
@@ -56,7 +53,7 @@ apiTest.describe('Unsnooze action policy API', { tag: '@local-stateful-classic' 
       );
       await apiServices.alertingV2.actionPolicies.snooze(created.id, futureIsoDate());
 
-      const response = await apiClient.post(getUnsnoozeUrl(created.id), {
+      const response = await apiClient.post(getUnsnoozeActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
       });
 
@@ -78,7 +75,7 @@ apiTest.describe('Unsnooze action policy API', { tag: '@local-stateful-classic' 
       await apiServices.alertingV2.actionPolicies.snooze(created.id, futureIsoDate());
       await apiServices.alertingV2.actionPolicies.disable(created.id);
 
-      const response = await apiClient.post(getUnsnoozeUrl(created.id), {
+      const response = await apiClient.post(getUnsnoozeActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
       });
 
@@ -97,7 +94,7 @@ apiTest.describe('Unsnooze action policy API', { tag: '@local-stateful-classic' 
         buildCreateActionPolicyData({ name: 'test-unsnooze-noop' })
       );
 
-      const response = await apiClient.post(getUnsnoozeUrl(created.id), {
+      const response = await apiClient.post(getUnsnoozeActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
       });
 
@@ -109,7 +106,7 @@ apiTest.describe('Unsnooze action policy API', { tag: '@local-stateful-classic' 
   // ---------- not found ----------
 
   apiTest('not found: returns 404 for a non-existent id', async ({ apiClient }) => {
-    const response = await apiClient.post(getUnsnoozeUrl('non-existent-id'), {
+    const response = await apiClient.post(getUnsnoozeActionPolicyUrl('non-existent-id'), {
       headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
     });
 
@@ -119,9 +116,12 @@ apiTest.describe('Unsnooze action policy API', { tag: '@local-stateful-classic' 
   // ---------- schema validation ----------
 
   apiTest('validation: rejects id over the maximum length', async ({ apiClient }) => {
-    const response = await apiClient.post(getUnsnoozeUrl('a'.repeat(ID_MAX_LENGTH + 1)), {
-      headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
-    });
+    const response = await apiClient.post(
+      getUnsnoozeActionPolicyUrl('a'.repeat(ID_MAX_LENGTH + 1)),
+      {
+        headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
+      }
+    );
 
     expect(response).toHaveStatusCode(400);
   });
@@ -137,7 +137,7 @@ apiTest.describe('Unsnooze action policy API', { tag: '@local-stateful-classic' 
       );
       await apiServices.alertingV2.actionPolicies.snooze(created.id, futureIsoDate());
 
-      const response = await apiClient.post(getUnsnoozeUrl(created.id), {
+      const response = await apiClient.post(getUnsnoozeActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...writerCredentials.apiKeyHeader },
       });
 
@@ -155,7 +155,7 @@ apiTest.describe('Unsnooze action policy API', { tag: '@local-stateful-classic' 
       );
       await apiServices.alertingV2.actionPolicies.snooze(created.id, futureIsoDate());
 
-      const response = await apiClient.post(getUnsnoozeUrl(created.id), {
+      const response = await apiClient.post(getUnsnoozeActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...readerCredentials.apiKeyHeader },
       });
 
@@ -172,7 +172,7 @@ apiTest.describe('Unsnooze action policy API', { tag: '@local-stateful-classic' 
       );
       await apiServices.alertingV2.actionPolicies.snooze(created.id, futureIsoDate());
 
-      const response = await apiClient.post(getUnsnoozeUrl(created.id), {
+      const response = await apiClient.post(getUnsnoozeActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...noAccessCredentials.apiKeyHeader },
       });
 

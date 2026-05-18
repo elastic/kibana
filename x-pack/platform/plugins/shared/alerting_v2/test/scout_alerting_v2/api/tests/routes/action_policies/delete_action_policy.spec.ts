@@ -12,13 +12,11 @@ import {
   ALL_ROLE,
   apiTest,
   buildCreateActionPolicyData,
+  getActionPolicyUrl,
   NO_ACCESS_ROLE,
   READ_ROLE,
   testData,
 } from '../../../fixtures';
-
-const policyUrl = (id: string): string =>
-  `${testData.ACTION_POLICY_API_PATH}/${encodeURIComponent(id)}`;
 
 /*
  * Custom-role auth (`requestAuth.getApiKeyForCustomRole`) is not yet supported
@@ -56,7 +54,7 @@ apiTest.describe('Delete action policy API', { tag: '@local-stateful-classic' },
         })
       );
 
-      const deleteResponse = await apiClient.delete(policyUrl(created.id), {
+      const deleteResponse = await apiClient.delete(getActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
       });
 
@@ -66,7 +64,7 @@ apiTest.describe('Delete action policy API', { tag: '@local-stateful-classic' },
       // actually gone. We use apiClient (not apiServices) here because the
       // service helpers throw on 4xx, which would obscure the assertion. This
       // GET is a verifier — it is not the endpoint under test.
-      const getResponse = await apiClient.get(policyUrl(created.id), {
+      const getResponse = await apiClient.get(getActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
       });
       expect(getResponse).toHaveStatusCode(404);
@@ -76,7 +74,7 @@ apiTest.describe('Delete action policy API', { tag: '@local-stateful-classic' },
   // ---------- not found / idempotency ----------
 
   apiTest('not found: returns 404 for a non-existent id', async ({ apiClient }) => {
-    const response = await apiClient.delete(policyUrl('non-existent-id'), {
+    const response = await apiClient.delete(getActionPolicyUrl('non-existent-id'), {
       headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
     });
 
@@ -90,12 +88,12 @@ apiTest.describe('Delete action policy API', { tag: '@local-stateful-classic' },
         buildCreateActionPolicyData({ name: 'idempotent-delete-policy' })
       );
 
-      const firstDelete = await apiClient.delete(policyUrl(created.id), {
+      const firstDelete = await apiClient.delete(getActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
       });
       expect(firstDelete).toHaveStatusCode(204);
 
-      const secondDelete = await apiClient.delete(policyUrl(created.id), {
+      const secondDelete = await apiClient.delete(getActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
       });
       expect(secondDelete).toHaveStatusCode(404);
@@ -105,7 +103,7 @@ apiTest.describe('Delete action policy API', { tag: '@local-stateful-classic' },
   // ---------- schema validation ----------
 
   apiTest('validation: rejects id over the maximum length', async ({ apiClient }) => {
-    const response = await apiClient.delete(policyUrl('a'.repeat(ID_MAX_LENGTH + 1)), {
+    const response = await apiClient.delete(getActionPolicyUrl('a'.repeat(ID_MAX_LENGTH + 1)), {
       headers: { ...testData.COMMON_HEADERS, ...adminHeaders },
     });
 
@@ -122,7 +120,7 @@ apiTest.describe('Delete action policy API', { tag: '@local-stateful-classic' },
         buildCreateActionPolicyData({ name: 'writer-can-delete' })
       );
 
-      const response = await apiClient.delete(policyUrl(created.id), {
+      const response = await apiClient.delete(getActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...writerCredentials.apiKeyHeader },
       });
 
@@ -138,7 +136,7 @@ apiTest.describe('Delete action policy API', { tag: '@local-stateful-classic' },
         buildCreateActionPolicyData({ name: 'reader-cannot-delete' })
       );
 
-      const response = await apiClient.delete(policyUrl(created.id), {
+      const response = await apiClient.delete(getActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...readerCredentials.apiKeyHeader },
       });
 
@@ -154,7 +152,7 @@ apiTest.describe('Delete action policy API', { tag: '@local-stateful-classic' },
         buildCreateActionPolicyData({ name: 'no-access-cannot-delete' })
       );
 
-      const response = await apiClient.delete(policyUrl(created.id), {
+      const response = await apiClient.delete(getActionPolicyUrl(created.id), {
         headers: { ...testData.COMMON_HEADERS, ...noAccessCredentials.apiKeyHeader },
       });
 

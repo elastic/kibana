@@ -195,6 +195,7 @@ export function FieldValueSelection({
           }}
           listProps={{
             onFocusBadge: false,
+            paddingSize: 's',
           }}
           options={options}
           onChange={onChange}
