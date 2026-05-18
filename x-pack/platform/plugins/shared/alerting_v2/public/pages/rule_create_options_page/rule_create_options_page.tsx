@@ -9,10 +9,15 @@ import React from 'react';
 import { EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
+import { useComposeDiscoverFlyout } from '../../hooks/use_compose_discover_flyout';
 import { RuleCreateOptionsPanel } from '../../components/rule_create_options/rule_create_options_panel';
+import { paths } from '../../constants';
 
 export const RuleCreateOptionsPage = () => {
   useBreadcrumbs('rule_create_options');
+  const { flyout, openCreateFlyout } = useComposeDiscoverFlyout({
+    createSuccessRedirectPath: paths.ruleList,
+  });
 
   return (
     <div>
@@ -25,7 +30,8 @@ export const RuleCreateOptionsPage = () => {
         }
       />
       <EuiSpacer size="m" />
-      <RuleCreateOptionsPanel />
+      <RuleCreateOptionsPanel onCreateEsqlRule={openCreateFlyout} />
+      {flyout}
     </div>
   );
 };
