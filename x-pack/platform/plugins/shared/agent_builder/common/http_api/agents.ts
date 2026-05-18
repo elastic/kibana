@@ -24,11 +24,11 @@ export interface DeleteAgentResponse {
 /**
  * Response shape for `GET /api/agent_builder/agents/{id}/acl`.
  *
- * `canManage` indicates whether the requesting user can edit the ACL via PUT.
+ * `can_manage` indicates whether the requesting user can edit the ACL via PUT.
  * `acl` is always present and reflects the current persisted entries.
  */
 export interface GetAgentAclResponse {
-  canManage: boolean;
+  can_manage: boolean;
   acl: AgentAcl;
 }
 

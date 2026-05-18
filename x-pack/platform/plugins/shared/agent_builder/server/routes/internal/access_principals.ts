@@ -38,14 +38,8 @@ export function registerAccessPrincipalsRoutes({ router, logger, coreSetup }: Ro
     wrapHandler(async (ctx, request, response) => {
       const [, deps] = await coreSetup.getStartServices();
       if (!deps.security) {
-        // Security plugin is optional in our manifest; in practice it's always present
-        // in deployments where Agent Builder runs, but guard for the type.
         return response.ok({ body: [] });
       }
-
-      // requiredPrivileges is hard-coded server-side per the user_profile_examples guidance.
-      // We require login on the current space so we don't suggest deactivated users or
-      // users without access to the workspace the agent lives in.
       const spaceId = (await ctx.agentBuilder).spaces.getSpaceId();
       const profiles = await deps.security.userProfiles.suggest({
         name: request.body.name,

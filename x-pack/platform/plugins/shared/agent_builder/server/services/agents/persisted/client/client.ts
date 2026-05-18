@@ -22,11 +22,7 @@ import {
   type ToolSelection,
 } from '@kbn/agent-builder-common';
 import { SYSTEM_USER_ID } from '@kbn/agent-builder-common/constants';
-import {
-  hasManageAgentAclsFromRequest,
-  isAdminFromRequest,
-  getUserFromRequest,
-} from '../../../utils';
+import { isAdminFromRequest, getUserFromRequest } from '../../../utils';
 import type {
   AgentAclUpdateRequest,
   AgentCreateRequest,
@@ -119,10 +115,6 @@ export const createClient = async ({
   const isAdmin = await isAdminFromRequest({
     esClient: scopedClient.asCurrentUser,
   });
-  const manageAcls = await hasManageAgentAclsFromRequest({
-    esClient: scopedClient.asCurrentUser,
-    space,
-  });
   const esClient = scopedClient.asInternalUser;
   const storage = createStorage({ logger, esClient });
 
@@ -130,7 +122,6 @@ export const createClient = async ({
     storage,
     user,
     isAdmin,
-    manageAcls,
     request,
     space,
     toolsService,
@@ -145,7 +136,6 @@ class AgentClientImpl implements AgentClient {
   private readonly toolsService: ToolsServiceStart;
   private readonly user: CurrentUser;
   private readonly isAdmin: boolean;
-  private readonly manageAcls: boolean;
   private readonly logger: Logger;
 
   constructor({
@@ -153,7 +143,6 @@ class AgentClientImpl implements AgentClient {
     toolsService,
     user,
     isAdmin,
-    manageAcls,
     request,
     space,
     logger,
@@ -162,7 +151,6 @@ class AgentClientImpl implements AgentClient {
     toolsService: ToolsServiceStart;
     user: CurrentUser;
     isAdmin: boolean;
-    manageAcls: boolean;
     request: KibanaRequest;
     space: string;
     logger: Logger;
@@ -172,7 +160,6 @@ class AgentClientImpl implements AgentClient {
     this.request = request;
     this.user = user;
     this.isAdmin = isAdmin;
-    this.manageAcls = manageAcls;
     this.space = space;
     this.logger = logger;
   }
@@ -390,7 +377,6 @@ class AgentClientImpl implements AgentClient {
       source,
       user: this.user,
       isAdmin: this.isAdmin,
-      manageAcls: this.manageAcls,
     });
     const acl: AgentAcl = source.acl ?? { entries: [] };
     return { canManage, acl };
@@ -473,7 +459,6 @@ class AgentClientImpl implements AgentClient {
           source,
           user: this.user,
           isAdmin: this.isAdmin,
-          manageAcls: this.manageAcls,
         });
         break;
     }

@@ -6,12 +6,7 @@
  */
 
 import type { GetResponse } from '@elastic/elasticsearch/lib/api/types';
-import {
-  agentBuilderDefaultAgentId,
-  AgentType,
-  AgentVisibility,
-  EMPTY_AGENT_ACL,
-} from '@kbn/agent-builder-common';
+import { agentBuilderDefaultAgentId, AgentType, AgentVisibility } from '@kbn/agent-builder-common';
 import type { AgentAcl, UserIdAndName } from '@kbn/agent-builder-common';
 import type { AgentCreateRequest, AgentUpdateRequest } from '../../../../../common/agents';
 import type { AgentConfigurationProperties, AgentProperties } from './storage';
@@ -86,7 +81,7 @@ export const createRequestToEs = ({
     visibility: profile.visibility ?? AgentVisibility.Public,
     created_by_id: user.id,
     created_by_name: user.username,
-    acl: { ...EMPTY_AGENT_ACL },
+    acl: getEmptyAgentAcl(),
     config: {
       instructions: profile.configuration.instructions,
       tools: profile.configuration.tools,
@@ -131,10 +126,16 @@ export const updateRequestToEs = ({
   return updated;
 };
 
-const normalizeAcl = (acl: AgentAcl | undefined): AgentAcl => {
-  if (!acl) return { ...EMPTY_AGENT_ACL };
+const getEmptyAgentAcl = (): AgentAcl => {
   return {
-    entries: acl.entries ?? [],
+    entries: [],
+  };
+};
+
+const normalizeAcl = (acl: AgentAcl | undefined): AgentAcl => {
+  if (!acl) return getEmptyAgentAcl();
+  return {
+    entries: acl.entries,
   };
 };
 

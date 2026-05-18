@@ -96,12 +96,10 @@ export const hasManageAclAccess = ({
   source,
   user,
   isAdmin,
-  manageAcls,
 }: {
   source: AgentProperties;
   user: CurrentUser;
   isAdmin: boolean;
-  manageAcls: boolean;
 }): boolean =>
   canManageAgentAcl({
     agentId: source.id,
@@ -110,7 +108,6 @@ export const hasManageAclAccess = ({
     acl: source.acl,
     currentUser: user,
     isAdmin,
-    manageAcls,
   });
 
 /**

@@ -150,21 +150,17 @@ export const canDeleteAgent = (args: AgentAuthzArgs): boolean =>
 /**
  * Whether the current user may view/edit the agent's ACL.
  *
- * Authorized when any of:
- *   - cluster admin (`isAdmin`)
- *   - owner of the agent
- *   - holder of the `manageAgentAcls` sub-feature privilege (`manageAcls: true`)
- *   - effective Manager role via ACL grant
+ * ACL management is bundled into write access on the agent: if you can write to the agent,
+ * you can write to its ACL. That covers owner, effective ACL Editor/Manager grantees, and
+ * (for Public agents) anyone holding the `manageAgents` Kibana sub-feature privilege.
+ * Cluster admin bypasses via the `isAdmin` path in {@link hasAgentWriteAccess}.
+ *
+ * The default agent is excluded — it is system-owned, always Public, and must remain
+ * reachable for everyone in the workspace.
  */
-export const canManageAgentAcl = (
-  args: AgentAuthzArgs & { manageAcls?: boolean; agentId?: string }
-): boolean => {
+export const canManageAgentAcl = (args: AgentAuthzArgs & { agentId?: string }): boolean => {
   if (args.agentId === agentBuilderDefaultAgentId) return false;
-  if (args.isAdmin) return true;
-  if (isAgentOwner({ owner: args.owner, currentUser: args.currentUser })) return true;
-  if (args.manageAcls) return true;
-  const role = getEffectiveAgentRole(args);
-  return role === AgentAclRole.Manager;
+  return hasAgentWriteAccess(args);
 };
 
 /**

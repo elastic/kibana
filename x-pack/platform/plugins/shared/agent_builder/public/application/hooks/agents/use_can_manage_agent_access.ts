@@ -7,17 +7,17 @@
 
 import { useMemo } from 'react';
 import type { AgentDefinition } from '@kbn/agent-builder-common';
-import { agentBuilderDefaultAgentId, isAgentOwner } from '@kbn/agent-builder-common';
+import { agentBuilderDefaultAgentId, canCurrentUserEditAgent } from '@kbn/agent-builder-common';
 import { useUiPrivileges } from '../use_ui_privileges';
 import { useCurrentUser } from './use_current_user';
 
 /**
  * Returns whether the current user is allowed to view and edit an agent's access control list.
  *
- * Authorized when any of:
- *   - cluster admin (`isAdmin` capability)
- *   - holder of the `manageAgentAcls` sub-feature privilege
- *   - the agent's owner
+ * ACL editing is bundled into write access on the agent — if you can edit the agent, you
+ * can edit its ACL. That covers the agent owner, cluster admins, anyone the ACL grants
+ * Editor or higher, and (on Public agents) anyone holding the `manageAgents` sub-feature
+ * privilege via the visibility baseline.
  *
  * The default agent is excluded entirely — it is system-owned, always Public, and must
  * remain reachable for everyone in the workspace, so ACLs on it are not supported.
@@ -27,17 +27,20 @@ import { useCurrentUser } from './use_current_user';
 export const useCanManageAgentAccess = (
   agent: AgentDefinition | null | undefined
 ): { canManage: boolean; isLoading: boolean } => {
-  const { isAdmin, manageAgentAcls } = useUiPrivileges();
+  const { isAdmin, manageAgents } = useUiPrivileges();
   const { currentUser, isLoading } = useCurrentUser();
 
   const canManage = useMemo(() => {
-    if (!agent || agent.readonly) return false;
+    if (!agent) return false;
     if (agent.id === agentBuilderDefaultAgentId) return false;
-    if (isLoading) return false;
-    if (isAdmin) return true;
-    if (manageAgentAcls) return true;
-    return isAgentOwner({ owner: agent.created_by, currentUser });
-  }, [agent, currentUser, isAdmin, manageAgentAcls, isLoading]);
+    return canCurrentUserEditAgent({
+      agent,
+      manageAgents,
+      currentUser,
+      isAdmin,
+      isCurrentUserLoading: isLoading,
+    });
+  }, [agent, currentUser, isAdmin, manageAgents, isLoading]);
 
   return { canManage, isLoading };
 };

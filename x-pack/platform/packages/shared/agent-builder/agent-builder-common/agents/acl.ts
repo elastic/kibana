@@ -40,8 +40,6 @@ export interface AgentAcl {
   entries: AgentAclEntry[];
 }
 
-export const EMPTY_AGENT_ACL: AgentAcl = { entries: [] };
-
 export const AGENT_ACL_MAX_ENTRIES = 100;
 export const AGENT_ACL_PRINCIPAL_NAME_MAX_LENGTH = 1024;
 

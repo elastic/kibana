@@ -11,11 +11,7 @@ import { AgentAclRole, AgentVisibility } from '@kbn/agent-builder-common';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
 import { publicApiPath } from '../../common/constants';
-import {
-  AGENT_BUILDER_READ_SECURITY,
-  AGENTS_MANAGE_ACL_SECURITY,
-  AGENTS_WRITE_SECURITY,
-} from './route_security';
+import { AGENT_BUILDER_READ_SECURITY, AGENTS_WRITE_SECURITY } from './route_security';
 import type {
   GetAgentResponse,
   CreateAgentResponse,
@@ -507,7 +503,7 @@ export function registerAgentRoutes({
       access: 'public',
       summary: "Get an agent's access control list",
       description:
-        'Get the ACL for a specific agent. Callers without permission to manage the ACL receive `canManage: false` and an empty `entries` list — the principal list itself is sensitive.',
+        'Get the ACL for a specific agent. Callers without permission to manage the ACL receive `can_manage: false` and an empty `entries` list — the principal list itself is sensitive.',
       options: {
         tags: ['agent', 'oas-tag:agent builder'],
         availability: { since: '9.5.0' },
@@ -532,7 +528,7 @@ export function registerAgentRoutes({
         const result = await service.getAcl(request.params.id);
 
         const body: GetAgentAclResponse = {
-          canManage: result.canManage,
+          can_manage: result.canManage,
           acl: result.canManage ? result.acl : { entries: [] },
         };
         return response.ok<GetAgentAclResponse>({ body });
@@ -543,11 +539,11 @@ export function registerAgentRoutes({
   router.versioned
     .put({
       path: `${publicApiPath}/agents/{id}/acl`,
-      security: AGENTS_MANAGE_ACL_SECURITY,
+      security: AGENTS_WRITE_SECURITY,
       access: 'public',
       summary: "Update an agent's access control list",
       description:
-        "Replace the per-agent access control list. Either the agent's owner or a holder of the `manageAgentAcls` privilege may call this endpoint. The PUT replaces the entire entries list — last write wins.",
+        "Replace the per-agent access control list. ACL editing is bundled into write access on the agent: the agent owner, cluster admins, and anyone the agent's ACL grants Editor or higher (or anyone with `manageAgents` on a Public agent) may call this endpoint. The PUT replaces the entire entries list with last-write-wins semantics.",
       options: {
         tags: ['agent', 'oas-tag:agent builder'],
         availability: { since: '9.5.0' },

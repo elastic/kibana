@@ -527,12 +527,14 @@ describe('ACL-aware authorization', () => {
       expect(hasAgentUseAccess(args)).toBe(false);
     });
 
-    test('Editor can write but not delete or manage ACL', () => {
+    test('Editor can write and manage ACL but not delete', () => {
+      // ACL management is bundled into write access; Editor can edit the ACL.
+      // Delete still requires Manager.
       const acl = aclWith({ type: 'user', name: 'bob', role: AgentAclRole.Editor });
       const args = { ...privateAgent, acl, currentUser: bob };
       expect(hasAgentWriteAccess(args)).toBe(true);
+      expect(canManageAgentAcl(args)).toBe(true);
       expect(canDeleteAgent(args)).toBe(false);
-      expect(canManageAgentAcl(args)).toBe(false);
     });
 
     test('Manager can delete and manage ACL', () => {
@@ -578,31 +580,42 @@ describe('ACL-aware authorization', () => {
   });
 
   describe('canManageAgentAcl', () => {
-    test('grants when manageAcls privilege is held', () => {
+    // ACL management is bundled into write access on the agent.
+    test('grants for the agent owner on a Private agent', () => {
       expect(
         canManageAgentAcl({
           visibility: AgentVisibility.Private,
           owner,
-          currentUser: bob,
+          currentUser: { id: 'owner-id', username: 'alice' },
           isAdmin: false,
-          manageAcls: true,
         })
       ).toBe(true);
     });
 
-    test('denies when manageAcls is false and no ownership/admin/Manager role', () => {
+    test('denies a non-owner on a Private agent with no ACL grant', () => {
       expect(
         canManageAgentAcl({
           visibility: AgentVisibility.Private,
           owner,
           currentUser: bob,
           isAdmin: false,
-          manageAcls: false,
         })
       ).toBe(false);
     });
 
-    test('grants for ACL Manager grant', () => {
+    test('grants for an ACL Editor grant on a Private agent', () => {
+      expect(
+        canManageAgentAcl({
+          visibility: AgentVisibility.Private,
+          owner,
+          acl: aclWith({ type: 'user', name: 'bob', role: AgentAclRole.Editor }),
+          currentUser: bob,
+          isAdmin: false,
+        })
+      ).toBe(true);
+    });
+
+    test('grants for an ACL Manager grant on a Private agent', () => {
       expect(
         canManageAgentAcl({
           visibility: AgentVisibility.Private,
@@ -610,6 +623,28 @@ describe('ACL-aware authorization', () => {
           acl: aclWith({ type: 'user', name: 'bob', role: AgentAclRole.Manager }),
           currentUser: bob,
           isAdmin: false,
+        })
+      ).toBe(true);
+    });
+
+    test('grants for any non-owner on a Public agent (visibility baseline = Editor)', () => {
+      expect(
+        canManageAgentAcl({
+          visibility: AgentVisibility.Public,
+          owner,
+          currentUser: bob,
+          isAdmin: false,
+        })
+      ).toBe(true);
+    });
+
+    test('grants for cluster admin regardless of agent state', () => {
+      expect(
+        canManageAgentAcl({
+          visibility: AgentVisibility.Private,
+          owner,
+          currentUser: bob,
+          isAdmin: true,
         })
       ).toBe(true);
     });
@@ -622,7 +657,6 @@ describe('ACL-aware authorization', () => {
           owner,
           currentUser: bob,
           isAdmin: true,
-          manageAcls: true,
         })
       ).toBe(false);
     });

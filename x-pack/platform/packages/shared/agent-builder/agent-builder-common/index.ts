@@ -121,7 +121,6 @@ export {
   type AgentAuthzArgs,
   canCurrentUserEditAgent,
   AgentAclRole,
-  EMPTY_AGENT_ACL,
   AGENT_ACL_MAX_ENTRIES,
   AGENT_ACL_PRINCIPAL_NAME_MAX_LENGTH,
   isAgentAclRole,

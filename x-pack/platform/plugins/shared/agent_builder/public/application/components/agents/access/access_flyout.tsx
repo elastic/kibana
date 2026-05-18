@@ -124,7 +124,7 @@ export const AccessFlyout: React.FC<AccessFlyoutProps> = ({ agent, onClose }) =>
         </EuiCallOut>
       );
     }
-    if (!data.canManage) {
+    if (!data.can_manage) {
       // The user can read the agent but not manage its ACL. Server has already redacted
       // entries — this is its own first-class state, not an error. Be honest about it.
       return (
@@ -174,7 +174,7 @@ export const AccessFlyout: React.FC<AccessFlyoutProps> = ({ agent, onClose }) =>
       </EuiFlyoutHeader>
       <EuiFlyoutBody
         banner={
-          !isLoading && draft !== null && !isError && data?.canManage ? (
+          !isLoading && draft !== null && !isError && data?.can_manage ? (
             <VisibilityContextStrip agent={agent} />
           ) : undefined
         }
@@ -193,7 +193,7 @@ export const AccessFlyout: React.FC<AccessFlyoutProps> = ({ agent, onClose }) =>
               fill
               onClick={handleSave}
               isLoading={updateMutation.isLoading}
-              isDisabled={!isDirty || isBusy || !data?.canManage}
+              isDisabled={!isDirty || isBusy || !data?.can_manage}
               data-test-subj="agentBuilderAclSaveButton"
             >
               {accessFlyoutSave}

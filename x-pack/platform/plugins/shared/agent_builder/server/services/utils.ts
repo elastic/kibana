@@ -94,7 +94,6 @@ export const getAgentApiAccessFromRequest = async ({
 }): Promise<{
   canReadAgents: boolean;
   canManageAgents: boolean;
-  canManageAgentAcls: boolean;
 }> => {
   const resource = `space:${space}`;
   const response = await esClient.security.hasPrivileges({
@@ -102,49 +101,13 @@ export const getAgentApiAccessFromRequest = async ({
       {
         application: KIBANA_APPLICATION,
         resources: [resource],
-        privileges: [
-          apiPrivileges.readAgentBuilder,
-          apiPrivileges.manageAgents,
-          apiPrivileges.manageAgentAcls,
-        ],
+        privileges: [apiPrivileges.readAgentBuilder, apiPrivileges.manageAgents],
       },
     ],
   });
   const applicationPrivileges = response.application?.[KIBANA_APPLICATION]?.[resource];
   const canReadAgents = applicationPrivileges?.[apiPrivileges.readAgentBuilder] ?? false;
   const canManageAgents = applicationPrivileges?.[apiPrivileges.manageAgents] ?? false;
-  const canManageAgentAcls = applicationPrivileges?.[apiPrivileges.manageAgentAcls] ?? false;
 
-  return { canReadAgents, canManageAgents, canManageAgentAcls };
-};
-
-/**
- * Returns `true` when the request holds the `manageAgentAcls` sub-feature privilege in `space`.
- * This privilege gates editing the ACL of agents the user does not own.
- */
-export const hasManageAgentAclsFromRequest = async ({
-  esClient,
-  space,
-}: {
-  esClient: ElasticsearchClient;
-  space: string;
-}): Promise<boolean> => {
-  const resource = `space:${space}`;
-  try {
-    const response = await esClient.security.hasPrivileges({
-      application: [
-        {
-          application: KIBANA_APPLICATION,
-          resources: [resource],
-          privileges: [apiPrivileges.manageAgentAcls],
-        },
-      ],
-    });
-    return (
-      response.application?.[KIBANA_APPLICATION]?.[resource]?.[apiPrivileges.manageAgentAcls] ??
-      false
-    );
-  } catch {
-    return false;
-  }
+  return { canReadAgents, canManageAgents };
 };

@@ -25,7 +25,6 @@ import { i18n } from '@kbn/i18n';
 import {
   agentBuilderDefaultAgentId,
   canCurrentUserEditAgent,
-  isAgentOwner,
   type AgentDefinition,
 } from '@kbn/agent-builder-common';
 import { countBy } from 'lodash';
@@ -78,7 +77,7 @@ export const AgentsList: React.FC = () => {
   const { agents, isLoading, error } = useAgentBuilderAgents();
   const { createAgentBuilderUrl } = useNavigation();
   const { deleteAgent } = useDeleteAgent();
-  const { manageAgents, manageAgentAcls, isAdmin } = useUiPrivileges();
+  const { manageAgents, isAdmin } = useUiPrivileges();
   const { currentUser, isLoading: isCurrentUserLoading } = useCurrentUser();
   const [pageIndex, setPageIndex] = React.useState(0);
   const [pageSize, setPageSize] = React.useState(10);
@@ -86,14 +85,18 @@ export const AgentsList: React.FC = () => {
 
   const canManageAgentAccess = React.useCallback(
     (agent: AgentDefinition) => {
-      if (agent.readonly) return false;
+      // The default agent never accepts ACLs; everyone else falls through to the same
+      // "can I edit this agent?" check that gates the rest of the row actions.
       if (agent.id === agentBuilderDefaultAgentId) return false;
-      if (isCurrentUserLoading) return false;
-      if (isAdmin) return true;
-      if (manageAgentAcls) return true;
-      return isAgentOwner({ owner: agent.created_by, currentUser });
+      return canCurrentUserEditAgent({
+        agent,
+        manageAgents,
+        currentUser,
+        isAdmin,
+        isCurrentUserLoading,
+      });
     },
-    [currentUser, isAdmin, isCurrentUserLoading, manageAgentAcls]
+    [currentUser, isAdmin, isCurrentUserLoading, manageAgents]
   );
 
   const columns: Array<EuiBasicTableColumn<AgentDefinition>> = useMemo(() => {
