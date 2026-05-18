@@ -60,10 +60,10 @@ export type {
   RuleFormMeta,
   RuleFormLayout,
   RuleRequestCommon,
-  WorkflowFormValue,
   WorkflowFormComponentProps,
   RuleNotificationsValue,
 } from './form';
+export { NOOP_WORKFLOW_FORM } from './form';
 
 export type {
   RuleFormFlyoutProps,

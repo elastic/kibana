@@ -237,7 +237,7 @@ describe('NotificationsStep', () => {
   });
 
   it('hides workflow component when toggle is turned off after being on', () => {
-    renderNotificationsStep({ notifications: { enabled: true, workflow: DEFAULT_WORKFLOW_VALUE } });
+    renderNotificationsStep({ notifications: { workflow: DEFAULT_WORKFLOW_VALUE } });
 
     expect(screen.getByTestId('mockWorkflowComponent')).toBeInTheDocument();
 

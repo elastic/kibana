@@ -21,7 +21,11 @@ import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useParams, useLocation } from 'react-router-dom';
 import { useQueryClient } from '@kbn/react-query';
-import { StandaloneRuleForm, mapRuleResponseToFormValues } from '@kbn/alerting-v2-rule-form';
+import {
+  StandaloneRuleForm,
+  NOOP_WORKFLOW_FORM,
+  mapRuleResponseToFormValues,
+} from '@kbn/alerting-v2-rule-form';
 import type { FormValues } from '@kbn/alerting-v2-rule-form';
 import { i18n } from '@kbn/i18n';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
@@ -148,10 +152,7 @@ const RuleFormPageContent = ({ ruleId, initialQuery, initialValues }: RuleFormPa
       notifications,
       application,
       lens,
-      workflowForm: {
-        Component: () => null,
-        defaultValue: () => ({}),
-      },
+      workflowForm: NOOP_WORKFLOW_FORM,
     }),
     [http, data, dataViews, notifications, application, lens]
   );

@@ -17,10 +17,24 @@ export {
   getSingleStepWorkflowType,
 } from './registry';
 export type { PayloadVariable, SingleStepWorkflowType } from './registry';
-export { SingleStepWorkflowForm, createInitialCreateValue } from './single_step_workflow_form';
+export { SingleStepWorkflowForm } from './single_step_workflow_form';
 export type {
   CreateWorkflowFormValue,
   ExistingWorkflowFormValue,
   SingleStepWorkflowFormValue,
   SingleStepWorkflowTypeId,
 } from './types';
+
+import React from 'react';
+import type { RuleFormServices } from '@kbn/alerting-v2-rule-form';
+import type { ExistingWorkflowFormValue, SingleStepWorkflowFormValue } from './types';
+
+const LazySingleStepWorkflowForm = React.lazy(() =>
+  import('./single_step_workflow_form').then((m) => ({ default: m.SingleStepWorkflowForm }))
+);
+
+export const createSingleStepWorkflowFormService =
+  (): RuleFormServices<SingleStepWorkflowFormValue>['workflowForm'] => ({
+    Component: LazySingleStepWorkflowForm,
+    defaultValue: (): ExistingWorkflowFormValue => ({ mode: 'existing', workflowId: null }),
+  });

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { Suspense, useCallback } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
-import { EuiCallOut, EuiFormRow, EuiSpacer, EuiSwitch, EuiText } from '@elastic/eui';
+import { EuiCallOut, EuiLoadingSpinner, EuiSpacer, EuiSwitch, EuiText } from '@elastic/eui';
 import type { RuleFormServices } from '../../../form/contexts/rule_form_context';
 import type { FormValues } from '../../../form/types';
 
@@ -25,7 +25,6 @@ const notificationsEnableLabel = i18n.translate(
   { defaultMessage: 'Enable notifications' }
 );
 
-
 const notificationsCalloutTitle = i18n.translate(
   'xpack.responseOps.alertingV2RuleForm.composeDiscover.notifications.calloutTitle',
   { defaultMessage: 'Need more control?' }
@@ -40,20 +39,20 @@ const notificationsCalloutBody = i18n.translate(
 );
 
 interface NotificationsStepProps {
-  services: Pick<RuleFormServices, 'workflowForm'>;
+  services: RuleFormServices;
 }
 
 export const NotificationsStep: React.FC<NotificationsStepProps> = ({ services }) => {
   const { watch, setValue } = useFormContext<FormValues>();
   const notifications = watch('notifications');
-  const enabled = notifications?.enabled ?? false;
+  const enabled = !!notifications;
   const { workflowForm } = services;
 
   const handleToggle = useCallback(() => {
     if (enabled) {
-      setValue('notifications', undefined);
+      setValue('notifications', undefined, { shouldDirty: true });
     } else {
-      setValue('notifications', { enabled: true, workflow: workflowForm.defaultValue() });
+      setValue('notifications', { workflow: workflowForm.defaultValue() }, { shouldDirty: true });
     }
   }, [enabled, setValue, workflowForm]);
 
@@ -73,12 +72,14 @@ export const NotificationsStep: React.FC<NotificationsStepProps> = ({ services }
       {enabled && (
         <>
           <EuiSpacer size="m" />
-          <EuiFormRow fullWidth>
+          <Suspense fallback={<EuiLoadingSpinner size="m" />}>
             <workflowForm.Component
               value={notifications!.workflow}
-              onChange={(next) => setValue('notifications', { enabled: true, workflow: next })}
+              onChange={(next) =>
+                setValue('notifications', { workflow: next }, { shouldDirty: true })
+              }
             />
-          </EuiFormRow>
+          </Suspense>
         </>
       )}
 

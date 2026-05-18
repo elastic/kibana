@@ -51,14 +51,18 @@ export const RuleResultsPreview = () => (
 export type {
   FormValues,
   StateTransitionDelayMode,
-  WorkflowFormValue,
   WorkflowFormComponentProps,
   RuleNotificationsValue,
 } from './types';
 export type { DynamicRuleFormProps } from './dynamic_rule_form';
 export type { StandaloneRuleFormProps } from './standalone_rule_form';
 export type { RuleFormServices, RuleFormMeta, RuleFormLayout } from './contexts';
-export { RuleFormProvider, useRuleFormServices, useRuleFormMeta } from './contexts';
+export {
+  RuleFormProvider,
+  useRuleFormServices,
+  useRuleFormMeta,
+  NOOP_WORKFLOW_FORM,
+} from './contexts';
 export {
   deriveAlertDelayModeFromStateTransition,
   deriveRecoveryDelayModeFromStateTransition,

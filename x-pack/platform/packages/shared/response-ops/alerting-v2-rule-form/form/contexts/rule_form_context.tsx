@@ -11,9 +11,9 @@ import type { ApplicationStart, HttpStart, NotificationsStart } from '@kbn/core/
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
-import type { WorkflowFormComponentProps, WorkflowFormValue } from '../types';
+import type { WorkflowFormComponentProps } from '../types';
 
-export interface RuleFormServices {
+export interface RuleFormServices<TWorkflow extends object = object> {
   http: HttpStart;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
@@ -21,10 +21,15 @@ export interface RuleFormServices {
   application: ApplicationStart;
   lens: LensPublicStart;
   workflowForm: {
-    Component: React.ComponentType<WorkflowFormComponentProps>;
-    defaultValue: () => WorkflowFormValue;
+    Component: React.ComponentType<WorkflowFormComponentProps<TWorkflow>>;
+    defaultValue: () => TWorkflow;
   };
 }
+
+export const NOOP_WORKFLOW_FORM: RuleFormServices['workflowForm'] = {
+  Component: () => null,
+  defaultValue: () => ({}),
+};
 
 export type RuleFormLayout = 'page' | 'flyout';
 
@@ -46,13 +51,25 @@ const RuleFormContext = createContext<RuleFormContextValue | undefined>(undefine
  * Provides services and metadata to all rule form descendants.
  *
  * `meta` defaults to `{ layout: 'page' }` when omitted.
+ *
+ * Accepts `RuleFormServices<TWorkflow>` for any `TWorkflow` so callers need
+ * no cast when passing a narrowly-typed services object.
  */
-export const RuleFormProvider = ({
+export const RuleFormProvider = <TWorkflow extends object = object>({
   children,
   services,
   meta = DEFAULT_META,
-}: PropsWithChildren<{ services: RuleFormServices; meta?: RuleFormMeta }>) => {
-  const value = useMemo(() => ({ services, meta }), [services, meta]);
+}: PropsWithChildren<{
+  services: RuleFormServices<TWorkflow>;
+  meta?: RuleFormMeta;
+}>): React.ReactElement => {
+  const value = useMemo(
+    // The cast collapses the concrete TWorkflow to unknown at the context boundary.
+    // This is intentional: internal consumers (NotificationsStep) operate on unknown
+    // workflow values; the typed boundary lives at the call-site (ComposeDiscoverFlyout).
+    () => ({ services: services as unknown as RuleFormServices, meta }),
+    [services, meta]
+  );
   return <RuleFormContext.Provider value={value}>{children}</RuleFormContext.Provider>;
 };
 

@@ -62,7 +62,7 @@ const EDIT_MODE_OPTIONS = [
 // These hooks live in the plugin, not the package — imported via the plugin's hook layer
 // when this flyout is rendered in the rules list page.
 // For now they are passed as props to keep the package boundary clean.
-export interface ComposeDiscoverFlyoutProps {
+export interface ComposeDiscoverFlyoutProps<TWorkflow extends object = object> {
   historyKey: symbol;
   mode?: ComposeDiscoverMode;
   /** The existing rule — provided when mode === 'edit'. Used to seed the RHF form. */
@@ -70,11 +70,11 @@ export interface ComposeDiscoverFlyoutProps {
   /** The ID of the rule being edited. Required when mode === 'edit'. */
   ruleId?: string;
   onClose: () => void;
-  services: RuleFormServices;
+  services: RuleFormServices<TWorkflow>;
   /** Called with the create payload when the user submits in create mode. */
   onCreateRule: (
     payload: ReturnType<typeof mapFormValuesToCreateRequest>,
-    notifications?: RuleNotificationsValue
+    notifications?: RuleNotificationsValue<TWorkflow>
   ) => void;
   /** Called with id + update payload when the user submits in edit mode. */
   onUpdateRule?: (id: string, payload: ReturnType<typeof mapFormValuesToUpdateRequest>) => void;
@@ -98,7 +98,7 @@ const EMPTY_FORM_VALUES: FormValues = {
   artifacts: [],
 };
 
-export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
+export function ComposeDiscoverFlyout<TWorkflow extends object = object>({
   historyKey,
   mode = 'create',
   rule,
@@ -108,7 +108,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
   onCreateRule,
   onUpdateRule,
   isSaving = false,
-}) => {
+}: ComposeDiscoverFlyoutProps<TWorkflow>): React.ReactElement | null {
   /*
    * ── UI state (step navigation, sandbox open/close, tab selection, etc.) ──
    * In edit mode, seed the sandbox draft with the rule's existing query so the
@@ -116,6 +116,9 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
    * When the persisted rule has a custom recovery query, the initial state
    * infers that tracking was active and reconstructs the split.
    */
+  // Internal alias: typed-down to the base RuleFormServices for sub-components that
+  // don't need the concrete TWorkflow. The typed boundary lives in onCreateRule.
+  const baseServices = services as unknown as RuleFormServices;
   const initialMapped = mode === 'edit' && rule ? mapRuleResponseToFormValues(rule) : undefined;
   const [uiState, dispatch] = useComposeDiscoverState({
     mode,
@@ -127,7 +130,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
   });
 
   // Registered once here so providers persist across Sandbox open/close cycles.
-  useEsqlAutocomplete(services);
+  useEsqlAutocomplete(baseServices);
 
   /*
    * Split-query completion for alert and recovery block editors. Registered at
@@ -136,11 +139,11 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
    */
   const { onEditorMount: onAlertEditorMount } = useSplitQueryCompletion({
     baseQuery: uiState.baseQuery,
-    search: services.data.search.search,
+    search: baseServices.data.search.search,
   });
   const { onEditorMount: onRecoveryEditorMount } = useSplitQueryCompletion({
     baseQuery: uiState.baseQuery,
-    search: services.data.search.search,
+    search: baseServices.data.search.search,
   });
 
   // ── Form values (submitted to the API) ──
@@ -294,7 +297,12 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
 
   const handleSubmit = methods.handleSubmit((values) => {
     if (isCreate) {
-      onCreateRule(mapFormValuesToCreateRequest(values), values.notifications);
+      // FormValues.notifications is RuleNotificationsValue<unknown>; the cast narrows to
+      // TWorkflow because the workflow value was seeded by services.workflowForm.defaultValue().
+      onCreateRule(
+        mapFormValuesToCreateRequest(values),
+        values.notifications as RuleNotificationsValue<TWorkflow> | undefined
+      );
     } else if (ruleId && onUpdateRule) {
       onUpdateRule(ruleId, mapFormValuesToUpdateRequest(values));
     }
@@ -372,14 +380,14 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
             {uiState.yamlMode ? (
               <React.Suspense fallback={null}>
                 <LazyYamlRuleForm
-                  services={services}
+                  services={baseServices}
                   yamlText={yamlText}
                   setYamlText={handleSetYamlText}
                   isSubmitting={isSaving}
                 />
               </React.Suspense>
             ) : (
-              <ComposeDiscoverForm state={uiState} dispatch={dispatch} services={services} />
+              <ComposeDiscoverForm state={uiState} dispatch={dispatch} services={baseServices} />
             )}
           </EuiFlyoutBody>
 
@@ -481,4 +489,4 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
       </FormProvider>
     </RuleFormProvider>
   );
-};
+}

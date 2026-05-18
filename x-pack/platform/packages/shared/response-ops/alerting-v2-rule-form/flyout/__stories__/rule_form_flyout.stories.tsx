@@ -14,6 +14,7 @@ import { RuleFormFlyout } from '../rule_form_flyout';
 import { DynamicRuleForm } from '../../form/dynamic_rule_form';
 import { StandaloneRuleForm } from '../../form/standalone_rule_form';
 import type { RuleFormServices } from '../../form/contexts/rule_form_context';
+import { NOOP_WORKFLOW_FORM } from '../../form/contexts/rule_form_context';
 
 const mockServices = {
   http: {
@@ -61,10 +62,7 @@ const mockServices = {
     EmbeddableComponent: () => null,
     stateHelperApi: () => ({}),
   } as any,
-  workflowForm: {
-    Component: () => null,
-    defaultValue: () => ({}),
-  },
+  workflowForm: NOOP_WORKFLOW_FORM,
 };
 
 const mockFormServices: RuleFormServices = {
@@ -74,10 +72,7 @@ const mockFormServices: RuleFormServices = {
   application: mockServices.application,
   notifications: mockServices.notifications,
   lens: mockServices.lens,
-  workflowForm: {
-    Component: () => null,
-    defaultValue: () => ({}),
-  },
+  workflowForm: NOOP_WORKFLOW_FORM,
 };
 
 // =============================================================================

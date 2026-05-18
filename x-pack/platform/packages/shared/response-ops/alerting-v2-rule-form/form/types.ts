@@ -56,18 +56,15 @@ export interface RuleArtifact {
   value: string;
 }
 
-export type WorkflowFormValue = object;
-
-export interface WorkflowFormComponentProps {
-  value: WorkflowFormValue;
-  onChange: (next: WorkflowFormValue) => void;
+export interface WorkflowFormComponentProps<TWorkflow extends object = object> {
+  value: TWorkflow;
+  onChange: (next: TWorkflow) => void;
   isInvalid?: boolean;
   errorMessage?: string;
 }
 
-export interface RuleNotificationsValue {
-  enabled: boolean;
-  workflow: WorkflowFormValue;
+export interface RuleNotificationsValue<TWorkflow extends object = object> {
+  workflow: TWorkflow;
 }
 
 /**
