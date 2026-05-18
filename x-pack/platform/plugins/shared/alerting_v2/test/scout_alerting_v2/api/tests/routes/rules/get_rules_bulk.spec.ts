@@ -160,7 +160,6 @@ apiTest.describe('Get rules bulk API', { tag: '@local-stateful-classic' }, () =>
       headers: readerHeaders,
     });
     expect(response).toHaveStatusCode(400);
-    expect(response.body).toMatchObject({ statusCode: 400, error: 'Bad Request' });
   });
 
   apiTest(

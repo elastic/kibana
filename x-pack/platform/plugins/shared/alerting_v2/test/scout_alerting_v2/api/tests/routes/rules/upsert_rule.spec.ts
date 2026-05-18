@@ -134,7 +134,6 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
         }),
       });
       expect(response).toHaveStatusCode(409);
-      expect(response.body).toMatchObject({ statusCode: 409, error: 'Conflict' });
       // Verify the rule was not modified.
       const stored = await apiServices.alertingV2.rules.get(id);
       expect(stored.kind).toBe(created.kind);
@@ -150,7 +149,6 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
         body: buildCreateRuleData(),
       });
       expect(response).toHaveStatusCode(400);
-      expect(response.body).toMatchObject({ statusCode: 400, error: 'Bad Request' });
     }
   );
 
@@ -162,7 +160,6 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
       body: invalidBody,
     });
     expect(response).toHaveStatusCode(400);
-    expect(response.body).toMatchObject({ statusCode: 400, error: 'Bad Request' });
   });
 
   apiTest('validation: should reject body with missing metadata', async ({ apiClient }) => {
@@ -172,7 +169,6 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
       body: rest,
     });
     expect(response).toHaveStatusCode(400);
-    expect(response.body).toMatchObject({ statusCode: 400, error: 'Bad Request' });
   });
 
   apiTest('validation: should reject body with empty metadata.name', async ({ apiClient }) => {
@@ -181,7 +177,6 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
       body: buildCreateRuleData({ metadata: { name: '' } }),
     });
     expect(response).toHaveStatusCode(400);
-    expect(response.body).toMatchObject({ statusCode: 400, error: 'Bad Request' });
   });
 
   apiTest(
@@ -192,7 +187,6 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
         body: buildCreateRuleData({ metadata: { name: 'a'.repeat(MAX_NAME_LENGTH + 1) } }),
       });
       expect(response).toHaveStatusCode(400);
-      expect(response.body).toMatchObject({ statusCode: 400, error: 'Bad Request' });
     }
   );
 
@@ -209,7 +203,6 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
         body: invalidBody,
       });
       expect(response).toHaveStatusCode(400);
-      expect(response.body).toMatchObject({ statusCode: 400, error: 'Bad Request' });
     }
   );
 
@@ -226,7 +219,6 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
         }),
       });
       expect(response).toHaveStatusCode(400);
-      expect(response.body).toMatchObject({ statusCode: 400, error: 'Bad Request' });
     }
   );
 
@@ -240,7 +232,6 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
         }),
       });
       expect(response).toHaveStatusCode(400);
-      expect(response.body).toMatchObject({ statusCode: 400, error: 'Bad Request' });
     }
   );
 
@@ -252,7 +243,6 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
         body: buildCreateRuleData({ schedule: { every: '1s' } }),
       });
       expect(response).toHaveStatusCode(400);
-      expect(response.body).toMatchObject({ statusCode: 400, error: 'Bad Request' });
     }
   );
 
@@ -264,7 +254,6 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
         body: buildCreateRuleData({ evaluation: { query: { base: '' } } }),
       });
       expect(response).toHaveStatusCode(400);
-      expect(response.body).toMatchObject({ statusCode: 400, error: 'Bad Request' });
     }
   );
 

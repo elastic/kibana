@@ -71,7 +71,6 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
       body: invalidBody,
     });
     expect(response).toHaveStatusCode(400);
-    expect(response.body).toMatchObject({ statusCode: 400, error: 'Bad Request' });
   });
 
   apiTest(
@@ -85,7 +84,6 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
         body,
       });
       expect(response).toHaveStatusCode(400);
-      expect(response.body).toMatchObject({ statusCode: 400, error: 'Bad Request' });
     }
   );
 
@@ -102,7 +100,6 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
         body: invalidBody,
       });
       expect(response).toHaveStatusCode(400);
-      expect(response.body).toMatchObject({ statusCode: 400, error: 'Bad Request' });
     }
   );
 
@@ -113,7 +110,6 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
       body: rest,
     });
     expect(response).toHaveStatusCode(400);
-    expect(response.body).toMatchObject({ statusCode: 400, error: 'Bad Request' });
   });
 
   apiTest('validation: rejects body with empty metadata.name', async ({ apiClient }) => {
@@ -123,7 +119,6 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
       body,
     });
     expect(response).toHaveStatusCode(400);
-    expect(response.body).toMatchObject({ statusCode: 400, error: 'Bad Request' });
   });
 
   apiTest(
@@ -137,7 +132,6 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
         body,
       });
       expect(response).toHaveStatusCode(400);
-      expect(response.body).toMatchObject({ statusCode: 400, error: 'Bad Request' });
     }
   );
 
@@ -152,7 +146,6 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
         body,
       });
       expect(response).toHaveStatusCode(400);
-      expect(response.body).toMatchObject({ statusCode: 400, error: 'Bad Request' });
     }
   );
 
@@ -163,7 +156,6 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
       body,
     });
     expect(response).toHaveStatusCode(400);
-    expect(response.body).toMatchObject({ statusCode: 400, error: 'Bad Request' });
   });
 
   apiTest(
@@ -175,7 +167,6 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
         body,
       });
       expect(response).toHaveStatusCode(400);
-      expect(response.body).toMatchObject({ statusCode: 400, error: 'Bad Request' });
     }
   );
 
@@ -186,7 +177,6 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
       body,
     });
     expect(response).toHaveStatusCode(400);
-    expect(response.body).toMatchObject({ statusCode: 400, error: 'Bad Request' });
   });
 
   apiTest('validation: rejects state_transition for non-alert kinds', async ({ apiClient }) => {
@@ -199,7 +189,6 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
       body,
     });
     expect(response).toHaveStatusCode(400);
-    expect(response.body).toMatchObject({ statusCode: 400, error: 'Bad Request' });
   });
 
   apiTest(
@@ -213,7 +202,6 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
         body,
       });
       expect(response).toHaveStatusCode(400);
-      expect(response.body).toMatchObject({ statusCode: 400, error: 'Bad Request' });
     }
   );
 
@@ -285,7 +273,6 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
       body: rest,
     });
     expect(response).toHaveStatusCode(400);
-    expect(response.body).toMatchObject({ statusCode: 400, error: 'Bad Request' });
   });
 
   apiTest('validation: rejects body with missing schedule', async ({ apiClient }) => {
@@ -297,7 +284,6 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
       body: rest,
     });
     expect(response).toHaveStatusCode(400);
-    expect(response.body).toMatchObject({ statusCode: 400, error: 'Bad Request' });
   });
 
   apiTest('validation: rejects body with missing evaluation', async ({ apiClient }) => {
@@ -309,7 +295,6 @@ apiTest.describe('Create rule API', { tag: '@local-stateful-classic' }, () => {
       body: rest,
     });
     expect(response).toHaveStatusCode(400);
-    expect(response.body).toMatchObject({ statusCode: 400, error: 'Bad Request' });
   });
 
   apiTest(

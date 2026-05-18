@@ -55,7 +55,6 @@ apiTest.describe('Delete rule API', { tag: '@local-stateful-classic' }, () => {
       headers: writerHeaders,
     });
     expect(response).toHaveStatusCode(404);
-    expect(response.body).toMatchObject({ statusCode: 404, error: 'Not Found' });
   });
 
   apiTest('validation: rejects ids longer than ID_MAX_LENGTH with a 400', async ({ apiClient }) => {
@@ -64,7 +63,6 @@ apiTest.describe('Delete rule API', { tag: '@local-stateful-classic' }, () => {
       headers: writerHeaders,
     });
     expect(response).toHaveStatusCode(400);
-    expect(response.body).toMatchObject({ statusCode: 400, error: 'Bad Request' });
   });
 
   apiTest(

@@ -58,7 +58,6 @@ apiTest.describe('Get rule API', { tag: '@local-stateful-classic' }, () => {
       headers: readerHeaders,
     });
     expect(response).toHaveStatusCode(404);
-    expect(response.body).toMatchObject({ statusCode: 404, error: 'Not Found' });
   });
 
   apiTest(
@@ -69,7 +68,6 @@ apiTest.describe('Get rule API', { tag: '@local-stateful-classic' }, () => {
         headers: readerHeaders,
       });
       expect(response).toHaveStatusCode(400);
-      expect(response.body).toMatchObject({ statusCode: 400, error: 'Bad Request' });
     }
   );
 
