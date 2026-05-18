@@ -58,16 +58,14 @@ export const DataConditionPanel = ({
 
   if (!activeDescriptor) return null;
 
-  const isComplete = activeDescriptor.isComplete(entry);
-
-  return (
-    <EuiPanel
-      hasBorder={true}
-      color="plain"
-      paddingSize="s"
-      data-test-subj={`dataConditionPanel-${entry.id}`}
-    >
-      {entry.confirmed ? (
+  if (entry.confirmed) {
+    return (
+      <EuiPanel
+        hasBorder={true}
+        color="plain"
+        paddingSize="s"
+        data-test-subj={`dataConditionPanel-${entry.id}`}
+      >
         <EuiFlexGroup
           alignItems="center"
           gutterSize="s"
@@ -107,57 +105,64 @@ export const DataConditionPanel = ({
             />
           </EuiFlexItem>
         </EuiFlexGroup>
-      ) : (
-        <>
-          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiIcon type="database" aria-hidden={true} />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText size="s">
-                <strong>{i18n.DATA_CONDITION_LABEL}</strong>
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                iconType="check"
-                color="success"
-                display="base"
-                aria-label={i18n.CONFIRM_CONDITION_ARIA_LABEL}
-                onClick={() => onChange({ ...entry, confirmed: true })}
-                isDisabled={!isComplete}
-                data-test-subj={`confirmDataCondition-${entry.id}`}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                iconType="cross"
-                aria-label={i18n.REMOVE_DATA_CONDITION_ARIA_LABEL}
-                onClick={() => onChange(null)}
-                data-test-subj={`removeDataCondition-${entry.id}`}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size="s" />
-          <EuiFlexGroup gutterSize="s" responsive={false}>
-            <EuiFlexItem>
-              <EuiSelect
-                compressed
-                fullWidth
-                options={typeOptions}
-                value={entry.type}
-                onChange={(e) => onChange({ ...entry, type: e.target.value })}
-                aria-label={i18n.CONDITION_FIELD_ARIA_LABEL}
-                data-test-subj={`dataConditionType-${entry.id}`}
-              />
-            </EuiFlexItem>
-            {(() => {
-              const input = activeDescriptor.renderInput(entry, onChange);
-              return input ? <EuiFlexItem>{input}</EuiFlexItem> : null;
-            })()}
-          </EuiFlexGroup>
-        </>
-      )}
+      </EuiPanel>
+    );
+  }
+
+  const isComplete = activeDescriptor.isComplete(entry);
+  const renderedInput = activeDescriptor.renderInput(entry, onChange);
+
+  return (
+    <EuiPanel
+      hasBorder={true}
+      color="plain"
+      paddingSize="s"
+      data-test-subj={`dataConditionPanel-${entry.id}`}
+    >
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiIcon type="database" aria-hidden={true} />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiText size="s">
+            <strong>{i18n.DATA_CONDITION_LABEL}</strong>
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            iconType="check"
+            color="success"
+            display="base"
+            aria-label={i18n.CONFIRM_CONDITION_ARIA_LABEL}
+            onClick={() => onChange({ ...entry, confirmed: true })}
+            isDisabled={!isComplete}
+            data-test-subj={`confirmDataCondition-${entry.id}`}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            iconType="cross"
+            aria-label={i18n.REMOVE_DATA_CONDITION_ARIA_LABEL}
+            onClick={() => onChange(null)}
+            data-test-subj={`removeDataCondition-${entry.id}`}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="s" />
+      <EuiFlexGroup gutterSize="s" responsive={false}>
+        <EuiFlexItem>
+          <EuiSelect
+            compressed
+            fullWidth
+            options={typeOptions}
+            value={entry.type}
+            onChange={(e) => onChange({ ...entry, type: e.target.value })}
+            aria-label={i18n.CONDITION_FIELD_ARIA_LABEL}
+            data-test-subj={`dataConditionType-${entry.id}`}
+          />
+        </EuiFlexItem>
+        {renderedInput && <EuiFlexItem>{renderedInput}</EuiFlexItem>}
+      </EuiFlexGroup>
     </EuiPanel>
   );
 };

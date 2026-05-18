@@ -6,7 +6,6 @@
  */
 
 import React, { useRef, useState, useCallback, useMemo, useEffect } from 'react';
-import moment from 'moment';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -25,8 +24,12 @@ import type {
   DataConditionTypeDescriptor,
   SnoozeCondition,
 } from './types';
-import { SNOOZE_DATE_DISPLAY_FORMAT, SNOOZE_UNIT_OPTIONS } from './constants';
 import { validateDuration, computeEndDate } from '../utils/duration_validation';
+import {
+  buildTimeChipLabel,
+  buildPreviewSentences,
+  buildConditionalSnoozeSchedule,
+} from '../utils/conditional_snooze_schedule';
 import { TimeConditionPanel } from './time_condition_panel';
 import type { TimeConditionState } from './time_condition_panel';
 import { DataConditionPanel } from './data_condition_panel';
@@ -103,16 +106,7 @@ export const ConditionalSnoozePanel = ({
     [isTimeConditionInvalid, timeCondition]
   );
 
-  const timeChipLabel = ((): string => {
-    if (!timeCondition) return '';
-    if (timeCondition.mode === 'datetime') {
-      return timeCondition.dateTime?.format(SNOOZE_DATE_DISPLAY_FORMAT) ?? '';
-    }
-    const unitText = (
-      SNOOZE_UNIT_OPTIONS.find((o) => o.value === timeCondition.unit)?.text ?? timeCondition.unit
-    ).toLowerCase();
-    return i18n.getAfterDurationLabel(timeCondition.value, unitText);
-  })();
+  const timeChipLabel = buildTimeChipLabel(timeCondition);
 
   const usedDescriptorIds = new Set(dataConditions.map((c) => c.type));
   const disabledDataConditionTypes: readonly string[] = dataConditionTypes
@@ -132,31 +126,12 @@ export const ConditionalSnoozePanel = ({
     return null;
   })();
 
-  const previewSentences = ((): string[] => {
-    const formattedTimeDate =
-      isConfirmed && timeEndDate ? moment(timeEndDate).format(SNOOZE_DATE_DISPLAY_FORMAT) : null;
-
-    const dataConnector =
-      conditionOperator === 'all' ? i18n.PREVIEW_CONNECTOR_AND : i18n.PREVIEW_CONNECTOR_OR;
-
-    const dataPreviewPart =
-      confirmedDataConditions.length > 0
-        ? confirmedDataConditions
-            .map((c) => descriptorById.get(c.type)?.getPreviewText(c) ?? c.type)
-            .reduce((acc, part) => `${acc} ${dataConnector} ${part}`)
-        : null;
-
-    let sentence: string | null = null;
-    if (dataPreviewPart && formattedTimeDate) {
-      sentence = i18n.getUnsnoozeIfConditionsOrOnDateMessage(dataPreviewPart, formattedTimeDate);
-    } else if (dataPreviewPart) {
-      sentence = i18n.getUnsnoozeIfConditionsMessage(dataPreviewPart);
-    } else if (formattedTimeDate) {
-      sentence = i18n.getUnsnoozeOnDateMessage(formattedTimeDate);
-    }
-
-    return sentence ? [sentence] : [i18n.CONDITIONS_FOOTER_HINT];
-  })();
+  const previewSentences = buildPreviewSentences({
+    confirmedDataConditions,
+    descriptorById,
+    conditionOperator,
+    timeEndDate: isConfirmed ? timeEndDate : null,
+  });
 
   const addDataCondition = useCallback(() => {
     setDataConditions((prev) => [
@@ -182,22 +157,13 @@ export const ConditionalSnoozePanel = ({
 
   const snoozeSchedule = useMemo<ConditionalSnoozeSchedule | undefined>(() => {
     if (isSnoozeDisabled) return undefined;
-
-    const schedule: ConditionalSnoozeSchedule = {};
-
-    if (isConfirmed && timeEndDate) {
-      schedule.expiresAt = timeEndDate;
-    }
-
-    const confirmed = dataConditions.filter((c) => c.confirmed);
-    if (confirmed.length > 0) {
-      schedule.conditions = confirmed
-        .map((entry) => descriptorById.get(entry.type)?.serialize(entry) ?? null)
-        .filter((c): c is SnoozeCondition => c !== null);
-      schedule.conditionOperator = conditionOperator;
-    }
-
-    return schedule;
+    return buildConditionalSnoozeSchedule({
+      hasConfirmedTimeCondition: isConfirmed,
+      timeEndDate,
+      dataConditions,
+      descriptorById,
+      conditionOperator,
+    });
   }, [
     isSnoozeDisabled,
     isConfirmed,
