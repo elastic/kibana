@@ -101,6 +101,14 @@ export const EngineDescriptor = lazySchema(() =>
       .optional()
       .default('1m'),
     /**
+     * Maximum number of raw log documents processed per task run. 0 disables the cap.
+     */
+    maxLogsPerWindow: z.number().int().min(0).optional().default(500000),
+    /**
+     * What to do when the volume cap fires — `defer` preserves the cursor so the next run resumes; `drop` advances the cursor to the window end, skipping uncapped logs.
+     */
+    maxLogsPerWindowCapBehavior: z.enum(['defer', 'drop']).optional().default('defer'),
+    /**
      * Throttle value for the number of documents processed per second. Use -1 for no throttle.
      */
     docsPerSecond: z.number().int().optional(),

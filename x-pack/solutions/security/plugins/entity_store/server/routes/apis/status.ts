@@ -29,6 +29,8 @@ interface LegacyEngineDescriptorV1 {
   fieldHistoryLength: number;
   maxLogsPerPage: number;
   maxTimeWindowSize: string;
+  maxLogsPerWindow: number;
+  maxLogsPerWindowCapBehavior: 'defer' | 'drop';
   docsPerSecond: -1;
   indexPattern: '';
   enrichPolicyExecutionInterval: null;
@@ -68,6 +70,8 @@ function toPublicEngine(
     fieldHistoryLength,
     maxLogsPerPage,
     maxTimeWindowSize,
+    maxLogsPerWindow,
+    maxLogsPerWindowCapBehavior,
   } = logsExtractionConfig;
 
   return {
@@ -81,6 +85,8 @@ function toPublicEngine(
     fieldHistoryLength,
     maxLogsPerPage,
     maxTimeWindowSize,
+    maxLogsPerWindow,
+    maxLogsPerWindowCapBehavior,
     docsPerSecond: -1,
     indexPattern: '',
     enrichPolicyExecutionInterval: null,
