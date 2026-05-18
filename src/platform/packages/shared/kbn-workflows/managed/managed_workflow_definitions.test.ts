@@ -19,12 +19,14 @@ const ManagedWorkflowSchema = WorkflowSchemaBase.extend({
   triggers: z.array(z.object({ type: z.string().min(1) }).passthrough()).min(1),
 });
 
-type RegistryManagedWorkflowDefinition = (typeof managedWorkflowDefinitions)[number];
-type TemplateManagedWorkflowDefinition = RegistryManagedWorkflowDefinition & {
-  yamlTemplate: (values: ManagedWorkflowTemplateValues) => string;
+type TemplateManagedWorkflowDefinition = ManagedWorkflowDefinition & {
+  yamlTemplate(values: ManagedWorkflowTemplateValues): string;
 };
 
-const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
+const templateRepresentativeValuesById: Pick<
+  ManagedWorkflowTemplateValuesById,
+  typeof EXAMPLE_MANAGED_WORKFLOW_ID
+> = {
   [EXAMPLE_MANAGED_WORKFLOW_ID]: {
     recipient: 'World',
   },
@@ -35,7 +37,7 @@ const templateValuesLookup = templateRepresentativeValuesById as Record<
   ManagedWorkflowTemplateValues | undefined
 >;
 
-const managedDefinitionsById: Array<[string, RegistryManagedWorkflowDefinition]> =
+const managedDefinitionsById: Array<[string, ManagedWorkflowDefinition]> =
   managedWorkflowDefinitions.map((definition) => [definition.id, definition]);
 const managedTemplateDefinitionsById: Array<[string, TemplateManagedWorkflowDefinition]> =
   managedDefinitionsById.filter(
@@ -56,18 +58,20 @@ function hasYaml(
 }
 
 function renderWorkflowYaml(definition: ManagedWorkflowDefinition): string {
+  const { id } = definition;
+
   if (hasYaml(definition)) {
     return definition.yaml;
   }
 
   if (!hasYamlTemplate(definition)) {
-    throw new Error(`Managed workflow '${definition.id}' must define either yaml or yamlTemplate`);
+    throw new Error(`Managed workflow '${id}' must define either yaml or yamlTemplate`);
   }
 
-  const representativeValues = templateValuesLookup[definition.id];
+  const representativeValues = templateValuesLookup[id];
   if (!representativeValues) {
     throw new Error(
-      `Missing representative template values for managed workflow '${definition.id}'. Add an entry to templateRepresentativeValuesById.`
+      `Missing representative template values for managed workflow '${id}'. Add an entry to templateRepresentativeValuesById.`
     );
   }
 

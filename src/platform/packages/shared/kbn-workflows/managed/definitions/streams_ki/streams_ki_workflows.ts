@@ -16,7 +16,7 @@ import type { ManagedWorkflowDefinition } from '../../types';
 export const STREAMS_KI_CONTINUOUS_EXTRACTION_WORKFLOW_ID =
   'system-streams-ki-continuous-extraction';
 
-export const STREAMS_KI_CONTINUOUS_EXTRACTION_WORKFLOW: ManagedWorkflowDefinition = {
+export const STREAMS_KI_CONTINUOUS_EXTRACTION_WORKFLOW = {
   id: STREAMS_KI_CONTINUOUS_EXTRACTION_WORKFLOW_ID,
   pluginId: 'streams',
   yaml: STREAMS_KI_CONTINUOUS_EXTRACTION_YAML,
@@ -26,12 +26,12 @@ export const STREAMS_KI_CONTINUOUS_EXTRACTION_WORKFLOW: ManagedWorkflowDefinitio
     enablement: 'restorable',
   },
   version: 1,
-};
+} as const satisfies ManagedWorkflowDefinition;
 
 export const STREAMS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID =
   'system-streams-ki-features-identification';
 
-export const STREAMS_KI_FEATURES_IDENTIFICATION_WORKFLOW: ManagedWorkflowDefinition = {
+export const STREAMS_KI_FEATURES_IDENTIFICATION_WORKFLOW = {
   id: STREAMS_KI_FEATURES_IDENTIFICATION_WORKFLOW_ID,
   pluginId: 'streams',
   yaml: STREAMS_KI_FEATURES_IDENTIFICATION_YAML,
@@ -41,11 +41,11 @@ export const STREAMS_KI_FEATURES_IDENTIFICATION_WORKFLOW: ManagedWorkflowDefinit
     enablement: 'enforced',
   },
   version: 1,
-};
+} as const satisfies ManagedWorkflowDefinition;
 
 export const STREAMS_KI_QUERIES_GENERATION_WORKFLOW_ID = 'system-streams-ki-queries-generation';
 
-export const STREAMS_KI_QUERIES_GENERATION_WORKFLOW: ManagedWorkflowDefinition = {
+export const STREAMS_KI_QUERIES_GENERATION_WORKFLOW = {
   id: STREAMS_KI_QUERIES_GENERATION_WORKFLOW_ID,
   pluginId: 'streams',
   yaml: STREAMS_KI_QUERIES_GENERATION_YAML,
@@ -55,11 +55,11 @@ export const STREAMS_KI_QUERIES_GENERATION_WORKFLOW: ManagedWorkflowDefinition =
     enablement: 'enforced',
   },
   version: 1,
-};
+} as const satisfies ManagedWorkflowDefinition;
 
 export const STREAMS_KI_ONBOARDING_WORKFLOW_ID = 'system-streams-ki-onboarding';
 
-export const STREAMS_KI_ONBOARDING_WORKFLOW: ManagedWorkflowDefinition = {
+export const STREAMS_KI_ONBOARDING_WORKFLOW = {
   id: STREAMS_KI_ONBOARDING_WORKFLOW_ID,
   pluginId: 'streams',
   yaml: STREAMS_KI_ONBOARDING_YAML,
@@ -69,4 +69,4 @@ export const STREAMS_KI_ONBOARDING_WORKFLOW: ManagedWorkflowDefinition = {
     enablement: 'enforced',
   },
   version: 1,
-};
+} as const satisfies ManagedWorkflowDefinition;
