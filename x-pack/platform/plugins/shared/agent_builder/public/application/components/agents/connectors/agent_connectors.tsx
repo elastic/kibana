@@ -16,8 +16,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import React, { useMemo } from 'react';
-import useToggle from 'react-use/lib/useToggle';
+import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useListDetailPageStyles } from '../common/styles';
 import { useListConnectors } from '../../../hooks/tools/use_mcp_connectors';
@@ -26,6 +25,7 @@ import { useAgentBuilderAgentById } from '../../../hooks/agents/use_agent_by_id'
 import { labels } from '../../../utils/i18n';
 import { AgentBuilderConnectorsTable } from '../../connectors/table/connectors_table';
 import { useHasConnectorsAllPrivileges } from '../../../hooks/use_has_connectors_all_privileges';
+import { AssignConnectorsFlyout } from './assign_connectors_flyout';
 
 interface AgentConnectorsProps {
   agentId: string;
@@ -35,7 +35,7 @@ export const AgentConnectors = ({ agentId }: AgentConnectorsProps) => {
   const styles = useListDetailPageStyles();
   const agentQuery = useAgentBuilderAgentById(agentId);
   const { openCreateFlyout } = useConnectorsActions();
-  const [isAddMenuOpen, toggleAddMenu] = useToggle(false);
+  const [activeLayer, setActiveLayer] = useState<'dropdown' | 'assign' | null>(null);
   const addConnectorPopoverId = useGeneratedHtmlId({ prefix: 'addConnectorPopover' });
   const hasAllPrivileges = useHasConnectorsAllPrivileges();
   const connectorsQuery = useListConnectors({});
@@ -77,7 +77,7 @@ export const AgentConnectors = ({ agentId }: AgentConnectorsProps) => {
                       fill
                       iconType="arrowDown"
                       iconSide="right"
-                      onClick={toggleAddMenu}
+                      onClick={() => setActiveLayer('dropdown')}
                       data-test-subj="agentBuilderAddConnectorButton"
                     >
                       <EuiText size="s">
@@ -88,14 +88,18 @@ export const AgentConnectors = ({ agentId }: AgentConnectorsProps) => {
                     </EuiButton>
                   }
                   aria-labelledby={addConnectorPopoverId}
-                  isOpen={isAddMenuOpen}
-                  closePopover={() => toggleAddMenu(false)}
+                  isOpen={activeLayer === 'dropdown'}
+                  closePopover={() => setActiveLayer(null)}
                   anchorPosition="downRight"
                   panelPaddingSize="none"
                 >
                   <EuiContextMenuPanel
                     items={[
-                      <EuiContextMenuItem key="add-existing" icon="link">
+                      <EuiContextMenuItem
+                        key="add-existing"
+                        icon="link"
+                        onClick={() => setActiveLayer('assign')}
+                      >
                         {i18n.translate(
                           'xpack.agentBuilder.agentConnectors.addExistingConnectorMenuItem',
                           { defaultMessage: 'Add existing connector' }
@@ -105,7 +109,7 @@ export const AgentConnectors = ({ agentId }: AgentConnectorsProps) => {
                         key="create-new"
                         icon="plusInCircle"
                         onClick={() => {
-                          toggleAddMenu(false);
+                          setActiveLayer(null);
                           openCreateFlyout();
                         }}
                       >
@@ -128,6 +132,14 @@ export const AgentConnectors = ({ agentId }: AgentConnectorsProps) => {
           error={connectorsQuery.error}
         />
       </KibanaPageTemplate.Section>
+      {activeLayer === 'assign' && (
+        <AssignConnectorsFlyout
+          agentId={agentId}
+          connectors={connectorsQuery.connectors}
+          selectedIds={agentQuery.agent?.configuration?.connector_ids ?? []}
+          onClose={() => setActiveLayer(null)}
+        />
+      )}
     </KibanaPageTemplate>
   );
 };

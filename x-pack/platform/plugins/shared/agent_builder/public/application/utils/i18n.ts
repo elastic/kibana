@@ -2187,6 +2187,20 @@ export const labels = {
         defaultMessage: 'Clear selection',
       }
     ),
+    assignButtonLabel: i18n.translate('xpack.agentBuilder.connectors.assignButtonLabel', {
+      defaultMessage: 'Assign',
+    }),
+    chooseConnectorPlaceholder: i18n.translate(
+      'xpack.agentBuilder.connectors.chooseConnectorPlaceholder',
+      { defaultMessage: 'Choose a connector' }
+    ),
+    addExistingConnectorFlyoutTitle: i18n.translate(
+      'xpack.agentBuilder.connectors.addExistingConnectorFlyoutTitle',
+      { defaultMessage: 'Add existing connector' }
+    ),
+    cancelButtonLabel: i18n.translate('xpack.agentBuilder.connectors.cancelButtonLabel', {
+      defaultMessage: 'Cancel',
+    }),
 
     // Delete modal
     deleteConnectorTitle: (name: string) =>
