@@ -9,7 +9,7 @@ import { PARTITION_CHART_TYPES, SeriesTypes } from '@kbn/lens-common';
 import { applyDateHistogramEmptyRowsPolicyToDatasourceState } from './date_histogram_empty_rows_policy';
 
 describe('applyDateHistogramEmptyRowsPolicyToDatasourceState', () => {
-  const createDatasourceState = (includeEmptyRows = true) => ({
+  const createDatasourceState = (includeEmptyRows?: boolean) => ({
     currentIndexPatternId: 'logs-*',
     layers: {
       layer1: {
@@ -22,7 +22,7 @@ describe('applyDateHistogramEmptyRowsPolicyToDatasourceState', () => {
             operationType: 'date_histogram',
             params: {
               interval: 'auto',
-              includeEmptyRows,
+              ...(includeEmptyRows === undefined ? {} : { includeEmptyRows }),
             },
             scale: 'interval',
             sourceField: '@timestamp',
@@ -44,7 +44,21 @@ describe('applyDateHistogramEmptyRowsPolicyToDatasourceState', () => {
     },
   });
 
-  it('turns empty rows off for bar chart states', () => {
+  it('preserves explicit empty rows values for bar chart states', () => {
+    const datasourceState = createDatasourceState(true);
+
+    const updatedState = applyDateHistogramEmptyRowsPolicyToDatasourceState(
+      datasourceState,
+      'lnsXY',
+      {
+        preferredSeriesType: SeriesTypes.BAR,
+      }
+    );
+
+    expect(updatedState).toBe(datasourceState);
+  });
+
+  it('defaults empty rows off for bar chart states when the param is unset', () => {
     const datasourceState = createDatasourceState();
 
     const updatedState = applyDateHistogramEmptyRowsPolicyToDatasourceState(
@@ -73,10 +87,12 @@ describe('applyDateHistogramEmptyRowsPolicyToDatasourceState', () => {
         },
       },
     });
-    expect(datasourceState.layers.layer1.columns.date.params.includeEmptyRows).toBe(true);
+    expect(datasourceState.layers.layer1.columns.date.params).not.toHaveProperty(
+      'includeEmptyRows'
+    );
   });
 
-  it('keeps the datasource state reference when no update is needed', () => {
+  it('keeps the datasource state reference when the explicit value already matches the policy', () => {
     const datasourceState = createDatasourceState(false);
 
     const updatedState = applyDateHistogramEmptyRowsPolicyToDatasourceState(
@@ -88,6 +104,35 @@ describe('applyDateHistogramEmptyRowsPolicyToDatasourceState', () => {
     );
 
     expect(updatedState).toBe(datasourceState);
+  });
+
+  it('defaults empty rows on for tables when the param is unset', () => {
+    const datasourceState = createDatasourceState();
+
+    const updatedState = applyDateHistogramEmptyRowsPolicyToDatasourceState(
+      datasourceState,
+      'lnsDatatable',
+      {}
+    );
+
+    expect(updatedState).toEqual({
+      ...datasourceState,
+      layers: {
+        layer1: {
+          ...datasourceState.layers.layer1,
+          columns: {
+            ...datasourceState.layers.layer1.columns,
+            date: {
+              ...datasourceState.layers.layer1.columns.date,
+              params: {
+                ...datasourceState.layers.layer1.columns.date.params,
+                includeEmptyRows: true,
+              },
+            },
+          },
+        },
+      },
+    });
   });
 
   it('leaves non form-based datasource state unchanged', () => {

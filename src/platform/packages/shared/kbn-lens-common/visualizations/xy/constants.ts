@@ -27,6 +27,22 @@ export const SeriesTypes = {
   BAR_HORIZONTAL_PERCENTAGE_STACKED: 'bar_horizontal_percentage_stacked',
 } as const;
 
+export const BAR_SERIES_TYPES = [
+  SeriesTypes.BAR,
+  SeriesTypes.BAR_STACKED,
+  SeriesTypes.BAR_PERCENTAGE_STACKED,
+  SeriesTypes.BAR_HORIZONTAL,
+  SeriesTypes.BAR_HORIZONTAL_STACKED,
+  SeriesTypes.BAR_HORIZONTAL_PERCENTAGE_STACKED,
+] as const;
+
+const barSeriesTypeSet = new Set<string>(BAR_SERIES_TYPES);
+
+export const isBarSeriesType = (
+  seriesType: string | null | undefined
+): seriesType is (typeof BAR_SERIES_TYPES)[number] =>
+  typeof seriesType === 'string' && barSeriesTypeSet.has(seriesType);
+
 /**
  * Need to duplicate these icons from expression-xy to avoid circular dependencies in the config builder
  */

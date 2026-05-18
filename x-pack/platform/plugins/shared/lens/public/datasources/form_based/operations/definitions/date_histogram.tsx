@@ -163,6 +163,7 @@ export const dateHistogramOperation: OperationDefinition<
       isBucketed: true,
       params: {
         interval: columnParams?.interval ?? AUTO_INTERVAL,
+        // Visualization-specific defaults are injected before buildColumn is called.
         includeEmptyRows: columnParams?.includeEmptyRows ?? true,
         dropPartials: Boolean(columnParams?.dropPartials),
       },
@@ -578,6 +579,12 @@ export const dateHistogramOperation: OperationDefinition<
         </p>
 
         <EuiBasicTable
+          tableCaption={i18n.translate(
+            'xpack.lens.indexPattern.dateHistogram.autoIntervalLogicTableCaption',
+            {
+              defaultMessage: 'Auto interval thresholds and the resulting interval selection',
+            }
+          )}
           items={search.aggs.boundsDescendingRaw.map(({ bound, boundLabel, intervalLabel }) => ({
             bound: typeof bound === 'number' ? infiniteBound : `${upToLabel} ${boundLabel}`,
             interval: intervalLabel,

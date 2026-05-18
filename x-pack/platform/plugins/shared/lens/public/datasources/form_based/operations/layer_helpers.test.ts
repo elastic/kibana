@@ -134,7 +134,7 @@ const createVisualizationGroups = (defaultValue: boolean): VisualizationDimensio
   },
 ];
 
-describe('state_helpers', () => {
+describe('layer_helpers', () => {
   beforeEach(() => {
     let count = 0;
     (generateId as jest.Mock).mockImplementation(() => `id${++count}`);

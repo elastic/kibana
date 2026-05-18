@@ -36,6 +36,9 @@ const isDateHistogramColumn = (
   column: GenericIndexPatternColumn
 ): column is DateHistogramIndexPatternColumn => column.operationType === 'date_histogram';
 
+const hasExplicitIncludeEmptyRowsValue = (column: DateHistogramIndexPatternColumn) =>
+  typeof column.params?.includeEmptyRows === 'boolean';
+
 export const applyDateHistogramEmptyRowsPolicyToDatasourceState = (
   datasourceState: unknown,
   visualizationType: string | null | undefined,
@@ -58,10 +61,7 @@ export const applyDateHistogramEmptyRowsPolicyToDatasourceState = (
 
       const columns = Object.fromEntries(
         Object.entries(layer.columns).map(([columnId, column]) => {
-          if (
-            !isDateHistogramColumn(column) ||
-            column.params?.includeEmptyRows === policy.defaultValue
-          ) {
+          if (!isDateHistogramColumn(column) || hasExplicitIncludeEmptyRowsValue(column)) {
             return [columnId, column];
           }
 
@@ -73,7 +73,7 @@ export const applyDateHistogramEmptyRowsPolicyToDatasourceState = (
             {
               ...column,
               params: {
-                ...column.params,
+                ...(column.params ?? {}),
                 includeEmptyRows: policy.defaultValue,
               },
             },

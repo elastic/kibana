@@ -10,8 +10,8 @@
 import { LENS_DATATABLE_ID } from './visualizations/datatable/constants';
 import { LENS_HEATMAP_ID } from './visualizations/heatmap/constants';
 import { LENS_METRIC_ID } from './visualizations/metric/constants';
-import { PARTITION_CHART_TYPES } from './visualizations/partition/constants';
-import { SeriesTypes } from './visualizations/xy/constants';
+import { isPartitionChartTypeWithDefaultEmptyRowsOff } from './visualizations/partition/utils';
+import { isBarSeriesType } from './visualizations/xy/constants';
 
 const XY_VISUALIZATION_ID = 'lnsXY';
 const PARTITION_VISUALIZATION_ID = 'lnsPie';
@@ -37,23 +37,6 @@ const DEFAULT_ON_POLICY: DateHistogramEmptyRowsPolicy = {
   defaultValue: true,
 };
 
-const XY_BAR_SERIES_TYPES = new Set<string>([
-  SeriesTypes.BAR,
-  SeriesTypes.BAR_STACKED,
-  SeriesTypes.BAR_PERCENTAGE_STACKED,
-  SeriesTypes.BAR_HORIZONTAL,
-  SeriesTypes.BAR_HORIZONTAL_STACKED,
-  SeriesTypes.BAR_HORIZONTAL_PERCENTAGE_STACKED,
-]);
-
-const PARTITION_DEFAULT_OFF_SHAPES = new Set<string>([
-  PARTITION_CHART_TYPES.PIE,
-  PARTITION_CHART_TYPES.DONUT,
-  PARTITION_CHART_TYPES.TREEMAP,
-  PARTITION_CHART_TYPES.WAFFLE,
-  PARTITION_CHART_TYPES.MOSAIC,
-]);
-
 const getXYSeriesTypeFromState = (visualizationState: unknown) => {
   if (!visualizationState || typeof visualizationState !== 'object') {
     return;
@@ -74,22 +57,16 @@ const getPartitionShapeFromState = (visualizationState: unknown) => {
 
 export const getDateHistogramEmptyRowsPolicy = (
   visualizationType: string | null | undefined,
-  subVisualizationId?: string | null
+  visualizationSubtype?: string | null
 ) => {
   switch (visualizationType) {
     case XY_VISUALIZATION_ID:
-      if (subVisualizationId && XY_BAR_SERIES_TYPES.has(subVisualizationId)) {
-        return DEFAULT_OFF_POLICY;
-      }
-
-      return;
+      return isBarSeriesType(visualizationSubtype) ? DEFAULT_OFF_POLICY : undefined;
 
     case PARTITION_VISUALIZATION_ID:
-      if (subVisualizationId && PARTITION_DEFAULT_OFF_SHAPES.has(subVisualizationId)) {
-        return DEFAULT_OFF_POLICY;
-      }
-
-      return;
+      return isPartitionChartTypeWithDefaultEmptyRowsOff(visualizationSubtype)
+        ? DEFAULT_OFF_POLICY
+        : undefined;
 
     case LENS_HEATMAP_ID:
       return DEFAULT_OFF_POLICY;

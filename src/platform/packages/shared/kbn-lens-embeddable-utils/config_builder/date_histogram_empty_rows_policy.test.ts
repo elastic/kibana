@@ -8,7 +8,7 @@
  */
 
 import type { DateHistogramIndexPatternColumn } from '@kbn/lens-common';
-import { PARTITION_CHART_TYPES } from '@kbn/lens-common';
+import { PARTITION_CHART_TYPES, SeriesTypes } from '@kbn/lens-common';
 import { applyDateHistogramEmptyRowsPolicyToDatasourceStates } from './date_histogram_empty_rows_policy';
 
 const createDatasourceStates = (
@@ -47,11 +47,21 @@ const createDatasourceStates = (
 });
 
 describe('config builder empty rows policy', () => {
-  it('forces empty rows off for bar charts', () => {
+  it('preserves explicit empty rows values for bar charts', () => {
     const datasourceStates = createDatasourceStates(true);
 
     const result = applyDateHistogramEmptyRowsPolicyToDatasourceStates(datasourceStates, 'lnsXY', {
-      preferredSeriesType: 'bar',
+      preferredSeriesType: SeriesTypes.BAR,
+    });
+
+    expect(result).toBe(datasourceStates);
+  });
+
+  it('defaults empty rows off for bar charts when the param is unset', () => {
+    const datasourceStates = createDatasourceStates();
+
+    const result = applyDateHistogramEmptyRowsPolicyToDatasourceStates(datasourceStates, 'lnsXY', {
+      preferredSeriesType: SeriesTypes.BAR,
     });
 
     expect(result.formBased.layers.layer1.columns.x.params).toHaveProperty(
@@ -60,17 +70,14 @@ describe('config builder empty rows policy', () => {
     );
   });
 
-  it('forces empty rows off for pie charts', () => {
+  it('preserves explicit empty rows values for pie charts', () => {
     const datasourceStates = createDatasourceStates(true);
 
     const result = applyDateHistogramEmptyRowsPolicyToDatasourceStates(datasourceStates, 'lnsPie', {
       shape: PARTITION_CHART_TYPES.PIE,
     });
 
-    expect(result.formBased.layers.layer1.columns.x.params).toHaveProperty(
-      'includeEmptyRows',
-      false
-    );
+    expect(result).toBe(datasourceStates);
   });
 
   it('defaults empty rows off for tag cloud charts', () => {

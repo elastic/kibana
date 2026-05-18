@@ -107,7 +107,6 @@ function buildFormulaLayer(
           sourceField: dataView.timeFieldName,
           params: {
             interval: 'auto',
-            includeEmptyRows: true,
           },
         },
       }),
