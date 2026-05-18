@@ -18,6 +18,7 @@ import {
 } from '../application/components/conversations/conversation.styles';
 import { EmbeddableWelcomeMessage } from './embeddable_welcome_message';
 import { EmbeddableAccessBoundary } from './embeddable_access_boundary';
+import { AgentBuilderUiClickTelemetry } from '../application/agent_builder_ui_click_telemetry';
 
 export const EmbeddableConversationInternal: React.FC<EmbeddableConversationInternalProps> = (
   props
@@ -64,15 +65,17 @@ export const EmbeddableConversationInternal: React.FC<EmbeddableConversationInte
   return (
     <div css={wrapperStyles}>
       <EmbeddableConversationsProvider {...props}>
-        <EmbeddableAccessBoundary onClose={onClose}>
-          <EuiFlyoutHeader css={headerStyles}>
-            <EmbeddableConversationHeader onClose={onClose} ariaLabelledBy={ariaLabelledBy} />
-          </EuiFlyoutHeader>
-          <EmbeddableWelcomeMessage />
-          <EuiFlyoutBody css={bodyStyles}>
-            <Conversation />
-          </EuiFlyoutBody>
-        </EmbeddableAccessBoundary>
+        <AgentBuilderUiClickTelemetry>
+          <EmbeddableAccessBoundary onClose={onClose}>
+            <EuiFlyoutHeader css={headerStyles}>
+              <EmbeddableConversationHeader onClose={onClose} ariaLabelledBy={ariaLabelledBy} />
+            </EuiFlyoutHeader>
+            <EmbeddableWelcomeMessage />
+            <EuiFlyoutBody css={bodyStyles}>
+              <Conversation />
+            </EuiFlyoutBody>
+          </EmbeddableAccessBoundary>
+        </AgentBuilderUiClickTelemetry>
       </EmbeddableConversationsProvider>
     </div>
   );
