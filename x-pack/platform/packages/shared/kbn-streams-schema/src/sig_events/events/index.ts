@@ -6,35 +6,12 @@
  */
 
 import { z } from '@kbn/zod/v4';
-
-const eventDependencyEdgeSchema = z.object({
-  source: z.string(),
-  target: z.string(),
-  protocol: z.string().optional(),
-  exposure: z.string().optional(),
-});
-
-const eventInfraComponentSchema = z.object({
-  title: z.string().optional(),
-  workloads: z.array(z.string()).optional(),
-  exposure: z.string().optional(),
-});
-
-const eventCauseKiSchema = z.object({
-  name: z.string().optional(),
-  stream_name: z.string().optional(),
-});
-
-const eventEvidenceSchema = z.object({
-  rule_name: z.string().optional(),
-  result: z.string().optional(),
-  description: z.string().optional(),
-  stream_name: z.string().optional(),
-  row_count: z.number().optional(),
-  collected_at: z.string().optional(),
-  esql_query: z.string().nullable().optional(),
-  confirmed: z.boolean().optional(),
-});
+import {
+  dependencyEdgeSchema,
+  infraComponentSchema,
+  causeKiSchema,
+  evidenceSchema,
+} from '../common_schemas';
 
 export const sigEventSchema = z.object({
   '@timestamp': z.iso.datetime(),
@@ -55,10 +32,10 @@ export const sigEventSchema = z.object({
   recommended_action: z.string().optional(),
   impact: z.string().optional(),
   recommendations: z.array(z.string()).optional(),
-  dependency_edges: z.array(eventDependencyEdgeSchema).optional(),
-  infra_components: z.array(eventInfraComponentSchema).optional(),
-  cause_kis: z.array(eventCauseKiSchema).optional(),
-  evidences: z.array(eventEvidenceSchema).optional(),
+  dependency_edges: z.array(dependencyEdgeSchema).optional(),
+  infra_components: z.array(infraComponentSchema).optional(),
+  cause_kis: z.array(causeKiSchema).optional(),
+  evidences: z.array(evidenceSchema).optional(),
   grouped_into: z.string().optional(),
 });
 

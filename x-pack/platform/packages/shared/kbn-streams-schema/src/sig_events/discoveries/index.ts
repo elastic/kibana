@@ -6,6 +6,12 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import {
+  dependencyEdgeSchema,
+  infraComponentSchema,
+  causeKiSchema,
+  evidenceSchema,
+} from '../common_schemas';
 
 const discoveryDetectionSchema = z.object({
   detection_id: z.string().optional(),
@@ -15,35 +21,6 @@ const discoveryDetectionSchema = z.object({
   change_point_type: z.string().optional(),
   event_count: z.number().optional(),
   detected_at: z.string().optional(),
-});
-
-const dependencyEdgeSchema = z.object({
-  source: z.string(),
-  target: z.string(),
-  protocol: z.string().optional(),
-  exposure: z.string().optional(),
-});
-
-const infraComponentSchema = z.object({
-  title: z.string().optional(),
-  workloads: z.array(z.string()).optional(),
-  exposure: z.string().optional(),
-});
-
-const causeKiSchema = z.object({
-  name: z.string().optional(),
-  stream_name: z.string().optional(),
-});
-
-const evidenceSchema = z.object({
-  rule_name: z.string().optional(),
-  result: z.string().optional(),
-  description: z.string().optional(),
-  stream_name: z.string().optional(),
-  row_count: z.number().optional(),
-  collected_at: z.string().optional(),
-  esql_query: z.string().nullable().optional(),
-  confirmed: z.boolean().optional(),
 });
 
 export const discoverySchema = z.object({

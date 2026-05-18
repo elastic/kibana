@@ -6,35 +6,12 @@
  */
 
 import { z } from '@kbn/zod/v4';
-
-const verdictDependencyEdgeSchema = z.object({
-  source: z.string(),
-  target: z.string(),
-  protocol: z.string().optional(),
-  exposure: z.string().optional(),
-});
-
-const verdictInfraComponentSchema = z.object({
-  title: z.string().optional(),
-  workloads: z.array(z.string()).optional(),
-  exposure: z.string().optional(),
-});
-
-const verdictCauseKiSchema = z.object({
-  name: z.string().optional(),
-  stream_name: z.string().optional(),
-});
-
-const verdictEvidenceSchema = z.object({
-  rule_name: z.string().optional(),
-  result: z.string().optional(),
-  description: z.string().optional(),
-  stream_name: z.string().optional(),
-  row_count: z.number().optional(),
-  collected_at: z.string().optional(),
-  esql_query: z.string().nullable().optional(),
-  confirmed: z.boolean().optional(),
-});
+import {
+  dependencyEdgeSchema,
+  infraComponentSchema,
+  causeKiSchema,
+  evidenceSchema,
+} from '../common_schemas';
 
 export const verdictSchema = z.object({
   '@timestamp': z.iso.datetime(),
@@ -60,10 +37,10 @@ export const verdictSchema = z.object({
   verdict_source: z.string().optional(),
   grouped_discovery_ids: z.array(z.string()).optional(),
   grouped_into: z.string().optional(),
-  dependency_edges: z.array(verdictDependencyEdgeSchema).optional(),
-  infra_components: z.array(verdictInfraComponentSchema).optional(),
-  cause_kis: z.array(verdictCauseKiSchema).optional(),
-  evidences: z.array(verdictEvidenceSchema).optional(),
+  dependency_edges: z.array(dependencyEdgeSchema).optional(),
+  infra_components: z.array(infraComponentSchema).optional(),
+  cause_kis: z.array(causeKiSchema).optional(),
+  evidences: z.array(evidenceSchema).optional(),
 });
 
 export type Verdict = z.infer<typeof verdictSchema>;
