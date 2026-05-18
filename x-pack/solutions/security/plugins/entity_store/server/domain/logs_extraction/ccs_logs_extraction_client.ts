@@ -50,7 +50,7 @@ interface CcsExtractToUpdatesParams {
   windowOverride?: { fromDateISO: string; toDateISO: string };
   /** Cap each scheduled sub-window to this duration to bound probe cost in lagging environments. */
   maxTimeWindowSize: string;
-  /** Total CCS entity rows allowed per run. 0 = disabled. */
+  /** Total raw log documents allowed per run. 0 = disabled. */
   maxLogsPerWindow: number;
   /** What to do when the cap fires: preserve cursor (defer) or advance to window end (drop). */
   maxLogsPerWindowCapBehavior: 'defer' | 'drop';
