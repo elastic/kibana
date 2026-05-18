@@ -44,6 +44,7 @@ export const MetricsExperienceGrid = ({
     onToggleFullscreen,
     selectedDimensions,
     onDimensionsChange,
+    profileId,
   } = useMetricsExperienceState();
 
   const {
@@ -57,6 +58,7 @@ export const MetricsExperienceGrid = ({
     services,
     isComponentVisible,
     selectedDimensionNames: selectedDimensions,
+    profileId,
   });
 
   const { filteredMetricItems } = useMetricFieldsFilter({

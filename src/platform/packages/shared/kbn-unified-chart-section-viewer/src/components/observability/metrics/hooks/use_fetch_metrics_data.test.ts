@@ -117,6 +117,7 @@ const createDefaultParams = (overrides?: Record<string, unknown>) => ({
   } as any,
   isComponentVisible: true,
   selectedDimensionNames: undefined as Dimension[] | undefined,
+  profileId: 'test-profile-id',
 });
 
 describe('useFetchMetricsData', () => {
@@ -672,7 +673,7 @@ describe('useFetchMetricsData', () => {
       expect(mockApmCaptureError).toHaveBeenCalledTimes(1);
       expect(mockApmCaptureError).toHaveBeenCalledWith(fetchError, {
         labels: {
-          error_type: 'metrics_fetch_metrics_info',
+          profile_id: 'test-profile-id',
         },
       });
       // Success-path emission must NOT fire when the fetch failed.
@@ -697,7 +698,7 @@ describe('useFetchMetricsData', () => {
       expect(mockApmCaptureError).toHaveBeenCalledTimes(1);
       expect(mockApmCaptureError).toHaveBeenCalledWith(responseError, {
         labels: {
-          error_type: 'metrics_fetch_metrics_info',
+          profile_id: 'test-profile-id',
         },
       });
     });

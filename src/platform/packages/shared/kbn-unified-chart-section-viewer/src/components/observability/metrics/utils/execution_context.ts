@@ -23,10 +23,3 @@ export const getMetricsExecutionContext = (
 ) => ({
   executionContext: { page: `metrics_${action}_${name}` } as KibanaExecutionContext,
 });
-
-export const getMetricsApmLabels = (
-  action: MetricsExecutionContextAction,
-  name: MetricsExecutionContextName
-) => ({
-  error_type: `metrics_${action}_${name}`,
-});
