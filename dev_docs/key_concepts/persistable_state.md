@@ -3,18 +3,18 @@ id: kibDevDocsPersistableStateIntro
 slug: /kibana-dev-docs/key-concepts/persistable-state-intro
 title: Persistable State
 description: Persitable state is a key concept to understand when building a Kibana plugin.
-date: 2021-02-02
+date: 2025-08-21
 tags: ['kibana', 'dev', 'contributor', 'api docs']
 ---
 
-“Persistable state” is developer-defined state that supports being persisted by a plugin other than the one defining it. Persistable State needs to be serializable and the owner can/should provide utilities to migrate it, extract and inject any <DocLink id="kibDevDocsSavedObjectsIntro" section="references" text="references to Saved Objects"/> it may contain, as well as telemetry collection utilities.
+"Persistable state" is developer-defined state that supports being persisted by a plugin other than the one defining it. Persistable State needs to be serializable and the owner can/should provide utilities to migrate it, extract and inject any [references to Saved Objects](saved_objects.md#references) it may contain, as well as telemetry collection utilities.
 
 ## Exposing state that can be persisted
 
-Any plugin that exposes state that another plugin might persist should implement <DocLink id="kibKibanaUtilsPluginApi" section="def-common.PersistableStateService" text="`PersistableStateService`"/> interface on their `setup` contract. This will allow plugins persisting the state to easily access migrations and other utilities.
+Any plugin that exposes state that another plugin might persist should implement `PersistableStateService` interface on their `setup` contract. This will allow plugins persisting the state to easily access migrations and other utilities.
 
 Example: Data plugin allows you to generate filters. Those filters can be persisted by applications in their saved
-objects or in the URL. In order to allow apps to migrate the filters in case the structure changes in the future, the Data plugin implements `PersistableStateService` on <DocLink id="kibDataQueryPluginApi" section="def-public.FilterManager" text="`data.query.filterManager`"/>.
+objects or in the URL. In order to allow apps to migrate the filters in case the structure changes in the future, the Data plugin implements `PersistableStateService` on `data.query.filterManager`.
 
 note: There is currently no obvious way for a plugin to know which state is safe to persist. The developer must manually look for a matching `PersistableStateService`, or ad-hoc provided migration utilities (as is the case with Rule Type Parameters).
 In the future, we hope to make it easier for producers of state to understand when they need to write a migration with changes, and also make it easier for consumers of such state, to understand whether it is safe to persist.
@@ -22,7 +22,7 @@ In the future, we hope to make it easier for producers of state to understand wh
 ## Exposing state that can be persisted but is not owned by plugin exposing it (registry)
 
 Any plugin that owns collection of items (registry) whose state/configuration can be persisted should implement `PersistableStateService`
-interface on their `setup` contract and each item in the collection should implement <DocLink id="kibKibanaUtilsPluginApi" section="def-common.PersistableStateDefinition" text="`PersistableStateDefinition`"/> interface.
+interface on their `setup` contract and each item in the collection should implement `PersistableStateDefinition` interface.
 
 Example: Embeddable plugin owns the registry of embeddable factories to which other plugins can register new embeddable factories. Dashboard plugin
 stores a bunch of embeddable panels input in its saved object and URL. Embeddable plugin setup contract implements `PersistableStateService`
@@ -63,13 +63,9 @@ note: Currently there is no recommended way on how to store version in url and i
 ### Extraction/Injection of References
 
 In order to support import and export, and space-sharing capabilities, Saved Objects need to explicitly list any references they contain to other Saved Objects.
-To support persisting your state in saved objects owned by another plugin, the <DocLink id="kibKibanaUtilsPluginApi" section="def-common.PersistableState.extract" text="`extract`"/> and <DocLink id="kibKibanaUtilsPluginApi" section="def-common.PersistableState.inject" text="`inject`"/> methods of Persistable State interface should be implemented.
+To support persisting your state in saved objects owned by another plugin, the `extract` and `inject` methods of Persistable State interface should be implemented.
 
-<DocLink
-  id="kibDevTutorialSavedObject"
-  section="references"
-  text="Learn how to define Saved Object references"
-/>
+[Learn how to define Saved Object references](../tutorials/saved_objects.mdx#references)
 
 [See example embeddable providing extract/inject functions](https://github.com/elastic/kibana/blob/8.9/examples/embeddable_examples/public/migrations/migrations_embeddable_factory.ts)
 
@@ -77,7 +73,7 @@ To support persisting your state in saved objects owned by another plugin, the <
 
 As your plugin evolves, you may need to change your state in a breaking way. If that happens, you should write a migration to upgrade the state that existed prior to the change.
 
-<DocLink id="kibDevTutorialSavedObject" section="migrations" text="How to write a migration" />.
+[How to write a migration](../tutorials/saved_objects.mdx#migrations).
 
 [See an example saved object storing embeddable state implementing saved object migration function](https://github.com/elastic/kibana/blob/8.9/examples/embeddable_examples/server/searchable_list_saved_object.ts)
 
