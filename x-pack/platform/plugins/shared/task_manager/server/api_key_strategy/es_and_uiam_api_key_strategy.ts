@@ -18,7 +18,12 @@ import { getSpaceIdFromPath } from '@kbn/spaces-utils';
 import { ApiKeyType } from '../config';
 import type { ConcreteTaskInstance, TaskInstance } from '../task';
 import { createApiKey, requestHasApiKey, getApiKeyFromRequest } from '../lib/api_key_utils';
-import type { ApiKeySOFields, ApiKeyStrategy, InvalidationTarget } from './api_key_strategy';
+import type {
+  ApiKeySOFields,
+  ApiKeyStrategy,
+  GrantApiKeysOpts,
+  InvalidationTarget,
+} from './api_key_strategy';
 import { markApiKeysForInvalidation } from './api_key_strategy';
 import {
   UIAM_LOGS_CREDENTIALS_TAGS,
@@ -47,10 +52,14 @@ export class EsAndUiamApiKeyStrategy implements ApiKeyStrategy {
     taskInstances: TaskInstance[],
     request: KibanaRequest,
     security: SecurityServiceStart,
-    basePath: IBasePath
+    basePath: IBasePath,
+    opts?: GrantApiKeysOpts
   ): Promise<Map<string, ApiKeySOFields>> {
     const esKeys = await createApiKey(taskInstances, request, security);
-    const uiamKeys = await this.grantUiamApiKeys(taskInstances, request, security);
+    const uiamKeys =
+      opts?.onEsKey === true
+        ? new Map<string, UiamApiKeyResult>()
+        : await this.grantUiamApiKeys(taskInstances, request, security);
 
     const requestBasePath = basePath.get(request);
     const space = getSpaceIdFromPath(requestBasePath, basePath.serverBasePath);
