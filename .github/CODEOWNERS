@@ -1559,6 +1559,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/platform/test/functional/apps/reporting_management/ @elastic/response-ops
 /x-pack/platform/test/examples/screenshotting/ @elastic/response-ops
 /x-pack/platform/test/fixtures/es_archives/reporting/ @elastic/response-ops
+/x-pack/platform/test/functional/fixtures/kbn_archives/alerts @elastic/response-ops
 /x-pack/platform/test/functional/fixtures/kbn_archives/reporting/ @elastic/response-ops
 /x-pack/platform/test/reporting_api_integration/ @elastic/response-ops
 /x-pack/platform/test/reporting_functional/ @elastic/response-ops
