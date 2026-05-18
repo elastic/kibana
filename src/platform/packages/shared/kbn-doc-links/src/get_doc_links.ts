@@ -472,6 +472,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       blocklist: `${ELASTIC_DOCS}solutions/security/manage-elastic-defend/blocklist`,
       threatIntelInt: `${ELASTIC_DOCS}solutions/security/get-started/enable-threat-intelligence-integrations`,
       endpointArtifacts: `${ELASTIC_DOCS}solutions/security/manage-elastic-defend/optimize-elastic-defend`,
+      endpointArtifactsNoEscaping: `${ELASTIC_DOCS}solutions/security/manage-elastic-defend/exception-types-and-syntax#endpoint-no-escaping`,
       eventMerging: `${ELASTIC_DOCS}solutions/security/configure-elastic-defend/configure-data-volume-for-elastic-endpoint`,
       policyResponseTroubleshooting: {
         full_disk_access: `${ELASTIC_DOCS}solutions/security/configure-elastic-defend/enable-access-for-macos-monterey#enable-fda-endpoint`,
