@@ -382,6 +382,7 @@ const CasesSearchRequestSearchFieldsValues = [
   'cases-comments.comment',
   'cases-comments.alertId',
   'cases-comments.eventId',
+  'cases.ef_all_values',
 ] as const;
 
 export const CasesSearchRequestSearchFieldsSchema = z.enum(CasesSearchRequestSearchFieldsValues);

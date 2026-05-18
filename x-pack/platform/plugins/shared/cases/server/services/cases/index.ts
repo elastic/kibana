@@ -67,6 +67,8 @@ import type {
 import {
   buildExtendedFieldRuntimeMappings,
   buildFieldLabelRuntimeMappings,
+  buildAllExtendedFieldValuesRuntimeMapping,
+  EF_ALL_VALUES_FIELD,
 } from './extended_field_search_utils';
 import type {
   CasePersistedAttributes,
@@ -230,22 +232,8 @@ export class CasesService {
         filter,
       });
 
-<<<<<<< HEAD
-      const owners: Array<SavedObjectsFindResult<{ owner: string }>> = [];
-      for (const so of response.saved_objects) {
-        const validatedAttributes = decodeOrThrowZod(OwnerSchema)(so.attributes);
-
-        owners.push(Object.assign(so, { attributes: validatedAttributes }));
-||||||| 709a910be178
-      const owners: Array<SavedObjectsFindResult<{ owner: string }>> = [];
-      for (const so of response.saved_objects) {
-        const validatedAttributes = decodeOrThrow(OwnerRt)(so.attributes);
-
-        owners.push(Object.assign(so, { attributes: validatedAttributes }));
-=======
       if (!this.attachmentService.isUnifiedAttachmentsEnabled) {
         return legacyResponse;
->>>>>>> main
       }
 
       const unifiedResponse = await this.findCaseIdsForAlertByType({
@@ -442,9 +430,15 @@ export class CasesService {
         ? buildFieldLabelRuntimeMappings(fieldLabelFilters)
         : {};
 
+    const allValuesRuntimeMappings =
+      caseOptions.search && caseOptions.searchFields?.includes(EF_ALL_VALUES_FIELD)
+        ? buildAllExtendedFieldValuesRuntimeMapping()
+        : {};
+
     const runtimeMappings = {
       ...extendedFieldRuntimeMappings,
       ...fieldLabelRuntimeMappings,
+      ...allValuesRuntimeMappings,
     };
 
     const hasRuntimeMappings = Object.keys(runtimeMappings).length > 0;
