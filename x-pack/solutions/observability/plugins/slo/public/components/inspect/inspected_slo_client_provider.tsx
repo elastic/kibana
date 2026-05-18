@@ -5,34 +5,35 @@
  * 2.0.
  */
 
-import React, { useMemo, useRef } from 'react';
-import { useHistory } from 'react-router-dom';
+import React, { useEffect, useMemo, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useInspectorContext, FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 import { PluginContext } from '../../context/plugin_context';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import type { SLORepositoryClient } from '../../types';
 
 export function InspectedSloClientProvider({ children }: { children: React.ReactNode }) {
-  const { addInspectorRequest } = useInspectorContext();
+  const { addInspectorRequest, inspectorAdapters } = useInspectorContext();
   const pluginContextValue = usePluginContext();
-  const history = useHistory();
+  const { pathname } = useLocation();
 
   const addInspectorRequestRef = useRef(addInspectorRequest);
   addInspectorRequestRef.current = addInspectorRequest;
+
+  useEffect(() => {
+    inspectorAdapters.requests.reset();
+  }, [pathname, inspectorAdapters]);
 
   const inspectedSloClient = useMemo(() => {
     const { sloClient } = pluginContextValue;
 
     const wrappedFetch: SLORepositoryClient['fetch'] = (endpoint, ...args) => {
-      const requestPathname = history.location.pathname;
       return sloClient.fetch(endpoint, ...args).then((response) => {
-        if (history.location.pathname === requestPathname) {
-          addInspectorRequestRef.current({
-            data: response as any,
-            status: FETCH_STATUS.SUCCESS,
-            loading: false,
-          });
-        }
+        addInspectorRequestRef.current({
+          data: response as any,
+          status: FETCH_STATUS.SUCCESS,
+          loading: false,
+        });
 
         if (response && typeof response === 'object') {
           const resp = response as Record<string, unknown>;
@@ -55,7 +56,7 @@ export function InspectedSloClientProvider({ children }: { children: React.React
       fetch: wrappedFetch,
       stream: sloClient.stream,
     } as SLORepositoryClient;
-  }, [pluginContextValue, history]);
+  }, [pluginContextValue]);
 
   const contextValue = useMemo(
     () => ({
