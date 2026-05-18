@@ -31,5 +31,6 @@ process.stdout.write(
     id: suite.id,
     name: suite.name,
     slackChannel: suite.slackChannel,
+    serverConfigSet: suite.serverConfigSet,
   })
 );
