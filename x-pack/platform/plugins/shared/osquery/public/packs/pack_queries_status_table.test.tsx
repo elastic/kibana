@@ -128,9 +128,9 @@ describe('PackQueriesStatusTable', () => {
     } as Parameters<typeof getLensAttributes>[0];
 
     it('uses action_id filter and "Action ..." title when no executionCount is provided', () => {
-      // Every pack query carries `schedule_id` after backfill, so passing it
-      // alone is not enough — without `executionCount`, no schedule_id docs
-      // were observed and we must keep the legacy action_id behavior.
+      // `scheduleId` alone is not enough to switch branches — `executionCount`
+      // gates the schedule path so we don't filter on a schedule_id that has
+      // no observed docs.
       const attrs = getLensAttributes(logsDataView, 'legacy-action-id', 'some-schedule-uuid');
 
       expect(attrs.title).toBe('Action legacy-action-id results');
@@ -183,9 +183,6 @@ describe('PackQueriesStatusTable', () => {
       <PackQueriesStatusTable agentIds={['a-1']} data={data} packName="pack-name" />
     );
 
-    // Without the fix, scheduled rows render `—` because the `action_id` filter
-    // matches no docs. With the fix, the hook returns aggregation values from
-    // the `schedule_id` branch and the columns surface them.
     expect(screen.getByText('150')).toBeInTheDocument();
     expect(screen.getByText('5')).toBeInTheDocument();
   });
