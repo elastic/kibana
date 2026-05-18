@@ -324,7 +324,7 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
    * Get the alert formatter for a specific rule type.
    * Used to generate "View in App" links for individual alerts.
    */
-  getAlertFormatter?: (ruleTypeId: string) => AlertFormatter | undefined;
+  getAlertFormatter?: (ruleTypeId: string) => Promise<AlertFormatter | undefined>;
   /**
    * Navigation config for the alert details page.
    * When provided, the "View alert details" row action and the flyout footer

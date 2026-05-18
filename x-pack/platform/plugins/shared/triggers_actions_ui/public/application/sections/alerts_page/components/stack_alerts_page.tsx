@@ -124,11 +124,11 @@ const PageContentComponent: React.FC<PageContentProps> = ({
   } = useKibana().services;
 
   const getAlertFormatter = useCallback(
-    (ruleTypeId: string) => {
+    async (ruleTypeId: string) => {
       if (!ruleTypeRegistry.has(ruleTypeId)) {
         return undefined;
       }
-      return ruleTypeRegistry.get(ruleTypeId).format;
+      return (await ruleTypeRegistry.get(ruleTypeId)).format;
     },
     [ruleTypeRegistry]
   );

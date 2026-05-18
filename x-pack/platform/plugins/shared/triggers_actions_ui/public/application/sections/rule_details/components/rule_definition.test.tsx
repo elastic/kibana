@@ -9,8 +9,7 @@ import { screen, render } from '@testing-library/react';
 import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { RuleDefinition } from './rule_definition';
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
-import type { ActionTypeModel, Rule, RuleTypeModel } from '../../../../types';
-import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
+import type { ActionTypeModel, Rule } from '../../../../types';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import * as capabilities from '../../../lib/capabilities';
 
@@ -88,39 +87,8 @@ const mockedRuleTypeIndex = new Map(
 
 describe('Rule Definition', () => {
   let actionTypeRegistry: ReturnType<typeof actionTypeRegistryMock.create>;
-  let ruleTypeRegistry: ReturnType<typeof ruleTypeRegistryMock.create>;
-  let ruleTypeR: RuleTypeModel;
-
   beforeEach(() => {
     actionTypeRegistry = actionTypeRegistryMock.create();
-    ruleTypeRegistry = ruleTypeRegistryMock.create();
-
-    ruleTypeRegistry.has.mockImplementation((id) => {
-      if (id === 'siem_rule' || id === 'attack-discovery') {
-        return false;
-      }
-      return true;
-    });
-
-    ruleTypeR = {
-      id: 'my-rule-type',
-      iconClass: 'test',
-      description: 'Rule when testing',
-      documentationUrl: 'https://localhost.local/docs',
-      validate: () => {
-        return { errors: {} };
-      },
-      ruleParamsExpression: jest.fn(),
-      requiresAppContext: false,
-    };
-
-    ruleTypeRegistry.get.mockImplementation(async (id) => {
-      if (id === 'siem_rule' || id === 'attack-discovery') {
-        throw new Error('error');
-      }
-      return ruleTypeR;
-    });
-
     actionTypeRegistry.list.mockResolvedValue([
       { id: '.server-log', iconClass: 'logsApp' },
       { id: '.slack', iconClass: 'logoSlack' },
@@ -144,7 +112,7 @@ describe('Rule Definition', () => {
           rule={mockRule()}
           actionTypeRegistry={actionTypeRegistry}
           onEditRule={jest.fn()}
-          ruleTypeRegistry={ruleTypeRegistry}
+          ruleTypeModel={undefined}
         />
       </QueryClientProvider>
     );
@@ -159,7 +127,7 @@ describe('Rule Definition', () => {
           rule={mockRule()}
           actionTypeRegistry={actionTypeRegistry}
           onEditRule={jest.fn()}
-          ruleTypeRegistry={ruleTypeRegistry}
+          ruleTypeModel={undefined}
         />
       </QueryClientProvider>
     );
@@ -177,7 +145,17 @@ describe('Rule Definition', () => {
           rule={mockRule()}
           actionTypeRegistry={actionTypeRegistry}
           onEditRule={jest.fn()}
-          ruleTypeRegistry={ruleTypeRegistry}
+          ruleTypeModel={{
+            id: 'my-rule-type',
+            iconClass: 'test',
+            description: 'Rule when testing',
+            documentationUrl: 'https://localhost.local/docs',
+            validate: () => {
+              return { errors: {} };
+            },
+            ruleParamsExpression: jest.fn(),
+            requiresAppContext: false,
+          }}
         />
       </QueryClientProvider>
     );
@@ -193,7 +171,7 @@ describe('Rule Definition', () => {
           rule={mockRule({ consumer: 'siem', ruleTypeId: 'siem_rule' })}
           actionTypeRegistry={actionTypeRegistry}
           onEditRule={jest.fn()}
-          ruleTypeRegistry={ruleTypeRegistry}
+          ruleTypeModel={undefined}
         />
       </QueryClientProvider>
     );
@@ -209,7 +187,7 @@ describe('Rule Definition', () => {
           rule={mockRule({ consumer: 'siem', ruleTypeId: 'attack-discovery' })}
           actionTypeRegistry={actionTypeRegistry}
           onEditRule={jest.fn()}
-          ruleTypeRegistry={ruleTypeRegistry}
+          ruleTypeModel={undefined}
         />
       </QueryClientProvider>
     );
@@ -225,7 +203,7 @@ describe('Rule Definition', () => {
           rule={mockRule()}
           actionTypeRegistry={actionTypeRegistry}
           onEditRule={jest.fn()}
-          ruleTypeRegistry={ruleTypeRegistry}
+          ruleTypeModel={undefined}
         />
       </QueryClientProvider>
     );
@@ -241,7 +219,7 @@ describe('Rule Definition', () => {
           rule={mockRule()}
           actionTypeRegistry={actionTypeRegistry}
           onEditRule={jest.fn()}
-          ruleTypeRegistry={ruleTypeRegistry}
+          ruleTypeModel={undefined}
         />
       </QueryClientProvider>
     );
@@ -257,7 +235,7 @@ describe('Rule Definition', () => {
           rule={mockRule()}
           actionTypeRegistry={actionTypeRegistry}
           onEditRule={jest.fn()}
-          ruleTypeRegistry={ruleTypeRegistry}
+          ruleTypeModel={undefined}
         />
       </QueryClientProvider>
     );
@@ -273,7 +251,7 @@ describe('Rule Definition', () => {
           rule={mockRule()}
           actionTypeRegistry={actionTypeRegistry}
           onEditRule={jest.fn()}
-          ruleTypeRegistry={ruleTypeRegistry}
+          ruleTypeModel={undefined}
         />
       </QueryClientProvider>
     );

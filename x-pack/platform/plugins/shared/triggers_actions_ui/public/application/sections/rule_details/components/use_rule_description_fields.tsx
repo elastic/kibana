@@ -21,7 +21,7 @@ import { FilterItems } from '@kbn/unified-search-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common/data_views/data_view';
 import { useKibana } from '../../../../common/lib/kibana';
 import { RULE_PREBUILD_DESCRIPTION_FIELDS } from './rule_detail_description_type';
-import type { PrebuildFieldsMap, RuleDefinitionProps } from '../../../../types';
+import type { PrebuildFieldsMap, RuleDefinitionProps, RuleTypeModel } from '../../../../types';
 
 const RULE_DESCRIPTION_GET_DATA_VIEW_QUERY_KEY = 'ruleDescriptionGetDataView';
 
@@ -217,22 +217,15 @@ export const createPrebuildFields = ({ border }: { border: string }): PrebuildFi
 
 export const useRuleDescriptionFields = ({
   rule,
-  ruleTypeRegistry,
+  ruleTypeModel,
 }: {
   rule: RuleDefinitionProps['rule'];
-  ruleTypeRegistry: RuleDefinitionProps['ruleTypeRegistry'];
+  ruleTypeModel: RuleTypeModel | undefined;
 }) => {
   const { euiTheme } = useEuiTheme();
 
-  const getDescriptionFields = useMemo(() => {
-    if (!rule || !rule.ruleTypeId || !ruleTypeRegistry.has(rule.ruleTypeId)) {
-      return;
-    }
-    return ruleTypeRegistry.get(rule.ruleTypeId).getDescriptionFields;
-  }, [rule, ruleTypeRegistry]);
-
   const descriptionFields = useMemo(() => {
-    if (!getDescriptionFields) {
+    if (!ruleTypeModel || !ruleTypeModel.getDescriptionFields) {
       return [];
     }
 
@@ -244,8 +237,8 @@ export const useRuleDescriptionFields = ({
       return [];
     }
 
-    return getDescriptionFields({ rule, prebuildFields });
-  }, [getDescriptionFields, euiTheme.border.thin, rule]);
+    return ruleTypeModel.getDescriptionFields({ rule, prebuildFields });
+  }, [ruleTypeModel, euiTheme.border.thin, rule]);
 
   return { descriptionFields };
 };

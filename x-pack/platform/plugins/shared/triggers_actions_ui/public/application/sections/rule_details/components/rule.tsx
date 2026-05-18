@@ -42,9 +42,10 @@ import { RuleAlertActionsCell } from './rule_alert_actions_cell';
 import { RuleAlertSearchBar } from './rule_alert_search_bar';
 import { RULE_DETAILS_FILTER_CONTROLS } from '../../alerts_search_bar/constants';
 import { AlertSummaryWidget } from '../../alert_summary_widget';
+import useAsync from 'react-use/lib/useAsync';
+import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
 
 const RuleEventLogList = lazy(() => import('./rule_event_log_list'));
-const RuleDefinition = lazy(() => import('./rule_definition'));
 const AlertsTable = lazy(() => import('@kbn/response-ops-alerts-table')) as AlertsTableType;
 
 export type RuleComponentProps = {
@@ -114,11 +115,11 @@ export function RuleComponent({
   }, [getCasesPlugin]);
 
   const getAlertFormatter = useCallback(
-    (ruleTypeId: string) => {
+    async (ruleTypeId: string) => {
       if (!ruleTypeRegistry.has(ruleTypeId)) {
         return undefined;
       }
-      return ruleTypeRegistry.get(ruleTypeId).format;
+      return (await ruleTypeRegistry.get(ruleTypeId)).format;
     },
     [ruleTypeRegistry]
   );
@@ -351,6 +352,14 @@ export function RuleComponent({
     return renderRuleAlertsContent();
   };
 
+  const { value, loading } = useAsync(async () => {
+    const [{ RuleDefinition }, ruleTypeModel] = await Promise.all([
+      import('./rule_definition'),
+      ruleTypeRegistry.get(rule.ruleTypeId)
+    ]);
+    return { RuleDefinition, ruleTypeModel };
+  }, [rule, ruleTypeRegistry]);
+
   return (
     <>
       <EuiFlexGroup gutterSize="s" wrap>
@@ -381,16 +390,18 @@ export function RuleComponent({
             dependencies={{ charts, uiSettings }}
           />
         </EuiFlexItem>
-        {suspendedComponentWithProps(
-          RuleDefinition,
-          'xl'
-        )({
-          rule,
-          actionTypeRegistry,
-          ruleTypeRegistry,
-          hideEditButton: true,
-          onEditRule: requestRefresh,
-        })}
+        {!loading && value
+          ? (
+            <value.RuleDefinition
+              rule={rule}
+              actionTypeRegistry={actionTypeRegistry}
+              ruleTypeModel={value.ruleTypeModel}
+              hideEditButton
+              onEditRule={requestRefresh}
+            />
+            )
+          : (<CenterJustifiedSpinner size="xl" />)
+        }
       </EuiFlexGroup>
 
       <EuiSpacer size="xl" />
