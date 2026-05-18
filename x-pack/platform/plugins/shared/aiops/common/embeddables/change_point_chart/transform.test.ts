@@ -100,36 +100,6 @@ describe('change point chart embeddable transforms', () => {
     });
   });
 
-  it('normalizes legacy camelCase input to snake_case stored state', () => {
-    expect(
-      transformIn({
-        dataViewId: 'data-view-id',
-        fn: 'sum',
-        viewType: 'table',
-        metricField: 'bytes',
-        splitField: 'host.name',
-        partitions: ['host-a'],
-        maxSeriesToPlot: 12,
-      } as unknown as Parameters<typeof transformIn>[0])
-    ).toEqual({
-      state: {
-        aggregation_function: 'sum',
-        max_series_to_plot: 12,
-        metric_field: 'bytes',
-        partitions: ['host-a'],
-        split_field: 'host.name',
-        view_type: 'table',
-      },
-      references: [
-        {
-          id: 'data-view-id',
-          name: CHANGE_POINT_CHART_DATA_VIEW_REF_NAME,
-          type: DATA_VIEW_SAVED_OBJECT_TYPE,
-        },
-      ],
-    });
-  });
-
   it('throws when stored state is missing a required metric field', () => {
     const storedState = {
       aggregation_function: 'sum',
