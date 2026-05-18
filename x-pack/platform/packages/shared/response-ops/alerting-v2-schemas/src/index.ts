@@ -21,5 +21,6 @@ export * from './action_policy_response_schema';
 export * from './alert_action_schema';
 export * from './bulk_operation_schema';
 export * from './rule_doctor_insights_schema';
+export * from './policy_execution_history_schema';
 export type { MatcherContext, MatcherContextFieldDescriptor } from './matcher_context';
 export { MATCHER_CONTEXT_FIELDS } from './matcher_context';

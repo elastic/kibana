@@ -230,6 +230,7 @@ describe('registerTracingExporter', () => {
       send_to_self: true,
       exporters: [],
       scheduledDelay: 100,
+      opik_distributed_tracing: false,
     };
 
     const teardown = await registerTracingExporter({ core: coreStart, tracingConfig, logger });

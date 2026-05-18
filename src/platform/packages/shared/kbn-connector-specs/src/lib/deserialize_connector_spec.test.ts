@@ -65,8 +65,18 @@ describe('fromConnectorSpecSchema', () => {
       const zodSchema = fromConnectorSpecSchema(serialized.schema);
 
       expect(zodSchema).toBeDefined();
-      expect(zodSchema?.shape.config).toBeInstanceOf(z.ZodObject);
-      expect(zodSchema?.shape.secrets).toBeInstanceOf(z.ZodDiscriminatedUnion);
+      expect(() =>
+        zodSchema?.parse({
+          config: {},
+          secrets: { authType: 'api_key_header', 'x-apikey': 'test-api-key' },
+        })
+      ).not.toThrow();
+      expect(() =>
+        zodSchema?.parse({
+          config: {},
+          secrets: { authType: 'api_key_header' },
+        })
+      ).toThrow();
     });
 
     it('preserves schema structure for AlienVault OTX connector', () => {
@@ -75,8 +85,18 @@ describe('fromConnectorSpecSchema', () => {
       const zodSchema = fromConnectorSpecSchema(serialized.schema);
 
       expect(zodSchema).toBeDefined();
-      expect(zodSchema?.shape.config).toBeDefined();
-      expect(zodSchema?.shape.secrets).toBeDefined();
+      expect(() =>
+        zodSchema?.parse({
+          config: {},
+          secrets: { authType: 'api_key_header', 'X-OTX-API-KEY': 'test-api-key' },
+        })
+      ).not.toThrow();
+      expect(() =>
+        zodSchema?.parse({
+          config: {},
+          secrets: { authType: 'api_key_header' },
+        })
+      ).toThrow();
     });
 
     it('handles connector with multiple auth types', () => {
@@ -114,6 +134,24 @@ describe('fromConnectorSpecSchema', () => {
       });
 
       expect(authTypes).toEqual(expect.arrayContaining(['basic', 'bearer', 'api_key_header']));
+      expect(() =>
+        zodSchema?.parse({
+          config: {},
+          secrets: { authType: 'basic', username: 'user', password: 'password' },
+        })
+      ).not.toThrow();
+      expect(() =>
+        zodSchema?.parse({
+          config: {},
+          secrets: { authType: 'bearer', token: 'token' },
+        })
+      ).not.toThrow();
+      expect(() =>
+        zodSchema?.parse({
+          config: {},
+          secrets: { authType: 'api_key_header', headerField: 'X-Api-Key', apiKey: 'api-key' },
+        })
+      ).not.toThrow();
     });
 
     it('handles connector without auth types', () => {
@@ -137,8 +175,8 @@ describe('fromConnectorSpecSchema', () => {
       const zodSchema = fromConnectorSpecSchema(serialized.schema);
 
       expect(zodSchema).toBeDefined();
-      expect(zodSchema?.shape.config).toBeInstanceOf(z.ZodObject);
-      expect(zodSchema?.shape.secrets).toBeInstanceOf(z.ZodObject);
+      expect(() => zodSchema?.parse({ config: {}, secrets: {} })).not.toThrow();
+      expect(() => zodSchema?.parse({ config: {}, secrets: {}, extra: true })).toThrow();
     });
   });
 });

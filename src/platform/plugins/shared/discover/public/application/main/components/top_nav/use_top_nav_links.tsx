@@ -319,7 +319,7 @@ export const useTopNavLinks = ({
             onOpenSaveModal();
           }
         },
-        popoverWidth: 150,
+        popoverWidth: 170,
         popoverTestId: 'discoverSaveButtonPopover',
         splitButtonProps: {
           secondaryButtonAriaLabel: i18n.translate('discover.localMenu.saveOptionsAriaLabel', {

@@ -14,6 +14,7 @@ import {
   toDiscoverQuery,
   buildScreenContext,
   buildEsqlResultsAttachment,
+  shouldPrefillEsqlPrompt,
 } from './discover_agent_builder_config';
 
 interface EsqlResultsData {
@@ -84,6 +85,36 @@ describe('buildScreenContext', () => {
         }),
       })
     );
+  });
+});
+
+describe('shouldPrefillEsqlPrompt', () => {
+  it('returns false when not in ES|QL mode', () => {
+    expect(shouldPrefillEsqlPrompt(false, null, false)).toBe(false);
+    expect(shouldPrefillEsqlPrompt(false, { id: undefined }, false)).toBe(false);
+    expect(shouldPrefillEsqlPrompt(false, { id: 'abc' }, false)).toBe(false);
+  });
+
+  it('returns false when already prefilled', () => {
+    expect(shouldPrefillEsqlPrompt(true, null, true)).toBe(false);
+    expect(shouldPrefillEsqlPrompt(true, { id: undefined }, true)).toBe(false);
+  });
+
+  it('returns false when activeConversation is undefined (pre-first-emission gap)', () => {
+    // Don't prefill before we know whether the sidebar is already open with an existing conversation.
+    expect(shouldPrefillEsqlPrompt(true, undefined, false)).toBe(false);
+  });
+
+  it('returns true when in ES|QL mode and sidebar is closed', () => {
+    expect(shouldPrefillEsqlPrompt(true, null, false)).toBe(true);
+  });
+
+  it('returns true when sidebar is open without a conversation id', () => {
+    expect(shouldPrefillEsqlPrompt(true, { id: undefined }, false)).toBe(true);
+  });
+
+  it('returns false once the conversation has an id', () => {
+    expect(shouldPrefillEsqlPrompt(true, { id: 'abc' }, false)).toBe(false);
   });
 });
 

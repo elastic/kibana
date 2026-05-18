@@ -21,7 +21,7 @@ export const transformGetConnectorSpecResponse = (
     display_name: spec.metadata.displayName,
     description: spec.metadata.description,
     minimum_license: spec.metadata.minimumLicense as string,
-    supported_feature_ids: [...(spec.metadata.supportedFeatureIds ?? [])],
+    supported_feature_ids: spec.metadata.supportedFeatureIds ?? [],
     ...(spec.metadata.icon !== undefined ? { icon: spec.metadata.icon } : {}),
     ...(spec.metadata.docsUrl !== undefined ? { docs_url: spec.metadata.docsUrl } : {}),
     ...(spec.metadata.isTechnicalPreview !== undefined

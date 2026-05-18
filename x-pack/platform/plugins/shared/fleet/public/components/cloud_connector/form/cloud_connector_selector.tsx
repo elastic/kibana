@@ -239,7 +239,6 @@ export const CloudConnectorSelector = ({
           placeholder={i18n.translate('xpack.fleet.cloudConnector.selector.placeholder', {
             defaultMessage: 'Select a Federated Identity',
           })}
-          hasDividers
           data-test-subj={testSubj}
         />
       </EuiFormRow>
