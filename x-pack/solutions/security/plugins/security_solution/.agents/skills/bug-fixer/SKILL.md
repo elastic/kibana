@@ -27,7 +27,7 @@ Step 2 (fix) — after reviewing the reproduction report:
 
 **Step 1 — bug-reproduce**
 Fetches the ticket, starts the Scout server, reproduces the bug through the browser,
-and writes `analysis.json` + `reproduction-report.md`. Ends by asking you to review
+and writes `.bug-fixer-session/analysis.json` + `.bug-fixer-session/reproduction-report.md`. Ends by asking you to review
 the findings before proceeding.
 
 **Step 2 — bug-fix**

@@ -7,8 +7,8 @@ description: >
 
 # Bug Reproduce
 
-Investigate and reproduce a Security Solution bug. Produces `analysis.json` and
-`reproduction-report.md` at the Kibana repo root.
+Investigate and reproduce a Security Solution bug. Produces `.bug-fixer-session/analysis.json`
+and `.bug-fixer-session/reproduction-report.md` (gitignored, never committed).
 
 **Execute phases 0 → 1 → 2 → 3 in strict order.** Each phase produces evidence the
 next depends on. Do not skip or abbreviate any phase — not even for bugs that seem
@@ -29,7 +29,7 @@ Feature flags won't be known until the ticket is parsed. If `server_args` turn o
 non-empty, Phase 1 will stop and restart with the config set — one restart costs far less
 than waiting for the server after analysis finishes.
 
-If `analysis.json` already exists at the repo root from a prior session, skip the fetch
+If `.bug-fixer-session/analysis.json` already exists from a prior session, skip the fetch
 and parse steps — but you still must execute Phases 1, 2, and 3 in full. A prior analysis
 does not substitute for a live reproduction. The environment must be started fresh and the
 bug must be reproduced in the browser before any fix work begins.
@@ -42,7 +42,8 @@ gh issue view <NUMBER> --repo elastic/kibana \
   --json number,title,body,labels,comments,createdAt,state
 ```
 
-Write `analysis.json` to the Kibana repo root with these fields:
+Create `.bug-fixer-session/` if it doesn't exist (`mkdir -p .bug-fixer-session`), then write
+`.bug-fixer-session/analysis.json` with these fields:
 - `classification` — bug pattern (see `x-pack/solutions/security/plugins/security_solution/.agents/skills/bug-fixer/references/classification-guide.md`)
 - `confidence` — high / medium / low
 - `prerequisites` — roles, permissions, prior state required
@@ -181,7 +182,7 @@ After the bug manifests, collect:
 3. Find the lifecycle gap: _"When would this data NOT be populated?"_ — common gaps:
    data seeded only at boot, not initialized for new spaces
 
-Write `reproduction-report.md` to the Kibana repo root:
+Write `.bug-fixer-session/reproduction-report.md`:
 
 ```markdown
 # Reproduction Report

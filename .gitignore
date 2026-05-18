@@ -30,6 +30,7 @@ target
 types.eslint.config.js
 types.eslint.config.cjs
 __tmp__
+.bug-fixer-session/
 
 # Ignore example plugin builds
 /examples/*/build

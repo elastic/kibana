@@ -2,7 +2,7 @@
 name: bug-fix
 description: >
   Use after /bug-reproduce has confirmed reproduction and the user has reviewed the
-  report. Requires analysis.json and reproduction-report.md at the Kibana repo root.
+  report. Requires .bug-fixer-session/analysis.json and .bug-fixer-session/reproduction-report.md.
 ---
 
 # Bug Fix
@@ -12,10 +12,10 @@ Implements a verified fix for a reproduced Security Solution bug.
 ## Starting context
 
 Read these files before doing anything else:
-- `analysis.json` — classification, affected paths, server args, similar issues, related PRs
-- `reproduction-report.md` — browser diagnostics, data path trace, root cause hypothesis
+- `.bug-fixer-session/analysis.json` — classification, affected paths, server args, similar issues, related PRs
+- `.bug-fixer-session/reproduction-report.md` — browser diagnostics, data path trace, root cause hypothesis
 
-If either file is missing, or if `reproduction-report.md` has `status: not_reproduced`
+If either file is missing, or if `.bug-fixer-session/reproduction-report.md` has `status: not_reproduced`
 or `user_acknowledged: pending`, stop immediately and tell the user:
 _"Run `/bug-reproduce #NUMBER` first. This skill requires a confirmed browser
 reproduction before fix work can begin."_
@@ -24,7 +24,7 @@ reproduction before fix work can begin."_
 
 **Before doing anything in this phase**, verify:
 
-1. `reproduction-report.md` exists at the Kibana repo root
+1. `.bug-fixer-session/reproduction-report.md` exists
 2. Its `status` field is `reproduced`
 3. Its `user_acknowledged` field is `yes`
 
