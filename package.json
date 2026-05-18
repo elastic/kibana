@@ -112,8 +112,7 @@
     "@types/react-dom": "18.2.25",
     "@xstate5/react/**/xstate": "5.19.2",
     "apache-arrow": "20.x - 21.x",
-    "globby/fast-glob": "3.3.2",
-    "lodash": "4.17.23"
+    "globby/fast-glob": "3.3.2"
   },
   "dependencies": {
     "@ai-sdk/langchain": "1.0.102",
@@ -1233,7 +1232,7 @@
     "langsmith": "0.5.25",
     "launchdarkly-js-client-sdk": "3.9.0",
     "load-json-file": "6.2.0",
-    "lodash": "4.17.23",
+    "lodash": "4.18.1",
     "lru-cache": "11.3.5",
     "lz-string": "1.5.0",
     "magic-bytes.js": "1.12.1",
@@ -1341,6 +1340,7 @@
     "type-fest": "4.26.1",
     "typescript-fsa": "3.0.0",
     "typescript-fsa-reducers": "1.2.2",
+    "undici": "6.24.1",
     "unidiff": "1.0.4",
     "unified": "9.2.2",
     "use-resize-observer": "9.1.0",
@@ -1797,7 +1797,7 @@
     "cache-manager-fs-hash": "2.0.0",
     "callsites": "3.1.0",
     "chance": "1.1.13",
-    "chromedriver": "148.0.0",
+    "chromedriver": "148.0.1",
     "clean-webpack-plugin": "4.0.0",
     "cli-progress": "3.12.0",
     "cli-table3": "0.6.1",
