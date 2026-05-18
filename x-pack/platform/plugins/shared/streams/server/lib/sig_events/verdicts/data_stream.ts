@@ -17,6 +17,7 @@ export const verdictsMappings = {
   properties: {
     '@timestamp': mappings.date({ format: 'strict_date_optional_time' }),
     verdict: mappings.keyword(),
+    verdict_id: mappings.keyword(),
     discovery_id: mappings.keyword(),
     discovery_slug: mappings.keyword(),
   },

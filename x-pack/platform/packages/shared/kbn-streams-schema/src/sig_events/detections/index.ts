@@ -18,7 +18,7 @@ export const detectionSchema = z.object({
   detection_id: z.string(),
   rule_uuid: z.string(),
   rule_name: z.string(),
-  stream: z.string().optional(),
+  stream_name: z.string().optional(),
   alert_count: z.number().optional(),
   alert_index: z.string().optional(),
   workflow_execution_id: z.string().optional(),
