@@ -10,6 +10,10 @@ For routing decisions between raw EUI and Kibana-specific wrappers, see
 For full prop APIs and usage examples for any resolved component, read:
 `node_modules/@elastic/eui/metadata/components/[name].json`
 
+Each component JSON also contains a `visualDescription` field — a detailed
+visual recognition guide for the screenshot case. Read it when the "Visual
+signal" column in this file is not enough to disambiguate.
+
 ---
 
 ## How to use this reference
