@@ -166,7 +166,7 @@ const buildBulkBody = (reports: ReportHit[], now: string): IocIndicatorDoc[] => 
               ...ecsIndicatorPayload(ioc.type, ioc.value),
               provider,
               // Workflow 4's join key. Indicator Match alerts carry this
-              // through to `kibana.alert.threat.indicator.reference`.
+              // through to `threat.enrichments.indicator.reference`.
               reference: `${INDICATOR_REFERENCE_PREFIX}${reportId}`,
               first_seen: report._source?.provenance?.extracted_at ?? now,
               last_seen: now,

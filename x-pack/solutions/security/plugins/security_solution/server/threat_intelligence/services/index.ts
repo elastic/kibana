@@ -113,3 +113,6 @@ export type { ExtractIocsParams, ExtractIocsResult, ExtractedIoc } from './extra
 
 export { analyseEnvironment } from './analyse_environment';
 export type { AnalyseEnvironmentParams, AnalyseEnvironmentResult } from './analyse_environment';
+
+export { flyoutInsights, parseReportIdFromIndicatorReference } from './flyout_insights';
+export type { FlyoutInsightsRequest, FlyoutInsightsResponse } from './flyout_insights';

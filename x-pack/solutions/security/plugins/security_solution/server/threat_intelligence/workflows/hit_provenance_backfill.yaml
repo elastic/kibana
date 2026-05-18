@@ -18,7 +18,7 @@
 #     Task Manager task writes a `threat.indicator.reference` of the form
 #     `threat-report:<report_id>` onto every indicator it syncs from
 #     `.kibana-threat-reports-*`, so Indicator Match alerts carry that
-#     backlink through to `kibana.alert.threat.indicator.reference`.
+#     backlink through to `threat.enrichments.indicator.reference` on alerts.
 #
 #   - **Layer 2 (behavioral DE rule)** — alerts whose
 #     `kibana.alert.rule.threat.technique[].id` overlaps with this report's
@@ -96,8 +96,14 @@ steps:
                       gte: "now-7d"
                 - term:
                     kibana.alert.rule.type: threat_match
-                - term:
-                    kibana.alert.threat.indicator.reference: "threat-report:{{ foreach.item._id }}"
+                # Indicator Match copies matched indicators into
+                # `threat.enrichments` (see ENRICHMENT_DESTINATION_PATH), not
+                # `kibana.alert.threat.*` — use a nested term on the reference.
+                - nested:
+                    path: threat.enrichments
+                    query:
+                      term:
+                        threat.enrichments.indicator.reference: "threat-report:{{ foreach.item._id }}"
         on-failure:
           # If the alerts index doesn't exist yet (fresh deployment) or RBAC
           # blocks the read, treat as zero rather than failing the loop.

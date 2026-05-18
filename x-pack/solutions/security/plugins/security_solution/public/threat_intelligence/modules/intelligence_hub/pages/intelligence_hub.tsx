@@ -6,7 +6,8 @@
  */
 
 import type { FC } from 'react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedRelative } from '@kbn/i18n-react';
 import {
@@ -174,6 +175,11 @@ const timeRangePresetLabel = (preset: TimeRangePresetId): string => {
  */
 export const IntelligenceHubPage: FC = () => {
   const { http, uiSettings, notifications } = useKibana().services;
+  const location = useLocation();
+  const highlightReportId = useMemo(
+    () => new URLSearchParams(location.search).get('highlightReportId') ?? undefined,
+    [location.search]
+  );
   const [data, setData] = useState<DashboardOverviewResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -377,18 +383,22 @@ export const IntelligenceHubPage: FC = () => {
         onToggleSeverity={toggleSeverity}
         onToggleCategory={toggleCategoryChip}
         onClearChipFilters={clearChipFilters}
+        highlightReportId={highlightReportId}
       />
     );
-  }, [data, error, loading, filters, sortBy, toggleSeverity, toggleCategoryChip, clearChipFilters]);
+  }, [
+    data,
+    error,
+    loading,
+    filters,
+    sortBy,
+    toggleSeverity,
+    toggleCategoryChip,
+    clearChipFilters,
+    highlightReportId,
+  ]);
 
-  // Best-effort source count derived from the response. The server route
-  // doesn't return a distinct-sources cardinality today; using the
-  // recent_articles sample is a reasonable proxy until a dedicated
-  // aggregation is added (`distinct_source_count` on the ribbon contract).
-  const sourceCount = useMemo(() => {
-    if (!data) return 0;
-    return new Set(data.recent_articles.map((a) => a.source_name).filter(Boolean)).size;
-  }, [data]);
+  const sourceCount = data?.stats_ribbon.distinct_source_count ?? 0;
 
   return (
     <EuiPageTemplate restrictWidth={false} grow={true}>
@@ -669,7 +679,7 @@ const FilterBar: React.FC<{
               'xpack.securitySolution.threatIntelligence.app.sourceCountTooltip',
               {
                 defaultMessage:
-                  'Distinct feed sources represented in the most recent articles sample.',
+                  'Distinct feed sources with reports in the selected time range and filters.',
               }
             )}
           >
@@ -1122,6 +1132,7 @@ const DashboardLayout: React.FC<{
   onToggleSeverity: (severity: SeverityLevel) => void;
   onToggleCategory: (category: ThreatCategory) => void;
   onClearChipFilters: () => void;
+  highlightReportId?: string;
 }> = ({
   data,
   filters,
@@ -1130,6 +1141,7 @@ const DashboardLayout: React.FC<{
   onToggleSeverity,
   onToggleCategory,
   onClearChipFilters,
+  highlightReportId,
 }) => {
   const topCategory = data.by_category[0]?.category;
 
@@ -1179,7 +1191,7 @@ const DashboardLayout: React.FC<{
         recentArticles={data.recent_articles}
       />
       <EuiSpacer size="l" />
-      <EuiFlexGroup gutterSize="l" wrap>
+      <EuiFlexGroup gutterSize="l" wrap alignItems="flexStart">
         <EuiFlexItem style={{ minWidth: 320 }}>
           <ThreatRadar buckets={data.by_category} />
         </EuiFlexItem>
@@ -1207,7 +1219,7 @@ const DashboardLayout: React.FC<{
       <EuiSpacer size="m" />
       <RegionBreakdown buckets={data.by_region} />
       <EuiSpacer size="l" />
-      <ArticleGrid articles={filteredArticles} />
+      <ArticleGrid articles={filteredArticles} highlightReportId={highlightReportId} />
       <EuiSpacer size="l" />
       <EuiFlexGroup gutterSize="l" wrap>
         <EuiFlexItem style={{ minWidth: 360 }}>
@@ -1226,11 +1238,6 @@ const StatsRibbon: React.FC<{
   topCategory?: ThreatCategory | '<unknown>';
   recentArticles: DashboardOverviewResponse['recent_articles'];
 }> = ({ stats, topCategory, recentArticles }) => {
-  const distinctSources = useMemo(
-    () => new Set(recentArticles.map((a) => a.source_name).filter(Boolean)).size,
-    [recentArticles]
-  );
-
   const severityTotals = useMemo(() => {
     const totals: Record<SeverityLevel, number> = { low: 0, medium: 0, high: 0, critical: 0 };
     for (const article of recentArticles) {
@@ -1269,7 +1276,7 @@ const StatsRibbon: React.FC<{
       <EuiFlexItem style={{ minWidth: 160 }}>
         <EuiPanel hasBorder paddingSize="m">
           <EuiStat
-            title={distinctSources.toLocaleString()}
+            title={stats.distinct_source_count.toLocaleString()}
             description={i18n.translate(
               'xpack.securitySolution.threatIntelligence.app.statSources',
               {
@@ -1407,6 +1414,9 @@ const TopThreatPanel: React.FC<{ topCategory?: ThreatCategory | '<unknown>' }> =
   </EuiPanel>
 );
 
+/** Matches ThreatRadar SVG height so the three overview panels align. */
+const OVERVIEW_PANEL_CONTENT_HEIGHT = 260;
+
 const PanelHeader: React.FC<{ title: string; description?: string }> = ({ title, description }) => (
   <>
     <EuiTitle size="xs">
@@ -1445,21 +1455,28 @@ const CategoryBreakdown: React.FC<{ buckets: DashboardOverviewResponse['by_categ
           })}
         </EuiText>
       ) : (
-        buckets.map((bucket) => (
-          <div key={bucket.category} style={{ marginBottom: 8 }}>
-            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-              <EuiFlexItem>
-                <EuiText size="s">{bucket.category}</EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText size="s" color="subdued">
-                  {bucket.report_count}
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <EuiProgress value={bucket.report_count} max={max || 1} size="xs" color="primary" />
-          </div>
-        ))
+        <div
+          style={{
+            maxHeight: OVERVIEW_PANEL_CONTENT_HEIGHT,
+            overflowY: 'auto',
+          }}
+        >
+          {buckets.map((bucket) => (
+            <div key={bucket.category} style={{ marginBottom: 8 }}>
+              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                <EuiFlexItem>
+                  <EuiText size="s">{bucket.category}</EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="s" color="subdued">
+                    {bucket.report_count}
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiProgress value={bucket.report_count} max={max || 1} size="xs" color="primary" />
+            </div>
+          ))}
+        </div>
       )}
     </EuiPanel>
   );
@@ -1582,7 +1599,7 @@ const ThreatRadar: React.FC<{ buckets: DashboardOverviewResponse['by_category'] 
     [buckets]
   );
   const max = radarBuckets[0]?.report_count ?? 0;
-  const size = 260;
+  const size = OVERVIEW_PANEL_CONTENT_HEIGHT;
   const center = size / 2;
   const radius = size / 2 - 36;
   const ringCount = 4;
@@ -2014,7 +2031,8 @@ const ArticleFilterRow: React.FC<{
 
 const ArticleGrid: React.FC<{
   articles: DashboardOverviewResponse['recent_articles'];
-}> = ({ articles }) => {
+  highlightReportId?: string;
+}> = ({ articles, highlightReportId }) => {
   if (articles.length === 0) {
     return (
       <EuiPanel hasBorder paddingSize="m">
@@ -2035,7 +2053,11 @@ const ArticleGrid: React.FC<{
       }}
     >
       {articles.map((article) => (
-        <ArticleCard key={article.report_id} article={article} />
+        <ArticleCard
+          key={article.report_id}
+          article={article}
+          isHighlighted={highlightReportId === article.report_id}
+        />
       ))}
     </div>
   );
@@ -2043,16 +2065,28 @@ const ArticleGrid: React.FC<{
 
 const ArticleCard: React.FC<{
   article: DashboardOverviewResponse['recent_articles'][number];
-}> = ({ article }) => {
+  isHighlighted?: boolean;
+}> = ({ article, isHighlighted = false }) => {
+  const cardRef = useRef<HTMLDivElement>(null);
   const displayTitle = article.title || article.report_id;
   const articleUrl = isBrowsableArticleUrl(article.source_url) ? article.source_url : undefined;
 
+  useEffect(() => {
+    if (isHighlighted && cardRef.current) {
+      cardRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [isHighlighted]);
+
   return (
     <EuiPanel
+      panelRef={cardRef}
       hasBorder
       paddingSize="m"
       style={{
         borderLeft: `4px solid ${SEVERITY_HEX[article.severity]}`,
+        ...(isHighlighted
+          ? { boxShadow: '0 0 0 2px var(--euiColorPrimary)', backgroundColor: 'var(--euiColorHighlight)' }
+          : {}),
       }}
     >
       <EuiText size="s">

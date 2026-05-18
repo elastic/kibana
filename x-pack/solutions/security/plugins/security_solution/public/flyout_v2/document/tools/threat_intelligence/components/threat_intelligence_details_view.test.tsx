@@ -21,6 +21,15 @@ import { useThreatIntelligenceDetails } from '../hooks/use_threat_intelligence_d
 import { buildEventEnrichmentMock } from '../../../../../../common/search_strategy/security_solution/cti/index.mock';
 
 jest.mock('../hooks/use_threat_intelligence_details');
+jest.mock('../hooks/use_flyout_insights', () => ({
+  useFlyoutInsights: () => ({
+    enabled: false,
+    loading: false,
+    error: undefined,
+    data: undefined,
+    refetch: jest.fn(),
+  }),
+}));
 
 const mockHit: DataTableRecord = {
   id: '1',

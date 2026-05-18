@@ -17,6 +17,16 @@ import {
   type ThreatRegion,
 } from '../../../common/threat_intelligence/hub';
 import { buildSpaceFilterTerms, resolveCurrentSpaceId } from '../lib/space_filter';
+import {
+  buildTechniqueCountsFromBehaviorsAgg,
+  buildTechniqueCountsFromTtpsAgg,
+  mergeTechniqueReportCounts,
+  parseTechniqueCountsFromBehaviors,
+  parseTechniqueCountsFromTtps,
+  topTechniqueBuckets,
+  type EsTechniqueBehaviorBucket,
+  type EsTechniqueTtpBucket,
+} from '../lib/technique_report_counts';
 import type { RouteRegistrationDeps } from '.';
 
 const DEFAULT_LOOKBACK_DAYS = 7;
@@ -54,10 +64,14 @@ interface ReportsAggregations {
   by_region?: { buckets: BucketCount[] };
   by_severity?: { buckets: BucketCount[] };
   by_time?: { buckets: SeverityBucket[] };
-  top_techniques?: { buckets: BucketCount[] };
+  top_techniques_from_behaviors?: {
+    techniques: { buckets: EsTechniqueBehaviorBucket[] };
+  };
+  top_techniques_from_ttps?: { buckets: EsTechniqueTtpBucket[] };
   environment_hits_total?: { value: number };
   layer_1_total?: { value: number };
   layer_2_total?: { value: number };
+  distinct_source_count?: { value: number };
   recent_articles?: {
     hits: {
       hits: Array<{
@@ -116,9 +130,8 @@ const fetchReportsOverview = async (
           by_severity: { terms: { field: 'severity.level', size: 4 } },
         },
       },
-      top_techniques: {
-        terms: { field: 'extracted.ttps.techniques', size: 15 },
-      },
+      top_techniques_from_behaviors: buildTechniqueCountsFromBehaviorsAgg(15),
+      top_techniques_from_ttps: buildTechniqueCountsFromTtpsAgg(15),
       environment_hits_total: {
         sum: { field: 'provenance.environment_hits_total' },
       },
@@ -127,6 +140,9 @@ const fetchReportsOverview = async (
       },
       layer_2_total: {
         sum: { field: 'provenance.environment_hits.layer_2_behavioral' },
+      },
+      distinct_source_count: {
+        cardinality: { field: 'source.name' },
       },
       recent_articles: {
         top_hits: {
@@ -267,14 +283,20 @@ export const registerDashboardOverviewRoute = ({
             };
           });
 
-          const topTechniques = (aggs?.top_techniques?.buckets ?? []).map((b) => ({
-            technique_id: b.key,
-            report_count: b.doc_count,
-          }));
+          const topTechniques = topTechniqueBuckets(
+            mergeTechniqueReportCounts(
+              parseTechniqueCountsFromBehaviors(
+                aggs?.top_techniques_from_behaviors?.techniques?.buckets ?? []
+              ),
+              parseTechniqueCountsFromTtps(aggs?.top_techniques_from_ttps?.buckets ?? [])
+            ),
+            15
+          );
 
           const environmentHitsTotal = aggs?.environment_hits_total?.value ?? 0;
           const layer1Total = aggs?.layer_1_total?.value ?? 0;
           const layer2Total = aggs?.layer_2_total?.value ?? 0;
+          const distinctSourceCount = Math.round(aggs?.distinct_source_count?.value ?? 0);
 
           const alertsAggs = alertsResponse?.aggregations as AlertsAggregations | undefined;
           const affectedAssetsSample = (alertsAggs?.affected_hosts?.buckets ?? []).map(
@@ -300,6 +322,7 @@ export const registerDashboardOverviewRoute = ({
               critical_reports: severityCount('critical'),
               high_reports: severityCount('high'),
               affects_you_total: environmentHitsTotal,
+              distinct_source_count: distinctSourceCount,
             },
             by_category: byCategory,
             by_region: byRegion,

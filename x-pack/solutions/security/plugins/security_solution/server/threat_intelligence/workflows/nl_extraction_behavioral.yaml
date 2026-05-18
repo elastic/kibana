@@ -407,6 +407,10 @@ steps:
               iocs: "${{ steps.extract_iocs.output.iocs }}"
               ioc_set_hash: "{{ steps.extract_iocs.output.ioc_set_hash }}"
               behaviors: "${{ steps.extract_behaviors.output.indexed_behaviors }}"
+              # Denormalize ATT&CK ids for flat `terms` aggs (dashboard, coverage_gap).
+              # Nested `extracted.behaviors` remains the source of truth for hunts.
+              ttps:
+                techniques: "${{ steps.extract_behaviors.output.indexed_behaviors | map: 'technique_id' }}"
               categories: "${{ steps.enrich_taxonomy.output.structured_output.categories }}"
               # Hoisted from `capture_ranking_signals` so the neutral
               # defaults (0.5 / 'informational') apply uniformly whether

@@ -90,7 +90,8 @@ export const THREAT_INTEL_INDICATORS_INDEX = '.kibana-threat-intel-indicators' a
 /**
  * Prefix written to `threat.indicator.reference` on every synced indicator
  * so Workflow 4's `hit_provenance_backfill` can join Indicator Match alerts
- * back to the originating threat-reports doc by exact term match.
+ * back to the originating threat-reports doc via
+ * `threat.enrichments.indicator.reference`.
  */
 export const INDICATOR_REFERENCE_PREFIX = 'threat-report:' as const;
 
@@ -237,6 +238,14 @@ export const DASHBOARD_OVERVIEW_API_PATH =
  * a saved object so users can share or revisit a curated cut of the data.
  */
 export const SAVED_VIEWS_API_PATH = `${THREAT_INTELLIGENCE_API_BASE}/saved_views` as const;
+
+/**
+ * Internal API for the document flyout Threat intelligence panel — joins the
+ * current alert to `.kibana-threat-reports*` via Layer 1 indicator reference
+ * and/or Layer 2 MITRE technique overlap (see RFC 0002).
+ */
+export const FLYOUT_INSIGHTS_API_PATH =
+  `${THREAT_INTELLIGENCE_API_BASE}/flyout_insights` as const;
 
 /**
  * Saved-object type for `threat-intelligence-saved-view`. The

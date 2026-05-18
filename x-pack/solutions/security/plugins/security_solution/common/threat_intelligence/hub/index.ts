@@ -67,9 +67,16 @@ export {
   DELETE_SUBSCRIPTION_API_PATH,
   DASHBOARD_OVERVIEW_API_PATH,
   SAVED_VIEWS_API_PATH,
+  FLYOUT_INSIGHTS_API_PATH,
   SAVED_VIEW_SO_TYPE,
   DEFAULT_REGIONS_SETTING_KEY,
 } from './constants';
+export type {
+  FlyoutInsightsRequest,
+  FlyoutInsightsResponse,
+  FlyoutInsightsRelatedReport,
+  RelatedReportJoinReason,
+} from './flyout_insights_types';
 export type { SubscriptionTemplate, SubscriptionTemplateId } from './subscription_templates';
 export {
   SUBSCRIPTION_TEMPLATES,

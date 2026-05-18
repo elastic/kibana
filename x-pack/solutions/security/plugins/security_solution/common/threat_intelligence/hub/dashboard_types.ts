@@ -19,6 +19,8 @@ export interface DashboardOverviewResponse {
     critical_reports: number;
     high_reports: number;
     affects_you_total: number;
+    /** Distinct `source.name` values in the overview query scope (time + filters). */
+    distinct_source_count: number;
   };
   by_category: Array<{
     category: ThreatCategory | '<unknown>';

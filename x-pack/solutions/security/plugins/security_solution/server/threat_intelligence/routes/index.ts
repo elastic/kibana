@@ -12,6 +12,7 @@ import { registerAnalyseEnvironmentRoute } from './analyse_environment';
 import { registerCoverageGapRoute } from './coverage_gap';
 import { registerDashboardOverviewRoute } from './dashboard_overview';
 import { registerExtractIocsRoute } from './extract_iocs';
+import { registerFlyoutInsightsRoute } from './flyout_insights';
 import { registerGeneralizeFromTelemetryRoute } from './generalize_from_telemetry';
 import { registerHuntBehaviorRoute } from './hunt_behavior';
 import { registerHuntForThreatRoute } from './hunt_for_threat';
@@ -62,7 +63,8 @@ export const registerRoutes = (deps: RouteRegistrationDeps): void => {
   registerSynthesizeAdvisoryRoute(deps);
   registerSubscriptionRoutes(deps);
 
-  // UI-facing routes (dashboard + saved views).
+  // UI-facing routes (dashboard + saved views + flyout).
   registerDashboardOverviewRoute(deps);
   registerSavedViewsRoutes(deps);
+  registerFlyoutInsightsRoute(deps);
 };

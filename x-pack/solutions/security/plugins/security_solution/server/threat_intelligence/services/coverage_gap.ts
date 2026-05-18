@@ -14,6 +14,15 @@ import {
   type SeverityLevel,
   type SourceType,
 } from '../../../common/threat_intelligence/hub';
+import {
+  buildTechniqueCountsFromBehaviorsWithSeverityAgg,
+  buildTechniqueCountsFromTtpsWithSeverityAgg,
+  mergeTechniqueReportCounts,
+  parseTechniqueCountsFromBehaviors,
+  parseTechniqueCountsFromTtps,
+  type EsTechniqueBehaviorBucket,
+  type EsTechniqueTtpBucket,
+} from '../lib/technique_report_counts';
 
 /**
  * Domain capability module for the `coverage_gap` action.
@@ -183,12 +192,23 @@ export const coverageGap = async (
 
   interface AggregationResponse {
     aggregations?: {
-      techniques?: {
-        buckets: Array<{
-          key: string;
-          doc_count: number;
-          severity_max?: { buckets: Array<{ key: string; doc_count: number }> };
-        }>;
+      techniques_from_behaviors?: {
+        techniques: {
+          buckets: Array<
+            EsTechniqueBehaviorBucket & {
+              severity_on_reports?: {
+                severity_max: { buckets: Array<{ key: string; doc_count: number }> };
+              };
+            }
+          >;
+        };
+      };
+      techniques_from_ttps?: {
+        buckets: Array<
+          EsTechniqueTtpBucket & {
+            severity_max?: { buckets: Array<{ key: string; doc_count: number }> };
+          }
+        >;
       };
     };
   }
@@ -198,14 +218,14 @@ export const coverageGap = async (
     size: 0,
     query: { bool: { filter: filters } },
     aggs: {
-      techniques: {
-        terms: { field: 'extracted.ttps.techniques', size: maxTechniques * 2 },
-        aggs: {
-          severity_max: {
-            terms: { field: 'severity.level', size: SEVERITY_LEVELS.length },
-          },
-        },
-      },
+      techniques_from_behaviors: buildTechniqueCountsFromBehaviorsWithSeverityAgg(
+        maxTechniques * 2,
+        SEVERITY_LEVELS.length
+      ),
+      techniques_from_ttps: buildTechniqueCountsFromTtpsWithSeverityAgg(
+        maxTechniques * 2,
+        SEVERITY_LEVELS.length
+      ),
     },
   })) as AggregationResponse;
 
@@ -221,30 +241,52 @@ export const coverageGap = async (
     rulesByTechnique = new Map();
   }
 
-  const buckets = aggregation.aggregations?.techniques?.buckets ?? [];
-  const severityForBucket = (b: (typeof buckets)[number]): SeverityLevel => {
-    const sevBuckets = b.severity_max?.buckets ?? [];
-    const found = sevBuckets
-      .map((sb) => sb.key as SeverityLevel)
-      .filter((s): s is SeverityLevel => (SEVERITY_LEVELS as readonly string[]).includes(s));
-    if (found.length === 0) return 'medium';
-    return found.reduce((max, s) => (SEVERITY_RANK[s] > SEVERITY_RANK[max] ? s : max), found[0]);
+  const behaviorBuckets = aggregation.aggregations?.techniques_from_behaviors?.techniques?.buckets ?? [];
+  const ttpBuckets = aggregation.aggregations?.techniques_from_ttps?.buckets ?? [];
+
+  const reportCounts = mergeTechniqueReportCounts(
+    parseTechniqueCountsFromBehaviors(behaviorBuckets),
+    parseTechniqueCountsFromTtps(ttpBuckets)
+  );
+
+  const severityForTechnique = (techniqueId: string): SeverityLevel => {
+    const severityFromBuckets = (
+      sevBuckets: Array<{ key: string; doc_count: number }> | undefined
+    ): SeverityLevel | undefined => {
+      const found = (sevBuckets ?? [])
+        .map((sb) => sb.key as SeverityLevel)
+        .filter((s): s is SeverityLevel => (SEVERITY_LEVELS as readonly string[]).includes(s));
+      if (found.length === 0) {
+        return undefined;
+      }
+      return found.reduce((max, s) => (SEVERITY_RANK[s] > SEVERITY_RANK[max] ? s : max), found[0]);
+    };
+
+    const behaviorBucket = behaviorBuckets.find((b) => b.key === techniqueId);
+    const ttpBucket = ttpBuckets.find((b) => b.key === techniqueId);
+    return (
+      severityFromBuckets(behaviorBucket?.severity_on_reports?.severity_max?.buckets) ??
+      severityFromBuckets(ttpBucket?.severity_max?.buckets) ??
+      'medium'
+    );
   };
 
-  const techniqueRows: CoverageGapTechniqueRow[] = buckets.slice(0, maxTechniques).map((bucket) => {
-    const techniqueId = bucket.key;
-    const isCovered = covered.has(techniqueId);
-    return {
-      technique_id: techniqueId,
-      name: techniqueDisplayName(techniqueId),
-      tactic: tacticIdsForTechnique(techniqueId)[0] ?? '<unmapped>',
-      article_count: bucket.doc_count,
-      severity_max: severityForBucket(bucket),
-      top_actors: [],
-      has_coverage: isCovered,
-      matching_rule_count: rulesByTechnique.get(techniqueId) ?? 0,
-    };
-  });
+  const techniqueRows: CoverageGapTechniqueRow[] = [...reportCounts.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, maxTechniques)
+    .map(([techniqueId, articleCount]) => {
+      const isCovered = covered.has(techniqueId);
+      return {
+        technique_id: techniqueId,
+        name: techniqueDisplayName(techniqueId),
+        tactic: tacticIdsForTechnique(techniqueId)[0] ?? '<unmapped>',
+        article_count: articleCount,
+        severity_max: severityForTechnique(techniqueId),
+        top_actors: [],
+        has_coverage: isCovered,
+        matching_rule_count: rulesByTechnique.get(techniqueId) ?? 0,
+      };
+    });
 
   const uncovered = techniqueRows.filter((row) => !row.has_coverage);
   const coveredRows = techniqueRows.filter((row) => row.has_coverage);
