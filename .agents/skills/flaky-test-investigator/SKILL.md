@@ -59,8 +59,8 @@ Work through all of these questions:
   - _Why it matters:_ narrows down the Kibana commit or PR that may have introduced the flakiness.
 - **Has this issue or a related one been closed and reopened before?**
   - _Why it matters:_ a reopen is the single strongest signal that the previous diagnosis did not hold. Don't repeat the previous line of reasoning.
-- **Has a prior fix PR been merged for this test or path?** Search merged PRs that touched the test or related files.
-  - _Why it matters:_ understand what's been done so far to fix flakiness.
+- **Is there a chain of fix attempts on this test or test file?** Look for multiple PRs in the last 12 months whose titles mention this test or area (e.g. "address flaky X", "fix flaky X", "another attempt at X").
+  - _Why it matters:_ a significant share of "fix" PRs are followed within months by another fix PR on the same area. If you are about to be the third or fourth attempt, the previous shape was almost certainly wrong. Do not repeat it.
 - **What did the previous fix change, and what did it claim to address?**
   - _Why it matters:_ if it touched only test code and the test recurred, weigh the product side more heavily this time. If it touched product code and still recurred, the real bug is likely deeper than the previous diff captured.
 
@@ -86,12 +86,15 @@ Identify the test runner for the failing test(s) and follow the framework-specif
 
 Watch out for these pitfalls when investigating the failure:
 
-- **Ignoring the bigger picture**: ensure you have as much data as you can about the test environment and related failures (in the same test file, test config or elsewhere)
-- **Increasing timeouts or retries**: this is often not the right conclusion, so treat it as a last resort
-- **Weakening assertions**: don't recommend making assertions more lenient or narrowing their scope just to make the test pass (this hides regressions instead of catching them)
-- **Reducing coverage surface**: don't recommend stripping tags to skip the test in certain environments (e.g. Cloud) or project types (e.g. serverless Security) unless you have a real reason it shouldn't run there. "It's flaky here" is not a real reason
-- **Trusting flaky-test-runner alone**: a green 30/30 or 60/60 run does not prove a fix held. The runner runs tests in isolation, which isn't always the case (Scout test runs share the same test servers for multiple test configs)
-- **Assuming "fix the test, not the product"**: always ask first whether the product could be at fault
+- **Ignoring the bigger picture**: ensure you have as much data as you can about the test environment and related failures (in the same test file, test config or elsewhere).
+- **Recommending a timeout bump as the primary fix**: timeout bumps consistently fail to hold in Kibana. Investigate what it is that never happened.
+- **Never recommend wrapping the assertion in `retry()` as the fix.** Wrapping the assertion in `retry()` without addressing the underlying cause frequently recurs. Acceptable only as a temporary unblock; in that case the recommendation must explicitly say "this is a stopgap" and link a follow-up issue for the real fix.
+- **Never recommend a config-only change (yaml / ftrConfigsManifest / kibana.yml) as the fix.** Config-only fixes consistently fail to hold. Examples that recurred or were superseded: [#244993](https://github.com/elastic/kibana/pull/244993), [#250040](https://github.com/elastic/kibana/pull/250040), [#245869](https://github.com/elastic/kibana/pull/245869).
+- **Never recommend only test-side async hooks (`await`, `waitFor`, `waitUntil`) when there is evidence of a production-side race.** This is the most common pattern that looks like a fix but isn't — popular precisely because it appears principled, but it lets the test wait _longer_ without fixing the race. The race resurfaces on the next slow CI agent, a backport branch, or a neighbor test that shifts timing. Examples that recurred: [#243659](https://github.com/elastic/kibana/pull/243659), [#249800](https://github.com/elastic/kibana/pull/249800), [#231407](https://github.com/elastic/kibana/pull/231407).
+- **Weakening assertions**: don't recommend making assertions more lenient or narrowing their scope just to make the test pass — this hides regressions instead of catching them. Generic test-only refactors that loosen assertions often regress; if you weaken an assertion, you are likely writing a future failed-test issue.
+- **Reducing coverage surface**: don't recommend stripping tags to skip the test in certain environments (e.g. Cloud) or project types (e.g. serverless Security) unless you have a real reason it shouldn't run there. "It's flaky here" is not a real reason.
+- **Trusting flaky-test-runner alone**: a green 30/30 or 60/60 run does not prove a fix held. The runner runs tests in isolation, which isn't always the case (Scout test runs share the same test servers for multiple test configs).
+- **Assuming "fix the test, not the product"**: always ask first whether the product could be at fault. Test-only fixes are meaningfully less durable than fixes that change production code.
 - **Reporting false certainty**: "I don't know, here are the two plausible explanations and what would distinguish them" is more useful to the owning team than a confident wrong answer.
 
 ### Is a fix worth it?
@@ -99,8 +102,7 @@ Watch out for these pitfalls when investigating the failure:
 Consider alternatives before recommending a code fix. Once you have a diagnosis, the right next step is not always a code change. Consider:
 
 - **Delete the test.** Do other tests already cover what this one is testing?
-- **Refactor or downgrade the test.** See "Pick the right test type" in `docs/extend/scout/best-practices.md`. A functional test can often become an API, component, or Jest unit/integration test.
-  - **Caveat:** "migrate this Jest test to RTL" or "convert this to a unit test" is commonly proposed on a flaky-test issue without addressing the underlying flake. Downgrading test type is good hygiene, but the rewrite alone is rarely the fix — the underlying problem (often a missing await or shared state) must also be addressed, or the new test will inherit the flake.
+- **Refactor or downgrade the test.** See "Pick the right test type" in `docs/extend/scout/best-practices.md`. A functional test can often become an API, component, or Jest unit/integration test. (A test-type downgrade alone without addressing the underlying flake is a Tier 3 shape and will inherit the flake — see "What shape of fix actually holds" above.)
 - **Update the tags.** Are the test's tags still appropriate? Should it run on Cloud? Should it be excluded from certain serverless solution types (e.g. Security)?
 - **Escalate to the owning team.** If this is a recurring offender or you suspect a product bug, the most useful conclusion may be a writeup handed to the owners, not a fix attempt.
 

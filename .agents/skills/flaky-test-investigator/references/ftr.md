@@ -8,7 +8,7 @@ FTR tests are divided into groups. A fresh set of test servers is started for ea
 
 When investigating an FTR failure, weight these checks higher:
 
-- **`retry.tryForTime reached timeout` / `retry.try reached timeout` is a diagnostic signal, not a knob.** If the failure stack already shows a retry-helper timeout, the awaited state is not arriving — raising the duration almost never fixes the underlying cause. Investigate _what_ the retry is waiting for and why it never settles.
+- **`retry.tryForTime reached timeout` / `retry.try reached timeout` is a diagnostic signal, not a knob.** If the failure stack already shows a retry-helper timeout, the awaited state is not arriving. Investigate _what_ the retry is waiting for and why it never settles. (The pitfall rule against timeout bumps lives in the parent `SKILL.md`.)
 - **What the retry wraps matters more than whether one is added.** `retry.try` / `retry.tryForTime` / `retry.waitFor` tend to hold when wrapping operations that are genuinely eventually consistent (Fleet/EPM install, EBT telemetry events, saved-object indexing propagation, task-manager pickup). They tend to recur when wrapping a page-object helper whose real problem is silent failure or a stale locator — in those cases the right fix is upstream of the retry.
 - **Audit page-object helpers for silent-failure anti-patterns** when the failure manifests as `Cannot read properties of undefined` or "click on a thing that was never rendered". Two patterns repeatedly cause this:
   - `testSubjects.exists()` inside an `if` — silently skips the action when the element isn't ready, leaving the caller to operate on absent state.
