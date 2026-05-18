@@ -207,7 +207,6 @@ describe('LensWrapper', () => {
       // The component should be wrapped in the context provider
       expect(getByTestId('embeddable-component')).toBeInTheDocument();
     });
-  });
 
     it('checks if  LensProps fields are passed to EmbeddableComponent', () => {
       const lensProps = {
