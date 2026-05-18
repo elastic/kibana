@@ -61,6 +61,7 @@ describe('getConfiguration', () => {
       layerType: 'data',
       metricAccessor: metric,
       palette,
+      applyColorTo: 'value',
     });
   });
 });
