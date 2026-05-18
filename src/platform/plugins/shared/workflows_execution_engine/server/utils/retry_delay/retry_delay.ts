@@ -6,7 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { memoize, random } from 'lodash';
+import { memoize } from 'lodash';
+import { applyBackoffJitter } from '../backoff_jitter/backoff_jitter';
 import { parseDuration } from '../parse-duration/parse-duration';
 
 // parseDuration is on the hot path of retry delay computation,
@@ -51,7 +52,7 @@ export function computeRetryDelayMs(config: RetryDelayConfig, attempt: number): 
     }
     let delayMs = parseDurationMemoized(config.delay);
     if (config.jitter) {
-      delayMs = applyRetryBackoffJitter(delayMs);
+      delayMs = applyBackoffJitter(delayMs);
     }
     return delayMs;
   }
@@ -68,17 +69,8 @@ export function computeRetryDelayMs(config: RetryDelayConfig, attempt: number): 
   }
 
   if (config.jitter) {
-    delayMs = applyRetryBackoffJitter(delayMs);
+    delayMs = applyBackoffJitter(delayMs);
   }
 
   return Math.max(0, Math.floor(delayMs));
-}
-
-/**
- * Jitter for on-failure retry delays and poll exponential backoff: picks a uniform
- * delay in `[delayMs / 2, delayMs]` (inclusive), then floors — same formula as
- * {@link computeRetryDelayMs} when `jitter` is true.
- */
-export function applyRetryBackoffJitter(delayMs: number): number {
-  return Math.floor(random(delayMs / 2, delayMs));
 }

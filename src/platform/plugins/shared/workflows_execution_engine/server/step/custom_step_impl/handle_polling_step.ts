@@ -20,7 +20,7 @@ import type {
 } from '@kbn/workflows-extensions/server';
 import type { z } from '@kbn/zod/v4';
 import { createHandlerContext } from './step_context_handler';
-import { applyRetryBackoffJitter } from '../../utils/retry_delay/retry_delay';
+import { applyBackoffJitter } from '../../utils/backoff_jitter/backoff_jitter';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger';
 import type { RunStepResult } from '../node_implementation';
@@ -229,7 +229,7 @@ export class PollPolicyStepHandler implements StepHandler {
         const exponent = Math.max(currentAttempt, 0);
         const raw = policy.initialMs * Math.pow(multiplier, exponent);
         const capped = Math.min(raw, policy.maxMs);
-        const delayMs = policy.jitter ? applyRetryBackoffJitter(capped) : Math.floor(capped);
+        const delayMs = policy.jitter ? applyBackoffJitter(capped) : Math.floor(capped);
         policyData = {
           startedAt,
           lastPollAt,

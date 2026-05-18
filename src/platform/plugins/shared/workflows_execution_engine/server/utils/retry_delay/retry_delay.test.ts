@@ -7,20 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { applyRetryBackoffJitter, computeRetryDelayMs } from './retry_delay';
-
-describe('applyRetryBackoffJitter', () => {
-  it('returns values in [delayMs/2, delayMs] for positive delay', () => {
-    const results = new Set<number>();
-    for (let i = 0; i < 80; i++) {
-      const ms = applyRetryBackoffJitter(1000);
-      results.add(ms);
-      expect(ms).toBeGreaterThanOrEqual(500);
-      expect(ms).toBeLessThanOrEqual(1000);
-    }
-    expect(results.size).toBeGreaterThan(1);
-  });
-});
+import { computeRetryDelayMs } from './retry_delay';
 
 describe('computeRetryDelayMs', () => {
   describe('fixed strategy', () => {
