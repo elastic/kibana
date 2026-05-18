@@ -25,17 +25,13 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useBoolean, useDebouncedValue } from '@kbn/react-hooks';
 import type { FindRulesSortField } from '@kbn/alerting-v2-schemas';
-import { AGENT_BUILDER_APP_ID } from '@kbn/deeplinks-agent-builder';
 import type { RuleApiResponse } from '../../services/rules_api';
 import { useFetchRules } from '../../hooks/use_fetch_rules';
 import { useFetchRuleTags } from '../../hooks/use_fetch_rule_tags';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useComposeDiscoverFlyout } from '../../hooks/use_compose_discover_flyout';
-import {
-  paths,
-  CREATE_WITH_AGENT_INITIAL_PROMPT,
-  AGENT_BUILDER_NEW_CONVERSATION_PATH,
-} from '../../constants';
+import { useNavigateToAgentBuilder } from '../../hooks/use_navigate_to_agent_builder';
+import { paths } from '../../constants';
 
 import { RulesListTableContainer } from './rules_list_table_container';
 import type { RulesListTableSortField } from './rules_list_table';
@@ -60,19 +56,12 @@ const TABLE_FIELD_TO_API_SORT_FIELD = Object.fromEntries(
 
 export const RulesListPage = () => {
   const http = useService(CoreStart('http'));
-  const application = useService(CoreStart('application'));
   useBreadcrumbs('rules_list');
 
   const [isCreateMenuOpen, { off: closeCreateMenu, toggle: toggleCreateMenu }] = useBoolean(false);
   const createMenuId = useGeneratedHtmlId({ prefix: 'createRuleMenu' });
   const { flyout, openCreateFlyout, openEditFlyout } = useComposeDiscoverFlyout();
-
-  const navigateToAgentBuilder = () => {
-    application.navigateToApp(AGENT_BUILDER_APP_ID, {
-      path: AGENT_BUILDER_NEW_CONVERSATION_PATH,
-      state: { initialMessage: CREATE_WITH_AGENT_INITIAL_PROMPT },
-    });
-  };
+  const navigateToAgentBuilder = useNavigateToAgentBuilder();
 
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(DEFAULT_PER_PAGE);
