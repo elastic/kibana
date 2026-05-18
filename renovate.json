@@ -857,6 +857,7 @@
         "fastify",
         "find-my-way",
         "@fastify/compress",
+        "@fastify/cors",
         "@fastify/multipart"
       ],
       "reviewers": ["team:kibana-core"],

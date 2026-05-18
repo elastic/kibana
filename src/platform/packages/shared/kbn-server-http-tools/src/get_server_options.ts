@@ -11,7 +11,14 @@ import type { RouteOptionsCors, ServerOptions } from '@hapi/hapi';
 import type { IHttpConfig } from './types';
 import { getServerListener } from './get_listener';
 
-const corsAllowedHeaders = ['Accept', 'Authorization', 'Content-Type', 'If-None-Match', 'kbn-xsrf'];
+/** Shared with the Fastify HTTP backend (`installFastifyCors`) for Hapi/Fastify parity. */
+export const KIBANA_HTTP_CORS_ALLOWED_HEADERS = [
+  'Accept',
+  'Authorization',
+  'Content-Type',
+  'If-None-Match',
+  'kbn-xsrf',
+] as const;
 
 /**
  * Converts Kibana `HttpConfig` into `ServerOptions` that are accepted by the Hapi server.
@@ -21,7 +28,7 @@ export function getServerOptions(config: IHttpConfig, { configureTLS = true } = 
     ? {
         credentials: config.cors.allowCredentials,
         origin: config.cors.allowOrigin,
-        headers: corsAllowedHeaders,
+        headers: [...KIBANA_HTTP_CORS_ALLOWED_HEADERS],
       }
     : false;
   const maxPayload = config.maxPayload.getValueInBytes();

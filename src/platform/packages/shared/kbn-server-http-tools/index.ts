@@ -17,7 +17,7 @@ export type {
 export { createServer } from './src/create_server';
 export { createFastifyServer } from './src/create_fastify_server';
 export { getServerListener } from './src/get_listener';
-export { getServerOptions } from './src/get_server_options';
+export { getServerOptions, KIBANA_HTTP_CORS_ALLOWED_HEADERS } from './src/get_server_options';
 export { getServerTLSOptions } from './src/get_tls_options';
 export { getRequestId } from './src/get_request_id';
 export { setTlsConfig } from './src/set_tls_config';

@@ -166,6 +166,7 @@
     "@emotion/styled": "11.14.1",
     "@faker-js/faker": "9.7.0",
     "@fastify/compress": "8",
+    "@fastify/cors": "11",
     "@fastify/multipart": "9",
     "@formatjs/icu-messageformat-parser": "2.11.1",
     "@formatjs/intl": "2.10.2",

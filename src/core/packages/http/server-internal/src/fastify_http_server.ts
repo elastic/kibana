@@ -79,6 +79,7 @@ import {
   getRequestAcceptEncoding,
   installFastifyCompression,
 } from './fastify/install_fastify_compression';
+import { installFastifyCors } from './fastify/install_fastify_cors';
 import { applyHapiCompatRequestTimeouts } from './fastify/apply_hapi_compat_request_timeouts';
 import { attachFastifyPayloadReceiveTimeout } from './fastify/register_fastify_payload_timeout_pre_parsing';
 
@@ -291,6 +292,7 @@ export class FastifyHttpServer {
 
     installFastifyGlobalErrorHandler(this.fastify, this.log);
     await installFastifyCompression(this.fastify, config, this.log);
+    await installFastifyCors(this.fastify, config, this.log);
     this.installKibanaRequestStateOnRequest(config, executionContext, userActivity);
 
     // Mirror @hapi/hapi: reject malformed `Cookie` headers before auth redirects (GET `/` would
