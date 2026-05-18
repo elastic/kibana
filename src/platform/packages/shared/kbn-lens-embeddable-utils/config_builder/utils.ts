@@ -243,7 +243,9 @@ function buildDatasourceStatesLayer(
   return [LENS_DATASOURCE_ID.FORM_BASED, buildFormulaLayers(layer, i, dataView!)];
 }
 export const buildDatasourceStates = async (
-  config: (LensBaseConfig & { layers: LensBaseXYLayer[] }) | (LensBaseLayer & LensBaseConfig),
+  config:
+    | (LensBaseConfig & { layers: Array<LensBaseXYLayer | LensAnnotationLayer> })
+    | (LensBaseLayer & LensBaseConfig),
   dataviews: Record<string, DataView>,
   buildFormulaLayers: (
     config: unknown,
