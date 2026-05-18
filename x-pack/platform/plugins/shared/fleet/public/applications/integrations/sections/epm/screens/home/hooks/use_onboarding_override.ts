@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 
 import { useStartServices } from '../../../../../hooks';
 
@@ -17,21 +17,13 @@ const ONBOARDING_ENABLED_FLAG = 'ingestHub.onboardingEnabled';
 const HIDDEN_TILE_NAMES = new Set(['aws', 'awsfirehose']);
 const HIDDEN_TILE_IDS = new Set(['ui_link:esf']);
 
-const ONBOARDING_AWS_TILE: IntegrationCardItem = {
-  id: 'onboarding:aws',
-  title: 'Amazon Web Services',
-  description: 'Collect logs and metrics from AWS services.',
-  icons: [{ type: 'eui', src: 'logoAWS' }],
-  url: '/app/onboarding/aws',
-  integration: 'aws',
-  name: 'aws-onboarding',
-  version: '',
-  categories: ['aws', 'observability'],
-};
-
 export function useOnboardingOverride() {
-  const { featureFlags } = useStartServices();
+  const { featureFlags, application } = useStartServices();
   const isOnboardingEnabled = featureFlags.getBooleanValue(ONBOARDING_ENABLED_FLAG, false);
+
+  const navigateToOnboarding = useCallback(() => {
+    application.navigateToApp('onboarding', { path: '/aws' });
+  }, [application]);
 
   const applyOnboardingOverride = useMemo(() => {
     return (cards: IntegrationCardItem[]): IntegrationCardItem[] => {
@@ -43,9 +35,22 @@ export function useOnboardingOverride() {
         (card) => !HIDDEN_TILE_NAMES.has(card.name) && !HIDDEN_TILE_IDS.has(card.id)
       );
 
-      return [ONBOARDING_AWS_TILE, ...filtered];
+      const onboardingAwsTile: IntegrationCardItem = {
+        id: 'onboarding:aws',
+        title: 'Amazon Web Services',
+        description: 'Collect logs and metrics from AWS services.',
+        icons: [{ type: 'eui', src: 'logoAWS' }],
+        url: '',
+        integration: 'aws',
+        name: 'aws-onboarding',
+        version: '',
+        categories: ['aws', 'observability'],
+        onCardClick: navigateToOnboarding,
+      };
+
+      return [onboardingAwsTile, ...filtered];
     };
-  }, [isOnboardingEnabled]);
+  }, [isOnboardingEnabled, navigateToOnboarding]);
 
   return { applyOnboardingOverride, isOnboardingEnabled };
 }
