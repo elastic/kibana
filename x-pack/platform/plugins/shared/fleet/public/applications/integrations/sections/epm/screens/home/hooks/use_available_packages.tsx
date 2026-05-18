@@ -46,6 +46,7 @@ import type { CategoryFacet } from '../category_facets';
 import { mergeCategoriesAndCount } from '../util';
 
 import { useBuildIntegrationsUrl } from './use_build_integrations_url';
+import { useOnboardingOverride } from './use_onboarding_override';
 
 export interface IntegrationsURLParameters {
   searchString?: string;
@@ -152,6 +153,7 @@ export const useAvailablePackages = ({
   const [preference, setPreference] = useState<IntegrationPreferenceType>('agent');
 
   const { isAgentlessEnabled } = useAgentless();
+  const { applyOnboardingOverride } = useOnboardingOverride();
 
   const { packageVerificationKeyId } = useGetPackageVerificationKeyId();
 
@@ -214,7 +216,7 @@ export const useAvailablePackages = ({
   // Used by useBrowseIntegrationHook which applies both filters from the live URL.
   const allCards: IntegrationCardItem[] = useMemo(() => {
     const eprAndCustomPackages = [...mergedEprPackages, ...(appendCustomIntegrations || [])];
-    return eprAndCustomPackages
+    const mapped = eprAndCustomPackages
       .map((item) =>
         mapToCard({
           getAbsolutePath,
@@ -225,9 +227,11 @@ export const useAvailablePackages = ({
         })
       )
       .sort((a, b) => a.title.localeCompare(b.title));
+    return applyOnboardingOverride(mapped);
   }, [
     addBasePath,
     appendCustomIntegrations,
+    applyOnboardingOverride,
     getAbsolutePath,
     getHref,
     mergedEprPackages,
