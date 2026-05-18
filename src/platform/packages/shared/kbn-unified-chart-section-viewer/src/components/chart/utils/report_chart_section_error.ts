@@ -52,36 +52,42 @@ export const reportChartSectionError = ({
     return;
   }
 
-  const labels: Record<string, string> = {
-    error_type: CHART_SECTION_ERROR_TYPE_LABEL,
-    chart_section_source: source,
-  };
-  if (error instanceof EsqlResponseError) {
-    if (error.type) {
-      labels.esql_error_type = error.type;
+  // Best-effort: APM reporting must never break the host app. If `@elastic/apm-rum`
+  // throws (e.g. transport failure, internal error) swallow it silently.
+  try {
+    const labels: Record<string, string> = {
+      error_type: CHART_SECTION_ERROR_TYPE_LABEL,
+      chart_section_source: source,
+    };
+    if (error instanceof EsqlResponseError) {
+      if (error.type) {
+        labels.esql_error_type = error.type;
+      }
+      if (error.status != null) {
+        labels.esql_status = String(error.status);
+      }
     }
-    if (error.status != null) {
-      labels.esql_status = String(error.status);
+    // Drop undefined / empty values so APM is not polluted with placeholder
+    // labels (e.g., an unset `chart_id`).
+    for (const [key, value] of Object.entries(callerLabels)) {
+      if (value !== undefined && value !== '') {
+        labels[key] = value;
+      }
     }
-  }
-  // Drop undefined / empty values so APM is not polluted with placeholder
-  // labels (e.g., an unset `chart_id`).
-  for (const [key, value] of Object.entries(callerLabels)) {
-    if (value !== undefined && value !== '') {
-      labels[key] = value;
-    }
-  }
 
-  // `apm.captureError` alone doesn't mark the surrounding transaction failed.
-  // Mirror lens/data_loader.ts: attach a failed child span around the capture.
-  const span = apm
-    .getCurrentTransaction()
-    ?.startSpan('chart-section-non-render-error', 'chart-section');
-  span?.addLabels(labels);
-  apm.captureError(error, { labels });
-  if (span) {
-    // @ts-expect-error RUM types do not expose `outcome` on Span.
-    span.outcome = 'failure';
-    span.end();
+    // `apm.captureError` alone doesn't mark the surrounding transaction failed.
+    // Mirror lens/data_loader.ts: attach a failed child span around the capture.
+    const span = apm
+      .getCurrentTransaction()
+      ?.startSpan('chart-section-non-render-error', 'chart-section');
+    span?.addLabels(labels);
+    apm.captureError(error, { labels });
+    if (span) {
+      // @ts-expect-error RUM types do not expose `outcome` on Span.
+      span.outcome = 'failure';
+      span.end();
+    }
+  } catch {
+    // Intentionally swallow: telemetry reporting failures must not propagate.
   }
 };
