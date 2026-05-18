@@ -261,7 +261,9 @@ export const ErrorsList = ({
               isGlobalView ?? false
             );
 
-            activeDuration = moment(resolvedState?.state.started_at).diff(item['@timestamp']) ?? 0;
+            activeDuration = resolvedState
+              ? moment(resolvedState.state.started_at).diff(item['@timestamp'])
+              : 0;
           }
         }
         return (
@@ -291,10 +293,13 @@ export const ErrorsList = ({
     if (state?.id) {
       const itemConfigId = item.config_id ?? configId;
       const locationId = item.observer?.name ?? selectedLocation?.id;
+      const locationQuery = locationId
+        ? `?locationId=${encodeURIComponent(locationId)}`
+        : '';
       return {
         'data-test-subj': `row-${state.id}`,
         onClick: (evt: MouseEvent) => {
-          history.push(`/monitor/${itemConfigId}/errors/${state.id}?locationId=${locationId}`);
+          history.push(`/monitor/${itemConfigId}/errors/${state.id}${locationQuery}`);
         },
       };
     }
