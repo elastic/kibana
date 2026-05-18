@@ -233,6 +233,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
       const full = getBreachQuery(methods.getValues('query'));
       const { base, alertBlock } = splitQuery(full);
       setDraft((d) => ({ ...d, base, breach: alertBlock }));
+      methods.setValue('query', { format: 'composed', base, blocks: { breach: alertBlock } });
       dispatch({ type: 'ENABLE_TRACKING' });
     } else {
       // Assemble from the last committed RHF query — not from draft — so
