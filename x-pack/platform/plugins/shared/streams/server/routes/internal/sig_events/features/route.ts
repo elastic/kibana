@@ -148,6 +148,16 @@ export const listFeaturesRoute = createServerRoute({
         query: z.string().optional(),
         search_mode: searchModeSchema.optional(),
         include_excluded: BooleanFromString.optional(),
+        type: z
+          .preprocess((val) => (typeof val === 'string' ? [val] : val), z.array(z.string()))
+          .optional()
+          .describe('Filter to features whose type is one of the given values'),
+        min_confidence: z.coerce
+          .number()
+          .min(0)
+          .max(100)
+          .optional()
+          .describe('Filter to features whose confidence is >= the given value (0-100)'),
       })
     ),
   }),
@@ -171,10 +181,21 @@ export const listFeaturesRoute = createServerRoute({
       query,
       search_mode: searchMode,
       include_excluded: includeExcluded,
+      type,
+      min_confidence: minConfidence,
     } = params.query ?? {};
     const { hits: features } = query
-      ? await featureClient.findFeatures(params.path.name, query, { searchMode, includeExcluded })
-      : await featureClient.getFeatures(params.path.name, { includeExcluded });
+      ? await featureClient.findFeatures(params.path.name, query, {
+          searchMode,
+          includeExcluded,
+          type,
+          minConfidence,
+        })
+      : await featureClient.getFeatures(params.path.name, {
+          includeExcluded,
+          type,
+          minConfidence,
+        });
 
     return { features };
   },
@@ -198,6 +219,16 @@ export const listAllFeaturesRoute = createServerRoute({
         query: z.string().optional().describe('Free-text query for semantic/keyword search'),
         search_mode: searchModeSchema.optional(),
         include_excluded: BooleanFromString.optional(),
+        type: z
+          .preprocess((val) => (typeof val === 'string' ? [val] : val), z.array(z.string()))
+          .optional()
+          .describe('Filter to features whose type is one of the given values'),
+        min_confidence: z.coerce
+          .number()
+          .min(0)
+          .max(100)
+          .optional()
+          .describe('Filter to features whose confidence is >= the given value (0-100)'),
       })
       .optional(),
   }),
@@ -223,10 +254,17 @@ export const listAllFeaturesRoute = createServerRoute({
       query,
       search_mode: searchMode,
       include_excluded: includeExcluded,
+      type,
+      min_confidence: minConfidence,
     } = params?.query ?? {};
     const { hits: features } = query
-      ? await featureClient.findFeatures(streamNames, query, { searchMode, includeExcluded })
-      : await featureClient.getFeatures(streamNames, { includeExcluded });
+      ? await featureClient.findFeatures(streamNames, query, {
+          searchMode,
+          includeExcluded,
+          type,
+          minConfidence,
+        })
+      : await featureClient.getFeatures(streamNames, { includeExcluded, type, minConfidence });
 
     return { features };
   },

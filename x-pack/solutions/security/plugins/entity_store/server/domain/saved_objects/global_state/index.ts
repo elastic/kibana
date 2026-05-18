@@ -11,7 +11,12 @@ import type {
 } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsErrorHelpers, type Logger } from '@kbn/core/server';
 import Boom from '@hapi/boom';
-import { EntityStoreGlobalState, HistorySnapshotState, LogExtractionConfig } from './constants';
+import {
+  EntityStoreGlobalState,
+  HistorySnapshotState,
+  KnowledgeIndicatorsConfig,
+  LogExtractionConfig,
+} from './constants';
 import { EntityStoreGlobalStateTypeName } from './types';
 
 export class EntityStoreGlobalStateClient {
@@ -55,9 +60,13 @@ export class EntityStoreGlobalStateClient {
 
     const historySnapshot = HistorySnapshotState.parse(initialState?.historySnapshot ?? {});
     const logsExtraction = LogExtractionConfig.parse(initialState?.logsExtraction ?? {});
+    const knowledgeIndicators = KnowledgeIndicatorsConfig.parse(
+      initialState?.knowledgeIndicators ?? {}
+    );
     const defaultState: EntityStoreGlobalState = {
       historySnapshot,
       logsExtraction,
+      knowledgeIndicators,
     };
     const parsed = EntityStoreGlobalState.parse(defaultState);
 
@@ -75,6 +84,32 @@ export class EntityStoreGlobalStateClient {
 
     const id = this.getSavedObjectId();
     return this.updateInternal(id, partial);
+  }
+
+  /**
+   * Read-modify-write update for the `knowledgeIndicators` config block.
+   *
+   * The SO update path uses `mergeAttributes: true`, which only merges at the
+   * top level; passing `{ knowledgeIndicators: { entityMinConfidence: 80 } }`
+   * directly would replace the entire block, dropping `aggregationGroupCap`.
+   * This method first reads the current state, merges the partial, validates
+   * with the Zod schema (which applies defaults for any missing fields, so
+   * pre-V2-migration documents without the block are tolerated), then writes
+   * back the full block.
+   *
+   * Mirrors the shape of `LogsExtractionClient.updateConfig` so callers
+   * (route handlers, tests) get a familiar API.
+   */
+  async updateKnowledgeIndicatorsConfig(
+    params: Partial<KnowledgeIndicatorsConfig>
+  ): Promise<KnowledgeIndicatorsConfig> {
+    const current = await this.findOrThrow();
+    const merged = KnowledgeIndicatorsConfig.parse({
+      ...(current.knowledgeIndicators ?? {}),
+      ...params,
+    });
+    await this.update({ knowledgeIndicators: merged });
+    return merged;
   }
 
   private async updateInternal(

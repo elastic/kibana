@@ -148,11 +148,16 @@ export function getEuidDslFilterBasedOnDocument(
   };
   const boolQuery = dsl.bool!;
 
-  // Compute source match specs once, excluding evaluations whose sources are themselves evaluated.
+  // Compute source match specs once, excluding evaluations whose sources are themselves evaluated
+  // and pure-literal evaluations (which carry no document constraint to add).
   const evaluationSpecs = fieldEvaluations
     .filter((evaluation) => {
       const { exactMatchFields, prefixMatchFields } = getSourceFieldNames(evaluation.sources);
-      return ![...exactMatchFields, ...prefixMatchFields].some((f) => evaluatedDestinations.has(f));
+      const sourceFields = [...exactMatchFields, ...prefixMatchFields];
+      if (sourceFields.length === 0) {
+        return false;
+      }
+      return !sourceFields.some((f) => evaluatedDestinations.has(f));
     })
     .map((evaluation) => ({ evaluation, spec: getSourceMatchSpec(doc, evaluation) }));
 

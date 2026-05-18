@@ -8,6 +8,7 @@
 import { conditionToESQL } from '@kbn/streamlang';
 import type {
   EntityDefinitionWithoutId,
+  EntityIdentity,
   FieldEvaluation,
   EntityType,
   EuidAttribute,
@@ -115,6 +116,10 @@ export function getEuidEsqlFilterBasedOnDocument(
     for (const evaluation of fieldEvaluations) {
       const { exactMatchFields, prefixMatchFields } = getSourceFieldNames(evaluation.sources);
       const sourceFields = [...exactMatchFields, ...prefixMatchFields];
+      // Pure-literal evaluations carry no document constraint — there is nothing to filter on.
+      if (sourceFields.length === 0) {
+        continue;
+      }
       const hasEvaluatedSource = sourceFields.some((f) => evaluatedDestinations.has(f));
       if (hasEvaluatedSource) {
         continue;
@@ -130,6 +135,9 @@ export function getEuidEsqlFilterBasedOnDocument(
 function sourceToEsqlExpression(source: FieldEvaluation['sources'][number]): string {
   if ('field' in source) {
     return `MV_FIRST(${source.field})`;
+  }
+  if ('literal' in source) {
+    return `"${escapeEsqlString(source.literal)}"`;
   }
   return `MV_FIRST(SPLIT(MV_FIRST(${source.firstChunkOfField}), "${escapeEsqlString(
     source.splitBy
@@ -253,18 +261,28 @@ export function getFieldEvaluationsEsqlFromDefinition({
  * // '((host.entity.id IS NOT NULL) OR (host.id IS NOT NULL) OR (host.name IS NOT NULL) OR (host.hostname IS NOT NULL))'
  * ```
  *
+ * Callers that work with a custom (non-registered) definition — e.g. stream-derived
+ * Knowledge Indicator entities that ride the `generic` type but carry their own
+ * grouping field — MUST pass that definition's `identityField` via the `identityField`
+ * argument. Without it, this function falls back to the registry definition for
+ * `entityType`, which for `generic` requires `entity.id` on the document and will
+ * produce ESQL that fails against arbitrary stream indices.
+ *
  * @param entityType - The entity type string (e.g. 'host', 'user', 'generic')
+ * @param identityField - Optional override; when omitted, the registry's identity for `entityType` is used.
  * @returns An ESQL filter string that checks if the document contains an entity id.
  */
-export function getEuidEsqlDocumentsContainsIdFilter(entityType: EntityType) {
-  const entityDefinition = getEntityDefinitionWithoutId(entityType);
-  const { identityField } = entityDefinition;
+export function getEuidEsqlDocumentsContainsIdFilter(
+  entityType: EntityType,
+  identityField?: EntityIdentity
+): string {
+  const effectiveIdentity = identityField ?? getEntityDefinitionWithoutId(entityType).identityField;
 
-  if (isSingleFieldIdentity(identityField)) {
-    return `(${esqlIsNotNullOrEmpty(identityField.singleField)})`;
+  if (isSingleFieldIdentity(effectiveIdentity)) {
+    return `(${esqlIsNotNullOrEmpty(effectiveIdentity.singleField)})`;
   }
 
-  return conditionToESQL(identityField.documentsFilter);
+  return conditionToESQL(effectiveIdentity.documentsFilter);
 }
 
 /**
@@ -338,16 +356,19 @@ function buildRankingCaseEsql(ranking: EuidAttribute[][]): string {
 
 export function getEuidEsqlEvaluation(
   entityType: EntityType,
-  { withTypeId = true }: { withTypeId?: boolean } = {}
+  {
+    withTypeId = true,
+    identityField,
+  }: { withTypeId?: boolean; identityField?: EntityIdentity } = {}
 ) {
-  const { identityField } = getEntityDefinitionWithoutId(entityType);
-  const mustPrependTypeId = withTypeId && !identityField.skipTypePrepend;
+  const effectiveIdentity = identityField ?? getEntityDefinitionWithoutId(entityType).identityField;
+  const mustPrependTypeId = withTypeId && !effectiveIdentity.skipTypePrepend;
 
-  if (isSingleFieldIdentity(identityField)) {
-    return appendTypeIdIfNeeded(entityType, identityField.singleField, mustPrependTypeId);
+  if (isSingleFieldIdentity(effectiveIdentity)) {
+    return appendTypeIdIfNeeded(entityType, effectiveIdentity.singleField, mustPrependTypeId);
   }
 
-  const { euidRanking } = identityField;
+  const { euidRanking } = effectiveIdentity;
   const branches = euidRanking.branches;
   const hasConditionalBranch = branches.some((b) => b.when != null);
   if (!hasConditionalBranch && branches.length === 1) {

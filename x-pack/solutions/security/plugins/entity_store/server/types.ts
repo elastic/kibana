@@ -26,8 +26,8 @@ import type {
   LicensingPluginStart,
 } from '@kbn/licensing-plugin/server';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import type { CoreSetup } from '@kbn/core/server';
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { StreamsPluginStart } from '@kbn/streams-plugin/server';
+import type { CoreSetup, ElasticsearchClient } from '@kbn/core/server';
 import type { AssetManagerClient } from './domain/asset_manager';
 import type { EntityMaintainersClient } from './domain/entity_maintainers';
 import type { FeatureFlags } from './infra/feature_flags';
@@ -35,6 +35,7 @@ import type { CcsLogsExtractionClient, LogsExtractionClient } from './domain/log
 import type { HistorySnapshotClient } from './domain/history_snapshot';
 import type { CRUDClient } from './domain/crud';
 import type { ResolutionClient } from './domain/resolution';
+import type { EntityStoreGlobalStateClient } from './domain/saved_objects';
 import type { RegisterEntityMaintainerConfig } from './tasks/entity_maintainers/types';
 
 export interface EntityStoreSetupPlugins {
@@ -50,6 +51,12 @@ export interface EntityStoreStartPlugins {
   security: SecurityPluginStart;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   licensing: LicensingPluginStart;
+  /**
+   * Optional, declared in `kibana.jsonc` as `optionalPlugins.streams` so the
+   * entity store keeps working in deployments that don't have streams
+   * enabled. Consumers must guard against `undefined` at the call site.
+   */
+  streams?: StreamsPluginStart;
 }
 
 export interface EntityStoreApiRequestHandlerContext {
@@ -63,6 +70,13 @@ export interface EntityStoreApiRequestHandlerContext {
   featureFlags: FeatureFlags;
   logsExtractionClient: LogsExtractionClient;
   historySnapshotClient: HistorySnapshotClient;
+  /**
+   * Exposed alongside the extraction client so route handlers can read or
+   * update individual config blocks on the global state SO (e.g. the
+   * Knowledge Indicators block) without re-instantiating their own client.
+   * Same instance the extraction client uses internally.
+   */
+  globalStateClient: EntityStoreGlobalStateClient;
   security: SecurityPluginStart;
   namespace: string;
 }

@@ -54,6 +54,10 @@ const fieldEvaluationWhenClauseSchema = z.union([
 const fieldEvaluationSourceSchema = z.union([
   z.object({ field: z.string() }),
   z.object({ firstChunkOfField: z.string(), splitBy: z.string() }),
+  // A constant string injected into the EUID composition (e.g. a stream name for
+  // stream-derived definitions). Literal sources are always defined and contribute
+  // no field-name to filter clauses.
+  z.object({ literal: z.string().min(1) }),
 ]);
 
 const fieldEvaluationSchema = z.object({

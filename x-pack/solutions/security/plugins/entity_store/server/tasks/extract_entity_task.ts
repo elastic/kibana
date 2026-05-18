@@ -19,6 +19,18 @@ import type * as types from '../types';
 import type { EntityType } from '../../common/domain/definitions/entity_schema';
 import { createLogsExtractionClient } from './factories';
 import { wrapTaskRun } from '../telemetry/traces';
+import {
+  coerceTaskState,
+  toTaskManagerState,
+  type ExtractEntityTaskState,
+  type KiDefinitionStates,
+} from './extract_entity_task_state';
+import { createKnowledgeIndicatorsReader } from '../domain/streams_features';
+import {
+  runKnowledgeIndicatorsExtraction,
+  type KnowledgeIndicatorsLoopMetrics,
+} from './knowledge_indicators_loop';
+import { ENTITY_STORE_KI_LOOP_EVENT, createReportEvent } from '../telemetry/events';
 
 function getTaskType(entityType: EntityType): string {
   const config = TasksConfig[EntityStoreTaskType.enum.extractEntity];
@@ -43,21 +55,18 @@ async function runTask({
 }): Promise<RunResult> {
   logger.info(`Running extract entity task`);
 
-  const currentState = taskInstance.state;
-  const runs = currentState.runs || 0;
-  const namespace = currentState.namespace;
+  const currentState = coerceTaskState(taskInstance.state);
+  const { runs, namespace } = currentState;
 
   if (!fakeRequest) {
     logger.error(`No fake request found, skipping extract entity task`);
     return {
-      state: {
-        ...currentState,
-      },
+      state: toTaskManagerState({ ...currentState } satisfies ExtractEntityTaskState),
     };
   }
 
   try {
-    const { logsExtractionClient } = await createLogsExtractionClient({
+    const { logsExtractionClient, globalStateClient } = await createLogsExtractionClient({
       core,
       fakeRequest,
       logger,
@@ -80,28 +89,80 @@ async function runTask({
       );
     }
 
-    const updatedState = {
+    // Stream-derived (Knowledge Indicators) entity extraction runs ONLY for
+    // the generic entity type, AFTER the static generic extraction so that
+    // a KI-loop failure can never undo a successful static run. Errors
+    // thrown by the KI loop itself (e.g. global state SO missing, streams
+    // ES unreachable for the initial feature read) are caught locally and
+    // logged at warn level — they do not flip the task into the error
+    // branch of the outer try/catch.
+    let kiDefinitionStates: KiDefinitionStates | undefined = currentState.kiDefinitionStates;
+    let kiMetrics: KnowledgeIndicatorsLoopMetrics | undefined;
+    if (entityType === 'generic') {
+      try {
+        const reader = await createKnowledgeIndicatorsReader({ core, fakeRequest, logger });
+        const globalState = await globalStateClient.findOrThrow();
+        const kiResult = await runKnowledgeIndicatorsExtraction(
+          {
+            logger,
+            reader,
+            logsExtractionClient,
+            namespace,
+            config: globalState.logsExtraction,
+            knowledgeIndicatorsConfig: globalState.knowledgeIndicators,
+            abortController,
+          },
+          { currentStates: kiDefinitionStates }
+        );
+        kiDefinitionStates = kiResult.updatedStates;
+        kiMetrics = kiResult.metrics;
+        logger.info(
+          `KI extraction loop: total=${kiMetrics.groupsTotal} ` +
+            `succeeded=${kiMetrics.groupsSucceeded} failed=${kiMetrics.groupsFailed} ` +
+            `skipped=${kiMetrics.groupsSkippedNoIndexPatterns} ` +
+            `truncated=${kiMetrics.groupsTruncated}`
+        );
+        // Telemetry is emitted ONLY on completed loops, not on the
+        // pre-loop catch path. A pre-loop crash means we have no metrics
+        // to report; the local warn log is the only signal.
+        const telemetryReporter = createReportEvent(core.analytics);
+        telemetryReporter.reportEvent(ENTITY_STORE_KI_LOOP_EVENT, {
+          namespace,
+          ...kiMetrics,
+        });
+      } catch (kiError) {
+        const message = kiError instanceof Error ? kiError.message : String(kiError);
+        logger.warn(
+          `KI extraction loop aborted before processing groups (${message}); ` +
+            `static generic extraction result is unaffected.`
+        );
+      }
+    }
+
+    const updatedState: ExtractEntityTaskState = {
       namespace,
       lastExecutionTimestamp: new Date().toISOString(),
       runs: runs + 1,
       entityType,
       lastExtractionSuccess: extractionResult.success,
       status: 'success',
+      kiDefinitionStates,
     };
 
     return {
-      state: updatedState,
+      state: toTaskManagerState(updatedState),
     };
   } catch (e) {
     logger.error(`Error running extract entity task, received ${e.message}`);
+    const errorState: ExtractEntityTaskState = {
+      ...currentState,
+      lastError: e.message,
+      lastErrorTimestamp: new Date().toISOString(),
+      status: 'error',
+      entityType,
+    };
     return {
-      state: {
-        ...currentState,
-        lastError: e.message,
-        lastErrorTimestamp: new Date().toISOString(),
-        status: 'error',
-        entityType,
-      },
+      state: toTaskManagerState(errorState),
     };
   }
 }

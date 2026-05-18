@@ -592,6 +592,36 @@ describe('FeatureClient', () => {
       const args = storageClient.search.mock.calls[0][0];
       expect(args.size).toBe(25);
     });
+
+    it('applies the type filter to the keyword query', async () => {
+      const { client, storageClient } = createFeatureClient();
+      await client.findFeatures('logs.test', 'http', {
+        searchMode: 'keyword',
+        type: ['entity', 'dependency'],
+      });
+
+      const filter = storageClient.search.mock.calls[0][0].query.bool.filter;
+      const typeFilter = filter.find((f: Record<string, unknown>) => {
+        const should = (f?.bool as Record<string, unknown>)?.should as
+          | Array<Record<string, unknown>>
+          | undefined;
+        return should?.some(
+          (s) => (s?.term as Record<string, unknown>)?.[FEATURE_TYPE] !== undefined
+        );
+      });
+      expect(typeFilter).toBeDefined();
+    });
+
+    it('applies the minConfidence filter to the keyword query', async () => {
+      const { client, storageClient } = createFeatureClient();
+      await client.findFeatures('logs.test', 'http', {
+        searchMode: 'keyword',
+        minConfidence: 70,
+      });
+
+      const filter = storageClient.search.mock.calls[0][0].query.bool.filter;
+      expect(filter).toContainEqual({ range: { [FEATURE_CONFIDENCE]: { gte: 70 } } });
+    });
   });
 
   describe('bulk() inference fallback behaviour', () => {

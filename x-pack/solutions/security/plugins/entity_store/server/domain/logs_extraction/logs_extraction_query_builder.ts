@@ -97,15 +97,28 @@ export function buildLogsExtractionEsqlQuery({
   logsPageCursorStart,
   logsPageCursorEnd,
 }: LogsExtractionQueryParams): string {
-  const { fields, type, entityTypeFallback } = entityDefinition;
+  const { fields, type, entityTypeFallback, identityField } = entityDefinition;
 
   const parts = [];
 
-  // FROM and WHERE
+  // Treat unmapped columns as NULL instead of failing query verification. The same
+  // ESQL is run against arbitrary index patterns (notably stream-derived KI
+  // definitions targeting a single data stream like `logs-elastic_agent.status_change-default`)
+  // that may not map every entity.*/event.*/asset.* source referenced in the
+  // definition. Without this, ESQL aborts with `verification_exception: Unknown
+  // column [...]` for every missing field and the whole extraction batch is lost.
+  // Mirrors the CCS extraction path, which sets the same directive for the same reason.
+  parts.push(`SET unmapped_fields="nullify";`);
+
+  // FROM and WHERE.
+  // `identityField` must come from the passed-in definition (not the registry) so that
+  // stream-derived (KI) definitions — which ride `type: 'generic'` but use a custom
+  // grouping field — produce a `documentsFilter` that matches their source indices.
   parts.push(
     buildExtractionSourceClause({
       indexPatterns,
       type,
+      identityField,
       fromDateISO,
       toDateISO,
       logsPageCursorStart,
@@ -124,10 +137,13 @@ export function buildLogsExtractionEsqlQuery({
     }
   }
 
-  // Evaluation of the id without type so we can fallback to name
+  // Evaluation of the id without type so we can fallback to name.
+  // Pass the definition's own identity; the registry lookup would yield the wrong
+  // identity for KI definitions (see comment above).
   parts.push(
     `| EVAL ${recentData(ENGINE_METADATA_UNTYPED_ID_FIELD)} = ${getEuidEsqlEvaluation(type, {
       withTypeId: false,
+      identityField,
     })}`
   );
 

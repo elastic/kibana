@@ -227,7 +227,7 @@ export function KnowledgeIndicatorsTable() {
   }
 
   return (
-    <EuiPanel hasBorder hasShadow={false}>
+    <EuiPanel hasBorder={false} hasShadow>
       {generationRow}
       {generationProgressCallout}
       <EuiSpacer size="m" />

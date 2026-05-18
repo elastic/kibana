@@ -39,6 +39,8 @@
     "@kbn/es-query",
     "@kbn/security-plugin",
     "@kbn/streamlang",
+    "@kbn/streams-plugin",
+    "@kbn/streams-schema",
     "@kbn/safer-lodash-set",
     "@kbn/tracing-utils",
     "@kbn/esql-language",

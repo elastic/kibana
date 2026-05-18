@@ -9,8 +9,7 @@ import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { EntityStoreCoreSetup } from '../types';
 import { AssetManagerClient } from '../domain/asset_manager';
-import { LogsExtractionClient } from '../domain/logs_extraction';
-import { CcsLogsExtractionClient } from '../domain/logs_extraction';
+import { CcsLogsExtractionClient, LogsExtractionClient } from '../domain/logs_extraction';
 import {
   CcsLogExtractionStateClient,
   EngineDescriptorClient,
@@ -20,6 +19,13 @@ import type { TelemetryReporter } from '../telemetry/events';
 
 export interface LogsExtractionClientFactoryResult {
   logsExtractionClient: LogsExtractionClient;
+  /**
+   * Exposed alongside the extraction client so task code can read the
+   * `knowledgeIndicators` config block without re-instantiating its own
+   * client. The instance is the same one the extraction client uses
+   * internally for `LogExtractionConfig` reads.
+   */
+  globalStateClient: EntityStoreGlobalStateClient;
 }
 
 export interface AssetManagerClientFactoryResult {
@@ -58,18 +64,21 @@ export async function createLogsExtractionClient({
     new CcsLogExtractionStateClient(soClient, namespace, logger)
   );
 
+  const globalStateClient = new EntityStoreGlobalStateClient(soClient, namespace, logger);
+
   const logsExtractionClient = new LogsExtractionClient({
     logger,
     namespace,
     esClient,
     dataViewsService,
     engineDescriptorClient: new EngineDescriptorClient(soClient, namespace, logger),
-    globalStateClient: new EntityStoreGlobalStateClient(soClient, namespace, logger),
+    globalStateClient,
     ccsLogsExtractionClient,
   });
 
   return {
     logsExtractionClient,
+    globalStateClient,
   };
 }
 

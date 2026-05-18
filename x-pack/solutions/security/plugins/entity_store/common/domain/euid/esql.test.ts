@@ -216,6 +216,21 @@ describe('getEuidEsqlDocumentsContainsIdFilter', () => {
 
     expect(result).toMatchSnapshot();
   });
+
+  // Stream-derived (KI) definitions ride type: 'generic' but carry a custom
+  // identityField with a documentsFilter on the grouping field. Without the
+  // override the caller would pick up the registry's generic singleField
+  // (entity.id) and emit ESQL that fails against arbitrary stream indices.
+  it('uses the provided identityField override instead of the registry entry for the given type', () => {
+    const result = getEuidEsqlDocumentsContainsIdFilter('generic', {
+      euidRanking: { branches: [{ ranking: [[{ field: 'service.name' }]] }] },
+      documentsFilter: { field: 'service.name', exists: true },
+      skipTypePrepend: true,
+    });
+
+    expect(result).toBe('NOT(`service.name` IS NULL)');
+    expect(result).not.toContain('entity.id');
+  });
 });
 
 describe('getFieldEvaluationsEsql', () => {
@@ -287,6 +302,32 @@ true, CASE((user.email IS NOT NULL AND user.email != "" AND entity.namespace IS 
 (user.name IS NOT NULL AND user.name != "" AND user.domain IS NOT NULL AND user.domain != "" AND entity.namespace IS NOT NULL AND entity.namespace != ""), CONCAT(user.name, "@", user.domain, "@", entity.namespace),
 (user.name IS NOT NULL AND user.name != "" AND entity.namespace IS NOT NULL AND entity.namespace != ""), CONCAT(user.name, "@", entity.namespace), NULL), NULL))`;
     expect(normalize(result)).toBe(normalize(expected));
+  });
+
+  // See the parallel test on getEuidEsqlDocumentsContainsIdFilter for context:
+  // KI definitions need this override so the extraction query builds its EUID
+  // from the definition's grouping field rather than the registry's entity.id.
+  it('uses the provided identityField override instead of the registry entry for the given type', () => {
+    const result = getEuidEsqlEvaluation('generic', {
+      identityField: {
+        euidRanking: {
+          branches: [
+            {
+              ranking: [[{ field: 'service.name' }, { sep: '@' }, { field: 'entity.source' }]],
+            },
+          ],
+        },
+        documentsFilter: { field: 'service.name', exists: true },
+        skipTypePrepend: true,
+      },
+    });
+
+    // skipTypePrepend: no "generic:" prefix.
+    expect(result).not.toContain('CONCAT("generic:"');
+    // Composition uses the definition's own euidRanking.
+    expect(result).toContain('CONCAT(service.name, "@", entity.source)');
+    // Registry fallback (entity.id) is not used.
+    expect(normalize(result)).not.toBe('entity.id');
   });
 });
 

@@ -78,11 +78,28 @@ import {
   createContinuousKiExtractionWorkflowService,
   type ContinuousKiExtractionWorkflowService,
 } from './lib/workflows/continuous_extraction_workflow';
+import {
+  createKnowledgeIndicatorsReader,
+  type StreamsKnowledgeIndicatorsReader,
+} from './lib/streams/cross_plugin/knowledge_indicators_reader';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StreamsPluginSetup {}
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface StreamsPluginStart {}
+
+export interface StreamsPluginStart {
+  /**
+   * Builds a request-scoped, read-only reader exposing the subset of stream
+   * Knowledge Indicators APIs intended for cross-plugin consumers. The
+   * reader is intentionally narrower than the internal `FeatureClient` /
+   * `StreamsClient` and never grants write access. See
+   * `StreamsKnowledgeIndicatorsReader` for the full surface.
+   */
+  getKnowledgeIndicatorsReader(args: {
+    request: KibanaRequest;
+  }): Promise<StreamsKnowledgeIndicatorsReader>;
+}
+
+export type { StreamsKnowledgeIndicatorsReader };
 
 export class StreamsPlugin
   implements
@@ -101,6 +118,9 @@ export class StreamsPlugin
   private statsTelemetryService = new StatsTelemetryService();
   private processorSuggestionsService: ProcessorSuggestionsService;
   private patternExtractionService?: PatternExtractionService;
+  private getScopedClients?: (args: {
+    request: KibanaRequest;
+  }) => Promise<RouteHandlerScopedClients>;
 
   constructor(context: PluginInitializerContext<StreamsConfig>) {
     this.isDev = context.env.mode.dev;
@@ -154,6 +174,9 @@ export class StreamsPlugin
     const contentService = new ContentService(core, this.logger);
     const queryService = new QueryService(core, this.logger);
     const taskService = new TaskService(plugins.taskManager);
+    // Stored on `this` so the `start()` contract (e.g.
+    // `getKnowledgeIndicatorsReader`) can reuse the same scoped-client
+    // resolver the route handlers use, avoiding parallel construction logic.
     const getScopedClients = async ({
       request,
       rulesClientOptions,
@@ -259,6 +282,8 @@ export class StreamsPlugin
         tuningConfig,
       };
     };
+
+    this.getScopedClients = getScopedClients;
 
     const telemetryClient = this.ebtTelemetryService.getClient();
 
@@ -568,7 +593,24 @@ export class StreamsPlugin
 
     this.processorSuggestionsService.setConsoleStart(plugins.console);
 
-    return {};
+    const getScopedClients = this.getScopedClients;
+    if (!getScopedClients) {
+      // Defensive: setup() always assigns this.getScopedClients before start()
+      // runs. Throwing here surfaces a programming error rather than allowing
+      // a silently broken cross-plugin reader.
+      throw new Error('Streams plugin: getScopedClients was not initialised in setup()');
+    }
+
+    return {
+      getKnowledgeIndicatorsReader: async ({ request }) => {
+        const scopedClients = await getScopedClients({ request });
+        const featureClient = await scopedClients.getFeatureClient();
+        return createKnowledgeIndicatorsReader({
+          featureClient,
+          streamsClient: scopedClients.streamsClient,
+        });
+      },
+    };
   }
 
   public async stop() {

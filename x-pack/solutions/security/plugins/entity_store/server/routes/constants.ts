@@ -64,3 +64,18 @@ export type HistorySnapshotBodyParams = z.infer<typeof HistorySnapshotBodyParams
 export const HistorySnapshotBodyParams = HistorySnapshotState.pick({
   frequency: true,
 }).partial();
+
+/**
+ * Partial-update body schema for the `knowledgeIndicators` block of the
+ * global state SO. Mirrors `KnowledgeIndicatorsConfig` (defined in
+ * `domain/saved_objects/global_state/constants.ts`) but every field is
+ * optional so callers can update one knob at a time. Field-level
+ * validation (range, integer-ness) is duplicated here intentionally so
+ * the route returns a 400 with a friendly path-prefixed error message
+ * before reaching the SO write.
+ */
+export type KnowledgeIndicatorsUpdateParams = z.infer<typeof KnowledgeIndicatorsUpdateParams>;
+export const KnowledgeIndicatorsUpdateParams = z.object({
+  entityMinConfidence: z.number().int().min(0).max(100).optional(),
+  aggregationGroupCap: z.number().int().min(1).optional(),
+});

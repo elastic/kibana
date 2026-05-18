@@ -54,6 +54,9 @@ function resolveSourceValue(doc: any, source: FieldEvaluationSource): string | u
   if ('field' in source) {
     return getFieldValue(doc, source.field);
   }
+  if ('literal' in source) {
+    return source.literal;
+  }
   const raw = getFieldValue(doc, source.firstChunkOfField);
   if (raw === undefined || raw === '') {
     return undefined;
