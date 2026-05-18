@@ -12,7 +12,6 @@ import {
   type AsCodeDataViewSpec,
   type AsCodeSavedDataView,
 } from '@kbn/as-code-data-views-schema';
-import { fromStoredDataView } from './from_stored_data_view';
 import { fromStoredFields } from './from_stored_fields';
 import { toStoredDataView } from './to_stored_data_view';
 
@@ -517,16 +516,18 @@ describe('roundtrip: stored → AsCode → stored', () => {
         },
       };
 
-      const asCodeSaved = fromStoredDataView(
-        {
-          id: 'saved-id',
-          name: 'Saved data view',
-          title: 'logs-*',
-          allowHidden: true,
-          ...stored,
-        },
-        true
-      );
+      const asCodeSaved: AsCodeSavedDataView = {
+        id: 'saved-id',
+        name: 'Saved data view',
+        index_pattern: 'logs-*',
+        allow_hidden_indices: true,
+        field_settings: fromStoredFields(
+          stored.runtimeFieldMap,
+          stored.fieldFormats,
+          stored.fieldAttrs,
+          true
+        ),
+      };
       const result = toStoredDataView(asCodeSaved);
 
       if (typeof result === 'string') {
