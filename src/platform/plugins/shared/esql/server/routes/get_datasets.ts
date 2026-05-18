@@ -10,6 +10,7 @@
 import type { IRouter, PluginInitializerContext } from '@kbn/core/server';
 import { DATASETS_ROUTE } from '@kbn/esql-types';
 import { EsqlService } from '@kbn/esql-server-utils';
+import { esqlRouteRequestCounter, getErrorStatusCode } from '../metrics';
 
 export const registerGetDatasetsRoute = (router: IRouter, { logger }: PluginInitializerContext) => {
   router.get(
@@ -29,10 +30,20 @@ export const registerGetDatasetsRoute = (router: IRouter, { logger }: PluginInit
         const service = new EsqlService({ client: core.elasticsearch.client.asCurrentUser });
         const result = await service.getDatasets();
 
+        esqlRouteRequestCounter.add(1, {
+          route: 'datasets',
+          outcome: 'success',
+          'http.response.status_code': 200,
+        });
         return response.ok({
           body: result,
         });
       } catch (error) {
+        esqlRouteRequestCounter.add(1, {
+          route: 'datasets',
+          outcome: 'failure',
+          'http.response.status_code': getErrorStatusCode(error),
+        });
         logger.get().debug(error);
         // TODO: Add error logging back in when datasets are available in Tech preview
         // const message = error instanceof Error ? error.message : String(error);
