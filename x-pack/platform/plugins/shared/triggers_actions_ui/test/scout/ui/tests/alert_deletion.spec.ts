@@ -73,8 +73,6 @@ test.describe('Alert deletion', { tag: tags.stateful.classic }, () => {
       })
     );
 
-    // Keep parity with the deleted FTR coverage by seeding the full stack,
-    // observability, and security alert mix.
     await esClient.deleteByQuery({
       index: '.internal.alerts-*',
       query: { ids: { values: ALL_ALERT_IDS } },
@@ -169,7 +167,7 @@ test.describe('Alert deletion', { tag: tags.stateful.classic }, () => {
       });
 
     // Only the newer alerts should remain across stack, observability, and
-    // security. This matches the breadth of the deleted FTR test.
+    // security.
     const remaining = await esClient.search({
       index: '.internal.alerts-*',
       size: ALL_ALERT_IDS.length,

@@ -9,7 +9,6 @@
   },
   "kbn_references": [
     "@kbn/scout",
-    "@kbn/rule-data-utils",
-    "@kbn/test-suites-xpack-platform"
+    "@kbn/rule-data-utils"
   ]
 }
