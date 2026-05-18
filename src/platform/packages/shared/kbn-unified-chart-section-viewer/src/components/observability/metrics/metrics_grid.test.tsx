@@ -192,6 +192,31 @@ describe('MetricsGrid', () => {
     );
   });
 
+  it('passes getDescription(metric) result to each chart when getDescription is provided', () => {
+    const descriptionForFirst = 'Data stream: metrics-system.cpu-default';
+
+    const getDescription = jest.fn((metric: (typeof metricItems)[0]) =>
+      metric.metricName === 'system.cpu.utilization' ? descriptionForFirst : undefined
+    );
+
+    renderMetricsGrid({ getDescription });
+
+    expect(getDescription).toHaveBeenCalledTimes(metricItems.length);
+    expect(getDescription).toHaveBeenNthCalledWith(1, metricItems[0]);
+    expect(getDescription).toHaveBeenNthCalledWith(2, metricItems[1]);
+
+    expect(Chart).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({ description: descriptionForFirst }),
+      expect.anything()
+    );
+    expect(Chart).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({ description: undefined }),
+      expect.anything()
+    );
+  });
+
   it('filters dimensions to only those applicable to each metric', () => {
     // mockMetricItems only have dimensionFields: [{ name: 'host.name' }]
     // so service.name and container.id should be filtered out
