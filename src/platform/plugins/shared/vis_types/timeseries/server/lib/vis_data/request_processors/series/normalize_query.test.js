@@ -82,7 +82,7 @@ describe('normalizeQuery', () => {
       intervalString: '10s',
       bucketSize: 10,
       seriesId: [seriesId],
-      panelId: panelId,
+      panelId,
     });
   });
 

@@ -389,7 +389,7 @@ describe('geoShapeToGeometry', () => {
     ];
     const value = {
       type: 'LineString',
-      coordinates: coordinates,
+      coordinates,
     };
     const shapes = [];
     geoShapeToGeometry(value, shapes);
@@ -405,7 +405,7 @@ describe('geoShapeToGeometry', () => {
     ];
     const value = {
       type: 'Envelope',
-      coordinates: coordinates,
+      coordinates,
     };
     const shapes = [];
     geoShapeToGeometry(value, shapes);

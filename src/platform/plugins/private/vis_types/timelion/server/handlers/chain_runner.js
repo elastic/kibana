@@ -150,7 +150,7 @@ export default function chainRunner(tlConfig) {
     }
 
     return promise.then(function (result) {
-      return invokeChain({ type: 'chain', chain: chain }, [result], parentIsDatasource, depth);
+      return invokeChain({ type: 'chain', chain }, [result], parentIsDatasource, depth);
     });
   }
 
@@ -253,8 +253,8 @@ export default function chainRunner(tlConfig) {
   }
 
   return {
-    processRequest: processRequest,
-    getStats: function () {
+    processRequest,
+    getStats () {
       return stats;
     },
   };

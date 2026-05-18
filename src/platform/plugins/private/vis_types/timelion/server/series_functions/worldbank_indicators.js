@@ -57,7 +57,7 @@ export default new Datasource('worldbank_indicators', {
     const seriesLists = _.map(countries, function (country) {
       const code = 'country/' + country + '/indicator/' + config.indicator;
       const wbArgs = [code];
-      wbArgs.byName = { code: code };
+      wbArgs.byName = { code };
       return worldbank.timelionFn(wbArgs, tlConfig);
     });
 
@@ -68,7 +68,7 @@ export default new Datasource('worldbank_indicators', {
     ).then(function (list) {
       return {
         type: 'seriesList',
-        list: list,
+        list,
       };
     });
   },

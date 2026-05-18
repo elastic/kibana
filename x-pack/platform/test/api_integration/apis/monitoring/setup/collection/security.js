@@ -44,7 +44,7 @@ export default function ({ getService }) {
       const password = 'changeme';
 
       await security.user.create(username, {
-        password: password,
+        password,
         full_name: 'Limited User',
         roles: ['kibana_admin', 'monitoring_user'],
       });

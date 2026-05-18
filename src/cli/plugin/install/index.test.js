@@ -15,16 +15,16 @@ describe('kibana cli', function () {
   describe('plugin installer', function () {
     describe('commander options', function () {
       const program = {
-        command: function () {
+        command () {
           return program;
         },
-        description: function () {
+        description () {
           return program;
         },
-        option: function () {
+        option () {
           return program;
         },
-        action: function () {
+        action () {
           return program;
         },
       };

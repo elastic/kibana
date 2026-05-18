@@ -724,7 +724,7 @@ function GraphWorkspace(options) {
       fieldsChoice.forEach(({ name: field, hopSize }) => {
         const excludes = excludeNodesByField[field];
         const stepField = {
-          field: field,
+          field,
           size: hopSize,
           min_doc_count: parseInt(self.options.exploreControls.minDocCount),
         };
@@ -752,7 +752,7 @@ function GraphWorkspace(options) {
     }
 
     const request = {
-      query: query,
+      query,
       controls: self.buildControls(),
       connections: rootStep.connections,
       vertices: rootStep.vertices,
@@ -840,7 +840,7 @@ function GraphWorkspace(options) {
         parent: undefined,
         isSelected: false,
         id: dedupedNode.id,
-        label: label,
+        label,
         color: dedupedNode.color,
         icon: getIcon(dedupedNode.icon),
         data: dedupedNode,
@@ -1066,7 +1066,7 @@ function GraphWorkspace(options) {
       // Add the new nodes and edges into the existing workspace's graph
       self.mergeGraph({
         nodes: data.vertices,
-        edges: edges,
+        edges,
       });
     });
     //===== End expand graph ========================
@@ -1519,7 +1519,7 @@ function GraphWorkspace(options) {
             v2: t2,
             mergeLeftConfidence: t1AndT2 / t1,
             mergeRightConfidence: t1AndT2 / t2,
-            mergeConfidence: mergeConfidence,
+            mergeConfidence,
             overlap: t1AndT2,
           };
           termIntersects.push(termIntersect);
@@ -1584,7 +1584,7 @@ function GraphWorkspace(options) {
       self.mergeGraph(
         {
           nodes: data.vertices,
-          edges: edges,
+          edges,
         },
         {
           labeller: self.options.labeller,

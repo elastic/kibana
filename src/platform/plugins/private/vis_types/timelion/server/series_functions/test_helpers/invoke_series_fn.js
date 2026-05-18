@@ -22,8 +22,8 @@ export default function invokeSeriesFn(fnDef, args, tlConfigOverrides) {
 
     return Promise.resolve(fnDef.originalFn(args, tlConfig)).then(function (output) {
       const result = {
-        output: output,
-        input: input,
+        output,
+        input,
       };
       return result;
     });

@@ -77,7 +77,7 @@ export default {
     },
   ],
   hits: 14005,
-  xAxisFormatter: function (val) {
+  xAxisFormatter (val) {
     if (_.isObject(val)) {
       return JSON.stringify(val);
     } else if (val == null) {
@@ -86,10 +86,10 @@ export default {
       return '' + val;
     }
   },
-  yAxisFormatter: function (val) {
+  yAxisFormatter (val) {
     return val;
   },
-  tooltipFormatter: function (d) {
+  tooltipFormatter (d) {
     return d;
   },
 };

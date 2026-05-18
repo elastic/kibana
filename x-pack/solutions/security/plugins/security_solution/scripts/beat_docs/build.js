@@ -162,7 +162,7 @@ const manageTarFields = async (beat, filePath, beatFields) =>
         tar.extract({
           sync: true,
           cwd: OUTPUT_DIRECTORY,
-          filter: function (path) {
+          filter (path) {
             return path.includes('fields.yml');
           },
         })

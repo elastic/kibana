@@ -50,7 +50,7 @@ const createSeriesFromParams = (cfg, seri) => {
       show: true,
       type: cfg.type || 'line',
       mode: stacked ? 'stacked' : 'normal',
-      interpolate: interpolate,
+      interpolate,
       drawLinesBetweenPoints: seriesParams0.drawLinesBetweenPoints,
       showCircles: seriesParams0.showCircles,
       radiusRatio: cfg.radiusRatio,
@@ -127,7 +127,7 @@ function create(opts) {
             boundsMargin: defaultYExtents ? config.boundsMargin : 0,
             min: isUserDefinedYAxis ? config.yAxis.min : undefined,
             max: isUserDefinedYAxis ? config.yAxis.max : undefined,
-            mode: mode,
+            mode,
           },
           labels: {
             axisFormatter: data.data.yAxisFormatter || data.get('yAxisFormatter'),
@@ -225,7 +225,7 @@ export const vislibPointSeriesTypes = {
       },
       labels: {
         filter: false,
-        axisFormatter: function (val) {
+        axisFormatter (val) {
           return val;
         },
       },

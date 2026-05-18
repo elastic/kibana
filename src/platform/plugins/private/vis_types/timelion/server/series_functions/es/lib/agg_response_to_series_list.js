@@ -50,7 +50,7 @@ export function flattenBucket(bucket, splitKey, path, result) {
       _.each(metrics, function (pairs, metricName) {
         result[path.concat([metricName]).join(' > ')] = {
           data: pairs,
-          splitKey: splitKey,
+          splitKey,
         };
       });
     }

@@ -1585,10 +1585,10 @@ export default {
     },
   ],
   hits: 2595,
-  xAxisFormatter: function (thing) {
+  xAxisFormatter (thing) {
     return moment(thing);
   },
-  tooltipFormatter: function (d) {
+  tooltipFormatter (d) {
     return d;
   },
 };

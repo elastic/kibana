@@ -151,7 +151,7 @@ dateHistogramArray.forEach(function (data, i) {
         expect(function () {
           testLayout.layout({
             parent: vis.element,
-            type: function (d) {
+            type (d) {
               return d;
             },
             class: 'chart',

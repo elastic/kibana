@@ -95,13 +95,13 @@ const MONITOR_KEY = '__KBN_BENCH_MONITOR';
         argv,
         time: now,
         cpuUsage: cpuUsage / 1000,
-        rssMax: rssMax,
+        rssMax,
         heapUsage: heapUsed / heapTotal,
-        gcMajor: gcMajor,
-        gcMinor: gcMinor,
-        gcIncremental: gcIncremental,
-        gcWeakCb: gcWeakCb,
-        gcTotal: gcTotal,
+        gcMajor,
+        gcMinor,
+        gcIncremental,
+        gcWeakCb,
+        gcTotal,
       }) + '\n'
     );
   }

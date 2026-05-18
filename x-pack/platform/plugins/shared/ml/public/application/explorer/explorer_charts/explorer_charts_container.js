@@ -121,7 +121,7 @@ function ExplorerChartContainer({
 
     const locator = share.url.locators.get(MAPS_APP_LOCATOR);
     const location = await locator.getLocation({
-      initialLayers: initialLayers,
+      initialLayers,
       timeRange: timeRange ?? timefilter?.getTime(),
       ...(queryString !== undefined ? { query } : {}),
     });

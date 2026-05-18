@@ -247,7 +247,7 @@ function init(plot) {
     if (numCombined > 1) {
       newdata.push({
         data: [[1, combined]],
-        color: color,
+        color,
         label: options.series.pie.combine.label,
         angle: (combined * Math.PI * 2) / total,
         percent: combined / (total / 100),
@@ -753,7 +753,7 @@ function init(plot) {
     const i = indexOfHighlight(s);
 
     if (i === -1) {
-      highlights.push({ series: s, auto: auto });
+      highlights.push({ series: s, auto });
       plot.triggerRedrawOverlay();
     } else if (!auto) {
       highlights[i].auto = false;
@@ -860,7 +860,7 @@ const options = {
       },
       label: {
         show: 'auto',
-        formatter: function (label, slice) {
+        formatter (label, slice) {
           return (
             "<div style='font-size:x-small;text-align:center;padding:2px;color:" +
             slice.color +
@@ -892,8 +892,8 @@ const options = {
 };
 
 export const pie = {
-  init: init,
-  options: options,
+  init,
+  options,
   name: 'pie',
   version: '1.1',
 };

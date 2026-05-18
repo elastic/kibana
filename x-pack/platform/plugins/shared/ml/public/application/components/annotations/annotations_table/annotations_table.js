@@ -701,7 +701,7 @@ class AnnotationsTableUI extends Component {
         incremental: true,
         schema: true,
       },
-      filters: filters,
+      filters,
     };
 
     columns.push(

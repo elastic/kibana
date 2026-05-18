@@ -54,7 +54,7 @@ export default {
   ],
   hits: 171499,
   xAxisOrderedValues: ['0.0-1000.0', '1000.0-2000.0'],
-  xAxisFormatter: function (val) {
+  xAxisFormatter (val) {
     if (_.isObject(val)) {
       return JSON.stringify(val);
     } else if (val == null) {
@@ -63,7 +63,7 @@ export default {
       return '' + val;
     }
   },
-  tooltipFormatter: function (d) {
+  tooltipFormatter (d) {
     return d;
   },
 };

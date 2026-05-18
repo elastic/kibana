@@ -101,7 +101,7 @@ export default {
     11811160000, 12884901800, 13958643700, 15032385500, 16106127300, 17179869100, 18253611000,
     19327352800, 20401094600, 21474836400, 32212254700,
   ],
-  xAxisFormatter: function (val) {
+  xAxisFormatter (val) {
     if (_.isObject(val)) {
       return JSON.stringify(val);
     } else if (val == null) {
@@ -110,7 +110,7 @@ export default {
       return '' + val;
     }
   },
-  tooltipFormatter: function (d) {
+  tooltipFormatter (d) {
     return d;
   },
 };

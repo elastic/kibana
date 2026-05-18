@@ -40,7 +40,7 @@ function mergeStackTracesByDepth(response) {
       };
     } else {
       eventsByFrameDepth[numFrames] = {
-        event: event,
+        event,
         count: numEvents,
       };
     }
@@ -93,7 +93,7 @@ function purgeUnusedFramesAndExecutables(response) {
     stack_trace_events: response.stack_trace_events,
     stack_traces: response.stack_traces,
     stack_frames: stackFrames,
-    executables: executables,
+    executables,
     sampling_rate: response.sampling_rate,
   };
 }

@@ -212,24 +212,24 @@ function parseConfig(log) {
   var resolvedDestApiKey = destApiKey || destEsConfig.apiKey || undefined;
 
   var config = {
-    sourceHost: sourceHost,
-    sourceApiKey: sourceApiKey,
+    sourceHost,
+    sourceApiKey,
     destHost: destHost.replace(/\/$/, ''),
     destApiKey: resolvedDestApiKey,
     destUsername: destEsConfig.username || 'elastic',
     destPassword: destEsConfig.password || 'changeme',
-    indexPattern: indexPattern,
+    indexPattern,
     size: parseInt(size, 10),
     intervalSeconds: parseFloat(interval),
-    sampleMode: sampleMode,
+    sampleMode,
     randomSeed: randomSeed !== undefined ? parseInt(randomSeed, 10) : null,
-    targetIndex: targetIndex,
+    targetIndex,
     batchSize: parseInt(batchSize, 10),
     noVerifyCerts: opts['no-verify-certs'] || false,
     verbose: opts.verbose || false,
-    from: from,
-    to: to,
-    translateTimestamps: translateTimestamps,
+    from,
+    to,
+    translateTimestamps,
   };
 
   if (!config.sourceHost || !config.sourceApiKey) {
@@ -275,7 +275,7 @@ function parseConfig(log) {
 function createSourceClient(config) {
   var node = config.sourceHost.replace(/\/$/, '');
   var client = new Client({
-    node: node,
+    node,
     auth: { apiKey: config.sourceApiKey },
     requestTimeout: requestTimeoutMs,
     tls: config.noVerifyCerts ? { rejectUnauthorized: false } : undefined,
@@ -289,8 +289,8 @@ function createDestClient(config) {
     ? { apiKey: config.destApiKey }
     : { username: config.destUsername, password: config.destPassword };
   var client = new Client({
-    node: node,
-    auth: auth,
+    node,
+    auth,
     requestTimeout: requestTimeoutMs,
     tls: config.noVerifyCerts ? { rejectUnauthorized: false } : undefined,
   });
@@ -332,9 +332,9 @@ function search(sourceClient, config, cycleNumber, log, startTime, endTime) {
   var body;
   if (config.sampleMode === 'recent') {
     body = {
-      query: query,
+      query,
       sort: [{ '@timestamp': { order: 'desc' } }],
-      size: size,
+      size,
     };
   } else {
     var seed =
@@ -342,17 +342,17 @@ function search(sourceClient, config, cycleNumber, log, startTime, endTime) {
     body = {
       query: {
         function_score: {
-          query: query,
-          functions: [{ random_score: { seed: seed } }],
+          query,
+          functions: [{ random_score: { seed } }],
           boost_mode: 'replace',
         },
       },
-      size: size,
+      size,
     };
   }
 
   return sourceClient
-    .search({ index: indexPattern, body: body })
+    .search({ index: indexPattern, body })
     .then(function (res) {
       var hits =
         (res.body && res.body.hits && res.body.hits.hits) || (res.hits && res.hits.hits) || [];
@@ -453,14 +453,14 @@ function backingIndexToStreamName(index) {
 
 function ensureDataStreamExists(destClient, name, log) {
   return destClient.indices
-    .getDataStream({ name: name })
+    .getDataStream({ name })
     .then(function () {
       return true;
     })
     .catch(function (err) {
       if (err.meta && err.meta.statusCode === 404) {
         return destClient.indices
-          .createDataStream({ name: name })
+          .createDataStream({ name })
           .then(function () {
             log('Created data stream: ' + name);
             return true;
@@ -495,7 +495,7 @@ function uploadDocumentsToStream(destClient, docs, targetStreamOrIndex, batchSiz
 
         return destClient
           .bulk({
-            operations: operations,
+            operations,
             refresh: false,
           })
           .then(function (response) {
@@ -761,12 +761,12 @@ if (require.main === module) {
 }
 
 module.exports = {
-  parseConfig: parseConfig,
-  createSourceClient: createSourceClient,
-  createDestClient: createDestClient,
-  search: search,
-  transform: transform,
-  backingIndexToStreamName: backingIndexToStreamName,
-  uploadDocumentsToStream: uploadDocumentsToStream,
-  runSyncCycle: runSyncCycle,
+  parseConfig,
+  createSourceClient,
+  createDestClient,
+  search,
+  transform,
+  backingIndexToStreamName,
+  uploadDocumentsToStream,
+  runSyncCycle,
 };

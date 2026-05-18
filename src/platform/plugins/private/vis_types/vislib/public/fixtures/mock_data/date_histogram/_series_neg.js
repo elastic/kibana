@@ -159,10 +159,10 @@ export default {
     1411762170000, 1411762200000, 1411762230000, 1411762260000, 1411762290000, 1411762320000,
     1411762350000,
   ],
-  xAxisFormatter: function (thing) {
+  xAxisFormatter (thing) {
     return moment(thing);
   },
-  tooltipFormatter: function (d) {
+  tooltipFormatter (d) {
     return d;
   },
 };

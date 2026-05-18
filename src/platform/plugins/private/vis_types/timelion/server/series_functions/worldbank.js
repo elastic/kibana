@@ -100,7 +100,7 @@ export default new Datasource('worldbank', {
           type: 'seriesList',
           list: [
             {
-              data: data,
+              data,
               type: 'series',
               label: description,
               _meta: {

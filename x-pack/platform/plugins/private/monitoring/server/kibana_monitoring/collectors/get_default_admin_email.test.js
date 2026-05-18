@@ -13,7 +13,7 @@ describe('getSettingsCollector / getDefaultAdminEmail', () => {
       cluster_alerts: {
         email_notifications: {
           email_address: adminEmail,
-          enabled: enabled,
+          enabled,
         },
       },
       kibana: {

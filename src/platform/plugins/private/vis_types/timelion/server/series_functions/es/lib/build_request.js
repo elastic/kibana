@@ -72,9 +72,9 @@ export default function buildRequest(config, tlConfig, scriptFields, runtimeFiel
     index: config.index,
     ...(includeFrozen ? { ignore_throttled: false } : {}),
     query: {
-      bool: bool,
+      bool,
     },
-    aggs: aggs,
+    aggs,
     size: 0,
     runtime_mappings: runtimeFields,
   };

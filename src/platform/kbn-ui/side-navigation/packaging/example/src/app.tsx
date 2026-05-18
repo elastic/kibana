@@ -129,7 +129,7 @@ const App = () => {
         />
 
         <main
-          role="main"
+          
           style={{
             flex: 1,
             padding: '24px',

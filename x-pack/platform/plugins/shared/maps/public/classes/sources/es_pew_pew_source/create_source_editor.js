@@ -89,7 +89,7 @@ export class CreateSourceEditor extends Component {
     const geoFields = getFieldsWithGeoTileAgg(indexPattern.fields);
     this.setState({
       isLoadingIndexPattern: false,
-      indexPattern: indexPattern,
+      indexPattern,
       indexPatternHasMultipleGeoFields: geoFields.length >= 2,
     });
   }, 300);

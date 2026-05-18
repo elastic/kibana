@@ -101,10 +101,10 @@ export const rowsSeriesWithHoles = {
         },
       ],
       hits: 533,
-      xAxisFormatter: function (thing) {
+      xAxisFormatter (thing) {
         return moment(thing);
       },
-      tooltipFormatter: function (d) {
+      tooltipFormatter (d) {
         return d;
       },
     },

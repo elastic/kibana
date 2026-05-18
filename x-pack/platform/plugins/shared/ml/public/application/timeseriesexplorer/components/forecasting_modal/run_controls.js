@@ -68,7 +68,7 @@ function getRunInputDisabledState(job, isForecastRequested, mlNodesAvailable, jo
         'xpack.ml.timeSeriesExplorer.runControls.forecastsCanNotBeRunOnJobsTooltip',
         {
           defaultMessage: 'Forecasts cannot be run on {jobState} jobs',
-          values: { jobState: jobState },
+          values: { jobState },
         }
       ),
     };

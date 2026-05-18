@@ -68,7 +68,7 @@ export const command = {
         });
       } else {
         await spawnStreaming('yarn', ['run', scriptName, ...scriptArgs], {
-          cwd: cwd,
+          cwd,
           logPrefix: '    ',
         });
       }

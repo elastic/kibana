@@ -1369,7 +1369,7 @@ export const getSelectionStateFull = (
       down,
       uid,
       metaHeld,
-      boxHighlightedShapes: boxHighlightedShapes,
+      boxHighlightedShapes,
     };
   }
   const selectFunction = config.singleSelect || !multiselect ? singleSelect : multiSelect;

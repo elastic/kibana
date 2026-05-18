@@ -98,14 +98,14 @@ function normalizeSuite(entry, repoRoot) {
   var suiteRoot = deriveSuiteRoot(entry.configPath);
 
   return {
-    id: id,
-    name: name,
+    id,
+    name,
     configPath: entry.configPath,
-    absoluteConfigPath: absoluteConfigPath,
-    suiteRoot: suiteRoot,
+    absoluteConfigPath,
+    suiteRoot,
     relativeSuiteRoot: suiteRoot,
-    tags: tags,
-    ciLabels: ciLabels,
+    tags,
+    ciLabels,
     description: entry.description,
     source: 'metadata',
   };

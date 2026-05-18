@@ -93,8 +93,8 @@ function init(plot) {
 }
 
 export const text = {
-  init: init,
-  options: options,
+  init,
+  options,
   name: 'text',
   version: '0.1.0',
 };

@@ -112,7 +112,7 @@ function convertSeriesParams(visState) {
     boundsMargin: defaultYExtents ? visState.params.boundsMargin : 0,
     min: isUserDefinedYAxis ? visState.params.yAxis.min : undefined,
     max: isUserDefinedYAxis ? visState.params.yAxis.max : undefined,
-    mode: mode,
+    mode,
   };
 
   // update series options
@@ -123,7 +123,7 @@ function convertSeriesParams(visState) {
       show: true,
       type: visState.params.type || 'line',
       mode: stacked ? 'stacked' : 'normal',
-      interpolate: interpolate,
+      interpolate,
       drawLinesBetweenPoints: visState.params.drawLinesBetweenPoints,
       showCircles: visState.params.showCircles,
       radiusRatio: visState.params.radiusRatio,

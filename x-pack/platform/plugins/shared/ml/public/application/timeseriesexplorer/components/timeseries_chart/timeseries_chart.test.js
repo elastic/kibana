@@ -13,13 +13,13 @@ import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { TimeseriesChart } from './timeseries_chart';
 
 jest.mock('../../../util/time_buckets_service', () => ({
-  timeBucketsServiceFactory: function () {
+  timeBucketsServiceFactory () {
     return { getTimeBuckets: jest.fn() };
   },
 }));
 
 jest.mock('../../../util/time_series_explorer_service', () => ({
-  timeSeriesExplorerServiceFactory: function () {
+  timeSeriesExplorerServiceFactory () {
     return {
       getAutoZoomDuration: jest.fn(),
       calculateAggregationInterval: jest.fn(),

@@ -27,11 +27,11 @@ export function collectBranch(leaf) {
 
     // Add the row to the tooltipScope.rows
     memo.unshift({
-      depth: depth,
+      depth,
       field: getFieldName(item),
       bucket: item.name,
       metric: item.size,
-      item: item,
+      item,
     });
 
     // If the item has a parent and it's also a child then continue walking

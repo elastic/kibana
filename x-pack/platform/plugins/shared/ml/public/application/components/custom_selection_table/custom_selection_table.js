@@ -66,7 +66,7 @@ export function CustomSelectionTable({
   const [sortedColumn, setSortedColumn] = useState('');
   const [pager, setPager] = useState();
   const [pagerSettings, setPagerSettings] = useState({
-    itemsPerPage: itemsPerPage,
+    itemsPerPage,
     firstItemIndex: 0,
     lastItemIndex: 1,
   });
@@ -75,7 +75,7 @@ export function CustomSelectionTable({
 
   useEffect(() => {
     setCurrentItems(items);
-    handleQueryChange({ query: query });
+    handleQueryChange({ query });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [items]);
 
@@ -88,7 +88,7 @@ export function CustomSelectionTable({
   useEffect(() => {
     const tablePager = new Pager(currentItems.length, itemsPerPage, currentPage);
     setPagerSettings({
-      itemsPerPage: itemsPerPage,
+      itemsPerPage,
       firstItemIndex: tablePager.getFirstItemIndex(),
       lastItemIndex: tablePager.getLastItemIndex(),
     });

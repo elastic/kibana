@@ -88,11 +88,11 @@ peg$SyntaxError.prototype.format = function (sources) {
 
 peg$SyntaxError.buildMessage = function (expected, found) {
   const DESCRIBE_EXPECTATION_FNS = {
-    literal: function (expectation) {
+    literal (expectation) {
       return '"' + literalEscape(expectation.text) + '"';
     },
 
-    class: function (expectation) {
+    class (expectation) {
       const escapedParts = expectation.parts.map(function (part) {
         return Array.isArray(part)
           ? classEscape(part[0]) + '-' + classEscape(part[1])
@@ -102,15 +102,15 @@ peg$SyntaxError.buildMessage = function (expected, found) {
       return '[' + (expectation.inverted ? '^' : '') + escapedParts.join('') + ']';
     },
 
-    any: function () {
+    any () {
       return 'any character';
     },
 
-    end: function () {
+    end () {
       return 'end of input';
     },
 
-    other: function (expectation) {
+    other (expectation) {
       return expectation.description;
     },
   };
@@ -286,11 +286,11 @@ function peg$parse(input, options) {
   }
 
   function peg$literalExpectation(text, ignoreCase) {
-    return { type: 'literal', text: text, ignoreCase: ignoreCase };
+    return { type: 'literal', text, ignoreCase };
   }
 
   function peg$classExpectation(parts, inverted, ignoreCase) {
-    return { type: 'class', parts: parts, inverted: inverted, ignoreCase: ignoreCase };
+    return { type: 'class', parts, inverted, ignoreCase };
   }
 
   function peg$endExpectation() {
@@ -298,7 +298,7 @@ function peg$parse(input, options) {
   }
 
   function peg$otherExpectation(description) {
-    return { type: 'other', description: description };
+    return { type: 'other', description };
   }
 
   function peg$computePosDetails(pos) {

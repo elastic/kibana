@@ -14,16 +14,16 @@ export default function tlConfigFn(setup) {
   let targetSeries;
 
   let tlConfig = {
-    getTargetSeries: function () {
+    getTargetSeries () {
       return _.map(targetSeries, function (bucket) {
         // eslint-disable-line no-use-before-define
         return [bucket, null];
       });
     },
-    setTargetSeries: function () {
+    setTargetSeries () {
       targetSeries = buildTarget(this);
     },
-    writeTargetSeries: function (series) {
+    writeTargetSeries (series) {
       targetSeries = _.map(series, function (p) {
         return p[0];
       });

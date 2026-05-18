@@ -196,10 +196,10 @@ describe('Tooltip Positioning', function () {
       const directions = _.drop(arguments, 2);
       const event = makeEvent(xPercent, yPercent);
       const placement = positionTooltip({
-        $window: $window,
-        $chart: $chart,
-        $sizer: $sizer,
-        event: event,
+        $window,
+        $chart,
+        $sizer,
+        event,
         $el: $tooltip,
         prev: _.isObject(directions[0]) ? directions.shift() : null,
       });

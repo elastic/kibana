@@ -34,7 +34,7 @@ describe('render', () => {
     const result = fn(renderTable, {
       as: 'debug',
       css: '".canvasRenderEl { background-color: red; }"',
-      containerStyle: containerStyle,
+      containerStyle,
     });
 
     expect(result).toHaveProperty('type', 'render');
@@ -70,7 +70,7 @@ describe('render', () => {
 
     describe('containerStyle', () => {
       it('sets the containerStyler', () => {
-        const result = fn(renderTable, { containerStyle: containerStyle });
+        const result = fn(renderTable, { containerStyle });
 
         expect(result).toHaveProperty('containerStyle', containerStyle);
       });

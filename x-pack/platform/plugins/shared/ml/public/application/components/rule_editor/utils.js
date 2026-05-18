@@ -146,7 +146,7 @@ export function updateJobRules(mlJobService, job, detectorIndex, rules, mlApi) {
   }
   return new Promise((resolve, reject) => {
     mlApi
-      .updateJob({ jobId: jobId, job: jobData })
+      .updateJob({ jobId, job: jobData })
       .then(() => {
         mlJobService
           .refreshJob(jobId)

@@ -162,7 +162,7 @@ export class PointSeries extends Chart {
       }
 
       return {
-        wholeBucket: wholeBucket,
+        wholeBucket,
         touchdown: min > xLeft || max < xRight,
       };
     }

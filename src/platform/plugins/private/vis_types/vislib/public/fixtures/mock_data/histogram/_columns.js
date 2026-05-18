@@ -110,7 +110,7 @@ export default {
           ],
         },
       ],
-      xAxisFormatter: function (val) {
+      xAxisFormatter (val) {
         if (_.isObject(val)) {
           return JSON.stringify(val);
         } else if (val == null) {
@@ -119,7 +119,7 @@ export default {
           return '' + val;
         }
       },
-      tooltipFormatter: function (d) {
+      tooltipFormatter (d) {
         return d;
       },
     },
@@ -222,7 +222,7 @@ export default {
           ],
         },
       ],
-      xAxisFormatter: function (val) {
+      xAxisFormatter (val) {
         if (_.isObject(val)) {
           return JSON.stringify(val);
         } else if (val == null) {
@@ -231,7 +231,7 @@ export default {
           return '' + val;
         }
       },
-      tooltipFormatter: function (d) {
+      tooltipFormatter (d) {
         return d;
       },
     },
@@ -334,7 +334,7 @@ export default {
           ],
         },
       ],
-      xAxisFormatter: function (val) {
+      xAxisFormatter (val) {
         if (_.isObject(val)) {
           return JSON.stringify(val);
         } else if (val == null) {
@@ -343,7 +343,7 @@ export default {
           return '' + val;
         }
       },
-      tooltipFormatter: function (d) {
+      tooltipFormatter (d) {
         return d;
       },
     },

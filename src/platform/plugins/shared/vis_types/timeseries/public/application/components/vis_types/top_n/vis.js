@@ -82,7 +82,7 @@ function TopNVisualization(props) {
   const style = { backgroundColor: panelBackgroundColor };
 
   const params = {
-    series: series,
+    series,
     reversed: isBackgroundInverted(panelBackgroundColor),
   };
 

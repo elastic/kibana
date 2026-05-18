@@ -126,7 +126,7 @@ setAndSetWithFunctions.forEach(([set, testName]) => {
     const funcTestCases = [
       [function () {}, 'prototype'],
       [() => {}, 'prototype'],
-      [{ fn: function () {} }, 'fn.prototype'],
+      [{ fn () {} }, 'fn.prototype'],
       [{ fn: () => {} }, 'fn.prototype'],
     ];
     funcTestCases.forEach(([obj, path]) => {

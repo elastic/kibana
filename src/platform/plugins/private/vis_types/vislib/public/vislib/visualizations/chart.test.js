@@ -82,10 +82,10 @@ describe('Vislib _chart Test Suite', function () {
         ],
       },
     ],
-    tooltipFormatter: function (datapoint) {
+    tooltipFormatter (datapoint) {
       return datapoint;
     },
-    xAxisFormatter: function (thing) {
+    xAxisFormatter (thing) {
       return thing;
     },
     xAxisLabel: 'Date Histogram',

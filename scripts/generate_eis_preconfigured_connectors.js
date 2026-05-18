@@ -144,10 +144,10 @@ function main() {
         }
         seen[id] = true;
         entries.push({
-          endpoint: endpoint,
-          id: id,
+          endpoint,
+          id,
           name: toDisplayName(modelId),
-          modelId: modelId,
+          modelId,
         });
       }
       var lines = [

@@ -75,7 +75,7 @@ jest.mock('../../../../../common/components/query_bar', () => {
             // Language selector is an expandable menu in the real component.
             // Here we set some role distinguished from `textbox` to match the real
             // behavior when there is a single role="textbox" input in the QueryBar
-            role="searchbox"
+            
             type="text"
             value={filterQuery.language}
             onChange={handleLanguageChange}

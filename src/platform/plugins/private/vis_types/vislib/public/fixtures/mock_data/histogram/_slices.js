@@ -293,7 +293,7 @@ export default {
     15000, 16000, 17000, 18000, 19000, 20000,
   ],
   hits: 3967374,
-  tooltipFormatter: function (event) {
+  tooltipFormatter (event) {
     return event.point;
   },
 };

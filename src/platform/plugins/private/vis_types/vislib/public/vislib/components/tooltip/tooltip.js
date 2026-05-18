@@ -84,7 +84,7 @@ Tooltip.prototype.show = function () {
   const placement = positionTooltip(
     {
       $window: $(window),
-      $chart: $chart,
+      $chart,
       $el: $tooltip,
       $sizer: this.$getSizer(),
       event: d3.event,

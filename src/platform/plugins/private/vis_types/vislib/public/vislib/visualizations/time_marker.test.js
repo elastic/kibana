@@ -25,9 +25,9 @@ describe('Vislib Time Marker Test Suite', function () {
     return {
       time: dateMathString,
       class: customClass,
-      color: color,
-      opacity: opacity,
-      width: width,
+      color,
+      opacity,
+      width,
     };
   });
   const getExtent = function (dataArray, func) {

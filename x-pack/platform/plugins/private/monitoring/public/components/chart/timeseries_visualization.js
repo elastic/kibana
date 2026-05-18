@@ -142,7 +142,7 @@ export class TimeseriesVisualization extends React.Component {
     const currentKeys = keys(this.state.values);
     const valueKeys = keys(values);
     const diff = difference(valueKeys, currentKeys);
-    const nextState = { values: values };
+    const nextState = { values };
 
     if (diff.length && !this.state.ignoreVisibilityUpdates) {
       nextState.seriesToShow = valueKeys;

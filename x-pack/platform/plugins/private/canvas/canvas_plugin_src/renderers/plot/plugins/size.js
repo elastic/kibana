@@ -122,8 +122,8 @@ function init(plot) {
 }
 
 export const size = {
-  init: init,
-  options: options,
+  init,
+  options,
   name: pluginName,
   version: pluginVersion,
 };

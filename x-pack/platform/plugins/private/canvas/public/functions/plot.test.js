@@ -97,7 +97,7 @@ describe('plot', () => {
 
     describe('defaultStyle', () => {
       it('sets the default seriesStyle for the entire plot', () => {
-        const results = fn(testPlot, { defaultStyle: defaultStyle });
+        const results = fn(testPlot, { defaultStyle });
         const defaultSeriesConfig = results.value.options.series;
 
         expect(defaultSeriesConfig.lines).toHaveProperty('lineWidth', defaultStyle.lines);

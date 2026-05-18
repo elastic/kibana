@@ -35,9 +35,9 @@ function main() {
 
       printSummary({
         inputPath: args.inputPath,
-        parsedIssues: parsedIssues,
-        filteredIssues: filteredIssues,
-        groupedIssues: groupedIssues,
+        parsedIssues,
+        filteredIssues,
+        groupedIssues,
         json: args.json,
       });
     })

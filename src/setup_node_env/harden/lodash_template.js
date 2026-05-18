@@ -11,7 +11,7 @@ var isIterateeCall = require('lodash/_isIterateeCall');
 
 function createProxy(template) {
   return new Proxy(template, {
-    apply: function (target, thisArg, args) {
+    apply (target, thisArg, args) {
       if (args.length === 1 || isIterateeCall(args)) {
         return target.apply(thisArg, [args[0], { sourceURL: '' }]);
       }
@@ -29,7 +29,7 @@ function createFpProxy(template) {
   // we have to do the require here, so that we get the patched version
   var _ = require('lodash');
   return new Proxy(template, {
-    apply: function (target, thisArg, args) {
+    apply (target, thisArg, args) {
       // per https://github.com/lodash/lodash/wiki/FP-Guide
       // > Iteratee arguments are capped to avoid gotchas with variadic iteratees.
       // this means that we can't specify the options in the second argument to fp.template because it's ignored.

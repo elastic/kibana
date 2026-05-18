@@ -113,7 +113,7 @@ function getBundleSummary(bundlesDir) {
         })
         .map(function (f) {
           var size = Fs.statSync(Path.join(chunksDir, f)).size;
-          return { name: f, size: size };
+          return { name: f, size };
         })
         .sort(function (a, b) {
           return b.size - a.size;
@@ -160,19 +160,19 @@ async function main() {
 
   try {
     var result = await runBuild({
-      repoRoot: repoRoot,
-      outputRoot: outputRoot,
-      dist: dist,
+      repoRoot,
+      outputRoot,
+      dist,
       watch: false,
       cache: !args['no-cache'],
       examples: args.examples,
       testPlugins: args['test-plugins'],
       themeTags: themes,
-      log: log,
+      log,
       profile: true,
       profileStatsOnly: statsOnly,
-      profileFocus: profileFocus,
-      limitsPath: limitsPath,
+      profileFocus,
+      limitsPath,
     });
 
     var duration = ((Date.now() - startTime) / 1000).toFixed(2);

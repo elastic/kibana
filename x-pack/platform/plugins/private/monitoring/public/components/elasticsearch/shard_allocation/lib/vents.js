@@ -10,16 +10,16 @@ import { each, isArray } from 'lodash';
 export const _vents = {};
 export const vents = {
   vents: _vents,
-  on: function (id, cb) {
+  on (id, cb) {
     if (!isArray(_vents[id])) {
       _vents[id] = [];
     }
     _vents[id].push(cb);
   },
-  clear: function (id) {
+  clear (id) {
     delete _vents[id];
   },
-  trigger: function () {
+  trigger () {
     const args = Array.prototype.slice.call(arguments);
     const id = args.shift();
     if (_vents[id]) {

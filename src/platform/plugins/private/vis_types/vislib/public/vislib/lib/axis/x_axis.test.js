@@ -79,7 +79,7 @@ describe('Vislib xAxis Class Test Suite', function () {
         ],
       },
     ],
-    xAxisFormatter: function (thing) {
+    xAxisFormatter (thing) {
       return new Date(thing);
     },
     xAxisLabel: 'Date Histogram',

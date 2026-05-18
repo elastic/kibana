@@ -199,7 +199,7 @@ setFunctions.forEach(([testPermutations, set, testName]) => {
 
   test(`${testName}: Function manipulation, object containing function`, (t) => {
     const funcTestCases = [
-      [{ fn: function () {} }, 'fn.prototype'],
+      [{ fn () {} }, 'fn.prototype'],
       [{ fn: () => {} }, 'fn.prototype'],
     ];
     const expected = /Illegal access of function prototype/;

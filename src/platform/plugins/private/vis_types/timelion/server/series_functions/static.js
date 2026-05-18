@@ -60,7 +60,7 @@ export default new Datasource('static', {
       type: 'seriesList',
       list: [
         {
-          data: data,
+          data,
           type: 'series',
           label: args.byName.label == null ? String(args.byName.value) : args.byName.label,
           fit: args.byName.fit || 'average',

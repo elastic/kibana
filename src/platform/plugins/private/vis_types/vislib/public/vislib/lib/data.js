@@ -297,7 +297,7 @@ export class Data {
       names.push({
         label: obj.name,
         values: [obj.rawData],
-        index: index,
+        index,
       });
 
       if (obj.children) {

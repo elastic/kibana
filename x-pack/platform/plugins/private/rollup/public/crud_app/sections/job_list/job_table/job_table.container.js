@@ -54,7 +54,7 @@ const mapDispatchToProps = (dispatch) => {
       dispatch(sortChanged({ sortField, isSortAscending }));
     },
     openDetailPanel: (jobId) => {
-      dispatch(openDetailPanel({ jobId: jobId }));
+      dispatch(openDetailPanel({ jobId }));
     },
   };
 };

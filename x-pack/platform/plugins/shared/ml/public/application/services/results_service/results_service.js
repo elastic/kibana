@@ -317,7 +317,7 @@ export function resultsServiceProvider(mlApi) {
         mlApi
           .overallBuckets({
             jobId: jobIds,
-            topN: topN,
+            topN,
             bucketSpan: interval,
             start: earliestMs,
             end: latestMs,

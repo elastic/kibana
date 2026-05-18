@@ -67,7 +67,7 @@ export default function ({ getService, getPageObjects }) {
               attachments: {
                 'test_report.pdf': {
                   reporting: {
-                    url: url,
+                    url,
                     auth: {
                       basic: {
                         username: servers.elasticsearch.username,

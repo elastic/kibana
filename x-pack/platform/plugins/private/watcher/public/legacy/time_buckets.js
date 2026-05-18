@@ -325,18 +325,18 @@ TimeBuckets.__cached__ = function (self) {
 
   const resources = {
     bounds: {
-      setup: function () {
+      setup () {
         return [self._lb, self._ub];
       },
-      changes: function (prev) {
+      changes (prev) {
         return !sameMoment(prev[0], self._lb) || !sameMoment(prev[1], self._ub);
       },
     },
     interval: {
-      setup: function () {
+      setup () {
         return self._i;
       },
-      changes: function (prev) {
+      changes (prev) {
         return !sameDuration(prev, this._i);
       },
     },
