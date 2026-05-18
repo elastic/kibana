@@ -13,7 +13,8 @@ import '../../../..';
 
 import type { HotkeyDefinition, HotkeyHandle } from '@kbn/core-hotkeys-browser';
 import { monaco } from '@kbn/monaco';
-import { installDiscoveryAwareAddAction } from './install_discovery_aware_add_action';
+import { mapHotkeyChordToMonacoKeybinding } from '../utils';
+import { installDiscoveryAwareAddAction } from './monkey_patch_add_action';
 
 const discoveryHandleMock = (): HotkeyHandle => ({
   id: 'mock-discovery-handle',
@@ -138,5 +139,37 @@ describe('installDiscoveryAwareAddAction', () => {
 
     teardown();
     expect(editor.addAction).toBe(originalAddAction);
+  });
+
+  it('reinstalls Monaco action when allowUserRebinding and onEffectiveBindingChange fires', () => {
+    let onEffectiveBindingChange: HotkeyDefinition['onEffectiveBindingChange'];
+    const registerForDiscovery = jest.fn((def: HotkeyDefinition): HotkeyHandle => {
+      onEffectiveBindingChange = def.onEffectiveBindingChange;
+      return discoveryHandleMock();
+    });
+    const { editor, originalAddAction } = createEditorStub();
+
+    installDiscoveryAwareAddAction(editor, { registerForDiscovery });
+
+    editor.addAction({
+      id: 'rebind-action',
+      label: 'Rebind',
+      keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyL],
+      run: jest.fn(),
+      hotkeysDiscovery: {
+        id: 'feat:rebind',
+        label: 'Rebind discovery',
+        allowUserRebinding: true,
+      },
+    });
+
+    expect(typeof onEffectiveBindingChange).toBe('function');
+    expect(originalAddAction).toHaveBeenCalledTimes(1);
+
+    onEffectiveBindingChange!('Mod+Shift+P');
+
+    expect(originalAddAction).toHaveBeenCalledTimes(2);
+    const secondDescriptor = originalAddAction.mock.calls[1][0] as monaco.editor.IActionDescriptor;
+    expect(secondDescriptor.keybindings?.[0]).toBe(mapHotkeyChordToMonacoKeybinding('Mod+Shift+P'));
   });
 });

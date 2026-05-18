@@ -14,7 +14,7 @@ export { useCopy } from './hooks/use_copy';
 export { usePlaceholder } from './hooks/use_placeholder';
 export { useFitToContent } from './hooks/use_fit_content';
 export {
-  installDiscoveryAwareAddCommand,
-  installDiscoveryAwareAddAction,
+  monkeyPatchEditorAddCommandForHotkeysDiscovery,
+  monkeyPatchEditorAddActionForHotkeysDiscovery,
   type MonacoHotkeyDiscoveryMeta,
-} from './lib/side_effects';
+} from './lib/hotkeys_discovery';

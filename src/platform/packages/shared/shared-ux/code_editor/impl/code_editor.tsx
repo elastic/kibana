@@ -39,8 +39,8 @@ import {
   usePlaceholder,
   useFitToContent,
   ReBroadcastMouseDownEvents,
-  installDiscoveryAwareAddCommand,
-  installDiscoveryAwareAddAction,
+  monkeyPatchEditorAddCommandForHotkeysDiscovery,
+  monkeyPatchEditorAddActionForHotkeysDiscovery,
 } from './mods';
 import { styles } from './editor.styles';
 
@@ -513,8 +513,14 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
         throw new Error('react-monaco-editor is using a different version of monaco');
       }
 
-      discoveryAddCommandDisposeRef.current = installDiscoveryAwareAddCommand(editor, hotkeys);
-      discoveryAddActionDisposeRef.current = installDiscoveryAwareAddAction(editor, hotkeys);
+      discoveryAddCommandDisposeRef.current = monkeyPatchEditorAddCommandForHotkeysDiscovery(
+        editor,
+        hotkeys
+      );
+      discoveryAddActionDisposeRef.current = monkeyPatchEditorAddActionForHotkeysDiscovery(
+        editor,
+        hotkeys
+      );
 
       remeasureFonts();
 

@@ -12,7 +12,7 @@
 import type { HotkeyDefinition, HotkeysStart } from '@kbn/core-hotkeys-browser';
 import { monaco } from '@kbn/monaco';
 import type { MonacoHotkeyDiscoveryMeta } from '../types';
-import { mapMonacoKeybindingToHotkeyChord } from '../utils';
+import { mapMonacoKeybindingToHotkeyChord, createHandleSet } from '../utils';
 
 /**
  * Wraps `editor.addAction`, so when a descriptor includes optional {@link MonacoHotkeyDiscoveryMeta}
@@ -21,7 +21,7 @@ import { mapMonacoKeybindingToHotkeyChord } from '../utils';
  *
  * The returned {@link monaco.IDisposable} unregisters discovery rows then disposes the Monaco action.
  */
-export const installDiscoveryAwareAddAction = (
+export const monkeyPatchEditorAddActionForHotkeysDiscovery = (
   editor: monaco.editor.IStandaloneCodeEditor,
   hotkeys?: Pick<HotkeysStart, 'registerForDiscovery'>
 ) => {
@@ -40,7 +40,7 @@ export const installDiscoveryAwareAddAction = (
 
     const inner = original(monacoDescriptor);
 
-    const discoveryHandles: Array<{ unregister: () => void }> = [];
+    const discoveryHandles = createHandleSet();
 
     const bindings = descriptor.keybindings;
     if (hotkeysDiscovery && bindings?.length) {
@@ -61,16 +61,16 @@ export const installDiscoveryAwareAddAction = (
             group: hotkeysDiscovery.group,
             enabled: hotkeysDiscovery.enabled,
           };
-          discoveryHandles.push(hotkeys.registerForDiscovery(def));
+          discoveryHandles.add(hotkeys.registerForDiscovery(def));
         } catch {
-          // If discovery registration fails, still register the Monaco action (best-effort discovery).
+          // If discovery registration fails, the Monaco action would still have been added (best-effort discovery).
         }
       });
     }
 
     return {
       dispose: () => {
-        discoveryHandles.splice(0).forEach((h) => h.unregister());
+        discoveryHandles.drain();
         inner.dispose();
       },
     };
