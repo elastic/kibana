@@ -30,6 +30,8 @@ import { i18n } from '@kbn/i18n';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
+import { MANAGEMENT_APP_ID } from '@kbn/deeplinks-management/constants';
+
 import { DEV_TOOLS_CONSOLE_PATH, CONNECTOR_DETAIL_TAB_PATH } from '../../routes';
 
 import { ConnectorDetailTabId } from '../../connector_detail/connector_detail';
@@ -188,15 +190,15 @@ export const FinishUpStep: React.FC<FinishUpStepProps> = ({ title }) => {
                             fill
                             onClick={() => {
                               if (connector) {
-                                application?.navigateToUrl(
-                                  generateEncodedPath(
-                                    `/app/management/data/content_connectors${CONNECTOR_DETAIL_TAB_PATH}`,
+                                application?.navigateToApp(MANAGEMENT_APP_ID, {
+                                  path: `/data/content_connectors${generateEncodedPath(
+                                    CONNECTOR_DETAIL_TAB_PATH,
                                     {
                                       connectorId: connector.id,
                                       tabId: ConnectorDetailTabId.CONFIGURATION,
                                     }
-                                  )
-                                );
+                                  )}`,
+                                });
                               }
                             }}
                           >
