@@ -88,7 +88,7 @@ pageLoadAssetSize:
   home: 13091
   imageEmbeddable: 6189
   inbox: 5344
-  indexLifecycleManagement: 35090
+  indexLifecycleManagement: 42659
   indexManagement: 39694
   inference: 10368
   infra: 56302
@@ -170,7 +170,7 @@ pageLoadAssetSize:
   serverless: 7412
   serverlessObservability: 19104
   serverlessSearch: 26287
-  serverlessVectordb: 4389
+  serverlessVectordb: 7618
   serverlessWorkplaceAI: 4855
   sessionView: 47912
   share: 64066
