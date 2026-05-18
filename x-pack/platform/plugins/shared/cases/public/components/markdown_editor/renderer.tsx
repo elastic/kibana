@@ -30,14 +30,13 @@ const withDisabledLinks = (disableLinks?: boolean): React.FC<EuiLinkAnchorProps>
 
 const MarkdownRendererComponent: React.FC<Props> = ({ children, disableLinks, textSize }) => {
   const { processingPlugins, parsingPlugins } = usePlugins();
-
-  const linkComponent = useMemo(() => withDisabledLinks(disableLinks), [disableLinks]);
   // Deep clone of the processing plugins to prevent affecting the markdown editor.
   const processingPluginList = cloneDeep(processingPlugins);
-  const rehypeConfig = processingPluginList?.[1]?.[1];
-  if (rehypeConfig?.components) {
-    rehypeConfig.components.a = linkComponent;
-  }
+  // This line of code is TS-compatible and it will break if [1][1] change in the future.
+  processingPluginList[1][1].components.a = useMemo(
+    () => withDisabledLinks(disableLinks),
+    [disableLinks]
+  );
 
   return (
     <EuiMarkdownFormat

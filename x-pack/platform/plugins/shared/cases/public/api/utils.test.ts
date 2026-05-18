@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { COMMENT_ATTACHMENT_TYPE } from '../../common/constants/attachments';
+import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
+import { AttachmentType } from '../../common/types/domain';
 import {
   allCases,
   allCasesSnake,
@@ -113,6 +116,64 @@ describe('utils', () => {
       expect(convertAttachmentToCamelCase(persistableStateAttachmentSnake)).toEqual(
         persistableStateAttachment
       );
+    });
+
+    describe('comment content sanitization', () => {
+      it('escapes bare ampersands in legacy user comment payloads', () => {
+        const legacyUserComment = {
+          type: AttachmentType.user,
+          owner: SECURITY_SOLUTION_OWNER,
+          comment: 'See ?index=foo&timestamp=bar',
+        };
+
+        expect(convertAttachmentToCamelCase(legacyUserComment)).toEqual({
+          type: AttachmentType.user,
+          owner: SECURITY_SOLUTION_OWNER,
+          comment: 'See ?index=foo&amp;timestamp=bar',
+        });
+      });
+
+      it('escapes bare ampersands in unified comment data.content', () => {
+        const unifiedComment = {
+          type: COMMENT_ATTACHMENT_TYPE,
+          owner: SECURITY_SOLUTION_OWNER,
+          data: { content: 'Link with &special=value' },
+        };
+
+        expect(convertAttachmentToCamelCase(unifiedComment)).toEqual({
+          type: COMMENT_ATTACHMENT_TYPE,
+          owner: SECURITY_SOLUTION_OWNER,
+          data: { content: 'Link with &amp;special=value' },
+        });
+      });
+
+      it('does not modify non-comment attachments such as alerts', () => {
+        const alertAttachment = {
+          type: AttachmentType.alert,
+          alertId: 'alert-id',
+          index: 'alert-index',
+          rule: { id: 'rule-id', name: 'rule & alert name' },
+          owner: SECURITY_SOLUTION_OWNER,
+        };
+
+        expect(convertAttachmentToCamelCase(alertAttachment)).toEqual({
+          type: AttachmentType.alert,
+          alertId: 'alert-id',
+          index: 'alert-index',
+          rule: { id: 'rule-id', name: 'rule & alert name' },
+          owner: SECURITY_SOLUTION_OWNER,
+        });
+      });
+
+      it('does not alter legacy comments that contain no ampersands', () => {
+        const legacyUserComment = {
+          type: AttachmentType.user,
+          owner: SECURITY_SOLUTION_OWNER,
+          comment: 'plain text comment',
+        };
+
+        expect(convertAttachmentToCamelCase(legacyUserComment)).toEqual(legacyUserComment);
+      });
     });
   });
 
