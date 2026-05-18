@@ -10,8 +10,12 @@ import type { ScoutLogger } from '@kbn/scout';
 import { measurePerformanceAsync } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { DISPATCHER_TASK_ID } from '../../../../server/lib/dispatcher/constants';
+import { ACTION_POLICY_EVENT_PROVIDER } from '../../../../server/lib/dispatcher/steps/constants';
+import type { ActionPolicyEventAction } from '../../../../server/lib/dispatcher/steps/constants';
 import { POLL_INTERVAL_MS, POLL_TIMEOUT_MS } from '../constants';
 import { countTaskRuns } from './task_event_log';
+
+const EVENT_LOG_INDEX = '.kibana-event-log*';
 
 export interface WaitForDispatcherTickParams {
   /** Number of dispatcher ticks to wait for. Defaults to 1. */
@@ -24,11 +28,39 @@ export interface WaitForDispatcherTickParams {
   since?: Date;
 }
 
+export interface CountDispatcherEventLogEntriesParams {
+  /** Which dispatcher outcome to count: dispatched, throttled, or unmatched. */
+  action: ActionPolicyEventAction;
+  /** Lower bound (inclusive) for `@timestamp`, in milliseconds since epoch. */
+  sinceMs: number;
+}
+
+export interface WaitForDispatcherEventLogEntriesParams
+  extends CountDispatcherEventLogEntriesParams {
+  /** Minimum number of matching entries to wait for. */
+  expected: number;
+}
+
 /**
- * Test-time accessor for the alerting_v2 dispatcher singleton task.
+ * Test-time accessor for the alerting_v2 dispatcher singleton task and the
+ * execution-history records its `StoreExecutionHistoryStep` writes into the
+ * Kibana event log.
  */
 export interface DispatcherApiService {
   waitForDispatcherTick: (params?: WaitForDispatcherTickParams) => Promise<void>;
+  /**
+   * Counts entries the dispatcher emits into `.kibana-event-log*` since
+   * `sinceMs`.
+   */
+  countDispatcherEventLogEntries: (params: CountDispatcherEventLogEntriesParams) => Promise<number>;
+  /**
+   * Polls `countDispatcherEventLogEntries` until at least `expected` entries
+   * are visible. Uses the shared poll timeout so flakes due to event-log
+   * indexing lag stay bounded.
+   */
+  waitForDispatcherEventLogEntries: (
+    params: WaitForDispatcherEventLogEntriesParams
+  ) => Promise<void>;
 }
 
 export const getDispatcherApiService = ({
@@ -38,6 +70,28 @@ export const getDispatcherApiService = ({
   log: ScoutLogger;
   esClient: EsClient;
 }): DispatcherApiService => {
+  const countDispatcherEventLogEntries: DispatcherApiService['countDispatcherEventLogEntries'] = ({
+    action,
+    sinceMs,
+  }) =>
+    measurePerformanceAsync(log, `dispatcher.countEventLogEntries[${action}]`, async () => {
+      await esClient.indices.refresh({ index: EVENT_LOG_INDEX }, { ignore: [404] });
+      const result = await esClient.count({
+        index: EVENT_LOG_INDEX,
+        ignore_unavailable: true,
+        query: {
+          bool: {
+            filter: [
+              { term: { 'event.provider': ACTION_POLICY_EVENT_PROVIDER } },
+              { term: { 'event.action': action } },
+              { range: { '@timestamp': { gte: new Date(sinceMs).toISOString() } } },
+            ],
+          },
+        },
+      });
+      return result.count;
+    });
+
   return {
     waitForDispatcherTick: ({ ticks = 1, since } = {}) =>
       measurePerformanceAsync(log, `dispatcher.waitForDispatcherTick[${ticks}]`, async () => {
@@ -50,5 +104,21 @@ export const getDispatcherApiService = ({
           })
           .toBeGreaterThanOrEqual(ticks);
       }),
+
+    countDispatcherEventLogEntries,
+
+    waitForDispatcherEventLogEntries: ({ action, sinceMs, expected }) =>
+      measurePerformanceAsync(
+        log,
+        `dispatcher.waitForEventLogEntries[${action}>=${expected}]`,
+        async () => {
+          await expect
+            .poll(() => countDispatcherEventLogEntries({ action, sinceMs }), {
+              timeout: POLL_TIMEOUT_MS,
+              intervals: [POLL_INTERVAL_MS],
+            })
+            .toBeGreaterThanOrEqual(expected);
+        }
+      ),
   };
 };

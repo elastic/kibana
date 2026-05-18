@@ -16,6 +16,7 @@ import {
 import { COMMON_HEADERS } from '../constants';
 
 const FIND_PATH = `${BASE_MAINTENANCE_WINDOW_API_PATH}/_find`;
+const FIND_PAGE_SIZE = 100;
 
 /**
  * Test-time accessor for Kibana's public maintenance windows REST API.
@@ -41,7 +42,7 @@ export const getMaintenanceWindowsApiService = ({
       const response = await kbnClient.request<ExternalFindMaintenanceWindowsResponse>({
         method: 'GET',
         path: FIND_PATH,
-        query: { per_page: 1000 },
+        query: { per_page: FIND_PAGE_SIZE },
       });
       return response.data.maintenanceWindows;
     });
@@ -74,8 +75,11 @@ export const getMaintenanceWindowsApiService = ({
 
     cleanUp: () =>
       measurePerformanceAsync(log, 'maintenanceWindows.cleanUp', async () => {
-        const windows = await list();
-        await Promise.all(windows.map((mw) => deleteWindow(mw.id)));
+        while (true) {
+          const windows = await list();
+          if (windows.length === 0) return;
+          await Promise.all(windows.map((mw) => deleteWindow(mw.id)));
+        }
       }),
   };
 };

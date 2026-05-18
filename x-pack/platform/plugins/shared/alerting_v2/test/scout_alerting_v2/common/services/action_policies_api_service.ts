@@ -25,6 +25,8 @@ export interface ActionPoliciesApiService {
   patch: (id: string, data: UpdateActionPolicyData) => Promise<ActionPolicyResponse>;
   enable: (id: string) => Promise<ActionPolicyResponse>;
   disable: (id: string) => Promise<ActionPolicyResponse>;
+  snooze: (id: string, snoozedUntil: string) => Promise<ActionPolicyResponse>;
+  unsnooze: (id: string) => Promise<void>;
   delete: (id: string) => Promise<void>;
   cleanUp: () => Promise<void>;
 }
@@ -115,6 +117,31 @@ export const getActionPoliciesApiService = ({
           headers: COMMON_HEADERS,
         });
         return response.data;
+      }),
+
+    snooze: (id, snoozedUntil) =>
+      measurePerformanceAsync(log, 'actionPolicies.snooze', async () => {
+        const response = await kbnClient.request<ActionPolicyResponse>({
+          method: 'POST',
+          path: `${ALERTING_V2_ACTION_POLICY_API_PATH}/${encodeURIComponent(id)}/_snooze`,
+          headers: COMMON_HEADERS,
+          body: { snoozedUntil },
+        });
+        return response.data;
+      }),
+
+    unsnooze: (id) =>
+      measurePerformanceAsync(log, 'actionPolicies.unsnooze', async () => {
+        await kbnClient.request({
+          method: 'POST',
+          path: `${ALERTING_V2_ACTION_POLICY_API_PATH}/${encodeURIComponent(id)}/_unsnooze`,
+          headers: COMMON_HEADERS,
+          // The unsnooze route is a no-op when the policy is not snoozed,
+          // so we swallow 400/404/409 to keep callers (e.g. beforeEach
+          // resets) idempotent.
+          ignoreErrors: [400, 404, 409],
+          retries: 0,
+        });
       }),
 
     delete: (id) =>
