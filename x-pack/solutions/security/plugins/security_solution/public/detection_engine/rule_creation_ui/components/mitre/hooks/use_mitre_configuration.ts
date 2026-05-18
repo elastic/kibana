@@ -149,6 +149,6 @@ export const useMitreConfiguration = (): UseMitreConfigurationResult => {
 
   const managed = useManagedMitreConfiguration(managedEnabled);
   const legacy = useLegacyMitreConfiguration(!managedEnabled);
-
+  console.log('isUsingManaged: ', managedEnabled);
   return managedEnabled ? managed : legacy;
 };

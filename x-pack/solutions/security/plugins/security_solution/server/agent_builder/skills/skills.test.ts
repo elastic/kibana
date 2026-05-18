@@ -9,6 +9,7 @@ import { platformCoreTools } from '@kbn/agent-builder-common';
 import { validateSkillDefinition } from '@kbn/agent-builder-server/skills/type_definition';
 import { threatHuntingSkill } from './threat_hunting';
 import { alertAnalysisSkill } from './alert_analysis';
+import { SECURITY_MITRE_ATTACK_TOOL_ID } from '../tools/mitre_attack_tool';
 
 const ALL_SKILLS = [threatHuntingSkill, alertAnalysisSkill];
 
@@ -26,14 +27,19 @@ describe('Security Skills', () => {
       expect(threatHuntingSkill.description.length).toBeLessThanOrEqual(1024);
     });
 
-    it('returns 6 registry tools (under 7 limit)', () => {
+    it('returns 7 registry tools (within 7 limit)', () => {
       const tools = threatHuntingSkill.getRegistryTools!();
-      expect(tools).toHaveLength(6);
+      expect(tools).toHaveLength(7);
     });
 
     it('includes platformCoreTools.cases for escalation', () => {
       const tools = threatHuntingSkill.getRegistryTools!();
       expect(tools).toContain(platformCoreTools.cases);
+    });
+
+    it('includes the MITRE ATT&CK tool for technique lookups', () => {
+      const tools = threatHuntingSkill.getRegistryTools!();
+      expect(tools).toContain(SECURITY_MITRE_ATTACK_TOOL_ID);
     });
 
     it('content mentions case creation for confirmed findings', () => {

@@ -44,14 +44,29 @@ interface AddMitreMappingsNodeParams {
   model: InferenceChatModel;
   events?: ToolEventEmitter;
   /**
-   * When present, MITRE IDs returned by the LLM are validated against the
-   * managed index. When absent, the node falls back to in-memory lookups
-   * against the legacy hardcoded TS blob.
+   * When present, the node retrieves MITRE candidates from the managed index
+   * and constrains the LLM to a closed-set selection from those candidates.
+   * Validates and shapes the chosen IDs against the same index. When absent,
+   * the node falls back to in-memory lookups against the legacy hardcoded
+   * TS blob and lets the LLM use its prior MITRE knowledge.
    */
   mitreAttackDataClient?: MitreAttackDataClient;
 }
 
 const FRAMEWORK = 'enterprise';
+
+/**
+ * Maximum number of techniques + subtechniques to retrieve as candidates.
+ * Tactics are always fully enumerated (~14 entries) since the corpus is small.
+ */
+const MAX_TECHNIQUE_CANDIDATES = 25;
+
+/**
+ * Truncate long descriptions to keep the prompt size bounded. Most MITRE
+ * descriptions exceed 1k characters; for selection purposes the leading
+ * sentences carry the salient meaning.
+ */
+const DESCRIPTION_TRUNCATE_CHARS = 250;
 
 interface MitreLookups {
   getTactic: (id: string) => Promise<{ id: string; name: string; reference: string } | undefined>;
@@ -212,6 +227,94 @@ const formatMitreMapping = async (
   return threatMappings;
 };
 
+/**
+ * Retrieve a candidate set of MITRE entities from the managed index that the
+ * LLM may select from. Uses BM25 over the user's free-text request, the rule
+ * tags, and the ES|QL query body to surface lexically-relevant techniques and
+ * subtechniques. Tactics are fully enumerated since there are only ~14 of
+ * them — listing all of them is cheaper and removes the recall risk that the
+ * primary tactic gets BM25-ranked off the top of the list.
+ */
+const retrieveCandidates = async (
+  client: MitreAttackDataClient,
+  state: RuleCreationState
+): Promise<MitreEntity[]> => {
+  const ruleTags = Array.isArray(state?.rule?.tags) ? state.rule.tags.join(' ') : '';
+  const ruleQuery = state?.rule?.query ?? '';
+  const searchQuery = [state.userQuery, ruleTags, ruleQuery].filter(Boolean).join(' ').trim();
+
+  const tactics =
+    searchQuery.length > 0
+      ? await client.list({ framework: FRAMEWORK, types: ['tactic'] })
+      : [];
+
+  const techniqueAndSub = searchQuery
+    ? await client.search({
+        query: searchQuery,
+        framework: FRAMEWORK,
+        types: ['technique', 'subtechnique'],
+        limit: MAX_TECHNIQUE_CANDIDATES,
+      })
+    : [];
+
+  return [...tactics, ...techniqueAndSub];
+};
+
+const truncateDescription = (description: string): string => {
+  if (description.length <= DESCRIPTION_TRUNCATE_CHARS) return description;
+  return `${description.slice(0, DESCRIPTION_TRUNCATE_CHARS).trimEnd()}…`;
+};
+
+/**
+ * Render the candidate entities as a compact text block scoped to the
+ * information the LLM needs to make a selection: id, name, parent/tactic
+ * relationships, and a short description excerpt.
+ */
+const formatCandidateBlock = (candidates: MitreEntity[]): string => {
+  if (candidates.length === 0) return '';
+
+  const tactics = candidates.filter(isTactic);
+  const techniques = candidates.filter(isTechnique);
+  const subtechniques = candidates.filter(isSubtechnique);
+
+  const sections: string[] = [];
+
+  if (tactics.length > 0) {
+    sections.push(
+      'Tactics:',
+      ...tactics.map(
+        (t) => `- ${t.id} ${t.name} — ${truncateDescription(t.description ?? '')}`
+      )
+    );
+  }
+  if (techniques.length > 0) {
+    sections.push(
+      '',
+      'Techniques:',
+      ...techniques.map(
+        (t) =>
+          `- ${t.id} ${t.name} (tactics: ${t.tactics.join(', ')}) — ${truncateDescription(
+            t.description ?? ''
+          )}`
+      )
+    );
+  }
+  if (subtechniques.length > 0) {
+    sections.push(
+      '',
+      'Subtechniques:',
+      ...subtechniques.map(
+        (s) =>
+          `- ${s.id} ${s.name} (parent technique: ${s.techniqueId}) — ${truncateDescription(
+            s.description ?? ''
+          )}`
+      )
+    );
+  }
+
+  return sections.join('\n');
+};
+
 export const addMitreMappingsNode = ({
   model,
   events,
@@ -228,6 +331,17 @@ export const addMitreMappingsNode = ({
     );
 
     try {
+      const candidates = mitreAttackDataClient
+        ? await retrieveCandidates(mitreAttackDataClient, state)
+        : [];
+      const candidateBlock = formatCandidateBlock(candidates);
+
+      if (mitreAttackDataClient) {
+        events?.reportProgress(
+          `Retrieved ${candidates.length} MITRE ATT&CK candidate(s) from managed index`
+        );
+      }
+
       const mitreSelectionChain = MITRE_MAPPING_SELECTION_PROMPT.pipe(model).pipe(jsonParser);
 
       const ruleTags = Array.isArray(state?.rule?.tags) ? state.rule.tags.join(', ') : '';
@@ -236,6 +350,7 @@ export const addMitreMappingsNode = ({
         user_request: state.userQuery,
         esql_query: state?.rule?.query || '',
         rule_tags: ruleTags,
+        candidate_mitre: candidateBlock,
       });
 
       const threatMappings = await formatMitreMapping(mitreSelectionResult, lookups);

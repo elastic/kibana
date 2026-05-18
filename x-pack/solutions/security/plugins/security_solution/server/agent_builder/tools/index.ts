@@ -23,3 +23,4 @@ export {
   createDetectionRuleTool,
   SECURITY_CREATE_DETECTION_RULE_TOOL_ID,
 } from './create_detection_rule_tool';
+export { mitreAttackTool, SECURITY_MITRE_ATTACK_TOOL_ID } from './mitre_attack_tool';
