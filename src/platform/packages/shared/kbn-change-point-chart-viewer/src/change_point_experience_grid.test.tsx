@@ -13,8 +13,8 @@ import {
   KibanaErrorBoundaryProvider,
   KibanaSectionErrorBoundary,
 } from '@kbn/shared-ux-error-boundary';
-import type { UnifiedHistogramFetchParams } from '@kbn/unified-histogram';
 import { ChangePointExperienceGrid } from './change_point_experience_grid';
+import type { UnifiedChangePointGridProps } from './types';
 
 // The APM client is pulled in transitively by the error boundary package.
 jest.mock('@elastic/apm-rum');
@@ -44,13 +44,14 @@ const fetchParams = {
   relativeTimeRange: { from: 'now-15m', to: 'now' },
   filters: [],
   esqlVariables: [],
-} as unknown as UnifiedHistogramFetchParams;
+} as unknown as UnifiedChangePointGridProps['fetchParams'];
 
 const minimalProps = {
   services: {} as never,
   fetchParams,
   fetch$: {} as never,
   isComponentVisible: true,
+  isTabSelected: true,
   renderToggleActions: () => undefined,
 };
 
