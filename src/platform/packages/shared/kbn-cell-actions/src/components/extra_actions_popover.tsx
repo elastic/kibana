@@ -151,7 +151,7 @@ const ExtraActionsPopOverContent: React.FC<ExtraActionsPopOverContentProps> = ({
           )}
         </p>
       </EuiScreenReaderOnly>
-      <EuiContextMenuPanel size="s" items={items} />
+      <EuiContextMenuPanel items={items} />
     </>
   );
 };
