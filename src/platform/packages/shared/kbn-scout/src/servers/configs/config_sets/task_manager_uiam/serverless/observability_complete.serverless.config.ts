@@ -10,9 +10,9 @@
 import { servers as defaultConfig } from '../../default/serverless/observability_complete.serverless.config';
 import type { ScoutServerConfig } from '../../../../../types';
 
-// Enables the Task Manager UIAM rollout flag so the EsAndUiamApiKeyStrategy is
-// exercised. The flag is not yet enabled on MKI, so these tests run only on
-// Kibana CI (not on MKI).
+// Enables Task Manager UIAM rollout flags so the EsAndUiamApiKeyStrategy and
+// background provisioning task are exercised. Flags are not yet enabled on MKI,
+// so these tests run only on Kibana CI (not on MKI).
 export const servers: ScoutServerConfig = {
   ...defaultConfig,
   kbnTestServer: {
@@ -20,6 +20,8 @@ export const servers: ScoutServerConfig = {
     serverArgs: [
       ...defaultConfig.kbnTestServer.serverArgs,
       '--xpack.task_manager.grant_uiam_api_keys=true',
+      // Schedules task_manager:uiam_api_key_provisioning so background conversion can run in Scout.
+      '--feature_flags.overrides.taskManager.provisionUiamApiKeys=true',
     ],
   },
 };

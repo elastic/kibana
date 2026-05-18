@@ -58,7 +58,7 @@ export const SearchEmptyPrompt: React.FC<SearchEmptyPromptProps> = ({
         )}
         {icon && (
           <EuiFlexItem>
-            <EuiIcon size="xxl" type={icon} />
+            <EuiIcon aria-hidden={true} size="xxl" type={icon} />
           </EuiFlexItem>
         )}
         <EuiFlexItem>
