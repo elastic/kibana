@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo, useRef } from 'react';
+import { useHistory } from 'react-router-dom';
 import { useInspectorContext, FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 import { PluginContext } from '../../context/plugin_context';
 import { usePluginContext } from '../../hooks/use_plugin_context';
@@ -14,6 +15,7 @@ import type { SLORepositoryClient } from '../../types';
 export function InspectedSloClientProvider({ children }: { children: React.ReactNode }) {
   const { addInspectorRequest } = useInspectorContext();
   const pluginContextValue = usePluginContext();
+  const history = useHistory();
 
   const addInspectorRequestRef = useRef(addInspectorRequest);
   addInspectorRequestRef.current = addInspectorRequest;
@@ -22,12 +24,15 @@ export function InspectedSloClientProvider({ children }: { children: React.React
     const { sloClient } = pluginContextValue;
 
     const wrappedFetch: SLORepositoryClient['fetch'] = (endpoint, ...args) => {
+      const requestPathname = history.location.pathname;
       return sloClient.fetch(endpoint, ...args).then((response) => {
-        addInspectorRequestRef.current({
-          data: response as any,
-          status: FETCH_STATUS.SUCCESS,
-          loading: false,
-        });
+        if (history.location.pathname === requestPathname) {
+          addInspectorRequestRef.current({
+            data: response as any,
+            status: FETCH_STATUS.SUCCESS,
+            loading: false,
+          });
+        }
 
         if (response && typeof response === 'object') {
           const resp = response as Record<string, unknown>;
@@ -50,7 +55,7 @@ export function InspectedSloClientProvider({ children }: { children: React.React
       fetch: wrappedFetch,
       stream: sloClient.stream,
     } as SLORepositoryClient;
-  }, [pluginContextValue]);
+  }, [pluginContextValue, history]);
 
   const contextValue = useMemo(
     () => ({
