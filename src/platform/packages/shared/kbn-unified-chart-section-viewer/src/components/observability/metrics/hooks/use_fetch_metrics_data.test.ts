@@ -533,7 +533,11 @@ describe('useFetchMetricsData', () => {
       });
     });
 
-    it('does not re-report the same error on re-render', async () => {
+    it('does not re-fire on re-renders that preserve the error reference', async () => {
+      // `useAsyncFn` exposes a stable error reference for a given failed run,
+      // so the reporter useEffect (deps: [error, profileId]) does not re-fire
+      // on identity-preserving re-renders. Repeat failures with fresh Error
+      // instances do produce fresh reports - exercised by the sibling test.
       const fetchError = new Error('re-render test');
       mockExecuteEsqlQuery.mockRejectedValue(fetchError);
 
@@ -553,6 +557,43 @@ describe('useFetchMetricsData', () => {
       rerender(params);
 
       expect(mockReportChartSectionError).toHaveBeenCalledTimes(1);
+    });
+
+    it('re-reports when a subsequent fetch fails with a fresh error instance', async () => {
+      const firstError = new Error('first failure');
+      const secondError = new Error('second failure');
+      mockExecuteEsqlQuery.mockRejectedValueOnce(firstError);
+
+      const params = createDefaultParams();
+      const { result, rerender } = renderHook(
+        (props: ReturnType<typeof createDefaultParams>) => useFetchMetricsData(props),
+        { initialProps: params }
+      );
+
+      await waitFor(() => {
+        expect(result.current.error).toBe(firstError);
+      });
+      expect(mockReportChartSectionError).toHaveBeenCalledTimes(1);
+
+      // Trigger a refetch by changing fetchParams.timeRange, then resolve the
+      // next call with a different rejection so `error` references update.
+      mockExecuteEsqlQuery.mockRejectedValueOnce(secondError);
+      rerender({
+        ...params,
+        fetchParams: { ...params.fetchParams, timeRange: { from: 'now-1h', to: 'now' } },
+      });
+
+      await waitFor(() => {
+        expect(result.current.error).toBe(secondError);
+      });
+      expect(mockReportChartSectionError).toHaveBeenCalledTimes(2);
+      expect(mockReportChartSectionError).toHaveBeenLastCalledWith({
+        error: secondError,
+        source: 'useFetchMetricsData',
+        labels: {
+          profile_id: 'test-profile-id',
+        },
+      });
     });
   });
 

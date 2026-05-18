@@ -8,7 +8,7 @@
  */
 
 import useAsyncFn from 'react-use/lib/useAsyncFn';
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo } from 'react';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { buildMetricsInfoQuery, hasTransformationalCommand } from '@kbn/esql-utils';
 import { getFieldIconType } from '@kbn/field-utils';
@@ -157,13 +157,15 @@ export function useFetchMetricsData({
     executeFetch,
   ]);
 
-  // De-duped report of landed fetch errors.
-  const lastReportedErrorRef = useRef<unknown>(null);
+  // Report every distinct landed fetch error. Repeated failures are a
+  // monitoring signal (something is broken right now), so we deliberately do
+  // not de-dupe at the source - rate-limiting / sampling belongs in APM.
+  // `useAsyncFn` produces a single error reference per failed run, so the
+  // effect only fires once per failure landing.
   useEffect(() => {
-    if (!error || error === lastReportedErrorRef.current) {
+    if (!error) {
       return;
     }
-    lastReportedErrorRef.current = error;
     reportChartSectionError({
       error,
       source: 'useFetchMetricsData',
