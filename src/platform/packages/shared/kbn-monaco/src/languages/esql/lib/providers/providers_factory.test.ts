@@ -81,6 +81,30 @@ describe('Providers Factory', () => {
   });
 
   describe('createCancellableCallbacks', () => {
+    it('returns emptyResult when the token is already cancelled before any callback runs', async () => {
+      const tokenSource = new monaco.CancellationTokenSource();
+      tokenSource.cancel();
+
+      const callbacks = {
+        getSources: jest.fn(async () => []),
+        getVariables: jest.fn().mockReturnValue({}),
+      };
+
+      const providerPromise = createMonacoProvider({
+        model: nonDisposedModel(),
+        run: async () => {
+          const cancellableCallbacks = createCancellableCallbacks(callbacks, tokenSource.token);
+          await cancellableCallbacks.getSources();
+          return 'full-result';
+        },
+        emptyResult: '__empty__',
+      });
+
+      await expect(providerPromise).resolves.toBe('__empty__');
+      expect(callbacks.getSources).not.toHaveBeenCalled();
+      expect(callbacks.getVariables).not.toHaveBeenCalled();
+    });
+
     it('returns emptyResult when the Monaco token is cancelled on the middle of the provider execution, and cuts the execution', async () => {
       const tokenSource = new monaco.CancellationTokenSource();
 
