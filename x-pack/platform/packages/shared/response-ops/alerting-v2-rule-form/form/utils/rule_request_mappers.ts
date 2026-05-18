@@ -6,7 +6,7 @@
  */
 
 import type { RuleResponse, CreateRuleData, Query, UpdateRuleData } from '@kbn/alerting-v2-schemas';
-import { getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
+import { getBreachEsqlQuery, getRecoverEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { RUNBOOK_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
 import { DELAY_MODE } from '../types';
 import type { FormValues, StateTransition } from '../types';
@@ -31,16 +31,19 @@ const mapSchedule = (schedule: FormValues['schedule']) => ({
   lookback: schedule.lookback,
 });
 
-/**
- * Builds the API `query` field from the form's query values. Emits
- * `standalone` format with an optional `recover` block when the compose
- * discover flow has configured a custom recovery condition.
- */
-const mapQuery = (query: FormValues['query']): Query => ({
-  format: 'standalone',
-  breach: query.breach,
-  ...(query.recover ? { recover: query.recover } : {}),
-});
+// TEMPORARY — remove when the standalone form migrates to the new query schema (#268984).
+const mapQuery = (formValues: FormValues): Query => {
+  const breach = formValues.evaluation.query.base;
+  const recover =
+    formValues.recoveryPolicy?.type === 'query'
+      ? formValues.recoveryPolicy.query?.base ?? undefined
+      : undefined;
+  return {
+    format: 'standalone',
+    breach,
+    ...(recover ? { recover } : {}),
+  };
+};
 
 const mapGrouping = (grouping: FormValues['grouping']) =>
   grouping?.fields?.length ? { fields: grouping.fields } : undefined;
@@ -162,14 +165,14 @@ const mapArtifacts = (artifacts: FormValues['artifacts']): RuleRequestCommon['ar
  * both create and update endpoints. Does not include `kind`.
  */
 export const mapFormValuesToRuleRequest = (formValues: FormValues): RuleRequestCommon => {
-  const { metadata, timeField, schedule, query, grouping, artifacts } = formValues;
+  const { metadata, timeField, schedule, grouping, artifacts } = formValues;
   const mappedArtifacts = mapArtifacts(artifacts);
 
   return {
     metadata: mapMetadata(metadata),
     time_field: timeField,
     schedule: mapSchedule(schedule),
-    query: mapQuery(query),
+    query: mapQuery(formValues),
     grouping: mapGrouping(grouping),
     state_transition: mapStateTransition(formValues),
     ...(mappedArtifacts ? { artifacts: mappedArtifacts } : {}),
@@ -211,11 +214,10 @@ export const mapFormValuesToUpdateRequest = (formValues: FormValues): UpdateRule
  * Only fields present in the response are included so the form defaults fill in the rest.
  * Use this when populating the edit form with an existing rule's data.
  *
- * The form has a single breach-query field, so composed-format rules are
- * flattened to their effective breach query. Recover and no-data queries on
- * the existing rule are dropped: the form does not yet surface them and
- * saving will overwrite the rule with a `standalone` query containing only
- * the (possibly edited) breach.
+ * The new API uses `query: Query` (composed or standalone). This bridge converts
+ * it back to the standalone form's internal `evaluation.query.base` / `recoveryPolicy`
+ * shape so all existing form components continue to work unchanged.
+ * Remove this bridge when the standalone form migrates to the new query schema (#268984).
  */
 export const mapRuleResponseToFormValues = (rule: RuleResponse): Partial<FormValues> => {
   const stateTransition: StateTransition = {
@@ -224,6 +226,8 @@ export const mapRuleResponseToFormValues = (rule: RuleResponse): Partial<FormVal
     recoveringCount: rule.state_transition?.recovering_count ?? null,
     recoveringTimeframe: rule.state_transition?.recovering_timeframe ?? null,
   };
+
+  const recoverQuery = getRecoverEsqlQuery(rule.query);
 
   return {
     kind: rule.kind,
@@ -239,10 +243,15 @@ export const mapRuleResponseToFormValues = (rule: RuleResponse): Partial<FormVal
       every: rule.schedule.every,
       lookback: rule.schedule.lookback ?? '1m',
     },
-    query: {
-      breach: getBreachEsqlQuery(rule.query),
+    evaluation: {
+      query: {
+        base: getBreachEsqlQuery(rule.query),
+      },
     },
     ...(rule.grouping ? { grouping: { fields: rule.grouping.fields } } : {}),
+    ...(recoverQuery
+      ? { recoveryPolicy: { type: 'query' as const, query: { base: recoverQuery } } }
+      : {}),
     stateTransition,
     stateTransitionAlertDelayMode: deriveAlertDelayModeFromStateTransition(stateTransition),
     stateTransitionRecoveryDelayMode: deriveRecoveryDelayModeFromStateTransition(stateTransition),

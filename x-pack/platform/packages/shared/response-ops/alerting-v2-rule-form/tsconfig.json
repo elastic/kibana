@@ -38,9 +38,7 @@
     "@kbn/field-types",
     "@kbn/lens-plugin",
     "@kbn/visualization-utils",
-    "@kbn/expressions-plugin",
-    "@kbn/code-editor",
-    "@kbn/esql-language"
+    "@kbn/expressions-plugin"
   ]
 }
 

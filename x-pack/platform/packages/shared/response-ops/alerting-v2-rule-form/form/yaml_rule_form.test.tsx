@@ -50,6 +50,16 @@ jest.mock('@kbn/yaml-rule-editor', () => ({
   ),
 }));
 
+// Mock ES|QL validation
+jest.mock('@kbn/alerting-v2-schemas', () => ({
+  validateEsqlQuery: (query: string) => {
+    if (!query || query.includes('INVALID')) {
+      return 'Invalid ES|QL query syntax';
+    }
+    return null;
+  },
+}));
+
 // Mock EUI components that cause act() warnings due to internal state management
 jest.mock('@elastic/eui', () => {
   const actual = jest.requireActual('@elastic/eui');
@@ -121,7 +131,7 @@ describe('YamlRuleForm component', () => {
     const initialYaml = dump({
       kind: 'alert',
       metadata: { name: 'Initial Rule', enabled: true },
-      query: { format: 'standalone', breach: 'FROM logs-*' },
+      evaluation: { query: { base: 'FROM logs-*' } },
     });
 
     render(<StatefulYamlRuleForm {...defaultProps} initialYaml={initialYaml} />, {
@@ -164,7 +174,7 @@ describe('YamlRuleForm component', () => {
       metadata: { name: 'Test Rule', enabled: true },
       time_field: '@timestamp',
       schedule: { every: '5m', lookback: '1m' },
-      query: { format: 'standalone', breach: 'FROM logs-*' },
+      evaluation: { query: { base: 'FROM logs-*' } },
     });
 
     fireEvent.change(editor, { target: { value: validYaml } });
@@ -246,7 +256,7 @@ describe('YamlRuleForm component', () => {
         metadata: { name: 'Blurred Name', enabled: true },
         time_field: '@timestamp',
         schedule: { every: '5m', lookback: '1m' },
-        query: { format: 'standalone', breach: 'FROM logs-*' },
+        evaluation: { query: { base: 'FROM logs-*' } },
       });
 
       render(

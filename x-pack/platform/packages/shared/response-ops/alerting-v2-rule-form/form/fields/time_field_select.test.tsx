@@ -174,8 +174,10 @@ describe('TimeFieldSelect', () => {
     render(<TimeFieldSelect />, {
       wrapper: createFormWrapper(
         {
-          query: {
-            breach: 'FROM logs-*',
+          evaluation: {
+            query: {
+              base: 'FROM logs-*',
+            },
           },
         },
         mockServices

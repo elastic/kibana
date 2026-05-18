@@ -8,7 +8,7 @@
 import type React from 'react';
 import type { UseFormReturn } from 'react-hook-form';
 import type { RuleFormServices } from '../../form/contexts/rule_form_context';
-import type { FormValues } from '../../form/types';
+import type { ComposeFormValues } from './compose_form_types';
 
 export type ComposeDiscoverMode = 'create' | 'edit';
 
@@ -29,7 +29,7 @@ export interface StepDefinition {
   title: string;
   render: (props: StepRenderProps) => React.ReactNode;
   validate?: (
-    methods: UseFormReturn<FormValues>,
+    methods: UseFormReturn<ComposeFormValues>,
     state: ComposeDiscoverState
   ) => Promise<boolean> | boolean;
 }

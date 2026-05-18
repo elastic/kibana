@@ -26,9 +26,7 @@ describe('rule_request_mappers', () => {
     },
     timeField: '@timestamp',
     schedule: { every: '5m', lookback: '1m' },
-    query: {
-      breach: 'FROM logs-* | LIMIT 10',
-    },
+    evaluation: { query: { base: 'FROM logs-* | LIMIT 10' } },
     stateTransitionAlertDelayMode: 'immediate',
     stateTransitionRecoveryDelayMode: 'immediate',
   };
@@ -51,6 +49,46 @@ describe('rule_request_mappers', () => {
       const result = mapFormValuesToRuleRequest(baseFormValues);
 
       expect(result).not.toHaveProperty('kind');
+    });
+
+    it('maps recovery query when recoveryPolicy type is query', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        recoveryPolicy: { type: 'query', query: { base: 'FROM logs-* | WHERE level = "ok"' } },
+      };
+
+      const result = mapFormValuesToRuleRequest(formValues);
+
+      expect(result.query).toEqual({
+        format: 'standalone',
+        breach: 'FROM logs-* | LIMIT 10',
+        recover: 'FROM logs-* | WHERE level = "ok"',
+      });
+    });
+
+    it('omits recover when recoveryPolicy type is no_breach', () => {
+      const formValues: FormValues = {
+        ...baseFormValues,
+        recoveryPolicy: { type: 'no_breach' },
+      };
+
+      const result = mapFormValuesToRuleRequest(formValues);
+
+      expect(result.query).toEqual({
+        format: 'standalone',
+        breach: 'FROM logs-* | LIMIT 10',
+      });
+      expect(result.query).not.toHaveProperty('recover');
+    });
+
+    it('omits recover when recoveryPolicy is not set', () => {
+      const result = mapFormValuesToRuleRequest(baseFormValues);
+
+      expect(result.query).toEqual({
+        format: 'standalone',
+        breach: 'FROM logs-* | LIMIT 10',
+      });
+      expect(result.query).not.toHaveProperty('recover');
     });
 
     it('maps grouping fields when present', () => {
@@ -379,7 +417,6 @@ describe('rule_request_mappers', () => {
         artifacts?: RuleRequestCommon['artifacts'];
       };
 
-      // Every key in common should be present in create with the same value
       for (const key of Object.keys(common) as Array<keyof typeof common>) {
         expect(createRequest[key]).toEqual(common[key]);
       }
@@ -432,7 +469,6 @@ describe('rule_request_mappers', () => {
 
       const result = mapFormValuesToUpdateRequest(formValues);
 
-      // Empty fields → mapGrouping returns undefined → coerced to null
       expect(result.grouping).toBeNull();
     });
 
@@ -531,12 +567,71 @@ describe('rule_request_mappers', () => {
       expect(result.schedule).toEqual({ every: '10m', lookback: '1m' });
     });
 
-    it('maps query breach', () => {
+    it('maps standalone breach query to evaluation.query.base', () => {
       const result = mapRuleResponseToFormValues(baseRuleResponse);
 
-      expect(result.query).toEqual({
-        breach: 'FROM logs-* | STATS count() BY host',
+      expect(result.evaluation).toEqual({
+        query: { base: 'FROM logs-* | STATS count() BY host' },
       });
+    });
+
+    it('maps composed breach query (base + block) to evaluation.query.base', () => {
+      const rule = {
+        ...baseRuleResponse,
+        query: {
+          format: 'composed',
+          base: 'FROM logs-* | STATS count() BY host',
+          blocks: { breach: '| WHERE count > 5' },
+        },
+      } as RuleResponse;
+
+      const result = mapRuleResponseToFormValues(rule);
+
+      expect(result.evaluation).toEqual({
+        query: { base: 'FROM logs-* | STATS count() BY host| WHERE count > 5' },
+      });
+    });
+
+    it('maps standalone recover query to recoveryPolicy', () => {
+      const rule = {
+        ...baseRuleResponse,
+        query: {
+          format: 'standalone',
+          breach: 'FROM logs-* | STATS count() BY host',
+          recover: 'FROM logs-* | WHERE level = "ok"',
+        },
+      } as RuleResponse;
+
+      const result = mapRuleResponseToFormValues(rule);
+
+      expect(result.recoveryPolicy).toEqual({
+        type: 'query',
+        query: { base: 'FROM logs-* | WHERE level = "ok"' },
+      });
+    });
+
+    it('maps composed recover query (base + block) to recoveryPolicy', () => {
+      const rule = {
+        ...baseRuleResponse,
+        query: {
+          format: 'composed',
+          base: 'FROM logs-* | STATS count() BY host',
+          blocks: { breach: '| WHERE count > 5', recover: '| WHERE count = 0' },
+        },
+      } as RuleResponse;
+
+      const result = mapRuleResponseToFormValues(rule);
+
+      expect(result.recoveryPolicy).toEqual({
+        type: 'query',
+        query: { base: 'FROM logs-* | STATS count() BY host| WHERE count = 0' },
+      });
+    });
+
+    it('omits recoveryPolicy when no recover query is present', () => {
+      const result = mapRuleResponseToFormValues(baseRuleResponse);
+
+      expect(result).not.toHaveProperty('recoveryPolicy');
     });
 
     it('maps grouping when present', () => {
@@ -672,14 +767,14 @@ describe('rule_request_mappers', () => {
 
       const formValues = mapRuleResponseToFormValues(fullRule);
 
-      // Fill in required fields that mapRuleResponseToFormValues returns
       const completeFormValues: FormValues = {
         kind: formValues.kind!,
         metadata: formValues.metadata!,
         timeField: formValues.timeField!,
         schedule: formValues.schedule as FormValues['schedule'],
-        query: formValues.query!,
+        evaluation: formValues.evaluation!,
         grouping: formValues.grouping,
+        recoveryPolicy: formValues.recoveryPolicy,
         stateTransition: formValues.stateTransition,
         stateTransitionAlertDelayMode: formValues.stateTransitionAlertDelayMode!,
         stateTransitionRecoveryDelayMode: formValues.stateTransitionRecoveryDelayMode!,

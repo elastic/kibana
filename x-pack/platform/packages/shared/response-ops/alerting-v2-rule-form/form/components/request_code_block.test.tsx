@@ -16,7 +16,7 @@ describe('RequestCodeBlock', () => {
   const formValues = {
     ...defaultTestFormValues,
     metadata: { name: 'Test rule', enabled: true },
-    query: { breach: 'FROM logs-* | STATS count = COUNT(*)' },
+    evaluation: { query: { base: 'FROM logs-* | STATS count = COUNT(*)' } },
   };
 
   it('renders create request with POST method and correct path', () => {

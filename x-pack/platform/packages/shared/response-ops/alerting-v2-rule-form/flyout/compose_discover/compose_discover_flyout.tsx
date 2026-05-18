@@ -22,16 +22,17 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { getRecoverEsqlQuery } from '@kbn/alerting-v2-schemas';
 import type { RuleFormServices } from '../../form/contexts/rule_form_context';
 import { RuleFormProvider } from '../../form/contexts/rule_form_context';
-import type { FormValues } from '../../form/types';
-import { serializeFormToYaml, parseYamlToFormValues } from '../../form/utils/yaml_form_utils';
+import type { ComposeFormValues } from './compose_form_types';
+import { getRecoverQuery } from './compose_form_types';
 import {
-  mapRuleResponseToFormValues,
-  mapFormValuesToCreateRequest,
-  mapFormValuesToUpdateRequest,
-} from '../../form/utils/rule_request_mappers';
+  mapRuleToComposeFormValues,
+  composeFormToCreateRequest,
+  composeFormToUpdateRequest,
+  serializeComposeFormToYaml,
+  parseYamlToComposeFormValues,
+} from './compose_mappers';
 import type { ComposeDiscoverMode, SandboxApplyData } from './types';
 import { useComposeDiscoverState, getSandboxTabConfig } from './use_compose_discover_state';
 import { ComposeDiscoverForm, getSteps } from './compose_discover_form';
@@ -39,8 +40,8 @@ import { ComposeDiscoverChild } from './compose_discover_child';
 import { useEsqlAutocomplete } from './use_esql_providers';
 import { useSplitQueryCompletion } from './use_split_query_completion';
 
-const LazyYamlRuleForm = React.lazy(() =>
-  import('../../form/yaml_rule_form').then((m) => ({ default: m.YamlRuleForm }))
+const LazyComposeYamlEditor = React.lazy(() =>
+  import('./compose_yaml_editor').then((m) => ({ default: m.ComposeYamlEditor }))
 );
 
 const EDIT_MODE_OPTIONS = [
@@ -67,27 +68,27 @@ export interface ComposeDiscoverFlyoutProps {
   historyKey: symbol;
   mode?: ComposeDiscoverMode;
   /** The existing rule — provided when mode === 'edit'. Used to seed the RHF form. */
-  rule?: Parameters<typeof mapRuleResponseToFormValues>[0];
+  rule?: Parameters<typeof mapRuleToComposeFormValues>[0];
   /** The ID of the rule being edited. Required when mode === 'edit'. */
   ruleId?: string;
   onClose: () => void;
   services: RuleFormServices;
   /** Called with the create payload when the user submits in create mode. */
-  onCreateRule: (payload: ReturnType<typeof mapFormValuesToCreateRequest>) => void;
+  onCreateRule: (payload: ReturnType<typeof composeFormToCreateRequest>) => void;
   /** Called with id + update payload when the user submits in edit mode. */
-  onUpdateRule?: (id: string, payload: ReturnType<typeof mapFormValuesToUpdateRequest>) => void;
+  onUpdateRule?: (id: string, payload: ReturnType<typeof composeFormToUpdateRequest>) => void;
   /** True while a create/update mutation is in flight. */
   isSaving?: boolean;
 }
 
 const FLYOUT_TITLE_ID = 'composeDiscoverFlyoutTitle';
 
-const EMPTY_FORM_VALUES: FormValues = {
+const EMPTY_FORM_VALUES: ComposeFormValues = {
   kind: 'alert',
   metadata: { name: '', enabled: true, description: '', tags: [] },
   timeField: '@timestamp',
   schedule: { every: '1m', lookback: '5m' },
-  query: { breach: '' },
+  query: { format: 'standalone', breach: '' },
   grouping: undefined,
   stateTransition: undefined,
   stateTransitionAlertDelayMode: 'immediate',
@@ -113,11 +114,13 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
    * When the persisted rule has a custom recovery query, the initial state
    * infers that tracking was active and reconstructs the split.
    */
-  const initialMapped = mode === 'edit' && rule ? mapRuleResponseToFormValues(rule) : undefined;
+  const initialMapped = mode === 'edit' && rule ? mapRuleToComposeFormValues(rule) : undefined;
   const [uiState, dispatch] = useComposeDiscoverState({
     mode,
-    initialQuery: initialMapped?.query?.breach ?? '',
-    initialRecoveryQuery: rule ? getRecoverEsqlQuery(rule.query) ?? undefined : undefined,
+    initialQuery: initialMapped?.query?.format === 'standalone' ? initialMapped.query.breach : '',
+    initialRecoveryQuery: rule
+      ? getRecoverQuery(rule.query as ComposeFormValues['query']) ?? undefined
+      : undefined,
   });
 
   // Registered once here so providers persist across Sandbox open/close cycles.
@@ -138,9 +141,9 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
   });
 
   // ── Form values (submitted to the API) ──
-  const defaultValues = useMemo<FormValues>(() => {
+  const defaultValues = useMemo<ComposeFormValues>(() => {
     if (rule) {
-      const mapped = mapRuleResponseToFormValues(rule);
+      const mapped = mapRuleToComposeFormValues(rule);
       return {
         kind: mapped.kind ?? 'alert',
         metadata: {
@@ -155,7 +158,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
           every: mapped.schedule?.every ?? '1m',
           lookback: mapped.schedule?.lookback ?? '5m',
         },
-        query: mapped.query ?? { breach: '' },
+        query: mapped.query ?? { format: 'standalone', breach: '' },
         grouping: mapped.grouping,
         stateTransition: mapped.stateTransition,
         stateTransitionAlertDelayMode: mapped.stateTransitionAlertDelayMode ?? 'immediate',
@@ -166,7 +169,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
     return EMPTY_FORM_VALUES;
   }, [rule]);
 
-  const methods = useForm<FormValues>({ mode: 'onBlur', defaultValues });
+  const methods = useForm<ComposeFormValues>({ mode: 'onBlur', defaultValues });
 
   const isCreate = mode === 'create';
   const title = isCreate ? 'Create alert rule' : 'Edit alert rule';
@@ -187,11 +190,16 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
    */
   useEffect(() => {
     if (!uiState.queryCommitted) return;
+    const currentQuery = methods.getValues('query');
     if (uiState.tracking && uiState.recoveryType === 'custom' && uiState.recoveryBlock) {
       const recoveryQuery = [uiState.baseQuery, uiState.recoveryBlock].filter(Boolean).join('\n');
-      methods.setValue('query', { ...methods.getValues('query'), recover: recoveryQuery });
+      if (currentQuery.format === 'standalone') {
+        methods.setValue('query', { ...currentQuery, recover: recoveryQuery });
+      }
     } else {
-      methods.setValue('query', { ...methods.getValues('query'), recover: undefined });
+      if (currentQuery.format === 'standalone') {
+        methods.setValue('query', { ...currentQuery, recover: undefined });
+      }
     }
   }, [
     uiState.tracking,
@@ -204,7 +212,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
 
   // ── YAML mode state ──────────────────────────────────────────────────────
   const [yamlText, setYamlText] = useState('');
-  const preYamlFormSnapshotRef = useRef<FormValues | null>(null);
+  const preYamlFormSnapshotRef = useRef<ComposeFormValues | null>(null);
   const debouncedParseRef = useRef<ReturnType<typeof setTimeout>>();
 
   // Wraps setYamlText with a debounced (~300 ms) lenient parse that pushes
@@ -215,7 +223,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
       setYamlText(yaml);
       clearTimeout(debouncedParseRef.current);
       debouncedParseRef.current = setTimeout(() => {
-        const result = parseYamlToFormValues(yaml);
+        const result = parseYamlToComposeFormValues(yaml);
         if (result.values) {
           methods.reset(result.values);
         }
@@ -228,13 +236,14 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
     (enabled: boolean) => {
       if (enabled) {
         preYamlFormSnapshotRef.current = methods.getValues();
-        setYamlText(serializeFormToYaml(methods.getValues()));
+        setYamlText(serializeComposeFormToYaml(methods.getValues()));
       } else {
         clearTimeout(debouncedParseRef.current);
-        const result = parseYamlToFormValues(yamlText);
+        const result = parseYamlToComposeFormValues(yamlText);
         if (result.values) {
           methods.reset(result.values);
-          const parsedQuery = result.values.query?.breach ?? '';
+          const parsedQuery =
+            result.values.query.format === 'standalone' ? result.values.query.breach : '';
           dispatch({ type: 'COMMIT_CHILD_QUERY', fullQuery: parsedQuery });
         }
         preYamlFormSnapshotRef.current = null;
@@ -262,7 +271,12 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
       const breachQuery = data.isSplit
         ? [data.baseQuery, data.alertBlock].filter(Boolean).join('\n')
         : data.fullQuery;
-      methods.setValue('query', { ...methods.getValues('query'), breach: breachQuery });
+      const currentQuery = methods.getValues('query');
+      if (currentQuery.format === 'standalone') {
+        methods.setValue('query', { ...currentQuery, breach: breachQuery });
+      } else {
+        methods.setValue('query', { format: 'standalone', breach: breachQuery });
+      }
 
       if (data.isSplit) {
         dispatch({
@@ -276,7 +290,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
       }
 
       if (uiState.yamlMode) {
-        setYamlText(serializeFormToYaml(methods.getValues()));
+        setYamlText(serializeComposeFormToYaml(methods.getValues()));
       }
     },
     [dispatch, methods, uiState.yamlMode]
@@ -284,9 +298,9 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
 
   const handleSubmit = methods.handleSubmit((values) => {
     if (isCreate) {
-      onCreateRule(mapFormValuesToCreateRequest(values));
+      onCreateRule(composeFormToCreateRequest(values));
     } else if (ruleId && onUpdateRule) {
-      onUpdateRule(ruleId, mapFormValuesToUpdateRequest(values));
+      onUpdateRule(ruleId, composeFormToUpdateRequest(values));
     }
   });
 
@@ -294,7 +308,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
   // handleSubmit path so validation + submission use a single pipeline.
   const handleYamlSave = useCallback(() => {
     clearTimeout(debouncedParseRef.current);
-    const result = parseYamlToFormValues(yamlText);
+    const result = parseYamlToComposeFormValues(yamlText);
     if (result.values) {
       methods.reset(result.values);
     }
@@ -361,7 +375,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
           <EuiFlyoutBody>
             {uiState.yamlMode ? (
               <React.Suspense fallback={null}>
-                <LazyYamlRuleForm
+                <LazyComposeYamlEditor
                   services={services}
                   yamlText={yamlText}
                   setYamlText={handleSetYamlText}

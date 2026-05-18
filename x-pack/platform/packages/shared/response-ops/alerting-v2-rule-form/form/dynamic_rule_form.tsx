@@ -75,14 +75,14 @@ export const DynamicRuleForm = ({
   });
 
   useEffect(() => {
-    methods.setValue('query.breach', query);
+    methods.setValue('evaluation.query.base', query);
   }, [query, methods]);
 
   return (
     <FormProvider {...methods}>
       {/* Hidden field to validate the ES|QL query */}
       <Controller
-        name="query.breach"
+        name="evaluation.query.base"
         control={methods.control}
         rules={{
           required: i18n.translate('xpack.alertingV2.ruleForm.queryRequiredError', {

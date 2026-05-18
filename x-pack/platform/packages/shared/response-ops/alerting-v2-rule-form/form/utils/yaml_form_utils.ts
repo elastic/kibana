@@ -7,7 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { dump, load } from 'js-yaml';
-import type { FormValues, StateTransition } from '../types';
+import { validateEsqlQuery } from '@kbn/alerting-v2-schemas';
+import type { FormValues, RecoveryPolicy, StateTransition } from '../types';
 import {
   deriveAlertDelayModeFromStateTransition,
   deriveRecoveryDelayModeFromStateTransition,
@@ -44,9 +45,9 @@ interface YamlStateTransition {
   recovering_timeframe?: string;
 }
 
-interface YamlQuery {
-  format: 'standalone';
-  breach: string;
+interface YamlRecoveryPolicy {
+  type: string;
+  query?: { base: string };
 }
 
 interface YamlRuleObject {
@@ -54,9 +55,10 @@ interface YamlRuleObject {
   metadata: { name: string; description?: string; owner?: string; tags?: string[] };
   time_field: string;
   schedule: { every: string; lookback: string };
-  query: YamlQuery;
+  evaluation: { query: { base: string } };
   grouping?: { fields: string[] };
   state_transition?: YamlStateTransition;
+  recovery_policy?: YamlRecoveryPolicy;
   artifacts?: Array<{ id: string; type: string; value: string }>;
 }
 
@@ -70,6 +72,15 @@ const serializeStateTransition = (st?: StateTransition): YamlStateTransition | u
   return Object.keys(out).length ? out : undefined;
 };
 
+const serializeRecoveryPolicy = (rp?: RecoveryPolicy): YamlRecoveryPolicy | undefined => {
+  if (!rp) return undefined;
+  const out: YamlRecoveryPolicy = { type: rp.type };
+  if (rp.type === 'query' && rp.query?.base) {
+    out.query = { base: rp.query.base };
+  }
+  return out;
+};
+
 /**
  * Convert FormValues to YAML-compatible object (snake_case keys for API compatibility).
  *
@@ -81,6 +92,7 @@ const serializeStateTransition = (st?: StateTransition): YamlStateTransition | u
  */
 export const formValuesToYamlObject = (values: FormValues): YamlRuleObject => {
   const st = serializeStateTransition(values.stateTransition);
+  const rp = serializeRecoveryPolicy(values.recoveryPolicy);
 
   return {
     kind: values.kind,
@@ -95,23 +107,20 @@ export const formValuesToYamlObject = (values: FormValues): YamlRuleObject => {
       every: values.schedule.every,
       lookback: values.schedule.lookback,
     },
-    query: {
-      format: 'standalone',
-      breach: values.query.breach,
+    evaluation: {
+      query: {
+        base: values.evaluation.query.base,
+      },
     },
     ...(values.grouping?.fields?.length && { grouping: { fields: values.grouping.fields } }),
     ...(st && { state_transition: st }),
+    ...(rp && { recovery_policy: rp }),
     ...(values.artifacts?.length && { artifacts: values.artifacts }),
   };
 };
 
 /**
- * Parse YAML string to FormValues (lenient).
- *
- * Parses the YAML structure and extracts all recognised fields, providing
- * safe defaults for any that are missing. YAML syntax errors are still
- * reported. Field-level validation (required name, valid ES|QL, etc.)
- * is handled by RHF at submit time, keeping a single validation pipeline.
+ * Parse and validate YAML string to FormValues
  */
 export const parseYamlToFormValues = (yamlString: string): YamlParseResult => {
   let parsed: unknown;
@@ -138,7 +147,8 @@ export const parseYamlToFormValues = (yamlString: string): YamlParseResult => {
   const obj = parsed as Record<string, unknown>;
   const metadata = obj.metadata as Record<string, unknown> | undefined;
   const schedule = obj.schedule as Record<string, unknown> | undefined;
-  const queryObj = obj.query as Record<string, unknown> | undefined;
+  const evaluation = obj.evaluation as Record<string, unknown> | undefined;
+  const evalQuery = evaluation?.query as Record<string, unknown> | undefined;
   const grouping = obj.grouping as Record<string, unknown> | undefined;
   const artifacts = parseArtifacts(obj.artifacts);
   const stateTransitionObj = obj.state_transition as Record<string, unknown> | undefined;
@@ -163,6 +173,28 @@ export const parseYamlToFormValues = (yamlString: string): YamlParseResult => {
       }
     : undefined;
 
+  const recoveryPolicyObj = obj.recovery_policy as Record<string, unknown> | undefined;
+  const recoveryPolicy: RecoveryPolicy | undefined = recoveryPolicyObj
+    ? {
+        type:
+          recoveryPolicyObj.type === 'query' || recoveryPolicyObj.type === 'no_breach'
+            ? recoveryPolicyObj.type
+            : 'no_breach',
+        ...(recoveryPolicyObj.type === 'query' &&
+        recoveryPolicyObj.query &&
+        typeof recoveryPolicyObj.query === 'object'
+          ? {
+              query: {
+                base:
+                  typeof (recoveryPolicyObj.query as Record<string, unknown>).base === 'string'
+                    ? ((recoveryPolicyObj.query as Record<string, unknown>).base as string)
+                    : undefined,
+              },
+            }
+          : {}),
+      }
+    : undefined;
+
   // Validate kind
   const kind = obj.kind;
   if (kind !== undefined && kind !== 'alert' && kind !== 'signal') {
@@ -174,13 +206,41 @@ export const parseYamlToFormValues = (yamlString: string): YamlParseResult => {
     };
   }
 
+  // Validate required fields
   const name = metadata?.name;
+  if (typeof name !== 'string' || !name.trim()) {
+    return {
+      values: null,
+      error: i18n.translate('xpack.alertingV2.yamlRuleForm.nameRequiredError', {
+        defaultMessage: 'metadata.name is required.',
+      }),
+    };
+  }
+
+  const queryBase = evalQuery?.base;
+  if (typeof queryBase !== 'string' || !queryBase.trim()) {
+    return {
+      values: null,
+      error: i18n.translate('xpack.alertingV2.yamlRuleForm.queryRequiredError', {
+        defaultMessage: 'evaluation.query.base is required.',
+      }),
+    };
+  }
+
+  // Validate ES|QL query syntax
+  const queryValidationError = validateEsqlQuery(queryBase);
+  if (queryValidationError) {
+    return {
+      values: null,
+      error: queryValidationError,
+    };
+  }
 
   return {
     values: {
       kind: (kind as 'alert' | 'signal') ?? 'alert',
       metadata: {
-        name: typeof name === 'string' ? name.trim() : '',
+        name: name.trim(),
         enabled: metadata?.enabled !== false,
         description: typeof metadata?.description === 'string' ? metadata.description : undefined,
         owner: typeof metadata?.owner === 'string' ? metadata.owner : undefined,
@@ -191,13 +251,16 @@ export const parseYamlToFormValues = (yamlString: string): YamlParseResult => {
         every: typeof schedule?.every === 'string' ? schedule.every : '5m',
         lookback: typeof schedule?.lookback === 'string' ? schedule.lookback : '1m',
       },
-      query: {
-        breach: typeof queryObj?.breach === 'string' ? queryObj.breach : '',
+      evaluation: {
+        query: {
+          base: queryBase,
+        },
       },
       grouping: Array.isArray(grouping?.fields)
         ? { fields: grouping.fields as string[] }
         : undefined,
       artifacts,
+      recoveryPolicy: recoveryPolicy ?? { type: 'no_breach' },
       stateTransition,
       stateTransitionAlertDelayMode: deriveAlertDelayModeFromStateTransition(stateTransition),
       stateTransitionRecoveryDelayMode: deriveRecoveryDelayModeFromStateTransition(stateTransition),

@@ -8,27 +8,44 @@
 import React, { useCallback, useState } from 'react';
 import { EuiButton, EuiFlyout, EuiFlyoutBody, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useFormContext, useWatch } from 'react-hook-form';
+import type { FormValues } from '../types';
 import { useRuleFormMeta } from '../contexts';
 import { RuleResultsPreview } from './rule_results_preview';
+import { RecoveryResultsPreview } from './recovery_results_preview';
 
 /**
- * Layout-aware wrapper for the rule results preview.
+ * Layout-aware wrapper for the rule and recovery results previews.
  *
- * - **Page layout**: Renders the preview inline (for side-by-side placement).
+ * - **Page layout**: Renders both previews inline (for side-by-side placement).
+ *   The recovery preview is only shown when the recovery policy type is `'query'`.
  * - **Flyout layout**: Renders a trigger button that opens a nested flyout
- *   containing the preview.
+ *   containing both previews.
  */
 export const RulePreviewPanel = () => {
   const { layout } = useRuleFormMeta();
+  const { control } = useFormContext<FormValues>();
+  const recoveryType = useWatch({ control, name: 'recoveryPolicy.type' });
+  const showRecoveryPreview = recoveryType === 'query';
 
   if (layout === 'page') {
-    return <RuleResultsPreview />;
+    return (
+      <>
+        <RuleResultsPreview />
+        {showRecoveryPreview && (
+          <>
+            <EuiSpacer size="m" />
+            <RecoveryResultsPreview />
+          </>
+        )}
+      </>
+    );
   }
 
-  return <FlyoutPreview />;
+  return <FlyoutPreview showRecoveryPreview={showRecoveryPreview} />;
 };
 
-const FlyoutPreview = () => {
+const FlyoutPreview = ({ showRecoveryPreview }: { showRecoveryPreview: boolean }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const openFlyout = useCallback(() => setIsOpen(true), []);
@@ -75,6 +92,12 @@ const FlyoutPreview = () => {
           <EuiFlyoutBody>
             <EuiSpacer size="m" />
             <RuleResultsPreview />
+            {showRecoveryPreview && (
+              <>
+                <EuiSpacer size="m" />
+                <RecoveryResultsPreview />
+              </>
+            )}
           </EuiFlyoutBody>
         </EuiFlyout>
       )}

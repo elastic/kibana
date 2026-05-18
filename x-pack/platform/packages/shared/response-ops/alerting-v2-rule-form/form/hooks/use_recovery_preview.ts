@@ -8,28 +8,33 @@
 import { useFormContext, useWatch } from 'react-hook-form';
 import type { FormValues } from '../types';
 import { usePreview } from './use_preview';
+import type { PreviewResult } from './use_preview';
 
-// Re-export shared types for backward compatibility
-export type { PreviewResult as RulePreviewResult, PreviewColumn } from './use_preview';
+export type { PreviewResult as RecoveryPreviewResult } from './use_preview';
 
 /**
- * Rule preview hook.
+ * Recovery preview hook.
  *
- * Watches the evaluation base query and delegates to the generic `usePreview`
- * hook for ES|QL execution, debouncing, and result mapping.
+ * Watches the recovery policy form fields and uses the standalone
+ * `recoveryPolicy.query.base` as the recovery query.
+ *
+ * Delegates to `usePreview` for ES|QL execution and result mapping.
+ * Disabled when recovery type is not `'query'`.
  */
-export const useRulePreview = () => {
+export const useRecoveryPreview = (): PreviewResult => {
   const { control } = useFormContext<FormValues>();
 
-  const baseQuery = useWatch({ control, name: 'evaluation.query.base' });
+  const recoveryBase = useWatch({ control, name: 'recoveryPolicy.query.base' });
+  const recoveryType = useWatch({ control, name: 'recoveryPolicy.type' });
   const timeField = useWatch({ control, name: 'timeField' });
   const lookback = useWatch({ control, name: 'schedule.lookback' });
   const groupingFields = useWatch({ control, name: 'grouping.fields' }) ?? [];
 
   return usePreview({
-    query: baseQuery ?? '',
+    query: recoveryBase?.trim() ?? '',
     timeField,
     lookback,
     groupingFields,
+    enabled: recoveryType === 'query',
   });
 };

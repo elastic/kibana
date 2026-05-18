@@ -11,7 +11,7 @@ import userEvent from '@testing-library/user-event';
 import { useForm, FormProvider } from 'react-hook-form';
 import { QueryClientProvider } from '@kbn/react-query';
 import type { AggregateQuery } from '@kbn/es-query';
-import { BreachQueryField } from './breach_query_field';
+import { EvaluationQueryField } from './evaluation_query_field';
 import { createFormWrapper, createTestQueryClient, defaultTestFormValues } from '../../test_utils';
 import type { FormValues } from '../types';
 
@@ -61,30 +61,30 @@ jest.mock('@kbn/alerting-v2-schemas', () => ({
   }),
 }));
 
-describe('BreachQueryField', () => {
+describe('EvaluationQueryField', () => {
   it('renders the editor with data-test-subj attribute', () => {
-    render(<BreachQueryField />, { wrapper: createFormWrapper() });
+    render(<EvaluationQueryField />, { wrapper: createFormWrapper() });
 
-    expect(screen.getByTestId('ruleV2FormBreachQueryField')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleV2FormEvaluationQueryField')).toBeInTheDocument();
   });
 
   it('displays initial value from form context', () => {
-    render(<BreachQueryField />, {
+    render(<EvaluationQueryField />, {
       wrapper: createFormWrapper({
-        query: { breach: 'FROM logs-* | STATS count = COUNT(*)' },
+        evaluation: { query: { base: 'FROM logs-* | STATS count = COUNT(*)' } },
       }),
     });
 
-    expect(screen.getByTestId('ruleV2FormBreachQueryField-editor-input')).toHaveValue(
+    expect(screen.getByTestId('ruleV2FormEvaluationQueryField-editor-input')).toHaveValue(
       'FROM logs-* | STATS count = COUNT(*)'
     );
   });
 
   it('updates value when user types', async () => {
     const user = userEvent.setup();
-    render(<BreachQueryField />, { wrapper: createFormWrapper() });
+    render(<EvaluationQueryField />, { wrapper: createFormWrapper() });
 
-    const textarea = screen.getByTestId('ruleV2FormBreachQueryField-editor-input');
+    const textarea = screen.getByTestId('ruleV2FormEvaluationQueryField-editor-input');
     await user.clear(textarea);
     await user.type(textarea, 'FROM metrics-*');
 
@@ -98,7 +98,7 @@ describe('BreachQueryField', () => {
       const form = useForm<FormValues>({
         defaultValues: {
           ...defaultTestFormValues,
-          query: { breach: '' },
+          evaluation: { query: { base: '' } },
         },
         mode: 'onSubmit',
       });
@@ -116,7 +116,7 @@ describe('BreachQueryField', () => {
     };
 
     const user = userEvent.setup();
-    render(<BreachQueryField />, { wrapper: WrapperWithSubmit });
+    render(<EvaluationQueryField />, { wrapper: WrapperWithSubmit });
 
     const submitButton = screen.getByText('Submit');
     await user.click(submitButton);
@@ -135,7 +135,7 @@ describe('BreachQueryField', () => {
       const form = useForm<FormValues>({
         defaultValues: {
           ...defaultTestFormValues,
-          query: { breach: 'INVALID QUERY' },
+          evaluation: { query: { base: 'INVALID QUERY' } },
         },
         mode: 'onSubmit',
       });
@@ -153,7 +153,7 @@ describe('BreachQueryField', () => {
     };
 
     const user = userEvent.setup();
-    render(<BreachQueryField />, { wrapper: WrapperWithSubmit });
+    render(<EvaluationQueryField />, { wrapper: WrapperWithSubmit });
 
     const submitButton = screen.getByText('Submit');
     await user.click(submitButton);
@@ -172,7 +172,7 @@ describe('BreachQueryField', () => {
       const form = useForm<FormValues>({
         defaultValues: {
           ...defaultTestFormValues,
-          query: { breach: 'FROM logs-* |' },
+          evaluation: { query: { base: 'FROM logs-* |' } },
         },
         mode: 'onSubmit',
       });
@@ -190,7 +190,7 @@ describe('BreachQueryField', () => {
     };
 
     const user = userEvent.setup();
-    render(<BreachQueryField />, { wrapper: WrapperWithSubmit });
+    render(<EvaluationQueryField />, { wrapper: WrapperWithSubmit });
 
     const submitButton = screen.getByText('Submit');
     await user.click(submitButton);
@@ -203,9 +203,9 @@ describe('BreachQueryField', () => {
   });
 
   it('accepts custom height prop', () => {
-    render(<BreachQueryField height={200} />, { wrapper: createFormWrapper() });
+    render(<EvaluationQueryField height={200} />, { wrapper: createFormWrapper() });
 
     // The component renders - height is passed to EsqlEditorField
-    expect(screen.getByTestId('ruleV2FormBreachQueryField')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleV2FormEvaluationQueryField')).toBeInTheDocument();
   });
 });

@@ -28,7 +28,7 @@ const TestWrapper = ({
       metadata: { name: '', enabled: false },
       timeField: '',
       schedule: { every: '', lookback: '' },
-      query: { breach: '' },
+      evaluation: { query: { base: '' } },
     },
   });
 
@@ -98,7 +98,7 @@ describe('ErrorCallOut', () => {
     it('displays multiple error messages', () => {
       const errors = createErrors({
         metadata: { message: 'Name is required' },
-        query: { message: 'Query is invalid' },
+        evaluation: { message: 'Query is invalid' },
         timeField: { message: 'Time field is required' },
       });
 
@@ -116,7 +116,7 @@ describe('ErrorCallOut', () => {
     it('filters out errors without messages', () => {
       const errors = createErrors({
         metadata: { message: 'Name is required' },
-        query: { message: undefined },
+        evaluation: { message: undefined },
         timeField: { message: '' },
       });
 

@@ -22,8 +22,10 @@ const mockUseRulePreview = jest.mocked(useRulePreviewModule.useRulePreview);
 const defaultFormValues = {
   timeField: '@timestamp',
   schedule: { every: '5m', lookback: '1m' },
-  query: {
-    breach: 'FROM logs-*',
+  evaluation: {
+    query: {
+      base: 'FROM logs-*',
+    },
   },
 };
 

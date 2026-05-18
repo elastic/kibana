@@ -41,7 +41,6 @@ export const useQueryColumns = ({ query, search, onSuccess }: UseQueryColumnsPro
     enabled: Boolean(query),
     refetchOnWindowFocus: false,
     retry: false,
-    keepPreviousData: true,
   });
 
   // Call onSuccess when columns are fetched for the current query

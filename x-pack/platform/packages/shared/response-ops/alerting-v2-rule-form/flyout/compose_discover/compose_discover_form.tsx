@@ -36,12 +36,12 @@ import type {
   StepDefinition,
 } from './types';
 import { getStepIds } from './use_compose_discover_state';
-import type { FormValues } from '../../form/types';
+import type { ComposeFormValues } from './compose_form_types';
 import { QuerySummary } from './query_summary';
 import type { RuleFormServices } from '../../form/contexts/rule_form_context';
 import { useDataFields } from '../../form/hooks/use_data_fields';
 import { splitQuery } from './use_heuristic_split';
-import { RuleDetailsFieldGroup } from '../../form';
+import { RuleDetailsFieldGroup } from '../../form/field_groups';
 import { ScheduleField } from '../../form/fields/schedule_field';
 import { LookbackWindowField } from '../../form/fields/lookback_window_field';
 import { RecoveryDelayField } from '../../form/fields/recovery_delay_field';
@@ -183,7 +183,7 @@ function AlertConditionStep({
   dispatch: React.Dispatch<ComposeDiscoverAction>;
   services: RuleFormServices;
 }) {
-  const { setValue, watch } = useFormContext<FormValues>();
+  const { setValue, watch } = useFormContext<ComposeFormValues>();
   const timeField = watch('timeField') ?? '@timestamp';
   const grouping = watch('grouping');
   const groupFields = grouping?.fields ?? [];

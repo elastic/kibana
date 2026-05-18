@@ -42,7 +42,6 @@ export const useDataFields = ({ query, http, dataViews, onSuccess }: UseDataFiel
     },
     enabled: Boolean(query),
     refetchOnWindowFocus: false,
-    keepPreviousData: true,
   });
 
   // Call onSuccess when data is fetched for the current query

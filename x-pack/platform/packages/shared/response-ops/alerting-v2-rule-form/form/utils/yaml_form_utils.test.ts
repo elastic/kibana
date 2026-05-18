@@ -14,6 +14,16 @@ import {
 import { defaultTestFormValues } from '../../test_utils';
 import type { FormValues } from '../types';
 
+// Mock ES|QL validation
+jest.mock('@kbn/alerting-v2-schemas', () => ({
+  validateEsqlQuery: (query: string) => {
+    if (!query || query.includes('INVALID')) {
+      return 'Invalid ES|QL query syntax';
+    }
+    return null;
+  },
+}));
+
 describe('yaml_form_utils', () => {
   describe('formValuesToYamlObject', () => {
     it('converts FormValues to YAML-compatible object with snake_case keys', () => {
@@ -31,8 +41,10 @@ describe('yaml_form_utils', () => {
           every: '5m',
           lookback: '1m',
         },
-        query: {
-          breach: 'FROM logs-* | LIMIT 10',
+        evaluation: {
+          query: {
+            base: 'FROM logs-* | LIMIT 10',
+          },
         },
         grouping: {
           fields: ['host.name', 'service.name'],
@@ -57,9 +69,10 @@ describe('yaml_form_utils', () => {
           every: '5m',
           lookback: '1m',
         },
-        query: {
-          format: 'standalone',
-          breach: 'FROM logs-* | LIMIT 10',
+        evaluation: {
+          query: {
+            base: 'FROM logs-* | LIMIT 10',
+          },
         },
         grouping: {
           fields: ['host.name', 'service.name'],
@@ -80,8 +93,10 @@ describe('yaml_form_utils', () => {
           every: '1m',
           lookback: '5m',
         },
-        query: {
-          breach: 'FROM logs-*',
+        evaluation: {
+          query: {
+            base: 'FROM logs-*',
+          },
         },
         stateTransitionAlertDelayMode: 'immediate',
         stateTransitionRecoveryDelayMode: 'immediate',
@@ -99,9 +114,10 @@ describe('yaml_form_utils', () => {
           every: '1m',
           lookback: '5m',
         },
-        query: {
-          format: 'standalone',
-          breach: 'FROM logs-*',
+        evaluation: {
+          query: {
+            base: 'FROM logs-*',
+          },
         },
       });
       expect(result).not.toHaveProperty('grouping');
@@ -111,7 +127,7 @@ describe('yaml_form_utils', () => {
     it('serializes state_transition when present', () => {
       const formValues: FormValues = {
         ...defaultTestFormValues,
-        query: { breach: 'FROM logs-*' },
+        evaluation: { query: { base: 'FROM logs-*' } },
         stateTransition: { pendingCount: 3, recoveringCount: 1 },
       };
 
@@ -126,7 +142,7 @@ describe('yaml_form_utils', () => {
     it('excludes state_transition when not present', () => {
       const formValues: FormValues = {
         ...defaultTestFormValues,
-        query: { breach: 'FROM logs-*' },
+        evaluation: { query: { base: 'FROM logs-*' } },
       };
 
       const result = formValuesToYamlObject(formValues);
@@ -134,10 +150,36 @@ describe('yaml_form_utils', () => {
       expect(result).not.toHaveProperty('state_transition');
     });
 
+    it('serializes recovery_policy with type no_breach', () => {
+      const formValues: FormValues = {
+        ...defaultTestFormValues,
+        evaluation: { query: { base: 'FROM logs-*' } },
+        recoveryPolicy: { type: 'no_breach' },
+      };
+
+      const result = formValuesToYamlObject(formValues);
+
+      expect(result.recovery_policy).toEqual({ type: 'no_breach' });
+    });
+
+    it('serializes recovery_policy with type query and base', () => {
+      const formValues: FormValues = {
+        ...defaultTestFormValues,
+        evaluation: { query: { base: 'FROM logs-*' } },
+        recoveryPolicy: { type: 'query', query: { base: 'FROM logs-* | WHERE status = "ok"' } },
+      };
+
+      const result = formValuesToYamlObject(formValues);
+
+      expect(result.recovery_policy).toEqual({
+        type: 'query',
+        query: { base: 'FROM logs-* | WHERE status = "ok"' },
+      });
+    });
+
     it('excludes empty grouping fields array', () => {
       const formValues: FormValues = {
         ...defaultTestFormValues,
-        query: { breach: 'FROM logs-*' },
         grouping: {
           fields: [],
         },
@@ -163,9 +205,10 @@ describe('yaml_form_utils', () => {
           every: '5m',
           lookback: '1m',
         },
-        query: {
-          format: 'standalone',
-          breach: 'FROM logs-*',
+        evaluation: {
+          query: {
+            base: 'FROM logs-*',
+          },
         },
         grouping: {
           fields: ['host.name'],
@@ -193,8 +236,10 @@ describe('yaml_form_utils', () => {
           every: '5m',
           lookback: '1m',
         },
-        query: {
-          breach: 'FROM logs-*',
+        evaluation: {
+          query: {
+            base: 'FROM logs-*',
+          },
         },
         grouping: {
           fields: ['host.name'],
@@ -203,6 +248,7 @@ describe('yaml_form_utils', () => {
           { id: 'artifact-1', type: 'host', value: 'host-a' },
           { id: 'artifact-2', type: 'service', value: 'service-a' },
         ],
+        recoveryPolicy: { type: 'no_breach' },
         stateTransitionAlertDelayMode: 'immediate',
         stateTransitionRecoveryDelayMode: 'immediate',
       });
@@ -211,7 +257,7 @@ describe('yaml_form_utils', () => {
     it('ignores invalid artifacts entries', () => {
       const yaml = dump({
         metadata: { name: 'Rule with mixed artifacts' },
-        query: { format: 'standalone', breach: 'FROM logs-*' },
+        evaluation: { query: { base: 'FROM logs-*' } },
         artifacts: [{ id: 'artifact-1', type: 'host', value: 'host-a' }, { id: 1 }, 'bad'],
       });
 
@@ -245,7 +291,7 @@ describe('yaml_form_utils', () => {
       const yaml = dump({
         kind: 'invalid',
         metadata: { name: 'Test' },
-        query: { format: 'standalone', breach: 'FROM logs-*' },
+        evaluation: { query: { base: 'FROM logs-*' } },
       });
 
       const result = parseYamlToFormValues(yaml);
@@ -254,62 +300,62 @@ describe('yaml_form_utils', () => {
       expect(result.error).toContain('Kind must be "alert" or "signal"');
     });
 
-    it('returns values with empty name when metadata.name is missing', () => {
+    it('returns error for missing name', () => {
       const yaml = dump({
         kind: 'alert',
         metadata: {},
-        query: { format: 'standalone', breach: 'FROM logs-*' },
+        evaluation: { query: { base: 'FROM logs-*' } },
       });
 
       const result = parseYamlToFormValues(yaml);
 
-      expect(result.error).toBeNull();
-      expect(result.values?.metadata.name).toBe('');
+      expect(result.values).toBeNull();
+      expect(result.error).toContain('metadata.name is required');
     });
 
-    it('returns values with trimmed empty name when name is whitespace', () => {
+    it('returns error for empty name', () => {
       const yaml = dump({
         kind: 'alert',
         metadata: { name: '   ' },
-        query: { format: 'standalone', breach: 'FROM logs-*' },
+        evaluation: { query: { base: 'FROM logs-*' } },
       });
 
       const result = parseYamlToFormValues(yaml);
 
-      expect(result.error).toBeNull();
-      expect(result.values?.metadata.name).toBe('');
+      expect(result.values).toBeNull();
+      expect(result.error).toContain('metadata.name is required');
     });
 
-    it('returns values with empty query when query.breach is missing', () => {
+    it('returns error for missing query', () => {
       const yaml = dump({
         kind: 'alert',
         metadata: { name: 'Test' },
-        query: {},
+        evaluation: { query: {} },
       });
 
       const result = parseYamlToFormValues(yaml);
 
-      expect(result.error).toBeNull();
-      expect(result.values?.query.breach).toBe('');
+      expect(result.values).toBeNull();
+      expect(result.error).toContain('evaluation.query.base is required');
     });
 
-    it('returns values for ES|QL query without validation', () => {
+    it('returns error for invalid ES|QL query', () => {
       const yaml = dump({
         kind: 'alert',
         metadata: { name: 'Test' },
-        query: { format: 'standalone', breach: 'INVALID query' },
+        evaluation: { query: { base: 'INVALID query' } },
       });
 
       const result = parseYamlToFormValues(yaml);
 
-      expect(result.error).toBeNull();
-      expect(result.values?.query.breach).toBe('INVALID query');
+      expect(result.values).toBeNull();
+      expect(result.error).toContain('Invalid ES|QL query syntax');
     });
 
     it('uses default values for missing optional fields', () => {
       const yaml = dump({
         metadata: { name: 'Minimal Rule' },
-        query: { format: 'standalone', breach: 'FROM logs-*' },
+        evaluation: { query: { base: 'FROM logs-*' } },
       });
 
       const result = parseYamlToFormValues(yaml);
@@ -328,7 +374,7 @@ describe('yaml_form_utils', () => {
     it('defaults enabled to true when not specified', () => {
       const yaml = dump({
         metadata: { name: 'Test' },
-        query: { format: 'standalone', breach: 'FROM logs-*' },
+        evaluation: { query: { base: 'FROM logs-*' } },
       });
 
       const result = parseYamlToFormValues(yaml);
@@ -339,7 +385,7 @@ describe('yaml_form_utils', () => {
     it('respects enabled: false', () => {
       const yaml = dump({
         metadata: { name: 'Test', enabled: false },
-        query: { format: 'standalone', breach: 'FROM logs-*' },
+        evaluation: { query: { base: 'FROM logs-*' } },
       });
 
       const result = parseYamlToFormValues(yaml);
@@ -350,7 +396,7 @@ describe('yaml_form_utils', () => {
     it('trims whitespace from name', () => {
       const yaml = dump({
         metadata: { name: '  Test Rule  ' },
-        query: { format: 'standalone', breach: 'FROM logs-*' },
+        evaluation: { query: { base: 'FROM logs-*' } },
       });
 
       const result = parseYamlToFormValues(yaml);
@@ -361,7 +407,7 @@ describe('yaml_form_utils', () => {
     it('derives breaches alert delay mode from state_transition with pending_count', () => {
       const yaml = dump({
         metadata: { name: 'Rule with breaches' },
-        query: { format: 'standalone', breach: 'FROM logs-*' },
+        evaluation: { query: { base: 'FROM logs-*' } },
         state_transition: { pending_count: 3 },
       });
 
@@ -381,7 +427,7 @@ describe('yaml_form_utils', () => {
     it('derives duration alert delay mode from state_transition with pending_timeframe', () => {
       const yaml = dump({
         metadata: { name: 'Rule with duration' },
-        query: { format: 'standalone', breach: 'FROM logs-*' },
+        evaluation: { query: { base: 'FROM logs-*' } },
         state_transition: { pending_timeframe: '10m' },
       });
 
@@ -395,7 +441,7 @@ describe('yaml_form_utils', () => {
     it('derives both delay modes from state_transition with pending and recovering fields', () => {
       const yaml = dump({
         metadata: { name: 'Rule with both' },
-        query: { format: 'standalone', breach: 'FROM logs-*' },
+        evaluation: { query: { base: 'FROM logs-*' } },
         state_transition: {
           pending_count: 2,
           recovering_timeframe: '15m',
@@ -415,10 +461,54 @@ describe('yaml_form_utils', () => {
       expect(result.values?.stateTransitionRecoveryDelayMode).toBe('duration');
     });
 
+    it('parses recovery_policy with type no_breach', () => {
+      const yaml = dump({
+        metadata: { name: 'Rule with recovery' },
+        evaluation: { query: { base: 'FROM logs-*' } },
+        recovery_policy: { type: 'no_breach' },
+      });
+
+      const result = parseYamlToFormValues(yaml);
+
+      expect(result.error).toBeNull();
+      expect(result.values?.recoveryPolicy).toEqual({ type: 'no_breach' });
+    });
+
+    it('parses recovery_policy with type query', () => {
+      const yaml = dump({
+        metadata: { name: 'Rule with query recovery' },
+        evaluation: { query: { base: 'FROM logs-*' } },
+        recovery_policy: {
+          type: 'query',
+          query: { base: 'FROM logs-* | WHERE status = "ok"' },
+        },
+      });
+
+      const result = parseYamlToFormValues(yaml);
+
+      expect(result.error).toBeNull();
+      expect(result.values?.recoveryPolicy).toEqual({
+        type: 'query',
+        query: { base: 'FROM logs-* | WHERE status = "ok"' },
+      });
+    });
+
+    it('defaults recovery_policy to no_breach when not present', () => {
+      const yaml = dump({
+        metadata: { name: 'No recovery policy' },
+        evaluation: { query: { base: 'FROM logs-*' } },
+      });
+
+      const result = parseYamlToFormValues(yaml);
+
+      expect(result.error).toBeNull();
+      expect(result.values?.recoveryPolicy).toEqual({ type: 'no_breach' });
+    });
+
     it('defaults both modes to immediate when no state_transition is present', () => {
       const yaml = dump({
         metadata: { name: 'No delay' },
-        query: { format: 'standalone', breach: 'FROM logs-*' },
+        evaluation: { query: { base: 'FROM logs-*' } },
       });
 
       const result = parseYamlToFormValues(yaml);
@@ -440,7 +530,7 @@ describe('yaml_form_utils', () => {
         },
         timeField: '@timestamp',
         schedule: { every: '5m', lookback: '1m' },
-        query: { breach: 'FROM logs-*' },
+        evaluation: { query: { base: 'FROM logs-*' } },
         stateTransitionAlertDelayMode: 'immediate',
         stateTransitionRecoveryDelayMode: 'immediate',
       };
@@ -464,10 +554,11 @@ describe('yaml_form_utils', () => {
         metadata: { name: 'Round-trip rule', enabled: true, description: 'desc' },
         timeField: '@timestamp',
         schedule: { every: '5m', lookback: '10m' },
-        query: {
-          breach: 'FROM logs-* | STATS count = COUNT(*) BY host.name | WHERE count > 5',
+        evaluation: {
+          query: { base: 'FROM logs-* | STATS count = COUNT(*) BY host.name | WHERE count > 5' },
         },
         stateTransition: { pendingCount: 2, recoveringCount: 2 },
+        recoveryPolicy: { type: 'no_breach' },
         stateTransitionAlertDelayMode: 'breaches',
         stateTransitionRecoveryDelayMode: 'recoveries',
       };
@@ -480,7 +571,7 @@ describe('yaml_form_utils', () => {
       expect(result.values?.kind).toBe(original.kind);
       expect(result.values?.metadata.name).toBe(original.metadata.name);
       expect(result.values?.timeField).toBe(original.timeField);
-      expect(result.values?.query.breach).toBe(original.query.breach);
+      expect(result.values?.evaluation.query.base).toBe(original.evaluation.query.base);
       expect(result.values?.schedule.every).toBe(original.schedule.every);
       expect(result.values?.schedule.lookback).toBe(original.schedule.lookback);
       expect(result.values?.stateTransition?.pendingCount).toBe(
@@ -489,6 +580,7 @@ describe('yaml_form_utils', () => {
       expect(result.values?.stateTransition?.recoveringCount).toBe(
         original.stateTransition?.recoveringCount
       );
+      expect(result.values?.recoveryPolicy).toEqual(original.recoveryPolicy);
     });
   });
 });
