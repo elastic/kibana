@@ -114,7 +114,7 @@ const createPersistedProvider = async ({
     },
     getAcl: async (agentId: string) => {
       const result = await client.getAcl(agentId);
-      return { canManage: result.canManage, acl: result.acl };
+      return { can_manage: result.canManage, acl: result.acl };
     },
     updateAcl: async (agentId, update) => {
       return client.updateAcl(agentId, update);

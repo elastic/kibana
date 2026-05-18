@@ -7,6 +7,7 @@
 
 import {
   AgentVisibility,
+  type AgentAcl,
   type CurrentUser,
   type UserIdAndName,
   hasAgentReadAccess,
@@ -109,6 +110,31 @@ export const hasManageAclAccess = ({
     currentUser: user,
     isAdmin,
   });
+
+/**
+ * Strips `acl.entries` from a returned agent definition when the caller is not allowed
+ * to manage the ACL.
+ */
+export const redactAclForCaller = <T extends { acl?: AgentAcl }>({
+  definition,
+  source,
+  user,
+  isAdmin,
+}: {
+  definition: T;
+  source: AgentProperties;
+  user: CurrentUser;
+  isAdmin: boolean;
+}): T => {
+  if (!definition.acl || definition.acl.entries.length === 0) {
+    return definition;
+  }
+  const canManage = hasManageAclAccess({ source, user, isAdmin });
+  if (canManage) {
+    return definition;
+  }
+  return { ...definition, acl: { entries: [] } };
+};
 
 /**
  * Builds an Elasticsearch DSL filter that limits the visible agents for a non-admin user

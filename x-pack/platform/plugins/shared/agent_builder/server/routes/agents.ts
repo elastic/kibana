@@ -528,8 +528,8 @@ export function registerAgentRoutes({
         const result = await service.getAcl(request.params.id);
 
         const body: GetAgentAclResponse = {
-          can_manage: result.canManage,
-          acl: result.canManage ? result.acl : { entries: [] },
+          can_manage: result.can_manage,
+          acl: result.can_manage ? result.acl : { entries: [] },
         };
         return response.ok<GetAgentAclResponse>({ body });
       })

@@ -58,6 +58,7 @@ import {
   hasReadAccess,
   hasUseAccess,
   hasWriteAccess,
+  redactAclForCaller,
   validateVisibilityUpdateAccess,
 } from './utils/access_control';
 import { hasRequiredDocumentFields } from './utils/helper';
@@ -227,12 +228,22 @@ class AgentClientImpl implements AgentClient {
   async get(agentId: string): Promise<PersistedAgentDefinition> {
     const document = await this.getDocumentWithAccess({ agentId, access: 'read' });
 
-    return fromEs(document);
+    return redactAclForCaller({
+      definition: fromEs(document),
+      source: document._source,
+      user: this.user,
+      isAdmin: this.isAdmin,
+    });
   }
 
   async getWithAccess(agentId: string, access: AgentAccess): Promise<PersistedAgentDefinition> {
     const document = await this.getDocumentWithAccess({ agentId, access });
-    return fromEs(document);
+    return redactAclForCaller({
+      definition: fromEs(document),
+      source: document._source,
+      user: this.user,
+      isAdmin: this.isAdmin,
+    });
   }
 
   async has(agentId: string): Promise<boolean> {
@@ -263,7 +274,15 @@ class AgentClientImpl implements AgentClient {
       },
     });
 
-    return response.hits.hits.map((hit) => fromEs(hit as Document));
+    return response.hits.hits.map((hit) => {
+      const document = hit as Document;
+      return redactAclForCaller({
+        definition: fromEs(document),
+        source: document._source!,
+        user: this.user,
+        isAdmin: this.isAdmin,
+      });
+    });
   }
 
   async create(profile: AgentCreateRequest): Promise<PersistedAgentDefinition> {
