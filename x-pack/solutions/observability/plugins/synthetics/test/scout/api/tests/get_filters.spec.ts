@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { tags } from '@kbn/scout-oblt';
+import { getPlaywrightTagsFor } from '@kbn/scout/src/playwright/tags';
 import { expect } from '@kbn/scout-oblt/api';
 import { apiTest, mergeSyntheticsApiHeaders } from '../fixtures';
 import { addMonitor } from '../fixtures/monitors';
@@ -29,7 +29,12 @@ const byLabel = (a: LabelCount, b: LabelCount) => a.label.localeCompare(b.label)
  */
 apiTest.describe(
   'getMonitorFilters',
-  { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
+  {
+    tag: [
+      ...getPlaywrightTagsFor('stateful', 'classic', 'local'),
+      ...getPlaywrightTagsFor('serverless', 'observability_complete', 'local'),
+    ],
+  },
   () => {
     let editorHeaders: Record<string, string>;
     let privateLocation: { id: string; label: string };
