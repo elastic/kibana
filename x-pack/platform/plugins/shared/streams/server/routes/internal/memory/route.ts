@@ -10,11 +10,20 @@ import type { IUiSettingsClient, Logger } from '@kbn/core/server';
 import { OBSERVABILITY_STREAMS_ENABLE_MEMORY } from '@kbn/management-settings-ids';
 import { notFound, forbidden, serverUnavailable } from '@hapi/boom';
 import {
+<<<<<<< HEAD
   STREAMS_MEMORY_CONSOLIDATION_WORKFLOW_ID,
   STREAMS_MEMORY_CONVERSATION_SCRAPER_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
+=======
+  STREAMS_API_PRIVILEGES,
+  CONVERSATION_SCRAPER_WORKFLOW_NAME,
+  MEMORY_CONSOLIDATION_WORKFLOW_NAME,
+  MEMORY_SYNTHESIS_WORKFLOW_NAME,
+  GAP_DETECTION_WORKFLOW_NAME,
+} from '../../../../common/constants';
+>>>>>>> 3c11d735f457 ([streams] Add sigevents gap detection agent)
 import { createServerRoute } from '../../create_server_route';
 import type {
   MemoryEntry,
@@ -505,6 +514,12 @@ const synthesizeMemoryRoute = createServerRoute({
   },
 });
 
+const detectGapsRoute = createWorkflowTriggerRoute(
+  'POST /internal/streams/memory/_detect_gaps',
+  GAP_DETECTION_WORKFLOW_NAME,
+  'Trigger gap detection for memory'
+);
+
 export const internalMemoryRoutes = {
   ...createEntryRoute,
   ...getEntryRoute,
@@ -520,4 +535,5 @@ export const internalMemoryRoutes = {
   ...scrapeConversationsRoute,
   ...consolidateMemoryRoute,
   ...synthesizeMemoryRoute,
+  ...detectGapsRoute,
 };

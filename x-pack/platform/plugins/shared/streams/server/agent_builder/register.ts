@@ -50,6 +50,17 @@ const conversationScraperAgent: AgentDefinition = {
   },
 };
 
+const gapDetectorAgent: AgentDefinition = {
+  id: 'sigevents.memory.gap-detector',
+  name: 'Gap Detector',
+  description:
+    'Audits the sigevents memory knowledge base against 11 required knowledge dimensions and writes a structured gaps page listing everything that is unknown, ambiguous, or missing.',
+  configuration: {
+    skill_ids: ['streams-gap-detection'],
+    tools: [],
+  },
+};
+
 export const registerStreamsAgentBuilder = async ({
   agentBuilder,
   getScopedClients,
@@ -93,6 +104,7 @@ export const registerStreamsAgentBuilder = async ({
   agentBuilder.agents.register(memorySynthesizerAgent);
   agentBuilder.agents.register(memoryConsolidatorAgent);
   agentBuilder.agents.register(conversationScraperAgent);
+  agentBuilder.agents.register(gapDetectorAgent);
   logger.info('sigevents memory agents registered');
 
   let memorySkillRegistered = false;
