@@ -16,12 +16,10 @@ export const eventsMappings = {
   dynamic: false,
   properties: {
     '@timestamp': mappings.date({ format: 'strict_date_optional_time' }),
-    verdict: mappings.keyword(),
     event_id: mappings.keyword(),
     discovery_id: mappings.keyword(),
     discovery_slug: mappings.keyword(),
     rule_names: mappings.keyword(),
-    grouped_into: mappings.keyword(),
   },
 } satisfies MappingsDefinition;
 
