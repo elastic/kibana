@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { RouterProvider } from '@kbn/typed-react-router-config';
-import { render } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import type { Location, MemoryHistory } from 'history';
 import { createMemoryHistory } from 'history';
 import qs from 'query-string';
@@ -14,12 +14,19 @@ import { RedirectWithDefaultEnvironment } from '.';
 import { apmRouter } from '../../apm_route_config';
 import * as useApmPluginContextExports from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
+import { fromQuery } from '../../../shared/links/url_helpers';
 
 describe('RedirectWithDefaultEnvironment', () => {
   let history: MemoryHistory;
 
+  const noQuery = '';
+
   beforeEach(() => {
     history = createMemoryHistory();
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   function renderUrl(location: Pick<Location, 'pathname' | 'search'>, defaultSetting: string) {
@@ -43,25 +50,23 @@ describe('RedirectWithDefaultEnvironment', () => {
   }
 
   it('eventually renders the child element', async () => {
-    const element = renderUrl(
+    const view = renderUrl(
       {
         pathname: '/services',
-        search: location.search,
+        search: noQuery,
       },
       ''
     );
 
-    await expect(element.findByText('Foo')).resolves.not.toBeUndefined();
-
-    // assertion to make sure our element test actually works
-    await expect(element.findByText('Bar')).rejects.not.toBeUndefined();
+    expect(await view.findByText('Foo')).toBeInTheDocument();
+    expect(view.queryByText('Bar')).not.toBeInTheDocument();
   });
 
   it('redirects to ENVIRONMENT_ALL if not set', async () => {
     renderUrl(
       {
         pathname: '/services',
-        search: location.search,
+        search: noQuery,
       },
       ''
     );
@@ -69,11 +74,31 @@ describe('RedirectWithDefaultEnvironment', () => {
     expect(qs.parse(history.entries[0].search).environment).toEqual(ENVIRONMENT_ALL.value);
   });
 
+  it('preserves existing query when adding default environment', async () => {
+    renderUrl(
+      {
+        pathname: '/services',
+        search: fromQuery({
+          rangeFrom: 'now-15m',
+          rangeTo: 'now',
+        }),
+      },
+      ''
+    );
+
+    await waitFor(() => {
+      const parsed = qs.parse(history.location.search);
+      expect(parsed.environment).toEqual(ENVIRONMENT_ALL.value);
+      expect(parsed.rangeFrom).toEqual('now-15m');
+      expect(parsed.rangeTo).toEqual('now');
+    });
+  });
+
   it('redirects to the default environment if set', () => {
     renderUrl(
       {
         pathname: '/services',
-        search: location.search,
+        search: noQuery,
       },
       'production'
     );
@@ -99,7 +124,7 @@ describe('RedirectWithDefaultEnvironment', () => {
     renderUrl(
       {
         pathname: '/services/opbeans-java',
-        search: location.search,
+        search: noQuery,
       },
       ''
     );

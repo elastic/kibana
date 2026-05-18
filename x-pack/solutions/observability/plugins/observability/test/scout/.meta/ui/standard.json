@@ -1,5 +1,5 @@
 {
-  "sha1": "28e201388316e8747cfe5b8ce81c3c374ec1a63e",
+  "sha1": "512381122a506479f0b866f8b7a3ed3287ff9f0e",
   "tests": [
     {
       "id": "08ad6c943106b9a-e97f149531b91cd",
@@ -11,7 +11,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/esql_landing.spec.ts",
-        "line": 53,
+        "line": 57,
         "column": 9
       }
     },
@@ -25,7 +25,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/esql_landing.spec.ts",
-        "line": 72,
+        "line": 76,
         "column": 9
       }
     }

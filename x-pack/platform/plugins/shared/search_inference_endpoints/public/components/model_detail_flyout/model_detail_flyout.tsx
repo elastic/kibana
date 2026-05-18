@@ -31,7 +31,7 @@ import {
   isInferenceEndpointWithDisplayNameMetadata,
   isInferenceEndpointWithDisplayCreatorMetadata,
 } from '../../../common/type_guards';
-import { TASK_TYPE_TOOLTIPS } from '../all_inference_endpoints/render_table_columns/render_endpoint/translations';
+import { TASK_TYPE_TOOLTIPS } from '../all_inference_endpoints/render_table_columns/render_endpoint/endpoint_info';
 import { getModelId } from '../../utils/get_model_id';
 import { AddEndpointModal } from './add_endpoint_modal';
 import { ModelEndpointRow } from './model_endpoint_row';
@@ -115,7 +115,12 @@ export const ModelDetailFlyout: React.FC<ModelDetailFlyoutProps> = ({
         defaultMessage: 'Documentation',
       }),
       description: (
-        <EuiLink href={docLinks.elasticInferenceService} target="_blank" external>
+        <EuiLink
+          data-test-subj="searchInferenceEndpointsModelDetailFlyoutViewDocumentationLink"
+          href={docLinks.elasticInferenceService}
+          target="_blank"
+          external
+        >
           {i18n.translate(
             'xpack.searchInferenceEndpoints.modelDetailFlyout.viewDocumentationLink',
             { defaultMessage: 'View documentation' }

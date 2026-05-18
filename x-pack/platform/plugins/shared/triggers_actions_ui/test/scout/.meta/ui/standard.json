@@ -1,5 +1,5 @@
 {
-  "sha1": "09f3aff2a16f17a036d9d0ea55866027e36507f7",
+  "sha1": "f70f5c927ac8b29e9c4f447a93c15daae37294dc",
   "tests": [
     {
       "id": "b4b539a64e36b08-cf340212ea83da6",
@@ -13,6 +13,20 @@
         "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rule_details_alerts_tab.spec.ts",
         "line": 80,
         "column": 7
+      }
+    },
+    {
+      "id": "e3c419a0049fd78-26ee1dab0262b36",
+      "title": "Rule snooze scheduler legacy theme independence keeps the scheduler stable without legacy theme CSS",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/triggers_actions_ui/test/scout/ui/tests/rule_snooze_scheduler_legacy_theme.spec.ts",
+        "line": 59,
+        "column": 9
       }
     }
   ]

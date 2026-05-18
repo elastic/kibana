@@ -44,6 +44,7 @@ Important: Do not post GitHub comments unless explicitly stated.
 - **RBAC / realism**: minimal permissions (avoid `admin` unless required); space-aware behavior covered or explicitly out of scope.
 - **Flake traps**: avoid `waitForTimeout()` and time-based assertions/retries; rely on auto-waiting + explicit readiness signals. Some locators are restricted by `@kbn/eslint/scout_no_locators` (e.g. `globalLoadingIndicator`).
 - **Cost**: avoid repeating expensive setup; consider a global setup hook for shared one-time operations.
+- **Global teardown** (when `global.teardown.ts` is present): cleanup must use `esClient`/`kbnClient`/`apiServices`. `esArchiver` isn't on the teardown fixture surface — Scout intentionally never exposed archive-unloading (slow and unnecessary; leftover indexes don't break tests with idempotent `loadIfNeeded`). Flag teardowns that try to use `esArchiver` at all, that **load** new data (teardown is for state reset only), or that duplicate work belonging in `afterAll`/per-test cleanup.
 - **Tags / environment**: validate deployment tags and avoid assumptions that only hold in specific environments.
 
 ### Migration parity analysis (required when migration is detected)

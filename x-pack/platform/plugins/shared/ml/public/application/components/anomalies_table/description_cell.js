@@ -23,7 +23,7 @@ export function DescriptionCell({ actual, typical }) {
     <EuiFlexGroup gutterSize="s" alignItems="center">
       {iconType !== undefined && (
         <EuiFlexItem grow={false}>
-          <EuiIcon type={iconType} size="s" />
+          <EuiIcon type={iconType} size="s" aria-hidden={true} />
         </EuiFlexItem>
       )}
       <EuiFlexItem grow={false}>

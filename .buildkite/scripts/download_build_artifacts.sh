@@ -10,7 +10,7 @@ if [[ "${KIBANA_BUILD_ID:-}" != "false" ]]; then
 
     cd "$WORKSPACE"
 
-    download_artifact kibana-default.tar.zst . --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
+    download_tmp_artifact kibana-default.tar.zst . "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
 
     mkdir -p "$KIBANA_BUILD_LOCATION"
     tar -xf kibana-default.tar.zst -I zstd -C "$KIBANA_BUILD_LOCATION" --strip=1
