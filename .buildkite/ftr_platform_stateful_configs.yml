@@ -360,7 +360,6 @@ enabled:
   - x-pack/platform/test/rule_registry/security_and_spaces/config_trial.ts
   - x-pack/platform/test/rule_registry/spaces_only/config_basic.ts
   - x-pack/platform/test/rule_registry/spaces_only/config_trial.ts
-  - x-pack/platform/test/saved_object_tagging/functional/config.ts
   - x-pack/platform/test/saved_objects_field_count/config.ts
   - x-pack/platform/test/search_sessions_integration/config.ts
   - x-pack/platform/test/search_sessions_integration/config.discover.ts
