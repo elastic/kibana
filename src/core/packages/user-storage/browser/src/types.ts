@@ -32,16 +32,19 @@ export interface UserStorageUpdate<T = unknown> {
  */
 export interface IUserStorageClient {
   /**
-   * Synchronous read from the local cache. Returns `defaultValue` (or
-   * `undefined` if not provided) when no cached value exists for the key.
+   * Synchronous read from the local cache. Returns `undefined` when no cached
+   * value exists for the key and no `defaultValue` is provided.
    */
-  get<T = unknown>(key: string, defaultValue?: T): T;
+  get<T = unknown>(key: string): T | undefined;
+  get<T = unknown>(key: string, defaultValue: T): T;
 
   /**
    * Observable that emits the current cached value followed by every future
-   * value seen for the given key. Suitable for React subscriptions.
+   * value seen for the given key. Emits `undefined` when no cached value
+   * exists and no `defaultValue` is provided. Suitable for React subscriptions.
    */
-  get$<T = unknown>(key: string, defaultValue?: T): Observable<T>;
+  get$<T = unknown>(key: string): Observable<T | undefined>;
+  get$<T = unknown>(key: string, defaultValue: T): Observable<T>;
 
   /**
    * Returns a clone of every cached key/value pair.

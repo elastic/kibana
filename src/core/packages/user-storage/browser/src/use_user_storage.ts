@@ -9,6 +9,7 @@
 
 import { useCallback, useContext, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
+import type { Observable } from 'rxjs';
 import type { IUserStorageClient } from './types';
 import { UserStorageContext } from './user_storage_context';
 
@@ -37,6 +38,10 @@ export type UserStorageSetter<T> = (newValue: T) => Promise<void>;
  * tuple. The value reflects the synchronous cache and re-renders on change.
  * The setter persists via HTTP and updates the cache on success.
  *
+ * When called without a `defaultValue` the first element of the tuple is
+ * `T | undefined` — it is `undefined` when the key has no cached value.
+ * When called with a `defaultValue` it is always `T`.
+ *
  * @example
  * ```tsx
  * const [layout, setLayout] = useUserStorage<NavLayout>(
@@ -47,18 +52,29 @@ export type UserStorageSetter<T> = (newValue: T) => Promise<void>;
  *
  * @public
  */
-export const useUserStorage = <T = unknown>(
+export function useUserStorage<T = unknown>(key: string): [T | undefined, UserStorageSetter<T>];
+export function useUserStorage<T = unknown>(
+  key: string,
+  defaultValue: T
+): [T, UserStorageSetter<T>];
+export function useUserStorage<T = unknown>(
   key: string,
   defaultValue?: T
-): [T, UserStorageSetter<T>] => {
+): [T | undefined, UserStorageSetter<T>] {
   const client = useUserStorageClient();
 
-  const observable$ = useMemo(() => client.get$<T>(key, defaultValue), [client, key, defaultValue]);
-  const value = useObservable<T>(observable$, client.get<T>(key, defaultValue as T));
+  const observable$: Observable<T | undefined> = useMemo(
+    () => (defaultValue !== undefined ? client.get$<T>(key, defaultValue) : client.get$<T>(key)),
+    [client, key, defaultValue]
+  );
+  const value = useObservable<T | undefined>(
+    observable$,
+    defaultValue !== undefined ? client.get<T>(key, defaultValue) : client.get<T>(key)
+  );
   const set = useCallback<UserStorageSetter<T>>(
     (newValue) => client.set<T>(key, newValue),
     [client, key]
   );
 
-  return [value as T, set];
-};
+  return [value, set];
+}

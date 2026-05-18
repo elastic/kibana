@@ -44,17 +44,23 @@ export class UserStorageClient implements IUserStorageClient {
     });
   }
 
-  public get<T = unknown>(key: string, defaultValue?: T): T {
+  public get<T = unknown>(key: string): T | undefined;
+  public get<T = unknown>(key: string, defaultValue: T): T;
+  public get<T = unknown>(key: string, defaultValue?: T): T | undefined {
     const cached = this.cache[key];
-    return (cached !== undefined ? cached : defaultValue) as T;
+    return cached !== undefined ? (cached as T) : defaultValue;
   }
 
-  public get$<T = unknown>(key: string, defaultValue?: T): Observable<T> {
+  public get$<T = unknown>(key: string): Observable<T | undefined>;
+  public get$<T = unknown>(key: string, defaultValue: T): Observable<T>;
+  public get$<T = unknown>(key: string, defaultValue?: T): Observable<T | undefined> {
+    const getCurrent = () =>
+      defaultValue !== undefined ? this.get<T>(key, defaultValue) : this.get<T>(key);
     return concat(
-      defer(() => of(this.get<T>(key, defaultValue))),
+      defer(() => of(getCurrent())),
       this.update$.pipe(
         filter((u) => u.key === key),
-        map(() => this.get<T>(key, defaultValue))
+        map(() => getCurrent())
       )
     );
   }
