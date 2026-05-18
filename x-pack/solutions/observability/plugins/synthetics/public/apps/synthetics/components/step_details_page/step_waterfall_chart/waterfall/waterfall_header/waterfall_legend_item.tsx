@@ -53,7 +53,12 @@ export function WaterfallLegendItem<T = string>({
         onClick?.(id);
       }}
     >
-      <EuiIcon color={color} size="m" type={isBoxFilled ? 'stopFill' : 'stopSlash'} />
+      <EuiIcon
+        color={color}
+        size="m"
+        type={isBoxFilled ? 'stopFill' : 'stopSlash'}
+        aria-hidden={true}
+      />
 
       <EuiText size="xs">{label}</EuiText>
     </EuiFlexGroup>

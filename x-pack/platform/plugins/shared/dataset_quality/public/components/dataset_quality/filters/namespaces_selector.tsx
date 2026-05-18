@@ -96,6 +96,7 @@ export function NamespacesSelector({
           placeholder: namespacesSelectorSearchPlaceholder,
           compressed: true,
         }}
+        listProps={{ paddingSize: 's' }}
         aria-label={namespacesSelectorLabel}
         options={namespaces}
         onChange={onNamespacesChange}

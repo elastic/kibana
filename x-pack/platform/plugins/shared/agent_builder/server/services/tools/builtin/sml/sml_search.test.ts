@@ -14,7 +14,6 @@ import { createSmlSearchTool } from './sml_search';
 const mockSearch = jest.fn();
 const getAgentContextLayer = jest.fn(() => ({
   search: mockSearch,
-  checkItemsAccess: jest.fn(),
   indexAttachment: jest.fn(),
   getDocuments: jest.fn(),
   getTypeDefinition: jest.fn(),

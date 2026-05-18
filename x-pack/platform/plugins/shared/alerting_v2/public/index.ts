@@ -22,10 +22,12 @@ import {
   ALERTING_V2_RULES_APP_ID,
   ALERTING_V2_ACTION_POLICIES_APP_ID,
   ALERTING_V2_EPISODES_APP_ID,
+  ALERTING_V2_EXECUTION_HISTORY_APP_ID,
   ALERTING_V2_RULE_DOCTOR_APP_ID,
 } from './constants';
 import { ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID } from '../common/advanced_settings';
 import { ActionPoliciesApi } from './services/action_policies_api';
+import { ExecutionHistoryApi } from './services/execution_history_api';
 import { RulesApi } from './services/rules_api';
 import { WorkflowsApi } from './services/workflows_api';
 import { registerTriggerDefinitions } from './lib/workflow_extensions/register_trigger_definitions';
@@ -39,6 +41,7 @@ export type { CreateRuleFormFlyoutProps } from './create_rule_form_flyout';
 export const module = new ContainerModule(({ bind }) => {
   bind(RulesApi).toSelf().inSingletonScope();
   bind(ActionPoliciesApi).toSelf().inSingletonScope();
+  bind(ExecutionHistoryApi).toSelf().inSingletonScope();
   bind(WorkflowsApi).toSelf().inSingletonScope();
   bind(Start).toConstantValue({
     DynamicRuleFormFlyout,
@@ -170,6 +173,23 @@ export const module = new ContainerModule(({ bind }) => {
           },
         });
       }
+    });
+
+    alertingV2Section.registerApp({
+      id: ALERTING_V2_EXECUTION_HISTORY_APP_ID,
+      title: i18n.translate('xpack.alertingV2.management.executionHistoryNavTitle', {
+        defaultMessage: 'Execution history',
+      }),
+      order: 5,
+      async mount(params) {
+        const [coreStart] = await getStartServices();
+        const { mountExecutionHistoryApp } = await import('./application/mount');
+        return mountExecutionHistoryApp({
+          params,
+          container: coreStart.injection.getContainer(),
+          coreStart,
+        });
+      },
     });
   });
 });
