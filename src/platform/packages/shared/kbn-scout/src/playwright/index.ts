@@ -56,7 +56,7 @@ export type {
 } from './fixtures/scope/worker';
 
 // Tagging utility
-export { tags, getPlaywrightTagsFor } from './tags';
+export { tags } from './tags';
 
 // Test entrypoints
 export { test, spaceTest, lighthouseTest, globalSetupHook, globalTeardownHook } from './test/ui';
