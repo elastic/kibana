@@ -17,15 +17,15 @@ describe('entity_summary_staleness', () => {
       expect(
         buildEntitySummaryStaleness(
           {
-            riskLevel: 'high',
+            riskScore: 82.97,
             anomalyJobIds: ['job-a'],
             ruleNames: ['Rule A'],
           },
-          ['risk_level']
+          ['risk_score']
         )
       ).toEqual({
-        enabled_signals: ['risk_level'],
-        snapshot: { risk_level: 'high' },
+        enabled_signals: ['risk_score'],
+        snapshot: { risk_score: 82.97 },
       });
     });
   });
@@ -36,35 +36,21 @@ describe('entity_summary_staleness', () => {
         highlights: [{ title: 'T', text: 'x' }],
       } as EntitySummaryAttribute;
 
-      expect(computeEntitySummaryStalenessReasons(summary, { riskLevel: 'high' })).toEqual([]);
-    });
-
-    it('detects risk level change when risk_level is enabled', () => {
-      const summary = {
-        highlights: [{ title: 'T', text: 'x' }],
-        staleness: {
-          enabled_signals: ['risk_level'],
-          snapshot: { risk_level: 'low' },
-        },
-      } as EntitySummaryAttribute;
-
-      expect(computeEntitySummaryStalenessReasons(summary, { riskLevel: 'high' })).toEqual([
-        'Risk level changed from low to high',
-      ]);
+      expect(computeEntitySummaryStalenessReasons(summary, {})).toEqual([]);
     });
 
     it('ignores anomaly jobs when not enabled', () => {
       const summary = {
         highlights: [{ title: 'T', text: 'x' }],
         staleness: {
-          enabled_signals: ['risk_level'],
-          snapshot: { risk_level: 'low', anomaly_job_ids: [] },
+          enabled_signals: ['risk_score'],
+          snapshot: { risk_score: 70, anomaly_job_ids: [] },
         },
       } as EntitySummaryAttribute;
 
       expect(
         computeEntitySummaryStalenessReasons(summary, {
-          riskLevel: 'low',
+          riskScore: 70,
           anomalyJobIds: ['new-job'],
         })
       ).toEqual([]);
@@ -98,33 +84,18 @@ describe('entity_summary_staleness', () => {
 
     it('builds risk_score snapshot when enabled', () => {
       expect(
-        buildEntitySummaryStaleness(
-          { riskLevel: 'high', riskScore: 82.97 },
-          ['risk_score']
-        )
+        buildEntitySummaryStaleness({ riskScore: 82.97 }, ['risk_score'])
       ).toEqual({
         enabled_signals: ['risk_score'],
         snapshot: { risk_score: 82.97 },
       });
     });
 
-    it('does not flag stale when risk level is cleared', () => {
-      const summary = {
-        highlights: [{ title: 'T', text: 'x' }],
-        staleness: {
-          enabled_signals: ['risk_level'],
-          snapshot: { risk_level: 'high' },
-        },
-      } as EntitySummaryAttribute;
-
-      expect(computeEntitySummaryStalenessReasons(summary, { riskLevel: null })).toEqual([]);
-    });
-
     it('does not flag stale when anomaly jobs are removed', () => {
       const summary = {
         highlights: [{ title: 'T', text: 'x' }],
         staleness: {
-          enabled_signals: ['anomaly_jobs'],
+          enabled_signals: ['anomaly_job_ids'],
           snapshot: { anomaly_job_ids: ['job-a', 'job-b'] },
         },
       } as EntitySummaryAttribute;
@@ -143,16 +114,16 @@ describe('entity_summary_staleness', () => {
           enabled_signals: ['future_signal'],
           snapshot: {},
         },
-      } as EntitySummaryAttribute;
+      } as unknown as EntitySummaryAttribute;
 
-      expect(computeEntitySummaryStalenessReasons(summary, { riskLevel: 'high' })).toEqual([]);
+      expect(computeEntitySummaryStalenessReasons(summary, {})).toEqual([]);
     });
 
-    it('detects new anomaly jobs when anomaly_jobs is enabled', () => {
+    it('detects new anomaly jobs when anomaly_job_ids is enabled', () => {
       const summary = {
         highlights: [{ title: 'T', text: 'x' }],
         staleness: {
-          enabled_signals: ['anomaly_jobs'],
+          enabled_signals: ['anomaly_job_ids'],
           snapshot: { anomaly_job_ids: ['job-a'] },
         },
       } as EntitySummaryAttribute;

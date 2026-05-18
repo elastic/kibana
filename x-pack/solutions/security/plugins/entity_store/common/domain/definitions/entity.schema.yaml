@@ -181,19 +181,17 @@ components:
                       items:
                         type: string
                         enum:
-                          - risk_level
                           - risk_score
-                          - anomaly_jobs
+                          - anomaly_job_ids
                           - rule_names
                     snapshot:
                       type: object
-                      description: Signal values captured at generation time.
+                      description: >
+                        Signal values captured at generation time. Property names must stay in
+                        sync with `enabled_signals` enum values — adding a signal to the enum
+                        requires a matching snapshot property here.
                       additionalProperties: false
                       properties:
-                        risk_level:
-                          type: string
-                          nullable: true
-                          description: entity.risk.calculated_level at generation time.
                         risk_score:
                           type: number
                           nullable: true

@@ -25,7 +25,6 @@ export function buildEntitySummaryStalenessEntitySnapshot(
 ): EntitySummaryStalenessEntitySnapshot {
   const risk = record ? getRiskFromEntityRecord(record) : null;
   return {
-    riskLevel: risk?.calculated_level ?? null,
     riskScore: risk?.calculated_score ?? null,
     anomalyJobIds: record?.entity?.behaviors?.anomaly_job_ids ?? [],
     ruleNames: record?.entity?.behaviors?.rule_names ?? [],

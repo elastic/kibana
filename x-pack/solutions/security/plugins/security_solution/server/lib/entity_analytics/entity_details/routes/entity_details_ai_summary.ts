@@ -22,15 +22,15 @@ const AiSummaryHighlightItem = z.object({
   text: z.string(),
 });
 
+// Snapshot property names must stay in sync with enabled_signals enum values.
 const EntitySummaryStalenessSnapshotSchema = z.object({
-  risk_level: z.string().nullable().optional(),
   risk_score: z.number().nullable().optional(),
   anomaly_job_ids: z.array(z.string()).nullable().optional(),
   rule_names: z.array(z.string()).nullable().optional(),
 });
 
 const EntitySummaryStalenessSchema = z.object({
-  enabled_signals: z.array(z.enum(['risk_level', 'risk_score', 'anomaly_jobs', 'rule_names'])),
+  enabled_signals: z.array(z.enum(['risk_score', 'anomaly_job_ids', 'rule_names'])),
   snapshot: EntitySummaryStalenessSnapshotSchema,
 });
 

@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { ENTITY_ANOMALY_DEFAULT_LOOKBACK_DAYS } from '../../../../../common/constants';
 import {
   type EntitySummaryAttribute,
+  type EntitySummaryStalenessEntitySnapshot,
   buildEntitySummaryStaleness,
 } from '@kbn/entity-store/common';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
@@ -95,12 +96,7 @@ export const useFetchEntityDetailsHighlights = ({
   entityIdentifier: string;
   storedSummary?: EntitySummaryAttribute | null;
   /** Current entity signal values — snapshotted into the summary at generation time for staleness detection. */
-  entitySnapshot?: {
-    riskLevel?: string | null;
-    riskScore?: number | null;
-    anomalyJobIds?: string[];
-    ruleNames?: string[];
-  } | null;
+  entitySnapshot?: EntitySummaryStalenessEntitySnapshot | null;
 }) => {
   const { inference } = useKibana().services;
   const { fetchEntityDetailsHighlights, saveEntityAiSummary } = useEntityAnalyticsRoutes();
@@ -200,7 +196,6 @@ export const useFetchEntityDetailsHighlights = ({
           recommendedActions: typedOutput.recommendedActions,
           generated_at: generatedAt,
           staleness: buildEntitySummaryStaleness({
-            riskLevel: entitySnapshot?.riskLevel ?? null,
             riskScore: entitySnapshot?.riskScore ?? null,
             anomalyJobIds: entitySnapshot?.anomalyJobIds ?? [],
             ruleNames: entitySnapshot?.ruleNames ?? [],
