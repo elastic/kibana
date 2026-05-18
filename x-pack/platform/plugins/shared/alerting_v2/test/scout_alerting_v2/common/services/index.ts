@@ -14,8 +14,8 @@ export { getInsightsApiService } from './insights_api_service';
 export type { RuleEventsApiService } from './rule_events_api_service';
 export { getRuleEventsApiService } from './rule_events_api_service';
 
-export type { TaskExecutionsApiService } from './task_executions_api_service';
-export { getTaskExecutionsApiService } from './task_executions_api_service';
+export type { RuleExecutionsApiService } from './rule_executions_api_service';
+export { getRuleExecutionsApiService } from './rule_executions_api_service';
 
 export type { AlertActionsApiService, AlertActionsFilter } from './alert_actions_api_service';
 export { getAlertActionsApiService } from './alert_actions_api_service';
@@ -25,3 +25,6 @@ export { getActionPoliciesApiService } from './action_policies_api_service';
 
 export type { MaintenanceWindowsApiService } from './maintenance_windows_api_service';
 export { getMaintenanceWindowsApiService } from './maintenance_windows_api_service';
+
+export type { DispatcherApiService, WaitForDispatcherTickParams } from './dispatcher_api_service';
+export { getDispatcherApiService } from './dispatcher_api_service';

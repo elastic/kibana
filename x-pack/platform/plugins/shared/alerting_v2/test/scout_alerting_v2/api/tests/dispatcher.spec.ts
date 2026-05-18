@@ -26,15 +26,6 @@ import { apiTest, buildCreateRuleData, testData } from '../fixtures';
 
 const { POLL_INTERVAL_MS, POLL_TIMEOUT_MS } = testData;
 
-/**
- * Time-based wait used by tests that assert an exact count of side-effect
- * actions, where the next dispatcher tick must not produce extras. Sized to
- * comfortably cover ~1 dispatcher tick (SCHEDULE_INTERVAL is 5s) so a
- * regression that incorrectly produced extra actions has time to surface
- * before we lock in the count.
- */
-const WAIT_TIME_MS = 12_000;
-
 const ACTION_POLICY_ID = 'np-1';
 const ACTION_POLICY_MATCHER_ID = 'np-matcher';
 const ACTION_POLICY_GROUPBY_ID = 'np-groupby';
@@ -129,9 +120,10 @@ const buildAlertAction = ({
 
 /**
  * Polls `apiServices.alertingV2.alertActions.find(...)` until the count matches
- * `expected`, then asserts no further actions arrive within an extra grace
- * period. Use this when a test asserts an exact number of side-effect actions
- * (the next dispatcher tick must not produce extras).
+ * `expected`, then waits for one more dispatcher tick to surface any extras
+ * a regression might produce, and finally asserts the count is exactly
+ * `expected`. Use this when a test asserts an exact number of side-effect
+ * actions (the next dispatcher tick must not produce extras).
  */
 const expectStableCount = async (
   apiServices: AlertingApiServicesFixture,
@@ -140,9 +132,13 @@ const expectStableCount = async (
 ): Promise<AlertAction[]> => {
   await apiServices.alertingV2.alertActions.waitForAtLeast(expected, filter);
 
-  // Poll for ~1 dispatcher tick + margin so a regression that produces extra
-  // actions has time to surface before we lock in the count.
-  await wait(WAIT_TIME_MS);
+  // Wait for at least one full dispatcher tick AFTER the count reached
+  // `expected`. Polling the Task Manager event log for the dispatcher's
+  // `task-run` entry is strictly more correct than sleeping by wall-clock
+  // time: we verify a tick actually ran (so a regression that produces
+  // extras has had the chance to do so) rather than hoping one fit inside
+  // a fixed timeout.
+  await apiServices.alertingV2.dispatcher.waitForDispatcherTick();
 
   const actions = await apiServices.alertingV2.alertActions.find(filter);
   expect(actions).toHaveLength(expected);
@@ -151,18 +147,12 @@ const expectStableCount = async (
 
 apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
   apiTest.beforeAll(async ({ apiServices }) => {
-    // Drop any leftovers from previous runs before seeding fresh fixtures.
     await apiServices.alertingV2.maintenanceWindows.cleanUp();
     await apiServices.alertingV2.actionPolicies.cleanUp();
     await apiServices.alertingV2.rules.cleanUp();
     await apiServices.alertingV2.ruleEvents.cleanUp();
     await apiServices.alertingV2.alertActions.cleanUp();
 
-    // Test rules: upserted via the public API so their auth/api-key wiring
-    // matches production, then immediately disabled so the executor task
-    // does not pollute `.rule-events` with breach events the dispatcher
-    // would race against. The dispatcher's `findByIds` returns disabled
-    // rules, so suppression behavior is unaffected.
     for (const ruleId of TEST_RULE_IDS) {
       await apiServices.alertingV2.rules.upsert(
         ruleId,
@@ -172,9 +162,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
           // A `WHERE rule_id == "__never_matches__"` query against an
           // existing index is the cheapest no-op: it parses, runs
           // successfully, and returns zero rows even if the executor task
-          // fires before the bulkDisable below lands. (`_id` is not exposed
-          // as a column in ES|QL, so referencing it triggers a
-          // verification_exception.)
+          // fires before the bulkDisable below lands.
           evaluation: {
             query: { base: 'FROM .alert-actions | WHERE rule_id == "__never_matches__"' },
           },
@@ -186,8 +174,6 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
 
     await apiServices.alertingV2.rules.bulkDisable({ ids: [...TEST_RULE_IDS] });
 
-    // Action policies: seed with the same logical IDs the dispatcher Jest
-    // tests used so reasoning ("notified by policy np-1", etc.) carries over.
     await apiServices.alertingV2.actionPolicies.upsert(ACTION_POLICY_ID, {
       name: 'Test Policy',
       description: 'Default test action policy',
@@ -200,6 +186,7 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
       destinations: [{ type: 'workflow', id: 'test-workflow' }],
       matcher: 'data.severity: "critical"',
     });
+
     await apiServices.alertingV2.actionPolicies.disable(ACTION_POLICY_MATCHER_ID);
 
     await apiServices.alertingV2.actionPolicies.upsert(ACTION_POLICY_GROUPBY_ID, {
@@ -209,12 +196,11 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
       groupBy: ['data.host.name'],
       groupingMode: 'per_field',
     });
+
     await apiServices.alertingV2.actionPolicies.disable(ACTION_POLICY_GROUPBY_ID);
   });
 
   apiTest.beforeEach(async ({ apiServices }) => {
-    // Fresh data streams between tests so `last_fired` filters and notified
-    // throttle bookkeeping start from a clean slate.
     await apiServices.alertingV2.alertActions.cleanUp();
     await apiServices.alertingV2.ruleEvents.cleanUp();
 
@@ -239,8 +225,9 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
   apiTest(
     'does not dispatch any episodes when there are no alert events',
     async ({ apiServices }) => {
-      // Wait long enough for at least one dispatcher tick (5s schedule + jitter).
-      await wait(WAIT_TIME_MS);
+      // Wait for at least one dispatcher tick so we know the dispatcher had
+      // a chance to produce actions and chose not to.
+      await apiServices.alertingV2.dispatcher.waitForDispatcherTick();
 
       const actions = await apiServices.alertingV2.alertActions.find();
       expect(actions).toHaveLength(0);

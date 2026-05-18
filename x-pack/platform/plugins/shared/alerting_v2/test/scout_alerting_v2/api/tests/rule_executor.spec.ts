@@ -45,7 +45,7 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
    * a disabled or deleted rule, where there is no positive condition to poll
    * for (the executor is no longer scheduled, so no `task-run` events will
    * appear). All other negative assertions wait for executor ticks via
-   * `taskExecutions.waitForExecutorRuns`. This buffer covers ~2 task manager
+   * `ruleExecutions.waitForRuns`. This buffer covers ~2 task manager
    * ticks (SCHEDULE_INTERVAL is 5s) so a regression that incorrectly executed
    * disabled rules would have time to manifest.
    */
@@ -583,7 +583,7 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
       })
     );
 
-    await apiServices.alertingV2.taskExecutions.waitForExecutorRuns({
+    await apiServices.alertingV2.ruleExecutions.waitForRuns({
       ruleId: rule.id,
       runs: 2,
     });
@@ -624,7 +624,7 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
         })
       );
 
-      await apiServices.alertingV2.taskExecutions.waitForExecutorRuns({
+      await apiServices.alertingV2.ruleExecutions.waitForRuns({
         ruleId: rule.id,
         runs: 2,
       });
@@ -678,7 +678,7 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
 
       await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, { status: 'breached' });
 
-      await apiServices.alertingV2.taskExecutions.waitForExecutorRuns({
+      await apiServices.alertingV2.ruleExecutions.waitForRuns({
         ruleId: rule.id,
         runs: 2,
       });
@@ -824,7 +824,7 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
         query: { term: { 'host.name': 'host-signal-no-recovery' } },
       });
 
-      await apiServices.alertingV2.taskExecutions.waitForExecutorRuns({
+      await apiServices.alertingV2.ruleExecutions.waitForRuns({
         ruleId: rule.id,
         runs: 2,
       });
@@ -1070,7 +1070,7 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
         ],
       });
 
-      await apiServices.alertingV2.taskExecutions.waitForExecutorRuns({
+      await apiServices.alertingV2.ruleExecutions.waitForRuns({
         ruleId: rule.id,
         runs: 2,
       });
@@ -1135,7 +1135,7 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
         },
       });
 
-      await apiServices.alertingV2.taskExecutions.waitForExecutorRuns({
+      await apiServices.alertingV2.ruleExecutions.waitForRuns({
         ruleId: rule.id,
         runs: 2,
       });
@@ -1352,7 +1352,7 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
       })
     );
 
-    await apiServices.alertingV2.taskExecutions.waitForExecutorRuns({
+    await apiServices.alertingV2.ruleExecutions.waitForRuns({
       ruleId: rule.id,
       runs: 2,
     });
@@ -1390,7 +1390,7 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
     await apiServices.alertingV2.rules.bulkDisable({ ids: [rule.id] });
 
     await apiServices.alertingV2.rules.waitForEnabledState({ id: rule.id, enabled: false });
-    await apiServices.alertingV2.taskExecutions.waitForExecutorTaskDrained({ ruleId: rule.id });
+    await apiServices.alertingV2.ruleExecutions.waitForTaskDrained({ ruleId: rule.id });
 
     await apiServices.alertingV2.sourceIndex.indexDocs({
       index: SOURCE_INDEX,
@@ -1460,11 +1460,11 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
        * We wait on two independent signals:
        *   1. `waitForEnabledState({ enabled: false })` — the rule SO has the
        *      disabled state visible to the API layer.
-       *   2. `waitForExecutorTaskDrained` — no executor run is in flight, so
+       *   2. `waitForTaskDrained` — no executor run is in flight, so
        *      the baseline event snapshot below is stable.
        */
       await apiServices.alertingV2.rules.waitForEnabledState({ id: rule.id, enabled: false });
-      await apiServices.alertingV2.taskExecutions.waitForExecutorTaskDrained({ ruleId: rule.id });
+      await apiServices.alertingV2.ruleExecutions.waitForTaskDrained({ ruleId: rule.id });
       const baseline = (await apiServices.alertingV2.ruleEvents.find(rule.id)).length;
 
       await apiServices.alertingV2.rules.bulkEnable({ ids: [rule.id] });
@@ -1522,7 +1522,7 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
 
     await apiServices.alertingV2.rules.delete(rule.id);
 
-    await apiServices.alertingV2.taskExecutions.waitForExecutorTaskDrained({ ruleId: rule.id });
+    await apiServices.alertingV2.ruleExecutions.waitForTaskDrained({ ruleId: rule.id });
 
     await apiServices.alertingV2.sourceIndex.indexDocs({
       index: SOURCE_INDEX,
@@ -1565,7 +1565,7 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
       })
     );
 
-    await apiServices.alertingV2.taskExecutions.waitForExecutorRuns({
+    await apiServices.alertingV2.ruleExecutions.waitForRuns({
       ruleId: rule.id,
       runs: 2,
     });

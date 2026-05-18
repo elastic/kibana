@@ -10,17 +10,19 @@ import type { ApiServicesFixture, EsClient, KbnClient, ScoutLogger } from '@kbn/
 import {
   getActionPoliciesApiService,
   getAlertActionsApiService,
+  getDispatcherApiService,
   getInsightsApiService,
   getMaintenanceWindowsApiService,
+  getRuleExecutionsApiService,
   getRulesApiService,
-  getTaskExecutionsApiService,
   type ActionPoliciesApiService,
   type AlertActionsApiService,
+  type DispatcherApiService,
   type InsightsApiService,
   type MaintenanceWindowsApiService,
+  type RuleExecutionsApiService,
   type RulesApiService,
   type RuleEventsApiService,
-  type TaskExecutionsApiService,
 } from '../../common/services';
 import { getRuleEventsApiService } from '../../common/services/rule_events_api_service';
 import type { SourceIndexApiService } from '../../common/services/source_index_api_service';
@@ -34,7 +36,8 @@ export interface AlertingApiServices {
   maintenanceWindows: MaintenanceWindowsApiService;
   insights: InsightsApiService;
   sourceIndex: SourceIndexApiService;
-  taskExecutions: TaskExecutionsApiService;
+  ruleExecutions: RuleExecutionsApiService;
+  dispatcher: DispatcherApiService;
 }
 
 export interface AlertingApiServicesFixture extends ApiServicesFixture {
@@ -62,7 +65,8 @@ export const buildAlertingApiServices = ({
   maintenanceWindows: getMaintenanceWindowsApiService({ kbnClient, log }),
   insights: getInsightsApiService({ esClient, log }),
   sourceIndex: getSourceIndexApiService({ esClient, log }),
-  taskExecutions: getTaskExecutionsApiService({ esClient, log }),
+  ruleExecutions: getRuleExecutionsApiService({ esClient, log }),
+  dispatcher: getDispatcherApiService({ esClient, log }),
 });
 
 export const apiTest = baseApiTest.extend<{}, { apiServices: AlertingApiServicesFixture }>({
