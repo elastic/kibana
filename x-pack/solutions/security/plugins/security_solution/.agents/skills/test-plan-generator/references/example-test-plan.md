@@ -17,6 +17,7 @@ The example is **abbreviated** (6 scenarios, 2 feature areas) but **complete** �
 - A `Known Limitations` entry for an inaccessible source (no Figma)
 - A `Known Limitations` entry for a coverage gap (no API integration tests)
 - Optional sections (RBAC, upgrade, CCS, multi-space) omitted — the fictional issue does not mention them
+- An *Issue Clarity Assessment* section showing the canonical layout for a single-issue plan, with combined readability matching the per-issue score and no Actionable feedback bullets (the issue scored 4/5 and the Coverage Ratio is above 60%, so the bullets are intentionally omitted per the rules in [`output-formats.md`](output-formats.md#issue-clarity-assessment-section))
 - The footer with model identifier and date
 
 ---
@@ -213,6 +214,21 @@ And no note rows are rendered
 
 **P2 — run as capacity allows, limited blast radius:**
 - Note text at the maximum character limit is accepted
+
+---
+
+<details>
+<summary>📊 Issue Clarity Assessment</summary>
+
+| Issue | Type | Score | Critical gaps |
+|---|---|---|---|
+| #12345 (target) | Target | 4/5 | UI described in text but no Figma mockup available |
+
+**Combined readability: 4/5** — Single-issue plan with no parent or sub-issues; combined readability matches the per-issue score.
+
+**Issue Coverage Ratio: 5 / 6 scenarios (83%)** are derivable from issue text alone. The 10 000-character maximum was sourced from the PR diff; all other scenario facts derive from the issue body and its acceptance criteria.
+
+</details>
 
 ---
 

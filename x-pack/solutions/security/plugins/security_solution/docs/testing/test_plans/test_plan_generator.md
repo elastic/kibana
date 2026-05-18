@@ -174,13 +174,14 @@ x-pack/solutions/security/plugins/security_solution/.agents/skills/test-plan-gen
 ├── SKILL.md                              # Agent instructions
 ├── references/
 │   ├── common-mistakes.md                # 8 common quality mistakes with ❌ Bad / ✅ Good examples; reviewed before every save
-│   ├── document-structure.md             # Test plan template, required sections, and the Pending work pattern for epics
-│   ├── example-test-plan.md              # Fully-worked end-to-end example — structure, scenario density, Known Limitations
-│   ├── gathering-context.md              # Step 1 in detail: gh CLI commands, URL handling, images, Figma, sub-issues, PRs, test catalog
+│   ├── document-structure.md             # Test plan template, required sections, the Pending work pattern, and the Issue Clarity Assessment block
+│   ├── example-test-plan.md              # Fully-worked end-to-end example — structure, scenario density, Known Limitations, assessment block
+│   ├── gathering-context.md              # Step 1 in detail: gh CLI commands, URL handling, images, Figma, sub-issues, PRs, test catalog, AC origin tagging
+│   ├── issue-clarity-assessment.md       # Rubric, 5 dimensions, per-issue + combined readability scoring, Coverage Ratio, stop-and-ask gate
 │   ├── mode-generate.md                  # Generate / regenerate flow (run end-to-end or fill gaps when a draft exists)
-│   ├── mode-update.md                    # Incremental update flow with PR re-read for activity since last publish
+│   ├── mode-update.md                    # Incremental update flow with PR re-read and Issue Clarity Assessment re-evaluation
 │   ├── optional-scenarios.md             # Optional sections (RBAC, upgrade, CCS, multi-space, multi-tenant), Gherkin rules, priorities
-│   ├── output-formats.md                 # Scenario format, footer, Sources Summary, Gherkin self-review with sum-checks
+│   ├── output-formats.md                 # Scenario format, footer, Sources Summary, Gherkin self-review with sum-checks, assessment markdown layout
 │   └── security-test-directories.md      # Map of existing test locations in the repo
 └── scripts/
     └── publish_test_plan.sh              # Deterministic publish step (invoked in Step 4)
@@ -356,10 +357,23 @@ The skill files live in the repository under `x-pack/solutions/security/plugins/
 
 **How does the agent self-review the draft before saving?**
 Two layers, both run during Step 3 just before the draft is written:
-1. The *Red flags — STOP and ask* table at the top of `SKILL.md` (right below the Core rule). It is a 7-row table mapping the most common "I'll just rationalise this" thoughts (e.g. *"the image fetch failed, I'll describe it from alt text"*, *"the total scenarios count looks close enough — I'll round"*) to the correct alternative behaviour. If the agent catches itself in any of those, it stops and asks instead of inventing.
-2. The expanded `references/common-mistakes.md` file. 8 frequent quality issues (hallucinated scenarios, duplicated sub-issue coverage, speculative optional sections, UI-step Gherkin, overlooked sub-issue ACs, overlooked PR artifacts, inconsistent Known Limitations, ignoring the Core rule) — each entry has a one-paragraph description, a concrete ❌ Bad example (most sourced from observed agent runs), and a ✅ Good alternative. On top of that, the Gherkin self-review in `references/output-formats.md` includes three mechanical sum-checks on the Test Coverage Summary table to catch undercounts.
+1. The *Red flags — STOP and ask* table at the top of `SKILL.md` (right below the Core rule). It is a 8-row table mapping the most common "I'll just rationalise this" thoughts (e.g. *"the image fetch failed, I'll describe it from alt text"*, *"the total scenarios count looks close enough — I'll round"*, *"the issue is thin but the PR fills the gaps"*) to the correct alternative behaviour. If the agent catches itself in any of those, it stops and asks instead of inventing.
+2. The expanded `references/common-mistakes.md` file. 8 frequent quality issues (hallucinated scenarios, duplicated sub-issue coverage, speculative optional sections, UI-step Gherkin, overlooked sub-issue ACs, overlooked PR artifacts, inconsistent Known Limitations, ignoring the Core rule) — each entry has a one-paragraph description, a concrete ❌ Bad example (most sourced from observed agent runs), and a ✅ Good alternative. On top of that, the Gherkin self-review in `references/output-formats.md` includes three mechanical sum-checks on the Test Coverage Summary table to catch undercounts and a structural check on the Issue Clarity Assessment block.
 
 If something still looks off in the published comment, edit the source file in `references/` and open a PR — the skill improves the same way any other code does.
+
+**What is the *Issue Clarity Assessment* section at the bottom of every test plan?**
+A built-in metric that grades how clear the **issue descriptions** are for the purpose of deriving a test plan. It is computed in two halves — per-issue + combined scores after Step 1, Coverage Ratio after Step 3 — and renders as a collapsible section at the bottom of every published test plan. It contains:
+
+- A **1–5 score per issue** read in Step 1 (target, parent, every sub-issue) with a short *critical gaps* note. The rubric grades five dimensions: Acceptance Criteria, Scope, UX/UI, Data & Roles, Edge cases. Dimensions that do not apply (e.g. UI grade for an API-only change) are marked N/A.
+- A **combined readability score (1–5)** that is **not** an average — it is graded independently on the union of all issues, so a weak sub-issue can be compensated by a strong parent and the set can score higher than any individual issue.
+- A quantitative **Issue Coverage Ratio**: the fraction of scenarios in the final draft that are derivable from issue text alone, with a breakdown of which fact categories (UI labels, error strings, telemetry fields, feature flag names) required pulling from the PR or code. The denominator equals *Total Scenarios* in the Test Coverage Summary.
+- **Actionable feedback bullets** identifying specific issues and gaps — included only when at least one issue scored ≤ 3 or the Coverage Ratio is below 60% (otherwise omitted to keep the section concise).
+
+PR descriptions, PR review comments, PR diffs, and code do **not** count toward the score — only what appears in issue bodies and issue comments (including images, Figma nodes, and Google Docs linked from those bodies). The full rubric, procedure, and tie-breakers live in `references/issue-clarity-assessment.md`. If the combined readability is **1**, the skill stops and asks before continuing — the issue corpus is too thin to derive a test plan from text alone.
+
+**Why is the Issue Clarity Assessment published in the GitHub comment instead of just shown in the chat?**
+Because the audience for the feedback is the PMs and writers who own the issue, not just the engineer running the skill. Putting the assessment inside the published test plan means anyone reading the GitHub comment sees the score; tracking it across runs gives the team a quality KPI for issue authoring without any separate dashboard. The section is wrapped in `<details>` and collapsed by default so it never crowds the actual scenarios.
 
 **Can I run this without being inside the repository folder in Cursor?**
 No — the skill only loads when you have the repository open in Cursor. The MCP servers work globally, but the skill is repo-specific.
