@@ -18,6 +18,7 @@ import type {
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import type { SLOConfig, SLOPluginStartDependencies } from '../../../types';
 import { cleanupOrphanSummaries } from './cleanup_orphan_summary';
+import { cleanupOrphanTransforms } from './cleanup_orphan_transforms';
 
 export const TYPE = 'SLO:ORPHAN_SUMMARIES-CLEANUP-TASK';
 
@@ -141,6 +142,18 @@ export class OrphanSummaryCleanupTask {
           state: result.nextState,
         };
       }
+
+      this.logger.debug(`Summary cleanup completed, starting transform cleanup`);
+
+      await cleanupOrphanTransforms(
+        {},
+        {
+          esClient,
+          soClient: internalSoClient,
+          logger: this.logger,
+          abortController,
+        }
+      );
 
       this.logger.debug(`Task completed successfully`);
     } catch (err) {
