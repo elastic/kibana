@@ -80,9 +80,22 @@ export class AgentBuilderWorkflowsPlugin
     // so security_solution / observability can register their own paths from
     // their own plugin start. Keeping the wiring inline here for the eval
     // branch avoids a cross-plugin contract change just to demo the primitive.
-    const getSafeKibanaRequestPaths = () => [
-      'POST:/internal/security_solution/alert_analysis/related_alerts',
-    ];
+    //
+    // EVAL-ONLY ESCAPE HATCH: set EVAL_DISABLE_KBN_REQUEST_ALLOWLIST=true to
+    // empty the list at runtime. Used by the v2-vs-v6 fairness comparison —
+    // one Kibana build, two boots: with-allowlist (v6) and without (v2), so
+    // the only delta on tokens/latency is Primitive A itself, not a code
+    // diff. See ../docs/eval-3way-comparison.md for the run procedure.
+    const allowlistDisabled = process.env.EVAL_DISABLE_KBN_REQUEST_ALLOWLIST === 'true';
+    if (allowlistDisabled) {
+      this.logger.info(
+        '[EVAL] EVAL_DISABLE_KBN_REQUEST_ALLOWLIST=true — Primitive A allow-list is empty for this boot'
+      );
+    }
+    const getSafeKibanaRequestPaths = (): string[] =>
+      allowlistDisabled
+        ? []
+        : ['POST:/internal/security_solution/alert_analysis/related_alerts'];
 
     // Workflow tools
     registerValidateWorkflowTool(agentBuilder, api);
