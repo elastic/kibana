@@ -450,6 +450,14 @@ export class AttachmentService {
       await this.context.unsecuredSavedObjectsClient.bulkDelete(deleteRequests, {
         refresh,
       });
+
+      // analyticsV2 mirror to `.cases-attachments`. Fire-and-forget — the
+      // SO bulkDelete is the source of truth; the writer logs and
+      // reconciliation has nothing to repair (the source SOs are gone).
+      // Same id is unique across both source SO types, so a single
+      // bulk-delete by id on the analytics index covers both source-side
+      // deletes.
+      this.context.analyticsV2AttachmentsWriter.bulkDeleteAttachments(savedObjectIds);
     } catch (error) {
       this.context.log.error(`Error on DELETE attachments ${savedObjectIds}: ${error}`);
       throw error;
@@ -501,6 +509,12 @@ export class AttachmentService {
         const validatedAttributes = decodeOrThrow(AttachmentAttributesRtV2)(
           injectedAttachment.attributes
         );
+        // analyticsV2 mirror to `.cases-attachments`. Fire-and-forget —
+        // the SO write is the source of truth; the writer logs and
+        // reconciliation fixes anything that fails.
+        this.context.analyticsV2AttachmentsWriter.upsertAttachment(
+          unifiedAttachment as unknown as SavedObject<UnifiedAttachmentAttributes>
+        );
         return Object.assign(injectedAttachment, {
           attributes: validatedAttributes,
         }) as unknown as UnifiedAttachmentSavedObjectTransformed;
@@ -533,6 +547,11 @@ export class AttachmentService {
       const validatedAttributes = decodeOrThrow(AttachmentTransformedAttributesRt)(
         transformedAttachment.attributes
       );
+
+      // analyticsV2 mirror — see comment in the unified branch above.
+      // Same writer for both source SO types; the doc-builder normalizes
+      // legacy → unified at write time.
+      this.context.analyticsV2AttachmentsWriter.upsertAttachment(attachment);
 
       return Object.assign(transformedAttachment, { attributes: validatedAttributes });
     } catch (error) {
@@ -626,11 +645,18 @@ export class AttachmentService {
       | UnifiedAttachmentSavedObjectTransformed
       | AttachmentSavedObjectTransformedV2
     > = [];
+    // Filter out per-entry errors before mirroring to analytics — the
+    // SO bulkCreate returns a per-entry response, and a failed entry
+    // means there's no SO to mirror. Mirror only the successes.
+    const successesToMirror: Array<
+      SavedObject<AttachmentPersistedAttributes | UnifiedAttachmentAttributes>
+    > = [];
 
     for (const so of res.saved_objects) {
       if (isSOError(so)) {
         validatedAttachments.push(so as AttachmentSavedObjectTransformed);
       } else if (so.type === CASE_ATTACHMENT_SAVED_OBJECT) {
+        successesToMirror.push(so);
         // Restore `attachmentId` for savedObject-backed unified rows; no-op
         // for other unified types.
         const injectedAttachment = injectAttachmentSOAttributesFromRefs(
@@ -647,6 +673,7 @@ export class AttachmentService {
             | UnifiedAttachmentSavedObjectTransformed
         );
       } else if (so.type === CASE_COMMENT_SAVED_OBJECT) {
+        successesToMirror.push(so);
         const legacySo = so as SavedObject<AttachmentPersistedAttributes>;
         const transformedAttachment = injectAttachmentSOAttributesFromRefs(
           legacySo,
@@ -661,6 +688,14 @@ export class AttachmentService {
           Object.assign(transformedAttachment, { attributes: validatedAttributes })
         );
       }
+    }
+
+    // analyticsV2 mirror to `.cases-attachments`. Fire-and-forget — single
+    // bulk request regardless of how many entries succeeded. The writer
+    // logs per-item failures; reconciliation backstops anything that gets
+    // dropped. No-op when v2 is disabled (writer is V2_NOOP_ATTACHMENTS_WRITER).
+    if (successesToMirror.length > 0) {
+      this.context.analyticsV2AttachmentsWriter.bulkUpsertAttachments(successesToMirror);
     }
 
     return Object.assign(res, { saved_objects: validatedAttachments });
@@ -696,6 +731,20 @@ export class AttachmentService {
             unifiedAttributes,
             { ...options }
           );
+        // analyticsV2 mirror. The SO `update` response is a partial — it
+        // typically only carries the patch. The analytics doc is keyed
+        // on `_id` and the writer does an `index` (full upsert), so we
+        // re-read what we wrote: build a minimal SavedObject around the
+        // SO id and the merged attributes we know about. Forward-compat
+        // gap: if the SO has fields we didn't patch, the analytics doc
+        // ends up with only the patched-in fields. Reconciliation
+        // walks the source SO every tick and re-emits the full shape,
+        // so the gap closes within one reconciliation interval.
+        this.context.analyticsV2AttachmentsWriter.upsertAttachment(
+          Object.assign({}, res, {
+            attributes: unifiedAttributes,
+          }) as unknown as SavedObject<UnifiedAttachmentAttributes>
+        );
         return Object.assign(res, { attributes: decodedAttributes });
       }
 
@@ -738,6 +787,16 @@ export class AttachmentService {
       assertAlertAttachmentHasRuleName(transformedAttachment.attributes as Record<string, unknown>);
       const validatedAttributes = decodeOrThrow(AttachmentPartialAttributesRt)(
         transformedAttachment.attributes
+      );
+
+      // analyticsV2 mirror. Same forward-compat gap as the unified
+      // branch above: SO `update` is a partial; the analytics doc
+      // re-indexes with whatever the patch carried. Reconciliation
+      // closes the gap on the next tick.
+      this.context.analyticsV2AttachmentsWriter.upsertAttachment(
+        Object.assign({}, res, {
+          attributes: stripUnifiedOnlyFields(extractedAttributes),
+        }) as unknown as SavedObject<AttachmentPersistedAttributes>
       );
 
       return Object.assign(transformedAttachment, { attributes: validatedAttributes });
@@ -845,6 +904,16 @@ export class AttachmentService {
     const validatedAttachments: Array<
       SavedObjectsUpdateResponse<AttachmentTransformedAttributesV2>
     > = [];
+    // Mirror only the successful entries to analytics. SO bulkUpdate
+    // returns a per-entry partial response (only the patched fields);
+    // attaching the matching `comments[i].updatedAttributes` lets the
+    // analytics doc-builder run against the same shape it would have
+    // seen on a `update()` call. The forward-compat gap noted on the
+    // single `update` paths applies here too — reconciliation closes
+    // it on the next tick.
+    const successesToMirror: Array<
+      SavedObject<AttachmentPersistedAttributes | UnifiedAttachmentAttributes>
+    > = [];
 
     for (let i = 0; i < res.saved_objects.length; i++) {
       const attachment = res.saved_objects[i];
@@ -859,6 +928,11 @@ export class AttachmentService {
         // the full merged document. Match single update(): return the validated patch from the request.
         const validatedAttributes = decodeOrThrow(AttachmentPatchAttributesRtV2)(
           comments[i].updatedAttributes
+        );
+        successesToMirror.push(
+          Object.assign({}, attachment, {
+            attributes: validatedAttributes,
+          }) as unknown as SavedObject<UnifiedAttachmentAttributes>
         );
         validatedAttachments.push(Object.assign(attachment, { attributes: validatedAttributes }));
       } else {
@@ -880,10 +954,22 @@ export class AttachmentService {
           transformedAttachment.attributes
         );
 
+        successesToMirror.push(
+          Object.assign({}, attachment, {
+            attributes: legacyAttributes,
+          }) as unknown as SavedObject<AttachmentPersistedAttributes>
+        );
         validatedAttachments.push(
           Object.assign(transformedAttachment, { attributes: validatedAttributes })
         );
       }
+    }
+
+    // analyticsV2 mirror — single bulk request regardless of how many
+    // entries succeeded. See `transformAndDecodeBulkCreateResponse`
+    // for the rationale.
+    if (successesToMirror.length > 0) {
+      this.context.analyticsV2AttachmentsWriter.bulkUpsertAttachments(successesToMirror);
     }
 
     return Object.assign(res, { saved_objects: validatedAttachments });
