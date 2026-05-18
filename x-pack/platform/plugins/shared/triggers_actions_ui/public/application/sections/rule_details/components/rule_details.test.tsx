@@ -485,7 +485,7 @@ describe('rule_details', () => {
       ruleParamsExpression: jest.fn(),
       requiresAppContext: false,
     };
-    ruleTypeRegistry.get.mockReturnValue(ruleTypeR);
+    ruleTypeRegistry.get.mockResolvedValue(ruleTypeR);
     useKibanaMock().services.ruleTypeRegistry = ruleTypeRegistry;
 
     const renderEditButton = (rule: Rule, actionTypesOverride: ActionType[] = actionTypes) =>
@@ -582,7 +582,7 @@ describe('rule_details', () => {
       ruleParamsExpression: jest.fn(),
       requiresAppContext: false,
     };
-    ruleTypeRegistry.get.mockReturnValue(ruleTypeR);
+    ruleTypeRegistry.get.mockResolvedValue(ruleTypeR);
     useKibanaMock().services.ruleTypeRegistry = ruleTypeRegistry;
     const { loadAllActions } = jest.requireMock('../../../lib/action_connector_api');
     loadAllActions.mockResolvedValue([

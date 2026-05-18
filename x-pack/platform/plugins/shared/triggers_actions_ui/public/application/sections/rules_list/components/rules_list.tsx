@@ -319,9 +319,6 @@ export const RulesList = ({
     await runRule(http, toasts, id);
   };
 
-  const isRuleTypeEditableInContext = (ruleTypeId: string) =>
-    ruleTypeRegistry.has(ruleTypeId) ? !ruleTypeRegistry.get(ruleTypeId).requiresAppContext : false;
-
   const refreshRules = useCallback(async () => {
     if (!ruleTypesState || !hasAnyAuthorizedRuleType) {
       return;
@@ -892,8 +889,9 @@ export const RulesList = ({
                 const detailsRoute = ruleDetailsRoute ? ruleDetailsRoute : commonRuleDetailsRoute;
                 history.push(detailsRoute.replace(`:ruleId`, rule.id));
               }}
-              onRuleEditClick={(rule) => {
-                if (rule.isEditable && isRuleTypeEditableInContext(rule.ruleTypeId)) {
+              onRuleEditClick={async (rule) => {
+                const isRuleTypeEditableInContext = ruleTypeRegistry.has(rule.ruleTypeId) ? !(await ruleTypeRegistry.get(rule.ruleTypeId)).requiresAppContext : false;
+                if (rule.isEditable && isRuleTypeEditableInContext) {
                   onRuleEdit(rule);
                 }
               }}

@@ -42,7 +42,7 @@ describe('CollapsedItemActions', () => {
       ruleParamsExpression: jest.fn(),
       requiresAppContext: !editable,
     };
-    ruleTypeRegistry.get.mockReturnValue(ruleTypeR);
+    ruleTypeRegistry.get.mockResolvedValue(ruleTypeR);
     const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
     // eslint-disable-next-line react-hooks/rules-of-hooks
     useKibanaMock().services.ruleTypeRegistry = ruleTypeRegistry;
