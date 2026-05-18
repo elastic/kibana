@@ -7,6 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { AppScopedHotkeys, HotkeyDefinition, HotkeyHandle, HotkeyScope } from './src/types';
+export type {
+  AppScopedHotkeys,
+  HotkeyDefinition,
+  HotkeyHandle,
+  HotkeyScope,
+  DiscoveryOnlyHotkeyDefinition,
+} from './src/types';
 export type { HotkeysSetup, HotkeysStart } from './src/contracts';
 export type { HotkeysSidebarActions, HotkeysSidebarState } from './src/hotkeys_sidebar';

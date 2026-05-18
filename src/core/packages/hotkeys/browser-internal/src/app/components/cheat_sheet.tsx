@@ -8,15 +8,7 @@
  */
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import {
-  EuiEmptyPrompt,
-  EuiFieldSearch,
-  EuiFlexGroup,
-  EuiSpacer,
-  EuiTitle,
-  EuiPanel,
-  EuiHorizontalRule,
-} from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFieldSearch, EuiFlexGroup, EuiSpacer, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { SidebarComponentProps } from '@kbn/core-chrome-sidebar';
 import { SidebarHeader, SidebarBody } from '@kbn/core-chrome-sidebar-components';
@@ -24,22 +16,23 @@ import type {
   HotkeyDefinition,
   HotkeysSidebarActions,
   HotkeysSidebarState,
+  HotkeyScope,
+  DiscoveryOnlyHotkeyDefinition,
 } from '@kbn/core-hotkeys-browser';
 import { useObservable } from '@kbn/use-observable';
 import type { Observable } from 'rxjs';
-import { HotkeyRow } from './blocks/hotkey_row';
+import { ScopeSection } from './blocks/scope_section';
 
-type Section = 'global' | 'app' | 'context';
+type HotkeyDefinitionOrDiscoveryOnlyHotkeyDefinition =
+  | HotkeyDefinition
+  | DiscoveryOnlyHotkeyDefinition;
+
+type Section = HotkeyScope;
 
 interface GroupedRegistrations {
-  global: HotkeyDefinition[];
-  app: HotkeyDefinition[];
-  context: HotkeyDefinition[];
-}
-
-interface FeatureBucket {
-  readonly featureId: string;
-  readonly defs: readonly HotkeyDefinition[];
+  global: HotkeyDefinitionOrDiscoveryOnlyHotkeyDefinition[];
+  app: HotkeyDefinitionOrDiscoveryOnlyHotkeyDefinition[];
+  context: HotkeyDefinitionOrDiscoveryOnlyHotkeyDefinition[];
 }
 
 const EMPTY_REGISTRATIONS: ReadonlyArray<HotkeyDefinition> = [];
@@ -56,45 +49,13 @@ const SECTION_TITLES: Record<Section, string> = {
   }),
 };
 
-/** Cosmetic display only — featureIds are registrant-supplied namespaces. */
-const formatFeatureTitle = (featureId: string): string => featureId.replace(/:/g, ' › ');
+interface HotkeysCheatSheetProps
+  extends SidebarComponentProps<HotkeysSidebarState, HotkeysSidebarActions> {
+  getRegistrations$: () => Observable<ReadonlyArray<HotkeyDefinition>>;
+  getCurrentAppId$: () => Observable<string | undefined>;
+}
 
-/** Subsection heading for a bucket keyed by {@link HotkeyDefinition.featureId}. */
-const getBucketTitle = (featureId: string, defs: readonly HotkeyDefinition[]): string => {
-  if (defs.length === 0) {
-    return formatFeatureTitle(featureId);
-  }
-  const firstGroup = defs[0].group;
-  if (firstGroup !== undefined && firstGroup !== '' && defs.every((d) => d.group === firstGroup)) {
-    return firstGroup;
-  }
-  return formatFeatureTitle(featureId);
-};
-
-const partitionIntoFeatureBuckets = (
-  entries: readonly HotkeyDefinition[]
-): { readonly buckets: readonly FeatureBucket[]; readonly noFeature: HotkeyDefinition[] } => {
-  const byFeature = new Map<string, HotkeyDefinition[]>();
-  const noFeature: HotkeyDefinition[] = [];
-  for (const def of entries) {
-    if (def.featureId) {
-      const list = byFeature.get(def.featureId);
-      if (list) {
-        list.push(def);
-      } else {
-        byFeature.set(def.featureId, [def]);
-      }
-    } else {
-      noFeature.push(def);
-    }
-  }
-  const buckets: FeatureBucket[] = [...byFeature.entries()]
-    .sort(([a], [b]) => a.localeCompare(b))
-    .map(([featureId, defs]) => ({ featureId, defs }));
-  return { buckets, noFeature };
-};
-
-const matches = (def: HotkeyDefinition, query: string): boolean => {
+const matches = (def: HotkeyDefinitionOrDiscoveryOnlyHotkeyDefinition, query: string): boolean => {
   if (!query) return true;
   const haystack = [def.label, def.description, def.group, def.featureId, def.keys]
     .filter(Boolean)
@@ -103,7 +64,7 @@ const matches = (def: HotkeyDefinition, query: string): boolean => {
 };
 
 const group = (
-  registrations: ReadonlyArray<HotkeyDefinition>,
+  registrations: ReadonlyArray<HotkeyDefinitionOrDiscoveryOnlyHotkeyDefinition>,
   currentAppId: string | undefined,
   query: string
 ): GroupedRegistrations => {
@@ -122,76 +83,6 @@ const group = (
   return grouped;
 };
 
-const HotkeyRows = ({
-  defs,
-  actions,
-}: {
-  defs: readonly HotkeyDefinition[];
-  actions: HotkeysSidebarActions;
-}) => (
-  <>
-    {defs.map((def) => (
-      <React.Fragment key={def.id}>
-        <HotkeyRow def={def} actions={actions} />
-        <EuiSpacer size="s" />
-      </React.Fragment>
-    ))}
-  </>
-);
-
-const ScopeSection = ({
-  title,
-  entries,
-  actions,
-}: {
-  title: string;
-  entries: readonly HotkeyDefinition[];
-  actions: HotkeysSidebarActions;
-}) => {
-  if (entries.length === 0) {
-    return null;
-  }
-  const { buckets, noFeature } = partitionIntoFeatureBuckets(entries);
-  const hasFeatureBuckets = buckets.length > 0;
-  const hasNoFeatureTail = noFeature.length > 0;
-
-  return (
-    <>
-      <EuiTitle size="xs">
-        <p>{title}</p>
-      </EuiTitle>
-      <EuiHorizontalRule margin="xs" />
-      {hasFeatureBuckets
-        ? buckets.map(({ featureId, defs }) => (
-            <React.Fragment key={featureId}>
-              <EuiTitle size="xxs">
-                <p>{getBucketTitle(featureId, defs)}</p>
-              </EuiTitle>
-              <EuiSpacer size="s" />
-              <HotkeyRows defs={defs} actions={actions} />
-              <EuiSpacer size="s" />
-            </React.Fragment>
-          ))
-        : null}
-      {hasFeatureBuckets && hasNoFeatureTail ? (
-        <>
-          <EuiHorizontalRule margin="m" />
-          <HotkeyRows defs={noFeature} actions={actions} />
-        </>
-      ) : (
-        <HotkeyRows defs={noFeature} actions={actions} />
-      )}
-      <EuiSpacer size="m" />
-    </>
-  );
-};
-
-interface HotkeysCheatSheetProps
-  extends SidebarComponentProps<HotkeysSidebarState, HotkeysSidebarActions> {
-  getRegistrations$: () => Observable<ReadonlyArray<HotkeyDefinition>>;
-  getCurrentAppId$: () => Observable<string | undefined>;
-}
-
 /**
  * Sidebar panel that lists Kibana hotkeys: grouped by scope and filterable.
  * When the sidebar store sets `pendingFeatureFocus`, the search field is seeded and the intent cleared.
@@ -203,9 +94,9 @@ export const HotkeysCheatSheet = ({
   getRegistrations$,
   getCurrentAppId$,
 }: HotkeysCheatSheetProps) => {
-  const registrationsObsRef = useRef<Observable<ReadonlyArray<HotkeyDefinition>>>(
-    getRegistrations$()
-  );
+  const registrationsObsRef = useRef<
+    Observable<ReadonlyArray<HotkeyDefinitionOrDiscoveryOnlyHotkeyDefinition>>
+  >(getRegistrations$());
   const currentAppIdObsRef = useRef<Observable<string | undefined>>(getCurrentAppId$());
 
   const currentAppId = useObservable(currentAppIdObsRef.current);

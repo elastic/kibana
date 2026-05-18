@@ -20,12 +20,14 @@ import type { Hotkey, RegisterableHotkey } from '@tanstack/hotkeys';
  */
 export type HotkeyScope = 'global' | 'app' | 'context';
 
+export type KibanaHotkey = Hotkey | RegisterableHotkey | (string & {});
+
 /**
  * Declaration of a Kibana-managed hotkey.
  *
  * @public
  */
-export interface HotkeyDefinition {
+type BaseHotkeyDefinition = {
   /** Stable, namespaced id (e.g. `discover:toggleSidebar`). Used for unregister and discovery grouping. */
   id: string;
   /**
@@ -39,7 +41,7 @@ export interface HotkeyDefinition {
    * this is the chord that is currently bound (after any user override);
    * the originally declared value is preserved on {@link defaultKeys}.
    */
-  keys: Hotkey | RegisterableHotkey | (string & {});
+  keys: KibanaHotkey;
   /**
    * The originally declared chord. Stamped by the service at first register
    * and preserved across updates/overrides so discovery UIs can show both
@@ -48,7 +50,7 @@ export interface HotkeyDefinition {
    * Plugins should not set this manually: it is auto-populated from `keys`
    * and any value passed at registration is ignored.
    */
-  defaultKeys?: Hotkey | RegisterableHotkey | (string & {});
+  defaultKeys?: KibanaHotkey;
   /** Human-readable label, shown in the cheat sheet. Must be i18n-translated by the caller. */
   label: string;
   /** Optional longer description, shown alongside the label. Must be i18n-translated by the caller. */
@@ -69,16 +71,26 @@ export interface HotkeyDefinition {
   group?: string;
   /** Soft-disable without unregistering. Defaults to `true`. */
   enabled?: boolean;
-  /** DOM element/root to attach the listener to. Defaults to `document`. */
-  target?: HTMLElement | Document | Window | null;
-  /**
-   * Discovery-only: invoked whenever the effective chord changes for this id (persisted override,
-   * cleared override, or declaration keys updated via {@link HotkeyHandle.update}). Surfaces such as
-   * Monaco should re-bind listeners here. Omitted ⇒ cheat-sheet rebinding for this row is disabled.
-   * Never persisted; not serialized into TanStack registration meta.
-   */
-  onEffectiveBindingChange?: (keys: Hotkey | RegisterableHotkey | (string & {})) => void;
-}
+  /** Whether the hotkey is editable. Defaults to `true`. */
+  editable?: boolean;
+} & (
+  | {
+      /**
+       * The hotkey is only used for discovery (cheat sheet).
+       * Hence why we provide the {@link HotkeyDefinition.onEffectiveBindingChange} callback, that should be called when the keybinding changes.
+       */
+      discoveryOnly: true;
+      onEffectiveBindingChange?: (binding: KibanaHotkey) => void;
+    }
+  | {
+      discoveryOnly: false;
+      /** DOM element/root to attach the listener to. Defaults to `document`. */
+      target?: HTMLElement | Document | Window | null;
+    }
+);
+
+export type DiscoveryOnlyHotkeyDefinition = Extract<BaseHotkeyDefinition, { discoveryOnly: true }>;
+export type HotkeyDefinition = Extract<BaseHotkeyDefinition, { discoveryOnly: false }>;
 
 /**
  * Handle returned from {@link HotkeysStart.register}.
@@ -131,22 +143,9 @@ declare module '@tanstack/hotkeys' {
    * {@link HotkeysStart.getRegistrations$} can project back to {@link HotkeyDefinition}.
    */
   interface HotkeyMeta {
-    kibana?: {
-      id: string;
-      label: string;
-      description?: string;
-      scope: HotkeyScope;
-      appId?: string;
-      /** Optional; included when {@link HotkeyDefinition.featureId} was set at registration. */
-      featureId?: string;
-      group?: string;
-      /**
-       * The chord that was declared when the hotkey was first registered,
-       * preserved here so discovery UIs can surface the shipped default
-       * independently of any user override that may be active on
-       * {@link HotkeyRegistration.hotkey}.
-       */
-      defaultKeys: Hotkey | RegisterableHotkey | (string & {});
-    };
+    kibana?: Pick<
+      BaseHotkeyDefinition,
+      'id' | 'label' | 'description' | 'scope' | 'appId' | 'featureId' | 'group' | 'defaultKeys'
+    >;
   }
 }

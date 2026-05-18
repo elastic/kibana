@@ -9,7 +9,7 @@
 
 import { firstValueFrom, take } from 'rxjs';
 import {
-  HOTKEY_OVERRIDES_LOCAL_STORAGE_KEY,
+  HOTKEY_OVERRIDES_STORAGE_KEY,
   createLocalStorageHotkeyOverridesPersistence,
 } from './local_storage_hotkey_overrides_persistence';
 
@@ -44,7 +44,7 @@ describe('createLocalStorageHotkeyOverridesPersistence', () => {
   it('loads persisted overrides on construction', async () => {
     const storage = createMemoryStorage();
     storage.setItem(
-      HOTKEY_OVERRIDES_LOCAL_STORAGE_KEY,
+      HOTKEY_OVERRIDES_STORAGE_KEY,
       JSON.stringify({ 'my:id': { keys: 'Mod+Shift+X' } })
     );
     const p = createLocalStorageHotkeyOverridesPersistence({ storage });
@@ -54,7 +54,7 @@ describe('createLocalStorageHotkeyOverridesPersistence', () => {
 
   it('ignores malformed JSON in storage', async () => {
     const storage = createMemoryStorage();
-    storage.setItem(HOTKEY_OVERRIDES_LOCAL_STORAGE_KEY, '{not json');
+    storage.setItem(HOTKEY_OVERRIDES_STORAGE_KEY, '{not json');
     const p = createLocalStorageHotkeyOverridesPersistence({ storage });
     const map = await firstValueFrom(p.overrides$.pipe(take(1)));
     expect(map.size).toBe(0);
