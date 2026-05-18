@@ -755,7 +755,7 @@
           }
         ],
         "path": "src/platform/packages/shared/kbn-monaco/src/languages/console/language.ts",
-        "lineNumber": 172,
+        "lineNumber": 178,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -772,7 +772,7 @@
               ".ITextModel | null"
             ],
             "path": "src/platform/packages/shared/kbn-monaco/src/languages/console/language.ts",
-            "lineNumber": 172,
+            "lineNumber": 178,
             "columnNumber": 43,
             "deprecated": false,
             "trackAdoption": false,
@@ -1209,7 +1209,7 @@
             "label": "onLanguage",
             "description": [],
             "signature": [
-              "() => void"
+              "() => void | Promise<void>"
             ],
             "path": "src/platform/packages/shared/kbn-monaco/src/types.ts",
             "lineNumber": 49,
@@ -1420,7 +1420,7 @@
             "label": "onLanguage",
             "description": [],
             "signature": [
-              "(() => void) | undefined"
+              "(() => void | Promise<void>) | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-monaco/src/types.ts",
             "lineNumber": 20,
@@ -2377,7 +2377,7 @@
           "\"console\""
         ],
         "path": "src/platform/packages/shared/kbn-monaco/src/languages/console/language.ts",
-        "lineNumber": 170,
+        "lineNumber": 176,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2394,7 +2394,7 @@
           "\"console\""
         ],
         "path": "src/platform/packages/shared/kbn-monaco/src/languages/console/language.ts",
-        "lineNumber": 167,
+        "lineNumber": 173,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -2916,7 +2916,7 @@
             "label": "onLanguage",
             "description": [],
             "signature": [
-              "() => void"
+              "() => Promise<void>"
             ],
             "path": "src/platform/packages/shared/kbn-monaco/src/languages/console/language.ts",
             "lineNumber": 89,
@@ -2945,7 +2945,7 @@
               ".BuiltinTheme; inherit: boolean; encodedTokensColors?: string[] | undefined; }"
             ],
             "path": "src/platform/packages/shared/kbn-monaco/src/languages/console/language.ts",
-            "lineNumber": 93,
+            "lineNumber": 99,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3006,7 +3006,7 @@
               ".CompletionItemProvider"
             ],
             "path": "src/platform/packages/shared/kbn-monaco/src/languages/console/language.ts",
-            "lineNumber": 94,
+            "lineNumber": 100,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false,
@@ -3030,7 +3030,7 @@
                   ", \"getSources\" | \"getPolicies\"> | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-monaco/src/languages/console/language.ts",
-                "lineNumber": 95,
+                "lineNumber": 101,
                 "columnNumber": 5,
                 "deprecated": false,
                 "trackAdoption": false,
@@ -3059,7 +3059,7 @@
                   ".CompletionList>; } | null>"
                 ],
                 "path": "src/platform/packages/shared/kbn-monaco/src/languages/console/language.ts",
-                "lineNumber": 96,
+                "lineNumber": 102,
                 "columnNumber": 5,
                 "deprecated": false,
                 "docsReferencedTypeName": "MutableRefObject",
@@ -3082,7 +3082,7 @@
         "label": "ConsoleOutputLang",
         "description": [],
         "path": "src/platform/packages/shared/kbn-monaco/src/languages/console/language.ts",
-        "lineNumber": 159,
+        "lineNumber": 165,
         "columnNumber": 14,
         "deprecated": false,
         "trackAdoption": false,
@@ -3100,7 +3100,7 @@
               "\"consoleOutput\""
             ],
             "path": "src/platform/packages/shared/kbn-monaco/src/languages/console/language.ts",
-            "lineNumber": 160,
+            "lineNumber": 166,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3119,7 +3119,7 @@
               ".IMonarchLanguage"
             ],
             "path": "src/platform/packages/shared/kbn-monaco/src/languages/console/language.ts",
-            "lineNumber": 161,
+            "lineNumber": 167,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3138,7 +3138,7 @@
               ".LanguageConfiguration"
             ],
             "path": "src/platform/packages/shared/kbn-monaco/src/languages/console/language.ts",
-            "lineNumber": 162,
+            "lineNumber": 168,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false
@@ -3155,7 +3155,7 @@
               ".FoldingRangeProvider"
             ],
             "path": "src/platform/packages/shared/kbn-monaco/src/languages/console/language.ts",
-            "lineNumber": 163,
+            "lineNumber": 169,
             "columnNumber": 3,
             "deprecated": false,
             "trackAdoption": false

@@ -41,40 +41,6 @@ const requestParamsSchema = baseRequestParamsSchema.extend({
   searchMode: searchModeSchema,
 });
 
-export const getUnbackedQueriesCountRoute = createServerRoute({
-  endpoint: 'GET /internal/streams/queries/_unbacked_count',
-  options: {
-    access: 'internal',
-    summary: 'Count unbacked queries across streams',
-    description:
-      'Returns the count of stored significant-events queries across all streams that do not yet have a backing Kibana rule.',
-  },
-  security: {
-    authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
-    },
-  },
-  params: z.object({
-    query: z
-      .object({
-        minSeverityScore: z.coerce.number().int().min(0).max(100).optional(),
-      })
-      .optional(),
-  }),
-  handler: async ({ params, request, getScopedClients, server }): Promise<{ count: number }> => {
-    const { getQueryClient, licensing, uiSettingsClient } = await getScopedClients({
-      request,
-    });
-
-    await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
-
-    const queryClient = await getQueryClient();
-    const minSeverityScore = params?.query?.minSeverityScore;
-    const count = await queryClient.countPromotableUnbackedQueries({ minSeverityScore });
-    return { count };
-  },
-});
-
 /**
  * Promotes unbacked queries to rule-backed status. Returns
  * `{ promoted, skipped_stats }`. Since STATS queries are filtered at
@@ -559,7 +525,6 @@ const persistQueriesRoute = createServerRoute({
 });
 
 export const internalQueriesRoutes = {
-  ...getUnbackedQueriesCountRoute,
   ...promoteUnbackedQueriesRoute,
   ...demoteBackedQueriesRoute,
   ...bulkDeleteQueriesRoute,

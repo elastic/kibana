@@ -49,6 +49,8 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
   - [Deprecation review: edge cases](#deprecation-review-edge-cases)
     - [**Scenario: Review respects MAX\_DEPRECATED\_RULES\_TO\_RETURN limit**](#scenario-review-respects-max_deprecated_rules_to_return-limit)
     - [**Scenario: Review handles package with no deprecated rules**](#scenario-review-handles-package-with-no-deprecated-rules)
+    - [**Scenario: Review excludes custom rules whose rule\_id matches a deprecated asset**](#scenario-review-excludes-custom-rules-whose-rule_id-matches-a-deprecated-asset)
+    - [**Scenario: Review excludes a custom rule looked up by SO id whose rule\_id matches a deprecated asset**](#scenario-review-excludes-a-custom-rule-looked-up-by-so-id-whose-rule_id-matches-a-deprecated-asset)
   - [Rule Management page: deprecation callout](#rule-management-page-deprecation-callout)
     - [**Scenario: Callout appears when user has installed deprecated rules**](#scenario-callout-appears-when-user-has-installed-deprecated-rules)
     - [**Scenario: Callout does not appear when no deprecated rules are installed**](#scenario-callout-does-not-appear-when-no-deprecated-rules-are-installed)
@@ -268,6 +270,28 @@ Then at most 200 deprecated rules are returned
 ```Gherkin
 Given the package contains no deprecated rule assets
 When the user requests the deprecation review
+Then the response contains an empty rules array
+```
+
+#### **Scenario: Review excludes custom rules whose rule_id matches a deprecated asset**
+
+**Automation**: API integration tests.
+
+```Gherkin
+Given a custom rule is installed with a rule_id
+And the package contains a deprecated rule asset with the same rule_id
+When the user requests the deprecation review with no filter
+Then the response contains an empty rules array
+```
+
+#### **Scenario: Review excludes a custom rule looked up by SO id whose rule_id matches a deprecated asset**
+
+**Automation**: API integration tests.
+
+```Gherkin
+Given a custom rule is installed with a rule_id
+And the package contains a deprecated rule asset with the same rule_id
+When the user requests the deprecation review filtered to the custom rule's SO id
 Then the response contains an empty rules array
 ```
 

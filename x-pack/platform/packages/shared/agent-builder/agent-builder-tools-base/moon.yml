@@ -27,6 +27,7 @@ dependsOn:
   - '@kbn/workflows'
   - '@kbn/workflows-management-plugin'
   - '@kbn/zod'
+  - '@kbn/palettes'
 tags:
   - shared-server
   - package

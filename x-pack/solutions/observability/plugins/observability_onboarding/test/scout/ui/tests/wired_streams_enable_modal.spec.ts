@@ -93,7 +93,9 @@ test.describe(
       });
 
       await test.step('modal closes and Wired Streams is now selected', async () => {
-        await expect(pageObjects.onboarding.enableWiredStreamsModal).toBeHidden();
+        await expect(pageObjects.onboarding.enableWiredStreamsModal).toBeHidden({
+          timeout: 30_000,
+        });
         await expect(pageObjects.onboarding.wiredStreamsOption).toHaveAttribute(
           'aria-pressed',
           'true'

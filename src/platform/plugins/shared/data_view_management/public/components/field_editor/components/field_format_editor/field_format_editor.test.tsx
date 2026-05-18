@@ -7,31 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FormatEditorServiceStart } from '@kbn/data-view-field-editor-plugin/public/service';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
-import { shallow } from 'enzyme';
-import React, { PureComponent } from 'react';
+import type { FormatEditorServiceStart } from '@kbn/data-view-field-editor-plugin/public/service';
 import { FieldFormatEditor } from './field_format_editor';
+import { render, screen } from '@testing-library/react';
+import React, { PureComponent } from 'react';
 
 class TestEditor extends PureComponent {
-  render() {
-    if (this.props) {
-      return null;
-    }
-    return <div>Test editor</div>;
-  }
+  render = () => <div data-test-subj="test-editor">Test editor</div>;
 }
 
+const numberFormatEditorFactory = () => Promise.resolve(TestEditor);
+
 const formatEditors: FormatEditorServiceStart['fieldFormatEditors'] = {
-  getById: jest.fn(
-    () => () => Promise.resolve(TestEditor)
+  getById: jest.fn((id: string) =>
+    id === 'number' ? numberFormatEditorFactory : undefined
   ) as unknown as FormatEditorServiceStart['fieldFormatEditors']['getById'],
-  getAll: jest.fn(),
+  getAll: jest.fn(() => []),
 };
 
 describe('FieldFormatEditor', () => {
   it('should render normally', async () => {
-    const component = shallow(
+    render(
       <FieldFormatEditor
         fieldType="number"
         fieldFormat={{} as FieldFormat}
@@ -43,11 +40,12 @@ describe('FieldFormatEditor', () => {
       />
     );
 
-    expect(component).toMatchSnapshot();
+    expect(formatEditors.getById).toHaveBeenCalledWith('number');
+    expect(await screen.findByTestId('test-editor')).toBeVisible();
   });
 
   it('should render nothing if there is no editor for the format', async () => {
-    const component = shallow(
+    render(
       <FieldFormatEditor
         fieldType="number"
         fieldFormat={{} as FieldFormat}
@@ -59,6 +57,7 @@ describe('FieldFormatEditor', () => {
       />
     );
 
-    expect(component).toMatchSnapshot();
+    expect(formatEditors.getById).toHaveBeenCalledWith('ip');
+    expect(await screen.queryByTestId('test-editor')).not.toBeInTheDocument();
   });
 });

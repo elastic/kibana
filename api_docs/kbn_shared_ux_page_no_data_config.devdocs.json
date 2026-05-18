@@ -195,7 +195,7 @@
               "; }"
             ],
             "path": "src/platform/packages/shared/shared-ux/page/solution_nav/src/with_solution_nav.tsx",
-            "lineNumber": 38,
+            "lineNumber": 39,
             "columnNumber": 28,
             "deprecated": false,
             "docsReferencedTypeName": "Props",

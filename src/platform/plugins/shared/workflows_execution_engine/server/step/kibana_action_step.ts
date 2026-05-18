@@ -168,8 +168,7 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
     params: any,
     debug: boolean = false
   ): Promise<any> {
-    // Get current space ID from workflow context
-    const spaceId = this.stepExecutionRuntime.contextManager.getContext().workflow.spaceId;
+    const spaceId = this.stepExecutionRuntime.contextManager.getWorkflowSpaceId();
 
     // Extract and remove fetcher configuration from params (it's only for our internal use)
     const { fetcher: fetcherOptions, ...cleanParams } = params;
@@ -301,10 +300,11 @@ export class KibanaActionStepImpl extends BaseAtomicNodeImplementation<BaseStep>
     // getEventChainContext will parse the event-chain headers. Note: this header can be set by any
     // HTTP caller, so it gates naive spoofing but is not a hard trust boundary.
     const fakeRequest = this.stepExecutionRuntime.contextManager.getFakeRequest();
+    const workflowRunId = this.stepExecutionRuntime.workflowExecution?.id;
     const outboundHeaders = {
       ...headers,
       [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'Kibana',
-      ...getOutboundEventChainHeaders(fakeRequest),
+      ...getOutboundEventChainHeaders(fakeRequest, workflowRunId),
     };
 
     // Build full URL with query parameters

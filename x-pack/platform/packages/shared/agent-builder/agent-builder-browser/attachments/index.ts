@@ -10,6 +10,7 @@ export type {
   AttachmentServiceStartContract,
   AttachmentRenderProps,
   CanvasRenderCallbacks,
+  InlineRenderCallbacks,
   GetActionButtonsParams,
   ActionButton,
   AttachmentPreviewState,

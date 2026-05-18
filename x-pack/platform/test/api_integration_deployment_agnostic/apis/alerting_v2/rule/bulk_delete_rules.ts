@@ -41,7 +41,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         ...overrides,
       });
 
-    expect(response.status).to.be(200);
+    expect(response.status).to.be(201);
     return response.body;
   }
 

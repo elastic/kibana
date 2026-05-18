@@ -7,8 +7,9 @@
 
 import type { VFC } from 'react';
 import React, { memo } from 'react';
-import { EuiButtonIcon, EuiCopy, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { ShareUrlIconButton } from '../../../shared/components/share_url_icon_button';
 import { useGetFlyoutLink } from '../hooks/use_get_flyout_link';
 import { useBasicDataFromDetailsData } from '../../shared/hooks/use_basic_data_from_details_data';
 import { useDocumentDetailsContext } from '../../shared/context';
@@ -27,8 +28,6 @@ export const HeaderActions: VFC = memo(() => {
     timestamp,
   });
 
-  const showShareAlertButton = isAlert && alertDetailsLink;
-
   return (
     <EuiFlexGroup
       direction="row"
@@ -37,32 +36,19 @@ export const HeaderActions: VFC = memo(() => {
       gutterSize="none"
       responsive={false}
     >
-      {showShareAlertButton && (
-        <EuiFlexItem grow={false}>
-          <EuiToolTip
-            content={i18n.translate(
-              'xpack.securitySolution.flyout.right.header.shareButtonToolTip',
-              { defaultMessage: 'Share alert' }
-            )}
-          >
-            <EuiCopy textToCopy={alertDetailsLink}>
-              {(copy) => (
-                <EuiButtonIcon
-                  iconType={'share'}
-                  color={'text'}
-                  aria-label={i18n.translate(
-                    'xpack.securitySolution.flyout.right.header.shareButtonAriaLabel',
-                    { defaultMessage: 'Share alert' }
-                  )}
-                  data-test-subj={SHARE_BUTTON_TEST_ID}
-                  onClick={copy}
-                  onKeyDown={copy}
-                />
-              )}
-            </EuiCopy>
-          </EuiToolTip>
-        </EuiFlexItem>
-      )}
+      <ShareUrlIconButton
+        url={isAlert ? alertDetailsLink : null}
+        tooltip={i18n.translate('xpack.securitySolution.flyout.right.header.shareButtonToolTip', {
+          defaultMessage: 'Share alert',
+        })}
+        ariaLabel={i18n.translate(
+          'xpack.securitySolution.flyout.right.header.shareButtonAriaLabel',
+          {
+            defaultMessage: 'Share alert',
+          }
+        )}
+        dataTestSubj={SHARE_BUTTON_TEST_ID}
+      />
     </EuiFlexGroup>
   );
 });

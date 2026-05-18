@@ -234,7 +234,6 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
               <EuiContextMenuItem
                 key="createInferenceEndpointButton"
                 icon="plusCircle"
-                size="s"
                 data-test-subj="createInferenceEndpointButton"
                 onClick={(e) => {
                   e.preventDefault();
@@ -253,7 +252,6 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
                 <EuiContextMenuItem
                   key="manageInferenceEndpointButton"
                   icon="gear"
-                  size="s"
                   data-test-subj="manageInferenceEndpointButton"
                   href={inferenceEndpointsPageLink}
                   onClick={(e) => {
@@ -325,7 +323,9 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
               </EuiPanel>
             </EuiContextMenuPanel>
             <EuiHorizontalRule margin="none" />
-            <EuiContextMenuItem icon={<EuiIcon type="question" color="primary" />} size="m">
+            <EuiContextMenuItem
+              icon={<EuiIcon type="question" color="primary" aria-hidden={true} />}
+            >
               <EuiLink
                 href={docLinks.links.inferenceManagement.inferenceAPIDocumentation}
                 target="_blank"

@@ -19,10 +19,10 @@ import {
   type PopoverAnchorPosition,
   useEuiTheme,
 } from '@elastic/eui';
+import { PHASE_ORDER, PHASE_TITLES } from '@kbn/data-lifecycle-phases';
 import { useIlmPhasesColorAndDescription } from '../../hooks/use_ilm_phases_color_and_description';
-import { ILM_PHASE_ORDER } from '../edit_ilm_phases_flyout/constants';
 
-export type IlmPhaseSelectOption = (typeof ILM_PHASE_ORDER)[number];
+export type IlmPhaseSelectOption = (typeof PHASE_ORDER)[number];
 
 export interface IlmPhaseSelectRenderButtonProps {
   disabled: boolean;
@@ -42,24 +42,6 @@ export interface IlmPhaseSelectProps {
   'data-test-subj'?: string;
 }
 
-const PHASE_LABELS: Record<IlmPhaseSelectOption, string> = {
-  hot: i18n.translate('xpack.streams.ilmPhaseSelect.hotPhaseLabel', {
-    defaultMessage: 'Hot phase',
-  }),
-  warm: i18n.translate('xpack.streams.ilmPhaseSelect.warmPhaseLabel', {
-    defaultMessage: 'Warm phase',
-  }),
-  cold: i18n.translate('xpack.streams.ilmPhaseSelect.coldPhaseLabel', {
-    defaultMessage: 'Cold phase',
-  }),
-  frozen: i18n.translate('xpack.streams.ilmPhaseSelect.frozenPhaseLabel', {
-    defaultMessage: 'Frozen phase',
-  }),
-  delete: i18n.translate('xpack.streams.ilmPhaseSelect.deletePhaseLabel', {
-    defaultMessage: 'Delete phase',
-  }),
-};
-
 export const IlmPhaseSelect = ({
   renderButton,
   selectedPhases,
@@ -77,7 +59,7 @@ export const IlmPhaseSelect = ({
 
   const availableOptions = useMemo(
     () =>
-      ILM_PHASE_ORDER.filter(
+      PHASE_ORDER.filter(
         (option) => !selectedPhases.includes(option) && !excludedPhases.includes(option)
       ),
     [excludedPhases, selectedPhases]
@@ -88,7 +70,11 @@ export const IlmPhaseSelect = ({
     () =>
       availableOptions.map((option) => {
         const icon =
-          option === 'delete' ? 'trash' : <EuiIcon type="dot" color={ilmPhases[option].color} />;
+          option === 'delete' ? (
+            'trash'
+          ) : (
+            <EuiIcon type="dot" color={ilmPhases[option].color} aria-hidden={true} />
+          );
 
         return (
           <EuiContextMenuItem
@@ -106,7 +92,7 @@ export const IlmPhaseSelect = ({
           >
             <EuiFlexGroup direction="column" gutterSize="none">
               <EuiFlexItem>
-                <EuiText size="s">{PHASE_LABELS[option]}</EuiText>
+                <EuiText size="s">{PHASE_TITLES[option]}</EuiText>
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiText size="xs" color="subdued">

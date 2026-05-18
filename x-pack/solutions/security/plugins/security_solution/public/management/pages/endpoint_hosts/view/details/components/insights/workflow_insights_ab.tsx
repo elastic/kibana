@@ -19,6 +19,7 @@ import { useFetchInsightsAB } from '../../../hooks/insights/use_fetch_insights_a
 import { WORKFLOW_INSIGHTS } from '../../../translations';
 import { WorkflowInsightsResults } from './workflow_insights_results';
 import { WorkflowInsightsScanSectionAB } from './workflow_insights_scan_ab';
+import { StaleEndpointPackageBanner } from './components/stale_endpoint_package_banner';
 
 interface WorkflowInsightsABProps {
   endpointId: string;
@@ -205,6 +206,7 @@ export const WorkflowInsightsAB = ({ endpointId }: WorkflowInsightsABProps) => {
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
+      <StaleEndpointPackageBanner />
       <WorkflowInsightsScanSectionAB
         isScanButtonDisabled={isScanRunning || isTriggerLoading || isUserScanLoading}
         isLoading={showScanLoading}

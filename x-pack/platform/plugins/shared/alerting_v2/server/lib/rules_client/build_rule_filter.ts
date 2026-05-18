@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import type { KueryNode } from '@kbn/es-query';
 import { fromKueryExpression, toKqlExpression } from '@kbn/es-query';
 
@@ -42,7 +43,7 @@ const rewriteFieldArg = (node: KueryNode): KueryNode => {
   if (fieldArg?.type === 'literal' && typeof fieldArg.value === 'string') {
     const soField = FIELD_MAP[fieldArg.value];
     if (!soField) {
-      throw new Error(
+      throw Boom.badRequest(
         `Invalid filter field "${fieldArg.value}". Allowed fields: ${ALLOWED_FILTER_FIELDS.join(
           ', '
         )}`
@@ -65,8 +66,8 @@ const rewriteFieldArg = (node: KueryNode): KueryNode => {
  * type is added to KQL, this will throw immediately rather than silently
  * passing unvalidated fields through.
  *
- * @throws Error if a field name is not in the FIELD_MAP.
- * @throws Error if an unknown KQL function type is encountered.
+ * @throws Boom badRequest (400) if a field name is not in the FIELD_MAP.
+ * @throws Boom badRequest (400) if an unknown KQL function type is encountered.
  */
 const rewriteNode = (node: KueryNode): KueryNode => {
   if (node.type !== 'function') {
@@ -95,7 +96,7 @@ const rewriteNode = (node: KueryNode): KueryNode => {
       return rewriteFieldArg(node);
 
     default:
-      throw new Error(`Unsupported KQL function "${node.function}" in filter`);
+      throw Boom.badRequest(`Unsupported KQL function "${node.function}" in filter`);
   }
 };
 
@@ -118,7 +119,8 @@ const rewriteNode = (node: KueryNode): KueryNode => {
  *
  * Returns an empty string unchanged (used for "match all").
  *
- * @throws Error if the filter contains a field name not in the allowed set.
+ * @throws Boom badRequest (400) if the filter contains a field name not in
+ *   the allowed set or uses an unsupported KQL function.
  */
 export const buildRuleSoFilter = (apiFilter: string): string => {
   if (!apiFilter) {
