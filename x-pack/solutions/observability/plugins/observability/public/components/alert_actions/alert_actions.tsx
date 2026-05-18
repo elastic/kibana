@@ -122,7 +122,6 @@ export function AlertActions(
           handleAddToExistingCaseClick();
           closeActionsPopover();
         }}
-        size="s"
       >
         {ADD_TO_EXISTING_CASE}
       </EuiContextMenuItem>,
@@ -133,7 +132,6 @@ export function AlertActions(
           handleAddToNewCaseClick();
           closeActionsPopover();
         }}
-        size="s"
       >
         {ADD_TO_NEW_CASE}
       </EuiContextMenuItem>,
