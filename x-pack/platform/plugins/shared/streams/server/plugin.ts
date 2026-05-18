@@ -614,7 +614,7 @@ export class StreamsPlugin
       if (this.continuousKiExtractionWorkflowService) {
         const migrationLogger = this.logger.get('legacy-workflow-migration');
         const { continuousKiExtractionWorkflowService: workflowService } = this;
-        this.managedWorkflowsClientPromise.then(async () => {
+        void this.managedWorkflowsClientPromise.then(async () => {
           try {
             const fakeRawRequest: FakeRawRequest = { headers: {}, path: '/' };
             const fakeRequest = kibanaRequestFactory(fakeRawRequest);

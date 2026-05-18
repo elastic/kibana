@@ -19,37 +19,6 @@ jest.mock('@kbn/ebt-tools', () => ({
 // Mock the useStreamsPrivileges hook
 jest.mock('../../../../../hooks/use_streams_privileges');
 
-// Mock hooks used by StreamDescription
-jest.mock(
-  '../../../../sig_events/stream_detail_systems/stream_description/use_stream_description_api',
-  () => ({
-    useStreamDescriptionApi: () => ({
-      description: '',
-      setDescription: jest.fn(),
-      isUpdating: false,
-      isEditing: false,
-      onCancelEdit: jest.fn(),
-      onStartEditing: jest.fn(),
-      onSaveDescription: jest.fn(),
-      isTaskLoading: false,
-      task: undefined,
-      taskError: null,
-      refreshTask: jest.fn(),
-      getDescriptionGenerationStatus: jest.fn().mockResolvedValue({ status: 'not_started' }),
-      scheduleDescriptionGenerationTask: jest.fn(),
-      cancelDescriptionGenerationTask: jest.fn(),
-      acknowledgeDescriptionGenerationTask: jest.fn(),
-      areButtonsDisabled: false,
-    }),
-  })
-);
-
-jest.mock('../../../../../hooks/use_ai_features', () => ({
-  useAIFeatures: () => ({
-    genAiConnectors: { selectedConnector: null },
-  }),
-}));
-
 // Mock hooks used by IndexConfiguration/Settings
 jest.mock('../../../../../hooks/use_stream_detail', () => ({
   useStreamDetail: () => ({
@@ -90,15 +59,6 @@ jest.mock('../../../../../hooks/use_kibana', () => ({
   }),
 }));
 
-// Mock ConnectorListButton used in StreamDescription
-jest.mock('../../../../connector_list_button/connector_list_button', () => ({
-  ConnectorListButton: ({ buttonProps }: { buttonProps: { children: React.ReactNode } }) => (
-    <button type="button">{buttonProps.children}</button>
-  ),
-  ConnectorListButtonBase: ({ buttonProps }: { buttonProps: { children: React.ReactNode } }) => (
-    <button type="button">{buttonProps.children}</button>
-  ),
-}));
 
 const mockUseStreamsPrivileges = useStreamsPrivileges as jest.MockedFunction<
   typeof useStreamsPrivileges
