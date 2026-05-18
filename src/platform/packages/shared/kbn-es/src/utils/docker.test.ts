@@ -160,9 +160,7 @@ describe('getServerlessNodes()', () => {
     expect(nodes[1].params).toEqual(expect.arrayContaining(['127.0.0.1:9202:9202']));
     expect(nodes[1].params).toEqual(expect.arrayContaining(['127.0.0.1:9302:9302']));
     expect(nodes[0].params).toEqual(
-      expect.arrayContaining([
-        'node.roles=["master","remote_cluster_client","ingest","index"]',
-      ])
+      expect.arrayContaining(['node.roles=["master","remote_cluster_client","ingest","index"]'])
     );
     expect(nodes[1].params).toEqual(
       expect.arrayContaining([
