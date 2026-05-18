@@ -6,7 +6,8 @@
  */
 
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
-import type { SkillReferencedContent } from '@kbn/agent-builder-common';
+import type { skillCreateRequestObjectSchema } from '@kbn/agent-builder-common/skills/validation';
+import type { z } from '@kbn/zod';
 
 /**
  * Attachment type id for skill drafts authored via chat.
@@ -22,19 +23,8 @@ export const SKILL_DRAFT_ATTACHMENT_TYPE = 'skill_draft' as const;
 
 /**
  * Data shape stored on a `skill_draft` attachment version.
- *
- * Mirrors `PersistedSkillCreateRequest` exactly so the same draft can be
- * shipped straight to the create endpoint without remapping. Keep this in
- * sync with `skillCreateRequestSchema` from `@kbn/agent-builder-common`.
  */
-export interface SkillDraftAttachmentData {
-  id: string;
-  name: string;
-  description: string;
-  content: string;
-  tool_ids: string[];
-  referenced_content?: SkillReferencedContent[];
-}
+export type SkillDraftAttachmentData = z.infer<typeof skillCreateRequestObjectSchema>;
 
 export type SkillDraftAttachment = Attachment<
   typeof SKILL_DRAFT_ATTACHMENT_TYPE,
