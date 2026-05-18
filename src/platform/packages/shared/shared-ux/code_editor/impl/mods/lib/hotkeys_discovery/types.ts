@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type HotkeyDefinition } from '@kbn/core-hotkeys-browser';
+import { type DiscoveryOnlyHotkeyDefinition } from '@kbn/core-hotkeys-browser';
 
 /**
  * Optional metadata for Monaco `addCommand` discovery rows (cheat sheet).
@@ -17,6 +17,6 @@ import { type HotkeyDefinition } from '@kbn/core-hotkeys-browser';
  * @public
  */
 export type MonacoHotkeyDiscoveryMeta = Pick<
-  HotkeyDefinition,
+  DiscoveryOnlyHotkeyDefinition,
   'id' | 'label' | 'description' | 'scope' | 'appId' | 'featureId' | 'group' | 'enabled' | 'keys'
 >;
