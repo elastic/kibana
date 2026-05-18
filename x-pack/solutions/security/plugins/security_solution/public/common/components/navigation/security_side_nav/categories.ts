@@ -10,12 +10,15 @@ import { SecurityPageName } from '../../../../../common';
 
 export const getNavCategories = (
   enableAlertsAndAttacksAlignment?: boolean,
-  isNewEAHomePageEnabled?: boolean
+  isNewEAHomePageEnabled?: boolean,
+  securityClassicNavExternalLinks?: boolean
 ): SeparatorLinkCategory[] => {
   const categories: SeparatorLinkCategory[] = [
     {
       type: LinkCategoryType.separator,
-      linkIds: [SecurityPageName.dashboards],
+      linkIds: securityClassicNavExternalLinks
+        ? [SecurityPageName.externalLinkDiscover, SecurityPageName.dashboards]
+        : [SecurityPageName.dashboards],
     },
     {
       type: LinkCategoryType.separator,
@@ -24,6 +27,9 @@ export const getNavCategories = (
         enableAlertsAndAttacksAlignment
           ? SecurityPageName.alertDetections
           : SecurityPageName.alerts,
+        ...(securityClassicNavExternalLinks
+          ? [SecurityPageName.externalLinkAgentBuilder, SecurityPageName.externalLinkWorkflows]
+          : []),
         SecurityPageName.attackDiscovery,
         SecurityPageName.cloudSecurityPostureFindings,
         SecurityPageName.case,

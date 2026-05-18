@@ -99,24 +99,69 @@ describe('SecuritySideNav', () => {
     useKibana().services.serverless = undefined;
   });
 
-  it('should render main items', () => {
-    mockUseNavLinks.mockReturnValue([alertsNavLink]);
-    renderNav();
-    expect(mockSolutionSideNav).toHaveBeenCalledWith(
-      expect.objectContaining({
-        selectedId: SecurityPageName.alerts,
-        items: [
-          {
-            id: SecurityPageName.alerts,
-            label: 'alerts',
-            href: '/alerts',
-            position: 'top',
-          },
-        ],
-        categories: getNavCategories(false),
-        tracker: track,
-      })
-    );
+  describe('with securityClassicNavExternalLinks disabled', () => {
+    it('should render main items without external links', () => {
+      mockUseNavLinks.mockReturnValue([alertsNavLink]);
+      renderNav();
+      expect(mockSolutionSideNav).toHaveBeenCalledWith(
+        expect.objectContaining({
+          selectedId: SecurityPageName.alerts,
+          items: [
+            {
+              id: SecurityPageName.alerts,
+              label: 'alerts',
+              href: '/alerts',
+              position: 'top',
+            },
+          ],
+          categories: getNavCategories(false, false, false),
+          tracker: track,
+        })
+      );
+    });
+  });
+
+  describe('with securityClassicNavExternalLinks enabled', () => {
+    it('should render main items with external links', () => {
+      mockUseIsExperimentalFeatureEnabled.mockImplementation((feature: string) => {
+        if (feature === 'securityClassicNavExternalLinks') {
+          return true;
+        }
+        return false;
+      });
+      mockUseNavLinks.mockReturnValue([alertsNavLink]);
+      renderNav();
+      expect(mockSolutionSideNav).toHaveBeenCalledWith(
+        expect.objectContaining({
+          selectedId: SecurityPageName.alerts,
+          items: [
+            expect.objectContaining({
+              id: SecurityPageName.externalLinkAgentBuilder,
+              label: 'Agents',
+              position: 'top',
+            }),
+            expect.objectContaining({
+              id: SecurityPageName.externalLinkDiscover,
+              label: 'Discover',
+              position: 'top',
+            }),
+            expect.objectContaining({
+              id: SecurityPageName.externalLinkWorkflows,
+              label: 'Workflows',
+              position: 'top',
+            }),
+            {
+              id: SecurityPageName.alerts,
+              label: 'alerts',
+              href: '/alerts',
+              position: 'top',
+            },
+          ],
+          categories: getNavCategories(false, false, true),
+          tracker: track,
+        })
+      );
+    });
   });
 
   it('should render the loader if items are still empty', () => {
@@ -132,6 +177,17 @@ describe('SecuritySideNav', () => {
     expect(mockSolutionSideNav).toHaveBeenCalledWith(
       expect.objectContaining({
         selectedId: SecurityPageName.administration,
+        items: expect.arrayContaining([
+          expect.objectContaining({
+            id: SecurityPageName.externalLinkAgentBuilder,
+          }),
+          expect.objectContaining({
+            id: SecurityPageName.externalLinkDiscover,
+          }),
+          expect.objectContaining({
+            id: SecurityPageName.externalLinkWorkflows,
+          }),
+        ]),
       })
     );
   });
@@ -141,8 +197,17 @@ describe('SecuritySideNav', () => {
     renderNav();
     expect(mockSolutionSideNav).toHaveBeenCalledWith(
       expect.objectContaining({
-        items: [
-          {
+        items: expect.arrayContaining([
+          expect.objectContaining({
+            id: SecurityPageName.externalLinkAgentBuilder,
+          }),
+          expect.objectContaining({
+            id: SecurityPageName.externalLinkDiscover,
+          }),
+          expect.objectContaining({
+            id: SecurityPageName.externalLinkWorkflows,
+          }),
+          expect.objectContaining({
             id: SecurityPageName.administration,
             label: 'Settings',
             href: '/administration',
@@ -156,8 +221,8 @@ describe('SecuritySideNav', () => {
                 isBeta: true,
               },
             ],
-          },
-        ],
+          }),
+        ]),
       })
     );
   });
@@ -167,11 +232,20 @@ describe('SecuritySideNav', () => {
     renderNav();
     expect(mockSolutionSideNav).toHaveBeenCalledWith(
       expect.objectContaining({
-        items: [
+        items: expect.arrayContaining([
+          expect.objectContaining({
+            id: SecurityPageName.externalLinkAgentBuilder,
+          }),
+          expect.objectContaining({
+            id: SecurityPageName.externalLinkDiscover,
+          }),
+          expect.objectContaining({
+            id: SecurityPageName.externalLinkWorkflows,
+          }),
           expect.objectContaining({
             id: SecurityPageName.administration,
           }),
-        ],
+        ]),
       })
     );
   });
@@ -183,13 +257,22 @@ describe('SecuritySideNav', () => {
     renderNav();
     expect(mockSolutionSideNav).toHaveBeenCalledWith(
       expect.objectContaining({
-        items: [
+        items: expect.arrayContaining([
+          expect.objectContaining({
+            id: SecurityPageName.externalLinkAgentBuilder,
+          }),
+          expect.objectContaining({
+            id: SecurityPageName.externalLinkDiscover,
+          }),
+          expect.objectContaining({
+            id: SecurityPageName.externalLinkWorkflows,
+          }),
           expect.objectContaining({
             id: SecurityPageName.launchpad,
             label: 'Launchpad',
             position: 'top',
           }),
-        ],
+        ]),
       })
     );
   });
@@ -253,12 +336,20 @@ describe('SecuritySideNav', () => {
   });
 
   describe('enableAlertsAndAttacksAlignment setting', () => {
+    beforeEach(() => {
+      mockUseIsExperimentalFeatureEnabled.mockImplementation((feature: string) => {
+        if (feature === 'enableAlertsAndAttacksAlignment') {
+          return true;
+        }
+        return false;
+      });
+    });
     it('should call getNavCategories with true when setting is enabled', () => {
       useKibana().services.uiSettings.get = jest.fn().mockReturnValue(true);
       renderNav();
       expect(mockSolutionSideNav).toHaveBeenCalledWith(
         expect.objectContaining({
-          categories: getNavCategories(true),
+          categories: getNavCategories(true, false, false),
         })
       );
     });
@@ -268,7 +359,7 @@ describe('SecuritySideNav', () => {
       renderNav();
       expect(mockSolutionSideNav).toHaveBeenCalledWith(
         expect.objectContaining({
-          categories: getNavCategories(false),
+          categories: getNavCategories(false, false, false),
         })
       );
     });
@@ -276,21 +367,26 @@ describe('SecuritySideNav', () => {
 
   describe('isNewEAHomePageEnabled feature flag', () => {
     it('should call getNavCategories with true when feature flag is enabled', () => {
-      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+      mockUseIsExperimentalFeatureEnabled.mockImplementation((feature: string) => {
+        if (feature === 'entityAnalyticsNewHomePageEnabled') {
+          return true;
+        }
+        return false;
+      });
       renderNav();
       expect(mockSolutionSideNav).toHaveBeenCalledWith(
         expect.objectContaining({
-          categories: getNavCategories(false, true),
+          categories: getNavCategories(false, true, false),
         })
       );
     });
 
     it('should call getNavCategories with false when feature flag is disabled', () => {
-      mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+      mockUseIsExperimentalFeatureEnabled.mockImplementation((feature: string) => false);
       renderNav();
       expect(mockSolutionSideNav).toHaveBeenCalledWith(
         expect.objectContaining({
-          categories: getNavCategories(false, false),
+          categories: getNavCategories(false, false, false),
         })
       );
     });
@@ -344,12 +440,12 @@ describe('SecuritySideNav', () => {
     renderNav();
     expect(mockSolutionSideNav).toHaveBeenCalledWith(
       expect.objectContaining({
-        items: [
+        items: expect.arrayContaining([
           expect.objectContaining({
             id: SecurityPageName.alerts,
             position: 'top',
           }),
-        ],
+        ]),
       })
     );
   });

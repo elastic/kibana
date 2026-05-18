@@ -92,7 +92,9 @@ const formatLink = (
   };
 };
 
-const useSolutionSideNavItems = (): SolutionSideNavItem<string>[] | undefined => {
+const useSolutionSideNavItems = (
+  isClassicNavExternalLinksEnabled: boolean
+): SolutionSideNavItem<string>[] | undefined => {
   const navLinks = useNavLinks();
   const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps(); // adds href and onClick props
 
@@ -214,8 +216,39 @@ const useSolutionSideNavItems = (): SolutionSideNavItem<string>[] | undefined =>
       return navItems;
     }, []);
 
-    return [...bodyItems, ...(classicFooterItems ? classicFooterItems : [])];
-  }, [navLinks, getSecuritySolutionLinkProps, classicFooterItems]);
+    // External app links
+    const externalLinks: SolutionSideNavItem[] = [
+      {
+        id: SecurityPageName.externalLinkAgentBuilder,
+        label: 'Agents',
+        href: '/app/agent_builder/agents',
+        position: SolutionSideNavItemPosition.top,
+      },
+      {
+        id: SecurityPageName.externalLinkDiscover,
+        label: 'Discover',
+        href: '/app/discover',
+        position: SolutionSideNavItemPosition.top,
+      },
+      {
+        id: SecurityPageName.externalLinkWorkflows,
+        label: 'Workflows',
+        href: '/app/workflows',
+        position: SolutionSideNavItemPosition.top,
+      },
+    ];
+
+    return [
+      ...(isClassicNavExternalLinksEnabled ? externalLinks : []),
+      ...bodyItems,
+      ...(classicFooterItems ? classicFooterItems : []),
+    ];
+  }, [
+    navLinks,
+    getSecuritySolutionLinkProps,
+    classicFooterItems,
+    isClassicNavExternalLinksEnabled,
+  ]);
 
   return sideNavItems;
 };
@@ -255,7 +288,10 @@ export const SecuritySideNav: React.FC = () => {
   const isNewEAHomePageEnabled = useIsExperimentalFeatureEnabled(
     'entityAnalyticsNewHomePageEnabled'
   );
-  const items = useSolutionSideNavItems();
+  const isClassicNavExternalLinksEnabled = useIsExperimentalFeatureEnabled(
+    'securityClassicNavExternalLinks'
+  );
+  const items = useSolutionSideNavItems(isClassicNavExternalLinksEnabled);
   const selectedId = useSelectedId();
   const panelTopOffset = usePanelTopOffset();
   const panelBottomOffset = usePanelBottomOffset();
@@ -265,8 +301,12 @@ export const SecuritySideNav: React.FC = () => {
       ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
       false
     );
-    return getNavCategories(enableAlertsAndAttacksAlignment, isNewEAHomePageEnabled);
-  }, [uiSettings, isNewEAHomePageEnabled]);
+    return getNavCategories(
+      enableAlertsAndAttacksAlignment,
+      isNewEAHomePageEnabled,
+      isClassicNavExternalLinksEnabled
+    );
+  }, [uiSettings, isNewEAHomePageEnabled, isClassicNavExternalLinksEnabled]);
 
   if (!items) {
     return <EuiLoadingSpinner size="m" data-test-subj="sideNavLoader" />;
