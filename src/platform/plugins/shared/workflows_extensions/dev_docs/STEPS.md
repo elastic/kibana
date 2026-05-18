@@ -749,7 +749,7 @@ Some integrations finish asynchronously: you start work in one request, then mus
 - **`state`** — author-owned state persisted from the previous `run` or `poll` result (`undefined` on the first poll of a **poll-only** step).
 - **`attempt`** — 1-based count of **`poll.handler`** invocations so far (does not count `run`).
 
-**`poll.policy`** (required) defines how long the workflow stays in **`WAITING`** between polls. Supported strategies: **`fixed`**, **`exponential`** (optional `jitter` to spread wake-ups), and **`dynamic`** (author-supplied `next(ctx)` returning delay ms from engine bookkeeping + `state`). Cadence is fixed at **definition time**; it is not configurable from workflow YAML.
+**`poll.policy`** (required) defines how long the workflow stays in **`WAITING`** between polls. Supported strategies: **`fixed`**, **`exponential`** (optional `multiplier`, default `2`, same meaning as on-failure retry; optional `jitter` using the **same** random delay in `[computed/2, computed]` ms as retry backoff), and **`dynamic`** (author-supplied `next(ctx)` returning delay ms from engine bookkeeping + `state`). Cadence is fixed at **definition time**; it is not configurable from workflow YAML.
 
 **`poll.ceilings`** (optional) caps runaway polling. Omitted ceilings default to conservative **`DEFAULT_POLL_CEILINGS`** (`maxAttempts` / `maxWaitMs`). If a ceiling is exceeded, the step fails with `ExecutionError` type **`PollCeilingExceeded`**. When you rely on those defaults, the registry logs a **warning** at registration time so authors notice.
 
@@ -775,7 +775,7 @@ export const demoPollOnly = createServerStepDefinition({
       // return { output: { status: 'complete' } };
       return { state: { marker: `${marker}.` } };
     },
-    policy: { strategy: 'exponential', initialMs: 5_000, maxMs: 60_000, jitter: true },
+    policy: { strategy: 'exponential', initialMs: 5_000, maxMs: 60_000, multiplier: 2, jitter: true },
     ceilings: { maxAttempts: 60, maxWaitMs: 30 * 60_000 },
   },
 });

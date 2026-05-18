@@ -261,14 +261,14 @@ describe('ServerStepRegistry', () => {
       ).toThrow(/"exponential.maxMs" must be >= "initialMs"/);
     });
 
-    it('rejects exponential policy when factor <= 1', () => {
+    it('rejects exponential policy when multiplier <= 1', () => {
       const poll: PollLifecycle = {
         handler: jest.fn(),
-        policy: { strategy: 'exponential', initialMs: 1_000, maxMs: 10_000, factor: 1 },
+        policy: { strategy: 'exponential', initialMs: 1_000, maxMs: 10_000, multiplier: 1 },
       };
       expect(() =>
         registry.register({ ...baseCommon, poll } as unknown as ServerStepDefinition)
-      ).toThrow(/"exponential.factor" must be > 1/);
+      ).toThrow(/"exponential.multiplier" must be > 1/);
     });
 
     it('rejects dynamic policy when next is not a function', () => {

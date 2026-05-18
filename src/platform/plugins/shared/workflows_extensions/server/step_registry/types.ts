@@ -163,10 +163,10 @@ export type OnCancelHandler<
  * author at definition time and is intentionally not configurable from YAML.
  *
  * - `fixed`        — constant interval between every poll.
- * - `exponential`  — `initialMs` doubles by `factor` (default 2) each attempt,
- *                    capped at `maxMs`. With `jitter` enabled, the computed
- *                    delay is multiplied by a uniform random value in
- *                    `[0.5, 1.5]` to avoid thundering herds across executions.
+ * - `exponential`  — `initialMs` scaled by `multiplier` (default 2, same name as
+ *                    on-failure retry) each attempt, capped at `maxMs`. With
+ *                    `jitter` enabled, uses the same backoff jitter as on-failure
+ *                    retry: a uniform delay in `[computed/2, computed]` ms.
  * - `dynamic`      — the step author supplies a pure function that computes
  *                    the next delay (in ms) from the engine bookkeeping plus
  *                    the persisted author state. Useful when the upstream
@@ -179,7 +179,7 @@ export type PollPolicy<State = unknown> =
       strategy: 'exponential';
       initialMs: number;
       maxMs: number;
-      factor?: number;
+      multiplier?: number;
       jitter?: boolean;
     }
   | {
@@ -283,7 +283,7 @@ export interface PollLifecycle<
  *       const results = await osqueryClient.results.get({ actionId: state.actionId });
  *       return { output: { rows: results.items } };
  *     },
- *     policy: { strategy: 'exponential', initialMs: 5_000, maxMs: 60_000, jitter: true },
+ *     policy: { strategy: 'exponential', initialMs: 5_000, maxMs: 60_000, multiplier: 2, jitter: true },
  *     ceilings: { maxAttempts: 60, maxWaitMs: 30 * 60_000 },
  *   },
  * });
@@ -467,9 +467,12 @@ function validatePollPolicy(stepId: string, policy: PollPolicy): void {
           `Step "${stepId}" has invalid poll policy: "exponential.maxMs" must be >= "initialMs".`
         );
       }
-      if (policy.factor != null && (!Number.isFinite(policy.factor) || policy.factor <= 1)) {
+      if (
+        policy.multiplier != null &&
+        (!Number.isFinite(policy.multiplier) || policy.multiplier <= 1)
+      ) {
         throw new Error(
-          `Step "${stepId}" has invalid poll policy: "exponential.factor" must be > 1 when provided.`
+          `Step "${stepId}" has invalid poll policy: "exponential.multiplier" must be > 1 when provided.`
         );
       }
       break;

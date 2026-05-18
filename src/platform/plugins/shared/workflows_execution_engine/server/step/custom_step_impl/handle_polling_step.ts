@@ -20,14 +20,10 @@ import type {
 } from '@kbn/workflows-extensions/server';
 import type { z } from '@kbn/zod/v4';
 import { createHandlerContext } from './step_context_handler';
+import { applyRetryBackoffJitter } from '../../utils/retry_delay/retry_delay';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger';
 import type { RunStepResult } from '../node_implementation';
-
-export function applyJitter(delayMs: number, random: () => number = Math.random): number {
-  const factor = 0.5 + random();
-  return Math.floor(delayMs * factor);
-}
 
 const bookkeepingKey = '__durableStepState';
 
@@ -229,11 +225,11 @@ export class PollPolicyStepHandler implements StepHandler {
         break;
       }
       case 'exponential': {
-        const factor = policy.factor ?? 2;
+        const multiplier = policy.multiplier ?? 2;
         const exponent = Math.max(currentAttempt, 0);
-        const raw = policy.initialMs * Math.pow(factor, exponent);
+        const raw = policy.initialMs * Math.pow(multiplier, exponent);
         const capped = Math.min(raw, policy.maxMs);
-        const delayMs = policy.jitter ? applyJitter(capped) : Math.floor(capped);
+        const delayMs = policy.jitter ? applyRetryBackoffJitter(capped) : Math.floor(capped);
         policyData = {
           startedAt,
           lastPollAt,

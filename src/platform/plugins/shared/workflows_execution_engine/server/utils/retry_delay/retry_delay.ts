@@ -51,7 +51,7 @@ export function computeRetryDelayMs(config: RetryDelayConfig, attempt: number): 
     }
     let delayMs = parseDurationMemoized(config.delay);
     if (config.jitter) {
-      delayMs = applyJitter(delayMs);
+      delayMs = applyRetryBackoffJitter(delayMs);
     }
     return delayMs;
   }
@@ -68,15 +68,17 @@ export function computeRetryDelayMs(config: RetryDelayConfig, attempt: number): 
   }
 
   if (config.jitter) {
-    delayMs = applyJitter(delayMs);
+    delayMs = applyRetryBackoffJitter(delayMs);
   }
 
   return Math.max(0, Math.floor(delayMs));
 }
 
 /**
- * Applies full jitter: delay * random(0.5, 1) to spread retries and avoid thundering herd.
+ * Jitter for on-failure retry delays and poll exponential backoff: picks a uniform
+ * delay in `[delayMs / 2, delayMs]` (inclusive), then floors — same formula as
+ * {@link computeRetryDelayMs} when `jitter` is true.
  */
-function applyJitter(delayMs: number): number {
+export function applyRetryBackoffJitter(delayMs: number): number {
   return Math.floor(random(delayMs / 2, delayMs));
 }
