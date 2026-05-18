@@ -7,6 +7,11 @@
 
 import { z } from '@kbn/zod';
 
+import {
+  asCodePaginationParamsSchema,
+  asCodePaginationResponseMetaSchema,
+  PAGINATION_MAX_SIZE,
+} from '@kbn/as-code-shared-schemas';
 import { lensResponseItemSchema } from './common';
 
 export const lensSearchRequestQuerySchema = z.object({
@@ -24,25 +29,12 @@ export const lensSearchRequestQuerySchema = z.object({
   query: z.string().optional().meta({
     description: 'Text to match against `search_fields`.',
   }),
-  page: z.coerce.number().min(1).default(1).meta({
-    description: 'Page number.',
-  }),
-  per_page: z.coerce.number().min(1).max(1000).default(20).meta({
-    description: 'Results per page.',
-  }),
+  ...asCodePaginationParamsSchema.shape,
 });
-
-const lensSearchResponseMetaSchema = z
-  .object({
-    page: z.number().optional(),
-    per_page: z.number().optional(),
-    total: z.number().meta({ description: 'Total number of matching visualizations.' }),
-  })
-  .strict();
 
 export const lensSearchResponseBodySchema = z
   .object({
-    data: z.array(lensResponseItemSchema).max(1000),
-    meta: lensSearchResponseMetaSchema,
+    data: z.array(lensResponseItemSchema).max(PAGINATION_MAX_SIZE),
+    meta: asCodePaginationResponseMetaSchema,
   })
   .strict();

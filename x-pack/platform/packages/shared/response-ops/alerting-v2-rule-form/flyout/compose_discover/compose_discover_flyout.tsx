@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import {
   EuiBadge,
@@ -22,20 +22,26 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { FormValues } from '../../form/types';
 import type { RuleFormServices } from '../../form/contexts/rule_form_context';
 import { RuleFormProvider } from '../../form/contexts/rule_form_context';
-import type { FormValues } from '../../form/types';
 import { serializeFormToYaml, parseYamlToFormValues } from '../../form/utils/yaml_form_utils';
+import type { ComposeFormValues, RuleQuery } from './compose_form_types';
+import { getBreachQuery, getRecoverQuery } from './compose_form_types';
 import {
-  mapRuleResponseToFormValues,
-  mapFormValuesToCreateRequest,
-  mapFormValuesToUpdateRequest,
-} from '../../form/utils/rule_request_mappers';
-import type { ComposeDiscoverMode } from './types';
-import { useComposeDiscoverState, getStepTitles } from './use_compose_discover_state';
-import { ComposeDiscoverForm } from './compose_discover_form';
+  mapRuleToComposeFormValues,
+  composeFormToCreateRequest,
+  composeFormToUpdateRequest,
+  transformQueryIn,
+  transformQueryOut,
+} from './compose_mappers';
+import type { ComposeDiscoverMode, SandboxApplyData } from './types';
+import { useComposeDiscoverState, getSandboxTabConfig } from './use_compose_discover_state';
+import { ComposeDiscoverForm, getSteps } from './compose_discover_form';
+import { HorizontalMinimalStepper, type MinimalStep } from './horizontal_minimal_stepper';
 import { ComposeDiscoverChild } from './compose_discover_child';
 import { useEsqlAutocomplete } from './use_esql_providers';
+import { useSplitQueryCompletion } from './use_split_query_completion';
 
 const LazyYamlRuleForm = React.lazy(() =>
   import('../../form/yaml_rule_form').then((m) => ({ default: m.YamlRuleForm }))
@@ -65,29 +71,82 @@ export interface ComposeDiscoverFlyoutProps {
   historyKey: symbol;
   mode?: ComposeDiscoverMode;
   /** The existing rule — provided when mode === 'edit'. Used to seed the RHF form. */
-  rule?: Parameters<typeof mapRuleResponseToFormValues>[0];
+  rule?: Parameters<typeof mapRuleToComposeFormValues>[0];
   /** The ID of the rule being edited. Required when mode === 'edit'. */
   ruleId?: string;
   onClose: () => void;
   services: RuleFormServices;
   /** Called with the create payload when the user submits in create mode. */
-  onCreateRule: (payload: ReturnType<typeof mapFormValuesToCreateRequest>) => void;
+  onCreateRule: (payload: ReturnType<typeof composeFormToCreateRequest>) => void;
   /** Called with id + update payload when the user submits in edit mode. */
-  onUpdateRule?: (id: string, payload: ReturnType<typeof mapFormValuesToUpdateRequest>) => void;
+  onUpdateRule?: (id: string, payload: ReturnType<typeof composeFormToUpdateRequest>) => void;
   /** True while a create/update mutation is in flight. */
   isSaving?: boolean;
 }
 
 const FLYOUT_TITLE_ID = 'composeDiscoverFlyoutTitle';
 
-const EMPTY_FORM_VALUES: FormValues = {
+const getStepStatus = (currentStep: number, stepIndex: number): MinimalStep['status'] => {
+  if (stepIndex < currentStep) return 'complete';
+  if (stepIndex === currentStep) return 'current';
+  return 'incomplete';
+};
+
+/** Bridge YAML parse (FormValues) into compose form shape until yaml_form_utils adopts ComposeFormValues. */
+const formValuesFromYamlToCompose = (parsed: FormValues): ComposeFormValues => ({
+  kind: parsed.kind,
+  metadata: parsed.metadata,
+  timeField: parsed.timeField,
+  schedule: parsed.schedule,
+  query: transformQueryIn({
+    kind: parsed.kind,
+    evaluation: parsed.evaluation,
+    ...(parsed.recoveryPolicy?.type === 'query' &&
+    parsed.recoveryPolicy.query?.base !== undefined &&
+    parsed.recoveryPolicy.query?.base !== null
+      ? {
+          recovery_policy: {
+            type: parsed.recoveryPolicy.type,
+            query: {
+              base: parsed.recoveryPolicy.query.base ?? '',
+            },
+          },
+        }
+      : {}),
+  }),
+  grouping: parsed.grouping,
+  stateTransition: parsed.stateTransition,
+  stateTransitionAlertDelayMode: parsed.stateTransitionAlertDelayMode,
+  stateTransitionRecoveryDelayMode: parsed.stateTransitionRecoveryDelayMode,
+  artifacts: parsed.artifacts,
+});
+
+/** Compose form → legacy FormValues for YAML serialization via yaml_form_utils. */
+const composeFormValuesForYamlSerialize = (compose: ComposeFormValues): FormValues => {
+  const { evaluation, recovery_policy } = transformQueryOut(compose.query, compose.kind);
+
+  return {
+    kind: compose.kind,
+    metadata: compose.metadata,
+    timeField: compose.timeField,
+    schedule: compose.schedule,
+    evaluation,
+    grouping: compose.grouping,
+    ...(recovery_policy ? { recoveryPolicy: recovery_policy } : {}),
+    stateTransition: compose.stateTransition,
+    stateTransitionAlertDelayMode: compose.stateTransitionAlertDelayMode,
+    stateTransitionRecoveryDelayMode: compose.stateTransitionRecoveryDelayMode,
+    artifacts: compose.artifacts,
+  };
+};
+
+const EMPTY_FORM_VALUES: ComposeFormValues = {
   kind: 'alert',
   metadata: { name: '', enabled: true, description: '', tags: [] },
   timeField: '@timestamp',
   schedule: { every: '1m', lookback: '5m' },
-  evaluation: { query: { base: '' } },
+  query: { format: 'standalone', breach: '' },
   grouping: undefined,
-  recoveryPolicy: { type: 'no_breach' },
   stateTransition: undefined,
   stateTransitionAlertDelayMode: 'immediate',
   stateTransitionRecoveryDelayMode: 'immediate',
@@ -105,61 +164,108 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
   onUpdateRule,
   isSaving = false,
 }) => {
-  // ── UI state (step navigation, sandbox open/close, tab selection, etc.) ──
-  // In edit mode, seed the sandbox draft with the rule's existing query so the
-  // Alert Condition step shows the current query summary instead of "No query defined".
-  const initialSandboxQuery =
-    mode === 'edit'
-      ? rule
-        ? mapRuleResponseToFormValues(rule).evaluation?.query?.base ?? ''
-        : ''
-      : '';
-  const [uiState, dispatch] = useComposeDiscoverState(mode, initialSandboxQuery);
+  /*
+   * ── UI state (step navigation, sandbox open/close, tab selection, etc.) ──
+   * In edit mode, seed the sandbox draft with the rule's existing query so the
+   * Alert Condition step shows the current query summary instead of "No query defined".
+   * When the persisted rule has a custom recovery query, the initial state
+   * infers that tracking was active and reconstructs the split.
+   */
+  const initialMapped = mode === 'edit' && rule ? mapRuleToComposeFormValues(rule) : undefined;
+  const [uiState, dispatch] = useComposeDiscoverState({
+    mode,
+    initialQuery: getBreachQuery(initialMapped?.query),
+    initialRecoveryQuery: getRecoverQuery(initialMapped?.query)?.trim() || undefined,
+  });
 
   // Registered once here so providers persist across Sandbox open/close cycles.
   useEsqlAutocomplete(services);
 
-  // ── Form values (submitted to the API) ──
-  const defaultValues = useMemo<FormValues>(() => {
-    if (rule) {
-      const mapped = mapRuleResponseToFormValues(rule);
-      return {
-        kind: mapped.kind ?? 'alert',
-        metadata: {
-          name: mapped.metadata?.name ?? '',
-          enabled: mapped.metadata?.enabled ?? true,
-          description: mapped.metadata?.description ?? '',
-          owner: mapped.metadata?.owner,
-          tags: mapped.metadata?.tags ?? [],
-        },
-        timeField: mapped.timeField ?? '@timestamp',
-        schedule: {
-          every: mapped.schedule?.every ?? '1m',
-          lookback: mapped.schedule?.lookback ?? '5m',
-        },
-        evaluation: { query: { base: mapped.evaluation?.query?.base ?? '' } },
-        grouping: mapped.grouping,
-        recoveryPolicy: mapped.recoveryPolicy ?? { type: 'no_breach' },
-        stateTransition: mapped.stateTransition,
-        stateTransitionAlertDelayMode: mapped.stateTransitionAlertDelayMode ?? 'immediate',
-        stateTransitionRecoveryDelayMode: mapped.stateTransitionRecoveryDelayMode ?? 'immediate',
-        artifacts: mapped.artifacts ?? [],
-      };
-    }
-    return EMPTY_FORM_VALUES;
-  }, [rule]);
+  /*
+   * Split-query completion for alert and recovery block editors. Registered at
+   * the flyout level so providers survive Sandbox (child) open/close cycles and
+   * are immune to React Strict Mode double-mount disposal.
+   */
+  const { onEditorMount: onAlertEditorMount } = useSplitQueryCompletion({
+    baseQuery: uiState.baseQuery,
+    search: services.data.search.search,
+  });
+  const { onEditorMount: onRecoveryEditorMount } = useSplitQueryCompletion({
+    baseQuery: uiState.baseQuery,
+    search: services.data.search.search,
+  });
 
-  const methods = useForm<FormValues>({ mode: 'onBlur', defaultValues });
+  // ── Form values (submitted to the API) ──
+  const defaultValues = useMemo<ComposeFormValues>(
+    () => (rule ? mapRuleToComposeFormValues(rule) : EMPTY_FORM_VALUES),
+    [rule]
+  );
+
+  const methods = useForm<ComposeFormValues>({ mode: 'onBlur', defaultValues });
 
   const isCreate = mode === 'create';
   const title = isCreate ? 'Create alert rule' : 'Edit alert rule';
 
-  const stepTitles = getStepTitles();
-  const isLastStep = uiState.step === stepTitles.length - 1;
+  const steps = getSteps(uiState.tracking);
+  const currentStep = steps[uiState.step];
+  const isLastStep = uiState.step === steps.length - 1;
+
+  /*
+   * Sync recovery into RHF.query (composed blocks.recover or standalone recover).
+   * When tracking + custom recovery, persist the Sandbox recovery block/shape.
+   * Otherwise strip recover from the canonical query shape.
+   */
+  useEffect(() => {
+    if (!uiState.queryCommitted) return;
+
+    const current = methods.getValues('query');
+
+    if (uiState.tracking && uiState.recoveryType === 'custom') {
+      if (current.format === 'composed') {
+        methods.setValue('query', {
+          ...current,
+          blocks: {
+            breach: current.blocks.breach,
+            ...(uiState.recoveryBlock.trim() ? { recover: uiState.recoveryBlock } : {}),
+          },
+        });
+      } else {
+        const recoverMerged = [uiState.baseQuery, uiState.recoveryBlock]
+          .filter(Boolean)
+          .join('\n')
+          .trim();
+        if (recoverMerged) {
+          methods.setValue('query', { ...current, recover: recoverMerged });
+        } else {
+          methods.setValue('query', { format: 'standalone', breach: current.breach });
+        }
+      }
+      return;
+    }
+
+    if (current.format === 'composed') {
+      methods.setValue('query', {
+        ...current,
+        blocks: { breach: current.blocks.breach },
+      });
+    } else {
+      methods.setValue('query', {
+        format: 'standalone',
+        breach: current.breach,
+      });
+    }
+  }, [
+    uiState.tracking,
+    uiState.recoveryType,
+    uiState.baseQuery,
+    uiState.recoveryBlock,
+    uiState.queryCommitted,
+    methods,
+  ]);
 
   // ── YAML mode state ──────────────────────────────────────────────────────
   const [yamlText, setYamlText] = useState('');
-  const preYamlFormSnapshotRef = useRef<FormValues | null>(null);
+  const preYamlFormSnapshotRef = useRef<ComposeFormValues | null>(null);
   const debouncedParseRef = useRef<ReturnType<typeof setTimeout>>();
 
   // Wraps setYamlText with a debounced (~300 ms) lenient parse that pushes
@@ -172,7 +278,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
       debouncedParseRef.current = setTimeout(() => {
         const result = parseYamlToFormValues(yaml);
         if (result.values) {
-          methods.reset(result.values);
+          methods.reset(formValuesFromYamlToCompose(result.values));
         }
       }, 300);
     },
@@ -183,14 +289,16 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
     (enabled: boolean) => {
       if (enabled) {
         preYamlFormSnapshotRef.current = methods.getValues();
-        setYamlText(serializeFormToYaml(methods.getValues()));
+        setYamlText(serializeFormToYaml(composeFormValuesForYamlSerialize(methods.getValues())));
       } else {
         clearTimeout(debouncedParseRef.current);
         const result = parseYamlToFormValues(yamlText);
         if (result.values) {
-          methods.reset(result.values);
-          const parsedQuery = result.values.evaluation?.query?.base ?? '';
-          dispatch({ type: 'COMMIT_SANDBOX_QUERY', query: parsedQuery });
+          const compose = formValuesFromYamlToCompose(result.values);
+          methods.reset(compose);
+          const parsedQuery =
+            getBreachQuery(compose.query) || result.values.evaluation?.query?.base || '';
+          dispatch({ type: 'COMMIT_CHILD_QUERY', fullQuery: parsedQuery });
         }
         preYamlFormSnapshotRef.current = null;
       }
@@ -209,14 +317,38 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
   }, [methods, dispatch]);
 
   // Imperative handler for Sandbox "Apply changes". Writes the committed
-  // query into both the reducer and RHF, then regenerates YAML if in YAML
-  // mode. No effects involved — every Apply call executes this directly.
+  // query into both RHF (the source of truth) and the reducer cache, then
+  // regenerates YAML if in YAML mode. No effects involved for the eval
+  // query — every Apply call executes this directly.
   const handleSandboxApply = useCallback(
-    (query: string) => {
-      dispatch({ type: 'COMMIT_SANDBOX_QUERY', query });
-      methods.setValue('evaluation.query.base', query);
+    (data: SandboxApplyData) => {
+      const updatedQuery: RuleQuery = data.isSplit
+        ? {
+            format: 'composed',
+            base: data.baseQuery,
+            blocks: {
+              breach: data.alertBlock,
+              ...(data.recoveryBlock.trim() ? { recover: data.recoveryBlock } : {}),
+            },
+          }
+        : { format: 'standalone', breach: data.fullQuery };
+
+      methods.setValue('query', updatedQuery);
+
+      if (data.isSplit) {
+        dispatch({
+          type: 'COMMIT_CHILD_SPLIT',
+          baseQuery: data.baseQuery,
+          alertBlock: data.alertBlock,
+          recoveryBlock: data.recoveryBlock,
+        });
+      } else {
+        dispatch({ type: 'COMMIT_CHILD_QUERY', fullQuery: data.fullQuery });
+      }
+
       if (uiState.yamlMode) {
-        setYamlText(serializeFormToYaml(methods.getValues()));
+        const current = { ...methods.getValues(), query: updatedQuery };
+        setYamlText(serializeFormToYaml(composeFormValuesForYamlSerialize(current)));
       }
     },
     [dispatch, methods, uiState.yamlMode]
@@ -224,9 +356,9 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
 
   const handleSubmit = methods.handleSubmit((values) => {
     if (isCreate) {
-      onCreateRule(mapFormValuesToCreateRequest(values));
+      onCreateRule(composeFormToCreateRequest(values));
     } else if (ruleId && onUpdateRule) {
-      onUpdateRule(ruleId, mapFormValuesToUpdateRequest(values));
+      onUpdateRule(ruleId, composeFormToUpdateRequest(values));
     }
   });
 
@@ -236,21 +368,18 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
     clearTimeout(debouncedParseRef.current);
     const result = parseYamlToFormValues(yamlText);
     if (result.values) {
-      methods.reset(result.values);
+      methods.reset(formValuesFromYamlToCompose(result.values));
     }
     handleSubmit();
   }, [yamlText, methods, handleSubmit]);
 
   const handleNext = useCallback(async () => {
-    // Step 0: require a committed query before advancing
-    if (uiState.step === 0 && !uiState.queryCommitted) return;
-    // Step 1: validate that the rule name has been filled in
-    if (uiState.step === 1) {
-      const valid = await methods.trigger(['metadata.name']);
+    if (currentStep?.validate) {
+      const valid = await currentStep.validate(methods, uiState);
       if (!valid) return;
     }
     dispatch({ type: 'GO_NEXT' });
-  }, [uiState.step, uiState.queryCommitted, methods, dispatch]);
+  }, [currentStep, methods, uiState, dispatch]);
 
   return (
     <RuleFormProvider services={services} meta={{ layout: 'flyout' }}>
@@ -274,7 +403,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
               responsive={false}
               style={{ marginTop: 8 }}
             >
-              <EuiFlexItem grow={false}>
+              <EuiFlexItem grow>
                 {uiState.yamlMode ? (
                   <EuiBadge color="hollow" data-test-subj="composeDiscoverYamlBadge">
                     {i18n.translate('xpack.alertingV2.composeDiscover.yamlMode.badge', {
@@ -282,7 +411,14 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
                     })}
                   </EuiBadge>
                 ) : (
-                  <>{/* Step indicator coming in PR A — HorizontalMinimalStepper */}</>
+                  <HorizontalMinimalStepper
+                    steps={steps.map(
+                      (s, i): MinimalStep => ({
+                        title: s.title,
+                        status: getStepStatus(uiState.step, i),
+                      })
+                    )}
+                  />
                 )}
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
@@ -351,6 +487,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
                       <EuiFlexItem grow={false}>
                         <EuiButtonEmpty
                           iconType="arrowLeft"
+                          isDisabled={uiState.childOpen}
                           onClick={() => dispatch({ type: 'GO_BACK' })}
                           data-test-subj="composeDiscoverBack"
                         >
@@ -371,7 +508,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
                       ) : (
                         <EuiToolTip
                           content={
-                            uiState.step === 0 && !uiState.queryCommitted
+                            currentStep?.id === 'alertCondition' && !uiState.queryCommitted
                               ? 'Define a query in the editor before continuing'
                               : undefined
                           }
@@ -381,7 +518,8 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
                             iconType="arrowRight"
                             iconSide="right"
                             isDisabled={
-                              uiState.childOpen || (uiState.step === 0 && !uiState.queryCommitted)
+                              uiState.childOpen ||
+                              (currentStep?.id === 'alertCondition' && !uiState.queryCommitted)
                             }
                             onClick={handleNext}
                             data-test-subj="composeDiscoverNext"
@@ -401,6 +539,9 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
             <ComposeDiscoverChild
               state={uiState}
               dispatch={dispatch}
+              tabConfig={getSandboxTabConfig(uiState)}
+              onAlertEditorMount={onAlertEditorMount}
+              onRecoveryEditorMount={onRecoveryEditorMount}
               onClose={() => dispatch({ type: 'CLOSE_CHILD' })}
               onApply={handleSandboxApply}
             />

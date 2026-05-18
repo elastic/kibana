@@ -8,37 +8,38 @@
  */
 
 import { z } from '@kbn/zod';
-import { asCodeMetaSchema } from '@kbn/as-code-shared-schemas';
-
-const MAX_PER_PAGE = 10000;
+import {
+  asCodeMetaSchema,
+  asCodePaginationParamsSchema,
+  asCodePaginationResponseMetaSchema,
+  PAGINATION_MAX_SIZE,
+} from '@kbn/as-code-shared-schemas';
 
 export const searchRequestQuerySchema = z.object({
   query: z.string().optional().meta({
     description:
       'An Elasticsearch simple_query_string query that filters markdown library items by "title" and "description"',
   }),
-  page: z.coerce.number().optional().meta({
-    description: 'The search page to return',
-  }),
-  per_page: z.coerce.number().max(MAX_PER_PAGE).optional().meta({
-    description: 'The number of items to return per page',
-  }),
+  ...asCodePaginationParamsSchema.shape,
 });
 
 export const searchResponseBodySchema = z.object({
-  markdowns: z
+  data: z
     .array(
       z.object({
-        id: z.string(),
+        id: z.string().meta({ description: 'The markdown library item ID.' }),
         data: z.object({
-          description: z.string().optional(),
-          title: z.string(),
+          description: z
+            .string()
+            .optional()
+            .meta({ description: 'The markdown library item description.' }),
+          title: z.string().meta({ description: 'The markdown library item title.' }),
         }),
         meta: asCodeMetaSchema,
       })
     )
     .min(0)
-    .max(MAX_PER_PAGE),
-  total: z.number(),
-  page: z.number(),
+    .max(PAGINATION_MAX_SIZE)
+    .meta({ description: 'List of markdown library items matching the query.' }),
+  meta: asCodePaginationResponseMetaSchema,
 });

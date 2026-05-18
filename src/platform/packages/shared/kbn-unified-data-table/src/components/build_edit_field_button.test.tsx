@@ -106,7 +106,6 @@ describe('buildEditFieldButton', () => {
           id="unifiedDataTable.grid.editFieldButton"
         />,
         "onClick": [Function],
-        "size": "xs",
       }
     `);
   });
