@@ -18,8 +18,11 @@ import {
 } from './constants';
 import {
   DASHBOARD_DEFAULT_BACKGROUND_TOKEN,
+  DASHBOARD_DEFAULT_PANEL_BACKGROUND_TOKEN,
   getDashboardBackgroundBaseTokenOptions,
+  getDashboardBackgroundTokenOptions,
   type DashboardBackgroundBaseToken,
+  type DashboardBackgroundToken,
 } from './dashboard_background_tokens';
 import {
   DASHBOARD_LAYOUT_TWEAKPANE_CURRENT_STATE_PRESET_ID,
@@ -95,6 +98,10 @@ export function useDashboardLayoutTweakpane(): DashboardLayoutTweakpaneValues {
   const [markdownCornerPaddingBottomPx, setMarkdownCornerPaddingBottomPx] = useState(0);
   const [dashboardBackgroundToken, setDashboardBackgroundToken] =
     useState<DashboardBackgroundBaseToken>(DASHBOARD_DEFAULT_BACKGROUND_TOKEN);
+  const [lightModePanelBackgroundToken, setLightModePanelBackgroundToken] =
+    useState<DashboardBackgroundToken>(DASHBOARD_DEFAULT_PANEL_BACKGROUND_TOKEN);
+  const [darkModePanelBackgroundToken, setDarkModePanelBackgroundToken] =
+    useState<DashboardBackgroundToken>(DASHBOARD_DEFAULT_PANEL_BACKGROUND_TOKEN);
 
   const markdownCornerUnlinkedFromPanelPaddingRef = useRef(false);
 
@@ -118,7 +125,8 @@ export function useDashboardLayoutTweakpane(): DashboardLayoutTweakpaneValues {
       container.dataset.testSubj = 'dashboardLayoutTweakpane';
       document.body.appendChild(container);
 
-      const bgOptions = getDashboardBackgroundBaseTokenOptions(euiThemeRef.current.colors);
+      const dashboardBgOptions = getDashboardBackgroundBaseTokenOptions(euiThemeRef.current.colors);
+      const panelBgOptions = getDashboardBackgroundTokenOptions(euiThemeRef.current.colors);
       const presets = getDashboardLayoutTweakpanePresets(defaultPanelRadiusRef.current);
 
       const params = {
@@ -130,6 +138,8 @@ export function useDashboardLayoutTweakpane(): DashboardLayoutTweakpaneValues {
         markdownCornerPaddingRightPx: 0,
         markdownCornerPaddingBottomPx: 0,
         dashboardBackgroundToken: DASHBOARD_DEFAULT_BACKGROUND_TOKEN,
+        lightModePanelBackgroundToken: DASHBOARD_DEFAULT_PANEL_BACKGROUND_TOKEN,
+        darkModePanelBackgroundToken: DASHBOARD_DEFAULT_PANEL_BACKGROUND_TOKEN,
       };
 
       const pane = new Pane({
@@ -169,6 +179,8 @@ export function useDashboardLayoutTweakpane(): DashboardLayoutTweakpaneValues {
           Math.max(0, markdownBottomRaw)
         );
         params.dashboardBackgroundToken = next.dashboardBackgroundToken;
+        params.lightModePanelBackgroundToken = next.lightModePanelBackgroundToken;
+        params.darkModePanelBackgroundToken = next.darkModePanelBackgroundToken;
 
         // Before `pane.refresh()`, which can re-fire other bindings' `change` handlers: if markdown
         // still matches panel padding, those handlers should sync (linked). If not, skip sync so
@@ -185,6 +197,8 @@ export function useDashboardLayoutTweakpane(): DashboardLayoutTweakpaneValues {
         setMarkdownCornerPaddingRightPx(params.markdownCornerPaddingRightPx);
         setMarkdownCornerPaddingBottomPx(params.markdownCornerPaddingBottomPx);
         setDashboardBackgroundToken(params.dashboardBackgroundToken);
+        setLightModePanelBackgroundToken(params.lightModePanelBackgroundToken);
+        setDarkModePanelBackgroundToken(params.darkModePanelBackgroundToken);
         pane.refresh();
       };
 
@@ -318,14 +332,43 @@ export function useDashboardLayoutTweakpane(): DashboardLayoutTweakpaneValues {
         .addBinding(params, 'dashboardBackgroundToken', {
           label: 'Dashboard background',
           options:
-            bgOptions.length > 0
-              ? bgOptions
+            dashboardBgOptions.length > 0
+              ? dashboardBgOptions
               : [{ text: 'Subdued', value: DASHBOARD_DEFAULT_BACKGROUND_TOKEN }],
         })
         .on('change', (ev) => {
           const next = typeof ev.value === 'string' ? ev.value : params.dashboardBackgroundToken;
           params.dashboardBackgroundToken = next;
           setDashboardBackgroundToken(next);
+        });
+
+      const panelBgListOptions =
+        panelBgOptions.length > 0
+          ? panelBgOptions
+          : [{ text: 'Plain', value: DASHBOARD_DEFAULT_PANEL_BACKGROUND_TOKEN }];
+
+      pane
+        .addBinding(params, 'lightModePanelBackgroundToken', {
+          label: 'Light mode panel BG',
+          options: panelBgListOptions,
+        })
+        .on('change', (ev) => {
+          const next =
+            typeof ev.value === 'string' ? ev.value : params.lightModePanelBackgroundToken;
+          params.lightModePanelBackgroundToken = next;
+          setLightModePanelBackgroundToken(next);
+        });
+
+      pane
+        .addBinding(params, 'darkModePanelBackgroundToken', {
+          label: 'Dark mode panel BG',
+          options: panelBgListOptions,
+        })
+        .on('change', (ev) => {
+          const next =
+            typeof ev.value === 'string' ? ev.value : params.darkModePanelBackgroundToken;
+          params.darkModePanelBackgroundToken = next;
+          setDarkModePanelBackgroundToken(next);
         });
 
       applyLayoutTweakValues(params);
@@ -351,5 +394,7 @@ export function useDashboardLayoutTweakpane(): DashboardLayoutTweakpaneValues {
     markdownCornerPaddingRightPx,
     markdownCornerPaddingBottomPx,
     dashboardBackgroundToken,
+    lightModePanelBackgroundToken,
+    darkModePanelBackgroundToken,
   };
 }

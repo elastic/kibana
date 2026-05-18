@@ -27,6 +27,8 @@ export function DashboardLayoutTweakpaneSync() {
     markdownCornerPaddingRightPx,
     markdownCornerPaddingBottomPx,
     dashboardBackgroundToken,
+    lightModePanelBackgroundToken,
+    darkModePanelBackgroundToken,
   } = useDashboardLayoutTweakpane();
 
   useEffect(() => {
@@ -39,6 +41,8 @@ export function DashboardLayoutTweakpaneSync() {
       markdownCornerPaddingRightPx,
       markdownCornerPaddingBottomPx,
       dashboardBackgroundToken,
+      lightModePanelBackgroundToken,
+      darkModePanelBackgroundToken,
     });
   }, [
     internalApi,
@@ -50,6 +54,8 @@ export function DashboardLayoutTweakpaneSync() {
     markdownCornerPaddingRightPx,
     markdownCornerPaddingBottomPx,
     dashboardBackgroundToken,
+    lightModePanelBackgroundToken,
+    darkModePanelBackgroundToken,
   ]);
 
   return null;

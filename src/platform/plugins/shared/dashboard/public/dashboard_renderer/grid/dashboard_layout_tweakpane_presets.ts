@@ -18,7 +18,10 @@
 
 import type { DashboardLayoutTweakpaneValues } from '../../dashboard_api/types';
 
-import { DASHBOARD_DEFAULT_BACKGROUND_TOKEN } from './dashboard_background_tokens';
+import {
+  DASHBOARD_DEFAULT_BACKGROUND_TOKEN,
+  DASHBOARD_DEFAULT_PANEL_BACKGROUND_TOKEN,
+} from './dashboard_background_tokens';
 import { DASHBOARD_HORIZONTAL_PADDING_PX, DASHBOARD_MARGIN_SIZE } from './constants';
 
 /** A named bundle of layout tweak values for the dashboard Tweakpane. */
@@ -51,6 +54,8 @@ export function getDashboardLayoutTweakpanePresets(
         markdownCornerPaddingBottomPx: 0,
         markdownCornerPaddingRightPx: 0,
         dashboardBackgroundToken: DASHBOARD_DEFAULT_BACKGROUND_TOKEN,
+        lightModePanelBackgroundToken: DASHBOARD_DEFAULT_PANEL_BACKGROUND_TOKEN,
+        darkModePanelBackgroundToken: DASHBOARD_DEFAULT_PANEL_BACKGROUND_TOKEN,
       },
     },
     {
@@ -65,6 +70,8 @@ export function getDashboardLayoutTweakpanePresets(
         markdownCornerPaddingBottomPx: 0,
         markdownCornerPaddingRightPx: 80,
         dashboardBackgroundToken: 'backgroundBaseSubdued',
+        lightModePanelBackgroundToken: 'backgroundBasePlain',
+        darkModePanelBackgroundToken: 'backgroundBaseSubdued',
       },
     },
   ];

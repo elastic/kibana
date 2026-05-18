@@ -10,10 +10,10 @@
 import classNames from 'classnames';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import type { UseEuiTheme } from '@elastic/eui';
+import { useEuiTheme, type UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useAppFixedViewport } from '@kbn/core-rendering-browser';
-import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import useObservable from 'react-use/lib/useObservable';
 import type { GridLayoutData, GridPanelData } from '@kbn/grid-layout';
 import { GridLayout } from '@kbn/grid-layout';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
@@ -23,7 +23,15 @@ import type { GridData } from '../../../server';
 import { areLayoutsEqual, type DashboardLayout } from '../../dashboard_api/layout_manager';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_internal_api';
-import { DASHBOARD_GRID_HEIGHT, DEFAULT_DASHBOARD_DRAG_TOP_OFFSET } from './constants';
+import {
+  DASHBOARD_GRID_HEIGHT,
+  DEFAULT_DASHBOARD_DRAG_TOP_OFFSET,
+  INITIAL_DASHBOARD_LAYOUT_TWEAK,
+} from './constants';
+import {
+  getPanelBackgroundTokenForColorMode,
+  resolveDashboardBackgroundColor,
+} from './dashboard_background_tokens';
 import { DashboardGridItem } from './dashboard_grid_item';
 import { useLayoutStyles } from './use_layout_styles';
 
@@ -38,7 +46,26 @@ export const DashboardGrid = ({ marginGutterPx }: DashboardGridProps) => {
   const layoutRef = useRef<HTMLDivElement | null>(null);
 
   const layoutStyles = useLayoutStyles();
+  const { euiTheme, colorMode } = useEuiTheme();
+  const layoutTweak = useObservable(
+    dashboardInternalApi.layoutTweak$,
+    INITIAL_DASHBOARD_LAYOUT_TWEAK
+  );
   const panelRefs = useRef<{ [panelId: string]: React.Ref<HTMLDivElement> }>({});
+
+  const panelBackgroundColor = useMemo(
+    () =>
+      resolveDashboardBackgroundColor(
+        euiTheme.colors,
+        getPanelBackgroundTokenForColorMode(layoutTweak, colorMode)
+      ),
+    [colorMode, euiTheme.colors, layoutTweak]
+  );
+
+  const dashboardStyle = useMemo(
+    () => dashboardGridStyles.dashboard(euiTheme, panelBackgroundColor),
+    [euiTheme, panelBackgroundColor]
+  );
 
   const [topOffset, setTopOffset] = useState(DEFAULT_DASHBOARD_DRAG_TOP_OFFSET);
   const [expandedPanelId, useMargins, viewMode, layout, dashboardContainerRef] =
@@ -126,8 +153,6 @@ export const DashboardGrid = ({ marginGutterPx }: DashboardGridProps) => {
     [appFixedViewport, dashboardApi.layout$]
   );
 
-  const styles = useMemoCss(dashboardGridStyles);
-
   useEffect(() => {
     /**
      * ResizeObserver fires the callback on `.observe()` with the initial size of the observed
@@ -210,7 +235,7 @@ export const DashboardGrid = ({ marginGutterPx }: DashboardGridProps) => {
         'dshLayout-withoutMargins': !useMargins,
         'dshLayout-isMaximizedPanel': expandedPanelId !== undefined,
       })}
-      css={styles.dashboard}
+      css={dashboardStyle}
     >
       {memoizedGridLayout}
     </div>
@@ -227,7 +252,7 @@ const convertGridPanelToDashboardGridData = (panel: GridPanelData): GridData => 
 };
 
 const dashboardGridStyles = {
-  dashboard: ({ euiTheme }: UseEuiTheme) =>
+  dashboard: (euiTheme: UseEuiTheme['euiTheme'], panelBackgroundColor: string) =>
     css({
       position: 'relative',
       // for dashboards with no controls, increase the z-index of the hover actions in the
@@ -262,7 +287,7 @@ const dashboardGridStyles = {
           borderRadius: 0,
         },
         '.embPanel__content, .embPanel__header': {
-          backgroundColor: euiTheme.colors.backgroundBasePlain,
+          backgroundColor: 'transparent',
         },
       },
       // drag handle visibility when dashboard is in edit mode or a panel is expanded

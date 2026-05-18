@@ -9,7 +9,10 @@
 
 import type { DashboardLayoutTweakpaneValues } from '../../dashboard_api/types';
 
-import { DASHBOARD_DEFAULT_BACKGROUND_TOKEN } from './dashboard_background_tokens';
+import {
+  DASHBOARD_DEFAULT_BACKGROUND_TOKEN,
+  DASHBOARD_DEFAULT_PANEL_BACKGROUND_TOKEN,
+} from './dashboard_background_tokens';
 
 export const DASHBOARD_GRID_HEIGHT = 20;
 export const DASHBOARD_MARGIN_SIZE = 8;
@@ -29,4 +32,6 @@ export const INITIAL_DASHBOARD_LAYOUT_TWEAK: DashboardLayoutTweakpaneValues = {
   markdownCornerPaddingBottomPx: 0,
   markdownCornerPaddingRightPx: 0,
   dashboardBackgroundToken: DASHBOARD_DEFAULT_BACKGROUND_TOKEN,
+  lightModePanelBackgroundToken: DASHBOARD_DEFAULT_PANEL_BACKGROUND_TOKEN,
+  darkModePanelBackgroundToken: DASHBOARD_DEFAULT_PANEL_BACKGROUND_TOKEN,
 };

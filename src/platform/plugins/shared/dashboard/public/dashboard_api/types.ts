@@ -76,6 +76,10 @@ export interface DashboardLayoutTweakpaneValues {
    */
   markdownCornerPaddingRightPx: number;
   dashboardBackgroundToken: string;
+  /** EUI `background*` token for embeddable panels when the UI is in light mode. */
+  lightModePanelBackgroundToken: string;
+  /** EUI `background*` token for embeddable panels when the UI is in dark mode. */
+  darkModePanelBackgroundToken: string;
 }
 
 /** The type identifier for dashboard APIs. */

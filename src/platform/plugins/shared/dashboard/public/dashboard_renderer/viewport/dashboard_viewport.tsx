@@ -20,7 +20,11 @@ import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_internal_api';
 import { DashboardGrid } from '../grid';
 import { INITIAL_DASHBOARD_LAYOUT_TWEAK } from '../grid/constants';
-import { resolveDashboardBackgroundBaseColor } from '../grid/dashboard_background_tokens';
+import {
+  getPanelBackgroundTokenForColorMode,
+  resolveDashboardBackgroundBaseColor,
+  resolveDashboardBackgroundColor,
+} from '../grid/dashboard_background_tokens';
 import { DashboardEmptyScreen } from './empty_screen/dashboard_empty_screen';
 import { DashboardTechnicalFooter } from './dashboard_technical_footer';
 
@@ -67,7 +71,7 @@ export const DashboardViewport = () => {
   });
 
   const styles = useMemoCss(dashboardViewportStyles);
-  const { euiTheme } = useEuiTheme();
+  const { euiTheme, colorMode } = useEuiTheme();
   const layoutTweak = useObservable(
     dashboardInternalApi.layoutTweak$,
     INITIAL_DASHBOARD_LAYOUT_TWEAK
@@ -81,7 +85,21 @@ export const DashboardViewport = () => {
     markdownCornerPaddingRightPx,
     markdownCornerPaddingBottomPx,
     dashboardBackgroundToken,
+    lightModePanelBackgroundToken,
+    darkModePanelBackgroundToken,
   } = layoutTweak;
+
+  const panelBackgroundColor = useMemo(
+    () =>
+      resolveDashboardBackgroundColor(
+        euiTheme.colors,
+        getPanelBackgroundTokenForColorMode(
+          { lightModePanelBackgroundToken, darkModePanelBackgroundToken },
+          colorMode
+        )
+      ),
+    [colorMode, darkModePanelBackgroundToken, euiTheme.colors, lightModePanelBackgroundToken]
+  );
 
   const dashboardWrapperBackgroundStyle = useMemo(
     () =>
@@ -116,6 +134,7 @@ export const DashboardViewport = () => {
           borderRadius: `${panelBorderRadiusPx}px !important`,
           paddingBlock: `${panelPaddingVerticalPx}px`,
           paddingInline: `${panelPaddingHorizontalPx}px`,
+          backgroundColor: `${panelBackgroundColor} !important`,
         },
         // Markdown embeddable: allow independent bottom/right inset (Tweakpane "Markdown corner padding").
         '.embPanel:has([data-embeddable-type="markdown"])': {
@@ -124,10 +143,13 @@ export const DashboardViewport = () => {
           paddingLeft: `${panelPaddingHorizontalPx}px`,
           paddingRight: `${markdownCornerPaddingRightPx}px`,
         },
-        '.embPanel__content, .embPanel__header, .embPanel__hoverActionsAnchor, .lnsExpressionRenderer':
-          {
-            borderRadius: `${panelBorderRadiusPx}px !important`,
-          },
+        '.embPanel__content, .embPanel__header, .embPanel__hoverActionsAnchor': {
+          borderRadius: `${panelBorderRadiusPx}px !important`,
+          backgroundColor: 'transparent !important',
+        },
+        [DASHBOARD_TRANSPARENT_VIZ_SURFACE_SELECTOR]: {
+          backgroundColor: 'transparent !important',
+        },
         '[data-test-subj="embeddablePanelLoadingIndicator"]': {
           borderRadius: `${panelBorderRadiusPx}px !important`,
         },
@@ -138,6 +160,7 @@ export const DashboardViewport = () => {
       panelPaddingHorizontalPx,
       markdownCornerPaddingRightPx,
       markdownCornerPaddingBottomPx,
+      panelBackgroundColor,
     ]
   );
 
@@ -175,6 +198,25 @@ export const DashboardViewport = () => {
     </div>
   );
 };
+
+/**
+ * Lens charts, metric tiles, and tables inside dashboard panels (not markdown).
+ * Kept transparent so Tweakpane panel background shows through.
+ */
+const DASHBOARD_TRANSPARENT_VIZ_SURFACE_SELECTOR = [
+  '.embPanel:not(:has([data-embeddable-type="markdown"])) .lnsExpressionRenderer',
+  '.embPanel:not(:has([data-embeddable-type="markdown"])) [data-test-subj="lnsVisualizationContainer"]',
+  '.embPanel:not(:has([data-embeddable-type="markdown"])) .echChartBackground',
+  '.embPanel:not(:has([data-embeddable-type="markdown"])) .echCanvas',
+  '.embPanel:not(:has([data-embeddable-type="markdown"])) .echMetric',
+  '.embPanel:not(:has([data-embeddable-type="markdown"])) [data-test-subj="lnsDataTable"]',
+  '.embPanel:not(:has([data-embeddable-type="markdown"])) .euiDataGrid',
+  '.embPanel:not(:has([data-embeddable-type="markdown"])) .euiDataGrid__content',
+  '.embPanel:not(:has([data-embeddable-type="markdown"])) .euiDataGrid__virtualized',
+  '.embPanel:not(:has([data-embeddable-type="markdown"])) .euiDataGridHeader',
+  '.embPanel:not(:has([data-embeddable-type="markdown"])) .euiDataGridFooter',
+  '.embPanel:not(:has([data-embeddable-type="markdown"])) .euiDataGridRow',
+].join(', ');
 
 const dashboardViewportStyles = {
   wrapper: ({ euiTheme }: UseEuiTheme) => ({

@@ -12,7 +12,11 @@ import type { UseEuiTheme } from '@elastic/eui';
 /** Matches dashboard canvas default before Tweakpane (`dashboardViewportStyles.wrapper`). */
 export const DASHBOARD_DEFAULT_BACKGROUND_TOKEN = 'backgroundBasePlain';
 
+/** Default embeddable panel surface before Tweakpane overrides. */
+export const DASHBOARD_DEFAULT_PANEL_BACKGROUND_TOKEN = 'backgroundBasePlain';
+
 export type DashboardBackgroundBaseToken = string;
+export type DashboardBackgroundToken = string;
 
 export interface DashboardBackgroundListOption {
   readonly text: string;
@@ -24,6 +28,30 @@ export interface DashboardBackgroundListOption {
  * https://eui.elastic.co/docs/getting-started/theming/tokens/colors/#background-colors).
  * Built from the active theme so new tokens are picked up automatically.
  */
+function formatBackgroundTokenLabel(value: string): string {
+  return value
+    .replace(/^background/, '')
+    .replace(/([A-Z])/g, ' $1')
+    .trim();
+}
+
+/**
+ * All EUI semantic `background*` color tokens on the active theme (base, light, accent, etc.).
+ */
+export function getDashboardBackgroundTokenOptions(
+  colors: UseEuiTheme['euiTheme']['colors']
+): DashboardBackgroundListOption[] {
+  const record = colors as Record<string, unknown>;
+  return (Object.keys(record) as string[])
+    .filter((key) => key.startsWith('background') && typeof record[key] === 'string')
+    .sort((a, b) => a.localeCompare(b))
+    .map((value) => ({
+      text: formatBackgroundTokenLabel(value),
+      value,
+    }));
+}
+
+/** @deprecated Use {@link getDashboardBackgroundTokenOptions} — kept for dashboard canvas control. */
 export function getDashboardBackgroundBaseTokenOptions(
   colors: UseEuiTheme['euiTheme']['colors']
 ): DashboardBackgroundListOption[] {
@@ -32,23 +60,40 @@ export function getDashboardBackgroundBaseTokenOptions(
     .filter((key) => key.startsWith('backgroundBase') && typeof record[key] === 'string')
     .sort((a, b) => a.localeCompare(b))
     .map((value) => ({
-      text: value
-        .replace(/^backgroundBase/, '')
-        .replace(/([A-Z])/g, ' $1')
-        .trim(),
+      text: formatBackgroundTokenLabel(value),
       value,
     }));
 }
 
-export function resolveDashboardBackgroundBaseColor(
+export function getPanelBackgroundTokenForColorMode(
+  layoutTweak: {
+    lightModePanelBackgroundToken: DashboardBackgroundToken;
+    darkModePanelBackgroundToken: DashboardBackgroundToken;
+  },
+  colorMode: string
+): DashboardBackgroundToken {
+  return colorMode === 'DARK'
+    ? layoutTweak.darkModePanelBackgroundToken
+    : layoutTweak.lightModePanelBackgroundToken;
+}
+
+export function resolveDashboardBackgroundColor(
   colors: UseEuiTheme['euiTheme']['colors'],
-  token: DashboardBackgroundBaseToken
+  token: DashboardBackgroundToken
 ): string {
   const record = colors as Record<string, unknown>;
   const resolved = record[token];
   if (typeof resolved === 'string') {
     return resolved;
   }
-  const fallback = record[DASHBOARD_DEFAULT_BACKGROUND_TOKEN];
+  const fallback = record[DASHBOARD_DEFAULT_PANEL_BACKGROUND_TOKEN];
   return typeof fallback === 'string' ? fallback : '#fff';
+}
+
+/** @deprecated Use {@link resolveDashboardBackgroundColor}. */
+export function resolveDashboardBackgroundBaseColor(
+  colors: UseEuiTheme['euiTheme']['colors'],
+  token: DashboardBackgroundBaseToken
+): string {
+  return resolveDashboardBackgroundColor(colors, token);
 }
