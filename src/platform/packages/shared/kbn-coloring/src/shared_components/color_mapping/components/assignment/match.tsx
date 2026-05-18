@@ -166,10 +166,11 @@ function getOptionForRawValueFn(fieldFormat?: IFieldFormat) {
   return (serializedValue: unknown) => {
     const rawValue = deserializeField(serializedValue);
     const key = getValueKey(rawValue);
+    const formatted = formatter(rawValue);
     return {
       key,
       value: typeof rawValue === 'number' ? key : undefined,
-      label: formatter(rawValue),
+      label: typeof formatted === 'string' ? formatted : String(rawValue),
     } satisfies EuiComboBoxOptionOption<string>;
   };
 }
