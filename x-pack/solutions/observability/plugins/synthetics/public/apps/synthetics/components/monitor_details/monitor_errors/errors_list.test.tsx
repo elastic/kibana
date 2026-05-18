@@ -6,7 +6,7 @@
  */
 
 import type { PingState } from '../../../../../../common/runtime_types';
-import { computeGlobalActiveErrorIds, getNextUpStateForResolvedError } from './errors_list';
+import { computeActiveErrorKeys, getNextUpStateForResolvedError } from './errors_list';
 
 const makePingState = (overrides: {
   configId: string;
@@ -89,7 +89,7 @@ describe('getNextUpStateForResolvedError', () => {
   });
 });
 
-describe('computeGlobalActiveErrorIds', () => {
+describe('computeActiveErrorKeys', () => {
   const MONITOR = 'm-123';
 
   const activeKey = (err: PingState) => `${err.config_id}:${err['@timestamp']}`;
@@ -111,7 +111,7 @@ describe('computeGlobalActiveErrorIds', () => {
       timestamp: '2026-05-07T10:05:00.000Z',
     });
 
-    const ids = computeGlobalActiveErrorIds([errUsEastOld, errUsEastLatest, errEuWestLatest], []);
+    const ids = computeActiveErrorKeys([errUsEastOld, errUsEastLatest, errEuWestLatest], []);
 
     expect(ids.has(activeKey(errUsEastLatest))).toBe(true);
     expect(ids.has(activeKey(errEuWestLatest))).toBe(true);
@@ -132,7 +132,7 @@ describe('computeGlobalActiveErrorIds', () => {
       startedAt: '2026-05-07T10:05:00.000Z',
     });
 
-    const ids = computeGlobalActiveErrorIds([errEuWest], [upEuWest]);
+    const ids = computeActiveErrorKeys([errEuWest], [upEuWest]);
 
     expect(ids.size).toBe(0);
   });
@@ -150,7 +150,7 @@ describe('computeGlobalActiveErrorIds', () => {
       startedAt: '2026-05-07T10:05:00.000Z',
     });
 
-    const ids = computeGlobalActiveErrorIds([errUsEast], [upEuWest]);
+    const ids = computeActiveErrorKeys([errUsEast], [upEuWest]);
 
     expect(ids.has(activeKey(errUsEast))).toBe(true);
     expect(ids.size).toBe(1);

@@ -43,7 +43,7 @@ export function getNextUpStateForResolvedError(
   }
 }
 
-export function computeGlobalActiveErrorIds(
+export function computeActiveErrorKeys(
   errorStates: PingState[],
   upStates: PingState[]
 ): Set<string> {
@@ -105,7 +105,7 @@ export const ErrorsList = ({
     const ids = new Set<string>();
 
     if (isGlobalView) {
-      for (const id of computeGlobalActiveErrorIds(errorStates, upStates)) {
+      for (const id of computeActiveErrorKeys(errorStates, upStates)) {
         ids.add(id);
       }
     } else if (latestPing?.monitor.status === 'down') {
