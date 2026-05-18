@@ -64,11 +64,11 @@ export const ActionPolicyCanvasContent = ({
       );
     }
 
-    const matcherRuleId = extractRuleIdFromMatcher(data.matcher);
-    if (matcherRuleId) {
+    const linkedRuleId = data.ruleId ?? extractRuleIdFromMatcher(data.matcher);
+    if (linkedRuleId) {
       checks.push(
         rulesApi
-          .getRule(matcherRuleId, abortController.signal)
+          .getRule(linkedRuleId, abortController.signal)
           .then(() => ({ rule: true }))
           .catch(() => ({ rule: false }))
       );
@@ -90,7 +90,7 @@ export const ActionPolicyCanvasContent = ({
     return () => {
       abortController.abort();
     };
-  }, [workflowsApi, rulesApi, data.destinations, data.matcher]);
+  }, [workflowsApi, rulesApi, data.destinations, data.ruleId, data.matcher]);
 
   const hasDraftDependencies = dependenciesReady !== true;
 

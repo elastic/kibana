@@ -143,6 +143,60 @@ describe('executeActionPolicyOperations', () => {
     });
   });
 
+  describe('set_type operation', () => {
+    it('sets type to single_rule with ruleId', () => {
+      const ops: ActionPolicyOperation[] = [
+        { operation: 'set_type', type: 'single_rule', ruleId: 'rule-123' },
+      ];
+
+      const result = executeActionPolicyOperations({}, ops);
+
+      expect(result.type).toBe('single_rule');
+      expect(result.ruleId).toBe('rule-123');
+    });
+
+    it('sets type to global and clears ruleId', () => {
+      const ops: ActionPolicyOperation[] = [
+        { operation: 'set_type', type: 'global' },
+      ];
+
+      const result = executeActionPolicyOperations(
+        { type: 'single_rule', ruleId: 'rule-123' },
+        ops
+      );
+
+      expect(result.type).toBe('global');
+      expect(result.ruleId).toBeNull();
+    });
+
+    it('throws when single_rule is set without ruleId', () => {
+      const ops: ActionPolicyOperation[] = [
+        { operation: 'set_type', type: 'single_rule' },
+      ];
+
+      expect(() => executeActionPolicyOperations({}, ops)).toThrow(
+        'ruleId is required when type is "single_rule"'
+      );
+    });
+
+    it('passes validation for a complete single_rule policy', () => {
+      const ops: ActionPolicyOperation[] = [
+        { operation: 'set_metadata', name: 'My Policy', description: 'desc' },
+        {
+          operation: 'set_destinations',
+          destinations: [{ type: 'workflow', id: '00000000-0000-0000-0000-000000000001' }],
+        },
+        { operation: 'set_type', type: 'single_rule', ruleId: 'rule-123' },
+        { operation: 'validate' },
+      ];
+
+      const result = executeActionPolicyOperations({}, ops, { isNew: true });
+
+      expect(result.type).toBe('single_rule');
+      expect(result.ruleId).toBe('rule-123');
+    });
+  });
+
   describe('throttle / grouping compatibility', () => {
     it('throws when per_episode grouping uses time_interval strategy', () => {
       const ops: ActionPolicyOperation[] = [
