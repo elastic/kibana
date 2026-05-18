@@ -183,17 +183,13 @@ export const EntityField = lazySchema(() =>
                    * Signal ids to compare when deciding if the summary is stale.
                    */
                   enabled_signals: z.array(
-                    z.enum(['risk_level', 'risk_score', 'anomaly_jobs', 'rule_names'])
+                    z.enum(['risk_score', 'anomaly_job_ids', 'rule_names'])
                   ),
                   /**
-                   * Signal values captured at generation time.
+                   * Signal values captured at generation time. Property names must stay in sync with `enabled_signals` enum values — adding a signal to the enum requires a matching snapshot property here.
                    */
                   snapshot: z
                     .object({
-                      /**
-                       * entity.risk.calculated_level at generation time.
-                       */
-                      risk_level: z.string().nullable().optional(),
                       /**
                        * entity.risk.calculated_score at generation time.
                        */

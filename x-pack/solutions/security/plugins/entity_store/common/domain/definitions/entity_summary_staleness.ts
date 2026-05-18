@@ -7,11 +7,13 @@
 
 import type { EntitySummaryAttribute } from './entity.gen';
 
-/** Staleness signal ids stored on `entity.attributes.summary.staleness.enabled_signals`. */
+/**
+ * Staleness signal ids stored on `entity.attributes.summary.staleness.enabled_signals`.
+ * Snapshot property names in `entity.schema.yaml` must stay in sync with these values.
+ */
 export const ENTITY_SUMMARY_STALENESS_SIGNALS = [
-  'risk_level',
   'risk_score',
-  'anomaly_jobs',
+  'anomaly_job_ids',
   'rule_names',
 ] as const;
 
@@ -37,14 +39,17 @@ export interface SaveEntityAiSummaryParams {
   summary: SaveEntityAiSummarySummary;
 }
 
-/** Default signals checked until user/space configuration is implemented. */
+/**
+ * Signals enabled by default. Intentionally a subset in future once user/space
+ * configuration is implemented — do not collapse this into ENTITY_SUMMARY_STALENESS_SIGNALS.
+ */
 export const DEFAULT_ENTITY_SUMMARY_STALENESS_SIGNALS: EntitySummaryStalenessSignal[] = [
-  ...ENTITY_SUMMARY_STALENESS_SIGNALS,
+  'risk_score',
+  'rule_names',
 ];
 
 /** Normalized entity fields used when capturing and comparing staleness snapshots. */
 export interface EntitySummaryStalenessEntitySnapshot {
-  riskLevel?: string | null;
   riskScore?: number | null;
   anomalyJobIds?: string[];
   ruleNames?: string[];
@@ -71,8 +76,8 @@ const countNewItemsSinceSnapshot = (
 ): number => (current ?? []).filter((item) => !(baseline ?? []).includes(item)).length;
 
 /**
- * Scalar signals (risk level, risk score) are only compared when both stored and current
- * values are present. Null/missing on either side is not stale (e.g. risk not loaded yet).
+ * Scalar signals (e.g. risk score) are only compared when both stored and current values are
+ * present. Null/missing on either side is not stale (e.g. risk not loaded yet).
  */
 const staleReasonWhenBothPresent = <T>(
   baseline: T | null | undefined,
@@ -93,15 +98,6 @@ const isKnownStalenessSignal = (signal: string): signal is EntitySummaryStalenes
  * Add new signals here and to `ENTITY_SUMMARY_STALENESS_SIGNALS` / `entity.schema.yaml`.
  */
 const ENTITY_SUMMARY_STALENESS_SIGNALS_REGISTRY = {
-  risk_level: {
-    capture: (entity) => ({ risk_level: entity.riskLevel ?? null }),
-    staleReason: (stored, current) =>
-      staleReasonWhenBothPresent(stored.risk_level, current.riskLevel, (baseline, level) =>
-        level === baseline
-          ? undefined
-          : `Risk level changed from ${baseline} to ${level}`
-      ),
-  },
   risk_score: {
     capture: (entity) => ({ risk_score: entity.riskScore ?? null }),
     staleReason: (stored, current) =>
@@ -111,7 +107,7 @@ const ENTITY_SUMMARY_STALENESS_SIGNALS_REGISTRY = {
           : `Risk score changed from ${baseline} to ${score}`
       ),
   },
-  anomaly_jobs: {
+  anomaly_job_ids: {
     capture: (entity) => ({ anomaly_job_ids: entity.anomalyJobIds ?? [] }),
     staleReason: (stored, current) => {
       const count = countNewItemsSinceSnapshot(stored.anomaly_job_ids, current.anomalyJobIds);
