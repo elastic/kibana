@@ -77,22 +77,25 @@ export const EmbeddableAlertsTable = ({
     () => (!ruleTypes || !solution ? [] : getRuleTypeIdsForSolution(ruleTypes, solution)),
     [ruleTypes, solution]
   );
+  const timeRangeFrom = timeRange?.from;
+  const timeRangeTo = timeRange?.to;
   const timeRangeQuery = useMemo<QueryDslQueryContainer | null>(() => {
-    if (!timeRange) return null;
+    if (!timeRangeFrom || !timeRangeTo) return null;
+    const range = { from: timeRangeFrom, to: timeRangeTo };
     return {
       bool: {
         minimum_should_match: 1,
         should: [
-          getTime(undefined, timeRange, {
+          getTime(undefined, range, {
             fieldName: ALERT_TIME_RANGE,
           })!.query,
-          getTime(undefined, timeRange, {
+          getTime(undefined, range, {
             fieldName: TIMESTAMP,
           })!.query,
         ],
       },
     };
-  }, [timeRange?.from, timeRange?.to]);
+  }, [timeRangeFrom, timeRangeTo]);
   const filtersQuery = useMemo(() => {
     let filters: JsonObject | null = null;
     try {
