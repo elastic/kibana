@@ -4,6 +4,7 @@ This document provides more information on Kibana's CI testing setup. Tests run 
 
 ## Elastic Cloud pipelines
 
+- They run Scout and FTR tests only.
 - Slugs follow the pattern `appex-qa-{serverless|stateful}-kibana-{ftr|scout}-tests`.
 - Each run provisions real Cloud projects or deployments and tests against them.
 - Projects and deployments are created in the QA environment via the internal QAF tool, which calls the Elastic Cloud API.
@@ -35,7 +36,7 @@ In **local** pipelines:
 - **Scout** tests are split into "lanes". All Playwright configs in the same lane run against the same test servers, so state can leak between configs.
 - **FTR** tests are divided into groups. A fresh set of test servers is started for each config, so cross-config pollution is unlikely.
 
-ALl **Cloud** pipelines (regardless of test runner type) create a fresh project or deployment per Playwright config.
+All **Cloud** pipelines (regardless of test runner type) create a fresh project or deployment per Playwright config.
 
 ## Troubleshooting: finding the Kibana commit a Cloud run used
 
