@@ -41,6 +41,9 @@ const techniqueRowSchema = z.object({
   top_actors: z.array(z.string()),
   has_coverage: z.boolean().optional(),
   matching_rule_count: z.number().int().min(0).optional(),
+  matching_disabled_rule_count: z.number().int().min(0).optional(),
+  coverage_recommendation: z.enum(['covered', 'enable_existing', 'create_rule']).optional(),
+  matching_disabled_rule_ids: z.array(z.string().min(1)).optional(),
 });
 
 const mitreHeatmapPayloadSchema = z.object({
@@ -70,9 +73,10 @@ export const mitreHeatmapAttachmentType: AttachmentTypeDefinition<
       .slice(0, 5)
       .map((t) =>
         isCoverage
-          ? `${t.technique_id} (${t.has_coverage ? 'covered' : 'uncovered'}, ${
-              t.article_count
-            } reports)`
+          ? `${t.technique_id} (${
+              t.coverage_recommendation ??
+              (t.has_coverage ? 'covered' : 'uncovered')
+            }, ${t.article_count} reports)`
           : `${t.technique_id} (${t.article_count} reports, ${t.severity_max})`
       );
     const uncovered = isCoverage
@@ -93,8 +97,9 @@ export const mitreHeatmapAttachmentType: AttachmentTypeDefinition<
   getAgentDescription: () =>
     `An ATT&CK technique heatmap rendered inline. Two modes: ` +
     `(a) "reports" — cells colored by max observed severity, sized by report count; ` +
-    `(b) "coverage" — cells colored green when covered by at least one enabled SIEM rule, ` +
-    `red when uncovered. Use mode "coverage" with the output of threat_intel.coverage_gap.`,
+    `(b) "coverage" — green when covered by an enabled SIEM rule, warning when only disabled ` +
+    `rules exist (enable, do not duplicate), red when no rule exists. Use mode "coverage" with ` +
+    `the output of threat_intel.coverage_gap.`,
 };
 
 const iocRowSchema = z.object({

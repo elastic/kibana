@@ -76,7 +76,13 @@ export type {
 } from './synthesize_advisory';
 
 export { coverageGap } from './coverage_gap';
-export type { CoverageGapParams, CoverageGapResult, CoverageGapTechniqueRow } from './coverage_gap';
+export type {
+  CoverageGapParams,
+  CoverageGapResult,
+  CoverageGapTechniqueRow,
+  CoverageRecommendation,
+} from './coverage_gap';
+export { collectRuleCoverageByTechnique } from './coverage_gap';
 
 export {
   generalizeFromTelemetry,

@@ -46,8 +46,8 @@ const coverageGapBodySchema = schema.object({
 
 /**
  * Internal route for the `coverage_gap` domain action — joins in-the-wild
- * ATT&CK techniques in the threat-reports data stream against enabled
- * Detection Engine rules.
+ * ATT&CK techniques in the threat-reports data stream against Detection
+ * Engine rules (enabled and disabled) to recommend enable vs create.
  */
 export const registerCoverageGapRoute = ({ router, logger }: RouteRegistrationDeps): void => {
   router.versioned

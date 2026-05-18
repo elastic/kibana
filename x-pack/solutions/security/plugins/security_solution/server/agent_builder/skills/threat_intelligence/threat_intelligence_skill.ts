@@ -214,10 +214,12 @@ bullet list a subscription produces.
 
 ### \`POST ${COVERAGE_GAP_API_PATH}\` (read)
 Join in-the-wild ATT&CK techniques in \`.kibana-threat-reports-*\` against
-enabled Detection Engine rules and return uncovered techniques scoped to
-a time window + tag set. The \`attachment_hint\` payload renders as a
-\`threat-intel-mitre-heatmap\` attachment with \`mode: "coverage"\`. Body:
-\`{ time_range, tags?, source_types?, min_severity?, max_techniques? }\`.
+Detection Engine rules (enabled and disabled). Each technique row includes
+\`coverage_recommendation\`: \`covered\` (enabled rule exists),
+\`enable_existing\` (disabled rule(s) — enable via bulk-enable, do not
+duplicate), or \`create_rule\` (no matching rule). The \`attachment_hint\`
+payload renders as \`threat-intel-mitre-heatmap\` with \`mode: "coverage"\`.
+Body: \`{ time_range, tags?, source_types?, min_severity?, max_techniques? }\`.
 
 ### \`POST ${GENERALIZE_FROM_TELEMETRY_API_PATH}\` (write)
 Phase C — closes the brittle-alert → durable-behavioral-rule loop.
@@ -342,9 +344,14 @@ timeline, category breakdown, report cards, environment impact) scoped to the sa
 2. Call \`attachments.add\` with \`type: "${ATTACHMENT_TYPES.mitreHeatmap}"\` and
    \`data\` = the \`attachment_hint.payload\` with \`mode: "coverage"\` — uncovered
    techniques render red. Emit \`<render_attachment … />\` after the add succeeds.
-3. For each uncovered technique, recommend issuing
-   \`POST ${HUNT_BEHAVIOR_API_PATH}\` on the underlying reports to
-   propose a durable rule.
+3. Branch on \`coverage_recommendation\` per technique:
+   - \`enable_existing\`: recommend enabling the disabled rule(s) in
+     \`matching_disabled_rule_ids\` (Detection Engine bulk-enable) — do
+     **not** call \`security.create_detection_rule\`.
+   - \`create_rule\`: call \`POST ${HUNT_BEHAVIOR_API_PATH}\` on the
+     underlying reports, then propose a durable rule via
+     \`security.create_detection_rule\`.
+   - \`covered\`: no action required.
 
 ### For subscription requests ("send me a weekly digest of...")
 

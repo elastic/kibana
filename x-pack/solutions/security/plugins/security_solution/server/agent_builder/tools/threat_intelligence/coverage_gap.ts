@@ -58,9 +58,10 @@ export const coverageGapTool: BuiltinSkillBoundedTool<typeof coverageGapSchema> 
   description:
     `Portability wrapper around POST ${COVERAGE_GAP_API_PATH}. ` +
     'Compute the gap between ATT&CK techniques observed in recent threat reports and ATT&CK ' +
-    "techniques covered by the customer's currently enabled Detection Engine rules. The output " +
-    'renders as a `threat-intel-mitre-heatmap` attachment with `mode: "coverage"`. Inside Kibana, ' +
-    'prefer calling the route directly via `execute_workflow_step` + `kibana-request`.',
+    "techniques covered by the customer's Detection Engine rules. Distinguishes enabled coverage " +
+    'from disabled rules that should be re-enabled (`coverage_recommendation: enable_existing`) ' +
+    'versus techniques with no rule (`create_rule`). Renders as a `threat-intel-mitre-heatmap` ' +
+    'attachment with `mode: "coverage"`. Inside Kibana, prefer the route via `kibana-request`.',
   schema: coverageGapSchema,
   handler: async (params, { esClient, savedObjectsClient, logger }) => {
     try {

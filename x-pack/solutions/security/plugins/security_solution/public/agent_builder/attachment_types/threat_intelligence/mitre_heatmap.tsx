@@ -30,8 +30,21 @@ const SEVERITY_COLOR: Record<
   critical: 'danger',
 };
 
-const COVERAGE_BADGE_COLOR = (hasCoverage: boolean | undefined): 'success' | 'danger' | 'subdued' =>
-  hasCoverage === true ? 'success' : hasCoverage === false ? 'danger' : 'subdued';
+const COVERAGE_BADGE_COLOR = (
+  recommendation: MitreHeatmapPayload['techniques'][number]['coverage_recommendation'],
+  hasCoverage: boolean | undefined
+): 'success' | 'warning' | 'danger' | 'subdued' => {
+  if (recommendation === 'covered' || hasCoverage === true) {
+    return 'success';
+  }
+  if (recommendation === 'enable_existing') {
+    return 'warning';
+  }
+  if (recommendation === 'create_rule' || hasCoverage === false) {
+    return 'danger';
+  }
+  return 'subdued';
+};
 
 type HeatmapAttachment = Attachment<'threat-intel-mitre-heatmap', MitreHeatmapPayload>;
 
@@ -61,7 +74,14 @@ export const mitreHeatmapUiDefinition: AttachmentUIDefinition<HeatmapAttachment>
     const isCoverage = mode === 'coverage';
     const top = [...techniques].sort((a, b) => b.article_count - a.article_count).slice(0, 12);
     const uncoveredCount = isCoverage
-      ? techniques.filter((t) => t.has_coverage === false).length
+      ? techniques.filter(
+          (t) =>
+            t.coverage_recommendation === 'create_rule' ||
+            (t.coverage_recommendation == null && t.has_coverage === false)
+        ).length
+      : 0;
+    const enableExistingCount = isCoverage
+      ? techniques.filter((t) => t.coverage_recommendation === 'enable_existing').length
       : 0;
     return (
       <EuiPanel hasBorder paddingSize="m">
@@ -86,10 +106,15 @@ export const mitreHeatmapUiDefinition: AttachmentUIDefinition<HeatmapAttachment>
           {range}
           {isCoverage
             ? ` · ${i18n.translate(
-                'xpack.securitySolution.threatIntelligence.attachments.mitreHeatmap.uncoveredSummary',
+                'xpack.securitySolution.threatIntelligence.attachments.mitreHeatmap.coverageSummary',
                 {
-                  defaultMessage: '{uncovered} uncovered of {total} in-wild technique(s)',
-                  values: { uncovered: uncoveredCount, total: techniques.length },
+                  defaultMessage:
+                    '{uncovered} uncovered, {enableExisting} to enable of {total} in-wild technique(s)',
+                  values: {
+                    uncovered: uncoveredCount,
+                    enableExisting: enableExistingCount,
+                    total: techniques.length,
+                  },
                 }
               )}`
             : null}
@@ -118,8 +143,22 @@ export const mitreHeatmapUiDefinition: AttachmentUIDefinition<HeatmapAttachment>
                     </EuiText>
                     <EuiSpacer size="xs" />
                     {showCoverageBadge ? (
-                      <EuiBadge color={COVERAGE_BADGE_COLOR(t.has_coverage)}>
-                        {t.has_coverage
+                      <EuiBadge
+                        color={COVERAGE_BADGE_COLOR(t.coverage_recommendation, t.has_coverage)}
+                      >
+                        {t.coverage_recommendation === 'enable_existing'
+                          ? i18n.translate(
+                              'xpack.securitySolution.threatIntelligence.attachments.mitreHeatmap.enableExistingBadge',
+                              {
+                                defaultMessage:
+                                  'enable existing · {ruleCount} disabled rule(s) · {articleCount} report(s)',
+                                values: {
+                                  ruleCount: t.matching_disabled_rule_count ?? 0,
+                                  articleCount: t.article_count,
+                                },
+                              }
+                            )
+                          : t.has_coverage || t.coverage_recommendation === 'covered'
                           ? i18n.translate(
                               'xpack.securitySolution.threatIntelligence.attachments.mitreHeatmap.coveredBadge',
                               {

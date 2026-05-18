@@ -23,9 +23,12 @@ import type { IocType, SeverityLevel, ThreatCategory, ThreatRegion } from './con
  * `mode: 'coverage'` re-uses the same renderer with a coverage-gap framing:
  * each technique row carries a `has_coverage` flag (derived by the
  * `threat_intel.coverage_gap` tool by joining extracted techniques against
- * enabled SIEM rules) and the cell color shifts to red for uncovered
- * techniques and green for covered ones. Same data shape, different lens.
+ * SIEM rules) and the cell color shifts to red for uncovered techniques,
+ * green for covered ones, and warning for techniques with only disabled
+ * rules. Same data shape, different lens.
  */
+export type CoverageRecommendation = 'covered' | 'enable_existing' | 'create_rule';
+
 export interface MitreHeatmapTechniqueRow {
   technique_id: string;
   name: string;
@@ -35,6 +38,9 @@ export interface MitreHeatmapTechniqueRow {
   top_actors: string[];
   has_coverage?: boolean;
   matching_rule_count?: number;
+  matching_disabled_rule_count?: number;
+  coverage_recommendation?: CoverageRecommendation;
+  matching_disabled_rule_ids?: string[];
 }
 
 export interface MitreHeatmapPayload {

@@ -28,10 +28,13 @@ import {
  * Domain capability module for the `coverage_gap` action.
  *
  * Joins ATT&CK techniques observed in recent threat reports against the
- * customer's enabled Detection Engine rules and returns covered /
- * uncovered counts plus the per-technique heatmap rows. Same shape is
- * used by the internal HTTP route and the Agent Builder tool wrapper.
+ * customer's Detection Engine rules (enabled and disabled) and returns
+ * covered / enable-existing / create-rule counts plus per-technique
+ * heatmap rows. Same shape is used by the internal HTTP route and the
+ * Agent Builder tool wrapper.
  */
+
+export type CoverageRecommendation = 'covered' | 'enable_existing' | 'create_rule';
 
 export interface CoverageGapParams {
   time_range: { from: string; to: string };
@@ -50,6 +53,9 @@ export interface CoverageGapTechniqueRow {
   top_actors: string[];
   has_coverage: boolean;
   matching_rule_count: number;
+  matching_disabled_rule_count: number;
+  coverage_recommendation: CoverageRecommendation;
+  matching_disabled_rule_ids?: string[];
 }
 
 export interface CoverageGapResult {
@@ -58,11 +64,13 @@ export interface CoverageGapResult {
   counts: {
     total_techniques: number;
     covered: number;
+    enable_existing: number;
     uncovered: number;
     total_rules_inspected: number;
   };
   techniques: CoverageGapTechniqueRow[];
   uncovered_techniques: string[];
+  techniques_to_enable: string[];
   attachment_hint: {
     type: 'threat-intel-mitre-heatmap';
     mode: 'coverage';
@@ -108,22 +116,65 @@ interface RuleThreatBlock {
   technique?: RuleThreatTechnique[];
 }
 
+const MAX_DISABLED_RULE_IDS_PER_TECHNIQUE = 10;
+
+interface TechniqueRuleCoverage {
+  enabledCount: number;
+  disabledCount: number;
+  disabledRuleIds: string[];
+}
+
+const emptyTechniqueCoverage = (): TechniqueRuleCoverage => ({
+  enabledCount: 0,
+  disabledCount: 0,
+  disabledRuleIds: [],
+});
+
+const recordTechniqueOnRule = (
+  coverageByTechnique: Map<string, TechniqueRuleCoverage>,
+  techniqueId: string,
+  ruleId: string,
+  enabled: boolean
+): void => {
+  const entry = coverageByTechnique.get(techniqueId) ?? emptyTechniqueCoverage();
+  if (enabled) {
+    entry.enabledCount += 1;
+  } else {
+    entry.disabledCount += 1;
+    if (entry.disabledRuleIds.length < MAX_DISABLED_RULE_IDS_PER_TECHNIQUE) {
+      entry.disabledRuleIds.push(ruleId);
+    }
+  }
+  coverageByTechnique.set(techniqueId, entry);
+};
+
+const coverageRecommendationFor = (
+  entry: TechniqueRuleCoverage | undefined
+): CoverageRecommendation => {
+  if (!entry || (entry.enabledCount === 0 && entry.disabledCount === 0)) {
+    return 'create_rule';
+  }
+  if (entry.enabledCount > 0) {
+    return 'covered';
+  }
+  return 'enable_existing';
+};
+
 /**
  * Walks `params.threat[].technique[]` (and `.subtechnique[]`) on every
- * enabled SIEM rule and returns the set of ATT&CK technique IDs the
- * customer is already detecting on. Sub-technique IDs are normalized so
- * they can be joined directly against the in-wild technique IDs from
- * the threat-reports data stream.
+ * SIEM rule (enabled and disabled) and returns per-technique counts so
+ * callers can distinguish active coverage from dormant rules that only
+ * need to be re-enabled. Sub-technique IDs are normalized so they can be
+ * joined directly against the in-wild technique IDs from the threat-reports
+ * data stream.
  */
-const collectRuleTechniques = async (
+export const collectRuleCoverageByTechnique = async (
   savedObjectsClient: SavedObjectsClientContract
-): Promise<{ covered: Set<string>; rulesByTechnique: Map<string, number> }> => {
-  const covered = new Set<string>();
-  const rulesByTechnique = new Map<string, number>();
+): Promise<Map<string, TechniqueRuleCoverage>> => {
+  const coverageByTechnique = new Map<string, TechniqueRuleCoverage>();
   const filter = SECURITY_SOLUTION_RULE_TYPE_IDS.map(
     (id) => `alert.attributes.alertTypeId:"${id}"`
   ).join(' OR ');
-  const enabledFilter = `(${filter}) AND alert.attributes.enabled:true`;
 
   let page = 1;
   const perPage = 200;
@@ -131,26 +182,26 @@ const collectRuleTechniques = async (
   // is well above realistic deployments and bounds tail latency.
   while (page <= 10) {
     const response = await savedObjectsClient.find<{
+      enabled?: boolean;
       params?: { threat?: RuleThreatBlock[] };
     }>({
       type: 'alert',
       page,
       perPage,
-      filter: enabledFilter,
+      filter,
     });
 
     for (const rule of response.saved_objects) {
+      const ruleEnabled = rule.attributes?.enabled === true;
       const threatBlocks = rule.attributes?.params?.threat ?? [];
       for (const block of threatBlocks) {
         for (const tech of block.technique ?? []) {
           if (tech.id) {
-            covered.add(tech.id);
-            rulesByTechnique.set(tech.id, (rulesByTechnique.get(tech.id) ?? 0) + 1);
+            recordTechniqueOnRule(coverageByTechnique, tech.id, rule.id, ruleEnabled);
           }
           for (const sub of tech.subtechnique ?? []) {
             if (sub.id) {
-              covered.add(sub.id);
-              rulesByTechnique.set(sub.id, (rulesByTechnique.get(sub.id) ?? 0) + 1);
+              recordTechniqueOnRule(coverageByTechnique, sub.id, rule.id, ruleEnabled);
             }
           }
         }
@@ -161,7 +212,7 @@ const collectRuleTechniques = async (
     page += 1;
   }
 
-  return { covered, rulesByTechnique };
+  return coverageByTechnique;
 };
 
 export const coverageGap = async (
@@ -229,19 +280,18 @@ export const coverageGap = async (
     },
   })) as AggregationResponse;
 
-  let covered: Set<string>;
-  let rulesByTechnique: Map<string, number>;
+  let coverageByTechnique: Map<string, TechniqueRuleCoverage>;
   try {
-    ({ covered, rulesByTechnique } = await collectRuleTechniques(savedObjectsClient));
+    coverageByTechnique = await collectRuleCoverageByTechnique(savedObjectsClient);
   } catch (err) {
     logger.warn(`coverage_gap rule walk failed: ${(err as Error).message}`);
     // Degrade gracefully — emit the in-wild techniques without coverage flags
     // so the agent can still narrate "here's what's hot in the window".
-    covered = new Set();
-    rulesByTechnique = new Map();
+    coverageByTechnique = new Map();
   }
 
-  const behaviorBuckets = aggregation.aggregations?.techniques_from_behaviors?.techniques?.buckets ?? [];
+  const behaviorBuckets =
+    aggregation.aggregations?.techniques_from_behaviors?.techniques?.buckets ?? [];
   const ttpBuckets = aggregation.aggregations?.techniques_from_ttps?.buckets ?? [];
 
   const reportCounts = mergeTechniqueReportCounts(
@@ -275,7 +325,9 @@ export const coverageGap = async (
     .sort((a, b) => b[1] - a[1])
     .slice(0, maxTechniques)
     .map(([techniqueId, articleCount]) => {
-      const isCovered = covered.has(techniqueId);
+      const ruleCoverage = coverageByTechnique.get(techniqueId);
+      const recommendation = coverageRecommendationFor(ruleCoverage);
+      const disabledRuleIds = ruleCoverage?.disabledRuleIds;
       return {
         technique_id: techniqueId,
         name: techniqueDisplayName(techniqueId),
@@ -283,13 +335,55 @@ export const coverageGap = async (
         article_count: articleCount,
         severity_max: severityForTechnique(techniqueId),
         top_actors: [],
-        has_coverage: isCovered,
-        matching_rule_count: rulesByTechnique.get(techniqueId) ?? 0,
+        has_coverage: recommendation === 'covered',
+        matching_rule_count: ruleCoverage?.enabledCount ?? 0,
+        matching_disabled_rule_count: ruleCoverage?.disabledCount ?? 0,
+        coverage_recommendation: recommendation,
+        ...(recommendation === 'enable_existing' && disabledRuleIds?.length
+          ? { matching_disabled_rule_ids: disabledRuleIds }
+          : {}),
       };
     });
 
-  const uncovered = techniqueRows.filter((row) => !row.has_coverage);
-  const coveredRows = techniqueRows.filter((row) => row.has_coverage);
+  const coveredRows = techniqueRows.filter((row) => row.coverage_recommendation === 'covered');
+  const enableExistingRows = techniqueRows.filter(
+    (row) => row.coverage_recommendation === 'enable_existing'
+  );
+  const uncoveredRows = techniqueRows.filter(
+    (row) => row.coverage_recommendation === 'create_rule'
+  );
+
+  const totalRulesInspected = [...coverageByTechnique.values()].reduce(
+    (sum, entry) => sum + entry.enabledCount + entry.disabledCount,
+    0
+  );
+
+  const nextStep = (() => {
+    if (uncoveredRows.length === 0 && enableExistingRows.length === 0) {
+      return (
+        'Every technique observed in this window is already covered by an enabled ' +
+        'SIEM rule. Render the heatmap with mode="coverage" so the user can confirm.'
+      );
+    }
+    const parts: string[] = [];
+    if (enableExistingRows.length > 0) {
+      parts.push(
+        'For techniques with `coverage_recommendation: "enable_existing"`, recommend ' +
+          'enabling the existing disabled Detection Engine rule(s) listed in ' +
+          '`matching_disabled_rule_ids` via the rules bulk-enable API — do NOT create ' +
+          'a duplicate rule.'
+      );
+    }
+    if (uncoveredRows.length > 0) {
+      parts.push(
+        'For techniques with `coverage_recommendation: "create_rule"`, call ' +
+          '`threat_intel.hunt_behavior` on the underlying reports and propose a new ' +
+          'Detection Engine rule via `security.create_detection_rule`.'
+      );
+    }
+    parts.push('Render the heatmap with mode="coverage".');
+    return parts.join(' ');
+  })();
 
   return {
     status: 'coverage_gap_evaluated',
@@ -297,11 +391,13 @@ export const coverageGap = async (
     counts: {
       total_techniques: techniqueRows.length,
       covered: coveredRows.length,
-      uncovered: uncovered.length,
-      total_rules_inspected: Array.from(rulesByTechnique.values()).reduce((sum, n) => sum + n, 0),
+      enable_existing: enableExistingRows.length,
+      uncovered: uncoveredRows.length,
+      total_rules_inspected: totalRulesInspected,
     },
     techniques: techniqueRows,
-    uncovered_techniques: uncovered.map((u) => u.technique_id),
+    uncovered_techniques: uncoveredRows.map((row) => row.technique_id),
+    techniques_to_enable: enableExistingRows.map((row) => row.technique_id),
     attachment_hint: {
       type: 'threat-intel-mitre-heatmap',
       mode: 'coverage',
@@ -311,12 +407,6 @@ export const coverageGap = async (
         techniques: techniqueRows,
       },
     },
-    next_step:
-      uncovered.length === 0
-        ? 'Every technique observed in this window is already covered by an enabled ' +
-          'SIEM rule. Render the heatmap with mode="coverage" so the user can confirm.'
-        : 'For each uncovered technique, prioritize calling `threat_intel.hunt_behavior` ' +
-          'on the underlying reports and proposing a Detection Engine rule via ' +
-          '`security.create_detection_rule`.',
+    next_step: nextStep,
   };
 };
