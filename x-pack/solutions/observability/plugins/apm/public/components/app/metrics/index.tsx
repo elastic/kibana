@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { EuiSpacer } from '@elastic/eui';
 import { isElasticAgentName, isJRubyAgentName } from '@kbn/elastic-agent-utils/src/agent_guards';
 import { isAWSLambdaAgentName } from '../../../../common/agent_name';
 import type { IngestionTimeRanges } from '../../../../common/metrics_types';
@@ -45,13 +46,16 @@ export function Metrics() {
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const { hasMultipleAgentTypes, ingestionTimeRanges } = useServiceMixedIngestionFetcher({
+  const { data: mixedIngestionData } = useServiceMixedIngestionFetcher({
     serviceName,
     environment,
     kuery,
     start,
     end,
   });
+
+  const hasMultipleAgentTypes = mixedIngestionData?.hasMultipleAgentTypes ?? false;
+  const ingestionTimeRanges = mixedIngestionData?.ingestionTimeRanges;
 
   const isAWSLambda = isAWSLambdaAgentName(serverlessType);
   const { dataView, apmIndices } = useAdHocApmDataView();
@@ -135,6 +139,7 @@ export function Metrics() {
     return (
       <>
         {mixedAgentCallout}
+        {mixedAgentCallout && <EuiSpacer size="m" />}
         <JsonMetricsDashboard
           agentName={effectiveAgentFields.agentName}
           telemetrySdkName={effectiveAgentFields.telemetrySdkName}
@@ -153,6 +158,7 @@ export function Metrics() {
     return (
       <>
         {mixedAgentCallout}
+        {mixedAgentCallout && <EuiSpacer size="m" />}
         <JvmMetricsOverview />
       </>
     );
@@ -161,6 +167,7 @@ export function Metrics() {
   return (
     <>
       {mixedAgentCallout}
+      {mixedAgentCallout && <EuiSpacer size="m" />}
       <ServiceMetrics />
     </>
   );

@@ -7,11 +7,6 @@
 
 import { useFetcher } from './use_fetcher';
 
-const INITIAL_STATE = {
-  hasMultipleAgentTypes: false,
-  ingestionTimeRanges: undefined,
-};
-
 export function useServiceMixedIngestionFetcher({
   serviceName,
   environment,
@@ -25,11 +20,7 @@ export function useServiceMixedIngestionFetcher({
   start: string;
   end: string;
 }) {
-  const {
-    data = INITIAL_STATE,
-    error,
-    status,
-  } = useFetcher(
+  const { data, error, status } = useFetcher(
     (callApmApi) => {
       if (serviceName) {
         return callApmApi('GET /internal/apm/services/{serviceName}/metrics/mixed_ingestion', {
@@ -43,5 +34,5 @@ export function useServiceMixedIngestionFetcher({
     [serviceName, environment, kuery, start, end]
   );
 
-  return { ...data, status, error };
+  return { data, status, error };
 }

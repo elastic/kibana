@@ -57,8 +57,7 @@ function MetricsWithWrapper() {
 describe('Metrics', () => {
   beforeEach(() => {
     jest.spyOn(useMixedIngestionHook, 'useServiceMixedIngestionFetcher').mockReturnValue({
-      hasMultipleAgentTypes: false,
-      ingestionTimeRanges: undefined,
+      data: { hasMultipleAgentTypes: false, ingestionTimeRanges: undefined },
       status: FETCH_STATUS.SUCCESS,
       error: undefined,
     });
@@ -166,8 +165,7 @@ describe('Metrics', () => {
       });
 
       jest.spyOn(useMixedIngestionHook, 'useServiceMixedIngestionFetcher').mockReturnValue({
-        hasMultipleAgentTypes: true,
-        ingestionTimeRanges: mixedIngestionTimeRanges,
+        data: { hasMultipleAgentTypes: true, ingestionTimeRanges: mixedIngestionTimeRanges },
         status: FETCH_STATUS.SUCCESS,
         error: undefined,
       });
@@ -187,8 +185,7 @@ describe('Metrics', () => {
       });
 
       jest.spyOn(useMixedIngestionHook, 'useServiceMixedIngestionFetcher').mockReturnValue({
-        hasMultipleAgentTypes: false,
-        ingestionTimeRanges: undefined,
+        data: { hasMultipleAgentTypes: false, ingestionTimeRanges: undefined },
         status: FETCH_STATUS.SUCCESS,
         error: undefined,
       });
@@ -214,8 +211,7 @@ describe('Metrics', () => {
       };
 
       jest.spyOn(useMixedIngestionHook, 'useServiceMixedIngestionFetcher').mockReturnValue({
-        hasMultipleAgentTypes: true,
-        ingestionTimeRanges: overlappingRanges,
+        data: { hasMultipleAgentTypes: true, ingestionTimeRanges: overlappingRanges },
         status: FETCH_STATUS.SUCCESS,
         error: undefined,
       });

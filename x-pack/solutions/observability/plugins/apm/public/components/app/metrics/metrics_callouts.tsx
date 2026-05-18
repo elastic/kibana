@@ -7,7 +7,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { IngestionTimeRange, IngestionTimeRanges } from '../../../../common/metrics_types';
@@ -158,83 +158,76 @@ export function MixedAgentCallout({
       });
 
   return (
-    <>
-      <EuiCallOut
-        announceOnMount
-        title={title}
-        iconType={hasOverlap ? 'warning' : 'info'}
-        color={hasOverlap ? 'warning' : 'primary'}
-        data-test-subj={
-          hasOverlap ? 'apmMetricsMixedAgentTypesOverlap' : 'apmMetricsMixedAgentTypes'
-        }
-      >
-        <p>
-          <FormattedMessage
-            id="xpack.apm.metrics.mixedAgentTypes.changeDetectedDescription"
-            defaultMessage="We have detected a change on {timestamp} in the instrumentation of your service."
-            values={{
-              timestamp: <strong>{formatTimestamp(details.changeTimestamp)}</strong>,
-            }}
-          />
-        </p>
-        <p>
-          <FormattedMessage
-            id="xpack.apm.metrics.mixedAgentTypes.currentInstrumentationDescription"
-            defaultMessage="We are showing the {instrumentationName} covering {timePeriod}."
-            values={{
-              instrumentationName: <strong>{details.currentName}</strong>,
-              timePeriod: (
-                <EuiLink
-                  data-test-subj="apmMetricsCurrentTimeRangeLink"
-                  onClick={() => navigateToIngestionRange(details.currentRange, details.currentKey)}
-                >
-                  {formatRange(details.currentRange)}
-                </EuiLink>
-              ),
-            }}
-          />
-        </p>
-        <p>
-          <FormattedMessage
-            id="xpack.apm.metrics.mixedAgentTypes.previousRangeDescription"
-            defaultMessage="You can see data for the previous {previousInstrumentationName} instrumentation period by changing the date range to {previousDateRange}."
-            values={{
-              previousInstrumentationName: <strong>{details.previousName}</strong>,
-              previousDateRange: (
-                <EuiLink
-                  data-test-subj="apmMetricsPreviousTimeRangeLink"
-                  onClick={() =>
-                    navigateToIngestionRange(details.previousRange, details.previousKey)
-                  }
-                >
-                  {formatRange(details.previousRange)}
-                </EuiLink>
-              ),
-            }}
-          />
-        </p>
-        <p>
-          <FormattedMessage
-            id="xpack.apm.metrics.mixedAgentTypes.docsDescription"
-            defaultMessage="See {docsLink} for more information."
-            values={{
-              docsLink: (
-                <EuiLink
-                  data-test-subj="apmMetricsMixedAgentTypesDocLink"
-                  href={docLinks.links.apm.metricsUi}
-                  target="_blank"
-                  external
-                >
-                  {i18n.translate('xpack.apm.metrics.mixedAgentTypes.docsLinkText', {
-                    defaultMessage: 'documentation',
-                  })}
-                </EuiLink>
-              ),
-            }}
-          />
-        </p>
-      </EuiCallOut>
-      <EuiSpacer size="m" />
-    </>
+    <EuiCallOut
+      announceOnMount
+      title={title}
+      iconType={hasOverlap ? 'warning' : 'info'}
+      color={hasOverlap ? 'warning' : 'primary'}
+      data-test-subj={hasOverlap ? 'apmMetricsMixedAgentTypesOverlap' : 'apmMetricsMixedAgentTypes'}
+    >
+      <p>
+        <FormattedMessage
+          id="xpack.apm.metrics.mixedAgentTypes.changeDetectedDescription"
+          defaultMessage="We have detected a change on {timestamp} in the instrumentation of your service."
+          values={{
+            timestamp: <strong>{formatTimestamp(details.changeTimestamp)}</strong>,
+          }}
+        />
+      </p>
+      <p>
+        <FormattedMessage
+          id="xpack.apm.metrics.mixedAgentTypes.currentInstrumentationDescription"
+          defaultMessage="We are showing the {instrumentationName} covering {timePeriod}."
+          values={{
+            instrumentationName: <strong>{details.currentName}</strong>,
+            timePeriod: (
+              <EuiLink
+                data-test-subj="apmMetricsCurrentTimeRangeLink"
+                onClick={() => navigateToIngestionRange(details.currentRange, details.currentKey)}
+              >
+                {formatRange(details.currentRange)}
+              </EuiLink>
+            ),
+          }}
+        />
+      </p>
+      <p>
+        <FormattedMessage
+          id="xpack.apm.metrics.mixedAgentTypes.previousRangeDescription"
+          defaultMessage="You can see data for the previous {previousInstrumentationName} instrumentation period by changing the date range to {previousDateRange}."
+          values={{
+            previousInstrumentationName: <strong>{details.previousName}</strong>,
+            previousDateRange: (
+              <EuiLink
+                data-test-subj="apmMetricsPreviousTimeRangeLink"
+                onClick={() => navigateToIngestionRange(details.previousRange, details.previousKey)}
+              >
+                {formatRange(details.previousRange)}
+              </EuiLink>
+            ),
+          }}
+        />
+      </p>
+      <p>
+        <FormattedMessage
+          id="xpack.apm.metrics.mixedAgentTypes.docsDescription"
+          defaultMessage="See {docsLink} for more information."
+          values={{
+            docsLink: (
+              <EuiLink
+                data-test-subj="apmMetricsMixedAgentTypesDocLink"
+                href={docLinks.links.apm.metricsUi}
+                target="_blank"
+                external
+              >
+                {i18n.translate('xpack.apm.metrics.mixedAgentTypes.docsLinkText', {
+                  defaultMessage: 'documentation',
+                })}
+              </EuiLink>
+            ),
+          }}
+        />
+      </p>
+    </EuiCallOut>
   );
 }
