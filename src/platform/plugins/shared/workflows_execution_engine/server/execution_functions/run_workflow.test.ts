@@ -226,10 +226,14 @@ describe('runWorkflow', () => {
         workflowDefinition: { name: 'Test Workflow', steps: [] },
       });
 
-      it('does not call getWorkflowExecutionById when metering is omitted', async () => {
+      it('calls getWorkflowExecutionById for queue drain but not for metering when meteringService is omitted', async () => {
         await runWorkflowWithDefaults();
 
-        expect(workflowExecutionRepository.getWorkflowExecutionById).not.toHaveBeenCalled();
+        expect(workflowExecutionRepository.getWorkflowExecutionById).toHaveBeenCalledTimes(1);
+        expect(workflowExecutionRepository.getWorkflowExecutionById).toHaveBeenCalledWith(
+          workflowRunId,
+          spaceId
+        );
       });
 
       it('when triggeredBy is undefined, does not treat as event-driven', async () => {
@@ -359,10 +363,14 @@ describe('runWorkflow', () => {
         status: ExecutionStatus.COMPLETED,
       };
 
-      it('does not call getWorkflowExecutionById for metering when meteringService is omitted', async () => {
+      it('calls getWorkflowExecutionById for queue drain but not for metering when meteringService is omitted', async () => {
         await runWorkflowWithDefaults();
 
-        expect(workflowExecutionRepository.getWorkflowExecutionById).not.toHaveBeenCalled();
+        expect(workflowExecutionRepository.getWorkflowExecutionById).toHaveBeenCalledTimes(1);
+        expect(workflowExecutionRepository.getWorkflowExecutionById).toHaveBeenCalledWith(
+          workflowRunId,
+          spaceId
+        );
       });
 
       it('calls reportWorkflowExecution when final execution exists', async () => {
@@ -578,7 +586,7 @@ describe('runWorkflow', () => {
       expect(emittedPayload.error).not.toHaveProperty('stepName');
     });
 
-    it('should not query execution for metering when triggerEvents path completes without metering', async () => {
+    it('queries execution for queue drain but not for metering when triggerEvents path completes without metering', async () => {
       mockWorkflowExecutionLoop.mockResolvedValue(undefined);
       mockGetWorkflowExecutionStatus.mockReturnValue(ExecutionStatus.COMPLETED);
 
@@ -593,7 +601,8 @@ describe('runWorkflow', () => {
         workflowsExecutionEngine: mockWorkflowExecutionEngineLocal,
       });
 
-      expect(mockGetWorkflowExecutionById).not.toHaveBeenCalled();
+      expect(mockGetWorkflowExecutionById).toHaveBeenCalledTimes(1);
+      expect(mockGetWorkflowExecutionById).toHaveBeenCalledWith(workflowRunId, spaceId);
     });
 
     it('does not emit when execution status is not FAILED', async () => {

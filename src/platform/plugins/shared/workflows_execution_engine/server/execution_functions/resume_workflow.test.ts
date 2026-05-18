@@ -177,10 +177,14 @@ describe('resumeWorkflow', () => {
         status: ExecutionStatus.COMPLETED,
       };
 
-      it('does not call getWorkflowExecutionById for metering when meteringService is omitted', async () => {
+      it('calls getWorkflowExecutionById for queue drain but not for metering when meteringService is omitted', async () => {
         await resumeWorkflowWithDefaults();
 
-        expect(workflowExecutionRepository.getWorkflowExecutionById).not.toHaveBeenCalled();
+        expect(workflowExecutionRepository.getWorkflowExecutionById).toHaveBeenCalledTimes(1);
+        expect(workflowExecutionRepository.getWorkflowExecutionById).toHaveBeenCalledWith(
+          workflowRunId,
+          spaceId
+        );
       });
 
       it('calls reportWorkflowExecution when final execution exists', async () => {

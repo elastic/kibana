@@ -274,7 +274,8 @@ describe('WorkflowExecutionState', () => {
       await ioService.flush();
 
       expect(workflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledWith(
-        updatedWorkflowExecution
+        updatedWorkflowExecution,
+        {}
       );
     });
 
@@ -288,7 +289,8 @@ describe('WorkflowExecutionState', () => {
       expect(workflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledWith(
         expect.objectContaining({
           id: 'test-workflow-execution-id',
-        })
+        }),
+        {}
       );
     });
 
