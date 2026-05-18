@@ -26,7 +26,7 @@ import type {
   CasePostRequest,
   PostFileAttachmentRequest,
 } from '@kbn/cases-plugin/common/types/api';
-import { FILE_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common/constants';
+import { LEGACY_FILE_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common/constants';
 import { ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
 import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
 import type { AttachmentRequest, CasesFindResponse } from '@kbn/cases-plugin/common/types/api';
@@ -160,7 +160,7 @@ export const getFilesAttachmentReq = (
       type: ExternalReferenceStorageType.savedObject,
       soType: FILE_SO_TYPE,
     },
-    externalReferenceAttachmentTypeId: FILE_ATTACHMENT_TYPE,
+    externalReferenceAttachmentTypeId: LEGACY_FILE_ATTACHMENT_TYPE,
     externalReferenceMetadata: { ...fileAttachmentMetadata },
     ...req,
   };
