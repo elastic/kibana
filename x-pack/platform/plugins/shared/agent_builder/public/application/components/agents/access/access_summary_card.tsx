@@ -56,11 +56,9 @@ export const AccessSummaryCard: React.FC<AccessSummaryCardProps> = ({ agent, onM
   const { euiTheme } = useEuiTheme();
   const isDefaultAgent = agent.id === agentBuilderDefaultAgentId;
   const { canManage } = useCanManageAgentAccess(agent);
-  // Skip the network call entirely on the default agent — there's nothing to render.
+
   const { data, isLoading } = useAgentAcl(agent.id, { enabled: canManage && !isDefaultAgent });
 
-  // V1: only user-type entries exist. The filter is a defensive cast in case stale
-  // role entries linger in storage from PoC data — they'll be hidden until V2 lands.
   const userCount = data?.acl.entries.filter((e) => e.type === 'user').length ?? 0;
   const hasCustom = userCount > 0;
 
