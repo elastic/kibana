@@ -10,6 +10,19 @@ import React, { useCallback, useMemo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { EmbeddableRendererContext } from '@kbn/embeddable-plugin/public';
+
+// Mirror QuickActionIds shape from @kbn/embeddable-plugin/public (not re-exported there yet):
+// up to 8 string entries promoted as the "view" quick-action row.
+type QuickActionIds = [
+  string?,
+  string?,
+  string?,
+  string?,
+  string?,
+  string?,
+  string?,
+  string?
+];
 import type { LensProps } from './hooks/use_lens_props';
 import { useLensExtraActions } from './hooks/use_lens_extra_actions';
 import { resolveEsqlVariables } from './helpers/resolve_esql_variables';
@@ -115,7 +128,7 @@ export function LensWrapper({
 
   const disabledActions = [...DEFAULT_DISABLED_ACTIONS, ...extraDisabledActions];
 
-  const quickActionView = (quickActionIds ?? DEFAULT_QUICK_ACTION_VIEW) as string[];
+  const quickActionView = (quickActionIds ?? DEFAULT_QUICK_ACTION_VIEW) as QuickActionIds;
 
   return (
     <div css={chartCss}>
