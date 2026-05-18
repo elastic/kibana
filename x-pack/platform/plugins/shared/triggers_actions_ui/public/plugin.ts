@@ -162,7 +162,7 @@ export interface TriggersAndActionsUIPublicPluginStart {
    * Get the alert formatter for a specific rule type.
    * Returns the formatter function if the rule type has one registered, undefined otherwise.
    */
-  getAlertFormatter: (ruleTypeId: string) => AlertFormatter | undefined;
+  getAlertFormatter: (ruleTypeId: string) => Promise<AlertFormatter | undefined>;
 }
 
 interface PluginsSetup {
@@ -628,11 +628,11 @@ export class Plugin
           }),
         };
       },
-      getAlertFormatter: (ruleTypeId: string): AlertFormatter | undefined => {
+      getAlertFormatter: async (ruleTypeId: string): Promise<AlertFormatter | undefined> => {
         if (!this.ruleTypeRegistry.has(ruleTypeId)) {
           return undefined;
         }
-        return this.ruleTypeRegistry.get(ruleTypeId).format;
+        return (await this.ruleTypeRegistry.get(ruleTypeId)).format;
       },
     };
   }

@@ -106,11 +106,11 @@ describe('get()', () => {
 });
 
 describe('list()', () => {
-  test('returns list of action types', () => {
+  test('returns list of action types', async () => {
     const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
     const actionType = getTestActionType();
     actionTypeRegistry.register(actionType);
-    const actionTypes = actionTypeRegistry.list();
+    const actionTypes = await actionTypeRegistry.list();
     expect(actionTypes).toEqual([
       {
         id: 'my-action-type',

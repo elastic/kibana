@@ -139,11 +139,11 @@ function createStartMock(): TriggersAndActionsUIPublicPluginStart {
         }),
       };
     },
-    getAlertFormatter: (ruleTypeId: string) => {
+    getAlertFormatter: async (ruleTypeId: string) => {
       if (ruleTypeRegistry.has(ruleTypeId)) {
         return undefined;
       }
-      return ruleTypeRegistry.get(ruleTypeId).format;
+      return (await ruleTypeRegistry.get(ruleTypeId)).format;
     },
   };
 }

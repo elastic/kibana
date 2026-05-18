@@ -43,7 +43,7 @@ export class TypeRegistry<T extends BaseObjectType> {
   /**
    * Returns an object type, throw error if not registered
    */
-  public get(id: string): T {
+  public async get(id: string): Promise<T> {
     if (!this.has(id)) {
       throw new Error(
         i18n.translate('alertsUIShared.typeRegistry.get.missingActionTypeErrorMessage', {
@@ -57,7 +57,7 @@ export class TypeRegistry<T extends BaseObjectType> {
     return this.objectTypes.get(id)!;
   }
 
-  public list() {
+  public async list(): Promise<T[]> {
     return Array.from(this.objectTypes).map(([id, objectType]) => objectType);
   }
 }
