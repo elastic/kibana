@@ -193,7 +193,7 @@ export const ActionTypeMenu = ({
           role="listitem"
           titleSize="xs"
           data-test-subj={`${item.actionType.id}-card`}
-          icon={<EuiIcon size="xl" type={item.iconClass} />}
+          icon={<EuiIcon size="xl" type={item.iconClass} aria-hidden={true} />}
           title={item.name}
           description={description}
           isDisabled={!checkEnabledResult.isEnabled}
