@@ -33,6 +33,7 @@ Object {
     "projectName": undefined,
     "projectType": undefined,
   },
+  "trialDaysLeft": [Function],
   "trialEndDate": undefined,
 }
 `;
@@ -43,5 +44,6 @@ Object {
   "isCloudEnabled": true,
   "isInTrial": [Function],
   "projectsUrl": "https://cloud.elastic.co/projects/",
+  "trialDaysLeft": [Function],
 }
 `;

@@ -225,6 +225,12 @@ class MultiJobActionsMenuUI extends Component {
         closePopover={this.closePopover}
         panelPaddingSize="none"
         anchorPosition="downCenter"
+        aria-label={i18n.translate(
+          'xpack.ml.jobsList.multiJobActionsMenu.actionsPopoverAriaLabel',
+          {
+            defaultMessage: 'Multi-job actions menu',
+          }
+        )}
       >
         <EuiContextMenuPanel items={items.reverse()} />
       </EuiPopover>

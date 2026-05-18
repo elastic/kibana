@@ -275,4 +275,37 @@ describe('Gauge Schema', () => {
 
     expect(() => gaugeConfigSchema.validate(input)).toThrow();
   });
+
+  it('throws on reference-based operations for min, max, and goal', () => {
+    const refBasedOps = [
+      {
+        operation: 'differences',
+        of: { operation: 'sum', field: 'bytes', empty_as_null: true },
+      },
+      {
+        operation: 'moving_average',
+        of: { operation: 'sum', field: 'bytes', empty_as_null: true },
+        window: 5,
+      },
+      { operation: 'cumulative_sum', field: 'bytes' },
+      { operation: 'counter_rate', field: 'bytes' },
+    ];
+
+    const validMetric = {
+      operation: 'count',
+      field: 'test_field',
+      empty_as_null: LENS_EMPTY_AS_NULL_DEFAULT_VALUE,
+    };
+
+    for (const op of refBasedOps) {
+      for (const dimension of ['min', 'max', 'goal']) {
+        expect(() =>
+          gaugeConfigSchema.validate({
+            ...baseGaugeConfig,
+            metric: { ...validMetric, [dimension]: op },
+          })
+        ).toThrow();
+      }
+    }
+  });
 });
