@@ -2926,6 +2926,25 @@ components:
           example: 24h
           pattern: '[smdh]$'
           type: string
+        maxLogsPerWindow:
+          default: 500000
+          description: >-
+            Maximum number of raw log documents processed per task run. 0
+            disables the cap.
+          example: 500000
+          minimum: 0
+          type: integer
+        maxLogsPerWindowCapBehavior:
+          default: defer
+          description: >-
+            What to do when the volume cap fires — `defer` preserves the cursor
+            so the next run resumes; `drop` advances the cursor to the window
+            end, skipping uncapped logs.
+          enum:
+            - defer
+            - drop
+          example: defer
+          type: string
         status:
           $ref: '#/components/schemas/EngineStatus'
         timeout:
