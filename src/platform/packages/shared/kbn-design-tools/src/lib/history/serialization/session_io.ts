@@ -365,7 +365,13 @@ const sanitizeInlineStyles = (raw: string): string => {
   const scratch = document.createElement('div');
   scratch.style.cssText = raw;
   const cleaned = scratch.style.cssText;
-  return cleaned.replace(/url\([^)]*\)/gi, 'url()');
+  // Preserve internal fragment references (url(#id)) used by SVG
+  // clip-paths/masks, but strip external URLs that could load resources.
+  return cleaned.replace(/url\(([^)]*)\)/gi, (_match, inner) => {
+    const trimmed = inner.trim().replace(/^["']|["']$/g, '');
+    if (trimmed.startsWith('#')) return _match;
+    return '';
+  });
 };
 
 const recreateFromOuterHTML = (
@@ -499,293 +505,302 @@ export const importState = async (
   }
 
   for (const exported of state.sessions) {
-    let el: HTMLElement;
-    let liveReactElement: { element: ReactElement; zIndex: number } | undefined;
-    let cleanup: (() => void) | undefined;
-    let cloneRect: DOMRect | undefined;
+    try {
+      let el: HTMLElement;
+      let liveReactElement: { element: ReactElement; zIndex: number } | undefined;
+      let cleanup: (() => void) | undefined;
+      let cloneRect: DOMRect | undefined;
 
-    // For duplicates (library inserts / outerHTML clones), shift the
-    // exported viewport position by the scroll delta. For non-duplicate
-    // re-clones, cloneElement positions from the reference's current
-    // BCR which already accounts for scroll — no adjustment needed.
-    const scrollAdjustedRect = exported.isDuplicate
-      ? roundRect(
-          new DOMRect(
-            exported.originalRect.x - scrollDx,
-            exported.originalRect.y - scrollDy,
-            exported.originalRect.width,
-            exported.originalRect.height
+      // For duplicates (library inserts / outerHTML clones), shift the
+      // exported viewport position by the scroll delta. For non-duplicate
+      // re-clones, cloneElement positions from the reference's current
+      // BCR which already accounts for scroll — no adjustment needed.
+      const scrollAdjustedRect = exported.isDuplicate
+        ? roundRect(
+            new DOMRect(
+              exported.originalRect.x - scrollDx,
+              exported.originalRect.y - scrollDy,
+              exported.originalRect.width,
+              exported.originalRect.height
+            )
           )
-        )
-      : null;
+        : null;
 
-    if (exported.isDuplicate) {
-      const libraryMatch = exported.libraryId ? findLibraryElement(exported.libraryId) : null;
+      if (exported.isDuplicate) {
+        const libraryMatch = exported.libraryId ? findLibraryElement(exported.libraryId) : null;
 
-      if (libraryMatch) {
-        try {
-          const live = await renderEuiComponentLive(
-            libraryMatch.element,
-            IMPORT_CLONE_Z_INDEX,
-            exported.stateAttributes
-          );
-          el = live.wrapper;
-          liveReactElement = live.liveReactElement;
-          cleanup = live.cleanup;
-          setImportant(el, 'left', `${scrollAdjustedRect!.left}px`);
-          setImportant(el, 'top', `${scrollAdjustedRect!.top}px`);
-          el.style.pointerEvents = 'auto';
-          if (exported.libraryId) {
-            el.setAttribute(DEVTOOL_LIBRARY_ID_ATTR, exported.libraryId);
+        if (libraryMatch) {
+          try {
+            const live = await renderEuiComponentLive(
+              libraryMatch.element,
+              IMPORT_CLONE_Z_INDEX,
+              exported.stateAttributes
+            );
+            el = live.wrapper;
+            liveReactElement = live.liveReactElement;
+            cleanup = live.cleanup;
+            setImportant(el, 'left', `${scrollAdjustedRect!.left}px`);
+            setImportant(el, 'top', `${scrollAdjustedRect!.top}px`);
+            el.style.pointerEvents = 'auto';
+            if (exported.libraryId) {
+              el.setAttribute(DEVTOOL_LIBRARY_ID_ATTR, exported.libraryId);
+            }
+            applyIconOverrides(exported.outerHTML, el);
+          } catch {
+            warnings.push(
+              `Fresh render failed for ${exported.libraryId}. Falling back to outerHTML.`
+            );
+            const fallback = recreateFromOuterHTML(exported, warnings);
+            if (!fallback) {
+              failedCount++;
+              continue;
+            }
+            setImportant(fallback, 'left', `${scrollAdjustedRect!.left}px`);
+            setImportant(fallback, 'top', `${scrollAdjustedRect!.top}px`);
+            el = fallback;
           }
-          applyIconOverrides(exported.outerHTML, el);
-        } catch {
-          warnings.push(
-            `Fresh render failed for ${exported.libraryId}. Falling back to outerHTML.`
-          );
-          const fallback = recreateFromOuterHTML(exported, warnings);
-          if (!fallback) {
+        } else {
+          if (!exported.outerHTML) {
+            warnings.push('Duplicate session missing outerHTML. Skipping.');
             failedCount++;
             continue;
           }
-          setImportant(fallback, 'left', `${scrollAdjustedRect!.left}px`);
-          setImportant(fallback, 'top', `${scrollAdjustedRect!.top}px`);
-          el = fallback;
+          const recreated = recreateFromOuterHTML(exported, warnings);
+          if (!recreated) {
+            failedCount++;
+            continue;
+          }
+          setImportant(recreated, 'left', `${scrollAdjustedRect!.left}px`);
+          setImportant(recreated, 'top', `${scrollAdjustedRect!.top}px`);
+          el = recreated;
         }
       } else {
-        if (!exported.outerHTML) {
-          warnings.push('Duplicate session missing outerHTML. Skipping.');
+        if (!exported.elPath) {
+          warnings.push('Non-duplicate session missing elPath. Skipping.');
           failedCount++;
           continue;
         }
-        const recreated = recreateFromOuterHTML(exported, warnings);
-        if (!recreated) {
-          failedCount++;
-          continue;
-        }
-        setImportant(recreated, 'left', `${scrollAdjustedRect!.left}px`);
-        setImportant(recreated, 'top', `${scrollAdjustedRect!.top}px`);
-        el = recreated;
-      }
-    } else {
-      if (!exported.elPath) {
-        warnings.push('Non-duplicate session missing elPath. Skipping.');
-        failedCount++;
-        continue;
-      }
-      const elResult = fromPath(exported.elPath);
-      const elResolved = elResult.element instanceof HTMLElement ? elResult.element : null;
+        const elResult = fromPath(exported.elPath);
+        const elResolved = elResult.element instanceof HTMLElement ? elResult.element : null;
 
-      if (
-        elResolved &&
-        !registry.has(elResolved) &&
-        (elResult.fingerprintMatch || !exported.referenceElPath)
-      ) {
-        if (!elResult.fingerprintMatch) {
-          warnings.push(
-            `session element was found but its content has changed (selector: ${exported.elPath.selector}).`
+        if (
+          elResolved &&
+          !registry.has(elResolved) &&
+          (elResult.fingerprintMatch || !exported.referenceElPath)
+        ) {
+          if (!elResult.fingerprintMatch) {
+            warnings.push(
+              `session element was found but its content has changed (selector: ${exported.elPath.selector}).`
+            );
+          }
+          el = elResolved;
+        } else if (exported.referenceElPath) {
+          // The clone was removed (e.g. by resetAll). Re-create it from
+          // the original in-flow element found via referenceElPath.
+          const original = resolveElement(
+            exported.referenceElPath,
+            'original element for re-clone',
+            warnings
           );
-        }
-        el = elResolved;
-      } else if (exported.referenceElPath) {
-        // The clone was removed (e.g. by resetAll). Re-create it from
-        // the original in-flow element found via referenceElPath.
-        const original = resolveElement(
-          exported.referenceElPath,
-          'original element for re-clone',
-          warnings
-        );
-        if (!original) {
+          if (!original) {
+            failedCount++;
+            continue;
+          }
+          const cloneResult = cloneElement(original, IMPORT_CLONE_Z_INDEX);
+          const clone = cloneResult.clone;
+          cloneRect = cloneResult.rect;
+          clone.style.pointerEvents = 'auto';
+
+          setImportant(clone, 'width', `${exported.originalRect.width}px`);
+          setImportant(clone, 'height', `${exported.originalRect.height}px`);
+
+          // The fresh clone has all children's dimensions frozen by
+          // copyStylesDeep at the original's full size. Only unfreeze
+          // properties that were actually edited so other frozen
+          // dimensions remain intact.
+          const editedProps = new Set(
+            exported.styleEdits.filter((e) => e.relativeSelector === '').map((e) => e.property)
+          );
+          if (editedProps.has('width')) {
+            unfreezeChildren(clone, 'width');
+          }
+          if (editedProps.has('height')) {
+            unfreezeChildren(clone, 'height');
+          }
+
+          // Hide the original so there's no visual duplication,
+          // same as the drag system does. Preserve the original's
+          // current transform so resetAll can restore it.
+          softHideElement(original);
+
+          document.body.appendChild(clone);
+          el = clone;
+        } else {
           failedCount++;
           continue;
         }
-        const cloneResult = cloneElement(original, IMPORT_CLONE_Z_INDEX);
-        const clone = cloneResult.clone;
-        cloneRect = cloneResult.rect;
-        clone.style.pointerEvents = 'auto';
+      }
 
-        setImportant(clone, 'width', `${exported.originalRect.width}px`);
-        setImportant(clone, 'height', `${exported.originalRect.height}px`);
+      const referenceEl = exported.referenceElPath
+        ? resolveElement(exported.referenceElPath, 'reference element', warnings) ?? undefined
+        : undefined;
 
-        // The fresh clone has all children's dimensions frozen by
-        // copyStylesDeep at the original's full size. Only unfreeze
-        // properties that were actually edited so other frozen
-        // dimensions remain intact.
-        const editedProps = new Set(
-          exported.styleEdits.filter((e) => e.relativeSelector === '').map((e) => e.property)
-        );
-        if (editedProps.has('width')) {
-          unfreezeChildren(clone, 'width');
+      // When the color mode differs, remap stale Emotion class names
+      // so CSS rules from the current mode apply correctly.
+      if (emotionMap) {
+        remapEmotionClasses(el, emotionMap);
+        // The remapped Emotion classes provide correct ::before/::after
+        // rules for the current color mode. Strip the captured pseudo-
+        // element <style> tags and their class names so they don't
+        // override the Emotion rules with stale structural properties
+        // (e.g. border-style: solid when the current mode uses none).
+        stripPseudoStyles(el);
+      }
+
+      // Refresh var(--dt-*) fallback hex values in inline styles so
+      // colors match the current color mode.
+      resolveColorTokensDeep(el);
+
+      // For edits, try to resolve the original target. If that fails (e.g.
+      // the old clone was removed), fall back to the newly created element.
+      // This handles both cases: importing onto an existing clone, and
+      // re-cloning from the original after a reset.
+      const resolveEditElement = (
+        path: ElementPath,
+        label: string,
+        relativeSelector?: string
+      ): HTMLElement | null => {
+        if (relativeSelector !== undefined) {
+          const target =
+            relativeSelector === ''
+              ? el
+              : (el.querySelector(relativeSelector) as HTMLElement | null);
+          if (target) return target;
         }
-        if (editedProps.has('height')) {
-          unfreezeChildren(clone, 'height');
-        }
+        const resolved = resolveElement(path, label, []);
+        return resolved ?? (el instanceof HTMLElement ? el : null);
+      };
 
-        // Hide the original so there's no visual duplication,
-        // same as the drag system does. Preserve the original's
-        // current transform so resetAll can restore it.
-        softHideElement(original);
+      const styleEdits = exported.styleEdits
+        .map((e) => {
+          const element = resolveEditElement(
+            e.targetPath,
+            `style edit (${e.property})`,
+            e.relativeSelector
+          );
+          if (!element) return null;
+          element.style.setProperty(e.property, e.current, e.currentPriority);
+          reflowManagedStyle(element, e.property);
+          return {
+            element,
+            property: e.property,
+            original: e.original,
+            originalPriority: e.originalPriority,
+          };
+        })
+        .filter((e): e is NonNullable<typeof e> => e !== null);
 
-        document.body.appendChild(clone);
-        el = clone;
+      const textEdits = exported.textEdits
+        .map((e) => {
+          const parent = resolveEditElement(
+            e.parentPath,
+            'text edit parent',
+            e.parentRelativeSelector
+          );
+          if (!parent) return null;
+          const node = parent.childNodes[e.childIndex];
+          if (!node || node.nodeType !== Node.TEXT_NODE) return null;
+          // Re-apply the current text content.
+          if (e.current !== undefined) {
+            node.textContent = e.current;
+            reflowManagedText(parent);
+          }
+          return { node: node as Text, original: e.original };
+        })
+        .filter((e): e is NonNullable<typeof e> => e !== null);
+
+      const mediaEdits = exported.mediaEdits
+        .map((e) => {
+          if (!ALLOWED_SOURCE_ATTRIBUTES.has(e.attribute)) return null;
+          const element = resolveEditElement(
+            e.targetPath,
+            `media edit (${e.attribute})`,
+            e.relativeSelector
+          );
+          if (!element) return null;
+          // Re-apply the current attribute value.
+          if (e.current !== undefined) {
+            applySourceAttribute(element, e.attribute, e.current);
+          }
+          return { element, attribute: e.attribute, original: e.original };
+        })
+        .filter((e): e is NonNullable<typeof e> => e !== null);
+
+      // For duplicates, use the scroll-adjusted position. For re-clones,
+      // use the position from cloneElement (reflects reference element's
+      // current BCR). For existing elements, use their current parsed position.
+      let rectLeft: number;
+      let rectTop: number;
+      if (scrollAdjustedRect) {
+        rectLeft = scrollAdjustedRect.left;
+        rectTop = scrollAdjustedRect.top;
+      } else if (cloneRect) {
+        rectLeft = cloneRect.left;
+        rectTop = cloneRect.top;
       } else {
-        failedCount++;
-        continue;
+        rectLeft = parseFloat(el.style.left) || exported.originalRect.x;
+        rectTop = parseFloat(el.style.top) || exported.originalRect.y;
       }
+      const originalRect = new DOMRect(
+        rectLeft,
+        rectTop,
+        exported.originalRect.width,
+        exported.originalRect.height
+      );
+
+      const session: ElementSession = {
+        el,
+        dx: exported.dx,
+        dy: exported.dy,
+        dw: exported.dw,
+        dh: exported.dh,
+        originalRect,
+        isDuplicate: exported.isDuplicate,
+        referenceEl,
+        liveReactElement,
+        styleEdits,
+        textEdits,
+        mediaEdits,
+        cleanup,
+      };
+
+      registry.set(session);
+
+      // Style-edit reflow may strip the root's frozen width/height
+      // (unfreezeAncestors walks up from the edited child). Re-apply
+      // the root dimensions so the managed element keeps its size.
+      const finalW = exported.originalRect.width + exported.dw;
+      const finalH = exported.originalRect.height + exported.dh;
+      setImportant(el, 'width', `${finalW}px`);
+      setImportant(el, 'height', `${finalH}px`);
+
+      // Re-apply the CSS transform so the element visually moves.
+      // transform-origin must be 0 0 so scale pivots from the top-left
+      // corner, matching what drag/duplicate/resize set at runtime.
+      el.style.transformOrigin = '0 0';
+      const hasZeroDimension = originalRect.width === 0 || originalRect.height === 0;
+      const scaleX = hasZeroDimension ? 1 : (originalRect.width + exported.dw) / originalRect.width;
+      const scaleY = hasZeroDimension
+        ? 1
+        : (originalRect.height + exported.dh) / originalRect.height;
+      setImportant(el, 'transform', buildTransform(exported.dx, exported.dy, scaleX, scaleY));
+
+      importedElements.push(el);
+      restoredCount++;
+    } catch (e) {
+      warnings.push(`Failed to import session: ${e instanceof Error ? e.message : String(e)}`);
+      failedCount++;
     }
-
-    const referenceEl = exported.referenceElPath
-      ? resolveElement(exported.referenceElPath, 'reference element', warnings) ?? undefined
-      : undefined;
-
-    // When the color mode differs, remap stale Emotion class names
-    // so CSS rules from the current mode apply correctly.
-    if (emotionMap) {
-      remapEmotionClasses(el, emotionMap);
-      // The remapped Emotion classes provide correct ::before/::after
-      // rules for the current color mode. Strip the captured pseudo-
-      // element <style> tags and their class names so they don't
-      // override the Emotion rules with stale structural properties
-      // (e.g. border-style: solid when the current mode uses none).
-      stripPseudoStyles(el);
-    }
-
-    // Refresh var(--dt-*) fallback hex values in inline styles so
-    // colors match the current color mode.
-    resolveColorTokensDeep(el);
-
-    // For edits, try to resolve the original target. If that fails (e.g.
-    // the old clone was removed), fall back to the newly created element.
-    // This handles both cases: importing onto an existing clone, and
-    // re-cloning from the original after a reset.
-    const resolveEditElement = (
-      path: ElementPath,
-      label: string,
-      relativeSelector?: string
-    ): HTMLElement | null => {
-      if (relativeSelector !== undefined) {
-        const target =
-          relativeSelector === '' ? el : (el.querySelector(relativeSelector) as HTMLElement | null);
-        if (target) return target;
-      }
-      const resolved = resolveElement(path, label, []);
-      return resolved ?? (el instanceof HTMLElement ? el : null);
-    };
-
-    const styleEdits = exported.styleEdits
-      .map((e) => {
-        const element = resolveEditElement(
-          e.targetPath,
-          `style edit (${e.property})`,
-          e.relativeSelector
-        );
-        if (!element) return null;
-        element.style.setProperty(e.property, e.current, e.currentPriority);
-        reflowManagedStyle(element, e.property);
-        return {
-          element,
-          property: e.property,
-          original: e.original,
-          originalPriority: e.originalPriority,
-        };
-      })
-      .filter((e): e is NonNullable<typeof e> => e !== null);
-
-    const textEdits = exported.textEdits
-      .map((e) => {
-        const parent = resolveEditElement(
-          e.parentPath,
-          'text edit parent',
-          e.parentRelativeSelector
-        );
-        if (!parent) return null;
-        const node = parent.childNodes[e.childIndex];
-        if (!node || node.nodeType !== Node.TEXT_NODE) return null;
-        // Re-apply the current text content.
-        if (e.current !== undefined) {
-          node.textContent = e.current;
-          reflowManagedText(parent);
-        }
-        return { node: node as Text, original: e.original };
-      })
-      .filter((e): e is NonNullable<typeof e> => e !== null);
-
-    const mediaEdits = exported.mediaEdits
-      .map((e) => {
-        if (!ALLOWED_SOURCE_ATTRIBUTES.has(e.attribute)) return null;
-        const element = resolveEditElement(
-          e.targetPath,
-          `media edit (${e.attribute})`,
-          e.relativeSelector
-        );
-        if (!element) return null;
-        // Re-apply the current attribute value.
-        if (e.current !== undefined) {
-          applySourceAttribute(element, e.attribute, e.current);
-        }
-        return { element, attribute: e.attribute, original: e.original };
-      })
-      .filter((e): e is NonNullable<typeof e> => e !== null);
-
-    // For duplicates, use the scroll-adjusted position. For re-clones,
-    // use the position from cloneElement (reflects reference element's
-    // current BCR). For existing elements, use their current parsed position.
-    let rectLeft: number;
-    let rectTop: number;
-    if (scrollAdjustedRect) {
-      rectLeft = scrollAdjustedRect.left;
-      rectTop = scrollAdjustedRect.top;
-    } else if (cloneRect) {
-      rectLeft = cloneRect.left;
-      rectTop = cloneRect.top;
-    } else {
-      rectLeft = parseFloat(el.style.left) || exported.originalRect.x;
-      rectTop = parseFloat(el.style.top) || exported.originalRect.y;
-    }
-    const originalRect = new DOMRect(
-      rectLeft,
-      rectTop,
-      exported.originalRect.width,
-      exported.originalRect.height
-    );
-
-    const session: ElementSession = {
-      el,
-      dx: exported.dx,
-      dy: exported.dy,
-      dw: exported.dw,
-      dh: exported.dh,
-      originalRect,
-      isDuplicate: exported.isDuplicate,
-      referenceEl,
-      liveReactElement,
-      styleEdits,
-      textEdits,
-      mediaEdits,
-      cleanup,
-    };
-
-    registry.set(session);
-
-    // Style-edit reflow may strip the root's frozen width/height
-    // (unfreezeAncestors walks up from the edited child). Re-apply
-    // the root dimensions so the managed element keeps its size.
-    const finalW = exported.originalRect.width + exported.dw;
-    const finalH = exported.originalRect.height + exported.dh;
-    setImportant(el, 'width', `${finalW}px`);
-    setImportant(el, 'height', `${finalH}px`);
-
-    // Re-apply the CSS transform so the element visually moves.
-    // transform-origin must be 0 0 so scale pivots from the top-left
-    // corner, matching what drag/duplicate/resize set at runtime.
-    el.style.transformOrigin = '0 0';
-    const hasZeroDimension = originalRect.width === 0 || originalRect.height === 0;
-    const scaleX = hasZeroDimension ? 1 : (originalRect.width + exported.dw) / originalRect.width;
-    const scaleY = hasZeroDimension ? 1 : (originalRect.height + exported.dh) / originalRect.height;
-    setImportant(el, 'transform', buildTransform(exported.dx, exported.dy, scaleX, scaleY));
-
-    importedElements.push(el);
-    restoredCount++;
   }
 
   // Re-apply soft-deletions: hide elements that were deleted before export.
@@ -859,7 +874,11 @@ export const pickJsonFile = (): Promise<ExportedState | null> =>
       reader.onload = () => {
         try {
           const parsed = JSON.parse(reader.result as string) as ExportedState;
-          if (parsed.version !== 1) {
+          if (
+            parsed.version !== 1 ||
+            !Array.isArray(parsed.sessions) ||
+            typeof parsed.pageUrl !== 'string'
+          ) {
             settle(null);
             return;
           }

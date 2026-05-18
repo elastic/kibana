@@ -99,13 +99,16 @@ export const usePreviewClone = (target: HTMLElement): UsePreviewCloneResult => {
       if (!node) return;
       if (cloneRef.current) {
         cloneRef.current.remove();
+        cloneRef.current = null;
       }
 
       const { clone, elementMap } = createPreviewClone(target);
       elementMapRef.current = elementMap;
       cloneRef.current = clone;
 
-      node.innerHTML = '';
+      while (node.firstChild) {
+        node.removeChild(node.firstChild);
+      }
       node.appendChild(clone);
 
       const origTextNodes = collectAllTextNodes(target);

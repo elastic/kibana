@@ -20,6 +20,7 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { DEVTOOL_IGNORE_ATTR, EDIT_MODAL_ID } from '../../../lib/constants';
+import { DIMENSION_PROPS } from './dimension_props';
 import { useOverlayZIndex } from '../../../hooks/use_overlay_z_index';
 import { usePortalZIndex } from '../../../hooks/use_portal_z_index';
 import { usePreviewClone } from '../../../hooks/use_preview_clone';
@@ -33,48 +34,12 @@ import { EditModalFooterBar } from './edit_modal_footer';
 import { roundPxValue } from '../../../lib/dom/round_px_value';
 import type { DimensionEntry } from './dimensions_editor';
 
-export type { StyleChange, TextNodeChange, MediaChange as MediaChange };
+export type { StyleChange, TextNodeChange, MediaChange };
 
 const modalCss = css({
   width: '90vw',
-  maxWidth: 1200,
   minHeight: 800,
 });
-
-type DimensionProperty = 'width' | 'height' | 'padding' | 'margin' | 'border-radius';
-
-const DIMENSION_PROPS: Array<{ property: DimensionProperty; label: string }> = [
-  {
-    property: 'width',
-    label: i18n.translate('kbnDesignTools.edit.modal.dimensions.width', {
-      defaultMessage: 'Width',
-    }),
-  },
-  {
-    property: 'height',
-    label: i18n.translate('kbnDesignTools.edit.modal.dimensions.height', {
-      defaultMessage: 'Height',
-    }),
-  },
-  {
-    property: 'padding',
-    label: i18n.translate('kbnDesignTools.edit.modal.dimensions.padding', {
-      defaultMessage: 'Padding',
-    }),
-  },
-  {
-    property: 'margin',
-    label: i18n.translate('kbnDesignTools.edit.modal.dimensions.margin', {
-      defaultMessage: 'Margin',
-    }),
-  },
-  {
-    property: 'border-radius',
-    label: i18n.translate('kbnDesignTools.edit.modal.dimensions.borderRadius', {
-      defaultMessage: 'Border radius',
-    }),
-  },
-];
 
 interface Props {
   target: HTMLElement;
@@ -86,12 +51,11 @@ interface Props {
   ) => void;
 }
 
-const useDimensionEntries = (
-  selectedElement: Element | null,
+const computeDimensionEntries = (
+  selectedElement: HTMLElement,
   elementMapRef: React.MutableRefObject<Map<Element, Element>>,
   originalDimensionsRef: React.MutableRefObject<Map<Element, Map<string, string>>>
 ): DimensionEntry[] => {
-  if (!selectedElement || !(selectedElement instanceof HTMLElement)) return [];
   const cloneEl = elementMapRef.current.get(selectedElement);
   const el = cloneEl instanceof HTMLElement ? cloneEl : selectedElement;
   const computed = window.getComputedStyle(el);
@@ -119,7 +83,7 @@ export const EditModal = ({ target, onClose, onSave }: Props) => {
     textEntries,
     setTextEntries,
     mediaEntries,
-    setMediaEntries: setMediaEntries,
+    setMediaEntries,
     selectedElement,
     color,
     setColor,
@@ -159,11 +123,10 @@ export const EditModal = ({ target, onClose, onSave }: Props) => {
 
   useModalKeyboard(handleDraftUndo, handleDraftRedo);
 
-  const dimensionEntries = useDimensionEntries(
-    selectedElement,
-    elementMapRef,
-    originalDimensionsRef
-  );
+  const dimensionEntries =
+    selectedElement instanceof HTMLElement
+      ? computeDimensionEntries(selectedElement, elementMapRef, originalDimensionsRef)
+      : [];
 
   return (
     <EuiModal

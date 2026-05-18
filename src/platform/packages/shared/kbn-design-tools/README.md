@@ -2,6 +2,19 @@
 
 Developer toolbar design tools addon - an interactive DOM editor overlaid on Kibana pages that supports dragging, resizing, duplicating, inline editing (styles, text, HTML attributes), inserting live EUI components, and full undo/redo.
 
+## Keyboard Shortcuts
+
+| Shortcut | Action |
+|---|---|
+| `Escape` | Exit current mode / deselect |
+| `Delete` / `Backspace` | Delete selected element |
+| `Enter` | Open edit modal for selected element |
+| `Cmd+D` (`Ctrl+D`) | Duplicate hovered element |
+| `Cmd+Z` (`Ctrl+Z`) | Undo |
+| `Cmd+Shift+Z` (`Ctrl+Shift+Z`) | Redo |
+| `Cmd+.` (`Ctrl+.`) | Toggle measure mode |
+| `Shift` (during drag) | Free move without grid snapping |
+
 ## Architecture
 
 ```mermaid
@@ -80,7 +93,7 @@ Every element the user touches gets an `ElementSession` - a per-element state co
 | Session Type | `isDuplicate` | `referenceEl` | Owns Element? | Use Case |
 |---|---|---|---|---|
 | Drag | `false` | original | Yes (clone) | User drags a page element - original hidden, clone visible |
-| Duplicate | `true` | source | Yes | Cmd+C copy of an existing element |
+| Duplicate | `true` | source | Yes | Cmd+D copy of an existing element |
 | Live/Insert | `true` | (optional) | Yes + cleanup | Library component rendered with a live React root |
 | Promoted Edit | `false` | original | Yes (clone) | Edit modal save on an original element - promoted to a managed clone |
 

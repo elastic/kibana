@@ -62,7 +62,7 @@ interface UseModalChangeHandlersArgs {
   setTextEntries: Dispatch<SetStateAction<TextNodeEntry[]>>;
   mediaEntries: MediaEditorEntry[];
   setMediaEntries: Dispatch<SetStateAction<MediaEditorEntry[]>>;
-  dimensionProps: DimensionProp[];
+  dimensionProps: readonly DimensionProp[];
   onSave: (
     styleChanges: StyleChange[],
     textChanges: TextNodeChange[],
@@ -130,6 +130,9 @@ export const useModalChangeHandlers = ({
       });
     }
   }, [selectedElement, handleSelect]);
+
+  const refreshOverlayRef = useRef(refreshOverlay);
+  refreshOverlayRef.current = refreshOverlay;
 
   const handleColorChange = useCallback(
     (newColor: string) => {
@@ -225,9 +228,9 @@ export const useModalChangeHandlers = ({
         property,
         cloneRef.current?.firstElementChild as HTMLElement | null
       );
-      refreshOverlay();
+      refreshOverlayRef.current();
     },
-    [selectedElement, refreshOverlay, draft, elementMapRef, cloneRef]
+    [selectedElement, draft, elementMapRef, cloneRef, originalDimensionsRef]
   );
 
   const handleDimensionFocus = useCallback(() => {
@@ -282,9 +285,9 @@ export const useModalChangeHandlers = ({
       }
 
       setTextEntries((prev) => prev.map((e, i) => (i === index ? { ...e, ...updates } : e)));
-      refreshOverlay();
+      refreshOverlayRef.current();
     },
-    [refreshOverlay, draft, textNodeMap, setTextEntries]
+    [draft, textNodeMap, setTextEntries]
   );
 
   const handleTextNodeFocus = useCallback(
@@ -303,10 +306,8 @@ export const useModalChangeHandlers = ({
     (index: number, value: string) => {
       const mapping = mediaMap.current[index];
       if (!mapping) return;
-      const entry = mediaEntries[index];
-      if (!entry) return;
 
-      const currentValue = entry.value;
+      const currentValue = mapping.clone.getAttribute(mapping.attribute) ?? '';
       if (currentValue === value) return;
 
       draft.push({
@@ -322,7 +323,7 @@ export const useModalChangeHandlers = ({
 
       setMediaEntries((prev) => prev.map((e, i) => (i === index ? { ...e, value } : e)));
     },
-    [mediaEntries, draft, mediaMap, setMediaEntries]
+    [draft, mediaMap, setMediaEntries]
   );
 
   const handleMediaFocus = useCallback(
@@ -353,9 +354,9 @@ export const useModalChangeHandlers = ({
           setMediaEntries((prev) => prev.map((e, i) => (i === edit.index ? { ...e, value } : e)));
           break;
       }
-      refreshOverlay();
+      refreshOverlayRef.current();
     },
-    [setColor, refreshOverlay, setTextEntries, setMediaEntries]
+    [setColor, setTextEntries, setMediaEntries]
   );
 
   const handleDraftUndo = useCallback(() => {

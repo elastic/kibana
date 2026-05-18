@@ -41,7 +41,7 @@ export const MediaEditor = ({ entries, onChange, onFocus }: Props) => {
     <>
       {entries.map((entry, idx) => (
         <EuiFormRow
-          key={idx}
+          key={`${entry.label}-${entry.attribute}-${idx}`}
           label={
             <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>

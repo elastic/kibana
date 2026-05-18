@@ -291,6 +291,8 @@ const EUI_COMPONENTS: ReadonlySet<string> = new Set([
   'EuiWrappingPopover',
 ]);
 
+const EUI_CLASS_RE = /^eui[A-Z]/;
+
 /**
  * Map a CSS class name (e.g. `euiAvatar`) to its EUI component name
  * (e.g. `EuiAvatar`), but only if that component is exported
@@ -298,7 +300,7 @@ const EUI_COMPONENTS: ReadonlySet<string> = new Set([
  */
 export const resolveEuiTag = (el: Element): string | null => {
   for (const cls of el.classList) {
-    if (/^eui[A-Z]/.test(cls)) {
+    if (EUI_CLASS_RE.test(cls)) {
       const candidate = cls.charAt(0).toUpperCase() + cls.slice(1);
       if (EUI_COMPONENTS.has(candidate)) return candidate;
     }
