@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type { EuiDataGridColumn } from '@elastic/eui';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiLoadingChart } from '@elastic/eui';
 import type { RuleTypeSolution } from '@kbn/alerting-types';
@@ -35,6 +35,8 @@ import { NO_AUTHORIZED_RULE_TYPE_PROMPT_SUBJ } from '../constants';
 export interface EmbeddableAlertsTableProps {
   id: string;
   timeRange?: TimeRange;
+  lastReloadRequestTime?: number;
+  onLoadingChange?: (isLoading: boolean) => void;
   solution?: RuleTypeSolution;
   query?: EmbeddableAlertsTableQuery;
   services: AlertsTableProps['services'];
@@ -54,10 +56,18 @@ const columns = defaultAlertsTableColumns.map<EuiDataGridColumn>((column) => ({
 export const EmbeddableAlertsTable = ({
   id,
   timeRange,
+  lastReloadRequestTime,
+  onLoadingChange,
   solution,
   query,
   services,
 }: EmbeddableAlertsTableProps) => {
+  const onUpdate = useCallback<NonNullable<AlertsTableProps['onUpdate']>>(
+    (context) => {
+      onLoadingChange?.(context.isLoading);
+    },
+    [onLoadingChange]
+  );
   const {
     data: ruleTypes,
     isLoading: isLoadingRuleTypes,
@@ -67,21 +77,22 @@ export const EmbeddableAlertsTable = ({
     () => (!ruleTypes || !solution ? [] : getRuleTypeIdsForSolution(ruleTypes, solution)),
     [ruleTypes, solution]
   );
-  const timeRangeQuery: QueryDslQueryContainer | null = timeRange
-    ? {
-        bool: {
-          minimum_should_match: 1,
-          should: [
-            getTime(undefined, timeRange, {
-              fieldName: ALERT_TIME_RANGE,
-            })!.query,
-            getTime(undefined, timeRange, {
-              fieldName: TIMESTAMP,
-            })!.query,
-          ],
-        },
-      }
-    : null;
+  const timeRangeQuery = useMemo<QueryDslQueryContainer | null>(() => {
+    if (!timeRange) return null;
+    return {
+      bool: {
+        minimum_should_match: 1,
+        should: [
+          getTime(undefined, timeRange, {
+            fieldName: ALERT_TIME_RANGE,
+          })!.query,
+          getTime(undefined, timeRange, {
+            fieldName: TIMESTAMP,
+          })!.query,
+        ],
+      },
+    };
+  }, [timeRange?.from, timeRange?.to]);
   const filtersQuery = useMemo(() => {
     let filters: JsonObject | null = null;
     try {
@@ -93,11 +104,14 @@ export const EmbeddableAlertsTable = ({
     }
     return filters;
   }, [query?.filters, services.notifications.toasts]);
-  const finalQuery = {
-    bool: {
-      must: [timeRangeQuery, filtersQuery].filter(Boolean) as QueryDslQueryContainer[],
-    },
-  };
+  const finalQuery = useMemo(
+    () => ({
+      bool: {
+        must: [timeRangeQuery, filtersQuery].filter(Boolean) as QueryDslQueryContainer[],
+      },
+    }),
+    [timeRangeQuery, filtersQuery]
+  );
 
   if (isLoadingRuleTypes) {
     // Using EuiLoadingChart instead of EuiLoadingSpinner to match the
@@ -135,36 +149,35 @@ export const EmbeddableAlertsTable = ({
   }
 
   return (
-    <AlertsTable
-      id={id}
-      ruleTypeIds={ruleTypeIds}
-      query={finalQuery}
-      columns={columns}
-      showAlertStatusWithFlapping
-      renderActionsCell={AlertActionsCell}
-      toolbarVisibility={{
-        // Disabling the fullscreen toggle since it breaks in Dashboards
-        // and panels can be maximized on their own
-        showFullScreenSelector: false,
-        // Disable data grid customizations
-        showColumnSelector: false,
-        showSortSelector: false,
-        showKeyboardShortcuts: false,
-        showDisplaySelector: false,
-      }}
-      emptyState={{
-        height: 'flex',
-        variant: 'transparent',
-      }}
-      openLinksInNewTab={true}
-      renderExpandedAlertView={(props) => (
-        <AlertDetailFlyout {...props} ownFocus={true} hasPagination={false} />
-      )}
-      // Disable configuration persistence
-      configurationStorage={null}
-      // Disable columns customziation
-      browserFields={{}}
-      services={services}
-    />
+    <div css={{  height: '100%', width: '100%' }}>
+      <AlertsTable
+        id={id}
+        ruleTypeIds={ruleTypeIds}
+        query={finalQuery}
+        columns={columns}
+        lastReloadRequestTime={lastReloadRequestTime}
+        onUpdate={onUpdate}
+        showAlertStatusWithFlapping
+        renderActionsCell={AlertActionsCell}
+        toolbarVisibility={{
+          showFullScreenSelector: false,
+          showColumnSelector: false,
+          showSortSelector: false,
+          showKeyboardShortcuts: false,
+          showDisplaySelector: false,
+        }}
+        emptyState={{
+          height: 'flex',
+          variant: 'transparent',
+        }}
+        openLinksInNewTab={true}
+        renderExpandedAlertView={(props) => (
+          <AlertDetailFlyout {...props} ownFocus={true} hasPagination={false} />
+        )}
+        configurationStorage={null}
+        browserFields={{}}
+        services={services}
+      />
+    </div>
   );
 };
