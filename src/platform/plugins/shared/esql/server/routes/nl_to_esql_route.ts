@@ -11,6 +11,7 @@ import type { CoreSetup, IRouter, PluginInitializerContext } from '@kbn/core/ser
 import { NL_TO_ESQL_ROUTE } from '@kbn/esql-types';
 import { generateEsql, generateEsqlCompletion } from '@kbn/agent-builder-genai-utils';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
+import type { EsqlServerPluginStart } from '../types';
 import { createScopedModel, resolveConnectorId } from './helpers';
 
 const MAX_NL_INSTRUCTION_LENGTH = 2000;
@@ -31,8 +32,6 @@ const buildNlToEsqlAdditionalContext = (currentQuery: string): string => {
     '</current_query>',
   ].join('\n');
 };
-
-import type { EsqlServerPluginStart } from '../types';
 
 export const registerNLtoESQLRoute = (
   router: IRouter,

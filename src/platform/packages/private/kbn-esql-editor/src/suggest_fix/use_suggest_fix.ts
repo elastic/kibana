@@ -15,11 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { SUGGEST_FIX_ROUTE, FIX_WITH_AI_COMMAND_ID } from '@kbn/esql-types';
 import type { HttpStart, NotificationsStart } from '@kbn/core/public';
 import { ReviewActionsWidget } from '../comment_to_esql/review_actions_widget';
-import {
-  CODE_ADDED_CLASS,
-  GENERATING_HINT_CLASS,
-  LINE_REPLACED_CLASS,
-} from '../editor_ai_constants';
+import { CODE_ADDED_CLASS, GENERATING_HINT_CLASS, LINE_REPLACED_CLASS } from '../editor_ai.styles';
 import { findChangedRegion } from './utils';
 
 // The command is registered once for the lifetime of

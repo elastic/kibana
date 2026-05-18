@@ -73,7 +73,7 @@ export function getHoverProvider(deps?: ESQLDependencies): monaco.languages.Hove
             JSON.stringify(args)
           )}`;
           const fixLink: monaco.IMarkdownString = {
-            value: `[${i18n.translate('kbnMonaco.esql.fixWithAI.hoverLink', {
+            value: `[${i18n.translate('monaco.esql.fixWithAI.hoverLink', {
               defaultMessage: '✨ Fix with AI',
             })}](${commandUri})`,
             isTrusted: true,

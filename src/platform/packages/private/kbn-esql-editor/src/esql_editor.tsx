@@ -41,6 +41,7 @@ import { isMac } from '@kbn/shared-ux-utility';
 import { useLookupIndexCommand } from './lookup_join';
 import { useCommentToEsql, useGhostLineHint } from './comment_to_esql';
 import { useSuggestFix } from './suggest_fix/use_suggest_fix';
+import { useEditorAiStyle } from './editor_ai.styles';
 import { useFieldsBrowser } from './resource_browser/use_fields_browser';
 import { EditorFooter } from './editor_footer';
 import { QuickSearchVisor } from './editor_visor';
@@ -553,8 +554,9 @@ const ESQLEditorInternal = function ESQLEditor({
   // ghost hint when generation starts; populated below by useGhostLineHint.
   const clearGhostHintRef = useRef<() => void>(() => {});
 
+  const editorAiStyle = useEditorAiStyle();
+
   const {
-    commentToEsqlStyle,
     generateFromComment: onGenerateFromComment,
     isReviewActiveRef,
     isGeneratingRef,
@@ -672,7 +674,7 @@ const ESQLEditorInternal = function ESQLEditor({
           ${lookupIndexBadgeStyle}
           ${sourcesBadgeStyle}
           ${ghostLineHintStyle}
-          ${commentToEsqlStyle}
+          ${editorAiStyle}
         `}
       />
       {Boolean(editorIsInline) && !hideRunQueryButton ? (

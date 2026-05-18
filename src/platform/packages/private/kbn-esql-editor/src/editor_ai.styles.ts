@@ -11,17 +11,15 @@ import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 import { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  CODE_ADDED_CLASS,
-  LINE_REPLACED_CLASS,
-  GENERATING_HINT_CLASS,
-} from '../editor_ai_constants';
+export const CODE_ADDED_CLASS = 'esqlCodeAdded';
+export const LINE_REPLACED_CLASS = 'esqlLineReplaced';
+export const GENERATING_HINT_CLASS = 'esqlGeneratingHint';
 
 const GENERATING_TEXT = i18n.translate('esqlEditor.commentToEsql.generating', {
   defaultMessage: 'Generating...',
 });
 
-export const useCommentToEsqlStyle = () => {
+export const useEditorAiStyle = () => {
   const { euiTheme } = useEuiTheme();
 
   return useMemo(
