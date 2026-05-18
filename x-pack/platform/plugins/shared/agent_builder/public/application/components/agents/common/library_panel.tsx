@@ -52,8 +52,8 @@ export interface LibraryPanelProps<T extends LibraryItem> {
   flyoutTitleId: string;
   libraryLabels: LibraryPanelLabels;
   manageLibraryPath: string;
-  manageLibraryDataEbtElement?: string;
-  manageLibraryDataEbtAction?: string;
+  manageLibraryDataEbtElement: string;
+  manageLibraryDataEbtAction: string;
   sortFilterEbtElement: string;
   getItemName?: (item: T) => string;
   getSearchableText?: (item: T) => string[];
@@ -124,12 +124,8 @@ export function LibraryPanel<T extends LibraryItem>({
                 margin-top: ${euiTheme.size.m};
                 font-size: ${euiTheme.size.m};
               `}
-              {...(manageLibraryDataEbtElement != null
-                ? { 'data-ebt-element': manageLibraryDataEbtElement }
-                : {})}
-              {...(manageLibraryDataEbtAction != null
-                ? { 'data-ebt-action': manageLibraryDataEbtAction }
-                : {})}
+              data-ebt-element={manageLibraryDataEbtElement}
+              data-ebt-action={manageLibraryDataEbtAction}
             >
               {libraryLabels.manageLibraryLink}
             </EuiLink>

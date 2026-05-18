@@ -7,6 +7,7 @@
 
 import type { ToolCallStep } from '@kbn/agent-builder-common/chat/conversation';
 import { ToolOrigin } from '@kbn/agent-builder-common/tools';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import type { ReactNode } from 'react';
 import React from 'react';
 import { EuiLink, EuiText, EuiCode } from '@elastic/eui';
@@ -63,6 +64,9 @@ export const ToolCallDisplay: React.FC<ToolCallDisplayProps> = ({ step, icon, te
                     id={toolLinkId}
                     aria-label={`${labels.toolLink} ${toolId}`}
                     rel="noopener noreferrer"
+                    data-ebt-element={AGENT_BUILDER_UI_EBT.element.CONVERSATION_ROUND_THINKING}
+                    data-ebt-action={AGENT_BUILDER_UI_EBT.action.layer2Crud.ENTITY_DETAIL_VIEW}
+                    data-ebt-detail={toolId}
                   >
                     {toolId}
                   </EuiLink>

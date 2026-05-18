@@ -23,6 +23,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { EsqlToolFieldType } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import React, { useCallback, useMemo } from 'react';
 import type { FieldArrayWithId, FieldError } from 'react-hook-form';
 import { Controller, useFormContext, useWatch } from 'react-hook-form';
@@ -319,6 +320,8 @@ export const EsqlParamRow: React.FC<EsqlParamRowProps> = ({
           }}
           size="s"
           aria-label={i18nMessages.removeParamButtonLabel}
+          data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_TOOLS_FORM}
+          data-ebt-action={AGENT_BUILDER_UI_EBT.action.manageTools.FORM_ESQL_PARAM_REMOVE}
         />
       </EuiTableRowCell>
     </EuiTableRow>

@@ -9,6 +9,7 @@ import React, { useCallback, useMemo } from 'react';
 import type { EuiComboBoxOptionOption, UseEuiTheme } from '@elastic/eui';
 import { EuiComboBox, EuiFormRow, EuiLink, euiFontSize, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import type { ActionConnector } from '@kbn/alerts-ui-shared';
 import { CONNECTOR_ID as MCP_CONNECTOR_TYPE } from '@kbn/connector-schemas/mcp/constants';
 import { Controller, useFormContext, useWatch } from 'react-hook-form';
@@ -81,7 +82,12 @@ export const SourceSection = () => {
           isInvalid={!!errors.connectorId}
           error={errors.connectorId?.message}
           labelAppend={
-            <EuiLink onClick={openCreateMcpServerFlyout} css={mcpActionLinkStyles(euiThemeContext)}>
+            <EuiLink
+              onClick={openCreateMcpServerFlyout}
+              css={mcpActionLinkStyles(euiThemeContext)}
+              data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_TOOLS_BULK_IMPORT}
+              data-ebt-action={AGENT_BUILDER_UI_EBT.action.manageTools.MCP_CREATE_SERVER_OPEN}
+            >
               {labels.tools.bulkImportMcp.sourceSection.addMcpServerLink}
             </EuiLink>
           }

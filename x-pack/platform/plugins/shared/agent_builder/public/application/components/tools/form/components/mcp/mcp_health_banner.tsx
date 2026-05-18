@@ -7,6 +7,7 @@
 
 import { EuiButton, EuiCallOut, EuiFlexGroup, EuiSpacer, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import {
@@ -98,6 +99,7 @@ interface StatusMessageConfig {
 interface ActionButtonConfig {
   label: string;
   iconType: string;
+  ebtAction: string;
   onClick?: () => void;
 }
 
@@ -138,24 +140,28 @@ export const McpHealthBanner = ({
   const deleteToolButton: ActionButtonConfig = {
     label: mcpHealthI18nMessages.deleteToolButtonLabel,
     iconType: 'trash',
+    ebtAction: AGENT_BUILDER_UI_EBT.action.manageTools.HEALTH_BANNER_DELETE_TOOL,
     onClick: onDeleteTool,
   };
 
   const createNewToolButton: ActionButtonConfig = {
     label: mcpHealthI18nMessages.createNewToolButtonLabel,
     iconType: 'plus',
+    ebtAction: AGENT_BUILDER_UI_EBT.action.manageTools.HEALTH_BANNER_CREATE_NEW_TOOL,
     onClick: onCreateNewTool,
   };
 
   const viewConnectorsButton: ActionButtonConfig = {
     label: mcpHealthI18nMessages.viewConnectorsButtonLabel,
     iconType: 'eye',
+    ebtAction: AGENT_BUILDER_UI_EBT.action.manageTools.HEALTH_BANNER_VIEW_CONNECTORS,
     onClick: onViewConnectors,
   };
 
   const viewMcpServerButton: ActionButtonConfig = {
     label: mcpHealthI18nMessages.viewMcpServerButtonLabel,
     iconType: 'eye',
+    ebtAction: AGENT_BUILDER_UI_EBT.action.manageTools.HEALTH_BANNER_VIEW_MCP_SERVER,
     onClick: onViewMcpServer,
   };
 
@@ -198,6 +204,8 @@ export const McpHealthBanner = ({
                 iconType={button.iconType}
                 onClick={button.onClick}
                 fill={index === 0}
+                data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_TOOLS_FORM}
+                data-ebt-action={button.ebtAction}
               >
                 {button.label}
               </EuiButton>

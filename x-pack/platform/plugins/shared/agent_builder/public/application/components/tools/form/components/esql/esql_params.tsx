@@ -24,6 +24,7 @@ import {
 import { css } from '@emotion/react';
 import { getESQLQueryVariables } from '@kbn/esql-utils';
 import { EsqlToolFieldType } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { defer } from 'lodash';
 import React, { useCallback, useMemo } from 'react';
@@ -102,6 +103,8 @@ const EsqlParamActions: React.FC<EsqlParamActionsProps> = ({ onAppend, onReplace
           iconType="plusCircle"
           color="primary"
           size="s"
+          data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_TOOLS_FORM}
+          data-ebt-action={AGENT_BUILDER_UI_EBT.action.manageTools.FORM_ESQL_PARAM_ADD}
           onClick={() => {
             triggerEsqlParamFieldsValidation(['name', 'description', 'type']);
             onAppend();
@@ -230,6 +233,10 @@ export const EsqlParams = () => {
                               target="_blank"
                               data-test-subj="mvContainsLink"
                               aria-label="MV_CONTAINS"
+                              data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_TOOLS_FORM}
+                              data-ebt-action={
+                                AGENT_BUILDER_UI_EBT.action.manageTools.DOCS_LEARN_MORE_TOOLS
+                              }
                             >
                               MV_CONTAINS
                             </EuiLink>

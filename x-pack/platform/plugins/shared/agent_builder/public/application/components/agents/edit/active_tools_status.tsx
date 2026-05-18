@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { appPaths } from '../../../utils/app_paths';
 
@@ -97,7 +98,11 @@ export const ActiveToolsStatus: React.FC<ActiveToolsStatusProps> = ({
                   defaultMessage="{toolsLink} enable agents to work with your data. For best results, keep the selection under {threshold} to avoid overwhelming your agent with too many options."
                   values={{
                     toolsLink: (
-                      <EuiLink href={createAgentBuilderUrl(appPaths.tools.list)}>
+                      <EuiLink
+                        href={createAgentBuilderUrl(appPaths.tools.list)}
+                        data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_AGENT_FORM}
+                        data-ebt-action={AGENT_BUILDER_UI_EBT.action.uiChrome.CROSS_NAVIGATE}
+                      >
                         {i18n.translate('xpack.agentBuilder.activeToolsStatus.toolsLinkText', {
                           defaultMessage: 'Tools',
                         })}

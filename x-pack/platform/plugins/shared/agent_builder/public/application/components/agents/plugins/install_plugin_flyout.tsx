@@ -120,6 +120,8 @@ export const InstallPluginFlyout: React.FC<InstallPluginFlyoutProps> = ({
             isSelected={activeTab === 'url'}
             onClick={() => setActiveTab('url')}
             disabled={isLoading}
+            data-ebt-element={AGENT_BUILDER_UI_EBT.element.CUSTOMIZE_PLUGINS}
+            data-ebt-action={AGENT_BUILDER_UI_EBT.action.managePlugins.INSTALL_FROM_URL}
           >
             {labels.agentPlugins.installPluginUrlTab}
           </EuiTab>
@@ -127,6 +129,8 @@ export const InstallPluginFlyout: React.FC<InstallPluginFlyoutProps> = ({
             isSelected={activeTab === 'upload'}
             onClick={() => setActiveTab('upload')}
             disabled={isLoading}
+            data-ebt-element={AGENT_BUILDER_UI_EBT.element.CUSTOMIZE_PLUGINS}
+            data-ebt-action={AGENT_BUILDER_UI_EBT.action.managePlugins.INSTALL_UPLOAD}
           >
             {labels.agentPlugins.installPluginUploadTab}
           </EuiTab>
@@ -177,7 +181,12 @@ export const InstallPluginFlyout: React.FC<InstallPluginFlyoutProps> = ({
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={onClose} disabled={isLoading}>
+            <EuiButtonEmpty
+              onClick={onClose}
+              disabled={isLoading}
+              data-ebt-element={AGENT_BUILDER_UI_EBT.element.CUSTOMIZE_PLUGINS}
+              data-ebt-action={AGENT_BUILDER_UI_EBT.action.uiChrome.INSTALL_FLYOUT_CANCEL}
+            >
               {labels.plugins.cancelButton}
             </EuiButtonEmpty>
           </EuiFlexItem>

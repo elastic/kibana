@@ -8,6 +8,7 @@
 import type { IconType } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common/telemetry';
 import { isEqual } from 'lodash';
 import type { FC, PropsWithChildren, ReactNode } from 'react';
 import React, { memo } from 'react';
@@ -52,7 +53,12 @@ export const ToolFormSection: FC<PropsWithChildren<ToolFormSectionProps>> = memo
             {content && <EuiFlexItem grow={0}>{content}</EuiFlexItem>}
             {documentation && (
               <EuiFlexItem>
-                <EuiLink href={documentation.href} target="_blank">
+                <EuiLink
+                  href={documentation.href}
+                  target="_blank"
+                  data-ebt-element={AGENT_BUILDER_UI_EBT.element.MANAGE_TOOLS_FORM}
+                  data-ebt-action={AGENT_BUILDER_UI_EBT.action.manageTools.DOCS_LEARN_MORE_TOOLS}
+                >
                   {i18nMessages.documentationLinkLabel} - {documentation.title}
                 </EuiLink>
               </EuiFlexItem>

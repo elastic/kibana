@@ -19,9 +19,9 @@ export interface ActiveItemRowProps {
   removeAriaLabel: string;
   readOnlyContent?: React.ReactNode;
   canEditAgent: boolean;
-  removeDataEbtElement?: string;
-  removeDataEbtAction?: string;
-  removeDataEbtDetail?: string;
+  removeDataEbtElement: string;
+  removeDataEbtAction: string;
+  removeDataEbtDetail: string;
 }
 
 const SHOW_ON_HOVER_CLASS = 'agentBuilder__agentActiveItemRow--showOnHover';
@@ -112,9 +112,9 @@ export const ActiveItemRow: React.FC<ActiveItemRowProps> = ({
               event.stopPropagation();
               onRemove();
             }}
-            {...(removeDataEbtElement != null ? { 'data-ebt-element': removeDataEbtElement } : {})}
-            {...(removeDataEbtAction != null ? { 'data-ebt-action': removeDataEbtAction } : {})}
-            {...(removeDataEbtDetail != null ? { 'data-ebt-detail': removeDataEbtDetail } : {})}
+            data-ebt-element={removeDataEbtElement}
+            data-ebt-action={removeDataEbtAction}
+            data-ebt-detail={removeDataEbtDetail}
           />
         </EuiFlexItem>
       )}

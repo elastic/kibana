@@ -24,12 +24,12 @@ describe('CustomizeLandingEmptyState', () => {
         description={<span>Description with copy.</span>}
         learnMoreHref="https://example.com/docs"
         primaryAction={
-          <EuiButton data-test-subj="testPrimary" fill>
+          <EuiButton data-test-subj="testPrimary" fill data-ebt-skip>
             Add skills
           </EuiButton>
         }
         secondaryAction={
-          <EuiButtonEmpty data-test-subj="testSecondary" href="/manage/skills">
+          <EuiButtonEmpty data-test-subj="testSecondary" href="/manage/skills" data-ebt-skip>
             Manage all skills
           </EuiButtonEmpty>
         }

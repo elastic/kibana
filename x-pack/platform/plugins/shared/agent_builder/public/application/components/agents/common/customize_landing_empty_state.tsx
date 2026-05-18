@@ -150,12 +150,8 @@ export const CustomizeLandingEmptyState: React.FC<CustomizeLandingEmptyStateProp
                     href={learnMoreHref}
                     target="_blank"
                     rel="noopener noreferrer"
-                    {...(learnMoreDataEbtElement != null
-                      ? { 'data-ebt-element': learnMoreDataEbtElement }
-                      : {})}
-                    {...(learnMoreDataEbtAction != null
-                      ? { 'data-ebt-action': learnMoreDataEbtAction }
-                      : {})}
+                    data-ebt-element={learnMoreDataEbtElement}
+                    data-ebt-action={learnMoreDataEbtAction}
                   >
                     {learnMoreLabel}
                   </EuiLink>
