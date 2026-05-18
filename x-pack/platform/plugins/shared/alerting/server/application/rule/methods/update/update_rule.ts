@@ -46,7 +46,7 @@ import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { updateRuleDataSchema } from './schemas';
 import { transformRuleAttributesToRuleDomain, transformRuleDomainToRule } from '../../transforms';
 import { ruleDomainSchema } from '../../schemas';
-import { logBulkRuleChanges } from '../common_utils/log_bulk_rule_changes';
+import { logRuleChanges } from '../common_utils/log_rule_changes';
 
 type ShouldIncrementRevision = (params?: RuleParams) => boolean;
 
@@ -380,7 +380,7 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
       },
     });
 
-    await logBulkRuleChanges({
+    await logRuleChanges({
       ruleSOs: [updatedRuleSavedObject],
       rulesClientContext: context,
       changesContext: {
