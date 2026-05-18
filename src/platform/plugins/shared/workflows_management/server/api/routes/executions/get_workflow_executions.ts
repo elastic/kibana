@@ -82,6 +82,11 @@ export function registerGetWorkflowExecutionsRoute({ router, api, spaces }: Rout
                   meta: { description: 'Filter by the user who triggered the execution.' },
                 })
               ),
+              concurrencyGroupKey: schema.maybe(
+                schema.string({
+                  meta: { description: 'Filter by evaluated concurrency group key.' },
+                })
+              ),
               omitStepRuns: schema.maybe(
                 schema.boolean({
                   meta: { description: 'Whether to exclude step-level execution data.' },
@@ -113,6 +118,7 @@ export function registerGetWorkflowExecutionsRoute({ router, api, spaces }: Rout
               : executedBy
               ? [executedBy]
               : undefined,
+            concurrencyGroupKey: request.query.concurrencyGroupKey,
             page: request.query.page,
             size: request.query.size,
             omitStepRuns: request.query.omitStepRuns,

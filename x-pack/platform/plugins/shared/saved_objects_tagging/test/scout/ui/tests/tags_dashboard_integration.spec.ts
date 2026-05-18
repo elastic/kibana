@@ -94,13 +94,13 @@ test.describe('Dashboard integration', { tag: tags.stateful.classic }, () => {
     await page.testSubj.fill('savedObjectTitle', 'dashboard-with-new-tag');
 
     await pageObjects.tagManagement.openCreateTagFromSelector();
-    await pageObjects.tagManagement.fillForm({
+    await pageObjects.tagManagement.tagModal.fillForm({
       name: 'my-new-tag',
       color: '#FFCC33',
       description: '',
     });
     await page.testSubj.click('createModalConfirmButton');
-    await pageObjects.tagManagement.getTagModalForm().waitFor({ state: 'hidden' });
+    await pageObjects.tagManagement.tagModal.form.waitFor({ state: 'hidden' });
 
     await page.testSubj.click('confirmSaveSavedObjectButton');
     await page.testSubj.locator('confirmSaveSavedObjectButton').waitFor({ state: 'hidden' });
