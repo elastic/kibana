@@ -84,7 +84,7 @@ export class TypedSearchService implements ITypedSearchService {
     options?: IDSLSearchOptions
   ): Promise<IDSLSearchResult> {
     const request = this.buildDSLRequest(params, options);
-    const response = await this.executeSearch(request, this.mapDSLOptions(options));
+    const response = await this.executeSearch(request, this.mapDSLOptions(options, params));
 
     const result: IDSLSearchResult = {
       rawResponse: response.rawResponse,
@@ -173,18 +173,18 @@ export class TypedSearchService implements ITypedSearchService {
 
     return {
       params: {
-        index: params.index,
+        index: typeof params.index === 'string' ? params.index : params.index.getIndexPattern(),
         body,
       },
     };
   }
 
-  private mapDSLOptions(options?: IDSLSearchOptions): ISearchOptions {
+  private mapDSLOptions(options?: IDSLSearchOptions, params?: IDSLSearchParams): ISearchOptions {
     return {
       ...this.mapBaseOptions(options),
       strategy: 'ese' as typeof ENHANCED_ES_SEARCH_STRATEGY,
       legacyHitsTotal: options?.legacyHitsTotal,
-      indexPattern: options?.dataView,
+      indexPattern: typeof params?.index === 'object' ? params.index : undefined,
     };
   }
 
@@ -286,7 +286,7 @@ export class TypedSearchService implements ITypedSearchService {
   private buildEQLRequest(params: IEQLSearchParams, options?: IEQLSearchOptions): IEsSearchRequest {
     return {
       params: {
-        index: params.index,
+        index: typeof params.index === 'string' ? params.index : params.index.getIndexPattern(),
         body: {
           query: params.query as any,
           filter: params.filter as any,
@@ -323,7 +323,6 @@ export class TypedSearchService implements ITypedSearchService {
           params: params.params,
           fetch_size: params.fetchSize,
           filter: params.filter,
-          format: options?.format,
           time_zone: options?.timeZone,
         } as any,
       },
