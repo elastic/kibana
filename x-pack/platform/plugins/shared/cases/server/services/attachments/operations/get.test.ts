@@ -20,7 +20,12 @@ import {
   CASE_ATTACHMENT_SAVED_OBJECT,
   CASE_COMMENT_SAVED_OBJECT,
 } from '../../../../common/constants';
-import { SECURITY_EVENT_ATTACHMENT_TYPE } from '../../../../common/constants/attachments';
+import {
+  OBSERVABILITY_ALERT_ATTACHMENT_TYPE,
+  SECURITY_ALERT_ATTACHMENT_TYPE,
+  SECURITY_EVENT_ATTACHMENT_TYPE,
+  STACK_ALERT_ATTACHMENT_TYPE,
+} from '../../../../common/constants/attachments';
 import { AttachmentType } from '../../../../common/types/domain';
 import type { ConfigType } from '../../../config';
 
@@ -610,6 +615,7 @@ describe('AttachmentService getter', () => {
                     reverse: {
                       comments: { doc_count: 3 },
                       events: { eventIds: { value: 2 } },
+                      alerts: { alertIds: { value: 0 } },
                     },
                   },
                 ],
@@ -662,6 +668,7 @@ describe('AttachmentService getter', () => {
                     reverse: {
                       comments: { doc_count: 0 },
                       events: { eventIds: { value: 4 } },
+                      alerts: { alertIds: { value: 0 } },
                     },
                   },
                 ],
@@ -730,6 +737,7 @@ describe('AttachmentService getter', () => {
                     reverse: {
                       comments: { doc_count: 1 },
                       events: { eventIds: { value: 2 } },
+                      alerts: { alertIds: { value: 0 } },
                     },
                   },
                   {
@@ -737,6 +745,7 @@ describe('AttachmentService getter', () => {
                     reverse: {
                       comments: { doc_count: 0 },
                       events: { eventIds: { value: 3 } },
+                      alerts: { alertIds: { value: 0 } },
                     },
                   },
                 ],
@@ -758,6 +767,73 @@ describe('AttachmentService getter', () => {
         userComments: 2,
         alerts: 0,
         events: 4,
+      });
+    });
+
+    it('sums unified alert ids across the per-type filter buckets', async () => {
+      const attachmentGetterWithFlagOn = createAttachmentGetter(true);
+      unsecuredSavedObjectsClient.find
+        .mockResolvedValueOnce({
+          saved_objects: [],
+          page: 1,
+          per_page: 0,
+          total: 0,
+          aggregations: {
+            references: {
+              caseIds: {
+                buckets: [
+                  {
+                    key: 'case-mixed-alerts',
+                    doc_count: 1,
+                    reverse: {
+                      comments: { doc_count: 0 },
+                      alerts: { value: 1 },
+                      events: { value: 0 },
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        })
+        .mockResolvedValueOnce({
+          saved_objects: [],
+          page: 1,
+          per_page: 0,
+          total: 0,
+          aggregations: {
+            refs: {
+              caseIds: {
+                buckets: [
+                  {
+                    key: 'case-mixed-alerts',
+                    reverse: {
+                      comments: { doc_count: 0 },
+                      events: { eventIds: { value: 0 } },
+                      alerts: {
+                        buckets: {
+                          [SECURITY_ALERT_ATTACHMENT_TYPE]: { alertIds: { value: 2 } },
+                          [OBSERVABILITY_ALERT_ATTACHMENT_TYPE]: { alertIds: { value: 1 } },
+                          [STACK_ALERT_ATTACHMENT_TYPE]: { alertIds: { value: 4 } },
+                        },
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        });
+
+      const stats = await attachmentGetterWithFlagOn.getCaseAttatchmentStats({
+        caseIds: ['case-mixed-alerts'],
+      });
+
+      expect(stats.get('case-mixed-alerts')).toEqual({
+        userComments: 0,
+        // 1 legacy + 2 + 1 + 4 unified across three alert types
+        alerts: 8,
+        events: 0,
       });
     });
 
@@ -802,6 +878,7 @@ describe('AttachmentService getter', () => {
                       comments: { doc_count: 0 },
                       // Cardinality should count unique values only.
                       events: { eventIds: { value: 1 } },
+                      alerts: { alertIds: { value: 0 } },
                     },
                   },
                 ],
