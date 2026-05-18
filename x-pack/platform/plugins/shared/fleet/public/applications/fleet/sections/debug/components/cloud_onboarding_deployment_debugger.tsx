@@ -151,7 +151,7 @@ export const CloudOnboardingDeploymentDebugger: React.FunctionComponent = () => 
     setDeploymentsLoading(true);
     const result = await sendRequest({
       method: 'get',
-      path: `/api/fleet/cloud_onboarding_deployments/connection/${connId}`,
+      path: `/api/fleet/cloud_onboarding_deployments/connector/${connId}`,
       version: API_VERSIONS.public.v1,
     });
     setDeploymentsLoading(false);

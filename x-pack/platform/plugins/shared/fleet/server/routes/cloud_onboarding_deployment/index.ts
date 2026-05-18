@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import path from 'path';
+
 import type { FleetAuthzRouter } from '../../services/security';
 
 import { API_VERSIONS, CLOUD_ONBOARDING_DEPLOYMENT_API_ROUTES } from '../../../common/constants';
@@ -62,6 +64,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () =>
+            path.join(__dirname, 'examples/post_cloud_onboarding_deployment.yaml'),
+        },
         validate: {
           request: CreateCloudOnboardingDeploymentRequestSchema,
           response: {
@@ -88,8 +94,8 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           requiredPrivileges: [
             {
               anyRequired: [
-                FLEET_API_PRIVILEGES.AGENT_POLICIES.ALL,
-                FLEET_API_PRIVILEGES.INTEGRATIONS.ALL,
+                FLEET_API_PRIVILEGES.AGENT_POLICIES.READ,
+                FLEET_API_PRIVILEGES.INTEGRATIONS.READ,
               ],
             },
           ],
@@ -108,6 +114,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () =>
+            path.join(__dirname, 'examples/get_cloud_onboarding_deployment.yaml'),
+        },
         validate: {
           request: GetCloudOnboardingDeploymentRequestSchema,
           response: {
@@ -134,8 +144,8 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           requiredPrivileges: [
             {
               anyRequired: [
-                FLEET_API_PRIVILEGES.AGENT_POLICIES.ALL,
-                FLEET_API_PRIVILEGES.INTEGRATIONS.ALL,
+                FLEET_API_PRIVILEGES.AGENT_POLICIES.READ,
+                FLEET_API_PRIVILEGES.INTEGRATIONS.READ,
               ],
             },
           ],
@@ -154,6 +164,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () =>
+            path.join(__dirname, 'examples/get_cloud_onboarding_deployments_by_connector_id.yaml'),
+        },
         validate: {
           request: GetCloudOnboardingDeploymentsByConnectorIdRequestSchema,
           response: {
@@ -200,6 +214,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () =>
+            path.join(__dirname, 'examples/put_cloud_onboarding_deployment.yaml'),
+        },
         validate: {
           request: UpdateCloudOnboardingDeploymentRequestSchema,
           response: {
@@ -246,6 +264,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
+        options: {
+          oasOperationObject: () =>
+            path.join(__dirname, 'examples/delete_cloud_onboarding_deployment.yaml'),
+        },
         validate: {
           request: DeleteCloudOnboardingDeploymentRequestSchema,
           response: {
