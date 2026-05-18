@@ -5,35 +5,48 @@
  * 2.0.
  */
 
-import { EuiButton, EuiFlexGroup, EuiLoadingSpinner, EuiText } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiFlexGroup,
+  EuiLoadingSpinner,
+  EuiPopover,
+  EuiText,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React, { useMemo } from 'react';
+import useToggle from 'react-use/lib/useToggle';
+import { i18n } from '@kbn/i18n';
 import { useListDetailPageStyles } from '../common/styles';
 import { useListConnectors } from '../../../hooks/tools/use_mcp_connectors';
 import { useConnectorsActions } from '../../../context/connectors_provider';
-import { useAgentContext } from '../../../context/agent_provider';
+import { useAgentBuilderAgentById } from '../../../hooks/agents/use_agent_by_id';
 import { labels } from '../../../utils/i18n';
 import { AgentBuilderConnectorsTable } from '../../connectors/table/connectors_table';
 import { useHasConnectorsAllPrivileges } from '../../../hooks/use_has_connectors_all_privileges';
 
-export const AgentConnectors = () => {
+interface AgentConnectorsProps {
+  agentId: string;
+}
+
+export const AgentConnectors = ({ agentId }: AgentConnectorsProps) => {
   const styles = useListDetailPageStyles();
-  const { agent, agentLoading, agentError } = useAgentContext();
+  const agentQuery = useAgentBuilderAgentById(agentId);
   const { openCreateFlyout } = useConnectorsActions();
+  const [isAddMenuOpen, toggleAddMenu] = useToggle(false);
+  const addConnectorPopoverId = useGeneratedHtmlId({ prefix: 'addConnectorPopover' });
   const hasAllPrivileges = useHasConnectorsAllPrivileges();
-  const {
-    connectors,
-    isLoading: isConnectorsLoading,
-    error: connectorsError,
-  } = useListConnectors({});
+  const connectorsQuery = useListConnectors({});
 
   const agentConnectors = useMemo(() => {
-    const connectorIds = agent?.configuration?.connector_ids;
-    if (connectorIds === undefined) return connectors;
-    return connectors.filter((c) => connectorIds.includes(c.id));
-  }, [connectors, agent?.configuration?.connector_ids]);
+    const connectorIds = agentQuery.agent?.configuration?.connector_ids;
+    if (connectorIds === undefined) return connectorsQuery.connectors;
+    return connectorsQuery.connectors.filter((c) => connectorIds.includes(c.id));
+  }, [connectorsQuery.connectors, agentQuery.agent?.configuration?.connector_ids]);
 
-  if (agentLoading) {
+  if (agentQuery.isLoading) {
     return (
       <EuiFlexGroup alignItems="center" justifyContent="center" css={styles.loadingSpinner}>
         <EuiLoadingSpinner size="xl" />
@@ -41,7 +54,7 @@ export const AgentConnectors = () => {
     );
   }
 
-  if (agentError || !agent) {
+  if (agentQuery.error || !agentQuery.agent) {
     return null;
   }
 
@@ -57,9 +70,53 @@ export const AgentConnectors = () => {
         rightSideItems={[
           ...(hasAllPrivileges
             ? [
-                <EuiButton key="create" fill iconType="plusInCircle" onClick={openCreateFlyout}>
-                  <EuiText size="s">{labels.connectors.createButton}</EuiText>
-                </EuiButton>,
+                <EuiPopover
+                  key="add-connector"
+                  button={
+                    <EuiButton
+                      fill
+                      iconType="arrowDown"
+                      iconSide="right"
+                      onClick={toggleAddMenu}
+                      data-test-subj="agentBuilderAddConnectorButton"
+                    >
+                      <EuiText size="s">
+                        {i18n.translate('xpack.agentBuilder.agentConnectors.addConnectorButton', {
+                          defaultMessage: 'Add connector',
+                        })}
+                      </EuiText>
+                    </EuiButton>
+                  }
+                  aria-labelledby={addConnectorPopoverId}
+                  isOpen={isAddMenuOpen}
+                  closePopover={() => toggleAddMenu(false)}
+                  anchorPosition="downRight"
+                  panelPaddingSize="none"
+                >
+                  <EuiContextMenuPanel
+                    items={[
+                      <EuiContextMenuItem key="add-existing" icon="link">
+                        {i18n.translate(
+                          'xpack.agentBuilder.agentConnectors.addExistingConnectorMenuItem',
+                          { defaultMessage: 'Add existing connector' }
+                        )}
+                      </EuiContextMenuItem>,
+                      <EuiContextMenuItem
+                        key="create-new"
+                        icon="plusInCircle"
+                        onClick={() => {
+                          toggleAddMenu(false);
+                          openCreateFlyout();
+                        }}
+                      >
+                        {i18n.translate(
+                          'xpack.agentBuilder.agentConnectors.createNewConnectorMenuItem',
+                          { defaultMessage: 'Create new connector' }
+                        )}
+                      </EuiContextMenuItem>,
+                    ]}
+                  />
+                </EuiPopover>,
               ]
             : []),
         ]}
@@ -67,8 +124,8 @@ export const AgentConnectors = () => {
       <KibanaPageTemplate.Section>
         <AgentBuilderConnectorsTable
           connectors={agentConnectors}
-          isLoading={isConnectorsLoading}
-          error={connectorsError}
+          isLoading={connectorsQuery.isLoading}
+          error={connectorsQuery.error}
         />
       </KibanaPageTemplate.Section>
     </KibanaPageTemplate>

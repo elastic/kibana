@@ -6,15 +6,19 @@
  */
 
 import React, { useMemo } from 'react';
-import { AgentProvider, useAgentContext } from '../context/agent_provider';
+import { useParams } from 'react-router-dom';
 import { ConnectorsProvider } from '../context/connectors_provider';
 import { AgentConnectors } from '../components/agents/connectors/agent_connectors';
+import { useAgentBuilderAgentById } from '../hooks/agents/use_agent_by_id';
+import { useAssignConnectorToAgent } from '../hooks/connectors/use_assign_connector_to_agent';
 import { useBreadcrumb } from '../hooks/use_breadcrumbs';
 import { appPaths } from '../utils/app_paths';
 import { labels } from '../utils/i18n';
 
-const AgentConnectorsPageContent = () => {
-  const { agent, agentId, assignConnectorToAgent } = useAgentContext();
+export const AgentBuilderAgentConnectorsPage: React.FC = () => {
+  const { agentId } = useParams<{ agentId: string }>();
+  const { agent } = useAgentBuilderAgentById(agentId);
+  const { assignConnectorToAgent } = useAssignConnectorToAgent(agentId);
 
   const breadcrumbs = useMemo(
     () => [
@@ -28,13 +32,7 @@ const AgentConnectorsPageContent = () => {
 
   return (
     <ConnectorsProvider onConnectorCreated={assignConnectorToAgent}>
-      <AgentConnectors />
+      <AgentConnectors agentId={agentId} />
     </ConnectorsProvider>
   );
 };
-
-export const AgentBuilderAgentConnectorsPage: React.FC = () => (
-  <AgentProvider>
-    <AgentConnectorsPageContent />
-  </AgentProvider>
-);
