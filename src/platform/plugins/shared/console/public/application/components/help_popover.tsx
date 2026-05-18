@@ -131,7 +131,7 @@ export const HelpPopover = ({ button, isOpen, closePopover, resetTour }: HelpPop
         </EuiText>
       </EuiPanel>
 
-      <EuiListGroup listItems={listItems} color="primary" size="s" />
+      <EuiListGroup listItems={listItems} color="primary" />
     </EuiPopover>
   );
 };
