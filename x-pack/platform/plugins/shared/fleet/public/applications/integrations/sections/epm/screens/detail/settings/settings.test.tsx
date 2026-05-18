@@ -27,6 +27,13 @@ jest.mock('../../../../../hooks', () => {
           addSuccess: jest.fn(),
         },
       },
+      docLinks: {
+        links: {
+          fleet: {
+            datastreams: 'https://www.elastic.co/docs/reference/fleet/data-streams',
+          },
+        },
+      },
     }),
     useUpgradePackagePolicyDryRunQuery: jest.fn().mockReturnValue({ data: null }),
     useUpdatePackageMutation: jest.fn().mockReturnValue({ mutate: jest.fn() }),
