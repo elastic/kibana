@@ -15,6 +15,11 @@ import {
   rawRuleSchemaV6,
   rawRuleSchemaV7,
   rawRuleSchemaV8,
+  rawRuleSchemaV9,
+  rawRuleSchemaV10,
+  rawRuleSchemaV11,
+  rawRuleSchemaV12,
+  rawRuleSchemaV13,
 } from '../schemas/raw_rule';
 
 export const ruleModelVersions: SavedObjectsModelVersionMap = {
@@ -102,6 +107,82 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
     schemas: {
       forwardCompatibility: rawRuleSchemaV8.extends({}, { unknowns: 'ignore' }),
       create: rawRuleSchemaV8,
+    },
+  },
+  '9': {
+    changes: [
+      {
+        type: 'mappings_addition',
+        addedMappings: {
+          uiamApiKey: {
+            type: 'binary',
+          },
+        },
+      },
+    ],
+    schemas: {
+      forwardCompatibility: rawRuleSchemaV9.extends({}, { unknowns: 'ignore' }),
+      create: rawRuleSchemaV9,
+    },
+  },
+  '10': {
+    changes: [],
+    schemas: {
+      forwardCompatibility: rawRuleSchemaV10.extends({}, { unknowns: 'ignore' }),
+      create: rawRuleSchemaV10,
+    },
+  },
+  '11': {
+    changes: [],
+    schemas: {
+      forwardCompatibility: rawRuleSchemaV11.extends({}, { unknowns: 'ignore' }),
+      create: rawRuleSchemaV11,
+    },
+  },
+  '12': {
+    changes: [
+      {
+        type: 'mappings_addition',
+        addedMappings: {
+          snoozedInstances: {
+            type: 'nested',
+            properties: {
+              instanceId: {
+                type: 'keyword',
+              },
+              snoozeSnapshot: {
+                type: 'object',
+                dynamic: false,
+              },
+            },
+          },
+        },
+      },
+    ],
+    schemas: {
+      forwardCompatibility: rawRuleSchemaV12.extends({}, { unknowns: 'ignore' }),
+      create: rawRuleSchemaV12,
+    },
+  },
+  '13': {
+    changes: [
+      {
+        type: 'mappings_addition',
+        addedMappings: {
+          actions: {
+            properties: {
+              params: {
+                type: 'flattened',
+                ignore_above: 4096,
+              },
+            },
+          },
+        },
+      },
+    ],
+    schemas: {
+      forwardCompatibility: rawRuleSchemaV13.extends({}, { unknowns: 'ignore' }),
+      create: rawRuleSchemaV13,
     },
   },
 };
