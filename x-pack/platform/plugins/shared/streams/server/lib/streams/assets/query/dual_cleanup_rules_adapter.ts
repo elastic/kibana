@@ -6,7 +6,11 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { CreateRuleBody, IRulesManagementClient, UpdateRuleBody } from './rules_management_client';
+import type {
+  CreateRuleBody,
+  IRulesManagementClient,
+  UpdateRuleBody,
+} from './rules_management_client';
 
 /**
  * Routes writes to the primary client and cleans up the legacy client on every operation.
@@ -44,7 +48,9 @@ export class DualCleanupRulesAdapter implements IRulesManagementClient {
 
     if (legacyResult.status === 'rejected') {
       this.logger.warn(
-        `Legacy rule cleanup failed for ${ids.length} rule(s) — orphaned rules may continue running: ${
+        `Legacy rule cleanup failed for ${
+          ids.length
+        } rule(s) — orphaned rules may continue running: ${
           legacyResult.reason instanceof Error
             ? legacyResult.reason.message
             : String(legacyResult.reason)

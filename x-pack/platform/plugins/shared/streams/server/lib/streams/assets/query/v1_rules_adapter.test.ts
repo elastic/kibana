@@ -15,7 +15,9 @@ import {
   type UpdateRuleBody,
 } from './rules_management_client';
 
-function makeRulesClient(): jest.Mocked<Pick<RulesClient, 'create' | 'update' | 'bulkDeleteRules'>> {
+function makeRulesClient(): jest.Mocked<
+  Pick<RulesClient, 'create' | 'update' | 'bulkDeleteRules'>
+> {
   return {
     create: jest.fn().mockResolvedValue({}),
     update: jest.fn().mockResolvedValue({}),
@@ -106,7 +108,10 @@ describe('V1RulesAdapter', () => {
 
       expect(rc.update).toHaveBeenCalledTimes(1);
       expect(rc.create).toHaveBeenCalledTimes(1);
-      const createCall = rc.create.mock.calls[0][0] as { data: Record<string, unknown>; options: { id: string } };
+      const createCall = rc.create.mock.calls[0][0] as {
+        data: Record<string, unknown>;
+        options: { id: string };
+      };
       expect(createCall.options.id).toBe('rule-id-2');
       expect(createCall.data.name).toBe(updateBody.name);
       expect(createCall.data.consumer).toBe(STREAMS_RULE_CONSUMER);
