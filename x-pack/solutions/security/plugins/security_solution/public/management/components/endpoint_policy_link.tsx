@@ -97,7 +97,6 @@ export const EndpointPolicyLink = memo<EndpointPolicyLinkProps>(
       );
 
       return displayAsLink ? (
-        // eslint-disable-next-line @elastic/eui/href-or-on-click
         <EuiLink
           href={toRouteUrl}
           onClick={clickHandler}
