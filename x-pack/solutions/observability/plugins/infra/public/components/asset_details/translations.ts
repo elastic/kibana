@@ -11,6 +11,15 @@ export const NOT_AVAILABLE_LABEL = i18n.translate('xpack.infra.assetDetails.notA
   defaultMessage: 'N/A',
 });
 
+export const METRIC_NOT_AVAILABLE_LABEL = i18n.translate(
+  'xpack.infra.hostsTable.metricNotAvailableLabel',
+  {
+    defaultMessage: 'N/A',
+    description:
+      'Neutral label shown in the hosts table when a specific metric is not available for a host that otherwise reports system metrics (e.g. normalized load on Windows)',
+  }
+);
+
 export const HOST_METRIC_GROUP_TITLES = {
   cpu: i18n.translate('xpack.infra.metricsGroup.cpu', {
     defaultMessage: 'CPU',
