@@ -185,12 +185,7 @@ export const VisualizationsSection = memo(
           showIcon={false}
         />
         {hasGraphData && (
-          <GraphPreviewContainer
-            disableNavigation={false}
-            hit={hit}
-            onShowGraph={onShowGraph}
-            showIcon={false}
-          />
+          <GraphPreviewContainer hit={hit} onShowGraph={onShowGraph} showIcon={false} />
         )}
       </ExpandableSection>
     );

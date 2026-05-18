@@ -6,7 +6,6 @@
  */
 
 import React, { memo, useCallback } from 'react';
-import { TableId } from '@kbn/securitysolution-data-table';
 import { FLYOUT_STORAGE_KEYS } from '../../../../../flyout_v2/document/main/constants/local_storage';
 import { useExpandSection } from '../../../../../flyout_v2/shared/hooks/use_expand_section';
 import { ExpandableSection } from '../../../../../flyout_v2/shared/components/expandable_section';
@@ -59,7 +58,6 @@ export const VisualizationsSection = memo(
             <EntityGraphPreviewContainer
               entityId={entityId}
               showIcon={!isPreviewMode}
-              disableNavigation={isPreviewMode || scopeId === TableId.rulePreview}
               onShowGraph={handleOpenGraphViewTab}
             />
           </ExpandableSection>

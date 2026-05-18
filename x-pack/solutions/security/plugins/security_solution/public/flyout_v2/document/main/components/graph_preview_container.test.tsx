@@ -20,7 +20,6 @@ import {
   EXPANDABLE_PANEL_CONTENT_TEST_ID,
   EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID,
   EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID,
-  EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID,
   GRAPH_PREVIEW_TEST_ID,
 } from '../../../shared/components/test_ids';
 import { useGraphPreview } from '../hooks/use_graph_preview';
@@ -57,13 +56,7 @@ const renderContainer = (
 ) =>
   render(
     <TestProviders>
-      <GraphPreviewContainer
-        hit={mockHit}
-        onShowGraph={mockOnShowGraph}
-        showIcon
-        disableNavigation={false}
-        {...overrides}
-      />
+      <GraphPreviewContainer hit={mockHit} onShowGraph={mockOnShowGraph} showIcon {...overrides} />
     </TestProviders>
   );
 
@@ -111,22 +104,6 @@ describe('<GraphPreviewContainer />', () => {
     expect(await findByTestId(GRAPH_PREVIEW_TEST_ID)).toBeInTheDocument();
     getByTestId(EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(GRAPH_PREVIEW_TEST_ID)).click();
     expect(mockOnShowGraph).toHaveBeenCalled();
-  });
-
-  it('hides the header link when disableNavigation is true', async () => {
-    mockUseGraphPreview.mockReturnValue(previewAvailable);
-
-    const { findByTestId, getByTestId, queryByTestId } = renderContainer({
-      disableNavigation: true,
-    });
-
-    expect(await findByTestId(GRAPH_PREVIEW_TEST_ID)).toBeInTheDocument();
-    expect(
-      queryByTestId(EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(GRAPH_PREVIEW_TEST_ID))
-    ).not.toBeInTheDocument();
-    expect(
-      getByTestId(EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID(GRAPH_PREVIEW_TEST_ID))
-    ).toBeInTheDocument();
   });
 
   it('hides the header link when onShowGraph is not provided', async () => {
