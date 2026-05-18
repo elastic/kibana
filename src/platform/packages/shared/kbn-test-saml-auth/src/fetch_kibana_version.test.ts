@@ -7,12 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import axios from 'axios';
 import { ToolingLog } from '@kbn/tooling-log';
 import { fetchKibanaVersionHeaderString } from './fetch_kibana_version';
 
-jest.mock('axios');
-const mockedAxios = axios as jest.Mocked<typeof axios>;
+const mockedFetch = jest.spyOn(global, 'fetch');
 
 describe('fetchKibanaVersionHeaderString', () => {
   const log = new ToolingLog();
@@ -22,11 +20,11 @@ describe('fetchKibanaVersionHeaderString', () => {
   });
 
   test('returns version.number and appends -SNAPSHOT when build_snapshot is true', async () => {
-    mockedAxios.request.mockResolvedValue({
-      data: {
-        version: { number: '9.0.0', build_snapshot: true },
-      },
-    });
+    mockedFetch.mockResolvedValue(
+      new Response(JSON.stringify({ version: { number: '9.0.0', build_snapshot: true } }), {
+        status: 200,
+      })
+    );
 
     const v = await fetchKibanaVersionHeaderString(
       'https://localhost:5601',
@@ -36,36 +34,33 @@ describe('fetchKibanaVersionHeaderString', () => {
     );
 
     expect(v).toBe('9.0.0-SNAPSHOT');
-    expect(mockedAxios.request).toHaveBeenCalledTimes(1);
-    expect(mockedAxios.request).toHaveBeenCalledWith(
-      expect.objectContaining({
-        method: 'GET',
-        auth: { username: 'elastic', password: 'changeme' },
-        validateStatus: expect.any(Function),
-      })
-    );
-    const callUrl = mockedAxios.request.mock.calls[0][0].url as string;
-    expect(callUrl).toContain('/api/status');
-    expect(callUrl).toContain('v8format=true');
+    expect(mockedFetch).toHaveBeenCalledTimes(1);
+    const [callUrl, callInit] = mockedFetch.mock.calls[0];
+    expect(callInit?.method).toBe('GET');
+    const expectedAuth = `Basic ${Buffer.from('elastic:changeme').toString('base64')}`;
+    expect((callInit?.headers as Record<string, string>).Authorization).toBe(expectedAuth);
+    const callUrlString = callUrl instanceof URL ? callUrl.toString() : String(callUrl);
+    expect(callUrlString).toContain('/api/status');
+    expect(callUrlString).toContain('v8format=true');
   });
 
   test('throws when version is missing from response body', async () => {
-    mockedAxios.request.mockResolvedValue({ data: {} });
+    mockedFetch.mockResolvedValue(new Response('{}', { status: 200 }));
 
     await expect(
       fetchKibanaVersionHeaderString('http://localhost:5601', 'u', 'p', log)
     ).rejects.toThrow(/Unable to get version from Kibana/);
 
-    expect(mockedAxios.request).toHaveBeenCalledTimes(1);
+    expect(mockedFetch).toHaveBeenCalledTimes(1);
   });
 
-  test('propagates axios errors after a single attempt', async () => {
-    mockedAxios.request.mockRejectedValue(new Error('network down'));
+  test('propagates fetch errors after a single attempt', async () => {
+    mockedFetch.mockRejectedValue(new Error('network down'));
 
     await expect(
       fetchKibanaVersionHeaderString('http://localhost:5601', 'u', 'p', log)
     ).rejects.toThrow('network down');
 
-    expect(mockedAxios.request).toHaveBeenCalledTimes(1);
+    expect(mockedFetch).toHaveBeenCalledTimes(1);
   });
 });
