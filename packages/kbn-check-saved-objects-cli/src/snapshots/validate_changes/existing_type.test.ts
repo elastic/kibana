@@ -327,6 +327,64 @@ describe('validateChangesExistingType', () => {
       expect(log).toHaveBeenCalledWith(expect.stringContaining('WARNING'));
     });
 
+    it('should throw when the create schema is removed from an existing model version', () => {
+      const from = loadSnapshot('schema_only_change_in_latest_model_version.json');
+      const typeFrom = from.typeDefinitions.task;
+      const typeTo = {
+        ...typeFrom,
+        modelVersions: typeFrom.modelVersions.map((mv) => {
+          if (mv.version !== '3') return mv;
+          return {
+            ...mv,
+            modelVersionHash: 'changed-hash',
+            schemas: {
+              forwardCompatibility: mv.schemas.forwardCompatibility,
+              create: false as const,
+            },
+          };
+        }),
+      };
+      const registeredType: SavedObjectsType = {
+        name: 'task',
+        namespaceType: 'agnostic',
+        hidden: false,
+        mappings: { dynamic: false, properties: {} },
+        modelVersions: {},
+      };
+      expect(() =>
+        validateChangesExistingType({ from: typeFrom, to: typeTo, registeredType, log })
+      ).toThrowError(/Breaking schema changes.*create schema removed from model version/s);
+    });
+
+    it('should throw when the forwardCompatibility schema is removed from an existing model version', () => {
+      const from = loadSnapshot('schema_only_change_in_latest_model_version.json');
+      const typeFrom = from.typeDefinitions.task;
+      const typeTo = {
+        ...typeFrom,
+        modelVersions: typeFrom.modelVersions.map((mv) => {
+          if (mv.version !== '3') return mv;
+          return {
+            ...mv,
+            modelVersionHash: 'changed-hash',
+            schemas: {
+              create: mv.schemas.create,
+              forwardCompatibility: false as const,
+            },
+          };
+        }),
+      };
+      const registeredType: SavedObjectsType = {
+        name: 'task',
+        namespaceType: 'agnostic',
+        hidden: false,
+        mappings: { dynamic: false, properties: {} },
+        modelVersions: {},
+      };
+      expect(() =>
+        validateChangesExistingType({ from: typeFrom, to: typeTo, registeredType, log })
+      ).toThrowError(/Breaking schema changes.*forwardCompatibility schema removed from model version/s);
+    });
+
     it('should not flag an unchanged function-based schema when comparing against a legacy hash baseline', () => {
       // Old snapshots stored function-based forwardCompatibility schemas as SHA256(fn.toString()).
       // The new format stores { __fn: fn.toString() }. Verify no false positive is raised.

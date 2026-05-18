@@ -297,7 +297,15 @@ function diffSchemas(
   after: false | Record<string, unknown>,
   schemaType: 'create' | 'forwardCompatibility'
 ): SchemaDiffResult {
-  if (before === false || after === false) {
+  if (before === false && after === false) {
+    return { breaking: [], warnings: [] };
+  }
+  if (before !== false && after === false) {
+    // Schema existed but was removed — breaking, since existing callers can no longer rely on it.
+    return { breaking: [`${schemaType} schema removed from model version`], warnings: [] };
+  }
+  if (before === false) {
+    // Schema added to an existing model version — non-breaking (was previously unenforced).
     return { breaking: [], warnings: [] };
   }
 
@@ -419,6 +427,10 @@ function resolveSchemaType(schema: SchemaNode): string {
 
 function resolvePresence(schema: SchemaNode): 'required' | 'optional' {
   const flags = schema.flags as Record<string, unknown> | undefined;
+  // In @kbn/config-schema, `Type.validate()` is called with `{ presence: 'required' }` as a
+  // global Joi option, which means fields are required by default unless explicitly wrapped
+  // with `schema.maybe()` (which sets `flags.presence = 'optional'`). Therefore a field with
+  // no `flags.presence` in the describe() output IS required at runtime.
   return flags?.presence === 'optional' ? 'optional' : 'required';
 }
 
@@ -449,12 +461,14 @@ export function validateNewMappingsInModelVersion(
 
   const undeclaredFields = newMappingFields.filter((field) => !declaredMappings.has(field));
   if (undeclaredFields.length > 0) {
-    throw new Error(
-      `❌ The SO type '${name}' has new mapping fields that are not declared in model version '${
-        newModelVersion.version
-      }': ${undeclaredFields.join(', ')}. ` +
-        `All new mapping fields must be declared via 'mappings_addition' changes in the corresponding model version.`
-    );
+    throw new SavedObjectsCheckError({
+      ruleId: RULE_IDS.EXISTING_TYPE_NEW_MAPPINGS_NOT_IN_MODEL_VERSION,
+      severity: 'error',
+      typeName: name,
+      message: `The SO type '${name}' has new mapping fields that are not declared in model version '${newModelVersion.version}': ${undeclaredFields.join(', ')}.`,
+      fixHint: `Add the missing fields to the 'mappings_addition' change in model version '${newModelVersion.version}'.`,
+      docsAnchor: '#defining-model-versions',
+    });
   }
 }
 
@@ -487,12 +501,14 @@ export function validateIgnoreAboveExistingType(
   }
 
   if (newlyIntroduced.length > 0) {
-    throw new Error(
-      `❌ The SO type '${name}' has newly introduced 'keyword' or 'flattened' mapping fields without 'ignore_above': ${newlyIntroduced.join(
-        ', '
-      )}. ` +
-        `Add 'ignore_above' to prevent Elasticsearch from silently dropping strings that exceed the limit.`
-    );
+    throw new SavedObjectsCheckError({
+      ruleId: RULE_IDS.EXISTING_TYPE_KEYWORD_MISSING_IGNORE_ABOVE,
+      severity: 'error',
+      typeName: name,
+      message: `The SO type '${name}' has newly introduced 'keyword' or 'flattened' mapping fields without 'ignore_above': ${newlyIntroduced.join(', ')}.`,
+      fixHint: `Add 'ignore_above: 1024' (or another appropriate limit) to each affected field to prevent Elasticsearch from silently dropping strings that exceed the limit.`,
+      docsAnchor: '#defining-model-versions',
+    });
   }
 }
 
@@ -542,10 +558,13 @@ export function validateNameTitleFieldTypesExistingType(
   }
 
   if (newlyIntroduced.length > 0) {
-    throw new Error(
-      `❌ The SO type '${name}' has 'name' or 'title' fields with incorrect types: ${newlyIntroduced
-        .map(({ description }) => description)
-        .join(', ')}. ` + `These fields must be of type 'text' for Search API compatibility.`
-    );
+    throw new SavedObjectsCheckError({
+      ruleId: RULE_IDS.EXISTING_TYPE_INVALID_NAME_TITLE_FIELD_TYPE,
+      severity: 'error',
+      typeName: name,
+      message: `The SO type '${name}' has 'name' or 'title' fields with incorrect types: ${newlyIntroduced.map(({ description }) => description).join(', ')}.`,
+      fixHint: `Change the field mapping type to 'text'. If the field already exists in production, this requires a reindex.`,
+      docsAnchor: '#defining-model-versions',
+    });
   }
 }

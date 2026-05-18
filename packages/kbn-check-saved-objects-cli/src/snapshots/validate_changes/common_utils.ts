@@ -208,11 +208,14 @@ export function validateAllMappingsInModelVersion(
   });
 
   if (undeclaredFields.length > 0) {
-    throw new Error(
-      `❌ The SO type '${name}' has mapping fields not present in the latest model version schema: ${undeclaredFields.join(
-        ', '
-      )}. ` + `All mapping fields must be declared in the latest model version's 'create' schema.`
-    );
+    throw new SavedObjectsCheckError({
+      ruleId: RULE_IDS.MODEL_VERSION_MAPPINGS_NOT_IN_SCHEMA,
+      severity: 'error',
+      typeName: name,
+      message: `The SO type '${name}' has mapping fields not present in the latest model version schema: ${undeclaredFields.join(', ')}.`,
+      fixHint: `Add the missing fields to the 'create' schema of the latest model version.`,
+      docsAnchor: '#defining-model-versions',
+    });
   }
 }
 
@@ -222,21 +225,25 @@ function throwIfIndexOrEnabledFalse(
   fieldsWithEnabledFalse: string[]
 ): void {
   if (fieldsWithIndexFalse.length > 0) {
-    throw new Error(
-      `❌ The SO type '${name}' has new mapping fields with 'index: false': ${fieldsWithIndexFalse.join(
-        ', '
-      )}. ` +
-        `This option cannot be updated without reindexing. Use 'dynamic: false' instead or omit the mapping.`
-    );
+    throw new SavedObjectsCheckError({
+      ruleId: RULE_IDS.MODEL_VERSION_MAPPING_INDEX_FALSE,
+      severity: 'error',
+      typeName: name,
+      message: `The SO type '${name}' has new mapping fields with 'index: false': ${fieldsWithIndexFalse.join(', ')}.`,
+      fixHint: `Use 'dynamic: false' instead or omit the mapping entirely. The 'index: false' option cannot be updated without reindexing.`,
+      docsAnchor: '#defining-model-versions',
+    });
   }
 
   if (fieldsWithEnabledFalse.length > 0) {
-    throw new Error(
-      `❌ The SO type '${name}' has new mapping fields with 'enabled: false': ${fieldsWithEnabledFalse.join(
-        ', '
-      )}. ` +
-        `This option cannot be updated without reindexing. Use 'dynamic: false' instead or omit the mapping.`
-    );
+    throw new SavedObjectsCheckError({
+      ruleId: RULE_IDS.MODEL_VERSION_MAPPING_ENABLED_FALSE,
+      severity: 'error',
+      typeName: name,
+      message: `The SO type '${name}' has new mapping fields with 'enabled: false': ${fieldsWithEnabledFalse.join(', ')}.`,
+      fixHint: `Use 'dynamic: false' instead or omit the mapping entirely. The 'enabled: false' option cannot be updated without reindexing.`,
+      docsAnchor: '#defining-model-versions',
+    });
   }
 }
 
