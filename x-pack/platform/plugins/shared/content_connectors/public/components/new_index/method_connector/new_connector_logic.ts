@@ -10,7 +10,8 @@ import { kea } from 'kea';
 
 import type { Connector, ConnectorDefinition } from '@kbn/search-connectors';
 
-import type { HttpSetup, NavigateToUrlOptions } from '@kbn/core/public';
+import type { ApplicationStart, HttpSetup } from '@kbn/core/public';
+import { MANAGEMENT_APP_ID } from '@kbn/deeplinks-management/constants';
 import type {
   AddConnectorApiLogicActions,
   AddConnectorApiLogicArgs,
@@ -91,7 +92,7 @@ type NewConnectorActions = {
 
 export interface NewConnectorLogicProps {
   http?: HttpSetup;
-  navigateToUrl?: (url: string, options?: NavigateToUrlOptions) => Promise<void>;
+  navigateToApp?: ApplicationStart['navigateToApp'];
 }
 
 export const NewConnectorLogic = kea<
@@ -99,7 +100,7 @@ export const NewConnectorLogic = kea<
 >({
   key: (props) => ({
     http: props.http,
-    navigateToUrl: props.navigateToUrl,
+    navigateToApp: props.navigateToApp,
   }),
   actions: {
     createConnector: ({
@@ -139,16 +140,13 @@ export const NewConnectorLogic = kea<
   },
   listeners: ({ actions, values, props }) => ({
     connectorCreated: ({ id, uiFlags }) => {
-      if (uiFlags?.shouldNavigateToConnectorAfterCreate && props.navigateToUrl) {
-        props.navigateToUrl(
-          generateEncodedPath(
-            `app/management/data/content_connectors${CONNECTOR_DETAIL_TAB_PATH}`,
-            {
-              connectorId: id,
-              tabId: SearchIndexTabId.CONFIGURATION,
-            }
-          )
-        );
+      if (uiFlags?.shouldNavigateToConnectorAfterCreate && props.navigateToApp) {
+        props.navigateToApp(MANAGEMENT_APP_ID, {
+          path: `/data/content_connectors${generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
+            connectorId: id,
+            tabId: SearchIndexTabId.CONFIGURATION,
+          })}`,
+        });
       } else {
         actions.fetchConnector({ connectorId: id, http: props.http });
         if (!uiFlags || uiFlags.shouldGenerateAfterCreate) {
