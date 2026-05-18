@@ -9,6 +9,7 @@
 
 import type { DatatableVisualizationState, FormBasedLayer, TextBasedLayer } from '@kbn/lens-common';
 import { parseTransposeId, getTransposeId, TRANSPOSE_SEPARATOR } from '@kbn/transpose-utils';
+import { uniqBy } from 'lodash';
 import {
   DEFAULT_ROW_HEIGHT_LINES,
   DEFAULT_HEADER_ROW_HEIGHT_LINES,
@@ -77,20 +78,8 @@ function sortByColumnType(a: DatatableColumn, b: DatatableColumn): number {
 }
 
 /**
- * Remove duplicate visualization columns by columnId.
- * There is one datatable panel with 2 columns with the same columnId.
+ * Classify a visualization column as a metric, split_metric_by, or row.
  */
-function dedupColumnsByColumnId(columns: DatatableColumn[]): DatatableColumn[] {
-  const seen = new Set<string>();
-  return columns.filter((col) => {
-    if (seen.has(col.columnId)) {
-      return false;
-    }
-    seen.add(col.columnId);
-    return true;
-  });
-}
-
 function classifyVisualizationColumn(
   isMetric: boolean,
   isTransposed: boolean | undefined
@@ -383,9 +372,10 @@ export const normalizeDatatable: AttributesNormalizer<DatatableAttributes> = (at
     },
   };
 
+  // Remove duplicate visualization columns by columnId.
   const deduplicateColumns: NormalizerConfig<DatatableAttributes> = {
     original: (attrs) => {
-      attrs.state.visualization.columns = dedupColumnsByColumnId(attrs.state.visualization.columns);
+      attrs.state.visualization.columns = uniqBy(attrs.state.visualization.columns, 'columnId');
       return attrs;
     },
   };
