@@ -92,6 +92,11 @@ export function useFetchMetricsData({
               filters: fetchParams.filters ?? [],
               variables: fetchParams.esqlVariables,
               uiSettings: services.uiSettings,
+              // Forwarded onto executionContext.meta so the server-side APM
+              // transaction picks it up as kibana_meta_profile_id via the
+              // pipeline added in #263201. Keeps request and error telemetry
+              // filterable by the same profile_id.
+              profileId,
             });
 
             return {
@@ -128,9 +133,12 @@ export function useFetchMetricsData({
         // Don't report cancellations: signal.aborted covers the local AbortController
         // path; isSuppressedFetchError covers AbortErrors thrown from the data plugin.
         if (!signal.aborted && !isSuppressedFetchError(err) && err instanceof Error) {
-          // Tag with profile_id so failures can be filtered by the data source
-          // profile that rendered the grid (same id used in the Lens success-path
-          // executionContext.meta.profile_id), rather than a synthesized constant.
+          // Tag the browser-side APM error with the same profile_id that the
+          // request transaction carries via executionContext.meta (forwarded
+          // to executeEsqlQuery above). Server-side propagation tags the
+          // transaction automatically; this explicit label ensures the
+          // browser RUM error document is filterable by the same dimension
+          // when no RUM transaction is active to inherit labels from.
           apm.captureError(err, { labels: { profile_id: profileId } });
         }
         throw err;

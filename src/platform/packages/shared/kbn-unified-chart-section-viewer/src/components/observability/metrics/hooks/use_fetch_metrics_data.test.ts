@@ -658,6 +658,19 @@ describe('useFetchMetricsData', () => {
       );
     });
 
+    it('forwards profileId to executeEsqlQuery so the request executionContext carries it as meta', async () => {
+      const params = createDefaultParams();
+      const { result } = renderHook(() => useFetchMetricsData(params));
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      expect(mockExecuteEsqlQuery).toHaveBeenCalledWith(
+        expect.objectContaining({ profileId: 'test-profile-id' })
+      );
+    });
+
     it('reports the error to APM when fetch rejects with a generic Error', async () => {
       const fetchError = new Error('Network error');
       mockExecuteEsqlQuery.mockRejectedValue(fetchError);

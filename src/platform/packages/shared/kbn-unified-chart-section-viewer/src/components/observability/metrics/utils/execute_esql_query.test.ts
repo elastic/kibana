@@ -112,6 +112,38 @@ describe('executeEsqlQuery', () => {
     );
   });
 
+  it('forwards profileId onto executionContext.meta so the server-side APM transaction is tagged via the standardized pipeline', async () => {
+    await executeEsqlQuery({
+      esqlQuery: 'TS metrics-* | METRICS_INFO',
+      search: mockSearch,
+      dataView: dataViewWithAtTimefieldMock,
+      uiSettings: mockUiSettings,
+      profileId: 'metrics-data-source-profile',
+    });
+
+    expect(mockGetESQLResults).toHaveBeenCalledWith(
+      expect.objectContaining({
+        executionContext: expect.objectContaining({
+          page: 'metrics_fetch_metrics_info',
+          meta: { profile_id: 'metrics-data-source-profile' },
+        }),
+      })
+    );
+  });
+
+  it('omits executionContext.meta when no profileId is provided', async () => {
+    await executeEsqlQuery({
+      esqlQuery: 'TS metrics-* | METRICS_INFO',
+      search: mockSearch,
+      dataView: dataViewWithAtTimefieldMock,
+      uiSettings: mockUiSettings,
+    });
+
+    const lastCall = mockGetESQLResults.mock.calls[mockGetESQLResults.mock.calls.length - 1]?.[0];
+    expect(lastCall?.executionContext).toBeDefined();
+    expect(lastCall?.executionContext).not.toHaveProperty('meta');
+  });
+
   it('returns the response from getESQLResults', async () => {
     const result = await executeEsqlQuery({
       esqlQuery: 'TS metrics-* | METRICS_INFO',

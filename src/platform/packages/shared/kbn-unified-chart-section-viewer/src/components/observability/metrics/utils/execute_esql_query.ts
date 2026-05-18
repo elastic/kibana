@@ -32,6 +32,15 @@ export interface ExecuteEsqlParams {
   filters?: Filter[];
   variables?: ESQLControlVariable[];
   uiSettings: IUiSettingsClient;
+  /**
+   * Data source profile id (same value used in the Lens success path's
+   * `executionContext.meta.profile_id`). When provided, it is forwarded onto
+   * the request's executionContext so the standardized server-side propagation
+   * pipeline tags the APM transaction with `kibana_meta_profile_id`. Pairing
+   * the request label with the error label keeps both telemetry signals
+   * filterable by the same profile.
+   */
+  profileId?: string;
 }
 
 export const fetchEsqlResponseOrThrow = async (
@@ -65,6 +74,7 @@ export async function executeEsqlQuery<TDocument extends object = Record<string,
   filters = [],
   variables,
   uiSettings,
+  profileId,
 }: ExecuteEsqlParams): Promise<ExecuteEsqlResult<TDocument>> {
   const esQueryConfig = getEsQueryConfig(uiSettings);
   const timeFilter =
@@ -86,7 +96,8 @@ export async function executeEsqlQuery<TDocument extends object = Record<string,
     variables,
     ...getMetricsExecutionContext(
       MetricsExecutionContextAction.FETCH,
-      MetricsExecutionContextName.METRICS_INFO
+      MetricsExecutionContextName.METRICS_INFO,
+      profileId ? { profile_id: profileId } : undefined
     ),
   });
 
