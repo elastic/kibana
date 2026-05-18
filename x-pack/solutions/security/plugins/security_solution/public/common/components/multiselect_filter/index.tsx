@@ -102,7 +102,7 @@ const MultiselectFilterComponent = <T extends unknown>({
       }
       isOpen={isPopoverOpen}
       closePopover={closePopover}
-      panelPaddingSize="none"
+      panelPaddingSize="s"
       repositionOnScroll
     >
       <EuiSelectable
