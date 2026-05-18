@@ -20,8 +20,7 @@ import {
 } from './common_utils';
 import {
   mappingsUpdated,
-  validateNoModelVersionChanges,
-  validateModelVersionsChanges,
+  validateNoStructuralModelVersionChanges,
   validateNewMappingsInModelVersion,
   validateIgnoreAboveExistingType,
   validateNameTitleFieldTypesExistingType,
@@ -77,6 +76,11 @@ export function validateChangesExistingType({
   // validate that keyword and flattened fields have ignore_above
   validateIgnoreAboveExistingType(name, to, from, log);
 
+  // Validate existing model versions for structural and schema-only mutations.
+  // Structural mutations always throw; schema-only mutations are classified
+  // with granular diffing (breaking → throw, warnings → log).
+  validateNoStructuralModelVersionChanges(from, to, registeredType, log);
+
   const newModelVersionCount = to.modelVersions.length - from.modelVersions.length;
 
   switch (newModelVersionCount) {
@@ -91,11 +95,8 @@ export function validateChangesExistingType({
           docsAnchor: '#defining-model-versions',
         });
       }
-      validateModelVersionsChanges({ from, to, registeredType, log });
       break;
-    case 1:
-      validateNoModelVersionChanges(from, to);
-
+    case 1: {
       const newModelVersion = getLatestModelVersion(to);
 
       if (to.modelVersions.length === 1) {
@@ -108,6 +109,7 @@ export function validateChangesExistingType({
 
       validateNoIndexOrEnabledFalse(name, to, [newModelVersion]);
       break;
+    }
     default:
       throw new SavedObjectsCheckError({
         ruleId: RULE_IDS.EXISTING_TYPE_TOO_MANY_NEW_MODEL_VERSIONS,
