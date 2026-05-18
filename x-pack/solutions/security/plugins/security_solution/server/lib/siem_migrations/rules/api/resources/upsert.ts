@@ -22,6 +22,7 @@ import { authz } from '../util/authz';
 import { processLookups } from '../util/lookups';
 import { withLicense } from '../../../common/api/util/with_license';
 import type { CreateSiemMigrationResourceInput } from '../../../common/data/siem_migrations_data_resources_client';
+import { getVendorProcessor } from '../../vendors/get_vendor_processor';
 
 export const registerSiemRuleMigrationsResourceUpsertRoute = (
   router: SecuritySolutionPluginRouter,
@@ -70,7 +71,35 @@ export const registerSiemRuleMigrationsResourceUpsertRoute = (
               return res.notFound({ body: { message: 'Migration not found' } });
             }
 
-            const [lookups, macros] = partition(resources, { type: 'lookup' });
+            const hasWatchlistUploads = resources.some((resource) => resource.type === 'watchlist');
+            if (hasWatchlistUploads && rule.original_rule.vendor !== 'microsoft-sentinel') {
+              return res.badRequest({
+                body: {
+                  message:
+                    'Sentinel watchlist resources can only be uploaded to Sentinel migrations',
+                },
+              });
+            }
+
+            let resourcesToUpsert = resources;
+            if (rule.original_rule.vendor === 'microsoft-sentinel' && resources.length > 0) {
+              try {
+                const VendorProcessor = getVendorProcessor('microsoft-sentinel');
+                resourcesToUpsert = new VendorProcessor({
+                  migrationId,
+                  dataClient: ruleMigrationsClient.data.items,
+                  logger,
+                }).getProcessor('resources')(resources);
+              } catch (error) {
+                return res.badRequest({
+                  body: {
+                    message: `Failed to process Sentinel watchlist resources: ${error.message}`,
+                  },
+                });
+              }
+            }
+
+            const [lookups, macros] = partition(resourcesToUpsert, { type: 'lookup' });
             const processedLookups = await processLookups(
               lookups,
               ruleMigrationsClient.data.lookups
