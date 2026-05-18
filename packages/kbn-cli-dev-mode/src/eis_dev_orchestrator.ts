@@ -10,11 +10,20 @@
 /**
  * EIS connector discovery for `yarn start --eis`.
  *
- * Queries a running Elasticsearch instance for all inference endpoints provided
- * by the Elastic Inference Service (GET _inference/_all, filtered to
- * service === 'elastic'), converts them into Kibana preconfigured connector
- * definitions, and returns the result so bootstrap.ts can inject them into the
- * Kibana config via an env var.
+ * Two-phase flow:
+ *
+ *  1. Wait for Elasticsearch to be reachable and healthy (yellow/green) —
+ *     generous timeout (5 min), since a cold ES snapshot install/start can
+ *     legitimately take minutes.
+ *  2. Poll `GET /_inference/_all` for EIS-provided endpoints
+ *     (`service === 'elastic'`) — bounded retry budget (~30s). If ES is
+ *     healthy but no EIS endpoints exist, that is a configuration error
+ *     (typically `yarn es snapshot` was run without `--eis`, or the CCM
+ *     API key was not set).
+ *
+ * Converts each endpoint into a Kibana preconfigured connector definition
+ * keyed by a sanitised model ID, and returns the result so bootstrap.ts can
+ * inject them into the Kibana config via an env var.
  *
  * All EIS task types (chat_completion, sparse_embedding, text_embedding, etc.)
  * are picked up — the gateway-defined task type is preserved on each connector.
@@ -24,7 +33,7 @@
  */
 
 import chalk from 'chalk';
-import { createBasicAuth, eisHttpRequest } from '@kbn/es';
+import { createBasicAuth, eisHttpRequest, waitForEisEsReady } from '@kbn/es';
 import type { EisElasticsearchConnection } from '@kbn/es';
 
 import type { Log } from './log';
@@ -66,25 +75,35 @@ interface EisInferenceEndpoint {
 }
 
 /**
- * Polls ES for EIS inference endpoints with retries (endpoints may take a few
- * seconds to register after the CCM key is set). Converts each endpoint into a
- * Kibana preconfigured connector definition keyed by a sanitised model ID.
+ * Phase 1: wait for Elasticsearch to be reachable and reporting a yellow (or
+ * green) cluster health status. Delegates to `waitForEisEsReady`, which is
+ * backed by `@kbn/es`'s `waitUntilClusterReady`. SIGINT is honoured (it forces
+ * process exit, matching the rest of the dev tooling).
  */
-const discoverConnectors = async (
+const waitForEsReachable = async (es: EisElasticsearchConnection, log: Log): Promise<void> => {
+  log.write(`Waiting for Elasticsearch at ${chalk.cyan(es.baseUrl)} to be ready...`);
+  await waitForEisEsReady(es, log.toolingLog);
+};
+
+/**
+ * Phase 2: poll `GET /_inference/_all` until we see at least one endpoint with
+ * `service === 'elastic'`. Bounded retries — if ES is up but EIS endpoints are
+ * not registered, this is a real misconfiguration that should fail fast.
+ */
+const discoverEisEndpoints = async (
   es: EisElasticsearchConnection,
   log: Log
-): Promise<Record<string, PreconfiguredConnector>> => {
-  const maxAttempts = 5;
-  const baseDelayMs = 3000;
+): Promise<EisInferenceEndpoint[]> => {
+  const maxAttempts = 10;
+  const delayMs = 3000;
+  const auth = createBasicAuth(es.credentials.username, es.credentials.password);
+
+  let lastStatus: number | undefined;
+  let lastError: unknown;
 
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-    const auth = createBasicAuth(es.credentials.username, es.credentials.password);
-
-    let statusCode: number;
-    let data: string;
-
     try {
-      ({ statusCode, data } = await eisHttpRequest(
+      const { statusCode, data } = await eisHttpRequest(
         `${es.baseUrl}/_inference/_all`,
         {
           method: 'GET',
@@ -93,124 +112,100 @@ const discoverConnectors = async (
         },
         undefined,
         es.ssl
-      ));
+      );
+      lastStatus = statusCode;
+
+      if (statusCode === 200) {
+        const body = JSON.parse(data) as { endpoints?: EisInferenceEndpoint[] };
+        const eisEndpoints = (body.endpoints ?? []).filter((ep) => ep.service === 'elastic');
+
+        if (eisEndpoints.length > 0) {
+          return eisEndpoints;
+        }
+
+        log.write(
+          `No EIS inference endpoints registered yet, retrying in ${delayMs}ms... (${attempt}/${maxAttempts})`
+        );
+      } else {
+        log.write(
+          `Inference endpoints not available (HTTP ${statusCode}), retrying in ${delayMs}ms... (${attempt}/${maxAttempts})`
+        );
+      }
     } catch (error) {
-      if (error instanceof Error && (error as NodeJS.ErrnoException).code === 'ECONNREFUSED') {
-        throw new Error(
-          [
-            `Cannot connect to Elasticsearch at ${es.baseUrl} — is it running?`,
-            'Start it first with: yarn es snapshot --eis',
-          ].join('\n')
-        );
-      }
-      if (attempt < maxAttempts) {
-        const delay = baseDelayMs * attempt;
-        const msg = error instanceof Error ? error.message : error;
-        log.write(
-          `Cannot reach Elasticsearch (${msg}), retrying in ${delay}ms... (${attempt}/${maxAttempts})`
-        );
-        await new Promise((r) => setTimeout(r, delay));
-        continue;
-      }
-      throw new Error(
-        `Cannot reach Elasticsearch after ${maxAttempts} attempts. Make sure it is running with: yarn es snapshot --eis`
+      lastError = error;
+      const msg = error instanceof Error ? error.message : String(error);
+      log.write(
+        `Failed to query inference endpoints (${msg}), retrying in ${delayMs}ms... (${attempt}/${maxAttempts})`
       );
     }
 
-    if (statusCode !== 200) {
-      if (attempt < maxAttempts) {
-        const delay = baseDelayMs * attempt;
-        log.write(
-          `EIS inference endpoints not ready yet (HTTP ${statusCode}), retrying in ${delay}ms... (${attempt}/${maxAttempts})`
-        );
-        await new Promise((r) => setTimeout(r, delay));
-        continue;
-      }
-      throw new Error(
-        `EIS inference endpoints not available after ${maxAttempts} attempts (last status: HTTP ${statusCode}). ` +
-          `Make sure Elasticsearch was started with: yarn es snapshot --eis`
-      );
+    if (attempt < maxAttempts) {
+      await new Promise((r) => setTimeout(r, delayMs));
     }
-
-    let body: { endpoints?: EisInferenceEndpoint[] };
-    try {
-      body = JSON.parse(data);
-    } catch (parseError) {
-      if (attempt < maxAttempts) {
-        const delay = baseDelayMs * attempt;
-        log.write(
-          `Invalid JSON from inference endpoints, retrying in ${delay}ms... (${attempt}/${maxAttempts})`
-        );
-        await new Promise((r) => setTimeout(r, delay));
-        continue;
-      }
-      const msg = parseError instanceof Error ? parseError.message : parseError;
-      throw new Error(`Failed to parse inference endpoints response: ${msg}`);
-    }
-
-    const endpoints: EisInferenceEndpoint[] = body.endpoints || [];
-    const eisEndpoints = endpoints.filter((ep) => ep.service === 'elastic');
-
-    if (eisEndpoints.length === 0) {
-      if (attempt < maxAttempts) {
-        const delay = baseDelayMs * attempt;
-        log.write(
-          `No EIS inference endpoints found yet, retrying in ${delay}ms... (${attempt}/${maxAttempts})`
-        );
-        await new Promise((r) => setTimeout(r, delay));
-        continue;
-      }
-      return {};
-    }
-
-    eisEndpoints.sort((a, b) => (a.inference_id || '').localeCompare(b.inference_id || ''));
-
-    const seen: Record<string, boolean> = {};
-    const connectors: Record<string, PreconfiguredConnector> = {};
-
-    for (const endpoint of eisEndpoints) {
-      // Fallback model id: strip a leading '.' and any trailing '-<task_type>'
-      // suffix from the inference id. This works for chat_completion,
-      // sparse_embedding, text_embedding, and any future task types.
-      const fallbackModelId = endpoint.inference_id
-        .replace(/^\./, '')
-        .replace(new RegExp(`-${endpoint.task_type}$`), '');
-      const modelId = endpoint.service_settings?.model_id || fallbackModelId;
-
-      let baseId = toConnectorId(modelId);
-      if (!baseId) {
-        baseId = toConnectorId(endpoint.inference_id) || 'connector';
-      }
-
-      let id = baseId;
-      let n = 1;
-      while (seen[id]) {
-        id = `${baseId}-${++n}`;
-      }
-      seen[id] = true;
-
-      connectors[id] = {
-        name: toDisplayName(modelId),
-        actionTypeId: '.inference',
-        exposeConfig: true,
-        config: {
-          provider: endpoint.service,
-          taskType: endpoint.task_type,
-          inferenceId: endpoint.inference_id,
-          providerConfig: { model_id: modelId },
-        },
-      };
-    }
-
-    return connectors;
   }
 
-  throw new Error('Unreachable: discoverConnectors loop exhausted without returning');
+  const detail = lastError
+    ? `last error: ${lastError instanceof Error ? lastError.message : String(lastError)}`
+    : `last HTTP status: ${lastStatus ?? 'unknown'}`;
+
+  throw new Error(
+    [
+      `No EIS inference endpoints found after ${maxAttempts} attempts (${detail}).`,
+      'Elasticsearch is responding but EIS endpoints are not registered.',
+      'Make sure Elasticsearch was started with `yarn es snapshot --eis` and that the CCM API key was set successfully.',
+    ].join('\n')
+  );
+};
+
+/** Builds the Kibana preconfigured-connectors map from the discovered endpoints. */
+const buildConnectors = (
+  endpoints: EisInferenceEndpoint[]
+): Record<string, PreconfiguredConnector> => {
+  endpoints.sort((a, b) => (a.inference_id || '').localeCompare(b.inference_id || ''));
+
+  const seen: Record<string, boolean> = {};
+  const connectors: Record<string, PreconfiguredConnector> = {};
+
+  for (const endpoint of endpoints) {
+    // Fallback model id: strip a leading '.' and any trailing '-<task_type>'
+    // suffix from the inference id. This works for chat_completion,
+    // sparse_embedding, text_embedding, and any future task types.
+    const fallbackModelId = endpoint.inference_id
+      .replace(/^\./, '')
+      .replace(new RegExp(`-${endpoint.task_type}$`), '');
+    const modelId = endpoint.service_settings?.model_id || fallbackModelId;
+
+    let baseId = toConnectorId(modelId);
+    if (!baseId) {
+      baseId = toConnectorId(endpoint.inference_id) || 'connector';
+    }
+
+    let id = baseId;
+    let n = 1;
+    while (seen[id]) {
+      id = `${baseId}-${++n}`;
+    }
+    seen[id] = true;
+
+    connectors[id] = {
+      name: toDisplayName(modelId),
+      actionTypeId: '.inference',
+      exposeConfig: true,
+      config: {
+        provider: endpoint.service,
+        taskType: endpoint.task_type,
+        inferenceId: endpoint.inference_id,
+        providerConfig: { model_id: modelId },
+      },
+    };
+  }
+
+  return connectors;
 };
 
 /** Entry point called from bootstrap.ts when `--eis` is passed to `yarn start`. */
 export const discoverEisConnectors = async (log: Log): Promise<EisConnectorResult> => {
-  log.good('eis', 'Discovering EIS connectors from Elasticsearch...');
+  log.good('eis', 'Setting up EIS connectors from Elasticsearch...');
 
   // yarn start --eis always targets a local dev ES instance started via
   // yarn es snapshot --eis, which binds to http://localhost:9200 without SSL.
@@ -223,16 +218,14 @@ export const discoverEisConnectors = async (log: Log): Promise<EisConnectorResul
     ssl: false,
   };
 
-  log.write('Waiting for EIS inference endpoints to become available...');
-  const connectors = await discoverConnectors(es, log);
-  const count = Object.keys(connectors).length;
+  // Phase 1: wait for ES itself (generous timeout).
+  await waitForEsReachable(es, log);
 
-  if (count === 0) {
-    throw new Error(
-      'No EIS inference endpoints found — cannot start Kibana with --eis.\n' +
-        'Make sure Elasticsearch is running with: yarn es snapshot --eis'
-    );
-  }
+  // Phase 2: wait for EIS endpoints to register (bounded — fail fast on misconfig).
+  log.write('Discovering EIS connectors...');
+  const endpoints = await discoverEisEndpoints(es, log);
+  const connectors = buildConnectors(endpoints);
+  const count = Object.keys(connectors).length;
 
   log.good('eis', `Discovered ${count} EIS connectors:`);
   for (const [id, connector] of Object.entries(connectors)) {

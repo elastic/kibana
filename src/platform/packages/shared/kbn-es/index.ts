@@ -38,5 +38,6 @@ export {
   resolveCcmApiKey,
   setCcmApiKey,
   eisHttpRequest,
+  waitForEisEsReady,
 } from './src/eis/eis_setup';
 export type { EisElasticsearchConnection } from './src/eis/eis_setup';

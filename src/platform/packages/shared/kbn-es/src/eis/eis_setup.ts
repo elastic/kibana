@@ -27,9 +27,11 @@ import https from 'https';
 import { spawn } from 'child_process';
 import execa from 'execa';
 import chalk from 'chalk';
+import { Client, HttpConnection } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 
 import { readCachedKey, readStaleKey, writeCachedKey } from './ccm_key_cache';
+import { waitUntilClusterReady } from '../utils/wait_until_cluster_ready';
 
 /** QA environment URL for the Elastic Inference Service. */
 export const EIS_QA_URL = 'https://inference.eu-west-1.aws.svc.qa.elastic.cloud';
@@ -244,6 +246,44 @@ export const resolveCcmApiKey = async (log: ToolingLog): Promise<string> => {
       return stale;
     }
     throw error;
+  }
+};
+
+/**
+ * Waits for the Elasticsearch cluster to report a yellow (or green) status by
+ * delegating to `waitUntilClusterReady` from `@kbn/es`. Builds a transient
+ * `@elastic/elasticsearch` Client from the given `EisElasticsearchConnection`
+ * so callers (e.g. `kbn-cli-dev-mode`) don't have to depend on the ES client
+ * directly.
+ *
+ * Defaults `readyTimeoutMs` to 5 minutes — large enough to cover a cold
+ * snapshot install/start, small enough to surface real problems.
+ */
+export const waitForEisEsReady = async (
+  es: EisElasticsearchConnection,
+  log: ToolingLog,
+  options: { readyTimeoutMs?: number } = {}
+): Promise<void> => {
+  const client = new Client({
+    node: es.baseUrl,
+    auth: {
+      username: es.credentials.username,
+      password: es.credentials.password,
+    },
+    tls: es.ssl ? { rejectUnauthorized: false } : undefined,
+    Connection: HttpConnection,
+    requestTimeout: 30_000,
+  });
+
+  try {
+    await waitUntilClusterReady({
+      client,
+      expectedStatus: 'yellow',
+      log,
+      readyTimeout: options.readyTimeoutMs ?? 5 * 60 * 1000,
+    });
+  } finally {
+    await client.close();
   }
 };
 
