@@ -157,6 +157,7 @@ export const MappingsFilter: React.FC<Props> = ({
           options={
             !isAddingFields ? state.filter.selectedOptions : previousState.filter.selectedOptions
           }
+          listProps={{ paddingSize: 's' }}
           onChange={(options) => {
             if (!isAddingFields) {
               setSelectedOptions(options);

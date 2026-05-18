@@ -1304,6 +1304,7 @@ async function seedRulesAndPolicies(
   const policyAttrs: ActionPolicySavedObjectAttributes = {
     name: 'Test Policy',
     description: 'Test action policy',
+    type: 'global',
     enabled: true,
     destinations: [{ type: 'workflow' as const, id: 'test-workflow' }],
     auth: {
@@ -1312,9 +1313,7 @@ async function seedRulesAndPolicies(
       createdByUser: false,
     },
     createdBy: null,
-    createdByUsername: null,
     updatedBy: null,
-    updatedByUsername: null,
     createdAt: '2026-01-20T00:00:00.000Z',
     updatedAt: '2026-01-20T00:00:00.000Z',
   };
@@ -1324,6 +1323,7 @@ async function seedRulesAndPolicies(
     ...policyAttrs,
     name: 'Matcher Policy',
     description: 'Only matches critical severity',
+    type: 'global',
     enabled: false,
     matcher: 'data.severity: "critical"',
   };
@@ -1333,6 +1333,7 @@ async function seedRulesAndPolicies(
     ...policyAttrs,
     name: 'GroupBy Policy',
     description: 'Groups by host.name',
+    type: 'global',
     enabled: false,
     groupBy: ['data.host.name'],
     groupingMode: 'per_field',
