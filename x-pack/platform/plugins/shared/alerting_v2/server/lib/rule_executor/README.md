@@ -151,7 +151,7 @@ Step order is defined in `setup/bind_rule_executor.ts`.
 
 Recovery is implemented in `CreateRecoveryEventsStep` after `CreateAlertEventsStep`, so the current batch already contains breach documents when recovery logic runs.
 
-Recovery only applies to `kind: alert` rules and is **opt-in**: a rule without a `recovery_policy` never emits recovery events. The rule form UI always populates a default `recovery_policy` for new alert rules, so opting out is only possible when the rule is created through the API (or the agent builder) without specifying one.
+Recovery only applies to `kind: alert` rules and is optional. A rule without a `recovery_policy` never emits recovery events.
 
 ### `no_breach` recovery
 

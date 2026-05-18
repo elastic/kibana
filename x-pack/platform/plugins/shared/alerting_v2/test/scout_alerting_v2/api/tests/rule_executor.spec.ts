@@ -870,15 +870,11 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
 
       await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, { status: 'breached' });
 
-      // Drop the breaching doc so a recovery-enabled rule would emit a
-      // `recovered` event for this group.
       await apiServices.alertingV2.sourceIndex.deleteDocs({
         index: SOURCE_INDEX,
         query: { term: { 'host.name': 'host-alert-no-recovery-policy' } },
       });
 
-      // Wait for at least two executor ticks so a regression that incorrectly
-      // ran the recovery step would have time to write recovered documents.
       await apiServices.alertingV2.taskExecutions.waitForExecutorRuns({
         ruleId: rule.id,
         runs: 2,
