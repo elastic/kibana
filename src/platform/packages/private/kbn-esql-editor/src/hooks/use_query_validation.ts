@@ -29,7 +29,7 @@ interface ValidationLatencyTracking {
   resetValidationTracking: () => void;
 }
 
-interface UseQueryValidationParams {
+export interface UseQueryValidationParams {
   code: string;
   codeWhenSubmitted: string;
   editorRef: React.MutableRefObject<monaco.editor.IStandaloneCodeEditor | undefined>;
@@ -48,6 +48,8 @@ interface UseQueryValidationParams {
   pickerProjectRouting: string | undefined;
   latencyTracking: ValidationLatencyTracking;
 }
+
+export const VALIDATION_DEBOUNCE_MS = 256;
 
 export const useQueryValidation = ({
   code,
@@ -317,7 +319,7 @@ export const useQueryValidation = ({
       }
     },
     { skipFirstRender: false },
-    256,
+    VALIDATION_DEBOUNCE_MS,
     [code]
   );
 
