@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { TimelineNonEcsData } from '../../../../../common/search_strategy';
@@ -17,6 +17,7 @@ import { useAlertTagsActions } from '../../../../detections/components/alerts_ta
 import { useAlertExceptionActions } from '../../../../detections/components/alerts_table/timeline_actions/use_add_exception_actions';
 import { useInvestigateInTimeline } from '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline';
 import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
+import { useHostIsolationAction } from '../../../../common/components/endpoint/host_isolation/from_alerts/use_host_isolation_action';
 import { TakeActionButton } from './take_action_button';
 import { FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID } from './test_ids';
 
@@ -35,6 +36,28 @@ jest.mock(
   '../../../../detections/components/alerts_table/timeline_actions/use_add_exception_actions'
 );
 jest.mock('../../../../common/hooks/is_in_security_app');
+jest.mock(
+  '../../../../common/components/endpoint/host_isolation/from_alerts/use_host_isolation_action',
+  () => ({
+    useHostIsolationAction: jest.fn(),
+  })
+);
+jest.mock(
+  '../../../../common/components/endpoint/host_isolation/from_alerts/host_isolation_flyout',
+  () => ({
+    HostIsolationFlyout: ({
+      isolateAction,
+      onClose,
+    }: {
+      isolateAction: string;
+      onClose: () => void;
+    }) => (
+      <button type="button" data-test-subj={`hostIsolationMock-${isolateAction}`} onClick={onClose}>
+        {`isolation-mock-${isolateAction}`}
+      </button>
+    ),
+  })
+);
 
 const mockUseExploreActions = jest.fn().mockReturnValue({ exploreActionItems: [] });
 jest.mock('../hooks/use_explore_actions', () => ({
@@ -97,8 +120,18 @@ const remoteEventHit = createMockHit(
 );
 const mockUseInvestigateInTimeline = useInvestigateInTimeline as jest.Mock;
 const mockUseIsInSecurityApp = useIsInSecurityApp as jest.Mock;
+const mockUseHostIsolationAction = useHostIsolationAction as jest.Mock;
 const mockEcsData: Ecs = { _id: 'test-id', _index: 'test-index' };
 const mockNonEcsData: TimelineNonEcsData[] = [{ field: 'host.name', value: ['test-host'] }];
+const mockDetailsData = [
+  {
+    category: 'host',
+    field: 'host.name',
+    values: ['test-host'],
+    originalValue: ['test-host'],
+    isObjectArray: false,
+  },
+];
 const mockRefetchFlyoutData = jest.fn().mockResolvedValue(undefined);
 const mockOnAlertUpdated = jest.fn();
 const mockOnShowNotes = jest.fn();
@@ -106,6 +139,7 @@ const defaultProps = {
   hit: createMockHit(),
   ecsData: mockEcsData,
   nonEcsData: mockNonEcsData,
+  detailsData: mockDetailsData,
   refetchFlyoutData: mockRefetchFlyoutData,
   onAlertUpdated: mockOnAlertUpdated,
   onShowNotes: mockOnShowNotes,
@@ -131,6 +165,7 @@ describe('<TakeActionButton />', () => {
       runAlertWorkflowPanel: [],
     });
     mockUseExploreActions.mockReturnValue({ exploreActionItems: [] });
+    mockUseHostIsolationAction.mockReturnValue([]);
   });
 
   it('should render the take action button', () => {
@@ -629,6 +664,104 @@ describe('<TakeActionButton />', () => {
       fireEvent.click(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID));
 
       expect(getByText('Explore action')).toBeInTheDocument();
+    });
+  });
+
+  describe('Host isolation action', () => {
+    const isolateMenuItem = {
+      key: 'isolate-host-action-item',
+      'data-test-subj': 'isolate-host-action-item',
+      name: 'Isolate host',
+    };
+
+    it('should pass detailsData to useHostIsolationAction', () => {
+      renderTakeActionButton();
+
+      expect(mockUseHostIsolationAction).toHaveBeenCalledWith(
+        expect.objectContaining({ detailsData: mockDetailsData })
+      );
+    });
+
+    it('should include the isolate host item only for local alerts', () => {
+      mockUseHostIsolationAction.mockReturnValue([isolateMenuItem]);
+
+      const { getByTestId, getByText } = renderTakeActionButton({
+        ...defaultProps,
+        hit: createMockHit({ 'event.kind': 'signal' }),
+      });
+
+      fireEvent.click(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID));
+
+      expect(getByText('Isolate host')).toBeInTheDocument();
+    });
+
+    it('should hide the isolate host item for non-alert documents', () => {
+      mockUseHostIsolationAction.mockReturnValue([isolateMenuItem]);
+
+      const { getByTestId, queryByText } = renderTakeActionButton({
+        ...defaultProps,
+        hit: createMockHit({ 'event.kind': 'event' }),
+      });
+
+      fireEvent.click(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID));
+
+      expect(queryByText('Isolate host')).not.toBeInTheDocument();
+    });
+
+    it('should hide the isolate host item for remote alerts', () => {
+      mockUseHostIsolationAction.mockReturnValue([isolateMenuItem]);
+
+      const { getByTestId, queryByText } = renderTakeActionButton({
+        ...defaultProps,
+        hit: remoteAlertHit,
+      });
+
+      fireEvent.click(getByTestId(FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID));
+
+      expect(queryByText('Isolate host')).not.toBeInTheDocument();
+    });
+
+    it('should render HostIsolation inline when isolation action is triggered', () => {
+      let captured: ((action: 'isolateHost' | 'unisolateHost') => void) | undefined;
+      mockUseHostIsolationAction.mockImplementation(
+        ({ onAddIsolationStatusClick }: { onAddIsolationStatusClick: typeof captured }) => {
+          captured = onAddIsolationStatusClick;
+          return [];
+        }
+      );
+
+      renderTakeActionButton({
+        ...defaultProps,
+        hit: createMockHit({ 'event.kind': 'signal' }),
+      });
+
+      expect(screen.queryByTestId('hostIsolationMock-isolateHost')).not.toBeInTheDocument();
+
+      act(() => captured?.('isolateHost'));
+
+      expect(screen.getByTestId('hostIsolationMock-isolateHost')).toBeInTheDocument();
+    });
+
+    it('should unmount HostIsolation when its onClose is called', () => {
+      let captured: ((action: 'isolateHost' | 'unisolateHost') => void) | undefined;
+      mockUseHostIsolationAction.mockImplementation(
+        ({ onAddIsolationStatusClick }: { onAddIsolationStatusClick: typeof captured }) => {
+          captured = onAddIsolationStatusClick;
+          return [];
+        }
+      );
+
+      renderTakeActionButton({
+        ...defaultProps,
+        hit: createMockHit({ 'event.kind': 'signal' }),
+      });
+
+      act(() => captured?.('isolateHost'));
+      expect(screen.getByTestId('hostIsolationMock-isolateHost')).toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId('hostIsolationMock-isolateHost'));
+
+      expect(screen.queryByTestId('hostIsolationMock-isolateHost')).not.toBeInTheDocument();
     });
   });
 });

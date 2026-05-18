@@ -243,7 +243,7 @@ export const EndpointExceptionsFlyout: React.FC<EndpointExceptionsFlyoutProps> =
 
   const confirmModal = showConfirmModal && confirmModalLabels && (
     <ArtifactConfirmModal
-      {...confirmModalLabels}
+      labels={confirmModalLabels}
       onSuccess={submitException}
       onCancel={() => setShowConfirmModal(false)}
       data-test-subj="endpointExceptionConfirmModal"
