@@ -6,12 +6,12 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import moment from 'moment';
 import { useHistory, useLocation } from 'react-router-dom';
 import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { IngestionTimeRange, IngestionTimeRanges } from '../../../../common/metrics_types';
+import { asAbsoluteDateTime } from '../../../../common/utils/formatters';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { fromQuery, toQuery, isInactiveHistoryError } from '../../shared/links/url_helpers';
 
@@ -45,9 +45,7 @@ export function NoDashboardFoundCallout() {
 
 export type IngestionType = 'classicApm' | 'otelNative';
 
-const DATE_FORMAT = 'MMM D, YYYY HH:mm';
-
-const formatTimestamp = (ts: number) => moment(ts).format(DATE_FORMAT);
+const formatTimestamp = (ts: number) => asAbsoluteDateTime(ts, 'minutes');
 
 const formatRange = (range: IngestionTimeRange) =>
   `${formatTimestamp(range.from)} - ${formatTimestamp(range.to)}`;
