@@ -185,5 +185,6 @@ toc:
           - file: write-api-capacity-testing-journey.md
           - file: running-performance-journey-in-cloud.md
       - file: ftr.md
+      - file: writing-stable-functional-tests.md
   - file: plugin-list.md
   - file: dependencies-versions.md
