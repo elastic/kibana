@@ -36,6 +36,7 @@ import {
   resolveMainExtractionWindow,
   validateExtractionWindow,
 } from './extraction_window';
+import { capAtMaxLogsPerWindow } from './effective_page_limits';
 import { getLatestEntitiesIndexName } from '../../../common/domain/entity_index';
 import { getUpdatesEntitiesDataStreamName } from '../asset_manager/updates_data_stream';
 import { executeEsqlQuery } from '../../infra/elasticsearch/esql';
@@ -519,6 +520,8 @@ export class LogsExtractionClient {
     maxLogsPerWindow: number;
     entityDefinition: ManagedEntityDefinition;
   }) {
+    const effectiveMaxLogsPerPage = capAtMaxLogsPerWindow(maxLogsPerPage, maxLogsPerWindow);
+    const effectiveDocsLimit = capAtMaxLogsPerWindow(docsLimit, maxLogsPerWindow);
     let totalCount = 0;
     let totalLogs = 0;
     let pages = 0;
@@ -562,7 +565,7 @@ export class LogsExtractionClient {
           fromDateISO,
           toDateISO,
           logsPageCursorStart,
-          maxLogsPerPage,
+          maxLogsPerPage: effectiveMaxLogsPerPage,
           opts,
         });
 
@@ -585,7 +588,7 @@ export class LogsExtractionClient {
           indexPatterns,
           latestIndex,
           entityDefinition,
-          docsLimit,
+          docsLimit: effectiveDocsLimit,
           fromDateISO,
           toDateISO,
           logsPageCursorStart,

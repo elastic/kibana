@@ -35,6 +35,7 @@ import { ingestEntities } from '../../infra/elasticsearch/ingest';
 import { getUpdatesEntitiesDataStreamName } from '../asset_manager/updates_data_stream';
 import type { CcsLogExtractionStateClient } from '../saved_objects/ccs_log_extraction_state';
 import { capExtractionWindowEnd, resolveCcsExtractionWindow } from './extraction_window';
+import { capAtMaxLogsPerWindow } from './effective_page_limits';
 
 interface CcsExtractToUpdatesParams {
   type: EntityType;
@@ -236,7 +237,6 @@ export class CcsLogsExtractionClient {
     docsLimit,
     maxLogsPerPage,
     maxLogsPerWindow,
-    maxLogsPerWindowCapBehavior,
     entityDefinition,
     abortController,
     effectiveFromDateISO: initialFromDateISO,
@@ -249,13 +249,14 @@ export class CcsLogsExtractionClient {
     docsLimit: number;
     maxLogsPerPage: number;
     maxLogsPerWindow: number;
-    maxLogsPerWindowCapBehavior: 'defer' | 'drop';
     entityDefinition: ManagedEntityDefinition;
     abortController?: AbortController;
     effectiveFromDateISO: string;
     recoveryId: string | undefined;
     skipStateUpdates: boolean;
   }): Promise<CcsExtractToUpdatesResult> {
+    const effectiveMaxLogsPerPage = capAtMaxLogsPerWindow(maxLogsPerPage, maxLogsPerWindow);
+    const effectiveDocsLimit = capAtMaxLogsPerWindow(docsLimit, maxLogsPerWindow);
     let totalCount = 0;
     let totalPages = 0;
     let totalLogs = 0;
@@ -280,7 +281,7 @@ export class CcsLogsExtractionClient {
         fromDateISO: effectiveFromDateISO,
         toDateISO,
         sliceStart,
-        maxLogsPerPage,
+        maxLogsPerPage: effectiveMaxLogsPerPage,
         abortController,
       });
 
@@ -301,7 +302,7 @@ export class CcsLogsExtractionClient {
         remoteIndexPatterns,
         fromDateISO: effectiveFromDateISO,
         toDateISO,
-        docsLimit,
+        docsLimit: effectiveDocsLimit,
         entityDefinition,
         abortController,
         sliceStart,

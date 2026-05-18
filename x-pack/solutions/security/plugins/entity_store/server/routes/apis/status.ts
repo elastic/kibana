@@ -15,6 +15,7 @@ import type { EntityStorePluginRouter } from '../../types';
 import { wrapMiddlewares } from '../middleware';
 import type { EntityStoreStatus, GetStatusSuccessResult } from '../../domain/types';
 import type { LogExtractionConfig } from '../../domain/saved_objects';
+import { capAtMaxLogsPerWindow } from '../../domain/logs_extraction/effective_page_limits';
 import { ENTITY_STORE_STATUS } from '../../domain/constants';
 
 /**
@@ -45,7 +46,7 @@ type StatusEngine = Omit<
 > &
   LegacyEngineDescriptorV1;
 
-interface EntityStoreStatusResponseBody {
+export interface EntityStoreStatusResponseBody {
   status: EntityStoreStatus;
   engines: StatusEngine[];
 }
@@ -83,7 +84,7 @@ function toPublicEngine(
     frequency,
     lookbackPeriod,
     fieldHistoryLength,
-    maxLogsPerPage,
+    maxLogsPerPage: capAtMaxLogsPerWindow(maxLogsPerPage, maxLogsPerWindow),
     maxTimeWindowSize,
     maxLogsPerWindow,
     maxLogsPerWindowCapBehavior,

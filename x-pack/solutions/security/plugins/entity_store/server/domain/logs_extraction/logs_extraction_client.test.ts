@@ -17,6 +17,7 @@ import { ingestEntities } from '../../infra/elasticsearch/ingest';
 import { HASHED_ID_FIELD } from './logs_extraction_query_builder';
 import {
   ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD,
+  ENGINE_METADATA_UNTYPED_ID_FIELD,
   TIMESTAMP_FIELD,
 } from './query_builder_commons';
 import { LOG_PAGINATION_CURSOR_TOTAL_LOGS_FIELD } from './log_pagination_probe_query_builder';
@@ -1005,14 +1006,17 @@ describe('LogsExtractionClient', () => {
           columns: [
             { name: '@timestamp', type: 'date' },
             { name: HASHED_ID_FIELD, type: 'keyword' },
+            { name: ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD, type: 'date' },
+            { name: ENGINE_METADATA_UNTYPED_ID_FIELD, type: 'keyword' },
           ],
           values: [
-            ['2025-01-15T11:00:00.000Z', 'hash1'],
-            ['2025-01-15T11:00:01.000Z', 'hash2'],
+            ['2025-01-15T11:00:00.000Z', 'hash1', '2025-01-15T11:00:00.000Z', 'entity1'],
+            ['2025-01-15T11:00:01.000Z', 'hash2', '2025-01-15T11:00:01.000Z', 'entity2'],
           ],
         };
-        // Probe default total_logs = maxLogsPerPage+1 → sliceLogCount = maxLogsPerPage.
-        // With maxLogsPerWindow=1, totalLogs >= 1 after the first slice → cap fires.
+        // effectiveMaxLogsPerPage = min(40000, maxLogsPerWindow=1) = 1.
+        // Probe total_logs = maxLogsPerPage+1 → sliceLogCount = min(total_logs, 1) = 1.
+        // totalLogs = 1 >= maxLogsPerWindow=1 → cap fires.
         setupVolCapTest({ maxLogsPerWindow: 1, maxLogsPerWindowCapBehavior: 'defer' });
         mockExtractSuccessSequence(mainExtractionResponse);
         mockIngestEntities.mockResolvedValue(undefined);
@@ -1023,7 +1027,7 @@ describe('LogsExtractionClient', () => {
         if (!result.success) return;
         expect(result.count).toBe(2);
         expect(result.logsCapApplied).toBe(true);
-        expect(result.logsProcessed).toBe(LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT);
+        expect(result.logsProcessed).toBe(1);
 
         // Final engineDescriptorClient.update must NOT include logExtractionState —
         // the cursor is already persisted by the inner loop.
@@ -1041,14 +1045,17 @@ describe('LogsExtractionClient', () => {
           columns: [
             { name: '@timestamp', type: 'date' },
             { name: HASHED_ID_FIELD, type: 'keyword' },
+            { name: ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD, type: 'date' },
+            { name: ENGINE_METADATA_UNTYPED_ID_FIELD, type: 'keyword' },
           ],
           values: [
-            ['2025-01-15T11:00:00.000Z', 'hash1'],
-            ['2025-01-15T11:00:01.000Z', 'hash2'],
+            ['2025-01-15T11:00:00.000Z', 'hash1', '2025-01-15T11:00:00.000Z', 'entity1'],
+            ['2025-01-15T11:00:01.000Z', 'hash2', '2025-01-15T11:00:01.000Z', 'entity2'],
           ],
         };
-        // Probe default total_logs = maxLogsPerPage+1 → sliceLogCount = maxLogsPerPage.
-        // With maxLogsPerWindow=1, totalLogs >= 1 after the first slice → cap fires.
+        // effectiveMaxLogsPerPage = min(40000, maxLogsPerWindow=1) = 1.
+        // Probe total_logs = maxLogsPerPage+1 → sliceLogCount = min(total_logs, 1) = 1.
+        // totalLogs = 1 >= maxLogsPerWindow=1 → cap fires.
         setupVolCapTest({ maxLogsPerWindow: 1, maxLogsPerWindowCapBehavior: 'drop' });
         mockExtractSuccessSequence(mainExtractionResponse);
         mockIngestEntities.mockResolvedValue(undefined);
@@ -1059,7 +1066,7 @@ describe('LogsExtractionClient', () => {
         if (!result.success) return;
         expect(result.count).toBe(2);
         expect(result.logsCapApplied).toBe(true);
-        expect(result.logsProcessed).toBe(LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT);
+        expect(result.logsProcessed).toBe(1);
         expect(result.lastSearchTimestamp).toBe(effectiveWindowEnd);
 
         const finalUpdate = mockEngineDescriptorClient.update.mock.calls.at(-1)!;
@@ -1121,10 +1128,12 @@ describe('LogsExtractionClient', () => {
           columns: [
             { name: '@timestamp', type: 'date' },
             { name: HASHED_ID_FIELD, type: 'keyword' },
+            { name: ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD, type: 'date' },
+            { name: ENGINE_METADATA_UNTYPED_ID_FIELD, type: 'keyword' },
           ],
           values: [
-            ['2024-01-02T10:00:00.000Z', 'hash1'],
-            [lastPageTimestamp, 'hash2'],
+            ['2024-01-02T10:00:00.000Z', 'hash1', '2024-01-02T10:00:00.000Z', 'entity1'],
+            [lastPageTimestamp, 'hash2', lastPageTimestamp, 'entity2'],
           ],
         };
         setupVolCapTest({ maxLogsPerWindow: 1, maxLogsPerWindowCapBehavior: 'defer' });
@@ -1144,7 +1153,8 @@ describe('LogsExtractionClient', () => {
         expect(result.success).toBe(true);
         if (!result.success) return;
         expect(result.logsCapApplied).toBe(true);
-        expect(result.logsProcessed).toBe(LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT);
+        // effectiveMaxLogsPerPage = min(40000, maxLogsPerWindow=1) = 1 → sliceLogCount = 1
+        expect(result.logsProcessed).toBe(1);
         // defer: lastSearchTimestamp is where the loop stopped, NOT the window end
         expect(result.lastSearchTimestamp).toBe(lastPageTimestamp);
         expect(result.lastSearchTimestamp).not.toBe(toDateISO);
@@ -1158,10 +1168,12 @@ describe('LogsExtractionClient', () => {
           columns: [
             { name: '@timestamp', type: 'date' },
             { name: HASHED_ID_FIELD, type: 'keyword' },
+            { name: ENGINE_METADATA_PAGINATION_FIRST_SEEN_LOG_FIELD, type: 'date' },
+            { name: ENGINE_METADATA_UNTYPED_ID_FIELD, type: 'keyword' },
           ],
           values: [
-            ['2024-01-02T10:00:00.000Z', 'hash1'],
-            ['2024-01-02T11:00:00.000Z', 'hash2'],
+            ['2024-01-02T10:00:00.000Z', 'hash1', '2024-01-02T10:00:00.000Z', 'entity1'],
+            ['2024-01-02T11:00:00.000Z', 'hash2', '2024-01-02T11:00:00.000Z', 'entity2'],
           ],
         };
         setupVolCapTest({ maxLogsPerWindow: 1, maxLogsPerWindowCapBehavior: 'drop' });
@@ -1175,7 +1187,8 @@ describe('LogsExtractionClient', () => {
         expect(result.success).toBe(true);
         if (!result.success) return;
         expect(result.logsCapApplied).toBe(true);
-        expect(result.logsProcessed).toBe(LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT);
+        // effectiveMaxLogsPerPage = min(40000, maxLogsPerWindow=1) = 1 → sliceLogCount = 1
+        expect(result.logsProcessed).toBe(1);
         // drop: lastSearchTimestamp is advanced to the window end
         expect(result.lastSearchTimestamp).toBe(toDateISO);
         expect(mockEngineDescriptorClient.update).not.toHaveBeenCalled();
