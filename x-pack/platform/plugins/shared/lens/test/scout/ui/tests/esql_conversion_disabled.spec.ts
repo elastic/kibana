@@ -10,7 +10,13 @@ import { expect } from '@kbn/scout/ui';
 import { openInlineEditorAndWaitVisible, testData } from '../fixtures';
 
 test.describe('Lens Convert to ES|QL button', { tag: '@local-stateful-classic' }, () => {
-  test.beforeAll(async ({ esArchiver, kbnClient, uiSettings }) => {
+  test.beforeAll(async ({ apiServices, esArchiver, kbnClient, uiSettings }) => {
+    await apiServices.core.settings({
+      'feature_flags.overrides': {
+        'lens.enable_esql_conversion': false,
+      },
+    });
+
     await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.LOGSTASH);
     await kbnClient.importExport.load(testData.KBN_ARCHIVES.ESQL_CONVERSION_DASHBOARD);
     await uiSettings.set({
