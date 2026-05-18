@@ -7,16 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const {
+import {
   FORCE_ALL_CHANGED_PATHS,
   getPackageNameFromSourceRoot,
+  type MoonProject,
   resolveAffectedPackages,
   shouldForceAllPackages,
-} = require('./affected_packages');
+} from './affected_packages';
 
 const packageNames = ['other-package', 'side-navigation'];
 
-const createProject = (sourceRoot) => ({
+const createProject = (sourceRoot: string): MoonProject => ({
   config: {
     project: {
       metadata: {
