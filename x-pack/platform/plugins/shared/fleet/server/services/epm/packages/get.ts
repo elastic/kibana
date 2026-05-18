@@ -709,7 +709,7 @@ export async function getPackageDependencies(
   );
 }
 
-interface PackageResponse {
+export interface PackageResponse {
   paths: string[];
   packageInfo: ArchivePackage | RegistryPackage;
 }
