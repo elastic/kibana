@@ -244,12 +244,12 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
 
   const handleRecoveryTypeChange = useCallback(
     (type: RecoveryType) => {
-      if (type === 'custom' && !draft.recover.trim()) {
-        setDraft((d) => ({ ...d, recover: guessRecoveryBlock(draft.breach) }));
+      if (type === 'custom') {
+        setDraft((d) => ({ ...d, recover: d.recover.trim() ? d.recover : guessRecoveryBlock(d.breach) }));
       }
       dispatch({ type: 'SET_RECOVERY_TYPE', recoveryType: type });
     },
-    [draft.breach, draft.recover, setDraft, dispatch]
+    [setDraft, dispatch]
   );
 
   const isCreate = mode === 'create' || mode === 'clone';
