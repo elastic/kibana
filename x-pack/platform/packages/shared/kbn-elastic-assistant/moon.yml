@@ -55,6 +55,7 @@ dependsOn:
   - '@kbn/shared-ux-utility'
   - '@kbn/inference-connectors'
   - '@kbn/shared-ux-ai-components'
+  - '@kbn/core-hotkeys-browser-mocks'
 tags:
   - shared-browser
   - package

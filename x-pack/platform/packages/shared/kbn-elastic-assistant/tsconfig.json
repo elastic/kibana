@@ -54,6 +54,7 @@
     "@kbn/kibana-react-plugin",
     "@kbn/shared-ux-utility",
     "@kbn/inference-connectors",
-    "@kbn/shared-ux-ai-components"
+    "@kbn/shared-ux-ai-components",
+    "@kbn/core-hotkeys-browser-mocks"
   ]
 }

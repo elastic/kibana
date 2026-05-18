@@ -17,6 +17,7 @@
     "@kbn/config-schema",
     "@kbn/shared-ux-utility",
     "@kbn/core-hotkeys-browser",
+    "@kbn/core-hotkeys-browser-mocks",
   ],
   "exclude": [
     "target/**/*",

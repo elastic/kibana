@@ -332,6 +332,7 @@ export const addEditorKeyBindings = (
     featureId: 'esql:editor',
     group: shortcutsGroup,
     scope: 'context' as const,
+    allowUserRebinding: true as const,
   });
 
   // Add editor key bindings

@@ -54,6 +54,7 @@ const buildHotkeysDiscoveryMeta = (
   featureId: CONSOLE_EDITOR_FEATURE_ID,
   group: options.group,
   scope: 'context' as const,
+  allowUserRebinding: true as const,
 });
 
 /**
