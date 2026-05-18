@@ -118,17 +118,41 @@ export default ({ getService }: FtrProviderContext) => {
     }
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/260599
-  describe.skip('@ess @serverless @skipInServerlessMKI Entity Resolution CSV Upload', () => {
+  describe('@ess @serverless @skipInServerlessMKI Entity Resolution CSV Upload', () => {
     before(async () => {
-      // Use enableEntityStoreV2 and explicitly stop
-      // the automated-resolution maintainer so it cannot race with CSV upload tests.
-      // The maintainer would link entities sharing the same user.email,
-      // interfering with the test's own resolution assertions.
       await entityStoreUtils.enableEntityStoreV2();
-      await entityMaintainerRouteHelpersFactory(supertest).stopMaintainer(
-        AUTOMATED_RESOLUTION_MAINTAINER_ID
+      await entityStoreUtils.waitForEngineStatus('user', 'started');
+
+      // Install schedules autoStart=true, so TM may be mid-run — wait for idle before stopping.
+      const maintainerRoutes = entityMaintainerRouteHelpersFactory(supertest);
+      let lastSeenRuns = -1;
+      await retry.waitForWithTimeout(
+        'automated-resolution maintainer to be idle before stop',
+        60_000,
+        async () => {
+          const { body } = await maintainerRoutes.getMaintainers(200, [
+            AUTOMATED_RESOLUTION_MAINTAINER_ID,
+          ]);
+          const maintainer = body.maintainers.find(
+            (m: { id: string }) => m.id === AUTOMATED_RESOLUTION_MAINTAINER_ID
+          );
+          if (!maintainer || maintainer.taskStatus === 'never_started') return true;
+          if (maintainer.taskStatus === 'stopped') return true;
+
+          const nextRunAt: string | null = maintainer.nextRunAt ?? null;
+          const isNextRunInFuture = nextRunAt != null && new Date(nextRunAt).getTime() > Date.now();
+          if (!isNextRunInFuture) {
+            lastSeenRuns = -1;
+            return false;
+          }
+          const runs: number = maintainer.runs ?? 0;
+          if (runs === lastSeenRuns) return true;
+          lastSeenRuns = runs;
+          return false;
+        }
       );
+      await maintainerRoutes.stopMaintainer(AUTOMATED_RESOLUTION_MAINTAINER_ID);
+
       await cleanEntities();
       await seedEntities();
       await waitForEntities();
