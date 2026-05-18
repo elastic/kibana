@@ -129,6 +129,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
               body: genericErrorResponse,
               description: 'A bad request.',
             },
+            404: {
+              body: genericErrorResponse,
+              description: 'Not found.',
+            },
           },
         },
       },

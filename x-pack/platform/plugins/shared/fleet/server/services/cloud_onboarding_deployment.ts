@@ -105,7 +105,7 @@ class CloudOnboardingDeploymentService {
     await soClient.update<CloudOnboardingDeploymentSOAttributes>(
       CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
       id,
-      { ...update, mechanisms: update.mechanisms }
+      { ...update }
     );
 
     return this.getById(soClient, id);
