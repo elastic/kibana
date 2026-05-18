@@ -150,16 +150,20 @@ export const getUnifiedHistoryRoute = (router: IRouter, osqueryContext: OsqueryA
           let integrationNamespaces: string[] | undefined;
 
           if (includeLive && osqueryContext?.service?.getIntegrationNamespaces) {
-            const namespaceMap = await osqueryContext.service.getIntegrationNamespaces(
-              [OSQUERY_INTEGRATION_NAME],
-              spaceScopedClient,
-              logger
-            );
-            const osqueryNamespaces = namespaceMap[OSQUERY_INTEGRATION_NAME];
-            integrationNamespaces =
-              osqueryNamespaces && osqueryNamespaces.length > 0 ? osqueryNamespaces : undefined;
+            try {
+              const namespaceMap = await osqueryContext.service.getIntegrationNamespaces(
+                [OSQUERY_INTEGRATION_NAME],
+                spaceScopedClient,
+                logger
+              );
+              const osqueryNamespaces = namespaceMap[OSQUERY_INTEGRATION_NAME];
+              integrationNamespaces =
+                osqueryNamespaces && osqueryNamespaces.length > 0 ? osqueryNamespaces : undefined;
 
-            logger.debug(`Retrieved integration namespaces: ${JSON.stringify(namespaceMap)}`);
+              logger.debug(`Retrieved integration namespaces: ${JSON.stringify(namespaceMap)}`);
+            } catch (err) {
+              logger.warn(`Failed to resolve integration namespaces: ${(err as Error).message}`);
+            }
           }
 
           let packIdsForQuery: string[] | undefined;
