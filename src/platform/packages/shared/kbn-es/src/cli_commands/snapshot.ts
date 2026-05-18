@@ -15,7 +15,6 @@ import { tmpdir } from 'os';
 import { ToolingLog } from '@kbn/tooling-log';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
 import {
-  MOCK_IDP_KIBANA_URL,
   MOCK_IDP_REALM_NAME,
   MOCK_IDP_ENTITY_ID,
   MOCK_IDP_ATTRIBUTE_PRINCIPAL,
@@ -23,6 +22,7 @@ import {
   MOCK_IDP_ATTRIBUTE_NAME,
   MOCK_IDP_ATTRIBUTE_EMAIL,
   createMockIdpMetadata,
+  MOCK_IDP_SP_BASE_URL,
 } from '@kbn/mock-idp-utils';
 
 import { Cluster } from '../cluster';
@@ -51,8 +51,6 @@ export const snapshot: Command = {
       --port            The port to bind to on 127.0.0.1 [default: 9200]
       --kill            Kill running ES Docker containers before starting
       --ssl             Sets up SSL on Elasticsearch
-      --kibana-url      Fully qualified URL where Kibana is hosted (including base path). Used to configure
-                        the SAML Mock IdP realm so SP/ACS endpoints match Kibana. [default: ${MOCK_IDP_KIBANA_URL}]
       --use-cached      Skips cache verification and use cached ES snapshot.
       --skip-ready-check  Disable the ready check,
       --ready-timeout   Customize the ready check timeout, in seconds or "Xm" format, defaults to 1m
@@ -85,20 +83,13 @@ export const snapshot: Command = {
         readyTimeout: 'ready-timeout',
         esLogLevel: 'es-log-level',
         secureFiles: 'secure-files',
-        kibanaUrl: 'kibana-url',
       },
 
-      string: ['version', 'ready-timeout', 'es-log-level', 'kibana-url'],
+      string: ['version', 'ready-timeout', 'es-log-level'],
       boolean: ['download-only', 'use-cached', 'skip-ready-check', 'kill'],
 
-      default: { kibanaUrl: MOCK_IDP_KIBANA_URL, ...defaults },
+      default: defaults,
     });
-
-    // When --ssl is used and no explicit --kibana-url was provided, switch the
-    // default Kibana URL to https:// so the SAML realm ACS endpoint matches.
-    if (options.ssl && options.kibanaUrl === MOCK_IDP_KIBANA_URL) {
-      options.kibanaUrl = MOCK_IDP_KIBANA_URL.replace('http://', 'https://');
-    }
 
     const cluster = new Cluster({ ssl: options.ssl });
 
@@ -130,13 +121,10 @@ export const snapshot: Command = {
         arg.includes(`authc.realms.saml.${MOCK_IDP_REALM_NAME}.`)
       );
 
-      const kibanaUrl: string = options.kibanaUrl || MOCK_IDP_KIBANA_URL;
-
       if (!hasSamlConfig && options.license !== 'basic') {
-        log.info('Configuring SAML realm for Mock IdP with Kibana at %s', kibanaUrl);
+        log.info('Configuring SAML realm for Mock IdP ');
 
-        // Generate IDP metadata with the correct Kibana URL
-        const metadata = await createMockIdpMetadata(kibanaUrl);
+        const metadata = await createMockIdpMetadata();
         const metadataPath = resolve(tmpdir(), 'mock_idp_metadata.xml');
         writeFileSync(metadataPath, metadata);
 
@@ -145,9 +133,9 @@ export const snapshot: Command = {
           `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.order=0`,
           `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.idp.metadata.path=${metadataPath}`,
           `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.idp.entity_id=${MOCK_IDP_ENTITY_ID}`,
-          `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.entity_id=${kibanaUrl}`,
-          `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.acs=${kibanaUrl}/api/security/saml/callback`,
-          `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.logout=${kibanaUrl}/logout`,
+          `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.entity_id=${MOCK_IDP_SP_BASE_URL}`,
+          `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.acs=${MOCK_IDP_SP_BASE_URL}/api/security/saml/callback`,
+          `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.logout=${MOCK_IDP_SP_BASE_URL}/logout`,
           `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.principal=${MOCK_IDP_ATTRIBUTE_PRINCIPAL}`,
           `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.groups=${MOCK_IDP_ATTRIBUTE_ROLES}`,
           `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.name=${MOCK_IDP_ATTRIBUTE_NAME}`,
