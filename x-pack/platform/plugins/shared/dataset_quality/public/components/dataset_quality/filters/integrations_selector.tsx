@@ -116,6 +116,7 @@ export function IntegrationsSelector({
           placeholder: integrationsSelectorSearchPlaceholder,
           compressed: true,
         }}
+        listProps={{ paddingSize: 's' }}
         aria-label={integrationsSelectorLabel}
         options={integrations}
         onChange={onIntegrationsChange}

@@ -43,6 +43,7 @@ describe('WaitForInputStepImpl', () => {
       setInput: jest.fn(),
       updateWorkflowExecution: jest.fn(),
       stepExecutionId: 'test-step-exec-id',
+      abortController: new AbortController(),
       contextManager: {
         renderValueAccordingToContext: jest.fn(<T>(v: T): T => v),
       },
@@ -50,7 +51,7 @@ describe('WaitForInputStepImpl', () => {
 
     mockWorkflowRuntime = {
       navigateToNextNode: jest.fn(),
-      getWorkflowExecution: jest.fn().mockReturnValue({ context: {} }),
+      getWorkflowExecution: jest.fn().mockReturnValue({ id: 'exec-abc', context: {} }),
     } as unknown as jest.Mocked<WorkflowExecutionRuntimeManager>;
 
     workflowLogger = {
@@ -153,7 +154,8 @@ describe('WaitForInputStepImpl', () => {
     beforeEach(() => {
       mockStepExecutionRuntime.tryEnterWaitUntil.mockReturnValue(false);
       mockWorkflowRuntime.getWorkflowExecution.mockReturnValue({
-        context: { resumeInput, otherKey: 'preserved' },
+        id: 'exec-abc',
+        context: { resumeInput, resumedBy: 'jane.doe', otherKey: 'preserved' },
       } as any);
     });
 
@@ -170,7 +172,7 @@ describe('WaitForInputStepImpl', () => {
     it('should clear resumeInput from context while preserving other keys', async () => {
       await underTest.run();
       expect(mockStepExecutionRuntime.updateWorkflowExecution).toHaveBeenCalledWith({
-        context: { otherKey: 'preserved' },
+        context: { resumedBy: 'jane.doe', otherKey: 'preserved' },
       });
     });
 
@@ -192,12 +194,31 @@ describe('WaitForInputStepImpl', () => {
       await underTest.run();
       expect(mockWorkflowRuntime.navigateToNextNode).toHaveBeenCalled();
     });
+
+    it('should emit a hitl:resumed audit log event with responder identity', async () => {
+      await underTest.run();
+      expect(workflowLogger.logDebug).toHaveBeenCalledWith(
+        'Workflow exec-abc resumed by jane.doe',
+        expect.objectContaining({
+          event: expect.objectContaining({
+            action: 'hitl:resumed',
+            category: ['workflow'],
+            outcome: 'success',
+          }),
+          labels: expect.objectContaining({
+            responder: 'jane.doe',
+            execution_id: 'exec-abc',
+          }),
+        })
+      );
+    });
   });
 
   describe('resume run — exiting wait state with no input', () => {
     beforeEach(() => {
       mockStepExecutionRuntime.tryEnterWaitUntil.mockReturnValue(false);
       mockWorkflowRuntime.getWorkflowExecution.mockReturnValue({
+        id: 'exec-abc',
         context: {},
       } as any);
     });
@@ -222,10 +243,45 @@ describe('WaitForInputStepImpl', () => {
     });
   });
 
+  describe('aborted runtime — race with workflow-level timeout', () => {
+    // Regression: when the workflow-level timeout monitor fires in parallel
+    // with a resume iteration, it aborts the step runtime and calls
+    // `failStep(timeoutError)`. Without this guard the waitForInput step
+    // proceeded to re-enter its wait state, overwriting `status: FAILED` back
+    // to `status: WAITING_FOR_INPUT` (error/finishedAt survived because
+    // `updateStep` spreads). The zombie step then permanently reappeared in
+    // the Inbox because `listWaitingForInputSteps` filters only on status.
+    beforeEach(() => {
+      mockStepExecutionRuntime.abortController.abort();
+    });
+
+    it('should not call tryEnterWaitUntil when the runtime is already aborted', async () => {
+      await underTest.run();
+      expect(mockStepExecutionRuntime.tryEnterWaitUntil).not.toHaveBeenCalled();
+    });
+
+    it('should not mutate step state when the runtime is already aborted', async () => {
+      await underTest.run();
+      expect(mockStepExecutionRuntime.setInput).not.toHaveBeenCalled();
+      expect(mockStepExecutionRuntime.finishStep).not.toHaveBeenCalled();
+      expect(mockStepExecutionRuntime.updateWorkflowExecution).not.toHaveBeenCalled();
+      expect(mockWorkflowRuntime.navigateToNextNode).not.toHaveBeenCalled();
+    });
+
+    it('should emit an observable hitl:aborted debug event', async () => {
+      await underTest.run();
+      expect(workflowLogger.logDebug).toHaveBeenCalledWith(
+        expect.stringContaining('run aborted before wait-entry'),
+        expect.objectContaining({ event: { action: 'hitl:aborted' } })
+      );
+    });
+  });
+
   describe('resume run — exiting wait state with null context', () => {
     beforeEach(() => {
       mockStepExecutionRuntime.tryEnterWaitUntil.mockReturnValue(false);
       mockWorkflowRuntime.getWorkflowExecution.mockReturnValue({
+        id: 'exec-abc',
         context: null,
       } as any);
     });

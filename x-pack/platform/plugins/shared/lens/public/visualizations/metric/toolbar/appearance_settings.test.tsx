@@ -8,8 +8,7 @@
 import React from 'react';
 import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import { fireEvent, render, screen } from '@testing-library/react';
-import type { Alignment, MetricVisualizationState, PrimaryMetricPosition } from '@kbn/lens-common';
-import { LENS_METRIC_LAYOUT_BY_POSITION } from '@kbn/lens-common';
+import type { Alignment, MetricVisualizationState } from '@kbn/lens-common';
 import { EuiButtonGroupTestHarness } from '@kbn/test-eui-helpers';
 import { MetricAppearanceSettings } from './appearance_settings';
 
@@ -50,7 +49,7 @@ const fullState: Required<
   primaryAlign: 'right',
   secondaryAlign: 'right',
   primaryPosition: 'bottom',
-  iconAlign: 'left',
+  iconAlign: 'right',
   valueFontMode: 'default',
   secondaryTrend: { type: 'none' },
   secondaryLabelPosition: 'before',
@@ -268,32 +267,209 @@ describe('appearance settings', () => {
     expect(screen.queryByTestId('lens-metric-appearance-other-icon-position-btn')).toBeDisabled();
   });
 
-  it.each<[PrimaryMetricPosition, string, PrimaryMetricPosition, string]>([
-    ['top', 'Top', 'bottom', 'Bottom'],
-    ['middle', 'Middle', 'bottom', 'Bottom'],
-    ['bottom', 'Bottom', 'top', 'Top'],
-    ['bottom', 'Bottom', 'middle', 'Middle'],
-    ['middle', 'Middle', 'top', 'Top'],
-    ['top', 'Top', 'middle', 'Middle'],
-  ])(
-    'should set default config when changing from %j (%s) to %j (%s)',
-    (newPosition, newLabel, prevPosition, prevLabel) => {
-      renderComponent({ primaryPosition: prevPosition });
+  it('shows custom template when layout fields do not match any preset', () => {
+    // 'left'/'center'/'right' combination does not match any preset
+    renderComponent({ primaryPosition: 'bottom', titlesTextAlign: 'center', primaryAlign: 'left' });
 
-      const btnGroup = new EuiButtonGroupTestHarness(
-        'lens-metric-appearance-primary-metric-position-btn'
-      );
+    expect(screen.getByTestId('lens-metric-style-template-custom')).toHaveAttribute(
+      'aria-checked',
+      'true'
+    );
+  });
 
-      expect(btnGroup.getSelected()?.textContent).toBe(prevLabel);
+  it('shows custom template after custom card is clicked even if layout still matches a preset', () => {
+    // State matches the 'bottom' preset
+    renderComponent({
+      primaryPosition: 'bottom',
+      titlesTextAlign: 'left',
+      primaryAlign: 'right',
+    });
 
-      btnGroup.select(newLabel);
+    // Before click: 'bottom' preset is inferred and selected
+    expect(screen.getByTestId('lens-metric-style-template-bottom')).toHaveAttribute(
+      'aria-checked',
+      'true'
+    );
 
-      expect(mockSetState).toHaveBeenCalledWith(
-        expect.objectContaining({
-          primaryPosition: newPosition,
-          ...LENS_METRIC_LAYOUT_BY_POSITION[newPosition],
-        })
-      );
-    }
-  );
+    fireEvent.click(screen.getByTestId('lens-metric-style-template-custom'));
+
+    // After click: custom is selected via local React state, no state write needed
+    expect(screen.getByTestId('lens-metric-style-template-custom')).toHaveAttribute(
+      'aria-checked',
+      'true'
+    );
+  });
+
+  it('shows bottom template when layout fields match the bottom preset', () => {
+    renderComponent({
+      primaryPosition: 'bottom',
+      titlesTextAlign: 'left',
+      primaryAlign: 'right',
+    });
+
+    expect(screen.getByTestId('lens-metric-style-template-bottom')).toHaveAttribute(
+      'aria-checked',
+      'true'
+    );
+  });
+
+  it('shows custom template when font size differs from defaults', () => {
+    renderComponent({
+      primaryPosition: 'bottom',
+      titlesTextAlign: 'left',
+      primaryAlign: 'right',
+      valueFontMode: 'fit',
+    });
+
+    expect(screen.getByTestId('lens-metric-style-template-custom')).toHaveAttribute(
+      'aria-checked',
+      'true'
+    );
+  });
+
+  it('shows custom template when icon position differs from defaults', () => {
+    renderComponent({
+      primaryPosition: 'bottom',
+      titlesTextAlign: 'left',
+      primaryAlign: 'right',
+      icon: 'sortUp',
+      iconAlign: 'left',
+    });
+
+    expect(screen.getByTestId('lens-metric-style-template-custom')).toHaveAttribute(
+      'aria-checked',
+      'true'
+    );
+  });
+
+  it('infers bottom preset when secondaryAlign is absent without secondary metric', () => {
+    renderComponent({
+      primaryPosition: 'bottom',
+      titlesTextAlign: 'left',
+      primaryAlign: 'right',
+      secondaryAlign: undefined,
+      secondaryMetricAccessor: undefined,
+    });
+
+    expect(screen.getByTestId('lens-metric-style-template-bottom')).toHaveAttribute(
+      'aria-checked',
+      'true'
+    );
+  });
+
+  it('infers custom template when secondaryAlign is set but mismatches preset without secondary metric', () => {
+    renderComponent({
+      primaryPosition: 'bottom',
+      titlesTextAlign: 'left',
+      primaryAlign: 'right',
+      secondaryAlign: 'left',
+      secondaryMetricAccessor: undefined,
+    });
+
+    expect(screen.getByTestId('lens-metric-style-template-custom')).toHaveAttribute(
+      'aria-checked',
+      'true'
+    );
+  });
+
+  it('applies full appearance defaults when a template card is selected', () => {
+    renderComponent({
+      primaryPosition: 'bottom',
+      titlesTextAlign: 'left',
+      primaryAlign: 'right',
+      secondaryAlign: 'right',
+      valueFontMode: 'fit',
+      iconAlign: 'left',
+    });
+
+    fireEvent.click(screen.getByTestId('lens-metric-style-template-top'));
+
+    expect(mockSetState).toHaveBeenCalledWith(
+      expect.objectContaining({
+        primaryPosition: 'top',
+        titlesTextAlign: 'left',
+        primaryAlign: 'left',
+        secondaryAlign: 'left',
+        valueFontMode: 'default',
+        iconAlign: 'right',
+      })
+    );
+  });
+
+  it('applies secondary and icon defaults even when controls are disabled', () => {
+    renderComponent({
+      secondaryMetricAccessor: undefined,
+      icon: undefined,
+      secondaryAlign: undefined,
+      iconAlign: undefined,
+      valueFontMode: 'fit',
+    });
+
+    fireEvent.click(screen.getByTestId('lens-metric-style-template-middle'));
+
+    expect(mockSetState).toHaveBeenCalledWith(
+      expect.objectContaining({
+        primaryPosition: 'middle',
+        titlesTextAlign: 'center',
+        primaryAlign: 'center',
+        secondaryAlign: 'center',
+        valueFontMode: 'default',
+        iconAlign: 'right',
+      })
+    );
+  });
+
+  it('opens details accordion when custom card is selected without writing to saved state', () => {
+    // Start with a preset layout (bottom matches)
+    renderComponent({
+      primaryPosition: 'bottom',
+      titlesTextAlign: 'left',
+      primaryAlign: 'right',
+    });
+
+    const detailsAccordion = screen.getByTestId('lens-metric-appearance-details-accordion');
+    const detailsButton = detailsAccordion.querySelector('button');
+
+    expect(detailsButton).not.toBeNull();
+    expect(detailsButton).toHaveAttribute('aria-expanded', 'false');
+
+    fireEvent.click(screen.getByTestId('lens-metric-style-template-custom'));
+
+    expect(detailsButton).toHaveAttribute('aria-expanded', 'true');
+    expect(mockSetState).not.toHaveBeenCalled();
+  });
+
+  it('infers template from new field values after editing a layout option', () => {
+    // Start with all four layout fields matching the 'top' preset exactly.
+    // icon/iconAlign are cleared so the legacy iconAlign fallback doesn't interfere.
+    const { rerender } = renderComponent({
+      primaryPosition: 'top',
+      titlesTextAlign: 'left',
+      primaryAlign: 'left',
+      secondaryAlign: 'left',
+      icon: undefined,
+      iconAlign: undefined,
+    });
+
+    expect(screen.getByTestId('lens-metric-style-template-top')).toHaveAttribute(
+      'aria-checked',
+      'true'
+    );
+
+    const btnGroup = new EuiButtonGroupTestHarness(
+      'lens-metric-appearance-primary-metric-alignment-btn'
+    );
+    btnGroup.select('Right');
+
+    expect(mockSetState).toHaveBeenCalledWith(expect.objectContaining({ primaryAlign: 'right' }));
+
+    // Re-render with the updated state to verify inference recalculates to 'custom'
+    const newState = mockSetState.mock.calls[0][0] as MetricVisualizationState;
+    rerender(<MetricAppearanceSettings state={newState} setState={mockSetState} />);
+
+    expect(screen.getByTestId('lens-metric-style-template-custom')).toHaveAttribute(
+      'aria-checked',
+      'true'
+    );
+  });
 });

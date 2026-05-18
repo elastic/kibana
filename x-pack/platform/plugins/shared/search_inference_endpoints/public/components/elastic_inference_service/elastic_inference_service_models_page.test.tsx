@@ -8,9 +8,9 @@
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react';
 import { ElasticInferenceServiceModelsPage } from './elastic_inference_service_models_page';
+import type { EisInferenceEndpoint } from '../../../common/types';
 import { useEisModels } from '../../hooks/use_eis_models';
 import { InferenceEndpoints } from '../../__mocks__/inference_endpoints';
-import type { EisInferenceEndpoint } from '../../utils/eis_utils';
 
 jest.mock('../../hooks/use_eis_models');
 jest.mock('../../hooks/use_kibana', () => ({
@@ -62,7 +62,7 @@ describe('ElasticInferenceServiceModelsPage', () => {
     mockUseEisModels.mockReturnValue({ data: endpoints, isLoading: false, isError: false });
     const { getByLabelText, queryByTestId } = render(<ElasticInferenceServiceModelsPage />);
 
-    const searchInput = getByLabelText('Find Elastic Inference Service models');
+    const searchInput = getByLabelText('Search Elastic Inference Service models');
     fireEvent.change(searchInput, { target: { value: 'Jina Reranker v2' } });
 
     expect(queryByTestId('eisModelCard-Jina Reranker v2')).toBeInTheDocument();
@@ -97,7 +97,7 @@ describe('ElasticInferenceServiceModelsPage', () => {
     mockUseEisModels.mockReturnValue({ data: endpoints, isLoading: false, isError: false });
     const { getByLabelText, getByText } = render(<ElasticInferenceServiceModelsPage />);
 
-    const searchInput = getByLabelText('Find Elastic Inference Service models');
+    const searchInput = getByLabelText('Search Elastic Inference Service models');
     fireEvent.change(searchInput, { target: { value: 'nonexistent-model-xyz-999' } });
 
     expect(getByText('No models found')).toBeInTheDocument();

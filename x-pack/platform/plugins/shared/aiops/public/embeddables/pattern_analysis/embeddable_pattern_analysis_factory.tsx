@@ -30,6 +30,7 @@ import type { AiopsPluginStart, AiopsPluginStartDeps } from '../../types';
 import { initializePatternAnalysisControls } from './initialize_pattern_analysis_controls';
 import type { PatternAnalysisEmbeddableApi } from './types';
 import type { PatternAnalysisEmbeddableState } from '../../../common/embeddables/pattern_analysis/types';
+import { canUseAiops } from '../../capabilities';
 
 export type EmbeddablePatternAnalysisType = typeof EMBEDDABLE_PATTERN_ANALYSIS_TYPE;
 
@@ -40,6 +41,7 @@ export const getPatternAnalysisEmbeddableFactory = (
     type: EMBEDDABLE_PATTERN_ANALYSIS_TYPE,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const [coreStart, pluginStart] = await getStartServices();
+      canUseAiops(coreStart, true);
       const runtimeState = initialState;
       const timeRangeManager = initializeTimeRangeManager(initialState);
       const titleManager = initializeTitleManager(initialState);

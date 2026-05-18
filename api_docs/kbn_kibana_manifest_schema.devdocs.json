@@ -1172,7 +1172,7 @@
                     "label": "enum",
                     "description": [],
                     "signature": [
-                      "readonly [\"platform\", \"observability\", \"security\", \"search\", \"workplaceai\"]"
+                      "readonly [\"platform\", \"observability\", \"security\", \"search\", \"workplaceai\", \"vectordb\"]"
                     ],
                     "path": "packages/kbn-kibana-manifest-schema/src/kibana_json_v2_schema.ts",
                     "lineNumber": 53,
