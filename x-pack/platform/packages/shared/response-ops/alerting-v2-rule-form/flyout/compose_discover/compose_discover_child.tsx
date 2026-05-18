@@ -100,6 +100,8 @@ export interface ComposeDiscoverChildProps {
    */
   onApply?: () => void;
   onClose: () => void;
+  /** Flyout header title. Defaults to "Query sandbox". */
+  title?: string;
   /** Called with the Monaco editor instance when the alert-block editor mounts.
    *  Use this to register split-query autocomplete providers at the flyout level. */
   onAlertEditorMount?: (editor: monaco.editor.IStandaloneCodeEditor) => void;
@@ -129,6 +131,7 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
   onClose,
   onAlertEditorMount,
   onRecoveryEditorMount,
+  title = 'Query sandbox',
 }) => {
   const services = useRuleFormServices();
   const isSplit = tabConfig.type !== 'single';
@@ -274,14 +277,8 @@ export const ComposeDiscoverChild: React.FC<ComposeDiscoverChildProps> = ({
     <EuiFlyout type="overlay" size="fill" onClose={onClose} aria-labelledby={CHILD_FLYOUT_TITLE_ID}>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s" id={CHILD_FLYOUT_TITLE_ID}>
-          <h3>{draft.breach ? 'Edit alert query' : 'Define alert query'}</h3>
+          <h3>{title}</h3>
         </EuiTitle>
-        {!draft.breach && (
-          <EuiText size="s" color="subdued">
-            Write the ES|QL query that defines when this rule should alert. You&apos;ll configure
-            the rest of the rule settings next.
-          </EuiText>
-        )}
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
