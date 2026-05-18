@@ -52,7 +52,7 @@ describe('validateChangesExistingType', () => {
     const to = loadSnapshot('migrations_deleted.json');
 
     expect(() => validateChangesWrapper({ from, to, type: { name: 'config' } })).toThrowError(
-      `❌ Modifications have been detected in the 'config.migrations'. This property is deprected and no modifications are allowed.`
+      `Modifications have been detected in the 'config.migrations'. This property is deprecated and no modifications are allowed.`
     );
   });
 
@@ -61,7 +61,7 @@ describe('validateChangesExistingType', () => {
     const to = loadSnapshot('migrations_added.json');
 
     expect(() => validateChangesWrapper({ from, to, type: { name: 'config' } })).toThrowError(
-      `❌ Modifications have been detected in the 'config.migrations'. This property is deprected and no modifications are allowed.`
+      `Modifications have been detected in the 'config.migrations'. This property is deprecated and no modifications are allowed.`
     );
   });
 
@@ -70,7 +70,7 @@ describe('validateChangesExistingType', () => {
     const to = loadSnapshot('model_versions_deleted.json');
 
     expect(() => validateChangesWrapper({ from, to, type: { name: 'task' } })).toThrowError(
-      `❌ Some model versions have been deleted for SO type 'task'.`
+      `Some model versions have been deleted for SO type 'task'.`
     );
   });
 
@@ -78,7 +78,7 @@ describe('validateChangesExistingType', () => {
     const from = loadSnapshot('baseline.json');
     const to = loadSnapshot('two_new_model_versions.json');
     expect(() => validateChangesWrapper({ from, to, type: { name: 'task' } })).toThrowError(
-      `❌ The SO type 'task' is defining 2 new model versions, but can only define one at a time.`
+      `The SO type 'task' is defining 2 new model versions, but can only define one at a time.`
     );
   });
 
@@ -87,7 +87,7 @@ describe('validateChangesExistingType', () => {
     const to = loadSnapshot('mutated_model_versions.json');
 
     expect(() => validateChangesWrapper({ from, to, type: { name: 'task' } })).toThrowError(
-      `❌ Some modelVersions have been updated for SO type 'task' after they were defined: 10.6.0.`
+      `Some modelVersions have been updated for SO type 'task' after they were defined: 10.6.0.`
     );
   });
 
@@ -106,7 +106,7 @@ describe('validateChangesExistingType', () => {
       const to = loadSnapshot('schema_only_change_in_older_model_version.json');
 
       expect(() => validateChangesWrapper({ from, to, type: { name: 'task' } })).toThrowError(
-        `❌ Some modelVersions have been updated for SO type 'task' after they were defined`
+        `Some modelVersions have been updated for SO type 'task' after they were defined`
       );
     });
 
@@ -165,7 +165,7 @@ describe('validateChangesExistingType', () => {
     const to = loadSnapshot('non_consecutive_model_versions.json');
 
     expect(() => validateChangesWrapper({ from, to, type: { name: 'task' } })).toThrowError(
-      `❌ The 'task' SO type is missing model version '7'. Model versions defined: 1,2,3,4,5,6,8`
+      `The 'task' SO type is missing model version '7'. Model versions defined: 1,2,3,4,5,6,8`
     );
   });
 
@@ -174,7 +174,7 @@ describe('validateChangesExistingType', () => {
     const to = loadSnapshot('mappings_updated_no_bump.json');
 
     expect(() => validateChangesWrapper({ from, to, type: { name: 'task' } })).toThrowError(
-      `❌ The 'task' SO type has changes in the mappings, but is missing a modelVersion that defines these changes.`
+      `The 'task' SO type has changes in the mappings, but is missing a modelVersion that defines these changes.`
     );
   });
 
@@ -185,7 +185,7 @@ describe('validateChangesExistingType', () => {
     expect(() =>
       validateChangesWrapper({ from, to, type: { name: 'usage-counter' } })
     ).toThrowError(
-      `❌ The new model version '1' for SO type 'usage-counter' is defining mappings' changes. For backwards-compatibility reasons, the initial model version can only include schema definitions.`
+      `The new model version '1' for SO type 'usage-counter' is defining mappings' changes. For backwards-compatibility reasons, the initial model version can only include schema definitions.`
     );
   });
 
@@ -214,6 +214,141 @@ describe('validateChangesExistingType', () => {
     expect(() => validateChangesWrapper({ from, to, type: { name: 'task' } })).toThrowError(
       /The SO type 'task' has new mapping fields with 'enabled: false': fieldWithEnabledFalse/
     );
+  });
+
+  describe('ignore_above validation', () => {
+    const sharedModelVersionIgnoreAbove = {
+      version: '1',
+      modelVersionHash: 'hash',
+      changeTypes: [],
+      hasTransformation: false,
+      newMappings: [],
+      schemas: { create: 'hash', forwardCompatibility: 'hash' },
+    };
+
+    const buildRecordIgnoreAbove = (
+      mappings: Record<string, unknown> = {}
+    ): MigrationInfoRecord => ({
+      name: 'my-type',
+      hash: 'hash',
+      migrationVersions: [],
+      schemaVersions: [],
+      modelVersions: [sharedModelVersionIgnoreAbove],
+      mappings,
+    });
+
+    const baseRegisteredType: SavedObjectsType = {
+      name: 'my-type',
+      namespaceType: 'agnostic',
+      hidden: false,
+      mappings: { dynamic: false, properties: {} },
+      modelVersions: {},
+    } as unknown as SavedObjectsType;
+
+    it('should warn (not throw) when a keyword field was already missing ignore_above in the baseline', () => {
+      const from = buildRecordIgnoreAbove({ 'properties.myField.type': 'keyword' });
+      const to = buildRecordIgnoreAbove({ 'properties.myField.type': 'keyword' });
+
+      expect(() =>
+        validateChangesExistingType({ from, to, registeredType: baseRegisteredType, log })
+      ).not.toThrow();
+      expect(log).toHaveBeenCalledWith(
+        expect.stringContaining(
+          "pre-existing 'keyword' or 'flattened' mapping fields without 'ignore_above'"
+        )
+      );
+      expect(log).toHaveBeenCalledWith(expect.stringContaining('myField'));
+    });
+
+    it('should warn (not throw) when a flattened field was already missing ignore_above in the baseline', () => {
+      const from = buildRecordIgnoreAbove({ 'properties.dataField.type': 'flattened' });
+      const to = buildRecordIgnoreAbove({ 'properties.dataField.type': 'flattened' });
+
+      expect(() =>
+        validateChangesExistingType({ from, to, registeredType: baseRegisteredType, log })
+      ).not.toThrow();
+      expect(log).toHaveBeenCalledWith(expect.stringContaining('dataField'));
+    });
+
+    it('should throw when a new keyword field is introduced without ignore_above', () => {
+      const from = buildRecordIgnoreAbove({});
+      const to = buildRecordIgnoreAbove({ 'properties.newField.type': 'keyword' });
+
+      expect(() =>
+        validateChangesExistingType({ from, to, registeredType: baseRegisteredType, log })
+      ).toThrowError(
+        /The SO type 'my-type' has newly introduced 'keyword' or 'flattened' mapping fields without 'ignore_above': newField/
+      );
+    });
+
+    it('should throw when a new flattened field is introduced without ignore_above', () => {
+      const from = buildRecordIgnoreAbove({});
+      const to = buildRecordIgnoreAbove({ 'properties.dataField.type': 'flattened' });
+
+      expect(() =>
+        validateChangesExistingType({ from, to, registeredType: baseRegisteredType, log })
+      ).toThrowError(
+        /The SO type 'my-type' has newly introduced 'keyword' or 'flattened' mapping fields without 'ignore_above': dataField/
+      );
+    });
+
+    it('should not throw or warn when all keyword fields have ignore_above', () => {
+      // Use the same mappings in from and to to avoid triggering the "no model version bump" check.
+      const mappings = {
+        'properties.myField.type': 'keyword',
+        'properties.myField.ignore_above': 1024,
+      };
+      const from = buildRecordIgnoreAbove(mappings);
+      const to = buildRecordIgnoreAbove(mappings);
+
+      expect(() =>
+        validateChangesExistingType({ from, to, registeredType: baseRegisteredType, log })
+      ).not.toThrow();
+      expect(log).not.toHaveBeenCalledWith(expect.stringContaining('ignore_above'));
+    });
+
+    it('should warn for pre-existing fields and throw for newly introduced ones in the same type', () => {
+      const from = buildRecordIgnoreAbove({ 'properties.oldField.type': 'keyword' });
+      const to = buildRecordIgnoreAbove({
+        'properties.oldField.type': 'keyword',
+        'properties.newField.type': 'keyword',
+      });
+
+      expect(() =>
+        validateChangesExistingType({ from, to, registeredType: baseRegisteredType, log })
+      ).toThrowError(/newField/);
+      expect(log).toHaveBeenCalledWith(expect.stringContaining('pre-existing'));
+      expect(log).toHaveBeenCalledWith(expect.stringContaining('oldField'));
+    });
+
+    it('should throw when a new keyword subfield (multi-field) is introduced without ignore_above', () => {
+      const from = buildRecordIgnoreAbove({ 'properties.name.type': 'text' });
+      const to = buildRecordIgnoreAbove({
+        'properties.name.type': 'text',
+        'properties.name.fields.keyword.type': 'keyword',
+      });
+
+      expect(() =>
+        validateChangesExistingType({ from, to, registeredType: baseRegisteredType, log })
+      ).toThrowError(/name\.fields\.keyword/);
+    });
+
+    it('should not throw when a keyword field lost ignore_above relative to baseline (treated as newly introduced problem)', () => {
+      // A field that had ignore_above in the baseline but lost it is a newly introduced problem,
+      // even though the field key existed before.
+      const from = buildRecordIgnoreAbove({
+        'properties.myField.type': 'keyword',
+        'properties.myField.ignore_above': 1024,
+      });
+      const to = buildRecordIgnoreAbove({ 'properties.myField.type': 'keyword' });
+
+      expect(() =>
+        validateChangesExistingType({ from, to, registeredType: baseRegisteredType, log })
+      ).toThrowError(
+        /The SO type 'my-type' has newly introduced 'keyword' or 'flattened' mapping fields without 'ignore_above': myField/
+      );
+      expect(log).not.toHaveBeenCalled();
+    });
   });
 
   describe('name/title field type validation', () => {
@@ -295,7 +430,7 @@ describe('validateChangesExistingType', () => {
       expect(log).not.toHaveBeenCalled();
     });
 
-    it('should not validate types not searchable via the management page', () => {
+    it('should not validate name/title field types for types not searchable via the management page', () => {
       const internalType: SavedObjectsType = {
         name: 'my-type',
         namespaceType: 'agnostic',
@@ -306,13 +441,17 @@ describe('validateChangesExistingType', () => {
       } as unknown as SavedObjectsType;
       // Use the same keyword mapping in both from and to so that the model-version check does not
       // fire — we only want to verify that the name/title check is skipped for internal types.
+      // Both snapshots have the same keyword field, so it is treated as pre-existing by the
+      // ignore_above check, which emits a warning but does not throw.
       const from = buildRecord({ 'properties.name.type': 'keyword' });
       const to = buildRecord({ 'properties.name.type': 'keyword' });
 
       expect(() =>
         validateChangesExistingType({ from, to, registeredType: internalType, log })
       ).not.toThrow();
-      expect(log).not.toHaveBeenCalled();
+      expect(log).not.toHaveBeenCalledWith(
+        expect.stringContaining("'name' or 'title' fields with incorrect types")
+      );
     });
   });
 });

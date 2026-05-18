@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { FILE_SO_TYPE } from '@kbn/files-plugin/common/constants';
 import type { ExternalReferenceAttachmentPayload } from '../../../common/types/domain';
 import { ExternalReferenceStorageType } from '../../../common/types/domain';
+import { LEGACY_FILE_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
 
 type ExternalReferenceStorage = ExternalReferenceAttachmentPayload['externalReferenceStorage'];
 
@@ -14,16 +16,15 @@ type ExternalReferenceStorage = ExternalReferenceAttachmentPayload['externalRefe
  * Resolves the legacy `externalReferenceStorage` that should be emitted when
  * converting a unified attachment back to its legacy external-reference shape.
  *
- * Today only `endpoint` is migrated and its payloads live in Elasticsearch
- * documents (not saved objects); future migrations of subtypes that persist
- * via `savedObject` (e.g. a migrated Osquery attachment) should add an entry
- * here rather than hard-coding the storage shape inside the transformer.
- *
  * The map is keyed by the legacy `externalReferenceAttachmentTypeId` so both
  * directions of the transformer can share the same source of truth.
  */
 const EXTERNAL_REFERENCE_STORAGE_BY_TYPE_ID: Record<string, ExternalReferenceStorage> = {
   endpoint: { type: ExternalReferenceStorageType.elasticSearchDoc },
+  [LEGACY_FILE_ATTACHMENT_TYPE]: {
+    type: ExternalReferenceStorageType.savedObject,
+    soType: FILE_SO_TYPE,
+  },
 };
 
 /**
