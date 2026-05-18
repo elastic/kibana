@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { getPlaywrightTagsFor } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import { apiTest, mergeSyntheticsApiHeaders } from '../fixtures';
 import { addMonitor } from '../fixtures/monitors';
@@ -30,17 +29,13 @@ const byLabel = (a: LabelCount, b: LabelCount) => a.label.localeCompare(b.label)
 apiTest.describe(
   'getMonitorFilters',
   {
-    tag: [
-      ...getPlaywrightTagsFor('stateful', 'classic', 'local'),
-      ...getPlaywrightTagsFor('serverless', 'observability_complete', 'local'),
-    ],
+    tag: ['@local-stateful-classic', '@local-serverless-observability_complete'],
   },
   () => {
     let editorHeaders: Record<string, string>;
     let privateLocation: { id: string; label: string };
 
     apiTest.beforeAll(async ({ requestAuth, apiServices, kbnClient }) => {
-      apiTest.setTimeout(120_000);
       await kbnClient.savedObjects.clean({
         types: [SYNTHETICS_MONITOR_TYPE, LEGACY_SYNTHETICS_MONITOR_TYPE],
       });

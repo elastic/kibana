@@ -6,7 +6,6 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { getPlaywrightTagsFor } from '@kbn/scout-oblt';
 import type { ApiClientFixture } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
 import { apiTest, KIBANA_HEADERS, SYNTHETICS_API_URLS } from '../fixtures';
@@ -72,10 +71,7 @@ const ENABLED_RESPONSE_EDITOR = {
 apiTest.describe(
   'SyntheticsEnablement',
   {
-    tag: [
-      ...getPlaywrightTagsFor('stateful', 'classic', 'local'),
-      ...getPlaywrightTagsFor('serverless', 'observability_complete', 'local'),
-    ],
+    tag: ['@local-stateful-classic', '@local-serverless-observability_complete'],
   },
   () => {
     interface ApiKey {
