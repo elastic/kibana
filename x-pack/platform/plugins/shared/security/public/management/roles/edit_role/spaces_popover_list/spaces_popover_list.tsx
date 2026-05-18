@@ -128,6 +128,7 @@ export class SpacesPopoverList extends Component<Props, State> {
           rowHeight: 40,
           showIcons: false,
           onFocusBadge: false,
+          paddingSize: 's',
         }}
       >
         {(list, search) => (

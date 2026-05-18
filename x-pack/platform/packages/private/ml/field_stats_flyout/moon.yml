@@ -29,6 +29,7 @@ dependsOn:
   - '@kbn/ml-query-utils'
   - '@kbn/ml-is-defined'
   - '@kbn/field-types'
+  - '@kbn/css-utils'
 tags:
   - shared-browser
   - package
