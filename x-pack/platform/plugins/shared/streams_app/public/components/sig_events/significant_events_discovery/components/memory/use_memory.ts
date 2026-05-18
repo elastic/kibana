@@ -7,6 +7,7 @@
 
 import { useQuery, useMutation, useQueryClient, type UseMutationResult } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import type {
   MemoryEntry,
@@ -151,15 +152,19 @@ const useMemoryTaskAction = (
       );
     },
     onError: (error) => {
-      core.notifications.toasts.addError(
-        error instanceof Error ? error : new Error(String(error)),
-        {
-          title: i18n.translate('xpack.streams.memory.taskError', {
-            defaultMessage: '{actionName} failed.',
-            values: { actionName },
-          }),
-        }
-      );
+      const fetchError = error as IHttpFetchError<{ message?: string }>;
+      const serverMessage = fetchError?.body?.message;
+      const displayError = serverMessage
+        ? new Error(serverMessage)
+        : error instanceof Error
+        ? error
+        : new Error(String(error));
+      core.notifications.toasts.addError(displayError, {
+        title: i18n.translate('xpack.streams.memory.taskError', {
+          defaultMessage: '{actionName} failed.',
+          values: { actionName },
+        }),
+      });
     },
   });
 };
