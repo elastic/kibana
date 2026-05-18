@@ -139,6 +139,22 @@ export class TelemetryEventsSender {
             description: 'Pack enabled',
           },
         },
+        schedule_type: {
+          type: 'keyword',
+          _meta: {
+            description:
+              'Pack-level schedule type: `interval`, `rrule`, or `null` for legacy packs',
+            optional: true,
+          },
+        },
+        queries_with_override: {
+          type: 'short',
+          _meta: {
+            description:
+              'Count of queries whose persisted schedule_type differs from the pack-level schedule_type',
+            optional: true,
+          },
+        },
       },
     });
 

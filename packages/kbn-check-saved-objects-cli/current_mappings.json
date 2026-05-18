@@ -3540,6 +3540,9 @@
       "enabled": {
         "type": "boolean"
       },
+      "interval": {
+        "type": "integer"
+      },
       "name": {
         "type": "text"
       },
@@ -3569,6 +3572,13 @@
             "type": "keyword"
           }
         }
+      },
+      "rrule_schedule": {
+        "dynamic": false,
+        "properties": {}
+      },
+      "schedule_type": {
+        "type": "keyword"
       },
       "shards": {
         "dynamic": false,

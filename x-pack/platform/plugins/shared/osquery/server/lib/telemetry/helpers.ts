@@ -22,6 +22,22 @@ export const templateConfigs = (configsData: PackagePolicy[]) =>
   }));
 
 /**
+ * Counts queries whose persisted `schedule_type` differs from the pack's
+ * pack-level `schedule_type`. Legacy packs (no `schedule_type` on the pack)
+ * return `0` so the flag-off baseline is meaningful — see PR A telemetry
+ * note in `tasks.md` 1.10.
+ */
+const countQueriesWithOverride = (pack: PackSavedObject): number => {
+  const packScheduleType = pack.schedule_type ?? null;
+  if (packScheduleType === null) return 0;
+
+  return filter(
+    pack.queries,
+    (query) => query.schedule_type !== undefined && query.schedule_type !== packScheduleType
+  ).length;
+};
+
+/**
  * Constructs the packs telemetry schema from a collection of packs saved objects
  */
 export const templatePacks = (packsData: PackSavedObject[]) => {
@@ -37,8 +53,20 @@ export const templatePacks = (packsData: PackSavedObject[]) => {
           ?.length,
         prebuilt:
           !!filter(item.references, ['type', 'osquery-pack-asset']) && item.version !== undefined,
+        // `null` for legacy packs (no pack-level `schedule_type`); the flag-off
+        // baseline distinguishes "never used RRULE" from "explicit interval".
+        schedule_type: item.schedule_type ?? null,
+        queries_with_override: countQueriesWithOverride(item),
       },
-      ['name', 'queries', 'policies', 'prebuilt', 'enabled']
+      [
+        'name',
+        'queries',
+        'policies',
+        'prebuilt',
+        'enabled',
+        'schedule_type',
+        'queries_with_override',
+      ]
     )
   );
 };

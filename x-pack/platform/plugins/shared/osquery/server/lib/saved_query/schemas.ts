@@ -77,3 +77,25 @@ export const packSchemaV2 = packSchemaV1.extends({
   created_by_profile_uid: schema.maybe(schema.nullable(schema.string())),
   updated_by_profile_uid: schema.maybe(schema.nullable(schema.string())),
 });
+
+const rruleScheduleConfigSchema = schema.object(
+  {
+    rrule: schema.string(),
+    start_date: schema.string(),
+    end_date: schema.maybe(schema.string()),
+    splay: schema.maybe(schema.string()),
+    timeout: schema.maybe(schema.number()),
+  },
+  { unknowns: 'allow' }
+);
+
+export const packSchemaV3 = packSchemaV2.extends({
+  // Nullable so update routes can clear the prior-mode pack-level field on a
+  // schedule_type transition (D14) — the SO mapping accepts null and the
+  // discriminated read/find responses then drop the slot entirely.
+  schedule_type: schema.maybe(
+    schema.nullable(schema.oneOf([schema.literal('interval'), schema.literal('rrule')]))
+  ),
+  interval: schema.maybe(schema.nullable(schema.number())),
+  rrule_schedule: schema.maybe(schema.nullable(rruleScheduleConfigSchema)),
+});
