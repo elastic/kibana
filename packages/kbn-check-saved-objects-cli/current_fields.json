@@ -100,7 +100,6 @@
     "auth.owner",
     "createdAt",
     "createdBy",
-    "createdByUsername",
     "description",
     "destinations",
     "destinations.id",
@@ -116,8 +115,7 @@
     "throttle.strategy",
     "type",
     "updatedAt",
-    "updatedBy",
-    "updatedByUsername"
+    "updatedBy"
   ],
   "alerting_api_key_pending_invalidation": [
     "apiKeyId",
@@ -967,11 +965,7 @@
   ],
   "inventory-view": [],
   "kql-telemetry": [],
-  "lead-generation-config": [
-    "connectorId",
-    "lastError",
-    "lastExecutionUuid"
-  ],
+  "lead-generation-config": [],
   "legacy-url-alias": [
     "disabled",
     "resolveCounter",
