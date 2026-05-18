@@ -281,6 +281,46 @@ describe('reportChartSectionError', () => {
       });
     });
 
+    it('does not let caller-supplied labels override reserved label keys', () => {
+      // The `ChartSectionErrorLabels` type prevents callers from passing
+      // `error_type`, `chart_section_source`, or the `esql_*` keys at compile
+      // time. This test guards the runtime merge order so a caller that
+      // bypasses the type (e.g., spreading from `any`) can never overwrite
+      // the values the reporter owns.
+      const esqlError = new EsqlResponseError(
+        {
+          type: 'verification_exception',
+          reason: 'unknown column x',
+          root_cause: [{ type: 'verification_exception', reason: 'unknown column x' }],
+        },
+        { status: 400 }
+      );
+
+      const hostileLabels = {
+        profile_id: 'metrics-experience',
+        error_type: 'spoofed-error-type',
+        chart_section_source: 'spoofed-source',
+        esql_error_type: 'spoofed-esql-type',
+        esql_status: 'spoofed-esql-status',
+      } as unknown as Parameters<typeof reportChartSectionError>[0]['labels'];
+
+      reportChartSectionError({
+        error: esqlError,
+        source: 'useLensProps',
+        labels: hostileLabels,
+      });
+
+      expect(captureErrorMock).toHaveBeenCalledWith(esqlError, {
+        labels: {
+          error_type: CHART_SECTION_ERROR_TYPE_LABEL,
+          chart_section_source: 'useLensProps',
+          esql_error_type: 'verification_exception',
+          esql_status: '400',
+          profile_id: 'metrics-experience',
+        },
+      });
+    });
+
     it('preserves EsqlResponseError fields alongside caller labels', () => {
       const esqlError = new EsqlResponseError(
         {

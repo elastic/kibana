@@ -55,23 +55,25 @@ export const reportChartSectionError = ({
   // Best-effort: APM reporting must never break the host app. If `@elastic/apm-rum`
   // throws (e.g. transport failure, internal error) swallow it silently.
   try {
-    const labels: Record<string, string> = {
-      error_type: CHART_SECTION_ERROR_TYPE_LABEL,
-      chart_section_source: source,
-    };
+    const labels: Record<string, string> = {};
+    // Drop undefined / empty values so APM is not polluted with placeholder
+    // labels (e.g., an unset `chart_id`). Caller labels are written first so
+    // that the reserved keys assigned below (`error_type`,
+    // `chart_section_source`, `esql_*`) always win on collision and cannot be
+    // overridden by a caller bypassing the `ChartSectionErrorLabels` type.
+    for (const [key, value] of Object.entries(callerLabels)) {
+      if (value !== undefined && value !== '') {
+        labels[key] = value;
+      }
+    }
+    labels.error_type = CHART_SECTION_ERROR_TYPE_LABEL;
+    labels.chart_section_source = source;
     if (error instanceof EsqlResponseError) {
       if (error.type) {
         labels.esql_error_type = error.type;
       }
       if (error.status != null) {
         labels.esql_status = String(error.status);
-      }
-    }
-    // Drop undefined / empty values so APM is not polluted with placeholder
-    // labels (e.g., an unset `chart_id`).
-    for (const [key, value] of Object.entries(callerLabels)) {
-      if (value !== undefined && value !== '') {
-        labels[key] = value;
       }
     }
 
