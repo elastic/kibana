@@ -1,8 +1,3 @@
----
-name: kui-side-navigation
-description: Solution-focused left-side navigation for Kibana chrome and KUI consumers. Use when defining, implementing, or reviewing primary/secondary nav structure, collapse behavior, badges, or overflow "More" menu.
----
-
 # Left-side navigation
 
 Package `@kbn/ui-side-navigation` · Component `Navigation` · UX source: *Solution-focused left-side navigation* (approved Jul 2025).
@@ -11,7 +6,7 @@ Package `@kbn/ui-side-navigation` · Component `Navigation` · UX source: *Solut
 
 Adaptive left chrome navigation: **logo**, **primary** rail (top + **More** overflow), **footer** utilities, and optional **secondary** panel or popovers for child links. Built on [EUI](https://eui.elastic.co/) (`IconType`, breakpoints, tooltips, popovers). Accessibility-first (roving focus, `aria-current`, screen-reader hints). Part of solution chrome layout (grid sidebar slot).
 
-![Expanded mode](./references/assets/expanded_mode.png) ![Collapsed mode](./references/assets/collapsed_mode.png)
+![Expanded mode](./wiki/assets/expanded_mode.png) ![Collapsed mode](./wiki/assets/collapsed_mode.png)
 
 ## Problem it solves
 
@@ -29,39 +24,39 @@ Adaptive left chrome navigation: **logo**, **primary** rail (top + **More** over
 ## When not to use
 
 - Classic Kibana nav (different chrome).
-- In-page-only wayfinding (tabs, breadcrumbs)—see [primary](./references/primary-menu.md#content-guidelines) / [secondary](./references/secondary-menu.md#content-guidelines) content rules.
+- In-page-only wayfinding (tabs, breadcrumbs)—see [primary](./wiki/primary-menu.md#content-guidelines) / [secondary](./wiki/secondary-menu.md#content-guidelines) content rules.
 - Announcements or non-nav content in the secondary panel.
-- Very shallow IA (2–3 links)—see [secondary menu](./references/secondary-menu.md#content-guidelines).
+- Very shallow IA (2–3 links)—see [secondary menu](./wiki/secondary-menu.md#content-guidelines).
 - Features marked **future/WIP** in UX only (resizable secondary, listing-page auto-hide, in-panel search)—not in this component yet.
 
 ## Anatomy
 
 | Part | Role | Detail |
 | ---- | ---- | ------ |
-| Primary menu | Logo, top items, More overflow | [references/primary-menu.md](./references/primary-menu.md) |
-| Secondary menu | Child links & sections | [references/secondary-menu.md](./references/secondary-menu.md) |
-| Footer menu | Utilities (e.g. Settings) | [references/footer.md](./references/footer.md) |
-| Badges | New / beta / tech preview | [references/badges.md](./references/badges.md) |
-| Collapse control | Expanded ↔ collapsed | [references/modes.md](./references/modes.md) |
+| Primary menu | Logo, top items, More overflow | [wiki/primary-menu.md](./wiki/primary-menu.md) |
+| Secondary menu | Child links & sections | [wiki/secondary-menu.md](./wiki/secondary-menu.md) |
+| Footer menu | Utilities (e.g. Settings) | [wiki/footer.md](./wiki/footer.md) |
+| Badges | New / beta / tech preview | [wiki/badges.md](./wiki/badges.md) |
+| Collapse control | Expanded ↔ collapsed | [wiki/modes.md](./wiki/modes.md) |
 
 ## Behavior
 
 - **Expanded:** Labels on primary items; secondary **persists** beside the rail when the active primary has `sections`.
 - **Collapsed:** Icon-only rail; secondary in **popovers** (footer popovers bottom-aligned).
 - **Active state:** Exactly one `aria-current="page"`; parent highlighted when a child route is active.
-- **More:** Click-pinned nested popover when primary overflows—[primary-menu](./references/primary-menu.md#more-overflow).
+- **More:** Click-pinned nested popover when primary overflows—[primary-menu](./wiki/primary-menu.md#more-overflow).
 - **Responsive:** `xs`/`s` forces collapsed; collapse toggle hidden.
-- **New badges:** Visit tracking + caps in `useNewItems`—[badges](./references/badges.md).
+- **New badges:** Visit tracking + caps in `useNewItems`—[badges](./wiki/badges.md).
 
-Full interaction matrix (expanded vs collapsed): [references/modes.md](./references/modes.md).
+Full interaction matrix (expanded vs collapsed): [wiki/modes.md](./wiki/modes.md).
 
 ## Code
 
 | Topic | Reference |
 | ----- | --------- |
-| Props, types, exports, a11y | [references/code/api.md](./references/code/api.md) |
-| Full examples | [references/code/examples.md](./references/code/examples.md) |
-| Kibana chrome wiring | [references/code/kibana-integration.md](./references/code/kibana-integration.md) |
+| Props, types, exports, a11y | [wiki/code/api.md](./wiki/code/api.md) |
+| Full examples | [wiki/code/examples.md](./wiki/code/examples.md) |
+| Kibana chrome wiring | [wiki/code/kibana-integration.md](./wiki/code/kibana-integration.md) |
 
 ```tsx
 import { Navigation } from '@kbn/ui-side-navigation';
