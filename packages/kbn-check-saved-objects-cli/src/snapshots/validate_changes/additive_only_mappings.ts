@@ -57,7 +57,7 @@ export const validateAdditiveOnlyMappings = (
         `Mapped properties have been removed from SO type '${name}', which is not allowed. ` +
         `Missing properties: ${JSON.stringify(missing)}.`,
       fixHint: `Restore the removed mapped properties; existing mapped fields cannot be deleted.`,
-      docsAnchor: '#defining-model-versions',
+      docsAnchor: '/validate#ensuring-safe-saved-objects-type-changes',
     });
   }
 };
