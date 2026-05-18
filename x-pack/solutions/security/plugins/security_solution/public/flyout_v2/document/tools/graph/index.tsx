@@ -33,6 +33,10 @@ import { DocumentFlyoutWrapper } from '../../main/document_flyout_wrapper';
 import { useDefaultDocumentFlyoutProperties } from '../../../shared/hooks/use_default_flyout_properties';
 import { Network } from '../../../network/main';
 import type { FlowTargetSourceDest } from '../../../../../common/search_strategy';
+import { HostPanel } from '../../../../flyout/entity_details/host_right';
+import { UserPanel } from '../../../../flyout/entity_details/user_right';
+import { ServicePanel } from '../../../../flyout/entity_details/service_right';
+import { GenericEntityPanel } from '../../../../flyout/entity_details/generic_right';
 
 export const GRAPH_TOOLS_TEST_ID = `${PREFIX}GraphTools` as const;
 
@@ -112,9 +116,54 @@ export const GraphDetails = memo(
       [defaultFlyoutProperties, history, historyKey, overlays, services, store]
     );
 
-    // Entity panels (host, user, service) are not yet migrated to flyout_v2.
-    // Once they exist under flyout_v2/, wire this up the same way as onOpenDocumentPreview.
-    const onOpenEntityPreview = useCallback(() => {}, []);
+    const onOpenEntityPreview = useCallback(
+      ({
+        engineType,
+        entityId,
+        entityName,
+      }: {
+        engineType: string | undefined;
+        entityId: string;
+        entityName: string | undefined;
+      }) => {
+        const contextID = GRAPH_SCOPE_ID;
+        const child =
+          engineType === 'host' ? (
+            <HostPanel
+              contextID={contextID}
+              scopeId={GRAPH_SCOPE_ID}
+              hostName={entityName ?? ''}
+              entityId={entityId}
+              isPreviewMode
+            />
+          ) : engineType === 'user' ? (
+            <UserPanel
+              contextID={contextID}
+              scopeId={GRAPH_SCOPE_ID}
+              userName={entityName ?? ''}
+              entityId={entityId}
+              isPreviewMode
+            />
+          ) : engineType === 'service' ? (
+            <ServicePanel
+              contextID={contextID}
+              scopeId={GRAPH_SCOPE_ID}
+              serviceName={entityName ?? ''}
+              entityId={entityId}
+              isPreviewMode
+            />
+          ) : (
+            <GenericEntityPanel scopeId={GRAPH_SCOPE_ID} entityId={entityId} isPreviewMode />
+          );
+
+        overlays.openSystemFlyout(flyoutProviders({ services, store, history, children: child }), {
+          ...defaultFlyoutProperties,
+          historyKey,
+          session: 'inherit',
+        });
+      },
+      [defaultFlyoutProperties, history, historyKey, overlays, services, store]
+    );
 
     const onOpenGroupedPreview = useCallback(
       (params: Omit<GraphGroupedNodePreviewPanelProps, 'scopeId' | 'showLoadingState'>) =>

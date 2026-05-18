@@ -21,7 +21,10 @@ import {
   type GraphGroupedNodePreviewPanelProps,
   type NodeViewModel,
 } from '@kbn/cloud-security-posture-graph';
-import { type NodeDocumentDataModel } from '@kbn/cloud-security-posture-common/types/graph/v1';
+import {
+  type NodeDocumentDataModel,
+  type EntityDocumentDataModel,
+} from '@kbn/cloud-security-posture-common/types/graph/v1';
 import { DOCUMENT_TYPE_ENTITY } from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import { isEntityNodeEnriched } from '@kbn/cloud-security-posture-graph/src/components/utils';
 import { useFlyoutBodyAvailableHeight } from '../hooks/use_flyout_body_available_height';
@@ -255,6 +258,10 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props
       } else if (docMode === 'grouped-entities' && documentsData.length > 0) {
         const entityItems = (node.documentsData as NodeDocumentDataModel[])
           .slice(0, MAX_DOCUMENTS_TO_LOAD)
+          .filter(
+            (doc): doc is NodeDocumentDataModel & { entity: EntityDocumentDataModel } =>
+              doc.entity !== undefined
+          )
           .map((doc) => ({
             itemType: DOCUMENT_TYPE_ENTITY,
             entity: doc.entity,
