@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ACCESSES_ENGINE_CONFIGS golden snapshots aws_cloudtrail: targets-per-actor ES|QL is locked 1`] = `
+exports[`ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS golden snapshots aws_cloudtrail: targets-per-actor ES|QL is locked 1`] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM logs-aws.cloudtrail-__namespace__
 | WHERE event.module == \\"aws\\"
@@ -41,7 +41,7 @@ true, CASE((user.email IS NOT NULL AND user.email != \\"\\" AND entity.namespace
 | LIMIT 3500"
 `;
 
-exports[`ACCESSES_ENGINE_CONFIGS golden snapshots elastic_defend: targets-per-actor ES|QL is locked 1`] = `
+exports[`ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS golden snapshots elastic_defend: targets-per-actor ES|QL is locked 1`] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM logs-endpoint.events.security-__namespace__
 | WHERE event.action == \\"log_on\\"
@@ -82,7 +82,7 @@ true, CASE((user.email IS NOT NULL AND user.email != \\"\\" AND entity.namespace
 | LIMIT 3500"
 `;
 
-exports[`ACCESSES_ENGINE_CONFIGS golden snapshots system_auth: targets-per-actor ES|QL is locked 1`] = `
+exports[`ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS golden snapshots system_auth: targets-per-actor ES|QL is locked 1`] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM logs-system.auth-__namespace__
 | WHERE event.category IN (\\"authentication\\", \\"session\\")
@@ -123,7 +123,7 @@ true, CASE((user.email IS NOT NULL AND user.email != \\"\\" AND entity.namespace
 | LIMIT 3500"
 `;
 
-exports[`ACCESSES_ENGINE_CONFIGS golden snapshots system_security: targets-per-actor ES|QL is locked 1`] = `
+exports[`ACCESSES_INTEGRATION_RELATIONSHIP_CONFIGS golden snapshots system_security: targets-per-actor ES|QL is locked 1`] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM logs-system.security-__namespace__
 | WHERE event.action IN (\\"logged-in\\", \\"logged-in-explicit\\")
