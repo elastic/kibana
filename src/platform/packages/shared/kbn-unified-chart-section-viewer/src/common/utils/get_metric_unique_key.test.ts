@@ -70,9 +70,15 @@ describe('getMetricUniqueKey', () => {
     expect(key.length).toBe(255 + 2 + 255);
   });
 
-  it('remains parseable when metricName contains ":" (dataStream cannot per ES rules)', () => {
+  // ES forbids ":" in dataStream, so the first "::" is always the delimiter
+  // and the encoding stays injective even if metricName contains "::".
+  it('stays injective when metricName contains "::"', () => {
     const a = buildItem({ dataStream: 'metrics-system', metricName: 'a::b' });
-    const b = buildItem({ dataStream: 'metrics-system', metricName: 'a:b' });
-    expect(getMetricUniqueKey(a)).not.toBe(getMetricUniqueKey(b));
+    const b = buildItem({ dataStream: 'metrics-system', metricName: 'a::c' });
+    const c = buildItem({ dataStream: 'metrics-system', metricName: 'a::b::c' });
+    const d = buildItem({ dataStream: 'metrics-other', metricName: 'a::b' });
+
+    const keys = [a, b, c, d].map(getMetricUniqueKey);
+    expect(new Set(keys).size).toBe(keys.length);
   });
 });

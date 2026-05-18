@@ -90,6 +90,8 @@ export const MetricsGrid = ({
     if (!flyoutState) {
       return undefined;
     }
+    // `metricItems` is already scoped to the current page (see `PAGE_SIZE`), so
+    // this lookup is bounded and intentionally not indexed/memoized further.
     const matchedItem = metricItems.find(
       (item) => getMetricUniqueKey(item) === flyoutState.metricUniqueKey
     );
