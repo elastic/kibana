@@ -25,10 +25,6 @@ export interface RuleEventFilter {
 
 /**
  * Test-time accessor for the alerting_v2 `.rule-events` data stream.
- *
- * Knows the on-disk schema (`rule.id`, `type`, `status`, `episode.status`,
- * `group_hash`) so specs can read the stream as `apiServices.alertingV2.ruleEvents.find(...)`
- * instead of hand-writing search bodies.
  */
 export interface RuleEventsApiService {
   find: (ruleId: string, filter?: RuleEventFilter) => Promise<AlertEvent[]>;
@@ -38,8 +34,6 @@ export interface RuleEventsApiService {
   waitForAtLeast: (ruleId: string, min: number, filter?: RuleEventFilter) => Promise<void>;
   /**
    * Bulk-seed alert events directly into the `.rule-events` data stream.
-   * Used by dispatcher tests that drive the dispatcher with synthetic events
-   * instead of going through the rule executor.
    */
   seed: (events: AlertEvent[]) => Promise<void>;
   /** Removes every document from the `.rule-events` data stream. */

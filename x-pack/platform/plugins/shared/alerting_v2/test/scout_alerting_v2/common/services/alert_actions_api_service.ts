@@ -14,22 +14,16 @@ import { ALERT_ACTIONS_DATA_STREAM, POLL_INTERVAL_MS, POLL_TIMEOUT_MS } from '..
 
 export interface AlertActionsFilter {
   ruleId?: string;
-  actionType?: AlertAction['action_type'];
   actionTypes?: ReadonlyArray<AlertAction['action_type']>;
 }
 
 /**
  * Test-time accessor for the alerting_v2 `.alert-actions` data stream.
- *
- * Knows the on-disk schema (`rule_id`, `action_type`, `group_hash`,
- * `last_series_event_timestamp`, etc.) so dispatcher specs can read the stream
- * via `apiServices.alertingV2.alertActions.find(...)` instead of hand-writing
- * search bodies.
  */
 export interface AlertActionsApiService {
   /** Bulk-seed historical actions (e.g. ack/snooze/deactivate) to the data stream. */
   seed: (actions: AlertAction[]) => Promise<void>;
-  /** Search the data stream by rule id and/or action type(s). */
+  /** Search the data stream by rule id and/or one or more action types. */
   find: (filter?: AlertActionsFilter) => Promise<AlertAction[]>;
   /** Polls `find(...)` until at least `min` matching actions exist. */
   waitForAtLeast: (min: number, filter?: AlertActionsFilter) => Promise<void>;
@@ -50,14 +44,13 @@ export const getAlertActionsApiService = ({
 
       const must: object[] = [];
       if (filter.ruleId) must.push({ term: { rule_id: filter.ruleId } });
-      if (filter.actionType) must.push({ term: { action_type: filter.actionType } });
       if (filter.actionTypes) must.push({ terms: { action_type: [...filter.actionTypes] } });
 
       const result = await esClient.search<AlertAction>({
         index: ALERT_ACTIONS_DATA_STREAM,
         query: must.length === 0 ? { match_all: {} } : { bool: { filter: must } },
         sort: [{ '@timestamp': 'asc' }],
-        size: 1000,
+        size: 100,
       });
       return result.hits.hits.map((hit) => hit._source as AlertAction);
     });

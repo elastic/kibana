@@ -25,10 +25,6 @@ export interface WaitForEnabledStateParams {
 
 export interface RulesApiService {
   create: (data: CreateRuleData) => Promise<RuleResponse>;
-  /**
-   * Creates a rule with the given identifier, or fully replaces it if one
-   * already exists. Backed by `PUT /api/alerting/v2/rules/{id}`.
-   */
   upsert: (id: string, data: CreateRuleData) => Promise<RuleResponse>;
   get: (id: string) => Promise<RuleResponse>;
   find: (query?: FindRulesParams) => Promise<FindRulesResponse>;

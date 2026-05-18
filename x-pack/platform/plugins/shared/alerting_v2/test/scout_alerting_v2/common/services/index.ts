@@ -22,3 +22,6 @@ export { getAlertActionsApiService } from './alert_actions_api_service';
 
 export type { ActionPoliciesApiService } from './action_policies_api_service';
 export { getActionPoliciesApiService } from './action_policies_api_service';
+
+export type { MaintenanceWindowsApiService } from './maintenance_windows_api_service';
+export { getMaintenanceWindowsApiService } from './maintenance_windows_api_service';

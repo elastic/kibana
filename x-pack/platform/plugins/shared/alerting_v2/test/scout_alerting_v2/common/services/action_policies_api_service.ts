@@ -22,16 +22,10 @@ export interface ActionPoliciesApiService {
   upsert: (id: string, data: CreateActionPolicyDataInput) => Promise<ActionPolicyResponse>;
   get: (id: string) => Promise<ActionPolicyResponse>;
   list: (query?: Record<string, string | number | boolean>) => Promise<FindActionPoliciesResponse>;
-  update: (params: {
-    id: string;
-    version: string;
-    data: UpdateActionPolicyData;
-  }) => Promise<ActionPolicyResponse>;
+  patch: (id: string, data: UpdateActionPolicyData) => Promise<ActionPolicyResponse>;
   enable: (id: string) => Promise<ActionPolicyResponse>;
   disable: (id: string) => Promise<ActionPolicyResponse>;
   delete: (id: string) => Promise<void>;
-  /** Convenience: GET → merge → PUT to update partial attributes without manually fetching the version. */
-  patch: (id: string, data: UpdateActionPolicyData) => Promise<ActionPolicyResponse>;
   cleanUp: () => Promise<void>;
 }
 
@@ -61,24 +55,19 @@ export const getActionPoliciesApiService = ({
       return response.data;
     });
 
-  const update: ActionPoliciesApiService['update'] = ({ id, version, data }) =>
-    measurePerformanceAsync(log, 'actionPolicies.update', async () => {
-      const response = await kbnClient.request<ActionPolicyResponse>({
-        method: 'PATCH',
-        path: `${ALERTING_V2_ACTION_POLICY_API_PATH}/${encodeURIComponent(id)}`,
-        headers: COMMON_HEADERS,
-        body: { ...data, version },
-      });
-      return response.data;
-    });
-
   const patch: ActionPoliciesApiService['patch'] = (id, data) =>
     measurePerformanceAsync(log, 'actionPolicies.patch', async () => {
       const current = await get(id);
       if (!current.version) {
         throw new Error(`Action policy "${id}" has no version; cannot patch.`);
       }
-      return update({ id, version: current.version, data });
+      const response = await kbnClient.request<ActionPolicyResponse>({
+        method: 'PATCH',
+        path: `${ALERTING_V2_ACTION_POLICY_API_PATH}/${encodeURIComponent(id)}`,
+        headers: COMMON_HEADERS,
+        body: { ...data, version: current.version },
+      });
+      return response.data;
     });
 
   return {
@@ -106,7 +95,6 @@ export const getActionPoliciesApiService = ({
 
     get,
     list,
-    update,
     patch,
 
     enable: (id) =>
