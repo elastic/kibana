@@ -58,6 +58,7 @@ interface UseIlmLifecycleSummaryProps {
 interface UseIlmLifecycleSummaryResult {
   phases: LifecyclePhase[];
   loading: boolean;
+  policyMissing: boolean;
   onRemovePhase?: (phaseName: string) => void;
   onRemoveDownsampleStep?: (stepNumber: number) => void;
   onEditPhase?: (phaseName: PhaseName) => void;
@@ -580,6 +581,7 @@ export const useIlmLifecycleSummary = ({
   return {
     phases,
     loading: isIlm && ilmLoading,
+    policyMissing: isIlm ? ilmStatsValue?.policy_missing ?? false : false,
     onRemovePhase: isIlm ? handleRemovePhase : undefined,
     onRemoveDownsampleStep: isIlm ? handleRemoveIlmDownsampleStep : undefined,
     onEditPhase: isIlm ? (phaseName) => openEditFlyout({ phaseName }) : undefined,
