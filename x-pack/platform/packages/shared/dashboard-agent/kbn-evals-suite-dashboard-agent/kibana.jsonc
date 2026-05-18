@@ -1,0 +1,7 @@
+{
+  "type": "functional-tests",
+  "id": "@kbn/evals-suite-dashboard-agent",
+  "owner": "@elastic/appex-ai-infra",
+  "group": "platform",
+  "visibility": "private"
+}

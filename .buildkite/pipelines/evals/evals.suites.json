@@ -138,6 +138,7 @@
       "serverConfigSet": "evals_entity_analytics"
     },
     {
+<<<<<<< Updated upstream:.buildkite/pipelines/evals/evals.suites.json
       "id": "entity-analytics-v2",
       "name": "Security Entity Analytics V2",
       "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-entity-analytics/playwright.v2.config.ts",
@@ -186,6 +187,19 @@
       "configPath": "x-pack/solutions/security/packages/kbn-evals-suite-security-automatic-migrations/playwright.config.ts",
       "tags": ["security", "migrations"],
       "ciLabels": ["evals:security-automatic-migrations"]
+=======
+      "id": "dashboard-agent",
+      "name": "Dashboard Agent",
+      "configPath": "x-pack/platform/packages/shared/dashboard-agent/kbn-evals-suite-dashboard-agent/playwright.config.ts",
+      "tags": [
+        "platform",
+        "dashboard-agent"
+      ],
+      "ciLabels": [
+        "evals:dashboard-agent"
+      ],
+      "serverConfigSet": "evals_dashboard_agent"
+>>>>>>> Stashed changes:x-pack/platform/packages/shared/kbn-evals/evals.suites.json
     }
   ]
 }
