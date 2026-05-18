@@ -68,13 +68,34 @@ export class AgentBuilderWorkflowsPlugin
       return startDeps.workflowsExtensions;
     };
 
+    // EVAL-ONLY: inline allow-list of `kibana.request` (method, path) pairs
+    // that the v6 alert-analysis skill exercises. Treated as read-only so
+    // `workflow_execute_step` runs them without a HITL confirmation dialog
+    // (Primitive A) and emits the discovery hint (Primitive B) for any path
+    // not on this list.
+    //
+    // FIXME(@platform): when promoting Primitive A out of v6-empirics, replace
+    // this with a setup-contract registration hook
+    // (`agentBuilderWorkflows.registerSafeKibanaRequestPath(method, path)`)
+    // so security_solution / observability can register their own paths from
+    // their own plugin start. Keeping the wiring inline here for the eval
+    // branch avoids a cross-plugin contract change just to demo the primitive.
+    const getSafeKibanaRequestPaths = () => [
+      'POST:/internal/security_solution/alert_analysis/related_alerts',
+    ];
+
     // Workflow tools
     registerValidateWorkflowTool(agentBuilder, api);
     registerGetStepDefinitionsTool(agentBuilder, api, getWorkflowsExtensions);
     registerGetTriggerDefinitionsTool(agentBuilder);
     registerGetConnectorsTool(agentBuilder, api);
     registerGetExamplesTool(agentBuilder);
-    registerWorkflowExecuteStepTool(agentBuilder, api, getWorkflowsExtensions);
+    registerWorkflowExecuteStepTool(
+      agentBuilder,
+      api,
+      getWorkflowsExtensions,
+      getSafeKibanaRequestPaths
+    );
     registerWorkflowEditTools(agentBuilder, api, aiTelemetryClient);
 
     // Workflow attachment types

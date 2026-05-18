@@ -69,11 +69,19 @@ Call \`platform.workflows.workflow_execute_step\` with inline workflow YAML and 
   - \`hostNames\`, \`userNames\`, \`sourceIps\`, \`destIps\` (optional arrays; pass when already known)
   - \`maxResults\` (optional, bounded server-side for token efficiency)
 
-When \`alertId\` is present, use this exact shape:
+When \`alertId\` is present, use this exact shape (always include
+\`confirmation_body\` — \`workflow_execute_step\` falls back to a flat
+key/value dump otherwise):
 \`\`\`
 tool_id: platform.workflows.workflow_execute_step
 params:
   stepName: get_related_alerts
+  confirmation_body: |
+    **Correlate related alerts**
+    - **alertId:** \`<alert-id>\`
+    - **Time window:** 24 hours
+    - **Path:** ${ALERT_ANALYSIS_GET_RELATED_ALERTS_API_PATH}
+    - Read-only internal API; returns a token-budgeted correlation summary.
   yaml: |
     version: "1"
     name: alert_analysis_related_alerts
@@ -89,6 +97,11 @@ params:
             alertId: "<alert-id>"
             timeWindowHours: 24
 \`\`\`
+
+This (method, path) pair is registered as read-only in
+\`workflow_execute_step\`, so the confirmation dialog is skipped — the
+\`confirmation_body\` field is still included for forward-compatibility
+with any deployment whose allow-list omits it.
 
 The API response is token-budgeted and may include truncation metadata.`,
   getRegistryTools: () => [
