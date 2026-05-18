@@ -164,16 +164,16 @@ deployment:
 ```
 
 :::{important}
-When {{kib}} runs on {{ech}} or Elastic Cloud Serverless, outbound connector HTTP requests include an Elastic Cloud deployment or serverless project identifier in the `User-Agent` header. On self-managed or on-premises deployments, connector requests **do not** add this fragment. The `User-Agent` stays at the default HTTP client value (for example, `axios/1.7.2`).
+When cloud deployment or project metadata is available, outbound connector HTTP requests include a deployment or project identifier in the `User-Agent` header. When that metadata is not available, connector requests **do not** add this fragment. The `User-Agent` stays at the default HTTP client value (for example, `axios/1.7.2`).
 :::
 
-IT and information security teams can match outbound connector traffic in third-party audit or access logs to the originating {{ech}} deployment or {{serverless-full}} project—for example, during incident response or when a vendor contacts Elastic about suspicious activity.
+IT and information security teams can match outbound connector traffic in third-party audit or access logs to the originating deployment or project—for example, during incident response or when a vendor contacts Elastic about suspicious activity.
 
-For every outbound HTTP request made by a connector (for example, to Slack, Google Workspace, or PagerDuty), {{kib}} sets a `User-Agent` header that includes that identifier on {{ech}} and {{serverless-full}}. This is automatic and does not require connector configuration, networking settings, or other administrator actions.
+For every outbound HTTP request made by a connector (for example, to Slack, Google Workspace, or PagerDuty), {{kib}} sets a `User-Agent` header that includes an identifier for the deployment or project that originated the traffic. This is automatic and does not require connector configuration, networking settings, or other administrator actions.
 
 ### Header format
 
-The header starts with the underlying HTTP client name and version (for example, `axios/1.7.2`). On {{ech}} and Elastic Cloud Serverless, an additional Elastic fragment is appended.
+The header starts with the underlying HTTP client name and version (for example, `axios/1.7.2`). When cloud metadata is available, an additional Elastic fragment is appended.
 
 | Environment | Example suffix in `User-Agent` | Meaning |
 | --- | --- | --- |
