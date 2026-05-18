@@ -302,7 +302,7 @@ export class InventoryPage {
 
   public async selectMetric(metricName: string) {
     await this.metricSwitcherButton.click();
-    await this.metricsContextMenu.getByRole('button', { name: metricName }).click();
+    await this.metricsContextMenu.getByRole('menuitem', { name: metricName }).click();
     await this.waitForNodesToLoad();
   }
 
