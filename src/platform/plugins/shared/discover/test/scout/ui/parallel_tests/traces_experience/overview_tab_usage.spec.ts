@@ -46,7 +46,7 @@ spaceTest.describe(
 
     spaceTest.beforeEach(async ({ browserAuth, pageObjects, page }) => {
       await browserAuth.loginAsViewer();
-      await pageObjects.discover.goto();
+      await pageObjects.discover.goto({ queryMode: 'esql' });
       await page.evaluate(() => localStorage.setItem('fullscreenWaterfallTourDismissed', 'true'));
     });
 
