@@ -131,7 +131,9 @@ export function IntegrationsSelector({
       >
         {(list, search) => (
           <div style={{ width: 300 }}>
-            <EuiPopoverTitle paddingSize="s" id={popoverTitleId}>{search}</EuiPopoverTitle>
+            <EuiPopoverTitle paddingSize="s" id={popoverTitleId}>
+              {search}
+            </EuiPopoverTitle>
             {list}
           </div>
         )}

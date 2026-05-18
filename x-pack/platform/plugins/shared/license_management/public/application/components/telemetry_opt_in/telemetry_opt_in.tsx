@@ -111,10 +111,9 @@ export class TelemetryOptIn extends React.Component<Props, State> {
       <EuiPopover
         ownFocus
         id="readMorePopover"
-        aria-label={i18n.translate(
-          'xpack.licenseMgmt.telemetryOptIn.readMorePopoverAriaLabel',
-          { defaultMessage: 'Telemetry information' }
-        )}
+        aria-label={i18n.translate('xpack.licenseMgmt.telemetryOptIn.readMorePopoverAriaLabel', {
+          defaultMessage: 'Telemetry information',
+        })}
         button={readMoreButton}
         isOpen={showMoreTelemetryInfo}
         closePopover={this.closeReadMorePopover}

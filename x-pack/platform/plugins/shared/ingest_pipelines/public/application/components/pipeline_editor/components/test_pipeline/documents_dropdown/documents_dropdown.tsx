@@ -114,7 +114,9 @@ export const DocumentsDropdown: FunctionComponent<Props> = ({
       >
         {(list) => (
           <>
-            <EuiPopoverTitle paddingSize="s" id={popoverTitleId}>{i18nTexts.popoverTitle}</EuiPopoverTitle>
+            <EuiPopoverTitle paddingSize="s" id={popoverTitleId}>
+              {i18nTexts.popoverTitle}
+            </EuiPopoverTitle>
             {list}
           </>
         )}

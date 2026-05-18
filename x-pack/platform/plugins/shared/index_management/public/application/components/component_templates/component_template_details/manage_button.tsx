@@ -60,10 +60,9 @@ export const ManageButton: React.FunctionComponent<Props> = ({
   return (
     <EuiPopover
       id="manageComponentTemplatePanel"
-      aria-label={i18n.translate(
-        'xpack.idxMgmt.componentTemplateDetails.managePopoverAriaLabel',
-        { defaultMessage: 'Manage component template' }
-      )}
+      aria-label={i18n.translate('xpack.idxMgmt.componentTemplateDetails.managePopoverAriaLabel', {
+        defaultMessage: 'Manage component template',
+      })}
       button={
         <EuiButton
           fill

@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { EuiFilterButton, EuiPopover, EuiPopoverTitle, EuiSelectable, EuiText, useGeneratedHtmlId } from '@elastic/eui';
+import {
+  EuiFilterButton,
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiSelectable,
+  EuiText,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import React, { useState } from 'react';
 import type { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
 import { i18n } from '@kbn/i18n';
@@ -110,7 +117,9 @@ export function NamespacesSelector({
       >
         {(list, search) => (
           <div style={{ width: 300 }}>
-            <EuiPopoverTitle paddingSize="s" id={popoverTitleId}>{search}</EuiPopoverTitle>
+            <EuiPopoverTitle paddingSize="s" id={popoverTitleId}>
+              {search}
+            </EuiPopoverTitle>
             {list}
           </div>
         )}
