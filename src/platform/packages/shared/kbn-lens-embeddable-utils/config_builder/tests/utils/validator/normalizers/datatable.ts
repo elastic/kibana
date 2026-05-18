@@ -93,6 +93,9 @@ function classifyVisualizationColumn(
   return 'row';
 }
 
+/**
+ * Push a remapping entry to the remapping array.
+ */
 function pushRemappingEntry(
   remapping: DatatableRemapping,
   oldId: string,
@@ -102,6 +105,9 @@ function pushRemappingEntry(
   remapping.push({ oldId, type, newId: getAccessorName(type, indices[type]++) });
 }
 
+/**
+ * Create a map of column types to their index.
+ */
 const createTypeIndices = (): Record<DatatableColumnType, number> => ({
   metric: 0,
   row: 0,
@@ -109,6 +115,9 @@ const createTypeIndices = (): Record<DatatableColumnType, number> => ({
   metric_ref: 0,
 });
 
+/**
+ * Remap column IDs for form-based datasource layers.
+ */
 function getColumnRemappingFormBased(
   visualization: DatatableVisualizationState,
   layer: Omit<FormBasedLayer, 'indexPatternId'>
@@ -149,6 +158,9 @@ function getColumnRemappingFormBased(
   return remapping;
 }
 
+/**
+ * Remap column IDs for text-based datasource layers.
+ */
 function getColumnRemappingTextBased(
   visualization: DatatableVisualizationState,
   layer: TextBasedLayer
@@ -171,6 +183,9 @@ function getColumnRemappingTextBased(
   return remapping;
 }
 
+/**
+ * Remap column IDs
+ */
 function getColumnRemapping(
   visualization: DatatableVisualizationState,
   datasourceStates: LensAttributes['state']['datasourceStates']
@@ -228,10 +243,13 @@ export const normalizeDatatable: AttributesNormalizer<DatatableAttributes> = (at
   const columnRemapping = getColumnRemapping(visualization, datasourceStates);
   const layerRemapping: IdRemapping = [[visualization.layerId, DEFAULT_LAYER_ID]];
 
+  // Map original column ID → new column ID
   const idMap = new Map(toIdRemapping(columnRemapping));
 
+  // Filter out visualization columns that only exist in the visualization state
   const filterOrphanColumns = getFilterOrphanColumns(datasourceStates);
 
+  // Align IDs
   const alignId: NormalizerConfig<DatatableAttributes> = {
     original: (attrs) => {
       const viz = attrs.state.visualization;
@@ -268,6 +286,7 @@ export const normalizeDatatable: AttributesNormalizer<DatatableAttributes> = (at
       ])
   );
 
+  // Map original column ID → { isMetric, isTransposed } using the type assigned
   const alignColumnTypes: NormalizerConfig<DatatableAttributes> = {
     original: (attrs) => {
       for (const col of attrs.state.visualization.columns) {
@@ -281,6 +300,7 @@ export const normalizeDatatable: AttributesNormalizer<DatatableAttributes> = (at
     },
   };
 
+  // Align legacy types
   const alignLegacyTypes: NormalizerConfig<DatatableAttributes> = {
     original: (attrs) => {
       const vis = attrs.state.visualization;
@@ -380,6 +400,7 @@ export const normalizeDatatable: AttributesNormalizer<DatatableAttributes> = (at
     },
   };
 
+  // Sort visualization columns by semantic type: rows first, then split_metrics_by, then metrics.
   const sortColumns: NormalizerConfig<DatatableAttributes> = {
     original: (attrs) => {
       attrs.state.visualization.columns.sort(sortByColumnType);
