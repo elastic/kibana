@@ -64,7 +64,7 @@ export const CloudOnboardingDeploymentDebugger: React.FunctionComponent = () => 
   const [newConnectorLoading, setNewConnectorLoading] = useState(false);
 
   const [authType, setAuthType] = useState<string>('identity_federation');
-  const [connectionId, setConnectionId] = useState<string>('');
+  const [connectorId, setConnectorId] = useState<string>('');
   const [externalId, setExternalId] = useState<string>('');
   const [selectedServices, setSelectedServices] = useState<Record<string, boolean>>({});
   const [selectedMechanisms, setSelectedMechanisms] = useState<Record<string, boolean>>({});
@@ -133,7 +133,7 @@ export const CloudOnboardingDeploymentDebugger: React.FunctionComponent = () => 
     } else {
       const created = result.data?.item;
       if (created) {
-        setConnectionId(created.id);
+        setConnectorId(created.id);
         setShowNewConnectorForm(false);
         setNewConnectorName('');
         setNewConnectorRoleArn('');
@@ -167,8 +167,8 @@ export const CloudOnboardingDeploymentDebugger: React.FunctionComponent = () => 
   }, []);
 
   useEffect(() => {
-    fetchDeployments(connectionId);
-  }, [connectionId, fetchDeployments]);
+    fetchDeployments(connectorId);
+  }, [connectorId, fetchDeployments]);
 
   const activeServices = SERVICE_OPTIONS.filter((s) => selectedServices[s.id]);
   const activeMechanisms = Object.entries(selectedMechanisms)
@@ -206,7 +206,7 @@ export const CloudOnboardingDeploymentDebugger: React.FunctionComponent = () => 
       path: '/api/fleet/cloud_onboarding_deployments',
       body: {
         provider: 'aws',
-        connectionId,
+        connectorId,
         mechanisms: activeMechanisms,
         services: activeServices.map((s) => s.id),
         serviceVars: Object.keys(serviceVars).length > 0 ? serviceVars : undefined,
@@ -218,7 +218,7 @@ export const CloudOnboardingDeploymentDebugger: React.FunctionComponent = () => 
       setCreateError(result.error.message ?? JSON.stringify(result.error));
     } else {
       setCreateResult(JSON.stringify(result.data, null, 2));
-      await fetchDeployments(connectionId);
+      await fetchDeployments(connectorId);
     }
   };
 
@@ -295,8 +295,8 @@ export const CloudOnboardingDeploymentDebugger: React.FunctionComponent = () => 
               </EuiFlexGroup>
             ),
           }))}
-          idSelected={connectionId}
-          onChange={(id) => setConnectionId(id)}
+          idSelected={connectorId}
+          onChange={(id) => setConnectorId(id)}
           name="connectorSelect"
         />
       )}
@@ -400,8 +400,8 @@ export const CloudOnboardingDeploymentDebugger: React.FunctionComponent = () => 
 
       <EuiFormRow label="Connection ID">
         <EuiSelect
-          value={connectionId}
-          onChange={(e) => setConnectionId(e.target.value)}
+          value={connectorId}
+          onChange={(e) => setConnectorId(e.target.value)}
           hasNoInitialSelection
           options={connectors.map((c) => ({
             value: c.id,

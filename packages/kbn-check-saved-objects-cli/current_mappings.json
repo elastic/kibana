@@ -2336,7 +2336,7 @@
       "attemptCount": {
         "type": "integer"
       },
-      "connectionId": {
+      "connectorId": {
         "ignore_above": 1024,
         "type": "keyword"
       },

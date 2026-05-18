@@ -695,7 +695,7 @@
   ],
   "fleet-cloud-onboarding-deployment": [
     "attemptCount",
-    "connectionId",
+    "connectorId",
     "createdAt",
     "deploymentId",
     "deploymentName",
