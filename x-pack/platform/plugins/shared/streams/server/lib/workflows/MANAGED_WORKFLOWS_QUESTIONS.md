@@ -55,17 +55,13 @@ The managed API exposes `install`/`uninstall`/`execute` but not `getWorkflowExec
 
 **Ask**: Add `getExecutions` and `cancelExecution` to `PluginScopedManagedWorkflowsApi`, or document the expected pattern.
 
-### D2: N+1 enrichment — `concurrencyGroupKey` missing from list items
+### ~~D2: N+1 enrichment — `concurrencyGroupKey` missing from list items~~ (RESOLVED)
 
-`getWorkflowExecutions` strips `concurrencyGroupKey` from list results even though it is stored in ES. We need it to identify which stream an execution belongs to, forcing a per-item `getWorkflowExecution` call.
+`concurrencyGroupKey` is now included in `WorkflowExecutionListItemDto` and returned on list results. `WorkflowExecutionClient` extracts stream names directly from list items.
 
-**Ask**: Include `concurrencyGroupKey` in `WorkflowExecutionListItemDto`.
+### ~~D3: Client-side pagination & filtering~~ (PARTIALLY RESOLVED)
 
-### D3: Client-side pagination & filtering
-
-Without server-side filters for `concurrencyGroupKey` and `finishedAfter`/`finishedBefore`, we paginate through all completed executions and filter in a loop — doesn't scale when a workflow has thousands of executions across concurrency groups.
-
-**Ask**: Add `concurrencyGroupKey`, `finishedAfter`, and `finishedBefore` as filter parameters on `getWorkflowExecutions` (all are already indexed ES fields).
+`concurrencyGroupKey` is now supported as a server-side filter parameter on `getWorkflowExecutions`. `WorkflowExecutionClient` uses it to query directly for a specific stream's executions. `finishedAfter`/`finishedBefore` are still not supported.
 
 ### D4: Sort order control
 

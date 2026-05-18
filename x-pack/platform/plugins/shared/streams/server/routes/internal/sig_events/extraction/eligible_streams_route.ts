@@ -27,7 +27,10 @@ import { StatusError } from '../../../../lib/streams/errors/status_error';
 import { classifyStreams, parseExcludePatterns, type StreamCandidate } from './classify_streams';
 import { resolveConnectorForFeature } from '../../../utils/resolve_connector_for_feature';
 import { shouldIdentifyFeaturesBatch } from '../../../../lib/sig_events/features/should_identify_features';
-import { WorkflowExecutionClient } from '../../../../lib/workflows/workflow_execution_client';
+import {
+  WorkflowExecutionClient,
+  STREAMS_KI_ONBOARDING_CONCURRENCY_PREFIX,
+} from '../../../../lib/workflows/workflow_execution_client';
 
 const DEFAULT_LOOKBACK_HOURS = 24;
 
@@ -120,7 +123,11 @@ const eligibleStreamsRoute = createServerRoute({
     const resolvedExcludedPatterns = query.excludedStreamPatterns ?? excludedStreamPatterns ?? '';
 
     const onboardingClient = workflowsManagementApi
-      ? new WorkflowExecutionClient(workflowsManagementApi, STREAMS_KI_ONBOARDING_WORKFLOW_ID)
+      ? new WorkflowExecutionClient(
+          workflowsManagementApi,
+          STREAMS_KI_ONBOARDING_WORKFLOW_ID,
+          STREAMS_KI_ONBOARDING_CONCURRENCY_PREFIX
+        )
       : undefined;
 
     const [connectorId, allStreams, featureClient, runningStreamNames] = await Promise.all([

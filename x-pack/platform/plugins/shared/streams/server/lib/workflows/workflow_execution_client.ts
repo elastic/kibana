@@ -52,27 +52,28 @@ const mapListItem = (execution: WorkflowExecutionListItemDto): WorkflowExecution
   error: execution.error?.message ?? null,
 });
 
-const getStreamNameFromContext = (
-  context: Record<string, unknown> | undefined
-): string | undefined => {
-  const inputs = context?.inputs;
-  if (inputs && typeof inputs === 'object' && !Array.isArray(inputs) && 'streamName' in inputs) {
-    return String(inputs.streamName);
-  }
-  return undefined;
-};
+export const STREAMS_KI_ONBOARDING_CONCURRENCY_PREFIX = 'streams-ki-onboarding';
 
-// TODO: The Workflows Management API doesn't expose `context` or
-// `concurrencyGroupKey` on list items, so we must fetch the full execution
-// for each candidate to extract `streamName`. Push for native filtering
-// support (by concurrencyGroupKey, context field) to eliminate this N+1.
 const MAX_SEARCH_SIZE = 50;
 
 export class WorkflowExecutionClient {
   constructor(
     private readonly managementApi: WorkflowsManagementApi,
-    private readonly workflowId: string
+    private readonly workflowId: string,
+    private readonly concurrencyKeyPrefix: string
   ) {}
+
+  private buildConcurrencyKey(streamName: string): string {
+    return `${this.concurrencyKeyPrefix}-${streamName}`;
+  }
+
+  private extractStreamName(concurrencyGroupKey: string): string | undefined {
+    const prefix = `${this.concurrencyKeyPrefix}-`;
+    if (concurrencyGroupKey.startsWith(prefix)) {
+      return concurrencyGroupKey.slice(prefix.length);
+    }
+    return undefined;
+  }
 
   async run(
     inputs: Record<string, unknown>,
@@ -137,10 +138,9 @@ export class WorkflowExecutionClient {
 
     const names: string[] = [];
     for (const listItem of results) {
-      const full = await this.managementApi.getWorkflowExecution(listItem.id, DEFAULT_SPACE_ID, {
-        includeOutput: true,
-      });
-      const name = full && getStreamNameFromContext(full.context);
+      const name = listItem.concurrencyGroupKey
+        ? this.extractStreamName(listItem.concurrencyGroupKey)
+        : undefined;
       if (name) {
         names.push(name);
       }
@@ -163,22 +163,26 @@ export class WorkflowExecutionClient {
     const { results } = await this.managementApi.getWorkflowExecutions(
       {
         workflowId: this.workflowId,
+        concurrencyGroupKey: this.buildConcurrencyKey(streamName),
         ...(statuses && { statuses }),
         omitStepRuns: true,
-        size: MAX_SEARCH_SIZE,
+        size: 1,
       },
       DEFAULT_SPACE_ID
     );
 
-    for (const listItem of results) {
-      const full = await this.managementApi.getWorkflowExecution(listItem.id, DEFAULT_SPACE_ID, {
-        includeOutput: true,
-      });
-      if (full && getStreamNameFromContext(full.context) === streamName) {
-        return { listItem, full };
-      }
+    const listItem = results[0];
+    if (!listItem) {
+      return undefined;
     }
 
-    return undefined;
+    const full = await this.managementApi.getWorkflowExecution(listItem.id, DEFAULT_SPACE_ID, {
+      includeOutput: true,
+    });
+    if (!full) {
+      return undefined;
+    }
+
+    return { listItem, full };
   }
 }

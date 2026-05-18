@@ -11,6 +11,7 @@ import { STREAMS_KI_ONBOARDING_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { getStreamsLocation } from '../../../../common/get_streams_location/get_streams_location';
 import {
   WorkflowExecutionClient,
+  STREAMS_KI_ONBOARDING_CONCURRENCY_PREFIX,
   type WorkflowsManagementApi,
 } from '../../../lib/workflows/workflow_execution_client';
 
@@ -42,7 +43,8 @@ export async function startKiIdentificationToolHandler({
 
   const client = new WorkflowExecutionClient(
     workflowsManagementApi,
-    STREAMS_KI_ONBOARDING_WORKFLOW_ID
+    STREAMS_KI_ONBOARDING_WORKFLOW_ID,
+    STREAMS_KI_ONBOARDING_CONCURRENCY_PREFIX
   );
 
   const skipFeatures = !steps.includes('features_identification' as OnboardingStep);

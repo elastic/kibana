@@ -8,6 +8,7 @@
 import { STREAMS_KI_ONBOARDING_WORKFLOW_ID } from '@kbn/workflows/managed';
 import {
   WorkflowExecutionClient,
+  STREAMS_KI_ONBOARDING_CONCURRENCY_PREFIX,
   type WorkflowsManagementApi,
   type WorkflowExecutionResult,
 } from '../../../lib/workflows/workflow_execution_client';
@@ -25,7 +26,8 @@ export async function getKiIdentificationStatusToolHandler({
 > {
   const client = new WorkflowExecutionClient(
     workflowsManagementApi,
-    STREAMS_KI_ONBOARDING_WORKFLOW_ID
+    STREAMS_KI_ONBOARDING_WORKFLOW_ID,
+    STREAMS_KI_ONBOARDING_CONCURRENCY_PREFIX
   );
   const execution = await client.getLatestExecution(streamName);
 

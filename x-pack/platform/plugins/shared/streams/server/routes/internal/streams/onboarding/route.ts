@@ -15,6 +15,7 @@ import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import {
   WorkflowExecutionClient,
+  STREAMS_KI_ONBOARDING_CONCURRENCY_PREFIX,
   type WorkflowExecutionResult,
 } from '../../../../lib/workflows/workflow_execution_client';
 
@@ -129,7 +130,8 @@ const onboardingExecutionRoute = createServerRoute({
     const { streamName } = params.path;
     const client = new WorkflowExecutionClient(
       workflowsManagementApi,
-      STREAMS_KI_ONBOARDING_WORKFLOW_ID
+      STREAMS_KI_ONBOARDING_WORKFLOW_ID,
+      STREAMS_KI_ONBOARDING_CONCURRENCY_PREFIX
     );
 
     return client.getLatestExecution(streamName);
@@ -169,7 +171,8 @@ const onboardingCancelRoute = createServerRoute({
     const { streamName } = params.path;
     const client = new WorkflowExecutionClient(
       workflowsManagementApi,
-      STREAMS_KI_ONBOARDING_WORKFLOW_ID
+      STREAMS_KI_ONBOARDING_WORKFLOW_ID,
+      STREAMS_KI_ONBOARDING_CONCURRENCY_PREFIX
     );
 
     await client.cancelExecution(streamName);
