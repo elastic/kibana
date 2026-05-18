@@ -976,7 +976,9 @@ describe('getBreachEsqlQuery', () => {
       base: 'FROM metrics-*',
       blocks: { breach: '| WHERE cpu > 0.9 | STATS count = COUNT(*)' },
     };
-    expect(getBreachEsqlQuery(query)).toBe('FROM metrics-* | WHERE cpu > 0.9 | STATS count = COUNT(*)');
+    expect(getBreachEsqlQuery(query)).toBe(
+      'FROM metrics-* | WHERE cpu > 0.9 | STATS count = COUNT(*)'
+    );
   });
 });
 
