@@ -44,10 +44,7 @@ export const RuleCreateOptionsPanel: React.FC<RuleCreateOptionsPanelProps> = ({
         textAlign: isVerticalLayout ? 'left' : 'center',
       }}
     >
-      <EuiSplitPanel.Inner
-        paddingSize={isVerticalLayout ? 'none' : 'xl'}
-        css={{ padding: isVerticalLayout ? 0 : euiTheme.size.xxxl }}
-      >
+      <EuiSplitPanel.Inner css={{ padding: isVerticalLayout ? 0 : euiTheme.size.xxxl }}>
         {!isVerticalLayout ? (
           <>
             <EuiTitle size="m">
