@@ -9,18 +9,25 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiConfirmModal, EuiCallOut, useGeneratedHtmlId } from '@elastic/eui';
 
-interface BulkActionModalProps {
+interface ConfirmActionModalProps {
   count: number;
   onCancel: () => void;
   onConfirm: () => void;
+  isLoading?: boolean;
 }
 
-export const ConfirmRevokeModal = ({ count, onCancel, onConfirm }: BulkActionModalProps) => {
+export const ConfirmRevokeModal = ({
+  count,
+  onCancel,
+  onConfirm,
+  isLoading,
+}: ConfirmActionModalProps) => {
   const modalTitleId = useGeneratedHtmlId();
 
   return (
     <EuiConfirmModal
       aria-labelledby={modalTitleId}
+      isLoading={isLoading}
       title={
         count === 1
           ? i18n.translate('xpack.fleet.enrollmentTokenBulkRevokeModal.titleSingle', {
@@ -59,12 +66,18 @@ export const ConfirmRevokeModal = ({ count, onCancel, onConfirm }: BulkActionMod
   );
 };
 
-export const ConfirmDeleteModal = ({ count, onCancel, onConfirm }: BulkActionModalProps) => {
+export const ConfirmDeleteModal = ({
+  count,
+  onCancel,
+  onConfirm,
+  isLoading,
+}: ConfirmActionModalProps) => {
   const modalTitleId = useGeneratedHtmlId();
 
   return (
     <EuiConfirmModal
       aria-labelledby={modalTitleId}
+      isLoading={isLoading}
       title={
         count === 1
           ? i18n.translate('xpack.fleet.enrollmentTokenBulkDeleteModal.titleSingle', {
