@@ -14,6 +14,7 @@ import type {
   RouteConfig,
   KibanaRequest,
   KibanaResponseFactory,
+  ResponseHeaders,
 } from '@kbn/core-http-server';
 import type {
   InternalHttpServiceSetup,
@@ -33,6 +34,20 @@ import type {
 } from '@kbn/core-http-resources-server';
 
 import type { InternalHttpResourcesSetup } from './types';
+
+const toArray = (val: string | string[] | undefined): string[] => {
+  if (val === undefined) return [];
+  return Array.isArray(val) ? val : [val];
+};
+
+const mergeRenderHeaders = (
+  renderHeaders: ResponseHeaders,
+  optionsHeaders: ResponseHeaders = {}
+): ResponseHeaders => ({
+  ...renderHeaders,
+  ...optionsHeaders,
+  'set-cookie': [...toArray(renderHeaders['set-cookie']), ...toArray(optionsHeaders['set-cookie'])],
+});
 
 /**
  * @internal
@@ -121,7 +136,7 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
 
         return response.ok({
           body,
-          headers: { ...renderHeaders, ...options.headers },
+          headers: mergeRenderHeaders(renderHeaders, options.headers),
         });
       },
       async renderAnonymousCoreApp(options: HttpResourcesRenderOptions = {}) {
@@ -133,7 +148,7 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
 
         return response.ok({
           body,
-          headers: { ...renderHeaders, ...options.headers },
+          headers: mergeRenderHeaders(renderHeaders, options.headers),
         });
       },
       renderHtml(options: HttpResourcesResponseOptions) {

@@ -147,11 +147,28 @@ describe('HttpResources service', () => {
             expect(responseFactory.ok).toHaveBeenCalledWith(
               expect.objectContaining({
                 headers: expect.objectContaining({
-                  'set-cookie': expect.stringContaining('KBN_LOCALE='),
+                  'set-cookie': expect.arrayContaining([expect.stringContaining('KBN_LOCALE=')]),
                   'x-extra': 'yes',
                 }),
               })
             );
+          });
+
+          it('preserves both KBN_LOCALE and a caller-provided set-cookie', async () => {
+            register(routeConfig, async (ctx, req, res) => {
+              return res.renderCoreApp({ headers: { 'set-cookie': 'foo=bar' } });
+            });
+            const [[, routeHandler]] = router.get.mock.calls;
+
+            const responseFactory = createHttpResourcesResponseFactory();
+            await routeHandler(context, kibanaRequest, responseFactory);
+
+            const { headers } = (responseFactory.ok as jest.Mock).mock.calls[0][0];
+            const cookies: string[] = Array.isArray(headers['set-cookie'])
+              ? headers['set-cookie']
+              : [headers['set-cookie']];
+            expect(cookies.some((c: string) => c.includes('KBN_LOCALE='))).toBe(true);
+            expect(cookies.some((c: string) => c.includes('foo=bar'))).toBe(true);
           });
         });
 
@@ -174,6 +191,23 @@ describe('HttpResources service', () => {
                 isAnonymousPage: true,
               }
             );
+          });
+
+          it('preserves both KBN_LOCALE and a caller-provided set-cookie', async () => {
+            register(routeConfig, async (ctx, req, res) => {
+              return res.renderAnonymousCoreApp({ headers: { 'set-cookie': 'foo=bar' } });
+            });
+            const [[, routeHandler]] = router.get.mock.calls;
+
+            const responseFactory = createHttpResourcesResponseFactory();
+            await routeHandler(context, kibanaRequest, responseFactory);
+
+            const { headers } = (responseFactory.ok as jest.Mock).mock.calls[0][0];
+            const cookies: string[] = Array.isArray(headers['set-cookie'])
+              ? headers['set-cookie']
+              : [headers['set-cookie']];
+            expect(cookies.some((c: string) => c.includes('KBN_LOCALE='))).toBe(true);
+            expect(cookies.some((c: string) => c.includes('foo=bar'))).toBe(true);
           });
         });
 
