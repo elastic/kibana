@@ -6,7 +6,12 @@
  */
 
 import type { SampleDocument } from '@kbn/streams-schema';
-import { findConditionById, deduplicateDocuments, buildKqlWhereClause } from './fetch_more_actor';
+import {
+  findConditionById,
+  deduplicateDocuments,
+  buildKqlWhereClause,
+  extractRawDocumentsFromSource,
+} from './fetch_more_actor';
 import type { StreamlangStepWithUIAttributes } from '@kbn/streamlang';
 import type { EnrichmentDataSourceWithUIAttributes } from '../../types';
 
@@ -199,6 +204,74 @@ describe('fetch_more_actor', () => {
     it('returns empty string for empty KQL query with no filters or time range', () => {
       const ds = makeKqlDataSource({});
       expect(buildKqlWhereClause(ds)).toBe('');
+    });
+  });
+
+  describe('extractRawDocumentsFromSource', () => {
+    it('extracts flattened _source as the document, preserving _id', () => {
+      const docs: SampleDocument[] = [
+        {
+          _id: 'doc-1',
+          _source: { message: 'hello world', '@timestamp': '2025-01-01T00:00:00.000Z' },
+          extracted_field: 'this was added by processing',
+          message: 'hello world',
+          '@timestamp': '2025-01-01T00:00:00.000Z',
+        },
+      ];
+
+      const result = extractRawDocumentsFromSource(docs);
+      expect(result).toHaveLength(1);
+      expect(result[0]).toEqual({
+        _id: 'doc-1',
+        message: 'hello world',
+        '@timestamp': '2025-01-01T00:00:00.000Z',
+      });
+      expect(result[0]).not.toHaveProperty('extracted_field');
+      expect(result[0]).not.toHaveProperty('_source');
+    });
+
+    it('flattens nested _source objects', () => {
+      const docs: SampleDocument[] = [
+        {
+          _id: 'doc-1',
+          _source: {
+            message: 'test',
+            log: { level: 'error' },
+          },
+          message: 'test',
+          'log.level': 'error',
+          extracted: 'from processing',
+        },
+      ];
+
+      const result = extractRawDocumentsFromSource(docs);
+      expect(result[0]).toEqual({
+        _id: 'doc-1',
+        message: 'test',
+        'log.level': 'error',
+      });
+    });
+
+    it('returns original doc when _source is missing', () => {
+      const docs: SampleDocument[] = [{ _id: 'doc-1', message: 'no source here' }];
+
+      const result = extractRawDocumentsFromSource(docs);
+      expect(result[0]).toEqual({ _id: 'doc-1', message: 'no source here' });
+    });
+
+    it('works without _id', () => {
+      const docs: SampleDocument[] = [
+        {
+          _source: { message: 'hello' },
+          message: 'hello',
+          processed_field: 'should be discarded',
+        },
+      ];
+
+      const result = extractRawDocumentsFromSource(docs);
+      expect(result[0]).toEqual({ message: 'hello' });
+      expect(result[0]).not.toHaveProperty('_id');
+      expect(result[0]).not.toHaveProperty('processed_field');
     });
   });
 });

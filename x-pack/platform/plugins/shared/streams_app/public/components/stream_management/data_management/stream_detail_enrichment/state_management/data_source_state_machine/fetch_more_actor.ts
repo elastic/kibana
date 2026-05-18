@@ -9,11 +9,11 @@ import { isConditionBlock, transpileEsql } from '@kbn/streamlang';
 import type { Condition, StreamlangStepWithUIAttributes } from '@kbn/streamlang';
 import type { StreamlangDSL } from '@kbn/streamlang/types/streamlang';
 import {
-  mergeSourceIntoDocuments,
   stripOtelAliases,
   withUnmappedFieldsDirective,
   type SampleDocument,
 } from '@kbn/streams-schema';
+import { getFlattenedObject } from '@kbn/std';
 import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import { fromObservable } from 'xstate';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -27,6 +27,26 @@ import { resolveDraftSampleSource } from './data_collector_actor';
 import type { EnrichmentDataSourceWithUIAttributes } from '../../types';
 
 const FETCH_MORE_LIMIT = 100;
+
+/**
+ * Extracts raw documents from `_source` metadata, discarding ES|QL
+ * processing-derived columns. The ES|QL query applies processing only
+ * to enable condition filtering; the actual document content should
+ * come from `_source` so the simulation can show correct diffs.
+ */
+export function extractRawDocumentsFromSource(docs: SampleDocument[]): SampleDocument[] {
+  return docs.map((doc) => {
+    const { _source, _id } = doc;
+    if (!_source || typeof _source !== 'object') {
+      return doc;
+    }
+    const flatSource = getFlattenedObject(_source as Record<string, unknown>) as SampleDocument;
+    if (typeof _id === 'string') {
+      flatSource._id = _id;
+    }
+    return flatSource;
+  });
+}
 
 export interface FetchMoreInput {
   conditionEsql: string;
@@ -168,7 +188,7 @@ export function createFetchMoreDocumentsActor({ data, streamsRepositoryClient }:
         )
         .then(({ response }) => {
           let docs = esqlResultToPlainObjects<SampleDocument>(response);
-          docs = mergeSourceIntoDocuments(docs);
+          docs = extractRawDocumentsFromSource(docs);
           docs = stripOtelAliases(docs);
           observer.next(deduplicateDocuments(existingDocuments, docs));
           observer.complete();
