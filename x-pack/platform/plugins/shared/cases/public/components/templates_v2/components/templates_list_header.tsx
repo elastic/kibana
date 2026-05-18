@@ -9,14 +9,19 @@ import React, { useCallback, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import * as i18n from '../translations';
+import * as fieldLibraryI18n from '../../field_library/translations';
 import { LinkButton } from '../../links';
-import { useCasesCreateTemplateNavigation } from '../../../common/navigation';
+import {
+  useCasesCreateTemplateNavigation,
+  useCasesFieldLibraryNavigation,
+} from '../../../common/navigation';
 import { TemplateFlyout } from './template_flyout';
 
 export const TemplatesListHeader: React.FC = () => {
   const { euiTheme } = useEuiTheme();
   const { getCasesCreateTemplateUrl, navigateToCasesCreateTemplate } =
     useCasesCreateTemplateNavigation();
+  const { getCasesFieldLibraryUrl, navigateToCasesFieldLibrary } = useCasesFieldLibraryNavigation();
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
 
   const openFlyout = useCallback(() => {
@@ -50,6 +55,17 @@ export const TemplatesListHeader: React.FC = () => {
               }
             `}
           >
+            <EuiFlexItem grow={false}>
+              <LinkButton
+                onClick={navigateToCasesFieldLibrary}
+                href={getCasesFieldLibraryUrl()}
+                iconType="database"
+                isEmpty={true}
+                data-test-subj="field-library-button"
+              >
+                {fieldLibraryI18n.FIELD_LIBRARY_TITLE}
+              </LinkButton>
+            </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <LinkButton
                 onClick={openFlyout}

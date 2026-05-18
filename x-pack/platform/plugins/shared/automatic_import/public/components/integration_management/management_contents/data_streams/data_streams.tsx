@@ -19,11 +19,11 @@ import { useUIState } from '../../contexts';
 import { CreateDataStreamFlyout } from './create_data_stream_flyout';
 import * as i18n from './translations';
 import { useGetIntegrationById, isValidNameFormat, startsWithLetter } from '../../../../common';
-import { meetsMinLength } from '../../../../common/lib/helper_functions';
+import { meetsMinLength, normalizeTitleName } from '../../../../common/lib/helper_functions';
 import { DataStreamsTable } from './data_streams_table/data_steams_table';
 import { EditPipelineFlyout } from './edit_pipeline_flyout';
 import { useTelemetry } from '../../../telemetry_context';
-import { useIntegrationForm } from '../../forms/integration_form';
+import { useIntegrationForm, usePackageNames } from '../../forms/integration_form';
 
 export const DataStreams = React.memo<{
   onDataStreamReanalyzeSuccess?: () => void;
@@ -40,6 +40,7 @@ export const DataStreams = React.memo<{
   const { integration } = useGetIntegrationById(integrationId);
   const { reportDataStreamFlyoutOpened } = useTelemetry();
   const { formData } = useIntegrationForm();
+  const packageNames = usePackageNames();
 
   const hasDataStreams = (integration?.dataStreams?.length ?? 0) > 0;
 
@@ -50,14 +51,17 @@ export const DataStreams = React.memo<{
       return true;
     }
     const title = formData?.title?.trim() ?? '';
+    const normalizedTitle = normalizeTitleName(title);
+    const isDuplicate = Boolean(normalizedTitle && packageNames?.has(normalizedTitle));
     return (
       Boolean(title) &&
       meetsMinLength(title) &&
       Boolean(formData?.description?.trim()) &&
       isValidNameFormat(title) &&
-      startsWithLetter(title)
+      startsWithLetter(title) &&
+      !isDuplicate
     );
-  }, [formData?.description, formData?.title, isCreateIntegrationPage]);
+  }, [formData?.description, formData?.title, isCreateIntegrationPage, packageNames]);
 
   const handleOpenCreateDataStreamFlyout = useCallback(() => {
     openCreateDataStreamFlyout();

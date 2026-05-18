@@ -33,9 +33,11 @@ import { EditConnectorTabs } from '../../../../types';
 import { CreateConnectorFlyout } from '../../action_connector_form/create_connector_flyout';
 import { EditConnectorFlyout } from '../../action_connector_form/edit_connector_flyout';
 import type { EditConnectorProps } from './types';
-import { loadAllActions } from '../../../lib/action_connector_api';
+import { loadAllActions, loadConnectorAuthStatus } from '../../../lib/action_connector_api';
 import { hasSaveActionsCapability } from '../../../lib/capabilities';
 import { useSkippedPreconfiguredConnectorIds } from '../../../hooks/use_conflicted_connector_ids';
+
+type ConnectorAuthStatusError = string | undefined;
 
 const ConnectorsList = lazy(() => import('./actions_connectors_list'));
 
@@ -67,6 +69,8 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
   const [editConnectorProps, setEditConnectorProps] = useState<EditConnectorProps>({});
   const [actions, setActions] = useState<ActionConnector[]>([]);
   const [isLoadingActions, setIsLoadingActions] = useState<boolean>(true);
+  const [connectorAuthStatusError, setConnectorAuthStatusError] =
+    useState<ConnectorAuthStatusError>(undefined);
 
   const editItem = useCallback(
     (actionConnector: ActionConnector, tab: EditConnectorTabs, isFix?: boolean) => {
@@ -78,8 +82,35 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
   const loadActions = useCallback(async () => {
     setIsLoadingActions(true);
     try {
-      const actionsResponse = await loadAllActions({ http });
-      setActions(actionsResponse);
+      const [actionsResponse, authStatusMap] = await Promise.all([
+        loadAllActions({ http }),
+        loadConnectorAuthStatus({ http }).catch((error) => {
+          const message =
+            error?.body?.message ??
+            i18n.translate(
+              'xpack.triggersActionsUI.sections.connector.home.unableToLoadAuthStatusFallbackDetail',
+              {
+                defaultMessage: 'Check the Kibana logs for more information.',
+              }
+            );
+          setConnectorAuthStatusError(message);
+          return null;
+        }),
+      ]);
+
+      if (authStatusMap !== null) {
+        setConnectorAuthStatusError(undefined);
+      }
+
+      const actionsWithAuth = actionsResponse.map((connector) => {
+        const authEntry = authStatusMap?.[connector.id];
+        if (!authEntry) {
+          return connector;
+        }
+        return { ...connector, userAuthStatus: authEntry.userAuthStatus };
+      });
+
+      setActions(actionsWithAuth);
     } catch (e) {
       toasts.addDanger({
         title: i18n.translate(
@@ -159,6 +190,7 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
       actions,
       loadActions,
       setActions,
+      connectorAuthStatusError,
     });
   };
 

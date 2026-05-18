@@ -76,12 +76,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         hideTimeFieldColumnSetting || !hasTimeField ? ['Summary'] : ['@timestamp', 'Summary']
       );
       await discover.saveSearch(`${SEARCH_NO_COLUMNS}${savedSearchSuffix}`);
-      await discover.waitUntilSearchingHasFinished();
+      await discover.waitUntilTabIsLoaded();
 
       const isTimestampUnavailableInSidebar = isEsqlMode && !hasTimeField;
       if (!isTimestampUnavailableInSidebar) {
         await unifiedFieldList.clickFieldListItemAdd('@timestamp');
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
         await retry.try(async () => {
           expect(await dataGrid.getHeaderFields()).to.eql(
             !hasTimeField
@@ -93,7 +93,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         await discover.saveSearch(`${SEARCH_WITH_ONLY_TIMESTAMP}${savedSearchSuffix}`, true);
-        await discover.waitUntilSearchingHasFinished();
+        await discover.waitUntilTabIsLoaded();
 
         await unifiedFieldList.clickFieldListItemRemove('@timestamp');
         await retry.try(async () => {
@@ -161,7 +161,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await discover.saveSearch(`${SEARCH_WITH_SELECTED_COLUMNS}${savedSearchSuffix}`);
-      await discover.waitUntilSearchingHasFinished();
+      await discover.waitUntilTabIsLoaded();
 
       await unifiedFieldList.clickFieldListItemAdd('@timestamp');
       await retry.try(async () => {
@@ -172,7 +172,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         `${SEARCH_WITH_SELECTED_COLUMNS_AND_TIMESTAMP}${savedSearchSuffix}`,
         true
       );
-      await discover.waitUntilSearchingHasFinished();
+      await discover.waitUntilTabIsLoaded();
 
       await dataGrid.clickMoveColumnLeft('@timestamp');
       await retry.try(async () => {
@@ -237,7 +237,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             'doc_table:hideTimeColumn': hideTimeFieldColumnSetting,
           });
           await common.navigateToApp('discover');
-          await discover.waitUntilSearchingHasFinished();
+          await discover.waitUntilTabIsLoaded();
         });
 
         describe('data view mode', () => {
@@ -266,7 +266,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 adHoc: true,
                 hasTimeField: false,
               });
-              await discover.waitUntilSearchingHasFinished();
+              await discover.waitUntilTabIsLoaded();
             });
 
             it('should render initial columns correctly', async () => {
@@ -290,6 +290,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         describe('ESQL mode', () => {
           it('should render initial columns correctly', async () => {
             await discover.selectTextBaseLang();
+            await discover.waitUntilTabIsLoaded();
 
             await checkInitialColumns({
               hasTimeField: true,
@@ -303,7 +304,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await discover.selectTextBaseLang();
             await monacoEditor.setCodeEditorValue('from logstash-* | limit 10 | drop @timestamp');
             await testSubjects.click('querySubmitButton');
-            await header.waitUntilLoadingHasFinished();
+            await discover.waitUntilTabIsLoaded();
 
             await checkInitialColumns({
               hasTimeField: false,
@@ -315,6 +316,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           it('should render selected columns correctly', async () => {
             await discover.selectTextBaseLang();
+            await discover.waitUntilTabIsLoaded();
 
             await checkSelectedColumns({
               hasTimeField: true,

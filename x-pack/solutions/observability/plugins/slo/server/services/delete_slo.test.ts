@@ -7,8 +7,10 @@
 
 import { rulesClientMock } from '@kbn/alerting-plugin/server/rules_client.mock';
 import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
+import type { MockedLogger } from '@kbn/logging-mocks';
 import type { ScopedClusterClientMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { DeleteSLO } from './delete_slo';
 import { createAPMTransactionErrorRateIndicator, createSLO } from './fixtures/slo';
 import {
@@ -25,6 +27,7 @@ describe('DeleteSLO', () => {
   let mockSummaryTransformManager: jest.Mocked<TransformManager>;
   let mockScopedClusterClient: ScopedClusterClientMock;
   let mockRulesClient: jest.Mocked<RulesClientApi>;
+  let mockLogger: MockedLogger;
   let deleteSLO: DeleteSLO;
 
   beforeEach(() => {
@@ -33,12 +36,14 @@ describe('DeleteSLO', () => {
     mockSummaryTransformManager = createSummaryTransformManagerMock();
     mockScopedClusterClient = elasticsearchServiceMock.createScopedClusterClient();
     mockRulesClient = rulesClientMock.create();
+    mockLogger = loggingSystemMock.createLogger();
     deleteSLO = new DeleteSLO(
       mockRepository,
       mockTransformManager,
       mockSummaryTransformManager,
       mockScopedClusterClient,
-      mockRulesClient
+      mockRulesClient,
+      mockLogger
     );
   });
 

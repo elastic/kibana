@@ -254,45 +254,6 @@
       },
       {
         "parentPluginId": "@kbn/unified-histogram",
-        "id": "def-public.useStableCallback",
-        "type": "Function",
-        "tags": [],
-        "label": "useStableCallback",
-        "description": [
-          "\nAccepts a callback and returns a function with a stable identity\nthat will always call the latest version of the callback when invoked"
-        ],
-        "signature": [
-          "<T extends (...args: any[]) => any>(fn: T | undefined) => (...args: Parameters<T>) => any"
-        ],
-        "path": "src/platform/packages/shared/kbn-unified-histogram/hooks/use_stable_callback.ts",
-        "lineNumber": 16,
-        "columnNumber": 14,
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/unified-histogram",
-            "id": "def-public.useStableCallback.$1",
-            "type": "Function",
-            "tags": [],
-            "label": "fn",
-            "description": [],
-            "signature": [
-              "T | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-unified-histogram/hooks/use_stable_callback.ts",
-            "lineNumber": 16,
-            "columnNumber": 70,
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/unified-histogram",
         "id": "def-public.useUnifiedHistogram",
         "type": "Function",
         "tags": [],
@@ -4133,7 +4094,7 @@
                 "section": "def-common.FieldFormatsRegistry",
                 "text": "FieldFormatsRegistry"
               },
-              ", \"register\" | \"init\"> & { deserialize: ",
+              ", \"init\" | \"register\"> & { deserialize: ",
               {
                 "pluginId": "fieldFormats",
                 "scope": "common",

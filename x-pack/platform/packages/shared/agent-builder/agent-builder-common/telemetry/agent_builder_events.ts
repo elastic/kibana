@@ -14,6 +14,7 @@ const TELEMETRY_PREFIX = 'agent_builder';
 export const AGENT_BUILDER_EVENT_TYPES = {
   OptInAction: `${TELEMETRY_PREFIX}_opt_in_action`,
   OptOut: `${TELEMETRY_PREFIX}_opt_out`,
+  UiClick: `${TELEMETRY_PREFIX}_ui_click`,
   AddToChatClicked: `${TELEMETRY_PREFIX}_add_to_chat_clicked`,
   AgentCreated: `${TELEMETRY_PREFIX}_agent_created`,
   AgentUpdated: `${TELEMETRY_PREFIX}_agent_updated`,
@@ -60,6 +61,21 @@ export interface ReportOptOutParams {
 export interface ReportAddToChatClickedParams {
   pathway: string;
   attachments?: string[];
+}
+
+export type AgentBuilderUiClickElementKind =
+  | 'button'
+  | 'link'
+  | 'role_button'
+  | 'input_button'
+  | 'other';
+
+export interface ReportUiClickParams {
+  ebt_element: string;
+  ebt_action?: string;
+  ebt_detail?: string;
+  element_kind: AgentBuilderUiClickElementKind;
+  location_pathname: string;
 }
 
 export interface ReportRoundCompleteParams {
@@ -228,6 +244,7 @@ export interface ReportToolCallErrorParams {
 export interface AgentBuilderTelemetryEventsMap {
   [AGENT_BUILDER_EVENT_TYPES.OptInAction]: ReportOptInActionParams;
   [AGENT_BUILDER_EVENT_TYPES.OptOut]: ReportOptOutParams;
+  [AGENT_BUILDER_EVENT_TYPES.UiClick]: ReportUiClickParams;
   [AGENT_BUILDER_EVENT_TYPES.AddToChatClicked]: ReportAddToChatClickedParams;
   [AGENT_BUILDER_EVENT_TYPES.AgentCreated]: ReportAgentCreatedParams;
   [AGENT_BUILDER_EVENT_TYPES.AgentUpdated]: ReportAgentUpdatedParams;
@@ -251,6 +268,7 @@ export interface AgentBuilderTelemetryEventsMap {
 export type AgentBuilderTelemetryEvent =
   | EventTypeOpts<ReportOptInActionParams>
   | EventTypeOpts<ReportOptOutParams>
+  | EventTypeOpts<ReportUiClickParams>
   | EventTypeOpts<ReportAddToChatClickedParams>
   | EventTypeOpts<ReportAgentCreatedParams>
   | EventTypeOpts<ReportAgentUpdatedParams>
@@ -268,6 +286,7 @@ export type AgentBuilderTelemetryEvent =
 export type AgentBuilderEventTypes =
   | typeof AGENT_BUILDER_EVENT_TYPES.OptInAction
   | typeof AGENT_BUILDER_EVENT_TYPES.OptOut
+  | typeof AGENT_BUILDER_EVENT_TYPES.UiClick
   | typeof AGENT_BUILDER_EVENT_TYPES.AddToChatClicked
   | typeof AGENT_BUILDER_EVENT_TYPES.AgentCreated
   | typeof AGENT_BUILDER_EVENT_TYPES.AgentUpdated
@@ -341,6 +360,48 @@ const OPT_OUT_EVENT: AgentBuilderTelemetryEvent = {
       _meta: {
         description: 'Whether the user had prior AI Assistant conversations in the current space',
         optional: true,
+      },
+    },
+  },
+};
+
+const UI_CLICK_EVENT: AgentBuilderTelemetryEvent = {
+  eventType: AGENT_BUILDER_EVENT_TYPES.UiClick,
+  schema: {
+    ebt_element: {
+      type: 'keyword',
+      _meta: {
+        description:
+          'Primary click identity from data-ebt-element (nearest ancestor from the interactive element upward)',
+        optional: false,
+      },
+    },
+    ebt_action: {
+      type: 'keyword',
+      _meta: {
+        description: 'Optional data-ebt-action from DOM',
+        optional: true,
+      },
+    },
+    ebt_detail: {
+      type: 'keyword',
+      _meta: {
+        description: 'Optional data-ebt-detail from DOM',
+        optional: true,
+      },
+    },
+    element_kind: {
+      type: 'keyword',
+      _meta: {
+        description: 'Kind of activated control (button|link|role_button|input_button|other)',
+        optional: false,
+      },
+    },
+    location_pathname: {
+      type: 'keyword',
+      _meta: {
+        description: 'Agent Builder app pathname when the click occurred',
+        optional: false,
       },
     },
   },
@@ -986,6 +1047,7 @@ const TOOL_CALL_ERROR_EVENT: AgentBuilderTelemetryEvent = {
 export const agentBuilderPublicEbtEvents: Array<EventTypeOpts<Record<string, unknown>>> = [
   OPT_IN_EVENT,
   OPT_OUT_EVENT,
+  UI_CLICK_EVENT,
   ADD_TO_CHAT_CLICKED_EVENT,
 ];
 

@@ -1,0 +1,7 @@
+{
+  "type": "functional-tests",
+  "id": "@kbn/evals-suite-pci-compliance",
+  "owner": "@elastic/security-defend-workflows",
+  "group": "security",
+  "visibility": "private"
+}

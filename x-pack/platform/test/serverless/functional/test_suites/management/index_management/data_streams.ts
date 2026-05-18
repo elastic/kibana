@@ -16,6 +16,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const es = getService('es');
   const testSubjects = getService('testSubjects');
   const toasts = getService('toasts');
+  const retry = getService('retry');
 
   const TEST_DS_NAME = 'test-ds-1';
 
@@ -121,8 +122,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.click('saveButton');
 
         // Expect to see a success toast
-        const successToast = await toasts.getElementByIndex(1);
-        expect(await successToast.getVisibleText()).to.contain('Data retention updated');
+        await retry.try(async () => {
+          const successToast = await toasts.getElementByIndex(1);
+          expect(await successToast.getVisibleText()).to.contain('Data retention updated');
+        });
       });
 
       describe('Project level data retention checks - security solution', () => {

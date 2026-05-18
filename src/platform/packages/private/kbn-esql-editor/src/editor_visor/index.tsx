@@ -29,8 +29,8 @@ import { NLInput } from './nl_input';
 import { visorStyles, visorWidthPercentage, dropdownWidthPercentage } from './visor.styles';
 import type { ESQLEditorDeps } from '../types';
 import { useNlToEsqlCheck } from '../hooks/use_nl_to_esql_check';
+import { reportEsqlError } from '../report_error';
 
-export { NL_TO_ESQL_FLAG } from '../hooks/use_nl_to_esql_check';
 export { VisorMode } from './mode_selector';
 
 export interface QuickSearchVisorProps {
@@ -126,6 +126,7 @@ export function QuickSearchVisor({
         setNlValue('');
       }
     } catch (error) {
+      reportEsqlError(error, { errorType: 'NlToEsql' });
       const message =
         (error as { body?: { message?: string } })?.body?.message ??
         i18n.translate('esqlEditor.visor.nlError', {

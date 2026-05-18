@@ -9,7 +9,6 @@ import type { FeatureFlagDefinitions } from '@kbn/core-feature-flags-server';
 import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 import type { ElasticConsoleConfig } from './config';
 import { configSchema } from './config';
-import { ElasticConsolePlugin } from './plugin';
 import { ELASTIC_CONSOLE_ENABLED_FLAG } from '../common/feature_flags';
 
 export const featureFlags: FeatureFlagDefinitions = [
@@ -26,8 +25,10 @@ export const featureFlags: FeatureFlagDefinitions = [
   },
 ];
 
-export const plugin = async (pluginInitializerContext: PluginInitializerContext) =>
-  new ElasticConsolePlugin(pluginInitializerContext);
+export const plugin = async (pluginInitializerContext: PluginInitializerContext) => {
+  const { ElasticConsolePlugin } = await import('./plugin');
+  return new ElasticConsolePlugin(pluginInitializerContext);
+};
 
 export const config: PluginConfigDescriptor<ElasticConsoleConfig> = {
   schema: configSchema,

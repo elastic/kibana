@@ -48,6 +48,7 @@ export const ApplyTemplateModal: FC<ApplyTemplateModalProps> = ({ caseData, onCl
   const options: Array<EuiComboBoxOptionOption<string>> = useMemo(
     () =>
       (templatesData?.templates ?? []).map((t) => ({
+        key: t.templateId,
         label: t.name,
         value: t.templateId,
       })),

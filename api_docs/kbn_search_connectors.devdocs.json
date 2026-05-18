@@ -7821,15 +7821,7 @@
             "section": "def-common.IngestPipelineParams",
             "text": "IngestPipelineParams"
           },
-          " | null | undefined; last_seen: string | null; api_key_id: string | null; api_key_secret_id: string | null; custom_scheduling: ",
-          {
-            "pluginId": "@kbn/search-connectors",
-            "scope": "common",
-            "docId": "kibKbnSearchConnectorsPluginApi",
-            "section": "def-common.ConnectorCustomScheduling",
-            "text": "ConnectorCustomScheduling"
-          },
-          "; filtering: ",
+          " | null | undefined; last_seen: string | null; filtering: ",
           {
             "pluginId": "@kbn/search-connectors",
             "scope": "common",
@@ -7837,7 +7829,15 @@
             "section": "def-common.FilteringConfig",
             "text": "FilteringConfig"
           },
-          "[]; is_native: boolean; last_access_control_sync_error: string | null; last_access_control_sync_scheduled_at: string | null; last_access_control_sync_status: ",
+          "[]; api_key_id: string | null; api_key_secret_id: string | null; custom_scheduling: ",
+          {
+            "pluginId": "@kbn/search-connectors",
+            "scope": "common",
+            "docId": "kibKbnSearchConnectorsPluginApi",
+            "section": "def-common.ConnectorCustomScheduling",
+            "text": "ConnectorCustomScheduling"
+          },
+          "; is_native: boolean; last_access_control_sync_error: string | null; last_access_control_sync_scheduled_at: string | null; last_access_control_sync_status: ",
           {
             "pluginId": "@kbn/search-connectors",
             "scope": "common",

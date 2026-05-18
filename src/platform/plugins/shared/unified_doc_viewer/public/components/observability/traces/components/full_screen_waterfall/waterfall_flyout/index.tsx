@@ -29,6 +29,7 @@ import { useDocViewerSpanLogViewedEvent } from '@kbn/unified-doc-viewer';
 import DocViewerSource from '../../../../../doc_viewer_source';
 import DocViewerTable from '../../../../../doc_viewer_table';
 import { getUnifiedDocViewerServices } from '../../../../../../plugin';
+import { useOriginDocType } from '../../../../../doc_viewer_flyout/origin_doc_type_context';
 import type { FlyoutContentId } from '../../../common/constants';
 
 const tabIds = {
@@ -84,6 +85,7 @@ export interface Props {
   flyoutContentId: FlyoutContentId;
   children: React.ReactNode;
   skipNextEventReport?: boolean;
+  size?: EuiFlyoutProps['size'];
 }
 
 export function WaterfallFlyout({
@@ -97,14 +99,17 @@ export function WaterfallFlyout({
   hasAnimation,
   flyoutContentId,
   skipNextEventReport,
+  size = 's',
 }: Props) {
   const { analytics } = getUnifiedDocViewerServices();
   const [selectedTabId, setSelectedTabId] = useState(tabIds.OVERVIEW);
   const flyoutTitleId = useGeneratedHtmlId();
   const flyoutId = useGeneratedHtmlId({ prefix: 'documentDetailFlyout' });
+  const originDocType = useOriginDocType();
 
   useDocViewerSpanLogViewedEvent({
     reportEvent: analytics.reportEvent,
+    originDocType,
     contentId: flyoutContentId,
     tabId: selectedTabId,
     hit,
@@ -114,7 +119,7 @@ export function WaterfallFlyout({
   return (
     <EuiFlyout
       data-test-subj={dataTestSubj}
-      size="s"
+      size={size}
       includeFixedHeadersInFocusTrap={false}
       onClose={onCloseFlyout}
       aria-labelledby={flyoutTitleId}

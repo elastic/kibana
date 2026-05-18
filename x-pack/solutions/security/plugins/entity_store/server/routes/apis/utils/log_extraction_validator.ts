@@ -7,7 +7,6 @@
 
 import { z } from '@kbn/zod/v4';
 import { validateDataView } from '@kbn/data-view-validation';
-import { fromKueryExpression } from '@kbn/es-query';
 import type { LogExtractionBodyParams } from '../../constants';
 import { LogExtractionInstallParams, LogExtractionUpdateParams } from '../../constants';
 import { parseDurationToMs } from '../../../infra/time';
@@ -17,42 +16,6 @@ import {
 } from '../../../domain/saved_objects';
 
 const MIN_FREQUENCY_MS = 30 * 1000;
-
-export function validateKql(kql: string): { isValid: boolean; errorMsg?: string } {
-  try {
-    if (!kql || kql.trim() === '') {
-      return { isValid: true };
-    }
-
-    fromKueryExpression(kql);
-
-    if (/(\s+)(and|or)\s*$/i.test(kql)) {
-      throw new Error('Incomplete KQL expression');
-    }
-
-    if (!kql.includes(':')) {
-      throw new Error('Field-based KQL is required');
-    }
-
-    return { isValid: true };
-  } catch (error) {
-    return { isValid: false, errorMsg: error.message };
-  }
-}
-
-function validateFilter(data: LogExtractionBodyParams, ctx: z.RefinementCtx): void {
-  if (data.filter === undefined) {
-    return;
-  }
-  const { isValid, errorMsg } = validateKql(data.filter);
-  if (!isValid) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      path: ['filter'],
-      message: errorMsg,
-    });
-  }
-}
 
 function validateFrequencyParam(data: LogExtractionBodyParams, ctx: z.RefinementCtx): void {
   if (data.frequency === undefined) {
@@ -75,11 +38,11 @@ function isValidFrequency(frequency: string): boolean {
   }
 }
 
-function validateAdditionalIndexPatterns(
-  data: LogExtractionBodyParams,
+function validateIndexPatternList(
+  patterns: string[] | undefined,
+  fieldName: 'additionalIndexPatterns' | 'excludedIndexPatterns',
   ctx: z.RefinementCtx
 ): void {
-  const patterns = data.additionalIndexPatterns;
   if (patterns === undefined) {
     return;
   }
@@ -93,7 +56,7 @@ function validateAdditionalIndexPatterns(
     if (isEmpty || !validIndexPattern) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        path: ['additionalIndexPatterns', i],
+        path: [fieldName, i],
         message: 'must be a non-empty, valid index pattern (no spaces or illegal characters)',
       });
     }
@@ -134,9 +97,9 @@ export function validateLogExtractionParams(
 ): void {
   if (!data) return;
 
-  validateFilter(data, ctx);
   validateFrequencyParam(data, ctx);
-  validateAdditionalIndexPatterns(data, ctx);
+  validateIndexPatternList(data.additionalIndexPatterns, 'additionalIndexPatterns', ctx);
+  validateIndexPatternList(data.excludedIndexPatterns, 'excludedIndexPatterns', ctx);
   validateDelayVsLookbackPeriod(data, ctx);
 }
 
