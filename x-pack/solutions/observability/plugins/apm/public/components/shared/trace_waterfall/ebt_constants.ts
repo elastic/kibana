@@ -18,7 +18,6 @@ export const TRACE_WATERFALL_EBT_ELEMENTS = {
   FLYOUT_WATERFALL_ERROR_BADGE: 'flyoutWaterfallErrorBadge',
   FLYOUT_WATERFALL_SERVICE_BADGE: 'flyoutWaterfallServiceBadge',
   SUMMARY_VIEW_FULL_TRACE: 'waterfallSummaryViewFullTrace',
-  FLYOUT_OPEN_IN_DISCOVER: 'flyoutWaterfallOpenInDiscover',
-  FLYOUT_OPEN_IN_APM: 'flyoutWaterfallOpenInApm',
+  FLYOUT_FOOTER: 'flyoutWaterfallFooter',
   FLYOUT_SCROLL_TO_ORIGIN: 'flyoutWaterfallScrollToOriginButton',
 } as const;
