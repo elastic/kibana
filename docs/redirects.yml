@@ -23,6 +23,8 @@ redirects:
   'extend/scout/setup-plugin.md': 'extend/testing/setup-scout.md'
   'extend/scout/run-tests.md': 'extend/testing/run-scout-tests.md'
   'extend/scout/best-practices.md': 'extend/testing/scout-best-practices.md'
+  'extend/scout/ui-best-practices.md': 'extend/testing/ui-best-practices.md'
+  'extend/scout/api-best-practices.md': 'extend/testing/api-best-practices.md'
   'extend/contributing/scout-best-practices.md': 'extend/testing/scout-best-practices.md'
   'extend/scout/getting-started.md': 'extend/testing/scout.md'
   'extend/scout/core-concepts.md': 'extend/testing/scout.md'
