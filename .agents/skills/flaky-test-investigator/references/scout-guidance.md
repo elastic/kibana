@@ -1,10 +1,4 @@
-# Scout
-
-## Cloud failure
-
-If the test failed outside of `kibana-on-merge`
-
-## Investigation help
+## Scout test failure guidance
 
 When investigating a Scout failure, weight these checks higher:
 
@@ -16,21 +10,30 @@ When investigating a Scout failure, weight these checks higher:
 
 ## Failure artifacts (Scout)
 
-Scout / Playwright produces richer artifacts than FTR because the framework records the full session. Pull these in this order:
+Scout uses a custom Playwright reporter (`@kbn/scout-reporting`) that produces a self-contained HTML report per failure with the screenshot embedded. Artifacts live under `.scout/` in the Buildkite job. The standard Playwright outputs (`playwright-report/index.html`, `trace.zip`, video) are NOT what Scout publishes — don't look for them.
 
-- **Playwright HTML report** (`playwright-report/index.html`, usually zipped per failure). Open locally — it gives a per-test summary, embedded screenshots at each step, the full call log of every locator query, the stack trace, and (if enabled) attached video and trace files.
-- **Trace file** (`trace.zip`). Open with `npx playwright show-trace trace.zip`. Lets you scrub through every action with synchronized screenshots, DOM snapshots, network panel, and console output — the closest you can get to a debugger replay without re-running the test.
-- **Video** (when the config enables it). Confirms timing-related flakes that screenshots miss.
+- **Per-run failure index**: `.scout/reports/scout-playwright-test-failures-<runId>/test-failures-summary.json`. Always at the repo root. Lists every failure in the run as `{ name, htmlReportFilename }`. **Start here** — it maps each failed test to its specific HTML report file.
+- **Per-failure HTML report**: `.scout/reports/scout-playwright-test-failures-<runId>/<testId>.html` (e.g. `f24ba03baeb5e26-0723e6c11fe5d87.html`). Always at the repo root, alongside the summary JSON. One self-contained HTML file per failed test. The failure screenshot is embedded inline (base64) along with: test details (suite, title, target, duration, kibana module, code owners), the command that was run, the full error stack trace, captured stdout, and a "tracked branches" status section indicating whether this failure also reproduces on a tracked branch.
+- **Individual screenshot PNGs**: `**/.scout/test-artifacts/<testId>_<attachmentName>_<timestamp>.png`. **Not at a fixed path** — the `.scout/test-artifacts/` directory is created relative to the process working directory, so for per-plugin Scout configs the PNGs may be nested under paths like `x-pack/.../test/scout/.scout/test-artifacts/...`. Buildkite uploads them with `**/.scout/test-artifacts/**/*.png` so the glob discovers them at any depth. Filename pieces:
+  - `<testId>` = same hash as the HTML report (a content hash of test file path + full title).
+  - `<attachmentName>` = the Playwright attachment name, typically `screenshot`.
+  - `<timestamp>` = ISO timestamp with `:` and `.` replaced by `-` (e.g. `2026-05-18T13-44-30-123Z`).
 - **Server logs** (`kibana.log`, `elasticsearch.log`) when the failing config uploads them.
+
+`<runId>` is a per-run hash; `<testId>` is a hash of the test file path + full test title, so the same failing test re-emits the same `<testId>` across runs. This means you can correlate a PNG to its HTML report by matching `<testId>` even though the two files live in different artifact trees.
 
 How to retrieve them:
 
-- From the Buildkite job page: scroll to the "Artifacts" section. The HTML report is usually inside a `.zip`.
-- Locally: `bk artifact download <build> "playwright-report*" .` then unzip and open `index.html` in a browser.
+- From the Buildkite job page: open the "Artifacts" tab. Either download the full `.scout/reports/scout-playwright-test-failures-<runId>/` folder, or pick the single summary JSON + the one HTML + the matching PNG(s).
+- From the CLI (`bk artifact download <build> <glob> .`):
+  - `".scout/reports/scout-playwright-test-failures-*/test-failures-summary.json"` — grab the index first to find your test's `htmlReportFilename`.
+  - `".scout/reports/scout-playwright-test-failures-*/<testId>.html"` — then the specific HTML report.
+  - `"**/.scout/test-artifacts/<testId>_*.png"` — all PNGs for that one failing test (note the `**/` prefix; without it the glob may not match nested paths).
+  - `"**/.scout/test-artifacts/**/*.png"` — every Scout screenshot in the build (use when you don't yet have a `<testId>`).
 
-Scout-specific patterns the trace and HTML report reveal:
+Scout-specific patterns the HTML report screenshot reveals:
 
 - **The locator was queried before the matching element rendered** → missing `waitForResponse` / `waitForSelector` upstream, NOT a reason to add a longer timeout to the locator itself.
 - **The page navigated mid-action** → race between an in-flight network response and the next test step; usually the test should wait for the response, not for the locator.
-- **A neighbor test left state in the shared server** (visible as unexpected pre-existing data in the first screenshot) → lane pollution, see "Lane pollution" above.
+- **A neighbor test left state in the shared server** (visible as unexpected pre-existing data in the screenshot) → lane pollution, see "Lane pollution" above.
 - **The screenshot shows what you expect but the assertion still failed** → assertion is testing a different attribute than the visible one (e.g. `data-test-subj` is correct but `aria-label` was the locator).

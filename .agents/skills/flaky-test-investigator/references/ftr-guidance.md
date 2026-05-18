@@ -1,10 +1,4 @@
-# FTR
-
-## Test distribution
-
-FTR tests are divided into groups. A fresh set of test servers is started for each config, so cross-config pollution is unlikely.
-
-## Investigation help
+# FTR test failure guidance
 
 When investigating an FTR failure, weight these checks higher:
 
