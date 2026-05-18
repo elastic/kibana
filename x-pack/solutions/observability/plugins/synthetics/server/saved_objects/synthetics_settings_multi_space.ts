@@ -8,7 +8,6 @@
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
-import { maxSize } from 'zod';
 
 export const SYNTHETICS_SETTINGS_MULTI_SPACE_SO_TYPE = 'synthetics-settings-multi-space';
 
