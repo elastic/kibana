@@ -38,7 +38,7 @@ const createConfigService = (value: Partial<HttpConfigType> = {}) => {
     {
       getConfig$: () =>
         new BehaviorSubject({
-          server: value,
+          server: { experimental: { framework: 'hapi' }, ...value },
         }),
     },
     env,
