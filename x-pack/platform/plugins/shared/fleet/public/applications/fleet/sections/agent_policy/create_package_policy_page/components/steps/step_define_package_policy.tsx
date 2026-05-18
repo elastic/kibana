@@ -77,7 +77,6 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
   noAdvancedToggle?: boolean;
   isAgentlessSelected?: boolean;
   agentPolicies?: AgentPolicy[];
-  // Namespace-level customization toggle (rendered when this callback is provided).
   onNamespaceCustomizationEnabledChange?: (enabled: boolean, isInit?: boolean) => void;
   packagePolicyId?: string;
 }> = memo(
@@ -459,7 +458,6 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                     />
                   </EuiFlexItem>
 
-                  {/* Namespace-level customization toggle */}
                   {showNamespaceCustomizationToggle && (
                     <EuiFlexItem>
                       <EuiToolTip
@@ -470,7 +468,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                                 'xpack.fleet.createPackagePolicy.namespaceCustomization.disabledMissingNamespace',
                                 {
                                   defaultMessage:
-                                    'Enter a namespace before enabling namespace-level customization.',
+                                    'Enter a namespace to enable the namespace index template.',
                                 }
                               )
                             : !isNamespacePrefixAllowed
@@ -478,7 +476,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                                 'xpack.fleet.createPackagePolicy.namespaceCustomization.disabledPrefix',
                                 {
                                   defaultMessage:
-                                    'This namespace does not match an allowed prefix for this space, so namespace-level customization cannot be enabled.',
+                                    'This namespace does not match an allowed prefix for this space, so the namespace index template cannot be enabled.',
                                 }
                               )
                             : isManaged
@@ -486,7 +484,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                                 'xpack.fleet.createPackagePolicy.namespaceCustomization.disabledManaged',
                                 {
                                   defaultMessage:
-                                    'Namespace-level customization cannot be changed on a managed integration policy.',
+                                    'Namespace index templates cannot be enabled on a managed integration policy.',
                                 }
                               )
                             : undefined
@@ -496,7 +494,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                           data-test-subj="packagePolicyNamespaceCustomizationToggle"
                           label={i18n.translate(
                             'xpack.fleet.createPackagePolicy.namespaceCustomization.label',
-                            { defaultMessage: 'Enable namespace-level customization' }
+                            { defaultMessage: 'Use a dedicated index template for this namespace' }
                           )}
                           checked={namespaceCustomizationEnabled}
                           disabled={isNamespaceCustomizationInputDisabled}
@@ -509,7 +507,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                       <EuiText size="xs" color="subdued">
                         <FormattedMessage
                           id="xpack.fleet.createPackagePolicy.namespaceCustomization.helpText"
-                          defaultMessage="Creates a dedicated index template for this namespace, enabling independent settings and mappings from other namespaces."
+                          defaultMessage="Enables independent settings and mappings for this namespace's data streams."
                         />
                       </EuiText>
                       {showOptInImpactWarning && (
@@ -525,14 +523,14 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                               'xpack.fleet.createPackagePolicy.namespaceCustomization.optInImpactTitle',
                               {
                                 defaultMessage:
-                                  'Enabling namespace customization will affect {count, plural, one {# other policy} other {# other policies}}',
+                                  'Enabling the namespace index template will affect {count, plural, one {# other policy} other {# other policies}}',
                                 values: { count: otherPoliciesCount },
                               }
                             )}
                           >
                             <FormattedMessage
                               id="xpack.fleet.createPackagePolicy.namespaceCustomization.optInImpactDescription"
-                              defaultMessage="The namespace index template is shared across all {packageTitle} integration policies targeting namespace {namespace}. Enabling customization here will apply it to all of them."
+                              defaultMessage="The namespace index template is shared across all {packageTitle} integration policies targeting namespace {namespace}. Enabling it here will apply it to all of them."
                               values={{
                                 packageTitle: packageInfo.title,
                                 namespace: <strong>{currentNamespace}</strong>,
@@ -554,14 +552,14 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                               'xpack.fleet.createPackagePolicy.namespaceCustomization.optOutImpactTitle',
                               {
                                 defaultMessage:
-                                  'Disabling customization will affect {count, plural, one {# other policy} other {# other policies}}',
+                                  'Disabling the namespace index template will affect {count, plural, one {# other policy} other {# other policies}}',
                                 values: { count: otherPoliciesCount },
                               }
                             )}
                           >
                             <FormattedMessage
                               id="xpack.fleet.createPackagePolicy.namespaceCustomization.optOutImpactDescription"
-                              defaultMessage="The namespace index template is shared across all {packageTitle} integration policies targeting namespace {namespace}. Disabling customization here will remove it from all of them."
+                              defaultMessage="The namespace index template is shared across all {packageTitle} integration policies targeting namespace {namespace}. Disabling it here will remove it from all of them."
                               values={{
                                 packageTitle: packageInfo.title,
                                 namespace: <strong>{currentNamespace}</strong>,

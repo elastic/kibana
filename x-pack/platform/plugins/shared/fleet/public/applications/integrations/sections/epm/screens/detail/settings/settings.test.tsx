@@ -328,7 +328,7 @@ describe('SettingsPage', () => {
     it('renders the section title and existing opted-in namespaces', () => {
       const result = renderComponent(installedPackageInfo);
 
-      expect(result.getByText('Namespace customization')).toBeInTheDocument();
+      expect(result.getByText('Namespace index templates')).toBeInTheDocument();
       const input = result.getByTestId('epmSettings.namespaceCustomizationInput');
       expect(input).toBeInTheDocument();
       expect(result.getByText('production')).toBeInTheDocument();
@@ -341,7 +341,7 @@ describe('SettingsPage', () => {
       }));
 
       const result = renderComponent(basePackageInfo);
-      expect(result.queryByText('Namespace customization')).not.toBeInTheDocument();
+      expect(result.queryByText('Namespace index templates')).not.toBeInTheDocument();
     });
   });
 });

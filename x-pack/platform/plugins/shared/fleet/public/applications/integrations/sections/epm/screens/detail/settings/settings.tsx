@@ -208,7 +208,7 @@ export const SettingsPage: React.FC<Props> = memo(
                 toastMessage: i18n.translate(
                   'xpack.fleet.integrations.namespaceCustomizationError',
                   {
-                    defaultMessage: 'Error saving namespace customization for {title}',
+                    defaultMessage: 'Error updating namespace index templates for {title}',
                     values: { title },
                   }
                 ),

@@ -10,7 +10,6 @@ import type { NotificationsStart } from '@kbn/core/public';
 
 import { sendUpdatePackage } from '../../../../hooks';
 
-// Best effort: errors show a toast but are not rethrown — the policy save has already succeeded.
 export async function applyNamespaceCustomizationChange(
   pkgName: string,
   pkgVersion: string,
@@ -44,7 +43,7 @@ export async function applyNamespaceCustomizationChange(
   if (error) {
     notifications.toasts.addError(error, {
       title: i18n.translate('xpack.fleet.packagePolicy.namespaceCustomizationApplyErrorTitle', {
-        defaultMessage: 'Could not update namespace customization for {title}',
+        defaultMessage: 'Could not update namespace index template for {title}',
         values: { title: packageTitle },
       }),
     });
@@ -53,7 +52,7 @@ export async function applyNamespaceCustomizationChange(
 
   notifications.toasts.addSuccess({
     title: i18n.translate('xpack.fleet.packagePolicy.namespaceCustomizationApplySuccessTitle', {
-      defaultMessage: 'Namespace customization updated',
+      defaultMessage: 'Namespace index template updated',
     }),
     text: i18n.translate('xpack.fleet.packagePolicy.namespaceCustomizationApplySuccessText', {
       defaultMessage: 'Applying namespace index template changes for {title}.',

@@ -151,14 +151,14 @@ export const NamespaceCustomizationSection: React.FC<Props> = ({
         <h4>
           <FormattedMessage
             id="xpack.fleet.integrations.settings.namespaceCustomization.title"
-            defaultMessage="Namespace customization"
+            defaultMessage="Namespace index templates"
           />
         </h4>
       </EuiTitle>
       <EuiText>
         <FormattedMessage
           id="xpack.fleet.integrations.settings.namespaceCustomization.description"
-          defaultMessage="Select which namespaces use a dedicated index template for this integration. This enables independent customization of settings and mappings per namespace."
+          defaultMessage="Select which namespaces use a dedicated index template for this integration. This enables independent settings and mappings per namespace."
         />
       </EuiText>
       <EuiSpacer size="m" />
@@ -166,7 +166,7 @@ export const NamespaceCustomizationSection: React.FC<Props> = ({
         isInvalid={!!validationError}
         error={validationError}
         label={i18n.translate('xpack.fleet.integrations.settings.namespaceCustomization.label', {
-          defaultMessage: 'Namespaces opted in for customization',
+          defaultMessage: 'Namespaces with a dedicated index template',
         })}
         helpText={
           allowedNamespacePrefixes.length > 0 && (
