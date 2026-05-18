@@ -146,6 +146,12 @@ export function ExecutionListFilters({
     <EuiFilterGroup compressed css={styles.filterGroup}>
       <EuiPopover
         id={filterGroupPopoverId}
+        aria-label={i18n.translate(
+          'workflows.workflowExecutionList.filterPopoverAriaLabel',
+          {
+            defaultMessage: 'Filter executions',
+          }
+        )}
         isOpen={isPopoverOpen}
         closePopover={() => setIsPopoverOpen(false)}
         button={

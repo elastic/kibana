@@ -106,6 +106,9 @@ export const StepActions = React.memo<StepActionsProps>(({ onStepRun }) => {
         <EuiFlexItem grow={false}>
           <EuiPopover
             id="contextMenu"
+            aria-label={i18n.translate('workflows.stepActions.contextMenuAriaLabel', {
+              defaultMessage: 'Step actions',
+            })}
             button={menuButton}
             isOpen={isPopoverOpen}
             closePopover={closePopover}

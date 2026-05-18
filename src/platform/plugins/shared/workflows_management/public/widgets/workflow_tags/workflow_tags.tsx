@@ -7,7 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiBadge, EuiBadgeGroup, EuiIcon, EuiPopover, EuiPopoverTitle } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiBadgeGroup,
+  EuiIcon,
+  EuiPopover,
+  EuiPopoverTitle,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import * as i18n from '../../../common/translations';
@@ -105,6 +112,7 @@ const useVisibleTagsCount = (totalTags: number): [number, React.RefObject<HTMLDi
 
 export const WorkflowTags = ({ tags }: WorkflowTagsProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const tagsPopoverTitleId = useGeneratedHtmlId();
   const totalTags = tags?.length ?? 0;
   const [visibleTagsCount, containerRef] = useVisibleTagsCount(totalTags);
 
@@ -129,7 +137,7 @@ export const WorkflowTags = ({ tags }: WorkflowTagsProps) => {
   const popoverContent = useMemo(
     () => (
       <>
-        <EuiPopoverTitle>{i18n.TAGS_LIST_TITLE}</EuiPopoverTitle>
+        <EuiPopoverTitle id={tagsPopoverTitleId}>{i18n.TAGS_LIST_TITLE}</EuiPopoverTitle>
         <EuiBadgeGroup
           gutterSize="xs"
           css={css`
@@ -184,6 +192,7 @@ export const WorkflowTags = ({ tags }: WorkflowTagsProps) => {
         {hasOverflow && (
           <EuiPopover
             ownFocus
+            aria-labelledby={tagsPopoverTitleId}
             css={css`
               display: inline-flex;
               align-items: center;
