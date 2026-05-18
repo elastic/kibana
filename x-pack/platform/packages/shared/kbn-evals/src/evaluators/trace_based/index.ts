@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-export { createTraceBasedEvaluator, type TraceBasedEvaluatorConfig } from './factory';
+export {
+  createTraceBasedEvaluator,
+  normalizeTraceIds,
+  traceIdInClause,
+  type TraceBasedEvaluatorConfig,
+} from './factory';
 export {
   createInputTokensEvaluator,
   createOutputTokensEvaluator,

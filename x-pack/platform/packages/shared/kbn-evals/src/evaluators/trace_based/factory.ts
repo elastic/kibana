@@ -18,10 +18,52 @@ interface EsqlResponse {
 
 export interface TraceBasedEvaluatorConfig {
   name: string;
-  buildQuery: (traceId: string) => string;
+  // `traceIds` is always normalized to a non-empty array of valid trace IDs.
+  // For single-round conversations it has length 1; for HITL-resume flows
+  // where the agent_builder server's `mergeRounds` concatenates per-round
+  // trace_ids, the array carries all of them so the query covers the full
+  // conversation. Build the ES|QL WHERE clause with `traceIdInClause`
+  // below (e.g. `WHERE ${traceIdInClause(traceIds)}`).
+  buildQuery: (traceIds: string[]) => string;
   extractResult: (response: EsqlResponse) => number | null;
   // Optional validation for the extracted result. Return false to signal the trace data looks incomplete, which triggers a retry
   isResultValid?: (result: number | null) => boolean;
+}
+
+/**
+ * Normalize the value the harness writes into `output.traceId`. The
+ * agent_builder server's `mergeRounds`
+ * (x-pack/platform/plugins/shared/agent_builder/server/services/execution/run_agent/utils/add_round_complete_event.ts)
+ * flattens per-round trace_ids into `string[]` whenever a conversation
+ * spans multiple HITL-prompt-resume rounds. Returning a clean string[]
+ * lets every trace-based evaluator query the full conversation, not
+ * just the first round.
+ */
+export function normalizeTraceIds(raw: unknown): string[] {
+  const candidates =
+    typeof raw === 'string'
+      ? [raw]
+      : Array.isArray(raw)
+      ? raw.filter((v): v is string => typeof v === 'string' && v.length > 0)
+      : [];
+  return candidates.filter((id) => isValidTraceId(id));
+}
+
+/**
+ * Format a non-empty array of trace IDs as an ES|QL `trace.id IN (...)`
+ * clause (or `trace.id == "..."` for the common single-trace case so
+ * the produced query stays readable in logs). Escapes any double quotes
+ * defensively even though `isValidTraceId` already rejects strings with
+ * non-hex characters.
+ */
+export function traceIdInClause(traceIds: string[]): string {
+  if (traceIds.length === 0) {
+    throw new Error('traceIdInClause requires at least one trace ID');
+  }
+  if (traceIds.length === 1) {
+    return `trace.id == "${traceIds[0].replace(/"/g, '\\"')}"`;
+  }
+  return `trace.id IN (${traceIds.map((t) => `"${t.replace(/"/g, '\\"')}"`).join(', ')})`;
 }
 
 export function createTraceBasedEvaluator({
@@ -37,9 +79,9 @@ export function createTraceBasedEvaluator({
 
   return {
     evaluate: async ({ output }) => {
-      const traceId = (output as any)?.traceId;
+      const rawTraceId = (output as any)?.traceId;
 
-      if (!traceId) {
+      if (!rawTraceId) {
         return {
           score: null,
           label: 'unavailable',
@@ -48,9 +90,9 @@ export function createTraceBasedEvaluator({
         };
       }
 
-      const isTraceIdValid = typeof traceId === 'string' && isValidTraceId(traceId);
-      if (!isTraceIdValid) {
-        log.error(`Invalid traceId for ${name} (traceId: ${traceId})`);
+      const traceIds = normalizeTraceIds(rawTraceId);
+      if (traceIds.length === 0) {
+        log.error(`Invalid traceId for ${name} (traceId: ${JSON.stringify(rawTraceId)})`);
         return {
           score: null,
           label: 'error',
@@ -62,7 +104,7 @@ export function createTraceBasedEvaluator({
       let lastResult: number | null | undefined;
 
       async function fetchStats(): Promise<number> {
-        const query = buildQuery(traceId);
+        const query = buildQuery(traceIds);
         const response = (await traceEsClient.esql.query({ query })) as unknown as EsqlResponse;
 
         const { values } = response;
@@ -99,7 +141,9 @@ export function createTraceBasedEvaluator({
               );
             } else {
               log.warning(
-                `${name} query failed on attempt ${error.attemptNumber}; retrying... (traceId: ${traceId})`
+                `${name} query failed on attempt ${error.attemptNumber}; retrying... (traceIds: ${traceIds.join(
+                  ','
+                )})`
               );
             }
           },
@@ -113,7 +157,7 @@ export function createTraceBasedEvaluator({
 
         if (lastResult !== undefined) {
           log.warning(
-            `${name} returning potentially incomplete result for trace ${traceId}: ${lastResult}`
+            `${name} returning potentially incomplete result for traces ${traceIds.join(',')}: ${lastResult}`
           );
           return {
             score: lastResult,
@@ -123,7 +167,7 @@ export function createTraceBasedEvaluator({
           };
         }
 
-        log.error(`Failed to evaluate ${name} for trace ${traceId}: ${errorMessage}`);
+        log.error(`Failed to evaluate ${name} for traces ${traceIds.join(',')}: ${errorMessage}`);
         return {
           label: 'error',
           explanation: `Failed to retrieve ${name}: ${errorMessage}`,

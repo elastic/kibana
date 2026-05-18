@@ -8,7 +8,7 @@
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { Evaluator } from '../../types';
-import { createTraceBasedEvaluator } from './factory';
+import { createTraceBasedEvaluator, traceIdInClause } from './factory';
 
 export function createLatencyEvaluator({
   traceEsClient,
@@ -22,8 +22,8 @@ export function createLatencyEvaluator({
     log,
     config: {
       name: 'Latency',
-      buildQuery: (traceId) => `FROM traces-*
-| WHERE trace.id == "${traceId}"
+      buildQuery: (traceIds) => `FROM traces-*
+| WHERE ${traceIdInClause(traceIds)}
 | STATS total_duration_ns = MAX(duration)
 | EVAL latency_seconds = TO_DOUBLE(total_duration_ns) / 1000000000
 | KEEP latency_seconds`,
@@ -48,8 +48,8 @@ export function createSpanLatencyEvaluator({
     log,
     config: {
       name: 'Latency',
-      buildQuery: (traceId) => `FROM traces-*
-| WHERE trace.id == "${traceId}" AND name == "${spanName}"
+      buildQuery: (traceIds) => `FROM traces-*
+| WHERE ${traceIdInClause(traceIds)} AND name == "${spanName}"
 | EVAL latency_seconds = TO_DOUBLE(duration) / 1000000000
 | KEEP latency_seconds`,
       extractResult: (response) => {

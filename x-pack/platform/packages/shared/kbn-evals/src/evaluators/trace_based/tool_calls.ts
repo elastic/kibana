@@ -8,7 +8,7 @@
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { Evaluator } from '../../types';
-import { createTraceBasedEvaluator } from './factory';
+import { createTraceBasedEvaluator, traceIdInClause } from './factory';
 
 export function createToolCallsEvaluator({
   traceEsClient,
@@ -22,8 +22,8 @@ export function createToolCallsEvaluator({
     log,
     config: {
       name: 'Tool Calls',
-      buildQuery: (traceId) => `FROM traces-*
-| WHERE trace.id == "${traceId}" AND attributes.elastic.inference.span.kind == "TOOL"
+      buildQuery: (traceIds) => `FROM traces-*
+| WHERE ${traceIdInClause(traceIds)} AND attributes.elastic.inference.span.kind == "TOOL"
 | STATS 
   tool_calls = COUNT(*)`,
       extractResult: (response) => {
