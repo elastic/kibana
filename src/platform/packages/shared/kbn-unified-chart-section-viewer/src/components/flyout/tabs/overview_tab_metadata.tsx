@@ -60,17 +60,15 @@ export const OverviewTabMetadata = ({ metricItem, sourceRow }: OverviewTabMetada
           {
             title: <StrongTitle text={SOURCE_LABEL[sourceRow.kind]} />,
             description: (
-              <EuiText
-                color="primary"
-                size="s"
+              <div
                 css={css`
                   word-break: break-word;
                   overflow-wrap: anywhere;
                 `}
                 data-test-subj={SOURCE_TEST_SUBJ[sourceRow.kind]}
               >
-                {sourceRow.indexName}
-              </EuiText>
+                {sourceRow.streamLink ?? <EuiText size="s">{sourceRow.indexName}</EuiText>}
+              </div>
             ),
           },
         ]
