@@ -103,7 +103,7 @@ spaceTest.describe(
       await expect(metricsExperience.grid).toBeVisible();
     });
 
-    spaceTest('should show chart actions menu on metric card', async ({ pageObjects, page }) => {
+    spaceTest('should show chart actions menu on metric card', async ({ pageObjects }) => {
       await pageObjects.discover.writeAndSubmitEsqlQuery(testData.ESQL_QUERIES.TS);
       const { metricsExperience } = pageObjects;
       await expect(metricsExperience.grid).toBeVisible();
