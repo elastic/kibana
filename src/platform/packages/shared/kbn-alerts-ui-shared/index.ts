@@ -15,7 +15,6 @@ export { AddMessageVariables } from './src/add_message_variables';
 
 export * from './src/common/formatters';
 export * from './src/common/hooks';
-export * from './src/common/utils';
 export { AlertsSearchBar } from './src/alerts_search_bar';
 export type { AlertsSearchBarProps } from './src/alerts_search_bar/types';
 

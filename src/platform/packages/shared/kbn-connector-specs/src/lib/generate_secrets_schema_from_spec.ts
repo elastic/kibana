@@ -10,7 +10,7 @@
 import { z } from '@kbn/zod/v4';
 import type { AuthMode, ConnectorSpec } from '../connector_spec';
 import * as authTypeSpecs from '../all_auth_types';
-import { getSchemaForAuthType } from './get_schema_for_auth_type';
+import { getSchemaForAuthType } from '.';
 
 interface GenerateOptions {
   isPfxEnabled?: boolean;
