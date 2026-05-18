@@ -264,8 +264,11 @@ export class AgentBuilderPlugin
       }
       await installAgentBuilderDashboard(internalClient, this.logger);
     };
-    void installTokenUsageDashboardIfExperimentalEnabled().catch((e) => {
-      this.logger.error(`Failed to install Agent Builder token usage dashboard: ${e.message}`);
+
+    void installTokenUsageDashboardIfExperimentalEnabled().catch((error) => {
+      this.logger.warn(
+        `Failed to install Agent Builder token usage dashboard: ${(error as Error).message}`
+      );
     });
 
     const modelProviderFactory = createModelProviderFactory({

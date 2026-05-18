@@ -1,0 +1,116 @@
+{
+  "type": "vis",
+  "embeddableConfig": {
+    "attributes": {
+      "visualizationType": "lnsXY",
+      "title": "ExecuteAgent Count by Agent",
+      "state": {
+        "datasourceStates": {
+          "textBased": {
+            "layers": {
+              "line_0": {
+                "index": "traces-agent_builder.otel-default-@timestamp",
+                "query": {
+                  "esql": "FROM traces-agent_builder.otel-default\n| WHERE name == \"ExecuteAgent\" AND @timestamp >= ?_tstart AND @timestamp < ?_tend\n| STATS `Execution Count` = COUNT(*) BY `Agent` = attributes.elastic.agent.id\n| SORT `Execution Count` DESC"
+                },
+                "timeField": "@timestamp",
+                "columns": [
+                  {
+                    "columnId": "line_x",
+                    "fieldName": "Agent",
+                    "meta": {
+                      "type": "string"
+                    }
+                  },
+                  {
+                    "columnId": "line_y_0",
+                    "fieldName": "Execution Count",
+                    "params": {
+                      "format": {
+                        "id": "number",
+                        "params": {
+                          "decimals": 0,
+                          "compact": true
+                        }
+                      }
+                    },
+                    "meta": {
+                      "type": "number"
+                    }
+                  }
+                ],
+                "ignoreGlobalFilters": false
+              }
+            }
+          }
+        },
+        "internalReferences": [
+          {
+            "type": "index-pattern",
+            "id": "traces-agent_builder.otel-default-@timestamp",
+            "name": "indexpattern-datasource-layer-line_0"
+          }
+        ],
+        "visualization": {
+          "preferredSeriesType": "bar",
+          "legend": {
+            "isVisible": false,
+            "position": "right"
+          },
+          "axisTitlesVisibilitySettings": {
+            "x": false,
+            "yLeft": false,
+            "yRight": true
+          },
+          "layers": [
+            {
+              "layerId": "line_0",
+              "accessors": [
+                "line_y_0"
+              ],
+              "layerType": "data",
+              "seriesType": "bar",
+              "xAccessor": "line_x",
+              "yConfig": [
+                {
+                  "axisMode": "left",
+                  "forAccessor": "line_y_0"
+                }
+              ]
+            }
+          ]
+        },
+        "adHocDataViews": {
+          "traces-agent_builder.otel-default-@timestamp": {
+            "id": "traces-agent_builder.otel-default-@timestamp",
+            "title": "traces-agent_builder.otel-default",
+            "name": "traces-agent_builder.otel-default",
+            "timeFieldName": "@timestamp",
+            "sourceFilters": [],
+            "fieldFormats": {},
+            "runtimeFieldMap": {},
+            "fieldAttrs": {},
+            "allowNoIndex": false,
+            "allowHidden": false,
+            "type": "esql"
+          }
+        },
+        "query": {
+          "esql": "FROM traces-agent_builder.otel-default\n| WHERE name == \"ExecuteAgent\" AND @timestamp >= ?_tstart AND @timestamp < ?_tend\n| STATS `Execution Count` = COUNT(*) BY `Agent` = attributes.elastic.agent.id\n| SORT `Execution Count` DESC"
+        },
+        "filters": []
+      },
+      "references": [],
+      "description": ""
+    },
+    "drilldowns": []
+  },
+  "panelIndex": "d1e2f3a4-b5c6-4789-ad01-234567890def",
+  "gridData": {
+    "y": 30,
+    "x": 0,
+    "w": 24,
+    "h": 15,
+    "i": "d1e2f3a4-b5c6-4789-ad01-234567890def"
+  }
+}

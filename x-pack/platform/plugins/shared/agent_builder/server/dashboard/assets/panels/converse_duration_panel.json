@@ -1,0 +1,124 @@
+{
+  "type": "vis",
+  "embeddableConfig": {
+    "attributes": {
+      "visualizationType": "lnsXY",
+      "title": "Average Converse Duration Over Time",
+      "state": {
+        "datasourceStates": {
+          "textBased": {
+            "layers": {
+              "line_0": {
+                "index": "traces-agent_builder.otel-default-@timestamp",
+                "query": {
+                  "esql": "FROM traces-agent_builder.otel-default\n| WHERE name == \"Converse\"\n| EVAL duration_sec = duration / 1000000000.0\n| STATS avg_duration = AVG(duration_sec) BY time_bucket = BUCKET(@timestamp, 1 minute)\n| SORT time_bucket ASC"
+                },
+                "timeField": "@timestamp",
+                "columns": [
+                  {
+                    "columnId": "line_x",
+                    "fieldName": "time_bucket",
+                    "params": {
+                      "format": {
+                        "id": "custom",
+                        "params": {
+                          "decimals": 2,
+                          "pattern": "YYYY-MM-DD HH:mm"
+                        }
+                      }
+                    },
+                    "meta": {
+                      "type": "date"
+                    }
+                  },
+                  {
+                    "columnId": "line_y_0",
+                    "fieldName": "avg_duration",
+                    "params": {
+                      "format": {
+                        "id": "number",
+                        "params": {
+                          "decimals": 2
+                        }
+                      }
+                    },
+                    "meta": {
+                      "type": "number"
+                    }
+                  }
+                ],
+                "ignoreGlobalFilters": false
+              }
+            }
+          }
+        },
+        "internalReferences": [
+          {
+            "type": "index-pattern",
+            "id": "traces-agent_builder.otel-default-@timestamp",
+            "name": "indexpattern-datasource-layer-line_0"
+          }
+        ],
+        "visualization": {
+          "preferredSeriesType": "bar",
+          "legend": {
+            "isVisible": true,
+            "position": "right"
+          },
+          "axisTitlesVisibilitySettings": {
+            "x": false,
+            "yLeft": false,
+            "yRight": true
+          },
+          "layers": [
+            {
+              "layerId": "line_0",
+              "accessors": [
+                "line_y_0"
+              ],
+              "layerType": "data",
+              "seriesType": "bar",
+              "xAccessor": "line_x",
+              "yConfig": [
+                {
+                  "axisMode": "left",
+                  "forAccessor": "line_y_0"
+                }
+              ]
+            }
+          ]
+        },
+        "adHocDataViews": {
+          "traces-agent_builder.otel-default-@timestamp": {
+            "id": "traces-agent_builder.otel-default-@timestamp",
+            "title": "traces-agent_builder.otel-default",
+            "name": "traces-agent_builder.otel-default",
+            "timeFieldName": "@timestamp",
+            "sourceFilters": [],
+            "fieldFormats": {},
+            "runtimeFieldMap": {},
+            "fieldAttrs": {},
+            "allowNoIndex": false,
+            "allowHidden": false,
+            "type": "esql"
+          }
+        },
+        "query": {
+          "esql": "FROM traces-agent_builder.otel-default\n| WHERE name == \"Converse\"\n| EVAL duration_sec = duration / 1000000000.0\n| STATS avg_duration = AVG(duration_sec) BY time_bucket = BUCKET(@timestamp, 1 minute)\n| SORT time_bucket ASC"
+        },
+        "filters": []
+      },
+      "references": [],
+      "description": ""
+    },
+    "drilldowns": []
+  },
+  "panelIndex": "c4d5e6f7-8901-4abc-def0-123456789abc",
+  "gridData": {
+    "y": 15,
+    "x": 24,
+    "w": 24,
+    "h": 15,
+    "i": "c4d5e6f7-8901-4abc-def0-123456789abc"
+  }
+}

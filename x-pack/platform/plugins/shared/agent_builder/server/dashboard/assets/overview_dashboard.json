@@ -1,0 +1,19 @@
+[
+  {
+    "type": "dashboard",
+    "id": "agent-builder-token-usage",
+    "managed": true,
+    "coreMigrationVersion": "8.8.0",
+    "typeMigrationVersion": "10.3.0",
+    "attributes": {
+      "description": "",
+      "kibanaSavedObjectMeta": {
+        "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"}}"
+      },
+      "optionsJSON": "{\"hidePanelTitles\":false,\"hidePanelBorders\":false,\"useMargins\":true,\"autoApplyFilters\":true,\"syncColors\":false,\"syncCursor\":true,\"syncTooltips\":false}",
+      "timeRestore": false,
+      "title": "[Elastic] Agent Builder Overview"
+    },
+    "references": []
+  }
+]

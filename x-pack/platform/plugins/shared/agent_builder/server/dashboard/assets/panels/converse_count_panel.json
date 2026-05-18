@@ -1,0 +1,135 @@
+{
+  "type": "vis",
+  "embeddableConfig": {
+    "attributes": {
+      "visualizationType": "lnsXY",
+      "title": "Converse Count by Agent",
+      "state": {
+        "datasourceStates": {
+          "textBased": {
+            "layers": {
+              "line_0": {
+                "index": "traces-agent_builder.otel-default-@timestamp",
+                "query": {
+                  "esql": "FROM traces-agent_builder.otel-default\n| WHERE name == \"Converse\" AND @timestamp >= ?_tstart AND @timestamp < ?_tend\n| STATS `Converse Count` = COUNT(*) BY `Time` = BUCKET(@timestamp, 75, ?_tstart, ?_tend), `Agent` = attributes.elastic.agent.id\n| SORT `Time`"
+                },
+                "timeField": "@timestamp",
+                "columns": [
+                  {
+                    "columnId": "line_x",
+                    "fieldName": "Time",
+                    "params": {
+                      "format": {
+                        "id": "custom",
+                        "params": {
+                          "decimals": 2,
+                          "pattern": "YYYY-MM-DD HH:mm"
+                        }
+                      }
+                    },
+                    "meta": {
+                      "type": "date"
+                    }
+                  },
+                  {
+                    "columnId": "line_y_0",
+                    "fieldName": "Converse Count",
+                    "params": {
+                      "format": {
+                        "id": "number",
+                        "params": {
+                          "decimals": 0,
+                          "compact": true
+                        }
+                      }
+                    },
+                    "meta": {
+                      "type": "number"
+                    }
+                  },
+                  {
+                    "columnId": "line_breakdown",
+                    "fieldName": "Agent",
+                    "meta": {
+                      "type": "string"
+                    }
+                  }
+                ],
+                "ignoreGlobalFilters": false
+              }
+            }
+          }
+        },
+        "internalReferences": [
+          {
+            "type": "index-pattern",
+            "id": "traces-agent_builder.otel-default-@timestamp",
+            "name": "indexpattern-datasource-layer-line_0"
+          }
+        ],
+        "visualization": {
+          "preferredSeriesType": "line",
+          "legend": {
+            "isVisible": true,
+            "position": "right"
+          },
+          "axisTitlesVisibilitySettings": {
+            "x": false,
+            "yLeft": false,
+            "yRight": true
+          },
+          "layers": [
+            {
+              "layerId": "line_0",
+              "accessors": [
+                "line_y_0"
+              ],
+              "layerType": "data",
+              "seriesType": "line",
+              "xAccessor": "line_x",
+              "yConfig": [
+                {
+                  "axisMode": "left",
+                  "forAccessor": "line_y_0"
+                }
+              ],
+              "splitAccessors": [
+                "line_breakdown"
+              ]
+            }
+          ]
+        },
+        "adHocDataViews": {
+          "traces-agent_builder.otel-default-@timestamp": {
+            "id": "traces-agent_builder.otel-default-@timestamp",
+            "title": "traces-agent_builder.otel-default",
+            "name": "traces-agent_builder.otel-default",
+            "timeFieldName": "@timestamp",
+            "sourceFilters": [],
+            "fieldFormats": {},
+            "runtimeFieldMap": {},
+            "fieldAttrs": {},
+            "allowNoIndex": false,
+            "allowHidden": false,
+            "type": "esql"
+          }
+        },
+        "query": {
+          "esql": "FROM traces-agent_builder.otel-default\n| WHERE name == \"Converse\" AND @timestamp >= ?_tstart AND @timestamp < ?_tend\n| STATS `Converse Count` = COUNT(*) BY `Time` = BUCKET(@timestamp, 75, ?_tstart, ?_tend), `Agent` = attributes.elastic.agent.id\n| SORT `Time`"
+        },
+        "filters": []
+      },
+      "references": [],
+      "description": ""
+    },
+    "drilldowns": []
+  },
+  "panelIndex": "f3a4b5c6-d7e8-4901-cf23-456789abcdef",
+  "gridData": {
+    "y": 15,
+    "x": 0,
+    "w": 24,
+    "h": 15,
+    "i": "f3a4b5c6-d7e8-4901-cf23-456789abcdef"
+  }
+}

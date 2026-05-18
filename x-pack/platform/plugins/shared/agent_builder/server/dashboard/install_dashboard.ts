@@ -6,24 +6,49 @@
  */
 import type { Logger, SavedObjectsClientContract, SavedObject } from '@kbn/core/server';
 
-import tokenUsageDashboardSavedObjects from './token_usage_dashboard.json';
+import overviewDashboardSavedObjects from './assets/overview_dashboard.json';
+import tokenUsagePanel from './assets/panels/token_usage_panel.json';
+import converseCountPanel from './assets/panels/converse_count_panel.json';
+import converseDurationPanel from './assets/panels/converse_duration_panel.json';
+import executeAgentCountPanel from './assets/panels/execute_agent_count_panel.json';
+import executeAgentDurationPanel from './assets/panels/execute_agent_duration_panel.json';
 
 const DASHBOARD_ID = 'agent-builder-token-usage';
 
+/** Dashboard panels merged in layout order (top to bottom). */
+const DASHBOARD_PANELS = [
+  tokenUsagePanel,
+  converseCountPanel,
+  converseDurationPanel,
+  executeAgentCountPanel,
+  executeAgentDurationPanel,
+];
+
 function getDashboardDocument(): SavedObject<Record<string, unknown>> | undefined {
-  const assets = tokenUsageDashboardSavedObjects as SavedObject<Record<string, unknown>>[];
-  return assets.find((o) => o.type === 'dashboard');
+  const assets = overviewDashboardSavedObjects as SavedObject<Record<string, unknown>>[];
+  const dashboard = assets.find((o) => o.type === 'dashboard');
+  if (!dashboard?.attributes) {
+    return undefined;
+  }
+
+  return {
+    ...dashboard,
+    attributes: {
+      ...dashboard.attributes,
+      panelsJSON: JSON.stringify(DASHBOARD_PANELS),
+    },
+  };
 }
 
 /**
- * Creates or overwrites the plugin-owned Agent Builder token usage dashboard via the
+ * Creates or overwrites the plugin-owned Agent Builder overview dashboard via the
  * Saved Objects API (programmatic create), aligned with feature-gated OOTB assets.
  */
 export const installAgentBuilderDashboard = async (
   savedObjectsClient: SavedObjectsClientContract,
   logger: Logger
 ): Promise<void> => {
-  logger.debug(`Installing Agent Builder token usage dashboard (${DASHBOARD_ID})...`);
+  logger.debug(`Installing Agent Builder overview dashboard (${DASHBOARD_ID})...`);
 
   const doc = getDashboardDocument();
   if (!doc?.attributes) {
@@ -41,5 +66,5 @@ export const installAgentBuilderDashboard = async (
     refresh: false,
   });
 
-  logger.debug('Agent Builder token usage dashboard installed');
+  logger.debug('Agent Builder overview dashboard installed');
 };
