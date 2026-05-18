@@ -60,15 +60,10 @@ const defaultProps = {
   attachments: [basicCommentUnified],
   caseConnectors: getCaseConnectorsMockResponse(),
   data: basicCaseWithUnifiedComments,
-  manualAlertsData: { 'some-id': { _id: 'some-id' } },
   onUpdateField,
   userActivityQueryParams,
   userActionsStats,
   statusActionButton: null,
-  useFetchAlertData: (): [boolean, Record<string, unknown>] => [
-    false,
-    { 'some-id': { _id: 'some-id' } },
-  ],
 };
 
 jest.mock('../../containers/use_infinite_find_case_user_actions');
