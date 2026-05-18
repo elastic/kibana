@@ -11,6 +11,9 @@ import type { FtrConfigProviderContext } from '@kbn/test';
 import { services } from './services';
 import { pageObjects } from './page_objects';
 
+// if config is executed on CI or locally
+const isRunOnCI = process.env.CI;
+
 // the default export of config files must be a config provider
 // that returns an object with the projects config values
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
@@ -53,6 +56,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         // disable fleet task that writes to metrics.fleet_server.* data streams, impacting functional tests
         `--xpack.task_manager.unsafe.exclude_task_types=${JSON.stringify(['Fleet-Metrics-Task'])}`,
         '--xpack.fleet.experimentalFeatures.installIntegrationsKnowledge=false',
+        // if the config is run locally, disable mock SAML IdP Kibana plugin, since Elasticsearch in stateful tests
+        // isn't configured with SAML.
+        ...(isRunOnCI ? [] : ['--mockIdpPlugin.enabled=false']),
       ],
     },
     uiSettings: {

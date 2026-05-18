@@ -96,6 +96,7 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
           enableVersionSpecificPolicies: true,
           enableOpAMP: true,
           installIntegrationsKnowledge: false,
+          enableIntegrationConditions: true,
         })}`,
         `--xpack.fleet.agentless.enabled=true`,
         `--xpack.fleet.agentless.api.url=http://localhost:8089/agentless-api`,

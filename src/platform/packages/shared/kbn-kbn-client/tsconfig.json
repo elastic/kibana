@@ -16,7 +16,6 @@
   "kbn_references": [
     "@kbn/core-saved-objects-api-server",
     "@kbn/dev-cli-errors",
-    "@kbn/dev-utils",
     "@kbn/repo-info",
     "@kbn/tooling-log"
   ]
