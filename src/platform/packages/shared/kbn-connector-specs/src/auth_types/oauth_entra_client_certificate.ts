@@ -99,23 +99,6 @@ export const OAuthEntraClientCertificate: AuthTypeSpec<AuthSchemaType> = {
     axiosInstance: AxiosInstance,
     secret: AuthSchemaType
   ): Promise<AxiosInstance> => {
-    let clientAssertion: string;
-    try {
-      clientAssertion = ctx.buildClientAssertion({
-        tokenUrl: secret.tokenUrl,
-        clientId: secret.clientId,
-        certificate: secret.certificate,
-        privateKey: secret.privateKey,
-        passphrase: secret.passphrase,
-      });
-    } catch (error) {
-      throw new EntraAuthError(
-        'assertion',
-        `Unable to build client assertion (check certificate/privateKey/passphrase): ${error.message}`,
-        { cause: error }
-      );
-    }
-
     let token;
     try {
       token = await ctx.getToken({
@@ -123,12 +106,29 @@ export const OAuthEntraClientCertificate: AuthTypeSpec<AuthSchemaType> = {
         tokenUrl: secret.tokenUrl,
         scope: secret.scope,
         clientId: secret.clientId,
-        additionalFields: {
-          client_assertion: clientAssertion,
-          client_assertion_type: CLIENT_ASSERTION_TYPE,
+        buildAdditionalFields: () => {
+          try {
+            return {
+              client_assertion: ctx.buildClientAssertion({
+                tokenUrl: secret.tokenUrl,
+                clientId: secret.clientId,
+                certificate: secret.certificate,
+                privateKey: secret.privateKey,
+                passphrase: secret.passphrase,
+              }),
+              client_assertion_type: CLIENT_ASSERTION_TYPE,
+            };
+          } catch (error) {
+            throw new EntraAuthError(
+              'assertion',
+              `Unable to build client assertion (check certificate/privateKey/passphrase): ${error.message}`,
+              { cause: error }
+            );
+          }
         },
       });
     } catch (error) {
+      if (error instanceof EntraAuthError) throw error;
       throw new EntraAuthError(
         'exchange',
         `Unable to retrieve/refresh the access token from ${secret.tokenUrl}: ${error.message}`,

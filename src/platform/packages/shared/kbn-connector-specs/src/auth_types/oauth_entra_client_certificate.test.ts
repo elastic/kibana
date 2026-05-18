@@ -11,7 +11,6 @@ import type { AxiosInstance } from 'axios';
 import type { AuthContext } from '../connector_spec';
 import {
   CLIENT_ASSERTION_TYPE,
-  OAUTH_ENTRA_CLIENT_CERTIFICATE_ID,
   OAuthEntraClientCertificate,
 } from './oauth_entra_client_certificate';
 
@@ -147,12 +146,22 @@ describe('OAuthEntraClientCertificate', () => {
   });
 
   describe('configure', () => {
-    it('builds a JWT assertion and exchanges it for a token', async () => {
-      const ctx = createMockContext();
+    it('passes a buildAdditionalFields factory to getToken and only builds the assertion on cache miss', async () => {
+      // Simulate a cache miss: getToken calls buildAdditionalFields before resolving
+      const ctx = createMockContext({
+        getToken: jest.fn().mockImplementation(async (opts) => {
+          opts.buildAdditionalFields();
+          return ACCESS_TOKEN;
+        }),
+      });
       const axiosInstance = createMockAxiosInstance();
+
+      // buildClientAssertion must NOT be called before getToken decides it needs a fresh token
+      expect(ctx.buildClientAssertion).not.toHaveBeenCalled();
 
       const result = await OAuthEntraClientCertificate.configure(ctx, axiosInstance, SECRETS);
 
+      // After a cache miss the factory was invoked, which triggered buildClientAssertion
       expect(ctx.buildClientAssertion).toHaveBeenCalledWith({
         tokenUrl: SECRETS.tokenUrl,
         clientId: SECRETS.clientId,
@@ -161,22 +170,42 @@ describe('OAuthEntraClientCertificate', () => {
         passphrase: SECRETS.passphrase,
       });
 
-      expect(ctx.getToken).toHaveBeenCalledWith({
-        authType: OAUTH_ENTRA_CLIENT_CERTIFICATE_ID,
-        tokenUrl: SECRETS.tokenUrl,
-        scope: SECRETS.scope,
-        clientId: SECRETS.clientId,
-        additionalFields: {
-          client_assertion: CLIENT_ASSERTION,
-          client_assertion_type: CLIENT_ASSERTION_TYPE,
-        },
-      });
-
       expect(result.defaults.headers.common.Authorization).toBe(ACCESS_TOKEN);
     });
 
-    it('works without an optional passphrase', async () => {
+    it('factory returns the correct assertion fields', async () => {
       const ctx = createMockContext();
+      const axiosInstance = createMockAxiosInstance();
+
+      await OAuthEntraClientCertificate.configure(ctx, axiosInstance, SECRETS);
+
+      const { buildAdditionalFields } = (ctx.getToken as jest.Mock).mock.calls[0][0];
+      expect(typeof buildAdditionalFields).toBe('function');
+
+      const fields = buildAdditionalFields();
+      expect(fields).toEqual({
+        client_assertion: CLIENT_ASSERTION,
+        client_assertion_type: CLIENT_ASSERTION_TYPE,
+      });
+    });
+
+    it('does not call buildClientAssertion on a cache hit (getToken ignores factory)', async () => {
+      // Simulate a cache hit: getToken returns without calling buildAdditionalFields
+      const ctx = createMockContext();
+      const axiosInstance = createMockAxiosInstance();
+
+      await OAuthEntraClientCertificate.configure(ctx, axiosInstance, SECRETS);
+
+      expect(ctx.buildClientAssertion).not.toHaveBeenCalled();
+    });
+
+    it('works without an optional passphrase', async () => {
+      const ctx = createMockContext({
+        getToken: jest.fn().mockImplementation(async (opts) => {
+          opts.buildAdditionalFields();
+          return ACCESS_TOKEN;
+        }),
+      });
       const axiosInstance = createMockAxiosInstance();
       const secretsWithoutPassphrase = {
         ...SECRETS,
@@ -197,6 +226,11 @@ describe('OAuthEntraClientCertificate', () => {
         buildClientAssertion: jest.fn(() => {
           throw rootCause;
         }),
+        // Simulate cache miss so the factory (and buildClientAssertion) is actually invoked
+        getToken: jest.fn().mockImplementation(async (opts) => {
+          opts.buildAdditionalFields();
+          return ACCESS_TOKEN;
+        }),
       });
       const axiosInstance = createMockAxiosInstance();
 
@@ -208,8 +242,6 @@ describe('OAuthEntraClientCertificate', () => {
         message: expect.stringMatching(/Unable to build client assertion/),
         cause: rootCause,
       });
-
-      expect(ctx.getToken).not.toHaveBeenCalled();
     });
 
     it('wraps token-endpoint failures as EntraAuthError(exchange) with tokenUrl context', async () => {

@@ -12,6 +12,7 @@ import { requestOAuthClientCredentialsToken } from './request_oauth_client_crede
 export interface GetOAuthClientCredentialsConfig {
   clientId: string;
   additionalFields?: Record<string, unknown>;
+  buildAdditionalFields?: () => Record<string, unknown>;
 }
 
 export interface GetOAuthClientCredentialsSecrets {
@@ -42,11 +43,14 @@ export const getOAuthClientCredentialsAccessToken = async ({
   connectorTokenClient,
   tokenEndpointAuthMethod,
 }: GetOAuthClientCredentialsAccessTokenOpts) => {
-  const { clientId, additionalFields } = credentials.config;
+  const { clientId, additionalFields, buildAdditionalFields } = credentials.config;
   const { clientSecret } = credentials.secrets;
 
-  const hasClientAssertion = Boolean(additionalFields?.client_assertion);
-  if (!clientId || (!clientSecret && !hasClientAssertion)) {
+  const hasCredentials =
+    Boolean(clientSecret) ||
+    Boolean(additionalFields?.client_assertion) ||
+    Boolean(buildAdditionalFields);
+  if (!clientId || !hasCredentials) {
     logger.warn(`Missing required fields for requesting OAuth Client Credentials access token`);
     return null;
   }
@@ -71,6 +75,8 @@ export const getOAuthClientCredentialsAccessToken = async ({
     // Save the time before requesting token so we can use it to calculate expiration
     const requestTokenStart = Date.now();
 
+    const resolvedAdditionalFields = buildAdditionalFields ? buildAdditionalFields() : undefined;
+
     const tokenResult = await requestOAuthClientCredentialsToken(
       tokenUrl,
       logger,
@@ -79,6 +85,7 @@ export const getOAuthClientCredentialsAccessToken = async ({
         clientId,
         clientSecret,
         ...additionalFields,
+        ...resolvedAdditionalFields,
       },
       configurationUtilities,
       tokenEndpointAuthMethod

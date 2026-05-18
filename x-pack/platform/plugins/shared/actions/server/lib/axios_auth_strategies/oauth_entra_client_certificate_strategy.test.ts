@@ -94,18 +94,20 @@ describe('OAuthEntraClientCertificateStrategy', () => {
       );
     });
 
-    it('delegates to getOAuthClientCredentialsAccessToken with empty secrets', async () => {
+    it('delegates to getOAuthClientCredentialsAccessToken with the buildAdditionalFields factory', async () => {
       mockGetOAuthClientCredentialsAccessToken.mockResolvedValue('Bearer entra');
+
+      const buildAdditionalFields = jest.fn().mockReturnValue({
+        client_assertion: 'signed.jwt.assertion',
+        client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
+      });
 
       const opts: OAuthWithCertificateGetTokenOpts = {
         authType: 'oauth_entra_client_certificate',
         tokenUrl: 'https://login.microsoftonline.com/tenant-id/oauth2/v2.0/token',
         clientId: 'the-client-id',
         scope: 'https://graph.microsoft.com/.default',
-        additionalFields: {
-          client_assertion: 'signed.jwt.assertion',
-          client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
-        },
+        buildAdditionalFields,
       };
       const result = await strategy.getToken(opts, baseDeps);
 
@@ -118,34 +120,11 @@ describe('OAuthEntraClientCertificateStrategy', () => {
           credentials: {
             config: {
               clientId: 'the-client-id',
-              additionalFields: {
-                client_assertion: 'signed.jwt.assertion',
-                client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
-              },
+              buildAdditionalFields,
             },
             secrets: {},
           },
           connectorTokenClient,
-        })
-      );
-    });
-
-    it('omits additionalFields when not present in opts', async () => {
-      mockGetOAuthClientCredentialsAccessToken.mockResolvedValue('Bearer token');
-
-      const opts: OAuthWithCertificateGetTokenOpts = {
-        authType: 'oauth_entra_client_certificate',
-        tokenUrl: 'https://login.microsoftonline.com/tenant-id/oauth2/v2.0/token',
-        clientId: 'id',
-      };
-      await strategy.getToken(opts, baseDeps);
-
-      expect(mockGetOAuthClientCredentialsAccessToken).toHaveBeenCalledWith(
-        expect.objectContaining({
-          credentials: {
-            config: { clientId: 'id' },
-            secrets: {},
-          },
         })
       );
     });

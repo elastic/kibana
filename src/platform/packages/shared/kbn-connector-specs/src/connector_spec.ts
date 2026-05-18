@@ -97,7 +97,7 @@ export interface OAuthWithCertificateGetTokenOpts {
   tokenUrl: string;
   scope?: string;
   clientId: string;
-  additionalFields?: Record<string, unknown>;
+  buildAdditionalFields: () => Record<string, unknown>;
 }
 
 export interface EarsGetTokenOpts {

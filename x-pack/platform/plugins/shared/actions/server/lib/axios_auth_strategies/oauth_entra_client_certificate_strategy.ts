@@ -42,7 +42,7 @@ export class OAuthEntraClientCertificateStrategy implements AxiosAuthStrategy {
       credentials: {
         config: {
           clientId: opts.clientId,
-          ...(opts.additionalFields ? { additionalFields: opts.additionalFields } : {}),
+          buildAdditionalFields: opts.buildAdditionalFields,
         },
         secrets: {},
       },
