@@ -43,7 +43,7 @@ spaceTest.describe(
         async ({ scoutSpace, browserAuth, pageObjects }) => {
           await scoutSpace.setSolutionView(solutionView);
           await browserAuth.loginAsViewer();
-          await pageObjects.discover.goto();
+          await pageObjects.discover.goto({ queryMode: 'classic' });
 
           await spaceTest.step('wait for results to load', async () => {
             await pageObjects.discover.waitForDocTableRendered();
@@ -62,7 +62,7 @@ spaceTest.describe(
         async ({ scoutSpace, browserAuth, pageObjects }) => {
           await scoutSpace.setSolutionView(solutionView);
           await browserAuth.loginAsViewer();
-          await pageObjects.discover.goto();
+          await pageObjects.discover.goto({ queryMode: 'esql' });
 
           await spaceTest.step('run ESQL query for traces', async () => {
             await pageObjects.discover.writeAndSubmitEsqlQuery(TRACES.ESQL_QUERY);
@@ -79,7 +79,7 @@ spaceTest.describe(
         async ({ scoutSpace, browserAuth, pageObjects }) => {
           await scoutSpace.setSolutionView(solutionView);
           await browserAuth.loginAsViewer();
-          await pageObjects.discover.goto();
+          await pageObjects.discover.goto({ queryMode: 'classic' });
 
           await spaceTest.step('open first document in flyout', async () => {
             await pageObjects.tracesExperience.openDocumentFlyout(pageObjects.discover);

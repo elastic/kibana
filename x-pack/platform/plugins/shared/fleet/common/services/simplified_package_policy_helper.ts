@@ -7,6 +7,7 @@
 import { isEmpty } from 'lodash';
 
 import type {
+  AgentConditionExpression,
   NewPackagePolicyInput,
   NewPackagePolicyInputStream,
   PackagePolicyConfigRecord,
@@ -41,6 +42,7 @@ export type SimplifiedPackagePolicyStreams = Record<
   {
     enabled?: undefined | boolean;
     vars?: SimplifiedVars;
+    condition?: AgentConditionExpression;
   }
 >;
 
@@ -50,6 +52,7 @@ export type SimplifiedInputs = Record<
     enabled?: boolean | undefined;
     vars?: SimplifiedVars;
     streams?: SimplifiedPackagePolicyStreams;
+    condition?: AgentConditionExpression;
   }
 >;
 
@@ -71,6 +74,7 @@ export interface SimplifiedPackagePolicy {
   // Only available for agentless integration policies.
   // On standard package policies this field is rejected by server-side validation.
   global_data_tags?: Array<{ name: string; value: string | number }> | null;
+  condition?: AgentConditionExpression;
 }
 
 export interface FormattedPackagePolicy extends Omit<PackagePolicy, 'inputs' | 'vars'> {
@@ -122,6 +126,7 @@ export function formatInputs(
         : false,
       vars: formatVars(input.vars),
       streams: formatStreams(input.streams),
+      ...(input.condition !== undefined ? { condition: input.condition } : {}),
     };
 
     return acc;
@@ -153,6 +158,7 @@ function formatStreams(streams: NewPackagePolicy['inputs'][number]['streams']) {
     acc[stream.data_stream.dataset] = {
       enabled: stream.enabled,
       vars: formatVars(stream.vars),
+      ...(stream.condition !== undefined ? { condition: stream.condition } : {}),
     };
 
     return acc;
@@ -199,6 +205,7 @@ export function simplifiedPackagePolicytoNewPackagePolicy(
     cloud_connector_id: cloudConnectorId,
     additional_datastreams_permissions: additionalDatastreamsPermissions,
     global_data_tags: globalDataTags,
+    condition: integrationCondition,
   } = data;
   const packagePolicy = {
     ...packageToPackagePolicy(
@@ -214,6 +221,7 @@ export function simplifiedPackagePolicytoNewPackagePolicy(
     cloud_connector_id: cloudConnectorId,
     output_id: outputId,
     var_group_selections: varGroupSelections,
+    ...(integrationCondition !== undefined ? { condition: integrationCondition } : {}),
   };
 
   if (additionalDatastreamsPermissions) {
@@ -244,7 +252,7 @@ export function simplifiedPackagePolicytoNewPackagePolicy(
   }
 
   Object.entries(inputs).forEach(([inputId, val]) => {
-    const { enabled, streams = {}, vars: inputLevelVars } = val;
+    const { enabled, streams = {}, vars: inputLevelVars, condition: inputCondition } = val;
 
     const { input: packagePolicyInput, streams: streamsMap } = inputMap.get(inputId) ?? {};
 
@@ -264,8 +272,16 @@ export function simplifiedPackagePolicytoNewPackagePolicy(
       assignVariables(inputLevelVars, packagePolicyInput.vars, `${inputId}`);
     }
 
+    if (inputCondition !== undefined) {
+      packagePolicyInput.condition = inputCondition;
+    }
+
     Object.entries(streams).forEach(([streamId, streamVal]) => {
-      const { enabled: streamEnabled, vars: streamsLevelVars } = streamVal;
+      const {
+        enabled: streamEnabled,
+        vars: streamsLevelVars,
+        condition: streamCondition,
+      } = streamVal;
       const packagePolicyStream = streamsMap.get(streamId);
       if (!packagePolicyStream) {
         throw new PackagePolicyValidationError(`Stream not found ${inputId}: ${streamId}`);
@@ -278,6 +294,10 @@ export function simplifiedPackagePolicytoNewPackagePolicy(
 
       if (streamsLevelVars) {
         assignVariables(streamsLevelVars, packagePolicyStream.vars, `${inputId} ${streamId}`);
+      }
+
+      if (streamCondition !== undefined) {
+        packagePolicyStream.condition = streamCondition;
       }
     });
   });

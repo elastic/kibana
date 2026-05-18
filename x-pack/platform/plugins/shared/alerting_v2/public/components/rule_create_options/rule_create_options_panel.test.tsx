@@ -6,28 +6,24 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { RuleCreateOptionsPanel } from './rule_create_options_panel';
 
-jest.mock('@kbn/core-di-browser', () => ({
-  useService: (token: unknown) => {
-    if (token === 'http') {
-      return { basePath: { prepend: (p: string) => p } };
-    }
-    throw new Error(`Unexpected service token in test: ${String(token)}`);
-  },
-  CoreStart: (key: string) => key,
-}));
+const onCreateEsqlRule = jest.fn();
 
 const renderPanel = () =>
   render(
     <I18nProvider>
-      <RuleCreateOptionsPanel />
+      <RuleCreateOptionsPanel onCreateEsqlRule={onCreateEsqlRule} />
     </I18nProvider>
   );
 
 describe('RuleCreateOptionsPanel', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('renders the welcome title', () => {
     renderPanel();
 
@@ -42,12 +38,12 @@ describe('RuleCreateOptionsPanel', () => {
     expect(screen.getByText(/powerful es\|ql-driven rules/i)).toBeInTheDocument();
   });
 
-  it('renders the "Create ES|QL rule" card with correct href', () => {
+  it('calls onCreateEsqlRule when the "Create ES|QL rule" card is clicked', () => {
     renderPanel();
 
-    const card = screen.getByRole('link', { name: /create es\|ql rule/i });
-    expect(card).toBeInTheDocument();
-    expect(card).toHaveAttribute('href', '/app/management/alertingV2/rules/create');
+    fireEvent.click(screen.getByRole('button', { name: /create es\|ql rule/i }));
+
+    expect(onCreateEsqlRule).toHaveBeenCalledTimes(1);
   });
 
   it('renders the "Create with AI Agent" card as disabled and non-interactive', () => {
