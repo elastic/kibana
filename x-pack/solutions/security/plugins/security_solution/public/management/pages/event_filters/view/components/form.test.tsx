@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useCallback, useState } from 'react';
-import { act, cleanup, fireEvent } from '@testing-library/react';
+import { act, cleanup, fireEvent, waitFor } from '@testing-library/react';
 import { stubIndexPattern } from '@kbn/data-plugin/common/stubs';
 import { useFetchIndex } from '../../../../../common/containers/source';
 import { NAME_ERROR } from '../event_filters_list';
@@ -81,6 +81,13 @@ const TestComponentWrapper: typeof EventFiltersForm = (formProps: ArtifactFormCo
   return <EventFiltersForm {...formProps} item={item} onChange={handleOnChange} />;
 };
 
+const expectReactNodeContainingMessage = (substring: string) =>
+  expect.objectContaining({
+    props: expect.objectContaining({
+      defaultMessage: expect.stringContaining(substring),
+    }),
+  });
+
 describe('Event filter form', () => {
   const formPrefix = 'eventFilters-form';
 
@@ -151,6 +158,13 @@ describe('Event filter form', () => {
         data: {},
         unifiedSearch: {},
         notifications: {},
+        docLinks: {
+          links: {
+            securitySolution: {
+              endpointArtifactsNoEscaping: 'some-link',
+            },
+          },
+        },
       },
     });
     (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(true);
@@ -635,15 +649,20 @@ describe('Event filter form', () => {
     });
 
     describe('wildcard with wrong operator', () => {
-      it('should not show warning callout when wildcard is used with the "MATCHES" operator', async () => {
+      beforeEach(() => {
         formProps.item.entries = [
           {
             field: 'event.category',
             operator: 'included',
-            type: 'wildcard',
+            type: 'match',
             value: 'valuewithwildcard*',
           },
         ];
+      });
+
+      it('should not show warning callout when wildcard is used with the "MATCHES" operator', async () => {
+        formProps.item.entries[0].type = 'wildcard';
+
         render();
         expect(await renderResult.findByDisplayValue('valuewithwildcard*')).toBeInTheDocument();
 
@@ -653,19 +672,99 @@ describe('Event filter form', () => {
       });
 
       it('should show warning callout when wildcard is used with the "IS" operator', async () => {
-        formProps.item.entries = [
-          {
-            field: 'event.category',
-            operator: 'included',
-            type: 'match',
-            value: 'valuewithwildcard*',
-          },
-        ];
         render();
 
         expect(
           await renderResult.findByTestId('wildcardWithWrongOperatorCallout')
         ).toBeInTheDocument();
+        expect(renderResult.queryByTestId('unnecessaryEscapingCallout')).not.toBeInTheDocument();
+      });
+
+      it('should provide confirm modal labels when wildcard warning exists', async () => {
+        render();
+
+        await waitFor(() => {
+          expect(formProps.onChange).toHaveBeenCalledWith(
+            expect.objectContaining({
+              confirmModalLabels: expect.objectContaining({
+                listOfWarnings: [expect.stringContaining('wildcards')],
+              }),
+            })
+          );
+        });
+      });
+    });
+
+    describe('unnecessary escaping', () => {
+      beforeEach(() => {
+        formProps.item.entries = [
+          {
+            field: 'process.code_signature.subject_name',
+            operator: 'included',
+            type: 'match',
+            value: 'C:\\\\abc\\\\test.exe',
+          },
+        ];
+      });
+
+      it('should show warning callout when unnecessary escaping is used', async () => {
+        render();
+
+        expect(renderResult.getByTestId('unnecessaryEscapingCallout')).toBeInTheDocument();
+        expect(
+          renderResult.queryByTestId('wildcardWithWrongOperatorCallout')
+        ).not.toBeInTheDocument();
+      });
+
+      it('should provide confirm modal labels when unnecessary escaping warning exists', async () => {
+        render();
+
+        await waitFor(() => {
+          expect(formProps.onChange).toHaveBeenCalledWith(
+            expect.objectContaining({
+              confirmModalLabels: expect.objectContaining({
+                listOfWarnings: [expectReactNodeContainingMessage('escaping')],
+              }),
+            })
+          );
+        });
+      });
+    });
+
+    describe('both wildcard and unnecessary escaping', () => {
+      beforeEach(() => {
+        formProps.item.entries = [
+          {
+            field: 'process.code_signature.subject_name',
+            operator: 'included',
+            type: 'match',
+            value: 'C:\\\\abc*\\\\test.exe',
+          },
+        ];
+      });
+
+      it('should display both warnings when both warnings exist', async () => {
+        render();
+
+        expect(renderResult.getByTestId('wildcardWithWrongOperatorCallout')).toBeInTheDocument();
+        expect(renderResult.getByTestId('unnecessaryEscapingCallout')).toBeInTheDocument();
+      });
+
+      it('should provide confirm modal labels when both warnings exist', async () => {
+        render();
+
+        await waitFor(() => {
+          expect(formProps.onChange).toHaveBeenCalledWith(
+            expect.objectContaining({
+              confirmModalLabels: expect.objectContaining({
+                listOfWarnings: [
+                  expect.stringContaining('wildcards'),
+                  expectReactNodeContainingMessage('escaping'),
+                ],
+              }),
+            })
+          );
+        });
       });
     });
   });

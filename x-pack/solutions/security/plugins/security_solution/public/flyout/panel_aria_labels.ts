@@ -44,11 +44,6 @@ export const RULE_PREVIEW_PANEL_ARIA_LABEL = i18n.translate(
   { defaultMessage: 'Rule preview' }
 );
 
-export const DOCUMENT_DETAILS_ISOLATE_HOST_PANEL_ARIA_LABEL = i18n.translate(
-  'xpack.securitySolution.flyout.panelAriaLabel.documentDetailsIsolateHost',
-  { defaultMessage: 'Isolate host' }
-);
-
 export const DOCUMENT_DETAILS_ANALYZER_PANEL_ARIA_LABEL = i18n.translate(
   'xpack.securitySolution.flyout.panelAriaLabel.documentDetailsAnalyzer',
   { defaultMessage: 'Analyzer node details' }
