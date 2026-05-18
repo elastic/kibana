@@ -295,7 +295,7 @@ export const ComponentTable: FunctionComponent<Props> = ({
                   button={button}
                   isOpen={isPopoverOpen}
                   closePopover={closePopover}
-                  panelPaddingSize="none"
+                  panelPaddingSize="s"
                 >
                   <EuiSelectable
                     allowExclusions
