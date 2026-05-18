@@ -158,7 +158,7 @@ export interface ESQLCommandSummary {
    */
   metadataColumns?: Set<string>;
   /**
-   * A set of renamed columns pairs [oldName, newName]
+   * A set of renamed columns pairs [newName, oldName]
    */
   renamedColumnsPairs?: Set<[string, string]>;
 
@@ -222,6 +222,7 @@ export interface ICommandContext {
   supportsControls?: boolean;
   histogramBarTarget?: number;
   activeProduct?: PricingProduct | undefined;
+  subquerySupport?: boolean;
   isCursorInSubquery?: boolean;
   isFieldsBrowserEnabled?: boolean;
   unmappedFieldsStrategy?: UnmappedFieldsStrategy;

@@ -1,0 +1,273 @@
+{
+  "sha1": "6f24a135d20eb91ed82db341d7ac2a7b389e4d47",
+  "tests": [
+    {
+      "id": "81653fc077ca513-fbd174b45e37209",
+      "title": "Ingest pipelines feature controls ingest user with dev tools has the embedded console",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/ui/tests/feature_controls.spec.ts",
+        "line": 13,
+        "column": 7
+      }
+    },
+    {
+      "id": "00ccace4950a296-752591d4fccfaaf",
+      "title": "Ingest pipelines home and list loads the app",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/ui/tests/home_and_list.spec.ts",
+        "line": 42,
+        "column": 7
+      }
+    },
+    {
+      "id": "00ccace4950a296-c69d5e2cf0128d1",
+      "title": "Ingest pipelines home and list displays the test pipeline in the list of pipelines",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/ui/tests/home_and_list.spec.ts",
+        "line": 48,
+        "column": 7
+      }
+    },
+    {
+      "id": "00ccace4950a296-549d4d5fe002332",
+      "title": "Ingest pipelines home and list opens the details flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/ui/tests/home_and_list.spec.ts",
+        "line": 59,
+        "column": 7
+      }
+    },
+    {
+      "id": "a50f7d61466a71e-8c01f3e7c7d3f9c",
+      "title": "Ingest pipelines Manage Processors shows the empty list prompt",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/ui/tests/manage_processors.spec.ts",
+        "line": 29,
+        "column": 7
+      }
+    },
+    {
+      "id": "a50f7d61466a71e-5cd6998af641813",
+      "title": "Ingest pipelines Manage Processors creates MaxMind and IPinfo databases and deletes them",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/ui/tests/manage_processors.spec.ts",
+        "line": 33,
+        "column": 7
+      }
+    },
+    {
+      "id": "ae47b58f6467138-cf46e4cc2a13ed3",
+      "title": "Ingest pipelines create flows creates a pipeline",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/ui/tests/pipeline_create.spec.ts",
+        "line": 30,
+        "column": 7
+      }
+    },
+    {
+      "id": "ae47b58f6467138-a710815fb5d4f84",
+      "title": "Ingest pipelines create flows creates a pipeline from CSV",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/ui/tests/pipeline_create.spec.ts",
+        "line": 41,
+        "column": 7
+      }
+    },
+    {
+      "id": "4cb2c26a2e9a30f-3f61a771194ded2",
+      "title": "Ingest pipelines tree details displays the structure tree when the pipeline has Pipeline processors",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/ui/tests/pipeline_tree.spec.ts",
+        "line": 35,
+        "column": 7
+      }
+    },
+    {
+      "id": "4cb2c26a2e9a30f-add3dac0174c531",
+      "title": "Ingest pipelines tree details does not display the structure tree when the pipeline has no Pipeline processors",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/ui/tests/pipeline_tree.spec.ts",
+        "line": 43,
+        "column": 7
+      }
+    },
+    {
+      "id": "4cb2c26a2e9a30f-e31476d8fb5617b",
+      "title": "Ingest pipelines tree details opens the details panel for the selected tree node",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/ui/tests/pipeline_tree.spec.ts",
+        "line": 53,
+        "column": 7
+      }
+    },
+    {
+      "id": "a5b657634720b0d-76a6704be227a01",
+      "title": "Ingest pipelines stateful create form navigation shows a prompt when trying to navigate away from a dirty creation form",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/ui/tests/stateful_create_form_navigation.spec.ts",
+        "line": 21,
+        "column": 9
+      }
+    },
+    {
+      "id": "80db1f87274852d-640cadea7bba467",
+      "title": "Ingest pipelines stateful list URL behavior adds pipeline query param when flyout is opened and removes it when closed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/ui/tests/stateful_list_url_behavior.spec.ts",
+        "line": 30,
+        "column": 7
+      }
+    },
+    {
+      "id": "80db1f87274852d-ffa44baa967cf27",
+      "title": "Ingest pipelines stateful list URL behavior sets query params for search and filters when changed",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/ui/tests/stateful_list_url_behavior.spec.ts",
+        "line": 43,
+        "column": 7
+      }
+    },
+    {
+      "id": "80db1f87274852d-9934c47ecbda4a2",
+      "title": "Ingest pipelines stateful list URL behavior removes only pipeline query param and leaves other query params",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/ui/tests/stateful_list_url_behavior.spec.ts",
+        "line": 53,
+        "column": 7
+      }
+    },
+    {
+      "id": "80db1f87274852d-e2f2b17b7e5c32f",
+      "title": "Ingest pipelines stateful list URL behavior opens the details flyout through the URL",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/ui/tests/stateful_list_url_behavior.spec.ts",
+        "line": 69,
+        "column": 7
+      }
+    },
+    {
+      "id": "efbc483c93229d4-8625df2e092723d",
+      "title": "Ingest pipelines delete shows warning callout when deleting a managed pipeline",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/ui/tests/stateful_pipeline_delete.spec.ts",
+        "line": 31,
+        "column": 7
+      }
+    }
+  ]
+}

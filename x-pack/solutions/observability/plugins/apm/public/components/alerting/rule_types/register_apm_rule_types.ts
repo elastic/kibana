@@ -24,6 +24,7 @@ import type { AlertParams } from './anomaly_rule_type';
 import { getDescriptionFields } from './get_description_fields';
 import {
   createLazyApmComponentWithContext,
+  type ApmAlertingSetupDeps,
   type ApmCoreSetup,
 } from '../utils/create_lazy_component_with_context';
 
@@ -34,11 +35,13 @@ const TRANSACTION_TYPE = 'transaction.type';
 
 export function registerApmRuleTypes(
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry,
-  coreSetup: ApmCoreSetup
+  coreSetup: ApmCoreSetup,
+  setupDeps?: ApmAlertingSetupDeps
 ) {
   const alertDetailsAppSection = createLazyApmComponentWithContext(
     coreSetup,
-    () => import('../ui_components/alert_details_app_section')
+    () => import('../ui_components/alert_details_app_section'),
+    setupDeps
   );
 
   observabilityRuleTypeRegistry.register({
