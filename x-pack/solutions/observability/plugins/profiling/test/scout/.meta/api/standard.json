@@ -1,31 +1,31 @@
 {
-  "sha1": "a841b12e482b9012fa623d6fe69964ba8ea894b6",
+  "sha1": "61131f976feb06209f0d2c6aafa67975497bf984",
   "tests": [
     {
       "id": "405beff6794306f-a54347ac1e57e7e",
       "title": "Profiling is not setup and no data is loaded Admin users",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/has_no_setup.spec.ts",
-        "line": 29,
+        "line": 30,
         "column": 12
       }
     },
     {
       "id": "405beff6794306f-429a339166c2e77",
       "title": "Profiling is not setup and no data is loaded Viewer users",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/has_no_setup.spec.ts",
-        "line": 43,
+        "line": 44,
         "column": 12
       }
     },
