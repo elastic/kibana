@@ -10,12 +10,6 @@ import { expect } from '@kbn/scout/ui';
 import { test, testData } from '../fixtures';
 
 test.describe('Ingest pipelines Manage Processors', { tag: tags.stateful.classic }, () => {
-  test.beforeEach(async ({ browserAuth, pageObjects }) => {
-    await browserAuth.loginAsManageProcessorsUser();
-    await pageObjects.ingestPipelines.goto();
-    await pageObjects.ingestPipelines.navigateToManageProcessorsPage();
-  });
-
   test.beforeAll(async ({ esClient, log }) => {
     for (const databaseId of [testData.MAXMIND_DATABASE_ID, testData.IPINFO_DATABASE_ID]) {
       try {
@@ -26,6 +20,12 @@ test.describe('Ingest pipelines Manage Processors', { tag: tags.stateful.classic
         );
       }
     }
+  });
+
+  test.beforeEach(async ({ browserAuth, pageObjects }) => {
+    await browserAuth.loginAsManageProcessorsUser();
+    await pageObjects.ingestPipelines.goto();
+    await pageObjects.ingestPipelines.navigateToManageProcessorsPage();
   });
 
   test.afterAll(async ({ esClient, log }) => {
