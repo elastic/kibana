@@ -14,6 +14,7 @@ import type { Reference } from '@kbn/content-management-utils';
 import type {
   FormBasedPersistedState,
   GenericIndexPatternColumn,
+  ReferenceBasedIndexPatternColumn,
   TextBasedPersistedState,
 } from '@kbn/lens-common';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
@@ -74,6 +75,11 @@ export const getFormBasedDatasourceState = (
   datasourceStates: LensAttributes['state']['datasourceStates']
 ): FormBasedPersistedState | undefined =>
   datasourceStates.formBased ?? ((datasourceStates as any).indexpattern as FormBasedPersistedState);
+
+export const isReferenceBasedColumn = (
+  c: GenericIndexPatternColumn
+): c is ReferenceBasedIndexPatternColumn =>
+  Array.isArray((c as ReferenceBasedIndexPatternColumn).references);
 
 /**
  * ES|QL ad-hoc data views: remap existing ones to deterministic IDs or create
@@ -374,11 +380,10 @@ function normalizeColumnReferences(
   col: GenericIndexPatternColumn,
   columnIdMap: Map<string | undefined, string>
 ) {
-  if (Array.isArray((col as any).references)) {
-    (col as any).references = (col as any).references.map(
-      (refId: string) => columnIdMap.get(refId) ?? refId
-    );
+  if (isReferenceBasedColumn(col)) {
+    col.references = col.references.map((refId: string) => columnIdMap.get(refId) ?? refId);
   }
+
   if (col.operationType === 'formula') {
     (col as any).references = [];
   }

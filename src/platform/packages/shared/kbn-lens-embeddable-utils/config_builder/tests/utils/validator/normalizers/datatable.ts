@@ -7,13 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  DatatableVisualizationState,
-  FormBasedLayer,
-  GenericIndexPatternColumn,
-  ReferenceBasedIndexPatternColumn,
-  TextBasedLayer,
-} from '@kbn/lens-common';
+import type { DatatableVisualizationState, FormBasedLayer, TextBasedLayer } from '@kbn/lens-common';
 import { parseTransposeId, getTransposeId, TRANSPOSE_SEPARATOR } from '@kbn/transpose-utils';
 import {
   DEFAULT_ROW_HEIGHT_LINES,
@@ -29,6 +23,7 @@ import {
   getCommonNormalizer,
   getFormBasedDatasourceState,
   getPaletteNormalizer,
+  isReferenceBasedColumn,
 } from './common';
 import {
   getAccessorName,
@@ -39,9 +34,6 @@ import {
 type DatatableAttributes = Extract<LensAttributes, { visualizationType: 'lnsDatatable' }>;
 
 type DatatableColumn = DatatableVisualizationState['columns'][number];
-
-const isReferenceBased = (c: GenericIndexPatternColumn): c is ReferenceBasedIndexPatternColumn =>
-  Array.isArray((c as ReferenceBasedIndexPatternColumn).references);
 
 /**
  * Semantic type assigned to a datatable column during classification.
@@ -154,7 +146,7 @@ function getColumnRemappingFormBased(
     const dsCol = layer.columns[oldId];
     // Exclude formula columns — their internal math references are cleared separately.
     // Only ReferenceBasedIndexPatternColumn have references array.
-    if (!dsCol || dsCol.operationType === 'formula' || !isReferenceBased(dsCol)) {
+    if (!dsCol || dsCol.operationType === 'formula' || !isReferenceBasedColumn(dsCol)) {
       continue;
     }
 
