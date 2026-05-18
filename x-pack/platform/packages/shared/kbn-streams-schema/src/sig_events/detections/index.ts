@@ -15,8 +15,8 @@ const detectionEvidenceSchema = z.object({
 export const detectionSchema = z.object({
   '@timestamp': z.iso.datetime(),
   doc_type: z.string(),
-  detection_id: z.string(),
-  rule_uuid: z.string(),
+  detection_id: z.string().optional(),
+  rule_uuid: z.string().optional(),
   rule_name: z.string(),
   stream_name: z.string().optional(),
   alert_count: z.number().optional(),
@@ -27,8 +27,6 @@ export const detectionSchema = z.object({
   detection_evidence: detectionEvidenceSchema.optional(),
   alert_samples: z.array(z.record(z.string(), z.unknown())).optional(),
   rules_activity: z.array(z.record(z.string(), z.unknown())).optional(),
-  watermark_timestamp: z.iso.datetime().optional(),
-  detection_ids: z.array(z.string()).optional(),
 });
 
 export type Detection = z.infer<typeof detectionSchema>;

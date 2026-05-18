@@ -20,11 +20,9 @@ export const detectionsMappings = {
     detection_id: mappings.keyword(),
     rule_uuid: mappings.keyword(),
     rule_name: mappings.keyword(),
-    stream_name: mappings.keyword(),
     peak_30m_alert_count: mappings.long(),
     detection_evidence: mappings.object({
       properties: {
-        change_point_type: mappings.keyword(),
         p_value: { type: 'double' as const },
       },
     }),
