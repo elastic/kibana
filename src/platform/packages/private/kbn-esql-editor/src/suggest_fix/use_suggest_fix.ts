@@ -20,6 +20,7 @@ import {
   GENERATING_HINT_CLASS,
   LINE_REPLACED_CLASS,
 } from '../editor_ai_constants';
+import { findChangedRegion } from './utils';
 
 // The command is registered once for the lifetime of
 // the app; the handler reads _runSuggestFixFn so we never need to re-register.
@@ -50,38 +51,6 @@ function ensureCommandRegistered() {
       _runSuggestFixFn.current?.(queryString, errorMessage, errorCode, errorLineNumber);
     }
   );
-}
-
-/**
- * Returns the number of identical lines at the start and end of both arrays.
- * Lines are compared after trimming so that indentation differences introduced
- * by the LLM (e.g. dropping leading spaces from pipe-separated lines) don't
- * cause unchanged lines to appear in the diff.
- */
-function findChangedRegion(
-  originalLines: string[],
-  fixedLines: string[]
-): { prefixLen: number; suffixLen: number } {
-  const maxPrefix = Math.min(originalLines.length, fixedLines.length);
-  let prefixLen = 0;
-  while (
-    prefixLen < maxPrefix &&
-    originalLines[prefixLen].trim() === fixedLines[prefixLen].trim()
-  ) {
-    prefixLen++;
-  }
-
-  const maxSuffix = Math.min(originalLines.length - prefixLen, fixedLines.length - prefixLen);
-  let suffixLen = 0;
-  while (
-    suffixLen < maxSuffix &&
-    originalLines[originalLines.length - 1 - suffixLen].trim() ===
-      fixedLines[fixedLines.length - 1 - suffixLen].trim()
-  ) {
-    suffixLen++;
-  }
-
-  return { prefixLen, suffixLen };
 }
 
 interface ReviewState {
