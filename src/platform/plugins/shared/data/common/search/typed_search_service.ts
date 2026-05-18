@@ -220,27 +220,42 @@ export class TypedSearchService implements ITypedSearchService {
 
     return {
       hasNextPage,
-      nextPage: async (): Promise<IDSLSearchResult | null> => {
+      nextPage: async (abortSignal?: AbortSignal): Promise<IDSLSearchResult | null> => {
         if (!hasNextPage || !lastHit?.sort) {
           return null;
         }
+
+        // Strip session ID for pagination calls (pagination fetches shouldn't be cached)
+        const paginationOptions = {
+          ...options,
+          abortSignal,
+          // Strip session ID for pagination calls (pagination fetches shouldn't be cached)
+          sessionId: undefined,
+        };
 
         // Build next search with search_after
         const nextParams: IDSLSearchParams = {
           ...originalParams,
         };
 
-        const request = self.buildDSLRequest(nextParams, options);
+        const request = self.buildDSLRequest(nextParams, paginationOptions);
         if (request.params && typeof request.params !== 'string') {
           (request.params as any).body.search_after = lastHit.sort;
         }
 
-        const nextResponse = await self.executeSearch(request, self.mapDSLOptions(options));
+        const nextResponse = await self.executeSearch(
+          request,
+          self.mapDSLOptions(paginationOptions)
+        );
 
         return {
           rawResponse: nextResponse.rawResponse,
           requestParams: nextResponse.requestParams,
-          pagination: self.buildDSLPagination(nextResponse.rawResponse, nextParams, options),
+          pagination: self.buildDSLPagination(
+            nextResponse.rawResponse,
+            nextParams,
+            paginationOptions
+          ),
         };
       },
       async *getAllPages(maxPages = 100) {

@@ -9,6 +9,7 @@
 
 import type { ISearchSource } from '@kbn/data-plugin/public';
 import { buildDataTableRecordList } from '@kbn/discover-utils';
+import type { EsHitRecord } from '@kbn/discover-utils/types';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import { DataViewType } from '@kbn/data-views-plugin/public';
 import type { RecordsFetchResponse } from '../../types';
@@ -43,37 +44,27 @@ export const fetchDocuments = async (
     searchSource.setOverwriteDataViewType(undefined);
   }
   const dataView = searchSource.getField('index')!;
-  const isFetchingMore = Boolean(searchSource.getField('searchAfter'));
-
-  const executionContext = {
-    description: isFetchingMore ? 'fetch more documents' : 'fetch documents',
-  };
 
   // Build the search request (this is the ES DSL)
   const searchRequest = searchSource.build();
 
-  // Extract index for searchDSL
-  const index =
-    typeof searchRequest.index === 'string'
-      ? searchRequest.index
-      : searchRequest.index?.getIndexPattern();
-
-  // Call typed search service directly
+  // Call typed search service with pagination enabled
   const result = await services.data.search.typed.searchDSL(
     {
-      index,
+      index: dataView,
       ...searchRequest.body,
     },
     {
       abortSignal: abortController.signal,
-      sessionId: isFetchingMore ? undefined : searchSessionId,
-      executionContext,
+      sessionId: searchSessionId,
+      executionContext: { description: 'fetch documents' },
+      paginate: true,
     }
   );
 
   // Build records from response
   const records = buildDataTableRecordList({
-    records: result.rawResponse.hits.hits,
+    records: result.rawResponse.hits.hits as unknown as EsHitRecord[],
     dataView,
     processRecord: (record) => scopedProfilesManager.resolveDocumentProfile({ record }),
   });
@@ -90,5 +81,6 @@ export const fetchDocuments = async (
   return {
     records,
     interceptedWarnings,
+    pagination: result.pagination,
   };
 };

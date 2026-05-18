@@ -67,8 +67,14 @@ describe('test fetchDocuments', () => {
     }));
 
     // Mock services.data.search.typed.searchDSL()
+    const mockPagination = {
+      hasNextPage: true,
+      nextPage: jest.fn(),
+      getAllPages: jest.fn(),
+    };
     deps.services.data.search.typed.searchDSL = jest.fn().mockResolvedValue({
       rawResponse: { hits: { hits } } as SearchResponse,
+      pagination: mockPagination,
     });
 
     const resolveDocumentProfileSpy = jest.spyOn(
@@ -78,6 +84,7 @@ describe('test fetchDocuments', () => {
     expect(await fetchDocuments(savedSearchMock.searchSource, deps)).toEqual({
       interceptedWarnings: [],
       records: documents,
+      pagination: mockPagination,
     });
     expect(resolveDocumentProfileSpy).toHaveBeenCalledTimes(2);
     expect(resolveDocumentProfileSpy).toHaveBeenCalledWith({ record: documents[0] });
@@ -103,7 +110,7 @@ describe('test fetchDocuments', () => {
     }
   });
 
-  test('passes a correct session id', async () => {
+  test('passes session id and enables pagination', async () => {
     const deps = await getDeps();
     const hits = [
       { _id: '1', foo: 'bar' },
@@ -111,49 +118,35 @@ describe('test fetchDocuments', () => {
     ] as unknown as EsHitRecord[];
     const documents = hits.map((hit) => buildDataTableRecord(hit, dataViewMock));
 
-    // regular search source
-
-    const searchSourceRegular = createSearchSourceMock({ index: dataViewMock });
-    searchSourceRegular.build = jest.fn(() => ({
+    const searchSource = createSearchSourceMock({ index: dataViewMock });
+    searchSource.build = jest.fn(() => ({
       index: dataViewMock,
       body: { query: {} },
     }));
 
+    const mockPagination = {
+      hasNextPage: true,
+      nextPage: jest.fn(),
+      getAllPages: jest.fn(),
+    };
+
     deps.services.data.search.typed.searchDSL = jest.fn().mockResolvedValue({
       rawResponse: { hits: { hits } } as SearchResponse,
+      pagination: mockPagination,
     });
 
-    expect(await fetchDocuments(searchSourceRegular, deps)).toEqual({
+    expect(await fetchDocuments(searchSource, deps)).toEqual({
       interceptedWarnings: [],
       records: documents,
+      pagination: mockPagination,
     });
 
     expect(deps.services.data.search.typed.searchDSL).toHaveBeenCalledWith(
       expect.objectContaining({ index: dataViewMock.getIndexPattern() }),
-      expect.objectContaining({ sessionId: deps.searchSessionId })
-    );
-
-    // search source with `search_after` for "Load more" requests
-
-    const searchSourceForLoadMore = createSearchSourceMock({ index: dataViewMock });
-    searchSourceForLoadMore.setField('searchAfter', ['100']);
-    searchSourceForLoadMore.build = jest.fn(() => ({
-      index: dataViewMock,
-      body: { query: {}, search_after: ['100'] },
-    }));
-
-    deps.services.data.search.typed.searchDSL = jest.fn().mockResolvedValue({
-      rawResponse: { hits: { hits } } as SearchResponse,
-    });
-
-    expect(await fetchDocuments(searchSourceForLoadMore, deps)).toEqual({
-      interceptedWarnings: [],
-      records: documents,
-    });
-
-    expect(deps.services.data.search.typed.searchDSL).toHaveBeenCalledWith(
-      expect.objectContaining({ search_after: ['100'] }),
-      expect.objectContaining({ sessionId: undefined })
+      expect.objectContaining({
+        sessionId: deps.searchSessionId,
+        paginate: true,
+      })
     );
   });
 });
