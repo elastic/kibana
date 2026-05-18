@@ -62,7 +62,7 @@ const renderWithRouter = (
   return render(
     <TestProviders permissions={permissions}>
       <MemoryRouter initialEntries={initialEntries}>
-        <CasesRoutes useFetchAlertData={(alertIds) => [false, {}]} />
+        <CasesRoutes />
       </MemoryRouter>
     </TestProviders>
   );

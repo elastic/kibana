@@ -9,7 +9,14 @@ import type { ReactNode } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiLinkButtonProps, EuiPopoverProps } from '@elastic/eui';
-import { EuiButtonEmpty, EuiButtonIcon, EuiPopover, EuiPopoverTitle, EuiText } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiText,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import styled from '@emotion/styled';
 
 const PopoverContent = styled(EuiText)`
@@ -68,6 +75,8 @@ export function HelpPopover({
   isOpen: EuiPopoverProps['isOpen'];
   title?: string;
 }) {
+  const popoverTitleId = useGeneratedHtmlId();
+
   return (
     <EuiPopover
       anchorPosition={anchorPosition}
@@ -76,8 +85,20 @@ export function HelpPopover({
       isOpen={isOpen}
       panelPaddingSize="s"
       ownFocus
+      aria-labelledby={title ? popoverTitleId : undefined}
+      aria-label={
+        title
+          ? undefined
+          : i18n.translate('xpack.apm.helpPopover.popoverAriaLabel', {
+              defaultMessage: 'Help',
+            })
+      }
     >
-      {title && <EuiPopoverTitle paddingSize="s">{title}</EuiPopoverTitle>}
+      {title && (
+        <EuiPopoverTitle id={popoverTitleId} paddingSize="s">
+          {title}
+        </EuiPopoverTitle>
+      )}
 
       <PopoverContent size="s">{children}</PopoverContent>
     </EuiPopover>
