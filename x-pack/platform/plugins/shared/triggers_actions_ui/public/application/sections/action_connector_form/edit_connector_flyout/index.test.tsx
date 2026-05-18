@@ -91,7 +91,7 @@ describe('EditConnectorFlyout', () => {
 
   const actionTypeRegistry = actionTypeRegistryMock.create();
 
-  beforeEach(async () => {
+  beforeEach(() => {
     jest.clearAllMocks();
     loadActionTypes.mockResolvedValue(defaultEditFlyoutLoadActionTypes);
     actionTypeRegistry.has.mockReturnValue(true);
@@ -103,9 +103,6 @@ describe('EditConnectorFlyout', () => {
     };
     appMockRenderer.coreStart.http.put = jest.fn().mockResolvedValue(updateConnectorResponse);
     appMockRenderer.coreStart.http.post = jest.fn().mockResolvedValue(executeConnectorResponse);
-    await act(async () => {
-      await Promise.resolve();
-    });
   });
 
   it('renders', async () => {
@@ -868,7 +865,7 @@ describe('is spec connector', () => {
 
   const actionTypeRegistry = actionTypeRegistryMock.create();
 
-  beforeEach(async () => {
+  beforeEach(() => {
     jest.clearAllMocks();
     loadActionTypes.mockResolvedValue(defaultEditFlyoutLoadActionTypes);
     actionTypeRegistry.has.mockReturnValue(true);
@@ -880,9 +877,6 @@ describe('is spec connector', () => {
     };
     appMockRenderer.coreStart.http.put = jest.fn().mockResolvedValue(updateConnectorResponse);
     appMockRenderer.coreStart.http.post = jest.fn().mockResolvedValue(executeConnectorResponse);
-    await act(async () => {
-      await Promise.resolve();
-    });
   });
 
   it('should not render the test tab', async () => {
