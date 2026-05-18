@@ -210,6 +210,16 @@ export interface CloudSetup extends CloudBasicUrls {
    */
   registerCloudService: (contextProvider: FC) => void;
   /**
+   * Managed OTLP service configuration.
+   */
+  managedOtlp: {
+    /**
+     * URL of the managed OTLP endpoint. Only set when the deployment is configured to use the
+     * managed OTLP service (always on observability serverless projects, and feature-flagged on ECH).
+     */
+    url?: string;
+  };
+  /**
    * Onboarding configuration
    */
   onboarding: {
