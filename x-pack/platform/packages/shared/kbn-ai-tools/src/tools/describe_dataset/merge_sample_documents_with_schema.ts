@@ -6,18 +6,18 @@
  */
 
 import { castArray, sortBy } from 'lodash';
-import type { FieldCapsResponse, SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { getFlattenedObject } from '@kbn/std';
 import type { DocumentAnalysis } from './document_analysis';
 
-export function mergeSampleDocumentsWithFieldCaps({
+export function mergeSampleDocumentsWithSchema({
   total,
   hits,
-  fieldCaps,
+  schema,
 }: {
   total: number;
   hits: SearchHit[];
-  fieldCaps: FieldCapsResponse;
+  schema: Array<{ name: string; types: string[] }>;
 }): DocumentAnalysis {
   const valueDocCountsByField = new Map<string, Map<string | number | boolean, number>>();
   const docsWithValueByField = new Map<string, number>();
@@ -27,13 +27,9 @@ export function mergeSampleDocumentsWithFieldCaps({
     ...getFlattenedObject(hit._source ?? {}),
   }));
 
-  const specs = Object.entries(fieldCaps.fields).map(([name, capabilities]) => {
-    return { name, esTypes: Object.keys(capabilities) };
-  });
-
   const typesByFields = new Map(
-    specs.map(({ name, esTypes }) => {
-      return [name, esTypes ?? []];
+    schema.map(({ name, types }) => {
+      return [name, types];
     })
   );
 
