@@ -73,12 +73,12 @@ function removeAdditionalPropertiesFromAllOfItems(ctx: OverrideCtx) {
  * enum hint alongside the oneOf.
  */
 function addDiscriminatorEnumHints(ctx: OverrideCtx) {
-  const { oneOf } = ctx.jsonSchema;
-  if (!oneOf || !Array.isArray(oneOf) || oneOf.length === 0) {
+  const unionBranches = getUnionBranches(ctx.jsonSchema);
+  if (!unionBranches || unionBranches.length === 0) {
     return;
   }
 
-  const branches = oneOf as Array<Record<string, unknown>>;
+  const branches = unionBranches;
   const discriminatorValues: Record<string, string[]> = {};
 
   for (const branch of branches) {
@@ -96,7 +96,7 @@ function addDiscriminatorEnumHints(ctx: OverrideCtx) {
   }
 
   for (const [propName, values] of Object.entries(discriminatorValues)) {
-    if (values.length === branches.length) {
+    if (values.length >= 2) {
       if (!ctx.jsonSchema.properties) {
         ctx.jsonSchema.properties = {};
       }
@@ -140,12 +140,12 @@ const FIELD_TYPE_TITLES: Record<string, string> = {
  * autocomplete shows every field variant as "object".
  */
 function addTitlesToOneOfBranches(ctx: OverrideCtx) {
-  const { oneOf } = ctx.jsonSchema;
-  if (!oneOf || !Array.isArray(oneOf) || oneOf.length === 0) {
+  const unionBranches = getUnionBranches(ctx.jsonSchema);
+  if (!unionBranches || unionBranches.length === 0) {
     return;
   }
 
-  for (const branch of oneOf as Array<Record<string, unknown>>) {
+  for (const branch of unionBranches) {
     const props = getPropertiesFromBranch(branch);
     if (props) {
       const controlProp = props.control;
@@ -158,6 +158,19 @@ function addTitlesToOneOfBranches(ctx: OverrideCtx) {
       }
     }
   }
+}
+
+/**
+ * Zod v4 emits `anyOf` for `z.union`, while discriminatedUnion may emit `oneOf`.
+ * This helper normalises both to a single branch array.
+ */
+function getUnionBranches(
+  schema: z.core.JSONSchema.BaseSchema
+): Array<Record<string, unknown>> | null {
+  const candidates =
+    (schema.oneOf as Array<Record<string, unknown>> | undefined) ??
+    (schema.anyOf as Array<Record<string, unknown>> | undefined);
+  return candidates && Array.isArray(candidates) && candidates.length > 0 ? candidates : null;
 }
 
 function getPropertiesFromBranch(branch: Record<string, unknown>): Record<string, unknown> | null {

@@ -22,12 +22,14 @@ function getFieldsOneOfBranches(
     throw new Error('items not found in fields schema');
   }
 
-  const { oneOf } = itemsSchema;
-  if (!Array.isArray(oneOf)) {
-    throw new Error('oneOf not found in fields.items schema');
+  const unionBranches =
+    (itemsSchema.oneOf as JsonSchemaObject[] | undefined) ??
+    (itemsSchema.anyOf as JsonSchemaObject[] | undefined);
+  if (!Array.isArray(unionBranches)) {
+    throw new Error('oneOf/anyOf not found in fields.items schema');
   }
 
-  return (oneOf as JsonSchemaObject[]).map((branch) => {
+  return (unionBranches as JsonSchemaObject[]).map((branch) => {
     let controlConst: string | undefined;
 
     if (branch.properties) {
@@ -61,13 +63,16 @@ describe('getTemplateDefinitionJsonSchema', () => {
     expect(schema).not.toBeNull();
   });
 
-  it('adds a title to every oneOf branch under fields.items', () => {
+  it('adds a title to every oneOf branch that has a control discriminator', () => {
     const schema = getTemplateDefinitionJsonSchema() as JsonSchemaObject;
     const branches = getFieldsOneOfBranches(schema);
 
     expect(branches.length).toBeGreaterThan(0);
 
-    for (const { title, controlConst } of branches) {
+    const controlBranches = branches.filter(({ controlConst }) => controlConst != null);
+    expect(controlBranches.length).toBeGreaterThan(0);
+
+    for (const { title, controlConst } of controlBranches) {
       expect(title).toBeDefined();
       expect(typeof title).toBe('string');
       expect(title!.length).toBeGreaterThan(0);
