@@ -21,7 +21,7 @@ Investigate a flaky Scout, FTR, or Jest test failure and determine what should b
 You may access Buildkite either with `bk` CLI or direct API calls (ensure `BUILDKITE_API_TOKEN` variable exported with the Buildkite token). Required Buildkite token scopes:
 
 - `read_builds`: browse pipelines, builds, and job logs.
-- `read_artifacts`: list and download build artifacts (Scout HTML failure reports, screenshots, FTR failure-debug HTML, etc.). See "Did the environment cause the failure?" for the specific paths and how to use them.
+- `read_artifacts`: list and download build artifacts (Scout HTML failure reports, screenshots, FTR failure-debug HTML, etc.). See "Inspect the failure artifacts" below for what to pull and how to read it.
 
 ### GitHub access
 
@@ -42,6 +42,31 @@ If no link to a `failed-test` issue was provided, search for one in the `elastic
   - _Why it matters:_ broad failure across unrelated tests points to an environment or infrastructure problem, not a problem with this test.
 - **Understand the test server configuration.** are Scout tests using the **default** or a **custom** test server configuration? Do FTR tests belong to a test config that defines custom server arguments that aren't supported on e.g., Elastic Cloud?
   - _Why it matters:_ custom server configurations are a common source of flakiness — they diverge from the configurations used by the broader test suite, so issues affecting only them won't surface elsewhere. They also tend to be less actively maintained.
+
+### Inspect the failure artifacts
+
+Before you go deep on scope or root-cause hypotheses, look at the artifacts the CI run produced. For UI tests in particular, the screenshot at the moment of failure often resolves the diagnosis in under a minute — and skipping this step is a common reason an investigation ends up in the wrong tier of fix.
+
+For every failure, try to retrieve:
+
+- **Screenshot at the failure point.** What is actually on the page? Is the awaited element present but the selector wrong? Is a loading indicator still visible? Is there an error toast or unexpected modal? Is the page blank (app crash) or on a different route than expected?
+- **DOM / HTML snapshot at the failure point.** Confirms whether the element the test was looking for actually existed in the DOM (selector issue vs. rendering issue vs. product missing the element entirely).
+- **Server logs** (`kibana.log`, `elasticsearch.log` when present). Cross-reference the failure timestamp with any errors in the logs — a server-side 500 or unexpected warning is strong evidence the failure is a product bug, not a test bug.
+- **Full session trace** when the framework supports it (Scout / Playwright). Lets you scrub through every step, locator query, network call, and DOM snapshot.
+
+How to actually find and download each artifact type is framework-specific:
+
+- Scout (Playwright HTML report, traces, video): see `references/scout.md`.
+- FTR (failure_screenshot, failure_debug_html, server logs): see `references/ftr.md`.
+
+Things to specifically check in the artifacts before forming a root-cause hypothesis:
+
+- **Did the expected element render at all?** If yes and the selector missed it → flaky selector (Tier 2 fix territory). If no → real rendering / race / data issue (Tier 1 territory).
+- **Is there an error visible in the UI** (toast, banner, console error in the HTML report)? If yes → product side, not test side.
+- **Is the page in an unexpected state** (different URL, different user's data, different space)? → cleanup or isolation issue, often points at `afterEach` / `afterAll`.
+- **Does the screenshot timestamp match the failure timestamp**? Stale artifacts from a prior step can mislead.
+
+If artifacts are not available (expired, not uploaded, no `read_artifacts` token), say so in the report rather than fabricating a hypothesis. "Screenshot would have resolved this; not available" is a valid open question.
 
 ### Understand the scope
 
@@ -89,9 +114,8 @@ Watch out for these pitfalls when investigating the failure:
 - **Ignoring the bigger picture**: ensure you have as much data as you can about the test environment and related failures (in the same test file, test config or elsewhere).
 - **Recommending a timeout bump as the primary fix**: timeout bumps consistently fail to hold in Kibana. Investigate what it is that never happened.
 - **Never recommend wrapping the assertion in `retry()` as the fix.** Wrapping the assertion in `retry()` without addressing the underlying cause frequently recurs. Acceptable only as a temporary unblock; in that case the recommendation must explicitly say "this is a stopgap" and link a follow-up issue for the real fix.
-- **Never recommend a config-only change (yaml / ftrConfigsManifest / kibana.yml) as the fix.** Config-only fixes consistently fail to hold. Examples that recurred or were superseded: [#244993](https://github.com/elastic/kibana/pull/244993), [#250040](https://github.com/elastic/kibana/pull/250040), [#245869](https://github.com/elastic/kibana/pull/245869).
-- **Never recommend only test-side async hooks (`await`, `waitFor`, `waitUntil`) when there is evidence of a production-side race.** This is the most common pattern that looks like a fix but isn't — popular precisely because it appears principled, but it lets the test wait _longer_ without fixing the race. The race resurfaces on the next slow CI agent, a backport branch, or a neighbor test that shifts timing. Examples that recurred: [#243659](https://github.com/elastic/kibana/pull/243659), [#249800](https://github.com/elastic/kibana/pull/249800), [#231407](https://github.com/elastic/kibana/pull/231407).
-- **Weakening assertions**: don't recommend making assertions more lenient or narrowing their scope just to make the test pass — this hides regressions instead of catching them. Generic test-only refactors that loosen assertions often regress; if you weaken an assertion, you are likely writing a future failed-test issue.
+- **Never recommend only test-side async hooks (`await`, `waitFor`, `waitUntil`) when there is evidence of a production-side race.** This is the most common pattern that looks like a fix but isn't — popular precisely because it appears principled, but it lets the test wait _longer_ without fixing the race.
+- **Weakening assertions**: don't recommend making assertions more lenient or narrowing their scope just to make the test pass — this hides regressions instead of catching them. Generic test-only refactors that loosen assertions often regress.
 - **Reducing coverage surface**: don't recommend stripping tags to skip the test in certain environments (e.g. Cloud) or project types (e.g. serverless Security) unless you have a real reason it shouldn't run there. "It's flaky here" is not a real reason.
 - **Trusting flaky-test-runner alone**: a green 30/30 or 60/60 run does not prove a fix held. The runner runs tests in isolation, which isn't always the case (Scout test runs share the same test servers for multiple test configs).
 - **Assuming "fix the test, not the product"**: always ask first whether the product could be at fault. Test-only fixes are meaningfully less durable than fixes that change production code.
@@ -102,7 +126,7 @@ Watch out for these pitfalls when investigating the failure:
 Consider alternatives before recommending a code fix. Once you have a diagnosis, the right next step is not always a code change. Consider:
 
 - **Delete the test.** Do other tests already cover what this one is testing?
-- **Refactor or downgrade the test.** See "Pick the right test type" in `docs/extend/scout/best-practices.md`. A functional test can often become an API, component, or Jest unit/integration test. (A test-type downgrade alone without addressing the underlying flake is a Tier 3 shape and will inherit the flake — see "What shape of fix actually holds" above.)
+- **Refactor or downgrade the test.** See "Pick the right test type" in `docs/extend/scout/best-practices.md`. A functional test can often become an API, component, or Jest unit/integration test.
 - **Update the tags.** Are the test's tags still appropriate? Should it run on Cloud? Should it be excluded from certain serverless solution types (e.g. Security)?
 - **Escalate to the owning team.** If this is a recurring offender or you suspect a product bug, the most useful conclusion may be a writeup handed to the owners, not a fix attempt.
 
