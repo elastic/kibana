@@ -12,13 +12,13 @@ import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { isNonColorableValue } from './cell_value_helpers';
 import {
-  getNonFilterableQueryTimeFieldMessage,
-  getNonFilterableValueMessage,
+  getEsqlComputedColumnFilterDisabledMessage,
+  getGenericFilterDisabledMessage,
   isEsqlTableComputedColumn,
 } from './helpers';
 
 const datatableCellPopoverStyles = {
-  notice: ({ euiTheme }: UseEuiTheme) =>
+  message: ({ euiTheme }: UseEuiTheme) =>
     css`
       padding: ${euiTheme.size.s};
       color: ${euiTheme.colors.textSubdued};
@@ -29,19 +29,19 @@ const datatableCellPopoverStyles = {
 };
 
 const LensDatatableCellPopover = ({
-  sortedTable,
+  table,
   columnFilterable,
   popoverProps,
 }: {
-  sortedTable: Datatable;
+  table: Datatable;
   columnFilterable?: boolean[];
   popoverProps: EuiDataGridCellPopoverElementProps;
 }) => {
   const styles = useMemoCss(datatableCellPopoverStyles);
   const { rowIndex, columnId, DefaultCellPopover, cellActions } = popoverProps;
 
-  const rawValue = sortedTable.rows[rowIndex]?.[columnId];
-  const colIndex = sortedTable.columns.findIndex((col) => col.id === columnId);
+  const rawValue = table.rows[rowIndex]?.[columnId];
+  const colIndex = table.columns.findIndex((col) => col.id === columnId);
   const filterable = colIndex >= 0 ? columnFilterable?.[colIndex] || false : false;
 
   if (isNonColorableValue(rawValue)) {
@@ -49,9 +49,9 @@ const LensDatatableCellPopover = ({
   }
 
   const popoverMessage = !filterable
-    ? isEsqlTableComputedColumn(sortedTable, columnId)
-      ? getNonFilterableQueryTimeFieldMessage()
-      : getNonFilterableValueMessage()
+    ? isEsqlTableComputedColumn(table, columnId)
+      ? getEsqlComputedColumnFilterDisabledMessage()
+      : getGenericFilterDisabledMessage()
     : undefined;
 
   return (
@@ -61,7 +61,7 @@ const LensDatatableCellPopover = ({
         <>
           {cellActions}
           {popoverMessage ? (
-            <div css={styles.notice} data-test-subj="lensDatatableCellPopoverMessage">
+            <div css={styles.message} data-test-subj="lensDatatableCellPopoverMessage">
               {popoverMessage}
             </div>
           ) : null}
@@ -77,7 +77,7 @@ export const createRenderDatatableCellPopover = (
 ): ((popoverProps: EuiDataGridCellPopoverElementProps) => React.ReactNode) => {
   return (popoverProps: EuiDataGridCellPopoverElementProps) => (
     <LensDatatableCellPopover
-      sortedTable={sortedTable}
+      table={sortedTable}
       columnFilterable={columnFilterable}
       popoverProps={popoverProps}
     />

@@ -23,8 +23,8 @@ import type { DatatableColumnConfig } from '../../../../common/expressions';
 import { nonNullable } from '../../../utils';
 import {
   buildColumnsMetaLookup,
-  getNonFilterableQueryTimeFieldMessage,
-  getNonFilterableValueMessage,
+  getEsqlComputedColumnFilterDisabledMessage,
+  getGenericFilterDisabledMessage,
   isEsqlTableComputedColumn,
 } from './helpers';
 
@@ -93,6 +93,8 @@ export const createGridColumns = (
       // compatible cell actions from actions registry
       const compatibleCellActions = columnCellValueActions?.[colIndex] ?? [];
 
+      // Actions are still added when the column is not filterable (`columnFilterable`);
+      // they render disabled with an explanatory `title` instead of being hidden.
       const showFilterActions =
         !hasFilterCellAction(compatibleCellActions) &&
         handleFilterClick &&
@@ -100,8 +102,8 @@ export const createGridColumns = (
 
       const disabledFilterActionMessage = !filterable
         ? isEsqlTableComputedColumn(table, field)
-          ? getNonFilterableQueryTimeFieldMessage()
-          : getNonFilterableValueMessage()
+          ? getEsqlComputedColumnFilterDisabledMessage()
+          : getGenericFilterDisabledMessage()
         : undefined;
 
       if (showFilterActions) {
