@@ -628,6 +628,77 @@ describe('regroupEvents', () => {
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining(`${EVENTS_ESQL_LIMIT}`));
   });
 
+  it('deduplicates actorsDocData and targetsDocData when same entity appears across merged rows', () => {
+    // Scenario: actor A acts on targets B and C (both host type).
+    // Initial STATS produces 2 rows: (A,B) and (A,C).
+    // After re-grouping by (userType, hostType), they merge.
+    // Actor A's docData should appear only ONCE, not twice.
+    const actorDoc = '{"id":"user:alice","type":"entity","sourceFields":{}}';
+    const targetBDoc = '{"id":"host:b","type":"entity","sourceFields":{}}';
+    const targetCDoc = '{"id":"host:c","type":"entity","sourceFields":{}}';
+
+    const record1 = buildEventEdge({
+      actorEntityId: 'user:alice',
+      targetEntityId: 'host:b',
+      actorsDocData: [actorDoc],
+      targetsDocData: [targetBDoc],
+    });
+    const record2 = buildEventEdge({
+      actorEntityId: 'user:alice',
+      targetEntityId: 'host:c',
+      actorsDocData: [actorDoc],
+      targetsDocData: [targetCDoc],
+    });
+
+    const enrichmentMap = new Map<string, EntityEnrichmentFields>([
+      ['user:alice', { name: 'Alice', type: 'user', subType: null, engineType: null, hostIps: [] }],
+      ['host:b', { name: 'B', type: 'host', subType: null, engineType: null, hostIps: [] }],
+      ['host:c', { name: 'C', type: 'host', subType: null, engineType: null, hostIps: [] }],
+    ]);
+
+    const result = regroupEvents([record1, record2], enrichmentMap, logger);
+
+    expect(result).toHaveLength(1);
+    const [group] = result;
+
+    // actorsDocData: actor A appears in BOTH records but should be deduplicated to 1
+    expect((group.actorsDocData as string[]).length).toBe(1);
+    expect(group.actorsDocData).toContain(actorDoc);
+
+    // targetsDocData: each target is unique, so both should be present
+    expect((group.targetsDocData as string[]).length).toBe(2);
+    expect(group.targetsDocData).toContain(targetBDoc);
+    expect(group.targetsDocData).toContain(targetCDoc);
+  });
+
+  it('deduplicates docs when same document appears across merged rows', () => {
+    const sharedDoc = '{"id":"shared-_id","type":"event","index":".alerts"}';
+    const record1 = buildEventEdge({
+      actorEntityId: 'user:alice',
+      targetEntityId: 'host:b',
+      docs: [sharedDoc],
+    });
+    const record2 = buildEventEdge({
+      actorEntityId: 'user:alice',
+      targetEntityId: 'host:c',
+      docs: [sharedDoc],
+    });
+
+    const enrichmentMap = new Map<string, EntityEnrichmentFields>([
+      ['user:alice', { name: 'Alice', type: 'user', subType: null, engineType: null, hostIps: [] }],
+      ['host:b', { name: 'B', type: 'host', subType: null, engineType: null, hostIps: [] }],
+      ['host:c', { name: 'C', type: 'host', subType: null, engineType: null, hostIps: [] }],
+    ]);
+
+    const result = regroupEvents([record1, record2], enrichmentMap, logger);
+
+    expect(result).toHaveLength(1);
+    const [group] = result;
+
+    // sharedDoc appears in both rows but should appear only once after dedup
+    expect((group.docs as string[]).filter((d) => d === sharedDoc).length).toBe(1);
+  });
+
   it('sorts groups by action DESC then pinned ASC then isOrigin DESC', () => {
     const recordA = buildEventEdge({
       actorEntityId: 'user:alice',

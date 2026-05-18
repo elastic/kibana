@@ -702,7 +702,9 @@ export const regroupEvents = (
       isOriginAlert: group.isOriginAlert,
       pinned: group.pinned,
       labelNodeId,
-      docs: group.docs,
+      // Deduplicate: old ESQL VALUES() was a set; TS accumulation can repeat entries when the
+      // same entity appears in multiple (actorEntityId, targetEntityId) rows that merge into one group.
+      docs: [...new Set(group.docs)],
       sourceIps: uniqueSourceIps.length > 0 ? uniqueSourceIps : undefined,
       sourceCountryCodes:
         uniqueSourceCountryCodes.length > 0 ? uniqueSourceCountryCodes : undefined,
@@ -713,7 +715,7 @@ export const regroupEvents = (
       actorEntityName:
         actorNames.length === 0 ? null : actorNames.length === 1 ? actorNames[0] : actorNames,
       actorHostIps: actorHostIps.length > 0 ? actorHostIps : undefined,
-      actorsDocData: group.actorsDocData,
+      actorsDocData: [...new Set(group.actorsDocData)],
       targetNodeId,
       targetIdsCount: targetEntityIds.length,
       targetEntityType: group.targetType,
@@ -721,7 +723,7 @@ export const regroupEvents = (
       targetEntityName:
         targetNames.length === 0 ? null : targetNames.length === 1 ? targetNames[0] : targetNames,
       targetHostIps: targetHostIps.length > 0 ? targetHostIps : undefined,
-      targetsDocData: group.targetsDocData,
+      targetsDocData: [...new Set(group.targetsDocData)],
     };
   });
 
