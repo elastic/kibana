@@ -90,10 +90,14 @@ test.describe('Rules create flow', { tag: tags.stateful.classic }, () => {
 
     await page.gotoApp('rules');
     await expect(page.testSubj.locator('rulesList')).toBeVisible();
+    await page.testSubj.locator('ruleSearchField').fill(ruleName);
     await expect(page.testSubj.locator('rulesList').locator(`[title="${ruleName}"]`)).toBeVisible();
   });
 
-  test('redirects to the rule details page after saving a new rule', async ({ page }) => {
+  test('redirects to the rule details page after saving a new rule', async ({
+    page,
+    kbnClient,
+  }) => {
     const ruleName = `scout-create-flow-redirect-${Date.now()}`;
     createdRuleNames.push(ruleName);
 
@@ -105,6 +109,9 @@ test.describe('Rules create flow', { tag: tags.stateful.classic }, () => {
 
     // After save Kibana redirects to the rule details page automatically.
     await expect(page.testSubj.locator('ruleDetailsTitle')).toBeVisible({ timeout: 15000 });
-    expect(page.url()).toContain('/app/rules/rule/');
+
+    const ruleId = await findRuleIdByName(kbnClient, ruleName);
+    expect(ruleId).toBeDefined();
+    expect(page.url()).toContain(`/app/rules/rule/${ruleId}`);
   });
 });

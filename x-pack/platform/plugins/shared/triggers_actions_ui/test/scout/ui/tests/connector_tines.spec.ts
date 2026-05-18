@@ -199,6 +199,18 @@ test.describe('Tines connector', { tag: tags.stateful.classic }, () => {
     await expect(page.testSubj.locator('euiToastHeader__title')).toContainText(
       `Updated '${updatedConnectorName}'`
     );
+
+    // Close the flyout and verify the updated name appears in the list.
+    await page.testSubj.click('euiFlyoutCloseButton');
+    await expect(page.testSubj.locator('edit-connector-flyout-save-btn')).toBeHidden();
+
+    await searchBox.fill(updatedConnectorName);
+    await searchBox.press('Enter');
+    await page.locator(CONNECTORS_LIST_SELECTORS.TABLE_LOADED).waitFor();
+
+    await expect(rows).toHaveCount(1);
+    await expect(rows.getByTestId('connectorsTableCell-name')).toContainText(updatedConnectorName);
+    await expect(rows.getByTestId('connectorsTableCell-actionType')).toContainText('Tines');
   });
 
   test('resets the connector form when an edit is canceled', async ({
