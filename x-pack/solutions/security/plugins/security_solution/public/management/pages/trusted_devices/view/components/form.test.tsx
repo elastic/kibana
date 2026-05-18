@@ -253,7 +253,7 @@ describe('Trusted devices form', () => {
       await openOsCombo();
 
       const options = Array.from(
-        renderResult.baseElement.querySelectorAll('button[role="option"]')
+        renderResult.baseElement.querySelectorAll('.euiComboBoxOption')
       ).map((el) => el.textContent?.trim());
 
       expect(options).toEqual([
