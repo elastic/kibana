@@ -1,5 +1,5 @@
 {
-  "sha1": "926f8272b35e2823cb31b098b04d3d6eeb08e85c",
+  "sha1": "f188cee7f2e4962b8af8e316332dda3ca8c0ac81",
   "tests": [
     {
       "id": "30ebe9a34bf659d-a632a3af2fa3cab",
@@ -143,7 +143,7 @@
     {
       "id": "4c939ca2b72e878-ee032ba495e2030",
       "title": "GenAI Settings - Page Display should display correct UI elements",
-      "expectedStatus": "skipped",
+      "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
         "@local-serverless-security_complete",
@@ -155,7 +155,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/gen_ai_settings/test/scout/ui/parallel_tests/page_display.spec.ts",
-        "line": 29,
+        "line": 28,
         "column": 14
       }
     },
