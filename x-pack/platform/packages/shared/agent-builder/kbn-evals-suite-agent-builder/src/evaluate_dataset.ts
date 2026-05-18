@@ -92,6 +92,65 @@ const extractWorkflowExecuteParams = (output: TaskOutput): unknown[] => {
     .filter((params) => params != null);
 };
 
+const GET_STEP_DEFINITIONS_TOOL_ID = 'platform.workflows.get_step_definitions';
+
+/**
+ * Full workflow_execute_step tool-call records (with index in the original
+ * step sequence) so B3-feature evaluators can inspect both the params the LLM
+ * sent and the result the tool returned, and reason about ordering relative
+ * to other tool calls (e.g. discovery-first pattern).
+ *
+ * Shape returned by createToolResult in workflow_execute_step_tool.ts:
+ *   { results: [{ type: 'other', data: { success, error?, parseError?, reason?, ... } }] }
+ */
+interface WorkflowExecuteStepRecord {
+  index: number;
+  params: Record<string, unknown> | null;
+  data: Record<string, unknown> | null;
+}
+
+const extractWorkflowExecuteStepRecords = (output: TaskOutput): WorkflowExecuteStepRecord[] => {
+  const steps = (output as { steps?: unknown[] }).steps;
+  if (!Array.isArray(steps)) return [];
+
+  return steps
+    .map((step, index) => ({ step, index }))
+    .filter(({ step }) => isRecord(step))
+    .filter(
+      ({ step }) =>
+        (step as Record<string, unknown>).type === 'tool_call' &&
+        (step as Record<string, unknown>).tool_id === WORKFLOW_EXECUTE_STEP_TOOL_ID
+    )
+    .map(({ step, index }) => {
+      const s = step as Record<string, unknown>;
+      const results = Array.isArray(s.results) ? s.results : [];
+      const firstResult = results.find((r): r is Record<string, unknown> => isRecord(r));
+      const data =
+        firstResult && isRecord(firstResult.data)
+          ? (firstResult.data as Record<string, unknown>)
+          : null;
+      return {
+        index,
+        params: isRecord(s.params) ? (s.params as Record<string, unknown>) : null,
+        data,
+      };
+    });
+};
+
+const firstGetStepDefinitionsIndex = (output: TaskOutput): number | null => {
+  const steps = (output as { steps?: unknown[] }).steps;
+  if (!Array.isArray(steps)) return null;
+
+  for (let i = 0; i < steps.length; i++) {
+    const step = steps[i];
+    if (!isRecord(step)) continue;
+    if (step.type === 'tool_call' && step.tool_id === GET_STEP_DEFINITIONS_TOOL_ID) {
+      return i;
+    }
+  }
+  return null;
+};
+
 export type EvaluateDataset = ({
   dataset: { name, description, examples },
 }: {
@@ -255,6 +314,146 @@ function configureExperiment({
         return {
           score: hasExpected && allExpected ? 1 : 0,
           metadata: { expectedOnlyToolId, usedToolIds },
+        };
+      },
+    },
+    // ─────────────────────────────────────────────────────────────────────
+    // B3 / v6 evaluators for the workflow-shaped alert-analysis variant.
+    //
+    // These fire on examples whose metadata carries `variantFamily: 'workflow'`
+    // (i.e. the workflow-spec.ts pair). They short-circuit to `not_applicable`
+    // on examples that never call platform.workflows.workflow_execute_step, so
+    // it is safe to include them in dataset runs that mix workflow and
+    // non-workflow examples.
+    // ─────────────────────────────────────────────────────────────────────
+    {
+      name: 'Workflow_Yaml_Validity',
+      kind: 'CODE' as const,
+      evaluate: async ({ output, metadata }) => {
+        if (getStringMeta(metadata, 'variantFamily') !== 'workflow') return { score: 1 };
+        const records = extractWorkflowExecuteStepRecords(output as TaskOutput);
+        if (records.length === 0) {
+          return { score: null, label: 'not_applicable' };
+        }
+
+        // YAML parse failure is signalled by `parseError` on the result data
+        // (see workflow_execute_step_tool.ts:826-830).
+        const failures = records.filter((r) => r.data?.parseError != null).length;
+        const valid = records.length - failures;
+        return {
+          score: valid / records.length,
+          metadata: {
+            workflowCallCount: records.length,
+            yamlValidCount: valid,
+            yamlFailureCount: failures,
+          },
+        };
+      },
+    },
+    {
+      name: 'Workflow_PreValidation_PassRate',
+      kind: 'CODE' as const,
+      evaluate: async ({ output, metadata }) => {
+        if (getStringMeta(metadata, 'variantFamily') !== 'workflow') return { score: 1 };
+        const records = extractWorkflowExecuteStepRecords(output as TaskOutput);
+        if (records.length === 0) {
+          return { score: null, label: 'not_applicable' };
+        }
+
+        // Among YAML-valid calls, count those that did NOT trip the
+        // preValidateStepWith Zod check. The check returns a result with a
+        // `reason` field (see workflow_execute_step_tool.ts:854-863). Mustache-
+        // templated `with:` blocks are skipped by the validator and therefore
+        // count as passing — that is the intentional B3 trade-off.
+        const yamlValid = records.filter((r) => r.data?.parseError == null);
+        if (yamlValid.length === 0) {
+          return {
+            score: 0,
+            metadata: {
+              reason: 'All workflow_execute_step calls failed YAML parse before pre-validation',
+              workflowCallCount: records.length,
+            },
+          };
+        }
+
+        const preValidationFailures = yamlValid.filter((r) => r.data?.reason != null).length;
+        const passed = yamlValid.length - preValidationFailures;
+        return {
+          score: passed / yamlValid.length,
+          metadata: {
+            workflowCallCount: records.length,
+            yamlValidCount: yamlValid.length,
+            preValidationPassedCount: passed,
+            preValidationFailureCount: preValidationFailures,
+          },
+        };
+      },
+    },
+    {
+      name: 'Workflow_Execution_SuccessRate',
+      kind: 'CODE' as const,
+      evaluate: async ({ output, metadata }) => {
+        if (getStringMeta(metadata, 'variantFamily') !== 'workflow') return { score: 1 };
+        const records = extractWorkflowExecuteStepRecords(output as TaskOutput);
+        if (records.length === 0) {
+          return { score: null, label: 'not_applicable' };
+        }
+
+        // Among calls that passed YAML parse and pre-validation, count those
+        // whose execution returned success=true (formatExecutionResult writes
+        // success based on ExecutionStatus.COMPLETED — see line 380).
+        const eligible = records.filter(
+          (r) => r.data?.parseError == null && r.data?.reason == null
+        );
+        if (eligible.length === 0) {
+          return {
+            score: 0,
+            metadata: {
+              reason: 'No workflow_execute_step calls reached execution',
+              workflowCallCount: records.length,
+            },
+          };
+        }
+
+        const succeeded = eligible.filter((r) => r.data?.success === true).length;
+        return {
+          score: succeeded / eligible.length,
+          metadata: {
+            workflowCallCount: records.length,
+            executedCount: eligible.length,
+            succeededCount: succeeded,
+          },
+        };
+      },
+    },
+    {
+      name: 'Discovery_First_Pattern_Usage',
+      kind: 'CODE' as const,
+      evaluate: async ({ output, metadata }) => {
+        if (getStringMeta(metadata, 'variantFamily') !== 'workflow') return { score: 1 };
+        const records = extractWorkflowExecuteStepRecords(output as TaskOutput);
+        if (records.length === 0) {
+          return { score: null, label: 'not_applicable' };
+        }
+
+        // Canary metric for whether the LLM is exercising B3's auto-schema
+        // feature: was platform.workflows.get_step_definitions called BEFORE
+        // the first workflow_execute_step in the same trace? Counts the
+        // proportion of workflow_execute_step calls preceded by a discovery
+        // call so multi-call traces are not penalised for caching the schema
+        // after the first lookup.
+        const firstDiscoveryIdx = firstGetStepDefinitionsIndex(output as TaskOutput);
+        const precededCount = records.filter(
+          (r) => firstDiscoveryIdx !== null && firstDiscoveryIdx < r.index
+        ).length;
+
+        return {
+          score: precededCount / records.length,
+          metadata: {
+            workflowCallCount: records.length,
+            firstGetStepDefinitionsIndex: firstDiscoveryIdx,
+            precededByDiscoveryCount: precededCount,
+          },
         };
       },
     },
