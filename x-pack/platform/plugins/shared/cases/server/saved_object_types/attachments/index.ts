@@ -8,6 +8,7 @@
 import type { SavedObjectsType } from '@kbn/core/server';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { CASE_ATTACHMENT_SAVED_OBJECT } from '../../../common/constants';
+import { CASE_ID_FIELD_MAPPING } from '../shared/case_id_script';
 import { modelVersion1 } from './model_versions/model_version_1';
 
 /**
@@ -35,6 +36,7 @@ export const createCaseAttachmentSavedObjectType = (): SavedObjectsType => ({
       owner: {
         type: 'keyword',
       },
+      caseId: CASE_ID_FIELD_MAPPING,
       data: {
         properties: {
           content: {

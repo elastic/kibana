@@ -7,24 +7,22 @@
 
 import { schema } from '@kbn/config-schema';
 import type { SavedObjectsFullModelVersion } from '@kbn/core-saved-objects-server';
-import { CASE_ID_SCRIPT_SOURCE } from '../../shared/case_id_script';
+import { CASE_ID_FIELD_MAPPING } from '../../shared/case_id_script';
 
 /**
  * Adds the indexed scripted `caseId` keyword, derived from
  * `references[type=cases].id` at index time. The platform's
  * `pickupUpdatedMappings` (`_update_by_query`) re-runs the script and
  * backfills existing docs automatically — no `data_backfill` step needed.
+ * Mapping is sourced from the shared `CASE_ID_FIELD_MAPPING` so the top-level
+ * mapping and this `addedMappings` stay in sync.
  */
 export const modelVersion2: SavedObjectsFullModelVersion = {
   changes: [
     {
       type: 'mappings_addition',
       addedMappings: {
-        caseId: {
-          type: 'keyword',
-          on_script_error: 'continue',
-          script: { source: CASE_ID_SCRIPT_SOURCE },
-        },
+        caseId: CASE_ID_FIELD_MAPPING,
       },
     },
   ],

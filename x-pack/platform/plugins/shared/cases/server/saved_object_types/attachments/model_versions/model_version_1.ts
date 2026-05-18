@@ -7,23 +7,20 @@
 
 import { schema } from '@kbn/config-schema';
 import type { SavedObjectsFullModelVersion } from '@kbn/core-saved-objects-server';
-import { CASE_ID_SCRIPT_SOURCE } from '../../shared/case_id_script';
+import { CASE_ID_FIELD_MAPPING } from '../../shared/case_id_script';
 
 /**
  * Baseline + indexed scripted `caseId` derived from `references[type=cases].id`.
- * The script runs at index time; `caseId` must never appear in `_source`
- * (ES rejects docs that include a value for a scripted field name).
+ * Mapping is sourced from the shared `CASE_ID_FIELD_MAPPING` so the top-level
+ * `mappings.properties.caseId` and this `addedMappings` stay in sync — Kibana
+ * validates the two and refuses to start if they diverge.
  */
 export const modelVersion1: SavedObjectsFullModelVersion = {
   changes: [
     {
       type: 'mappings_addition',
       addedMappings: {
-        caseId: {
-          type: 'keyword',
-          on_script_error: 'continue',
-          script: { source: CASE_ID_SCRIPT_SOURCE },
-        },
+        caseId: CASE_ID_FIELD_MAPPING,
       },
     },
   ],
