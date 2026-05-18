@@ -47,8 +47,8 @@ describe('useBreadcrumbs', () => {
     expect(breadcrumbs[1]).toMatchObject({ text: 'Rules' });
   });
 
-  it('should set breadcrumbs for the create page with root and list link', () => {
-    renderHook(() => useBreadcrumbs('create'));
+  it('should set breadcrumbs for the rule_create_options page with root and list link', () => {
+    renderHook(() => useBreadcrumbs('rule_create_options'));
 
     const breadcrumbs = mockSetBreadcrumbs.mock.calls[0][0];
     expect(breadcrumbs).toHaveLength(3);
@@ -57,17 +57,7 @@ describe('useBreadcrumbs', () => {
       text: 'Rules',
       href: '/',
     });
-    expect(breadcrumbs[2]).toMatchObject({ text: 'Create' });
-  });
-
-  it('should set breadcrumbs for the edit page with root and list link', () => {
-    renderHook(() => useBreadcrumbs('edit'));
-
-    const breadcrumbs = mockSetBreadcrumbs.mock.calls[0][0];
-    expect(breadcrumbs).toHaveLength(3);
-    expect(breadcrumbs[0]).toMatchObject({ text: 'Alerting V2' });
-    expect(breadcrumbs[1]).toMatchObject({ text: 'Rules', href: '/' });
-    expect(breadcrumbs[2]).toMatchObject({ text: 'Edit' });
+    expect(breadcrumbs[2]).toMatchObject({ text: 'Create rule' });
   });
 
   it('should set breadcrumbs for rule_details with the rule name', () => {
@@ -88,7 +78,7 @@ describe('useBreadcrumbs', () => {
   });
 
   it('should set the document title from breadcrumbs in reverse order', () => {
-    renderHook(() => useBreadcrumbs('create'));
+    renderHook(() => useBreadcrumbs('rule_create_options'));
 
     expect(mockDocTitleChange).toHaveBeenCalledTimes(1);
     const docTitle = mockDocTitleChange.mock.calls[0][0];
@@ -97,7 +87,7 @@ describe('useBreadcrumbs', () => {
   });
 
   it('should include href on rules list breadcrumb for sub-pages', () => {
-    renderHook(() => useBreadcrumbs('create'));
+    renderHook(() => useBreadcrumbs('rule_create_options'));
 
     const breadcrumbs = mockSetBreadcrumbs.mock.calls[0][0];
     const rulesListBreadcrumb = breadcrumbs[1];

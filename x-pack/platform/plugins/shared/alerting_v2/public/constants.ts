@@ -33,8 +33,6 @@ export {
 } from '@kbn/alerting-v2-constants';
 
 export const paths = {
-  ruleCreate: `${ALERTING_V2_RULES_BASE_PATH}/create`,
-  ruleEdit: (id: string) => `${ALERTING_V2_RULES_BASE_PATH}/edit/${encodeURIComponent(id)}`,
   ruleDetails: (id: string) => `${ALERTING_V2_RULES_BASE_PATH}/${encodeURIComponent(id)}`,
   ruleList: ALERTING_V2_RULES_BASE_PATH,
   ruleCreateOptions: `${ALERTING_V2_RULES_BASE_PATH}/create_options`,
