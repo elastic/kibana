@@ -620,6 +620,33 @@ describe('FastifyHttpServer', () => {
       fs.rmSync(dir, { recursive: true, force: true });
     }, 15000);
 
+    it('serves a sibling .gz asset when compression.enabled is false (Hapi Inert parity)', async () => {
+      const ctx = createCoreContext();
+      const config = createHttpConfig(PORT);
+      const config$ = new BehaviorSubject(config);
+
+      const dir = fs.mkdtempSync(nodePath.join(os.tmpdir(), 'fastify-static-gz-disabled-'));
+      fs.writeFileSync(nodePath.join(dir, 'bundle.js'), 'not-gzip');
+      fs.writeFileSync(nodePath.join(dir, 'bundle.js.gz'), 'gzipped-body');
+
+      server = new FastifyHttpServer(ctx, 'Kibana', new BehaviorSubject(config.shutdownTimeout));
+      const setup = await server.setup({ config$ });
+      setup.registerStaticDir('/assets/{any*}', dir);
+
+      await server.start();
+      const address = (setup.server as any).server.address();
+      const port = typeof address === 'object' && address ? address.port : 0;
+
+      const res = await httpRequest(port, '/assets/bundle.js', 'GET', {
+        headers: { 'accept-encoding': 'gzip' },
+      });
+      expect(res.statusCode).toBe(200);
+      expect(res.headers['content-encoding']).toBe('gzip');
+      expect(res.body).toBe('gzipped-body');
+
+      fs.rmSync(dir, { recursive: true, force: true });
+    }, 15000);
+
     it('falls back to dynamic gzip when no .gz sibling exists', async () => {
       const ctx = createCoreContext();
       const config = createHttpConfig(PORT);
@@ -1055,6 +1082,136 @@ describe('FastifyHttpServer', () => {
         message: 'lifecycle-blocked',
       });
     }, 15000);
+  });
+
+  describe('conditional compression', () => {
+    let server: FastifyHttpServer;
+    let listenPort = 0;
+
+    const largeHtmlBody = {
+      body: 'hello'.repeat(500),
+      headers: { 'Content-Type': 'text/html; charset=UTF-8' },
+    };
+
+    const setupCompressionServer = async (compression: HttpConfig['compression']) => {
+      const ctx = createCoreContext();
+      const config = createHttpConfig(PORT);
+      (config as unknown as { compression: HttpConfig['compression'] }).compression = compression;
+      const config$ = new BehaviorSubject(config);
+
+      server = new FastifyHttpServer(ctx, 'Kibana', new BehaviorSubject(config.shutdownTimeout));
+      const setup = await server.setup({ config$ });
+
+      const enhanceHandler = (handler: any) => async (req: any, res: any) =>
+        handler({} as any, req, res);
+
+      const router = new Router('/api/fastify-mvp', ctx.logger.get('router'), enhanceHandler, {
+        env,
+      });
+      router.get(
+        {
+          path: '/',
+          validate: false,
+          security: { authz: { enabled: false, reason: 'test' } },
+        },
+        (_context, _req, res) => res.ok(largeHtmlBody)
+      );
+      setup.registerRouter(router);
+      await server.start();
+
+      const address = (setup.server as any).server.address();
+      listenPort = typeof address === 'object' && address ? address.port : 0;
+    };
+
+    afterEach(async () => {
+      await server?.stop();
+    });
+
+    it('compresses when compression.enabled is true', async () => {
+      await setupCompressionServer({
+        enabled: true,
+        brotli: { enabled: false, quality: 3 },
+      });
+
+      const res = await httpRequest(listenPort, '/api/fastify-mvp/', 'GET', {
+        headers: { 'accept-encoding': 'gzip' },
+      });
+      expect(res.headers['content-encoding']).toBe('gzip');
+    });
+
+    it('does not compress when compression.enabled is false', async () => {
+      await setupCompressionServer({
+        enabled: false,
+        brotli: { enabled: false, quality: 3 },
+      });
+
+      const res = await httpRequest(listenPort, '/api/fastify-mvp/', 'GET', {
+        headers: { 'accept-encoding': 'gzip' },
+      });
+      expect(res.headers['content-encoding']).toBeUndefined();
+    });
+
+    it('does not use brotli when compression.brotli.enabled is false', async () => {
+      await setupCompressionServer({
+        enabled: true,
+        brotli: { enabled: false, quality: 3 },
+      });
+
+      const res = await httpRequest(listenPort, '/api/fastify-mvp/', 'GET', {
+        headers: { 'accept-encoding': 'br' },
+      });
+      expect(res.headers['content-encoding']).not.toBe('br');
+    });
+
+    it('uses brotli when compression.brotli.enabled is true', async () => {
+      await setupCompressionServer({
+        enabled: true,
+        brotli: { enabled: true, quality: 3 },
+      });
+
+      const res = await httpRequest(listenPort, '/api/fastify-mvp/', 'GET', {
+        headers: { 'accept-encoding': 'br' },
+      });
+      expect(res.headers['content-encoding']).toBe('br');
+    });
+
+    describe('with compression.referrerWhitelist', () => {
+      beforeEach(async () => {
+        await setupCompressionServer({
+          enabled: true,
+          referrerWhitelist: ['foo'],
+          brotli: { enabled: false, quality: 3 },
+        });
+      });
+
+      it('compresses when there is no referer', async () => {
+        const res = await httpRequest(listenPort, '/api/fastify-mvp/', 'GET', {
+          headers: { 'accept-encoding': 'gzip' },
+        });
+        expect(res.headers['content-encoding']).toBe('gzip');
+      });
+
+      it('compresses for a whitelisted referer', async () => {
+        const res = await httpRequest(listenPort, '/api/fastify-mvp/', 'GET', {
+          headers: { 'accept-encoding': 'gzip', referer: 'http://foo:1234' },
+        });
+        expect(res.headers['content-encoding']).toBe('gzip');
+      });
+
+      it('does not compress for a non-whitelisted referer', async () => {
+        const res = await httpRequest(listenPort, '/api/fastify-mvp/', 'GET', {
+          headers: { 'accept-encoding': 'gzip', referer: 'http://bar:1234' },
+        });
+        expect(res.headers['content-encoding']).toBeUndefined();
+      });
+
+      it('does not compress for an invalid referer', async () => {
+        const res = await httpRequest(listenPort, '/api/fastify-mvp/', 'GET', {
+          headers: { 'accept-encoding': 'gzip', referer: 'http://asdf$%^' },
+        });
+        expect(res.headers['content-encoding']).toBeUndefined();
+      });
+    });
   });
 
   it('stop() is a no-op safe to call before setup()', async () => {

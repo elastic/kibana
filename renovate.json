@@ -856,6 +856,7 @@
       "matchDepNames": [
         "fastify",
         "find-my-way",
+        "@fastify/compress",
         "@fastify/multipart"
       ],
       "reviewers": ["team:kibana-core"],

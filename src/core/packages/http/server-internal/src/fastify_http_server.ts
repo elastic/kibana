@@ -16,7 +16,6 @@ import type { HTTPVersion as FmwHTTPVersion, Instance as FmwInstance } from 'fin
 import { EventEmitter } from 'events';
 import * as fs from 'fs';
 import * as nodePath from 'path';
-import { createBrotliCompress, createGzip, constants as zlibConstants } from 'zlib';
 import mime from 'mime-types';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { context, trace, type Span as OTelSpan } from '@opentelemetry/api';
@@ -75,10 +74,11 @@ import { installHapiCompatibleJsonBodyParser } from './fastify/install_hapi_comp
 import { installFastifyGlobalErrorHandler } from './fastify/fastify_global_error_handler';
 import { registerFastifyMultipartAndKibanaBodyHook } from './fastify/fastify_multipart_kibana_body';
 import { registerFastifyFallbackStreamBodyParser } from './fastify/register_fastify_fallback_stream_body_parser';
+import { resolvePrecompressedStaticPath } from './fastify/precompressed_static_file';
 import {
-  orderPrecompressedEncodings,
-  resolvePrecompressedStaticPath,
-} from './fastify/precompressed_static_file';
+  getRequestAcceptEncoding,
+  installFastifyCompression,
+} from './fastify/install_fastify_compression';
 import { applyHapiCompatRequestTimeouts } from './fastify/apply_hapi_compat_request_timeouts';
 import { attachFastifyPayloadReceiveTimeout } from './fastify/register_fastify_payload_timeout_pre_parsing';
 
@@ -290,6 +290,7 @@ export class FastifyHttpServer {
     }) as unknown as FastifyInstance;
 
     installFastifyGlobalErrorHandler(this.fastify, this.log);
+    await installFastifyCompression(this.fastify, config, this.log);
     this.installKibanaRequestStateOnRequest(config, executionContext, userActivity);
 
     // Mirror @hapi/hapi: reject malformed `Cookie` headers before auth redirects (GET `/` would
@@ -990,56 +991,26 @@ export class FastifyHttpServer {
             .code(404)
             .send({ statusCode: 404, error: 'Not Found', message: 'Not Found' });
         }
-        const acceptEncoding = req.headers['accept-encoding'];
         const resolved = await resolvePrecompressedStaticPath(
           requested,
-          typeof acceptEncoding === 'string' ? acceptEncoding : undefined
+          getRequestAcceptEncoding(req)
         );
         const fileStat = await fs.promises.stat(resolved.path);
         const contentType = mime.lookup(requested) || 'application/octet-stream';
-        const acceptedEncodings = orderPrecompressedEncodings(
-          typeof acceptEncoding === 'string' ? acceptEncoding : undefined
-        );
-        const compression = this.config?.compression;
-        const dynamicEncoding =
-          !resolved.contentEncoding && compression?.enabled
-            ? acceptedEncodings.find(
-                (enc) => enc === 'gzip' || (enc === 'br' && compression.brotli.enabled)
-              )
-            : undefined;
+        const compressionEnabled = this.config?.compression.enabled ?? true;
         reply
           .header('cache-control', 'must-revalidate')
           .header('vary', 'accept-encoding')
           .header('content-type', mime.contentType(contentType) || contentType);
-        if (resolved.contentEncoding || dynamicEncoding) {
-          reply.header('content-encoding', resolved.contentEncoding ?? dynamicEncoding);
+        if (resolved.contentEncoding) {
+          reply.header('content-encoding', resolved.contentEncoding);
         }
-        if (dynamicEncoding) {
-          if (reply.hasHeader('content-length')) {
-            reply.removeHeader('content-length');
-          }
-        } else {
+        // Pre-compressed siblings and disabled compression have a known length; dynamic
+        // compression is handled by `@fastify/compress` (variable output size).
+        if (resolved.contentEncoding || !compressionEnabled) {
           reply.header('content-length', String(fileStat.size));
         }
-        // Stream from disk so a single Kibana process can serve large/many static
-        // assets without buffering each file in memory. Fastify pipes Readable
-        // streams natively and finalizes the reply when the stream ends.
-        const fileStream = fs.createReadStream(resolved.path);
-        if (dynamicEncoding === 'gzip') {
-          return reply.send(fileStream.pipe(createGzip()));
-        }
-        if (dynamicEncoding === 'br') {
-          return reply.send(
-            fileStream.pipe(
-              createBrotliCompress({
-                params: {
-                  [zlibConstants.BROTLI_PARAM_QUALITY]: compression?.brotli.quality ?? 3,
-                },
-              })
-            )
-          );
-        }
-        return reply.send(fileStream);
+        return reply.send(fs.createReadStream(resolved.path));
       } catch (err) {
         if ((err as NodeJS.ErrnoException).code === 'ENOENT') {
           return reply
