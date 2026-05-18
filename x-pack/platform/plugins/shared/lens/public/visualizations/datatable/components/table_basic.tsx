@@ -516,8 +516,13 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
   ]);
 
   const renderCellPopover = useMemo(
-    () => createRenderDatatableCellPopover(sortedTable, props.columnFilterable),
-    [sortedTable, props.columnFilterable]
+    () =>
+      createRenderDatatableCellPopover(
+        sortedTable,
+        props.columnFilterable,
+        props.panelHasConfiguredDrilldowns
+      ),
+    [sortedTable, props.columnFilterable, props.panelHasConfiguredDrilldowns]
   );
 
   const columnVisibility = useMemo(

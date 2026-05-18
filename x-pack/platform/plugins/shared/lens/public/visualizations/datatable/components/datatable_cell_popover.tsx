@@ -31,10 +31,12 @@ const datatableCellPopoverStyles = {
 const LensDatatableCellPopover = ({
   table,
   columnFilterable,
+  panelHasConfiguredDrilldowns,
   popoverProps,
 }: {
   table: Datatable;
   columnFilterable?: boolean[];
+  panelHasConfiguredDrilldowns?: boolean;
   popoverProps: EuiDataGridCellPopoverElementProps;
 }) => {
   const styles = useMemoCss(datatableCellPopoverStyles);
@@ -50,7 +52,7 @@ const LensDatatableCellPopover = ({
 
   const popoverMessage = !filterable
     ? isEsqlTableComputedColumn(table, columnId)
-      ? getEsqlComputedColumnFilterDisabledMessage()
+      ? getEsqlComputedColumnFilterDisabledMessage(panelHasConfiguredDrilldowns)
       : getGenericFilterDisabledMessage()
     : undefined;
 
@@ -73,12 +75,14 @@ const LensDatatableCellPopover = ({
 
 export const createRenderDatatableCellPopover = (
   sortedTable: Datatable,
-  columnFilterable?: boolean[]
+  columnFilterable?: boolean[],
+  panelHasConfiguredDrilldowns?: boolean
 ): ((popoverProps: EuiDataGridCellPopoverElementProps) => React.ReactNode) => {
   return (popoverProps: EuiDataGridCellPopoverElementProps) => (
     <LensDatatableCellPopover
       table={sortedTable}
       columnFilterable={columnFilterable}
+      panelHasConfiguredDrilldowns={panelHasConfiguredDrilldowns}
       popoverProps={popoverProps}
     />
   );
