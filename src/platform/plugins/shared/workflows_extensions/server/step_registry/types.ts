@@ -35,19 +35,6 @@ export interface PhaseDoneResult<TOutput> {
 }
 
 /**
- * Run-phase hand-off: the step has started its work and now needs the engine
- * to drive the {@link PollLifecycle.handler} until the work completes.
- */
-export type RunHandoffResult<TState extends Record<string, unknown>> =
-  | {
-      output?: never;
-      state?: TState | null;
-      pollDelayMs?: number;
-      error?: never;
-    }
-  | undefined;
-
-/**
  * Poll-phase continuation: the step is not done yet. Engine schedules the next
  * wake-up using the step definition's {@link PollPolicy}. The handler may
  * optionally update the persisted author state.
@@ -97,6 +84,11 @@ export type RunDoneOnlyHandler<
   context: StepHandlerContext<Input, Config>
 ) => Promise<PhaseDoneResult<z.infer<Output>> | PhaseErrorResult>;
 
+export type DurablePhaseResult<
+  Output extends z.ZodType = z.ZodType,
+  State extends Record<string, unknown> = Record<string, unknown>
+> = PhaseDoneResult<z.infer<Output>> | PollContinueResult<State> | PhaseErrorResult;
+
 /**
  * Handler for a `run` phase that hands off to a `poll` phase.
  * Returns either a final output (synchronous completion) or `{ state }`
@@ -106,10 +98,8 @@ export type RunWithHandoffHandler<
   Input extends z.ZodType = z.ZodType,
   Output extends z.ZodType = z.ZodType,
   Config extends z.ZodObject = z.ZodObject,
-  State = unknown
-> = (
-  context: StepHandlerContext<Input, Config>
-) => Promise<PhaseDoneResult<z.infer<Output>> | RunHandoffResult<State> | PhaseErrorResult>;
+  State extends Record<string, unknown> = Record<string, unknown>
+> = (context: StepHandlerContext<Input, Config>) => Promise<DurablePhaseResult<Output, State>>;
 
 /**
  * Handler for a `poll` phase. Receives the persisted author `state` alongside
@@ -120,10 +110,8 @@ export type PollHandler<
   Input extends z.ZodType = z.ZodType,
   Output extends z.ZodType = z.ZodType,
   Config extends z.ZodObject = z.ZodObject,
-  State = unknown
-> = (
-  context: PollContext<Input, Config, State>
-) => Promise<PhaseDoneResult<z.infer<Output>> | PollContinueResult<State> | PhaseErrorResult>;
+  State extends Record<string, unknown> = Record<string, unknown>
+> = (context: PollContext<Input, Config, State>) => Promise<DurablePhaseResult<Output, State>>;
 
 /**
  * Handler function that executes a custom workflow step.
@@ -329,7 +317,7 @@ export interface RunPlusPollMode<
   Input extends z.ZodType,
   Output extends z.ZodType,
   Config extends z.ZodObject,
-  State
+  State extends Record<string, unknown> = Record<string, unknown>
 > {
   handler?: never;
   run: RunWithHandoffHandler<Input, Output, Config, State>;

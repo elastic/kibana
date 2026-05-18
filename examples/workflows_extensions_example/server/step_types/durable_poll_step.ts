@@ -16,7 +16,7 @@ import { durablePollStepCommonDefinition } from '../../common/step_types/durable
 export const durablePollStepDefinition = createServerStepDefinition({
   ...durablePollStepCommonDefinition,
   run: async (context) => {
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    // await new Promise((resolve) => setTimeout(resolve, 1000));
     return {
       state: {
         lastAttempt: 0,
@@ -49,7 +49,7 @@ export const durablePollStepDefinition = createServerStepDefinition({
           : undefined,
       };
     },
-    policy: { strategy: 'fixed', intervalMs: 2 },
+    policy: { strategy: 'fixed', intervalMs: 2000 },
     ceilings: { maxAttempts: 5, maxWaitMs: 36 * 1000 },
   },
 }) as ServerStepDefinition;
