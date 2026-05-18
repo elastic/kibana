@@ -12,11 +12,17 @@ import type {
 } from '@elastic/eui';
 import { EuiButtonEmpty } from '@elastic/eui';
 import type { Datatable } from '@kbn/expressions-plugin/public';
+import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
+import { FILTER_CELL_ACTION_TYPE } from '@kbn/cell-actions/constants';
 import { render, screen } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import type { FormatFactory } from '../../../../common/types';
 import { LENS_ROW_HEIGHT_MODE, type LensCellValueAction } from '@kbn/lens-common';
 import { createGridColumns } from './columns';
+import {
+  getEsqlComputedColumnFilterDisabledMessage,
+  getGenericFilterDisabledMessage,
+} from './helpers';
 
 const table: Datatable = {
   type: 'datatable',
@@ -63,6 +69,7 @@ const callCreateGridColumns = (
     columnCellValueActions: CreateGridColumnsParams[12];
     closeCellPopover: CreateGridColumnsParams[13];
     columnFilterable: CreateGridColumnsParams[14];
+    panelHasConfiguredDrilldowns: CreateGridColumnsParams[15];
   }> = {}
 ) =>
   createGridColumns(
@@ -80,7 +87,8 @@ const callCreateGridColumns = (
     params.headerRowLines ?? 1,
     params.columnCellValueActions ?? [],
     params.closeCellPopover ?? jest.fn(),
-    params.columnFilterable ?? []
+    params.columnFilterable ?? [],
+    params.panelHasConfiguredDrilldowns ?? false
   );
 
 const renderCellAction = (
@@ -112,10 +120,100 @@ describe('getContentData', () => {
       expect(cellActions).toHaveLength(2);
     });
 
-    it('should not include filter actions if column not filterable', () => {
+    it('should include disabled filter actions when column is not filterable', () => {
       const [{ cellActions }] = callCreateGridColumns({
         handleFilterClick: () => {},
         columnFilterable: [false],
+      });
+      expect(cellActions).toHaveLength(2);
+
+      renderCellAction(cellActions, 0);
+      expect(screen.getByTestId('lensDatatableFilterFor')).toBeDisabled();
+      expect(screen.getByTestId('lensDatatableFilterFor')).toHaveAttribute(
+        'title',
+        getGenericFilterDisabledMessage()
+      );
+
+      renderCellAction(cellActions, 1);
+      expect(screen.getByTestId('lensDatatableFilterOut')).toBeDisabled();
+      expect(screen.getByTestId('lensDatatableFilterOut')).toHaveAttribute(
+        'title',
+        getGenericFilterDisabledMessage()
+      );
+    });
+
+    it('should use the ES|QL computed column disabled message when filtering is not allowed', () => {
+      const esqlTable: Datatable = {
+        ...table,
+        meta: { type: ESQL_TABLE_TYPE },
+        columns: [{ ...table.columns[0], isComputedColumn: true }],
+      };
+      const [{ cellActions }] = callCreateGridColumns({
+        table: esqlTable,
+        handleFilterClick: () => {},
+        columnFilterable: [false],
+      });
+
+      renderCellAction(cellActions, 0);
+      expect(screen.getByTestId('lensDatatableFilterFor')).toHaveAttribute(
+        'title',
+        getEsqlComputedColumnFilterDisabledMessage()
+      );
+    });
+
+    it('should use drilldown-specific ES|QL computed column disabled message when panel has drilldowns', () => {
+      const esqlTable: Datatable = {
+        ...table,
+        meta: { type: ESQL_TABLE_TYPE },
+        columns: [{ ...table.columns[0], isComputedColumn: true }],
+      };
+      const [{ cellActions }] = callCreateGridColumns({
+        table: esqlTable,
+        handleFilterClick: () => {},
+        columnFilterable: [false],
+        panelHasConfiguredDrilldowns: true,
+      });
+
+      renderCellAction(cellActions, 0);
+      expect(screen.getByTestId('lensDatatableFilterFor')).toHaveAttribute(
+        'title',
+        getEsqlComputedColumnFilterDisabledMessage(true)
+      );
+    });
+
+    it('should not disable filter actions when column is filterable', () => {
+      const [{ cellActions }] = callCreateGridColumns({
+        handleFilterClick: () => {},
+        columnFilterable: [true],
+      });
+
+      renderCellAction(cellActions, 0);
+      expect(screen.getByTestId('lensDatatableFilterFor')).toBeEnabled();
+      expect(screen.getByTestId('lensDatatableFilterFor')).not.toHaveAttribute('title');
+    });
+
+    it('should not include built-in filter actions when a compatible filter cell action exists', () => {
+      const filterCellAction: LensCellValueAction = {
+        ...cellValueAction,
+        type: FILTER_CELL_ACTION_TYPE,
+      };
+      const [{ cellActions }] = callCreateGridColumns({
+        handleFilterClick: () => {},
+        columnFilterable: [true],
+        columnCellValueActions: [[filterCellAction]],
+      });
+      expect(cellActions).toHaveLength(1);
+    });
+
+    it('should not include filter actions when oneClickFilter is enabled', () => {
+      const [{ cellActions }] = callCreateGridColumns({
+        handleFilterClick: () => {},
+        columnFilterable: [true],
+        columnConfig: {
+          columns: [{ columnId: 'a', type: 'lens_datatable_column', oneClickFilter: true }],
+          sortingColumnId: undefined,
+          sortingDirection: 'none',
+        },
       });
       expect(cellActions).toHaveLength(0);
     });
