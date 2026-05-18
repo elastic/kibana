@@ -21,8 +21,9 @@ import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 interface SparklineChartProps {
   charts: ChartsPluginStart;
   values?: number[];
-  rowHeight: number;
+  rowHeight?: number;
 }
+
 const miniHistogramChartTheme: PartialTheme = {
   chartMargins: {
     left: 0,
@@ -50,7 +51,9 @@ export const SparklineChart: FC<SparklineChartProps> = ({ values, charts, rowHei
 
   const cssChartSize = css({
     width: '100%',
-    height: `${rowHeight * 14}px`,
+    // ROWS_HEIGHT_OPTIONS.auto = -1, which makes rowHeight * 14 produce a negative (invalid) CSS
+    // value that collapses the chart. Use an explicit fixed height for any non-positive value.
+    height: rowHeight !== undefined && rowHeight > 0 ? `${rowHeight * 14}px` : '40px',
     margin: '0px',
   });
 
