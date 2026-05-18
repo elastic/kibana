@@ -88,13 +88,8 @@ import {
 import { installMemoryWorkflows } from './lib/memory/install_managed_workflows';
 import { StreamsKIsOnboardingClient } from './lib/workflows/onboarding_workflow_client';
 import { STREAMS_SIGNIFICANT_EVENTS_MEMORY_ENABLED_FLAG } from '../common/feature_flags';
-import {
-  createScsAgenticInterfaceService,
-  type ScsAgenticInterfaceService,
-} from './lib/agentic_interfaces/scs_agentic_interface_service';
 
 const STREAMS_MANAGED_WORKFLOW_OWNER = 'streams';
-
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StreamsPluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -355,18 +350,6 @@ export class StreamsPlugin
 
     plugins.workflowsExtensions?.registerManagedWorkflowOwner(STREAMS_MANAGED_WORKFLOW_OWNER);
 
-    let scsAgenticInterfaceService: ScsAgenticInterfaceService | undefined;
-
-    if (plugins.workflowsManagement) {
-      scsAgenticInterfaceService = createScsAgenticInterfaceService(
-        this.logger,
-        plugins.workflowsManagement.management,
-        async () => {
-          const [, startPlugins] = await core.getStartServices();
-          return startPlugins.agentBuilder;
-        }
-      );
-    }
 
     taskService.registerTasks({
       getScopedClients: this.streamsGetScopedClients,
@@ -448,7 +431,6 @@ export class StreamsPlugin
         getScopedClients: this.streamsGetScopedClients,
         continuousKiOnboardingWorkflowService,
         streamsKIsOnboardingClient,
-        scsAgenticInterfaceService,
       },
       core,
       logger: this.logger,

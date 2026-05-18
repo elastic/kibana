@@ -10,7 +10,6 @@ import {
   OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_ENABLED,
   OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_INTERVAL_HOURS,
   OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_EXCLUDED_STREAM_PATTERNS,
-  OBSERVABILITY_STREAMS_CODE_SEARCH_SUPPORT_ENABLED,
 } from '@kbn/management-settings-ids';
 import { createServerRoute } from '../../../create_server_route';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
@@ -28,11 +27,6 @@ const putSignificantEventsSettingsBodySchema = z.object({
       excludedStreamPatterns: z.string().optional(),
     })
     .optional(),
-  codeSearchSupport: z
-    .object({
-      enabled: z.boolean().optional(),
-    })
-    .optional(),
 });
 
 export const putSignificantEventsSettingsRoute = createServerRoute({
@@ -41,7 +35,7 @@ export const putSignificantEventsSettingsRoute = createServerRoute({
     access: 'internal',
     summary: 'Update significant events settings',
     description:
-      'Updates significant events settings including continuous KI extraction and code search support, ensuring the associated workflows and agentic interfaces are created or removed accordingly.',
+      'Updates significant events settings including continuous KI extraction, ensuring the associated workflows are created or removed accordingly.',
   },
   security: {
     authz: {
@@ -57,7 +51,6 @@ export const putSignificantEventsSettingsRoute = createServerRoute({
     getScopedClients,
     server,
     continuousKiOnboardingWorkflowService,
-    scsAgenticInterfaceService,
     logger,
   }): Promise<{ success: true }> => {
     const { licensing, uiSettingsClient, globalUiSettingsClient } = await getScopedClients({
@@ -65,7 +58,7 @@ export const putSignificantEventsSettingsRoute = createServerRoute({
     });
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
-    const { continuousKiExtraction, codeSearchSupport } = params.body;
+    const { continuousKiExtraction } = params.body;
 
     const updates: Record<string, boolean | number | string> = {};
 
@@ -80,9 +73,6 @@ export const putSignificantEventsSettingsRoute = createServerRoute({
     if (continuousKiExtraction?.excludedStreamPatterns !== undefined) {
       updates[OBSERVABILITY_STREAMS_CONTINUOUS_KI_EXTRACTION_EXCLUDED_STREAM_PATTERNS] =
         continuousKiExtraction.excludedStreamPatterns;
-    }
-    if (codeSearchSupport?.enabled !== undefined) {
-      updates[OBSERVABILITY_STREAMS_CODE_SEARCH_SUPPORT_ENABLED] = codeSearchSupport.enabled;
     }
 
     const previousValues: Record<string, boolean | number | string> = {};
@@ -107,16 +97,6 @@ export const putSignificantEventsSettingsRoute = createServerRoute({
           enabled,
           request,
         });
-      }
-
-      if (codeSearchSupport !== undefined) {
-        if (!scsAgenticInterfaceService) {
-          throw new Error('SCS agentic interface service is not available');
-        }
-        const enabled =
-          codeSearchSupport.enabled ??
-          (allSettings[OBSERVABILITY_STREAMS_CODE_SEARCH_SUPPORT_ENABLED] as boolean);
-        await scsAgenticInterfaceService.ensureAgenticInterfaces({ enabled, request });
       }
     } catch (err) {
       if (Object.keys(previousValues).length > 0) {

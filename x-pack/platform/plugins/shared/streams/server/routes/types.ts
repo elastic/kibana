@@ -31,7 +31,6 @@ import type { InsightClient } from '../lib/sig_events/insights/client/insight_cl
 import type { StreamsSettingsStorageClient } from '../lib/streams/storage/streams_settings_storage_client';
 import type { ContinuousKiOnboardingWorkflowService } from '../lib/workflows/continuous_onboarding_workflow';
 import type { StreamsKIsOnboardingClient } from '../lib/workflows/onboarding_workflow_client';
-import type { ScsAgenticInterfaceService } from '../lib/agentic_interfaces/scs_agentic_interface_service';
 import type { SigEventsTuningConfig } from '../../common/sig_events_tuning_config';
 
 export type GetScopedClients = (params: {
@@ -68,7 +67,6 @@ export interface RouteDependencies {
   patternExtractionService: IPatternExtractionService;
   continuousKiOnboardingWorkflowService?: ContinuousKiOnboardingWorkflowService;
   streamsKIsOnboardingClient?: StreamsKIsOnboardingClient;
-  scsAgenticInterfaceService?: ScsAgenticInterfaceService;
 }
 
 export type StreamsRouteHandlerResources = RouteDependencies & DefaultRouteHandlerResources;
