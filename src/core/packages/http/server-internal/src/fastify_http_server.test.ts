@@ -856,6 +856,86 @@ describe('FastifyHttpServer', () => {
       expect(JSON.parse(res.body)).toEqual({ filename: 'sample.ndjson' });
     }, 15000);
 
+    it('passes raw multipart bytes as Buffer when parse: false (lists _import parity)', async () => {
+      const ctx = createCoreContext();
+      const config = createHttpConfig(PORT);
+      const config$ = new BehaviorSubject(config);
+
+      server = new FastifyHttpServer(ctx, 'Kibana', new BehaviorSubject(config.shutdownTimeout));
+      const setup = await server.setup({ config$ });
+
+      const enhanceHandler = (handler: any) => async (req: any, res: any) =>
+        handler({} as any, req, res);
+
+      const router = new Router('/api/fastify-mvp', ctx.logger.get('router'), enhanceHandler, {
+        env,
+      });
+
+      router.post(
+        {
+          path: '/lists-import',
+          security: { authz: { enabled: false, reason: 'test' } },
+          validate: {
+            body: schema.buffer(),
+          },
+          options: {
+            body: {
+              accepts: ['multipart/form-data'],
+              parse: false,
+              maxBytes: 1024 * 1024,
+            },
+          },
+        },
+        async (_context, req, res) => {
+          expect(Buffer.isBuffer(req.body)).toBe(true);
+          const text = (req.body as Buffer).toString('utf8');
+          expect(text).toContain('Content-Disposition');
+          expect(text).toContain('filename="list_items.txt"');
+          expect(text).toContain('word one');
+          return res.ok({ body: { ok: true } });
+        }
+      );
+
+      setup.registerRouter(router);
+      await server.start();
+
+      const address = (setup.server as any).server.address();
+      listenPort = typeof address === 'object' && address ? address.port : 0;
+
+      const form = new FormData();
+      form.append('file', Buffer.from('word one\n'), {
+        filename: 'list_items.txt',
+        contentType: 'text/plain',
+      });
+
+      const res = await new Promise<{ statusCode: number; body: string }>((resolve, reject) => {
+        const req = http.request(
+          {
+            hostname: '127.0.0.1',
+            port: listenPort,
+            path: '/api/fastify-mvp/lists-import',
+            method: 'POST',
+            headers: form.getHeaders(),
+          },
+          (incoming) => {
+            const chunks: Buffer[] = [];
+            incoming.on('data', (c) => chunks.push(Buffer.from(c)));
+            incoming.on('end', () =>
+              resolve({
+                statusCode: incoming.statusCode ?? 0,
+                body: Buffer.concat(chunks).toString('utf8'),
+              })
+            );
+          }
+        );
+        req.on('error', reject);
+        form.pipe(req);
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(JSON.parse(res.body)).toEqual({ ok: true });
+    }, 15000);
+
     it('matches `/seg/{id}/{rest*}` on URLs without an extra slash before the splat (e.g. `/app/home`)', async () => {
       const ctx = createCoreContext();
       const config = createHttpConfig(PORT);

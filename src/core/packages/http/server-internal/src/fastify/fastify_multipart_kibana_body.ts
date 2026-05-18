@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { IncomingMessage } from 'node:http';
 import { Readable } from 'node:stream';
 import { finished } from 'node:stream/promises';
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
@@ -14,6 +15,7 @@ import fastifyMultipart from '@fastify/multipart';
 import type { RouterRoute } from '@kbn/core-http-server';
 
 import { KIBANA_HAPI_COMPAT_REQUEST } from './fastify_auth';
+import { routeHasUnparsedPayload } from './fastify_route_body_options';
 
 /** Matches the default `parts` limit in `@fastify/multipart` unless overridden at register time. */
 const MULTIPART_MAX_PARTS = 1000;
@@ -35,6 +37,19 @@ function acceptsMultipartRoute(accepts: string | readonly string[] | undefined):
 
 function multipartRequestOptions(fileSize: number) {
   return { limits: { fileSize, parts: MULTIPART_MAX_PARTS } };
+}
+
+/**
+ * Hapi `payload.parse: false` with `multipart/form-data` exposes the raw entity body
+ * (lists `_import` parses boundaries in {@link BufferLines}). `@fastify/multipart` only
+ * flags the request until `req.parts()` runs — read `IncomingMessage` without busboy.
+ */
+async function readRawRequestBody(raw: IncomingMessage): Promise<Buffer> {
+  const chunks: Buffer[] = [];
+  for await (const chunk of raw) {
+    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+  }
+  return Buffer.concat(chunks);
 }
 
 async function drainMultipartBody(req: FastifyRequest, maxFileSize: number): Promise<void> {
@@ -97,6 +112,14 @@ export async function registerFastifyMultipartAndKibanaBodyHook(params: {
 
     if (!needsMultipart) {
       await drainMultipartBody(req, maxPayloadBytes);
+      return;
+    }
+
+    if (routeHasUnparsedPayload(route)) {
+      req.body = await readRawRequestBody(req.raw);
+      if (app) {
+        delete app[KIBANA_HAPI_COMPAT_REQUEST];
+      }
       return;
     }
 
