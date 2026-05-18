@@ -109,18 +109,15 @@ describe('stripMetadata', () => {
 
   describe('with identifiersToStrip', () => {
     it('removes only listed identifiers from METADATA', () => {
-      const result = stripMetadata(
-        'FROM logs* METADATA _id, _source | WHERE x > 1',
-        ['_source']
-      );
+      const result = stripMetadata('FROM logs* METADATA _id, _source | WHERE x > 1', ['_source']);
       expect(result).toBe('FROM logs* METADATA _id | WHERE x > 1');
     });
 
     it('drops the METADATA option when all of its identifiers are stripped', () => {
-      const result = stripMetadata(
-        'FROM logs* METADATA _id, _source | WHERE x > 1',
-        ['_id', '_source']
-      );
+      const result = stripMetadata('FROM logs* METADATA _id, _source | WHERE x > 1', [
+        '_id',
+        '_source',
+      ]);
       expect(result).toBe('FROM logs* | WHERE x > 1');
     });
 
