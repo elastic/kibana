@@ -241,7 +241,6 @@ export const ES_SERVERLESS_DEFAULT_IMAGE = `${ES_SERVERLESS_REPO_KIBANA}:${ES_SE
 export function getSharedServerlessParams(nameSuffix = ''): string[] {
   const n1 = `es01${nameSuffix}`;
   const n2 = `es02${nameSuffix}`;
-  const n3 = `es03${nameSuffix}`;
 
   return [
     'run',
@@ -259,7 +258,7 @@ export function getSharedServerlessParams(nameSuffix = ''): string[] {
     'path.repo=/objectstore',
 
     '--env',
-    `cluster.initial_master_nodes=${n1},${n2},${n3}`,
+    `cluster.initial_master_nodes=${n1},${n2}`,
 
     '--env',
     'stateless.enabled=true',
@@ -355,7 +354,6 @@ export function getServerlessNodes(
 ): Array<Omit<ServerlessEsNodeArgs, 'image'>> {
   const n1 = `es01${nameSuffix}`;
   const n2 = `es02${nameSuffix}`;
-  const n3 = `es03${nameSuffix}`;
 
   return [
     {
@@ -365,7 +363,7 @@ export function getServerlessNodes(
         `127.0.0.1:${9300 + portOffset}:${9300 + portOffset}`,
 
         '--env',
-        `discovery.seed_hosts=${n2},${n3}`,
+        `discovery.seed_hosts=${n2}`,
 
         '--env',
         'node.roles=["master","remote_cluster_client","ingest","index"]',
@@ -386,30 +384,14 @@ export function getServerlessNodes(
         `127.0.0.1:${9302 + portOffset}:${9302 + portOffset}`,
 
         '--env',
-        `discovery.seed_hosts=${n1},${n3}`,
+        `discovery.seed_hosts=${n1}`,
 
         '--env',
-        'node.roles=["master","remote_cluster_client","search"]',
+        'node.roles=["master","remote_cluster_client","search","ml","transform"]',
       ],
       esArgs: [
         ['xpack.searchable.snapshot.shared_cache.size', '16MB'],
         ['xpack.searchable.snapshot.shared_cache.region_size', '256K'],
-      ],
-    },
-    {
-      name: n3,
-      params: [
-        '-p',
-        `127.0.0.1:${9203 + portOffset}:${9203 + portOffset}`,
-
-        '-p',
-        `127.0.0.1:${9303 + portOffset}:${9303 + portOffset}`,
-
-        '--env',
-        `discovery.seed_hosts=${n1},${n2}`,
-
-        '--env',
-        'node.roles=["master","remote_cluster_client","ml","transform"]',
       ],
     },
   ];
