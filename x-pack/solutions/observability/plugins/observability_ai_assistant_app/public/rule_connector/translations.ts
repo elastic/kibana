@@ -41,3 +41,10 @@ export const STATUS_REQUIRED = i18n.translate(
     defaultMessage: 'Status is required.',
   }
 );
+
+export const ACTION_UNAVAILABLE_IN_AGENT_MODE = i18n.translate(
+  'xpack.observabilityAiAssistant.alertConnector.actionUnavailableInAgentMode',
+  {
+    defaultMessage: 'This action is unavailable when the chat experience is set to AI Agent.',
+  }
+);

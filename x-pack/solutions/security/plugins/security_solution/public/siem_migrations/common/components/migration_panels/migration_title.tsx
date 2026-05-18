@@ -166,7 +166,7 @@ export const MigrationPanelTitle = React.memo(function MigrationPanelTitle({
               panelPaddingSize="none"
               anchorPosition="downCenter"
             >
-              <EuiContextMenuPanel size="s">
+              <EuiContextMenuPanel>
                 <EuiContextMenuItem
                   icon="pencil"
                   onClick={showRename}
