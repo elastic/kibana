@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { EXAMPLE_MANAGED_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { WorkflowsClient } from '@kbn/workflows/server';
 import type {
   WorkflowsExtensionsServerPluginSetup,
@@ -16,6 +17,20 @@ import type {
 const createManagedWorkflowsMock = () => ({
   install: jest.fn().mockResolvedValue(undefined),
   uninstall: jest.fn().mockResolvedValue(undefined),
+  getWorkflowStatus: jest.fn().mockResolvedValue({
+    status: 'intact',
+    workflowId: EXAMPLE_MANAGED_WORKFLOW_ID,
+    definitionId: EXAMPLE_MANAGED_WORKFLOW_ID,
+    spaceId: 'default',
+    installed: true,
+    enabled: true,
+    valid: true,
+    managedBy: 'mockPlugin',
+    storedVersion: 1,
+    registryVersion: 1,
+    storedHash: 'mock-hash',
+    registryHash: 'mock-hash',
+  }),
   execute: jest.fn().mockResolvedValue('mock-execution-id'),
 });
 
@@ -50,6 +65,20 @@ const createStartMock: () => jest.Mocked<WorkflowsExtensionsServerPluginStart> =
       install: jest.fn().mockResolvedValue(undefined),
       uninstall: jest.fn().mockResolvedValue(undefined),
       ready: jest.fn().mockResolvedValue(undefined),
+      getWorkflowStatus: jest.fn().mockResolvedValue({
+        status: 'intact',
+        workflowId: EXAMPLE_MANAGED_WORKFLOW_ID,
+        definitionId: EXAMPLE_MANAGED_WORKFLOW_ID,
+        spaceId: 'default',
+        installed: true,
+        enabled: true,
+        valid: true,
+        managedBy: 'mockPlugin',
+        storedVersion: 1,
+        registryVersion: 1,
+        storedHash: 'mock-hash',
+        registryHash: 'mock-hash',
+      }),
       execute: jest.fn().mockResolvedValue('mock-execution-id'),
     }),
     getManagedWorkflowPluginIds: jest.fn().mockReturnValue([]),

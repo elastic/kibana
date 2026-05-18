@@ -19,7 +19,10 @@ import {
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type {
   ExecuteManagedWorkflowOptions,
+  GetManagedWorkflowStatusOptions,
   ManagedWorkflowOperationOptions,
+  ManagedWorkflowStatus,
+  ManagedWorkflowStatusReport,
 } from '@kbn/workflows/server/types';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import { updateYamlField } from '@kbn/workflows-yaml';
@@ -254,6 +257,78 @@ export class ManagedWorkflowsService {
     await this.deps.crudService.deleteWorkflows([workflowDocumentId], spaceId, { force: true });
   }
 
+  public async getManagedWorkflowStatus(
+    id: ManagedWorkflowId,
+    options: GetManagedWorkflowStatusOptions,
+    registeredPluginId: string
+  ): Promise<ManagedWorkflowStatusReport> {
+    const definition = getManagedWorkflowDefinition(id);
+    if (!definition) {
+      throw new Error(`Unknown managed workflow id: ${id}`);
+    }
+    this.assertPluginRegistration(definition, registeredPluginId);
+
+    const workflowDocumentId = this.resolveWorkflowDocumentId(id, options);
+    const spaceId = this.getRequiredSpaceId(options);
+    const registryHash = this.computeManagedDefinitionHash(definition);
+    const existing = await this.deps.crudService.getWorkflowDocumentSource(
+      workflowDocumentId,
+      spaceId,
+      {
+        includeDeleted: true,
+        includeGlobal: true,
+      }
+    );
+
+    if (!existing || existing.deleted_at) {
+      return this.createManagedWorkflowStatusReport({
+        status: 'missing',
+        workflowDocumentId,
+        definitionId: id,
+        spaceId,
+        definition,
+        registryHash,
+      });
+    }
+
+    if (existing.managed !== true) {
+      return this.createManagedWorkflowStatusReport({
+        status: 'not_managed',
+        workflowDocumentId,
+        definitionId: id,
+        spaceId,
+        definition,
+        registryHash,
+        existing,
+      });
+    }
+
+    const storedHash = existing.definitionHash ?? null;
+    const storedVersion = existing.managedVersion ?? null;
+    let status: ManagedWorkflowStatus = 'intact';
+    if (!existing.valid || !existing.definition) {
+      status = 'invalid';
+    } else if (!existing.enabled) {
+      status = 'disabled';
+    } else if (
+      storedHash !== registryHash ||
+      storedVersion !== definition.version ||
+      existing.originManagedWorkflowId !== definition.id
+    ) {
+      status = 'drifted';
+    }
+
+    return this.createManagedWorkflowStatusReport({
+      status,
+      workflowDocumentId,
+      definitionId: id,
+      spaceId,
+      definition,
+      registryHash,
+      existing,
+    });
+  }
+
   public async executeManagedWorkflow(
     id: ManagedWorkflowId,
     request: KibanaRequest,
@@ -405,6 +480,41 @@ export class ManagedWorkflowsService {
             enabled,
           }
         : null,
+    };
+  }
+
+  private createManagedWorkflowStatusReport(params: {
+    status: ManagedWorkflowStatus;
+    workflowDocumentId: string;
+    definitionId: ManagedWorkflowId;
+    spaceId: string;
+    definition: ManagedWorkflowDefinition;
+    registryHash: string;
+    existing?: WorkflowProperties;
+  }): ManagedWorkflowStatusReport {
+    const {
+      status,
+      workflowDocumentId,
+      definitionId,
+      spaceId,
+      definition,
+      registryHash,
+      existing,
+    } = params;
+
+    return {
+      status,
+      workflowId: workflowDocumentId,
+      definitionId,
+      spaceId: existing?.spaceId ?? spaceId,
+      installed: Boolean(existing),
+      enabled: existing?.enabled ?? null,
+      valid: existing?.valid ?? null,
+      managedBy: existing?.managedBy ?? null,
+      storedVersion: existing?.managedVersion ?? null,
+      registryVersion: definition.version,
+      storedHash: existing?.definitionHash ?? null,
+      registryHash,
     };
   }
 
