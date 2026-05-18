@@ -11,15 +11,15 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useAttackDetailsContext } from '../../context';
 import { useHeaderData } from '../../hooks/use_header_data';
 import { useAttackEntitiesLists } from '../../hooks/use_attack_entities_lists';
-import { UserDetails } from '../../../document_details/left/components/user_details';
-import { HostDetails } from '../../../document_details/left/components/host_details';
+import { UserDetailsView } from '../../../../flyout_v2/document/tools/entities/components/user_details_view';
+import { HostDetailsView } from '../../../../flyout_v2/document/tools/entities/components/host_details_view';
 
 const ATTACK_ENTITIES_DETAILS_TEST_ID = 'attack-entities-details';
 
 /**
  * Entities (related users and hosts) displayed in the Attack Details expandable flyout left section
  * under the Insights tab. Uses all users and hosts from the alerts that are part of the attack.
- * Reuses the same UserDetails and HostDetails UI as the document details flyout.
+ * Reuses the same UserDetailsView and HostDetailsView UI as the document details flyout.
  */
 export const AttackEntitiesDetails: React.FC = memo(() => {
   const { scopeId } = useAttackDetailsContext();
@@ -75,12 +75,13 @@ export const AttackEntitiesDetails: React.FC = memo(() => {
           <React.Fragment
             key={`user-${index}-${identifiers['user.name'] ?? Object.values(identifiers)[0]}`}
           >
-            <UserDetails
+            <UserDetailsView
               userName={identifiers['user.name'] ?? Object.values(identifiers)[0]}
               timestamp={timestampOrFallback}
               scopeId={scopeId}
               expandedOnFirstRender={false}
               isAttackDetails={true}
+              useLegacyExpandableFlyout={true}
             />
             <EuiSpacer size="s" />
           </React.Fragment>
@@ -101,12 +102,13 @@ export const AttackEntitiesDetails: React.FC = memo(() => {
           <React.Fragment
             key={`host-${index}-${identifiers['host.name'] ?? Object.values(identifiers)[0]}`}
           >
-            <HostDetails
+            <HostDetailsView
               hostName={identifiers['host.name'] ?? Object.values(identifiers)[0]}
               timestamp={timestampOrFallback}
               scopeId={scopeId}
               expandedOnFirstRender={false}
               isAttackDetails={true}
+              useLegacyExpandableFlyout={true}
             />
             <EuiSpacer size="s" />
           </React.Fragment>

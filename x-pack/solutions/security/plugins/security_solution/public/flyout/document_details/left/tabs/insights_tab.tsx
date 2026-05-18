@@ -24,7 +24,8 @@ import {
 import { useDocumentDetailsContext } from '../../shared/context';
 import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
 import { LeftPanelInsightsTab } from '..';
-import { EntitiesDetails } from '../components/entities_details';
+import { ENTITIES_TAB_ID } from '../../../../flyout_v2/document/tools/entities';
+import { EntitiesDetailsView } from '../../../../flyout_v2/document/tools/entities/components/entities_details_view';
 import { THREAT_INTELLIGENCE_TAB_ID } from '../../../../flyout_v2/document/tools/threat_intelligence';
 import { ThreatIntelligenceDetailsView } from '../../../../flyout_v2/document/tools/threat_intelligence/components/threat_intelligence_details_view';
 import { PREVALENCE_TAB_ID, PrevalenceDetails } from '../components/prevalence_details';
@@ -32,8 +33,6 @@ import { CORRELATIONS_TAB_ID, CorrelationsDetails } from '../components/correlat
 import { getField } from '../../shared/utils';
 import { EventKind } from '../../../../flyout_v2/document/main/constants/event_kinds';
 import { DocumentEventTypes } from '../../../../common/lib/telemetry';
-
-const ENTITIES_TAB_ID = 'entity';
 
 const insightsButtons: EuiButtonGroupOptionProps[] = [
   {
@@ -141,7 +140,9 @@ export const InsightsTab = memo(() => {
         style={!isEventKindSignal ? { maxWidth: 450 } : undefined}
       />
       <EuiSpacer size="m" />
-      {activeInsightsId === ENTITIES_TAB_ID && <EntitiesDetails />}
+      {activeInsightsId === ENTITIES_TAB_ID && (
+        <EntitiesDetailsView hit={hit} scopeId={scopeId} useLegacyExpandableFlyout />
+      )}
       {activeInsightsId === THREAT_INTELLIGENCE_TAB_ID && (
         <ThreatIntelligenceDetailsView hit={hit} />
       )}

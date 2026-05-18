@@ -22,13 +22,29 @@ import { useEntitiesOverview } from '../hooks/use_entities_overview';
 
 jest.mock('../hooks/use_entities_overview');
 jest.mock('./user_entity_overview', () => ({
-  UserEntityOverview: ({ userName }: { userName: string }) => (
-    <div data-test-subj="userEntityOverviewMock">{userName}</div>
+  UserEntityOverview: ({
+    userName,
+    onShowUserDetails,
+  }: {
+    userName: string;
+    onShowUserDetails?: () => void;
+  }) => (
+    <button type="button" data-test-subj="userEntityOverviewMock" onClick={onShowUserDetails}>
+      {userName}
+    </button>
   ),
 }));
 jest.mock('./host_entity_overview', () => ({
-  HostEntityOverview: ({ hostName }: { hostName: string }) => (
-    <div data-test-subj="hostEntityOverviewMock">{hostName}</div>
+  HostEntityOverview: ({
+    hostName,
+    onShowHostDetails,
+  }: {
+    hostName: string;
+    onShowHostDetails?: () => void;
+  }) => (
+    <button type="button" data-test-subj="hostEntityOverviewMock" onClick={onShowHostDetails}>
+      {hostName}
+    </button>
   ),
 }));
 
@@ -45,6 +61,8 @@ const buildHit = (source: Record<string, unknown>): DataTableRecord =>
 const renderEntitiesOverview = (props: {
   hit: DataTableRecord;
   onShowEntitiesDetails?: () => void;
+  onShowUserDetails?: (userName: string, entityId?: string) => void;
+  onShowHostDetails?: (hostName: string, entityId?: string) => void;
   showIcon?: boolean;
 }) =>
   render(
@@ -112,6 +130,24 @@ describe('<EntitiesOverview />', () => {
     expect(getByTestId('userEntityOverviewMock').textContent).toContain('user1');
     expect(getByTestId('hostEntityOverviewMock').textContent).toContain('host-name');
     expect(queryByText(NO_DATA_MESSAGE)).toBeNull();
+  });
+
+  it('should pass user/host details callbacks to user and host rows', () => {
+    const hit = buildHit({ host: { name: 'host-name' }, user: { name: 'user1' } });
+    const onShowUserDetails = jest.fn();
+    const onShowHostDetails = jest.fn();
+
+    const { getByTestId } = renderEntitiesOverview({
+      hit,
+      onShowUserDetails,
+      onShowHostDetails,
+    });
+
+    getByTestId('userEntityOverviewMock').click();
+    getByTestId('hostEntityOverviewMock').click();
+
+    expect(onShowUserDetails).toHaveBeenCalledWith('user1', undefined);
+    expect(onShowHostDetails).toHaveBeenCalledWith('host-name', undefined);
   });
 
   it('should only render user when host name is null', () => {

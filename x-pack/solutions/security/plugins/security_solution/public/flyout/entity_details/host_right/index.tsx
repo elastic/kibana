@@ -67,6 +67,11 @@ export interface HostPanelProps extends Record<string, unknown> {
    * Canonical Entity Store v2 id (`entity.id`) when already resolved (e.g. from alerts/events table).
    */
   entityId?: string;
+  /**
+   * When provided (e.g. from flyout v2 system flyout context), overrides the default
+   * left-panel navigation for "Show all alerts" in EntityInsight.
+   */
+  onShowAlertsDetails?: () => void;
 }
 
 export interface HostPanelExpandableFlyoutProps extends FlyoutPanelProps {
@@ -87,6 +92,7 @@ export const HostPanel = memo(function HostPanel({
   isPreviewMode = false,
   hostName,
   entityId,
+  onShowAlertsDetails,
 }: HostPanelProps) {
   const { uiSettings } = useKibana().services;
   const euidApi = useEntityStoreEuidApi();
@@ -285,18 +291,19 @@ export const HostPanel = memo(function HostPanel({
 
   return (
     <>
-      <FlyoutNavigation
-        flyoutIsExpandable={
-          isRiskScoreExist ||
-          hasMisconfigurationFindings ||
-          hasVulnerabilitiesFindings ||
-          hasNonClosedAlerts ||
-          !!entityStoreEntityId
-        }
-        expandDetails={openDefaultPanel}
-        isPreviewMode={isPreviewMode}
-        isRulePreview={scopeId === TableId.rulePreview}
-      />
+      {!isPreviewMode && (
+        <FlyoutNavigation
+          flyoutIsExpandable={
+            isRiskScoreExist ||
+            hasMisconfigurationFindings ||
+            hasVulnerabilitiesFindings ||
+            hasNonClosedAlerts ||
+            !!entityStoreEntityId
+          }
+          expandDetails={openDefaultPanel}
+          isRulePreview={scopeId === TableId.rulePreview}
+        />
+      )}
       <HostPanelHeader
         hostName={hostName}
         lastSeen={observedHost.lastSeen}
@@ -336,6 +343,7 @@ export const HostPanel = memo(function HostPanel({
             entityRecord={entityStoreV2Enabled ? observedHost.entityRecord ?? undefined : undefined}
             skipRiskAndCriticality={noEntityInStore}
             entityStoreEntityId={entityStoreEntityId}
+            onShowAlertsDetails={onShowAlertsDetails}
           />
         )}
       </FlyoutBody>

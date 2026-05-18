@@ -46,6 +46,8 @@ interface UserPanelContentProps {
   entityStoreEntityId?: string;
   /** See {@link RiskSummaryProps.prefetchedResolutionRisk}. */
   prefetchedResolutionRisk?: EntityRiskScore<EntityType.user>;
+  /** Overrides the default left-panel navigation for "Show all alerts" in EntityInsight. */
+  onShowAlertsDetails?: () => void;
 }
 
 export const UserPanelContent = ({
@@ -62,6 +64,7 @@ export const UserPanelContent = ({
   skipRiskAndCriticality = false,
   entityStoreEntityId,
   prefetchedResolutionRisk,
+  onShowAlertsDetails,
 }: UserPanelContentProps) => {
   const hasEntityResolutionLicense = useHasEntityResolutionLicense();
 
@@ -129,6 +132,7 @@ export const UserPanelContent = ({
         isPreviewMode={isPreviewMode}
         openDetailsPanel={openDetailsPanel}
         entityType={EntityType.user}
+        onShowAlertsDetails={onShowAlertsDetails}
       />
       <ObservedDataSection
         identityFields={identityFields}

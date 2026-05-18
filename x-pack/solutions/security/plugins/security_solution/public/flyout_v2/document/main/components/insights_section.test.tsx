@@ -45,6 +45,9 @@ jest.mock('../../tools/prevalence/utils/get_columns', () => ({
 jest.mock('../../tools/correlations', () => ({
   CorrelationsDetails: () => null,
 }));
+jest.mock('../../tools/entities', () => ({
+  EntitiesDetails: () => null,
+}));
 jest.mock('../../../shared/components/flyout_provider', () => ({
   flyoutProviders: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
@@ -74,7 +77,41 @@ jest.mock('./threat_intelligence_overview', () => ({
   ThreatIntelligenceOverview: () => <div data-test-subj="threatIntelligenceOverviewMock" />,
 }));
 jest.mock('./entities_overview', () => ({
-  EntitiesOverview: () => <div data-test-subj="entitiesOverviewMock" />,
+  EntitiesOverview: ({
+    onShowEntitiesDetails,
+    onShowUserDetails,
+    onShowHostDetails,
+  }: {
+    onShowEntitiesDetails: () => void;
+    onShowUserDetails: (userName: string, entityId?: string) => void;
+    onShowHostDetails: (hostName: string, entityId?: string) => void;
+  }) => (
+    <>
+      <button type="button" data-test-subj="entitiesOverviewMock" onClick={onShowEntitiesDetails}>
+        {'Show entities'}
+      </button>
+      <button
+        type="button"
+        data-test-subj="userDetailsMock"
+        onClick={() => onShowUserDetails('user1', 'user-entity-id')}
+      >
+        {'Show user details'}
+      </button>
+      <button
+        type="button"
+        data-test-subj="hostDetailsMock"
+        onClick={() => onShowHostDetails('host-1', 'host-entity-id')}
+      >
+        {'Show host details'}
+      </button>
+    </>
+  ),
+}));
+jest.mock('../../../../flyout/entity_details/user_right', () => ({
+  UserPanel: () => null,
+}));
+jest.mock('../../../../flyout/entity_details/host_right', () => ({
+  HostPanel: () => null,
 }));
 const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord =>
   ({
@@ -193,6 +230,21 @@ describe('InsightsSection', () => {
     expect(queryByTestId('threatIntelligenceOverviewMock')).not.toBeInTheDocument();
   });
 
+  it('opens a tools flyout when clicking entities overview', () => {
+    const { getByTestId } = renderInsightsSection();
+
+    fireEvent.click(getByTestId('entitiesOverviewMock'));
+
+    expect(mockOpenSystemFlyout).toHaveBeenCalledTimes(1);
+    expect(mockOpenSystemFlyout).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        historyKey: documentFlyoutHistoryKey,
+        session: 'start',
+      })
+    );
+  });
+
   it('opens a tools flyout when clicking correlations overview', () => {
     const { getByTestId } = renderInsightsSection();
 
@@ -234,6 +286,51 @@ describe('InsightsSection', () => {
       '',
       expect.any(Function)
     );
+    expect(mockOpenSystemFlyout).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        historyKey: DOC_VIEWER_FLYOUT_HISTORY_KEY,
+        session: 'start',
+      })
+    );
+  });
+
+  it('opens the user entity right flyout when clicking a user entity', () => {
+    const { getByTestId } = renderInsightsSection();
+
+    fireEvent.click(getByTestId('userDetailsMock'));
+
+    expect(mockOpenSystemFlyout).toHaveBeenCalledTimes(1);
+    expect(mockOpenSystemFlyout).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        historyKey: documentFlyoutHistoryKey,
+        session: 'start',
+      })
+    );
+  });
+
+  it('opens the host entity right flyout when clicking a host entity', () => {
+    const { getByTestId } = renderInsightsSection();
+
+    fireEvent.click(getByTestId('hostDetailsMock'));
+
+    expect(mockOpenSystemFlyout).toHaveBeenCalledTimes(1);
+    expect(mockOpenSystemFlyout).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        historyKey: documentFlyoutHistoryKey,
+        session: 'start',
+      })
+    );
+  });
+
+  it('opens entities flyout with Discover history key outside Security Solution', () => {
+    mockUseIsInSecurityApp.mockReturnValue(false);
+
+    const { getByTestId } = renderInsightsSection();
+    fireEvent.click(getByTestId('entitiesOverviewMock'));
+
     expect(mockOpenSystemFlyout).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({

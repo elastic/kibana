@@ -43,6 +43,8 @@ interface HostPanelContentProps {
   entityStoreEntityId?: string;
   /** See {@link RiskSummaryProps.prefetchedResolutionRisk}. */
   prefetchedResolutionRisk?: EntityRiskScore<EntityType.host>;
+  /** Overrides the default left-panel navigation for "Show all alerts" in EntityInsight. */
+  onShowAlertsDetails?: () => void;
 }
 
 export const HostPanelContent = ({
@@ -59,6 +61,7 @@ export const HostPanelContent = ({
   skipRiskAndCriticality = false,
   entityStoreEntityId,
   prefetchedResolutionRisk,
+  onShowAlertsDetails,
 }: HostPanelContentProps) => {
   const hasEntityResolutionLicense = useHasEntityResolutionLicense();
 
@@ -126,6 +129,7 @@ export const HostPanelContent = ({
         isPreviewMode={isPreviewMode}
         openDetailsPanel={openDetailsPanel}
         entityType={EntityType.host}
+        onShowAlertsDetails={onShowAlertsDetails}
       />
       <ObservedDataSection
         observedHost={observedHost}

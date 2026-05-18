@@ -36,7 +36,7 @@ const hostName = 'host';
 const identityFields = { 'host.name': hostName };
 const osFamily = 'Windows';
 const lastSeen = '2022-04-08T18:35:45.064Z';
-const lastSeenText = 'Apr 8, 2022 @ 18:35:45.064';
+const lastSeenText = '2022-04-08T18:35:45Z';
 const from = '2022-04-05T12:00:00.000Z';
 const to = '2022-04-08T12:00:00.;000Z';
 const selectedPatterns = 'alerts';
@@ -51,6 +51,13 @@ const panelContextValue = {
 jest.mock('@kbn/expandable-flyout');
 jest.mock('@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview');
 jest.mock('@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_preview');
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const actual = jest.requireActual('@kbn/kibana-react-plugin/public');
+  return {
+    ...actual,
+    useUiSetting: jest.fn().mockReturnValue(false),
+  };
+});
 
 jest.mock('../../../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
@@ -110,13 +117,16 @@ jest.mock('../../../../entity_analytics/api/hooks/use_risk_score');
 const mockUseFirstLastSeen = useFirstLastSeen as jest.Mock;
 jest.mock('../../../../common/containers/use_first_last_seen');
 
-const renderHostEntityContent = () =>
+const renderHostEntityContent = (
+  props: Partial<React.ComponentProps<typeof HostEntityOverview>> = {}
+) =>
   render(
     <TestProviders>
       <HostEntityOverview
         hostName={hostName}
         identityFields={identityFields}
         scopeId={panelContextValue.scopeId}
+        {...props}
       />
     </TestProviders>
   );
@@ -220,7 +230,19 @@ describe('<HostEntityContent />', () => {
       expect(mockFlyoutApi.openPreviewPanel).not.toHaveBeenCalled();
     });
 
-    it('opens host preview when clicking on title with enableEntityLinks', () => {
+    it('opens host entity details when clicking host name with Flyout v2 host details callback', () => {
+      mockUseHostDetails.mockReturnValue([false, { hostDetails: hostData }]);
+      mockUseRiskScore.mockReturnValue({ data: riskLevel, isAuthorized: true });
+      const onShowHostDetails = jest.fn();
+
+      const { getByTestId } = renderHostEntityContent({ onShowHostDetails });
+
+      getByTestId(ENTITIES_HOST_OVERVIEW_LINK_TEST_ID).click();
+      expect(onShowHostDetails).toHaveBeenCalled();
+      expect(mockFlyoutApi.openPreviewPanel).not.toHaveBeenCalled();
+    });
+
+    it('opens host preview when clicking on title with useLegacyExpandableFlyout', () => {
       mockUseHostDetails.mockReturnValue([false, { hostDetails: hostData }]);
       mockUseRiskScore.mockReturnValue({ data: riskLevel, isAuthorized: true });
 
@@ -230,7 +252,7 @@ describe('<HostEntityContent />', () => {
             hostName={hostName}
             identityFields={identityFields}
             scopeId={panelContextValue.scopeId}
-            enableEntityLinks
+            useLegacyExpandableFlyout
           />
         </TestProviders>
       );
@@ -274,7 +296,34 @@ describe('<HostEntityContent />', () => {
       expect(getByTestId(ENTITIES_HOST_OVERVIEW_ALERT_COUNT_TEST_ID)).toBeInTheDocument();
     });
 
-    it('opens host alert details when clicking alert count with enableEntityLinks', () => {
+    it('does not expose alert navigation link without useLegacyExpandableFlyout', () => {
+      (useAlertsByStatus as jest.Mock).mockReturnValue({
+        isLoading: false,
+        items: mockAlertData,
+      });
+
+      const { queryByTestId } = renderHostEntityContent();
+
+      expect(
+        queryByTestId(INSIGHTS_ALERTS_COUNT_NAVIGATION_BUTTON_TEST_ID)
+      ).not.toBeInTheDocument();
+    });
+
+    it('opens alerts list when clicking alert count with Flyout v2 alerts callback', () => {
+      (useAlertsByStatus as jest.Mock).mockReturnValue({
+        isLoading: false,
+        items: mockAlertData,
+      });
+      const onShowEntityAlertsDetails = jest.fn();
+
+      const { getByTestId } = renderHostEntityContent({ onShowEntityAlertsDetails });
+
+      getByTestId(INSIGHTS_ALERTS_COUNT_NAVIGATION_BUTTON_TEST_ID).click();
+      expect(onShowEntityAlertsDetails).toHaveBeenCalled();
+      expect(mockFlyoutApi.openFlyout).not.toHaveBeenCalled();
+    });
+
+    it('opens host alert details when clicking alert count with useLegacyExpandableFlyout', () => {
       (useAlertsByStatus as jest.Mock).mockReturnValue({
         isLoading: false,
         items: mockAlertData,
@@ -287,7 +336,7 @@ describe('<HostEntityContent />', () => {
             hostName={hostName}
             identityFields={identityFields}
             scopeId={panelContextValue.scopeId}
-            enableEntityLinks
+            useLegacyExpandableFlyout
           />
         </TestProviders>
       );

@@ -68,6 +68,11 @@ export interface UserPanelProps extends Record<string, unknown> {
    * Canonical Entity Store v2 id (`entity.id`) when already resolved (e.g. from alerts/events table).
    */
   entityId?: string;
+  /**
+   * When provided (e.g. from flyout v2 system flyout context), overrides the default
+   * left-panel navigation for "Show all alerts" in EntityInsight.
+   */
+  onShowAlertsDetails?: () => void;
 }
 
 export interface UserPanelExpandableFlyoutProps extends FlyoutPanelProps {
@@ -88,6 +93,7 @@ export const UserPanel = memo(function UserPanel({
   isPreviewMode = false,
   userName,
   entityId: entityIdProp,
+  onShowAlertsDetails,
 }: UserPanelProps) {
   const { uiSettings } = useKibana().services;
   const euidApi = useEntityStoreEuidApi();
@@ -285,17 +291,18 @@ export const UserPanel = memo(function UserPanel({
 
   return (
     <>
-      <FlyoutNavigation
-        flyoutIsExpandable={
-          hasUserDetailsData ||
-          hasMisconfigurationFindings ||
-          hasNonClosedAlerts ||
-          !!entityStoreEntityId
-        }
-        expandDetails={openDefaultPanel}
-        isPreviewMode={isPreviewMode}
-        isRulePreview={scopeId === TableId.rulePreview}
-      />
+      {!isPreviewMode && (
+        <FlyoutNavigation
+          flyoutIsExpandable={
+            hasUserDetailsData ||
+            hasMisconfigurationFindings ||
+            hasNonClosedAlerts ||
+            !!entityStoreEntityId
+          }
+          expandDetails={openDefaultPanel}
+          isRulePreview={scopeId === TableId.rulePreview}
+        />
+      )}
       <UserPanelHeader
         lastSeen={observedUser.lastSeen}
         managedUser={managedUser}
@@ -336,6 +343,7 @@ export const UserPanel = memo(function UserPanel({
             entityRecord={entityStoreV2Enabled ? observedUser.entityRecord ?? undefined : undefined}
             skipRiskAndCriticality={noEntityInStore}
             entityStoreEntityId={entityStoreEntityId}
+            onShowAlertsDetails={onShowAlertsDetails}
           />
         )}
       </FlyoutBody>

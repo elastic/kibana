@@ -47,8 +47,8 @@ jest.mock('../../hooks/use_attack_entities_lists', () => ({
   useAttackEntitiesLists: jest.fn(),
 }));
 
-jest.mock('../../../document_details/left/components/user_details', () => ({
-  UserDetails: ({
+jest.mock('../../../../flyout_v2/document/tools/entities/components/user_details_view', () => ({
+  UserDetailsView: ({
     userName,
     timestamp,
     scopeId,
@@ -68,8 +68,8 @@ jest.mock('../../../document_details/left/components/user_details', () => ({
   ),
 }));
 
-jest.mock('../../../document_details/left/components/host_details', () => ({
-  HostDetails: ({
+jest.mock('../../../../flyout_v2/document/tools/entities/components/host_details_view', () => ({
+  HostDetailsView: ({
     hostName,
     timestamp,
     scopeId,

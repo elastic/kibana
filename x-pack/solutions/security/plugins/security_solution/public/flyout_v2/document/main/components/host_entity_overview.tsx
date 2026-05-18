@@ -10,6 +10,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiLink,
   EuiSkeletonText,
   EuiText,
   useEuiFontSize,
@@ -116,11 +117,18 @@ export interface HostEntityOverviewProps {
    */
   renderCellActions?: CellActionRenderer;
   /**
-   * When true, renders the host name as a preview link and the alert/misconfig/vuln chips
-   * as clickable counts. Set by the legacy expandable flyout host. Flyout v2 and Discover
-   * leave this off so everything renders as plain text.
+   * Whether to render legacy PreviewLink and expandable-flyout navigation callbacks.
    */
-  enableEntityLinks?: boolean;
+  useLegacyExpandableFlyout?: boolean;
+  /**
+   * Callback to show the host entity right flyout (`flyout/entity_details/host_right`).
+   * When provided, the host name link opens this flyout in Flyout v2 mode.
+   */
+  onShowHostDetails?: () => void;
+  /**
+   * Callback to show the alerts list for this host entity.
+   */
+  onShowEntityAlertsDetails?: () => void;
 }
 
 export const HOST_PREVIEW_BANNER = {
@@ -131,16 +139,15 @@ export const HOST_PREVIEW_BANNER = {
   textColor: 'warning',
 };
 
-/**
- * Host preview content for the entities preview in right flyout. It contains ip addresses and risk level
- */
 export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({
   hostName,
   identityFields,
   entityRecord,
   scopeId = '',
   renderCellActions = noopCellActionRenderer,
-  enableEntityLinks = false,
+  useLegacyExpandableFlyout = false,
+  onShowHostDetails,
+  onShowEntityAlertsDetails,
 }) => {
   const { from, to } = useGlobalTime();
   const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView();
@@ -231,20 +238,19 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({
     to,
     from,
     queryId: HOST_ENTITY_OVERVIEW_ID,
+    skip: !useLegacyExpandableFlyout,
   });
   const hostCspIdentityDoc = entityRecord ?? hostIdentityFields;
-  const { hasMisconfigurationFindings } = useHasMisconfigurations(
-    buildEuidCspPreviewOptions('host', hostCspIdentityDoc, euidApi, {
-      entityStoreV2Enabled,
-      legacyIdentityFields: hostIdentityFields,
-    })
-  );
-  const { hasVulnerabilitiesFindings } = useHasVulnerabilities(
-    buildEuidCspPreviewOptions('host', hostCspIdentityDoc, euidApi, {
-      entityStoreV2Enabled,
-      legacyIdentityFields: hostIdentityFields,
-    })
-  );
+  const hostCspPreviewOptions = buildEuidCspPreviewOptions('host', hostCspIdentityDoc, euidApi, {
+    entityStoreV2Enabled,
+    legacyIdentityFields: hostIdentityFields,
+  });
+  const legacyHostCspPreviewOptions = {
+    ...hostCspPreviewOptions,
+    enabled: useLegacyExpandableFlyout && hostCspPreviewOptions.enabled,
+  };
+  const { hasMisconfigurationFindings } = useHasMisconfigurations(legacyHostCspPreviewOptions);
+  const { hasVulnerabilitiesFindings } = useHasVulnerabilities(legacyHostCspPreviewOptions);
 
   const openDetailsPanel = useNavigateToHostDetails({
     hostName,
@@ -254,9 +260,10 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({
     hasMisconfigurationFindings,
     hasVulnerabilitiesFindings,
     hasNonClosedAlerts,
-    isPreviewMode: true, // setting to true to always open a new host flyout
+    isPreviewMode: true,
     contextID: 'HostEntityOverview',
   });
+
   type HostDetailsPath = Parameters<typeof openDetailsPanel>[0];
 
   const hostOSFamilyValue = useMemo(() => {
@@ -320,6 +327,10 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({
 
   const { euiTheme } = useEuiTheme();
   const xsFontSize = useEuiFontSize('xs').fontSize;
+  const displayNameStyles = css`
+    font-size: ${xsFontSize};
+    font-weight: ${euiTheme.font.weight.bold};
+  `;
 
   const isLoading = entityStoreV2Enabled
     ? riskFromEntityRecord == null && isRiskScoreLoading
@@ -366,7 +377,7 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({
             <EuiIcon type={HOST_ICON} aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            {enableEntityLinks ? (
+            {useLegacyExpandableFlyout ? (
               <PreviewLink
                 field="host.name"
                 value={hostName}
@@ -374,23 +385,18 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({
                 scopeId={scopeId}
                 data-test-subj={ENTITIES_HOST_OVERVIEW_LINK_TEST_ID}
               >
-                <EuiText
-                  css={css`
-                    font-size: ${xsFontSize};
-                    font-weight: ${euiTheme.font.weight.bold};
-                  `}
-                >
-                  {hostName}
-                </EuiText>
+                <EuiText css={displayNameStyles}>{hostName}</EuiText>
               </PreviewLink>
-            ) : (
-              <EuiText
+            ) : onShowHostDetails ? (
+              <EuiLink
                 data-test-subj={ENTITIES_HOST_OVERVIEW_LINK_TEST_ID}
-                css={css`
-                  font-size: ${xsFontSize};
-                  font-weight: ${euiTheme.font.weight.bold};
-                `}
+                onClick={onShowHostDetails}
+                css={displayNameStyles}
               >
+                {hostName}
+              </EuiLink>
+            ) : (
+              <EuiText data-test-subj={ENTITIES_HOST_OVERVIEW_LINK_TEST_ID} css={displayNameStyles}>
                 {hostName}
               </EuiText>
             )}
@@ -436,20 +442,20 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({
         entityType={EntityType.host}
         queryId={`${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}-${HOST_ENTITY_OVERVIEW_ID}`}
         onShowAlertCountDetails={
-          enableEntityLinks
+          useLegacyExpandableFlyout
             ? () =>
                 openDetailsPanel({
                   tab: CSP_INSIGHTS_TAB_ID,
                   subTab: ALERTS_TAB_ID,
                 } as HostDetailsPath)
-            : undefined
+            : onShowEntityAlertsDetails
         }
         data-test-subj={ENTITIES_HOST_OVERVIEW_ALERT_COUNT_TEST_ID}
       />
       <MisconfigurationsInsight
         identityFields={hostIdentityFields}
         onShowMisconfigurationsDetails={
-          enableEntityLinks
+          useLegacyExpandableFlyout
             ? () =>
                 openDetailsPanel({
                   tab: CSP_INSIGHTS_TAB_ID,
@@ -463,7 +469,7 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({
       <VulnerabilitiesInsight
         identityFields={hostIdentityFields}
         onShowVulnerabilitiesDetails={
-          enableEntityLinks
+          useLegacyExpandableFlyout
             ? () =>
                 openDetailsPanel({
                   tab: CSP_INSIGHTS_TAB_ID,

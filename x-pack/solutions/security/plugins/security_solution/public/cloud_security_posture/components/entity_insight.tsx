@@ -43,6 +43,7 @@ export const EntityInsight = <T,>({
   openDetailsPanel,
   entityType,
   entityRecord,
+  onShowAlertsDetails,
 }: {
   identityFields: IdentityFields;
   isPreviewMode: boolean;
@@ -50,6 +51,8 @@ export const EntityInsight = <T,>({
   /** Host or user when the flyout represents that entity; enables v2 alerts resolution by `entity.id`. */
   entityType?: string;
   entityRecord?: EntityStoreRecord | null;
+  /** When provided, overrides the default left-panel navigation for "Show all alerts". */
+  onShowAlertsDetails?: () => void;
 }) => {
   const { euiTheme } = useEuiTheme();
   const euidApi = useEntityStoreEuidApi();
@@ -96,6 +99,7 @@ export const EntityInsight = <T,>({
           alertsData={filteredAlertsData}
           isPreviewMode={isPreviewMode}
           openDetailsPanel={openDetailsPanel}
+          onShowAllAlerts={onShowAlertsDetails}
         />
         <EuiSpacer size="s" />
       </>

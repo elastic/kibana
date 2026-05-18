@@ -64,10 +64,12 @@ export const AlertsPreview = ({
   alertsData,
   isPreviewMode,
   openDetailsPanel,
+  onShowAllAlerts,
 }: {
   alertsData: ParsedAlertsData;
   isPreviewMode: boolean;
   openDetailsPanel: (path: EntityDetailsPath) => void;
+  onShowAllAlerts?: () => void;
 }) => {
   const { euiTheme } = useEuiTheme();
 
@@ -101,11 +103,13 @@ export const AlertsPreview = ({
 
   const goToEntityInsightTab = useCallback(
     () =>
-      openDetailsPanel({
-        tab: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
-        subTab: CspInsightLeftPanelSubTab.ALERTS,
-      }),
-    [openDetailsPanel]
+      onShowAllAlerts
+        ? onShowAllAlerts()
+        : openDetailsPanel({
+            tab: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
+            subTab: CspInsightLeftPanelSubTab.ALERTS,
+          }),
+    [onShowAllAlerts, openDetailsPanel]
   );
 
   const link = useMemo(

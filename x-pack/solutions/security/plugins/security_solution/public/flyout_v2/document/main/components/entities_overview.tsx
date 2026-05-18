@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React, { memo, useMemo } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataTableRecord } from '@kbn/discover-utils';
@@ -40,11 +40,24 @@ export interface EntitiesOverviewProps {
    */
   onShowEntitiesDetails?: () => void;
   /**
-   * When true, host/user names render as preview links and the alert/misconfig/vuln chips
-   * become clickable. The legacy expandable flyout sets this; Flyout v2 and Discover leave
-   * it off so everything renders as plain text.
+   * Callback to open the user entity right flyout (`flyout/entity_details/user_right`).
+   * Invoked when the user name link is clicked.
    */
-  enableEntityLinks?: boolean;
+  onShowUserDetails?: (userName: string, entityId?: string) => void;
+  /**
+   * Callback to open the host entity right flyout (`flyout/entity_details/host_right`).
+   * Invoked when the host name link is clicked.
+   */
+  onShowHostDetails?: (hostName: string, entityId?: string) => void;
+  /**
+   * Callback invoked when the alert count badge is clicked. Receives the entity type, name, and
+   * optional entity-store ID so the caller can open the appropriate alerts list.
+   */
+  onShowEntityAlertsDetails?: (entityType: 'host' | 'user', name: string, entityId?: string) => void;
+  /**
+   * Whether to render legacy PreviewLink and expandable-flyout navigation callbacks.
+   */
+  useLegacyExpandableFlyout?: boolean;
 }
 
 const HEADER_TITLE = (
@@ -76,7 +89,10 @@ export const EntitiesOverview: FC<EntitiesOverviewProps> = memo(
     scopeId = '',
     renderCellActions = noopCellActionRenderer,
     onShowEntitiesDetails,
-    enableEntityLinks = false,
+    onShowUserDetails,
+    onShowHostDetails,
+    onShowEntityAlertsDetails,
+    useLegacyExpandableFlyout = false,
   }) => {
     const { user, host, hasAnyEntity } = useEntitiesOverview({ hit });
 
@@ -89,6 +105,38 @@ export const EntitiesOverview: FC<EntitiesOverviewProps> = memo(
             }
           : undefined,
       [onShowEntitiesDetails]
+    );
+
+    const onShowUserDetailsClick = useCallback(
+      () =>
+        user && onShowUserDetails
+          ? onShowUserDetails(user.name, user.entityRecord?.entity?.id)
+          : undefined,
+      [onShowUserDetails, user]
+    );
+
+    const onShowHostDetailsClick = useCallback(
+      () =>
+        host && onShowHostDetails
+          ? onShowHostDetails(host.name, host.entityRecord?.entity?.id)
+          : undefined,
+      [onShowHostDetails, host]
+    );
+
+    const onShowUserAlertsDetails = useCallback(
+      () =>
+        user && onShowEntityAlertsDetails
+          ? onShowEntityAlertsDetails('user', user.name, user.entityRecord?.entity?.id)
+          : undefined,
+      [onShowEntityAlertsDetails, user]
+    );
+
+    const onShowHostAlertsDetails = useCallback(
+      () =>
+        host && onShowEntityAlertsDetails
+          ? onShowEntityAlertsDetails('host', host.name, host.entityRecord?.entity?.id)
+          : undefined,
+      [onShowEntityAlertsDetails, host]
     );
 
     return (
@@ -110,7 +158,11 @@ export const EntitiesOverview: FC<EntitiesOverviewProps> = memo(
                   entityRecord={user.entityRecord}
                   scopeId={scopeId}
                   renderCellActions={renderCellActions}
-                  enableEntityLinks={enableEntityLinks}
+                  useLegacyExpandableFlyout={useLegacyExpandableFlyout}
+                  onShowUserDetails={onShowUserDetails ? onShowUserDetailsClick : undefined}
+                  onShowEntityAlertsDetails={
+                    onShowEntityAlertsDetails ? onShowUserAlertsDetails : undefined
+                  }
                 />
               </EuiFlexItem>
             )}
@@ -122,7 +174,11 @@ export const EntitiesOverview: FC<EntitiesOverviewProps> = memo(
                   entityRecord={host.entityRecord}
                   scopeId={scopeId}
                   renderCellActions={renderCellActions}
-                  enableEntityLinks={enableEntityLinks}
+                  useLegacyExpandableFlyout={useLegacyExpandableFlyout}
+                  onShowHostDetails={onShowHostDetails ? onShowHostDetailsClick : undefined}
+                  onShowEntityAlertsDetails={
+                    onShowEntityAlertsDetails ? onShowHostAlertsDetails : undefined
+                  }
                 />
               </EuiFlexItem>
             )}

@@ -26,7 +26,7 @@ import { LeftPanelInsightsTab } from '../../left';
 import { THREAT_INTELLIGENCE_TAB_ID } from '../../../../flyout_v2/document/tools/threat_intelligence';
 import { CORRELATIONS_TAB_ID } from '../../left/components/correlations_details';
 import { PREVALENCE_TAB_ID } from '../../left/components/prevalence_details';
-import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
+import { ENTITIES_TAB_ID } from '../../../../flyout_v2/document/tools/entities';
 import { CellActions } from '../../shared/components/cell_actions';
 
 const KEY = 'insights';
@@ -94,7 +94,7 @@ export const InsightsSection = memo(() => {
         showIcon={!isPreviewMode}
         renderCellActions={renderCellActions}
         onShowEntitiesDetails={goToEntitiesTab}
-        enableEntityLinks
+        useLegacyExpandableFlyout
       />
       {eventKind === EventKind.signal && (
         <>

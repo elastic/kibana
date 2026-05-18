@@ -10,6 +10,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiLink,
   EuiSkeletonText,
   EuiText,
   useEuiFontSize,
@@ -106,11 +107,18 @@ export interface UserEntityOverviewProps {
    */
   renderCellActions?: CellActionRenderer;
   /**
-   * When true, renders the user name as a preview link and the alert/misconfig chips
-   * as clickable counts. Set by the legacy expandable flyout host. Flyout v2 and Discover
-   * leave this off so everything renders as plain text.
+   * Whether to render legacy PreviewLink and expandable-flyout navigation callbacks.
    */
-  enableEntityLinks?: boolean;
+  useLegacyExpandableFlyout?: boolean;
+  /**
+   * Callback to show the user entity right flyout (`flyout/entity_details/user_right`).
+   * When provided, the user name link opens this flyout in Flyout v2 mode.
+   */
+  onShowUserDetails?: () => void;
+  /**
+   * Callback to show the alerts list for this user entity.
+   */
+  onShowEntityAlertsDetails?: () => void;
 }
 
 export const USER_PREVIEW_BANNER = {
@@ -121,16 +129,15 @@ export const USER_PREVIEW_BANNER = {
   textColor: 'warning',
 };
 
-/**
- * User preview content for the entities preview in right flyout. It contains ip addresses and risk level
- */
 export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
   userName,
   identityFields,
   entityRecord,
   scopeId = '',
   renderCellActions = noopCellActionRenderer,
-  enableEntityLinks = false,
+  useLegacyExpandableFlyout = false,
+  onShowUserDetails,
+  onShowEntityAlertsDetails,
 }) => {
   const { from, to } = useGlobalTime();
   const { selectedPatterns: oldSelectedPatterns } = useSourcererDataView();
@@ -215,12 +222,14 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
   const isAuthorized = entityStoreV2Enabled ? true : isRiskScoreAuthorized;
 
   const userCspIdentityDoc = entityRecord ?? userIdentityFields;
-  const { hasMisconfigurationFindings } = useHasMisconfigurations(
-    buildEuidCspPreviewOptions('user', userCspIdentityDoc, euidApi, {
-      entityStoreV2Enabled,
-      legacyIdentityFields: userIdentityFields,
-    })
-  );
+  const userCspPreviewOptions = buildEuidCspPreviewOptions('user', userCspIdentityDoc, euidApi, {
+    entityStoreV2Enabled,
+    legacyIdentityFields: userIdentityFields,
+  });
+  const { hasMisconfigurationFindings } = useHasMisconfigurations({
+    ...userCspPreviewOptions,
+    enabled: useLegacyExpandableFlyout && userCspPreviewOptions.enabled,
+  });
   const { hasNonClosedAlerts } = useNonClosedAlerts({
     entityRecord,
     identityFields: userIdentityFields,
@@ -228,6 +237,7 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
     to,
     from,
     queryId: USER_ENTITY_OVERVIEW_ID,
+    skip: !useLegacyExpandableFlyout,
   });
 
   const openDetailsPanel = useNavigateToUserDetails({
@@ -238,9 +248,10 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
     isRiskScoreExist,
     hasMisconfigurationFindings,
     hasNonClosedAlerts,
-    isPreviewMode: true, // setting to true to always open a new user flyout
+    isPreviewMode: true,
     contextID: 'UserEntityOverview',
   });
+
   type UserDetailsPath = Parameters<typeof openDetailsPanel>[0];
 
   const userDetailsForDomain = entityStoreV2Enabled ? entityRecord : userDetails;
@@ -300,6 +311,10 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
 
   const { euiTheme } = useEuiTheme();
   const xsFontSize = useEuiFontSize('xs').fontSize;
+  const displayNameStyles = css`
+    font-size: ${xsFontSize};
+    font-weight: ${euiTheme.font.weight.bold};
+  `;
 
   const isLoading = entityStoreV2Enabled
     ? riskFromEntityRecord == null && isRiskScoreLoading
@@ -348,7 +363,7 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
             <EuiIcon type={USER_ICON} aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            {enableEntityLinks ? (
+            {useLegacyExpandableFlyout ? (
               <PreviewLink
                 field="user.name"
                 value={displayName}
@@ -356,23 +371,18 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
                 scopeId={scopeId}
                 data-test-subj={ENTITIES_USER_OVERVIEW_LINK_TEST_ID}
               >
-                <EuiText
-                  css={css`
-                    font-size: ${xsFontSize};
-                    font-weight: ${euiTheme.font.weight.bold};
-                  `}
-                >
-                  {displayName}
-                </EuiText>
+                <EuiText css={displayNameStyles}>{displayName}</EuiText>
               </PreviewLink>
-            ) : (
-              <EuiText
+            ) : onShowUserDetails ? (
+              <EuiLink
                 data-test-subj={ENTITIES_USER_OVERVIEW_LINK_TEST_ID}
-                css={css`
-                  font-size: ${xsFontSize};
-                  font-weight: ${euiTheme.font.weight.bold};
-                `}
+                onClick={onShowUserDetails}
+                css={displayNameStyles}
               >
+                {displayName}
+              </EuiLink>
+            ) : (
+              <EuiText data-test-subj={ENTITIES_USER_OVERVIEW_LINK_TEST_ID} css={displayNameStyles}>
                 {displayName}
               </EuiText>
             )}
@@ -418,20 +428,20 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
         entityType={EntityType.user}
         queryId={`${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}-${USER_ENTITY_OVERVIEW_ID}`}
         onShowAlertCountDetails={
-          enableEntityLinks
+          useLegacyExpandableFlyout
             ? () =>
                 openDetailsPanel({
                   tab: CSP_INSIGHTS_TAB_ID,
                   subTab: ALERTS_TAB_ID,
                 } as UserDetailsPath)
-            : undefined
+            : onShowEntityAlertsDetails
         }
         data-test-subj={ENTITIES_USER_OVERVIEW_ALERT_COUNT_TEST_ID}
       />
       <MisconfigurationsInsight
         identityFields={userIdentityFields}
         onShowMisconfigurationsDetails={
-          enableEntityLinks
+          useLegacyExpandableFlyout
             ? () =>
                 openDetailsPanel({
                   tab: CSP_INSIGHTS_TAB_ID,
@@ -445,3 +455,5 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
     </EuiFlexGroup>
   );
 };
+
+UserEntityOverview.displayName = 'UserEntityOverview';

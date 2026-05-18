@@ -35,7 +35,7 @@ const userName = 'user';
 const identityFields = { 'user.name': userName };
 const domain = 'n54bg2lfc7';
 const lastSeen = '2022-04-08T18:35:45.064Z';
-const lastSeenText = 'Apr 8, 2022 @ 18:35:45.064';
+const lastSeenText = '2022-04-08T18:35:45Z';
 const from = '2022-04-05T12:00:00.000Z';
 const to = '2022-04-08T12:00:00.000Z';
 const selectedPatterns = 'alerts';
@@ -49,6 +49,13 @@ const panelContextValue = {
 
 jest.mock('@kbn/expandable-flyout');
 jest.mock('@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview');
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const actual = jest.requireActual('@kbn/kibana-react-plugin/public');
+  return {
+    ...actual,
+    useUiSetting: jest.fn().mockReturnValue(false),
+  };
+});
 
 jest.mock('../../../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
@@ -104,13 +111,16 @@ jest.mock('../../../../entity_analytics/api/hooks/use_risk_score');
 const mockUseFirstLastSeen = useFirstLastSeen as jest.Mock;
 jest.mock('../../../../common/containers/use_first_last_seen');
 
-const renderUserEntityOverview = () =>
+const renderUserEntityOverview = (
+  props: Partial<React.ComponentProps<typeof UserEntityOverview>> = {}
+) =>
   render(
     <TestProviders>
       <UserEntityOverview
         userName={userName}
         identityFields={identityFields}
         scopeId={panelContextValue.scopeId}
+        {...props}
       />
     </TestProviders>
   );
@@ -215,7 +225,19 @@ describe('<UserEntityOverview />', () => {
       expect(mockFlyoutApi.openPreviewPanel).not.toHaveBeenCalled();
     });
 
-    it('opens user preview when clicking on title with enableEntityLinks', () => {
+    it('opens user entity details when clicking user name with Flyout v2 user details callback', () => {
+      mockUseUserDetails.mockReturnValue([false, { userDetails: userData }]);
+      mockUseRiskScore.mockReturnValue({ data: riskLevel, isAuthorized: true });
+      const onShowUserDetails = jest.fn();
+
+      const { getByTestId } = renderUserEntityOverview({ onShowUserDetails });
+
+      getByTestId(ENTITIES_USER_OVERVIEW_LINK_TEST_ID).click();
+      expect(onShowUserDetails).toHaveBeenCalled();
+      expect(mockFlyoutApi.openPreviewPanel).not.toHaveBeenCalled();
+    });
+
+    it('opens user preview when clicking on title with useLegacyExpandableFlyout', () => {
       mockUseUserDetails.mockReturnValue([false, { userDetails: userData }]);
       mockUseRiskScore.mockReturnValue({ data: riskLevel, isAuthorized: true });
 
@@ -225,7 +247,7 @@ describe('<UserEntityOverview />', () => {
             userName={userName}
             identityFields={identityFields}
             scopeId={panelContextValue.scopeId}
-            enableEntityLinks
+            useLegacyExpandableFlyout
           />
         </TestProviders>
       );
@@ -268,7 +290,34 @@ describe('<UserEntityOverview />', () => {
       expect(getByTestId(ENTITIES_USER_OVERVIEW_ALERT_COUNT_TEST_ID)).toBeInTheDocument();
     });
 
-    it('opens user alert details when clicking alert count with enableEntityLinks', () => {
+    it('does not expose alert navigation link without useLegacyExpandableFlyout', () => {
+      (useAlertsByStatus as jest.Mock).mockReturnValue({
+        isLoading: false,
+        items: mockAlertData,
+      });
+
+      const { queryByTestId } = renderUserEntityOverview();
+
+      expect(
+        queryByTestId(INSIGHTS_ALERTS_COUNT_NAVIGATION_BUTTON_TEST_ID)
+      ).not.toBeInTheDocument();
+    });
+
+    it('opens alerts list when clicking alert count with Flyout v2 alerts callback', () => {
+      (useAlertsByStatus as jest.Mock).mockReturnValue({
+        isLoading: false,
+        items: mockAlertData,
+      });
+      const onShowEntityAlertsDetails = jest.fn();
+
+      const { getByTestId } = renderUserEntityOverview({ onShowEntityAlertsDetails });
+
+      getByTestId(INSIGHTS_ALERTS_COUNT_NAVIGATION_BUTTON_TEST_ID).click();
+      expect(onShowEntityAlertsDetails).toHaveBeenCalled();
+      expect(mockFlyoutApi.openFlyout).not.toHaveBeenCalled();
+    });
+
+    it('opens user alert details when clicking alert count with useLegacyExpandableFlyout', () => {
       (useAlertsByStatus as jest.Mock).mockReturnValue({
         isLoading: false,
         items: mockAlertData,
@@ -281,7 +330,7 @@ describe('<UserEntityOverview />', () => {
             userName={userName}
             identityFields={identityFields}
             scopeId={panelContextValue.scopeId}
-            enableEntityLinks
+            useLegacyExpandableFlyout
           />
         </TestProviders>
       );
