@@ -160,6 +160,11 @@ export function extractModifiedFields(processor: StreamlangProcessorDefinition):
 
     case 'user_agent':
       fields.push(processor.to ?? 'user_agent');
+    case 'registered_domain':
+      fields.push(`${processor.prefix}.domain`);
+      fields.push(`${processor.prefix}.registered_domain`);
+      fields.push(`${processor.prefix}.top_level_domain`);
+      fields.push(`${processor.prefix}.subdomain`);
       break;
 
     case 'remove':
@@ -251,6 +256,7 @@ export function getProcessorOutputType(
     case 'lowercase':
     case 'trim':
     case 'concat':
+    case 'registered_domain':
       return 'string';
 
     case 'date':
@@ -396,6 +402,12 @@ export function getExpectedInputType(
       }
       return null;
 
+    case 'registered_domain':
+      if (processor.expression === fieldName) {
+        return ['string'];
+      }
+      return null;
+
     case 'sort':
     case 'rename':
     case 'set':
@@ -498,6 +510,8 @@ export function trackFieldTypesAndValidate(flattenedSteps: StreamlangProcessorDe
         if (step.from) {
           fieldsUsed.push(step.from);
         }
+      case 'registered_domain':
+        fieldsUsed.push(step.expression);
         break;
       case 'append':
       case 'drop_document':

@@ -244,6 +244,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await kibanaServer.uiSettings.update({
         [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: true,
       });
+      await kibanaServer.uiSettings.waitForEventualCacheRefresh();
       // link and unlink dashboard to make sure attachments index is created
       await apiClient.fetch(
         'PUT /api/streams/{streamName}/attachments/{attachmentType}/{attachmentId} 2023-10-31',
@@ -335,6 +336,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await kibanaServer.uiSettings.update({
         [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: false,
       });
+      await kibanaServer.uiSettings.waitForEventualCacheRefresh();
     });
 
     it('should read and return existing orphaned classic stream', async () => {

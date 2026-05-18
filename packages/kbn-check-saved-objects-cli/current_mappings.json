@@ -336,9 +336,7 @@
       "createdBy": {
         "type": "keyword"
       },
-      "createdByUsername": {
-        "type": "keyword"
-      },
+
       "description": {
         "fields": {
           "keyword": {
@@ -377,6 +375,9 @@
         },
         "type": "text"
       },
+      "ruleId": {
+        "type": "keyword"
+      },
       "snoozedUntil": {
         "type": "date"
       },
@@ -391,13 +392,13 @@
         },
         "type": "object"
       },
+      "type": {
+        "type": "keyword"
+      },
       "updatedAt": {
         "type": "date"
       },
       "updatedBy": {
-        "type": "keyword"
-      },
-      "updatedByUsername": {
         "type": "keyword"
       }
     }

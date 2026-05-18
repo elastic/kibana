@@ -35,6 +35,7 @@ import type {
   JsonExtractProcessor,
   EnrichProcessor,
   UserAgentProcessor,
+  RegisteredDomainProcessor,
 } from '../../../types/processors';
 import { type StreamlangProcessorDefinition } from '../../../types/processors';
 import {
@@ -64,6 +65,7 @@ import { convertNetworkDirectionProcessorToESQL } from './processors/network_dir
 import { convertJsonExtractProcessorToESQL } from './processors/json_extract';
 import { convertEnrichProcessorToESQL } from './processors/enrich';
 import { convertUserAgentProcessorToESQL } from './processors/user_agent';
+import { convertRegisteredDomainProcessorToESQL } from './processors/registered_domain';
 
 async function convertProcessorToESQL(
   processor: StreamlangProcessorDefinition,
@@ -146,6 +148,9 @@ async function convertProcessorToESQL(
       return await convertEnrichProcessorToESQL(processor as EnrichProcessor, resolver);
     case 'user_agent':
       return convertUserAgentProcessorToESQL(processor as UserAgentProcessor);
+
+    case 'registered_domain':
+      return convertRegisteredDomainProcessorToESQL(processor as RegisteredDomainProcessor);
 
     case 'manual_ingest_pipeline':
       return [

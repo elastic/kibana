@@ -804,6 +804,34 @@ export const userAgentProcessorSchema = processorBaseWithWhereSchema
     'User agent processor - Extract browser, OS, and device details from a user agent string'
   ) satisfies z.Schema<UserAgentProcessor>;
 
+/**
+ * Registered domain processor
+ */
+
+export interface RegisteredDomainProcessor extends ProcessorBaseWithWhere {
+  action: 'registered_domain';
+  expression: string;
+  prefix: string;
+  ignore_missing?: boolean;
+}
+
+export const registeredDomainSchema = processorBaseWithWhereSchema
+  .extend({
+    action: z.literal('registered_domain'),
+    expression: StreamlangSourceField.describe(
+      'The string expression containing the FQDN to parse'
+    ),
+    prefix: NonEmptyString.describe(
+      'The prefix for the output columns. The extracted parts are available as prefix.part_name'
+    ),
+    ignore_missing: z
+      .optional(z.boolean())
+      .describe('Skip processing when expression field is missing'),
+  })
+  .describe(
+    'Registered domain processor - extracts domain, registered_domain, top_level_domain, subdomain from a FQDN'
+  ) satisfies z.Schema<RegisteredDomainProcessor>;
+
 export type StreamlangProcessorDefinition =
   | DateProcessor
   | DissectProcessor
@@ -829,6 +857,7 @@ export type StreamlangProcessorDefinition =
   | JsonExtractProcessor
   | EnrichProcessor
   | UserAgentProcessor
+  | RegisteredDomainProcessor
   | ManualIngestPipelineProcessor;
 
 export const streamlangProcessorSchema = z.union([
@@ -856,6 +885,7 @@ export const streamlangProcessorSchema = z.union([
   jsonExtractProcessorSchema,
   enrichProcessorSchema,
   userAgentProcessorSchema,
+  registeredDomainSchema,
   manualIngestPipelineProcessorSchema,
 ]);
 
@@ -877,6 +907,8 @@ export const isProcessWithIgnoreMissingOption = createIsNarrowSchema(
     splitProcessorSchema,
     jsonExtractProcessorSchema,
     enrichProcessorSchema,
+    userAgentProcessorSchema,
+    registeredDomainSchema,
   ])
 );
 

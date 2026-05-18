@@ -11,7 +11,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 import type { EsTestCluster } from '@kbn/test';
 import { createTestEsCluster } from '@kbn/test';
 import { FLAGS } from '../src/constants';
-import { ChangeHistoryClient } from '..';
+import { ChangeHistoryClient, ILM_POLICY_NAME } from '..';
 import { DATA_STREAM_NAME } from '../src/client';
 import type { ObjectChange } from '..';
 import { sha256 } from '../src/utils';
@@ -43,6 +43,7 @@ describe('ChangeHistoryClient', () => {
     const client = esServer.getClient();
     await client.indices.deleteDataStream({ name: DATA_STREAM_NAME }).catch(() => {});
     await client.indices.deleteIndexTemplate({ name: DATA_STREAM_NAME }).catch(() => {});
+    await client.ilm.deleteLifecycle({ name: ILM_POLICY_NAME }).catch(() => {});
   };
 
   beforeAll(async () => {
@@ -93,6 +94,71 @@ describe('ChangeHistoryClient', () => {
       const result = await client.getHistory(KIBANA_SPACE, 'rule', 'any-id');
       expect(result.total).toBe(0);
       expect(result.items).toEqual([]);
+    });
+
+    describe('ILM policy', () => {
+      const getInstalledPolicy = async () => {
+        const res = await esServer.getClient().ilm.getLifecycle({ name: ILM_POLICY_NAME });
+        return res[ILM_POLICY_NAME]?.policy;
+      };
+      const getBackingIndexLifecycleName = async () => {
+        const settings = await esServer
+          .getClient()
+          .indices.getSettings({ index: DATA_STREAM_NAME, expand_wildcards: ['hidden', 'open'] });
+        const [first] = Object.values(settings);
+        return first?.settings?.index?.lifecycle?.name;
+      };
+
+      it('installs the ILM policy and points the index template at it', async () => {
+        const esClient = esServer.getClient();
+        await expect(esClient.ilm.getLifecycle({ name: ILM_POLICY_NAME })).rejects.toMatchObject({
+          meta: { statusCode: 404 },
+        });
+
+        const client = new ChangeHistoryClient(defaultCostructorOpts);
+        await client.initialize(esClient);
+
+        const policy = await getInstalledPolicy();
+        expect(policy).toEqual({
+          _meta: { managed: true },
+          phases: { hot: { min_age: '0ms', actions: {} } },
+        });
+
+        const template = await esClient.indices.getIndexTemplate({ name: DATA_STREAM_NAME });
+        expect(
+          template.index_templates[0]?.index_template?.template?.settings?.index?.lifecycle?.name
+        ).toBe(ILM_POLICY_NAME);
+
+        expect(await getBackingIndexLifecycleName()).toBe(ILM_POLICY_NAME);
+      });
+
+      it('does not overwrite an admin-modified ILM policy on re-initialize', async () => {
+        const esClient = esServer.getClient();
+
+        const customPolicy = {
+          _meta: { managed: false, modified_by: 'admin' },
+          phases: {
+            hot: {
+              actions: {
+                rollover: { max_age: '7d', max_primary_shard_size: '25gb' },
+              },
+            },
+            delete: { min_age: '90d', actions: { delete: {} } },
+          },
+        };
+        await esClient.ilm.putLifecycle({ name: ILM_POLICY_NAME, policy: customPolicy });
+
+        const client = new ChangeHistoryClient(defaultCostructorOpts);
+        await client.initialize(esClient);
+
+        const policy = await getInstalledPolicy();
+        expect(policy?._meta).toEqual({ managed: false, modified_by: 'admin' });
+        expect(policy?.phases?.hot?.actions?.rollover).toEqual({
+          max_age: '7d',
+          max_primary_shard_size: '25gb',
+        });
+        expect(policy?.phases?.delete).toBeDefined();
+      });
     });
   });
 

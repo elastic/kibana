@@ -63,7 +63,7 @@ import { UsersDetailsTabs } from './details_tabs';
 import { navTabsUsersDetails } from './nav_tabs';
 import type { UsersDetailsProps } from './types';
 import { UsersType } from '../../store/model';
-import { getUsersDetailsPageFilters, euidDslFilterToPageFilters } from './helpers';
+import { getUsersDetailsPageFilters } from './helpers';
 import { useGlobalFullScreen } from '../../../../common/containers/use_full_screen';
 import { Display } from '../../../hosts/pages/display';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
@@ -90,6 +90,7 @@ import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/
 import { sourcererSelectors } from '../../../../sourcerer/store';
 import type { UserItem } from '../../../../../common/search_strategy';
 import type { Entity } from '../../../../../common/api/entity_analytics';
+import { euidDslFilterToPageFilters } from '../../../helpers';
 
 const USERS_DETAILS_OVERVIEW_QUERY_ID = 'UsersDetailsQueryId';
 const ES_USER_FIELD = 'user.name';
