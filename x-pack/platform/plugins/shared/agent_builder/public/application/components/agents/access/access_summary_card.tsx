@@ -8,6 +8,7 @@
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import {
+  EuiAvatar,
   EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -15,7 +16,6 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
-  EuiToken,
   EuiToolTip,
   useEuiTheme,
   type EuiThemeComputed,
@@ -106,7 +106,7 @@ export const AccessSummaryCard: React.FC<AccessSummaryCardProps> = ({ agent, onM
                   key={`${entry.type}:${entry.name}`}
                   content={`${entry.name} — ${ROLE_LABEL[entry.role]}`}
                 >
-                  <EuiToken iconType="tokenUser" shape="circle" color="euiColorVis1" size="s" />
+                  <EuiAvatar name={entry.name} size="s" />
                 </EuiToolTip>
               ))}
               {overflow > 0 ? (

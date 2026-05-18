@@ -8,12 +8,12 @@
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import {
+  EuiAvatar,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSuperSelect,
   EuiText,
-  EuiToken,
   useEuiTheme,
 } from '@elastic/eui';
 import type { AgentAclEntry, AgentAclRole, AgentVisibility } from '@kbn/agent-builder-common';
@@ -68,7 +68,7 @@ export const PrincipalRow: React.FC<PrincipalRowProps> = ({
     }));
   }, [entry.role, visibility]);
 
-  const tokenStyles = css`
+  const avatarStyles = css`
     flex-shrink: 0;
   `;
 
@@ -84,13 +84,7 @@ export const PrincipalRow: React.FC<PrincipalRowProps> = ({
     <div css={rowStyles} data-test-subj={`agentBuilderAclRow-${entry.type}-${entry.name}`}>
       <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiToken
-            css={tokenStyles}
-            size="m"
-            iconType="tokenUser"
-            shape="circle"
-            color="euiColorVis1"
-          />
+          <EuiAvatar css={avatarStyles} name={entry.name} size="m" />
         </EuiFlexItem>
 
         <EuiFlexItem grow>
