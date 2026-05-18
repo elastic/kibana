@@ -39,7 +39,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     await svlSearchNavigation.navigateToLandingPage();
 
     await svlCommonNavigation.sidenav.clickLink({ navId: 'admin_and_settings' });
-    await svlCommonNavigation.sidenav.clickPanelLink('rules');
+    await svlCommonNavigation.sidenav.clickPanelLink('management:triggersActions');
   };
 
   const navigateToConnectors = async () => {
