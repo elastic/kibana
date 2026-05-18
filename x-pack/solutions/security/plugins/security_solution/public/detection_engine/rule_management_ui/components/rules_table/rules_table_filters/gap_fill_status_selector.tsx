@@ -86,7 +86,7 @@ export const GapFillStatusSelector = ({
       button={trigger}
       isOpen={isOpen}
       closePopover={close}
-      panelPaddingSize="none"
+      panelPaddingSize="s"
       repositionOnScroll
     >
       <EuiSelectable

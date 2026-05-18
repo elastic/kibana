@@ -56,12 +56,6 @@ jest.mock('./components/case_view_activity', () => ({
   )),
 }));
 
-jest.mock('./components/case_view_alerts', () => ({
-  CaseViewAlerts: jest.fn(() => (
-    <div data-test-subj="test-case-view-alerts">{'Case view alerts'}</div>
-  )),
-}));
-
 jest.mock('./components/case_view_observables', () => ({
   CaseViewObservables: jest.fn(() => (
     <div data-test-subj="test-case-view-observables">{'Case view observables'}</div>
@@ -101,6 +95,18 @@ describe('CaseViewPage', () => {
       getAttachmentTabViewObject: () => ({
         children: () => (
           <div data-test-subj="test-case-view-events-content">{'Events content'}</div>
+        ),
+      }),
+      schemaValidator: () => {},
+    });
+    unifiedAttachmentTypeRegistry.register({
+      id: 'security.alert',
+      displayName: 'Alert',
+      icon: 'bell',
+      getAttachmentViewObject: () => ({ event: 'added an alert' }),
+      getAttachmentTabViewObject: () => ({
+        children: () => (
+          <div data-test-subj="test-case-view-alerts-content">{'Alerts content'}</div>
         ),
       }),
       schemaValidator: () => {},
@@ -183,5 +189,43 @@ describe('CaseViewPage', () => {
     });
 
     expect(await screen.findByTestId('test-case-view-events-content')).toBeInTheDocument();
+  });
+
+  it('resolves alert type using the full case owner', () => {
+    const caseDataWithStringOwner = { ...caseProps.caseData, owner: 'securitySolution' };
+
+    renderWithTestingProviders(<CaseViewPage {...caseProps} caseData={caseDataWithStringOwner} />);
+
+    expect(toUnifiedAttachmentTypeMock).toHaveBeenCalledWith('alert', 'securitySolution');
+  });
+
+  it('does not render the alerts tab content when alerts feature is disabled', () => {
+    useUrlParamsMock.mockReturnValue({
+      urlParams: { tabId: CASE_VIEW_PAGE_TABS.ALERTS },
+    });
+
+    renderWithTestingProviders(<CaseViewPage {...caseProps} />, {
+      wrapperProps: {
+        features: { alerts: { enabled: false } },
+        unifiedAttachmentTypeRegistry,
+      },
+    });
+
+    expect(screen.queryByTestId('test-case-view-alerts-content')).not.toBeInTheDocument();
+  });
+
+  it('renders the alerts tab content when alerts feature is enabled and type is registered', async () => {
+    useUrlParamsMock.mockReturnValue({
+      urlParams: { tabId: CASE_VIEW_PAGE_TABS.ALERTS },
+    });
+
+    renderWithTestingProviders(<CaseViewPage {...caseProps} />, {
+      wrapperProps: {
+        features: { alerts: { enabled: true } },
+        unifiedAttachmentTypeRegistry,
+      },
+    });
+
+    expect(await screen.findByTestId('test-case-view-alerts-content')).toBeInTheDocument();
   });
 });
