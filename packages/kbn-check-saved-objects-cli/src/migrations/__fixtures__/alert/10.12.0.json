@@ -1,5 +1,5 @@
 {
-  "10.12.0": [
+  "10.11.0": [
     {
       "name": "string",
       "enabled": "boolean",
@@ -15,7 +15,6 @@
       "createdAt": "string",
       "muteAll": "boolean",
       "mutedInstanceIds": "array",
-      "snoozedInstances": "array?",
       "throttle": "string?|null",
       "revision": "number",
       "running": "boolean?|null",
@@ -83,7 +82,7 @@
       }
     }
   ],
-  "10.13.0": [
+  "10.12.0": [
     {
       "name": "string",
       "enabled": "boolean",
@@ -99,7 +98,6 @@
       "createdAt": "string",
       "muteAll": "boolean",
       "mutedInstanceIds": "array",
-      "snoozedInstances": "array?",
       "throttle": "string?|null",
       "revision": "number",
       "running": "boolean?|null",
