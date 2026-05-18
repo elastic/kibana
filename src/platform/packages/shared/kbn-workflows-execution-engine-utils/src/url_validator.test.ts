@@ -32,6 +32,7 @@ describe('UrlValidator', () => {
 
     it('should reject non-http schemes even with wildcard host', () => {
       expect(validator.isUrlAllowed('file:///etc/passwd')).toBe(false);
+      // eslint-disable-next-line no-script-url
       expect(validator.isUrlAllowed('javascript://example.com/x')).toBe(false);
       expect(validator.isUrlAllowed('data:text/html,<h1>test</h1>')).toBe(false);
     });
