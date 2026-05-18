@@ -8,6 +8,6 @@
 export const AGENT_CONTEXT_LAYER_FEATURE_ID = 'agentContextLayer';
 
 export const apiPrivileges = {
-  read: 'read_agent_context_layer',
-  write: 'manage_agent_context_layer',
+  readAgentContextLayer: `${AGENT_CONTEXT_LAYER_FEATURE_ID}:read`,
+  writeAgentContextLayer: `${AGENT_CONTEXT_LAYER_FEATURE_ID}:write`,
 };
