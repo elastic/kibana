@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { DecorativeHorizontalStepper } from '@kbn/search-connectors';
+import { MANAGEMENT_APP_ID } from '@kbn/deeplinks-management/constants';
 import { CRAWLERS_PATH } from '../routes';
 import { BACK_BUTTON_LABEL, COMING_SOON_LABEL } from './translations';
 import { SearchEmptyPrompt } from '../search_empty_prompt';
@@ -23,7 +24,10 @@ export const ElasticManagedWebCrawlerEmptyPrompt: React.FC = () => {
     <SearchEmptyPrompt
       backButton={{
         label: BACK_BUTTON_LABEL,
-        onClickBack: () => application?.navigateToUrl(CRAWLERS_PATH),
+        onClickBack: () =>
+          application?.navigateToApp(MANAGEMENT_APP_ID, {
+            path: `/data/content_connectors${CRAWLERS_PATH}`,
+          }),
       }}
       icon="web"
       title={i18n.translate('xpack.contentConnectors.elasticManagedWebCrawlerEmpty.title', {
