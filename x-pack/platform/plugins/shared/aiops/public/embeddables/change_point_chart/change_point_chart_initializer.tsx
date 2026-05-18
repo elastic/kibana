@@ -75,21 +75,6 @@ const getInitialFormControls = (
   };
 };
 
-const getFormControlsState = (
-  formInput?: FormControlsProps
-): Pick<
-  ChangePointChartEmbeddableState,
-  'aggregation_function' | 'metric_field' | 'split_field' | 'max_series_to_plot' | 'partitions'
-> => {
-  return {
-    aggregation_function: formInput?.fn ?? DEFAULT_AGG_FUNCTION,
-    metric_field: formInput?.metricField ?? '',
-    split_field: formInput?.splitField,
-    max_series_to_plot: formInput?.maxSeriesToPlot ?? CHANGE_POINT_CHART_DEFAULT_SERIES,
-    partitions: formInput?.partitions,
-  };
-};
-
 const getTitle = (formInput?: FormControlsProps) => {
   if (!isPopulatedObject(formInput)) return '';
 
@@ -145,12 +130,17 @@ export const ChangePointChartInitializer: FC<AnomalyChartsInitializerProps> = ({
 
   const [isFormValid, setIsFormValid] = useState(true);
 
-  const embeddableState = useMemo(() => {
+  const embeddableState = useMemo<ChangePointChartEmbeddableState | undefined>(() => {
+    if (!dataViewId || !formInput?.metricField) return undefined;
     return {
-      view_type: viewType,
       title: getTitle(formInput),
+      view_type: viewType,
       data_view_id: dataViewId,
-      ...getFormControlsState(formInput),
+      aggregation_function: formInput.fn,
+      metric_field: formInput.metricField,
+      max_series_to_plot: formInput.maxSeriesToPlot,
+      ...(formInput.splitField ? { split_field: formInput.splitField } : {}),
+      ...(formInput.partitions?.length ? { partitions: formInput.partitions } : {}),
     };
   }, [formInput, dataViewId, viewType]);
 
@@ -226,8 +216,8 @@ export const ChangePointChartInitializer: FC<AnomalyChartsInitializerProps> = ({
           <EuiFlexItem grow={false}>
             <EuiButton
               data-test-subj="aiopsChangePointChartsInitializerConfirmButton"
-              isDisabled={!isFormValid || !dataViewId || !formInput?.metricField}
-              onClick={onCreate.bind(null, embeddableState)}
+              isDisabled={!isFormValid || !embeddableState}
+              onClick={() => embeddableState && onCreate(embeddableState)}
               fill
             >
               <FormattedMessage
