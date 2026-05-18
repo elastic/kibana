@@ -60,6 +60,54 @@ interface EntityMaintainerEvent {
   errorMessage?: string;
 }
 
+interface EntityMaintainerRunSummaryFunnel {
+  scanned: number;
+  qualified: number;
+  proposed: number;
+  applied: number;
+  droppedNotInStore?: number;
+  skipped?: number;
+  failed: number;
+}
+
+interface EntityMaintainerRunSummarySource {
+  id: string;
+  scanned: number;
+  qualified: number;
+  outcome: 'index_missing' | 'empty' | 'partial' | 'producing' | 'error';
+}
+
+interface EntityMaintainerRunSummaryBreakdown {
+  name: string;
+  count: number;
+}
+
+interface EntityMaintainerRunSummaryStage {
+  name: string;
+  status: 'success' | 'error' | 'skipped';
+  durationMs: number;
+  skipReason?: string;
+  errorKind?: string;
+  applied?: number;
+}
+
+export interface EntityMaintainerRunSummaryEvent {
+  id: string;
+  namespace: string;
+  runId: string;
+  scope?: { kind: string; value: string };
+  durationMs: number;
+  iterations?: number;
+  truncated?: boolean;
+  aborted: boolean;
+  errorClass?: string;
+  errorMessage?: string;
+  funnel: EntityMaintainerRunSummaryFunnel;
+  sources?: EntityMaintainerRunSummarySource[];
+  breakdown?: EntityMaintainerRunSummaryBreakdown[];
+  stages?: EntityMaintainerRunSummaryStage[];
+}
+
 // ------------------------------------
 // Event definitions
 // ------------------------------------
@@ -175,6 +223,206 @@ export const ENTITY_MAINTAINER_EVENT = {
   },
 } as const satisfies EventTypeOpts<EntityMaintainerEvent>;
 
+export const ENTITY_MAINTAINER_RUN_SUMMARY_EVENT = {
+  eventType: 'entity_store_entity_maintainer_run_summary',
+  schema: {
+    id: {
+      type: 'keyword',
+      _meta: { description: 'Entity maintainer identifier' },
+    },
+    namespace: {
+      type: 'keyword',
+      _meta: { description: 'Kibana space the maintainer runs in (e.g. "default")' },
+    },
+    runId: {
+      type: 'keyword',
+      _meta: { description: 'UUID shared by all events from one scheduled run; joins to logs' },
+    },
+    scope: {
+      properties: {
+        kind: {
+          type: 'keyword',
+          _meta: { description: 'Scope discriminator kind (e.g. "entity_type")' },
+        },
+        value: {
+          type: 'keyword',
+          _meta: { description: 'Scope value (e.g. "host", "user", "service", "generic")' },
+        },
+      },
+      _meta: {
+        optional: true,
+        description: 'Sub-run discriminator; only risk-score uses this (one event per entity type)',
+      },
+    },
+    durationMs: {
+      type: 'long',
+      _meta: { description: 'Total run duration in milliseconds' },
+    },
+    iterations: {
+      type: 'long',
+      _meta: {
+        optional: true,
+        description: 'Number of outer-loop pagination passes consumed during the run',
+      },
+    },
+    truncated: {
+      type: 'boolean',
+      _meta: {
+        optional: true,
+        description: 'Run hit a hard-coded pagination or query ceiling and stopped voluntarily',
+      },
+    },
+    aborted: {
+      type: 'boolean',
+      _meta: { description: 'Run was cut short by an external abort signal' },
+    },
+    errorClass: {
+      type: 'keyword',
+      _meta: { optional: true, description: 'Sanitised error class name, set only on error' },
+    },
+    errorMessage: {
+      type: 'keyword',
+      _meta: {
+        optional: true,
+        description: 'Error message capped at 500 chars, set only on error',
+      },
+    },
+    funnel: {
+      properties: {
+        scanned: {
+          type: 'long',
+          _meta: { description: 'Entities or records scanned from source' },
+        },
+        qualified: {
+          type: 'long',
+          _meta: { description: 'Entities that passed business-logic qualification' },
+        },
+        proposed: {
+          type: 'long',
+          _meta: { description: 'Bulk-update objects built after cross-source merge' },
+        },
+        applied: {
+          type: 'long',
+          _meta: { description: 'Writes successfully applied to the entity store' },
+        },
+        droppedNotInStore: {
+          type: 'long',
+          _meta: {
+            optional: true,
+            description: '404 bulk errors — entity absent from store; omitted when not applicable',
+          },
+        },
+        skipped: {
+          type: 'long',
+          _meta: {
+            optional: true,
+            description:
+              'Entities intentionally skipped (ambiguous, deferred); omitted when not applicable',
+          },
+        },
+        failed: {
+          type: 'long',
+          _meta: { description: 'Non-404 write errors' },
+        },
+      },
+    },
+    sources: {
+      type: 'array',
+      items: {
+        properties: {
+          id: {
+            type: 'keyword',
+            _meta: { description: 'Integration or logical input id (e.g. "aws_cloudtrail")' },
+          },
+          scanned: {
+            type: 'long',
+            _meta: { description: 'Records scanned from this source' },
+          },
+          qualified: {
+            type: 'long',
+            _meta: { description: 'Records that qualified from this source' },
+          },
+          outcome: {
+            type: 'keyword',
+            _meta: {
+              description: 'Source outcome: index_missing | empty | partial | producing | error',
+            },
+          },
+        },
+      },
+      _meta: {
+        optional: true,
+        description:
+          'Per-source early funnel breakdown (scanned, qualified); empty means not applicable',
+      },
+    },
+    breakdown: {
+      type: 'array',
+      items: {
+        properties: {
+          name: {
+            type: 'keyword',
+            _meta: { description: 'Relationship kind or sub-category name' },
+          },
+          count: {
+            type: 'long',
+            _meta: { description: 'Applied writes for this breakdown entry' },
+          },
+        },
+      },
+      _meta: {
+        optional: true,
+        description: 'Per-relationship-kind split of applied; omitted when not applicable',
+      },
+    },
+    stages: {
+      type: 'array',
+      items: {
+        properties: {
+          name: {
+            type: 'keyword',
+            _meta: { description: 'Stage name (fixed enum per maintainer)' },
+          },
+          status: {
+            type: 'keyword',
+            _meta: { description: 'Stage outcome: success | error | skipped' },
+          },
+          durationMs: {
+            type: 'long',
+            _meta: { description: 'Stage duration in milliseconds' },
+          },
+          skipReason: {
+            type: 'keyword',
+            _meta: {
+              optional: true,
+              description: 'Fixed enum per maintainer when status is skipped',
+            },
+          },
+          errorKind: {
+            type: 'keyword',
+            _meta: {
+              optional: true,
+              description: 'Fixed enum per maintainer when status is error',
+            },
+          },
+          applied: {
+            type: 'long',
+            _meta: {
+              optional: true,
+              description: 'Stage-specific applied count rolling up into funnel.applied',
+            },
+          },
+        },
+      },
+      _meta: {
+        optional: true,
+        description:
+          'Per-stage execution detail for multi-stage maintainers; omitted when not applicable',
+      },
+    },
+  },
+} as const satisfies EventTypeOpts<EntityMaintainerRunSummaryEvent>;
+
 export const ENTITY_STORE_HEALTH_REPORT_EVENT = {
   eventType: 'entity_store_health_report',
   schema: {
@@ -250,6 +498,7 @@ const events = [
   ENTITY_STORE_USAGE_EVENT,
   ENTITY_STORE_HEALTH_REPORT_EVENT,
   ENTITY_MAINTAINER_EVENT,
+  ENTITY_MAINTAINER_RUN_SUMMARY_EVENT,
 ] as const;
 
 export const registerTelemetry = (analytics: AnalyticsServiceSetup) =>
@@ -266,6 +515,7 @@ interface TelemetryEventMap {
   [ENTITY_STORE_USAGE_EVENT.eventType]: StoreUsageEventPayload;
   [ENTITY_STORE_HEALTH_REPORT_EVENT.eventType]: EntityStoreHealthReportPayload;
   [ENTITY_MAINTAINER_EVENT.eventType]: EntityMaintainerEvent;
+  [ENTITY_MAINTAINER_RUN_SUMMARY_EVENT.eventType]: EntityMaintainerRunSummaryEvent;
 }
 
 export type TelemetryReporter = ReturnType<typeof createReportEvent>;
