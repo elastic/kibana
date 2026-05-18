@@ -1,0 +1,25 @@
+
++----------------------------------------------------------------------------------+
+| Inference Plugin: chatComplete(messages, metadata.sessionId)                     |
+|                                                                                  |
+|  1. Derive Salt: HMAC(serverSecret, sessionId)                                   |
+|  2. Init Call-Scoped TokenMap {}                                                 |
+|                                                                                  |
+|  3. invokeHook('inference.beforeCompletion', { messages })                       |
+|     +--> Workflow Engine [Inline Execution]                                      |
+|           +--> ai.pii step:                                                      |
+|                 - Detect PII (IP, EMAIL, HOST_NAME, etc.) via Regex              |
+|                 - Compute HMAC Token: generateToken(salt, entity, value)         |
+|                 - Store { token: original } in TokenMap                          |
+|                 - Replace PII with Token                                         |
+|                                                                                  |
+|  4. Connector.chatComplete(anonymizedMessages + [Anonymization context])         |
+|                                                                                  |
+|  5. invokeHook('inference.afterCompletion', { response })                        |
+|     +--> Workflow Engine [Inline Execution]                                      |
+|           +--> transform.pii_restore step:                                       |
+|                 - Scan response for Tokens                                       |
+|                 - Replace Tokens with original values from TokenMap              |
+|                                                                                  |
+|  6. Return de-anonymized response to caller                                      |
++----------------------------------------------------------------------------------+
