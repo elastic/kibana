@@ -23,6 +23,11 @@ FAILED_TESTS_KEY="${BUILDKITE_STEP_ID}${FTR_CONFIG_GROUP_KEY}_failed_tests"
 # a FTR failure will result in the script returning an exit code of 10
 exitCode=0
 
+# Per-config rows for the job annotation summary, plus a flag set when
+# the retry-only-failed logic marks an otherwise-red step green.
+annotation_rows=()
+retry_recovered=false
+
 configs="${FTR_CONFIG:-}"
 
 # The first retry should only run the configs that failed in the previous attempt
@@ -64,6 +69,7 @@ while read -r config; do
 
   if [[ "$IS_CONFIG_EXECUTION" == "true" && "$IS_FLAKY_TEST_RUN" == "false" ]]; then
     echo "--- [ already-tested ] $FULL_COMMAND"
+    annotation_rows+=("| \`${config}\` | — | skipped (already-tested) |")
     continue
   else
     echo "--- $ $FULL_COMMAND"
@@ -126,6 +132,7 @@ while read -r config; do
   if [ $lastCode -eq 0 ]; then
     # Test was successful, so mark it as executed
     buildkite-agent meta-data set "$CONFIG_EXECUTION_KEY" "true"
+    annotation_rows+=("| \`${config}\` | ${duration} | passed |")
   else
     exitCode=10
     echo "FTR exited with code $lastCode"
@@ -136,6 +143,7 @@ while read -r config; do
     else
       failedConfigs="$config"
     fi
+    annotation_rows+=("| \`${config}\` | ${duration} | **failed** |")
   fi
 done <<< "$configs"
 
@@ -179,6 +187,7 @@ if [[ -z "${KIBANA_FLAKY_TEST_RUNNER_CONFIG:-}" && \
       echo "--- [retry-only-failed] All previously-failing tests recovered on retry — marking step green"
       exitCode=0
       failedConfigs=""
+      retry_recovered=true
       buildkite-agent meta-data set "$FAILED_CONFIGS_KEY" "" 2>/dev/null || true
     fi
   fi
@@ -188,5 +197,41 @@ fi
 echo "--- FTR configs complete"
 printf "%s\n" "${results[@]}"
 echo ""
+
+write_job_annotation() {
+  local style attempt_num
+  attempt_num=$((${BUILDKITE_RETRY_COUNT:-0} + 1))
+
+  if [[ "$exitCode" == "0" ]]; then
+    style="success"
+  else
+    style="error"
+  fi
+
+  {
+    echo "### FTR Configs — \`${JOB}\` (attempt ${attempt_num})"
+    echo ""
+    if [[ "$retry_recovered" == "true" ]]; then
+      echo "**Recovered on retry** — all previously-failing tests passed; step marked green."
+      echo ""
+    elif [[ -n "$failedConfigs" ]]; then
+      echo "**Failed configs:**"
+      while IFS= read -r f; do
+        [[ -n "$f" ]] && echo "- \`$f\`"
+      done <<< "$failedConfigs"
+      echo ""
+    fi
+    if [[ ${#annotation_rows[@]} -gt 0 ]]; then
+      echo "| Config | Duration | Status |"
+      echo "| --- | --- | --- |"
+      printf "%s\n" "${annotation_rows[@]}"
+    fi
+  } | buildkite-agent annotate \
+        --scope job \
+        --context "ftr-summary" \
+        --style "${style}" || true
+}
+
+write_job_annotation
 
 exit $exitCode
