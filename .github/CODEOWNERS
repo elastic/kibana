@@ -1019,6 +1019,7 @@ x-pack/platform/packages/shared/kbn-content-packs-schema @elastic/obs-onboarding
 x-pack/platform/packages/shared/kbn-data-forge @elastic/actionable-obs-team
 x-pack/platform/packages/shared/kbn-data-lifecycle-phases @elastic/kibana-management
 x-pack/platform/packages/shared/kbn-dissect-heuristics @elastic/obs-onboarding-team
+x-pack/platform/packages/shared/kbn-elastic-agent-condition-language @elastic/fleet
 x-pack/platform/packages/shared/kbn-elastic-assistant @elastic/security-threat-hunting
 x-pack/platform/packages/shared/kbn-elastic-assistant-common @elastic/security-threat-hunting
 x-pack/platform/packages/shared/kbn-elastic-assistant-shared-state @elastic/security-threat-hunting
