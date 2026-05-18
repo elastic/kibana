@@ -154,11 +154,3 @@ export function isAsCodeFilter(filter: AsCodeFilter): boolean {
   const count = [hasCondition, hasGroup, hasDSL, hasSpatial].filter(Boolean).length;
   return count === 1;
 }
-
-/**
- * Narrow a stored range bound to a usable value.
- * Stored filters can carry `null` or `undefined` for any of `gte`/`lte`/`gt`/`lt`.
- */
-export function isValidRangeBoundValue(value: unknown): value is number | string {
-  return typeof value === 'number' || typeof value === 'string';
-}
