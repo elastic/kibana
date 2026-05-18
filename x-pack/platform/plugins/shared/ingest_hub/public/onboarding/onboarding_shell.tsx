@@ -37,11 +37,40 @@ const STEP_COMPONENTS: Record<string, React.ComponentType> = {
   'see-data': SeeDataStep,
 };
 
+interface OnboardingLocationState {
+  title?: string;
+  description?: string;
+}
+
 function formatIntegrationTitle(integrationId: string): string {
   return integrationId
     .split('-')
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ');
+}
+
+function useIntegrationMeta(integrationId: string) {
+  const location = useLocation<OnboardingLocationState | undefined>();
+  const storageKey = `onboarding.${integrationId}.meta`;
+
+  const navState = location.state;
+
+  if (navState?.title) {
+    sessionStorage.setItem(storageKey, JSON.stringify(navState));
+  }
+
+  const stored = sessionStorage.getItem(storageKey);
+  const meta: OnboardingLocationState = navState?.title
+    ? navState
+    : stored
+    ? JSON.parse(stored)
+    : {};
+
+  return {
+    title: meta.title || formatIntegrationTitle(integrationId),
+    description:
+      meta.description || `Collect logs and metrics from ${formatIntegrationTitle(integrationId)}.`,
+  };
 }
 
 export function OnboardingShell() {
@@ -50,6 +79,7 @@ export function OnboardingShell() {
   const location = useLocation();
   const { euiTheme } = useEuiTheme();
   const { completedSteps, firstIncompleteStepId } = useStepState(integrationId);
+  const { title, description } = useIntegrationMeta(integrationId);
 
   const currentStepId = location.hash ? location.hash.slice(1) : '';
   const isValidStep = ONBOARDING_STEPS.some((s) => s.id === currentStepId);
@@ -110,11 +140,11 @@ export function OnboardingShell() {
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiTitle size="l">
-              <h1>{formatIntegrationTitle(integrationId)}</h1>
+              <h1>{title}</h1>
             </EuiTitle>
             <EuiSpacer size="xs" />
             <EuiText size="m" color="subdued">
-              <p>Collect logs and metrics from {formatIntegrationTitle(integrationId)}.</p>
+              <p>{description}</p>
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>

@@ -22,7 +22,13 @@ export function useOnboardingOverride() {
   const isOnboardingEnabled = featureFlags.getBooleanValue(ONBOARDING_ENABLED_FLAG, false);
 
   const navigateToOnboarding = useCallback(() => {
-    application.navigateToApp('onboarding', { path: '/aws' });
+    application.navigateToApp('onboarding', {
+      path: '/aws',
+      state: {
+        title: 'Amazon Web Services',
+        description: 'Collect logs and metrics from AWS services.',
+      },
+    });
   }, [application]);
 
   const applyOnboardingOverride = useMemo(() => {
