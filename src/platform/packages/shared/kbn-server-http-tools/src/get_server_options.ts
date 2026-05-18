@@ -25,6 +25,7 @@ export function getServerOptions(config: IHttpConfig, { configureTLS = true } = 
         headers: corsAllowedHeaders,
       }
     : false;
+  const maxPayload = config.maxPayload.getValueInBytes();
 
   const options: ServerOptions = {
     host: config.host,
@@ -39,9 +40,13 @@ export function getServerOptions(config: IHttpConfig, { configureTLS = true } = 
         privacy: 'private',
         otherwise: 'private, no-cache, no-store, must-revalidate',
       },
+      compression: {
+        deflate: { maxOutputLength: maxPayload },
+        gzip: { maxOutputLength: maxPayload },
+      },
       cors,
       payload: {
-        maxBytes: config.maxPayload.getValueInBytes(),
+        maxBytes: maxPayload,
         timeout: config.payloadTimeout,
       },
       validate: {
