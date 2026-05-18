@@ -1,5 +1,5 @@
 {
-  "sha1": "c81a2e4638730004aa9843f805fe9449c227ef7c",
+  "sha1": "a8a93fdf70e03322b3b10a7d1454afe05b90c22b",
   "tests": [
     {
       "id": "405beff6794306f-a54347ac1e57e7e",
@@ -11,7 +11,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/has_no_setup.spec.ts",
-        "line": 29,
+        "line": 44,
         "column": 12
       }
     },
@@ -25,7 +25,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/has_no_setup.spec.ts",
-        "line": 43,
+        "line": 58,
         "column": 12
       }
     },
@@ -39,7 +39,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/has_setup_apm_not_installed.spec.ts",
-        "line": 53,
+        "line": 59,
         "column": 12
       }
     },
@@ -53,7 +53,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/has_setup_apm_not_installed.spec.ts",
-        "line": 68,
+        "line": 74,
         "column": 12
       }
     },
@@ -67,7 +67,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/has_setup_with_data.spec.ts",
-        "line": 34,
+        "line": 42,
         "column": 10
       }
     },
@@ -81,7 +81,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/has_setup_with_data.spec.ts",
-        "line": 48,
+        "line": 56,
         "column": 10
       }
     },

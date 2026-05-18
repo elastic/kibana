@@ -1,31 +1,31 @@
 {
-  "sha1": "bfecfae5a0ce43a690273a5002fa48eacb7de9bd",
+  "sha1": "73758a0cb6495d1ff4853ff30309f1b4ea147cc3",
   "tests": [
     {
       "id": "08ad6c943106b9a-e97f149531b91cd",
       "title": "Observability Landing Page (discover.isEsqlDefault enabled) redirects to Discover with an ES|QL query when logs data exists",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/esql_landing.spec.ts",
-        "line": 57,
+        "line": 58,
         "column": 9
       }
     },
     {
       "id": "08ad6c943106b9a-a8f4d61d87c1d79",
       "title": "Observability Landing Page (discover.isEsqlDefault enabled) redirects to onboarding when no logs data exists",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/observability/test/scout/ui/tests/esql_landing.spec.ts",
-        "line": 76,
+        "line": 77,
         "column": 9
       }
     }
