@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormProvider, useForm, useWatch } from 'react-hook-form';
 import {
   EuiBadge,
@@ -44,6 +44,7 @@ import { useEsqlAutocomplete } from './use_esql_providers';
 import { useSplitQueryCompletion } from './use_split_query_completion';
 import { useSandboxDraft, draftToRuleQuery } from './use_sandbox_draft';
 import { splitQuery, guessRecoveryBlock } from './use_heuristic_split';
+import { useDebounceFn } from '@kbn/react-hooks';
 
 const LazyYamlRuleForm = React.lazy(() =>
   import('../../form/yaml_rule_form').then((m) => ({ default: m.YamlRuleForm }))
@@ -87,6 +88,7 @@ export interface ComposeDiscoverFlyoutProps {
 }
 
 const FLYOUT_TITLE_ID = 'composeDiscoverFlyoutTitle';
+const YAML_PARSE_DEBOUNCE_OPTIONS = { wait: 300 } as const;
 
 const getStepStatus = (currentStep: number, stepIndex: number): MinimalStep['status'] => {
   if (stepIndex < currentStep) return 'complete';
@@ -273,24 +275,26 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
 
   // ── YAML mode state ──────────────────────────────────────────────────────
   const [yamlText, setYamlText] = useState('');
-  const debouncedParseRef = useRef<ReturnType<typeof setTimeout>>();
 
-  // Wraps setYamlText with a debounced (~300 ms) lenient parse that pushes
-  // every YAML keystroke into RHF. The Sandbox watches RHF, so it sees
-  // YAML edits live. Passed to YamlRuleForm as the setYamlText prop.
+  // Debounced (~300 ms) lenient parse that pushes every YAML keystroke into RHF.
+  // The Sandbox watches RHF via props, so it sees YAML edits live.
+  const { run: runYamlParse, cancel: cancelYamlParse } = useDebounceFn(
+    (yaml: string) => {
+      const result = parseYamlToFormValues(yaml);
+      if (result.values) {
+        methods.reset(formValuesFromYamlToCompose(result.values));
+        resetFromRhf();
+      }
+    },
+    YAML_PARSE_DEBOUNCE_OPTIONS
+  );
+
   const handleSetYamlText = useCallback(
     (yaml: string) => {
       setYamlText(yaml);
-      clearTimeout(debouncedParseRef.current);
-      debouncedParseRef.current = setTimeout(() => {
-        const result = parseYamlToFormValues(yaml);
-        if (result.values) {
-          methods.reset(formValuesFromYamlToCompose(result.values));
-          resetFromRhf();
-        }
-      }, 300);
+      runYamlParse(yaml);
     },
-    [methods, resetFromRhf]
+    [runYamlParse]
   );
 
   const handleToggleYamlMode = useCallback(
@@ -298,7 +302,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
       if (enabled) {
         setYamlText(serializeFormToYaml(composeFormValuesForYamlSerialize(methods.getValues())));
       } else {
-        clearTimeout(debouncedParseRef.current);
+        cancelYamlParse();
         const result = parseYamlToFormValues(yamlText);
         if (result.values) {
           const compose = formValuesFromYamlToCompose(result.values);
@@ -309,7 +313,7 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
       }
       dispatch({ type: 'SET_YAML_MODE', enabled });
     },
-    [methods, yamlText, resetFromRhf, dispatch]
+    [cancelYamlParse, methods, yamlText, resetFromRhf, dispatch]
   );
 
   const handleSandboxApply = useCallback(() => {
@@ -342,13 +346,13 @@ export const ComposeDiscoverFlyout: React.FC<ComposeDiscoverFlyoutProps> = ({
   // YAML "Save" — flush any pending debounce into RHF, then run the shared
   // handleSubmit path so validation + submission use a single pipeline.
   const handleYamlSave = useCallback(() => {
-    clearTimeout(debouncedParseRef.current);
+    cancelYamlParse();
     const result = parseYamlToFormValues(yamlText);
     if (result.values) {
       methods.reset(formValuesFromYamlToCompose(result.values));
     }
     handleSubmit();
-  }, [yamlText, methods, handleSubmit]);
+  }, [cancelYamlParse, yamlText, methods, handleSubmit]);
 
   const handleNext = useCallback(async () => {
     if (currentStep?.validate) {
