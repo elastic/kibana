@@ -22,6 +22,7 @@ import { breadcrumbService, docTitleService } from '../../services/navigation';
 import { useCanSetDefaultRepository } from '../../services/authorization';
 import { addRepository, useLoadRepositories } from '../../services/http';
 import { useDefaultRepository } from '../../services/use_default_repository';
+import { isRepositoryReadOnly } from '../../../../common/lib';
 
 export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({
   history,
@@ -86,11 +87,12 @@ export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({
     if (error) {
       setSaveError(error);
     } else {
+      const isReadOnly = isRepositoryReadOnly(newRepository);
       const shouldSetDefault =
         canSetOrChangeDefaultRepository &&
         (isDefaultRepository ||
-          isFirstRepository ||
-          (isDefaultRepositoryKnown && normalizedDefaultRepository === null));
+          (!isReadOnly && isFirstRepository) ||
+          (!isReadOnly && isDefaultRepositoryKnown && normalizedDefaultRepository === null));
 
       if (shouldSetDefault) {
         const defaultResponse = await setDefaultRepositoryRequest(name);
@@ -120,11 +122,12 @@ export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({
 
   const onSave = async (newRepository: Repository | EmptyRepository) => {
     const name = newRepository.name;
+    const isReadOnly = isRepositoryReadOnly(newRepository);
     const shouldSetDefault =
       canSetOrChangeDefaultRepository &&
       (isDefaultRepository ||
-        isFirstRepository ||
-        (isDefaultRepositoryKnown && normalizedDefaultRepository === null));
+        (!isReadOnly && isFirstRepository) ||
+        (!isReadOnly && isDefaultRepositoryKnown && normalizedDefaultRepository === null));
     const isChangingDefault =
       shouldSetDefault &&
       isDefaultRepositoryKnown &&
@@ -220,7 +223,7 @@ export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({
         onSave={onSave}
         onCancel={onCancel}
         isFirstRepository={isFirstRepository}
-        isDefaultRepository={isFirstRepository ? true : isDefaultRepository}
+        isDefaultRepository={isDefaultRepository}
         onToggleDefault={canSetOrChangeDefaultRepository ? setIsDefaultRepository : undefined}
       />
     </EuiPageSection>

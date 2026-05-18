@@ -23,6 +23,7 @@ import {
 
 import type { Repository } from '../../../../common/types';
 import { REPOSITORY_TYPES } from '../../../../common/constants';
+import { isRepositoryReadOnly } from '../../../../common/lib';
 import type { RepositoryValidation } from '../../services/validation';
 import { TypeSettings } from './type_settings';
 import { textService } from '../../services/text';
@@ -64,6 +65,11 @@ export const RepositoryFormStepTwo: React.FunctionComponent<Props> = ({
 }) => {
   const { docLinks } = useCore();
   const hasValidationErrors: boolean = !validation.isValid;
+  const isReadOnly = isRepositoryReadOnly(repository);
+  const isFirstRegister = Boolean(isFirstRepository && !isEditing && !isReadOnly);
+  const isDefaultRepositorySelected = Boolean(
+    isFirstRegister || isAlreadyDefaultRepository || isDefaultRepository
+  );
   const {
     name,
     type,
@@ -116,6 +122,15 @@ export const RepositoryFormStepTwo: React.FunctionComponent<Props> = ({
         settingErrors={
           hasValidationErrors && validation.errors.settings ? validation.errors.settings : {}
         }
+        isReadOnlyToggleDisabled={isDefaultRepositorySelected}
+        readOnlyToggleDisabledTooltipContent={
+          isDefaultRepositorySelected ? (
+            <FormattedMessage
+              id="xpack.snapshotRestore.repositoryForm.readonlyDisabledForDefaultTooltip"
+              defaultMessage="The default repository cannot be read-only."
+            />
+          ) : undefined
+        }
       />
     </Fragment>
   );
@@ -125,8 +140,7 @@ export const RepositoryFormStepTwo: React.FunctionComponent<Props> = ({
       return null;
     }
 
-    const isFirstRegister = Boolean(isFirstRepository && !isEditing);
-    const isDisabled = Boolean(isFirstRegister || isAlreadyDefaultRepository);
+    const isDisabled = Boolean(isFirstRegister || isAlreadyDefaultRepository || isReadOnly);
 
     const tooltipContent = isFirstRegister ? (
       <FormattedMessage
@@ -137,6 +151,11 @@ export const RepositoryFormStepTwo: React.FunctionComponent<Props> = ({
       <FormattedMessage
         id="xpack.snapshotRestore.repositoryForm.fields.defaultRepositoryDisabledTooltip"
         defaultMessage="This is currently the default repository. To unassign it, you must set another repository as the default."
+      />
+    ) : isReadOnly ? (
+      <FormattedMessage
+        id="xpack.snapshotRestore.repositoryForm.fields.defaultRepositoryReadOnlyDisabledTooltip"
+        defaultMessage="Read-only repositories cannot be set as the default."
       />
     ) : undefined;
 

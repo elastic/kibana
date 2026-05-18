@@ -135,6 +135,32 @@ describe('<RepositoryTable /> default repository actions', () => {
     expect(await screen.findByTestId('deleteRepositoryButton-repo2')).toBeInTheDocument();
   });
 
+  it('disables "Set as default" action for read-only repositories', async () => {
+    renderTable({
+      repositories: [
+        { name: 'repo1', type: 'fs', settings: { location: '/tmp', readonly: true } } as any,
+      ],
+      defaultRepository: null,
+    });
+
+    fireEvent.click(screen.getByTestId('repositoryActionsMenuButton-repo1'));
+
+    expect(await screen.findByTestId('setDefaultRepositoryButton-repo1')).toBeDisabled();
+  });
+
+  it('disables "Set as default" action for Read-only URL repositories', async () => {
+    renderTable({
+      repositories: [
+        { name: 'repo1', type: 'url', settings: { url: 'http://example.com' } } as any,
+      ],
+      defaultRepository: null,
+    });
+
+    fireEvent.click(screen.getByTestId('repositoryActionsMenuButton-repo1'));
+
+    expect(await screen.findByTestId('setDefaultRepositoryButton-repo1')).toBeDisabled();
+  });
+
   it('confirms before changing the default repository from the table', async () => {
     const { onSetDefaultRepository } = renderTable({
       repositories: [{ name: 'repo2', type: 'fs', settings: { location: '/tmp' } } as any],

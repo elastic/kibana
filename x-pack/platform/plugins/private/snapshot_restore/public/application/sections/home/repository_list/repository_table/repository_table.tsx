@@ -24,6 +24,7 @@ import {
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { REPOSITORY_TYPES } from '../../../../../../common';
+import { isRepositoryReadOnly } from '../../../../../../common/lib';
 import type { Repository, RepositoryType } from '../../../../../../common/types';
 import type { UseRequestResponse } from '../../../../../shared_imports';
 import { ConfirmDefaultRepositoryModal, RepositoryDeleteProvider } from '../../../../components';
@@ -190,9 +191,11 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
           },
         },
         {
-          render: ({ name }: Repository) => {
+          render: (repository: Repository) => {
+            const { name } = repository;
             const isDefault = defaultRepository != null && name === defaultRepository;
             const isManaged = name === managedRepository;
+            const isReadOnly = isRepositoryReadOnly(repository);
 
             const actionsButton = (
               <EuiButtonIcon
@@ -219,17 +222,25 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
                     <EuiContextMenuItem
                       key="setDefault"
                       icon="flag"
-                      disabled={isDefault}
+                      disabled={isDefault || isReadOnly}
                       toolTipContent={
                         isDefault
                           ? i18n.translate(
                               'xpack.snapshotRestore.repositoryList.table.actionSetDefaultAlreadyDefaultTooltip',
                               { defaultMessage: 'This repository is already the default.' }
                             )
+                          : isReadOnly
+                          ? i18n.translate(
+                              'xpack.snapshotRestore.repositoryList.table.actionSetDefaultReadOnlyTooltip',
+                              {
+                                defaultMessage:
+                                  'Read-only repositories cannot be set as the default.',
+                              }
+                            )
                           : undefined
                       }
                       onClick={
-                        !isDefault
+                        !isDefault && !isReadOnly
                           ? () => {
                               closeActionsMenu();
                               if (defaultRepository) {
