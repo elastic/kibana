@@ -1,8 +1,8 @@
 ---
-navigation_title: "Adding Api Capacity Testing Journey"
+navigation_title: "API Capacity Testing Journeys"
 ---
 
-# Adding Api Capacity Testing Journey
+# Adding API Capacity Journeys
 
 ## Overview
 

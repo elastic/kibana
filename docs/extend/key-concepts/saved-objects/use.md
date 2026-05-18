@@ -106,7 +106,7 @@ To avoid exposing data unintentionally:
 ### Operations
 
 * **Create:** `create(type, attributes, options?)`, `bulkCreate(objects, options?)`, `checkConflicts(objects, options?)`
-* **Read:** `get(type, id, options?)`, `bulkGet(objects, options?)`, `resolve(type, id, options?)`, `bulkResolve(objects, options?)`
+* **Read:** `get(type, id, options?)`, `bulkGet(objects, options?)`, `resolve(type, id, options?)`, `bulkResolve(objects, options?)`, [`esql`](./esql.md)
 * **Search / list:** `find(options)`, `search(options)` (raw {{es}}-style search; use with care), `createPointInTimeFinder(findOptions, deps?)` for large result sets
 * **Update:** `update(type, id, attributes, options?)`, `bulkUpdate(objects, options?)`
 * **Delete:** `delete(type, id, options?)`, `bulkDelete(objects, options?)`

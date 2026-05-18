@@ -1,5 +1,5 @@
 ---
-navigation_title: "Saved Object `esql` method"
+navigation_title: "ES|QL"
 description: "Learn how to use the `esql` method to query Saved Objects using ES|QL."
 ---
 

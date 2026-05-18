@@ -76,6 +76,7 @@ toc:
           - file: saved-objects/validate.md
           - file: saved-objects/delete.md
           - file: saved-objects/use.md
+          - file: saved-objects/esql.md
           - file: saved-objects/export.md
           - file: saved-objects/share.md
           - file: saved-objects/migrations.md
@@ -178,6 +179,11 @@ toc:
               - file: write-api-tests.md
               - file: api-best-practices.md
               - file: api-auth.md
+      - file: performance-journeys.md
+        children:
+          - file: write-single-user-performance-journey.md
+          - file: write-api-capacity-testing-journey.md
+          - file: running-performance-journey-in-cloud.md
       - file: ftr.md
   - file: plugin-list.md
   - file: dependencies-versions.md
