@@ -21,7 +21,9 @@ test.describe('Ingest pipelines Manage Processors', { tag: tags.stateful.classic
       try {
         await esClient.ingest.deleteGeoipDatabase({ id: databaseId });
       } catch (error) {
-        log.debug(`GeoIP database pre-cleanup skipped for ${databaseId}: ${(error as Error).message}`);
+        log.debug(
+          `GeoIP database pre-cleanup skipped for ${databaseId}: ${(error as Error).message}`
+        );
       }
     }
   });
