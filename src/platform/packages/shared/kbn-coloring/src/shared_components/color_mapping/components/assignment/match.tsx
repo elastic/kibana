@@ -170,7 +170,7 @@ function getOptionForRawValueFn(fieldFormat?: IFieldFormat) {
     return {
       key,
       value: typeof rawValue === 'number' ? key : undefined,
-      label: typeof formatted === 'string' ? formatted : String(rawValue),
+      label: formatted,
     } satisfies EuiComboBoxOptionOption<string>;
   };
 }
