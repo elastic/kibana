@@ -692,6 +692,64 @@ steps:
       );
     });
 
+    it('allows inline ephemeral executions to opt into test-run semantics', async () => {
+      await runWithTimers(
+        api.executeWorkflow({
+          workflowId: 'inline-test-workflow',
+          definition: workflowDefinition,
+          yaml: 'name: Test Workflow',
+          inputs: {},
+          spaceId: 'default',
+          request: mockRequest,
+          waitForCompletion: false,
+          isTestRun: true,
+        })
+      );
+
+      expect(mockWorkflowsExecutionEngine.executeWorkflow).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'inline-test-workflow',
+          isEphemeral: true,
+          isTestRun: true,
+        }),
+        expect.any(Object),
+        mockRequest
+      );
+    });
+
+    it('polls until the execution reaches a final status when waiting for completion', async () => {
+      mockWorkflowsService.getWorkflow.mockResolvedValue({
+        id: 'workflow-123',
+        name: 'Test Workflow',
+        enabled: true,
+        valid: true,
+        yaml: 'name: Test Workflow',
+        definition: workflowDefinition,
+      } as any);
+      mockWorkflowsService.getWorkflowExecution
+        .mockResolvedValueOnce({
+          ...workflowExecution,
+          status: 'running',
+        } as any)
+        .mockResolvedValueOnce(workflowExecution as any);
+
+      const result = await runWithTimers(
+        api.executeWorkflow({
+          workflowId: 'workflow-123',
+          inputs: {},
+          spaceId: 'default',
+          request: mockRequest,
+          waitForCompletion: true,
+        })
+      );
+
+      expect(mockWorkflowsService.getWorkflowExecution).toHaveBeenCalledTimes(2);
+      expect(result).toEqual({
+        workflowExecutionId: 'test-exec-id',
+        execution: workflowExecution,
+      });
+    });
+
     it('reports timeout when the execution document is not visible before the deadline', async () => {
       mockWorkflowsService.getWorkflow.mockResolvedValue({
         id: 'workflow-123',
