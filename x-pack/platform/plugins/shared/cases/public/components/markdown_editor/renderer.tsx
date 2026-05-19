@@ -10,7 +10,7 @@ import { cloneDeep } from 'lodash/fp';
 import type { EuiMarkdownFormatProps, EuiLinkAnchorProps } from '@elastic/eui';
 import { EuiMarkdownFormat } from '@elastic/eui';
 import { MarkdownLink } from './markdown_link';
-import { escapeUnterminatedEntities } from './sanitize_markdown';
+import { MarkdownErrorBoundary } from './markdown_error_boundary';
 import { usePlugins } from './use_plugins';
 
 interface Props {
@@ -40,14 +40,16 @@ const MarkdownRendererComponent: React.FC<Props> = ({ children, disableLinks, te
   );
 
   return (
-    <EuiMarkdownFormat
-      parsingPluginList={parsingPlugins}
-      processingPluginList={processingPluginList}
-      grow={true}
-      textSize={textSize}
-    >
-      {escapeUnterminatedEntities(children)}
-    </EuiMarkdownFormat>
+    <MarkdownErrorBoundary source={children}>
+      <EuiMarkdownFormat
+        parsingPluginList={parsingPlugins}
+        processingPluginList={processingPluginList}
+        grow={true}
+        textSize={textSize}
+      >
+        {children}
+      </EuiMarkdownFormat>
+    </MarkdownErrorBoundary>
   );
 };
 MarkdownRendererComponent.displayName = 'MarkdownRenderer';
