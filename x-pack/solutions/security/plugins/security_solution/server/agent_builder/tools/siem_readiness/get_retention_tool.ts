@@ -44,25 +44,25 @@ export const getRetentionTool = (
         fetchCategories({ esClient: esClient.asCurrentUser, logger: handlerLogger }),
       ]);
 
-      // Retention items carry data stream names; category indices carry backing index names.
-      // A data stream name is a substring of its backing index names, so use contains-match.
-      const getCategoryForItem = (indexName: string): MainCategories | undefined => {
-        for (const group of categoriesResult.mainCategoriesMap ?? []) {
-          if (group.indices.some((idx) => idx.indexName.includes(indexName))) {
-            return group.category as MainCategories;
-          }
-        }
-        return undefined;
-      };
-
       // Shared predicate — same function used by the UI retention tab
       const categorizedItems = filterRetentionItemsByCategories(payload.items, categoriesResult);
 
+      // Build the category lookup once from the already-filtered items so findings enrichment
+      // stays in sync with the filter predicate — no separate closure needed.
+      const resourceToCategoryMap = new Map<string, MainCategories>();
+      for (const group of categoriesResult.mainCategoriesMap ?? []) {
+        for (const item of categorizedItems) {
+          if (group.indices.some((idx) => idx.indexName.includes(item.indexName))) {
+            resourceToCategoryMap.set(item.indexName, group.category as MainCategories);
+          }
+        }
+      }
+
       const enrichedFindings = (payload.actionableFindings ?? [])
-        .filter((finding) => getCategoryForItem(finding.resource) !== undefined)
+        .filter((finding) => resourceToCategoryMap.has(finding.resource))
         .map((finding) => {
-          const category = getCategoryForItem(finding.resource);
-          return category ? { ...finding, category } : finding;
+          const category = resourceToCategoryMap.get(finding.resource);
+          return category !== undefined ? { ...finding, category } : finding;
         });
 
       const nonCompliantCount = categorizedItems.filter((item) =>

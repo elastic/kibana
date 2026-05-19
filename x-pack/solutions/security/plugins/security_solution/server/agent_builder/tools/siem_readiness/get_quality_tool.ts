@@ -11,7 +11,7 @@ import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import type { Logger } from '@kbn/logging';
 import type { MainCategories } from '@kbn/siem-readiness';
-import { getIndexCategoryMap } from '@kbn/siem-readiness';
+import { getIndexCategoryMap, isQualityIncompatible } from '@kbn/siem-readiness';
 import { getAgentBuilderResourceAvailability } from '../../utils/get_agent_builder_resource_availability';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
 import { getQuality } from '../../../lib/siem_readiness/dimensions';
@@ -49,17 +49,41 @@ export const getQualityTool = (
         indexToCategoryMap.has(result.indexName)
       );
 
-      const enrichedFindings = (payload.actionableFindings ?? []).map((finding) => {
-        const category = indexToCategoryMap.get(finding.resource) as MainCategories | undefined;
-        return category ? { ...finding, category } : finding;
-      });
+      const enrichedFindings = (payload.actionableFindings ?? [])
+        .filter((finding) => indexToCategoryMap.has(finding.resource))
+        .map((finding) => {
+          const category = indexToCategoryMap.get(finding.resource) as MainCategories | undefined;
+          return category ? { ...finding, category } : finding;
+        });
+
+      const incompatibleCount = categorizedItems.filter((item) =>
+        isQualityIncompatible(item.incompatibleFieldCount)
+      ).length;
+      const filteredStatus =
+        categorizedItems.length === 0
+          ? ('noData' as const)
+          : incompatibleCount > 0
+          ? ('actionsRequired' as const)
+          : ('healthy' as const);
+      const filteredSummary =
+        filteredStatus === 'noData'
+          ? 'No quality check results available for categorized indices.'
+          : incompatibleCount > 0
+          ? `${incompatibleCount} of ${categorizedItems.length} indices have incompatible ECS field mappings.`
+          : `All ${categorizedItems.length} checked indices have compatible ECS field mappings.`;
 
       return {
         results: [
           {
             tool_result_id: getToolResultId(),
             type: ToolResultType.other,
-            data: { ...payload, items: categorizedItems, actionableFindings: enrichedFindings },
+            data: {
+              ...payload,
+              status: filteredStatus,
+              summary: filteredSummary,
+              items: categorizedItems,
+              actionableFindings: enrichedFindings,
+            },
           },
         ],
       };

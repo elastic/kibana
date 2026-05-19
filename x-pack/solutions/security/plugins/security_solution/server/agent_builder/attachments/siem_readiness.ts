@@ -25,7 +25,7 @@ export const SIEM_READINESS_ATTACHMENT_ID = 'security.siem_readiness';
 // ---- Shared sub-schemas ----
 
 const actionableFindingSchema = z.object({
-  category: z.string(),
+  category: z.string().optional(),
   severity: z.enum(['critical', 'warning']),
   message: z.string(),
   resource: z.string(),

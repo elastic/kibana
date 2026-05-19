@@ -8,6 +8,7 @@
 import { ToolResultType, type OtherResult } from '@kbn/agent-builder-common';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
 import type { QualityPayload, CategoriesResponse } from '@kbn/siem-readiness';
+import { getIndexCategoryMap } from '@kbn/siem-readiness';
 import {
   createToolTestMocks,
   createToolHandlerContext,
@@ -147,7 +148,7 @@ describe('getQualityTool', () => {
       expect(data.actionableFindings![0].category).toBe('Cloud');
     });
 
-    it('leaves category undefined when the finding resource is not in any category', async () => {
+    it('filters out findings whose resource is not in any category', async () => {
       mockGetQuality.mockResolvedValueOnce(
         makePayload({
           items: [],
@@ -163,7 +164,113 @@ describe('getQualityTool', () => {
       )) as ToolHandlerStandardReturn;
 
       const data = (result.results[0] as OtherResult<QualityPayload>).data;
-      expect(data.actionableFindings![0].category).toBeUndefined();
+      expect(data.actionableFindings).toHaveLength(0);
+    });
+  });
+
+  describe('handler — summary recomputation after filtering', () => {
+    it('recomputes status and summary from filtered items, not the pre-filter payload', async () => {
+      // Orchestrator sees 5 items (3 incompatible), only 2 categorized (1 incompatible).
+      mockGetQuality.mockResolvedValueOnce(
+        makePayload({
+          status: 'actionsRequired',
+          summary: '3 of 5 indices have incompatible ECS field mappings.',
+          items: [
+            makeQualityResult(IDENTITY_INDEX, 2),
+            makeQualityResult(CLOUD_INDEX, 0),
+            makeQualityResult('logs-uncategorized-1', 3),
+            makeQualityResult('logs-uncategorized-2', 1),
+            makeQualityResult('logs-uncategorized-3', 0),
+          ],
+          actionableFindings: [
+            { severity: 'warning', message: '2 incompatible fields', resource: IDENTITY_INDEX },
+            { severity: 'warning', message: '3 incompatible', resource: 'logs-uncategorized-1' },
+          ],
+        })
+      );
+
+      const result = (await tool.handler(
+        {},
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+      )) as ToolHandlerStandardReturn;
+
+      const data = (result.results[0] as OtherResult<QualityPayload>).data;
+      expect(data.items).toHaveLength(2);
+      expect(data.status).toBe('actionsRequired');
+      // Summary must reference 1 of 2, not 3 of 5
+      expect(data.summary).toContain('1');
+      expect(data.summary).toContain('2');
+      expect(data.summary).not.toContain('5');
+      // Only the categorized finding survives
+      expect(data.actionableFindings).toHaveLength(1);
+      expect(data.actionableFindings![0].resource).toBe(IDENTITY_INDEX);
+    });
+
+    it('reports healthy when all categorized items are compatible, regardless of uncategorized', async () => {
+      mockGetQuality.mockResolvedValueOnce(
+        makePayload({
+          status: 'actionsRequired',
+          summary: '2 of 20 indices have incompatible ECS field mappings.',
+          items: [
+            makeQualityResult(IDENTITY_INDEX, 0),
+            makeQualityResult(CLOUD_INDEX, 0),
+            makeQualityResult('logs-uncategorized', 2),
+          ],
+        })
+      );
+
+      const result = (await tool.handler(
+        {},
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+      )) as ToolHandlerStandardReturn;
+
+      const data = (result.results[0] as OtherResult<QualityPayload>).data;
+      expect(data.status).toBe('healthy');
+      expect(data.summary).toContain('2');
+    });
+
+    it('reports noData when no categorized items survive filtering', async () => {
+      mockGetQuality.mockResolvedValueOnce(
+        makePayload({
+          status: 'actionsRequired',
+          summary: 'Some problems found.',
+          items: [makeQualityResult('logs-uncategorized', 3)],
+        })
+      );
+
+      const result = (await tool.handler(
+        {},
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+      )) as ToolHandlerStandardReturn;
+
+      const data = (result.results[0] as OtherResult<QualityPayload>).data;
+      expect(data.status).toBe('noData');
+    });
+  });
+
+  describe('parity — agent tool matches getIndexCategoryMap filter (shared predicate)', () => {
+    it('agent data.items contains exactly the items that match the category map', async () => {
+      const allItems = [
+        makeQualityResult(IDENTITY_INDEX, 0),
+        makeQualityResult(CLOUD_INDEX, 1),
+        makeQualityResult('logs-uncategorized', 2),
+      ];
+      mockGetQuality.mockResolvedValueOnce(makePayload({ items: allItems }));
+
+      const result = (await tool.handler(
+        {},
+        createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
+      )) as ToolHandlerStandardReturn;
+
+      const agentItemNames = (result.results[0] as OtherResult<QualityPayload>).data.items.map(
+        (i) => i.indexName
+      );
+      const categoryMap = getIndexCategoryMap(mockCategories);
+      const sharedFilteredNames = allItems
+        .filter((item) => categoryMap.has(item.indexName))
+        .map((item) => item.indexName);
+
+      expect(agentItemNames).toEqual(sharedFilteredNames);
     });
   });
 
