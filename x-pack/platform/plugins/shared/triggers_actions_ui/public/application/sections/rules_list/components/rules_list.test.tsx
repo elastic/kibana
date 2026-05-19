@@ -1557,8 +1557,9 @@ describe('UIAM API Key Banner', () => {
     cleanup();
   });
 
-  it('renders UIAM API key banner when isServerless is true', async () => {
+  it('renders UIAM API key banner when isServerless is true and feature flag is enabled', async () => {
     useKibanaMock().services.isServerless = true;
+    jest.mocked(useKibanaMock().services.featureFlags.getBooleanValue).mockReturnValue(true);
 
     renderWithProviders(<RulesList />);
 
@@ -1575,8 +1576,20 @@ describe('UIAM API Key Banner', () => {
     });
   });
 
+  it('does not render UIAM API key banner when isServerless is true but feature flag is disabled', async () => {
+    useKibanaMock().services.isServerless = true;
+    jest.mocked(useKibanaMock().services.featureFlags.getBooleanValue).mockReturnValue(false);
+
+    renderWithProviders(<RulesList />);
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('rulesListUiamApiKeyBanner')).not.toBeInTheDocument();
+    });
+  });
+
   it('displays correct banner content when rendered', async () => {
     useKibanaMock().services.isServerless = true;
+    jest.mocked(useKibanaMock().services.featureFlags.getBooleanValue).mockReturnValue(true);
 
     renderWithProviders(<RulesList />);
 
