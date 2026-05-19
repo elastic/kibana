@@ -17,6 +17,10 @@ import { useTimefilter } from '../../../../../hooks/use_timefilter';
 import { getFormattedError } from '../../../../../util/errors';
 import { getStreamTypeFromDefinition } from '../../../../../util/get_stream_type_from_definition';
 import type { useDataStreamStats } from '../hooks/use_data_stream_stats';
+import {
+  LifecycleAfterSaveProvider,
+  useLifecycleAfterSave,
+} from '../common/hooks/lifecycle_after_save';
 import { LifecyclePreviewProvider, useLifecyclePreview } from '../common/hooks/lifecycle_preview';
 import { SectionPanel } from '../common/section_panel';
 import { EditLifecycleModal } from './modal';
@@ -51,6 +55,7 @@ const StreamDetailGeneralDataInner = ({
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [updateInProgress, setUpdateInProgress] = useState(false);
   const lifecyclePreview = useLifecyclePreview();
+  const { notifyAfterSave } = useLifecycleAfterSave();
 
   useUnsavedChangesPrompt({
     hasUnsavedChanges: lifecyclePreview.hasUnsavedChanges,
@@ -106,6 +111,7 @@ const StreamDetailGeneralDataInner = ({
         signal,
       });
 
+      notifyAfterSave();
       refreshDefinition();
       setIsEditModalOpen(false);
 
@@ -218,12 +224,14 @@ export const StreamDetailGeneralData = ({
   data: ReturnType<typeof useDataStreamStats>;
 }) => {
   return (
-    <LifecyclePreviewProvider>
-      <StreamDetailGeneralDataInner
-        definition={definition}
-        refreshDefinition={refreshDefinition}
-        data={data}
-      />
-    </LifecyclePreviewProvider>
+    <LifecycleAfterSaveProvider>
+      <LifecyclePreviewProvider>
+        <StreamDetailGeneralDataInner
+          definition={definition}
+          refreshDefinition={refreshDefinition}
+          data={data}
+        />
+      </LifecyclePreviewProvider>
+    </LifecycleAfterSaveProvider>
   );
 };

@@ -10,6 +10,8 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { Streams } from '@kbn/streams-schema';
 import { RetentionCard } from './retention_card';
+import { LifecycleAfterSaveProvider } from '../../common/hooks/lifecycle_after_save';
+import { useLifecycleAfterSave } from '../../common/hooks/lifecycle_after_save';
 import type { LifecyclePreviewState } from '../../common/hooks/lifecycle_preview';
 import { LifecyclePreviewProvider } from '../../common/hooks/lifecycle_preview';
 
@@ -37,6 +39,15 @@ jest.mock('../../../../../../hooks/use_streams_app_fetch', () => ({
 
 const mockUseStreamsAppFetch = useStreamsAppFetch as unknown as jest.Mock;
 
+const AfterSaveTrigger = () => {
+  const { notifyAfterSave } = useLifecycleAfterSave();
+  return (
+    <button type="button" data-test-subj="afterSaveTrigger" onClick={notifyAfterSave}>
+      trigger
+    </button>
+  );
+};
+
 describe('RetentionCard', () => {
   const mockOpenEditModal = jest.fn();
 
@@ -45,7 +56,9 @@ describe('RetentionCard', () => {
     initialState?: Partial<LifecyclePreviewState>
   ) => {
     return render(
-      <LifecyclePreviewProvider initialState={initialState}>{ui}</LifecyclePreviewProvider>
+      <LifecycleAfterSaveProvider>
+        <LifecyclePreviewProvider initialState={initialState}>{ui}</LifecyclePreviewProvider>
+      </LifecycleAfterSaveProvider>
     );
   };
 
@@ -82,6 +95,35 @@ describe('RetentionCard', () => {
   });
 
   describe('ILM lifecycle', () => {
+    it('refetches ILM _stats after after-save notification', async () => {
+      const refresh = jest.fn();
+      mockUseStreamsAppFetch.mockReturnValue({
+        value: {
+          phases: {
+            hot: { name: 'hot', min_age: '0ms', size_in_bytes: 1000, rollover: {} },
+            delete: { name: 'delete', min_age: '60d' },
+          },
+        },
+        loading: false,
+        refresh,
+      });
+
+      const definition = createMockDefinition({ ilm: { policy: 'my-ilm-policy' } });
+
+      renderWithSync(
+        <>
+          <RetentionCard definition={definition} openEditModal={mockOpenEditModal} />
+          <AfterSaveTrigger />
+        </>
+      );
+
+      expect(refresh).not.toHaveBeenCalled();
+
+      await userEvent.click(screen.getByTestId('afterSaveTrigger'));
+
+      expect(refresh).toHaveBeenCalledTimes(1);
+    });
+
     it('renders ILM retention + phase count from lifecycle stats', () => {
       mockUseStreamsAppFetch.mockReturnValue({
         value: {
@@ -192,6 +234,33 @@ describe('RetentionCard', () => {
   });
 
   describe('DSL lifecycle', () => {
+    it('does not refetch ILM _stats after after-save notification', async () => {
+      const refresh = jest.fn();
+      mockUseStreamsAppFetch.mockReturnValue({
+        value: undefined,
+        loading: false,
+        refresh,
+      });
+
+      const definition = createMockDefinition(
+        { dsl: { data_retention: '30d' } },
+        { inherit: {} },
+        'logs-test',
+        { lifecycle: true },
+        'time_series'
+      );
+
+      renderWithSync(
+        <>
+          <RetentionCard definition={definition} openEditModal={mockOpenEditModal} />
+          <AfterSaveTrigger />
+        </>
+      );
+
+      await userEvent.click(screen.getByTestId('afterSaveTrigger'));
+      expect(refresh).not.toHaveBeenCalled();
+    });
+
     it('renders custom retention period in days', () => {
       const definition = createMockDefinition(
         {

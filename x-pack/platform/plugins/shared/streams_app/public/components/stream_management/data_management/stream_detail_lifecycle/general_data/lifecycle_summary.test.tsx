@@ -10,6 +10,7 @@ import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { LifecycleSummary } from './lifecycle_summary';
 import { Streams, type IngestStreamLifecycle } from '@kbn/streams-schema';
+import { LifecycleAfterSaveProvider } from '../common/hooks/lifecycle_after_save';
 import { LifecyclePreviewProvider } from '../common/hooks/lifecycle_preview';
 
 // Mock the hooks
@@ -68,7 +69,11 @@ jest.mock('../hooks/use_ilm_phases_color_and_description', () => ({
 
 describe('LifecycleSummary', () => {
   const renderWithSync = (ui: React.ReactElement) => {
-    return render(<LifecyclePreviewProvider>{ui}</LifecyclePreviewProvider>);
+    return render(
+      <LifecycleAfterSaveProvider>
+        <LifecyclePreviewProvider>{ui}</LifecyclePreviewProvider>
+      </LifecycleAfterSaveProvider>
+    );
   };
 
   const createDslDefinition = (

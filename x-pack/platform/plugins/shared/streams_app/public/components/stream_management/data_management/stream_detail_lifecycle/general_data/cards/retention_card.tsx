@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
 import { isDisabledLifecycle, isDslLifecycle, isIlmLifecycle } from '@kbn/streams-schema';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { EuiButton } from '@elastic/eui';
 import { PHASE_ORDER } from '@kbn/data-lifecycle-phases';
 import { useKibana } from '../../../../../../hooks/use_kibana';
@@ -16,6 +16,7 @@ import { useStreamsAppFetch } from '../../../../../../hooks/use_streams_app_fetc
 import { BaseMetricCard } from '../../common/base_metric_card';
 import { getTimeSizeAndUnitLabel } from '../../../../../../util/format_size_units';
 import { useLifecyclePreview } from '../../common/hooks/lifecycle_preview';
+import { useLifecycleAfterSave } from '../../common/hooks/lifecycle_after_save';
 
 export const RetentionCard = ({
   definition,
@@ -24,6 +25,7 @@ export const RetentionCard = ({
   definition: Streams.ingest.all.GetResponse;
   openEditModal: () => void;
 }) => {
+  const { refreshToken } = useLifecycleAfterSave();
   const {
     isActive: isPreviewActive,
     dataPhasesCount: previewDataPhasesCount,
@@ -43,7 +45,11 @@ export const RetentionCard = ({
 
   const isIlm = isIlmLifecycle(lifecycle);
 
-  const { value: ilmStatsValue, loading: ilmStatsLoading } = useStreamsAppFetch(
+  const {
+    value: ilmStatsValue,
+    loading: ilmStatsLoading,
+    refresh: refreshIlmStats,
+  } = useStreamsAppFetch(
     ({ signal }) => {
       if (!isIlm) return undefined;
       return streamsRepositoryClient.fetch('GET /internal/streams/{name}/lifecycle/_stats', {
@@ -54,12 +60,18 @@ export const RetentionCard = ({
     [streamsRepositoryClient, definition.stream.name, isIlm],
     {
       withTimeRange: false,
-      withRefresh: false,
+      withRefresh: true,
       clearValueOnNext: true,
       unsetValueOnError: true,
       disableToastOnError: true,
     }
   );
+
+  useEffect(() => {
+    if (!isIlm) return;
+    if (refreshToken === 0) return;
+    refreshIlmStats();
+  }, [isIlm, refreshIlmStats, refreshToken]);
 
   const getMetrics = () => {
     const subtitles: string[] = [];
