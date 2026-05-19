@@ -9,8 +9,8 @@
 
 import dateMath from '@elastic/datemath';
 import type { TimeRange } from '@kbn/data-plugin/common';
+import { formatEsqlIdentifier, formatEsqlLiteral } from '@kbn/esql-utils';
 import type { ChangePointCardModel } from './derive_change_point_cards';
-import { formatEsqlIdentifier, formatEsqlLiteral } from './append_entity_filters_to_line_esql';
 
 // Resolves any time range bound (absolute ISO or relative expression) to epoch milliseconds.
 // Returns undefined if the string cannot be parsed (e.g. "$timeFrom").

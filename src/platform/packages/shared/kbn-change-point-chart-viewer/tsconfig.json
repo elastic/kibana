@@ -6,6 +6,7 @@
   "include": ["**/*.ts", "**/*.tsx"],
   "exclude": ["target/**/*"],
   "kbn_references": [
+    "@elastic/esql",
     "@kbn/data-plugin",
     "@kbn/es-query",
     "@kbn/esql-utils",

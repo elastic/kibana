@@ -73,7 +73,6 @@ export {
   hasChangePointCommand,
   getChangePointOutputColumnNames,
   getChangePointSeriesColumns,
-  getChangePointByColumns,
   buildChangePointLineDataQuery,
   appendEntityFiltersToChangePointLineEsql,
   formatEsqlIdentifier,

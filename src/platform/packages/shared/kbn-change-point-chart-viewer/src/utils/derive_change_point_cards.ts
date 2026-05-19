@@ -7,16 +7,45 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { Walker, Parser, isColumn } from '@elastic/esql';
+import type {
+  ESQLAstChangePointCommand,
+  ESQLCommandOption,
+  ESQLAstItem,
+} from '@elastic/esql/types';
 import {
+  appendEntityFiltersToChangePointLineEsql,
   buildChangePointLineDataQuery,
-  getChangePointByColumns,
   getChangePointOutputColumnNames,
   getChangePointSeriesColumns,
 } from '@kbn/esql-utils';
+import { CommandNames } from '@kbn/esql-language';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { CHANGE_POINT_TYPE_COLUMN, CHANGE_POINT_PVALUE_COLUMN } from '../constants';
-import { appendEntityFiltersToChangePointLineEsql } from './append_entity_filters_to_line_esql';
+
+const isByOption = (a: ESQLAstItem): a is ESQLCommandOption =>
+  (a as { type?: string; name?: string }).type === 'option' &&
+  (a as { type?: string; name?: string }).name === 'by';
+
+const getChangePointByColumns = (esql?: string): string[] | undefined => {
+  if (!esql) return undefined;
+  try {
+    const { root } = Parser.parse(esql);
+    const changePointCommands = Walker.findAll(
+      root,
+      (node) => node.type === 'command' && node.name === CommandNames.CHANGE_POINT
+    );
+    const cp = changePointCommands[0] as ESQLAstChangePointCommand | undefined;
+    if (!cp) return undefined;
+    const byOption = cp.args.find(isByOption);
+    if (!byOption) return undefined;
+    const cols = byOption.args.filter(isColumn).map((c) => c.parts.join('.'));
+    return cols.length ? cols : undefined;
+  } catch {
+    return undefined;
+  }
+};
 
 export interface ChangePointCardModel {
   readonly id: string;

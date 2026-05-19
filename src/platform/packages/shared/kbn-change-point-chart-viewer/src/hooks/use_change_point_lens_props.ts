@@ -203,7 +203,8 @@ export const useChangePointLensProps = ({
       }
 
       return () => observer.disconnect();
-    }).pipe(distinctUntilChanged(), shareReplay(1));
+      // refCount:true ensures observer.disconnect() runs when combineLatest unsubscribes on unmount.
+    }).pipe(distinctUntilChanged(), shareReplay({ bufferSize: 1, refCount: true }));
 
     // On every config change or Discover fetch, kick off a new async build. switchMap cancels any
     // in-flight build so only the result of the latest trigger is ever applied.

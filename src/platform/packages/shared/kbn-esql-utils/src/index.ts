@@ -32,16 +32,17 @@ export {
   convertTimeseriesCommandToFrom,
   hasOnlySourceCommand,
   hasTimeseriesInfoCommand,
+} from './utils/query_parsing_helpers';
+export {
   hasChangePointCommand,
   getChangePointOutputColumnNames,
   getChangePointSeriesColumns,
-  getChangePointByColumns,
   buildChangePointLineDataQuery,
   appendEntityFiltersToChangePointLineEsql,
   formatEsqlIdentifier,
   formatEsqlLiteral,
   type BuildChangePointLineDataQueryOptions,
-} from './utils/query_parsing_helpers';
+} from './utils/change_point_helpers';
 export {
   getIndexPatternFromESQLQuery,
   getSourceCommandFromESQLQuery,
