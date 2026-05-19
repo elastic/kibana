@@ -9,11 +9,11 @@
 
 import { i18n } from '@kbn/i18n';
 import { getHoverItem } from '@kbn/esql-language';
+import { FIX_WITH_AI_COMMAND_ID } from '@kbn/esql-types';
 import { monaco } from '../../../../monaco_imports';
 import { createMonacoProvider } from './providers_factory';
 import { getDecorationHoveredMessages, monacoPositionToOffset } from '../shared/utils';
 import type { ESQLDependencies } from './types';
-import { FIX_WITH_AI_COMMAND_ID } from './fix_with_ai_command';
 
 export function getHoverProvider(deps?: ESQLDependencies): monaco.languages.HoverProvider {
   let lastHoveredWord: string;
@@ -63,6 +63,7 @@ export function getHoverProvider(deps?: ESQLDependencies): monaco.languages.Hove
 
           const rawCode = errorAtPosition.code;
           const errorCode = typeof rawCode === 'string' ? rawCode : rawCode?.value;
+
           const args = [
             fullText,
             errorAtPosition.message,

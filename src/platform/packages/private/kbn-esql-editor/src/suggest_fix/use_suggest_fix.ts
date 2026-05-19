@@ -117,12 +117,12 @@ export const useSuggestFix = ({
     const editor = editorRef.current;
     const model = editorModel.current;
     const state = reviewStateRef.current;
-    if (!editor || !model || !state) {
-      cleanup();
-      return;
-    }
 
     cleanup();
+
+    if (!editor || !model || !state) {
+      return;
+    }
 
     // Remove only the original changed lines — the fix lines shift up to replace them
     editor.executeEdits('esql-suggest-fix-accept', [
@@ -142,12 +142,12 @@ export const useSuggestFix = ({
     const editor = editorRef.current;
     const model = editorModel.current;
     const state = reviewStateRef.current;
-    if (!editor || !model || !state) {
-      cleanup();
-      return;
-    }
 
     cleanup();
+
+    if (!editor || !model || !state) {
+      return;
+    }
 
     // Remove the "\n" connector + fix lines by selecting from the end of the last
     // original changed line through the end of the last fix line.
@@ -245,8 +245,7 @@ export const useSuggestFix = ({
       const model = editorModel.current;
       if (!editor || !model) return;
 
-      abortInFlight();
-      cleanup();
+      rejectFix();
 
       const decorationLine = errorLineNumber ?? model.getLineCount();
       const decorationCol = model.getLineMaxColumn(decorationLine);
@@ -331,8 +330,7 @@ export const useSuggestFix = ({
       editorModel,
       http,
       notifications.toasts,
-      abortInFlight,
-      cleanup,
+      rejectFix,
       showReview,
       clearGeneratingDecoration,
     ]
