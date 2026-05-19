@@ -79,9 +79,9 @@ export const LogRateAnalysisAttachmentsMenu = ({
         serializedState: {
           title: newTitle,
           description: newDescription,
-          dataViewId: dataView.id,
-          hidePanelTitles: false,
-          ...(applyTimeRange && { timeRange }),
+          data_view_id: dataView.id,
+          hide_title: false,
+          ...(applyTimeRange && { time_range: timeRange }),
         },
         type: EMBEDDABLE_LOG_RATE_ANALYSIS_TYPE,
       };
@@ -142,7 +142,7 @@ export const LogRateAnalysisAttachmentsMenu = ({
                   onClick: () => {
                     setIsActionMenuOpen(false);
                     openCasesModalCallback({
-                      dataViewId: dataView.id,
+                      data_view_id: dataView.id,
                       time_range: absoluteTimeRange,
                       ...(windowParameters && { windowParameters }),
                     });
