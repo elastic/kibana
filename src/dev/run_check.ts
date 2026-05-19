@@ -138,6 +138,18 @@ const TEST_FILE_RE = /\.(?:test|spec)\.(js|mjs|ts|tsx)$/;
 
 const isTestFile = (filePath: string) => TEST_FILE_RE.test(filePath);
 
+const isIntegrationTestFile = (filePath: string): boolean => {
+  let dir = Path.dirname(Path.resolve(REPO_ROOT, filePath));
+  while (true) {
+    if (existsSync(Path.join(dir, 'jest.integration.config.js'))) {
+      return true;
+    }
+    if (dir === REPO_ROOT || dir === Path.dirname(dir)) break;
+    dir = Path.dirname(dir);
+  }
+  return false;
+};
+
 const stripAnsi = (s: string) => s.replace(/\x1B\[[0-9;]*[A-Za-z]/g, '');
 
 const runJestTestsDirectly = async (
@@ -273,6 +285,7 @@ run(
         jestProgress.writeResult(line('jest', '—', 'no changed files', jestProgress.elapsed()));
       } else if (
         changedFiles.every(isTestFile) &&
+        !changedFiles.some(isIntegrationTestFile) &&
         (() => {
           // Fast path only safe when all test files share a single jest config.
           const configs = new Set(changedFiles.map(findJestConfig).filter(Boolean));
