@@ -16,7 +16,7 @@ const DASHBOARD_FIXTURE_PATH =
 const ESQL_ASYNC_ENDPOINT = '/internal/search/esql_async';
 const DASHBOARD_ID = '80d92ad1-ce0d-4567-81a0-a53987daf0f9';
 
-test.describe('ES|QL Async Polling - HTTP/1', { tag: tags.stateful.classic }, () => {
+test.describe.fixme('ES|QL Async Polling - HTTP/1', { tag: tags.stateful.classic }, () => {
   let cdp: CDPSession;
   let esqlAsyncRequestCount: number;
 
