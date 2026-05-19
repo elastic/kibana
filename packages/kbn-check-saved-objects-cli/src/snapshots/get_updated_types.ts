@@ -26,3 +26,24 @@ export function getUpdatedTypes({
     return infoBefore && !equal(infoBefore, infoAfter);
   });
 }
+
+/**
+ * Returns the names of updated types that introduced at least one new model version
+ * (i.e. the model version count increased between the two snapshots).
+ *
+ * Types whose only changes are schema-only mutations in existing model versions are
+ * intentionally excluded: they don't require fixture verification or rollback tests.
+ */
+export function getTypesWithNewModelVersions({
+  from,
+  to,
+}: {
+  from: MigrationSnapshot;
+  to: MigrationSnapshot;
+}): string[] {
+  return Object.keys(to.typeDefinitions).filter((type) => {
+    const infoBefore = from.typeDefinitions[type];
+    const infoAfter = to.typeDefinitions[type]!;
+    return infoBefore && infoAfter.modelVersions.length > infoBefore.modelVersions.length;
+  });
+}
