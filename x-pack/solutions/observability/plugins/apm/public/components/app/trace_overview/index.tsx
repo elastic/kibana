@@ -13,6 +13,7 @@ import { Breadcrumb } from '../breadcrumb';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { OpenInDiscover } from '../../shared/links/discover_links/open_in_discover';
 import { ApmIndexSettingsContextProvider } from '../../../context/apm_index_settings/apm_index_settings_context';
+import { TRACE_OVERVIEW_EBT_ACTIONS, TRACE_OVERVIEW_EBT_ELEMENTS } from './ebt_constants';
 
 export function TraceOverview({
   children,
@@ -57,6 +58,10 @@ export function TraceOverview({
                   rangeFrom={rangeFrom}
                   rangeTo={rangeTo}
                   queryParams={{ kuery, environment, sortDirection: 'DESC' }}
+                  ebt={{
+                    action: TRACE_OVERVIEW_EBT_ACTIONS.EXPLORE_TRACES,
+                    element: TRACE_OVERVIEW_EBT_ELEMENTS.PAGE_HEADER,
+                  }}
                 />
               </span>,
             ],
