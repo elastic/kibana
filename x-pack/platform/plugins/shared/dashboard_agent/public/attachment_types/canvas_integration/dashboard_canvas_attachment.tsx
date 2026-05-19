@@ -29,6 +29,7 @@ export type DashboardCanvasAttachmentProps = AttachmentRenderProps<DashboardAtta
   data: DataPublicPluginStart;
   checkSavedDashboardExist: (dashboardId: string) => Promise<boolean>;
   canWriteDashboards: boolean;
+  getLazyFlyoutContainer?: () => HTMLElement | null;
 };
 
 export const DashboardCanvasAttachment = (props: DashboardCanvasAttachmentProps) => {

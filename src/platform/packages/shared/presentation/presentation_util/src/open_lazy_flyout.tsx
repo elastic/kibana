@@ -14,6 +14,7 @@ import useAsync from 'react-use/lib/useAsync';
 import { i18n } from '@kbn/i18n';
 import { focusFirstFocusable } from './focus_helpers';
 import { LoadingFlyout } from './loading_flyout';
+import { getLazyFlyoutContainerFromParent } from './get_lazy_flyout_container';
 import { tracksOverlays } from './tracks_overlays';
 
 const htmlId = htmlIdGenerator('modalTitleId');
@@ -55,6 +56,7 @@ export const openLazyFlyout = (params: OpenLazyFlyoutParams) => {
 
   const ariaLabelledBy = flyoutProps?.['aria-labelledby'] ?? htmlId();
   const overlayTracker = tracksOverlays(parentApi) ? parentApi : undefined;
+  const lazyFlyoutContainer = getLazyFlyoutContainerFromParent(parentApi);
 
   const onClose = () => {
     overlayTracker?.clearOverlays();
@@ -64,30 +66,30 @@ export const openLazyFlyout = (params: OpenLazyFlyoutParams) => {
     }
   };
 
-  const flyoutRef = core.overlays.openFlyout(
-    toMountPoint(
-      <LazyFlyout
-        closeFlyout={onClose}
-        loadContent={loadContent}
-        core={core}
-        ariaLabelledBy={ariaLabelledBy}
-      />,
-      core
-    ),
-    {
-      size: 500,
-      type: 'push',
-      paddingSize: 'm',
-      maxWidth: 800,
-      ownFocus: true,
-      isResizable: true,
-      outsideClickCloses: true,
-      className: 'kbnPresentationLazyFlyout',
-      'aria-labelledby': ariaLabelledBy,
-      onClose,
-      ...flyoutProps,
-    }
+  const lazyFlyout = (
+    <LazyFlyout
+      closeFlyout={onClose}
+      loadContent={loadContent}
+      core={core}
+      ariaLabelledBy={ariaLabelledBy}
+    />
   );
+
+  const flyoutRef = core.overlays.openFlyout(toMountPoint(lazyFlyout, core), {
+    size: 500,
+    type: lazyFlyoutContainer ? 'overlay' : 'push',
+    paddingSize: lazyFlyoutContainer ? undefined : 'm',
+    maxWidth: 800,
+    ownFocus: !lazyFlyoutContainer,
+    isResizable: !lazyFlyoutContainer,
+    outsideClickCloses: true,
+    className: 'kbnPresentationLazyFlyout',
+    'aria-labelledby': ariaLabelledBy,
+    container: lazyFlyoutContainer ?? undefined,
+    onClose,
+    ...flyoutProps,
+  });
+
   overlayTracker?.openOverlay(flyoutRef, { focusedPanelId });
   return flyoutRef;
 };

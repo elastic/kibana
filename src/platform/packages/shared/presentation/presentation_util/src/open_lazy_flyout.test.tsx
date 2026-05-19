@@ -23,8 +23,9 @@ const core = {
   application: {
     currentAppId$: { pipe: () => ({ subscribe: () => {} }) },
   },
+  notifications: { toasts: { addWarning: jest.fn() } },
 } as unknown as CoreStart;
-const loadContent = jest.fn(async () => <div>Test Content</div>);
+const loadContent = jest.fn(async () => <>Test Content</>);
 const props = {
   core,
   loadContent,
@@ -56,6 +57,25 @@ describe('openLazyFlyout', () => {
         ownFocus: true,
         paddingSize: 'm',
         type: 'push',
+      })
+    );
+  });
+
+  it('opens overlay flyout scoped to parent container when provided', () => {
+    const container = document.createElement('div');
+    const parentApi = {
+      getLazyFlyoutContainer: () => container,
+    };
+
+    openLazyFlyout({ core, parentApi, loadContent });
+
+    expect(openFlyout).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        container,
+        type: 'overlay',
+        ownFocus: false,
+        isResizable: false,
       })
     );
   });

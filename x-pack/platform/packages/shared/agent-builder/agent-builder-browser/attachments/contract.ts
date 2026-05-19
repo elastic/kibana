@@ -46,6 +46,11 @@ export interface CanvasRenderCallbacks {
   /** Close the canvas (expanded flyout view) */
   closeCanvas: () => void;
   /**
+   * Returns the DOM element that should contain nested flyouts (e.g. panel settings)
+   * opened while the canvas is visible.
+   */
+  getLazyFlyoutContainer?: () => HTMLElement | null;
+  /**
    * Optional callback for externally-controlled inline preview state.
    * Use to mark an attachment as currently previewed outside canvas.
    */

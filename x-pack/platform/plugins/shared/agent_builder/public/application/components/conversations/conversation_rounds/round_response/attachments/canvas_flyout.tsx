@@ -94,6 +94,9 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
     setDynamicButtons(buttons);
   }, []);
 
+  const lazyFlyoutContainerRef = useRef<HTMLDivElement>(null);
+  const getLazyFlyoutContainer = useCallback(() => lazyFlyoutContainerRef.current, []);
+
   const canvasHeaderActionButtons = useMemo(() => {
     if (!canvasState) {
       return dynamicButtons;
@@ -132,6 +135,13 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
     }
   `;
 
+  const lazyFlyoutContainerStyles = css`
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+  `;
+
   return (
     <EuiFlyout
       onClose={closeCanvas}
@@ -153,20 +163,23 @@ export const CanvasFlyout: React.FC<CanvasFlyoutProps> = ({ attachmentsService }
         previewBadgeState="preview_available"
       />
       <EuiFlyoutBody css={flyoutBodyStyles}>
-        <React.Fragment key={`${attachment.id}:${canvasState.version ?? 'latest'}`}>
-          {uiDefinition.renderCanvasContent(
-            {
-              attachment,
-              isSidebar,
-              openSidebarConversation: isSidebar ? undefined : openSidebarConversation,
-            },
-            {
-              registerActionButtons,
-              updateOrigin,
-              closeCanvas,
-            }
-          )}
-        </React.Fragment>
+        <div ref={lazyFlyoutContainerRef} css={lazyFlyoutContainerStyles}>
+          <React.Fragment key={`${attachment.id}:${canvasState.version ?? 'latest'}`}>
+            {uiDefinition.renderCanvasContent(
+              {
+                attachment,
+                isSidebar,
+                openSidebarConversation: isSidebar ? undefined : openSidebarConversation,
+              },
+              {
+                registerActionButtons,
+                updateOrigin,
+                closeCanvas,
+                getLazyFlyoutContainer,
+              }
+            )}
+          </React.Fragment>
+        </div>
       </EuiFlyoutBody>
     </EuiFlyout>
   );

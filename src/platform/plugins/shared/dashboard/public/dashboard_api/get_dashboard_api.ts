@@ -203,6 +203,7 @@ export function getDashboardApi({
       };
     },
     isEmbeddedExternally: Boolean(creationOptions?.isEmbeddedExternally),
+    getLazyFlyoutContainer: creationOptions?.getLazyFlyoutContainer,
     isManaged,
     getSerializedState: () => ({
       attributes: getState(),

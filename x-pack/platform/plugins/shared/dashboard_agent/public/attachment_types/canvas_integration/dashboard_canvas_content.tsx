@@ -58,11 +58,13 @@ export const DashboardCanvasContent = ({
   data,
   checkSavedDashboardExist,
   canWriteDashboards,
+  getLazyFlyoutContainer,
 }: AttachmentRenderProps<DashboardAttachment> & {
   dashboardState: DashboardState;
   registerActionButtons: (buttons: ActionButton[]) => void;
   updateOrigin: (origin: string) => Promise<unknown>;
   closeCanvas: () => void;
+  getLazyFlyoutContainer?: () => HTMLElement | null;
   dashboardLocator?: DashboardRendererProps['locator'];
   openSidebarConversation?: () => void;
   searchBarComponent: UnifiedSearchPublicPluginStart['ui']['SearchBar'];
@@ -115,8 +117,9 @@ export const DashboardCanvasContent = ({
     () =>
       Promise.resolve({
         getInitialInput: () => ({ ...dashboardState, viewMode: 'view' as const }),
+        getLazyFlyoutContainer,
       }),
-    [dashboardState]
+    [dashboardState, getLazyFlyoutContainer]
   );
 
   const dashboardLocatorParams = useMemo<DashboardLocatorParams>(

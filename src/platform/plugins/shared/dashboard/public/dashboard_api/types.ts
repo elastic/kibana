@@ -133,6 +133,12 @@ export interface DashboardCreationOptions {
   isEmbeddedExternally?: boolean;
 
   /**
+   * Returns the DOM element that nested lazy flyouts (e.g. panel settings) should use as
+   * their `container`, such as the Agent Builder canvas flyout body.
+   */
+  getLazyFlyoutContainer?: () => HTMLElement | null;
+
+  /**
    * Returns the embeddable app context for the dashboard.
    *
    * @param dashboardId - The optional dashboard ID.
@@ -192,6 +198,7 @@ export type DashboardApi = CanExpandPanels &
     highlightPanel: (panelRef: HTMLDivElement) => void;
     highlightPanelId$: PublishingSubject<string | undefined>;
     isEmbeddedExternally: boolean;
+    getLazyFlyoutContainer?: () => HTMLElement | null;
     isEditableByUser: boolean;
     isManaged: boolean;
     locator?: Pick<LocatorPublic<DashboardLocatorParams>, 'navigate' | 'getRedirectUrl'>;

@@ -7,9 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { openLazyFlyout } from './src/open_lazy_flyout';
-export {
-  getLazyFlyoutContainerFromParent,
-  type ProvidesLazyFlyoutContainer,
-} from './src/get_lazy_flyout_container';
-export { tracksOverlays, type TracksOverlays } from './src/tracks_overlays';
+export interface ProvidesLazyFlyoutContainer {
+  getLazyFlyoutContainer?: () => HTMLElement | null;
+}
+
+export const getLazyFlyoutContainerFromParent = (parentApi: unknown): HTMLElement | null => {
+  if (typeof parentApi !== 'object' || parentApi === null) {
+    return null;
+  }
+
+  return (parentApi as ProvidesLazyFlyoutContainer).getLazyFlyoutContainer?.() ?? null;
+};
