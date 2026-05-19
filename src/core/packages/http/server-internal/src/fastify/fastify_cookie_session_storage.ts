@@ -9,6 +9,7 @@
 
 import * as iron from '@hapi/iron';
 import { isDeepStrictEqual } from 'util';
+import type { FastifyReply } from 'fastify';
 import type { Logger } from '@kbn/logging';
 import type {
   KibanaRequest,
@@ -37,17 +38,32 @@ interface RawHttpAccess {
  */
 const getRawHttpAccess = (kbnRequest: KibanaRequest): RawHttpAccess | null => {
   const raw = ensureRawRequest(kbnRequest) as unknown as {
+    app?: { fastifyReply?: FastifyReply };
     raw?: { req?: { headers?: { cookie?: string } }; res?: import('http').ServerResponse };
     headers?: { cookie?: string };
   };
   const cookieHeader = raw.raw?.req?.headers?.cookie ?? raw.headers?.cookie;
   const res = raw.raw?.res;
-  if (!res) return null;
+  const fastifyReply = raw.app?.fastifyReply;
+  if (!res && !fastifyReply) return null;
   return {
     cookieHeader,
     setCookies(cookieStrings) {
       if (!cookieStrings.length) return;
-      if (res.headersSent) {
+      if (fastifyReply && !fastifyReply.sent) {
+        const existing = fastifyReply.getHeader('set-cookie');
+        const merged: string[] = Array.isArray(existing)
+          ? existing.map(String)
+          : existing != null
+          ? [String(existing)]
+          : [];
+        for (const cookie of cookieStrings) {
+          merged.push(cookie);
+        }
+        fastifyReply.header('set-cookie', merged);
+        return;
+      }
+      if (!res || res.headersSent) {
         return;
       }
       const existing = res.getHeader('Set-Cookie');
@@ -132,24 +148,34 @@ class ScopedFastifyCookieSessionStorage<T extends object> implements SessionStor
     const access = getRawHttpAccess(this.request);
     if (!access) return;
 
-    const sealed = await iron.seal(
-      sessionValue as unknown,
-      this.cookieOptions.encryptionKey,
-      IRON_DEFAULTS
-    );
     const isSecure = options?.isSecure ?? this.cookieOptions.isSecure;
     const sameSite = options?.sameSite ?? this.cookieOptions.sameSite ?? false;
     const partitioned = sameSite === 'None' && Boolean(isSecure) && !this.disableEmbedding;
 
-    access.setCookies([
-      serializeCookie(this.cookieOptions.name, sealed, {
-        path: this.basePath,
-        isHttpOnly: true,
-        isSecure: Boolean(isSecure),
-        sameSite,
-        partitioned,
-      }),
-    ]);
+    const writePromise = (async () => {
+      const sealed = await iron.seal(
+        sessionValue as unknown,
+        this.cookieOptions.encryptionKey,
+        IRON_DEFAULTS
+      );
+      access.setCookies([
+        serializeCookie(this.cookieOptions.name, sealed, {
+          path: this.basePath,
+          isHttpOnly: true,
+          isSecure: Boolean(isSecure),
+          sameSite,
+          partitioned,
+        }),
+      ]);
+    })();
+
+    const raw = ensureRawRequest(this.request) as unknown as {
+      app?: { pendingCookieWrites?: Array<Promise<unknown>> };
+    };
+    const app = raw.app ?? (raw.app = {});
+    app.pendingCookieWrites = app.pendingCookieWrites ?? [];
+    app.pendingCookieWrites.push(writePromise);
+    await writePromise;
   }
 
   public clear(): void {

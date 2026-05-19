@@ -95,7 +95,7 @@ export function registerFastifyAuthentication(params: {
           return;
         }
         await responseAdapter.handle(result, reply);
-        return reply;
+        return;
       }
 
       if (result.type === AuthResultType.authenticated) {
@@ -128,7 +128,7 @@ export function registerFastifyAuthentication(params: {
           }),
           reply
         );
-        return reply;
+        return;
       }
 
       if (result.type === AuthResultType.notHandled) {
@@ -138,7 +138,7 @@ export function registerFastifyAuthentication(params: {
           return;
         }
         await responseAdapter.handle(lifecycleResponseFactory.unauthorized(), reply);
-        return reply;
+        return;
       }
 
       throw new Error(`Unexpected authentication result: ${JSON.stringify(result)}`);
@@ -154,7 +154,6 @@ export function registerFastifyAuthentication(params: {
         }),
         reply
       );
-      return reply;
     }
   });
 

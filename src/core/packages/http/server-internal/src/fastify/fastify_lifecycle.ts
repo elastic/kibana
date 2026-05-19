@@ -19,6 +19,7 @@ import type {
   OnPreAuthHandler,
   OnPreAuthToolkit,
   OnPreResponseHandler,
+  OnPreResponseInfo,
   OnPreResponseToolkit,
   OnPreRoutingHandler,
   OnPreRoutingToolkit,
@@ -39,6 +40,7 @@ import { KIBANA_HAPI_COMPAT_REQUEST } from './fastify_auth';
 import {
   getKibanaCompatRequestUrl,
   mapRouteSecurityToHapiAuthSettings,
+  toPlainQuery,
   toPlainRouteParams,
 } from './fastify_to_hapi_request';
 import { isReplyCommitted } from './fastify_reply_utils';
@@ -77,7 +79,8 @@ const preResponseToolkit: OnPreResponseToolkit = {
  * that to populate `route.settings.app` so consumers like the security plugin can read
  * `KibanaRequest.route.options.security`.
  */
-const buildKibanaRequest = (req: FastifyRequest, reply: FastifyReply): HapiRequest => {
+/** @internal */
+export const buildKibanaRequest = (req: FastifyRequest, reply: FastifyReply): HapiRequest => {
   const existingCompat = (req as any).app?.[KIBANA_HAPI_COMPAT_REQUEST] as HapiRequest | undefined;
   if (existingCompat) {
     return existingCompat;
@@ -91,6 +94,7 @@ const buildKibanaRequest = (req: FastifyRequest, reply: FastifyReply): HapiReque
   // Reuse the per-request `app` slot if a previous hook (e.g. the route handler's
   // own builder) populated it; otherwise initialize it once.
   const app = ((req as any).app = (req as any).app ?? { requestId: req.id ?? '', requestUuid: '' });
+  app.fastifyReply = reply;
   const matched = app.matchedRoute as
     | {
         method: string;
@@ -131,7 +135,7 @@ const buildKibanaRequest = (req: FastifyRequest, reply: FastifyReply): HapiReque
     headers: req.headers,
     method: String(req.method ?? '').toLowerCase(),
     params: toPlainRouteParams((req as any).params),
-    query: (req as any).query ?? {},
+    query: toPlainQuery((req as any).query),
     payload: (req as any).body,
     path: url.pathname,
     // `reply.raw` is required so {@link CoreKibanaRequest} wires `request.events.completed$`
@@ -140,7 +144,7 @@ const buildKibanaRequest = (req: FastifyRequest, reply: FastifyReply): HapiReque
     auth: { isAuthenticated: false },
     info: { host: hostHeader, referrer: '' },
     route: {
-      method: matched?.method ?? String(req.method ?? '').toLowerCase(),
+      method: String(matched?.method ?? req.method ?? '').toLowerCase(),
       path: matched?.path ?? url.pathname,
       settings: {
         app: settingsApp,
@@ -160,16 +164,24 @@ const buildKibanaRequest = (req: FastifyRequest, reply: FastifyReply): HapiReque
 
 const adapter = new FastifyResponseAdapter();
 
-const sendInternalError = (reply: FastifyReply, log: Logger): FastifyReply | void => {
+const sendInternalError = (reply: FastifyReply, log: Logger): void => {
   if (isReplyCommitted(reply)) {
     log.error(new Error('HTTP lifecycle handler failed after the response was already committed'));
     return;
   }
-  return reply.code(500).send({
+  void reply.code(500).send({
     statusCode: 500,
     error: 'Internal Server Error',
     message: 'An internal server error occurred. Check Kibana server logs for details.',
   });
+};
+
+/** preParsing/preHandler hooks must not return the Fastify reply object (that is treated as a new payload stream). */
+const shortCircuitLifecycle = async (
+  reply: FastifyReply,
+  handle: () => Promise<unknown>
+): Promise<void> => {
+  await handle();
 };
 
 /** @internal */
@@ -220,8 +232,9 @@ export function adoptToFastifyOnPreRouting(fn: OnPreRoutingHandler, log: Logger)
 export function adoptToFastifyOnPreAuth(fn: OnPreAuthHandler, log: Logger) {
   return async function preAuth(
     req: FastifyRequest,
-    reply: FastifyReply
-  ): Promise<FastifyReply | void> {
+    reply: FastifyReply,
+    payload: unknown
+  ): Promise<unknown> {
     try {
       const result = await fn(
         CoreKibanaRequest.from(buildKibanaRequest(req, reply)),
@@ -229,28 +242,26 @@ export function adoptToFastifyOnPreAuth(fn: OnPreAuthHandler, log: Logger) {
         preAuthToolkit
       );
       if (isKibanaResponse(result)) {
-        await adapter.handle(result, reply);
-        return reply;
+        await shortCircuitLifecycle(reply, () => adapter.handle(result, reply));
+        return payload === undefined ? Buffer.alloc(0) : payload;
       }
       if (result.type === OnPreAuthResultType.next) {
-        return;
+        return payload === undefined ? Buffer.alloc(0) : payload;
       }
       throw new Error(
         `Unexpected result from OnPreAuth. Expected OnPreAuthResult or KibanaResponse, but given: ${result}.`
       );
     } catch (error) {
       log.error(error);
-      return sendInternalError(reply, log);
+      sendInternalError(reply, log);
+      return payload === undefined ? Buffer.alloc(0) : payload;
     }
   };
 }
 
 /** @internal */
 export function adoptToFastifyOnPostAuth(fn: OnPostAuthHandler, log: Logger) {
-  return async function postAuth(
-    req: FastifyRequest,
-    reply: FastifyReply
-  ): Promise<FastifyReply | void> {
+  return async function postAuth(req: FastifyRequest, reply: FastifyReply): Promise<void> {
     try {
       const result = await fn(
         CoreKibanaRequest.from(buildKibanaRequest(req, reply)),
@@ -258,8 +269,8 @@ export function adoptToFastifyOnPostAuth(fn: OnPostAuthHandler, log: Logger) {
         postAuthToolkit
       );
       if (isKibanaResponse(result)) {
-        await adapter.handle(result, reply);
-        return reply;
+        await shortCircuitLifecycle(reply, () => adapter.handle(result, reply));
+        return;
       }
       if (result.type === OnPostAuthResultType.next) {
         return;
@@ -279,7 +290,7 @@ export function adoptToFastifyOnPostAuth(fn: OnPostAuthHandler, log: Logger) {
       );
     } catch (error) {
       log.error(error);
-      return sendInternalError(reply, log);
+      sendInternalError(reply, log);
     }
   };
 }
@@ -295,7 +306,10 @@ export function adoptToFastifyOnPreResponse(fn: OnPreResponseHandler, log: Logge
       const statusCode = reply.statusCode;
       const result = await fn(
         CoreKibanaRequest.from(buildKibanaRequest(req, reply)),
-        { statusCode },
+        {
+          statusCode,
+          headers: reply.getHeaders() as OnPreResponseInfo['headers'],
+        },
         preResponseToolkit
       );
       if (result.type === OnPreResponseResultType.next) {

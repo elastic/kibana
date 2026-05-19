@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { inspect } from 'util';
 import { URL } from 'url';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { Request as HapiRequest } from '@hapi/hapi';
@@ -24,6 +25,17 @@ import type {
  *
  * @internal
  */
+/** Plain object copy for config-schema validation (Fastify may use null-prototype query objects). */
+export function toPlainQuery(input: unknown): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  if (input && typeof input === 'object' && !Array.isArray(input)) {
+    for (const key of Object.keys(input as Record<string, unknown>)) {
+      out[key] = (input as Record<string, unknown>)[key];
+    }
+  }
+  return out;
+}
+
 export function toPlainRouteParams(input: unknown): Record<string, string | undefined> {
   const out: Record<string, string | undefined> = {};
   if (input && typeof input === 'object' && !Array.isArray(input)) {
@@ -134,6 +146,7 @@ export function buildHapiCompatRequestFromFastify(
   const app = ((fastifyReq as any).app = (fastifyReq as any).app ?? {});
   app.requestId = app.requestId ?? fastifyReq.id ?? '';
   app.requestUuid = app.requestUuid ?? '';
+  app.fastifyReply = fastifyReply;
 
   const security =
     typeof routeApp.security === 'function' ? undefined : (routeApp.security as RouteSecurity);
@@ -148,7 +161,7 @@ export function buildHapiCompatRequestFromFastify(
     headers: fastifyReq.headers,
     method: String(fastifyReq.method ?? '').toLowerCase(),
     params: toPlainRouteParams(fastifyReq.params),
-    query: (fastifyReq as { query?: Record<string, unknown> }).query ?? {},
+    query: toPlainQuery((fastifyReq as { query?: Record<string, unknown> }).query),
     payload: fastifyReq.body,
     path: url.pathname,
     raw: {
@@ -158,7 +171,7 @@ export function buildHapiCompatRequestFromFastify(
     auth: { isAuthenticated: false },
     info: { host: hostHeader, referrer: '' },
     route: {
-      method: String(fastifyReq.method ?? '').toLowerCase(),
+      method: String(route.method ?? fastifyReq.method ?? '').toLowerCase(),
       path: route.path,
       settings: {
         app: routeApp,
@@ -173,6 +186,17 @@ export function buildHapiCompatRequestFromFastify(
       },
     },
   };
+
+  compat.toString = function hapiCompatRequestToString(this: typeof compat) {
+    return `[HAPI.Request method="${this.method}" url="${String(this.url)}"]`;
+  };
+  compat.toJSON = function hapiCompatRequestToJSON(this: typeof compat) {
+    return {
+      method: this.method,
+      url: String(this.url),
+    };
+  };
+  compat[inspect.custom] = compat.toJSON;
 
   return compat as HapiRequest;
 }

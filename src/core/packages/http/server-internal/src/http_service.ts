@@ -47,6 +47,7 @@ import type { HttpConfigType } from './http_config';
 import { HttpConfig, config as httpConfig } from './http_config';
 import { HttpServer } from './http_server';
 import { FastifyHttpServer } from './fastify_http_server';
+import { toPlainQuery } from './fastify/fastify_to_hapi_request';
 import { HttpsRedirectServer } from './https_redirect_server';
 import type {
   InternalHttpServicePreboot,
@@ -136,7 +137,7 @@ export class HttpService
         'Preboot',
         this.config$.pipe(map(({ shutdownTimeout }) => shutdownTimeout))
       );
-      this.log.warn(
+      this.log.debug(
         `[experimental] server.experimental.framework: '${config.experimental.framework}' is enabled. The Fastify backend is being introduced incrementally - do not use in production.`
       );
     }
@@ -363,7 +364,7 @@ export class HttpService
         let filters: GenerateOpenApiDocumentOptionsFilters;
         let query: TypeOf<typeof querySchema>;
         try {
-          query = querySchema.validate(req.query);
+          query = querySchema.validate(toPlainQuery((req as { query?: unknown }).query));
           filters = {
             ...query,
             excludePathsMatching:

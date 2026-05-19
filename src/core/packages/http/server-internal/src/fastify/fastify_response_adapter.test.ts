@@ -19,6 +19,7 @@ describe('FastifyResponseAdapter', () => {
     const recordedHeaders = new Map<string, string | number | string[]>();
 
     const reply = {
+      request: { app: {} },
       code: jest.fn().mockReturnThis(),
       header(this: void, name: string, value: string | number | string[]) {
         recordedHeaders.set(name.toLowerCase(), value);
@@ -60,6 +61,7 @@ describe('FastifyResponseAdapter', () => {
     const recordedHeaders = new Map<string, string | number | string[]>();
 
     const reply = {
+      request: { app: {} },
       code: jest.fn().mockReturnThis(),
       header(this: void, name: string, value: string | number | string[]) {
         recordedHeaders.set(name.toLowerCase(), value);
@@ -89,6 +91,7 @@ describe('FastifyResponseAdapter', () => {
 
   it('formats customError bodies that nest a Boom on `message` (content_management wrapError)', async () => {
     const reply = {
+      request: { app: {} },
       code: jest.fn().mockReturnThis(),
       header: jest.fn(),
       hasHeader: jest.fn().mockReturnValue(false),
@@ -112,6 +115,7 @@ describe('FastifyResponseAdapter', () => {
   it('passes through duck-typed readable bodies on errors (Fastify stream detection parity)', async () => {
     const recordedHeaders = new Map<string, string | number | string[]>();
     const reply = {
+      request: { app: {} },
       code: jest.fn().mockReturnThis(),
       header(this: void, name: string, value: string | number | string[]) {
         recordedHeaders.set(name.toLowerCase(), value);

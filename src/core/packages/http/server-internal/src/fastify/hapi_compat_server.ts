@@ -83,7 +83,11 @@ const writeHapiResponseToReply = async (
   if (result.__redirectUrl) {
     return reply.redirect(result.__redirectUrl);
   }
-  return reply.send(result.__payload);
+  const payload = result.__payload;
+  if (typeof payload === 'string') {
+    return reply.type('text/plain; charset=utf-8').send(payload);
+  }
+  return reply.send(payload);
 };
 
 const isHapiCompatResponse = (value: unknown): value is HapiResponseLike =>

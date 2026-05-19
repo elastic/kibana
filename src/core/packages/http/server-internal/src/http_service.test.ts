@@ -552,7 +552,7 @@ describe('experimental.framework', () => {
     expect(fastifyInstance.setup).toHaveBeenCalled();
 
     // The opt-in is logged for observability.
-    const warnLogs = loggingSystemMock.collect(logger).warn.flat();
-    expect(warnLogs.some((line) => /experimental/i.test(String(line)))).toBe(true);
+    const debugLogs = loggingSystemMock.collect(logger).debug.flat();
+    expect(debugLogs.some((line) => /experimental/i.test(String(line)))).toBe(true);
   });
 });

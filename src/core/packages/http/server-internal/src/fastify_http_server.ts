@@ -8,7 +8,7 @@
  */
 
 import type { Duration } from 'moment';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, take } from 'rxjs';
 import type { Observable } from 'rxjs';
 import Fastify from 'fastify';
 import FindMyWay from 'find-my-way';
@@ -27,6 +27,7 @@ import { getServerListener, getRequestId } from '@kbn/server-http-tools';
 import { addSpanLabels } from '@kbn/apm-utils';
 import { isNil, omitBy } from 'lodash';
 import type { Logger } from '@kbn/logging';
+import type { AuthenticatedUser } from '@kbn/core-security-common';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { InternalExecutionContextSetup } from '@kbn/core-execution-context-server-internal';
 import type { InternalUserActivityServiceSetup } from '@kbn/core-user-activity-server-internal';
@@ -36,6 +37,7 @@ import type {
   Router,
 } from '@kbn/core-http-router-server-internal';
 import {
+  CoreKibanaRequest,
   KibanaResponse,
   formatErrorMeta,
   getInternalRouteHandler,
@@ -48,6 +50,10 @@ import type {
   KibanaRequest,
   KibanaRequestState,
   KibanaRouteOptions,
+  OnPreAuthHandler,
+  OnPostAuthHandler,
+  OnPreResponseHandler,
+  OnPreRoutingHandler,
   RouterDeprecatedApiDetails,
   RouterRoute,
   HttpServerInfo,
@@ -61,7 +67,11 @@ import { BasePath } from './base_path_service';
 import { AuthStateStorage } from './auth_state_storage';
 import { AuthHeadersStorage } from './auth_headers_storage';
 import { StaticAssets } from './static_assets';
-import { FastifyResponseAdapter } from './fastify/fastify_response_adapter';
+import {
+  FastifyResponseAdapter,
+  flushPendingCookieWrites,
+  syncNodeResponseHeadersToFastifyReply,
+} from './fastify/fastify_response_adapter';
 import {
   buildHapiCompatRequestFromFastify,
   toPlainRouteParams,
@@ -71,7 +81,9 @@ import {
   adoptToFastifyOnPreAuth,
   adoptToFastifyOnPreResponse,
   adoptToFastifyOnPreRouting,
+  buildKibanaRequest,
 } from './fastify/fastify_lifecycle';
+import { getEcsResponseLog } from './logging';
 import { extractHapiWildcardName, translateHapiPathToFastify } from './fastify/translate_path';
 import { HapiCompatServer } from './fastify/hapi_compat_server';
 import { createFastifyCookieSessionStorageFactory } from './fastify/fastify_cookie_session_storage';
@@ -228,7 +240,11 @@ export class FastifyHttpServer {
   private fallbackHandler?: FmwHandler;
   private config?: HttpConfig;
   private listening = false;
+  private stopping = false;
   private stopped = false;
+  private lifecycleHooksInstalledOnStart = false;
+  private fastifyReady = false;
+  private userActivity?: InternalUserActivityServiceSetup;
   private redactedSessionIdGetter?: (request: KibanaRequest) => Promise<string | undefined>;
   private readonly registeredRouters = new Set<IRouter>();
   private authRegistered = false;
@@ -251,7 +267,7 @@ export class FastifyHttpServer {
   constructor(
     private readonly coreContext: CoreContext,
     name: string,
-    _shutdownTimeout$: Observable<Duration>
+    private readonly shutdownTimeout$: Observable<Duration>
   ) {
     // Same logger id as {@link HttpServer} so FTR/CLI wait patterns match (e.g. config.status.ts).
     this.log = coreContext.logger.get('http', 'server', name);
@@ -271,6 +287,18 @@ export class FastifyHttpServer {
     this.redactedSessionIdGetter = getter;
   }
 
+  /**
+   * Seals the Fastify instance with `ready()` after {@link HttpService} registers core lifecycle
+   * hooks. Must run before `supertest(server.listener)` against a server that has not `start()`ed.
+   */
+  public async seal(): Promise<void> {
+    if (!this.fastify || this.fastifyReady) {
+      return;
+    }
+    await this.fastify.ready();
+    this.fastifyReady = true;
+  }
+
   public async setup({
     config$,
     executionContext,
@@ -278,14 +306,34 @@ export class FastifyHttpServer {
   }: HttpServerSetupOptions): Promise<HttpServerSetup> {
     const config = await firstValueFrom(config$);
     this.config = config;
+    this.userActivity = userActivity;
 
-    this.log.warn(
+    this.log.debug(
       `[experimental] Starting Kibana with the Fastify HTTP backend. Intended as a drop-in for the Hapi server contract; report behavioral differences during review.`
     );
 
     // Reuse the Kibana TLS/HTTP2 listener factory so `server.protocol`, TLS, etc. keep
     // working. Fastify accepts an arbitrary listener via `serverFactory`.
     const listener = getServerListener(config);
+    listener.prependListener('request', (req, res) => {
+      if (!this.stopping && !this.stopped) {
+        return;
+      }
+      if (res.headersSent) {
+        return;
+      }
+      const body = JSON.stringify({
+        statusCode: 503,
+        error: 'Service Unavailable',
+        message: 'Kibana is shutting down and not accepting new incoming requests',
+      });
+      (req as { __kibanaStoppedResponse?: boolean }).__kibanaStoppedResponse = true;
+      res.statusCode = 503;
+      res.setHeader('Connection', 'close');
+      res.setHeader('Content-Type', 'application/json; charset=utf-8');
+      res.setHeader('Content-Length', Buffer.byteLength(body));
+      res.end(body);
+    });
     this.fastify = Fastify({
       logger: false,
       bodyLimit: Math.max(config.maxPayload.getValueInBytes(), FASTIFY_BODY_LIMIT_CEILING_BYTES),
@@ -307,6 +355,24 @@ export class FastifyHttpServer {
     installFastifyGlobalErrorHandler(this.fastify, this.log);
     await installFastifyCompression(this.fastify, config, this.log);
     await installFastifyCors(this.fastify, config, this.log);
+
+    this.fastify.addHook('onRequest', async (req, reply) => {
+      if (
+        reply.raw.headersSent ||
+        (req.raw as { __kibanaStoppedResponse?: boolean }).__kibanaStoppedResponse
+      ) {
+        return reply;
+      }
+      if (!this.stopping && !this.stopped) {
+        return;
+      }
+      return reply.code(503).header('Connection', 'close').send({
+        statusCode: 503,
+        error: 'Service Unavailable',
+        message: 'Kibana is shutting down and not accepting new incoming requests',
+      });
+    });
+
     this.installKibanaRequestStateOnRequest(config, executionContext, userActivity);
 
     // Mirror @hapi/hapi: reject malformed `Cookie` headers before auth redirects (GET `/` would
@@ -352,6 +418,13 @@ export class FastifyHttpServer {
     });
     this.installFastifyDispatcher(this.fastify, this.fmw);
     this.installRouteLookupHook(this.fastify, this.fmw, config.socketTimeout);
+    this.installRedactedSessionIdPostAuthHandler();
+
+    this.fastify.addHook('onSend', async (req, reply, payload) => {
+      await flushPendingCookieWrites(req);
+      syncNodeResponseHeadersToFastifyReply(reply);
+      return payload;
+    });
 
     const basePathService = new BasePath(config.basePath, config.publicBaseUrl);
     const staticAssets = new StaticAssets({
@@ -380,6 +453,10 @@ export class FastifyHttpServer {
     const serverFacade = this.createHapiShapedServerFacade(this.fastify, hapiCompat, listener);
     this.server = serverFacade as FastifyHttpServer['server'];
 
+    this.setupBasePathRewrite(config, basePathService);
+    this.setupGracefulShutdownHandlers();
+    this.setupResponseLogging();
+
     return {
       server: serverFacade as any,
       registerRouter: this.registerRouter.bind(this),
@@ -396,11 +473,11 @@ export class FastifyHttpServer {
           config.csp.disableEmbedding,
           config.basePath
         ),
-      registerOnPreRouting: (handler) => {
+      registerOnPreRouting: (handler: OnPreRoutingHandler) => {
         if (!this.fastify) throw new Error('Fastify instance not initialized');
         this.fastify.addHook('onRequest', adoptToFastifyOnPreRouting(handler, this.log));
       },
-      registerOnPreAuth: (handler) => {
+      registerOnPreAuth: (handler: OnPreAuthHandler) => {
         if (!this.fastify) throw new Error('Fastify instance not initialized');
         this.fastify.addHook('preParsing', adoptToFastifyOnPreAuth(handler, this.log) as any);
       },
@@ -410,6 +487,9 @@ export class FastifyHttpServer {
         }
         if (this.authRegistered) {
           throw new Error('Auth interceptor was already registered');
+        }
+        if (this.fastifyReady) {
+          throw new Error('Auth interceptor cannot be registered after the HTTP server is sealed');
         }
         this.authRegistered = true;
         registerFastifyAuthentication({
@@ -422,11 +502,11 @@ export class FastifyHttpServer {
           authResponseHeaders: this.authResponseHeaders,
         });
       },
-      registerOnPostAuth: (handler) => {
+      registerOnPostAuth: (handler: OnPostAuthHandler) => {
         if (!this.fastify) throw new Error('Fastify instance not initialized');
         this.fastify.addHook('preHandler', adoptToFastifyOnPostAuth(handler, this.log));
       },
-      registerOnPreResponse: (handler) => {
+      registerOnPreResponse: (handler: OnPreResponseHandler) => {
         if (!this.fastify) throw new Error('Fastify instance not initialized');
         this.fastify.addHook('onSend', adoptToFastifyOnPreResponse(handler, this.log));
       },
@@ -467,7 +547,11 @@ export class FastifyHttpServer {
 
     this.flushBarePrefixRoutes();
 
-    await this.fastify.ready();
+    this.installLifecycleHooksOnStart();
+
+    if (!this.fastifyReady) {
+      await this.seal();
+    }
     await this.fastify.listen({ port: this.config.port, host: this.config.host });
     this.listening = true;
 
@@ -480,17 +564,180 @@ export class FastifyHttpServer {
   }
 
   public async stop(): Promise<void> {
-    this.stopped = true;
+    this.stopping = true;
     if (!this.fastify) {
+      this.stopping = false;
+      this.stopped = true;
       this.listening = false;
       return;
     }
+    this.stopped = true;
     try {
-      await this.fastify.close();
+      const shutdownTimeout = await firstValueFrom(this.shutdownTimeout$.pipe(take(1)));
+      await Promise.race([
+        this.fastify.close(),
+        new Promise<void>((resolve) => setTimeout(resolve, shutdownTimeout.asMilliseconds())),
+      ]);
     } catch (err) {
       this.log.warn(`Error while closing Fastify server: ${err?.message ?? err}`);
     }
+    this.stopping = false;
     this.listening = false;
+  }
+
+  /** Mirrors {@link HttpServer}'s `onPostAuth` redacted session id assignment (checks getter at request time). */
+  private installRedactedSessionIdPostAuthHandler(): void {
+    if (!this.fastify) {
+      return;
+    }
+    this.fastify.addHook('preHandler', async (req, reply) => {
+      if (!this.redactedSessionIdGetter) {
+        return;
+      }
+      try {
+        const kibanaRequest = CoreKibanaRequest.from(buildKibanaRequest(req, reply));
+        const redactedSessionId = await this.redactedSessionIdGetter(kibanaRequest);
+        const app = (req as { app?: KibanaRequestState }).app;
+        if (app) {
+          app.redactedSessionId = redactedSessionId;
+        }
+      } catch {
+        // leave session id undefined
+      }
+    });
+  }
+
+  private setupGracefulShutdownHandlers(): void {
+    this.registerOnPreRoutingFromSetup((request, response, toolkit) => {
+      if (this.stopping || this.stopped) {
+        return response.customError({
+          statusCode: 503,
+          body: { message: 'Kibana is shutting down and not accepting new incoming requests' },
+        });
+      }
+      return toolkit.next();
+    });
+  }
+
+  private setupBasePathRewrite(config: HttpConfig, basePathService: BasePath): void {
+    if (config.basePath === undefined || !config.rewriteBasePath) {
+      return;
+    }
+
+    this.registerOnPreRoutingFromSetup((request, response, toolkit) => {
+      const oldUrl = request.url.pathname + request.url.search;
+      const newURL = basePathService.remove(oldUrl);
+      if (newURL !== oldUrl) {
+        return toolkit.rewriteUrl(newURL);
+      }
+      return response.notFound();
+    });
+  }
+
+  private registerOnPreRoutingFromSetup(handler: OnPreRoutingHandler): void {
+    if (!this.fastify) {
+      throw new Error('Fastify instance not initialized');
+    }
+    this.fastify.addHook('onRequest', adoptToFastifyOnPreRouting(handler, this.log));
+  }
+
+  private setupResponseLogging(): void {
+    if (!this.fastify) {
+      return;
+    }
+    const log = this.coreContext.logger.get('http', 'server', 'response');
+    this.fastify.addHook('onResponse', (req, reply, done) => {
+      if (!log.isLevelEnabled('debug')) {
+        done();
+        return;
+      }
+      const compatReq = buildKibanaRequest(req, reply) as unknown as Request;
+      const received = (req as { __receivedAt?: number }).__receivedAt ?? Date.now();
+      const now = Date.now();
+      const compatWithInfo = compatReq as unknown as { info: Record<string, unknown> };
+      compatWithInfo.info = {
+        ...compatWithInfo.info,
+        received,
+        responded: now,
+        completed: now,
+        remoteAddress: req.ip,
+        referrer: (req.headers.referer as string | undefined) ?? '',
+      };
+      (compatReq as unknown as { response: unknown }).response = {
+        statusCode: reply.statusCode,
+        headers: reply.getHeaders(),
+      };
+      const { message, meta } = getEcsResponseLog(compatReq, this.log);
+      if (message) {
+        log.debug(message, meta);
+      }
+      done();
+    });
+  }
+
+  /**
+   * Installed from {@link start} after all `registerOnPostAuth` handlers are registered so these
+   * run last in the `preHandler` phase (mirrors Hapi `onPreHandler` after `onPostAuth`).
+   */
+  private installLifecycleHooksOnStart(): void {
+    if (!this.fastify || this.lifecycleHooksInstalledOnStart) {
+      return;
+    }
+    this.lifecycleHooksInstalledOnStart = true;
+
+    this.fastify.addHook('preHandler', (req, _reply, done) => {
+      const app = (req as { app?: KibanaRequestState }).app;
+      if (app) {
+        app.span?.end();
+        app.otelSubSpan?.end();
+        app.span = null;
+        app.otelSubSpan = undefined;
+      }
+
+      const compatReq = buildKibanaRequest(req, _reply);
+      const user = this.authState.get<AuthenticatedUser>(compatReq).state ?? null;
+      const { redactedSessionId } = app ?? {};
+      this.userActivity?.setInjectedContext({
+        client: req.ip
+          ? {
+              ip: req.ip,
+              address: req.ip,
+            }
+          : undefined,
+        user: user
+          ? {
+              id: user.profile_uid,
+              name: user.username,
+              email: user.email,
+              roles: user.roles ? [...user.roles] : undefined,
+            }
+          : undefined,
+        session: {
+          id: redactedSessionId,
+        },
+        http: {
+          request: {
+            referrer: (req.headers.referer as string | undefined) ?? '',
+          },
+        },
+      });
+
+      done();
+    });
+
+    this.fastify.addHook('onSend', (req, reply, payload, done) => {
+      const app = (req as { app?: KibanaRequestState }).app;
+      if (app && !app.otelSubSpan) {
+        app.otelSubSpan = this.createSubspanForRequest('post-route handler middlewares');
+      }
+      done(null, payload);
+    });
+
+    this.fastify.addHook('onResponse', (req, _reply, done) => {
+      const app = (req as { app?: KibanaRequestState }).app;
+      app?.otelSubSpan?.end();
+      done();
+    });
   }
 
   public getRouters(_options: GetRoutersOptions = {}): {
@@ -657,11 +904,12 @@ export class FastifyHttpServer {
       | 'PATCH'
       | 'HEAD'
       | 'OPTIONS';
+    const routeHandler = ((req: FastifyRequest, reply: FastifyReply) =>
+      handler(req, reply)) as unknown as any;
     this.registerFindMyWayRoute(
       method,
       url,
-      ((req: FastifyRequest, reply: FastifyReply) => handler(req, reply)) as unknown as any,
-      // The store travels with the route in find-my-way; the early route-lookup hook
+      routeHandler, // The store travels with the route in find-my-way; the early route-lookup hook
       // copies it to `req.app.matchedRoute` so lifecycle hooks (onPreAuth/onPostAuth)
       // and the request builder can populate `KibanaRequest.route.options.security`
       // and friends without a second lookup.
@@ -675,6 +923,14 @@ export class FastifyHttpServer {
         wildcardName: extractHapiWildcardName(route.path),
       }
     );
+    // Hapi automatically serves HEAD for GET routes; find-my-way requires an explicit entry.
+    if (method === 'GET') {
+      this.registerFindMyWayRoute('HEAD', url, routeHandler, {
+        kibanaRoute: route,
+        kibanaRouteOptions,
+        wildcardName: extractHapiWildcardName(route.path),
+      });
+    }
   }
 
   /**
@@ -722,6 +978,12 @@ export class FastifyHttpServer {
     fmw: FmwInstance<FmwHTTPVersion.V1>
   ): void {
     const dispatcher = async (req: FastifyRequest, reply: FastifyReply) => {
+      if (
+        reply.raw.headersSent ||
+        (req.raw as { __kibanaStoppedResponse?: boolean }).__kibanaStoppedResponse
+      ) {
+        return;
+      }
       const lookupPath = getFindMyWayLookupPath(req);
       const match = fmw.find(req.method as any, lookupPath);
       if (!match) {
@@ -789,9 +1051,12 @@ export class FastifyHttpServer {
       pathnameMatchesWildcardPattern: pathnameMatchesFastifyWildcardPattern,
       defaultSocketTimeoutMs,
     };
-    fastify.addHook('preParsing', (req, reply, _payload, done) => {
+    fastify.addHook('preParsing', async (req, reply, payload) => {
       populateMatchedRouteFromFindMyWay(req, reply, lookupOptions);
-      done();
+      // Fastify's `preParsingHookRunner` assumes a defined payload (reads `.length` on streams);
+      // GET/HEAD/DELETE without a body may pass `undefined` here; Fastify expects a
+      // stream/buffer/string (reads `.length`), not `undefined`.
+      return payload === undefined ? Buffer.alloc(0) : payload;
     });
   }
 
@@ -896,6 +1161,7 @@ export class FastifyHttpServer {
   ) {
     return async (req: FastifyRequest, reply: FastifyReply) => {
       const app = ((req as any).app = (req as any).app ?? {});
+      let apmSpan: ReturnType<typeof apm.startSpan> | null | undefined;
       try {
         let compat = app[KIBANA_HAPI_COMPAT_REQUEST] as ReturnType<
           typeof buildHapiCompatRequestFromFastify
@@ -910,10 +1176,13 @@ export class FastifyHttpServer {
           );
           app[KIBANA_HAPI_COMPAT_REQUEST] = compat;
         }
+        apmSpan = apm.startSpan('route handler');
         const kibanaResponse = await internalHandler(compat);
+        apmSpan?.end();
         return await this.responseAdapter.handle(kibanaResponse, reply);
       } catch (error) {
         apm.captureError(error);
+        apmSpan?.end();
         let compatForError = app[KIBANA_HAPI_COMPAT_REQUEST] as ReturnType<
           typeof buildHapiCompatRequestFromFastify
         > | null;

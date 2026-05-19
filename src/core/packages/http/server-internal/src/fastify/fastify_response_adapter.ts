@@ -11,7 +11,7 @@ import type { IncomingMessage } from 'http';
 import { STATUS_CODES } from 'http';
 import * as stream from 'stream';
 import typeDetect from 'type-detect';
-import type { FastifyReply } from 'fastify';
+import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { ElasticsearchErrorDetails } from '@kbn/es-errors';
 import { isResponseError as isElasticsearchResponseError } from '@kbn/es-errors';
 import type { ResponseError, ResponseErrorAttributes } from '@kbn/core-http-server';
@@ -96,6 +96,42 @@ function isOpaqueErrorBody(payload: unknown): boolean {
  * Hapi copies {@link IncomingMessage} headers onto the outgoing response when the body is a proxied
  * Node client response; Fastify only streams bytes unless we set headers explicitly.
  */
+/**
+ * Session/auth code may set `Set-Cookie` on `reply.raw` before {@link FastifyReply#send}; copy those
+ * onto the Fastify reply so they are not dropped when the route handler responds.
+ */
+/** @internal */
+export async function flushPendingCookieWrites(req: FastifyRequest | undefined): Promise<void> {
+  if (!req) {
+    return;
+  }
+  const app = (req as { app?: { pendingCookieWrites?: Array<Promise<unknown>> } }).app;
+  const pending = app?.pendingCookieWrites;
+  if (!pending?.length) {
+    return;
+  }
+  await Promise.all(pending);
+  app!.pendingCookieWrites = [];
+}
+
+/** @internal */
+export function syncNodeResponseHeadersToFastifyReply(reply: FastifyReply): void {
+  const raw = reply.raw;
+  if (!raw || typeof raw.getHeader !== 'function') {
+    return;
+  }
+  const setCookie = raw.getHeader('Set-Cookie');
+  if (setCookie === undefined) {
+    return;
+  }
+  const cookies = Array.isArray(setCookie) ? setCookie : [setCookie];
+  for (const cookie of cookies) {
+    if (cookie !== undefined) {
+      reply.header('set-cookie', cookie);
+    }
+  }
+}
+
 function applyIncomingMessageHeaders(reply: FastifyReply, incoming: IncomingMessage): void {
   for (const [name, value] of Object.entries(incoming.headers)) {
     if (value === undefined) continue;
@@ -123,30 +159,33 @@ export class FastifyResponseAdapter {
         )}.`
       );
     }
-    return this.toFastifyReply(kibanaResponse, reply);
+    return await this.toFastifyReply(kibanaResponse, reply);
   }
 
-  private toFastifyReply(kibanaResponse: KibanaResponse, reply: FastifyReply): FastifyReply {
+  private async toFastifyReply(
+    kibanaResponse: KibanaResponse,
+    reply: FastifyReply
+  ): Promise<FastifyReply> {
     if (kibanaResponse.options.bypassErrorFormat) {
-      return this.toSuccess(kibanaResponse, reply);
+      return await this.toSuccess(kibanaResponse, reply);
     }
     // Error responses whose body is already wire-format bytes/streams must not be wrapped in the
     // Kibana JSON error envelope. Delegate to `toSuccess` so Fastify applies the same `Reply#send`
     // stream detection as successful responses (see `HapiResponseAdapter.toError` opaque branch).
     if (statusHelpers.isError(kibanaResponse.status) && isOpaqueErrorBody(kibanaResponse.payload)) {
-      return this.toSuccess(kibanaResponse, reply);
+      return await this.toSuccess(kibanaResponse, reply);
     }
     if (statusHelpers.isError(kibanaResponse.status)) {
-      return this.toError(kibanaResponse, reply);
+      return await this.toError(kibanaResponse, reply);
     }
     if (
       statusHelpers.isSuccess(kibanaResponse.status) ||
       statusHelpers.isNotModified(kibanaResponse.status)
     ) {
-      return this.toSuccess(kibanaResponse, reply);
+      return await this.toSuccess(kibanaResponse, reply);
     }
     if (statusHelpers.isRedirect(kibanaResponse.status)) {
-      return this.toRedirect(kibanaResponse, reply);
+      return await this.toRedirect(kibanaResponse, reply);
     }
     throw new Error(
       `Unexpected Http status code. Expected from 100 to 599, but given: ${kibanaResponse.status}.`
@@ -277,7 +316,12 @@ export class FastifyResponseAdapter {
     reply.header('cache-control', HAPI_DEFAULT_CACHE_CONTROL);
   }
 
-  private toSuccess(kibanaResponse: KibanaResponse, reply: FastifyReply): FastifyReply {
+  private async toSuccess(
+    kibanaResponse: KibanaResponse,
+    reply: FastifyReply
+  ): Promise<FastifyReply> {
+    await flushPendingCookieWrites(reply.request);
+    syncNodeResponseHeadersToFastifyReply(reply);
     if (this.shouldReturnNotModified(reply, kibanaResponse.options.headers)) {
       reply.code(304);
       this.applyHeaders(reply, kibanaResponse.options.headers);
@@ -320,7 +364,12 @@ export class FastifyResponseAdapter {
     return reply.send(payload);
   }
 
-  private toRedirect(kibanaResponse: KibanaResponse, reply: FastifyReply): FastifyReply {
+  private async toRedirect(
+    kibanaResponse: KibanaResponse,
+    reply: FastifyReply
+  ): Promise<FastifyReply> {
+    await flushPendingCookieWrites(reply.request);
+    syncNodeResponseHeadersToFastifyReply(reply);
     const { headers } = kibanaResponse.options;
     const location = headers && typeof headers.location === 'string' ? headers.location : undefined;
     if (!location) {
@@ -334,10 +383,12 @@ export class FastifyResponseAdapter {
     return reply.send(payload !== undefined && payload !== null ? payload : '');
   }
 
-  private toError(
+  private async toError(
     kibanaResponse: KibanaResponse<ResponseError>,
     reply: FastifyReply
-  ): FastifyReply {
+  ): Promise<FastifyReply> {
+    await flushPendingCookieWrites(reply.request);
+    syncNodeResponseHeadersToFastifyReply(reply);
     const { payload } = kibanaResponse;
 
     // Streaming/buffer errors are passed through opaquely (e.g. proxied responses).
