@@ -39,8 +39,19 @@ export class FindingsCollector {
     }
   }
 
+  /**
+   * Returns deduplicated findings. When the same rule fires for the same type
+   * in both the regular and serverless baseline checks, only one finding is kept.
+   * Deduplication key: ruleId + typeName + message.
+   */
   getFindings(): SavedObjectsCheckFinding[] {
-    return this.findings.slice();
+    const seen = new Set<string>();
+    return this.findings.filter((f) => {
+      const key = `${f.ruleId}:${f.typeName ?? ''}:${f.message}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
   }
 }
 

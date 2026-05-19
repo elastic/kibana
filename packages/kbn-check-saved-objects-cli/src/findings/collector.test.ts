@@ -95,4 +95,43 @@ describe('FindingsCollector', () => {
     expect(findings[0].message).toBe('boom');
     expect(findings[1].message).toBe('kaboom');
   });
+
+  it('deduplicates identical findings (same ruleId + typeName + message)', () => {
+    const collector = new FindingsCollector();
+    const duplicate = new SavedObjectsCheckError({
+      ruleId: RULE_IDS.MODEL_VERSION_MISSING_CREATE_SCHEMA,
+      severity: 'error',
+      typeName: 'my-type',
+      message:
+        "The new model version '3' for SO type 'my-type' is missing the 'create' schema definition.",
+    });
+
+    // Simulates the same error thrown by both the regular and serverless baseline checks
+    collector.ingestErrors([duplicate, duplicate]);
+
+    expect(collector.getFindings()).toHaveLength(1);
+  });
+
+  it('keeps findings that share a ruleId but differ in typeName', () => {
+    const collector = new FindingsCollector();
+    const errFoo = new SavedObjectsCheckError({
+      ruleId: RULE_IDS.MODEL_VERSION_MISSING_CREATE_SCHEMA,
+      severity: 'error',
+      typeName: 'foo',
+      message:
+        "The new model version '3' for SO type 'foo' is missing the 'create' schema definition.",
+    });
+    const errBar = new SavedObjectsCheckError({
+      ruleId: RULE_IDS.MODEL_VERSION_MISSING_CREATE_SCHEMA,
+      severity: 'error',
+      typeName: 'bar',
+      message:
+        "The new model version '3' for SO type 'bar' is missing the 'create' schema definition.",
+    });
+
+    collector.ingestErrors([errFoo, errBar]);
+
+    expect(collector.getFindings()).toHaveLength(2);
+    expect(collector.getFindings().map((f) => f.typeName)).toEqual(['foo', 'bar']);
+  });
 });
