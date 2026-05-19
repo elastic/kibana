@@ -25,13 +25,14 @@ export const MalformedMatchesValueCallout = () => {
       <p>
         <FormattedMessage
           id="exceptionList-components.malformedMatchesValueCallout.body"
-          defaultMessage="An entry uses {matches} with a value containing escape sequences (e.g. {escapedStar}, {escapedQuestion}, {escapedBackslash}). These will match literal characters, not wildcard patterns — for example {escapedStar} matches a literal asterisk. If you intended an exact match, consider using {is} instead."
+          defaultMessage="An entry uses {matches} with a value containing escape sequences (e.g. {escapedStar}, {escapedQuestion}). These will {literalCharacters}, not wildcard patterns (for example {escapedStar} matches a literal asterisk). If you intended an exact match, {changeOperator} to {is}."
           values={{
             matches: <strong>{'matches'}</strong>,
             is: <strong>{'is'}</strong>,
             escapedStar: <code>{'\\*'}</code>,
             escapedQuestion: <code>{'\\?'}</code>,
-            escapedBackslash: <code>{'\\\\'}</code>,
+            literalCharacters: <strong>{'match literal characters'}</strong>,
+            changeOperator: <strong>{'change the operator'}</strong>,
           }}
         />
       </p>
