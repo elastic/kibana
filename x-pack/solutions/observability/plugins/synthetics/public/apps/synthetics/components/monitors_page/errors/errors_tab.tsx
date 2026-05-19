@@ -56,7 +56,7 @@ export const ErrorsTab = () => {
       )}
       {isEmpty && (
         <EuiEmptyPrompt
-          icon={<EuiIcon type="checkCircleFill" color="success" size="xl" />}
+          icon={<EuiIcon type="checkCircleFill" color="success" size="xl" aria-hidden={true} />}
           title={<h3>{EMPTY_TITLE}</h3>}
           body={<p>{EMPTY_BODY}</p>}
         />

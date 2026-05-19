@@ -195,7 +195,11 @@ const MonitorTypeCard = ({
               >
                 <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
                   <EuiFlexItem grow={false}>
-                    <EuiIcon type={TYPE_ICONS[t.monitorType] ?? 'dot'} size="s" />
+                    <EuiIcon
+                      type={TYPE_ICONS[t.monitorType] ?? 'dot'}
+                      size="s"
+                      aria-hidden={true}
+                    />
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <EuiText size="xs">{t.monitorType}</EuiText>
@@ -391,7 +395,12 @@ const TagBreakdownCard = ({
                 .map((t) => `${t.tag}: ${t.downChecks}`)
                 .join(', ')}
             >
-              <EuiBadge color="hollow">+{tags.length - MAX_VISIBLE_TAGS} more</EuiBadge>
+              <EuiBadge color="hollow">
+                +{tags.length - MAX_VISIBLE_TAGS}{' '}
+                {i18n.translate('xpack.synthetics.tagBreakdownCard.moreBadgeLabel', {
+                  defaultMessage: 'more',
+                })}
+              </EuiBadge>
             </EuiToolTip>
           </EuiFlexItem>
         )}
@@ -488,7 +497,7 @@ const EmergingTermsCard = ({
     <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s" color="subdued">
       <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
         <EuiFlexItem grow={false}>
-          <EuiIcon type="sparkles" size="s" color="accent" />
+          <EuiIcon type="sparkles" size="s" color="accent" aria-hidden={true} />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiText

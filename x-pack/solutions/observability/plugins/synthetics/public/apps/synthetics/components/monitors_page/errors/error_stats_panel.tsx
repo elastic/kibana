@@ -137,7 +137,12 @@ const LocationBadges = ({
       {overflow.length > 0 && (
         <EuiFlexItem grow={false}>
           <EuiToolTip content={overflow.map((loc) => `${loc.location}: ${loc.count}`).join(', ')}>
-            <EuiBadge color="hollow">+{overflow.length} more</EuiBadge>
+            <EuiBadge color="hollow">
+              +{overflow.length}{' '}
+              {i18n.translate('xpack.synthetics.locationBadges.moreBadgeLabel', {
+                defaultMessage: 'more',
+              })}
+            </EuiBadge>
           </EuiToolTip>
         </EuiFlexItem>
       )}
@@ -155,7 +160,7 @@ const TrendIndicator = ({
   if (direction === 'flat') {
     return (
       <span>
-        <EuiIcon type="minus" /> {STABLE_LABEL}
+        <EuiIcon type="minus" aria-hidden={true} /> {STABLE_LABEL}
       </span>
     );
   }
@@ -163,7 +168,11 @@ const TrendIndicator = ({
   const isUp = direction === 'up';
   return (
     <span style={{ color: isUp ? '#BD271E' : '#017D73' }}>
-      <EuiIcon type={isUp ? 'sortUp' : 'sortDown'} color={isUp ? 'danger' : 'success'} />{' '}
+      <EuiIcon
+        type={isUp ? 'sortUp' : 'sortDown'}
+        color={isUp ? 'danger' : 'success'}
+        aria-hidden={true}
+      />{' '}
       {isUp ? '+' : '-'}
       {delta}%
     </span>
