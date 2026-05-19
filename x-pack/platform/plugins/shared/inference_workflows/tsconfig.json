@@ -12,6 +12,7 @@
     "@kbn/workflows",
     "@kbn/workflows-extensions",
     "@kbn/inference-plugin",
-    "@kbn/inference-common"
+    "@kbn/inference-common",
+    "@kbn/search-inference-endpoints"
   ]
 }
