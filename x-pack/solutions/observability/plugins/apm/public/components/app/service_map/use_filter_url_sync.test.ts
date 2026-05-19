@@ -49,9 +49,7 @@ describe('useFilterUrlSync', () => {
   });
 
   it('restores filters from _a URL state into filterManager on mount', () => {
-    const storedFilters = [
-      { meta: { key: 'transaction.type', negate: false, disabled: false } },
-    ];
+    const storedFilters = [{ meta: { key: 'transaction.type', negate: false, disabled: false } }];
     mockGet.mockReturnValue({ filters: storedFilters });
 
     renderHook(() => useFilterUrlSync());

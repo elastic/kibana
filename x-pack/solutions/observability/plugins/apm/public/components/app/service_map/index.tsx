@@ -84,7 +84,13 @@ export function ServiceMapServiceDetail() {
   const { esQuery } = useServiceMapSearchContext();
 
   return (
-    <ServiceMap environment={environment} kuery={kuery} start={start} end={end} esQuery={esQuery ?? undefined} />
+    <ServiceMap
+      environment={environment}
+      kuery={kuery}
+      start={start}
+      end={end}
+      esQuery={esQuery ?? undefined}
+    />
   );
 }
 
