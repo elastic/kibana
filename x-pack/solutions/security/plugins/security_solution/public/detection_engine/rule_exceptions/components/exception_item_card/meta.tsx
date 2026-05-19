@@ -101,7 +101,7 @@ export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
             data-test-subj={`${dataTestSubj}-rulesPopover`}
             id={'rulesPopover'}
           >
-            <EuiContextMenuPanel size="s" css={referenceLinksContainerStyles} items={itemActions} />
+            <EuiContextMenuPanel css={referenceLinksContainerStyles} items={itemActions} />
           </EuiPopover>
         </EuiFlexItem>
       );
@@ -137,7 +137,6 @@ export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
               id={'listsPopover'}
             >
               <EuiContextMenuPanel
-                size="s"
                 css={referenceLinksContainerStyles}
                 items={[
                   <EuiContextMenuItem

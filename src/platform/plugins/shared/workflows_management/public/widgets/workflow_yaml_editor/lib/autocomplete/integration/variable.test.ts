@@ -591,9 +591,11 @@ version: "1"
 name: "test"
 consts:
   apiUrl: "https://api.example.com"
-inputs:
-  - name: threshold
-    type: number
+triggers:
+  - type: manual
+    inputs:
+      - name: threshold
+        type: number
 steps:
   - name: step1
     type: console

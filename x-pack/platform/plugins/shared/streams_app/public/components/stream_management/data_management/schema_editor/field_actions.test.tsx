@@ -105,7 +105,7 @@ const openActionsMenu = async () => {
 
 const getMenuItemNames = () => {
   // EuiContextMenu items are buttons with class euiContextMenuItem, excluding the title and actions button
-  const menuItems = screen.getAllByRole('button').filter((button) => {
+  const menuItems = screen.getAllByRole('menuitem').filter((button) => {
     const isContextMenuItem = button.classList.contains('euiContextMenuItem');
     const isTitle = button.getAttribute('data-test-subj') === 'contextMenuPanelTitle';
     const isActionsButton = button.getAttribute('data-test-subj') === 'streamsAppActionsButton';
@@ -212,7 +212,7 @@ describe('FieldActionsCell', () => {
       const { mockOnFieldUpdate } = renderWithContext(fieldWithDescription as SchemaEditorField);
       await openActionsMenu();
 
-      const clearDescriptionButton = screen.getByRole('button', { name: 'Clear description' });
+      const clearDescriptionButton = screen.getByRole('menuitem', { name: 'Clear description' });
       await user.click(clearDescriptionButton);
 
       expect(mockOnFieldUpdate).toHaveBeenCalledWith({
@@ -322,7 +322,7 @@ describe('FieldActionsCell', () => {
       const { mockOnFieldUpdate } = renderWithContext(fieldWithDescription as SchemaEditorField);
       await openActionsMenu();
 
-      const clearDescriptionButton = screen.getByRole('button', { name: 'Clear description' });
+      const clearDescriptionButton = screen.getByRole('menuitem', { name: 'Clear description' });
       await user.click(clearDescriptionButton);
 
       expect(mockOnFieldUpdate).toHaveBeenCalledWith({
@@ -382,7 +382,7 @@ describe('FieldActionsCell', () => {
       const { mockOnFieldUpdate } = renderWithContext(fieldWithDescription as SchemaEditorField);
       await openActionsMenu();
 
-      const clearDescriptionButton = screen.getByRole('button', { name: 'Clear description' });
+      const clearDescriptionButton = screen.getByRole('menuitem', { name: 'Clear description' });
       await user.click(clearDescriptionButton);
 
       expect(mockOnFieldUpdate).toHaveBeenCalledWith({

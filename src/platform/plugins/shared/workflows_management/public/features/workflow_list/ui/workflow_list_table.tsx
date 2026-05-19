@@ -29,10 +29,9 @@ import { Link } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowListItemDto } from '@kbn/workflows';
+import { WorkflowTriggersAndSteps } from './workflow_triggers_and_steps';
 import { getRunTooltipContent, StatusBadge, WorkflowStatus } from '../../../shared/ui';
 import { NextExecutionTime } from '../../../shared/ui/next_execution_time';
-import { WorkflowsTriggersList } from '../../../widgets/worflows_triggers_list/worflows_triggers_list';
-import { WorkflowsStepTypesList } from '../../../widgets/workflows_step_types_list/workflows_step_types_list';
 import { WORKFLOWS_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
 
 export interface WorkflowListTableProps {
@@ -167,30 +166,26 @@ export const WorkflowListTable = ({
       },
       {
         field: 'triggers',
-        name: i18n.translate('workflows.workflowList.column.trigger', {
-          defaultMessage: 'Trigger',
+        name: i18n.translate('workflows.workflowList.column.triggersAndSteps', {
+          defaultMessage: 'Triggers and Steps',
         }),
-        width: '12%',
+        width: '24%',
         render: (value: unknown, item: WorkflowListItemDto) => {
-          if (!item.history || item.history.length === 0) {
-            return <WorkflowsTriggersList triggers={item.definition?.triggers ?? []} />;
+          const triggers = item.definition?.triggers ?? [];
+          const steps = item.definition?.steps ?? [];
+          const history = item.history ?? [];
+
+          const cell = <WorkflowTriggersAndSteps triggers={triggers} steps={steps} />;
+
+          if (history.length > 0 && triggers.length > 0) {
+            return (
+              <NextExecutionTime triggers={triggers} history={history}>
+                {cell}
+              </NextExecutionTime>
+            );
           }
-          return (
-            <NextExecutionTime triggers={item.definition?.triggers ?? []} history={item.history}>
-              <WorkflowsTriggersList triggers={item.definition?.triggers ?? []} />
-            </NextExecutionTime>
-          );
+          return cell;
         },
-      },
-      {
-        field: 'steps',
-        name: i18n.translate('workflows.workflowList.column.steps', {
-          defaultMessage: 'Steps',
-        }),
-        width: '12%',
-        render: (value: unknown, item: WorkflowListItemDto) => (
-          <WorkflowsStepTypesList steps={item.definition?.steps ?? []} />
-        ),
       },
       {
         name: i18n.translate('workflows.workflowList.column.lastRun', {

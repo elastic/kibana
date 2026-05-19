@@ -67,11 +67,7 @@ export const AlertSnoozePopover = ({ onApply, dataConditionTypes }: AlertSnoozeP
 
   const triggerElement = useMemo(() => {
     return (
-      <EuiContextMenuItem
-        onClick={togglePopover}
-        data-test-subj="alertSnoozePopoverTrigger"
-        size="s"
-      >
+      <EuiContextMenuItem onClick={togglePopover} data-test-subj="alertSnoozePopoverTrigger">
         {i18n.SNOOZE_TRIGGER_BUTTON}
       </EuiContextMenuItem>
     );
@@ -84,6 +80,7 @@ export const AlertSnoozePopover = ({ onApply, dataConditionTypes }: AlertSnoozeP
       closePopover={closePopover}
       panelPaddingSize="none"
       anchorPosition="downRight"
+      display="block"
       data-test-subj="alertSnoozePopover"
     >
       <EuiPopoverTitle paddingSize="m">
