@@ -172,7 +172,7 @@ export class ActionPolicyClient {
       await this.assertRuleExists(parsed.ruleId);
     }
 
-    const userProfile = await this.getUserProfile();
+    const userProfileUid = await this.userService.getCurrentUserProfileUid();
     const now = new Date().toISOString();
 
     const apiKeyAttrs = await this.apiKeyService.create(`Action Policy: ${parsed.name}`);
@@ -180,11 +180,9 @@ export class ActionPolicyClient {
     const attributes = buildCreateActionPolicyAttributes({
       data: parsed,
       auth: apiKeyAttrs,
-      createdBy: userProfile.uid,
-      createdByUsername: userProfile.username,
+      createdBy: userProfileUid,
       createdAt: now,
-      updatedBy: userProfile.uid,
-      updatedByUsername: userProfile.username,
+      updatedBy: userProfileUid,
       updatedAt: now,
     });
 
@@ -258,7 +256,7 @@ export class ActionPolicyClient {
   public async updateActionPolicy(params: UpdateActionPolicyParams): Promise<ActionPolicyResponse> {
     const parsed = this.parseActionPolicyData(updateActionPolicyDataSchema, params.data, 'update');
 
-    const userProfile = await this.getUserProfile();
+    const userProfileUid = await this.userService.getCurrentUserProfileUid();
     const now = new Date().toISOString();
 
     const { attrs: existingPolicy } = await this.getExistingActionPolicy(params.options.id);
@@ -272,8 +270,7 @@ export class ActionPolicyClient {
       existing: existingPolicy,
       update: parsed,
       auth: apiKeyAttrs,
-      updatedBy: userProfile.uid,
-      updatedByUsername: userProfile.username,
+      updatedBy: userProfileUid,
       updatedAt: now,
     });
 
@@ -353,7 +350,7 @@ export class ActionPolicyClient {
     const { attrs: existingPolicy } = await this.getExistingActionPolicy(id);
 
     const oldAuth = await this.getDecryptedAuth(id);
-    const userProfile = await this.getUserProfile();
+    const userProfileUid = await this.userService.getCurrentUserProfileUid();
     const now = new Date().toISOString();
     const apiKeyAttrs = await this.apiKeyService.create(`Action Policy: ${existingPolicy.name}`);
 
@@ -362,8 +359,7 @@ export class ActionPolicyClient {
         id,
         attrs: {
           auth: apiKeyAttrs,
-          updatedBy: userProfile.uid,
-          updatedByUsername: userProfile.username,
+          updatedBy: userProfileUid,
           updatedAt: now,
         },
       });
@@ -388,15 +384,14 @@ export class ActionPolicyClient {
     let processed = 0;
 
     if (updateActions.length > 0) {
-      const userProfile = await this.getUserProfile();
+      const userProfileUid = await this.userService.getCurrentUserProfileUid();
       const now = new Date().toISOString();
 
       const objects = updateActions.map((action) => ({
         id: action.id,
         attrs: {
           ...resolveActionAttrs(action),
-          updatedBy: userProfile.uid,
-          updatedByUsername: userProfile.username,
+          updatedBy: userProfileUid,
           updatedAt: now,
         },
       }));
@@ -508,9 +503,7 @@ export class ActionPolicyClient {
     const sortFieldMap: Record<string, string> = {
       name: 'name.keyword',
       createdAt: 'createdAt',
-      createdByUsername: 'createdByUsername',
       updatedAt: 'updatedAt',
-      updatedByUsername: 'updatedByUsername',
     };
 
     return sortFieldMap[sortField];
@@ -627,7 +620,7 @@ export class ActionPolicyClient {
       validateDateString(stateUpdate.snoozedUntil);
     }
 
-    const userProfile = await this.getUserProfile();
+    const userProfileUid = await this.userService.getCurrentUserProfileUid();
     const now = new Date().toISOString();
 
     try {
@@ -635,8 +628,7 @@ export class ActionPolicyClient {
         id,
         attrs: {
           ...stateUpdate,
-          updatedBy: userProfile.uid,
-          updatedByUsername: userProfile.username,
+          updatedBy: userProfileUid,
           updatedAt: now,
         },
       });
@@ -651,10 +643,6 @@ export class ActionPolicyClient {
     }
 
     return this.getActionPolicy({ id });
-  }
-
-  private async getUserProfile() {
-    return this.userService.getCurrentUserProfile();
   }
 
   public async upsertActionPolicy({
@@ -675,7 +663,7 @@ export class ActionPolicyClient {
       return { policy, created: true };
     }
 
-    const userProfile = await this.getUserProfile();
+    const userProfileUid = await this.userService.getCurrentUserProfileUid();
     const now = new Date().toISOString();
 
     const { attrs: existingAttrs, version: existingVersion } = await this.getExistingActionPolicy(
@@ -696,10 +684,8 @@ export class ActionPolicyClient {
         data: parsed,
         auth: apiKeyAttrs,
         createdBy: existingAttrs.createdBy,
-        createdByUsername: existingAttrs.createdByUsername,
         createdAt: existingAttrs.createdAt,
-        updatedBy: userProfile.uid,
-        updatedByUsername: userProfile.username,
+        updatedBy: userProfileUid,
         updatedAt: now,
       }),
       enabled: existingAttrs.enabled,

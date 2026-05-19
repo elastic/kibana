@@ -73,19 +73,15 @@ export const buildCreateActionPolicyAttributes = ({
   data,
   auth,
   createdBy,
-  createdByUsername,
   createdAt,
   updatedBy,
-  updatedByUsername,
   updatedAt,
 }: {
   data: CreateActionPolicyData;
   auth: ActionPolicySavedObjectAttributes['auth'];
   createdBy: string | null;
-  createdByUsername: string | null;
   createdAt: string;
   updatedBy: string | null;
-  updatedByUsername: string | null;
   updatedAt: string;
 }): ActionPolicySavedObjectAttributes => {
   return {
@@ -103,10 +99,8 @@ export const buildCreateActionPolicyAttributes = ({
     snoozedUntil: null,
     auth,
     createdBy,
-    createdByUsername,
     createdAt,
     updatedBy,
-    updatedByUsername,
     updatedAt,
   };
 };
@@ -116,14 +110,12 @@ export const buildUpdateActionPolicyAttributes = ({
   update,
   auth,
   updatedBy,
-  updatedByUsername,
   updatedAt,
 }: {
   existing: ActionPolicySavedObjectAttributes;
   update: UpdateActionPolicyData;
   auth: ActionPolicySavedObjectAttributes['auth'];
   updatedBy: string | null;
-  updatedByUsername: string | null;
   updatedAt: string;
 }): ActionPolicySavedObjectAttributes => {
   return {
@@ -141,9 +133,7 @@ export const buildUpdateActionPolicyAttributes = ({
     snoozedUntil: normalizeNullableField(existing.snoozedUntil),
     auth,
     createdBy: existing.createdBy,
-    createdByUsername: existing.createdByUsername,
     updatedBy,
-    updatedByUsername,
     createdAt: existing.createdAt,
     updatedAt,
   };
@@ -175,10 +165,8 @@ export const transformActionPolicySoAttributesToApiResponse = ({
     snoozedUntil: normalizeNullableField(attributes.snoozedUntil),
     auth: toAuthResponse(attributes.auth),
     createdBy: attributes.createdBy,
-    createdByUsername: attributes.createdByUsername,
     createdAt: attributes.createdAt,
     updatedBy: attributes.updatedBy,
-    updatedByUsername: attributes.updatedByUsername,
     updatedAt: attributes.updatedAt,
   };
 };
