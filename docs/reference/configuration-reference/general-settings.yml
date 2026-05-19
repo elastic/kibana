@@ -895,7 +895,7 @@ groups:
         default: 100000
         applies_to:
           - "stack: deprecated 8.3"
-          - "ech: ga"
+          - "ech: unavailable"
           - "self: ga"
         deprecation_details: "Deprecated in 8.3.0. Use `unifiedSearch.autocomplete.valueSuggestions.terminateAfter` instead."
 
@@ -906,7 +906,7 @@ groups:
         default: 1000
         applies_to:
           - "stack: deprecated 8.3"
-          - "ech: ga"
+          - "ech: unavailable"
           - "self: ga"
         deprecation_details: "Deprecated in 8.3.0. Use `unifiedSearch.autocomplete.valueSuggestions.timeout` instead."
 
