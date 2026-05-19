@@ -59,4 +59,11 @@ describe('alertAnalysisApiDrivenSkill', () => {
       'STOP and report the error verbatim. Do NOT verify by listing all alerts'
     );
   });
+
+  it('guards against retrying security.security_labs_search when content is not installed', () => {
+    expect(alertAnalysisApiDrivenSkill.content).toContain('install-not-completed error');
+    expect(alertAnalysisApiDrivenSkill.content).toContain('GenAI Settings');
+    expect(alertAnalysisApiDrivenSkill.content).toContain('do NOT retry the tool');
+    expect(alertAnalysisApiDrivenSkill.content).toContain('do NOT fabricate threat intelligence');
+  });
 });

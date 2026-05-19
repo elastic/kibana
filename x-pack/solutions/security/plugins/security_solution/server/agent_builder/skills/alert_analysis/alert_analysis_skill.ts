@@ -54,6 +54,7 @@ Use this skill when:
   - Known threat actor TTPs matching the alert's MITRE technique
   - Malware family information if process hashes or names are available
   - IOC context for IPs, domains, or file hashes found in the alert
+- If 'security.security_labs_search' returns an install-not-completed error referencing the GenAI Settings page, surface that link to the user as the final answer; do not retry the tool, do not call other tools to compensate, and do not fabricate threat intelligence — the install is a prerequisite the user must complete first.
 
 ### 4. Assess Entity Risk
 - Check entity risk scores using 'security.entity_risk_score' for involved hosts and users

@@ -47,6 +47,11 @@ Hard rules:
   inside a workflow YAML — they are not workflow step types.
 - If \`workflow_execute_step\` returns \`"alert not found"\` or any explicit error,
   STOP and report the error verbatim. Do NOT verify by listing all alerts.
+- If \`security.security_labs_search\` returns an install-not-completed error
+  pointing at the GenAI Settings page, surface that link to the user as the
+  final answer; do NOT retry the tool, do NOT call other tools to compensate,
+  and do NOT fabricate threat intelligence — the install is a prerequisite
+  the user must complete first.
 
 ## Related Alerts API (correlation by alertId)
 
