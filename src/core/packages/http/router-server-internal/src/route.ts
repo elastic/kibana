@@ -64,6 +64,7 @@ interface Dependencies {
   handler: RequestHandlerEnhanced<unknown, unknown, unknown, RouteMethod>;
   log: Logger;
   method: RouteMethod;
+  isDevMode?: boolean;
 }
 
 export function buildRoute({
@@ -72,6 +73,7 @@ export function buildRoute({
   route,
   router,
   method,
+  isDevMode,
 }: Dependencies): InternalRouterRoute {
   route = prepareRouteConfigValidation(route);
   const routeSchemas = routeSchemasFromRouteConfig(route, method);
@@ -84,6 +86,7 @@ export function buildRoute({
         route,
         router,
         routeSchemas,
+        isDevMode,
       });
     },
     method,
@@ -163,7 +166,7 @@ export function validateHapiRequest(
 /** @internal */
 export const handle = async (
   request: Request,
-  { router, route, handler, routeSchemas, log }: HandlerDependencies
+  { router, route, handler, routeSchemas, log, isDevMode = false }: HandlerDependencies
 ) => {
   const {
     error,
@@ -189,6 +192,18 @@ export const handle = async (
       failure.request,
       kibanaResponseFactory
     );
+    if (isDevMode) {
+      const validationErrorMessage = validateOnRequestValidationErrorResponse(
+        route.onRequestValidationError,
+        customResponse
+      );
+      if (validationErrorMessage) {
+        return kibanaResponseFactory.custom({
+          statusCode: 500,
+          body: `Failed output validation: ${validationErrorMessage}`,
+        });
+      }
+    }
     if (isPublicAccessApiRoute(route.options)) {
       injectVersionHeader(BASE_PUBLIC_VERSION, customResponse);
     }
@@ -245,6 +260,31 @@ function logRequestValidationError(
     `${statusCode} Request Validation Error`,
     formatErrorMeta(statusCode, { request, error })
   );
+}
+
+function validateOnRequestValidationErrorResponse(
+  onRequestValidationError: OnRequestValidationError,
+  response: IKibanaResponse
+): string | undefined {
+  const { response: responseValidation } = onRequestValidationError;
+  const validation = responseValidation[response.status];
+  if (!validation) {
+    return `No response validation defined for status code [${response.status}] in 'onRequestValidationError.response'.`;
+  }
+  if (!validation.body) {
+    return undefined;
+  }
+
+  try {
+    const { unsafe } = responseValidation;
+    const validator = RouteValidator.from({
+      body: validation.body(),
+      unsafe: { body: unsafe?.body },
+    });
+    validator.getBody(response.payload, 'response body');
+  } catch (e) {
+    return e instanceof Error ? e.message : String(e);
+  }
 }
 
 /**

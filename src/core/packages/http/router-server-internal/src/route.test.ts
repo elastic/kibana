@@ -180,6 +180,62 @@ describe('handle', () => {
     expect(response.options.headers).toEqual({ 'elastic-api-version': '2023-10-31' });
   });
 
+  it('validates custom request validation error responses in dev mode', async () => {
+    const response = await handle(createRequest({ query: { foo: 'bar' } }), {
+      router,
+      handler,
+      log,
+      method: 'get',
+      isDevMode: true,
+      route: {
+        path: '/test',
+        validate: { query: schema.object({ foo: schema.number() }) },
+        onRequestValidationError: {
+          response: {
+            422: {
+              description: 'Validation failed',
+              body: () => schema.object({ message: schema.string() }),
+            },
+          },
+          handler: (_error, _request, res) => res.custom({ statusCode: 422, body: { message: 1 } }),
+        },
+      },
+      routeSchemas: RouteValidator.from({ query: schema.object({ foo: schema.number() }) }),
+    });
+
+    expect(response.status).toEqual(500);
+    expect(response.payload).toMatch(
+      'Failed output validation: [response body.message]: expected value of type [string] but got [number]'
+    );
+    expect(log.error).not.toHaveBeenCalled();
+  });
+
+  it('rejects undocumented custom request validation error status codes in dev mode', async () => {
+    const response = await handle(createRequest({ query: { foo: 'bar' } }), {
+      router,
+      handler,
+      log,
+      method: 'get',
+      isDevMode: true,
+      route: {
+        path: '/test',
+        validate: { query: schema.object({ foo: schema.number() }) },
+        onRequestValidationError: {
+          response: { 400: { description: 'Validation failed' } },
+          handler: (_error, _request, res) =>
+            res.custom({ statusCode: 422, body: { message: 'Invalid request' } }),
+        },
+      },
+      routeSchemas: RouteValidator.from({ query: schema.object({ foo: schema.number() }) }),
+    });
+
+    expect(response.status).toEqual(500);
+    expect(response.payload).toMatch(
+      "Failed output validation: No response validation defined for status code [422] in 'onRequestValidationError.response'."
+    );
+    expect(log.error).not.toHaveBeenCalled();
+  });
+
   it('rejects onRequestValidationError when validate is false', () => {
     expect(() =>
       buildRoute({
