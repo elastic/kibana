@@ -7,13 +7,7 @@
 
 import React from 'react';
 import { apm } from '@elastic/apm-rum';
-import {
-  EuiButtonEmpty,
-  EuiCallOut,
-  EuiCodeBlock,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiCallOut, EuiCodeBlock, EuiSpacer, EuiText } from '@elastic/eui';
 
 import * as i18n from './translations';
 
@@ -46,8 +40,7 @@ export class MarkdownErrorBoundary extends React.Component<Props, State> {
     });
   }
 
-  private readonly toggleSource = () =>
-    this.setState((prev) => ({ showSource: !prev.showSource }));
+  private readonly toggleSource = () => this.setState((prev) => ({ showSource: !prev.showSource }));
 
   render() {
     if (!this.state.hasError) {

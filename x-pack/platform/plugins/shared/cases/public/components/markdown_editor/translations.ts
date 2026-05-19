@@ -25,12 +25,9 @@ export const UNSUPPORTED_MIME_TYPE_MESSAGE = i18n.translate(
   }
 );
 
-export const RENDER_ERROR_TITLE = i18n.translate(
-  'xpack.cases.markdownEditor.renderError.title',
-  {
-    defaultMessage: 'This content could not be displayed',
-  }
-);
+export const RENDER_ERROR_TITLE = i18n.translate('xpack.cases.markdownEditor.renderError.title', {
+  defaultMessage: 'This content could not be displayed',
+});
 
 export const RENDER_ERROR_DESCRIPTION = i18n.translate(
   'xpack.cases.markdownEditor.renderError.description',
