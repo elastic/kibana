@@ -8,11 +8,25 @@
  */
 
 /**
- * Stub for `@kbn/core-chrome-layout-utils`.
+ * Packaging stub for `@kbn/core-chrome-layout-utils`.
  *
- * Inlines the pure EUI-theme-based helpers the layout depends on so the
- * standalone bundle does not reach back into the Kibana source tree at build
- * time. Kept byte-for-byte in sync with the upstream implementation.
+ * WHY: source files under `../../src/` import from `@kbn/core-chrome-layout-utils`.
+ * That package lives in the Kibana monorepo and is not published to npm, so it cannot
+ * resolve when the tarball is consumed externally (e.g. by Cloud UI).
+ *
+ * HOW: this file is aliased over the real import at build time by:
+ *   - `packaging/tsconfig.json`      → `compilerOptions.paths`
+ *   - `packaging/webpack.config.js`  → `resolve.alias`
+ * Kibana itself never compiles this file — it only applies during the packaging build.
+ *
+ * SCOPE: trimmed copy. Only `getHighContrastBorder` and `getHighContrastSeparator`
+ * from `high_contrast.ts` are re-exported here. `scroll.ts` (scroll-container helpers)
+ * is intentionally omitted — chrome-layout doesn't depend on it at the packaged
+ * boundary. Upstream source of truth:
+ *   src/core/packages/chrome/layout/core-chrome-layout-utils/src/high_contrast.ts
+ *
+ * MAINTENANCE: if a source file under `../../src/` begins importing a symbol not
+ * listed here, add it — otherwise the packaging type-validation step will fail.
  */
 
 import type { UseEuiTheme } from '@elastic/eui';

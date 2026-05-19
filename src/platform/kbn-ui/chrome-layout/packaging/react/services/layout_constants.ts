@@ -8,11 +8,25 @@
  */
 
 /**
- * Stub for `@kbn/core-chrome-layout-constants`.
+ * Packaging stub for `@kbn/core-chrome-layout-constants`.
  *
- * Provides the same constants exported by the Kibana package so that source
- * files can be bundled without modification. Consumers of the standalone
- * package should ensure their application provides matching DOM elements.
+ * WHY: source files under `../../src/` import from `@kbn/core-chrome-layout-constants`.
+ * That package lives in the Kibana monorepo and is not published to npm, so it cannot
+ * resolve when the tarball is consumed externally (e.g. by Cloud UI).
+ *
+ * HOW: this file is aliased over the real import at build time by:
+ *   - `packaging/tsconfig.json`      → `compilerOptions.paths`
+ *   - `packaging/webpack.config.js`  → `resolve.alias`
+ * Kibana itself never compiles this file — it only applies during the packaging build.
+ *
+ * SCOPE: trimmed copy. Only the symbols chrome-layout actually imports at runtime
+ * are re-exported here; test helpers and unused utilities are omitted. Upstream
+ * source of truth:
+ *   src/core/packages/chrome/layout/core-chrome-layout-constants/src/css_variables.ts
+ *   src/core/packages/chrome/layout/core-chrome-layout-constants/src/levels.ts
+ *
+ * MAINTENANCE: if a source file under `../../src/` begins importing a symbol not
+ * listed here, add it — otherwise the packaging type-validation step will fail.
  */
 
 export const APP_MAIN_SCROLL_CONTAINER_ID = 'app-main-scroll';
