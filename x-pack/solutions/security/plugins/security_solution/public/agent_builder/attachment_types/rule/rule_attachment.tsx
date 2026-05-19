@@ -17,12 +17,13 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import type {
-  AttachmentUIDefinition,
-  AttachmentRenderProps,
-  AttachmentServiceStartContract,
+import {
+  type AttachmentUIDefinition,
+  type AttachmentRenderProps,
+  type AttachmentServiceStartContract,
+  type ActionButton,
+  ActionButtonType,
 } from '@kbn/agent-builder-browser/attachments';
-import { ActionButtonType } from '@kbn/agent-builder-browser/attachments';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
@@ -360,13 +361,10 @@ const RuleInlineContent: React.FC<AttachmentRenderProps<RuleAttachment>> = ({ at
         )}
       >
         <EuiText size="xs">
-          {i18n.translate(
-            'xpack.securitySolution.agentBuilder.ruleAttachment.limitationsBody',
-            {
-              defaultMessage:
-                'Only ES|QL rules are supported. Requires existing index data. Severity and risk score default to Low / 21 — ask the assistant to change them.',
-            }
-          )}
+          {i18n.translate('xpack.securitySolution.agentBuilder.ruleAttachment.limitationsBody', {
+            defaultMessage:
+              'Only ES|QL rules are supported. Requires existing index data. Severity and risk score default to Low / 21 — ask the assistant to change them.',
+          })}
         </EuiText>
       </EuiCallOut>
     </EuiPanel>
@@ -417,7 +415,7 @@ export const createRuleAttachmentDefinition = ({
       return [];
     }
 
-    const buttons = [
+    const buttons: ActionButton[] = [
       {
         label: rule.id
           ? i18n.translate('xpack.securitySolution.agentBuilder.ruleAttachment.saveChanges', {
