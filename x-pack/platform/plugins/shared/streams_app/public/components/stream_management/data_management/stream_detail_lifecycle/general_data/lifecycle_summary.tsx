@@ -238,8 +238,9 @@ const IlmLifecycleSummary = ({
       {!ilmSummary.policyMissing && (
         <DataLifecycleSummary
           model={{
-            phases: ilmSummary.phases,
+            phases: (isPreviewActive && previewTimelinePhases) || ilmSummary.phases,
             loading: ilmSummary.loading,
+            downsampleSteps: previewTimelineDownsampleSteps ?? undefined,
           }}
           title={
             isIlmLifecycle(definition.effective_lifecycle)
