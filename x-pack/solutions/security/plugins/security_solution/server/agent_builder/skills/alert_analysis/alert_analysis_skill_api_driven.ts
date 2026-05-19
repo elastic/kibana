@@ -23,65 +23,42 @@ export const alertAnalysisApiDrivenSkill = defineSkillType({
   description:
     'API-driven alert triage and investigation: fetch alerts, correlate related alerts through internal APIs, ' +
     'enrich with Security Labs intelligence, and assess entity risk to determine disposition.',
-  content: `# Alert Analysis Guide (API-Driven)
+  content: `# Alert Analysis Skill
 
-## When to Use This Skill
+## When to use
 
-Use this skill when:
-- Triaging a specific security alert to determine disposition
-- Correlating related alerts across shared entities (host, user, source.ip, destination.ip)
-- Enriching alert context with Security Labs threat intelligence
-- Prioritizing investigation using entity risk signals
+The question is about: triaging a specific alert, correlating related alerts by \`alertId\`,
+Security Labs threat intel, or entity risk signals.
 
-## Required Step Selection Policy
+## Tool selection (one rule per question shape)
 
-- Use \`kibana.request\` (via \`platform.workflows.workflow_execute_step\`) for internal Security Solution API calls.
-- Use Elasticsearch steps (\`elasticsearch.search\`, \`elasticsearch.esql.query\`, etc.) for Elasticsearch lookups.
-- Do **NOT** proxy standard Elasticsearch reads through \`kibana.request\`.
+| Question shape | Tool |
+|---|---|
+| Correlation by \`alertId\` | \`platform.workflows.workflow_execute_step\` — see Related Alerts API below |
+| List/prioritize alerts (e.g. "high/critical last 24h") | \`security.alerts\` |
+| Security Labs intel (e.g. "Lazarus techniques") | \`security.security_labs_search\` |
+| Entity risk score (e.g. "risk score for DC01") | \`security.entity_risk_score\` |
 
-## Recommended Investigation Flow
+Hard rules:
+- When an \`alertId\` is present, call \`workflow_execute_step\` **directly**.
+  Do NOT first call \`security.alerts\` to "fetch alert context".
+- \`security.alerts\`, \`security.security_labs_search\`, and \`security.entity_risk_score\`
+  are top-level registry tools. NEVER nest them as \`type: security.alerts\`
+  inside a workflow YAML — they are not workflow step types.
+- If \`workflow_execute_step\` returns \`"alert not found"\` or any explicit error,
+  STOP and report the error verbatim. Do NOT verify by listing all alerts.
 
-1. Fetch alert context with \`security.alerts\`
-2. Correlate related alerts by calling internal API path \`${ALERT_ANALYSIS_GET_RELATED_ALERTS_API_PATH}\` with \`kibana.request\`
-3. Query threat intelligence with \`security.security_labs_search\`
-4. Check host/user risk with \`security.entity_risk_score\`
-5. Synthesize disposition and next actions
+## Related Alerts API (correlation by alertId)
 
-## Tool Selection Guardrails
+Use this exact \`workflow_execute_step\` call shape. The (POST, ${ALERT_ANALYSIS_GET_RELATED_ALERTS_API_PATH})
+pair is registered as read-only, so the confirmation dialog is skipped automatically.
 
-- For list/prioritization questions (for example: "high/critical alerts in last 24h"), use only \`security.alerts\` unless explicit correlation by \`alertId\` is requested.
-- For Security Labs intel questions (for example: "Lazarus Group techniques"), use only \`security.security_labs_search\`.
-- For risk score questions (for example: "risk score for host DC01"), use only \`security.entity_risk_score\`.
-- For correlation requests that include an \`alertId\`, call \`platform.workflows.workflow_execute_step\` with step type \`kibana.request\` and path \`${ALERT_ANALYSIS_GET_RELATED_ALERTS_API_PATH}\`.
-- Do NOT use \`platform.core.search\` for related-alert correlation when an \`alertId\` is available.
-- Do NOT use workflow status/inspection tools as a substitute for executing the related-alert request.
-- If the workflow call fails or is blocked, report that clearly and include the returned error details.
-
-## Internal API Contract (Related Alerts)
-
-Call \`platform.workflows.workflow_execute_step\` with inline workflow YAML and a \`stepName\`:
-
-- **method**: \`POST\`
-- **path**: \`${ALERT_ANALYSIS_GET_RELATED_ALERTS_API_PATH}\`
-- **body**:
-  - \`alertId\` (required)
-  - \`timeWindowHours\` (optional, default 24, max 168)
-  - \`hostNames\`, \`userNames\`, \`sourceIps\`, \`destIps\` (optional arrays; pass when already known)
-  - \`maxResults\` (optional, bounded server-side for token efficiency)
-
-When \`alertId\` is present, use this exact shape (always include
-\`confirmation_body\` — \`workflow_execute_step\` falls back to a flat
-key/value dump otherwise):
 \`\`\`
 tool_id: platform.workflows.workflow_execute_step
 params:
   stepName: get_related_alerts
   confirmation_body: |
-    **Correlate related alerts**
-    - **alertId:** \`<alert-id>\`
-    - **Time window:** 24 hours
-    - **Path:** ${ALERT_ANALYSIS_GET_RELATED_ALERTS_API_PATH}
-    - Read-only internal API; returns a token-budgeted correlation summary.
+    Correlate related alerts for \`<alert-id>\` over the last 24h (read-only API).
   yaml: |
     version: "1"
     name: alert_analysis_related_alerts
@@ -100,12 +77,11 @@ params:
             timeWindowHours: 24
 \`\`\`
 
-This (method, path) pair is registered as read-only in
-\`workflow_execute_step\`, so the confirmation dialog is skipped — the
-\`confirmation_body\` field is still included for forward-compatibility
-with any deployment whose allow-list omits it.
+Optional body fields: \`timeWindowHours\` (default 24, max 168),
+\`hostNames\` / \`userNames\` / \`sourceIps\` / \`destIps\` (arrays, pass when already known),
+\`maxResults\` (bounded server-side).
 
-The API response is token-budgeted and may include truncation metadata.`,
+The response is token-budgeted and may include truncation metadata.`,
   getRegistryTools: () => [
     SECURITY_ALERTS_TOOL_ID,
     SECURITY_LABS_SEARCH_TOOL_ID,

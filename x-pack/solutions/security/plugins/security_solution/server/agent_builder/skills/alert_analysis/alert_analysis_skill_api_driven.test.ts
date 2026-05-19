@@ -39,9 +39,24 @@ describe('alertAnalysisApiDrivenSkill', () => {
     );
   });
 
-  it('documents that Elasticsearch lookups are not proxied through kibana.request', () => {
+  it('documents the hard rule against pre-fetching with security.alerts when alertId is present', () => {
     expect(alertAnalysisApiDrivenSkill.content).toContain(
-      'Do **NOT** proxy standard Elasticsearch reads through `kibana.request`'
+      'When an `alertId` is present, call `workflow_execute_step` **directly**'
+    );
+    expect(alertAnalysisApiDrivenSkill.content).toContain(
+      'Do NOT first call `security.alerts` to "fetch alert context"'
+    );
+  });
+
+  it('documents that registry tools must not be nested as workflow step types', () => {
+    expect(alertAnalysisApiDrivenSkill.content).toContain(
+      'NEVER nest them as `type: security.alerts`'
+    );
+  });
+
+  it('documents the short-circuit-on-error rule', () => {
+    expect(alertAnalysisApiDrivenSkill.content).toContain(
+      'STOP and report the error verbatim. Do NOT verify by listing all alerts'
     );
   });
 });
