@@ -43,6 +43,8 @@ import type {
 import type { IFileStore } from '@kbn/agent-builder-server/runner/filestore';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
+import type { TodoStateManager } from '@kbn/agent-builder-server/runner';
+import { createTodoStateManager } from '@kbn/agent-builder-server/runner';
 import type { AgentExecutionService } from '@kbn/agent-builder-server/execution';
 import type { ToolsServiceStart } from '../../tools';
 import type { AgentsServiceStart } from '../../agents';
@@ -94,6 +96,7 @@ export interface CreateScopedRunnerDeps {
   resultStore: WritableToolResultStore;
   skillsStore: WritableSkillsStore;
   attachmentStateManager: AttachmentStateManager;
+  todoStateManager: TodoStateManager;
   skillServiceStart: SkillServiceStart;
   pluginsServiceStart: PluginsServiceStart;
   toolManager: ToolManager;
@@ -113,6 +116,7 @@ export type CreateRunnerDeps = Omit<
   | 'resultStore'
   | 'skillsStore'
   | 'attachmentStateManager'
+  | 'todoStateManager'
   | 'modelProvider'
   | 'promptManager'
   | 'stateManager'
@@ -214,6 +218,8 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       getTypeDefinition: runnerDeps.attachmentsService.getTypeDefinition,
     });
 
+    const todoStateManager = createTodoStateManager(conversation?.state?.todos);
+
     const stateManager = createConversationStateManager(conversation);
     const promptManager = createPromptManager({ state: promptState });
     const toolManager = createToolManager();
@@ -231,6 +237,7 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       resultStore,
       skillsStore,
       attachmentStateManager,
+      todoStateManager,
       stateManager,
       promptManager,
       filestore,

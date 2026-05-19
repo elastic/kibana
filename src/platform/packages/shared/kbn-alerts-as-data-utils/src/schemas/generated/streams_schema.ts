@@ -123,6 +123,8 @@ const StreamsAlertOptional = rt.partial({
   'kibana.alert.workflow_assignee_ids': schemaStringArray,
   'kibana.alert.workflow_status': schemaString,
   'kibana.alert.workflow_tags': schemaStringArray,
+  'kibana.cps_scope.expression': schemaString,
+  'kibana.cps_scope.linked_projects': schemaUnknownArray,
   'kibana.version': schemaString,
   tags: schemaStringArray,
 });
