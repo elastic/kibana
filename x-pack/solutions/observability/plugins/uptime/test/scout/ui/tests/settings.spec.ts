@@ -12,11 +12,13 @@ import { test, testData } from '../fixtures';
 test.describe('Uptime settings page', { tag: ['@local-stateful-classic'] }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects, kbnClient }) => {
     await browserAuth.loginAsPrivilegedUser();
-    await kbnClient.request({
-      method: 'PUT',
-      path: '/api/uptime/settings',
-      body: DYNAMIC_SETTINGS_DEFAULTS,
-    }).catch(() => {});
+    await kbnClient
+      .request({
+        method: 'PUT',
+        path: '/api/uptime/settings',
+        body: DYNAMIC_SETTINGS_DEFAULTS,
+      })
+      .catch(() => {});
     await pageObjects.uptimeApp.navigateToOverview(testData.DEFAULT_NAVIGATION_SEARCH);
   });
 

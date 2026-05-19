@@ -22,8 +22,7 @@ const makeTlsDoc = (
   opts: { sha256?: string; commonName?: string; monitorName?: string; urlFull?: string } = {}
 ) => {
   const timestamp = new Date();
-  const sha256 =
-    opts.sha256 ?? '1a48f1db13c3bd1482ba1073441e74a1bb1308dc445c88749e0dc4f1889a88a4';
+  const sha256 = opts.sha256 ?? '1a48f1db13c3bd1482ba1073441e74a1bb1308dc445c88749e0dc4f1889a88a4';
   return {
     '@timestamp': timestamp.toISOString(),
     monitor: {
@@ -89,11 +88,13 @@ const UPTIME_ROLE = {
 test.describe('Uptime certificates', { tag: ['@local-stateful-classic'] }, () => {
   test.setTimeout(180_000);
   test.beforeAll(async ({ esArchiver, kbnClient }) => {
-    await kbnClient.request({
-      method: 'PUT',
-      path: '/api/uptime/settings',
-      body: DYNAMIC_SETTINGS_DEFAULTS,
-    }).catch(() => {});
+    await kbnClient
+      .request({
+        method: 'PUT',
+        path: '/api/uptime/settings',
+        body: DYNAMIC_SETTINGS_DEFAULTS,
+      })
+      .catch(() => {});
     await esArchiver.loadIfNeeded(BLANK_ARCHIVE);
   });
 

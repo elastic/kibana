@@ -73,7 +73,9 @@ test.describe('Uptime feature controls - security', { tag: ['@local-stateful-cla
 
     await test.step('shows read-only badge', async () => {
       await page.testSubj.waitForSelector('headerBadge', { timeout: 10_000 });
-      const badgeLabel = await page.testSubj.locator('headerBadge').getAttribute('data-test-badge-label');
+      const badgeLabel = await page.testSubj
+        .locator('headerBadge')
+        .getAttribute('data-test-badge-label');
       expect(badgeLabel?.toUpperCase()).toBe('READ ONLY');
     });
   });

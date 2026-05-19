@@ -6,8 +6,7 @@
  */
 
 export const ES_ARCHIVES = {
-  FULL_HEARTBEAT:
-    'x-pack/solutions/observability/test/fixtures/es_archives/uptime/full_heartbeat',
+  FULL_HEARTBEAT: 'x-pack/solutions/observability/test/fixtures/es_archives/uptime/full_heartbeat',
   BLANK: 'x-pack/solutions/observability/test/fixtures/es_archives/uptime/blank',
 } as const;
 

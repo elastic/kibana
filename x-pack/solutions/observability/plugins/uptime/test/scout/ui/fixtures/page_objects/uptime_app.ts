@@ -81,8 +81,13 @@ export class UptimeAppPage {
   }
 
   async getSnapshotCount(): Promise<{ up: string; down: string }> {
-    const up = await this.page.testSubj.locator('xpack.synthetics.snapshot.donutChart.up').textContent() ?? '0';
-    const down = await this.page.testSubj.locator('xpack.synthetics.snapshot.donutChart.down').textContent() ?? '0';
+    const up =
+      (await this.page.testSubj.locator('xpack.synthetics.snapshot.donutChart.up').textContent()) ??
+      '0';
+    const down =
+      (await this.page.testSubj
+        .locator('xpack.synthetics.snapshot.donutChart.down')
+        .textContent()) ?? '0';
     return { up: up.trim(), down: down.trim() };
   }
 
@@ -96,11 +101,19 @@ export class UptimeAppPage {
 
   async resetStatusFilter() {
     const upFilter = this.page.testSubj.locator('xpack.synthetics.filterBar.filterStatusUp');
-    if (await upFilter.evaluate((el: Element) => el.classList.contains('euiFilterButton-hasActiveFilters'))) {
+    if (
+      await upFilter.evaluate((el: Element) =>
+        el.classList.contains('euiFilterButton-hasActiveFilters')
+      )
+    ) {
       await this.setStatusFilterUp();
     }
     const downFilter = this.page.testSubj.locator('xpack.synthetics.filterBar.filterStatusDown');
-    if (await downFilter.evaluate((el: Element) => el.classList.contains('euiFilterButton-hasActiveFilters'))) {
+    if (
+      await downFilter.evaluate((el: Element) =>
+        el.classList.contains('euiFilterButton-hasActiveFilters')
+      )
+    ) {
       await this.setStatusFilterDown();
     }
   }
@@ -138,9 +151,7 @@ export class UptimeAppPage {
 
   async setMonitorListPageSize(size: number) {
     await this.openPageSizeSelectPopover();
-    await this.page.testSubj.click(
-      `xpack.uptime.monitorList.pageSizeSelect.sizeSelectItem${size}`
-    );
+    await this.page.testSubj.click(`xpack.uptime.monitorList.pageSizeSelect.sizeSelectItem${size}`);
   }
 
   async getCurrentUrl(): Promise<string> {
@@ -151,8 +162,12 @@ export class UptimeAppPage {
 
   async loadSettingsFields() {
     await this.page.testSubj.waitForSelector('heartbeat-indices-input-loaded', { timeout: 10_000 });
-    const heartbeatIndices = await this.page.testSubj.locator('heartbeat-indices-input-loaded').inputValue();
-    const expiration = await this.page.testSubj.locator('expiration-threshold-input-loaded').inputValue();
+    const heartbeatIndices = await this.page.testSubj
+      .locator('heartbeat-indices-input-loaded')
+      .inputValue();
+    const expiration = await this.page.testSubj
+      .locator('expiration-threshold-input-loaded')
+      .inputValue();
     const age = await this.page.testSubj.locator('age-threshold-input-loaded').inputValue();
     return {
       heartbeatIndices,
@@ -188,7 +203,9 @@ export class UptimeAppPage {
   async applySettings() {
     await this.page.testSubj.click('apply-settings-button');
     await expect(async () => {
-      const disabled = await this.page.testSubj.locator('heartbeat-indices-input-loaded').getAttribute('disabled');
+      const disabled = await this.page.testSubj
+        .locator('heartbeat-indices-input-loaded')
+        .getAttribute('disabled');
       expect(disabled).toBeNull();
     }).toPass({ timeout: 10_000 });
   }
@@ -197,7 +214,9 @@ export class UptimeAppPage {
 
   async hasViewCertButton(): Promise<boolean> {
     try {
-      await this.page.locator('[href="/app/uptime/certificates"]').waitFor({ state: 'visible', timeout: 15_000 });
+      await this.page
+        .locator('[href="/app/uptime/certificates"]')
+        .waitFor({ state: 'visible', timeout: 15_000 });
       return true;
     } catch {
       return false;
@@ -235,7 +254,9 @@ export class UptimeAppPage {
 
   async hasMLJob(): Promise<boolean> {
     try {
-      await this.page.testSubj.locator('uptimeManageMLJobBtn').waitFor({ state: 'visible', timeout: 5_000 });
+      await this.page.testSubj
+        .locator('uptimeManageMLJobBtn')
+        .waitFor({ state: 'visible', timeout: 5_000 });
       return true;
     } catch {
       return false;
@@ -264,7 +285,9 @@ export class UptimeAppPage {
         await this.waitForLoadingToFinish();
       }
       await this.page.testSubj.locator('uptimeManageMLJobBtn').click({ timeout: 10_000 });
-      await this.page.testSubj.locator('uptimeManageMLContextMenu').waitFor({ state: 'visible', timeout: 5_000 });
+      await this.page.testSubj
+        .locator('uptimeManageMLContextMenu')
+        .waitFor({ state: 'visible', timeout: 5_000 });
     }).toPass({ timeout: 60_000 });
   }
 
@@ -294,7 +317,9 @@ export class UptimeAppPage {
 
   async hasMissingData(): Promise<boolean> {
     try {
-      await this.page.testSubj.locator('data-missing').waitFor({ state: 'visible', timeout: 15_000 });
+      await this.page.testSubj
+        .locator('data-missing')
+        .waitFor({ state: 'visible', timeout: 15_000 });
       return true;
     } catch {
       return false;
