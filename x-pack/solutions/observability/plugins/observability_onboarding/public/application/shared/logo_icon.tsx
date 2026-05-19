@@ -93,7 +93,7 @@ export interface LogoIconProps {
   isAvatar?: boolean;
   size?: LogoIconSizeProp;
   className?: string;
-  type?: EuiAvatarProps['type'];
+  avatarType?: EuiAvatarProps['type'];
   hasBorder?: boolean;
   color?: EuiAvatarProps['color'];
 }
@@ -108,7 +108,7 @@ export function LogoIcon({
   isAvatar,
   size,
   className,
-  type,
+  avatarType,
   hasBorder,
   color = 'subdued',
 }: LogoIconProps) {
@@ -122,7 +122,7 @@ export function LogoIcon({
         iconType={resolvedIconType}
         name="logoIcon"
         size={size}
-        type={type}
+        type={avatarType}
         className={className}
         aria-hidden={true}
         css={

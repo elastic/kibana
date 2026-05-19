@@ -20,10 +20,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import { IntegrationsCategory } from './integrations_category';
 import { IntegrationTile } from './integration_tile';
-import { INTEGRATION_CATEGORIES } from './tiles_config';
-import { MiniIntegrationTile } from './more_integrations_section/mini_integration_tile';
+import { INTEGRATION_TILES } from './integration_tiles';
+import { IntegrationMiniTile } from './more_integrations_section/integration_mini_tile';
 import { BrowseAllIntegrationsTile } from './more_integrations_section/browse_all_integrations_tile';
-import { MINI_INTEGRATION_TILES } from './more_integrations_section/mini_tiles_config';
+import { INTEGRATION_MINI_TILES } from './more_integrations_section/integration_mini_tiles';
 import { IntegrationsSearch } from './integrations_search';
 
 export const IntegrationsGrid = () => {
@@ -53,7 +53,7 @@ export const IntegrationsGrid = () => {
         <IntegrationsSearch />
         <EuiSpacer size="l" />
         <EuiFlexGroup direction="column" gutterSize="xl">
-          {INTEGRATION_CATEGORIES.map((category) => (
+          {INTEGRATION_TILES.map((category) => (
             <EuiFlexItem key={category.id} grow={false}>
               <IntegrationsCategory id={category.id} label={category.label}>
                 <EuiFlexGrid columns={3} gutterSize="m">
@@ -77,9 +77,9 @@ export const IntegrationsGrid = () => {
               <EuiFlexGroup direction={shouldStackVertically ? 'column' : 'row'} gutterSize="m">
                 <EuiFlexItem grow={shouldStackVertically ? false : 5}>
                   <EuiFlexGroup gutterSize="m">
-                    {MINI_INTEGRATION_TILES.map((tile) => (
+                    {INTEGRATION_MINI_TILES.map((tile) => (
                       <EuiFlexItem key={tile.id} grow={1}>
-                        <MiniIntegrationTile tile={tile} />
+                        <IntegrationMiniTile tile={tile} />
                       </EuiFlexItem>
                     ))}
                   </EuiFlexGroup>
