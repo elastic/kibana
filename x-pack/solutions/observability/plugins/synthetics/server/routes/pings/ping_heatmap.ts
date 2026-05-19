@@ -21,13 +21,21 @@ export const syntheticsGetPingHeatmapRoute: SyntheticsRestApiRouteFactory = () =
       interval: schema.number(),
       monitorId: schema.string(),
       location: schema.string(),
+      remoteName: schema.maybe(schema.string()),
     }),
   },
   handler: async ({
     syntheticsEsClient,
     request,
   }): Promise<{ result: MonitorStatusHeatmapBucket[] } | undefined> => {
-    const { from, to, interval: intervalInMinutes, monitorId, location } = request.query;
+    const {
+      from,
+      to,
+      interval: intervalInMinutes,
+      monitorId,
+      location,
+      remoteName,
+    } = request.query;
 
     const result = await queryMonitorHeatmap({
       syntheticsEsClient,
@@ -36,6 +44,7 @@ export const syntheticsGetPingHeatmapRoute: SyntheticsRestApiRouteFactory = () =
       monitorId,
       location,
       intervalInMinutes,
+      remoteName,
     });
 
     return { result: result.body.aggregations?.heatmap?.buckets as MonitorStatusHeatmapBucket[] };

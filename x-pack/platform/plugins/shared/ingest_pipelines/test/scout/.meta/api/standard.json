@@ -1,0 +1,545 @@
+{
+  "sha1": "8686cb2ba1984c65915cd283cc2c9150988671ee",
+  "tests": [
+    {
+      "id": "bff6a9ee7d96cf9-ff99aaa78ec522c",
+      "title": "Ingest pipelines feature controls kibana admin without ingest privileges cannot access ingest_pipelines management section",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/api/tests/feature_controls.spec.ts",
+        "line": 25,
+        "column": 10
+      }
+    },
+    {
+      "id": "bff6a9ee7d96cf9-559b03104d0f00b",
+      "title": "Ingest pipelines feature controls user with dashboard read and ingest pipelines privileges can access ingest_pipelines management section",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/api/tests/feature_controls.spec.ts",
+        "line": 39,
+        "column": 10
+      }
+    },
+    {
+      "id": "f7fdbd287590b02-fca7a67dfd6d438",
+      "title": "Ingest pipelines GeoIP databases API creates, lists, and deletes GeoIP databases",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/api/tests/geoip_databases.spec.ts",
+        "line": 35,
+        "column": 10
+      }
+    },
+    {
+      "id": "f7fdbd287590b02-d4e4b6a4325d1de",
+      "title": "Ingest pipelines GeoIP databases API returns an error when creating a GeoIP database with an incorrect name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/api/tests/geoip_databases.spec.ts",
+        "line": 126,
+        "column": 10
+      }
+    },
+    {
+      "id": "fe7adb61f1a8511-0eef9ef9883f18f",
+      "title": "Ingest pipelines read and delete API returns all pipelines",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/api/tests/ingest_pipelines_read_delete.spec.ts",
+        "line": 55,
+        "column": 10
+      }
+    },
+    {
+      "id": "fe7adb61f1a8511-7427c55517705a9",
+      "title": "Ingest pipelines read and delete API returns a single pipeline",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/api/tests/ingest_pipelines_read_delete.spec.ts",
+        "line": 76,
+        "column": 10
+      }
+    },
+    {
+      "id": "fe7adb61f1a8511-4f19944766264ac",
+      "title": "Ingest pipelines read and delete API deletes a pipeline",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/api/tests/ingest_pipelines_read_delete.spec.ts",
+        "line": 92,
+        "column": 10
+      }
+    },
+    {
+      "id": "fe7adb61f1a8511-e9f12ed0e0f857b",
+      "title": "Ingest pipelines read and delete API deletes multiple pipelines",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/api/tests/ingest_pipelines_read_delete.spec.ts",
+        "line": 108,
+        "column": 10
+      }
+    },
+    {
+      "id": "fe7adb61f1a8511-f565ae36c06a3f1",
+      "title": "Ingest pipelines read and delete API returns an error for any pipelines not successfully deleted",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/api/tests/ingest_pipelines_read_delete.spec.ts",
+        "line": 136,
+        "column": 10
+      }
+    },
+    {
+      "id": "b7d1efbb313fd39-08b06b7a537424e",
+      "title": "Ingest pipelines simulate, documents, and CSV API simulates a pipeline",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/api/tests/ingest_pipelines_simulate_documents.spec.ts",
+        "line": 35,
+        "column": 12
+      }
+    },
+    {
+      "id": "b7d1efbb313fd39-a97cf9e57bb8ad8",
+      "title": "Ingest pipelines simulate, documents, and CSV API simulates a pipeline with only required pipeline fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/api/tests/ingest_pipelines_simulate_documents.spec.ts",
+        "line": 55,
+        "column": 12
+      }
+    },
+    {
+      "id": "b7d1efbb313fd39-ef0e0243ad6c8b9",
+      "title": "Ingest pipelines simulate, documents, and CSV API returns a document",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/api/tests/ingest_pipelines_simulate_documents.spec.ts",
+        "line": 75,
+        "column": 12
+      }
+    },
+    {
+      "id": "b7d1efbb313fd39-146b7f2a0a8d865",
+      "title": "Ingest pipelines simulate, documents, and CSV API returns an error if the document does not exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/api/tests/ingest_pipelines_simulate_documents.spec.ts",
+        "line": 102,
+        "column": 12
+      }
+    },
+    {
+      "id": "b7d1efbb313fd39-c44b9e49cc86254",
+      "title": "Ingest pipelines simulate, documents, and CSV API maps CSV to a pipeline",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/api/tests/ingest_pipelines_simulate_documents.spec.ts",
+        "line": 126,
+        "column": 12
+      }
+    },
+    {
+      "id": "2747ec602808e75-5371a35b0613b6b",
+      "title": "Ingest pipelines API creates a pipeline",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/api/tests/ingest_pipelines.spec.ts",
+        "line": 44,
+        "column": 10
+      }
+    },
+    {
+      "id": "2747ec602808e75-20e55c3e3f02617",
+      "title": "Ingest pipelines API creates a pipeline with only required fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/api/tests/ingest_pipelines.spec.ts",
+        "line": 62,
+        "column": 10
+      }
+    },
+    {
+      "id": "2747ec602808e75-41eaf4335e9260b",
+      "title": "Ingest pipelines API does not allow creation of an existing pipeline",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/api/tests/ingest_pipelines.spec.ts",
+        "line": 80,
+        "column": 10
+      }
+    },
+    {
+      "id": "2747ec602808e75-3879256a4e926fb",
+      "title": "Ingest pipelines API does not allow creation of a pipeline with a too long name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/api/tests/ingest_pipelines.spec.ts",
+        "line": 103,
+        "column": 10
+      }
+    },
+    {
+      "id": "2747ec602808e75-9afef350b516940",
+      "title": "Ingest pipelines API updates an existing pipeline",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/api/tests/ingest_pipelines.spec.ts",
+        "line": 117,
+        "column": 10
+      }
+    },
+    {
+      "id": "2747ec602808e75-38ec7ffa691d896",
+      "title": "Ingest pipelines API removes optional fields while updating a pipeline",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/api/tests/ingest_pipelines.spec.ts",
+        "line": 144,
+        "column": 10
+      }
+    },
+    {
+      "id": "2747ec602808e75-75ac4da26bc60ff",
+      "title": "Ingest pipelines API does not allow a non-existing pipeline to be updated",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/api/tests/ingest_pipelines.spec.ts",
+        "line": 166,
+        "column": 10
+      }
+    },
+    {
+      "id": "aa468f2297117e5-b18c30d99633ed9",
+      "title": "Ingest pipelines parse CSV privileges API allows access with manage pipeline privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/api/tests/parse_csv_privileges.spec.ts",
+        "line": 29,
+        "column": 12
+      }
+    },
+    {
+      "id": "aa468f2297117e5-3266ce8aaa16b84",
+      "title": "Ingest pipelines parse CSV privileges API denies access without manage pipeline privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/api/tests/parse_csv_privileges.spec.ts",
+        "line": 45,
+        "column": 12
+      }
+    },
+    {
+      "id": "eae523514863541-b61223b858b7965",
+      "title": "Ingest pipelines structure tree API fetches a complex structure tree up to the fifth level",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/ingest_pipelines/test/scout/api/tests/structure_tree.spec.ts",
+        "line": 100,
+        "column": 10
+      }
+    }
+  ]
+}

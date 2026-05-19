@@ -9,8 +9,8 @@
 
 import { isConfigSchema, schema } from '@kbn/config-schema';
 import type { Type } from '@kbn/config-schema';
+import { isZod } from '@kbn/zod/v4';
 
-// Validate that the value is a function
 const functionSchema = schema.any({
   validate: (value) => {
     if (typeof value !== 'function') {
@@ -19,19 +19,17 @@ const functionSchema = schema.any({
   },
 });
 
-// Validate that the value is a kbn config Schema (Type<any>)
-const kbnConfigSchema = schema.any({
+const validSchema = schema.any({
   validate: (value) => {
-    if (!isConfigSchema(value)) {
-      return 'Invalid schema type.';
-    }
+    if (isConfigSchema(value) || isZod(value)) return;
+
+    return 'Invalid schema type.';
   },
 });
 
-// VersionableObject schema
 const versionableObjectSchema = schema.object(
   {
-    schema: schema.maybe(kbnConfigSchema),
+    schema: schema.maybe(validSchema),
     down: schema.maybe(functionSchema),
     up: schema.maybe(functionSchema),
   },
