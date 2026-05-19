@@ -213,7 +213,7 @@ async function sendEmailWithNodemailer(
 }
 
 // basic CSS to improve rendering of markdown-generated HTML in email clients
-const EMAIL_STYLES = `
+export const EMAIL_STYLES = `
   body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     font-size: 14px;
@@ -282,7 +282,7 @@ function htmlFromMarkdown(logger: Logger, markdown: string) {
   }
 }
 
-function wrapHtmlWithStyles(html: string): string {
+export function wrapHtmlWithStyles(html: string): string {
   return `<!DOCTYPE html>
 <html>
 <head>
