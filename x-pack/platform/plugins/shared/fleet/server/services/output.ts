@@ -136,10 +136,11 @@ async function getAgentPoliciesPerOutput(outputId?: string, isDefault?: boolean)
   const internalSoClientWithoutSpaceExtension =
     appContextService.getInternalUserSOClientWithoutSpaceExtension();
   let agentPoliciesKuery: string;
-  const packagePoliciesKuery: string = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.output_id:"${escapeQuotes(
-    outputId!
-  )}"`;
+  let packagePoliciesKuery: string | undefined;
   if (outputId) {
+    packagePoliciesKuery = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.output_id:"${escapeQuotes(
+      outputId
+    )}"`;
     if (isDefault) {
       agentPoliciesKuery = `${AGENT_POLICY_SAVED_OBJECT_TYPE}.data_output_id:"${escapeQuotes(
         outputId
@@ -168,11 +169,13 @@ async function getAgentPoliciesPerOutput(outputId?: string, isDefault?: boolean)
   // Get package policies using output and derive agent policies from that which
   // are not already identfied above. The IDs cannot be used as part of the kuery
   // above since the underlying saved object client .find() only filters on attributes
-  const packagePolicySOs = await packagePolicyService.list(internalSoClientWithoutSpaceExtension, {
-    kuery: packagePoliciesKuery,
-    perPage: SO_SEARCH_LIMIT,
-    spaceId: '*',
-  });
+  const packagePolicySOs = packagePoliciesKuery
+    ? await packagePolicyService.list(internalSoClientWithoutSpaceExtension, {
+        kuery: packagePoliciesKuery,
+        perPage: SO_SEARCH_LIMIT,
+        spaceId: '*',
+      })
+    : undefined;
   const agentPolicyIdsFromPackagePolicies = [
     ...new Set(
       packagePolicySOs?.items.reduce((acc: string[], packagePolicy) => {
