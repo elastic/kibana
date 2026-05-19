@@ -22,7 +22,7 @@ export class GlobalNavService extends FtrService {
   }
 
   public async clickNewsfeed(): Promise<void> {
-    return await this.testSubjects.click('headerGlobalNav > newsfeed');
+    return await this.testSubjects.click('headerGlobalNav > ^newsfeed');
   }
 
   public async exists(): Promise<boolean> {

@@ -717,6 +717,10 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
                   closePopover={closePopover}
                   panelPaddingSize="none"
                   anchorPosition="downLeft"
+                  aria-label={i18n.translate(
+                    'xpack.idxMgmt.dataStreamDetailPanel.managePopoverAriaLabel',
+                    { defaultMessage: 'Manage data stream' }
+                  )}
                 >
                   <EuiContextMenu initialPanelId={0} panels={panels} />
                 </EuiPopover>

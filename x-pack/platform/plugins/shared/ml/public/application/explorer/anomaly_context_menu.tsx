@@ -272,7 +272,6 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
 
       menuPanels.push({
         id: 'addToDashboardPanel',
-        size: 's',
         title: i18n.translate('xpack.ml.explorer.anomalies.addToDashboardLabel', {
           defaultMessage: 'Add to dashboard',
         }),
@@ -294,7 +293,6 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
 
       menuPanels.push({
         id: 'addToCasePanel',
-        size: 's',
         title: i18n.translate('xpack.ml.explorer.attachToCaseLabel', {
           defaultMessage: 'Add to case',
         }),
