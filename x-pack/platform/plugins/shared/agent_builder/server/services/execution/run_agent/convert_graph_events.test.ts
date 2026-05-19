@@ -332,9 +332,7 @@ describe('convertGraphEvents', () => {
       )
     );
 
-    expect(converted).not.toContainEqual(
-      expect.objectContaining({ type: 'thinking_complete' })
-    );
+    expect(converted).not.toContainEqual(expect.objectContaining({ type: 'thinking_complete' }));
   });
 
   it('does not emit thinkingCompleteEvent in structured mode', async () => {
@@ -386,8 +384,6 @@ describe('convertGraphEvents', () => {
       )
     );
 
-    expect(converted).not.toContainEqual(
-      expect.objectContaining({ type: 'thinking_complete' })
-    );
+    expect(converted).not.toContainEqual(expect.objectContaining({ type: 'thinking_complete' }));
   });
 });

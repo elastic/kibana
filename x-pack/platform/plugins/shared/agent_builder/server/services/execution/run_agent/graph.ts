@@ -269,9 +269,7 @@ export const createAgentGraph = ({
     if (isHandoverAction(lastMainAction)) {
       return { finalAnswer: lastMainAction.message };
     }
-    throw invalidState(
-      `[finalize] expected handover action, got ${lastMainAction.type} instead.`
-    );
+    throw invalidState(`[finalize] expected handover action, got ${lastMainAction.type} instead.`);
   };
 
   // note: the node names are used in the event convertion logic, they should *not* be changed
