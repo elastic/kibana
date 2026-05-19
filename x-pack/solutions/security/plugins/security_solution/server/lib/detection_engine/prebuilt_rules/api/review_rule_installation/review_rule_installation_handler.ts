@@ -97,21 +97,20 @@ export const reviewRuleInstallationHandler = async (
         ? buildPrebuiltRuleInstallationAggregations(categoryCounts)
         : undefined;
 
-    const [rulesResult, stats] = await Promise.all([
-      fetchRules({
-        ruleAssetsClient,
-        logger,
-        mlAuthz,
-        installedRuleVersionsMap,
-        filter: combinedKql,
-        sort,
-        page,
-        perPage,
-        aggs,
-        fields,
-      }),
-      fetchStats({ ruleAssetsClient, logger, mlAuthz, installedRuleVersionsMap }),
-    ]);
+    // Run sequentially rather than concurrently to avoid memory spikes on small clusters.
+    const rulesResult = await fetchRules({
+      ruleAssetsClient,
+      logger,
+      mlAuthz,
+      installedRuleVersionsMap,
+      filter: combinedKql,
+      sort,
+      page,
+      perPage,
+      aggs,
+      fields,
+    });
+    const stats = await fetchStats({ ruleAssetsClient, logger, mlAuthz, installedRuleVersionsMap });
 
     const counts = rulesResult.aggregations
       ? expandRawAggregationResult(rulesResult.aggregations, categoryCounts)
