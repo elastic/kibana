@@ -135,6 +135,7 @@ dependsOn:
   - '@kbn/agent-builder-browser'
   - '@kbn/core-analytics-browser'
   - '@kbn/inspector-plugin'
+  - '@kbn/zod-helpers'
 tags:
   - plugin
   - prod
