@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { KbnClient } from '@kbn/test';
-import type { AxiosResponse } from 'axios';
+import type { KbnClient, KbnClientResponse } from '@kbn/test';
 import type {
   AgentPolicy,
   CreateAgentPolicyRequest,
@@ -69,7 +68,7 @@ export const indexFleetEndpointPolicy = usageTracker.track(
       monitoring_enabled: ['logs', 'metrics'],
     };
 
-    let agentPolicy: AxiosResponse<CreateAgentPolicyResponse>;
+    let agentPolicy: KbnClientResponse<CreateAgentPolicyResponse>;
 
     try {
       agentPolicy = (await kbnClient
@@ -81,7 +80,7 @@ export const indexFleetEndpointPolicy = usageTracker.track(
           method: 'POST',
           body: newAgentPolicyData,
         })
-        .catch(wrapErrorAndRejectPromise)) as AxiosResponse<CreateAgentPolicyResponse>;
+        .catch(wrapErrorAndRejectPromise)) as KbnClientResponse<CreateAgentPolicyResponse>;
     } catch (error) {
       throw new Error(`create fleet agent policy failed ${error}`);
     }
@@ -195,7 +194,7 @@ export const deleteIndexedFleetEndpointPolicies = async (
             packagePolicyIds: indexData.integrationPolicies.map((policy) => policy.id),
           },
         })
-        .catch(wrapErrorAndRejectPromise)) as AxiosResponse<PostDeletePackagePoliciesResponse>
+        .catch(wrapErrorAndRejectPromise)) as KbnClientResponse<PostDeletePackagePoliciesResponse>
     ).data;
   }
 
@@ -216,7 +215,7 @@ export const deleteIndexedFleetEndpointPolicies = async (
                 agentPolicyId: agentPolicy.id,
               },
             })
-            .catch(wrapErrorAndRejectPromise)) as AxiosResponse<DeleteAgentPolicyResponse>
+            .catch(wrapErrorAndRejectPromise)) as KbnClientResponse<DeleteAgentPolicyResponse>
         ).data
       );
     }

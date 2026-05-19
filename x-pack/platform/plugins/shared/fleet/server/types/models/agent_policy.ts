@@ -99,6 +99,9 @@ export const AgentPolicyBaseSchema = {
           if (Object.keys(val).some((key) => key.match(/^inputs(\.)?/))) {
             return 'inputs overrides is not allowed';
           }
+          if (Object.keys(val).some((key) => key.match(/^output_permissions(\.)?/))) {
+            return 'output_permissions overrides is not allowed';
+          }
         },
       })
     )
