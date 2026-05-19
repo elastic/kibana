@@ -20,6 +20,40 @@ import {
   RELATED_ALERTS_INLINE_MAX_RESULTS,
 } from '../../../lib/alert_analysis/services/find_related_alerts';
 
+const getRelatedAlertsSchema = z.object({
+  alertId: z.string().describe('The _id of the alert to find related alerts for'),
+  timeWindowHours: z
+    .number()
+    .min(1)
+    .max(168)
+    .default(24)
+    .describe('Time window in hours to search for related alerts (1-168, default 24)'),
+  hostNames: z
+    .array(z.string())
+    .optional()
+    .describe(
+      'Optional: host.name values from the alert. If provided along with other entity fields, skips refetching the alert.'
+    ),
+  userNames: z
+    .array(z.string())
+    .optional()
+    .describe(
+      'Optional: user.name values from the alert. If provided along with other entity fields, skips refetching the alert.'
+    ),
+  sourceIps: z
+    .array(z.string())
+    .optional()
+    .describe(
+      'Optional: source.ip values from the alert. If provided along with other entity fields, skips refetching the alert.'
+    ),
+  destIps: z
+    .array(z.string())
+    .optional()
+    .describe(
+      'Optional: destination.ip values from the alert. If provided along with other entity fields, skips refetching the alert.'
+    ),
+});
+
 export const alertAnalysisSkill = defineSkillType({
   id: 'alert-analysis',
   name: 'alert-analysis',
@@ -101,43 +135,11 @@ Use this skill when:
       type: ToolType.builtin,
       description:
         'Find alerts that share entities (host.name, user.name, source.ip, destination.ip) with a given alert. Returns related alerts within the specified time window. Pass entity values directly if already available to skip refetching the alert.',
-      schema: z.object({
-        alertId: z.string().describe('The _id of the alert to find related alerts for'),
-        timeWindowHours: z
-          .number()
-          .min(1)
-          .max(168)
-          .default(24)
-          .describe('Time window in hours to search for related alerts (1-168, default 24)'),
-        hostNames: z
-          .array(z.string())
-          .optional()
-          .describe(
-            'Optional: host.name values from the alert. If provided along with other entity fields, skips refetching the alert.'
-          ),
-        userNames: z
-          .array(z.string())
-          .optional()
-          .describe(
-            'Optional: user.name values from the alert. If provided along with other entity fields, skips refetching the alert.'
-          ),
-        sourceIps: z
-          .array(z.string())
-          .optional()
-          .describe(
-            'Optional: source.ip values from the alert. If provided along with other entity fields, skips refetching the alert.'
-          ),
-        destIps: z
-          .array(z.string())
-          .optional()
-          .describe(
-            'Optional: destination.ip values from the alert. If provided along with other entity fields, skips refetching the alert.'
-          ),
-      }),
-      handler: async (
-        { alertId, timeWindowHours, hostNames, userNames, sourceIps, destIps },
-        context
-      ) => {
+      schema: getRelatedAlertsSchema,
+      handler: async (args, context) => {
+        const { alertId, timeWindowHours, hostNames, userNames, sourceIps, destIps } =
+          getRelatedAlertsSchema.parse(args);
+
         const alertsIndex = `${DEFAULT_ALERTS_INDEX}-${context.spaceId}`;
 
         const result = await findRelatedAlerts(context.esClient.asCurrentUser, {

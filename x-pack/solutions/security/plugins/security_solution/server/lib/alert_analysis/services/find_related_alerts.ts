@@ -184,11 +184,18 @@ export const findRelatedAlerts = async (
       ignore_unavailable: true,
     });
 
-    const relatedAlerts: RelatedAlertDocument[] = searchResult.hits.hits.map((hit) => ({
-      _id: hit._id,
-      _index: hit._index ?? alertsIndex,
-      ...((hit._source as Record<string, unknown> | undefined) ?? {}),
-    }));
+    const relatedAlerts: RelatedAlertDocument[] = searchResult.hits.hits.flatMap((hit) => {
+      if (hit._id == null) {
+        return [];
+      }
+      return [
+        {
+          _id: hit._id,
+          _index: hit._index ?? alertsIndex,
+          ...((hit._source as Record<string, unknown> | undefined) ?? {}),
+        },
+      ];
+    });
 
     const totalMatched = getTotalMatched(searchResult.hits.total);
     const returnedCount = relatedAlerts.length;
