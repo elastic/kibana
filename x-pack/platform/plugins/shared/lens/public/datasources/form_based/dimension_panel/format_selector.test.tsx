@@ -43,7 +43,7 @@ describe('FormatSelector', () => {
     user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
   });
 
-  afterEach(async () => {
+  afterEach(() => {
     jest.useRealTimers();
   });
   it('updates the format decimals', async () => {
