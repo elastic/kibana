@@ -101,6 +101,40 @@ describe('FieldDefinitionsService', () => {
         })
       );
     });
+
+    it('adds renderInAllCases filter when renderInAllCases is true', async () => {
+      soClient.find.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        per_page: MAX_FIELD_DEFINITIONS_PER_OWNER,
+        page: 1,
+      } as SavedObjectsFindResponse<FieldDefinition>);
+
+      await service.getFieldDefinitions('securitySolution', { renderInAllCases: true });
+
+      expect(soClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filter: `(${CASE_FIELD_DEFINITION_SAVED_OBJECT}.attributes.owner: "securitySolution") AND ${CASE_FIELD_DEFINITION_SAVED_OBJECT}.attributes.renderInAllCases: true`,
+        })
+      );
+    });
+
+    it('does not add renderInAllCases filter when renderInAllCases is false', async () => {
+      soClient.find.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        per_page: MAX_FIELD_DEFINITIONS_PER_OWNER,
+        page: 1,
+      } as SavedObjectsFindResponse<FieldDefinition>);
+
+      await service.getFieldDefinitions('securitySolution', { renderInAllCases: false });
+
+      expect(soClient.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filter: `${CASE_FIELD_DEFINITION_SAVED_OBJECT}.attributes.owner: "securitySolution"`,
+        })
+      );
+    });
   });
 
   describe('getFieldDefinition', () => {

@@ -9,6 +9,7 @@ import React, { useCallback, useRef, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCheckbox,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -20,6 +21,7 @@ import {
   EuiSpacer,
   EuiTextArea,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { load as parseYaml } from 'js-yaml';
 import type { FieldDefinition } from '../../../../common/types/domain/field_definition/v1';
@@ -45,7 +47,12 @@ type: keyword
 interface FieldDefinitionFlyoutProps {
   owner: string;
   fieldDefinition?: FieldDefinition;
-  onSave: (params: { name: string; description: string; definition: string }) => void;
+  onSave: (params: {
+    name: string;
+    description: string;
+    definition: string;
+    renderInAllCases: boolean;
+  }) => void;
   onClose: () => void;
   isSaving?: boolean;
 }
@@ -61,6 +68,9 @@ export const FieldDefinitionFlyout: React.FC<FieldDefinitionFlyoutProps> = ({
 
   const [description, setDescription] = useState(fieldDefinition?.description ?? '');
   const [definition, setDefinition] = useState(fieldDefinition?.definition ?? EXAMPLE_FIELD_YAML);
+  const [renderInAllCases, setRenderInAllCases] = useState(
+    fieldDefinition?.renderInAllCases ?? false
+  );
   const [definitionError, setDefinitionError] = useState<string | undefined>();
 
   const definitionRef = useRef(definition);
@@ -89,8 +99,8 @@ export const FieldDefinitionFlyout: React.FC<FieldDefinitionFlyoutProps> = ({
   const handleSave = useCallback(() => {
     if (!validate()) return;
     const name = parseName(definition) as string;
-    onSave({ name, description: description.trim(), definition });
-  }, [validate, parseName, onSave, description, definition]);
+    onSave({ name, description: description.trim(), definition, renderInAllCases });
+  }, [validate, parseName, onSave, description, definition, renderInAllCases]);
 
   const handleDefaultChange = useCallback((fieldName: string, value: string, control: string) => {
     const trimmedValue = value.trim();
@@ -169,6 +179,16 @@ export const FieldDefinitionFlyout: React.FC<FieldDefinitionFlyoutProps> = ({
               data-test-subj="fieldDefinitionDescriptionInput"
             />
           </EuiFormRow>
+          <EuiSpacer size="m" />
+          <EuiToolTip content={i18n.RENDER_IN_ALL_CASES_HELP_TEXT}>
+            <EuiCheckbox
+              id="fieldDefinitionRenderInAllCases"
+              label={i18n.RENDER_IN_ALL_CASES_LABEL}
+              checked={renderInAllCases}
+              onChange={(e) => setRenderInAllCases(e.target.checked)}
+              data-test-subj="fieldDefinitionRenderInAllCasesCheckbox"
+            />
+          </EuiToolTip>
         </EuiForm>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>

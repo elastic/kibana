@@ -53,7 +53,9 @@ export const createFieldDefinitionsSubClient = (
         operation: Operations.manageTemplate,
         entities: owners.map((owner) => ({ owner, id: owner })),
       });
-      return fieldDefinitionsService.getFieldDefinitions(owners);
+      return fieldDefinitionsService.getFieldDefinitions(owners, {
+        renderInAllCases: params.renderInAllCases,
+      });
     },
 
     getFieldDefinition: async (id: string) => {

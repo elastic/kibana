@@ -24,6 +24,11 @@ jest.mock('./use_template_form_sync', () => ({
   useTemplateFormSync: (...args: unknown[]) => mockUseTemplateFormSync(...args),
 }));
 
+const mockUseGetFieldDefinitions = jest.fn();
+jest.mock('../field_library/hooks/use_get_field_definitions', () => ({
+  useGetFieldDefinitions: (...args: unknown[]) => mockUseGetFieldDefinitions(...args),
+}));
+
 jest.mock('../templates_v2/field_types/field_types_registry', () => ({
   controlRegistry: {
     INPUT_TEXT: ({ name, label }: { name: string; label?: string }) => (
@@ -46,6 +51,10 @@ describe('CreateCaseTemplateFields', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseFormContext.mockReturnValue({ setFieldValue: jest.fn() });
+    mockUseGetFieldDefinitions.mockReturnValue({
+      data: { fieldDefinitions: [] },
+      isLoading: false,
+    });
   });
 
   it('shows callout when no template is selected', () => {
@@ -60,7 +69,7 @@ describe('CreateCaseTemplateFields', () => {
     ).toBeInTheDocument();
   });
 
-  it('renders extended fields header when template has empty fields array', () => {
+  it('renders nothing when template has empty fields array and no global fields', () => {
     mockUseFormData.mockReturnValue([{ templateId: 'template-1' }]);
     mockUseTemplateFormSync.mockReturnValue({
       template: {
@@ -70,9 +79,10 @@ describe('CreateCaseTemplateFields', () => {
       isLoading: false,
     });
 
-    renderWithTestingProviders(<CreateCaseTemplateFields />);
+    const { container } = renderWithTestingProviders(<CreateCaseTemplateFields />);
 
-    expect(screen.getByText('Extended fields')).toBeInTheDocument();
+    expect(container.textContent).toBe('');
+    expect(screen.queryByText('Extended fields')).not.toBeInTheDocument();
   });
 
   it('shows callout when template definition has no fields property', () => {

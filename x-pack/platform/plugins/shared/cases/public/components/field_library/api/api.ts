@@ -19,18 +19,20 @@ import { KibanaServices } from '../../../common/lib/kibana';
 
 export const getFieldDefinitions = async ({
   owner,
+  renderInAllCases,
   signal,
 }: {
   owner?: string | string[];
+  renderInAllCases?: boolean;
   signal?: AbortSignal;
 }): Promise<FieldDefinitionsFindResponse> => {
+  const query: Record<string, unknown> = {};
+  if (owner) query.owner = owner;
+  if (renderInAllCases !== undefined) query.renderInAllCases = renderInAllCases;
+
   return KibanaServices.get().http.fetch<FieldDefinitionsFindResponse>(
     INTERNAL_FIELD_DEFINITIONS_URL,
-    {
-      method: 'GET',
-      query: owner ? { owner } : {},
-      signal,
-    }
+    { method: 'GET', query, signal }
   );
 };
 

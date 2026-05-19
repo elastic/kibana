@@ -8,6 +8,7 @@
 import React, { useCallback, useState } from 'react';
 import {
   EuiBasicTable,
+  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -73,21 +74,23 @@ export const AllFieldDefinitionsPage: React.FC<AllFieldDefinitionsPageProps> = (
       name,
       description,
       definition,
+      renderInAllCases,
     }: {
       name: string;
       description: string;
       definition: string;
+      renderInAllCases: boolean;
     }) => {
       const ownerValue = (Array.isArray(owner) ? owner[0] : owner) as Owner;
 
       if (editingFieldDef) {
         updateFieldDef({
           id: editingFieldDef.fieldDefinitionId,
-          fieldDefinition: { name, description, definition, owner: ownerValue },
+          fieldDefinition: { name, description, definition, owner: ownerValue, renderInAllCases },
         });
       } else {
         createFieldDef({
-          fieldDefinition: { name, description, definition, owner: ownerValue },
+          fieldDefinition: { name, description, definition, owner: ownerValue, renderInAllCases },
         });
       }
     },
@@ -126,6 +129,13 @@ export const AllFieldDefinitionsPage: React.FC<AllFieldDefinitionsPageProps> = (
       field: 'owner',
       name: i18n.OWNER_COLUMN,
       truncateText: true,
+    },
+    {
+      field: 'renderInAllCases',
+      name: i18n.RENDER_IN_ALL_CASES_COLUMN,
+      render: (value: boolean | undefined) =>
+        value ? <EuiBadge color="primary">{i18n.RENDER_IN_ALL_CASES_LABEL}</EuiBadge> : null,
+      'data-test-subj': 'fieldDefinitionRenderInAllCasesCell',
     },
     {
       name: i18n.ACTIONS_COLUMN,

@@ -1,0 +1,125 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import { screen, fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { FieldDefinitionFlyout } from './field_definition_flyout';
+import { renderWithTestingProviders } from '../../../common/mock';
+
+jest.mock('./field_definition_yaml_editor', () => ({
+  FieldDefinitionYamlEditor: ({
+    value,
+    onChange,
+  }: {
+    value: string;
+    onChange: (v: string) => void;
+  }) => (
+    <textarea
+      data-test-subj="fieldDefinitionYamlInput"
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+    />
+  ),
+}));
+
+jest.mock('./field_definition_preview', () => ({
+  FieldDefinitionPreview: () => <div data-test-subj="fieldDefinitionPreview" />,
+}));
+
+const VALID_YAML = `name: my_field
+label: "My Field"
+control: INPUT_TEXT
+type: keyword
+`;
+
+const defaultProps = {
+  owner: 'securitySolution',
+  onSave: jest.fn(),
+  onClose: jest.fn(),
+};
+
+describe('FieldDefinitionFlyout — renderInAllCases checkbox', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('renders the renderInAllCases checkbox unchecked by default', () => {
+    renderWithTestingProviders(<FieldDefinitionFlyout {...defaultProps} />);
+
+    const checkbox = screen.getByTestId('fieldDefinitionRenderInAllCasesCheckbox');
+    expect(checkbox).toBeInTheDocument();
+    expect(checkbox).not.toBeChecked();
+  });
+
+  it('renders the renderInAllCases checkbox checked when fieldDefinition has renderInAllCases: true', () => {
+    const fieldDefinition = {
+      fieldDefinitionId: 'fd-1',
+      name: 'my_field',
+      owner: 'securitySolution' as const,
+      definition: VALID_YAML,
+      renderInAllCases: true,
+    };
+
+    renderWithTestingProviders(
+      <FieldDefinitionFlyout {...defaultProps} fieldDefinition={fieldDefinition} />
+    );
+
+    const checkbox = screen.getByTestId('fieldDefinitionRenderInAllCasesCheckbox');
+    expect(checkbox).toBeChecked();
+  });
+
+  it('passes renderInAllCases: false to onSave when checkbox is unchecked', async () => {
+    renderWithTestingProviders(<FieldDefinitionFlyout {...defaultProps} />);
+
+    // Set a valid YAML so validation passes
+    const yamlInput = screen.getByTestId('fieldDefinitionYamlInput');
+    fireEvent.change(yamlInput, { target: { value: VALID_YAML } });
+
+    fireEvent.click(screen.getByTestId('fieldDefinitionSaveButton'));
+
+    expect(defaultProps.onSave).toHaveBeenCalledWith(
+      expect.objectContaining({ renderInAllCases: false })
+    );
+  });
+
+  it('passes renderInAllCases: true to onSave when checkbox is checked', async () => {
+    renderWithTestingProviders(<FieldDefinitionFlyout {...defaultProps} />);
+
+    const yamlInput = screen.getByTestId('fieldDefinitionYamlInput');
+    fireEvent.change(yamlInput, { target: { value: VALID_YAML } });
+
+    const checkbox = screen.getByTestId('fieldDefinitionRenderInAllCasesCheckbox');
+    fireEvent.click(checkbox);
+
+    fireEvent.click(screen.getByTestId('fieldDefinitionSaveButton'));
+
+    expect(defaultProps.onSave).toHaveBeenCalledWith(
+      expect.objectContaining({ renderInAllCases: true })
+    );
+  });
+
+  it('toggles renderInAllCases when checkbox is clicked', async () => {
+    const user = userEvent.setup();
+    renderWithTestingProviders(<FieldDefinitionFlyout {...defaultProps} />);
+
+    const checkbox = screen.getByTestId('fieldDefinitionRenderInAllCasesCheckbox');
+    expect(checkbox).not.toBeChecked();
+
+    await user.click(checkbox);
+    expect(checkbox).toBeChecked();
+
+    await user.click(checkbox);
+    expect(checkbox).not.toBeChecked();
+  });
+
+  it('displays the renderInAllCases label text', () => {
+    renderWithTestingProviders(<FieldDefinitionFlyout {...defaultProps} />);
+
+    expect(screen.getByText('Render in all cases')).toBeInTheDocument();
+  });
+});

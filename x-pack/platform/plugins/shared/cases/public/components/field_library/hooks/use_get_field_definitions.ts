@@ -16,14 +16,16 @@ import * as i18n from '../translations';
 
 export const useGetFieldDefinitions = ({
   owner,
+  renderInAllCases,
 }: {
   owner?: string | string[];
+  renderInAllCases?: boolean;
 } = {}): UseQueryResult<FieldDefinitionsFindResponse> => {
   const toasts = useToasts();
 
   return useQuery(
-    casesQueriesKeys.fieldDefinitionsList({ owner }),
-    ({ signal }) => getFieldDefinitions({ owner, signal }),
+    casesQueriesKeys.fieldDefinitionsList({ owner, renderInAllCases }),
+    ({ signal }) => getFieldDefinitions({ owner, renderInAllCases, signal }),
     {
       keepPreviousData: true,
       onError: (error: ServerError) => {

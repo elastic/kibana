@@ -7,6 +7,7 @@
 
 import { differenceWith, intersectionWith, isEmpty } from 'lodash';
 import Boom from '@hapi/boom';
+import { load as parseYaml } from 'js-yaml';
 import type { CustomFieldsConfiguration } from '../../../common/types/domain';
 import type {
   CasePatchRequest,
@@ -19,8 +20,14 @@ import { casesCustomFields } from '../../custom_fields';
 import { MAX_CUSTOM_FIELDS_PER_CASE } from '../../../common/constants';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
 import type { TemplatesService } from '../../services/templates';
+import type { FieldDefinitionsService } from '../../services/field_definitions';
 import { parseTemplate } from '../../routes/api/templates/parse_template';
 import { validateExtendedFields } from '../../../common/types/domain/template/validate_extended_fields';
+import {
+  FieldSchema,
+  isInlineField,
+} from '../../../common/types/domain/template/fields';
+import { getFieldSnakeKey } from '../../../common/utils';
 
 interface CustomFieldValidationParams {
   requestCustomFields?: CaseRequestCustomFields;
@@ -156,23 +163,63 @@ export const validateRequiredCustomFields = ({
   }
 };
 
+/**
+ * Parses renderInAllCases field definitions for the given owner and returns the
+ * set of valid extended-field snake_case keys those definitions produce.
+ */
+export const resolveGlobalFieldKeys = async (
+  owner: string,
+  fieldDefinitionsService: FieldDefinitionsService
+): Promise<Set<string>> => {
+  const { fieldDefinitions } = await fieldDefinitionsService.getFieldDefinitions(owner, {
+    renderInAllCases: true,
+  });
+  const keys = new Set<string>();
+  for (const fd of fieldDefinitions) {
+    try {
+      const parsed = parseYaml(fd.definition);
+      const result = FieldSchema.safeParse(parsed);
+      if (result.success && isInlineField(result.data)) {
+        keys.add(getFieldSnakeKey(result.data.name, result.data.type));
+      }
+    } catch {
+      // Ignore malformed definitions
+    }
+  }
+  return keys;
+};
+
 export const validateExtendedFieldsInRequest = async ({
   updateReq,
   originalCase,
   templatesService,
+  fieldDefinitionsService,
 }: {
   updateReq: CasePatchRequest;
   originalCase: CaseSavedObjectTransformed;
   templatesService: TemplatesService;
+  fieldDefinitionsService: FieldDefinitionsService;
 }): Promise<void> => {
   if (!updateReq.extended_fields) return;
   if (updateReq.template === null) {
     throw Boom.badRequest('extended_fields cannot be set when template is being cleared');
   }
+
+  const owner = originalCase.attributes.owner;
+  const globalKeys = await resolveGlobalFieldKeys(owner, fieldDefinitionsService);
+
   const templateId = updateReq.template?.id ?? originalCase.attributes.template?.id;
   if (!templateId) {
-    throw Boom.badRequest('extended_fields require a template to be specified on the case');
+    // No template — only global field keys are permitted
+    const invalidKeys = Object.keys(updateReq.extended_fields).filter((k) => !globalKeys.has(k));
+    if (invalidKeys.length) {
+      throw Boom.badRequest(
+        `extended_fields keys [${invalidKeys.join(', ')}] are not global (renderInAllCases) field definitions`
+      );
+    }
+    return;
   }
+
   const templateSO = await templatesService.getTemplate(templateId);
   if (!templateSO) {
     throw Boom.badRequest(`Template ${templateId} not found`);
@@ -183,10 +230,12 @@ export const validateExtendedFieldsInRequest = async ({
   } catch (err) {
     throw Boom.badRequest(`Template ${templateId} has an invalid definition`);
   }
-  const errors = validateExtendedFields(
-    updateReq.extended_fields,
-    parsedTemplate.definition.fields
+
+  // Validate only the template-specific keys (global keys are always valid).
+  const templateOnlyFields = Object.fromEntries(
+    Object.entries(updateReq.extended_fields).filter(([k]) => !globalKeys.has(k))
   );
+  const errors = validateExtendedFields(templateOnlyFields, parsedTemplate.definition.fields);
   if (errors.length) {
     throw Boom.badRequest(`Invalid extended_fields: ${errors.join('; ')}`);
   }

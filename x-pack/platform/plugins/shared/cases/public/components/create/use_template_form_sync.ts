@@ -37,8 +37,13 @@ interface UseTemplateFormSyncReturn {
  * - Extended (template-defined) fields are written to the inner react-hook-form
  *   instance owned by `CreateCaseTemplateFields` and mirrored back to the
  *   parent's `extendedFields` field by that component.
+ * - `globalFieldKeys` contains the snake_case keys of `renderInAllCases` field
+ *   definitions; their values are preserved across template changes and resets.
  */
-export const useTemplateFormSync = (innerForm: UseFormReturn): UseTemplateFormSyncReturn => {
+export const useTemplateFormSync = (
+  innerForm: UseFormReturn,
+  globalFieldKeys: ReadonlySet<string>
+): UseTemplateFormSyncReturn => {
   const { setFieldValue } = useFormContext();
   const [{ templateId }] = useFormData<{ templateId?: string }>({ watch: ['templateId'] });
   const { data: template, isLoading } = useGetTemplate(templateId || undefined);
@@ -59,8 +64,15 @@ export const useTemplateFormSync = (innerForm: UseFormReturn): UseTemplateFormSy
         setFieldValue('severity', 'low');
         setFieldValue('category', null);
 
-        // Clear all extended-field values from the inner RHF form.
-        innerForm.reset({ [CASE_EXTENDED_FIELDS]: {} });
+        // Clear template-specific extended-field values but preserve global field values.
+        const current =
+          (innerForm.getValues() as Record<string, Record<string, unknown>>)?.[
+            CASE_EXTENDED_FIELDS
+          ] ?? {};
+        const preserved = Object.fromEntries(
+          Object.entries(current).filter(([k]) => globalFieldKeys.has(k))
+        );
+        innerForm.reset({ [CASE_EXTENDED_FIELDS]: preserved });
       }
       return;
     }
@@ -134,7 +146,14 @@ export const useTemplateFormSync = (innerForm: UseFormReturn): UseTemplateFormSy
         field.metadata?.default
       );
     }
-    innerForm.reset({ [CASE_EXTENDED_FIELDS]: nextExtended });
+    // Preserve current values for global fields when template changes.
+    const current =
+      (innerForm.getValues() as Record<string, Record<string, unknown>>)?.[CASE_EXTENDED_FIELDS] ??
+      {};
+    const preserved = Object.fromEntries(
+      Object.entries(current).filter(([k]) => globalFieldKeys.has(k))
+    );
+    innerForm.reset({ [CASE_EXTENDED_FIELDS]: { ...preserved, ...nextExtended } });
     appliedRef.current = key;
   }, [
     templateId,
@@ -145,6 +164,7 @@ export const useTemplateFormSync = (innerForm: UseFormReturn): UseTemplateFormSy
     innerForm,
     fieldDefsData,
     isLoadingFieldDefs,
+    globalFieldKeys,
   ]);
 
   return { template, isLoading };

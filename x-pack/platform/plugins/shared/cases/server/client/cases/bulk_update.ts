@@ -450,6 +450,7 @@ export const bulkUpdate = async (
       notificationService,
       attachmentService,
       templatesService,
+      fieldDefinitionsService,
     },
     user,
     logger,
@@ -579,7 +580,12 @@ export const bulkUpdate = async (
 
     await Promise.all(
       casesToUpdate.map(({ updateReq, originalCase }) =>
-        validateExtendedFieldsInRequest({ updateReq, originalCase, templatesService })
+        validateExtendedFieldsInRequest({
+          updateReq,
+          originalCase,
+          templatesService,
+          fieldDefinitionsService,
+        })
       )
     );
 

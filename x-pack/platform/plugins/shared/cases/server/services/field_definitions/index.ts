@@ -27,16 +27,26 @@ export class FieldDefinitionsService {
     }
   ) {}
 
-  async getFieldDefinitions(owner: string | string[]): Promise<FieldDefinitionsFindResponse> {
+  async getFieldDefinitions(
+    owner: string | string[],
+    { renderInAllCases }: { renderInAllCases?: boolean } = {}
+  ): Promise<FieldDefinitionsFindResponse> {
     const owners = castArray(owner);
 
     if (owners.length === 0) {
       return { fieldDefinitions: [], total: 0 };
     }
 
-    const filter = owners
+    const ownerFilter = owners
       .map((o) => `${CASE_FIELD_DEFINITION_SAVED_OBJECT}.attributes.owner: "${escapeKuery(o)}"`)
       .join(' OR ');
+
+    const globalFilter =
+      renderInAllCases === true
+        ? `${CASE_FIELD_DEFINITION_SAVED_OBJECT}.attributes.renderInAllCases: true`
+        : undefined;
+
+    const filter = globalFilter ? `(${ownerFilter}) AND ${globalFilter}` : ownerFilter;
 
     const result = await this.dependencies.unsecuredSavedObjectsClient.find<FieldDefinition>({
       type: CASE_FIELD_DEFINITION_SAVED_OBJECT,

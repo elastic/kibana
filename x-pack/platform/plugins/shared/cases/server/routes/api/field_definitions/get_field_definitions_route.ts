@@ -29,10 +29,13 @@ export const getFieldDefinitionsRoute = createCasesRoute<{}, FieldDefinitionsFin
       const caseContext = await context.cases;
       const casesClient = await caseContext.getCasesClient();
 
-      const { owner } = request.query;
+      const { owner, renderInAllCases } = request.query;
       const owners = owner ? castArray(owner) : [];
 
-      const result = await casesClient.fieldDefinitions.getFieldDefinitions({ owner: owners });
+      const result = await casesClient.fieldDefinitions.getFieldDefinitions({
+        owner: owners,
+        renderInAllCases,
+      });
 
       return response.ok({ body: result });
     } catch (error) {

@@ -181,3 +181,25 @@ export const DELETE_CONFIRM_BODY = (name: string) =>
     defaultMessage: 'Are you sure you want to delete the field definition "{name}"?',
     values: { name },
   });
+
+export const RENDER_IN_ALL_CASES_LABEL = i18n.translate(
+  'xpack.cases.fieldLibrary.renderInAllCasesLabel',
+  { defaultMessage: 'Render in all cases' }
+);
+
+export const RENDER_IN_ALL_CASES_HELP_TEXT = i18n.translate(
+  'xpack.cases.fieldLibrary.renderInAllCasesHelpText',
+  {
+    defaultMessage:
+      'When enabled, this field appears in every case regardless of which template is applied.',
+  }
+);
+
+export const RENDER_IN_ALL_CASES_COLUMN = i18n.translate(
+  'xpack.cases.fieldLibrary.renderInAllCasesColumn',
+  { defaultMessage: 'Render in all cases' }
+);
+
+export const GLOBAL_FIELDS_TITLE = i18n.translate('xpack.cases.fieldLibrary.globalFieldsTitle', {
+  defaultMessage: 'Global fields',
+});
