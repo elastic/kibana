@@ -7,8 +7,8 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import {
-  EuiButton,
   EuiCallOut,
+  EuiContextMenu,
   EuiFieldSearch,
   EuiFilterGroup,
   EuiFlexGroup,
@@ -16,6 +16,8 @@ import {
   EuiLoadingSpinner,
   EuiPageHeader,
   EuiSpacer,
+  EuiSplitButton,
+  useGeneratedHtmlId,
   type Criteria,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -27,6 +29,7 @@ import { useFetchRules } from '../../hooks/use_fetch_rules';
 import { useFetchRuleTags } from '../../hooks/use_fetch_rule_tags';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useComposeDiscoverFlyout } from '../../hooks/use_compose_discover_flyout';
+import { useNavigateToAgentBuilder } from '../../hooks/use_navigate_to_agent_builder';
 
 import { RulesListTableContainer } from './rules_list_table_container';
 import type { RulesListTableSortField } from './rules_list_table';
@@ -57,7 +60,10 @@ export const RulesListPage = () => {
     isCreateOptionsFlyoutOpen,
     { on: openCreateOptionsFlyout, off: closeCreateOptionsFlyout },
   ] = useBoolean(false);
+  const [isCreateMenuOpen, { off: closeCreateMenu, toggle: toggleCreateMenu }] = useBoolean(false);
+  const createMenuId = useGeneratedHtmlId({ prefix: 'createRuleMenu' });
   const { flyout, openCreateFlyout, openEditFlyout } = useComposeDiscoverFlyout();
+  const navigateToAgentBuilder = useNavigateToAgentBuilder();
 
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(DEFAULT_PER_PAGE);
@@ -127,6 +133,10 @@ export const RulesListPage = () => {
     closeCreateOptionsFlyout();
     openCreateFlyout();
   };
+  const onCreateWithAgentFromOptionsFlyout = () => {
+    closeCreateOptionsFlyout();
+    navigateToAgentBuilder();
+  };
 
   return (
     <div>
@@ -137,18 +147,72 @@ export const RulesListPage = () => {
         rightSideItems={
           hasRules || hasActiveFilters
             ? [
-                <EuiButton
-                  key="create-rule"
+                <EuiSplitButton
+                  key="create-rule-split"
                   color="primary"
-                  fill
-                  onClick={openCreateOptionsFlyout}
-                  data-test-subj="createRuleButton"
+                  data-test-subj="createRuleSplitButton"
                 >
-                  <FormattedMessage
-                    id="xpack.alertingV2.rulesList.createRuleButton"
-                    defaultMessage="Create rule"
+                  <EuiSplitButton.ActionPrimary
+                    onClick={openCreateOptionsFlyout}
+                    data-test-subj="createRuleButton"
+                  >
+                    <FormattedMessage
+                      id="xpack.alertingV2.rulesList.createRuleButton"
+                      defaultMessage="Create rule"
+                    />
+                  </EuiSplitButton.ActionPrimary>
+                  <EuiSplitButton.ActionSecondary
+                    iconType="arrowDown"
+                    aria-label={i18n.translate('xpack.alertingV2.rulesList.createRuleMoreOptions', {
+                      defaultMessage: 'More create options',
+                    })}
+                    onClick={toggleCreateMenu}
+                    data-test-subj="createRulePopoverButton"
+                    popoverProps={{
+                      id: createMenuId,
+                      isOpen: isCreateMenuOpen,
+                      closePopover: closeCreateMenu,
+                      anchorPosition: 'downRight',
+                      panelPaddingSize: 'none',
+                      children: (
+                        <EuiContextMenu
+                          initialPanelId={0}
+                          panels={[
+                            {
+                              id: 0,
+                              items: [
+                                {
+                                  name: i18n.translate(
+                                    'xpack.alertingV2.rulesList.createEsqlRuleButton',
+                                    { defaultMessage: 'Create ES|QL rule' }
+                                  ),
+                                  icon: 'productDiscover',
+                                  onClick: () => {
+                                    closeCreateMenu();
+                                    openCreateFlyout();
+                                  },
+                                  'data-test-subj': 'createEsqlRuleButton',
+                                },
+                                {
+                                  name: i18n.translate(
+                                    'xpack.alertingV2.rulesList.createWithAgentButton',
+                                    { defaultMessage: 'Create with agent' }
+                                  ),
+                                  icon: 'sparkles',
+                                  onClick: () => {
+                                    closeCreateMenu();
+                                    navigateToAgentBuilder();
+                                  },
+                                  'data-test-subj': 'createWithAgentButton',
+                                },
+                              ],
+                            },
+                          ]}
+                        />
+                      ),
+                    }}
                   />
-                </EuiButton>,
+                </EuiSplitButton>,
               ]
             : []
         }
@@ -179,7 +243,12 @@ export const RulesListPage = () => {
           <EuiSpacer />
         </>
       ) : null}
-      {showEmptyState ? <RuleCreateOptionsPanel onCreateEsqlRule={openCreateFlyout} /> : null}
+      {showEmptyState ? (
+        <RuleCreateOptionsPanel
+          onCreateEsqlRule={openCreateFlyout}
+          onCreateWithAgent={navigateToAgentBuilder}
+        />
+      ) : null}
       {hasRules || hasActiveFilters ? (
         <>
           <EuiFlexGroup gutterSize="s">
@@ -228,6 +297,7 @@ export const RulesListPage = () => {
         <RuleCreateOptionsFlyout
           onClose={closeCreateOptionsFlyout}
           onCreateEsqlRule={onCreateEsqlRuleFromOptionsFlyout}
+          onCreateWithAgent={onCreateWithAgentFromOptionsFlyout}
         />
       ) : null}
       {flyout}

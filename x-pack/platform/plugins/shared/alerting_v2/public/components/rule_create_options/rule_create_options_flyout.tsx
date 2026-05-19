@@ -24,11 +24,13 @@ const FLYOUT_TITLE_ID = 'ruleCreateOptionsFlyoutTitle';
 export interface RuleCreateOptionsFlyoutProps {
   onClose: () => void;
   onCreateEsqlRule: () => void;
+  onCreateWithAgent: () => void;
 }
 
 export const RuleCreateOptionsFlyout = ({
   onClose,
   onCreateEsqlRule,
+  onCreateWithAgent,
 }: RuleCreateOptionsFlyoutProps) => {
   return (
     <EuiFlyout
@@ -66,7 +68,11 @@ export const RuleCreateOptionsFlyout = ({
         </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <RuleCreateOptionsPanel layout="vertical" onCreateEsqlRule={onCreateEsqlRule} />
+        <RuleCreateOptionsPanel
+          layout="vertical"
+          onCreateEsqlRule={onCreateEsqlRule}
+          onCreateWithAgent={onCreateWithAgent}
+        />
       </EuiFlyoutBody>
     </EuiFlyout>
   );

@@ -12,11 +12,16 @@ import { RuleCreateOptionsFlyout } from './rule_create_options_flyout';
 
 const onClose = jest.fn();
 const onCreateEsqlRule = jest.fn();
+const onCreateWithAgent = jest.fn();
 
 const renderFlyout = () =>
   render(
     <I18nProvider>
-      <RuleCreateOptionsFlyout onClose={onClose} onCreateEsqlRule={onCreateEsqlRule} />
+      <RuleCreateOptionsFlyout
+        onClose={onClose}
+        onCreateEsqlRule={onCreateEsqlRule}
+        onCreateWithAgent={onCreateWithAgent}
+      />
     </I18nProvider>
   );
 
@@ -52,5 +57,13 @@ describe('RuleCreateOptionsFlyout', () => {
     fireEvent.click(screen.getByRole('button', { name: /create es\|ql rule/i }));
 
     expect(onCreateEsqlRule).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls onCreateWithAgent when the AI Agent option is selected', () => {
+    renderFlyout();
+
+    fireEvent.click(screen.getByRole('button', { name: /create with ai agent/i }));
+
+    expect(onCreateWithAgent).toHaveBeenCalledTimes(1);
   });
 });

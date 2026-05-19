@@ -11,8 +11,10 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { MemoryRouter } from 'react-router-dom';
 import { RulesListPage, SEARCH_DEBOUNCE_MS } from './rules_list_page';
+import { CREATE_WITH_AGENT_INITIAL_PROMPT } from '../../constants';
 
 const mockNavigateToUrl = jest.fn();
+const mockNavigateToApp = jest.fn();
 const mockGetUrlForApp = jest.fn((appId: string, options?: { path?: string }) => {
   const path = options?.path ?? '';
   return `/app/${appId}${path}`;
@@ -26,7 +28,11 @@ jest.mock('../../application/breadcrumb_context', () => ({
 jest.mock('@kbn/core-di-browser', () => ({
   useService: (token: unknown) => {
     if (token === 'application') {
-      return { navigateToUrl: mockNavigateToUrl, getUrlForApp: mockGetUrlForApp };
+      return {
+        navigateToUrl: mockNavigateToUrl,
+        navigateToApp: mockNavigateToApp,
+        getUrlForApp: mockGetUrlForApp,
+      };
     }
     if (token === 'chrome') {
       return { docTitle: { change: mockDocTitleChange } };
@@ -741,6 +747,51 @@ describe('RulesListPage', () => {
     expect(screen.queryByTestId('composeDiscoverFlyout')).not.toBeInTheDocument();
     expect(screen.getByTestId('rulesListTable')).toBeInTheDocument();
     expect(mockNavigateToUrl).not.toHaveBeenCalled();
+  });
+
+  it('opens the rule creation flow from the split button dropdown', async () => {
+    mockUseFetchRules.mockReturnValue({
+      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    renderPage();
+
+    fireEvent.click(screen.getByTestId('createRulePopoverButton'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('createEsqlRuleButton')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId('createEsqlRuleButton'));
+
+    expect(screen.getByTestId('composeDiscoverFlyout')).toBeInTheDocument();
+  });
+
+  it('opens agent chat when "Create with agent" is clicked in the split button dropdown', async () => {
+    mockUseFetchRules.mockReturnValue({
+      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    renderPage();
+
+    fireEvent.click(screen.getByTestId('createRulePopoverButton'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('createWithAgentButton')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId('createWithAgentButton'));
+
+    expect(mockNavigateToApp).toHaveBeenCalledWith('agent_builder', {
+      path: '/agents/elastic-ai-agent/conversations/new',
+      state: { initialMessage: CREATE_WITH_AGENT_INITIAL_PROMPT },
+    });
   });
 
   it('shows delete confirmation modal when delete action is clicked', async () => {

@@ -18,6 +18,18 @@
     "@kbn/core",
     "@kbn/serverless",
     "@kbn/config-schema",
+    "@kbn/core-security-server",
     "@kbn/serverless-vectordb-settings",
+    "@kbn/i18n-react",
+    "@kbn/kibana-react-plugin",
+    "@kbn/share-plugin",
+    "@kbn/console-plugin",
+    "@kbn/core-chrome-browser",
+    "@kbn/cloud-plugin",
+    "@kbn/shared-ux-router",
+    "@kbn/agent-builder-plugin",
+    "@kbn/vectordb-onboarding",
+    "@kbn/react-query",
+    "@kbn/i18n",
   ]
 }
