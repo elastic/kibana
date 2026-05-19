@@ -15,9 +15,31 @@ import {
   getUpdatedTypes,
   getTypesWithNewModelVersions,
   validateChangesExistingType,
+  gcsSnapshotUrl,
 } from '../../snapshots';
+import { isSavedObjectsCheckError, SavedObjectsCheckError } from '../../findings';
 import { getLatestTypeFixtures } from '../../migrations/fixtures';
 import { getVersions } from '../../migrations';
+
+/**
+ * Catches any SavedObjectsCheckError thrown by `fn` and re-throws it with
+ * each finding annotated with the snapshot URL that was used as a baseline.
+ * Plain errors (programming bugs, I/O failures) are re-thrown as-is.
+ */
+const withBaselineContext = (
+  url: string | undefined,
+  isServerless: boolean,
+  fn: () => void
+): void => {
+  if (!url) return fn();
+  try {
+    fn();
+  } catch (err) {
+    if (!isSavedObjectsCheckError(err)) throw err;
+    const field = isServerless ? ('serverlessBaselineUrl' as const) : ('baselineUrl' as const);
+    throw new SavedObjectsCheckError(err.findings.map((f) => ({ ...f, [field]: url })));
+  }
+};
 
 export const validateUpdatedTypes: Task = (ctx, task) => {
   const subtasks: ListrTask<TaskContext>[] = [
@@ -48,12 +70,14 @@ export const validateUpdatedTypes: Task = (ctx, task) => {
           (registeredType) => ({
             title: `Checking updates on type '${registeredType.name}'`,
             task: (__, typeTask) =>
-              validateChangesExistingType({
-                from: ctx.from!.typeDefinitions[registeredType.name],
-                to: ctx.to?.typeDefinitions[registeredType.name]!,
-                registeredType,
-                log: (msg) => (typeTask.output = msg),
-              }),
+              withBaselineContext(gcsSnapshotUrl(ctx.gitRev), false, () =>
+                validateChangesExistingType({
+                  from: ctx.from!.typeDefinitions[registeredType.name],
+                  to: ctx.to?.typeDefinitions[registeredType.name]!,
+                  registeredType,
+                  log: (msg) => (typeTask.output = msg),
+                })
+              ),
           })
         );
 
@@ -72,12 +96,14 @@ export const validateUpdatedTypes: Task = (ctx, task) => {
           .map((registeredType) => ({
             title: `Checking updates on type '${registeredType.name}' against serverless baseline`,
             task: (__, typeTask) =>
-              validateChangesExistingType({
-                from: ctx.serverlessFrom!.typeDefinitions[registeredType.name],
-                to: ctx.to?.typeDefinitions[registeredType.name]!,
-                registeredType,
-                log: (msg) => (typeTask.output = msg),
-              }),
+              withBaselineContext(gcsSnapshotUrl(ctx.serverlessGitRev), true, () =>
+                validateChangesExistingType({
+                  from: ctx.serverlessFrom!.typeDefinitions[registeredType.name],
+                  to: ctx.to?.typeDefinitions[registeredType.name]!,
+                  registeredType,
+                  log: (msg) => (typeTask.output = msg),
+                })
+              ),
           }));
 
         return subtask.newListr<TaskContext>(validateChangesTasks, {

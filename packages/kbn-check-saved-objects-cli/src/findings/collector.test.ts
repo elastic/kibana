@@ -112,6 +112,37 @@ describe('FindingsCollector', () => {
     expect(collector.getFindings()).toHaveLength(1);
   });
 
+  it('merges baselineUrl and serverlessBaselineUrl from duplicate findings into one', () => {
+    const collector = new FindingsCollector();
+    const regularErr = new SavedObjectsCheckError({
+      ruleId: RULE_IDS.MODEL_VERSION_MISSING_CREATE_SCHEMA,
+      severity: 'error',
+      typeName: 'my-type',
+      message:
+        "The new model version '3' for SO type 'my-type' is missing the 'create' schema definition.",
+      baselineUrl: 'https://storage.googleapis.com/kibana-so-types-snapshots/abc123.json',
+    });
+    const serverlessErr = new SavedObjectsCheckError({
+      ruleId: RULE_IDS.MODEL_VERSION_MISSING_CREATE_SCHEMA,
+      severity: 'error',
+      typeName: 'my-type',
+      message:
+        "The new model version '3' for SO type 'my-type' is missing the 'create' schema definition.",
+      serverlessBaselineUrl: 'https://storage.googleapis.com/kibana-so-types-snapshots/def456.json',
+    });
+
+    collector.ingestErrors([regularErr, serverlessErr]);
+
+    const findings = collector.getFindings();
+    expect(findings).toHaveLength(1);
+    expect(findings[0].baselineUrl).toBe(
+      'https://storage.googleapis.com/kibana-so-types-snapshots/abc123.json'
+    );
+    expect(findings[0].serverlessBaselineUrl).toBe(
+      'https://storage.googleapis.com/kibana-so-types-snapshots/def456.json'
+    );
+  });
+
   it('keeps findings that share a ruleId but differ in typeName', () => {
     const collector = new FindingsCollector();
     const errFoo = new SavedObjectsCheckError({

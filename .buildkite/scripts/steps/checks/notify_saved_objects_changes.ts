@@ -28,6 +28,10 @@ export interface SavedObjectsCheckFinding {
    * A value without a leading `#` or `/` will produce a malformed URL.
    */
   docsAnchor?: string;
+  /** GCS URL of the regular (merge-base) baseline snapshot that triggered this finding. */
+  baselineUrl?: string;
+  /** GCS URL of the serverless baseline snapshot that triggered this finding. */
+  serverlessBaselineUrl?: string;
 }
 
 export interface SavedObjectsCheckReport {
@@ -100,7 +104,14 @@ See the [Saved Objects troubleshooting guide](${TROUBLESHOOTING_URL}) and the [m
     const bullets = findings
       .map((f) => {
         const fix = f.fixHint ? ` _Fix:_ ${f.fixHint}` : '';
-        return `- **[${f.ruleId}]** ${f.message}${fix} ([docs](${findingDocsLink(f)}))`;
+        const baselineLinks = [
+          f.baselineUrl ? `[baseline](${f.baselineUrl})` : null,
+          f.serverlessBaselineUrl ? `[serverless baseline](${f.serverlessBaselineUrl})` : null,
+        ]
+          .filter(Boolean)
+          .join(' ');
+        const links = `([docs](${findingDocsLink(f)}))${baselineLinks ? ` (${baselineLinks})` : ''}`;
+        return `- **[${f.ruleId}]** ${f.message}${fix} ${links}`;
       })
       .join('\n');
     sections.push(`${heading}\n${bullets}`);
