@@ -21,7 +21,6 @@ export function registerOnboardingApp(
     }),
     appRoute: '/app/onboarding',
     visibleIn: [],
-    chromeless: true,
     updater$: from(startServicesPromise).pipe(
       switchMap(([coreStart]) =>
         coreStart.featureFlags.getBooleanValue$(INGEST_HUB_ONBOARDING_ENABLED_FLAG, false).pipe(
