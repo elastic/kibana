@@ -22,6 +22,7 @@ const errorGroups = [
     lastSeen: 1634833121434,
     handled: false,
     type: 'errorString',
+    traceId: 'abc123',
   },
   {
     name: 'POST /api/orders (500)',
@@ -31,6 +32,7 @@ const errorGroups = [
     lastSeen: 1634833121434,
     handled: false,
     type: 'OpError',
+    traceId: 'def456',
   },
   {
     name: 'write tcp 10.36.2.24:3000->10.36.1.14:34232: write: connection reset by peer',
@@ -40,6 +42,7 @@ const errorGroups = [
     lastSeen: 1634833121434,
     handled: false,
     type: 'OpError',
+    traceId: 'ghi789',
   },
   {
     name: 'write tcp 10.36.0.21:3000->10.36.1.252:57070: write: connection reset by peer',
@@ -49,6 +52,7 @@ const errorGroups = [
     lastSeen: 1634833121434,
     handled: false,
     type: 'OpError',
+    traceId: 'jkl012',
   },
   {
     name: 'write tcp 10.36.0.21:3000->10.36.0.88:33926: write: broken pipe',
@@ -58,6 +62,7 @@ const errorGroups = [
     lastSeen: 1634833121434,
     handled: false,
     type: 'OpError',
+    traceId: 'mno345',
   },
 ];
 

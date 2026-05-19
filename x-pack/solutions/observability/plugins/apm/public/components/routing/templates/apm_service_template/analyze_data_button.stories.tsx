@@ -10,6 +10,12 @@ import React from 'react';
 import { AnalyzeDataButton } from './analyze_data_button';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 
+interface Args {
+  agentName?: string;
+  canShowDashboard?: boolean;
+  environment?: string;
+}
+
 export default {
   title: 'routing/templates/ApmServiceTemplate/AnalyzeDataButton',
   component: AnalyzeDataButton,
@@ -25,9 +31,9 @@ export default {
       serviceAgentStatus: FETCH_STATUS.SUCCESS,
     },
   },
-} as Meta;
+} as Meta<Args>;
 
-export const Example: StoryObj = {
+export const Example: StoryObj<Args> = {
   render: () => {
     return <AnalyzeDataButton />;
   },
