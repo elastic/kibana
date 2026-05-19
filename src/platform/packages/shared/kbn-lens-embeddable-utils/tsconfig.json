@@ -29,7 +29,5 @@
     "@kbn/transpose-utils",
     "@kbn/palettes",
     "@kbn/crypto-browser",
-    "@kbn/babel-register",
-    "@kbn/lens-plugin",
   ]
 }
