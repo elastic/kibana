@@ -2,7 +2,7 @@
   "type": "plugin",
   "id": "@kbn/elastic-assistant-shared-state-plugin",
   "owner": [
-    "@elastic/security-generative-ai"
+    "@elastic/security-threat-hunting"
   ],
   "group": "security",
   "visibility": "private",
@@ -16,10 +16,8 @@
       "elasticAssistantSharedState"
     ],
     "requiredPlugins": [
-      
     ],
     "requiredBundles": [
-
-    ],
+    ]
   }
 }
