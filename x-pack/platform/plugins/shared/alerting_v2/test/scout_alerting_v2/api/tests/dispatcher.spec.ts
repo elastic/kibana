@@ -238,7 +238,11 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
     await apiServices.alertingV2.ruleEvents.cleanUp();
     await apiServices.alertingV2.maintenanceWindows.cleanUp();
 
-    await apiServices.alertingV2.actionPolicies.patch(ACTION_POLICY_ID, { throttle: null });
+    await apiServices.alertingV2.actionPolicies.patch(ACTION_POLICY_ID, {
+      throttle: null,
+      groupingMode: 'per_episode',
+    });
+
     await apiServices.alertingV2.actionPolicies.enable(ACTION_POLICY_ID);
     // Restore np-1 in case a previous test left it snoozed. Idempotent.
     await apiServices.alertingV2.actionPolicies.unsnooze(ACTION_POLICY_ID);
