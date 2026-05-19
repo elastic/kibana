@@ -75,6 +75,7 @@ export type ManagementId =
   | 'trained_models'
   | 'transform'
   | 'action_policies'
+  | 'execution_history'
   | 'rules'
   | 'triggersActionsAlerts'
   | 'triggersActionsConnectors'
