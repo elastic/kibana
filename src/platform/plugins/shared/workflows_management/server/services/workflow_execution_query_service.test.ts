@@ -114,6 +114,21 @@ describe('WorkflowExecutionQueryService', () => {
       expect(must).toContainEqual({ terms: { executedBy: ['user1', 'user2'] } });
     });
 
+    it('adds concurrencyGroupKey filter', async () => {
+      mockEsClient.search.mockResolvedValue(emptyResponse as any);
+
+      await service.getWorkflowExecutions(
+        { workflowId: 'wf-1', concurrencyGroupKey: 'streams-ki-onboarding-my-stream' },
+        'default'
+      );
+
+      const call = mockEsClient.search.mock.calls[0][0] as any;
+      const must = call.query.bool.must;
+      expect(must).toContainEqual({
+        term: { concurrencyGroupKey: 'streams-ki-onboarding-my-stream' },
+      });
+    });
+
     it('adds omitStepRuns filter', async () => {
       mockEsClient.search.mockResolvedValue(emptyResponse as any);
 
@@ -125,6 +140,51 @@ describe('WorkflowExecutionQueryService', () => {
         (clause: any) => clause.bool?.must_not?.exists?.field === 'stepId'
       );
       expect(stepIdFilter).toBeDefined();
+    });
+
+    it('adds finishedAt range filter when finish bounds are provided', async () => {
+      mockEsClient.search.mockResolvedValue(emptyResponse as any);
+
+      await service.getWorkflowExecutions(
+        {
+          workflowId: 'wf-1',
+          finishedAfter: '2026-05-01T00:00:00.000Z',
+          finishedBefore: '2026-05-14T00:00:00.000Z',
+        },
+        'default'
+      );
+
+      const call = mockEsClient.search.mock.calls[0][0] as any;
+      const must = call.query.bool.must;
+      expect(must).toContainEqual({
+        range: {
+          finishedAt: {
+            gte: '2026-05-01T00:00:00.000Z',
+            lte: '2026-05-14T00:00:00.000Z',
+          },
+        },
+      });
+    });
+
+    it('uses createdAt desc as the default sort', async () => {
+      mockEsClient.search.mockResolvedValue(emptyResponse as any);
+
+      await service.getWorkflowExecutions({ workflowId: 'wf-1' }, 'default');
+
+      const call = mockEsClient.search.mock.calls[0][0] as any;
+      expect(call.sort).toEqual([{ createdAt: 'desc' }]);
+    });
+
+    it('uses explicit execution sort when provided', async () => {
+      mockEsClient.search.mockResolvedValue(emptyResponse as any);
+
+      await service.getWorkflowExecutions(
+        { workflowId: 'wf-1', sortField: 'finishedAt', sortOrder: 'desc' },
+        'default'
+      );
+
+      const call = mockEsClient.search.mock.calls[0][0] as any;
+      expect(call.sort).toEqual([{ finishedAt: { order: 'desc' } }]);
     });
 
     it('uses default page size and page 1 when not specified', async () => {

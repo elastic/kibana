@@ -27,6 +27,9 @@ test.describe(
       });
       await serviceMapPage.waitForMapToLoad();
       await serviceMapPage.dismissPopoverIfOpen();
+      // Close the options menu so its expanded panel can't overlap the node we click
+      // (the menu opens by default and the post-fitView layout may center nodes under it).
+      await serviceMapPage.closeOptionsPanelIfOpen();
       await serviceMapPage.settleServiceMapLayout();
     });
 
