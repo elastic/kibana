@@ -27,7 +27,6 @@ export class AiRuleCreationService {
   public readonly lastSavedRuleId$ = this.lastSavedRuleIdSubject.asObservable();
   public readonly dirty$ = this.dirtySubject.asObservable();
   public readonly aiCreatedRule$ = this.aiRuleSubject.asObservable();
-  /** bidirectional form sync is disabled in chat-centric flow; kept for hook compatibility */
   public readonly formSyncActive$ = this.formSyncSubject.pipe(distinctUntilChanged());
 
   public startSession = (): AiRuleCreationSession => {
@@ -77,8 +76,9 @@ export class AiRuleCreationService {
     this.aiRuleSubject.next(null);
   };
 
-  /** @deprecated bidirectional form sync is disabled in chat-centric flow */
-  public activateFormSync = (): void => {};
+  public activateFormSync = (): void => {
+    this.formSyncSubject.next(true);
+  };
 
   public clearSession = (): void => {
     this.session = null;

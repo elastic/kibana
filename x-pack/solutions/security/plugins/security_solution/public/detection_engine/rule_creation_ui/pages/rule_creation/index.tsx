@@ -228,6 +228,11 @@ const CreateRulePageComponent: React.FC<{}> = () => {
     aboutStepForm,
     scheduleStepForm,
     actionsStepForm,
+    defineStepData,
+    aboutStepData,
+    scheduleStepData,
+    actionsStepData,
+    actionTypeRegistry: triggersActionsUi.actionTypeRegistry,
   });
 
   const { isAiRuleAppliedRef, getAiMeta, reportRuleCreated, reportRuleCreationError } =
