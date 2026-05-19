@@ -19,6 +19,7 @@ import type {
   RouteValidatorOptions,
 } from '@kbn/core-http-server';
 import { RouteValidationError } from '@kbn/core-http-server';
+import { RawRouteValidationError } from './raw_route_validation_error';
 
 /**
  * Route validator class to define the validation logic for each new route.
@@ -38,8 +39,8 @@ export class RouteValidator<P = {}, Q = {}, B = {}> {
 
   private static ResultFactory: RouteValidationResultFactory = {
     ok: <T>(value: T) => ({ value }),
-    badRequest: (error: Error | string, path?: string[]) => ({
-      error: new RouteValidationError(error, path),
+    badRequest: (error: unknown, path?: string[]) => ({
+      error: createRouteValidationError(error, path),
     }),
   };
 
@@ -142,11 +143,15 @@ export class RouteValidator<P = {}, Q = {}, B = {}> {
     try {
       result = validateFn(data, RouteValidator.ResultFactory);
     } catch (err) {
-      result = { error: new RouteValidationError(err) };
+      result = { error: createRouteValidationError(err) };
     }
 
     if (result.error) {
-      throw new ValidationError(result.error, namespace);
+      const rawError =
+        'rawError' in result.error
+          ? (result.error as { rawError: unknown }).rawError
+          : result.error;
+      throw new RawRouteValidationError(result.error, namespace, rawError);
     }
     return result.value;
   }
@@ -162,4 +167,17 @@ export class RouteValidator<P = {}, Q = {}, B = {}> {
       return schema.maybe(schema.nullable(schema.any({})));
     }
   }
+}
+
+function createRouteValidationError(error: unknown, path?: string[]): RouteValidationError {
+  const validationError = new RouteValidationError(getRouteValidationErrorMessage(error), path);
+  (validationError as { rawError: unknown }).rawError = error;
+  return validationError;
+}
+
+function getRouteValidationErrorMessage(error: unknown): Error | string {
+  if (error instanceof Error) {
+    return error;
+  }
+  return String(error);
 }

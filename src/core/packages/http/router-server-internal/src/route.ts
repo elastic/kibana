@@ -32,6 +32,7 @@ import type { Request } from '@hapi/hapi';
 import type { Mutable } from 'utility-types';
 import type { InternalRouterRoute, RequestHandlerEnhanced, Router } from './router';
 import { CoreKibanaRequest } from './request';
+import { RequestValidationFailure } from './request_validation_failure';
 import { RouteValidator } from './validator';
 import { BASE_PUBLIC_VERSION } from './versioned_router';
 import { kibanaResponseFactory } from './response';
@@ -228,6 +229,14 @@ function isPublicAccessApiRoute({
 }
 
 function normalizeRequestValidationError(rawError: unknown): RequestValidationError {
+  if (rawError instanceof RequestValidationFailure) {
+    return {
+      message: rawError.message,
+      source: rawError.source,
+      rawError: rawError.rawError,
+    };
+  }
+
   const message = rawError instanceof Error ? rawError.message : String(rawError);
   return {
     message,

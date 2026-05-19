@@ -14,6 +14,7 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { Logger } from '@kbn/logging';
 import { RouteValidator } from './validator';
 import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod/v4';
 import type { Router } from './router';
 import type { RouteAccess } from '@kbn/core-http-server';
 import { createRequest } from './versioned_router/core_versioned_route.test.util';
@@ -114,6 +115,7 @@ describe('handle', () => {
   });
 
   it('maps request validation failures with onRequestValidationError', async () => {
+    let rawError: unknown;
     const response = await handle(createRequest({ query: { foo: 'bar' } }), {
       router,
       handler,
@@ -134,6 +136,7 @@ describe('handle', () => {
               message: '[request query.foo]: expected value of type [number] but got [string]',
               source: 'query',
             });
+            rawError = error.rawError;
             expect(request.query).toEqual({});
             return res.custom({
               statusCode: 422,
@@ -151,10 +154,126 @@ describe('handle', () => {
       message: '[request query.foo]: expected value of type [number] but got [string]',
       source: 'query',
     });
+    expect(rawError).toBeInstanceOf(Error);
+    expect(rawError).toMatchObject({
+      message: '[request query.foo]: expected value of type [number] but got [string]',
+    });
     expect(log.error).toHaveBeenCalledWith('422 Request Validation Error', {
       error: { message: '[request query.foo]: expected value of type [number] but got [string]' },
       http: { request: { method: undefined, path: undefined }, response: { status_code: 422 } },
     });
+  });
+
+  it('preserves zod request validation failures as rawError', async () => {
+    let rawError: unknown;
+    const response = await handle(createRequest({ body: { foo: 1 } }), {
+      router,
+      handler,
+      log,
+      method: 'post',
+      route: {
+        path: '/test',
+        validate: { body: z.object({ foo: z.string() }) },
+        onRequestValidationError: {
+          response: { 422: { description: 'Validation failed' } },
+          handler: (error, _request, res) => {
+            rawError = error.rawError;
+            return res.custom({
+              statusCode: 422,
+              body: { message: error.message, source: error.source },
+            });
+          },
+        },
+      },
+      routeSchemas: RouteValidator.from({ body: z.object({ foo: z.string() }) }),
+    });
+
+    expect(response.status).toEqual(422);
+    expect(response.payload).toMatchObject({
+      message: expect.stringContaining('Invalid input: expected string, received number'),
+      source: 'body',
+    });
+    expect(rawError).toBeInstanceOf(z.ZodError);
+  });
+
+  it('preserves custom validation result failures as rawError', async () => {
+    let rawError: unknown;
+    const response = await handle(createRequest({ query: { foo: 'bar' } }), {
+      router,
+      handler,
+      log,
+      method: 'get',
+      route: {
+        path: '/test',
+        validate: {
+          query: (_data, validationResult) =>
+            validationResult.badRequest(new Error('Custom validation failed')),
+        },
+        onRequestValidationError: {
+          response: { 422: { description: 'Validation failed' } },
+          handler: (error, _request, res) => {
+            rawError = error.rawError;
+            return res.custom({
+              statusCode: 422,
+              body: { message: error.message, source: error.source },
+            });
+          },
+        },
+      },
+      routeSchemas: RouteValidator.from({
+        query: (_data, validationResult) =>
+          validationResult.badRequest(new Error('Custom validation failed')),
+      }),
+    });
+
+    expect(response.status).toEqual(422);
+    expect(response.payload).toEqual({
+      message: '[request query]: Custom validation failed',
+      source: 'query',
+    });
+    expect(rawError).toBeInstanceOf(Error);
+    expect(rawError).toMatchObject({ message: 'Custom validation failed' });
+  });
+
+  it('normalizes custom validation functions that throw non-Error values', async () => {
+    let rawError: unknown;
+    const thrownValue = { code: 'invalid_query' };
+    const response = await handle(createRequest({ query: { foo: 'bar' } }), {
+      router,
+      handler,
+      log,
+      method: 'get',
+      route: {
+        path: '/test',
+        validate: {
+          query: () => {
+            throw thrownValue;
+          },
+        },
+        onRequestValidationError: {
+          response: { 422: { description: 'Validation failed' } },
+          handler: (error, _request, res) => {
+            rawError = error.rawError;
+            return res.custom({
+              statusCode: 422,
+              body: { message: error.message, source: error.source },
+            });
+          },
+        },
+      },
+      routeSchemas: RouteValidator.from({
+        query: () => {
+          throw thrownValue;
+        },
+      }),
+    });
+
+    expect(response.status).toEqual(422);
+    expect(response.payload).toEqual({
+      message: '[request query]: [object Object]',
+      source: 'query',
+    });
+    expect(rawError).toBe(thrownValue);
   });
 
   it('adds the public API version header to custom request validation error responses', async () => {
