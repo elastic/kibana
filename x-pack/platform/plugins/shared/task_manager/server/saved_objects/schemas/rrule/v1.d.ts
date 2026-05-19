@@ -1,4 +1,4 @@
-import { Frequency } from '@kbn/rrule';
+import type { Frequency } from '@kbn/rrule';
 export declare function validateTimezone(timezone: string): string | undefined;
 export declare const rruleCommon: import("@kbn/config-schema").ObjectType<{
     freq: import("@kbn/config-schema").Type<0 | 1 | 5 | 6 | 2 | 4 | 3>;

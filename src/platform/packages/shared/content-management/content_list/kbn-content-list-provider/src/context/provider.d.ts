@@ -2,7 +2,7 @@ import React, { type ReactNode } from 'react';
 import type { ContentListCoreConfig, ContentListConfig, ContentListServices } from './types';
 import type { ContentListFeatures, ContentListSupports } from '../features';
 import type { DataSourceConfig } from '../datasource';
-import { ProfileCache } from '../services';
+import type { ProfileCache } from '../services';
 /**
  * Internal context value type.
  */

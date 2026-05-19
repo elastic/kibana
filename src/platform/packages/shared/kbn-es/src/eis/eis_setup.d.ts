@@ -12,8 +12,8 @@
  * Used by `yarn es snapshot --eis` (sets the key) and `yarn start --eis`
  * (discovers connectors).
  */
-import http from 'http';
-import https from 'https';
+import type http from 'http';
+import type https from 'https';
 import type { ToolingLog } from '@kbn/tooling-log';
 /** QA environment URL for the Elastic Inference Service. */
 export declare const EIS_QA_URL = "https://inference.eu-west-1.aws.svc.qa.elastic.cloud";

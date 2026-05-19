@@ -1,4 +1,4 @@
-import { Transform } from 'stream';
+import type { Transform } from 'stream';
 /**
  *  Create a transform stream that consumes each chunk it receives
  *  and passes it to the reducer, which will return the new value

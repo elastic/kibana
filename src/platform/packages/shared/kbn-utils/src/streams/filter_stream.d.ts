@@ -1,2 +1,2 @@
-import { Transform } from 'stream';
+import type { Transform } from 'stream';
 export declare function createFilterStream<T>(fn: (obj: T) => boolean): Transform;

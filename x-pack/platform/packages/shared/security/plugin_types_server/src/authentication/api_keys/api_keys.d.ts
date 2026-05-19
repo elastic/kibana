@@ -1,4 +1,4 @@
-import { getKibanaRoleSchema } from '../../authorization';
+import type { getKibanaRoleSchema } from '../../authorization';
 export declare const restApiKeySchema: import("@kbn/config-schema").ObjectType<{
     type: import("@kbn/config-schema").Type<"rest" | undefined>;
     name: import("@kbn/config-schema").Type<string>;

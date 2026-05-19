@@ -1,4 +1,4 @@
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 declare const trackedAlertStateRt: t.TypeC<{
     alertId: t.StringC;
     alertUuid: t.StringC;

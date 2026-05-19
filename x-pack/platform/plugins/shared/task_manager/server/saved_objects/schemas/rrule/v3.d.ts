@@ -1,4 +1,4 @@
-import { Frequency } from '@kbn/rrule';
+import type { Frequency } from '@kbn/rrule';
 export declare const rruleSchedule: import("@kbn/config-schema").Type<Readonly<{
     bymonthday?: number[] | undefined;
     byweekday?: string[] | undefined;

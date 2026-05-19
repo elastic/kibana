@@ -1,4 +1,4 @@
-import { Frequency } from '@kbn/rrule';
+import type { Frequency } from '@kbn/rrule';
 export declare const rruleCommon: import("@kbn/config-schema").ObjectType<Omit<{
     freq: import("@kbn/config-schema").Type<0 | 1 | 5 | 6 | 2 | 4 | 3>;
     interval: import("@kbn/config-schema").Type<number>;

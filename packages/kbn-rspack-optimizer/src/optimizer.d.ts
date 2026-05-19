@@ -1,4 +1,4 @@
-import * as Rx from 'rxjs';
+import type * as Rx from 'rxjs';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { ThemeTag } from './types';
 export type OptimizerPhase = 'initializing' | 'running' | 'success' | 'issue' | 'error' | 'idle';

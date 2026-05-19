@@ -1,4 +1,4 @@
-import { errors } from '@elastic/elasticsearch';
+import type { errors } from '@elastic/elasticsearch';
 /**
  * An unauthorized (401) error returned by elasticsearch
  * @public

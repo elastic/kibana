@@ -4,7 +4,7 @@ import type { JsonObject } from '@kbn/utility-types';
 import type { estypes } from '@elastic/elasticsearch';
 import type { AggregationResultOf } from '@kbn/es-types';
 import type { AggregatedStatProvider } from '../lib/runtime_statistics_aggregator';
-import { HealthStatus } from './monitoring_stats_stream';
+import type { HealthStatus } from './monitoring_stats_stream';
 import type { TaskStore } from '../task_store';
 import type { TaskTypeDictionary } from '../task_type_dictionary';
 interface StatusStat extends JsonObject {

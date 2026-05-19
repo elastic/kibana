@@ -4,7 +4,7 @@ import type { Observable } from 'rxjs';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { Logger, ServiceStatus } from '@kbn/core/server';
 import type { MonitoringStats, RawMonitoringStats } from '../monitoring';
-import { HealthStatus } from '../monitoring';
+import type { HealthStatus } from '../monitoring';
 import type { TaskManagerConfig } from '../config';
 export type MonitoredHealth = RawMonitoringStats & {
     id: string;

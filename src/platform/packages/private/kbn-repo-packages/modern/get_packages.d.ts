@@ -46,4 +46,4 @@ export function readPackageMap(packageMapPath?: string | undefined): Map<string,
  * @returns {string}
  */
 export function readHashOfPackageMap(): string;
-import { Package } from "./package";
+import type { Package } from "./package";

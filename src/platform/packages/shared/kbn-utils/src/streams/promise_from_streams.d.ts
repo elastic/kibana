@@ -15,5 +15,5 @@
  *  @return {Promise<any>}
  */
 import type { Readable } from 'stream';
-import { Writable } from 'stream';
+import type { Writable } from 'stream';
 export declare function createPromiseFromStreams<T>(streams: [Readable, ...Writable[]]): Promise<T>;

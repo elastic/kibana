@@ -1,5 +1,5 @@
 import React from 'react';
-import { Query } from '@elastic/eui';
+import type { Query } from '@elastic/eui';
 /**
  * Checks if the exclude modifier key is pressed (Cmd on Mac, Ctrl on Windows/Linux).
  *

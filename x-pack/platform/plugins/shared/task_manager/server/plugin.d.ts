@@ -5,8 +5,8 @@ import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-s
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { Middleware } from './lib/middleware';
 import type { TaskDefinitionRegistry } from './task_type_dictionary';
-import { TaskStore } from './task_store';
-import { TaskScheduling } from './task_scheduling';
+import type { TaskStore } from './task_store';
+import type { TaskScheduling } from './task_scheduling';
 import type { TaskEventLogger } from './task';
 import type { ApiKeyInvalidationFn, UiamApiKeyInvalidationFn } from './invalidate_api_keys/invalidate_api_keys_task';
 export interface TaskManagerSetupContract {

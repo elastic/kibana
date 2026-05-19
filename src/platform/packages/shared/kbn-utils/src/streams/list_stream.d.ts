@@ -1,4 +1,4 @@
-import { Readable } from 'stream';
+import type { Readable } from 'stream';
 /**
  *  Create a Readable stream that provides the items
  *  from a list as objects to subscribers

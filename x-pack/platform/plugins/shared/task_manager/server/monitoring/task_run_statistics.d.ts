@@ -1,11 +1,11 @@
 import type { JsonObject, JsonValue } from '@kbn/utility-types';
 import type { Logger } from '@kbn/core/server';
 import type { AggregatedStatProvider } from '../lib/runtime_statistics_aggregator';
-import { TaskPersistence } from '../task_events';
-import { TaskRunResult } from '../task_running';
-import { FillPoolResult } from '../lib/fill_pool';
+import type { TaskPersistence } from '../task_events';
+import type { TaskRunResult } from '../task_running';
+import type { FillPoolResult } from '../lib/fill_pool';
 import type { AveragedStat } from './task_run_calculators';
-import { HealthStatus } from './monitoring_stats_stream';
+import type { HealthStatus } from './monitoring_stats_stream';
 import type { TaskPollingLifecycle } from '../polling_lifecycle';
 import type { TaskManagerConfig } from '../config';
 interface FillPoolStat extends JsonObject {

@@ -1,4 +1,4 @@
-import { Transform } from 'stream';
+import type { Transform } from 'stream';
 /**
  *  Create a Transform stream that receives values in object mode,
  *  and intersperses a chunk between each object received.

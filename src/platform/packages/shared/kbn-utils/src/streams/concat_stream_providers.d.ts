@@ -1,5 +1,5 @@
 import type { Readable, TransformOptions } from 'stream';
-import { PassThrough } from 'stream';
+import type { PassThrough } from 'stream';
 /**
  *  Write the data and errors from a list of stream providers
  *  to a single stream in order. Stream providers are only

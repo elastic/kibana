@@ -1,4 +1,4 @@
-import { Transform } from 'stream';
+import type { Transform } from 'stream';
 /**
  *  Creates a Transform stream that consumes a stream of Buffers
  *  and produces a stream of strings (in object mode) by splitting

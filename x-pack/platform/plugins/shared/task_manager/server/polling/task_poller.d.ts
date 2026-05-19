@@ -1,7 +1,7 @@
 import type { Observable } from 'rxjs';
 import type { Option } from 'fp-ts/Option';
 import type { Logger } from '@kbn/core/server';
-import { TaskErrorSource } from '../task_running';
+import type { TaskErrorSource } from '../task_running';
 import type { Result } from '../lib/result_type';
 type WorkFn<H> = () => Promise<H>;
 interface Opts<H> {

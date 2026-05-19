@@ -1,7 +1,8 @@
 import type { Logger, ElasticsearchClient, SavedObjectsClientContract, ExecutionContextSetup } from '@kbn/core/server';
-import { Collector } from './collector';
+import type { Collector } from './collector';
 import type { ICollector, CollectorOptions, ICollectorSet } from './types';
-import { UsageCollector, type UsageCollectorOptions } from './usage_collector';
+import type { UsageCollector} from './usage_collector';
+import { type UsageCollectorOptions } from './usage_collector';
 type AnyCollector = ICollector<any, any>;
 export interface CollectorSetConfig {
     logger: Logger;
