@@ -14,14 +14,10 @@ import {
 } from '../../../detection_engine/routes/__mocks__';
 import { riskScoreDataClientMock } from '../risk_score_data_client.mock';
 import { riskScoreHistoryRoute } from './history';
-import type {
-  MockClients,
-  SecuritySolutionRequestHandlerContextMock,
-} from '../../../detection_engine/routes/__mocks__/request_context';
+import type { SecuritySolutionRequestHandlerContextMock } from '../../../detection_engine/routes/__mocks__/request_context';
 
 describe('risk score history route', () => {
   let server: ReturnType<typeof serverMock.create>;
-  let clients: MockClients;
   let context: SecuritySolutionRequestHandlerContextMock;
   let logger: ReturnType<typeof loggerMock.create>;
   let mockRiskScoreDataClient: ReturnType<typeof riskScoreDataClientMock.create>;
@@ -29,7 +25,7 @@ describe('risk score history route', () => {
   beforeEach(() => {
     server = serverMock.create();
     logger = loggerMock.create();
-    ({ clients, context } = requestContextMock.createTools());
+    ({ context } = requestContextMock.createTools());
     mockRiskScoreDataClient = riskScoreDataClientMock.create();
     context.securitySolution.getRiskScoreDataClient.mockReturnValue(mockRiskScoreDataClient);
 
@@ -59,7 +55,7 @@ describe('risk score history route', () => {
       {
         '@timestamp': '2026-01-01T00:00:00.000Z',
         calculated_score_norm: 42,
-        calculated_level: 'Low',
+        calculated_level: 'Low' as const,
       },
     ];
     mockRiskScoreDataClient.getRiskScoreHistory.mockResolvedValue(entries);
