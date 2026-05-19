@@ -42,15 +42,15 @@ export function useOnboardingOverride() {
       );
 
       const onboardingAwsTile: IntegrationCardItem = {
-        id: 'onboarding:aws',
+        id: 'epr:aws',
         title: 'Amazon Web Services',
         description: 'Collect logs and metrics from AWS services.',
         icons: [{ type: 'eui', src: 'logoAWS' }],
-        url: '',
+        url: '/app/onboarding/aws',
         integration: 'aws',
         name: 'aws-onboarding',
         version: '',
-        categories: ['aws', 'observability'],
+        categories: ['aws'],
         onCardClick: navigateToOnboarding,
       };
 
