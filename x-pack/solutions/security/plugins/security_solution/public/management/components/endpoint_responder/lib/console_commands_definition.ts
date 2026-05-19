@@ -679,23 +679,19 @@ export const getEndpointConsoleCommands = ({
       ),
       mustHaveArgs: true,
       args: {
-        ...(isSupported
-          ? {
-              action: {
-                required: true,
-                allowMultiples: false,
-                about: i18n.translate(
-                  'xpack.securitySolution.endpointConsoleCommands.cancel.action.about',
-                  {
-                    defaultMessage:
-                      'The response action to cancel (selected from a popup that displays the list of pending actions for this host that can be canceled).',
-                  }
-                ),
-                mustHaveValue: 'truthy',
-                SelectorComponent: PendingActionsSelector,
-              },
+        action: {
+          required: true,
+          allowMultiples: false,
+          about: i18n.translate(
+            'xpack.securitySolution.endpointConsoleCommands.cancel.action.about',
+            {
+              defaultMessage:
+                'The response action to cancel (selected from a popup that displays the list of pending actions for this host that can be canceled).',
             }
-          : {}),
+          ),
+          mustHaveValue: 'truthy',
+          SelectorComponent: PendingActionsSelector,
+        },
         ...commandCommentArgument(),
       },
       helpGroupLabel: HELP_GROUPS.responseActions.label,

@@ -631,7 +631,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
           return {
             isValid: false,
             error: new ResponseActionsClientError(
-              `Cancel does not support response action [${originalAction.command}]`,
+              `[${originalAction.command}] response action cannot be canceled.`,
               400
             ),
           };
