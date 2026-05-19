@@ -10,16 +10,18 @@
 import { telemetryHandler } from '@kbn/as-code-shared-telemetry';
 import { schema } from '@kbn/config-schema';
 import type { VersionedRouter } from '@kbn/core-http-server';
-import type { RequestHandlerContext } from '@kbn/core/server';
+import type { Logger, RequestHandlerContext } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 import { getRouteConfig } from '../get_route_config';
 import { trackDeleteDashboardAction } from '../../user_activity';
 import { deleteDashboard } from './delete';
+import { logRequest } from '../log_request';
 
 export function registerDeleteRoute(
   router: VersionedRouter<RequestHandlerContext>,
-  usageCounter: UsageCounter | undefined
+  usageCounter: UsageCounter | undefined,
+  logger: Logger
 ) {
   const { basePath, routeConfig, routeVersion } = getRouteConfig(false);
   const deleteRoute = router.delete({
@@ -52,6 +54,9 @@ export function registerDeleteRoute(
           404: {
             description: 'not found',
           },
+          500: {
+            description: 'internal server error',
+          },
         },
       },
     },
@@ -66,16 +71,22 @@ export function registerDeleteRoute(
           }
         } catch (e) {
           if (e.isBoom && e.output.statusCode === 404) {
+            const message = `A dashboard with ID [${req.params.id}] was not found.`;
+            logRequest(logger, req, 'debug', message);
             return res.notFound({
               body: {
-                message: `A dashboard with ID [${req.params.id}] was not found.`,
+                message,
               },
             });
           }
+
           if (e.isBoom && e.output.statusCode === 403) {
+            logRequest(logger, req, 'debug', e.message);
             return res.forbidden({ body: { message: e.message } });
           }
-          return res.badRequest({ body: { message: e.message } });
+
+          logRequest(logger, req, 'error', e.message);
+          return res.customError({ statusCode: 500, body: { message: e.message } });
         }
 
         return res.noContent();

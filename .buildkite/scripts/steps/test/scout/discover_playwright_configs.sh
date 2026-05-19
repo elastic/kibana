@@ -17,4 +17,5 @@ cp .scout/test_configs/scout_playwright_configs.json scout_playwright_configs.js
 # directly from disk in the same step (see discover_and_plan_flaky.sh) and does
 # not depend on the artifact name.
 buildkite-agent artifact upload "scout_playwright_configs.json"
+upload_tmp_artifact scout_playwright_configs.json scout_playwright_configs.json "$BUILDKITE_BUILD_ID"
 

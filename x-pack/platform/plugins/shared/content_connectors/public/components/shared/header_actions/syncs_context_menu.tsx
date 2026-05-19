@@ -179,6 +179,10 @@ export const SyncsContextMenu: React.FC<SyncsContextMenuProps> = ({ disabled = f
 
   return (
     <EuiPopover
+      aria-label={i18n.translate(
+        'xpack.contentConnectors.content.index.syncButton.popover.ariaLabel',
+        { defaultMessage: 'Sync options' }
+      )}
       button={
         <EuiButton
           disabled={disabled || isWaitingForConnector}

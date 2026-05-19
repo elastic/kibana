@@ -70,7 +70,18 @@ export { CONTENT_LIST_ACTIONS } from './src/state';
 export type { ContentListAction } from './src/state';
 
 // Types.
-export type { ContentListItem, ContentListItemConfig } from './src/item';
+export type {
+  ContentListItem,
+  ContentListItemConfig,
+  ContentListActions,
+  ActionConfig,
+  ActionRestriction,
+  ActionId,
+  KnownActionId,
+  ItemActionHref,
+  ItemActionHandler,
+  BulkActionHandler,
+} from './src/item';
 export type {
   ContentListFeatures,
   ContentListSupports,
@@ -132,6 +143,10 @@ export {
   SENTINEL_KEYS,
   getCreatorKey,
 } from './src/item';
+
+// Bulk actions.
+export { partitionByRestriction } from './src/bulk_actions';
+export type { BulkActionPartition, BulkActionSkippedItem } from './src/bulk_actions';
 
 // Utilities.
 export { contentListKeys, contentListQueryClient } from './src/query';
