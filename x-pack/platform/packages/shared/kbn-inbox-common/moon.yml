@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/inbox-common'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/security-generative-ai'
+  defaultOwner: '@elastic/security-genai-research-and-development'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/inbox-common'
   description: Moon project for @kbn/inbox-common
   channel: ''
-  owner: '@elastic/security-generative-ai'
+  owner: '@elastic/security-genai-research-and-development'
   sourceRoot: x-pack/platform/packages/shared/kbn-inbox-common
 dependsOn:
   - '@kbn/zod'

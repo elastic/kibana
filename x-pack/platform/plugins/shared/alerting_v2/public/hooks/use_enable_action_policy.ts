@@ -19,8 +19,9 @@ export const useEnableActionPolicy = () => {
 
   return useMutation<ActionPolicyResponse, Error, string>({
     mutationFn: (id) => actionPoliciesApi.enableActionPolicy(id),
-    onSuccess: () => {
+    onSuccess: (_, id) => {
       queryClient.invalidateQueries({ queryKey: actionPolicyKeys.lists(), exact: false });
+      queryClient.invalidateQueries({ queryKey: actionPolicyKeys.detail(id) });
       toasts.addSuccess(
         i18n.translate('xpack.alertingV2.actionPolicy.enableSuccess', {
           defaultMessage: 'Action policy enabled',

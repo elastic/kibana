@@ -17,7 +17,7 @@ import {
   type EvaluationScoreDocument,
 } from '@kbn/evals-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
-import { PLUGIN_ID } from '../../../common';
+import { EVALS_API_PRIVILEGES } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
 
 const EXAMPLE_SCORES_SORT_ORDER = [
@@ -31,7 +31,7 @@ export const registerGetExampleScoresRoute = ({ router, logger }: RouteDependenc
       path: EVALS_EXAMPLE_SCORES_URL,
       access: INTERNAL_API_ACCESS,
       security: {
-        authz: { requiredPrivileges: [PLUGIN_ID] },
+        authz: { requiredPrivileges: [EVALS_API_PRIVILEGES.read] },
       },
       summary: 'Get example scores',
     })

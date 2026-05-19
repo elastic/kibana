@@ -120,10 +120,10 @@ describe('useRiskLevelsEsqlQuery', () => {
     const generatedQuery = queryKey[1];
 
     expect(generatedQuery).toContain('FROM entities-latest-default');
-    expect(generatedQuery).toContain('entity.attributes.watchlists == "test-watchlist"');
+    expect(generatedQuery).toContain('MV_CONTAINS(entity.attributes.watchlists, "test-watchlist")');
   });
 
-  it('should translate prebuilt watchlist IDs to names in query', () => {
+  it('should include prebuilt watchlist id in MV_CONTAINS filter', () => {
     renderHook(() =>
       useRiskLevelsEsqlQuery({ spaceId: 'default', watchlistId: 'privileged_watchlist_id' })
     );
@@ -131,7 +131,9 @@ describe('useRiskLevelsEsqlQuery', () => {
     const queryKey = mockUseQuery.mock.calls[0][0];
     const generatedQuery = queryKey[1];
 
-    expect(generatedQuery).toContain('entity.attributes.watchlists == "privileged_watchlist_id"');
+    expect(generatedQuery).toContain(
+      'MV_CONTAINS(entity.attributes.watchlists, "privileged_watchlist_id")'
+    );
   });
 
   it('should set enabled to false if skip is true', () => {

@@ -223,7 +223,7 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
                       isOpen={isAddMenuOpen}
                       closePopover={closeAddMenu}
                     >
-                      <EuiContextMenuPanel size="s" items={addMenuItems} />
+                      <EuiContextMenuPanel items={addMenuItems} />
                     </EuiPopover>
                   </EuiFlexItem>
                 ) : null}

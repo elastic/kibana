@@ -295,6 +295,12 @@ export const TimeSeriesExplorerControls: FC<Props> = ({
                 closePopover={setIsMenuOpen.bind(null, false)}
                 panelPaddingSize="none"
                 anchorPosition="downLeft"
+                aria-label={i18n.translate(
+                  'xpack.ml.timeSeriesExplorer.controls.popoverAriaLabel',
+                  {
+                    defaultMessage: 'Single metric viewer actions',
+                  }
+                )}
               >
                 <EuiContextMenu initialPanelId={0} panels={menuPanels} />
               </EuiPopover>
