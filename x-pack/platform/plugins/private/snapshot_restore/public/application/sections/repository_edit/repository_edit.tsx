@@ -102,7 +102,7 @@ export const RepositoryEdit: React.FunctionComponent<RouteComponentProps<MatchPa
         if (defaultResponse.error) {
           toastNotifications.addDanger(
             i18n.translate('xpack.snapshotRestore.editRepository.setDefaultErrorMessage', {
-              defaultMessage: 'Repository saved, but default repository could not be updated.',
+              defaultMessage: 'Repository saved, but the default repository could not be updated.',
             })
           );
         }
