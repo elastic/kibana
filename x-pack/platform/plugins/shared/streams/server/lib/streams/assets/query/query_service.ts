@@ -208,7 +208,7 @@ export class QueryService {
 
     const v1Adapter = new V1RulesAdapter(alertingRulesClient);
     const v2Client = alertingV2RulesClient
-      ? new V2RulesAdapter(alertingV2RulesClient, this.logger)
+      ? new V2RulesAdapter(alertingV2RulesClient)
       : new V2RulesUnavailableAdapter(this.logger);
 
     const rulesManagementClient = alertingV2Enabled

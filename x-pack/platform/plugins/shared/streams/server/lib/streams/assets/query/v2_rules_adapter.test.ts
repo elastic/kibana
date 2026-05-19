@@ -12,8 +12,6 @@ import { V2RulesAdapter, V2RulesUnavailableAdapter } from './v2_rules_adapter';
 import type { CreateRuleBody, UpdateRuleBody } from './rules_management_client';
 import { STREAMS_RULE_CONSUMER, STREAMS_ESQL_RULE_TYPE_ID } from './rules_management_client';
 
-const logger = loggerMock.create();
-
 function makeRulesClientMock() {
   return {
     createRule: jest.fn(),
@@ -23,7 +21,7 @@ function makeRulesClientMock() {
 }
 
 function makeAdapter(mock: ReturnType<typeof makeRulesClientMock>) {
-  return new V2RulesAdapter(mock as unknown as RulesClientApi, logger);
+  return new V2RulesAdapter(mock as unknown as RulesClientApi);
 }
 
 function lastCreateCall(mock: ReturnType<typeof makeRulesClientMock>) {

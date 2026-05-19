@@ -32,7 +32,7 @@ const V2_MATCH_LOOKBACK = `${MATCH_LOOKBACK_MINUTES}m` as const;
  * (SigEvents uses default space), matching the former HTTP client behavior.
  */
 export class V2RulesAdapter implements IRulesManagementClient {
-  constructor(private readonly rulesClient: RulesClientApi, private readonly logger: Logger) {}
+  constructor(private readonly rulesClient: RulesClientApi) {}
 
   async createRule(id: string, body: CreateRuleBody): Promise<void> {
     await this.rulesClient
