@@ -14,6 +14,7 @@ export const configSchema = schema.object({
   healthScanTaskEnabled: schema.boolean({ defaultValue: true }),
   staleInstancesCleanupTaskEnabled: schema.boolean({ defaultValue: false }),
   compositeSloSummaryTaskEnabled: schema.boolean({ defaultValue: false }),
+  compositeSloOrphanSummaryCleanupTaskEnabled: schema.boolean({ defaultValue: false }),
   enabled: schema.boolean({ defaultValue: true }),
   experimental: schema.maybe(
     schema.object({
