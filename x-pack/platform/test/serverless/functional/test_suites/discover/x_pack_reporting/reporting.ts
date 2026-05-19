@@ -73,7 +73,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.savedObjects.cleanStandardList();
       await reportingAPI.initEcommerce({
         batchSize: 5000,
-        concurrency: 4,
+        concurrency: 1,
       });
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.waitUntilTabIsLoaded();
