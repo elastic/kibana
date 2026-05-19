@@ -17,6 +17,10 @@ interface FetchComponentDataOptions {
   httpService: HttpStart;
   /** Full component path. */
   fileName: string;
+  /** 1-indexed line number of the JSX element in the source file. */
+  lineNumber?: number;
+  /** 1-indexed column number of the JSX element in the source file. */
+  columnNumber?: number;
 }
 
 /**
@@ -29,25 +33,27 @@ export interface InspectComponentResponse {
   relativePath: string;
   /** File name with extension. */
   baseFileName: string;
+  /** Prop names explicitly written in the JSX source at the component's line. */
+  explicitProps: string[];
+  /** File modification time in milliseconds since epoch. */
+  mtime: number;
 }
 
 /**
  * Fetch component data.
  * @async
- * @param {FetchComponentDataOptions} options
- * @param {HttpStart} options.httpService {@link HttpStart}
- * @param {string} options.fileName Full component path.
- * @returns {Promise<InspectComponentResponse | undefined>} Resolves with {@link InspectComponentResponse component data} or null if an error occurs.
  */
 export const fetchComponentData = async ({
   httpService,
   fileName,
+  lineNumber,
+  columnNumber,
 }: FetchComponentDataOptions): Promise<InspectComponentResponse | null> => {
   try {
     const response: InspectComponentResponse = await httpService.post(
       '/internal/inspect_component/inspect',
       {
-        body: JSON.stringify({ path: fileName }),
+        body: JSON.stringify({ path: fileName, lineNumber, columnNumber }),
       }
     );
 

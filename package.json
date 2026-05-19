@@ -2170,6 +2170,7 @@
     "prettier": "2.8.8",
     "proxy": "2.1.1",
     "qs": "6.15.2",
+    "react-docgen-typescript": "2.2.2",
     "react-element-to-jsx-string": "15.0.0",
     "react-refresh": "0.18.0",
     "react-test-renderer": "18.2.0",

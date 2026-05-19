@@ -10,8 +10,11 @@
 import React from 'react';
 import { screen, fireEvent } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { coreMock } from '@kbn/core/public/mocks';
 import { InspectFlyout } from './inspect_flyout';
 import { mockBranch, mockComponentData } from '../../../__mocks__/mocks';
+
+const mockCore = coreMock.createStart();
 
 describe('InspectFlyout', () => {
   let target: HTMLElement;
@@ -30,7 +33,12 @@ describe('InspectFlyout', () => {
 
   it('should render correctly', () => {
     renderWithI18n(
-      <InspectFlyout componentData={mockComponentData} target={target} branch={mockBranch} />
+      <InspectFlyout
+        componentData={mockComponentData}
+        target={target}
+        branch={mockBranch}
+        core={mockCore}
+      />
     );
 
     expect(screen.getByTestId('inspectFlyoutHeader')).toBeInTheDocument();
@@ -38,7 +46,12 @@ describe('InspectFlyout', () => {
 
   it('should set initial highlight position based on target', () => {
     renderWithI18n(
-      <InspectFlyout componentData={mockComponentData} target={target} branch={mockBranch} />
+      <InspectFlyout
+        componentData={mockComponentData}
+        target={target}
+        branch={mockBranch}
+        core={mockCore}
+      />
     );
 
     // For fixed positioning, check the container element that has the actual positioning
@@ -61,7 +74,12 @@ describe('InspectFlyout', () => {
 
   it('should update highlight position on window resize', async () => {
     renderWithI18n(
-      <InspectFlyout componentData={mockComponentData} target={target} branch={mockBranch} />
+      <InspectFlyout
+        componentData={mockComponentData}
+        target={target}
+        branch={mockBranch}
+        core={mockCore}
+      />
     );
 
     // Verify initial position

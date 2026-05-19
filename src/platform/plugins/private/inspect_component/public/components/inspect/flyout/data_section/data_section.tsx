@@ -17,9 +17,11 @@ import type { ComponentData } from '../../../../lib/get_inspected_element_data';
 
 interface Props {
   componentData: ComponentData;
+  /** Forwarded to ComponentPreview to trigger a re-capture after prop edits. */
+  previewVersion?: number;
 }
 
-export const DataSection = ({ componentData }: Props) => {
+export const DataSection = ({ componentData, previewVersion }: Props) => {
   const {
     fileData: { codeowners },
     euiData,
@@ -28,7 +30,7 @@ export const DataSection = ({ componentData }: Props) => {
 
   return (
     <>
-      <ComponentPreview element={sourceComponent.element} />
+      <ComponentPreview element={sourceComponent.element} previewVersion={previewVersion} />
       <ComponentTitle sourceComponentType={sourceComponent.type} />
       <CodeownersList codeowners={codeowners} />
       <IconType iconType={euiData.iconType} />
