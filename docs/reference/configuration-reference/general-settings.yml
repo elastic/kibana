@@ -891,11 +891,6 @@ groups:
       - setting: data.autocomplete.valueSuggestions.terminateAfter
         description: |
           Specifies the max number of documents loaded by each shard to generate autocomplete suggestions. Allowed values are between 1 and 10000000.
-          
-          :::{note}
-          :applies_to: stack: ga 9.4.0!-9.4.1!
-          Using this setting in Kibana 9.4.0 and 9.4.1 causes a startup failure due to a known regression. Migrate to `unifiedSearch.autocomplete.valueSuggestions.terminateAfter` or upgrade to a later version.
-          :::
         datatype: int
         default: 100000
         applies_to:
@@ -903,15 +898,13 @@ groups:
           - "ech: unavailable"
           - "self: ga"
         deprecation_details: "Deprecated in 8.3.0. Use `unifiedSearch.autocomplete.valueSuggestions.terminateAfter` instead."
+        note: |
+          :applies_to: stack: ga 9.4.0!-9.4.1!
+          Using this setting in Kibana 9.4.0 and 9.4.1 causes a startup failure due to a known regression. Migrate to `unifiedSearch.autocomplete.valueSuggestions.terminateAfter` or upgrade to a later version.
 
       - setting: data.autocomplete.valueSuggestions.timeout
         description: |
           Specifies the time in milliseconds to wait for autocomplete suggestions from Elasticsearch. Allowed values are between 1 and 1200000.
-          
-          :::{note}
-          :applies_to: stack: ga 9.4.0!-9.4.1!
-          Using this setting in Kibana 9.4.0 and 9.4.1 causes a startup failure due to a known regression. Migrate to `unifiedSearch.autocomplete.valueSuggestions.timeout` or upgrade to a later version.
-          :::
         datatype: int
         default: 1000
         applies_to:
@@ -919,6 +912,9 @@ groups:
           - "ech: unavailable"
           - "self: ga"
         deprecation_details: "Deprecated in 8.3.0. Use `unifiedSearch.autocomplete.valueSuggestions.timeout` instead."
+        note: |
+          :applies_to: stack: ga 9.4.0!-9.4.1!
+          Using this setting in Kibana 9.4.0 and 9.4.1 causes a startup failure due to a known regression. Migrate to `unifiedSearch.autocomplete.valueSuggestions.timeout` or upgrade to a later version.
 
       - setting: unifiedSearch.autocomplete.valueSuggestions.timeout
         description: |
