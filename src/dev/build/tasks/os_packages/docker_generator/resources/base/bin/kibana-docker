@@ -34,11 +34,13 @@ kibana_vars=(
     csp.frame_src
     csp.img_src
     csp.object_src
+    csp.form_action
     csp.frame_ancestors
     csp.report_uri
     csp.report_to
     csp.report_only.form_action
     csp.report_only.object_src
+    csp.report_only.connect_src
     permissionsPolicy.report_to
     data.autocomplete.valueSuggestions.terminateAfter
     data.autocomplete.valueSuggestions.timeout
