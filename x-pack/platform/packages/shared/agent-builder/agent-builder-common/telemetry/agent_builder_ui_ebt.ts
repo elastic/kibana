@@ -38,6 +38,10 @@ const ebtAction = {
     MANAGE_ENTITY_EDIT: 'manage_entity_edit',
     MANAGE_ENTITY_DELETE: 'manage_entity_delete',
   },
+  inappChat: {
+    OPEN_FULLSCREEN: 'inapp_open_fullscreen',
+    AGENT_SWITCH: 'inapp_agent_switch',
+  },
 } as const;
 
 const ebtDetail = {

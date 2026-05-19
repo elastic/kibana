@@ -15,6 +15,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useState } from 'react';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { useNavigation } from '../../../hooks/use_navigation';
 import {
   useAgentId,
@@ -208,6 +210,10 @@ export const MoreActionsButton: React.FC<MoreActionsButtonProps> = ({ onCloseSid
             disabled={!conversationId}
             data-test-subj="agentBuilderFullScreenMenuItem"
             onClick={handleOpenFullScreen}
+            {...getEbtProps({
+              element: AGENT_BUILDER_UI_EBT.element.pageContent,
+              action: AGENT_BUILDER_UI_EBT.action.inappChat.OPEN_FULLSCREEN,
+            })}
           >
             {fullScreenMenuItemLabel}
           </EuiContextMenuItem>,
