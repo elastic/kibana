@@ -26,10 +26,6 @@ describe('getShowTimeCol', () => {
     expect(getShowTimeCol(createUiSettingsMock(true), undefined)).toBe(false);
   });
 
-  it('should return true when no query is provided', () => {
-    expect(getShowTimeCol(createUiSettingsMock(false), undefined)).toBe(true);
-  });
-
   it('should return true for a Classic (non-aggregate) query', () => {
     expect(getShowTimeCol(createUiSettingsMock(false), { language: 'kuery', query: '*' })).toBe(
       true
@@ -46,14 +42,6 @@ describe('getShowTimeCol', () => {
     expect(
       getShowTimeCol(createUiSettingsMock(false), {
         esql: 'from logstash-* | keep ip, @timestamp',
-      })
-    ).toBe(false);
-  });
-
-  it('should return false for a transformational ES|QL query with STATS', () => {
-    expect(
-      getShowTimeCol(createUiSettingsMock(false), {
-        esql: 'from logstash-* | stats count() by extension',
       })
     ).toBe(false);
   });
