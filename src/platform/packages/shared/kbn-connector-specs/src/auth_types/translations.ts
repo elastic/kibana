@@ -138,58 +138,60 @@ export const OAUTH_AUTHORIZATION_URL_LABEL = i18n.translate(
   }
 );
 
-export const OAUTH_CERT_LABEL = i18n.translate('connectorSpecs.oauthEntraClientCertificate.label', {
-  defaultMessage: 'OAuth Client Certificate (Microsoft Entra)',
-});
-
-export const OAUTH_CERT_CERTIFICATE_LABEL = i18n.translate(
-  'connectorSpecs.oauthEntraClientCertificate.certificate.label',
-  {
-    defaultMessage: 'Certificate (PEM)',
-  }
+export const OAUTH_CLIENT_CREDENTIALS_PRIVATE_KEY_JWT_LABEL = i18n.translate(
+  'connectorSpecs.oauthClientCredentialsPrivateKeyJwt.label',
+  { defaultMessage: 'OAuth Client Credentials (Private Key JWT)' }
 );
 
-export const OAUTH_CERT_PRIVATE_KEY_LABEL = i18n.translate(
-  'connectorSpecs.oauthEntraClientCertificate.privateKey.label',
-  {
-    defaultMessage: 'Private key (PEM)',
-  }
+export const OAUTH_CLIENT_CREDENTIALS_PRIVATE_KEY_JWT_ALGORITHM_LABEL = i18n.translate(
+  'connectorSpecs.oauthClientCredentialsPrivateKeyJwt.algorithm.label',
+  { defaultMessage: 'Signing algorithm' }
 );
 
-export const OAUTH_CERT_PRIVATE_KEY_REQUIRED_MESSAGE = i18n.translate(
-  'connectorSpecs.oauthEntraClientCertificate.privateKey.requiredMessage',
-  {
-    defaultMessage: 'Private key is required',
-  }
+export const OAUTH_CLIENT_CREDENTIALS_PRIVATE_KEY_JWT_BINDING_LABEL = i18n.translate(
+  'connectorSpecs.oauthClientCredentialsPrivateKeyJwt.certificateBinding.label',
+  { defaultMessage: 'Certificate binding header' }
 );
 
-export const OAUTH_CERT_CERTIFICATE_REQUIRED_MESSAGE = i18n.translate(
-  'connectorSpecs.oauthEntraClientCertificate.certificate.requiredMessage',
-  {
-    defaultMessage: 'Certificate is required',
-  }
+export const OAUTH_CLIENT_CREDENTIALS_PRIVATE_KEY_JWT_KEY_ID_LABEL = i18n.translate(
+  'connectorSpecs.oauthClientCredentialsPrivateKeyJwt.keyId.label',
+  { defaultMessage: 'Key ID' }
 );
 
-export const OAUTH_CERT_PASSPHRASE_LABEL = i18n.translate(
-  'connectorSpecs.oauthEntraClientCertificate.passphrase.label',
-  {
-    defaultMessage: 'Private key passphrase',
-  }
+export const OAUTH_CLIENT_CREDENTIALS_PRIVATE_KEY_JWT_CERTIFICATE_LABEL = i18n.translate(
+  'connectorSpecs.oauthClientCredentialsPrivateKeyJwt.certificate.label',
+  { defaultMessage: 'Certificate (PEM)' }
 );
 
-export const OAUTH_CERT_CERTIFICATE_INVALID_PEM_MESSAGE = i18n.translate(
-  'connectorSpecs.oauthEntraClientCertificate.certificate.invalidPemMessage',
-  {
-    defaultMessage: 'Certificate must be in PEM format (-----BEGIN CERTIFICATE-----)',
-  }
+export const OAUTH_CLIENT_CREDENTIALS_PRIVATE_KEY_JWT_CERTIFICATE_INVALID_PEM_MESSAGE =
+  i18n.translate(
+    'connectorSpecs.oauthClientCredentialsPrivateKeyJwt.certificate.invalidPemMessage',
+    {
+      defaultMessage: 'Certificate must be a PEM-encoded X.509 certificate.',
+    }
+  );
+
+export const OAUTH_CLIENT_CREDENTIALS_PRIVATE_KEY_JWT_PRIVATE_KEY_LABEL = i18n.translate(
+  'connectorSpecs.oauthClientCredentialsPrivateKeyJwt.privateKey.label',
+  { defaultMessage: 'Private key (PEM)' }
 );
 
-export const OAUTH_CERT_PRIVATE_KEY_INVALID_PEM_MESSAGE = i18n.translate(
-  'connectorSpecs.oauthEntraClientCertificate.privateKey.invalidPemMessage',
-  {
-    defaultMessage:
-      'Private key must be in PEM format (-----BEGIN PRIVATE KEY-----, -----BEGIN RSA PRIVATE KEY-----, or -----BEGIN ENCRYPTED PRIVATE KEY-----)',
-  }
+export const OAUTH_CLIENT_CREDENTIALS_PRIVATE_KEY_JWT_PRIVATE_KEY_REQUIRED_MESSAGE = i18n.translate(
+  'connectorSpecs.oauthClientCredentialsPrivateKeyJwt.privateKey.requiredMessage',
+  { defaultMessage: 'Private key is required.' }
+);
+
+export const OAUTH_CLIENT_CREDENTIALS_PRIVATE_KEY_JWT_PRIVATE_KEY_INVALID_PEM_MESSAGE =
+  i18n.translate(
+    'connectorSpecs.oauthClientCredentialsPrivateKeyJwt.privateKey.invalidPemMessage',
+    {
+      defaultMessage: 'Private key must be a PEM-encoded RSA or PKCS#8 key.',
+    }
+  );
+
+export const OAUTH_CLIENT_CREDENTIALS_PRIVATE_KEY_JWT_PASSPHRASE_LABEL = i18n.translate(
+  'connectorSpecs.oauthClientCredentialsPrivateKeyJwt.passphrase.label',
+  { defaultMessage: 'Private key passphrase' }
 );
 
 export const CRT_AUTH_LABEL = i18n.translate('connectorSpecs.crt.label', {

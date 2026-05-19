@@ -6,20 +6,38 @@
  */
 
 import type { AxiosInstance } from 'axios';
-import type { GetTokenOpts } from '@kbn/connector-specs';
-import { CLIENT_ASSERTION_TYPE, EntraAuthError } from '@kbn/connector-specs';
+import type { CertificateBindingKind, GetTokenOpts, JwtAlgorithm } from '@kbn/connector-specs';
+import { CLIENT_ASSERTION_TYPE } from '@kbn/connector-specs';
+import type { CertificateBinding } from '../build_client_assertion';
 import { buildClientAssertion } from '../build_client_assertion';
 import { getOAuthClientCredentialsAccessToken } from '../get_oauth_client_credentials_access_token';
 import { getDeleteTokenAxiosInterceptor } from '../delete_token_axios_interceptor';
 import type { AuthStrategyDeps, AxiosAuthStrategy } from './types';
 
-interface EntraCertSecrets {
-  certificate: string;
+interface PrivateKeyJwtSecrets {
+  algorithm: JwtAlgorithm;
+  certificateBinding: CertificateBindingKind;
+  certificate?: string;
+  keyId?: string;
   privateKey: string;
   passphrase?: string;
 }
 
-export class OAuthEntraClientCertificateStrategy implements AxiosAuthStrategy {
+function toBindingDescriptor(secrets: PrivateKeyJwtSecrets): CertificateBinding {
+  switch (secrets.certificateBinding) {
+    case 'x5t#S256':
+    case 'x5c':
+      if (!secrets.certificate) {
+        throw new Error(`certificateBinding=${secrets.certificateBinding} requires certificate`);
+      }
+      return { kind: secrets.certificateBinding, certificate: secrets.certificate };
+    case 'kid':
+      if (!secrets.keyId) throw new Error('certificateBinding=kid requires keyId');
+      return { kind: 'kid', keyId: secrets.keyId };
+  }
+}
+
+export class OAuthClientCredentialsPrivateKeyJwtStrategy implements AxiosAuthStrategy {
   installResponseInterceptor(axiosInstance: AxiosInstance, deps: AuthStrategyDeps): void {
     const { connectorId, connectorTokenClient } = deps;
     if (!connectorTokenClient) {
@@ -33,14 +51,14 @@ export class OAuthEntraClientCertificateStrategy implements AxiosAuthStrategy {
   }
 
   async getToken(opts: GetTokenOpts, deps: AuthStrategyDeps): Promise<string | null> {
-    if (opts.authType !== 'oauth_entra_client_certificate') {
+    if (opts.authType !== 'oauth_client_credentials_private_key_jwt') {
       throw new Error(
-        'OAuthEntraClientCertificateStrategy received non-oauth_entra_client_certificate token opts'
+        'OAuthClientCredentialsPrivateKeyJwtStrategy received non-oauth_client_credentials_private_key_jwt token opts'
       );
     }
 
     const { connectorId, connectorTokenClient, logger, configurationUtilities, secrets } = deps;
-    const { certificate, privateKey, passphrase } = secrets as unknown as EntraCertSecrets;
+    const typedSecrets = secrets as unknown as PrivateKeyJwtSecrets;
 
     return getOAuthClientCredentialsAccessToken({
       connectorId,
@@ -58,16 +76,16 @@ export class OAuthEntraClientCertificateStrategy implements AxiosAuthStrategy {
                 client_assertion: buildClientAssertion({
                   tokenUrl: opts.tokenUrl,
                   clientId: opts.clientId,
-                  certificate,
-                  privateKey,
-                  passphrase,
+                  algorithm: typedSecrets.algorithm,
+                  certificateBinding: toBindingDescriptor(typedSecrets),
+                  privateKey: typedSecrets.privateKey,
+                  passphrase: typedSecrets.passphrase,
                 }),
                 client_assertion_type: CLIENT_ASSERTION_TYPE,
               };
             } catch (error) {
-              throw new EntraAuthError(
-                'assertion',
-                `Unable to build client assertion (check certificate/privateKey/passphrase): ${error.message}`,
+              throw new Error(
+                `Unable to build client assertion (check certificate/privateKey/passphrase/keyId for the chosen binding): ${error.message}`,
                 { cause: error }
               );
             }

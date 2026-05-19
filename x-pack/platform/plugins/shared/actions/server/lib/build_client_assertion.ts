@@ -6,40 +6,32 @@
  */
 
 /**
- * JWT client assertion builder for OAuth2 client_credentials with a certificate.
- * Scoped to Microsoft Entra ID.
+ * Builds a signed JWT client assertion (RFC 7521 §4.2.2 + RFC 7523 §2.2) for
+ * OAuth2 `client_credentials` flows that accept a JWT in place of
+ * `client_secret`. Works for any conforming provider — Microsoft Entra, Okta,
+ * Auth0, etc.
  *
  * Relationship to ./create_jwt_assertion.ts
  * ------------------------------------------
- * `create_jwt_assertion.ts` is the pre-existing, generic JWT helper used by
- * ServiceNow-style connectors. It signs with RS256, supports an optional `kid`
- * header, and takes a 3600s default lifetime. We deliberately do not call into
- * it here because the Entra cert flow needs different primitives:
- *
- *   1. algorithm:  Entra expects PS256 (RSA-PSS) while create_jwt_assertion uses
- *                  RS256. Swapping the alg per-caller there would require
- *                  threading another argument through every existing consumer.
- *   2. x5t#S256:   Entra binds the assertion to the uploaded cert via an
- *                  x5t#S256 header (base64url SHA-256 of the DER bytes).
- *                  create_jwt_assertion emits `kid` at most.
- *   3. no `kid`:   Entra ignores `kid` when x5t#S256 is present.
- *
- * These three points are the "generalization knobs" a future
- * `oauth_private_key_jwt` auth type would need to parameterize in order to
- * support providers beyond Entra (Okta, Auth0, Google, etc.). When a second
- * consumer appears, promote:
- *   - `alg`                   (e.g. 'PS256' | 'RS256' | 'ES256')
- *   - `certificateBinding`    ('x5t#S256' | 'x5c' | 'kid' | 'none')
- *   - `lifetimeSec`           (currently hard-coded to 600s)
- * into arguments, and replace this module with a backend-agnostic builder that
- * both consumers share.
+ * `create_jwt_assertion.ts` implements RFC 7523 §2.1 — the JWT is used as
+ * the *grant* (`grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer`,
+ * alongside a client_secret). This file implements §2.2 — the JWT *replaces*
+ * client_secret. Different POST bodies, different subject semantics; keeping
+ * them separate is intentional.
  */
 import { constants, createHash, createSign, randomUUID } from 'crypto';
+import type { JwtAlgorithm } from '@kbn/connector-specs';
+
+export type CertificateBinding =
+  | { kind: 'x5t#S256'; certificate: string }
+  | { kind: 'x5c'; certificate: string }
+  | { kind: 'kid'; keyId: string };
 
 export interface BuildClientAssertionOpts {
   tokenUrl: string;
   clientId: string;
-  certificate: string;
+  algorithm: JwtAlgorithm;
+  certificateBinding: CertificateBinding;
   privateKey: string;
   passphrase?: string;
 }
@@ -53,25 +45,8 @@ function base64UrlEncode(data: Buffer | string): string {
 
 /**
  * Normalizes a PEM string by re-wrapping its base64 body at 64 characters and
- * validating that BEGIN/END markers match.
- *
- * Why this exists despite the UI using a fileUpload widget (which preserves
- * newlines via FileReader.readAsText): connectors are also created by
- * non-UI callers that have to encode the PEM into a JSON string. Common shapes
- * that arrive in encrypted saved-object storage with newlines mangled:
- *
- *   - Kibana connector REST API consumers (curl, Postman) who strip newlines
- *     to make the JSON body parse, instead of escaping them as `\n`.
- *   - Terraform / Ansible / Pulumi configurations that pipe the PEM through
- *     `tr -d '\n'`, `replace(..., "\n", "")`, or a secrets manager that
- *     flattens multiline values.
- *   - CI/CD secret stores that don't round-trip newlines cleanly when the
- *     secret is pasted into their UI.
- *
- * Node's OpenSSL PEM parser rejects unwrapped base64 with
- * "PEM routines:get_name:no start line" / "DECODER routines::unsupported".
- * Re-wrapping here lets the connector keep working regardless of how the
- * secret reached storage.
+ * validating that BEGIN/END markers match. Defends against non-UI ingress
+ * paths (REST API, Terraform, CI secret stores) that flatten newlines.
  */
 function normalizePem(input: string): string {
   const match = input.match(/-----BEGIN ([^-]+)-----\s*([\s\S]+?)\s*-----END ([^-]+)-----/);
@@ -84,14 +59,10 @@ function normalizePem(input: string): string {
     throw new Error(`Invalid PEM: mismatched markers (BEGIN ${beginType} / END ${endType})`);
   }
   const cleanBase64 = base64Content.replace(/\s+/g, '');
-  const lines = cleanBase64.match(/.{1,64}/g) || [];
+  const lines = cleanBase64.match(/.{1,64}/g) ?? [];
   return `-----BEGIN ${beginType}-----\n${lines.join('\n')}\n-----END ${beginType}-----\n`;
 }
 
-/**
- * Extracts DER bytes from a PEM-encoded certificate and computes
- * the SHA-256 thumbprint as a base64url string (x5t#S256).
- */
 export function computeCertificateThumbprint(pemCert: string): string {
   const matches = pemCert.match(
     /-----BEGIN CERTIFICATE-----\s*([\s\S]+?)\s*-----END CERTIFICATE-----/
@@ -105,23 +76,60 @@ export function computeCertificateThumbprint(pemCert: string): string {
   return base64UrlEncode(thumbprint);
 }
 
-/**
- * Builds and signs a JWT client assertion for the OAuth2 client_credentials
- * flow with certificate-based authentication. Microsoft Entra ID only.
- *
- * Header uses x5t#S256 (RFC 7515 §4.1.8) and alg PS256 (RSA-PSS + SHA-256).
- * See the file header for the rationale and for generalization knobs.
- */
+function extractDerChain(pemCert: string): string[] {
+  const matches = [
+    ...pemCert.matchAll(/-----BEGIN CERTIFICATE-----\s*([\s\S]+?)\s*-----END CERTIFICATE-----/g),
+  ];
+  if (matches.length === 0) {
+    throw new Error('Invalid PEM certificate: could not extract certificate data');
+  }
+  return matches.map((m) => m[1].replace(/\s+/g, ''));
+}
+
+function buildBindingHeaders(binding: CertificateBinding): Record<string, string | string[]> {
+  switch (binding.kind) {
+    case 'x5t#S256':
+      return { 'x5t#S256': computeCertificateThumbprint(binding.certificate) };
+    case 'x5c':
+      return { x5c: extractDerChain(binding.certificate) };
+    case 'kid':
+      return { kid: binding.keyId };
+  }
+}
+
+function signingOptionsFor(algorithm: JwtAlgorithm) {
+  switch (algorithm) {
+    case 'PS256':
+      return {
+        digest: 'sha256' as const,
+        signOpts: {
+          padding: constants.RSA_PKCS1_PSS_PADDING,
+          saltLength: constants.RSA_PSS_SALTLEN_DIGEST,
+        },
+      };
+    case 'RS256':
+      return {
+        digest: 'sha256' as const,
+        signOpts: { padding: constants.RSA_PKCS1_PADDING },
+      };
+    case 'ES256':
+      return { digest: 'sha256' as const, signOpts: { dsaEncoding: 'ieee-p1363' as const } };
+  }
+}
+
 export function buildClientAssertion({
   tokenUrl,
   clientId,
-  certificate,
+  algorithm,
+  certificateBinding,
   privateKey,
   passphrase,
 }: BuildClientAssertionOpts): string {
-  const x5tS256 = computeCertificateThumbprint(certificate);
-
-  const header = { alg: 'PS256', typ: 'JWT', 'x5t#S256': x5tS256 };
+  const header = {
+    alg: algorithm,
+    typ: 'JWT',
+    ...buildBindingHeaders(certificateBinding),
+  };
 
   const now = Math.floor(Date.now() / 1000);
   const payload = {
@@ -139,12 +147,12 @@ export function buildClientAssertion({
   const signingInput = `${encodedHeader}.${encodedPayload}`;
 
   const normalizedKey = normalizePem(privateKey);
-  const signer = createSign('sha256');
+  const { digest, signOpts } = signingOptionsFor(algorithm);
+  const signer = createSign(digest);
   signer.update(signingInput);
   const signatureBuffer = signer.sign({
     key: normalizedKey,
-    padding: constants.RSA_PKCS1_PSS_PADDING,
-    saltLength: constants.RSA_PSS_SALTLEN_DIGEST,
+    ...signOpts,
     ...(passphrase ? { passphrase } : {}),
   });
   const encodedSignature = base64UrlEncode(signatureBuffer);

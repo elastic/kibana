@@ -13,11 +13,13 @@ export * as authTypeSpecs from './src/all_auth_types';
 export { EARS_AUTH_ID, EARS_PROVIDERS } from './src/auth_types/ears';
 export { OAUTH_AUTHORIZATION_CODE_AUTH_ID } from './src/auth_types/oauth_authorization_code';
 export {
+  CERTIFICATE_BINDING_KINDS,
   CLIENT_ASSERTION_TYPE,
-  EntraAuthError,
-  OAUTH_ENTRA_CLIENT_CERTIFICATE_ID,
-  type EntraAuthErrorKind,
-} from './src/auth_types/oauth_entra_client_certificate';
+  JWT_ALGORITHMS,
+  OAUTH_CLIENT_CREDENTIALS_PRIVATE_KEY_JWT_ID,
+  type CertificateBindingKind,
+  type JwtAlgorithm,
+} from './src/auth_types/oauth_client_credentials_private_key_jwt';
 
 export { getConnectorSpec } from './src/get_connector_spec';
 export { isToolAction } from './src/connector_spec';

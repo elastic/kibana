@@ -157,18 +157,29 @@ describe('SharepointOnline', () => {
       });
     });
 
-    it('supports oauth_entra_client_certificate with Microsoft defaults', () => {
+    it('supports oauth_client_credentials_private_key_jwt with Microsoft defaults', () => {
       const certType = (
         SharepointOnline.auth?.types as Array<
-          string | { type: string; defaults?: Record<string, unknown> }
+          | string
+          | {
+              type: string;
+              defaults?: Record<string, unknown>;
+              overrides?: { meta?: Record<string, Record<string, unknown>> };
+            }
         >
-      ).find((t) => typeof t === 'object' && t.type === 'oauth_entra_client_certificate');
+      ).find((t) => typeof t === 'object' && t.type === 'oauth_client_credentials_private_key_jwt');
       expect(certType).toBeDefined();
       expect(certType).toMatchObject({
-        type: 'oauth_entra_client_certificate',
+        type: 'oauth_client_credentials_private_key_jwt',
         defaults: {
           scope: 'https://graph.microsoft.com/.default',
-          tokenUrl: 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token',
+        },
+        overrides: {
+          meta: {
+            tokenUrl: {
+              placeholder: 'https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/token',
+            },
+          },
         },
       });
     });
@@ -177,7 +188,7 @@ describe('SharepointOnline', () => {
   describe('getAllSites action', () => {
     const appOnlyContext = {
       ...mockContext,
-      secrets: { authType: 'oauth_entra_client_certificate' },
+      secrets: { authType: 'oauth_client_credentials_private_key_jwt' },
     } as unknown as ActionContext;
 
     const delegatedContext = {
@@ -1075,7 +1086,7 @@ describe('SharepointOnline', () => {
   describe('search action', () => {
     const appOnlySearchContext = {
       ...mockContext,
-      secrets: { authType: 'oauth_entra_client_certificate' },
+      secrets: { authType: 'oauth_client_credentials_private_key_jwt' },
     } as unknown as ActionContext;
 
     it('should search with default entity types using app-only auth (includes region)', async () => {

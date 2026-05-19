@@ -113,7 +113,8 @@ describe('buildClientAssertion', () => {
       const jwt = buildClientAssertion({
         tokenUrl: TOKEN_URL,
         clientId: CLIENT_ID,
-        certificate: TEST_CERT,
+        algorithm: 'PS256',
+        certificateBinding: { kind: 'x5t#S256', certificate: TEST_CERT },
         privateKey: TEST_KEY,
       });
 
@@ -128,7 +129,8 @@ describe('buildClientAssertion', () => {
       const jwt = buildClientAssertion({
         tokenUrl: TOKEN_URL,
         clientId: CLIENT_ID,
-        certificate: TEST_CERT,
+        algorithm: 'PS256',
+        certificateBinding: { kind: 'x5t#S256', certificate: TEST_CERT },
         privateKey: TEST_KEY,
       });
 
@@ -146,7 +148,8 @@ describe('buildClientAssertion', () => {
       const jwt = buildClientAssertion({
         tokenUrl: TOKEN_URL,
         clientId: CLIENT_ID,
-        certificate: TEST_CERT,
+        algorithm: 'PS256',
+        certificateBinding: { kind: 'x5t#S256', certificate: TEST_CERT },
         privateKey: TEST_KEY,
       });
 
@@ -169,7 +172,8 @@ describe('buildClientAssertion', () => {
       const jwt = buildClientAssertion({
         tokenUrl: TOKEN_URL,
         clientId: CLIENT_ID,
-        certificate: TEST_CERT,
+        algorithm: 'PS256',
+        certificateBinding: { kind: 'x5t#S256', certificate: TEST_CERT },
         privateKey: TEST_KEY,
       });
 
@@ -194,7 +198,8 @@ describe('buildClientAssertion', () => {
       const jwt = buildClientAssertion({
         tokenUrl: TOKEN_URL,
         clientId: CLIENT_ID,
-        certificate: TEST_CERT,
+        algorithm: 'PS256',
+        certificateBinding: { kind: 'x5t#S256', certificate: TEST_CERT },
         privateKey: singleLineKey,
       });
 
@@ -219,7 +224,8 @@ describe('buildClientAssertion', () => {
       const jwt = buildClientAssertion({
         tokenUrl: TOKEN_URL,
         clientId: CLIENT_ID,
-        certificate: TEST_CERT,
+        algorithm: 'PS256',
+        certificateBinding: { kind: 'x5t#S256', certificate: TEST_CERT },
         privateKey: messyKey,
       });
 
@@ -231,7 +237,8 @@ describe('buildClientAssertion', () => {
         buildClientAssertion({
           tokenUrl: TOKEN_URL,
           clientId: CLIENT_ID,
-          certificate: TEST_CERT,
+          algorithm: 'PS256',
+          certificateBinding: { kind: 'x5t#S256', certificate: TEST_CERT },
           privateKey: 'not-a-key',
         })
       ).toThrow('Invalid PEM');
@@ -241,7 +248,8 @@ describe('buildClientAssertion', () => {
       const jwt = buildClientAssertion({
         tokenUrl: TOKEN_URL,
         clientId: CLIENT_ID,
-        certificate: TEST_CERT,
+        algorithm: 'PS256',
+        certificateBinding: { kind: 'x5t#S256', certificate: TEST_CERT },
         privateKey: TEST_KEY_ENCRYPTED,
         passphrase: TEST_PASSPHRASE,
       });
@@ -267,7 +275,8 @@ describe('buildClientAssertion', () => {
         buildClientAssertion({
           tokenUrl: TOKEN_URL,
           clientId: CLIENT_ID,
-          certificate: TEST_CERT,
+          algorithm: 'PS256',
+          certificateBinding: { kind: 'x5t#S256', certificate: TEST_CERT },
           privateKey: TEST_KEY_ENCRYPTED,
         })
       ).toThrow();
@@ -278,7 +287,8 @@ describe('buildClientAssertion', () => {
         buildClientAssertion({
           tokenUrl: TOKEN_URL,
           clientId: CLIENT_ID,
-          certificate: TEST_CERT,
+          algorithm: 'PS256',
+          certificateBinding: { kind: 'x5t#S256', certificate: TEST_CERT },
           privateKey: TEST_KEY_ENCRYPTED,
           passphrase: 'wrong-passphrase',
         })
@@ -290,7 +300,8 @@ describe('buildClientAssertion', () => {
         buildClientAssertion({
           tokenUrl: TOKEN_URL,
           clientId: CLIENT_ID,
-          certificate: 'not-a-cert',
+          algorithm: 'PS256',
+          certificateBinding: { kind: 'x5t#S256', certificate: 'not-a-cert' },
           privateKey: TEST_KEY,
         })
       ).toThrow('Invalid PEM certificate');
@@ -300,13 +311,15 @@ describe('buildClientAssertion', () => {
       const jwt1 = buildClientAssertion({
         tokenUrl: TOKEN_URL,
         clientId: CLIENT_ID,
-        certificate: TEST_CERT,
+        algorithm: 'PS256',
+        certificateBinding: { kind: 'x5t#S256', certificate: TEST_CERT },
         privateKey: TEST_KEY,
       });
       const jwt2 = buildClientAssertion({
         tokenUrl: TOKEN_URL,
         clientId: CLIENT_ID,
-        certificate: TEST_CERT,
+        algorithm: 'PS256',
+        certificateBinding: { kind: 'x5t#S256', certificate: TEST_CERT },
         privateKey: TEST_KEY,
       });
 
@@ -318,6 +331,49 @@ describe('buildClientAssertion', () => {
       const payload1 = decode(jwt1.split('.')[1]);
       const payload2 = decode(jwt2.split('.')[1]);
       expect(payload1.jti).not.toBe(payload2.jti);
+    });
+
+    it('signs with RS256 and emits a kid header when binding=kid', () => {
+      const jwt = buildClientAssertion({
+        tokenUrl: TOKEN_URL,
+        clientId: CLIENT_ID,
+        algorithm: 'RS256',
+        certificateBinding: { kind: 'kid', keyId: 'my-key-1' },
+        privateKey: TEST_KEY,
+      });
+
+      const [headerB64, payloadB64, signatureB64] = jwt.split('.');
+      const padded = headerB64.replace(/-/g, '+').replace(/_/g, '/');
+      const header = JSON.parse(Buffer.from(padded, 'base64').toString());
+
+      expect(header.alg).toBe('RS256');
+      expect(header.kid).toBe('my-key-1');
+      expect(header['x5t#S256']).toBeUndefined();
+
+      const signingInput = `${headerB64}.${payloadB64}`;
+      const sigPadded = signatureB64.replace(/-/g, '+').replace(/_/g, '/');
+      const signature = Buffer.from(sigPadded, 'base64');
+      const isValid = createVerify('sha256')
+        .update(signingInput)
+        .verify({ key: TEST_CERT, padding: constants.RSA_PKCS1_PADDING }, signature);
+      expect(isValid).toBe(true);
+    });
+
+    it('emits an x5t#S256 header when binding=x5t#S256', () => {
+      const jwt = buildClientAssertion({
+        tokenUrl: TOKEN_URL,
+        clientId: CLIENT_ID,
+        algorithm: 'PS256',
+        certificateBinding: { kind: 'x5t#S256', certificate: TEST_CERT },
+        privateKey: TEST_KEY,
+      });
+      const [headerB64] = jwt.split('.');
+      const padded = headerB64.replace(/-/g, '+').replace(/_/g, '/');
+      const header = JSON.parse(Buffer.from(padded, 'base64').toString());
+
+      expect(header.alg).toBe('PS256');
+      expect(header['x5t#S256']).toBe(computeCertificateThumbprint(TEST_CERT));
+      expect(header.kid).toBeUndefined();
     });
   });
 });

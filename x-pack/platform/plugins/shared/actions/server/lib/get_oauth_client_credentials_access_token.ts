@@ -58,8 +58,8 @@ export const getOAuthClientCredentialsAccessToken = async ({
 }: GetOAuthClientCredentialsAccessTokenOpts) => {
   const { clientId } = credentials.config;
   const hasCredentials =
-    (credentials.type === 'client_secret' && credentials.secrets.clientSecret) ||
-    (credentials.type === 'client_assertion' && credentials.config.buildAdditionalFields());
+    credentials.type === 'client_assertion' ||
+    (credentials.type === 'client_secret' && !!credentials.secrets.clientSecret);
   if (!clientId || !hasCredentials) {
     logger.warn(`Missing required fields for requesting OAuth Client Credentials access token`);
     return null;

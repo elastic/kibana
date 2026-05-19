@@ -10,7 +10,7 @@ jest.mock('../delete_token_axios_interceptor');
 jest.mock('../build_client_assertion');
 
 import type { AxiosInstance } from 'axios';
-import type { GetTokenOpts, OAuthWithCertificateGetTokenOpts } from '@kbn/connector-specs';
+import type { GetTokenOpts, OAuthClientCredsPrivateKeyJWTGetTokenOpts } from '@kbn/connector-specs';
 import { CLIENT_ASSERTION_TYPE } from '@kbn/connector-specs';
 import { loggerMock } from '@kbn/logging-mocks';
 import { actionsConfigMock } from '../../actions_config.mock';
@@ -18,7 +18,7 @@ import { connectorTokenClientMock } from '../connector_token_client.mock';
 import { buildClientAssertion } from '../build_client_assertion';
 import { getOAuthClientCredentialsAccessToken } from '../get_oauth_client_credentials_access_token';
 import { getDeleteTokenAxiosInterceptor } from '../delete_token_axios_interceptor';
-import { OAuthEntraClientCertificateStrategy } from './oauth_entra_client_certificate_strategy';
+import { OAuthClientCredentialsPrivateKeyJwtStrategy } from './oauth_client_credentials_private_key_jwt_strategy';
 import type { AuthStrategyDeps } from './types';
 
 const mockGetOAuthClientCredentialsAccessToken =
@@ -46,6 +46,8 @@ const baseDeps: AuthStrategyDeps = {
     clientId: 'my-client-id',
     tokenUrl: 'https://login.microsoftonline.com/tenant-id/oauth2/v2.0/token',
     scope: 'https://graph.microsoft.com/.default',
+    algorithm: 'PS256',
+    certificateBinding: 'x5t#S256',
     certificate: PEM_CERT,
     privateKey: PEM_KEY,
     passphrase: 'passphrase',
@@ -55,8 +57,8 @@ const baseDeps: AuthStrategyDeps = {
   configurationUtilities,
 };
 
-const baseOpts: OAuthWithCertificateGetTokenOpts = {
-  authType: 'oauth_entra_client_certificate',
+const baseOpts: OAuthClientCredsPrivateKeyJWTGetTokenOpts = {
+  authType: 'oauth_client_credentials_private_key_jwt',
   tokenUrl: 'https://login.microsoftonline.com/tenant-id/oauth2/v2.0/token',
   clientId: 'the-client-id',
   scope: 'https://graph.microsoft.com/.default',
@@ -67,15 +69,15 @@ const createMockAxiosInstance = () =>
     interceptors: { response: { use: jest.fn() } },
   } as unknown as AxiosInstance);
 
-describe('OAuthEntraClientCertificateStrategy', () => {
-  let strategy: OAuthEntraClientCertificateStrategy;
+describe('OAuthClientCredentialsPrivateKeyJwtStrategy', () => {
+  let strategy: OAuthClientCredentialsPrivateKeyJwtStrategy;
 
   const mockOnFulfilled = jest.fn();
   const mockOnRejected = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
-    strategy = new OAuthEntraClientCertificateStrategy();
+    strategy = new OAuthClientCredentialsPrivateKeyJwtStrategy();
     mockGetDeleteTokenAxiosInterceptor.mockReturnValue({
       onFulfilled: mockOnFulfilled,
       onRejected: mockOnRejected,
@@ -108,10 +110,10 @@ describe('OAuthEntraClientCertificateStrategy', () => {
   });
 
   describe('getToken', () => {
-    it('throws when opts authType is not oauth_entra_client_certificate', async () => {
+    it('throws when opts authType is not oauth_client_credentials_private_key_jwt', async () => {
       const opts: GetTokenOpts = { authType: 'ears', provider: 'google' };
       await expect(strategy.getToken(opts, baseDeps)).rejects.toThrow(
-        'OAuthEntraClientCertificateStrategy received non-oauth_entra_client_certificate token opts'
+        'OAuthClientCredentialsPrivateKeyJwtStrategy received non-oauth_client_credentials_private_key_jwt token opts'
       );
     });
 
@@ -160,7 +162,8 @@ describe('OAuthEntraClientCertificateStrategy', () => {
       expect(mockBuildClientAssertion).toHaveBeenCalledWith({
         tokenUrl: baseOpts.tokenUrl,
         clientId: baseOpts.clientId,
-        certificate: PEM_CERT,
+        algorithm: 'PS256',
+        certificateBinding: { kind: 'x5t#S256', certificate: PEM_CERT },
         privateKey: PEM_KEY,
         passphrase: 'passphrase',
       });
@@ -170,7 +173,7 @@ describe('OAuthEntraClientCertificateStrategy', () => {
       });
     });
 
-    it('factory wraps buildClientAssertion errors as EntraAuthError(assertion)', async () => {
+    it('factory wraps buildClientAssertion errors with cause preserved', async () => {
       const rootCause = new Error('Invalid PEM certificate');
       mockBuildClientAssertion.mockImplementation(() => {
         throw rootCause;
@@ -186,8 +189,6 @@ describe('OAuthEntraClientCertificateStrategy', () => {
 
       expect(() => buildAdditionalFields!()).toThrow(
         expect.objectContaining({
-          name: 'EntraAuthError',
-          kind: 'assertion',
           message: expect.stringMatching(/Unable to build client assertion/),
           cause: rootCause,
         })

@@ -78,7 +78,7 @@ export interface ConnectorMetadata {
 // OAuth2, SSL/mTLS, AWS SigV4 → Phase 2 (see connector_rfc.ts)
 
 // Auth schemas defined in ./auth_types
-// oauth authz code and client credentials
+// oauth authz code and client credentials with client secret
 export interface OAuthGetTokenOpts {
   authType: 'oauth';
   tokenUrl: string;
@@ -92,8 +92,8 @@ export interface OAuthGetTokenOpts {
   tokenType?: string;
 }
 
-export interface OAuthWithCertificateGetTokenOpts {
-  authType: 'oauth_entra_client_certificate';
+export interface OAuthClientCredsPrivateKeyJWTGetTokenOpts {
+  authType: 'oauth_client_credentials_private_key_jwt';
   tokenUrl: string;
   scope?: string;
   clientId: string;
@@ -105,7 +105,10 @@ export interface EarsGetTokenOpts {
   scope?: string;
 }
 
-export type GetTokenOpts = OAuthGetTokenOpts | OAuthWithCertificateGetTokenOpts | EarsGetTokenOpts;
+export type GetTokenOpts =
+  | OAuthGetTokenOpts
+  | OAuthClientCredsPrivateKeyJWTGetTokenOpts
+  | EarsGetTokenOpts;
 
 export interface AuthContext {
   getCustomHostSettings: (url: string) => CustomHostSettings | undefined;

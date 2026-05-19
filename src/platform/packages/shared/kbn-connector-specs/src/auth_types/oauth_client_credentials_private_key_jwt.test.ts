@@ -10,10 +10,9 @@
 import type { AxiosInstance } from 'axios';
 import type { AuthContext } from '../connector_spec';
 import {
-  EntraAuthError,
-  OAUTH_ENTRA_CLIENT_CERTIFICATE_ID,
-  OAuthEntraClientCertificate,
-} from './oauth_entra_client_certificate';
+  OAUTH_CLIENT_CREDENTIALS_PRIVATE_KEY_JWT_ID,
+  OAuthClientCredentialsPrivateKeyJwt,
+} from './oauth_client_credentials_private_key_jwt';
 
 const TOKEN_URL = 'https://login.microsoftonline.com/test-tenant/oauth2/v2.0/token';
 const CLIENT_ID = 'test-client-id';
@@ -29,6 +28,8 @@ const SECRETS = {
   tokenUrl: TOKEN_URL,
   clientId: CLIENT_ID,
   scope: 'https://graph.microsoft.com/.default',
+  algorithm: 'PS256' as const,
+  certificateBinding: 'x5t#S256' as const,
   certificate: PEM_CERT,
   privateKey: PEM_ENCRYPTED_KEY,
   passphrase: 'passphrase',
@@ -56,19 +57,19 @@ function createMockContext(overrides: Partial<AuthContext> = {}): AuthContext {
   return ctx as AuthContext;
 }
 
-describe('OAuthEntraClientCertificate', () => {
+describe('OAuthClientCredentialsPrivateKeyJwt', () => {
   it('has the expected id', () => {
-    expect(OAuthEntraClientCertificate.id).toBe('oauth_entra_client_certificate');
+    expect(OAuthClientCredentialsPrivateKeyJwt.id).toBe('oauth_client_credentials_private_key_jwt');
   });
 
   describe('schema', () => {
     it('accepts a valid cert secret payload', () => {
-      const result = OAuthEntraClientCertificate.schema.safeParse(SECRETS);
+      const result = OAuthClientCredentialsPrivateKeyJwt.schema.safeParse(SECRETS);
       expect(result.success).toBe(true);
     });
 
     it('rejects missing required fields', () => {
-      const result = OAuthEntraClientCertificate.schema.safeParse({
+      const result = OAuthClientCredentialsPrivateKeyJwt.schema.safeParse({
         tokenUrl: TOKEN_URL,
         clientId: CLIENT_ID,
       });
@@ -76,21 +77,15 @@ describe('OAuthEntraClientCertificate', () => {
     });
 
     it('rejects an invalid tokenUrl', () => {
-      const result = OAuthEntraClientCertificate.schema.safeParse({
+      const result = OAuthClientCredentialsPrivateKeyJwt.schema.safeParse({
         ...SECRETS,
         tokenUrl: 'not-a-url',
       });
       expect(result.success).toBe(false);
     });
 
-    it('rejects empty certificate / privateKey', () => {
-      const withEmptyCert = OAuthEntraClientCertificate.schema.safeParse({
-        ...SECRETS,
-        certificate: '',
-      });
-      expect(withEmptyCert.success).toBe(false);
-
-      const withEmptyKey = OAuthEntraClientCertificate.schema.safeParse({
+    it('rejects empty privateKey', () => {
+      const withEmptyKey = OAuthClientCredentialsPrivateKeyJwt.schema.safeParse({
         ...SECRETS,
         privateKey: '',
       });
@@ -98,7 +93,7 @@ describe('OAuthEntraClientCertificate', () => {
     });
 
     it('rejects certificate missing PEM markers', () => {
-      const result = OAuthEntraClientCertificate.schema.safeParse({
+      const result = OAuthClientCredentialsPrivateKeyJwt.schema.safeParse({
         ...SECRETS,
         certificate: 'not a PEM',
       });
@@ -106,7 +101,7 @@ describe('OAuthEntraClientCertificate', () => {
     });
 
     it('rejects privateKey missing PEM markers', () => {
-      const result = OAuthEntraClientCertificate.schema.safeParse({
+      const result = OAuthClientCredentialsPrivateKeyJwt.schema.safeParse({
         ...SECRETS,
         privateKey: 'not a PEM',
       });
@@ -114,14 +109,14 @@ describe('OAuthEntraClientCertificate', () => {
     });
 
     it('accepts PKCS#1 (RSA PRIVATE KEY) and PKCS#8 keys', () => {
-      const pkcs1 = OAuthEntraClientCertificate.schema.safeParse({
+      const pkcs1 = OAuthClientCredentialsPrivateKeyJwt.schema.safeParse({
         ...SECRETS,
         privateKey: PEM_RSA_KEY,
         passphrase: undefined,
       });
       expect(pkcs1.success).toBe(true);
 
-      const pkcs8 = OAuthEntraClientCertificate.schema.safeParse({
+      const pkcs8 = OAuthClientCredentialsPrivateKeyJwt.schema.safeParse({
         ...SECRETS,
         privateKey: PEM_KEY,
         passphrase: undefined,
@@ -129,8 +124,20 @@ describe('OAuthEntraClientCertificate', () => {
       expect(pkcs8.success).toBe(true);
     });
 
+    it('accepts a kid-bound payload without a certificate', () => {
+      const result = OAuthClientCredentialsPrivateKeyJwt.schema.safeParse({
+        tokenUrl: TOKEN_URL,
+        clientId: CLIENT_ID,
+        algorithm: 'RS256' as const,
+        certificateBinding: 'kid' as const,
+        keyId: 'my-key-1',
+        privateKey: PEM_KEY,
+      });
+      expect(result.success).toBe(true);
+    });
+
     it('exposes fileUpload widget hints for PEM fields', () => {
-      const shape = OAuthEntraClientCertificate.schema.shape;
+      const shape = OAuthClientCredentialsPrivateKeyJwt.schema.shape;
       const certMeta = shape.certificate.meta() ?? {};
       const keyMeta = shape.privateKey.meta() ?? {};
       expect(certMeta.widget).toBe('fileUpload');
@@ -141,7 +148,7 @@ describe('OAuthEntraClientCertificate', () => {
     });
 
     it('marks tokenUrl for allowedHosts validation', () => {
-      const shape = OAuthEntraClientCertificate.schema.shape;
+      const shape = OAuthClientCredentialsPrivateKeyJwt.schema.shape;
       const tokenUrlMeta = shape.tokenUrl.meta() ?? {};
       expect(tokenUrlMeta.validate).toEqual({ allowedHosts: true });
     });
@@ -152,10 +159,14 @@ describe('OAuthEntraClientCertificate', () => {
       const ctx = createMockContext();
       const axiosInstance = createMockAxiosInstance();
 
-      const result = await OAuthEntraClientCertificate.configure(ctx, axiosInstance, SECRETS);
+      const result = await OAuthClientCredentialsPrivateKeyJwt.configure(
+        ctx,
+        axiosInstance,
+        SECRETS
+      );
 
       expect(ctx.getToken).toHaveBeenCalledWith({
-        authType: OAUTH_ENTRA_CLIENT_CERTIFICATE_ID,
+        authType: OAUTH_CLIENT_CREDENTIALS_PRIVATE_KEY_JWT_ID,
         tokenUrl: SECRETS.tokenUrl,
         scope: SECRETS.scope,
         clientId: SECRETS.clientId,
@@ -163,7 +174,7 @@ describe('OAuthEntraClientCertificate', () => {
       expect(result.defaults.headers.common.Authorization).toBe(ACCESS_TOKEN);
     });
 
-    it('wraps getToken failures as EntraAuthError(exchange) with tokenUrl context', async () => {
+    it('wraps getToken failures with tokenUrl context and preserves cause', async () => {
       const rootCause = new Error('invalid_client');
       const ctx = createMockContext({
         getToken: jest.fn().mockRejectedValue(rootCause),
@@ -171,41 +182,22 @@ describe('OAuthEntraClientCertificate', () => {
       const axiosInstance = createMockAxiosInstance();
 
       await expect(
-        OAuthEntraClientCertificate.configure(ctx, axiosInstance, SECRETS)
+        OAuthClientCredentialsPrivateKeyJwt.configure(ctx, axiosInstance, SECRETS)
       ).rejects.toMatchObject({
-        name: 'EntraAuthError',
-        kind: 'exchange',
         message: expect.stringContaining(SECRETS.tokenUrl),
         cause: rootCause,
       });
     });
 
-    it('re-throws EntraAuthError from getToken without re-wrapping', async () => {
-      // The strategy may surface an EntraAuthError('assertion') through getToken;
-      // configure must pass it through unchanged.
-      const original = new EntraAuthError('assertion', 'bad PEM');
-      const ctx = createMockContext({
-        getToken: jest.fn().mockRejectedValue(original),
-      });
-      const axiosInstance = createMockAxiosInstance();
-
-      await expect(OAuthEntraClientCertificate.configure(ctx, axiosInstance, SECRETS)).rejects.toBe(
-        original
-      );
-    });
-
-    it('throws EntraAuthError(exchange) when getToken resolves to a falsy value', async () => {
+    it('throws when getToken resolves to a falsy value', async () => {
       const ctx = createMockContext({
         getToken: jest.fn().mockResolvedValue(null),
       });
       const axiosInstance = createMockAxiosInstance();
 
       await expect(
-        OAuthEntraClientCertificate.configure(ctx, axiosInstance, SECRETS)
-      ).rejects.toMatchObject({
-        name: 'EntraAuthError',
-        kind: 'exchange',
-      });
+        OAuthClientCredentialsPrivateKeyJwt.configure(ctx, axiosInstance, SECRETS)
+      ).rejects.toThrow(SECRETS.tokenUrl);
     });
   });
 });

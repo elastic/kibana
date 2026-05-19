@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { OAuthEntraClientCertificateStrategy } from './oauth_entra_client_certificate_strategy';
 import type { AxiosAuthStrategy } from './types';
 import { EarsStrategy } from './ears_strategy';
 import { OAuthAuthCodeStrategy } from './oauth_auth_code_strategy';
 import { OAuthClientCredentialsStrategy } from './oauth_client_credentials_strategy';
+import { OAuthClientCredentialsPrivateKeyJwtStrategy } from './oauth_client_credentials_private_key_jwt_strategy';
 
 /**
  * Returns the AxiosAuthStrategy for the given auth type.
@@ -22,8 +22,8 @@ export const getAxiosAuthStrategy = (authTypeId: string): AxiosAuthStrategy => {
       return new EarsStrategy();
     case 'oauth_authorization_code':
       return new OAuthAuthCodeStrategy();
-    case 'oauth_entra_client_certificate':
-      return new OAuthEntraClientCertificateStrategy();
+    case 'oauth_client_credentials_private_key_jwt':
+      return new OAuthClientCredentialsPrivateKeyJwtStrategy();
     default:
       return new OAuthClientCredentialsStrategy();
   }
