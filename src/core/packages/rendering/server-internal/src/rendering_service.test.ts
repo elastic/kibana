@@ -240,6 +240,32 @@ function renderTestCases(
       expect(uiSettings.globalClient.getUserProvided).not.toHaveBeenCalled();
     });
 
+    it('does not resolve async default `getValue` for anonymous pages', async () => {
+      const getValue = jest.fn().mockResolvedValue('async-default');
+      uiSettings.client.getRegistered.mockReturnValue({
+        registered: { name: 'title', getValue },
+      });
+
+      const [render] = await getRender();
+      await render(createKibanaRequest(), uiSettings, {
+        isAnonymousPage: true,
+      });
+
+      expect(getValue).not.toHaveBeenCalled();
+    });
+
+    it('resolves async default `getValue` for non-anonymous pages', async () => {
+      const getValue = jest.fn().mockResolvedValue('async-default');
+      uiSettings.client.getRegistered.mockReturnValue({
+        registered: { name: 'title', getValue },
+      });
+
+      const [render] = await getRender();
+      await render(createKibanaRequest(), uiSettings);
+
+      expect(getValue).toHaveBeenCalledTimes(1);
+    });
+
     it('calls `getCommonStylesheetPaths` with the correct parameters', async () => {
       getSettingValueMock.mockImplementation((settingName: string) => {
         if (settingName === 'theme:darkMode') {
