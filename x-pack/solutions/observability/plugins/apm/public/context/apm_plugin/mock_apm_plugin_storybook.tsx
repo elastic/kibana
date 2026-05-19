@@ -21,6 +21,7 @@ import { Observable, of } from 'rxjs';
 import { apmRouter } from '../../components/routing/apm_route_config';
 import type { ITelemetryClient } from '../../services/telemetry/types';
 import { createCallApmApi } from '../../services/rest/create_call_apm_api';
+import { storybookMockHttp } from '../../services/rest/storybook_mock_http';
 import type { APMServiceContextValue } from '../apm_service/apm_service_context';
 import { APMServiceContext } from '../apm_service/apm_service_context';
 import { MockTimeRangeContextProvider } from '../time_range_metadata/mock_time_range_metadata_context_provider';
@@ -110,12 +111,7 @@ export const mockCore = {
       security: { apiKeyServiceSettings: '' },
     },
   },
-  http: {
-    basePath: {
-      prepend: (path: string) => `/basepath${path}`,
-      get: () => '/basepath',
-    },
-  },
+  http: storybookMockHttp,
   i18n: {
     Context: ({ children }: { children: ReactNode }) => children,
   },

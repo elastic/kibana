@@ -10,7 +10,7 @@ import React from 'react';
 import { FocusedTraceWaterfall } from '.';
 
 const stories: Meta<any> = {
-  title: 'FocusedTraceWaterfall',
+  title: 'shared/TraceWaterfall/FocusedTraceWaterfall',
   component: FocusedTraceWaterfall,
 };
 export default stories;

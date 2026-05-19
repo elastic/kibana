@@ -10,7 +10,7 @@ import React from 'react';
 import { ServiceOverview } from '.';
 import type { APMServiceContextValue } from '../../../context/apm_service/apm_service_context';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
-import { mockApmApiCallResponse } from '../../../services/rest/call_apm_api_spy';
+import { mockApmApiCallResponse } from '../../../services/rest/storybook_mock_http';
 
 const stories: Meta<{}> = {
   title: 'app/ServiceOverview',

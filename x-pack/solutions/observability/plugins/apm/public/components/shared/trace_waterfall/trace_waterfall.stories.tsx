@@ -15,7 +15,7 @@ import { getTimestampUs } from '../../../../common/utils/get_timestamp_us';
 import type { TraceItem } from '../../../../common/waterfall/unified_trace_item';
 
 const stories: Meta = {
-  title: 'UnifiedTraceWaterfall',
+  title: 'shared/TraceWaterfall/UnifiedTraceWaterfall',
   component: TraceWaterfall,
 };
 

@@ -10,7 +10,7 @@ import type { StoryObj, Meta } from '@storybook/react';
 import { noop } from 'lodash';
 import type { ComponentProps } from 'react';
 import React from 'react';
-import { mockApmApiCallResponse } from '../../../services/rest/call_apm_api_spy';
+import { mockApmApiCallResponse } from '../../../services/rest/storybook_mock_http';
 import { SettingsTemplate } from './settings_template';
 
 type Args = ComponentProps<typeof SettingsTemplate>;

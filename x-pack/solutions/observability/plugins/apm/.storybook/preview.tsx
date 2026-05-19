@@ -8,6 +8,7 @@
 import React from 'react';
 import type { Decorator } from '@storybook/react';
 import * as jest from 'jest-mock';
+import '@elastic/charts/dist/theme_only_light.css';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { RouterProvider } from '@kbn/typed-react-router-config';
