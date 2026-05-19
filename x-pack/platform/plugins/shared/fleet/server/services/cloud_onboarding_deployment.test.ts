@@ -170,51 +170,39 @@ describe('cloudOnboardingDeploymentService', () => {
   });
 
   describe('getByConnectorId', () => {
-    it('passes soClient as PIT finder dependency for namespace scoping', async () => {
+    it('returns all deployments for a connector using soClient PIT finder', async () => {
       const attrs1 = makeAttributes({ mechanisms: ['identity_federation'] });
       const attrs2 = makeAttributes({ mechanisms: ['firehose'] });
 
-      const esoClientMock = {
-        getDecryptedAsInternalUser: jest.fn(),
-        createPointInTimeFinderDecryptedAsInternalUser: jest.fn().mockResolvedValue({
-          async *find() {
-            yield {
-              saved_objects: [
-                makeSOResponse('deploy-1', attrs1),
-                makeSOResponse('deploy-2', attrs2),
-              ],
-            };
-          },
-          close: jest.fn(),
-        }),
-      } as jest.Mocked<EncryptedSavedObjectsClient>;
-      mockedAppContextService.getEncryptedSavedObjects.mockReturnValue(esoClientMock);
+      soClient.createPointInTimeFinder.mockReturnValue({
+        async *find() {
+          yield {
+            saved_objects: [makeSOResponse('deploy-1', attrs1), makeSOResponse('deploy-2', attrs2)],
+          };
+        },
+        close: jest.fn(),
+      } as any);
 
       const results = await cloudOnboardingDeploymentService.getByConnectorId(soClient, 'conn-1');
 
       expect(results).toHaveLength(2);
       expect(results[0].id).toBe('deploy-1');
       expect(results[1].id).toBe('deploy-2');
-      expect(esoClientMock.createPointInTimeFinderDecryptedAsInternalUser).toHaveBeenCalledWith(
+      expect(soClient.createPointInTimeFinder).toHaveBeenCalledWith(
         expect.objectContaining({
           type: CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
           filter: expect.any(Object),
-        }),
-        { client: soClient }
+        })
       );
     });
 
     it('returns an empty array when no deployments exist', async () => {
-      const esoClientMock = {
-        getDecryptedAsInternalUser: jest.fn(),
-        createPointInTimeFinderDecryptedAsInternalUser: jest.fn().mockResolvedValue({
-          async *find() {
-            yield { saved_objects: [] };
-          },
-          close: jest.fn(),
-        }),
-      } as jest.Mocked<EncryptedSavedObjectsClient>;
-      mockedAppContextService.getEncryptedSavedObjects.mockReturnValue(esoClientMock);
+      soClient.createPointInTimeFinder.mockReturnValue({
+        async *find() {
+          yield { saved_objects: [] };
+        },
+        close: jest.fn(),
+      } as any);
 
       const results = await cloudOnboardingDeploymentService.getByConnectorId(
         soClient,

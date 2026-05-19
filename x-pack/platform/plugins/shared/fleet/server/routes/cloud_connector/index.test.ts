@@ -93,10 +93,11 @@ describe('Cloud Connector API', () => {
 
         await createCloudConnectorHandler(context, request, response);
 
-        // Should still call the service, which will handle the undefined body
+        // Should still call the service, which will handle the undefined body.
+        // The handler always normalizes vars, so the body gains vars: {} even when empty.
         expect(mockCloudConnectorService.create).toHaveBeenCalledWith(
           expect.any(Object), // internalSoClient
-          {}
+          { vars: {} }
         );
       });
 

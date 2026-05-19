@@ -95,6 +95,7 @@ const previouslyRegisteredTypes = [
   'fleet-setup-lock',
   'fleet-space-settings',
   'fleet-cloud-connector',
+  'fleet-cloud-onboarding-deployment',
   'graph-workspace',
   'guided-setup-state',
   'guided-onboarding-guide-state',
