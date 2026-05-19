@@ -22,26 +22,56 @@ any of the tool calls below will work.
 
 Before calling any Figma tool, confirm the MCP is running:
 
-- In **Claude Code**: run `/mcp` in the chat — the Figma server should
-  appear with a green ● status.
-- In **Claude.ai** (desktop app): open Settings → Integrations → MCP
-  and check that the Figma server is listed and enabled.
+| Client | How to check |
+|---|---|
+| **Claude Code** | Run `/mcp` in the chat — the Figma server should appear with a green ● status |
+| **Claude.ai desktop** | Settings → Integrations → MCP — Figma server listed and enabled |
+| **Cursor** | Settings → Features → MCP (Cmd+Shift+J) — Figma server listed with a green ● |
 
-**If the Figma MCP is not installed**, direct the user to set it up:
+---
 
-1. Install the Figma MCP globally:
-   ```bash
-   npx figma-mcp install
+**If the Figma MCP is not installed**, direct the user to the right setup
+path for their client:
+
+#### Claude Code / Claude.ai desktop
+
+```bash
+npx figma-mcp install
+```
+
+When prompted, provide a Figma personal access token
+(Figma → Settings → Security → Personal access tokens).
+Restart Claude Code or the Claude desktop app, then verify with `/mcp`.
+
+#### Cursor
+
+1. Open `~/.cursor/mcp.json` (global) or `.cursor/mcp.json` (project-level).
+   Create the file if it doesn't exist.
+
+2. Add the Figma server entry:
+   ```json
+   {
+     "mcpServers": {
+       "Figma": {
+         "command": "npx",
+         "args": ["-y", "@figma/mcp"],
+         "env": {
+           "FIGMA_API_KEY": "YOUR_PERSONAL_ACCESS_TOKEN"
+         }
+       }
+     }
+   }
    ```
-   Or follow the official guide:
-   https://help.figma.com/hc/en-us/articles/32132100833559
+   Replace `YOUR_PERSONAL_ACCESS_TOKEN` with a token from
+   Figma → Settings → Security → Personal access tokens.
 
-2. Provide a personal access token when prompted
-   (Figma → Settings → Security → Personal access tokens).
+3. Reload Cursor (Cmd+Shift+P → "Reload Window").
 
-3. Restart Claude Code / the Claude desktop app.
+4. Confirm in Settings → Features → MCP that the Figma server shows
+   a green ● status.
 
-4. Confirm with `/mcp` that the Figma server now shows a green ● status.
+Official guide for all clients:
+https://help.figma.com/hc/en-us/articles/32132100833559
 
 > **If the MCP cannot be installed** (e.g. corporate environment, no
 > network access to Figma), fall back to **Mode B** — ask the user to
