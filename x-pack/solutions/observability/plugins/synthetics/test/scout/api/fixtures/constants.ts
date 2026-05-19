@@ -19,6 +19,7 @@ export const SYNTHETICS_API_URLS = {
   SUGGESTIONS: '/internal/synthetics/suggestions',
   PRIVATE_LOCATIONS: '/api/synthetics/private_locations',
   DYNAMIC_SETTINGS: '/internal/synthetics/settings',
+  MULTI_SPACE_SETTINGS: '/internal/synthetics/settings_multi_space',
   SYNTHETICS_MONITORS_PROJECT_UPDATE: '/api/synthetics/project/{projectName}/monitors/_bulk_update',
 } as const;
 

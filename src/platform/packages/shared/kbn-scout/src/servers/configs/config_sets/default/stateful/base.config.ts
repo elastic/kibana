@@ -236,6 +236,9 @@ export const defaultConfig: ScoutServerConfig = {
       '--xpack.uptime.service.username=localKibanaIntegrationTestsUser',
       '--xpack.uptime.service.devUrl=mockDevUrl',
       '--xpack.uptime.service.manifestUrl=mockDevUrl',
+      // Experimental Cross-Cluster Search settings for Synthetics; required for the
+      // multi-space settings routes to be reachable. Remove when the flag becomes default-on.
+      '--xpack.uptime.experimental.ccs.enabled=true',
       // Allow dynamic config overrides in tests
       `--coreApp.allowDynamicConfigOverrides=true`,
     ],
