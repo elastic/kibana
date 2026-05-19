@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
-import type { Streams } from '@kbn/streams-schema';
+import type { Streams, IngestStreamLifecycleILM } from '@kbn/streams-schema';
 import {
   Streams as StreamsSchema,
   isDslLifecycle,
@@ -16,19 +16,19 @@ import {
 } from '@kbn/streams-schema';
 import type { PhaseName } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
-import { EuiBadge, EuiButton, EuiToolTip } from '@elastic/eui';
+import { EuiBadge, EuiButton, EuiCallOut, EuiSpacer, EuiToolTip } from '@elastic/eui';
 import type { DataStreamStats } from '../hooks/use_data_stream_stats';
 import { DataLifecycleSummary } from '../common/data_lifecycle/data_lifecycle_summary';
 import { useUpdateStreamLifecycle } from '../hooks/use_update_stream_lifecycle';
 import { useIlmLifecycleSummary } from '../hooks/use_ilm_lifecycle_summary';
 import { useDslLifecycleSummary } from '../hooks/use_dsl_lifecycle_summary';
-import { MAX_DOWNSAMPLE_STEPS } from '../downsampling/edit_dsl_steps_flyout/form';
+import { MAX_DOWNSAMPLE_STEPS } from '../data_phases/edit_dsl_steps_flyout/form';
 import { useLifecyclePreview } from '../common/hooks/lifecycle_preview';
 import type {
   IlmPhaseSelectOption,
   IlmPhaseSelectRenderButtonProps,
-} from '../downsampling/ilm_phase_select/ilm_phase_select';
-import { IlmPhaseSelect } from '../downsampling/ilm_phase_select/ilm_phase_select';
+} from '../data_phases/ilm_phase_select/ilm_phase_select';
+import { IlmPhaseSelect } from '../data_phases/ilm_phase_select/ilm_phase_select';
 
 const addPhaseButtonLabel = i18n.translate(
   'xpack.streams.dataLifecycleSummary.addPhaseButtonLabel',
@@ -213,39 +213,62 @@ const IlmLifecycleSummary = ({
 
   return (
     <>
-      <DataLifecycleSummary
-        model={{
-          phases: (isPreviewActive && previewTimelinePhases) || ilmSummary.phases,
-          loading: ilmSummary.loading,
-          downsampleSteps: previewTimelineDownsampleSteps ?? undefined,
-        }}
-        title={
-          isIlmLifecycle(definition.effective_lifecycle)
-            ? getIlmTitle(definition.effective_lifecycle.ilm.policy)
-            : dataStreamLifecycleTitle
-        }
-        titleBadge={
-          shouldShowInheritedBadge ? <EuiBadge>{inheritedBadgeLabel}</EuiBadge> : undefined
-        }
-        showDownsampling={isMetricsStream}
-        capabilities={{ canManageLifecycle: definition.privileges.lifecycle }}
-        headerActions={headerActions}
-        phaseActions={{
-          onRemovePhase: ilmSummary.onRemovePhase,
-          onEditPhase: (phaseName) => ilmSummary.onEditPhase?.(phaseName as PhaseName),
-          showPhaseActions: true,
-        }}
-        downsamplingActions={{
-          onRemoveDownsampleStep: ilmSummary.onRemoveDownsampleStep,
-          onEditDownsampleStep: (stepNumber, phaseName) =>
-            ilmSummary.onEditDownsampleStep?.(stepNumber, phaseName as PhaseName | undefined),
-        }}
-        uiState={{
-          editedPhaseName: ilmSummary.editingPhase,
-          isEditLifecycleFlyoutOpen,
-          invalidPhases,
-        }}
-      />
+      {ilmSummary.policyMissing && (
+        <>
+          <EuiCallOut
+            announceOnMount
+            title={i18n.translate('xpack.streams.lifecycleSummary.policyMissingTitle', {
+              defaultMessage: 'ILM policy not found',
+            })}
+            color="warning"
+            iconType="warning"
+            data-test-subj="lifecycleSummary-policyMissingCallout"
+          >
+            {i18n.translate('xpack.streams.lifecycleSummary.policyMissingDescription', {
+              defaultMessage:
+                'The ILM policy "{policyName}" referenced by this data stream does not exist. Assign a valid ILM policy to restore lifecycle management.',
+              values: {
+                policyName: (definition.effective_lifecycle as IngestStreamLifecycleILM).ilm.policy,
+              },
+            })}
+          </EuiCallOut>
+          <EuiSpacer size="s" />
+        </>
+      )}
+      {!ilmSummary.policyMissing && (
+        <DataLifecycleSummary
+          model={{
+            phases: ilmSummary.phases,
+            loading: ilmSummary.loading,
+          }}
+          title={
+            isIlmLifecycle(definition.effective_lifecycle)
+              ? getIlmTitle(definition.effective_lifecycle.ilm.policy)
+              : dataStreamLifecycleTitle
+          }
+          titleBadge={
+            shouldShowInheritedBadge ? <EuiBadge>{inheritedBadgeLabel}</EuiBadge> : undefined
+          }
+          showDownsampling={isMetricsStream}
+          capabilities={{ canManageLifecycle: definition.privileges.lifecycle }}
+          headerActions={headerActions}
+          phaseActions={{
+            onRemovePhase: ilmSummary.onRemovePhase,
+            onEditPhase: (phaseName) => ilmSummary.onEditPhase?.(phaseName as PhaseName),
+            showPhaseActions: true,
+          }}
+          downsamplingActions={{
+            onRemoveDownsampleStep: ilmSummary.onRemoveDownsampleStep,
+            onEditDownsampleStep: (stepNumber, phaseName) =>
+              ilmSummary.onEditDownsampleStep?.(stepNumber, phaseName as PhaseName | undefined),
+          }}
+          uiState={{
+            editedPhaseName: ilmSummary.editingPhase,
+            isEditLifecycleFlyoutOpen,
+            invalidPhases,
+          }}
+        />
+      )}
 
       {ilmSummary.modals}
     </>

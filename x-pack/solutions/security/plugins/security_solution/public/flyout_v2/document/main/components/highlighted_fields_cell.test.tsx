@@ -19,9 +19,9 @@ import { useGetAgentStatus } from '../../../../management/hooks/agents/use_get_a
 import { mockFlyoutApi } from '../../../../flyout/document_details/shared/mocks/mock_flyout_context';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { HostPreviewPanelKey } from '../../../../flyout/entity_details/host_right';
-import { HOST_PREVIEW_BANNER } from '../../../../flyout/document_details/right/components/host_entity_overview';
+import { HOST_PREVIEW_BANNER } from './host_entity_overview';
 import { UserPreviewPanelKey } from '../../../../flyout/entity_details/user_right';
-import { USER_PREVIEW_BANNER } from '../../../../flyout/document_details/right/components/user_entity_overview';
+import { USER_PREVIEW_BANNER } from './user_entity_overview';
 import { createTelemetryServiceMock } from '../../../../common/lib/telemetry/telemetry_service.mock';
 import { ChildLink } from '../../../shared/components/child_link';
 
