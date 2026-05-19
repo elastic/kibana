@@ -90,13 +90,6 @@ export const concatJsonObjectPropertyBool = (propertyName: string, boolValue: bo
   return `CONCAT("\\"${propertyName}\\":", "${boolValue}")`;
 };
 
-export const concatJsonObjectPropertyEsqlExpr = (
-  propertyName: string,
-  esqlExpr: string
-): string => {
-  return `CONCAT("\\"${propertyName}\\":", ${esqlExpr})`;
-};
-
 export const concatJsonObjectPropertyEsqlExprAsString = (
   propertyName: string,
   esqlExpr: string
