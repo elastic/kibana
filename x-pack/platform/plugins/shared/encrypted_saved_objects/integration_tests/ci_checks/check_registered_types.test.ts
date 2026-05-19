@@ -74,7 +74,7 @@ describe('checking changes on all registered encrypted SO types', () => {
         "cloud-connect-api-key": "8c0ae7a780c411145ae4aaf7a70235672c9ccfb56d011c322da3c4eeb258f32d",
         "connector_token": "e446f5ff0fbf516f63398e474f126332b4c31e316daa613c6cb8c863400110c5",
         "entity-discovery-api-key": "cd3b5230a513d2d3503583223e48362fbbbc7812aa4710579a62acfa5bbc30e6",
-        "fleet-cloud-onboarding-deployment": "7c474cd3f23ce3d84fdb6af8b1bf3855c0ec01590afda861b7c3d41b7e1b60f6",
+        "fleet-cloud-onboarding-deployment": "34f9ecf864a9cc1d28e54b7a90f828c49cb18129f9de8b3d5c994aebd8652d21",
         "fleet-fleet-server-host": "3b8d0809aaf8a133596307bc29328207c7ceee1dc72233da75141ec47ad8d327",
         "fleet-message-signing-keys": "5cdcf6bf85247267f8876bda4226e871dbfefe01f050e898db7cbc267d57a275",
         "fleet-uninstall-tokens": "6e7d75921dcce46e566f175eab1b0e3825fe565f20cdb3c984e7037934d61e23",
