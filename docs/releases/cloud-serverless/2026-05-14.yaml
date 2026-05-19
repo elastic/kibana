@@ -7,9 +7,9 @@ products:
 entries:
 - file:
     name: 267342.yaml
-    checksum: 4430d41990dae7abf12957737fb005e8e8ba5ca1
+    checksum: e5d24a80609c9fc3a9c4682aa913f16805710a4d
   type: bug-fix
-  title: Fixes entity details not rendered properly on preview mode from Agent Builder
+  title: Fix entity details not rendered properly on preview mode from Agent Builder
   products:
   - product: cloud-serverless
     target: 2026-05-14
@@ -19,13 +19,13 @@ entries:
   - https://github.com/elastic/kibana/issues/265943
 - file:
     name: 268326.yaml
-    checksum: 4ccd4350aeb1ae826e0d76bb8ae3b67deb3bf5ad
+    checksum: 7a0abba643d382792b8808caac00d60309846706
   type: enhancement
   title: Show "Go to dashboard" button in save success toast
   products:
   - product: cloud-serverless
     target: 2026-05-14
-  description: Add a "Go to dashboard" navigation button to the dashboard save toast when saving from outside the Dashboard app.
+  description: Adds a "Go to dashboard" navigation button to the dashboard save toast when saving from outside the Dashboard app.
   areas:
   - Dashboards and visualizations
   prs:
@@ -167,9 +167,9 @@ entries:
   - https://github.com/elastic/kibana/issues/222215
 - file:
     name: 267517.yaml
-    checksum: a0c69ba4e3200534e274e8a1aaa0d8ce52168a02
+    checksum: 290ad2890efac3b2857c0a57bc0fd0fe3c433fdd
   type: deprecation
-  title: Remove html converter/bridge from field formatters plugin and clean up
+  title: Remove HTML converter/bridge from field formatters plugin and clean up
   products:
   - product: cloud-serverless
     target: 2026-05-14
@@ -293,13 +293,13 @@ entries:
   - https://github.com/elastic/kibana/issues/266430
 - file:
     name: 268168.yaml
-    checksum: 33254a922c92e289ef1568e65ae05a37668dcf01
+    checksum: b942cda237096905b07dec4cf15f0775723140b6
   type: bug-fix
   title: Fix gauge min/max/goal available operations
   products:
   - product: cloud-serverless
     target: 2026-05-14
-  description: Updated gauge chart `min`, `max`, and `goal` schemas to reject reference-based metric operations (`moving_average`, `differences`, `cumulative_sum`, `counter_rate`). These pipeline aggregations require a date histogram, which the gauge chart does not support. The accepted operations are now limited to field-based aggregations, static values, and formulas.
+  description: Updates gauge chart `min`, `max`, and `goal` schemas to reject reference-based metric operations (`moving_average`, `differences`, `cumulative_sum`, `counter_rate`). These pipeline aggregations require a date histogram, which the gauge chart does not support. The accepted operations are now limited to field-based aggregations, static values, and formulas.
   areas:
   - Dashboards and visualizations
   prs:
@@ -356,13 +356,13 @@ entries:
   - https://github.com/elastic/kibana/pull/268515
 - file:
     name: 267906.yaml
-    checksum: 51bc6af30386d5d00b518d0da846a3c4b62b7c5f
+    checksum: dc0db00b9bf69deee3116170c7914846be4fa87b
   type: enhancement
   title: Update Agent Builder announcement modal revert flow
   products:
   - product: cloud-serverless
     target: 2026-05-14
-  description: Update the Agent Builder announcement modal so that the revert button immediately switches all space users back to AI Assistant and shows a confirmation toast with a link to "GenAI Settings".
+  description: Updates the Agent Builder announcement modal so that the revert button immediately switches all space users back to AI Assistant and shows a confirmation toast with a link to "GenAI Settings".
   prs:
   - https://github.com/elastic/kibana/pull/267906
   issues:
