@@ -106,6 +106,7 @@ describe('OAuthClientCredentialsStrategy', () => {
           tokenUrl: 'https://provider.example.com/token',
           oAuthScope: 'openid profile',
           credentials: {
+            type: 'client_secret',
             config: { clientId: 'the-client-id' },
             secrets: { clientSecret: 'the-client-secret' },
           },

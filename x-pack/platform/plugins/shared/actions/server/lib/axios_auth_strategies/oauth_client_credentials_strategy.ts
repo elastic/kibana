@@ -38,6 +38,7 @@ export class OAuthClientCredentialsStrategy implements AxiosAuthStrategy {
       oAuthScope: opts.scope,
       configurationUtilities,
       credentials: {
+        type: 'client_secret',
         config: {
           clientId: opts.clientId,
           ...(opts.additionalFields ? { additionalFields: opts.additionalFields } : {}),

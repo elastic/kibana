@@ -6,7 +6,6 @@
  */
 import sinon from 'sinon';
 import type { Logger } from '@kbn/core/server';
-import { asyncForEach } from '@kbn/std';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsConfigMock } from '../actions_config.mock';
 import { connectorTokenClientMock } from './connector_token_client.mock';
@@ -36,6 +35,7 @@ describe('getOAuthClientCredentialsAccessToken', () => {
     logger,
     configurationUtilities,
     credentials: {
+      type: 'client_secret' as const,
       config: {
         clientId: 'clientId',
         additionalFields: defaultAdditionalFields,
@@ -186,7 +186,7 @@ describe('getOAuthClientCredentialsAccessToken', () => {
           ...getOAuthClientCredentialsAccessTokenOpts.credentials.config,
           additionalFields: specificAdditionalFields,
         },
-      },
+      } as const,
     };
 
     await getOAuthClientCredentialsAccessToken(optsWithSpecificFields);
@@ -206,33 +206,31 @@ describe('getOAuthClientCredentialsAccessToken', () => {
     );
   });
 
-  test('returns null and logs warning if any required fields are missing', async () => {
-    await asyncForEach(['clientId'], async (configField: string) => {
-      const accessToken = await getOAuthClientCredentialsAccessToken({
-        ...getOAuthClientCredentialsAccessTokenOpts,
-        credentials: {
-          config: {
-            ...getOAuthClientCredentialsAccessTokenOpts.credentials.config,
-            [configField]: null,
-          },
-          secrets: getOAuthClientCredentialsAccessTokenOpts.credentials.secrets,
-        },
-      });
-      expect(accessToken).toBeNull();
-      expect(logger.warn).toHaveBeenCalledWith(
-        `Missing required fields for requesting OAuth Client Credentials access token`
-      );
-    });
-  });
-
-  test('returns null and logs warning when both clientSecret and client_assertion are missing', async () => {
+  test('returns null and logs warning if clientId is missing', async () => {
     const accessToken = await getOAuthClientCredentialsAccessToken({
       ...getOAuthClientCredentialsAccessTokenOpts,
       credentials: {
+        type: 'client_secret',
         config: {
-          clientId: 'clientId',
+          ...getOAuthClientCredentialsAccessTokenOpts.credentials.config,
+          clientId: '',
         },
-        secrets: {},
+        secrets: getOAuthClientCredentialsAccessTokenOpts.credentials.secrets,
+      },
+    });
+    expect(accessToken).toBeNull();
+    expect(logger.warn).toHaveBeenCalledWith(
+      `Missing required fields for requesting OAuth Client Credentials access token`
+    );
+  });
+
+  test('returns null and logs warning when clientSecret is missing in client_secret mode', async () => {
+    const accessToken = await getOAuthClientCredentialsAccessToken({
+      ...getOAuthClientCredentialsAccessTokenOpts,
+      credentials: {
+        type: 'client_secret',
+        config: { clientId: 'clientId' },
+        secrets: { clientSecret: '' },
       },
     });
 
@@ -243,7 +241,7 @@ describe('getOAuthClientCredentialsAccessToken', () => {
     expect(requestOAuthClientCredentialsToken as jest.Mock).not.toHaveBeenCalled();
   });
 
-  test('requests new token when clientSecret is absent but client_assertion is present', async () => {
+  test('requests new token in client_assertion mode using buildAdditionalFields lazily', async () => {
     connectorTokenClient.get.mockResolvedValueOnce({
       hasErrors: false,
       connectorToken: null,
@@ -254,21 +252,24 @@ describe('getOAuthClientCredentialsAccessToken', () => {
       expiresIn: 1000,
     });
 
+    const buildAdditionalFields = jest.fn().mockReturnValue({
+      client_assertion: 'signed.jwt.assertion',
+      client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
+    });
+
     const accessToken = await getOAuthClientCredentialsAccessToken({
       ...getOAuthClientCredentialsAccessTokenOpts,
       credentials: {
+        type: 'client_assertion',
         config: {
           clientId: 'clientId',
-          additionalFields: {
-            client_assertion: 'signed.jwt.assertion',
-            client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
-          },
+          buildAdditionalFields,
         },
-        secrets: {},
       },
     });
 
     expect(accessToken).toEqual('Bearer assertion-token');
+    expect(buildAdditionalFields).toHaveBeenCalledTimes(1);
     expect(logger.warn).not.toHaveBeenCalled();
     expect(requestOAuthClientCredentialsToken as jest.Mock).toHaveBeenCalledWith(
       'https://login.microsoftonline.com/98765/oauth2/v2.0/token',
@@ -276,13 +277,40 @@ describe('getOAuthClientCredentialsAccessToken', () => {
       {
         scope: 'https://graph.microsoft.com/.default',
         clientId: 'clientId',
-        clientSecret: undefined,
         client_assertion: 'signed.jwt.assertion',
         client_assertion_type: 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
       },
       configurationUtilities,
       undefined
     );
+  });
+
+  test('does not invoke buildAdditionalFields on a cache hit', async () => {
+    connectorTokenClient.get.mockResolvedValueOnce({
+      hasErrors: false,
+      connectorToken: {
+        id: '1',
+        connectorId: '123',
+        tokenType: 'access_token',
+        token: 'Bearer cached',
+        createdAt: new Date(Date.now() - 1000).toISOString(),
+        expiresAt: new Date(Date.now() + 60_000).toISOString(),
+      },
+    });
+
+    const buildAdditionalFields = jest.fn();
+
+    const accessToken = await getOAuthClientCredentialsAccessToken({
+      ...getOAuthClientCredentialsAccessTokenOpts,
+      credentials: {
+        type: 'client_assertion',
+        config: { clientId: 'clientId', buildAdditionalFields },
+      },
+    });
+
+    expect(accessToken).toEqual('Bearer cached');
+    expect(buildAdditionalFields).not.toHaveBeenCalled();
+    expect(requestOAuthClientCredentialsToken as jest.Mock).not.toHaveBeenCalled();
   });
 
   test('throws error if requestOAuthClientCredentialsToken throws error', async () => {
@@ -333,6 +361,7 @@ describe('getOAuthClientCredentialsAccessToken', () => {
       logger,
       configurationUtilities,
       credentials: {
+        type: 'client_secret',
         config: {
           clientId: 'clientId',
           additionalFields: defaultAdditionalFields,
@@ -376,6 +405,7 @@ describe('getOAuthClientCredentialsAccessToken', () => {
       logger,
       configurationUtilities,
       credentials: {
+        type: 'client_secret',
         config: {
           clientId: 'clientId',
           additionalFields: defaultAdditionalFields,

@@ -127,11 +127,11 @@ describe('OAuthEntraClientCertificateStrategy', () => {
           tokenUrl: baseOpts.tokenUrl,
           oAuthScope: baseOpts.scope,
           credentials: {
+            type: 'client_assertion',
             config: {
               clientId: baseOpts.clientId,
               buildAdditionalFields: expect.any(Function),
             },
-            secrets: {},
           },
           connectorTokenClient,
         })
@@ -150,8 +150,11 @@ describe('OAuthEntraClientCertificateStrategy', () => {
       mockGetOAuthClientCredentialsAccessToken.mockResolvedValue('Bearer entra');
       await strategy.getToken(baseOpts, baseDeps);
 
-      const { buildAdditionalFields } =
-        mockGetOAuthClientCredentialsAccessToken.mock.calls[0][0].credentials.config;
+      const credentials = mockGetOAuthClientCredentialsAccessToken.mock.calls[0][0].credentials;
+      if (credentials.type !== 'client_assertion') {
+        throw new Error('expected client_assertion credentials');
+      }
+      const { buildAdditionalFields } = credentials.config;
       const fields = buildAdditionalFields!();
 
       expect(mockBuildClientAssertion).toHaveBeenCalledWith({
@@ -175,8 +178,11 @@ describe('OAuthEntraClientCertificateStrategy', () => {
       mockGetOAuthClientCredentialsAccessToken.mockResolvedValue('Bearer entra');
       await strategy.getToken(baseOpts, baseDeps);
 
-      const { buildAdditionalFields } =
-        mockGetOAuthClientCredentialsAccessToken.mock.calls[0][0].credentials.config;
+      const credentials = mockGetOAuthClientCredentialsAccessToken.mock.calls[0][0].credentials;
+      if (credentials.type !== 'client_assertion') {
+        throw new Error('expected client_assertion credentials');
+      }
+      const { buildAdditionalFields } = credentials.config;
 
       expect(() => buildAdditionalFields!()).toThrow(
         expect.objectContaining({

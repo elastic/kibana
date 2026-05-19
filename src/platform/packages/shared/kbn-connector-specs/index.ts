@@ -17,8 +17,8 @@ export {
   CLIENT_ASSERTION_TYPE,
   EntraAuthError,
   OAUTH_ENTRA_CLIENT_CERTIFICATE_ID,
+  type EntraAuthErrorKind,
 } from './src/auth_types/oauth_entra_client_certificate';
-export type { EntraAuthErrorKind } from './src/auth_types/oauth_entra_client_certificate';
 
 export { getConnectorSpec } from './src/get_connector_spec';
 export { isToolAction } from './src/connector_spec';

@@ -49,6 +49,7 @@ export class OAuthEntraClientCertificateStrategy implements AxiosAuthStrategy {
       oAuthScope: opts.scope,
       configurationUtilities,
       credentials: {
+        type: 'client_assertion',
         config: {
           clientId: opts.clientId,
           buildAdditionalFields: () => {
@@ -72,7 +73,6 @@ export class OAuthEntraClientCertificateStrategy implements AxiosAuthStrategy {
             }
           },
         },
-        secrets: {},
       },
       connectorTokenClient,
     });
