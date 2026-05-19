@@ -24,6 +24,7 @@ Hands-on, task-focused guides for working with the {{kib}} platform from inside 
 
 - [Register an application](./registering-an-application.md) — register a top-level application in {{kib}}
 - [Page template](./kibana-page-template.md) — create consistent page layouts with `KibanaPageTemplate`
+- [Recently viewed](./chrome-recently-viewed.md) — register items in the side navigation's "Recently Viewed" list via `chrome.recentlyAccessed`
 - [Expressions service](./kibana-expressions-service.md) — build and execute expression pipelines
 - [Lens Config Builder API](./lens-config-builder-api-examples.md) — embed Lens visualizations using the config builder API
 - [Add data tutorials](./home-tutorials.md) — register data ingestion tutorials in the {{kib}} home screen
