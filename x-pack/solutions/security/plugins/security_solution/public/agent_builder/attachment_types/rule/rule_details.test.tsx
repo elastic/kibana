@@ -21,6 +21,7 @@ import { createRuleAttachmentDefinition } from './rule_attachment';
 import type { Filter } from '@kbn/es-query';
 import { AiRuleCreationService } from '../../../detection_engine/common/ai_rule_creation_store';
 import type { ApplicationStart } from '@kbn/core-application-browser';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { RULES_FEATURE_LATEST } from '@kbn/security-solution-features/constants';
 
 const baseRule = {
@@ -40,10 +41,16 @@ const makeApplication = () =>
     navigateToApp: jest.fn(),
   } as unknown as ApplicationStart);
 
+const makeUiSettings = () =>
+  ({
+    get: jest.fn(),
+  } as unknown as IUiSettingsClient);
+
 const renderInlineContent = (rule: Record<string, unknown>) => {
   const aiRuleCreation = new AiRuleCreationService();
   const application = makeApplication();
-  const definition = createRuleAttachmentDefinition({ application, aiRuleCreation });
+  const uiSettings = makeUiSettings();
+  const definition = createRuleAttachmentDefinition({ application, aiRuleCreation, uiSettings });
   const Renderer = definition.renderInlineContent!;
   return render(
     <Renderer
@@ -964,7 +971,8 @@ describe('RuleInlineContent integration', () => {
   it('shows "New Rule" callout when attachment data is not valid JSON', () => {
     const aiRuleCreation = new AiRuleCreationService();
     const application = makeApplication();
-    const definition = createRuleAttachmentDefinition({ application, aiRuleCreation });
+    const uiSettings = makeUiSettings();
+    const definition = createRuleAttachmentDefinition({ application, aiRuleCreation, uiSettings });
     const Renderer = definition.renderInlineContent!;
     render(
       <Renderer
@@ -998,7 +1006,11 @@ describe('RuleInlineContent integration', () => {
   it('shows "New Rule" callout when attachment data is a JSON array', () => {
     const aiRuleCreation = new AiRuleCreationService();
     const application = makeApplication();
-    const definition = createRuleAttachmentDefinition({ application, aiRuleCreation });
+    const definition = createRuleAttachmentDefinition({
+      application,
+      aiRuleCreation,
+      uiSettings: makeUiSettings(),
+    });
     const Renderer = definition.renderInlineContent!;
     render(
       <Renderer
