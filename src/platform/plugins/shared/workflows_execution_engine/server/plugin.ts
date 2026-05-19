@@ -38,6 +38,7 @@ import {
 } from './execution_functions';
 import { cancelWaitingWorkflow } from './lib/cancel_waiting_workflow';
 import { checkLicense } from './lib/check_license';
+import { ensureWorkflowsDataStreamsRolledOver } from './lib/data_streams/ensure_data_streams_rolled_over';
 import { getAuthenticatedUser } from './lib/get_user';
 import {
   resolveExhaustedWorkflowRunTask,
@@ -597,9 +598,11 @@ export class WorkflowsExecutionEnginePlugin
       throw new Error('Setup not called before start');
     }
 
+    const esClient = coreStart.elasticsearch.client.asInternalUser;
+    void ensureWorkflowsDataStreamsRolledOver(this.logger.get('data-stream-rollover'), esClient);
+
     // Initialize ConcurrencyManager with dependencies
     const workflowTaskManager = new WorkflowTaskManager(plugins.taskManager);
-    const esClient = coreStart.elasticsearch.client.asInternalUser;
     const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
     const workflowRepository = new WorkflowRepository({ esClient, logger: this.logger });
     this.concurrencyManager = new ConcurrencyManager(
