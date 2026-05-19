@@ -6,10 +6,8 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiBasicTable, EuiCodeBlock, EuiButtonIcon } from '@elastic/eui';
+import { EuiBasicTable, EuiBadge, EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
-import { PlatformIcons } from './queries/platforms';
 import type { PackQueryFormData } from './queries/use_pack_query_form';
 
 export interface PackQueriesTableProps {
@@ -65,18 +63,41 @@ const PackQueriesTableComponent: React.FC<PackQueriesTableProps> = ({
     [onEditClick]
   );
 
-  const renderQueryColumn = useCallback(
-    (query: string) => (
-      <EuiCodeBlock language="sql" fontSize="s" paddingSize="none" transparentBackground>
-        {query}
-      </EuiCodeBlock>
-    ),
+  const OS_LABELS: Record<string, string> = useMemo(
+    () => ({
+      linux: i18n.translate('xpack.osquery.pack.queriesTable.osLinuxLabel', {
+        defaultMessage: 'Linux',
+      }),
+      darwin: i18n.translate('xpack.osquery.pack.queriesTable.osMacOSLabel', {
+        defaultMessage: 'macOS',
+      }),
+      windows: i18n.translate('xpack.osquery.pack.queriesTable.osWindowsLabel', {
+        defaultMessage: 'Windows',
+      }),
+    }),
     []
   );
 
   const renderPlatformColumn = useCallback(
-    (platform: string) => <PlatformIcons platform={platform} />,
-    []
+    (platform: string) => {
+      const ids = platform
+        ? platform
+            .split(',')
+            .map((s) => s.trim())
+            .filter(Boolean)
+        : ['linux', 'darwin', 'windows'];
+
+      return (
+        <EuiFlexGroup gutterSize="xs" wrap>
+          {ids.map((id) => (
+            <EuiFlexItem key={id} grow={false}>
+              <EuiBadge color="hollow">{OS_LABELS[id] ?? id}</EuiBadge>
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGroup>
+      );
+    },
+    [OS_LABELS]
   );
 
   const renderVersionColumn = useCallback(
@@ -106,16 +127,9 @@ const PackQueriesTableComponent: React.FC<PackQueriesTableProps> = ({
         width: '100px',
       },
       {
-        field: 'query',
-        name: i18n.translate('xpack.osquery.pack.queriesTable.queryColumnTitle', {
-          defaultMessage: 'Query',
-        }),
-        render: renderQueryColumn,
-      },
-      {
         field: 'platform',
-        name: i18n.translate('xpack.osquery.pack.queriesTable.platformColumnTitle', {
-          defaultMessage: 'Platform',
+        name: i18n.translate('xpack.osquery.pack.queriesTable.osColumnTitle', {
+          defaultMessage: 'Operating systems',
         }),
         render: renderPlatformColumn,
       },
@@ -145,14 +159,7 @@ const PackQueriesTableComponent: React.FC<PackQueriesTableProps> = ({
           ]
         : []),
     ],
-    [
-      isReadOnly,
-      renderDeleteAction,
-      renderEditAction,
-      renderPlatformColumn,
-      renderQueryColumn,
-      renderVersionColumn,
-    ]
+    [isReadOnly, renderDeleteAction, renderEditAction, renderPlatformColumn, renderVersionColumn]
   );
 
   const sorting = useMemo(
