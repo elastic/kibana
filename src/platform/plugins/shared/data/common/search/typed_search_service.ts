@@ -13,6 +13,7 @@ import type {
   IDSLSearchParams,
   IDSLSearchOptions,
   IDSLSearchResult,
+  IDSLPaginatedSearchResult,
   IDSLPagination,
   IESQLSearchParams,
   IESQLSearchOptions,
@@ -64,21 +65,8 @@ export class TypedSearchService implements ITypedSearchService {
   }
 
   /**
-   * Execute a DSL (Elasticsearch Query DSL) search with pagination
+   * Execute a DSL (Elasticsearch Query DSL) search
    */
-  searchDSL(
-    params: IDSLSearchParams,
-    options: IDSLSearchOptions & { paginate: true }
-  ): Promise<IDSLSearchResult & { pagination: IDSLPagination }>;
-
-  /**
-   * Execute a DSL (Elasticsearch Query DSL) search without pagination
-   */
-  searchDSL(
-    params: IDSLSearchParams,
-    options?: IDSLSearchOptions
-  ): Promise<IDSLSearchResult & { pagination: never }>;
-
   async searchDSL(
     params: IDSLSearchParams,
     options?: IDSLSearchOptions
@@ -86,17 +74,27 @@ export class TypedSearchService implements ITypedSearchService {
     const request = this.buildDSLRequest(params, options);
     const response = await this.executeSearch(request, this.mapDSLOptions(options, params));
 
-    const result: IDSLSearchResult = {
+    return {
       rawResponse: response.rawResponse,
       requestParams: response.requestParams,
     };
+  }
 
-    // Add pagination helpers if requested
-    if (options?.paginate) {
-      result.pagination = this.buildDSLPagination(response.rawResponse, params, options);
-    }
+  /**
+   * Execute a paginated DSL (Elasticsearch Query DSL) search with pagination helpers
+   */
+  async searchDSLPaginated(
+    params: IDSLSearchParams,
+    options?: IDSLSearchOptions
+  ): Promise<IDSLPaginatedSearchResult> {
+    const request = this.buildDSLRequest(params, options);
+    const response = await this.executeSearch(request, this.mapDSLOptions(options, params));
 
-    return result;
+    return {
+      rawResponse: response.rawResponse,
+      requestParams: response.requestParams,
+      pagination: this.buildDSLPagination(response.rawResponse, params, options),
+    };
   }
 
   /**
@@ -207,7 +205,7 @@ export class TypedSearchService implements ITypedSearchService {
   private buildDSLPagination(
     rawResponse: any,
     originalParams: IDSLSearchParams,
-    options: IDSLSearchOptions
+    options?: IDSLSearchOptions
   ): IDSLPagination {
     const self = this;
     const lastHit = rawResponse.hits?.hits?.at?.(-1);
@@ -220,7 +218,7 @@ export class TypedSearchService implements ITypedSearchService {
 
     return {
       hasNextPage,
-      nextPage: async (): Promise<IDSLSearchResult | null> => {
+      nextPage: async (): Promise<IDSLPaginatedSearchResult | null> => {
         if (!hasNextPage || !lastHit?.sort) {
           return null;
         }
@@ -244,7 +242,7 @@ export class TypedSearchService implements ITypedSearchService {
         };
       },
       async *getAllPages(maxPages = 100) {
-        let currentResult: IDSLSearchResult = {
+        let currentResult: IDSLPaginatedSearchResult = {
           rawResponse,
           requestParams: undefined,
           pagination: self.buildDSLPagination(rawResponse, originalParams, options),
@@ -253,10 +251,10 @@ export class TypedSearchService implements ITypedSearchService {
 
         yield currentResult;
 
-        while (currentResult.pagination?.hasNextPage && pageCount < maxPages) {
+        while (currentResult.pagination.hasNextPage && pageCount < maxPages) {
           const nextResult = await currentResult.pagination.nextPage();
           if (!nextResult) break;
-          currentResult = nextResult as IDSLSearchResult;
+          currentResult = nextResult;
           pageCount++;
           yield currentResult;
         }

@@ -110,11 +110,6 @@ export interface IDSLSearchOptions extends IBaseSearchOptions {
    * Control total hits counting precision
    */
   trackTotalHits?: boolean | number;
-
-  /**
-   * Enable pagination support using search_after
-   */
-  paginate?: boolean;
 }
 
 /**
@@ -129,12 +124,12 @@ export interface IDSLPagination {
   /**
    * Fetch the next page of results using search_after
    */
-  nextPage: () => Promise<IDSLSearchResult | null>;
+  nextPage: () => Promise<IDSLPaginatedSearchResult | null>;
 
   /**
    * Iterate through all pages (up to maxPages)
    */
-  getAllPages: (maxPages?: number) => AsyncGenerator<IDSLSearchResult>;
+  getAllPages: (maxPages?: number) => AsyncGenerator<IDSLPaginatedSearchResult>;
 }
 
 /**
@@ -149,10 +144,24 @@ export interface IDSLSearchResult {
    * Request parameters for inspector
    */
   requestParams?: SanitizedConnectionRequestParams;
+}
+
+/**
+ * Result from a paginated DSL search
+ */
+export interface IDSLPaginatedSearchResult {
   /**
-   * Pagination helpers (only present when paginate: true option is used)
+   * Raw Elasticsearch search response
    */
-  pagination?: IDSLPagination;
+  rawResponse: estypes.SearchResponse;
+  /**
+   * Request parameters for inspector
+   */
+  requestParams?: SanitizedConnectionRequestParams;
+  /**
+   * Pagination helpers for navigating through result pages
+   */
+  pagination: IDSLPagination;
 }
 
 // ============================================================================
@@ -368,20 +377,17 @@ export interface ITypedSearchService {
   ) => Promise<IESQLSearchResult>;
 
   /**
-   * Execute a DSL (Elasticsearch Query DSL) search with pagination
+   * Execute a DSL (Elasticsearch Query DSL) search
    */
-  searchDSL(
-    params: IDSLSearchParams,
-    options: IDSLSearchOptions & { paginate: true }
-  ): Promise<IDSLSearchResult & { pagination: IDSLPagination }>;
+  searchDSL: (params: IDSLSearchParams, options?: IDSLSearchOptions) => Promise<IDSLSearchResult>;
 
   /**
-   * Execute a DSL (Elasticsearch Query DSL) search without pagination
+   * Execute a paginated DSL (Elasticsearch Query DSL) search with pagination helpers
    */
-  searchDSL(
+  searchDSLPaginated: (
     params: IDSLSearchParams,
     options?: IDSLSearchOptions
-  ): Promise<IDSLSearchResult & { pagination: never }>;
+  ) => Promise<IDSLPaginatedSearchResult>;
 
   /**
    * Execute an EQL (Event Query Language) search

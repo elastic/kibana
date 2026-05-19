@@ -30,6 +30,7 @@ function createStartContract(
     search: jest.fn(),
     typed: {
       searchDSL: jest.fn(),
+      searchDSLPaginated: jest.fn(),
       searchESQL: jest.fn(),
       searchEQL: jest.fn(),
       searchSQL: jest.fn(),

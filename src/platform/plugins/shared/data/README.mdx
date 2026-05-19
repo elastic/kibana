@@ -143,7 +143,8 @@ The Typed Search Service provides a type-safe, Promise-based interface for execu
 **Available search methods:**
 
 - `searchESQL` - ES|QL queries for columnar data analysis
-- `searchDSL` - Query DSL searches with built-in pagination
+- `searchDSL` - Query DSL searches
+- `searchDSLPaginated` - Query DSL searches with built-in pagination
 - `searchEQL` - Event Query Language for sequence queries
 - `searchSQL` - SQL syntax queries
 
@@ -177,15 +178,12 @@ console.log(result.rawResponse.hits.total);
 #### DSL Search with Pagination
 
 ```.ts
-const result = await data.search.typed.searchDSL(
-  {
-    index: 'logs-*',
-    query: { range: { '@timestamp': { gte: 'now-1d' } } },
-    size: 1000,
-    sort: [{ '@timestamp': 'desc' }]
-  },
-  { paginate: true }
-);
+const result = await data.search.typed.searchDSLPaginated({
+  index: 'logs-*',
+  query: { range: { '@timestamp': { gte: 'now-1d' } } },
+  size: 1000,
+  sort: [{ '@timestamp': 'desc' }]
+});
 
 // Fetch next page
 if (result.pagination.hasNextPage) {

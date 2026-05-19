@@ -213,277 +213,237 @@ describe('TypedSearchService', () => {
         })
       );
     });
-
-    describe('without pagination', () => {
-      it('returns result without pagination property', async () => {
-        const mockResponse = { hits: { hits: [], total: 0 } };
-        mockSearch.mockReturnValue(createMockResponse(mockResponse));
-
-        const result = await service.searchDSL({
-          index: 'logs-*',
-          query: { match_all: {} },
-        });
-
-        expect(result).toEqual({ rawResponse: mockResponse });
-        expect(result.pagination).toBeUndefined();
-      });
-    });
-
-    describe('with pagination', () => {
-      it('returns pagination object', async () => {
-        const mockResponse = {
-          hits: {
-            hits: [
-              { _id: '1', _source: { message: 'test' }, sort: [1000] },
-              { _id: '2', _source: { message: 'test2' }, sort: [2000] },
-            ],
-            total: { value: 100 },
-          },
-        };
-        mockSearch.mockReturnValue(createMockResponse(mockResponse));
-
-        const result = await service.searchDSL(
-          {
-            index: 'logs-*',
-            query: { match_all: {} },
-            sort: [{ timestamp: 'desc' }],
-          },
-          { paginate: true }
-        );
-
-        expect(result.pagination).toBeDefined();
-        expect(result.pagination?.hasNextPage).toBeDefined();
-        expect(result.pagination?.nextPage).toBeDefined();
-        expect(result.pagination?.getAllPages).toBeDefined();
-      });
-
-      it('hasNextPage is true when hits remain', async () => {
-        const mockResponse = {
-          hits: {
-            hits: [
-              { _id: '1', _source: { message: 'test' }, sort: [1000] },
-              { _id: '2', _source: { message: 'test2' }, sort: [2000] },
-            ],
-            total: { value: 100 },
-          },
-        };
-        mockSearch.mockReturnValue(createMockResponse(mockResponse));
-
-        const result = await service.searchDSL(
-          {
-            index: 'logs-*',
-            query: { match_all: {} },
-            sort: [{ timestamp: 'desc' }],
-          },
-          { paginate: true }
-        );
-
-        expect(result.pagination?.hasNextPage).toBe(true);
-      });
-
-      it('hasNextPage is false when no more results', async () => {
-        const mockResponse = {
-          hits: {
-            hits: [
-              { _id: '1', _source: { message: 'test' }, sort: [1000] },
-              { _id: '2', _source: { message: 'test2' }, sort: [2000] },
-            ],
-            total: { value: 2 },
-          },
-        };
-        mockSearch.mockReturnValue(createMockResponse(mockResponse));
-
-        const result = await service.searchDSL(
-          {
-            index: 'logs-*',
-            query: { match_all: {} },
-            sort: [{ timestamp: 'desc' }],
-          },
-          { paginate: true }
-        );
-
-        expect(result.pagination?.hasNextPage).toBe(false);
-      });
-
-      it('hasNextPage is false when no sort values', async () => {
-        const mockResponse = {
-          hits: {
-            hits: [
-              { _id: '1', _source: { message: 'test' } },
-              { _id: '2', _source: { message: 'test2' } },
-            ],
-            total: { value: 100 },
-          },
-        };
-        mockSearch.mockReturnValue(createMockResponse(mockResponse));
-
-        const result = await service.searchDSL(
-          {
-            index: 'logs-*',
-            query: { match_all: {} },
-          },
-          { paginate: true }
-        );
-
-        expect(result.pagination?.hasNextPage).toBe(false);
-      });
-
-      it('nextPage() uses search_after from last hit sort', async () => {
-        const firstPageResponse = {
-          hits: {
-            hits: [
-              { _id: '1', _source: { message: 'test' }, sort: [1000] },
-              { _id: '2', _source: { message: 'test2' }, sort: [2000] },
-            ],
-            total: { value: 100 },
-          },
-        };
-
-        const secondPageResponse = {
-          hits: {
-            hits: [
-              { _id: '3', _source: { message: 'test3' }, sort: [3000] },
-              { _id: '4', _source: { message: 'test4' }, sort: [4000] },
-            ],
-            total: { value: 100 },
-          },
-        };
-
-        mockSearch
-          .mockReturnValueOnce(createMockResponse(firstPageResponse))
-          .mockReturnValueOnce(createMockResponse(secondPageResponse));
-
-        const result = await service.searchDSL(
-          {
-            index: 'logs-*',
-            query: { match_all: {} },
-            sort: [{ timestamp: 'desc' }],
-          },
-          { paginate: true }
-        );
-
-        await result.pagination?.nextPage();
-
-        expect(mockSearch).toHaveBeenCalledTimes(2);
-        expect(mockSearch).toHaveBeenNthCalledWith(
-          2,
-          expect.objectContaining({
-            params: expect.objectContaining({
-              body: expect.objectContaining({
-                search_after: [2000],
-              }),
-            }),
-          }),
-          expect.anything()
-        );
-      });
-
-      it('nextPage() returns null when no more pages', async () => {
-        const mockResponse = {
-          hits: {
-            hits: [
-              { _id: '1', _source: { message: 'test' }, sort: [1000] },
-              { _id: '2', _source: { message: 'test2' }, sort: [2000] },
-            ],
-            total: { value: 2 },
-          },
-        };
-        mockSearch.mockReturnValue(createMockResponse(mockResponse));
-
-        const result = await service.searchDSL(
-          {
-            index: 'logs-*',
-            query: { match_all: {} },
-            sort: [{ timestamp: 'desc' }],
-          },
-          { paginate: true }
-        );
-
-        const nextPage = await result.pagination?.nextPage();
-
-        expect(nextPage).toBeNull();
-      });
-
-      it('getAllPages() yields all pages', async () => {
-        const page1 = {
-          hits: {
-            hits: [{ _id: '1', sort: [1000] }],
-            total: { value: 3 },
-          },
-        };
-
-        const page2 = {
-          hits: {
-            hits: [{ _id: '2', sort: [2000] }],
-            total: { value: 3 },
-          },
-        };
-
-        const page3 = {
-          hits: {
-            hits: [
-              { _id: '3', sort: [3000] },
-              { _id: '4', sort: [4000] },
-              { _id: '5', sort: [5000] },
-            ],
-            total: { value: 3 },
-          },
-        };
-
-        mockSearch
-          .mockReturnValueOnce(createMockResponse(page1))
-          .mockReturnValueOnce(createMockResponse(page2))
-          .mockReturnValueOnce(createMockResponse(page3));
-
-        const result = await service.searchDSL(
-          {
-            index: 'logs-*',
-            query: { match_all: {} },
-            sort: [{ timestamp: 'desc' }],
-          },
-          { paginate: true }
-        );
-
-        const pages = [];
-        for await (const page of result.pagination!.getAllPages()) {
-          pages.push(page);
-        }
-
-        expect(pages).toHaveLength(3);
-        expect(pages[0].rawResponse.hits.hits[0]._id).toBe('1');
-        expect(pages[1].rawResponse.hits.hits[0]._id).toBe('2');
-        expect(pages[2].rawResponse.hits.hits[0]._id).toBe('3');
-      });
-
-      it('getAllPages() respects maxPages limit', async () => {
-        const pageResponse = {
-          hits: {
-            hits: [{ _id: '1', sort: [1000] }],
-            total: { value: 1000 },
-          },
-        };
-
-        mockSearch.mockReturnValue(createMockResponse(pageResponse));
-
-        const result = await service.searchDSL(
-          {
-            index: 'logs-*',
-            query: { match_all: {} },
-            sort: [{ timestamp: 'desc' }],
-          },
-          { paginate: true }
-        );
-
-        const pages = [];
-        for await (const page of result.pagination!.getAllPages(3)) {
-          pages.push(page);
-        }
-
-        expect(pages).toHaveLength(3);
-      });
-    });
   });
 
+  describe('searchDSLPaginated', () => {
+    it('returns pagination object', async () => {
+      const mockResponse = {
+        hits: {
+          hits: [
+            { _id: '1', _source: { message: 'test' }, sort: [1000] },
+            { _id: '2', _source: { message: 'test2' }, sort: [2000] },
+          ],
+          total: { value: 100 },
+        },
+      };
+      mockSearch.mockReturnValue(createMockResponse(mockResponse));
+
+      const result = await service.searchDSLPaginated({
+        index: 'logs-*',
+        query: { match_all: {} },
+        sort: [{ timestamp: 'desc' }],
+      });
+
+      expect(result.pagination).toBeDefined();
+      expect(result.pagination.hasNextPage).toBeDefined();
+      expect(result.pagination.nextPage).toBeDefined();
+      expect(result.pagination.getAllPages).toBeDefined();
+    });
+
+    it('hasNextPage is true when hits remain', async () => {
+      const mockResponse = {
+        hits: {
+          hits: [
+            { _id: '1', _source: { message: 'test' }, sort: [1000] },
+            { _id: '2', _source: { message: 'test2' }, sort: [2000] },
+          ],
+          total: { value: 100 },
+        },
+      };
+      mockSearch.mockReturnValue(createMockResponse(mockResponse));
+
+      const result = await service.searchDSLPaginated({
+        index: 'logs-*',
+        query: { match_all: {} },
+        sort: [{ timestamp: 'desc' }],
+      });
+
+      expect(result.pagination.hasNextPage).toBe(true);
+    });
+
+    it('hasNextPage is false when no more results', async () => {
+      const mockResponse = {
+        hits: {
+          hits: [
+            { _id: '1', _source: { message: 'test' }, sort: [1000] },
+            { _id: '2', _source: { message: 'test2' }, sort: [2000] },
+          ],
+          total: { value: 2 },
+        },
+      };
+      mockSearch.mockReturnValue(createMockResponse(mockResponse));
+
+      const result = await service.searchDSLPaginated({
+        index: 'logs-*',
+        query: { match_all: {} },
+        sort: [{ timestamp: 'desc' }],
+      });
+
+      expect(result.pagination.hasNextPage).toBe(false);
+    });
+
+    it('hasNextPage is false when no sort values', async () => {
+      const mockResponse = {
+        hits: {
+          hits: [
+            { _id: '1', _source: { message: 'test' } },
+            { _id: '2', _source: { message: 'test2' } },
+          ],
+          total: { value: 100 },
+        },
+      };
+      mockSearch.mockReturnValue(createMockResponse(mockResponse));
+
+      const result = await service.searchDSLPaginated({
+        index: 'logs-*',
+        query: { match_all: {} },
+      });
+
+      expect(result.pagination.hasNextPage).toBe(false);
+    });
+
+    it('nextPage() uses search_after from last hit sort', async () => {
+      const firstPageResponse = {
+        hits: {
+          hits: [
+            { _id: '1', _source: { message: 'test' }, sort: [1000] },
+            { _id: '2', _source: { message: 'test2' }, sort: [2000] },
+          ],
+          total: { value: 100 },
+        },
+      };
+
+      const secondPageResponse = {
+        hits: {
+          hits: [
+            { _id: '3', _source: { message: 'test3' }, sort: [3000] },
+            { _id: '4', _source: { message: 'test4' }, sort: [4000] },
+          ],
+          total: { value: 100 },
+        },
+      };
+
+      mockSearch
+        .mockReturnValueOnce(createMockResponse(firstPageResponse))
+        .mockReturnValueOnce(createMockResponse(secondPageResponse));
+
+      const result = await service.searchDSLPaginated({
+        index: 'logs-*',
+        query: { match_all: {} },
+        sort: [{ timestamp: 'desc' }],
+      });
+
+      await result.pagination.nextPage();
+
+      expect(mockSearch).toHaveBeenCalledTimes(2);
+      expect(mockSearch).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({
+          params: expect.objectContaining({
+            body: expect.objectContaining({
+              search_after: [2000],
+            }),
+          }),
+        }),
+        expect.anything()
+      );
+    });
+
+    it('nextPage() returns null when no more pages', async () => {
+      const mockResponse = {
+        hits: {
+          hits: [
+            { _id: '1', _source: { message: 'test' }, sort: [1000] },
+            { _id: '2', _source: { message: 'test2' }, sort: [2000] },
+          ],
+          total: { value: 2 },
+        },
+      };
+      mockSearch.mockReturnValue(createMockResponse(mockResponse));
+
+      const result = await service.searchDSLPaginated({
+        index: 'logs-*',
+        query: { match_all: {} },
+        sort: [{ timestamp: 'desc' }],
+      });
+
+      const nextPage = await result.pagination.nextPage();
+
+      expect(nextPage).toBeNull();
+    });
+
+    it('getAllPages() yields all pages', async () => {
+      const page1 = {
+        hits: {
+          hits: [{ _id: '1', sort: [1000] }],
+          total: { value: 3 },
+        },
+      };
+
+      const page2 = {
+        hits: {
+          hits: [{ _id: '2', sort: [2000] }],
+          total: { value: 3 },
+        },
+      };
+
+      const page3 = {
+        hits: {
+          hits: [
+            { _id: '3', sort: [3000] },
+            { _id: '4', sort: [4000] },
+            { _id: '5', sort: [5000] },
+          ],
+          total: { value: 3 },
+        },
+      };
+
+      mockSearch
+        .mockReturnValueOnce(createMockResponse(page1))
+        .mockReturnValueOnce(createMockResponse(page2))
+        .mockReturnValueOnce(createMockResponse(page3));
+
+      const result = await service.searchDSLPaginated({
+        index: 'logs-*',
+        query: { match_all: {} },
+        sort: [{ timestamp: 'desc' }],
+      });
+
+      const pages = [];
+      for await (const page of result.pagination.getAllPages()) {
+        pages.push(page);
+      }
+
+      expect(pages).toHaveLength(3);
+      expect(pages[0].rawResponse.hits.hits[0]._id).toBe('1');
+      expect(pages[1].rawResponse.hits.hits[0]._id).toBe('2');
+      expect(pages[2].rawResponse.hits.hits[0]._id).toBe('3');
+    });
+
+    it('getAllPages() respects maxPages limit', async () => {
+      const pageResponse = {
+        hits: {
+          hits: [{ _id: '1', sort: [1000] }],
+          total: { value: 1000 },
+        },
+      };
+
+      mockSearch.mockReturnValue(createMockResponse(pageResponse));
+
+      const result = await service.searchDSLPaginated({
+        index: 'logs-*',
+        query: { match_all: {} },
+        sort: [{ timestamp: 'desc' }],
+      });
+
+      const pages = [];
+      for await (const page of result.pagination.getAllPages(3)) {
+        pages.push(page);
+      }
+
+      expect(pages).toHaveLength(3);
+    });
+  });
   describe('searchEQL', () => {
     it('executes with correct strategy', async () => {
       const mockResponse = { hits: { events: [] } };
