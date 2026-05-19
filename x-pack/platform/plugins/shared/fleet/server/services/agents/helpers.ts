@@ -23,7 +23,7 @@ type FleetServerAgentESResponse =
 export function searchHitToAgent(
   hit: FleetServerAgentESResponse & {
     sort?: SortResults;
-    fields?: { status?: AgentStatus[] };
+    fields?: { status?: AgentStatus[]; effective_config_label?: string[] };
   }
 ): Agent {
   const outputs: OutputMap | undefined = hit._source?.outputs
@@ -108,7 +108,12 @@ export function searchHitToAgent(
     sequence_num: hit._source?.sequence_num,
     capabilities: hit._source?.capabilities,
     health: hit._source?.health,
+    effective_config_hash: hit._source?.effective_config_hash,
   };
+
+  if (hit.fields?.effective_config_label?.length) {
+    agent.effective_config_label = hit.fields.effective_config_label[0];
+  }
 
   if (!hit.fields?.status?.length) {
     appContextService

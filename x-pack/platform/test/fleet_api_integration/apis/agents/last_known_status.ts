@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 
 import { HAS_CHANGED_RUNTIME_FIELD } from '@kbn/fleet-plugin/server/tasks/agent_status_change_task';
-import { _buildStatusRuntimeField } from '@kbn/fleet-plugin/server/services/agents/build_status_runtime_field';
+import { _buildAgentRuntimeFields } from '@kbn/fleet-plugin/server/services/agents/build_status_runtime_field';
 import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
 
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
@@ -29,7 +29,7 @@ export default function (providerContext: FtrProviderContext) {
     describe('hasChanged runtime fields', () => {
       const runtimeFields = Object.assign(
         {},
-        _buildStatusRuntimeField({
+        _buildAgentRuntimeFields({
           inactivityTimeouts: [],
           logger: undefined,
         }),

@@ -27,7 +27,7 @@ import { retryTransientEsErrors } from '../epm/elasticsearch/retry';
 import { DEFAULT_NAMESPACES_FILTER } from '../spaces/agent_namespaces';
 
 import { getAgentById, removeSOAttributes } from './crud';
-import { buildAgentStatusRuntimeField } from './build_status_runtime_field';
+import { buildAgentRuntimeFields } from './build_status_runtime_field';
 
 interface AggregationsStatusTermsBucketKeys extends AggregationsTermsBucketBase {
   key: AgentStatus;
@@ -63,7 +63,7 @@ export async function getAgentStatusForAgentPolicy(
   agentPolicyIds?: string[]
 ) {
   const logger = appContextService.getLogger();
-  const runtimeFields = await buildAgentStatusRuntimeField(soClient);
+  const runtimeFields = await buildAgentRuntimeFields(soClient);
 
   const clauses: QueryDslQueryContainer[] = [];
 

@@ -17,7 +17,7 @@ import type { ReportingStart } from '@kbn/reporting-plugin/server';
 import { AGENT_API_ROUTES, getSortConfig, removeSOAttributes } from '../../../common';
 import type { FleetRequestHandler, PostGenerateAgentsReportRequestSchema } from '../../types';
 import { appContextService } from '../../services/app_context';
-import { buildAgentStatusRuntimeField } from '../../services/agents/build_status_runtime_field';
+import { buildAgentRuntimeFields } from '../../services/agents/build_status_runtime_field';
 import { FleetError } from '../../errors';
 import { getSpaceAwarenessFilterForAgents } from '../../services/agents/crud';
 
@@ -33,7 +33,7 @@ export const generateReportHandler: FleetRequestHandler<
   const spaceId = fleetContext.spaceId;
   const logger = appContextService.getLogger();
 
-  const runtimeFieldsResult = await buildAgentStatusRuntimeField();
+  const runtimeFieldsResult = await buildAgentRuntimeFields();
   const runtimeFields = runtimeFieldsResult.status.script?.source ?? 'emit("")';
 
   const reporting = appContextService.getReportingStart();

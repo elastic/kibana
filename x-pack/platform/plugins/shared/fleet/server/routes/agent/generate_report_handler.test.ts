@@ -13,7 +13,7 @@ import type { SavedReport } from '@kbn/reporting-plugin/server/lib/store';
 
 import { FleetError } from '../../errors';
 import { appContextService } from '../../services/app_context';
-import { buildAgentStatusRuntimeField } from '../../services/agents/build_status_runtime_field';
+import { buildAgentRuntimeFields } from '../../services/agents/build_status_runtime_field';
 import { isSpaceAwarenessEnabled } from '../../services/spaces/helpers';
 import type {
   FleetRequestHandlerContext,
@@ -26,7 +26,7 @@ import { generateReportHandler, getSortFieldForAPI } from './generate_report_han
 jest.mock('../../services/agents/build_status_runtime_field');
 jest.mock('../../services/spaces/helpers');
 
-const mockBuildAgentStatusRuntimeField = buildAgentStatusRuntimeField as jest.Mock;
+const mockBuildAgentStatusRuntimeField = buildAgentRuntimeFields as jest.Mock;
 const baseRequestBodyMock = {
   agents: ['agent1', 'agent2'],
   fields: ['id', 'status', 'enrolled_at'],

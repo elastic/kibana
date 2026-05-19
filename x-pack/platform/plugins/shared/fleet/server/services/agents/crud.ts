@@ -36,7 +36,7 @@ import { createEsSearchIterable } from '../utils/create_es_search_iterable';
 import { retryTransientEsErrors } from '../epm/elasticsearch/retry';
 
 import { searchHitToAgent, agentSOAttributesToFleetServerAgentDoc } from './helpers';
-import { buildAgentStatusRuntimeField } from './build_status_runtime_field';
+import { buildAgentRuntimeFields } from './build_status_runtime_field';
 import { getLatestAvailableAgentVersion } from './versions';
 
 const INACTIVE_AGENT_CONDITION = `status:inactive`;
@@ -175,7 +175,7 @@ export async function getAgentTags(
 
   const kueryNode = _joinFilters(filters);
   const query = kueryNode ? { query: toElasticsearchQuery(kueryNode) } : {};
-  const runtimeFields = await buildAgentStatusRuntimeField(soClient);
+  const runtimeFields = await buildAgentRuntimeFields(soClient);
   try {
     const result = await retryTransientEsErrors(() =>
       esClient.search<{}, { tags: { buckets: Array<{ key: string }> } }>({
@@ -277,7 +277,7 @@ export async function getAgentsByKuery(
 
   const kueryNode = _joinFilters(filters);
 
-  const runtimeFields = await buildAgentStatusRuntimeField(soClient);
+  const runtimeFields = await buildAgentRuntimeFields(soClient);
 
   const sort = getSortConfig(sortField, sortOrder);
 
@@ -473,7 +473,7 @@ export async function fetchAllAgentsByKuery(
   const kueryNode = _joinFilters(filters);
   const query = kueryNode ? { query: toElasticsearchQuery(kueryNode) } : {};
   const runtimeFields = Object.assign(
-    await buildAgentStatusRuntimeField(soClient),
+    await buildAgentRuntimeFields(soClient),
     options.runtimeFields
   );
 
@@ -584,7 +584,7 @@ async function _filterAgents(
   perPage: number;
 }> {
   const { page = 1, perPage = 20, sortField = 'enrolled_at', sortOrder = 'desc' } = options;
-  const runtimeFields = await buildAgentStatusRuntimeField(soClient);
+  const runtimeFields = await buildAgentRuntimeFields(soClient);
   const currentSpaceId = getCurrentNamespace(soClient);
 
   let res;

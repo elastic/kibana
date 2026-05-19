@@ -7,7 +7,7 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import { buildAgentStatusRuntimeField } from '@kbn/fleet-plugin/server';
+import { buildAgentRuntimeFields } from '@kbn/fleet-plugin/server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { EndpointSortableField } from '../../../../common/endpoint/types';
 import {
@@ -186,7 +186,7 @@ export async function buildUnitedIndexQuery(
     };
   }
 
-  const statusRuntimeField = await buildAgentStatusRuntimeField(soClient, 'united.agent.');
+  const statusRuntimeField = await buildAgentRuntimeFields(soClient, 'united.agent.');
   const runtimeMappings = { ...statusRuntimeField, ...lastCheckinRuntimeField };
 
   const fields = Object.keys(runtimeMappings);

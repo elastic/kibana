@@ -14,6 +14,7 @@ import { DEFAULT_MAX_AGENT_POLICIES_WITH_INACTIVITY_TIMEOUT } from '../../../com
 import { AGENT_POLLING_THRESHOLD_MS } from '../../constants';
 import { agentPolicyService } from '../agent_policy';
 import { appContextService } from '../app_context';
+import { buildConfigLabelRuntimeField } from './build_config_label_runtime_field';
 const MISSED_INTERVALS_BEFORE_OFFLINE = 10;
 const MS_BEFORE_OFFLINE = MISSED_INTERVALS_BEFORE_OFFLINE * AGENT_POLLING_THRESHOLD_MS;
 export type InactivityTimeouts = Awaited<
@@ -172,7 +173,7 @@ function _buildSource(
 }
 
 // exported for testing
-export function _buildStatusRuntimeField(opts: {
+export function _buildAgentRuntimeFields(opts: {
   inactivityTimeouts: InactivityTimeouts;
   maxAgentPoliciesWithInactivityTimeout?: number;
   pathPrefix?: string;
@@ -198,6 +199,7 @@ export function _buildStatusRuntimeField(opts: {
         source,
       },
     },
+    ...buildConfigLabelRuntimeField(),
   };
 }
 
@@ -205,7 +207,7 @@ export function _buildStatusRuntimeField(opts: {
 // pathPrefix is used to prefix the field path in the source
 // pathPrefix is used by the endpoint team currently to run
 // agent queries against the endpoint metadata index
-export async function buildAgentStatusRuntimeField(
+export async function buildAgentRuntimeFields(
   soClient?: SavedObjectsClientContract, // Deprecated, it's now using an internal client
   pathPrefix?: string
 ) {
@@ -222,7 +224,7 @@ export async function buildAgentStatusRuntimeField(
     config?.developer?.maxAgentPoliciesWithInactivityTimeout;
   const inactivityTimeouts = await agentPolicyService.getInactivityTimeouts();
 
-  return _buildStatusRuntimeField({
+  return _buildAgentRuntimeFields({
     inactivityTimeouts,
     maxAgentPoliciesWithInactivityTimeout,
     pathPrefix,
