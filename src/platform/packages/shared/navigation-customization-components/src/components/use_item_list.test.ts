@@ -57,9 +57,7 @@ describe('useItemList', () => {
 
   it('should allow setItems to replace the list', () => {
     const { result } = renderHook(() => useItemList(items));
-    const newItems: NavigationItemInfo[] = [
-      { id: 'new', title: 'New Item', hidden: false },
-    ];
+    const newItems: NavigationItemInfo[] = [{ id: 'new', title: 'New Item', hidden: false }];
 
     act(() => {
       result.current.setItems(newItems);

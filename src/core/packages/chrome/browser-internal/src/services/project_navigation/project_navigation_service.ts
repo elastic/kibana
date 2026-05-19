@@ -60,6 +60,7 @@ interface ParsedNavigation {
   treeUI: NavigationTreeDefinitionUI;
   flattened: Record<string, ChromeProjectNavigationNode>;
   overflowItemIds: string[];
+  defaultItemIds: string[];
 }
 
 export class ProjectNavigationService {
@@ -120,30 +121,32 @@ export class ProjectNavigationService {
             let { body } = def;
             let overflowItemIds: string[] = [];
 
+            // Capture default item IDs from the raw body before any customization is applied.
+            const getId = (item: (typeof body)[number]) => item.id ?? item.link;
+            const defaultItemIds = body
+              .filter((item) => item.renderAs !== 'home')
+              .map((item) => getId(item) as string)
+              .filter(Boolean);
+
             if (customization) {
-              const { order, hiddenIds } = customization;
-              overflowItemIds = hiddenIds;
-              const getId = (item: (typeof body)[number]) => item.id ?? item.link;
-              const orderSet = new Set<string | undefined>(order);
-              const itemMap = new Map(body.map((i) => [getId(i), i]));
+              const { moves, hidden } = customization;
+              overflowItemIds = hidden;
 
-              // Items in the customized order, preserving the user's arrangement
-              const ordered = order.flatMap((id) => {
-                const item = itemMap.get(id);
-                return item ? [item] : [];
-              });
+              // Replay each move sequentially on top of the default order.
+              // Skip moves whose id or afterId no longer exists in the current nav.
+              for (const { id, afterId } of moves) {
+                const fromIdx = body.findIndex((item) => getId(item) === id);
+                if (fromIdx === -1) continue; // item no longer in nav — skip
+                if (afterId !== null && !body.some((item) => getId(item) === afterId)) continue; // reference item gone — skip
 
-              // New items (not in the customized order) inserted at their original position
-              const unordered = body
-                .map((item, i) => ({ item, originalIndex: i }))
-                .filter(({ item }) => !orderSet.has(getId(item)));
-
-              const result = [...ordered];
-              unordered.forEach(({ item, originalIndex }) => {
-                result.splice(Math.min(originalIndex, result.length), 0, item);
-              });
-
-              body = result;
+                const [moving] = body.splice(fromIdx, 1);
+                if (afterId === null) {
+                  body = [moving, ...body];
+                } else {
+                  const afterIdx = body.findIndex((item) => getId(item) === afterId);
+                  body.splice(afterIdx + 1, 0, moving);
+                }
+              }
             }
 
             const { navigationTree, navigationTreeUI } = parseNavigationTree(
@@ -158,6 +161,7 @@ export class ProjectNavigationService {
               tree: navigationTree,
               flattened: flattenNav(navigationTree),
               overflowItemIds,
+              defaultItemIds,
             };
           }),
           catchError((err) => {
@@ -179,6 +183,7 @@ export class ProjectNavigationService {
           navigationTree: parsed.treeUI,
           activeNodes: findActiveNodes(pathname, parsed.flattened, location, prependBasePath),
           overflowItemIds: parsed.overflowItemIds,
+          defaultItemIds: parsed.defaultItemIds,
         };
       }),
       distinctUntilChanged(deepEqual),

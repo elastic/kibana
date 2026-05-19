@@ -89,6 +89,8 @@ export interface InternalChromeStart extends ChromeStart {
       navigationTree: NavigationTreeDefinitionUI;
       activeNodes: ChromeProjectNavigationNode[][];
       overflowItemIds: string[];
+      /** Default top-level item IDs before any user customization is applied. */
+      defaultItemIds: string[];
     }>;
 
     /** Get an observable of the current project breadcrumbs. */

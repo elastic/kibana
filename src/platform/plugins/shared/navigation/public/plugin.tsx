@@ -24,6 +24,7 @@ import { type SolutionId, type NavigationCustomization } from '@kbn/core-chrome-
 import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { i18n } from '@kbn/i18n';
+import { computeMoves } from './compute_moves';
 import type {
   NavigationPublicSetup,
   NavigationPublicStart,
@@ -276,32 +277,33 @@ export class NavigationPublicPlugin
     const openModal = async () => {
       const { CustomizeNavigationModal } = await import('@kbn/navigation-customization-components');
 
-      const items = this.getNavigationItems(chrome);
+      const { items, defaultItemIds } = this.getNavigationItems(chrome);
 
       const savedCustomization = this.loadCustomization();
 
-      const isCalloutDismissed = () => {
-        try {
-          return localStorage.getItem(CALLOUT_DISMISSED_KEY) === 'true';
-        } catch {
-          return true;
-        }
-      };
+      let isCalloutDismissed: boolean;
+      try {
+        isCalloutDismissed = localStorage.getItem(CALLOUT_DISMISSED_KEY) === 'true';
+      } catch {
+        isCalloutDismissed = true;
+      }
+
+      const toCustomization = (order: string[], hiddenIds: string[]): NavigationCustomization => ({
+        moves: computeMoves(defaultItemIds, order),
+        hidden: hiddenIds as AppDeepLinkId[],
+      });
 
       const modal = core.overlays.openModal(
         toMountPoint(
           core.rendering.addContext(
             <CustomizeNavigationModal
               items={items}
-              isCalloutDismissed={isCalloutDismissed()}
+              isCalloutDismissed={isCalloutDismissed}
               onChange={(order, hiddenIds) => {
-                chrome.project.setNavigationCustomization({
-                  order,
-                  hiddenIds: hiddenIds as AppDeepLinkId[],
-                });
+                chrome.project.setNavigationCustomization(toCustomization(order, hiddenIds));
               }}
               onSave={(order, hiddenIds) => {
-                const customization = { order, hiddenIds: hiddenIds as AppDeepLinkId[] };
+                const customization = toCustomization(order, hiddenIds);
                 this.persistCustomization(customization);
                 chrome.project.setNavigationCustomization(customization);
                 modal.close();
@@ -309,7 +311,7 @@ export class NavigationPublicPlugin
               onReset={() => {
                 this.persistCustomization(undefined);
                 chrome.project.setNavigationCustomization(undefined);
-                return this.getNavigationItems(chrome);
+                return this.getNavigationItems(chrome).items;
               }}
               onClose={() => {
                 chrome.project.setNavigationCustomization(savedCustomization);
@@ -328,26 +330,36 @@ export class NavigationPublicPlugin
     openModal();
   }
 
-  private getNavigationItems(chrome: InternalChromeStart) {
+  private getNavigationItems(chrome: InternalChromeStart): {
+    items: Array<{ id: string; title: string; hidden: boolean; icon?: string }>;
+    defaultItemIds: string[];
+  } {
     let tree: any;
     let overflowItemIds: string[] = [];
+    let defaultItemIds: string[] = [];
+
     chrome.project
       .getNavigation$()
       .subscribe((nav) => {
         tree = nav.navigationTree;
         overflowItemIds = nav.overflowItemIds;
+        defaultItemIds = nav.defaultItemIds;
       })
       .unsubscribe();
-    if (!tree) return [];
+
+    if (!tree) return { items: [], defaultItemIds };
+
     const overflowSet = new Set(overflowItemIds);
-    return tree.body
-      .filter((node: any) => node.renderAs !== 'home')
-      .map((node: any) => ({
-        id: node.id,
-        title: node.title || node.id,
+    const items = (tree.body as any[])
+      .filter((node) => node.renderAs !== 'home')
+      .map((node) => ({
+        id: node.id as string,
+        title: (node.title || node.id) as string,
         hidden: overflowSet.has(node.id),
-        icon: node.icon,
+        icon: node.icon as string | undefined,
       }));
+
+    return { items, defaultItemIds };
   }
 
   private getStorageKey(): string | null {
@@ -360,9 +372,20 @@ export class NavigationPublicPlugin
     try {
       const stored = localStorage.getItem(CUSTOM_NAV_STORAGE_KEY);
       if (!stored) return undefined;
-      const data = JSON.parse(stored) as Record<string, NavigationCustomization>;
+      const data = JSON.parse(stored) as Record<string, unknown>;
       const key = this.getStorageKey();
-      return key ? data[key] : undefined;
+      if (!key) return undefined;
+      const entry = data[key];
+      // Validate the shape matches the current format; discard stale entries.
+      if (
+        !entry ||
+        typeof entry !== 'object' ||
+        !Array.isArray((entry as any).moves) ||
+        !Array.isArray((entry as any).hidden)
+      ) {
+        return undefined;
+      }
+      return entry as NavigationCustomization;
     } catch {
       return undefined;
     }

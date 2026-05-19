@@ -49,6 +49,7 @@ export type {
   SolutionNavigationDefinition,
   SolutionNavigationDefinitions,
   NavigationCustomization,
+  NavigationCustomizationMove,
   EuiSideNavItemTypeEnhanced,
   RenderAs,
 } from './project_navigation';
