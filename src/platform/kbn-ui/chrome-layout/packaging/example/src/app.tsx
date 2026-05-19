@@ -18,11 +18,7 @@ import {
   EuiHeaderLogo,
 } from '@elastic/eui';
 
-import {
-  ChromeLayout,
-  ChromeLayoutConfigProvider,
-  GridLayoutGlobalStyles,
-} from '@kbn/ui-chrome-layout';
+import { ChromeLayout, ChromeLayoutConfigProvider, GridLayoutGlobalStyles } from '../../..';
 
 const App = () => {
   const layoutConfig = {

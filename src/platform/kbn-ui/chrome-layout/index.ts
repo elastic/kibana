@@ -21,6 +21,9 @@ export type { ChromeStyle } from './src/layout.types';
 
 export { LayoutDebugOverlay } from './src/debug/layout_debug_overlay';
 
-export { GridLayoutGlobalStyles, type GridLayoutGlobalStylesProps } from './src/layouts/grid_global_app_style';
+export {
+  GridLayoutGlobalStyles,
+  type GridLayoutGlobalStylesProps,
+} from './src/layouts/grid_global_app_style';
 
 export { CommonGlobalAppStyles } from './src/layouts/global_app_styles';
