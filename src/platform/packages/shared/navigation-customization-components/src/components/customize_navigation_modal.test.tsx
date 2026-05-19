@@ -16,9 +16,9 @@ import type { NavigationItemInfo } from '../types';
 
 describe('CustomizeNavigationModal', () => {
   const items: NavigationItemInfo[] = [
-    { id: 'home', title: 'Home', hidden: false, locked: true, icon: 'home' },
-    { id: 'dashboards', title: 'Dashboards', hidden: false, locked: false, icon: 'dashboard' },
-    { id: 'discover', title: 'Discover', hidden: true, locked: false, icon: 'discoverApp' },
+    { id: 'home', title: 'Home', hidden: false, icon: 'home' },
+    { id: 'dashboards', title: 'Dashboards', hidden: false, icon: 'dashboard' },
+    { id: 'discover', title: 'Discover', hidden: true, icon: 'discoverApp' },
   ];
 
   const defaultProps = {
@@ -45,13 +45,9 @@ describe('CustomizeNavigationModal', () => {
     expect(screen.getByText('Customize Navigation')).toBeInTheDocument();
   });
 
-  it('should render locked items', () => {
-    renderWithI18n(<CustomizeNavigationModal {...defaultProps} />);
-    expect(screen.getByText('Home')).toBeInTheDocument();
-  });
-
   it('should render visible items', () => {
     renderWithI18n(<CustomizeNavigationModal {...defaultProps} />);
+    expect(screen.getByText('Home')).toBeInTheDocument();
     expect(screen.getByText('Dashboards')).toBeInTheDocument();
   });
 

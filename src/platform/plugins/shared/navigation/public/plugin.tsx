@@ -41,7 +41,6 @@ const LazyCustomizeNavigationUserMenuLink = lazy(async () => {
   return { default: CustomizeNavigationUserMenuLink };
 });
 
-const LOCKED_ITEM_IDS = new Set<AppDeepLinkId>(['discover', 'dashboards']);
 const CUSTOM_NAV_STORAGE_KEY = 'kibana.solutionNavigationCustomization';
 const CALLOUT_DISMISSED_KEY = 'kibana.customizeNavigation.calloutDismissed';
 
@@ -350,7 +349,6 @@ export class NavigationPublicPlugin
         id: node.id,
         title: node.title || node.id,
         hidden: overflowSet.has(node.id),
-        locked: LOCKED_ITEM_IDS.has(node.id),
         icon: node.icon,
       }));
   }

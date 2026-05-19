@@ -13,18 +13,16 @@ import type { NavigationItemInfo } from '../types';
 
 describe('useItemList', () => {
   const items: NavigationItemInfo[] = [
-    { id: 'home', title: 'Home', hidden: false, locked: true },
-    { id: 'dashboards', title: 'Dashboards', hidden: false, locked: false },
-    { id: 'discover', title: 'Discover', hidden: false, locked: false },
-    { id: 'maps', title: 'Maps', hidden: true, locked: false },
+    { id: 'home', title: 'Home', hidden: false },
+    { id: 'dashboards', title: 'Dashboards', hidden: false },
+    { id: 'discover', title: 'Discover', hidden: false },
+    { id: 'maps', title: 'Maps', hidden: true },
   ];
 
-  it('should separate items into locked, visible, and hidden', () => {
+  it('should separate items into visible and hidden', () => {
     const { result } = renderHook(() => useItemList(items));
 
-    expect(result.current.lockedItems).toHaveLength(1);
-    expect(result.current.lockedItems[0].id).toBe('home');
-    expect(result.current.visibleItems).toHaveLength(2);
+    expect(result.current.visibleItems).toHaveLength(3);
     expect(result.current.hiddenItems).toHaveLength(1);
     expect(result.current.hiddenItems[0].id).toBe('maps');
   });
@@ -42,7 +40,7 @@ describe('useItemList', () => {
     });
 
     expect(result.current.hiddenItems).toHaveLength(2);
-    expect(result.current.visibleItems).toHaveLength(1);
+    expect(result.current.visibleItems).toHaveLength(2);
     expect(result.current.hasChanges).toBe(true);
   });
 
@@ -54,13 +52,13 @@ describe('useItemList', () => {
     });
 
     expect(result.current.hiddenItems).toHaveLength(0);
-    expect(result.current.visibleItems).toHaveLength(3);
+    expect(result.current.visibleItems).toHaveLength(4);
   });
 
   it('should allow setItems to replace the list', () => {
     const { result } = renderHook(() => useItemList(items));
     const newItems: NavigationItemInfo[] = [
-      { id: 'new', title: 'New Item', hidden: false, locked: false },
+      { id: 'new', title: 'New Item', hidden: false },
     ];
 
     act(() => {

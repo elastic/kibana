@@ -13,6 +13,5 @@ export interface NavigationItemInfo {
   id: string;
   title: string;
   hidden: boolean;
-  locked: boolean;
   icon?: IconType;
 }

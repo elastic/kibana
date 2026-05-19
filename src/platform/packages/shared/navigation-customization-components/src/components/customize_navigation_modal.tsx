@@ -28,7 +28,6 @@ import {
 import { css, Global } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DraggableItem } from './draggable_item';
-import { LockedItem } from './locked_item';
 import { HiddenItemsSection } from './hidden_items_section';
 import { SpaceCallout } from './space_callout';
 import { useItemList } from './use_item_list';
@@ -66,7 +65,6 @@ export const CustomizeNavigationModal = ({
   const {
     items,
     setItems,
-    lockedItems,
     visibleItems,
     hiddenItems,
     hasChanges,
@@ -123,9 +121,6 @@ export const CustomizeNavigationModal = ({
         </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
-        {lockedItems.map((item) => (
-          <LockedItem key={item.id} item={item} />
-        ))}
         <EuiDragDropContext onDragEnd={createDragEndHandler('visible')}>
           <EuiDroppable droppableId="nav-items" spacing="none">
             {visibleItems.map((item, index) => (

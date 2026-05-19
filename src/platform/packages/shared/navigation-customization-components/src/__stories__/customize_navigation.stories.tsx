@@ -19,14 +19,14 @@ import type { NavigationItemInfo } from '../types';
 // ---------------------------------------------------------------------------
 
 const BASE_ITEMS: NavigationItemInfo[] = [
-  { id: 'discover', title: 'Discover', hidden: false, locked: true, icon: 'discoverApp' },
-  { id: 'dashboards', title: 'Dashboards', hidden: false, locked: true, icon: 'dashboardApp' },
-  { id: 'apm', title: 'Services', hidden: false, locked: false, icon: 'apmApp' },
-  { id: 'infrastructure', title: 'Infrastructure', hidden: false, locked: false, icon: 'infraApp' },
-  { id: 'logs', title: 'Logs', hidden: false, locked: false, icon: 'logsApp' },
-  { id: 'alerts', title: 'Alerts', hidden: false, locked: false, icon: 'bell' },
-  { id: 'fleet', title: 'Fleet', hidden: true, locked: false, icon: 'fleetApp' },
-  { id: 'profiling', title: 'Profiling', hidden: true, locked: false, icon: 'profilingApp' },
+  { id: 'discover', title: 'Discover', hidden: false, icon: 'discoverApp' },
+  { id: 'dashboards', title: 'Dashboards', hidden: false, icon: 'dashboardApp' },
+  { id: 'apm', title: 'Services', hidden: false, icon: 'apmApp' },
+  { id: 'infrastructure', title: 'Infrastructure', hidden: false, icon: 'infraApp' },
+  { id: 'logs', title: 'Logs', hidden: false, icon: 'logsApp' },
+  { id: 'alerts', title: 'Alerts', hidden: false, icon: 'bell' },
+  { id: 'fleet', title: 'Fleet', hidden: true, icon: 'fleetApp' },
+  { id: 'profiling', title: 'Profiling', hidden: true, icon: 'profilingApp' },
 ];
 
 // ---------------------------------------------------------------------------

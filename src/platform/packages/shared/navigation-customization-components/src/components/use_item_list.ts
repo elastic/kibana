@@ -15,9 +15,8 @@ export const useItemList = (initial: NavigationItemInfo[]) => {
   const initialItems = useRef(initial);
   const [items, setItems] = useState(initial);
 
-  const lockedItems = useMemo(() => items.filter((item) => item.locked), [items]);
-  const visibleItems = useMemo(() => items.filter((item) => !item.locked && !item.hidden), [items]);
-  const hiddenItems = useMemo(() => items.filter((item) => !item.locked && item.hidden), [items]);
+  const visibleItems = useMemo(() => items.filter((item) => !item.hidden), [items]);
+  const hiddenItems = useMemo(() => items.filter((item) => item.hidden), [items]);
 
   const hasChanges = useMemo(() => {
     if (items.length !== initialItems.current.length) return true;
@@ -33,22 +32,13 @@ export const useItemList = (initial: NavigationItemInfo[]) => {
         if (!destination || source.index === destination.index) return;
 
         setItems((prev) => {
-          const locked = prev.filter((item) => item.locked);
-          const visible = prev.filter((item) => !item.locked && !item.hidden);
-          const hidden = prev.filter((item) => !item.locked && item.hidden);
+          const visible = prev.filter((item) => !item.hidden);
+          const hidden = prev.filter((item) => item.hidden);
 
           if (section === 'visible') {
-            return [
-              ...locked,
-              ...euiDragDropReorder(visible, source.index, destination.index),
-              ...hidden,
-            ];
+            return [...euiDragDropReorder(visible, source.index, destination.index), ...hidden];
           }
-          return [
-            ...locked,
-            ...visible,
-            ...euiDragDropReorder(hidden, source.index, destination.index),
-          ];
+          return [...visible, ...euiDragDropReorder(hidden, source.index, destination.index)];
         });
       },
     []
@@ -63,7 +53,6 @@ export const useItemList = (initial: NavigationItemInfo[]) => {
   return {
     items,
     setItems,
-    lockedItems,
     visibleItems,
     hiddenItems,
     hasChanges,
