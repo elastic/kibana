@@ -166,6 +166,9 @@ export const fetchGraph = async ({
           entityIds: [...allEntityIds],
           spaceId,
           entityStoreIndexExists,
+        }).catch((error) => {
+          logger.error(`Failed to enrich entities: ${error.message}`);
+          throw error;
         })
       : new Map<string, EntityEnrichmentFields>();
 

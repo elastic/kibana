@@ -205,26 +205,73 @@ describe('fetchEntityEnrichment', () => {
     expect(esClient.asInternalUser.helpers.esql).toHaveBeenCalledTimes(2);
   });
 
-  it('returns partial map when one chunk fails', async () => {
+  it('throws when a chunk fails after one retry', async () => {
+    const transient = Object.assign(new Error('connection reset'), { name: 'ConnectionError' });
+    (esClient.asInternalUser.helpers.esql as unknown as jest.Mock).mockReturnValue({
+      toRecords: jest.fn().mockRejectedValue(transient),
+    });
+
+    await expect(
+      fetchEntityEnrichment({
+        esClient,
+        logger,
+        entityIds: ['user:alice'],
+        spaceId: 'default',
+        entityStoreIndexExists: true,
+      })
+    ).rejects.toBe(transient);
+    // Initial attempt + one retry on the same chunk
+    expect(esClient.asInternalUser.helpers.esql).toHaveBeenCalledTimes(2);
+  });
+
+  it('retries transient errors once and returns full map', async () => {
+    const transient = Object.assign(new Error('upstream timeout'), { name: 'TimeoutError' });
+    const successRecord = {
+      'entity.id': 'user:alice',
+      'entity.name': 'Alice',
+      'entity.type': 'user',
+      'entity.sub_type': null,
+      'entity.EngineMetadata.Type': null,
+      'host.ip': null,
+    };
     (esClient.asInternalUser.helpers.esql as unknown as jest.Mock)
       .mockReturnValueOnce({
-        toRecords: jest.fn().mockRejectedValue(new Error('ES error')),
+        toRecords: jest.fn().mockRejectedValue(transient),
       })
-      .mockReturnValue({
-        toRecords: jest.fn().mockResolvedValue({ records: [] }),
+      .mockReturnValueOnce({
+        toRecords: jest.fn().mockResolvedValue({ records: [successRecord] }),
       });
 
-    const ids = Array.from({ length: 101 }, (_, i) => `user:entity${i}`);
     const result = await fetchEntityEnrichment({
       esClient,
       logger,
-      entityIds: ids,
+      entityIds: ['user:alice'],
       spaceId: 'default',
       entityStoreIndexExists: true,
     });
-    // Should not throw, should return partial (empty) map
-    expect(result).toBeInstanceOf(Map);
-    expect(logger.warn).toHaveBeenCalled();
+    expect(esClient.asInternalUser.helpers.esql).toHaveBeenCalledTimes(2);
+    expect(result.get('user:alice')?.name).toBe('Alice');
+  });
+
+  it('does not retry non-transient errors', async () => {
+    const permanent = Object.assign(new Error('bad request'), {
+      name: 'ResponseError',
+      meta: { statusCode: 400 },
+    });
+    (esClient.asInternalUser.helpers.esql as unknown as jest.Mock).mockReturnValue({
+      toRecords: jest.fn().mockRejectedValue(permanent),
+    });
+
+    await expect(
+      fetchEntityEnrichment({
+        esClient,
+        logger,
+        entityIds: ['user:alice'],
+        spaceId: 'default',
+        entityStoreIndexExists: true,
+      })
+    ).rejects.toBe(permanent);
+    expect(esClient.asInternalUser.helpers.esql).toHaveBeenCalledTimes(1);
   });
 
   it('handles array host.ip values', async () => {

@@ -77,6 +77,29 @@ const buildSourceFields = (
   return result;
 };
 
+const TRANSIENT_RETRY_DELAY_MS = 200;
+const TRANSIENT_STATUS_CODES = new Set([502, 503, 504]);
+
+const isTransientError = (err: unknown): boolean => {
+  if (err == null || typeof err !== 'object') return false;
+  const name = (err as { name?: string }).name;
+  if (name === 'ConnectionError' || name === 'TimeoutError') return true;
+  const meta = (err as { meta?: { statusCode?: number } }).meta;
+  // No meta → raw network/abort error (ECONNRESET etc.); treat as transient.
+  if (meta == null) return true;
+  return meta.statusCode != null && TRANSIENT_STATUS_CODES.has(meta.statusCode);
+};
+
+const withTransientRetry = async <T>(fn: () => Promise<T>): Promise<T> => {
+  try {
+    return await fn();
+  } catch (err) {
+    if (!isTransientError(err)) throw err;
+    await new Promise((resolve) => setTimeout(resolve, TRANSIENT_RETRY_DELAY_MS));
+    return await fn();
+  }
+};
+
 /**
  * Fetches enrichment metadata for a set of entity IDs from the local entity store.
  *
@@ -86,6 +109,12 @@ const buildSourceFields = (
  *
  * `entityStoreIndexExists` is the result of a single upstream existence check
  * (see fetchGraph). Returns an empty map when the index is absent or no IDs were given.
+ *
+ * Atomic: chunks run in parallel and each is retried once on transient errors
+ * (ConnectionError / TimeoutError / 5xx / raw network). If any chunk still fails the
+ * rejection propagates and the caller's graph request fails — matching the original
+ * LOOKUP JOIN all-or-nothing semantics and avoiding silent type/subtype group drift in
+ * downstream regroup* logic.
  */
 export const fetchEntityEnrichment = async ({
   esClient,
@@ -107,9 +136,6 @@ export const fetchEntityEnrichment = async ({
   const indexName = getEntitiesLatestIndexName(spaceId);
   const result = new Map<string, EntityEnrichmentFields>();
 
-  // Chunks run in parallel. If one chunk fails, its entities get availableInEntityStore=false
-  // while other chunks' entities remain enriched. This can split a previously-coherent
-  // type/subtype group — a known behavioral edge case documented in the CPS refactor.
   await Promise.all(
     chunk([...new Set(entityIds)], 100).map(async (entityIdChunk) => {
       const paramNames = entityIdChunk.map((_, i) => `?entityId${i}`).join(', ');
@@ -122,8 +148,8 @@ FROM ${indexName}
         EXTRA_SOURCE_FIELD_COLUMNS.length > 0 ? ', ' + EXTRA_SOURCE_FIELD_COLUMNS.join(', ') : ''
       }`;
 
-      try {
-        const response = await esClient.asInternalUser.helpers
+      const response = await withTransientRetry(() =>
+        esClient.asInternalUser.helpers
           .esql({
             columnar: false,
             query,
@@ -139,36 +165,31 @@ FROM ${indexName}
               'entity.EngineMetadata.Type'?: string | null;
               'host.ip'?: string | string[] | null;
             } & Record<string, unknown>
-          >();
+          >()
+      );
 
-        for (const record of response.records) {
-          const id = record['entity.id'];
-          if (!id) continue;
-          if (!result.has(id)) {
-            // First-seen wins; entity.id should be unique but may appear across namespaces
-            const rawHostIp = record['host.ip'];
-            const hostIps =
-              rawHostIp != null
-                ? Array.isArray(rawHostIp)
-                  ? rawHostIp.map(String)
-                  : [String(rawHostIp)]
-                : [];
-            const sourceFields = buildSourceFields(id, record);
-            result.set(id, {
-              name: record['entity.name'] ?? null,
-              type: record['entity.type'] ?? null,
-              subType: record['entity.sub_type'] ?? null,
-              engineType: record['entity.EngineMetadata.Type'] ?? null,
-              hostIps,
-              ...(Object.keys(sourceFields).length > 0 ? { sourceFields } : {}),
-            });
-          }
+      for (const record of response.records) {
+        const id = record['entity.id'];
+        if (!id) continue;
+        if (!result.has(id)) {
+          // First-seen wins; entity.id should be unique but may appear across namespaces
+          const rawHostIp = record['host.ip'];
+          const hostIps =
+            rawHostIp != null
+              ? Array.isArray(rawHostIp)
+                ? rawHostIp.map(String)
+                : [String(rawHostIp)]
+              : [];
+          const sourceFields = buildSourceFields(id, record);
+          result.set(id, {
+            name: record['entity.name'] ?? null,
+            type: record['entity.type'] ?? null,
+            subType: record['entity.sub_type'] ?? null,
+            engineType: record['entity.EngineMetadata.Type'] ?? null,
+            hostIps,
+            ...(Object.keys(sourceFields).length > 0 ? { sourceFields } : {}),
+          });
         }
-      } catch (err) {
-        logger.warn(
-          `Entity enrichment fetch failed for chunk of ${entityIdChunk.length} IDs: ${err.message}`
-        );
-        // Non-fatal: partial map returned, graph renders without enrichment for missing entities
       }
     })
   );
