@@ -1,11 +1,44 @@
 {
-  "sha1": "5853a7cf0f8c87c87954653f47ce5b73959e3d62",
+  "sha1": "f7b4ca4e38ff1b39ea4618c9042faadd56cfa8d6",
   "tests": [
+    {
+      "id": "bd41f0240dfdfcb-9b0e8252d0034ea",
+      "title": "Reset profiling state after API tests",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/global.teardown.ts",
+        "line": 14,
+        "column": 19
+      }
+    },
+    {
+      "id": "1219f91050e9ce3-f2cd2d3cdc77643",
+      "title": "Ingest data to Elasticsearch",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/global.setup.ts",
+        "line": 13,
+        "column": 1
+      }
+    },
     {
       "id": "405beff6794306f-a54347ac1e57e7e",
       "title": "Profiling is not setup and no data is loaded Admin users",
       "expectedStatus": "passed",
-      "tags": ["@local-stateful-classic", "@cloud-stateful-classic"],
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/has_no_setup.spec.ts",
         "line": 44,
@@ -16,7 +49,10 @@
       "id": "405beff6794306f-429a339166c2e77",
       "title": "Profiling is not setup and no data is loaded Viewer users",
       "expectedStatus": "passed",
-      "tags": ["@local-stateful-classic", "@cloud-stateful-classic"],
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/has_no_setup.spec.ts",
         "line": 58,
@@ -27,10 +63,13 @@
       "id": "f24ba03baeb5e26-0723e6c11fe5d87",
       "title": "APM integration not installed but setup completed Admin user",
       "expectedStatus": "passed",
-      "tags": ["@local-stateful-classic", "@cloud-stateful-classic"],
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/has_setup_apm_not_installed.spec.ts",
-        "line": 59,
+        "line": 64,
         "column": 12
       }
     },
@@ -38,10 +77,13 @@
       "id": "f24ba03baeb5e26-76b2ff68d4e7a1b",
       "title": "APM integration not installed but setup completed Viewer user",
       "expectedStatus": "passed",
-      "tags": ["@local-stateful-classic", "@cloud-stateful-classic"],
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/has_setup_apm_not_installed.spec.ts",
-        "line": 74,
+        "line": 79,
         "column": 12
       }
     },
@@ -49,10 +91,13 @@
       "id": "da6d82a4243ce6c-271837831195e95",
       "title": "Profiling is setup and data is loaded Admin user",
       "expectedStatus": "passed",
-      "tags": ["@local-stateful-classic", "@cloud-stateful-classic"],
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/has_setup_with_data.spec.ts",
-        "line": 42,
+        "line": 47,
         "column": 10
       }
     },
@@ -60,10 +105,13 @@
       "id": "da6d82a4243ce6c-7018203930dfa66",
       "title": "Profiling is setup and data is loaded Viewer user",
       "expectedStatus": "passed",
-      "tags": ["@local-stateful-classic", "@cloud-stateful-classic"],
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/has_setup_with_data.spec.ts",
-        "line": 56,
+        "line": 61,
         "column": 10
       }
     },
@@ -71,10 +119,13 @@
       "id": "8b3eca81b16d245-3ee5b04db1c974d",
       "title": "Collector integration is not installed collector integration missing",
       "expectedStatus": "passed",
-      "tags": ["@local-stateful-classic", "@cloud-stateful-classic"],
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/has_setup_with_integrations.spec.ts",
-        "line": 78,
+        "line": 79,
         "column": 10
       }
     },
@@ -82,10 +133,13 @@
       "id": "8b3eca81b16d245-7029a2aca281cbb",
       "title": "Collector integration is not installed Symbolizer integration is not installed",
       "expectedStatus": "passed",
-      "tags": ["@local-stateful-classic", "@cloud-stateful-classic"],
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/profiling/test/scout/api/tests/has_setup_with_integrations.spec.ts",
-        "line": 101,
+        "line": 102,
         "column": 10
       }
     }
