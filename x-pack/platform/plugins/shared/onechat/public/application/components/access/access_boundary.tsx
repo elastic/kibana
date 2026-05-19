@@ -7,19 +7,33 @@
 
 import React, { type ReactNode } from 'react';
 import { useOnechatServices } from '../../hooks/use_onechat_service';
+import { useBreadcrumb } from '../../hooks/use_breadcrumbs';
 import { AddLlmConnectionPrompt } from './prompts/add_llm_connection_prompt';
 import { UpgradeLicensePrompt } from './prompts/upgrade_license_prompt';
+
+const AccessPromptWithBreadcrumb: React.FC<{ children: ReactNode }> = ({ children }) => {
+  useBreadcrumb([]);
+  return <>{children}</>;
+};
 
 export const AccessBoundary: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { accessChecker } = useOnechatServices();
   const { hasRequiredLicense, hasLlmConnector } = accessChecker.getAccess();
 
   if (!hasRequiredLicense) {
-    return <UpgradeLicensePrompt />;
+    return (
+      <AccessPromptWithBreadcrumb>
+        <UpgradeLicensePrompt />
+      </AccessPromptWithBreadcrumb>
+    );
   }
 
   if (!hasLlmConnector) {
-    return <AddLlmConnectionPrompt />;
+    return (
+      <AccessPromptWithBreadcrumb>
+        <AddLlmConnectionPrompt />
+      </AccessPromptWithBreadcrumb>
+    );
   }
 
   return children;
