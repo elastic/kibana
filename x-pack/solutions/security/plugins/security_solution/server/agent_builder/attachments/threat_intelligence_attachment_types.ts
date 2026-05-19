@@ -11,6 +11,7 @@ import {
   IOC_TYPES,
   SEVERITY_LEVELS,
   THREAT_CATEGORIES,
+  THREAT_INTEL_ATTACHMENT_TYPES,
   THREAT_REGIONS,
 } from '../../../common/threat_intelligence/hub';
 
@@ -24,13 +25,9 @@ import {
  * Investigate) so an analyst can act on a behavioral finding without
  * leaving chat.
  */
-export const ATTACHMENT_TYPES = {
-  mitreHeatmap: 'threat-intel-mitre-heatmap',
-  reportTable: 'threat-intel-report-table',
-  severityTimeline: 'threat-intel-severity-timeline',
-  subscriptionConfirmation: 'threat-intel-subscription-confirmation',
-  findingCard: 'threat-intel-finding-card',
-} as const;
+
+/** @deprecated Prefer {@link THREAT_INTEL_ATTACHMENT_TYPES} from `common/threat_intelligence/hub`. */
+export const ATTACHMENT_TYPES = THREAT_INTEL_ATTACHMENT_TYPES;
 
 const techniqueRowSchema = z.object({
   technique_id: z.string().regex(/^T\d{4}(\.\d{3})?$/),

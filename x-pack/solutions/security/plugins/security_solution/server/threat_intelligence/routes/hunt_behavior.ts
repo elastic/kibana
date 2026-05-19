@@ -10,6 +10,7 @@ import {
   HUNT_BEHAVIOR_API_PATH,
   THREAT_INTELLIGENCE_API_PRIVILEGES,
 } from '../../../common/threat_intelligence/hub';
+import { buildFindingCardUiHints, withUiHints } from '../../../common/threat_intelligence/hub';
 import { huntBehavior } from '../services';
 import { resolveScopedModel } from './lib/scoped_model';
 import type { RouteRegistrationDeps } from '.';
@@ -78,7 +79,10 @@ export const registerHuntBehaviorRoute = ({
             report_id: request.body.report_id,
             llm_confidence_threshold: request.body.llm_confidence_threshold,
           });
-          return response.ok({ body: result });
+          const uiHints = buildFindingCardUiHints(result.attachment_hints);
+          return response.ok({
+            body: withUiHints({ body: result, uiHints }),
+          });
         } catch (err) {
           logger.warn(`hunt_behavior failed: ${(err as Error).message}`);
           return response.customError({

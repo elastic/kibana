@@ -14,6 +14,7 @@ import {
   type SeverityLevel,
   type SourceType,
 } from '../../../common/threat_intelligence/hub';
+import { buildCoverageGapUiHints, withUiHints } from '../../../common/threat_intelligence/hub';
 import { coverageGap } from '../services';
 import type { RouteRegistrationDeps } from '.';
 
@@ -77,7 +78,10 @@ export const registerCoverageGapRoute = ({ router, logger }: RouteRegistrationDe
             min_severity: request.body.min_severity as SeverityLevel | undefined,
             max_techniques: request.body.max_techniques,
           });
-          return response.ok({ body: result });
+          const uiHints = buildCoverageGapUiHints(result.attachment_hint);
+          return response.ok({
+            body: withUiHints({ body: result, uiHints }),
+          });
         } catch (err) {
           logger.warn(`coverage_gap failed: ${(err as Error).message}`);
           return response.customError({

@@ -10,6 +10,7 @@ import {
   GENERALIZE_FROM_TELEMETRY_API_PATH,
   THREAT_INTELLIGENCE_API_PRIVILEGES,
 } from '../../../common/threat_intelligence/hub';
+import { buildFindingCardUiHints, withUiHints } from '../../../common/threat_intelligence/hub';
 import { generalizeFromTelemetry } from '../services';
 import { resolveCurrentSpaceId } from '../lib/space_filter';
 import { resolveScopedModel } from './lib/scoped_model';
@@ -90,7 +91,10 @@ export const registerGeneralizeFromTelemetryRoute = ({
               persist_synthetic_report: request.body.persist_synthetic_report,
             }
           );
-          return response.ok({ body: result });
+          const uiHints = buildFindingCardUiHints(result.attachment_hints);
+          return response.ok({
+            body: withUiHints({ body: result, uiHints }),
+          });
         } catch (err) {
           logger.warn(`generalize_from_telemetry failed: ${(err as Error).message}`);
           return response.customError({

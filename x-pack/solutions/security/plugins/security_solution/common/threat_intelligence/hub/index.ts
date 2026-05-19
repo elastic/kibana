@@ -127,3 +127,18 @@ export type {
   SubscriptionConfirmationPayload,
   FindingCardPayload,
 } from './attachment_payloads';
+export { THREAT_INTEL_ATTACHMENT_TYPES } from './attachment_type_ids';
+export type { ThreatIntelAttachmentType } from './attachment_type_ids';
+export type { ThreatIntelUiHint, ThreatIntelUiHintsEnvelope } from './ui_hints';
+export {
+  buildSearchReportsUiHints,
+  buildCoverageGapUiHints,
+  buildFindingCardUiHints,
+  withUiHints,
+} from './ui_hints_builders';
+export {
+  formatTimeRangeLabel,
+  mapSearchReportHitToTableRow,
+  buildReportTablePayloadFromSearch,
+  type SearchReportHit,
+} from './report_table_rows';

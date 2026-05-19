@@ -22,6 +22,10 @@ import {
   type ThreatCategory,
   type ThreatRegion,
 } from '../../../common/threat_intelligence/hub';
+import {
+  buildSearchReportsUiHints,
+  withUiHints,
+} from '../../../common/threat_intelligence/hub';
 import { searchReports } from '../services';
 import { resolveCurrentSpaceId } from '../lib/space_filter';
 import type { RouteRegistrationDeps } from '.';
@@ -127,7 +131,7 @@ export const registerSearchReportsRoute = ({
         const esClient = core.elasticsearch.client.asCurrentUser;
         const spaceId = resolveCurrentSpaceId(getSpacesService(), request);
         try {
-          const result = await searchReports(esClient, logger, spaceId, {
+          const searchParams = {
             query: request.body.query,
             size: request.body.size,
             source_types: request.body.source_types as SourceType[] | undefined,
@@ -139,8 +143,16 @@ export const registerSearchReportsRoute = ({
               | DetectionActionability[]
               | undefined,
             sort_by: request.body.sort_by as ReportSortBy | undefined,
+          };
+          const result = await searchReports(esClient, logger, spaceId, searchParams);
+          const uiHints = buildSearchReportsUiHints({
+            params: searchParams,
+            reports: result.reports,
+            total: result.total,
           });
-          return response.ok({ body: result });
+          return response.ok({
+            body: withUiHints({ body: result, uiHints }),
+          });
         } catch (err) {
           logger.warn(`search_reports failed: ${(err as Error).message}`);
           return response.customError({
