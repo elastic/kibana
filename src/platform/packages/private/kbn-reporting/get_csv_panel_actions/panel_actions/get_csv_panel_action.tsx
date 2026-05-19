@@ -126,12 +126,7 @@ export class ReportingCsvPanelAction implements ActionDefinition<EmbeddableApiCo
   public async getSharingData(savedSearch: SavedSearch) {
     const [{ uiSettings }, { data }] = await firstValueFrom(this.startServices$);
     const { getSharingData } = await loadSharingDataHelpers();
-    return await getSharingData(
-      savedSearch.searchSource,
-      savedSearch,
-      { uiSettings, data },
-      this.isEsqlMode(savedSearch)
-    );
+    return await getSharingData(savedSearch.searchSource, savedSearch, { uiSettings, data });
   }
 
   private isEsqlMode(savedSearch: SavedSearch) {
