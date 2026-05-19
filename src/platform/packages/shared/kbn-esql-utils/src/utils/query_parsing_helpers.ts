@@ -34,7 +34,6 @@ import type {
   ESQLAstQueryExpression,
   ESQLAstCommand,
   ESQLForkParens,
-  ESQLAstItem,
   ESQLDecimalLiteral,
   ESQLIntegerLiteral,
 } from '@elastic/esql/types';
