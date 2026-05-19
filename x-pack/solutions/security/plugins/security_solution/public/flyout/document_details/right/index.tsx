@@ -14,7 +14,7 @@ import { useTabs } from './hooks/use_tabs';
 import { FLYOUT_STORAGE_KEYS } from '../shared/constants/local_storage';
 import { useKibana } from '../../../common/lib/kibana';
 import { useDocumentDetailsContext } from '../shared/context';
-import { useAlertsContext } from '../../../detections/components/alerts_table/alerts_context';
+import { useFlyoutPagination } from '../../../common/utils/flyout_pagination/use_flyout_pagination';
 import type { DocumentDetailsProps } from '../shared/types';
 import { PanelNavigation } from './navigation';
 import { PanelHeader } from './header';
@@ -33,9 +33,16 @@ export type RightPanelPaths = 'overview' | 'table' | 'json';
 export const RightPanel: FC<Partial<DocumentDetailsProps>> = memo(({ path }) => {
   const { storage, telemetry } = useKibana().services;
   const { openRightPanel, closeFlyout } = useExpandableFlyoutApi();
-  const { eventId, indexName, scopeId, isRulePreview, dataAsNestedObject, getFieldsData } =
-    useDocumentDetailsContext();
-  const { isFlyoutAlertLoading } = useAlertsContext();
+  const {
+    eventId,
+    indexName,
+    scopeId,
+    isRulePreview,
+    dataAsNestedObject,
+    getFieldsData,
+    paginationInstanceId,
+  } = useDocumentDetailsContext();
+  const { isFlyoutAlertLoading } = useFlyoutPagination(paginationInstanceId);
 
   // if the flyout is expandable we render all 3 tabs (overview, table and json)
   // if the flyout is not, we render only table and json
@@ -52,6 +59,7 @@ export const RightPanel: FC<Partial<DocumentDetailsProps>> = memo(({ path }) => 
         id: eventId,
         indexName,
         scopeId,
+        paginationInstanceId,
       },
     });
 

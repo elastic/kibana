@@ -20,7 +20,7 @@ import type { State } from '../../../common/store';
 import { RowAction } from '../../../common/components/control_columns/row_action';
 import type { GetSecurityAlertsTableProp } from './types';
 import { expandDottedObject } from '../../../../common/utils/expand_dotted';
-import { useAlertsContext } from './alerts_context';
+import { useFlyoutPagination } from '../../../common/utils/flyout_pagination/use_flyout_pagination';
 
 const onRowSelected = () => {};
 
@@ -37,6 +37,7 @@ export const ActionsCellComponent: GetSecurityAlertsTableProp<'renderActionsCell
   refresh: alertsTableRefresh,
   clearSelection,
   leadingControlColumn,
+  paginationInstanceId,
 }) => {
   const license = useLicense();
   const defaults = useMemo(() => getAlertsDefaultModel(license), [license]);
@@ -48,11 +49,11 @@ export const ActionsCellComponent: GetSecurityAlertsTableProp<'renderActionsCell
     loadingEventIds,
   } = useSelector((state: State) => selectTableById(state, tableType) ?? defaults);
   const eventContext = useContext(StatefulEventContext);
-  const { openAlertFlyout } = useAlertsContext();
+  const { openAlertFlyout } = useFlyoutPagination(paginationInstanceId);
 
   // `rowIndex` is absolute (it crosses page boundaries), which is also what
-  // the AlertsContext expects (`flyoutAlertIndex`). See `ActionsCellHost` in
-  // `@kbn/response-ops-alerts-table` for where the page-relative index is
+  // the pagination slice expects (`flyoutAlertIndex`). See `ActionsCellHost`
+  // in `@kbn/response-ops-alerts-table` for where the page-relative index is
   // computed back from this absolute one.
   const onExpandFlyout = useCallback(() => {
     openAlertFlyout(rowIndex);

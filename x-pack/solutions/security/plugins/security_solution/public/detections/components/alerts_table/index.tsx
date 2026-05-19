@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type FC, memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { type FC, memo, useCallback, useEffect, useMemo, useState } from 'react';
 import type { EuiDataGridRowHeightsOptions, EuiDataGridStyle } from '@elastic/eui';
 import { EuiFlexGroup } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
@@ -16,9 +16,7 @@ import type {
 import { ALERT_BUILDING_BLOCK_TYPE, AlertConsumers } from '@kbn/rule-data-utils';
 import { SECURITY_SOLUTION_RULE_TYPE_IDS } from '@kbn/securitysolution-rules';
 import styled from 'styled-components';
-import { useDispatch, useSelector, useStore } from 'react-redux';
-import { useHistory } from 'react-router-dom';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useDispatch, useSelector } from 'react-redux';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import {
   dataTableActions,
@@ -29,7 +27,6 @@ import {
 import type { SetOptional } from 'type-fest';
 import { noop } from 'lodash';
 import type { Alert } from '@kbn/alerting-types';
-import type { OverlayRef } from '@kbn/core-mount-utils-browser';
 import {
   AlertsTable as ResponseOpsAlertsTable,
   alertsTableQueryClient,
@@ -42,10 +39,10 @@ import { DocumentDetailsRightPanelKey } from '../../../flyout/document_details/s
 import { PageScope } from '../../../data_view_manager/constants';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { documentFlyoutHistoryKey } from '../../../flyout_v2/shared/constants/flyout_history';
-import { flyoutProviders } from '../../../flyout_v2/shared/components/flyout_provider';
-import { useDefaultDocumentFlyoutProperties } from '../../../flyout_v2/shared/hooks/use_default_flyout_properties';
 import { PaginatedDocumentFlyout } from '../../../flyout_v2/document/paginated_document_flyout';
-import { useAlertsContext } from './alerts_context';
+import type { ScopedPaginationSlice } from '../../../common/utils/flyout_pagination/types';
+import { usePaginatedFlyout } from '../../../common/utils/flyout_pagination/use_paginated_flyout';
+import { alertsTableRef } from './alerts_table_ref';
 import { useBulkActionsByTableType } from '../../hooks/trigger_actions_alert_table/use_bulk_actions';
 import type {
   GetSecurityAlertsTableProp,
@@ -190,31 +187,7 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
     uiSettings,
     settings,
     cases,
-    overlays,
   } = kibanaServices;
-  const {
-    alertsTableRef,
-    flyoutAlertIndex,
-    setFlyoutAlertIndex,
-    pageSize,
-    setPageSize,
-    setTotalAlertCount,
-    setIsFlyoutAlertLoading,
-    setFlyoutAlert,
-    setOpenAlertFlyoutImpl,
-  } = useAlertsContext();
-  const { openFlyout } = useExpandableFlyoutApi();
-  const newFlyoutSystemEnabled = useIsExperimentalFeatureEnabled('newFlyoutSystemEnabled');
-  const reduxStore = useStore();
-  const history = useHistory();
-  const defaultFlyoutProperties = useDefaultDocumentFlyoutProperties();
-  // The V2 system flyout escapes the React tree (it is rendered in a
-  // separate root by `overlays.openSystemFlyout`). We open it once per
-  // alerts-table session and let the inner `PaginatedDocumentFlyout` swap
-  // alerts via the shared `alertsTablePaginationStore`. This ref tracks the
-  // currently-open flyout so subsequent clicks (re-clicks, pagination)
-  // update store state without stacking new flyouts.
-  const systemFlyoutRef = useRef<OverlayRef | null>(null);
 
   const { from, to, setQuery } = useGlobalTime();
 
@@ -343,6 +316,44 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
   // flyout query to return alerts in a different (stale) order.
   const [liftedSort, setLiftedSort] = useState<GetSecurityAlertsTableProp<'sort'>>(sort);
 
+  const getAlertBody = useCallback(
+    (instanceId: string) => (
+      <PaginatedDocumentFlyout scopeId={tableType} paginationInstanceId={instanceId} />
+    ),
+    [tableType]
+  );
+
+  // Resolves the document at an absolute alert index (0-based across the full
+  // result set) from the currently-loaded page. Returns null when the alert is
+  // on a different page — the parallel cross-page query will resolve it and
+  // call openPaginatedFlyout again once the data is available.
+  const resolveDocument = useCallback(
+    (alertIndex: number) => {
+      if (reduxItemsPerPage <= 0 || !tableContext) return null;
+      const targetPageIndex = Math.floor(alertIndex / reduxItemsPerPage);
+      const isInPage = targetPageIndex === tablePageIndex;
+      const offset = alertIndex - tablePageIndex * reduxItemsPerPage;
+      const alert = isInPage ? (tableContext.alerts?.[offset] as Alert | undefined) : undefined;
+      if (!alert) return null;
+      return {
+        id: alert._id,
+        indexName: alert._index,
+        scopeId: tableType,
+        stateUpdate: { flyoutAlert: alert } as Partial<ScopedPaginationSlice>,
+      };
+    },
+    [reduxItemsPerPage, tableContext, tablePageIndex, tableType]
+  );
+
+  const { paginationInstanceId, slice, setState, openPaginatedFlyout } = usePaginatedFlyout({
+    rightPanelKey: DocumentDetailsRightPanelKey,
+    resolveDocument,
+    renderBody: getAlertBody,
+    historyKey: documentFlyoutHistoryKey,
+  });
+
+  const { flyoutAlertIndex, pageSize } = slice;
+
   const onUpdate: GetSecurityAlertsTableProp<'onUpdate'> = useCallback(
     (context) => {
       setTableContext(context);
@@ -358,7 +369,7 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
           totalCount: context.alertsCount ?? -1,
         })
       );
-      setTotalAlertCount(context.alertsCount ?? 0);
+      setState({ totalAlertCount: context.alertsCount ?? 0 });
       setQuery({
         id: tableType,
         loading: context.isLoading ?? true,
@@ -366,7 +377,7 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
         inspect: null,
       });
     },
-    [dispatch, setQuery, setTotalAlertCount, tableType]
+    [dispatch, setQuery, setState, tableType]
   );
 
   const onPageIndexChange = useCallback((newPageIndex: number) => {
@@ -376,18 +387,19 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
   const onPageSizeChange = useCallback(
     (newPageSize: number) => {
       dispatch(updateItemsPerPage({ id: tableType, itemsPerPage: newPageSize }));
-      setPageSize(newPageSize);
+      setState({ pageSize: newPageSize });
     },
-    [dispatch, setPageSize, tableType]
+    [dispatch, setState, tableType]
   );
 
-  // Mirror Redux `itemsPerPage` into the AlertsContext so that the in-flyout
-  // pagination can compute `alertIndexInPage` without reaching into Redux.
+  // Mirror Redux `itemsPerPage` into the pagination slice so that the
+  // in-flyout pagination can compute `alertIndexInPage` without reaching
+  // into Redux.
   useEffect(() => {
     if (reduxItemsPerPage !== pageSize) {
-      setPageSize(reduxItemsPerPage);
+      setState({ pageSize: reduxItemsPerPage });
     }
-  }, [pageSize, reduxItemsPerPage, setPageSize]);
+  }, [pageSize, reduxItemsPerPage, setState]);
 
   // Fields fetched alongside each alert. Same shape that response-ops derives
   // internally from `columns` (see `useColumns`); reproduced here so the
@@ -433,56 +445,46 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
   // and the parallel query hasn't resolved that alert yet.
   useEffect(() => {
     if (flyoutAlertIndex == null || flyoutPageIndex === tablePageIndex) {
-      setIsFlyoutAlertLoading(false);
+      setState({ isFlyoutAlertLoading: false });
       return;
     }
     const offset = flyoutAlertIndex - flyoutPageIndex * reduxItemsPerPage;
     const alertOnRequestedPage = flyoutAlertsData?.alerts?.[offset];
-    setIsFlyoutAlertLoading(!alertOnRequestedPage || isFetchingFlyoutAlerts);
+    setState({
+      isFlyoutAlertLoading: !alertOnRequestedPage || isFetchingFlyoutAlerts,
+    });
   }, [
     flyoutAlertIndex,
     flyoutAlertsData?.alerts,
     flyoutPageIndex,
     isFetchingFlyoutAlerts,
     reduxItemsPerPage,
-    setIsFlyoutAlertLoading,
+    setState,
     tablePageIndex,
   ]);
 
   // Push the resolved alert into the shared store once the parallel query
   // returns it, for the cross-page case. The synchronous in-page case is
-  // handled directly in `openAlertFlyoutImpl` below so that re-clicking the
-  // same row after closing the flyout reliably re-opens it (a pure
-  // store-only path would be a no-op when `flyoutAlertIndex` is unchanged).
-  // V1 also forwards the alert id to the expandable flyout here; V2 only
-  // needs the store update because `PaginatedDocumentFlyout` re-renders off
-  // `useAlertsContext().flyoutAlert`.
+  // handled by `usePaginatedFlyout` / `onOpen` so that re-clicking the same
+  // row after closing the flyout reliably re-opens it.
   useEffect(() => {
     if (flyoutAlertIndex == null || reduxItemsPerPage <= 0) return;
     if (flyoutPageIndex === tablePageIndex) return;
     const offset = flyoutAlertIndex - flyoutPageIndex * reduxItemsPerPage;
     const alert = flyoutAlertsData?.alerts?.[offset] as Alert | undefined;
     if (!alert) return;
-    setFlyoutAlert(alert);
-    if (newFlyoutSystemEnabled) return;
-    openFlyout({
-      right: {
-        id: DocumentDetailsRightPanelKey,
-        params: {
-          id: alert._id,
-          indexName: alert._index,
-          scopeId: tableType,
-        },
-      },
+    openPaginatedFlyout(flyoutAlertIndex, {
+      id: alert._id,
+      indexName: alert._index,
+      scopeId: tableType,
+      stateUpdate: { flyoutAlert: alert },
     });
   }, [
     flyoutAlertIndex,
     flyoutAlertsData?.alerts,
     flyoutPageIndex,
-    newFlyoutSystemEnabled,
-    openFlyout,
+    openPaginatedFlyout,
     reduxItemsPerPage,
-    setFlyoutAlert,
     tablePageIndex,
     tableType,
   ]);
@@ -526,13 +528,14 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
       userProfiles,
       tableType,
       pageScope,
+      paginationInstanceId,
     }),
-    [leadingControlColumn, pageScope, tableType, userProfiles]
+    [leadingControlColumn, pageScope, paginationInstanceId, tableType, userProfiles]
   );
 
   const refreshAlertsTable = useCallback(() => {
     alertsTableRef.current?.refresh();
-  }, [alertsTableRef]);
+  }, []);
 
   const fieldsBrowserOptions = useAlertsTableFieldsBrowserOptions(
     pageScope,
@@ -610,99 +613,6 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services' | 'isMutedAlerts
   );
 
   const onLoaded = useCallback(({ alerts }: { alerts: Alert[] }) => onLoad(alerts), [onLoad]);
-
-  // Register the implementation that opens the document-details flyout for a
-  // given absolute alert index. The in-page path (alert lives on the table's
-  // current page) updates the flyout state synchronously here, which means
-  // re-clicks on the same row after the flyout was closed still re-open it
-  // (a pure state-only path would be a no-op when `flyoutAlertIndex` is
-  // unchanged). The cross-page path (alert lives on another page) is handled
-  // by the resolution effect above once the parallel query resolves.
-  //
-  // V2 (newFlyoutSystemEnabled): the system flyout is opened once via
-  // `overlays.openSystemFlyout` and the inner `PaginatedDocumentFlyout`
-  // reads the current alert from the shared store; subsequent clicks just
-  // mutate the store.
-  // V1: each click calls `openFlyout(...)` with the new alert params so the
-  // expandable-flyout url state updates.
-  useEffect(() => {
-    const impl = (absoluteAlertIndex: number) => {
-      setFlyoutAlertIndex(absoluteAlertIndex);
-      if (reduxItemsPerPage <= 0) return;
-      const targetPageIndex = Math.floor(absoluteAlertIndex / reduxItemsPerPage);
-      const isInPage = targetPageIndex === tablePageIndex;
-      const offset = absoluteAlertIndex - tablePageIndex * reduxItemsPerPage;
-      const alert = isInPage ? (tableContext?.alerts?.[offset] as Alert | undefined) : undefined;
-      if (alert) {
-        setFlyoutAlert(alert);
-      }
-
-      if (newFlyoutSystemEnabled) {
-        if (systemFlyoutRef.current) return;
-        systemFlyoutRef.current = overlays.openSystemFlyout(
-          flyoutProviders({
-            services: kibanaServices,
-            store: reduxStore,
-            history,
-            children: <PaginatedDocumentFlyout scopeId={tableType} />,
-          }),
-          {
-            ...defaultFlyoutProperties,
-            historyKey: documentFlyoutHistoryKey,
-            session: 'start',
-            onClose: (flyout) => {
-              flyout.close();
-              systemFlyoutRef.current = null;
-              setFlyoutAlertIndex(null);
-              setFlyoutAlert(null);
-            },
-          }
-        );
-        return;
-      }
-
-      if (!alert) return;
-      openFlyout({
-        right: {
-          id: DocumentDetailsRightPanelKey,
-          params: {
-            id: alert._id,
-            indexName: alert._index,
-            scopeId: tableType,
-          },
-        },
-      });
-    };
-    setOpenAlertFlyoutImpl(impl);
-    return () => {
-      setOpenAlertFlyoutImpl(null);
-    };
-  }, [
-    defaultFlyoutProperties,
-    history,
-    kibanaServices,
-    newFlyoutSystemEnabled,
-    openFlyout,
-    overlays,
-    reduxItemsPerPage,
-    reduxStore,
-    setFlyoutAlert,
-    setFlyoutAlertIndex,
-    setOpenAlertFlyoutImpl,
-    tableContext,
-    tablePageIndex,
-    tableType,
-  ]);
-
-  // When the alerts table unmounts (or the user closes the V2 flyout via the
-  // browser tab/etc.), make sure the system flyout is dismissed so we don't
-  // leak it across navigations.
-  useEffect(() => {
-    return () => {
-      systemFlyoutRef.current?.close();
-      systemFlyoutRef.current = null;
-    };
-  }, []);
 
   /**
    * We want to hide additional controls (like grouping) if the table is being rendered

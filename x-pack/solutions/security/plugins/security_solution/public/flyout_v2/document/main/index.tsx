@@ -24,7 +24,7 @@ import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { defaultToolsFlyoutProperties } from '../../shared/hooks/use_default_flyout_properties';
 import type { CellActionRenderer } from '../../shared/components/cell_actions';
 import { useAlertsPrivileges } from '../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
-import { useAlertsContext } from '../../../detections/components/alerts_table/alerts_context';
+import { useFlyoutPagination } from '../../../common/utils/flyout_pagination/use_flyout_pagination';
 import { FlyoutLoading } from '../../shared/components/flyout_loading';
 import { FlyoutMissingAlertsPrivilege } from './components/flyout_missing_alerts_privilege';
 import { EventKind } from './constants/event_kinds';
@@ -64,13 +64,19 @@ export interface DocumentFlyoutProps {
    * Callback invoked after alert mutations to refresh related flyouts.
    */
   onAlertUpdated: () => void;
+  /**
+   * Per-source-instance UUID forwarded from the V2 paginated wrapper.
+   * Passed down to `Header` and used to look up the loading/pagination state
+   * from `flyoutPaginationStore`. Absent for non-paginated flyout opens.
+   */
+  paginationInstanceId?: string;
 }
 
 /**
  * Content for the document flyout, combining the header and overview tab.
  */
 export const DocumentFlyout = memo(
-  ({ hit, onAlertUpdated, renderCellActions }: DocumentFlyoutProps) => {
+  ({ hit, onAlertUpdated, renderCellActions, paginationInstanceId }: DocumentFlyoutProps) => {
     const { services } = useKibana();
     const { overlays } = services;
     const store = useStore();
@@ -87,7 +93,7 @@ export const DocumentFlyout = memo(
     // page than the alerts table is showing, render a centered spinner in the
     // body and keep the previous alert's header (with the new pagination
     // position) visible. Mirrors the V1 `RightPanel` loading branch.
-    const { isFlyoutAlertLoading } = useAlertsContext();
+    const { isFlyoutAlertLoading } = useFlyoutPagination(paginationInstanceId);
 
     const onShowNotes = useCallback(() => {
       overlays.openSystemFlyout(
@@ -122,6 +128,7 @@ export const DocumentFlyout = memo(
               renderCellActions={renderCellActions}
               onAlertUpdated={onAlertUpdated}
               onShowNotes={onShowNotes}
+              paginationInstanceId={paginationInstanceId}
             />
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
@@ -149,6 +156,7 @@ export const DocumentFlyout = memo(
             renderCellActions={renderCellActions}
             onAlertUpdated={onAlertUpdated}
             onShowNotes={onShowNotes}
+            paginationInstanceId={paginationInstanceId}
           />
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
