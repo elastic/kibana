@@ -110,7 +110,9 @@ See the [Saved Objects troubleshooting guide](${TROUBLESHOOTING_URL}) and the [m
         ]
           .filter(Boolean)
           .join(' ');
-        const links = `([docs](${findingDocsLink(f)}))${baselineLinks ? ` (${baselineLinks})` : ''}`;
+        const links = `([docs](${findingDocsLink(f)}))${
+          baselineLinks ? ` (${baselineLinks})` : ''
+        }`;
         return `- **[${f.ruleId}]** ${f.message}${fix} ${links}`;
       })
       .join('\n');
