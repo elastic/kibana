@@ -173,16 +173,20 @@ export const MetricVis = ({
   const metricConfigs: MetricSpec['data'][number] = (
     breakdownByColumn ? data.rows : firstRowForNonBreakdown
   ).map((row, rowIdx) => {
-    const value: number | string =
-      row[primaryMetricColumn.id] !== null ? row[primaryMetricColumn.id] : NaN;
+    const rowValue = row[primaryMetricColumn.id];
+    const value: number | string = rowValue !== null && rowValue !== undefined ? rowValue : NaN;
+
     const title = breakdownByColumn
       ? formatBreakdownValue(row[breakdownByColumn.id])
       : primaryMetricColumn.name;
     const subtitle = breakdownByColumn ? primaryMetricColumn.name : config.metric.subtitle;
 
-    const tileColor =
-      config.metric.palette?.params && typeof value === 'number'
-        ? getColor(
+    let tileColor = defaultColor;
+
+    if (config.metric.applyColorTo) {
+      if (config.metric.palette?.params && typeof value === 'number') {
+        tileColor =
+          getColor(
             value,
             config.metric.palette,
             {
@@ -192,8 +196,11 @@ export const MetricVis = ({
             },
             data,
             rowIdx
-          ) ?? defaultColor
-        : config.metric.color ?? defaultColor;
+          ) ?? defaultColor;
+      } else {
+        tileColor = config.metric.color ?? defaultColor;
+      }
+    }
 
     let secondaryMetricProps: SecondaryMetricProps | undefined;
     const { secondaryMetric } = config.dimensions;
@@ -230,7 +237,7 @@ export const MetricVis = ({
         subtitle,
         icon: config.metric?.icon ? getIcon(config.metric?.icon) : undefined,
         extra: secondaryMetricProps,
-        color: config.metric.color ?? defaultColor,
+        color: config.metric.applyColorTo ? config.metric.color ?? defaultColor : defaultColor,
       };
       return Array.isArray(value)
         ? { ...nonNumericMetricBase, value: value.map((v) => formatPrimaryMetric(v)) }

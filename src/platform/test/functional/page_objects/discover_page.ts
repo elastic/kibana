@@ -47,12 +47,9 @@ export class DiscoverPageObject extends FtrService {
 
   /** Ensures that navigation to discover has completed */
   public async expectOnDiscover() {
-    await this.retry.waitFor('discover app menu items to be present', async () => {
-      return (
-        (await this.appMenu.menuItemExists('discoverNewButton')) &&
-        (await this.appMenu.menuItemExists('discoverOpenButton'))
-      );
-    });
+    await this.retry.waitFor('discover app to be rendered', () =>
+      this.testSubjects.exists('discoverSavedSearchTitle', { allowHidden: true })
+    );
   }
 
   public async isOnDashboardsEditMode() {
@@ -157,6 +154,54 @@ export class DiscoverPageObject extends FtrService {
     }
   }
 
+  public async saveSearchToDashboard(
+    searchName: string,
+    dashboardOption: 'new' | { existing: string },
+    { saveAsNew, storeTimeRange }: { saveAsNew?: boolean; storeTimeRange?: boolean } = {}
+  ) {
+    if (saveAsNew) {
+      await this.clickSaveAsSearchButton();
+    } else {
+      await this.clickSaveSearchButton();
+    }
+
+    await this.retry.waitFor(
+      `saved search title is set to ${searchName} and save button is clickable`,
+      async () => {
+        const saveButton = await this.testSubjects.find('confirmSaveSavedObjectButton');
+        await this.testSubjects.setValue('savedObjectTitle', searchName);
+        return (await saveButton.getAttribute('disabled')) !== 'true';
+      }
+    );
+
+    if (storeTimeRange !== undefined) {
+      await this.retry.waitFor(`store time range switch is set`, async () => {
+        await this.testSubjects.setEuiSwitch(
+          'storeTimeWithSearch',
+          storeTimeRange ? 'check' : 'uncheck'
+        );
+        return (
+          (await this.testSubjects.isEuiSwitchChecked('storeTimeWithSearch')) === storeTimeRange
+        );
+      });
+    }
+
+    if (dashboardOption === 'new') {
+      await this.find.clickByCssSelector('#new-dashboard-option');
+    } else {
+      await this.find.clickByCssSelector('#existing-dashboard-option');
+      await this.testSubjects.waitForEnabled('open-dashboard-picker');
+      await this.testSubjects.click('open-dashboard-picker');
+      await this.testSubjects.setValue('dashboard-picker-search', dashboardOption.existing);
+      await this.testSubjects.click(
+        `dashboard-picker-option-${dashboardOption.existing.replaceAll(' ', '-')}`
+      );
+    }
+
+    await this.clickConfirmSavedSearch();
+    await this.header.waitUntilLoadingHasFinished();
+  }
+
   public async clickSaveDiscoverTableToDashboard(title: string, existing?: string) {
     await this.testSubjects.click('saveDiscoverTableToDashboardButton');
     await this.retry.waitFor('Save Discover session table modal', () =>
@@ -172,6 +217,9 @@ export class DiscoverPageObject extends FtrService {
       await this.testSubjects.click(`dashboard-picker-option-${existing}`);
     }
     await this.clickConfirmSavedSearch();
+    if (await this.testSubjects.exists('appLeaveConfirmModal', { timeout: 1000 })) {
+      await this.testSubjects.click('confirmModalConfirmButton');
+    }
     await this.header.waitUntilLoadingHasFinished();
   }
 
@@ -197,6 +245,10 @@ export class DiscoverPageObject extends FtrService {
 
   public async waitUntilSearchingHasFinished() {
     await this.testSubjects.missingOrFail('loadingSpinner', {
+      timeout: this.defaultFindTimeout * 10,
+    });
+    // does not show "Cancel" button, so we can use it to determine that searching has finished
+    await this.testSubjects.missingOrFail('queryCancelButton', {
       timeout: this.defaultFindTimeout * 10,
     });
   }
@@ -246,10 +298,17 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async loadSavedSearch(searchName: string) {
+    const mode = await this.globalNav.getFirstBreadcrumb();
     await this.openLoadSavedSearchPanel();
     await this.savedObjectsFinder.filterEmbeddableNames(`"${searchName.replace('-', ' ')}"`);
     await this.testSubjects.click(`savedObjectTitle${searchName.split(' ').join('-')}`);
     await this.header.waitUntilLoadingHasFinished();
+    if (mode === 'Discover') {
+      await this.retry.waitFor(`saved search ${searchName} is loaded`, async () => {
+        const currentName = await this.getCurrentQueryName();
+        return currentName === searchName;
+      });
+    }
   }
 
   public async clickNewSearchButton({ isInOverflowMenu }: { isInOverflowMenu?: boolean } = {}) {
@@ -1007,12 +1066,7 @@ export class DiscoverPageObject extends FtrService {
   }
 
   private async waitForDropToFinish() {
-    await this.retry.try(async () => {
-      const exists = await this.find.existsByCssSelector('.domDragDrop-isActiveGroup');
-      if (exists) {
-        throw new Error('UI still in drag/drop mode');
-      }
-    });
+    await this.find.waitForDeletedByCssSelector('.domDragDrop-isActiveGroup');
     await this.header.waitUntilLoadingHasFinished();
     await this.waitUntilSearchingHasFinished();
   }
@@ -1046,7 +1100,7 @@ export class DiscoverPageObject extends FtrService {
     await field.focus();
     await this.retry.try(async () => {
       await this.browser.pressKeys(this.browser.keys.ENTER);
-      await this.testSubjects.exists('.domDroppable--active'); // checks if we're in dnd mode and there's any drop target active
+      await this.find.byCssSelector('.domDroppable--active'); // checks if we're in dnd mode and there's any drop target active
     });
     await this.browser.pressKeys(this.browser.keys.RIGHT);
     await this.browser.pressKeys(this.browser.keys.ENTER);

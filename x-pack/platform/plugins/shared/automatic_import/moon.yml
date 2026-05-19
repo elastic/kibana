@@ -31,7 +31,6 @@ dependsOn:
   - '@kbn/core-lifecycle-server-internal'
   - '@kbn/core-test-helpers-kbn-server'
   - '@kbn/logging-mocks'
-  - '@kbn/core-security-common'
   - '@kbn/storage-adapter'
   - '@kbn/core-saved-objects-server-mocks'
   - '@kbn/inference-langchain'
@@ -63,6 +62,9 @@ dependsOn:
   - '@kbn/monaco'
   - '@kbn/scout'
   - '@kbn/core-analytics-browser'
+  - '@kbn/inference-common'
+  - '@kbn/shared-ux-ai-components'
+  - '@kbn/core-http-browser'
 tags:
   - plugin
   - prod

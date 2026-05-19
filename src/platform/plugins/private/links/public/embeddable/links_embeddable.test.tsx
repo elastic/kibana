@@ -23,20 +23,24 @@ const getLinks = (): Link[] => [
     type: 'dashboardLink',
     label: '',
     destination: '999',
+    options: { open_in_new_tab: false, use_time_range: false, use_filters: false },
   },
   {
     type: 'dashboardLink',
     label: 'Dashboard 2',
     destination: '888',
+    options: { open_in_new_tab: false, use_time_range: false, use_filters: false },
   },
   {
     type: 'externalLink',
     label: 'Example homepage',
     destination: 'https://example.com',
+    options: { open_in_new_tab: false, encode_url: true },
   },
   {
     type: 'externalLink',
     destination: 'https://elastic.co',
+    options: { open_in_new_tab: true, encode_url: false },
   },
 ];
 
@@ -48,6 +52,7 @@ const getResolvedLinks: () => ResolvedLink[] = () => [
     destination: '999',
     title: 'Dashboard 1',
     description: 'Dashboard 1 description',
+    options: { open_in_new_tab: false, use_time_range: false, use_filters: false },
   },
   {
     id: '002',
@@ -56,6 +61,7 @@ const getResolvedLinks: () => ResolvedLink[] = () => [
     destination: '888',
     title: 'Dashboard 2',
     description: 'Dashboard 2 description',
+    options: { open_in_new_tab: false, use_time_range: false, use_filters: false },
   },
   {
     id: '003',
@@ -63,12 +69,14 @@ const getResolvedLinks: () => ResolvedLink[] = () => [
     label: 'Example homepage',
     destination: 'https://example.com',
     title: 'Example homepage',
+    options: { open_in_new_tab: false, encode_url: true },
   },
   {
     id: '004',
     type: 'externalLink',
     destination: 'https://elastic.co',
     title: 'https://elastic.co',
+    options: { open_in_new_tab: true, encode_url: false },
   },
 ];
 
@@ -90,7 +98,7 @@ jest.mock('../content_management', () => {
 
 jest.mock('../content_management/load_from_library', () => {
   return {
-    loadFromLibrary: jest.fn((savedObjectId) => {
+    loadFromLibrary: jest.fn((refId) => {
       return Promise.resolve({
         title: 'links 001',
         description: 'some links',
@@ -128,7 +136,7 @@ describe('getLinksEmbeddableFactory', () => {
       description: 'just a few links',
       hide_title: false,
       hide_border: false,
-      savedObjectId: '123',
+      ref_id: '123',
     };
 
     test('component renders', async () => {
@@ -148,7 +156,7 @@ describe('getLinksEmbeddableFactory', () => {
         description: 'just a few links',
         hide_title: false,
         hide_border: false,
-        savedObjectId: '123',
+        ref_id: '123',
       });
       expect(await api.canUnlinkFromLibrary()).toBe(true);
       expect(api.defaultTitle$?.value).toBe('links 001');
@@ -219,7 +227,7 @@ describe('getLinksEmbeddableFactory', () => {
         description: 'just a few links',
         hide_title: true,
         hide_border: true,
-        savedObjectId: '333',
+        ref_id: '333',
       });
     });
   });

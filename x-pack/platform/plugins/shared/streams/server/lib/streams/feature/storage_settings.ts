@@ -26,9 +26,18 @@ import {
   FEATURE_ID,
   FEATURE_FILTER,
   FEATURE_EVIDENCE_DOC_IDS,
+  FEATURE_RUN_ID,
   FEATURE_SEARCH_EMBEDDING,
 } from './fields';
 
+// The base settings use `semantic_text()` with no explicit `inference_id`,
+// which causes ES to use the cluster default at index-creation time.
+// For existing indices that already have a `semantic_text` mapping with a
+// specific `inference_id`, use `getFeatureStorageSettings(existingId)` so that
+// the schema hash and putMapping payload stay compatible with the index.
+// Sending a bare `semantic_text()` to putMapping on such an index would resolve
+// to the cluster default (potentially a different model) and fail with
+// illegal_argument_exception when the models are incompatible.
 export const featureStorageSettings = {
   name: '.kibana_streams_features',
   schema: {
@@ -50,6 +59,7 @@ export const featureStorageSettings = {
       [FEATURE_META]: types.object({ enabled: false }),
       [FEATURE_EXPIRES_AT]: types.date(),
       [FEATURE_EXCLUDED_AT]: types.date(),
+      [FEATURE_RUN_ID]: types.keyword(),
       [FEATURE_FILTER]: types.object({ enabled: false }),
       [FEATURE_SEARCH_EMBEDDING]: types.semantic_text(),
     },
@@ -58,15 +68,17 @@ export const featureStorageSettings = {
 
 export type FeatureStorageSettings = typeof featureStorageSettings;
 
-export const getFeatureStorageSettings = (inferenceId: string): IndexStorageSettings => ({
-  name: featureStorageSettings.name,
-  schema: {
-    properties: {
-      ...featureStorageSettings.schema.properties,
-      // The semantic_text field is always declared in the mapping regardless of
-      // inference availability — ES does not validate the inference_id at mapping
-      // time, so this is safe even when ML is disabled or ELSER is not deployed.
-      [FEATURE_SEARCH_EMBEDDING]: types.semantic_text({ inference_id: inferenceId }),
+export function getFeatureStorageSettings(inferenceId?: string): IndexStorageSettings {
+  if (!inferenceId) {
+    return featureStorageSettings;
+  }
+  return {
+    name: featureStorageSettings.name,
+    schema: {
+      properties: {
+        ...featureStorageSettings.schema.properties,
+        [FEATURE_SEARCH_EMBEDDING]: types.semantic_text({ inference_id: inferenceId }),
+      },
     },
-  },
-});
+  };
+}

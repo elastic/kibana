@@ -20,7 +20,7 @@ export const ReviewRuleInstallationRequestBody = z.object({
   /**
    * Rules per page
    */
-  per_page: z.number().int().min(1).max(10_000).default(20),
+  per_page: z.number().int().min(1).max(500).default(20),
 
   /**
    * Filtering criteria

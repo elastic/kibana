@@ -169,6 +169,12 @@ export interface ApiDeclaration {
   returnComment?: TextWithLinks;
 
   /**
+   * For parameter declarations, indicates a named referenced type whose documentation
+   * should live on that type's own API declaration rather than being duplicated inline.
+   */
+  docsReferencedTypeName?: string;
+
+  /**
    * Will contain the tags on a comment, like `beta` or `deprecated`.
    * Won't include param or returns tags.
    */

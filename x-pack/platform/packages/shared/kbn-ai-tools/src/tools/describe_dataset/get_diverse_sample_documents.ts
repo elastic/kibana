@@ -5,33 +5,32 @@
  * 2.0.
  */
 
-import type {
-  MappingRuntimeFields,
-  QueryDslQueryContainer,
-  SearchHit,
-} from '@elastic/elasticsearch/lib/api/types';
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import { esql } from '@elastic/esql';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ESQLSearchResponse } from '@kbn/es-types';
 import { dateRangeQuery } from '@kbn/es-query';
-import { castArray } from 'lodash';
-import { getSampleDocuments } from './get_sample_documents';
+import type { Logger } from '@kbn/logging';
+import { getEsqlColumnSchema } from '../../utils/get_esql_column_schema';
+import {
+  buildPass1Query,
+  buildPass2Query,
+  parsePass1Rows,
+  parsePass2Hits,
+} from '../../utils/esql_two_pass';
+import { getSampleDocumentsEsql } from './get_sample_documents';
 
 const MESSAGE_FIELD_CANDIDATES = ['message', 'body.text'];
 const MAX_DOCS_TO_SAMPLE = 100_000;
 
-interface CategoryBucket {
-  doc_count: number;
-  docs: { hits: { hits: Array<SearchHit<Record<string, unknown>>> } };
-}
-
 interface GetDiverseSampleDocumentsOptions {
   esClient: ElasticsearchClient;
-  index: string;
+  index: string | string[];
   start: number;
   end: number;
+  offset: number;
   size?: number;
-  filter?: QueryDslQueryContainer | QueryDslQueryContainer[];
-  runtime_mappings?: MappingRuntimeFields;
-  timeout?: string;
+  logger: Logger;
 }
 
 export async function getDiverseSampleDocuments({
@@ -40,124 +39,115 @@ export async function getDiverseSampleDocuments({
   start,
   end,
   size = 100,
-  filter,
-  runtime_mappings,
-  timeout = '10s',
+  offset,
+  logger,
 }: GetDiverseSampleDocumentsOptions): Promise<{ hits: Array<SearchHit<Record<string, unknown>>> }> {
   const timeRangeFilter = dateRangeQuery(start, end);
-  const combinedFilter = [...timeRangeFilter, ...castArray(filter ?? [])];
-  const sampleDocOpts = { esClient, index, start, end, size, filter, runtime_mappings, timeout };
+  const filter = { bool: { filter: timeRangeFilter } };
+  const indices = Array.isArray(index) ? index : [index];
 
   const [messageField, totalDocs] = await Promise.all([
-    detectMessageField({ esClient, index, timeRangeFilter }),
-    countDocs({ esClient, index, combinedFilter }),
+    detectMessageField({ esClient, index, start, end }),
+    runEsqlCount({ esClient, indices, filter }),
   ]);
 
-  if (!messageField || totalDocs === 0) {
-    return totalDocs === 0 ? { hits: [] } : getSampleDocuments(sampleDocOpts);
+  if (totalDocs === 0) {
+    return { hits: [] };
   }
 
-  let samplingProbability = MAX_DOCS_TO_SAMPLE / totalDocs;
-  if (samplingProbability >= 0.5) {
-    samplingProbability = 1;
-  }
-
-  let buckets: CategoryBucket[];
-  try {
-    const response = await esClient.search({
+  if (!messageField) {
+    // The old DSL path fell back to plain random sampling when no log-message
+    // text field was available. Keep that behavior, but use the ES|QL sampler so
+    // this retrieval path no longer depends on search hits/fields.
+    const { hits } = await getSampleDocumentsEsql({
+      esClient,
       index,
-      size: 0,
-      track_total_hits: false,
-      timeout,
-      runtime_mappings,
-      query: { bool: { filter: combinedFilter } },
-      aggregations: {
-        sampler: {
-          random_sampler: { probability: samplingProbability },
-          aggs: {
-            categories: {
-              categorize_text: {
-                field: messageField,
-                size,
-                min_doc_count: 1,
-              },
-              aggs: {
-                docs: {
-                  top_hits: {
-                    size: 1,
-                    _source: false,
-                    fields: [{ field: '*', include_unmapped: true }],
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
+      start,
+      end,
+      sampleSize: size,
     });
-
-    const sampler = response.aggregations?.sampler as
-      | { categories: { buckets: CategoryBucket[] } }
-      | undefined;
-
-    buckets = sampler?.categories?.buckets ?? [];
-  } catch {
-    return getSampleDocuments(sampleDocOpts);
+    return { hits };
   }
 
-  if (buckets.length === 0) {
-    return getSampleDocuments(sampleDocOpts);
+  // ES|QL cannot do `CATEGORIZE(...)` and return a coherent full source
+  // document from the same grouped row in one query. Per-field aggregations like
+  // TOP/SAMPLE/VALUES can mix values from different documents, so pass 1 only
+  // chooses one representative document key per category.
+  //
+  // The SAMPLE probability mirrors the previous DSL random_sampler cap:
+  // categorizing every document in a busy stream is expensive, and this helper
+  // only needs representative document diversity, not exact category counts.
+  const samplingProbability =
+    MAX_DOCS_TO_SAMPLE / totalDocs < 0.5 ? MAX_DOCS_TO_SAMPLE / totalDocs : 1;
+  // Ask pass 1 for size+offset rows so we can client-side slice the window
+  // [offset, offset+size] after sorting by count. SAMPLE-reduced counts are
+  // fine here because we only use them for internal sort/slice.
+  const pass1Response = (await esClient.esql.query({
+    query: buildPass1Query({
+      indices,
+      field: messageField,
+      limit: size + offset,
+      samplingProbability,
+    }),
+    filter,
+    drop_null_columns: true,
+  })) as unknown as ESQLSearchResponse;
+  const window = parsePass1Rows(pass1Response)
+    .sort((a, b) => b.count - a.count)
+    .slice(offset, offset + size);
+
+  if (window.length === 0) {
+    return { hits: [] };
   }
 
-  // 1 representative doc per category
-  const categoryHits = buckets
-    .map((bucket) => bucket.docs.hits.hits[0])
-    .filter((hit): hit is SearchHit<Record<string, unknown>> => Boolean(hit?._id));
-
-  // Pad with random samples if categories < target
-  const remaining = size - categoryHits.length;
-  if (remaining <= 0) {
-    return { hits: categoryHits.slice(0, size) };
-  }
-
-  // Over-fetch to compensate for duplicates that will be removed during dedup
-  const randomSamples = await getSampleDocuments({
-    ...sampleDocOpts,
-    size: remaining + categoryHits.length,
-  });
-
-  const categoryIdSet = new Set(categoryHits.map((hit) => hit._id));
-  const dedupedRandomHits = randomSamples.hits.filter(
-    (hit) => !hit._id || !categoryIdSet.has(hit._id)
+  // Pass 2 fetches the actual `_source` for the keys selected above. Joining the
+  // full source client-side is what preserves per-document coherence across all
+  // fields in the returned sample.
+  const pass2Response = (await esClient.esql.query({
+    query: buildPass2Query(
+      indices,
+      window.map(({ docKey }) => docKey)
+    ),
+    filter,
+    drop_null_columns: true,
+  })) as unknown as ESQLSearchResponse;
+  const keyToHit = new Map(
+    parsePass2Hits(pass2Response).map((hit) => [`${hit._index}:${hit._id}`, hit])
   );
+  const hits: Array<SearchHit<Record<string, unknown>>> = [];
 
-  return { hits: [...categoryHits, ...dedupedRandomHits].slice(0, size) };
+  for (const row of window) {
+    const hit = keyToHit.get(row.docKey);
+    if (!hit) {
+      logger.warn(
+        `Diverse sampling: doc ${row.docKey} not found in pass-2 fetch (deleted between passes); skipping pattern.`
+      );
+      continue;
+    }
+    hits.push(hit);
+  }
+
+  return { hits };
 }
 
 async function detectMessageField({
   esClient,
   index,
-  timeRangeFilter,
+  start,
+  end,
 }: {
   esClient: ElasticsearchClient;
-  index: string;
-  timeRangeFilter: ReturnType<typeof dateRangeQuery>;
+  index: string | string[];
+  start: number;
+  end: number;
 }): Promise<string | undefined> {
-  const fieldCapsResponse = await esClient.fieldCaps({
-    index,
-    fields: MESSAGE_FIELD_CANDIDATES,
-    index_filter: {
-      bool: {
-        filter: timeRangeFilter,
-      },
-    },
-    types: ['text', 'match_only_text'],
-  });
-
-  const fieldsFound = Object.keys(fieldCapsResponse.fields);
+  const columns = await getEsqlColumnSchema({ esClient, index, start, end });
+  const textColumnNames = new Set(
+    columns.filter((column) => column.type === 'text').map((column) => column.name)
+  );
 
   for (const candidate of MESSAGE_FIELD_CANDIDATES) {
-    if (fieldsFound.includes(candidate)) {
+    if (textColumnNames.has(candidate)) {
       return candidate;
     }
   }
@@ -165,19 +155,21 @@ async function detectMessageField({
   return undefined;
 }
 
-async function countDocs({
+async function runEsqlCount({
   esClient,
-  index,
-  combinedFilter,
+  indices,
+  filter,
 }: {
   esClient: ElasticsearchClient;
-  index: string;
-  combinedFilter: QueryDslQueryContainer[];
+  indices: string[];
+  filter: { bool: { filter: ReturnType<typeof dateRangeQuery> } };
 }): Promise<number> {
-  const response = await esClient.count({
-    index,
-    query: { bool: { filter: combinedFilter } },
-  });
+  const response = (await esClient.esql.query({
+    query: esql.from(indices).pipe`STATS total = COUNT(*)`.print('basic'),
+    filter,
+    drop_null_columns: true,
+  })) as unknown as ESQLSearchResponse;
+  const total = response.values[0]?.[0];
 
-  return response.count;
+  return typeof total === 'number' ? total : 0;
 }

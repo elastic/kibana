@@ -6,9 +6,10 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { render, fireEvent, screen, within } from '@testing-library/react';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { fireEvent, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { I18nProvider } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import EmailParamsFields from './email_params';
@@ -64,16 +65,14 @@ describe('EmailParamsFields renders', () => {
       message: 'test message',
     };
 
-    render(
-      <IntlProvider locale="en">
-        <EmailParamsFields
-          actionParams={actionParams}
-          errors={{ to: [], cc: [], bcc: [], subject: [], message: [] }}
-          editAction={() => {}}
-          defaultMessage={'Some default message'}
-          index={0}
-        />
-      </IntlProvider>
+    renderWithI18n(
+      <EmailParamsFields
+        actionParams={actionParams}
+        errors={{ to: [], cc: [], bcc: [], subject: [], message: [] }}
+        editAction={() => {}}
+        defaultMessage={'Some default message'}
+        index={0}
+      />
     );
 
     expect(screen.getByTestId('toEmailAddressInput')).toBeVisible();
@@ -92,16 +91,14 @@ describe('EmailParamsFields renders', () => {
       message: 'test message',
     };
 
-    render(
-      <IntlProvider locale="en">
-        <EmailParamsFields
-          actionParams={actionParams}
-          errors={{ to: [], cc: [], bcc: [], subject: [], message: [], replyTo: [] }}
-          editAction={() => {}}
-          defaultMessage={'Some default message'}
-          index={0}
-        />
-      </IntlProvider>
+    renderWithI18n(
+      <EmailParamsFields
+        actionParams={actionParams}
+        errors={{ to: [], cc: [], bcc: [], subject: [], message: [], replyTo: [] }}
+        editAction={() => {}}
+        defaultMessage={'Some default message'}
+        index={0}
+      />
     );
 
     expect(screen.getByTestId('toEmailAddressInput')).toBeVisible();
@@ -123,21 +120,19 @@ describe('EmailParamsFields renders', () => {
 
       const editAction = jest.fn();
 
-      render(
-        <IntlProvider locale="en">
-          <EmailParamsFields
-            actionParams={actionParams}
-            errors={{ to: [], cc: [], bcc: [], subject: [], message: [] }}
-            editAction={editAction}
-            defaultMessage={'Some default message'}
-            index={0}
-          />
-        </IntlProvider>
+      renderWithI18n(
+        <EmailParamsFields
+          actionParams={actionParams}
+          errors={{ to: [], cc: [], bcc: [], subject: [], message: [] }}
+          editAction={editAction}
+          defaultMessage={'Some default message'}
+          index={0}
+        />
       );
 
       const euiComboBox = screen.getByTestId(`${field}EmailAddressInput`);
       const input = within(euiComboBox).getByTestId('comboBoxSearchInput');
-      fireEvent.change(input, { target: { value: fieldValue } });
+      await userEvent.type(input, fieldValue);
       expect(input).toHaveValue(fieldValue);
 
       fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
@@ -157,24 +152,20 @@ describe('EmailParamsFields renders', () => {
 
     const editAction = jest.fn();
 
-    render(
-      <IntlProvider locale="en">
-        <EmailParamsFields
-          actionParams={actionParams}
-          errors={{ to: [], cc: [], bcc: [], subject: [], message: [], replyTo: [] }}
-          editAction={editAction}
-          defaultMessage={'Some default message'}
-          index={0}
-        />
-      </IntlProvider>
+    renderWithI18n(
+      <EmailParamsFields
+        actionParams={actionParams}
+        errors={{ to: [], cc: [], bcc: [], subject: [], message: [], replyTo: [] }}
+        editAction={editAction}
+        defaultMessage={'Some default message'}
+        index={0}
+      />
     );
 
     const replyToComboBox = screen.getByTestId('replyToEmailAddressInput');
     const input = within(replyToComboBox).getByTestId('comboBoxSearchInput');
 
-    fireEvent.change(input, {
-      target: { value: 'new1@test.com, new2@test.com, new1@test.com' },
-    });
+    await userEvent.type(input, 'new1@test.com, new2@test.com, new1@test.com');
     fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
 
     expect(editAction).toHaveBeenCalledWith(
@@ -193,7 +184,7 @@ describe('EmailParamsFields renders', () => {
     };
 
     const editAction = jest.fn();
-    mountWithIntl(
+    renderWithI18n(
       <EmailParamsFields
         actionParams={actionParams}
         errors={{ to: [], cc: [], bcc: [], subject: [], message: [] }}
@@ -215,7 +206,7 @@ describe('EmailParamsFields renders', () => {
     };
 
     const editAction = jest.fn();
-    const wrapper = mountWithIntl(
+    const { rerender } = renderWithI18n(
       <EmailParamsFields
         actionParams={actionParams}
         errors={{ to: [], cc: [], bcc: [], subject: [], message: [] }}
@@ -227,14 +218,22 @@ describe('EmailParamsFields renders', () => {
 
     expect(editAction).toHaveBeenCalledWith('message', 'Some default message', 0);
 
-    wrapper.setProps({
-      defaultMessage: 'Some different default message',
-    });
+    rerender(
+      <I18nProvider>
+        <EmailParamsFields
+          actionParams={actionParams}
+          errors={{ to: [], cc: [], bcc: [], subject: [], message: [] }}
+          editAction={editAction}
+          defaultMessage={'Some different default message'}
+          index={0}
+        />
+      </I18nProvider>
+    );
 
     expect(editAction).toHaveBeenCalledWith('message', 'Some different default message', 0);
   });
 
-  test('when the default message changes, it doesnt change the underlying message if it wasnt set by a previous default', () => {
+  test('when the default message changes, it doesnt change the underlying message if it wasnt set by a previous default', async () => {
     const actionParams = {
       cc: [],
       bcc: [],
@@ -243,30 +242,27 @@ describe('EmailParamsFields renders', () => {
     };
 
     const editAction = jest.fn();
-    const { rerender } = render(
-      <IntlProvider locale="en">
-        <EmailParamsFields
-          actionParams={actionParams}
-          errors={{ to: [], cc: [], bcc: [], subject: [], message: [] }}
-          editAction={editAction}
-          defaultMessage={'Some default message'}
-          index={0}
-        />
-      </IntlProvider>
+    const { rerender } = renderWithI18n(
+      <EmailParamsFields
+        actionParams={actionParams}
+        errors={{ to: [], cc: [], bcc: [], subject: [], message: [] }}
+        editAction={editAction}
+        defaultMessage={'Some default message'}
+        index={0}
+      />
     );
 
     expect(editAction).toHaveBeenCalledWith('message', 'Some default message', 0);
 
     // simulate value being updated
     const valueToSimulate = 'some new value';
-    fireEvent.change(screen.getByTestId('messageTextArea'), {
-      target: { value: valueToSimulate },
-    });
+    await userEvent.tripleClick(screen.getByTestId('messageTextArea'));
+    await userEvent.paste(valueToSimulate);
 
     expect(editAction).toHaveBeenCalledWith('message', valueToSimulate, 0);
 
     rerender(
-      <IntlProvider locale="en">
+      <I18nProvider>
         <EmailParamsFields
           actionParams={{
             ...actionParams,
@@ -277,11 +273,11 @@ describe('EmailParamsFields renders', () => {
           defaultMessage={'Some default message'}
           index={0}
         />
-      </IntlProvider>
+      </I18nProvider>
     );
 
     rerender(
-      <IntlProvider locale="en">
+      <I18nProvider>
         <EmailParamsFields
           actionParams={{
             ...actionParams,
@@ -292,7 +288,7 @@ describe('EmailParamsFields renders', () => {
           defaultMessage={'Some different default message'}
           index={0}
         />
-      </IntlProvider>
+      </I18nProvider>
     );
 
     expect(editAction).not.toHaveBeenCalledWith('message', 'Some different default message', 0);
@@ -307,7 +303,7 @@ describe('EmailParamsFields renders', () => {
     };
 
     const editAction = jest.fn();
-    const wrapper = mountWithIntl(
+    const { rerender } = renderWithI18n(
       <EmailParamsFields
         actionParams={{ ...actionParams, message: 'not the default message' }}
         errors={{ to: [], cc: [], bcc: [], subject: [], message: [] }}
@@ -316,13 +312,20 @@ describe('EmailParamsFields renders', () => {
         index={0}
       />
     );
-    const text = wrapper.find('[data-test-subj="messageTextArea"]').first().text();
-    expect(text).toEqual('not the default message');
+    expect(screen.getByTestId('messageTextArea')).toHaveValue('not the default message');
 
-    wrapper.setProps({
-      useDefaultMessage: true,
-      defaultMessage: 'Some different default message',
-    });
+    rerender(
+      <I18nProvider>
+        <EmailParamsFields
+          actionParams={{ ...actionParams, message: 'not the default message' }}
+          errors={{ to: [], cc: [], bcc: [], subject: [], message: [] }}
+          editAction={editAction}
+          useDefaultMessage={true}
+          defaultMessage={'Some different default message'}
+          index={0}
+        />
+      </I18nProvider>
+    );
 
     expect(editAction).toHaveBeenCalledWith('message', 'Some different default message', 0);
   });
@@ -336,7 +339,7 @@ describe('EmailParamsFields renders', () => {
     };
 
     const editAction = jest.fn();
-    const wrapper = mountWithIntl(
+    const { rerender } = renderWithI18n(
       <EmailParamsFields
         actionParams={{ ...actionParams, message: 'not the default message' }}
         errors={{ to: [], cc: [], bcc: [], subject: [], message: [] }}
@@ -345,13 +348,20 @@ describe('EmailParamsFields renders', () => {
         index={0}
       />
     );
-    const text = wrapper.find('[data-test-subj="messageTextArea"]').first().text();
-    expect(text).toEqual('not the default message');
+    expect(screen.getByTestId('messageTextArea')).toHaveValue('not the default message');
 
-    wrapper.setProps({
-      useDefaultMessage: false,
-      defaultMessage: 'Some different default message',
-    });
+    rerender(
+      <I18nProvider>
+        <EmailParamsFields
+          actionParams={{ ...actionParams, message: 'not the default message' }}
+          errors={{ to: [], cc: [], bcc: [], subject: [], message: [] }}
+          editAction={editAction}
+          useDefaultMessage={false}
+          defaultMessage={'Some different default message'}
+          index={0}
+        />
+      </I18nProvider>
+    );
 
     expect(editAction).not.toHaveBeenCalled();
   });

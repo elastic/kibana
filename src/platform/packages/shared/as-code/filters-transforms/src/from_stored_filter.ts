@@ -434,7 +434,7 @@ function extractBaseProperties(storedFilter: Filter): Partial<AsCodeFilter> {
     ...(meta?.disabled !== undefined ? { disabled: meta.disabled } : {}),
     ...(meta?.controlledBy !== undefined ? { controlled_by: meta.controlledBy } : {}),
     ...(meta?.index !== undefined ? { data_view_id: meta.index } : {}),
-    ...(meta?.negate !== undefined ? { negate: meta.negate } : {}),
+    ...(meta?.negate === true ? { negate: true } : {}),
     ...(meta?.alias != null ? { label: meta.alias } : {}),
     ...(meta?.isMultiIndex !== undefined ? { is_multi_index: meta.isMultiIndex } : {}),
   };

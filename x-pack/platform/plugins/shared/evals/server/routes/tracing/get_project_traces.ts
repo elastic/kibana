@@ -10,14 +10,13 @@ import {
   API_VERSIONS,
   INTERNAL_API_ACCESS,
   TRACES_INDEX_PATTERN,
-  buildRouteValidationWithZod,
   GetProjectTracesRequestParams,
   GetProjectTracesRequestQuery,
 } from '@kbn/evals-common';
-import { PLUGIN_ID } from '../../../common';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { EVALS_API_PRIVILEGES } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
-
-const escapeWildcard = (value: string): string => value.replace(/[\\*?]/g, (ch) => `\\${ch}`);
+import { escapeWildcard } from './utils';
 
 interface RootSpanSource {
   trace_id?: string;
@@ -34,7 +33,7 @@ export const registerGetProjectTracesRoute = ({ router, logger }: RouteDependenc
       path: EVALS_TRACING_PROJECT_TRACES_URL,
       access: INTERNAL_API_ACCESS,
       security: {
-        authz: { requiredPrivileges: [PLUGIN_ID] },
+        authz: { requiredPrivileges: [EVALS_API_PRIVILEGES.read] },
       },
       summary: 'List traces for a tracing project',
     })

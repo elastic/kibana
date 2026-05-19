@@ -5,29 +5,30 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash';
+import { esql } from '@elastic/esql';
 import type { Client } from '@elastic/elasticsearch';
-import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import type { QueryDslQueryContainer, SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { getSampleDocuments } from '@kbn/ai-tools';
+import { getSampleDocumentsEsql } from '@kbn/ai-tools';
+import { DEFAULT_SIG_EVENTS_TUNING_CONFIG } from '@kbn/streams-plugin/common/sig_events_tuning_config';
 import {
   MANAGED_STREAM_SEARCH_PATTERN,
   type KIFeatureExtractionScenario,
 } from '../../src/datasets';
 
-const SAMPLE_DOCS_MAX = 50;
-
 const addUniqueHitsToSample = ({
   hits,
   docs,
   seen,
+  size,
 }: {
   hits: Array<SearchHit<Record<string, unknown>>>;
   docs: Array<SearchHit<Record<string, unknown>>>;
   seen: Set<string>;
+  size: number;
 }): void => {
   for (const hit of hits) {
-    if (!hit._id || !hit.fields || isEmpty(hit.fields)) {
+    if (!hit._id || !hit._source) {
       continue;
     }
 
@@ -38,7 +39,7 @@ const addUniqueHitsToSample = ({
     seen.add(hit._id);
     docs.push(hit);
 
-    if (docs.length >= SAMPLE_DOCS_MAX) {
+    if (docs.length >= size) {
       break;
     }
   }
@@ -48,12 +49,19 @@ export const collectSampleDocuments = async ({
   esClient,
   scenario,
   log,
+  size = DEFAULT_SIG_EVENTS_TUNING_CONFIG.sample_size,
 }: {
   esClient: Client;
   scenario: KIFeatureExtractionScenario;
   log: ToolingLog;
+  size?: number;
 }): Promise<Array<SearchHit<Record<string, unknown>>>> => {
-  const query = scenario.input.log_query_filter ?? [{ match_all: {} }];
+  // `scenario.input.log_query_filter` is fixture-authored Query DSL — forward
+  // it verbatim to `getSampleDocumentsEsql` via `dslFilter`, which ES|QL's
+  // `_query` endpoint applies through its native `filter` request parameter.
+  // No DSL → KQL translation is needed; ES handles `term`/`terms`/`match`/
+  // `match_phrase`/`exists`/`bool { should, minimum_should_match }` natively.
+  const baseDslFilter: QueryDslQueryContainer[] = scenario.input.log_query_filter ?? [];
 
   const docs: Array<SearchHit<Record<string, unknown>>> = [];
   const seen = new Set<string>();
@@ -66,12 +74,12 @@ export const collectSampleDocuments = async ({
       const { sampling_filters = [], ...details } = criterion;
 
       return sampling_filters.map(async (filter) => {
-        const { hits } = await getSampleDocuments({
+        const { hits } = await getSampleDocumentsEsql({
           esClient,
           index: MANAGED_STREAM_SEARCH_PATTERN,
           start: 0,
           end: Date.now(),
-          filter: [...query, filter],
+          dslFilter: [...baseDslFilter, filter],
           size: 1,
         });
         return { hits, criterion: details, filter };
@@ -104,6 +112,7 @@ export const collectSampleDocuments = async ({
     hits: samplingFilterResults.flatMap(({ hits }) => hits),
     docs,
     seen,
+    size,
   });
   const criteriaCount = docs.length;
   const duplicateCount = totalFilterHits - criteriaCount;
@@ -114,19 +123,24 @@ export const collectSampleDocuments = async ({
   }
 
   let generalFillCount = 0;
-  if (docs.length < SAMPLE_DOCS_MAX) {
-    const remaining = SAMPLE_DOCS_MAX - docs.length;
-    const { hits } = await getSampleDocuments({
+  if (docs.length < size) {
+    const remaining = size - docs.length;
+    const seenIds = [...seen];
+    const unseenCondition = seenIds.length
+      ? esql.exp`${esql.col('_id')} NOT IN (${seenIds.map((id) => esql.str(id))})`
+      : undefined;
+    const { hits } = await getSampleDocumentsEsql({
       esClient,
       index: MANAGED_STREAM_SEARCH_PATTERN,
       start: 0,
       end: Date.now(),
-      filter: [...query, { bool: { must_not: [{ ids: { values: [...seen] } }] } }],
+      dslFilter: baseDslFilter,
+      whereCondition: unseenCondition,
       size: remaining,
     });
 
     const beforeFill = docs.length;
-    addUniqueHitsToSample({ hits, docs, seen });
+    addUniqueHitsToSample({ hits, docs, seen, size });
     generalFillCount = docs.length - beforeFill;
   }
 

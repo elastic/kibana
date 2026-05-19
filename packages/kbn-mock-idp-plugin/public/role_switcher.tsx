@@ -29,16 +29,17 @@ export const useAuthenticator = (reloadPage = false) => {
   const { services } = useKibana<CoreStart>();
 
   return useAsyncFn(async (params: CreateSAMLResponseParams) => {
-    // Create SAML Response using Mock IDP
     const response = await services.http.post<Record<string, string>>('/mock_idp/saml_response', {
       body: JSON.stringify(params),
     });
 
-    // Authenticate user with SAML response
     if (reloadPage) {
-      const form = createForm('/api/security/saml/callback', response);
+      const form = createForm(
+        services.http.basePath.prepend('/api/security/saml/callback'),
+        response
+      );
       form.submit();
-      await new Promise(() => {}); // Never resolve
+      await new Promise(() => {});
     } else {
       await services.http.post('/api/security/saml/callback', {
         body: JSON.stringify(response),

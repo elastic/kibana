@@ -27,6 +27,18 @@ describe('buildResolutionGroupingQuery', () => {
     expect(scriptSource).toContain(ENTITY_FIELDS.ENTITY_ID);
   });
 
+  it('emits the bucket risk score runtime script with alias-skip and the resolution/individual COALESCE pair', () => {
+    const result = buildResolutionGroupingQuery(defaultParams);
+
+    const script = result.runtime_mappings?.bucketRiskScore?.script;
+    const scriptSource = (
+      typeof script === 'object' && script !== null && 'source' in script ? script.source : script
+    ) as string;
+    expect(scriptSource).toContain(ENTITY_FIELDS.RESOLVED_TO);
+    expect(scriptSource).toContain(ENTITY_FIELDS.RESOLUTION_RISK_SCORE);
+    expect(scriptSource).toContain(ENTITY_FIELDS.ENTITY_RISK);
+  });
+
   it('includes resolutionRiskScore max aggregation', () => {
     const result = buildResolutionGroupingQuery(defaultParams);
 
@@ -36,39 +48,19 @@ describe('buildResolutionGroupingQuery', () => {
     });
   });
 
-  it('includes resolutionEntityName filtered sub-agg excluding aliases', () => {
+  it('does not include entity name or type sub-aggs (fetched separately via useFetchTargetMetadata)', () => {
     const result = buildResolutionGroupingQuery(defaultParams);
 
-    const entityNameAgg = result.aggs?.groupByFields?.aggs?.resolutionEntityName;
-    expect(entityNameAgg?.filter).toEqual({
-      bool: {
-        must_not: [{ exists: { field: ENTITY_FIELDS.RESOLVED_TO } }],
-      },
-    });
-    expect(entityNameAgg?.aggs?.name).toEqual({
-      terms: { field: ENTITY_FIELDS.ENTITY_NAME, size: 1 },
-    });
+    const aggs = result.aggs?.groupByFields?.aggs;
+    expect(aggs).not.toHaveProperty('resolutionEntityName');
+    expect(aggs).not.toHaveProperty('resolutionEntityType');
   });
 
-  it('includes resolutionEntityType filtered sub-agg excluding aliases', () => {
-    const result = buildResolutionGroupingQuery(defaultParams);
-
-    const entityTypeAgg = result.aggs?.groupByFields?.aggs?.resolutionEntityType;
-    expect(entityTypeAgg?.filter).toEqual({
-      bool: {
-        must_not: [{ exists: { field: ENTITY_FIELDS.RESOLVED_TO } }],
-      },
-    });
-    expect(entityTypeAgg?.aggs?.type).toEqual({
-      terms: { field: ENTITY_FIELDS.ENTITY_TYPE, size: 1 },
-    });
-  });
-
-  it('orders by resolutionRiskScore desc then _count desc', () => {
+  it('orders by bucketRiskScore desc then _count desc', () => {
     const result = buildResolutionGroupingQuery(defaultParams);
 
     const order = result.aggs?.groupByFields?.terms?.order;
-    expect(order).toEqual([{ resolutionRiskScore: 'desc' }, { _count: 'desc' }]);
+    expect(order).toEqual([{ bucketRiskScore: 'desc' }, { _count: 'desc' }]);
   });
 
   it('applies pagination via bucket_sort', () => {

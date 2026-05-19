@@ -6,9 +6,18 @@
  */
 
 import { AttachmentType } from '../../../common/types/domain';
-import { COMMENT_ATTACHMENT_TYPE } from '../../../common/constants/attachments';
+import {
+  COMMENT_ATTACHMENT_TYPE,
+  SECURITY_ENDPOINT_ATTACHMENT_TYPE,
+  LEGACY_LENS_ATTACHMENT_TYPE,
+  LENS_ATTACHMENT_TYPE,
+} from '../../../common/constants/attachments';
+import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { getAttachmentTypeFromAttributes, getAttachmentTypeTransformers } from '.';
 import { commentAttachmentTransformer } from './comment';
+import { alertAttachmentTransformer } from './alert';
+import { passThroughTransformer } from './base';
+import { externalReferenceAttachmentTransformer } from './external_reference';
 
 const owner = 'cases';
 
@@ -40,6 +49,41 @@ describe('common/attachments', () => {
       expect(getAttachmentTypeFromAttributes({ comment: 'hello', type: 'user' })).toBe(
         AttachmentType.user
       );
+    });
+
+    it('resolves migrated external reference subtypes to unified type names', () => {
+      expect(
+        getAttachmentTypeFromAttributes({
+          type: AttachmentType.externalReference,
+          externalReferenceAttachmentTypeId: 'endpoint',
+        })
+      ).toBe(SECURITY_ENDPOINT_ATTACHMENT_TYPE);
+    });
+
+    it('returns externalReference for unmigrated external reference subtypes', () => {
+      expect(
+        getAttachmentTypeFromAttributes({
+          type: AttachmentType.externalReference,
+          externalReferenceAttachmentTypeId: 'some-unknown-type',
+        })
+      ).toBe(AttachmentType.externalReference);
+    });
+
+    it('returns type for external references without externalReferenceAttachmentTypeId', () => {
+      expect(
+        getAttachmentTypeFromAttributes({
+          type: AttachmentType.externalReference,
+        })
+      ).toBe(AttachmentType.externalReference);
+    });
+
+    it('returns persistableStateAttachmentTypeId for persistable state attachments', () => {
+      expect(
+        getAttachmentTypeFromAttributes({
+          type: AttachmentType.persistableState,
+          persistableStateAttachmentTypeId: LEGACY_LENS_ATTACHMENT_TYPE,
+        })
+      ).toBe(LEGACY_LENS_ATTACHMENT_TYPE);
     });
 
     it('throws when attributes have no recognizable attachment type', () => {
@@ -76,10 +120,64 @@ describe('common/attachments', () => {
       expect(transformer4).toBe(commentAttachmentTransformer);
     });
 
-    it('returns pass-through transformer for other types', () => {
-      const transformer = getAttachmentTypeTransformers(AttachmentType.alert, owner);
-      expect(transformer).not.toBe(commentAttachmentTransformer);
-      expect(transformer.isType({ type: AttachmentType.alert } as never)).toBe(false);
+    it('returns external reference transformer for security.endpoint', () => {
+      const transformer = getAttachmentTypeTransformers(SECURITY_ENDPOINT_ATTACHMENT_TYPE, owner);
+      expect(transformer).toBe(externalReferenceAttachmentTransformer);
+    });
+
+    it('returns alert transformer for legacy and unified alert types', () => {
+      const legacyAlertTransformer = getAttachmentTypeTransformers(AttachmentType.alert, owner);
+      expect(legacyAlertTransformer).toBe(alertAttachmentTransformer);
+
+      const unifiedAlertTransformer = getAttachmentTypeTransformers('stack.alert', owner);
+      expect(unifiedAlertTransformer).toBe(alertAttachmentTransformer);
+    });
+
+    it('returns event transformer for legacy and unified event types', () => {
+      const transformer = getAttachmentTypeTransformers(
+        AttachmentType.event,
+        SECURITY_SOLUTION_OWNER
+      );
+      expect(transformer).not.toBe(externalReferenceAttachmentTransformer);
+      expect(
+        transformer.isType({
+          type: AttachmentType.event,
+          eventId: 'event-1',
+          index: 'index-1',
+          owner: SECURITY_SOLUTION_OWNER,
+        } as never)
+      ).toBe(true);
+
+      const unifiedEventTransformer = getAttachmentTypeTransformers(
+        'security.event',
+        SECURITY_SOLUTION_OWNER
+      );
+      expect(
+        unifiedEventTransformer.isType({
+          type: 'security.event',
+          attachmentId: 'event-1',
+          metadata: { index: 'index-1' },
+          owner: SECURITY_SOLUTION_OWNER,
+        } as never)
+      ).toBe(true);
+    });
+
+    it('returns pass-through transformer for unrecognized types', () => {
+      const transformer = getAttachmentTypeTransformers('unknown.type', owner);
+      expect(transformer).toBe(passThroughTransformer);
+    });
+
+    it('returns configured persistable state transformer for known visualization types', () => {
+      const lensTransformer = getAttachmentTypeTransformers(LENS_ATTACHMENT_TYPE, owner);
+      expect(lensTransformer).not.toBe(commentAttachmentTransformer);
+      expect(
+        lensTransformer.isLegacyType({
+          type: AttachmentType.persistableState,
+          persistableStateAttachmentTypeId: LEGACY_LENS_ATTACHMENT_TYPE,
+          persistableStateAttachmentState: {},
+          owner: 'securitySolution',
+        })
+      ).toBe(true);
     });
   });
 });

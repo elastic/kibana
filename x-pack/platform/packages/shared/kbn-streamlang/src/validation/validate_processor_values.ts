@@ -70,6 +70,7 @@ export function validateProcessorValues(
     case 'sort':
     case 'network_direction':
     case 'enrich':
+    case 'registered_domain':
     case 'manual_ingest_pipeline':
       break;
     case 'json_extract': {

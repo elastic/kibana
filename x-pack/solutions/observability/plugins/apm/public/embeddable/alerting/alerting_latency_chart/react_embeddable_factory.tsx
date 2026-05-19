@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import {
   initializeTitleManager,
   titleComparators,
@@ -14,14 +14,14 @@ import {
 } from '@kbn/presentation-publishing';
 import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
 import { BehaviorSubject, map, merge } from 'rxjs';
+import { APM_ALERTING_LATENCY_CHART_EMBEDDABLE } from '@kbn/apm-embeddable-common';
 import type { EmbeddableApmAlertingLatencyVizProps } from '../types';
 import type { EmbeddableDeps } from '../../types';
 import { ApmEmbeddableContext } from '../../embeddable_context';
 import { APMAlertingLatencyChart } from './chart';
-import { APM_ALERTING_LATENCY_CHART_EMBEDDABLE } from '../constants';
 
 export const getApmAlertingLatencyChartEmbeddableFactory = (deps: EmbeddableDeps) => {
-  const factory: EmbeddableFactory<
+  const factory: EmbeddablePublicDefinition<
     EmbeddableApmAlertingLatencyVizProps,
     DefaultEmbeddableApi<EmbeddableApmAlertingLatencyVizProps>
   > = {

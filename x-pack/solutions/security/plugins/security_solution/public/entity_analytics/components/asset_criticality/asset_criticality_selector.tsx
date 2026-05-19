@@ -52,7 +52,7 @@ interface Props {
   entity: Entity;
   onChange?: () => void;
   /** When using Entity Store v2: criticality from the store record. */
-  criticalityFromEntityStore?: CriticalityLevelWithUnassigned;
+  criticalityFromEntityStore?: CriticalityLevelWithUnassigned | null;
   /** When using Entity Store v2: the full entity record for upsert on save. */
   entityRecord?: ApiEntity;
   /** When using Entity Store v2: called after updating criticality via entity store API. */
@@ -250,7 +250,7 @@ export const AssetCriticalityTitle = () => (
     content={
       <FormattedMessage
         id="xpack.securitySolution.entityAnalytics.assetCriticality.accordionTooltip"
-        defaultMessage="You can now categorize entities based on your organization's sensitivity and business risk. The classification tiers can be used to prioritize alert triage and investigation tasks. If the entity risk engine is enabled, the asset classification tier will dynamically impact the entity risk."
+        defaultMessage="You can now categorize entities based on your organization's sensitivity and business risk. The classification tiers can be used to prioritize alert triage and investigation tasks. If the entity risk score maintainer is enabled, the asset classification tier will dynamically impact the entity risk."
       />
     }
   >
@@ -273,7 +273,7 @@ export const AssetCriticalityTitle = () => (
 );
 
 export interface AssetCriticalityModalProps {
-  initialCriticalityLevel: CriticalityLevel | undefined;
+  initialCriticalityLevel: CriticalityLevel | undefined | null;
   toggle: (nextValue: boolean) => void;
   onSave: (value: CriticalityLevelWithUnassigned) => void;
 }

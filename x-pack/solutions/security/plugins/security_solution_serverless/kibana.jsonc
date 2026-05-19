@@ -30,7 +30,8 @@
     "optionalPlugins": [
       "securitySolutionEss",
       "automaticImport",
-      "usageApi"
+      "usageApi",
+      "workflowsManagement"
     ]
   }
 }

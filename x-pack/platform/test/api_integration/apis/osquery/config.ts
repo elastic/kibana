@@ -17,7 +17,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...baseIntegrationTestsConfig.get('kbnTestServer'),
       serverArgs: [
         ...baseIntegrationTestsConfig.get('kbnTestServer.serverArgs'),
-        '--xpack.osquery.enableExperimental=["queryHistoryRework"]',
+        '--xpack.osquery.enableExperimental=["queryHistoryRework","exportResults"]',
       ],
     },
   };

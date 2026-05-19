@@ -46,7 +46,6 @@ describe('NewVisModal', () => {
       name: 'vis3',
       title: 'Vis3',
       stage: 'production',
-      group: VisGroups.TOOLS,
       ...defaultVisTypeParams,
     },
     {

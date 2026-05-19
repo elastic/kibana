@@ -8,16 +8,12 @@
  */
 
 import { isMap, isList, isStringLiteral } from '@elastic/esql';
-import type {
-  ESQLAstAllCommands,
-  ESQLAstUserAgentCommand,
-  ESQLCommand,
-  ESQLMessage,
-} from '@elastic/esql/types';
+import type { ESQLAstAllCommands, ESQLAstUserAgentCommand, ESQLCommand } from '@elastic/esql/types';
 import { getMessageFromId } from '../../definitions/utils/errors';
 import { getExpressionType } from '../../definitions/utils/expressions';
 import { validateMap } from '../../definitions/utils/validation/map';
 import type { ICommandCallbacks, ICommandContext } from '../types';
+import type { ESQLMessage } from '../../definitions/types';
 
 // `properties` uses type=[keyword] so validateMap doesn't false-error on valid list values
 // (getExpressionType delegates list type to its first element, which is keyword for string literals).

@@ -35,7 +35,7 @@ export const getRiskInputTab = <T extends EntityType>({
   name: (
     <FormattedMessage
       id="xpack.securitySolution.flyout.entityDetails.userDetails.riskInputs.tabLabel"
-      defaultMessage="Risk contributions"
+      defaultMessage="Risk score"
     />
   ),
   content: (
@@ -99,17 +99,19 @@ export const getFieldsTableTab = ({ document, tableStorageKey }: FieldsTableProp
 export const getResolutionGroupTab = ({
   entityId,
   entityType,
+  scopeId,
 }: {
   entityId: string;
   entityType: EntityStoreEntityType;
+  scopeId: string;
 }) => ({
   id: EntityDetailsLeftPanelTab.RESOLUTION_GROUP,
   'data-test-subj': RESOLUTION_GROUP_TAB_TEST_ID,
   name: (
     <FormattedMessage
       id="xpack.securitySolution.flyout.entityDetails.resolutionGroupTab.tabLabel"
-      defaultMessage="Resolution group"
+      defaultMessage="Resolution"
     />
   ),
-  content: <ResolutionGroupTab entityId={entityId} entityType={entityType} />,
+  content: <ResolutionGroupTab entityId={entityId} entityType={entityType} scopeId={scopeId} />,
 });

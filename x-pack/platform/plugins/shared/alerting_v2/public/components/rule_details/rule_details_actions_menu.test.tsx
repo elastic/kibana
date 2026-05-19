@@ -8,14 +8,11 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { CoreStart, useService } from '@kbn/core-di-browser';
 import { RuleDetailsActionsMenu } from './rule_details_actions_menu';
+import { RuleProvider } from './rule_context';
 import type { RuleApiResponse } from '../../services/rules_api';
 
 const mockToggleRuleEnabled = jest.fn();
-const mockNavigateToUrl = jest.fn();
-const mockUseService = useService as jest.MockedFunction<typeof useService>;
-const mockCoreStart = CoreStart as jest.MockedFunction<typeof CoreStart>;
 
 jest.mock('@kbn/core-di-browser');
 jest.mock('../../hooks/use_toggle_rule_enabled', () => ({
@@ -31,26 +28,24 @@ const enabledRule = {
 
 const disabledRule = { ...enabledRule, enabled: false } as RuleApiResponse;
 
-const renderMenu = (rule: RuleApiResponse, showDeleteConfirmation = jest.fn()) =>
+const mockOnClone = jest.fn();
+
+const renderMenu = (
+  rule: RuleApiResponse,
+  showDeleteConfirmation = jest.fn(),
+  onClone = mockOnClone
+) =>
   render(
     <I18nProvider>
-      <RuleDetailsActionsMenu rule={rule} showDeleteConfirmation={showDeleteConfirmation} />
+      <RuleProvider rule={rule}>
+        <RuleDetailsActionsMenu showDeleteConfirmation={showDeleteConfirmation} onClone={onClone} />
+      </RuleProvider>
     </I18nProvider>
   );
 
 describe('RuleDetailsActionsMenu', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockCoreStart.mockImplementation((key: string) => key as never);
-    mockUseService.mockImplementation((service: unknown) => {
-      if (service === 'application') {
-        return { navigateToUrl: mockNavigateToUrl } as never;
-      }
-      if (service === 'http') {
-        return { basePath: { prepend: (url: string) => url } } as never;
-      }
-      return undefined as never;
-    });
   });
 
   it('renders the actions button', () => {
@@ -86,13 +81,11 @@ describe('RuleDetailsActionsMenu', () => {
     expect(mockToggleRuleEnabled).toHaveBeenCalledWith({ id: 'rule-1', enabled: true });
   });
 
-  it('navigates to create page with cloneFrom query param when clone is clicked', () => {
+  it('calls onClone when clone is clicked', () => {
     renderMenu(enabledRule);
     fireEvent.click(screen.getByTestId('ruleDetailsActionsButton'));
     fireEvent.click(screen.getByTestId('ruleDetailsCloneButton'));
-    expect(mockNavigateToUrl).toHaveBeenCalledWith(
-      '/app/management/alertingV2/rules/create?cloneFrom=rule-1'
-    );
+    expect(mockOnClone).toHaveBeenCalledTimes(1);
   });
 
   it('calls showDeleteConfirmation when delete is clicked', () => {

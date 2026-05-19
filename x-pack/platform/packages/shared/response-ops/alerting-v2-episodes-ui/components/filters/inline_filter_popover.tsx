@@ -9,7 +9,7 @@ import React, { useCallback, useMemo } from 'react';
 import { EuiSelectable, EuiPopoverTitle } from '@elastic/eui';
 import type { EuiSelectableOption } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
+import * as i18n from './translations';
 
 const INLINE_FILTER_POPOVER_MIN_WIDTH = 220;
 
@@ -82,11 +82,10 @@ export function InlineFilterPopover({
       isLoading={isLoading}
       listProps={{
         onFocusBadge: false,
+        paddingSize: 's',
       }}
       emptyMessage={emptyMessage}
-      aria-label={i18n.translate('xpack.alertingV2EpisodesUi.inlineFilterPopoverAriaLabel', {
-        defaultMessage: 'Filter options',
-      })}
+      aria-label={i18n.INLINE_FILTER_POPOVER_ARIA_LABEL}
     >
       {(list, search) => (
         <div

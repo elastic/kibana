@@ -31,6 +31,28 @@ export function resolveConnectorId(connectorId: string): string {
     : getConnectorIdAsUuid(connectorId);
 }
 
+/**
+ * Inference connectors may return 400 (not 409) when the backing inference endpoint
+ * was created by another parallel worker — treat as success and reuse.
+ */
+function isAlreadyExistsConnectorError(error: unknown): boolean {
+  if (!isAxiosError(error)) {
+    return false;
+  }
+  if (error.status === 409) {
+    return true;
+  }
+  if (error.status !== 400) {
+    return false;
+  }
+  const data = error.response?.data;
+  const message =
+    typeof data === 'object' && data !== null && 'message' in data
+      ? String((data as { message: unknown }).message)
+      : '';
+  return /already exists/i.test(message);
+}
+
 export async function deleteConnectorById({
   fetch,
   connectorId,
@@ -124,9 +146,8 @@ export async function createConnectorFixture({
       }),
     });
   } catch (error) {
-    const status = isAxiosError(error) ? error.status : (error as any)?.status;
-    if (status === 409) {
-      log.info(`Connector already exists, reusing: ${connectorIdAsUuid}`);
+    if (isAlreadyExistsConnectorError(error)) {
+      log.info(`Connector or inference endpoint already exists, reusing: ${connectorIdAsUuid}`);
     } else {
       throw error;
     }
