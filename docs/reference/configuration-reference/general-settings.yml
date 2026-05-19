@@ -894,9 +894,10 @@ groups:
         datatype: int
         default: 100000
         applies_to:
-          stack: ga
-          ech: ga
-          self: ga
+          - "stack: deprecated 8.3"
+          - "ech: ga"
+          - "self: ga"
+        deprecation_details: "Deprecated in 8.3.0. Use `unifiedSearch.autocomplete.valueSuggestions.terminateAfter` instead."
 
       - setting: data.autocomplete.valueSuggestions.timeout
         description: |
@@ -904,9 +905,10 @@ groups:
         datatype: int
         default: 1000
         applies_to:
-          stack: ga
-          ech: ga
-          self: ga
+          - "stack: deprecated 8.3"
+          - "ech: ga"
+          - "self: ga"
+        deprecation_details: "Deprecated in 8.3.0. Use `unifiedSearch.autocomplete.valueSuggestions.timeout` instead."
 
       - setting: unifiedSearch.autocomplete.valueSuggestions.timeout
         description: |
