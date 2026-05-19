@@ -20,6 +20,18 @@ import type {
 } from '@kbn/core-http-server';
 import { RouteValidationError } from '@kbn/core-http-server';
 
+export class RawRouteValidationError extends ValidationError {
+  constructor(
+    error: RouteValidationError,
+    namespace: string | undefined,
+    public readonly rawError: unknown
+  ) {
+    super(error, namespace);
+
+    Object.setPrototypeOf(this, RawRouteValidationError.prototype);
+  }
+}
+
 /**
  * Route validator class to define the validation logic for each new route.
  *
@@ -38,9 +50,11 @@ export class RouteValidator<P = {}, Q = {}, B = {}> {
 
   private static ResultFactory: RouteValidationResultFactory = {
     ok: <T>(value: T) => ({ value }),
-    badRequest: (error: Error | string, path?: string[]) => ({
-      error: new RouteValidationError(error, path),
-    }),
+    badRequest: (error: unknown, path?: string[]) => {
+      const validationError = new RouteValidationError(error, path);
+      (validationError as { rawError: unknown }).rawError = error;
+      return { error: validationError };
+    },
   };
 
   private constructor(
@@ -142,11 +156,17 @@ export class RouteValidator<P = {}, Q = {}, B = {}> {
     try {
       result = validateFn(data, RouteValidator.ResultFactory);
     } catch (err) {
-      result = { error: new RouteValidationError(err) };
+      const validationError = new RouteValidationError(String(err));
+      (validationError as { rawError: unknown }).rawError = err;
+      result = { error: validationError };
     }
 
     if (result.error) {
-      throw new ValidationError(result.error, namespace);
+      const rawError =
+        'rawError' in result.error
+          ? (result.error as { rawError: unknown }).rawError
+          : result.error;
+      throw new RawRouteValidationError(result.error, namespace, rawError);
     }
     return result.value;
   }

@@ -15,13 +15,23 @@ import type { ZodType } from '@kbn/zod/v4';
  * @public
  */
 export class RouteValidationError extends SchemaTypeError {
-  constructor(error: Error | string, path: string[] = []) {
-    super(error, path);
+  public readonly rawError: unknown;
+
+  constructor(error: unknown, path: string[] = []) {
+    super(normalizeRouteValidationErrorMessage(error), path);
+    this.rawError = error;
 
     // Set the prototype explicitly, see:
     // https://github.com/Microsoft/TypeScript/wiki/Breaking-Changes#extending-built-ins-like-error-array-and-map-may-no-longer-work
     Object.setPrototypeOf(this, RouteValidationError.prototype);
   }
+}
+
+function normalizeRouteValidationErrorMessage(error: unknown): string {
+  if (error instanceof Error) {
+    return error.message;
+  }
+  return String(error);
 }
 
 /**
@@ -33,7 +43,7 @@ export class RouteValidationError extends SchemaTypeError {
  */
 export interface RouteValidationResultFactory {
   ok: <T>(value: T) => { value: T };
-  badRequest: (error: Error | string, path?: string[]) => { error: RouteValidationError };
+  badRequest: (error: unknown, path?: string[]) => { error: RouteValidationError };
 }
 
 /**
