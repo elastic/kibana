@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import crypto from 'crypto';
 
 export interface TlsProps {
@@ -15,19 +14,19 @@ export interface TlsProps {
   sha256?: string;
 }
 
-type Props = TlsProps & boolean;
-
-// Note This is just a mock sha256 value, this doesn't actually generate actually sha 256 val
 export const getSha256 = () => {
   return crypto.randomBytes(64).toString('hex').toUpperCase();
 };
 
-export const makeTls = ({ valid = true, commonName = '*.elastic.co', expiry, sha256 }: Props) => {
-  const expiryDate =
-    expiry ??
-    moment()
-      .add(valid ? 2 : -2, 'months')
-      .toISOString();
+export const makeTls = ({
+  valid = true,
+  commonName = '*.elastic.co',
+  expiry,
+  sha256,
+}: TlsProps) => {
+  const now = new Date();
+  const offset = valid ? 2 : -2;
+  const expiryDate = expiry ?? new Date(now.setMonth(now.getMonth() + offset)).toISOString();
 
   return {
     version: '1.3',

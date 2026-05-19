@@ -7,14 +7,14 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { merge } from 'lodash';
-import type { Client } from '@elastic/elasticsearch';
+import type { EsClient } from '@kbn/scout-oblt';
 import type { TlsProps } from './make_tls';
 import { makeTls } from './make_tls';
 
 const DEFAULT_INDEX_NAME = 'heartbeat-8-generated-test';
 
 export const makePing = async (
-  es: Client,
+  es: EsClient,
   monitorId: string,
   fields: { [key: string]: any },
   mogrify: (doc: any) => any,
@@ -95,7 +95,7 @@ export const makePing = async (
       status: 'up',
       timespan: {
         gte: timestamp.toISOString(),
-        lt: new Date(timestamp.getTime() + 5000).toISOString,
+        lt: new Date(timestamp.getTime() + 5000).toISOString(),
       },
     },
     event: {

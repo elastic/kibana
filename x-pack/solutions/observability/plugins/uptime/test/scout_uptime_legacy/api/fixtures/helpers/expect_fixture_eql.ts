@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import fs from 'fs';
 import { join } from 'path';
 import { cloneDeep, isEqual } from 'lodash';
+import { expect } from '@kbn/scout-oblt/api';
 
-const fixturesDir = join(__dirname, '..', 'fixtures');
+const fixturesDir = join(__dirname, '..', 'responses');
 
 const excludeFieldsFrom = (from: any, excluder?: (d: any) => any): any => {
   const clone = cloneDeep(from);
@@ -21,26 +21,24 @@ const excludeFieldsFrom = (from: any, excluder?: (d: any) => any): any => {
 };
 
 export const expectFixtureEql = <T>(data: T, fixtureName: string, excluder?: (d: T) => void) => {
-  expect(data).not.to.eql(null);
-  expect(data).not.to.eql(undefined);
+  expect(data).not.toBeNull();
+  expect(data).toBeDefined();
 
   const fixturePath = join(fixturesDir, `${fixtureName}.json`);
 
   excluder = excluder || ((d) => d);
   const dataExcluded = excludeFieldsFrom(data, excluder);
-  expect(dataExcluded).not.to.be(undefined);
-  const fixtureExists = () => fs.existsSync(dataExcluded);
+  expect(dataExcluded).toBeDefined();
+  const fixtureExists = () => fs.existsSync(fixturePath);
   const fixtureChanged = () =>
     !isEqual(
       dataExcluded,
       excludeFieldsFrom(JSON.parse(fs.readFileSync(fixturePath, 'utf8')), excluder)
     );
   if (process.env.UPDATE_UPTIME_FIXTURES && (!fixtureExists() || fixtureChanged())) {
-    // Check if the data has changed. We can't simply write it because the order of attributes
-    // can change leading to different bytes on disk, which we don't care about
     fs.writeFileSync(fixturePath, JSON.stringify(dataExcluded, null, 2));
   }
   const fileContents = fs.readFileSync(fixturePath, 'utf8');
   const fixture = JSON.parse(fileContents);
-  expect(dataExcluded).to.eql(excludeFieldsFrom(fixture, excluder));
+  expect(dataExcluded).toStrictEqual(excludeFieldsFrom(fixture, excluder));
 };

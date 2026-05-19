@@ -7,12 +7,12 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { merge, flattenDeep } from 'lodash';
-import type { Client } from '@elastic/elasticsearch';
+import type { EsClient } from '@kbn/scout-oblt';
 import { makePing } from './make_ping';
 import type { TlsProps } from './make_tls';
 
 interface CheckProps {
-  es: Client;
+  es: EsClient;
   monitorId?: string;
   numIps?: number;
   fields?: { [key: string]: any };
@@ -25,6 +25,7 @@ interface CheckProps {
 const getRandomMonitorId = () => {
   return 'monitor-' + Math.random().toString(36).substring(7);
 };
+
 export const makeCheck = async ({
   es,
   monitorId = getRandomMonitorId(),
@@ -69,11 +70,11 @@ export const makeCheck = async ({
 };
 
 export const makeChecks = async (
-  es: Client,
+  es: EsClient,
   monitorId: string,
   numChecks: number = 1,
   numIps: number = 1,
-  every: number = 10000, // number of millis between checks
+  every: number = 10000,
   fields: { [key: string]: any } = {},
   mogrify: (doc: any) => any = (d) => d,
   refresh: boolean = true,
@@ -114,7 +115,7 @@ export const makeChecks = async (
 };
 
 export const makeChecksWithStatus = async (
-  es: Client,
+  es: EsClient,
   monitorId: string,
   numChecks: number,
   numIps: number,
@@ -149,9 +150,7 @@ export const makeChecksWithStatus = async (
   );
 };
 
-// Helper for processing a list of checks to find the time picker bounds.
 export const getChecksDateRange = (checks: any[]) => {
-  // Flatten 2d arrays
   const flattened = flattenDeep(checks);
 
   let startTime = 1 / 0;
