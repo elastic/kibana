@@ -73,7 +73,7 @@ export function transformDashboardOut(
         }
       : undefined;
 
-  const { options, warning: optionsWarning } = transformOptionsOut(
+  const options = transformOptionsOut(
     optionsJSON ?? '{}',
     legacyControls?.showApplySelections,
     strictPropsSchemas.options
@@ -82,9 +82,6 @@ export function transformDashboardOut(
   const { filters, query } = transformSearchSourceOut(kibanaSavedObjectMeta, references);
 
   const allWarnings = [...warnings, ...pinnedPanelWarnings];
-  if (optionsWarning) {
-    allWarnings.push(optionsWarning);
-  }
 
   // try to maintain a consistent (alphabetical) order of keys
   return {

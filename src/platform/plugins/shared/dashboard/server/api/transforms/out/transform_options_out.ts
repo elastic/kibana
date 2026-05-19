@@ -10,8 +10,9 @@
 import type { Writable } from '@kbn/utility-types';
 import type { Type, TypeOf } from '@kbn/config-schema';
 
-import type { DashboardState, Warnings } from '../../types';
+import type { DashboardState } from '../../types';
 import type { getDashboardStateSchema } from '../../dashboard_state_schemas';
+import { DEFAULT_DASHBOARD_OPTIONS } from '../../../../common/constants';
 
 const savedObjectToAPIOptionsKeys = {
   hidePanelTitles: 'hide_panel_titles',
@@ -28,9 +29,7 @@ export function transformOptionsOut(
   optionsJSON: string,
   controlGroupShowApplyButtonSetting: boolean | undefined,
   schema: Type<TypeOf<ReturnType<typeof getDashboardStateSchema>>['options']>
-): { options: Partial<DashboardState['options']>; warning: Warnings[number] | undefined } {
-  let warning: Warnings[number] | undefined;
-
+): Partial<DashboardState['options']> {
   const options = JSON.parse(optionsJSON) as ParsedSavedObjectOptions;
   const apiOptions: Writable<Partial<DashboardState['options']>> = {};
   Object.keys(options).forEach((key) => {
@@ -50,12 +49,8 @@ export function transformOptionsOut(
   try {
     transformedOptions = schema.validate(transformOptionsOut);
   } catch (e) {
-    warning = {
-      type: 'dropped_property',
-      message: `Unable to validate dashboard options. Error:  ${e.messaged}`,
-      key: 'options',
-      value: transformedOptions,
-    };
+    // if unable to validate the options, don't throw or warn; just use the default value
+    transformedOptions = DEFAULT_DASHBOARD_OPTIONS;
   }
-  return { options: transformedOptions, warning };
+  return transformedOptions;
 }
