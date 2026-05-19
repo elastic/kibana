@@ -683,8 +683,7 @@
       "reviewers": ["team:kibana-visualizations", "markov00", "nickofthyme"],
       "matchBaseBranches": ["main"],
       "labels": ["release_note:skip", "backport:skip", "Team:Visualizations"],
-      "enabled": true,
-      "minimumReleaseAge": "14 days"
+      "enabled": true
     },
     {
       "groupName": "@elastic/ecs",
@@ -2304,7 +2303,6 @@
         "@opentelemetry/instrumentation-undici",
         "@opentelemetry/otlp-exporter-base",
         "@opentelemetry/otlp-transformer",
-        "@opentelemetry/resources",
         "@opentelemetry/sdk-logs",
         "@opentelemetry/semantic-conventions"
       ],
@@ -2563,15 +2561,6 @@
       "reviewers": ["team:eui-team"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:EUI"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
-      "groupName": "patch-package",
-      "matchDepNames": ["patch-package"],
-      "reviewers": ["team:kibana-operations"],
-      "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Operations"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     }
