@@ -35,9 +35,10 @@ export interface PhaseDoneResult<TOutput> {
 }
 
 /**
- * Poll-phase continuation: the step is not done yet. Engine schedules the next
- * wake-up using the step definition's {@link PollPolicy}. The handler may
- * optionally update the persisted author state.
+ * Poll-phase continuation: the step is not done yet. The engine schedules the
+ * next wake-up from {@link PollPolicy} unless a positive `nextPollDelayMs` is
+ * returned (that value is used from **now** for the next wake-up only).
+ * The handler may optionally update the persisted author state.
  */
 export interface PollContinueResult<TState extends Record<string, unknown>> {
   output?: never;
@@ -46,7 +47,10 @@ export interface PollContinueResult<TState extends Record<string, unknown>> {
    * Pass `null` to explicitly clear it.
    */
   state?: TState | null;
-  /** The number of milliseconds until the next poll. */
+  /**
+   * Optional delay (ms) until the next poll. When omitted or non-positive, the
+   * engine uses {@link PollPolicy} for the next wake-up.
+   */
   nextPollDelayMs?: number;
   error?: never;
 }
@@ -160,11 +164,6 @@ export type OnCancelHandler<
  *                    on-failure retry) each attempt, capped at `maxMs`. With
  *                    `jitter` enabled, uses the same backoff jitter as on-failure
  *                    retry: a uniform delay in `[computed/2, computed]` ms.
- * - `dynamic`      — the step author supplies a pure function that computes
- *                    the next delay (in ms) from the engine bookkeeping plus
- *                    the persisted author state. Useful when the upstream
- *                    system gives explicit timing hints (e.g. HTTP
- *                    `Retry-After`, ML job progress).
  */
 export type PollPolicy<
   Input extends z.ZodType = z.ZodType,
@@ -454,13 +453,6 @@ function validatePollPolicy(stepId: string, policy: PollPolicy): void {
         );
       }
       break;
-    case 'dynamic':
-      if (typeof policy.next !== 'function') {
-        throw new Error(
-          `Step "${stepId}" has invalid poll policy: "dynamic.next" must be a function.`
-        );
-      }
-      break;
     default:
       throw new Error(
         `Step "${stepId}" has invalid poll policy: unknown strategy "${
@@ -581,7 +573,10 @@ export interface PollContext<TInput = z.ZodType, TConfig = z.ZodObject, TState =
    */
   state: TState | undefined;
 
-  /** 1-based count of poll invocations so far. */
+  /**
+   * 0-based index of this `poll.handler` invocation (first poll is `0`, including
+   * the first wake-up after `run` returns `{ state }` on a `run` + `poll` step).
+   */
   attempt: number;
 }
 

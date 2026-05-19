@@ -11,12 +11,12 @@ import type { AtomicGraphNode } from '@kbn/workflows/graph';
 import { ExecutionError } from '@kbn/workflows/server';
 import { DEFAULT_POLL_CEILINGS } from '@kbn/workflows-extensions/server';
 import type {
+  DurablePhaseResult,
   PollCeilings,
   PollHandlerContext,
   PollOnlyMode,
   RunPlusPollMode,
 } from '@kbn/workflows-extensions/server';
-import type { DurablePhaseResult } from '@kbn/workflows-extensions/server/step_registry/types';
 import type { z } from '@kbn/zod/v4';
 import { createHandlerContext } from './step_context_handler';
 import { applyBackoffJitter } from '../../utils/backoff_jitter/backoff_jitter';

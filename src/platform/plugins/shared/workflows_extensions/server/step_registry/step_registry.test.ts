@@ -271,14 +271,14 @@ describe('ServerStepRegistry', () => {
       ).toThrow(/"exponential.multiplier" must be > 1/);
     });
 
-    it('rejects dynamic policy when next is not a function', () => {
+    it('rejects unknown poll policy strategy', () => {
       const poll = {
         handler: jest.fn(),
-        policy: { strategy: 'dynamic', next: 'not a function' },
+        policy: { strategy: 'dynamic', next: () => 1 },
       } as unknown as PollLifecycle;
       expect(() =>
         registry.register({ ...baseCommon, poll } as unknown as ServerStepDefinition)
-      ).toThrow(/"dynamic.next" must be a function/);
+      ).toThrow(/unknown strategy "dynamic"/);
     });
 
     it('logs a warning and applies defaults when poll.ceilings is omitted', () => {

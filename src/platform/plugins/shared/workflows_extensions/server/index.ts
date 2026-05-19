@@ -59,11 +59,10 @@ export type {
   PollContext as PollHandlerContext,
   PollLifecycle,
   PollPolicy,
-  PollPolicyContext,
   PollCeilings,
   PhaseDoneResult,
   PhaseErrorResult,
-  RunHandoffResult,
+  DurablePhaseResult,
   PollContinueResult,
 } from './step_registry/types';
 

@@ -707,7 +707,7 @@ The step type ID used in the server registry **must match** the one used in the 
 
 ### Handler Implementation
 
-Your step handler is a `StepHandler` function that receives a `StepHandlerContext` and returns a `StepHandlerResult`:
+Your step handler is a `StepHandler` function that receives a `StepHandlerContext` and returns a `StepHandlerResult`. Durable `run` / `poll` phases instead return a `DurablePhaseResult` (see [Durable awaitable steps](#durable-awaitable-steps-run--poll)).
 
 ```typescript
 import type { StepHandler } from '@kbn/workflows-extensions/server';
@@ -736,6 +736,12 @@ const myStepHandler: StepHandler = async (context) => {
 
 Some integrations finish asynchronously: you start work in one request, then must **wake up later** and check status until the work completes or fails. For that, server steps can use **`run` with `poll`**, or **`poll`** alone. **Single-shot steps always use `handler`** (not `run` without `poll`).
 
+**Return type (`DurablePhaseResult`)** — both **`run`** and **`poll.handler`** return the same union:
+
+- **`{ output }`** — success; the step completes (same idea as legacy `handler`).
+- **`{ error }`** — failure; the step fails with that error.
+- **`{ state?, nextPollDelayMs? }`** — continue in **`WAITING`**. **`state`** is optional: omit it to keep the previously persisted author state; pass **`null`** to clear it. **`nextPollDelayMs`** is optional: when it is a **positive** number, the next wake-up is scheduled that many milliseconds from **now**, overriding **`poll.policy`** for that wake-up only. When omitted or non-positive, spacing follows **`poll.policy`**.
+
 **Modes** involving `poll` (`handler` cannot be combined with `run` or `poll`):
 
 | Mode | Behavior |
@@ -744,16 +750,16 @@ Some integrations finish asynchronously: you start work in one request, then mus
 | **`poll` only** | No setup phase. The engine invokes `poll.handler` on the first execution, then on each scheduled wake-up until the handler returns `{ output }` or `{ error }`. |
 | **`run` + `poll`** | The only shape that uses **`run`**: `run` may return `{ output }` / `{ error }` immediately, or return **`{ state }`** to hand off to polling. After a hand-off, the **first** `poll.handler` invocation happens on the **next** wake-up (not in the same turn as `run`). |
 
-**`PollHandlerContext`** (passed to `poll.handler`) extends `StepHandlerContext` with:
+**`PollHandlerContext`** (alias: **`PollContext`**; passed to `poll.handler`) extends `StepHandlerContext` with:
 
 - **`state`** — author-owned state persisted from the previous `run` or `poll` result (`undefined` on the first poll of a **poll-only** step).
-- **`attempt`** — 1-based count of **`poll.handler`** invocations so far (does not count `run`).
+- **`attempt`** — **0-based** index of this **`poll.handler`** invocation (first poll is `0`; does not count `run`).
 
-**`poll.policy`** (required) defines how long the workflow stays in **`WAITING`** between polls. Supported strategies: **`fixed`**, **`exponential`** (optional `multiplier`, default `2`, same meaning as on-failure retry; optional `jitter` using shared **`applyBackoffJitter`** in workflows execution engine — uniform delay in `[computed/2, computed]` ms, same as on-failure retry when `jitter` is true), and **`dynamic`** (author-supplied `next(ctx)` returning delay ms from engine bookkeeping + `state`). Cadence is fixed at **definition time**; it is not configurable from workflow YAML.
+**`poll.policy`** (required) defines how long the workflow stays in **`WAITING`** between polls when the handler does not return a positive **`nextPollDelayMs`**. Supported strategies: **`fixed`** and **`exponential`** (optional **`multiplier`**, default `2`, same meaning as on-failure retry; optional **`jitter`** using shared **`applyBackoffJitter`** in the workflows execution engine — uniform delay in `[computed/2, computed]` ms, same as on-failure retry when `jitter` is true). Cadence is fixed at **definition time**; it is not configurable from workflow YAML.
 
 **`poll.ceilings`** (optional) caps runaway polling. Omitted ceilings default to conservative **`DEFAULT_POLL_CEILINGS`** (`maxAttempts` / `maxWaitMs`). If a ceiling is exceeded, the step fails with `ExecutionError` type **`PollCeilingExceeded`**. When you rely on those defaults, the registry logs a **warning** at registration time so authors notice.
 
-**Reserved persisted keys** inside the step’s persisted state object: **`__poll`** (engine bookkeeping) and **`__authorState`** (your `state` from `run` / `poll`). Step authors should return **`{ state }`** / **`{ state: null }`** at the top level of results; the runtime maps that to `__authorState`. Clearing author state uses **`{ state: null }`**; merging treats explicit `undefined` fields as removals so stale keys do not linger.
+**Persistence** — the execution engine stores durable polling metadata under a reserved key on the step state object (**`__durableStepState`**). Step authors should only use the typed **`{ state }`** / **`{ state: null }`** fields on `run` / `poll` results; do not read or write the reserved key from handlers or workflow YAML.
 
 **`onCancel` and `WAITING`**: optional **`onCancel`** still runs when a workflow is cancelled while the step is **waiting** between polls (after `abortSignal` has fired), so you can tear down external jobs without waiting for the next poll.
 
