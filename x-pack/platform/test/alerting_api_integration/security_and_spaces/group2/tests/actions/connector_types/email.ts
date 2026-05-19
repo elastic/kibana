@@ -22,7 +22,7 @@ export default function emailTest({ getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
 
-  describe.only('create email action', () => {
+  describe('create email action', () => {
     let createdActionId = '';
     let createdMSExchangeActionId = '';
 
