@@ -560,10 +560,10 @@ describe('TableListView', () => {
 
       expect(filterOptions.length).toBe(4);
       expect(filterOptions.map((wrapper) => wrapper.text())).toEqual([
-        'A-Z ',
-        'Z-A ',
-        'Recent-Old. Checked option. ',
-        'Old-Recent ',
+        'A-Z',
+        'Z-A',
+        'Recent-Old. Checked option.',
+        'Old-Recent',
       ]);
     });
 
@@ -594,7 +594,7 @@ describe('TableListView', () => {
       const filterOptions = find('sortSelect').find('li');
 
       // Check that the second option is 'Z-A'
-      expect(filterOptions.at(1).text()).toBe('Z-A ');
+      expect(filterOptions.at(1).text()).toBe('Z-A');
 
       // Click 'Z-A'
       act(() => {
@@ -665,10 +665,10 @@ describe('TableListView', () => {
       component.update();
       let filterOptions = find('sortSelect').find('li');
       expect(filterOptions.map((wrapper) => wrapper.text())).toEqual([
-        'A-Z ',
-        'Z-A ',
-        'Recent-Old. Checked option. ', // checked
-        'Old-Recent ',
+        'A-Z',
+        'Z-A',
+        'Recent-Old. Checked option.', // checked
+        'Old-Recent',
       ]);
 
       const nameColumnHeaderButton = getTableColumnSortButton(testBed!, 'Name');
@@ -705,10 +705,10 @@ describe('TableListView', () => {
       filterOptions = find('sortSelect').find('li');
 
       expect(filterOptions.map((wrapper) => wrapper.text())).toEqual([
-        'A-Z ',
-        'Z-A. Checked option. ', // now this option is checked
-        'Recent-Old ',
-        'Old-Recent ',
+        'A-Z',
+        'Z-A. Checked option.', // now this option is checked
+        'Recent-Old',
+        'Old-Recent',
       ]);
     });
   });
@@ -792,7 +792,7 @@ describe('TableListView', () => {
       const filterOptions = find('sortSelect').find('li');
 
       // Check that the fourth option is 'Type Z-A'
-      expect(filterOptions.at(3).text()).toBe('Type Z-A ');
+      expect(filterOptions.at(3).text()).toBe('Type Z-A');
 
       // Click 'Type Z-A'
       act(() => {
@@ -865,12 +865,12 @@ describe('TableListView', () => {
 
       expect(filterOptions.length).toBe(6);
       expect(filterOptions.map((wrapper) => wrapper.text())).toEqual([
-        'A-Z ',
-        'Z-A ',
-        'Type A-Z ',
-        'Type Z-A ',
-        'Recent-Old. Checked option. ',
-        'Old-Recent ',
+        'A-Z',
+        'Z-A',
+        'Type A-Z',
+        'Type Z-A',
+        'Recent-Old. Checked option.',
+        'Old-Recent',
       ]);
 
       const typeColumnHeaderButton = getCustomTableColumnSortButton(testBed!, 'Type');
@@ -910,12 +910,12 @@ describe('TableListView', () => {
       filterOptions = find('sortSelect').find('li');
 
       expect(filterOptions.map((wrapper) => wrapper.text())).toEqual([
-        'A-Z ',
-        'Z-A ',
-        'Type A-Z ',
-        'Type Z-A. Checked option. ',
-        'Recent-Old ',
-        'Old-Recent ',
+        'A-Z',
+        'Z-A',
+        'Type A-Z',
+        'Type Z-A. Checked option.',
+        'Recent-Old',
+        'Old-Recent',
       ]);
     });
   });
@@ -996,11 +996,11 @@ describe('TableListView', () => {
 
       expect(filterOptions.length).toBe(5);
       expect(filterOptions.map((wrapper) => wrapper.text())).toEqual([
-        'Recently viewed. Checked option.Additional information ',
-        'A-Z ',
-        'Z-A ',
-        'Recent-Old ',
-        'Old-Recent ',
+        'Recently viewed. Checked option.Additional information',
+        'A-Z',
+        'Z-A',
+        'Recent-Old',
+        'Old-Recent',
       ]);
     });
   });
@@ -1773,7 +1773,7 @@ describe('TableListView', () => {
       const filterOptions = find('sortSelect').find('li');
 
       // Check that the second option is 'Z-A'
-      expect(filterOptions.at(1).text()).toBe('Z-A ');
+      expect(filterOptions.at(1).text()).toBe('Z-A');
 
       // Click 'Z-A'
       act(() => {
