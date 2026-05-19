@@ -21,6 +21,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 
+import { AWS_ONBOARDING_TITLE, AWS_ONBOARDING_DESCRIPTION } from '../../common/constants';
 import { ONBOARDING_STEPS } from './steps';
 import { useStepState } from './use_step_state';
 import { ConnectStep } from './steps/connect_step';
@@ -37,10 +38,9 @@ const STEP_COMPONENTS: Record<string, React.ComponentType> = {
   'see-data': SeeDataStep,
 };
 
-interface OnboardingLocationState {
-  title?: string;
-  description?: string;
-}
+const INTEGRATION_META: Record<string, { title: string; description: string }> = {
+  aws: { title: AWS_ONBOARDING_TITLE, description: AWS_ONBOARDING_DESCRIPTION },
+};
 
 function formatIntegrationTitle(integrationId: string): string {
   return integrationId
@@ -50,26 +50,13 @@ function formatIntegrationTitle(integrationId: string): string {
 }
 
 function useIntegrationMeta(integrationId: string) {
-  const location = useLocation<OnboardingLocationState | undefined>();
-  const storageKey = `onboarding.${integrationId}.meta`;
-
-  const navState = location.state;
-
-  if (navState?.title) {
-    sessionStorage.setItem(storageKey, JSON.stringify(navState));
+  const known = INTEGRATION_META[integrationId];
+  if (known) {
+    return known;
   }
-
-  const stored = sessionStorage.getItem(storageKey);
-  const meta: OnboardingLocationState = navState?.title
-    ? navState
-    : stored
-    ? JSON.parse(stored)
-    : {};
-
   return {
-    title: meta.title || formatIntegrationTitle(integrationId),
-    description:
-      meta.description || `Collect logs and metrics from ${formatIntegrationTitle(integrationId)}.`,
+    title: formatIntegrationTitle(integrationId),
+    description: `Collect logs and metrics from ${formatIntegrationTitle(integrationId)}.`,
   };
 }
 

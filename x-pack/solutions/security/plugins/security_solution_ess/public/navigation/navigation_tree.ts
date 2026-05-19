@@ -87,6 +87,10 @@ export const createNavigationTree = (
       },
       defaultNavigationTree.assets(services),
       defaultNavigationTree.ml(),
+      {
+        link: 'onboarding' as AppDeepLinkId,
+        sideNavStatus: 'hidden',
+      },
     ],
     footer: [
       {

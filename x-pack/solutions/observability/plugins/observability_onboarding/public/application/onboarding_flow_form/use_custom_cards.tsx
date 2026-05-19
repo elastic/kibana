@@ -12,7 +12,11 @@ import type { IntegrationCardItem } from '@kbn/fleet-plugin/public';
 import { useHistory } from 'react-router-dom';
 import { useLocation } from 'react-router-dom-v5-compat';
 import { syntheticsAddMonitorLocatorID } from '@kbn/observability-plugin/common';
-import { INGEST_HUB_ONBOARDING_ENABLED_FLAG } from '@kbn/ingest-hub-plugin/common/constants';
+import {
+  INGEST_HUB_ONBOARDING_ENABLED_FLAG,
+  AWS_ONBOARDING_TITLE,
+  AWS_ONBOARDING_DESCRIPTION,
+} from '@kbn/ingest-hub-plugin/common';
 import { ObservabilityOnboardingPricingFeature } from '../../../common/pricing_features';
 import type { ObservabilityOnboardingAppServices } from '../..';
 import { LogoIcon } from '../shared/logo_icon';
@@ -432,14 +436,8 @@ export function useCustomCards(
           {
             id: 'aws-logs-virtual',
             type: 'virtual',
-            title: i18n.translate(
-              'xpack.observability_onboarding.useCustomCardsForCategory.awsOnboardingTitle',
-              { defaultMessage: 'Amazon Web Services' }
-            ),
-            description: i18n.translate(
-              'xpack.observability_onboarding.useCustomCardsForCategory.awsOnboardingDescription',
-              { defaultMessage: 'Collect logs and metrics from Amazon Web Services (AWS).' }
-            ),
+            title: AWS_ONBOARDING_TITLE,
+            description: AWS_ONBOARDING_DESCRIPTION,
             name: 'aws',
             categories: ['observability'],
             icons: [{ type: 'eui' as const, src: 'logoAWS' }],
@@ -448,13 +446,7 @@ export function useCustomCards(
             integration: '',
             isCollectionCard: false,
             onCardClick: () => {
-              application?.navigateToApp('onboarding', {
-                path: '/aws',
-                state: {
-                  title: 'Amazon Web Services',
-                  description: 'Collect logs and metrics from Amazon Web Services (AWS).',
-                },
-              });
+              application?.navigateToApp('onboarding', { path: '/aws' });
             },
           } as IntegrationCardItem,
         ]
