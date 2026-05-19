@@ -81,13 +81,13 @@ export const getLegendAction = (
       return null;
     }
 
-    const filterActionsDisabled = filterActionData.some((data) => {
+    const isComputedColumn = filterActionData.some((data) => {
       const column = data.table.columns[data.column];
       return column?.isComputedColumn === true;
     });
 
     const filterHandler = ({ negate }: { negate?: boolean } = {}) => {
-      if (filterActionsDisabled) {
+      if (isComputedColumn) {
         return;
       }
       onFilter({ data: filterActionData, negate });
@@ -118,7 +118,7 @@ export const getLegendAction = (
         }
         onFilter={filterHandler}
         legendCellValueActions={legendCellValueActions}
-        filterActionsDisabled={filterActionsDisabled}
+        isComputedColumn={isComputedColumn}
       />
     );
   });

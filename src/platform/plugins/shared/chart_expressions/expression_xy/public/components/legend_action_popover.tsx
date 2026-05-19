@@ -40,10 +40,10 @@ export interface LegendActionPopoverProps {
   /**
    * When true, built-in Filter for / Filter out items are shown disabled.
    */
-  filterActionsDisabled?: boolean;
+  isComputedColumn?: boolean;
 }
 
-const getFilterActionsDisabledMessage = () =>
+const getEsqlComputedColumnFilterDisabledMessage = () =>
   i18n.translate('expressionXY.legend.esqlComputedColumnFilterDisabledMessage', {
     defaultMessage:
       "You can't apply a filter from this value because it relies on a field created at query time.",
@@ -72,7 +72,7 @@ export const LegendActionPopover: React.FunctionComponent<LegendActionPopoverPro
   label,
   onFilter,
   legendCellValueActions = [],
-  filterActionsDisabled = false,
+  isComputedColumn = false,
 }) => {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [ref, onClose] = useLegendAction<HTMLDivElement>();
@@ -105,8 +105,8 @@ export const LegendActionPopover: React.FunctionComponent<LegendActionPopoverPro
       },
     ];
 
-    const filterActionsDisabledMessage = filterActionsDisabled
-      ? getFilterActionsDisabledMessage()
+    const filterActionsDisabledMessage = isComputedColumn
+      ? getEsqlComputedColumnFilterDisabledMessage()
       : undefined;
 
     const defaultFilterPanelItems = !hasFilterCellAction(legendCellValueActions)
@@ -114,9 +114,9 @@ export const LegendActionPopover: React.FunctionComponent<LegendActionPopoverPro
           name: action.displayName,
           'data-test-subj': `legend-${label}-${action.id}`,
           icon: <EuiIcon type={action.iconType} size="m" aria-hidden={true} />,
-          disabled: filterActionsDisabled,
+          disabled: isComputedColumn,
           onClick: () => {
-            if (filterActionsDisabled) {
+            if (isComputedColumn) {
               return;
             }
             action.execute();
@@ -160,7 +160,7 @@ export const LegendActionPopover: React.FunctionComponent<LegendActionPopoverPro
         ],
       },
     ];
-  }, [label, legendCellValueActions, onFilter, filterActionsDisabled]);
+  }, [label, legendCellValueActions, onFilter, isComputedColumn]);
 
   const Button = (
     <div
