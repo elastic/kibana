@@ -52,10 +52,6 @@ jest.mock('../../../hooks/use_has_connectors_all_privileges', () => ({
   useHasConnectorsAllPrivileges: jest.fn(),
 }));
 
-jest.mock('../common/styles', () => ({
-  useListDetailPageStyles: () => ({ loadingSpinner: {} }),
-}));
-
 jest.mock('./assign_connectors_flyout', () => ({
   AssignConnectorsFlyout: () => <div data-test-subj="assignConnectorsFlyout" />,
 }));
