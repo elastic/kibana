@@ -17,9 +17,6 @@ export const esqlRouteRequestCounter = meter.createCounter('kibana.esql.route.re
   valueType: ValueType.INT,
 });
 
-export type EsqlRouteName = 'datasets' | 'views' | 'timefield';
-export type EsqlRouteOutcome = 'success' | 'failure';
-
 export const getErrorStatusCode = (error: unknown): number => {
   const err = error as { statusCode?: number; meta?: { statusCode?: number } } | null;
   return err?.statusCode ?? err?.meta?.statusCode ?? 500;
