@@ -140,12 +140,36 @@ export function normalizeMetricDocumentForEquality(doc: LensDocument): LensDocum
     return doc;
   }
 
-  const column = rawState.layers[trendlineLayerId]?.columns?.[trendlineTimeAccessor];
+  const layer = rawState.layers[trendlineLayerId];
+  const column = layer?.columns?.[trendlineTimeAccessor];
   if (!isDateHistogramColumn(column)) {
     return doc;
   }
 
-  column.label = '';
-  column.sourceField = '';
-  return doc;
+  return {
+    ...doc,
+    state: {
+      ...doc.state,
+      datasourceStates: {
+        ...doc.state.datasourceStates,
+        [LENS_DATASOURCE_ID.FORM_BASED]: {
+          ...rawState,
+          layers: {
+            ...rawState.layers,
+            [trendlineLayerId]: {
+              ...layer,
+              columns: {
+                ...layer.columns,
+                [trendlineTimeAccessor]: {
+                  ...column,
+                  label: '',
+                  sourceField: '',
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  };
 }
