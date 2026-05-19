@@ -194,8 +194,12 @@ export class WorkflowCrudService {
 
   async getManagedWorkflowDocumentsAllSpaces(options?: {
     includeDeleted?: boolean;
+    pluginId?: string;
   }): Promise<Array<{ id: string; source: WorkflowProperties }>> {
     const must: estypes.QueryDslQueryContainer[] = [{ term: { managed: true } }];
+    if (options?.pluginId) {
+      must.push({ term: { managedBy: options.pluginId } });
+    }
     const mustNot: estypes.QueryDslQueryContainer[] = options?.includeDeleted
       ? []
       : [{ exists: { field: 'deleted_at' } }];

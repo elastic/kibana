@@ -340,9 +340,9 @@ export class ManagedWorkflowsService {
       return;
     }
 
-    const existingManagedDocs = (
-      await this.deps.crudService.getManagedWorkflowDocumentsAllSpaces()
-    ).filter(({ source }) => source.managedBy === pluginId);
+    const existingManagedDocs = await this.deps.crudService.getManagedWorkflowDocumentsAllSpaces({
+      pluginId,
+    });
 
     const orphanIdsBySpace = new Map<string, string[]>();
     const dynamicUpdates: Array<{
