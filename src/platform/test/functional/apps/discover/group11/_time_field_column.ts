@@ -332,11 +332,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await discover.waitUntilTabIsLoaded();
 
             await retry.try(async () => {
-              expect(await dataGrid.getHeaderFields()).to.eql([
-                'bytes',
-                'extension',
-                '@timestamp',
-              ]);
+              expect(await dataGrid.getHeaderFields()).to.eql(['bytes', 'extension', '@timestamp']);
             });
 
             await unifiedFieldList.clickFieldListItemRemove('@timestamp');
