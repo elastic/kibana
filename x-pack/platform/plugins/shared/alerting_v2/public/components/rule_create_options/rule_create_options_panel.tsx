@@ -23,38 +23,54 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 interface RuleCreateOptionsPanelProps {
   onCreateEsqlRule: () => void;
+  layout?: 'vertical' | 'horizontal';
+  onCreateWithAgent: () => void;
 }
 
 export const RuleCreateOptionsPanel: React.FC<RuleCreateOptionsPanelProps> = ({
   onCreateEsqlRule,
+  layout = 'horizontal',
+  onCreateWithAgent,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const isVerticalLayout = layout === 'vertical';
 
   return (
     <EuiSplitPanel.Outer
-      hasBorder
+      hasBorder={!isVerticalLayout}
       hasShadow={false}
       grow={false}
-      css={{ maxWidth: euiTheme.breakpoint.l, margin: '0 auto', textAlign: 'center' }}
+      css={{
+        maxWidth: isVerticalLayout ? 'none' : euiTheme.breakpoint.l,
+        margin: isVerticalLayout ? 0 : '0 auto',
+        textAlign: isVerticalLayout ? 'left' : 'center',
+      }}
     >
-      <EuiSplitPanel.Inner paddingSize="xl" css={{ padding: euiTheme.size.xxxl }}>
-        <EuiTitle size="m">
-          <h2>
-            <FormattedMessage
-              id="xpack.alertingV2.ruleCreateOptionsPanel.welcomeTitle"
-              defaultMessage="Welcome to the new Alerting experience"
-            />
-          </h2>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiText size="s" color="subdued" textAlign="center">
-          <FormattedMessage
-            id="xpack.alertingV2.ruleCreateOptionsPanel.welcomeDescription"
-            defaultMessage="Powerful ES|QL-driven rules and support for external alerts, it delivers consistent, high-quality alert data into a unified experience."
-          />
-        </EuiText>
-        <EuiSpacer size="l" />
-        <EuiFlexGroup>
+      <EuiSplitPanel.Inner css={{ padding: isVerticalLayout ? 0 : euiTheme.size.xxxl }}>
+        {!isVerticalLayout ? (
+          <>
+            <EuiTitle size="m">
+              <h2>
+                <FormattedMessage
+                  id="xpack.alertingV2.ruleCreateOptionsPanel.welcomeTitle"
+                  defaultMessage="Welcome to the new Alerting experience"
+                />
+              </h2>
+            </EuiTitle>
+            <EuiSpacer size="s" />
+            <EuiText size="s" color="subdued" textAlign="center">
+              <FormattedMessage
+                id="xpack.alertingV2.ruleCreateOptionsPanel.welcomeDescription"
+                defaultMessage="Powerful ES|QL-driven rules and support for external alerts, it delivers consistent, high-quality alert data into a unified experience."
+              />
+            </EuiText>
+            <EuiSpacer size="l" />
+          </>
+        ) : null}
+        <EuiFlexGroup
+          direction={isVerticalLayout ? 'column' : 'row'}
+          gutterSize={isVerticalLayout ? 'l' : 'm'}
+        >
           <EuiFlexItem>
             <EuiCard
               layout="horizontal"
@@ -78,16 +94,11 @@ export const RuleCreateOptionsPanel: React.FC<RuleCreateOptionsPanelProps> = ({
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiCard
-              betaBadgeProps={{
-                label: i18n.translate('xpack.alertingV2.ruleCreateOptionsPanel.comingSoonLabel', {
-                  defaultMessage: 'Coming soon',
-                }),
-                color: 'hollow',
-                size: 'm',
-              }}
               layout="horizontal"
+              display="plain"
               titleElement="h3"
               titleSize="xs"
+              hasBorder={true}
               title={i18n.translate(
                 'xpack.alertingV2.ruleCreateOptionsPanel.createWithAiAgentTitle',
                 {
@@ -98,13 +109,8 @@ export const RuleCreateOptionsPanel: React.FC<RuleCreateOptionsPanelProps> = ({
                 'xpack.alertingV2.ruleCreateOptionsPanel.createWithAiAgentDescription',
                 { defaultMessage: 'Set up an Alerting rule with the help of the AI Agent.' }
               )}
-              aria-disabled={true}
-              display="subdued"
+              onClick={onCreateWithAgent}
               icon={<EuiIcon type="productAgent" color="text" size="l" aria-hidden={true} />}
-              css={{
-                cursor: 'default',
-                pointerEvents: 'none',
-              }}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -165,8 +171,8 @@ export const RuleCreateOptionsPanel: React.FC<RuleCreateOptionsPanelProps> = ({
               css={{
                 cursor: 'default',
                 pointerEvents: 'none',
-                width: '50%',
-                margin: '0 auto',
+                width: isVerticalLayout ? '100%' : '50%',
+                margin: isVerticalLayout ? 0 : '0 auto',
               }}
             />
           </EuiFlexItem>
