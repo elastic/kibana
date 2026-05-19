@@ -96,7 +96,7 @@ const OsqueryEditorComponent: React.FC<OsqueryEditorProps> = ({
   );
 
   return (
-    <div style={containerStyle}>
+    <div style={containerStyle} data-test-subj="osqueryEditor">
       <CodeEditor
         languageId={'sql'}
         value={editorValue}

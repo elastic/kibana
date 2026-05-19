@@ -58,6 +58,7 @@ dependsOn:
   - '@kbn/core-saved-objects-server'
   - '@kbn/monaco'
   - '@kbn/io-ts-utils'
+  - '@kbn/kbn-client'
   - '@kbn/shared-ux-page-kibana-template'
   - '@kbn/openapi-generator'
   - '@kbn/code-editor'
@@ -90,6 +91,9 @@ dependsOn:
   - '@kbn/core-logging-server-mocks'
   - '@kbn/core-http-request-handler-context-server'
   - '@kbn/core-security-server'
+  - '@kbn/core-http-browser'
+  - '@kbn/es'
+  - '@kbn/dev-utils'
 tags:
   - plugin
   - prod
@@ -103,7 +107,7 @@ fileGroups:
     - scripts/**/*
     - scripts/**/*.json
     - server/**/*
-    - test/scout/**/*
+    - test/scout_osquery/**/*
     - common/schemas/*/*.json
     - '!target/**/*'
   jest-config:

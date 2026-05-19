@@ -11,7 +11,7 @@
     "scripts/**/*",
     "scripts/**/*.json",
     "server/**/*",
-    "test/scout/**/*",
+    "test/scout_osquery/**/*",
     "../../../../../typings/**/*",
     // ECS and Osquery schema files (JSON not matched by **/* globs)
     "common/schemas/*/*.json"
@@ -67,6 +67,7 @@
     "@kbn/core-saved-objects-server",
     "@kbn/monaco",
     "@kbn/io-ts-utils",
+    "@kbn/kbn-client",
     "@kbn/shared-ux-page-kibana-template",
     "@kbn/openapi-generator",
     "@kbn/code-editor",
@@ -98,6 +99,8 @@
     "@kbn/core-http-browser",
     "@kbn/core-logging-server-mocks",
     "@kbn/core-http-request-handler-context-server",
-    "@kbn/core-security-server"
+    "@kbn/core-security-server",
+    "@kbn/es",
+    "@kbn/dev-utils"
   ]
 }

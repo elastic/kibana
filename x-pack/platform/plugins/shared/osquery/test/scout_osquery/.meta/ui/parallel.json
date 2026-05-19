@@ -1,0 +1,421 @@
+{
+  "sha1": "",
+  "tests": [
+    {
+      "id": "a43bba141bc59db-493b97db0359c20",
+      "title": "Pack-based Osquery response actions in the rule editor persists pack response actions and expands queries on save",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/parallel_tests/alert_response_action_form.spec.ts",
+        "line": 83,
+        "column": 7
+      }
+    },
+    {
+      "id": "daffd303944de7a-550dd3f7c848565",
+      "title": "Osquery in a custom space runs a live query in the custom space and asserts the Discover link routes to that space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/parallel_tests/custom_space.spec.ts",
+        "line": 32,
+        "column": 7
+      }
+    },
+    {
+      "id": "daffd303944de7a-1450128a33d095c",
+      "title": "Osquery in a custom space runs a pack in the custom space and verifies results render",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/parallel_tests/custom_space.spec.ts",
+        "line": 70,
+        "column": 7
+      }
+    },
+    {
+      "id": "cc47f3c0ee420c4-44841165ef6d854",
+      "title": "Fleet integration adds osquery_manager integration to a new agent policy and verifies it surfaces in the Fleet API",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/parallel_tests/fleet_integration.spec.ts",
+        "line": 28,
+        "column": 7
+      }
+    },
+    {
+      "id": "cc47f3c0ee420c4-827eb86739b5d33",
+      "title": "Fleet integration creates a policy with packs and verifies the pack key surfaces in the Fleet package-policy list",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/parallel_tests/fleet_integration.spec.ts",
+        "line": 59,
+        "column": 7
+      }
+    },
+    {
+      "id": "cc47f3c0ee420c4-d7cd1bf959d91c4",
+      "title": "Fleet integration handles Fleet tour dismissal when navigating to agent policies",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/parallel_tests/fleet_integration.spec.ts",
+        "line": 109,
+        "column": 7
+      }
+    },
+    {
+      "id": "d605f1580fc0166-8a416d2a6d73139",
+      "title": "Live query ECS mapping submits a query with dynamic + static ECS mappings and surfaces both columns in results",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/parallel_tests/live_query_ecs_mapping.spec.ts",
+        "line": 21,
+        "column": 7
+      }
+    },
+    {
+      "id": "d605f1580fc0166-fe3850f6291134f",
+      "title": "Live query ECS mapping adds and removes ECS mapping rows without blocking submission",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/parallel_tests/live_query_ecs_mapping.spec.ts",
+        "line": 88,
+        "column": 7
+      }
+    },
+    {
+      "id": "96aa7cde337639f-b31adc7da92cd9c",
+      "title": "Live query history re-runs the most recent query from history and restores its editor state",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/parallel_tests/live_query_history.spec.ts",
+        "line": 38,
+        "column": 7
+      }
+    },
+    {
+      "id": "96aa7cde337639f-c950b20a05e2cdc",
+      "title": "Live query history opens query details from history and surfaces the submitted query body",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/parallel_tests/live_query_history.spec.ts",
+        "line": 67,
+        "column": 7
+      }
+    },
+    {
+      "id": "96aa7cde337639f-d4c169e60c3cc7d",
+      "title": "Live query history paginates the query history list",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/parallel_tests/live_query_history.spec.ts",
+        "line": 98,
+        "column": 7
+      }
+    },
+    {
+      "id": "d209ab14200cb69-40e5b065bb39044",
+      "title": "Live query submission without enrolled agents blocks submit with an agents validation message when no agents are selected",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/parallel_tests/live_query_submission_no_agent.spec.ts",
+        "line": 33,
+        "column": 7
+      }
+    },
+    {
+      "id": "d209ab14200cb69-929480e41542885",
+      "title": "Live query submission without enrolled agents grows the editor on Shift+Enter and keeps a multiline query in Monaco",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/parallel_tests/live_query_submission_no_agent.spec.ts",
+        "line": 42,
+        "column": 7
+      }
+    },
+    {
+      "id": "d209ab14200cb69-14cad3e7e19e125",
+      "title": "Live query submission without enrolled agents reveals the timeout field when Advanced options are expanded",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/parallel_tests/live_query_submission_no_agent.spec.ts",
+        "line": 58,
+        "column": 7
+      }
+    },
+    {
+      "id": "d209ab14200cb69-76cbef97c7ac692",
+      "title": "Live query submission without enrolled agents blocks submit with a query validation message when the query is empty",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/parallel_tests/live_query_submission_no_agent.spec.ts",
+        "line": 68,
+        "column": 7
+      }
+    },
+    {
+      "id": "b98b79240d97459-6fc0688d5f75e80",
+      "title": "Live query submission with enrolled agents submits a live query against all agents and validates results, per-agent rendering, and the Discover link",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/parallel_tests/live_query_submission_with_agent.spec.ts",
+        "line": 18,
+        "column": 7
+      }
+    },
+    {
+      "id": "0a770251df54127-a309b611b1c88ac",
+      "title": "Osquery results attached to Observability cases adds a live query result to an Observability case from history",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/parallel_tests/osquery_case_observability.spec.ts",
+        "line": 17,
+        "column": 7
+      }
+    },
+    {
+      "id": "35472dad0581849-34610f5cb162973",
+      "title": "Osquery results attached to Security cases adds a live query result to a Security case from history",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/parallel_tests/osquery_case_security.spec.ts",
+        "line": 16,
+        "column": 7
+      }
+    },
+    {
+      "id": "eb5aa55a369498c-5088a770a076e97",
+      "title": "Pack CRUD from UI creates a pack from a saved query and verifies Fleet-backed query shape",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/parallel_tests/packs_crud.spec.ts",
+        "line": 52,
+        "column": 7
+      }
+    },
+    {
+      "id": "eb5aa55a369498c-d370cb7d2ba2725",
+      "title": "Pack CRUD from UI edits pack queries from the UI",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/parallel_tests/packs_crud.spec.ts",
+        "line": 116,
+        "column": 7
+      }
+    },
+    {
+      "id": "eb5aa55a369498c-eb889fff357ff43",
+      "title": "Pack CRUD from UI deletes a pack from the edit page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/parallel_tests/packs_crud.spec.ts",
+        "line": 172,
+        "column": 7
+      }
+    },
+    {
+      "id": "5b10b9d70c5f968-5274dadd706aa66",
+      "title": "Pack Fleet policy sync toggles pack active state and observes Fleet policy updates",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/parallel_tests/packs_policy_sync.spec.ts",
+        "line": 34,
+        "column": 7
+      }
+    },
+    {
+      "id": "5b10b9d70c5f968-348145620c73aa2",
+      "title": "Pack Fleet policy sync duplicates a pack from the kebab menu with a _copy suffix",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/parallel_tests/packs_policy_sync.spec.ts",
+        "line": 81,
+        "column": 7
+      }
+    },
+    {
+      "id": "9785cb403f3ab09-4fb1e56a6b12f8b",
+      "title": "Saved queries CRUD from UI creates a saved query with ECS mapping from the UI",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/parallel_tests/saved_queries_crud.spec.ts",
+        "line": 38,
+        "column": 7
+      }
+    },
+    {
+      "id": "9785cb403f3ab09-1fda53dd9534647",
+      "title": "Saved queries CRUD from UI edits an existing saved query description from the UI",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/parallel_tests/saved_queries_crud.spec.ts",
+        "line": 77,
+        "column": 7
+      }
+    },
+    {
+      "id": "9785cb403f3ab09-310944e82714928",
+      "title": "Saved queries CRUD from UI blocks deletion of prebuilt saved queries but allows deleting custom ones",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/parallel_tests/saved_queries_crud.spec.ts",
+        "line": 104,
+        "column": 7
+      }
+    },
+    {
+      "id": "9785cb403f3ab09-6fdf8ce226c4f84",
+      "title": "Saved queries CRUD from UI paginates the saved queries list when size changes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/parallel_tests/saved_queries_crud.spec.ts",
+        "line": 153,
+        "column": 7
+      }
+    },
+    {
+      "id": "a8b1c2d3e4f5a6b7-rewritten-saved-dropdown",
+      "title": "Live query saved-query dropdown populates the editor from the saved-query dropdown and submits against agents",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/ui/parallel_tests/live_query_saved_query_dropdown.spec.ts",
+        "line": 57,
+        "column": 7
+      }
+    }
+  ]
+}

@@ -55,6 +55,7 @@ const NewLiveQueryButton = React.memo(() => {
   return (
     <EuiButton
       fill
+      data-test-subj="osqueryLiveQueriesListNewLiveQueryButton"
       {...newQueryLinkProps}
       iconType="plusCircle"
       isDisabled={

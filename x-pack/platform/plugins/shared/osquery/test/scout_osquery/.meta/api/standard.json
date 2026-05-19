@@ -1,0 +1,813 @@
+{
+  "sha1": "",
+  "tests": [
+    {
+      "id": "6d0453e6643bec7-ac29b1ca2fd493b",
+      "title": "Osquery live query details accepts live query creation request (permission check)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/api/tests/live_query_details.spec.ts",
+        "line": 25,
+        "column": 12
+      }
+    },
+    {
+      "id": "6d0453e6643bec7-7f1310726858224",
+      "title": "Osquery live query details GET live query details returns expected shape",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/api/tests/live_query_details.spec.ts",
+        "line": 40,
+        "column": 12
+      }
+    },
+    {
+      "id": "79c16e94f07636f-eaa6b580adf8c44",
+      "title": "Osquery packs - admin includes profile_uid fields on create and find",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/api/tests/packs_admin.spec.ts",
+        "line": 35,
+        "column": 12
+      }
+    },
+    {
+      "id": "4d999c6a8ddb2e5-bddf81e18219419",
+      "title": "Osquery packs - editor creates and reads a pack",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/api/tests/packs_editor.spec.ts",
+        "line": 30,
+        "column": 12
+      }
+    },
+    {
+      "id": "4d999c6a8ddb2e5-37c8854d1767461",
+      "title": "Osquery packs - editor creates a pack with multiple queries",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/api/tests/packs_editor.spec.ts",
+        "line": 52,
+        "column": 12
+      }
+    },
+    {
+      "id": "4d999c6a8ddb2e5-d999be7a0de1646",
+      "title": "Osquery packs - editor updates a pack",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/api/tests/packs_editor.spec.ts",
+        "line": 88,
+        "column": 12
+      }
+    },
+    {
+      "id": "4d999c6a8ddb2e5-a4cb66f1e8548d0",
+      "title": "Osquery packs - editor deletes a pack",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/api/tests/packs_editor.spec.ts",
+        "line": 127,
+        "column": 12
+      }
+    },
+    {
+      "id": "4d999c6a8ddb2e5-22285146536f2ba",
+      "title": "Osquery packs - editor finds packs with search, enabled, and createdBy filters",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/api/tests/packs_editor.spec.ts",
+        "line": 154,
+        "column": 12
+      }
+    },
+    {
+      "id": "ac8bae3856427d5-289ada8c99df93c",
+      "title": "Osquery packs - policy ID validation strips duplicate policy IDs and returns 200",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/api/tests/packs_policy_validation.spec.ts",
+        "line": 91,
+        "column": 12
+      }
+    },
+    {
+      "id": "ac8bae3856427d5-b812192f2a94010",
+      "title": "Osquery packs - policy ID validation returns 400 for a single non-existent policy ID",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/api/tests/packs_policy_validation.spec.ts",
+        "line": 112,
+        "column": 12
+      }
+    },
+    {
+      "id": "ac8bae3856427d5-d61aeb0c4f9fc8c",
+      "title": "Osquery packs - policy ID validation returns 400 for mixed valid and invalid policy IDs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/api/tests/packs_policy_validation.spec.ts",
+        "line": 124,
+        "column": 12
+      }
+    },
+    {
+      "id": "f0f34ddebf05cba-86baa7b4aef6ba9",
+      "title": "Osquery packs - viewer allows reading a pack",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/api/tests/packs_viewer.spec.ts",
+        "line": 33,
+        "column": 12
+      }
+    },
+    {
+      "id": "f0f34ddebf05cba-458da8bee3b9dfa",
+      "title": "Osquery packs - viewer denies pack creation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/api/tests/packs_viewer.spec.ts",
+        "line": 41,
+        "column": 12
+      }
+    },
+    {
+      "id": "f0f34ddebf05cba-a109046fc85ce09",
+      "title": "Osquery packs - viewer denies pack update",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/api/tests/packs_viewer.spec.ts",
+        "line": 50,
+        "column": 12
+      }
+    },
+    {
+      "id": "f0f34ddebf05cba-b25f0a0ef4568e8",
+      "title": "Osquery packs - viewer denies pack deletion",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/api/tests/packs_viewer.spec.ts",
+        "line": 59,
+        "column": 12
+      }
+    },
+    {
+      "id": "05f41143376c3b4-4e01da7e575f420",
+      "title": "Osquery RBAC - alert test (investigation guide) is not rejected when running an investigation guide query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/api/tests/rbac_alert_test.spec.ts",
+        "line": 54,
+        "column": 12
+      }
+    },
+    {
+      "id": "05f41143376c3b4-dcffc21648db436",
+      "title": "Osquery RBAC - alert test (investigation guide) returns 403 when running a custom query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/api/tests/rbac_alert_test.spec.ts",
+        "line": 66,
+        "column": 12
+      }
+    },
+    {
+      "id": "3bbcf29fcafe4ac-7cef85cc75cf448",
+      "title": "Osquery RBAC - reader role returns 403 when creating a saved query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/api/tests/rbac_reader.spec.ts",
+        "line": 22,
+        "column": 12
+      }
+    },
+    {
+      "id": "3bbcf29fcafe4ac-774f1c2e1292420",
+      "title": "Osquery RBAC - reader role returns 403 when creating a live query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/api/tests/rbac_reader.spec.ts",
+        "line": 32,
+        "column": 12
+      }
+    },
+    {
+      "id": "3bbcf29fcafe4ac-c5d4f4b0a2babcd",
+      "title": "Osquery RBAC - reader role returns 403 when creating a pack",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/api/tests/rbac_reader.spec.ts",
+        "line": 42,
+        "column": 12
+      }
+    },
+    {
+      "id": "b860bd6654f4034-da1717e57b98569",
+      "title": "Osquery RBAC - t1_analyst role is not rejected when running a saved query via live query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/api/tests/rbac_t1_analyst.spec.ts",
+        "line": 43,
+        "column": 12
+      }
+    },
+    {
+      "id": "b860bd6654f4034-526d50c78392f6e",
+      "title": "Osquery RBAC - t1_analyst role returns 403 when running a custom query from scratch",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/api/tests/rbac_t1_analyst.spec.ts",
+        "line": 55,
+        "column": 12
+      }
+    },
+    {
+      "id": "b860bd6654f4034-88f6459e2293ebf",
+      "title": "Osquery RBAC - t1_analyst role returns 403 when creating a saved query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/api/tests/rbac_t1_analyst.spec.ts",
+        "line": 65,
+        "column": 12
+      }
+    },
+    {
+      "id": "b860bd6654f4034-1b540842ddfd74e",
+      "title": "Osquery RBAC - t1_analyst role returns 403 when creating a pack",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/api/tests/rbac_t1_analyst.spec.ts",
+        "line": 75,
+        "column": 12
+      }
+    },
+    {
+      "id": "137a121c3784999-4619d952b1b5960",
+      "title": "Osquery RBAC - t2_analyst role is not rejected when running a saved query via live query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/api/tests/rbac_t2_analyst.spec.ts",
+        "line": 43,
+        "column": 12
+      }
+    },
+    {
+      "id": "137a121c3784999-82df5dbc8049001",
+      "title": "Osquery RBAC - t2_analyst role returns 403 when running a custom query from scratch",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/api/tests/rbac_t2_analyst.spec.ts",
+        "line": 55,
+        "column": 12
+      }
+    },
+    {
+      "id": "137a121c3784999-59b9baded963841",
+      "title": "Osquery RBAC - t2_analyst role returns 403 when creating a saved query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/api/tests/rbac_t2_analyst.spec.ts",
+        "line": 65,
+        "column": 12
+      }
+    },
+    {
+      "id": "137a121c3784999-4b04eb9a1fe2d4d",
+      "title": "Osquery RBAC - t2_analyst role returns 403 when creating a pack",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/api/tests/rbac_t2_analyst.spec.ts",
+        "line": 75,
+        "column": 12
+      }
+    },
+    {
+      "id": "31c5f25bd74f58e-07a1141a62b77c5",
+      "title": "Detection rules with Osquery response actions creates a rule with a single Osquery query action",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/api/tests/response_actions_rules.spec.ts",
+        "line": 59,
+        "column": 12
+      }
+    },
+    {
+      "id": "31c5f25bd74f58e-7a74e651c672fbe",
+      "title": "Detection rules with Osquery response actions creates a rule with full Osquery params including ecs_mapping and timeout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/api/tests/response_actions_rules.spec.ts",
+        "line": 97,
+        "column": 12
+      }
+    },
+    {
+      "id": "31c5f25bd74f58e-92efca6fb3579ad",
+      "title": "Detection rules with Osquery response actions creates a rule with pack-based Osquery action",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/api/tests/response_actions_rules.spec.ts",
+        "line": 129,
+        "column": 12
+      }
+    },
+    {
+      "id": "31c5f25bd74f58e-ca609faa8720ed8",
+      "title": "Detection rules with Osquery response actions updates a rule to add Osquery response actions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/api/tests/response_actions_rules.spec.ts",
+        "line": 168,
+        "column": 12
+      }
+    },
+    {
+      "id": "31c5f25bd74f58e-c4f918e36731c14",
+      "title": "Detection rules with Osquery response actions updates a rule to remove Osquery response actions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/api/tests/response_actions_rules.spec.ts",
+        "line": 208,
+        "column": 12
+      }
+    },
+    {
+      "id": "31c5f25bd74f58e-a49e137dd0f3ccb",
+      "title": "Detection rules with Osquery response actions creates a rule with multiple Osquery actions of different types",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/api/tests/response_actions_rules.spec.ts",
+        "line": 240,
+        "column": 12
+      }
+    },
+    {
+      "id": "7128f28c6223b98-f16f846afda2c5a",
+      "title": "Osquery saved queries - admin includes profile_uid fields on create response",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/api/tests/saved_queries_admin.spec.ts",
+        "line": 31,
+        "column": 12
+      }
+    },
+    {
+      "id": "7128f28c6223b98-a457f659437d0ce",
+      "title": "Osquery saved queries - admin includes profile_uid fields on read and find responses",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/api/tests/saved_queries_admin.spec.ts",
+        "line": 45,
+        "column": 12
+      }
+    },
+    {
+      "id": "012e4fecc6d27f8-67440a67e237991",
+      "title": "Osquery saved queries - editor creates and reads a saved query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/api/tests/saved_queries_editor.spec.ts",
+        "line": 30,
+        "column": 12
+      }
+    },
+    {
+      "id": "012e4fecc6d27f8-26426f84826a8fa",
+      "title": "Osquery saved queries - editor updates a saved query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/api/tests/saved_queries_editor.spec.ts",
+        "line": 57,
+        "column": 12
+      }
+    },
+    {
+      "id": "012e4fecc6d27f8-4e1d010ae0371a6",
+      "title": "Osquery saved queries - editor deletes a saved query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/api/tests/saved_queries_editor.spec.ts",
+        "line": 95,
+        "column": 12
+      }
+    },
+    {
+      "id": "012e4fecc6d27f8-e0d4bc92dade940",
+      "title": "Osquery saved queries - editor returns 404 when reading a non-existent saved query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/api/tests/saved_queries_editor.spec.ts",
+        "line": 125,
+        "column": 12
+      }
+    },
+    {
+      "id": "012e4fecc6d27f8-c40765cf3b90f9e",
+      "title": "Osquery saved queries - editor returns 404 when updating a non-existent saved query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/api/tests/saved_queries_editor.spec.ts",
+        "line": 136,
+        "column": 12
+      }
+    },
+    {
+      "id": "012e4fecc6d27f8-c5441e2aab3ccae",
+      "title": "Osquery saved queries - editor returns 404 when deleting a non-existent saved query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/api/tests/saved_queries_editor.spec.ts",
+        "line": 148,
+        "column": 12
+      }
+    },
+    {
+      "id": "012e4fecc6d27f8-18bf53d94bae2be",
+      "title": "Osquery saved queries - editor filters by search term and createdBy",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/api/tests/saved_queries_editor.spec.ts",
+        "line": 159,
+        "column": 12
+      }
+    },
+    {
+      "id": "733756d74bfb9c9-2f94eba6498c183",
+      "title": "Osquery saved queries - viewer allows reading a saved query",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/api/tests/saved_queries_viewer.spec.ts",
+        "line": 36,
+        "column": 12
+      }
+    },
+    {
+      "id": "733756d74bfb9c9-2f8be15ea077669",
+      "title": "Osquery saved queries - viewer denies saved query creation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/api/tests/saved_queries_viewer.spec.ts",
+        "line": 47,
+        "column": 12
+      }
+    },
+    {
+      "id": "733756d74bfb9c9-83ca7ae1c50bb95",
+      "title": "Osquery saved queries - viewer denies saved query update",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/api/tests/saved_queries_viewer.spec.ts",
+        "line": 56,
+        "column": 12
+      }
+    },
+    {
+      "id": "733756d74bfb9c9-3db66f1ffb065f8",
+      "title": "Osquery saved queries - viewer denies saved query deletion",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-stateful-search",
+        "@cloud-stateful-search",
+        "@local-stateful-observability_complete",
+        "@cloud-stateful-observability_complete",
+        "@local-stateful-security_complete",
+        "@cloud-stateful-security_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/api/tests/saved_queries_viewer.spec.ts",
+        "line": 68,
+        "column": 12
+      }
+    },
+    {
+      "id": "460384e993f27ed-1b361dc73721b52",
+      "title": "Osquery tier gating - Endpoint Complete permits response actions allows creating a rule with osquery response action",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/api/tests/tier_gating_complete.spec.ts",
+        "line": 65,
+        "column": 12
+      }
+    },
+    {
+      "id": "d577a62b6f04e6a-c27bb92f6e29d68",
+      "title": "Osquery tier gating - Essentials tiers accept rule with response actions at API level allows creating a rule with osquery response action on essentials tier",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_essentials",
+        "@cloud-serverless-security_essentials"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/osquery/test/scout_osquery/api/tests/tier_gating_essentials.spec.ts",
+        "line": 53,
+        "column": 12
+      }
+    }
+  ]
+}

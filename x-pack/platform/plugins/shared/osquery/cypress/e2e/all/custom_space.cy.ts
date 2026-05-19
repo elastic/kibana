@@ -24,7 +24,6 @@ const testSpaces = [
 describe('ALL - Custom space', () => {
   testSpaces.forEach((testSpace) => {
     describe(`[${testSpace.name}]`, { tags: testSpace.tags }, () => {
-      let packName: string;
       let packId: string;
       let spaceId: string;
 
@@ -56,7 +55,6 @@ describe('ALL - Custom space', () => {
             space as string
           ).then((data) => {
             packId = data.saved_object_id;
-            packName = data.name;
           });
         });
       });
@@ -100,7 +98,7 @@ describe('ALL - Custom space', () => {
       it('runs packs normally', () => {
         cy.contains('Packs').click();
         cy.contains('Create pack').click();
-        cy.getBySel(`play-${packName}-button`).click();
+        cy.getBySel(`play-pack-${packId}-button`).click();
         selectAllAgents();
         cy.contains('Submit').click();
         checkResults();
