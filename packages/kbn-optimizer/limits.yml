@@ -173,7 +173,7 @@ pageLoadAssetSize:
   serverlessVectordb: 4389
   serverlessWorkplaceAI: 4855
   sessionView: 47912
-  share: 64066
+  share: 64059
   slo: 40437
   snapshotRestore: 22068
   spaces: 28871
@@ -188,7 +188,7 @@ pageLoadAssetSize:
   transform: 16515
   triggersActionsUi: 123512
   uiActions: 35180
-  unifiedDocViewer: 15000
+  unifiedDocViewer: 16520
   unifiedSearch: 19500
   upgradeAssistant: 6898
   uptime: 48171
