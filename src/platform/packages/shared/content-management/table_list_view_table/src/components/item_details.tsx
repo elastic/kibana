@@ -75,7 +75,6 @@ export function ItemDetails<T extends UserContentCommonSchema>({
 
     return (
       <>
-        {}
         <EuiLink
           href={getDetailViewLink?.(item)}
           onClick={onClickTitleHandler}

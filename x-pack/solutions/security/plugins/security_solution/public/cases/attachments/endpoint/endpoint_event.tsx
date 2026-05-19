@@ -50,7 +50,6 @@ const EndpointEventLink = ({ target, actionText, remainingTargets }: EndpointEve
   return (
     <>
       {actionText}
-      {}
       <EuiLink
         onClick={onLinkClick}
         href={linkHref}

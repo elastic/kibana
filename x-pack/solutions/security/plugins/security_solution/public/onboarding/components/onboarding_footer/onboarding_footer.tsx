@@ -81,7 +81,6 @@ export const FooterLinkItem = React.memo<FooterLinkItemProps>(
           <EuiText size="xs">{description}</EuiText>
           <EuiSpacer size="m" />
           <EuiText size="xs">
-            {}
             <EuiLink
               data-test-subj="footerLinkItem"
               onClick={onClickWithReport}

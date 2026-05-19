@@ -55,7 +55,6 @@ export const NameCellTitle = ({ item, shouldUseHref, onClick }: NameCellTitlePro
 
   return (
     <EuiText size="s">
-      {}
       <EuiLink href={href} onClick={handleClick} data-test-subj="content-list-table-item-link">
         {title}
       </EuiLink>

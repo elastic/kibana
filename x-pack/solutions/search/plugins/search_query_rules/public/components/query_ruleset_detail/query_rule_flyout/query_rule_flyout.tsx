@@ -179,7 +179,6 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
                   id="xpack.search.queryRulesetDetail.queryRuleFlyout.findDocuments"
                   defaultMessage="Find your documents IDs into "
                 />
-                {}
                 <EuiLink
                   data-test-subj="searchQueryRulesQueryRuleFlyoutLink"
                   external
