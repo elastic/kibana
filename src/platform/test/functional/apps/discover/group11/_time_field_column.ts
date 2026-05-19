@@ -141,12 +141,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       hasTimeField,
       hideTimeFieldColumnSetting,
       savedSearchSuffix,
-      isEsqlMode,
     }: {
       hasTimeField: boolean;
       hideTimeFieldColumnSetting: boolean;
       savedSearchSuffix: string;
-      isEsqlMode?: boolean;
     }) {
       // check in Discover
       await unifiedFieldList.clickFieldListItemAdd('bytes');
@@ -154,7 +152,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await retry.try(async () => {
         expect(await dataGrid.getHeaderFields()).to.eql(
-          hideTimeFieldColumnSetting || !hasTimeField || isEsqlMode
+          hideTimeFieldColumnSetting || !hasTimeField
             ? ['bytes', 'extension']
             : ['@timestamp', 'bytes', 'extension']
         );
@@ -187,7 +185,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await unifiedFieldList.clickFieldListItemRemove('@timestamp');
       await retry.try(async () => {
         expect(await dataGrid.getHeaderFields()).to.eql(
-          hideTimeFieldColumnSetting || !hasTimeField || isEsqlMode
+          hideTimeFieldColumnSetting || !hasTimeField
             ? ['bytes', 'extension']
             : ['@timestamp', 'bytes', 'extension']
         );
@@ -203,7 +201,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await retry.try(async () => {
         expect(await dataGrid.getHeaderFields()).to.eql(
-          hideTimeFieldColumnSetting || !hasTimeField || isEsqlMode
+          hideTimeFieldColumnSetting || !hasTimeField
             ? ['bytes', 'extension']
             : ['@timestamp', 'bytes', 'extension']
         );
@@ -322,7 +320,28 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               hasTimeField: true,
               hideTimeFieldColumnSetting,
               savedSearchSuffix: savedSearchSuffix + 'ESQL',
-              isEsqlMode: true,
+            });
+          });
+
+          it('should not auto-prepend time column for transformational queries', async () => {
+            await discover.selectTextBaseLang();
+            await monacoEditor.setCodeEditorValue(
+              'from logstash-* | keep bytes, extension, @timestamp'
+            );
+            await testSubjects.click('querySubmitButton');
+            await discover.waitUntilTabIsLoaded();
+
+            await retry.try(async () => {
+              expect(await dataGrid.getHeaderFields()).to.eql([
+                'bytes',
+                'extension',
+                '@timestamp',
+              ]);
+            });
+
+            await unifiedFieldList.clickFieldListItemRemove('@timestamp');
+            await retry.try(async () => {
+              expect(await dataGrid.getHeaderFields()).to.eql(['bytes', 'extension']);
             });
           });
         });

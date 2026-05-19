@@ -187,7 +187,7 @@ describe('getSharingData', () => {
     `);
   });
 
-  test('fields do not have prepended timeField for ES|QL', async () => {
+  test('fields do not have prepended timeField for transformational ES|QL', async () => {
     const index = { ...dataViewMock } as DataView;
     index.timeFieldName = 'cool-timefield';
 
@@ -203,13 +203,51 @@ describe('getSharingData', () => {
           'cool-field-5',
           'cool-field-6',
         ],
+        query: {
+          esql: 'from logstash-* | keep cool-field-1, cool-field-2, cool-field-3, cool-field-4, cool-field-5, cool-field-6',
+        },
       },
-      services,
-      true
+      services
     );
     expect(result).toMatchInlineSnapshot(`
       Object {
         "columns": Array [
+          "cool-field-1",
+          "cool-field-2",
+          "cool-field-3",
+          "cool-field-4",
+          "cool-field-5",
+          "cool-field-6",
+        ],
+        "getSearchSource": [Function],
+      }
+    `);
+  });
+
+  test('fields have prepended timeField for non-transformational ES|QL', async () => {
+    const index = { ...dataViewMock } as DataView;
+    index.timeFieldName = 'cool-timefield';
+
+    const searchSourceMock = createSearchSourceMock({ index });
+    const result = await getSharingData(
+      searchSourceMock,
+      {
+        columns: [
+          'cool-field-1',
+          'cool-field-2',
+          'cool-field-3',
+          'cool-field-4',
+          'cool-field-5',
+          'cool-field-6',
+        ],
+        query: { esql: 'from logstash-* | where bytes > 0' },
+      },
+      services
+    );
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "columns": Array [
+          "cool-timefield",
           "cool-field-1",
           "cool-field-2",
           "cool-field-3",

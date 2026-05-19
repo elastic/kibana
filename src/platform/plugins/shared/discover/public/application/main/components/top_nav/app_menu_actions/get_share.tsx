@@ -64,12 +64,7 @@ export const buildShareOptions = async ({
     services,
   });
 
-  const searchSourceSharingData = await getSharingData(
-    searchSource,
-    currentTab.appState,
-    services,
-    isEsqlMode
-  );
+  const searchSourceSharingData = await getSharingData(searchSource, currentTab.appState, services);
 
   const { locator } = services;
   const { timefilter } = services.data.query.timefilter;
