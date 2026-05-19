@@ -34,6 +34,10 @@ const ebtAction = {
     ENTITY_DETAIL_VIEW: 'entity_detail_view',
     ENTITY_EDIT_FROM_AGENT: 'entity_edit_from_agent',
   },
+  globalManagement: {
+    MANAGE_ENTITY_EDIT: 'manage_entity_edit',
+    MANAGE_ENTITY_DELETE: 'manage_entity_delete',
+  },
 } as const;
 
 const ebtDetail = {
@@ -46,6 +50,7 @@ const ebtDetail = {
 const ebtEntity = {
   TOOL: 'tool',
   PLUGIN: 'plugin',
+  SKILL: 'skill',
 } as const;
 const ebtFormat = {} as const;
 

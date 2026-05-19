@@ -28,6 +28,8 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { PublicSkillDefinition } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { defer } from 'lodash';
@@ -240,6 +242,11 @@ export const SkillForm: React.FC<SkillFormProps> = ({
                     disabled={hasErrors || isSubmitting || (!isCreateMode && !isDirty)}
                     isLoading={isSubmitting}
                     data-test-subj="agentBuilderSkillFormSaveButton"
+                    {...getEbtProps({
+                      element: AGENT_BUILDER_UI_EBT.element.pageContent,
+                      action: AGENT_BUILDER_UI_EBT.action.globalManagement.MANAGE_ENTITY_EDIT,
+                      detail: AGENT_BUILDER_UI_EBT.entity.SKILL,
+                    })}
                   >
                     {labels.skills.saveButtonLabel}
                   </EuiButton>,

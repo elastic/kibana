@@ -7,6 +7,8 @@
 
 import { EuiButtonIcon, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import type { PluginDefinition } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useNavigation } from '../../hooks/use_navigation';
 import { appPaths } from '../../utils/app_paths';
@@ -55,6 +57,11 @@ export const PluginContextMenu: React.FC<PluginContextMenuProps> = ({
           closePopover();
         },
         'data-test-subj': `agentBuilderPluginDeleteButton-${plugin.id}`,
+        ...getEbtProps({
+          element: AGENT_BUILDER_UI_EBT.element.pageContent,
+          action: AGENT_BUILDER_UI_EBT.action.globalManagement.MANAGE_ENTITY_DELETE,
+          detail: AGENT_BUILDER_UI_EBT.entity.PLUGIN,
+        }),
       });
     }
 

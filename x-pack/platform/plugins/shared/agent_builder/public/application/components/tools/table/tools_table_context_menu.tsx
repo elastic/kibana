@@ -14,6 +14,8 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ToolDefinition } from '@kbn/agent-builder-common';
+import { AGENT_BUILDER_UI_EBT } from '@kbn/agent-builder-common';
+import { getEbtProps } from '@kbn/ebt-click';
 import React, { useState } from 'react';
 import { labels } from '../../../utils/i18n';
 import { useToolsActions } from '../../../context/tools_provider';
@@ -53,6 +55,11 @@ export const ToolContextMenu = ({ tool }: ToolContextMenuProps) => {
         deleteTool(tool.id);
         setIsOpen(false);
       }}
+      {...getEbtProps({
+        element: AGENT_BUILDER_UI_EBT.element.pageContent,
+        action: AGENT_BUILDER_UI_EBT.action.globalManagement.MANAGE_ENTITY_DELETE,
+        detail: AGENT_BUILDER_UI_EBT.entity.TOOL,
+      })}
     >
       {labels.tools.deleteToolButtonLabel}
     </EuiContextMenuItem>
