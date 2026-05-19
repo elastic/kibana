@@ -115,13 +115,13 @@ export const Navigation = ({
     items.primaryItems
   );
 
-  const allOverflowItems = [...overflowMenuItems, ...items.overflowItems];
+  const allOverflowItems = [...overflowMenuItems, ...(items.overflowItems ?? [])];
   const hasMoreMenu = allOverflowItems.length > 0;
 
   const setSize = visibleMenuItems.length + (hasMoreMenu ? 1 : 0);
 
   const { getIsNewPrimary, getIsNewSecondary } = useNewItems(
-    [...items.primaryItems, ...items.overflowItems, ...items.footerItems],
+    [...items.primaryItems, ...(items.overflowItems ?? []), ...items.footerItems],
     activeItemId
   );
 
@@ -304,7 +304,7 @@ export const Navigation = ({
                                   </SideNav.NestedSecondaryMenu.PrimaryMenuItem>
                                 );
                               })}
-                              {items.overflowItems.map((item) => {
+                              {(items.overflowItems ?? []).map((item) => {
                                 const hasSubmenu = getHasSubmenu(item);
                                 const { sections, ...itemProps } = item;
                                 return (

@@ -108,7 +108,7 @@ export interface NavigationStructure {
   /**
    * Items that are always placed in the overflow ("More") menu.
    */
-  overflowItems: MenuItem[];
+  overflowItems?: MenuItem[];
   /**
    * The primary navigation items displayed in the navigation main menu.
    */
