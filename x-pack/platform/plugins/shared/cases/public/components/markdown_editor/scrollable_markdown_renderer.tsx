@@ -11,7 +11,6 @@ import type { EuiThemeComputed } from '@elastic/eui';
 import { useEuiTheme } from '@elastic/eui';
 
 import { MarkdownRenderer } from './renderer';
-import { escapeUnterminatedEntities } from './sanitize_markdown';
 
 export const getContentWrapperCss = (euiTheme: EuiThemeComputed<{}>) => css`
   padding: ${`${euiTheme.size.m} ${euiTheme.size.l}`};
@@ -29,7 +28,7 @@ const ScrollableMarkdownRenderer = ({ content }: { content: string }) => {
       css={getContentWrapperCss(euiTheme)}
       data-test-subj="scrollable-markdown"
     >
-      <MarkdownRenderer>{escapeUnterminatedEntities(content)}</MarkdownRenderer>
+      <MarkdownRenderer>{content}</MarkdownRenderer>
     </div>
   );
 };

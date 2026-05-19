@@ -26,6 +26,7 @@ import {
   isCommentRequestTypePersistableState,
   isUnifiedAttachmentRequest,
 } from '../../common/utils/attachments';
+import { escapeUnterminatedEntities } from '../components/markdown_editor/sanitize_markdown';
 import { isCommentUserAction } from '../../common/utils/user_actions';
 import type {
   CasesFindResponseUI,
@@ -96,19 +97,48 @@ export const convertAttachmentsToCamelCase = (attachments: AttachmentV2[]): Atta
 };
 
 export const convertAttachmentToCamelCase = (attachment: AttachmentRequestV2): AttachmentUIV2 => {
-  if (isCommentRequestTypeExternalReference(attachment)) {
-    return convertAttachmentToCamelExceptProperty(attachment, 'externalReferenceMetadata');
+  const sanitized = sanitizeAttachmentContent(attachment);
+
+  if (isCommentRequestTypeExternalReference(sanitized)) {
+    return convertAttachmentToCamelExceptProperty(sanitized, 'externalReferenceMetadata');
   }
 
-  if (isCommentRequestTypePersistableState(attachment)) {
-    return convertAttachmentToCamelExceptProperty(attachment, 'persistableStateAttachmentState');
+  if (isCommentRequestTypePersistableState(sanitized)) {
+    return convertAttachmentToCamelExceptProperty(sanitized, 'persistableStateAttachmentState');
   }
 
-  if (isUnifiedAttachmentRequest(attachment)) {
-    return convertAttachmentToCamelExceptProperty(attachment, 'data');
+  if (isUnifiedAttachmentRequest(sanitized)) {
+    return convertAttachmentToCamelExceptProperty(sanitized, 'data');
   }
 
-  return convertToCamelCase<AttachmentRequestV2, AttachmentUIV2>(attachment);
+  return convertToCamelCase<AttachmentRequestV2, AttachmentUIV2>(sanitized);
+};
+
+/**
+ * Sanitizes markdown content in comment attachments to prevent a crash
+ * caused by bare `&` characters triggering a bug in the minified DLL bundle.
+ * See https://github.com/elastic/kibana/issues/268564
+ */
+const sanitizeAttachmentContent = (attachment: AttachmentRequestV2): AttachmentRequestV2 => {
+  if (
+    isUnifiedAttachmentRequest(attachment) &&
+    'data' in attachment &&
+    typeof attachment.data?.content === 'string'
+  ) {
+    return {
+      ...attachment,
+      data: { ...attachment.data, content: escapeUnterminatedEntities(attachment.data.content) },
+    };
+  }
+
+  if ('comment' in attachment && typeof (attachment as { comment?: string }).comment === 'string') {
+    return {
+      ...attachment,
+      comment: escapeUnterminatedEntities((attachment as { comment: string }).comment),
+    };
+  }
+
+  return attachment;
 };
 
 export const convertUserActionsToCamelCase = (userActions: UserActions) => {
