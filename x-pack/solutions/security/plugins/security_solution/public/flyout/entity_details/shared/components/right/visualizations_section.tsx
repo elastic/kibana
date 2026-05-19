@@ -58,7 +58,7 @@ export const VisualizationsSection = memo(
             <EntityGraphPreviewContainer
               entityId={entityId}
               showIcon={!isPreviewMode}
-              onShowGraph={handleOpenGraphViewTab}
+              onShowGraph={isPreviewMode ? undefined : handleOpenGraphViewTab}
             />
           </ExpandableSection>
         )}
