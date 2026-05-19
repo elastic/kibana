@@ -29,8 +29,7 @@ description: GitHub interactions via gh CLI for the Kibana repo. Use when perfor
 - View PR details: `gh pr view`.
 - View PR diff: `gh pr diff`.
 - List PR files: `gh pr diff --name-only`.
-- Read PR review comments:
-  `gh api repos/elastic/kibana/pulls/{number}/comments`.
+- Read PR review comments: `gh api repos/elastic/kibana/pulls/{number}/comments`.
 
 ## PR Creation
 
@@ -62,39 +61,7 @@ description: GitHub interactions via gh CLI for the Kibana repo. Use when perfor
 
 ## Posting PR Review Comments
 
-Inline review comment (line or range; supports GitHub suggestion blocks):
-
-````bash
-gh api repos/elastic/kibana/pulls/NUM/comments -f body=$'Text.\n\n```suggestion\ncode\n```' -f commit_id=SHA -f path=FILE -f side=RIGHT -f line=LINE
-````
-
-For multi-line, add: `-f start_line=START -f start_side=RIGHT`.
-
-File-level review comment (file-scoped, immediately visible):
-
-```bash
-gh api repos/elastic/kibana/pulls/NUM/comments \
-  -f body=$'Text.' \
-  -f commit_id=SHA -f path=FILE -f subject_type=file
-```
-
-Reply in an existing review thread:
-
-```bash
-gh api repos/elastic/kibana/pulls/NUM/comments \
-  -f body=$'Text.' \
-  -F in_reply_to=COMMENT_ID
-```
-
-- The request field is `in_reply_to` (integer). The response field is `in_reply_to_id`.
-- Do NOT use `in_reply_to_id` in the request; it may create a new top-level comment instead of a reply.
-- If you are posting an anchored comment that requires `commit_id`, and GitHub rejects it as "commit_id is not part of the pull request", use the `commit_id` from the target review comment you're replying to.
-
-PR-level timeline comment (use sparingly):
-
-```bash
-gh pr comment NUM -b "<text>"
-```
+See [references/review.md](references/review.md) for inline, file-level, threaded reply, and PR-level comment examples.
 
 ## Advanced / API
 
