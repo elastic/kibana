@@ -163,6 +163,99 @@ export const mergeResponseContent = (
   return { ...(Object.keys(mergedContent).length ? { content: mergedContent } : {}) };
 };
 
+export type ResponseValidationSource =
+  | 'route response validation'
+  | 'request validation error response';
+
+interface ResponseMergeContext {
+  path: string;
+  method: string;
+}
+
+interface ResponseDeclaration {
+  statusCode: string;
+  source: ResponseValidationSource;
+  response: OpenAPIV3.ResponseObject;
+}
+
+const describeResponseConflict = ({
+  context,
+  statusCode,
+  contentType,
+  source,
+  existingSource,
+}: {
+  context: ResponseMergeContext;
+  statusCode: string;
+  contentType: string;
+  source: ResponseValidationSource;
+  existingSource: ResponseValidationSource;
+}) =>
+  `Conflicting response declaration for [${context.method} ${context.path}] status [${statusCode}] content type [${contentType}] from [${existingSource}] and [${source}]`;
+
+const getExistingResponseSource = (
+  source: ResponseValidationSource,
+  existingSource: ResponseValidationSource | undefined
+) => existingSource ?? source;
+
+const schemasMatch = (
+  a: OpenAPIV3.MediaTypeObject | undefined,
+  b: OpenAPIV3.MediaTypeObject | undefined
+) => JSON.stringify(a?.schema) === JSON.stringify(b?.schema);
+
+export const mergeResponseDeclarations = (
+  declarations: ResponseDeclaration[],
+  context: ResponseMergeContext
+): OpenAPIV3.ResponsesObject => {
+  const responses: OpenAPIV3.ResponsesObject = {};
+  const sources = new Map<string, ResponseValidationSource>();
+
+  for (const { statusCode, source, response } of declarations) {
+    const existing = responses[statusCode] as OpenAPIV3.ResponseObject | undefined;
+    const existingSource = sources.get(statusCode);
+
+    if (!existing) {
+      responses[statusCode] = response;
+      sources.set(statusCode, source);
+      continue;
+    }
+
+    if (existing.description !== response.description) {
+      throw new Error(
+        describeResponseConflict({
+          context,
+          statusCode,
+          contentType: '*',
+          source,
+          existingSource: getExistingResponseSource(source, existingSource),
+        })
+      );
+    }
+
+    for (const [contentType, mediaType] of Object.entries(response.content ?? {})) {
+      const existingMediaType = existing.content?.[contentType];
+      if (existingMediaType && !schemasMatch(existingMediaType, mediaType)) {
+        throw new Error(
+          describeResponseConflict({
+            context,
+            statusCode,
+            contentType,
+            source,
+            existingSource: getExistingResponseSource(source, existingSource),
+          })
+        );
+      }
+    }
+
+    responses[statusCode] = {
+      ...existing,
+      ...mergeResponseContent(existing.content, response.content),
+    };
+  }
+
+  return responses;
+};
+
 export const getXsrfHeaderForMethod = (
   method: RouteMethod,
   options?: RouteConfigOptions<RouteMethod>

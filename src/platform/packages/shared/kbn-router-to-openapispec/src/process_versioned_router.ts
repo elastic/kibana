@@ -26,7 +26,7 @@ import {
   getVersionedHeaderParam,
   getVersionedContentTypeString,
   extractTags,
-  mergeResponseContent,
+  mergeResponseDeclarations,
   getXsrfHeaderForMethod,
   setXState,
 } from './util';
@@ -182,35 +182,58 @@ export const extractVersionedResponse = (
   operationId: string
 ) => {
   const schemas = extractValidationSchemaFromVersionedHandler(handler);
-  if (!schemas?.response) return {};
-  const result: OpenAPIV3.ResponsesObject = {};
-  const { unsafe, ...responses } = schemas.response;
-  for (const [statusCode, responseSchema] of Object.entries(responses)) {
-    let newContent: OpenAPIV3.ResponseObject['content'];
-    if (responseSchema.body) {
-      const maybeSchema = unwrapVersionedResponseBodyValidation(responseSchema.body);
-      const schema = converter.convert(maybeSchema);
-      const contentTypeString = getVersionedContentTypeString(
-        handler.options.version,
-        route.options.access,
-        responseSchema.bodyContentType ? [responseSchema.bodyContentType] : contentType
-      );
-      newContent = {
-        [contentTypeString]: {
-          schema,
+  const declarations: Array<{
+    statusCode: string;
+    source: 'route response validation' | 'request validation error response';
+    response: OpenAPIV3.ResponseObject;
+  }> = [];
+  const addResponses = (
+    responses: NonNullable<typeof schemas>['response'],
+    source: 'route response validation' | 'request validation error response'
+  ) => {
+    if (!responses) return;
+    const { unsafe, ...documentedResponses } = responses;
+    for (const [statusCode, responseSchema] of Object.entries(documentedResponses)) {
+      let content: OpenAPIV3.ResponseObject['content'];
+      if (responseSchema.body) {
+        const maybeSchema = unwrapVersionedResponseBodyValidation(responseSchema.body);
+        const schema = converter.convert(maybeSchema);
+        const contentTypeString = getVersionedContentTypeString(
+          handler.options.version,
+          route.options.access,
+          responseSchema.bodyContentType ? [responseSchema.bodyContentType] : contentType
+        );
+        content = {
+          [contentTypeString]: {
+            schema,
+          },
+        };
+      }
+      declarations.push({
+        statusCode,
+        source,
+        response: {
+          description: responseSchema.description!,
+          ...(content ? { content } : {}),
         },
-      };
+      });
     }
-    result[statusCode] = {
-      ...result[statusCode],
-      description: responseSchema.description!,
-      ...mergeResponseContent(
-        ((result[statusCode] ?? {}) as OpenAPIV3.ResponseObject).content,
-        newContent
-      ),
-    };
+  };
+
+  addResponses(schemas?.response, 'route response validation');
+  addResponses(
+    (
+      handler.options as typeof handler.options & {
+        onRequestValidationError?: { response?: NonNullable<typeof schemas>['response'] };
+      }
+    ).onRequestValidationError?.response,
+    'request validation error response'
+  );
+
+  if (!declarations.length) {
+    return {};
   }
-  return result;
+  return mergeResponseDeclarations(declarations, { path: route.path, method: route.method });
 };
 
 const extractValidationSchemaFromVersionedHandler = (
