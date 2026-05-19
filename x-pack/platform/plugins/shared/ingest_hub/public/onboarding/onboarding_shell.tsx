@@ -123,7 +123,7 @@ export function OnboardingShell() {
       >
         <EuiFlexGroup alignItems="center" gutterSize="l">
           <EuiFlexItem grow={false}>
-            <EuiIcon type="logoAWS" size="xxl" />
+            <EuiIcon type="logoAWS" size="xxl" aria-hidden={true} />
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiTitle size="l">
