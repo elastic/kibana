@@ -14,7 +14,8 @@ const detectionEvidenceSchema = z.object({
 
 export const detectionSchema = z.object({
   '@timestamp': z.iso.datetime(),
-  doc_type: z.string(),
+  silent: z.boolean(),
+  processed: z.boolean(),
   detection_id: z.string().optional(),
   rule_uuid: z.string().optional(),
   rule_name: z.string(),

@@ -16,7 +16,8 @@ export const detectionsMappings = {
   dynamic: false,
   properties: {
     '@timestamp': mappings.date({ format: 'strict_date_optional_time' }),
-    doc_type: mappings.keyword(),
+    silent: mappings.boolean(),
+    processed: mappings.boolean(),
     detection_id: mappings.keyword(),
     rule_uuid: mappings.keyword(),
     rule_name: mappings.keyword(),
