@@ -9,6 +9,10 @@ import { platformCoreTools } from '@kbn/agent-builder-common';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import { SECURITY_CREATE_DETECTION_RULE_TOOL_ID, SECURITY_LABS_SEARCH_TOOL_ID } from '../../tools';
 
+// TODO: Update SKILL_CONTENT to instruct the agent to route query-field rewrites through
+// security.create_detection_rule (passing existing_rule + attachment_id) rather than
+// attachment_update. All other field edits (severity, tags, MITRE, schedule, etc.) remain
+// on the attachment_update path.
 export const getDetectionRuleEditSkill = () =>
   defineSkillType({
     id: 'detection-rule-edit',
@@ -304,6 +308,18 @@ User says: "Add the tags Network and Lateral Movement to the rule"
    attachment_update({ attachment_id: "ATTACHMENT_ID", data: { text: "{\\"name\\":\\"DNS Tunneling Detection\\",\\"type\\":\\"esql\\",\\"tags\\":[\\"DNS\\",\\"Network\\",\\"Lateral Movement\\"],\\"severity\\":\\"high\\",\\"risk_score\\":73,...}" } })
    \`\`\`
 7. Render: \`<render_attachment id="ATTACHMENT_ID" version="VERSION" />\`
+
+## Limitations
+
+When a user asks what you can or cannot do, or what limitations exist, communicate these clearly:
+
+- **Rule type**: Only ES|QL rules are supported. EQL, KQL, threshold, ML, and other rule types cannot be created.
+- **Data requirement**: Rule generation requires relevant data in your Elasticsearch indices. If no matching index or field data is found, the rule cannot be created.
+- **Severity and risk score**: These default to \`low\` / \`21\`. They are not AI-adapted based on threat context — ask to change them and they will be updated via \`attachment_update\`.
+- **MITRE ATT&CK**: Mappings are generated from the model's knowledge and validated against local data. They may not reflect the very latest ATT&CK version.
+- **Interruption**: Once rule generation starts, it runs to completion. The stop button cancels streaming output but not the underlying tool execution.
+
+---
 
 ## CRITICAL INSTRUCTIONS — READ CAREFULLY
 

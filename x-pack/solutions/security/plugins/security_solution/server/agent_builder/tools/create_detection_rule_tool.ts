@@ -17,6 +17,7 @@ import type {
 } from '../../plugin_contract';
 import { securityTool } from './constants';
 import type { ExperimentalFeatures } from '../../../common';
+import type { EsqlRuleCreateProps } from '../../../common/api/detection_engine/model/rule_schema';
 import {
   SecurityAgentBuilderAttachments,
   SECURITY_RULE_ATTACHMENT_ID,
@@ -32,6 +33,18 @@ const createDetectionRuleSchema = z.object({
     .describe(
       'Natural language description of the detection rule to create, including threat scenarios, data sources, and desired detection logic'
     ),
+  existing_rule: z
+    .record(z.string(), z.unknown())
+    .optional()
+    .describe(
+      'Current rule object from the attachment. Pass when rewriting the query of an existing rule — seeds the graph with the current rule state so non-query fields (severity, risk_score, etc.) are preserved as the base.'
+    ),
+  attachment_id: z
+    .string()
+    .optional()
+    .describe(
+      'ID of the existing rule attachment to update. Required alongside existing_rule — causes the tool to update the attachment in place rather than create a new one.'
+    ),
 });
 
 export function createDetectionRuleTool(
@@ -44,7 +57,9 @@ export function createDetectionRuleTool(
     type: ToolType.builtin,
     description: `Creates a security detection rule based on natural language description. Analyzes the query, identifies relevant data sources, generates ES|QL queries, and produces a complete detection rule with metadata, tags, and scheduling information.
 
-The tool stores the result as an attachment (creating new or updating existing). Use the returned attachmentId and version with <render_attachment id="..." version="..."> to display it.`,
+The tool stores the result as an attachment (creating new or updating existing). Use the returned attachmentId and version with <render_attachment id="..." version="..."> to display it.
+
+Limitations: only ES|QL rules are supported; requires relevant data in existing Elasticsearch indices to generate a query; severity and risk score default to low/21 and are not AI-adapted from threat context.`,
     schema: createDetectionRuleSchema,
     tags: ['security', 'detection', 'rule-creation', 'siem'],
     availability: {
@@ -84,7 +99,7 @@ The tool stores the result as an attachment (creating new or updating existing).
       },
     },
     handler: async (
-      { user_query: userQuery },
+      { user_query: userQuery, existing_rule: existingRule, attachment_id: existingAttachmentId },
       { esClient, modelProvider, request, events, attachments }
     ) => {
       try {
@@ -124,7 +139,10 @@ The tool stores the result as an attachment (creating new or updating existing).
           rulesClient,
           events,
         });
-        const result = await iterativeAgent.invoke({ userQuery });
+        const result = await iterativeAgent.invoke({
+          userQuery,
+          ...(existingRule && { rule: existingRule as Partial<EsqlRuleCreateProps> }),
+        });
 
         if (result.errors.length) {
           logger.error(`Rule creation failed with errors: ${result.errors.join('; ')}`);
@@ -153,15 +171,25 @@ The tool stores the result as an attachment (creating new or updating existing).
         let version: number | undefined;
 
         try {
-          const created = await attachments.add({
-            id: SECURITY_RULE_ATTACHMENT_ID,
-            type: SecurityAgentBuilderAttachments.rule,
-            data: attachmentData,
-            description: attachmentDescription,
-          });
-          resultAttachmentId = created.id;
-          version = created.current_version;
-          logger.debug(`Created rule attachment ${resultAttachmentId} v${version}`);
+          if (existingAttachmentId) {
+            const updated = await attachments.update(existingAttachmentId, {
+              data: attachmentData,
+              description: attachmentDescription,
+            });
+            resultAttachmentId = updated?.id ?? existingAttachmentId;
+            version = updated?.current_version;
+            logger.debug(`Updated rule attachment ${resultAttachmentId} v${version}`);
+          } else {
+            const created = await attachments.add({
+              id: SECURITY_RULE_ATTACHMENT_ID,
+              type: SecurityAgentBuilderAttachments.rule,
+              data: attachmentData,
+              description: attachmentDescription,
+            });
+            resultAttachmentId = created.id;
+            version = created.current_version;
+            logger.debug(`Created rule attachment ${resultAttachmentId} v${version}`);
+          }
         } catch (attachmentError) {
           logger.error(
             `Could not persist rule attachment: ${
