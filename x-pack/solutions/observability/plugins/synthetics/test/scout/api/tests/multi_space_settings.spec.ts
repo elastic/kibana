@@ -268,7 +268,7 @@ apiTest.describe(
       });
 
       expect(res).toHaveStatusCode(200);
-      expect((res.body as MultiSpaceSettingsResponse).spaces).toEqual([ALL_SPACES]);
+      expect((res.body as MultiSpaceSettingsResponse).spaces).toStrictEqual([ALL_SPACES]);
     });
   }
 );
