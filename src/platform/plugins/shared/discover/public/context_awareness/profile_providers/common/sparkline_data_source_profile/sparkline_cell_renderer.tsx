@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import type { FC } from 'react';
+import { EuiScreenReaderOnly, useEuiTheme } from '@elastic/eui';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { SparklineChart } from './sparkline_chart';
-import { useContainerStyle } from './use_container_style';
 
 interface Props {
   charts: ChartsPluginStart;
@@ -20,17 +20,26 @@ interface Props {
   defaultRowHeight?: number;
 }
 
-export const SparklineCellRenderer: FC<Props> = ({
-  charts,
-  values,
-  isDetails,
-  defaultRowHeight,
-}) => {
-  const containerStyle = useContainerStyle(defaultRowHeight);
+export const SparklineCellRenderer: FC<Props> = ({ charts, values, defaultRowHeight }) => {
+  const { euiTheme } = useEuiTheme();
+
+  const containerStyle = useMemo(
+    () => ({
+      display: 'flex',
+      alignItems: 'center',
+      height: '100%',
+      boxSizing: 'border-box' as const,
+      paddingBlock: euiTheme.size.xs,
+    }),
+    [euiTheme.size.xs]
+  );
 
   return (
     <div css={containerStyle}>
-      <SparklineChart charts={charts} values={values} rowHeight={defaultRowHeight ?? 1} />
+      <SparklineChart charts={charts} values={values} rowHeight={defaultRowHeight} />
+      <EuiScreenReaderOnly>
+        <span>{values.join(', ')}</span>
+      </EuiScreenReaderOnly>
     </div>
   );
 };
