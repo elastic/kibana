@@ -18,7 +18,10 @@ export {
 } from './replay_logs_snapshot';
 
 export type { ReplayStats } from './replay_into_managed_stream';
-export { replayIntoManagedStream } from './replay_into_managed_stream';
+export {
+  deleteTemporaryReplayIndices,
+  replayIntoManagedStream,
+} from './replay_into_managed_stream';
 
 export { loadKIFeaturesFromSnapshot } from './load_ki_features_from_snapshot';
 

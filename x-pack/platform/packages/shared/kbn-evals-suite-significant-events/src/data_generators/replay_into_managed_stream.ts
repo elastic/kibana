@@ -373,6 +373,20 @@ const cleanupReplayArtifacts = async ({
   }
 };
 
+export async function deleteTemporaryReplayIndices(
+  esClient: Client,
+  log: ToolingLog
+): Promise<void> {
+  try {
+    await esClient.indices.delete({
+      index: `${REPLAY_TEMP_PREFIX}*`,
+      ignore_unavailable: true,
+    });
+  } catch {
+    log.debug('Failed to delete temporary replay indices');
+  }
+}
+
 /**
  * Replays a snapshot into the managed `logs` ES stream by setting a
  * `default_pipeline` on the write index rather than specifying a per-request

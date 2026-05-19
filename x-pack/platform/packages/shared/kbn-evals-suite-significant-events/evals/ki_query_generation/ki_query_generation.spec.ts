@@ -15,6 +15,7 @@ import type { GcsConfig } from '../../src/data_generators/replay';
 import {
   canonicalKIFeaturesFromExpectedGroundTruth,
   cleanSignificantEventsDataStreams,
+  deleteTemporaryReplayIndices,
   listAvailableSnapshots,
   loadKIFeaturesFromSnapshot,
   replayIntoManagedStream,
@@ -102,6 +103,7 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                 .catch(() => {});
             }
 
+            await deleteTemporaryReplayIndices(esClient, log);
             await apiServices.streams.disable().catch(() => {});
             await apiServices.streams.enable();
 
@@ -260,6 +262,7 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
                         .delete({ index: name, ignore_unavailable: true })
                         .catch(() => {});
                     }
+                    await deleteTemporaryReplayIndices(esClient, log);
                     await apiServices.streams.disable().catch(() => {});
                     await apiServices.streams.enable();
                     await replayIntoManagedStream(esClient, log, source.snapshotName, source.gcs);
@@ -331,6 +334,7 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
 
         evaluate.afterAll(async ({ esClient, apiServices, log }) => {
           log.debug('Cleaning up KI query generation test data');
+          await deleteTemporaryReplayIndices(esClient, log);
           await apiServices.streams.disable().catch(() => {});
           await cleanSignificantEventsDataStreams(esClient, log);
         });
@@ -341,8 +345,9 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
   evaluate.describe('empty datastream', () => {
     let emptyDataStreamTestIndex: string | undefined;
 
-    evaluate.beforeAll(async ({ esClient, apiServices }) => {
+    evaluate.beforeAll(async ({ esClient, apiServices, log }) => {
       emptyDataStreamTestIndex = `logs-sig-events-test-${Date.now()}`;
+      await deleteTemporaryReplayIndices(esClient, log);
       await apiServices.streams.disable().catch(() => {});
       await apiServices.streams.enable();
       await esClient.indices.createDataStream({ name: emptyDataStreamTestIndex });
@@ -396,11 +401,12 @@ evaluate.describe('KI query generation', { tag: tags.serverless.observability.co
       }
     );
 
-    evaluate.afterAll(async ({ esClient, apiServices }) => {
+    evaluate.afterAll(async ({ esClient, apiServices, log }) => {
       if (emptyDataStreamTestIndex) {
         await esClient.indices.deleteDataStream({ name: emptyDataStreamTestIndex }).catch(() => {});
       }
 
+      await deleteTemporaryReplayIndices(esClient, log);
       await apiServices.streams.disable().catch(() => {});
     });
   });
