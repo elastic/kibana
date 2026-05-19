@@ -9,10 +9,13 @@
 
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import type { ESQLCallbacks, ESQLTelemetryCallbacks } from '@kbn/esql-types';
-import type { monaco } from '@kbn/monaco';
-import { ESQLLang, ESQL_LANG_ID } from '@kbn/monaco';
-import type { MonacoMessage } from '@kbn/monaco/src/languages/esql/language';
-import type { CodeEditorProps } from '@kbn/code-editor';
+import {
+  ESQLLang,
+  ESQL_LANG_ID,
+  type CodeEditorProps,
+  type MonacoMessage,
+  type monaco,
+} from '@kbn/code-editor';
 import type { EsqlLanguageDeps } from '../types';
 
 // Module-level singleton: maps each Monaco model URI to its ES|QL language
@@ -41,6 +44,7 @@ interface UseEditorConfigParams {
   >;
   esqlCallbacks: ESQLCallbacks;
   telemetryCallbacks: ESQLTelemetryCallbacks;
+  isSuggestFixEnabled: boolean;
   isDisabled: boolean | undefined;
   measuredEditorWidth: number;
   setMeasuredEditorWidth: (width: number) => void;
@@ -58,6 +62,7 @@ export const useEditorConfig = ({
   editorCommandDisposables,
   esqlCallbacks,
   telemetryCallbacks,
+  isSuggestFixEnabled,
   isDisabled,
   measuredEditorWidth,
   setMeasuredEditorWidth,
@@ -73,18 +78,26 @@ export const useEditorConfig = ({
       esqlDepsByModelUri.set(modelUri, {
         ...esqlCallbacks,
         telemetry: telemetryCallbacks,
+        isSuggestFixEnabled,
         getEditorMessages: () => editorMessagesRef.current,
       });
     }
-  }, [esqlCallbacks, telemetryCallbacks, editorModelUriRef, editorMessagesRef]);
+  }, [
+    esqlCallbacks,
+    telemetryCallbacks,
+    isSuggestFixEnabled,
+    editorModelUriRef,
+    editorMessagesRef,
+  ]);
 
   const hoverProvider = useMemo(
     () =>
       ESQLLang.getHoverProvider?.({
         ...esqlCallbacks,
         telemetry: telemetryCallbacks,
+        isSuggestFixEnabled,
       }),
-    [esqlCallbacks, telemetryCallbacks]
+    [esqlCallbacks, telemetryCallbacks, isSuggestFixEnabled]
   );
 
   const signatureProvider = useMemo(() => {

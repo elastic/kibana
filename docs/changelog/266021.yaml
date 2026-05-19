@@ -1,0 +1,9 @@
+﻿prs:
+- https://github.com/elastic/kibana/pull/266021
+issues:
+- https://github.com/elastic/kibana/issues/265690
+type: enhancement
+products:
+- product: cloud-serverless
+  target: 2026-05-06
+title: 'Add context highlights for embeddable and focused APM service maps'

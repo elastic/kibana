@@ -25,6 +25,7 @@ import {
   SECURITY_SOLUTION_OWNER,
 } from '../../../common/constants';
 import {
+  ATTACHMENT_ID_REF_NAME,
   CASE_REF_NAME,
   COMMENT_REF_NAME,
   CONNECTOR_ID_REFERENCE_NAME,
@@ -225,6 +226,35 @@ export const createExternalReferenceUserAction = () => {
       },
       type: 'comment',
       references: [{ id: 'my-id', name: EXTERNAL_REFERENCE_REF_NAME, type: 'test-so' }],
+    }),
+  };
+};
+
+export const createUnifiedFileUserAction = () => {
+  return {
+    ...createUserActionSO({
+      action: UserActionActions.create,
+      commentId: 'unified-file-test-id',
+      payload: {
+        comment: {
+          type: 'file',
+          attachmentId: 'file-so-id',
+          owner: 'securitySolution',
+          metadata: {
+            soType: 'file',
+            files: [
+              {
+                name: 'image',
+                extension: 'png',
+                mimeType: 'image/png',
+                created: '2026-05-04T21:33:45.025Z',
+              },
+            ],
+          },
+        },
+      },
+      type: 'comment',
+      references: [{ id: 'file-so-id', name: ATTACHMENT_ID_REF_NAME, type: 'file' }],
     }),
   };
 };

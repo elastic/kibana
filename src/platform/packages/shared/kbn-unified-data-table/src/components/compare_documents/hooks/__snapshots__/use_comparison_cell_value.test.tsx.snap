@@ -360,6 +360,7 @@ exports[`useComparisonCellValue should render field cells 1`] = `
     >
       <span
         class="euiToken kbnFieldIcon emotion-euiToken-square-light-s-euiColorVis2"
+        data-test-subj="unifiedDataTableComparisonFieldIcon"
       >
         <span
           data-euiicon-type="tokenString"
@@ -395,6 +396,7 @@ exports[`useComparisonCellValue should render field cells 2`] = `
     >
       <span
         class="euiToken kbnFieldIcon emotion-euiToken-square-light-s-euiColorVis2"
+        data-test-subj="unifiedDataTableComparisonFieldIcon"
       >
         <span
           data-euiicon-type="tokenString"
@@ -430,6 +432,7 @@ exports[`useComparisonCellValue should render field cells 3`] = `
     >
       <span
         class="euiToken kbnFieldIcon emotion-euiToken-square-light-s-euiColorVis0"
+        data-test-subj="unifiedDataTableComparisonFieldIcon"
       >
         <span
           data-euiicon-type="tokenNumber"

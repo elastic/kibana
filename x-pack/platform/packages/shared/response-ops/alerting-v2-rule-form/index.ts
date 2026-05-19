@@ -6,20 +6,21 @@
  */
 
 // Pre-composed flyouts (lazy loaded) - recommended for most use cases
-export { DynamicRuleFormFlyout, StandaloneRuleFormFlyout } from './flyout';
+export { DynamicRuleFormFlyout } from './flyout';
+
+// Compose Discover flyout — stepped Edit Form + Discover Sandbox
+export { ComposeDiscoverFlyout } from './flyout/compose_discover';
+export type { ComposeDiscoverFlyoutProps } from './flyout/compose_discover';
+export type { ComposeDiscoverMode } from './flyout/compose_discover/types';
 
 // Lazy components (without Suspense wrapper) - for consumers who need full control
-export {
-  LazyDynamicRuleFormFlyout,
-  LazyStandaloneRuleFormFlyout,
-  LazyRuleFormFlyout,
-} from './flyout';
+export { LazyDynamicRuleFormFlyout, LazyRuleFormFlyout } from './flyout';
 
 // Constants
 export { RULE_FORM_ID, DEFAULT_RULE_NAME } from './form/constants';
 
 // Form components (lazy loaded) - for embedding in custom forms
-export { DynamicRuleForm, StandaloneRuleForm } from './form';
+export { DynamicRuleForm } from './form';
 
 // Preview component (lazy loaded) - for displaying rule query results preview
 export { RuleResultsPreview } from './form';
@@ -51,15 +52,10 @@ export type {
   FormValues,
   StateTransitionDelayMode,
   DynamicRuleFormProps,
-  StandaloneRuleFormProps,
   RuleFormServices,
   RuleFormMeta,
   RuleFormLayout,
   RuleRequestCommon,
 } from './form';
 
-export type {
-  RuleFormFlyoutProps,
-  DynamicRuleFormFlyoutProps,
-  StandaloneRuleFormFlyoutProps,
-} from './flyout';
+export type { RuleFormFlyoutProps, DynamicRuleFormFlyoutProps } from './flyout';

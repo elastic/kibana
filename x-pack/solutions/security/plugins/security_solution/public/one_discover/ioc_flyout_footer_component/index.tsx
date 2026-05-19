@@ -7,7 +7,7 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { Footer } from '../../flyout_v2/ioc/footer';
+import { Footer } from '../../flyout_v2/ioc/main/footer';
 import type { SecurityAppStore } from '../../common/store/types';
 import type { StartServices } from '../../types';
 import { flyoutProviders } from '../../flyout_v2/shared/components/flyout_provider';
