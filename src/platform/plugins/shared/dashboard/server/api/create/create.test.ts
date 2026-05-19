@@ -11,7 +11,7 @@ import supertest from 'supertest';
 
 import type { SetupServerReturn } from '@kbn/core-test-helpers-test-utils';
 import { setupServer } from '@kbn/core-test-helpers-test-utils';
-import type { RequestHandlerContext } from '@kbn/core/server';
+import type { RequestHandlerContext, Logger } from '@kbn/core/server';
 import { type savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
@@ -49,7 +49,7 @@ describe(`create`, () => {
     ({ server, createRouter, handlerContext } = await setupServer());
     savedObjectsClient = handlerContext.savedObjects.client;
     const { versioned } = createRouter<RequestHandlerContext>('/');
-    registerCreateRoute(versioned, undefined, false);
+    registerCreateRoute(versioned, undefined, false, { debug: jest.fn(), warn: jest.fn() } as Logger);
 
     savedObjectsClient.create.mockResolvedValue({
       id: 'test-dashboard',

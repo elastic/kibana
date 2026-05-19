@@ -49,7 +49,7 @@ describe(`delete`, () => {
     ({ server, createRouter, handlerContext } = await setupServer());
     savedObjectsClient = handlerContext.savedObjects.client;
     const { versioned } = createRouter<RequestHandlerContext>('/');
-    registerDeleteRoute(versioned, undefined);
+    registerDeleteRoute(versioned, undefined, { debug: jest.fn(), warn: jest.fn() } as Logger);
     await server.start();
   });
 
