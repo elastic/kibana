@@ -365,33 +365,34 @@ export function WorkflowDetailBottomBar({
   const [isCompact, setIsCompact] = useState(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-  // Auto-hide: slide the bar down to a thin handle while the user is
-  // scrolling/panning (wheel) or typing (keydown). Restore after idle timeout.
+  // Auto-hide: any user activity (scroll, click, keydown) hides the bar and
+  // resets the idle timer. The bar reappears after AUTOHIDE_TIMEOUT_MS of
+  // inactivity. Events that originate from inside the bar itself are ignored
+  // so clicking bar buttons doesn't collapse it.
   const [isHidden, setIsHidden] = useState(false);
-  const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const scheduleReappear = useCallback(() => {
-    if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
-    hideTimerRef.current = setTimeout(() => setIsHidden(false), AUTOHIDE_TIMEOUT_MS);
+  const triggerActivity = useCallback((e: Event) => {
+    if (barRef.current?.contains(e.target as Node)) return;
+    setIsHidden(true);
+    if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
+    idleTimerRef.current = setTimeout(() => setIsHidden(false), AUTOHIDE_TIMEOUT_MS);
   }, []);
 
-  const triggerHide = useCallback(() => {
-    setIsHidden(true);
-    scheduleReappear();
-  }, [scheduleReappear]);
-
   useEffect(() => {
-    window.addEventListener('wheel', triggerHide, { passive: true });
-    document.addEventListener('keydown', triggerHide, { passive: true });
+    window.addEventListener('wheel', triggerActivity, { passive: true });
+    document.addEventListener('keydown', triggerActivity, { passive: true });
+    document.addEventListener('pointerdown', triggerActivity, { passive: true });
     return () => {
-      window.removeEventListener('wheel', triggerHide);
-      document.removeEventListener('keydown', triggerHide);
-      if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+      window.removeEventListener('wheel', triggerActivity);
+      document.removeEventListener('keydown', triggerActivity);
+      document.removeEventListener('pointerdown', triggerActivity);
+      if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
     };
-  }, [triggerHide]);
+  }, [triggerActivity]);
 
   const handleBarMouseEnter = useCallback(() => {
-    if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+    if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
     setIsHidden(false);
   }, []);
 
@@ -436,6 +437,7 @@ export function WorkflowDetailBottomBar({
 
     return (
       <div
+        ref={barRef}
         onMouseEnter={handleBarMouseEnter}
         css={{
           position: 'absolute',
