@@ -55,8 +55,7 @@ const buildRelationshipTargetsEval = (field: string): string => {
  * Builds ES|QL query for fetching entity relationships from the generic entities index.
  * Uses FORK to expand each relationship field and aggregates results.
  * The filter is applied via the DSL filter parameter.
- * Uses LOOKUP JOIN to enrich target entity metadata.
- * Note: This function should only be called when the entities index is in lookup mode.
+ * Target enrichment is applied later in TypeScript via fetchEntityEnrichment.
  */
 const buildRelationshipsEsqlQuery = ({
   indexName,
@@ -194,7 +193,8 @@ const buildRelationshipDslFilter = (entityIds: EntityId[]) => {
 /**
  * Fetches entity relationships from the generic entities index.
  * Queries for all relationship types for entities matching the provided entityIds.
- * Note: Relationships are only available in v2 entity store with lookup mode enabled.
+ * Note: Relationships require the v2 entity store; returns an empty result if the
+ * entities index does not exist.
  */
 export const fetchEntityRelationships = async ({
   esClient,
