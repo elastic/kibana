@@ -396,6 +396,7 @@ describe('GoogleDriveConnector', () => {
           Math.ceil((10 * 1024 * 1024) / 3) * 4 + ESTIMATED_JSON_OUTPUT_OVERHEAD_BYTES,
       });
     });
+
     it('should download a native file', async () => {
       const metadataResponse = {
         data: {

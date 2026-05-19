@@ -22,7 +22,7 @@ import type { IWorkflowEventLogger } from '../workflow_event_logger';
 
 /**
  * Connector step types that support Layer 1 (mid-stream) response size enforcement
- * via fetcher.max_content_length. All other connector types get Layer 2 only
+ * via fetchOptions.max_content_length. All other connector types get Layer 2 only
  * (output size check in base class after the response is in memory).
  * When adding Layer 1 for a new connector type (e.g. one that can return large payloads),
  * add it here and implement the limit in that connector's Actions executor.
@@ -131,7 +131,7 @@ export class ConnectorStepImpl extends BaseAtomicNodeImplementation<ConnectorSte
           }
         : withInputs;
 
-      // For connector types with Layer 1 support, inject max_content_length into the fetcher config
+      // For connector types with Layer 1 support, inject max_content_length into fetchOptions
       // so axios can abort mid-stream (Layer 1 OOM prevention).
       const rawType = step.type;
       const isSpecConnector = isSpecConnectorType(stepType);
