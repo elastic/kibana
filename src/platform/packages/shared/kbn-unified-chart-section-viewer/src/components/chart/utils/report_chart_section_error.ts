@@ -37,6 +37,16 @@ interface ReportChartSectionErrorArgs {
 }
 
 /**
+ * Minimal adapter for the APM RUM `Span` outcome field. The public RUM types
+ * do not expose `outcome`, but the runtime span object accepts it (mirroring
+ * lens/data_loader.ts). Casting through this interface preserves type-safety
+ * for the single assignment without suppressing real type errors.
+ */
+interface SpanWithOutcome {
+  outcome: 'success' | 'failure';
+}
+
+/**
  * Reports a non-render chart-section error to APM.
  * No-ops on `AbortError` (per `isSuppressedFetchError`) and non-Error values.
  */
@@ -85,8 +95,7 @@ export const reportChartSectionError = ({
     span?.addLabels(labels);
     apm.captureError(error, { labels });
     if (span) {
-      // @ts-expect-error RUM types do not expose `outcome` on Span.
-      span.outcome = 'failure';
+      (span as unknown as SpanWithOutcome).outcome = 'failure';
       span.end();
     }
   } catch {
