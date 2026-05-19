@@ -67,6 +67,28 @@ describe('splitCoordinateSeriesForEdgeDots', () => {
     expect(leadingEdge).toBeNull();
     expect(trailingEdge).toBeNull();
   });
+
+  it('includes trailing y:0 in the main series (no trailing dotted line)', () => {
+    const { main, leadingEdge, trailingEdge } = splitCoordinateSeriesForEdgeDots([
+      { x: 10, y: null },
+      { x: 20, y: 50 },
+      { x: 30, y: 30 },
+      { x: 40, y: 0 },
+      { x: 50, y: 0 },
+    ]);
+
+    expect(main).toEqual([
+      { x: 20, y: 50 },
+      { x: 30, y: 30 },
+      { x: 40, y: 0 },
+      { x: 50, y: 0 },
+    ]);
+    expect(leadingEdge).toEqual([
+      { x: 10, y: 50 },
+      { x: 20, y: 50 },
+    ]);
+    expect(trailingEdge).toBeNull();
+  });
 });
 
 describe('expandApmTimeseriesWithEdgeDottedLines', () => {

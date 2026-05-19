@@ -12,15 +12,24 @@ export interface RedMetricHistogramPoint {
 }
 
 /**
- * For RED series from `date_histogram`: empty buckets at the **start or end** of the
- * selected range are often incomplete (no observation), not a measured zero — those
- * become `null` so charts do not dip to zero at the edges. Empty buckets **between**
- * non-empty buckets keep their computed values (e.g. true zero throughput).
+ * For RED series from `date_histogram`:
+ *
+ * - **Leading** empty buckets (before the first bucket with data) become `null`
+ *   so charts show a dotted line instead of dipping to zero at the start.
+ * - **Trailing** empty buckets **in the past** (after the last bucket with data
+ *   but before `cutoffDate`) are kept as `y: 0` — the service genuinely dropped to
+ *   zero (e.g. catastrophic failure) and users must see this.
+ * - **Trailing** empty buckets **in the future** (timestamp >= `cutoffDate`) become
+ *   `null` — no observation is available yet, shown as a dotted line.
+ *
  * Invalid values (`null`, `NaN`) are always dropped to `null`.
  *
+ * @param cutoffDate - epoch ms cutoff; buckets at or after this timestamp are
+ *   considered "future". Defaults to `Date.now()`.
  */
 export function nullifyLeadingTrailingEmptyRedMetricPoints(
-  points: ReadonlyArray<RedMetricHistogramPoint>
+  points: ReadonlyArray<RedMetricHistogramPoint>,
+  cutoffDate: number | undefined = Date.now()
 ): Array<{ x: number; y: number | null }> {
   if (points.length === 0) {
     return [];
@@ -37,10 +46,11 @@ export function nullifyLeadingTrailingEmptyRedMetricPoints(
   }
 
   return points.map((point, index) => {
-    const isLeadingOrTrailingEmpty =
-      point.docCount === 0 && (index < firstNonEmpty || index > lastNonEmpty);
+    const isLeadingEmpty = point.docCount === 0 && index < firstNonEmpty;
+    const isTrailingEmpty = point.docCount === 0 && index > lastNonEmpty;
+    const isFutureTrailingEmpty = isTrailingEmpty && cutoffDate && point.x >= cutoffDate;
 
-    if (isLeadingOrTrailingEmpty) {
+    if (isLeadingEmpty || isFutureTrailingEmpty) {
       return { x: point.x, y: null };
     }
 
