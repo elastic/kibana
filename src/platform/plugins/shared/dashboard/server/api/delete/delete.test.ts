@@ -15,7 +15,7 @@ import type { RequestHandlerContext } from '@kbn/core/server';
 import { type savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
-import { coreServices, taggingService } from '../../kibana_services';
+import { coreServices, taggingService, logger } from '../../kibana_services';
 import { setStubKibanaServices } from '../../mocks';
 import { registerDeleteRoute } from './register_delete_route';
 
@@ -49,7 +49,7 @@ describe(`delete`, () => {
     ({ server, createRouter, handlerContext } = await setupServer());
     savedObjectsClient = handlerContext.savedObjects.client;
     const { versioned } = createRouter<RequestHandlerContext>('/');
-    registerDeleteRoute(versioned, undefined, { debug: jest.fn(), warn: jest.fn() } as Logger);
+    registerDeleteRoute(versioned, undefined, logger);
     await server.start();
   });
 
