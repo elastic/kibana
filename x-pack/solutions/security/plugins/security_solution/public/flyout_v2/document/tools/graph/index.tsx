@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { memo, useCallback } from 'react';
 import { css } from '@emotion/react';
 import { EuiFlyoutBody, EuiFlyoutHeader, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -55,10 +55,7 @@ export const GraphDetails = memo(
     const { euiTheme } = useEuiTheme();
     const eventId = hit.raw._id ?? '';
     const { timestamp, eventIds } = useGraphPreview({ hit });
-    const isAlert = useMemo(
-      () => (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal,
-      [hit]
-    );
+    const isAlert = (getFieldValue(hit, EVENT_KIND) as string) === EventKind.signal;
 
     const { services } = useKibana();
     const { overlays } = services;
@@ -126,35 +123,40 @@ export const GraphDetails = memo(
         entityId: string;
         entityName: string | undefined;
       }) => {
-        const contextID = GRAPH_SCOPE_ID;
-        const child =
-          engineType === 'host' ? (
+        let child: React.ReactNode;
+        if (engineType === 'host') {
+          child = (
             <HostPanel
-              contextID={contextID}
+              contextID={GRAPH_SCOPE_ID}
               scopeId={GRAPH_SCOPE_ID}
               hostName={entityName ?? ''}
               entityId={entityId}
               isPreviewMode
             />
-          ) : engineType === 'user' ? (
+          );
+        } else if (engineType === 'user') {
+          child = (
             <UserPanel
-              contextID={contextID}
+              contextID={GRAPH_SCOPE_ID}
               scopeId={GRAPH_SCOPE_ID}
               userName={entityName ?? ''}
               entityId={entityId}
               isPreviewMode
             />
-          ) : engineType === 'service' ? (
+          );
+        } else if (engineType === 'service') {
+          child = (
             <ServicePanel
-              contextID={contextID}
+              contextID={GRAPH_SCOPE_ID}
               scopeId={GRAPH_SCOPE_ID}
               serviceName={entityName ?? ''}
               entityId={entityId}
               isPreviewMode
             />
-          ) : (
-            <GenericEntityPanel scopeId={GRAPH_SCOPE_ID} entityId={entityId} isPreviewMode />
           );
+        } else {
+          child = <GenericEntityPanel scopeId={GRAPH_SCOPE_ID} entityId={entityId} isPreviewMode />;
+        }
 
         overlays.openSystemFlyout(flyoutProviders({ services, store, history, children: child }), {
           ...defaultFlyoutProperties,

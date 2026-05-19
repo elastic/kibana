@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useRef } from 'react';
+import React, { memo, useCallback, useMemo, useRef } from 'react';
 import { css } from '@emotion/react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
@@ -138,7 +138,10 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
   const dataView = newDataViewPickerEnabled ? experimentalDataView : oldDataView;
-  const dataViewIndexPattern = dataView ? dataView.getIndexPattern() : undefined;
+  const dataViewIndexPattern = useMemo(
+    () => (dataView ? dataView.getIndexPattern() : undefined),
+    [dataView]
+  );
 
   const { openPreviewPanel } = useExpandableFlyoutApi();
 
