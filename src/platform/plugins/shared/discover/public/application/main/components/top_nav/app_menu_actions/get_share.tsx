@@ -18,7 +18,11 @@ import type { ShareActionIntents, SharingData } from '@kbn/share-plugin/public/t
 import type { IntlShape } from '@kbn/i18n-react';
 import type { ReportingCSVSharingData } from '@kbn/reporting-public/types';
 import type { DataTotalHitsMsg } from '../../../state_management/discover_data_state_container';
-import { getSharingData, showPublicUrlSwitch } from '../../../../../utils/get_sharing_data';
+import {
+  getColumnsWithTimeField,
+  getSharingData,
+  showPublicUrlSwitch,
+} from '../../../../../utils/get_sharing_data';
 import { createSearchSource } from '../../../state_management/utils/create_search_source';
 import type { DiscoverAppLocatorParams } from '../../../../../../common/app_locator';
 import type { AppMenuDiscoverParams } from './types';
@@ -146,7 +150,23 @@ export const buildShareOptions = async ({
     },
     sharingData: {
       isTextBased: isEsqlMode,
-      locatorParams: [{ id: locator.id, version: services.metadata.version, params }],
+      locatorParams: [
+        {
+          id: locator.id,
+          version: services.metadata.version,
+          params: isEsqlMode
+            ? {
+                ...params,
+                columns: getColumnsWithTimeField(
+                  (params.columns as string[]) || [],
+                  dataView?.timeFieldName,
+                  services.uiSettings,
+                  currentTab.appState.query
+                ),
+              }
+            : params,
+        },
+      ],
       ...searchSourceSharingData,
       // CSV reports can be generated without a saved search so we provide a fallback title
       title:
