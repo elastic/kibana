@@ -664,6 +664,7 @@ src/platform/packages/shared/kbn-server-route-repository @elastic/observability-
 src/platform/packages/shared/kbn-server-route-repository-client @elastic/observability-ui
 src/platform/packages/shared/kbn-server-route-repository-utils @elastic/observability-ui
 src/platform/packages/shared/kbn-shared-svg @elastic/obs-presentation-team
+src/platform/packages/shared/kbn-shared-url-state @elastic/appex-sharedux
 src/platform/packages/shared/kbn-shared-ux-utility @elastic/appex-sharedux
 src/platform/packages/shared/kbn-sort-predicates @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-spaces-utils @elastic/kibana-security
@@ -3481,6 +3482,10 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 
 # Inbox FTR test directory (no kibana.jsonc — manual entry)
 /x-pack/platform/test/inbox_api_integration/ @elastic/security-genai-research-and-development
+
+# FTR config manifests have no single owner — touched by all solutions.
+# Leaving this unowned avoids routing every edit through Kibana Operations.
+/.buildkite/ftr-manifests/
 
 ####
 ## These rules are always last so they take ultimate priority over everything else
