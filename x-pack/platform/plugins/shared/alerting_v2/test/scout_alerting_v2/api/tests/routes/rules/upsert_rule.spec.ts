@@ -246,16 +246,13 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
     }
   );
 
-  apiTest(
-    'validation: should reject body with empty query.breach',
-    async ({ apiClient }) => {
-      const response = await apiClient.put(getRuleUrl('any-id'), {
-        headers: writerHeaders,
-        body: buildCreateRuleData({ query: { format: 'standalone', breach: '' } }),
-      });
-      expect(response).toHaveStatusCode(400);
-    }
-  );
+  apiTest('validation: should reject body with empty query.breach', async ({ apiClient }) => {
+    const response = await apiClient.put(getRuleUrl('any-id'), {
+      headers: writerHeaders,
+      body: buildCreateRuleData({ query: { format: 'standalone', breach: '' } }),
+    });
+    expect(response).toHaveStatusCode(400);
+  });
 
   apiTest(
     'authorization: should return 201 for a user with full alerting_v2 privileges',
