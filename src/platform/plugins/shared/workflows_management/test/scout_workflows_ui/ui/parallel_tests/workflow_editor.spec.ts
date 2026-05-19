@@ -144,6 +144,8 @@ test.describe(
       await pageObjects.workflowEditor.gotoNewWorkflow();
       const workflowName = 'Root Autocomplete Test';
 
+      const suggestWidget = pageObjects.workflowEditor.getYamlEditorSuggestWidget();
+
       await pageObjects.workflowEditor.triggerAutocompleteAfter(
         getRootLevelAutocompleteYaml(workflowName),
         'message: "hello"\n'

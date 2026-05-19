@@ -14,7 +14,7 @@ import {
   ESQL_LANG_ID,
   type CodeEditorProps,
   type MonacoMessage,
-  type monaco,
+  monaco,
 } from '@kbn/code-editor';
 import type { EsqlLanguageDeps } from '../types';
 

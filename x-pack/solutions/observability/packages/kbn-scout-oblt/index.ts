@@ -17,7 +17,7 @@ export { lighthouseTest, tags } from '@kbn/scout';
 
 export { KibanaCodeEditorWrapper } from '@kbn/scout';
 // Custom global setup hook with profiling support
-export { globalSetupHook } from './src/playwright/global_hook';
+export { globalSetupHook, globalTeardownHook } from './src/playwright/global_hook';
 
 // re-exported fixtures & configuration from @kbn/scout
 export {
