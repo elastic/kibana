@@ -789,8 +789,7 @@ platform_engineer:
         - '.entities.v2.latest.security_*'
         - 'entities-latest-*'
       privileges:
-        - read
-        - write
+        - all
     - names:
         - '.ml-anomalies-*'
         - .entity_analytics.monitoring*
