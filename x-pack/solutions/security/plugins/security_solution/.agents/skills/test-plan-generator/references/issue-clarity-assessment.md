@@ -14,13 +14,15 @@ The assessment is published with the test plan so PMs and writers see actionable
 - [What this metric is — and what it is not](#what-this-metric-is--and-what-it-is-not)
 - [Inputs](#inputs)
 - [The five dimensions](#the-five-dimensions)
+- [Grading anchors](#grading-anchors)
 - [The 1–5 rubric](#the-15-rubric)
 - [Per-issue score procedure](#per-issue-score-procedure)
 - [Combined readability — not an average](#combined-readability--not-an-average)
 - [Issue Coverage Ratio](#issue-coverage-ratio)
 - [Stop-and-ask gate](#stop-and-ask-gate)
 - [Output format](#output-format)
-- [Worked example](#worked-example)
+- [Worked example — well-organized epic](#worked-example--well-organized-epic)
+- [Worked example — combined=1 case](#worked-example--combined1-case)
 
 ---
 
@@ -66,10 +68,33 @@ Each issue is graded against the same five dimensions. Each dimension is rated *
 | **Acceptance Criteria** | Are the ACs explicit, numbered (or clearly enumerable), and testable from the wording alone? | Never N/A — every issue must have at least implicit ACs. |
 | **Scope** | Is it clear what is in scope and what is out of scope? Is there an explicit "Out of scope" section, or unambiguous boundaries? | Trivial single-line bug fixes where scope is self-evident from the title. |
 | **UX / UI** | If the feature has UI, is it described in text, screenshot, mockup, or Figma node? Are component names, states, and labels grounded? | Pure API change, pure background job, telemetry-only change, infra change with no UI. |
-| **Data & Roles** | Are pre-conditions, fixture data, user roles, RBAC requirements, and license level stated? | License/role/data are explicitly the same as the rest of the feature area and no exceptions apply. |
+| **Data & Roles** | Are pre-conditions, fixture data, user roles, RBAC requirements, and license level stated? | Mark N/A only when the feature is **purely backend** (no user-facing flow, no API endpoint requiring authorization beyond default), AND the input data shape is **fully described elsewhere in the issue** (e.g. ARM/JSON shape, KQL examples). Otherwise mark ⚠️ Partial or ❌ Missing as appropriate. |
 | **Edge cases** | Are negative paths, error handling, limits, and edge conditions mentioned (even briefly)? Is there a "what should NOT happen" anywhere in the text? | Never N/A — even trivial changes have edge cases. Mark **❌ Missing** rather than N/A when nothing is mentioned. |
 
 **Marking N/A is a judgement call.** When in doubt, mark **❌ Missing** rather than N/A — N/A removes the dimension from the score and biases it upward.
+
+---
+
+## Grading anchors
+
+Calibration anchors for each grade across the five dimensions. Use these to decide between ✅ Present / ⚠️ Partial / ❌ Missing when the grading is borderline — the strict rubric below depends on these grades being applied consistently.
+
+| Dimension | ✅ Present | ⚠️ Partial | ❌ Missing |
+|---|---|---|---|
+| **Acceptance Criteria** | Numbered bullets, specific, testable from wording alone (e.g. *"Importer recognizes `kind: NRT`"*) | Bullets present **in form** but **untestable in content** (e.g. *"works correctly"*, *"with high accuracy"*, *"as expected"*) | No AC section, and no enumerable list of expected behaviours anywhere in the body or comments |
+| **Scope** | Explicit `Scope` / `Out of scope` section, **OR** ≥6 testable ACs whose scope boundary is unambiguous from their wording | Implicit boundaries only, or `Out of scope` present without a matching `Scope` section | No mention of what is in or out anywhere in the issue |
+| **UX / UI** | Mockup, Figma node, screenshot, **or** detailed text description of layout, states, and labels | UI element named (e.g. *"data-input flyout"*) but layout / states / labels not described | UI implied by the feature but no description, mockup, or component name anywhere |
+| **Data & Roles** | Data shape examples + roles/RBAC/license explicitly stated (user-facing feature); **OR** full data shape examples for a purely backend feature | Some data shown but roles or license missing for a user-facing feature; or roles stated but no data shape | Neither data shape nor roles/license addressed |
+| **Edge cases** | Negative paths, error handling, limits, or *"what should NOT happen"* explicitly listed | Only the `Out of scope` section enumerates exclusions — no positive enumeration of error paths or limits | No `Out of scope`, no error/edge bullets, no limits — nothing |
+
+**Reading the anchors:**
+
+| Anchor pattern | Meaning |
+|---|---|
+| AC ✅ Present and ≥6 testable ACs | Score typically lands at **3 or higher**, even when other dimensions are ⚠️ — strong ACs implicitly carry scope and edge cases. |
+| AC ⚠️ Partial (bullets present but untestable) | Score capped at **3** — the AC cap (`AC ❌ → max 2`) does **not** apply, but the rubric will not reach 4. |
+| AC ❌ Missing (no AC section, no enumerable list) | AC cap applies: maximum per-issue score is **2**. |
+| Scope ✅ via strong ACs (no explicit `Scope` section) | Still counts as ✅ Present — do not down-grade for the missing section alone. |
 
 ---
 
@@ -118,7 +143,7 @@ The combined readability score is **not** the average of per-issue scores. Sub-i
 2. Grade the same five dimensions against the **union** of all issues. Each dimension is **✅ Present** if the information appears anywhere in the corpus, even if no single issue contains it.
 3. Apply the 1–5 rubric to the dimension grades. Use the same tie-breakers.
 4. Write a one-sentence rationale that names *why* the combined score differs from the per-issue scores, when it does. Examples:
-   - *"Gaps in #16938 are covered by #16937's ACs when the set is read together."*
+   - *"Gaps in #90004 are covered by #90003's ACs when the set is read together."*
    - *"All sub-issues miss explicit scope; the epic does not fill that gap, so combined matches the weakest per-issue score."*
    - *"All issues are equally weak — combined matches the average."*
 
@@ -145,6 +170,18 @@ A scenario is **not derivable from issue text** when:
 
 - It exists because of an artifact discovered only in the PR (e.g. a new API endpoint introduced in the diff with no mention in any issue).
 - A concrete fact in the Gherkin (error message wording, exact label text, telemetry field name, feature flag identifier) was sourced from the PR or the code, not from any issue body or comment.
+
+### Why the rule is conservative
+
+Scenarios written with PR-specific vocabulary (feature flag names, exact UI element names) count as `pr` even when the underlying behaviour traces fully to an issue AC. This is intentional:
+
+| Tempting alternative | Why we don't do it |
+|---|---|
+| Abstract the Gherkin to issue-text vocabulary to lift the ratio | Loses precision — the test writer can no longer identify the exact artifact under test. |
+| Weight scenarios by *"mostly issue, some PR"* | Hides PR sourcing; opens the door to hallucinated facts being silently included. |
+| Drop the `pr` scenarios from the denominator | Falsifies the signal — the metric is meant to count what the issue text supports, not what the agent chose to write. |
+
+**The signal points to the PM / writer**, not to the test writer. A low ratio means the issue lacks detail, not that the scenarios are wrong. Do not abstract the Gherkin to inflate the number.
 
 **Procedure:**
 
@@ -194,7 +231,7 @@ The gate triggers **only** on combined = 1. Per-issue scores of 1 on individual 
 
 The assessment is rendered both in the chat (immediately after the draft is saved) and as a collapsible section at the end of the test plan that is published in the GitHub comment.
 
-The canonical markdown template is defined in [`output-formats.md`](output-formats.md#issue-clarity-assessment-section). It looks like this when rendered:
+The canonical markdown template is defined in [`output-formats.md`](output-formats.md#issue-clarity-assessment-section). It looks like this when rendered (numbers are synthetic for illustration — do not match any real Kibana issue):
 
 ```markdown
 <details>
@@ -202,17 +239,17 @@ The canonical markdown template is defined in [`output-formats.md`](output-forma
 
 | Issue | Type | Score | Critical gaps |
 |---|---|---|---|
-| #16898 (target) | Epic | 3/5 | UI flow not described; edge cases missing |
-| #16797 (parent) | Parent epic | 4/5 | Roles/permissions implicit |
-| #16937 (sub) | Sub-issue | 4/5 | None |
-| #16938 (sub) | Sub-issue | 2/5 | No numbered ACs, prose only |
+| #90001 (target) | Epic | 3/5 | UI flow not described; edge cases missing |
+| #90002 (parent) | Parent epic | 4/5 | Roles/permissions implicit |
+| #90003 (sub) | Sub-issue | 4/5 | None |
+| #90004 (sub) | Sub-issue | 2/5 | No numbered ACs, prose only |
 
-**Combined readability: 4/5** — Gaps in #16938 are covered by #16937's ACs when the set is read together.
+**Combined readability: 4/5** — Gaps in #90004 are covered by #90003's ACs when the set is read together.
 
 **Issue Coverage Ratio: 38 / 61 scenarios (62%)** are derivable from issue text alone. The remaining 23 required PR analysis (mostly error message strings, telemetry field names, and feature flag identifiers).
 
 **Actionable feedback:**
-- Issue #16938 should add numbered ACs before the next sprint.
+- Issue #90004 should add numbered ACs before the next sprint.
 - All sub-issues would benefit from listing edge cases and error states explicitly.
 
 </details>
@@ -227,27 +264,84 @@ The canonical markdown template is defined in [`output-formats.md`](output-forma
 
 ---
 
-## Worked example
+## Worked example — well-organized epic
 
-For a fictional epic #16898 about ES|QL inline UDFs with three sub-issues, the assessment might look like this:
+Synthetic numbers for illustration — do not match any real Kibana issue.
+
+For a fictional epic `#90001` about ES|QL inline UDFs with one parent and two sub-issues, the assessment might look like this:
 
 | Issue | Acceptance Criteria | Scope | UX/UI | Data & Roles | Edge cases | Score | Gaps |
 |---|---|---|---|---|---|---|---|
-| #16898 (target, epic) | ✅ | ✅ | ⚠️ | ⚠️ | ❌ | 3 | UI flow not described; edge cases missing |
-| #16797 (parent) | ✅ | ✅ | ✅ | ⚠️ | ⚠️ | 4 | Roles/permissions implicit |
-| #16937 (sub) | ✅ | ✅ | N/A (API change) | ✅ | ⚠️ | 4 | None significant |
-| #16938 (sub) | ❌ | ⚠️ | N/A (API change) | ⚠️ | ❌ | 2 | No numbered ACs, prose only |
+| #90001 (target, epic) | ✅ | ✅ | ⚠️ | ⚠️ | ❌ | 3 | UI flow not described; edge cases missing |
+| #90002 (parent) | ✅ | ✅ | ✅ | ⚠️ | ⚠️ | 4 | Roles/permissions implicit |
+| #90003 (sub) | ✅ | ✅ | N/A (API change) | ✅ | ⚠️ | 4 | None significant |
+| #90004 (sub) | ❌ | ⚠️ | N/A (API change) | ⚠️ | ❌ | 2 | No numbered ACs, prose only |
 
 Combined readability evaluation, re-reading the corpus as a single text:
 
 | Dimension | Combined grade | Why |
 |---|---|---|
-| Acceptance Criteria | ✅ | Numbered ACs in #16898 cover #16938's gap |
+| Acceptance Criteria | ✅ | Numbered ACs in #90001 cover #90004's gap |
 | Scope | ✅ | Target and parent both explicit |
-| UX/UI | ✅ | Parent #16797 has Figma node |
+| UX/UI | ✅ | Parent #90002 has Figma node |
 | Data & Roles | ⚠️ | Mentioned but not enumerated by role anywhere |
-| Edge cases | ⚠️ | A few mentioned in #16937, none in others |
+| Edge cases | ⚠️ | A few mentioned in #90003, none in others |
 
 → Combined readability: **4/5** (two ⚠️ Partial, three ✅; passes the 4-band rule with one ⚠️ tolerance).
 
 Coverage Ratio computed at the end of Step 3: of 61 final scenarios, 38 were derivable from issue text alone (62%). The 23 PR-only scenarios broke down mostly into UI label text and telemetry field names not in any issue.
+
+---
+
+## Worked example — combined=1 case
+
+Synthetic numbers for illustration — do not match any real Kibana issue.
+
+A catastrophic case where the corpus is too thin to derive a test plan from text alone. Demonstrates the stop-and-ask gate firing.
+
+**Corpus:**
+
+| Source | Content |
+|---|---|
+| Target `#90010` (epic) | Title + one paragraph: *"Add support for X integration. The feature should work as expected and feel native."* No ACs, no scope, no UI, no edge cases. |
+| Parent `#90011` (epic) | Empty body. |
+| Sub-issue `#90012` | Prose paragraph describing a use case but no enumerable behaviours. |
+
+**Per-issue grades:**
+
+| Issue | Acceptance Criteria | Scope | UX/UI | Data & Roles | Edge cases | Score | Gaps |
+|---|---|---|---|---|---|---|---|
+| #90010 (target, epic) | ❌ | ❌ | ❌ | ❌ | ❌ | 1 | No ACs, no scope, no UI, no data/roles, no edge cases — tie-breaker: AC ❌ + Scope ❌ → 1 |
+| #90011 (parent) | ❌ | ❌ | ❌ | ❌ | ❌ | 1 | Empty body — same tie-breaker |
+| #90012 (sub) | ❌ | ❌ | ❌ | ⚠️ | ❌ | 1 | Prose only — same tie-breaker |
+
+**Combined readability:**
+
+| Dimension | Combined grade | Why |
+|---|---|---|
+| Acceptance Criteria | ❌ | Not present anywhere in the corpus |
+| Scope | ❌ | Not present anywhere in the corpus |
+| UX/UI | ❌ | Not present anywhere in the corpus |
+| Data & Roles | ⚠️ | Sub-issue prose vaguely implies a user role; not enumerated |
+| Edge cases | ❌ | Not present anywhere in the corpus |
+
+→ Combined readability: **1/5** (four ❌ + one ⚠️; tie-breaker AC ❌ + Scope ❌ → 1). **Stop-and-ask gate fires.**
+
+**Message rendered to the user:**
+
+> ⚠️ Issue clarity check failed for issue #90010. After reading the target issue, the parent epic, and every sub-issue, the combined readability score is **1/5** — the descriptions do not contain enough information to derive a test plan from the text alone.
+>
+> Most critical gaps across the set:
+> - No acceptance criteria in any issue (target, parent, or sub-issue)
+> - No scope boundary defined anywhere
+> - UI is completely undescribed
+>
+> How would you like to proceed?
+>
+> **A) Pause and improve the issues first** — I will stop here and you can return when the issues have been updated.
+>
+> **B) Continue anyway** — I will build the test plan primarily from the PR. The plan will rely heavily on PR content; the Coverage Ratio will likely be very low, and the published Issue Clarity Assessment will record the combined-1 grade as feedback for the PM/writer.
+>
+> **C) Cancel.**
+
+If the user chooses **B**, the published assessment carries the combined=1 grade verbatim — do not lower or alter it. The grade is the signal.

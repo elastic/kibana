@@ -38,6 +38,7 @@ If you catch yourself thinking any of these, STOP. The thought itself is the sig
 | "The total scenarios count looks close enough — I'll round." | Run the three mechanical sum-checks in `references/output-formats.md`. (Eyeballing produced a 7-scenario undercount in dry-run validation.) |
 | "This sub-issue's ACs apply even though the sub-issue is not yet implemented." | Use the Pending work pattern in `references/document-structure.md`. |
 | "The issue is thin but the PR fills the gaps — I'll just write the plan from the PR." | The skill records *Issue clarity*, not PR clarity. Run the Issue Clarity Assessment (Step 1.5) — if combined readability is 1, apply the stop-and-ask gate before continuing. See [`references/issue-clarity-assessment.md`](references/issue-clarity-assessment.md). |
+| "I found a PR that obviously implements this scope, but no issue cross-references it — I'll add it to the corpus." | Treat as **orphan**. Do not absorb silently — orphan PRs are the most common source of silent scope creep. Flag under Known Limitations with `⚠️` and ask the user whether to include before proceeding. See [`references/gathering-context.md`](references/gathering-context.md#orphan-prs). |
 
 ---
 

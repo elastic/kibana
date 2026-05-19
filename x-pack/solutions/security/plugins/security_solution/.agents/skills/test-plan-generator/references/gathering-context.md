@@ -151,6 +151,29 @@ Fall back to GitHub MCP if unavailable. Apply these limits to the diff:
 
 If no tests are found after all of the above, record `No existing tests found` in the catalog for this PR and continue — do not block. If a PR was already read in a previous session and a draft file exists, do not re-read it unless the user explicitly asks.
 
+### Orphan PRs
+
+A PR is **orphan** when its title or scope clearly relates to the target issue (or any sub-issue) but no formal cross-reference exists in either direction — no `Closes #N`, no mention in any issue body or timeline. Identify orphan PRs **after** the regular cross-reference walk and **before** adding them to the corpus.
+
+| Signal | Action |
+|---|---|
+| PR title contains the feature name or area, AND it was opened/updated in the relevant window | Open the PR. Check its body and the issue timeline for a reference (`Closes #N`, `Tracked by`, `Refs #N`, mentioned in a review comment) |
+| Reference found after deeper inspection (timeline comment, PR review, sub-issue body) | **Not orphan.** Add to the primary corpus as usual |
+| No reference found in either direction after the walk above | **Orphan.** Do not add to the primary corpus. Record under Known Limitations with `⚠️` and **stop and ask the user** whether to include it before proceeding to Step 2 |
+
+**Why this matters.** Orphan PRs are the single most common cause of silent scope creep in generated test plans. Absorbing them quietly would produce scenarios traceable to no issue AC, breaking the Core rule. Explicit handling preserves traceability and makes the relationship visible to the reader.
+
+When asking the user, surface:
+
+| Field | Example |
+|---|---|
+| PR number + URL | `#269123` |
+| One-line title | *"Add validation to X importer"* |
+| Best-guess relation to the target | *"Likely implements AC4 of #16898, but no explicit reference"* |
+| Default if no response | Exclude from corpus; keep in Known Limitations with `⚠️` |
+
+---
+
 Do not proceed to Step 2 until all linked PRs and their sub-issue PRs have been read, within the limits above.
 
 ---
