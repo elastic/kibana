@@ -42,7 +42,7 @@ export function ServiceContents({
 }: ContentsProps) {
   const apmRouter = useApmRouter();
   const { services } = useKibana<ApmPluginStartDeps>();
-  const { filterManager } = services.data.query;
+  const filterManager = services.data?.query?.filterManager;
   const { query } = useAnyOfApmParams(
     '/service-map',
     '/services/{serviceName}/service-map',
@@ -84,6 +84,14 @@ export function ServiceContents({
 
   const isLoading = status === FETCH_STATUS.LOADING;
 
+  const handleFocusClick = useCallback(
+    (event: React.MouseEvent<HTMLAnchorElement>) => {
+      filterManager?.setAppFilters([]);
+      onFocusClick(event);
+    },
+    [filterManager, onFocusClick]
+  );
+
   if (!isServiceNode || !nodeData || !serviceName) {
     return null;
   }
@@ -115,14 +123,6 @@ export function ServiceContents({
   });
 
   const { serviceAnomalyStats } = nodeData;
-
-  const handleFocusClick = useCallback(
-    (event: React.MouseEvent<HTMLAnchorElement>) => {
-      filterManager.setAppFilters([]);
-      onFocusClick(event);
-    },
-    [filterManager, onFocusClick]
-  );
 
   return (
     <>
