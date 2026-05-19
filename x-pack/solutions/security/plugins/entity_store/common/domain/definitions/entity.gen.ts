@@ -191,7 +191,7 @@ export const EntityField = lazySchema(() =>
                   snapshot: z
                     .object({
                       /**
-                       * entity.risk.calculated_score at generation time.
+                       * entity.risk.calculated_score_norm at generation time (flyout risk gauge).
                        */
                       risk_score: z.number().nullable().optional(),
                       /**

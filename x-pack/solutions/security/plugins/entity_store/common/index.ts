@@ -112,6 +112,10 @@ export {
   buildEntitySummaryStaleness,
   computeEntitySummaryStalenessReasons,
 } from './domain/definitions/entity_summary_staleness';
+export {
+  ENTITY_ATTRIBUTES_SUMMARY_SOURCE_PATH,
+  buildEntityListSourceFilter,
+} from './domain/definitions/entity_list_source';
 
 export interface IdentitySourceFields {
   /** Fields that participate in identity (EUID composition). */

@@ -36,6 +36,7 @@ interface ServicePanelContentProps {
   onAssetCriticalityChange: () => void;
   openDetailsPanel: (path: EntityDetailsPath) => void;
   entityRecord?: Entity;
+  refetchEntityRecord?: () => void;
   entityStoreEntityId?: string;
   /** See {@link RiskSummaryProps.prefetchedResolutionRisk}. */
   prefetchedResolutionRisk?: EntityRiskScore<EntityType.service>;
@@ -44,6 +45,7 @@ interface ServicePanelContentProps {
 export const ServicePanelContent = ({
   serviceName,
   entityRecord,
+  refetchEntityRecord,
   observedService,
   riskScoreState,
   recalculatingScore,
@@ -64,6 +66,7 @@ export const ServicePanelContent = ({
         entityIdentifier={entityRecord ? entityRecord.entity.id : serviceName}
         entityType={EntityType.service}
         entityRecord={entityRecord}
+        refetchEntityRecord={refetchEntityRecord}
       />
       {riskScoreState.hasEngineBeenInstalled && riskScoreState.data?.length !== 0 && (
         <>

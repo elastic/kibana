@@ -218,6 +218,7 @@ export const ServicePanel = memo(function ServicePanel({
         ) : (
           <ServicePanelContent
             entityRecord={entityFromStoreResult.entityRecord ?? undefined}
+            refetchEntityRecord={entityFromStoreResult.refetch}
             serviceName={serviceName}
             observedService={observedService}
             riskScoreState={riskScoreState}

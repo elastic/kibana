@@ -217,7 +217,7 @@ export const useEntityAnalyticsRoutes = () => {
       params,
     }: {
       signal?: AbortSignal;
-      params: FetchEntitiesListParams;
+      params: FetchEntitiesListParams & { includeSummary?: boolean };
     }) =>
       http.fetch<ListEntitiesResponse>(ENTITY_STORE_ROUTES.public.CRUD_GET, {
         version: ENTITY_STORE_API_VERSIONS.public.v1,
@@ -229,6 +229,7 @@ export const useEntityAnalyticsRoutes = () => {
           page: params.page,
           per_page: params.perPage,
           filterQuery: params.filterQuery,
+          ...(params.includeSummary ? { include_summary: true } : {}),
         },
         signal,
       });

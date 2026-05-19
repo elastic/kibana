@@ -335,6 +335,9 @@ export const UserPanel = memo(function UserPanel({
             isPreviewMode={isPreviewMode}
             identityFields={documentEntityIdentifiers}
             entityRecord={entityStoreV2Enabled ? observedUser.entityRecord ?? undefined : undefined}
+            refetchEntityRecord={
+              entityStoreV2Enabled ? entityFromStoreResult.refetch : undefined
+            }
             skipRiskAndCriticality={noEntityInStore}
             entityStoreEntityId={entityStoreEntityId}
           />
