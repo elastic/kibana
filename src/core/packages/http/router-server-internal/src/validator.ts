@@ -19,18 +19,7 @@ import type {
   RouteValidatorOptions,
 } from '@kbn/core-http-server';
 import { RouteValidationError } from '@kbn/core-http-server';
-
-export class RawRouteValidationError extends ValidationError {
-  constructor(
-    error: RouteValidationError,
-    namespace: string | undefined,
-    public readonly rawError: unknown
-  ) {
-    super(error, namespace);
-
-    Object.setPrototypeOf(this, RawRouteValidationError.prototype);
-  }
-}
+import { RawRouteValidationError } from './raw_route_validation_error';
 
 /**
  * Route validator class to define the validation logic for each new route.
@@ -50,11 +39,9 @@ export class RouteValidator<P = {}, Q = {}, B = {}> {
 
   private static ResultFactory: RouteValidationResultFactory = {
     ok: <T>(value: T) => ({ value }),
-    badRequest: (error: unknown, path?: string[]) => {
-      const validationError = new RouteValidationError(error, path);
-      (validationError as { rawError: unknown }).rawError = error;
-      return { error: validationError };
-    },
+    badRequest: (error: unknown, path?: string[]) => ({
+      error: createRouteValidationError(error, path),
+    }),
   };
 
   private constructor(
@@ -156,9 +143,7 @@ export class RouteValidator<P = {}, Q = {}, B = {}> {
     try {
       result = validateFn(data, RouteValidator.ResultFactory);
     } catch (err) {
-      const validationError = new RouteValidationError(String(err));
-      (validationError as { rawError: unknown }).rawError = err;
-      result = { error: validationError };
+      result = { error: createRouteValidationError(err) };
     }
 
     if (result.error) {
@@ -182,4 +167,17 @@ export class RouteValidator<P = {}, Q = {}, B = {}> {
       return schema.maybe(schema.nullable(schema.any({})));
     }
   }
+}
+
+function createRouteValidationError(error: unknown, path?: string[]): RouteValidationError {
+  const validationError = new RouteValidationError(getRouteValidationErrorMessage(error), path);
+  (validationError as { rawError: unknown }).rawError = error;
+  return validationError;
+}
+
+function getRouteValidationErrorMessage(error: unknown): Error | string {
+  if (error instanceof Error) {
+    return error;
+  }
+  return String(error);
 }

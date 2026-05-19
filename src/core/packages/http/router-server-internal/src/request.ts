@@ -40,7 +40,12 @@ import {
   ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
-import { RawRouteValidationError, RouteValidator } from './validator';
+import { RouteValidator } from './validator';
+import { RawRouteValidationError } from './raw_route_validation_error';
+import {
+  RequestValidationFailure,
+  type RequestValidationSource,
+} from './request_validation_failure';
 import { isSafeMethod } from './route';
 import { KibanaSocket } from './socket';
 import { patchRequest } from './patch_requests';
@@ -50,20 +55,6 @@ import { RequestTimingImpl } from './timing';
 patchRequest();
 
 const requestSymbol = Symbol('request');
-
-export type RequestValidationSource = 'params' | 'query' | 'body' | 'unknown';
-
-export class RequestValidationFailure extends Error {
-  constructor(
-    message: string,
-    public readonly source: RequestValidationSource,
-    public readonly rawError: unknown
-  ) {
-    super(message);
-
-    Object.setPrototypeOf(this, RequestValidationFailure.prototype);
-  }
-}
 
 const isRouteSecurityGetter = (
   security?: RouteSecurityGetter | RecursiveReadonly<RouteSecurity>
@@ -425,10 +416,7 @@ export class CoreKibanaRequest<
   }
 }
 
-function validateRequestPart<T>(
-  validate: () => T,
-  source: RequestValidationSource
-): T {
+function validateRequestPart<T>(validate: () => T, source: RequestValidationSource): T {
   try {
     return validate();
   } catch (error) {
