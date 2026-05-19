@@ -7,6 +7,22 @@
 
 import { schema } from '@kbn/config-schema';
 
+// `ecs_mapping` lives in two shapes on the wire:
+// - HTTP request bodies use the record form `{ [field]: { value/field } }`
+// - The SO is written via `convertECSMappingToArray`, producing
+//   `Array<{ key, value }>` — that's what actually lands on disk.
+// Both shapes must validate so the `create` schema accepts every existing
+// pack/saved-query write without rejecting on-disk doc shape.
+const ecsMappingSchema = schema.oneOf([
+  schema.recordOf(schema.string(), schema.object({}, { unknowns: 'allow' })),
+  schema.arrayOf(
+    schema.object({
+      key: schema.string(),
+      value: schema.object({}, { unknowns: 'allow' }),
+    })
+  ),
+]);
+
 const savedQuerySchemaV1 = schema.object({
   id: schema.string(),
   description: schema.maybe(schema.string()),
@@ -22,9 +38,7 @@ const savedQuerySchemaV1 = schema.object({
   snapshot: schema.maybe(schema.boolean()),
   removed: schema.maybe(schema.boolean()),
   prebuilt: schema.maybe(schema.boolean()),
-  ecs_mapping: schema.maybe(
-    schema.recordOf(schema.string(), schema.object({}, { unknowns: 'allow' }))
-  ),
+  ecs_mapping: schema.maybe(ecsMappingSchema),
 });
 
 export const savedQuerySchemaV2 = savedQuerySchemaV1.extends({
@@ -46,9 +60,7 @@ const packQuerySchema = schema.object(
     timeout: schema.maybe(schema.number()),
     platform: schema.maybe(schema.string()),
     version: schema.maybe(schema.string()),
-    ecs_mapping: schema.maybe(
-      schema.recordOf(schema.string(), schema.object({}, { unknowns: 'allow' }))
-    ),
+    ecs_mapping: schema.maybe(ecsMappingSchema),
     snapshot: schema.maybe(schema.boolean()),
     removed: schema.maybe(schema.boolean()),
   },
