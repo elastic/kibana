@@ -234,6 +234,13 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
     ): T;
   };
 
+  /**
+   * Optional hook called after both visualization and datasource states have been initialized
+   * from a saved document and index patterns are available. Allows the visualization to
+   * hydrate runtime-only fields that depend on loaded data view metadata (e.g., filling in
+   * a time field name that was intentionally left unresolved during persistence).
+   * The returned states replace the initialized states before the editor becomes interactive.
+   */
   postProcessLoadedState?: (state: {
     visualizationState: T;
     datasourceStates: DatasourceStates;
