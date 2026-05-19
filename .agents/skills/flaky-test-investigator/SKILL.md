@@ -5,6 +5,7 @@ description: >-
   triaging a failed-test issue, a Buildkite-reported failure, a test path
   that has been failing intermittently, or any time the user asks to look at
   a flaky test, deflake a test, or stabilize a test.
+disable-model-invocation: true
 ---
 
 # Flaky Test Investigator
@@ -18,7 +19,7 @@ Investigate a flaky Scout, FTR, or Jest test failure and determine what should b
 
 ### Buildkite access
 
-You may access Buildkite either with `bk` CLI or direct API calls (ensure `BUILDKITE_API_TOKEN` variable exported with the Buildkite token). Required Buildkite token scopes:
+Use the `bk` CLI for all Buildkite interactions. Confirm the CLI is authenticated before starting: `bk user --me` should print your Buildkite user. If it fails, run `bk auth login` (OAuth) or `bk configure` (token) — both store credentials in `$HOME/.config/bk.yaml`.
 
 - `read_builds`: browse pipelines, builds, and job logs.
 - `read_artifacts`: list and download build artifacts (Scout HTML failure reports, screenshots, FTR failure-debug HTML, etc.). See "Inspect the failure artifacts" below for what to pull and how to read it.
