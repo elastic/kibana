@@ -89,7 +89,7 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
 
     toastNotifications.addSuccess(
       i18n.translate('xpack.snapshotRestore.repositoryList.table.setDefaultSuccessMessage', {
-        defaultMessage: "Set default repository to ''{name}''",
+        defaultMessage: "Set the default repository to ''{name}''",
         values: { name },
       })
     );
