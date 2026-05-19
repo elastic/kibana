@@ -53,6 +53,13 @@ function getMetricTrendlineTimeColumn(
   return { formBasedState, column, trendlineLayer, trendlineLayerId, trendlineTimeAccessor };
 }
 
+/**
+ * Hydrates the metric trendline's date histogram column with the correct time field
+ * from the loaded data view. During persistence, the trendline time column may be saved
+ * with an empty or incorrect sourceField (e.g., when the data view's default time field
+ * is not @timestamp). This function resolves the actual timeFieldName at runtime once
+ * index patterns are available, ensuring the trendline renders against the correct field.
+ */
 export function postProcessMetricLoadedState({
   visualizationState,
   datasourceStates,
@@ -70,15 +77,15 @@ export function postProcessMetricLoadedState({
     !trendlineLayer ||
     !trendlineLayerId ||
     !trendlineTimeAccessor ||
-    !isDateHistogramColumn(column) ||
-    column.sourceField
+    !isDateHistogramColumn(column)
   ) {
     return { visualizationState, datasourceStates };
   }
 
   const indexPattern = indexPatterns[trendlineLayer.indexPatternId];
   const timeFieldName = indexPattern?.timeFieldName;
-  if (!indexPattern || !timeFieldName) {
+  // If the time field is correct -> no hydration needed
+  if (!indexPattern || !timeFieldName || column.sourceField === timeFieldName) {
     return { visualizationState, datasourceStates };
   }
 
