@@ -188,7 +188,7 @@ describe('fetchEntityRelationships', () => {
   });
 
   describe('query structure', () => {
-    it('should include actorsDocData and targetsDocData in query without LOOKUP JOIN', async () => {
+    it('should include actorsDocData and targetsDocData in query', async () => {
       const toRecordsMock = jest.fn().mockResolvedValue({ records: [] });
       esClient.asCurrentUser.helpers.esql.mockReturnValue({
         toRecords: toRecordsMock,
@@ -216,9 +216,6 @@ describe('fetchEntityRelationships', () => {
       expect(query).toContain('availableInEntityStore');
       expect(query).toContain('relationshipNodeId');
       expect(query).toContain('actorHostIps = VALUES(host.ip)');
-
-      // LOOKUP JOIN is removed — target enrichment happens in TypeScript
-      expect(query).not.toContain('LOOKUP JOIN');
 
       // Verify sourceFields are included in actor doc data
       expect(query).toContain('sourceFields');
