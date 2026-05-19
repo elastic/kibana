@@ -277,9 +277,7 @@ describe('run_check', () => {
       if (p === '/repo/src/core/server/integration_tests/user_storage/jest.integration.config.js') {
         return true;
       }
-      return (
-        p === '/repo/packages/foo/jest.config.js' || p === '/repo/packages/bar/jest.config.js'
-      );
+      return p === '/repo/packages/foo/jest.config.js' || p === '/repo/packages/bar/jest.config.js';
     });
 
     await handler(createArgs());
