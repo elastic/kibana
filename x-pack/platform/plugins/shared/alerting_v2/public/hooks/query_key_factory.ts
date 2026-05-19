@@ -31,7 +31,8 @@ export const workflowKeys = {
 
 export const matcherSuggestionKeys = {
   all: ['matcherSuggestions'] as const,
-  dataFields: () => [...matcherSuggestionKeys.all, 'dataFields'] as const,
+  dataFields: (matcher?: string) =>
+    [...matcherSuggestionKeys.all, 'dataFields', { matcher: matcher || undefined }] as const,
 };
 
 export const actionPolicyKeys = {
@@ -56,4 +57,9 @@ export const executionHistoryKeys = {
   list: (filters: { page: number; perPage: number }) =>
     [...executionHistoryKeys.all, 'list', filters] as const,
   countSince: (since: string) => [...executionHistoryKeys.all, 'countSince', since] as const,
+};
+
+export const userProfileKeys = {
+  all: ['userProfile'] as const,
+  bulk: (uids: string[]) => [...userProfileKeys.all, 'bulk', [...uids].sort()] as const,
 };

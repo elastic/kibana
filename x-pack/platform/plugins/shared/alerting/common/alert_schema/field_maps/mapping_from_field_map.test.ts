@@ -400,6 +400,16 @@ describe('mappingFromFieldMap', () => {
                 },
               },
             },
+            cps_scope: {
+              properties: {
+                expression: {
+                  type: 'keyword',
+                },
+                linked_projects: {
+                  type: 'flattened',
+                },
+              },
+            },
             space_ids: {
               type: 'keyword',
             },

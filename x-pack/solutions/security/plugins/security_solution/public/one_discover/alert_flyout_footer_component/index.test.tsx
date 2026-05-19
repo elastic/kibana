@@ -28,7 +28,7 @@ const mockFlyoutProviders = jest.fn(({ children }: { children: React.ReactNode }
   <>{children}</>
 ));
 
-jest.mock('../../flyout_v2/document/footer', () => ({
+jest.mock('../../flyout_v2/document/main/footer', () => ({
   Footer: (props: unknown) => mockDocumentFooter(props),
 }));
 jest.mock('../../flyout_v2/shared/components/flyout_provider', () => ({

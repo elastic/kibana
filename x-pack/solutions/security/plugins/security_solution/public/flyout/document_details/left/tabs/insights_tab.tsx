@@ -25,12 +25,12 @@ import { useDocumentDetailsContext } from '../../shared/context';
 import { DocumentDetailsLeftPanelKey } from '../../shared/constants/panel_keys';
 import { LeftPanelInsightsTab } from '..';
 import { EntitiesDetails } from '../components/entities_details';
-import { THREAT_INTELLIGENCE_TAB_ID } from '../../../../flyout_v2/threat_intelligence';
-import { ThreatIntelligenceDetailsView } from '../../../../flyout_v2/threat_intelligence/components/threat_intelligence_details_view';
+import { THREAT_INTELLIGENCE_TAB_ID } from '../../../../flyout_v2/document/tools/threat_intelligence';
+import { ThreatIntelligenceDetailsView } from '../../../../flyout_v2/document/tools/threat_intelligence/components/threat_intelligence_details_view';
 import { PREVALENCE_TAB_ID, PrevalenceDetails } from '../components/prevalence_details';
 import { CORRELATIONS_TAB_ID, CorrelationsDetails } from '../components/correlations_details';
 import { getField } from '../../shared/utils';
-import { EventKind } from '../../../../flyout_v2/document/constants/event_kinds';
+import { EventKind } from '../../../../flyout_v2/document/main/constants/event_kinds';
 import { DocumentEventTypes } from '../../../../common/lib/telemetry';
 
 const ENTITIES_TAB_ID = 'entity';
