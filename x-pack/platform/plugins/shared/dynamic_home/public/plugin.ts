@@ -16,8 +16,8 @@ export class DynamicHomePublicPlugin implements Plugin<void, void, {}, StartDeps
   setup(core: CoreSetup<StartDeps>) {
     core.application.register({
       id: 'dynamicHome',
-      title: 'Dynamic Home',
-      appRoute: '/app/dynamic_home',
+      title: 'Home',
+      appRoute: '/app/home',
       async mount(params) {
         const [{ renderApp }, [coreStart, startDeps]] = await Promise.all([
           import('./application'),

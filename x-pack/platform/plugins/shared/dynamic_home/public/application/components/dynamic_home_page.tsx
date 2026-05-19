@@ -128,15 +128,18 @@ export const DynamicHomePage: React.FC<DynamicHomePageProps> = ({ http, agentBui
 
         <EuiSpacer size="l" />
 
-        {/* AI Digest with suggestions */}
-        <AIDigestPanel
-          http={http}
-          context={context}
-          isContextLoading={isLoading}
-          agentBuilder={agentBuilder}
-        />
-
-        <EuiSpacer size="l" />
+        {/* AI Digest with suggestions — only when agent builder is available */}
+        {agentBuilder && (
+          <>
+            <AIDigestPanel
+              http={http}
+              context={context}
+              isContextLoading={isLoading}
+              agentBuilder={agentBuilder}
+            />
+            <EuiSpacer size="l" />
+          </>
+        )}
 
         {/* Solution nav */}
         <SolutionNav http={http} />

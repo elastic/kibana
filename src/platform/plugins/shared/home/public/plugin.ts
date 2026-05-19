@@ -77,7 +77,8 @@ export class HomePublicPlugin
   ): HomePublicPluginSetup {
     core.application.register({
       id: PLUGIN_ID,
-      title: 'Home',
+      title: 'Home (Classic)',
+      appRoute: '/app/home_classic',
       visibleIn: [],
       mount: async (params: AppMountParameters) => {
         const trackUiMetric = usageCollection
