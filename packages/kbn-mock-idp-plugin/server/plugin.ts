@@ -25,7 +25,7 @@ import {
   STATEFUL_ROLES_ROOT_PATH,
 } from '@kbn/es';
 import type { ServerlessProductTier } from '@kbn/es/src/utils';
-import type { FeaturesPluginStart } from '@kbn/features-plugin/server';
+import type { FeaturesPluginStart, KibanaFeature } from '@kbn/features-plugin/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import {
   createSAMLResponse,
@@ -109,7 +109,7 @@ export type CreateSAMLResponseParams = TypeOf<typeof createSAMLResponseSchema>;
 function constructRole(
   userQuery: string,
   roleName: string,
-  features: import('@kbn/features-plugin/server').KibanaFeature[],
+  features: KibanaFeature[],
   llmResponse: z.infer<typeof roleSchema>
 ) {
   const indices = llmResponse.elasticsearch.map((es) => ({
