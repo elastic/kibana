@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { makeCheck } from '../../../../../plugins/uptime/test/scout_uptime_legacy/api/fixtures/helpers/make_checks';
-import { getSha256 } from '../../../../../plugins/uptime/test/scout_uptime_legacy/api/fixtures/helpers/make_tls';
+import { makeCheck } from '../../../api_integration/apis/uptime/rest/helper/make_checks';
+import { getSha256 } from '../../../api_integration/apis/uptime/rest/helper/make_tls';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import { UPTIME_HEARTBEAT_DATA } from './overview';
 
