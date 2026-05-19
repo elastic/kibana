@@ -271,19 +271,24 @@ export async function runEntityMaintainerTask({
   } finally {
     status.metadata.runs++;
     abortController.signal.removeEventListener('abort', onAbort);
+    try {
+      telemetryClient.flush({
+        durationMs: Date.now() - runStartedAt,
+        aborted,
+        errorClass:
+          caughtError instanceof Error
+            ? caughtError.constructor.name
+            : caughtError != null
+            ? 'Error'
+            : undefined,
+        errorMessage: caughtError instanceof Error ? caughtError.message : undefined,
+      });
+    } catch (flushErr) {
+      logger.error(
+        `Failed to flush maintainer telemetry: ${(flushErr as Error)?.message ?? 'unknown'}`
+      );
+    }
   }
-
-  telemetryClient.flush({
-    durationMs: Date.now() - runStartedAt,
-    aborted,
-    errorClass:
-      caughtError instanceof Error
-        ? caughtError.constructor.name
-        : caughtError != null
-        ? 'Error'
-        : undefined,
-    errorMessage: caughtError instanceof Error ? caughtError.message : undefined,
-  });
 
   return {
     state: status,

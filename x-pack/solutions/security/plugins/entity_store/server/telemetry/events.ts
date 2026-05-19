@@ -61,50 +61,87 @@ interface EntityMaintainerEvent {
 }
 
 interface EntityMaintainerRunSummaryFunnel {
+  /** Entities or records scanned from source */
   scanned: number;
+  /** Entities that passed business-logic qualification */
   qualified: number;
+  /** Bulk-update objects built after cross-source merge */
   proposed: number;
+  /** Writes successfully applied to the entity store */
   applied: number;
+  /** 404 bulk errors — entity absent from store; omitted when not applicable */
   droppedNotInStore?: number;
+  /** Entities intentionally skipped (ambiguous, deferred); omitted when not applicable */
   skipped?: number;
+  /** Non-404 write errors */
   failed: number;
 }
 
 interface EntityMaintainerRunSummarySource {
+  /** Integration or logical input id (e.g. "aws_cloudtrail") */
   id: string;
+  /** Records scanned from this source */
   scanned: number;
+  /** Records that qualified from this source */
   qualified: number;
+  /** Source outcome: index_missing | empty | partial | producing | error */
   outcome: 'index_missing' | 'empty' | 'partial' | 'producing' | 'error';
 }
 
 interface EntityMaintainerRunSummaryBreakdown {
+  /** Relationship kind or sub-category name */
   name: string;
+  /** Applied writes for this breakdown entry */
   count: number;
 }
 
 interface EntityMaintainerRunSummaryStage {
+  /** Stage name (fixed enum per maintainer) */
   name: string;
+  /** Stage outcome: success | error | skipped */
   status: 'success' | 'error' | 'skipped';
+  /** Stage duration in milliseconds */
   durationMs: number;
+  /** Fixed enum per maintainer when status is skipped */
   skipReason?: string;
+  /** Fixed enum per maintainer when status is error */
   errorKind?: string;
+  /** Stage-specific applied count rolling up into funnel.applied */
   applied?: number;
 }
 
 export interface EntityMaintainerRunSummaryEvent {
+  /** Entity maintainer identifier */
   id: string;
+  /** Kibana space the maintainer runs in (e.g. "default") */
   namespace: string;
+  /** UUID shared by all events from one scheduled run; joins to logs */
   runId: string;
-  scope?: { kind: string; value: string };
+  /** Sub-run discriminator; only risk-score uses this (one event per entity type) */
+  scope?: {
+    /** Scope discriminator kind (e.g. "entity_type") */
+    kind: string;
+    /** Scope value (e.g. "host", "user", "service", "generic") */
+    value: string;
+  };
+  /** Total run duration in milliseconds */
   durationMs: number;
+  /** Number of outer-loop pagination passes consumed during the run */
   iterations?: number;
+  /** Run hit a hard-coded pagination or query ceiling and stopped voluntarily */
   truncated?: boolean;
+  /** Run was cut short by an external abort signal */
   aborted: boolean;
+  /** Sanitised error class name, set only on error */
   errorClass?: string;
+  /** Error message capped at 500 chars, set only on error */
   errorMessage?: string;
   funnel: EntityMaintainerRunSummaryFunnel;
+  /** Per-source early funnel breakdown (scanned, qualified); empty means not applicable */
   sources?: EntityMaintainerRunSummarySource[];
+  /** Per-relationship-kind split of applied; omitted when not applicable */
   breakdown?: EntityMaintainerRunSummaryBreakdown[];
+  /** Per-stage execution detail for multi-stage maintainers; omitted when not applicable */
   stages?: EntityMaintainerRunSummaryStage[];
 }
 

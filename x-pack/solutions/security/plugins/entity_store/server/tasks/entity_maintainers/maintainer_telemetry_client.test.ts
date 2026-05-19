@@ -152,6 +152,44 @@ describe('createMaintainerTelemetryClient', () => {
     expect(payload.breakdown).toHaveLength(2);
   });
 
+  it('forwards stages[] entries from report to the emitted event', () => {
+    const analytics = createMockAnalytics();
+    const client = createMaintainerTelemetryClient({
+      id: 'risk-score',
+      namespace: 'default',
+      analytics,
+    });
+
+    client.report({
+      funnel: BASE_FUNNEL,
+      scope: { kind: 'entity_type', value: 'host' },
+      stages: [
+        { name: 'fetch_scores', status: 'success', durationMs: 120, applied: 65 },
+        {
+          name: 'apply_decay',
+          status: 'skipped',
+          durationMs: 0,
+          skipReason: 'no_eligible_entities',
+        },
+        { name: 'write_alerts', status: 'error', durationMs: 30, errorKind: 'es_timeout' },
+      ],
+    });
+    client.flush({ durationMs: 400, aborted: false });
+
+    const [, payload] = analytics.reportEvent.mock.calls[0];
+    expect(payload.stages).toHaveLength(3);
+    expect(payload.stages[0]).toEqual({
+      name: 'fetch_scores',
+      status: 'success',
+      durationMs: 120,
+      applied: 65,
+    });
+    expect(payload.stages[1].status).toBe('skipped');
+    expect(payload.stages[1].skipReason).toBe('no_eligible_entities');
+    expect(payload.stages[2].status).toBe('error');
+    expect(payload.stages[2].errorKind).toBe('es_timeout');
+  });
+
   it('generates a fresh runId for each client instance', () => {
     const analytics = createMockAnalytics();
     const client1 = createMaintainerTelemetryClient({
