@@ -21,10 +21,7 @@ import { getDashboardStateSchema } from '../../dashboard_state_schemas';
 export function transformDashboardOut(
   attributes: DashboardSavedObjectAttributes | Partial<DashboardSavedObjectAttributes>,
   references: SavedObjectReference[] | undefined,
-  isDashboardAppRequest: boolean = false,
-  dashboardStateSchema: ReturnType<typeof getDashboardStateSchema> = getDashboardStateSchema(
-    isDashboardAppRequest
-  )
+  isDashboardAppRequest: boolean = false
 ): {
   dashboardState: Partial<
     Omit<DashboardState, 'options'> & { options: Partial<DashboardState['options']> }
@@ -52,13 +49,13 @@ export function transformDashboardOut(
     ? references.filter(({ type }) => type === tagSavedObjectTypeName).map(({ id }) => id)
     : [];
 
-  const propsSchemas = dashboardStateSchema.getPropSchemas();
+  const strictPropsSchemas = getDashboardStateSchema(false).getPropSchemas();
 
   const { panels, warnings } = transformPanelsOut(
     panelsJSON,
     sections,
     references,
-    propsSchemas.panels,
+    strictPropsSchemas.panels,
     isDashboardAppRequest
   );
 
@@ -66,7 +63,7 @@ export function transformDashboardOut(
     legacyControls,
     pinned_panels,
     references,
-    propsSchemas.pinned_panels
+    strictPropsSchemas.pinned_panels
   );
 
   // console.log({

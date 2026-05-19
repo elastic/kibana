@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { flow } from 'lodash';
+
 import type { Type, TypeOf } from '@kbn/config-schema';
 import type { Reference } from '@kbn/content-management-utils';
 import type {
@@ -14,18 +16,13 @@ import type {
   LegacyStoredPinnedControlState,
 } from '@kbn/controls-schemas';
 import { transformType } from '@kbn/embeddable-plugin/server';
-import { flow } from 'lodash';
 
-import type {
-  DashboardPinnedPanelsState as DashboardControlsState,
-  DashboardPinnedPanelsState,
-} from '../../../../common';
+import type { DashboardPinnedPanel, DashboardPinnedPanelsState } from '../../../../common';
 import type { DashboardSavedObjectAttributes } from '../../../dashboard_saved_object';
 import { embeddableService } from '../../../kibana_services';
 import type { getDashboardStateSchema } from '../../dashboard_state_schemas';
 import type { DashboardState, Warnings } from '../../types';
 
-type PinnedPanelsState = Required<DashboardState>['pinned_panels'];
 type StoredPinnedPanels = Required<DashboardSavedObjectAttributes>['pinned_panels']['panels'];
 
 export function transformPinnedPanelsOut(
@@ -106,7 +103,7 @@ export function transformPinnedPanelProperties(
       | Required<DashboardSavedObjectAttributes>['pinned_panels']['panels'][number]
     ) & { id: string }
   >
-): PinnedPanelsState {
+): DashboardPinnedPanelsState {
   return controls
     .sort(({ order: orderA = 0 }, { order: orderB = 0 }) => orderA - orderB)
     .map(({ id, type, grow, width, ...rest }) => {
@@ -116,7 +113,7 @@ export function transformPinnedPanelProperties(
         ...(grow !== undefined && { grow }),
         ...(width !== undefined && { width }),
         config: 'explicitInput' in rest ? rest.explicitInput : rest.config,
-      } as PinnedPanelsState[number];
+      } as DashboardPinnedPanel;
     });
 }
 
@@ -124,11 +121,11 @@ export function transformPinnedPanelProperties(
  * Inject references via the embeddable transforms
  */
 function transformPanel(
-  panels: PinnedPanelsState,
+  panels: DashboardPinnedPanelsState,
   containerReferences: Reference[],
   panelsStateSchema: Type<TypeOf<ReturnType<typeof getDashboardStateSchema>>['pinned_panels']>
 ): { panels: DashboardPinnedPanelsState; warnings: Warnings } {
-  const transformedPanels: DashboardControlsState = [];
+  const transformedPanels: DashboardPinnedPanelsState = [];
   const warnings: Warnings = [];
 
   panels.forEach((panel) => {
@@ -139,11 +136,7 @@ function transformPanel(
         const transformed = {
           ...rest,
           config: transforms.transformOut(config, [], containerReferences, panel.id),
-        } as DashboardControlsState[number];
-        console.log({
-          test: panelsStateSchema.getSchemaStructure(),
-          transformed: JSON.stringify(transformed, null, 2),
-        });
+        } as DashboardPinnedPanel;
         panelsStateSchema.validate([transformed]);
         transformedPanels.push(transformed);
       } catch (e) {
@@ -155,7 +148,7 @@ function transformPanel(
         });
       }
     } else {
-      transformedPanels.push({ ...rest, config } as DashboardControlsState[number]);
+      transformedPanels.push({ ...rest, config } as DashboardPinnedPanel);
     }
   });
   return { warnings, panels: transformedPanels };

@@ -12,7 +12,7 @@ import { schema } from '@kbn/config-schema';
 import { refreshIntervalSchema } from '@kbn/data-service-server';
 import { asCodeFilterSchema } from '@kbn/as-code-filters-schema';
 import { asCodeQuerySchema } from '@kbn/as-code-shared-schemas';
-import { getControlsGroupSchema as getPinnedPanelsSchema } from '@kbn/controls-schemas';
+import { getControlsGroupSchema } from '@kbn/controls-schemas';
 import { timeRangeSchema } from '@kbn/es-query-server';
 import { embeddableService } from '../kibana_services';
 import { DASHBOARD_GRID_COLUMN_COUNT } from '../../common/page_bundle_constants';
@@ -149,6 +149,20 @@ export function getSectionSchema(isDashboardAppRequest: boolean) {
   );
 }
 
+export function getPinnedPanelsSchema(isDashboardAppRequest: boolean = false) {
+  return isDashboardAppRequest // looser route validation for dashboard application requestsd
+    ? schema.arrayOf(
+        schema.object(
+          {},
+          {
+            unknowns: 'allow',
+          }
+        ),
+        { maxSize: Number.MAX_SAFE_INTEGER }
+      )
+    : getControlsGroupSchema();
+}
+
 export const optionsSchema = schema.object(
   {
     auto_apply_filters: schema.boolean({
@@ -240,17 +254,13 @@ export function getDashboardStateSchema(isDashboardAppRequest: boolean) {
       ),
       options: optionsSchema,
       panels: schema.arrayOf(
-        isDashboardAppRequest
-          ? schema.oneOf([
-              getPanelSchema(),
-              getSectionSchema(isDashboardAppRequest),
-              schema.object(
-                {},
-                {
-                  unknowns: 'allow',
-                }
-              ),
-            ])
+        isDashboardAppRequest // looser route validation for dashboard application requests
+          ? schema.object(
+              {},
+              {
+                unknowns: 'allow',
+              }
+            )
           : schema.oneOf([getPanelSchema(), getSectionSchema(isDashboardAppRequest)]),
         {
           defaultValue: [],
