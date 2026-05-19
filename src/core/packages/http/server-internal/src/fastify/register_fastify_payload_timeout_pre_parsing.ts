@@ -29,8 +29,8 @@ function resolvePayloadSource(req: FastifyRequest): Readable | undefined {
 
 /**
  * Arms {@link RouterRoute} `options.timeout.payload` on the raw request stream.
- * Must run from `onRequest` after `req.app.matchedRoute` is populated and before Fastify's
- * content-type parsers buffer the entity body.
+ * Must run after {@link populateMatchedRouteFromFindMyWay} populates `req.app.matchedRoute`
+ * and before Fastify's content-type parsers buffer the entity body (typically `preParsing`).
  *
  * @internal
  */

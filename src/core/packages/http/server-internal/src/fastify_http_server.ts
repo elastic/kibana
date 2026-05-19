@@ -87,8 +87,7 @@ import {
   installFastifyCompression,
 } from './fastify/install_fastify_compression';
 import { installFastifyCors } from './fastify/install_fastify_cors';
-import { applyHapiCompatRequestTimeouts } from './fastify/apply_hapi_compat_request_timeouts';
-import { attachFastifyPayloadReceiveTimeout } from './fastify/register_fastify_payload_timeout_pre_parsing';
+import { populateMatchedRouteFromFindMyWay } from './fastify/fastify_route_lookup';
 
 /** Upper bound for Fastify's raw body limit — must cover saved_objects `_import` (see `savedObjects.maxImportPayloadBytes`). */
 const FASTIFY_BODY_LIMIT_CEILING_BYTES = 36 * 1024 * 1024;
@@ -770,81 +769,28 @@ export class FastifyHttpServer {
   }
 
   /**
-   * Registers an `onRequest` Fastify hook that performs the find-my-way lookup ahead of
-   * body parsing, `onPreAuth`/`onPostAuth`, and the route handler. The matched route,
-   * params, and Kibana-specific options (security, access, xsrfRequired, etc.) are stashed
-   * on `req.app` so the Hapi-shaped Kibana request builders downstream can expose them via
-   * `KibanaRequest.route.options.security`.
+   * Registers a `preParsing` hook that performs find-my-way lookup after `onRequest`
+   * {@link registerOnPreRouting} URL rewrites and before body parsing / `onPreAuth`.
+   * Matched route metadata is stashed on `req.app` for `KibanaRequest.route.options.security`.
    *
-   * Must run in `onRequest` (not `preParsing`) so per-route `timeout.payload` can arm on
-   * `req.raw` before Fastify's JSON parser buffers the entity body — otherwise slow uploads
-   * never hit the receive timeout (Hapi `payload.timeout` parity).
-   *
-   * Registered during `setup()` before consumers call `registerOnPreAuth` (which adds a
-   * `preParsing` hook), so route metadata is always available to later lifecycle hooks.
+   * Registered during `setup()` before consumers call `registerOnPreAuth` (which adds more
+   * `preParsing` hooks), so lookup always runs first in that phase.
    */
   private installRouteLookupHook(
     fastify: FastifyInstance,
     fmw: FmwInstance<FmwHTTPVersion.V1>,
     defaultSocketTimeoutMs: number
   ): void {
-    fastify.addHook('onRequest', (req, reply, done) => {
-      const lookupPath = getFindMyWayLookupPath(req);
-      const match = fmw.find(req.method as any, lookupPath);
-      const app = ((req as any).app = (req as any).app ?? {});
-      let matchedKibanaRoute: RouterRoute | undefined;
-      if (match) {
-        const store = (match as any).store as
-          | {
-              kibanaRoute?: RouterRoute;
-              kibanaRouteOptions?: KibanaRouteOptions;
-              wildcardName?: string;
-            }
-          | undefined;
-        if (store?.kibanaRoute) {
-          app.matchedRoute = store.kibanaRoute;
-          matchedKibanaRoute = store.kibanaRoute;
-        }
-        if (store?.kibanaRouteOptions) {
-          app.matchedKibanaRouteOptions = store.kibanaRouteOptions;
-        } else {
-          const routingPath = lookupPath;
-          for (const [pattern] of this.staticDirectoryRouteInfo) {
-            if (pathnameMatchesFastifyWildcardPattern(routingPath, pattern)) {
-              app.matchedKibanaRouteOptions = STATIC_DIRECTORY_ROUTE_OPTIONS;
-              break;
-            }
-          }
-        }
-        const params: Record<string, string | undefined> = { ...(match.params ?? {}) };
-        let wildcardName = store?.wildcardName;
-        if (!wildcardName) {
-          const routingPath = lookupPath;
-          for (const [pattern, wildName] of this.staticDirectoryRouteInfo) {
-            if (pathnameMatchesFastifyWildcardPattern(routingPath, pattern)) {
-              wildcardName = wildName;
-              break;
-            }
-          }
-        }
-        if (wildcardName) {
-          if ('*' in params) {
-            params[wildcardName] = params['*'];
-            delete params['*'];
-          } else if (params[wildcardName] === undefined) {
-            params[wildcardName] = '';
-          }
-        }
-        const plainParams = toPlainRouteParams(params);
-        app.matchedRouteParams = plainParams;
-        // Mutate before `preValidation` (registerAuth): auth caches the Hapi-compat request,
-        // which snapshots `req.params` for route validation. The dispatcher runs later and
-        // would set params correctly, but without this hook assignment cached compat keeps
-        // Fastify's `/*` params (`*` not renamed to `{path*}` names like `path`).
-        (req as { params: unknown }).params = plainParams;
-      }
-      applyHapiCompatRequestTimeouts(req, reply, matchedKibanaRoute, defaultSocketTimeoutMs);
-      attachFastifyPayloadReceiveTimeout(req, reply);
+    const lookupOptions = {
+      fmw,
+      getLookupPath: getFindMyWayLookupPath,
+      staticDirectoryRouteInfo: this.staticDirectoryRouteInfo,
+      staticDirectoryRouteOptions: STATIC_DIRECTORY_ROUTE_OPTIONS,
+      pathnameMatchesWildcardPattern: pathnameMatchesFastifyWildcardPattern,
+      defaultSocketTimeoutMs,
+    };
+    fastify.addHook('preParsing', (req, reply, _payload, done) => {
+      populateMatchedRouteFromFindMyWay(req, reply, lookupOptions);
       done();
     });
   }

@@ -72,10 +72,10 @@ const preResponseToolkit: OnPreResponseToolkit = {
 /**
  * Lifecycle hooks run before Fastify's normal route handler invokes our internal
  * builder, so we have to assemble a Hapi-shaped request here too. The route-lookup
- * `preParsing` hook in {@link FastifyHttpServer} stashes the matched route on
- * `req.app.matchedRoute` (when the URL resolved to a registered Kibana route); this
- * builder reads that to populate `route.settings.app` so consumers like the security
- * plugin can read `KibanaRequest.route.options.security`.
+ * {@link populateMatchedRouteFromFindMyWay} (Fastify `preParsing`, after `onPreRouting`
+ * URL rewrites) stashes the matched route on `req.app.matchedRoute`; this builder reads
+ * that to populate `route.settings.app` so consumers like the security plugin can read
+ * `KibanaRequest.route.options.security`.
  */
 const buildKibanaRequest = (req: FastifyRequest, reply: FastifyReply): HapiRequest => {
   const existingCompat = (req as any).app?.[KIBANA_HAPI_COMPAT_REQUEST] as HapiRequest | undefined;
@@ -100,26 +100,31 @@ const buildKibanaRequest = (req: FastifyRequest, reply: FastifyReply): HapiReque
       }
     | undefined;
   const matchedKibanaOptions = app.matchedKibanaRouteOptions as KibanaRouteOptions | undefined;
-  const settingsApp =
-    matchedKibanaOptions ??
-    (matched
+  const matchedRoute = matched as RouterRoute | undefined;
+  const settingsApp = (
+    matchedKibanaOptions
+      ? {
+          ...matchedKibanaOptions,
+          security: matchedKibanaOptions.security ?? matchedRoute?.security,
+        }
+      : matched
       ? {
           xsrfRequired: undefined,
           access: undefined,
           deprecated: undefined,
           security: matched.security,
         }
-      : {});
+      : {}
+  ) as KibanaRouteOptions;
   const authRegistered =
     typeof (req.server as any).getKibanaAuthRegistered === 'function'
       ? Boolean((req.server as any).getKibanaAuthRegistered())
       : false;
-  const mergedSecurity = matchedKibanaOptions?.security ?? (matched ? matched.security : undefined);
+  const mergedSecurity = settingsApp.security;
   const routeSecurity =
     typeof mergedSecurity === 'function'
       ? undefined
       : (mergedSecurity as RouteSecurity | undefined);
-  const matchedRoute = matched as RouterRoute | undefined;
   const compat: any = {
     app,
     url,
