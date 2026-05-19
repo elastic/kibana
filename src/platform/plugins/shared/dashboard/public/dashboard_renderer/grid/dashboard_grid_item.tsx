@@ -8,7 +8,7 @@
  */
 
 import type { UseEuiTheme } from '@elastic/eui';
-import { EuiLoadingChart, useEuiTheme } from '@elastic/eui';
+import { EuiLoadingChart, transparentize, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import {
@@ -290,8 +290,10 @@ const dashboardGridItemStyles = {
         },
         // Call out panels that are selected to indicate their related panels with the same border plus a semitransparent overlay
         '&.dshDashboardGrid__item--selected .embPanel': {
-          '&, & div, & button': {
-            backgroundColor: context.euiTheme.colors.vis.euiColorVis1,
+          backgroundColor: transparentize(context.euiTheme.colors.vis.euiColorVis0, 0.1),
+
+          '& div, & button': {
+            backgroundColor: 'transparent',
           },
         },
       },
