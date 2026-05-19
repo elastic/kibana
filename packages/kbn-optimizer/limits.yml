@@ -9,7 +9,7 @@ pageLoadAssetSize:
   aiops: 15227
   alerting: 22371
   alertingVTwo: 76778
-  apm: 48558
+  apm: 54371
   apmSourcesAccess: 2278
   automaticImport: 18629
   banners: 4006
@@ -45,7 +45,7 @@ pageLoadAssetSize:
   dataViews: 66000
   dataVisualizer: 32727
   developerToolbar: 5000
-  devTools: 8109
+  devTools: 8107
   discover: 30501
   discoverEnhanced: 5353
   discoverShared: 2322
@@ -188,7 +188,7 @@ pageLoadAssetSize:
   transform: 16515
   triggersActionsUi: 123512
   uiActions: 35180
-  unifiedDocViewer: 16520
+  unifiedDocViewer: 16519
   unifiedSearch: 19500
   upgradeAssistant: 6898
   uptime: 48171
