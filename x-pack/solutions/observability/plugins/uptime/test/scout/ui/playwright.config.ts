@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export { UptimeProvider } from './uptime';
+import { createPlaywrightConfig } from '@kbn/scout-oblt';
+
+export default createPlaywrightConfig({
+  testDir: './tests',
+  runGlobalSetup: true,
+});
