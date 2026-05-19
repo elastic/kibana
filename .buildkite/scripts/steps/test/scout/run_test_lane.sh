@@ -5,7 +5,6 @@ set -euo pipefail
 source .buildkite/scripts/steps/functional/common.sh
 
 SCOUT_SERVER_LOG=".scout/server.log"
-PLAYWRIGHT_BIN="./node_modules/.bin/playwright"
 
 LOAD_IDS=()
 PASSED_INDICES=""
@@ -113,12 +112,27 @@ start_server() {
   exit 1
 }
 
+# Uploads Scout test server logs as a Buildkite artifact
+upload_test_server_log() {
+  if [[ ! -f "$SCOUT_SERVER_LOG" ]]; then
+    echo "No server log found at $SCOUT_SERVER_LOG, skipping upload"
+    return
+  fi
+
+  echo "--- Uploading test server log"
+  buildkite-agent artifact upload "$SCOUT_SERVER_LOG"
+}
+
 # Stop the test server if it's still running
 stop_server() {
   if [[ -n "${SCOUT_SERVER_PID:-}" ]] && kill -0 "$SCOUT_SERVER_PID" 2>/dev/null; then
     echo "--- Stopping test server (PID: $SCOUT_SERVER_PID)"
     kill "$SCOUT_SERVER_PID" 2>/dev/null || true
     wait "$SCOUT_SERVER_PID" 2>/dev/null || true
+  fi
+
+  if [[ ${#FAILED[@]} -gt 0 ]]; then
+    upload_test_server_log
   fi
 }
 
@@ -128,26 +142,17 @@ run_scout_tests() {
   local config_path="$2"
 
   echo "--- Running: $config_path"
-
-  local pw_args=(
-    test
-    "--config=$config_path"
-    "--grep=$PLAYWRIGHT_GREP_TAG"
-    "--project=$PLAYWRIGHT_PROJECT"
-  )
-
-  local pw_env=(
-    "SCOUT_TARGET_LOCATION=$SCOUT_TEST_TARGET_LOCATION"
-    "SCOUT_TARGET_ARCH=$SCOUT_TEST_TARGET_ARCH"
-    "SCOUT_TARGET_DOMAIN=$SCOUT_TEST_TARGET_DOMAIN"
-    "NODE_OPTIONS=${NODE_OPTIONS:-} --require=@kbn/babel-register/install"
-  )
-
   local start_time
   start_time=$(date +%s)
 
   set +e
-  env "${pw_env[@]}" "$PLAYWRIGHT_BIN" "${pw_args[@]}"
+
+  node scripts/scout run-tests \
+    --location "$SCOUT_TEST_TARGET_LOCATION" \
+    --arch "$SCOUT_TEST_TARGET_ARCH" \
+    --domain "$SCOUT_TEST_TARGET_DOMAIN" \
+    --config "$config_path"
+
   local exit_code=$?
   set -e
 
@@ -166,10 +171,10 @@ run_scout_tests() {
       PASSED+=("$config_path ($duration)")
       ;;
     *)
+      echo "^^^ +++"
       upload_report_events "$config_path"
       FAILED+=("$config_path")
       echo "Exited with code $exit_code for $config_path"
-      echo "^^^ +++"
       ;;
   esac
 }
@@ -187,7 +192,7 @@ upload_report_events() {
     return
   fi
 
-  echo "--- Uploading report events: $config_path"
+  echo "~~~ Uploading report events: $config_path"
 
   set +e
   node scripts/scout upload-events --dontFailOnError
@@ -203,6 +208,34 @@ upload_report_events() {
     if [[ -d "$dir" ]] && [[ "$dir" != *"scout-playwright-test-failures-"* ]]; then
       rm -rf "$dir"
     fi
+  done
+}
+
+# Return the final status of a config path based on the run results
+get_config_status() {
+  local config="$1" s
+  for s in "${SKIPPED[@]+"${SKIPPED[@]}"}"; do [[ "$s" == "$config" ]] && echo "skipped" && return; done
+  for s in "${PASSED[@]+"${PASSED[@]}"}"; do [[ "$s" == "$config"* ]] && echo "passed" && return; done
+  for s in "${FAILED[@]+"${FAILED[@]}"}"; do [[ "$s" == "$config" ]] && echo "failed" && return; done
+  echo "unknown"
+}
+
+display_test_load_ids_in_order_of_execution() {
+  echo ""
+  echo "Test loads in this lane ran in the following order:"
+  echo ""
+  local load_count=${#LOAD_IDS[@]}
+  local idx_width=${#load_count}
+  local idx_sep
+  idx_sep=$(printf '%*s' "$idx_width" '' | tr ' ' '-')
+  printf '  %*s  %-7s  %s\n' "$idx_width" "#" "Status" "Config"
+  printf '  %*s  %-7s  %s\n' "$idx_width" "$idx_sep" "-------" "------"
+  local i
+  for i in "${!LOAD_IDS[@]}"; do
+    local config="${LOAD_IDS[$i]}"
+    local status
+    status=$(get_config_status "$config")
+    printf '  %*d  %-7s  %s\n' "$idx_width" "$((i+1))" "$status" "$config"
   done
 }
 
@@ -229,6 +262,7 @@ print_summary() {
     echo ""
     echo "Failed run(s):"
     printf '  %s\n' "${FAILED[@]}"
+    display_test_load_ids_in_order_of_execution
   fi
 }
 
@@ -246,8 +280,6 @@ check_required_env_vars \
   KIBANA_BUILD_LOCATION
 
 PASSED_LOAD_INDICES_META_KEY="${BUILDKITE_STEP_KEY}_passed"
-PLAYWRIGHT_GREP_TAG="@${SCOUT_TEST_TARGET_LOCATION}-${SCOUT_TEST_TARGET_ARCH}-${SCOUT_TEST_TARGET_DOMAIN}"
-PLAYWRIGHT_PROJECT="local"
 
 download_test_lane_loads
 read_load_ids
@@ -261,7 +293,7 @@ for i in "${!LOAD_IDS[@]}"; do
 
   if has_load_index_passed "$i"; then
     SKIPPED+=("$config_path")
-    echo "--- Skipping (already passed): $config_path"
+    echo "~~~ Skipping (already passed): $config_path"
     continue
   fi
 
