@@ -98,7 +98,7 @@ export const useLensProps = ({
 
   useEffect(() => {
     chartConfigUpdates$.current.next(void 0);
-  }, [query, title, description, chartLayers, yBounds, error, userMessages, profileId]);
+  }, [query, title, description, chartLayers, yBounds, effectiveError, userMessages, profileId]);
 
   // creates a stable function that builds the Lens attributes
   const buildAttributesFn = useLatest(async () => {
