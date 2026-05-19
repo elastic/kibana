@@ -238,6 +238,12 @@ describe('When using cancel action from response actions console', () => {
     });
   });
 
+  describe('and agent type is endpoint', () => {
+    it('should display help panel "+" button disabled if Endpoint does not support runscript', async () => {
+      //
+    });
+  });
+
   describe('Feature flag behavior', () => {
     it('should enable cancel command for Microsoft Defender Endpoint when feature flag is enabled', async () => {
       const renderResult = await renderConsole('microsoft_defender_endpoint');

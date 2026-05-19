@@ -100,7 +100,8 @@ export const isResponseActionCancelable = (
 ): boolean => {
   return (
     (CANCELABLE_RESPONSE_ACTIONS[command]?.[agentType] ?? false) &&
-    isActionSupportedByAgentType(agentType, command, 'manual')
+    isActionSupportedByAgentType(agentType, command, 'manual') &&
+    isActionSupportedByAgentType(agentType, 'cancel', 'manual')
   );
 };
 
