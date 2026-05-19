@@ -74,7 +74,6 @@ function AppearanceSelectorUI({ security, core, closePopover, isServerless }: Pr
   return (
     <EuiContextMenuItem
       icon="brush"
-      size="s"
       onClick={() => {
         openModal();
         closePopover();

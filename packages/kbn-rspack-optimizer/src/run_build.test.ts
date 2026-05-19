@@ -59,6 +59,9 @@ describe('IGNORED_WATCH_PATTERNS', () => {
       ['unit test file (.test.ts)', p('repo', 'pkg', 'src', 'foo.test.ts')],
       ['unit test file (.test.tsx)', p('repo', 'pkg', 'src', 'foo.test.tsx')],
       ['unit test file (.test.js)', p('repo', 'pkg', 'src', 'foo.test.js')],
+      ['spec test file (.spec.ts)', p('repo', 'pkg', 'src', 'foo.spec.ts')],
+      ['spec test file (.spec.tsx)', p('repo', 'pkg', 'src', 'foo.spec.tsx')],
+      ['spec test file (.spec.js)', p('repo', 'pkg', 'src', 'foo.spec.js')],
       ['storybook story', p('repo', 'pkg', 'src', 'foo.stories.tsx')],
       ['mock sibling', p('repo', 'pkg', 'src', 'foo.mock.ts')],
 
