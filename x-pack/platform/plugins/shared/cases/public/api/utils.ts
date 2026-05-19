@@ -24,7 +24,9 @@ import type {
 import {
   isCommentRequestTypeExternalReference,
   isCommentRequestTypePersistableState,
+  isLegacyCommentAttachment,
   isUnifiedAttachmentRequest,
+  isUnifiedCommentAttachment,
 } from '../../common/utils/attachments';
 import { escapeUnterminatedEntities } from '../components/markdown_editor/sanitize_markdown';
 import { isCommentUserAction } from '../../common/utils/user_actions';
@@ -120,21 +122,17 @@ export const convertAttachmentToCamelCase = (attachment: AttachmentRequestV2): A
  * See https://github.com/elastic/kibana/issues/268564
  */
 const sanitizeAttachmentContent = (attachment: AttachmentRequestV2): AttachmentRequestV2 => {
-  if (
-    isUnifiedAttachmentRequest(attachment) &&
-    'data' in attachment &&
-    typeof attachment.data?.content === 'string'
-  ) {
+  if (isUnifiedCommentAttachment(attachment)) {
     return {
       ...attachment,
       data: { ...attachment.data, content: escapeUnterminatedEntities(attachment.data.content) },
     };
   }
 
-  if ('comment' in attachment && typeof (attachment as { comment?: string }).comment === 'string') {
+  if (isLegacyCommentAttachment(attachment)) {
     return {
       ...attachment,
-      comment: escapeUnterminatedEntities((attachment as { comment: string }).comment),
+      comment: escapeUnterminatedEntities(attachment.comment),
     };
   }
 
