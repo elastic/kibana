@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { chunk } from 'lodash';
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { getEntitiesLatestIndexName } from '@kbn/cloud-security-posture-common/utils/helpers';
 import { checkIfEntitiesIndexExists } from './utils';
@@ -77,15 +78,6 @@ const buildSourceFields = (
   return result;
 };
 
-/** Chunks an array into subarrays of at most `size` elements. */
-const chunkArray = <T>(arr: T[], size: number): T[][] => {
-  const chunks: T[][] = [];
-  for (let i = 0; i < arr.length; i += size) {
-    chunks.push(arr.slice(i, i + size));
-  }
-  return chunks;
-};
-
 /**
  * Fetches enrichment metadata for a set of entity IDs from the local entity store.
  *
@@ -119,8 +111,8 @@ export const fetchEntityEnrichment = async (
   // while other chunks' entities remain enriched. This can split a previously-coherent
   // type/subtype group — a known behavioral edge case documented in the CPS refactor.
   await Promise.all(
-    chunkArray([...new Set(entityIds)], 100).map(async (chunk) => {
-      const paramNames = chunk.map((_, i) => `?entityId${i}`).join(', ');
+    chunk([...new Set(entityIds)], 100).map(async (entityIdChunk) => {
+      const paramNames = entityIdChunk.map((_, i) => `?entityId${i}`).join(', ');
       // Some entity-store mappings (e.g. tests inserting minimal entities) omit columns we
       // KEEP below. unmapped_fields=nullify makes ESQL return NULL for those instead of erroring.
       const query = `SET unmapped_fields="nullify";
@@ -136,7 +128,7 @@ FROM ${indexName}
             columnar: false,
             query,
             // @ts-ignore - types are not up to date
-            params: chunk.map((id, i) => ({ [`entityId${i}`]: id })),
+            params: entityIdChunk.map((id, i) => ({ [`entityId${i}`]: id })),
           })
           .toRecords<
             {
@@ -174,7 +166,7 @@ FROM ${indexName}
         }
       } catch (err) {
         logger.warn(
-          `Entity enrichment fetch failed for chunk of ${chunk.length} IDs: ${err.message}`
+          `Entity enrichment fetch failed for chunk of ${entityIdChunk.length} IDs: ${err.message}`
         );
         // Non-fatal: partial map returned, graph renders without enrichment for missing entities
       }
