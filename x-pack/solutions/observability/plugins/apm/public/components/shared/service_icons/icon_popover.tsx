@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiSkeletonText, EuiPopover, EuiPopoverTitle } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiSkeletonText,
+  EuiPopover,
+  EuiPopoverTitle,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import React from 'react';
 import type { PopoverItem } from '.';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
@@ -29,12 +35,15 @@ export function IconPopover({
   detailsFetchStatus,
   isOpen,
 }: IconPopoverProps) {
+  const popoverTitleId = useGeneratedHtmlId();
+
   if (!icon.type) {
     return null;
   }
   const isLoading = detailsFetchStatus === FETCH_STATUS.LOADING;
   return (
     <EuiPopover
+      aria-labelledby={popoverTitleId}
       anchorPosition="downCenter"
       ownFocus={false}
       button={
@@ -54,7 +63,7 @@ export function IconPopover({
       closePopover={onClose}
       onBlur={onClose}
     >
-      <EuiPopoverTitle>{title}</EuiPopoverTitle>
+      <EuiPopoverTitle id={popoverTitleId}>{title}</EuiPopoverTitle>
       <div style={{ minWidth: 300 }}>
         {isLoading ? <EuiSkeletonText data-test-subj="loading-content" /> : children}
       </div>
