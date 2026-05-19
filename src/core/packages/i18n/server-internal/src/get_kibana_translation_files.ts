@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { readFile } from 'fs/promises';
 import { basename } from 'path';
+import { createHash } from 'crypto';
 import { fromRoot } from '@kbn/repo-info';
 import { asyncMapWithLimit } from '@kbn/std';
 import { getPackages, getPluginPackagesFilter } from '@kbn/repo-packages';
@@ -56,4 +58,31 @@ export const getAllKibanaTranslationFiles = async (
   const allPaths = await discoverAllTranslationPaths(pluginPaths);
   const allowed = new Set(supportedLocales);
   return allPaths.filter((translationPath) => allowed.has(basename(translationPath, '.json')));
+};
+
+/**
+ * Groups a flat list of translation file paths by locale code
+ * (the filename without the .json extension).
+ */
+export const groupFilesByLocale = (files: string[]): Record<string, string[]> => {
+  const map: Record<string, string[]> = {};
+  for (const file of files) {
+    const locale = basename(file, '.json');
+    (map[locale] ??= []).push(file);
+  }
+  return map;
+};
+
+/**
+ * Hashes the raw bytes of a set of translation files without parsing them or
+ * populating the loader cache. Files are sorted by path for determinism.
+ * Returns a 12-character hex digest suitable for cache-busting URLs.
+ */
+export const computeLocaleFileHash = async (files: string[]): Promise<string> => {
+  const sorted = [...files].sort();
+  const hash = createHash('sha256');
+  for (const file of sorted) {
+    hash.update(await readFile(file));
+  }
+  return hash.digest('hex').slice(0, 12);
 };

@@ -106,6 +106,7 @@ export class ChromeService {
     theme,
     userProfile,
     uiSettings,
+    featureFlags,
   }: StartDeps): Promise<InternalChromeStart> {
     // 1. Create all chrome state
     const state = createChromeState({
@@ -185,6 +186,7 @@ export class ChromeService {
         projectNavigation,
       },
       sidebar,
+      featureFlags,
     });
 
     return chrome;

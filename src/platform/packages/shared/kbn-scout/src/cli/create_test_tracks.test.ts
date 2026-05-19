@@ -11,6 +11,7 @@ import type { ScoutTestConfig, ScoutTestConfigStatsEntry } from '@kbn/scout-repo
 import { ScoutTestConfigStats } from '@kbn/scout-reporting';
 import { ScoutTestTarget } from '@kbn/scout-info';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { findPackageForPath } from '@kbn/repo-packages';
 import {
   msToHuman,
   identifyTestLoads,
@@ -30,6 +31,12 @@ jest.mock('@kbn/scout-reporting', () => {
     },
   };
 });
+
+jest.mock('@kbn/repo-packages', () => ({
+  findPackageForPath: jest.fn(),
+}));
+
+const mockFindPackageForPath = findPackageForPath as jest.Mock;
 
 let mockTestConfigs: ScoutTestConfig[] = [];
 
@@ -155,7 +162,7 @@ describe('identifyTestLoads', () => {
       configs: [],
     });
 
-    const loads = identifyTestLoads(ciConfig, stats, testTarget, log);
+    const loads = identifyTestLoads(ciConfig, stats, testTarget, new Set(), log);
     expect(loads).toHaveLength(0);
   });
 
@@ -211,7 +218,7 @@ describe('identifyTestLoads', () => {
       configs: [],
     });
 
-    const loads = identifyTestLoads(ciConfig, stats, testTarget, log);
+    const loads = identifyTestLoads(ciConfig, stats, testTarget, new Set(), log);
     expect(loads).toHaveLength(1);
     expect(loads[0].config.path).toBe('matching/config.ts');
   });
@@ -241,7 +248,7 @@ describe('identifyTestLoads', () => {
       configs: [],
     });
 
-    const loads = identifyTestLoads(ciConfig, stats, testTarget, log);
+    const loads = identifyTestLoads(ciConfig, stats, testTarget, new Set(), log);
     expect(loads).toHaveLength(1);
     expect(loads[0].enabled).toBe(false);
   });
@@ -263,7 +270,7 @@ describe('identifyTestLoads', () => {
       configs: [],
     });
 
-    const loads = identifyTestLoads(ciConfig, stats, testTarget, log);
+    const loads = identifyTestLoads(ciConfig, stats, testTarget, new Set(), log);
     expect(loads).toHaveLength(1);
     expect(loads[0].enabled).toBe(true);
   });
@@ -293,7 +300,7 @@ describe('identifyTestLoads', () => {
       configs: [],
     });
 
-    const loads = identifyTestLoads(ciConfig, stats, testTarget, log);
+    const loads = identifyTestLoads(ciConfig, stats, testTarget, new Set(), log);
     expect(loads).toHaveLength(1);
     expect(loads[0].enabled).toBe(false);
   });
@@ -317,7 +324,7 @@ describe('identifyTestLoads', () => {
       configs: [statsEntry],
     });
 
-    const loads = identifyTestLoads(ciConfig, stats, testTarget, log);
+    const loads = identifyTestLoads(ciConfig, stats, testTarget, new Set(), log);
     expect(loads).toHaveLength(1);
     expect(loads[0].stats).toBeDefined();
     expect(loads[0].stats!.path).toBe('plugin/config.ts');
@@ -340,9 +347,81 @@ describe('identifyTestLoads', () => {
       configs: [],
     });
 
-    const loads = identifyTestLoads(ciConfig, stats, testTarget, log);
+    const loads = identifyTestLoads(ciConfig, stats, testTarget, new Set(), log);
     expect(loads).toHaveLength(1);
     expect(loads[0].stats).toBeUndefined();
+  });
+
+  describe('moduleIds filter', () => {
+    const ciConfig: ScoutCIConfig = {
+      plugins: { enabled: [], disabled: [] },
+      packages: { enabled: [], disabled: [] },
+      excluded_configs: [],
+    };
+    const stats = new ScoutTestConfigStats({
+      lastUpdated: new Date(),
+      lookbackDays: 3,
+      buildkite: {},
+      configs: [],
+    });
+
+    beforeEach(() => {
+      mockFindPackageForPath.mockReset();
+    });
+
+    it('includes configs whose resolved module ID is in the filter set', () => {
+      const config = createMockConfig({ path: 'plugin/config.ts' });
+      mockTestConfigs = [config];
+      mockFindPackageForPath.mockReturnValue({ id: '@kbn/test-plugin' });
+
+      const loads = identifyTestLoads(
+        ciConfig,
+        stats,
+        testTarget,
+        new Set(['@kbn/test-plugin']),
+        log
+      );
+      expect(loads).toHaveLength(1);
+    });
+
+    it('excludes configs whose resolved module ID is not in the filter set', () => {
+      const config = createMockConfig({ path: 'plugin/config.ts' });
+      mockTestConfigs = [config];
+      mockFindPackageForPath.mockReturnValue({ id: '@kbn/other-plugin' });
+
+      const loads = identifyTestLoads(
+        ciConfig,
+        stats,
+        testTarget,
+        new Set(['@kbn/test-plugin']),
+        log
+      );
+      expect(loads).toHaveLength(0);
+    });
+
+    it('excludes configs that cannot be resolved to a module ID', () => {
+      const config = createMockConfig({ path: 'plugin/config.ts' });
+      mockTestConfigs = [config];
+      mockFindPackageForPath.mockReturnValue(undefined);
+
+      const loads = identifyTestLoads(
+        ciConfig,
+        stats,
+        testTarget,
+        new Set(['@kbn/test-plugin']),
+        log
+      );
+      expect(loads).toHaveLength(0);
+    });
+
+    it('includes all configs when no module filter is provided', () => {
+      const config = createMockConfig({ path: 'plugin/config.ts' });
+      mockTestConfigs = [config];
+
+      const loads = identifyTestLoads(ciConfig, stats, testTarget, new Set(), log);
+      expect(loads).toHaveLength(1);
+      expect(mockFindPackageForPath).not.toHaveBeenCalled();
+    });
   });
 
   it('returns empty array and logs warning when no configs match', () => {
@@ -361,7 +440,7 @@ describe('identifyTestLoads', () => {
       configs: [],
     });
 
-    const loads = identifyTestLoads(ciConfig, stats, testTarget, log);
+    const loads = identifyTestLoads(ciConfig, stats, testTarget, new Set(), log);
     expect(loads).toHaveLength(0);
     expect(log.warning).toHaveBeenCalledWith(expect.stringContaining('No test loads discovered'));
   });

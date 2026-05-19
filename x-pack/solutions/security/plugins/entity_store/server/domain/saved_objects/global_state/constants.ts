@@ -17,10 +17,15 @@ export const LOG_EXTRACTION_DOCS_LIMIT_DEFAULT = 10000;
 // Max raw log documents per logs to be processed in a query (inside elastic search)
 export const LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT = 40000;
 export const LOG_EXTRACTION_TIMEOUT_DEFAULT = '59s';
+export const LOG_EXTRACTION_MAX_TIME_WINDOW_SIZE_DEFAULT = '15m';
+// Max total raw log documents to process per task run; 0 = no cap
+export const LOG_EXTRACTION_MAX_LOGS_PER_WINDOW_DEFAULT = 500_000;
+export const LOG_EXTRACTION_CAP_BEHAVIOR_DEFAULT = 'defer' as const;
 
 export type LogExtractionConfig = z.infer<typeof LogExtractionConfig>;
 export const LogExtractionConfig = z.object({
   additionalIndexPatterns: z.array(z.string()).default([]),
+  excludedIndexPatterns: z.array(z.string()).default([]),
   fieldHistoryLength: z.number().int().default(10),
   lookbackPeriod: z
     .string()
@@ -40,6 +45,14 @@ export const LogExtractionConfig = z.object({
     .string()
     .regex(/[smdh]$/)
     .default(LOG_EXTRACTION_FREQUENCY_DEFAULT),
+  maxTimeWindowSize: z
+    .string()
+    .regex(/[smdh]$/)
+    .default(LOG_EXTRACTION_MAX_TIME_WINDOW_SIZE_DEFAULT),
+  maxLogsPerWindow: z.number().int().min(0).default(LOG_EXTRACTION_MAX_LOGS_PER_WINDOW_DEFAULT),
+  maxLogsPerWindowCapBehavior: z
+    .enum(['defer', 'drop'])
+    .default(LOG_EXTRACTION_CAP_BEHAVIOR_DEFAULT),
 });
 
 export type HistorySnapshotStatus = z.infer<typeof HistorySnapshotStatus>;

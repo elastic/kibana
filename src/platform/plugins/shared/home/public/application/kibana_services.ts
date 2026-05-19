@@ -12,6 +12,7 @@ import type {
   DocLinksStart,
   HttpStart,
   NotificationsSetup,
+  NotificationsStart,
   OverlayStart,
   IUiSettingsClient,
   ApplicationStart,
@@ -43,6 +44,7 @@ export interface HomeKibanaServices {
   homeConfig: ConfigSchema;
   featureCatalogue: FeatureCatalogueRegistry;
   http: HttpStart;
+  notifications: NotificationsStart;
   toastNotifications: NotificationsSetup['toasts'];
   banners: OverlayStart['banners'];
   trackUiMetric: (type: UiCounterMetricType, eventNames: string | string[], count?: number) => void;

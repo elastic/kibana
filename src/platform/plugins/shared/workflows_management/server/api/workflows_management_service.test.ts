@@ -291,4 +291,22 @@ describe('WorkflowsService (facade)', () => {
       await expect(service.getWorkflow('wf-1', 'default')).rejects.toBe(boom);
     });
   });
+
+  describe('listWaitingForInputSteps', () => {
+    it('delegates to WorkflowExecutionQueryService.listWaitingForInputSteps after init', async () => {
+      // Behavioural coverage for this method lives next to the implementation
+      // in `services/workflow_execution_query_service.test.ts`. This facade
+      // test only asserts the delegation shape.
+      const listSpy = jest
+        .spyOn(WorkflowExecutionQueryService.prototype, 'listWaitingForInputSteps')
+        .mockResolvedValue({ results: [], total: 0 } as never);
+      try {
+        const service = await buildService();
+        await service.listWaitingForInputSteps('my-space', { page: 2, perPage: 25 });
+        expect(listSpy).toHaveBeenCalledWith('my-space', { page: 2, perPage: 25 });
+      } finally {
+        listSpy.mockRestore();
+      }
+    });
+  });
 });

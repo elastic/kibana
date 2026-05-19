@@ -11,8 +11,10 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { MemoryRouter } from 'react-router-dom';
 import { RulesListPage, SEARCH_DEBOUNCE_MS } from './rules_list_page';
+import { paths, CREATE_WITH_AGENT_INITIAL_PROMPT } from '../../constants';
 
 const mockNavigateToUrl = jest.fn();
+const mockNavigateToApp = jest.fn();
 const mockGetUrlForApp = jest.fn((appId: string, options?: { path?: string }) => {
   const path = options?.path ?? '';
   return `/app/${appId}${path}`;
@@ -26,7 +28,11 @@ jest.mock('../../application/breadcrumb_context', () => ({
 jest.mock('@kbn/core-di-browser', () => ({
   useService: (token: unknown) => {
     if (token === 'application') {
-      return { navigateToUrl: mockNavigateToUrl, getUrlForApp: mockGetUrlForApp };
+      return {
+        navigateToUrl: mockNavigateToUrl,
+        navigateToApp: mockNavigateToApp,
+        getUrlForApp: mockGetUrlForApp,
+      };
     }
     if (token === 'chrome') {
       return { docTitle: { change: mockDocTitleChange } };
@@ -34,9 +40,23 @@ jest.mock('@kbn/core-di-browser', () => ({
     if (token === 'http') {
       return { basePath: { prepend: (p: string) => p } };
     }
-    return {};
+    if (token === 'notifications') {
+      return {};
+    }
+    if (token === 'data' || token === 'dataViews' || token === 'lens') {
+      return {};
+    }
+    throw new Error(`Unexpected token in useService mock: ${String(token)}`);
   },
   CoreStart: (key: string) => key,
+}));
+
+jest.mock('@kbn/core-di', () => ({
+  PluginStart: (key: string) => key,
+}));
+
+jest.mock('@kbn/alerting-v2-rule-form', () => ({
+  ComposeDiscoverFlyout: () => <div data-test-subj="composeDiscoverFlyout" />,
 }));
 
 const mockUseFetchRules = jest.fn();
@@ -46,6 +66,16 @@ jest.mock('../../hooks/use_fetch_rules', () => ({
 
 jest.mock('../../hooks/use_fetch_rule_tags', () => ({
   useFetchRuleTags: () => ({ data: ['prod'], isLoading: false, isError: false }),
+}));
+
+const mockCreateRuleMutate = jest.fn();
+jest.mock('../../hooks/use_create_rule', () => ({
+  useCreateRule: () => ({ mutate: mockCreateRuleMutate, isLoading: false }),
+}));
+
+const mockUpdateRuleMutate = jest.fn();
+jest.mock('../../hooks/use_update_rule', () => ({
+  useUpdateRule: () => ({ mutate: mockUpdateRuleMutate, isLoading: false }),
 }));
 
 const mockDeleteMutate = jest.fn();
@@ -135,7 +165,8 @@ describe('RulesListPage', () => {
 
     renderPage();
 
-    expect(screen.getByRole('table')).toBeInTheDocument();
+    expect(screen.getByTestId('rulesListLoading')).toBeInTheDocument();
+    expect(screen.queryByRole('table')).not.toBeInTheDocument();
   });
 
   it('renders rules in the table', () => {
@@ -221,7 +252,7 @@ describe('RulesListPage', () => {
     expect(screen.getByText('Network error')).toBeInTheDocument();
   });
 
-  it('shows "Showing 0-0 of 0 Rules" when there are no rules', () => {
+  it('shows empty state when there are no rules and no active filters', () => {
     mockUseFetchRules.mockReturnValue({
       data: { items: [], total: 0, page: 1, perPage: 20 },
       isLoading: false,
@@ -231,8 +262,25 @@ describe('RulesListPage', () => {
 
     renderPage();
 
-    const showingLabel = screen.getByTestId('rulesListShowingLabel');
-    expect(showingLabel).toHaveTextContent('Showing 0-0 of 0 Rules');
+    expect(
+      screen.getByRole('heading', { level: 2, name: /welcome to the new alerting experience/i })
+    ).toBeInTheDocument();
+    expect(screen.queryByRole('table')).not.toBeInTheDocument();
+  });
+
+  it('opens the flyout from the empty state ES|QL rule card', () => {
+    mockUseFetchRules.mockReturnValue({
+      data: { items: [], total: 0, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    renderPage();
+
+    fireEvent.click(screen.getByRole('button', { name: /create es\|ql rule/i }));
+
+    expect(screen.getByTestId('composeDiscoverFlyout')).toBeInTheDocument();
   });
 
   it('shows correct "Showing" range when rules exist', () => {
@@ -620,9 +668,9 @@ describe('RulesListPage', () => {
     });
   });
 
-  it('navigates to create page when create button is clicked', () => {
+  it('navigates to rule selector page when create button is clicked', () => {
     mockUseFetchRules.mockReturnValue({
-      data: { items: [], total: 0, page: 1, perPage: 20 },
+      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
       isLoading: false,
       isError: false,
       error: null,
@@ -630,10 +678,31 @@ describe('RulesListPage', () => {
 
     renderPage();
 
-    expect(screen.getByTestId('createRuleButton')).toHaveAttribute(
-      'href',
-      '/app/management/alertingV2/rules/create'
-    );
+    expect(screen.getByTestId('createRuleButton')).toHaveAttribute('href', paths.ruleCreateOptions);
+  });
+
+  it('opens agent chat when "Create with agent" is clicked in the dropdown', async () => {
+    mockUseFetchRules.mockReturnValue({
+      data: { items: mockRules, total: 2, page: 1, perPage: 20 },
+      isLoading: false,
+      isError: false,
+      error: null,
+    });
+
+    renderPage();
+
+    fireEvent.click(screen.getByTestId('createRulePopoverButton'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('createWithAgentButton')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId('createWithAgentButton'));
+
+    expect(mockNavigateToApp).toHaveBeenCalledWith('agent_builder', {
+      path: '/agents/elastic-ai-agent/conversations/new',
+      state: { initialMessage: CREATE_WITH_AGENT_INITIAL_PROMPT },
+    });
   });
 
   it('shows delete confirmation modal when delete action is clicked', async () => {

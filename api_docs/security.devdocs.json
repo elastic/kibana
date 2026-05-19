@@ -220,6 +220,26 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-public.AuthenticationServiceSetup.isUIAMEnabled",
+            "type": "Function",
+            "tags": [],
+            "label": "isUIAMEnabled",
+            "description": [
+              "\nDetermines if UIAM (User Identity and Access Management) is enabled for this deployment."
+            ],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/authentication/authentication_service.ts",
+            "lineNumber": 21,
+            "columnNumber": 3,
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -1289,7 +1309,7 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/security/plugin_types_public/src/authentication/authentication_service.ts",
-        "lineNumber": 22,
+        "lineNumber": 27,
         "columnNumber": 1,
         "deprecated": false,
         "trackAdoption": false,
