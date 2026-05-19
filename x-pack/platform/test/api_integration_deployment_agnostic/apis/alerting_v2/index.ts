@@ -12,7 +12,6 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./bulk_create_alert_action'));
     loadTestFile(require.resolve('./episode_status_filter'));
     loadTestFile(require.resolve('./action_policy'));
-    loadTestFile(require.resolve('./rule'));
     loadTestFile(require.resolve('./telemetry'));
   });
 }
