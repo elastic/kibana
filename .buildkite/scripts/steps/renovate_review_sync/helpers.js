@@ -11,6 +11,7 @@ const fs = require('fs');
 
 const readReport = (reportPath) => JSON.parse(fs.readFileSync(reportPath, 'utf8'));
 const asArray = (value) => (Array.isArray(value) ? value : []);
+const toElasticTeamReviewer = (slug) => (slug.startsWith('elastic/') ? slug : `elastic/${slug}`);
 
 const safeInt = (n) => {
   const i = Number.parseInt(String(n), 10);
@@ -22,13 +23,14 @@ const getManagedRuleDrift = (report) => asArray(report.managedRuleDrift);
 const printReportMetrics = (reportPath) => {
   const report = readReport(reportPath);
   const managedRuleDrift = getManagedRuleDrift(report);
+  const rulesWithNoComputedReviewersDetails = asArray(report.rulesWithNoComputedReviewersDetails);
   const managedSyncNeeded = Number.isFinite(report.managedSyncNeeded)
     ? report.managedSyncNeeded
     : managedRuleDrift.length;
   const packagesUsedButNotCovered = asArray(report.packagesUsedButNotCovered);
   const rulesWithNoComputedReviewers = Number.isFinite(report.rulesWithNoComputedReviewers)
     ? report.rulesWithNoComputedReviewers
-    : 0;
+    : rulesWithNoComputedReviewersDetails.length;
 
   process.stdout.write(
     `managedSyncNeeded=${safeInt(managedSyncNeeded)}\n` +
@@ -119,7 +121,7 @@ const printRequestedReviewers = async () => {
       }
 
       if (typeof reviewRequest.slug === 'string') {
-        return `elastic/${reviewRequest.slug}`;
+        return toElasticTeamReviewer(reviewRequest.slug);
       }
 
       if (typeof reviewRequest.login === 'string') {

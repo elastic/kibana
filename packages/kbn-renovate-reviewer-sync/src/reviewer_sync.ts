@@ -98,6 +98,28 @@ export function convertTeamFormat(team: string): string {
   return team.replace('@elastic/', 'team:');
 }
 
+function getPackagesMatchingPatterns(patterns: string[], knownPackages: Set<string>): string[] {
+  const packages: string[] = [];
+
+  for (const pattern of patterns) {
+    let regex: RegExp;
+    try {
+      regex = new RegExp(pattern);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      throw new Error(`Invalid matchDepPatterns pattern "${pattern}": ${message}`);
+    }
+
+    for (const pkg of knownPackages) {
+      if (regex.test(pkg)) {
+        packages.push(pkg);
+      }
+    }
+  }
+
+  return packages;
+}
+
 export function getRulePackages(rule: RenovatePackageRule, knownPackages: Set<string>): string[] {
   const packages: string[] = [];
 
@@ -107,6 +129,10 @@ export function getRulePackages(rule: RenovatePackageRule, knownPackages: Set<st
 
   if (isStringArray(rule.matchPackageNames)) {
     packages.push(...rule.matchPackageNames);
+  }
+
+  if (isStringArray(rule.matchDepPatterns)) {
+    packages.push(...getPackagesMatchingPatterns(rule.matchDepPatterns, knownPackages));
   }
 
   // Only consider packages we can actually map from code -> team
@@ -189,9 +215,12 @@ type EffectiveRuleMode = ReviewerSyncOverrideMode | 'report';
 function getEffectiveRuleMode(rule: RenovatePackageRule): EffectiveRuleMode {
   const override = rule.x_kbn_reviewer_sync;
   if (!override) return 'report';
-  if (override.mode === 'fixed') return 'fixed';
-  if (override.mode === 'sync') return 'sync';
-  return 'report';
+  const mode: unknown = override.mode;
+  if (mode === 'fixed') return 'fixed';
+  if (mode === 'sync') return 'sync';
+  throw new Error(
+    `Invalid x_kbn_reviewer_sync.mode "${String(mode)}". Expected one of: sync, fixed.`
+  );
 }
 
 /**
@@ -237,6 +266,10 @@ export function syncReviewersInConfig(params: {
 
   for (let i = 0; i < rules.length; i++) {
     const rule = rules[i];
+    if (rule.enabled === false) {
+      continue;
+    }
+
     const ruleMode = getEffectiveRuleMode(rule);
     const packages = getRulePackages(rule, knownPackages);
 

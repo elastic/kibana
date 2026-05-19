@@ -58,7 +58,10 @@ compute_new_reviewers_to_request () {
   fi
 
   local existing_reviewers
-  existing_reviewers="$(gh pr view "$pr_number" --json reviewRequests 2>/dev/null | node_helper requested-reviewers || true)"
+  if ! existing_reviewers="$(gh pr view "$pr_number" --json reviewRequests 2>/dev/null | node_helper requested-reviewers)"; then
+    echo "WARN: Failed to read existing review requests for #${pr_number}; skipping new reviewer requests this run"
+    return 0
+  fi
 
   # Use sorted set difference: computed - existing.
   # The computed side is a space-separated string; we intentionally word-split it into one
@@ -143,7 +146,10 @@ compute_requested_stale_team_reviewers_to_remove () {
   fi
 
   local existing_reviewers
-  existing_reviewers="$(gh pr view "$pr_number" --json reviewRequests 2>/dev/null | node_helper requested-reviewers || true)"
+  if ! existing_reviewers="$(gh pr view "$pr_number" --json reviewRequests 2>/dev/null | node_helper requested-reviewers)"; then
+    echo "WARN: Failed to read existing review requests for #${pr_number}; skipping stale reviewer removal this run"
+    return 0
+  fi
 
   # Remove only teams that are both stale according to the marker and currently requested
   # on GitHub. If a team already reviewed, was dismissed, or was manually removed, including
@@ -185,8 +191,9 @@ best_effort_remove_team_reviewers () {
   echo "--- Removing stale team reviewers (best-effort): ${slugs[*]}"
 
   # Build the JSON payload via jq so unusual characters in slugs are escaped correctly.
+  # GitHub's DELETE endpoint requires `reviewers`, even when only teams are removed.
   local payload
-  payload="$(printf '%s\n' "${slugs[@]}" | jq -R . | jq -s '{team_reviewers: .}')"
+  payload="$(printf '%s\n' "${slugs[@]}" | jq -R . | jq -s '{reviewers: [], team_reviewers: .}')"
 
   if printf '%s' "$payload" | gh api \
     --method DELETE \
@@ -203,14 +210,15 @@ maybe_close_stale_bot_pr () {
   # from `mode: "sync"`), any open bot PR is by definition stale. Close it and delete the
   # branch so its currently-requested reviewers stop seeing it on their dashboards. The
   # next weekly run will re-open a fresh PR if drift returns.
+  local stale_pr_json
   local stale_pr_number
-  stale_pr_number="$(gh pr list \
-    --search "$PR_TITLE" \
+  stale_pr_json="$(gh pr list \
+    --search "\"${PR_TITLE}\" in:title" \
     --state open \
     --author "$KIBANA_MACHINE_USERNAME" \
-    --limit 1 \
-    --json number \
-    --jq '.[0].number // empty' 2>/dev/null || true)"
+    --limit 20 \
+    --json number,title 2>/dev/null || echo '[]')"
+  stale_pr_number="$(echo "$stale_pr_json" | jq -r --arg title "$PR_TITLE" 'map(select(.title == $title))[0].number // empty')"
 
   if [ -z "${stale_pr_number:-}" ]; then
     return 0
@@ -339,7 +347,7 @@ main () {
 
   # Single lookup — pull all fields we need in one API call. `body` lets us read the
   # bot-managed-reviewer-teams marker from the previous run without an extra round-trip.
-  existing_pr_json="$(gh pr list --search "$PR_TITLE" --state open --author "$KIBANA_MACHINE_USERNAME" --limit 1 --json number,url,headRefName,body 2>/dev/null || echo '[]')"
+  existing_pr_json="$(gh pr list --search "\"${PR_TITLE}\" in:title" --state open --author "$KIBANA_MACHINE_USERNAME" --limit 20 --json number,title,url,headRefName,body 2>/dev/null | jq --arg title "$PR_TITLE" 'map(select(.title == $title))[:1]' || echo '[]')"
   existing_pr_number="$(echo "$existing_pr_json" | jq -r '.[0].number // empty')"
   existing_pr_url="$(echo "$existing_pr_json" | jq -r '.[0].url // empty')"
   existing_pr_branch="$(echo "$existing_pr_json" | jq -r '.[0].headRefName // empty')"
@@ -391,7 +399,9 @@ main () {
 
   if [ -n "${existing_pr_number:-}" ]; then
     report_main_step "Updating pull request body"
-    gh pr edit "$existing_pr_number" --body "$PR_BODY" >/dev/null 2>&1 || true
+    if ! gh pr edit "$existing_pr_number" --body "$PR_BODY" >/dev/null 2>&1; then
+      echo "WARN: Failed to update PR body marker for #${existing_pr_number} (continuing)"
+    fi
     pr_number="$existing_pr_number"
   else
     report_main_step "Creating pull request"

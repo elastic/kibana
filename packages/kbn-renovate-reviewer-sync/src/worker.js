@@ -69,14 +69,17 @@ function parseCodeOwners(content) {
   const entries = [];
 
   for (const line of lines) {
-    if (!line || line.startsWith('#') || line.includes('@kibanamachine')) continue;
+    if (!line) continue;
 
     const trimmedLine = line.trim();
-    if (!trimmedLine) continue;
+    if (!trimmedLine || trimmedLine.startsWith('#')) continue;
 
-    const [pattern, ...teams] = trimmedLine.replace(/#.+$/, '').split(/\s+/);
+    const [pattern, ...teams] = trimmedLine.replace(/#.+$/, '').trim().split(/\s+/);
     const pathPattern = pattern.replace(/\/$/, '');
-    const validTeams = teams.map((t) => t.replace('@', '')).filter((t) => t.length > 0);
+    const validTeams = teams
+      .filter((t) => t !== '@kibanamachine')
+      .map((t) => t.replace('@', ''))
+      .filter((t) => t.length > 0);
 
     if (validTeams.length > 0) {
       entries.push({ pattern: pathPattern, teams: validTeams });

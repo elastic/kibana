@@ -55,6 +55,7 @@ export const GREP_PATTERNS: readonly string[] = [
   '(^|[^a-zA-Z0-9_])import',
   '(^|[^a-zA-Z0-9_])require\\(',
   '(^|[^a-zA-Z0-9_])export.*[^a-zA-Z0-9_]from([^a-zA-Z0-9_]|$)',
+  '(^|[^a-zA-Z0-9_])}[[:space:]]*from[[:space:]]*[\'"]',
 ];
 
 /** Predicate: is this file in a scanned directory and a scanned extension? */
@@ -131,8 +132,9 @@ export function getAllPackages(packageJson: unknown): string[] {
  * `repoRoot`, restricted to scanned extensions, and returns the paths that
  * live inside the scanned directory prefixes.
  *
- * Patterns that match nothing make `git grep` exit non-zero — that's expected
- * and treated as "no files" rather than a failure.
+ * Patterns that match nothing make `git grep` exit with status 1 — that's
+ * expected and treated as "no files" rather than a failure. Other git failures
+ * reject so a bad `repoRoot` can't silently look like an empty scan.
  *
  * Streaming rather than buffered: `git grep` emits matching paths as it walks
  * the tree, so `onProgress` fires with a running total as lines arrive. That
@@ -158,6 +160,7 @@ export function discoverFilesViaGitGrep(
     // completes it. Dropping that would silently lose the last file on every
     // chunk boundary.
     let pending = '';
+    let stderr = '';
     let settled = false;
 
     const flushLine = (line: string) => {
@@ -167,12 +170,25 @@ export function discoverFilesViaGitGrep(
       }
     };
 
-    const settleWithResult = () => {
+    const settleWithError = (error: Error) => {
       // `error` and `close` can both fire (error → process dies → close).
-      // Guard so we only resolve once; a Promise ignores extra resolves but
+      // Guard so we only settle once; a Promise ignores extra settles but
       // the idempotency keeps the intent explicit.
       if (settled) return;
       settled = true;
+      rejectPromise(error);
+    };
+
+    const settleWithResult = (exitCode: number | null) => {
+      if (settled) return;
+      settled = true;
+      if (exitCode !== null && exitCode > 1) {
+        const detail = stderr.trim();
+        rejectPromise(
+          new Error(`git grep failed with exit code ${exitCode}${detail ? `: ${detail}` : ''}`)
+        );
+        return;
+      }
       if (pending) flushLine(pending);
       pending = '';
       resolvePromise(Array.from(filesWithImports));
@@ -189,14 +205,11 @@ export function discoverFilesViaGitGrep(
       if (onProgress) onProgress(filesWithImports.size);
     });
 
-    // Drain stderr so a large error message (>~64KB kernel pipe buffer) can't
-    // block git grep on a write. Match the prior `execSync`-in-try/catch
-    // behavior and discard — any git-side failure resolves with whatever
-    // partial set we collected, just like the old implementation which
-    // caught every error from execSync.
-    child.stderr.on('data', () => {});
+    child.stderr.on('data', (chunk: Buffer) => {
+      stderr += chunk.toString('utf8');
+    });
 
-    child.on('error', settleWithResult);
+    child.on('error', settleWithError);
     child.on('close', settleWithResult);
   });
 }

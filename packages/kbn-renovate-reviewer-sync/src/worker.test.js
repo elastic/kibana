@@ -32,9 +32,29 @@ describe('worker', () => {
       expect(parseCodeOwners(content)).toEqual([]);
     });
 
-    it('skips lines containing @kibanamachine (the bot is not a real owner)', () => {
+    it('removes @kibanamachine owner tokens but keeps real teams on the same line', () => {
       const content = 'src/foo @kibanamachine @elastic/team-a';
+      expect(parseCodeOwners(content)).toEqual([
+        {
+          pattern: 'src/foo',
+          teams: ['elastic/team-a'],
+        },
+      ]);
+    });
+
+    it('drops lines where @kibanamachine is the only owner', () => {
+      const content = 'src/foo @kibanamachine';
       expect(parseCodeOwners(content)).toEqual([]);
+    });
+
+    it('does not drop a line when @kibanamachine appears only in an inline comment', () => {
+      const content = 'src/foo @elastic/team-a # @kibanamachine is ignored as a comment';
+      expect(parseCodeOwners(content)).toEqual([
+        {
+          pattern: 'src/foo',
+          teams: ['elastic/team-a'],
+        },
+      ]);
     });
 
     it('drops entries with no team owners', () => {

@@ -346,6 +346,11 @@ describe('discoverFilesViaGitGrep', () => {
       "export { foo } from 'lodash';\n",
       'utf8'
     );
+    writeFileSync(
+      join(repoRoot, 'src/with_multiline_export.ts'),
+      "export {\n  foo,\n} from 'lodash';\n",
+      'utf8'
+    );
     writeFileSync(join(repoRoot, 'packages/no_imports.ts'), 'export const x = 1;\n', 'utf8');
     writeFileSync(join(repoRoot, 'tools/wrong_prefix.ts'), "import x from 'lodash';\n", 'utf8');
     writeFileSync(join(repoRoot, 'src/wrong_ext.md'), "import x from 'lodash';\n", 'utf8');
@@ -360,7 +365,12 @@ describe('discoverFilesViaGitGrep', () => {
 
   it('SHOULD discover files containing import/require/export under scanned prefixes', async () => {
     const files = (await discoverFilesViaGitGrep(repoRoot)).sort();
-    expect(files).toEqual(['src/with_import.ts', 'src/with_require.js', 'x-pack/with_export.ts']);
+    expect(files).toEqual([
+      'src/with_import.ts',
+      'src/with_multiline_export.ts',
+      'src/with_require.js',
+      'x-pack/with_export.ts',
+    ]);
   });
 
   it('SHOULD emit running file-count progress as paths stream in', async () => {
@@ -370,7 +380,12 @@ describe('discoverFilesViaGitGrep', () => {
         progressTicks.push(n);
       })
     ).sort();
-    expect(files).toEqual(['src/with_import.ts', 'src/with_require.js', 'x-pack/with_export.ts']);
+    expect(files).toEqual([
+      'src/with_import.ts',
+      'src/with_multiline_export.ts',
+      'src/with_require.js',
+      'x-pack/with_export.ts',
+    ]);
     expect(progressTicks.length).toBeGreaterThan(0);
     // The callback must report a monotonically non-decreasing count — any
     // backwards step would mean the file set shrank mid-scan, which would
@@ -379,6 +394,15 @@ describe('discoverFilesViaGitGrep', () => {
       expect(progressTicks[i]).toBeGreaterThanOrEqual(progressTicks[i - 1]);
     }
     expect(progressTicks[progressTicks.length - 1]).toEqual(files.length);
+  });
+
+  it('SHOULD reject when git grep fails for reasons other than no matches', async () => {
+    const notARepo = mkdtempSync(join(tmpdir(), 'krrs-not-repo-'));
+    try {
+      await expect(discoverFilesViaGitGrep(notARepo)).rejects.toThrow(/git grep failed/);
+    } finally {
+      rmSync(notARepo, { recursive: true, force: true });
+    }
   });
 });
 
