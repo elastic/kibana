@@ -9,6 +9,13 @@
 
 import type { DynamicStepContextSchema } from '@kbn/workflows';
 import { getSchemaAtPath } from '@kbn/workflows/common/utils/zod/get_schema_at_path';
+import {
+  DataMapStepTypeId,
+  DEFAULT_INDEX_BINDING,
+  DEFAULT_ITEM_BINDING,
+  MAP_BINDING_IDENTIFIER_REGEX,
+  MAP_DIRECTIVE,
+} from '@kbn/workflows-extensions/common';
 import { inferZodType, VARIABLE_REGEX } from '@kbn/workflows-yaml';
 import { z } from '@kbn/zod/v4';
 import { parseVariablePath } from '../../../../common/lib/parse_variable_path';
@@ -17,12 +24,6 @@ interface DataMapContextSchemaEntries {
   item: z.ZodType;
   index: z.ZodType;
 }
-
-const MAP_BINDING_IDENTIFIER_REGEX = /^[A-Za-z_][A-Za-z0-9_]*$/;
-const DATA_MAP_STEP_TYPE = 'data.map';
-const MAP_DIRECTIVE = '$map';
-const DEFAULT_ITEM_BINDING = 'item';
-const DEFAULT_INDEX_BINDING = 'index';
 
 /**
  * Derives `item` and `index` schemas for a `data.map` step.
@@ -142,7 +143,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function isDataMapStep(step: unknown): step is Record<string, unknown> {
-  return isRecord(step) && step.type === DATA_MAP_STEP_TYPE;
+  return isRecord(step) && step.type === DataMapStepTypeId;
 }
 
 function getStepFields(step: unknown): Record<string, unknown> | null {
