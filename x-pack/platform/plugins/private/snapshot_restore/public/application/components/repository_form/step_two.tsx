@@ -146,7 +146,7 @@ export const RepositoryFormStepTwo: React.FunctionComponent<Props> = ({
     const tooltipContent = !isDefaultRepositoryFeatureAvailable ? (
       <FormattedMessage
         id="xpack.snapshotRestore.repositoryForm.fields.defaultRepositoryUnavailableTooltip"
-        defaultMessage="Default repository feature is currently unavailable."
+        defaultMessage="The default repository feature is currently unavailable."
       />
     ) : isAlreadyDefaultRepository ? (
       <FormattedMessage
