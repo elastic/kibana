@@ -170,6 +170,52 @@ describe('useModalChangeHandlers', () => {
 
       expect(draftResult.current.state.canUndo).toBe(false);
     });
+
+    it('should compensate width and height when padding changes on border-box element', () => {
+      const { result: draftResult } = renderHook(() => useDraftHistory());
+      const args = createArgs();
+      const cloneEl = args.elementMapRef.current.get(args.selectedElement!)! as HTMLElement;
+      cloneEl.style.boxSizing = 'border-box';
+
+      const { result } = renderHook(() =>
+        useModalChangeHandlers({ ...args, draft: draftResult.current })
+      );
+
+      act(() => result.current.handleDimensionChange('padding', '20px'));
+
+      const allEdits = Array.from(draftResult.current.edits.values()).flat();
+      const styleEdits = allEdits.filter((e) => e.type === 'style');
+      const widthEdit = styleEdits.find((e) => e.property === 'width');
+      const heightEdit = styleEdits.find((e) => e.property === 'height');
+
+      expect(widthEdit).toBeDefined();
+      expect(heightEdit).toBeDefined();
+      // padding 10→20 = delta 10*2 = 20; width 100+20 = 120
+      expect(widthEdit!.after).toBe('120px');
+      // height 50+20 = 70
+      expect(heightEdit!.after).toBe('70px');
+    });
+
+    it('should not compensate width/height when padding changes on content-box element', () => {
+      const { result: draftResult } = renderHook(() => useDraftHistory());
+      const args = createArgs();
+      const cloneEl = args.elementMapRef.current.get(args.selectedElement!)! as HTMLElement;
+      cloneEl.style.boxSizing = 'content-box';
+
+      const { result } = renderHook(() =>
+        useModalChangeHandlers({ ...args, draft: draftResult.current })
+      );
+
+      act(() => result.current.handleDimensionChange('padding', '20px'));
+
+      const allEdits = Array.from(draftResult.current.edits.values()).flat();
+      const styleEdits = allEdits.filter((e) => e.type === 'style');
+      const widthEdit = styleEdits.find((e) => e.property === 'width');
+      const heightEdit = styleEdits.find((e) => e.property === 'height');
+
+      expect(widthEdit).toBeUndefined();
+      expect(heightEdit).toBeUndefined();
+    });
   });
 
   describe('handleMediaChange', () => {

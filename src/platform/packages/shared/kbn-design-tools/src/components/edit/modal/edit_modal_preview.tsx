@@ -67,6 +67,9 @@ export const EditModalPreview = ({
       backgroundSize: '16px 16px',
       backgroundPosition: '0 0, 0 8px, 8px -8px, -8px 0px',
       height: 400,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
     });
   }, [euiTheme]);
 

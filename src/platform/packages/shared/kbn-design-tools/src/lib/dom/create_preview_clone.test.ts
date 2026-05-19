@@ -120,4 +120,37 @@ describe('createPreviewClone', () => {
     expect(transform).not.toContain('translate');
     expect(transform).toContain('scale(1.5)');
   });
+
+  it('should strip translate with nested parens like calc()', () => {
+    target.style.transform = 'translateX(calc(100% - 10px)) scale(2)';
+
+    const { clone } = createPreviewClone(target);
+    const inner = clone.firstElementChild as HTMLElement;
+    const transform = inner.style.getPropertyValue('transform');
+
+    expect(transform).not.toContain('translate');
+    expect(transform).not.toContain('calc');
+    expect(transform).toContain('scale(2)');
+  });
+
+  it('should strip translate3d while keeping rotate', () => {
+    target.style.transform = 'translate3d(10px, 20px, 30px) rotate(45deg)';
+
+    const { clone } = createPreviewClone(target);
+    const inner = clone.firstElementChild as HTMLElement;
+    const transform = inner.style.getPropertyValue('transform');
+
+    expect(transform).not.toContain('translate');
+    expect(transform).toContain('rotate(45deg)');
+  });
+
+  it('should return none when transform is only translate', () => {
+    target.style.transform = 'translate(50px, 30px)';
+
+    const { clone } = createPreviewClone(target);
+    const inner = clone.firstElementChild as HTMLElement;
+    const transform = inner.style.getPropertyValue('transform');
+
+    expect(transform).toBe('none');
+  });
 });

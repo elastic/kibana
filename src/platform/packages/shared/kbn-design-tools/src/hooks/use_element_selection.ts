@@ -29,7 +29,8 @@ export const useElementSelection = (
 ): UseElementSelectionResult => {
   const { euiTheme } = useEuiTheme();
   const zIndex = useOverlayZIndex();
-  const [selectedElement, setSelectedElement] = useState<Element | null>(null);
+  const [selection, setSelection] = useState<{ element: Element | null }>({ element: null });
+  const selectedElement = selection.element;
   const [color, setColor] = useState('');
   const overlayRef = useRef<HTMLElement | null>(null);
 
@@ -52,7 +53,7 @@ export const useElementSelection = (
         overlayRef.current = null;
       }
 
-      setSelectedElement(element);
+      setSelection({ element });
 
       // Highlight the clone in the preview by placing an overlay on the
       // parent element, positioned over the clone via getBoundingClientRect.

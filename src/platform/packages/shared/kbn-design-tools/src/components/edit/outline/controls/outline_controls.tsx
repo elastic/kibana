@@ -44,7 +44,7 @@ export const OutlineControls = ({ onDelete, onDuplicate, onEdit }: Props) => {
   );
 
   return (
-    <div css={panelCss} {...{ [DEVTOOL_IGNORE_ATTR]: '' }}>
+    <div css={panelCss} {...{ [DEVTOOL_IGNORE_ATTR]: true }}>
       <EditButton onClick={onEdit} />
       <DuplicateButton onClick={onDuplicate} />
       <DeleteButton onClick={onDelete} />

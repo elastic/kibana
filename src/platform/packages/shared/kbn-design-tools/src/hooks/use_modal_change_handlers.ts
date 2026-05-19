@@ -15,7 +15,7 @@ import {
   collectTextReflowDimensions,
   collectStyleReflowDimensions,
 } from '../lib/dom/clone_element';
-import { roundPxValue } from '../lib/dom/round_px_value';
+import { parsePx, roundPxValue } from '../lib/dom/round_px_value';
 import type { DraftHistoryResult } from './use_draft_history';
 import { flattenDraftEdits } from './use_draft_history';
 import type { DraftEdit } from '../lib/history/draft_history';
@@ -220,7 +220,49 @@ export const useModalChangeHandlers = ({
           )
         );
       } else {
-        draft.push(dimensionEdit);
+        const batch: DraftEdit[] = [dimensionEdit];
+
+        // For padding on border-box elements, the frozen width/height
+        // includes padding. Compensate by adjusting width/height by the
+        // padding delta so the content area stays stable.
+        if (property === 'padding' && computed.boxSizing === 'border-box') {
+          const oldPx = parsePx(currentValue);
+          const newPx = parsePx(value);
+          const delta = (newPx - oldPx) * 2;
+          if (delta !== 0) {
+            const currentW = parsePx(computed.width);
+            const currentH = parsePx(computed.height);
+            const adjustedW = `${Math.max(0, currentW + delta)}px`;
+            const adjustedH = `${Math.max(0, currentH + delta)}px`;
+            batch.push({
+              type: 'style',
+              label: 'width',
+              element: selectedElement,
+              cloneElement: cloneEl,
+              property: 'width',
+              before: roundPxValue(computed.width),
+              after: adjustedW,
+            });
+            batch.push({
+              type: 'style',
+              label: 'height',
+              element: selectedElement,
+              cloneElement: cloneEl,
+              property: 'height',
+              before: roundPxValue(computed.height),
+              after: adjustedH,
+            });
+          }
+        }
+
+        draft.pushBatch(
+          batch,
+          collectStyleReflowDimensions(
+            cloneEl,
+            property,
+            cloneRef.current?.firstElementChild as HTMLElement | null
+          )
+        );
       }
 
       reflowAfterStyleChange(

@@ -134,7 +134,7 @@ export const EditModal = ({ target, onClose, onSave }: Props) => {
       maxWidth="90vw"
       css={modalCss}
       id={EDIT_MODAL_ID}
-      {...{ [DEVTOOL_IGNORE_ATTR]: '' }}
+      {...{ [DEVTOOL_IGNORE_ATTR]: true }}
     >
       <EuiModalHeader>
         <EuiModalHeaderTitle>

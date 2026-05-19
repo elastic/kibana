@@ -13,3 +13,12 @@
  */
 export const roundPxValue = (value: string): string =>
   value.replace(/(\d+\.\d+)px/g, (_m, n) => `${Math.round(parseFloat(n))}px`);
+
+/**
+ * Parse a CSS pixel value to a rounded integer, returning 0 for
+ * non-numeric values (e.g. "auto", "normal", "inherit").
+ */
+export const parsePx = (value: string): number => {
+  const n = parseFloat(value);
+  return Number.isFinite(n) ? Math.round(n) : 0;
+};

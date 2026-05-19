@@ -21,6 +21,7 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { COMBO_POPOVER_PROPS } from '../../../lib/constants';
+import { parsePx } from '../../../lib/dom/round_px_value';
 import { isEnterKey } from '../../../lib/keyboard_shortcuts';
 
 interface DimensionEntry {
@@ -37,11 +38,6 @@ interface Props {
   onChange: (property: DimensionEntry['property'], value: string) => void;
   onFocus?: () => void;
 }
-
-const parsePx = (value: string): number => {
-  const n = parseFloat(value);
-  return Number.isFinite(n) ? Math.round(n) : 0;
-};
 
 const comboCss = css({ width: 200 });
 const pxInputCss = css({ width: 144 });
