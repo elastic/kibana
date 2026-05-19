@@ -100,7 +100,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await common.navigateToApp('maps');
       await retry.waitFor(
         'maps workpads visible',
-        async () => await testSubjects.exists('itemsInMemTable')
+        async () => await testSubjects.exists('listingTable-isLoaded')
       );
       await a11y.testAppSnapshot();
     });

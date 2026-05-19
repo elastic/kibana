@@ -14,23 +14,24 @@ import { constructFileKindIdByOwner } from '../../../../common/files';
 import { useFilePreview } from './use_file_preview';
 import { FilePreview } from './file_preview';
 import { useCasesContext } from '../../cases_context/use_cases_context';
-import type { ExternalReferenceAttachmentViewProps } from '../../../client/attachment_framework/types';
-import { getFileFromReferenceMetadata, isValidFileExternalReferenceMetadata } from './utils';
+import type { UnifiedReferenceAttachmentViewProps } from '../../../client/attachment_framework/types';
+import type { FileAttachmentMetadata } from '../../../../common/types/domain_zod/attachment/file/v2';
+import { getFileFromReferenceMetadata } from './utils';
 
 const componentStyle: EuiImageProps['css'] = { cursor: 'pointer' };
 
-export const FileThumbnail = React.memo((props: ExternalReferenceAttachmentViewProps) => {
+type FileThumbnailProps = UnifiedReferenceAttachmentViewProps<FileAttachmentMetadata>;
+
+export const FileThumbnail = React.memo((props: FileThumbnailProps) => {
   const { isPreviewVisible, showPreview, closePreview } = useFilePreview();
   const { client: filesClient } = useFilesContext();
   const { owner } = useCasesContext();
 
-  if (!isValidFileExternalReferenceMetadata(props.externalReferenceMetadata)) {
-    // This check is done only for TS reasons, externalReferenceMetadata is always FileAttachmentMetadata
-    return null;
-  }
+  if (!props.metadata?.files.length) return null;
+  const fileId = Array.isArray(props.attachmentId) ? props.attachmentId[0] : props.attachmentId;
   const file = getFileFromReferenceMetadata({
-    externalReferenceMetadata: props.externalReferenceMetadata,
-    fileId: props.externalReferenceId,
+    metadata: props.metadata,
+    fileId,
   });
 
   const imageUrl = filesClient.getDownloadHref({
