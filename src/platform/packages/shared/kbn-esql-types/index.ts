@@ -30,6 +30,8 @@ export {
   type ESQLSourceResult,
   type EsqlView,
   type EsqlViewsResult,
+  type EsqlDataset,
+  type EsqlDatasetsResult,
 } from './src/sources_autocomplete_types';
 
 export {
@@ -49,7 +51,10 @@ export {
   SOURCES_AUTOCOMPLETE_ROUTE,
   TIMEFIELD_ROUTE,
   VIEWS_ROUTE,
+  DATASETS_ROUTE,
   NL_TO_ESQL_ROUTE,
+  SUGGEST_FIX_ROUTE,
+  FIX_WITH_AI_COMMAND_ID,
   SOURCES_TYPES,
   LOOKUP_INDEX_CREATE_ROUTE,
   LOOKUP_INDEX_UPDATE_ROUTE,

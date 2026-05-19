@@ -401,7 +401,7 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
           ruleId: schema.string(),
         }),
         body: schema.object({
-          synonyms: schema.string(),
+          synonyms: schema.string({ maxLength: 4096 }),
         }),
       },
     },

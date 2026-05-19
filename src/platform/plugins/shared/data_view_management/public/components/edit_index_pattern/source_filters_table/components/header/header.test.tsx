@@ -8,14 +8,23 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
-
 import { Header } from '.';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { screen } from '@testing-library/react';
 
 describe('Header', () => {
-  test('should render normally', () => {
-    const component = shallow(<Header />);
+  it('should render normally', () => {
+    renderWithI18n(<Header />);
 
-    expect(component).toMatchSnapshot();
+    expect(
+      screen.getByText(
+        'Field filters can be used to exclude one or more fields when fetching a document. This happens when viewing a document in the Discover app, or with a table displaying results from a Discover session in the Dashboard app. If you have documents with large or unimportant fields you may benefit from filtering those out at this lower level.'
+      )
+    ).toBeVisible();
+    expect(
+      screen.getByText(
+        'Note that multi-fields will incorrectly appear as matches in the table below. These filters only actually apply to fields in the original source document, so matching multi-fields are not actually being filtered.'
+      )
+    ).toBeVisible();
   });
 });

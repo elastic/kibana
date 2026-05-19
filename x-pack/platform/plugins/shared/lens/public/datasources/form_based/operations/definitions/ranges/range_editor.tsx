@@ -149,7 +149,7 @@ const BaseRangeEditor = ({
       >
         <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiToolTip content={decreaseButtonLabel} delay="long" disableScreenReaderOutput>
+            <EuiToolTip content={decreaseButtonLabel} disableScreenReaderOutput>
               <EuiButtonIcon
                 iconType="minusCircle"
                 color="text"
@@ -175,7 +175,7 @@ const BaseRangeEditor = ({
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiToolTip content={increaseButtonLabel} delay="long" disableScreenReaderOutput>
+            <EuiToolTip content={increaseButtonLabel} disableScreenReaderOutput>
               <EuiButtonIcon
                 iconType="plusCircle"
                 color="text"

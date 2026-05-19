@@ -9,7 +9,7 @@
 
 import { euiMarkdownLinkValidator, getDefaultEuiMarkdownPlugins } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import {
   apiCanAddNewPanel,
   apiCanFocusPanel,
@@ -34,7 +34,7 @@ import { resolveRelativeLinksPlugin } from './plugins/resolve_relative_links';
 import { MarkdownEditor } from './components/markdown_editor';
 import { MarkdownEditorPreviewSwitch } from './components/markdown_editor_preview_switch';
 import { MarkdownRenderer } from './components/markdown_renderer';
-import { checkForDuplicateTitle } from './markdown_client/duplicate_title_check';
+import { hasLibraryItemWithTitle } from './markdown_client/has_library_item_with_title';
 import { markdownClient } from './markdown_client/markdown_client';
 import type { MarkdownSettingsState } from '../server/embeddable/schemas';
 
@@ -43,7 +43,7 @@ const flexCss = css({
   flex: '1 1 100%',
 });
 
-export const markdownEmbeddableFactory: EmbeddableFactory<
+export const markdownEmbeddableFactory: EmbeddablePublicDefinition<
   MarkdownEmbeddableState,
   MarkdownEditorApi
 > = {
@@ -173,19 +173,7 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
       getSerializedStateByReference: serializeByReference,
       canLinkToLibrary: async () => !isByReference,
       canUnlinkFromLibrary: async () => isByReference,
-      checkForDuplicateTitle: async (
-        newTitle: string,
-        isTitleDuplicateConfirmed: boolean,
-        onTitleDuplicate: () => void
-      ) => {
-        await checkForDuplicateTitle({
-          title: newTitle,
-          copyOnSave: false,
-          lastSavedTitle: '',
-          isTitleDuplicateConfirmed,
-          onTitleDuplicate,
-        });
-      },
+      hasLibraryItemWithTitle,
     });
 
     return {

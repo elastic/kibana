@@ -115,6 +115,7 @@ export const ATTACKS_PATH = '/attacks' as const;
 export const ALERT_DETECTIONS = '/alert_detections' as const;
 
 export const ALERT_DETAILS_REDIRECT_PATH = `${ALERTS_PATH}/redirect` as const;
+export const ATTACK_DETAILS_REDIRECT_PATH = `${ATTACKS_PATH}/redirect` as const;
 export const ALERT_SUMMARY_PATH = `/alert_summary` as const;
 export const RULES_PATH = '/rules' as const;
 export const RULES_LANDING_PATH = `${RULES_PATH}/landing` as const;

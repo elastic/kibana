@@ -12,7 +12,6 @@ import {
   EuiButtonIcon,
   EuiComboBox,
   EuiFlexGroup,
-  EuiFlexItem,
   EuiHorizontalRule,
   EuiPanel,
   EuiSpacer,
@@ -33,10 +32,26 @@ import { css } from '@emotion/react';
 import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import type { SloStatus } from '../../../../common/service_inventory';
 import type { ServiceMapNode } from '../../../../common/service_map';
+import type { ConnectionFilter } from './apply_service_map_visibility';
 import type { ServiceMapFilterOptionCounts } from './service_map_filter_option_counts';
 import { ServiceMapFindInPage } from './service_map_find_in_page';
 
 export type ServiceMapOrientation = 'horizontal' | 'vertical';
+
+const CONNECTION_FILTER_OPTIONS: { value: ConnectionFilter; label: string }[] = [
+  {
+    value: 'orphaned',
+    label: i18n.translate('xpack.apm.serviceMap.controls.connectionOrphaned', {
+      defaultMessage: 'No connections',
+    }),
+  },
+  {
+    value: 'connected',
+    label: i18n.translate('xpack.apm.serviceMap.controls.connectionConnected', {
+      defaultMessage: 'With connections',
+    }),
+  },
+];
 
 const ALERT_STATUS_OPTIONS: { value: AlertStatus; label: string }[] = [
   {
@@ -131,9 +146,16 @@ const ANOMALY_SEVERITY_OPTIONS: { value: ML_ANOMALY_SEVERITY; label: string }[] 
   },
 ];
 
+export interface ServiceMapOptionsPanelToggleProps {
+  isExpanded: boolean;
+  onExpandedChange: (next: boolean) => void;
+}
+
 export interface ServiceMapOptionsPanelProps {
   nodes: ServiceMapNode[];
   filterOptionCounts: ServiceMapFilterOptionCounts;
+  connectionFilter: ConnectionFilter[];
+  onConnectionFilterChange: (next: ConnectionFilter[]) => void;
   alertStatusFilter: AlertStatus[];
   onAlertStatusFilterChange: (next: AlertStatus[]) => void;
   sloStatusFilter: SloStatus[];
@@ -142,13 +164,79 @@ export interface ServiceMapOptionsPanelProps {
   onAnomalySeverityFilterChange: (next: ML_ANOMALY_SEVERITY[]) => void;
   mapOrientation: ServiceMapOrientation;
   onMapOrientationChange: (next: ServiceMapOrientation) => void;
-  isExpanded: boolean;
-  onExpandedChange: (next: boolean) => void;
+}
+
+/** Same hit target as map zoom / fit controls in graph.tsx (2 × base size). */
+const useToolbarToggleIconCss = () => {
+  const { euiTheme } = useEuiTheme();
+  return useMemo(
+    () => css`
+      min-inline-size: calc(${euiTheme.size.base} * 2);
+      min-block-size: calc(${euiTheme.size.base} * 2);
+      padding: ${euiTheme.size.s};
+      box-sizing: border-box;
+
+      &:hover {
+        background-color: ${euiTheme.colors.backgroundBaseSubdued};
+      }
+    `,
+    [euiTheme]
+  );
+};
+
+export function ServiceMapOptionsPanelToggle({
+  isExpanded,
+  onExpandedChange,
+}: ServiceMapOptionsPanelToggleProps) {
+  const mapToolbarToggleIconCss = useToolbarToggleIconCss();
+
+  const toggleLabel = isExpanded
+    ? i18n.translate('xpack.apm.serviceMap.controls.hideControls', {
+        defaultMessage: 'Hide controls',
+      })
+    : i18n.translate('xpack.apm.serviceMap.controls.showControls', {
+        defaultMessage: 'Show controls',
+      });
+
+  return (
+    <EuiPanel
+      data-test-subj="serviceMapOptionsPanelToggle"
+      hasBorder
+      hasShadow={false}
+      paddingSize="none"
+      borderRadius="m"
+      grow={false}
+    >
+      <EuiFlexGroup
+        justifyContent="center"
+        alignItems="center"
+        gutterSize="none"
+        responsive={false}
+      >
+        <EuiButtonIcon
+          display="empty"
+          color={isExpanded ? 'primary' : 'text'}
+          size="s"
+          iconType="controls"
+          css={mapToolbarToggleIconCss}
+          onClick={() => onExpandedChange(!isExpanded)}
+          aria-expanded={isExpanded}
+          title={toggleLabel}
+          aria-label={toggleLabel}
+          data-test-subj={
+            isExpanded ? 'serviceMapHideControlsButton' : 'serviceMapShowControlsButton'
+          }
+        />
+      </EuiFlexGroup>
+    </EuiPanel>
+  );
 }
 
 export function ServiceMapOptionsPanel({
   nodes,
   filterOptionCounts,
+  connectionFilter,
+  onConnectionFilterChange,
   alertStatusFilter,
   onAlertStatusFilterChange,
   sloStatusFilter,
@@ -157,14 +245,37 @@ export function ServiceMapOptionsPanel({
   onAnomalySeverityFilterChange,
   mapOrientation,
   onMapOrientationChange,
-  isExpanded,
-  onExpandedChange,
 }: ServiceMapOptionsPanelProps) {
-  const { euiTheme } = useEuiTheme();
-
+  const connectionCounts = filterOptionCounts.connection;
   const alertCounts = filterOptionCounts.alerts;
   const sloStatusCounts = filterOptionCounts.slo;
   const anomalySeverityCounts = filterOptionCounts.anomaly;
+
+  const connectionFilterComboBoxOptions = useMemo(
+    () =>
+      CONNECTION_FILTER_OPTIONS.map((opt) => {
+        let count: number;
+        switch (opt.value) {
+          case 'orphaned':
+            count = connectionCounts.orphaned;
+            break;
+          case 'connected':
+            count = connectionCounts.connected;
+            break;
+        }
+        return {
+          label: opt.label,
+          value: opt.value,
+          append: (
+            <EuiBadge color={count === 0 ? 'subdued' : 'hollow'} title={String(count)}>
+              {count}
+            </EuiBadge>
+          ),
+          disabled: count === 0,
+        };
+      }),
+    [connectionCounts]
+  );
 
   const alertStatusComboBoxOptions = useMemo(
     () =>
@@ -229,21 +340,6 @@ export function ServiceMapOptionsPanel({
     []
   );
 
-  /** Same hit target as map zoom / fit controls in graph.tsx (2 × base size). */
-  const mapToolbarToggleIconCss = useMemo(
-    () => css`
-      min-inline-size: calc(${euiTheme.size.base} * 2);
-      min-block-size: calc(${euiTheme.size.base} * 2);
-      padding: ${euiTheme.size.s};
-      box-sizing: border-box;
-
-      &:hover {
-        background-color: ${euiTheme.colors.backgroundBaseSubdued};
-      }
-    `,
-    [euiTheme]
-  );
-
   const layoutOrientationIdPrefix = useMemo(() => htmlIdGenerator()(), []);
 
   const presentationLegend = i18n.translate('xpack.apm.serviceMap.controls.presentationSection', {
@@ -272,47 +368,6 @@ export function ServiceMapOptionsPanel({
     [layoutOrientationIdPrefix]
   );
 
-  const toggleLabel = isExpanded
-    ? i18n.translate('xpack.apm.serviceMap.controls.hideControls', {
-        defaultMessage: 'Hide controls',
-      })
-    : i18n.translate('xpack.apm.serviceMap.controls.showControls', {
-        defaultMessage: 'Show controls',
-      });
-
-  if (!isExpanded) {
-    return (
-      <EuiPanel
-        data-test-subj="serviceMapOptionsPanel"
-        hasBorder
-        hasShadow={false}
-        paddingSize="none"
-        borderRadius="m"
-        grow={false}
-      >
-        <EuiFlexGroup
-          justifyContent="center"
-          alignItems="center"
-          gutterSize="none"
-          responsive={false}
-        >
-          <EuiButtonIcon
-            display="empty"
-            color="text"
-            size="s"
-            iconType="transitionLeftIn"
-            css={mapToolbarToggleIconCss}
-            onClick={() => onExpandedChange(true)}
-            aria-expanded={false}
-            title={toggleLabel}
-            aria-label={toggleLabel}
-            data-test-subj="serviceMapShowControlsButton"
-          />
-        </EuiFlexGroup>
-      </EuiPanel>
-    );
-  }
-
   return (
     <EuiPanel
       data-test-subj="serviceMapOptionsPanel"
@@ -323,25 +378,7 @@ export function ServiceMapOptionsPanel({
       grow={false}
       css={panelSizingCss}
     >
-      <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            display="empty"
-            color="text"
-            size="s"
-            iconType="transitionLeftOut"
-            css={mapToolbarToggleIconCss}
-            onClick={() => onExpandedChange(false)}
-            aria-expanded={true}
-            title={toggleLabel}
-            aria-label={toggleLabel}
-            data-test-subj="serviceMapHideControlsButton"
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow>
-          <ServiceMapFindInPage nodes={nodes} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <ServiceMapFindInPage nodes={nodes} />
 
       <EuiHorizontalRule margin="m" />
 
@@ -353,6 +390,29 @@ export function ServiceMapOptionsPanel({
         </h3>
       </EuiText>
       <EuiSpacer size="s" />
+
+      <EuiComboBox
+        placeholder={i18n.translate('xpack.apm.serviceMap.controls.connectionFilter', {
+          defaultMessage: 'Connections',
+        })}
+        options={connectionFilterComboBoxOptions}
+        selectedOptions={connectionFilter.map((value) => {
+          const opt = connectionFilterComboBoxOptions.find((o) => o.value === value);
+          return { label: opt?.label ?? value, value };
+        })}
+        onChange={(selected) => {
+          onConnectionFilterChange(selected.map((s) => (s.value ?? s.label) as ConnectionFilter));
+        }}
+        fullWidth
+        compressed
+        isClearable
+        data-test-subj="serviceMapConnectionFilter"
+        aria-label={i18n.translate('xpack.apm.serviceMap.controls.connectionFilterAriaLabel', {
+          defaultMessage: 'Filter by connection status',
+        })}
+      />
+
+      <EuiSpacer size="m" />
 
       <EuiComboBox
         placeholder={i18n.translate('xpack.apm.serviceMap.controls.alertStatusFilter', {
