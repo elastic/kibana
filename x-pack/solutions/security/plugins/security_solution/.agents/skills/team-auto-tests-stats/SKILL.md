@@ -133,11 +133,22 @@ References: `docs/extend/scout/skip-tests.md`.
 
 | Metric | Heuristic |
 |--------|-----------|
-| Test cases | **`it(`** and **`specify(`** counts under ownership (leaf tests only). **`context(`** is an alias for **`describe`**-style grouping — **do not** count **`context(`** toward **Test Cases**; use it only when identifying **suites** / skips / tags below. |
+| Test cases | Use `count_test_cases.mjs --total` (command below). Word-boundary `\bit\(` / `\bspecify\(` — excludes substrings like `intercept(`, hooks, and `it.skip(`. **`context(`** groups suites only — **do not** count it toward **Test Cases**. |
 | describe-level static skips | `describe.skip`, `context.skip`, nested describe skip patterns |
 | test-level static skips | `it.skip`, `xit`, `xcontext`, … |
-| Suite-level **tag** skips | Any `describe(` or `context(` **not** using `.skip`, whose options include `tags: [...]` with at least one string matching **`@skipIn`** (Security Solution convention: `@skipInServerless`, `@skipInServerlessMKI`, `@skipInServerlessQA`, … — grep owned specs for `'@skipIn` to discover current tags). Count **suite roots** separately from static skips; **K TC** = sum of `it(` / `specify(` leaves under that suite only. |
-| Test-level **tag** skips | Any `it(` / `specify(` whose options include `tags` with **`@skipIn…`**, and **no** ancestor `describe` / `context` (up to the file’s top level) already has suite `tags` containing **`@skipIn…`** — otherwise those TCs are already counted under suite-level tag skips. Attribute bullets to the **file**. |
+| Suite-level **tag** skips | Any `describe(` or `context(` **not** using `.skip`, whose options include `tags: [...]` with at least one string matching **`@skipIn`** (Security Solution convention: `@skipInServerless`, `@skipInServerlessMKI`, `@skipInServerlessQA`, … — grep owned specs for `'@skipIn` to discover current tags). Count **suite roots** separately from static skips; **K TC** = output of `count_test_cases.mjs` for that suite (brace-depth scoped, not whole-file grep). |
+| Test-level **tag** skips | Any `it(` / `specify(` whose options include `tags` with **`@skipIn…`**, and **no** ancestor `describe` / `context` (up to the file’s top level) already has suite `tags` containing **`@skipIn…`** — otherwise those TCs are already counted under suite-level tag skips. `count_test_cases.mjs` handles the ancestor check automatically. Attribute bullets to the **file**. |
+
+**Commands (run from repo root):**
+
+```bash
+SKILL_DIR="x-pack/solutions/security/plugins/security_solution/.agents/skills/team-auto-tests-stats"
+# Total Cypress TC count
+find <owned-cypress-paths> -name "*.cy.ts" | xargs node "$SKILL_DIR/scripts/count_test_cases.mjs" --total
+
+# Skipped column markdown bullets (paste output directly into report)
+find <owned-cypress-paths> -name "*.cy.ts" | xargs node "$SKILL_DIR/scripts/count_test_cases.mjs" --md
+```
 
 **`Skipped` column (Cypress):** Use **`<br>`** for line breaks. **Combine** static skips and **@skipIn…** tag skips into **one** inventory (do not split into two sub-headings).
 
@@ -150,7 +161,16 @@ Reference: Cypress runner / config excludes tags per environment; inventory reco
 
 ### 4) FTR-oriented / integration-style
 
-Trees: `test/functional`, `test/api_integration`, `test/serverless/**`, `test/security_solution_api_integration/**`, etc. Count **leaf** tests with **`it(`** / **`specify(`** where those APIs appear (mirror Cypress §3 — **`context(`** groups suites, not TCs). **Other** FTR/Mocha patterns may exist — **flag** in the report if counts look inconsistent rather than inventing new heuristics here.
+Trees: `test/functional`, `test/api_integration`, `test/serverless/**`, `test/security_solution_api_integration/**`, etc. Use `count_test_cases.mjs --ftr` for both total TC count and skip inventory — same word-boundary and brace-depth rules as §3, static skips only (**`context(`** groups suites, not TCs). **Other** FTR/Mocha patterns may exist — **flag** in the report if counts look inconsistent.
+
+```bash
+SKILL_DIR="x-pack/solutions/security/plugins/security_solution/.agents/skills/team-auto-tests-stats"
+# Total FTR TC count
+find <owned-ftr-paths> -name "*.ts" | xargs node "$SKILL_DIR/scripts/count_test_cases.mjs" --ftr --total
+
+# Skipped column markdown bullets
+find <owned-ftr-paths> -name "*.ts" | xargs node "$SKILL_DIR/scripts/count_test_cases.mjs" --ftr --md
+```
 
 **FTR row vs Jest units:** This row is for **FTR-style / integration paths** above only. **Jest unit** files (`*.test.ts` / `*.test.tsx`) are **never** counted in the **Tests** table (**Out of scope**).
 
@@ -167,6 +187,28 @@ The deliverable **Tests** table **always lists FTR**. If legacy suites remain on
 | Quality gates | `.buildkite/pipelines/quality-gates/`, `.buildkite/pipelines/security_solution_quality_gate/` |
 | Periodic | MKI periodic groups under `.buildkite/pipelines/security_solution_quality_gate/` |
 | Elastic Cloud / Appex QA | Scout (and related automation) may also run on Elastic Cloud pipelines documented for troubleshooting — see [Elastic Cloud pipelines](https://docs.elastic.dev/appex-qa/troubleshooting-cloud-failures#elastic-cloud-pipelines) (external). Supplements `.buildkite/` sources above. |
+
+**Search commands (run from repo root):**
+
+```bash
+# PR CI — find pipelines that run this team's tests
+ls .buildkite/pipelines/pull_request/security_solution/
+rg -l '<team-keyword>' .buildkite/pipelines/pull_request/security_solution/
+
+# Post-merge
+grep -n '<team-keyword>' .buildkite/pipelines/on_merge_fanout.yml
+
+# Quality gate + periodic
+ls .buildkite/pipelines/security_solution_quality_gate/
+ls .buildkite/pipelines/security_solution_quality_gate/mki_quality_gate/
+ls .buildkite/pipelines/security_solution_quality_gate/mki_periodic/
+
+# FTR manifest (confirms which API integration configs run on PRs)
+grep '<team-keyword>' .buildkite/ftr-manifests/ftr_security_stateful_configs.yml
+grep '<team-keyword>' .buildkite/ftr-manifests/ftr_security_serverless_configs.yml
+```
+
+Replace `<team-keyword>` with a distinctive token from the team's test paths (e.g. `investigation`, `siem_migration`, `genai`).
 
 **Deliverable (Execution phase):**
 
