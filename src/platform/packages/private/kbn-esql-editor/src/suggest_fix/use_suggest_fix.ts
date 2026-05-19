@@ -25,8 +25,12 @@ type SuggestFixHandler = (
   errorLineNumber?: number
 ) => void;
 
-// Keyed by model URI so multiple editors on the same page each dispatch to the correct instance.
-const _suggestFixHandlers = new Map<string, SuggestFixHandler>();
+// Maps handler → its editor's model ref so the URI can be resolved at call time,
+// not at registration time (avoiding timing races with editorModel.current).
+const _suggestFixHandlers = new Map<
+  SuggestFixHandler,
+  MutableRefObject<monaco.editor.ITextModel | undefined>
+>();
 let _commandRegistered = false;
 
 function ensureCommandRegistered() {
@@ -42,8 +46,16 @@ function ensureCommandRegistered() {
       errorLineNumber?: number,
       modelUri?: string
     ) => {
-      const handler = modelUri ? _suggestFixHandlers.get(modelUri) : undefined;
-      handler?.(queryString, errorMessage, errorCode, errorLineNumber);
+      let matched: SuggestFixHandler | undefined;
+      let fallback: SuggestFixHandler | undefined;
+      for (const [handler, modelRef] of _suggestFixHandlers) {
+        fallback = handler;
+        if (modelUri && modelRef.current?.uri.toString() === modelUri) {
+          matched = handler;
+          break;
+        }
+      }
+      (matched ?? fallback)?.(queryString, errorMessage, errorCode, errorLineNumber);
     }
   );
 }
@@ -337,14 +349,13 @@ export const useSuggestFix = ({
 
   // Register the Monaco command once.
   useEffect(() => {
-    const uri = editorModel.current?.uri.toString();
-    if (!isEnabled || !uri) return;
+    if (!isEnabled) return;
 
     ensureCommandRegistered();
-    _suggestFixHandlers.set(uri, runSuggestFix);
+    _suggestFixHandlers.set(runSuggestFix, editorModel);
 
     return () => {
-      _suggestFixHandlers.delete(uri);
+      _suggestFixHandlers.delete(runSuggestFix);
     };
   }, [isEnabled, runSuggestFix, editorModel]);
 };
