@@ -77,8 +77,8 @@ export class ManagedWorkflowsService {
       );
       return;
     }
-    this.readyPluginIds.add(pluginId);
     await this.reconcilePluginManagedWorkflows(pluginId);
+    this.readyPluginIds.add(pluginId);
   }
 
   /**

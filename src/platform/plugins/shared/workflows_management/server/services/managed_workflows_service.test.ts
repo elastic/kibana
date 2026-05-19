@@ -312,6 +312,31 @@ describe('ManagedWorkflowsService', () => {
       expect(crudService.indexWorkflowDocument).not.toHaveBeenCalled();
     });
 
+    it('skips on_adopt updates during the startup window when template values change', async () => {
+      const definition = createTemplateDefinition({
+        management: { versionStrategy: 'on_adopt' },
+      });
+      mockManagedWorkflowDefinitions = [definition];
+      const { crudService, service } = createService();
+      crudService.getWorkflowDocumentWithVersion.mockResolvedValue(
+        createVersionedDocument(
+          createWorkflowSource({
+            definitionHash: definitionHash(definition.yamlTemplate.toString()),
+            managedTemplateValues: { recipient: 'Original', enabled: true },
+            yaml: workflowYaml({ name: 'Managed Workflow - Original', enabled: true }),
+          })
+        )
+      );
+
+      await service.installManagedWorkflow(
+        WORKFLOW_ID,
+        { spaceId: SPACE_ID, values: { recipient: 'Changed', enabled: false } },
+        definition.pluginId
+      );
+
+      expect(crudService.indexWorkflowDocument).not.toHaveBeenCalled();
+    });
+
     it('applies on_adopt updates after the plugin is ready', async () => {
       const definition = createDefinition({
         management: { versionStrategy: 'on_adopt' },
@@ -580,6 +605,37 @@ describe('ManagedWorkflowsService', () => {
       await service.pluginReady(PLUGIN_ID);
 
       expect(crudService.getManagedWorkflowDocumentsAllSpaces).not.toHaveBeenCalled();
+      expect(crudService.indexWorkflowDocument).not.toHaveBeenCalled();
+    });
+
+    it('does not update on_adopt templated dynamic workflows during startup reconciliation', async () => {
+      const autoDefinition = createDefinition({
+        id: 'system-dynamic-auto',
+        management: { lifecycle: 'dynamic', versionStrategy: 'auto' },
+      });
+      const onAdoptDefinition = createTemplateDefinition({
+        id: 'system-dynamic-on-adopt',
+        management: { lifecycle: 'dynamic', versionStrategy: 'on_adopt' },
+      });
+      const templateValues: TemplateValues = { recipient: 'Persisted Override', enabled: false };
+      mockManagedWorkflowDefinitions = [autoDefinition, onAdoptDefinition];
+      const { crudService, service } = createService();
+      crudService.getManagedWorkflowDocumentsAllSpaces.mockResolvedValue([
+        {
+          id: `${onAdoptDefinition.id}-instance`,
+          source: createWorkflowSource({
+            enabled: false,
+            definitionHash: 'old-hash',
+            lifecycle: 'dynamic',
+            managedTemplateValues: templateValues,
+            originManagedWorkflowId: onAdoptDefinition.id,
+          }),
+        },
+      ]);
+
+      await service.pluginReady(PLUGIN_ID);
+
+      expect(crudService.getWorkflowDocumentWithVersion).not.toHaveBeenCalled();
       expect(crudService.indexWorkflowDocument).not.toHaveBeenCalled();
     });
 
