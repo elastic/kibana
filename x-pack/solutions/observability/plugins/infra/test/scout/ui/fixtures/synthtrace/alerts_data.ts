@@ -63,8 +63,10 @@ export const ingestAlertsData = async ({
   hosts: string[];
   timestamp: string;
 }): Promise<void> => {
-  const indexExists = await esClient.indices.exists({ index: ALERTS_INDEX });
-  if (!indexExists) {
+  const aliasOrIndexExists = await esClient.indices.exists({ index: ALERTS_ALIAS });
+  const backingIndexExists = await esClient.indices.exists({ index: ALERTS_INDEX });
+
+  if (!aliasOrIndexExists && !backingIndexExists) {
     await esClient.indices.create({
       index: ALERTS_INDEX,
       settings: {
@@ -121,8 +123,9 @@ export const ingestAlertsData = async ({
   alertDocs.push({ hostName: hosts[2], status: 'recovered' });
   alertDocs.push({ hostName: hosts[0], status: 'recovered' });
 
+  const writeTarget = aliasOrIndexExists ? ALERTS_ALIAS : ALERTS_INDEX;
   const operations = alertDocs.flatMap((doc) => [
-    { index: { _index: ALERTS_INDEX } },
+    { index: { _index: writeTarget } },
     createAlertDocument({
       hostName: doc.hostName,
       status: doc.status,
@@ -138,8 +141,27 @@ export const ingestAlertsData = async ({
 };
 
 export const cleanAlertsData = async ({ esClient }: { esClient: EsClient }): Promise<void> => {
-  const indexExists = await esClient.indices.exists({ index: ALERTS_INDEX });
-  if (indexExists) {
-    await esClient.indices.delete({ index: ALERTS_INDEX });
+  const backingIndexExists = await esClient.indices.exists({ index: ALERTS_INDEX });
+  if (backingIndexExists) {
+    const aliasResponse = await esClient.indices
+      .getAlias({ index: ALERTS_INDEX })
+      .catch(() => null);
+    const weOwnTheIndex =
+      aliasResponse != null && ALERTS_ALIAS in (aliasResponse[ALERTS_INDEX]?.aliases ?? {});
+
+    if (weOwnTheIndex) {
+      await esClient.indices.delete({ index: ALERTS_INDEX });
+      return;
+    }
   }
+
+  await esClient
+    .deleteByQuery({
+      index: ALERTS_ALIAS,
+      query: {
+        term: { 'kibana.alert.rule.uuid': 'test-rule-uuid-scout' },
+      },
+      refresh: true,
+    })
+    .catch(() => {});
 };
