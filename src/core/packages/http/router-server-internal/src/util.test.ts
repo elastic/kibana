@@ -57,19 +57,25 @@ describe('prepareResponseValidation', () => {
 
 describe('prepareOnRequestValidationError', () => {
   it('prepares lazy response schemas without instantiating them', () => {
-    const body = jest.fn(() => schema.string());
+    const validationFailedBody = jest.fn(() => schema.string());
+    const conflictBody = jest.fn(() => schema.string());
 
     const prepared = prepareOnRequestValidationError({
       response: {
-        422: { description: 'Validation failed', body },
+        409: { description: 'Conflict', body: conflictBody },
+        422: { description: 'Validation failed', body: validationFailedBody },
       },
       handler: (_error, _request, res) => res.badRequest(),
     });
 
-    expect(body).not.toHaveBeenCalled();
+    expect(validationFailedBody).not.toHaveBeenCalled();
+    expect(conflictBody).not.toHaveBeenCalled();
+    prepared.response[409].body!();
+    prepared.response[409].body!();
     prepared.response[422].body!();
     prepared.response[422].body!();
-    expect(body).toHaveBeenCalledTimes(1);
+    expect(validationFailedBody).toHaveBeenCalledTimes(1);
+    expect(conflictBody).toHaveBeenCalledTimes(1);
   });
 });
 
