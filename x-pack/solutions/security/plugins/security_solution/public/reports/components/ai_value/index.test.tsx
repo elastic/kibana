@@ -17,9 +17,7 @@ import { useValueMetrics } from './hooks/use_value_metrics';
 import { useHasEverUsedAttackDiscovery } from './hooks/use_has_ever_used_attack_discovery';
 import { AIValueReportLayout } from './ai_value_report_layout';
 import {
-  SAMPLE_ANALYST_HOURLY_RATE,
   SAMPLE_FROM,
-  SAMPLE_MINUTES_PER_ALERT,
   SAMPLE_TO,
   SAMPLE_VALUE_METRICS,
   SAMPLE_VALUE_METRICS_COMPARE,
@@ -188,8 +186,6 @@ describe('AIValueReport', () => {
         isSample: true,
         from: SAMPLE_FROM,
         to: SAMPLE_TO,
-        minutesPerAlert: SAMPLE_MINUTES_PER_ALERT,
-        analystHourlyRate: SAMPLE_ANALYST_HOURLY_RATE,
         valueMetrics: SAMPLE_VALUE_METRICS,
         valueMetricsCompare: SAMPLE_VALUE_METRICS_COMPARE,
       }),

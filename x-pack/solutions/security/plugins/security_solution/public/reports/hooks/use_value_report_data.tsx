@@ -8,9 +8,7 @@
 import { useMemo } from 'react';
 import type { ValueMetrics } from '../components/ai_value/metrics';
 import {
-  SAMPLE_ANALYST_HOURLY_RATE,
   SAMPLE_FROM,
-  SAMPLE_MINUTES_PER_ALERT,
   SAMPLE_TO,
   SAMPLE_VALUE_METRICS,
   SAMPLE_VALUE_METRICS_COMPARE,
@@ -75,8 +73,8 @@ export const useValueReportData = ({
         isSample: true,
         hasEverUsedAttackDiscovery,
         attackAlertIds: [],
-        analystHourlyRate: SAMPLE_ANALYST_HOURLY_RATE,
-        minutesPerAlert: SAMPLE_MINUTES_PER_ALERT,
+        analystHourlyRate,
+        minutesPerAlert,
         from: SAMPLE_FROM,
         to: SAMPLE_TO,
         valueMetrics: SAMPLE_VALUE_METRICS,

@@ -11,9 +11,7 @@ import { useValueReportData } from './use_value_report_data';
 import { useValueMetrics } from '../components/ai_value/hooks/use_value_metrics';
 import { useHasEverUsedAttackDiscovery } from '../components/ai_value/hooks/use_has_ever_used_attack_discovery';
 import {
-  SAMPLE_ANALYST_HOURLY_RATE,
   SAMPLE_FROM,
-  SAMPLE_MINUTES_PER_ALERT,
   SAMPLE_TO,
   SAMPLE_VALUE_METRICS,
   SAMPLE_VALUE_METRICS_COMPARE,
@@ -89,7 +87,7 @@ describe('useValueReportData', () => {
   });
 
   describe('sample vs live mode', () => {
-    it('enters sample mode when the feature was never used and the range is empty, overriding props with sample constants', () => {
+    it('enters sample mode when the feature was never used and the range is empty, passing through settings-derived props', () => {
       mockMetrics({ valueMetrics: EMPTY_LIVE_METRICS });
       mockHistory({ hasEverUsedAttackDiscovery: false });
 
@@ -100,8 +98,8 @@ describe('useValueReportData', () => {
         isSample: true,
         hasEverUsedAttackDiscovery: false,
         attackAlertIds: [],
-        analystHourlyRate: SAMPLE_ANALYST_HOURLY_RATE,
-        minutesPerAlert: SAMPLE_MINUTES_PER_ALERT,
+        analystHourlyRate: PROPS.analystHourlyRate,
+        minutesPerAlert: PROPS.minutesPerAlert,
         from: SAMPLE_FROM,
         to: SAMPLE_TO,
         valueMetrics: SAMPLE_VALUE_METRICS,

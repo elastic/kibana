@@ -29,8 +29,6 @@ export const SAMPLE_VALUE_METRICS_COMPARE: ValueMetrics = {
   costSavings: 136500,
 };
 
-export const SAMPLE_MINUTES_PER_ALERT = 8;
-export const SAMPLE_ANALYST_HOURLY_RATE = 75;
 export const SAMPLE_FROM = '2025-07-18T23:59:59.999Z';
 export const SAMPLE_TO = '2025-08-18T00:00:00.000Z';
 

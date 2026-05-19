@@ -377,7 +377,7 @@ export const GET_STARTED_ATTACK_DISCOVERY_TEXT = i18n.translate(
   'xpack.securitySolution.reports.aiValue.getStartedAttackDiscoveryText',
   {
     defaultMessage:
-      "Value Reports shows how much time and money Elastic's AI SOC saved your team. It is powered by Attack discovery results, once you run first discovery, we'll populate your savings, time reclaimed and threat findings here.",
+      "Value Reports show how much time and money Elastic's AI SOC saves your team. Run your first Attack Discovery to populate savings, time reclaimed, and threat findings.",
   }
 );
 

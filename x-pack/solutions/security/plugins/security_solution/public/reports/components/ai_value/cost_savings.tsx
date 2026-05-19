@@ -42,6 +42,7 @@ export const CostSavings: React.FC<Props> = ({
       css={css`
         min-height: 140px;
         border: 1px solid ${colors.success};
+        overflow: hidden;
       `}
       hasBorder
       hasShadow={false}
