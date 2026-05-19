@@ -60,7 +60,7 @@ export const findGapsResponseSchema = schema.object(
     page: schema.number(),
     per_page: schema.number(),
     total: schema.number(),
-    data: schema.arrayOf(gapsResponseSchemaV1),
+    data: schema.arrayOf(gapsResponseSchemaV1, { maxSize: 10000 }),
   },
   { meta: { id: 'find_gaps_response' } }
 );

@@ -50,11 +50,16 @@ export const rRuleRequestSchema = schema.object(
     byweekday: schema.maybe(
       schema.arrayOf(schema.string(), {
         minSize: 1,
+        maxSize: 7,
         validate: validateRecurrenceByWeekdayV1,
       })
     ),
-    bymonthday: schema.maybe(schema.arrayOf(schema.number({ min: 1, max: 31 }), { minSize: 1 })),
-    bymonth: schema.maybe(schema.arrayOf(schema.number({ min: 1, max: 12 }), { minSize: 1 })),
+    bymonthday: schema.maybe(
+      schema.arrayOf(schema.number({ min: 1, max: 31 }), { minSize: 1, maxSize: 31 })
+    ),
+    bymonth: schema.maybe(
+      schema.arrayOf(schema.number({ min: 1, max: 12 }), { minSize: 1, maxSize: 12 })
+    ),
   },
   { meta: { id: 'r_rule_request' } }
 );

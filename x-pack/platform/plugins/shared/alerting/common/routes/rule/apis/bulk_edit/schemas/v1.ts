@@ -85,7 +85,7 @@ export const bulkEditOperationsSchema = schema.arrayOf(
 export const bulkEditRulesRequestBodySchema = schema.object(
   {
     filter: schema.maybe(schema.string()),
-    ids: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
+    ids: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1, maxSize: 1000 })),
     operations: bulkEditOperationsSchema,
   },
   { meta: { id: 'bulk_edit_rules_request' } }

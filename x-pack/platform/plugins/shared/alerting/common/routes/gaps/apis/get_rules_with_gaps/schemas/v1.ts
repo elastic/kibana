@@ -81,7 +81,7 @@ export const gapsSummarySchema = schema.object(
 export const getRuleIdsWithGapResponseSchema = schema.object(
   {
     total: schema.number(),
-    rule_ids: schema.arrayOf(schema.string()),
+    rule_ids: schema.arrayOf(schema.string(), { maxSize: 1000 }),
     latest_gap_timestamp: schema.maybe(schema.number()),
     summary: gapsSummarySchema,
   },

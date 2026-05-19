@@ -23,7 +23,8 @@ export const ruleTemplateResponseSchema = schema.object(
     tags: schema.arrayOf(
       schema.string({
         meta: { description: 'The tags for the rule.' },
-      })
+      }),
+      { maxSize: 1000 }
     ),
     rule_type_id: schema.string({
       meta: { description: 'The rule type identifier.' },

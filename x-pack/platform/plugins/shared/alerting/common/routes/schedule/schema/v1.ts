@@ -162,6 +162,7 @@ export const scheduleResponseSchema = schema.object(
         ),
         onWeekDay: schema.maybe(
           schema.arrayOf(schema.string(), {
+            maxSize: 7,
             meta: {
               description:
                 'The specific days of the week (`[MO,TU,WE,TH,FR,SA,SU]`) or nth day of month (`[+1MO, -3FR, +2WE, -4SA, -5SU]`) for a recurring schedule.',
@@ -170,6 +171,7 @@ export const scheduleResponseSchema = schema.object(
         ),
         onMonthDay: schema.maybe(
           schema.arrayOf(schema.number(), {
+            maxSize: 31,
             meta: {
               description:
                 'The specific days of the month for a recurring schedule. Valid values are 1-31.',
@@ -178,6 +180,7 @@ export const scheduleResponseSchema = schema.object(
         ),
         onMonth: schema.maybe(
           schema.arrayOf(schema.number(), {
+            maxSize: 12,
             meta: {
               description: 'The specific months for a recurring schedule. Valid values are 1-12.',
             },

@@ -83,7 +83,7 @@ export const findResponseSchema = schema.object(
     page: schema.number(),
     per_page: schema.number(),
     total: schema.number(),
-    data: schema.arrayOf(backfillResponseSchemaV1),
+    data: schema.arrayOf(backfillResponseSchemaV1, { maxSize: 10000 }),
   },
   { meta: { id: 'find_backfill_response' } }
 );

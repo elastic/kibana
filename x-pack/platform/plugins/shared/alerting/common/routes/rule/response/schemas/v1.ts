@@ -294,7 +294,8 @@ export const ruleLastRunSchema = schema.object(
             meta: {
               description: 'Outcome message generated during last rule run.',
             },
-          })
+          }),
+          { maxSize: 100 }
         )
       )
     ),
@@ -476,7 +477,8 @@ export const ruleSnoozeScheduleSchema = schema.object(
           meta: {
             description: 'Skips recurrence of rule on this date.',
           },
-        })
+        }),
+        { maxSize: 1000 }
       )
     ),
   },
@@ -537,7 +539,8 @@ export const ruleResponseSchema = schema.object(
     tags: schema.arrayOf(
       schema.string({
         meta: { description: 'The tags for the rule.' },
-      })
+      }),
+      { maxSize: 1000 }
     ),
     rule_type_id: schema.string({
       meta: { description: 'The rule type identifier.' },
@@ -549,7 +552,7 @@ export const ruleResponseSchema = schema.object(
       },
     }),
     schedule: intervalScheduleSchema,
-    actions: schema.arrayOf(actionSchema),
+    actions: schema.arrayOf(actionSchema, { maxSize: 1000 }),
     params: ruleParamsSchemaV1,
     mapped_params: schema.maybe(mappedParamsSchema),
     scheduled_task_id: schema.maybe(
@@ -623,18 +626,20 @@ export const ruleResponseSchema = schema.object(
         meta: {
           description: 'List of identifiers of muted alerts. ',
         },
-      })
+      }),
+      { maxSize: 10000 }
     ),
     execution_status: ruleExecutionStatusSchema,
     monitoring: schema.maybe(monitoringSchema),
-    snooze_schedule: schema.maybe(schema.arrayOf(ruleSnoozeScheduleSchema)),
+    snooze_schedule: schema.maybe(schema.arrayOf(ruleSnoozeScheduleSchema, { maxSize: 100 })),
     active_snoozes: schema.maybe(
       schema.arrayOf(
         schema.string({
           meta: {
             description: `List of active snoozes for the rule.`,
           },
-        })
+        }),
+        { maxSize: 100 }
       )
     ),
     is_snoozed_until: schema.maybe(

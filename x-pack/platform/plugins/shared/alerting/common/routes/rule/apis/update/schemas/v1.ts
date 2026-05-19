@@ -52,6 +52,7 @@ export const actionAlertsFilterSchema = schema.object(
               schema.literal(7),
             ]),
             {
+              maxSize: 7,
               meta: {
                 description:
                   'Defines the days of the week that the action can run, represented as an array of numbers. For example, `1` represents Monday. An empty array is equivalent to specifying all the days of the week.',
@@ -150,7 +151,7 @@ export const updateBodySchema = schema.object(
           description: 'The tags for the rule.',
         },
       }),
-      { defaultValue: [] }
+      { defaultValue: [], maxSize: 1000 }
     ),
     schedule: schema.object({
       interval: schema.string({
@@ -170,7 +171,7 @@ export const updateBodySchema = schema.object(
       )
     ),
     params: ruleParamsSchemaForUpdateV1,
-    actions: schema.arrayOf(actionSchema, { defaultValue: [] }),
+    actions: schema.arrayOf(actionSchema, { defaultValue: [], maxSize: 1000 }),
     notify_when: schema.maybe(schema.nullable(notifyWhenSchemaV1)),
     alert_delay: schema.maybe(alertDelaySchemaV1),
     flapping: schema.maybe(schema.nullable(flappingSchemaV2)),
