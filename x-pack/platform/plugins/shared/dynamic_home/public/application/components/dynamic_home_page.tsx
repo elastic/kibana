@@ -19,6 +19,7 @@ import {
 } from '@elastic/eui';
 import { css, keyframes } from '@emotion/react';
 import type { HttpStart } from '@kbn/core/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { SpaceContextResponse } from '../../../server/routes/space_context';
 import { AIDigestPanel } from './ai_digest_panel';
 import { RecentDashboardsWidget } from './recent_dashboards_widget';
@@ -28,9 +29,13 @@ import { SolutionNav } from './solution_nav';
 import { SpaceActivityChart } from './space_activity_chart';
 import { TopIndicesChart } from './top_indices_chart';
 import { GetStartedPanel } from './get_started_panel';
+import { QuickSearchBar } from './quick_search_bar';
+import { RecentAlertsFeed } from './recent_alerts_feed';
+import { FavoritesWidget } from './favorites_widget';
 
 interface DynamicHomePageProps {
   http: HttpStart;
+  agentBuilder?: AgentBuilderPluginStart;
 }
 
 const getGreeting = (): string => {
@@ -47,7 +52,7 @@ const HEALTH_COLORS: Record<string, string> = {
   unknown: 'default',
 };
 
-export const DynamicHomePage: React.FC<DynamicHomePageProps> = ({ http }) => {
+export const DynamicHomePage: React.FC<DynamicHomePageProps> = ({ http, agentBuilder }) => {
   const { euiTheme } = useEuiTheme();
   const [context, setContext] = useState<SpaceContextResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -75,11 +80,10 @@ export const DynamicHomePage: React.FC<DynamicHomePageProps> = ({ http }) => {
     background: linear-gradient(135deg, #1d87d0 0%, #7b61ff 40%, #a855f7 70%, #1d87d0 100%);
     background-size: 300% 300%;
     animation: ${gradientShift} 10s ease infinite;
-    padding: ${euiTheme.size.xxl} ${euiTheme.size.xxl};
+    padding: ${euiTheme.size.l} ${euiTheme.size.xxl};
     border-radius: ${euiTheme.border.radius.medium};
     color: #fff;
     position: relative;
-    overflow: hidden;
 
     &::before {
       content: '';
@@ -96,8 +100,8 @@ export const DynamicHomePage: React.FC<DynamicHomePageProps> = ({ http }) => {
 
   const subtitleStyle = css`
     color: rgba(255, 255, 255, 0.8);
-    font-size: ${euiTheme.size.l};
-    margin-top: ${euiTheme.size.s};
+    font-size: ${euiTheme.size.m};
+    margin-top: ${euiTheme.size.xs};
   `;
 
   return (
@@ -112,19 +116,25 @@ export const DynamicHomePage: React.FC<DynamicHomePageProps> = ({ http }) => {
               </EuiBadge>
             </div>
           )}
-          <EuiTitle size="l">
+          <EuiTitle size="m">
             <h1 style={{ color: '#fff' }}>
               {getGreeting()}
               {userName ? `, ${userName}` : ''}
             </h1>
           </EuiTitle>
           <p css={subtitleStyle}>Here&apos;s what&apos;s happening in your Kibana space</p>
+          <QuickSearchBar http={http} />
         </div>
 
         <EuiSpacer size="l" />
 
-        {/* AI Digest */}
-        <AIDigestPanel http={http} context={context} isContextLoading={isLoading} />
+        {/* AI Digest with suggestions */}
+        <AIDigestPanel
+          http={http}
+          context={context}
+          isContextLoading={isLoading}
+          agentBuilder={agentBuilder}
+        />
 
         <EuiSpacer size="l" />
 
@@ -143,7 +153,7 @@ export const DynamicHomePage: React.FC<DynamicHomePageProps> = ({ http }) => {
             </>
           )}
 
-        {/* Widget grid */}
+        {/* Widget grid — Favorites | Recent Dashboards | Recent Searches */}
         {isLoading ? (
           <EuiFlexGroup>
             {[0, 1, 2].map((i) => (
@@ -155,16 +165,38 @@ export const DynamicHomePage: React.FC<DynamicHomePageProps> = ({ http }) => {
         ) : (
           <EuiFlexGroup alignItems="stretch">
             <EuiFlexItem>
+              <FavoritesWidget http={http} />
+            </EuiFlexItem>
+            <EuiFlexItem>
               <RecentDashboardsWidget dashboards={context?.recentDashboards ?? []} http={http} />
             </EuiFlexItem>
             <EuiFlexItem>
               <RecentSearchesWidget searches={context?.recentSearches ?? []} http={http} />
             </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
+
+        <EuiSpacer size="l" />
+
+        {/* Alerts row — donut + recent alerts feed */}
+        {isLoading ? (
+          <EuiFlexGroup>
+            {[0, 1].map((i) => (
+              <EuiFlexItem key={i}>
+                <EuiSkeletonRectangle width="100%" height={260} borderRadius="m" />
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
+        ) : (
+          <EuiFlexGroup alignItems="stretch">
             <EuiFlexItem>
               <AlertsWidget
                 alertStats={context?.alertStats ?? { firing: 0, ok: 0, error: 0, total: 0 }}
                 http={http}
               />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <RecentAlertsFeed alerts={context?.recentAlerts ?? []} http={http} />
             </EuiFlexItem>
           </EuiFlexGroup>
         )}

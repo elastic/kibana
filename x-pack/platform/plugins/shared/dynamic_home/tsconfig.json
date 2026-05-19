@@ -15,6 +15,7 @@
     "@kbn/core-saved-objects-server",
     "@kbn/core-saved-objects-api-server",
     "@kbn/agent-builder-server",
+    "@kbn/agent-builder-browser",
     "@kbn/agent-builder-common",
     "@kbn/alerting-plugin",
     "@kbn/spaces-plugin",

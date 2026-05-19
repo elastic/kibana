@@ -54,7 +54,12 @@ export const AlertsWidget: React.FC<AlertsWidgetProps> = ({ alertStats, http }) 
     <EuiPanel hasBorder style={{ height: '100%' }}>
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false}>
-          <EuiIcon type="bell" size="m" color={firing > 0 ? 'danger' : 'success'} />
+          <EuiIcon
+            type="bell"
+            size="m"
+            color={firing > 0 ? 'danger' : 'success'}
+            aria-hidden={true}
+          />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiTitle size="xs">
@@ -131,7 +136,10 @@ export const AlertsWidget: React.FC<AlertsWidgetProps> = ({ alertStats, http }) 
       <EuiSpacer size="s" />
 
       <EuiText size="xs" textAlign="center">
-        <EuiLink href={http.basePath.prepend('/app/management/insightsAndAlerting/triggersActions/rules')} target="_self">
+        <EuiLink
+          href={http.basePath.prepend('/app/management/insightsAndAlerting/triggersActions/rules')}
+          target="_self"
+        >
           View all rules →
         </EuiLink>
       </EuiText>

@@ -39,12 +39,15 @@ const relativeTime = (isoDate: string): string => {
   return `${Math.floor(hours / 24)}d ago`;
 };
 
-export const RecentDashboardsWidget: React.FC<RecentDashboardsWidgetProps> = ({ dashboards, http }) => {
+export const RecentDashboardsWidget: React.FC<RecentDashboardsWidgetProps> = ({
+  dashboards,
+  http,
+}) => {
   return (
     <EuiPanel hasBorder style={{ height: '100%' }}>
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false}>
-          <EuiIcon type="dashboardApp" size="m" color="primary" />
+          <EuiIcon type="dashboardApp" size="m" color="primary" aria-hidden={true} />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiTitle size="xs">
@@ -68,7 +71,10 @@ export const RecentDashboardsWidget: React.FC<RecentDashboardsWidgetProps> = ({ 
             <EuiFlexItem key={d.id}>
               <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">
                 <EuiFlexItem>
-                  <EuiLink href={http.basePath.prepend(`/app/dashboards#/view/${d.id}`)} target="_self">
+                  <EuiLink
+                    href={http.basePath.prepend(`/app/dashboards#/view/${d.id}`)}
+                    target="_self"
+                  >
                     <EuiText size="s">
                       <p>{d.title}</p>
                     </EuiText>

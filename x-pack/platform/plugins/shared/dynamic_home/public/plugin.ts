@@ -6,19 +6,24 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 
-export class DynamicHomePublicPlugin implements Plugin<void, void> {
-  setup(core: CoreSetup) {
+interface StartDeps {
+  agentBuilder?: AgentBuilderPluginStart;
+}
+
+export class DynamicHomePublicPlugin implements Plugin<void, void, {}, StartDeps> {
+  setup(core: CoreSetup<StartDeps>) {
     core.application.register({
       id: 'dynamicHome',
       title: 'Dynamic Home',
       appRoute: '/app/dynamic_home',
       async mount(params) {
-        const [{ renderApp }, [coreStart]] = await Promise.all([
+        const [{ renderApp }, [coreStart, startDeps]] = await Promise.all([
           import('./application'),
           core.getStartServices(),
         ]);
-        return renderApp(params, coreStart);
+        return renderApp(params, coreStart, startDeps.agentBuilder);
       },
     });
   }

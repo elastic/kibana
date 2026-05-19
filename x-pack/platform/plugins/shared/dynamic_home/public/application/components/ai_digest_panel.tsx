@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiBadge,
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
@@ -22,6 +23,7 @@ import {
 } from '@elastic/eui';
 import { css, keyframes } from '@emotion/react';
 import type { HttpStart } from '@kbn/core/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import { defer } from 'rxjs';
 import { httpResponseIntoObservable } from '@kbn/sse-utils-client';
 import { isMessageChunkEvent, isRoundCompleteEvent } from '@kbn/agent-builder-common';
@@ -31,6 +33,7 @@ interface AIDigestPanelProps {
   http: HttpStart;
   context: SpaceContextResponse | null;
   isContextLoading: boolean;
+  agentBuilder?: AgentBuilderPluginStart;
 }
 
 const CACHE_KEY = 'kbn_dynamic_home_digest';
@@ -63,7 +66,9 @@ const writeCache = (text: string) => {
 const clearCache = () => {
   try {
     window.localStorage.removeItem(CACHE_KEY);
-  } catch {}
+  } catch (_e) {
+    // quota exceeded or unavailable
+  }
 };
 
 const formatAge = (ms: number): string => {
@@ -82,6 +87,7 @@ export const AIDigestPanel: React.FC<AIDigestPanelProps> = ({
   http,
   context,
   isContextLoading,
+  agentBuilder,
 }) => {
   const { euiTheme } = useEuiTheme();
   const [digestText, setDigestText] = useState('');
@@ -190,6 +196,18 @@ export const AIDigestPanel: React.FC<AIDigestPanelProps> = ({
     border-left: 3px solid ${euiTheme.colors.primary};
   `;
 
+  const { digestProse, suggestions } = useMemo(() => {
+    const sepIdx = digestText.indexOf('\n---');
+    if (sepIdx === -1) return { digestProse: digestText, suggestions: [] };
+    const prose = digestText.slice(0, sepIdx).trim();
+    const rest = digestText.slice(sepIdx + 4).trim();
+    const bullets = rest
+      .split('\n')
+      .map((l) => l.replace(/^[-*]\s*/, '').trim())
+      .filter(Boolean);
+    return { digestProse: prose, suggestions: bullets };
+  }, [digestText]);
+
   const isLoading = isContextLoading || (isStreaming && !digestText);
 
   return (
@@ -222,7 +240,7 @@ export const AIDigestPanel: React.FC<AIDigestPanelProps> = ({
         )}
         <EuiFlexItem />
         <EuiFlexItem grow={false}>
-          <EuiToolTip content="Regenerate digest">
+          <EuiToolTip content="Regenerate digest" disableScreenReaderOutput>
             <EuiButtonIcon
               iconType="refresh"
               aria-label="Regenerate digest"
@@ -244,12 +262,47 @@ export const AIDigestPanel: React.FC<AIDigestPanelProps> = ({
           <p>AI digest unavailable. Make sure an AI connector is configured.</p>
         </EuiText>
       ) : (
-        <EuiText size="m">
-          <p>
-            {digestText}
-            {isStreaming && <span css={cursorStyle} />}
-          </p>
-        </EuiText>
+        <>
+          <EuiText size="m">
+            <p>
+              {digestProse}
+              {isStreaming && !digestText.includes('\n---') && <span css={cursorStyle} />}
+            </p>
+          </EuiText>
+
+          {suggestions.length > 0 && (
+            <>
+              <EuiSpacer size="s" />
+              <EuiFlexGroup gutterSize="s" wrap>
+                {suggestions.map((s, i) => (
+                  <EuiFlexItem grow={false} key={i}>
+                    <EuiButtonEmpty
+                      size="s"
+                      iconType="sparkles"
+                      onClick={() =>
+                        agentBuilder?.openChat({
+                          agentId: 'home-digest-agent',
+                          initialMessage: s,
+                          autoSendInitialMessage: true,
+                          newConversation: true,
+                        })
+                      }
+                      isDisabled={!agentBuilder}
+                      color="primary"
+                      css={css`
+                        border: 1px solid ${euiTheme.colors.primary};
+                        border-radius: ${euiTheme.border.radius.medium};
+                        font-size: ${euiTheme.size.m};
+                      `}
+                    >
+                      {s}
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                ))}
+              </EuiFlexGroup>
+            </>
+          )}
+        </>
       )}
     </EuiPanel>
   );

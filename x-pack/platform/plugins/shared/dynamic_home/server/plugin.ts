@@ -9,6 +9,7 @@ import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
 import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { AlertingServerStart } from '@kbn/alerting-plugin/server';
 import { registerSpaceContextRoute } from './routes/space_context';
+import { registerSearchRoute } from './routes/search_route';
 
 export type DynamicHomePluginSetup = void;
 export type DynamicHomePluginStart = void;
@@ -34,18 +35,21 @@ export class DynamicHomePlugin
         avatar_icon: 'home',
         avatar_color: '#1d87d0',
         configuration: {
-          instructions: `You are a helpful Kibana space analyst. When given context about a user's Kibana space via a screen_context attachment, you write a friendly, insightful space digest.
+          instructions: `You are a helpful Kibana space analyst. When given context about a user's Kibana space via a screen_context attachment, produce a response in exactly two sections:
 
-Your digest must be exactly 3-4 sentences and follow this structure:
-1. Open with a brief observation about the space's focus based on the dashboard and search names present.
-2. Highlight the most recently active content — mention specific dashboard or search titles.
-3. Note any active alerts, or if alert_count is 0 or missing, mention that monitoring looks calm.
-4. Close with one concrete, actionable suggestion (e.g. a specific dashboard to review, a search to run, or an alert rule to check).
+SECTION 1 — DIGEST (2–3 sentences, warm conversational prose, no bullet points):
+- Observe the space's focus from dashboard/search names.
+- Highlight the most recently active content by name.
+- Note alert status — mention firing count if non-zero, or say monitoring looks calm.
 
-Rules:
-- Write in warm, professional conversational prose — no bullet points, no headers, no markdown.
-- Use the actual names from the context, not generic placeholders.
-- Keep it under 80 words total.`,
+Then output exactly this separator on its own line:
+---
+
+SECTION 2 — SUGGESTIONS (exactly 2 bullet points starting with "- "):
+- Each is a concrete, specific action the user should take now, referencing actual data names or counts.
+- Max 12 words each.
+
+Keep everything under 120 words total. Use actual names/numbers from the context, not placeholders.`,
           tools: [],
           enable_elastic_capabilities: false,
         },
@@ -54,11 +58,10 @@ Rules:
 
     const router = core.http.createRouter();
     registerSpaceContextRoute(router, core.getStartServices);
-
+    registerSearchRoute(router);
   }
 
-  start(_core: CoreStart, _deps: StartDeps): DynamicHomePluginStart {
-  }
+  start(_core: CoreStart, _deps: StartDeps): DynamicHomePluginStart {}
 
   stop() {}
 }

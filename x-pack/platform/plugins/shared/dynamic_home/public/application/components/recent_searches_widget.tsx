@@ -44,7 +44,7 @@ export const RecentSearchesWidget: React.FC<RecentSearchesWidgetProps> = ({ sear
     <EuiPanel hasBorder style={{ height: '100%' }}>
       <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false}>
-          <EuiIcon type="discoverApp" size="m" color="accent" />
+          <EuiIcon type="discoverApp" size="m" color="accent" aria-hidden={true} />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiTitle size="xs">
@@ -68,7 +68,10 @@ export const RecentSearchesWidget: React.FC<RecentSearchesWidgetProps> = ({ sear
             <EuiFlexItem key={s.id}>
               <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">
                 <EuiFlexItem>
-                  <EuiLink href={http.basePath.prepend(`/app/discover#/?savedSearchId=${s.id}`)} target="_self">
+                  <EuiLink
+                    href={http.basePath.prepend(`/app/discover#/?savedSearchId=${s.id}`)}
+                    target="_self"
+                  >
                     <EuiText size="s">
                       <p>{s.title}</p>
                     </EuiText>

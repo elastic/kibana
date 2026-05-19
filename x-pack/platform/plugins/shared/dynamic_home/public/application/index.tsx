@@ -8,9 +8,17 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import { App } from './app';
 
-export const renderApp = (params: AppMountParameters, core: CoreStart) => {
-  ReactDOM.render(core.rendering.addContext(<App http={core.http} />), params.element);
+export const renderApp = (
+  params: AppMountParameters,
+  core: CoreStart,
+  agentBuilder?: AgentBuilderPluginStart
+) => {
+  ReactDOM.render(
+    core.rendering.addContext(<App http={core.http} agentBuilder={agentBuilder} />),
+    params.element
+  );
   return () => ReactDOM.unmountComponentAtNode(params.element);
 };

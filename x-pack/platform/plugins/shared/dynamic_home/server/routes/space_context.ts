@@ -19,10 +19,18 @@ export interface AlertStats {
   total: number;
 }
 
+export interface RecentAlert {
+  id: string;
+  name: string;
+  status: 'active' | 'error';
+  updatedAt: string;
+}
+
 export interface SpaceContextResponse {
   recentDashboards: Array<{ id: string; title: string; updatedAt: string }>;
   recentSearches: Array<{ id: string; title: string; updatedAt: string }>;
   alertStats: AlertStats;
+  recentAlerts: RecentAlert[];
   activityByDay: Array<{ date: string; count: number }>;
   topIndices: Array<{ index: string; docs: number }>;
   clusterHealth: 'green' | 'yellow' | 'red' | 'unknown';
@@ -54,9 +62,7 @@ const groupIndices = (
   }));
 };
 
-const computeActivityByDay = (
-  updatedAts: string[]
-): Array<{ date: string; count: number }> => {
+const computeActivityByDay = (updatedAts: string[]): Array<{ date: string; count: number }> => {
   const now = Date.now();
   const buckets: Record<string, number> = {};
   for (let i = 0; i < ACTIVITY_DAYS; i++) {
@@ -110,6 +116,7 @@ export const registerSpaceContextRoute = (
       ]);
 
       let alertStats: AlertStats = { firing: 0, ok: 0, error: 0, total: 0 };
+      let recentAlerts: RecentAlert[] = [];
       try {
         const [, startDeps] = await getStartServices();
         if (startDeps.alerting) {
@@ -122,6 +129,26 @@ export const registerSpaceContextRoute = (
             else if (status === 'ok') alertStats.ok++;
             else if (status === 'error') alertStats.error++;
           }
+          recentAlerts = rules.data
+            .filter((r) => {
+              const s = r.executionStatus?.status;
+              return s === 'active' || s === 'error';
+            })
+            .sort((a, b) => {
+              const aTime = a.executionStatus?.lastExecutionDate?.getTime() ?? 0;
+              const bTime = b.executionStatus?.lastExecutionDate?.getTime() ?? 0;
+              return bTime - aTime;
+            })
+            .slice(0, 5)
+            .map((r) => ({
+              id: r.id,
+              name: r.name,
+              status: (r.executionStatus?.status === 'active'
+                ? 'active'
+                : 'error') as RecentAlert['status'],
+              updatedAt:
+                r.executionStatus?.lastExecutionDate?.toISOString() ?? new Date().toISOString(),
+            }));
         }
       } catch {
         // alerting unavailable or unauthorized
@@ -130,6 +157,26 @@ export const registerSpaceContextRoute = (
       // Demo fallback: realistic fake data when alerting is not available
       if (alertStats.total === 0) {
         alertStats = { firing: 3, ok: 14, error: 1, total: 18 };
+        recentAlerts = [
+          {
+            id: '1',
+            name: 'High CPU Usage — prod-cluster',
+            status: 'active',
+            updatedAt: new Date(Date.now() - 5 * 60_000).toISOString(),
+          },
+          {
+            id: '2',
+            name: 'Disk Space Low — data-node-03',
+            status: 'active',
+            updatedAt: new Date(Date.now() - 23 * 60_000).toISOString(),
+          },
+          {
+            id: '3',
+            name: 'Log ingestion stalled',
+            status: 'error',
+            updatedAt: new Date(Date.now() - 2 * 3_600_000).toISOString(),
+          },
+        ];
       }
 
       let topIndices: Array<{ index: string; docs: number }> = [];
@@ -146,7 +193,9 @@ export const registerSpaceContextRoute = (
             const docs = Number(raw['docs.count'] ?? idx.docsCount ?? 0);
             return { index: idx.index!, docs };
           });
-        topIndices = groupIndices(rawIndices).sort((a, b) => b.docs - a.docs).slice(0, 5);
+        topIndices = groupIndices(rawIndices)
+          .sort((a, b) => b.docs - a.docs)
+          .slice(0, 5);
         const status = healthResponse.status;
         if (status === 'green' || status === 'yellow' || status === 'red') {
           clusterHealth = status;
@@ -172,6 +221,7 @@ export const registerSpaceContextRoute = (
           updatedAt: s.updated_at ?? new Date().toISOString(),
         })),
         alertStats,
+        recentAlerts,
         activityByDay: computeActivityByDay(allUpdatedAts),
         topIndices,
         clusterHealth,

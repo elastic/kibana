@@ -7,12 +7,14 @@
 
 import React from 'react';
 import type { HttpStart } from '@kbn/core/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import { DynamicHomePage } from './components/dynamic_home_page';
 
 interface AppProps {
   http: HttpStart;
+  agentBuilder?: AgentBuilderPluginStart;
 }
 
-export const App: React.FC<AppProps> = ({ http }) => {
-  return <DynamicHomePage http={http} />;
+export const App: React.FC<AppProps> = ({ http, agentBuilder }) => {
+  return <DynamicHomePage http={http} agentBuilder={agentBuilder} />;
 };
