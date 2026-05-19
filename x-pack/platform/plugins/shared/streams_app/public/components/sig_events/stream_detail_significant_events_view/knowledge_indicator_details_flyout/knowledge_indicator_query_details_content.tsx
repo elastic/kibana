@@ -16,7 +16,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { StreamQuery } from '@kbn/streams-schema';
+import type { Feature, StreamQuery } from '@kbn/streams-schema';
 import { COMPUTED_FEATURE_TYPES } from '@kbn/streams-schema';
 import React, { useMemo } from 'react';
 import { SeverityBadge } from '../../significant_events_discovery/components/severity_badge/severity_badge';
@@ -26,15 +26,25 @@ import { SparkPlot } from '../../../spark_plot';
 interface Props {
   query: StreamQuery;
   occurrences?: Array<{ x: number; y: number }>;
+  features?: Feature[];
 }
 
-export function KnowledgeIndicatorQueryDetailsContent({ query, occurrences }: Props) {
+export function KnowledgeIndicatorQueryDetailsContent({
+  query,
+  occurrences,
+  features = [],
+}: Props) {
+  const featureIdSet = useMemo(() => new Set(features.map((f) => f.id)), [features]);
+
   const inferredFeatureIds = useMemo(
     () =>
-      (query.feature_ids ?? []).filter(
-        (id) => !(COMPUTED_FEATURE_TYPES as readonly string[]).includes(id)
-      ),
-    [query.feature_ids]
+      (query.features ?? [])
+        .map((f) => f.id)
+        .filter(
+          (id) =>
+            !(COMPUTED_FEATURE_TYPES as readonly string[]).includes(id) && featureIdSet.has(id)
+        ),
+    [query.features, featureIdSet]
   );
   const hasFeatureIds = inferredFeatureIds.length > 0;
 

@@ -24,6 +24,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { KnowledgeIndicator } from '@kbn/streams-ai';
 import { isComputedFeature } from '@kbn/streams-schema';
+import type { Feature } from '@kbn/streams-schema';
 import { upperFirst } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
 import { getConfidenceColor } from '../utils/get_confidence_color';
@@ -48,12 +49,14 @@ interface Props {
   knowledgeIndicator: KnowledgeIndicator;
   occurrencesByQueryId: Record<string, Array<{ x: number; y: number }>>;
   onClose: () => void;
+  knowledgeIndicators: KnowledgeIndicator[];
 }
 
 export function KnowledgeIndicatorDetailsFlyout({
   knowledgeIndicator,
   occurrencesByQueryId,
   onClose,
+  knowledgeIndicators,
 }: Props) {
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'knowledgeIndicatorDetailsFlyoutTitle' });
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -75,6 +78,17 @@ export function KnowledgeIndicatorDetailsFlyout({
 
   const isDeleting = isKIDeleting || isDemoting;
   const isMutating = isActionMutating || isDeleting;
+
+  const sameStreamFeatures = useMemo<Feature[]>(() => {
+    if (knowledgeIndicator.kind !== 'query') return [];
+    const queryStreamName = knowledgeIndicator.stream_name;
+    return knowledgeIndicators
+      .filter(
+        (ki): ki is Extract<KnowledgeIndicator, { kind: 'feature' }> =>
+          ki.kind === 'feature' && ki.feature.stream_name === queryStreamName
+      )
+      .map((ki) => ki.feature);
+  }, [knowledgeIndicator, knowledgeIndicators]);
 
   const isRule = knowledgeIndicator.kind === 'query' && knowledgeIndicator.rule.backed;
 
@@ -280,6 +294,7 @@ export function KnowledgeIndicatorDetailsFlyout({
             <KnowledgeIndicatorQueryDetailsContent
               query={knowledgeIndicator.query}
               occurrences={occurrencesByQueryId[knowledgeIndicator.query.id]}
+              features={sameStreamFeatures}
             />
           )}
         </EuiFlyoutBody>

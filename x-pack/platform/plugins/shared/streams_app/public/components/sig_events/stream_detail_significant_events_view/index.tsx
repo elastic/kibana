@@ -311,6 +311,7 @@ export function StreamDetailSignificantEventsView({ definition }: Props) {
           knowledgeIndicator={selectedKnowledgeIndicator}
           occurrencesByQueryId={occurrencesByQueryId}
           onClose={closeFlyout}
+          knowledgeIndicators={knowledgeIndicators}
         />
       ) : null}
     </>

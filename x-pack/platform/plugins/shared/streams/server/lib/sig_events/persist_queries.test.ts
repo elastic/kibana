@@ -41,7 +41,7 @@ const makeGeneratedQuery = (
   description: 'desc',
   esql: { query: 'FROM logs | WHERE body.text:"timeout"' },
   severity_score: 50,
-  feature_ids: ['test-feature'],
+  features: [{ id: 'test-feature', run_id: 'test-run' }],
   ...overrides,
 });
 

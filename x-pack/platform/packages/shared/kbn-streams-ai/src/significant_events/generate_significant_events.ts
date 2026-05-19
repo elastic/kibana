@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { Feature, QueryType, Streams } from '@kbn/streams-schema';
+import type { Feature, QueryFeature, QueryType, Streams } from '@kbn/streams-schema';
 import {
-  QUERY_TYPE_MATCH,
   QUERY_TYPE_STATS,
   deriveQueryType,
   ensureMetadata,
@@ -23,7 +22,6 @@ import type {
   ToolCallback,
   ToolDefinition,
 } from '@kbn/inference-common';
-import { MessageRole } from '@kbn/inference-common';
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
 import { withSpan } from '@kbn/apm-utils';
 import { createGenerateSignificantEventsPrompt } from './prompt';
@@ -66,7 +64,7 @@ interface ParsedToolQuery {
   severity_score: number;
   evidence?: string[];
   replaces?: string;
-  feature_ids: string[];
+  features: QueryFeature[];
 }
 
 function getErrorMessage(error: unknown): string {
@@ -131,7 +129,8 @@ export async function generateSignificantEvents({
       )
     : '';
 
-  const returnedFeatureIds = new Set<string>();
+  const returnedFeatureMap = new Map<string, string>();
+  const validatedQueries: ParsedToolQuery[] = [];
 
   logger.trace('Generating significant events via reasoning agent');
   const response = await withSpan('generate_significant_events', () =>
@@ -166,7 +165,7 @@ export async function generateSignificantEvents({
             const llmFeatures = features.map(toFeatureForLlmContext);
 
             for (const feature of features) {
-              returnedFeatureIds.add(feature.id);
+              returnedFeatureMap.set(feature.id, feature.run_id ?? '');
             }
 
             return {
@@ -222,7 +221,7 @@ export async function generateSignificantEvents({
                 const validFeatureIds: string[] = [];
                 const invalidFeatureIds: string[] = [];
                 for (const id of rawFeatureIds) {
-                  (returnedFeatureIds.has(id) ? validFeatureIds : invalidFeatureIds).push(id);
+                  (returnedFeatureMap.has(id) ? validFeatureIds : invalidFeatureIds).push(id);
                 }
 
                 if (validFeatureIds.length === 0) {
@@ -241,6 +240,11 @@ export async function generateSignificantEvents({
                   warnings.push(`Stripped unknown feature_ids: [${invalidFeatureIds.join(', ')}]`);
                 }
 
+                const queryFeatures: QueryFeature[] = validFeatureIds.map((id) => ({
+                  id,
+                  run_id: returnedFeatureMap.get(id) ?? '',
+                }));
+
                 const sourceRewritten = replaceFromSources(query.esql, targetSources);
                 const rewritten =
                   derivedType === QUERY_TYPE_STATS
@@ -253,7 +257,6 @@ export async function generateSignificantEvents({
                       ...query,
                       type: derivedType,
                       esql: rewritten,
-                      feature_ids: validFeatureIds,
                     },
                     valid: false,
                     status: 'Duplicate',
@@ -272,13 +275,24 @@ export async function generateSignificantEvents({
                   { signal, requestTimeout: '10s' }
                 );
 
+                validatedQueries.push({
+                  type: derivedType,
+                  esql: rewritten,
+                  title: query.title,
+                  description: query.description,
+                  category: query.category,
+                  severity_score: query.severity_score,
+                  evidence: query.evidence,
+                  replaces: query.replaces,
+                  features: queryFeatures,
+                });
+
                 const allHints = [...warnings, ...hints];
                 return {
                   query: {
                     ...query,
                     type: derivedType,
                     esql: rewritten,
-                    feature_ids: validFeatureIds,
                   },
                   valid: true,
                   status: 'Added',
@@ -313,27 +327,10 @@ export async function generateSignificantEvents({
     })
   );
 
-  const queries: ParsedToolQuery[] = response.input.flatMap((message) => {
-    if (message.role === MessageRole.Tool && message.name === 'add_queries') {
-      const toolQueries = message.response?.queries;
-      if (!Array.isArray(toolQueries)) return [];
-      return toolQueries.flatMap(({ valid, query }) => {
-        if (!valid || !query?.esql) return [];
-        const type: QueryType =
-          query.type === QUERY_TYPE_MATCH || query.type === QUERY_TYPE_STATS
-            ? query.type
-            : deriveQueryType(query.esql);
-        return [{ ...query, type }];
-      });
-    }
-
-    return [];
-  });
-
-  logger.debug(`Generated ${queries.length} significant event queries`);
+  logger.debug(`Generated ${validatedQueries.length} significant event queries`);
 
   return {
-    queries,
+    queries: validatedQueries,
     tokensUsed: sumTokens({ added: response.tokens }),
     toolUsage,
   };

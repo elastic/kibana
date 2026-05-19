@@ -322,6 +322,7 @@ export function KnowledgeIndicatorsTable() {
           knowledgeIndicator={selectedKnowledgeIndicator}
           occurrencesByQueryId={occurrencesByQueryId}
           onClose={closeFlyout}
+          knowledgeIndicators={knowledgeIndicators}
         />
       ) : null}
       {knowledgeIndicatorsToDelete.length > 0 ? (
