@@ -59,7 +59,7 @@ export class NavigationPublicPlugin
   private readonly solutionNavDefinitions = new Map<SolutionId, AddSolutionNavigationArg>();
   private chrome?: InternalChromeStart;
   private activeSolutionId: SolutionId | null = null;
-  private activeSpaceId: string | null = null;
+  private activeSpaceId = 'default';
   private isSolutionNavEnabled = false;
 
   constructor(private initializerContext: PluginInitializerContext) {}
@@ -108,7 +108,7 @@ export class NavigationPublicPlugin
         activeSpace,
       });
 
-      this.activeSpaceId = activeSpace?.id ?? null;
+      this.activeSpaceId = activeSpace?.id ?? 'default';
 
       if (!this.isSolutionNavEnabled) return;
 
@@ -121,7 +121,7 @@ export class NavigationPublicPlugin
         });
       }
 
-      if (security && this.activeSpaceId && getIsProjectNav(activeSpace?.solution)) {
+      if (security && !isServerless && getIsProjectNav(activeSpace?.solution)) {
         security.navControlService.addUserMenuLinks([
           {
             iconType: 'controls',
@@ -273,9 +273,6 @@ export class NavigationPublicPlugin
   }
 
   private openCustomizeNavigationModal(core: CoreStart, chrome: InternalChromeStart) {
-    const spaceId = this.activeSpaceId;
-    if (!spaceId) return;
-
     const openModal = async () => {
       const { CustomizeNavigationModal } = await import('@kbn/navigation-customization-components');
 
@@ -354,7 +351,7 @@ export class NavigationPublicPlugin
   }
 
   private getStorageKey(): string | null {
-    if (!this.activeSpaceId || !this.activeSolutionId) return null;
+    if (!this.activeSolutionId) return null;
     return `${this.activeSpaceId}::${this.activeSolutionId}`;
   }
 

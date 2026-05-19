@@ -28,7 +28,6 @@ interface Props {
 
 export const DraggableItem = ({ item, index, toggleItemVisibility }: Props) => (
   <EuiDraggable
-    key={item.id}
     index={index}
     draggableId={item.id}
     customDragHandle
