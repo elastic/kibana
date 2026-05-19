@@ -163,6 +163,7 @@ export class IngestPipelinesPage {
 
   async closePipelineDetailsFlyout() {
     await this.flyoutCloseButton.click();
+    await this.detailsFlyout.waitFor({ state: 'hidden' });
   }
 
   async getDetailsFlyoutTitle() {
