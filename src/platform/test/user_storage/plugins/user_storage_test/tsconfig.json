@@ -5,13 +5,16 @@
   },
   "include": [
     "server/**/*.ts",
-    "../../../../../../../../typings/**/*",
+    "public/**/*.ts",
+    "public/**/*.tsx",
+    "../../../../../../typings/**/*",
   ],
   "exclude": [
     "target/**/*",
   ],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/core-user-storage-browser",
     "@kbn/zod",
   ]
 }

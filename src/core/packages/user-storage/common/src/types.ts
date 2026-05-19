@@ -20,6 +20,20 @@ export interface UserStorageDefinition<T = unknown> {
   defaultValue: T;
   /** Whether this key is per-space or global. */
   scope: UserStorageScope;
+  /**
+   * When `true`, the effective value for this key is resolved server-side at
+   * first-paint time and embedded in the page HTML so the browser cache is
+   * pre-populated before any JavaScript runs.
+   *
+   * Keys without `serverInject: true` are loaded lazily: the browser cache
+   * starts empty for that key and the first `get(key)` / `get$(key)` call
+   * triggers a per-key HTTP fetch to hydrate the cache.
+   *
+   * Prefer `serverInject: true` only for keys whose values are needed on the
+   * critical rendering path. Large or rarely-read payloads should remain lazy
+   * to avoid bloating the initial HTML payload.
+   */
+  serverInject?: boolean;
 }
 
 /** A record of key → definition, passed to `register()`. */
@@ -29,8 +43,12 @@ export type UserStorageRegistrations = Record<string, UserStorageDefinition>;
 export interface IUserStorageClient {
   /** Resolve a single key: returns the user override or the registered default. */
   get<T = unknown>(key: string): Promise<T>;
-  /** Resolve all registered keys (user overrides merged with defaults). */
-  getAll(): Promise<Record<string, unknown>>;
+  /**
+   * Resolve all keys whose definition has `serverInject: true`, merging user
+   * overrides with registered defaults. Used exclusively by the rendering
+   * service to embed values in the initial HTML payload.
+   */
+  getForInjection(): Promise<Record<string, unknown>>;
   /** Validate and persist a value for the current user. */
   set<T = unknown>(key: string, value: T): Promise<void>;
   /** Remove the user override so the key falls back to its default. */

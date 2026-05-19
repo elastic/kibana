@@ -9,6 +9,9 @@
 
 import { INTERNAL_HEADERS } from '../fixtures';
 
+// Mirrors the `register()` call in
+// `src/platform/test/user_storage/plugins/user_storage_test/server/plugin.ts`.
+// Keep both in sync when changing the test fixture.
 export const ALL_KEYS = [
   'test:string_key',
   'test:number_key',
