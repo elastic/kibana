@@ -72,9 +72,9 @@ const timeUnitSchema = schema.oneOf([
 const timeSizeSchema = schema.number();
 const groupBySchema = schema.arrayOf(schema.string());
 
-const countRuleParamsSchema = schema.object(
+export const logThresholdParamsSchema = schema.object(
   {
-    criteria: countCriteriaSchema,
+    criteria: schema.oneOf([countCriteriaSchema, ratioCriteriaSchema]),
     // NOTE: "count" would be better named as "threshold", but this would require a
     // migration of encrypted saved objects, so we'll keep "count" until it's problematic.
     count: ThresholdSchema,
@@ -83,26 +83,8 @@ const countRuleParamsSchema = schema.object(
     logView: persistedLogViewReferenceSchema, // Alerts are only compatible with persisted Log Views
     groupBy: schema.maybe(groupBySchema),
   },
-  { unknowns: 'ignore' }
-);
-
-const ratioRuleParamsSchema = schema.object(
   {
-    criteria: ratioCriteriaSchema,
-    // NOTE: "count" would be better named as "threshold", but this would require a
-    // migration of encrypted saved objects, so we'll keep "count" until it's problematic.
-    count: ThresholdSchema,
-    timeUnit: timeUnitSchema,
-    timeSize: timeSizeSchema,
-    logView: persistedLogViewReferenceSchema, // Alerts are only compatible with persisted Log Views
-    groupBy: schema.maybe(groupBySchema),
-  },
-  { unknowns: 'ignore' }
-);
-
-export const logThresholdParamsSchema = schema.oneOf(
-  [countRuleParamsSchema, ratioRuleParamsSchema],
-  {
+    unknowns: 'ignore',
     meta: {
       title: 'Log Threshold Rule Params',
       description:
