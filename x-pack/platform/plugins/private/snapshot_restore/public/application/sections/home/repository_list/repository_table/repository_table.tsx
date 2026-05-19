@@ -236,7 +236,7 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
                               'xpack.snapshotRestore.repositoryList.table.actionSetDefaultUnavailableTooltip',
                               {
                                 defaultMessage:
-                                  'Default repository feature is currently unavailable.',
+                                  'The default repository feature is currently unavailable.',
                               }
                             )
                           : isReadOnly
