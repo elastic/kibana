@@ -160,6 +160,7 @@ export function extractModifiedFields(processor: StreamlangProcessorDefinition):
 
     case 'user_agent':
       fields.push(processor.to ?? 'user_agent');
+      break;
     case 'registered_domain':
       fields.push(`${processor.prefix}.domain`);
       fields.push(`${processor.prefix}.registered_domain`);
@@ -510,6 +511,7 @@ export function trackFieldTypesAndValidate(flattenedSteps: StreamlangProcessorDe
         if (step.from) {
           fieldsUsed.push(step.from);
         }
+        break;
       case 'registered_domain':
         fieldsUsed.push(step.expression);
         break;
