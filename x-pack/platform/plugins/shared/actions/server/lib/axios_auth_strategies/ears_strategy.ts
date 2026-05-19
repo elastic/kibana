@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AxiosInstance } from 'axios';
+import type { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 import { normalizeAuthorizationHeaderValue, type GetTokenOpts } from '@kbn/connector-specs';
 import type { AxiosErrorWithRetry } from '../axios_utils';
 import { getEarsAccessToken } from '../ears';
@@ -15,8 +15,17 @@ interface EarsSecrets {
   provider?: string;
 }
 
+// Slack signals auth failures on HTTP 200 with ok:false rather than HTTP 401.
+const SLACK_AUTH_ERRORS = ['token_expired', 'invalid_auth', 'token_revoked', 'not_authed'] as const;
+type SlackAuthError = (typeof SLACK_AUTH_ERRORS)[number];
+
 export class EarsStrategy implements AxiosAuthStrategy {
-  installResponseInterceptor(axiosInstance: AxiosInstance, deps: AuthStrategyDeps): void {
+  private async refreshAndRetry(
+    axiosInstance: AxiosInstance,
+    deps: AuthStrategyDeps,
+    config: InternalAxiosRequestConfig & { _retry?: boolean },
+    onFailure: (message: string) => never
+  ): Promise<AxiosResponse> {
     const {
       connectorId,
       secrets,
@@ -27,12 +36,63 @@ export class EarsStrategy implements AxiosAuthStrategy {
       profileUid,
     } = deps;
 
+    config._retry = true;
+
+    const { provider } = secrets as EarsSecrets;
+    if (!provider) {
+      return onFailure('Authentication failed: Missing required EARS provider.');
+    }
+
+    const newAccessToken = await getEarsAccessToken({
+      connectorId,
+      logger,
+      configurationUtilities,
+      provider,
+      connectorTokenClient: connectorTokenClient!,
+      authMode,
+      profileUid,
+      forceRefresh: true,
+    });
+
+    if (!newAccessToken) {
+      return onFailure(
+        'Authentication failed: Unable to refresh access token via EARS. Please re-authorize the connector.'
+      );
+    }
+
+    const normalizedAccessToken = normalizeAuthorizationHeaderValue(newAccessToken);
+    config.headers.Authorization = normalizedAccessToken;
+    axiosInstance.defaults.headers.common.Authorization = normalizedAccessToken;
+    return axiosInstance.request(config);
+  }
+
+  installResponseInterceptor(axiosInstance: AxiosInstance, deps: AuthStrategyDeps): void {
+    const { secrets, connectorTokenClient } = deps;
+
     if (!connectorTokenClient) {
       throw new Error('ConnectorTokenClient is required for EARS authorization code flow');
     }
 
     axiosInstance.interceptors.response.use(
-      (response) => response,
+      async (response) => {
+        // Only Slack uses HTTP 200 + ok:false to signal auth failures.
+        if ((secrets as EarsSecrets).provider !== 'slack') return response;
+        const body = response.data as { ok?: boolean; error?: string } | undefined;
+        if (body?.ok !== false) return response;
+        if (!SLACK_AUTH_ERRORS.includes(body.error as SlackAuthError)) return response;
+        // If we already retried after a refresh, let the response through so the
+        // spec handler can throw its formatted error rather than looping forever.
+        if ((response.config as { _retry?: boolean })._retry) return response;
+
+        return this.refreshAndRetry(
+          axiosInstance,
+          deps,
+          response.config as InternalAxiosRequestConfig & { _retry?: boolean },
+          (msg) => {
+            throw new Error(msg);
+          }
+        );
+      },
       async (error: AxiosErrorWithRetry) => {
         if (error.response?.status !== 401) {
           return Promise.reject(error);
@@ -41,42 +101,15 @@ export class EarsStrategy implements AxiosAuthStrategy {
         if (error.config._retry) {
           return Promise.reject(error);
         }
-        error.config._retry = true;
 
-        logger.debug(
-          `Attempting EARS token refresh for connectorId ${connectorId} after 401 error`
-        );
-
-        const { provider } = secrets as EarsSecrets;
-        if (!provider) {
-          error.message = 'Authentication failed: Missing required EARS provider.';
-          return Promise.reject(error);
+        try {
+          return await this.refreshAndRetry(axiosInstance, deps, error.config, (msg) => {
+            error.message = msg;
+            throw error;
+          });
+        } catch (e) {
+          return Promise.reject(e);
         }
-
-        const newAccessToken = await getEarsAccessToken({
-          connectorId,
-          logger,
-          configurationUtilities,
-          provider,
-          connectorTokenClient,
-          authMode,
-          profileUid,
-          forceRefresh: true,
-        });
-
-        if (!newAccessToken) {
-          error.message =
-            'Authentication failed: Unable to refresh access token via EARS. Please re-authorize the connector.';
-          return Promise.reject(error);
-        }
-
-        logger.debug(
-          `EARS token refreshed successfully for connectorId ${connectorId}. Retrying request.`
-        );
-        const normalizedAccessToken = normalizeAuthorizationHeaderValue(newAccessToken);
-        error.config.headers.Authorization = normalizedAccessToken;
-        axiosInstance.defaults.headers.common.Authorization = normalizedAccessToken;
-        return axiosInstance.request(error.config);
       }
     );
   }

@@ -9,7 +9,7 @@ jest.mock('../ears/get_ears_access_token');
 jest.mock('../ears/url');
 
 import type { AxiosInstance } from 'axios';
-import { authTypeSpecs } from '@kbn/connector-specs';
+import { authTypeSpecs, ConnectorAuthorizationError } from '@kbn/connector-specs';
 import type { AuthContext, EarsGetTokenOpts, GetTokenOpts } from '@kbn/connector-specs';
 import { loggerMock } from '@kbn/logging-mocks';
 import { actionsConfigMock } from '../../actions_config.mock';
@@ -42,6 +42,12 @@ const createMockAxiosInstance = () => {
     defaults: { headers: { common: {} as Record<string, string> } },
   } as unknown as AxiosInstance;
   return { instance, mockRequest };
+};
+
+const getOnFulfilled = (instance: AxiosInstance) => {
+  const useMock = instance.interceptors.response.use as jest.Mock;
+  expect(useMock).toHaveBeenCalledTimes(1);
+  return useMock.mock.calls[0][0] as (response: unknown) => Promise<unknown>;
 };
 
 const getOnRejected = (instance: AxiosInstance) => {
@@ -151,6 +157,166 @@ describe('EarsStrategy', () => {
       expect((error as { message: string }).message).toContain(
         'Unable to refresh access token via EARS'
       );
+    });
+
+    describe('Slack 200 + ok:false auth error', () => {
+      const slackDeps = { ...baseDeps, secrets: { provider: 'slack' } };
+
+      it('token_expired triggers refresh and retries', async () => {
+        const { instance, mockRequest } = createMockAxiosInstance();
+        strategy.installResponseInterceptor(instance, slackDeps);
+        const onFulfilled = getOnFulfilled(instance);
+
+        mockGetEarsAccessToken.mockResolvedValue('Bearer newtoken');
+        mockRequest.mockResolvedValue({ status: 200, data: { ok: true } });
+
+        const response = {
+          config: { _retry: false, headers: {} as Record<string, string> },
+          data: { ok: false, error: 'token_expired' },
+        };
+        await onFulfilled(response);
+
+        expect(mockGetEarsAccessToken).toHaveBeenCalledWith(
+          expect.objectContaining({ forceRefresh: true, connectorId: 'connector-1' })
+        );
+        expect(response.config.headers.Authorization).toBe('Bearer newtoken');
+        expect(mockRequest).toHaveBeenCalledWith(response.config);
+      });
+
+      it('invalid_auth triggers refresh and retries', async () => {
+        const { instance, mockRequest } = createMockAxiosInstance();
+        strategy.installResponseInterceptor(instance, slackDeps);
+        const onFulfilled = getOnFulfilled(instance);
+
+        mockGetEarsAccessToken.mockResolvedValue('Bearer newtoken');
+        mockRequest.mockResolvedValue({ status: 200, data: { ok: true } });
+
+        const response = {
+          config: { _retry: false, headers: {} as Record<string, string> },
+          data: { ok: false, error: 'invalid_auth' },
+        };
+        await onFulfilled(response);
+
+        expect(mockGetEarsAccessToken).toHaveBeenCalledWith(
+          expect.objectContaining({ forceRefresh: true })
+        );
+        expect(mockRequest).toHaveBeenCalledWith(response.config);
+      });
+
+      it('not_authed triggers refresh and retries', async () => {
+        const { instance, mockRequest } = createMockAxiosInstance();
+        strategy.installResponseInterceptor(instance, slackDeps);
+        const onFulfilled = getOnFulfilled(instance);
+
+        mockGetEarsAccessToken.mockResolvedValue('Bearer newtoken');
+        mockRequest.mockResolvedValue({ status: 200, data: { ok: true } });
+
+        const response = {
+          config: { _retry: false, headers: {} as Record<string, string> },
+          data: { ok: false, error: 'not_authed' },
+        };
+        await onFulfilled(response);
+
+        expect(mockGetEarsAccessToken).toHaveBeenCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledWith(response.config);
+      });
+
+      it('token_revoked attempts refresh; ConnectorAuthorizationError propagates when refresh fails', async () => {
+        const { instance } = createMockAxiosInstance();
+        strategy.installResponseInterceptor(instance, slackDeps);
+        const onFulfilled = getOnFulfilled(instance);
+
+        const authError = new ConnectorAuthorizationError({
+          authMethod: 'ears',
+          reason: 'token_revoked',
+          message: 'The token was revoked',
+        });
+        mockGetEarsAccessToken.mockRejectedValue(authError);
+
+        const response = {
+          config: { _retry: false, headers: {} as Record<string, string> },
+          data: { ok: false, error: 'token_revoked' },
+        };
+        await expect(onFulfilled(response)).rejects.toBe(authError);
+        expect(mockGetEarsAccessToken).toHaveBeenCalledWith(
+          expect.objectContaining({ forceRefresh: true })
+        );
+      });
+
+      it('non-auth Slack error passes through unchanged', async () => {
+        const { instance } = createMockAxiosInstance();
+        strategy.installResponseInterceptor(instance, slackDeps);
+        const onFulfilled = getOnFulfilled(instance);
+
+        const response = {
+          config: { _retry: false, headers: {} },
+          data: { ok: false, error: 'channel_not_found' },
+        };
+        const result = await onFulfilled(response);
+        expect(result).toBe(response);
+        expect(mockGetEarsAccessToken).not.toHaveBeenCalled();
+      });
+
+      it('ok:true response passes through unchanged', async () => {
+        const { instance } = createMockAxiosInstance();
+        strategy.installResponseInterceptor(instance, slackDeps);
+        const onFulfilled = getOnFulfilled(instance);
+
+        const response = {
+          config: { _retry: false, headers: {} },
+          data: { ok: true, messages: [] },
+        };
+        const result = await onFulfilled(response);
+        expect(result).toBe(response);
+        expect(mockGetEarsAccessToken).not.toHaveBeenCalled();
+      });
+
+      it('non-Slack provider passes through unchanged', async () => {
+        const { instance } = createMockAxiosInstance();
+        strategy.installResponseInterceptor(instance, {
+          ...baseDeps,
+          secrets: { provider: 'google' },
+        });
+        const onFulfilled = getOnFulfilled(instance);
+
+        const response = {
+          config: { _retry: false, headers: {} },
+          data: { ok: false, error: 'token_expired' },
+        };
+        const result = await onFulfilled(response);
+        expect(result).toBe(response);
+        expect(mockGetEarsAccessToken).not.toHaveBeenCalled();
+      });
+
+      it('does not refresh again when _retry is already set', async () => {
+        const { instance } = createMockAxiosInstance();
+        strategy.installResponseInterceptor(instance, slackDeps);
+        const onFulfilled = getOnFulfilled(instance);
+
+        const response = {
+          config: { _retry: true, headers: {} },
+          data: { ok: false, error: 'token_expired' },
+        };
+        const result = await onFulfilled(response);
+        expect(result).toBe(response);
+        expect(mockGetEarsAccessToken).not.toHaveBeenCalled();
+      });
+
+      it('rejects with re-auth message when token refresh returns null', async () => {
+        const { instance } = createMockAxiosInstance();
+        strategy.installResponseInterceptor(instance, slackDeps);
+        const onFulfilled = getOnFulfilled(instance);
+
+        mockGetEarsAccessToken.mockResolvedValue(null);
+
+        const response = {
+          config: { _retry: false, headers: {} },
+          data: { ok: false, error: 'token_expired' },
+        };
+        await expect(onFulfilled(response)).rejects.toThrow(
+          'Unable to refresh access token via EARS'
+        );
+      });
     });
 
     it('calls getEarsAccessToken with the provider from secrets', async () => {
