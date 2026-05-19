@@ -19,10 +19,7 @@ Investigate a flaky Scout, FTR, or Jest test failure and determine what should b
 
 ### Buildkite access
 
-Use the `bk` CLI for all Buildkite interactions. Confirm the CLI is authenticated before starting: `bk user --me` should print your Buildkite user. If it fails, run `bk auth login` (OAuth) or `bk configure` (token) — both store credentials in `$HOME/.config/bk.yaml`.
-
-- `read_builds`: browse pipelines, builds, and job logs.
-- `read_artifacts`: list and download build artifacts (Scout HTML failure reports, screenshots, FTR failure-debug HTML, etc.). See "Inspect the failure artifacts" below for what to pull and how to read it.
+Run `bk user --me` to confirm `bk` is authenticated.
 
 ### GitHub access
 
