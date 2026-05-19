@@ -15,6 +15,7 @@ interface MultiSuperSelect<T> {
   inputDisplay: React.JSX.Element | string;
   options: Array<EuiSelectableOption<T>>;
   onOptionsChange?: (options: Array<EuiSelectableOption<T>>) => void;
+  'aria-label'?: string;
 }
 
 export const MultiSuperSelect = <T = string,>({
@@ -22,6 +23,7 @@ export const MultiSuperSelect = <T = string,>({
   inputDisplay,
   options,
   onOptionsChange,
+  'aria-label': ariaLabel,
 }: MultiSuperSelect<T>) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -33,7 +35,7 @@ export const MultiSuperSelect = <T = string,>({
 
   const popoverButton = (
     <EuiFormControlLayout isDropdown prepend={prepend} compressed fullWidth>
-      <EuiButtonEmpty onClick={onPopoverButtonClick} css={styles.control}>
+      <EuiButtonEmpty onClick={onPopoverButtonClick} css={styles.control} aria-label={ariaLabel}>
         {inputDisplay}
       </EuiButtonEmpty>
     </EuiFormControlLayout>

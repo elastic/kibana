@@ -48,6 +48,15 @@ export function useWorkflowsMonacoTheme() {
         // Transparent backgrounds, they are set by the styles of the editor container behind.
         'editor.background': '#00000000',
         'editor.selectionBackground': chroma(transparentize(euiTheme.colors.primary, 0.1)).hex(),
+        'editor.wordHighlightTextBackground': chroma(
+          transparentize(euiTheme.colors.primary, 0.1)
+        ).hex(),
+        'editor.wordHighlightBackground': chroma(
+          transparentize(euiTheme.colors.primary, 0.1)
+        ).hex(),
+        'editor.wordHighlightStrongBackground': chroma(
+          transparentize(euiTheme.colors.primary, 0.1)
+        ).hex(),
         'editorGutter.background': '#00000000',
         'minimap.background': '#00000000',
         'diffEditor.unchangedRegionBackground': '#00000000',

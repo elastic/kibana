@@ -32,6 +32,7 @@ const AnomaliesQueryTabBodyComponent: React.FC<AnomaliesQueryTabBodyProps> = ({
   hostName,
   userName,
   identityFields,
+  entityRecord,
 }) => {
   const { jobs } = useInstalledSecurityJobs();
   const [anomalyScore] = useUiSetting$<number>(DEFAULT_ANOMALY_SCORE);
@@ -73,6 +74,7 @@ const AnomaliesQueryTabBodyComponent: React.FC<AnomaliesQueryTabBodyProps> = ({
         ip={ip}
         hostName={hostName}
         userName={userName}
+        entityRecord={entityRecord}
         identityFields={identityFields}
       />
     </>

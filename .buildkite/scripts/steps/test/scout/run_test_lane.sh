@@ -33,7 +33,7 @@ check_required_env_vars() {
 # Download the test lane loads artifact produced by uploadAllScoutTestLaneSteps()
 download_test_lane_loads() {
   echo "--- Downloading test lane loads file"
-  download_artifact "$SCOUT_TEST_LANE_LOADS_PATH" .
+  download_tmp_artifact "$SCOUT_TEST_LANE_LOADS_PATH" . "$BUILDKITE_BUILD_ID"
 }
 
 # Read the comma-separated list of previously passed load indices from Buildkite metadata
@@ -140,6 +140,7 @@ run_scout_tests() {
     "SCOUT_TARGET_LOCATION=$SCOUT_TEST_TARGET_LOCATION"
     "SCOUT_TARGET_ARCH=$SCOUT_TEST_TARGET_ARCH"
     "SCOUT_TARGET_DOMAIN=$SCOUT_TEST_TARGET_DOMAIN"
+    "NODE_OPTIONS=${NODE_OPTIONS:-} --require=@kbn/babel-register/install"
   )
 
   local start_time
