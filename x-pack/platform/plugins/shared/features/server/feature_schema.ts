@@ -191,7 +191,6 @@ const kibanaIndependentSubFeaturePrivilegeSchema = schema.object({
 const kibanaMutuallyExclusiveSubFeaturePrivilegeSchema =
   kibanaIndependentSubFeaturePrivilegeSchema.extends({
     minimumLicense: schema.never(),
-    excludeFromBasePrivileges: schema.maybe(schema.boolean()),
   });
 
 const kibanaSubFeatureSchema = schema.object({
