@@ -11,9 +11,9 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import type { Alert } from '@kbn/alerting-types';
 import { PaginatedDocumentFlyout } from './paginated_document_flyout';
 import {
-  __resetAlertsTablePaginationStoreForTests,
-  alertsTablePaginationStore,
-} from '../../detections/components/alerts_table/alerts_table_pagination_store';
+  __resetFlyoutPaginationStoreForTests,
+  flyoutPaginationStore,
+} from '../../common/utils/flyout_pagination/store';
 
 const mockDocumentFlyout = jest.fn(({ hit }: { hit: DataTableRecord }) => (
   <div data-test-subj="mock-document-flyout" data-hit-id={hit.id} />
@@ -23,27 +23,32 @@ jest.mock('./main', () => ({
   DocumentFlyout: (props: { hit: DataTableRecord }) => mockDocumentFlyout(props),
 }));
 
+const INSTANCE_ID = 'test-instance-uuid';
 const alertA = { _id: 'alert-a', _index: 'idx', 'kibana.alert.uuid': ['a'] } as unknown as Alert;
 const alertB = { _id: 'alert-b', _index: 'idx', 'kibana.alert.uuid': ['b'] } as unknown as Alert;
 
 describe('<PaginatedDocumentFlyout />', () => {
   beforeEach(() => {
-    __resetAlertsTablePaginationStoreForTests();
+    __resetFlyoutPaginationStoreForTests();
     mockDocumentFlyout.mockClear();
   });
 
   it('renders nothing when no alert is selected', () => {
-    const { queryByTestId } = render(<PaginatedDocumentFlyout scopeId="alerts-page" />);
+    const { queryByTestId } = render(
+      <PaginatedDocumentFlyout scopeId="alerts-page" paginationInstanceId={INSTANCE_ID} />
+    );
 
     expect(queryByTestId('mock-document-flyout')).not.toBeInTheDocument();
   });
 
   it('renders DocumentFlyout with the resolved alert hit', () => {
     act(() => {
-      alertsTablePaginationStore.setState({ flyoutAlert: alertA });
+      flyoutPaginationStore.setSlice(INSTANCE_ID, { flyoutAlert: alertA });
     });
 
-    const { getByTestId } = render(<PaginatedDocumentFlyout scopeId="alerts-page" />);
+    const { getByTestId } = render(
+      <PaginatedDocumentFlyout scopeId="alerts-page" paginationInstanceId={INSTANCE_ID} />
+    );
 
     // `buildDataTableRecord` keys hits by `_index::_id::routing` (see
     // `getDocId`), not by raw `_id`.
@@ -53,13 +58,15 @@ describe('<PaginatedDocumentFlyout />', () => {
 
   it('swaps the hit when the alert id changes', () => {
     act(() => {
-      alertsTablePaginationStore.setState({ flyoutAlert: alertA });
+      flyoutPaginationStore.setSlice(INSTANCE_ID, { flyoutAlert: alertA });
     });
-    const { getByTestId } = render(<PaginatedDocumentFlyout scopeId="alerts-page" />);
+    const { getByTestId } = render(
+      <PaginatedDocumentFlyout scopeId="alerts-page" paginationInstanceId={INSTANCE_ID} />
+    );
     expect(getByTestId('mock-document-flyout')).toHaveAttribute('data-hit-id', 'idx::alert-a::');
 
     act(() => {
-      alertsTablePaginationStore.setState({ flyoutAlert: alertB });
+      flyoutPaginationStore.setSlice(INSTANCE_ID, { flyoutAlert: alertB });
     });
 
     expect(getByTestId('mock-document-flyout')).toHaveAttribute('data-hit-id', 'idx::alert-b::');
@@ -67,9 +74,11 @@ describe('<PaginatedDocumentFlyout />', () => {
 
   it('keeps the previous hit while the store is in the loading state with no resolved alert', () => {
     act(() => {
-      alertsTablePaginationStore.setState({ flyoutAlert: alertA });
+      flyoutPaginationStore.setSlice(INSTANCE_ID, { flyoutAlert: alertA });
     });
-    const { getByTestId } = render(<PaginatedDocumentFlyout scopeId="alerts-page" />);
+    const { getByTestId } = render(
+      <PaginatedDocumentFlyout scopeId="alerts-page" paginationInstanceId={INSTANCE_ID} />
+    );
     expect(getByTestId('mock-document-flyout')).toHaveAttribute('data-hit-id', 'idx::alert-a::');
 
     // Cross-page click: index advances, loading flips on, but the parallel
@@ -77,12 +86,24 @@ describe('<PaginatedDocumentFlyout />', () => {
     // previously displayed hit so V2's loading branch can render the prior
     // alert's header.
     act(() => {
-      alertsTablePaginationStore.setState({
+      flyoutPaginationStore.setSlice(INSTANCE_ID, {
         flyoutAlertIndex: 50,
         isFlyoutAlertLoading: true,
       });
     });
 
     expect(getByTestId('mock-document-flyout')).toHaveAttribute('data-hit-id', 'idx::alert-a::');
+  });
+
+  it('renders nothing when a different instance id is used', () => {
+    act(() => {
+      flyoutPaginationStore.setSlice('other-instance', { flyoutAlert: alertA });
+    });
+
+    // INSTANCE_ID has no slice, so the flyout should render nothing.
+    const { queryByTestId } = render(
+      <PaginatedDocumentFlyout scopeId="alerts-page" paginationInstanceId={INSTANCE_ID} />
+    );
+    expect(queryByTestId('mock-document-flyout')).not.toBeInTheDocument();
   });
 });

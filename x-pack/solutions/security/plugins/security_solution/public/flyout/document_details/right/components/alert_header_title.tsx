@@ -15,7 +15,7 @@ import {
   flyoutHeaderBlockStyles,
 } from '../../../../flyout_v2/shared/components/flyout_header_block';
 import { useRefetchByScope } from '../../../../flyout_v2/document/main/hooks/use_refetch_by_scope';
-import { useAlertsContext } from '../../../../detections/components/alerts_table/alerts_context';
+import { useFlyoutPagination } from '../../../../common/utils/flyout_pagination/use_flyout_pagination';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_panel';
@@ -44,19 +44,23 @@ const PAGINATION_ARIA_LABEL = i18n.translate(
  * Alert details flyout right section header
  */
 export const AlertHeaderTitle = memo(() => {
-  const { scopeId, isRulePreview, refetchFlyoutData, searchHit } = useDocumentDetailsContext();
+  const { scopeId, isRulePreview, refetchFlyoutData, searchHit, paginationInstanceId } =
+    useDocumentDetailsContext();
   const canReadRules = useUserPrivileges().rulesPrivileges.rules.read;
   const openNotesTab = useNavigateToLeftPanel({ tab: LeftPanelNotesTab });
   const hit = useMemo(() => buildDataTableRecord(searchHit as EsHitRecord), [searchHit]);
 
-  const { flyoutAlertIndex, totalAlertCount, openAlertFlyout } = useAlertsContext();
-  // The flyout pagination spans the entire query result, so `pageCount` is
-  // the total alert count and `activePage` is the absolute alert index. We
-  // hide it when the flyout is opened outside an alerts table (for instance
-  // from rule preview, where `flyoutAlertIndex` is never set) or when there
-  // is only a single alert to navigate.
+  const { flyoutAlertIndex, totalAlertCount, openAlertFlyout } =
+    useFlyoutPagination(paginationInstanceId);
+  // Show pagination only when this flyout was opened from a paginated source
+  // (paginationInstanceId is set), there is more than one document to
+  // navigate, and we are not in rule preview mode.
   const showPagination =
-    totalAlertCount > 1 && flyoutAlertIndex != null && flyoutAlertIndex >= 0 && !isRulePreview;
+    paginationInstanceId != null &&
+    totalAlertCount > 1 &&
+    flyoutAlertIndex != null &&
+    flyoutAlertIndex >= 0 &&
+    !isRulePreview;
 
   const { refetch } = useRefetchByScope({ scopeId });
 

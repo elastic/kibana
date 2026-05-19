@@ -31,12 +31,12 @@ import {
   NOTES_TITLE_TEST_ID,
 } from '../../../../flyout_v2/shared/components/test_ids';
 import { useRefetchByScope } from '../../../../flyout_v2/document/main/hooks/use_refetch_by_scope';
-import { useAlertsContext } from '../../../../detections/components/alerts_table/alerts_context';
+import { useFlyoutPagination } from '../../../../common/utils/flyout_pagination/use_flyout_pagination';
 import { FLYOUT_ALERT_PAGINATION_TEST_ID } from './test_ids';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../flyout_v2/document/main/hooks/use_refetch_by_scope');
-jest.mock('../../../../detections/components/alerts_table/alerts_context');
+jest.mock('../../../../common/utils/flyout_pagination/use_flyout_pagination');
 jest.mock('../../../../flyout_v2/document/main/components/status', () => ({
   Status: ({ onAlertUpdated }: { onAlertUpdated?: () => void }) => (
     <>
@@ -57,6 +57,8 @@ const createSearchHit = (fields: Record<string, unknown[]>) => ({
     ...fields,
   },
 });
+
+const TEST_PAGINATION_INSTANCE_ID = 'test-instance-uuid';
 
 const mockContextValue = {
   dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
@@ -83,19 +85,14 @@ describe('<AlertHeaderTitle />', () => {
   const refetchMock = jest.fn();
   const openAlertFlyoutMock = jest.fn();
 
-  const defaultAlertsContextValue = {
-    alertsTableRef: { current: null },
+  const defaultPaginationValue = {
     flyoutAlertIndex: null,
-    setFlyoutAlertIndex: jest.fn(),
     pageSize: 0,
-    setPageSize: jest.fn(),
     totalAlertCount: 0,
-    setTotalAlertCount: jest.fn(),
     isFlyoutAlertLoading: false,
-    setIsFlyoutAlertLoading: jest.fn(),
     flyoutAlert: null,
-    setFlyoutAlert: jest.fn(),
-    setOpenAlertFlyoutImpl: jest.fn(),
+    flyoutDocumentRef: null,
+    openAlertFlyoutImpl: null,
     openAlertFlyout: openAlertFlyoutMock,
   };
 
@@ -104,7 +101,7 @@ describe('<AlertHeaderTitle />', () => {
     jest.mocked(useDateFormat).mockImplementation(() => dateFormat);
     jest.mocked(useTimeZone).mockImplementation(() => 'UTC');
     jest.mocked(useRefetchByScope).mockReturnValue({ refetch: refetchMock });
-    jest.mocked(useAlertsContext).mockReturnValue(defaultAlertsContextValue);
+    jest.mocked(useFlyoutPagination).mockReturnValue(defaultPaginationValue);
   });
 
   it('should render component', () => {
@@ -153,41 +150,66 @@ describe('<AlertHeaderTitle />', () => {
   });
 
   describe('alert pagination', () => {
-    it('does not render the pagination control when no alerts table is driving the flyout', () => {
+    it('does not render the pagination control when no paginationInstanceId is in context', () => {
+      // mockContextValue has no paginationInstanceId → pagination hidden
       const { queryByTestId } = renderHeader(mockContextValue);
       expect(queryByTestId(FLYOUT_ALERT_PAGINATION_TEST_ID)).not.toBeInTheDocument();
     });
 
     it('does not render the pagination control when only one alert is in the result set', () => {
-      jest.mocked(useAlertsContext).mockReturnValue({
-        ...defaultAlertsContextValue,
+      jest.mocked(useFlyoutPagination).mockReturnValue({
+        ...defaultPaginationValue,
         flyoutAlertIndex: 0,
         pageSize: 50,
         totalAlertCount: 1,
       });
-      const { queryByTestId } = renderHeader(mockContextValue);
+      const { queryByTestId } = renderHeader({
+        ...mockContextValue,
+        paginationInstanceId: TEST_PAGINATION_INSTANCE_ID,
+      } as unknown as DocumentDetailsContext);
       expect(queryByTestId(FLYOUT_ALERT_PAGINATION_TEST_ID)).not.toBeInTheDocument();
     });
 
     it('does not render the pagination control when the flyout is in rule preview mode', () => {
-      jest.mocked(useAlertsContext).mockReturnValue({
-        ...defaultAlertsContextValue,
+      jest.mocked(useFlyoutPagination).mockReturnValue({
+        ...defaultPaginationValue,
         flyoutAlertIndex: 1,
         pageSize: 50,
         totalAlertCount: 1432,
       });
-      const { queryByTestId } = renderHeader({ ...mockContextValue, isRulePreview: true });
+      const { queryByTestId } = renderHeader({
+        ...mockContextValue,
+        isRulePreview: true,
+        paginationInstanceId: TEST_PAGINATION_INSTANCE_ID,
+      } as unknown as DocumentDetailsContext);
+      expect(queryByTestId(FLYOUT_ALERT_PAGINATION_TEST_ID)).not.toBeInTheDocument();
+    });
+
+    it('does not render the pagination control when paginationInstanceId does not match a slice (scopeId mismatch equivalent)', () => {
+      // useFlyoutPagination returns absent slice (no flyoutAlertIndex) for unknown id
+      jest.mocked(useFlyoutPagination).mockReturnValue({
+        ...defaultPaginationValue,
+        flyoutAlertIndex: null,
+        totalAlertCount: 0,
+      });
+      const { queryByTestId } = renderHeader({
+        ...mockContextValue,
+        paginationInstanceId: 'some-other-instance',
+      } as unknown as DocumentDetailsContext);
       expect(queryByTestId(FLYOUT_ALERT_PAGINATION_TEST_ID)).not.toBeInTheDocument();
     });
 
     it('renders the pagination control with page count equal to the total alert count', () => {
-      jest.mocked(useAlertsContext).mockReturnValue({
-        ...defaultAlertsContextValue,
+      jest.mocked(useFlyoutPagination).mockReturnValue({
+        ...defaultPaginationValue,
         flyoutAlertIndex: 2,
         pageSize: 50,
         totalAlertCount: 1432,
       });
-      const { getByTestId } = renderHeader(mockContextValue);
+      const { getByTestId } = renderHeader({
+        ...mockContextValue,
+        paginationInstanceId: TEST_PAGINATION_INSTANCE_ID,
+      } as unknown as DocumentDetailsContext);
       const pagination = getByTestId(FLYOUT_ALERT_PAGINATION_TEST_ID);
       expect(pagination).toBeInTheDocument();
       // The compressed EuiPagination renders a "{active+1} of {total}" label.
@@ -195,27 +217,33 @@ describe('<AlertHeaderTitle />', () => {
     });
 
     it('uses the absolute alert index when computing the active page', () => {
-      jest.mocked(useAlertsContext).mockReturnValue({
-        ...defaultAlertsContextValue,
+      jest.mocked(useFlyoutPagination).mockReturnValue({
+        ...defaultPaginationValue,
         // 2nd alert of the 2nd page (page size 50) → absolute index 51.
         flyoutAlertIndex: 51,
         pageSize: 50,
         totalAlertCount: 1432,
       });
-      const { getByTestId } = renderHeader(mockContextValue);
+      const { getByTestId } = renderHeader({
+        ...mockContextValue,
+        paginationInstanceId: TEST_PAGINATION_INSTANCE_ID,
+      } as unknown as DocumentDetailsContext);
       const pagination = getByTestId(FLYOUT_ALERT_PAGINATION_TEST_ID);
       // activePage is absolute, so we expect "52 of 1432".
       expect(pagination).toHaveTextContent('52 of 1432');
     });
 
-    it('opens the next/prev alert via the AlertsContext when pagination is clicked', () => {
-      jest.mocked(useAlertsContext).mockReturnValue({
-        ...defaultAlertsContextValue,
+    it('opens the next/prev alert via the flyout pagination slice when pagination is clicked', () => {
+      jest.mocked(useFlyoutPagination).mockReturnValue({
+        ...defaultPaginationValue,
         flyoutAlertIndex: 49,
         pageSize: 50,
         totalAlertCount: 1432,
       });
-      const { getByTestId } = renderHeader(mockContextValue);
+      const { getByTestId } = renderHeader({
+        ...mockContextValue,
+        paginationInstanceId: TEST_PAGINATION_INSTANCE_ID,
+      } as unknown as DocumentDetailsContext);
       const pagination = getByTestId(FLYOUT_ALERT_PAGINATION_TEST_ID);
 
       // EuiPagination tags its prev/next chevrons with these test subjects.
@@ -237,13 +265,16 @@ describe('<AlertHeaderTitle />', () => {
     });
 
     it('renders the severity badge and the pagination control in the same EuiFlexGroup row', () => {
-      jest.mocked(useAlertsContext).mockReturnValue({
-        ...defaultAlertsContextValue,
+      jest.mocked(useFlyoutPagination).mockReturnValue({
+        ...defaultPaginationValue,
         flyoutAlertIndex: 2,
         pageSize: 50,
         totalAlertCount: 1432,
       });
-      const { getByTestId } = renderHeader(mockContextValue);
+      const { getByTestId } = renderHeader({
+        ...mockContextValue,
+        paginationInstanceId: TEST_PAGINATION_INSTANCE_ID,
+      } as unknown as DocumentDetailsContext);
 
       const severity = getByTestId(SEVERITY_VALUE_TEST_ID);
       const pagination = getByTestId(FLYOUT_ALERT_PAGINATION_TEST_ID);
