@@ -36,6 +36,7 @@ import { registerActions } from './ui_actions/register_actions';
 import { closeSetup } from './react_embeddable_system/react_embeddable_registry';
 import type { RequestType, ResponseType } from '../server/search_route/types';
 import { SEARCH_ROUTE_PATH } from '../common/constants';
+import { getEmbeddableDefinition } from './react_embeddable_system/react_embeddable_registry';
 
 export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, EmbeddableStart> {
   private stateTransferService: EmbeddableStateTransfer = {} as EmbeddableStateTransfer;
@@ -84,6 +85,8 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
         );
         return AddFromLibraryContent;
       },
+      // @ts-ignore
+      getEmbeddableDefinition,
       getStateTransfer: (storage?: Storage) =>
         storage
           ? new EmbeddableStateTransfer(
