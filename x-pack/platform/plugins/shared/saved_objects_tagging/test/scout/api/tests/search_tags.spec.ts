@@ -8,14 +8,14 @@
 import type { RoleApiCredentials } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
-import { apiTest, testData } from '../fixtures';
+import { apiTest, PUBLIC_HEADERS, KBN_ARCHIVES } from '../fixtures';
 
 apiTest.describe('tags - search', { tag: tags.deploymentAgnostic }, () => {
-  let viewerCredentials: RoleApiCredentials;
+  let privilegedCredentials: RoleApiCredentials;
 
   apiTest.beforeAll(async ({ requestAuth, kbnClient }) => {
-    viewerCredentials = await requestAuth.getTagsViewerApiKey();
-    await kbnClient.importExport.load(testData.KBN_ARCHIVES.tagsFunctionalBase);
+    privilegedCredentials = await requestAuth.getApiKeyForPrivilegedUser();
+    await kbnClient.importExport.load(KBN_ARCHIVES.FUNCTIONAL_BASE);
   });
 
   apiTest.afterAll(async ({ kbnClient }) => {
@@ -25,7 +25,7 @@ apiTest.describe('tags - search', { tag: tags.deploymentAgnostic }, () => {
 
   apiTest('searches tags (200)', async ({ apiClient }) => {
     const response = await apiClient.get('api/tags', {
-      headers: { ...testData.PUBLIC_HEADERS, ...viewerCredentials.apiKeyHeader },
+      headers: { ...PUBLIC_HEADERS, ...privilegedCredentials.apiKeyHeader },
       responseType: 'json',
     });
 

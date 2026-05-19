@@ -8,16 +8,22 @@
 import type { RoleApiCredentials } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
-import { apiTest, testData } from '../fixtures';
+import {
+  apiTest,
+  PUBLIC_HEADERS,
+  KBN_ARCHIVES,
+  SO_TAGGING_WRITE_ROLE,
+  SO_TAGGING_READ_ROLE,
+} from '../fixtures';
 
 apiTest.describe('tags - create', { tag: tags.deploymentAgnostic }, () => {
   let editorCredentials: RoleApiCredentials;
   let viewerCredentials: RoleApiCredentials;
 
   apiTest.beforeAll(async ({ requestAuth, kbnClient }) => {
-    editorCredentials = await requestAuth.getTagsEditorApiKey();
-    viewerCredentials = await requestAuth.getTagsViewerApiKey();
-    await kbnClient.importExport.load(testData.KBN_ARCHIVES.tagsFunctionalBase);
+    editorCredentials = await requestAuth.getApiKeyForCustomRole(SO_TAGGING_WRITE_ROLE);
+    viewerCredentials = await requestAuth.getApiKeyForCustomRole(SO_TAGGING_READ_ROLE);
+    await kbnClient.importExport.load(KBN_ARCHIVES.FUNCTIONAL_BASE);
   });
 
   apiTest.afterAll(async ({ kbnClient }) => {
@@ -27,7 +33,7 @@ apiTest.describe('tags - create', { tag: tags.deploymentAgnostic }, () => {
 
   apiTest('creates a tag (201)', async ({ apiClient }) => {
     const createResponse = await apiClient.post('api/tags', {
-      headers: { ...testData.PUBLIC_HEADERS, ...editorCredentials.apiKeyHeader },
+      headers: { ...PUBLIC_HEADERS, ...editorCredentials.apiKeyHeader },
       body: {
         name: 'my new tag',
         description: 'some desc',
@@ -48,7 +54,7 @@ apiTest.describe('tags - create', { tag: tags.deploymentAgnostic }, () => {
     const newTagId = createResponse.body.id as string;
 
     const getResponse = await apiClient.get(`api/tags/${newTagId}`, {
-      headers: { ...testData.PUBLIC_HEADERS, ...editorCredentials.apiKeyHeader },
+      headers: { ...PUBLIC_HEADERS, ...editorCredentials.apiKeyHeader },
       responseType: 'json',
     });
     expect(getResponse).toHaveStatusCode(200);
@@ -63,7 +69,7 @@ apiTest.describe('tags - create', { tag: tags.deploymentAgnostic }, () => {
 
   apiTest('creates a tag with a generated color when omitted (201)', async ({ apiClient }) => {
     const createResponse = await apiClient.post('api/tags', {
-      headers: { ...testData.PUBLIC_HEADERS, ...editorCredentials.apiKeyHeader },
+      headers: { ...PUBLIC_HEADERS, ...editorCredentials.apiKeyHeader },
       body: {
         name: 'tag without color',
       },
@@ -80,7 +86,7 @@ apiTest.describe('tags - create', { tag: tags.deploymentAgnostic }, () => {
 
   apiTest('returns details when validation fails (400)', async ({ apiClient }) => {
     const response = await apiClient.post('api/tags', {
-      headers: { ...testData.PUBLIC_HEADERS, ...editorCredentials.apiKeyHeader },
+      headers: { ...PUBLIC_HEADERS, ...editorCredentials.apiKeyHeader },
       body: {
         name: 'a',
         description: 'some desc',
@@ -106,7 +112,7 @@ apiTest.describe('tags - create', { tag: tags.deploymentAgnostic }, () => {
     const existingName = 'tag-1';
 
     const response = await apiClient.post('api/tags', {
-      headers: { ...testData.PUBLIC_HEADERS, ...editorCredentials.apiKeyHeader },
+      headers: { ...PUBLIC_HEADERS, ...editorCredentials.apiKeyHeader },
       body: {
         name: existingName,
         description: 'some desc',
@@ -125,7 +131,7 @@ apiTest.describe('tags - create', { tag: tags.deploymentAgnostic }, () => {
     'authorization - returns error if user does not have permission to create a tag',
     async ({ apiClient }) => {
       const response = await apiClient.post('api/tags', {
-        headers: { ...testData.PUBLIC_HEADERS, ...viewerCredentials.apiKeyHeader },
+        headers: { ...PUBLIC_HEADERS, ...viewerCredentials.apiKeyHeader },
         body: {
           name: 'forbidden',
         },

@@ -7,7 +7,12 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import { asCodeMetaSchema } from '@kbn/as-code-shared-schemas';
+import {
+  asCodeMetaSchema,
+  asCodePaginationParamsSchema,
+  asCodePaginationResponseMetaSchema,
+  PAGINATION_MAX_SIZE,
+} from '@kbn/as-code-shared-schemas';
 
 export const tagsSearchRequestQuerySchema = schema.object({
   query: schema.maybe(
@@ -18,23 +23,7 @@ export const tagsSearchRequestQuerySchema = schema.object({
       },
     })
   ),
-  page: schema.maybe(
-    schema.number({
-      min: 1,
-      meta: {
-        description: 'The page of results to return. Defaults to `1`.',
-      },
-    })
-  ),
-  per_page: schema.maybe(
-    schema.number({
-      min: 1,
-      max: 1000,
-      meta: {
-        description: 'The number of results to return per page. Defaults to `20`.',
-      },
-    })
-  ),
+  ...asCodePaginationParamsSchema.getPropSchemas(),
 });
 
 export const tagIdParamSchema = schema.object({
@@ -91,32 +80,21 @@ export const tagRequestAttributesSchema = schema.object(
 
 export const tagResponseItemSchema = schema.object(
   {
-    id: schema.string(),
+    id: schema.string({ meta: { description: 'The tag ID.' } }),
     data: tagAttributesSchema,
     meta: asCodeMetaSchema,
   },
   { unknowns: 'forbid' }
 );
 
-const tagsSearchResponseMetaSchema = schema.object(
-  {
-    page: schema.number({
-      meta: { description: 'The current page number.' },
-    }),
-    per_page: schema.number({
-      meta: { description: 'The number of results returned per page.' },
-    }),
-    total: schema.number({
-      meta: { description: 'The total number of tags matching the query.' },
-    }),
-  },
-  { unknowns: 'forbid' }
-);
-
 export const tagsSearchResponseBodySchema = schema.object(
   {
-    data: schema.arrayOf(tagResponseItemSchema, { minSize: 0, maxSize: 1000 }),
-    meta: tagsSearchResponseMetaSchema,
+    data: schema.arrayOf(tagResponseItemSchema, {
+      minSize: 0,
+      maxSize: PAGINATION_MAX_SIZE,
+      meta: { description: 'List of tags matching the query.' },
+    }),
+    meta: asCodePaginationResponseMetaSchema,
   },
   { unknowns: 'forbid' }
 );

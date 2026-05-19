@@ -8,16 +8,22 @@
 import type { RoleApiCredentials } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
-import { apiTest, testData } from '../fixtures';
+import {
+  apiTest,
+  PUBLIC_HEADERS,
+  KBN_ARCHIVES,
+  SO_TAGGING_WRITE_ROLE,
+  SO_TAGGING_READ_ROLE,
+} from '../fixtures';
 
 apiTest.describe('tags - upsert', { tag: tags.deploymentAgnostic }, () => {
   let editorCredentials: RoleApiCredentials;
   let viewerCredentials: RoleApiCredentials;
 
   apiTest.beforeAll(async ({ requestAuth, kbnClient }) => {
-    editorCredentials = await requestAuth.getTagsEditorApiKey();
-    viewerCredentials = await requestAuth.getTagsViewerApiKey();
-    await kbnClient.importExport.load(testData.KBN_ARCHIVES.tagsFunctionalBase);
+    editorCredentials = await requestAuth.getApiKeyForCustomRole(SO_TAGGING_WRITE_ROLE);
+    viewerCredentials = await requestAuth.getApiKeyForCustomRole(SO_TAGGING_READ_ROLE);
+    await kbnClient.importExport.load(KBN_ARCHIVES.FUNCTIONAL_BASE);
   });
 
   apiTest.afterAll(async ({ kbnClient }) => {
@@ -27,7 +33,7 @@ apiTest.describe('tags - upsert', { tag: tags.deploymentAgnostic }, () => {
 
   apiTest('updates an existing tag (200)', async ({ apiClient }) => {
     const updateResponse = await apiClient.put('api/tags/tag-1', {
-      headers: { ...testData.PUBLIC_HEADERS, ...editorCredentials.apiKeyHeader },
+      headers: { ...PUBLIC_HEADERS, ...editorCredentials.apiKeyHeader },
       body: {
         name: 'updated name',
         description: 'updated desc',
@@ -49,7 +55,7 @@ apiTest.describe('tags - upsert', { tag: tags.deploymentAgnostic }, () => {
   apiTest('creates a tag at the provided id (201)', async ({ apiClient }) => {
     const id = `created-via-put-${Date.now()}`;
     const createResponse = await apiClient.put(`api/tags/${id}`, {
-      headers: { ...testData.PUBLIC_HEADERS, ...editorCredentials.apiKeyHeader },
+      headers: { ...PUBLIC_HEADERS, ...editorCredentials.apiKeyHeader },
       body: {
         name: 'created name',
         description: 'created desc',
@@ -70,7 +76,7 @@ apiTest.describe('tags - upsert', { tag: tags.deploymentAgnostic }, () => {
   apiTest('creates a tag with a generated color when omitted (201)', async ({ apiClient }) => {
     const id = `created-via-put-no-color-${Date.now()}`;
     const createResponse = await apiClient.put(`api/tags/${id}`, {
-      headers: { ...testData.PUBLIC_HEADERS, ...editorCredentials.apiKeyHeader },
+      headers: { ...PUBLIC_HEADERS, ...editorCredentials.apiKeyHeader },
       body: {
         name: 'created name no color',
       },
@@ -89,7 +95,7 @@ apiTest.describe('tags - upsert', { tag: tags.deploymentAgnostic }, () => {
 
   apiTest('returns 409 when updating to an existing name', async ({ apiClient }) => {
     const response = await apiClient.put('api/tags/tag-2', {
-      headers: { ...testData.PUBLIC_HEADERS, ...editorCredentials.apiKeyHeader },
+      headers: { ...PUBLIC_HEADERS, ...editorCredentials.apiKeyHeader },
       body: {
         name: 'tag-3',
         description: 'updated desc',
@@ -106,7 +112,7 @@ apiTest.describe('tags - upsert', { tag: tags.deploymentAgnostic }, () => {
 
   apiTest('returns details when validation fails (400)', async ({ apiClient }) => {
     const response = await apiClient.put(`api/tags/validation-failure-${Date.now()}`, {
-      headers: { ...testData.PUBLIC_HEADERS, ...editorCredentials.apiKeyHeader },
+      headers: { ...PUBLIC_HEADERS, ...editorCredentials.apiKeyHeader },
       body: {
         name: 'a',
         description: 'some desc',
@@ -132,7 +138,7 @@ apiTest.describe('tags - upsert', { tag: tags.deploymentAgnostic }, () => {
     'authorization - returns 403 when user does not have permission to update a tag',
     async ({ apiClient }) => {
       const response = await apiClient.put('api/tags/tag-1', {
-        headers: { ...testData.PUBLIC_HEADERS, ...viewerCredentials.apiKeyHeader },
+        headers: { ...PUBLIC_HEADERS, ...viewerCredentials.apiKeyHeader },
         body: {
           name: 'unauthorized update',
         },

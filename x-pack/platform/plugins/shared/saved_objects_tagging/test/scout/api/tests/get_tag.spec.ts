@@ -8,14 +8,14 @@
 import type { RoleApiCredentials } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
-import { apiTest, testData } from '../fixtures';
+import { apiTest, PUBLIC_HEADERS, KBN_ARCHIVES, SO_TAGGING_READ_ROLE } from '../fixtures';
 
 apiTest.describe('tags - get', { tag: tags.deploymentAgnostic }, () => {
   let viewerCredentials: RoleApiCredentials;
 
   apiTest.beforeAll(async ({ requestAuth, kbnClient }) => {
-    viewerCredentials = await requestAuth.getTagsViewerApiKey();
-    await kbnClient.importExport.load(testData.KBN_ARCHIVES.tagsFunctionalBase);
+    viewerCredentials = await requestAuth.getApiKeyForCustomRole(SO_TAGGING_READ_ROLE);
+    await kbnClient.importExport.load(KBN_ARCHIVES.FUNCTIONAL_BASE);
   });
 
   apiTest.afterAll(async ({ kbnClient }) => {
@@ -25,7 +25,7 @@ apiTest.describe('tags - get', { tag: tags.deploymentAgnostic }, () => {
 
   apiTest('returns 200 when tag exists', async ({ apiClient }) => {
     const response = await apiClient.get('api/tags/tag-1', {
-      headers: { ...testData.PUBLIC_HEADERS, ...viewerCredentials.apiKeyHeader },
+      headers: { ...PUBLIC_HEADERS, ...viewerCredentials.apiKeyHeader },
       responseType: 'json',
     });
 
@@ -37,7 +37,7 @@ apiTest.describe('tags - get', { tag: tags.deploymentAgnostic }, () => {
   apiTest('returns 404 when tag does not exist', async ({ apiClient }) => {
     const id = 'does-not-exist';
     const response = await apiClient.get(`api/tags/${id}`, {
-      headers: { ...testData.PUBLIC_HEADERS, ...viewerCredentials.apiKeyHeader },
+      headers: { ...PUBLIC_HEADERS, ...viewerCredentials.apiKeyHeader },
       responseType: 'json',
     });
 

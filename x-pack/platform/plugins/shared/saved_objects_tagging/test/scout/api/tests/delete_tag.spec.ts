@@ -8,16 +8,22 @@
 import type { RoleApiCredentials } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
-import { apiTest, testData } from '../fixtures';
+import {
+  apiTest,
+  PUBLIC_HEADERS,
+  KBN_ARCHIVES,
+  SO_TAGGING_WRITE_ROLE,
+  SO_TAGGING_READ_ROLE,
+} from '../fixtures';
 
 apiTest.describe('tags - delete', { tag: tags.deploymentAgnostic }, () => {
   let editorCredentials: RoleApiCredentials;
   let viewerCredentials: RoleApiCredentials;
 
   apiTest.beforeAll(async ({ requestAuth, kbnClient }) => {
-    editorCredentials = await requestAuth.getTagsEditorApiKey();
-    viewerCredentials = await requestAuth.getTagsViewerApiKey();
-    await kbnClient.importExport.load(testData.KBN_ARCHIVES.tagsFunctionalBase);
+    editorCredentials = await requestAuth.getApiKeyForCustomRole(SO_TAGGING_WRITE_ROLE);
+    viewerCredentials = await requestAuth.getApiKeyForCustomRole(SO_TAGGING_READ_ROLE);
+    await kbnClient.importExport.load(KBN_ARCHIVES.FUNCTIONAL_BASE);
   });
 
   apiTest.afterAll(async ({ kbnClient }) => {
@@ -28,7 +34,7 @@ apiTest.describe('tags - delete', { tag: tags.deploymentAgnostic }, () => {
   apiTest('returns 404 when deleting a missing tag', async ({ apiClient }) => {
     const id = 'does-not-exist';
     const response = await apiClient.delete(`api/tags/${id}`, {
-      headers: { ...testData.PUBLIC_HEADERS, ...editorCredentials.apiKeyHeader },
+      headers: { ...PUBLIC_HEADERS, ...editorCredentials.apiKeyHeader },
       responseType: 'json',
     });
 
@@ -42,7 +48,7 @@ apiTest.describe('tags - delete', { tag: tags.deploymentAgnostic }, () => {
     'authorization - returns 403 when user is not authorized to delete the tag',
     async ({ apiClient }) => {
       const response = await apiClient.delete('api/tags/tag-1', {
-        headers: { ...testData.PUBLIC_HEADERS, ...viewerCredentials.apiKeyHeader },
+        headers: { ...PUBLIC_HEADERS, ...viewerCredentials.apiKeyHeader },
         responseType: 'json',
       });
 
@@ -53,12 +59,12 @@ apiTest.describe('tags - delete', { tag: tags.deploymentAgnostic }, () => {
 
   apiTest('deletes an existing tag (204)', async ({ apiClient }) => {
     const deleteResponse = await apiClient.delete('api/tags/tag-2', {
-      headers: { ...testData.PUBLIC_HEADERS, ...editorCredentials.apiKeyHeader },
+      headers: { ...PUBLIC_HEADERS, ...editorCredentials.apiKeyHeader },
     });
     expect(deleteResponse).toHaveStatusCode(204);
 
     const getResponse = await apiClient.get('api/tags/tag-2', {
-      headers: { ...testData.PUBLIC_HEADERS, ...editorCredentials.apiKeyHeader },
+      headers: { ...PUBLIC_HEADERS, ...editorCredentials.apiKeyHeader },
       responseType: 'json',
     });
     expect(getResponse).toHaveStatusCode(404);
