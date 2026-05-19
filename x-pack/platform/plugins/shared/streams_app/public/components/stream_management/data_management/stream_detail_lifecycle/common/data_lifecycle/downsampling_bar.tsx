@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGrid, EuiFlexItem, EuiPanel, EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiFlexGrid, EuiFlexItem, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import { usePhaseColors } from '@kbn/data-lifecycle-phases';
 import { useDownsamplingColors } from '../../hooks/use_downsampling_colors';
 import type { DownsamplingSegment } from './data_lifecycle_segments';
 import { DownsamplingPhase } from './downsampling_phase';
+import { useDownsamplingBarStyles } from './downsampling_bar_styles';
 
 const getDownsamplingLayout = (segments: DownsamplingSegment[]) => {
   const deleteIndex = segments.findIndex((segment) => segment.isDelete);
@@ -86,68 +86,6 @@ export interface DownsamplingBarProps {
   isEditLifecycleFlyoutOpen?: boolean;
 }
 
-const useDownsamplingBarStyles = ({
-  gridTemplateColumns,
-  hasDownsamplingSteps,
-}: {
-  gridTemplateColumns: string;
-  hasDownsamplingSteps: boolean;
-}) => {
-  const { euiTheme } = useEuiTheme();
-
-  return useMemo(() => {
-    const containerCss = css`
-      background-color: ${hasDownsamplingSteps
-        ? euiTheme.colors.backgroundBaseSubdued
-        : 'transparent'};
-      border-radius: ${hasDownsamplingSteps ? '8px' : '0'};
-      padding: ${hasDownsamplingSteps ? '4px 2px' : '0'};
-      border: none;
-    `;
-
-    const gridCss = css`
-      grid-template-columns: ${gridTemplateColumns};
-      padding-inline: ${euiTheme.size.xxs};
-      box-sizing: border-box;
-    `;
-
-    const emptyFlexItemCss = css`
-      display: flex;
-      flex-basis: 0;
-      min-width: 0;
-      grid-column: 1 / -1;
-      padding-block: ${euiTheme.size.xxs};
-      padding-inline: ${euiTheme.size.xxs};
-      box-sizing: border-box;
-    `;
-
-    const emptyPanelCss = css`
-      padding-block: ${euiTheme.size.m};
-      position: relative;
-      box-sizing: border-box;
-      width: 100%;
-      border-radius: 8px;
-      background-image: repeating-linear-gradient(
-        -45deg,
-        ${euiTheme.colors.backgroundBaseSubdued},
-        ${euiTheme.colors.backgroundBaseSubdued} 25%,
-        ${euiTheme.colors.backgroundBasePlain} 25%,
-        ${euiTheme.colors.backgroundBasePlain} 50%,
-        ${euiTheme.colors.backgroundBaseSubdued} 50%
-      );
-      background-size: ${euiTheme.size.xs} ${euiTheme.size.xs};
-      text-align: center;
-    `;
-
-    const emptyLabelCss = css`
-      line-height: ${euiTheme.size.base};
-      display: inline-block;
-    `;
-
-    return { euiTheme, containerCss, gridCss, emptyFlexItemCss, emptyPanelCss, emptyLabelCss };
-  }, [euiTheme, gridTemplateColumns, hasDownsamplingSteps]);
-};
-
 export const DownsamplingBar = ({
   segments,
   gridTemplateColumns,
@@ -166,8 +104,20 @@ export const DownsamplingBar = ({
     defaultMessage: 'No downsampling',
   });
 
-  const { euiTheme, containerCss, gridCss, emptyFlexItemCss, emptyPanelCss, emptyLabelCss } =
-    useDownsamplingBarStyles({ gridTemplateColumns, hasDownsamplingSteps });
+  const {
+    containerCss,
+    gridCss,
+    emptyFlexItemCss,
+    emptyPanelCss,
+    emptyLabelCss,
+    segmentFlexItemCss,
+    deletePanelCss,
+    transparentPanelCss,
+  } = useDownsamplingBarStyles({
+    gridTemplateColumns,
+    hasDownsamplingSteps,
+    deletePanelColor: phaseColors.delete,
+  });
 
   if (!segments) {
     return null;
@@ -215,16 +165,7 @@ export const DownsamplingBar = ({
                 <EuiFlexItem
                   key={index}
                   grow={segment.grow}
-                  css={{
-                    display: 'flex',
-                    flexBasis: 0,
-                    minWidth: 0,
-                    gridColumn: `${columnStart} / span ${span}`,
-                    paddingBlock: euiTheme.size.xxs,
-                    paddingInline: euiTheme.size.xxs,
-                    boxSizing: 'border-box',
-                    justifyContent: 'center',
-                  }}
+                  css={[segmentFlexItemCss, { gridColumn: `${columnStart} / span ${span}` }]}
                 >
                   {segment.step ? (
                     <DownsamplingPhase
@@ -249,25 +190,14 @@ export const DownsamplingBar = ({
                       paddingSize="s"
                       hasBorder={false}
                       hasShadow={false}
-                      css={{
-                        backgroundColor: phaseColors.delete,
-                        borderRadius: euiTheme.border.radius.small,
-                        minHeight: '30px',
-                        height: '100%',
-                        width: '100%',
-                      }}
+                      css={deletePanelCss}
                     />
                   ) : (
                     <EuiPanel
                       paddingSize="none"
                       hasBorder={false}
                       hasShadow={false}
-                      css={{
-                        backgroundColor: 'transparent',
-                        minHeight: '30px',
-                        height: '100%',
-                        width: '100%',
-                      }}
+                      css={transparentPanelCss}
                     />
                   )}
                 </EuiFlexItem>
