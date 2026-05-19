@@ -34,6 +34,7 @@ import {
   comment,
   osType,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 
 import type {
   ExceptionsBuilderExceptionItem,
@@ -157,6 +158,43 @@ export const prepareExceptionItemsForBulkClose = (
     } else {
       return { ...item, comments: [] };
     }
+  });
+};
+
+const isEndpointExceptionList = (item: ExceptionListItemSchema): boolean =>
+  item.list_id === ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id;
+
+const escapeBackslashesForWildcardQuery = (value: string): string => value.replace(/\\/g, '\\\\');
+
+const prepareEndpointExceptionEntryForBulkClose = (
+  entry: Entry | EntryNested
+): Entry | EntryNested => {
+  if (entry.type === 'nested') {
+    return entry;
+  }
+
+  if (entry.type === 'wildcard') {
+    return {
+      ...entry,
+      value: escapeBackslashesForWildcardQuery(entry.value),
+    };
+  }
+
+  return entry;
+};
+
+export const prepareEndpointExceptionItemsForBulkClose = (
+  exceptionItems: ExceptionListItemSchema[]
+): ExceptionListItemSchema[] => {
+  return exceptionItems.map((item: ExceptionListItemSchema) => {
+    if (!isEndpointExceptionList(item) || item.entries === undefined) {
+      return item;
+    }
+
+    return {
+      ...item,
+      entries: item.entries.map(prepareEndpointExceptionEntryForBulkClose),
+    };
   });
 };
 

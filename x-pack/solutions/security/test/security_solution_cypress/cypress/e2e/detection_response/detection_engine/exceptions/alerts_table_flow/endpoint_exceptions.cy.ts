@@ -8,8 +8,10 @@
 import {
   createEndpointExceptionList,
   deleteEndpointExceptionList,
+  getEndpointExceptionListItems,
 } from '../../../../../tasks/api_calls/exceptions';
 import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
+import { createDocument } from '../../../../../tasks/api_calls/elasticsearch';
 import {
   expandFirstAlert,
   goToClosedAlertsOnRuleDetailsPage,
@@ -23,9 +25,11 @@ import { createRule } from '../../../../../tasks/api_calls/rules';
 import { waitForAlertsToPopulate } from '../../../../../tasks/create_new_rule';
 import {
   addExceptionEntryFieldValueAndSelectSuggestion,
+  addExceptionEntryOperatorValue,
   addExceptionEntryFieldValueValue,
   addExceptionFlyoutItemName,
   editExceptionFlyoutItemName,
+  selectBulkCloseAlerts,
   selectCloseSingleAlerts,
   submitNewExceptionItem,
   validateExceptionConditionField,
@@ -44,6 +48,58 @@ import {
   visitRuleDetailsPage,
   waitForTheRuleToBeExecuted,
 } from '../../../../../tasks/rule_details';
+
+const ENDPOINT_ALERTS_DATA_STREAM = 'logs-endpoint.alerts-default';
+const WINDOWS_MATCHING_PATH = 'C:\\Users\\matching\\app.exe';
+const WINDOWS_MATCHING_PATH_PATTERN = 'C:\\Users\\matching\\*.exe';
+const WINDOWS_MATCHING_PATH_SECOND = 'C:\\Users\\matching\\second.exe';
+const WINDOWS_NON_MATCHING_PATH = 'C:\\Users\\other\\app.exe';
+const WINDOWS_FILE_HASH = 'eb2d506e924e71d587890a8f743f39515c1116267db3815fe3a9e9d1f5aa6c21';
+const ENDPOINT_EXCEPTION_CONFIRM_MODAL_SUBMIT_BTN =
+  '[data-test-subj="endpointExceptionConfirmModal-submitButton"]';
+
+const createWindowsEndpointAlert = (
+  filePath: string,
+  timestamp: string
+): Record<string, unknown> => ({
+  '@timestamp': timestamp,
+  file: {
+    path: filePath,
+    hash: {
+      sha256: WINDOWS_FILE_HASH,
+    },
+  },
+  host: {
+    hostname: 'windows-host',
+    name: 'windows-host',
+    os: {
+      family: 'windows',
+      name: 'Windows',
+      type: 'windows',
+    },
+  },
+  agent: {
+    id: 'endpoint-agent-id',
+    name: 'windows-host',
+    type: 'endpoint',
+  },
+  event: {
+    action: 'process_started',
+    category: ['process'],
+    code: 'test',
+    dataset: 'process',
+    kind: 'alert',
+    module: 'endpoint',
+    type: ['start'],
+  },
+  process: {
+    executable: filePath,
+    name: 'app.exe',
+  },
+  ecs: {
+    version: '8.0.0',
+  },
+});
 
 // TODO: https://github.com/elastic/kibana/issues/161539
 describe(
@@ -129,6 +185,55 @@ describe(
       cy.get(ENDPOINT_EXCEPTION_CARD).should('have.length', 1);
       cy.get(ENDPOINT_EXCEPTION_CARD_HEADER_TITLE).should('have.text', ITEM_NAME_EDIT);
       cy.get(ENDPOINT_EXCEPTION_CARD_CONDITIONS).contains('span', ADDITIONAL_ENTRY);
+    });
+
+    it('Should close all matching alerts when an Endpoint exception wildcard value contains backslashes', () => {
+      deleteAlertsAndRules();
+      deleteEndpointExceptionList();
+      createEndpointExceptionList();
+      createDocument(
+        ENDPOINT_ALERTS_DATA_STREAM,
+        createWindowsEndpointAlert(WINDOWS_MATCHING_PATH, '2026-01-01T00:00:03.000Z')
+      );
+      createDocument(
+        ENDPOINT_ALERTS_DATA_STREAM,
+        createWindowsEndpointAlert(WINDOWS_MATCHING_PATH_SECOND, '2026-01-01T00:00:02.000Z')
+      );
+      createDocument(
+        ENDPOINT_ALERTS_DATA_STREAM,
+        createWindowsEndpointAlert(WINDOWS_NON_MATCHING_PATH, '2026-01-01T00:00:01.000Z')
+      );
+      createRule(getEndpointRule()).then((rule) =>
+        visitRuleDetailsPage(rule.body.id, { tab: 'alerts' })
+      );
+      waitForTheRuleToBeExecuted();
+      waitForAlertsToPopulate();
+
+      openAddEndpointExceptionFromFirstAlert();
+      validateExceptionConditionField('file.path.caseless');
+
+      addExceptionEntryOperatorValue('matches', 0);
+      addExceptionEntryFieldValueValue(WINDOWS_MATCHING_PATH_PATTERN, 0);
+      selectBulkCloseAlerts();
+      addExceptionFlyoutItemName(ITEM_NAME, ENDPOINT_EXCEPTION_ITEM_NAME_INPUT);
+      cy.get(ENDPOINT_EXCEPTION_ITEM_CONFIRM_BTN).click();
+      cy.get(ENDPOINT_EXCEPTION_CONFIRM_MODAL_SUBMIT_BTN).click();
+      cy.get(ENDPOINT_EXCEPTION_ITEM_CONFIRM_BTN).should('not.exist');
+
+      getEndpointExceptionListItems().then(({ body }) => {
+        expect(body.data[0].entries[0]).to.deep.include({
+          field: 'file.path.caseless',
+          operator: 'included',
+          type: 'wildcard',
+          value: WINDOWS_MATCHING_PATH_PATTERN,
+        });
+      });
+
+      waitForAlerts();
+      cy.get(ALERTS_COUNT).should('contain', '1');
+
+      goToClosedAlertsOnRuleDetailsPage();
+      cy.get(ALERTS_COUNT).should('contain', '2');
     });
   }
 );
