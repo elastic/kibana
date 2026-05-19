@@ -8,14 +8,8 @@
 import { isUnsafeId } from '@kbn/human-readable-id';
 
 /**
- * Config-schema `validate` function that rejects ids containing path
- * separators, traversal sequences, prototype-pollution keys, empty strings, or
- * values longer than 255 characters. Permissive of KQL-special chars (colons,
- * spaces, wildcards) — those are handled at every KQL interpolation site via
- * escapeKuery / escapeQuotes.
- *
- * Only wire into *create* request schemas, not read/response schemas, so that
- * pre-existing stored IDs continue to function (backward compatibility).
+ * Validates ids for Fleet saved objects
+ * Wraps @kbn/human-readable-id validator to enforce length, and special character / key restrictions
  */
 export const validateFleetSavedObjectId = (value: string | undefined): string | undefined => {
   if (value === undefined || !isUnsafeId(value)) return;
