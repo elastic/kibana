@@ -49,7 +49,8 @@ export const getColumnsWithTimeField = (
 export async function getSharingData(
   currentSearchSource: ISearchSource,
   state: DiscoverAppState,
-  services: { uiSettings: IUiSettingsClient; data: DataPublicPluginStart }
+  services: { uiSettings: IUiSettingsClient; data: DataPublicPluginStart },
+  isEsqlMode?: boolean
 ) {
   const { uiSettings, data } = services;
   const searchSource = currentSearchSource.createCopy();
@@ -70,12 +71,10 @@ export async function getSharingData(
   searchSource.removeField('size');
 
   // Columns that the user has selected in the saved search
-  const columns = getColumnsWithTimeField(
-    state.columns || [],
-    index?.timeFieldName,
-    uiSettings,
-    state.query
-  );
+  const columns =
+    isEsqlMode && !state.query
+      ? state.columns || []
+      : getColumnsWithTimeField(state.columns || [], index?.timeFieldName, uiSettings, state.query);
 
   const absoluteTimeFilter = data.query.timefilter.timefilter.createFilter(index);
   const relativeTimeFilter = data.query.timefilter.timefilter.createRelativeFilter(index);
