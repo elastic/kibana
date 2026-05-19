@@ -91,7 +91,7 @@ const createMockParsedMetrics = (
     total_number_of_dimensions: dimensions.length,
     metrics_by_type: { gauge: metricNames.length },
     units: { none: metricNames.length },
-    multi_value_counts: { data_streams: 0, field_types: 0, metric_types: 0 },
+    multi_value_counts: { data_streams: 0, field_types: 0, metric_types: 0, units: 0 },
   },
 });
 
@@ -233,7 +233,7 @@ describe('useFetchMetricsData', () => {
           total_number_of_dimensions: 0,
           metrics_by_type: {},
           units: {},
-          multi_value_counts: { data_streams: 0, field_types: 0, metric_types: 0 },
+          multi_value_counts: { data_streams: 0, field_types: 0, metric_types: 0, units: 0 },
         },
       });
 
