@@ -8,9 +8,9 @@
 import type React from 'react';
 import type { UseFormReturn } from 'react-hook-form';
 import type { RuleFormServices } from '../../form/contexts/rule_form_context';
-import type { FormValues } from '../../form/types';
+import type { ComposeFormValues } from './compose_form_types';
 
-export type ComposeDiscoverMode = 'create' | 'edit';
+export type ComposeDiscoverMode = 'create' | 'edit' | 'clone';
 
 export type RecoveryType = 'default' | 'custom' | 'none';
 
@@ -29,7 +29,7 @@ export interface StepDefinition {
   title: string;
   render: (props: StepRenderProps) => React.ReactNode;
   validate?: (
-    methods: UseFormReturn<FormValues>,
+    methods: UseFormReturn<ComposeFormValues>,
     state: ComposeDiscoverState
   ) => Promise<boolean> | boolean;
 }
@@ -64,7 +64,7 @@ export interface SandboxApplyData {
  * UI-only state for the ComposeDiscover flyout.
  *
  * This reducer manages navigation, Sandbox state, and split-query cache.
- * All form values (name, schedule, delays, etc.) live in useForm<FormValues>()
+ * All form values (name, schedule, delays, etc.) live in useForm<ComposeFormValues>()
  * via RHF and are never stored here. The query/split fields are a write-through
  * cache: written imperatively alongside RHF at Apply time. RHF is the source
  * of truth — these fields exist so the form view can display query summaries
@@ -93,7 +93,7 @@ export interface ComposeDiscoverState {
   childOpen: boolean;
   queryCommitted: boolean;
   /** Date range for the Discover Sandbox preview window — persists across open/close.
-   *  Intentionally NOT connected to FormValues.schedule.lookback. */
+   *  Intentionally NOT connected to ComposeFormValues.schedule.lookback. */
   sandboxDateStart: string;
   sandboxDateEnd: string;
   /** When true the stepped form is replaced by a full YAML editor. */
