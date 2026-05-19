@@ -61,7 +61,6 @@ export const fetchEvents = async ({
       columnar: false,
       filter: buildDslFilter(eventIds, start, end),
       query,
-      // @ts-expect-error - esql helper params types are not up to date
       params: eventIds.map((id, idx) => ({ [`doc_id${idx}`]: id })),
     })
     .toRecords<EventRecord>();

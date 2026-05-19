@@ -13,7 +13,7 @@ import { SECURITY_TAG_DESCRIPTION, SECURITY_TAG_NAME } from '../../../common/con
 import { getRandomColor } from '../../../common/utils/get_ramdom_color';
 
 export const useFetchSecurityTags = () => {
-  const { http, savedObjectsTagging } = useKibana().services;
+  const { savedObjectsTagging } = useKibana().services;
   const tagCreated = useRef(false);
 
   const {
@@ -21,11 +21,14 @@ export const useFetchSecurityTags = () => {
     isLoading: isLoadingTags,
     error: errorFetchTags,
   } = useFetch(REQUEST_NAMES.SECURITY_TAGS, getTagsByName, {
-    initialParameters: { http, tagName: SECURITY_TAG_NAME },
+    initialParameters: {
+      savedObjectsTaggingClient: savedObjectsTagging?.client,
+      tagName: SECURITY_TAG_NAME,
+    },
   });
 
   const {
-    fetch: fetchCreateTag,
+    fetch: createTagHandler,
     data: tag,
     isLoading: isLoadingCreateTags,
     error: errorCreateTag,
@@ -41,7 +44,7 @@ export const useFetchSecurityTags = () => {
       !tagCreated.current
     ) {
       tagCreated.current = true;
-      fetchCreateTag({
+      createTagHandler({
         savedObjectsTaggingClient: savedObjectsTagging.client,
         tag: {
           name: SECURITY_TAG_NAME,
@@ -50,11 +53,11 @@ export const useFetchSecurityTags = () => {
         },
       });
     }
-  }, [errorFetchTags, fetchCreateTag, savedObjectsTagging, isLoadingTags, tags]);
+  }, [errorFetchTags, createTagHandler, savedObjectsTagging, isLoadingTags, tags]);
 
   const tagsResult = useMemo(() => {
     if (tags?.length) {
-      return tags.map((t) => ({ id: t.id, type: 'tag', managed: t.managed, ...t.attributes }));
+      return tags.map((t) => ({ type: 'tag', ...t }));
     }
     return tag ? [{ type: 'tag', ...tag }] : undefined;
   }, [tags, tag]);

@@ -6,12 +6,20 @@
  */
 
 import expect from '@kbn/expect';
+import type { InfraSynthtraceEsClient } from '@kbn/synthtrace';
 import type {
   GetInfraMetricsRequestBodyPayloadClient,
   GetInfraMetricsResponsePayload,
 } from '@kbn/infra-plugin/common/http_api/infra';
 import type { SupertestWithRoleScopeType } from '../../../services';
 import { DATES } from '../utils/constants';
+import {
+  buildEcsAndSemconvWideTimerange,
+  generateSemconvHostsData,
+  SEMCONV_HOSTS,
+  SEMCONV_HOSTS_DATA_FROM,
+  SEMCONV_HOSTS_DATA_TO,
+} from '../utils/semconv_hosts_data';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 
 const ENDPOINT = '/api/metrics/infra/host';
@@ -22,6 +30,7 @@ const normalizeNewLine = (text: string) => {
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const roleScopedSupertest = getService('roleScopedSupertest');
+  const synthtrace = getService('synthtrace');
 
   const basePayload: GetInfraMetricsRequestBodyPayloadClient = {
     limit: 10,
@@ -197,6 +206,185 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           'gke-observability-8--observability-8--bc1afd95-f0zc',
           'gke-observability-8--observability-8--bc1afd95-ngmh',
         ]);
+      });
+    });
+
+    describe('Fetch hosts (semconv)', () => {
+      let synthtraceClient: InfraSynthtraceEsClient | undefined;
+
+      const semconvBasePayload: GetInfraMetricsRequestBodyPayloadClient = {
+        limit: 10,
+        // `rxV2` / `txV2` are intentionally omitted: the route rejects them when
+        // `schema: 'semconv'`, see UNSUPPORTED_SEMCONV_METRICS in
+        // x-pack/solutions/observability/plugins/infra/server/routes/infra/index.ts.
+        metrics: ['cpuV2', 'diskSpaceUsage', 'memory', 'memoryFree', 'normalizedLoad1m'],
+        from: SEMCONV_HOSTS_DATA_FROM,
+        to: SEMCONV_HOSTS_DATA_TO,
+        query: { bool: { must_not: [], filter: [], should: [], must: [] } },
+        schema: 'semconv',
+      };
+
+      before(async () => {
+        synthtraceClient = synthtrace.createInfraSynthtraceEsClient();
+        await synthtraceClient.clean();
+        await synthtraceClient.index(
+          generateSemconvHostsData({
+            from: SEMCONV_HOSTS_DATA_FROM,
+            to: SEMCONV_HOSTS_DATA_TO,
+            hosts: SEMCONV_HOSTS,
+          })
+        );
+      });
+
+      after(async () => {
+        await synthtraceClient?.clean();
+      });
+
+      it('returns only OTel hosts (filtered by data_stream.dataset=hostmetricsreceiver.otel)', async () => {
+        const response = await makeRequest({ body: semconvBasePayload, expectedHTTPCode: 200 });
+
+        const names = (response.body as GetInfraMetricsResponsePayload).nodes
+          .map((p) => p.name)
+          .sort();
+        expect(names).eql(SEMCONV_HOSTS.map((h) => h.hostName).sort());
+      });
+
+      it('reports hasSystemMetrics=true and computes core metrics for an OTel host', async () => {
+        const response = await makeRequest({
+          body: { ...semconvBasePayload, limit: 1 },
+          expectedHTTPCode: 200,
+        });
+        const nodes = (response.body as GetInfraMetricsResponsePayload).nodes;
+
+        expect(nodes).to.have.length(1);
+        expect(nodes[0].hasSystemMetrics).to.be(true);
+
+        const metricsByName = Object.fromEntries(nodes[0].metrics.map((m) => [m.name, m.value]));
+        // cpuV2 / memory derive from semconv state-based aggregations populated
+        // by `infra.semconvHost(...).cpu()` / `.memory()`.
+        expect(metricsByName.cpuV2).to.be.a('number');
+        expect(metricsByName.memory).to.be.a('number');
+      });
+
+      // Mirrors the exact error thrown by `UNSUPPORTED_SEMCONV_METRICS` in
+      // x-pack/solutions/observability/plugins/infra/server/routes/infra/index.ts
+      // so an unrelated 400 (e.g. unrelated body validation) cannot accidentally
+      // satisfy this assertion.
+      const unsupportedSemconvMessage = (metric: 'rxV2' | 'txV2') =>
+        `The following metrics are not supported for semconv schema: ${metric}`;
+
+      it('rejects rxV2 with 400 when schema=semconv', async () => {
+        const response = await makeRequest({
+          body: { ...semconvBasePayload, metrics: ['rxV2'] },
+          expectedHTTPCode: 400,
+        });
+        expect(normalizeNewLine(response.body.message)).to.equal(unsupportedSemconvMessage('rxV2'));
+      });
+
+      it('rejects txV2 with 400 when schema=semconv', async () => {
+        const response = await makeRequest({
+          body: { ...semconvBasePayload, metrics: ['txV2'] },
+          expectedHTTPCode: 400,
+        });
+        expect(normalizeNewLine(response.body.message)).to.equal(unsupportedSemconvMessage('txV2'));
+      });
+
+      it('returns only the queried OTel host when filtered by host.name', async () => {
+        const targetHost = SEMCONV_HOSTS[0].hostName;
+        const response = await makeRequest({
+          body: {
+            ...semconvBasePayload,
+            metrics: ['cpuV2'],
+            query: { bool: { filter: [{ term: { 'host.name': targetHost } }] } },
+          },
+          expectedHTTPCode: 200,
+        });
+        const names = (response.body as GetInfraMetricsResponsePayload).nodes.map((p) => p.name);
+        expect(names).eql([targetHost]);
+      });
+    });
+
+    // These mixed-schema cases cover the cohort split when ECS-archived hosts
+    // and OTel synthtrace hosts coexist in the cluster. They do NOT cover
+    // *dual-shipping* (the same `host.name` ingested through both pipelines);
+    // see issue #264011 for tracking.
+    describe('Mixed ECS + semconv hosts', () => {
+      let synthtraceClient: InfraSynthtraceEsClient | undefined;
+      let archiveLoaded = false;
+
+      before(async () => {
+        await esArchiver.load(
+          'x-pack/solutions/observability/test/fixtures/es_archives/infra/8.0.0/logs_and_metrics'
+        );
+        archiveLoaded = true;
+        synthtraceClient = synthtrace.createInfraSynthtraceEsClient();
+        await synthtraceClient.clean();
+        await synthtraceClient.index(
+          generateSemconvHostsData({
+            from: SEMCONV_HOSTS_DATA_FROM,
+            to: SEMCONV_HOSTS_DATA_TO,
+            hosts: SEMCONV_HOSTS,
+          })
+        );
+      });
+
+      after(async () => {
+        try {
+          await synthtraceClient?.clean();
+        } finally {
+          if (archiveLoaded) {
+            await esArchiver.unload(
+              'x-pack/solutions/observability/test/fixtures/es_archives/infra/8.0.0/logs_and_metrics'
+            );
+          }
+        }
+      });
+
+      const wideTimerange = buildEcsAndSemconvWideTimerange({
+        ecsFromMs: DATES['8.0.0'].logs_and_metrics.min,
+        ecsToMs: DATES['8.0.0'].logs_and_metrics.max,
+      });
+
+      it('returns only ECS hosts when schema=ecs', async () => {
+        const response = await makeRequest({
+          body: {
+            ...basePayload,
+            metrics: ['cpuV2'],
+            ...wideTimerange,
+            schema: 'ecs',
+          },
+          expectedHTTPCode: 200,
+        });
+        const names = (response.body as GetInfraMetricsResponsePayload).nodes
+          .map((p) => p.name)
+          .sort();
+
+        expect(names).to.eql([
+          'gke-observability-8--observability-8--bc1afd95-f0zc',
+          'gke-observability-8--observability-8--bc1afd95-ngmh',
+          'gke-observability-8--observability-8--bc1afd95-nhhw',
+        ]);
+        for (const name of names) {
+          expect(SEMCONV_HOSTS.map((h) => h.hostName)).not.to.contain(name);
+        }
+      });
+
+      it('returns only OTel hosts when schema=semconv', async () => {
+        const response = await makeRequest({
+          body: {
+            limit: 10,
+            metrics: ['cpuV2'],
+            ...wideTimerange,
+            query: { bool: { must_not: [], filter: [], should: [], must: [] } },
+            schema: 'semconv',
+          },
+          expectedHTTPCode: 200,
+        });
+        const names = (response.body as GetInfraMetricsResponsePayload).nodes
+          .map((p) => p.name)
+          .sort();
+
+        expect(names).to.eql(SEMCONV_HOSTS.map((h) => h.hostName).sort());
       });
     });
 

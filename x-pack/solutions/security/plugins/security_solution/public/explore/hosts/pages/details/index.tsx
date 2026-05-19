@@ -19,7 +19,6 @@ import { noop } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
-import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { useUpdateAssetCriticality } from '../../../../entity_analytics/api/hooks/use_update_asset_criticality';
@@ -64,11 +63,7 @@ import { HostDetailsTabs } from './details_tabs';
 import { navTabsHostDetails } from './nav_tabs';
 import type { HostDetailsProps } from './types';
 import { HostsType } from '../../store/model';
-import { getHostDetailsPageFilters, getIdentityFieldsPageFilters } from './helpers';
-import {
-  identityFieldsHaveUsableValues,
-  mergeLegacyIdentityWhenStoreEntityMissing,
-} from '../../../../flyout/document_details/shared/utils';
+import { getHostDetailsPageFilters } from './helpers';
 import { useGlobalFullScreen } from '../../../../common/containers/use_full_screen';
 import { Display } from '../display';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
@@ -96,6 +91,7 @@ import { NO_CORRESPONDING_ENTITY_EXISTS } from '../../../../flyout/entity_detail
 import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
 import { sourcererSelectors } from '../../../../sourcerer/store';
 import type { Entity } from '../../../../../common/api/entity_analytics';
+import { euidDslFilterToPageFilters } from '../../../helpers';
 
 const ES_HOST_FIELD = 'host.name';
 const HostOverviewManage = manageQuery(HostOverview);
@@ -186,11 +182,6 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({
     [identityFields, detailName]
   );
 
-  const hostDetailsPageFilters: Filter[] = useMemo(
-    () => getHostDetailsPageFilters(detailName),
-    [detailName]
-  );
-
   const isEnterprisePlus = useLicense().isEnterprise();
 
   const narrowDateRange = useCallback<NarrowDateRange>(
@@ -247,24 +238,23 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({
     entityStoreV2Enabled && !entityFromStoreResult.isLoading && !entityFromStoreResult.entityRecord;
 
   const hostDetailsEventsPageFilters = useMemo(() => {
+    // Builds Kibana (not ES DSL) filters
+    // Fallback to host.name filter if EUID-based filter cannot be built for any reason
+    const legacyFilters = getHostDetailsPageFilters(detailName);
     if (!entityStoreV2Enabled || noEntityInStore) {
-      return getHostDetailsPageFilters(detailName);
+      return legacyFilters;
     }
-    const fromStore =
-      euidApi?.euid?.getEntityIdentifiersFromDocument('host', entityFromStoreResult.entityRecord) ??
-      {};
-    const merged = mergeLegacyIdentityWhenStoreEntityMissing(fromStore, resolvedIdentityFields);
-    if (identityFieldsHaveUsableValues(merged)) {
-      return getIdentityFieldsPageFilters(merged);
-    }
-    return getHostDetailsPageFilters(detailName);
+    const entityDslFilter = euidApi?.euid?.dsl.getEuidFilterBasedOnDocument(
+      EntityType.host,
+      entityFromStoreResult.entityRecord
+    );
+    return entityDslFilter ? euidDslFilterToPageFilters(entityDslFilter) : legacyFilters;
   }, [
     detailName,
     entityFromStoreResult.entityRecord,
     entityStoreV2Enabled,
     noEntityInStore,
     euidApi?.euid,
-    resolvedIdentityFields,
   ]);
 
   const oldSecurityDefaultPatterns =
@@ -274,6 +264,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({
     ? experimentalSecurityDefaultIndexPatterns
     : oldSecurityDefaultPatterns;
 
+  // observedHost.entityRecord returns entityStoreFromResult.entityRecord when entityStoreV2Enabled
   const observedHost = useObservedHost(
     detailName,
     PageScope.explore,
@@ -316,32 +307,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({
     [entityId, entityStoreV2Enabled, observedHost.entityRecord?.entity?.id]
   );
 
-  const [rawFilteredQuery, kqlError] = useMemo(() => {
-    try {
-      return [
-        buildEsQuery(
-          newDataViewPickerEnabled
-            ? experimentalDataView
-            : dataViewSpecToViewBase(oldSourcererDataView),
-          [query],
-          [...hostDetailsPageFilters, ...globalFilters],
-          getEsQueryConfig(uiSettings)
-        ),
-      ];
-    } catch (e) {
-      return [undefined, e];
-    }
-  }, [
-    newDataViewPickerEnabled,
-    experimentalDataView,
-    oldSourcererDataView,
-    query,
-    hostDetailsPageFilters,
-    globalFilters,
-    uiSettings,
-  ]);
-
-  const [rawFilteredQueryForHostDetailsIdentity] = useMemo(() => {
+  const [rawFilteredQueryForHostDetailsIdentity, kqlError] = useMemo(() => {
     try {
       return [
         buildEsQuery(
@@ -353,8 +319,8 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({
           getEsQueryConfig(uiSettings)
         ),
       ];
-    } catch {
-      return [undefined];
+    } catch (e) {
+      return [undefined, e];
     }
   }, [
     newDataViewPickerEnabled,
@@ -374,10 +340,9 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({
     [rawFilteredQueryForHostDetailsIdentity]
   );
 
-  const stringifiedAdditionalFilters = JSON.stringify(rawFilteredQuery);
   useInvalidFilterQuery({
     id: ID,
-    filterQuery: stringifiedAdditionalFilters,
+    filterQuery: stringifiedHostDetailsIdentityFilterQuery,
     kqlError,
     query,
     startDate: from,
@@ -391,17 +356,9 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({
   const { hasAlertsRead, hasIndexRead } = useAlertsPrivileges();
   const canReadAlerts = hasAlertsRead && hasIndexRead;
 
-  const entityFilter = useMemo(
-    () => ({
-      field: ES_HOST_FIELD,
-      value: detailName,
-    }),
-    [detailName]
-  );
-
   const additionalFilters = useMemo(
-    () => (rawFilteredQuery ? [rawFilteredQuery] : []),
-    [rawFilteredQuery]
+    () => (rawFilteredQueryForHostDetailsIdentity ? [rawFilteredQueryForHostDetailsIdentity] : []),
+    [rawFilteredQueryForHostDetailsIdentity]
   );
 
   const entity = useMemo(
@@ -581,14 +538,14 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({
                     <EuiFlexItem>
                       <AlertsByStatus
                         signalIndexName={signalIndexName}
-                        entityFilter={entityFilter}
+                        entityType={EntityType.host}
+                        entityRecord={entityStoreV2Enabled ? observedHost.entityRecord : undefined}
                         identityFields={resolvedIdentityFields}
                         additionalFilters={additionalFilters}
                       />
                     </EuiFlexItem>
                     <EuiFlexItem>
                       <AlertCountByRuleByStatus
-                        entityFilter={entityFilter}
                         identityFields={resolvedIdentityFields}
                         signalIndexName={signalIndexName}
                         additionalFilters={additionalFilters}
@@ -620,16 +577,18 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({
               isInitializing={isInitializing}
               deleteQuery={deleteQuery}
               hostDetailsFilter={hostDetailsEventsPageFilters}
-              hostDetailsIdentityFilterQuery={stringifiedHostDetailsIdentityFilterQuery}
               to={to}
               from={from}
               detailName={detailName}
               type={HostsType.details}
               setQuery={setQuery}
-              filterQuery={stringifiedAdditionalFilters}
+              entityRecord={
+                entityStoreV2Enabled ? observedHost.entityRecord ?? undefined : undefined
+              }
+              filterQuery={stringifiedHostDetailsIdentityFilterQuery}
               hostDetailsPagePath={hostDetailsPagePath}
               identityFields={resolvedIdentityFields}
-              entityId={entityId}
+              entityId={displayEntityId}
             />
           </SecuritySolutionPageWrapper>
         </>

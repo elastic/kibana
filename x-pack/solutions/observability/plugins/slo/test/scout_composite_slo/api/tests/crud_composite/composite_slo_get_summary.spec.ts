@@ -14,7 +14,7 @@ import { apiTest, DEFAULT_COMPOSITE_SLO, mergeSloApiHeaders } from '../../fixtur
  * The GET /api/observability/slo_composites/{id} endpoint:
  * - Loads the composite definition and member SLO definitions
  * - Computes weighted average SLI across members
- * - Computes normalised weights and per-member contributions
+ * - Computes normalised weights for members
  * - Derives burn rates for 5m, 1h, 1d windows
  * - Returns NO_DATA when member SLOs are not found
  */

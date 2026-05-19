@@ -9,9 +9,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import type { EuiTourStepProps } from '@elastic/eui';
 import {
   EuiButton,
-  EuiHorizontalRule,
   EuiPopover,
-  useEuiPaddingSize,
   EuiContextMenuItem,
   useGeneratedHtmlId,
   EuiContextMenuPanel,
@@ -119,8 +117,6 @@ export const CreateRuleMenu: React.FC<CreateRuleContextMenuProps> = ({ loading, 
   const shouldShowAiRuleCreationMenuTour =
     isTourEnabled && aiRuleCreationMenuTourState.isTourActive && !isDisabled && !loading;
 
-  const m = useEuiPaddingSize('m');
-  const xl = useEuiPaddingSize('xl');
   const onButtonClick = useCallback(() => {
     setIsPopoverOpen(!isPopoverOpen);
   }, [isPopoverOpen]);
@@ -240,7 +236,6 @@ export const CreateRuleMenu: React.FC<CreateRuleContextMenuProps> = ({ loading, 
         <EuiContextMenuPanel>
           <EuiContextMenuItem
             key="ai-rule-creation"
-            style={{ padding: `${m} ${xl}` }}
             onClick={handleAiRuleCreation}
             data-test-subj="ai-rule-creation"
             icon="productAgent"
@@ -250,8 +245,7 @@ export const CreateRuleMenu: React.FC<CreateRuleContextMenuProps> = ({ loading, 
               defaultMessage="AI rule creation"
             />
           </EuiContextMenuItem>
-          <EuiHorizontalRule key="separator" margin="none" />
-          <EuiContextMenuItem key="manual-rule-creation" style={{ padding: `${m} ${xl}` }}>
+          <EuiContextMenuItem key="manual-rule-creation">
             <SecuritySolutionLinkAnchor
               deepLinkId={SecurityPageName.rulesCreate}
               data-test-subj="manual-rule-creation"
