@@ -7,7 +7,7 @@
 
 export type * from './cloud';
 export type * from './container';
-export * from './event_outcome';
+export type * from './event_outcome';
 export type * from './faas';
 export type * from './host';
 export type * from './http';
