@@ -338,15 +338,16 @@ describe('extractMigrationInfo', () => {
       const output = extractMigrationInfo(type);
 
       const { forwardCompatibility, create } = output.modelVersions[0].schemas;
-      expect(typeof forwardCompatibility).toBe('string');
-      expect(typeof create).toBe('string');
+      // Schemas are now stored as serialized objects, not hash strings
+      expect(typeof forwardCompatibility).toBe('object');
+      expect(typeof create).toBe('object');
       expect(output.modelVersions[1].schemas).toEqual({
         forwardCompatibility: false,
         create: false,
       });
     });
 
-    it('returns the same hash for two structurally identical config-schema objects', () => {
+    it('returns the same serialized schema for two structurally identical config-schema objects', () => {
       const makeType = () =>
         createType({
           modelVersions: {
@@ -359,12 +360,12 @@ describe('extractMigrationInfo', () => {
           },
         });
 
-      const hashA = extractMigrationInfo(makeType()).modelVersions[0].schemas.create;
-      const hashB = extractMigrationInfo(makeType()).modelVersions[0].schemas.create;
-      expect(hashA).toEqual(hashB);
+      const schemaA = extractMigrationInfo(makeType()).modelVersions[0].schemas.create;
+      const schemaB = extractMigrationInfo(makeType()).modelVersions[0].schemas.create;
+      expect(schemaA).toEqual(schemaB);
     });
 
-    it('returns different hashes for structurally different config-schema objects', () => {
+    it('returns different serialized schemas for structurally different config-schema objects', () => {
       const typeWithTitle = createType({
         modelVersions: {
           1: { changes: [], schemas: { create: schema.object({ title: schema.string() }) } },
@@ -376,12 +377,12 @@ describe('extractMigrationInfo', () => {
         },
       });
 
-      const hashWithTitle = extractMigrationInfo(typeWithTitle).modelVersions[0].schemas.create;
-      const hashWithBody = extractMigrationInfo(typeWithBody).modelVersions[0].schemas.create;
-      expect(hashWithTitle).not.toEqual(hashWithBody);
+      const schemaWithTitle = extractMigrationInfo(typeWithTitle).modelVersions[0].schemas.create;
+      const schemaWithBody = extractMigrationInfo(typeWithBody).modelVersions[0].schemas.create;
+      expect(schemaWithTitle).not.toEqual(schemaWithBody);
     });
 
-    it('returns different hashes when a custom validator is added to a config-schema object', () => {
+    it('returns different serialized schemas when a custom validator is added to a config-schema object', () => {
       const withoutValidator = createType({
         modelVersions: {
           1: { changes: [], schemas: { create: schema.object({ interval: schema.string() }) } },
@@ -398,9 +399,9 @@ describe('extractMigrationInfo', () => {
         },
       });
 
-      const hashWithout = extractMigrationInfo(withoutValidator).modelVersions[0].schemas.create;
-      const hashWith = extractMigrationInfo(withValidator).modelVersions[0].schemas.create;
-      expect(hashWithout).not.toEqual(hashWith);
+      const schemaWithout = extractMigrationInfo(withoutValidator).modelVersions[0].schemas.create;
+      const schemaWith = extractMigrationInfo(withValidator).modelVersions[0].schemas.create;
+      expect(schemaWithout).not.toEqual(schemaWith);
     });
   });
 
