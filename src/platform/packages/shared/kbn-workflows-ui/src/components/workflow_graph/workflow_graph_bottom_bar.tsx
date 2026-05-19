@@ -16,7 +16,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { useReactFlow, useStore } from '@xyflow/react';
-import React, { type ReactNode, useCallback, useEffect, useRef, useState } from 'react';
+import React, { type ReactNode, useCallback, useEffect, useRef, useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 
 export type WorkflowDetailBottomBarView = 'yaml' | 'graph';
@@ -70,6 +70,12 @@ const ICON_COLOR = '#1d2a3e'; // Figma Text/Default
 // to the compact "…" pill. Chosen to give the full bar enough room before it
 // starts overlapping the minimap (bottom-left of the canvas).
 const COMPACT_THRESHOLD_PX = 800;
+
+const BAR_HEIGHT = 54;
+// How many px of the bar remain visible as a "tab" while hidden.
+const HANDLE_HEIGHT = 8;
+// How long (ms) after the last wheel/keydown event before the bar re-appears.
+const AUTOHIDE_TIMEOUT_MS = 1200;
 
 const shortSeparator = (
   <EuiFlexItem grow={false} css={{ width: 1, height: 32, background: SEPARATOR_COLOR }} />
@@ -359,6 +365,43 @@ export function WorkflowDetailBottomBar({
   const [isCompact, setIsCompact] = useState(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
+  // Auto-hide: slide the bar down to a thin handle while the user is
+  // scrolling/panning (wheel) or typing (keydown). Restore after idle timeout.
+  const [isHidden, setIsHidden] = useState(false);
+  const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const scheduleReappear = useCallback(() => {
+    if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+    hideTimerRef.current = setTimeout(() => setIsHidden(false), AUTOHIDE_TIMEOUT_MS);
+  }, []);
+
+  const triggerHide = useCallback(() => {
+    setIsHidden(true);
+    scheduleReappear();
+  }, [scheduleReappear]);
+
+  useEffect(() => {
+    window.addEventListener('wheel', triggerHide, { passive: true });
+    document.addEventListener('keydown', triggerHide, { passive: true });
+    return () => {
+      window.removeEventListener('wheel', triggerHide);
+      document.removeEventListener('keydown', triggerHide);
+      if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+    };
+  }, [triggerHide]);
+
+  const handleBarMouseEnter = useCallback(() => {
+    if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+    setIsHidden(false);
+  }, []);
+
+  // `bottom` slides the bar: hidden → only HANDLE_HEIGHT px peek above the
+  // canvas bottom edge (relies on the canvas having overflow:hidden).
+  const barBottom = useMemo(
+    () => (isHidden ? -(BAR_HEIGHT - HANDLE_HEIGHT) : 26 + bottomOffset),
+    [isHidden, bottomOffset]
+  );
+
   useEffect(() => {
     const parent = barRef.current?.offsetParent as HTMLElement | null;
     if (!parent) return;
@@ -393,19 +436,20 @@ export function WorkflowDetailBottomBar({
 
     return (
       <div
+        onMouseEnter={handleBarMouseEnter}
         css={{
           position: 'absolute',
-          bottom: 26 + bottomOffset,
+          bottom: barBottom,
           left: '50%',
           transform: 'translateX(-50%)',
           zIndex: 5,
-          height: 54,
+          height: BAR_HEIGHT,
           borderRadius: 10,
           background: '#ffffff',
           boxShadow: BAR_SHADOW,
           display: 'flex',
           alignItems: 'center',
-          transition: 'bottom 180ms ease',
+          transition: 'bottom 250ms cubic-bezier(0.4, 0, 0.2, 1)',
           ...ICON_COLOR_STYLES,
         }}
         data-test-subj="workflowDetailBottomBar"
@@ -495,19 +539,20 @@ export function WorkflowDetailBottomBar({
   return (
     <div
       ref={barRef}
+      onMouseEnter={handleBarMouseEnter}
       css={{
         position: 'absolute',
-        bottom: 26 + bottomOffset,
+        bottom: barBottom,
         left: '50%',
         transform: 'translateX(-50%)',
         zIndex: 5,
-        height: 54,
+        height: BAR_HEIGHT,
         borderRadius: 10,
         background: '#ffffff',
         boxShadow: BAR_SHADOW,
         display: 'flex',
         alignItems: 'center',
-        transition: 'bottom 180ms ease',
+        transition: 'bottom 250ms cubic-bezier(0.4, 0, 0.2, 1)',
         // Force a uniform icon color for every icon-button rendered inside
         // the bar, regardless of the EUI color prop each child uses.
         '& .euiButtonIcon, & .euiButtonIcon svg': {
