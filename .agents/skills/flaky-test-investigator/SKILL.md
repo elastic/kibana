@@ -30,6 +30,8 @@ If no link to a `failed-test` issue was provided, search for one in the `elastic
   - _Why it matters:_ broad failure across unrelated tests points to an environment or infrastructure problem, not a problem with this test.
 - **Understand the test server configuration.** are Scout tests using the **default** or a **custom** test server configuration? Do FTR tests belong to a test config that defines custom server arguments that aren't supported on e.g., Elastic Cloud?
   - _Why it matters:_ custom server configurations are a common source of flakiness — they diverge from the configurations used by the broader test suite, so issues affecting only them won't surface elsewhere. They also tend to be less actively maintained.
+- **For Scout, which lane and neighbors shared servers with the failure?** Scout configs in the same Playwright lane share Kibana/Elasticsearch test servers — state can leak between configs. Map the job's `step_key` (e.g. `scout_test_lane_4`) to its config list by downloading `.scout/test_lane_loads.json` from the build's `Scout Test Run Builder` job (`step_key: build_scout_tests`). The same key is scheduled separately per `<arch>/<server-config>`; the job `name` (e.g. "Scout Lane #4 - stateful-classic / default") disambiguates the physical lane. Parallel configs (`parallel.playwright.config.ts`, `workers > 1`) also have multiple workers competing for the same servers, which can surface as transient timeouts under load.
+  - _Why it matters:_ if the same neighbor configs and arch/server-config combo recur across failing builds, suspect lane pollution rather than a test bug. Resource pressure in parallel configs can look test-specific but isn't on its own a reason to drop `workers` to 1.
 
 ### Inspect the failure artifacts
 
@@ -42,10 +44,7 @@ For every failure, try to retrieve:
 - **Server logs** (`kibana.log`, `elasticsearch.log` when present). Cross-reference the failure timestamp with any errors in the logs — a server-side 500 or unexpected warning is strong evidence the failure is a product bug, not a test bug.
 - **Full session trace** when the framework supports it (Scout / Playwright). Lets you scrub through every step, locator query, network call, and DOM snapshot.
 
-How to actually find and download each artifact type is framework-specific:
-
-- Scout (Playwright HTML report, traces, video): see `references/scout-guidance.md`.
-- FTR (failure_screenshot, failure_debug_html, server logs): see `references/ftr-guidance.md`.
+How to actually find and download each artifact type is framework-specific — see "Retrieve failure artifacts" below.
 
 Things to specifically check in the artifacts before forming a root-cause hypothesis:
 
@@ -55,6 +54,28 @@ Things to specifically check in the artifacts before forming a root-cause hypoth
 - **Does the screenshot timestamp match the failure timestamp**? Stale artifacts from a prior step can mislead.
 
 If artifacts are not available (expired, not uploaded, no `read_artifacts` token), say so in the report rather than fabricating a hypothesis. "Screenshot would have resolved this; not available" is a valid open question.
+
+### Retrieve failure artifacts
+
+The standard recipe is **list → filter by path → download by ID**, always scoped to the failed job's UUID. Two Buildkite gotchas to know about first:
+
+- **Failed-attempt jobs are hidden by default.** `/builds/<n>` returns only the latest attempt; append `?include_retried_jobs=true` to find the original failing job (the one cited in `failed-test` comments). `retried` and `retried_in_job_id` link the two.
+- **Per-job artifacts use a different endpoint than build-wide artifacts.** If a build retried to green, failure artifacts only live on the failed job's listing (`bk artifacts list <build> -p <pipeline> --job-uuid <jobId>`). Don't conclude "no screenshot uploaded" until you've checked there.
+
+**Scout** (`@kbn/scout-reporting`, not standard Playwright output — `playwright-report/`, `trace.zip`, and video are NOT published):
+
+- `.scout/reports/scout-playwright-test-failures-<runId>/test-failures-summary.json` — maps test name → HTML report. Start here.
+- `.scout/reports/scout-playwright-test-failures-<runId>/<testId>.html` — self-contained: error, stdout, embedded screenshot. Usually sufficient on its own.
+- `.scout/reports/scout-playwright-test-failures-<runId>/scout-failures-<runId>.ndjson` — one record per failure (`id` = `<testId>`, `owner`, `location`, `error.*`) for programmatic use.
+- `**/.scout/test-artifacts/<test-slug>/test-failed-<N>.png` — plain Playwright screenshot; the PNG doesn't carry `<testId>`, so correlate via spec path.
+
+**FTR** (a single content `<hash>` links every artifact for one failure):
+
+- `target/test_failures/<jobId>_<hash>.{json,log,html}` — `.json` is source of truth; full Kibana/ES stdout lives in `system-out` (there is no separate `kibana.log`). Pull this first.
+- `<test-root>/screenshots/failure/*-<hash>.png` and `<test-root>/failure_debug/html/*-<hash>.html` — UI tests only; fetch only when the failure is UI-side.
+- `.es/*.log` — transport/cluster-shaped failures.
+
+`target/test_failures/` is shared with Scout; filter by `.jobName` (e.g. `FTR Configs #90` vs `Scout Lane #12`) to keep only FTR. On Cloud FTR pipelines the layout differs: one self-contained HTML per failure at `<config-path-with-underscores>-<unix-timestamp>/html/<contentHash>.html` — no `target/test_failures/`, screenshot, or DOM artifacts.
 
 ### Understand the scope
 
@@ -88,19 +109,12 @@ Common best-practice violations that cause flakiness:
 
 Scout and FTR tests should also follow the general best practices in `docs/extend/scout/best-practices.md`, the UI best practices in `docs/extend/scout/ui-best-practices.md`, and the API best practices in `docs/extend/scout/api-best-practices.md`.
 
-### Practical guidance
-
-Identify the test runner for the failing test(s) and follow the framework-specific investigation guidance:
-
-- Scout: `references/scout-guidance.md`
-- FTR: `references/ftr-guidance.md`
-
 ### Investigation pitfalls
 
 Watch out for these pitfalls when investigating the failure:
 
 - **Ignoring the bigger picture**: ensure you have as much data as you can about the test environment and related failures (in the same test file, test config or elsewhere).
-- **Recommending a timeout bump as the primary fix**: timeout bumps consistently fail to hold in Kibana. Investigate what it is that never happened.
+- **Recommending a timeout bump as the primary fix**: timeout bumps consistently fail to hold in Kibana. Investigate what never happened — confirm the slow operation is intrinsic to the product (e.g. index creation, SLO calculation) rather than a missing `waitForResponse`/`waitForSelector` upstream.
 - **Never recommend wrapping the assertion in `retry()` as the fix.** Wrapping the assertion in `retry()` without addressing the underlying cause frequently recurs. Acceptable only as a temporary unblock; in that case the recommendation must explicitly say "this is a stopgap" and link a follow-up issue for the real fix.
 - **Never recommend only test-side async hooks (`await`, `waitFor`, `waitUntil`) when there is evidence of a production-side race.** This is the most common pattern that looks like a fix but isn't — popular precisely because it appears principled, but it lets the test wait _longer_ without fixing the race.
 - **Weakening assertions**: don't recommend making assertions more lenient or narrowing their scope just to make the test pass — this hides regressions instead of catching them. Generic test-only refactors that loosen assertions often regress.
