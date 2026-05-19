@@ -67,10 +67,7 @@ describe('cli_processing', () => {
     });
 
     it(`should throw error if command has less than 3 arguments`, () => {
-      const argv = [
-        '/usr/local/bin/node',
-        'node_modules/.bin/playwright',
-      ];
+      const argv = ['/usr/local/bin/node', 'node_modules/.bin/playwright'];
       expect(() => stripRunCommand(argv)).toThrow(
         /Invalid command arguments: must include at least 'node scripts\/playwright test'/
       );
