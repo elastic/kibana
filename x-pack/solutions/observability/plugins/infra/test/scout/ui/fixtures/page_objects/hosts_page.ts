@@ -314,6 +314,7 @@ export class HostsPage {
   }
 
   public async getAlertsCount(): Promise<string> {
+    await this.alertsTabCountBadge.waitFor({ state: 'visible', timeout: EXTENDED_TIMEOUT });
     return (await this.alertsTabCountBadge.textContent()) ?? '0';
   }
 

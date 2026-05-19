@@ -31,9 +31,10 @@ test.describe(
   'Hosts Page - Alerts Tab',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    test.beforeAll(async ({ esClient }) => {
+    test.beforeAll(async ({ esClient, apiServices }) => {
       await ingestAlertsData({
         esClient,
+        apiServices,
         hosts: HOSTS_WITH_ALERTS,
         timestamp: DATE_WITH_HOSTS_DATA_FROM,
       });
@@ -51,8 +52,8 @@ test.describe(
       });
     });
 
-    test.afterAll(async ({ esClient }) => {
-      await cleanAlertsData({ esClient });
+    test.afterAll(async ({ esClient, apiServices }) => {
+      await cleanAlertsData({ esClient, apiServices });
     });
 
     test('should correctly load the Alerts tab', async ({ pageObjects: { hostsPage }, page }) => {

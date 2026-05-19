@@ -6,10 +6,12 @@
  */
 
 import crypto from 'crypto';
-import type { EsClient } from '@kbn/scout-oblt';
+import type { EsClient, ObltWorkerFixtures } from '@kbn/scout-oblt';
 
 const ALERTS_INDEX = '.internal.alerts-observability.metrics.alerts-default-000001';
 const ALERTS_ALIAS = '.alerts-observability.metrics.alerts-default';
+
+const RULE_TAG = 'infra-hosts-scout-test';
 
 interface AlertDocumentParams {
   hostName: string;
@@ -17,6 +19,7 @@ interface AlertDocumentParams {
   timestamp: string;
   startTime: string;
   endTime?: string;
+  ruleUuid: string;
 }
 
 const createAlertDocument = ({
@@ -25,6 +28,7 @@ const createAlertDocument = ({
   timestamp,
   startTime,
   endTime,
+  ruleUuid,
 }: AlertDocumentParams) => ({
   '@timestamp': timestamp,
   'event.action': status === 'active' ? 'active' : 'close',
@@ -34,11 +38,11 @@ const createAlertDocument = ({
   'host.name': hostName,
   'kibana.alert.reason': `CPU usage is greater than a threshold of 40 for ${hostName}`,
   'kibana.alert.rule.category': 'Inventory',
-  'kibana.alert.rule.consumer': 'alerts',
+  'kibana.alert.rule.consumer': 'infrastructure',
   'kibana.alert.rule.name': 'hosts-cpu-alert-test',
   'kibana.alert.rule.producer': 'infrastructure',
   'kibana.alert.rule.rule_type_id': 'metrics.alert.inventory.threshold',
-  'kibana.alert.rule.uuid': 'test-rule-uuid-scout',
+  'kibana.alert.rule.uuid': ruleUuid,
   'kibana.alert.start': startTime,
   ...(endTime && { 'kibana.alert.end': endTime }),
   'kibana.alert.status': status,
@@ -47,7 +51,7 @@ const createAlertDocument = ({
   'kibana.alert.workflow_status': 'open',
   'kibana.space_ids': ['default'],
   'kibana.version': '8.0.0',
-  tags: [],
+  tags: [RULE_TAG],
 });
 
 export const ACTIVE_ALERTS = 6;
@@ -56,13 +60,39 @@ export const ALL_ALERTS = ACTIVE_ALERTS + RECOVERED_ALERTS;
 
 export const ingestAlertsData = async ({
   esClient,
+  apiServices,
   hosts,
   timestamp,
 }: {
   esClient: EsClient;
+  apiServices: ObltWorkerFixtures['apiServices'];
   hosts: string[];
   timestamp: string;
 }): Promise<void> => {
+  const ruleResponse = await apiServices.alerting.rules.create({
+    ruleTypeId: 'metrics.alert.inventory.threshold',
+    name: `hosts-cpu-alert-test-${Date.now()}`,
+    consumer: 'infrastructure',
+    schedule: { interval: '1m' },
+    enabled: false,
+    params: {
+      criteria: [
+        {
+          metric: 'cpu',
+          comparator: '>',
+          threshold: [40],
+          timeSize: 1,
+          timeUnit: 'm',
+        },
+      ],
+      nodeType: 'host',
+      sourceId: 'default',
+    },
+    tags: [RULE_TAG],
+  });
+
+  const ruleUuid = ruleResponse.data.id;
+
   const aliasOrIndexExists = await esClient.indices.exists({ index: ALERTS_ALIAS });
   const backingIndexExists = await esClient.indices.exists({ index: ALERTS_INDEX });
 
@@ -131,6 +161,7 @@ export const ingestAlertsData = async ({
       status: doc.status,
       timestamp,
       startTime: timestamp,
+      ruleUuid,
       ...(doc.status === 'recovered' && {
         endTime: new Date(new Date(timestamp).getTime() + 60000).toISOString(),
       }),
@@ -140,7 +171,15 @@ export const ingestAlertsData = async ({
   await esClient.bulk({ operations, refresh: 'wait_for' });
 };
 
-export const cleanAlertsData = async ({ esClient }: { esClient: EsClient }): Promise<void> => {
+export const cleanAlertsData = async ({
+  esClient,
+  apiServices,
+}: {
+  esClient: EsClient;
+  apiServices: ObltWorkerFixtures['apiServices'];
+}): Promise<void> => {
+  await apiServices.alerting.cleanup.deleteRulesByTags([RULE_TAG]);
+
   const backingIndexExists = await esClient.indices.exists({ index: ALERTS_INDEX });
   if (backingIndexExists) {
     const aliasResponse = await esClient.indices
@@ -159,7 +198,7 @@ export const cleanAlertsData = async ({ esClient }: { esClient: EsClient }): Pro
     .deleteByQuery({
       index: ALERTS_ALIAS,
       query: {
-        term: { 'kibana.alert.rule.uuid': 'test-rule-uuid-scout' },
+        term: { tags: RULE_TAG },
       },
       refresh: true,
     })
