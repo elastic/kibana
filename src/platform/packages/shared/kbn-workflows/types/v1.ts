@@ -25,6 +25,7 @@ export enum ExecutionStatus {
   PENDING = 'pending',
   WAITING = 'waiting',
   WAITING_FOR_INPUT = 'waiting_for_input',
+  WAITING_FOR_CHILD = 'waiting_for_child',
   RUNNING = 'running',
 
   // Done
@@ -49,6 +50,7 @@ export const NonTerminalExecutionStatuses: readonly ExecutionStatus[] = [
   ExecutionStatus.PENDING,
   ExecutionStatus.WAITING,
   ExecutionStatus.WAITING_FOR_INPUT,
+  ExecutionStatus.WAITING_FOR_CHILD,
   ExecutionStatus.RUNNING,
 ] as const;
 
