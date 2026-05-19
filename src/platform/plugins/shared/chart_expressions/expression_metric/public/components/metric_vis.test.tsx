@@ -27,6 +27,8 @@ import {
   renderChart,
   waitForRenderComplete,
 } from '@kbn/chart-test-jest-helpers';
+// Static EUI token values for assertions
+// eslint-disable-next-line @elastic/eui/no-restricted-eui-imports
 import { euiThemeVars } from '@kbn/ui-theme';
 
 import * as secondaryMetricInfoModule from './secondary_metric_info';
@@ -1021,6 +1023,27 @@ describe('MetricVisComponent', function () {
     });
 
     describe('by static color', () => {
+      it('uses the default when applyColorTo and color is not set', async () => {
+        const colorFromPalette = faker.color.rgb();
+        mockGetColorForValue.mockReturnValue(colorFromPalette);
+        const { applyColorTo, ...metricWithoutApplyColorTo } = defaultMetricParams;
+        await renderMetricChart({
+          config: {
+            dimensions: {
+              metric: basePriceColumnId,
+            },
+            metric: {
+              ...metricWithoutApplyColorTo,
+              color: undefined,
+            } as unknown as MetricVisParam,
+          },
+        });
+        expect(mockGetColorForValue).not.toHaveBeenCalled();
+        expect(screen.getByRole('figure')).toHaveStyle({
+          backgroundColor: euiThemeVars.euiColorEmptyShade,
+        });
+      });
+
       it('uses static color if no palette', async () => {
         const staticColor = faker.color.rgb();
 
