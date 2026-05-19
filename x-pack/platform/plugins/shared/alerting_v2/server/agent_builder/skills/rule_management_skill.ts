@@ -63,6 +63,16 @@ For an existing rule, pass the \`ruleAttachmentId\` and only include the operati
 
 - \`set_state_transition\` with \`consecutive_breaches: N\` means the rule fires only after N consecutive evaluation cycles breach the threshold. Use this when the user wants to reduce noise.
 
+## Rendering Attachments
+
+After calling ${alertingTools.manageRule}, **always** render the rule attachment inline in your response using the \`<render_attachment>\` tag with the attachment ID and version from the tool result:
+
+\`\`\`
+<render_attachment id="<ruleAttachment.id>" version="<version>" />
+\`\`\`
+
+This displays the interactive rule card with Preview and Create/Update buttons.
+
 ## Persistence
 
 The ${alertingTools.manageRule} tool only manages the **in-memory attachment** — it never writes to Elasticsearch.

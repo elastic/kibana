@@ -822,6 +822,52 @@ apiTest.describe('Rule executor', { tag: tags.stateful.classic }, () => {
     }
   );
 
+  apiTest(
+    'does not emit recovery events for alert rules created without a recovery query',
+    async ({ apiServices }) => {
+      await apiServices.alertingV2.sourceIndex.indexDocs({
+        index: SOURCE_INDEX,
+        docs: [
+          {
+            '@timestamp': new Date().toISOString(),
+            'host.name': 'host-alert-no-recovery-query',
+            severity: 'high',
+            value: 1,
+          },
+        ],
+      });
+
+      const rule = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({
+          kind: 'alert',
+          metadata: { name: 'executor-alert-no-recovery-query' },
+          query: {
+            format: 'standalone',
+            breach: `FROM ${SOURCE_INDEX} | WHERE host.name == "host-alert-no-recovery-query" | STATS count = COUNT(*) BY host.name | WHERE count >= 1`,
+          },
+        })
+      );
+
+      await apiServices.alertingV2.ruleEvents.waitForAtLeast(rule.id, 1, { status: 'breached' });
+
+      await apiServices.alertingV2.sourceIndex.deleteDocs({
+        index: SOURCE_INDEX,
+        query: { term: { 'host.name': 'host-alert-no-recovery-query' } },
+      });
+
+      await apiServices.alertingV2.taskExecutions.waitForExecutorRuns({
+        ruleId: rule.id,
+        runs: 2,
+      });
+
+      const recoveredEvents = await apiServices.alertingV2.ruleEvents.find(rule.id, {
+        status: 'recovered',
+      });
+
+      expect(recoveredEvents).toHaveLength(0);
+    }
+  );
+
   apiTest('uses the configured recover query', async ({ apiServices }) => {
     /**
      * severity=high docs drive the main breach query

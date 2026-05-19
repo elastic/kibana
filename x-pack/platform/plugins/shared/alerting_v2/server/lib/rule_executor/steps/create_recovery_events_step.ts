@@ -50,6 +50,16 @@ export class CreateRecoveryEventsStep implements RuleExecutionStep {
         return;
       }
 
+      const effectiveQuery = getRecoverEsqlQuery(rule.query);
+
+      if (!effectiveQuery) {
+        step.logger.debug({
+          message: `[${step.name}] Skipping recovery for rule ${input.ruleId} (no recover query configured)`,
+        });
+        yield { type: 'continue', state };
+        return;
+      }
+
       const activeGroupHashes = await step.fetchActiveAlertGroupHashes(
         rule.id,
         input.executionContext
@@ -62,8 +72,6 @@ export class CreateRecoveryEventsStep implements RuleExecutionStep {
         yield { type: 'continue', state };
         return;
       }
-
-      const effectiveQuery = getRecoverEsqlQuery(rule.query);
 
       const recoveryEvents = effectiveQuery
         ? await step.executeRecoveryQuery({ rule, effectiveQuery, input, activeGroupHashes })
