@@ -8,6 +8,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { scan, takeUntil, finalize, Observable } from 'rxjs';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
+import { isSSEError } from '@kbn/sse-utils';
 import type { ConnectorInfo } from '../../common';
 
 export type { ConnectorInfo };
@@ -44,9 +45,16 @@ export interface InsightResponse {
   connectorInfo?: ConnectorInfo;
 }
 
-const handleStreamError = (err: unknown, setError: (error: string | undefined) => void): void => {
+const handleStreamError = (
+  err: unknown,
+  setError: (error: string | undefined) => void,
+  setIsErrorRetryable: (isRetryable: boolean) => void
+): void => {
   if (err instanceof AbortError) {
     return;
+  }
+  if (isSSEError(err) && err.meta) {
+    setIsErrorRetryable(err.meta.retryable === true);
   }
   setError(err instanceof Error ? err.message : 'Failed to load AI insight');
 };
@@ -56,6 +64,7 @@ export function useStreamingAiInsight(
 ) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | undefined>(undefined);
+  const [isErrorRetryable, setIsErrorRetryable] = useState(true);
   const [summary, setSummary] = useState('');
   const [context, setContext] = useState('');
   const [connectorInfo, setConnectorInfo] = useState<ConnectorInfo | undefined>(undefined);
@@ -75,6 +84,7 @@ export function useStreamingAiInsight(
 
     setIsLoading(true);
     setError(undefined);
+    setIsErrorRetryable(true);
     setWasStopped(false);
     setSummary('');
     setContext('');
@@ -131,7 +141,7 @@ export function useStreamingAiInsight(
             setConnectorInfo(state.connectorInfo);
           }
         },
-        error: (err: unknown) => handleStreamError(err, setError),
+        error: (streamErr: unknown) => handleStreamError(streamErr, setError, setIsErrorRetryable),
       });
 
       cleanupRef.current = () => {
@@ -139,7 +149,7 @@ export function useStreamingAiInsight(
         subscription.unsubscribe();
       };
     } catch (e) {
-      handleStreamError(e, setError);
+      handleStreamError(e, setError, setIsErrorRetryable);
       setIsLoading(false);
     }
   }, [createStream]);
@@ -149,6 +159,7 @@ export function useStreamingAiInsight(
   return {
     isLoading,
     error,
+    isErrorRetryable,
     summary,
     context,
     connectorInfo,

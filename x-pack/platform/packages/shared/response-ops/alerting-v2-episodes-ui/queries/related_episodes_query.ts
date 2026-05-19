@@ -22,6 +22,7 @@ export const RELATED_EPISODE_FIELDS = [
   'first_timestamp',
   'last_timestamp',
   'duration',
+  'episode_data',
 ] as const;
 
 const RELATED_EPISODE_LIMIT = 5;
@@ -36,6 +37,8 @@ export const finishRelatedEpisodesQuery = (query: ComposerQuery) => {
 };
 
 export const buildRelatedBaseQuery = (ruleId: string, excludeEpisodeId: string) => {
-  return esql.from(ALERT_EVENTS_DATA_STREAM).where`type == "alert"`
+  // Because addEpisodeAggregation uses JSON_EXTRACT(_source, "data"),
+  // _source must be included here.
+  return esql.from([ALERT_EVENTS_DATA_STREAM], ['_source']).where`type == "alert"`
     .where`rule.id == ${ruleId} AND episode.id != ${excludeEpisodeId}`;
 };

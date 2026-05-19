@@ -6,6 +6,7 @@
  */
 
 import { cloneDeep } from 'lodash';
+import { RuleChangeTrackingAction } from '@kbn/alerting-types';
 import { updateRuleInMemory } from '../../../../rules_client/common/bulk_edit';
 import type {
   BulkEditResult,
@@ -56,6 +57,7 @@ export async function bulkEditRuleParamsWithReadAuth<Params extends RuleParams>(
     auditAction,
     requiredAuthOperation,
     shouldInvalidateApiKeys,
+    changeTrackingAction: RuleChangeTrackingAction.ruleUpdate,
     updateFn: (opts: UpdateOperationOpts) =>
       updateRuleParamsInMemory<Params>({
         ...opts,

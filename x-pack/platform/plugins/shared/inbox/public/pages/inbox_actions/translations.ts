@@ -73,3 +73,73 @@ export const getLoadErrorBody = (error: string) =>
     defaultMessage: 'Something went wrong while fetching inbox actions: {error}',
     values: { error },
   });
+
+export const COLUMN_ACTIONS = i18n.translate('xpack.inbox.actionsPage.column.actions', {
+  defaultMessage: 'Actions',
+});
+
+export const RESPOND_ACTION_LABEL = i18n.translate('xpack.inbox.actionsPage.respondAction', {
+  defaultMessage: 'Respond',
+});
+
+export const RESPOND_ACTION_DESCRIPTION = i18n.translate(
+  'xpack.inbox.actionsPage.respondActionDescription',
+  {
+    defaultMessage: 'Open the response form for this action',
+  }
+);
+
+export const FLYOUT_TITLE = i18n.translate('xpack.inbox.actionsPage.flyout.title', {
+  defaultMessage: 'Respond to action',
+});
+
+export const FLYOUT_SUBMIT = i18n.translate('xpack.inbox.actionsPage.flyout.submit', {
+  defaultMessage: 'Submit',
+});
+
+export const FLYOUT_CANCEL = i18n.translate('xpack.inbox.actionsPage.flyout.cancel', {
+  defaultMessage: 'Cancel',
+});
+
+export const FLYOUT_NO_SCHEMA_BODY = i18n.translate('xpack.inbox.actionsPage.flyout.noSchemaBody', {
+  defaultMessage:
+    'This action does not declare an input schema. Submitting will send an empty response.',
+});
+
+export const getFlyoutSubmitErrorMessage = (error: string) =>
+  i18n.translate('xpack.inbox.actionsPage.flyout.submitError', {
+    defaultMessage: 'Failed to submit response: {error}',
+    values: { error },
+  });
+
+export const FLYOUT_SUBMIT_SUCCESS = i18n.translate(
+  'xpack.inbox.actionsPage.flyout.submitSuccess',
+  {
+    defaultMessage: 'Response submitted',
+  }
+);
+
+export const REQUIRED_FIELD_ERROR = i18n.translate('xpack.inbox.actionsPage.requiredFieldError', {
+  defaultMessage: 'This field is required',
+});
+
+export const SELECT_PLACEHOLDER = i18n.translate('xpack.inbox.actionsPage.selectPlaceholder', {
+  defaultMessage: 'Select a value',
+});
+
+export const TIMEOUT_EXPIRED_LABEL = i18n.translate('xpack.inbox.actionsPage.timeoutChip.expired', {
+  defaultMessage: 'Timed out',
+});
+
+export const getTimeoutRemainingLabel = (remaining: string) =>
+  i18n.translate('xpack.inbox.actionsPage.timeoutChip.remaining', {
+    defaultMessage: 'Timeout in {remaining}',
+    values: { remaining },
+  });
+
+export const getTimedOutBannerText = (timestamp: string) =>
+  i18n.translate('xpack.inbox.actionsPage.timedOutBanner', {
+    defaultMessage:
+      'This action timed out on {timestamp}. The default response was applied automatically.',
+    values: { timestamp },
+  });

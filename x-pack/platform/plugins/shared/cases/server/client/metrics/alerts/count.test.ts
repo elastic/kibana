@@ -25,6 +25,7 @@ const clientArgs = {
     attachmentService,
   },
   authorization: { getAuthorizationFilter },
+  config: { attachments: { enabled: false } },
 } as unknown as CasesClientArgs;
 
 const constructorOptions = { caseId: 'test-id', casesClient: clientMock, clientArgs };
