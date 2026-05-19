@@ -344,14 +344,14 @@ const APPLY_CHANGES = i18n.translate('xpack.synthetics.settings.ccs.applyChanges
 });
 
 const SHARE_SPACES_TITLE = i18n.translate('xpack.synthetics.settings.ccs.shareSpacesTitle', {
-  defaultMessage: 'Share with spaces',
+  defaultMessage: 'Spaces with access',
 });
 
 const SHARE_SPACES_DESCRIPTION = i18n.translate(
   'xpack.synthetics.settings.ccs.shareSpacesDescription',
   {
     defaultMessage:
-      'Choose which spaces these settings apply to. Select "All spaces" to share with every space in your deployment.',
+      'These settings are shared. Choose which spaces these settings apply to. Removing a space hides the settings there. Select "All spaces" to share with every space in your deployment.',
   }
 );
 
