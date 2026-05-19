@@ -41,6 +41,9 @@ actions:
           > **Technical preview** — The Dashboards API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
           >
           > **[View the full Dashboards API reference →](https://elastic.github.io/dashboards-api-spec/dashboards#tag/Dashboards)**
+        responses:
+          '200':
+            description: See the full Dashboards API reference for detailed response schemas.
       post:
         tags:
           - Dashboards
@@ -50,6 +53,9 @@ actions:
           > **Technical preview** — The Dashboards API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
           >
           > **[View the full Dashboards API reference →](https://elastic.github.io/dashboards-api-spec/dashboards#tag/Dashboards)**
+        responses:
+          '200':
+            description: See the full Dashboards API reference for detailed response schemas.
 
   - target: "$.paths['/api/dashboards/{id}'].get"
     description: "Strip GET /api/dashboards/{id} down to redirect notice"
@@ -72,6 +78,9 @@ actions:
           > **Technical preview** — The Dashboards API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
           >
           > **[View the full Dashboards API reference →](https://elastic.github.io/dashboards-api-spec/dashboards#tag/Dashboards)**
+        responses:
+          '200':
+            description: See the full Dashboards API reference for detailed response schemas.
       put:
         tags:
           - Dashboards
@@ -81,6 +90,9 @@ actions:
           > **Technical preview** — The Dashboards API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
           >
           > **[View the full Dashboards API reference →](https://elastic.github.io/dashboards-api-spec/dashboards#tag/Dashboards)**
+        responses:
+          '200':
+            description: See the full Dashboards API reference for detailed response schemas.
       delete:
         tags:
           - Dashboards
@@ -90,6 +102,9 @@ actions:
           > **Technical preview** — The Dashboards API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
           >
           > **[View the full Dashboards API reference →](https://elastic.github.io/dashboards-api-spec/dashboards#tag/Dashboards)**
+        responses:
+          '200':
+            description: See the full Dashboards API reference for detailed response schemas.
 
   # ──────────────────────────────────────────────
   # VISUALIZATIONS — same strategy.
@@ -114,6 +129,9 @@ actions:
           > **Technical preview** — The Visualizations API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
           >
           > **[View the full Visualizations API reference →](https://elastic.github.io/dashboards-api-spec/visualizations#tag/Visualizations)**
+        responses:
+          '200':
+            description: See the full Visualizations API reference for detailed response schemas.
       post:
         tags:
           - Visualizations
@@ -123,6 +141,9 @@ actions:
           > **Technical preview** — The Visualizations API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
           >
           > **[View the full Visualizations API reference →](https://elastic.github.io/dashboards-api-spec/visualizations#tag/Visualizations)**
+        responses:
+          '200':
+            description: See the full Visualizations API reference for detailed response schemas.
 
   - target: "$.paths['/api/visualizations/{id}'].get"
     description: "Strip GET /api/visualizations/{id} down to redirect notice"
@@ -145,6 +166,9 @@ actions:
           > **Technical preview** — The Visualizations API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
           >
           > **[View the full Visualizations API reference →](https://elastic.github.io/dashboards-api-spec/visualizations#tag/Visualizations)**
+        responses:
+          '200':
+            description: See the full Visualizations API reference for detailed response schemas.
       put:
         tags:
           - Visualizations
@@ -154,6 +178,9 @@ actions:
           > **Technical preview** — The Visualizations API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
           >
           > **[View the full Visualizations API reference →](https://elastic.github.io/dashboards-api-spec/visualizations#tag/Visualizations)**
+        responses:
+          '200':
+            description: See the full Visualizations API reference for detailed response schemas.
       delete:
         tags:
           - Visualizations
@@ -163,6 +190,9 @@ actions:
           > **Technical preview** — The Visualizations API is currently in technical preview and its full reference documentation is temporarily hosted at a separate location.
           >
           > **[View the full Visualizations API reference →](https://elastic.github.io/dashboards-api-spec/visualizations#tag/Visualizations)**
+        responses:
+          '200':
+            description: See the full Visualizations API reference for detailed response schemas.
 
   # ──────────────────────────────────────────────
   # Tag-level descriptions (section intro above the operations list).
