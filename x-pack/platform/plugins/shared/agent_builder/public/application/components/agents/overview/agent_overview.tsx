@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { canChangeAgentVisibility, defaultAgentToolIds } from '@kbn/agent-builder-common';
+import { useHasConnectorsAllPrivileges } from '../../../hooks/use_has_connectors_all_privileges';
 import { useAgentBuilderAgentById } from '../../../hooks/agents/use_agent_by_id';
 import { useCanEditAgent } from '../../../hooks/agents/use_can_edit_agent';
 import { useSkillsService } from '../../../hooks/skills/use_skills';
@@ -52,6 +53,7 @@ export const AgentOverview: React.FC = () => {
   } = useKibana();
 
   const { isAdmin } = useUiPrivileges();
+  const hasConnectorsPrivileges = useHasConnectorsAllPrivileges();
   const { currentUser } = useCurrentUser();
 
   const { agent, isLoading } = useAgentBuilderAgentById(agentId);
@@ -100,6 +102,8 @@ export const AgentOverview: React.FC = () => {
     ).length;
   }, [agent, allTools, enableElasticCapabilities, defaultToolIdSet]);
 
+  const connectorsCount = agent?.configuration?.connector_ids?.length ?? 0;
+
   if (isLoading || !agent) {
     return (
       <EuiFlexGroup
@@ -138,20 +142,26 @@ export const AgentOverview: React.FC = () => {
         <CapabilitiesSection
           skillsCount={skillsCount}
           pluginsCount={pluginsCount}
+          connectorsCount={connectorsCount}
           toolsCount={toolsCount}
           skillsCountLoading={skillsLoading}
           pluginsCountLoading={pluginsLoading}
           toolsCountLoading={toolsLoading}
           enableElasticCapabilities={enableElasticCapabilities}
           isExperimentalFeaturesEnabled={isExperimentalFeaturesEnabled}
+          hasConnectorsPrivileges={hasConnectorsPrivileges}
           skillsHref={createAgentBuilderUrl(appPaths.agent.skills({ agentId: agentId! }))}
           pluginsHref={createAgentBuilderUrl(appPaths.agent.plugins({ agentId: agentId! }))}
+          connectorsHref={createAgentBuilderUrl(appPaths.agent.connectors({ agentId: agentId! }))}
           toolsHref={createAgentBuilderUrl(appPaths.agent.tools({ agentId: agentId! }))}
           onNavigateToSkills={() =>
             navigateToAgentBuilderUrl(appPaths.agent.skills({ agentId: agentId! }))
           }
           onNavigateToPlugins={() =>
             navigateToAgentBuilderUrl(appPaths.agent.plugins({ agentId: agentId! }))
+          }
+          onNavigateToConnectors={() =>
+            navigateToAgentBuilderUrl(appPaths.agent.connectors({ agentId: agentId! }))
           }
           onNavigateToTools={() =>
             navigateToAgentBuilderUrl(appPaths.agent.tools({ agentId: agentId! }))
