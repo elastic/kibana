@@ -1,0 +1,1 @@
+export { registerStatsRoute } from './stats';

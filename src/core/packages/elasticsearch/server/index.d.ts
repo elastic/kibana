@@ -1,0 +1,4 @@
+export type { ElasticsearchClient, ElasticsearchRequestLoggingOptions, IScopedClusterClient, IClusterClient, ICustomClusterClient, AsScopedOptions, ScopeableRequest, UnauthorizedErrorHandlerResult, UnauthorizedErrorHandler, UnauthorizedErrorHandlerRetryResult, UnauthorizedErrorHandlerToolkit, UnauthorizedErrorHandlerResultRetryParams, UnauthorizedErrorHandlerNotHandledResult, UnauthorizedErrorHandlerOptions, FakeRequest, UrlRequest, ScopeableUrlRequest, ElasticsearchClientSslConfig, ElasticsearchClientConfig, ElasticsearchApiToRedactInLogs, } from './src/client';
+export type { ElasticsearchConfigPreboot, ElasticsearchServicePreboot, ElasticsearchServiceStart, ElasticsearchServiceSetup, ElasticsearchCapabilities, } from './src/contracts';
+export type { IElasticsearchConfig, ElasticsearchSslConfig } from './src/elasticsearch_config';
+export type { ElasticsearchRequestHandlerContext } from './src/request_handler_context';

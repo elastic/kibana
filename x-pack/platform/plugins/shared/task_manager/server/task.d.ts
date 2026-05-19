@@ -1,0 +1,416 @@
+import type { ObjectType, TypeOf } from '@kbn/config-schema';
+import type { KibanaRequest } from '@kbn/core/server';
+import type { IntervalSchedule, RruleSchedule } from '@kbn/response-ops-scheduling-types';
+import type { DecoratedError } from './task_running';
+export declare const DEFAULT_TIMEOUT = "5m";
+export declare enum TaskPriority {
+    Low = 1,
+    NormalLongRunning = 40,
+    Normal = 50
+}
+export declare enum TaskCost {
+    Tiny = 1,
+    Normal = 2,
+    ExtraLarge = 10
+}
+/**
+ * String values for task cost as stored in the task schema (e.g. in saved objects).
+ * Use these when reading cost from task params or instance attributes.
+ */
+export declare enum InstanceTaskCost {
+    Tiny = "tiny",
+    Normal = "normal",
+    ExtraLarge = "extralarge"
+}
+/** Maps schema cost strings to their integer values for capacity calculations. */
+export declare const INSTANCE_TASK_COST_TO_INT: Record<InstanceTaskCost, TaskCost>;
+/**
+ * Translates cost string from task params/instance (e.g. 'extralarge') to the
+ * corresponding TaskCost integer. Returns undefined if the string is invalid or null.
+ */
+export declare const getTaskCostFromInstance: (cost?: InstanceTaskCost) => number | undefined;
+/**
+ * Require
+ * @desc Create a Subtype of type T `T` such that the property under key `P` becomes required
+ * @example
+ *    type TaskInstance = {
+ *      id?: string;
+ *      name: string;
+ *    };
+ *
+ *    // This type is now defined as { id: string; name: string; }
+ *    type TaskInstanceWithId = Require<TaskInstance, 'id'>;
+ */
+type Require<T extends object, P extends keyof T> = Omit<T, P> & Required<Pick<T, P>>;
+/**
+ * The run context is passed into a task's run function as its sole argument.
+ */
+export interface RunContext {
+    /**
+     * The document describing the task instance, its params, state, id, etc.
+     */
+    taskInstance: ConcreteTaskInstance;
+    /**
+     * If an API key is associated with the task, a fake KibanaRequest object
+     * is generated using the API key and passed as part of the run context.
+     */
+    fakeRequest?: KibanaRequest;
+    abortController: AbortController;
+}
+/**
+ * The return value of a task's run function should be a promise of RunResult.
+ */
+export type SuccessfulRunResult = {
+    /**
+     * The state which will be passed to the next run of this task (if this is a
+     * recurring task). See the RunContext type definition for more details.
+     */
+    state: Record<string, unknown>;
+    taskRunError?: DecoratedError;
+    shouldValidate?: boolean;
+    shouldDeleteTask?: boolean;
+    shouldDisableTask?: boolean;
+} & (// ensure a SuccessfulRunResult can either specify a new `runAt` or a new `schedule`, but not both
+{
+    /**
+     * Specifies the next run date / time for this task. If unspecified, this is
+     * treated as a single-run task, and will not be rescheduled after
+     * completion.
+     */
+    runAt?: Date;
+    schedule?: never;
+} | {
+    /**
+     * Specifies a new schedule for this tasks. If unspecified, the task will
+     * continue to use which ever schedule it already has, and if no there is
+     * no previous schedule then it will be treated as a single-run task.
+     */
+    schedule?: IntervalSchedule | RruleSchedule;
+    runAt?: never;
+});
+export type FailedRunResult = SuccessfulRunResult & {
+    /**
+     * If specified, indicates that the task failed to accomplish its work. This is
+     * logged out as a warning, and the task will be reattempted after a delay.
+     */
+    error: DecoratedError;
+};
+export type RunResult = FailedRunResult | SuccessfulRunResult;
+export declare const getDeleteTaskRunResult: () => {
+    state: {};
+    shouldDeleteTask: boolean;
+};
+export declare const isFailedRunResult: (result: unknown) => result is FailedRunResult;
+export interface FailedTaskResult {
+    status: TaskStatus.Failed | TaskStatus.DeadLetter;
+}
+export type AnyRunResult = RunResult | undefined | void;
+export type RunFunction = () => Promise<AnyRunResult>;
+export type CancelFunction = () => Promise<AnyRunResult>;
+export interface CancellableTask<T = never> {
+    run: RunFunction;
+    cancel?: CancelFunction;
+    cleanup?: () => Promise<void>;
+}
+export type TaskRunCreatorFunction = (context: RunContext) => CancellableTask<RunContext['taskInstance']>;
+export declare const taskDefinitionSchema: ObjectType<{
+    /**
+     * A unique identifier for the type of task being defined.
+     */
+    type: import("@kbn/config-schema").Type<string>;
+    /**
+     * A brief, human-friendly title for this task.
+     */
+    title: import("@kbn/config-schema").Type<string | undefined>;
+    /**
+     * Priority of this task type. Defaults to "NORMAL" if not defined
+     */
+    priority: import("@kbn/config-schema").Type<number | undefined>;
+    /**
+     * Cost to run this task type. Defaults to "Normal".
+     */
+    cost: import("@kbn/config-schema").Type<number>;
+    /**
+     * An optional more detailed description of what this task does.
+     */
+    description: import("@kbn/config-schema").Type<string | undefined>;
+    /**
+     * How long, in minutes or seconds, the system should wait for the task to complete
+     * before it is considered to be timed out. (e.g. '5m', the default). If
+     * the task takes longer than this, Kibana will send it a kill command and
+     * the task will be re-attempted.
+     */
+    timeout: import("@kbn/config-schema").Type<string>;
+    /**
+     * Up to how many times the task should retry when it fails to run. This will
+     * default to the global variable.
+     */
+    maxAttempts: import("@kbn/config-schema").Type<number | undefined>;
+    /**
+     * The maximum number tasks of this type that can be run concurrently per Kibana instance.
+     * Setting this value will force Task Manager to poll for this task type seperatly from other task types
+     * which can add significant load to the ES cluster, so please use this configuration only when absolutly necesery.
+     */
+    maxConcurrency: import("@kbn/config-schema").Type<number | undefined>;
+    stateSchemaByVersion: import("@kbn/config-schema").Type<Record<string, Readonly<{
+        schema?: any;
+        up?: any;
+    } & {}>> | undefined>;
+    paramsSchema: import("@kbn/config-schema").Type<any>;
+}>;
+/**
+ * Defines a task which can be scheduled and run by the Kibana
+ * task manager.
+ */
+export type TaskDefinition = Omit<TypeOf<typeof taskDefinitionSchema>, 'paramsSchema'> & {
+    /**
+     * Creates an object that has a run function which performs the task's work,
+     * and an optional cancel function which cancels the task.
+     */
+    createTaskRunner: TaskRunCreatorFunction;
+    stateSchemaByVersion?: Record<number, {
+        schema: ObjectType;
+        up: (state: Record<string, unknown>) => Record<string, unknown>;
+    }>;
+    paramsSchema?: ObjectType;
+};
+export declare enum TaskStatus {
+    Idle = "idle",
+    Claiming = "claiming",
+    Running = "running",
+    Failed = "failed",
+    ShouldDelete = "should_delete",
+    Unrecognized = "unrecognized",
+    DeadLetter = "dead_letter"
+}
+export declare enum TaskLifecycleResult {
+    NotFound = "notFound"
+}
+export type TaskLifecycle = TaskStatus | TaskLifecycleResult;
+export type { IntervalSchedule, Rrule, RruleSchedule } from '@kbn/response-ops-scheduling-types';
+export interface TaskUserScope {
+    apiKeyId: string;
+    uiamApiKeyId?: string;
+    spaceId?: string;
+    apiKeyCreatedByUser: boolean;
+}
+export interface TaskInstance {
+    /**
+     * Optional ID that can be passed by the caller. When ID is undefined, ES
+     * will auto-generate a unique id. Otherwise, ID will be used to either
+     * create a new document, or update existing document
+     */
+    id?: string;
+    /**
+     * The task definition type whose run function will execute this instance.
+     */
+    taskType: string;
+    /**
+     * The date and time that this task was originally scheduled. This is used
+     * for convenience to task run functions, and for troubleshooting.
+     */
+    scheduledAt?: Date;
+    /**
+     * The date and time that this task started execution. This is used to determine
+     * the "real" runAt that ended up running the task. This value is only set
+     * when status is set to "running".
+     */
+    startedAt?: Date | null;
+    /**
+     * The date and time that this task should re-execute if stuck in "running" / timeout
+     * status. This value is only set when status is set to "running".
+     */
+    retryAt?: Date | null;
+    /**
+     * The date and time that this task is scheduled to be run. It is not
+     * guaranteed to run at this time, but it is guaranteed not to run earlier
+     * than this. Defaults to immediately.
+     */
+    runAt?: Date;
+    /**
+     * A TaskSchedule string, which specifies this as a recurring task.
+     *
+     * Currently, this supports a single format: an interval in minutes or seconds (e.g. '5m', '30s').
+     */
+    schedule?: IntervalSchedule | RruleSchedule;
+    /**
+     * A task-specific set of parameters, used by the task's run function to tailor
+     * its work. This is generally user-input, such as { sms: '333-444-2222' }.
+     */
+    params: Record<string, any>;
+    /**
+     * The state passed into the task's run function, and returned by the previous
+     * run. If there was no previous run, or if the previous run did not return
+     * any state, this will be the empy object: {}
+     */
+    state: Record<string, any>;
+    stateVersion?: number;
+    /**
+     * The serialized traceparent string of the current APM transaction or span.
+     */
+    traceparent?: string;
+    /**
+     * The id of the user who scheduled this task.
+     */
+    user?: string;
+    /**
+     * Used to group tasks for querying. So, reporting might schedule tasks with a scope of 'reporting',
+     * and then query such tasks to provide a glimpse at only reporting tasks, rather than at all tasks.
+     */
+    scope?: string[];
+    /**
+     * The random uuid of the Kibana instance which claimed ownership of the task last
+     */
+    ownerId?: string | null;
+    /**
+     * Indicates whether the task is currently enabled. Disabled tasks will not be claimed.
+     */
+    enabled?: boolean;
+    timeoutOverride?: string;
+    partition?: number;
+    /**
+     * Used to allow tasks to be scoped to a user via their ES API key
+     */
+    apiKey?: string;
+    /**
+     * Used to allow tasks to be scoped to a user via their UIAM API key
+     */
+    uiamApiKey?: string;
+    /**
+     * Meta data related to the API key associated with this task
+     */
+    userScope?: TaskUserScope;
+    priority?: TaskPriority;
+    /**
+     * Optional cost for this task instance, overriding the task type's default cost.
+     * When set, must be one of the InstanceTaskCost enum values ('tiny', 'normal', 'extralarge').
+     * Used by the task selector and capacity logic to limit concurrent work.
+     * Use getTaskCostFromInstance() to translate to the integer TaskCost.
+     */
+    cost?: InstanceTaskCost;
+}
+/**
+ * Support for the depracated interval field, this should be removed in version 8.0.0
+ * and marked as a breaking change, ideally nutil then all usage of `interval` will be
+ * replaced with use of `schedule`
+ */
+export interface TaskInstanceWithDeprecatedFields extends TaskInstance {
+    /**
+     * An interval in minutes (e.g. '5m'). If specified, this is a recurring task.
+     * */
+    interval?: string;
+    /**
+     * Indicates the number of skipped executions.
+     */
+    numSkippedRuns?: number;
+}
+/**
+ * A task instance that has an id.
+ */
+export type TaskInstanceWithId = Require<TaskInstance, 'id'>;
+/**
+ * A task instance that has an id and is ready for storage.
+ */
+export interface ConcreteTaskInstance extends TaskInstance {
+    /**
+     * The id of the Elastic document that stores this instance's data. This can
+     * be passed by the caller when scheduling the task.
+     */
+    id: string;
+    /**
+     * @deprecated This field has been moved under schedule (deprecated) with version 7.6.0
+     */
+    interval?: string;
+    /**
+     *  @deprecated removed with version 8.14.0
+     */
+    numSkippedRuns?: number;
+    /**
+     * The saved object version from the Elasticsearch document.
+     */
+    version?: string;
+    /**
+     * The date and time that this task was originally scheduled. This is used
+     * for convenience to task run functions, and for troubleshooting.
+     */
+    scheduledAt: Date;
+    /**
+     * The number of unsuccessful attempts since the last successful run. This
+     * will be zeroed out after a successful run.
+     */
+    attempts: number;
+    /**
+     * Indicates whether or not the task is currently running.
+     */
+    status: TaskStatus;
+    /**
+     * The date and time that this task is scheduled to be run. It is not guaranteed
+     * to run at this time, but it is guaranteed not to run earlier than this.
+     */
+    runAt: Date;
+    /**
+     * The date and time that this task started execution. This is used to determine
+     * the "real" runAt that ended up running the task. This value is only set
+     * when status is set to "running".
+     */
+    startedAt: Date | null;
+    /**
+     * The date and time that this task should re-execute if stuck in "running" / timeout
+     * status. This value is only set when status is set to "running".
+     */
+    retryAt: Date | null;
+    /**
+     * The state passed into the task's run function, and returned by the previous
+     * run. If there was no previous run, or if the previous run did not return
+     * any state, this will be the empy object: {}
+     */
+    state: Record<string, any>;
+    /**
+     * The random uuid of the Kibana instance which claimed ownership of the task last
+     */
+    ownerId: string | null;
+    partition?: number;
+}
+export type PartialConcreteTaskInstance = Partial<ConcreteTaskInstance> & {
+    id: ConcreteTaskInstance['id'];
+};
+export interface ConcreteTaskInstanceVersion {
+    /** The _id of the the document (not the SO id) */
+    esId: string;
+    /** The _seq_no of the document when using seq_no_primary_term on fetch */
+    seqNo?: number;
+    /** The _primary_term of the document when using seq_no_primary_term on fetch */
+    primaryTerm?: number;
+    /** The error found if trying to resolve the version info for this esId */
+    error?: string;
+}
+export type SerializedConcreteTaskInstance = Omit<ConcreteTaskInstance, 'state' | 'params' | 'scheduledAt' | 'startedAt' | 'retryAt' | 'runAt'> & {
+    state: string;
+    params: string;
+    traceparent: string;
+    scheduledAt: string;
+    startedAt: string | null;
+    retryAt: string | null;
+    runAt: string;
+    partition?: number;
+    apiKey?: string;
+    uiamApiKey?: string;
+    userScope?: TaskUserScope;
+};
+export type PartialSerializedConcreteTaskInstance = Partial<SerializedConcreteTaskInstance> & {
+    id: SerializedConcreteTaskInstance['id'];
+};
+export interface ApiKeyOptions {
+    request?: KibanaRequest;
+    regenerateApiKey?: boolean;
+    /**
+     * When true with a request, grant only the Elasticsearch API key (skip UIAM). Intended for
+     * tests and narrow internal flows (e.g. exercising UIAM provisioning on tasks that have ES
+     * credentials only).
+     */
+    onEsKey?: boolean;
+}
+export type ScheduleOptions = Record<string, unknown> & ApiKeyOptions;
+export interface TaskEventLogger {
+    logEvent(properties: object, id?: string): void;
+}

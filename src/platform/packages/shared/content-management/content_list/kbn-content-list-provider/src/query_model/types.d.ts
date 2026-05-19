@@ -1,0 +1,103 @@
+/**
+ * Include/exclude filter for a single field dimension.
+ *
+ * Always uses arrays (never undefined) to avoid null-checking throughout.
+ */
+export interface QueryFilterValue {
+    /** IDs that items must match. */
+    include: string[];
+    /** IDs that items must not match. */
+    exclude: string[];
+}
+/**
+ * The query model — single source of truth for search, filters, and flags.
+ *
+ * - `search`: free text (no field syntax).
+ * - `filters`: field-based include/exclude filters, keyed by field name.
+ *   Values are internal IDs (e.g., tag IDs, user UIDs). Display values
+ *   (tag names, emails) are resolved via {@link FieldDefinition}.
+ * - `flags`: boolean toggles (e.g., `starred`). Rendered as `is:flagName`
+ *   in query text.
+ *
+ * This object is JSON-serializable and UI-independent.
+ */
+export interface ContentListQueryModel {
+    /** Free text search portion (field syntax already extracted). */
+    search: string;
+    /** Field-based filters. Key = field name, value = include/exclude IDs. */
+    filters: Record<string, QueryFilterValue>;
+    /** Boolean flags (e.g., `{ starred: true }`). */
+    flags: Record<string, boolean>;
+    /**
+     * Field names that had at least one clause with a non-empty value in the
+     * parsed query AST, regardless of whether the value resolved to an ID.
+     *
+     * Unlike `filters` (which only contains fields whose values resolved),
+     * this set captures field-clause *presence*. Used to gate lazy operations
+     * (e.g. profile priming) that must fire before resolution can succeed.
+     */
+    referencedFields: ReadonlySet<string>;
+    /**
+     * Field names whose clause values fell through to the raw display-value
+     * fallback in `resolveDisplayValue` — meaning `resolveDisplayToId` returned
+     * `undefined` and no fuzzy match was found.
+     *
+     * Only fields with lazy/async resolution (e.g. user-profile fields whose
+     * backing store is populated asynchronously) should be treated as a
+     * transient "resolving" state. Fields with synchronous resolution (e.g.
+     * tags) appear here when the display value simply doesn't exist — that is
+     * a valid empty result, not a loading condition.
+     */
+    unresolvedFields: ReadonlySet<string>;
+}
+/** Empty query model. */
+export declare const EMPTY_MODEL: ContentListQueryModel;
+/**
+ * Defines how a field-based filter maps between internal IDs and display values.
+ *
+ * Used by the parser (display→ID) and serializer (ID→display) to convert
+ * between query text and the query model. Adding a new filter dimension
+ * (e.g., `updatedBy`, `owner`) only requires providing a new `FieldDefinition`.
+ *
+ * @example
+ * ```ts
+ * const createdByField: FieldDefinition = {
+ *   fieldName: 'createdBy',
+ *   resolveIdToDisplay: (uid) => users.find(u => u.uid === uid)?.email ?? uid,
+ *   resolveDisplayToId: (email) => users.find(u => u.email === email)?.uid,
+ * };
+ * ```
+ */
+export interface FieldDefinition {
+    /** Field name used in query syntax (e.g., `'tag'`, `'createdBy'`). */
+    fieldName: string;
+    /** Resolve an internal ID to the display value shown in query text. */
+    resolveIdToDisplay: (id: string) => string;
+    /** Resolve a display value (from query text) to an internal ID. Returns `undefined` if unresolvable. */
+    resolveDisplayToId: (displayValue: string) => string | undefined;
+    /**
+     * Fuzzy/prefix match: resolve a partial display value to all matching IDs.
+     *
+     * Called when `resolveDisplayToId` returns `undefined` (no exact match).
+     * Returns all IDs whose display value contains the input (case-insensitive).
+     * Used for incremental search: typing `createdBy:j` matches "jane" and "john".
+     *
+     * Optional — when absent, unresolvable values are silently dropped.
+     */
+    resolveFuzzyDisplayToIds?: (displayValue: string) => string[];
+}
+/**
+ * Defines a boolean flag that appears as `is:flagName` in query text.
+ *
+ * @example
+ * ```ts
+ * const starredFlag: FlagDefinition = { flagName: 'starred', modelKey: 'starred' };
+ * // Renders as `is:starred` in query text when active.
+ * ```
+ */
+export interface FlagDefinition {
+    /** Flag name in query syntax (e.g., `'starred'` for `is:starred`). */
+    flagName: string;
+    /** Key in `ContentListQueryModel.flags`. */
+    modelKey: string;
+}
