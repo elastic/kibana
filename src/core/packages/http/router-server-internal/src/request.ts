@@ -41,7 +41,6 @@ import {
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 import { RouteValidator } from './validator';
-import { RawRouteValidationError } from './raw_route_validation_error';
 import {
   RequestValidationFailure,
   type RequestValidationSource,
@@ -429,9 +428,6 @@ function validateRequestPart<T>(validate: () => T, source: RequestValidationSour
 }
 
 function getRawValidationError(error: unknown): unknown {
-  if (error instanceof RawRouteValidationError) {
-    return error.rawError;
-  }
   if (
     error instanceof Error &&
     'cause' in error &&

@@ -380,9 +380,10 @@ describe('Versioned route', () => {
       .addVersion(
         {
           version: '1',
-          validate: testValidation.fooValidation,
-          onRequestValidationError: {
+          validate: {
+            ...testValidation.fooValidation,
             response: {
+              ...testValidation.fooValidation.response,
               422: {
                 body: () =>
                   schema.object({
@@ -391,7 +392,7 @@ describe('Versioned route', () => {
                   }),
               },
             },
-            handler: onRequestValidationErrorV1,
+            onRequestValidationError: onRequestValidationErrorV1,
           },
         },
         handlerFn
@@ -399,9 +400,10 @@ describe('Versioned route', () => {
       .addVersion(
         {
           version: '2',
-          validate: testValidation.fooValidation,
-          onRequestValidationError: {
+          validate: {
+            ...testValidation.fooValidation,
             response: {
+              ...testValidation.fooValidation.response,
               409: {
                 body: () =>
                   schema.object({
@@ -410,7 +412,7 @@ describe('Versioned route', () => {
                   }),
               },
             },
-            handler: onRequestValidationErrorV2,
+            onRequestValidationError: onRequestValidationErrorV2,
           },
         },
         handlerFn
@@ -488,12 +490,13 @@ describe('Versioned route', () => {
       .addVersion(
         {
           version: '1',
-          validate: testValidation.fooValidation,
-          onRequestValidationError: {
+          validate: {
+            ...testValidation.fooValidation,
             response: {
+              ...testValidation.fooValidation.response,
               422: { body: () => schema.object({ version: schema.literal('1') }) },
             },
-            handler: onRequestValidationError,
+            onRequestValidationError,
           },
         },
         handlerFn
@@ -511,7 +514,7 @@ describe('Versioned route', () => {
     });
   });
 
-  it('exposes request validation error response metadata separately from normal responses', () => {
+  it('exposes request validation error response metadata in validate.response', () => {
     versionedRouter
       .post({
         path: '/test/{id}',
@@ -527,13 +530,11 @@ describe('Versioned route', () => {
           version: '1',
           validate: {
             request: testValidation.fooValidation.request,
-            response: { 200: { body: () => schema.object({ foo: schema.number() }) } },
-          },
-          onRequestValidationError: {
             response: {
+              200: { body: () => schema.object({ foo: schema.number() }) },
               422: { body: () => schema.object({ message: schema.string() }) },
             },
-            handler: (error, request, response) =>
+            onRequestValidationError: (error, request, response) =>
               response.custom({ statusCode: 422, body: { message: error.message } }),
           },
         },
@@ -543,10 +544,8 @@ describe('Versioned route', () => {
     const [{ handlers }] = versionedRouter.getRoutes();
 
     expect(handlers[0].options.validate).toMatchObject({
-      response: { 200: expect.any(Object) },
-    });
-    expect(handlers[0].options.onRequestValidationError).toMatchObject({
-      response: { 422: expect.any(Object) },
+      response: { 200: expect.any(Object), 422: expect.any(Object) },
+      onRequestValidationError: expect.any(Function),
     });
   });
 
@@ -565,16 +564,32 @@ describe('Versioned route', () => {
       route.addVersion(
         {
           version: '1',
-          validate: false,
-          onRequestValidationError: {
+          validate: {
+            request: testValidation.fooValidation.request,
             response: { 422: {} },
-            handler: (error, request, response) => response.custom({ statusCode: 422 }),
+            onRequestValidationError: 'not a function' as never,
           },
         },
         handlerFn
       )
     ).toThrowError(
-      "The [post] at [/test/{id}] version [1] cannot configure 'onRequestValidationError' when 'validate' is false."
+      "The [post] at [/test/{id}] version [1] has an invalid 'validate.onRequestValidationError'. Expected a function."
+    );
+
+    expect(() =>
+      route.addVersion(
+        {
+          version: '2',
+          validate: {
+            request: testValidation.fooValidation.request,
+            onRequestValidationError: (error, request, response) =>
+              response.custom({ statusCode: 422 }),
+          },
+        },
+        handlerFn
+      )
+    ).toThrowError(
+      "The [post] at [/test/{id}] version [2] has an invalid 'validate.response'. Expected response metadata when 'validate.onRequestValidationError' is configured."
     );
   });
 

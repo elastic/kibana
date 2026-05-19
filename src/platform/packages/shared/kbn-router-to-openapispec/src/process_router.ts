@@ -9,7 +9,6 @@
 
 import type { Router } from '@kbn/core-http-router-server-internal';
 import { getResponseValidation } from '@kbn/core-http-server';
-import type { RouteValidatorFullConfigResponse } from '@kbn/core-http-server';
 import { BASE_PUBLIC_VERSION as SERVERLESS_VERSION_2023_10_31 } from '@kbn/core-http-router-server-internal';
 import type { OpenAPIV3 } from 'openapi-types';
 import type { OasConverter } from './oas_converter';
@@ -22,7 +21,7 @@ import {
   extractValidationSchemaFromRoute,
   getPathParameters,
   getVersionedContentTypeString,
-  mergeResponseDeclarations,
+  mergeResponseContent,
   prepareRoutes,
   setXState,
 } from './util';
@@ -128,30 +127,16 @@ export const processRouter = async ({
 };
 
 export const extractResponses = (route: InternalRouterRoute, converter: OasConverter) => {
-  const routeWithRequestValidationError = route as InternalRouterRoute & {
-    onRequestValidationError?: { response: RouteValidatorFullConfigResponse };
-  };
-  if (
-    !route.validationSchemas &&
-    !routeWithRequestValidationError.onRequestValidationError?.response
-  ) {
-    return {};
-  }
-  const declarations: Array<{
-    statusCode: string;
-    source: 'route response validation' | 'request validation error response';
-    response: OpenAPIV3.ResponseObject;
-  }> = [];
-  const fullConfig = route.validationSchemas
-    ? getResponseValidation(route.validationSchemas)
-    : undefined;
+  const responses: OpenAPIV3.ResponsesObject = {};
+  if (!route.validationSchemas) return responses;
+  const fullConfig = getResponseValidation(route.validationSchemas);
 
   if (fullConfig) {
     const { unsafe, ...validationSchemas } = fullConfig;
     const contentType = extractContentType(route.options?.body);
-    declarations.push(
-      ...Object.entries(validationSchemas).map(([statusCode, schema]) => {
-        const content = schema.body
+    return Object.entries(validationSchemas).reduce<OpenAPIV3.ResponsesObject>(
+      (acc, [statusCode, schema]) => {
+        const newContent = schema.body
           ? {
               [getVersionedContentTypeString(
                 SERVERLESS_VERSION_2023_10_31,
@@ -162,47 +147,19 @@ export const extractResponses = (route: InternalRouterRoute, converter: OasConve
               },
             }
           : undefined;
-        return {
-          statusCode,
-          source: 'route response validation' as const,
-          response: {
-            description: schema.description!,
-            ...(content ? { content } : {}),
-          },
+        acc[statusCode] = {
+          ...acc[statusCode],
+          description: schema.description!,
+          ...mergeResponseContent(
+            ((acc[statusCode] ?? {}) as OpenAPIV3.ResponseObject).content,
+            newContent
+          ),
         };
-      })
+        return acc;
+      },
+      responses
     );
   }
 
-  const requestValidationErrorResponse =
-    routeWithRequestValidationError.onRequestValidationError?.response;
-  if (requestValidationErrorResponse) {
-    const { unsafe, ...validationSchemas } = requestValidationErrorResponse;
-    const contentType = extractContentType(route.options?.body);
-    declarations.push(
-      ...Object.entries(validationSchemas).map(([statusCode, schema]) => {
-        const content = schema.body
-          ? {
-              [getVersionedContentTypeString(
-                SERVERLESS_VERSION_2023_10_31,
-                'public',
-                schema.bodyContentType ? [schema.bodyContentType] : contentType
-              )]: {
-                schema: converter.convert(schema.body()),
-              },
-            }
-          : undefined;
-        return {
-          statusCode,
-          source: 'request validation error response' as const,
-          response: {
-            description: schema.description!,
-            ...(content ? { content } : {}),
-          },
-        };
-      })
-    );
-  }
-
-  return mergeResponseDeclarations(declarations, { path: route.path, method: route.method });
+  return responses;
 };

@@ -190,7 +190,6 @@ export type {
   VersionedRouteCustomResponseBodyValidation,
   VersionedResponseBodyValidation,
   VersionedRouterRoute,
-  VersionedOnRequestValidationError,
 } from './src/versioning';
 
 export type { IStaticAssets } from './src/static_assets';

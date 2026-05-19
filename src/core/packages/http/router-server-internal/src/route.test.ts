@@ -123,15 +123,15 @@ describe('handle', () => {
       method: 'get',
       route: {
         path: '/test',
-        validate: { query: schema.object({ foo: schema.number() }) },
-        onRequestValidationError: {
+        validate: {
+          request: { query: schema.object({ foo: schema.number() }) },
           response: {
             422: {
               description: 'Validation failed',
               body: () => schema.object({ message: schema.string(), source: schema.string() }),
             },
           },
-          handler: (error, request, res) => {
+          onRequestValidationError: (error, request, res) => {
             expect(error).toMatchObject({
               message: '[request query.foo]: expected value of type [number] but got [string]',
               source: 'query',
@@ -173,10 +173,10 @@ describe('handle', () => {
       method: 'post',
       route: {
         path: '/test',
-        validate: { body: z.object({ foo: z.string() }) },
-        onRequestValidationError: {
+        validate: {
+          request: { body: z.object({ foo: z.string() }) },
           response: { 422: { description: 'Validation failed' } },
-          handler: (error, _request, res) => {
+          onRequestValidationError: (error, _request, res) => {
             rawError = error.rawError;
             return res.custom({
               statusCode: 422,
@@ -206,12 +206,12 @@ describe('handle', () => {
       route: {
         path: '/test',
         validate: {
-          query: (_data, validationResult) =>
-            validationResult.badRequest(new Error('Custom validation failed')),
-        },
-        onRequestValidationError: {
+          request: {
+            query: (_data, validationResult) =>
+              validationResult.badRequest(new Error('Custom validation failed')),
+          },
           response: { 422: { description: 'Validation failed' } },
-          handler: (error, _request, res) => {
+          onRequestValidationError: (error, _request, res) => {
             rawError = error.rawError;
             return res.custom({
               statusCode: 422,
@@ -246,13 +246,13 @@ describe('handle', () => {
       route: {
         path: '/test',
         validate: {
-          query: () => {
-            throw thrownValue;
+          request: {
+            query: () => {
+              throw thrownValue;
+            },
           },
-        },
-        onRequestValidationError: {
           response: { 422: { description: 'Validation failed' } },
-          handler: (error, _request, res) => {
+          onRequestValidationError: (error, _request, res) => {
             rawError = error.rawError;
             return res.custom({
               statusCode: 422,
@@ -284,13 +284,13 @@ describe('handle', () => {
       method: 'get',
       route: {
         path: '/test',
-        validate: { query: schema.object({ foo: schema.number() }) },
-        options: { access: 'public' },
-        onRequestValidationError: {
+        validate: {
+          request: { query: schema.object({ foo: schema.number() }) },
           response: { 418: { description: 'Validation failed' } },
-          handler: (_error, _request, res) =>
+          onRequestValidationError: (_error, _request, res) =>
             res.custom({ statusCode: 418, body: { error: 'validation_failed' } }),
         },
+        options: { access: 'public' },
       },
       routeSchemas: RouteValidator.from({ query: schema.object({ foo: schema.number() }) }),
     });
@@ -308,15 +308,16 @@ describe('handle', () => {
       isDevMode: true,
       route: {
         path: '/test',
-        validate: { query: schema.object({ foo: schema.number() }) },
-        onRequestValidationError: {
+        validate: {
+          request: { query: schema.object({ foo: schema.number() }) },
           response: {
             422: {
               description: 'Validation failed',
               body: () => schema.object({ message: schema.string() }),
             },
           },
-          handler: (_error, _request, res) => res.custom({ statusCode: 422, body: { message: 1 } }),
+          onRequestValidationError: (_error, _request, res) =>
+            res.custom({ statusCode: 422, body: { message: 1 } }),
         },
       },
       routeSchemas: RouteValidator.from({ query: schema.object({ foo: schema.number() }) }),
@@ -338,8 +339,8 @@ describe('handle', () => {
       isDevMode: true,
       route: {
         path: '/test',
-        validate: { query: schema.object({ foo: schema.number() }) },
-        onRequestValidationError: {
+        validate: {
+          request: { query: schema.object({ foo: schema.number() }) },
           response: {
             400: {
               description: 'Bad request',
@@ -350,7 +351,7 @@ describe('handle', () => {
               body: () => schema.object({ code: schema.literal('validation_failed') }),
             },
           },
-          handler: (_error, _request, res) =>
+          onRequestValidationError: (_error, _request, res) =>
             res.custom({ statusCode: 422, body: { code: 'validation_failed' } }),
         },
       },
@@ -376,15 +377,16 @@ describe('handle', () => {
       isDevMode: false,
       route: {
         path: '/test',
-        validate: { query: schema.object({ foo: schema.number() }) },
-        onRequestValidationError: {
+        validate: {
+          request: { query: schema.object({ foo: schema.number() }) },
           response: {
             422: {
               description: 'Validation failed',
               body,
             },
           },
-          handler: (_error, _request, res) => res.custom({ statusCode: 422, body: { message: 1 } }),
+          onRequestValidationError: (_error, _request, res) =>
+            res.custom({ statusCode: 422, body: { message: 1 } }),
         },
       },
       routeSchemas: RouteValidator.from({ query: schema.object({ foo: schema.number() }) }),
@@ -404,10 +406,10 @@ describe('handle', () => {
       isDevMode: true,
       route: {
         path: '/test',
-        validate: { query: schema.object({ foo: schema.number() }) },
-        onRequestValidationError: {
+        validate: {
+          request: { query: schema.object({ foo: schema.number() }) },
           response: { 400: { description: 'Validation failed' } },
-          handler: (_error, _request, res) =>
+          onRequestValidationError: (_error, _request, res) =>
             res.custom({ statusCode: 422, body: { message: 'Invalid request' } }),
         },
       },
@@ -416,12 +418,12 @@ describe('handle', () => {
 
     expect(response.status).toEqual(500);
     expect(response.payload).toMatch(
-      "Failed output validation: No response validation defined for status code [422] in 'onRequestValidationError.response'."
+      "Failed output validation: No response validation defined for status code [422] in 'validate.response'."
     );
     expect(log.error).not.toHaveBeenCalled();
   });
 
-  it('rejects onRequestValidationError when validate is false', () => {
+  it('rejects invalid onRequestValidationError config', () => {
     expect(() =>
       buildRoute({
         router,
@@ -430,19 +432,19 @@ describe('handle', () => {
         method: 'get',
         route: {
           path: '/test',
-          validate: false,
-          onRequestValidationError: {
+          validate: {
+            request: { query: schema.object({ foo: schema.number() }) },
             response: { 400: { description: 'Validation failed' } },
-            handler: (_error, _request, res) => res.badRequest(),
+            onRequestValidationError: 'not a function' as never,
           },
         },
       })
     ).toThrow(
-      "The [get] at [/test] cannot configure 'onRequestValidationError' when 'validate' is false."
+      "The [get] at [/test] has an invalid 'validate.onRequestValidationError'. Expected a function."
     );
   });
 
-  it('rejects incomplete onRequestValidationError config', () => {
+  it('rejects onRequestValidationError config without response metadata', () => {
     expect(() =>
       buildRoute({
         router,
@@ -451,14 +453,14 @@ describe('handle', () => {
         method: 'get',
         route: {
           path: '/test',
-          validate: { query: schema.object({ foo: schema.number() }) },
-          onRequestValidationError: {
-            handler: (_error, _request, res) => res.badRequest(),
-          } as never,
+          validate: {
+            request: { query: schema.object({ foo: schema.number() }) },
+            onRequestValidationError: (_error, _request, res) => res.badRequest(),
+          },
         },
       })
     ).toThrow(
-      "The [get] at [/test] has an invalid 'onRequestValidationError.response'. Expected response metadata."
+      "The [get] at [/test] has an invalid 'validate.response'. Expected response metadata when 'validate.onRequestValidationError' is configured."
     );
   });
 });

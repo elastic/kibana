@@ -19,7 +19,6 @@ import type {
   RouteValidatorOptions,
 } from '@kbn/core-http-server';
 import { RouteValidationError } from '@kbn/core-http-server';
-import { RawRouteValidationError } from './raw_route_validation_error';
 
 /**
  * Route validator class to define the validation logic for each new route.
@@ -147,11 +146,7 @@ export class RouteValidator<P = {}, Q = {}, B = {}> {
     }
 
     if (result.error) {
-      const rawError =
-        'rawError' in result.error
-          ? (result.error as { rawError: unknown }).rawError
-          : result.error;
-      throw new RawRouteValidationError(result.error, namespace, rawError);
+      throw new ValidationError(result.error, namespace);
     }
     return result.value;
   }
@@ -170,14 +165,5 @@ export class RouteValidator<P = {}, Q = {}, B = {}> {
 }
 
 function createRouteValidationError(error: unknown, path?: string[]): RouteValidationError {
-  const validationError = new RouteValidationError(getRouteValidationErrorMessage(error), path);
-  (validationError as { rawError: unknown }).rawError = error;
-  return validationError;
-}
-
-function getRouteValidationErrorMessage(error: unknown): Error | string {
-  if (error instanceof Error) {
-    return error;
-  }
-  return String(error);
+  return new RouteValidationError(error, path);
 }

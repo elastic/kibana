@@ -9,6 +9,9 @@
 
 import { type ObjectType, SchemaTypeError, type Type } from '@kbn/config-schema';
 import type { ZodType } from '@kbn/zod/v4';
+import type { IKibanaResponse } from './response';
+import type { KibanaResponseFactory } from './response_factory';
+import type { KibanaRequest } from './request';
 
 /**
  * Error to return when the validation is not successful.
@@ -196,6 +199,34 @@ export interface RouteValidatorFullConfigResponse {
 }
 
 /**
+ * Normalized request validation error passed to {@link OnRequestValidationError}.
+ * @public
+ */
+export interface RequestValidationError {
+  message: string;
+  source: 'params' | 'query' | 'body' | 'unknown';
+  rawError: unknown;
+}
+
+/**
+ * Maps a request validation failure to a Kibana response.
+ * @public
+ */
+export type RequestValidationErrorHandler = (
+  error: RequestValidationError,
+  request: KibanaRequest,
+  response: KibanaResponseFactory
+) => IKibanaResponse | Promise<IKibanaResponse>;
+
+/**
+ * Maps request validation failures to documented Kibana responses.
+ *
+ * Response metadata is declared in {@link RouteValidatorRequestAndResponses.response}.
+ * @public
+ */
+export type OnRequestValidationError = RequestValidationErrorHandler;
+
+/**
  * An alternative form to register both request schema and all response schemas.
  * @public
  */
@@ -205,6 +236,10 @@ export interface RouteValidatorRequestAndResponses<P, Q, B> {
    * Response schemas for your route.
    */
   response?: RouteValidatorFullConfigResponse;
+  /**
+   * Maps request validation failures to responses declared in {@link RouteValidatorRequestAndResponses.response}.
+   */
+  onRequestValidationError?: OnRequestValidationError;
 }
 
 /**

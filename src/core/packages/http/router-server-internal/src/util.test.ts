@@ -9,11 +9,7 @@
 
 import { schema } from '@kbn/config-schema';
 import type { RouteValidator } from '@kbn/core-http-server';
-import {
-  injectResponseHeaders,
-  prepareOnRequestValidationError,
-  prepareResponseValidation,
-} from './util';
+import { injectResponseHeaders, prepareResponseValidation } from './util';
 import { kibanaResponseFactory } from './response';
 
 describe('prepareResponseValidation', () => {
@@ -52,30 +48,6 @@ describe('prepareResponseValidation', () => {
     expect(validation.response![200].body).toHaveBeenCalledTimes(1);
     expect(validation.response![404].body).toHaveBeenCalledTimes(1);
     expect(validation.response![500].body).toBeUndefined();
-  });
-});
-
-describe('prepareOnRequestValidationError', () => {
-  it('prepares lazy response schemas without instantiating them', () => {
-    const validationFailedBody = jest.fn(() => schema.string());
-    const conflictBody = jest.fn(() => schema.string());
-
-    const prepared = prepareOnRequestValidationError({
-      response: {
-        409: { description: 'Conflict', body: conflictBody },
-        422: { description: 'Validation failed', body: validationFailedBody },
-      },
-      handler: (_error, _request, res) => res.badRequest(),
-    });
-
-    expect(validationFailedBody).not.toHaveBeenCalled();
-    expect(conflictBody).not.toHaveBeenCalled();
-    prepared.response[409].body!();
-    prepared.response[409].body!();
-    prepared.response[422].body!();
-    prepared.response[422].body!();
-    expect(validationFailedBody).toHaveBeenCalledTimes(1);
-    expect(conflictBody).toHaveBeenCalledTimes(1);
   });
 });
 

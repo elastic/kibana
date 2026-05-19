@@ -12,6 +12,8 @@ import {
   type SafeRouteMethod,
   type RouteConfig,
   getRequestValidation,
+  getResponseValidation,
+  isFullValidatorContainer,
 } from '@kbn/core-http-server';
 import type {
   RouteSecurityGetter,
@@ -20,6 +22,7 @@ import type {
   IKibanaResponse,
   OnRequestValidationError,
   RequestValidationError,
+  RouteValidatorFullConfigResponse,
   RouteAccess,
   RouteConfigOptions,
   PostValidationMetadata,
@@ -78,6 +81,8 @@ export function buildRoute({
 }: Dependencies): InternalRouterRoute {
   route = prepareRouteConfigValidation(route);
   const routeSchemas = routeSchemasFromRouteConfig(route, method);
+  const onRequestValidationError = getRouteOnRequestValidationError(route);
+  const responseValidation = getRouteResponseValidation(route);
   return {
     handler: async (req) => {
       return await handle(req, {
@@ -87,6 +92,8 @@ export function buildRoute({
         route,
         router,
         routeSchemas,
+        onRequestValidationError,
+        responseValidation,
         isDevMode,
       });
     },
@@ -102,6 +109,8 @@ export function buildRoute({
 /** @internal */
 interface HandlerDependencies extends Dependencies {
   routeSchemas?: RouteValidator<unknown, unknown, unknown>;
+  onRequestValidationError?: OnRequestValidationError;
+  responseValidation?: RouteValidatorFullConfigResponse;
 }
 
 type RouteInfo = Pick<RouteConfigOptions<RouteMethod>, 'access' | 'httpResource' | 'deprecated'>;
@@ -167,7 +176,16 @@ export function validateHapiRequest(
 /** @internal */
 export const handle = async (
   request: Request,
-  { router, route, handler, routeSchemas, log, isDevMode = false }: HandlerDependencies
+  {
+    router,
+    route,
+    handler,
+    routeSchemas,
+    onRequestValidationError = getRouteOnRequestValidationError(route),
+    responseValidation = getRouteResponseValidation(route),
+    log,
+    isDevMode = false,
+  }: HandlerDependencies
 ) => {
   const {
     error,
@@ -182,20 +200,20 @@ export const handle = async (
     router,
     log,
     routeSchemas,
-    shouldLogDefaultValidationError: !route.onRequestValidationError,
+    shouldLogDefaultValidationError: !onRequestValidationError,
   });
   if (error) {
-    if (!route.onRequestValidationError) {
+    if (!onRequestValidationError) {
       return error;
     }
-    const customResponse = await route.onRequestValidationError.handler(
+    const customResponse = await onRequestValidationError(
       failure.error,
       failure.request,
       kibanaResponseFactory
     );
     if (isDevMode) {
       const validationErrorMessage = validateOnRequestValidationErrorResponse(
-        route.onRequestValidationError,
+        responseValidation,
         customResponse
       );
       if (validationErrorMessage) {
@@ -240,22 +258,9 @@ function normalizeRequestValidationError(rawError: unknown): RequestValidationEr
   const message = rawError instanceof Error ? rawError.message : String(rawError);
   return {
     message,
-    source: getRequestValidationErrorSource(message),
+    source: 'unknown',
     rawError,
   };
-}
-
-function getRequestValidationErrorSource(message: string): RequestValidationError['source'] {
-  if (message.startsWith('[request params')) {
-    return 'params';
-  }
-  if (message.startsWith('[request query')) {
-    return 'query';
-  }
-  if (message.startsWith('[request body')) {
-    return 'body';
-  }
-  return 'unknown';
 }
 
 export function logRequestValidationError(
@@ -272,13 +277,12 @@ export function logRequestValidationError(
 }
 
 function validateOnRequestValidationErrorResponse(
-  onRequestValidationError: OnRequestValidationError,
+  responseValidation: RouteValidatorFullConfigResponse | undefined,
   response: IKibanaResponse
 ): string | undefined {
-  const { response: responseValidation } = onRequestValidationError;
-  const validation = responseValidation[response.status];
+  const validation = responseValidation?.[response.status];
   if (!validation) {
-    return `No response validation defined for status code [${response.status}] in 'onRequestValidationError.response'.`;
+    return `No response validation defined for status code [${response.status}] in 'validate.response'.`;
   }
   if (!validation.body) {
     return undefined;
@@ -333,28 +337,40 @@ function validateOnRequestValidationError<P, Q, B>(
   route: InternalRouteConfig<P, Q, B, typeof routeMethod>,
   routeMethod: RouteMethod
 ) {
-  const { onRequestValidationError } = route;
+  const onRequestValidationError = getRouteOnRequestValidationError(route);
   if (!onRequestValidationError) {
     return;
   }
 
-  if (route.validate === false) {
+  if (typeof onRequestValidationError !== 'function') {
     throw new Error(
-      `The [${routeMethod}] at [${route.path}] cannot configure 'onRequestValidationError' when 'validate' is false.`
+      `The [${routeMethod}] at [${route.path}] has an invalid 'validate.onRequestValidationError'. Expected a function.`
     );
   }
+  if (!getRouteResponseValidation(route)) {
+    throw new Error(
+      `The [${routeMethod}] at [${route.path}] has an invalid 'validate.response'. Expected response metadata when 'validate.onRequestValidationError' is configured.`
+    );
+  }
+}
 
-  const { handler, response } = onRequestValidationError as Partial<OnRequestValidationError>;
-  if (typeof handler !== 'function') {
-    throw new Error(
-      `The [${routeMethod}] at [${route.path}] has an invalid 'onRequestValidationError.handler'. Expected a function.`
-    );
+function getRouteOnRequestValidationError<P, Q, B>(
+  route: InternalRouteConfig<P, Q, B, RouteMethod>
+): OnRequestValidationError | undefined {
+  if (!route.validate) {
+    return undefined;
   }
-  if (!response) {
-    throw new Error(
-      `The [${routeMethod}] at [${route.path}] has an invalid 'onRequestValidationError.response'. Expected response metadata.`
-    );
+  const validate = typeof route.validate === 'function' ? route.validate() : route.validate;
+  return isFullValidatorContainer(validate) ? validate.onRequestValidationError : undefined;
+}
+
+function getRouteResponseValidation<P, Q, B>(
+  route: InternalRouteConfig<P, Q, B, RouteMethod>
+): RouteValidatorFullConfigResponse | undefined {
+  if (!route.validate) {
+    return undefined;
   }
+  return getResponseValidation(route.validate);
 }
 
 function getPostValidateEventMetadata(

@@ -9,10 +9,7 @@
 
 import type { OpenAPIV3 } from 'openapi-types';
 import type { DeepPartial } from '@kbn/utility-types';
-import type { RouteValidator, RouteValidatorFullConfigResponse } from './route_validator';
-import type { IKibanaResponse } from './response';
-import type { KibanaResponseFactory } from './response_factory';
-import type { KibanaRequest } from './request';
+import type { RouteValidator } from './route_validator';
 
 /**
  * The set of valid body.output
@@ -292,35 +289,6 @@ export type RouteAuthc = AuthcEnabled | AuthcMinimal | AuthcOptional | AuthcDisa
 export type RouteAuthz = AuthzEnabled | AuthzDisabled;
 
 /**
- * Normalized request validation error passed to {@link OnRequestValidationError.handler}.
- * @public
- */
-export interface RequestValidationError {
-  message: string;
-  source: 'params' | 'query' | 'body' | 'unknown';
-  rawError: unknown;
-}
-
-/**
- * Maps a request validation failure to a Kibana response.
- * @public
- */
-export type RequestValidationErrorHandler = (
-  error: RequestValidationError,
-  request: KibanaRequest,
-  response: KibanaResponseFactory
-) => IKibanaResponse | Promise<IKibanaResponse>;
-
-/**
- * Request validation failure response metadata and mapper.
- * @public
- */
-export interface OnRequestValidationError {
-  response: RouteValidatorFullConfigResponse;
-  handler: RequestValidationErrorHandler;
-}
-
-/**
  * Describes the security requirements for a route, including authorization and authentication.
  */
 export interface RouteSecurity {
@@ -592,11 +560,6 @@ export interface RouteConfig<P, Q, B, Method extends RouteMethod> {
    * ```
    */
   validate: RouteValidator<P, Q, B> | (() => RouteValidator<P, Q, B>) | false;
-
-  /**
-   * Maps request validation failures to documented Kibana responses.
-   */
-  onRequestValidationError?: OnRequestValidationError;
 
   /**
    * Defines the security requirements for a route, including authorization and authentication.
