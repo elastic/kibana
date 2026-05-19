@@ -31,6 +31,7 @@ dependsOn:
   - '@kbn/unified-histogram'
   - '@kbn/embeddable-plugin'
   - '@kbn/esql-types'
+  - '@kbn/esql-language'
   - '@kbn/embeddable-plugin'
 tags:
   - shared-browser
