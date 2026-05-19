@@ -57,10 +57,7 @@ export function isOnlySchemaMutated(
  * custom validators) emit a warning.
  *
  * When comparing against an older baseline that stored schemas as hashes, granular
- * diffing is not possible.  When `undiffableIsError` is `true` (the default) an error
- * is thrown to force a baseline regeneration; when `false` the undiffable versions are
- * logged as warnings instead — used for the serverless baseline comparison while the
- * serverless snapshot still uses the legacy hash format.
+ * diffing is not possible; an error is thrown to force a baseline regeneration.
  *
  * Structural mutations (which drive index operations during upgrades) still fail
  * unconditionally.
@@ -69,8 +66,7 @@ export function validateNoStructuralModelVersionChanges(
   from: MigrationInfoRecord,
   to: MigrationInfoRecord,
   registeredType: SavedObjectsType,
-  log: (message: string) => void,
-  undiffableIsError = true
+  log: (message: string) => void
 ): void {
   const name = to.name;
   const schemaOnlyMutations: MutationEntry[] = [];
@@ -111,7 +107,7 @@ export function validateNoStructuralModelVersionChanges(
 
   if (schemaOnlyMutations.length > 0) {
     validateAllMappingsInModelVersion(name, to, registeredType);
-    reportSchemaChanges(name, schemaOnlyMutations, log, undiffableIsError);
+    reportSchemaChanges(name, schemaOnlyMutations, log);
   }
 }
 
@@ -180,8 +176,7 @@ function computeSchemaHash(schema: Record<string, unknown>): string {
 function reportSchemaChanges(
   name: string,
   mutations: MutationEntry[],
-  log: (message: string) => void,
-  undiffableIsError: boolean
+  log: (message: string) => void
 ): void {
   const breaking: string[] = [];
   const warnings: string[] = [];
@@ -198,27 +193,18 @@ function reportSchemaChanges(
   }
 
   if (undiffable.length > 0) {
-    const undiffableMsg =
-      `Schema-only changes detected in model version(s) ${undiffable.join(
-        ', '
-      )} of SO type '${name}', ` +
-      `but the baseline snapshot uses the legacy hash format — detailed diff is not possible.`;
-
-    if (undiffableIsError) {
-      throw new SavedObjectsCheckError({
-        ruleId: RULE_IDS.EXISTING_TYPE_SCHEMA_UNDIFFABLE,
-        severity: 'error',
-        typeName: name,
-        message: undiffableMsg,
-        fixHint: `Re-generate the baseline snapshot to enable schema change validation.`,
-        docsAnchor: '#defining-model-versions',
-      });
-    } else {
-      // Serverless baseline uses the legacy hash format during the transition window.
-      // We cannot diff, but schema changes vs. the serverless release are expected as
-      // types evolve. Log a warning so the developer is informed without failing CI.
-      log(`⚠️ WARNING for type '${name}': ${undiffableMsg}`);
-    }
+    throw new SavedObjectsCheckError({
+      ruleId: RULE_IDS.EXISTING_TYPE_SCHEMA_UNDIFFABLE,
+      severity: 'error',
+      typeName: name,
+      message:
+        `Schema-only changes detected in model version(s) ${undiffable.join(
+          ', '
+        )} of SO type '${name}', ` +
+        `but the baseline snapshot uses the legacy hash format — detailed diff is not possible.`,
+      fixHint: `Re-generate the baseline snapshot to enable schema change validation.`,
+      docsAnchor: '#defining-model-versions',
+    });
   }
 
   if (breaking.length > 0) {
