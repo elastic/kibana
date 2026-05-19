@@ -16,11 +16,13 @@ export const useMonitorSummaryStats = ({
   locationLabel,
   from = 'now-30d',
   to = 'now',
+  remoteName,
 }: {
   monitorId: string;
   locationLabel: string;
   from?: string;
   to?: string;
+  remoteName?: string;
 }) => {
   const [data, setData] = useState<MonitorSummaryStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -37,6 +39,7 @@ export const useMonitorSummaryStats = ({
         locationLabel,
         from,
         to,
+        ...(remoteName ? { remoteName } : {}),
       })
       .then((result) => {
         if (!cancelled) {
@@ -53,7 +56,7 @@ export const useMonitorSummaryStats = ({
     return () => {
       cancelled = true;
     };
-  }, [monitorId, locationLabel, from, to, lastRefresh]);
+  }, [monitorId, locationLabel, from, to, remoteName, lastRefresh]);
 
   return { data, loading };
 };

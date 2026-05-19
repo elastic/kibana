@@ -135,12 +135,18 @@ export class SearchNavigationPlugin
     if (forClassicChromeStyle === true && this.currentChromeStyle !== 'classic') return;
 
     if (this.pluginsStart?.serverless) {
+      // Serverless: use the serverless plugin's breadcrumb API
       this.pluginsStart.serverless.setBreadcrumbs(breadcrumbs);
-    } else {
-      const searchBreadcrumbs = [this.getSearchHomeBreadcrumb(), ...breadcrumbs];
-      this.coreStart?.chrome.setBreadcrumbs(searchBreadcrumbs, {
-        project: { value: breadcrumbs, absolute: true },
+    } else if (this.currentChromeStyle === 'project') {
+      // Project chrome (solution spaces): the navigation tree provides the base path.
+      // Breadcrumbs are appended to the nav-tree-generated path.
+      this.coreStart?.chrome.setBreadcrumbs([], {
+        project: { value: breadcrumbs },
       });
+    } else {
+      // Classic chrome: prepend the Elasticsearch home breadcrumb
+      const searchBreadcrumbs = [this.getSearchHomeBreadcrumb(), ...breadcrumbs];
+      this.coreStart?.chrome.setBreadcrumbs(searchBreadcrumbs);
     }
   }
 

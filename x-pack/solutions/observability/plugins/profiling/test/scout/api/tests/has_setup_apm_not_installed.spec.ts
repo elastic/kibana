@@ -19,32 +19,38 @@ apiTest.describe(
     let adminApiCreditials: RoleApiCredentials;
 
     apiTest.beforeAll(async ({ profilingHelper, profilingSetup, esClient, requestAuth }) => {
-      // Ensure the agent policy that the cloud setup attaches the profiler_collector and
-      // profiler_symbolizer package policies to exists. Without this, setupResources()
-      // returns 500 when this spec runs ahead of (or independently of) has_no_setup.spec.
       await profilingHelper.installPolicies();
+      await profilingSetup.setupResources();
 
-      if (!(await profilingSetup.checkStatus()).has_setup) {
-        await profilingSetup.setupResources();
-      }
-
-      // Remove any profiling data left by other specs (e.g. has_setup_with_data) so
-      // has_data evaluates to false regardless of test execution order.
-      // Best-effort: shards of freshly-created profiling data-streams may still be
-      // initialising after setup, causing `search_phase_execution_exception`.  If the
-      // delete fails for that reason there is no data to remove anyway.
-      try {
-        await esClient.deleteByQuery({
-          index: 'profiling-events-*',
-          query: { match_all: {} },
-          ignore_unavailable: true,
-          refresh: true,
-        });
-      } catch (e) {
-        if (!String(e).includes('search_phase_execution_exception')) {
-          throw e;
-        }
-      }
+      // Delete documents (not indices) so has_data becomes false while has_setup
+      // stays true. Runs inside the poll because shards of newly-created
+      // .profiling-* data streams may still be initializing right after
+      // setupResources(), causing search_phase_execution_exception.
+      await expect
+        .poll(
+          async () => {
+            try {
+              await esClient.deleteByQuery({
+                index: 'profiling-events-*',
+                query: { match_all: {} },
+                ignore_unavailable: true,
+                refresh: true,
+                conflicts: 'proceed',
+              });
+            } catch {
+              return false;
+            }
+            const status = await profilingSetup.checkStatus();
+            return status.has_setup === true && status.has_data === false;
+          },
+          {
+            timeout: 30_000,
+            intervals: [500, 1000, 2000, 4000],
+            message:
+              'Profiling status did not converge to has_setup: true, has_data: false after deleting profiling documents',
+          }
+        )
+        .toBe(true);
 
       viewerApiCreditials = await requestAuth.getApiKey('viewer');
       adminApiCreditials = await requestAuth.getApiKey('admin');

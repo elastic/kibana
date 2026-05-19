@@ -18,19 +18,24 @@ type EntityStoreEntity = Awaited<
 >['entities'][number];
 
 /**
- * Convert an Entity Store V2 record into a LeadEntity, extracting the
- * convenience `type` and `name` fields from the nested `entity` object.
- * Falls back to `entity.id` (EUID) when `entity.name` is absent.
+ * Convert an Entity Store V2 record into a LeadEntity, extracting the EUID
+ * (`entity.id`) as the identity field plus the convenience `type` and `name`
+ * fields. Returns `undefined` when the record has no EUID — such records
+ * cannot be the subject of correct observations because they have no stable
+ * identity to join against.
  */
-export const entityRecordToLeadEntity = (record: EntityStoreEntity): LeadEntity => {
+export const entityRecordToLeadEntity = (record: EntityStoreEntity): LeadEntity | undefined => {
   const r = record as Record<string, unknown>;
   const entityField = r.entity as
     | { name?: string; type?: string; id?: string; EngineMetadata?: { Type?: string } }
     | undefined;
+  const id = entityField?.id;
+  if (!id) return undefined;
   return {
     record: record as Entity,
+    id,
     type: entityField?.EngineMetadata?.Type ?? entityField?.type ?? 'unknown',
-    name: entityField?.name ?? entityField?.id ?? 'unknown',
+    name: entityField?.name ?? id,
   };
 };
 
@@ -53,12 +58,17 @@ export const fetchCandidateEntities = async (
     page: 1,
   });
 
-  const leadEntities = entities.map(entityRecordToLeadEntity);
+  const leadEntities = entities
+    .map(entityRecordToLeadEntity)
+    .filter((entity): entity is LeadEntity => entity !== undefined);
+  const skipped = entities.length - leadEntities.length;
 
   logger?.debug(
-    `[LeadGeneration] Entity selection: ${total ?? leadEntities.length} total -> ${
+    `[LeadGeneration] Entity selection: ${total ?? entities.length} total -> ${
       leadEntities.length
-    } candidates (cap ${MAX_CANDIDATE_ENTITIES})`
+    } candidates (cap ${MAX_CANDIDATE_ENTITIES}${
+      skipped > 0 ? `, skipped ${skipped} without EUID` : ''
+    })`
   );
 
   return leadEntities;
