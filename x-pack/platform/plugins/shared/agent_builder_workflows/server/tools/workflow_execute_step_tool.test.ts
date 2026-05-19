@@ -5,8 +5,14 @@
  * 2.0.
  */
 
+import { AgentExecutionMode } from '@kbn/agent-builder-common';
+import type { ConfirmPromptDefinition } from '@kbn/agent-builder-common/agents/prompts';
+import { AgentPromptType, ConfirmationStatus } from '@kbn/agent-builder-common/agents/prompts';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
-import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';
+import type {
+  ToolHandlerPromptReturn,
+  ToolHandlerStandardReturn,
+} from '@kbn/agent-builder-server/tools';
 import { ExecutionStatus, type InternalConnectorContract } from '@kbn/workflows';
 import { WorkflowValidationError } from '@kbn/workflows-yaml';
 import {
@@ -115,23 +121,53 @@ steps:
             url: "https://example.com"
 `;
 
-const createMockContext = (yaml?: string) => ({
-  spaceId: 'default',
-  request: { headers: {} },
-  attachments: {
-    getActive: jest.fn().mockReturnValue(
-      yaml
-        ? [
-            {
-              type: 'workflow.yaml',
-              id: 'att-1',
-              versions: [{ data: { yaml, workflowId: 'wf-1' } }],
-            },
-          ]
-        : []
-    ),
-  },
-});
+interface MockContextOptions {
+  executionMode?: AgentExecutionMode;
+  promptStatus?: ConfirmationStatus;
+  toolCallId?: string;
+}
+
+const createMockContext = (yaml?: string, options: MockContextOptions = {}) => {
+  const askForConfirmation = jest.fn(
+    (def: ConfirmPromptDefinition): ToolHandlerPromptReturn => ({
+      prompt: { type: AgentPromptType.confirmation, ...def },
+    })
+  );
+  const checkConfirmationStatus = jest.fn().mockReturnValue({
+    status: options.promptStatus ?? ConfirmationStatus.unprompted,
+  });
+
+  return {
+    spaceId: 'default',
+    request: { headers: {} },
+    // Default to standalone so legacy tests (which expect the unsafe-step
+    // preview path) keep passing. Override with conversation mode to exercise
+    // the in-handler HITL gate.
+    executionMode: options.executionMode ?? AgentExecutionMode.standalone,
+    callContext: {
+      toolId: WORKFLOW_EXECUTE_STEP_TOOL_ID,
+      toolCallId: options.toolCallId ?? 'tc_default',
+      callSource: 'agent' as const,
+    },
+    prompts: {
+      checkConfirmationStatus,
+      askForConfirmation,
+    },
+    attachments: {
+      getActive: jest.fn().mockReturnValue(
+        yaml
+          ? [
+              {
+                type: 'workflow.yaml',
+                id: 'att-1',
+                versions: [{ data: { yaml, workflowId: 'wf-1' } }],
+              },
+            ]
+          : []
+      ),
+    },
+  };
+};
 
 describe('registerWorkflowExecuteStepTool', () => {
   let registeredTool: BuiltinToolDefinition;
@@ -268,6 +304,42 @@ describe('registerWorkflowExecuteStepTool', () => {
         'default',
         context.request
       );
+    });
+
+    it.each([
+      ['slack2.listChannels', { limit: 10 }],
+      ['slack2.resolveChannelId', { name: 'general' }],
+      ['slack2.searchMessages', { query: 'release' }],
+    ])('executes a %s step without prompting', async (stepType, withParams) => {
+      jest.useRealTimers();
+
+      const yaml = `version: '1'
+name: slack-read
+enabled: true
+triggers:
+  - type: manual
+steps:
+  - name: slack_read
+    type: ${stepType}
+    connector-id: my-slack
+    with: ${JSON.stringify(withParams)}
+`;
+
+      mockApi.testStep.mockResolvedValue('exec-slack-read');
+      mockApi.getWorkflowExecution.mockResolvedValue({
+        status: ExecutionStatus.COMPLETED,
+        stepExecutions: [{ stepId: 'slack_read', status: ExecutionStatus.COMPLETED }],
+        error: null,
+        duration: 40,
+      });
+
+      const context = createMockContext(yaml);
+      const result = await invokeHandler(registeredTool, { stepName: 'slack_read' }, context);
+      const data = result.results[0].data as Record<string, unknown>;
+
+      expect(data.success).toBe(true);
+      expect(context.prompts.askForConfirmation).not.toHaveBeenCalled();
+      expect(context.prompts.checkConfirmationStatus).not.toHaveBeenCalled();
     });
 
     it('passes contextOverride to testStep', async () => {
@@ -590,6 +662,259 @@ describe('registerWorkflowExecuteStepTool', () => {
       expect(data.conditionTest).toBe(true);
       expect(stubbedYaml).toContain('name: __stub_fallback');
       expect(stubbedYaml).not.toContain('name: fallback_http');
+    });
+  });
+
+  describe('unsafe step HITL confirmation', () => {
+    const invokePromptHandler = async (
+      tool: BuiltinToolDefinition,
+      input: unknown,
+      context: unknown
+    ) => (await tool.handler(input as never, context as never)) as ToolHandlerPromptReturn;
+
+    it('returns a confirmation prompt the first time an unsafe step is executed', async () => {
+      const context = createMockContext(VALID_WORKFLOW_YAML, {
+        executionMode: AgentExecutionMode.conversation,
+        promptStatus: ConfirmationStatus.unprompted,
+      });
+      const result = await invokePromptHandler(
+        registeredTool,
+        {
+          stepName: 'send_slack',
+          confirmation_body: '**Slack channel:** #alerts\n**Message:** notification',
+        },
+        context
+      );
+
+      expect(result.prompt).toBeDefined();
+      expect(result.prompt.type).toBe(AgentPromptType.confirmation);
+      expect(result.prompt.id).toContain(WORKFLOW_EXECUTE_STEP_TOOL_ID);
+      // Slack is unsafe but not destructive → 'warning'
+      expect(result.prompt.color).toBe('warning');
+      expect(result.prompt.message).toContain('#alerts');
+      expect(mockApi.testStep).not.toHaveBeenCalled();
+    });
+
+    it('uses color "danger" for destructive ES operations', async () => {
+      const context = createMockContext(VALID_WORKFLOW_YAML, {
+        executionMode: AgentExecutionMode.conversation,
+      });
+      const result = await invokePromptHandler(
+        registeredTool,
+        {
+          stepName: 'delete_index',
+          confirmation_body: 'Will permanently delete index `temp-index`. NOT reversible.',
+        },
+        context
+      );
+
+      expect(result.prompt.color).toBe('danger');
+      expect(result.prompt.title).toContain('elasticsearch.indices.delete');
+    });
+
+    it('falls back to a generated preview when confirmation_body is omitted', async () => {
+      const context = createMockContext(VALID_WORKFLOW_YAML, {
+        executionMode: AgentExecutionMode.conversation,
+      });
+      const result = await invokePromptHandler(registeredTool, { stepName: 'send_slack' }, context);
+
+      expect(result.prompt.message).toContain('send_slack');
+      expect(result.prompt.message).toContain('slack');
+    });
+
+    it('falls back to the generated preview when confirmation_body is an empty string', async () => {
+      const context = createMockContext(VALID_WORKFLOW_YAML, {
+        executionMode: AgentExecutionMode.conversation,
+      });
+      const result = await invokePromptHandler(
+        registeredTool,
+        { stepName: 'send_slack', confirmation_body: '' },
+        context
+      );
+
+      expect(result.prompt.message).toContain('send_slack');
+      expect(result.prompt.message).toContain('slack');
+      expect(result.prompt.message).not.toBe('');
+    });
+
+    it('executes the step after the user accepts the prompt', async () => {
+      jest.useRealTimers();
+      mockApi.testStep.mockResolvedValue('exec-slack-accepted');
+      mockApi.getWorkflowExecution.mockResolvedValue({
+        status: ExecutionStatus.COMPLETED,
+        stepExecutions: [{ stepId: 'send_slack', status: ExecutionStatus.COMPLETED }],
+        error: null,
+        duration: 75,
+      });
+
+      const context = createMockContext(VALID_WORKFLOW_YAML, {
+        executionMode: AgentExecutionMode.conversation,
+        promptStatus: ConfirmationStatus.accepted,
+      });
+      const result = await invokeHandler(registeredTool, { stepName: 'send_slack' }, context);
+      const data = result.results[0].data as Record<string, unknown>;
+
+      expect(data.success).toBe(true);
+      expect(data.executionId).toBe('exec-slack-accepted');
+      expect(mockApi.testStep).toHaveBeenCalled();
+      expect(context.prompts.askForConfirmation).not.toHaveBeenCalled();
+    });
+
+    it('returns an error result when the user rejects the prompt', async () => {
+      const context = createMockContext(VALID_WORKFLOW_YAML, {
+        executionMode: AgentExecutionMode.conversation,
+        promptStatus: ConfirmationStatus.rejected,
+      });
+      const result = await invokeHandler(registeredTool, { stepName: 'send_slack' }, context);
+      const data = result.results[0].data as Record<string, unknown>;
+
+      expect(data.success).toBe(false);
+      expect(data.error).toBe('User declined to execute this step.');
+      expect(mockApi.testStep).not.toHaveBeenCalled();
+    });
+
+    it('falls back to the preview path in standalone mode (no prompt)', async () => {
+      mockApi.validateWorkflow.mockResolvedValue({ valid: true, diagnostics: [] });
+      const context = createMockContext(VALID_WORKFLOW_YAML, {
+        executionMode: AgentExecutionMode.standalone,
+      });
+      const result = await invokeHandler(registeredTool, { stepName: 'send_slack' }, context);
+      const data = result.results[0].data as Record<string, unknown>;
+
+      expect(data.blocked).toBe(true);
+      expect(data.stepType).toBe('slack');
+      expect(context.prompts.askForConfirmation).not.toHaveBeenCalled();
+      expect(mockApi.testStep).not.toHaveBeenCalled();
+    });
+
+    it('reuses the same promptId for re-invocations within one tool call (so accept/execute round-trip works)', async () => {
+      const contextA = createMockContext(VALID_WORKFLOW_YAML, {
+        executionMode: AgentExecutionMode.conversation,
+        toolCallId: 'tc_round_trip',
+      });
+      const contextB = createMockContext(VALID_WORKFLOW_YAML, {
+        executionMode: AgentExecutionMode.conversation,
+        toolCallId: 'tc_round_trip',
+      });
+
+      await invokePromptHandler(
+        registeredTool,
+        { stepName: 'send_slack', confirmation_body: 'send hi to #alerts' },
+        contextA
+      );
+      await invokePromptHandler(
+        registeredTool,
+        { stepName: 'send_slack', confirmation_body: 'send hi to #alerts' },
+        contextB
+      );
+
+      const idA = (contextA.prompts.askForConfirmation as jest.Mock).mock.calls[0][0].id;
+      const idB = (contextB.prompts.askForConfirmation as jest.Mock).mock.calls[0][0].id;
+      expect(idA).toBe(idB);
+      expect(idA).toContain('tc_round_trip');
+    });
+
+    it('uses a different promptId for separate tool invocations (per-call freshness)', async () => {
+      const contextA = createMockContext(VALID_WORKFLOW_YAML, {
+        executionMode: AgentExecutionMode.conversation,
+        toolCallId: 'tc_first',
+      });
+      const contextB = createMockContext(VALID_WORKFLOW_YAML, {
+        executionMode: AgentExecutionMode.conversation,
+        toolCallId: 'tc_second',
+      });
+
+      await invokePromptHandler(
+        registeredTool,
+        { stepName: 'send_slack', confirmation_body: 'send hi to #alerts' },
+        contextA
+      );
+      await invokePromptHandler(
+        registeredTool,
+        { stepName: 'send_slack', confirmation_body: 'send hi to #alerts' },
+        contextB
+      );
+
+      const idA = (contextA.prompts.askForConfirmation as jest.Mock).mock.calls[0][0].id;
+      const idB = (contextB.prompts.askForConfirmation as jest.Mock).mock.calls[0][0].id;
+      expect(idA).not.toBe(idB);
+    });
+
+    it('prompts for confirmation when a foreach contains an unsafe descendant (conversation mode)', async () => {
+      const context = createMockContext(VALID_WORKFLOW_YAML, {
+        executionMode: AgentExecutionMode.conversation,
+      });
+      const result = await invokePromptHandler(
+        registeredTool,
+        {
+          stepName: 'outer_foreach',
+          confirmation_body: 'Will iterate `items` and POST each to https://example.com',
+        },
+        context
+      );
+
+      expect(result.prompt).toBeDefined();
+      expect(result.prompt.type).toBe(AgentPromptType.confirmation);
+      expect(result.prompt.color).toBe('warning');
+      expect(result.prompt.message).toContain('https://example.com');
+      expect(mockApi.testStep).not.toHaveBeenCalled();
+    });
+
+    it('names the unsafe descendant in the fallback when confirmation_body is omitted on a container step', async () => {
+      const context = createMockContext(VALID_WORKFLOW_YAML, {
+        executionMode: AgentExecutionMode.conversation,
+      });
+      const result = await invokePromptHandler(
+        registeredTool,
+        { stepName: 'outer_foreach' },
+        context
+      );
+
+      // Title flags the descendant, not just the container.
+      expect(result.prompt.title).toContain('outer_foreach');
+      expect(result.prompt.title).toContain('deep_http');
+      expect(result.prompt.title).toContain('http');
+      // Fallback body names the descendant too.
+      expect(result.prompt.message).toContain('deep_http');
+      expect(result.prompt.message).toContain('http');
+    });
+
+    it('keeps if/while-with-unsafe-children on the stub path (no prompt)', async () => {
+      jest.useRealTimers();
+      mockApi.testStep.mockResolvedValue('exec-stub');
+      mockApi.getWorkflowExecution.mockResolvedValue({
+        status: ExecutionStatus.COMPLETED,
+        stepExecutions: [{ stepId: 'check_alerts', status: ExecutionStatus.COMPLETED }],
+        error: null,
+        duration: 60,
+      });
+
+      const context = createMockContext(VALID_WORKFLOW_YAML, {
+        executionMode: AgentExecutionMode.conversation,
+      });
+      const result = await invokeHandler(registeredTool, { stepName: 'check_alerts' }, context);
+      const data = result.results[0].data as Record<string, unknown>;
+
+      expect(data.conditionTest).toBe(true);
+      expect(context.prompts.askForConfirmation).not.toHaveBeenCalled();
+    });
+
+    it('does not prompt for safe step types', async () => {
+      jest.useRealTimers();
+      mockApi.testStep.mockResolvedValue('exec-safe');
+      mockApi.getWorkflowExecution.mockResolvedValue({
+        status: ExecutionStatus.COMPLETED,
+        stepExecutions: [{ stepId: 'log_step', status: ExecutionStatus.COMPLETED }],
+        error: null,
+        duration: 10,
+      });
+
+      const context = createMockContext(VALID_WORKFLOW_YAML, {
+        executionMode: AgentExecutionMode.conversation,
+      });
+      await invokeHandler(registeredTool, { stepName: 'log_step' }, context);
+      expect(context.prompts.askForConfirmation).not.toHaveBeenCalled();
+      expect(context.prompts.checkConfirmationStatus).not.toHaveBeenCalled();
     });
   });
 });

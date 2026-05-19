@@ -23,7 +23,7 @@ import { getInfoMessage } from './components/vega_info_message';
 import { VegaVisEditorComponent } from './components/vega_vis_editor_lazy';
 
 import type { VisParams } from './vega_fn';
-import { VegaIcon } from './add_vega_panel_action';
+import { VegaIcon } from './vega_icon';
 
 export const vegaVisType: VisTypeDefinition<VisParams> = {
   name: 'vega',
@@ -33,7 +33,7 @@ export const vegaVisType: VisTypeDefinition<VisParams> = {
     defaultMessage: 'Use the Vega syntax to create new types of visualizations.',
     description: 'Vega and Vega-Lite are product names and should not be translated',
   }),
-  icon: VegaIcon,
+  icon: VegaIcon, // VegaIcon svg is wrapped into EUIIcon
   group: VisGroups.PROMOTED,
   titleInWizard: i18n.translate('visTypeVega.type.vegaTitleInWizard', {
     defaultMessage: 'Vega',

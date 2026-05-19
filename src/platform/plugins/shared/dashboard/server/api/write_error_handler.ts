@@ -8,6 +8,7 @@
  */
 
 import type { IKibanaResponse, KibanaResponseFactory } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { TransformPanelsInError } from './transforms/in/transform_panels_in_error';
 
 export function writeErrorHandler(error: any, response: KibanaResponseFactory): IKibanaResponse {
@@ -28,6 +29,10 @@ export function writeErrorHandler(error: any, response: KibanaResponseFactory): 
         })),
       },
     });
+  }
+
+  if (SavedObjectsErrorHelpers.isConflictError(error)) {
+    return response.conflict({ body: { message: error.message } });
   }
 
   return response.badRequest({ body: { message: error.message } });

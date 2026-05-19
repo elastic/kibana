@@ -22,17 +22,12 @@ const MANAGED_READONLY_REASON = i18n.translate(
 );
 
 /**
- * Creates an `onInspect` callback that opens the Kibana content editor flyout.
+ * Creates an inspect callback that opens the Kibana content editor flyout.
  *
- * This hook encapsulates all Kibana-specific content editor logic:
- * - Transforming `ContentListItem` to the content editor's `Item` shape
- * - Forcing managed items into read-only mode with an explanatory reason
- * - Wrapping `onSave` with query invalidation (to trigger refetch) and flyout close
+ * Returns `undefined` when `contentEditor` is not provided.
  *
- * Returns `undefined` when `contentEditor` is not provided, so the base provider's
- * `item.onInspect` remains unset and the inspect action won't render.
- *
- * @internal Used by `ContentListClientProvider`.
+ * @internal Used by `ContentListClientProvider` to populate
+ * `itemConfig.actions.inspect.onItemAction`.
  */
 export const useContentEditorInspect = ({
   contentEditor,

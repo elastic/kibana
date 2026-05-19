@@ -54,6 +54,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         [OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS]: true,
         [OBSERVABILITY_STREAMS_ENABLE_DRAFT_STREAMS]: true,
       });
+      await kibanaServer.uiSettings.waitForEventualCacheRefresh();
 
       // Create a parent wired stream to fork drafts from
       await forkStream(apiClient, ROOT, {
@@ -68,6 +69,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         [OBSERVABILITY_STREAMS_ENABLE_WIRED_STREAM_VIEWS]: false,
         [OBSERVABILITY_STREAMS_ENABLE_DRAFT_STREAMS]: false,
       });
+      await kibanaServer.uiSettings.waitForEventualCacheRefresh();
     });
 
     describe('Forking as draft', () => {

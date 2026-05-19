@@ -44,6 +44,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     resultStore,
     skillsStore,
     attachmentStateManager,
+    todoStateManager,
     logger,
     promptManager,
     stateManager,
@@ -67,6 +68,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     filestore: true,
     skills: true,
     subagents: isExperimentalEnabled,
+    todos: isExperimentalEnabled,
   };
 
   return {
@@ -87,6 +89,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     resultStore,
     skillsStore,
     attachmentStateManager,
+    todoStateManager,
     filestore,
     stateManager,
     promptManager,
