@@ -15,6 +15,7 @@ import type {
   VersionedResponseBodyValidation,
   VersionedRouteResponseValidation,
   VersionedRouteValidation,
+  VersionedOnRequestValidationError,
 } from '@kbn/core-http-server';
 import { validRouteSecurity } from '../security_route_config_validator';
 
@@ -67,11 +68,47 @@ function prepareValidation(validation: VersionedRouteValidation<unknown, unknown
   return validation;
 }
 
+function prepareOnRequestValidationError(
+  onRequestValidationError: VersionedOnRequestValidationError | undefined
+): VersionedOnRequestValidationError | undefined {
+  if (!onRequestValidationError) {
+    return onRequestValidationError;
+  }
+
+  return {
+    ...onRequestValidationError,
+    response: prepareResponseValidation(onRequestValidationError.response),
+  };
+}
+
+function prepareResponseValidation(
+  validation: VersionedRouteResponseValidation
+): VersionedRouteResponseValidation {
+  const { unsafe, ...responseValidations } = validation;
+  const result: VersionedRouteResponseValidation = {};
+
+  for (const [key, value] of Object.entries(responseValidations)) {
+    result[key as unknown as number] = {
+      ...value,
+    };
+    if (value.body) {
+      result[key as unknown as number].body = isCustomValidation(value.body)
+        ? value.body
+        : once(value.body);
+    }
+  }
+
+  return {
+    ...validation,
+    ...result,
+  };
+}
+
 // Integration tested in ./core_versioned_route.test.ts
 export function prepareVersionedRouteValidation(
   options: AddVersionOpts<unknown, unknown, unknown>
 ): AddVersionOpts<unknown, unknown, unknown> {
-  const { validate: originalValidate, security, ...rest } = options;
+  const { validate: originalValidate, security, onRequestValidationError, ...rest } = options;
   let validate = originalValidate;
 
   if (typeof originalValidate === 'function') {
@@ -82,6 +119,7 @@ export function prepareVersionedRouteValidation(
 
   return {
     security: validRouteSecurity(security),
+    onRequestValidationError: prepareOnRequestValidationError(onRequestValidationError),
     validate,
     ...rest,
   };

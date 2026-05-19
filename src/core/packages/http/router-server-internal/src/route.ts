@@ -249,7 +249,7 @@ function getRequestValidationErrorSource(message: string): RequestValidationErro
   return 'unknown';
 }
 
-function logRequestValidationError(
+export function logRequestValidationError(
   log: Logger,
   request: Request,
   statusCode: number,

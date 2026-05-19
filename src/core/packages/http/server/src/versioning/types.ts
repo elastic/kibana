@@ -21,7 +21,7 @@ import type {
   LazyValidator,
   RouteSecurity,
 } from '../..';
-import type { RouteDeprecationInfo } from '../router/route';
+import type { RequestValidationErrorHandler, RouteDeprecationInfo } from '../router/route';
 type RqCtx = RequestHandlerContextBase;
 
 export type { ApiVersion };
@@ -327,6 +327,15 @@ export interface VersionedRouteValidation<P, Q, B> {
 }
 
 /**
+ * Versioned request validation failure response metadata and mapper.
+ * @public
+ */
+export interface VersionedOnRequestValidationError {
+  response: VersionedRouteResponseValidation;
+  handler: RequestValidationErrorHandler;
+}
+
+/**
  * Options for a versioned route. Probably needs a lot more options like sunsetting
  * of an endpoint etc.
  * @public
@@ -344,6 +353,12 @@ export interface AddVersionOpts<P, Q, B> {
    * @public
    */
   validate: false | VersionedRouteValidation<P, Q, B> | (() => VersionedRouteValidation<P, Q, B>); // Provide a way to lazily load validation schemas
+
+  /**
+   * Maps request validation failures for this route version to documented Kibana responses.
+   * @public
+   */
+  onRequestValidationError?: VersionedOnRequestValidationError;
 
   security?: Pick<RouteSecurity, 'authz'>;
 

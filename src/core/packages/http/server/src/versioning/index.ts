@@ -20,4 +20,5 @@ export type {
   VersionedRouteCustomResponseBodyValidation,
   VersionedResponseBodyValidation,
   VersionedRouterRoute,
+  VersionedOnRequestValidationError,
 } from './types';
